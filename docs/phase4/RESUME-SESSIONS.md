@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-27 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
+> **Status of this revision:** 2026-09-27 15:19 FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -94,7 +94,7 @@ WHERE THINGS STAND (2026-09-27 ~14:30, i7 local time):
    - CNR, 742 byte-identical;
    - behavioral, 673 compared, 0 failed;
    - H7 on windows and linux.
-   The 92 sweeps were running. The record copy is docs/phase4/briefs/trainF-battery-run2-summary.txt on
+   The 92 sweeps were running: 47 of 92 PASS and 0 failed at 15:13 (syscall was the latest). The record copy is docs/phase4/briefs/trainF-battery-run2-summary.txt on
    claude/coord-handover. If the i7's run is gone, re-run .claude/coord-scripts/trainF/tF-battery.sh with
    EXPECT_HEAD=efc9c093de.
    LANDING STEPS:
@@ -125,7 +125,9 @@ WHERE THINGS STAND (2026-09-27 ~14:30, i7 local time):
    - the i9's claude/i9-host-sandbox-marker;
    - P2's F, claude/p2-method-wrapper;
    - G's windows-AV sink guard;
-   - P1's claude/p1-memclr.
+   - P1's claude/p1-memclr;
+   - C1's three re-cuts (address guard b0c721e507, slnx paths dc2a5104ae, census slice 62f40a767d; the last
+     needs its pwsh red-first on the i7) and C2's output-attr sync e9c57f833e.
    AT LANDING: bank runtime/trace (2, linux 2) out of E4 (224 -> 225); os/signal's linux annotation 29 + 1.
    The TRAIN F scripts are the template: rehearse with signed merges, pre-resolve, assemble with 10-char pins, check
    tree-hash equality, apply the rt-emit fixup, run the battery.
@@ -163,7 +165,8 @@ WHERE THINGS STAND (2026-09-27 ~14:30, i7 local time):
    - re-apply C1's two pure appends (board-goroot 5f0564da38, literal-tier-ruling 70e010aa46) at the next docs
      landing;
    - the Pages-audit fixes that need no owner decision (the layout's relative_url, the wrapped-code-span pages);
-   - reflect HASH-token residual onto the BOARD.
+   - reflect HASH-token residual onto the BOARD;
+   - prune C1's obsolete train-49 refs 2b823dc951, 5f7fef6683, 394de9fd68 (bundle first).
 
 LANES (every STATE BLOCK is in section 1d.2; confirm session names with ListAgents):
  - R (R-LAPTOP, Remote Control), in order:
@@ -308,13 +311,14 @@ BRANCH: claude/c1-orphan-census f4903fad5f90194288155293db85bdcc2dc1b79e on-orig
 BRANCH: claude/c1-tests-production-alias-sizing 7227138c2652503a1425b7833570598dcdc5f867 on-origin yes cut -- the -tests alias rewrite is a compilation-unit axis, re-pushed today
 BRANCH: claude/c1-literal-tier-ruling 70e010aa462093c0112f52daccf407afc60fbf93 on-origin yes accepted -- the owner's literal-tier record (a pure append); COORD re-applies it at the next docs landing
 BRANCH: claude/c1-board-goroot 5f0564da38e05beb59383ac214660fa5259e6e52 on-origin yes accepted -- the BOARD -goroot entry (a pure append); COORD re-applies it at the next docs landing
-BRANCH: claude/c1-handown-address-guard 2b823dc951f20769296f03325764ddc1ed61aed3 on-origin yes stale -- train 49; re-cut on current master owed (item 1)
-BRANCH: claude/c1-handown-census-slice 5f7fef6683730bef6ca6fcb87d0028ba2a131bb5 on-origin yes stale -- train 49; re-cut owed (item 2)
-BRANCH: claude/c1-train49-guards 394de9fd684756d6e3aeed6975587720d3d73180 on-origin yes stale -- train 49; re-cut of the slnx dangling-path half owed (item 3)
+BRANCH: claude/c1-handown-address-guard-recut b0c721e5072180edadb454c67fee281e6bc11671 on-origin yes accepted -- next-train seat (ledger 8d62b909a1): hand-own address guard, red on a real site
+BRANCH: claude/c1-handown-census-slice-recut 62f40a767df4b2c55c1c2fedacc4a4a89c6d76b4 on-origin yes accepted -- next-train seat; its red-first under pwsh 7 and PS 5.1 is the i7's at assembly, acceptance (a)-(d) in its message
+BRANCH: claude/c1-slnx-project-paths-recut dc2a5104aed27077388fc64bf7a49be199be98d5 on-origin yes accepted -- next-train seat: go2cs.slnx dangling-path guard, red on the real file
+NOTE: the old train-49 refs 2b823dc951, 5f7fef6683 and 394de9fd68 are RULED OBSOLETE (8d62b909a1); COORD prunes them after bundling
 NOTE: announced records, closed: c1-hop-lessons-outline 742a53090a, c1-fips140test-classing 769fc17fb1, c1-reflect-divergence-classing 9f894ac07c, c1-synctest-sizing 93cc9e215a, c1-h6-rewrites c5fb9e0ed8, c1-mcleanup-handown 23d07f7426; 27 other C1 branches are ancestors of master
 LOCAL-ONLY: none
 WORKTREE: C1 rfx (the reflect seat) and mbx (mailbox transport) kept; 33 others reclaimed today (about 21 GB)
-NEXT: the train-49 re-cuts (1)-(3), each red first on current master
+NEXT: STANDBY until the weekly reset; then whatever COORD assigns (the re-cuts are done and accepted)
 READ-FIRST: inbox C1 20260926T150820Z-COORD.md (the stranded re-cuts); ledger 7eb8b61ab2
 BLOCKED-ON: none
 TOOLS: GOTOOLCHAIN=go1.24.13 (linux/amd64); no .NET SDK; no pwsh; python 3.11.15; git 2.43.0 (the roster guard and any .NET gate are run by COORD)
@@ -332,10 +336,11 @@ BRANCH: claude/c2-darwin-trampoline-map 4bc0c35b01b0aff944c84f8433e105f81d6683c4
 BRANCH: claude/c2-darwin-option2-sizing 43e0dff04ccb19bc4dc7f753e1719b41598ff441 on-origin yes announced -- darwin option 2 sizing; same wait
 BRANCH: claude/c2-embed-sizing 602ba6f2739da1e4fec5e33ca95d06f9d9720af7 on-origin yes announced -- //go:embed DATA record, not landed
 BRANCH: claude/c2-literal-cache-draft 34b60c14dab0f04d0bb0d197b94ba5fa0b8e6226 on-origin yes announced -- O1 survival probe r2 record, not landed
+BRANCH: claude/c2-output-attr-sync e9c57f833ea4a5cad24cbf2fe880e2fb4ab1726d on-origin yes accepted -- next-train seat (8d62b909a1): the two [GoTestMatchingConsoleOutput] attributes plus a both-ways list guard; its behavioral and CNR legs are owed at the battery
 NOTE: probes never to merge: c2-getaddrinfo-probe 83385dad6c, c2-getaddrinfo-probe-before 9ecce1839c (retirement question open), c2-elemindex-probe 9483bc624b; superseded: c2-twin-pilot-design c0667831bd; the harness branch nifty-davinci-6i9u8x is pruned and contained in master
 LOCAL-ONLY: none
 WORKTREE: C2 mbx (claude/mailbox clone), clean
-NEXT: size the NARROW-ARITHMETIC-TO-INTERFACE defect first (int8 a+a reaching fmt prints 200 int32 where Go prints -56 int8; ledger 7eb8b61ab2), read-only on master 4fb6e460c6e1633b1d20d3092fe0339c9438fe81; cut claude/c2-output-attr-sync (two attributes plus a both-ways guard); the MinInt/-1 quo/rem shape waits on the OWNER
+NEXT: after the weekly reset, CUT the narrow-arithmetic SOURCE-SIDE pre-pass as ruled (ledger 8d62b909a1; sizing inbox COORD 20260927T201231Z-C2: 345 at-risk GOROOT sites) from master 4fb6e460c6e1633b1d20d3092fe0339c9438fe81, red first per consumer class, with the parenthesized-operand fix and the named-empty-interface arm; the MinInt/-1 quo/rem shape waits on the OWNER
 READ-FIRST: inbox COORD 20260927T193256Z-C2 (MinInt/-1 sizing) and 20260927T193445Z-C2 (the list sizing); ledger 7eb8b61ab2; inbox C2 20260926T112007Z (the anonymous-struct generic alias sizing, still queued) and 20260926T150835Z (the stranded re-cuts)
 BLOCKED-ON: none (the darwin option-2 branches wait on an owner hand)
 TOOLS: GOTOOLCHAIN=go1.24.13, dotnet SDK 10.0.112, python3 3.11.15, no pwsh

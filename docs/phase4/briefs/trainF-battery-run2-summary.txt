@@ -52,3 +52,77 @@
 14:22:22   S:crypto/internal/fips140test:   PASS  crypto/internal/fips140test        2260 [291s]
 14:23:26 LEG S:crypto/md5 rc=0 wall=63s free=3667G log=sweep-crypto.md5.log
 14:23:26   S:crypto/md5:   PASS  crypto/md5                         11 [59s]
+14:24:28 LEG S:crypto/rand rc=0 wall=61s free=3667G log=sweep-crypto.rand.log
+14:24:28   S:crypto/rand:   PASS  crypto/rand                        314 [58s]
+14:27:24 LEG S:crypto/rsa rc=0 wall=175s free=3667G log=sweep-crypto.rsa.log
+14:27:24   S:crypto/rsa:   PASS  crypto/rsa                         568 [172s]
+14:28:14 LEG S:crypto/sha1 rc=0 wall=49s free=3667G log=sweep-crypto.sha1.log
+14:28:14   S:crypto/sha1:   PASS  crypto/sha1                        12 [46s]
+14:29:07 LEG S:crypto/sha256 rc=0 wall=52s free=3666G log=sweep-crypto.sha256.log
+14:29:07   S:crypto/sha256:   PASS  crypto/sha256                      22 [49s]
+14:30:23 LEG S:crypto/sha3 rc=0 wall=75s free=3666G log=sweep-crypto.sha3.log
+14:30:23   S:crypto/sha3:   PASS  crypto/sha3                        18 [72s]
+14:31:13 LEG S:crypto/sha512 rc=0 wall=50s free=3666G log=sweep-crypto.sha512.log
+14:31:14   S:crypto/sha512:   PASS  crypto/sha512                      35 [46s]
+14:34:08 LEG S:database/sql rc=0 wall=173s free=3666G log=sweep-database.sql.log
+14:34:08   S:database/sql:   PASS  database/sql                       140 [170s]
+14:34:55 LEG S:encoding/binary rc=0 wall=46s free=3665G log=sweep-encoding.binary.log
+14:34:55   S:encoding/binary:   PASS  encoding/binary                    142 [42s]
+14:36:03 LEG S:fmt rc=0 wall=68s free=3665G log=sweep-fmt.log
+14:36:03   S:fmt:   PASS  fmt                                62 [65s]
+14:36:53 LEG S:io rc=0 wall=49s free=3665G log=sweep-io.log
+14:36:54   S:io:   PASS  io                                 60 [45s]
+14:37:34 LEG S:log rc=0 wall=39s free=3665G log=sweep-log.log
+14:37:34   S:log:   PASS  log                                8 [36s]
+14:38:43 LEG S:log/slog rc=0 wall=68s free=3665G log=sweep-log.slog.log
+14:38:43   S:log/slog:   PASS  log/slog                           198 [release-tiered] [65s]
+14:39:22 LEG S:log/slog/internal/buffer rc=0 wall=39s free=3664G log=sweep-log.slog.internal.buffer.log
+14:39:22   S:log/slog/internal/buffer:   PASS  log/slog/internal/buffer           1 [35s]
+14:40:02 LEG S:mime rc=0 wall=40s free=3664G log=sweep-mime.log
+14:40:02   S:mime:   PASS  mime                               17 [37s]
+14:44:19 LEG S:net rc=0 wall=255s free=3664G log=sweep-net.log
+14:44:19   S:net:   PASS  net                                476 [253s]
+14:45:00 LEG S:net/http/internal rc=0 wall=40s free=3664G log=sweep-net.http.internal.log
+14:45:00   S:net/http/internal:   PASS  net/http/internal                  14 [37s]
+14:45:47 LEG S:net/netip rc=0 wall=47s free=3664G log=sweep-net.netip.log
+14:45:47   S:net/netip:   PASS  net/netip                          211 [44s]
+14:47:48 LEG S:os rc=0 wall=119s free=3663G log=sweep-os.log
+14:47:48   S:os:   PASS  os                                 1105 [116s]
+14:48:27 LEG S:slices rc=0 wall=39s free=3663G log=sweep-slices.log
+14:48:28   S:slices:   PASS  slices                             121 [36s]
+14:49:09 LEG S:strconv rc=0 wall=40s free=3663G log=sweep-strconv.log
+14:49:09   S:strconv:   PASS  strconv                            55 [38s]
+14:50:02 LEG S:strings rc=0 wall=52s free=3663G log=sweep-strings.log
+14:50:02   S:strings:   PASS  strings                            69 [49s]
+14:50:56 LEG S:sync rc=0 wall=53s free=3663G log=sweep-sync.log
+14:50:56   S:sync:   PASS  sync                               46 [50s]
+14:52:00 LEG S:testing rc=0 wall=63s free=3663G log=sweep-testing.log
+14:52:00   S:testing:   PASS  testing                            53 [60s]
+14:52:34 LEG S:unicode/utf16 rc=0 wall=33s free=3662G log=sweep-unicode.utf16.log
+14:52:34   S:unicode/utf16:   PASS  unicode/utf16                      8 [30s]
+14:53:09 LEG S:unicode/utf8 rc=0 wall=34s free=3662G log=sweep-unicode.utf8.log
+14:53:09   S:unicode/utf8:   PASS  unicode/utf8                       14 [31s]
+14:54:31 LEG S:encoding/gob rc=0 wall=81s free=3662G log=sweep-encoding.gob.log
+14:54:31   S:encoding/gob:   PASS  encoding/gob                       106 [78s]
+14:59:29 LEG S:hash/maphash rc=0 wall=297s free=3662G log=sweep-hash.maphash.log
+14:59:29   S:hash/maphash:   PASS  hash/maphash                       59 [294s]
+15:00:25 LEG S:internal/reflectlite rc=0 wall=55s free=3662G log=sweep-internal.reflectlite.log
+15:00:25   S:internal/reflectlite:   PASS  internal/reflectlite               30 [52s]
+15:01:14 LEG S:internal/zstd rc=0 wall=49s free=3661G log=sweep-internal.zstd.log
+15:01:15   S:internal/zstd:   PASS  internal/zstd                      536 [45s]
+15:02:35 LEG S:math/big rc=0 wall=80s free=3661G log=sweep-math.big.log
+15:02:35   S:math/big:   PASS  math/big                           231 [77s]
+15:07:34 LEG S:net/http rc=0 wall=297s free=3661G log=sweep-net.http.log
+15:07:34   S:net/http:   PASS  net/http                           1387 [release-tiered] [294s]
+15:08:53 LEG S:net/rpc rc=0 wall=78s free=3661G log=sweep-net.rpc.log
+15:08:53   S:net/rpc:   PASS  net/rpc                            15 [75s]
+15:09:30 LEG S:net/textproto rc=0 wall=36s free=3660G log=sweep-net.textproto.log
+15:09:30   S:net/textproto:   PASS  net/textproto                      26 [34s]
+15:10:06 LEG S:path rc=0 wall=35s free=3660G log=sweep-path.log
+15:10:06   S:path:   PASS  path                               9 [32s]
+15:11:15 LEG S:path/filepath rc=0 wall=68s free=3660G log=sweep-path.filepath.log
+15:11:15   S:path/filepath:   PASS  path/filepath                      67 = 61 banked + 6 host-conditional [64s]
+15:11:57 LEG S:sort rc=0 wall=41s free=3660G log=sweep-sort.log
+15:11:57   S:sort:   PASS  sort                               63 [38s]
+15:13:00 LEG S:syscall rc=0 wall=62s free=3660G log=sweep-syscall.log
+15:13:00   S:syscall:   PASS  syscall                            65 [59s]
