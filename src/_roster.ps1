@@ -703,9 +703,12 @@ function Get-ProofPageIdentity {
     frozen roster's absolute ones.
 
     The note is inserted after the H1 rather than before it: this page has no YAML front matter
-    (nothing under docs\ does) and its first line is the Jekyll {% raw %} guard whose matching
-    endraw must stay the file's last line, so both ends of the document are spoken for. Inside the
-    raw guard is also where the note is safe by construction -- it can never be read as Liquid.
+    (nothing under docs\ does), its first line is the H1 (jekyll-titles-from-headings titles the
+    published page only from a heading at the very start of the file), and the line after the H1 is
+    the Jekyll {% raw %} guard whose matching endraw must stay the file's last line. The note goes
+    after that guard line, inside the raw guard, where it is safe by construction -- it can never be
+    read as Liquid. A roster whose guard is still on line 1 (every snapshot frozen before
+    2026-09-27) puts the note straight after the H1, which is inside the guard too.
 
     Non-ASCII is composed from [char], never written as a literal: PS 5.1 parses a BOM-less UTF-8
     .ps1 through the system codepage, and a mojibake'd em dash in a COMMENT is cosmetic while one
@@ -817,6 +820,9 @@ function ConvertTo-FrozenRosterText {
         if ($lines[$i] -match '^#\s') { $h1 = $i; break }
     }
     if ($h1 -lt 0) { throw 'ConvertTo-FrozenRosterText: the roster has no H1 to place the frozen-snapshot note under.' }
+
+    # The raw guard directly under the H1 keeps its place: the note goes inside it.
+    if ($h1 + 1 -lt $lines.Count -and $lines[$h1 + 1].Contains('{% raw %}')) { $h1++ }
 
     $out = New-Object System.Collections.Generic.List[string]
     for ($i = 0; $i -le $h1; $i++) { $out.Add($lines[$i]) }

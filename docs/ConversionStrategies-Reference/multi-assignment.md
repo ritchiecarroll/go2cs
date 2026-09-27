@@ -1,5 +1,5 @@
-<!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 # Multi-Assignment and Evaluation Order
+<!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#multi-assignment-and-evaluation-order)
 All right-hand operands in assignment expressions in Go are evaluated before assignment to the left-hand operands. C# can operate equivalently using tuple deconstruction (_thanks to Eugene Bekker for the [suggestion](https://github.com/ritchiecarroll/go2cs/issues/6)_). For the following Go code:

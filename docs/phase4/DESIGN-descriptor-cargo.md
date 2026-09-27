@@ -1,4 +1,5 @@
 # DESIGN — descriptor cargo at element positions
+<!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 > **Status.** Design record. No code. Two increments sized below; the arc's cut waits on this file.
 > **Root sentence:** *cargo is applied at the position that owns it and dropped on the way to the
@@ -1012,3 +1013,4 @@ machine-global deploy root (present, stale, fifteen projects) because no explici
 self-location correctly declines a root that has `core/golib`. The sequel's exe diff first ran a stale Debug
 build matched by a glob ahead of the runner's Release build. A one-hour clock step landed inside the full
 behavioral leg; that leg's 4,381 s is the runner's own stopwatch, and no wall reading spans the step.
+<!-- {% endraw %} -->

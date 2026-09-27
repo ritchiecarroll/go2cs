@@ -1,5 +1,5 @@
-<!-- {% raw %} — Jekyll/Liquid guard: this doc contains {{ sequences (Go template/composite syntax) that Liquid would otherwise parse or silently eat. Keep the matching endraw as the final line. -->
 # DESIGN — the converted host's package ancestry view
+<!-- {% raw %} — Jekyll/Liquid guard: this doc contains {{ sequences (Go template/composite syntax) that Liquid would otherwise parse or silently eat. Keep the matching endraw as the final line. -->
 
 **Status:** implemented, lane `claude/synthetic-goroot-class`, 2026-08-13.
 **Closes:** the board's *converted-host WORKING-DIRECTORY class* for five of its six members.

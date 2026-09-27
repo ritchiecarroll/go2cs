@@ -1201,6 +1201,19 @@ Assert-Equal 'frozen roster: a placeholder, an in-page anchor and a URL are left
 Assert-Equal 'frozen roster: the proof link becomes its sibling page' $true ($relocFixture.Text.Contains('[p](ex.row.md)'))
 Assert-Equal 'frozen roster: nothing path-shaped is left unrelocated' '' (Get-OrdinalJoin $relocFixture.Unrelocated)
 
+# The live roster's first line is its H1 and the Jekyll raw guard follows it (a guard on line 1
+# costs the published page its title). The frozen-snapshot note must land INSIDE that guard.
+$guardFixture = ConvertTo-FrozenRosterText -Version '1.24.13.1' -Commit 'abc1234' -FrozenOn '2026-01-01' -RosterText ((@(
+    '# Fixture roster'
+    '<!-- {% raw %} -->'
+    ''
+    'Body.'
+    '<!-- {% endraw %} -->'
+) -join "`n"))
+$guardLines = @($guardFixture.Text -split "`n")
+Assert-Equal 'frozen roster: the H1 stays the first line and the raw guard the second' '# Fixture roster|<!-- {% raw %} -->' ($guardLines[0] + '|' + $guardLines[1])
+Assert-Equal 'frozen roster: the note lands inside the raw guard' $true ($guardFixture.Text.IndexOf('Frozen snapshot') -gt $guardFixture.Text.IndexOf('{% raw %}'))
+
 $trackedFixture = @('docs/phase4/evidence/a.json', 'docs/phase4/list.txt', 'docs/README.md', 'src/tool.ps1')
 Assert-Equal 'link resolution: a tracked file, a tracked directory either spelling, a fragment and an ../ walk resolve' '' `
     (@(Get-UnresolvedRelativeLinks -Targets @('phase4/evidence/', 'phase4/evidence', 'phase4/list.txt', '../src/tool.ps1', 'README.md#try') `

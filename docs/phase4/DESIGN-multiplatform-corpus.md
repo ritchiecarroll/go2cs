@@ -1,5 +1,5 @@
-<!-- {% raw %} — Jekyll/Liquid guard: this doc contains {{ sequences (Go template/composite syntax) that Liquid would otherwise parse or silently eat. Keep the matching endraw as the final line. -->
 # DESIGN — one corpus, three platforms: what a multiplatform standard library costs, and how it ships
+<!-- {% raw %} — Jekyll/Liquid guard: this doc contains {{ sequences (Go template/composite syntax) that Liquid would otherwise parse or silently eat. Keep the matching endraw as the final line. -->
 
 > **STATUS: ACCEPTED** (user ruling 2026-08-08: recommendations accepted as written — layout L3 + packaging option (a) RID assemblies; increments proceed in order).
 > **Increment 1 LANDED 2026-08-08** — the converter now takes the census itself (`-platforms` list +

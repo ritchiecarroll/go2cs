@@ -1,4 +1,5 @@
 # CENSUS — H6 hand-own re-audit at go1.24.13
+<!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 **Read-only. Proposals only — no cuts, no dispositions applied, no ruling implied.** The input the
 H6 GATE consumes: every hand-owned file, its Go principal, and that principal's status at the
@@ -2163,3 +2164,4 @@ Two targets, release 1.23.12, one box, write evidence asserted per file; the fiv
 never writes were measured on the linux run and vice versa. ⚠ **The hook/non-hook split is
 PATTERN-DEPENDENT at about ±1 line** — `exec_unix` reads 24/12 under one blank-line rule and 25/11 under
 another, same total 36 — so the split is sound at the class level and should not be quoted to the line.
+<!-- {% endraw %} -->

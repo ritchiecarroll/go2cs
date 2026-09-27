@@ -1,4 +1,5 @@
 # BRIEF — the staging-root / internal-import refusal
+<!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 **Point-in-time brief for coordinator ruling**, per the document ladder in `CLAUDE.md`: this is a
 record, not a runbook and not doctrine. It is amended with dated blocks, never rewritten, and nothing
@@ -244,3 +245,4 @@ unsatisfiable assert.
    `GOFLAGS` into commands the harness cannot otherwise reach — the right instrument the day a test
    needs a *modified* source compiled at a GOROOT path, which is precisely what an
    `internal/coverage/cfile` harness rewrite would need.
+<!-- {% endraw %} -->

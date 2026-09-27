@@ -1,4 +1,5 @@
 # REHEARSAL — H5/H7 against Go 1.24.13
+<!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 **Lane R, 2026-09-07, on R-LAPTOP.** A point-in-time **record**: what a full `-stdlib` conversion of
 Go 1.24.13 emits, and how far the emitted corpus compiles. Amended with dated blocks, never rewritten,
@@ -993,3 +994,4 @@ repro first, announced before cutting.
 **Scope.** No new measurement: a record of readings taken on 2026-09-08, each at the tree its post names,
 with the two lineages kept apart. Written 2026-09-13 at master `654343a5e` from the posts themselves.
 Readings the posts do not reconcile are marked NOT MEASURED rather than smoothed.
+<!-- {% endraw %} -->

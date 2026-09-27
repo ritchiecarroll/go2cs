@@ -1,4 +1,5 @@
 # Conversion Strategies
+<!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 > **How `go2cs` turns each Go construct into C#, one short section per topic, with the Go and the C# it
 > becomes side by side.** This page is for a Go developer reading converted code, or anyone evaluating
@@ -12286,3 +12287,4 @@ order of those two statements is correct C#. The converter collects them in a ma
 sorted name order. So `x` always comes before `y`, and the line is the same every run.
 
 **Full detail:** [Reference → Deterministic Output](ConversionStrategies-Reference/deterministic-output.md#deterministic-output) — which shared converter state each rule protects, and the unstable or broken output it prevents.
+<!-- {% endraw %} -->

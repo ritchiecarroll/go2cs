@@ -1,5 +1,5 @@
-<!-- {% raw %} — Jekyll/Liquid guard: this doc quotes Go/Liquid-ambiguous syntax and shell braces; keep the matching endraw as the final line. -->
 # MILESTONE — the 75% crossing, prepared
+<!-- {% raw %} — Jekyll/Liquid guard: this doc quotes Go/Liquid-ambiguous syntax and shell braces; keep the matching endraw as the final line. -->
 
 > **✅ EXECUTED (2026-08-22) — this is now a RECORD of a ritual that ran.** The crossing happened and
 > the package below was used as written: tag **`stdlib-tests-75pct-2026-08-22`**, branch

@@ -1,5 +1,5 @@
-<!-- {% raw %} — Jekyll/Liquid guard: this doc contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 # Glossary — process terms used in commit messages, memory logs, and reviews
+<!-- {% raw %} — Jekyll/Liquid guard: this doc contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 > Definitions as **actually used** in this repository's development process — especially the
 > Phase-3 "full stdlib compile" campaign (2026-06/07) whose commit messages, chip briefs, and

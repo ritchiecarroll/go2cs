@@ -1,5 +1,5 @@
-<!-- {% raw %} — Jekyll/Liquid guard: this doc quotes Go composite-literal syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 # BOARD — next validation candidates, each rooted
+<!-- {% raw %} — Jekyll/Liquid guard: this doc quotes Go composite-literal syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 > Measured 2026-07-27 by running the `-tests` pipeline over every unbanked candidate the
 > shared-fixture fix structurally unblocked, plus the packages a prior scout left build-blocked.

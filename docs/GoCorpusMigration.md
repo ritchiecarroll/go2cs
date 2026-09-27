@@ -1,4 +1,5 @@
 # Migrating the go2cs corpus to a new Go version
+<!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 > The standing runbook for moving the converted standard library — and everything derived from it:
 > the goldens, the validation roster, the proof pages, the disclosure manifests, the published
@@ -4053,3 +4054,4 @@ healthy run look hung — and, in the other direction, what lets a hung one look
   `src/go2cs/embeddedTemplates.go`; `src/run-validated-sweep.ps1` (serial by design, the exact-match
   filter, the toolchain pin, the disk preflight, the long-timeout floors); `src/_roster.ps1` and
   `src/check-roster-format.ps1`
+<!-- {% endraw %} -->

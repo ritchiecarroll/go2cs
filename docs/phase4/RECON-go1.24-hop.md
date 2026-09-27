@@ -1,4 +1,5 @@
 # RECON — the Go 1.24 hop, baseline capture
+<!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 > Lane `C2`, 2026-09-02. **MEASUREMENT ONLY.** Nothing outside this record was committed, no
 > converter/golib/gen/corpus change is proposed here, and **the repository's `src/version.props` was
@@ -1026,3 +1027,4 @@ categories (the four vanished principals, the 39 changed, the 38 identical, the 
 principal), §7's rebank bill and §9's sequencing all stand as written. §F moves each census cell by
 one in both releases and no Δ; §G adds one re-key to the hop's work and moves no wall. The 2026-09-07
 amendment's §A–§E are untouched.
+<!-- {% endraw %} -->

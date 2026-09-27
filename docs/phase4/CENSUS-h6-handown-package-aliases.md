@@ -1,4 +1,5 @@
 # CENSUS — hand-own package aliases against the 1.24.13 release (H6, release-agnostic half)
+<!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 **Point-in-time record.** Taken at master `44f858717` (train 45 landed) on 2026-09-08 by lane G, per
 COORD's dispatch in the train-45 landing follow-up. Amend with dated blocks; never execute from it.
@@ -1074,3 +1075,4 @@ R's "different trees" account of 94 against 97 (`:159133-159134`) is NOT REPRODU
 - The comparison against G's table is per-file counts only; C2's §5.6 multiset check covers targets.
 - `4c491cb20` (on `claude/c1-h6-rewrites`) is a control blob only, not an ancestor of `44f858717` or `a02ac3df3`
   (`merge-base --is-ancestor` exit 1 for both).
+<!-- {% endraw %} -->

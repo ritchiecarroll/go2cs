@@ -1,5 +1,5 @@
-<!-- {% raw %} — Jekyll/Liquid guard: this doc contains {{ sequences (Go composite-literal syntax) that Liquid would otherwise parse or silently eat. Keep the matching endraw as the final line. -->
 # DESIGN — `reflect.StructOf`: runtime struct synthesis in the managed reflect bridge
+<!-- {% raw %} — Jekyll/Liquid guard: this doc contains {{ sequences (Go composite-literal syntax) that Liquid would otherwise parse or silently eat. Keep the matching endraw as the final line. -->
 
 > **STATUS: RATIFIED WITH AMENDMENTS (coordinator, 2026-08-25). NOT IMPLEMENTED.** The first draft was
 > measured against the live bridge by an adversarial review lane (probes on `golib.dll`, real
