@@ -1,5 +1,5 @@
 g-managed-tracer|08d07a9570|G: the managed execution tracer (Q28): Go's v2 trace of the goroutine facts, parsed by Go's own tool (runtime/trace validates 2; leaves E4)
-i9-host-flag-isolation|458b56f6e5|the i9: an in-process test run resets the flag parse state (definitions kept) and returns flag's exit status; real binaries untouched
+i9-host-sandbox-marker|002929151f|the i9: GO2CS_TEST_SANDBOX restored in TestHost.Run (carries the flag isolation 458b56f6e5) -- was: the i9: an in-process test run resets the flag parse state (definitions kept) and returns flag's exit status; real binaries untouched
 r-runtime-claims|3fae75de81|R: seat (ii) -- max/min signed zero, array map keys cloned on insert, panic(nil) and GODEBUG plumbing, nil-old CompareAndSwap (TestMaxFloat, TestMinFloat, TestBigItems, TestPanicNil pass)
 p2-stack-roots|b9d7f64248|P2: M3 stack roots (carries M2b cf95330847) -- was: P2: M2b, runtime/pprof reads the real heap profile (TestMemoryProfiler/proto and TestFakeMapping pass) -- on M2
 g-displacement-cache|ec5dce06b8|G: FieldRefBox caches its displacement by accessor delegate (the first conversion's premium falls to about +50 ns / +6 B)

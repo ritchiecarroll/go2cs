@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-27 14:40 -- SAVE-STATE at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
+> **Status of this revision:** 2026-09-27 14:45 (first cut 14:29; an earlier '14:40' stamp was ahead of the clock) -- SAVE-STATE at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -145,7 +145,7 @@ WHERE THINGS STAND (2026-09-27 ~14:30, i7 local time):
        them to the GitHub blob URL);
      - 144 anchors on 7 pages, where kramdown's ids differ from GitHub's slugs;
      - 12 pages with the default title.
-     Its report is docs/phase4/briefs/pages-audit-2026-09-27.md on claude/coord-handover when present. Otherwise
+     Its report is docs/phase4/briefs/pages-audit-2026-09-27.md on claude/coord-handover (33 items, 43 verified findings, one owner-only item withheld). To re-measure,
      rebuild with the claude/coord-pages-check workflow and run .claude/coord-scripts/docs/site_check.py. Delete
      claude/coord-pages-check after the fixes land.
    * THE COST SCOUT (owner side quest: per-call costs Go does not pay) was PAUSED at the save. Re-run it later as a
@@ -216,12 +216,13 @@ BRANCH: claude/g-darwin-funnel-marshal 7ca98749fafffaac0be986d7f72cb5584fdae550 
 BRANCH: claude/g-pidfd-probe 3e742c8122e69786553e194772a2d41d17011feb on-origin yes accepted -- os pidfd probe (TRAIN F)
 BRANCH: claude/g-os-linux-manifest 53cac3b6fe6d8b61ab484365ef5ead21d1bf7bc2 on-origin yes accepted -- os linux manifest (TRAIN F)
 BRANCH: claude/g-sigpipe-death 2ebbfd0351ad4365acb49b7dfab3858220669772 on-origin yes accepted -- SIGPIPE death L2 (TRAIN F)
+BRANCH: claude/g-native-sink-guard d381ae934c907105f1fbe639a9b4ddcb7c142462 on-origin yes cut -- the windows AV sink guard (bit 63; ruled 682938846e); P2 reviews; gates running in the posted order
 NOTE: landed G refs still on origin: claude/g-os-sigpipe-push b826b1d3e7, claude/g-deep-tree-removal 1b902f7471, claude/g-fieldref-token 490e4d0b0d, claude/g-repoguard-liveness-recut 2111673768
 LOCAL-ONLY: claude/g-a2-compile-order 289b53a16cc604a623409936f62e3e918c733d40 already contained in master none-needed none
 LOCAL-ONLY: scratch/g-os-linux-union bc3a3991b2fa400e351ad8bc4c1b2068169c7225 superseded scratch union bundle(prereq origin/master) 897b1657d12d398d
 LOCAL-ONLY: g-instruments-20260927.tgz (bisect, census, AV-probe and bench scripts) holds host paths, never pushed; tarball in the lane scratch 3ef5036ffef82ac4
 WORKTREE: G-LAPTOP gcm, gbi, gcn and the WSL scv-lin tree: detached measurement trees (-tests dirt, a LOCAL scratch skip of TestFunctionAlignmentTraceback, probes): discard on resume; the seat trees are clean at their pushed tips
-NEXT: cut the windows AV sink guard on a new branch from master 4fb6e460c6e1633b1d20d3092fe0339c9438fe81: NativeBox and native-slice-view refuse addresses at or above 0x0000_8000_0000_0000 with linux's nil-deref panic, one red arm per band, TestFunctionAlignmentTraceback a named capability disclosure
+NEXT: finish the sink guard's gates at d381ae934c907105f1fbe639a9b4ddcb7c142462 in the posted order (GolibTests windows, converter suite, full behavioral, the windows runtime row with two dotnet-stack samples in TestScavenger's stall, then linux GolibTests with the red, then the linux base and cut rows) and score them against the posted prediction
 READ-FIRST: ledger f8f73cd0a9 (the ruling) and the G lines before it (the AV root: P2 96ce90f997 / ed9dc138e8); golib ж.cs's uintptr->ж operator and ж.NativeBox.cs; runtime/managed_impl.cs s_callerSpanBase; golib GoSyntheticPC.cs
 BLOCKED-ON: none
 TOOLS: GOROOT go1.24.13; DOTNET_ROOT .NET SDK 10.0.400 (per-user side-by-side on windows; ~/.dotnet 10 on WSL); dotnet-stack 10.0.745401 (owner-cleared)
@@ -249,7 +250,7 @@ TOOLS: GOROOT go1.24.13 linux-amd64 via GOTOOLCHAIN=go1.24.13; .NET SDK 10.0.112
 
 ```
 LANE: i9   MODEL: Opus 5.5/standard   HOST: i9
-BRANCH: claude/i9-host-sandbox-marker 002929151f7c19800e5d5f0b899a996214ca4fd8 on-origin yes cut -- GO2CS_TEST_SANDBOX withdrawn in TestHost.Run's finally (red 0fcd83fd36), stacked on 458b56f6e5; guard 2/2; gates RUNNING
+BRANCH: claude/i9-host-sandbox-marker 002929151f7c19800e5d5f0b899a996214ca4fd8 on-origin yes accepted -- GO2CS_TEST_SANDBOX restored in TestHost.Run's finally (red 0fcd83fd36), stacked on 458b56f6e5; ALL gates green, surfaced none (ledger 6ec4ed25e1); the TRAIN G seat
 BRANCH: claude/i9-host-flag-isolation 458b56f6e540210020277c1f840dfd9526441a0c on-origin yes accepted -- in-process flag isolation (TRAIN G)
 BRANCH: claude/i9-test-source-refresh f6fe7d4bf479c0a9a24dc67fabf90af97038eb9d on-origin yes accepted -- test-source refresh (TRAIN F); worktree kept until TRAIN F lands
 NOTE: landed in master 1dae85e093 with their refs removed: i9-gosched-highres-escalation 37a4a8f72b, i9-junction-godebug-survives d4c9dd8305, i9-registry-running-count 2ba705db0a, i9-os-symlink-capability-block 5345c2a0b2
@@ -257,7 +258,7 @@ NOTE: older i9 evidence/recon refs on origin (disposition per the ledger): i9-da
 LOCAL-ONLY: old-repo-unpublished bundle (6 heads of the retired old-root clone, never censused for publication) preserved in the i9's DOCS-SSD archive 5e6278d41550c30b
 LOCAL-ONLY: the i9 logs directory (gate logs, tools, drafts; carries host paths) stays on the i9; every verdict is in a pushed commit or a COORD message
 WORKTREE: i9 DOCS-SSD i9-trt (claude/i9-host-sandbox-marker, gates running) and i9-refresh: 0 uncommitted, pushed
-NEXT: finish the marker cut's gates at 002929151f7c19800e5d5f0b899a996214ca4fd8 (GolibTests Release+Debug by name against 458b56f6e5, ALL BehavioralTests, sweeps os/exec syscall flag os/signal), report by name any test that surfaces, then clear the stranded .tmp run roots
+NEXT: STANDBY until the weekly reset (the marker seat 002929151f7c19800e5d5f0b899a996214ca4fd8 is accepted for TRAIN G; its stranded .tmp run roots are cleared)
 READ-FIRST: ledger lines 497-498 (the flag accept and the (1)/(2) ruling); inbox FLEET 20260927T191644Z-COORD.md; the commit messages of 0fcd83fd36 and 002929151f
 BLOCKED-ON: none
 TOOLS: GOROOT go1.24.13, GOTOOLCHAIN=local, CGO_ENABLED=0, GOFLAGS=-p=4, DOTNET_ROOT .NET SDK 10.0.401, pwsh 7; HARDWARE ORDER (-m:4 / -p 4, one task at a time, crypto/tls banned here)
