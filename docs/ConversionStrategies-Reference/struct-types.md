@@ -338,204 +338,21 @@ Guarded by `AnonStructCrossFile`'s `bvars.go`/`yvars.go` (both manifestations, s
 `main.go` so file order is exercised in both directions) and, for the `-tests` seed,
 `TestTestVariantPinsProductionLiftedTypeNames`.
 
-## A global addressed only by the package's own `_test.go` is still heap-boxed
-A Go pointer to a package-level var aliases that var's real storage, which in C# means the global
-must be backed by a heap box (see [Pointers](pointers.md#pointers)); `packageAddressedGlobals` decides that by
-scanning the package for `&g`. But `go/packages` excludes `_test.go` from a production package, so
-an address taken *only* by the package's own in-package test half is invisible at the declaration.
-path/filepath is the canonical case — `path.go` declares `var lstat = os.Lstat // for testing` and
-`export_test.go` declares `var LstatP = &lstat`, the whole point being that a test can swap the
-implementation the production `Walk` calls. The production emission left `lstat` a plain field, and
-the test variant's `Ꮡlstat` named a box nothing declared: **CS0103**.
+<a id="a-global-addressed-only-by-the-packages-own-_testgo-is-still-heap-boxed"></a>Moved to [A global addressed only by the package's own `_test.go` is still heap-boxed](pointers.md#a-global-addressed-only-by-the-packages-own-_testgo-is-still-heap-boxed).
 
-The converter now scans the build-selected in-package `_test.go` files for the identifiers they take
-the address of and folds them into the addressed-global set, so the production declaration carries
-the box:
+<a id="astral-rune-literals"></a>Moved to [Astral rune literals](strings.md#astral-rune-literals).
 
-```csharp
-internal static ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new(os.Lstat);
-internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref Ꮡlstat.ValueSlot;  // for testing
-```
+<a id="type-switch-default-arm-binds-the-interface-value"></a>Moved to [Type-switch default arm binds the interface value](type-switch.md#type-switch-default-arm-binds-the-interface-value).
 
-Three properties make this the right shape rather than a `-tests`-only patch:
-
-- **It runs in ordinary conversion too**, exactly as `siblingTestFuncMethodNames` does for reference
-  spelling, so a package's production storage shape is **mode-stable** — an `-stdlib` reconvert and a
-  `-tests` run emit the same bytes. Conditioning it on `-tests` would make the banked corpus flip
-  between the two.
-- **The scan is a cheap direct directory read, not a second type-check** — no test dependency graph is
-  loaded. It is therefore name-based, and the production pass resolves each candidate against the real
-  package scope, dropping anything that is not a package-level var (a type, a func, an import
-  qualifier, a name that exists only in the test file).
-- **It errs toward recording nothing.** Names bound anywhere inside the enclosing top-level
-  declaration — receiver, parameters, results, `:=`, `var`/`const`/`type`, range and type-switch
-  bindings — are excluded, so `&counter` on a local that shadows a global does not box the global.
-  Under-recording restores today's loud CS0103; over-recording would silently box a global no pointer
-  aliases.
-
-Only **build-selected** test files are scanned (`go/build`'s `MatchFile`, with the run's `GOOS`/
-`GOARCH` and `-tags`), so the boxed set is a property of the build configuration exactly as the
-converted production sources themselves are: `path_windows_test.go` contributes on Windows and
-`path_unix_test.go` does not. That is the same rule `siblingTestFuncMethodNames` already follows, and
-it is the correct answer — a global no *selected* file addresses needs no box in that configuration.
-
-Measured across the whole standard library by an A/B reconvert: **13 globals in 13 files**, and every
-single one is a Go *"for testing"* hook — `path/filepath` and `os`'s `lstat`, `os`'s
-`testingForceReadDirLstat` and `allowReadDirFileID`, `runtime`'s `readRandomFailed`, `useAeshash`,
-`doubleCheckReadMemStats`, `casgstatusAlwaysTrack`, `forcegcperiod` and `timeBeginPeriodRetValue`,
-`reflect`'s `callGC` (whose own comment reads *"for testing; see TestCallMethodJump and
-TestCallArgLive"*), `internal/poll`'s `logInitFD`, `net/http`'s `maxWriteWaitBeforeConnReuse` and
-`testHookEnterRoundTrip`, and `time`'s `usPacific`. No false positives, which is what the
-bind-aware exclusion buys — and the same set is forward work, since `os`, `runtime`, `reflect`,
-`net/http`, `internal/poll` and `time` all need those hooks to alias real storage before their own
-suites can pass.
-
-External (`package foo_test`) test files are deliberately not scanned: they reach the package only
-through its exported surface, and `&otherpkg.Var` from *any* other package is a separate, still-open
-gap — `collectAddressedGlobals` only ever scans the package under conversion. (Guarded by the
-`SiblingTestAddressedGlobal` behavioral test, whose `export_test.go` addresses a bare global, a
-global through a field selector, and a global from a function body, against negatives for a
-test-file-local declarator and a shadowing local. It is the first behavioral project to carry a
-`_test.go`; the corpus harness skips `_test.go` when pairing sources with `.cs` goldens, since a
-production transpile never emits one.)
-
-## Astral rune literals
-A quoted rune literal beyond the BMP (`'\U0001D504'`) cannot be a C# char literal — it emits
-the code point (`(rune)0x1D504`); BMP literals keep their source text verbatim (html's entity
-table, CS1012 ×133). Guarded by `StringConvPostfix` (`glyphs`).
-
-## Type-switch default arm binds the interface value
-The default clause binds the guard to the ORIGINAL guarded expression (`var x = err;`), whose
-static type is the interface — the switch-operand form (`err.type()`) is object and cannot
-flow back out (`default: return x`, go/build/constraint's pushNot, CS0266).
-
-## The type-switch tag evaluates exactly once
-Go evaluates the TypeSwitchGuard's operand exactly once, but the default-arm and multi-type
-re-binds above textually re-emit the tag expression, so a tag containing a **call or channel
-receive** evaluated once at dispatch and again at each matched re-bind arm —
-`switch p := recover().(type)` re-called `recover()` (which returns nil the second time,
-silently losing the recovered value in a `case nil, *bailout:`-style arm that reads `p`;
-go/types handleBailout), and a `switch v := (<-ch).(type)` re-received. Such a tag is now
-HOISTED into a one-time temporary, and both the dispatch operand and every re-bind read it:
-
-```csharp
-var switchᴛ1 = next(x);
-switch (switchᴛ1.type()) {
-case @string _:
-case bool _: {
-    var v = switchᴛ1;      // re-bind reads the temp — next() ran exactly once
-    …
-default: {
-    var v = switchᴛ1;
-```
-
-The hoist is deliberately GATED — only a tag containing a call (conversions hoist
-conservatively; the temp is merely unneeded) or a receive, and only when some arm actually
-re-binds (a bound default, or a multi-type clause with a non-blank ident) — so every pure-tag
-type switch keeps its direct, byte-identical emission. The temp name comes from the
-per-package `getGlobalTempVarName` counter (`switchᴛN`), so nested and sibling hoists never
-collide. Single-type concrete labels and the `when`-guard interface labels bind from the
-dispatch operand's pattern variable and never re-evaluate the tag regardless. (Guarded by the
-`TypeSwitchImpureTag` behavioral test — a counting-function tag whose per-switch eval count is
-printed and output-compared vs Go [the pre-fix emission provably prints `calls: 7` for Go's
-`calls: 4`], a `recover()` tag in a deferred multi-type switch, and a channel-receive tag that
-would deadlock on re-receive.)
+<a id="the-type-switch-tag-evaluates-exactly-once"></a>Moved to [The type-switch tag evaluates exactly once](type-switch.md#the-type-switch-tag-evaluates-exactly-once).
 
 <a id="generated-code-global-qualifies-root-namespace-references"></a>Moved to [Generated code global::-qualifies root-namespace references](golib-namespace.md#generated-code-global-qualifies-root-namespace-references).
 
-## A GoImplement record's adapter key is canonical, not textual
-`interfaceImplementations` is keyed by RENDERED type name, so one resolved pair recorded under two
-spellings is two records — and go2cs-gen turns two records into two definitions of the SAME adapter
-type. The interface side arrives class-relative when PARSED from a `package_info.cs`
-(`rand_package.Source`, via `loadPackageImplements`) and fully namespace-qualified when rendered at
-a CAST SITE (`go.math.rand.rand_package.Source`). `canonicalRecordIfaceName` stripped only the root
-prefix, so the two keyed differently, the foreign-adapter existence proof missed, and the pair was
-re-recorded under the second spelling.
-
-Under `-tests` this is routine rather than exotic: the EXTERNAL (`package <name>_test`) variant
-reaches the package under test through its import path, so it renders that package's types
-qualified, while the seeded production metadata carries them short. math/rand/v2 emitted both
-`[assembly: GoImplement<PCG, Source>(Pointer = true)]` and
-`[assembly: GoImplement<go.math.rand.rand_package.PCG, go.math.rand.rand_package.Source>(Pointer = true)]`,
-and `ImplementGenerator`'s `GetUniqueHintName` silently uniquified the duplicate FILE name — so the
-duplicate TYPE reached the compiler as CS0102 + CS0111 ×5 + CS8646 on `rand_package.PCGжSource`.
-(`math/rand` escapes only by luck: its one self-qualified record targets a different interface than
-any short record.)
-
-The adapter's identity is exactly `<class>_package.<Type>` — the pair `ImplementGenerator` composes
-its class name from — so the record key collapses a longer chain to its `<pkg>_package` tail, leaving
-a nested type reference (`x.y_package.Outer.Inner`) untouched. The EMISSION side is normalized to
-match: `stripLocalTypeQualifier` rewrites a reference naming one of THIS package's own types through
-the package's fully-qualified class back to the bare local form the attribute file's
-`using static <ns>.<pkg>_package;` resolves, so the two spellings collapse in the emitting
-`HashSet`. Guarded by `TestStripLocalTypeQualifier`.
-
-*(Superseded in the details, 2026-08-02: `canonicalRecordIfaceName` is retired. Both record sets now
-compose one key through `implementRecordKey` / `canonicalImplementRecordIfaceName` — same collapse
-rule, now shared rather than duplicated. See* A foreign implement record is keyed in ONE spelling,
-and a VALUE one is trusted only for a partial struct.*)*
-
-⚠ **The collapse only reaches records the CURRENT run rendered — a stale spelling already on disk
-slips past it, because `package_info_external_test.cs` / `package_test_info.cs` are MERGE-PRESERVING** (see
-the anchor-routing note above). The merge reads each existing attribute line VERBATIM into the
-emitting `HashSet`, so a record persisted by an OLDER converter — before `stripLocalTypeQualifier`
-reduced it — arrives under the pre-collapse spelling and never meets the fresh, already-collapsed
-one. `container/heap` (banked at package #8, before the collapse landed) committed
-`[assembly: GoImplement<IntHeap, go.container.heap_package.Interface>(Pointer = true)]`; a fresh
-`-tests` run of a NESTED package-under-test now renders that same pair as the bare
-`[assembly: GoImplement<IntHeap, Interface>(Pointer = true)]` (the qualified `go.container.heap_package.`
-prefix gets `rootQualifySubNamespaceTypeRefs`-rooted then stripped, whereas a TOP-LEVEL package's
-`sort_package.Interface` is never rooted so it is never stripped and stays byte-stable). The two
-spellings both survived the merge → `GetUniqueHintName` uniquified the second `.g.cs` → a duplicate
-`IntHeapжInterface` reached the compiler (CS0102 + CS0111 + CS8646). `writePackageInfoFile` now runs
-every merged-in `[assembly: GoImplement<…>]` line through the SAME `qualifyLocalTypeRef` pipeline the
-fresh render applies, so a stale record collapses into the canonical one instead of duplicating it —
-the whole-line pass is safe because the pipeline only rewrites package-qualified name tokens (bare
-flag keywords `Pointer`/`Promoted` and the `assembly`/`GoImplement` scaffolding are untouched), and it
-is scoped to `GoImplement` lines specifically so it cannot rewrite a `GoImplicitConv` attribute's
-`ValueType = "…"` keyword (`ValueType` is a System-colliding name the rooter would otherwise qualify).
-Because whole-package conversions (`-stdlib`, every behavioral test) write with `mergeExisting=false`
-they never take this path, so the corpus and behavioral goldens are byte-identical. Guarded by
-`TestMergedStaleGoImplementSpellingCollapses`.
-
-**A type ALIAS is the third spelling, and it is resolved at the SOURCE.** The two collapses above
-reconcile spellings of one type *after* they are rendered. An alias cannot be reconciled that way:
-`type Expr = ast.Expr` is a name for a type that already has a name, and go2cs-gen composes the
-adapter class from the *resolved symbol*, never from the record's text — so a cast site that
-composes the class name from the alias spelling names a class the generator never emits (CS0246),
-and the pair is additionally recorded twice, once per spelling. `convertToInterfaceType` therefore
-resolves BOTH operands through `types.Unalias` before composing anything, which is where the
-function already reached ad hoc at five later points.
-
-The defect long predates the case that exposed it: any alias whose name differs from its target's
-mismatched the same way, and a *package-level* `type E = ast.Expr` would have done it just as well.
-It stayed invisible because the only aliases the corpus reached were spelled exactly like their
-targets, so the composed name happened to be right. `go/types`' `rangeStmt` declares
-`type Expr = ast.Expr` **function-locally**, and once function-local type declarations began taking
-the enclosing-function lift (`rangeStmt_Expr`, so two functions never claim one compilation-scoped
-`global using`), `check.errorf(lhs[i], …)` started composing `ast_rangeStmt_Exprᴠpositioner` against
-the generator's `ast_Exprᴠpositioner` — 557 verdicts behind two lines. With the resolution in place
-the aliased and unaliased cast sites in that same function land on one adapter and one record.
-(Guarded by the `LocalTypeAliasScope` extension: a function-local `type S = fmt.Stringer` converted
-to a local `namer` beside the same conversion written through `fmt.Stringer` directly, so a
-spelling-composed name shows up as both a second `ᴠ` class and a duplicate `GoImplement` record.)
+<a id="a-goimplement-records-adapter-key-is-canonical-not-textual"></a>Moved to [A GoImplement record's adapter key is canonical, not textual](interfaces/records.md#a-goimplement-records-adapter-key-is-canonical-not-textual).
 
 <a id="a-test-projects-references-cover-unrooted-alias-targets-single--and-multi-segment"></a>Moved to [A test project's references cover UNROOTED alias targets (single- AND multi-segment)](test-conversion.md#a-test-projects-references-cover-unrooted-alias-targets-single--and-multi-segment).
 
-## Generic embedded fields
-A GENERIC embed (`entry[K,V]` embedding `node[K,V]`, internal/concurrent) arrives in the AST as
-an `IndexExpr`/`IndexListExpr` over the base type; the anonymous-field walk unwraps it (plain,
-pointer, and selector forms) and the member emits under the **base name** with type arguments
-stripped **before** the selector dot-strip — the arguments may contain qualified types whose
-dots otherwise win the LastIndex (`*concurrent.HashTrieMap[T, weak.Pointer[T]]` misnamed its
-member `Pointer` instead of `HashTrieMap`). The TypeGenerator's promoted accessors carry the
-type parameters on the instance param (`ref Δentry<K, V> instance`) and strip them from the
-member access (`instance.node.isEntry`). A promoted method call through a raw ж **box local**
-hops `X.Value` ahead of the cross-package pointer-embed hop
-(`m.Value.HashTrieMap.Value.Load(value)`, unique). BANKED: unqualified promoted METHOD calls
-through a generic embed (`w.show()`) — receiver wrappers resolve the embedded type by exact
-name; qualified calls work. Guarded by `GenericStructFields` (`wrapped[T]`/`tag[T]`) and
-`CrossPkgUser` (`holder[T]` embedding `*CrossPkgLib.Cache[T]`).
+<a id="generic-embedded-fields"></a>Moved to [Generic embedded fields](struct-embedding.md#generic-embedded-fields).
 
 <a id="a-func-literal-in-an-any-slot-states-its-go-result-type-explicitly"></a>Moved to [A func literal in an `any` slot states its Go result type explicitly](functions-and-closures.md#a-func-literal-in-an-any-slot-states-its-go-result-type-explicitly).
 
@@ -592,6 +409,57 @@ func TestNoFixedSize(t *testing.T) {
 Guarded by the `LiftedLocalTypes` behavioral test (single lifted declaration for repeated
 anonymous occurrences + `[GoLocalName]` pinned in the golden); operationally by
 encoding/binary's banked suite.
+
+## A function-LOCAL named type declaration hoists to member level (slice/map/channel/array/pointer)
+
+C# forbids a type declaration inside a method body, so a `type X []T` / `type X map[K]V` /
+`type X chan T` / `type X [N]T` declared **inside a function** cannot emit its `[GoType(…)] partial
+struct X;` forward declaration in place — the following statements would then parse as MEMBER
+declarations (`CS1519 Invalid token 'foreach' in a member declaration`, `CS1513 } expected`, the
+map form's `CS8124`). A local `type X struct{…}` already hoists: `visitStructType`/`visitIdent`/
+`visitInterfaceType` each redirect the declaration into `currentFuncPrefix` (emitted at member level
+ahead of the method), rename it with the enclosing-function prefix (`ExampleChunk_People`), and
+register the lifted name in `liftedTypeMap` so every reference resolves to it. The array/slice, map,
+and channel emitters did **not** — they wrote the forward declaration straight into the method body
+(the reported slices `example_test`/maps `maps_test` defect). The shared helper `liftLocalTypeDecl`
+(`visitTypeSpec.go`) now applies that same hoist to all three: at package scope it is a no-op
+(target stays `v.targetFile`, `finish()` does nothing, so production emission is byte-identical),
+and inside a function it prefixes the name, registers the lift, redirects to a member-level builder,
+and flushes into `currentFuncPrefix`. A local **slice/array of a local element type** also needs the
+element resolved to its lifted name: `visitArrayType`'s simple-identifier fast path (which keeps the
+written name so `[3]rune` stays `rune`) is skipped when the element is itself a lifted local type
+(`!v.liftedTypeExists`), routing it through `getFullyQualifiedTypeName`, which resolves `liftedTypeMap` — so
+`type People []Person` (Person a local struct) emits `[GoType("[]ExampleChunk_Person")] partial
+struct ExampleChunk_People;`, not the raw `[]Person`. (Guarded by the `LocalNamedTypeDecls`
+behavioral test — a function-local named slice-of-local-struct, map, channel, and fixed-size array,
+each constructed/ranged/indexed in the body and output-compared vs Go; the unfixed converter leaks
+four `partial struct …;` declarations into the method body.)
+
+Two completions of the same rule, both demonstrated by `encoding/gob`'s test suite:
+
+* **The POINTER kind hoists too.** `type X *T` was the one forward-declaration kind still writing
+  its `[GoType("ж<…>")] partial class X;` straight into the body — gob's `codec_test.go`
+  `type Rec ***Rec` produced `CS1525 Invalid expression term 'partial'` and took the rest of the
+  function with it. It now takes `liftLocalTypeDecl` like the other kinds, and the lift is taken
+  **before** `convStarExpr` renders the pointer text so a self-referential declaration resolves its
+  own name through `liftedTypeMap`.
+* **A SELF-REFERENTIAL local type re-resolves its element after the hoist.** The array/map/channel
+  emitters resolved the element/key/value name *before* the declaration's own hoist registered its
+  lifted name, so `type recursiveSlice []recursiveSlice` / `type recursiveMap
+  map[string]recursiveMap` (gob's `encoder_test.go`) emitted `[GoType("[]recursiveSlice")]` on a
+  member-level `TestRecursiveSliceType_recursiveSlice` — a name that no longer exists, `CS0246`
+  inside the generated slice/map partial. Each emitter now re-resolves its element through
+  `liftedTypeMap` **when the hoist actually renamed the declaration**; a package-level declaration
+  never renames, so its emission is untouched (verified byte-identical across the whole behavioral
+  corpus and the 302-package stdlib).
+
+**Known residual:** a *conversion expression* to a hoisted local named **pointer** type
+(`NodePtr(&Node{V: 9})`, with `type NodePtr *Node` declared in the function) still emits the
+pre-hoist source name (`new NodePtr(…)`, `CS0246`). The composite kinds do not have this — a local
+`Tally(m)` correctly renders `((main_Tally)m)` — so the gap is specific to the named-pointer
+conversion arm's target-name resolution. It was previously masked by the hard syntax error above and
+has no consumer among the measured packages (gob only *declares* `Rec` and takes its address); the
+`LocalNamedTypeDecls` guard therefore uses the assignment form `var np NodePtr = &Node{V: 9}`.
 
 ## A lift inside a PACKAGE-LEVEL func literal flushes at package scope, seeded by the declaration
 A func literal's body is function scope, and `convFuncLit` sets `inFunction` for it accordingly —
@@ -683,8 +551,6 @@ literal renders golib's `nil`, whose type `NilType` is an *exact* match for `T(N
 the field constructor's user-defined conversion without ambiguity, producing the zero struct, which
 is the correct value. `archive/tar`'s `testClose{nil}` is the reported shape (×9, and the last wall
 in front of that package's 97 verdicts); `database/sql`'s `stubDriverStmt{nil}` is the same root.
-
-**An imported type ALIAS through an aliased import renders as its `global using` name.** A `global using` alias is not a member of the package class, so `import pl "PALib"` with `pl.B2{V: 1}`, where `B2` is an exported alias, cannot render `new pl.B2(…)` (CS0426). The alias table is keyed by the package's declared name, and `aliasResolvedSelector` looks a published, non-const type alias up under that name, rendering `new PALibꓸB2(…)` as the canonical import does. Every other member keeps the file's alias (`new pl.Box(…)`). (Guarded by the `AliasImport` behavioral test's `aliased.go`.)
 
 ## Func-field callees drive argument treatment
 

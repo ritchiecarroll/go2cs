@@ -470,6 +470,21 @@ type (
 
 ⚠ Related but distinct, and still open: `%T` of a lifted function-local **non-struct** named type still prints the hoisted identifier, because only lifted STRUCT types carry the `[GoLocalName]` stamp that the reflection bridge reads.
 
+## An embedded field's NAME is the UNQUALIFIED type name (dot-imported embeds)
+
+An embedded struct field's name is, per the Go spec, the *unqualified* type name. A cross-package
+embed written as a selector (`struct{ io.Writer }`) already stripped its qualifier for the field
+name; a **dot-imported** embed (`import . "io"` then embedded `ReaderFrom`) reaches the emitter as a
+bare `*ast.Ident`, yet `getAliasQualifiedTypeName` still renders it package-qualified — and, once the package is a
+collision-rename, as `Δio.ReaderFrom`. Gating the qualifier-strip on the *selector* form left that
+qualifier in the field name (`internal io_package.ReaderFrom Δio.ReaderFrom;`), whose embedded dot is
+a C# syntax error (`CS1003 '(' expected` / `CS1026 ') expected'` — the reported io `io_test`
+defect). `visitStructType` now strips to the last segment whenever the resolved embedded-type name
+carries a qualifier (covering both the selector and dot-imported-ident forms; a same-package embed
+has no dot, so it is a byte-identical no-op), yielding the correct `public io_package.ReaderFrom
+ReaderFrom;`. (This is one root among several in the io test suite, which remains blocked by separate
+`import . "io"` using-alias resolution issues — the `Δio` namespace is emitted but never aliased.)
+
 ## An embedded PREDECLARED type is a plain field stamped `[GoEmbedded]` (2026-09-05)
 
 Go lets a struct embed a predeclared type — `struct{ int }`, `struct{ *int }` — and the embed has
@@ -928,6 +943,21 @@ Everything else on the path was already faithful: `syscall.CancelIoEx` really di
 `PipeCloseUnblocksRead` (a goroutine blocked on a pipe read, a closer, output-compared against
 `go run`) and `EmbeddedPointerFieldIdentity` (depth-2 chain equality, `map[*T]V` keying, and both
 spellings of a field promoted through an embedded pointer).
+
+## Generic embedded fields
+A GENERIC embed (`entry[K,V]` embedding `node[K,V]`, internal/concurrent) arrives in the AST as
+an `IndexExpr`/`IndexListExpr` over the base type; the anonymous-field walk unwraps it (plain,
+pointer, and selector forms) and the member emits under the **base name** with type arguments
+stripped **before** the selector dot-strip — the arguments may contain qualified types whose
+dots otherwise win the LastIndex (`*concurrent.HashTrieMap[T, weak.Pointer[T]]` misnamed its
+member `Pointer` instead of `HashTrieMap`). The TypeGenerator's promoted accessors carry the
+type parameters on the instance param (`ref Δentry<K, V> instance`) and strip them from the
+member access (`instance.node.isEntry`). A promoted method call through a raw ж **box local**
+hops `X.Value` ahead of the cross-package pointer-embed hop
+(`m.Value.HashTrieMap.Value.Load(value)`, unique). BANKED: unqualified promoted METHOD calls
+through a generic embed (`w.show()`) — receiver wrappers resolve the embedded type by exact
+name; qualified calls work. Guarded by `GenericStructFields` (`wrapped[T]`/`tag[T]`) and
+`CrossPkgUser` (`holder[T]` embedding `*CrossPkgLib.Cache[T]`).
 
 ## A struct embedding the constrained generic promotes its members — three residual crypto-curve fixes
 

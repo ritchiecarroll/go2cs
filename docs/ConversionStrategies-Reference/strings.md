@@ -310,6 +310,11 @@ A converting package reads the record, or the embedded standard-library metadata
 - `TestNoSStringTwinMethodGroupInCorpus` fails on any method-group use of a twin in `src/core` or the behavioral goldens.
 - The behavioral test `SStringTwinPilot` compares every call form, value site, identity and name against Go.
 
+## Astral rune literals
+A quoted rune literal beyond the BMP (`'\U0001D504'`) cannot be a C# char literal — it emits
+the code point (`(rune)0x1D504`); BMP literals keep their source text verbatim (html's entity
+table, CS1012 ×133). Guarded by `StringConvPostfix` (`glyphs`).
+
 ---
 
 [← Slices and Arrays](slices-and-arrays.md) · [Index](README.md) · [Maps and Channels →](maps-and-channels.md)

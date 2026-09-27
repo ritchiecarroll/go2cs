@@ -109,6 +109,27 @@ renders BCL names by the file-scoped conventions above). (Guarded by `BclTypeNam
 a package declaring `type Range struct` alongside a named string type and a named slice type, both
 sub-sliced with the Go `Range`'s fields as bounds, output vs Go.)
 
+## Two `[GoType]` payload conventions coexist
+
+Two `[GoType]` payload conventions coexist, and the generator's alias substitution must tell them
+apart. The map/channel emitters write dotted types in **source-alias form** (`CrossPkgLib.Ticks`,
+via `getAliasQualifiedTypeName`), which the substitution above resolves; the slice/array element and
+defined-over-selector emitters write the **namespace-qualified form** (`io.fs_package.FileInfo`,
+via `getFullyQualifiedTypeName`), which roots through the `go` namespace and must pass through untouched.
+The telltale is the segment after the leading identifier: a real alias maps to a package *class*,
+so its next segment is a type name — a `_package`-suffixed next segment means the leading
+identifier is a namespace segment that merely *collides* with a file alias. net/http's fs.go
+aliases `io` while declaring `type fileInfoDirs []fs.FileInfo` → `[]io.fs_package.FileInfo`;
+substituting the `io.` produced the nonexistent `go.io_package.fs_package.FileInfo` (CS0426 ×48).
+The substitution skips exactly those occurrences (a negative lookahead on `_package.`). On the
+converter side, the namespace-qualified form must lead with the **canonical** qualifier, never a
+file-local Δ collision-rename: a consumer whose own namespace has a same-named child imports under
+`using ΔIoLike = IoLike_package;`, but `[]ΔIoLike.FsLike_package.Info` resolves nowhere in the
+alias-free `.g.cs` — `canonicalizeQualifierRename` reverts a leading import-rename segment
+(mirroring the visitTypeSpec global-using-target rule). (Guarded by `NamedSliceChildPkg` — a
+nested-namespace consumer package importing both `IoLike` and `IoLike/FsLike`, with a named slice
+of the subpackage's type used across the assembly boundary.)
+
 ## ImplicitConvGenerator
 
 ### A GoImplicitConv record needs at least one LOCAL operand

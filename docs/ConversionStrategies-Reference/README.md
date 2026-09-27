@@ -213,6 +213,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [`sstring`: a string view that allocates nothing](strings.md#sstring-a-string-view-that-allocates-nothing)
   - [A non-escaping `string([]byte)` local emits the stack-string `sstring`](strings.md#a-non-escaping-stringbyte-local-emits-the-stack-string-sstring)
   - [An sstring TWIN: a registered function gains an `sstring` overload that calls bind](strings.md#an-sstring-twin-a-registered-function-gains-an-sstring-overload-that-calls-bind)
+  - [Astral rune literals](strings.md#astral-rune-literals)
 - **[Maps and Channels](maps-and-channels.md)**
   - [A `range` body may MUTATE the map it is ranging over — the enumerator walks a KEY SNAPSHOT](maps-and-channels.md#a-range-body-may-mutate-the-map-it-is-ranging-over--the-enumerator-walks-a-key-snapshot)
   - [`m[string(b)]` — the map-READ key does not copy (`tmpstring`)](maps-and-channels.md#mstringb--the-map-read-key-does-not-copy-tmpstring)
@@ -221,8 +222,6 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A NaN map key is never equal to anything, itself included](maps-and-channels.md#a-nan-map-key-is-never-equal-to-anything-itself-included)
   - [Named map types and constrained map access](maps-and-channels.md#named-map-types-and-constrained-map-access)
   - [Named channel types](maps-and-channels.md#named-channel-types)
-  - [A function-LOCAL named type declaration hoists to member level (slice/map/channel/array/pointer)](maps-and-channels.md#a-function-local-named-type-declaration-hoists-to-member-level-slicemapchannelarraypointer)
-  - [An embedded field's NAME is the UNQUALIFIED type name (dot-imported embeds)](maps-and-channels.md#an-embedded-fields-name-is-the-unqualified-type-name-dot-imported-embeds)
   - [Select statement lowering (terminating and empty clauses)](maps-and-channels.md#select-statement-lowering-terminating-and-empty-clauses)
   - [A NIL channel is never ready — and asking must not throw](maps-and-channels.md#a-nil-channel-is-never-ready--and-asking-must-not-throw)
   - [The default form routes through trySelect — send cases are unguarded in both forms](maps-and-channels.md#the-default-form-routes-through-tryselect--send-cases-are-unguarded-in-both-forms)
@@ -261,6 +260,8 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Type Alias Declarations](type-aliasing.md#type-alias-declarations)
   - [A collision-renamed alias chain resolves to its concrete target](type-aliasing.md#a-collision-renamed-alias-chain-resolves-to-its-concrete-target)
   - [A same-named cross-package alias target is fully qualified](type-aliasing.md#a-same-named-cross-package-alias-target-is-fully-qualified)
+  - [An aliased import's imported type ALIAS renders as its `global using` name](type-aliasing.md#an-aliased-imports-imported-type-alias-renders-as-its-global-using-name)
+  - [The ALIAS kind takes the lift too](type-aliasing.md#the-alias-kind-takes-the-lift-too)
   - [Generic Type Aliases](type-aliasing.md#generic-type-aliases)
 - **[Functions, Methods and Receivers](methods-and-receivers.md)**
   - [Receivers](methods-and-receivers.md#receivers)
@@ -396,19 +397,16 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Labeled switches declare their break target](expression-switch.md#labeled-switches-declare-their-break-target)
   - [Empty-interface switch tags compare via AreEqual](expression-switch.md#empty-interface-switch-tags-compare-via-areequal)
 - **[Type Switch Statements](type-switch.md)**
+  - [Type-switch default arm binds the interface value](type-switch.md#type-switch-default-arm-binds-the-interface-value)
+  - [The type-switch tag evaluates exactly once](type-switch.md#the-type-switch-tag-evaluates-exactly-once)
 - **[Struct Types](struct-types.md)**
   - [Lifted anonymous structs embedding an interface](struct-types.md#lifted-anonymous-structs-embedding-an-interface)
   - [An anonymous struct lifts from ANY depth of its declared type](struct-types.md#an-anonymous-struct-lifts-from-any-depth-of-its-declared-type)
   - [An INITIALIZED var lifts its explicit anonymous declared type too — and a blank name lifts from the GO identifier](struct-types.md#an-initialized-var-lifts-its-explicit-anonymous-declared-type-too--and-a-blank-name-lifts-from-the-go-identifier)
   - [Every type-name render resolves a lifted anonymous struct cross-file](struct-types.md#every-type-name-render-resolves-a-lifted-anonymous-struct-cross-file)
   - [A lifted type name is unique across the PACKAGE, and the `-tests` variant inherits production's](struct-types.md#a-lifted-type-name-is-unique-across-the-package-and-the--tests-variant-inherits-productions)
-  - [A global addressed only by the package's own `_test.go` is still heap-boxed](struct-types.md#a-global-addressed-only-by-the-packages-own-_testgo-is-still-heap-boxed)
-  - [Astral rune literals](struct-types.md#astral-rune-literals)
-  - [Type-switch default arm binds the interface value](struct-types.md#type-switch-default-arm-binds-the-interface-value)
-  - [The type-switch tag evaluates exactly once](struct-types.md#the-type-switch-tag-evaluates-exactly-once)
-  - [A GoImplement record's adapter key is canonical, not textual](struct-types.md#a-goimplement-records-adapter-key-is-canonical-not-textual)
-  - [Generic embedded fields](struct-types.md#generic-embedded-fields)
   - [Lifted function-local types: anonymous structs dedupe, named types carry [GoLocalName]](struct-types.md#lifted-function-local-types-anonymous-structs-dedupe-named-types-carry-golocalname)
+  - [A function-LOCAL named type declaration hoists to member level (slice/map/channel/array/pointer)](struct-types.md#a-function-local-named-type-declaration-hoists-to-member-level-slicemapchannelarraypointer)
   - [A lift inside a PACKAGE-LEVEL func literal flushes at package scope, seeded by the declaration](struct-types.md#a-lift-inside-a-package-level-func-literal-flushes-at-package-scope-seeded-by-the-declaration)
   - [A ONE-FIELD struct's positional `nil` literal names its field constructor](struct-types.md#a-one-field-structs-positional-nil-literal-names-its-field-constructor)
   - [Func-field callees drive argument treatment](struct-types.md#func-field-callees-drive-argument-treatment)
@@ -422,6 +420,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [The named-array wrapper publishes its lazy backing atomically](struct-embedding.md#the-named-array-wrapper-publishes-its-lazy-backing-atomically)
   - [A promoted field whose name equals the enclosing type is Δ-renamed](struct-embedding.md#a-promoted-field-whose-name-equals-the-enclosing-type-is-δ-renamed)
   - [An embedded field is named by GO, not by the C# rendering of its type](struct-embedding.md#an-embedded-field-is-named-by-go-not-by-the-c-rendering-of-its-type)
+  - [An embedded field's NAME is the UNQUALIFIED type name (dot-imported embeds)](struct-embedding.md#an-embedded-fields-name-is-the-unqualified-type-name-dot-imported-embeds)
   - [An embedded PREDECLARED type is a plain field stamped `[GoEmbedded]` (2026-09-05)](struct-embedding.md#an-embedded-predeclared-type-is-a-plain-field-stamped-goembedded-2026-09-05)
   - [An EMBEDDED field whose derived name equals the enclosing type is Δ-renamed](struct-embedding.md#an-embedded-field-whose-derived-name-equals-the-enclosing-type-is-δ-renamed)
   - [Promoted pointer methods descend multi-hop value-embed chains](struct-embedding.md#promoted-pointer-methods-descend-multi-hop-value-embed-chains)
@@ -433,6 +432,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Promoted methods through embedded INTERFACE fields route per-member to the declaring field](struct-embedding.md#promoted-methods-through-embedded-interface-fields-route-per-member-to-the-declaring-field)
   - [A nil embedded pointer is holdable and assignable — only its dereference panics](struct-embedding.md#a-nil-embedded-pointer-is-holdable-and-assignable--only-its-dereference-panics)
   - [A field promoted through an embedded POINTER is rooted at the POINTED-TO allocation](struct-embedding.md#a-field-promoted-through-an-embedded-pointer-is-rooted-at-the-pointed-to-allocation)
+  - [Generic embedded fields](struct-embedding.md#generic-embedded-fields)
   - [A struct embedding the constrained generic promotes its members — three residual crypto-curve fixes](struct-embedding.md#a-struct-embedding-the-constrained-generic-promotes-its-members--three-residual-crypto-curve-fixes)
 - **[Interfaces](interfaces.md)**
   - [Equality](interfaces.md#equality)
@@ -472,6 +472,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
       - [A cross-package interface's unexported sealing marker is stubbed](interfaces/records.md#a-cross-package-interfaces-unexported-sealing-marker-is-stubbed)
     - [Cross-package records](interfaces/records.md#cross-package-records)
       - [A foreign implement record is keyed in ONE spelling, and a VALUE one is trusted only for a partial struct](interfaces/records.md#a-foreign-implement-record-is-keyed-in-one-spelling-and-a-value-one-is-trusted-only-for-a-partial-struct)
+      - [A GoImplement record's adapter key is canonical, not textual](interfaces/records.md#a-goimplement-records-adapter-key-is-canonical-not-textual)
       - [A package records the pairs it SATISFIES, not only the ones it witnesses](interfaces/records.md#a-package-records-the-pairs-it-satisfies-not-only-the-ones-it-witnesses)
       - [The POINTER method set records the same way, for a different contract](interfaces/records.md#the-pointer-method-set-records-the-same-way-for-a-different-contract)
   - **[Interfaces: Run-Time Assertions](interfaces/runtime-asserts.md)**
@@ -550,6 +551,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
       - [The reflectlite MINI-BRIDGE mirrors reflect one layer down — and the closure that validated it landed five rules in SHARED machinery](reflection/values.md#the-reflectlite-mini-bridge-mirrors-reflect-one-layer-down--and-the-closure-that-validated-it-landed-five-rules-in-shared-machinery)
 - **[Pointers](pointers.md)**
   - [Pointer-typed globals and double-pointer walks (`&head`, `*pp`, `ValueSlot`)](pointers.md#pointer-typed-globals-and-double-pointer-walks-head-pp-valueslot)
+  - [A global addressed only by the package's own `_test.go` is still heap-boxed](pointers.md#a-global-addressed-only-by-the-packages-own-_testgo-is-still-heap-boxed)
   - [Nested dereferences parenthesize before the outer `.Value`](pointers.md#nested-dereferences-parenthesize-before-the-outer-value)
   - [A range over a pointer-typed type conversion parenthesizes before the deref](pointers.md#a-range-over-a-pointer-typed-type-conversion-parenthesizes-before-the-deref)
   - **[Pointers: Identity and Nil](pointers/identity-and-nil.md)**
@@ -634,6 +636,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [`package_info.cs`'s `TypeAccessibility` section pins each type's accessibility IN SOURCE](source-generators.md#package_infocss-typeaccessibility-section-pins-each-types-accessibility-in-source)
   - [Extended attributes: what stays on the declaration and what moves](source-generators.md#extended-attributes-what-stays-on-the-declaration-and-what-moves)
   - [BCL names in generator templates are global::-qualified too](source-generators.md#bcl-names-in-generator-templates-are-global-qualified-too)
+  - [Two `[GoType]` payload conventions coexist](source-generators.md#two-gotype-payload-conventions-coexist)
   - [ImplicitConvGenerator](source-generators.md#implicitconvgenerator)
 - **[The standard-library conversion applies `-tags purego`](purego.md)**
   - [Known accepted divergence — `crypto/elliptic` P256 `Inverse` panics under purego](purego.md#known-accepted-divergence--cryptoelliptic-p256-inverse-panics-under-purego)

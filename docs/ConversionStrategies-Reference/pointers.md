@@ -79,6 +79,67 @@ for (var pp = Ꮡhead; pp.ValueSlot != nil; pp = (pp.ValueSlot).of(node.Ꮡnext)
 
 This is exactly the runtime's `allm`/`itabTable` shape (`for pprev := &allm; *pprev != nil; pprev = &(*pprev).alllink`). (Guarded by the `GlobalPointerWalk` behavioral test — ordered insertion, head/middle removal, and a method call through the pointer global, all via `**node` writes, output-compared against Go.)
 
+## A global addressed only by the package's own `_test.go` is still heap-boxed
+A Go pointer to a package-level var aliases that var's real storage, which in C# means the global
+must be backed by a heap box (see [Pointers](#pointers)); `packageAddressedGlobals` decides that by
+scanning the package for `&g`. But `go/packages` excludes `_test.go` from a production package, so
+an address taken *only* by the package's own in-package test half is invisible at the declaration.
+path/filepath is the canonical case — `path.go` declares `var lstat = os.Lstat // for testing` and
+`export_test.go` declares `var LstatP = &lstat`, the whole point being that a test can swap the
+implementation the production `Walk` calls. The production emission left `lstat` a plain field, and
+the test variant's `Ꮡlstat` named a box nothing declared: **CS0103**.
+
+The converter now scans the build-selected in-package `_test.go` files for the identifiers they take
+the address of and folds them into the addressed-global set, so the production declaration carries
+the box:
+
+```csharp
+internal static ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new(os.Lstat);
+internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref Ꮡlstat.ValueSlot;  // for testing
+```
+
+Three properties make this the right shape rather than a `-tests`-only patch:
+
+- **It runs in ordinary conversion too**, exactly as `siblingTestFuncMethodNames` does for reference
+  spelling, so a package's production storage shape is **mode-stable** — an `-stdlib` reconvert and a
+  `-tests` run emit the same bytes. Conditioning it on `-tests` would make the banked corpus flip
+  between the two.
+- **The scan is a cheap direct directory read, not a second type-check** — no test dependency graph is
+  loaded. It is therefore name-based, and the production pass resolves each candidate against the real
+  package scope, dropping anything that is not a package-level var (a type, a func, an import
+  qualifier, a name that exists only in the test file).
+- **It errs toward recording nothing.** Names bound anywhere inside the enclosing top-level
+  declaration — receiver, parameters, results, `:=`, `var`/`const`/`type`, range and type-switch
+  bindings — are excluded, so `&counter` on a local that shadows a global does not box the global.
+  Under-recording restores today's loud CS0103; over-recording would silently box a global no pointer
+  aliases.
+
+Only **build-selected** test files are scanned (`go/build`'s `MatchFile`, with the run's `GOOS`/
+`GOARCH` and `-tags`), so the boxed set is a property of the build configuration exactly as the
+converted production sources themselves are: `path_windows_test.go` contributes on Windows and
+`path_unix_test.go` does not. That is the same rule `siblingTestFuncMethodNames` already follows, and
+it is the correct answer — a global no *selected* file addresses needs no box in that configuration.
+
+Measured across the whole standard library by an A/B reconvert: **13 globals in 13 files**, and every
+single one is a Go *"for testing"* hook — `path/filepath` and `os`'s `lstat`, `os`'s
+`testingForceReadDirLstat` and `allowReadDirFileID`, `runtime`'s `readRandomFailed`, `useAeshash`,
+`doubleCheckReadMemStats`, `casgstatusAlwaysTrack`, `forcegcperiod` and `timeBeginPeriodRetValue`,
+`reflect`'s `callGC` (whose own comment reads *"for testing; see TestCallMethodJump and
+TestCallArgLive"*), `internal/poll`'s `logInitFD`, `net/http`'s `maxWriteWaitBeforeConnReuse` and
+`testHookEnterRoundTrip`, and `time`'s `usPacific`. No false positives, which is what the
+bind-aware exclusion buys — and the same set is forward work, since `os`, `runtime`, `reflect`,
+`net/http`, `internal/poll` and `time` all need those hooks to alias real storage before their own
+suites can pass.
+
+External (`package foo_test`) test files are deliberately not scanned: they reach the package only
+through its exported surface, and `&otherpkg.Var` from *any* other package is a separate, still-open
+gap — `collectAddressedGlobals` only ever scans the package under conversion. (Guarded by the
+`SiblingTestAddressedGlobal` behavioral test, whose `export_test.go` addresses a bare global, a
+global through a field selector, and a global from a function body, against negatives for a
+test-file-local declarator and a shadowing local. It is the first behavioral project to carry a
+`_test.go`; the corpus harness skips `_test.go` when pairing sources with `.cs` goldens, since a
+production transpile never emits one.)
+
 ## Nested dereferences parenthesize before the outer `.Value`
 A deref whose operand is ITSELF a deref renders with the prefix `~` form, on which a naked postfix `.Value` mis-binds (postfix beats unary: `~X.Value` is `~(X.Value)`). The outer deref wraps the inner one -- reflect `MapOf`'s `**(**mapType)(unsafe.Pointer(&imap))`:
 ```csharp

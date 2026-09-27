@@ -450,6 +450,83 @@ four local adapters there where the fixed one emits the two negatives' alone. Un
 `TestImplementRecordKeyBothCompositionsAgree`,
 `TestImplementRecordKeyKeepsPackageClassDiscrimination` and `TestValueRecordRealizesAsPartialStruct`.)
 
+### A GoImplement record's adapter key is canonical, not textual
+`interfaceImplementations` is keyed by RENDERED type name, so one resolved pair recorded under two
+spellings is two records — and go2cs-gen turns two records into two definitions of the SAME adapter
+type. The interface side arrives class-relative when PARSED from a `package_info.cs`
+(`rand_package.Source`, via `loadPackageImplements`) and fully namespace-qualified when rendered at
+a CAST SITE (`go.math.rand.rand_package.Source`). `canonicalRecordIfaceName` stripped only the root
+prefix, so the two keyed differently, the foreign-adapter existence proof missed, and the pair was
+re-recorded under the second spelling.
+
+Under `-tests` this is routine rather than exotic: the EXTERNAL (`package <name>_test`) variant
+reaches the package under test through its import path, so it renders that package's types
+qualified, while the seeded production metadata carries them short. math/rand/v2 emitted both
+`[assembly: GoImplement<PCG, Source>(Pointer = true)]` and
+`[assembly: GoImplement<go.math.rand.rand_package.PCG, go.math.rand.rand_package.Source>(Pointer = true)]`,
+and `ImplementGenerator`'s `GetUniqueHintName` silently uniquified the duplicate FILE name — so the
+duplicate TYPE reached the compiler as CS0102 + CS0111 ×5 + CS8646 on `rand_package.PCGжSource`.
+(`math/rand` escapes only by luck: its one self-qualified record targets a different interface than
+any short record.)
+
+The adapter's identity is exactly `<class>_package.<Type>` — the pair `ImplementGenerator` composes
+its class name from — so the record key collapses a longer chain to its `<pkg>_package` tail, leaving
+a nested type reference (`x.y_package.Outer.Inner`) untouched. The EMISSION side is normalized to
+match: `stripLocalTypeQualifier` rewrites a reference naming one of THIS package's own types through
+the package's fully-qualified class back to the bare local form the attribute file's
+`using static <ns>.<pkg>_package;` resolves, so the two spellings collapse in the emitting
+`HashSet`. Guarded by `TestStripLocalTypeQualifier`.
+
+*(Superseded in the details, 2026-08-02: `canonicalRecordIfaceName` is retired. Both record sets now
+compose one key through `implementRecordKey` / `canonicalImplementRecordIfaceName` — same collapse
+rule, now shared rather than duplicated. See* A foreign implement record is keyed in ONE spelling,
+and a VALUE one is trusted only for a partial struct.*)*
+
+⚠ **The collapse only reaches records the CURRENT run rendered — a stale spelling already on disk
+slips past it, because `package_info_external_test.cs` / `package_test_info.cs` are MERGE-PRESERVING** (see
+the anchor-routing note above). The merge reads each existing attribute line VERBATIM into the
+emitting `HashSet`, so a record persisted by an OLDER converter — before `stripLocalTypeQualifier`
+reduced it — arrives under the pre-collapse spelling and never meets the fresh, already-collapsed
+one. `container/heap` (banked at package #8, before the collapse landed) committed
+`[assembly: GoImplement<IntHeap, go.container.heap_package.Interface>(Pointer = true)]`; a fresh
+`-tests` run of a NESTED package-under-test now renders that same pair as the bare
+`[assembly: GoImplement<IntHeap, Interface>(Pointer = true)]` (the qualified `go.container.heap_package.`
+prefix gets `rootQualifySubNamespaceTypeRefs`-rooted then stripped, whereas a TOP-LEVEL package's
+`sort_package.Interface` is never rooted so it is never stripped and stays byte-stable). The two
+spellings both survived the merge → `GetUniqueHintName` uniquified the second `.g.cs` → a duplicate
+`IntHeapжInterface` reached the compiler (CS0102 + CS0111 + CS8646). `writePackageInfoFile` now runs
+every merged-in `[assembly: GoImplement<…>]` line through the SAME `qualifyLocalTypeRef` pipeline the
+fresh render applies, so a stale record collapses into the canonical one instead of duplicating it —
+the whole-line pass is safe because the pipeline only rewrites package-qualified name tokens (bare
+flag keywords `Pointer`/`Promoted` and the `assembly`/`GoImplement` scaffolding are untouched), and it
+is scoped to `GoImplement` lines specifically so it cannot rewrite a `GoImplicitConv` attribute's
+`ValueType = "…"` keyword (`ValueType` is a System-colliding name the rooter would otherwise qualify).
+Because whole-package conversions (`-stdlib`, every behavioral test) write with `mergeExisting=false`
+they never take this path, so the corpus and behavioral goldens are byte-identical. Guarded by
+`TestMergedStaleGoImplementSpellingCollapses`.
+
+**A type ALIAS is the third spelling, and it is resolved at the SOURCE.** The two collapses above
+reconcile spellings of one type *after* they are rendered. An alias cannot be reconciled that way:
+`type Expr = ast.Expr` is a name for a type that already has a name, and go2cs-gen composes the
+adapter class from the *resolved symbol*, never from the record's text — so a cast site that
+composes the class name from the alias spelling names a class the generator never emits (CS0246),
+and the pair is additionally recorded twice, once per spelling. `convertToInterfaceType` therefore
+resolves BOTH operands through `types.Unalias` before composing anything, which is where the
+function already reached ad hoc at five later points.
+
+The defect long predates the case that exposed it: any alias whose name differs from its target's
+mismatched the same way, and a *package-level* `type E = ast.Expr` would have done it just as well.
+It stayed invisible because the only aliases the corpus reached were spelled exactly like their
+targets, so the composed name happened to be right. `go/types`' `rangeStmt` declares
+`type Expr = ast.Expr` **function-locally**, and once function-local type declarations began taking
+the enclosing-function lift (`rangeStmt_Expr`, so two functions never claim one compilation-scoped
+`global using`), `check.errorf(lhs[i], …)` started composing `ast_rangeStmt_Exprᴠpositioner` against
+the generator's `ast_Exprᴠpositioner` — 557 verdicts behind two lines. With the resolution in place
+the aliased and unaliased cast sites in that same function land on one adapter and one record.
+(Guarded by the `LocalTypeAliasScope` extension: a function-local `type S = fmt.Stringer` converted
+to a local `namer` beside the same conversion written through `fmt.Stringer` directly, so a
+spelling-composed name shows up as both a second `ᴠ` class and a duplicate `GoImplement` record.)
+
 ### A package records the pairs it SATISFIES, not only the ones it witnesses
 
 Every `[assembly: GoImplement<T, Iface>]` the converter writes comes from a **cast it converted** —
