@@ -335,6 +335,13 @@ def op_move(repo, op):
         if not ghs:
             D_lines, _ = splice(D_lines, body_end(D_lines), ['## ' + g])
             repo.log.append(f'  group created in {op["dst"]}: {g}')
+            # The new group heading is part of the page the block lands in: the "existing slugs
+            # unchanged" check below compares against the page WITH it. Creating it must not shift
+            # any slug already there (it lands last, so only its own slug can take a suffix).
+            with_group = rc.heading_slugs(D_lines)
+            if [h[3] for h in with_group if not (h[1] == 2 and h[2] == g)] != dst_before:
+                raise Fail(f'{what}: creating group {g!r} shifts the slugs of headings already in {op["dst"]}')
+            dst_before = [h[3] for h in with_group]
         dhs = rc.heading_slugs(D_lines)
         gk = [n for n, h in enumerate(dhs) if h[1] == 2 and h[2] == g][0]
         gstart, gend = block_range(D_lines, dhs, gk)
