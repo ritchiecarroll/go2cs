@@ -118,7 +118,7 @@ $applySites += @(
     @{ File = "$repo\CLAUDE.md";             Old = "its ``bin/Debug/$From``"; Why = 'Class E: operational instruction' },
     @{ File = "$repo\docs\Glossary.md";      Old = "bin/Debug/$From/<AssemblyName>.dll"; Why = 'Class E: definition' },
     @{ File = "$repo\docs\Glossary.md";      Old = "<TargetFramework>$From</TargetFramework>"; Why = 'Class E: definition example' },
-    @{ File = "$repo\docs\ConversionStrategies-Reference\package-conversion.md";
+    @{ File = "$repo\docs\ConversionStrategies-Reference\package-conversion\project-files.md";
        Old = "<TargetFramework Condition=`"'`$(TargetFramework)'==''`">$From</TargetFramework>";
        Why = 'Class E: the emitted form as documented' }
 )
