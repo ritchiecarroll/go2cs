@@ -225,7 +225,6 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A NIL channel is never ready — and asking must not throw](maps-and-channels.md#a-nil-channel-is-never-ready--and-asking-must-not-throw)
   - [The default form routes through trySelect — send cases are unguarded in both forms](maps-and-channels.md#the-default-form-routes-through-tryselect--send-cases-are-unguarded-in-both-forms)
   - [Every case's operands are hoisted — evaluated exactly once, in SOURCE ORDER, at select entry](maps-and-channels.md#every-cases-operands-are-hoisted--evaluated-exactly-once-in-source-order-at-select-entry)
-  - [Known exposure: marker-shaped USER identifiers can collide with synthetic names](maps-and-channels.md#known-exposure-marker-shaped-user-identifiers-can-collide-with-synthetic-names)
   - [Real channel runtime — the hchan/selectgo port (rendezvous, cap/len, single-fire, uniform-random)](maps-and-channels.md#real-channel-runtime--the-hchanselectgo-port-rendezvous-caplen-single-fire-uniform-random)
   - [An escaping comm-clause binding receives into a temp and heap-boxes at clause entry](maps-and-channels.md#an-escaping-comm-clause-binding-receives-into-a-temp-and-heap-boxes-at-clause-entry)
 - **[Generics](generics.md)**
@@ -419,7 +418,6 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A field promoted through an embedded POINTER is rooted at the POINTED-TO allocation](struct-embedding.md#a-field-promoted-through-an-embedded-pointer-is-rooted-at-the-pointed-to-allocation)
   - [A struct embedding the constrained generic promotes its members — three residual crypto-curve fixes](struct-embedding.md#a-struct-embedding-the-constrained-generic-promotes-its-members--three-residual-crypto-curve-fixes)
 - **[Interfaces](interfaces.md)**
-  - [A keyword-named addressed global's heap-box field strips the escape after the Ꮡ prefix](interfaces.md#a-keyword-named-addressed-globals-heap-box-field-strips-the-escape-after-the-ꮡ-prefix)
   - **[Interfaces: Adapters](interfaces/adapters.md)**
     - [Pointer, value and interface-to-interface adapters](interfaces/adapters.md#pointer-value-and-interface-to-interface-adapters)
       - [Pointer-sourced interface values use a generated ADAPTER, not the value-boxing partial struct](interfaces/adapters.md#pointer-sourced-interface-values-use-a-generated-adapter-not-the-value-boxing-partial-struct)
@@ -598,6 +596,11 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Converted programs write UTF-8 stdout — the ambient console code page never reaches the bytes](golib-namespace.md#converted-programs-write-utf-8-stdout--the-ambient-console-code-page-never-reaches-the-bytes)
   - [Generated code global::-qualifies root-namespace references](golib-namespace.md#generated-code-global-qualifies-root-namespace-references)
   - [A sub-package import whose leading segment is a package alias root-qualifies](golib-namespace.md#a-sub-package-import-whose-leading-segment-is-a-package-alias-root-qualifies)
+- **[Names and Glyphs](naming.md)**
+  - [Keyword names](naming.md#keyword-names)
+    - [A keyword-named addressed global's heap-box field strips the escape after the Ꮡ prefix](naming.md#a-keyword-named-addressed-globals-heap-box-field-strips-the-escape-after-the-ꮡ-prefix)
+  - [Synthetic names](naming.md#synthetic-names)
+    - [Known exposure: marker-shaped USER identifiers can collide with synthetic names](naming.md#known-exposure-marker-shaped-user-identifiers-can-collide-with-synthetic-names)
 - **[Source Generators](source-generators.md)**
   - [`package_info.cs`'s `TypeAccessibility` section pins each type's accessibility IN SOURCE](source-generators.md#package_infocss-typeaccessibility-section-pins-each-types-accessibility-in-source)
   - [Extended attributes: what stays on the declaration and what moves](source-generators.md#extended-attributes-what-stays-on-the-declaration-and-what-moves)
