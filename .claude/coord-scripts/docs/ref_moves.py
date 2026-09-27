@@ -45,6 +45,11 @@ operation succeeded, each with its original line ending, BOM and trailing newlin
       then its H2s (and, for a `grouped` page, the H3s under each H2), then its child pages nested.
   retarget    {file, from, to}
       Replace every link target exactly equal to `from` in one file (repairing a broken anchor).
+  relocate    {file, start, until?, before_heading}
+      Move unheaded lines WITHIN one page: from the one non-fenced line starting with `start` up to the
+      next heading (or, with `until`, to the line starting with that text), to just above the heading
+      `before_heading` (exact text). The lines may hold no heading and no stub, so no anchor changes;
+      used to return a stranded overview paragraph to the top of its page.
 
 --self-test renders the reference pages through GitHub's API (gh must be signed in) and checks that
 every heading anchor GitHub produced equals the slug computed here.
@@ -588,8 +593,39 @@ def op_retarget(repo, op):
     repo.log.append(f'retarget {op["file"]}: {op["from"]} -> {op["to"]} (x{n[0]})')
 
 
+def op_relocate(repo, op):
+    """Move unheaded, stub-free lines within one page to just above a named heading."""
+    d = repo.doc(repo.P(op['file']))
+    L = d.lines
+    what = f'relocate {op["start"][:50]!r}'
+    mask = rc.fence_mask(L)
+    i0 = find_line(L, lambda l: l.startswith(op['start']), what)
+    nxt = next((i for (i, _, _) in rc.headings(L, mask) if i > i0), body_end(L))
+    if op.get('until'):
+        us = [i for i in range(i0 + 1, nxt) if not mask[i] and L[i].startswith(op['until'])]
+        if len(us) != 1:
+            raise Fail(f'{what}: until-line {op["until"]!r} not found once before the next heading')
+        nxt = us[0]
+    i1 = trim_end(L, i0, nxt)
+    block = L[i0:i1]
+    bmask = rc.fence_mask(block)
+    if any(not f and (STUB_LINE_RE.match(l) or rc.HEADING_RE.match(l)) for l, f in zip(block, bmask)):
+        raise Fail(f'{what}: the lines hold a heading or a stub')
+    slugs_before = [h[3] for h in rc.heading_slugs(L)]
+    L2, _ = remove(L, i0, i1)
+    hs = rc.heading_slugs(L2)
+    ks = [h[0] for h in hs if h[2] == op['before_heading']]
+    if len(ks) != 1:
+        raise Fail(f'{what}: expected one heading {op["before_heading"]!r}, found {len(ks)}')
+    L2, _ = splice(L2, ks[0], block)
+    if [h[3] for h in rc.heading_slugs(L2)] != slugs_before:
+        raise Fail(f'{what}: relocating changes a heading slug')
+    d.lines = L2
+    repo.log.append(f'relocate {op["file"]}: {len(block)} lines above {op["before_heading"][:60]!r}')
+
+
 OPS = {'create': op_create, 'heading': op_heading, 'split_line': op_split_line, 'insert': op_insert,
-       'move': op_move, 'index': op_index, 'retarget': op_retarget}
+       'move': op_move, 'index': op_index, 'retarget': op_retarget, 'relocate': op_relocate}
 
 
 # ------------------------------------------------------------------------------------------------
