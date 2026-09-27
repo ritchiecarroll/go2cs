@@ -250,6 +250,36 @@ the adapter, and the signature).
 ### Adapter accessibility: symbol-OR-name on both sides
 The adapter class scope cannot be derived from Go name casing alone (`error` is lowercase yet the golib interface is public METADATA - the name rule made io/fs's PathErrorжerror internal, CS0122 x40) nor from symbols alone (sibling generators' `public partial` modifiers are invisible to a single-pass generator - the symbol rule broke same-assembly interfaces like `CrossPkgLib.Reporter`). The ImplementGenerator takes symbol-OR-name on the struct AND the interface.
 
+### The anchored adapter REFERENCE keeps the shadow marker
+
+The `-tests` metadata-anchored resolution composes the adapter class reference a cast site will use
+(`anchoredAdapterMemberName`) while go2cs-gen composes the class it emits. The two must agree
+character for character, and they disagreed on the shadow marker: the generator names a local adapter
+from `adapterBaseName` — the C# type name verbatim, `Δhandler` — and a foreign one from
+`GetSimpleName(structName)`, neither of which strips it, while the reference side stripped it and
+named a class that is never emitted. net/http's internal test variant declares
+`type handler struct{ i int }` (server_test.go), shadow-renamed to `Δhandler`, so the generator minted
+`ΔhandlerжΔHandler` and every cast site referenced `handlerжΔHandler` — CS0426 ×9.
+
+The rule the strip violated: **the marker belongs to the C# IDENTITY of the type, not to a rendering
+convention.** `adapterStructKey` strips it for GROUPING, which is right and unchanged — a collision
+group must not depend on which side got renamed — but that key must not double as the emitted name.
+Only the `-tests` anchored path was affected: a production conversion resolves through
+`adapterResolvedName`, which never stripped, so the corpus could not move (and CNR confirms it did
+not). The measured shape here also **corrects a plausible-looking diagnosis** worth recording: the
+symptom reads as an adapter minted for one test variant and referenced from the other, and it is not
+— the record is correctly bridge-anchored in `package_info_internal_test.cs` and the class is minted
+in `http_internal_test_package`, exactly where the reference looks for it. Only the NAME differed.
+
+⚠ One adjacent surface is deliberately NOT addressed and is worth naming, since a reader meeting it
+will otherwise read it as this defect: a `T` RETURNED out of a constrained generic into concrete code
+arrives as the proxy TYPE, whose forwarders are explicit interface implementations and so are
+unreachable by member lookup there (`r := second(p); r.Name()` — CS1929, resolving instead to the
+element's own extension whose receiver it cannot satisfy). The proxy carries an implicit conversion
+back to `ж<element>`, but C# does not apply a user conversion during member lookup. Nothing in the
+corpus or in `net/http` reaches it; the guard's `second` builds its result inside the generic context
+on purpose.
+
 ## Keyword names
 
 ### A dynamic interface's runtime conversion class re-escapes a keyword method name

@@ -756,6 +756,64 @@ in front of that package's 97 verdicts); `database/sql`'s `stubDriverStmt{nil}` 
 - **Defined-over-named-struct composites wrap the underlying** (`decoder{order: o}` →
   `new decoder(new coder(order: o))`, CS1739). Guarded by `NamedPointerReinterpret` (`view{}`).
 
+## Generic struct equality is decided per FIELD, not per type parameter
+A generic `[GoType]` struct's synthesized `Equals` (see [Struct Types](#struct-types)) was gated on
+the struct's TYPE PARAMETERS: unless every parameter carried an `IEqualityOperators`-implementing
+constraint (and, stricter still, every *constraint* of every parameter implemented it), the whole
+struct's `Equals` body was the constant **`false /* missing equality constraints */`**. Since a
+`comparable` parameter deliberately emits no C# constraint (previous subsection),
+essentially every generic struct in the corpus — all 22 generic `[GoType]` declarations at the time
+of the fix — carried a constant-false `Equals`, breaking equality that never depended on the
+parameter at all. `unique.Handle[T]`'s only field is `*T` (`ж<T>`), whose pointer-identity `==` is
+valid for **every** T, yet no two handles ever compared equal — directly contradicting the type's
+documented contract ("two handles compare equal exactly if the values used to create them would");
+`internal/weak.Pointer[T]`'s only field does not mention T at all. Even
+`internal/trace.dataTable[EI, E]` — whose `EI` explicitly lists `IEqualityOperators` — failed the
+every-constraint quantifier because `IAdditionOperators` and its siblings do not *themselves*
+implement the equality interface.
+
+The gate now decides **per member** (`GetEqualityFallbackMembers` in
+`StructDeclarationSyntaxExtensions`): a member whose type supports `==` independent of the
+unconstrained parameters keeps the same `this.f == other.f` compare a non-generic struct emits, and
+only a member whose type IS an unconstrained type parameter falls back to golib's
+**`AreEqual`** — the identical routing the converter emits for Go `==` on any type-parameter
+operand, giving `EqualityComparer<T>.Default` speed on value types while preserving IEEE float
+semantics (raw `EqualityComparer` reports NaN equal to itself, inverting Go — see the
+floating-point note above) and typed-null/runtime-type semantics for reference and interface
+instantiations. Real emissions (from the converted stdlib's generated sources):
+
+```csharp
+// unique.Handle<T> — ж<T> has pointer-identity == for every T:
+public bool Equals(Handle<T> other) =>
+    this.value == other.value;
+
+// database/sql.Null<T> — mixed: the T field routes through AreEqual, the rest keep ==:
+public bool Equals(Null<T> other) =>
+    global::go.builtin.AreEqual(this.V, other.V) &&
+    this.Valid == other.Valid;
+
+// net/http.mapping<K, V> — golib slice/map fields carry their own ==, so no member falls back:
+public bool Equals(mapping<K, V> other) =>
+    this.s == other.s &&
+    this.m == other.m;
+```
+
+The member classifier asks only "does `==` COMPILE for this member type": a type parameter
+qualifies through ANY `IEqualityOperators`-implementing constraint (matching C# operator
+resolution, not the whole-struct gate's every-constraint test); reference types (classes incl.
+`ж<T>` and `unsafe.Pointer`, interfaces, arrays, delegates), enums, pointers, and built-in value
+types always qualify; a `[GoType]` struct qualifies by its **attribute** — both struct templates
+emit a same-type `operator ==` unconditionally, and for a struct of the *same compilation* the
+attribute is the only visible evidence, because that operator does not exist yet while the
+generator runs; any other value type qualifies only by actually declaring a same-type
+`op_Equality`. Structs that passed the old whole-struct gate, and every non-generic struct, emit
+byte-identical bodies to before — the fallback set is computed only when the gate fails.
+`GetHashCode` needs no matching change (`golib.HashCode.Combine` always compiled and hashes
+consistently with both compare forms). (Guarded by the `GenericStructEquality` behavioral test —
+the `Handle` pointer-identity shape, the plain-T fallback shape, a T-independent-field struct, the
+`Null`-shaped mix, a nested generic struct field, and a generic struct as a map key, all
+output-compared vs Go.)
+
 ---
 
 [← Type Switch Statements](type-switch.md) · [Index](README.md) · [Struct Type Embedding →](struct-embedding.md)

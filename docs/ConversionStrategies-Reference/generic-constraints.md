@@ -132,54 +132,9 @@ see `DESIGN-pointer-core-typeparam.md` on the fix branch for the full study). (G
 `PointerCoreConstraints` — clone/read/write/round-trip through `[P *T]` and the swapped-order
 `[T any, P *T]`, flat-copy independence verified, values vs Go.)
 
-## An integer named-numeric wrapper implements the integer operator interfaces
+<a id="an-integer-named-numeric-wrapper-implements-the-integer-operator-interfaces"></a>Moved to [An integer named-numeric wrapper implements the integer operator interfaces](named-numeric-types.md#an-integer-named-numeric-wrapper-implements-the-integer-operator-interfaces).
 
-A `[GoType num:]` wrapper (`type stringID uint64`) already declared the *common* numeric operator
-interfaces so it could serve a `cmp.Ordered`-shaped constraint (`IAddition`/`ISubtraction`/
-`IMultiply`/`IDivision`/`IEquality`/`IComparison`/`IIncrement`/`IDecrementOperators`), but the
-*integer-only* three — `IModulusOperators`, `IBitwiseOperators`, `IShiftOperators<T, int, T>` —
-were deliberately left off because their operators (`%`, `&|^~`, `<<`, `>>`) are kind-gated. That
-left a named integer type unable to satisfy a converter-emitted `~integer` operator constraint:
-internal/trace's `type dataTable[EI ~uint64, E any]` instantiated with `type stringID uint64` was
-CS0315 ×48 on exactly those three interfaces. The `NumericTypeTemplate` operators already exist
-(same kind-gate), so `InheritedTypeTemplate` now also *declares* the three integer interfaces for an
-integer underlying (float/complex keep only the common set). `IShiftOperators` additionally requires
-`operator >>>` (unsigned right shift) — added to the integer operator block; Go emits no `>>>`, but
-the member is needed to satisfy the interface. Cleared internal/trace's 48 CS0315 (49→1, the residual
-being the unrelated ΔLabel CS0542). Guarded by `NamedNumericOperatorConstraint` (a generic
-`mix[K ~uint64 | ~int32]` applying modulus/bitwise/both-shifts on the type parameter, instantiated
-with a named `uint64` and a named `int32`, values vs Go). Corpus-verified against math/big (Word),
-archive/tar, and time (Duration).
-
-## A named-numeric wrapper is `IComparable<T>` as well as ordered by operators
-
-Ordering has two surfaces in .NET and the wrapper only carried one. `IComparisonOperators<T,T,bool>`
-(above) serves a constraint lifted from `cmp.Ordered`; `IComparable<T>` is what the BCL's own
-ordering binds — `Array`/`List.Sort`, `SortedSet<T>`, `Comparer<T>.Default` — and, decisively for
-converted code, what golib's N-argument `min`/`max` are constrained on. (The two-argument forms take
-`IComparisonOperators`, because a *type parameter* constrained by `cmp.Ordered` has no
-`IComparable<T>` conversion; the `params ReadOnlySpan<T>` forms cannot, since a span element must
-compare through a member, not an operator.) So a named numeric bound `min(a, b)` and failed
-`min(a, b, c, d)`: `min(a-got, got-a, a-got+q, got-a+q)` over `crypto/internal/mlkem768`'s
-`type fieldElement uint16` was CS0315, "no boxing conversion from `fieldElement` to
-`System.IComparable<fieldElement>`". `InheritedTypeTemplate` now declares `IComparable<T>` on the
-**same kind-gate** as `IComparisonOperators` — every numeric kind except complex, which Go orders no
-more than C# does — and `NumericTypeTemplate` emits its single member inside the same gated block:
-
-```csharp
-public int CompareTo(fieldElement other) => m_value.CompareTo(other.m_value);
-```
-
-Forwarding to the *underlying* value's `CompareTo`, rather than writing the comparison out of the
-wrapper's own `<`/`>`, is what keeps a named float on the BCL total order (NaN below everything) —
-which is what makes `min` yield NaN when any argument is NaN, as Go's does. Every underlying a
-`[GoType num:]` wrapper can name satisfies it: the aliases are BCL primitives, `uintptr` is a golib
-struct that declares `IComparable<uintptr>` itself, and a wrapper over another wrapper picks up the
-member this template gives it. The wrapper was already `IEquatable<T>`; this makes it ordered too,
-matching the golib `uintptr` and `@string` structs, which are both. (Guarded by extensions to the
-`MinMaxBuiltin` behavioral test — `min`/`max` at two and four arguments over named unsigned,
-floating and signed underlyings, values vs Go; the pre-fix generator is CS0315 ×10 across the three
-kinds.)
+<a id="a-named-numeric-wrapper-is-icomparablet-as-well-as-ordered-by-operators"></a>Moved to [A named-numeric wrapper is `IComparable<T>` as well as ordered by operators](named-numeric-types.md#a-named-numeric-wrapper-is-icomparablet-as-well-as-ordered-by-operators).
 
 ## Lifted shift constraint uses the BCL shape `IShiftOperators<T, int, T>`
 
@@ -192,15 +147,15 @@ golib's builtins carry **interface-typed overloads** so a value held as a constr
 **S-preserving sub-slice and append.** Go's sub-slice of a named slice type yields the *same named type sharing the same backing* — pdqsort's recursion depends on it (`pdqsort(s[:mid])` with `s S`). The `ISliceWrap<TSelf, T>` static-abstract factory (`TSelf Wrap(in slice<T> source)`) supplies the non-copying reconstruction: `slice<T>` implements it as identity, every generated named-slice wrapper wraps the window in its own type, and the `~[]E` where-clause carries it (`ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>`). A sub-slice of a constrained type parameter emits golib's `subslice<S, E>(s, lo, hi)` (type arguments explicit — `E` is constraint-only) which routes `S.Wrap(window.Reslice(…))`; the new `slice<T>(ISlice<T> view)` constructor SHARES storage (unboxes a `slice<T>`, reconstructs any other implementer from its source array and window). `append` on a constrained value binds golib's `append<S, T>(S, params ReadOnlySpan<T>)` (S from the first argument, T from the span — fully inferrable) and wraps the result back to S; its body routes to the core `slice<T>.Append` directly, since a recursive `append(…)` call would resolve back to itself (`slice<T>` satisfies the constraints). The same change fixed the named-slice WRAPPER template's sub-slice members, which routed through `ToSpan()` — *detached copies*, a silent write-through divergence for named slice types generally; they now route through the wrapped `m_value` (sharing). (Guarded by the `GenericTypeInference` extensions `SumHalves` — recursion over sub-slices of S with a write through the deepest view, verified against the caller's array — and `AppendKeep`.)
 **No bound of a constrained sub-slice is a SENTINEL** (2026-08-26). The omitted-high form used to travel as `high = -1` through the three-argument method and the omitted-low form as `low = -1`, so `s[i:]` and `s[i:-1]` were the identical call — and the low convention was worse than an ambiguity, because the method clamped EVERY negative low to 0 rather than only the sentinel. Go panics for a negative index, so `slices.Insert(s, -1, …)` and `slices.Replace(s, -1, 2, …)` — whose bodies OPEN with `_ = s[i:]` and `_ = s[i:j]` as their bounds check, the expressions existing for no other purpose — silently succeeded. The remedy removes both sentinels rather than moving them: an omitted LOW is emitted as the `0` it means (Go's `s[:h]` *is* `s[0:h]`, so no overload is needed), and an omitted HIGH selects a two-argument `subslice<S, E>(s, low)` overload. `subslice3` needs no companion — Go's grammar requires the high bound in a full slice expression — and all three now route `slice<T>.Reslice` directly rather than the `slice()` extension, whose own `-1` defaulting convention would have re-opened the collision one layer down. A golib-only remedy was impossible and the reason is worth stating: with one signature and the converter passing `-1` for "omitted", the two calls are byte-identical at the boundary, so no amount of golib logic can separate them — the honest layer is the emission. The corpus footprint is `core/slices/{slices,iter}.cs` and two behavioral goldens, since `subslice` is emitted only for type-parameter receivers. **Residual, recorded not fixed:** the ORDINARY (non-type-parameter) path emits `s[Low..]`, whose `int`→`Index` conversion throws `ArgumentOutOfRangeException` for a negative bound — a .NET exception, not a Go panic, so it is neither `recover`-able nor contained the way `RuntimeErrorPanic.SliceBoundsOutOfRange` is; and `SliceExtensions.slice`'s `-1` default still collides at exactly `-1` for the three-index form. Neither is reachable from a banked row today. (Measured by `slices`' `TestInsertPanics` and `TestReplacePanics`; guarded by `GolibTests.ConstrainedSubsliceBoundsTests`, which holds the negative, out-of-range, valid and backing-shared cases together.)
 
-Every generated named-slice wrapper also implements the non-generic `IArray` surface explicitly. The public typed `Source` remains `T[]` for the concrete wrapper, but the interface member is emitted as `Array IArray.Source => ((IArray)m_value).Source!;`, matching golib's `IArray.Source` contract and keeping `len(IArray)`, element-address helpers, and interface-typed builtins bound to the wrapper. Pointer elements use the same form, e.g. `type queue []*item` emits `ISlice<ж<item>>` plus the explicit `Array IArray.Source` member. (Guarded by `NamedSlicePointerElements`.)
-
 **S where `[]E` is expected.** Go assignability lets a named-slice-typed value pass where the unnamed `[]E` is expected (`rotateRight(s[m:i], …)`, `pdqsortOrdered(x, …)`); the converter materializes such an argument through the SHARING `slice<T>(ISlice<T>)` constructor — `pdqsortOrdered(new slice<E>(x), …)` — a cast cannot apply (interface-constrained source; C# forbids user conversions from interfaces). The constructor unboxes a boxed `slice<T>` directly and otherwise takes the implementer's full-window interface sub-slice, which every golib implementer returns as a boxed shared `slice<T>` — NOT `Source`, which materializes a detached copy (caught by the write-through gate: the helper's write must land in the caller's array). The 3-index form on a constrained value emits `subslice3<S, E>`, and a constrained spread (`append(s, v.ꓸꓸꓸ)` — a `Span<E>`) binds an exact `params Span<T>` twin of the constrained append (betterness otherwise picked the legacy `params T[]` candidate with `T = Span<E>`, a ref struct as type argument — CS9244). (Guarded by the `GenericTypeInference` extension `PassSlice` — S passed to a concrete `[]E` helper, write-through verified by value vs Go — and by the `ConstrainedSliceParamInPlace` behavioral test, which drives a *full in-place mutation* through the materialized `slice<E>` — an element reversal and a real insertion sort mirroring `slices.Sort`/`SortStableFunc` and `internal/fmtsort`'s make+append-built `SortedMap` — over plain, named, and `[]string` sequences, asserting the caller observes the reordering. A detached copy would leave the caller's slice untouched.)
 
 **Explicit `[]E(x)` conversion of a `~[]E` type parameter.** The *explicit* twin of the assignability case above — Go that spells out the slice conversion (`reverse([]E(x))`, `x` of type `S ~[]E`) rather than relying on assignability — took a different converter path and was broken (CS1503). `isTypeConversion`'s `*ast.ArrayType` arm rejects it (a type parameter's `Underlying()` is its constraint *interface*, not `[]E`, so the identical-underlyings gate fails), so it fell through to the general call assembly and rendered `slice<E>(x)` — the golib *array-only* builtin `slice<T>(T[])`, which the `ISlice<E>`-typed source `S` cannot satisfy. The converter now intercepts this shape in the general call path (mirroring the sibling `string|[]byte`-union `[]byte(x)` special case at `convCallExpr.go`): when the conversion target is a slice-type literal and the sole argument is a `*types.TypeParam` with a `~[]E` slice core (`typeParamSliceCore` — the *same* recognizer the implicit path uses), it emits the SHARING `new slice<E>(x)` constructor, so explicit and implicit `~[]E`→`[]E` conversions land identically on the sharing ctor and preserve Go's slice-conversion aliasing. Genuine conversions are untouched: named-slice casts (`[]CaseRange(special)`) take the `isTypeConversion` cast path; string/nil sources are not type parameters; the `string|[]byte` union is handled by the block just above (`typeParamSliceCore` is nil for it). Proven output-neutral (all 1696 stdlib `.cs` byte-identical across an old-vs-fixed reconvert; the behavioral corpus unchanged). (Guarded by the `ConstrainedSliceParamInPlace` behavioral test's `explicitReverseSeq` case — `reverse([]E(x))` over plain and named `~[]E` sources, which did not compile before the fix.)
 
+## An untyped-int literal in a `~[]E`-locked type-parameter slot is cast
+
 **An untyped-int literal in a `~[]E`-locked type-parameter slot is cast to the resolved element type.** A bare untyped-integer literal passed where the parameter is the **element type parameter `E` of a sibling `~[]E`-constrained type parameter** — `Index[S ~[]E, E comparable](s S, v E)` called `Index(s, 2)`, or the variadic element of `Insert[S ~[]E, E any](s S, i int, v ...E)` called `Insert(b, len(b)-1, 0)` (the `slices` shape) — drives C# generic inference from the *literal's own C# type*. Go infers `E` from `S`'s core type (`[]int` → `E` = Go `int` → `nint`), but C# has **no analogue for `~[]E` core-type inference**: the emitted `where S : ISlice<E>` does not flow `S`'s concrete element to `E`, so C# infers `E` SOLELY from the value literal. A bare C# int literal is `System.Int32`, so `Index(s, 2)` with `s []int` made C# infer `E=int`, and `slice<nint>` then failed the `~[]int` constraint — `CS0315` (no boxing conversion `slice<nint>`→`ISlice<int>`), `CS0411` (inference failed), or `CS1503` (arg conversion). go/types has already resolved the literal to `E`'s instantiation (`Info.Types[lit].Type` — `int` for the `[]int` caller, `byte` for a `[]byte` caller, `int64`→`long`, `uint`→`nuint`, …), so `convCallExpr` emits the literal AT that C# type via the shared `castArgToType` plumbing: `Index(s, (nint)(2))`, `Insert(b, len(b) - 1, (byte)(0))`. The **sibling-lock gate** (`typeParamIsSliceElementOfSibling`) is what keeps the footprint minimal and correct: the cast fires ONLY when the parameter's type parameter is the slice-element of another type parameter's `~[]E` constraint — the one shape C# cannot infer. Everything C# already infers correctly is left with its bare literal: a **freely-inferred** type parameter (`First[T any](v ...T)` — `T=int32` satisfies `any`, and the value is identical), one **determined directly by another argument** (`setThrough[P *T, T any](p P, v T)` — C# infers `T` from the pointer), and an **explicitly-instantiated** call (`NewOption[nint](42)` — the type argument is already pinned). A resolved **`int32`/`rune`** kind is skipped even inside the gate (a bare int literal already IS `System.Int32` — the `[]int32` element case stays a plain literal), and a value `convBasicLit` already casts (`(nint)…L` for an out-of-int32 constant) is not double-wrapped (the `wholeExprIsCastOfType` skip in `convExprList`). The literal-constant test reuses `isUntypedNumericConstArg`, the same recognizer the `append`-element and narrow-int casts key off, so a *tightened* local const — already declared at its concrete type — is excluded. This unblocks the whole `slices`-package `Index`/`Insert`/`Replace`/`Contains`-family value-argument seam (cleared the entire CS0315 cluster in the `slices` Phase-4 test host — 53→40 residual errors, the remainder unrelated classes). Proven zero-drift on the behavioral corpus. (Guarded by the `GenericUntypedIntArg` behavioral test — `Index`/`appendAll` over `[]int`, a named `numbers []int`, `[]byte`, and `[]int32` element types with bare int-literal args, which did not compile before the fix; the `[]int32` case proves the no-cast arm.)
 
-**Range-over-func on named/generic Seq types.** Go 1.23's `for v := range seq` (and the two-value `for k, v := range seq2`) on an `iter.Seq[E]`-shaped value emits through golib's yield-adapting `range()` overloads. Three pieces make the named/generic form work: detection unwraps the type's `Underlying()` (a defined or instantiated func type is a `Named`, not a bare `Signature`); a NAMED func type renders as a C# *delegate*, which has no conversion to the overloads' `Action<Func<…>>` parameter — its method GROUP does, so the emission appends `.Invoke`; and because C# cannot infer a type parameter from a method group's parameters, the element types are spelled out from the yield signature: `foreach (var v in range<nint>(countdown(5).Invoke))`. `break` inside the body ends the foreach, which cancels the adapter's producer — the yield function receives `false`, matching Go's semantics; a two-value `range<K, V>` overload adapts pair-yields onto the tuple machinery. One adjacent gate was refined en route: a call's result being a generic instantiation adds explicit type arguments only for conversions and GENERIC callees (`NewOption<nint>(42)` — an untyped-const arg would infer C# `int` where Go infers `nint`), never for a plain function returning a generic named type (`countdown<nint>(5)` was CS0308). (Guarded by the `GenericTypeInference` extensions — a generic `Seq[V]` ranged with `break` and a two-value `KVSeq[K, V]`, values vs Go.)
+## An EXPLICITLY-instantiated generic function through a package selector renders its type arguments
 
 **An EXPLICITLY-instantiated generic function through a package selector renders its type arguments once.** Go's `pkg.Func[T](…)` is an `IndexExpr` (or `IndexListExpr` for `pkg.Func[K, V]`) whose base `X` is the selector `pkg.Func`. `convIndexExpr`/`convIndexListExpr` renders the `[T]` as `<T>` itself. But the base is *also* a generic-function value, so `convSelectorExpr` — which spells a generic function's inferred type arguments when it appears as a method-group **value** (the `slices.SortFunc(all, slices.Compare)` path, needed because C# can't infer a method group's type parameters) — appended `<T>` a second time, producing `pkg.Func<T><T>()`. Depending on context this surfaced as CS1525 (`reflect.TypeFor[X]()` → invalid expression term), CS0119 (a plain-return generic like `saferio.SliceCap[T]`), or CS8124 (`<T>()` parsed as a one-element tuple) — ~67 errors across encoding/gob, xml, asn1, json, text/template, database/sql/driver, debug/macho·pe·elf, and unique. The index expression now converts its base with a `suppressGenericTypeArgs` context flag, so `convSelectorExpr` skips the value-path append when it is the base of an explicit instantiation (the standalone method-group-value case is unchanged — no flag, still appends). A *local* generic function (`Func[T]()`, base is an `Ident` not a selector) never hit this, since only `convSelectorExpr` appends. (Guarded by the `CrossPkgUser` extension — `CrossPkgLib.Wrap[int](5)` (IndexExpr) and `CrossPkgLib.Pair[string, int](…)` (IndexListExpr), both rendering single type-argument lists, output vs Go.)
 
@@ -414,98 +369,9 @@ leaving the declaration at its natural type, producing a local with the same nam
 beside it. net/http is entirely the renamed case (its inner `t` shadows the outer), so the guard
 carries both spellings and the un-renamed one alone would have passed over the real defect.
 
-### The anchored adapter REFERENCE keeps the shadow marker
+<a id="the-anchored-adapter-reference-keeps-the-shadow-marker"></a>Moved to [The anchored adapter REFERENCE keeps the shadow marker](interfaces/adapters.md#the-anchored-adapter-reference-keeps-the-shadow-marker).
 
-The `-tests` metadata-anchored resolution composes the adapter class reference a cast site will use
-(`anchoredAdapterMemberName`) while go2cs-gen composes the class it emits. The two must agree
-character for character, and they disagreed on the shadow marker: the generator names a local adapter
-from `adapterBaseName` — the C# type name verbatim, `Δhandler` — and a foreign one from
-`GetSimpleName(structName)`, neither of which strips it, while the reference side stripped it and
-named a class that is never emitted. net/http's internal test variant declares
-`type handler struct{ i int }` (server_test.go), shadow-renamed to `Δhandler`, so the generator minted
-`ΔhandlerжΔHandler` and every cast site referenced `handlerжΔHandler` — CS0426 ×9.
-
-The rule the strip violated: **the marker belongs to the C# IDENTITY of the type, not to a rendering
-convention.** `adapterStructKey` strips it for GROUPING, which is right and unchanged — a collision
-group must not depend on which side got renamed — but that key must not double as the emitted name.
-Only the `-tests` anchored path was affected: a production conversion resolves through
-`adapterResolvedName`, which never stripped, so the corpus could not move (and CNR confirms it did
-not). The measured shape here also **corrects a plausible-looking diagnosis** worth recording: the
-symptom reads as an adapter minted for one test variant and referenced from the other, and it is not
-— the record is correctly bridge-anchored in `package_info_internal_test.cs` and the class is minted
-in `http_internal_test_package`, exactly where the reference looks for it. Only the NAME differed.
-
-⚠ One adjacent surface is deliberately NOT addressed and is worth naming, since a reader meeting it
-will otherwise read it as this defect: a `T` RETURNED out of a constrained generic into concrete code
-arrives as the proxy TYPE, whose forwarders are explicit interface implementations and so are
-unreachable by member lookup there (`r := second(p); r.Name()` — CS1929, resolving instead to the
-element's own extension whose receiver it cannot satisfy). The proxy carries an implicit conversion
-back to `ж<element>`, but C# does not apply a user conversion during member lookup. Nothing in the
-corpus or in `net/http` reaches it; the guard's `second` builds its result inside the generic context
-on purpose.
-
-## A struct embedding the constrained generic promotes its members — three residual crypto-curve fixes
-
-crypto/elliptic's `p256Curve struct { nistCurve[*nistec.P256Point] }` — a **non-generic** struct
-embedding a **concrete instantiation** of the self-referential-constrained generic above — must PROMOTE
-`nistCurve`'s internal fields (`newPoint`, `params`) and methods (`Add`/`Double`/`Params`/`ScalarMult`/…)
-onto `p256Curve`, exactly as an embed of a plain struct does, so `p256.params = …` binds and the generated
-`p256Curve→Curve` interface adapter can forward `curve.Add(…)` to the promoted shim. Because the type
-argument is the box-wrapping proxy of the previous subsection, its rendered name **embeds the marker glyph
-`ж`** (`nistCurve<P256PointжnistPoint>`) — the thread that runs through all three fixes that made the whole
-crypto-curve family (elliptic, ecdh, nistec) COMPILE (+3 packages):
-
-1. **The proxy marker glyph `ж` is not a pointer prefix.** The generator's simple-name / underlying-name
-   helpers (`GetSimpleName`, `GetUnderlyingTypeName`) detected a pointer type `ж<T>` by scanning for a
-   *bare* `ж` and slicing from it. The proxy's own name embeds that glyph mid-identifier
-   (`P256Point`**`ж`**`nistPoint`), so an embed typed `nistCurve<P256PointжnistPoint>` was mis-sliced into
-   garbage (its simple name became `oint.Value`, its underlying name an unresolvable string) and the embed
-   promoted **nothing** (CS1061 on `params`, CS1929/CS1501 on every forwarded method). Both helpers now
-   match the pointer prefix as the two-character `ж<`, so a marker embedded in an identifier is left intact.
-
-2. **A generic-instantiation embed resolves to its declaration and substitutes its type arguments.** An
-   embed of a generic INSTANTIATION (`nistCurve<P256PointжnistPoint>`) resolves to the generic DECLARATION
-   (`nistCurve<Point>`) by base-name + arity (`FindStructDeclaration` — an instantiation can never
-   string-match a declaration that carries its type PARAMETERS), and a generic struct's extension methods
-   now match on the type-parameter-bearing receiver (`nistCurve<Point>`, not the bare `nistCurve`). The
-   promoted field and method signatures are harvested from the declaration, so they carry its type
-   PARAMETER (`Func<Point>`, `pointFromAffine` returning `(Point, error)`); the template rewrites each to
-   the instantiation's type ARGUMENT before emission —
-
-   ```csharp
-   internal ref global::System.Func<P256PointжnistPoint> newPoint => ref nistCurve.newPoint;
-   internal static (P256PointжnistPoint p, error err) pointFromAffine(this ref p256Curve target, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy)
-       => target.nistCurve.pointFromAffine(Ꮡx, Ꮡy);
-   ```
-
-   — so no promoted member references the out-of-scope `Point`. (The member ACCESS hop keeps the bare
-   property name `nistCurve`; only the emitted TYPE is substituted.) When the ENCLOSING struct is itself
-   GENERIC — `wrapped<T>` embedding `tag<T>` (the `GenericStructFields` guard) — the promoted method is
-   a GENERIC extension method carrying the struct's own type parameters (`static T show<T>(this wrapped<T>
-   target) => target.tag.show();`, the substitution then an identity `T`→`T`), else the `T` in the
-   receiver and return is an undefined type name (CS0246).
-
-3. **The constraint proxy imports its element's package namespace.** The proxy forwards each interface
-   method to the boxed element's box extension methods (`m_box.Bytes()`), which live in the element type's
-   PACKAGE class (`nistec_package`, namespace `go.crypto.@internal`). The `[assembly: GoImplement<…>(ConstraintProxy = true)]`
-   attribute driving the proxy sits in `package_info.cs`, whose usings never cover a FOREIGN element, so the
-   forwarders bound nothing (`ж<P224Point>` "has no `Bytes`", CS1929/CS1501). `EmitConstraintProxy` now emits
-   `using <element-namespace>;` for the box element's namespace.
-
-4. **An open-generic interface cast is CONVERTED but not RECORDED.** Inside a generic method the receiver
-   itself is cast to the interface — crypto/ecdh's `return newBoringPrivateKey(c, …)` with `c *nistCurve[Point]`.
-   The converter must still WRAP it in the generic adapter (`new nistCurveжΔCurve<Point>(Ꮡc)` — the adapter
-   the CLOSED per-instantiation records already generate), but must NOT RECORD it as an implementation: a
-   record emits `[assembly: GoImplement<nistCurve<Point>, ΔCurve>]`, whose type-PARAMETER argument `Point`
-   is out of scope in an assembly attribute (CS0246). `convertToInterfaceType` now skips the record for an
-   open-generic target while still firing the adapter-wrapping conversion.
-
-(Fix 2 is guarded by the `GenericEmbedPromotion` behavioral test — a non-generic struct embedding a concrete
-`curve[*p224]` over a self-referential proxy: reading a promoted internal field, calling a promoted method
-whose parameter is the type argument (passed the promoted proxy-typed field), and reaching the promoted
-methods through a non-generic interface adapter, values vs Go. Fixes 3 and 4 need a cross-package element /
-a generic-method interface cast the single-package baseline cannot express; they are validated by the census
-— elliptic, ecdh, and nistec now emit their DLLs, 254 → 257 packages.)
+<a id="a-struct-embedding-the-constrained-generic-promotes-its-members--three-residual-crypto-curve-fixes"></a>Moved to [A struct embedding the constrained generic promotes its members — three residual crypto-curve fixes](struct-embedding.md#a-struct-embedding-the-constrained-generic-promotes-its-members--three-residual-crypto-curve-fixes).
 
 ## Constraint-only type parameters need explicit type arguments
 
@@ -559,101 +425,9 @@ emits the C# operator directly. (Guarded by the `ReverseSortNaNOrder`
 behavioral test — generic `isNaN`/`less`/`eq` legs over `float64`/`float32`/`complex128`/
 `complex64`, boxed-`any` NaN equality, and a NaN-aware interface sort, values vs Go.)
 
-## Generic struct equality is decided per FIELD, not per type parameter
-A generic `[GoType]` struct's synthesized `Equals` (see [Struct Types](struct-types.md#struct-types)) was gated on
-the struct's TYPE PARAMETERS: unless every parameter carried an `IEqualityOperators`-implementing
-constraint (and, stricter still, every *constraint* of every parameter implemented it), the whole
-struct's `Equals` body was the constant **`false /* missing equality constraints */`**. Since a
-`comparable` parameter deliberately emits no C# constraint (previous subsection),
-essentially every generic struct in the corpus — all 22 generic `[GoType]` declarations at the time
-of the fix — carried a constant-false `Equals`, breaking equality that never depended on the
-parameter at all. `unique.Handle[T]`'s only field is `*T` (`ж<T>`), whose pointer-identity `==` is
-valid for **every** T, yet no two handles ever compared equal — directly contradicting the type's
-documented contract ("two handles compare equal exactly if the values used to create them would");
-`internal/weak.Pointer[T]`'s only field does not mention T at all. Even
-`internal/trace.dataTable[EI, E]` — whose `EI` explicitly lists `IEqualityOperators` — failed the
-every-constraint quantifier because `IAdditionOperators` and its siblings do not *themselves*
-implement the equality interface.
+<a id="generic-struct-equality-is-decided-per-field-not-per-type-parameter"></a>Moved to [Generic struct equality is decided per FIELD, not per type parameter](struct-types.md#generic-struct-equality-is-decided-per-field-not-per-type-parameter).
 
-The gate now decides **per member** (`GetEqualityFallbackMembers` in
-`StructDeclarationSyntaxExtensions`): a member whose type supports `==` independent of the
-unconstrained parameters keeps the same `this.f == other.f` compare a non-generic struct emits, and
-only a member whose type IS an unconstrained type parameter falls back to golib's
-**`AreEqual`** — the identical routing the converter emits for Go `==` on any type-parameter
-operand, giving `EqualityComparer<T>.Default` speed on value types while preserving IEEE float
-semantics (raw `EqualityComparer` reports NaN equal to itself, inverting Go — see the
-floating-point note above) and typed-null/runtime-type semantics for reference and interface
-instantiations. Real emissions (from the converted stdlib's generated sources):
-
-```csharp
-// unique.Handle<T> — ж<T> has pointer-identity == for every T:
-public bool Equals(Handle<T> other) =>
-    this.value == other.value;
-
-// database/sql.Null<T> — mixed: the T field routes through AreEqual, the rest keep ==:
-public bool Equals(Null<T> other) =>
-    global::go.builtin.AreEqual(this.V, other.V) &&
-    this.Valid == other.Valid;
-
-// net/http.mapping<K, V> — golib slice/map fields carry their own ==, so no member falls back:
-public bool Equals(mapping<K, V> other) =>
-    this.s == other.s &&
-    this.m == other.m;
-```
-
-The member classifier asks only "does `==` COMPILE for this member type": a type parameter
-qualifies through ANY `IEqualityOperators`-implementing constraint (matching C# operator
-resolution, not the whole-struct gate's every-constraint test); reference types (classes incl.
-`ж<T>` and `unsafe.Pointer`, interfaces, arrays, delegates), enums, pointers, and built-in value
-types always qualify; a `[GoType]` struct qualifies by its **attribute** — both struct templates
-emit a same-type `operator ==` unconditionally, and for a struct of the *same compilation* the
-attribute is the only visible evidence, because that operator does not exist yet while the
-generator runs; any other value type qualifies only by actually declaring a same-type
-`op_Equality`. Structs that passed the old whole-struct gate, and every non-generic struct, emit
-byte-identical bodies to before — the fallback set is computed only when the gate fails.
-`GetHashCode` needs no matching change (`golib.HashCode.Combine` always compiled and hashes
-consistently with both compare forms). (Guarded by the `GenericStructEquality` behavioral test —
-the `Handle` pointer-identity shape, the plain-T fallback shape, a T-independent-field struct, the
-`Null`-shaped mix, a nested generic struct field, and a generic struct as a map key, all
-output-compared vs Go.)
-
-## A generic struct implementing an interface BY VALUE partials at its OPEN definition
-A Go method on a generic type is declared for every instantiation, so `func (g G[T]) M()` makes
-`G[int]`, `G[string]` and `G[G[int]]` all satisfy an interface with `M`. The converter records a
-`[assembly: GoImplement<…>]` per instantiation it sees, and `ImplementGenerator`'s value-form arm
-wrote one `partial struct` per record, spelled with the record's TYPE ARGUMENTS:
-`partial struct G<IntPtr> : I`. C# reads that argument list as a **type-parameter list**, so the
-declaration disagrees with the converter's own `partial struct G<T>` (CS0264) and the mismatched
-parts stop merging — every member the template writes then lands in the containing **static**
-package class instead (CS0715 on the operators, CS0708 on `Equals`/`GetHashCode`/`ToString`,
-CS0563 and CS0540 in the cascade). The arm now emits ONE partial against the open definition, keyed
-by `(OriginalDefinition, interface)` so all instantiations of a pair fold into it; the member and
-value-pair dedupe indexes key on the same open form, since two interfaces over one open generic
-share a single partial. Constraints are deliberately omitted — a partial declaration may leave them
-off and they merge from the converter's declaration, so omission can never raise CS0265. The
-pointer-adapter arm had always done this (`emittedGenericPointerAdapters`, crypto/elliptic's
-`nistCurve[Point]`); this is its value-form sibling.
-
-Behind it sat a second, independent defect in the shared `GetSimpleName` helper, and it is the one
-that explains why the two packages holding this class both name their generic with a **single
-letter**. Asked to drop a type-argument list, the helper tested `typeName.IndexOf('<') > 1` — so
-`G<T>`, whose `<` sits at index 1, kept its arguments. `StructTypeTemplate` derives the constructor
-name from that call, and emitted `public G<T>(NilType _)`, which is not a constructor to C#: the
-`partial struct G<T>` scope never opens and the same spill follows. Every multi-character generic
-in the corpus (`meta<T>`, `nistCurve<Point>`, `Handle<T>`) cleared the guard, which is why this
-survived to the first single-letter one. The guard is now `> 0` and indexes the *simple* name
-rather than the full one — the latter also closes a latent, currently unreached miscut on a dotted
-generic (`a.Map<K, V>` indexed at 5 into an 8-character `Map<K, V>`, yielding `Map<K`).
-
-Measured on `internal/reflectlite` (`type B[T any] struct{}`) and `runtime/debug`
-(`type G[T any] struct{}` with `var dummy I = G[int]{}` and `var dummy2 I = G[G[int]]{}`), the two
-packages the board recorded behind one CS0715 root. `runtime/debug` moves from build-blocked to a
-measured **2 of 9**; `internal/reflectlite` clears this root and stops on five unrelated ones.
-Guarded by the `GenericValueInterfaceImpl` behavioral test — a single-letter generic held as an
-interface at three instantiations, a sibling type named exactly like the type parameter (the
-`runtime/debug` shape that made the spilled members render as `debug_test_package.T`), struct
-equality, struct-versus-interface comparison, and interface dispatch over a mixed slice, all
-output-compared against `go run`.
+<a id="a-generic-struct-implementing-an-interface-by-value-partials-at-its-open-definition"></a>Moved to [A generic struct implementing an interface BY VALUE partials at its OPEN definition](interfaces/records.md#a-generic-struct-implementing-an-interface-by-value-partials-at-its-open-definition).
 
 ## The `string | []byte` union
 C# generic constraints are conjunctive ("and"), so they cannot express Go's `string | []byte` union directly. The two members share no operators (the union is neither comparable nor additive), so a conforming body may only use the read operations common to both — indexing, `len`, and sub-slicing. These are captured by the golib read-only byte-sequence interface [`IByteSeq`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/IByteSeq.cs), which both `@string` and `slice<T>` implement; the converter emits it for the union and suppresses the (spurious) lifted operator constraints:

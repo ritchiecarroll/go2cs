@@ -929,6 +929,69 @@ Everything else on the path was already faithful: `syscall.CancelIoEx` really di
 `go run`) and `EmbeddedPointerFieldIdentity` (depth-2 chain equality, `map[*T]V` keying, and both
 spellings of a field promoted through an embedded pointer).
 
+## A struct embedding the constrained generic promotes its members — three residual crypto-curve fixes
+
+crypto/elliptic's `p256Curve struct { nistCurve[*nistec.P256Point] }` — a **non-generic** struct
+embedding a **concrete instantiation** of the self-referential-constrained generic above — must PROMOTE
+`nistCurve`'s internal fields (`newPoint`, `params`) and methods (`Add`/`Double`/`Params`/`ScalarMult`/…)
+onto `p256Curve`, exactly as an embed of a plain struct does, so `p256.params = …` binds and the generated
+`p256Curve→Curve` interface adapter can forward `curve.Add(…)` to the promoted shim. Because the type
+argument is the box-wrapping proxy of the previous subsection, its rendered name **embeds the marker glyph
+`ж`** (`nistCurve<P256PointжnistPoint>`) — the thread that runs through all three fixes that made the whole
+crypto-curve family (elliptic, ecdh, nistec) COMPILE (+3 packages):
+
+1. **The proxy marker glyph `ж` is not a pointer prefix.** The generator's simple-name / underlying-name
+   helpers (`GetSimpleName`, `GetUnderlyingTypeName`) detected a pointer type `ж<T>` by scanning for a
+   *bare* `ж` and slicing from it. The proxy's own name embeds that glyph mid-identifier
+   (`P256Point`**`ж`**`nistPoint`), so an embed typed `nistCurve<P256PointжnistPoint>` was mis-sliced into
+   garbage (its simple name became `oint.Value`, its underlying name an unresolvable string) and the embed
+   promoted **nothing** (CS1061 on `params`, CS1929/CS1501 on every forwarded method). Both helpers now
+   match the pointer prefix as the two-character `ж<`, so a marker embedded in an identifier is left intact.
+
+2. **A generic-instantiation embed resolves to its declaration and substitutes its type arguments.** An
+   embed of a generic INSTANTIATION (`nistCurve<P256PointжnistPoint>`) resolves to the generic DECLARATION
+   (`nistCurve<Point>`) by base-name + arity (`FindStructDeclaration` — an instantiation can never
+   string-match a declaration that carries its type PARAMETERS), and a generic struct's extension methods
+   now match on the type-parameter-bearing receiver (`nistCurve<Point>`, not the bare `nistCurve`). The
+   promoted field and method signatures are harvested from the declaration, so they carry its type
+   PARAMETER (`Func<Point>`, `pointFromAffine` returning `(Point, error)`); the template rewrites each to
+   the instantiation's type ARGUMENT before emission —
+
+   ```csharp
+   internal ref global::System.Func<P256PointжnistPoint> newPoint => ref nistCurve.newPoint;
+   internal static (P256PointжnistPoint p, error err) pointFromAffine(this ref p256Curve target, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy)
+       => target.nistCurve.pointFromAffine(Ꮡx, Ꮡy);
+   ```
+
+   — so no promoted member references the out-of-scope `Point`. (The member ACCESS hop keeps the bare
+   property name `nistCurve`; only the emitted TYPE is substituted.) When the ENCLOSING struct is itself
+   GENERIC — `wrapped<T>` embedding `tag<T>` (the `GenericStructFields` guard) — the promoted method is
+   a GENERIC extension method carrying the struct's own type parameters (`static T show<T>(this wrapped<T>
+   target) => target.tag.show();`, the substitution then an identity `T`→`T`), else the `T` in the
+   receiver and return is an undefined type name (CS0246).
+
+3. **The constraint proxy imports its element's package namespace.** The proxy forwards each interface
+   method to the boxed element's box extension methods (`m_box.Bytes()`), which live in the element type's
+   PACKAGE class (`nistec_package`, namespace `go.crypto.@internal`). The `[assembly: GoImplement<…>(ConstraintProxy = true)]`
+   attribute driving the proxy sits in `package_info.cs`, whose usings never cover a FOREIGN element, so the
+   forwarders bound nothing (`ж<P224Point>` "has no `Bytes`", CS1929/CS1501). `EmitConstraintProxy` now emits
+   `using <element-namespace>;` for the box element's namespace.
+
+4. **An open-generic interface cast is CONVERTED but not RECORDED.** Inside a generic method the receiver
+   itself is cast to the interface — crypto/ecdh's `return newBoringPrivateKey(c, …)` with `c *nistCurve[Point]`.
+   The converter must still WRAP it in the generic adapter (`new nistCurveжΔCurve<Point>(Ꮡc)` — the adapter
+   the CLOSED per-instantiation records already generate), but must NOT RECORD it as an implementation: a
+   record emits `[assembly: GoImplement<nistCurve<Point>, ΔCurve>]`, whose type-PARAMETER argument `Point`
+   is out of scope in an assembly attribute (CS0246). `convertToInterfaceType` now skips the record for an
+   open-generic target while still firing the adapter-wrapping conversion.
+
+(Fix 2 is guarded by the `GenericEmbedPromotion` behavioral test — a non-generic struct embedding a concrete
+`curve[*p224]` over a self-referential proxy: reading a promoted internal field, calling a promoted method
+whose parameter is the type argument (passed the promoted proxy-typed field), and reaching the promoted
+methods through a non-generic interface adapter, values vs Go. Fixes 3 and 4 need a cross-package element /
+a generic-method interface cast the single-package baseline cannot express; they are validated by the census
+— elliptic, ecdh, and nistec now emit their DLLs, 254 → 257 packages.)
+
 ---
 
 [← Struct Types](struct-types.md) · [Index](README.md) · [Interfaces →](interfaces.md)
