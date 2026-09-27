@@ -130,7 +130,7 @@ and the self-contained-assembly reasoning carry over unchanged.
 
 This half only became reachable when the white-box **bridge class** started carrying an access
 modifier. Before [the unconditional bridge metadata
-unit](shadowing.md#test-suites-reference-the-production-project-instead-of-recompiling-it), an internal
+unit](test-conversion.md#test-suites-reference-the-production-project-instead-of-recompiling-it), an internal
 test file's `partial class cpu_internal_test_package {` was the class's ONLY declaration, and a
 top-level C# class with no modifier is `internal` — so its `public` members were internal *in
 effect* and the inconsistency never arose. Making the bridge `public static partial` (which a
