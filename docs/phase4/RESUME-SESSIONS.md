@@ -300,31 +300,37 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
        R's reflect layout + map semantics, P2's caller-PC spans; emission check 0 union drift; 79/79 sweeps). The owner was
        pinged for the [GoStr] docs. TRAIN C's 23 seat branches are pruned (origin ~88 heads; the prune manifests and bundles
        are in the i7's go2cs archive, branch-prune-2026-09-26).
-       TRAIN D is REHEARSED (H:/go2cs-tmp-coord/tD-reh, local) with its seat table in the scratchpad's tD-seats.txt and the
-       assembly script tD-assemble.sh. Pre-resolutions: stubs_impl.cs at the i9's getg seat (keep R's s_getgReset AND the i9's
-       t_getgOwner, with its own GoroutineThreadState.Register reset), ConversionStrategies-Reference.md at C2's alias seat
-       (keep both new sections), visitFuncDecl.go at P2's forwarder seat (forwarderPrefix+twinMarker+noInlining), and the
-       runtime/<goos>/package_info.cs maps taken from the incoming side, then RE-DERIVED from a runtime emission (3 targets)
-       as a fixup. UNION COMMIT: census entries for t_getgOwner and t_cpuSamplerDraining (the sampler seam gets a
-       go.golib.GoroutineThreadState.Register reset), plus R's composed pooled-then-lent arm in GetgLentIdentityTests. That
-       arm was made DISCRIMINATING (another holder mints goroutine 1 first): red without the i9's fix ("status is 2"),
-       green with it. SEATS: R's coro pool 3024a93ecf and R1 f070febc4a (internal/synctest VALIDATES 27/27, a new row at
-       landing); the i9's getg da0845b2e7, registry race d9a7e8b81f, running count 2ba705db0a, os capability 5345c2a0b2 and
-       junction GODEBUG d4c9dd8305; C2's alias fixes d6fb50c663; G's repoguard re-cut 2111673768; P2's forwarder frames
-       187daab100, profiling docs 937832ca39, sampler seam 5cb606a2ce, companion 53ee28fe80, frames 3fb6a290e2, labels
-       dc19680049 and closure names 00ca353c89; P1's stack (959a88df3 line) and metrics histogram 0a074655e once their slnx
-       gate posts SHAs. The battery shape is TRAIN C's (tC-battery.sh with the two-arm emission check), plus a behavioral
-       and MSTest pass for C2's AliasImport projects and the solution builds for the new go2cs.CpuProfiler project.
-       NEXT AFTER TRAIN D: the committed test-source refresh (the i9, on the new SSD), the stranded docs batch (COORD), and
-       pruning TRAIN D's seat branches.
-       LANES: R = seat (c) M4 (TestIsZero) on 7433c7ac38; G = (b) FieldRefBox tokens (the os linux memory-safety fix) on
-       7433c7ac38; P1 = the 8 host-fatal runtime tests; P2 = class G (goroutine registration on the creating thread, stacked
-       on R's (A)), then magnitude; C1 = the crash backstop, then its stranded re-cuts; C2 = the anonymous-struct generic
-       alias sizing, then its stranded re-cuts; the i9 = the windows runtime/pprof classification (45 divergences).
-       OWNER HAND OPEN: the i9's session needs a permission rule for its last reclaim batch. OWNER RULED today: the CPU sampler
-       is BUILT, opt-in only (satisfied, measured); the standing cleanup rule (lanes delete verifiably stale local items; COORD
-       prunes GitHub branches; fleet total ~565 GB, origin 452 -> ~88 heads).
-   (4) LANDED since the release: 1.24.13.2 (tag nuget-1.24.13.2 -> 4c53b02a0a, the Linux packaging train); TRAIN A (master
+       STATE 2026-09-27 07:05 (COORD; read the ledger from 9760611653 on). LANDED 2026-09-26/27: TRAIN D (master
+       dd2b7f1d2b, 22:28; 18 seats; the roster stays at 219, since internal/synctest does NOT bank on its TestReflectFuncOf
+       measurement-aid pin under ruling #1, ledger 7ec996fcf3); the DOCS SPLIT (master 448efc4f0b: the strategy reference is
+       one page per topic under docs/ConversionStrategies-Reference/, the old page a 475-anchor stub; the tool is
+       .claude/coord-scripts/docs/split_reference.py); TRAIN E (master 02b1b58793, 06:49; 13 seats + fixups eefcdbdaef,
+       88cdc8394a, 02b1b58793). reflect VALIDATES there (395 + 23; linux 395 + 23) but its BANK WAITS: the roster guard refuses
+       42 legacy alloc-profile labels. 37 retire (TestDeepEqualAllocs/* never runs under SwissMap) and 5 relabel from their
+       readings; ASSIGNED to C1 (inbox 604cb2ebf). The bank commits are preserved on the LOCAL branch claude/coord-reflect-bank
+       in the i7 main repo (roster eb8d74967c, proof page ae9f885090). After C1's seat: re-apply them onto master, re-sweep
+       reflect, run the roster guard under both shells, then a bank-only landing.
+       TRAIN F is ASSEMBLED and PUSHED as claude/coord-trainF 2cd11624a6 (worktree H:/go2cs-tmp-coord/tF, rehearsal tF-reh;
+       the seat table and scripts are in the scratchpad: tF-seats.txt, tF-assemble.sh, tF-battery*.sh): the i9's test-source
+       refresh; P1 traceregion and /cpu/classes; P2 M1 memory records; R's sharded mint and compound-shift guard; G's SIGPIPE
+       death, pidfd, os linux manifest and darwin funnel; union 2cd11624a6 (the fleet scripts gain P1/P2). Battery running
+       from 07:01. AT ITS LANDING: bank internal/synctest (28, linux 28, 0 disclosures) and os's linux annotation 912 + 2 (the
+       Linux line reaches 218 of 218), after G reads both on linux at the exact tip; then the nistec cost-canary A/B (master
+       against the union, 3 runs each, alternating) as the recorded 1.24 baseline (ledger 1a696b92c5).
+       DOCS SIDE WORK (owner-ordered): the rewritten SUMMARY is on claude/coord-docs-strategies f54403090a, awaiting the
+       OWNER'S LOOK before it lands (worktree H:/go2cs-tmp-coord/docs-cs). Next there: the reference-side pass (moves, splits
+       of the four largest pages, new topic pages, present-tense clarity), from the audit plan (scratchpad docs-audit.json).
+       LANES: R = seat (ii) gates (claude/r-runtime-claims 3fae75de81: minmax, the map-key clone, panicnil; its
+       casPointerLatched body supersedes P1's at the next union), then seat (iii), the recover model (design approved on
+       claude/r-recover-design f019adfead); G = the managed execution tracer (Q28; design b45eae62db approved; C-1 + C-2, then
+       C-3) plus the linux readings above; P1 = the linkname rows (heapObjectsCanMove answers false); P2 = the creator-flake
+       test fix, then M2; C1 = reflect's alloc relabel; C2 = sizing MinInt / -1 (inbox b7a948590) after its anonymous-struct
+       sizing; the i9 = resting (next: the test-source refresh at TRAIN F's tip).
+       REMAINING ROWS for 100% after TRAIN F: runtime (P1's and R's claims; TestScavenger's windows stall is unowned),
+       runtime/pprof (P2's M2-M4 and class F), net/http/pprof (G's tracer and P2's mutex profile).
+       OWNER HANDS: the docs summary look (the branch above). Nothing else is open.
+   (4) LANDED since the release (newest first): TRAIN E 02b1b58793, the docs split 448efc4f0b, TRAIN D dd2b7f1d2b, TRAIN C
+       7433c7ac38, TRAIN B 3ffd1d8a8d; then 1.24.13.2 (tag nuget-1.24.13.2 -> 4c53b02a0a, the Linux packaging train); TRAIN A (master
        db1bd885a2, 2026-09-25 04:13: R's synctest re-entry, C2's atomic-loads PICK, R's mustBeKind; net/http validates again at
        1387, execution release-tiered; GoroutineWaitState turned green there).
  - QUEUE after TRAIN C: the metricsSema leak class (P1's census); the anonymous-struct generic alias (option c); direct-call
