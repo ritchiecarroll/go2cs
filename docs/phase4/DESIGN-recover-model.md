@@ -1,6 +1,6 @@
 # DESIGN — Go's recover(): the panic chain and direct-call eligibility
 
-> **Status: PROPOSED (2026-09-27, lane R).** A written design, owed before any cut by COORD's ruling
+> **Status: APPROVED (COORD, 2026-09-27) — to cut as seat (iii), after seats (i) and (ii).** Written by lane R, owed before any cut by COORD's ruling
 > on the runtime-claims seat. Nothing here is implemented. §6 is the gate the cut owes, and §7 names
 > what the model still does NOT reproduce.
 
@@ -135,13 +135,16 @@ converter emits only `GoFrame.IsPanic` / `Capture` / `Run` and `recover()`.
   14/14 on windows and linux.
 - **No regression:** GolibTests in both flavours; the full behavioral suite (`DeferPanicArg`, the
   recover and re-panic tests); CNR need not run, since no converter change is made.
-- **Rows** whose suites lean on the panic core:
+- **Rows** whose suites lean on the panic core (widened by COORD's ruling, 2026-09-27):
   - `sync` (OnceFunc / OnceValue replay a panic with `panic(recover())` from a deferred call);
-  - `testing`-adjacent rows;
-  - `encoding/json` and `text/template` (both recover internally to unwind parsers);
+  - `encoding/json`, `text/template`, `html/template`, `go/parser` and `go/types` (each recovers
+    internally to unwind a parser or checker);
+  - `fmt` (catchPanic recovers a panicking Stringer/Error) and `encoding/gob` (its error-unwinding
+    recover);
   - `net/http` (TestInterruptWithPanic).
 
-  All are swept on windows, and linux takes the three largest.
+  All are swept on windows. Linux takes the three largest by verdict count, recomputed from the
+  roster at gate time.
 - **Cost:** the §4 reading.
 
 ## 7. What the model does NOT reproduce — stated, not hidden
@@ -154,8 +157,10 @@ converter emits only `GoFrame.IsPanic` / `Capture` / `Run` and `recover()`.
   - It also needs `defer f()`'s wrapper lambda to hand that identity to `f`.
 
   No test in `defer_test.go` exercises it. Code that DEPENDS on a helper's recover returning nil is
-  rare, and code that works only because the helper's recover succeeded is a bug in Go. So the gap
-  can only make a converted program recover where Go would crash. **Stated as a known divergence; a
-  follow-up only if a measured row needs it.**
+  rare, and code that works only because the helper's recover succeeded is a bug in Go. The effect
+  of the gap: **the panic stops early** — at the helper's recover — **instead of reaching an outer
+  recover or crashing** as it would in Go. That is broader than "only where Go would crash": an outer
+  frame's recover that Go would reach sees nil here. **ACCEPTED as a known divergence (COORD,
+  2026-09-27); a follow-up only if a measured row needs it.**
 - **`runtime.Goexit` interplay** is unchanged: `GoexitException` is not a `PanicException`, so it
   never becomes recoverable.
