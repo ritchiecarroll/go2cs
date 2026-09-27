@@ -6330,7 +6330,7 @@ internal static void probeA1() {
 **A captured variable that nothing writes after the closure exists is read through a copy.** The copy
 always matches, because the variable never changes afterward. The `ʗ` suffix marks a copy the converter
 makes for a closure or a method value, and the number keeps the names unique, as in `tʗ1`
-([detail](ConversionStrategies-Reference/pointers.md#a-capture-that-is-written-after-the-capture-point-routes-to-shared-storage-not-a-snapshot)).
+([detail](ConversionStrategies-Reference/functions-and-closures.md#a-capture-that-is-written-after-the-capture-point-routes-to-shared-storage-not-a-snapshot)).
 This uses the same `Tally` struct, and prints `A3: 7`.
 
 <!-- source: src/tests/Behavioral/ClosureWriteVisibility/main.go:42-47 -->

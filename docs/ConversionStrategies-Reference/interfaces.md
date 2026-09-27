@@ -1526,8 +1526,7 @@ Guarded by `AnonStructCrossFile`'s `bvars.go`/`yvars.go` (both manifestations, s
 `main.go` so file order is exercised in both directions) and, for the `-tests` seed,
 `TestTestVariantPinsProductionLiftedTypeNames`.
 
-## Function-literal parameters share the body scope
-Go declares parameters in the function block, so a body-level `fpath, err := ...` REUSES a literal's `err` parameter. The variable analysis gives literals ONE merged scope (params + body declarations) mirroring real function declarations; a separate param scope had made the `:=` a shadow declaration beside later reuses (CS0841/CS0128, os CopyFS's WalkDir literal). Guarded by `LambdaFunctions` (`probe`).
+<a id="function-literal-parameters-share-the-body-scope"></a>Moved to [Function-literal parameters share the body scope](functions-and-closures.md#function-literal-parameters-share-the-body-scope).
 
 ## System-colliding local type names are root-qualified in assembly attributes
 A Go package can name one of its own exported types after a top-level C# `System` type — internal/profile's `ValueType`, go/ast's `Object`, bytes' `Buffer`. The `GoImplement`/`GoImplicitConv` assembly attributes generated in `package_info.cs` sit at **file scope**, before the `namespace` line, where both `using System;` (a csproj global using) and `using static go.<pkg>_package;` are active — so a bare `ValueType` is ambiguous between `System.ValueType` and the package type (CS0104). The emitter root-qualifies any bare, dotless type name matching a curated set of `System` top-level names at the package class:

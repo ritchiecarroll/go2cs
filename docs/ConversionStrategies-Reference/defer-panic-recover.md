@@ -773,137 +773,13 @@ names alias one channel object; the fix matters for ref-local-boxed value locals
 func literal, a deferred NAMED callee, and a go-statement literal, each inside an IIFE, with the
 mutations landing on the deferred copies and the source read back untouched, output-compared vs Go.)
 
-## A func-literal ARGUMENT inside an `if`/`for` condition hoists its captures before the statement
-The same capture-snapshot hazard occurs when a capturing func literal is passed as a call argument
-**inside a condition**. `go/types` is dense with this shape — `underIs(t, func(u Type) bool { … })`,
-`typeSet().is(func(t *term) bool { … })` — and the literal's snapshot declarations (`var suʗ1 = su;`)
-are statements, invalid inside the condition expression. `visitExprStmt` / `visitAssignStmt` already
-route such decls to a pre-statement hoist buffer (`v.hoistedDecls`), but `visitIfStmt` and
-`visitForStmt` converted the condition with `convExpr(cond, nil)` and no hoist target, so the decls
-were dumped inline into the condition (`if (tpar.underIs(` `var suʗ1 = su;` `(ΔType u) => { … }))` →
-CS1003/CS1026/CS1002/CS1022/CS1513, ~63 errors across `go/types` alone). Both statement emitters now
-convert the condition into a hoist buffer and write any collected decls on their own lines **before**
-the `if`/`for`, mirroring `visitExprStmt`:
+<a id="a-func-literal-argument-inside-an-iffor-condition-hoists-its-captures-before-the-statement"></a>Moved to [A func-literal ARGUMENT inside an `if`/`for` condition hoists its captures before the statement](functions-and-closures.md#a-func-literal-argument-inside-an-iffor-condition-hoists-its-captures-before-the-statement).
 
-```csharp
-ΔType su = default!;
-var suʗ1 = su;
-if (tpar.underIs((ΔType u) => {
-    …
-    if (suʗ1 != default!) { u = match(suʗ1, u); … }
-})) { … }
-```
+<a id="a-func-literal-argument-inside-a-return-expression-hoists-its-captures-before-the-return"></a>Moved to [A func-literal ARGUMENT inside a return expression hoists its captures before the `return`](functions-and-closures.md#a-func-literal-argument-inside-a-return-expression-hoists-its-captures-before-the-return).
 
-The condition is converted **after** an `if`/`for` init clause (preserving capture-counter ordering),
-and the `if`-with-init sub-block hoists between the init and the `if`. The traditional `for` reuses the
-existing `ForVarInitMarker` slot — the hoisted condition decls are emitted at the same pre-`for` position
-as the for-init heap allocations. The hoist buffer is empty for a condition with no capturing func-literal
-argument, so the behavioral corpus is byte-identical; the only stdlib deltas are five `go/types` files
-(`under.cs`, `builtins.cs`, `expr.cs`, `index.cs`, `instantiate.cs`) and one `crypto/tls`
-`slices.ContainsFunc` call. This clears the **syntax-error layer** in those files (`go/types` had ~63
-`CS100x`/`CS1026` from this one construct); it does not by itself green `go/types`, which compiles far
-enough afterward to surface a deeper layer of latent semantic defects (a `map[token.Token]func()`
-mis-lowered to a malformed explicit-interface `IDictionary`/`ICollection` implementation, named-slice
-wrappers not satisfying `IArray.Source`, `token` resolution) — the frontier moves from syntax to
-semantics, "progress, not regression." (Guarded by `FuncLitCaptureInCondition` — a func literal
-capturing an enclosing map, passed as an argument inside a plain `if` condition, an `if` condition with
-an init clause, a traditional `for` condition, and a while-style `for` condition, all output-compared vs
-Go.)
+<a id="a-func-literal-inside-a-range-expression-hoists-its-captures-before-the-loop"></a>Moved to [A func literal inside a RANGE expression hoists its captures before the loop](functions-and-closures.md#a-func-literal-inside-a-range-expression-hoists-its-captures-before-the-loop).
 
-## A func-literal ARGUMENT inside a return expression hoists its captures before the `return`
-
-The third statement position with the same hazard: a capturing func literal passed as a call argument
-**inside a return expression** — net/http's `findHandler` returns
-`HandlerFunc(func(w ResponseWriter, r *Request) { … allowedMethods … }), "", nil, nil`, and traceviewer's
-`MainHandler` returns `http.HandlerFunc(func(){ … views … })`. A **direct** func-literal result threads
-`lambdaContext.deferredDecls` (the go/defer/return channel in `convFuncLit`), but a literal nested as a
-call **argument** falls back to the pre-statement hoist sink, which `visitReturnStmt` never provided —
-the snapshot declaration was dumped inline inside the return expression (10 syntax errors in `server.cs`,
-a 4-error cascade in traceviewer). `visitReturnStmt` now provides the same hoist buffer as
-`visitExprStmt`/`visitIfStmt`/`visitForStmt` and splices it before the `return` through its existing
-`DeferredDeclsMarker` slot (ahead of any deferred tuple-deconstruction temps):
-
-```csharp
-var allowedʗ1 = allowed;
-return (wrap((@string msg) => {
-    fmt.Println(allowedʗ1[0] + ":" + msg, len(allowedʗ1));
-}), "label", default!);
-```
-
-The buffer is empty for a return with no capturing-literal argument, so the behavioral corpus is
-byte-identical. (Guarded by `ReturnTupleFuncLitArg` — a slice-capturing literal as a call argument inside
-a three-result return tuple, and a map-capturing one inside a single-result return, output-compared vs
-Go.)
-
-## A func literal inside a RANGE expression hoists its captures before the loop
-
-The fourth statement position, and the one the table-driven test idiom lands on constantly:
-
-```go
-for _, test := range []struct {
-    desc string
-    f    func()
-}{
-    {desc: "WithCancel(bg)", f: func() { c, cancel := WithCancel(bg); cancel(); <-c.Done() }},
-    …
-} {
-```
-
-The literal's snapshot declaration (`var bgʗ1 = bg;`) is a **statement**, and the composite-literal
-element position it would be written into is pure expression context. `visitRangeStmt` converted the
-range expression with `convExpr(rangeStmt.X, nil)` — no hoist target — so the decl was dumped inline
-after the `f:` argument name, and the whole file died in a syntax cascade (`context`'s `x_test.cs`:
-CS1003/CS1026/CS1002/CS1513/CS0106 ×195, from `TestAllocs` and `TestCause` alone).
-
-`visitRangeStmt` now converts the range expression into a hoist buffer and **splices** the collected
-decls in at the statement's own start — it records that offset before conversion and inserts there
-afterwards (`spliceOutput`, the positional twin of `replaceMarker`), because the `foreach` header is
-emitted much further down through a dozen different arms:
-
-```csharp
-    var bgʗ1 = bg;
-foreach (var (_, test) in new TestAllocs_type[]{
-    new(desc: "WithCancel(bg)"u8, f: () => { var (c, cancel) = WithCancel(bgʗ1); … }),
-    …
-}.slice()) {
-```
-
-The buffer is empty for a range expression with no capturing func literal, so the behavioral corpus is
-byte-identical. (Guarded by `RangeExprFuncLitCapture` — slice- and map-capturing literals as struct
-fields of a ranged composite literal, plus a bare `[]func(string)` element list, output-compared vs Go;
-its A/B reproduces the cascade exactly.)
-
-**The class, stated once:** `visitExprStmt`, `visitAssignStmt`, `visitIfStmt`, `visitForStmt`,
-`visitReturnStmt`, `visitValueSpec` and now `visitRangeStmt` each provide the pre-statement sink. The
-statement kinds that still do not — a `switch` tag, a `select` comm-clause, a bare send — have no
-demonstrated corpus site, and each would repeat this failure exactly. They are deliberately not widened
-speculatively: the tell that one has been reached is a syntax cascade whose first error sits on the line
-after a `<name>:` argument label.
-## The enclosing statement's hoist buffer does NOT extend into a literal's BODY
-
-Those four positions all work the same way: the enclosing statement opens a hoist buffer, and a
-capturing func literal inside it writes its snapshot declarations there. The buffer is a valid position
-for **that literal's own** captures — they name bindings from the enclosing scope, which exists before
-the statement. It is not a valid position for anything the literal's **body** hoists: a statement inside
-the body opens its own buffer, and a nested literal whose captures name a binding declared *inside* this
-body would be declared outside it.
-
-`time`'s `BenchmarkStaggeredTickerLatency` nests three levels of `b.Run(…, func(b *testing.B){…})`. The
-middle literal `make`s a `stats` slice; the innermost `go func(…)` captures it. The snapshots landed in
-the OUTER literal's `b.Run(…)` statement buffer — two blocks above the declaration:
-
-```csharp
-for (nint tickersPerP = 1; …; tickersPerP++) {
-    nint tickerCount = gmp * tickersPerP;
-    var statsʗ1 = stats;                      // CS0103 — `stats` is declared below, inside bΔ2
-    bΔ1.Run(…, (ж<Δtesting.B> bΔ2) => {
-        var stats = new slice<…>(tickerCount);
-```
-
-`convFuncLit` now detaches `v.hoistedDecls` for the duration of the body walk and restores it after, so
-a nested hoist can only reach a position inside the body. The literal's own captures are unaffected —
-they are flushed before the body is converted, while the enclosing buffer is still installed. (Guarded
-by `FuncLitArgCapture` case 15.)
+<a id="the-enclosing-statements-hoist-buffer-does-not-extend-into-a-literals-body"></a>Moved to [The enclosing statement's hoist buffer does NOT extend into a literal's BODY](functions-and-closures.md#the-enclosing-statements-hoist-buffer-does-not-extend-into-a-literals-body).
 
 Handling Go `defer` / `panic` / `recover` is what the FRAME above is for: the body is emitted inline in `try`/`catch`/`finally` beside a [`GoFrame`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/GoFrame.cs) local that holds this call's defer list. `panic` is the global [`panic`](https://golang.org/pkg/builtin/#panic) built-in and `recover` the global [`recover`](https://golang.org/pkg/builtin/#recover) (both a `using static go.builtin`). A function that neither directly nor indirectly (through a deferred lambda) uses `defer`/`recover` gets no frame at all -- the scope is per function, so a `main` that merely calls `f()` is emitted as a plain method body.
 
@@ -936,11 +812,7 @@ internal static (ж<Regexp>, error err) parse(@string s, Flags flags) {
 
 A result list that is entirely **unnamed** (`func f() (int, error)`) or entirely blank keeps the plain form: there is nothing deferred code could mutate, and Go likewise returns the zero results after a recover. Go forbids mixing named and unnamed results, so seeing one truly unnamed result settles the whole signature. (Guarded by the `NamedReturnDefer` extension — a `(_ *box, err error)` function whose recover sets `err`; the pre-fix converter compiles it and returns `(nil, nil)`.)
 
-## Function-literal named results
-
-A func **literal** with named results declares them at the top of its emitted block, zero-initialized — Go's semantics for `next = func() (v1 V, ok1 bool) { …; return }` (the `iter.Pull` shape): a bare `return` yields the named results as currently assigned, so the lambda emits `() => { V v1 = default!; bool ok1 = default!; …; return (v1, ok1); }`. Without the declarations the emitted tuple referenced undeclared names (CS0103 — the `iter` package's last wave-1 errors). Two interactions: a named-results literal whose *first* statement is a bare `return` must NOT collapse to an expression-bodied lambda (the names exist only as block declarations), and the `namedReturnDefer` path (named results that deferred code mutates) keeps its own arrangement — declarations *before* the `try`, returned after the `finally`. Declarations reuse the shadow-aware naming, so a literal result shadowing an outer local renames consistently in both the declaration and the return (`nΔ1`). (Guarded by the `FuncLitArgCapture` extension — bare returns with assigned and zero named results, plus the first-statement-bare-return shape, values vs Go.)
-
-Because a named result lives in the literal's OWN scope, a reference to it in the body is the result, never an outer-scope capture — so named results are excluded from the lambda-capture set (`convFuncLit`) exactly as parameters are. text/template's `readFileFS` returns `func(file string) (name string, b []byte, err error)`, whose closure captures the enclosing `fsys` AND writes `b` via the captured tuple call `b, err = fs.ReadFile(fsys, file)`. Because the closure genuinely captures `fsys`, the capture analysis ran and mis-flagged `b` too — hoisting `var bʗ1 = b;` into the enclosing function, where `b` does not exist (CS0103), and renaming the body's `b` to the captured `bʗ1`. Filtering the named-result names out of the capture set (alongside the parameter names) leaves `b` a plain in-block declaration. (Guarded by `CrossPkgUser`'s `makeScanner` — a captured closure returning named results, one written via a tuple call whose RHS uses the capture, output-compared vs Go; crypto/x509 and html/template shared the same latent shape.)
+<a id="function-literal-named-results"></a>Moved to [Function-literal named results](functions-and-closures.md#function-literal-named-results).
 
 ## Deferred calls whose callee returns a value take the lambda form
 The no-arg defer arm passes a bare method group (`defer(k.Close, ref ᒐ)`) only when the callee returns VOID -- an error-returning method (`defer k.Close()`, registry `Key.Close`) is a `Func<error>` method group that cannot bind the golib `defer(Action, ref GoFrame)` (CS1503). The lambda form discards the result, exactly Go's deferred-call semantics:

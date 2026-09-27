@@ -114,45 +114,9 @@ A closure that captures an outer variable is emitted with a snapshot copy declar
 
 The same rule applies to an **escaping local** whose address is taken — `var p _panic; … preprintpanics(&p)` in runtime's `gopanic`, where `p` collides with the type `p`. The heap allocation is `ref var Δp = ref heap(new _panic(), out var Ꮡp)`, so the box is `Ꮡp` (raw) and `&p` must emit `Ꮡp`, not `ᏑΔp`. **Crucially, the box-name rule is keyed to the rename *kind*, because the two kinds name their boxes differently:** a type-**collision** rename prepends the marker (`p` → `Δp`) but keeps the raw box (`Ꮡp`), whereas a nested-scope **shadow** rename appends the marker plus a counter (`i` → `iΔ1`, `iΔ2`) and keeps the *shadow* box (`ref var iΔ1 = ref heap<nint>(out var ᏑiΔ1)`, so `&i` correctly emits `ᏑiΔ1`). The converter therefore rewrites to the raw name *only* when the alias is exactly `Δ`+rawname (the collision form); a shadow-renamed or non-renamed var keeps its existing box name. (Guarded by the `CollisionRenamedLocalBox` behavioral test, with `ForVariants`/`NestedVarShadow` covering the shadow-rename form left unchanged.)
 
-### A nested closure must not clobber the enclosing closure's capture state
-The per-lambda conversion state — `conversionInLambda` (are we inside a closure body?) plus the capture-name maps (`currentLambdaVars`/`currentLambdaVarObjs`) — is what makes closure-body emission rewrite captured references to their box/copy forms: a captured local `s` reads as `sʗ1`, and the current method's **direct-ж receiver** (`func (s *Stmt) …` emitted `this ж<Stmt> Ꮡs`, whose body alias `ref var s = ref Ꮡs.Value` is a `ref`-local that **cannot** be captured by a C# closure) reads through its box as `Ꮡs.Value`. That state was *set* on entering a closure but **reset to `false`/`nil` on exit**, not restored — so a closure that contains an **inner** closure had its state wiped the moment the inner one finished, and every reference in the *outer* closure body **after** the inner one fell back to the bare, un-rewritten name. For a receiver field-read that is a bare ref-local capture — `database/sql (*Stmt).QueryContext`'s `s.db.retry(func(){ …; rows.releaseConn = func(err){…}; if s.cg != nil { … } })`, where `s.cg` sits after the inner `releaseConn` closure — the emission was `s.cg` (CS8175, "cannot use ref local `s` inside an anonymous method/lambda"); the equivalent captured-local case silently split a variable between its bare form and its `ʗ1` copy within one closure. The fix makes `enterLambdaConversion`/`exitLambdaConversion` a proper **LIFO save/restore stack** (`conversionStack`): entering pushes the current state and installs fresh state; exiting **restores the enclosing closure's** state instead of resetting. A closure at top level still restores to `false`/empty (unchanged), so the change is inert except where a closure body continues after a nested closure — there the receiver box-read (`Ꮡs.Value.cg`, `Ꮡs.Value.cg.txCtx()`) and the captured-local copy name are now applied consistently across the whole body. (Guarded by the `NestedLambdaReceiverField` behavioral test — a direct-ж receiver method whose closure holds a nested closure followed by a non-call receiver field read, a field-method call, and another field read, all verified to render `Ꮡs.Value.<field>` and output-compared vs Go; cleared `database/sql`'s 2×CS8175 and re-baselined `DeferValueFieldPtrReceiver` whose defer-then-body sequence exercises the same restore.)
+<a id="a-nested-closure-must-not-clobber-the-enclosing-closures-capture-state"></a>Moved to [A nested closure must not clobber the enclosing closure's capture state](functions-and-closures.md#a-nested-closure-must-not-clobber-the-enclosing-closures-capture-state).
 
-### The capture snapshot is a STATEMENT, so every position that can hold a func literal owes it a hoist target
-`var sʗ1 = s;` is a declaration statement, and C# has no statement slot inside an argument list — so a
-capturing literal in expression position must send its snapshot to a **hoist sink** the enclosing
-statement flushes ahead of itself. `convFuncLit` consults two, in order: the explicit
-`LambdaContext.deferredDecls` builder that `go`/`defer`/`return` thread through the expression
-contexts, then the ambient `v.hoistedDecls` that the assignment, expression-statement, `if`, `for`,
-`range` and var-spec forms install. With neither, the decls emit **inline** and the file stops
-parsing — `CS1003 ',' expected` + `CS1026 ')' expected` + `CS1002 ';' expected` + `CS1513 '}' expected`,
-per site, the first of which reads as a defect in whatever token happens to follow.
-
-Two positions had no sink, and between them they were the entire parse wall that kept `net/http`'s
-1,352-verdict suite from ever running (28 diagnostics, 7 clusters, 2 of 35 converted test files):
-
-- **A CONVERSION is transparent to the hoist.** `HandlerFunc(func(rw, req){ … conn … })` handed to
-  `go Serve(ls, …)` (serve_test) is a *type conversion* whose operand is the literal. The conversion
-  fork of `convCallExpr` rendered that operand with **no expression contexts at all**, so the wrapper
-  made the literal invisible to the sink the `go` statement had already provided, and the snapshot
-  landed inside the delegate-creation argument list `new Δhttp.HandlerFunc(var connʗ1 = conn; …)`.
-  The fix adopts the ambient target for the conversion operand exactly as the `&composite` and
-  composite-literal arms of `convExpr` already do — gated on a non-nil sink, so every other
-  conversion keeps rendering with the nil contexts it always had. It matters only where a statement
-  supplies the *explicit* builder and no ambient one, i.e. the `go`, `defer` and `return` forms; the
-  statement forms that install `v.hoistedDecls` were already served by the second lookup.
-- **A channel SEND supplied no sink of either kind.** `handlerc <- HandlerFunc(func(w, r){ … ts … })`
-  (client_test) broke for the same reason with the wrapper, and a **bare** capturing literal sent to a
-  channel broke without one. `visitSendStmt` now installs `v.hoistedDecls` and writes it before the
-  send, the same shape `visitExprStmt` uses — under the same `useNewLine` test, because a `SendStmt`
-  is a `SimpleStmt` and can also be a `for`/`if` init-or-post clause, where there is no statement slot
-  to hoist into and the enclosing statement's own sink must stand.
-
-The general rule the two share: **a conversion, an adapter wrap, or any other expression wrapper must
-not be able to hide a func literal from the enclosing statement's hoist.** (Guarded by the
-`CaptureHoistThroughConversion` behavioral test — ten shapes covering `go`, `defer`, channel send,
-interface-element send, plain call, return and assignment positions, wrapped and bare, all
-output-compared against `go run`; the seven affected shapes reproduce the CS1003/CS1026/CS1002
-cluster with the fix reverted.)
+<a id="the-capture-snapshot-is-a-statement-so-every-position-that-can-hold-a-func-literal-owes-it-a-hoist-target"></a>Moved to [The capture snapshot is a STATEMENT, so every position that can hold a func literal owes it a hoist target](functions-and-closures.md#the-capture-snapshot-is-a-statement-so-every-position-that-can-hold-a-func-literal-owes-it-a-hoist-target).
 
 ## Test-variant name coherence: production names are pinned, test-side method declarators Δ-rename
 
