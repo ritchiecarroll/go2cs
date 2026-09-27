@@ -756,6 +756,24 @@ defer(() => hʗ1.close(), ref ᒐ);
 ```
 Guarded by `DeferTypelessReturns`.
 
+## The parameter-type cast also reaches a go/defer call's lambda form
+
+The parameter-type cast also reaches the **lambda form** of a go/defer call, not just the method-value
+form. When the callee returns a value (or is a value-receiver method), `visitGoStmt`/`visitDeferStmt`
+force the temp-param lambda `goǃ(ᴛ1 => f(ᴛ1), arg)` (see *A value-returning goroutine callee is wrapped
+in a discarding lambda*); there the arg's C# type drives ᴛ1's inference, and the lambda body's `f(ᴛ1)`
+then needs ᴛ1 to be `f`'s parameter type. An untyped numeric const otherwise took `convExprList`'s
+DEFAULT-Go-type cast, so ᴛ1 inferred the default (`nint`) and `f(ᴛ1)` failed — hash/crc32's
+`go MakeTable(Castagnoli)` (Castagnoli an untyped `uint32` poly) emitted `goǃ(ᴛ1 => MakeTable(ᴛ1),
+(nint)Castagnoli)`, CS1503. `convCallExpr` now applies the parameter-type cast in the lambda form too, but
+ONLY when the parameter differs from the const's default type (`untypedNumericConstArgDefaultType` vs the
+param's underlying basic) — when they match, the existing default-cast path already yields the right type,
+so overriding would only churn the golden (`(nint)x`→`(nint)(x)`). Proven zero-drift on the behavioral
+corpus and the full stdlib reconvert (the fix fires only where a wider/other parameter demands it).
+(Guarded by the `GoUntypedConstArg` behavioral test — `go compute(poly)` with a value-returning callee and
+an untyped `uint32`-poly const, output-compared vs Go; without the fix the `goǃ` arg is `(nint)poly` and
+the lambda body is CS1503.)
+
 ## Deferred pointer-receiver nullary calls bind the box method group
 `defer conf.releaseSema()` with `conf *resolverConfig` (net nss.go / dnsclient_unix.go) trimmed to the deref-alias method group `Ꮡconf.Value.releaseSema` — a struct VALUE against the [GoRecv] `ref` extension, which cannot create a delegate (CS1113). The emission binds the BOX method group instead:
 ```csharp

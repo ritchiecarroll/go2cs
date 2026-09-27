@@ -1,4 +1,5 @@
 # Constant Values
+<!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#constant-values)
 Go constants hold arbitrary-precision literals with expression support, and assignment of a constant to a variable happens at compile time. The converter preserves the constant value (and, in a comment, the original expression). A *typed* Go constant is emitted with its concrete C# type, e.g.:
@@ -238,11 +239,15 @@ public static readonly uintptr MaxUintptr = /* ^uintptr(0) */ unchecked((uintptr
 
 The same `unchecked` cast is emitted for a **named** constant declared over a *wide unsigned* underlying whose folded value overflows int32 — `const unknownClass = ^Class(0)` (x/text/unicode/bidi, `type Class uint`) and `const _m = ^Word(0)` (go/constant via math/big, `type Word uintptr`) both fold to the all-ones literal `18446744073709551615` (a C# `ulong`), which has no implicit conversion to the `[GoType]` wrapper struct (CS0266). The native-int-const detection, which previously fired only for a `uintptr` underlying, now also fires for `uint`/`uint64` underlyings, so the const emits `unchecked((Class)18446744073709551615)`. A **small** named const stays uncast (`const c = Class(5)` → `Class(5)`, an ordinary in-range constant conversion) — the cast is added only when the value is out of int32 range, so no other named-const emission churns. (Guarded by the `NamedNumericConstCast` behavioral test — a beyond-int32 `^Named(0)` over `uint` and over `uint64` plus a small in-range control, values verified vs Go; shared root, cleared go/constant and bidi one error each.)
 
-**`uintptr` is a DISTINCT golib struct** (`golib/uintptr.cs`), not an alias of `System.UIntPtr`: Go's `uint` and `uintptr` are distinct types (both may appear in one type switch; `%T` reports them differently; conversion between them is explicit), and the historical alias erased that identity — type switches collided (CS8120), `%T` lied, and overloads could not distinguish them. The struct holds a single public mutable `nuint Value` field (PascalCase — it is public so `Interlocked`/`Volatile` seams can target the inner storage; the intrinsics cannot take a ref to a user struct) and carries the full operator surface so `uintptr`-typed expressions KEEP the type. The conversion matrix is empirically tuned to C#'s user-defined-conversion candidate rules (encompassing counts only STANDARD conversions, so nothing ever chains two user-defined operators; a PARTIAL outbound operator set is unstable — undeclared targets see multiple viable std-hop candidates, CS0457): implicit both ways with `nuint` plus implicit from smaller unsigned/`char`/`UntypedInt`; explicit inbound from signed types and `uint64`; the FULL exact outbound matrix (all integer widths + `float32`/`float64` + unsafe `void*`). Knock-ons handled with it: `const uintptr` is illegal C# (user struct) so every uintptr const emits `static readonly`; a uintptr-typed switch tag/label can never be a constant/relational pattern (CS9135) so those switches use the if-else `==` form; wrappers over uintptr (`[GoType("num:uintptr")]`) gain generated `nuint`/`UntypedInt` bridges; generic-math-constrained golib helpers (`unsafe.Add/Slice/String`) gain non-generic `uintptr` overloads; and the manual managed-referent types declare direct `uintptr` bridges (token out, panic-on-nonzero in).
-
 **Numeric literal formatting is preserved** wherever Go and C# syntax overlap: hex (`0x4000`), binary (`0b1011`), and decimal literals — including `_` digit separators — emit with their original source text (`0x4000` never flattens to `16384`), keeping bit masks and addresses recognizable; required `U`/`UL`/`L` suffixes and casts compose with the preserved text (`0xFFFFFFFFU`). Go-only forms re-render as decimal: `0o…` octal has no C# syntax, and a legacy leading-zero octal (`0755`) would silently re-bind as decimal 755 in C#.
 
+## Constant folds and narrowing casts
+
+### A beyond-MaxInt64 integer literal in a `uint64` context emits `UL`
+
 **A beyond-MaxInt64 integer literal in a `uint64` context emits a plain `UL` literal.** The emitter classifies an INT literal by parsed range, and a value above int64 (representable only unsigned — the `-Inf` bit pattern `0xFFF0000000000000`, `^uint64(0)`) previously *always* emitted `(nuint)0x…UL`. That prefix is the bridge needed when the literal's resolved type is Go `uint`/`uintptr` (C# `nuint` — a bare `ulong` literal has no implicit conversion to it, CS0266, while the non-constant unchecked `(nuint)` conversion compiles), but in a `uint64` context it is spurious: semantically wrong for a 64-bit target type and value-truncating on a 32-bit platform — `math.Float64frombits(0xFFF0000000000000)` emitted `Δmath.Float64frombits((nuint)0xFFF0000000000000UL)` while the int64-range `0x7FF0000000000000` emitted clean (the signed branch already consulted the resolved type). The emitter now checks the literal's resolved *underlying* type: `uint64` — including a named type over `uint64`, whose `[GoType]` wrapper converts implicitly from `ulong` — takes the plain `0xFFF0000000000000UL`; native-width unsigned targets keep the `(nuint)` cast. This also cleans the same pattern from stdlib constant tables on the next regen (crypto/sha512's K, crypto/des masks, nistec field elements). (Guarded by the `MathFloatBits` behavioral test — ±Inf bit patterns as `uint64` arguments plus var-decl, comparison-operand, and binary-mask contexts, values verified vs Go; the `BitwiseUntypedConst`/`NamedIntSignednessConv`/`ShiftPrecedenceUnsigned` goldens re-baselined to the cast-free form, and `LargeUintptrConst` pins the native-width path unchanged.)
+
+### A constant expression whose SUBexpression overflows the target narrows once
 
 **A constant expression whose SUBexpression overflows the target type narrows once at the whole expression.** Go evaluates constant arithmetic in **arbitrary precision** and requires only the FINAL value to be representable in the target type — a subexpression is free to overflow it, so `[]int32{1<<31 - 1}` is legal Go even though the inner shift is 2147483648. C# has no such rule: it would compute the operators in `int` and overflow at compile time (CS0220), which is why an out-of-int32-range constant subexpression FOLDS to a C# `long` literal (`2147483648L`) in the first place. That fold widens the WHOLE element rendering to `long`, and `long` converts implicitly to none of the narrower integer targets — so the emission must narrow back exactly once:
 
@@ -257,12 +262,16 @@ The narrowing applies to every integer target EXCEPT `int64`, whose C# `long` al
 
 Corpus effect: this repaired latent `ulong`-versus-`long` mismatches across crypto/aes, crypto/cipher, database/sql/driver, math/big, net/http, runtime, strconv, sync, and vendored chacha20poly1305, and made math/rand's `Int31n` compute in `uint32` exactly as Go does (it previously computed the same value in `long`). The `1<<31 - 1` / `1<<63 - 1` idiom is pervasive in Go's own `_test.go` files, where the shape is a hard compile blocker. (Guarded by the `ConstSubexprOverflow` behavioral test — int32/int16/uint32/uint64/uintptr/int elements, the int64 no-cast case, in-range controls, and assignment/explicit-conversion/argument positions, values verified vs Go.)
 
+### The narrowing root can be a UNARY node
+
 **The narrowing root can be a UNARY node, and the widening fold can be arbitrarily deep (2026-07-25).** Two shapes escaped the rule above because it only ever looked at a `*ast.BinaryExpr` and only at that node's two *direct* operands.
 
 1. **A negated widened constant roots at a unary node.** go/types types only the ROOT of a constant operator expression and leaves its operands untyped (`updateExprType` stops descending once the node it is retyping is itself constant), so `[]int32{-(1<<31 - 1)}` records `untyped int` on the inner `1<<31 - 1` and `int32` only on the negation. There is no typed *binary* anywhere in the tree to hang the cast on, so nothing narrowed and the element emitted a bare `-(2147483648L - 1)`. strconv's `atoi_test` parseInt32 table — `{"-2147483647", -(1<<31 - 1), nil}` against an `int32` struct field — is exactly this (CS1503). `widenedConstExprCastType` now accepts a unary root too and `convUnaryExpr` applies the cast at its own emission, mirroring `convBinaryExpr`: `(int32)(-(2147483648L - 1))`. `^` takes the same treatment (`(int32)(~(2147483648L - 1))`) and an `int` target narrows to `nint`; the non-constant unary operators (`&x`, `<-ch`, `!b`) are excluded by the existing constant-value and integer-kind guards.
 2. **The fold need not be a DIRECT operand.** The operator form is emitted over the operand *renderings*, so a subtree that does not fold itself still renders `long` when one of *its* operands does: in `[]int32{(1<<31 - 1) - 1}` the root's operands are `(1<<31 - 1)` (value in range, unfolded) and `1`, and only the grandchild shift folds — likewise `[]int32{1<<40>>20 - 1}`. `operandRendersWidenedFold` now descends the whole constant subtree instead of testing one level. Descent cannot over-report: because go/types leaves the operands of a constant operator expression untyped, no interior node ever carries a narrowing cast of its own, so exactly one cast is emitted at the root — the guard test pins `(int32)((2147483648L - 1) - 1)`, not a doubled form.
 
 The unary root is also taught to the explicit-conversion path (`int32(-(1<<31 - 1))`), which returns the operand's own cast rather than doubling it — the same `wholeExprIsCastOfType` check that path already applied to a binary operand. (Guarded by the `ConstSubexprOverflow` extension — negated/`^`/deep-fold elements for `int32`, `int`, and an in-range `int16` control, plus a typed assignment, an explicit conversion, a struct-field table entry and two call arguments, values vs Go; counter-proven against the pre-fix converter, whose emission fails to compile with ten CS0266/CS1503 on exactly those positions.)
+
+### A subexpression past INT64 under a NATIVE-WIDTH unsigned target folds
 
 **A subexpression past INT64 under a NATIVE-WIDTH unsigned target folds with its own `(nuint)` cast (2026-07-20).** The narrowing above needs the whole value to be int64-exact, and the *fold* that produces its widened operand originally ran only under a plain `uint64` target — a native-width target (`uint`/`uintptr`, and any named type over them) was left with its visible error, since `nuint` has no implicit conversion from `ulong` and the fold could not name the target. Go's arbitrary-precision rule makes this shape ordinary in numeric code: math/big's `nat{0, 0, 1 + 1<<(_W-1), _M ^ (1 << (_W - 1))}` (`int_test.go`'s `TestQuoStepD6`, where `Word` is a named type over `uintptr` and `_W` is 64) has an inner `1 << 63` of 9223372036854775808 — past int64 entirely, so no signed `long` fold can carry it — while each element's own value is representable in `Word`. Left alone, C# computed the element in int32: `1 + (1 << (int)(63))` against a `Word` element (CS0029), and `(nuint)_M ^ (1 << (int)(63))` mixing `nuint` with `int` (CS0019).
 
@@ -278,6 +287,121 @@ The fold now covers `uint64` **and** both native-width spellings — Go `uint` r
 The cast is spelled `nuint` for both native-width targets rather than naming the target: it is the primitive C# native unsigned type, and it converts implicitly to golib's `uintptr` struct and to a `[GoType]` wrapper over `uintptr` alike — so one spelling covers `uint`, `uintptr`, and named types over either, with no target-name synthesis. The `uint64` emission is untouched (it already had an implicit conversion from `ulong`), so this is zero-churn on the existing corpus — CNR is byte-identical across all 434 behavioral projects. (Guarded by the same `ConstSubexprOverflow` behavioral test, extended with a named-`uintptr` `Word` type plus plain `uintptr`/`uint`/`uint64` elements of the beyond-int64 shape, values verified vs Go.)
 
 See [Named Numeric Types and Constant Contexts](named-numeric-types.md#named-numeric-types-and-constant-contexts) for how these interact with native-int and named numeric types. See also [example](https://github.com/ritchiecarroll/go2cs/tree/master/src/archived/Examples/Manual%20Tour%20of%20Go%20Conversions/basics/numeric-constants).
+
+### A signed constant expression outside `int32` emits the folded 64-bit literal
+
+The unsigned named-numeric path above gets a width-cast operand, but a **signed** constant operator expression whose target is a plain builtin `int64` has no such cast, so C# would compute it in `int32` and overflow at compile time in checked mode (CS0220): `int64(1<<63 - 1)`, `var d int64 = 1<<40 + 7`, or `12345 * 1000000000 + 54321` passed to an `int64` parameter. Go evaluates each as a constant in its `int64` type. For a signed constant binary/shift expression whose folded value is **outside the C# `int32` range**, the converter emits the **folded 64-bit literal** (`9223372036854775807L`, `1099511627783L`, `12345000054321L`) instead of the operator form — correct, and self-contained. In-range constants are unchanged (they keep the readable `1 << k` form). (Guarded by the `UntypedConstArithmetic` behavioral test; runtime hits this in `mgcmark`/`netpoll`/`runtime1`.)
+
+A signed fold whose resolved type is Go **`int`** (C# `nint`) additionally carries its own cast (2026-07-17): C# has no implicit `long`→`nint` conversion, so the bare `L` fold failed loudly at every **non-assignment** use — strings' SplitN test table puts `math.MaxInt / 4` in an `n int` struct field, and the composite-literal element emitted `2305843009213693951L` against the `nint` field (CS1503; the Phase-4 blocker-map row B7a, one site each in strings and bytes). The fold now emits `(nint)(2305843009213693951L)` — the *parenthesized* cast form the assignment path's `nativeIntConstCastType` already recognizes (`wholeExprIsCastOfType`), so assignments that previously received the whole-RHS wrap render **byte-identically** (the cast simply moves into the fold; `NativeIntWideConstAssign`'s `n = (nint)(144115188075855772L)` is unchanged). The value always fits — `nint` is 64-bit on all supported platforms — and the conversion is a runtime unchecked narrowing, never a C# constant expression, so no checked-context overflow arises. An *untyped*-int subtree keeps the bare `L` form (its enclosing context supplies the conversion), as does an `int64` target (`long` is already exact). (Guarded by the `NativeIntWideConstElement` behavioral test — composite-literal elements, call arguments, and a var initializer, values verified vs Go.)
+
+The **in-range widened** sibling (2026-07-17; sort's test-suite conversion): a typed-`int` constant operator expression whose *value* fits int32 but whose emitted arithmetic an operand fold has widened to `long` — `maxswap: 1<<31 - 1` (sort_test `countOps`): the whole value (2147483647) is in range, so no whole-expression fold applies, but the *untyped* inner shift folds to a bare `2147483648L`, making the rendering `2147483648L - 1` — a C# `long` with no implicit conversion to the `nint` composite field (CS1503; assignments were equally unprotected, since `nativeIntConstCastType` also requires the whole value out of int32 range). `convBinaryExpr` now wraps such an expression in the same parenthesized cast at its own emission: `(nint)(2147483648L - 1)`, position-independent. The trigger is **shape-restricted** (`operandRendersWidenedFold`): an operand must be an *operator subtree* whose `overflowingConstLiteral` fold is non-empty — a named untyped-const *reference* of the same value renders as its `Untyped*` wrapper, which narrows itself at the use site (`maxInt - maxInt` stays unwrapped; wrapping it would churn green emissions). (Guarded by the `NativeIntWideConstElement` extension — the `1<<31 - 1` element, call argument, and assignment, plus the wrapper-operand control, values vs Go.)
+
+**FLOAT literals in INTEGER contexts** render their integer form (2026-07-17; sort's test-suite conversion). A float literal *directly* typed integer by go/types has always folded (`math.Inf(1.0)` → `1` — the convBasicLit integer-form rule), but inside a constant operator expression the literal stays **untyped float** (go/types resolves the context on the outermost node only): search_test's tests table writes `{"descending 7", 1e9, …, 1e9 - 7}` against `n, i int` fields, and the element rendered `1e9D - 7` — a C# `double` against the `nint` field (CS1503). Integer contexts now **propagate** through `markUntypedConstContexts` exactly like float/complex ones, and a float literal whose propagated context is integer emits its exact integer form: `1000000000 - 7` — the arithmetic stays exact C# `int`, implicitly convertible everywhere. Two soundness gates: a non-integral literal (`1.5`) keeps its loud `D` form (`constant.ToInt` exactness), and **division does not propagate** an integer context — Go evaluates an untyped-float constant `/` in exact rational arithmetic, so a nested quotient may be transiently non-integral (`3.0 / 2 * 2` = 3) where folded operands would int-divide (`3/2*2` = 2), a silently wrong value; those trees keep the loud `double` rendering. (Guarded by the `NativeIntWideConstElement` extension — `1e9 - 7` and `5e8 * 2` elements and a `2e9 - 8` call argument, values vs Go.)
+
+**UNSIGNED** constant expressions fold under a much narrower trigger (2026-07-03): every other unsigned shape already has a working mechanism — a *typed* unsigned shift gets the width-cast operand (`(uint64)1 << 40`), an int64-range untyped subtree is folded by the signed arm when recursion reaches it (`(281474976710655L) + arenaBaseOffset` in runtime `mranges`), and a named-const reference renders via its `Untyped*` wrapper (`(uintptr)m5 ^ 4` in runtime `hash64`). The one unfixable shape is an untyped constant **operator** subtree (a BinaryExpr) whose value exceeds **int64 entirely**: `1<<63` nested inside `(1 << 63) - 1` — go/types lands the uint64 conversion on the outermost constant node, so the inner shift stays untyped, no width cast reaches it, and C# computes it in int32. `int64((1 << 63) - 1 - (1<<63)%uint64(n))` (math/rand `Int63n`, CS0220) emits as `(int64)(9223372036854775807UL - (((uint64)1 << (int)(63))) % (uint64)n)`: the constant subtree folds to `UL`, the standalone *typed* shift keeps its readable width-cast form. Gated to plain-`uint64` underlying targets (`constExprHasBeyondInt64UntypedOperatorSubexpr`) — a native-width `uintptr` target would need a further cast the fold cannot safely synthesize, so that pre-existing caveat keeps its visible error. A first broader cut (any untyped subtree beyond int32, any unsigned target) regressed runtime's `hash64`/`mranges` by stealing exactly those already-working shapes — the narrow trigger is load-bearing. (Guarded by the `UntypedConstArithmetic` extension — the Int63n shape, value-compared vs Go.)
+
+**`uintptr` was missing from the width-cast retype the paragraph above relies on** (2026-08-09). Everything there is conditioned on "a *typed* unsigned shift gets the width-cast operand (`(uint64)1 << 40`)", which is emitted by the shift retype in `convBinaryExpr` when `isWideShiftType` says the target does not promote to `int`. That predicate listed `uint32`/`uint64`/`int64`/`nuint` — and `uintptr` is the one wide unsigned type that does NOT render as a C# primitive: Go's `uint` becomes `nuint`, but Go's `uintptr` becomes golib's `uintptr` STRUCT. So it fell to the narrow arm, which casts the **result** — precisely the thing the function's own comment says does not help, because the shift has already happened in `int32`. `1 << (4 * goarch.PtrSize)` emitted `(uintptr)(1 << (int)(32))`, C# masked the count to five bits, and the value was **1**. golib's `uintptr` carries a native `nuint` and declares `operator <<(uintptr, int)` over it, so a cast OPERAND (`((uintptr)1 << (int)(32))`) shifts at 64 bits exactly as `nuint` does; `uintptr` simply joins the list. Whole-corpus A/B: **eight files, one mechanical family**, six of them already-correct sub-int32 values reshaped (`16 << 10`, `512 << 20`, `1 << 16`, `1 << 20`) and **two live wrong answers** — `runtime/internal/math`'s `MulUintptr` overflow fast path, whose guard read 1 instead of 2³² so every `uintptr` below `MaxUint32` "overflowed", and `runtime/mpagealloc_64bit.go`'s `1 << heapAddrBits`, which computed 2¹⁶ where Go computes 2⁴⁸. The neighbouring `1<<(UintptrSize/2) - 1` was always right, which is what hid this: there the shift is an INNER node still typed `untyped int`, so the signed fold above takes it whole. CNR is byte-identical across all 576 behavioral packages — no behavioral project had the shape until now. (Guarded by the extended `LargeUintptrConst` behavioral test, already the `MaxUintptr` pattern's home: a context-typed `1 << (4 * ptrSize)`, a literal-count `1 << 40`, and the composite-literal table row beside its always-correct `- 1` sibling, values vs `go run`; and by `runtime/internal/math`'s banked suite.)
+
+**FLOAT** contexts need the same fold, and there the damage is **silent** rather than a compile error (2026-07-17). C# masks a shift count to the left operand's width (5 bits for `int`), so an integer-literal constant in a float context — where no arm above applies, because the constant's type is not an integer — evaluates in int32 and *quietly* yields the wrong number: `var hf float64 = 1 << 63` emitted `(1 << (int)(63))`, i.e. 63 & 31 = 31 → `int.MinValue`, and `hf / (1 << 60)` divided by 2^28 (60 & 31 = 28) instead of 2^60, printing 34359738368 where Go prints 8. Go evaluates the constant in exact arithmetic and converts the *result* to the float type, so the converter emits the Go-evaluated value as a float literal — `float64 hf = 9223372036854775808D`, `hf / (1152921504606846976D)`, `float32 sf = 1099511627776F` — which also carries the values `1<<63` puts beyond `int64`, where no `L`/`UL` fold could reach. Two gates keep the readable operator form everywhere it is already correct: the operands must be **all integer literals** (that is what makes C# evaluate in int32 — a float-literal operand like `1e18 * 10.0` already computes in `double`, and a named-const operand renders via its `Untyped*` wrapper), and the value must be **outside int32** (`1 << 10` computes identically in C# and is left alone). Unlike the int64 case, an inner shift is *not* rescued by recursion: Go promotes the operands of `1<<40 * 1.5` to a common kind, so the shift is recorded `untyped float` — invisible to the signed arm's integer test — and folds from its propagated context instead (see `markUntypedConstContexts` under [Constant Values](#constant-values)); left bare it masks to 256 and silently yields 0.375. The full-stdlib A/B footprint was exactly six lines, every one a live wrong-value bug: `math`'s `normalize` (`x * (1<<52)` off by 2^32), `cbrt` (2^54), `ldexp`'s denormal factor (`1.0/(1<<53)`), `pow`'s `1<<53`/`1<<63` branch guards, and **both** `math/rand` `Float64`s — v1 divided by `int.MinValue` and so returned *negative* numbers, v2 divided by 2^21 instead of 2^53. (`floatContextConstLiteral`, `convBinaryExpr.go`; guarded by the `UntypedConstArithmetic` extension — the `1<<63`/`1<<60` float64 and `1<<40` float32 folds, the `untyped float` nested shift, plus in-range and float-literal controls that must keep their operator form, values vs Go.)
+
+**The same fold covers a complex128 context (2026-07-18).** `complex128` is float64-backed (`System.Numerics.Complex`), so an all-integer-literal shift whose *result* type is `complex128` — a slice/array element like `[]complex128{1 << 35, 1 << 240}` (`math/cmplx`'s `hugeIn` test inputs) — carries the identical int32-masking hazard: `1 << 35` emitted `(1 << (int)(35))`, which C# masks to 35 & 31 = 3 → **8** instead of 2^35, silently corrupting the complex value's real part (its imaginary part is 0, so it is not int-literal arithmetic). `floatContextConstLiteral` takes the constant's **real part** and folds it to a `D`-suffixed literal — `34359738368D`, and the 73-digit exact form of `1<<240` — which C# parses to the same float64 the Go constant rounds to (a power of two lands exactly; a mixed value like `1234567891234567 << 40` round-trips to the nearest double, matching Go). `complex64` is deliberately excluded: its float32 real part would overflow to a C# compile error for the beyond-float32 magnitudes this fold targets, and such constants do not arise. This cleared `math/cmplx`'s `TestTanHuge`, whose huge `Tan` inputs were being reduced to tiny masked values (8, 65536, 4096) — `Tan` then computed correctly on the *wrong* arguments. (Guarded by the `ComplexConstContext` behavioral test — `1<<35`/`1<<240`/`-1<<120`/`1234567891234567<<40` complex128 real parts, values vs Go.)
+
+### A computed constant assigned to a native-width integer that overflows int32
+
+A related **wide** case: a computed *constant* arithmetic expression assigned to a **native-width integer** (`uintptr`/`uint`/`int` → C# `nuint`/`nint`) whose folded value overflows int32. `pattern = 1<<maxBits - 1` (runtime `mbitmap`, `maxBits` = 57) is a `uintptr` constant, but the converter folds the untyped sub-shift `1<<maxBits` to a **signed** C# `long` literal (`144115188075855872L`, since it exceeds int32 and the untyped operand is treated as signed), so the whole RHS is `long` — which has no implicit conversion to the native target (CS0266). A `UL`/`(nuint)` suffix would not help (`ulong`→`nuint` is also an explicit conversion). The converter wraps the whole RHS in the native target's cast: `pattern = (uintptr)(144115188075855872L - 1)`. This fires **only** when the constant fits int64 but is out of int32 range — exactly the signed-`long` fold range. A value that overflows *int64* (a large unsigned `uintptr` like `1<<63 + 1<<62`) is deliberately left alone: its sub-shift already mis-emits (a `1<<63` int-shift), so casting it would convert a visible compile error into a silent wrong value — that is a separate defect to fix on its own, not to mask. (Guarded by the `NativeIntWideConstAssign` behavioral test — `uintptr`/`uint`/`int` targets with int64-range constants, values verified vs Go; cleared the `mbitmap` CS0266, the last one in `runtime`.)
+
+### The signed integer minima sign-fold at the unary level
+
+**The signed integer minima sign-fold at the unary level.** Go folds `-literal` into one constant, but the emitter classifies the POSITIVE operand literal alone, and both signed minima's magnitudes overflow their own type: `[]int32{-2147483648}` (internal/fuzz mutator's `interesting32`) saw 2147483648 > MaxInt32 and emitted `-(nint)2147483648L`, which has no implicit conversion back to an int32 slot (CS0266); the int64 minimum's operand 9223372036854775808 does not even parse as int64, routing through the unsigned branch to `-(nuint)9223372036854775808UL` — and C# defines no unary minus on `nuint` at all (CS0023). `convUnaryExpr`'s `token.SUB` handling now mirrors its FLOAT arm: for an INT literal operand it classifies the range on the **unary expression's resolved (sign-folded) constant**. The exact int32 minimum in an int32-typed context emits the plain negated literal `-2147483648` — C# special-cases the negated decimal int-min as an `int` constant, **by value**, so `_` digit separators survive (`-2_147_483_648` compiles, proven by the guard) — and the exact int64 minimum emits `-9223372036854775808L` (the matching `long` special case), wrapped as `((nint)(-9223372036854775808L))` in a Go-`int` context where `long` has no implicit conversion. Decimal source formatting is preserved per the literal-formatting rule; hex/binary re-render as decimal (C# has no signed special case for those forms — `-0x80000000` binds as a `long`-typed expression). Everything else keeps the default path: in-int32 operands never had a problem, and a folded int32-min in a WIDER context (`var x int64 = -2147483648`, or boxed to `any` where Go-`int` must stay `nint`) keeps the implicitly-convertible `-(nint)…L` form — the full-stdlib A/B footprint was exactly the one mutator.cs line. (Guarded by the `IntMinLiterals` behavioral test — int32-min plain and underscored in `[]int32`, int64-min in `[]int64`, the nint-min `:=` form, between-minima and non-minimal negative controls, and min-value comparisons, values vs Go; the pre-fix converter fails it CS0266 ×2 + CS0023 ×2.)
+
+### A beyond-int32 integer constant takes the width of its RESOLVED type
+
+**A beyond-int32 integer constant takes the width of the type it RESOLVED to, not the untyped default (2026-08-08).** A Go integer constant outside the C# `int32` range cannot be written bare in a native-width slot — `long` has no implicit conversion to `nint` — so the converter wrapped every one of them in `(nint)…L`. That is right only when the constant really is a Go `int`. When it resolved to `int64` the cast is the wrong type: `int64` **is** C# `long`, so the digits alone denote it exactly, and the `(nint)` both truncates on a 32-bit target and reads nothing like the Go source. The compiler says so — `CS8778`, "constant value may overflow `nint` at runtime" — and 607 of the corpus's 620 such warnings were one table, `math/rand`'s `rngCooked [607]int64`:
+
+```csharp
+// before — every element carries the untyped-int DEFAULT type
+internal static array<int64> rngCooked = new int64[]{
+    -(nint)4181792142133755926L, -(nint)4576982950128230565L, (nint)1395769623340756751L, …
+
+// after — the element type the Go source declares, and the Go source's own digits
+internal static array<int64> rngCooked = new int64[]{
+    -4181792142133755926L, -4576982950128230565L, 1395769623340756751L, …
+```
+
+The cause is a deliberate go/types behavior that stays invisible until you look for it: `updateExprType0` short-circuits with *"if x is a constant, the operands were constants"* and does **not** descend into the operands of a constant expression, because in Go they never materialize at runtime. So in `[...]int64{-4181792142133755926, 1395769623340756751}` the NEGATED element records `untyped int` while its positive sibling records `int64` — purely because one is wrapped in a unary minus. Every element of `rngCooked` is negative, which is why that whole table lost its element type while positive-only tables elsewhere kept theirs. `convBasicLit` therefore resolves the literal's integer type from **two** routes, exactly as it already does for the float `F`/`D` suffix: the type go/types recorded directly, and failing that the contextual type `markUntypedConstContexts` propagated (which already pushes an integer context through unary `+`/`-`/`^` and arithmetic operands). An `int64` resolution emits the bare `…L`; everything else keeps `nint` — it must, because an `any` slot has to box a Go `int` as `nint` so a later `x.(int)` succeeds — but as `unchecked((nint)…L)`, which is what makes a beyond-int32 **constant** conversion legal without the warning (`nint` is 64-bit on every platform go2cs targets, so the value is exact). The same `unchecked` covers the other two emitters of a native-width constant: `convBinaryExpr`'s constant FOLD (`unchecked((nint)(4611686018427387903L))` — `bufio`'s `maxInt/2`) and `csNintLiteral`'s array LENGTH (`unchecked((nint)140737488355327)` — runtime's `(*[maxAlloc/2 - 1]byte)` casts). The fold keeps its parenthesized `(T)(…)` body: `wholeExprIsCastOfType`, the redundancy guard 17 call sites share, now peels an `unchecked(` wrapper first, so enclosing paths still recognize the cast and do not re-wrap it into `(nint)(unchecked((nint)(…)))`. (Guarded by `nativeIntConstWidth_test.go` — the negated `int64` element and its positive sibling, the `int` var and the `any` slot both taking `unchecked`, the fold NOT double-wrapped, an in-range constant untouched, plus a unit test pinning the recognizer's peel. Corpus effect: `CS8778` 620 → **0**.)
+
+### A NARROW-UNSIGNED target folds a constant only when nothing else can make it compile
+
+`uint32(1<<32 - 1)`, `*_C_pw_uidp(&sp) = 1<<32 - 2`. Go evaluates an untyped constant expression
+at arbitrary precision and requires only the RESULT to fit the target; C# evaluates the operands
+themselves, and an operand past `uint32` forces the literal path to emit a bare `long` — which has
+no implicit conversion to `uint`/`ushort`/`byte`, so the assignment fails **CS0266** even though
+the value fits exactly. The fix folds the whole expression and casts the result:
+
+```csharp
+//  Go:   *_C_pw_uidp(&sp) = 1<<32 - 2          (_C_uid_t = uint32)
+_C_pw_uidp(Ꮡsp).Value = unchecked((uint32)(4294967294UL));
+```
+
+**The FIVE conditions, and why each exists.** This arm is deliberately the narrowest in the fold
+family, because every widening of it damaged readable emission somewhere else in the corpus. It
+applies only when ALL of:
+
+1. **the target is unsigned and narrower than `uint64`** — the wider arms already handle their own;
+2. **the target is a plain basic type or an ALIAS to one**, never a NAMED type — `basic` at that
+   point is the UNDERLYING type, so `io/fs.FileMode` (a named `uint32`) arrives looking plain, and
+   folding it erased the type on every mode expression in the corpus
+   (`(fs.FileMode)(ModeDevice | ModeCharDevice)` → a bare `unchecked((uint32)(69206016UL))`). A
+   named target keeps the arm below, which carries its type in the fold; an alias has no distinct
+   C# type to lose;
+3. **no NAMED CONSTANT is referenced** — those render through their `Untyped*` wrappers, which is
+   how every wider arm preserves them, and folding replaced `math/bits`' `x>>1 & (m0 & m)` with
+   `unchecked((uint32)(1431655765UL))`: arithmetic no reader can trace back to `m0`;
+4. **an UNTYPED subexpression exceeds `uint32`** — a typed conversion carries its own width and
+   emits correctly unaided, so `runtime`'s `^uint32(0)/8 + 1` never needed the fold, and counting
+   it flattened the entire `class_to_divmagic` table into 68 casts;
+5. **the threshold is `uint32`, not the target's own width** — `(1<<16) - 1` exceeds a `uint16` but
+   the emission already carries an explicit `(ushort)` cast and compiles (measured), so
+   `regexp/syntax`'s `Range16` keeps its source form; only a bare `long` has nothing to rescue it.
+
+**How the conditions were found — the method, not just the result.** Each was exposed by a
+three-target corpus regeneration, never by the two packages the fix was aimed at: the local darwin
+build was green at every step. The site count fell **754 → 46 → 12 → 10 → 2** across six
+regenerations, and the two survivors are exactly the expressions that cannot compile otherwise.
+The lesson generalizes past this arm: *a converter change is measured against the corpus, not
+against the file that motivated it* — a fold that looks obviously correct at its motivating site
+can rewrite hundreds of unrelated ones, and only a full regeneration shows it.
+
+Guarded by the `ConstSubexprOverflow` behavioral test, which already covered the construct
+(`u32 := []uint32{1<<32 - 1}`); its golden re-baselined to the folded form with the Output phase
+passing unchanged — the value never moved, only the spelling.
+
+### A folded constant of a NAMED type carries its type in the fold
+
+`overflowingConstLiteral` materializes a compile-time integer constant whose value falls outside the C#
+`int32` range, because C# would otherwise evaluate the operator expression in `int32` and overflow
+(CS0220). It read the constant's type through `Underlying()`, so a constant of a *defined* type folded
+to a bare basic literal and the Go type was simply lost:
+
+```go
+d := 8 * time.Hour
+secondsEastOfUTC := int((8 * time.Hour).Seconds())
+```
+
+```csharp
+var d = 28800000000000L;                            // a C# long, not a Duration
+nint secondsEastOfUTC = (nint)(28800000000000L).Seconds();   // CS1929 — long has no Seconds
+```
+
+The compile error is the loud half; the silent half is `d`, which is now a `long` and prints as its
+digit count where a `Duration` prints `8h0m0s`. The fold now carries the named type in the same
+parenthesized `(T)(…)` shape the native-int arm uses — `(time.Duration)(28800000000000L)` — which
+`wholeExprIsCastOfType` already recognizes, so enclosing paths do not re-wrap it. The `[GoType]` wrapper
+converts implicitly from its underlying, so the cast is always legal, and Go's own parentheses around a
+method-call receiver keep the postfix `.M()` binding to the cast rather than to the literal. Only
+constants outside `int32` reach this arm at all, so the corpus footprint is the handful of computed
+`time.Duration`-class constants above that magnitude. (Guarded by the `PackageNameShadowing` behavioral
+test, case 4.)
 
 ## A COMPLEX constant expression must be FOLDED — .NET's mixed operators are not Go's arithmetic
 
@@ -389,6 +513,126 @@ its float32-range question, a named-untyped-const pair in both a complex128 and 
 complex64 context, and the mixed call that must stay unchanged; neuter-proven — with the arm removed
 the guard's `over` prints `(+Inf+Infi)` and `over-fits-float32 true` where Go says `false`).
 
+## A constant too large for `int64`/`uint64` is emitted as `GoBigConst`
+
+A constant too large for `int64`/`uint64` (or `float64`) is emitted as `GoBigConst` (=
+`System.Numerics.BigInteger`), which has **no** implicit operator with the built-in numeric types.
+Unlike an `UntypedInt`/`UntypedFloat` wrapper, that makes a bare reference a hard error in *every*
+concrete numeric context, not merely a resolution hazard in arithmetic — so the cast belongs to the
+**reference itself** (`bigIntegerConstMaterialization`), applied wherever go/types records a
+concrete numeric type on it:
+
+```go
+const below1e23 = 99999999999999974834176
+var ftoatests = []ftoaTest{{below1e23, 'e', 17, "9.99999999999999748e+22"}}
+_ = x > Two129                     // Two129 = 1<<129
+```
+```csharp
+internal static readonly GoBigConst below1e23 = /* 99999999999999974834176 */
+    GoBigConst.Parse("99999999999999974834176");
+internal static slice<ftoaTest> ftoatests = new ftoaTest[]{
+    new((float64)below1e23, (rune)'e', 17, "9.99999999999999748e+22"u8)}.slice();
+_ = x > (float64)Two129;
+```
+
+Comparison was originally the only casting consumer (in `convBinaryExpr`), which left composite-literal
+elements, call arguments, typed `var` initializers, assignments, returns, and channel sends emitting
+bare — twelve `BigInteger`→`double` CS1503s in `strconv`'s `ftoa_test.cs` alone. Moving the cast to the
+reference serves all of them at once, and the comparison arm was dropped so it no longer double-casts
+(`(float64)(float64)Two129`). Two properties make the context type reliable: go/types records the
+**converted** type on the reference (inside `[]float64{…}` the recorded type is `float64`, not
+untyped), and Go only admits a constant where its value is representable — so a BigInteger-backed
+value's concrete context is necessarily float/complex, never a 64-bit integer that would overflow.
+The reference is kept readable rather than folded to a literal, the same call
+`foldedNamedFloatConstLiteral` makes for a bare reference. (Guarded by `BigUntypedConstComparison`,
+extended from comparison-only to every position, with an in-range `UntypedInt` const as the
+must-stay-uncast counter-control.)
+
+### An INTEGER expression over a `GoBigConst` constant folds — it has no 64-bit form
+The `(float64)Two129` cast above works because BigInteger converts to `double`. An **integer** target has
+no such luck: `(uint64)mask` on a 128-bit BigInteger throws `System.OverflowException` at run time. That is
+not a corner case — it is the shape of the Go standard library's whole-width byte-classification bitmap
+idiom (`go/doc/comment`'s `isHost`/`isPath`/`isIdentASCII`/`importPathOK`, `net/textproto`'s
+`validHeaderFieldByte`/`validHeaderValueByte`), where a 128-bit untyped `mask` is legal precisely because
+Go requires only the FINAL value of a constant expression to be representable:
+
+```go
+const mask = 0 | (1<<26-1)<<'A' | (1<<26-1)<<'a' | (1<<10-1)<<'0' | 1<<'_' | /* … */ 1<<':'
+
+return ((uint64(1)<<c)&(mask&(1<<64-1)) |
+	(uint64(1)<<(c-64))&(mask>>64)) != 0
+```
+
+Both halves are `uint64`-valued constants, so both must emit as the go/types-recorded **folded value**.
+`mask&(1<<64-1)` already did — its `1<<64-1` operand subtree exceeds int64, which
+`constExprHasBeyondInt64UntypedOperatorSubexpr` recognizes. The sibling `mask>>64` has no such subtree: its
+only unrepresentable operand is the *reference*, which the shift path retyped to the shift's resolved width
+(`((uint64)mask).Rsh(64)`) and threw. `overflowingConstLiteral` therefore also folds on
+`constExprHasBeyondUint64UntypedConstRef` — any PROPER subexpression that is a named untyped-const
+reference fitting neither int64 nor uint64 (the `GoBigConst` emission, `isBigIntegerBackedConstRef`):
+
+```csharp
+GoBigConst mask = /* 0 | (1<<26-1)<<'A' | … */ GoBigConst.Parse("10633823862292363665388054147449749504");
+return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (576284830442979328UL)) |
+        (uint64)((((uint64)1).Lsh((uint64)((c - 64)))) & (576460746666278911UL)))) != 0;
+```
+
+Unlike the sibling overflow folds this one is **magnitude-independent**: the operator form does not merely
+compute in the wrong width, it *throws*, so a folded value that fits int32 (`mask>>64` of `1<<70 | 1<<3` is
+64) folds too. Scope: the unsigned arm covers `uint64`/`nuint`/`uintptr`; the signed arm is confined to the
+64-bit-wide targets its `…L` / `(nint)(…L)` contract already covers (a narrower signed target keeps the
+operator form, where the wrapper cast fails LOUDLY rather than silently computing the wrong value — no such
+site exists in the stdlib corpus). The `mask` local itself stays emitted, unused, carrying the gofmt'd Go
+constant as its comment: it is what makes the folded magic numbers readable back to the Go source (its
+`BigInteger.Parse` hoists to a static field — see the next subsection).
+
+Corpus footprint of the fold: exactly two files across the 302-package stdlib conversion
+(`go/doc/comment/parse.cs`, `net/textproto/reader.cs`), both still compiling clean.
+(Guarded by the `UntypedConstWideMask` behavioral test — the `isHost` mask, the `&^`-inverted
+`validHeaderValueByte` mask, a small-valued high half, and a `uintptr`-target native-width mask, all
+output-compared vs Go. Without the fold the `uintptr` arm is a hard CS0030 and the `uint64` arms throw.)
+
+## A function-LOCAL `GoBigConst` hoists its parse to a `static readonly` field
+
+A Go constant has no runtime existence — its value lives in the instruction stream — and `GoBigConst`
+is the one C# constant projection with a real **per-evaluation** cost: `BigInteger.Parse` allocates its
+bits array on every run. Emitted as a plain local, that parse re-ran on **every call** of the enclosing
+function; `net/textproto`'s `validHeaderFieldByte` paid it 14 times per `canonicalMIMEHeaderKey` call
+(560 B against Go's 0) inside `TestCommonHeaders`' want-ZERO `testing.AllocsPerRun` assert — and the
+local was not even referenced, every use having been folded by the subsection above. An **int-kind**
+function-local big constant therefore hoists its parse to one `private static readonly` field above the
+function (the hoisted-string-literal pattern), and the local initializes from the field — a BigInteger
+struct copy, which allocates nothing:
+
+```go
+func validHeaderFieldByte(c byte) bool {
+	const mask = 0 | (1<<(10)-1)<<'0' | /* … */ 1<<'~'
+	…
+}
+```
+```csharp
+// Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
+private static readonly GoBigConst maskᶜ = GoBigConst.Parse("116972063611741436228934278030836105216");
+
+internal static bool validHeaderFieldByte(byte c) {
+    GoBigConst mask = /* 0 | (1<<(10)-1)<<'0' | … */
+            maskᶜ;
+    return …;
+}
+```
+
+Field names are claimed package-wide (`<name>` + `HoistedConstMarker` `ᶜ` + ordinal on collision —
+`reader.cs` declares `maskᶜ` and `maskᶜ1` for its two functions' masks), deterministic because files
+convert sequentially; a `-tests` internal variant seeds from the production conversion's claims exactly
+as lifted type names do (`productionHoistedConstOrdinals`). **Float/complex OVERFLOW constants keep the
+per-call parse**: their exact string may be a rational (`"1/3"`) whose `Parse` throws, and a field
+initializer would turn that per-call throw into a package-class `TypeInitializationException`.
+Package-level big consts were already `static readonly` fields and are unchanged. (Guarded by
+`UntypedConstWideMask` — four functions with local big-const masks, exercising the ordinal chain — and
+by `net/textproto`'s validated `TestCommonHeaders`, whose want-zero assert is what surfaced the cost;
+L11.)
+
 ---
 
 [← Compiled Library versus Source Code](compiled-library-vs-source.md) · [Index](README.md) · [Native and Narrow Integer Types →](native-and-narrow-integers.md)
+<!-- {% endraw %} -->

@@ -2471,7 +2471,7 @@ internal static uintptr clampU(uintptr n) {
 **Values print as Go prints them.** A constant expression of a named type keeps that type after it is
 computed. So `8 * time.Hour` stays a `Duration`, and `fmt.Println` prints it through `Duration`'s own `String`
 method as `8h0m0s`, not as a count of nanoseconds
-([detail](ConversionStrategies-Reference/floating-point-formatting.md#a-folded-constant-of-a-named-type-carries-its-type-in-the-fold)).
+([detail](ConversionStrategies-Reference/constants.md#a-folded-constant-of-a-named-type-carries-its-type-in-the-fold)).
 In this program the C# alias for the `time` package is `Δtime`. The `Δ` marks a rename: the program's blank
 import of `time/tzdata` also brings a C# namespace named `time` into scope. `"4:"u8` is a Go string literal
 ([Strings](#strings-string-and-sstring)).

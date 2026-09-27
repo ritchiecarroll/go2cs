@@ -563,6 +563,44 @@ in front of that package's 97 verdicts); `database/sql`'s `stubDriverStmt{nil}` 
 - **Defined-over-named-struct composites wrap the underlying** (`decoder{order: o}` →
   `new decoder(new coder(order: o))`, CS1739). Guarded by `NamedPointerReinterpret` (`view{}`).
 
+## Defined types over a struct — forwarded fields
+
+**Defined types over a struct — forwarded fields.** A Go type definition over a *struct* — `type winlibcall libcall` — makes the underlying struct's fields accessible on the named type (`w.fn`), without promoting its methods. The named type is emitted as `[GoType("libcall")] partial struct winlibcall;` and the `TypeGenerator` wraps the underlying value (`private libcall m_value;`). For the underlying's fields to be reachable, the generator **forwards each as a ref-returning property** over `m_value`:
+```csharp
+private libcall m_value;                 // NOT readonly — see below
+[UnscopedRef] public ref nuint fn => ref m_value.fn;
+[UnscopedRef] public ref nuint n  => ref m_value.n;
+// … args, r1, r2, err
+```
+The underlying struct is resolved with `GetStructDeclaration` (same package, or a *source*-referenced package), and its members come from `GetStructMembers`. Crucially `m_value` is **mutable** (not the wrapper's usual `readonly`), so a write through a pointer — `c.Value.fn = fn`, where `c` is a `ж<winlibcall>` and `c.Value` is `ref winlibcall` — reaches the real storage and persists. (The `readonly`→mutable choice is decoupled from the nullable-`m_value` form that only the lazily-allocated `array` backing needs.) Forwarding is skipped for a non-struct underlying (a named type over an interface or another named type) and for an underlying that contributes no fields, so those wrappers are unchanged. *Composite-literal construction* of such a type (`winlibcall{fn: x}`) is a separate, not-yet-handled case (the runtime accesses these only by field). (Guarded by the `NamedTypeOverStruct` behavioral test — write-through and read-back of forwarded fields through a pointer; runtime hits this on `winlibcall` over `libcall`, `syscall_windows.go`.)
+
+**The forwarded member must be a VARIABLE, and the underlying may be METADATA-ONLY (2026-07-31).** Two independent defects in the paragraph above, both surfaced by `index/suffixarray`'s `suffixarray_test.go` — `type index Index`, where `Index` has an `ints`-typed field `sa` with `len`/`get` methods — and both fixed generally:
+
+1. **A get/set property is not a variable.** In Go the selection *is* the underlying field, so `x.sa.len()` binds a receiver the converter emits `this ref` (every value-receiver method is a ref extension) and `&x.sa` / `x.sa.Push(…)` take its address. A get/set property yields a *value*, so all of those were **CS0206** ("a non ref-returning property or indexer may not be used as an out or ref value"). The forward is now a **ref-returning property**, which is a strict superset — `w.fn = v` still assigns (through the ref), and the variable-requiring uses now bind. `[UnscopedRef]` is what makes it legal at all: a struct member returning a ref to instance state is **CS8170** by default (the receiver could be a temporary), and the attribute states the ref's lifetime is the *receiver's* — exactly Go's guarantee, since the selection aliases the wrapper's own storage. C#'s ref-safety rules then reject at the call site precisely the cases Go also rejects (addressing a non-variable). Note the neighbouring array-view case below keeps its ensure-then-share-copy shape: its accessor must *materialize* a lazily-allocated backing first, which is a different problem than aliasing an existing field.
+
+2. **A metadata-only underlying resolved to nothing.** `GetStructDeclaration` can only see a struct whose SOURCE is in this compilation or in a `CompilationReference`; a real MSBuild build hands a `<ProjectReference>` to the compiler as compiled *metadata*, so a defined type over a struct in **another package** forwarded no members at all and every selection on it was **CS1061**. `FindUnderlyingStructSymbol` now resolves the `[GoType("…")]` definition to its `INamedTypeSymbol` when the syntax walk misses — trying the name as written (`global::go.index.suffixarray_package.Index`, the fully-rooted form the `-tests` white-box bridge emits) and then `go.`-rooted (`time_package.Duration`, the package-alias-qualified form ordinary cross-package emission uses, is not a CLR name) — and `GetForeignStructMembers` enumerates it. Membership mirrors `StructTypeTemplate`'s metadata field scan: instance FIELDS plus the ref-returning, non-indexer PROPERTIES a referenced assembly's generated wrapper exposes for its embedded and promoted members. Visibility is decided by `Compilation.IsSymbolAccessibleWithin` rather than a public-only test, which is **Go's own rule projected into C#**: an exported field is `public` and always forwards, while an unexported one is `internal` and forwards only where C# can reach it — i.e. the friend (`InternalsVisibleTo`) test assembly, which is precisely the same-Go-package case where Go permits the selection. Ordinary cross-package wrappers over foreign structs whose fields are unexported (`type timeTime time.Time`) therefore forward nothing, exactly as Go allows nothing.
+
+Both fixes were needed for one package: with only (2), the CS1061 wall collapsed to the board's originally-reported **CS0206** at two sites — a worked example of charter §9's root-cause layering (the first diagnostic moved rather than cleared). (Guarded by the `DefinedTypeOverForeignStruct` behavioral test — a `ptlike` sub-library supplies `Outer{Name string; In Inner}`, the parent declares `type alias ptlike.Outer` and reads a forwarded field, writes one, calls `Inner`'s value- and pointer-receiver methods *through* the forwarded field with the mutations observed afterwards, writes a nested element, converts back to the underlying, and reads the zero value — output-compared vs `go run`. It is the cross-assembly sibling of `NamedTypeOverStruct`, which covers the same-package case, and of `DefinedTypeOverPkgType`, which covers a cross-package defined type reached only by conversion, never by field.)
+
+## The wrapper also forwards the underlying's field-box accessors
+
+The wrapper also forwards the underlying's **field-box accessors**. Taking the address of a wrapper's field — `&p.x` on a `*pinnerBits`, where `type pinnerBits gcBits` (runtime `pinner.go`) — emits the box-accessor form `Δp.of(pinnerBits.Ꮡx)`, whose owning type is the **wrapper**; without a forwarded accessor the static exists only on `gcBits` (CS0117). For every forwarded *field* (properties cannot be `ref`'d and get none, matching the plain-struct template) the generator emits the accessor as a **true ref through `m_value`** into the underlying struct's field: `public static ref uint8 Ꮡx(ref pinnerBits instance) => ref instance.m_value.x;` — a genuine ref chain into the wrapper's own storage, so a write through the resulting box persists (a copy here would silently drop writes — the trap that sank an earlier `pallocBits` forwarding attempt). Emitted only when members are forwarded, which is exactly when `m_value` is mutable. (Guarded by the `NamedTypeOverStruct` extension — `bump(&c.a)` writes through the wrapper's field address and the original observes it; cleared runtime `pinner.go`'s 3 CS0117, 89 → 86.)
+
+## Logical operators on a named boolean type cast through `bool`
+A Go defined type whose underlying type is `bool` (`type boolVal bool`) is modeled as a `[GoType("bool")]` struct with an implicit `bool` conversion but no logical operators. Go's `!`, `&&`, and `||` on such a value yield that **same named type**, so `return !y` / `return x && y` in a function returning an interface the type implements (go/constant's `UnaryOp`/`BinaryOp`, returning the `Value` interface) still satisfies the interface. A bare `!y` / `x && y` in C# collapses to a plain `bool` — which cannot implicitly convert to the interface (CS0029), and `!` has no operator on the struct (CS0023). The converter casts each operand through `bool`, applies the operator, then casts the result back to the named type so it keeps satisfying the interface:
+
+```go
+case boolVal:
+    return !y          // y is boolVal, result must be the Value interface
+```
+```csharp
+case boolVal y: {
+    return ((boolVal)(!(bool)y));
+}
+```
+
+Binary `&&`/`||` take the parallel form `((boolVal)((bool)x && (bool)y))`. A predeclared-`bool` operand keeps the bare `!x` / `x && y` form (no golden churn). (Guarded by the `NamedBooleanLogic` behavioral test.)
+
 ## Generic struct equality is decided per FIELD, not per type parameter
 A generic `[GoType]` struct's synthesized `Equals` (see [Struct Types](#struct-types)) was gated on
 the struct's TYPE PARAMETERS: unless every parameter carried an `IEqualityOperators`-implementing

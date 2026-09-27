@@ -6,51 +6,7 @@ In Go, `nil` is the equivalent of C# `null`. Where possible, converted code uses
 
 The same null-safe-zero-value principle applies to value types whose backing store is a reference. A zero-value `string` converts to `@string s = default!`, which runs no constructor, so the backing `byte[]` is null. Rather than [NRE](../Glossary.md#nre) on the first read, `@string` treats a null backing as Go's empty string `""` for every read — length 0, no bytes to index/range, `== ""` is true, prints empty, and concatenation yields the other operand (`var s string; s += "x"` → `"x"`). Constructors still allocate, so only the `default(@string)` zero value relies on this. (Guarded by the `StringZeroValueConcat` behavioral test.)
 
-## A NARROW-UNSIGNED target folds a constant only when nothing else can make it compile
-
-`uint32(1<<32 - 1)`, `*_C_pw_uidp(&sp) = 1<<32 - 2`. Go evaluates an untyped constant expression
-at arbitrary precision and requires only the RESULT to fit the target; C# evaluates the operands
-themselves, and an operand past `uint32` forces the literal path to emit a bare `long` — which has
-no implicit conversion to `uint`/`ushort`/`byte`, so the assignment fails **CS0266** even though
-the value fits exactly. The fix folds the whole expression and casts the result:
-
-```csharp
-//  Go:   *_C_pw_uidp(&sp) = 1<<32 - 2          (_C_uid_t = uint32)
-_C_pw_uidp(Ꮡsp).Value = unchecked((uint32)(4294967294UL));
-```
-
-**The FIVE conditions, and why each exists.** This arm is deliberately the narrowest in the fold
-family, because every widening of it damaged readable emission somewhere else in the corpus. It
-applies only when ALL of:
-
-1. **the target is unsigned and narrower than `uint64`** — the wider arms already handle their own;
-2. **the target is a plain basic type or an ALIAS to one**, never a NAMED type — `basic` at that
-   point is the UNDERLYING type, so `io/fs.FileMode` (a named `uint32`) arrives looking plain, and
-   folding it erased the type on every mode expression in the corpus
-   (`(fs.FileMode)(ModeDevice | ModeCharDevice)` → a bare `unchecked((uint32)(69206016UL))`). A
-   named target keeps the arm below, which carries its type in the fold; an alias has no distinct
-   C# type to lose;
-3. **no NAMED CONSTANT is referenced** — those render through their `Untyped*` wrappers, which is
-   how every wider arm preserves them, and folding replaced `math/bits`' `x>>1 & (m0 & m)` with
-   `unchecked((uint32)(1431655765UL))`: arithmetic no reader can trace back to `m0`;
-4. **an UNTYPED subexpression exceeds `uint32`** — a typed conversion carries its own width and
-   emits correctly unaided, so `runtime`'s `^uint32(0)/8 + 1` never needed the fold, and counting
-   it flattened the entire `class_to_divmagic` table into 68 casts;
-5. **the threshold is `uint32`, not the target's own width** — `(1<<16) - 1` exceeds a `uint16` but
-   the emission already carries an explicit `(ushort)` cast and compiles (measured), so
-   `regexp/syntax`'s `Range16` keeps its source form; only a bare `long` has nothing to rescue it.
-
-**How the conditions were found — the method, not just the result.** Each was exposed by a
-three-target corpus regeneration, never by the two packages the fix was aimed at: the local darwin
-build was green at every step. The site count fell **754 → 46 → 12 → 10 → 2** across six
-regenerations, and the two survivors are exactly the expressions that cannot compile otherwise.
-The lesson generalizes past this arm: *a converter change is measured against the corpus, not
-against the file that motivated it* — a fold that looks obviously correct at its motivating site
-can rewrite hundreds of unrelated ones, and only a full regeneration shows it.
-
-Guarded by the `ConstSubexprOverflow` behavioral test, which already covered the construct
-(`u32 := []uint32{1<<32 - 1}`); its golden re-baselined to the folded form with the Output phase
-passing unchanged — the value never moved, only the spelling.
+<a id="a-narrow-unsigned-target-folds-a-constant-only-when-nothing-else-can-make-it-compile"></a>Moved to [A NARROW-UNSIGNED target folds a constant only when nothing else can make it compile](constants.md#a-narrow-unsigned-target-folds-a-constant-only-when-nothing-else-can-make-it-compile).
 
 ## The THREE deref accessors of `ж<T>` — when each is needed, and how the converter picks
 
