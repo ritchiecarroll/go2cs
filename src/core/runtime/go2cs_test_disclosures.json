@@ -8,6 +8,12 @@
       "reason": "runtime-capability: symtab_test.go's assertion requires f.Entry() < pc -- the function's entry address always strictly precedes a call site's return address within it. go2cs has no addresses, only opaque per-call-site PC tokens (the deliberate model managed_impl.cs's header documents throughout); FuncForPC(pc) mints a *Func whose Entry() returns that SAME token, so Entry() == pc by construction and the < assertion can never hold. Inventing a value strictly less than the token (e.g. subtracting a constant) would satisfy the assert with a number that means nothing this host can stand behind -- the same class of laundering the ManagedPointerTokens/reflect pointer-identity disclosures already refuse. Falsifiable in the parts that matter: the same assertion also checks ok, Name()'s suffix, and the file/line range: if any of THOSE ever mismatch, the row is a real defect, not this disclosure -- only the Entry()>=pc arm is pinned. Measured 2026-09-02: ok=true, Name()=the correct qualified name, file/line correct, Entry()==pc exactly (e.g. 27==27) on every reported iteration."
     },
     {
+      "name": "TestFunctionAlignmentTraceback",
+      "class": "runtime-capability",
+      "signature": "invalid memory address or nil pointer dereference",
+      "reason": "runtime-capability: the test reads the CODE BYTE at a PC, *(*uint8)(unsafe.Pointer(pc)) at symtab_test.go:240, one byte before a caller token, expecting the INT3 alignment filler (0xcc) that the Go linker pads functions with. go2cs has no machine code at a PC: runtime.Caller answers an opaque call-site token from a non-canonical band (runtime/managed_impl.cs s_callerSpanBase, 0x8000_8000_0000_0000, TRAIN C's caller-PC spans 96ce90f997), so no byte exists there to read. The read is refused by golib's minted-address sink guard (ManagedPointerTokens.NamesNoUserMemory, bit 63) as Go's nil-dereference panic on EVERY platform. Before that guard the same read was a caught NullReferenceException on linux, because a non-canonical #GP reports address 0 there, and a FATAL AccessViolation on windows that ended the test host at test F and blanked every later verdict of the row (measured 2026-09-27: bisected to ed9dc138e8, pc = 0x800080000000F7FF printed at the site). Pinned to that panic text on this test alone: any OTHER failure here (the FuncForPC name check, or Frames.Next's Func) is a real defect, not this disclosure."
+    },
+    {
       "name": "TestPinnerConstStringData",
       "class": "runtime-capability",
       "signature": "not marked as pinned",

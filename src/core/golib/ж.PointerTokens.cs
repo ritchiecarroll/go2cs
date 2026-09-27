@@ -213,6 +213,56 @@ public static class ManagedPointerTokens
     internal const ulong TagMask = (1UL << 63) | (1UL << 47);
 
     /// <summary>
+    /// Whether <paramref name="address"/> lies where no user-mode memory can exist on any address
+    /// space this corpus runs on: bit 63 set. A raw read or write there must never reach the hardware.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// WHY IT EXISTS. Every number this runtime MINTS in place of an address has bit 63 set: caller
+    /// tokens (runtime.Caller's PCs, from 0x8000_8000_0000_0000), order tokens (<see cref="TagBit"/>,
+    /// live or dead), and synthetic function PCs (<see cref="GoSyntheticPC"/>, from
+    /// 0xFFFF_8000_0000_0000). A native box or native slice view over one of them, dereferenced, faults
+    /// in hardware, and HOW that fault surfaces is platform-dependent and was measured (a standalone
+    /// probe reading one byte in a child process, 2026-09-27):
+    /// </para>
+    /// <list type="bullet">
+    /// <item>Non-canonical x64 (caller and order tokens) raises #GP. Linux reports it at address 0,
+    /// so the CLR throws a catchable NullReferenceException; Windows reports the real address, so it
+    /// is a FATAL AccessViolationException that ends the host.</item>
+    /// <item>Canonical kernel-half (synthetic PCs) and unmapped user addresses are fatal on both.</item>
+    /// <item>Only the null page (below 64 KiB) is caught on both.</item>
+    /// </list>
+    /// <para>
+    /// runtime's TestFunctionAlignmentTraceback reads the byte before a caller token and took the
+    /// Windows test host down, blanking every later verdict of the row (TRAIN C's caller-PC spans,
+    /// 96ce90f997). Refusing here gives every platform linux's answer, a caught nil-dereference
+    /// panic, for the whole minted class at once.
+    /// </para>
+    /// <para>
+    /// THE THRESHOLD, per address space. It is bit 63, not 2^47, because 2^47 would refuse real
+    /// memory on arm64.
+    /// </para>
+    /// <list type="bullet">
+    /// <item>x64 Windows: user space ends below 2^47 (0x0000_7FFF_FFFF_FFFF).</item>
+    /// <item>x64 Linux: user space is below 2^47 with 4-level paging. With LA57 (5-level) it can reach
+    /// 2^56, but the kernel hands out addresses above 2^47 only to an mmap that asks for one with an
+    /// explicit high hint, which the CLR never does. Either way it is below 2^63.</item>
+    /// <item>arm64 Linux: user space is TTBR0, below 2^48 with 48-bit VA. mmap regions really do sit
+    /// near 0x0000_FFFF_xxxx_xxxx, above 2^47, and that is why 2^47 is wrong there. 52-bit VA (LVA)
+    /// raises the ceiling to 2^52, again only on an explicit hint. Bit 63 selects TTBR1, the kernel.</item>
+    /// <item>arm64 Darwin: user space is below 2^47 (MACH_VM_MAX_ADDRESS).</item>
+    /// <item>arm64 top-byte-ignore: MTE tags live in bits 59..56 and leave bit 63 alone. Android's
+    /// HWASan-style heap tags (top byte 0xB4) would set bit 63, and Android is not a target of this
+    /// corpus. Anyone porting there must revisit this line.</item>
+    /// </list>
+    /// <para>
+    /// 32-bit is excluded by construction: the corpus is 64-bit only (GoSyntheticPC refuses 32-bit).
+    /// </para>
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool NamesNoUserMemory(nuint address) => ((ulong)address & TagBit) != 0;
+
+    /// <summary>
     /// Answers, from the VALUE alone and with no registry lookup, whether <paramref name="number"/>
     /// was minted as a managed pointer's order token rather than being a real address, a HANDLE, a
     /// length or a flag word.

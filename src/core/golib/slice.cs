@@ -539,7 +539,22 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     // above). Native-backed slices are rare by construction — one creation door, reached only
     // through unsafe.Slice over a native pointer — so the call costs nothing that matters.
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private unsafe ref T NativeElementRef(nint index) => ref Unsafe.AsRef<T>(NativeElementPointer(index));
+    private unsafe ref T NativeElementRef(nint index)
+    {
+        RefuseNoUserMemory(m_nativeBase);
+        return ref Unsafe.AsRef<T>(NativeElementPointer(index));
+    }
+
+    // A native window whose base is a number this runtime MINTED (bit 63: caller or order token,
+    // synthetic PC) names no memory, and reading it faults: fatally on Windows, where linux catches
+    // it as a nil dereference. Refused as linux answers, at every read funnel of a native window. See
+    // ManagedPointerTokens.NamesNoUserMemory for the class and the threshold. NativeElementAddress
+    // does not ask: forming a pointer is not a read, and Go does not fault on it either.
+    private static void RefuseNoUserMemory(nuint nativeBase)
+    {
+        if (ManagedPointerTokens.NamesNoUserMemory(nativeBase))
+            throw RuntimeErrorPanic.NilPointerDereference();
+    }
 
     // Every element of a zero-size slice IS the same element: Go computes `&s[i]` as
     // `data + i*0`, so each index names the one address the slice was built over — the runtime's
@@ -743,6 +758,10 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // operation, then run flat. A native window's span is the mapping itself.
         if (m_nativeBase != 0)
         {
+            // An EMPTY window reads nothing (Go does not fault on it), so only a non-empty one asks.
+            if (m_length > 0)
+                RefuseNoUserMemory(m_nativeBase);
+
             unsafe
             {
                 return new Span<T>(NativeElementPointer(0), (int)m_length);
@@ -839,6 +858,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
                 {
                     unsafe
                     {
+                        RefuseNoUserMemory(m_nativeBase);
                         return (m_current - m_start,
                             Unsafe.Read<T>((void*)(m_nativeBase + (nuint)m_current * (nuint)Unsafe.SizeOf<T>())));
                     }
@@ -1219,6 +1239,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
                 {
                     unsafe
                     {
+                        RefuseNoUserMemory(m_nativeBase);
                         return Unsafe.Read<T>((void*)(m_nativeBase + (nuint)m_current * (nuint)Unsafe.SizeOf<T>()));
                     }
                 }

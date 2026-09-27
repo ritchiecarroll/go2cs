@@ -101,29 +101,26 @@ public sealed class NativeBox<T> : ж<T>, INativeRooted
     private PanicException OrderTokenRefusal() =>
         RuntimeErrorPanic.UnsafePointerOrderTokenDereferenced(typeof(T), m_nativeAddr);
 
-    /// <inheritdoc/>
-    public override unsafe ref T Value
+    // The address every dereference below reads or writes, refused first where no memory answers:
+    // arm 2a's named refusal for a flagged order token, then the minted class as a whole
+    // (ManagedPointerTokens.NamesNoUserMemory), which answers the nil-dereference panic linux's own
+    // fault already gives instead of letting Windows take the host down.
+    private unsafe void* DereferenceableAddress()
     {
-        get
-        {
-            if (m_aliasesAnOrderToken)
-                throw OrderTokenRefusal();
+        if (m_aliasesAnOrderToken)
+            throw OrderTokenRefusal();
 
-            return ref Unsafe.AsRef<T>((void*)m_nativeAddr);
-        }
+        if (ManagedPointerTokens.NamesNoUserMemory(m_nativeAddr))
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        return (void*)m_nativeAddr;
     }
 
     /// <inheritdoc/>
-    public override unsafe ref T ValueSlot
-    {
-        get
-        {
-            if (m_aliasesAnOrderToken)
-                throw OrderTokenRefusal();
+    public override unsafe ref T Value => ref Unsafe.AsRef<T>(DereferenceableAddress());
 
-            return ref Unsafe.AsRef<T>((void*)m_nativeAddr);
-        }
-    }
+    /// <inheritdoc/>
+    public override unsafe ref T ValueSlot => ref Unsafe.AsRef<T>(DereferenceableAddress());
 
     /// <summary>
     /// Whether this box aliases an ORDER TOKEN rather than an address — Q44 §10.3 arm 2a. Its
@@ -196,18 +193,18 @@ public sealed class NativeBox<T> : ж<T>, INativeRooted
     /// <inheritdoc/>
     public override unsafe nuint ReadPointerWord()
     {
-        return (nuint)Volatile.Read(ref *(ulong*)m_nativeAddr);
+        return (nuint)Volatile.Read(ref *(ulong*)DereferenceableAddress());
     }
 
     /// <inheritdoc/>
     public override unsafe nuint ExchangePointerWord(nuint value)
     {
-        return (nuint)Interlocked.Exchange(ref *(ulong*)m_nativeAddr, value);
+        return (nuint)Interlocked.Exchange(ref *(ulong*)DereferenceableAddress(), value);
     }
 
     /// <inheritdoc/>
     public override unsafe bool CompareExchangePointerWord(nuint old, nuint @new)
     {
-        return Interlocked.CompareExchange(ref *(ulong*)m_nativeAddr, @new, old) == old;
+        return Interlocked.CompareExchange(ref *(ulong*)DereferenceableAddress(), @new, old) == old;
     }
 }
