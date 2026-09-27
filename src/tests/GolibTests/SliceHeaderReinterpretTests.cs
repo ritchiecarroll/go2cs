@@ -124,6 +124,28 @@ public class SliceHeaderReinterpretTests
     }
 
     [TestMethod]
+    public void AHeaderReadAfterACapZeroViewFollowsTheSameLowOnceItHasCapacity()
+    {
+        // s = backing[8:8:8] (cap 0 at an in-bounds low: the zerobase), then s = backing[8:16]
+        // through the SAME header box: same backing, same low, cap 8. The pointer cache keyed only
+        // on (backing, low) kept the zerobase, so the clear landed on it and missed the slice.
+        byte[] backing = Backing(16);
+        ref slice<byte> s = ref heap(new slice<byte>(backing, 8, 8, 8), out ж<slice<byte>> Ꮡs);
+        ж<SliceHeaderShape> header = Ꮡs.Reinterpret<slice<byte>, SliceHeaderShape>();
+
+        Assert.AreEqual(0, (int)header.Value.cap);
+
+        s = new slice<byte>(backing, 8, 16, 16);
+        @unsafe.Pointer array = header.Value.array;
+        Assert.AreEqual(8, (int)header.Value.cap);
+
+        runtime_package.GoMemclrNoHeapPointers(array, new uintptr(8));
+
+        for (int i = 8; i < 16; i++)
+            Assert.AreEqual((byte)0, backing[i], $"backing[{i}]");
+    }
+
+    [TestMethod]
     public void AReassignedSliceIsFollowedThroughTheHeader()
     {
         byte[] backing = Backing(40);

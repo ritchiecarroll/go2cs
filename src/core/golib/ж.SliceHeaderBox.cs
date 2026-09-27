@@ -191,9 +191,10 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
     private TDst m_value;               // the header handed out through Value (a ref into this field)
     private TDst m_handedOut;           // what that header held when it was handed out
     private bool m_materialized;
-    private object? m_pointer;          // the cached pointer object, minted for (m_pointerBacking, m_pointerLow)
+    private object? m_pointer;          // the cached pointer object, minted for (m_pointerBacking, m_pointerLow, cap == 0)
     private object? m_pointerBacking;
     private nint m_pointerLow = -1;
+    private bool m_pointerZeroCapacity;  // a cap-0 slice names the zerobase, so cap 0 is part of the key
 
     private SliceHeaderBox(ж<T> source)
     {
@@ -243,12 +244,13 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
 
         (object? backing, nint low, nint len, nint cap) = s_describe!((IArray)(object)m_source.Value);
 
-        if (m_pointer is null || !ReferenceEquals(backing, m_pointerBacking) || low != m_pointerLow)
+        if (m_pointer is null || !ReferenceEquals(backing, m_pointerBacking) || low != m_pointerLow || (cap == 0) != m_pointerZeroCapacity)
         {
             object? elementZero = backing is null ? null : s_elementZero!((IArray)(object)m_source.Value);
             m_pointer = s_fromBox!.Invoke(null, [elementZero]);
             m_pointerBacking = backing;
             m_pointerLow = low;
+            m_pointerZeroCapacity = cap == 0;
         }
 
         object boxed = default(TDst)!;
