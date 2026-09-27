@@ -371,6 +371,39 @@ pattern only occurs on a pointer-producing conversion in range position, which n
 Guarded by `RangePointerArrayConversion` (transpile+compile+target only — the exact cast shape needs an
 `unsafe.Pointer` source, whose runtime round-trip golib does not reproduce, so it is not output-compared).
 
+## The THREE deref accessors of `ж<T>` — when each is needed, and how the converter picks
+
+Establishing a local `ref` over a heap box (`ref var p = ref Ꮡp.<accessor>`) looks like one
+operation but encodes different answers to one question: **is this access the Go DEREFERENCE, and
+what does Go say happens on nil at exactly this point?** Consolidated here because the members
+landed across separate arcs (their individual sections, linked below, carry the full derivations);
+this is the map.
+
+| Accessor | On nil | The Go semantics it encodes | How the converter KNOWS |
+|:--|:--|:--|:--|
+| `.Value` | **panics immediately** (Go's message, even on bind) | this access IS the deref, and Go panics here — the ordinary pointer USE site (`*p`, `~Ꮡp`, a read through the box) | the DEFAULT everywhere except a pointer's ENTRY alias; no special case applies |
+| `.ValueSlot` | **no check** — the slot as-is | a read of the HELD value, never a deref: when the pointee is itself reference-like, `*p` legally yields nil (`*(&err)` of a nil `error` panics in neither language), so `.Value`'s null check would fire SPURIOUSLY on a legally-held null. Identical to `.Value`'s slot in every non-throwing case. Also where nil is structurally impossible (a freshly `make`-allocated box, `heap(out …)`) and in the reflection bridge's field paths. | by the POINTEE'S TYPE or by CONSTRUCTION — a box-of-pointer LOCAL, a named-result box, the bridge's field walk. NOT at a pointer's entry alias (see below) |
+| `.DerefOrNull()` | **defers** — binds `Unsafe.NullRef<T>`, faults with Go's panic on first USE | Go defers the panic to the body's own deref point: passing a nil `*T` to a function, or calling a method through one, is legal; the body RUNS, a side effect before the deref must happen, and the panic lands where Go's would — after it, or never (delegated `checkValid`-style guards). | STRUCTURALLY — EVERY direct-ж pointer ENTRY alias, RECEIVER and PARAMETER alike, unconditionally (no analysis, because the accessor is faithful whether or not the body guards), plus the pointer-reassignment re-alias and go2cs-gen's `ReceiverMethodTemplate` bridge; see *A nil RECEIVER is nil-deferring, not nil-safe* and *A pointer PARAMETER is nil-deferring for exactly the reason a receiver is* |
+
+Why three and not one: the ENTRY alias and the USE site are different questions, and `.Value`
+answers the second. `.ValueSlot` is different in KIND rather than in timing — it marks accesses
+that were never dereferences in Go's semantics at all, which no nil-policy accessor can express —
+but it is not selected at an entry alias, where nothing can know whether the body will dereference
+and the nil-policy question is the only one being asked.
+
+**There used to be a fourth, `.DerefOrNil()` — a nil-SAFE accessor handing back a shared
+`default(T)` slot — and its retirement (2026-08-02) is what collapsed the set.** It was admitted
+by a body ANALYSIS: a pointer param the body nil-compares, one passed the untyped `nil` at a
+same-package call site, or one whose first mentioning statement re-points it without dereferencing
+(`l = l.get()` normalization). Wherever that analysis was RIGHT the silent zero was unobservable;
+wherever it was wrong — and it could never be complete, because a body's guard may be DELEGATED to
+a callee it merely hands the pointer to — a deref Go says must panic instead read a silent zero.
+Unifying every pointer entry alias on `.DerefOrNull()` made the analysis unnecessary in the first
+place, so the accessor, the three analyses that fed it (`collectNilSafePtrParams`,
+`reassignedBeforeDerefParamName`, and the package-wide nil-argument pre-pass) and their vestigial
+receiver arms were deleted together — 382 net lines of converter. The golib method survives with
+its own unit coverage, but converted code no longer emits it.
+
 ## Sub-pages
 
 | Page | Covers |

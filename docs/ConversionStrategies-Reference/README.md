@@ -154,9 +154,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Short declarations keep the named-numeric cast](named-numeric-types.md#short-declarations-keep-the-named-numeric-cast)
 - **[Floating-Point Formatting](floating-point-formatting.md)**
 - **[Nil and Zero Values](nil-and-zero-values.md)**
-  - [The THREE deref accessors of `ж<T>` — when each is needed, and how the converter picks](nil-and-zero-values.md#the-three-deref-accessors-of-жt--when-each-is-needed-and-how-the-converter-picks)
   - [Canonical typed-nil pointer boxing](nil-and-zero-values.md#canonical-typed-nil-pointer-boxing)
-  - [A HAND-OWN's pointer parameter sees `NilBox`, never `null` — and the doctrine alone did not hold it](nil-and-zero-values.md#a-hand-owns-pointer-parameter-sees-nilbox-never-null--and-the-doctrine-alone-did-not-hold-it)
   - [A pointer crossing into an interface carries its static type, however the pointer was produced](nil-and-zero-values.md#a-pointer-crossing-into-an-interface-carries-its-static-type-however-the-pointer-was-produced)
   - [`new(T)` is Go's ZERO value — and for a container kind that means the NIL one](nil-and-zero-values.md#newt-is-gos-zero-value--and-for-a-container-kind-that-means-the-nil-one)
   - [Zero-value construction](nil-and-zero-values.md#zero-value-construction)
@@ -182,6 +180,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
 - **[Multi-Result Values and Comma-Ok Forms](multi-result-and-comma-ok.md)**
   - [A grouped var spec with one multi-result call deconstructs](multi-result-and-comma-ok.md#a-grouped-var-spec-with-one-multi-result-call-deconstructs)
   - [A forwarded multi-value call deconstructs when tuple elements need interface conversion](multi-result-and-comma-ok.md#a-forwarded-multi-value-call-deconstructs-when-tuple-elements-need-interface-conversion)
+  - [A tuple deconstruction into INTERFACE variables hoists the call](multi-result-and-comma-ok.md#a-tuple-deconstruction-into-interface-variables-hoists-the-call)
   - [A multi-value call spread into a call's parameters in an assignment hoists into temps](multi-result-and-comma-ok.md#a-multi-value-call-spread-into-a-calls-parameters-in-an-assignment-hoists-into-temps)
 - **[Slices and Arrays](slices-and-arrays.md)**
   - [Array ASSIGNMENT copies the whole array (`.Clone()` on the RHS)](slices-and-arrays.md#array-assignment-copies-the-whole-array-clone-on-the-rhs)
@@ -296,6 +295,8 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
     - [A capture-mode method on a shadow-renamed heap-boxed local uses the rendered box name](methods-and-receivers.md#a-capture-mode-method-on-a-shadow-renamed-heap-boxed-local-uses-the-rendered-box-name)
     - [A capture-mode method called on a FIELD CHAIN of a local is an address-of too](methods-and-receivers.md#a-capture-mode-method-called-on-a-field-chain-of-a-local-is-an-address-of-too)
     - [The same chain one level up: `&recv.f1.f2` on a POINTER RECEIVER](methods-and-receivers.md#the-same-chain-one-level-up-recvf1f2-on-a-pointer-receiver)
+  - [Named results](methods-and-receivers.md#named-results)
+    - [A named result is DECLARED only when something reads it](methods-and-receivers.md#a-named-result-is-declared-only-when-something-reads-it)
 - **[Variadic Parameters](variadic-parameters.md)**
   - [Declaring a variadic parameter](variadic-parameters.md#declaring-a-variadic-parameter)
     - [A variadic closure rebinds its `params` array to a slice](variadic-parameters.md#a-variadic-closure-rebinds-its-params-array-to-a-slice)
@@ -358,7 +359,6 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A VALUE receiver reached through a POINTER expression hoists the POINTEE's copy](value-receiver-delegates.md#a-value-receiver-reached-through-a-pointer-expression-hoists-the-pointees-copy)
   - [A bare function value in `:=` takes its named delegate type, not `var`](value-receiver-delegates.md#a-bare-function-value-in--takes-its-named-delegate-type-not-var)
   - [A DISCARDED function value is cast, never declared](value-receiver-delegates.md#a-discarded-function-value-is-cast-never-declared)
-  - [Two `unsafe.Pointer`s compare as BOXES, not as addresses](value-receiver-delegates.md#two-unsafepointers-compare-as-boxes-not-as-addresses)
 - **[Defer / Panic / Recover](defer-panic-recover.md)**
   - [A function that defers or recovers emits its body INLINE, inside a frame](defer-panic-recover.md#a-function-that-defers-or-recovers-emits-its-body-inline-inside-a-frame)
   - [Why the body is not a lambda](defer-panic-recover.md#why-the-body-is-not-a-lambda)
@@ -569,10 +569,12 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [The address of a FIELD of a slice or array element aliases the element](pointers.md#the-address-of-a-field-of-a-slice-or-array-element-aliases-the-element)
   - [Nested dereferences parenthesize before the outer `.Value`](pointers.md#nested-dereferences-parenthesize-before-the-outer-value)
   - [A range over a pointer-typed type conversion parenthesizes before the deref](pointers.md#a-range-over-a-pointer-typed-type-conversion-parenthesizes-before-the-deref)
+  - [The THREE deref accessors of `ж<T>` — when each is needed, and how the converter picks](pointers.md#the-three-deref-accessors-of-жt--when-each-is-needed-and-how-the-converter-picks)
   - **[Pointers: Identity and Nil](pointers/identity-and-nil.md)**
     - [Pointer identity](pointers/identity-and-nil.md#pointer-identity)
       - [Pointer equality canonicalizes the STORAGE, not the referent — slice/array element identity](pointers/identity-and-nil.md#pointer-equality-canonicalizes-the-storage-not-the-referent--slicearray-element-identity)
       - [A pointer's nilness and identity are STRUCTURAL — the `IsNull` / `IsNilPointer` split](pointers/identity-and-nil.md#a-pointers-nilness-and-identity-are-structural--the-isnull--isnilpointer-split)
+      - [Every nil-pointer consumer must ask the structural predicate](pointers/identity-and-nil.md#every-nil-pointer-consumer-must-ask-the-structural-predicate)
       - [A pointer's REFERENT, not its box, answers every lifetime and identity question](pointers/identity-and-nil.md#a-pointers-referent-not-its-box-answers-every-lifetime-and-identity-question)
     - [Nil receivers and parameters](pointers/identity-and-nil.md#nil-receivers-and-parameters)
       - [A pointer parameter used only through its box gets no deref VALUE alias](pointers/identity-and-nil.md#a-pointer-parameter-used-only-through-its-box-gets-no-deref-value-alias)
@@ -606,6 +608,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Pointer comparison](unsafe-and-native-memory.md#pointer-comparison)
     - [An `unsafe.Pointer` is compared BY ADDRESS, and a container's pointer names its STORAGE](unsafe-and-native-memory.md#an-unsafepointer-is-compared-by-address-and-a-containers-pointer-names-its-storage)
     - [`unsafe.Pointer(uintptr(0))` must compare equal to `nil`](unsafe-and-native-memory.md#unsafepointeruintptr0-must-compare-equal-to-nil)
+    - [Two `unsafe.Pointer`s compare as BOXES, not as addresses](unsafe-and-native-memory.md#two-unsafepointers-compare-as-boxes-not-as-addresses)
   - [Size, alignment and offset](unsafe-and-native-memory.md#size-alignment-and-offset)
     - [`unsafe.Alignof` / `unsafe.Offsetof` name a TYPE, resolved through `go/types`](unsafe-and-native-memory.md#unsafealignof--unsafeoffsetof-name-a-type-resolved-through-gotypes)
     - [`unsafe.Sizeof` / `Alignof` / `Offsetof` FOLD to a constant at expression sites](unsafe-and-native-memory.md#unsafesizeof--alignof--offsetof-fold-to-a-constant-at-expression-sites)
@@ -632,6 +635,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A range-over-int index is `nint` (golib's `range` helper yields Go's `int`)](labels-and-loop-variables.md#a-range-over-int-index-is-nint-golibs-range-helper-yields-gos-int)
   - [Range-over-integer covers EVERY integer type, and the iteration variable keeps the operand's width](labels-and-loop-variables.md#range-over-integer-covers-every-integer-type-and-the-iteration-variable-keeps-the-operands-width)
   - [Range-over-func on named/generic Seq types](labels-and-loop-variables.md#range-over-func-on-namedgeneric-seq-types)
+  - [`iter.Pull`'s coro — a symmetric handoff between two threads, and the goroutine count that had never been wired](labels-and-loop-variables.md#iterpulls-coro--a-symmetric-handoff-between-two-threads-and-the-goroutine-count-that-had-never-been-wired)
   - [A blank scalar range variable never emits as `_`](labels-and-loop-variables.md#a-blank-scalar-range-variable-never-emits-as-_)
 - **[The `go.golib` support namespace](golib-namespace.md)**
   - [Package aliases shadowed by method names](golib-namespace.md#package-aliases-shadowed-by-method-names)
@@ -657,6 +661,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
       - [Hand-owns have a platform, and it is not the same question as a folder](manual-conversions/mechanism.md#hand-owns-have-a-platform-and-it-is-not-the-same-question-as-a-folder)
       - [The `*_impl_test.cs` convention](manual-conversions/mechanism.md#the-_impl_testcs-convention)
       - [Every P/Invoke is source-generated](manual-conversions/mechanism.md#every-pinvoke-is-source-generated)
+      - [A HAND-OWN's pointer parameter sees `NilBox`, never `null` — and the doctrine alone did not hold it](manual-conversions/mechanism.md#a-hand-owns-pointer-parameter-sees-nilbox-never-null--and-the-doctrine-alone-did-not-hold-it)
     - [Whole-file hand-owns](manual-conversions/mechanism.md#whole-file-hand-owns)
       - [`crypto/subtle`'s word-at-a-time XOR](manual-conversions/mechanism.md#cryptosubtles-word-at-a-time-xor)
       - [`sync/atomic.Value`](manual-conversions/mechanism.md#syncatomicvalue)
@@ -697,7 +702,6 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - **[Manually-Converted Declarations: Runtime Contracts](manual-conversions/runtime-contracts.md)**
     - [Process control](manual-conversions/runtime-contracts.md#process-control)
       - [The runtime's PROCESS-CONTROL surface: implement the CONTRACT, never the mechanism](manual-conversions/runtime-contracts.md#the-runtimes-process-control-surface-implement-the-contract-never-the-mechanism)
-      - [`iter.Pull`'s coro — a symmetric handoff between two threads, and the goroutine count that had never been wired](manual-conversions/runtime-contracts.md#iterpulls-coro--a-symmetric-handoff-between-two-threads-and-the-goroutine-count-that-had-never-been-wired)
     - [Timers](manual-conversions/runtime-contracts.md#timers)
       - [Realizing the runtime TIMER contract (`Sleep` / `newTimer` / `stopTimer` / `resetTimer`)](manual-conversions/runtime-contracts.md#realizing-the-runtime-timer-contract-sleep--newtimer--stoptimer--resettimer)
     - [Memory and the GC](manual-conversions/runtime-contracts.md#memory-and-the-gc)

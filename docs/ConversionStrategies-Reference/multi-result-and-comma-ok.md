@@ -19,23 +19,6 @@ The types that support these tuple-returns are defined in the [`golib`](https://
 
 **A package-level `var a, b = f()` reads ValueTuple components.** C# static field initializers cannot deconstruct a tuple, so the per-name field emission assigned the WHOLE result tuple to the first field (CS0029 — edwards25519's `var identity, _ = new(Point).SetBytes(…)`). With exactly one non-blank name the component read is appended to the inline call (`internal static ж<Point> identity = …SetBytes(…).Item1;` — blank names keep their uninitialized `_ᴛNʗ` fields, and the call still runs once). With two or more non-blank names the call is evaluated ONCE into a hidden tuple field and each name reads its component (`internal static (nint, @string) tupleᴛ1ʗ = pair(); internal static nint n = tupleᴛ1ʗ.Item1;` — C# static initializers run in textual order, so the reads follow the temp). Gated to package scope, no explicit type, one call initializer typed as a tuple; in-function `var x, y = f()` keeps the existing path. (Guarded by the `GlobalTupleVarDecl` behavioral test — both shapes plus a call-count probe proving single evaluation, output-compared vs Go.)
 
-**A named result is DECLARED only when something reads it (2026-08-08).** Go's named results are ordinary addressable locals, so the converter declared every one of them at function entry. But Go names results for *documentation* far more often than it uses them — `func EncodeRune(r rune) (r1, r2 rune)` never mentions `r1`/`r2` again — and the emitted `rune r1 = default!;` is then dead on arrival. That one shape was **1,218 of the corpus's 1,219 `CS0219`** ("assigned but its value is never used") warnings. Nothing is lost by omitting it, because the names survive exactly where a reader reads them — on the C# tuple return type — so the emission moves closer to the Go source, not further from it:
-
-```csharp
-// before
-public static (rune r1, rune r2) EncodeRune(rune r) {
-    rune r1 = default!;
-    rune r2 = default!;
-
-    if (r < surrSelf || r > maxRune) {
-
-// after — the names still read off the signature
-public static (rune r1, rune r2) EncodeRune(rune r) {
-    if (r < surrSelf || r > maxRune) {
-```
-
-The declaration is kept whenever anything can read it, and the check is deliberately conservative in every unclear case — a retained dead declaration costs one line, a dropped live one is `CS0103`. It stays when the body **references** the result (read, assigned, address-taken, or captured by a closure — a capture is a use, so that walk descends into function literals); when the body has a **naked `return`**, which reads every named result by definition (that walk stops at a nested `*ast.FuncLit`, whose bare returns belong to the literal — the `iter.Pull` shape above depends on this); when the result is **heap-box backed**, whose box is the storage the render sites reference; and when the function is lowered through either defer form — `namedReturnDeferMode`, where the declarations sit outside the `func()` wrapper precisely so deferred closures can mutate them, or a **GoFrame**, whose named exit emits a trailing `return <names>;` after the `try`. In those last two the *generated* code reads the locals and the Go body need never mention them, so liveness is switched off wholesale rather than inferred. The same rule and the same opt-out apply to function **literals** (`namedReturnDeclLines`). Keeping the check rather than suppressing the code corpus-wide also preserves `CS0219` as a live signal: a genuinely dropped assignment to a named result still surfaces. (Guarded by `namedResultLiveness_test.go`, which pins one function per liveness reason plus the dead shape and the outer-dead/inner-naked case, and is proved in BOTH directions by negative control. Corpus effect: `CS0219` 1,219 → **52**, none of them a named-return prologue — 33 are in hand-owned files the converter never re-emits, 18 are Go's own `var` witnesses for a constant-folded `unsafe.Sizeof`/`Offsetof`, and 1 is a folded local const.)
-
 ## A grouped var spec with one multi-result call deconstructs
 A grouped `var (name, offset, abs = t.locabs() ...)` spec is not a `:=`, so the assignment tuple machinery never saw it -- the per-name path assigned the WHOLE result tuple to the first name and silently DEFAULTED the rest (time appendFormat read a zero abs; a silent-wrongness class beyond the CS0029 that exposed it). Function-local specs now emit the C# tuple deconstruction, matching the `:=` form; package-level specs use the once-evaluated hidden-field component reads:
 ```csharp
@@ -77,6 +60,17 @@ return (new relayжReporter(ᴛ1), ᴛ2);
 
 Elements whose actual type is itself an interface are left alone (structural inheritance
 covers those). Guarded by `CrossPkgUser` (`getReporter` forwarding `makeRelay`).
+
+## A tuple deconstruction into INTERFACE variables hoists the call
+
+**A tuple deconstruction into INTERFACE variables hoists the call when a component needs converting.** Reassigning a multi-value call into pre-declared interface locals (`c, err = sd.dialTCP(…)` with `var c Conn`) can require a per-component interface conversion C#'s tuple assignment cannot perform implicitly — a `ж<TCPConn>` component satisfies `Conn` only through its generated pointer adapter, an *explicit* conversion (CS0266 ×11 in net's dial.go). Mirroring the return-statement tuple arm, the call is hoisted into temp markers and each component converts in a tuple literal:
+
+```csharp
+var (ᴛ1, ᴛ2) = Ꮡsd.dialTCP(ctx, laΔ1, raΔ1);
+(c, err) = (new TCPConnжConn(ᴛ1), ᴛ2);
+```
+
+The arm fires only for a statement-position deconstruction (one call RHS, several LHS) where some non-empty-interface target's tuple component is a non-identical, non-interface type; all other deconstructions keep the direct form. (Guarded by the `InterfaceCasting` extension `makeCounter` — a `(*Counter, error)` call deconstructed into an `Incrementer` — runtime-verified against Go.)
 
 ## A multi-value call spread into a call's parameters in an assignment hoists into temps
 Go lets a MULTI-VALUE call fill the parameters of an enclosing call — `r := t.newRange(t.parseControl("range"))`,

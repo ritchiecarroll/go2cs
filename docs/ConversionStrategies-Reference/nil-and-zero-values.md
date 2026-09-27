@@ -8,38 +8,7 @@ The same null-safe-zero-value principle applies to value types whose backing sto
 
 <a id="a-narrow-unsigned-target-folds-a-constant-only-when-nothing-else-can-make-it-compile"></a>Moved to [A NARROW-UNSIGNED target folds a constant only when nothing else can make it compile](constants.md#a-narrow-unsigned-target-folds-a-constant-only-when-nothing-else-can-make-it-compile).
 
-## The THREE deref accessors of `ж<T>` — when each is needed, and how the converter picks
-
-Establishing a local `ref` over a heap box (`ref var p = ref Ꮡp.<accessor>`) looks like one
-operation but encodes different answers to one question: **is this access the Go DEREFERENCE, and
-what does Go say happens on nil at exactly this point?** Consolidated here because the members
-landed across separate arcs (their individual sections, linked below, carry the full derivations);
-this is the map.
-
-| Accessor | On nil | The Go semantics it encodes | How the converter KNOWS |
-|:--|:--|:--|:--|
-| `.Value` | **panics immediately** (Go's message, even on bind) | this access IS the deref, and Go panics here — the ordinary pointer USE site (`*p`, `~Ꮡp`, a read through the box) | the DEFAULT everywhere except a pointer's ENTRY alias; no special case applies |
-| `.ValueSlot` | **no check** — the slot as-is | a read of the HELD value, never a deref: when the pointee is itself reference-like, `*p` legally yields nil (`*(&err)` of a nil `error` panics in neither language), so `.Value`'s null check would fire SPURIOUSLY on a legally-held null. Identical to `.Value`'s slot in every non-throwing case. Also where nil is structurally impossible (a freshly `make`-allocated box, `heap(out …)`) and in the reflection bridge's field paths. | by the POINTEE'S TYPE or by CONSTRUCTION — a box-of-pointer LOCAL, a named-result box, the bridge's field walk. NOT at a pointer's entry alias (see below) |
-| `.DerefOrNull()` | **defers** — binds `Unsafe.NullRef<T>`, faults with Go's panic on first USE | Go defers the panic to the body's own deref point: passing a nil `*T` to a function, or calling a method through one, is legal; the body RUNS, a side effect before the deref must happen, and the panic lands where Go's would — after it, or never (delegated `checkValid`-style guards). | STRUCTURALLY — EVERY direct-ж pointer ENTRY alias, RECEIVER and PARAMETER alike, unconditionally (no analysis, because the accessor is faithful whether or not the body guards), plus the pointer-reassignment re-alias and go2cs-gen's `ReceiverMethodTemplate` bridge; see *A nil RECEIVER is nil-deferring, not nil-safe* and *A pointer PARAMETER is nil-deferring for exactly the reason a receiver is* |
-
-Why three and not one: the ENTRY alias and the USE site are different questions, and `.Value`
-answers the second. `.ValueSlot` is different in KIND rather than in timing — it marks accesses
-that were never dereferences in Go's semantics at all, which no nil-policy accessor can express —
-but it is not selected at an entry alias, where nothing can know whether the body will dereference
-and the nil-policy question is the only one being asked.
-
-**There used to be a fourth, `.DerefOrNil()` — a nil-SAFE accessor handing back a shared
-`default(T)` slot — and its retirement (2026-08-02) is what collapsed the set.** It was admitted
-by a body ANALYSIS: a pointer param the body nil-compares, one passed the untyped `nil` at a
-same-package call site, or one whose first mentioning statement re-points it without dereferencing
-(`l = l.get()` normalization). Wherever that analysis was RIGHT the silent zero was unobservable;
-wherever it was wrong — and it could never be complete, because a body's guard may be DELEGATED to
-a callee it merely hands the pointer to — a deref Go says must panic instead read a silent zero.
-Unifying every pointer entry alias on `.DerefOrNull()` made the analysis unnecessary in the first
-place, so the accessor, the three analyses that fed it (`collectNilSafePtrParams`,
-`reassignedBeforeDerefParamName`, and the package-wide nil-argument pre-pass) and their vestigial
-receiver arms were deleted together — 382 net lines of converter. The golib method survives with
-its own unit coverage, but converted code no longer emits it.
+<a id="the-three-deref-accessors-of-жt--when-each-is-needed-and-how-the-converter-picks"></a>Moved to [The THREE deref accessors of `ж<T>` — when each is needed, and how the converter picks](pointers.md#the-three-deref-accessors-of-жt--when-each-is-needed-and-how-the-converter-picks).
 
 ## Canonical typed-nil pointer boxing
 Go's typed nil is a real value: `any((*T)(nil))` is a **non-nil** interface carrying dynamic type
@@ -71,21 +40,6 @@ the dereference guard):
   nil pointee.
 - The non-generic `INilPointer` surface exposes the structural predicate to runtime machinery
   holding a pointer only as `object` (equality tails, the reflection bridge's `IsNil`/`Elem`).
-
-**Every consumer that asks "is this THE nil pointer" must ask the structural predicate.** The
-managed-slot `atomic.Pointer<T>` (`core/sync/atomic/type.cs`) canonicalizes the nil pointer to a null
-slot so a reference `CompareAndSwap` treats all nil `*T` values as equal — and its `nilCanon` helper
-asked the value-peeking `IsNull`, so it collapsed a *pointer to a nil value* to nil as well. `sync.Map`
-is built out of exactly that shape and lost both halves of it: `e.p.Store(&i)` with a nil `any` value
-dropped the entry outright (`load()`'s `p == nil` then reported not-ok, so `Range` skipped it and
-`CompareAndSwap` failed against it), and the `expunged = new(any)` sentinel — a real address holding a
-nil interface — became indistinguishable from nil, so a *deleted* entry could not be told from an
-*expunged* one and the whole dirty/expunge protocol degenerated. The predicate is now
-`ж<T>.IsNilPointer`. The same conflation applied to `atomic.Pointer[error]`, `atomic.Pointer[func()]`
-and any `**T` slot (`atomic.Pointer[*T]`), all present in the corpus. (Guarded by
-`AtomicPointerToNil`: `Load`/`Store`/`Swap`/`CompareAndSwap` over a pointer to a nil `any`, two
-distinct `new(any)` sentinels, a pointer to a nil `*int`, and the genuinely-nil slot, output-compared
-vs `go run`. Before the fix the guard panics with a nil-pointer dereference on its second line.)
 
 `(*T)(nil)` conversion **expressions** are where the canonical instance is *minted*, and pointer
 locals, parameters and fields keep plain `null` — their statically-typed world never needs the
@@ -163,47 +117,7 @@ including composite and struct-keyed element types, a nilness/length/absent-key 
 converted nil IS nil rather than merely typed, and the named-map, named-slice, `[]byte`, `chan` and
 `*int` controls, output-compared vs Go.)
 
-## A HAND-OWN's pointer parameter sees `NilBox`, never `null` — and the doctrine alone did not hold it
-
-The rule above — *"every consumer that asks 'is this THE nil pointer' must ask the structural
-predicate"* — was written, correct, and violated **24 times** on one platform before anything
-measured it. That is worth recording, because the reason is a gap between two true sentences in this
-same section rather than an author ignoring either of them.
-
-Sentence one: `(*T)(nil)` conversion expressions **mint** the canonical instance, and "pointer locals,
-parameters and fields keep plain `null`". Sentence two: `nil` reaches a `ж<T>` through
-`implicit operator ж<T>(NilType) => NilBox`. Both hold. What follows from them together is the part
-neither states: **a hand-own's `ж<T>` PARAMETER is on the receiving end of a caller's `nil`, so it
-sees `NilBox` — a real `StandardBox<T>` whose `.Value` throws — and `Ꮡx is null` is FALSE for it.**
-A guard written that way takes the wrong branch and the dereference behind it faults.
-
-Neither half of the predicate is sufficient alone, which is why the corpus form is a pair:
-
-```csharp
-if (Ꮡrusage is not null && !Ꮡrusage.IsNilPointer) { ... }   // and its inverse
-uintptr addr = Ꮡrusage is null || Ꮡrusage.IsNilPointer ? (uintptr)0 : (uintptr)(nint)(&native);
-```
-
-A C# `null` is reachable at the same sites (an uninitialised `ж<T>?`) and `.IsNilPointer` on a
-genuine null would itself throw. **The ADDRESS arm needs the same predicate as the dereference**: with
-only the deref fixed, a syscall wrapper hands the kernel a non-zero pointer where the caller meant
-nil — a quietly wrong call rather than a crash.
-
-Measured 2026-09-02, corpus-wide over every tracked `.cs` under `src/core`, and the split was total:
-`syscall/linux/structclass_linux_impl.cs` 17 sites and
-`syscall/linux/zsyscall_linux_amd64_impl.cs` 7 sites carried the one-sided form with **zero** using
-the predicate, while all **four** `syscall/windows/*` sites used it — one hand-own family written
-twice with the check correct on one platform only, invisible on Windows because those functions do
-not exist there. Every one of the 24 was a PARAMETER (`Select`, `seedNativeFdSet`, `copyNativeFdSet`,
-`FcntlFlock`, `Statfs`, `Fstatfs`, `Sysinfo`, `Adjtimex`, `Fstat`, `fstatat`, `wait4`, `Uname`). The
-crash that surfaced it was `syscall.Wait4(pid, &status, 0, nil)` — Go's own `os/exec` wait shape.
-
-**The remedy that makes it stick is a guard, not more prose.** `corpusNilPointerGuard_test.go` walks
-every `.cs` under `src/core` in the converter's own `go test` and fails on a `Ꮡ`-prefixed identifier
-tested with `is null`/`is not null` alone. It is corpus-wide rather than hand-own-only because the
-converter never emits the form (generated code compares with `== nil`), so the walk needs no
-exception list and catches the next hand-own wherever it lands; comment lines are skipped, and an
-empty walk is a FAILURE rather than a pass so it cannot go green over a hole.
+<a id="a-hand-owns-pointer-parameter-sees-nilbox-never-null--and-the-doctrine-alone-did-not-hold-it"></a>Moved to [A HAND-OWN's pointer parameter sees `NilBox`, never `null` — and the doctrine alone did not hold it](manual-conversions/mechanism.md#a-hand-owns-pointer-parameter-sees-nilbox-never-null--and-the-doctrine-alone-did-not-hold-it).
 
 <a id="reflectvalueinterface-is-a-boundary-into-interface-space-so-it-packs-the-typed-nil-too"></a>Moved to [`reflect.Value.Interface()` is a boundary into interface space, so it packs the typed nil too](reflection/values.md#reflectvalueinterface-is-a-boundary-into-interface-space-so-it-packs-the-typed-nil-too).
 

@@ -82,6 +82,48 @@ That distinction is not hypothetical here. It is the exact defect `zsyscall_wind
 
 Guarded by the `LibraryImportPartial` behavioral test, which is deliberately a *compile* assertion — both failure modes (`SYSLIB1062` from a missing declaration, `CS0757` from an over-eager stub) are compile failures — carrying a hand-owned `[LibraryImport]` of exactly the corpus's shape, plus a module initializer that calls it, so a program that prints at all is one whose generated marshalling stub reached the kernel.
 
+### A HAND-OWN's pointer parameter sees `NilBox`, never `null` — and the doctrine alone did not hold it
+
+The rule above — *"every consumer that asks 'is this THE nil pointer' must ask the structural
+predicate"* — was written, correct, and violated **24 times** on one platform before anything
+measured it. That is worth recording, because the reason is a gap between two true sentences in this
+same section rather than an author ignoring either of them.
+
+Sentence one: `(*T)(nil)` conversion expressions **mint** the canonical instance, and "pointer locals,
+parameters and fields keep plain `null`". Sentence two: `nil` reaches a `ж<T>` through
+`implicit operator ж<T>(NilType) => NilBox`. Both hold. What follows from them together is the part
+neither states: **a hand-own's `ж<T>` PARAMETER is on the receiving end of a caller's `nil`, so it
+sees `NilBox` — a real `StandardBox<T>` whose `.Value` throws — and `Ꮡx is null` is FALSE for it.**
+A guard written that way takes the wrong branch and the dereference behind it faults.
+
+Neither half of the predicate is sufficient alone, which is why the corpus form is a pair:
+
+```csharp
+if (Ꮡrusage is not null && !Ꮡrusage.IsNilPointer) { ... }   // and its inverse
+uintptr addr = Ꮡrusage is null || Ꮡrusage.IsNilPointer ? (uintptr)0 : (uintptr)(nint)(&native);
+```
+
+A C# `null` is reachable at the same sites (an uninitialised `ж<T>?`) and `.IsNilPointer` on a
+genuine null would itself throw. **The ADDRESS arm needs the same predicate as the dereference**: with
+only the deref fixed, a syscall wrapper hands the kernel a non-zero pointer where the caller meant
+nil — a quietly wrong call rather than a crash.
+
+Measured 2026-09-02, corpus-wide over every tracked `.cs` under `src/core`, and the split was total:
+`syscall/linux/structclass_linux_impl.cs` 17 sites and
+`syscall/linux/zsyscall_linux_amd64_impl.cs` 7 sites carried the one-sided form with **zero** using
+the predicate, while all **four** `syscall/windows/*` sites used it — one hand-own family written
+twice with the check correct on one platform only, invisible on Windows because those functions do
+not exist there. Every one of the 24 was a PARAMETER (`Select`, `seedNativeFdSet`, `copyNativeFdSet`,
+`FcntlFlock`, `Statfs`, `Fstatfs`, `Sysinfo`, `Adjtimex`, `Fstat`, `fstatat`, `wait4`, `Uname`). The
+crash that surfaced it was `syscall.Wait4(pid, &status, 0, nil)` — Go's own `os/exec` wait shape.
+
+**The remedy that makes it stick is a guard, not more prose.** `corpusNilPointerGuard_test.go` walks
+every `.cs` under `src/core` in the converter's own `go test` and fails on a `Ꮡ`-prefixed identifier
+tested with `is null`/`is not null` alone. It is corpus-wide rather than hand-own-only because the
+converter never emits the form (generated code compares with `== nil`), so the walk needs no
+exception list and catches the next hand-own wherever it lands; comment lines are skipped, and an
+empty walk is a FAILURE rather than a pass so it cannot go green over a hole.
+
 ## Whole-file hand-owns
 
 ### `crypto/subtle`'s word-at-a-time XOR

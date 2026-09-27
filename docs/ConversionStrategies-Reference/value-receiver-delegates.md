@@ -310,20 +310,7 @@ A package named func type whose underlying signature matches is preferred over t
 
 Routing the named-type case through the *declaration* branch instead was the pre-fix behavior and is worse than the missing cast it fixed: `stateFn _ = lexText;` declares a local literally named `_`, which turns every other discard in the same scope into an assignment to it (CS0841 before it, CS0123/CS0029 after) and collides outright with a second one (CS0128). The blank test therefore short-circuits every declaration arm, not just the `var` one. (Guarded by the `BlankIdentifierCollision` extension — all seven RHS shapes plus the func-typed-variable and `:=`-named-delegate controls, proven failing-first at 11 diagnostics in 7 classes.)
 
-## Two `unsafe.Pointer`s compare as BOXES, not as addresses
-`unsafe.Pointer` is the one Go pointer that *carries* an address rather than *being* one, and its C# form says so: golib's `Pointer : ж<uintptr>`, whose `Value` **is** the address. That makes it the one type where the box and its value are both plausible comparands, and Go's rule picks the box — `p == q` is pointer identity.
-
-The box is also the only one that works. `Pointer` overrides `ж<T>.Equals` to compare `PointerOrderToken` (`IsNull ? 0 : Value.Value`), so equality, hashing and ordering are one fact about the address; the base `==`/`!=` operators route through it, and it is nil-safe by construction. Comparing `.Value` instead bypasses all of that: it is right by accident for two non-nil pointers, and it **throws** on a nil one, because a nil `unsafe.Pointer` local is `default!` — a C# null reference.
-
-```go
-k := LoadPointer(&x.i)
-if k != p { … }            // p ranges over testPointers(), whose first element is nil
-```
-```csharp
-if (k != p) { … }          // NOT k.Value != p.Value — that NREs on the nil element
-```
-
-The pointer context is therefore suppressed for an equality comparison with `unsafe.Pointer` on both sides (`convBinaryExpr`), so `convIdent`'s `x.Value` arm — which is correct where an *address* is genuinely wanted — does not fire. The scope is exact: Go admits no other pairing without a conversion (`unsafe.Pointer == *T` and `== uintptr` are type errors), and comparison against untyped `nil` has its own arm and is unaffected. Corpus footprint is seven `runtime` sites (`alg`, `map`, `map_fast32/64`, `mbarrier`, `traceback`, `pprof/map`), each a deref-compare collapsing to a box compare, all verified compiling. (Guarded by the `ManagedAtomicPointer` extension — same-address, distinct-address and nil operands on both sides, a fresh conversion of one address compared against an earlier one, the nil-first table walk, and a selector-versus-ident pairing; the pre-fix converter fails it on both Target and Output, exiting 2 on the nil operand.)
+<a id="two-unsafepointers-compare-as-boxes-not-as-addresses"></a>Moved to [Two `unsafe.Pointer`s compare as BOXES, not as addresses](unsafe-and-native-memory.md#two-unsafepointers-compare-as-boxes-not-as-addresses).
 
 ---
 
