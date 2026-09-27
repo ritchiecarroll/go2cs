@@ -259,8 +259,22 @@ public static partial class builtin
         // sync's testOncePanicX reported the self-contradictory `want panic x, got x`. Normalizing
         // at this single boxing boundary covers every caller — literal, computed, and hand-owned —
         // where a cast at the emission site could only cover the literal.
+        // Go 1.21's panic(nil): recover() observes a *runtime.PanicNilError unless GODEBUG=panicnil=1,
+        // which keeps the nil and counts a non-default event. That rule is runtime.gopanic's, and golib
+        // sits below the runtime and cannot name PanicNilError, so the runtime registers it here
+        // (panicvalues_impl.cs -- the same inversion as RuntimeErrorPanic.IntegerDivideByZeroValue).
+        // With no runtime loaded the nil stays nil, the pre-1.21 behavior.
+        if (state is null && NilPanicValue is { } nilPanicValue)
+            state = nilPanicValue();
+
         return new PanicException(state is string s ? (@string)s : state);
     }
+
+    /// <summary>
+    /// The value <c>panic(nil)</c> carries -- registered by the runtime package, which owns Go's rule
+    /// (a <c>*PanicNilError</c>, or nil under GODEBUG=panicnil=1). Null until the runtime is loaded.
+    /// </summary>
+    public static Func<object?>? NilPanicValue { get; set; }
 
     /// <summary>
     /// Returns the value of the panic being handled by this frame's deferred sequence, if any,
@@ -1559,8 +1573,17 @@ public static partial class builtin
     /// </remarks>
     public static T min<T>(T x, T y) where T : System.Numerics.IComparisonOperators<T, T, bool>
     {
-        if (OrderedFacts<T>.IsFloating && OrderedFacts<T>.IsNaN(in x))
-            return x;
+        if (OrderedFacts<T>.IsFloating)
+        {
+            if (OrderedFacts<T>.IsNaN(in x))
+                return x;
+
+            // SIGNED ZERO, Go's other floating rule: -0 and +0 compare equal, so the bare ternary
+            // answered whichever sat on the RIGHT (runtime's TestMinFloat: "min(-0, 0) = 0, want -0").
+            // An equal pair takes the negative one; for any other equal pair both sides are one value.
+            if (x == y)
+                return OrderedFacts<T>.IsNegative(in x) ? x : y;
+        }
 
         return x < y ? x : y;
     }
@@ -1594,7 +1617,10 @@ public static partial class builtin
                 if (OrderedFacts<T>.IsNaN(in value))
                     return value;
 
-                if (value.CompareTo(result) < 0)
+                // -0 and +0 CompareTo equal: the tie goes to the negative zero (see the two-argument form).
+                int order = value.CompareTo(result);
+
+                if (order < 0 || order == 0 && OrderedFacts<T>.IsNegative(in value))
                     result = value;
             }
 
@@ -1619,8 +1645,15 @@ public static partial class builtin
     /// <returns>The maximum of <paramref name="x"/> and <paramref name="y"/>, NaN if either is NaN.</returns>
     public static T max<T>(T x, T y) where T : System.Numerics.IComparisonOperators<T, T, bool>
     {
-        if (OrderedFacts<T>.IsFloating && OrderedFacts<T>.IsNaN(in x))
-            return x;
+        if (OrderedFacts<T>.IsFloating)
+        {
+            if (OrderedFacts<T>.IsNaN(in x))
+                return x;
+
+            // SIGNED ZERO -- see min: an equal pair takes the NON-negative one (Go: max(-0.0, 0.0) = 0.0).
+            if (x == y)
+                return OrderedFacts<T>.IsNegative(in x) ? y : x;
+        }
 
         return x > y ? x : y;
     }
@@ -1646,7 +1679,10 @@ public static partial class builtin
                 if (OrderedFacts<T>.IsNaN(in value))
                     return value;
 
-                if (value.CompareTo(result) > 0)
+                // -0 and +0 CompareTo equal: the tie goes to the NON-negative zero (see the two-argument form).
+                int order = value.CompareTo(result);
+
+                if (order > 0 || order == 0 && OrderedFacts<T>.IsNegative(in result))
                     result = value;
             }
 
@@ -1712,6 +1748,19 @@ public static partial class builtin
             {
                 8 => double.IsNaN(Unsafe.As<T, double>(ref Unsafe.AsRef(in value))),
                 4 => float.IsNaN(Unsafe.As<T, float>(ref Unsafe.AsRef(in value))),
+                _ => false
+            };
+        }
+
+        // The sign bit, which is the only thing separating -0 from +0: they compare EQUAL, so min/max
+        // break that tie by it (Go's spec: max(-0.0, 0.0) = 0.0, min(-0.0, 0.0) = -0.0).
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsNegative(in T value)
+        {
+            return s_floatWidth switch
+            {
+                8 => double.IsNegative(Unsafe.As<T, double>(ref Unsafe.AsRef(in value))),
+                4 => float.IsNegative(Unsafe.As<T, float>(ref Unsafe.AsRef(in value))),
                 _ => false
             };
         }
@@ -2455,10 +2504,17 @@ public static partial class builtin
     }
 
     // Formats a single print/println argument the way gc's runtime printer does where the BCL
-    // rendering diverges: a bool prints lowercase true/false (bool.ToString() yields True/False).
-    private static string? printArg(object arg)
+    // rendering diverges: a bool prints lowercase true/false (bool.ToString() yields True/False), and
+    // a nil interface prints its two zero words, "(0x0,0x0)", where arg.ToString() threw a
+    // NullReferenceException that surfaced as a Go nil dereference out of the println itself.
+    private static string? printArg(object? arg)
     {
-        return arg is bool value ? value ? "true" : "false" : arg.ToString();
+        return arg switch
+        {
+            null => "(0x0,0x0)",
+            bool value => value ? "true" : "false",
+            _ => arg.ToString()
+        };
     }
 
     /// <summary>

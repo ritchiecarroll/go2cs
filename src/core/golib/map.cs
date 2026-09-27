@@ -203,6 +203,19 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
     // Dictionary keeps the FIRST key and has no way to replace one. A per-instantiation constant.
     private static readonly bool s_keyMayNeedUpdate = GoEqualityComparer.MayHoldSignedZero(typeof(TKey));
 
+    // A Go map KEY is a value, so storing one copies it. golib's array<T> (and any value type carrying
+    // one -- IGoValueClone) is a struct over a SHARED T[] backing, so a stored key that is the caller's
+    // array ALIASES it and moves with the caller's later writes: runtime's TestBigItems mutates key[37]
+    // between inserts of `m[key] = key` and every stored key followed the buffer ("missing key"). The
+    // predicate is array<T>.s_elementNeedsDeepCopy's, the one definition of "a Go copy must re-copy this":
+    // an array kind that is not a slice (a slice key cannot exist in Go), or a value-clone struct. An
+    // INTERFACE key decides per value (keyNeedsClone). A per-instantiation constant otherwise.
+    private static readonly bool s_keyNeedsClone =
+        (typeof(IArray).IsAssignableFrom(typeof(TKey)) && !typeof(ISlice).IsAssignableFrom(typeof(TKey))) ||
+        typeof(IGoValueClone).IsAssignableFrom(typeof(TKey));
+
+    private static readonly bool s_keyMayHoldClonable = typeof(TKey).IsInterface || typeof(TKey) == typeof(object);
+
     private readonly NilKeyDictionary m_map;
 
     // Each of these charges ONE object: the store itself. The bucket and entry arrays Dictionary
@@ -300,6 +313,8 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
                 setNilKey(value);
             else if (s_keyMayNeedUpdate && keyCarriesZero(key))
                 setReplacingKey(key, value);
+            else if (s_keyNeedsClone || s_keyMayHoldClonable && keyNeedsClone(key))
+                setCopyingKey(key, value);
             else
                 m_map[key] = value;
         }
@@ -360,7 +375,7 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
         if (isNilKey(key))
             addNilKey(value);
         else
-            m_map.Add(key, value);
+            m_map.Add(storableKey(key), value);
     }
 
     // Set writes a key with Go's OVERWRITE semantics (unlike Add, which throws on a duplicate
@@ -377,6 +392,8 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
             setNilKey(value);
         else if (s_keyMayNeedUpdate && keyCarriesZero(key))
             setReplacingKey(key, value);
+        else if (s_keyNeedsClone || s_keyMayHoldClonable && keyNeedsClone(key))
+            setCopyingKey(key, value);
         else
             m_map[key] = value;
     }
@@ -475,14 +492,34 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
     {
         if (m_map.Remove(key))
         {
-            m_map.Add(key, value);
+            m_map.Add(storableKey(key), value);
             m_map.KeyEpoch++;
         }
         else
         {
-            m_map[key] = value;
+            m_map.Add(storableKey(key), value);
         }
     }
+
+    // A NEW key is stored as a COPY (see s_keyNeedsClone); an existing one keeps its stored key, which is
+    // what Go does on an overwrite (only NeedKeyUpdate's signed zero replaces it -- setReplacingKey). The
+    // extra lookup is paid only by a clone-needing key.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void setCopyingKey(TKey key, TValue value)
+    {
+        if (m_map.ContainsKey(key))
+            m_map[key] = value;
+        else
+            m_map.Add(storableKey(key), value);
+    }
+
+    // The key as the store must hold it: a copy when it carries shared backing, else itself.
+    private static TKey storableKey(TKey key) =>
+        s_keyNeedsClone || s_keyMayHoldClonable && keyNeedsClone(key) ? (TKey)((ICloneable)key!).Clone() : key;
+
+    // An INTERFACE key's dynamic value decides (the same predicate as s_keyNeedsClone, per value).
+    private static bool keyNeedsClone(TKey key) =>
+        key is IArray and not ISlice || key is IGoValueClone;
 
     // The key a range must produce for a snapshotted entry when a key was replaced during the range:
     // the stored one, found by the store's own comparer. Paid only after a replacement happened.

@@ -304,20 +304,31 @@ partial class atomic_package
     {
         lock (s_wideLatch)
         {
-            @unsafe.Pointer current = ptr.Value;
+            // The STRUCTURAL read and write (`~ptr`, ValueSlot): ptr is a non-nil *unsafe.Pointer
+            // whose slot may HOLD nil, which is an ordinary Go read. `.Value` is the value-peeking
+            // dereference guard and refuses a heap cell holding null — Casp1 over a never-stored
+            // `var p unsafe.Pointer` panicked where Go swaps. A nil ptr itself still panics in `~`.
+            @unsafe.Pointer current = ~ptr;
 
             // Two distinct Pointer objects addressing the same location ARE the same pointer to
-            // Go, so the comparison is on the wrapped number (nil ⇔ null ⇔ 0).
-            // ValueSlot, not Value: a nil unsafe.Pointer is a Pointer box marked nil, and Value on
-            // it panics as a nil dereference, so a swap from nil (traceMap.put's first insert) died.
-            uintptr currentValue = current is null ? default : current.ValueSlot;
-            uintptr oldValue = old is null ? default : old.ValueSlot;
+            // Go, so the comparison is on the wrapped number (nil ⇔ null ⇔ nil-marked ⇔ 0). Nil
+            // has TWO managed spellings — a never-stored C# null and the nil-MARKED box the
+            // converter mints for a nil operand (FromPinnedBox(null), Pointer(nil)) — and the
+            // marked one refuses .Value as a nil dereference, so reading it unguarded made every
+            // atomic.Pointer[T].CompareAndSwap(nil, x) panic (runtime's godebugInc.IncNonDefault).
+            uintptr currentValue = addressOf(current);
+            uintptr oldValue = addressOf(old);
 
             if (currentValue != oldValue)
                 return false;
 
-            ptr.Value = @new;
+            ptr.ValueSlot = @new;
             return true;
         }
     }
+
+    // The address an unsafe.Pointer carries, 0 for either nil spelling. IsNull is the STRUCTURAL nil
+    // question for this type (its pointee is uintptr, a value type — see unsafe.Pointer).
+    private static uintptr addressOf(@unsafe.Pointer? pointer) =>
+        pointer is null || pointer.IsNull ? default : pointer.Value;
 }

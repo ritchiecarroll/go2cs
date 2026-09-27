@@ -395,6 +395,22 @@ partial class runtime_package
     // read, and runtime/metrics.Read reports it from then on.
     public static void godebugRegisterMetric(@string name, Func<uint64> read) => godebug_registerMetric(name, read);
 
+    // godebugSetNewIncNonDefault is internal/godebug's //go:linkname setNewIncNonDefault, the same
+    // crossing: Go's godebug registers its counter factory from init, and the runtime's own GODEBUG
+    // settings (panicnil, asynctimerchan, ...) count their non-default events through it
+    // (godebugInc.IncNonDefault). Without the registration every such increment was dropped on the
+    // floor — Go's documented behavior only for "calls before internal/godebug registers itself".
+    public static void godebugSetNewIncNonDefault(Func<@string, Action> newIncNonDefault) => godebug_setNewIncNonDefault(newIncNonDefault);
+
+    // syscallRuntimeSetenv / syscallRuntimeUnsetenv are syscall's runtimeSetenv/runtimeUnsetenv, the
+    // same crossing. The environment itself needs no mirroring (syscall reads the live process
+    // environment), but the runtime's HALF of the call does: when the key is GODEBUG it reparses the
+    // runtime's atomic debug settings, which is how `t.Setenv("GODEBUG", "panicnil=1")` reaches
+    // debug.panicnil. A no-op in syscall left every such setting at its startup value.
+    public static void syscallRuntimeSetenv(@string key, @string value) => syscall_runtimeSetenv(key, value);
+
+    public static void syscallRuntimeUnsetenv(@string key) => syscall_runtimeUnsetenv(key);
+
     // GC runs a garbage collection and blocks the caller until the garbage collection is complete.
     public static void GC()
     {

@@ -27,6 +27,8 @@ namespace go;
 using System;
 using System.Runtime.CompilerServices;
 using go.golib;
+using atomic = @internal.runtime.atomic_package;
+using @internal.runtime;
 
 public static partial class runtime_package
 {
@@ -37,5 +39,18 @@ public static partial class runtime_package
         // module initialization would force this type's static constructor to run ahead of the
         // rest of the package's own initialization order.
         RuntimeErrorPanic.IntegerDivideByZeroValue = static () => divideError;
+
+        // Go 1.21's panic(nil), gopanic's own first branch verbatim (panic.go): a *PanicNilError unless
+        // GODEBUG=panicnil=1, which keeps the nil and counts the non-default event. golib's panic never
+        // reaches gopanic, so before this it wrapped the nil itself and runtime's TestPanicNil read
+        // recover() = nil where Go reads a *PanicNilError. Deferred to first use, like divideError.
+        builtin.NilPanicValue = static () =>
+        {
+            if (Ꮡdebug.of(debugᴛ1.Ꮡpanicnil).Load() != 1)
+                return @new<PanicNilError>();
+
+            panicnil.IncNonDefault();
+            return null;
+        };
     }
 }

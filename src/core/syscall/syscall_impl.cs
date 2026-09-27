@@ -40,16 +40,20 @@ partial class syscall_package
         return 4096;
     }
 
-    // In Go these keep the RUNTIME's private copy of the environment in sync with the process
-    // environment that syscall.Setenv/Unsetenv just changed via SetEnvironmentVariable. go2cs has
-    // no such second copy — syscall.Getenv/Environ read the live process environment through
-    // GetEnvironmentVariableW/GetEnvironmentStringsW every time — so there is nothing to mirror
-    // and the correct behavior is to do nothing.
+    // Go's runtime provides these (runtime.syscall_runtimeSetenv/Unsetenv): they mirror the change
+    // into the C environment when cgo is loaded, and when the key is GODEBUG they reparse the
+    // runtime's atomic debug settings. The first half is inert here (no cgo), but the second is not:
+    // with a do-nothing body `t.Setenv("GODEBUG", "panicnil=1")` never reached debug.panicnil, so
+    // runtime's TestPanicNil/GODEBUG=panicnil=1 still saw a *PanicNilError. The runtime symbols are
+    // `internal` under the exported-ness rule, so the call crosses through the runtime's public
+    // shims (managed_impl.cs, the registerPoolCleanup pattern), which forward unchanged.
     internal static partial void runtimeSetenv(@string k, @string v)
     {
+        runtime_package.syscallRuntimeSetenv(k, v);
     }
 
     internal static partial void runtimeUnsetenv(@string k)
     {
+        runtime_package.syscallRuntimeUnsetenv(k);
     }
 }

@@ -2162,6 +2162,13 @@ internal static @string methodName() {
     iter.mustBeStarted("MapIter.Key");
     object? cur = iter.mapEnum?.Current;
     object? key = cur?.GetType().GetProperty("Key")?.GetValue(cur);
+
+    // Go hands out a COPY of a map key. An array key (or a value struct carrying one) boxed here still
+    // shares the STORED key's backing, so a write through the handed-out value would move the key inside
+    // the map (golib's map copies a key on insert for the same reason -- see map<K,V>.s_keyNeedsClone).
+    if (key is IArray and not ISlice || key is IGoValueClone) {
+        key = ((ICloneable)key).Clone();
+    }
     return iter.mapKeyType is null ? makeReflectValue(key) : makeTypedValue(key, iter.mapKeyType, null, iter.mapRO);
 }
 

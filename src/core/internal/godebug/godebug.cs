@@ -145,6 +145,26 @@ private sealed class NonDefaultCounter {
 private static readonly ConcurrentDictionary<string, NonDefaultCounter> s_nonDefault =
     new(StringComparer.Ordinal);
 
+// Go's `func init() { setNewIncNonDefault(newIncNonDefault) }`, in effect verbatim: the runtime's own
+// GODEBUG settings (panicnil, asynctimerchan, ...) count their non-default events through this factory
+// (runtime.godebugInc.IncNonDefault), and until it is registered the runtime drops every increment.
+// Nothing registered it before, so runtime's TestPanicNil/GODEBUG=panicnil=1 read an unmoved
+// /godebug/non-default-behavior/panicnil:events. The linkname target is `internal` in the runtime, so
+// the call crosses through its public shim (managed_impl.cs). A module initializer is init()'s slot: it
+// stores one delegate and touches no static of this package.
+[ModuleInitializer]
+internal static void ᴛRegisterNewIncNonDefault() {
+    global::go.runtime_package.godebugSetNewIncNonDefault(newIncNonDefault);
+}
+
+// newIncNonDefault is Go's, line for line: s.Value() first (it panics for a name not in godebugs.All,
+// exactly as Go's does), then the setting's own IncNonDefault as the counter.
+private static Action newIncNonDefault(@string name) {
+    var s = New(name);
+    s.Value();
+    return () => s.IncNonDefault();
+}
+
 // Value returns the current value for the GODEBUG setting s.
 //
 // Value maintains an internal cache that is synchronized

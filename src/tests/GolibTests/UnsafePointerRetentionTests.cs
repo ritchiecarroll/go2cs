@@ -85,8 +85,8 @@ public class UnsafePointerRetentionTests
         // *unsafe.Pointer signature), then load through the bare-Pointer form. The collection in
         // the middle is what retires the old accidental aliasing: the raw transient address kept
         // working only until the collector moved the slot's storage. (The CAS runs from a non-nil
-        // initial: the latched siblings' number-compare reads `.Value`, which the nil-marked form
-        // refuses — a pre-existing sibling shape outside this guard's scope.)
+        // initial: the latched siblings' number-compare used to read `.Value`, which the nil-marked
+        // form refuses — fixed since, and guarded by AtomicPointerNilCompareTests.)
         ref @unsafe.Pointer cell = ref heap(new @unsafe.Pointer((uintptr)0x1), out ж<@unsafe.Pointer> Ꮡcell);
         @unsafe.Pointer initial = cell;
 
