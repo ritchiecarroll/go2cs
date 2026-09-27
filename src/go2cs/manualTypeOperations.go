@@ -512,6 +512,14 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// being skipped. ReadTrace and the rest of the tracer genuinely do stay auto: they are
 		// reached only from the goroutine trace.Start spawns AFTER it succeeds, which it never does.
 		"StopTrace": goosWindowsLinux,
+		// runtime.ReadTrace joins them 2026-09-27 (Q28, the managed execution tracer): StartTrace now
+		// SUCCEEDS on these two flavors -- golib's ExecutionTracer writes Go's v2 trace from the
+		// goroutine registry -- so the goroutine trace.Start spawns reaches ReadTrace, whose converted
+		// body is the runtime tracer's own reader (systemstack(readTrace0) and a gopark on
+		// waitReasonTraceReaderBlocked). The hand-own reads golib's buffered batches instead. The
+		// sentences above about refusal and unreachability describe the pre-Q28 state; the rest of the
+		// converted tracer stays auto and unreachable.
+		"ReadTrace": goosWindowsLinux,
 		// stopTheWorld refuses by name BEFORE it takes worldsema: the converted stopTheWorldWithSema
 		// died on the nil P while worldsema was held, which leaked the permit to every later caller
 		// once runtime's semaphore could park (sema_impl.cs). goroutineProfileWithLabels refuses by
@@ -529,14 +537,6 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// traceMap's node lives in Go-layout memory: newTraceMapNode reinterprets traceRegionAlloc
 		// bytes as a reference-bearing traceMapNode. It is allocated managed instead (tracemap_impl.cs).
 		"traceMap.newTraceMapNode": goosAny,
-		// runtime.ReadTrace joins them 2026-09-27 (Q28, the managed execution tracer): StartTrace now
-		// SUCCEEDS on these two flavors -- golib's ExecutionTracer writes Go's v2 trace from the
-		// goroutine registry -- so the goroutine trace.Start spawns reaches ReadTrace, whose converted
-		// body is the runtime tracer's own reader (systemstack(readTrace0) and a gopark on
-		// waitReasonTraceReaderBlocked). The hand-own reads golib's buffered batches instead. The
-		// sentences above about refusal and unreachability describe the pre-Q28 state; the rest of the
-		// converted tracer stays auto and unreachable.
-		"ReadTrace": goosWindowsLinux,
 		// The PROCESS-CONTROL surface (managed_impl.cs). Each of these is a public runtime API
 		// whose converted body drives Go's own scheduler / GC pacer — stopTheWorld, gcStart,
 		// mcall(gosched_m), the g/m/p stack walk — machinery that has no managed counterpart and

@@ -69,17 +69,17 @@ public static void BenchmarkFastrandn(ж<testing.B> Ꮡb) {
 }
 
 //go:linkname fastrand runtime.fastrand
-internal static uint32 fastrand() {
+[global::System.Diagnostics.StackTraceHidden] internal static uint32 fastrand() {
     return global::go.runtime_package.legacy_fastrand();
 }
 
 //go:linkname fastrandn runtime.fastrandn
-internal static uint32 fastrandn(uint32 _) {
+[global::System.Diagnostics.StackTraceHidden] internal static uint32 fastrandn(uint32 _) {
     return global::go.runtime_package.legacy_fastrandn(_);
 }
 
 //go:linkname fastrand64 runtime.fastrand64
-internal static uint64 fastrand64() {
+[global::System.Diagnostics.StackTraceHidden] internal static uint64 fastrand64() {
     return global::go.runtime_package.legacy_fastrand64();
 }
 
