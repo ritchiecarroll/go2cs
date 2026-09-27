@@ -1492,7 +1492,7 @@ package passes in would then not match the copy the test uses. Referencing keeps
 names each test whose C# result is known to differ from `go test`, with the reason. A test that fails
 without such an entry counts as a mismatch.
 
-**Full detail:** [Reference → Test suites reference the production project](ConversionStrategies-Reference/shadowing.md#test-suites-reference-the-production-project-instead-of-recompiling-it) — the test-project models and when each applies, the internal bridge class and its metadata files, test-side name collisions, and exactly which test files get no `.cs`.
+**Full detail:** [Reference → Test suites reference the production project](ConversionStrategies-Reference/test-conversion.md#test-suites-reference-the-production-project-instead-of-recompiling-it) — the test-project models and when each applies, the internal bridge class and its metadata files, test-side name collisions, and exactly which test files get no `.cs`.
 
 ---
 

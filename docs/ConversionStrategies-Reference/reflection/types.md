@@ -158,6 +158,10 @@ build a descriptor for" rule `ChanDir` settles on. A defined func type carrying 
 own delegate and keeps its name. Guarded by `ReflectBridgeClosure` (six unnamed shapes and one named,
 against `go run`) and `GolibTests.GoReflectBridgeClosureTests`.
 
+### `reflect` reads a package class's `[GoPackage]` stamp, not its NAME
+
+A sixth, in `golib`, was masked behind those compile failures: **`reflect` reads a package class's `[GoPackage]` stamp, not its NAME.** `GoReflect` reconstructed a type's Go package by trimming `_package` off the declaring class name — a heuristic the bridge breaks by design, since `binary_internal_test_package` hosts declarations Go-declared in `package binary`. Both readers (`GoTypeName`'s qualifier and `PkgPath`) now prefer the stamp, with the name-trim kept only for a hand-written class carrying none; the two agree for every ordinary converted package. encoding/binary catches it through Go's own asserts twice: `TestNoFixedSize` compares the error text `… not fixed-sized in type *binary.Person`, and `TestSizeAllocs` NAMES its subtests from `reflect.TypeOf(v)`, so a whole subtest set appeared under invented names with no Go counterpart.
+
 ## Method tables
 
 ### The method COUNT is a descriptor read too — `rtype.NumMethod`
