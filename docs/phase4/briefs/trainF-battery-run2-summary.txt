@@ -1,0 +1,54 @@
+08:30:44 PRE head=efc9c093de tree=4a2a4e3ce2 master=02b1b58793 go version go1.24.13 windows/amd64 dotnet=10.0.400 free=3670G tracked-changes=0
+08:39:02 LEG C rc=0 wall=497s free=3670G log=conv-suite.log
+08:39:02   C: ok  	go2cs	482.006s ok  	go2cs/internal/releasestamp	0.234s ok  	go2cs/internal/repoguard	150.517s 
+09:26:15 LEG E rc=0 wall=2832s free=3670G log=emitcheck.log
+09:26:15   E: EMIT M-windows rc=0 wall=433s written=1830 drift=1 :: Copied 6 of 6 root attribution files into H:\go2cs-tmp-coord\tFemitfull\M-windows\src\core EMIT M-linux rc=0 wall=463s written=1901 drift=4 :: Copied 6 of 6 root attribution files into H:\go2cs-tmp-coord\tFemitfull\M-linux\src\core EMIT M-darwin rc=0 wall=481s written=1905 drift=4 :: Copied 6 of 6 root attribution files into H:\go2cs-tmp-coord\tFemitfull\M-darwin\src\core EMIT U-windows rc=0 wall=428s written=1830 drift=1 :: Copied 6 of 6 root attribution files into H:\go2cs-tmp-coord\tFemitfull\U-windows\src\core EMIT U-linux rc=0 wall=429s written=1901 drift=4 :: Copied 6 of 6 root attribution files into H:\go2cs-tmp-coord\tFemitfull\U-linux\src\core EMIT U-darwin rc=0 wall=429s written=1905 drift=4 :: Copied 6 of 6 root attribution files into H:\go2cs-tmp-coord\tFemitfull\U-darwin\src\core windows: master-drift=1 union-drift=1 unio
+09:26:32 LEG G1 rc=0 wall=16s free=3670G log=roster.log
+09:26:32   G1: legacy alloc-profile in rows banked at go1.24.13: 219 rows read (253 entries), 0 rows older than the pin (not gated), 0 refused    roster format guard: 1859 checks pass (219 rows, 216 with a linux annotation, 3 with an execution config, 6 excluded)  
+09:26:35 LEG SY rc=0 wall=2s free=3670G log=symbol-sync.log
+09:26:35   SY: gensymbols: symbols.go up to date gensymbols: ..\core\go2cs\Symbols.cs up to date Symbol projections are in sync with symbols.json.  
+09:49:22 LEG 2b rc=0 wall=1365s free=3667G log=go2cs-slnx.log
+09:49:22   2b: errors=0 warnings-line=    806 Warning(s)     0 Error(s) 
+09:49:35 LEG GN rc=0 wall=12s free=3667G log=gentests.log
+09:49:35   GN: Passed!  - Failed:     0, Passed:    66, Skipped:     0, Total:    66, Duration: 6 s - GenTests.dll (net10.0) :: failed-names: 
+09:53:10 LEG GT-Debug rc=0 wall=214s free=3667G log=golibtests-Debug.log
+09:53:10   GT-Debug: Passed!  - Failed:     0, Passed:  1033, Skipped:    24, Total:  1057, Duration: 2 m 49 s - GolibTests.dll (net10.0) :: failed-names: 
+10:01:13 LEG GT-Release rc=0 wall=482s free=3667G log=golibtests-Release.log
+10:01:13   GT-Release: Passed!  - Failed:     0, Passed:  1041, Skipped:    16, Total:  1057, Duration: 2 m 49 s - GolibTests.dll (net10.0) :: failed-names: 
+10:02:50 PURGE(after-GT) purged=2809 remaining=0 tracked-deletions=0 free=3670G
+10:23:41 LEG 4 rc=0 wall=1250s free=3670G log=cnr.log
+10:23:41   4: ==> NO REGRESSION: generated C# and .csproj are byte-identical across all 742 behavioral packages (54 advisory converter warnings) (6 platform-exclusive skipped: MulticastGroupJoin, ScmRightsSeam, SendtoSeam, SetegidBroadcastSeam, UnixAbstractAddrName, WritevIovecSeam). 
+10:23:45 PURGE(after-CNR) purged=1 remaining=0 tracked-deletions=0 free=3670G
+13:01:16 LEG 5 rc=0 wall=9449s free=3666G log=behavioral.log
+13:01:16   5: [Compile]  C# (one-shot parallel build of 703)... ok [Compile]  Go (per project)... ok [Output]   running C# vs Go, comparing exit code + stdout... 673 compared, 0 failed   Transpile  pass  703   fail    0   skip    0   timeout    0   Compile    pass  703   fail    0   skip    0   timeout    0   Target     pass  703   fail    0   skip    0   timeout    0   Output     pass  673   fail    0   skip   30   timeout    0 PASS  (703 projects, 9,441.7s) 
+13:01:16   5 named: FuncLiteralCallerNames=0 :: FAIL lines: Compile Go Output Target Transpile 
+13:04:13 PURGE(after-behavioral) purged=2650 remaining=0 tracked-deletions=0 free=3671G
+13:18:56 LEG H7-windows rc=0 wall=882s free=3669G log=h7-windows.log
+13:18:57   H7-windows: CS=0 MSB/NETSDK=0 :: 
+13:19:41 PURGE(after-H7-windows) purged=1031 remaining=0 tracked-deletions=0 free=3669G
+13:33:11 LEG H7-linux rc=0 wall=809s free=3669G log=h7-linux.log
+13:33:12   H7-linux: CS=0 MSB/NETSDK=0 :: 
+13:34:28 PURGE(after-H7-linux) purged=1031 remaining=0 tracked-deletions=0 free=3669G
+13:52:24 LEG H7-darwin rc=0 wall=1075s free=3668G log=h7-darwin.log
+13:52:25   H7-darwin: CS=0 MSB/NETSDK=0 :: 
+13:52:50 PURGE(after-H7-darwin) purged=1031 remaining=0 tracked-deletions=0 free=3669G
+14:01:10 LEG S:internal/trace rc=0 wall=498s free=3669G log=sweep-internal.trace.log
+14:01:10   S:internal/trace:   PASS  internal/trace                     92 [484s]
+14:03:11 LEG S:internal/sync rc=0 wall=119s free=3669G log=sweep-internal.sync.log
+14:03:11   S:internal/sync:   PASS  internal/sync                      106 [115s]
+14:11:31 LEG S:sync/atomic rc=0 wall=498s free=3669G log=sweep-sync.atomic.log
+14:11:31   S:sync/atomic:   PASS  sync/atomic                        108 [494s]
+14:12:25 LEG S:weak rc=0 wall=53s free=3669G log=sweep-weak.log
+14:12:26   S:weak:   PASS  weak                               6 [47s]
+14:13:29 LEG S:bufio rc=0 wall=62s free=3668G log=sweep-bufio.log
+14:13:29   S:bufio:   PASS  bufio                              80 [59s]
+14:14:31 LEG S:bytes rc=0 wall=60s free=3668G log=sweep-bytes.log
+14:14:31   S:bytes:   PASS  bytes                              83 [57s]
+14:15:47 LEG S:context rc=0 wall=75s free=3668G log=sweep-context.log
+14:15:47   S:context:   PASS  context                            57 [71s]
+14:17:26 LEG S:crypto/ed25519 rc=0 wall=98s free=3668G log=sweep-crypto.ed25519.log
+14:17:26   S:crypto/ed25519:   PASS  crypto/ed25519                     9 [95s]
+14:22:22 LEG S:crypto/internal/fips140test rc=0 wall=295s free=3667G log=sweep-crypto.internal.fips140test.log
+14:22:22   S:crypto/internal/fips140test:   PASS  crypto/internal/fips140test        2260 [291s]
+14:23:26 LEG S:crypto/md5 rc=0 wall=63s free=3667G log=sweep-crypto.md5.log
+14:23:26   S:crypto/md5:   PASS  crypto/md5                         11 [59s]

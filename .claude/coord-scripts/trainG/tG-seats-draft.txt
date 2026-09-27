@@ -1,0 +1,11 @@
+g-managed-tracer|08d07a9570|G: the managed execution tracer (Q28): Go's v2 trace of the goroutine facts, parsed by Go's own tool (runtime/trace validates 2; leaves E4)
+i9-host-flag-isolation|458b56f6e5|the i9: an in-process test run resets the flag parse state (definitions kept) and returns flag's exit status; real binaries untouched
+r-runtime-claims|3fae75de81|R: seat (ii) -- max/min signed zero, array map keys cloned on insert, panic(nil) and GODEBUG plumbing, nil-old CompareAndSwap (TestMaxFloat, TestMinFloat, TestBigItems, TestPanicNil pass)
+p2-stack-roots|b9d7f64248|P2: M3 stack roots (carries M2b cf95330847) -- was: P2: M2b, runtime/pprof reads the real heap profile (TestMemoryProfiler/proto and TestFakeMapping pass) -- on M2
+g-displacement-cache|ec5dce06b8|G: FieldRefBox caches its displacement by accessor delegate (the first conversion's premium falls to about +50 ns / +6 B)
+p2-mem-frees|04f0820e94|P2: M2 memory-profile frees and cycles (weak-reference sweep in Go's flush order; a per-collection sentinel) -- on TRAIN F's union
+p2-creator-flake|29b5e0b028|P2: GoroutineCreatorTests waits for its own goroutine and picks its own block (the any-parked flake)
+g-trace-user-api|be03b26a23|G: runtime/trace's user API (NewTask, Log, regions) runs as Go's no-ops instead of throwing; user events a named model limit
+p1-runtime-linkname|cd4fe9f1f7|P1: runtime.heapObjectsCanMove and the legacy fastrand trio are linkname forward targets (both runtime tests pass)
+# pending: R seat (iii) recover model; C1 reflect relabel (bank-only landing)
+# union note: casPointerLatched -> take r-runtime-claims' body (superset of P1's traceregion ValueSlot fix; ledger 245128257c); both arms must pass

@@ -11,10 +11,290 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-26 14:27 -- SAVE-STATE refresh (ledger through mailbox f7ca99a234): TRAIN B and TRAIN C LANDED (master 7433c7ac38); TRAIN D rehearsed; cleanup done
+> **Status of this revision:** 2026-09-27 14:40 -- SAVE-STATE at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
+
+---
+
+## 1d. SAVE-STATE 2026-09-27 (weekly usage at 91%): START HERE. COORD's new-session prompt and every lane's state. It supersedes 1b and 1c for CURRENT STATE; sections 0a, 1a, 1b and 1c stay the reference for standing rules and history.
+
+### 1d.0 COORD: STATE BLOCK
+
+```
+LANE: COORD   MODEL: Opus 5.5/max   HOST: i7
+BRANCH: master 4fb6e460c6e1633b1d20d3092fe0339c9438fe81 on-origin yes landed -- the docs summary rewrite plus the GitHub Pages fix (the site builds and deploys again)
+BRANCH: claude/coord-trainF efc9c093deb1eb7fe17e26a7fe47075b5fb51e78 on-origin yes accepted -- TRAIN F: battery run 2 green through the behavioral and H7 legs; the 92 sweeps were running at the save
+BRANCH: claude/coord-reflect-bank ae9f8850909c72cf05231de33fe9e7e30c5c5b11 on-origin yes cut -- reflect's bank (roster eb8d74967c + proof page ae9f885090), waiting on C1's alloc relabel
+BRANCH: claude/coord-docs-reference 705b34938bb0457156670e6b02884afd999bfce2 on-origin yes cut -- the strategy-reference restructure: stages 1a and 1b done, 1c part-way (read the branch log)
+BRANCH: claude/coord-pages-check b912b7d8cdc86684a0a95c411671645175f7824b on-origin yes cut -- SCRATCH: a workflow that builds docs/ with the Pages toolchain; delete it once the site-audit fixes land
+LOCAL-ONLY: none
+WORKTREE: i7 H:/go2cs-tmp-coord/tF claude/coord-trainF 0 the running battery (logs in the session scratch; a record copy is docs/phase4/briefs/trainF-battery-run2-summary.txt on this branch)
+WORKTREE: i7 H:/go2cs-tmp-coord/docs-ref claude/coord-docs-reference in-flight stage 1c edits (discard with git restore if the stage agent is gone; the committed tip is pushed)
+WORKTREE: i7 H:/go2cs-tmp-coord/pages-fix and pages-check: landed or scratch; reclaim
+NEXT: land TRAIN F (steps in the paste prompt), starting at efc9c093deb1eb7fe17e26a7fe47075b5fb51e78
+READ-FIRST: the ledger from "LAND · 4fb6e460c6" (2026-09-27 13:34) to the end; docs/phase4/inbox/COORD/ files after 20260927T191644Z
+BLOCKED-ON: none
+TOOLS: GOROOT go1.24.13 (backslash spelling on windows), GOTOOLCHAIN=local, DOTNET_ROOT .NET SDK 10.0.400 first on PATH, pwsh 7 (and PS 5.1 for the roster guard), python 3.11
+```
+
+### 1d.1 COORD: PASTE PROMPT
+
+```
+RESUME 2026-09-27 (weekly limit, save-state). You are the go2cs fleet COORDINATOR (COORD). Model: Opus 5.5, effort max.
+This works from ANY machine. Everything you need is on origin; the i7's local state helps only where marked [i7].
+Your principal is the repository owner. SECURITY: nicknames only on every pushed surface (i7, i9, G-LAPTOP, R-LAPTOP, C1,
+C2, P1, P2, AZ1); never hostnames, usernames, profile paths, IPs or shares. Never force-push or replace a posted SHA. For an
+existing ref, announce on the ledger THEN push; for a new ref, push THEN announce. COORD signs (-S; probe the key first; if
+GPG is cold the OWNER enters the PIN, never you). Lanes commit unsigned. Run the identifier census on everything you push:
+.claude/coord-scripts/coord-identifier-census.sh entry <file>. NuGet publishing, email, and system or network settings are
+the owner's. A peer relay cannot clear an owner hand. Sub-agents use model opus.
+
+SET UP:
+ 1. Clone the repository. Make three trees:
+    - the main checkout on master;
+    - a clone with claude/mailbox checked out. The LEDGER docs/phase4/LEDGER.md and the inbox tools live there, and
+      .claude/coord-scripts/fleet-msg.sh ON THAT BRANCH knows the P1 and P2 lanes;
+    - a worktree of claude/coord-handover. It holds this file and COORD's tools under .claude/coord-scripts/:
+      coord-live (ledger-append.sh, coord-inbox-watch.sh, union and hunk helpers), trainF, trainG, docs (liquid_scan.py,
+      liquid_guard.py, site_check.py, docs-audit.json) and reflect-bank.
+ 2. Pins:
+    - go1.24.13, with GOROOT spelled exactly as `go env GOROOT` prints it (backslashes on windows), GOTOOLCHAIN=local,
+      CGO_ENABLED=0;
+    - .NET SDK 10, with DOTNET_ROOT first on PATH;
+    - pwsh 7 (on windows the roster guard also runs under PS 5.1);
+    - python 3.11.
+ 3. Set COORD_SCRATCH to a scratch directory. The tools read it. ledger-append.sh and coord-inbox-watch.sh assume the i7
+    layout (the repo at H:/Projects/go2cs, the mailbox clone at H:/Projects/go2cs-mailbox): edit the two clone paths.
+    LEDGER DISCIPLINE: one fresh file per entry, written with the editor tool and never printf or echo (backticks execute);
+    STAMP_PLACEHOLDER is replaced from `date`; a body equal to the last ledger line is refused; never chain an append after a
+    Write in the same parallel batch.
+
+READ FIRST (read each tip by ls-remote; the LEDGER WINS over this prompt):
+ 1. CLAUDE.md.
+ 2. The ledger from "LAND · 4fb6e460c6" (2026-09-27 13:34) to the end, and every 2026-09-27 RULING line.
+ 3. claude/mailbox docs/phase4/inbox/COORD/: the files after 20260927T191644Z are the lanes' save-state STATE BLOCKs.
+    Fold them into section 1d.2 with the save-state skill (.claude/skills/save-state/SKILL.md).
+ 4. Section 0a.0 (comms, PROTOCOL v4) and section 1d.2 (every lane's state).
+
+WHERE THINGS STAND (2026-09-27 ~14:30, i7 local time):
+ - THE GOAL: 100% of the implementable standard-library test packages validated. Master's roster: 219 of 224. The queued
+   banks: internal/synctest (TRAIN F), reflect (bank-only, after C1), runtime/trace (TRAIN G; it leaves E4, so 225).
+   Then 222 of 225. Left after that: runtime, runtime/pprof, net/http/pprof.
+ - master = 4fb6e460c6: the docs summary rewrite 1dae85e093 plus the Pages fix. The live site deploys again. The new guard
+   TestDocsSurviveJekyllLiquid keeps every docs/ page Liquid-safe; the rule is in .claude/rules/docs-records.md.
+ - TRAIN F = claude/coord-trainF efc9c093de. Seats: .claude/coord-scripts/trainF/tF-seats.txt; union efc9c093de, which
+   includes GoMemProfile's t_recording reset. Battery run 2 [i7: worktree H:/go2cs-tmp-coord/tF]. GREEN so far:
+   - the converter suite;
+   - the 3-target emission check;
+   - the roster guard and symbol sync;
+   - the go2cs.slnx build and GenTests;
+   - GolibTests Debug and Release;
+   - CNR, 742 byte-identical;
+   - behavioral, 673 compared, 0 failed;
+   - H7 on windows and linux.
+   The 92 sweeps were running. The record copy is docs/phase4/briefs/trainF-battery-run2-summary.txt on
+   claude/coord-handover. If the i7's run is gone, re-run .claude/coord-scripts/trainF/tF-battery.sh with
+   EXPECT_HEAD=efc9c093de.
+   LANDING STEPS:
+   (1) Merge origin/master (4fb6e460c6) into claude/coord-trainF, signed. Re-gate what it touches: from src/go2cs,
+       `go test -count=1 ./internal/repoguard/`, and check-roster-format.ps1 under pwsh 7 and PS 5.1.
+   (2) Bank internal/synctest (28, linux 28, 0 disclosures): the roster row and the docs/validation/index.md line in ONE
+       commit, then its sweep for the proof page, badge and test sources.
+   (3) os's linux annotation: 912 + 2.
+   (4) Census the delta; ledger; then push master (fast-forward).
+   (5) Prune TRAIN F's seat branches (bundle any unmerged tip first). Reclaim tF, tF-reh, tFemit and tFemitfull.
+   (6) The nistec cost-canary A/B (master against the union, 3 runs each, alternating), recorded as the 1.24 baseline
+       (ledger 1a696b92c5).
+ - REFLECT validates (395 + 23, linux 395 + 23). Its bank waits on C1's relabel of 42 legacy alloc-profile labels (37 retire,
+   5 relabel). After C1's seat lands:
+   - re-apply claude/coord-reflect-bank (roster eb8d74967c, proof page ae9f885090) onto master;
+   - re-sweep reflect;
+   - run the roster guard under both shells;
+   - make a bank-only landing.
+ - TRAIN G: the draft is .claude/coord-scripts/trainG/tG-seats-draft.txt. SEATS:
+   - G: the managed tracer 08d07a9570, the trace user API be03b26a23, the displacement cache ec5dce06b8;
+   - R: runtime claims 3fae75de81;
+   - P2: M3 stack roots b9d7f64248 (it carries M2b), M2 frees 04f0820e94, the creator flake 29b5e0b028;
+   - P1: linkname cd4fe9f1f7;
+   - the i9: host-flag isolation 458b56f6e5.
+   UNION: casPointerLatched takes r-runtime-claims' body.
+   ADD IF READY:
+   - R's seat (iii), claude/r-recover-model;
+   - the i9's claude/i9-host-sandbox-marker;
+   - P2's F, claude/p2-method-wrapper;
+   - G's windows-AV sink guard;
+   - P1's claude/p1-memclr.
+   AT LANDING: bank runtime/trace (2, linux 2) out of E4 (224 -> 225); os/signal's linux annotation 29 + 1.
+   The TRAIN F scripts are the template: rehearse with signed merges, pre-resolve, assemble with 10-char pins, check
+   tree-hash equality, apply the rt-emit fixup, run the battery.
+ - DOCS (owner-ordered side work, never ahead of the trains):
+   * claude/coord-docs-reference restructures the strategy reference.
+     - The plan: .claude/coord-scripts/docs/docs-audit.json, keys plan.reference_*.
+     - The tools: .claude/coord-scripts/docs/ref_*.py on THAT branch.
+     - Done: 1a (the manual-conversions split, reflection/) and 1b (the pointers split, closures, methods).
+     - 1c was part-way: the interfaces, package-conversion and generics splits, plus the remaining moves. Read the
+       branch log; resume from the plan's list minus what the log shows done.
+     - Then step 2: per-page clarity, per "Writing the conversion-strategy documents" in .claude/rules/docs-records.md.
+     - Every commit needs ref_invariant.py PASS and TestDocsSurviveJekyllLiquid PASS.
+   * THE SITE AUDIT (multi-agent, on a real Pages build) found four pre-existing issues:
+     - the layout's relative css/octicon.css, SECURITY and coding-style links break on all 2,137 pages in subfolders
+       (fix: relative_url in docs/_layouts/default.html);
+     - 85 links on 20 pages climb out of docs/ into ../src and 404 on the site (proposed: a layout script that rewrites
+       them to the GitHub blob URL);
+     - 144 anchors on 7 pages, where kramdown's ids differ from GitHub's slugs;
+     - 12 pages with the default title.
+     Its report is docs/phase4/briefs/pages-audit-2026-09-27.md on claude/coord-handover when present. Otherwise
+     rebuild with the claude/coord-pages-check workflow and run .claude/coord-scripts/docs/site_check.py. Delete
+     claude/coord-pages-check after the fixes land.
+   * THE COST SCOUT (owner side quest: per-call costs Go does not pay) was PAUSED at the save. Re-run it later as a
+     read-only scout; fixes wait until the last three packages are done.
+ - OWNER HANDS: none open.
+
+LANES (every STATE BLOCK is in section 1d.2; confirm session names with ListAgents):
+ - R (R-LAPTOP, Remote Control), in order:
+   1. seat (iii), the recover model;
+   2. option A, the verbatim import path (claude/r-pkgpath-verbatim);
+   3. parsedebugvars at start (claude/r-godebug-at-start);
+   4. B, the panic frames, on P2's M3 walk, keeping a GoWrapper panic-site frame.
+ - G (G-LAPTOP plus WSL, Remote Control): the windows AV sink guard (ledger f8f73cd0a9; P2 reviews), then TestScavenger's
+   windows stall.
+ - P2 (cloud, inbox only): F (ledger 93c2bdd50b), then E, then D. P2 reviews G's guard and R's B.
+ - P1 (cloud, inbox only): TestMemclr (claude/p1-memclr), then the runtime.Error factories. Also the memequal reorder
+   on TRAIN F's tip after it lands. R reviews.
+ - C1 (cloud): the reflect alloc relabel.
+ - C2 (cloud): MinInt / -1, and the OutputComparisonTests list sizing.
+ - The i9 (Remote Control; HARDWARE ORDER: one task at a time, light between heavy): the GO2CS_TEST_SANDBOX marker gates
+   (claude/i9-host-sandbox-marker), for TRAIN G.
+FIRST ACTIONS: ListAgents; read the ledger tail and the COORD inbox; ls-remote the tips above; re-arm the inbox watcher;
+then TRAIN F's landing if its battery is green, else re-run the battery.
+```
+
+### 1d.2 Lane states (the STATE BLOCKs the lanes posted for this save; COORD-written minimums where a block had not arrived)
+
+Every lane uses ONE paste prompt, with its own name in place of LANE:
+
+```
+RESUME 2026-09-27 (weekly limit). You are lane LANE of the go2cs fleet. Read, in order, from origin, reading every tip by
+ls-remote:
+ - CLAUDE.md;
+ - section 0a of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (the shared preamble: comms PROTOCOL v4,
+   security, how you work);
+ - your STATE BLOCK in section 1d.2 of the same file, and the READ-FIRST items it names;
+ - the ledger (claude/mailbox docs/phase4/LEDGER.md) from 2026-09-27 on.
+Your first action is your NEXT line. Reply to COORD with an ACK naming the tips you read.
+```
+
+#### R
+
+```
+LANE: R   MODEL: Opus 5.5/high   HOST: R-LAPTOP
+BRANCH: claude/r-compound-shift-guard e77c72409f6fe7bb2f7614c28078143d56a7ad6f on-origin yes accepted -- seat (i), compound shift-assign guard (TRAIN F)
+BRANCH: claude/r-runtime-claims 3fae75de813cc531610dba822de609ca46df9277 on-origin yes accepted -- seat (ii): minmax, map-key clone, panicnil + GODEBUG wiring (TRAIN G)
+BRANCH: claude/r-recover-model f8dfffc99ae7710370faa7b5cfb3ab4abd627b7f on-origin yes announced -- seat (iii): recover chain/eligibility + item C (nil defer); all gates green except the full behavioral suite, which was RUNNING
+BRANCH: claude/r-recover-design f019adfeadf457e811b4f1f5690c403d49f6fca4 on-origin yes accepted -- DESIGN-recover-model (approved)
+BRANCH: claude/r-panic-frames-design f4b6da3c32c8069550450f6fc02e3eb6257a26f6 on-origin yes accepted -- DESIGN-panic-stack-frames (B approved + P2's 4 changes + the GoWrapper rule)
+BRANCH: claude/r-pkgpath-verbatim 776491b6b0fc7154dc9126d74d15c3d15de22c07 on-origin yes cut -- option A: code + converter/golib arms red-first done; PREDICTION committed; footprint, corpus hunks, golden and gates NOT yet run
+BRANCH: claude/r-godebug-at-start c692b06bc16931ddc5edd17b26838b8ab4ff8263 on-origin yes cut -- parsedebugvars-at-start code half; does NOT build alone (needs the footprint's enableWER placeholder hunk); arms not yet written
+LOCAL-ONLY: none
+WORKTREE: R-LAPTOP r-minmax, r-shift, r-recover, r-recover-design, r-frames-design, r-pkgpath, r-godebugstart: 0 tracked changes (run artifacts only)
+NEXT: read seat (iii)'s full-behavioral result and post seat (iii) at f8dfffc99ae7710370faa7b5cfb3ab4abd627b7f; then option A's two-seeded 3-target footprint from 776491b6b0fc7154dc9126d74d15c3d15de22c07
+READ-FIRST: docs/phase4/DESIGN-recover-model.md; docs/phase4/DESIGN-panic-stack-frames.md; docs/phase4/r-evidence/pkgpath/PREDICTION.md (on claude/r-pkgpath-verbatim); the ledger's R rulings of 2026-09-27 (option A 89dd66fa84, parsedebugvars ea8a9a8b7e, B plus 93c2bdd50b); mailbox e3a5725cff (P2's B review)
+BLOCKED-ON: none
+TOOLS: GOROOT go1.24.13 WITH GOTOOLCHAIN=local (R-LAPTOP's ambient GOTOOLCHAIN is go1.23.1 and switches silently without the pin); DOTNET_ROOT .NET SDK 10.0.400; python 3.11.15; linux lane: WSL Ubuntu-22.04 with go1.24.13 and dotnet10, driven by script files only
+```
+
+#### G
+
+```
+LANE: G   MODEL: Opus 5.5/default   HOST: G-LAPTOP (+ its WSL linux arm)
+BRANCH: claude/g-trace-user-api be03b26a23013619c29d41b79e37545de226099d on-origin yes accepted -- runtime/trace user-API no-ops (TRAIN G)
+BRANCH: claude/g-displacement-cache ec5dce06b8e03a1696871c0ed4b5a978f19c3185 on-origin yes accepted -- FieldRefBox displacement cached by accessor (TRAIN G)
+BRANCH: claude/g-managed-tracer 08d07a9570c21a9dde03fcf6e09042d67fc3cea1 on-origin yes accepted -- Q28 managed execution tracer (TRAIN G)
+BRANCH: claude/g-darwin-funnel-marshal 7ca98749fafffaac0be986d7f72cb5584fdae550 on-origin yes accepted -- darwin libc-funnel marshal (TRAIN F)
+BRANCH: claude/g-pidfd-probe 3e742c8122e69786553e194772a2d41d17011feb on-origin yes accepted -- os pidfd probe (TRAIN F)
+BRANCH: claude/g-os-linux-manifest 53cac3b6fe6d8b61ab484365ef5ead21d1bf7bc2 on-origin yes accepted -- os linux manifest (TRAIN F)
+BRANCH: claude/g-sigpipe-death 2ebbfd0351ad4365acb49b7dfab3858220669772 on-origin yes accepted -- SIGPIPE death L2 (TRAIN F)
+NOTE: landed G refs still on origin: claude/g-os-sigpipe-push b826b1d3e7, claude/g-deep-tree-removal 1b902f7471, claude/g-fieldref-token 490e4d0b0d, claude/g-repoguard-liveness-recut 2111673768
+LOCAL-ONLY: claude/g-a2-compile-order 289b53a16cc604a623409936f62e3e918c733d40 already contained in master none-needed none
+LOCAL-ONLY: scratch/g-os-linux-union bc3a3991b2fa400e351ad8bc4c1b2068169c7225 superseded scratch union bundle(prereq origin/master) 897b1657d12d398d
+LOCAL-ONLY: g-instruments-20260927.tgz (bisect, census, AV-probe and bench scripts) holds host paths, never pushed; tarball in the lane scratch 3ef5036ffef82ac4
+WORKTREE: G-LAPTOP gcm, gbi, gcn and the WSL scv-lin tree: detached measurement trees (-tests dirt, a LOCAL scratch skip of TestFunctionAlignmentTraceback, probes): discard on resume; the seat trees are clean at their pushed tips
+NEXT: cut the windows AV sink guard on a new branch from master 4fb6e460c6e1633b1d20d3092fe0339c9438fe81: NativeBox and native-slice-view refuse addresses at or above 0x0000_8000_0000_0000 with linux's nil-deref panic, one red arm per band, TestFunctionAlignmentTraceback a named capability disclosure
+READ-FIRST: ledger f8f73cd0a9 (the ruling) and the G lines before it (the AV root: P2 96ce90f997 / ed9dc138e8); golib ж.cs's uintptr->ж operator and ж.NativeBox.cs; runtime/managed_impl.cs s_callerSpanBase; golib GoSyntheticPC.cs
+BLOCKED-ON: none
+TOOLS: GOROOT go1.24.13; DOTNET_ROOT .NET SDK 10.0.400 (per-user side-by-side on windows; ~/.dotnet 10 on WSL); dotnet-stack 10.0.745401 (owner-cleared)
+```
+
+#### P1
+
+```
+LANE: P1   MODEL: opus-class/as configured   HOST: P1 (cloud, linux)
+BRANCH: claude/p1-traceregion 806bd10a56c7c7fbd70150fbda1b5458ca23adef on-origin yes accepted -- TRAIN F: traceMap nodes, casPointerLatched, memequal
+BRANCH: claude/p1-cpu-classes 73e99c14c04300f52e6cd9942ad3c9cfe4b89695 on-origin yes accepted -- TRAIN F: /cpu/classes lazy catch-up
+BRANCH: claude/p1-runtime-linkname cd4fe9f1f7c8d1800107653f3b951327fb06d421 on-origin yes accepted -- TRAIN G: heapObjectsCanMove + fastrand forward rows
+BRANCH: claude/p1-memclr a89ca65276c62740eaa6573220e61d872ecff3f1 on-origin yes cut -- TestMemclr, 4 commits on master 02b1b58793; its full linux reading was running
+BRANCH: claude/p1-stw-contract 9be90cc4da3f797e2d2ad709bdaf683b871fe242 on-origin yes superseded -- worldsema-only STW, preserved for a later seat
+NOTE: landed P1 refs: claude/p1-runtime-sema 959a88df38, claude/p1-metrics-histogram 0a074655e1, claude/p1-host-fatals e399dbf878
+LOCAL-ONLY: none
+WORKTREE: P1 p1-main (claude/p1-memclr) and p1hist: clean and pushed; p1base: a detached measurement tree whose 29 changes are regenerated -tests sources
+NEXT: score the full linux reading of TestMemclr at a89ca65276c62740eaa6573220e61d872ecff3f1 and post the seat for R's review; then the runtime.Error factories (TestRuntimePanicWithRuntimeError); the memequal reorder goes on TRAIN F's tip after it lands
+READ-FIRST: ledger 04:36 (cpu-classes accept) and 08:18 (linkname accept); inbox P1 20260927T131901Z-COORD.md; P1's memclr post (inbox COORD 20260927T191846Z-P1.md)
+BLOCKED-ON: none
+TOOLS: GOROOT go1.24.13 linux-amd64 via GOTOOLCHAIN=go1.24.13; .NET SDK 10.0.112 (runtime 10.0.12); python 3.11.15; no pwsh (CNR owed at unions)
+```
+
+#### the i9
+
+```
+LANE: i9   MODEL: Opus 5.5/standard   HOST: i9
+BRANCH: claude/i9-host-sandbox-marker 002929151f7c19800e5d5f0b899a996214ca4fd8 on-origin yes cut -- GO2CS_TEST_SANDBOX withdrawn in TestHost.Run's finally (red 0fcd83fd36), stacked on 458b56f6e5; guard 2/2; gates RUNNING
+BRANCH: claude/i9-host-flag-isolation 458b56f6e540210020277c1f840dfd9526441a0c on-origin yes accepted -- in-process flag isolation (TRAIN G)
+BRANCH: claude/i9-test-source-refresh f6fe7d4bf479c0a9a24dc67fabf90af97038eb9d on-origin yes accepted -- test-source refresh (TRAIN F); worktree kept until TRAIN F lands
+NOTE: landed in master 1dae85e093 with their refs removed: i9-gosched-highres-escalation 37a4a8f72b, i9-junction-godebug-survives d4c9dd8305, i9-registry-running-count 2ba705db0a, i9-os-symlink-capability-block 5345c2a0b2
+NOTE: older i9 evidence/recon refs on origin (disposition per the ledger): i9-data-recon-2026-09-13, i9-h10-pprof-evidence, i9-h10-recon-wrapper, i9-h10-s1-evidence, i9-h10-s2-evidence, i9-halfa-manifests, i9-nonident-receiver-census, i9-sstring-twin-probe
+LOCAL-ONLY: old-repo-unpublished bundle (6 heads of the retired old-root clone, never censused for publication) preserved in the i9's DOCS-SSD archive 5e6278d41550c30b
+LOCAL-ONLY: the i9 logs directory (gate logs, tools, drafts; carries host paths) stays on the i9; every verdict is in a pushed commit or a COORD message
+WORKTREE: i9 DOCS-SSD i9-trt (claude/i9-host-sandbox-marker, gates running) and i9-refresh: 0 uncommitted, pushed
+NEXT: finish the marker cut's gates at 002929151f7c19800e5d5f0b899a996214ca4fd8 (GolibTests Release+Debug by name against 458b56f6e5, ALL BehavioralTests, sweeps os/exec syscall flag os/signal), report by name any test that surfaces, then clear the stranded .tmp run roots
+READ-FIRST: ledger lines 497-498 (the flag accept and the (1)/(2) ruling); inbox FLEET 20260927T191644Z-COORD.md; the commit messages of 0fcd83fd36 and 002929151f
+BLOCKED-ON: none
+TOOLS: GOROOT go1.24.13, GOTOOLCHAIN=local, CGO_ENABLED=0, GOFLAGS=-p=4, DOTNET_ROOT .NET SDK 10.0.401, pwsh 7; HARDWARE ORDER (-m:4 / -p 4, one task at a time, crypto/tls banned here)
+```
+
+#### P2 (COORD-written minimum until P2's block arrives)
+
+```
+LANE: P2   MODEL: opus-class   HOST: P2 (cloud, linux)
+BRANCH: claude/p2-stack-roots b9d7f64248de8f1ca03c1065171ef9e80f69d1d7 on-origin yes accepted -- M3 stack roots, carries M2b cf95330847 (TRAIN G)
+BRANCH: claude/p2-mem-frees 04f0820e940353d8e1c91efba2da026155f20f3a on-origin yes accepted -- M2 frees and cycles (TRAIN G)
+BRANCH: claude/p2-creator-flake 29b5e0b02869ec11db36df85e89d9c416d74b77c on-origin yes accepted -- GoroutineCreatorTests flake (TRAIN G)
+BRANCH: claude/p2-method-wrapper 4d427a3afbc6f7d2ddd04b6c09a4b88cb47a7ef4 on-origin yes cut -- F: wrapper frames (GoWrapperAttribute), ruled 93c2bdd50b
+NEXT: finish and post F (red first, the 3-target footprint, CNR, GolibTests both flavours, the runtime row, runtime/pprof and net/http/pprof re-read); then E, then D; review G's AV guard and R's B cut
+READ-FIRST: ledger 93c2bdd50b (F), 1fa91dfea3 (M3 accept), f8f73cd0a9 (G's guard, P2 reviews); inbox P2 files of 2026-09-27
+BLOCKED-ON: none
+```
+
+#### C1 (COORD-written minimum until C1's block arrives)
+
+```
+LANE: C1   MODEL: opus-class   HOST: C1 (cloud)
+NOTE: C1's current seat, claude/c1-reflect-alloc-relabel, was not on origin at the save
+NEXT: the reflect alloc relabel: 37 TestDeepEqualAllocs labels retire (never run under SwissMap), 5 relabel from their readings (deferred / structural / alloc-count-semantics); roster guard green under pwsh 7 and PS 5.1; post the seat so COORD can land reflect's bank
+READ-FIRST: inbox C1 604cb2ebf (the assignment); the TRAIN E ledger lines about reflect's refused bank
+BLOCKED-ON: none
+```
+
+#### C2 (COORD-written minimum until C2's block arrives)
+
+```
+LANE: C2   MODEL: opus-class   HOST: C2 (cloud)
+NOTE: C2's refs are on origin as claude/c2-*; no seat is in flight for a train
+NEXT: size MinInt / -1 (inbox b7a948590), then the OutputComparisonTests list sizing
+READ-FIRST: inbox C2 files of 2026-09-26/27
+BLOCKED-ON: none
+```
 
 ---
 

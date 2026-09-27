@@ -1,0 +1,10 @@
+i9-test-source-refresh|f6fe7d4bf4|the i9: committed test sources of 82 banked rows refreshed to the TRAIN D converter (215 files; no count moved)
+p1-traceregion|806bd10a56|P1: traceMap nodes are managed allocations; CompareAndSwapNoWB from a nil unsafe.Pointer; memequal bodied (the TestTraceMap pair passes)
+p1-cpu-classes|73e99c14c0|P1: /cpu/classes account every completed CLR gen2 at the next read (TestCPUStats, TestCPUMetricsSleep pass)
+p2-mem-records|b5a2434f80|P2: M1 memory-profile records; the rate is 0 unless runtime.pprof is in the static closure (Go's disableMemoryProfiling analog)
+r-structof-mint|016fbf2c78|R: reflect's StructOf/FuncOf mint shards its dynamic module every 128 types (internal/synctest validates 28/28, no disclosure)
+r-compound-shift-guard|e77c72409f|R: a compound shift-assign with a variable count takes Go's shift semantics (TestFloat64 passes)
+g-sigpipe-death|2ebbfd0351|G: SIGPIPE dies at Go's decision point on linux; children start with SIGPIPE at its default unless ignored (os family 5, L2)
+g-pidfd-probe|3e742c8122|G: checkPidfd passes on linux (the spawn mints the pidfd through pidfd_open); the two os pidfd tests pass
+g-os-linux-manifest|53cac3b6fe|G: os discloses TestRemoveAllNoFcntl on linux (host-limit) and records the linux WriteStringAlloc reading
+g-darwin-funnel-marshal|7ca98749fa|G: darwin libc calls marshal token-carrying structs to their Go layout; nil pointer fields cross as 0
