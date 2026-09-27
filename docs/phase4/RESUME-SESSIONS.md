@@ -20,6 +20,23 @@
 
 ## 1d. SAVE-STATE 2026-09-27 (weekly usage at 91%): START HERE. COORD's new-session prompt and every lane's state. It supersedes 1b and 1c for CURRENT STATE; sections 0a, 1a, 1b and 1c stay the reference for standing rules and history.
 
+### 1d.00 RESUME ADDENDUM 2026-09-27 17:45 (the fleet resumed at 17:27; the ledger wins over everything below it)
+
+- The FLEET RESUMED at 17:27 (ledger RULING, mailbox 3938d7b090). COORD runs at Opus 5.5 with ultracode effort; R, G,
+  the i9, C1 and C2 run at Opus 5.5, effort high. **P1 and P2 are OUT of the fleet this session.** Their accepted
+  seats seat as ruled; their open items are re-routed by that ruling: P2's F fc6461fae3 is SEATED in TRAIN G, with its
+  owed rows read at the union; R reviews P1's memclr a89ca65276 first; the i9 runs C1's census-slice red-first, then
+  cuts the memequal reorder on the landed master; C1 sizes the reflect HASH-token residual, then the runtime.Error
+  factories; P2's queue is held.
+- **TRAIN F LANDED** at 17:41 (ledger LAND, mailbox 439c5045d5): master 4fb6e460c6 -> 1aebd6a885, fast-forward.
+  internal/synctest banks 28 + 0; os gains linux 912 + 2. **220 of 224 implementable (98.2%); linux 218 of 218
+  applicable rows.** Owed: the prune of TRAIN F's 10 merged seat refs (the delete was refused at COORD's tooling:
+  an OWNER HAND); the nistec cost-canary A/B.
+- The lanes' resume prompts for this session were given in the owner's COORD session. Each one is section 1d.2's
+  template plus a YOUR QUEUE block taken from the 17:27 ruling.
+- NEXT for COORD: the docs-site workflow (the draft is staged; creating its branch was refused at COORD's tooling,
+  pending the owner); TRAIN G's rehearsal; reflect's two readings on the i7.
+
 ### 1d.0 COORD: STATE BLOCK
 
 ```
