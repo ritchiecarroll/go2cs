@@ -158,12 +158,10 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Canonical typed-nil pointer boxing](nil-and-zero-values.md#canonical-typed-nil-pointer-boxing)
   - [A HAND-OWN's pointer parameter sees `NilBox`, never `null` — and the doctrine alone did not hold it](nil-and-zero-values.md#a-hand-owns-pointer-parameter-sees-nilbox-never-null--and-the-doctrine-alone-did-not-hold-it)
   - [A pointer crossing into an interface carries its static type, however the pointer was produced](nil-and-zero-values.md#a-pointer-crossing-into-an-interface-carries-its-static-type-however-the-pointer-was-produced)
-  - [Pointer-to-interface assignment through selector fields](nil-and-zero-values.md#pointer-to-interface-assignment-through-selector-fields)
   - [`new(T)` is Go's ZERO value — and for a container kind that means the NIL one](nil-and-zero-values.md#newt-is-gos-zero-value--and-for-a-container-kind-that-means-the-nil-one)
 - **[Empty Interface (`any`)](empty-interface.md)**
   - [A string literal in an `any` slot boxes through `@string` — as `(@string)"…"u8`](empty-interface.md#a-string-literal-in-an-any-slot-boxes-through-string--as-stringu8)
   - [An untyped constant boxed as `any` boxes at Go's DEFAULT TYPE](empty-interface.md#an-untyped-constant-boxed-as-any-boxes-at-gos-default-type)
-  - [Comparing two interfaces of one UNCOMPARABLE dynamic type panics, as Go does](empty-interface.md#comparing-two-interfaces-of-one-uncomparable-dynamic-type-panics-as-go-does)
 - **[Multi-Assignment and Evaluation Order](multi-assignment.md)**
   - [A multi-value RETURN reads its plain operands AFTER its calls](multi-assignment.md#a-multi-value-return-reads-its-plain-operands-after-its-calls)
   - [A SELECTOR left-hand side counts as a reassignment — a field swap must stay simultaneous](multi-assignment.md#a-selector-left-hand-side-counts-as-a-reassignment--a-field-swap-must-stay-simultaneous)
@@ -437,6 +435,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A field promoted through an embedded POINTER is rooted at the POINTED-TO allocation](struct-embedding.md#a-field-promoted-through-an-embedded-pointer-is-rooted-at-the-pointed-to-allocation)
   - [A struct embedding the constrained generic promotes its members — three residual crypto-curve fixes](struct-embedding.md#a-struct-embedding-the-constrained-generic-promotes-its-members--three-residual-crypto-curve-fixes)
 - **[Interfaces](interfaces.md)**
+  - [Equality](interfaces.md#equality)
   - **[Interfaces: Adapters](interfaces/adapters.md)**
     - [Pointer, value and interface-to-interface adapters](interfaces/adapters.md#pointer-value-and-interface-to-interface-adapters)
       - [Pointer-sourced interface values use a generated ADAPTER, not the value-boxing partial struct](interfaces/adapters.md#pointer-sourced-interface-values-use-a-generated-adapter-not-the-value-boxing-partial-struct)
@@ -459,12 +458,14 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
       - [A struct-literal interface field takes a pointer element's adapter](interfaces/adapters.md#a-struct-literal-interface-field-takes-a-pointer-elements-adapter)
       - [The struct-field interface routing also fires on an ELIDED element composite](interfaces/adapters.md#the-struct-field-interface-routing-also-fires-on-an-elided-element-composite)
       - [A keyed element's interface target is the composite's own SLOT, never the LHS variable's type](interfaces/adapters.md#a-keyed-elements-interface-target-is-the-composites-own-slot-never-the-lhs-variables-type)
+      - [Pointer-to-interface assignment through selector fields](interfaces/adapters.md#pointer-to-interface-assignment-through-selector-fields)
   - **[Interfaces: GoImplement Records](interfaces/records.md)**
     - [Recording](interfaces/records.md#recording)
       - [Structural interface satisfaction emits C# interface inheritance](interfaces/records.md#structural-interface-satisfaction-emits-c-interface-inheritance)
       - [A GoImplement record is gated on the method set actually satisfying the interface](interfaces/records.md#a-goimplement-record-is-gated-on-the-method-set-actually-satisfying-the-interface)
       - [A white-box PRODUCTION↔PRODUCTION pointer pair is already implemented — do not record it again](interfaces/records.md#a-white-box-productionproduction-pointer-pair-is-already-implemented--do-not-record-it-again)
       - [A generic struct implementing an interface BY VALUE partials at its OPEN definition](interfaces/records.md#a-generic-struct-implementing-an-interface-by-value-partials-at-its-open-definition)
+      - [A local named-FUNC value record is exempt from the interface-inheritance prune](interfaces/records.md#a-local-named-func-value-record-is-exempt-from-the-interface-inheritance-prune)
     - [De-duplication](interfaces/records.md#de-duplication)
       - [GoImplement records de-duplicate at attribute emission](interfaces/records.md#goimplement-records-de-duplicate-at-attribute-emission)
     - [Sealing markers](interfaces/records.md#sealing-markers)
@@ -476,8 +477,17 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - **[Interfaces: Run-Time Assertions](interfaces/runtime-asserts.md)**
     - [Duck-typing shells](interfaces/runtime-asserts.md#duck-typing-shells)
       - [Every eligible interface carries runtime duck-typing shells — the sole resolver of a structural assert](interfaces/runtime-asserts.md#every-eligible-interface-carries-runtime-duck-typing-shells--the-sole-resolver-of-a-structural-assert)
+      - [The same relation gained its last carrier: golib's own `error<T>`](interfaces/runtime-asserts.md#the-same-relation-gained-its-last-carrier-golibs-own-errort)
     - [Type names at run time](interfaces/runtime-asserts.md#type-names-at-run-time)
       - [`%T` (and type-name rendering generally) unwraps generated adapters and pointer boxes](interfaces/runtime-asserts.md#t-and-type-name-rendering-generally-unwraps-generated-adapters-and-pointer-boxes)
+    - [Type assertions](interfaces/runtime-asserts.md#type-assertions)
+      - [An assertion to a pointer type renders the pointer type `ж<T>`](interfaces/runtime-asserts.md#an-assertion-to-a-pointer-type-renders-the-pointer-type-жt)
+      - [An assertion to a NAMED interface must record the concrete implementation](interfaces/runtime-asserts.md#an-assertion-to-a-named-interface-must-record-the-concrete-implementation)
+      - [The run-time structural match for an ANONYMOUS interface is SIGNATURE-aware](interfaces/runtime-asserts.md#the-run-time-structural-match-for-an-anonymous-interface-is-signature-aware)
+      - [An interface that EMBEDS another interface collects only the base's INSTANCE members](interfaces/runtime-asserts.md#an-interface-that-embeds-another-interface-collects-only-the-bases-instance-members)
+      - [A typed-error assert resolves through the SAME machinery](interfaces/runtime-asserts.md#a-typed-error-assert-resolves-through-the-same-machinery)
+      - [Constructing the run-time duck-typing wrapper is FAIL-SOFT](interfaces/runtime-asserts.md#constructing-the-run-time-duck-typing-wrapper-is-fail-soft)
+      - [A NAMED interface had no run-time wrapper (closed 2026-07-25)](interfaces/runtime-asserts.md#a-named-interface-had-no-run-time-wrapper-closed-2026-07-25)
   - **[Interfaces: Promotion Through Embeds](interfaces/promotion.md)**
     - [Embedded interface fields](interfaces/promotion.md#embedded-interface-fields)
       - [An embedded INTERFACE FIELD forwards the members it declares](interfaces/promotion.md#an-embedded-interface-field-forwards-the-members-it-declares)
