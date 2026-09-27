@@ -36,6 +36,20 @@
   template plus a YOUR QUEUE block taken from the 17:27 ruling.
 - NEXT for COORD: the docs-site workflow (the draft is staged; creating its branch was refused at COORD's tooling,
   pending the owner); TRAIN G's rehearsal; reflect's two readings on the i7.
+- 18:55 UPDATE:
+  - The owner granted prune/worktree permissions (project-local settings); TRAIN F's 10 seat refs are PRUNED.
+  - DOCS-SITE CI LANDED: master 38540fc0fd, ledger 18:22. OWNER HAND: the Pages source switch to "GitHub Actions".
+  - REFLECT BANKED: master e798b3e7fb, ledger 18:44. 221 of 224; linux 219 of 219. Its two alloc labels come from
+    the i7 readings, record docs/phase4/briefs/reflect-alloc-readings-2026-09-27.md.
+  - TRAIN G ASSEMBLED: claude/coord-trainG e6fc210500 (rehearsal claude/coord-trainG-rehearsal 64209be705; scripts
+    under .claude/coord-scripts/trainG). Its BATTERY runs on the i7 from a per-run copy since 18:51; if the i7 run is
+    lost, re-run tG-battery.sh with EXPECT_HEAD=e6fc210500 MASTER=e798b3e7fb. At landing: bank runtime/trace
+    (2, linux 2) out of E4 (224 -> 225); os/signal's linux annotation 29 + 1.
+  - LANES: R is on option A (9d46e5bff3 local; footprint running). G: the sink-guard gates, then the union's linux
+    row, then the TestSetPanicOnFault probe. The i9: the reflect-setter seat (setKinded's op as a span retires
+    TestMapAlloc; SetUint's kind check). C1: the runtime.Error factories cut, if it can provision .NET; the
+    hash-token band after TRAIN G. C2: the narrow-arithmetic pre-pass, then MinInt/-1.
+  - The C: disk scout (owner ask) is running as a read-only workflow.
 
 ### 1d.0 COORD: STATE BLOCK
 
