@@ -117,6 +117,72 @@ closes after it) rather than by matching converted text, so an unrelated emissio
 break the guard. The negative controls are in the same file: a whole-line comment and a multi-line
 block comment must **not** be pulled onto a code line.
 
+## A doc-comment link resolves to a fully-qualified, version-pinned URL
+
+A converted package's `README.md` is its package-level Go doc comment rendered to Markdown, and a Go doc
+comment can link. Left to `go/doc/comment`'s defaults, those links come out **site-root-relative**:
+`[io.Reader]` renders as `[io.Reader](/io#Reader)`, because `Printer.DocLinkBaseURL` defaults to empty and
+`DocLink.DefaultURL` then composes a path from the site root. That is exactly right for pkg.go.dev, which
+serves the documentation at its own root, and exactly wrong everywhere this README is actually read:
+GitHub resolves `/io#Reader` against `github.com`, Pages/Jekyll against the site root, and nuget.org
+against `nuget.org`. The link is dead in all three.
+
+The emitter therefore installs its own `Printer.DocLinkURL` (`renderPackageDoc` in `readme.go`, resolver in
+`readmeDocLinks.go`). A standard-library target pins the Go release that produced the conversion —
+`https://pkg.go.dev/io@go1.24.13#Reader` — which is the same rule, and the same honesty doctrine, the Docs
+badge beside it already follows.
+
+**Completeness is structural here, not a judgement call, because the grammar is closed.**
+`go/doc/comment`'s `Text` interface has exactly four implementations — `Plain`, `Italic`, `*Link`,
+`*DocLink` — and only two carry a URL:
+
+* **`*Link` URLs are absolute by construction.** Both of the parser's two link sources require a scheme:
+  `parseLink` rejects a `[text]: url` definition whose url has no `isScheme(...)://`, and `autoURL` rejects
+  inline text on the same test (the accepted schemes are `file`, `ftp`, `gopher`, `http`, `https`,
+  `mailto`, `nntp`). A `*Link` therefore *cannot* reach the emitter with a relative URL, and passes through
+  untouched — which is also what the "already-absolute URLs are left alone" rule asks for.
+* **`*DocLink` is the sole relative-URL producer**, and its own documentation enumerates the exhaustive set
+  of five field combinations. `resolveDocLinkURL` answers all five.
+
+| `DocLink` fields | Emitted URL |
+|---|---|
+| `ImportPath` | `https://pkg.go.dev/io@go1.24.13` |
+| `ImportPath`, `Name` | `https://pkg.go.dev/io@go1.24.13#Reader` |
+| `ImportPath`, `Recv`, `Name` | `https://pkg.go.dev/io@go1.24.13#Writer.Write` |
+| `Name` | `https://pkg.go.dev/<current>@go1.24.13#Name` |
+| `Recv`, `Name` | `https://pkg.go.dev/<current>@go1.24.13#Recv.Name` |
+
+The two same-package forms cannot occur today — the converter leaves `Parser.LookupSym` nil, so `[NewInt]`
+stays literal text rather than becoming a link (which is why the corpus is full of escaped `\[Int]`,
+`\[Encoder]`, `\[Decode]`: those are not dead links, they are not links at all, and pkg.go.dev shows an
+unresolvable name the same way). Answering them anyway is what makes the resolver total against the
+*grammar* rather than against today's census, so enabling `LookupSym` later needs no second pass here.
+
+**An external module path is pinned only when the distribution actually pinned it.** A path whose first
+element carries a dot is a module, not a std package, and cannot be pinned to a Go release — it is not a Go
+release artifact. When GOROOT vendors that exact package, `src/vendor/modules.txt` records the snapshot the
+conversion read and the URL states it (`golang.org/x/sys@v0.22.0/cpu#X86`). When it does not —
+`golang.org/x/sys/windows` is referenced by std doc comments but is **not** among the x/sys packages GOROOT
+vendors — the URL is emitted fully qualified but **unversioned** rather than borrowing the pin from the
+module's other vendored packages. A fabricated pin is worse than an unpinned link: the unpinned one still
+resolves on all three surfaces, which is the entire defect being fixed. Same degradation the Source·Go
+badge makes for the same reason — an unresolvable pin costs precision, never correctness.
+
+Corpus census at the change: **99 relative link occurrences across 38 of 307 emitted READMEs** (40
+package-only `/pkg`, 57 `/pkg#Name`, 2 `/pkg#Recv.Name`, 0 bare-fragment `#Name` — exactly the distribution
+the grammar predicts with `LookupSym` nil), against 1,899 already-absolute targets that pass through
+unchanged.
+
+Guarded by `readmeDocLinks_test.go`, which enumerates the five combinations rather than sampling them and
+fails on any target that still begins at the site root, plus an end-to-end case over real godoc markup that
+asserts both halves of the contract — every doc link qualified, every absolute link untouched.
+
+**One thing that looks like this defect and is not.** `src/core/image/README.md` renders
+`\[Go Security Policy]([https://go.dev/security/policy](https://go.dev/security/policy))`. That is upstream
+Go writing **Markdown** link syntax inside a doc comment (`image/image.go:37`), which `go/doc/comment` does
+not support; pkg.go.dev renders it identically. Faithful conversion of an upstream quirk, not an emitter
+defect.
+
 ---
 
 [← Manually-Converted Declarations](manual-conversions.md) · [Index](README.md) · [Deterministic Output →](deterministic-output.md)

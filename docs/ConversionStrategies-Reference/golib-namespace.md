@@ -322,6 +322,93 @@ One divergence remains, and it is stub-only: `Console.WriteLine` terminates with
 normalizes this away; the full conversion does not have it at all, since `WriteFile` passes Go's `\n`
 through unchanged.
 
+## Generated code global::-qualifies root-namespace references
+Inside a package whose namespace nests a same-named segment (go/build/constraint emits into
+`namespace go.go.build`), C# binds a generated reference's leading `go` RELATIVELY to `go.go`
+(CS0234). The generators qualify every type-reference position via `GlobalQualify`
+(Common.cs); generated signatures also carry parameter REF KINDS (`in slice<byte>`) and a
+canned `System.IFormattable` impl where the interface inherits it (the hand-finished io
+stub's dyn machinery).
+
+The **converter** faces the same `go.go` shadowing in the import `using` directives it emits for a
+`go/*` package (go/token lands in `namespace go.go`, imports `sync`/`unicode` sub-namespaces): a
+rooted `using atomic = go.sync.atomic_package;` / `using go.sync;` binds its leading `go` to the
+enclosing `go.go` namespace, resolving `go.sync` to the nonexistent `go.go.sync` (CS0234). `rootQualifyIfAmbiguous` routes its rooting returns through `rootQualified`, which emits `global::go.`
+instead of a bare `go.` when the package's namespace second segment is itself `go`:
+
+```csharp
+using atomic = global::go.sync.atomic_package;
+using global::go.sync;
+```
+
+The shadowing is NOT limited to `go/*` packages themselves: any package with a `go/*` package
+anywhere in its transitive import CLOSURE compiles with `namespace go.go` in scope (its referenced
+assembly makes `go.go` a member of namespace `go`), and C#'s inner-to-outer lookup then binds the
+bare leading `go` of a rooted using target to that member from EVERY namespace nested under the
+root — internal/fuzz (imports go/ast) emitted `using bits = go.math.bits_package;` inside
+`namespace go.@internal`, resolving to the nonexistent `go.go.math` (CS0234 ×16, plus the same
+shape in net/rpc's `Δhttp` alias and testing/internal/testdeps). `rootQualified` therefore also
+emits `global::go.` when `packageChildNamespaces` carries the `go.go` key (populated from the
+transitive import closure by `computeImportAliasRenames`' pre-pass). A package with no `go/*`
+anywhere in its closure — every package that was compiling before, and all pre-existing behavioral
+tests — keeps the bare `go.` prefix, so there is no golden churn. Cleared go/token, go/doc/comment,
+go/build/constraint (own-namespace branch); internal/fuzz's 18 CS0234 and net/rpc's latent pair
+(closure branch). Guarded by the `GoNamespaceShadow` behavioral test, which covers BOTH branches
+through a nested local module literally named `go/nsshadow` (emitting `namespace go.go`, the shape
+a single-file behavioral test cannot express): the nested lib imports `math` + `math/rand` so its
+own rooted using exercises the own-namespace branch, and the importing `main` package (namespace
+`go`, with `go.go` in its closure) exercises the closure branch.
+
+**Under `-tests` the shadow gate spans BOTH compilation halves, and the directly-composed using
+targets must go through it too.** The gate had two holes that only a test conversion can expose,
+and math/rand/v2 (whose `regress_test.go` imports `go/format`) hit both — 13 of the package's 22
+compile errors:
+
+1. *The closure was computed per PACKAGE, not per ASSEMBLY.* A `-tests` run recompiles the
+   package's PRODUCTION sources into the test assembly, so that assembly's reference closure is the
+   UNION of the production and `_test.go` closures. The production conversion pass saw only its own
+   half, never learned `go.go` was in scope, and emitted bare `using bits = go.math.bits_package;`
+   into a compilation that did contain `go.go`. `collectSiblingTestClosure` now runs a
+   metadata-only (`NeedName|NeedImports|NeedDeps`) load of the test variants before the production
+   conversion and records their transitive import paths in `siblingClosureImportPaths`, which
+   `computeImportAliasRenames` folds into the closure it walks — so every consumer of the namespace
+   maps (the shadow gate, `rootQualifyIfAmbiguous`, `isStrippedGoPathPackageRef`) describes the
+   assembly rather than the package. The set is empty for every non-`-tests` conversion, so no
+   other output moves.
+2. *Targets composed straight from `packageNamespace` bypassed `rootQualified` entirely.* Both the
+   package-under-test anchor (`visitImportSpec`'s `isPackageUnderTest` branch, which REPLACES the
+   `rootQualifyIfAmbiguous`-derived target with `<packageNamespace>.<pkg>_package`) and the test
+   host's `using go.testing_runtime;` were bare, which is why one emitted file could show a
+   correctly-qualified `using iotest = global::go.testing.iotest_package;` beside a broken
+   `using static go.math.rand.rand_package;`. `globalQualifyRooted` applies the same gate to an
+   ALREADY-rooted path and both sites now route through it. It is idempotent and a no-op with no
+   shadow, so unshadowed packages emit byte-identically.
+
+Both holes fire for ANY package whose test closure reaches a `go/*` package, and a `regress_test.go`
+importing `go/format` is a common stdlib idiom — this is not a v2 quirk. Guarded by
+`TestGlobalQualifyRootedForcesGlobalUnderRootShadow` and `TestSiblingClosureContributesRootShadow`
+(`src/go2cs/rootShadowQualification_test.go`); the behavioral corpus cannot cover them because it
+never runs `-tests` and no behavioral package imports a `go/*` package.
+
+## A sub-package import whose leading segment is a package alias root-qualifies
+When a package imports both a parent package and its sub-package — testing/fstest importing `io` **and** `io/fs` — the converter emits `using io = io_package;` (a **type** alias for the io package class) and, for io/fs, a **relative** namespace target `io.fs_package`. In C# the leading `io` segment of `io.fs_package` binds to that type alias, so `io.fs_package[.FS]` resolves to the nonexistent nested type `io_package.fs_package[.FS]` — CS0426 (the `using fs = …` alias line, the embedded `fs.FS` getter, and the generated `TypeGenerator` copies). The converter records every direct-import using-alias identifier bound in the package and prefixes `go.` onto any multi-segment relative namespace/type whose leading segment is one of them, so the segment resolves as the child **namespace** it names:
+
+```go
+import (
+    "io"
+    "io/fs"
+)
+type fsOnly struct{ fs.FS }
+```
+```csharp
+using fs = go.io.fs_package;
+public go.io.fs_package.FS FS;
+```
+
+The unqualified `io.fs_package.FS` is retained as the `promotedInterfaceImplementations` map **key** (which feeds alias-less generator files where the relative form resolves). This complements the existing alias-vs-child-namespace Δ-rename, which only catches `<currentNS>.<alias>` collisions. (Recurs for any parent+sub-package import pair; a behavioral guard is owed — the io/fs embedded-interface pattern needs a parent+sub-package pair absent from the core baseline stdlib.)
+
+The same collision detection must see GOROOT-VENDORED namespaces. `visitImportSpec` resolves a GOROOT package's `golang.org/x/…` import to its on-disk `vendor/…` path (and namespace) when the importing file lives under GOROOT, but `computeImportAliasRenames` built `packageChildNamespaces` from the raw `imp.Path()` — so a vendored sub-namespace like `go.vendor.golang.org.x.text.unicode` was absent from the map. `rootQualifyIfAmbiguous` then could not see that a stdlib alias's leading segment collides with it: bidirule (at `vendor/golang.org/x/text/secure/bidirule`, importing both `unicode/utf8` and the vendored `golang.org/x/text/unicode/bidi`) emitted `using utf8 = unicode.utf8_package;`, whose `unicode` bound to the in-scope vendored `unicode` namespace rather than stdlib `go.unicode` (CS0234). `computeImportAliasRenames` now applies `resolveGorootVendoredPath` to each closure path when the package lives under GOROOT — matching the emission — so the vendored namespaces populate the map and the alias root-qualifies to `go.unicode.utf8_package`. Gated on GOROOT so a user module's own `golang.org/x` dependency is untouched; **guard owed** (the fix fires only for a GOROOT-vendored package, which the behavioral harness — never under GOROOT — cannot express; validated by the bidirule reconvert [A/B](../Glossary.md#ab)).
+
 ---
 
 [← Labeled Control Flow and Loop Variables](labels-and-loop-variables.md) · [Index](README.md) · [Source Generators →](source-generators.md)
