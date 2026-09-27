@@ -822,6 +822,14 @@ operand orders, interface-vs-interface equality, both type-assert forms plus a m
 over both implementers, `%T`, method dispatch and an interface-keyed map — output-compared vs
 `go run`.)
 
+## Named func types implementing interfaces
+
+- **Named func types implementing interfaces** (flag's `funcValue`): a delegate cannot be a
+  partial struct — the generator routes Delegate records to the VALUE adapter
+  (`new funcValueᴠValue(v)`), whose Go methods are package extensions binding on the wrapped
+  copy; non-struct record kinds SKIP rather than throw (a throw kills the package's entire
+  generator run). Guarded by `FirstClassFunctions` (`handler.tag`).
+
 ## Under `-tests`, a white-box PRODUCTION type is FOREIGN to the generator — so the name carries the prefix
 The two sides of an adapter name must compose it identically, and they answer *"is the source type
 foreign?"* by different means: the generator tests the **containing assembly**, the converter tests the
@@ -845,6 +853,36 @@ is deliberately left alone: it already answers correctly (both reference models 
 `testPackagePath`), and it remains the RECOMPILE fallback's answer, where production sources really do
 compile into the test assembly. Behavioral CNR is byte-identical — the shape exists only under
 `-tests`.
+
+## A white-box PRODUCTION↔PRODUCTION pointer pair is already implemented — do not record it again
+
+Under the `whitebox-reference` test model the internal bridge is the SAME Go package as production, so
+a `*prodT → prodIface` cast inside an internal `_test.go` reads as local and records its own
+`[assembly: GoImplement<T, Iface>(Pointer = true)]`. Production, though, is a **referenced assembly**
+that already generated that adapter from its own record — and `InternalsVisibleTo <assembly>.tests`
+makes even an unexported adapter class reachable. The duplicate record makes go2cs-gen emit a SECOND
+adapter under a test anchor, and that copy resolves its forwarding members in the TEST class's scope:
+`context`'s `contains(pc.children, cc)` converts `*cancelCtx`/`*timerCtx` to `canceler` for a map key,
+and the duplicate bound `Done` to the unrelated `afterFuncContext.Done` extension (CS1929) while
+emitting `cancel` with an **empty body** — a silently degraded override, not merely a build error.
+
+The fix suppresses only the RECORD, which is what makes it small: `resolveAdapterNameMarkers` resolves
+a pair that reached no record to the unqualified name it would have had, and that name is production's
+own adapter, so the cast site repoints with no other change.
+
+```csharp
+!contains((~pc).children, new global::go.context_package.cancelCtxжcanceler(cc))   // production's, not a copy
+```
+
+It is gated on production ACTUALLY carrying the pair — its `package_info.cs` is loaded by
+`convertTestVariant` into `importedPointerImplements` — never assumed: a pair only the test converts
+still needs its local record. Reaching that set also required `canonicalRecordIfaceName` to strip a
+leading `global::`, which names no package and never appears in a parsed record; the deliberate
+non-collapse it documents is untouched, since a genuinely foreign pair still keys as
+`net.http_package.ΔHandler` against the record's `http_package.ΔHandler`. This is the POINTER twin of
+the value arm's `whiteboxProductionTarget` carve-out — note the pointer target arrives as a
+`*types.Pointer`, so the shared `whiteboxProductionTarget` flag (computed from the unwrapped VALUE
+form) is structurally false there and the check must unwrap and ask directly.
 
 ## An exported func type publicizes the unexported types in its signature
 An EXPORTED named func type becomes a `public` C# delegate; an unexported type in its signature —
@@ -1223,19 +1261,7 @@ internal static nint g = combine(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2);
 Guarded by the `TupleSpreadIntoCall` extension (a package-level `var` spreading a two-value call into a
 wrapping call, value read back in main).
 
-## A range over a pointer-typed type conversion parenthesizes before the deref
-Ranging over a pointer to an array implicitly dereferences it — the converter appends `.Value` to the
-range expression. When the range expression is itself a pointer-typed TYPE CONVERSION it renders as a C#
-cast (`(ж<array<byte>>)(uintptr)(p)`, crypto/internal/nistec's p256 init over
-`(*[43*32*2*4][8]byte)(*p256PrecomputedPtr)`). A cast binds LOWER than member access, so a bare append
-`(ж<…>)(p).Value` parses as `(ж<…>)((p).Value)` — the deref lands on the operand, not the cast result
-(CS1579 "no GetEnumerator" on the box type, CS8130). `visitRangeStmt` now wraps the range expression in
-parentheses — `((ж<…>)(p)).Value` — whenever the pointer-unwrap deref is active and `rangeStmt.X` is a
-`*ast.CallExpr` whose `Fun` is a type expression (`info.Types[Fun].IsType()`, which catches the
-unsafe.Pointer conversions `isTypeConversion` deliberately excludes). Byte-identical corpus-wide (the
-pattern only occurs on a pointer-producing conversion in range position, which never compiled before).
-Guarded by `RangePointerArrayConversion` (transpile+compile+target only — the exact cast shape needs an
-`unsafe.Pointer` source, whose runtime round-trip golib does not reproduce, so it is not output-compared).
+<a id="a-range-over-a-pointer-typed-type-conversion-parenthesizes-before-the-deref"></a>Moved to [A range over a pointer-typed type conversion parenthesizes before the deref](pointers.md#a-range-over-a-pointer-typed-type-conversion-parenthesizes-before-the-deref).
 
 ## Adapter accessibility: symbol-OR-name on both sides
 The adapter class scope cannot be derived from Go name casing alone (`error` is lowercase yet the golib interface is public METADATA - the name rule made io/fs's PathErrorжerror internal, CS0122 x40) nor from symbols alone (sibling generators' `public partial` modifiers are invisible to a single-pass generator - the symbol rule broke same-assembly interfaces like `CrossPkgLib.Reporter`). The ImplementGenerator takes symbol-OR-name on the struct AND the interface.
@@ -1336,6 +1362,9 @@ appears at thousands of construction sites, whereas no source-level call ever bi
 MEMBER always wins) and the method-set registry discovers them by scanning every non-nested static
 class, never by name. The rename is invisible everywhere except in its own declaration.
 
+## A GoImplement record is gated on the method set actually satisfying the interface
+Every `[assembly: GoImplement<T, Iface>]` record makes the `ImplementGenerator` emit implementation glue whose members forward to T's like-named methods — so a record whose Go method set does NOT satisfy the interface generates a forwarder to a method that does not exist. The corpus case: net/http's `err = http2GoAwayError{LastStreamID: …, ErrCode: cc.goAway.ErrCode, …}` — the keyed composite's sparse-array `ident` context leaks the `error`-typed LHS onto each FIELD value, and the `ErrCode` field's value recorded `GoImplement<http2ErrCode, error>` even though `http2ErrCode` has only `String()`/`stringToken()` (its generated `Error() => this.Error()` was CS1929). `convertToInterfaceType` now folds a `types.Implements` check over the recorded form's method set (T for a value record, `*T` for a `ж<T>` record) into `recordableBase`, which gates both the record and the matching adapter-wrapping emissions. A conversion the Go checker admitted always passes the check, so the gate can only drop pairs a caller composed from mismatched types; a type-param-carrying target skips the check (`types.Implements` is undefined for uninstantiated generics, and the open-generic conversion emission must stay). The full-stdlib A/B for this change is exactly one removed line — the false `http2ErrCode` record. (Guarded by the NEGATIVE `KeyedLiteralIfaceAssign` behavioral test: a keyed literal assigned to an `error` variable whose field-value type has `String()` but no `Error()` — a reintroduced record fails the compile phase.)
+
 ## Anonymous interfaces used as an adapter target are lifted package-wide
 
 An inline anonymous interface used as a `GoImplement` target — internal/trace's `readBatch(r
@@ -1430,6 +1459,44 @@ Both arms now share `wholeTypeAliasAdapterBase`, which returns any render that a
 qualifier untouched — so it is a no-op for every un-renamed type. (The same-assembly arm is a
 `-tests`-only shape, so its guard is `crypto/ecdh`'s banked suite rather than a behavioral
 project; the foreign arm's twin is guarded by `CrossPkgUser`.)
+
+## A colliding pointer-adapter name qualifies its FOREIGN interface side
+
+A pointer-interface adapter class is named `[<pkg>_]<structSimple>ж<ifaceSimple>`. The STRUCT side is
+package-qualified when foreign (`bytes_ReaderжReader`), which keeps two same-named foreign structs
+adapting to one interface apart. The INTERFACE side had no such treatment — it composed from its bare
+last-dot segment — so the mirror-image case collided: ONE struct cast to TWO interfaces whose simple
+names match composes one class name twice (`CS0102`, `CS0111` per member, `CS8646`).
+
+`compress/flate` is the case that surfaced it. It declares its own `Reader` (`io.Reader` +
+`io.ByteReader`), and its tests hand a `*bufio.Reader` and a `*bytes.Reader` to `NewReader`, which
+casts to both that and `io.Reader` — so `bufio_ReaderжReader` and `bytes_ReaderжReader` were each
+emitted twice and the package could not build its test host at all. The rule is
+**collision-conditional**: only within a group of records composing the same name does the interface
+side take a package qualifier (`bufio_Readerжio_Reader`), and the LOCAL member of a group keeps the
+bare name (at most one member can be local, so that stays unambiguous and preserves the Go-like short
+form). Qualifying unconditionally was measured and rejected — 644 distinct adapter names across 3,688
+construction sites would churn. The entire 302-package production corpus contains **no** collisions,
+so the rule is byte-neutral there by construction; it takes a test closure's extra casts to make one.
+
+Grouping keys on the whole composed name, struct side included. `compress/gzip` records both
+`<Reader, io.Reader>` and `<bufio.Reader, flate.Reader>` — two records whose interfaces share a simple
+name but whose struct sides differ, composing `ReaderжReader` and `bufio_ReaderжReader`. Keying on the
+interface name alone would call that a collision and rename a validated package's adapters for nothing.
+
+The converter and the generator must agree on every name, and neither may guess, so both read the same
+authority: the final `[assembly: GoImplement<…>(Pointer = true)]` lines. That set is not known while
+cast sites are being rendered — it is settled only after the whole package is visited and
+`writePackageInfoFile` has applied its alias-covered skip and its interface-inheritance prune — so a
+cast emits a deferred marker (mirroring the DYNTYPE marker of the anonymous-struct barrier) that
+`resolveAdapterNameMarkers` rewrites once the records are final. The marker's payload is hex-encoded
+for the same reason DYNTYPE's is: a rendered type name passes through string transformation passes
+before reaching the file. Only the INTERFACE side is ever rewritten — the struct side is emitted
+verbatim, because it is the reference's *path*, not just a name fragment: rewriting it turned
+`new os.FileжWriter(f)` (namespace `os`, adapter class `FileжWriter`, generated in os's own assembly)
+into a bare `FileжWriter` that resolves nowhere. (Guarded by `AdapterNameInterfaceCollision` — a local
+`Reader` and `io.Reader` reached from one `*src`, verified by reverting the fix: `CS0102` + `CS8646`
+on `srcжReader`. Unblocked `compress/flate`'s Phase-4 test host.)
 
 ## Every type-name render resolves a lifted anonymous struct cross-file
 

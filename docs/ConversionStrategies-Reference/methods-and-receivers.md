@@ -38,6 +38,20 @@ whose deref alias then emits inside the frame's `try` (`bodyWrappedInDeferContex
 guarded by `DeferCallOrder` `acc.add`). The direct-ж form is the alloc-free, race-free one, and it
 is also what a deferred closure needs, since a lambda cannot capture a `ref` local.
 
+### Blank params synthesize names when the body discards
+
+- **Blank params synthesize names when the body discards** (`_ = b[7]` bound the blank
+  `littleEndian` receiver, CS0029) — encoding/binary's bounds-check hints. Guarded by
+  `TypeSwitch` (`marker.tag`).
+
+### The club-41 mop-up batch (flag/flate/binary/syntax roots)
+Nine coupled rules from the shallow-stack campaign:
+
+- **Ref receivers never take box renders**: a `[GoRecv] ref` receiver has NO box — the
+  escape-heap and lambda-capture convIdent arms fall through to the value alias (flate init's
+  `d.fill = (*compressor).fillStore` emitted a nonexistent `Ꮡd`, CS0103). Guarded by
+  `FirstClassFunctions` (`worker`).
+
 ## Repointing a receiver or parameter
 
 ### Reassigning a pointer parameter to a new pointer

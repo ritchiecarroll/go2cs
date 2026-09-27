@@ -60,6 +60,10 @@ Some slots cannot take a span, and the literal changes form there:
 
 Parentheses are transparent: `(x)` renders exactly as `x` would in the same slot. The behavioral tests `StringLiteralSliceConversion`, `NamedStringConversion`, `NamedStringZeroValue`, `CompositeElementStringConcat`, `AnyStringLitComposite` and `ParenthesizedConcatContext` cover these forms.
 
+## A string indexed by a wide/unsigned integer takes an `(int)` cast
+
+A **string** indexed by a wide/unsigned integer takes the same `(int)` cast: a string LITERAL renders as a `ReadOnlySpan<byte>` (`"…"u8`) whose indexer takes `int`, so a `uintptr` index is CS1503 — runtime `heapdump.go`'s `"0123456789abcdef"[pc&15]` emitted `"…"u8[(uintptr)(pc & 15)]`. The index-expression emission routes a wide-kind index on any string-typed base through the cast — `"…"u8[(int)((uintptr)(pc & 15))]` — and an `@string` *variable*'s indexer binds an `int` argument too, so both renders are covered; an int/small index is unchanged. (Guarded by the `ArrayWideIndexAddress` extension — literal and variable string bases with `uintptr`/`uint64` indexes, byte values vs Go.)
+
 ## A string literal with raw-byte escapes emits a byte-array `@string`
 
 A C# literal cannot always hold Go's bytes. Go's `\xHH` is exactly one byte, but C#'s `\x` takes one to four hex digits and names a UTF-16 code unit. A `u8` literal also re-encodes any character at or above U+0080 as two or more bytes. So a literal that holds a raw byte emits the exact bytes:

@@ -875,6 +875,17 @@ in front of that package's 97 verdicts); `database/sql`'s `stubDriverStmt{nil}` 
 
 **An imported type ALIAS through an aliased import renders as its `global using` name.** A `global using` alias is not a member of the package class, so `import pl "PALib"` with `pl.B2{V: 1}`, where `B2` is an exported alias, cannot render `new pl.B2(…)` (CS0426). The alias table is keyed by the package's declared name, and `aliasResolvedSelector` looks a published, non-const type alias up under that name, rendering `new PALibꓸB2(…)` as the canonical import does. Every other member keeps the file's alias (`new pl.Box(…)`). (Guarded by the `AliasImport` behavioral test's `aliased.go`.)
 
+## Func-field callees drive argument treatment
+
+- **Func-field callees drive argument treatment**: `getFunctionSignature` resolves a
+  FUNC-typed field's signature (`d.fill(d, b)` — the receiver arg renders as the box for a
+  `ж<T>` slot, CS1503).
+
+## Defined-over-named-struct composites wrap the underlying
+
+- **Defined-over-named-struct composites wrap the underlying** (`decoder{order: o}` →
+  `new decoder(new coder(order: o))`, CS1739). Guarded by `NamedPointerReinterpret` (`view{}`).
+
 ---
 
 [← Type Switch Statements](type-switch.md) · [Index](README.md) · [Struct Type Embedding →](struct-embedding.md)

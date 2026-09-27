@@ -522,6 +522,16 @@ Keyed on the **AST**, not the rendered text: the operand's emission may be a cal
 ## A named complex type emits only Go's complex operator set
 The generated named-numeric wrapper (`go2cs-gen` `InheritedTypeTemplate`/`NumericTypeTemplate`) emits the operator surface of the *underlying kind*, and Go's complex kinds define only `==`/`!=`, `+`/`-`/`*`/`/`, unary `-`, and `++`/`--` — **no ordered comparisons and no `%`** (the Go spec limits `<`/`<=`/`>`/`>=` to ordered types and `%` to integers; C#'s `System.Numerics.Complex` and golib `complex64` have neither operator either). A `type C complex128` therefore gets no `<`/`<=`/`>`/`>=`/`%` operators and no `IComparisonOperators` interface declaration — emitting them was **CS0019 ×5 per type** (first hit: `testing/quick`'s `TestComplex64Alias`/`TestComplex128Alias`, which compile-blocked the whole quick test host). Integer named types keep the full set including `%`/bitwise/shifts, and float named types keep ordering (and C#'s native float `%`, inert for converted Go, stays). Same kind-gate shape as the pre-existing complement/shift gate (`GetComplementOperator`). Guarded by the `NamedNumericIncDec` behavioral test's named-complex block (`++`/`--`/arithmetic/equality on a `type cx complex128`).
 
+## Integer wrappers carry the UntypedInt bridge
+
+- **Integer wrappers carry the UntypedInt bridge** (`(token)(endBlockMarker)` — C# never
+  chains two user conversions, CS0030). Guarded by `SortArrayType` (`levelToken`).
+
+## Short declarations keep the named-numeric cast
+
+- **Short declarations keep the named-numeric cast** (`p := printFlags(0)` re-imposes
+  `((printFlags)0)`, CS1503)
+
 ---
 
 [← Native and Narrow Integer Types](native-and-narrow-integers.md) · [Index](README.md) · [Floating-Point Formatting →](floating-point-formatting.md)

@@ -367,6 +367,10 @@ type, and the receiver restriction) converter unit tests. `go/scanner` **validat
 not bank — `TestAll` asserts the GO source file's own extension and line numbers, which the converted
 program does not carry; see *`runtime.Caller` works by severing the FUNNEL* below.
 
+## A box accessor's qualifier names the class that DECLARES the type
+
+**A box accessor's qualifier names the class that DECLARES the type, which under `-tests` can be the bridge.** The accessor `Type.Ꮡfield` in `receiver.of(Type.Ꮡfield)` package-qualifies whenever a bare name could be shadowed (see *Field address of a collision-renamed heap-boxed local*), and the qualifier used to be the production `<pkg>_package` unconditionally. For a type an internal `_test.go` declares that class is the wrong one — the white-box emission unit is the bridge (`<pkg>_internal_test_package`), so the reference resolves to nothing (CS0117). `database/sql`'s `fakedb_test.go` is the corpus instance and it is forced into the qualifying path: `type table struct { mu sync.Mutex; … }` sits beside `func (db *fakeDB) table(string) (*table, bool)`, so the *type* is Δ-renamed, and Δ-renamed always qualifies — every one of the six `t.mu.Lock()`/`Unlock()` sites emitted `sql_package.Δtable.Ꮡmu`. The qualifier now resolves through `packageScopeClassName`, the same helper that already draws the production/bridge line for package-level *value* references, so both halves stay addressable from the one bridge file. Production conversions are unaffected by construction — outside `-tests` there is no class override and the helper returns the production class. (Guarded by the `TestTestVariantBoxAccessorNamesBridgeDeclaringClass` converter test, which asserts both directions: the bridge class appears and the production class does not.)
+
 ## Under the RECOMPILE model the test half CONTINUES the production emission (the `productionSeed`)
 
 The `recompile` model is the only one where the converted `_test.go` files land in the **same C# class**

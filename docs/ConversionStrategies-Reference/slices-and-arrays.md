@@ -986,6 +986,13 @@ nested, three-deep, a needy-struct element, a named-element counter-case, packag
 indexed forms; failing-first measured as `nested empty 2 0 0` against Go's `2 3 3`, followed by the
 panic, and `keyed nested 4 0 3 0 3` against Go's `4 3 3 3 3`.)
 
+## Slice-to-array: the VALUE form copies, the POINTER form ALIASES
+Go has two slice-to-array conversions and they are different conversions, so each gets its own
+golib entry. Both panic Go-style on a short slice.
+- The Go 1.20 **value** form `[4]byte(slice)` emits `new array<byte>(s, 4)` — the COPY
+  constructor `array<T>(slice<T>, nint)`. Go's conversion copies, so this is exactly faithful
+  (netip `AddrFromSlice`, CS1955).
+
 ## An ELIDED element carries the same construction as the spelling it elides
 
 Go lets a composite literal **elide** its element's own type, and in two directions: the element's

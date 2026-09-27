@@ -305,6 +305,17 @@ continue must keep binding inward, a labeled `continue outer` through a wrapper,
 per-iteration-capture loop whose wrapped continue must flow through the carrier copy-back — all
 output-compared vs Go.
 
+## Labeled switches declare their break target
+
+- **Labeled switches declare their break target** (`break_BigSwitch:;` after the switch —
+  both switch visitors now mirror visitForStmt, CS0159). Guarded by `SwitchBreakInCase`
+  (`pick`).
+
+## Empty-interface switch tags compare via AreEqual
+
+and **empty-interface switch tags compare via AreEqual**
+  (`switch err := recover(); err { case ErrLarge: }`, CS0019).
+
 ---
 
 [← Defer / Panic / Recover](defer-panic-recover.md) · [Index](README.md) · [Type Switch Statements →](type-switch.md)

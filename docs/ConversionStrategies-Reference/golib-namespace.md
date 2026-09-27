@@ -244,6 +244,52 @@ with the fix reverted.)
 
 <a id="a-typed-nil-keeps-its-type-across-both-interface-space-boundaries"></a>Moved to [A typed nil keeps its type across BOTH interface-space boundaries](reflection/values.md#a-typed-nil-keeps-its-type-across-both-interface-space-boundaries).
 
+## Package aliases shadowed by method names
+
+- **Package aliases shadowed by method names** qualify through the `_package` class
+  (`sort_package.Sort(…)` — flate's `byLiteral.sort` bound the method group, CS0119).
+  Guarded by `SortArrayType` (`PeopleByAge.sort`).
+  Same-package tests also participate in that shadow set even during an **ordinary production
+  conversion**. Under recompile fallback an in-package `_test.go` declaration lands in the SAME C#
+  package class and can shadow a production alias; under white-box reference it lives in a bridge,
+  but external-test references still need one stable production spelling — yet go/packages'
+  production package omits test files. hash/maphash's `smhasher_test.go`
+  declares `func (k *bytesKey) bits() int` while `maphash_purego.go` imports `math/bits`, so
+  `bits.Mul64(a, b)` binds the method group in the test assembly (CS0119, plus CS8130 on both
+  deconstructed results). Every production package conversion therefore performs a cheap,
+  build-constraint-aware directory scan of its in-package `_test.go` function/method names and
+  folds them into `packageFuncMethodNames`; it loads and type-checks no test dependency graph.
+  External-package tests are excluded because they emit into another C# package class. This makes
+  production output mode-stable: ordinary and `-tests` conversion both emit
+  `math.bits_package.Mul64(a, b)`. When a test-only declaration is specifically responsible, the
+  statement also explains the otherwise surprising spelling:
+
+  ```csharp
+  // Fully qualified to avoid alias shadowing by the same-package test declaration "bits".
+  var (hi, lo) = math.bits_package.Mul64(a, b);
+  ```
+
+  This remains a REFERENCE-spelling change only — never a symbol rename, so production names stay
+  pinned (see `testMethodRenames`). On entry to `processTestConversion` the sibling list is cleared:
+  the in-package variant sees the declaration in its own typed universe, while the external
+  variant's declarations live in a different C# class. Guarded by
+  `TestSiblingTestDeclaratorsContributeAliasShadow`, including build-excluded and external-test
+  negatives plus the exact explanatory comment; hash/maphash's normal-vs-`-tests` production file
+  is also byte-identical.
+  A **Δ-renamed foreign CONST reached through that fallback** must still substitute the
+  renamed member: the composed lookup key (`time_package.Second`) misses the alias map
+  (keyed on the plain package name, `time.Second`), so `getAliasedTypeName` retries with
+  the `PackageSuffix` stripped and, on a CONST hit, keeps the `_package` qualifier while
+  substituting the alias — `time_package.ΔSecond` (crypto/tls's `Config.time` method ×
+  time's `Second` const-vs-`Time.Second()` collision; the raw name bound the
+  `Second(this Time)` extension method group, CS0019 ×2). Gated to consts: const entries
+  exist only for collision-renamed members, while type entries cover every exported type,
+  whose raw `_package`-qualified renders already bind. Guarded by
+  `ShadowedImportConstLib`/`ShadowedImportConstUser` (the lib Δ-renames `Peak` for its own
+  `Meter.Peak` collision; the user's `gauge.ShadowedImportConstLib` method shadows the
+  import and `Span(2) * ShadowedImportConstLib.Peak` reaches the renamed const through the
+  fallback, output-compared vs Go).
+
 ## Converted programs write UTF-8 stdout — the ambient console code page never reaches the bytes
 Go writes stdout as raw UTF-8, unconditionally: `fmt.Println("Hello, 世界")` emits the same bytes to a
 terminal, a pipe, or a file. .NET does not. `Console.Out` is constructed with `Console.OutputEncoding`,
