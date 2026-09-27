@@ -75,6 +75,44 @@ the value arm's `whiteboxProductionTarget` carve-out — note the pointer target
 `*types.Pointer`, so the shared `whiteboxProductionTarget` flag (computed from the unwrapped VALUE
 form) is structurally false there and the check must unwrap and ask directly.
 
+### A generic struct implementing an interface BY VALUE partials at its OPEN definition
+A Go method on a generic type is declared for every instantiation, so `func (g G[T]) M()` makes
+`G[int]`, `G[string]` and `G[G[int]]` all satisfy an interface with `M`. The converter records a
+`[assembly: GoImplement<…>]` per instantiation it sees, and `ImplementGenerator`'s value-form arm
+wrote one `partial struct` per record, spelled with the record's TYPE ARGUMENTS:
+`partial struct G<IntPtr> : I`. C# reads that argument list as a **type-parameter list**, so the
+declaration disagrees with the converter's own `partial struct G<T>` (CS0264) and the mismatched
+parts stop merging — every member the template writes then lands in the containing **static**
+package class instead (CS0715 on the operators, CS0708 on `Equals`/`GetHashCode`/`ToString`,
+CS0563 and CS0540 in the cascade). The arm now emits ONE partial against the open definition, keyed
+by `(OriginalDefinition, interface)` so all instantiations of a pair fold into it; the member and
+value-pair dedupe indexes key on the same open form, since two interfaces over one open generic
+share a single partial. Constraints are deliberately omitted — a partial declaration may leave them
+off and they merge from the converter's declaration, so omission can never raise CS0265. The
+pointer-adapter arm had always done this (`emittedGenericPointerAdapters`, crypto/elliptic's
+`nistCurve[Point]`); this is its value-form sibling.
+
+Behind it sat a second, independent defect in the shared `GetSimpleName` helper, and it is the one
+that explains why the two packages holding this class both name their generic with a **single
+letter**. Asked to drop a type-argument list, the helper tested `typeName.IndexOf('<') > 1` — so
+`G<T>`, whose `<` sits at index 1, kept its arguments. `StructTypeTemplate` derives the constructor
+name from that call, and emitted `public G<T>(NilType _)`, which is not a constructor to C#: the
+`partial struct G<T>` scope never opens and the same spill follows. Every multi-character generic
+in the corpus (`meta<T>`, `nistCurve<Point>`, `Handle<T>`) cleared the guard, which is why this
+survived to the first single-letter one. The guard is now `> 0` and indexes the *simple* name
+rather than the full one — the latter also closes a latent, currently unreached miscut on a dotted
+generic (`a.Map<K, V>` indexed at 5 into an 8-character `Map<K, V>`, yielding `Map<K`).
+
+Measured on `internal/reflectlite` (`type B[T any] struct{}`) and `runtime/debug`
+(`type G[T any] struct{}` with `var dummy I = G[int]{}` and `var dummy2 I = G[G[int]]{}`), the two
+packages the board recorded behind one CS0715 root. `runtime/debug` moves from build-blocked to a
+measured **2 of 9**; `internal/reflectlite` clears this root and stops on five unrelated ones.
+Guarded by the `GenericValueInterfaceImpl` behavioral test — a single-letter generic held as an
+interface at three instantiations, a sibling type named exactly like the type parameter (the
+`runtime/debug` shape that made the spilled members render as `debug_test_package.T`), struct
+equality, struct-versus-interface comparison, and interface dispatch over a mixed slice, all
+output-compared against `go run`.
+
 ## De-duplication
 
 ### GoImplement records de-duplicate at attribute emission

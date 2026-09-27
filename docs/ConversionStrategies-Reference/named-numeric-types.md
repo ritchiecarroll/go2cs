@@ -522,6 +522,55 @@ Keyed on the **AST**, not the rendered text: the operand's emission may be a cal
 ## A named complex type emits only Go's complex operator set
 The generated named-numeric wrapper (`go2cs-gen` `InheritedTypeTemplate`/`NumericTypeTemplate`) emits the operator surface of the *underlying kind*, and Go's complex kinds define only `==`/`!=`, `+`/`-`/`*`/`/`, unary `-`, and `++`/`--` — **no ordered comparisons and no `%`** (the Go spec limits `<`/`<=`/`>`/`>=` to ordered types and `%` to integers; C#'s `System.Numerics.Complex` and golib `complex64` have neither operator either). A `type C complex128` therefore gets no `<`/`<=`/`>`/`>=`/`%` operators and no `IComparisonOperators` interface declaration — emitting them was **CS0019 ×5 per type** (first hit: `testing/quick`'s `TestComplex64Alias`/`TestComplex128Alias`, which compile-blocked the whole quick test host). Integer named types keep the full set including `%`/bitwise/shifts, and float named types keep ordering (and C#'s native float `%`, inert for converted Go, stays). Same kind-gate shape as the pre-existing complement/shift gate (`GetComplementOperator`). Guarded by the `NamedNumericIncDec` behavioral test's named-complex block (`++`/`--`/arithmetic/equality on a `type cx complex128`).
 
+## An integer named-numeric wrapper implements the integer operator interfaces
+
+A `[GoType num:]` wrapper (`type stringID uint64`) already declared the *common* numeric operator
+interfaces so it could serve a `cmp.Ordered`-shaped constraint (`IAddition`/`ISubtraction`/
+`IMultiply`/`IDivision`/`IEquality`/`IComparison`/`IIncrement`/`IDecrementOperators`), but the
+*integer-only* three — `IModulusOperators`, `IBitwiseOperators`, `IShiftOperators<T, int, T>` —
+were deliberately left off because their operators (`%`, `&|^~`, `<<`, `>>`) are kind-gated. That
+left a named integer type unable to satisfy a converter-emitted `~integer` operator constraint:
+internal/trace's `type dataTable[EI ~uint64, E any]` instantiated with `type stringID uint64` was
+CS0315 ×48 on exactly those three interfaces. The `NumericTypeTemplate` operators already exist
+(same kind-gate), so `InheritedTypeTemplate` now also *declares* the three integer interfaces for an
+integer underlying (float/complex keep only the common set). `IShiftOperators` additionally requires
+`operator >>>` (unsigned right shift) — added to the integer operator block; Go emits no `>>>`, but
+the member is needed to satisfy the interface. Cleared internal/trace's 48 CS0315 (49→1, the residual
+being the unrelated ΔLabel CS0542). Guarded by `NamedNumericOperatorConstraint` (a generic
+`mix[K ~uint64 | ~int32]` applying modulus/bitwise/both-shifts on the type parameter, instantiated
+with a named `uint64` and a named `int32`, values vs Go). Corpus-verified against math/big (Word),
+archive/tar, and time (Duration).
+
+## A named-numeric wrapper is `IComparable<T>` as well as ordered by operators
+
+Ordering has two surfaces in .NET and the wrapper only carried one. `IComparisonOperators<T,T,bool>`
+(above) serves a constraint lifted from `cmp.Ordered`; `IComparable<T>` is what the BCL's own
+ordering binds — `Array`/`List.Sort`, `SortedSet<T>`, `Comparer<T>.Default` — and, decisively for
+converted code, what golib's N-argument `min`/`max` are constrained on. (The two-argument forms take
+`IComparisonOperators`, because a *type parameter* constrained by `cmp.Ordered` has no
+`IComparable<T>` conversion; the `params ReadOnlySpan<T>` forms cannot, since a span element must
+compare through a member, not an operator.) So a named numeric bound `min(a, b)` and failed
+`min(a, b, c, d)`: `min(a-got, got-a, a-got+q, got-a+q)` over `crypto/internal/mlkem768`'s
+`type fieldElement uint16` was CS0315, "no boxing conversion from `fieldElement` to
+`System.IComparable<fieldElement>`". `InheritedTypeTemplate` now declares `IComparable<T>` on the
+**same kind-gate** as `IComparisonOperators` — every numeric kind except complex, which Go orders no
+more than C# does — and `NumericTypeTemplate` emits its single member inside the same gated block:
+
+```csharp
+public int CompareTo(fieldElement other) => m_value.CompareTo(other.m_value);
+```
+
+Forwarding to the *underlying* value's `CompareTo`, rather than writing the comparison out of the
+wrapper's own `<`/`>`, is what keeps a named float on the BCL total order (NaN below everything) —
+which is what makes `min` yield NaN when any argument is NaN, as Go's does. Every underlying a
+`[GoType num:]` wrapper can name satisfies it: the aliases are BCL primitives, `uintptr` is a golib
+struct that declares `IComparable<uintptr>` itself, and a wrapper over another wrapper picks up the
+member this template gives it. The wrapper was already `IEquatable<T>`; this makes it ordered too,
+matching the golib `uintptr` and `@string` structs, which are both. (Guarded by extensions to the
+`MinMaxBuiltin` behavioral test — `min`/`max` at two and four arguments over named unsigned,
+floating and signed underlyings, values vs Go; the pre-fix generator is CS0315 ×10 across the three
+kinds.)
+
 ## Integer wrappers carry the UntypedInt bridge
 
 - **Integer wrappers carry the UntypedInt bridge** (`(token)(endBlockMarker)` — C# never
