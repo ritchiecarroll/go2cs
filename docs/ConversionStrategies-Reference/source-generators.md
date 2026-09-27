@@ -89,6 +89,58 @@ Mechanics worth knowing:
 * **The section sorts on the DECLARATION, not the line.** `typeAccessibilityKey` strips the attribute prefix before comparing, so a stamped entry keeps the place its accessibility/kind/name earns instead of being pulled into a leading block by its `[`. Sorting the raw line is legal but scrambles a section whose whole value is being readable at a glance.
 * **Not a semantic change anywhere.** The relocation moves *where the attribute is written*, exactly as the `TypeAccessibility` section moved where the modifier is written. Nothing observes a difference: the generated `Clone()` is identical, and `GoReflect`'s `%T` output is identical.
 
+## ImplicitConvGenerator
+
+### A GoImplicitConv record needs at least one LOCAL operand
+`ImplicitConvGenerator` realizes a recorded conversion as a `partial struct <name>` inside THIS package's
+class, so the record has to name a type this package declares. The generator already relocates the host
+when exactly ONE side is foreign (its "foreign SOURCE via a local alias" / "foreign TARGET via a qualified
+reference" arms), and the converter's aliased-numeric arm swaps target and argument for the same reason —
+to anchor the record on the local operand. With NEITHER operand local the swap merely picks the other
+foreign one and the generator has nothing to extend: it declares `partial struct <simple name>` locally, a
+PHANTOM type of that name, and the operator body's `src.Value` does not exist (CS1061).
+
+os reaches it from `os_windows_test.go`'s privilege helper, `syscall.CloseHandle(syscall.Handle(t))` over a
+`syscall.Token` — both operands in `syscall`. Both the struct-conversion and the aliased-numeric arms of
+`checkForImplicitConversion` now require `conversionRecordHasLocalOperand`, stated once as the property
+rather than per-arm. Declining costs nothing: the call site already emits the explicit
+`((syscallꓸHandle)(uintptr)t)` cast chain, which needs no generated operator, and an operator between two
+foreign types could not be hosted in either of their assemblies from here in any case. Behavioral CNR is
+byte-identical. (Guarded by the `ForeignPairNumericConv` behavioral test — a sibling library declaring two
+named numerics and never converting between them, converted across in `main`, with the
+foreign→local and local→foreign directions as the live controls for the records that are still needed.)
+
+#### ...but the POINTER-BOXING route needs none, and a whitebox-production operand still counts
+The rule above is about HOSTING, so it stops where hosting does. A record of the form `T` → `ж<T>` —
+the shared Go pointer-boxing route, and the corpus's dominant record family at **193 of the 268**
+`GoImplicitConv` records across the emitted `package_info.cs` files — hosts nothing at all:
+`ж<T>` is golib's generic box, no converted package declares it, and `ImplicitConvGenerator` looks the
+target up by struct declaration and `continue`s when it finds none. No host is ever chosen, so no phantom
+can be minted and no closed assembly can be mutated. `recordsRequireProductionMutation` already stated
+exactly this when deciding whether a white-box test project can keep the reference model; the predicate is
+now written once (`pointerBoxConversionRecord`) and both readers share it.
+
+That matters because of the second refinement. On the internal `-tests` variant go/packages merges the
+production files into the test package, so a production type's `obj.Pkg()` IS the converted package while
+its C# lives in the CLOSED referenced production assembly — which is why `typeDeclaredInConvertedPackage`
+subtracts such a declaration (`whiteboxProductionObject`; internal/reflectlite's `flag(typ.Kind())` minted
+a phantom `partial struct flag` in the test class, CS1061). Subtracting it for the pointer-boxing route as
+well was one notch too far: it silently shrank every white-box package's committed `package_test_info.cs`
+on regen. `crypto/rc4` lost its `Cipher` → `ж<Cipher>` record **and** the
+`using testing = go.testing_package;` qualifier alias that the same record site registers;
+`go/types` lost three (`Basic`, `Interface`, `Tuple`). Nothing catches it: CNR never runs
+`-tests`, and the records are inert in the generator, so the only symptom is a `-tests` regen that no
+longer reproduces committed bytes.
+
+`conversionRecordHasLocalOperand` therefore takes the record shape as an argument and readmits a
+WHITEBOX-PRODUCTION operand — and only that — when the record is the pointer-boxing route. A
+BOTH-FOREIGN pair stays declined exactly as the section above describes, which is what keeps the change a
+restoration rather than a widening: `go/types`' test conversion also reaches `types.Basic` → `ж<types.Basic>`
+and `ast.FuncType` → `ж<ast.FuncType>`, and those must not start recording. (Guarded by
+`TestWhiteboxProductionPointerBoxConvStillRecorded`, whose both-foreign arm is the boundary, and
+`TestPointerBoxConversionRecordShape` for the shared predicate; the numeric phantom keeps its own guard,
+`TestWhiteboxProductionNumericConvNotRecorded`.)
+
 ---
 
 [← The `go.golib` support namespace](golib-namespace.md) · [Index](README.md) · [The standard-library conversion applies `-tags purego` →](purego.md)

@@ -10,7 +10,7 @@ Go structs use "[type embedding](https://go101.org/article/type-embedding.html)"
 
 **Cross-package embeds resolve through the semantic model.** The member-collection above resolves the embedded struct's *syntax* (`GetStructDeclaration`) — same-package or via `CompilationReference`s. In a real [MSBuild](../Glossary.md#msbuild) build, project references arrive as **metadata** references (never `CompilationReference`), so a cross-package embed — `type rtype struct { *abi.Type }` (runtime `type.go`) or a user package embedding a library struct — silently promoted **nothing**: the generated "Promoted Struct Field Accessors" section was empty and every `t.TFlag`/`t.Str`/`t.Kind_` was CS1061. The field collection now falls back to the **type's metadata symbol** (`GetTypeByMetadataName` on the normalized nested name, e.g. `go.internal.abi_package+Type`) and enumerates its public instance fields; the emitted accessors are unchanged in form — true refs through the embed (`public ref abi.TFlag TFlag => ref Type.Value.TFlag;` for a pointer embed), so writes through a promoted name reach the embedded target. Transitive promotion through a *metadata* type's own embeds is not chased (no corpus site needs it). **Promoted POINTER-RECEIVER method calls through a cross-package *pointer* embed are routed at the call site**: the generator emits no method forwarder for a metadata embed (method promotion is syntax-resolved), so `t.Uncommon()` on `Δrtype` (embeds `*abi.Type`, runtime `type.go`) was CS1929; the converter now emits the explicit hop through the embed field's box — `t.Type.Value.Uncommon()` — where the deref'd `.Value` is a ref return, binding the `[GoRecv] ref` extension addressably. A *same-package* pointer embed keeps its generated forwarder (no churn), and a promoted **value-receiver** method call (`p.Hot()`) remains a documented open gap — call through the embed explicitly. (Guarded by the `CrossPkgUser` Phase-4b extension — a promoted pointer-receiver `Calibrate` through the cross-assembly pointer embed, write-through observed via the target.) (Guarded by the `CrossPkgUser` Phase-4 extension — pointer-embed and value-embed field promotion across the assembly boundary, write-through observed via the embedded target, vs Go; cleared runtime `type.go`'s 4 CS1061, 68 → 64.)
 
-Two refinements complete the cross-package pointer-embed story (2026-07-03, internal/reflectlite's last 4): **(a) the hop names the FIELD, which is struct-scoped** — an embed field named like a Δ-renamed package type (rtype's embedded `Type` vs reflectlite's `Type` interface, Δ-renamed `ΔType` by its type-vs-method collision) is *declared* unrenamed, so the hop emission must not apply the package-level rename (`t.ΔType.Value.Uncommon()` was CS1061); both hop arms now route through `structFieldBoxName`, the same struct-scoped naming the box accessors use. **(b) A generated interface implementation forwards through the hop too**: when an interface member has NO direct struct method and is satisfied purely by Go promotion through a single embedded-pointer field (`GoImplement<rtype, ΔType>` — `Size`/`Kind` live on `*abi.Type`), the `InterfaceImplTemplate` emits `this.Type.Value.Size()` instead of the unbindable `this.Size()` (CS1929); the `IжAdapter` template forwards the same members `m_box.Value.Type.Value.M()`. Detection is syntax-level — the converter's embed marker is the `public partial ref ж<X> F {{ get; }}` property (`GetEmbeddedPointerHopNames`) — and originally gated to a SINGLE hop, on the reasoning that multi-embed interface satisfaction was rare. The corpus surfaced one (jsonrpc's `pipe`), and the gate is gone: several embeds now route each member to the unique embed declaring it (see [*With SEVERAL embedded pointers the hop is chosen per member, not per struct*](interfaces.md#with-several-embedded-pointers-the-hop-is-chosen-per-member-not-per-struct)). (Guarded by the `CrossPkgUser` Phase-5 extension — a local Δ-renamed `Meter` interface colliding with the embed field name, satisfied purely by promotion through `*CrossPkgLib.Meter`, with all bump paths aliasing one shared object, vs Go.)
+Two refinements complete the cross-package pointer-embed story (2026-07-03, internal/reflectlite's last 4): **(a) the hop names the FIELD, which is struct-scoped** — an embed field named like a Δ-renamed package type (rtype's embedded `Type` vs reflectlite's `Type` interface, Δ-renamed `ΔType` by its type-vs-method collision) is *declared* unrenamed, so the hop emission must not apply the package-level rename (`t.ΔType.Value.Uncommon()` was CS1061); both hop arms now route through `structFieldBoxName`, the same struct-scoped naming the box accessors use. **(b) A generated interface implementation forwards through the hop too**: when an interface member has NO direct struct method and is satisfied purely by Go promotion through a single embedded-pointer field (`GoImplement<rtype, ΔType>` — `Size`/`Kind` live on `*abi.Type`), the `InterfaceImplTemplate` emits `this.Type.Value.Size()` instead of the unbindable `this.Size()` (CS1929); the `IжAdapter` template forwards the same members `m_box.Value.Type.Value.M()`. Detection is syntax-level — the converter's embed marker is the `public partial ref ж<X> F {{ get; }}` property (`GetEmbeddedPointerHopNames`) — and originally gated to a SINGLE hop, on the reasoning that multi-embed interface satisfaction was rare. The corpus surfaced one (jsonrpc's `pipe`), and the gate is gone: several embeds now route each member to the unique embed declaring it (see [*With SEVERAL embedded pointers the hop is chosen per member, not per struct*](#with-several-embedded-pointers-the-hop-is-chosen-per-member-not-per-struct)). (Guarded by the `CrossPkgUser` Phase-5 extension — a local Δ-renamed `Meter` interface colliding with the embed field name, satisfied purely by promotion through `*CrossPkgLib.Meter`, with all bump paths aliasing one shared object, vs Go.)
 
 **A pointer-receiver method promoted through a VALUE embed is routed at the call site, not by a generator forwarder.** When `timeTimer` embeds `timer` *by value* and `timer` has a pointer-receiver method (`func (t *timer) modify(…)`), the generator emits **no** `modify` forwarder on `timeTimer` (a `target.timer.modify(…)` forwarder body would copy the value field, losing the write, and would not bind the `ж<timer>` overload) — so a promoted call `t.modify(…)` on a `*timeTimer` would leave the receiver as the whole `ж<timeTimer>` box, which the promoted method's ж/`[GoRecv]`-ref overload cannot bind (CS1929). The converter instead routes the promoted call through the embedded field's box, exactly as the *explicit* `t.timer.modify(…)` already renders: `t.of(timeTimer.Ꮡtimer).modify(…)` for a pointer local, `Ꮡt.of(timeTimer.Ꮡtimer).modify(…)` for a deref'd pointer parameter (the `&receiver.field` &-machinery supplies the correct box per receiver form). Because it field-refs the real embedded storage — never a `Ꮡ(copy)` — the mutation writes through. This is detected via the method's `types.Selection.Index()` having a single embedded-field hop (`[embeddedField, method]`); it is gated to a **value** embed (a *pointer* embed already yields the box as its field value and is left to the generated forwarder — taking its address would double-box to `ж<ж<T>>`), and to a single hop (deeper chains fall through).
 
@@ -570,8 +570,262 @@ A pointer-receiver method promoted through two or more embedded VALUE structs de
 ```
 The own-receiver bare form joins the hop path (`recv.E1.E2.method(...)`); a chain broken by a pointer embed falls through unchanged. Guarded by `CrossPkgUser`.
 
+## A promoted box-receiver method through an UNEXPORTED value embed is called cross-package via a public forwarder
+An EXPORTED, pointer-receiver method that takes the address of a receiver field is emitted as a
+**direct-ж (box-receiver) primary** `M(this ж<T> …)`. When such a method is *promoted* through an
+**unexported** VALUE embed — `testing.T.Errorf`, promoted from the embedded `common` (`type T struct{
+common; … }`), or go/types' `TypeName`/`Var`/`Func`, which embed `object` — an IN-PACKAGE caller
+renders the descent through the embed's box-field accessor (see *Promoted pointer methods descend
+multi-hop value-embed chains* above):
+```csharp
+Ꮡt.of(testing.T.Ꮡcommon).Errorf("…"u8, …);   // in-package
+```
+`Ꮡcommon` is the `TypeGenerator`'s `FieldReferences` box accessor for the embed, and — matching the
+embed's unexportedness — it is `internal`. So a caller in **another package/assembly** (crypto/internal/
+cryptotest, testing/slogtest, x/net/nettest, go/internal/gcimporter) cannot see it: a cross-assembly
+reference to an `internal` member reads as **CS0117** ("`testing_package.T` does not contain a definition
+for `Ꮡcommon`"), not CS0122. Every path through the unexported embed (`common`, `Ꮡcommon`, its promoted
+members) is `internal`, so no converter-only descent can reach it. The fix is two-sided:
+
+- **`go2cs-gen` (`StructTypeTemplate`)** — for a direct, non-generic **VALUE embed**, harvest
+  the embed's box-receiver primaries (`GetBoxReceiverExtensionMethods`, previously collected only for
+  POINTER embeds) and, for each **exported** one, emit a single box-only shim (`IsValueEmbedBoxRecv`) that
+  performs the descent internally, where the `internal` accessor is reachable:
+  ```csharp
+  public static void Errorf(this ж<T> Ꮡtarget, @string format, params Span<object> argsʗp)
+      => Ꮡtarget.of(T.Ꮡcommon).Errorf(format, argsʗp);
+  ```
+  No `this ref T` overload (a box receiver cannot bind on a value). The shim scope is the shared
+  `methodScope` — the STRUCT's exportedness, downgraded for a non-public return type — so it is `public`
+  only for an exported method on an EXPORTED struct returning void/public (the genuinely reachable case),
+  and `internal` on an UNEXPORTED enclosing struct (context's `afterFuncCtx`, reflect's
+  `structTypeUncommon`), whose `ж<T>` receiver is itself internal — a `public` shim there is CS0051. It is
+  gated to an exported promoted method (an unexported one is never reachable across packages, so it needs
+  no shim; its in-package callers keep the inline descent). The value embed is discriminated by
+  `!promotedStructType.Contains("<")` (a plain value embed's type name never carries `<`, whereas the
+  pointer-box form `ж<…>` and generic embeds do) — a more robust test than the `@`-keyword-escaped
+  `pointerEmbedTypeNames` membership, whose `ж<@file>`-shaped names mismatch and mis-fired the shim onto
+  os.File's `*file` POINTER embed (a stray `File.Ꮡfile.Value`, CS0119). The embed's own **exportedness is
+  NOT part of that discrimination** — it was, until r56g, and the restriction was never a Go rule; see
+  *A value embed promotes its pointer-receiver methods into the outer POINTER method set* below for why
+  the narrower gate silently truncated a Go method set rather than merely skipping an unreachable shim.
+- **the converter (`convSelectorExpr`)** — when the promoted-method descent is reached through an
+  unexported embed of a FOREIGN package (single hop), it drops the inaccessible `.of(…)` view and calls
+  the promoted method DIRECTLY on the receiver box, binding the public shim:
+  ```csharp
+  Ꮡt.Errorf("…"u8, …);   // cross-package (Ꮡt for a deref'd param, tΔ1 for a lambda box param)
+  ```
+  The box is recovered from the first-hop `&embed`-address the `&`-machinery already computes (the text
+  before its last `.of(`), so it is correct for every receiver kind without re-deriving it.
+
+(Guarded by `PromotedEmbedLib`/`PromotedEmbedUser`: `Counter` value-embeds an unexported `common` whose
+exported `Add`/`Report` take `&c.sum` (box-receiver); the user package calls them on a `*Counter` local
+and through a parameter, plus reads the exported `Label` field for contrast — output-compared vs Go.)
+
+**Plain-return-type addendum — a PLAIN (non-box) promoted method returning a public builtin.** The
+box-shim above covers a method emitted as a `ж<T>` primary (it takes `&receiver.field`). A method that
+merely READS a field — `testing.common.Name()` (`func (c *common) Name() string { return c.name }`) — is
+emitted as an ordinary `Name(this ref common)` extension, so the promotion machinery emits the usual
+value + box forwarders `Name(this ref T)` / `Name(this ж<T>)` with body `target.common.Name()`. But their
+scope was downgraded by the RETURN type: `@string` (and `error`, `bool`, `nint`, … — every golib builtin)
+is a PUBLIC C# type whose Go-lowercase name the name-based `GetScope` heuristic reads as unexported, so
+the forwarder was emitted `internal` and thus invisible cross-assembly. Cross-package the converter emits
+the same bare `Ꮡt.Name()` (the foreign-unexported-value-embed arm fires for EVERY promoted
+pointer-receiver method, not just box ones), which then bound a same-named FOREIGN extension —
+`x/net/nettest`'s `timeoutWrapper` reads `t.Name() == "…"`, and the only visible `Name` was
+`flag.Name(ref flag.FlagSet)` (flag is imported by testing) → **CS1929**. The fix keeps the forwarder
+public when its return type is GENUINELY accessible: `go2cs-gen` captures the return type's ACTUAL C#
+accessibility (`MethodInfo.ReturnTypeIsPublic`, computed by `IsEffectivelyPublicType` — the type and
+every type argument / tuple element / array-or-pointer element is `public`, treating builtin special
+types and use-site-bound type parameters as public) and, for the direct-unexported-value-embed case,
+trusts it over the lowercase name (`directEmbedIsUnexportedValue && method.ReturnTypeIsPublic`):
+```csharp
+public static @string Name(this ж<T> Ꮡtarget) { ref var target = ref Ꮡtarget.Value; return target.common.Name(); }
+```
+Every OTHER promotion keeps the conservative name heuristic (so no golden/compile churn), and an
+UNEXPORTED enclosing struct still yields an internal forwarder (its `ж<T>` receiver is internal — a public
+forwarder there is CS0051, and my change only prevents a downgrade below the struct's own scope). This
+greens `x/net/nettest` (census 271 → 272/302, zero regressions). (Guarded by `PromotedValueEmbedLib`/
+`PromotedValueEmbedUser`: `Widget` value-embeds an unexported `common` whose plain `Name() string` is read
+in an expression cross-package, alongside an unrelated `Gadget.Name()` — the foreign same-named extension
+— output-compared vs Go; CS1929 without the fix.)
+
+**Pointer-expression-receiver addendum.** The converter arm above recovers the box from the `.of(…)`
+strip of the first-hop `&embed` address — which assumes the receiver has an addressable base (an
+ident: a raw-box local, a deref'd param's `Ꮡx`). A pointer receiver **expression** — a type-assert or
+call chain like go/internal/gcimporter's `pkg.Scope().Lookup(name).(*types.TypeName).Type()` — has no
+such base: the `&`-machinery boxes a COPY (`Ꮡ(x.@object)`, no `.of(` anywhere), so the arm silently
+fell through to the spelled embed hop, `internal` cross-assembly (**CS1061**). A follow-up sub-arm
+recognizes a pointer-typed receiver expression that renders as the raw box (pointer-typed and not
+deref-aliased) and calls the promoted member straight on it — the box IS the receiver:
+```csharp
+pkg.Scope().Lookup(name)._<ж<types.TypeName>>().Type();   // binds the public Type(this ж<TypeName>)
+```
+(Guarded by `PromotedValueEmbedExprRecv`: the promoted `Name()` called on a `map[string]any`
+assert-chain receiver and on a constructor-call receiver, output-compared vs Go; CS1061 without the
+fix.)
+
+## A value embed promotes its pointer-receiver methods into the outer POINTER method set
+Go's rule has no exportedness clause: for `type S struct{ E; … }` embedding `E` **by value**, the method
+set of `*S` contains every **pointer**-receiver method of `E`, because `&s.E` is addressable. (The method
+set of a plain `S` does **not** — that half is the narrowing this subsection also has to preserve.)
+
+The shim above emitted exactly that promotion, but only for an **unexported** embed. That gate arrived
+with the cross-package-reachability problem it solves (`testing.T.Errorf`, whose `Ꮡcommon` accessor is
+`internal`) and reads as a scoping decision, which is why it looked harmless: for an EXPORTED embed the
+accessor is public, so the converter's own call sites descend inline and never need a shim.
+
+They are not the only reader. **golib reconstructs a Go method set at RUN TIME by scanning the EMITTED
+extension methods** (`TypeExtensions.GetGoMethodSetCandidates`, shared by the `StructurallyImplements`
+probe and `AdapterBinder`'s shell binder — see *Every eligible interface carries runtime duck-typing
+shells*). So an un-emitted promotion is not a missing convenience, it is an **ABSENT Go method**: the type
+stops satisfying interfaces Go says it satisfies, at every site the compile-time recorders cannot reach.
+
+`debug/dwarf` is the reached case. Its `readType` asserts to an **anonymous** interface —
+
+```go
+typ.(interface{ Basic() *BasicType }).Basic()
+```
+
+— which the converter lifts to a package-local `[GoType("dyn")] partial interface readType_type`. The
+concrete types (`*IntType`, `*UintType`, `*CharType`, `*UcharType`, `*FloatType`, …) satisfy it **only**
+through `func (b *BasicType) Basic() *BasicType` promoted from their exported `BasicType` value embed, and
+the value is held as a *different* named interface (`Type`) at the assertion site — so no compile-time
+witness can exist for the pair and the run-time tier is the only thing that can answer. It answered MISS:
+
+```
+panic: interface conversion: interface {} is *dwarf.UintType, not dwarf.readType_type
+```
+
+The gate is now the Go rule — any direct, non-generic VALUE embed promotes its box-receiver primaries —
+and the shim keeps its `ж<S>`-only receiver, which is what preserves the narrowing half (a `Uint` VALUE
+must still miss the same anonymous interface):
+
+```csharp
+public static ж<BasicType> Basic(this ж<UintType> Ꮡtarget) => Ꮡtarget.of(UintType.ᏑBasicType).Basic();
+```
+
+The `of(…)` view is load-bearing rather than incidental: it **aliases** the embedded storage, so dwarf's
+caller writing `t.Name`/`t.BitSize` through the returned `*BasicType` reaches the real field. A
+copy-returning promotion would have compiled, run, and printed plausible zeros.
+
+**Reachability addendum — the shim was emitted, and emitted unreachable.** Widening the collection gate
+made the promotion EXIST; it did not by itself make it bindable. The shim's scope is the shared
+`methodScope`, whose return-type downgrade runs the name heuristic — and `GetSimpleName` reduces a type to
+its last dotted segment, which for a Go MULTI-RETURN is `error)`. Lowercase. So *every tuple-returning*
+promoted method read as unexported and was emitted `internal`. `archive/zip` is the reached case: `Open`,
+promoted from `ReadCloser`'s exported `Reader` embed, returns `(io.fs.File, error)`, so the package's own
+test assembly could not bind the shim its `ReadCloser`→`fs.FS` adapter needed (**CS1929**, the whole
+package build-blocked behind it). The accurate test (`method.ReturnTypeIsPublic`, from
+`IsEffectivelyPublicType`, which walks tuple elements) already existed for the plain-return case; it now
+also applies to `IsValueEmbedBoxRecv`, which is the *stronger* case for it — that shim exists precisely to
+be reachable across assemblies, since it performs a descent the caller cannot spell, so emitting it
+`internal` defeats its own purpose. Every other promotion keeps the conservative heuristic.
+
+Only the **collection** gate widened. The return-type relaxation's OTHER arm
+(`directEmbedIsUnexportedValue && method.ReturnTypeIsPublic`, in the plain-return addendum above) stays on
+the narrow condition, because it answers a different question — a cross-package call the converter emits
+as a bare `Ꮡt.M()` — which remains the unexported-embed case alone.
+
+**Third gate, same reasoning — the promoted METHOD's own exportedness (2026-08-29).** The shim above kept
+one more `GetScope(…) == "public"` test, this one on the **method name**, on the argument that "an
+unexported method is never reachable across packages, so it needs no shim and its in-package callers keep
+the inline descent". That is true of the **call sites** and false of the **method set** — the identical
+distinction the embed-exportedness paragraph draws, one gate over. `net`'s vectored write is the reached
+case, and it is a **silent behavioral divergence rather than any diagnostic**:
+
+```go
+type buffersWriter interface{ writeBuffers(*Buffers) (int64, error) }   // UNEXPORTED, package net
+
+func (v *Buffers) WriteTo(w io.Writer) (int64, error) {
+	if wv, ok := w.(buffersWriter); ok {      // the ONLY thing that ever asks
+		return wv.writeBuffers(v)             // writev fast path
+	}
+	…                                          // per-chunk fallback
+}
+```
+
+`*net.TCPConn` satisfies it **only** by promoting the unexported `writeBuffers` from its embedded
+unexported `conn`, and `conn`'s methods are direct-ж primaries (`ok` compares the receiver against `nil`),
+so the promotion is exactly the box shim this subsection emits. With the shim withheld, the emitted method
+set had no `writeBuffers`, `StructurallyImplements` answered **False**, the assert MISSED, and the fallback
+ran — the program is correct, just not vectored, which surfaces only as `TestBuffers_WriteTo`'s
+`write calls = 0; want 1` (nine verdicts, `writev_test.go:91`). Measured on the built `net` assembly, before
+and after:
+
+```
+method-set entry : writeBuffers ABSENT from *TCPConn's Go method set   |  net_package.writeBuffers(this ж`1 …) [internal]
+structural probe : False                                              |  True
+type assert      : False -> <miss>                                    |  True -> ΔbuffersWriter`1
+```
+
+The shim for an unexported method is emitted **`internal`**, not at `methodScope`: that keeps an unexported
+Go method off the assembly's public surface while leaving it inside the set the run-time probe reads, since
+`GetGoMethodSetCandidates` resolves extension methods through `NonPublic` binding flags exactly as it does
+the converter's own `internal static M(this ж<T> …)` primaries. Guarded by the `UnexportedIfaceDynamicAssert`
+behavioral test, whose `conn` (method declared directly) and `ValueSink` (value method set) rows are the
+controls that hold while the promoted `TCPConn` row diverges.
+
+**No `GoImplement` record is involved, and none would have helped.** The pair is same-package and the
+interface is unexported, so `recordSamePackageImplements`' exported-interface gate declines it by design —
+correctly, since a record is a **cross-assembly** contract and no other assembly can name `buffersWriter`.
+The resolution path for such a pair is the run-time tier alone: `TryTypeAssert` unwraps the `io.Writer`
+adapter to the `ж<TCPConn>` box, misses the nominal `AdapterRegistry`, and binds `AdapterBinder`'s
+generated `ΔbuffersWriter<>` delegate shell — which needs no record and no `AdapterRegistry` change, only a
+complete method set. That is why the fix belongs to promotion emission and not to record emission: the
+record layer was never the variable.
+
 ## Promoted methods through a FOREIGN pointer embed forward via the embedded box
 A struct embedding a FOREIGN pointer (`net/http`'s `http2timeTimer struct { *time.Timer }`, `net/http/internal`'s `FlushAfterChunkWriter struct { *bufio.Writer }`, `bufio.ReadWriter { *Reader; *Writer }`) promotes the embed's pointer-receiver methods, but those land as ж-extensions visible to the consuming assembly only through METADATA — direct-ж primaries (`Reset(this ж<Timer> …)`) and the public `RecvGenerator` twins of `[GoRecv]` methods (`Write(this ж<Writer> …)`). The `ImplementGenerator`'s syntax-tree hop scan saw none of them, so the value-form partial deref'd to the value (`this.Timer.Value.Reset(d)` — CS1929, the extension receiver strands) and the FOREIGN-struct pointer adapter fell back to the struct itself (`m_box.Value.Write(p)` — CS1061, `ReadWriter` declares nothing). Both arms now probe the embed's type SYMBOL: the single-hop paths union the foreign element's metadata box methods into the hop's box-method set (`this.Timer.Reset(d)`; `m_box.Value.Writer` in the local pointer arm), and the foreign-struct pointer arm routes each member still on the plain fallback through the UNIQUE pointer embed whose metadata box methods declare it (`m_box.Value.Writer.Write(p)`; Go's depth-one promotion ambiguity rules make the unique-embed requirement faithful). An embed package class outside extension-lookup reach (not the emitting namespace, the shared root `go`, or an enclosing segment) forwards through its package-class static with the box as the receiver argument, mirroring the foreign-extension arm. (Guarded by the `ForeignPtrEmbedIfaceLib`/`ForeignPtrEmbedIfaceUser` pair — a local struct embedding a foreign pointer adapted by value AND by pointer, plus a foreign two-pointer-embed struct adapted by pointer, output-compared vs Go.)
+
+## Embedded-pointer hop receivers split per method
+An interface member satisfied by promotion through an embedded POINTER field forwards through
+the hop — but the receiver form depends on the target method: a `[GoRecv]` ref extension (or
+struct method) binds the deref'd value (`this.File.Value.Name()`), while a **direct-ж primary**
+(an extension on `ж<X>` emitted when the receiver escapes — os's `File.Read`/`Write`) binds the
+box FIELD itself (`this.File.Read(p)`; deref'ing first strands the receiver, CS1929). The
+generator discriminates by scanning the compilation for `this ж<X>` extensions — only
+converter-emitted primaries are visible to the single-pass scan (sibling-generator ж-twins are
+not), which is exactly the needed split. Applied to both the value-form partial and the pointer
+adapter's hop arm. Guarded by `StructPointerPromotionWithInterface` (`Describer` over
+`deviceHandle{*Device}`).
+
+## With SEVERAL embedded pointers the hop is chosen per member, not per struct
+The hop forwarding above was gated to a struct with exactly ONE embedded pointer, on the
+reasoning that multi-embed interface satisfaction was rare. It is not: `net/rpc/jsonrpc`'s
+`type pipe struct { *io.PipeReader; *io.PipeWriter }` (`all_test.go:310`) gets `Read` and
+`Write` entirely by promotion from two different embeds. With the gate closed, every promoted
+member fell through to the templates' bare receiver — `m_box.Read(p)` / `this.Read(p)` — which
+binds nothing on the struct, so C# overload resolution reached the nearest same-named extension
+anywhere in scope and reported **CS1929 naming a type the package never mentions**
+(`io_package.Read(ref io_package.LimitedReader, slice<byte>)` from a jsonrpc test; likewise
+`os_package.WriteString(ж<os_package.File>, …)`). That misdirection is the signature of this
+defect — it reads as a missing reference and is not one.
+
+The generator now indexes the hop path **per member** (`GetMultiEmbedHopPaths`), routing each
+still-unbound interface member to the UNIQUE embed declaring it — which is precisely Go's
+depth-1 promotion rule. A name TWO embeds declare is dropped rather than guessed (Go promotes
+neither, so only a method the struct declares itself can satisfy the member — `*pipe.Close`
+over the `Close` both `*io.PipeReader` and `*io.PipeWriter` declare). Each embed's method set
+is read from local **syntax** where its type is declared in this compilation and from
+**metadata** where it is not — a referenced assembly exposes both the converter's direct-ж
+primaries and the public `RecvGenerator` ж-twins as ordinary symbols, which is the whole
+jsonrpc case. The receiver form keeps the per-method split of the section above: a direct-ж
+primary binds the embed's ж field itself (`m_box.Value.PipeReader.Read(p)`), anything else its
+deref'd value (`m_box.Value.writer.Value.Write(p)`). Both emission paths are covered — the
+pointer adapter and the value-form partial, since a pointer embed's method set is in the
+STRUCT's method set too, so `var rw ReadWriter = p` (no `&`) records the pair as well. A member
+neither resolution places is left unbound and keeps the old fallback, i.e. a loud CS1929 naming
+it, never a silent wrong receiver.
+
+Note this is *not* the same machinery as the `TypeGenerator`'s promoted-method forwarders,
+which mint `M(this ж<Outer> …)` on the struct itself: those bail out on an embed with no local
+declaration (`GetStructDeclaration` returns null for a metadata-only type), which is why a
+struct with two LOCAL pointer embeds compiled all along and jsonrpc's two FOREIGN ones did not.
+Guarded by `MultiPointerEmbedPromotion` (local embeds in both receiver forms, foreign embeds
+`*strings.Reader`/`*strings.Builder` resolved from metadata, an overridden `Close` both embeds
+declare, and pointer- and value-sourced casts of each, with write-through observed via the
+original embedded objects, vs Go).
 
 ## Promoted methods through embedded INTERFACE fields route per-member to the declaring field
 A struct whose embeds are INTERFACE fields (httputil's `dumpConn struct { io.Writer; io.Reader }` adapted to `net.Conn`) satisfies interface members through the fields' method sets. The pointer adapter's embedded-interface-field arm was gated to a SINGLE field, so a multi-field struct got no forwarding at all (`m_box.Read(…)` — CS1061). The arm now resolves per member: each still-unbound interface member forwards through the UNIQUE embedded field whose interface declares it (`m_box.Value.Reader.Read(p)` / `m_box.Value.Writer.Write(p)`); a member declared by several fields is left unbound (Go's promotion ambiguity rules reject it unless the struct overrides, and a struct override is already resolved earlier). The single-field behavior is unchanged (zip's `nopCloser`, slogtest's Δ-renamed `Handler` field). (Guarded by the `IfaceFieldEmbedAdapter` behavioral test — a two-interface-field struct adapted by pointer to a third interface needing members from both fields plus one declared on the struct, output-compared vs Go.)
