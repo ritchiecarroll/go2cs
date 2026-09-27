@@ -711,23 +711,7 @@ by construction — exactly one case can ever be ready — so the uniform-random
 the output. Counter-proven against the pre-fix converter, which prints
 `3:recv-chan 1:send-chan 2:send-val` where Go prints `1:send-chan 2:send-val 3:recv-chan`.)
 
-## Known exposure: marker-shaped USER identifiers can collide with synthetic names
-
-The converter's synthetic-name markers — `ᴛ` (TempVarMarker, U+1D1B: `selᴛ1`, `tupleᴛ2`,
-`elemᴛ0`, `iᴛ1`, `initᴛ<name>`, lifted-type `<name>ᴛ1`), `ʗ` (CapturedVarMarker), `Δ`
-(ShadowVarMarker), and the rest of the Symbols.cs family — are exotic Unicode LETTERS, legal in
-Go identifiers. A Go program that itself declares an identifier matching a generated shape (e.g.
-`selᴛ1` used in a `select`, emitting `var selᴛ1 = selᴛ1;`) collides with the synthetic name —
-loudly, at C# compile time (CS0128/CS0102), never silently. A general Δ-rename of user
-identifiers matching the numbered-temp shape was attempted at the sanitizer choke point
-(`getCoreSanitizedIdentifier`) and REJECTED: that choke point also renders the converter's own
-synthetic names (loop temps `iᴛ1`, lifted anonymous/named-value types `main_MyBoolᴛ1`,
-cross-file anon-struct names), so the blanket rule Δ-renamed synthetic names too and churned
-non-select goldens; distinguishing user from synthetic identifiers requires threading origin
-through many naming call sites — deliberate sprawl for a trigger that demands typing U+1D1B in
-Go source. Accepted as a documented family-wide exposure: the failure mode is a compile error
-naming the colliding identifier, and the workaround is renaming the pathological identifier in
-the Go source.
+<a id="known-exposure-marker-shaped-user-identifiers-can-collide-with-synthetic-names"></a>Moved to [Known exposure: marker-shaped USER identifiers can collide with synthetic names](naming.md#known-exposure-marker-shaped-user-identifiers-can-collide-with-synthetic-names).
 
 ## Real channel runtime — the hchan/selectgo port (rendezvous, cap/len, single-fire, uniform-random)
 

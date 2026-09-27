@@ -50,23 +50,6 @@ Two rules govern how concrete implementation records are emitted:
 * **Only impl types declared in the *current* package are recorded.** `ImplementGenerator` realizes the attribute by emitting a `partial struct <Impl> : <Interface>` into the **current package's** namespace and class — so it can only add an interface to a type defined in the *same assembly*. A pairing whose impl type is *imported* from another package (e.g. `image/color/palette` building `[]color.Color{ color.RGBA{…} }`) is therefore **not** re-emitted in the consumer: that relationship is already established in the impl type's own package (`image/color` records `[assembly: GoImplement<ΔRGBA, Color>]`). Re-emitting it in a consumer would generate a broken cross-assembly partial (a fresh empty `palette_package.ΔRGBA` rather than the real `color_package.ΔRGBA`), so the converter skips any pairing whose impl type is not local.
 * **Multi-segment interface references are root-qualified.** The `GoImplement` attributes are emitted before the file's `namespace` with only `using go;` in scope; that directive imports the *types* of namespace `go` (so a top-level `io_package.Writer` resolves unqualified) but **not** its nested namespaces. A multi-segment package class such as `container.heap_package.Interface` is therefore root-qualified to `go.container.heap_package.Interface` so it resolves; single-segment refs (`io_package`, `sort_package`) are left unchanged.
 
-## A keyword-named addressed global's heap-box field strips the escape after the Ꮡ prefix
-An address-taken package-level var is backed by a heap-box FIELD plus a ref-returning property
-(`writeAddressedGlobalDecl`). A keyword-named such global (`var null = json.RawMessage([]byte("null"))`,
-net/rpc/jsonrpc) arrives keyword-escaped (`@null`), and composing the box as `Ꮡ` + `@null` places the
-escape INTERIOR to the identifier token — `Ꮡ@null` lexes as two tokens (a whole-file syntax cascade).
-The `Ꮡ` prefix already de-keywords the composed name (the keyword + affix rule the adapter compositions
-above rely on), so the field declaration strips the escape — matching every `&null` use site, which
-already composed `Ꮡnull` through `boxBaseName`:
-```csharp
-internal static ж<slice<byte>> Ꮡnull = new(slice<byte>((@string)"null"));
-internal static ref slice<byte> @null => ref Ꮡnull.ValueSlot;   // the var itself keeps its escape
-
-var p = Ꮡnull;                                                  // use site, unchanged
-```
-Guarded by `HeapKeywordVar` (a package-level `var null` written through its pointer and read back both
-ways), alongside its existing keyword-named LOCAL coverage.
-
 <a id="a-range-over-a-pointer-typed-type-conversion-parenthesizes-before-the-deref"></a>Moved to [A range over a pointer-typed type conversion parenthesizes before the deref](pointers.md#a-range-over-a-pointer-typed-type-conversion-parenthesizes-before-the-deref).
 
 <a id="function-literal-parameters-share-the-body-scope"></a>Moved to [Function-literal parameters share the body scope](functions-and-closures.md#function-literal-parameters-share-the-body-scope).
@@ -122,6 +105,7 @@ ways), alongside its existing keyword-named LOCAL coverage.
 - <a id="a-named-field-whose-name-equals-its-interface-type-is-not-an-embedded-interface"></a>Moved to [A named field whose name equals its interface type is NOT an embedded interface](interfaces/promotion.md#a-named-field-whose-name-equals-its-interface-type-is-not-an-embedded-interface).
 - <a id="a-foreign-structs-promoted-method-forwards-through-its-value-embed"></a>Moved to [A foreign struct's promoted method forwards through its value embed](interfaces/promotion.md#a-foreign-structs-promoted-method-forwards-through-its-value-embed).
 - <a id="a-name-both--tests-variant-classes-declare-is-qualified-with-the-files-anchor-class"></a>Moved to [A name both `-tests` variant classes declare is qualified with the FILE's anchor class](test-conversion.md#a-name-both--tests-variant-classes-declare-is-qualified-with-the-files-anchor-class).
+- <a id="a-keyword-named-addressed-globals-heap-box-field-strips-the-escape-after-the-ꮡ-prefix"></a>Moved to [A keyword-named addressed global's heap-box field strips the escape after the Ꮡ prefix](naming.md#a-keyword-named-addressed-globals-heap-box-field-strips-the-escape-after-the-ꮡ-prefix).
 
 ---
 
