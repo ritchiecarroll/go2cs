@@ -198,4 +198,44 @@ public class RuntimeMemmoveTests
 
         StringAssert.Contains(panic.Message, "arm 2a");
     }
+
+    // runtime's own slice header, as export_test.go's MemclrBytes reads it: (*slice)(unsafe.Pointer(&b)).
+    private struct SliceHeaderShape
+    {
+        public unsafe_package.Pointer array;
+        public nint len;
+        public nint cap;
+    }
+
+    [TestMethod]
+    public void MemclrThroughASliceHeaderClearsTheSliceAfterTheCollectorMovesIt()
+    {
+        // runtime's TestMemclr: MemclrBytes(mem[x:x+n]) hands memclrNoHeapPointers the slice
+        // header's array word. That word is a TRANSIENT address (FromBox: no pin) that RETAINS the
+        // element box. A compacting collection between the header read and the clear moves the
+        // backing, and a clear through the stale number misses the slice ("failed clear mem[200]").
+        byte[] backing = new byte[64];
+        backing.AsSpan().Fill(0xee);
+        slice<byte> mem = new(backing);
+        ref slice<byte> b = ref heap(mem[8..16], out ж<slice<byte>> Ꮡb);
+
+        unsafe_package.Pointer array = Ꮡb.Reinterpret<slice<byte>, SliceHeaderShape>().Value.array;
+        nuint minted = array.Value.Value;
+        bool moved = false;
+
+        for (int attempt = 0; attempt < 20 && !moved; attempt++)
+        {
+            GC.KeepAlive(new byte[4096]);
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+            moved = unsafe_package.Pointer.FromBox(new ElemRefBox<byte>(new slice<byte>(backing), 8)).Value.Value != minted;
+        }
+
+        if (!moved)
+            Assert.Inconclusive("the collector did not move the backing, so this run cannot tell a stale address from a live one");
+
+        runtime_package.GoMemclrNoHeapPointers(array, new uintptr(8));
+
+        for (int i = 0; i < 64; i++)
+            Assert.AreEqual(i >= 8 && i < 16 ? (byte)0 : (byte)0xee, backing[i], $"backing[{i}]");
+    }
 }

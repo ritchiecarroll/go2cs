@@ -159,9 +159,25 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
     }
 
     // The element-0 box at the slice's low index — Go's `s.array`. Constructed only when the words moved.
+    //
+    // A ZERO-CAPACITY slice names no element, and Go never gives it a pointer past the end: the
+    // compiler keeps an in-bounds base when a reslice leaves cap 0, and mallocgc(0) answers the
+    // runtime's zerobase. Element 0 at such a slice's low index is one past the end of its backing
+    // (mem[len:len], or any make([]T, 0)), and minting the pointer read it: IndexOutOfRangeException,
+    // which took runtime's TestMemclr down at MemclrBytes(mem[size:size]). So a cap-0 slice's array
+    // word is a per-element-type zerobase element: non-nil, as Go's is, and never dereferenced by a
+    // correct program, since there is no element to reach through it.
     private static object ElementZero<X>(IArray array)
     {
+        if (((slice<X>)array).Capacity == 0)
+            return ZeroCapacityBase<X>.Element;
+
         return new ElemRefBox<X>(array, 0);
+    }
+
+    private static class ZeroCapacityBase<X>
+    {
+        internal static readonly object Element = new ElemRefBox<X>(new slice<X>(new X[1]), 0);
     }
 
     internal static ж<TDst> Mint(ж<T> source)

@@ -85,6 +85,7 @@ public class NoUncountedBackingAllocationsTests
         ("GoStructSynthesis.cs|long[] result = new long[dims.Length];", "runtime struct-type synthesis: signature and dims metadata of a synthesized type"),
         ("string.cs|byte[][] table = new byte[256][];", "the one-byte string table: Go's runtime.staticuint64s, static data every one-byte string([]byte) views (runtime/string.go:144-150), built once, not an allocation of any conversion"),
         ("GoZeroSize.cs|internal static readonly T[] Storage = IsZeroSize ? new T[1] : [];", "a per-type static singleton: the one storage slot every zero-size value of T shares"),
+        ("ж.SliceHeaderBox.cs|internal static readonly object Element = new ElemRefBox<X>(new slice<X>(new X[1]), 0);", "a per-type static singleton: the zerobase a zero-capacity slice's array word names, never an element any slice holds"),
         ("runtime/BoringCaches.cs|Action[] updated = new Action[s_caches.Length + 1];", "runtime bookkeeping: the registered cache-cleanup callbacks (copy-on-register)"),
         ("runtime/CrashReport.cs|byte[] bytes = Encoding.UTF8.GetBytes(report);", "crash-report output: the UTF-8 text of a fatal report, written once as the process dies"),
         ("runtime/ExecutionTracer.cs|byte[] bytes = Encoding.UTF8.GetBytes(text);", "execution-trace output: a strings-table entry of the trace stream, written once per trace at stop; Go's tracer buffers are off-heap and never reach MemStats.Mallocs, so counting them would perturb AllocsPerRun under a running trace"),

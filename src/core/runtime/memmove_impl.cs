@@ -45,6 +45,16 @@ namespace go;
 //      element type whose Go size this file cannot state -- is REFUSED loudly with golib's arm-2a
 //      panic (Q44 §10.3), never byte-copied: a reference-bearing managed value has no byte image,
 //      and writing one would fabricate references.
+//
+// THE ORDER: elements (2) are tried BEFORE addresses (1). A number that is not a token is not
+// always a stable address: golib's FromBox mints a TRANSIENT one (the element's address under a
+// `fixed` that has already ended) and retains the element box beside it, which is what a slice
+// header's array word carries ((*slice)(unsafe.Pointer(&b)), export_test.go's MemclrBytes). A
+// compacting collection between that read and the copy moves the backing, and writing through the
+// old number misses the slice and lands on whatever the collector put there: runtime's TestMemclr
+// read "failed clear mem[200] = 238" on linux. The retained box is always current, so a pointer that
+// names managed elements is served through them, pinned or not. Case 1 keeps every pointer that
+// names no managed element: native memory and bare numbers.
 partial class runtime_package
 {
     internal static partial void memmove(unsafe_package.Pointer to, unsafe_package.Pointer from, uintptr n)
@@ -60,16 +70,8 @@ partial class runtime_package
         if (dst == 0 || src == 0)
             throw RuntimeErrorPanic.NilPointerDereference();
 
-        if (!ManagedPointerTokens.IsTaggedToken(dst) && !ManagedPointerTokens.IsTaggedToken(src))
-        {
-            unsafe
-            {
-                Buffer.MemoryCopy((void*)src, (void*)dst, n.Value, n.Value);
-            }
-
-            return;
-        }
-
+        // Elements first, whenever both pointers name managed array elements (see the header: a
+        // number that is not a token can still be a TRANSIENT address the collector has moved).
         if (TryElementRange(to!, n, out IArray? dstArray, out int dstIndex, out int count) &&
             TryElementRange(from!, n, out IArray? srcArray, out int srcIndex, out int srcCount) &&
             count == srcCount && ElementTypeOf(dstArray!) == ElementTypeOf(srcArray!))
@@ -81,6 +83,16 @@ partial class runtime_package
 
             for (int i = 0; i < count; i++)
                 dstArray![dstIndex + i] = staged[i];
+
+            return;
+        }
+
+        if (!ManagedPointerTokens.IsTaggedToken(dst) && !ManagedPointerTokens.IsTaggedToken(src))
+        {
+            unsafe
+            {
+                Buffer.MemoryCopy((void*)src, (void*)dst, n.Value, n.Value);
+            }
 
             return;
         }
@@ -142,22 +154,23 @@ partial class runtime_package
         if (address == 0)
             throw RuntimeErrorPanic.NilPointerDereference();
 
-        if (!ManagedPointerTokens.IsTaggedToken(address))
-        {
-            unsafe
-            {
-                new Span<byte>((void*)address, checked((int)n.Value)).Clear();
-            }
-
-            return;
-        }
-
+        // Elements first, whenever the pointer names managed array elements (see the header).
         if (TryElementRange(ptr!, n, out IArray? array, out int index, out int count))
         {
             object? zero = ZeroOf(ElementTypeOf(array!));
 
             for (int i = 0; i < count; i++)
                 array![index + i] = zero;
+
+            return;
+        }
+
+        if (!ManagedPointerTokens.IsTaggedToken(address))
+        {
+            unsafe
+            {
+                new Span<byte>((void*)address, checked((int)n.Value)).Clear();
+            }
 
             return;
         }
