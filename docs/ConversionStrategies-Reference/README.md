@@ -367,13 +367,16 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A panicked C# `string` boxes as Go `string` at golib's boxing boundary](defer-panic-recover.md#a-panicked-c-string-boxes-as-go-string-at-golibs-boxing-boundary)
   - [A NIL-POINTER dereference is a RECOVERABLE panic, with Go's message](defer-panic-recover.md#a-nil-pointer-dereference-is-a-recoverable-panic-with-gos-message)
   - [Named-delegate and builtin callees keep the lambda form](defer-panic-recover.md#named-delegate-and-builtin-callees-keep-the-lambda-form)
-  - [A value-returning goroutine callee is wrapped in a discarding lambda](defer-panic-recover.md#a-value-returning-goroutine-callee-is-wrapped-in-a-discarding-lambda)
   - [A func-literal ARGUMENT of a deferred call hoists its captures before the call](defer-panic-recover.md#a-func-literal-argument-of-a-deferred-call-hoists-its-captures-before-the-call)
   - [Defer/go EAGER arguments follow the enclosing closure's capture renames](defer-panic-recover.md#defergo-eager-arguments-follow-the-enclosing-closures-capture-renames)
   - [A BLANK result mixed with a named one still needs the named-return-defer handling](defer-panic-recover.md#a-blank-result-mixed-with-a-named-one-still-needs-the-named-return-defer-handling)
   - [Deferred calls whose callee returns a value take the lambda form](defer-panic-recover.md#deferred-calls-whose-callee-returns-a-value-take-the-lambda-form)
   - [Deferred pointer-receiver nullary calls bind the box method group](defer-panic-recover.md#deferred-pointer-receiver-nullary-calls-bind-the-box-method-group)
   - [A deferred pointer-receiver method on an escaping value local captures by-box, not by-copy](defer-panic-recover.md#a-deferred-pointer-receiver-method-on-an-escaping-value-local-captures-by-box-not-by-copy)
+- **[Goroutines and the Runtime Scheduler](goroutines.md)**
+  - [The go statement](goroutines.md#the-go-statement)
+    - [A value-returning goroutine callee is wrapped in a discarding lambda](goroutines.md#a-value-returning-goroutine-callee-is-wrapped-in-a-discarding-lambda)
+    - [The go-statement sibling of the receiver-capture family](goroutines.md#the-go-statement-sibling-of-the-receiver-capture-family)
 - **[Runtime Introspection](runtime-introspection.md)**
   - [Tracebacks](runtime-introspection.md#tracebacks)
     - [`runtime.Stack` renders a GO-shaped traceback, and recovers the panic site](runtime-introspection.md#runtimestack-renders-a-go-shaped-traceback-and-recovers-the-panic-site)

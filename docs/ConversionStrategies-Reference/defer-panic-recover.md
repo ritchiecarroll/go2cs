@@ -663,53 +663,7 @@ so its method group neither infers nor converts to `Action<T>`; the temp-param l
 `defer`'s eager-argument evaluation: `defer(ᴛ1 => builtin.close(ᴛ1), returned, ref ᒐ);` (net
 `dial.cs`). (Guarded by `DeferCallOrder`'s stopFn + close(drained) shapes, output-compared vs Go.)
 
-## A value-returning goroutine callee is wrapped in a discarding lambda
-Go's `go f(…)` discards `f`'s result. Every `goǃ` runtime overload takes a **void** `Action<…>`
-delegate, so a value-returning callee passed as a bare method group binds no overload (CS0407 "no
-overload matches the delegate" — x/net/nettest `conntest.go`'s `go chunkedCopy(c2, c2)`, where
-`chunkedCopy(io.Writer, io.Reader) error` returns `error`). `visitGoStmt` resolves the callee
-signature and, when it returns a value, keeps the invocation inside a lambda so the result is
-discarded — an expression-bodied lambda over a value-returning call converts to `Action` (the same
-form the variadic path, e.g. `go fmt.Println(…)`, already emits):
-
-```csharp
-go chunkedCopy(c2, c2)          -> goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), c2, c2);   // param callee
-go q.conn.HandshakeContext(ctx) -> goǃ(ᴛ1 => q.conn.HandshakeContext(ᴛ1), ctx);      // selector method
-go c.Close()                    -> goǃ(() => c.Close());                             // nullary callee
-```
-
-This parallels the **defer** case. Both `defer` and `goǃ` carry seventeen `Func<…, TResult>` twins
-alongside their `Action` rungs, so a value-returning method group *with arguments* binds either
-directly; neither has a nullary `Func<TResult>` rung, so a nullary value-returning callee takes the
-`() => call()` discard on both sides (see *Deferred calls whose callee returns a value* below). The
-converter's remaining discarding wraps cover the shapes a method group cannot express here — a
-value-returning callee reached through a selector or parameter, and the CS1113
-value-receiver-extension case below, whose reason is delegate *creation* rather than the callee's
-result. Func-literal callees and `void`-returning method groups are untouched (`goǃ(() => { … })`,
-`goǃ(emit, out)`).
-
-The runtime's `Func` twins are what make one shape expressible at all: a func-literal callee that
-*returns a value*. `go func(ln Listener) (retErr error) { … }(ln)` (net `sendfile_test`) emits its
-literal with an explicit `error` return type, because a named result set by a `defer` needs one, and
-no `Action<Listener>` overload accepts it (CS8934). Wrapping it in the converter would mean
-suppressing the literal's own return type and rewriting its trailing `return retErr;` — rewriting a
-correct emission to fit a runtime gap. The `Func` siblings fix that shape, and every other one, at
-the seam where Go's rule actually lives: `go f(…)` discards results, for **any** `f`. A void lambda
-or method group cannot bind `Func<TResult>` at all, so no existing call site is affected. (Guarded by
-the `GoStmtValueReturn` behavioral test — value-returning nullary, single-, multi-param, multi-result
-and func-literal goroutine callees, output-compared vs Go.)
-
-A **VALUE-receiver method callee** forces the same lambda forms even when void and
-arity-matching: every Go named type emits a C# struct and the method an extension on it, and C#
-forbids constructing a delegate from an extension method over a **value-type receiver** (CS1113 —
-net/http/httputil's `go spc.copyToBackend(errc)`, `switchProtocolCopier`). So
-`goǃ(spcʗ1.copyToBackend, errc)` becomes `goǃ(ᴛ1 => spcʗ1.copyToBackend(ᴛ1), errc)` and a nullary
-`go vs.ping()` keeps its invocation (`goǃ(() => vsʗ1.ping())`). The receiver snapshot (`spcʗ1`)
-still evaluates at go-statement time. An INTERFACE-receiver method group is excluded (a genuine C#
-instance method binds delegates fine), and pointer receivers keep the box-group machinery
-(`pointerReceiverBoxMethodGroup` — `ж<T>` is a class, so its group is delegate-legal). (Guarded by
-`GoStmtReceiverLambda`'s `valueSender` arms — value-receiver argument and nullary go-statements
-with blocking-receive completion proof, output-compared vs Go.)
+<a id="a-value-returning-goroutine-callee-is-wrapped-in-a-discarding-lambda"></a>Moved to [A value-returning goroutine callee is wrapped in a discarding lambda](goroutines.md#a-value-returning-goroutine-callee-is-wrapped-in-a-discarding-lambda).
 
 ## A func-literal ARGUMENT of a deferred call hoists its captures before the call
 When a deferred call's **callee** is itself a func literal (`defer func() { … }()`), that literal's
