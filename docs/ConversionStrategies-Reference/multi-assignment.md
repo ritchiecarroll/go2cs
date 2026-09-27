@@ -62,15 +62,6 @@ Without this, `&list` emits `Ꮡlist` with no box (CS0103), and the `Ꮡ(value)`
 
 A subtler case: a newly-declared tuple element can be flagged *escaping* by analysis yet need **no** heap box — typically an already-pointer local that is merely returned (`pp, now := pidleget(now)`, where `pp` is a `*p` that the function returns). The heap-decl path above only owns elements that produce an actual `ref var … = ref heap(…)`; an escaping element with no such declaration must still be counted as newly-declared so it receives its `var`, or the deconstruction emits `(pp, now) = …` with `pp` declared nowhere (CS0103). Both the mixed (`(var pp, now) = …`, reusing the value parameter `now`) and the all-shadowing (`var (ppΔ1, gpΔ1) = …`) forms are handled. (Guarded by the `TupleMixedDeclareReassign` behavioral test; runtime hits it in `pidlegetSpinning` and `findRunnable`.)
 
-**A tuple deconstruction into INTERFACE variables hoists the call when a component needs converting.** Reassigning a multi-value call into pre-declared interface locals (`c, err = sd.dialTCP(…)` with `var c Conn`) can require a per-component interface conversion C#'s tuple assignment cannot perform implicitly — a `ж<TCPConn>` component satisfies `Conn` only through its generated pointer adapter, an *explicit* conversion (CS0266 ×11 in net's dial.go). Mirroring the return-statement tuple arm, the call is hoisted into temp markers and each component converts in a tuple literal:
-
-```csharp
-var (ᴛ1, ᴛ2) = Ꮡsd.dialTCP(ctx, laΔ1, raΔ1);
-(c, err) = (new TCPConnжConn(ᴛ1), ᴛ2);
-```
-
-The arm fires only for a statement-position deconstruction (one call RHS, several LHS) where some non-empty-interface target's tuple component is a non-identical, non-interface type; all other deconstructions keep the direct form. (Guarded by the `InterfaceCasting` extension `makeCounter` — a `(*Counter, error)` call deconstructed into an `Incrementer` — runtime-verified against Go.)
-
 ## A multi-value RETURN reads its plain operands AFTER its calls
 
 The read-after-write hazard above has a **return-statement** sibling, and it arrives from the opposite direction: there Go's ordering is fixed and C#'s sequential emission breaks it; here Go's ordering is *free* and C#'s tuple literal fixes it the other way.
@@ -186,7 +177,17 @@ call-deref swap, output-compared vs `go run`; the pre-fix converter leaves all t
 
 <a id="a-field-addressed-value-local-heap-boxes--ꮡxof-copy-boxes-orphan-writes"></a>Moved to [A field-addressed value local heap-boxes — `Ꮡ(x).of(…)` copy-boxes orphan writes](escape-analysis.md#a-field-addressed-value-local-heap-boxes--ꮡxof-copy-boxes-orphan-writes).
 
+<a id="a-capture-mode-method-called-on-a-field-chain-of-a-local-is-an-address-of-too"></a>Moved to [A capture-mode method called on a FIELD CHAIN of a local is an address-of too](methods-and-receivers.md#a-capture-mode-method-called-on-a-field-chain-of-a-local-is-an-address-of-too).
+
+<a id="the-same-chain-one-level-up-recvf1f2-on-a-pointer-receiver"></a>Moved to [The same chain one level up: `&recv.f1.f2` on a POINTER RECEIVER](methods-and-receivers.md#the-same-chain-one-level-up-recvf1f2-on-a-pointer-receiver).
+
 <a id="ꮡxoftꮡf-returns-one-view-per-box-field--the-field-view-cache"></a>Moved to [`Ꮡx.of(T.Ꮡf)` returns ONE view per (box, field) — the field-view cache](escape-analysis.md#ꮡxoftꮡf-returns-one-view-per-box-field--the-field-view-cache).
+
+<a id="a-type-switch-binding-is-escape-analyzed-like-any-other-local"></a>Moved to [A TYPE-SWITCH BINDING is escape-analyzed like any other local](escape-analysis.md#a-type-switch-binding-is-escape-analyzed-like-any-other-local).
+
+<a id="a-package-level-function-literals-own-locals-are-analyzed-too"></a>Moved to [A PACKAGE-LEVEL function literal's own locals are analyzed too](escape-analysis.md#a-package-level-function-literals-own-locals-are-analyzed-too).
+
+<a id="a-pointer-receiver-method-value-heap-boxes-its-receiver--the-implicit-xm"></a>Moved to [A pointer-receiver METHOD VALUE heap-boxes its receiver — the implicit `(&x).M`](escape-analysis.md#a-pointer-receiver-method-value-heap-boxes-its-receiver--the-implicit-xm).
 
 ---
 

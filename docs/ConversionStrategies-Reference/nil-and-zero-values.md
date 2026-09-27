@@ -6,84 +6,9 @@ In Go, `nil` is the equivalent of C# `null`. Where possible, converted code uses
 
 The same null-safe-zero-value principle applies to value types whose backing store is a reference. A zero-value `string` converts to `@string s = default!`, which runs no constructor, so the backing `byte[]` is null. Rather than [NRE](../Glossary.md#nre) on the first read, `@string` treats a null backing as Go's empty string `""` for every read — length 0, no bytes to index/range, `== ""` is true, prints empty, and concatenation yields the other operand (`var s string; s += "x"` → `"x"`). Constructors still allocate, so only the `default(@string)` zero value relies on this. (Guarded by the `StringZeroValueConcat` behavioral test.)
 
-## A NARROW-UNSIGNED target folds a constant only when nothing else can make it compile
+<a id="a-narrow-unsigned-target-folds-a-constant-only-when-nothing-else-can-make-it-compile"></a>Moved to [A NARROW-UNSIGNED target folds a constant only when nothing else can make it compile](constants.md#a-narrow-unsigned-target-folds-a-constant-only-when-nothing-else-can-make-it-compile).
 
-`uint32(1<<32 - 1)`, `*_C_pw_uidp(&sp) = 1<<32 - 2`. Go evaluates an untyped constant expression
-at arbitrary precision and requires only the RESULT to fit the target; C# evaluates the operands
-themselves, and an operand past `uint32` forces the literal path to emit a bare `long` — which has
-no implicit conversion to `uint`/`ushort`/`byte`, so the assignment fails **CS0266** even though
-the value fits exactly. The fix folds the whole expression and casts the result:
-
-```csharp
-//  Go:   *_C_pw_uidp(&sp) = 1<<32 - 2          (_C_uid_t = uint32)
-_C_pw_uidp(Ꮡsp).Value = unchecked((uint32)(4294967294UL));
-```
-
-**The FIVE conditions, and why each exists.** This arm is deliberately the narrowest in the fold
-family, because every widening of it damaged readable emission somewhere else in the corpus. It
-applies only when ALL of:
-
-1. **the target is unsigned and narrower than `uint64`** — the wider arms already handle their own;
-2. **the target is a plain basic type or an ALIAS to one**, never a NAMED type — `basic` at that
-   point is the UNDERLYING type, so `io/fs.FileMode` (a named `uint32`) arrives looking plain, and
-   folding it erased the type on every mode expression in the corpus
-   (`(fs.FileMode)(ModeDevice | ModeCharDevice)` → a bare `unchecked((uint32)(69206016UL))`). A
-   named target keeps the arm below, which carries its type in the fold; an alias has no distinct
-   C# type to lose;
-3. **no NAMED CONSTANT is referenced** — those render through their `Untyped*` wrappers, which is
-   how every wider arm preserves them, and folding replaced `math/bits`' `x>>1 & (m0 & m)` with
-   `unchecked((uint32)(1431655765UL))`: arithmetic no reader can trace back to `m0`;
-4. **an UNTYPED subexpression exceeds `uint32`** — a typed conversion carries its own width and
-   emits correctly unaided, so `runtime`'s `^uint32(0)/8 + 1` never needed the fold, and counting
-   it flattened the entire `class_to_divmagic` table into 68 casts;
-5. **the threshold is `uint32`, not the target's own width** — `(1<<16) - 1` exceeds a `uint16` but
-   the emission already carries an explicit `(ushort)` cast and compiles (measured), so
-   `regexp/syntax`'s `Range16` keeps its source form; only a bare `long` has nothing to rescue it.
-
-**How the conditions were found — the method, not just the result.** Each was exposed by a
-three-target corpus regeneration, never by the two packages the fix was aimed at: the local darwin
-build was green at every step. The site count fell **754 → 46 → 12 → 10 → 2** across six
-regenerations, and the two survivors are exactly the expressions that cannot compile otherwise.
-The lesson generalizes past this arm: *a converter change is measured against the corpus, not
-against the file that motivated it* — a fold that looks obviously correct at its motivating site
-can rewrite hundreds of unrelated ones, and only a full regeneration shows it.
-
-Guarded by the `ConstSubexprOverflow` behavioral test, which already covered the construct
-(`u32 := []uint32{1<<32 - 1}`); its golden re-baselined to the folded form with the Output phase
-passing unchanged — the value never moved, only the spelling.
-
-## The THREE deref accessors of `ж<T>` — when each is needed, and how the converter picks
-
-Establishing a local `ref` over a heap box (`ref var p = ref Ꮡp.<accessor>`) looks like one
-operation but encodes different answers to one question: **is this access the Go DEREFERENCE, and
-what does Go say happens on nil at exactly this point?** Consolidated here because the members
-landed across separate arcs (their individual sections, linked below, carry the full derivations);
-this is the map.
-
-| Accessor | On nil | The Go semantics it encodes | How the converter KNOWS |
-|:--|:--|:--|:--|
-| `.Value` | **panics immediately** (Go's message, even on bind) | this access IS the deref, and Go panics here — the ordinary pointer USE site (`*p`, `~Ꮡp`, a read through the box) | the DEFAULT everywhere except a pointer's ENTRY alias; no special case applies |
-| `.ValueSlot` | **no check** — the slot as-is | a read of the HELD value, never a deref: when the pointee is itself reference-like, `*p` legally yields nil (`*(&err)` of a nil `error` panics in neither language), so `.Value`'s null check would fire SPURIOUSLY on a legally-held null. Identical to `.Value`'s slot in every non-throwing case. Also where nil is structurally impossible (a freshly `make`-allocated box, `heap(out …)`) and in the reflection bridge's field paths. | by the POINTEE'S TYPE or by CONSTRUCTION — a box-of-pointer LOCAL, a named-result box, the bridge's field walk. NOT at a pointer's entry alias (see below) |
-| `.DerefOrNull()` | **defers** — binds `Unsafe.NullRef<T>`, faults with Go's panic on first USE | Go defers the panic to the body's own deref point: passing a nil `*T` to a function, or calling a method through one, is legal; the body RUNS, a side effect before the deref must happen, and the panic lands where Go's would — after it, or never (delegated `checkValid`-style guards). | STRUCTURALLY — EVERY direct-ж pointer ENTRY alias, RECEIVER and PARAMETER alike, unconditionally (no analysis, because the accessor is faithful whether or not the body guards), plus the pointer-reassignment re-alias and go2cs-gen's `ReceiverMethodTemplate` bridge; see *A nil RECEIVER is nil-deferring, not nil-safe* and *A pointer PARAMETER is nil-deferring for exactly the reason a receiver is* |
-
-Why three and not one: the ENTRY alias and the USE site are different questions, and `.Value`
-answers the second. `.ValueSlot` is different in KIND rather than in timing — it marks accesses
-that were never dereferences in Go's semantics at all, which no nil-policy accessor can express —
-but it is not selected at an entry alias, where nothing can know whether the body will dereference
-and the nil-policy question is the only one being asked.
-
-**There used to be a fourth, `.DerefOrNil()` — a nil-SAFE accessor handing back a shared
-`default(T)` slot — and its retirement (2026-08-02) is what collapsed the set.** It was admitted
-by a body ANALYSIS: a pointer param the body nil-compares, one passed the untyped `nil` at a
-same-package call site, or one whose first mentioning statement re-points it without dereferencing
-(`l = l.get()` normalization). Wherever that analysis was RIGHT the silent zero was unobservable;
-wherever it was wrong — and it could never be complete, because a body's guard may be DELEGATED to
-a callee it merely hands the pointer to — a deref Go says must panic instead read a silent zero.
-Unifying every pointer entry alias on `.DerefOrNull()` made the analysis unnecessary in the first
-place, so the accessor, the three analyses that fed it (`collectNilSafePtrParams`,
-`reassignedBeforeDerefParamName`, and the package-wide nil-argument pre-pass) and their vestigial
-receiver arms were deleted together — 382 net lines of converter. The golib method survives with
-its own unit coverage, but converted code no longer emits it.
+<a id="the-three-deref-accessors-of-жt--when-each-is-needed-and-how-the-converter-picks"></a>Moved to [The THREE deref accessors of `ж<T>` — when each is needed, and how the converter picks](pointers.md#the-three-deref-accessors-of-жt--when-each-is-needed-and-how-the-converter-picks).
 
 ## Canonical typed-nil pointer boxing
 Go's typed nil is a real value: `any((*T)(nil))` is a **non-nil** interface carrying dynamic type
@@ -115,21 +40,6 @@ the dereference guard):
   nil pointee.
 - The non-generic `INilPointer` surface exposes the structural predicate to runtime machinery
   holding a pointer only as `object` (equality tails, the reflection bridge's `IsNil`/`Elem`).
-
-**Every consumer that asks "is this THE nil pointer" must ask the structural predicate.** The
-managed-slot `atomic.Pointer<T>` (`core/sync/atomic/type.cs`) canonicalizes the nil pointer to a null
-slot so a reference `CompareAndSwap` treats all nil `*T` values as equal — and its `nilCanon` helper
-asked the value-peeking `IsNull`, so it collapsed a *pointer to a nil value* to nil as well. `sync.Map`
-is built out of exactly that shape and lost both halves of it: `e.p.Store(&i)` with a nil `any` value
-dropped the entry outright (`load()`'s `p == nil` then reported not-ok, so `Range` skipped it and
-`CompareAndSwap` failed against it), and the `expunged = new(any)` sentinel — a real address holding a
-nil interface — became indistinguishable from nil, so a *deleted* entry could not be told from an
-*expunged* one and the whole dirty/expunge protocol degenerated. The predicate is now
-`ж<T>.IsNilPointer`. The same conflation applied to `atomic.Pointer[error]`, `atomic.Pointer[func()]`
-and any `**T` slot (`atomic.Pointer[*T]`), all present in the corpus. (Guarded by
-`AtomicPointerToNil`: `Load`/`Store`/`Swap`/`CompareAndSwap` over a pointer to a nil `any`, two
-distinct `new(any)` sentinels, a pointer to a nil `*int`, and the genuinely-nil slot, output-compared
-vs `go run`. Before the fix the guard panics with a nil-pointer dereference on its second line.)
 
 `(*T)(nil)` conversion **expressions** are where the canonical instance is *minted*, and pointer
 locals, parameters and fields keep plain `null` — their statically-typed world never needs the
@@ -207,47 +117,7 @@ including composite and struct-keyed element types, a nilness/length/absent-key 
 converted nil IS nil rather than merely typed, and the named-map, named-slice, `[]byte`, `chan` and
 `*int` controls, output-compared vs Go.)
 
-## A HAND-OWN's pointer parameter sees `NilBox`, never `null` — and the doctrine alone did not hold it
-
-The rule above — *"every consumer that asks 'is this THE nil pointer' must ask the structural
-predicate"* — was written, correct, and violated **24 times** on one platform before anything
-measured it. That is worth recording, because the reason is a gap between two true sentences in this
-same section rather than an author ignoring either of them.
-
-Sentence one: `(*T)(nil)` conversion expressions **mint** the canonical instance, and "pointer locals,
-parameters and fields keep plain `null`". Sentence two: `nil` reaches a `ж<T>` through
-`implicit operator ж<T>(NilType) => NilBox`. Both hold. What follows from them together is the part
-neither states: **a hand-own's `ж<T>` PARAMETER is on the receiving end of a caller's `nil`, so it
-sees `NilBox` — a real `StandardBox<T>` whose `.Value` throws — and `Ꮡx is null` is FALSE for it.**
-A guard written that way takes the wrong branch and the dereference behind it faults.
-
-Neither half of the predicate is sufficient alone, which is why the corpus form is a pair:
-
-```csharp
-if (Ꮡrusage is not null && !Ꮡrusage.IsNilPointer) { ... }   // and its inverse
-uintptr addr = Ꮡrusage is null || Ꮡrusage.IsNilPointer ? (uintptr)0 : (uintptr)(nint)(&native);
-```
-
-A C# `null` is reachable at the same sites (an uninitialised `ж<T>?`) and `.IsNilPointer` on a
-genuine null would itself throw. **The ADDRESS arm needs the same predicate as the dereference**: with
-only the deref fixed, a syscall wrapper hands the kernel a non-zero pointer where the caller meant
-nil — a quietly wrong call rather than a crash.
-
-Measured 2026-09-02, corpus-wide over every tracked `.cs` under `src/core`, and the split was total:
-`syscall/linux/structclass_linux_impl.cs` 17 sites and
-`syscall/linux/zsyscall_linux_amd64_impl.cs` 7 sites carried the one-sided form with **zero** using
-the predicate, while all **four** `syscall/windows/*` sites used it — one hand-own family written
-twice with the check correct on one platform only, invisible on Windows because those functions do
-not exist there. Every one of the 24 was a PARAMETER (`Select`, `seedNativeFdSet`, `copyNativeFdSet`,
-`FcntlFlock`, `Statfs`, `Fstatfs`, `Sysinfo`, `Adjtimex`, `Fstat`, `fstatat`, `wait4`, `Uname`). The
-crash that surfaced it was `syscall.Wait4(pid, &status, 0, nil)` — Go's own `os/exec` wait shape.
-
-**The remedy that makes it stick is a guard, not more prose.** `corpusNilPointerGuard_test.go` walks
-every `.cs` under `src/core` in the converter's own `go test` and fails on a `Ꮡ`-prefixed identifier
-tested with `is null`/`is not null` alone. It is corpus-wide rather than hand-own-only because the
-converter never emits the form (generated code compares with `== nil`), so the walk needs no
-exception list and catches the next hand-own wherever it lands; comment lines are skipped, and an
-empty walk is a FAILURE rather than a pass so it cannot go green over a hole.
+<a id="a-hand-owns-pointer-parameter-sees-nilbox-never-null--and-the-doctrine-alone-did-not-hold-it"></a>Moved to [A HAND-OWN's pointer parameter sees `NilBox`, never `null` — and the doctrine alone did not hold it](manual-conversions/mechanism.md#a-hand-owns-pointer-parameter-sees-nilbox-never-null--and-the-doctrine-alone-did-not-hold-it).
 
 <a id="reflectvalueinterface-is-a-boundary-into-interface-space-so-it-packs-the-typed-nil-too"></a>Moved to [`reflect.Value.Interface()` is a boundary into interface space, so it packs the typed nil too](reflection/values.md#reflectvalueinterface-is-a-boundary-into-interface-space-so-it-packs-the-typed-nil-too).
 
@@ -375,6 +245,192 @@ constructor blocked forty-odd verdicts at once. `builtin.@new<T>` now takes `def
 slice/map/chan kinds and keeps running the constructor for every other kind, because that is what
 materializes a struct's fixed-size ARRAY fields from the initializers the converter emits into it. The
 two rules are one classification now, asked of the same `KindOf`.
+
+## Zero-value construction
+
+### A struct's array fields get their fixed length from a generated parameterless constructor
+
+A Go `[N]T` array FIELD has a zero value of N zero elements — never nil. The converter emits the field
+with a length initializer — `internal array<atomic.Int32> c = new(3);` — but a C# struct field
+initializer only runs when an **explicitly declared** parameterless constructor is invoked; the implicit
+struct constructor that `new counters()` would otherwise use zeroes every field and SKIPS initializers,
+leaving the array's backing `T[]` null (an NPE on the first index or `len`). The `TypeGenerator`
+therefore emits an explicit parameterless constructor for every struct, so `new S()` runs the field
+initializers and each array field gets its `new(N)` backing. (C# 11 auto-defaults any field without an
+initializer; a slice/map/chan field — which has no `new(N)` initializer — stays its nil zero value,
+matching Go.) The **NilType constructor preserves the initializers too**: it used to re-assign
+`this.field = default!` to every plain member — running *after* the field initializers, which nulled an
+array field's fresh `new(N)` backing, so `S{}` (emitted `new S(nil)`) NREd on the first index. The
+NilType and parameterless constructor bodies (`AppendZeroValueInitializers`) now assign only what C#'s
+implicit zeroing would leave *broken*: the promoted-embed boxes (see
+[Struct Type Embedding](struct-embedding.md#struct-type-embedding)), and — see next paragraph — any plain struct-typed field
+whose own type needs construction; everything else is left to the field initializers plus C# 11
+auto-default. This is generator-only and produces no golden churn (the `.g.cs` output is not a
+golden). It is what lets `ArrayOfCrossPackageType` run as an **output-compared** test (`len(x.c)` /
+`len(x.d)` print `3 2`); before the fix, indexing `&x.c[i]` threw a `NullReferenceException`, so the test
+was compile+target-only.
+
+A plain (non-embed) struct-typed FIELD whose type *itself* needs construction is the recursive case:
+`default(T)` gives such a field a `default(FieldType)`, whose nested promoted-embed box or fixed-array
+backing is null — so the first touch NREs even though `T`'s own boxes were constructed. This is fmt's
+`pp{ … fmt fmt … }` where `fmt` embeds `fmtFlags` (a ctor-allocated box): `newPrinter`'s `@new<pp>()`
+ran `pp()`'s ctor, which left `fmt` as `default(fmt)` with a null box, and `p.fmt.init(&p.buf)` →
+`clearflags` NREd — the first crash of any converted `fmt.Println`. `AppendZeroValueInitializers`
+therefore also emits `this.f = new FieldType(nil);` for each such field, and because that runs
+`FieldType`'s own NilType constructor (which recursively constructs *its* needy fields), a single level of
+construction fixes every depth. "Needs construction" (`StructTypeNeedsConstruction`) is: has a promoted
+embed, a fixed-array field, or a nested struct field that needs construction; a reference field
+(pointer/interface/delegate) keeps its correct nil zero value.
+
+**The resolution must be by SYMBOL, not by syntax.** `StructTypeNeedsConstruction` originally answered
+only for structs it could find a `StructDeclarationSyntax` for (`GetStructDeclaration`), and left every
+other field type `default` on the reasoning that "its own package constructs it, and its nil zero value is
+correct anyway". The first half is wrong and the second half does not apply to a fixed array. A
+`<ProjectReference>` reaches the compiler as a **`PortableExecutableReference`** — compiled metadata with
+no syntax trees — so in any real MSBuild build *every* cross-package field type was unresolvable, and
+nothing in the consuming package ever constructed it. When such a type carries a fixed array at any depth,
+`default` leaves that `array<T>`'s backing null (golib's deliberate zero-value discriminator), so `len` and
+`range` silently measure **zero** and the first index or pin throws — `GCHandle.AddrOfPinnedObject`'s
+`InvalidOperationException: Handle is not initialized` (see golib `ж.cs`, `pinnedArrayData`). The live case
+was `math/rand/v2`'s `ChaCha8`, whose `internal chacha8rand.State state;` never got `State`'s
+`buf = new(32)` / `seed = new(4)`, where Go's `new(ChaCha8)` yields 32 real zeroed words. (The syntax path
+only ever worked because `CompilationReference`s — in-memory Roslyn compilations — do carry syntax; that is
+the shape unit tests use, not the shape MSBuild produces.)
+
+`GetStructDeclaration` is therefore backed by `Compilation.FindTypeSymbol`, which resolves a
+fully-qualified display name to an `INamedTypeSymbol` through `GetTypeByMetadataName` (stripping `global::`
+and verbatim `@`, rendering type arguments as arity suffixes, and trying each namespace-vs-nested-type split
+of the dotted name since a display string spells both `.`). The metadata walk applies the same three
+triggers over `GetMembers()` — a ref-returning property is a promoted embed, a `go.array<T>`-typed field is
+a fixed array, a struct-typed field recurses — with the same cycle guard. On the metadata path the
+`public T(NilType)` constructor that `new T(nil)` needs is **checked rather than assumed** (metadata is
+fully compiled, so the generated constructor is really there): a hand-written golib struct or any other
+referenced type without one returns `false` and correctly keeps its `default`. Scalars, pointers, slices,
+maps and interfaces are still left `default`, because `default` **is** their Go zero value — over-
+constructing would add an allocation to every instantiation for no semantic gain. (Guarded by the
+`CrossPackageArrayZeroValue` output-compared test — a `Holder` whose field type lives in the `bufpkg`
+sibling library sub-project, so the reference is genuinely metadata; a same-project field type resolves by
+syntax and would pass even unfixed. Against the unfixed generator the test panics with
+`index out of range [2] with length 0`.)
+
+**The field-wise constructor closes the same gap for a PARTIAL composite literal.** The *parameterized*
+constructor (`GenerateConstructor`, used by a composite literal that sets some fields —
+`&Holder{tag: "lit"}` → `new Holder(tag: "lit")`) took `T f = default!` for every member and assigned
+`this.f = f;` unconditionally, so an OMITTED needy-struct argument arrived as the broken `default(T)` and
+overwrote the field — identical breakage to the NilType path above, and (because it never consulted
+`StructTypeNeedsConstruction`) firing for a **same-package** field type too. The live case is `io.pipe`,
+whose `onceError rerr, werr` value fields each embed `sync.Mutex` via the promotion box: `io.Pipe()`
+builds the pipe with `new pipe(wrCh: …, rdCh: …, done: …)`, omitting `rerr`/`werr`, so both boxes were
+null and the first `Store`/`Load` `Lock()` NREd on the pipe's writer goroutine — crashing every `io.Pipe`
+consumer (`encoding/base32`'s `TestBufferedDecodingPadding`; the goroutine NRE aborted the whole test
+host). A fixed-array member beside it already had the analogous `if (f.Source is not null)` guard (its
+`= new(N)` field initializer supplies the omitted zero); the needy-struct member has no field initializer
+to fall back on, so it must be *constructed*. `GenerateConstructor` now emits the needy value-struct
+member's parameter as **nullable** — `onceError? rerr = default!` — making an omitted argument a genuine
+`null` sentinel that `default(onceError)` (a real struct value with a null box) could never be — and its
+body reconstructs only when omitted: `this.rerr = rerr ?? new onceError(nil);`, exactly mirroring the
+pointer-embed `?? new ж<T>(nil)` handling for a promoted embed. A caller-SUPPLIED value is used as-is (no
+extra allocation, unchanged reference semantics — the struct copy shares the same embed box); an omitted
+one gets `T`'s own NilType ctor, which recursively constructs *its* needy members. The predicate
+`IsNeedyValueStructMember` reuses `StructTypeNeedsConstruction` (member is not a promoted embed, not a
+reference, not a fixed array, and its struct type needs construction), so every *ordinary* member's
+parameter/assignment is byte-identical to before — the change is confined to genuinely-needy value-struct
+fields. All of the NilType, parameterless, and now field-wise constructors are covered, so this reaches
+`new(T)`/`@new<T>()`/`T{}`/`&T{…}` (empty **and** partial composite literals). (Guarded by the
+`PromotedEmbedZeroValueField` output-compared test — a `slotBox{id: 3}` partial literal omitting a
+`holder` value field that embeds a promoted `counter`, whose promoted `inc()` is then called on the
+omitted field; against the unfixed generator it NREs with `Object reference not set to an instance of an
+object`, exactly as `encoding/base32` did.)
+
+**A MIXED-VISIBILITY struct needed one arm more: the PUBLIC field-subset constructor, which does not
+name the needy member at all.** The paragraph above fixes the member's *parameter* — but a struct with
+any unexported field gets **two** field-wise constructors (`Constructors`): a `public` one over
+`PublicStructMembers` and an `internal` one over all of them, the public subset carrying
+`OverloadResolutionPriority(-1)` so a same-assembly named-args call binds the full overload. An
+unexported needy member is therefore absent from the public subset ctor's parameter list *and* its
+body, so the `?? new T(nil)` reconstruction never applied to it and the field was left at
+`default(T)` — the exact state `AppendZeroValueInitializers` exists to prevent. The deprioritization
+is also what hid it: every same-package literal binds the internal all-fields ctor and is correct, so
+only a literal in **another package** reaches the broken constructor. `syscall.SockaddrUnix` is the
+shipped case — `&SockaddrUnix{Name: path}` from `net` left `raw` default, so `raw.Path`'s `[108]int8`
+backing was zero-length and `sockaddr()`'s own `if n > len(sa.raw.Path)` guard returned `EINVAL`
+*before `bind` ever reached the kernel*, failing every AF_UNIX listen/dial on Windows with "invalid
+argument" (`net`'s `TestModeSocket` and `TestUnixConnLocalWindows`). Because the error is Go's own
+**invented** `EINVAL` (`APPLICATION_ERROR`-based, message "invalid argument") rather than the kernel's
+`WSAEINVAL` (10022, "An invalid argument was supplied."), the failure reads like a rejected sockaddr
+and invites a hunt through the marshaling — which is sound and was not at fault. `GenerateConstructor`
+now reuses `AppendZeroValueInitializers` over the members the ctor does **not** name, giving them the
+same zero-value construction the parameterless ctor gives them; the all-fields internal ctor omits
+nothing, so nothing changes there, and a struct with no unexported members emits no subset ctor at
+all. (Guarded by the `CrossPkgLiteralNestedField` output-compared test — an `addrlib` sibling library
+supplies `Addr{Name string; raw rawAddr}` in `SockaddrUnix`'s exact shape plus an `Embedder` whose
+unexported member is a promoted **embed**, both built from the parent package by composite literal;
+it reads the nested fixed array's length, runs a guard-then-fill `Encode()` mirroring `sockaddr()`,
+reads bytes back out, and checks that an over-long name is still rejected — so it separates "the array
+is right" from "the guard always fails". Against the unfixed generator the capacity reads `0` and
+`Encode` answers `0 false`.)
+
+A bare **`var x T`** zero-value declaration (no initializer) calls none of those, so the *converter*
+closes the remaining gap on its side: when `T` needs construction it emits `T x = new();` — the generated
+parameterless constructor, which runs the same field initializers + `AppendZeroValueInitializers` — instead
+of the `T x = default!;` that left an array field's backing null (an NRE on the first index/`len`). The
+converter mirrors `StructTypeNeedsConstruction` with the Go-side `structZeroValueNeedsConstruction` (promoted
+embed / fixed-array field / nested needy struct, recursively; a reference field keeps its correct nil zero
+value). A promoted-embed `var` keeps its existing `new(nil)` (the NilType ctor) and a scalar-only struct
+keeps `default!`, so the change is confined to genuinely-needy structs — one pre-existing corpus golden
+re-baselined, `PublicizedFieldType`'s `var cr CaseRange` (a `[3]rune` `Delta` field). A needy struct
+**global** likewise gets `new()` in place of the bare `static T x;`. This `var`/global path is guarded by the
+`ZeroValueStructVar` output-compared test (`var z holder` with a `[8]int` field, a nested `wrapper`, and a
+scalar-only `point` control). Guarded by
+the `NestedPromotedEmbedInit` output-compared test (a `printer` holding a `formatter` field that embeds
+`flags` and holds a `[3]byte`, reached via both `new(printer)` and `&printer{}`, its promoted fields and
+array written and printed against Go); before the fix the promoted-field write NRE'd.
+
+### The zero-value ladder is one ladder, and a NAMED RESULT climbs it too
+
+The `var x T` path above and the named-result prologue are the same question asked at two syntactic
+sites — *what does a declaration with no initializer put in the slot?* — but only the first had the
+full answer. A named result declared `T name = default!;` at function entry got exactly one rung
+(`structHasPromotedEmbeds` → `new(nil)`); the fixed-array and `structZeroValueNeedsConstruction`
+rungs were missing, so a `[N]T` result arrived with **length 0** and an array-bearing struct result
+arrived with a null backing. Both shapes were shipped, and both were measured live in `crypto/tls`:
+
+```csharp
+// src/core/net/netip/netip.cs — func (ip Addr) As16() (a16 [16]byte)
+array<byte> a16 = default!;                   // was: length 0, null backing
+byteorder.BePutUint64(a16[..8], ip.addr.hi);  // -> ArgumentException out of slice<T>'s ctor
+
+// src/core/crypto/tls/common.cs — func (c *Config) ticketKeyFromBytes(b [32]byte) (key ticketKey)
+ticketKey key = default!;                     // skips `aesKey = new(16)`, `hmacKey = new(16)`
+copy(key.aesKey[..], hashed[16..]);           // -> copies 0 bytes -> "aes: invalid key size 0"
+```
+
+Both now emit their construction — `array<byte> a16 = new(16);` and `ticketKey key = new();` — from
+a single shared helper, `zeroValueInitializer`, which the three named-result declaration sites
+(`visitFuncDecl`'s plain and blank-slot prologues, `iifeOperations.namedReturnDeclLines` for a
+function literal and the deferred-named-return lowering) and the `var`/global paths all read. Its
+rungs, in order: an **unnamed** fixed-size array → `new(N)` plus `arrayZeroValueArgs`' element
+factory; a promoted-embed struct → `new(nil)`; a struct carrying a fixed array at any depth →
+`new()`; everything else → `default!`. A **named** array type is deliberately excluded — go2cs-gen's
+array wrapper allocates its backing lazily from its own known size, so its `default` is already
+usable — and a scalar-only result still stays `default!`, which is what keeps the change confined
+to types whose Go zero value genuinely is not all-bits-zero.
+
+Guarded by the `ZeroValueArrayNamedResult` output-compared test, which pins all five emission sites
+against `go run`: an `As16`-shaped `[16]byte` result written through a slice of itself, a
+`ticketKey`-shaped struct result filled by `copy`, a nested value-struct result, a result declared
+by the deferred-named-return lowering, and a function literal's named result — plus a scalar-only
+control proving the ladder does not over-fire.
+
+Two sites of the same class are knowingly **not** changed, because the corpus does not exercise
+either and an unexercised emission change is an unmeasured one: the tuple element a *blank* named
+result contributes to an explicit return (`visitReturnStmt`), and the zero-results `return default!;`
+that closes a value-returning function's recovered-panic catch arm (`visitFuncDecl`/`convFuncLit`).
+Censused at zero — no `return default!;` in the corpus sits in a function whose return type mentions
+`array<`, and GOROOT declares no blank named result of array type. A third, narrower gap stays open
+for the same reason: a **map miss** on an array-valued map returns `default(V)` rather than Go's
+zeroed `[N]T` (`html/entity`'s `map[string][2]rune`, the corpus's only such map, only ever reads on
+a hit).
 
 ---
 

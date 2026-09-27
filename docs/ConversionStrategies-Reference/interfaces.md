@@ -50,6 +50,10 @@ Two rules govern how concrete implementation records are emitted:
 * **Only impl types declared in the *current* package are recorded.** `ImplementGenerator` realizes the attribute by emitting a `partial struct <Impl> : <Interface>` into the **current package's** namespace and class — so it can only add an interface to a type defined in the *same assembly*. A pairing whose impl type is *imported* from another package (e.g. `image/color/palette` building `[]color.Color{ color.RGBA{…} }`) is therefore **not** re-emitted in the consumer: that relationship is already established in the impl type's own package (`image/color` records `[assembly: GoImplement<ΔRGBA, Color>]`). Re-emitting it in a consumer would generate a broken cross-assembly partial (a fresh empty `palette_package.ΔRGBA` rather than the real `color_package.ΔRGBA`), so the converter skips any pairing whose impl type is not local.
 * **Multi-segment interface references are root-qualified.** The `GoImplement` attributes are emitted before the file's `namespace` with only `using go;` in scope; that directive imports the *types* of namespace `go` (so a top-level `io_package.Writer` resolves unqualified) but **not** its nested namespaces. A multi-segment package class such as `container.heap_package.Interface` is therefore root-qualified to `go.container.heap_package.Interface` so it resolves; single-segment refs (`io_package`, `sort_package`) are left unchanged.
 
+<a id="a-range-over-a-pointer-typed-type-conversion-parenthesizes-before-the-deref"></a>Moved to [A range over a pointer-typed type conversion parenthesizes before the deref](pointers.md#a-range-over-a-pointer-typed-type-conversion-parenthesizes-before-the-deref).
+
+<a id="function-literal-parameters-share-the-body-scope"></a>Moved to [Function-literal parameters share the body scope](functions-and-closures.md#function-literal-parameters-share-the-body-scope).
+
 ## Equality
 
 ### Comparing two interfaces of one UNCOMPARABLE dynamic type panics, as Go does

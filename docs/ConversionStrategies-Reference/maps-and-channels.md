@@ -302,25 +302,6 @@ the `any`-slot rule is exercised through a named type.)
 
 A bare **`make(Grades)` with no size argument** defaults the size to 0 — emitting `new Grades(0)` — so the wrapper's allocating `(nint size)` constructor runs and the backing dictionary is created. The generated wrapper struct has that `(nint size)` constructor but no *parameterless* one, so a plain `new Grades()` would be `default(Grades)` — a **nil** map (null backing store, so `m == nil` is true and a write panics), whereas Go's `make` returns a **non-nil empty** map (`m == nil` false, writes succeed). The default is applied only to `*types.Named` defined types: the unnamed `map<K, V>` builtin already allocates in its own parameterless constructor and stays `new map<K, V>()`, and a type *alias* (`type M = map[int]int`) resolves to that builtin rather than a wrapper — so neither drifts (`make` emission in `convCallExpr.go`, right beside the named-channel default below). This mirrors the named-channel unbuffered default (`make(closeWaiter)` → `new closeWaiter(1)`); a sized `make(Grades, n)` (already `new Grades(n)`) and the `Grades{}` composite literal are non-nil already. (Guarded by `NamedMapMakeNonNil` — `make` with and without a size, a plain nil `var`, and a composite literal, each `== nil`-compared and output-compared vs Go.)
 
-Two `[GoType]` payload conventions coexist, and the generator's alias substitution must tell them
-apart. The map/channel emitters write dotted types in **source-alias form** (`CrossPkgLib.Ticks`,
-via `getAliasQualifiedTypeName`), which the substitution above resolves; the slice/array element and
-defined-over-selector emitters write the **namespace-qualified form** (`io.fs_package.FileInfo`,
-via `getFullyQualifiedTypeName`), which roots through the `go` namespace and must pass through untouched.
-The telltale is the segment after the leading identifier: a real alias maps to a package *class*,
-so its next segment is a type name — a `_package`-suffixed next segment means the leading
-identifier is a namespace segment that merely *collides* with a file alias. net/http's fs.go
-aliases `io` while declaring `type fileInfoDirs []fs.FileInfo` → `[]io.fs_package.FileInfo`;
-substituting the `io.` produced the nonexistent `go.io_package.fs_package.FileInfo` (CS0426 ×48).
-The substitution skips exactly those occurrences (a negative lookahead on `_package.`). On the
-converter side, the namespace-qualified form must lead with the **canonical** qualifier, never a
-file-local Δ collision-rename: a consumer whose own namespace has a same-named child imports under
-`using ΔIoLike = IoLike_package;`, but `[]ΔIoLike.FsLike_package.Info` resolves nowhere in the
-alias-free `.g.cs` — `canonicalizeQualifierRename` reverts a leading import-rename segment
-(mirroring the visitTypeSpec global-using-target rule). (Guarded by `NamedSliceChildPkg` — a
-nested-namespace consumer package importing both `IoLike` and `IoLike/FsLike`, with a named slice
-of the subpackage's type used across the assembly boundary.)
-
 A map indexed by a **non-empty interface key** converts a concrete key expression through the same interface-adapter path used by assignments and call arguments. For example, `seen[item] = "kept"` where `seen` is `map[Node]string` and `item` is `*Item` emits `seen[new ItemжNode(item)] = "kept"u8`; the comma-ok read emits the same adapter for the key, `seen[new ItemжNode(item), ꟷ]`. This records the pointer implementation (`GoImplement<Item, Node>(Pointer = true)`) and keeps dictionary lookup semantics aligned with Go's interface key identity. Empty-interface map keys keep their existing literal handling (`map[any]...` turns string literals into Go strings rather than UTF-8 spans), and pointer-typed map keys keep the direct pointer-box path. (Guarded by `InterfaceMapKeyPointer`.)
 
 A **pointer-keyed** map indexed by the method's **receiver** supplies the receiver's box as the key, exactly like the deref-aliased pointer-parameter case: `t.m[c]` inside `func (c *conn) …` emits `t.m[Ꮡc]` (plain read, write, and the comma-ok `t.m[Ꮡc, ꟷ]` alike) — net/http transport.go's idle-connection bookkeeping (`t.idleLRU.m[pc]`) passed the deref-aliased VALUE where `ж<persistConn>` was expected (CS1503 plus the `(v, ok)` deconstruction cascade). The box exists only on a **direct-ж** method, so the receiver-as-map-key body shape itself now *promotes* the method to direct-ж (`bodyUsesReceiverAsPointerValue` gained an `IndexExpr` case, gated on a pointer-KEYED map operand) — a method whose only pointer-use of its receiver is the map key still gets `this ж<conn> Ꮡc`. A pointer LOCAL is unchanged (it *is* the key — no `Ꮡ`), and `delete(t.m, c)` boxes through the ordinary pointer-argument rule once the method is direct-ж. (Guarded by `PtrKeyMapReceiverLookup` — pure-shape promotion, plain read/write, comma-ok, and delete through two distinct receiver identities, values vs Go.)
@@ -349,6 +330,56 @@ A pointer-typed send value renders as its box (parity with the argument-position
 The string-literal empty-interface arm of the same helper is described under
 [Empty Interface (`any`)](empty-interface.md#empty-interface-any). (Guarded by `AnyStringLitChanSend` — a value impl and a pointer
 impl sent through a `chan speaker`, method-dispatched on receive, output-compared vs Go.)
+
+## A map READ of a shape-carrying element supplies the zero from the CALL SITE
+
+The sixth instance of the zero-value-construction class, and the last emission path that had no seat
+for it. Go's read of an ABSENT key — every read of a nil map included — yields the element type's
+zero value, and for `[N]T` that zero is N zeroed elements. golib's `map<TKey, TValue>` indexer
+answered `default(TValue)`, and `default(array<T>)` has **length zero**, so the first index into a
+missed entry panicked `index out of range [0] with length 0` where Go reads a zero:
+
+```go
+// html/escape.go — entity2 is map[string][2]rune
+if x := entity2[string(entityName)]; x[0] != 0 {
+```
+
+That is not an edge path. A miss is the NORMAL outcome for any `&…` run that is not a two-rune
+entity, so `html`'s `TestUnescape` died on ordinary input (the package measured 2 of 3).
+
+The shape cannot come from the map. It is a property of the Go map TYPE, and neither
+`map<TKey, TValue>` nor a `default` (nil) one carries it — reading it off an existing entry would
+answer only for a POPULATED map and guess for an empty or nil one. The READ SITE always knows it
+statically, so the same ladder every declaration site uses (`zeroValueInitializer` /
+`arrayZeroValueArgs`) is threaded into a golib indexer overload that invokes the factory **only on a
+miss**; the emitted lambda is non-capturing, so it is cached and a HIT costs nothing:
+
+```go
+x := entity2["notthere"]              // len 2, both runes 0
+n := nested["zzz"]                    // map[string][2][3]int — inner lengths survive too
+z, ok := entity2["alsomissing"]       // comma-ok form
+v := nilMap[7]                        // quadMap is map[int][4]byte, nil — len 4
+```
+```csharp
+var x = entity2[notthereˢ, () => new array<rune>(2)].Clone();
+var n = nested[zzzˢ, () => new array<array<nint>>(2, () => new(3))].Clone();
+var (z, ok) = entity2[alsomissingˢ, () => new array<rune>(2), ꟷ];
+var v = nilMap[7, () => new array<byte>(4)].Clone();
+```
+
+All three map surfaces answer it, so this is one rule rather than three: `map<TKey, TValue>` declares
+the two overloads, go2cs-gen's `IMapTypeTemplate` forwards them for a NAMED map type, and
+`IMap<TKey, TValue>` carries them as default members for a map-cored type parameter. Two exclusions
+keep the emission unchanged where it is already right — a NAMED array element (its wrapper allocates
+its backing lazily from its own known size, the same exclusion `arrayElemFactory` documents), and an
+assignment TARGET, which carries a value and needs no zero. The A/B footprint over the whole
+converted standard library is **one line**, `html/escape.cs:153` — the crash site itself.
+
+(Guarded by the `MapArrayValueZero` behavioral test: plain and comma-ok reads, hit and miss, a
+nested element, a named map type read both nil and empty, an unnamed map read both nil and empty,
+and a store-then-read control, all output-compared vs `go run`. Failing-first proof: transpiled with
+the pre-fix converter the same program panics `index out of range [0] with length 0` at
+`array.cs:284` — the html signature exactly.)
 
 ## Named channel types
 
@@ -402,110 +433,9 @@ no public surface is lost. (Guarded by `NamedChannelType` — the closeWaiter tr
 `type intQueue chan int` exercising make/send/len/cap/receive/comma-ok/close/range/select, output
 vs Go.)
 
-## A function-LOCAL named type declaration hoists to member level (slice/map/channel/array/pointer)
+<a id="a-function-local-named-type-declaration-hoists-to-member-level-slicemapchannelarraypointer"></a>Moved to [A function-LOCAL named type declaration hoists to member level (slice/map/channel/array/pointer)](struct-types.md#a-function-local-named-type-declaration-hoists-to-member-level-slicemapchannelarraypointer).
 
-C# forbids a type declaration inside a method body, so a `type X []T` / `type X map[K]V` /
-`type X chan T` / `type X [N]T` declared **inside a function** cannot emit its `[GoType(…)] partial
-struct X;` forward declaration in place — the following statements would then parse as MEMBER
-declarations (`CS1519 Invalid token 'foreach' in a member declaration`, `CS1513 } expected`, the
-map form's `CS8124`). A local `type X struct{…}` already hoists: `visitStructType`/`visitIdent`/
-`visitInterfaceType` each redirect the declaration into `currentFuncPrefix` (emitted at member level
-ahead of the method), rename it with the enclosing-function prefix (`ExampleChunk_People`), and
-register the lifted name in `liftedTypeMap` so every reference resolves to it. The array/slice, map,
-and channel emitters did **not** — they wrote the forward declaration straight into the method body
-(the reported slices `example_test`/maps `maps_test` defect). The shared helper `liftLocalTypeDecl`
-(`visitTypeSpec.go`) now applies that same hoist to all three: at package scope it is a no-op
-(target stays `v.targetFile`, `finish()` does nothing, so production emission is byte-identical),
-and inside a function it prefixes the name, registers the lift, redirects to a member-level builder,
-and flushes into `currentFuncPrefix`. A local **slice/array of a local element type** also needs the
-element resolved to its lifted name: `visitArrayType`'s simple-identifier fast path (which keeps the
-written name so `[3]rune` stays `rune`) is skipped when the element is itself a lifted local type
-(`!v.liftedTypeExists`), routing it through `getFullyQualifiedTypeName`, which resolves `liftedTypeMap` — so
-`type People []Person` (Person a local struct) emits `[GoType("[]ExampleChunk_Person")] partial
-struct ExampleChunk_People;`, not the raw `[]Person`. (Guarded by the `LocalNamedTypeDecls`
-behavioral test — a function-local named slice-of-local-struct, map, channel, and fixed-size array,
-each constructed/ranged/indexed in the body and output-compared vs Go; the unfixed converter leaks
-four `partial struct …;` declarations into the method body.)
-
-Two completions of the same rule, both demonstrated by `encoding/gob`'s test suite:
-
-* **The POINTER kind hoists too.** `type X *T` was the one forward-declaration kind still writing
-  its `[GoType("ж<…>")] partial class X;` straight into the body — gob's `codec_test.go`
-  `type Rec ***Rec` produced `CS1525 Invalid expression term 'partial'` and took the rest of the
-  function with it. It now takes `liftLocalTypeDecl` like the other kinds, and the lift is taken
-  **before** `convStarExpr` renders the pointer text so a self-referential declaration resolves its
-  own name through `liftedTypeMap`.
-* **A SELF-REFERENTIAL local type re-resolves its element after the hoist.** The array/map/channel
-  emitters resolved the element/key/value name *before* the declaration's own hoist registered its
-  lifted name, so `type recursiveSlice []recursiveSlice` / `type recursiveMap
-  map[string]recursiveMap` (gob's `encoder_test.go`) emitted `[GoType("[]recursiveSlice")]` on a
-  member-level `TestRecursiveSliceType_recursiveSlice` — a name that no longer exists, `CS0246`
-  inside the generated slice/map partial. Each emitter now re-resolves its element through
-  `liftedTypeMap` **when the hoist actually renamed the declaration**; a package-level declaration
-  never renames, so its emission is untouched (verified byte-identical across the whole behavioral
-  corpus and the 302-package stdlib).
-
-**The ALIAS kind takes the lift too — and for a different reason.** A local declaration that emits a
-`using` ALIAS rather than a nested type — a real `type X = Y`, or a defined type over a *named*
-interface such as `type X any` — was the last local type-declaration kind not taking the hoist. It
-needs no member-level redirection (an alias is emitted at file scope either way), but it needs the
-NAME, because the alias it writes is a `global using`: scoped to the whole **compilation**, not to
-the file, let alone the function. Two functions declaring `type testFnc any` therefore claimed one
-alias name — `CS1537 the using alias 'testFnc' appeared previously in this namespace` — whether they
-sat in one file or in two of the same compilation. `archive/tar`'s suite is the shape: `testFnc` is
-declared in `writer_test.go`'s `TestWriter` **and** `TestFileWriter`, and again in `reader_test.go`'s
-`TestFileReader`, with `fileMaker` alongside it; three diagnostics held all **97** of that package's
-verdicts. The naming half of `liftLocalTypeDecl` is now the shared `liftLocalTypeDeclName`, and the
-alias branch calls it when `v.inFunction`, emitting `global using TestWriter_testFnc = object;`.
-
-The reference mapping is registered under a **guard**, `liftedTypeDeclaredBy`: only a `*types.Named`
-or `*types.Alias` whose own `Obj` **is** this declaration qualifies. A wrong key here renames every
-reference to an unrelated type — `type X = Header` inside a function binds the declaration's object
-to the *existing* `Header`, and (without materialized aliases) `type X = int` binds it to plain
-`int`, so keying the lift on either would rewrite every `Header`, or every `int`, in the file.
-Anything that does not qualify registers nothing and renders exactly as before. A function-local
-declaration is also no longer published in `exportedTypeAliases`: it is not part of the package's
-exported surface whatever its Go name looks like, and after the lift the name a consumer would
-import does not exist. **Zero production-corpus impact by construction** — an AST scan of the Go
-1.23.1 sources finds *no* function-local alias-or-defined-over-interface declaration in any compiled
-stdlib file (all 50 hits are `internal/types/testdata`, which is never built), which is why only two
-test suites ever met it. (Guarded by the `LocalTypeAliasScope` behavioral test — the same local
-names declared in two functions of one file and again in a second file of the same package, plus a
-real `type hdr = Header` alias whose target is used bare alongside it; the unfixed converter emits
-five duplicate `global using` lines.)
-
-**Known residual, a different one, in the same emission line:** an alias whose target is an *unnamed
-composite* renders its type ARGUMENTS unrooted — `type names = []string` emits `global using names =
-go.slice<@string>;`, where only the outermost name is rooted and `@string`, a nested `slice`,
-`error`, `complex64`, a same-package `Header` and a foreign `io_package.Reader` all arrive bare and
-do not resolve at compilation scope (`CS0246`). This is **package-level**, not function-local, and
-predates the lift above; `getUsingAliasSafeTypeName` exists for exactly this class of problem
-(a using-alias RHS is resolved without reference to other using directives) but rewrites only the
-csproj-level golib name aliases, never the rooting. No converted stdlib package declares such an
-alias, so the corpus has never reached it; a converted user module would.
-
-**Known residual:** a *conversion expression* to a hoisted local named **pointer** type
-(`NodePtr(&Node{V: 9})`, with `type NodePtr *Node` declared in the function) still emits the
-pre-hoist source name (`new NodePtr(…)`, `CS0246`). The composite kinds do not have this — a local
-`Tally(m)` correctly renders `((main_Tally)m)` — so the gap is specific to the named-pointer
-conversion arm's target-name resolution. It was previously masked by the hard syntax error above and
-has no consumer among the measured packages (gob only *declares* `Rec` and takes its address); the
-`LocalNamedTypeDecls` guard therefore uses the assignment form `var np NodePtr = &Node{V: 9}`.
-
-## An embedded field's NAME is the UNQUALIFIED type name (dot-imported embeds)
-
-An embedded struct field's name is, per the Go spec, the *unqualified* type name. A cross-package
-embed written as a selector (`struct{ io.Writer }`) already stripped its qualifier for the field
-name; a **dot-imported** embed (`import . "io"` then embedded `ReaderFrom`) reaches the emitter as a
-bare `*ast.Ident`, yet `getAliasQualifiedTypeName` still renders it package-qualified — and, once the package is a
-collision-rename, as `Δio.ReaderFrom`. Gating the qualifier-strip on the *selector* form left that
-qualifier in the field name (`internal io_package.ReaderFrom Δio.ReaderFrom;`), whose embedded dot is
-a C# syntax error (`CS1003 '(' expected` / `CS1026 ') expected'` — the reported io `io_test`
-defect). `visitStructType` now strips to the last segment whenever the resolved embedded-type name
-carries a qualifier (covering both the selector and dot-imported-ident forms; a same-package embed
-has no dot, so it is a byte-identical no-op), yielding the correct `public io_package.ReaderFrom
-ReaderFrom;`. (This is one root among several in the io test suite, which remains blocked by separate
-`import . "io"` using-alias resolution issues — the `Δio` namespace is emitted but never aliased.)
+<a id="an-embedded-fields-name-is-the-unqualified-type-name-dot-imported-embeds"></a>Moved to [An embedded field's NAME is the UNQUALIFIED type name (dot-imported embeds)](struct-embedding.md#an-embedded-fields-name-is-the-unqualified-type-name-dot-imported-embeds).
 
 ## Select statement lowering (terminating and empty clauses)
 

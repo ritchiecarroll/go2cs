@@ -151,6 +151,43 @@ non-matching control, label-order precedence both directions, a multi-type claus
 labels, interface-tag-to-interface-label dispatch, and write-through aliasing, output-compared
 vs Go.)
 
+## Type-switch default arm binds the interface value
+The default clause binds the guard to the ORIGINAL guarded expression (`var x = err;`), whose
+static type is the interface — the switch-operand form (`err.type()`) is object and cannot
+flow back out (`default: return x`, go/build/constraint's pushNot, CS0266).
+
+## The type-switch tag evaluates exactly once
+Go evaluates the TypeSwitchGuard's operand exactly once, but the default-arm and multi-type
+re-binds above textually re-emit the tag expression, so a tag containing a **call or channel
+receive** evaluated once at dispatch and again at each matched re-bind arm —
+`switch p := recover().(type)` re-called `recover()` (which returns nil the second time,
+silently losing the recovered value in a `case nil, *bailout:`-style arm that reads `p`;
+go/types handleBailout), and a `switch v := (<-ch).(type)` re-received. Such a tag is now
+HOISTED into a one-time temporary, and both the dispatch operand and every re-bind read it:
+
+```csharp
+var switchᴛ1 = next(x);
+switch (switchᴛ1.type()) {
+case @string _:
+case bool _: {
+    var v = switchᴛ1;      // re-bind reads the temp — next() ran exactly once
+    …
+default: {
+    var v = switchᴛ1;
+```
+
+The hoist is deliberately GATED — only a tag containing a call (conversions hoist
+conservatively; the temp is merely unneeded) or a receive, and only when some arm actually
+re-binds (a bound default, or a multi-type clause with a non-blank ident) — so every pure-tag
+type switch keeps its direct, byte-identical emission. The temp name comes from the
+per-package `getGlobalTempVarName` counter (`switchᴛN`), so nested and sibling hoists never
+collide. Single-type concrete labels and the `when`-guard interface labels bind from the
+dispatch operand's pattern variable and never re-evaluate the tag regardless. (Guarded by the
+`TypeSwitchImpureTag` behavioral test — a counting-function tag whose per-switch eval count is
+printed and output-compared vs Go [the pre-fix emission provably prints `calls: 7` for Go's
+`calls: 4`], a `recover()` tag in a deferred multi-type switch, and a channel-receive tag that
+would deadlock on re-receive.)
+
 ---
 
 [← Expression Switch Statements](expression-switch.md) · [Index](README.md) · [Struct Types →](struct-types.md)

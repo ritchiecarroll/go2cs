@@ -65,32 +65,7 @@ every verb with and without precision, byte-compared against `go run`; ±Inf/NaN
 constants are themselves rendered lossily — `MaxFloat64` as `1.79769e+308` — which is a separate converter
 defect, deliberately not conflated with this one.)
 
-## A folded constant of a NAMED type carries its type in the fold
-
-`overflowingConstLiteral` materializes a compile-time integer constant whose value falls outside the C#
-`int32` range, because C# would otherwise evaluate the operator expression in `int32` and overflow
-(CS0220). It read the constant's type through `Underlying()`, so a constant of a *defined* type folded
-to a bare basic literal and the Go type was simply lost:
-
-```go
-d := 8 * time.Hour
-secondsEastOfUTC := int((8 * time.Hour).Seconds())
-```
-
-```csharp
-var d = 28800000000000L;                            // a C# long, not a Duration
-nint secondsEastOfUTC = (nint)(28800000000000L).Seconds();   // CS1929 — long has no Seconds
-```
-
-The compile error is the loud half; the silent half is `d`, which is now a `long` and prints as its
-digit count where a `Duration` prints `8h0m0s`. The fold now carries the named type in the same
-parenthesized `(T)(…)` shape the native-int arm uses — `(time.Duration)(28800000000000L)` — which
-`wholeExprIsCastOfType` already recognizes, so enclosing paths do not re-wrap it. The `[GoType]` wrapper
-converts implicitly from its underlying, so the cast is always legal, and Go's own parentheses around a
-method-call receiver keep the postfix `.M()` binding to the cast rather than to the literal. Only
-constants outside `int32` reach this arm at all, so the corpus footprint is the handful of computed
-`time.Duration`-class constants above that magnitude. (Guarded by the `PackageNameShadowing` behavioral
-test, case 4.)
+<a id="a-folded-constant-of-a-named-type-carries-its-type-in-the-fold"></a>Moved to [A folded constant of a NAMED type carries its type in the fold](constants.md#a-folded-constant-of-a-named-type-carries-its-type-in-the-fold).
 
 ---
 

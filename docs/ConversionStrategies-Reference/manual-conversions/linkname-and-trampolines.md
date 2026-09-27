@@ -604,6 +604,38 @@ The .NET runtime breaks the invariant before user code runs: at startup on Linux
 
 Guarded by the `StdoutCloseEofBarrier` behavioral test, deliberately deadlock-shaped rather than timed: the child closes stdout and then blocks on stdin until the parent — who must first see the EOF — writes the release byte. A regression deadlocks both sides into the harness run-timeout instead of flaking on a threshold. The residual is documented in the golib file: `println` routes through `Console.Error`, whose on-demand duplicate of fd 2 would hold a *stderr* pipe the same way; no measured row needs stderr-close EOF propagation yet.
 
+### Converted programs write UTF-8 stdout — the ambient console code page never reaches the bytes
+Go writes stdout as raw UTF-8, unconditionally: `fmt.Println("Hello, 世界")` emits the same bytes to a
+terminal, a pipe, or a file. .NET does not. `Console.Out` is constructed with `Console.OutputEncoding`,
+which on Windows defaults to the **console output code page** (`GetConsoleOutputCP()` — the OEM page, 437
+on a stock US install), and to the ANSI default (1252) when the process has no console at all — the case for a
+program launched by the behavioral runner (`CreateNoWindow = true`) or by the tour's `.NET Run` pane
+(`src/tour/pipeline.go` `runStage`, whose `command.Stdout` is a `bytes.Buffer`). Encoding a rune that code
+page cannot represent is not an error in .NET; the encoder substitutes `?`, so the Tour of Go's first
+lesson would render `Hello, ??` with no diagnostic anywhere.
+
+golib forecloses this in its `[ModuleInitializer]` (`src/core/golib/builtin.cs`), which runs before any
+converted code: `Console.OutputEncoding = Console.InputEncoding = Encoding.UTF8`. The setter also discards
+any already-created `Console.Out`, so the writer is rebuilt on the UTF-8 encoding, and .NET strips the
+encoding's preamble for console writers — no BOM is prepended. A failing `SetConsoleOutputCP` (no console
+attached) is tolerated, so the redirected case is covered as fully as the interactive one. The **full**
+conversion reaches the same place by a different route and needs nothing added: real `fmt` writes through
+`os.Stdout` → `internal/poll` → `syscall.WriteFile`, which hands the `[]byte` to Win32 verbatim and is
+byte-transparent by construction. Only the baseline `core/fmt` stub — a proxy over
+`Console.Write`/`Console.WriteLine` — depends on the encoding above.
+
+Guarded by the `UnicodeConsoleOutput` behavioral test, which prints CJK, Greek, Cyrillic, a math symbol and
+an astral-plane emoji, and is stdout-compared against the Go binary. The guard is differential, so it holds
+even under a lossy capture: the runner decodes both children's bytes with the same encoding, and mojibake
+never equals `?`. Neutering the golib line and running under `chcp 437` fails it with
+`stdout mismatch C# vs Go`; restoring the line passes in the same console.
+
+One divergence remains, and it is stub-only: `Console.WriteLine` terminates with `Environment.NewLine`
+(CRLF on Windows) where Go always writes `\n`, so baseline-stub output is mixed CRLF/LF — a `\n` inside a
+`Printf` format string stays LF. The behavioral comparison reads both children line-by-line and so
+normalizes this away; the full conversion does not have it at all, since `WriteFile` passes Go's `\n`
+through unchanged.
+
 ---
 
 [← Manually-Converted Declarations](../manual-conversions.md) · [Index](../README.md)

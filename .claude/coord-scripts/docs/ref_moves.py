@@ -36,13 +36,20 @@ operation succeeded, each with its original line ending, BOM and trailing newlin
       a doc path in src/migrate-tfm.ps1 whose anchored text moved is re-pointed. New slugs are
       computed in the destination page after insertion, with GitHub's -1/-2 suffixes.
       The move fails if any heading that stays behind (in src or dst) changes slug, or if an anchor it
-      creates collides with one already on the page.
+      creates collides with one already on the page. "Moved to" stubs that trail the block (left in place
+      by an earlier move) stay in src, where their anchors were published; a stub INSIDE the block fails
+      the move.
   index       {readme, new_pages: [{page, after}], children: {page: [pages]}, grouped: [pages],
                skip_h2: [texts]}
       Regenerate the Contents list of the reference index from the pages themselves: each page's H1,
       then its H2s (and, for a `grouped` page, the H3s under each H2), then its child pages nested.
   retarget    {file, from, to}
       Replace every link target exactly equal to `from` in one file (repairing a broken anchor).
+  relocate    {file, start, until?, before_heading}
+      Move unheaded lines WITHIN one page: from the one non-fenced line starting with `start` up to the
+      next heading (or, with `until`, to the line starting with that text), to just above the heading
+      `before_heading` (exact text). The lines may hold no heading and no stub, so no anchor changes;
+      used to return a stranded overview paragraph to the top of its page.
 
 --self-test renders the reference pages through GitHub's API (gh must be signed in) and checks that
 every heading anchor GitHub produced equals the slug computed here.
@@ -152,6 +159,20 @@ def find_line(lines, pred, what):
     if len(ks) != 1:
         raise Fail(f'{what}: expected one matching line, found {len(ks)}')
     return ks[0]
+
+
+STUB_LINE_RE = re.compile(r'^\s*(?:- )?<a id="[^"]+"></a>Moved to \[')
+
+
+def trim_stubs(lines, start, end):
+    """End a moving block before the "Moved to" stubs that trail it. An in-place stub is spliced where an
+    earlier move removed a section, i.e. right after the section above it; it belongs to the PAGE (its
+    anchor was published there), so it must not travel with that section when the section moves too."""
+    mask = rc.fence_mask(lines)
+    j = end
+    while j > start + 1 and (lines[j - 1].strip() == '' or (not mask[j - 1] and STUB_LINE_RE.match(lines[j - 1]))):
+        j -= 1
+    return trim_end(lines, start, j)
 
 
 def splice(lines, pos, new):
@@ -306,7 +327,11 @@ def op_move(repo, op):
         if not us:
             raise Fail(f'{what}: until-line {op["until"]!r} not inside the block')
         i1 = trim_end(S.lines, i0, us[0])
+    i1 = trim_stubs(S.lines, i0, i1)
     block = S.lines[i0:i1]
+    if any(STUB_LINE_RE.match(l) for l, f in zip(block, rc.fence_mask(block)) if not f):
+        raise Fail(f'{what}: the block holds a "Moved to" stub between its sections; that stub belongs to '
+                   f'{op["src"]} and would travel with the block')
     bmask = rc.fence_mask(block)
     bheads = [(i - i0, lv, t, s) for (i, lv, t, s) in hs if i0 <= i < i1]
     old_slugs = [s for (_, _, _, s) in bheads]
@@ -568,8 +593,39 @@ def op_retarget(repo, op):
     repo.log.append(f'retarget {op["file"]}: {op["from"]} -> {op["to"]} (x{n[0]})')
 
 
+def op_relocate(repo, op):
+    """Move unheaded, stub-free lines within one page to just above a named heading."""
+    d = repo.doc(repo.P(op['file']))
+    L = d.lines
+    what = f'relocate {op["start"][:50]!r}'
+    mask = rc.fence_mask(L)
+    i0 = find_line(L, lambda l: l.startswith(op['start']), what)
+    nxt = next((i for (i, _, _) in rc.headings(L, mask) if i > i0), body_end(L))
+    if op.get('until'):
+        us = [i for i in range(i0 + 1, nxt) if not mask[i] and L[i].startswith(op['until'])]
+        if len(us) != 1:
+            raise Fail(f'{what}: until-line {op["until"]!r} not found once before the next heading')
+        nxt = us[0]
+    i1 = trim_end(L, i0, nxt)
+    block = L[i0:i1]
+    bmask = rc.fence_mask(block)
+    if any(not f and (STUB_LINE_RE.match(l) or rc.HEADING_RE.match(l)) for l, f in zip(block, bmask)):
+        raise Fail(f'{what}: the lines hold a heading or a stub')
+    slugs_before = [h[3] for h in rc.heading_slugs(L)]
+    L2, _ = remove(L, i0, i1)
+    hs = rc.heading_slugs(L2)
+    ks = [h[0] for h in hs if h[2] == op['before_heading']]
+    if len(ks) != 1:
+        raise Fail(f'{what}: expected one heading {op["before_heading"]!r}, found {len(ks)}')
+    L2, _ = splice(L2, ks[0], block)
+    if [h[3] for h in rc.heading_slugs(L2)] != slugs_before:
+        raise Fail(f'{what}: relocating changes a heading slug')
+    d.lines = L2
+    repo.log.append(f'relocate {op["file"]}: {len(block)} lines above {op["before_heading"][:60]!r}')
+
+
 OPS = {'create': op_create, 'heading': op_heading, 'split_line': op_split_line, 'insert': op_insert,
-       'move': op_move, 'index': op_index, 'retarget': op_retarget}
+       'move': op_move, 'index': op_index, 'retarget': op_retarget, 'relocate': op_relocate}
 
 
 # ------------------------------------------------------------------------------------------------

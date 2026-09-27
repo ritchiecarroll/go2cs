@@ -109,6 +109,27 @@ renders BCL names by the file-scoped conventions above). (Guarded by `BclTypeNam
 a package declaring `type Range struct` alongside a named string type and a named slice type, both
 sub-sliced with the Go `Range`'s fields as bounds, output vs Go.)
 
+## Two `[GoType]` payload conventions coexist
+
+Two `[GoType]` payload conventions coexist, and the generator's alias substitution must tell them
+apart. The map/channel emitters write dotted types in **source-alias form** (`CrossPkgLib.Ticks`,
+via `getAliasQualifiedTypeName`), which the substitution above resolves; the slice/array element and
+defined-over-selector emitters write the **namespace-qualified form** (`io.fs_package.FileInfo`,
+via `getFullyQualifiedTypeName`), which roots through the `go` namespace and must pass through untouched.
+The telltale is the segment after the leading identifier: a real alias maps to a package *class*,
+so its next segment is a type name — a `_package`-suffixed next segment means the leading
+identifier is a namespace segment that merely *collides* with a file alias. net/http's fs.go
+aliases `io` while declaring `type fileInfoDirs []fs.FileInfo` → `[]io.fs_package.FileInfo`;
+substituting the `io.` produced the nonexistent `go.io_package.fs_package.FileInfo` (CS0426 ×48).
+The substitution skips exactly those occurrences (a negative lookahead on `_package.`). On the
+converter side, the namespace-qualified form must lead with the **canonical** qualifier, never a
+file-local Δ collision-rename: a consumer whose own namespace has a same-named child imports under
+`using ΔIoLike = IoLike_package;`, but `[]ΔIoLike.FsLike_package.Info` resolves nowhere in the
+alias-free `.g.cs` — `canonicalizeQualifierRename` reverts a leading import-rename segment
+(mirroring the visitTypeSpec global-using-target rule). (Guarded by `NamedSliceChildPkg` — a
+nested-namespace consumer package importing both `IoLike` and `IoLike/FsLike`, with a named slice
+of the subpackage's type used across the assembly boundary.)
+
 ## ImplicitConvGenerator
 
 ### A GoImplicitConv record needs at least one LOCAL operand
@@ -160,6 +181,70 @@ and `ast.FuncType` → `ж<ast.FuncType>`, and those must not start recording. (
 `TestWhiteboxProductionPointerBoxConvStillRecorded`, whose both-foreign arm is the boundary, and
 `TestPointerBoxConversionRecordShape` for the shared predicate; the numeric phantom keeps its own guard,
 `TestWhiteboxProductionNumericConvNotRecorded`.)
+
+### Generated conversion operators between named numerics of different assemblies
+
+**Generated conversion operators between named numerics of *different* assemblies.** The two paragraphs above are the *converter's inline* casts. Separately, when the converter sees a conversion *between two named numeric types* it records a `[assembly: GoImplicitConv<…>]` and the `ImplicitConvGenerator` emits a user-defined `implicit operator` for it. The emitted body constructs one named type from the other's underlying value: `new Target((ValueType)src.Value)`.
+
+**`ValueType` is a CAST TARGET, and it names the constructed type's BACKING PRIMITIVE (corrected
+2026-08-08).** The template applies it to `src.Value` and feeds the result to the constructed type's
+constructor, and that constructor takes the primitive — so `ValueType` must be `uint32`, `nint`,
+`int64`, not the wrapper. It named the **constructed type itself** until this was rooted, making the
+body a round-trip through that type's own conversion operators — `new WaitStatus((WaitStatus)src.Value)`
+— which compiles only while a standard EXPLICIT conversion exists between the two primitives, because
+a user-defined conversion admits just one standard conversion on its input. syscall's unix flavors are
+where it finally bit: `WaitStatus` is backed by `uint32` and `Signal` by `int` (`nint`), and
+`uint32`→`nint` is not a standard IMPLICIT conversion (a 32-bit unsigned value does not fit a 32-bit
+native int), so its reverse is not a standard explicit one, the operator is not applicable, and the
+cast is **CS0030**. Windows declares `WaitStatus` a struct, so the pair is never registered there and
+no corpus build reached it. All 49 of the corpus's `ValueType` records carried the constructed type's
+own name, so the form was never right — only never yet fatal, because the two compensating generator
+overrides below cover most of the gap. One consumer had to move with it: the `uintptr` hop read
+`ValueType` as the type to CONSTRUCT (`new {valueType}(…)`) and now constructs the LH type and casts
+to `ValueType`, exactly like the default body. (Guarded by `implicitConvValueType_test.go` — an
+end-to-end conversion of two named numerics with different underlyings, plus a unit sweep over every
+basic kind a named numeric can carry.)
+
+When both named types live in the **same** assembly the default body is fine (e.g. runtime's
+`muintptr ↔ Δhex`), but when the operator must **construct a *foreign* named numeric** — one declared
+in another C# assembly — two problems appear that only manifest cross-assembly:
+
+* A direct cast to the foreign named type has no route. `(NameOff)src.Value` where `src.Value` is `ulong` and `NameOff` (`internal/abi`) is a *different assembly* is **CS0030** — C# does not select the foreign type's `int32`-based user conversion for a `ulong` source across the assembly boundary (the same cast to a *local* named type compiles). It must go **through the foreign type's underlying basic**: `new …NameOff((int)src.Value)`.
+* The default host can be a phantom. The operator is hosted in `partial struct {sourceType}`; if that source is the *foreign* type (reached here via a local alias, e.g. runtime's `global using nameOff = abi.NameOff`, so the cross-package dot is hidden and the conversion records as `Inverted`), the `partial struct NameOff` declares a new *empty local* type rather than extending the foreign one — **CS1729** (no constructor). The operator is relocated into the **local** type instead.
+
+So for a foreign *constructed* type the generator emits, fully-qualified and hosted in the local type:
+
+```csharp
+// runtime, dur↔hex style: foreign abi.NameOff constructed from local Δhex
+partial struct Δhex {
+    public static implicit operator global::go.@internal.abi_package.NameOff(global::go.runtime_package.Δhex src)
+        => new global::go.@internal.abi_package.NameOff((int)src.Value); // through the underlying int32
+}
+```
+
+The override fires **only** when the `new`-constructed side (the LH type: the *source* when the conversion is `Inverted`, else the *target*) is foreign; same-assembly operators are emitted byte-identically as before (no churn). Because the trigger is inherently cross-assembly, the behavioral-test harness (single-assembly, and unable to import a foreign named numeric — `internal/*` types are un-importable from a test module and the baseline stubs expose none) cannot host it; the guard is the **`core/runtime` build**, where `NameOff`/`TypeOff`/`TextOff` ↔ `Δhex` naturally occur (this fix cleared 3×CS0030 + 3×CS1729 there).
+
+A **same-assembly** pair also needs the through-underlying routing when the two named numerics have **incompatible underlyings** — internal/trace's public `type Time int64` ↔ unexported `type timestamp uint64`, converted both ways (`Time(ev.Ts)` / `timestamp(ts)`). The default `new Time((ΔTime)src.Value)` casts `src.Value` (a `ulong`, since `timestamp` is `uint64`-backed) straight to the wrapper, which routes through the wrapper's `long`-based user conversion — but `ulong`→`long` is not an implicit C# conversion, so the cast is **CS0030**. (This is the *mixed-accessibility* case: `Time` is exported and `timestamp` is not, so the operator is already relocated into the less-accessible `timestamp` struct — orthogonal to the underlying.) The generator now, for a **local** numeric pair, casts through the constructed type's underlying C# keyword when the source underlying does **not** implicitly convert to it: `new Time((long)src.Value)`, `new timestamp((ulong)src.Value)`. The source/constructed underlyings are read from each side's `[GoType("num:X")]` tag (a sibling generator cannot see the generated `Value` property), and the implicit-convertibility test is the fixed C# numeric-conversion table over the fixed-width integer/float basics. Crucially this fires **only** on pairs the default cast could not compile (the default `(Wrapper)src.Value` succeeds *iff* that same source→underlying conversion is implicit), so every already-compiling conversion stays byte-identical — the full behavioral suite's [goldens](../Glossary.md#golden) are unchanged. `uintptr`-backed pairs keep the existing `nuint`-hop override; `int`/`uint` native-width wrappers are deliberately left to the default (their classification is version-sensitive and the failing corpus cases are fixed-width). (Guarded by the `NamedIntSignednessConv` behavioral test — a public `int64` ↔ unexported `uint64` named pair converted both ways, including a `^uint64(0)`→`int64` case whose `-1` result verifies the cast preserves the bit pattern exactly, output-compared vs Go; internal/trace's `timestamp`→`Time` inverse operator relies on it.)
+
+A **cross-assembly** mixed-accessibility pair has no legal form at all, and is skipped. The relocation
+above is the only remedy for a mixed pair — a C# user-defined conversion operator is necessarily
+`public` **and** must be declared in one of its two operand types — and a *foreign* type cannot host
+anything. Hosting in the local, more accessible side then exposes a type less accessible than the
+operator: **CS0056** when the foreign side is the return type, **CS0057** when it is the parameter, so
+neither direction is expressible. The shape is reachable only under the `-tests` white-box model, where
+a package's own `_test.go` declares an EXPORTED defined type over an UNEXPORTED production one — `time`'s
+`export_test.go` has `type RuleKind int` beside `zoneinfo.go`'s `type ruleKind int`, which become
+`public RuleKind` in the test assembly and `internal ruleKind` in the referenced production assembly.
+Nothing is lost by skipping: the converter renders such a conversion site as an explicit
+through-underlying cast (`(RuleKind)(nint)r.kind`), which needs no operator at all. The local side's
+accessibility comes from the GO export rule, as in the relocation above (at analysis time the `[GoType]`
+partials are modifier-less); the FOREIGN side is read from metadata, where it is already final.
+
+The recorded `GoImplicitConv` must also be able to **name the foreign type**. The recorded type name carries the foreign package's import qualifier — the DOT form `driver.IsolationLevel` for an unrenamed type, or a `ꓸ` global-using alias (`CrossPkgLibꓸGrade`) for a `Δ`-renamed one — but the attribute sits in `package_info.cs` at file scope and the generated operator lands in a `.g.cs`, neither of which carries the body files' import `using`s. A `Δ`-renamed foreign numeric resolves through its own `ꓸ` global using, but the **dot form needs a resolving `using driver = go.database.sql.driver_package;`** in `package_info.cs`'s `ImportedTypeAliases` block. The STRUCT-conversion branch of `checkForImplicitConversion` already drives that using by calling `recordConversionPackageUsing(argType)`/`(funcType)`, but the **aliased-NUMERIC branch omitted it** — so a cross-package named-numeric conversion (database/sql's `driver.IsolationLevel(opts.Isolation)`, where `sql.IsolationLevel` and `driver.IsolationLevel` are distinct named ints) left `driver` unresolved in both the attribute and the generated operator (CS0246). The numeric branch now records the same package usings. (Guarded by an extension to the `CrossPkgUser` cross-assembly test — a local `float64`-based named numeric converted to the *unrenamed* `CrossPkgLib.Celsius`, which renders in dot form and so needs the registered using; a `Δ`-renamed target like `CrossPkgLib.Grade` would have resolved via its alias and would not have caught the gap.)
+
+### A pointer conversion bridging structurally-identical structs records a boxing implicit conversion
+
+When a pointer conversion `(*Target)(srcPtr)` bridges two structurally-identical structs, the converter records an **indirect** (boxing) implicit conversion `Source → ж<Target>` and `ImplicitConvGenerator` emits `implicit operator ж<Target>(Source src) => Ꮡ(new Target(<members>))`. For a **self-boxing** conversion — `Source` and `Target` are the *same* struct (`mspan → ж<mspan>`), which arises from a self-referential struct's recursive sub-struct conversions — that member-by-member reconstruction is both unnecessary and wrong: a pointer field whose target ctor parameter is itself a `ж<…>` was deref'd (`src.f?.Value ?? default!`), and a value cannot bind a pointer parameter (CS1503). The generator detects self-boxing (the boxed element type equals the source) and emits `Ꮡ(src)` instead — boxing a copy of the whole struct directly, identical in effect for a pointer-free struct and correct for one with pointer fields. (Validated by the green baseline build, which regenerates every `.g.cs`, plus the `TypeConversion` behavioral test for the non-self-boxing form; runtime exercised self-boxing for `mspan`, `g`, `stackScanState`, `hmap`, etc.)
 
 ---
 

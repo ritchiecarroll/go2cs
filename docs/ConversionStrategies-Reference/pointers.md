@@ -79,6 +79,277 @@ for (var pp = Ꮡhead; pp.ValueSlot != nil; pp = (pp.ValueSlot).of(node.Ꮡnext)
 
 This is exactly the runtime's `allm`/`itabTable` shape (`for pprev := &allm; *pprev != nil; pprev = &(*pprev).alllink`). (Guarded by the `GlobalPointerWalk` behavioral test — ordered insertion, head/middle removal, and a method call through the pointer global, all via `**node` writes, output-compared against Go.)
 
+## A global addressed only by the package's own `_test.go` is still heap-boxed
+A Go pointer to a package-level var aliases that var's real storage, which in C# means the global
+must be backed by a heap box (see [Pointers](#pointers)); `packageAddressedGlobals` decides that by
+scanning the package for `&g`. But `go/packages` excludes `_test.go` from a production package, so
+an address taken *only* by the package's own in-package test half is invisible at the declaration.
+path/filepath is the canonical case — `path.go` declares `var lstat = os.Lstat // for testing` and
+`export_test.go` declares `var LstatP = &lstat`, the whole point being that a test can swap the
+implementation the production `Walk` calls. The production emission left `lstat` a plain field, and
+the test variant's `Ꮡlstat` named a box nothing declared: **CS0103**.
+
+The converter now scans the build-selected in-package `_test.go` files for the identifiers they take
+the address of and folds them into the addressed-global set, so the production declaration carries
+the box:
+
+```csharp
+internal static ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new(os.Lstat);
+internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref Ꮡlstat.ValueSlot;  // for testing
+```
+
+Three properties make this the right shape rather than a `-tests`-only patch:
+
+- **It runs in ordinary conversion too**, exactly as `siblingTestFuncMethodNames` does for reference
+  spelling, so a package's production storage shape is **mode-stable** — an `-stdlib` reconvert and a
+  `-tests` run emit the same bytes. Conditioning it on `-tests` would make the banked corpus flip
+  between the two.
+- **The scan is a cheap direct directory read, not a second type-check** — no test dependency graph is
+  loaded. It is therefore name-based, and the production pass resolves each candidate against the real
+  package scope, dropping anything that is not a package-level var (a type, a func, an import
+  qualifier, a name that exists only in the test file).
+- **It errs toward recording nothing.** Names bound anywhere inside the enclosing top-level
+  declaration — receiver, parameters, results, `:=`, `var`/`const`/`type`, range and type-switch
+  bindings — are excluded, so `&counter` on a local that shadows a global does not box the global.
+  Under-recording restores today's loud CS0103; over-recording would silently box a global no pointer
+  aliases.
+
+Only **build-selected** test files are scanned (`go/build`'s `MatchFile`, with the run's `GOOS`/
+`GOARCH` and `-tags`), so the boxed set is a property of the build configuration exactly as the
+converted production sources themselves are: `path_windows_test.go` contributes on Windows and
+`path_unix_test.go` does not. That is the same rule `siblingTestFuncMethodNames` already follows, and
+it is the correct answer — a global no *selected* file addresses needs no box in that configuration.
+
+Measured across the whole standard library by an A/B reconvert: **13 globals in 13 files**, and every
+single one is a Go *"for testing"* hook — `path/filepath` and `os`'s `lstat`, `os`'s
+`testingForceReadDirLstat` and `allowReadDirFileID`, `runtime`'s `readRandomFailed`, `useAeshash`,
+`doubleCheckReadMemStats`, `casgstatusAlwaysTrack`, `forcegcperiod` and `timeBeginPeriodRetValue`,
+`reflect`'s `callGC` (whose own comment reads *"for testing; see TestCallMethodJump and
+TestCallArgLive"*), `internal/poll`'s `logInitFD`, `net/http`'s `maxWriteWaitBeforeConnReuse` and
+`testHookEnterRoundTrip`, and `time`'s `usPacific`. No false positives, which is what the
+bind-aware exclusion buys — and the same set is forward work, since `os`, `runtime`, `reflect`,
+`net/http`, `internal/poll` and `time` all need those hooks to alias real storage before their own
+suites can pass.
+
+External (`package foo_test`) test files are deliberately not scanned: they reach the package only
+through its exported surface, and `&otherpkg.Var` from *any* other package is a separate, still-open
+gap — `collectAddressedGlobals` only ever scans the package under conversion. (Guarded by the
+`SiblingTestAddressedGlobal` behavioral test, whose `export_test.go` addresses a bare global, a
+global through a field selector, and a global from a function body, against negatives for a
+test-file-local declarator and a shadowing local. It is the first behavioral project to carry a
+`_test.go`; the corpus harness skips `_test.go` when pairing sources with `.cs` goldens, since a
+production transpile never emits one.)
+
+## Combined field-element address `base.at(field, i)`
+
+The address of an element of an array/slice FIELD of a boxed value — `&x.c[i]` where `c` is an
+array field, or the implicit address taken to call a pointer-receiver method `x.c[i].inc()` — was
+rendered as a two-step chain `Ꮡx.of(counters.Ꮡc).at<atomic.Int32>(i)`: `of(field)` takes the field's
+address (a `ж<array<E>>`), then `at<E>(i)` takes the element's. The explicit `<E>` is needed because
+golib's standalone `at<TElem>(nint)` is generic in an element type unrelated to the pointer's `T`, so
+it cannot be inferred. golib adds combined overloads `ж<T>.at<TElem>(FieldRefFunc<…array<TElem>…>, nint
+index)` (one per field-accessor shape and array/slice kind, each forwarding to `of(field).at<TElem>(i)`)
+whose `TElem` IS inferred from the field accessor's return type. The converter then collapses the chain
+to `Ꮡx.at(counters.Ꮡc, i)` — dropping both the `.of(` step and the `<E>` type argument. It rewrites the
+recursively-built field address `base.of(Type.Ꮡfield)` by retargeting its trailing `.of(field)` to
+`.at(field, i)`, only when the field segment is parenthesis-free (a plain `Type.Ꮡfield` accessor, so the
+final `)` provably matches the last `.of(`); any other shape falls back to the explicit chained form.
+The combined overload is behaviorally identical to the chain (it literally forwards to it). (Guarded by
+`ArrayOfCrossPackageType`, `IndexedElementDirectBoxMethod` and `PointerFieldArrayElementAddress` — all
+output-compared; the `.inc()`/`bump()` element writes verify runtime equivalence.)
+
+The routing gate sees through **nested value fields to the chain root**. `&pp.wbBuf.buf[0]` (runtime
+`mwbbuf.go`) roots at the pointer `pp` through the *value* field `wbBuf`; the original gate checked
+pointer-ness only one level up (`pp.wbBuf`, a struct), fell to a naive `Ꮡ` prefix (`Ꮡpp.wbBuf…` — CS1061
+on the box), and the same failure hit the closure-captured variant (`&mp.trace.buf[gen%2]`, `trace.go`).
+The gate now walks intermediate selectors to the root, so any pointer-rooted (or heap-boxed) chain routes
+through the recursive `&field` machinery — `pp.of(pstate.ᏑwbBuf).at(wbBuf.Ꮡbuf, 0)` — which already
+rendered multi-hop of-chains. A **nested-index** base — `&cache.entries[ck][i]` (2-D array via a pointer,
+`symtab.go`) — is an `IndexExpr`, not a selector, so it gets its own arm: recursively take the inner
+element's address (`cache.at(pcvalueCache.Ꮡentries, ck)`) and chain the outer `.at<T>(i)` onto it — the
+gate also accepts a HEAP-BOXED value root (`&grid.cells[1][2]` on an address-escaping local), fixing that
+shape too. An unboxed value-rooted chain keeps the prior naive form (corpus byte-identical). *Known
+remaining gap (pre-existing): an intermediate `IndexExpr` inside the selector chain —
+`&ptr.items[i].buf[j]`, an array-of-structs hop — defeats the root walk (both arms only step through
+selectors) and keeps the CS1061 naive form; the recursive machinery likely has the pieces when a runtime
+site demands it.* (Guarded by
+the `NestedFieldElementAddr` behavioral test — all three runtime shapes with write-through vs Go; note a
+ZERO-VALUED struct's array-field backing is null in the C# emulation — a separate pre-existing latent —
+so the test initializes its arrays.)
+
+**Element address of a by-value ARRAY PARAMETER.** Array parameters are cloned by value in the
+function preamble (`value = value.Clone();`, Go's array-copy semantics) but are never
+escape-analyzed, so they have no heap box — the naive element-address form would name a box that
+does not exist (`Ꮡvalue.at<byte>(0)`, CS0103 — syscall `SetsockoptInet4Addr`, `&value[0]` on
+`value [4]byte`). The converter boxes a **copy of the wrapper struct** instead:
+`Ꮡ(value).at<byte>(0)`. `array<T>` wraps a `T[]` reference, so the copied wrapper SHARES element
+storage with the cloned parameter — element reads and writes through the pointer stay behaviorally
+correct. (One accepted edge, no stdlib hit: reassigning the *whole* array param after taking an
+element address leaves the pointer on the older backing array.) (Guarded by `DeferTypelessReturns`'
+`first` — element address of a `[4]byte` parameter, value vs Go.)
+
+**Element address of a POINTER-to-array — `&t[i]` where `t` is `*[N]E`.** Go auto-derefs the index
+(`(*t)[i]`), so the element lives in the pointed-to array on the heap; `t` already IS the `ж<[N]E>`
+box. The converter emits `t.at<E>(i)` — ж's `at` materializes the array's lazy backing on the REAL
+storage and then returns an element pointer over the shared backing. (How `at` reaches that lazy
+getter has changed twice and matters: a reflection-built constrained delegate first — fatal under
+Native AOT, `d5c0c9c10` — then an unsynchronized box-touch-copy-back, and since 2026-08-30 a
+**per-box atomic publish**; see *The array-backing publish is atomic per box* below.) The base is
+rendered in POINTER context so it yields the box: a deref-aliased pointer
+PARAMETER gives `Ꮡt` (the parameter is `ж<[N]E> Ꮡt`, deref-aliased to `ref var t = ref Ꮡt.Value` in
+the prologue), while a box-valued LOCAL from `new([N]E)` gives the plain `t`. Previously this shape
+fell through every array/slice branch (the base's type is a `*types.Pointer`, not an array or slice)
+to the generic `Ꮡ(t.Value[i])` **copy** form, which boxes a snapshot of the element and silently
+drops any write made through the returned pointer. This is exactly hash/crc32's
+`slicingMakeTable`/`simpleMakeTable`: `simplePopulateTable(poly, &t[0])` populated a throwaway copy,
+leaving every CRC table all-zeros (checksums degenerated to `~0`-with-shifts — `TestGolden`,
+`TestSlicing`). The same latent write-through-a-copy bug lurked corpus-wide wherever `&ptr[i]` on a
+pointer-to-array was written through — `crypto/internal/nistec` (`p224GG[i].SetBytes(…)` in static
+init), `internal/bisect` and `runtime` (`atomic.Store*(&arr[i], …)`) — all now alias correctly. (A
+pointer-to-SLICE cannot reach here: Go does not auto-deref `*[]E` for indexing; it is written
+`(*t)[i]`, a `StarExpr` the slice branch already aliases.) (Guarded by `PointerToArrayElementAddress`
+— write-through `&g[j]` on a `*grid` local, value vs Go.)
+
+**Element address of a SLICE FIELD of the receiver — `&b.lines[i]`.** The address of a slice element
+uses one of two golib forms: the **element-aliasing** two-arg `Ꮡ(x, i)` (→ `new ж<T>(IArray, index)`,
+whose `ValueSlot` returns `ref backingArray[index]`, so writes land in the shared backing array), or the
+**copy-boxing** `Ꮡ(x[i])` (→ `Ꮡ(in T)`, which boxes a *copy* of the element value). For a slice the copy
+form is only sound when nothing is written back through the pointer. Inside a pointer-receiver method the
+converter had a `refRecv` fast-path that chose the copy form for a "receiver reference to a slice" — but
+its detection keyed off `getIdentifier(indexExpr.X)`, which walks the selector chain to its **root**
+identifier. So a slice *field* of the receiver — `&b.lines[i]`, whose base `b.lines` roots at the
+receiver `b` — matched the fast-path too, and emitted the copy form. text/tabwriter's `terminateCell`
+does `line := &b.lines[len-1]; *line = append(*line, cell)`: the `append` grew a *copy* of the row's
+slice header and wrote the new length into the boxed copy, never back into `b.lines`, so every line
+stayed length 0 and **all formatted output came out empty** (only the newlines survived). The fix
+restricts the copy form to the case the receiver is *directly* the slice (`indexExpr.X` is the bare
+receiver identifier); any slice base that is a field, call result, or other non-identifier expression
+uses the element-aliasing `Ꮡ(x, i)` form — which is correct for a slice in all cases, since a slice value
+always shares its backing array. This also corrected a benign read-only site (`NamedFuncTypeStructuralField`'s
+`s.by(&s.items[j], &s.items[i])` comparison) from copy to alias. (Guarded by
+`SliceFieldElementAddress` — append-through-pointer into a `[][]int` field of a pointer receiver plus an
+in-place element mutate, value vs Go; validated end-to-end by `text/tabwriter`'s test suite.) The ARRAY
+branch carried the identical defect and is narrowed the same way — next.
+
+**Element address of an ARRAY FIELD of the receiver — `&d.hashHead[h]`.** The array branch had its own
+`refRecv` fast-path with the same root-identifier detection, and so the same bug: an array *field* of the
+receiver roots at the receiver and took the copy-boxing `Ꮡ(d.hashHead[h])`, whose `Ꮡ(in T)` overload
+heap-boxes a copy of the **element**. `compress/flate`'s `deflate()` is the canonical victim — it does
+`hh := &d.hashHead[hash&hashMask]; … *hh = uint32(d.index + d.hashOffset)` to maintain the chained hash
+table. Every head write landed in a throwaway box, so `hashHead` stayed all-zero, `d.chainHead` was always
+`0`, and the `d.chainHead-d.hashOffset >= minIndex` guard (`0-1 >= 0`) meant **`findMatch` was never
+called at all**. Levels 2–9 therefore emitted LITERALS ONLY: still-valid deflate streams roughly the size
+of `HuffmanOnly` output. Since `png.BestCompression` maps to flate level 9, a 256×256 PNG encoded to
+**134,644 bytes instead of Go's 36,760** — pixel-identical on decode, ~3.7× weaker compression, with
+`NoCompression`, `HuffmanOnly` and `BestSpeed` (whose `deflatefast.go` encoder writes `e.table[…]`
+directly and never takes an element address) all byte-exact, which is what localized it. The fix mirrors
+the slice branch: the copy form is kept only when the receiver is *directly* the array (`indexExpr.X` is
+the bare receiver identifier); an array field of the receiver uses the element-aliasing two-arg
+`Ꮡ(d.hashHead, (int)(…))`.
+
+Note the array field deliberately does **not** route through the `.of(field)`/`.at<T>(i)` box machinery
+described above, even though that machinery exists for array fields. Its trigger is `baseIsPointer` — the
+*Go* receiver type is `*T` — but a Go pointer receiver renders as `this ref T recv`, which has **no** box
+companion, so it emitted `Ꮡr.of(RegArgs.ᏑInts)` for `internal/abi`'s `&r.Ints[reg]` → CS0103. The two-arg
+form needs no box and aliases correctly regardless: `array<T>` is a readonly struct wrapping an eagerly
+allocated `T[]`, so evaluating the field copies only the wrapper while the copy shares element storage —
+the same reasoning the array-*parameter* case above relies on. (That reasoning holds for `array<T>` and
+**not** for a field whose type is a NAMED array, whose wrapper allocates its backing lazily; such a
+field is projected through `.Value` first — see *The element address of a VIRGIN named array must
+materialize through the receiver*. No corpus site currently has that shape; the gate is there because
+the shape is legal Go, not because something was found broken.) Seventeen corpus files corrected, several
+of them silently broken in the same write-dropping way: `runtime`'s `&r.statusTraced[gen%3]`,
+`&h.counts[…]` and `&m.stats[gen]` performed `.CompareAndSwap`/`.Store`/`.Add` **on a copy**;
+`crypto/internal/edwards25519` built its lookup tables via `(&v.points[i]).FromP3(…)` into copies;
+`image/jpeg` wrote Huffman/quantization tables through `&d.huff[tc][th]` and `&d.quant[…]`. (Guarded by
+`RecvArrayFieldElementAddress` — chained-hash write-through with an unsigned index, plus a nested
+`&h.pairs[i][j]`, value vs Go; the flate ratio itself is verified by deflating fixed buffers at every
+level and byte-comparing the sizes against `go run`.)
+
+## The address of a FIELD of a slice or array element aliases the element
+
+Go's `&s[i].f` is a pointer *into* the backing storage: a write through it changes `s[i]`. The
+`&`-machinery builds such an address in two steps — the element's address, then a field reference on
+it — and the first step has to be the **element-aliasing** form the index branch already renders for
+`&s[i]` itself (`Ꮡ(s, i)` for a slice, `Ꮡarr.at<E>(i)` / `p.at<E>(i)` for an array or a
+pointer-to-array). The arm's last-resort fallback instead renders `Ꮡ(<value>)`, a box over a **copy**
+of the element, and a field ref rooted there aliases the copy: every write through the pointer is
+dropped while every read still looks right, so the container simply never changes.
+
+```go
+p_A_Other := &p.Inst[pc].Out        // regexp/onepass.go, onePassCopy
+*p_B_Alt = *p_A_Other               // patches the compiled program in place
+```
+
+```csharp
+var p_A_Other = Ꮡ((~p).Inst, pc).of(onePassInst.ᏑOut);          // aliases the element
+// NOT: Ꮡ((~p).Inst[pc]).of(onePassInst.ᏑOut)                   // a box over a COPY — write lost
+```
+
+This is the same write-dropping class the slice, array and pointer-to-array index branches each call
+out by name (`text/tabwriter`'s empty lines, `compress/flate` emitting literals only at levels 2–9,
+`hash/crc32`'s all-zero slicing tables), reached through a **field of the element** rather than
+through the element itself. The predicate is `exprIsIndexableElement`: slice, array, or
+pointer-to-array only. A map is excluded because Go does not permit `&m[k]` at all, so an index over
+one can never legitimately reach the `&`-machinery, and admitting it would mask a front-end error as
+a plausible emission; a generic instantiation shares `*ast.IndexExpr`'s shape but types as a
+signature or a named type and falls out without a special case. The recursion is ordered *before* the
+heap-boxed branch, which already recursed identically for an `IndexExpr` base, so a boxed base
+reaches the same emission either way and no existing site moves.
+
+**Why it surfaced when it did.** The PROMOTED case was masked for as long as `go2cs-gen` held an
+embed in a shared `ж<T>` box (see *An embedded struct is an INLINE field, so a value copy copies it*
+above): the embed's reference semantics meant a copied element still pointed at the origin's embedded
+storage, so `Ꮡ(elem).of(T.ᏑPromoted)` reached the real element **by accident**. Making the embed an
+inline field was correct and removed that accident, which is what exposed this — `regexp`'s
+`onePassCopy` stopped patching, and `TestCompileOnePass` reported `isOnePass=false` for
+`^(?:(?:a+)*)$` and `^(?:(?:(?:a*)+))$`. That commit fixed the sibling arm (a promoted
+pointer-receiver **call** descending a copy box); this is the address-of-**field** arm of the same
+defect. An ordinary, non-embedded field of an element was never masked and was broken all along.
+
+**The base the recursion newly exposed: a pointer RECEIVER over a named array.** `&t[i].field` where
+`t` is `*semTable` (`type semTable [4]struct{…}`, runtime's `semtable.rootFor`) now reaches the
+index arm's pointer-to-array branch, which renders `t.at<E>(i)` on the assumption that a
+pointer-to-array base yields a `ж<[N]E>` box. A Go pointer receiver does not: it renders as
+`this ref T recv`, which has no box companion, so `recv.at<E>(i)` names a member the value does not
+have (CS1061). It needs none — a named fixed-array type is generated as `IArray<E>` over a shared
+backing `E[]`, so the two-arg element-aliasing overload aliases on the wrapper itself. **But that
+wrapper's backing is allocated LAZILY, and the two-arg overload takes its target BY VALUE, so on a
+still-virgin wrapper the backing materialized on the call site's boxing temp and the receiver's own
+storage was never written** — see *The element address of a VIRGIN named array must materialize
+through the receiver* below, which is why the emission carries `.Value`:
+
+```csharp
+[GoRecv] internal static ж<semaRoot> rootFor(this ref semTable t, nint i) {
+    return Ꮡ(t.Value, i).of(semTableᴛ1.Ꮡroot);     // was: Ꮡ(t.Value[i]).of(…) — a COPY
+}
+```
+
+That is exactly the treatment the receiver's array FIELD already gets in the same arm (see *Element
+address of an ARRAY FIELD of the receiver* under Slices and Arrays), for the same reason. A
+deref-aliased pointer PARAMETER and a box-valued LOCAL both DO have a box and keep `.at<E>(i)`.
+
+The base has to be the receiver **identifier itself**, not merely rooted at it — the same
+object-identity-versus-root-identifier rule the slice and array branches state, inverted.
+`getIdentifier` walks a selector chain to its root, so `&p.chunks[l1][l2]` (runtime's
+`pageAlloc.chunkOf`) and `&u.inlTree[uf.index]` (`symtabinl`) both report the receiver as their root
+while their actual base is a pointer-to-array FIELD — a genuine `ж<[N]E>` rvalue that does have a box
+and must keep `.at<E>(i)`. Routing those through the two-arg overload hands it a `ж<array<E>>` where
+it wants an `IArray<E>`, which does not bind. Neither shape has a behavioral test, and the corpus is
+what caught them: a `-stdlib` reconvert of the affected packages moved both files, and reverting them
+is what the identifier restriction does.
+
+Guarded by the **`SliceElementFieldAddress`** behavioral test — the deliberate mirror of
+`SliceFieldElementAddress` (that one is `&(slice field)[i]`, this one is `&(slice[i]).field`) —
+covering an ordinary field of a slice local and of an array local, a promoted field of a slice field
+reached through a pointer, and `onePassCopy`'s own idioms: two pointers into one element swapped and
+then written through, and a cross-element `*dst = *src`. The pointer-receiver-over-named-array
+sub-case above is guarded by **`NamedArrayAnonElement`**'s Compile and golden phases, and — since
+the lazy-backing gap below was closed — behaviorally by **`NamedArrayWrapper`**'s element-address
+probe on a virgin wrapper. (`NamedArrayAnonElement`'s own `main` still deliberately never indexes
+the array; that note said zero-valuing a named fixed-size array "does not yet materialize its
+backing on the value itself", which is exactly the gap the next section closes.)
+
 ## Nested dereferences parenthesize before the outer `.Value`
 A deref whose operand is ITSELF a deref renders with the prefix `~` form, on which a naked postfix `.Value` mis-binds (postfix beats unary: `~X.Value` is `~(X.Value)`). The outer deref wraps the inner one -- reflect `MapOf`'s `**(**mapType)(unsafe.Pointer(&imap))`:
 ```csharp
@@ -99,6 +370,39 @@ unsafe.Pointer conversions `isTypeConversion` deliberately excludes). Byte-ident
 pattern only occurs on a pointer-producing conversion in range position, which never compiled before).
 Guarded by `RangePointerArrayConversion` (transpile+compile+target only — the exact cast shape needs an
 `unsafe.Pointer` source, whose runtime round-trip golib does not reproduce, so it is not output-compared).
+
+## The THREE deref accessors of `ж<T>` — when each is needed, and how the converter picks
+
+Establishing a local `ref` over a heap box (`ref var p = ref Ꮡp.<accessor>`) looks like one
+operation but encodes different answers to one question: **is this access the Go DEREFERENCE, and
+what does Go say happens on nil at exactly this point?** Consolidated here because the members
+landed across separate arcs (their individual sections, linked below, carry the full derivations);
+this is the map.
+
+| Accessor | On nil | The Go semantics it encodes | How the converter KNOWS |
+|:--|:--|:--|:--|
+| `.Value` | **panics immediately** (Go's message, even on bind) | this access IS the deref, and Go panics here — the ordinary pointer USE site (`*p`, `~Ꮡp`, a read through the box) | the DEFAULT everywhere except a pointer's ENTRY alias; no special case applies |
+| `.ValueSlot` | **no check** — the slot as-is | a read of the HELD value, never a deref: when the pointee is itself reference-like, `*p` legally yields nil (`*(&err)` of a nil `error` panics in neither language), so `.Value`'s null check would fire SPURIOUSLY on a legally-held null. Identical to `.Value`'s slot in every non-throwing case. Also where nil is structurally impossible (a freshly `make`-allocated box, `heap(out …)`) and in the reflection bridge's field paths. | by the POINTEE'S TYPE or by CONSTRUCTION — a box-of-pointer LOCAL, a named-result box, the bridge's field walk. NOT at a pointer's entry alias (see below) |
+| `.DerefOrNull()` | **defers** — binds `Unsafe.NullRef<T>`, faults with Go's panic on first USE | Go defers the panic to the body's own deref point: passing a nil `*T` to a function, or calling a method through one, is legal; the body RUNS, a side effect before the deref must happen, and the panic lands where Go's would — after it, or never (delegated `checkValid`-style guards). | STRUCTURALLY — EVERY direct-ж pointer ENTRY alias, RECEIVER and PARAMETER alike, unconditionally (no analysis, because the accessor is faithful whether or not the body guards), plus the pointer-reassignment re-alias and go2cs-gen's `ReceiverMethodTemplate` bridge; see *A nil RECEIVER is nil-deferring, not nil-safe* and *A pointer PARAMETER is nil-deferring for exactly the reason a receiver is* |
+
+Why three and not one: the ENTRY alias and the USE site are different questions, and `.Value`
+answers the second. `.ValueSlot` is different in KIND rather than in timing — it marks accesses
+that were never dereferences in Go's semantics at all, which no nil-policy accessor can express —
+but it is not selected at an entry alias, where nothing can know whether the body will dereference
+and the nil-policy question is the only one being asked.
+
+**There used to be a fourth, `.DerefOrNil()` — a nil-SAFE accessor handing back a shared
+`default(T)` slot — and its retirement (2026-08-02) is what collapsed the set.** It was admitted
+by a body ANALYSIS: a pointer param the body nil-compares, one passed the untyped `nil` at a
+same-package call site, or one whose first mentioning statement re-points it without dereferencing
+(`l = l.get()` normalization). Wherever that analysis was RIGHT the silent zero was unobservable;
+wherever it was wrong — and it could never be complete, because a body's guard may be DELEGATED to
+a callee it merely hands the pointer to — a deref Go says must panic instead read a silent zero.
+Unifying every pointer entry alias on `.DerefOrNull()` made the analysis unnecessary in the first
+place, so the accessor, the three analyses that fed it (`collectNilSafePtrParams`,
+`reassignedBeforeDerefParamName`, and the package-wide nil-argument pre-pass) and their vestigial
+receiver arms were deleted together — 382 net lines of converter. The golib method survives with
+its own unit coverage, but converted code no longer emits it.
 
 ## Sub-pages
 

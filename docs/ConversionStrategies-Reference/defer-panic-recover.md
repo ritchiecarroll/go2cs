@@ -2,6 +2,13 @@
 
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#defer--panic--recover)
 
+Handling Go `defer` / `panic` / `recover` is what the FRAME above is for: the body is emitted inline in `try`/`catch`/`finally` beside a [`GoFrame`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/GoFrame.cs) local that holds this call's defer list. `panic` is the global [`panic`](https://golang.org/pkg/builtin/#panic) built-in and `recover` the global [`recover`](https://golang.org/pkg/builtin/#recover) (both a `using static go.builtin`). A function that neither directly nor indirectly (through a deferred lambda) uses `defer`/`recover` gets no frame at all -- the scope is per function, so a `main` that merely calls `f()` is emitted as a plain method body.
+
+* **Named results + defer.** See *The named-result form* above: the results are declared before the `try` and read back after the `finally`, and every exit inside leaves through a `goto`.
+* **IIFEs.** An immediately-invoked function literal that itself uses defer/recover carries its own frame inside its own delegate-cast invocation (`((Action)(() => { GoFrame ... }))()`), so its defers are its own -- while its `recover()`, being a static call, still reads the one panic slot.
+* **A `return` emits against ITS OWN function's results, not the enclosing function's.** A bare `return` in a function with named results emits `return (n, ok);` (the named results). A *nested function literal* must be converted against its **own** signature -- otherwise a bare `return` inside a **void** closure would inherit the enclosing function's named results and emit `return (n, ok);` into a `void` lambda (CS8030, "anonymous function converted to a void-returning delegate cannot return a value"). Runtime `mprof.goroutineProfileWithLabelsSync` (named `(n, ok)`) passes `forEachGRace(func(gp1 *g) { ...; return; ... })` -- the void closure's bare returns must stay `return;`. The return signature is tracked separately from `currentFuncSignature` (which stays the *enclosing* function's, so the receiver/parameter detection still resolves a **captured** pointer parameter -- an outer parameter -- correctly): `convFuncLit` sets a dedicated return-signature to the literal's own signature with save/restore, and `visitReturnStmt` emits results against it. (Guarded by the `ClosureBareReturnNamedResults` behavioral test -- a void closure with bare returns nested in a named-results function, output verified vs Go; cleared runtime's 4 CS8030.)
+* **Return-type INFERENCE is not a concern.** An inline body returns against the METHOD's own declared result type, so no inference runs over the return statements and the two shapes that would defeat one cannot arise: every return carrying an untyped `default!` (Go `nil` -- syscall's `getProcessEntry`), and returns of two unrelated concrete types sharing only the declared interface (go/parser's `parseTypeName` returning `&ast.SelectorExpr{...}` beside a plain `*ast.Ident`). Both are pinned as guards: `DeferTypelessReturns` (unnamed results, a defer, and every return carrying nil) and `DeferInterfaceReturn` (a defer/recover func returning `Shape` via `Circle` vs `Square`, plus a heterogeneous `(Shape, bool)` tuple return).
+
 ## A function that defers or recovers emits its body INLINE, inside a frame
 
 A Go function is a stack frame: it registers `defer` records in its own frame and runs them on the
@@ -596,26 +603,7 @@ value; the `runtime.Error`-typed path is guarded by the committed math/bits Go t
 behavioral tests build against the baseline `src/core`, which has no `runtime` package, so the typed
 form cannot be exercised there.)
 
-## `make([]T, len[, cap])` out-of-range panics are RECOVERABLE, with Go's messages
-
-Go's `makeslice` panics recoverably for a negative or over-allocatable length/capacity — the
-recovered value's text is `runtime error: makeslice: len out of range` (or `cap`; probed vs
-`go run` — the recovered value is a `runtime.errorString`). golib's make path (the
-`slice<T>(nint length, nint capacity, nint low)` constructor) raised
-`ArgumentOutOfRangeException`/`OverflowException` for the same inputs — .NET exceptions
-`recover()` cannot catch, so a deferred recover never ran and the process died. The constructor
-now validates first and throws `RuntimeErrorPanic.MakeSliceLenOutOfRange()` /
-`MakeSliceCapOutOfRange()` (recoverable `PanicException`s carrying Go's message text), using
-`Array.MaxLength` as .NET's `maxAlloc` equivalent. The same validation class applies to the
-hand-owned `internal/bytealg.MakeNoZero` (`bytealg_impl.cs`) — Go's runtime implementation of it
-panics `len out of range` before allocating, and strings/bytes `TestRepeatCatchesOverflow`
-recovers that panic and matches on `"out of range"` (Phase-4 row R6; `strings.Repeat` of a
-near-`maxInt` product reaches `MakeNoZero` after passing Repeat's own overflow pre-checks).
-Like the established golib runtime-panic convention, the panic STATE is the message string, not
-an `error` value — a recovering type switch takes Go's `case error:` arm only in Go; both sides
-converge on the same `err.Error()` text through the `fmt.Errorf("%s", v)` default arm. (Guarded
-by the `MakeSlicePanicRange` behavioral test — in-range, negative, huge-length, and huge-capacity
-`make` under `recover()`, messages compared vs Go.)
+<a id="maket-len-cap-out-of-range-panics-are-recoverable-with-gos-messages"></a>Moved to [`make([]T, len[, cap])` out-of-range panics are RECOVERABLE, with Go's messages](slices-and-arrays.md#maket-len-cap-out-of-range-panics-are-recoverable-with-gos-messages).
 
 ## A panicked C# `string` boxes as Go `string` at golib's boxing boundary
 Go's `panic` takes an `any`, so the panicked value's **dynamic type** is observable on the recover
@@ -735,13 +723,6 @@ mutations landing on the deferred copies and the source read back untouched, out
 
 <a id="the-enclosing-statements-hoist-buffer-does-not-extend-into-a-literals-body"></a>Moved to [The enclosing statement's hoist buffer does NOT extend into a literal's BODY](functions-and-closures.md#the-enclosing-statements-hoist-buffer-does-not-extend-into-a-literals-body).
 
-Handling Go `defer` / `panic` / `recover` is what the FRAME above is for: the body is emitted inline in `try`/`catch`/`finally` beside a [`GoFrame`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/GoFrame.cs) local that holds this call's defer list. `panic` is the global [`panic`](https://golang.org/pkg/builtin/#panic) built-in and `recover` the global [`recover`](https://golang.org/pkg/builtin/#recover) (both a `using static go.builtin`). A function that neither directly nor indirectly (through a deferred lambda) uses `defer`/`recover` gets no frame at all -- the scope is per function, so a `main` that merely calls `f()` is emitted as a plain method body.
-
-* **Named results + defer.** See *The named-result form* above: the results are declared before the `try` and read back after the `finally`, and every exit inside leaves through a `goto`.
-* **IIFEs.** An immediately-invoked function literal that itself uses defer/recover carries its own frame inside its own delegate-cast invocation (`((Action)(() => { GoFrame ... }))()`), so its defers are its own -- while its `recover()`, being a static call, still reads the one panic slot.
-* **A `return` emits against ITS OWN function's results, not the enclosing function's.** A bare `return` in a function with named results emits `return (n, ok);` (the named results). A *nested function literal* must be converted against its **own** signature -- otherwise a bare `return` inside a **void** closure would inherit the enclosing function's named results and emit `return (n, ok);` into a `void` lambda (CS8030, "anonymous function converted to a void-returning delegate cannot return a value"). Runtime `mprof.goroutineProfileWithLabelsSync` (named `(n, ok)`) passes `forEachGRace(func(gp1 *g) { ...; return; ... })` -- the void closure's bare returns must stay `return;`. The return signature is tracked separately from `currentFuncSignature` (which stays the *enclosing* function's, so the receiver/parameter detection still resolves a **captured** pointer parameter -- an outer parameter -- correctly): `convFuncLit` sets a dedicated return-signature to the literal's own signature with save/restore, and `visitReturnStmt` emits results against it. (Guarded by the `ClosureBareReturnNamedResults` behavioral test -- a void closure with bare returns nested in a named-results function, output verified vs Go; cleared runtime's 4 CS8030.)
-* **Return-type INFERENCE is not a concern.** An inline body returns against the METHOD's own declared result type, so no inference runs over the return statements and the two shapes that would defeat one cannot arise: every return carrying an untyped `default!` (Go `nil` -- syscall's `getProcessEntry`), and returns of two unrelated concrete types sharing only the declared interface (go/parser's `parseTypeName` returning `&ast.SelectorExpr{...}` beside a plain `*ast.Ident`). Both are pinned as guards: `DeferTypelessReturns` (unnamed results, a defer, and every return carrying nil) and `DeferInterfaceReturn` (a defer/recover func returning `Shape` via `Circle` vs `Square`, plus a heterogeneous `(Shape, bool)` tuple return).
-
 ## A BLANK result mixed with a named one still needs the named-return-defer handling
 
 Go permits mixing the blank identifier and real names in one result list — `func parse(s string, flags Flags) (_ *Regexp, err error)` (regexp/syntax) — and deferred code can still mutate `err`. The detection required **every** result to be named and non-blank, so the first `_` rejected the whole signature and the function fell back to the unnamed-result form, whose catch arm returns Go's zero results. On a recovered panic that arm returned `default!`: the deferred handler assigned `err`, the catch arm discarded it, and the function reported **(nil, nil)** — a *successful* parse of an expression that must fail. Every "expression too large" / "nesting depth exceeded" input (`a{100000}`, `strings.Repeat("(", 1000)+…`) came back as a valid parse, and the caller's `dump(re)` on the nil pointer then panicked.
@@ -774,6 +755,24 @@ The no-arg defer arm passes a bare method group (`defer(k.Close, ref ᒐ)`) only
 defer(() => hʗ1.close(), ref ᒐ);
 ```
 Guarded by `DeferTypelessReturns`.
+
+## The parameter-type cast also reaches a go/defer call's lambda form
+
+The parameter-type cast also reaches the **lambda form** of a go/defer call, not just the method-value
+form. When the callee returns a value (or is a value-receiver method), `visitGoStmt`/`visitDeferStmt`
+force the temp-param lambda `goǃ(ᴛ1 => f(ᴛ1), arg)` (see *A value-returning goroutine callee is wrapped
+in a discarding lambda*); there the arg's C# type drives ᴛ1's inference, and the lambda body's `f(ᴛ1)`
+then needs ᴛ1 to be `f`'s parameter type. An untyped numeric const otherwise took `convExprList`'s
+DEFAULT-Go-type cast, so ᴛ1 inferred the default (`nint`) and `f(ᴛ1)` failed — hash/crc32's
+`go MakeTable(Castagnoli)` (Castagnoli an untyped `uint32` poly) emitted `goǃ(ᴛ1 => MakeTable(ᴛ1),
+(nint)Castagnoli)`, CS1503. `convCallExpr` now applies the parameter-type cast in the lambda form too, but
+ONLY when the parameter differs from the const's default type (`untypedNumericConstArgDefaultType` vs the
+param's underlying basic) — when they match, the existing default-cast path already yields the right type,
+so overriding would only churn the golden (`(nint)x`→`(nint)(x)`). Proven zero-drift on the behavioral
+corpus and the full stdlib reconvert (the fix fires only where a wider/other parameter demands it).
+(Guarded by the `GoUntypedConstArg` behavioral test — `go compute(poly)` with a value-returning callee and
+an untyped `uint32`-poly const, output-compared vs Go; without the fix the `goǃ` arg is `(nint)poly` and
+the lambda body is CS1503.)
 
 ## Deferred pointer-receiver nullary calls bind the box method group
 `defer conf.releaseSema()` with `conf *resolverConfig` (net nss.go / dnsclient_unix.go) trimmed to the deref-alias method group `Ꮡconf.Value.releaseSema` — a struct VALUE against the [GoRecv] `ref` extension, which cannot create a delegate (CS1113). The emission binds the BOX method group instead:

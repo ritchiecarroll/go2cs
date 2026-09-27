@@ -446,8 +446,6 @@ The predicate is pure `go/ast`+`go/types`: go/token's `example_test.go` declares
 
 Guarded by the `TestSelectCompileExcludedTestFilesDropsExampleAndBenchmarkOnly` (positive: external Example-only + internal Benchmark-only), `TestSelectCompileExcludedTestFilesDropsExampleWithHelperType` (the crypto/tls widened-arm positive), `TestSelectCompileExcludedTestFilesKeepsHelperTypeUsedByRetainedTest` (condition 2 over the widened arm — the disarm this change had to avoid), `TestSelectCompileExcludedTestFilesKeepsExampleWithTopLevelVar` (condition 1 negative), `TestSelectCompileExcludedTestFilesKeepsReferencedExample` (condition 2 fixpoint), and `TestSelectCompileExcludedTestFilesKeepsTestMainAndFuzzOnly` converter unit tests.
 
-<a id="a-package-qualifier-using-in-a-converted-test-source-contributes-a-project-reference"></a>Moved to [A package-qualifier `using` in a converted TEST SOURCE contributes a project reference](#a-package-qualifier-using-in-a-converted-test-source-contributes-a-project-reference).
-
 ---
 
 [Index](README.md)

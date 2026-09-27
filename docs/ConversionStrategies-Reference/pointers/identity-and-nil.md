@@ -50,6 +50,23 @@ Fixed consumers: `operator ~` (both the `ж<T>` and the `IPointer<T>` interface 
 
 golib-only change — no emitted-code difference. (Guarded two ways, because the converter routes every reference-typed-pointee deref through `.ValueSlot` — verified with a 6-shape probe including generics — so `operator ~` is unreachable from converted Go and only golib-internal, hand-owned and reflection-bridge code takes it. The Go-expressible half is in the `PointerToNilPointerIdentity` behavioral output test: distinct-variable identity, `map[**int]` two-key distinctness, hash stability across a pointee assignment, and reference-typed field-reference deref + map keying — pre-fix `&c == &d` printed `true`, the two-key map held **1** entry, and the stable-key lookup read back empty. The unreachable half is in `GolibTests.PointerNilPredicateTests`, which drives `operator ~` (both forms), `DerefOrNil`, `ReadPointerSlot` through a hand-written stand-in for a generated named-pointer wrapper, and native-alias identity — 7 of its 10 assertions fail pre-fix.)
 
+### Every nil-pointer consumer must ask the structural predicate
+
+**Every consumer that asks "is this THE nil pointer" must ask the structural predicate.** The
+managed-slot `atomic.Pointer<T>` (`core/sync/atomic/type.cs`) canonicalizes the nil pointer to a null
+slot so a reference `CompareAndSwap` treats all nil `*T` values as equal — and its `nilCanon` helper
+asked the value-peeking `IsNull`, so it collapsed a *pointer to a nil value* to nil as well. `sync.Map`
+is built out of exactly that shape and lost both halves of it: `e.p.Store(&i)` with a nil `any` value
+dropped the entry outright (`load()`'s `p == nil` then reported not-ok, so `Range` skipped it and
+`CompareAndSwap` failed against it), and the `expunged = new(any)` sentinel — a real address holding a
+nil interface — became indistinguishable from nil, so a *deleted* entry could not be told from an
+*expunged* one and the whole dirty/expunge protocol degenerated. The predicate is now
+`ж<T>.IsNilPointer`. The same conflation applied to `atomic.Pointer[error]`, `atomic.Pointer[func()]`
+and any `**T` slot (`atomic.Pointer[*T]`), all present in the corpus. (Guarded by
+`AtomicPointerToNil`: `Load`/`Store`/`Swap`/`CompareAndSwap` over a pointer to a nil `any`, two
+distinct `new(any)` sentinels, a pointer to a nil `*int`, and the genuinely-nil slot, output-compared
+vs `go run`. Before the fix the guard panics with a nil-pointer dereference on its second line.)
+
 ### A pointer's REFERENT, not its box, answers every lifetime and identity question
 
 A `ж<T>` is a *pointer*, and go2cs mints them freely: `Ꮡ(s, i)` allocates a fresh box on every call,

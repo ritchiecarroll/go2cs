@@ -293,10 +293,6 @@ method-body, value-embed-promoted, composite-literal, and return positions plus 
 pointer-hop negative control, all output-compared vs Go; the one churned golden
 `UnsafePointerParamPin` — `&h.v` under `unsafe.Pointer` — re-verified.)
 
-<a id="a-capture-mode-method-called-on-a-field-chain-of-a-local-is-an-address-of-too"></a>Moved to [A capture-mode method called on a FIELD CHAIN of a local is an address-of too](methods-and-receivers.md#a-capture-mode-method-called-on-a-field-chain-of-a-local-is-an-address-of-too).
-
-<a id="the-same-chain-one-level-up-recvf1f2-on-a-pointer-receiver"></a>Moved to [The same chain one level up: `&recv.f1.f2` on a POINTER RECEIVER](methods-and-receivers.md#the-same-chain-one-level-up-recvf1f2-on-a-pointer-receiver).
-
 ### A TYPE-SWITCH BINDING is escape-analyzed like any other local
 Every rule above reached a variable through `info.Defs` — and a type-switch guard has no object
 there (go/types: *"symbolic variables t in t := x.(type) … the corresponding objects are nil"*;
@@ -467,12 +463,6 @@ correctness is identical on both paths (the same view comes back), only the COST
 across a process's early life. Guarded by `GolibTests/FieldViewCacheTests.cs` (identity, the byte split
 by type, the chain hop, the fallback, the nil box, the negative arm, concurrent first calls — the last
 of which caught a publish race before the cut was announced).
-
-<a id="a-type-switch-binding-is-escape-analyzed-like-any-other-local"></a>Moved to [A TYPE-SWITCH BINDING is escape-analyzed like any other local](#a-type-switch-binding-is-escape-analyzed-like-any-other-local).
-
-<a id="a-package-level-function-literals-own-locals-are-analyzed-too"></a>Moved to [A PACKAGE-LEVEL function literal's own locals are analyzed too](#a-package-level-function-literals-own-locals-are-analyzed-too).
-
-<a id="a-pointer-receiver-method-value-heap-boxes-its-receiver--the-implicit-xm"></a>Moved to [A pointer-receiver METHOD VALUE heap-boxes its receiver — the implicit `(&x).M`](#a-pointer-receiver-method-value-heap-boxes-its-receiver--the-implicit-xm).
 
 ---
 
