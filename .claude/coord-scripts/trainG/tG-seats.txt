@@ -1,0 +1,18 @@
+g-managed-tracer|08d07a9570|G: the managed execution tracer (Q28): Go's v2 trace of the goroutine facts, parsed by Go's own tool (runtime/trace validates 2; leaves E4)
+i9-host-sandbox-marker|002929151f|the i9: GO2CS_TEST_SANDBOX restored in TestHost.Run (carries the in-process flag isolation 458b56f6e5)
+r-runtime-claims|3fae75de81|R: seat (ii) -- max/min signed zero, array map keys cloned on insert, panic(nil) and GODEBUG plumbing, nil-old CompareAndSwap
+p2-stack-roots|b9d7f64248|P2: M3 stack roots (carries M2b cf95330847)
+p2-method-wrapper|fc6461fae3|P2: F, method-expression wrapper frames, on M3 (TestCallersFromWrapper and the two /Stack subtests pass)
+g-displacement-cache|ec5dce06b8|G: FieldRefBox caches its displacement by accessor delegate
+p2-mem-frees|04f0820e94|P2: M2 memory-profile frees and cycles (weak-reference sweep in Go's flush order; a per-collection sentinel) [a no-op merge: M3 b9d7f64248 carries it]
+p2-creator-flake|29b5e0b028|P2: GoroutineCreatorTests waits for its own goroutine and picks its own block (the any-parked flake)
+g-trace-user-api|be03b26a23|G: runtime/trace's user API (NewTask, Log, regions) runs as Go's no-ops instead of throwing
+p1-runtime-linkname|cd4fe9f1f7|P1: runtime.heapObjectsCanMove and the legacy fastrand trio are linkname forward targets
+r-recover-model|f8dfffc99a|R: seat (iii) -- the recover model (chain, eligibility, nil defer)
+g-native-sink-guard|c6af425062|G: the windows AV sink guard -- minted addresses (bit 63) refuse at NativeBox and the native slice view with Go's nil-dereference panic
+r-memclr-zerocap-key|a46672209f|P1+R: TestMemclr -- a zero-capacity slice's per-type zerobase (cap==0 in the header-box cache key, R); memmove/memclr take the managed element route first (P1)
+i9-memequal-element-first|9337554e5b|the i9: memequal takes the element-first order (the a==b shortcut after the element route); seats WITH r-memclr-zerocap-key, whose memmove/memclr its header describes
+c1-handown-address-guard-recut|b0c721e507|C1: the hand-own address guard (namespace spelling of every hand-owned file)
+c1-slnx-project-paths-recut|dc2a5104ae|C1: the go2cs.slnx dangling-project-path guard
+c1-handown-census-slice-recut|62f40a767d|C1: handown-census.ps1 maps a one-segment path and an exact <goos>/<name>.cs correctly
+c2-output-attr-sync|e9c57f833e|C2: the two [GoTestMatchingConsoleOutput] attributes plus a both-ways list guard
