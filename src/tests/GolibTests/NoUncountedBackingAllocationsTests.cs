@@ -87,6 +87,7 @@ public class NoUncountedBackingAllocationsTests
         ("GoZeroSize.cs|internal static readonly T[] Storage = IsZeroSize ? new T[1] : [];", "a per-type static singleton: the one storage slot every zero-size value of T shares"),
         ("runtime/BoringCaches.cs|Action[] updated = new Action[s_caches.Length + 1];", "runtime bookkeeping: the registered cache-cleanup callbacks (copy-on-register)"),
         ("runtime/CrashReport.cs|byte[] bytes = Encoding.UTF8.GetBytes(report);", "crash-report output: the UTF-8 text of a fatal report, written once as the process dies"),
+        ("runtime/ExecutionTracer.cs|byte[] bytes = Encoding.UTF8.GetBytes(text);", "execution-trace output: a strings-table entry of the trace stream, written once per trace at stop; Go's tracer buffers are off-heap and never reach MemStats.Mallocs, so counting them would perturb AllocsPerRun under a running trace"),
         ("runtime/GcPauseRecorder.cs|private static readonly ulong[] s_pauseEndUnixNs = new ulong[RingLength];", "runtime bookkeeping: the static GC pause ring buffers behind ReadMemStats"),
         ("runtime/GcPauseRecorder.cs|private static readonly ulong[] s_pauseNs = new ulong[RingLength];", "runtime bookkeeping: the static GC pause ring buffers behind ReadMemStats"),
         ("runtime/TypeExtensions.ExtensionMethodRegistry.cs|return Delegate.CreateDelegate(getMethodType(types.ToArray()), methodInfo);", "runtime metadata: the extension-method registry and delegate signature types"),

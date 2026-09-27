@@ -115,3 +115,100 @@ and whose GC, syscall and heap event classes are absent — then the row is not 
 that finding is the evidence that would justify putting an owner-ruled fourth exclusion class to the
 owner. **Until that is measured, it is not claimed:** today's honest statement is that the row is
 unimplemented, and this document is the size of implementing it.
+
+---
+
+## AMENDED 2026-09-27 (G) — re-read at the go1.24.13 pin, and the shape of C-1/C-2/C-3 as cut
+
+COORD's order of 2026-09-27: re-read against Go 1.24.13, amend, post, then cut C-1 and C-2 together as
+one seat, then C-3 (Bar B), red first at each step. Everything below was read from the pin's GOROOT and
+the format facts were EXERCISED, not only read: a hand-built minimal trace parses under the pin's
+`go tool trace -d=parsed`, and two negative controls (no frequency batch; an event before any P) are
+refused with the parser's own error and exit 1.
+
+**The format at the pin.**
+- Header: the 1.24.13 runtime writes `go 1.23 trace\x00\x00\x00` (runtime/trace.go:823); the parser
+  accepts 22 and 23 through the same go122 spec (internal/trace/version/version.go:20-40). The header
+  this design named stands.
+- Batch: `EvEventBatch` (1), uvarint gen, uvarint M, uvarint base timestamp, uvarint payload length,
+  payload of at most 64 KiB (go122/event.go:508). Events are `[type, uvarint dt, args…]`, dt measured
+  from the previous event in the same batch.
+- Generation: detected by the batch's gen field alone. EXACTLY ONE frequency batch per generation
+  (`[8, uvarint ticksPerSecond]`, alone in its batch); strings and stacks batches are optional (ID 0
+  is the empty string / no stack); there is no end marker, EOF ends the trace; a later generation must
+  re-state every G and P. So the tracer writes ONE generation for the whole Start..Stop window.
+- Events used (numbers at go122/event.go): ProcStatus 13, ProcStop 11, GoStatus 25, GoCreate 14,
+  GoStart 16, GoBlock 20, GoUnblock 21, GoDestroy 17; String 5 inside a strings batch (4); Frequency 8.
+  Status enums: P Running 1 / Idle 2; G Runnable 1 / Running 2 / Waiting 4.
+- Ordering (internal/trace/order.go): GoCreate, GoBlock and GoDestroy need an M holding a P (ProcStatus
+  first, else "expected a proc but didn't have one"); GoStart needs the G Runnable, `g_seq` = previous
+  + 1 and an M with a P and no G; GoUnblock needs the G Waiting and seq + 1, and no context; a G's seq
+  counts only GoStart and GoUnblock.
+- runtime/trace's tests at the pin (trace_test.go:18, :38): TestTraceStartStop (non-empty output; no
+  bytes after Stop over 100 ms) and TestTraceDoubleStart (the second Start errors; a double Stop is
+  harmless). Neither parses the output, so Bar A is unchanged and still not a stopping point.
+- The Bar B oracle is `go tool trace -d=parsed FILE` (cmd/trace/main.go:232-238): the full
+  NewReader/ReadEvent path, exit 0 at EOF, exit 1 with the error on stderr. NOT the default HTTP mode,
+  which logs "able to proceed" and carries on.
+
+**What the pin says about the managed surface.**
+- The registry (golib/runtime/Goroutine.cs) has all five points: create is `StartWithCreator`
+  (registered on the CREATING thread), start is `Adopt` on the new thread, destroy is `Scope.Dispose`,
+  block is `Park` (outermost scope only) and unblock is `Ready` on the waker's side. `ParkTransition`
+  and `ReadyTransition` are single-slot hooks the runtime already occupies (runtime/stubs_impl.cs:287),
+  so the tracer does NOT take them: it gets direct calls at the five points behind one volatile
+  `enabled` read, which is its whole cost while tracing is off.
+- There is no M and no P: each goroutine owns its OS thread for life.
+- `runtime.ReadTrace` is still the converted body (systemstack + gopark on the tracer's own reader),
+  unreachable today, and runtime/trace.Start's reader goroutine loops on it. It joins StartTrace and
+  StopTrace as a hand-own (manualConversionFuncs, goosWindowsLinux) -- a converter registry row, with
+  its two-seeded footprint, in the C-1+C-2 seat. This design did not name it; the pin's sources do.
+
+**The model, as cut.**
+- M = the goroutine's OS thread; ONE P per M (P id = M id), declared by ProcStatus(Running) before that
+  M's first event. A goroutine's events are written on its own M; GoUnblock is written on the WAKER's M,
+  which is the one event that needs no context.
+- Statuses are LAZY per goroutine, as Go's own runtime states them (statusWasTraced): a goroutine's
+  first event on its own thread is preceded by GoStatus(Running); an Unblock target not yet stated is
+  preceded by GoStatus(Waiting). The Snapshot() PROLOGUE states every goroutine that is PARKED when
+  tracing starts as Waiting, so a goroutine that never wakes inside the window is still in the trace,
+  which is what Go's generation start gives. Running goroutines are stated lazily on their own thread,
+  the only place that can put them on an M.
+- ONE snapshot primitive: `Goroutine.Snapshot()`. `ProfileSnapshot()` (Q27, landed) is already its
+  user-goroutine projection; the tracer reads `Snapshot()` directly, because system goroutines park and
+  are unblocked too. Proposed to P2 through its inbox.
+- Every tracer event takes one global lock while tracing is on, and its timestamp is taken under that
+  lock, so events are globally ordered and each M's batch is monotonic. Per-M buffers flush as batches
+  of at most 64 KiB. The cost exists only while a trace runs.
+- GoBlock's reason string is Go's TRACE vocabulary, not the traceback one (`WaitReasons.Text` spells
+  "sync.Mutex.Lock"; the trace spells "sync"). The mapping is read from the pin's gopark call sites and
+  runtime/traceruntime.go's traceBlockReasonStrings: chan receive/send -> "chan receive"/"chan send";
+  the nil-channel waits and `select {}` -> "forever"; select -> "select"; semacquire, Mutex, RWMutex
+  and WaitGroup -> "sync"; Cond.Wait -> "sync.(*Cond).Wait"; sleep -> "sleep"; IO wait -> "network";
+  the synctest waits -> "synctest"; anything else -> "unspecified". Strings go in a strings batch at
+  flush.
+- Frequency is `Stopwatch.Frequency`, and timestamps are Stopwatch ticks.
+- Stacks: none (stack ID 0 everywhere), unchanged.
+- NEVER emitted: ProcSteal, GC, heap, syscall, CPU samples, and the user API's tasks, regions and logs.
+- Coroutine bodies (iter.Pull) are goroutines -- Coro.cs runs each through Goroutine.Run, which mints
+  the identity -- and hand off with Park(Coroutine)/Ready. Go traces a coroutine switch with its switch
+  events; this model states it as a block ("unspecified") and an unblock, which is a model difference
+  and is stated, not hidden. A pooled thread can carry successive bodies, each a GoStart/GoDestroy pair
+  on that M's one P.
+
+**Increments, amended.**
+- C-1 + C-2, ONE seat (as ruled): the state machine (a CAS so the second Start fails), the header, the
+  frequency and strings batches, lazy statuses, the Snapshot prologue, create/start/block/unblock/
+  destroy, and the ReadTrace hand-own. Red first: runtime/trace's two tests fail today on "tracing is
+  not supported"; they pass here, and a GolibTests arm pins the state machine and the stream's framing.
+- C-3 (Bar B): a GolibTests arm writes a managed program's trace (create, a channel block and unblock,
+  exit) and runs the toolchain's own parser on it (`go tool trace -d=parsed`), which must exit 0 and
+  show the expected transitions. Red first on a deliberately broken stream (the frequency batch
+  withheld), so the arm is shown able to fail. Inconclusive only where no Go toolchain resolves; every
+  fleet box has one.
+
+**Consequences.** runtime/trace leaves E4 by arithmetic the moment its two tests match on an honest
+tracer, and net/http/pprof's trace subtest moves with it (COORD: that row banks only behind a real
+tracer). Darwin keeps its converted StartTrace (it has no hand-own); out of scope and named.
+
+-- G, 2026-09-27

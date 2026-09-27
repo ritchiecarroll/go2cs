@@ -539,47 +539,7 @@ internal static void traceRegisterLabelsAndReasons(uintptr gen) {
     }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unexpectedTraceReaderˢ = "unexpected trace reader"u8;
-
-// ReadTrace returns the next chunk of binary tracing data, blocking until data
-// is available. If tracing is turned off and all the data accumulated while it
-// was on has been returned, ReadTrace returns nil. The caller must copy the
-// returned data before calling ReadTrace again.
-// ReadTrace must be called from one goroutine at a time.
-public static slice<byte> ReadTrace() {
-top:
-    ref var buf = ref heap<slice<byte>>(out var Ꮡbuf);
-    bool park = default!;
-    systemstack(() => {
-        (Ꮡbuf.ValueSlot, park) = readTrace0();
-    });
-    if (park) {
-        gopark((ж<g> gp, @unsafe.Pointer _) => {
-            if (!ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡreader).CompareAndSwapNoWB(nil, gp)) {
-                // We're racing with another reader.
-                // Wake up and handle this case.
-                return false;
-            }
-            {
-                var g2 = traceReader(); if (gp == g2){
-                    // New data arrived between unlocking
-                    // and the CAS and we won the wake-up
-                    // race, so wake up directly.
-                    return false;
-                } else 
-                if (g2 != nil) {
-                    printlock();
-                    println((@string)"runtime: got trace reader"u8, g2.OrTypedNil(), (~g2).goid);
-                    @throw(unexpectedTraceReaderˢ);
-                }
-            }
-            return true;
-        }, nil, waitReasonTraceReaderBlocked, traceBlockSystemGoroutine, 2);
-        goto top;
-    }
-    return buf;
-}
+// go2cs generated this placeholder — func ReadTrace is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string expectedRacectx0ˢ = "expected racectx == 0"u8;

@@ -279,6 +279,10 @@ public sealed class Goroutine
     // Go's gp.waitreason. WaitReason.Zero on a running goroutine, exactly as in Go.
     internal WaitReason Reason => (WaitReason)(Volatile.Read(ref m_waitReason) & ~ReadiedFlag);
 
+    // Parked and already readied by a waker, not yet resumed: runnable in Go's account (the execution
+    // tracer's start prologue states it so).
+    internal bool IsReadied => (Volatile.Read(ref m_waitReason) & ReadiedFlag) != 0;
+
     /// <summary>
     /// The stack size, in bytes, reserved for each goroutine's thread.
     /// </summary>
@@ -503,6 +507,11 @@ public sealed class Goroutine
         // goroutine as parked (Ready, above all) finds its g already _Gwaiting. Measured, S1a's R2 arm
         // (2026-09-22): with the reason published first, a racing waker readied a goroutine whose g
         // was still _Grunning, and only the runtime's own check caught it.
+        // The execution tracer's block, at the outermost boundary and before the reason is published,
+        // so a waker's unblock is always traced after it (ExecutionTracer, Q28).
+        if (previous == (int)WaitReason.Zero && ExecutionTracer.Enabled)
+            ExecutionTracer.OnBlock(goroutine, reason);
+
         if (previous == (int)WaitReason.Zero && ParkTransition is { } parkTransition)
         {
             parkTransition(reason, true);
@@ -577,6 +586,10 @@ public sealed class Goroutine
 
             if (Interlocked.CompareExchange(ref target.m_waitReason, current | ReadiedFlag, current) == current)
             {
+                // Go's goready traces the unblock on the waker's side (ExecutionTracer, Q28).
+                if (ExecutionTracer.Enabled)
+                    ExecutionTracer.OnUnblock(target);
+
                 // Back in its bubble's running count at the moment it is woken, on the waker's side
                 // (Go's goready -> changegstatus) -- never later, when its thread resumes.
                 if (target.m_bubble is { } bubble && Interlocked.Exchange(ref target.m_bubbleIdle, 0) == 1)
@@ -810,6 +823,10 @@ public sealed class Goroutine
         Goroutine goroutine = Register(isMain: false, creator, parentId, entry);
         goroutine.m_profileLabels = s_profileLabels.Value;
 
+        // Go's newproc traces the create on the creating thread (ExecutionTracer, Q28).
+        if (ExecutionTracer.Enabled)
+            ExecutionTracer.OnCreate(goroutine);
+
         Thread thread = new(() => Run(body, goroutine, bubble), s_stackReserve)
         {
             IsBackground = true
@@ -1029,8 +1046,15 @@ public sealed class Goroutine
         Run(body, Enter(creator, parentId, entry), bubble);
 
     // A `go` statement's root: the goroutine was registered by its creator (StartWithCreator).
-    private static void Run(Action body, Goroutine registered, SyncTestBubble? bubble) =>
-        Run(body, Adopt(registered), bubble);
+    private static void Run(Action body, Goroutine registered, SyncTestBubble? bubble)
+    {
+        Scope entered = Adopt(registered);
+
+        if (ExecutionTracer.Enabled)
+            ExecutionTracer.OnStart(registered);
+
+        Run(body, entered, bubble);
+    }
 
     private static void Run(Action body, Scope entered, SyncTestBubble? bubble)
     {
@@ -1131,6 +1155,10 @@ public sealed class Goroutine
             // left; otherwise ready and execute happen here, collapsed, as they always did.
             if (m_previous == (int)WaitReason.Zero)
             {
+                // The wakee runs again: the execution tracer's start after an unblock (Q28).
+                if (ExecutionTracer.Enabled)
+                    ExecutionTracer.OnResume(m_goroutine);
+
                 // A park its bubble counted idle and nobody readied (a refused commit, a timeout):
                 // back in the running count now. A readied one was put back by its waker.
                 if (m_goroutine.m_bubble is { } bubble && Interlocked.Exchange(ref m_goroutine.m_bubbleIdle, 0) == 1)
@@ -1206,6 +1234,10 @@ public sealed class Goroutine
                     m_goroutine.m_bubble = null;
                     bubble.Exited();
                 }
+
+                // Go's goexit traces the destroy on the goroutine's own thread (ExecutionTracer, Q28).
+                if (ExecutionTracer.Enabled)
+                    ExecutionTracer.OnDestroy(m_goroutine);
 
                 Unregister(m_goroutine);
             }

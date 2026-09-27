@@ -11,9 +11,9 @@
     {
       "name": "TestSignalTrace",
       "class": "runtime-capability",
-      "platforms": ["linux", "darwin"],
+      "platforms": ["darwin"],
       "signature": "the go2cs managed runtime has no execution tracer",
-      "reason": "the test wraps its signal exercise in runtime/trace.Start, and Go's execution tracer is a serialization of the scheduler the managed host does not have: StartTrace stops the world through the g/m/p machinery (semacquire's first step is getg, a per-thread runtime structure with no CLR counterpart). runtime.StartTrace returns an error by signature, so the linux hand-own answers a named tracing-not-supported error — the AllThreadsSyscall→ENOTSUP fidelity pattern — and the test fails cleanly asserting trace output it cannot have. The signal delivery under the trace is the part this row's siblings already prove; the tracer itself is the same class of unimplementable runtime machinery as WriteHeapDump"
+      "reason": "the test wraps its signal exercise in runtime/trace.Start, and Go's execution tracer is a serialization of the scheduler the managed host does not have: StartTrace stops the world through the g/m/p machinery (semacquire's first step is getg, a per-thread runtime structure with no CLR counterpart). runtime.StartTrace returns an error by signature, so the linux hand-own answers a named tracing-not-supported error — the AllThreadsSyscall→ENOTSUP fidelity pattern — and the test fails cleanly asserting trace output it cannot have. The signal delivery under the trace is the part this row's siblings already prove; the tracer itself is the same class of unimplementable runtime machinery as WriteHeapDump. LINUX RETIRED 2026-09-27 (Q28, the managed execution tracer): runtime.StartTrace now succeeds on linux and windows through golib's ExecutionTracer, and TestSignalTrace passes on linux (os/signal linux 29 + 1). Darwin keeps this entry: its StartTrace is still the converted body, no darwin tracer exists, and no fleet host measures darwin"
     }
   ]
 }
