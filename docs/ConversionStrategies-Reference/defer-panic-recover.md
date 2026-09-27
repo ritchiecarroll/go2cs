@@ -596,26 +596,7 @@ value; the `runtime.Error`-typed path is guarded by the committed math/bits Go t
 behavioral tests build against the baseline `src/core`, which has no `runtime` package, so the typed
 form cannot be exercised there.)
 
-## `make([]T, len[, cap])` out-of-range panics are RECOVERABLE, with Go's messages
-
-Go's `makeslice` panics recoverably for a negative or over-allocatable length/capacity — the
-recovered value's text is `runtime error: makeslice: len out of range` (or `cap`; probed vs
-`go run` — the recovered value is a `runtime.errorString`). golib's make path (the
-`slice<T>(nint length, nint capacity, nint low)` constructor) raised
-`ArgumentOutOfRangeException`/`OverflowException` for the same inputs — .NET exceptions
-`recover()` cannot catch, so a deferred recover never ran and the process died. The constructor
-now validates first and throws `RuntimeErrorPanic.MakeSliceLenOutOfRange()` /
-`MakeSliceCapOutOfRange()` (recoverable `PanicException`s carrying Go's message text), using
-`Array.MaxLength` as .NET's `maxAlloc` equivalent. The same validation class applies to the
-hand-owned `internal/bytealg.MakeNoZero` (`bytealg_impl.cs`) — Go's runtime implementation of it
-panics `len out of range` before allocating, and strings/bytes `TestRepeatCatchesOverflow`
-recovers that panic and matches on `"out of range"` (Phase-4 row R6; `strings.Repeat` of a
-near-`maxInt` product reaches `MakeNoZero` after passing Repeat's own overflow pre-checks).
-Like the established golib runtime-panic convention, the panic STATE is the message string, not
-an `error` value — a recovering type switch takes Go's `case error:` arm only in Go; both sides
-converge on the same `err.Error()` text through the `fmt.Errorf("%s", v)` default arm. (Guarded
-by the `MakeSlicePanicRange` behavioral test — in-range, negative, huge-length, and huge-capacity
-`make` under `recover()`, messages compared vs Go.)
+<a id="maket-len-cap-out-of-range-panics-are-recoverable-with-gos-messages"></a>Moved to [`make([]T, len[, cap])` out-of-range panics are RECOVERABLE, with Go's messages](slices-and-arrays.md#maket-len-cap-out-of-range-panics-are-recoverable-with-gos-messages).
 
 ## A panicked C# `string` boxes as Go `string` at golib's boxing boundary
 Go's `panic` takes an `any`, so the panicked value's **dynamic type** is observable on the recover

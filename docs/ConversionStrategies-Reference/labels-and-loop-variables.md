@@ -280,82 +280,9 @@ foreach (var _ᴛ1 in range((~bΔ1).N)) {
 ```
 Tuple positions are unaffected — `foreach (var (_, data) in …)` keeps the true C# discard. Guarded by the `RangeStatements` behavioral test (blank int-range and blank channel-range, each with a body blank assignment; the compile phase is the guard — the old emission is CS1656).
 
-## `for range` over a slice allocates NOTHING — `slice<T>.GetEnumerator()` returns a struct
+<a id="for-range-over-a-slice-allocates-nothing--slicetgetenumerator-returns-a-struct"></a>Moved to [`for range` over a slice allocates NOTHING — `slice<T>.GetEnumerator()` returns a struct](slices-and-arrays.md#for-range-over-a-slice-allocates-nothing--slicetgetenumerator-returns-a-struct).
 
-`for i, v := range s` emits `foreach (var (i, v) in s)`, and Go's range over a slice allocates nothing at all. C# matches that only if the enumerator stays off the heap, which is entirely a question of what `GetEnumerator` **returns**: `foreach` binds `GetEnumerator` by **pattern** — the concrete return type, ahead of and independently of any interface — so a struct return is enumerated in place, while an interface return is a heap object per loop *entry*.
-
-`slice<T>.GetEnumerator()` returned `IEnumerator<(nint, T)>` from an ITERATOR method (`yield return`), which is the worst of both: the compiler-generated state machine is one allocation and the inner `SliceEnumerator` class it drove is a second. Measured at **136 bytes per loop entry**, corpus-wide — every ranged loop in every converted package, paid whether the loop body allocated or not. It is invisible in output and in timings at small scale, and unmissable in a Go test that asserts an allocation count: `time.TestUnmarshalTextAllocations` runs `parseRFC3339`, whose `parseUint` closure ranges its argument once per field.
-
-The return type is now the concrete nested `slice<T>.Enumerator` struct (the shape `List<T>.Enumerator` uses, and the one golib's own `sslice<T>` already had). Two contracts had to move with it:
-
-* `slice<T>` reaches `IEnumerable<(nint, T)>` through `ISlice<T>` → `IArray<T>`, which the old public method satisfied implicitly. The interface member is now an **explicit** implementation returning the same struct boxed — so LINQ, an interface-typed local, and anything holding the slice as `IEnumerable<(nint, T)>` behave exactly as before, at exactly the cost they already paid. Only the pattern path is free.
-* go2cs-gen's `ISliceTypeTemplate` (every `type S []E` named-slice wrapper) forwarded the interface. It now forwards `global::go.slice<E>.Enumerator` and carries the same explicit interface member, so a named slice type ranges as cheaply as the `slice<E>` it wraps — otherwise every `for range` over a named slice would have kept the box.
-
-`array<T>.GetEnumerator()` was the identical shape and was deliberately left alone here, because the copy Go's array range takes had to be placed first; it is settled in the section below.
-
-Guarded by `SliceRangeAllocationTests` in `GolibTests`, which asserts **zero** bytes via `GC.GetAllocatedBytesForCurrentThread` across 1,000 loops (whole slice, sub-window with window-relative indices, and the nil slice), plus the interface-path equivalence. It is a measured guard on purpose: restoring the interface return type still compiles and still produces correct output — it just allocates again — so only bytes can catch the regression. Neutering to the interface return reports 48 B/loop; restoring the original iterator body reports exactly 136 B/loop.
-
-## `range` over an ARRAY VALUE iterates a COPY — the snapshot is the range EXPRESSION's `.Clone()`
-
-Go evaluates a range expression **once** before the loop, so `for i, v := range a` over an array VALUE iterates a copy: a write to the container inside the body is invisible to every later iteration. The emitted `array<T>` (and the generated named-array wrapper) is a struct over a shared `T[]` backing, so the plain operand ALIASES the container — the emission read the writes back, diverging from `go run` on every such loop:
-
-```go
-a := [4]int{1, 2, 3, 4}
-for i, v := range a {
-    if i == 0 { a[1], a[2], a[3] = 91, 92, 93 }
-    fmt.Println(i, v)                 // Go: 1 2 3 4        emitted (before): 1 91 92 93
-}
-```
-
-The range expression is simply the array value-copy site nobody had emitted (see *Array VALUE-COPY at every transfer site* above — `range` was listed there for the iteration VARIABLE, never for the operand). It now takes a copy of its own:
-
-```csharp
-foreach (var (i, v) in a.ΔRangeSnapshot()) { … }        // array value  — snapshot, Go's copy
-foreach (var (i, v) in h.arr.ΔRangeSnapshot()) { … }    // struct field — likewise a value
-foreach (var (i, v) in r.ΔRangeSnapshot()) { … }        // named array  — the wrapper forwards it
-```
-
-**Why it is not the `.Clone()` every other transfer site takes, and this is the load-bearing part.**
-Semantically it could be, and it was first. But a Go array copy lives INLINE — on the stack when the
-destination is a local — so Go charges it **zero mallocs and zero `TotalAlloc`**, and a range snapshot
-is the one array copy that provably cannot outlive its statement. `Clone()` mints a counted managed
-array through `AllocationCounter`, which is right for a copy that DOES outlive the statement (an
-assignment, a return, a field, a channel send) and wrong for one that cannot: golib's counter is
-documented as the structural mirror of `runtime.MemStats.Mallocs`, so charging what Go does not
-makes the mirror wrong by construction, and every `testing.AllocsPerRun` assertion around a range
-over an array value would disagree with Go's own number. The byte meter is stricter still —
-`runtime.ReadMemStats`'s `TotalAlloc` maps to `GC.GetTotalAllocatedBytes`, which no counter can hide
-from — so the copy has to genuinely not allocate. `array<T>.ΔRangeSnapshot()` returns a `RangeSnapshot`
-struct whose enumerator rents from `ArrayPool<T>.Shared` and returns the buffer in `Dispose`, which
-C#'s `foreach` calls in a `finally`; steady state is zero managed allocations on both meters. Three
-residuals are named rather than hidden: the first rent of a size class allocates once per process, an
-array beyond the pool's largest bucket allocates per rent (as it would in Go, which also moves an
-array that size off the stack), and an element type needing a DEEP copy still allocates per element,
-because a nested `array<T>`'s backing is a heap object in this model.
-
-**A SLICE element is never re-copied, and getting that wrong was a real crash.** `array<T>.Clone()`
-re-clones elements that are themselves array wrappers, and `ISlice<T>` derives from `IArray<T>` — so a
-named-slice element passed that test, while the generated wrapper's `Clone()` forwards to the
-underlying `slice<T>`'s `ICloneable.Clone()`, which hands back a boxed `slice<T>`: the element cast is
-then `slice<int>` → `ΔBits` and throws `InvalidCastException`. Latent until something first cloned an
-array whose element is a slice; the range snapshot was that first caller, and math/big's
-`bitsList` (`[...]Bits`, `type Bits []int`) is the corpus site — `TestFloatAdd` and `TestFloatMul` died
-on it. Semantically the exclusion is required anyway: Go's array-of-slices copy copies HEADERS and
-shares every backing store, which the shallow element copy already did. The `ArrayRangeSnapshot`
-guard pins both halves — replacing a whole element through the original is invisible to the loop
-(a fresh header), while a write THROUGH a shared backing is visible.
-
-Scoped exactly as gc's own rule is (`cmd/compile/internal/walk/order.go`'s `rangeStmt`), so three shapes stay UNCOPIED because Go copies nothing there either — and each is a control in the guard:
-
-* **No value iteration variable.** With at most one iteration variable and a constant length, Go does not evaluate the range expression at all, so `for i := range a` reads the LIVE array through the index. A blank value (`for i, _ := range a`) is the same case.
-* **A POINTER to an array.** `for i, v := range p` shares the pointee; the emission keeps the bare `p.Value`.
-* **A slice.** Its copy is the header, which the struct assignment already is.
-
-`exprReadsValueNeedingClone` narrows the rest: only a read out of EXISTING storage (ident, selector, index, deref) can alias — a composite literal, call result, or conversion is freshly constructed and reachable by no other name, and a return already clones on its own way out.
-
-With the operand snapshotted, `array<T>`'s enumerator reads LIVE storage and needs no capture point of its own, which is what finally let it shed the iterator method: `GetEnumerator()` returns the nested `array<T>.Enumerator` STRUCT, and go2cs-gen's `IArrayTypeTemplate` / `IArrayViewTypeTemplate` forward that struct (with the explicit `IEnumerable<(nint, T)>` member beside it) so named array types range as cheaply. Measured with `GC.GetAllocatedBytesForCurrentThread` over 1,000 loops: **72 B/loop → 0 B/loop** on the pattern path, and 103 → 79 B/loop on the boxing interface path, which now boxes a struct instead of driving a state machine. Snapshotting inside the enumerator instead would have been wrong in both directions — it would allocate on every loop AND copy for the two shapes above where Go shares.
-
-Guarded two ways: `ArrayRangeSnapshot` (behavioral, output-compared against `go run`) mutates the container mid-loop across the array value, named-array, struct-field, nested-array, array-of-named-slices, `=`-form, mutable-range-var and aliased-element shapes, with the pointer, slice and index-only arms as controls that must NOT copy; `ArrayRangeAllocationTests` (`GolibTests`) asserts the enumerator's zero bytes with the boxing interface path as its nonzero control, the snapshot's zero on BOTH meters (object count and CLR bytes) with `Clone()` as the counted control that makes those zeros mean something, and the array-of-slices copy that must share its backing rather than throw.
+<a id="range-over-an-array-value-iterates-a-copy--the-snapshot-is-the-range-expressions-clone"></a>Moved to [`range` over an ARRAY VALUE iterates a COPY — the snapshot is the range EXPRESSION's `.Clone()`](slices-and-arrays.md#range-over-an-array-value-iterates-a-copy--the-snapshot-is-the-range-expressions-clone).
 
 ---
 

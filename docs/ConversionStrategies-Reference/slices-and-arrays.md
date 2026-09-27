@@ -38,29 +38,6 @@ The **empty** composite of such a type is its **zero value**, not a one-element 
 
 **Slicing a pointer-to-array.** Go lets a `*[N]T` be sliced directly — `p[lo:hi:max]`, `p[:]` — auto-dereferencing the array. The C# box `ж<array<T>>` has no slice/range members (its underlying `array<T>` does), so the converter dereferences first: `p[1:3:4]` → `(~p).slice(1, 3, 4)`, `p[:]` → `(~p)[..]`, `p[2:]` → `(~p)[2..]`. Without the deref the call binds to the box and fails (CS1929). The resulting slice shares the array's backing storage, matching Go. (The `(*[N]T)(ptr)[:n]` pointer-*cast* form is different — see *Pointer-cast slice* below.) A deref-aliased pointer **parameter** or **receiver** is the exception: it is emitted as the pointed-to *value*, not a box, so a `~` on it would deref a non-pointer (CS0023). When that value is a **named** array type — `b *pageBits` emitted `ref pageBits b`, where `pageBits` is `[N]uint64` — the wrapper has no slice/range members, so its underlying `array<T>` is reached via `.Value`: `b[:2]` → `b.Value[..2]`. When it is an **anonymous** array (`p *[N]T` → `ref array<T> p`) the value already *is* the `array<T>` and is sliced directly (`p[:]` → `p[..]`). Only a pointer-to-array **box** (a local, a field, a call result) gets the `~` deref. (Guarded by the `PointerArraySlice` behavioral test — local box, named-array receiver, and named-array parameter; runtime hits this in `select.go`'s `cas1[:ncases:ncases]` / `mprof.go`'s `stk[:n:n]` (locals) and `mpallocbits.go`'s `pageBits` receiver methods (`clear(b[:])`).)
 
-**Named-slice pointer reinterpret (`(*[][]byte)(buf)` with `buf *Buffers`).** Go converts a pointer-to-named-slice to a pointer to its underlying slice type freely — net's `fd.pfd.Writev((*[][]byte)(buf))`, where poll's `Writev` *reslices the header through the pointer* (`consume` advances `*v`), and the caller must observe it. The C# boxes `ж<Buffers>` and `ж<slice<slice<byte>>>` are unrelated generic instantiations (CS0030), so the conversion emits a **field view over the wrapper's own backing slice**:
-
-```csharp
-consume(Ꮡbuf.of(Buffers.Ꮡm_value));
-```
-
-Two generator pieces make the view real aliasing: a named-slice wrapper's `m_value` is **mutable** (`ReadOnlyValue = false` — a readonly field would force a defensive copy and lose header writes), and `ISliceTypeTemplate` emits the field-ref accessor `internal static ref slice<T> Ꮡm_value(ref Buffers instance)` that `ж<T>.of()` projects through. Claimed narrowly: pointer→pointer, source pointee a NAMED type whose underlying is a slice identical to the (unnamed) target pointee. (Guarded by the `SortArrayType` extension `consumeOne` — a `(*[]Person)(&crew)` reinterpret whose reslice through the view shrinks the original `Roster`, runtime-verified against Go.)
-
-The **reverse** direction — an underlying-slice pointer to a NAMED-slice pointer, `(*Buffer)(&b)` with `type Buffer []byte` (log/slog/internal/buffer's `sync.Pool.New`) — is **asymmetric**, because the projection above cannot run backwards: a named-wrapper box *contains* the underlying slice (project it out), but a bare-slice box does **not** contain a wrapper to project. It is emitted as golib's **storage reinterpret** instead — `Ꮡb.Reinterpret<slice<byte>, Buffer>()` — which re-views the *same slot* as the wrapper type rather than constructing anything: a generated named-slice wrapper is a single-field struct over the slice header, exactly the layout correspondence `ReinterpretAliasesStorage` recognizes, so the managed alias arm engages and the derived pointer ALIASES the addressed slice. A bare `(ж<Buffer>)(Ꮡ(b))` cast is CS0030 (unrelated instantiations). The source comes two ways and both render in BOX form (the `isPointer` ident context): an **address-of** arg (`&b`, `&h.field`) and an **existing pointer** arg (cryptobyte's `(*String)(out)` with `out *[]byte`). Claimed narrowly by the mirror gate: pointer→pointer, target pointee a NAMED type whose underlying is a slice identical to the (unnamed) source pointee.
-
-It previously **constructed a wrapper box over a copy** — `Ꮡ(new Buffer(b))` — on the stated assumption that such a reinterpret is only ever used through the returned pointer. That assumption is false wherever the conversion exists precisely to write BACK, which is the shape's dominant corpus use, and the writes went nowhere:
-
-| Site | What the copy cost |
-|:--|:--|
-| `log/slog` `commonHandler.withAttrs` — `(*buffer.Buffer)(&h2.preformattedAttrs)` | Every attribute `WithAttrs` pre-formatted was dropped, while the handler still advanced `groupPrefix`/`nOpenGroups` — so the JSON it emitted afterwards was unbalanced. Four `testing/slogtest` rows (`WithAttrs`, `multi-With`, `empty-group-record`, `resolve-WithAttrs`). |
-| `crypto/tls` `readUint{8,16,24}LengthPrefixed` — `(*cryptobyte.String)(out)` with `out *[]byte` | An out-PARAMETER whose whole purpose is the write-back: the caller's slice never received the length-prefixed field. |
-| `crypto/tls` `parseECHConfigList` — `(*cryptobyte.String)(&ec.PublicKey)` | A struct FIELD that stayed empty after a successful parse. |
-| `vendor/…/cryptobyte` `ReadASN1Bytes` — `(*String)(out)` | Same out-parameter shape, same loss. |
-
-Corpus A/B footprint of the correction: **5 files, 8 sites** (`log/slog/handler.cs`, `log/slog/internal/buffer/buffer.cs`, `crypto/tls/ech.cs` ×2, `crypto/tls/handshake_messages.cs` ×3, `vendor/golang.org/x/crypto/cryptobyte/asn1.cs`), plus the dead `ref var @out = ref Ꮡout.DerefOrNull()` locals the aliasing form no longer needs. (Guarded by the `NamedSlicePointerReinterpret` behavioral test — a direct `(*Buf)(&b)` **read back through `b`**, the closure-returned `func() *Buf { … return (*Buf)(&s) }` shape, a pointer-**parameter** `fillVia(out *[]byte)` read back through `out`, and a struct-**field** `(*Buf)(&h.preformatted)` appended across a reallocating growth and then truncated through a freshly derived pointer — output-compared vs Go.)
-
-**Pointer-cast slice (`(*[N]T)(ptr)[:n]`).** A Go conversion that casts an `unsafe.Pointer` to a pointer-to-array and slices it produces a `[]T` over the pointed-to memory. It is emitted as the golib **`slice<T>`** — the C# representation of *every* `[]T` — built from a `ReadOnlySpan<T>` over the raw pointer: `new slice<T>(new ReadOnlySpan<T>((T*)ptr, (int)n))`. (Earlier it was a bare `Span<T>`, but a `Span<T>` does **not** range as `(index, element)` tuples — `for i := range s` → CS8130 — and has no `Ꮡ(s, i)` element-address — CS0411; `slice<T>` supports both, since it is `IArray<T>`.) The `ReadOnlySpan<T>` constructor takes a C# `int`, so a Go `int`/`uint` length (`nint`/`nuint`) is narrowed via `getRangeIndexer` (through the underlying for a named numeric); an int literal is left as-is. The slice **copies** the pointed-to memory (`ReadOnlySpan.ToArray()`), which is self-consistent for code that only uses the resulting slice (e.g. runtime's `printDebugLog` ranges `state` and writes `&state[i]`, never re-reading the raw buffer; `os_windows` ranges an unsafe `[]byte` read-only). Since this is always the `(*[N]T)(ptr)` unsafe-cast form, it is memory-layout-dependent code whose raw values flow through the `unsafe.Pointer`=`nuint` round-trip (a transient `fixed` address → not GC-stable), so the runtime values are not the contract — only compilable, rangeable, element-addressable C#. (Guarded by the `PointerCastSliceRange` behavioral Compile + target test — index range, value range, and `&s[i]` element-address over a pointer-cast slice; runtime greened `debuglog`'s `printDebugLog` and `os_windows`, ~25 errors via the cascade. The length narrowing is covered by `StdLibInternalAbi`.)
-
 An **untyped (type-inferred) composite literal** — the inner `{…}` of a `[][]rank{ key: {…} }`, which has no explicit type node — is emitted as a target-typed `new(…)` when its inferred type is a struct (the struct constructor takes the field values). When the inferred type is a **slice or array**, that form is wrong (`slice<rank>`/`array<rank>` have no element-list constructor → CS1729); the converter emits the element-array projection instead — `{rA, rB}` (inferred `[]rank`) → `new rank[]{rA, rB}.slice()`, and an inferred `[2]int` → `new nint[]{…}.array()`. When the inferred type is a **pointer-to-struct** — the `[]*T{ {…} }` shorthand for `&T{…}` — it is emitted as the boxed struct constructor `Ꮡ(new T(field: val, …))` (a bare `new(…)` would target the box `ж<T>`, whose constructor lacks the struct's fields → CS1739). When such an untyped slice/array literal is **keyed** (`{joiningL: stateBefore, …}` — the inner `{…}` of x/net/idna's `joinStates = [][numJoinTypes]joinState{stateStart: {…}, …}`), the element-array projection above cannot take Go's `key: value` syntax — `new joinState[]{ joiningL: stateBefore }` is a C# array initializer, which has no keyed element form (CS1003 ×62). The keyed case is routed to a golib `golib.SparseArray<T>` collection initializer instead — `new golib.SparseArray<joinState>{ [joiningL] = stateBefore, … }.array()` (`.slice()` for a slice element) — the same form the *typed* keyed slice/array path emits (see below); the `.array()`/`.slice()` `IEnumerable<T>` extension materializes the dense backing, and a defined-integer key takes the `[(int)key]` cast exactly as in the typed path. (Guarded by `UntypedNestedSliceComposite`; runtime/lockrank.go's `lockPartialOrder` is a `[][]lockRank` and runtime1.go's `dbgvars` is a `[]*dbgVar` of the positional forms, and x/net/idna's `joinStates` is the keyed form.)
 
 An **indexed (keyed) slice/array literal** — `[]string{lockRankSysmon: "sysmon", …}` — is emitted as a golib `golib.SparseArray<T>` collection initializer (`[index] = value`). Its indexer takes a Go `int`. When an index key's Go type is a **defined integer type** whose underlying type does not implicitly widen to C# `int` (i.e. `int`/`int64`/`uint`/`uint32`/`uint64`/`uintptr`, as opposed to `int8`/`uint8`/`int16`/`uint16`/`int32`), the key is cast to `int` so it satisfies the indexer (CS1503 otherwise): `[lockRankSysmon]` (a `type lockRank int`) → `[(int)lockRankSysmon]`. A key that already widens (e.g. a `uint8`-backed `Kind`) is left uncast.
@@ -93,189 +70,9 @@ type table[T any] [3]atomic.Pointer[T]
 
 An **anonymous array/slice field whose element type lives in a multi-segment-path package** — `cpuLogWrite [2]atomic.Pointer[profBuf]`, `children [4]atomic.UnsafePointer` (atomic = `internal/runtime/atomic`) — keeps its `array<…>` wrapper. The field's type name is built structurally from the `[N]`/`[]` marker plus the recursively resolved element, *not* from the type's package-qualified string: that string (`[2]internal/runtime/atomic.Pointer[…]`) goes through a cross-package last-segment strip that would also remove the leading `[2]`, collapsing the field to the bare element type (`atomic.Pointer<…> = new(2)`) whose array `new(2)` initializer then mis-binds the element constructor (CS1503). With the structural rendering the field stays `array<atomic.Pointer<profBuf>> = new(2)`. An array of a current-package or basic-typed element was unaffected (its string has no foreign path to strip). (Guarded by the `ArrayOfCrossPackageType` behavioral test — `[3]atomic.Int32` / `[2]atomic.Uint64` fields; runtime's `trace`/`traceMap` structs hold these.)
 
-### A struct's array fields get their fixed length from a generated parameterless constructor
+<a id="a-structs-array-fields-get-their-fixed-length-from-a-generated-parameterless-constructor"></a>Moved to [A struct's array fields get their fixed length from a generated parameterless constructor](nil-and-zero-values.md#a-structs-array-fields-get-their-fixed-length-from-a-generated-parameterless-constructor).
 
-A Go `[N]T` array FIELD has a zero value of N zero elements — never nil. The converter emits the field
-with a length initializer — `internal array<atomic.Int32> c = new(3);` — but a C# struct field
-initializer only runs when an **explicitly declared** parameterless constructor is invoked; the implicit
-struct constructor that `new counters()` would otherwise use zeroes every field and SKIPS initializers,
-leaving the array's backing `T[]` null (an NPE on the first index or `len`). The `TypeGenerator`
-therefore emits an explicit parameterless constructor for every struct, so `new S()` runs the field
-initializers and each array field gets its `new(N)` backing. (C# 11 auto-defaults any field without an
-initializer; a slice/map/chan field — which has no `new(N)` initializer — stays its nil zero value,
-matching Go.) The **NilType constructor preserves the initializers too**: it used to re-assign
-`this.field = default!` to every plain member — running *after* the field initializers, which nulled an
-array field's fresh `new(N)` backing, so `S{}` (emitted `new S(nil)`) NREd on the first index. The
-NilType and parameterless constructor bodies (`AppendZeroValueInitializers`) now assign only what C#'s
-implicit zeroing would leave *broken*: the promoted-embed boxes (see
-[Struct Type Embedding](struct-embedding.md#struct-type-embedding)), and — see next paragraph — any plain struct-typed field
-whose own type needs construction; everything else is left to the field initializers plus C# 11
-auto-default. This is generator-only and produces no golden churn (the `.g.cs` output is not a
-golden). It is what lets `ArrayOfCrossPackageType` run as an **output-compared** test (`len(x.c)` /
-`len(x.d)` print `3 2`); before the fix, indexing `&x.c[i]` threw a `NullReferenceException`, so the test
-was compile+target-only.
-
-A plain (non-embed) struct-typed FIELD whose type *itself* needs construction is the recursive case:
-`default(T)` gives such a field a `default(FieldType)`, whose nested promoted-embed box or fixed-array
-backing is null — so the first touch NREs even though `T`'s own boxes were constructed. This is fmt's
-`pp{ … fmt fmt … }` where `fmt` embeds `fmtFlags` (a ctor-allocated box): `newPrinter`'s `@new<pp>()`
-ran `pp()`'s ctor, which left `fmt` as `default(fmt)` with a null box, and `p.fmt.init(&p.buf)` →
-`clearflags` NREd — the first crash of any converted `fmt.Println`. `AppendZeroValueInitializers`
-therefore also emits `this.f = new FieldType(nil);` for each such field, and because that runs
-`FieldType`'s own NilType constructor (which recursively constructs *its* needy fields), a single level of
-construction fixes every depth. "Needs construction" (`StructTypeNeedsConstruction`) is: has a promoted
-embed, a fixed-array field, or a nested struct field that needs construction; a reference field
-(pointer/interface/delegate) keeps its correct nil zero value.
-
-**The resolution must be by SYMBOL, not by syntax.** `StructTypeNeedsConstruction` originally answered
-only for structs it could find a `StructDeclarationSyntax` for (`GetStructDeclaration`), and left every
-other field type `default` on the reasoning that "its own package constructs it, and its nil zero value is
-correct anyway". The first half is wrong and the second half does not apply to a fixed array. A
-`<ProjectReference>` reaches the compiler as a **`PortableExecutableReference`** — compiled metadata with
-no syntax trees — so in any real MSBuild build *every* cross-package field type was unresolvable, and
-nothing in the consuming package ever constructed it. When such a type carries a fixed array at any depth,
-`default` leaves that `array<T>`'s backing null (golib's deliberate zero-value discriminator), so `len` and
-`range` silently measure **zero** and the first index or pin throws — `GCHandle.AddrOfPinnedObject`'s
-`InvalidOperationException: Handle is not initialized` (see golib `ж.cs`, `pinnedArrayData`). The live case
-was `math/rand/v2`'s `ChaCha8`, whose `internal chacha8rand.State state;` never got `State`'s
-`buf = new(32)` / `seed = new(4)`, where Go's `new(ChaCha8)` yields 32 real zeroed words. (The syntax path
-only ever worked because `CompilationReference`s — in-memory Roslyn compilations — do carry syntax; that is
-the shape unit tests use, not the shape MSBuild produces.)
-
-`GetStructDeclaration` is therefore backed by `Compilation.FindTypeSymbol`, which resolves a
-fully-qualified display name to an `INamedTypeSymbol` through `GetTypeByMetadataName` (stripping `global::`
-and verbatim `@`, rendering type arguments as arity suffixes, and trying each namespace-vs-nested-type split
-of the dotted name since a display string spells both `.`). The metadata walk applies the same three
-triggers over `GetMembers()` — a ref-returning property is a promoted embed, a `go.array<T>`-typed field is
-a fixed array, a struct-typed field recurses — with the same cycle guard. On the metadata path the
-`public T(NilType)` constructor that `new T(nil)` needs is **checked rather than assumed** (metadata is
-fully compiled, so the generated constructor is really there): a hand-written golib struct or any other
-referenced type without one returns `false` and correctly keeps its `default`. Scalars, pointers, slices,
-maps and interfaces are still left `default`, because `default` **is** their Go zero value — over-
-constructing would add an allocation to every instantiation for no semantic gain. (Guarded by the
-`CrossPackageArrayZeroValue` output-compared test — a `Holder` whose field type lives in the `bufpkg`
-sibling library sub-project, so the reference is genuinely metadata; a same-project field type resolves by
-syntax and would pass even unfixed. Against the unfixed generator the test panics with
-`index out of range [2] with length 0`.)
-
-**The field-wise constructor closes the same gap for a PARTIAL composite literal.** The *parameterized*
-constructor (`GenerateConstructor`, used by a composite literal that sets some fields —
-`&Holder{tag: "lit"}` → `new Holder(tag: "lit")`) took `T f = default!` for every member and assigned
-`this.f = f;` unconditionally, so an OMITTED needy-struct argument arrived as the broken `default(T)` and
-overwrote the field — identical breakage to the NilType path above, and (because it never consulted
-`StructTypeNeedsConstruction`) firing for a **same-package** field type too. The live case is `io.pipe`,
-whose `onceError rerr, werr` value fields each embed `sync.Mutex` via the promotion box: `io.Pipe()`
-builds the pipe with `new pipe(wrCh: …, rdCh: …, done: …)`, omitting `rerr`/`werr`, so both boxes were
-null and the first `Store`/`Load` `Lock()` NREd on the pipe's writer goroutine — crashing every `io.Pipe`
-consumer (`encoding/base32`'s `TestBufferedDecodingPadding`; the goroutine NRE aborted the whole test
-host). A fixed-array member beside it already had the analogous `if (f.Source is not null)` guard (its
-`= new(N)` field initializer supplies the omitted zero); the needy-struct member has no field initializer
-to fall back on, so it must be *constructed*. `GenerateConstructor` now emits the needy value-struct
-member's parameter as **nullable** — `onceError? rerr = default!` — making an omitted argument a genuine
-`null` sentinel that `default(onceError)` (a real struct value with a null box) could never be — and its
-body reconstructs only when omitted: `this.rerr = rerr ?? new onceError(nil);`, exactly mirroring the
-pointer-embed `?? new ж<T>(nil)` handling for a promoted embed. A caller-SUPPLIED value is used as-is (no
-extra allocation, unchanged reference semantics — the struct copy shares the same embed box); an omitted
-one gets `T`'s own NilType ctor, which recursively constructs *its* needy members. The predicate
-`IsNeedyValueStructMember` reuses `StructTypeNeedsConstruction` (member is not a promoted embed, not a
-reference, not a fixed array, and its struct type needs construction), so every *ordinary* member's
-parameter/assignment is byte-identical to before — the change is confined to genuinely-needy value-struct
-fields. All of the NilType, parameterless, and now field-wise constructors are covered, so this reaches
-`new(T)`/`@new<T>()`/`T{}`/`&T{…}` (empty **and** partial composite literals). (Guarded by the
-`PromotedEmbedZeroValueField` output-compared test — a `slotBox{id: 3}` partial literal omitting a
-`holder` value field that embeds a promoted `counter`, whose promoted `inc()` is then called on the
-omitted field; against the unfixed generator it NREs with `Object reference not set to an instance of an
-object`, exactly as `encoding/base32` did.)
-
-**A MIXED-VISIBILITY struct needed one arm more: the PUBLIC field-subset constructor, which does not
-name the needy member at all.** The paragraph above fixes the member's *parameter* — but a struct with
-any unexported field gets **two** field-wise constructors (`Constructors`): a `public` one over
-`PublicStructMembers` and an `internal` one over all of them, the public subset carrying
-`OverloadResolutionPriority(-1)` so a same-assembly named-args call binds the full overload. An
-unexported needy member is therefore absent from the public subset ctor's parameter list *and* its
-body, so the `?? new T(nil)` reconstruction never applied to it and the field was left at
-`default(T)` — the exact state `AppendZeroValueInitializers` exists to prevent. The deprioritization
-is also what hid it: every same-package literal binds the internal all-fields ctor and is correct, so
-only a literal in **another package** reaches the broken constructor. `syscall.SockaddrUnix` is the
-shipped case — `&SockaddrUnix{Name: path}` from `net` left `raw` default, so `raw.Path`'s `[108]int8`
-backing was zero-length and `sockaddr()`'s own `if n > len(sa.raw.Path)` guard returned `EINVAL`
-*before `bind` ever reached the kernel*, failing every AF_UNIX listen/dial on Windows with "invalid
-argument" (`net`'s `TestModeSocket` and `TestUnixConnLocalWindows`). Because the error is Go's own
-**invented** `EINVAL` (`APPLICATION_ERROR`-based, message "invalid argument") rather than the kernel's
-`WSAEINVAL` (10022, "An invalid argument was supplied."), the failure reads like a rejected sockaddr
-and invites a hunt through the marshaling — which is sound and was not at fault. `GenerateConstructor`
-now reuses `AppendZeroValueInitializers` over the members the ctor does **not** name, giving them the
-same zero-value construction the parameterless ctor gives them; the all-fields internal ctor omits
-nothing, so nothing changes there, and a struct with no unexported members emits no subset ctor at
-all. (Guarded by the `CrossPkgLiteralNestedField` output-compared test — an `addrlib` sibling library
-supplies `Addr{Name string; raw rawAddr}` in `SockaddrUnix`'s exact shape plus an `Embedder` whose
-unexported member is a promoted **embed**, both built from the parent package by composite literal;
-it reads the nested fixed array's length, runs a guard-then-fill `Encode()` mirroring `sockaddr()`,
-reads bytes back out, and checks that an over-long name is still rejected — so it separates "the array
-is right" from "the guard always fails". Against the unfixed generator the capacity reads `0` and
-`Encode` answers `0 false`.)
-
-A bare **`var x T`** zero-value declaration (no initializer) calls none of those, so the *converter*
-closes the remaining gap on its side: when `T` needs construction it emits `T x = new();` — the generated
-parameterless constructor, which runs the same field initializers + `AppendZeroValueInitializers` — instead
-of the `T x = default!;` that left an array field's backing null (an NRE on the first index/`len`). The
-converter mirrors `StructTypeNeedsConstruction` with the Go-side `structZeroValueNeedsConstruction` (promoted
-embed / fixed-array field / nested needy struct, recursively; a reference field keeps its correct nil zero
-value). A promoted-embed `var` keeps its existing `new(nil)` (the NilType ctor) and a scalar-only struct
-keeps `default!`, so the change is confined to genuinely-needy structs — one pre-existing corpus golden
-re-baselined, `PublicizedFieldType`'s `var cr CaseRange` (a `[3]rune` `Delta` field). A needy struct
-**global** likewise gets `new()` in place of the bare `static T x;`. This `var`/global path is guarded by the
-`ZeroValueStructVar` output-compared test (`var z holder` with a `[8]int` field, a nested `wrapper`, and a
-scalar-only `point` control). Guarded by
-the `NestedPromotedEmbedInit` output-compared test (a `printer` holding a `formatter` field that embeds
-`flags` and holds a `[3]byte`, reached via both `new(printer)` and `&printer{}`, its promoted fields and
-array written and printed against Go); before the fix the promoted-field write NRE'd.
-
-### The zero-value ladder is one ladder, and a NAMED RESULT climbs it too
-
-The `var x T` path above and the named-result prologue are the same question asked at two syntactic
-sites — *what does a declaration with no initializer put in the slot?* — but only the first had the
-full answer. A named result declared `T name = default!;` at function entry got exactly one rung
-(`structHasPromotedEmbeds` → `new(nil)`); the fixed-array and `structZeroValueNeedsConstruction`
-rungs were missing, so a `[N]T` result arrived with **length 0** and an array-bearing struct result
-arrived with a null backing. Both shapes were shipped, and both were measured live in `crypto/tls`:
-
-```csharp
-// src/core/net/netip/netip.cs — func (ip Addr) As16() (a16 [16]byte)
-array<byte> a16 = default!;                   // was: length 0, null backing
-byteorder.BePutUint64(a16[..8], ip.addr.hi);  // -> ArgumentException out of slice<T>'s ctor
-
-// src/core/crypto/tls/common.cs — func (c *Config) ticketKeyFromBytes(b [32]byte) (key ticketKey)
-ticketKey key = default!;                     // skips `aesKey = new(16)`, `hmacKey = new(16)`
-copy(key.aesKey[..], hashed[16..]);           // -> copies 0 bytes -> "aes: invalid key size 0"
-```
-
-Both now emit their construction — `array<byte> a16 = new(16);` and `ticketKey key = new();` — from
-a single shared helper, `zeroValueInitializer`, which the three named-result declaration sites
-(`visitFuncDecl`'s plain and blank-slot prologues, `iifeOperations.namedReturnDeclLines` for a
-function literal and the deferred-named-return lowering) and the `var`/global paths all read. Its
-rungs, in order: an **unnamed** fixed-size array → `new(N)` plus `arrayZeroValueArgs`' element
-factory; a promoted-embed struct → `new(nil)`; a struct carrying a fixed array at any depth →
-`new()`; everything else → `default!`. A **named** array type is deliberately excluded — go2cs-gen's
-array wrapper allocates its backing lazily from its own known size, so its `default` is already
-usable — and a scalar-only result still stays `default!`, which is what keeps the change confined
-to types whose Go zero value genuinely is not all-bits-zero.
-
-Guarded by the `ZeroValueArrayNamedResult` output-compared test, which pins all five emission sites
-against `go run`: an `As16`-shaped `[16]byte` result written through a slice of itself, a
-`ticketKey`-shaped struct result filled by `copy`, a nested value-struct result, a result declared
-by the deferred-named-return lowering, and a function literal's named result — plus a scalar-only
-control proving the ladder does not over-fire.
-
-Two sites of the same class are knowingly **not** changed, because the corpus does not exercise
-either and an unexercised emission change is an unmeasured one: the tuple element a *blank* named
-result contributes to an explicit return (`visitReturnStmt`), and the zero-results `return default!;`
-that closes a value-returning function's recovered-panic catch arm (`visitFuncDecl`/`convFuncLit`).
-Censused at zero — no `return default!;` in the corpus sits in a function whose return type mentions
-`array<`, and GOROOT declares no blank named result of array type. A third, narrower gap stays open
-for the same reason: a **map miss** on an array-valued map returns `default(V)` rather than Go's
-zeroed `[N]T` (`html/entity`'s `map[string][2]rune`, the corpus's only such map, only ever reads on
-a hit).
+<a id="the-zero-value-ladder-is-one-ladder-and-a-named-result-climbs-it-too"></a>Moved to [The zero-value ladder is one ladder, and a NAMED RESULT climbs it too](nil-and-zero-values.md#the-zero-value-ladder-is-one-ladder-and-a-named-result-climbs-it-too).
 
 #### A slice-bounds fault is a PANIC, not an ArgumentException
 
@@ -309,131 +106,7 @@ The fallback matters: a Go file may *index* an atomic-typed array field of a str
 
 It is **not** used for forms consumed by the source generators in alias-less generated files, which must stay fully-qualified: the `[GoType("…")]` attribute string (e.g. `[GoType("sync.atomic_package.Uint32")]`, `[GoType("[3]sync.atomic_package.Pointer<T>")]`), the `global using` type-alias declarations, and the promoted-interface/embedded-field registration keys. (Embedded fields keep the full form for their promoted accessors; only the named-field branch uses the display name. Struct-embedding promotion across packages re-derives member types from the Roslyn semantic model, not from the field's emitted text, so aliasing the field declaration is safe.) Guarded by `ArrayOfCrossPackageType`, `AtomicValues`, `FuncTypeParam`, `GenericAtomicPointerField`, `GlobalAtomicDefer`, `GlobalAtomicFieldMethod`, and `StructPromotionWithInterface`/`StructPointerPromotionWithInterface`.
 
-### Combined field-element address `base.at(field, i)`
-
-The address of an element of an array/slice FIELD of a boxed value — `&x.c[i]` where `c` is an
-array field, or the implicit address taken to call a pointer-receiver method `x.c[i].inc()` — was
-rendered as a two-step chain `Ꮡx.of(counters.Ꮡc).at<atomic.Int32>(i)`: `of(field)` takes the field's
-address (a `ж<array<E>>`), then `at<E>(i)` takes the element's. The explicit `<E>` is needed because
-golib's standalone `at<TElem>(nint)` is generic in an element type unrelated to the pointer's `T`, so
-it cannot be inferred. golib adds combined overloads `ж<T>.at<TElem>(FieldRefFunc<…array<TElem>…>, nint
-index)` (one per field-accessor shape and array/slice kind, each forwarding to `of(field).at<TElem>(i)`)
-whose `TElem` IS inferred from the field accessor's return type. The converter then collapses the chain
-to `Ꮡx.at(counters.Ꮡc, i)` — dropping both the `.of(` step and the `<E>` type argument. It rewrites the
-recursively-built field address `base.of(Type.Ꮡfield)` by retargeting its trailing `.of(field)` to
-`.at(field, i)`, only when the field segment is parenthesis-free (a plain `Type.Ꮡfield` accessor, so the
-final `)` provably matches the last `.of(`); any other shape falls back to the explicit chained form.
-The combined overload is behaviorally identical to the chain (it literally forwards to it). (Guarded by
-`ArrayOfCrossPackageType`, `IndexedElementDirectBoxMethod` and `PointerFieldArrayElementAddress` — all
-output-compared; the `.inc()`/`bump()` element writes verify runtime equivalence.)
-
-The routing gate sees through **nested value fields to the chain root**. `&pp.wbBuf.buf[0]` (runtime
-`mwbbuf.go`) roots at the pointer `pp` through the *value* field `wbBuf`; the original gate checked
-pointer-ness only one level up (`pp.wbBuf`, a struct), fell to a naive `Ꮡ` prefix (`Ꮡpp.wbBuf…` — CS1061
-on the box), and the same failure hit the closure-captured variant (`&mp.trace.buf[gen%2]`, `trace.go`).
-The gate now walks intermediate selectors to the root, so any pointer-rooted (or heap-boxed) chain routes
-through the recursive `&field` machinery — `pp.of(pstate.ᏑwbBuf).at(wbBuf.Ꮡbuf, 0)` — which already
-rendered multi-hop of-chains. A **nested-index** base — `&cache.entries[ck][i]` (2-D array via a pointer,
-`symtab.go`) — is an `IndexExpr`, not a selector, so it gets its own arm: recursively take the inner
-element's address (`cache.at(pcvalueCache.Ꮡentries, ck)`) and chain the outer `.at<T>(i)` onto it — the
-gate also accepts a HEAP-BOXED value root (`&grid.cells[1][2]` on an address-escaping local), fixing that
-shape too. An unboxed value-rooted chain keeps the prior naive form (corpus byte-identical). *Known
-remaining gap (pre-existing): an intermediate `IndexExpr` inside the selector chain —
-`&ptr.items[i].buf[j]`, an array-of-structs hop — defeats the root walk (both arms only step through
-selectors) and keeps the CS1061 naive form; the recursive machinery likely has the pieces when a runtime
-site demands it.* (Guarded by
-the `NestedFieldElementAddr` behavioral test — all three runtime shapes with write-through vs Go; note a
-ZERO-VALUED struct's array-field backing is null in the C# emulation — a separate pre-existing latent —
-so the test initializes its arrays.)
-
-**Element address of a by-value ARRAY PARAMETER.** Array parameters are cloned by value in the
-function preamble (`value = value.Clone();`, Go's array-copy semantics) but are never
-escape-analyzed, so they have no heap box — the naive element-address form would name a box that
-does not exist (`Ꮡvalue.at<byte>(0)`, CS0103 — syscall `SetsockoptInet4Addr`, `&value[0]` on
-`value [4]byte`). The converter boxes a **copy of the wrapper struct** instead:
-`Ꮡ(value).at<byte>(0)`. `array<T>` wraps a `T[]` reference, so the copied wrapper SHARES element
-storage with the cloned parameter — element reads and writes through the pointer stay behaviorally
-correct. (One accepted edge, no stdlib hit: reassigning the *whole* array param after taking an
-element address leaves the pointer on the older backing array.) (Guarded by `DeferTypelessReturns`'
-`first` — element address of a `[4]byte` parameter, value vs Go.)
-
-**Element address of a POINTER-to-array — `&t[i]` where `t` is `*[N]E`.** Go auto-derefs the index
-(`(*t)[i]`), so the element lives in the pointed-to array on the heap; `t` already IS the `ж<[N]E>`
-box. The converter emits `t.at<E>(i)` — ж's `at` materializes the array's lazy backing on the REAL
-storage and then returns an element pointer over the shared backing. (How `at` reaches that lazy
-getter has changed twice and matters: a reflection-built constrained delegate first — fatal under
-Native AOT, `d5c0c9c10` — then an unsynchronized box-touch-copy-back, and since 2026-08-30 a
-**per-box atomic publish**; see *The array-backing publish is atomic per box* below.) The base is
-rendered in POINTER context so it yields the box: a deref-aliased pointer
-PARAMETER gives `Ꮡt` (the parameter is `ж<[N]E> Ꮡt`, deref-aliased to `ref var t = ref Ꮡt.Value` in
-the prologue), while a box-valued LOCAL from `new([N]E)` gives the plain `t`. Previously this shape
-fell through every array/slice branch (the base's type is a `*types.Pointer`, not an array or slice)
-to the generic `Ꮡ(t.Value[i])` **copy** form, which boxes a snapshot of the element and silently
-drops any write made through the returned pointer. This is exactly hash/crc32's
-`slicingMakeTable`/`simpleMakeTable`: `simplePopulateTable(poly, &t[0])` populated a throwaway copy,
-leaving every CRC table all-zeros (checksums degenerated to `~0`-with-shifts — `TestGolden`,
-`TestSlicing`). The same latent write-through-a-copy bug lurked corpus-wide wherever `&ptr[i]` on a
-pointer-to-array was written through — `crypto/internal/nistec` (`p224GG[i].SetBytes(…)` in static
-init), `internal/bisect` and `runtime` (`atomic.Store*(&arr[i], …)`) — all now alias correctly. (A
-pointer-to-SLICE cannot reach here: Go does not auto-deref `*[]E` for indexing; it is written
-`(*t)[i]`, a `StarExpr` the slice branch already aliases.) (Guarded by `PointerToArrayElementAddress`
-— write-through `&g[j]` on a `*grid` local, value vs Go.)
-
-**Element address of a SLICE FIELD of the receiver — `&b.lines[i]`.** The address of a slice element
-uses one of two golib forms: the **element-aliasing** two-arg `Ꮡ(x, i)` (→ `new ж<T>(IArray, index)`,
-whose `ValueSlot` returns `ref backingArray[index]`, so writes land in the shared backing array), or the
-**copy-boxing** `Ꮡ(x[i])` (→ `Ꮡ(in T)`, which boxes a *copy* of the element value). For a slice the copy
-form is only sound when nothing is written back through the pointer. Inside a pointer-receiver method the
-converter had a `refRecv` fast-path that chose the copy form for a "receiver reference to a slice" — but
-its detection keyed off `getIdentifier(indexExpr.X)`, which walks the selector chain to its **root**
-identifier. So a slice *field* of the receiver — `&b.lines[i]`, whose base `b.lines` roots at the
-receiver `b` — matched the fast-path too, and emitted the copy form. text/tabwriter's `terminateCell`
-does `line := &b.lines[len-1]; *line = append(*line, cell)`: the `append` grew a *copy* of the row's
-slice header and wrote the new length into the boxed copy, never back into `b.lines`, so every line
-stayed length 0 and **all formatted output came out empty** (only the newlines survived). The fix
-restricts the copy form to the case the receiver is *directly* the slice (`indexExpr.X` is the bare
-receiver identifier); any slice base that is a field, call result, or other non-identifier expression
-uses the element-aliasing `Ꮡ(x, i)` form — which is correct for a slice in all cases, since a slice value
-always shares its backing array. This also corrected a benign read-only site (`NamedFuncTypeStructuralField`'s
-`s.by(&s.items[j], &s.items[i])` comparison) from copy to alias. (Guarded by
-`SliceFieldElementAddress` — append-through-pointer into a `[][]int` field of a pointer receiver plus an
-in-place element mutate, value vs Go; validated end-to-end by `text/tabwriter`'s test suite.) The ARRAY
-branch carried the identical defect and is narrowed the same way — next.
-
-**Element address of an ARRAY FIELD of the receiver — `&d.hashHead[h]`.** The array branch had its own
-`refRecv` fast-path with the same root-identifier detection, and so the same bug: an array *field* of the
-receiver roots at the receiver and took the copy-boxing `Ꮡ(d.hashHead[h])`, whose `Ꮡ(in T)` overload
-heap-boxes a copy of the **element**. `compress/flate`'s `deflate()` is the canonical victim — it does
-`hh := &d.hashHead[hash&hashMask]; … *hh = uint32(d.index + d.hashOffset)` to maintain the chained hash
-table. Every head write landed in a throwaway box, so `hashHead` stayed all-zero, `d.chainHead` was always
-`0`, and the `d.chainHead-d.hashOffset >= minIndex` guard (`0-1 >= 0`) meant **`findMatch` was never
-called at all**. Levels 2–9 therefore emitted LITERALS ONLY: still-valid deflate streams roughly the size
-of `HuffmanOnly` output. Since `png.BestCompression` maps to flate level 9, a 256×256 PNG encoded to
-**134,644 bytes instead of Go's 36,760** — pixel-identical on decode, ~3.7× weaker compression, with
-`NoCompression`, `HuffmanOnly` and `BestSpeed` (whose `deflatefast.go` encoder writes `e.table[…]`
-directly and never takes an element address) all byte-exact, which is what localized it. The fix mirrors
-the slice branch: the copy form is kept only when the receiver is *directly* the array (`indexExpr.X` is
-the bare receiver identifier); an array field of the receiver uses the element-aliasing two-arg
-`Ꮡ(d.hashHead, (int)(…))`.
-
-Note the array field deliberately does **not** route through the `.of(field)`/`.at<T>(i)` box machinery
-described above, even though that machinery exists for array fields. Its trigger is `baseIsPointer` — the
-*Go* receiver type is `*T` — but a Go pointer receiver renders as `this ref T recv`, which has **no** box
-companion, so it emitted `Ꮡr.of(RegArgs.ᏑInts)` for `internal/abi`'s `&r.Ints[reg]` → CS0103. The two-arg
-form needs no box and aliases correctly regardless: `array<T>` is a readonly struct wrapping an eagerly
-allocated `T[]`, so evaluating the field copies only the wrapper while the copy shares element storage —
-the same reasoning the array-*parameter* case above relies on. (That reasoning holds for `array<T>` and
-**not** for a field whose type is a NAMED array, whose wrapper allocates its backing lazily; such a
-field is projected through `.Value` first — see *The element address of a VIRGIN named array must
-materialize through the receiver*. No corpus site currently has that shape; the gate is there because
-the shape is legal Go, not because something was found broken.) Seventeen corpus files corrected, several
-of them silently broken in the same write-dropping way: `runtime`'s `&r.statusTraced[gen%3]`,
-`&h.counts[…]` and `&m.stats[gen]` performed `.CompareAndSwap`/`.Store`/`.Add` **on a copy**;
-`crypto/internal/edwards25519` built its lookup tables via `(&v.points[i]).FromP3(…)` into copies;
-`image/jpeg` wrote Huffman/quantization tables through `&d.huff[tc][th]` and `&d.quant[…]`. (Guarded by
-`RecvArrayFieldElementAddress` — chained-hash write-through with an unsigned index, plus a nested
-`&h.pairs[i][j]`, value vs Go; the flate ratio itself is verified by deflating fixed buffers at every
-level and byte-comparing the sizes against `go run`.)
+<a id="combined-field-element-address-baseatfield-i"></a>Moved to [Combined field-element address `base.at(field, i)`](pointers.md#combined-field-element-address-baseatfield-i).
 
 ## Array ASSIGNMENT copies the whole array (`.Clone()` on the RHS)
 
@@ -557,6 +230,83 @@ CONVERSION (`[4]int(named)`) hands the wrapper's backing through the implicit op
 (4) an EMBEDDED struct member is held as a `ж<T>` box, so a struct copy shares the embed outright
 (`b := a; b.n = 99` writes through to `a.n`) — a defect of the embed model, wider than arrays and
 untouched by the section below.
+
+## `range` over an ARRAY VALUE iterates a COPY — the snapshot is the range EXPRESSION's `.Clone()`
+
+Go evaluates a range expression **once** before the loop, so `for i, v := range a` over an array VALUE iterates a copy: a write to the container inside the body is invisible to every later iteration. The emitted `array<T>` (and the generated named-array wrapper) is a struct over a shared `T[]` backing, so the plain operand ALIASES the container — the emission read the writes back, diverging from `go run` on every such loop:
+
+```go
+a := [4]int{1, 2, 3, 4}
+for i, v := range a {
+    if i == 0 { a[1], a[2], a[3] = 91, 92, 93 }
+    fmt.Println(i, v)                 // Go: 1 2 3 4        emitted (before): 1 91 92 93
+}
+```
+
+The range expression is simply the array value-copy site nobody had emitted (see *Array VALUE-COPY at every transfer site* above — `range` was listed there for the iteration VARIABLE, never for the operand). It now takes a copy of its own:
+
+```csharp
+foreach (var (i, v) in a.ΔRangeSnapshot()) { … }        // array value  — snapshot, Go's copy
+foreach (var (i, v) in h.arr.ΔRangeSnapshot()) { … }    // struct field — likewise a value
+foreach (var (i, v) in r.ΔRangeSnapshot()) { … }        // named array  — the wrapper forwards it
+```
+
+**Why it is not the `.Clone()` every other transfer site takes, and this is the load-bearing part.**
+Semantically it could be, and it was first. But a Go array copy lives INLINE — on the stack when the
+destination is a local — so Go charges it **zero mallocs and zero `TotalAlloc`**, and a range snapshot
+is the one array copy that provably cannot outlive its statement. `Clone()` mints a counted managed
+array through `AllocationCounter`, which is right for a copy that DOES outlive the statement (an
+assignment, a return, a field, a channel send) and wrong for one that cannot: golib's counter is
+documented as the structural mirror of `runtime.MemStats.Mallocs`, so charging what Go does not
+makes the mirror wrong by construction, and every `testing.AllocsPerRun` assertion around a range
+over an array value would disagree with Go's own number. The byte meter is stricter still —
+`runtime.ReadMemStats`'s `TotalAlloc` maps to `GC.GetTotalAllocatedBytes`, which no counter can hide
+from — so the copy has to genuinely not allocate. `array<T>.ΔRangeSnapshot()` returns a `RangeSnapshot`
+struct whose enumerator rents from `ArrayPool<T>.Shared` and returns the buffer in `Dispose`, which
+C#'s `foreach` calls in a `finally`; steady state is zero managed allocations on both meters. Three
+residuals are named rather than hidden: the first rent of a size class allocates once per process, an
+array beyond the pool's largest bucket allocates per rent (as it would in Go, which also moves an
+array that size off the stack), and an element type needing a DEEP copy still allocates per element,
+because a nested `array<T>`'s backing is a heap object in this model.
+
+**A SLICE element is never re-copied, and getting that wrong was a real crash.** `array<T>.Clone()`
+re-clones elements that are themselves array wrappers, and `ISlice<T>` derives from `IArray<T>` — so a
+named-slice element passed that test, while the generated wrapper's `Clone()` forwards to the
+underlying `slice<T>`'s `ICloneable.Clone()`, which hands back a boxed `slice<T>`: the element cast is
+then `slice<int>` → `ΔBits` and throws `InvalidCastException`. Latent until something first cloned an
+array whose element is a slice; the range snapshot was that first caller, and math/big's
+`bitsList` (`[...]Bits`, `type Bits []int`) is the corpus site — `TestFloatAdd` and `TestFloatMul` died
+on it. Semantically the exclusion is required anyway: Go's array-of-slices copy copies HEADERS and
+shares every backing store, which the shallow element copy already did. The `ArrayRangeSnapshot`
+guard pins both halves — replacing a whole element through the original is invisible to the loop
+(a fresh header), while a write THROUGH a shared backing is visible.
+
+Scoped exactly as gc's own rule is (`cmd/compile/internal/walk/order.go`'s `rangeStmt`), so three shapes stay UNCOPIED because Go copies nothing there either — and each is a control in the guard:
+
+* **No value iteration variable.** With at most one iteration variable and a constant length, Go does not evaluate the range expression at all, so `for i := range a` reads the LIVE array through the index. A blank value (`for i, _ := range a`) is the same case.
+* **A POINTER to an array.** `for i, v := range p` shares the pointee; the emission keeps the bare `p.Value`.
+* **A slice.** Its copy is the header, which the struct assignment already is.
+
+`exprReadsValueNeedingClone` narrows the rest: only a read out of EXISTING storage (ident, selector, index, deref) can alias — a composite literal, call result, or conversion is freshly constructed and reachable by no other name, and a return already clones on its own way out.
+
+With the operand snapshotted, `array<T>`'s enumerator reads LIVE storage and needs no capture point of its own, which is what finally let it shed the iterator method: `GetEnumerator()` returns the nested `array<T>.Enumerator` STRUCT, and go2cs-gen's `IArrayTypeTemplate` / `IArrayViewTypeTemplate` forward that struct (with the explicit `IEnumerable<(nint, T)>` member beside it) so named array types range as cheaply. Measured with `GC.GetAllocatedBytesForCurrentThread` over 1,000 loops: **72 B/loop → 0 B/loop** on the pattern path, and 103 → 79 B/loop on the boxing interface path, which now boxes a struct instead of driving a state machine. Snapshotting inside the enumerator instead would have been wrong in both directions — it would allocate on every loop AND copy for the two shapes above where Go shares.
+
+Guarded two ways: `ArrayRangeSnapshot` (behavioral, output-compared against `go run`) mutates the container mid-loop across the array value, named-array, struct-field, nested-array, array-of-named-slices, `=`-form, mutable-range-var and aliased-element shapes, with the pointer, slice and index-only arms as controls that must NOT copy; `ArrayRangeAllocationTests` (`GolibTests`) asserts the enumerator's zero bytes with the boxing interface path as its nonzero control, the snapshot's zero on BOTH meters (object count and CLR bytes) with `Clone()` as the counted control that makes those zeros mean something, and the array-of-slices copy that must share its backing rather than throw.
+
+## `for range` over a slice allocates NOTHING — `slice<T>.GetEnumerator()` returns a struct
+
+`for i, v := range s` emits `foreach (var (i, v) in s)`, and Go's range over a slice allocates nothing at all. C# matches that only if the enumerator stays off the heap, which is entirely a question of what `GetEnumerator` **returns**: `foreach` binds `GetEnumerator` by **pattern** — the concrete return type, ahead of and independently of any interface — so a struct return is enumerated in place, while an interface return is a heap object per loop *entry*.
+
+`slice<T>.GetEnumerator()` returned `IEnumerator<(nint, T)>` from an ITERATOR method (`yield return`), which is the worst of both: the compiler-generated state machine is one allocation and the inner `SliceEnumerator` class it drove is a second. Measured at **136 bytes per loop entry**, corpus-wide — every ranged loop in every converted package, paid whether the loop body allocated or not. It is invisible in output and in timings at small scale, and unmissable in a Go test that asserts an allocation count: `time.TestUnmarshalTextAllocations` runs `parseRFC3339`, whose `parseUint` closure ranges its argument once per field.
+
+The return type is now the concrete nested `slice<T>.Enumerator` struct (the shape `List<T>.Enumerator` uses, and the one golib's own `sslice<T>` already had). Two contracts had to move with it:
+
+* `slice<T>` reaches `IEnumerable<(nint, T)>` through `ISlice<T>` → `IArray<T>`, which the old public method satisfied implicitly. The interface member is now an **explicit** implementation returning the same struct boxed — so LINQ, an interface-typed local, and anything holding the slice as `IEnumerable<(nint, T)>` behave exactly as before, at exactly the cost they already paid. Only the pattern path is free.
+* go2cs-gen's `ISliceTypeTemplate` (every `type S []E` named-slice wrapper) forwarded the interface. It now forwards `global::go.slice<E>.Enumerator` and carries the same explicit interface member, so a named slice type ranges as cheaply as the `slice<E>` it wraps — otherwise every `for range` over a named slice would have kept the box.
+
+`array<T>.GetEnumerator()` was the identical shape and was deliberately left alone here, because the copy Go's array range takes had to be placed first; it is settled in the section below.
+
+Guarded by `SliceRangeAllocationTests` in `GolibTests`, which asserts **zero** bytes via `GC.GetAllocatedBytesForCurrentThread` across 1,000 loops (whole slice, sub-window with window-relative indices, and the nil slice), plus the interface-path equivalence. It is a measured guard on purpose: restoring the interface return type still compiles and still produces correct output — it just allocates again — so only bytes can catch the regression. Neutering to the interface return reports 48 B/loop; restoring the original iterator body reports exactly 136 B/loop.
 
 ## A STRUCT carrying array fields copies through its generated `ΔClone()`
 
@@ -1363,6 +1113,193 @@ converts correctly.
 reached through a composite LITERAL; this one guards the zero value, which is where every one of the
 standard library's needy named arrays is actually built.)
 
+## The array-backing publish is atomic per box
+
+`ж<T>.at<Telem>(i)` has to reach a go2cs-gen named fixed-size array wrapper's LAZY backing, and
+`ж<T>` is deliberately **unconstrained** in `T`, so golib cannot call an interface member on
+`ref Value` without boxing a copy. The sequence it used was box the wrapper, touch `Source` so the
+backing materializes on that copy, copy the whole wrapper back over the real storage — correct
+single-threaded (that copy-back IS `47ddd5a50`'s fix for the same lost write) and **lossy with two
+threads**, because it is an unsynchronized read-modify-write of shared state. Two threads reaching a
+still-lazy wrapper each allocated their own backing; the second copy-back discarded the first along
+with every element already written into it, and the element pointers already handed out kept naming
+the orphan. Because the wrapper is several words wide, the half-done copy-back could also be
+*observed*, surfacing as a spurious `IndexOutOfRangeException` out of `at`'s bounds check rather
+than as a lost write.
+
+`crypto/internal/boring/bcache`'s concurrent section is the measured victim: entries lost in ~28% of
+runs, and always in the first ~15 of 102,100 — the fingerprint of a bounded start-up window rather
+than of a broken CAS or a GC interaction (both A/B-eliminated).
+
+The publish is now gated per **box**, which is the only durable unit available: the by-value copy
+cannot be one, and constraining `T` is not on the table — the constrained-CALL route was torn out in
+`d5c0c9c10` for killing every Native AOT binary at type-init. `m_publishedArrayBacking` serves two
+jobs at once: `null` is the once-only gate (every thread serializes through `lock (this)`, which is
+exactly the cold-start window the race lives in), and a *different* backing is the reassignment
+detector, so no stale ready-flag can hand out a pointer into a private copy after `*p` is assigned a
+fresh zero wrapper. The fast path is lock-free — one acquire read, one type test, one reference
+compare.
+
+The publish path is also narrowed to the shapes that actually *are* lazy, which fixed a second,
+separate defect the old unconditional probe carried. golib's own `array<T>`/`slice<T>` and every
+named-slice wrapper hold their backing in a field, so there is nothing to publish — and
+**`slice<T>.Source` is defined to return a DETACHED COPY**, so the old code allocated and threw away
+a full copy of the backing on *every* element take through a `ж<slice<T>>`. Measured (isolated
+processes, median of three): slice `.at()` **215.09 → 29.00 ns/op**, array `23.66 → 21.84`, named
+wrapper `28.51 → 26.22`. Every shape got faster; the fix removes an allocation from the hot path
+rather than adding a lock to it.
+
+> **Doctrine: a lazy-initialization fix is not finished until the publish is atomic.** `47ddd5a50`
+> correctly diagnosed "the allocation landed on the copy and the real storage stayed virgin" and
+> added the copy-back. The single-threaded repair of a lost-write defect is exactly the shape that
+> leaves a concurrency residue behind.
+
+**Not closed by this**, because no golib-side gate can be: the generated `Value => m_value ??= …`
+getter is itself a read-modify-write, so two threads first-touching the *same struct instance* by
+ref still race (`ref semTable semtable => ref Ꮡsemtable.Value; semtable[i] = x`). Closing that needs
+an atomic publish inside the generated getter (go2cs-gen). Measured unchanged at ~95% of trials
+(ElemAliasProbe `arm7`) — closed separately, see *The named-array wrapper publishes its lazy backing
+atomically* below.
+
+## The element address of a VIRGIN named array must materialize through the receiver
+
+The arm above hands `&t[i]` to golib's by-value `Ꮡ<T>(IArray<T> target, int index)`, which was
+reasoned sound because "a named fixed-array type is generated as `IArray<E>` over a shared backing
+`E[]`". That is true of golib's own `array<E>` — an eagerly-allocated readonly struct, where a copy
+shares the storage — and **false of the go2cs-gen wrapper**, whose backing is allocated on first
+touch:
+
+```csharp
+private array<E>? m_value;
+public  array<E>  Value => m_value ??= new array<E>(N);
+```
+
+The overload takes its target by value, so the CALL SITE boxes the wrapper and golib only ever sees
+that private copy. Over a still-zero wrapper the `??=` therefore ran on the boxing temp, the
+receiver's storage stayed virgin, and **every element pointer named a fresh throwaway array — every
+write through it silently lost, single-threaded, no concurrency required.** `runtime`'s `rootFor` is
+the only access path to `semtable`, so nothing ever materialized the shared table: each call handed
+back a pointer into its own private 251-entry array of zero `semaRoot`s. (Latent only because
+`sync`'s Mutex/RWMutex/WaitGroup are hand-owned on `SemaphoreSlim` and never reach
+`runtime.semacquire`.)
+
+The emission projects through the wrapper's own `Value` getter first:
+
+```csharp
+Ꮡ(t.Value, i)      // was: Ꮡ(t, i)
+```
+
+`Value` is a **mutating struct member**, so invoking it on the `ref` receiver (or on a field of one)
+runs the `??=` against the REAL storage, and the `array<E>` it returns shares that backing — so the
+element box aliases the receiver. Both wrapper flavors carry it: a direct-array RHS
+(`type Mont [4]uint64`) exposes `Value : array<E>`, and a named RHS (`type pallocBits pageBits`)
+yields the view wrapper whose `Value` is that named type, itself an `IArray<E>` over the same
+storage. An UNNAMED `[N]E` base renders as golib `array<E>`, has no `Value` member and needs none,
+so the projection is gated on the base being a named type over an array
+(`lazyArrayBackingProjection`, `convUnaryExpr.go`) and every other site is unchanged — a seeded
+whole-corpus reconvert, diffed emission-against-emission, moves **exactly one file**:
+`runtime/sema.cs`.
+
+The `.at<E>(i)` route would also be correct (it publishes through the box — see golib's
+`arrayView`/`publishArrayBacking`), but it is unavailable here for the same reason this arm exists
+at all: a `[GoRecv] ref` receiver has no `ж<>` box.
+
+Guarded by **`NamedArrayWrapper`**'s `slots`/`slot` probe — a pointer-receiver method returning
+`&s[i]` on a virgin wrapper, written through and read back. Verified as a real gate rather than a
+green that cannot go red: at the previous emission it reports `stdout mismatch C# vs Go`.
+
+**A different door, measured and NOT closed by this.** `runtime/mpallocbits.cs`'s
+`Ꮡ((pageBits)(b))` binds golib's standard-box `Ꮡ<T>(in T)` over a value produced by the generated
+by-value conversion operator (`implicit operator pageBits(pallocBits value) => value.view`), which
+materializes on the operator's own parameter copy. First-touch writes through it are lost; once
+anything else materializes `b`, every copy shares the backing and writes land (measured both ways —
+ElemAliasProbe `arm8`). It needs its own increment.
+
+## The named-array wrapper publishes its lazy backing atomically
+
+The third door of the same family, and the one neither of the others can reach: the generated
+wrapper's **own** `Value` getter, reached by a plain `ref` with no golib on the path at all —
+`internal static ref semTable semtable => ref Ꮡsemtable.Value;` and then `semtable[i] = x`. A per-box
+publish gate in `ж<T>.at()` never sees it (there is no `at()` call), and the receiver projection above
+never sees it either (there is no `Ꮡ`). What it meets is `m_value ??= new array<E>(N)`, a
+read-modify-write of shared mutable state: two threads that first-touch the same zero-valued wrapper
+each allocate a backing and the second store **orphans the first**, together with every element
+pointer already derived from it. Silent — no fault, no exception — and confined to a start-up window
+measured in microseconds. Measured at **872 of 900** concurrent first-touch trials (ElemAliasProbe
+`arm7`, 24 threads × 300 trials × 3 batches).
+
+The publish becomes an interlocked CAS. Every racing thread allocates, exactly one wins the slot, and
+the losers discard their allocation *before* anything can derive an element address from it — which is
+what makes it correct rather than merely narrower:
+
+```csharp
+private global::System.Runtime.CompilerServices.StrongBox<array<uint64>>? m_value;   // was: array<uint64>?
+
+public array<uint64> Value
+{
+    get
+    {
+        global::System.Runtime.CompilerServices.StrongBox<array<uint64>>? value = m_value;
+
+        if (value is null)
+        {
+            var created = new global::System.Runtime.CompilerServices.StrongBox<array<uint64>>(new array<uint64>(256));
+            value = global::System.Threading.Interlocked.CompareExchange(ref m_value, created, null) ?? created;
+        }
+
+        return value.Value;
+    }
+}
+```
+
+**Why the slot had to change shape at all.** An interlocked publish needs ONE machine word. `array<E>`
+is a 3-field readonly struct (backing plus the `Alias` window's low/length), so `array<E>?` is 24
+bytes — it can neither be CAS'd nor even *read* without tearing while another thread writes it. The
+narrower one-word alternative, holding the bare `E[]`, does not preserve the value: a
+constructor-supplied array may be an alias **window** (`array<E>.Alias`, Go's `(*[N]E)(s)`) whose
+`Source` is wider than the array, and flattening it to its backing would silently widen the named
+array and shift its origin. The holder carries the whole `array<E>`, so nothing is lost. It is
+`StrongBox<array<E>>` and not plain `object` because an `object` slot makes every warm read an
+`unbox.any` — a type-check helper *call* in the hot loop; measured on the element-address path over 64
+cold tables, `1.97 → 4.13 ns/op` for `object` against `1.97 → 2.45` for the typed holder.
+
+The residual cost is one dependent load and the probe reports it honestly (`arm9`, both emissions in
+one process): the raw `Value` getter gets **faster** (`1.03 → 0.87 ns/op` — the wrapper struct shrank
+from 24 bytes to 8, so every Go by-value array copy moved with it), the element path over ONE
+long-lived table — what the corpus's named arrays actually are, and where the JIT hoists the
+loop-invariant getter — sits between `−1%` and `+12%` run to run, and the pathological shape of 64
+separate non-resident tables costs `+17…25%`.
+
+**The consequence that had to be measured, not reasoned.** A Go fixed-size array is COMPARABLE and
+legal as a map key. With no overrides a C# struct inherits `ValueType.Equals`/`GetHashCode`, and both
+read the single `m_value` field — now a *reference*. So two distinct wrappers over equal content began
+comparing unequal and hashing differently, missing each other in a map and in `reflect.DeepEqual`:
+precisely the silent wrong answer this door exists to remove, traded for a different one. The `==`
+operator hid it completely, because `EqualityExpression` binds the wrapper's own
+`Equals(IArray<E>)` at COMPILE time and that was structural all along. The Array kind therefore emits
+both overrides, delegating to `array<E>`'s element-wise pair so neither depends on the slot's shape
+any more:
+
+```csharp
+public override bool Equals(object? obj) => obj is Table other && Value.Equals(other.Value);
+
+public override int GetHashCode() => Value.GetHashCode();
+```
+
+One golib companion follows for the same reason: `GoReflect.TryUnwrapWrapperValue` reads `m_value` by
+reflection to hand callers the wrapper's underlying value, so it unwraps the holder's extra level (no
+converted or golib type is ever an `IStrongBox`).
+
+Guarded by **`NamedArrayWrapper`**'s map-key probe — two separately built equal keys, a re-store
+through the second, a third distinct key, and the same for the VIRGIN zero array whose backing neither
+side has materialized. Verified as a real gate rather than a green that cannot go red: with the two
+overrides suppressed and nothing else changed, it reports `stdout mismatch C# vs Go`.
+
+**Still not closed, by construction:** a materialization that happens on a by-value COPY of the
+wrapper publishes to the copy's field, so the `arm8` `Ꮡ((pageBits)(b))` door above is untouched. The
+emission-vs-emission blast radius is nil — a generator change alters no committed `.cs`, and the
+suite's Transpile and Target phases stay byte-identical across it.
+
 ## `make([]E, n)` constructs its ELEMENTS by the same rule
 
 `slice<T>`'s length constructor fills its backing with `default(T)` exactly as `array<T>`'s does, so
@@ -1416,6 +1353,27 @@ read as 41 pass / 20 fail from this single root. It is the fourth instance of th
 construction class in a fourth emission path, which is the standing argument for centralizing that
 construction rather than patching sites.
 
+## `make([]T, len[, cap])` out-of-range panics are RECOVERABLE, with Go's messages
+
+Go's `makeslice` panics recoverably for a negative or over-allocatable length/capacity — the
+recovered value's text is `runtime error: makeslice: len out of range` (or `cap`; probed vs
+`go run` — the recovered value is a `runtime.errorString`). golib's make path (the
+`slice<T>(nint length, nint capacity, nint low)` constructor) raised
+`ArgumentOutOfRangeException`/`OverflowException` for the same inputs — .NET exceptions
+`recover()` cannot catch, so a deferred recover never ran and the process died. The constructor
+now validates first and throws `RuntimeErrorPanic.MakeSliceLenOutOfRange()` /
+`MakeSliceCapOutOfRange()` (recoverable `PanicException`s carrying Go's message text), using
+`Array.MaxLength` as .NET's `maxAlloc` equivalent. The same validation class applies to the
+hand-owned `internal/bytealg.MakeNoZero` (`bytealg_impl.cs`) — Go's runtime implementation of it
+panics `len out of range` before allocating, and strings/bytes `TestRepeatCatchesOverflow`
+recovers that panic and matches on `"out of range"` (Phase-4 row R6; `strings.Repeat` of a
+near-`maxInt` product reaches `MakeNoZero` after passing Repeat's own overflow pre-checks).
+Like the established golib runtime-panic convention, the panic STATE is the message string, not
+an `error` value — a recovering type switch takes Go's `case error:` arm only in Go; both sides
+converge on the same `err.Error()` text through the `fmt.Errorf("%s", v)` default arm. (Guarded
+by the `MakeSlicePanicRange` behavioral test — in-range, negative, huge-length, and huge-capacity
+`make` under `recover()`, messages compared vs Go.)
+
 ## `clear` rebuilds each element through golib's `GoZero` — the RUN-TIME half of zero-value construction
 
 The fifth instance of that class landed in golib rather than the converter, and it is the one that
@@ -1467,55 +1425,7 @@ it, which is what a built-in is handed. (Guarded by the `ClearBuiltinShadow` beh
 extended with `clear` over an array-element slice, a struct-with-array-field slice, and an
 array-of-arrays element, each written to after the clear and output-compared vs `go run`.)
 
-## A map READ of a shape-carrying element supplies the zero from the CALL SITE
-
-The sixth instance of the zero-value-construction class, and the last emission path that had no seat
-for it. Go's read of an ABSENT key — every read of a nil map included — yields the element type's
-zero value, and for `[N]T` that zero is N zeroed elements. golib's `map<TKey, TValue>` indexer
-answered `default(TValue)`, and `default(array<T>)` has **length zero**, so the first index into a
-missed entry panicked `index out of range [0] with length 0` where Go reads a zero:
-
-```go
-// html/escape.go — entity2 is map[string][2]rune
-if x := entity2[string(entityName)]; x[0] != 0 {
-```
-
-That is not an edge path. A miss is the NORMAL outcome for any `&…` run that is not a two-rune
-entity, so `html`'s `TestUnescape` died on ordinary input (the package measured 2 of 3).
-
-The shape cannot come from the map. It is a property of the Go map TYPE, and neither
-`map<TKey, TValue>` nor a `default` (nil) one carries it — reading it off an existing entry would
-answer only for a POPULATED map and guess for an empty or nil one. The READ SITE always knows it
-statically, so the same ladder every declaration site uses (`zeroValueInitializer` /
-`arrayZeroValueArgs`) is threaded into a golib indexer overload that invokes the factory **only on a
-miss**; the emitted lambda is non-capturing, so it is cached and a HIT costs nothing:
-
-```go
-x := entity2["notthere"]              // len 2, both runes 0
-n := nested["zzz"]                    // map[string][2][3]int — inner lengths survive too
-z, ok := entity2["alsomissing"]       // comma-ok form
-v := nilMap[7]                        // quadMap is map[int][4]byte, nil — len 4
-```
-```csharp
-var x = entity2[notthereˢ, () => new array<rune>(2)].Clone();
-var n = nested[zzzˢ, () => new array<array<nint>>(2, () => new(3))].Clone();
-var (z, ok) = entity2[alsomissingˢ, () => new array<rune>(2), ꟷ];
-var v = nilMap[7, () => new array<byte>(4)].Clone();
-```
-
-All three map surfaces answer it, so this is one rule rather than three: `map<TKey, TValue>` declares
-the two overloads, go2cs-gen's `IMapTypeTemplate` forwards them for a NAMED map type, and
-`IMap<TKey, TValue>` carries them as default members for a map-cored type parameter. Two exclusions
-keep the emission unchanged where it is already right — a NAMED array element (its wrapper allocates
-its backing lazily from its own known size, the same exclusion `arrayElemFactory` documents), and an
-assignment TARGET, which carries a value and needs no zero. The A/B footprint over the whole
-converted standard library is **one line**, `html/escape.cs:153` — the crash site itself.
-
-(Guarded by the `MapArrayValueZero` behavioral test: plain and comma-ok reads, hit and miss, a
-nested element, a named map type read both nil and empty, an unnamed map read both nil and empty,
-and a store-then-read control, all output-compared vs `go run`. Failing-first proof: transpiled with
-the pre-fix converter the same program panics `index out of range [0] with length 0` at
-`array.cs:284` — the html signature exactly.)
+<a id="a-map-read-of-a-shape-carrying-element-supplies-the-zero-from-the-call-site"></a>Moved to [A map READ of a shape-carrying element supplies the zero from the CALL SITE](maps-and-channels.md#a-map-read-of-a-shape-carrying-element-supplies-the-zero-from-the-call-site).
 
 ## A named slice wrapper's non-generic `ISlice.Append` is an EXPLICIT implementation
 

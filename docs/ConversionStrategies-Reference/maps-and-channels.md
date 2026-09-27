@@ -331,6 +331,56 @@ The string-literal empty-interface arm of the same helper is described under
 [Empty Interface (`any`)](empty-interface.md#empty-interface-any). (Guarded by `AnyStringLitChanSend` — a value impl and a pointer
 impl sent through a `chan speaker`, method-dispatched on receive, output-compared vs Go.)
 
+## A map READ of a shape-carrying element supplies the zero from the CALL SITE
+
+The sixth instance of the zero-value-construction class, and the last emission path that had no seat
+for it. Go's read of an ABSENT key — every read of a nil map included — yields the element type's
+zero value, and for `[N]T` that zero is N zeroed elements. golib's `map<TKey, TValue>` indexer
+answered `default(TValue)`, and `default(array<T>)` has **length zero**, so the first index into a
+missed entry panicked `index out of range [0] with length 0` where Go reads a zero:
+
+```go
+// html/escape.go — entity2 is map[string][2]rune
+if x := entity2[string(entityName)]; x[0] != 0 {
+```
+
+That is not an edge path. A miss is the NORMAL outcome for any `&…` run that is not a two-rune
+entity, so `html`'s `TestUnescape` died on ordinary input (the package measured 2 of 3).
+
+The shape cannot come from the map. It is a property of the Go map TYPE, and neither
+`map<TKey, TValue>` nor a `default` (nil) one carries it — reading it off an existing entry would
+answer only for a POPULATED map and guess for an empty or nil one. The READ SITE always knows it
+statically, so the same ladder every declaration site uses (`zeroValueInitializer` /
+`arrayZeroValueArgs`) is threaded into a golib indexer overload that invokes the factory **only on a
+miss**; the emitted lambda is non-capturing, so it is cached and a HIT costs nothing:
+
+```go
+x := entity2["notthere"]              // len 2, both runes 0
+n := nested["zzz"]                    // map[string][2][3]int — inner lengths survive too
+z, ok := entity2["alsomissing"]       // comma-ok form
+v := nilMap[7]                        // quadMap is map[int][4]byte, nil — len 4
+```
+```csharp
+var x = entity2[notthereˢ, () => new array<rune>(2)].Clone();
+var n = nested[zzzˢ, () => new array<array<nint>>(2, () => new(3))].Clone();
+var (z, ok) = entity2[alsomissingˢ, () => new array<rune>(2), ꟷ];
+var v = nilMap[7, () => new array<byte>(4)].Clone();
+```
+
+All three map surfaces answer it, so this is one rule rather than three: `map<TKey, TValue>` declares
+the two overloads, go2cs-gen's `IMapTypeTemplate` forwards them for a NAMED map type, and
+`IMap<TKey, TValue>` carries them as default members for a map-cored type parameter. Two exclusions
+keep the emission unchanged where it is already right — a NAMED array element (its wrapper allocates
+its backing lazily from its own known size, the same exclusion `arrayElemFactory` documents), and an
+assignment TARGET, which carries a value and needs no zero. The A/B footprint over the whole
+converted standard library is **one line**, `html/escape.cs:153` — the crash site itself.
+
+(Guarded by the `MapArrayValueZero` behavioral test: plain and comma-ok reads, hit and miss, a
+nested element, a named map type read both nil and empty, an unnamed map read both nil and empty,
+and a store-then-read control, all output-compared vs `go run`. Failing-first proof: transpiled with
+the pre-fix converter the same program panics `index out of range [0] with length 0` at
+`array.cs:284` — the html signature exactly.)
+
 ## Named channel types
 
 A defined channel type — `type closeWaiter chan struct{}` (net/http's h2 bundle) — emits the

@@ -190,6 +190,29 @@ array-target exclusion by `PointerCastSliceReinterpret`, an output test over the
 pointer-cast slice that `PointerCastSliceRange` explicitly defers to "the stdlib exercises that
 shape" — which is exactly how the fabrication reached the corpus untested.)
 
+### Named-slice pointer reinterpret
+
+**Named-slice pointer reinterpret (`(*[][]byte)(buf)` with `buf *Buffers`).** Go converts a pointer-to-named-slice to a pointer to its underlying slice type freely — net's `fd.pfd.Writev((*[][]byte)(buf))`, where poll's `Writev` *reslices the header through the pointer* (`consume` advances `*v`), and the caller must observe it. The C# boxes `ж<Buffers>` and `ж<slice<slice<byte>>>` are unrelated generic instantiations (CS0030), so the conversion emits a **field view over the wrapper's own backing slice**:
+
+```csharp
+consume(Ꮡbuf.of(Buffers.Ꮡm_value));
+```
+
+Two generator pieces make the view real aliasing: a named-slice wrapper's `m_value` is **mutable** (`ReadOnlyValue = false` — a readonly field would force a defensive copy and lose header writes), and `ISliceTypeTemplate` emits the field-ref accessor `internal static ref slice<T> Ꮡm_value(ref Buffers instance)` that `ж<T>.of()` projects through. Claimed narrowly: pointer→pointer, source pointee a NAMED type whose underlying is a slice identical to the (unnamed) target pointee. (Guarded by the `SortArrayType` extension `consumeOne` — a `(*[]Person)(&crew)` reinterpret whose reslice through the view shrinks the original `Roster`, runtime-verified against Go.)
+
+The **reverse** direction — an underlying-slice pointer to a NAMED-slice pointer, `(*Buffer)(&b)` with `type Buffer []byte` (log/slog/internal/buffer's `sync.Pool.New`) — is **asymmetric**, because the projection above cannot run backwards: a named-wrapper box *contains* the underlying slice (project it out), but a bare-slice box does **not** contain a wrapper to project. It is emitted as golib's **storage reinterpret** instead — `Ꮡb.Reinterpret<slice<byte>, Buffer>()` — which re-views the *same slot* as the wrapper type rather than constructing anything: a generated named-slice wrapper is a single-field struct over the slice header, exactly the layout correspondence `ReinterpretAliasesStorage` recognizes, so the managed alias arm engages and the derived pointer ALIASES the addressed slice. A bare `(ж<Buffer>)(Ꮡ(b))` cast is CS0030 (unrelated instantiations). The source comes two ways and both render in BOX form (the `isPointer` ident context): an **address-of** arg (`&b`, `&h.field`) and an **existing pointer** arg (cryptobyte's `(*String)(out)` with `out *[]byte`). Claimed narrowly by the mirror gate: pointer→pointer, target pointee a NAMED type whose underlying is a slice identical to the (unnamed) source pointee.
+
+It previously **constructed a wrapper box over a copy** — `Ꮡ(new Buffer(b))` — on the stated assumption that such a reinterpret is only ever used through the returned pointer. That assumption is false wherever the conversion exists precisely to write BACK, which is the shape's dominant corpus use, and the writes went nowhere:
+
+| Site | What the copy cost |
+|:--|:--|
+| `log/slog` `commonHandler.withAttrs` — `(*buffer.Buffer)(&h2.preformattedAttrs)` | Every attribute `WithAttrs` pre-formatted was dropped, while the handler still advanced `groupPrefix`/`nOpenGroups` — so the JSON it emitted afterwards was unbalanced. Four `testing/slogtest` rows (`WithAttrs`, `multi-With`, `empty-group-record`, `resolve-WithAttrs`). |
+| `crypto/tls` `readUint{8,16,24}LengthPrefixed` — `(*cryptobyte.String)(out)` with `out *[]byte` | An out-PARAMETER whose whole purpose is the write-back: the caller's slice never received the length-prefixed field. |
+| `crypto/tls` `parseECHConfigList` — `(*cryptobyte.String)(&ec.PublicKey)` | A struct FIELD that stayed empty after a successful parse. |
+| `vendor/…/cryptobyte` `ReadASN1Bytes` — `(*String)(out)` | Same out-parameter shape, same loss. |
+
+Corpus A/B footprint of the correction: **5 files, 8 sites** (`log/slog/handler.cs`, `log/slog/internal/buffer/buffer.cs`, `crypto/tls/ech.cs` ×2, `crypto/tls/handshake_messages.cs` ×3, `vendor/golang.org/x/crypto/cryptobyte/asn1.cs`), plus the dead `ref var @out = ref Ꮡout.DerefOrNull()` locals the aliasing form no longer needs. (Guarded by the `NamedSlicePointerReinterpret` behavioral test — a direct `(*Buf)(&b)` **read back through `b`**, the closure-returned `func() *Buf { … return (*Buf)(&s) }` shape, a pointer-**parameter** `fillVia(out *[]byte)` read back through `out`, and a struct-**field** `(*Buf)(&h.preformatted)` appended across a reallocating growth and then truncated through a freshly derived pointer — output-compared vs Go.)
+
 ## Array and slice views
 
 ### The Go 1.17 pointer form aliases the slice's backing store
@@ -301,6 +324,10 @@ arms of `PointerCastSliceReinterpret` — the reparse `[n1:n2:n2]` shape and a b
 wider element sliced `[3:7]`, both wrong before and matching Go now. `StdLibInternalAbi`'s golden
 re-baselines to the corrected `OutSlice`; its own stdout does not depend on the offset, which is why
 it stayed green through the defect.)
+
+### Pointer-cast slice `(*[N]T)(ptr)[:n]`
+
+**Pointer-cast slice (`(*[N]T)(ptr)[:n]`).** A Go conversion that casts an `unsafe.Pointer` to a pointer-to-array and slices it produces a `[]T` over the pointed-to memory. It is emitted as the golib **`slice<T>`** — the C# representation of *every* `[]T` — built from a `ReadOnlySpan<T>` over the raw pointer: `new slice<T>(new ReadOnlySpan<T>((T*)ptr, (int)n))`. (Earlier it was a bare `Span<T>`, but a `Span<T>` does **not** range as `(index, element)` tuples — `for i := range s` → CS8130 — and has no `Ꮡ(s, i)` element-address — CS0411; `slice<T>` supports both, since it is `IArray<T>`.) The `ReadOnlySpan<T>` constructor takes a C# `int`, so a Go `int`/`uint` length (`nint`/`nuint`) is narrowed via `getRangeIndexer` (through the underlying for a named numeric); an int literal is left as-is. The slice **copies** the pointed-to memory (`ReadOnlySpan.ToArray()`), which is self-consistent for code that only uses the resulting slice (e.g. runtime's `printDebugLog` ranges `state` and writes `&state[i]`, never re-reading the raw buffer; `os_windows` ranges an unsafe `[]byte` read-only). Since this is always the `(*[N]T)(ptr)` unsafe-cast form, it is memory-layout-dependent code whose raw values flow through the `unsafe.Pointer`=`nuint` round-trip (a transient `fixed` address → not GC-stable), so the runtime values are not the contract — only compilable, rangeable, element-addressable C#. (Guarded by the `PointerCastSliceRange` behavioral Compile + target test — index range, value range, and `&s[i]` element-address over a pointer-cast slice; runtime greened `debuglog`'s `printDebugLog` and `os_windows`, ~25 errors via the cascade. The length narrowing is covered by `StdLibInternalAbi`.)
 
 ---
 
