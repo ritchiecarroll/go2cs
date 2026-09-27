@@ -197,7 +197,31 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted
         return source is INilPointer parent ? parent.GetHashCode() : RuntimeHelpers.GetHashCode(source);
     }
 
+    // The displacement a field view adds to its source's allocation base, cached by the accessor delegate
+    // (the view's identity token). A view is cached per (box, accessor), so every FRESH box pays its
+    // view's first token, and resolving it by name costs a Type[] (PointeeTypeOf's generic-argument
+    // read) and a sliced name string (FieldNameOf) each time. The answer is a pure function of the
+    // source box's TYPE and the accessor, so an entry that records the source type it was resolved for
+    // is exact on a match and re-resolves on a mismatch -- no assumption about which boxes an accessor
+    // serves. Weak on the delegate: an accessor built per call leaves nothing behind.
     private static nuint GoFieldDisplacement(object source, Delegate fieldId)
+    {
+        Type sourceType = source.GetType();
+
+        if (s_displacementsByAccessor.TryGetValue(fieldId, out Displacement? cached) && ReferenceEquals(cached.SourceType, sourceType))
+            return cached.Value;
+
+        nuint displacement = ResolveGoFieldDisplacement(source, fieldId);
+        s_displacementsByAccessor.AddOrUpdate(fieldId, new Displacement(sourceType, displacement));
+
+        return displacement;
+    }
+
+    private sealed record Displacement(Type SourceType, nuint Value);
+
+    private static readonly ConditionalWeakTable<Delegate, Displacement> s_displacementsByAccessor = new();
+
+    private static nuint ResolveGoFieldDisplacement(object source, Delegate fieldId)
     {
         Type? structType = PointeeTypeOf(source);
         string? fieldName = FieldNameOf(fieldId);

@@ -87,4 +87,84 @@ public class FieldRefTokenTests
         Assert.AreEqual((nuint)0, sink, "a view's number is stable across conversions");
         Assert.AreNotEqual((nuint)0, first);
     }
+
+    // ---- the displacement cache: a FRESH view's first token, keyed by the accessor ----
+
+    // The shape go2cs-gen emits for a struct field and converted code reaches through the typed of().
+    public struct Holder
+    {
+        public long A;
+        public Inner F;
+
+        public static ref Inner ᏑF(ref Holder instance) => ref instance.F;
+    }
+
+    // Two structs whose same-named field sits at different Go offsets (0 and 8).
+    public struct NAtZero
+    {
+        public long N;
+    }
+
+    public struct NAtEight
+    {
+        public long X;
+        public long N;
+    }
+
+    // One accessor serving both. Its name resolves (`ᏑN` -> field N), so each source's displacement is
+    // that struct's real Go offset of N -- which makes the answer depend on the SOURCE, the one case a
+    // cache keyed by the accessor alone would get wrong.
+    private static ref long ᏑN(object source)
+    {
+        if (source is ж<NAtZero> atZero)
+            return ref atZero.Value.N;
+
+        return ref ((ж<NAtEight>)source).Value.N;
+    }
+
+    private static readonly FieldRefFunc<long> s_n = ᏑN;
+
+    private static nuint Displacement(nuint token) => token & 0xFFFFFFFFu;
+
+    [TestMethod]
+    public void AFreshViewsFirstTokenAllocatesNothingOnceItsAccessorIsKnown()
+    {
+        const int views = 1000;
+        ж<Inner>[] fields = new ж<Inner>[views];
+
+        for (int i = 0; i < views; i++)
+        {
+            builtin.heap(new Holder(), out ж<Holder> box);
+            fields[i] = box.of(Holder.ᏑF);
+        }
+
+        // The accessor's first view resolves the field's Go offset: a long before it, so 8.
+        Assert.AreEqual((nuint)8, Displacement(fields[0].PointerOrderToken), "the token carries the field's real Go offset, not a fallback");
+
+        // The accessor's FIRST cache hit is left outside the window: it allocated 344 B once (measured,
+        // Debug, unrooted -- the lookup path's first execution, not a per-view cost), and every hit after
+        // it reads 0.
+        _ = fields[1].PointerOrderToken;
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        nuint sink = 0;
+
+        for (int i = 2; i < views; i++)
+            sink |= Displacement(fields[i].PointerOrderToken) ^ 8;
+
+        // Before the cache every fresh view re-resolved by name: a Type[] and a sliced name string, 56 B.
+        Assert.AreEqual(0L, GC.GetAllocatedBytesForCurrentThread() - before, "a known accessor's displacement is read back, not re-resolved");
+        Assert.AreEqual((nuint)0, sink, "every fresh view of the field carries the same displacement");
+    }
+
+    [TestMethod]
+    public void OneAccessorOverTwoSourceTypesKeepsEachSourcesDisplacement()
+    {
+        builtin.heap(new NAtZero(), out ж<NAtZero> zero);
+        builtin.heap(new NAtEight(), out ж<NAtEight> eight);
+
+        Assert.AreEqual((nuint)0, Displacement(zero.of(s_n).PointerOrderToken), "N is NAtZero's first field");
+        Assert.AreEqual((nuint)8, Displacement(eight.of(s_n).PointerOrderToken), "the cached entry is for another source type: re-resolve, never reuse");
+        builtin.heap(new NAtZero(), out ж<NAtZero> zeroAgain);
+        Assert.AreEqual((nuint)0, Displacement(zeroAgain.of(s_n).PointerOrderToken), "and back again, on a fresh view");
+    }
 }
