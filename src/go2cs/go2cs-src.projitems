@@ -35,6 +35,7 @@
     <None Include="$(MSBuildThisFileDirectory)embedDirective.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeNamedIntType_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)solutionProjectPaths_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syscallKeepAliveAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)syscallFunnelSet_test.go" />
     <None Include="$(MSBuildThisFileDirectory)captureModeOperations.go" />
