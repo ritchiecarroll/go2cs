@@ -174,7 +174,10 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A declaration named `heap` qualifies the boxing intrinsic](shadowing.md#a-declaration-named-heap-qualifies-the-boxing-intrinsic)
   - [A local that shadows a PACKAGE name is not a package qualifier](shadowing.md#a-local-that-shadows-a-package-name-is-not-a-package-qualifier)
   - [A collision-renamed member keeps the file's RENAMED qualifier](shadowing.md#a-collision-renamed-member-keeps-the-files-renamed-qualifier)
+  - [Foreign renamed types reference the recorded imported-type alias](shadowing.md#foreign-renamed-types-reference-the-recorded-imported-type-alias)
+  - [A foreign package's collision rename is derived from that package, not from the conversion run](shadowing.md#a-foreign-packages-collision-rename-is-derived-from-that-package-not-from-the-conversion-run)
   - [A DOT-imported collision-renamed member has no selector to carry the rename](shadowing.md#a-dot-imported-collision-renamed-member-has-no-selector-to-carry-the-rename)
+  - [A DOT-IMPORTED renamed type is spelled through the same alias as the qualified reference](shadowing.md#a-dot-imported-renamed-type-is-spelled-through-the-same-alias-as-the-qualified-reference)
 - **[Multi-Result Values and Comma-Ok Forms](multi-result-and-comma-ok.md)**
   - [A grouped var spec with one multi-result call deconstructs](multi-result-and-comma-ok.md#a-grouped-var-spec-with-one-multi-result-call-deconstructs)
   - [A forwarded multi-value call deconstructs when tuple elements need interface conversion](multi-result-and-comma-ok.md#a-forwarded-multi-value-call-deconstructs-when-tuple-elements-need-interface-conversion)
@@ -260,6 +263,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Type Alias Declarations](type-aliasing.md#type-alias-declarations)
   - [A collision-renamed alias chain resolves to its concrete target](type-aliasing.md#a-collision-renamed-alias-chain-resolves-to-its-concrete-target)
   - [A same-named cross-package alias target is fully qualified](type-aliasing.md#a-same-named-cross-package-alias-target-is-fully-qualified)
+  - [A foreign package's re-exported type ALIAS is derived from that package too](type-aliasing.md#a-foreign-packages-re-exported-type-alias-is-derived-from-that-package-too)
   - [An aliased import's imported type ALIAS renders as its `global using` name](type-aliasing.md#an-aliased-imports-imported-type-alias-renders-as-its-global-using-name)
   - [The ALIAS kind takes the lift too](type-aliasing.md#the-alias-kind-takes-the-lift-too)
   - [Generic Type Aliases](type-aliasing.md#generic-type-aliases)
@@ -619,12 +623,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [`for range` over a slice allocates NOTHING — `slice<T>.GetEnumerator()` returns a struct](labels-and-loop-variables.md#for-range-over-a-slice-allocates-nothing--slicetgetenumerator-returns-a-struct)
   - [`range` over an ARRAY VALUE iterates a COPY — the snapshot is the range EXPRESSION's `.Clone()`](labels-and-loop-variables.md#range-over-an-array-value-iterates-a-copy--the-snapshot-is-the-range-expressions-clone)
 - **[The `go.golib` support namespace](golib-namespace.md)**
-  - [Foreign renamed types reference the recorded imported-type alias](golib-namespace.md#foreign-renamed-types-reference-the-recorded-imported-type-alias)
-  - [A foreign package's collision rename is derived from that package, not from the conversion run](golib-namespace.md#a-foreign-packages-collision-rename-is-derived-from-that-package-not-from-the-conversion-run)
-  - [A foreign package's re-exported type ALIAS is derived from that package too](golib-namespace.md#a-foreign-packages-re-exported-type-alias-is-derived-from-that-package-too)
-  - [A DOT-IMPORTED renamed type is spelled through the same alias as the qualified reference](golib-namespace.md#a-dot-imported-renamed-type-is-spelled-through-the-same-alias-as-the-qualified-reference)
   - [Package aliases shadowed by method names](golib-namespace.md#package-aliases-shadowed-by-method-names)
-  - [Converted programs write UTF-8 stdout — the ambient console code page never reaches the bytes](golib-namespace.md#converted-programs-write-utf-8-stdout--the-ambient-console-code-page-never-reaches-the-bytes)
   - [Generated code global::-qualifies root-namespace references](golib-namespace.md#generated-code-global-qualifies-root-namespace-references)
   - [A sub-package import whose leading segment is a package alias root-qualifies](golib-namespace.md#a-sub-package-import-whose-leading-segment-is-a-package-alias-root-qualifies)
 - **[Names and Glyphs](naming.md)**
@@ -668,6 +667,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
       - [The process ROOTS a converted program never gets from a Go bootstrap: `runtime.envs`, `os.runtime_rand`](manual-conversions/linkname-and-trampolines.md#the-process-roots-a-converted-program-never-gets-from-a-go-bootstrap-runtimeenvs-osruntime_rand)
       - [Long-path awareness is process SETUP, and golib does what Go's `osinit` does](manual-conversions/linkname-and-trampolines.md#long-path-awareness-is-process-setup-and-golib-does-what-gos-osinit-does)
       - [Linux standard-descriptor hygiene is process SETUP too — Go's close-of-stdout must release the pipe](manual-conversions/linkname-and-trampolines.md#linux-standard-descriptor-hygiene-is-process-setup-too--gos-close-of-stdout-must-release-the-pipe)
+      - [Converted programs write UTF-8 stdout — the ambient console code page never reaches the bytes](manual-conversions/linkname-and-trampolines.md#converted-programs-write-utf-8-stdout--the-ambient-console-code-page-never-reaches-the-bytes)
   - **[Manually-Converted Declarations: The OS and Syscall Boundary](manual-conversions/os-and-syscall-boundary.md)**
     - [Pollers](manual-conversions/os-and-syscall-boundary.md#pollers)
       - [The managed netpoller — the ten `runtime_poll*` contracts on .NET's completion machinery](manual-conversions/os-and-syscall-boundary.md#the-managed-netpoller--the-ten-runtime_poll-contracts-on-nets-completion-machinery)

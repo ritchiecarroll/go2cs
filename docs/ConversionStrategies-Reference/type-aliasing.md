@@ -80,6 +80,83 @@ A consumer that resolves only the FIRST hop and then qualifies the intermediate 
 
 **A same-named cross-package alias target is fully qualified.** Two *different* packages can share a Go package name — html/template and text/template are both `package template`. When such a package aliases the other's type — html/template's `type FuncMap = template.FuncMap`, whose target lives in text/template — the alias RHS must name the target's OWN `(namespace, class)`: `go.text.template_package.FuncMap`. `getFullyQualifiedTypeName` had gated its cross-package branch on the package *name* (`pkg.Name() != packageName`), so a same-named foreign type read as *same-package* and fell through to the `t.String()` path, whose cross-package slash-strip drops BOTH the `text` path segment AND the `_package` class — emitting `global using FuncMap = go.template.FuncMap;` (CS0234; `template` is not a namespace of `go`). The check now compares package **identity** (`pkg != v.pkg`), matching `getAliasQualifiedTypeName` and `collectCrossPackagePaths`, so the branch fires and the target fully qualifies. (A code-*body* reference already rendered correctly — `getAliasQualifiedTypeName` keyed on identity — so only the `global using` alias RHS was wrong.) Guarded by the `CrossPkgSameNameAlias` behavioral test: a `package atomic` that aliases the same-named `sync/atomic`'s `Int32` (`type Int32 = atomic.Int32`), whose `global using` RHS must render `go.sync.atomic_package.Int32`, not the dropped-segment `go.atomic.Int32`.
 
+## A foreign package's re-exported type ALIAS is derived from that package too
+
+The sibling class, and the one that hits real end-user code hardest. `os` declares
+`type FileMode = fs.FileMode` (likewise `FileInfo`, `DirEntry`, `PathError`), and a re-export takes
+`visitTypeSpec`'s **using-alias** arm: the converted `os` emits an assembly-scoped
+`global using FileMode = go.io.fs_package.FileMode;` and publishes
+`[assembly: GoTypeAlias("FileMode", "go.io.fs_package.FileMode")]`. The re-export is therefore a *using
+alias inside os's assembly*, **never a member of `os_package`** — so a consumer converted without that
+artifact emits `os.PathError` and gets `CS0426: the type name 'PathError' does not exist in the type
+'os_package'`. Exactly the run-composition dependence of the collision renames, one metadata class over.
+
+`foreignTypeAliases.go` derives these under the same invariant — what a dependency publishes is a function
+of that package's own declarations — from its `go/types` scope, plus its syntax for the one distinction only
+a declaration's RHS carries. Two declarations take the using-alias route and are reproduced:
+
+| Dependency declares | Published entry | Consumer emits |
+|---|---|---|
+| `type FileMode = fs.FileMode` | `("FileMode", "go.io.fs_package.FileMode")` | `osꓸFileMode` |
+| `type Kind = abi.Kind` (and `abi` Δ-renames `Kind`) | `("Kind", "go.@internal.abi_package.ΔKind")` | `reflectliteꓸKind` |
+| `type PublicKey any` (a DEFINED type over the empty interface) | `("PublicKey", "object")` | `object` |
+| `type Reader io.Reader` (a DEFINED type over a named interface) | `("Reader", "go.io_package.Reader")` | `pkgꓸReader` |
+
+Three details make the reproduction exact rather than approximate:
+
+* **The alias TARGET carries the target package's OWN collision rename.** `internal/reflectlite`'s
+  `type Kind = abi.Kind` publishes `go.@internal.abi_package.ΔKind`, because `internal/abi` Δ-renames `Kind`
+  against `(*Type).Kind()`. In a full run that Δ arrives from `abi`'s parsed `package_info.cs` (the
+  `importedTypeAliases` consult in `convertToCSFullTypeName`'s default arm); the derivation recomputes it
+  with the same foreign-package-aware `packageHasMethodNamed` test the collision lane uses, so the two
+  sources agree.
+* **A Go type ALIAS is exempt from the collision lane.** `performNameCollisionAnalysis` records only
+  *defined* types (`!typeSpec.Assign.IsValid()`), so an alias name that *also* names a method is **not**
+  Δ-renamed — `reflectlite` declares both `type Kind = abi.Kind` and `(*rtype).Kind()` and still publishes
+  the plain source name `Kind`. The two derivations split on exactly that line: a colliding *defined* type
+  belongs to the collision lane (which owns the `Token`/`ΔToken`/`object` two-hop), a colliding *alias* to
+  this one. Getting that boundary wrong either double-publishes one source name with two targets or drops
+  `reflectlite`'s entry entirely.
+* **An empty-interface target is `object`, imported BARE.** `type PublicKey any` is not an alias at all but
+  a defined type over the empty interface, which has exactly that interface's method set and so takes the
+  using-alias arm too. Its target is the C# keyword, not a package member (`isCSharpBuiltinTypeName`) —
+  `crypto`'s `PublicKey`/`PrivateKey`/`DecrypterOpts`, `plugin`'s `Symbol`, `database/sql/driver`'s `Value`.
+
+**Deliberately not derived** (a wrong target is worse than none — a missing entry leaves the reference
+exactly as it converts today, a wrong one names a type that does not exist): a composite or basic RHS
+(`type Table = map[string]int`, whose rendering runs the whole `convertToCSFullTypeName` lowering) and an
+alias-to-an-alias chain; an **anonymous** struct/interface RHS, which is *lifted* under a generated name
+only a conversion assigns (`internal/fuzz`'s `type CorpusEntry = struct{…}` → `CorpusEntryᴛ1`); a generic
+target; a methodless named **func** type, rendered inline as its base delegate with no named type to point at
+(the same omission `typeCollisionAliases` and `writePackageInfoFile` make); and a target that is **itself**
+emitted as a using alias by its own package, which would need a second hop this derivation does not follow.
+Each declines by shape, from the dependency's own declarations, so the decision is stable across runs.
+
+Same use-gating as the collision renames: a derived alias's `global using` reaches the consumer's
+`package_info.cs` only once an emitted reference has resolved through it. Evidence, taken with the fix
+neutered and restored: a standalone `os.FileMode`/`os.FileInfo`/`os.PathError` + `fs.WalkDir` program
+converted with `go2cs <dir>` against an output root holding **no** converted stdlib failed with the CS0426
+above and now compiles and runs with output byte-identical to `go run .`; single-package `-stdlib crypto/ecdh`
+reconverts `ecdh.cs` byte-identically to the committed full-run corpus where before it emitted the
+nonexistent `crypto.PublicKey`; and a whole-stdlib reconvert is byte-for-byte unchanged, the derivation
+running only where the loader previously did nothing at all.
+
+**Still open — the `GoImplement` pairs** (`loadPackageImplements`), and *honestly* so rather than pending:
+they are recorded at CONVERSION time from the cast and witness sites a dependency's own bodies contain, so
+which adapter classes its assembly actually carries is a product of its **emission**, not of its
+declarations. There is nothing sound to compute from `go/types`: an over-approximation (every exported type
+× every exported interface) would name adapters that do not exist — CS0246, strictly worse than the present
+behavior, where the consumer records and emits its own local adapter (`io_SectionReaderжReader` instead of the
+provider's `io.SectionReaderжReader`), which compiles and behaves identically and only duplicates the class.
+The class retires with the runtime interface shells rather than with a derivation: once a concrete-to-interface
+conversion goes through a runtime-constructed shell instead of a compile-time adapter, there is no per-pair
+record left to be missing.
+
+(Guarded by `foreignTypeAliases_test.go`: a three-package fixture — a consumer, the `dep` whose re-exports
+are under test, and the `other` it re-exports from — carrying one declaration of every published shape and
+every declined one, asserting the derivation, its independence from run-accumulated state, and the end-to-end
+render with no `package_info.cs` present.)
+
 ## An aliased import's imported type ALIAS renders as its `global using` name
 
 **An imported type ALIAS through an aliased import renders as its `global using` name.** A `global using` alias is not a member of the package class, so `import pl "PALib"` with `pl.B2{V: 1}`, where `B2` is an exported alias, cannot render `new pl.B2(…)` (CS0426). The alias table is keyed by the package's declared name, and `aliasResolvedSelector` looks a published, non-const type alias up under that name, rendering `new PALibꓸB2(…)` as the canonical import does. Every other member keeps the file's alias (`new pl.Box(…)`). (Guarded by the `AliasImport` behavioral test's `aliased.go`.)
