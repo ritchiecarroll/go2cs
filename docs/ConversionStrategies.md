@@ -3239,7 +3239,7 @@ its plain name.
 
 **`keep` passes the box itself into the `any`.** So asserting it back with `._<ж<pp>>()` returns the same
 pointer, and writing `got.id` changes `c.id`. `OrTypedNil()` keeps a nil `*pp` typed inside the
-interface, as Go does ([detail](ConversionStrategies-Reference/pointers.md#a-pointer-value-passed-to-an-any-argument-takes-the-box)).
+interface, as Go does ([detail](ConversionStrategies-Reference/pointers/identity-and-nil.md#a-pointer-value-passed-to-an-any-argument-takes-the-box)).
 
 **`~` reads through a pointer, `.Value` writes through it.** `~c` returns a copy of the value `c` points
 to, like Go's `*c`. `got.Value` is a `ref` to the real storage, so `got.Value.id = 200` writes into
@@ -10796,7 +10796,7 @@ In the C#:
 - The tuple result is Go's multiple return ([Multi-Result Values](#multi-result-values-and-comma-ok-forms)).
 <!-- SliceData returns ж<T>: src/core/unsafe/unsafe.cs:957. The omitted lines: getrandom.cs:28-37 (the vgetrandom fast path and the getrandomUnsupported check) and 41-46 (errno handling). The indent of line 39 is an emission layout artifact; lines 38-40 sit in the same block of GetRandom's body. The keep-alive temp appears across the converted syscall surface, e.g. src/core/internal/syscall/unix/linux/at.cs, src/core/syscall/darwin/syscall_darwin.cs, src/core/internal/syscall/windows/windows/zsyscall_windows.cs. No behavioral test emits this shape (src/tests/Behavioral has no `GC.KeepAlive(ᴋ` in any .cs.target). -->
 
-**Full detail:** [Reference → Converting a Go pointer to `unsafe.Pointer`](ConversionStrategies-Reference/pointers.md#converting-a-go-pointer-to-unsafepointer) — every conversion form and when each factory is used, address arithmetic, pinning, order tokens, layout folding, value puns, the cases where `unsafe.Slice` or `unsafe.String` copies instead of aliasing, and the syscall keep-alive rule.
+**Full detail:** [Reference → Converting a Go pointer to `unsafe.Pointer`](ConversionStrategies-Reference/unsafe-and-native-memory.md#converting-a-go-pointer-to-unsafepointer) — every conversion form and when each factory is used, address arithmetic, pinning, order tokens, layout folding, value puns, the cases where `unsafe.Slice` or `unsafe.String` copies instead of aliasing, and the syscall keep-alive rule.
 
 ---
 
