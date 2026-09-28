@@ -594,7 +594,7 @@ public static (nint, nint) ReadVarint(this ΔName n, nint off) {
     nint v = 0;
     for (nint i = 0; ᐧ ; i++) {
         var x = n.DataChecked(off + i, readVarintˢ).Value;
-        v += ((nint)((byte)(x & 0x7f))).Lsh((uint64)((7 * i)));
+        v += ((nint)((byte)(x & 0x7f))).Lsh((int64)((7 * i)));
         if ((byte)(x & 0x80) == 0) {
             return (i + 1, v);
         }

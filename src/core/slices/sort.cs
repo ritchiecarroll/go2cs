@@ -211,7 +211,7 @@ internal static sortedHint decreasingHint => 2;
 }
 
 internal static nuint nextPowerOfTwo(nint length) {
-    return ((nuint)1).Lsh((uint64)(bits.Len((nuint)length)));
+    return ((nuint)1).Lsh((int64)(bits.Len((nuint)length)));
 }
 
 // isNaN reports whether x is a NaN without requiring the math package.

@@ -263,7 +263,7 @@ public static (ж<Matcher>, error) New(@string pattern) {
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && (exprᴛ1 is (rune)'0' or (rune)'1')) { matchᴛ1 = true;
-            bits.LshAssign((uint64)(wid));
+            bits.LshAssign((int64)(wid));
             bits |= (uint64)((uint64)((byte)(c - (rune)'0')));
         }
         else if (exprᴛ1 is (rune)'a' or (rune)'b' or (rune)'c' or (rune)'d' or (rune)'e' or (rune)'f' or (rune)'A' or (rune)'B' or (rune)'C' or (rune)'D' or (rune)'E' or (rune)'F') { matchᴛ1 = true;
@@ -295,7 +295,7 @@ public static (ж<Matcher>, error) New(@string pattern) {
                 if (p[start] == (rune)'y') {
                     n = 0;
                 }
-                var mask = ((uint64)1).Lsh((uint64)(n)) - 1;
+                var mask = ((uint64)1).Lsh((int64)(n)) - 1;
                 m.Value.list = append((~m).list, new cond(mask, bits, result));
             } else 
             if (c == (rune)'-') {

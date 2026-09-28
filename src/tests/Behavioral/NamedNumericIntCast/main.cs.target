@@ -14,7 +14,7 @@ internal static void Main() {
     idx hi = 4;
     fmt.Println(a[(int)(nuint)(lo)..(int)(nuint)(hi)]);
     cnt sh = 3;
-    fmt.Println(((uint64)1).Lsh((uint64)(nint)(sh)));
+    fmt.Println(((uint64)1).Lsh((int64)(nint)(sh)));
     fmt.Println(a[(int)(nuint)(lo + 1)..(int)(nuint)(hi)]);
 }
 

@@ -2191,8 +2191,13 @@ public static int64 Rsh(this int64 x, uint64 n) => n >= 64 ? x >> 63 : x >> (int
 public static int64 Lsh(this int64 x, uint64 n) => n >= 64 ? 0L : x << (int)n;
 ```
 
-The count is always taken as a `uint64`, so a count of any unsigned type, such as `nuint`, passes straight
+An unsigned count is taken as a `uint64`, so a count of any unsigned type, such as `nuint`, passes straight
 in. In the signed `Rsh`, `x >> 63` fills the result with the sign bit: -1 for a negative value, 0 otherwise.
+
+A signed count is taken as an `int64` instead (`one.Lsh((int64)(n))`), and binds a second set of overloads.
+Go panics with the runtime error "negative shift amount" when a signed count is below zero at run time, and
+these raise that same panic, which `recover` sees; a count of zero or more goes to the unsigned helper. So a
+signed count is never kept native on the strength of `y % M` alone, since Go's `-3 % 8` is -3.
 
 Here the counts come from a slice at run time, and several are 64 or more. In the C#,
 `new nuint[]{…}.slice()` builds a golib [slice](#slices-and-arrays), and `foreach (var (_, k) in c)` is

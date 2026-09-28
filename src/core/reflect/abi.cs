@@ -208,7 +208,7 @@ internal static abiStepKind abiStepFloatReg => 4; // copy to/from FP register
     }
     for (nint i = 0; i < n; i++) {
         abiStepKind kind = abiStepIntReg;
-        if ((uint8)(ptrMap & (((uint8)1).Lsh((uint64)(i)))) != 0) {
+        if ((uint8)(ptrMap & (((uint8)1).Lsh((int64)(i)))) != 0) {
             kind = abiStepPointer;
         }
         a.steps = builtin.append(a.steps, new abiStep(

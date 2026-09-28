@@ -212,7 +212,7 @@ internal static (ж<bigꓸInt> k, error err) randFieldElement(elliptic.Curve c, 
         }
         {
             nint excess = len(b) * 8 - N.BitLen(); if (excess > 0) {
-                b[0].RshAssign((uint64)(excess));
+                b[0].RshAssign((int64)(excess));
             }
         }
         k = @new<bigꓸInt>().SetBytes(b);

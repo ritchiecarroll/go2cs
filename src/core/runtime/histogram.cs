@@ -132,9 +132,9 @@ internal static slice<float64> timeHistogramMetricsBuckets() {
     for (nint i = timeHistMinBucketBits; i < timeHistMaxBucketBits; i++) {
         for (nint j = 0; j < timeHistNumSubBuckets; j++) {
             // Set the bucket bit.
-            var bucketNanos = ((uint64)1).Lsh((uint64)((i - 1)));
+            var bucketNanos = ((uint64)1).Lsh((int64)((i - 1)));
             // Set the sub-bucket bits.
-            bucketNanos |= (uint64)(((uint64)j).Lsh((uint64)((i - 1 - (nint)timeHistSubBucketBits))));
+            bucketNanos |= (uint64)(((uint64)j).Lsh((int64)((i - 1 - (nint)timeHistSubBucketBits))));
             // The index for this bucket is going to be the (i+1)'th bucket
             // (note that we're starting from zero, but handled the first bucket
             // earlier, so we need to compensate), and the j'th sub bucket.

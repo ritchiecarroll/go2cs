@@ -190,7 +190,7 @@ internal static void trace1(this ж<timer> Ꮡt, @string op) {
     }
     var bits = new @string[]{"h"u8, "m"u8, "z"u8, "c"u8}.array();
     foreach (var i in range(3)) {
-        if ((uint8)(t.state & (((uint8)1).Lsh((uint64)(i)))) == 0) {
+        if ((uint8)(t.state & (((uint8)1).Lsh((int64)(i)))) == 0) {
             bits[i] = "-"u8;
         }
     }

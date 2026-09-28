@@ -23,7 +23,7 @@ internal static nint maxAckBacklog(nint n) {
     if (major > 4 || (major == 4 && minor >= 1)) {
         size = 32;
     }
-    nuint max = ((nuint)1).Lsh((uint64)(size)) - 1;
+    nuint max = ((nuint)1).Lsh((int64)(size)) - 1;
     if ((nuint)n > max) {
         n = (nint)max;
     }

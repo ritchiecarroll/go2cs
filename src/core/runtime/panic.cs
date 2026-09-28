@@ -730,7 +730,7 @@ internal static (uint32, @unsafe.Pointer) readvarintUnsafe(@unsafe.Pointer fd) {
         var b = ~(ж<uint8>)(uintptr)(fd);
         fd.Value = (uintptr)add(fd, /* unsafe.Sizeof(b) */ (uintptr)1);
         if (b < 128) {
-            return (r + ((uint32)b).Lsh((uint64)(shift)), fd);
+            return (r + ((uint32)b).Lsh((int64)(shift)), fd);
         }
         r += ((uint32)((uint8)(b & 0x7F)) << (int)(((nint)(shift & 31))));
         shift += 7;

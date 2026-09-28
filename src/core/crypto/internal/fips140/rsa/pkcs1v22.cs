@@ -124,7 +124,7 @@ internal static (slice<byte>, error) emsaPSSEncode(slice<byte> mHash, nint emBit
     mgf1XOR(db, hash, h);
     // 11. Set the leftmost 8 * emLen - emBits bits of the leftmost octet in
     //     maskedDB to zero.
-    db[0] &= (byte)(((byte)0xff).Rsh((uint64)((8 * emLen - emBits))));
+    db[0] &= (byte)(((byte)0xff).Rsh((int64)((8 * emLen - emBits))));
     // 12. Let EM = maskedDB || H || 0xbc.
     em[emLen - 1] = 0xbc;
     // 13. Output EM.
@@ -167,7 +167,7 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
     // 6.  If the leftmost 8 * emLen - emBits bits of the leftmost octet in
     //     maskedDB are not all equal to zero, output "inconsistent" and
     //     stop.
-    byte bitMask = (byte)(((byte)0xff).Rsh((uint64)((8 * emLen - emBits))));
+    byte bitMask = (byte)(((byte)0xff).Rsh((int64)((8 * emLen - emBits))));
     if ((byte)(em[0] & ((byte)(~bitMask))) != 0) {
         return ErrVerification;
     }

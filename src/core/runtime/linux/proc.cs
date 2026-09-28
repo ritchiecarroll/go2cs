@@ -6149,14 +6149,14 @@ internal static bool read(this pMask Δp, uint32 id) {
 // set sets P id's bit.
 internal static void set(this pMask Δp, int32 id) {
     var word = id / 32;
-    var mask = ((uint32)1 << (int)((id % 32)));
+    var mask = ((uint32)1).Lsh((int64)((id % 32)));
     atomic.Or(Ꮡ(Δp, word), mask);
 }
 
 // clear clears P id's bit.
 internal static void clear(this pMask Δp, int32 id) {
     var word = id / 32;
-    var mask = ((uint32)1 << (int)((id % 32)));
+    var mask = ((uint32)1).Lsh((int64)((id % 32)));
     atomic.And(Ꮡ(Δp, word), ~mask);
 }
 

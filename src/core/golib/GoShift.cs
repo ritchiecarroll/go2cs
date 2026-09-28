@@ -8,6 +8,7 @@
 // ReSharper disable BuiltInTypeReferenceStyle
 
 using System.Runtime.CompilerServices;
+using go.golib;
 
 namespace go;
 
@@ -27,9 +28,9 @@ namespace go;
 /// </list>
 /// The count is taken as a WIDE UNSIGNED <see cref="uint64"/> so its FULL magnitude is compared against the
 /// width BEFORE any narrowing — a computed count such as <c>64 - n</c> that unsigned-wraps to a huge value
-/// is then correctly seen as <c>&gt;= width</c>. (Go panics on a negative count; that is out of scope here —
-/// widened into <see cref="uint64"/> a negative count reads as a huge value and yields 0, no worse than the
-/// masked native form it replaces.)
+/// is then correctly seen as <c>&gt;= width</c>. A SIGNED count is widened to <see cref="int64"/> instead, and
+/// its overloads raise Go's <c>runtime error: negative shift amount</c> panic for a count below zero, as
+/// Go's <c>panicshift</c> does.
 /// </remarks>
 public static class GoShift
 {
@@ -186,4 +187,143 @@ public static class GoShift
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void LshAssign(ref this int8 x, uint64 n) => x = x.Lsh(n);
+
+    // ---- a SIGNED count --------------------------------------------------------------------------------
+    //
+    // Go panics with the runtime.Error "negative shift amount" (runtime.panicshift) when a shift's count
+    // is a signed integer below zero at run time. The converter widens a signed count to int64, never to
+    // uint64 (where a negative count would read as a huge one and yield 0), so these overloads bind: a
+    // negative count raises the panic, and any other defers to the unsigned guard above.
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static uint64 Rsh(this uint64 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Rsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static uint64 Lsh(this uint64 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Lsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int64 Rsh(this int64 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Rsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int64 Lsh(this int64 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Lsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static nuint Rsh(this nuint x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Rsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static nuint Lsh(this nuint x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Lsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static nint Rsh(this nint x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Rsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static nint Lsh(this nint x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Lsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static uintptr Rsh(this uintptr x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Rsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static uintptr Lsh(this uintptr x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Lsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static uint32 Rsh(this uint32 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Rsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static uint32 Lsh(this uint32 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Lsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int32 Rsh(this int32 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Rsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int32 Lsh(this int32 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Lsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static uint16 Rsh(this uint16 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Rsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static uint16 Lsh(this uint16 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Lsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int16 Rsh(this int16 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Rsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int16 Lsh(this int16 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Lsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static uint8 Rsh(this uint8 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Rsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static uint8 Lsh(this uint8 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Lsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int8 Rsh(this int8 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Rsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int8 Lsh(this int8 x, int64 n) => n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Lsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this uint64 x, int64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this uint64 x, int64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this int64 x, int64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this int64 x, int64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this nuint x, int64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this nuint x, int64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this nint x, int64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this nint x, int64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this uintptr x, int64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this uintptr x, int64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this uint32 x, int64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this uint32 x, int64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this int32 x, int64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this int32 x, int64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this uint16 x, int64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this uint16 x, int64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this int16 x, int64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this int16 x, int64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this uint8 x, int64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this uint8 x, int64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this int8 x, int64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this int8 x, int64 n) => x = x.Lsh(n);
 }

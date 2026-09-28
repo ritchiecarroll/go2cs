@@ -139,17 +139,17 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
     if (tableBits > maxHuffmanBits) {
         return (0, 0, r.makeError(off, badHuffmanWeightsˢ));
     }
-    if (builtin.len(table) < ((nint)1).Lsh((uint64)(tableBits))) {
+    if (builtin.len(table) < ((nint)1).Lsh((int64)(tableBits))) {
         return (0, 0, r.makeError(off, huffmanTableTooSmallˢ));
     }
     // Work out the last weight value, which is omitted because
     // the weights must sum to a power of two.
-    var left = (((uint32)1).Lsh((uint64)(tableBits))) - weightMask;
+    var left = (((uint32)1).Lsh((int64)(tableBits))) - weightMask;
     if (left == 0) {
         return (0, 0, r.makeError(off, badHuffmanWeightsˢ));
     }
     nint highBit = 31 - bits.LeadingZeros32(left);
-    if (((uint32)1).Lsh((uint64)(highBit)) != left) {
+    if (((uint32)1).Lsh((int64)(highBit)) != left) {
         return (0, 0, r.makeError(off, badHuffmanWeightsˢ));
     }
     if (count >= 256) {
@@ -167,7 +167,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
     var next = (uint32)0;
     for (nint i = 0; i < tableBits; i++) {
         var cur = next;
-        next += weightMark[i + 1].Lsh((uint64)(i));
+        next += weightMark[i + 1].Lsh((int64)(i));
         weightMark[i + 1] = cur;
     }
     foreach (var (i, w) in weights[..(int)(count)]) {

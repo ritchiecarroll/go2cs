@@ -193,7 +193,7 @@ internal static (nint, error) setSeqTable(this ж<Reader> Ꮡr, block data, nint
             )
         }.slice();
         if (cap(r.seqTableBuffers[kind]) == 0) {
-            r.seqTableBuffers[kind] = new slice<fseBaselineEntry>(((nint)1).Lsh((uint64)((~info).maxBits)));
+            r.seqTableBuffers[kind] = new slice<fseBaselineEntry>(((nint)1).Lsh((int64)((~info).maxBits)));
         }
         r.seqTableBuffers[kind] = r.seqTableBuffers[kind][..1];
         {
@@ -206,20 +206,20 @@ internal static (nint, error) setSeqTable(this ж<Reader> Ꮡr, block data, nint
         return (off, default!);
     }
     case 2: {
-        if (cap(r.fseScratch) < ((nint)1).Lsh((uint64)((~info).maxBits))) {
+        if (cap(r.fseScratch) < ((nint)1).Lsh((int64)((~info).maxBits))) {
             // FSE_Compressed_Mode
-            r.fseScratch = new slice<fseEntry>(((nint)1).Lsh((uint64)((~info).maxBits)));
+            r.fseScratch = new slice<fseEntry>(((nint)1).Lsh((int64)((~info).maxBits)));
         }
-        r.fseScratch = r.fseScratch[..(int)(((nint)1).Lsh((uint64)((~info).maxBits)))];
+        r.fseScratch = r.fseScratch[..(int)(((nint)1).Lsh((int64)((~info).maxBits)))];
         var (tableBits, roff, err) = Ꮡr.readFSE(data, off, (~info).maxSym, (~info).maxBits, r.fseScratch);
         if (err != default!) {
             return (0, err);
         }
-        r.fseScratch = r.fseScratch[..(int)(((nint)1).Lsh((uint64)(tableBits)))];
+        r.fseScratch = r.fseScratch[..(int)(((nint)1).Lsh((int64)(tableBits)))];
         if (cap(r.seqTableBuffers[kind]) == 0) {
-            r.seqTableBuffers[kind] = new slice<fseBaselineEntry>(((nint)1).Lsh((uint64)((~info).maxBits)));
+            r.seqTableBuffers[kind] = new slice<fseBaselineEntry>(((nint)1).Lsh((int64)((~info).maxBits)));
         }
-        r.seqTableBuffers[kind] = r.seqTableBuffers[kind][..(int)(((nint)1).Lsh((uint64)(tableBits)))];
+        r.seqTableBuffers[kind] = r.seqTableBuffers[kind][..(int)(((nint)1).Lsh((int64)(tableBits)))];
         {
             var errΔ1 = (~info).toBaseline(Ꮡr, roff, r.fseScratch, r.seqTableBuffers[kind]); if (errΔ1 != default!) {
                 return (0, errΔ1);

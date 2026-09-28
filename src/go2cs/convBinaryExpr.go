@@ -419,8 +419,10 @@ func (v *Visitor) shiftCountGuarded(right ast.Expr, width int) bool {
 				return false
 			}
 		case token.REM:
-			// A modulo by a constant in [1, width] bounds the count to [0, width-1].
-			if m, ok := v.constIntShiftValue(bin.Y); ok && m >= 1 && m <= int64(width) {
+			// A modulo by a constant in [1, width] bounds an UNSIGNED count to [0, width-1]. A signed
+			// one keeps its dividend's sign (Go's -3 % 8 is -3), so it can still be negative and
+			// needs the guard, which raises Go's negative-shift panic.
+			if m, ok := v.constIntShiftValue(bin.Y); ok && m >= 1 && m <= int64(width) && !v.shiftCountIsSigned(bin.X) {
 				return false
 			}
 		}
@@ -495,21 +497,29 @@ func (v *Visitor) shiftReceiverRendersAsCast(expr ast.Expr) bool {
 	return ok && v.callExprIsTypeConversion(call)
 }
 
-// shiftCountUint64Operand renders the shift count widened to the guard's uint64 parameter, so its FULL
-// magnitude is seen before the width comparison (a computed count such as `64 - n` that unsigned-wraps
-// stays huge; a narrower negative count reads as huge → 0, matching the out-of-scope negative-count
-// behavior). A count already typed uint64 or native uint widens implicitly and is passed through
-// unwrapped; a NAMED numeric count converts only to its own underlying basic, so it is routed through it
-// (`(uint64)(nint)(sh)`) and a numeric TYPE PARAMETER through the ConvertToUInt64 bridge — both mirroring
-// intCastOperand. Every other integer count takes a plain `(uint64)(…)` wrap.
+// shiftCountUint64Operand renders the shift count widened for the guard, so its FULL magnitude is seen
+// before the width comparison (a computed count such as `64 - n` that unsigned-wraps stays huge). An
+// unsigned count widens to uint64. A SIGNED count widens to int64 instead (`(int64)(n)`), which binds
+// golib's signed-count GoShift overloads: a count below zero raises Go's runtime error "negative shift
+// amount", as runtime.panicshift does, where a uint64 widening would read it as huge and yield 0. A
+// count already typed uint64 or native uint widens implicitly and is passed through unwrapped; a NAMED
+// numeric count converts only to its own underlying basic, so it is routed through it
+// (`(int64)(sbyte)(c)`) and a numeric TYPE PARAMETER through the ConvertToUInt64 bridge — both mirroring
+// intCastOperand. A type-parameter count stays unsigned-widened: its sign is not known when converting.
 func (v *Visitor) shiftCountUint64Operand(expr ast.Expr, converted string) string {
 	if !v.shiftCountNeedsWiden(expr) {
 		return converted
 	}
 
+	width := "uint64"
+
+	if v.shiftCountIsSigned(expr) {
+		width = "int64"
+	}
+
 	if named, ok := v.getType(expr, false).(*types.Named); ok {
 		if basic, ok := named.Underlying().(*types.Basic); ok && basic.Info()&types.IsNumeric != 0 {
-			return fmt.Sprintf("(uint64)(%s)(%s)", v.getCSharpTypeName(basic), converted)
+			return fmt.Sprintf("(%s)(%s)(%s)", width, v.getCSharpTypeName(basic), converted)
 		}
 	}
 
@@ -517,7 +527,26 @@ func (v *Visitor) shiftCountUint64Operand(expr ast.Expr, converted string) strin
 		return fmt.Sprintf("ConvertToUInt64<%s>(%s)", v.getCSharpTypeName(tp), converted)
 	}
 
-	return fmt.Sprintf("(uint64)(%s)", converted)
+	return fmt.Sprintf("(%s)(%s)", width, converted)
+}
+
+// shiftCountIsSigned reports whether a shift count is a non-constant signed integer, the one kind of
+// count Go must check for a negative value at run time. A constant count is never negative here: Go
+// rejects a negative constant count when compiling.
+func (v *Visitor) shiftCountIsSigned(expr ast.Expr) bool {
+	if tv, ok := v.info.Types[expr]; ok && tv.Value != nil {
+		return false
+	}
+
+	t := v.getExprType(expr)
+
+	if t == nil {
+		return false
+	}
+
+	basic, ok := t.Underlying().(*types.Basic)
+
+	return ok && basic.Info()&types.IsInteger != 0 && basic.Info()&types.IsUnsigned == 0
 }
 
 // shiftCountNeedsWiden reports whether a shift count needs widening for the guard — true unless the count

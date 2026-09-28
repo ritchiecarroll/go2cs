@@ -42,11 +42,11 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
     }
     // The number of remaining probabilities, plus 1.
     // This determines the number of bits to be read for the next value.
-    nint remaining = (((nint)1).Lsh((uint64)(accuracyLog))) + 1;
+    nint remaining = (((nint)1).Lsh((int64)(accuracyLog))) + 1;
     // The current difference between small and large values,
     // which depends on the number of remaining values.
     // Small values use 1 less bit.
-    nint threshold = ((nint)1).Lsh((uint64)(accuracyLog));
+    nint threshold = ((nint)1).Lsh((int64)(accuracyLog));
     // The number of bits needed to compute threshold.
     nint bitsNeeded = accuracyLog + 1;
     // The next character value.
@@ -102,7 +102,7 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
         if ((nint)((uint32)(br.bits & (uint32)(threshold - 1))) < max){
             // A small value.
             count = (nint)((uint32)(br.bits & (uint32)(threshold - 1)));
-            br.bits.RshAssign((uint64)(bitsNeeded - 1));
+            br.bits.RshAssign((int64)(bitsNeeded - 1));
             br.cnt -= (uint32)(bitsNeeded - 1);
         } else {
             // A large value.
@@ -110,7 +110,7 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
             if (count >= threshold) {
                 count -= max;
             }
-            br.bits.RshAssign((uint64)(bitsNeeded));
+            br.bits.RshAssign((int64)(bitsNeeded));
             br.cnt -= (uint32)bitsNeeded;
         }
         count--;
@@ -153,7 +153,7 @@ internal static readonly @string fseStateErrorˢ = "FSE state error"u8;
 // The probabilities are in norm. next is scratch space. The number of bits
 // in the table is tableBits.
 [GoRecv] internal static error buildFSE(this ref Reader r, nint off, slice<int16> norm, slice<fseEntry> table, nint tableBits) {
-    nint tableSize = ((nint)1).Lsh((uint64)(tableBits));
+    nint tableSize = ((nint)1).Lsh((int64)(tableBits));
     nint highThreshold = tableSize - 1;
     array<uint16> next = new(256);
     foreach (var (i, n) in norm) {
@@ -190,7 +190,7 @@ internal static readonly @string fseStateErrorˢ = "FSE state error"u8;
         nint highBit = 15 - bits.LeadingZeros16(nextState);
         nint bitsΔ1 = tableBits - highBit;
         table[i].bits = (uint8)bitsΔ1;
-        table[i].@base = (uint16)((nextState.Lsh((uint64)(bitsΔ1))) - (uint16)tableSize);
+        table[i].@base = (uint16)((nextState.Lsh((int64)(bitsΔ1))) - (uint16)tableSize);
     }
     return default!;
 }

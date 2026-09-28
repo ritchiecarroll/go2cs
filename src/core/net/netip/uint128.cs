@@ -20,7 +20,7 @@ partial class netip_package {
 // mask6 returns a uint128 bitmask with the topmost n bits of a
 // 128-bit number.
 internal static uint128 mask6(nint n) {
-    return new uint128(~((~(uint64)0).Rsh((uint64)(n))), (~(uint64)0).Lsh((uint64)((128 - n))));
+    return new uint128(~((~(uint64)0).Rsh((int64)(n))), (~(uint64)0).Lsh((int64)((128 - n))));
 }
 
 // isZero reports whether u == 0.

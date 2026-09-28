@@ -1036,6 +1036,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMinIntDivideShadow() => CheckTarget("MinIntDivideShadow");
 
     [TestMethod]
+    public void CheckNegativeShiftCount() => CheckTarget("NegativeShiftCount");
+
+    [TestMethod]
     public void CheckMinMaxBuiltin() => CheckTarget("MinMaxBuiltin");
 
     [TestMethod]

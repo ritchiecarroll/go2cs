@@ -234,7 +234,7 @@ internal static (uint64, bool) alignUpPow2(uint64 n) {
     if (n == 0) {
         return (0, false);
     }
-    var v = (((uint64)1).Lsh((uint64)(sys.Len64(n - 1))));
+    var v = (((uint64)1).Lsh((int64)(sys.Len64(n - 1))));
     if (v == 0) {
         return (0, true);
     }

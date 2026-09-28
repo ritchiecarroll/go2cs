@@ -25,7 +25,7 @@ internal static array<byte> /*a16*/ as16(uint64 hi, uint64 lo) {
 
 internal static void putUint64(slice<byte> b, uint64 v) {
     for (nint i = 0; i < 8; i++) {
-        b[i] = (byte)(v.Rsh((uint64)((56 - 8 * i))));
+        b[i] = (byte)(v.Rsh((int64)((56 - 8 * i))));
     }
 }
 

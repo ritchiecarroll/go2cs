@@ -169,6 +169,23 @@ public static class RuntimeErrorPanic
         return new PanicException(IntegerDivideByZeroValue?.Invoke() ?? IntegerDivideByZeroMessage);
     }
 
+    private const string NegativeShiftAmountMessage = $"{RuntimeErrorMessage}negative shift amount";
+
+    /// <summary>
+    /// The <c>runtime.shiftError</c> value (<c>runtime.Error</c>), as the converted runtime registers
+    /// it; see <see cref="IntegerDivideByZeroValue"/>, which this mirrors.
+    /// </summary>
+    public static Func<object>? ShiftErrorValue { get; set; }
+
+    /// <summary>
+    /// Go's panic for a shift whose signed count is negative at run time (runtime.panicshift), raised by
+    /// golib's signed-count <c>GoShift</c> overloads.
+    /// </summary>
+    public static PanicException NegativeShiftAmount()
+    {
+        return new PanicException(ShiftErrorValue?.Invoke() ?? NegativeShiftAmountMessage);
+    }
+
     private const string ComparingUncomparableTypeMessage = $"{RuntimeErrorMessage}comparing uncomparable type {{0}}";
 
     /// <summary>

@@ -980,6 +980,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMinIntDivideShadow() => CheckTarget("MinIntDivideShadow");
 
     [TestMethod]
+    public void CheckNegativeShiftCount() => CheckTarget("NegativeShiftCount");
+
+    [TestMethod]
     public void CheckMinMaxBuiltin() => CheckTarget("MinMaxBuiltin");
 
     [TestMethod]

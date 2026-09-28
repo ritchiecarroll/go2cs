@@ -1033,6 +1033,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMinIntDivideShadow() => CheckTarget("MinIntDivideShadow");
 
     [TestMethod]
+    public void CheckNegativeShiftCount() => CheckTarget("NegativeShiftCount");
+
+    [TestMethod]
     public void CheckMinMaxBuiltin() => CheckTarget("MinMaxBuiltin");
 
     [TestMethod]

@@ -463,7 +463,7 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
     for (nint i = len(tab) - 1; i >= 0; i--) {
         {
             (t, r) = t.div(r, q, tab[i]); if (len(r) == 0) {
-                p5 += fp * (((nuint)1).Lsh((uint64)(i))); // tab[i] == 5^(fp·2^i)
+                p5 += fp * (((nuint)1).Lsh((int64)(i))); // tab[i] == 5^(fp·2^i)
                 q = q.set(t);
             }
         }

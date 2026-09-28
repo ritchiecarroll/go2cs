@@ -228,7 +228,7 @@ internal static slice<byte> ringCompressAndEncode1(slice<byte> s, ringElement f)
         b[i] = 0;
     }
     foreach (var (i, _) in f) {
-        b[i / 8] |= (uint8)((uint8)((uint16)(compress(f[i], 1) << (int)((i % 8)))));
+        b[i / 8] |= (uint8)((uint8)(compress(f[i], 1).Lsh((int64)((i % 8)))));
     }
     return s;
 }
@@ -241,7 +241,7 @@ internal static slice<byte> ringCompressAndEncode1(slice<byte> s, ringElement f)
 internal static ringElement ringDecodeAndDecompress1(ref array<byte> b) {
     ringElement f = default!;
     foreach (var (i, _) in f) {
-        var b_i = (byte)((b[i / 8] >> (int)((i % 8))) & 1);
+        var b_i = (byte)(b[i / 8].Rsh((int64)((i % 8))) & 1);
         UntypedInt halfQ = /* (q + 1) / 2 */ 1665; // ⌈q/2⌋, rounded up per FIPS 203, Section 2.3
         f[i] = (fieldElement)(((fieldElement)(uint16)b_i) * (uint16)halfQ); // 0 decompresses to 0, and 1 to ⌈q/2⌋
     }

@@ -26,7 +26,7 @@ internal static void Main() {
     fmt.Println(tcb.Lsh(k));
     fmt.Println((byte)(b + ((byte)ucb).Lsh(k)));
     fmt.Println((byte)(cb << (int)(3)));
-    fmt.Println(cb.Lsh((uint64)(ki)));
+    fmt.Println(cb.Lsh((int64)(ki)));
     fmt.Println(w.Lsh(k));
     fmt.Println(tcw.Lsh(k));
     fmt.Println(s8.Lsh(k));
