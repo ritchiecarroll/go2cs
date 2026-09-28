@@ -24,7 +24,7 @@ internal static nint randInt() {
 }
 
 internal static nint randIntn(nint n) {
-    return randInt() % n;
+    return rem(randInt(), n);
 }
 
 // reverseaddr returns the in-addr.arpa. or ip6.arpa. hostname of the IP

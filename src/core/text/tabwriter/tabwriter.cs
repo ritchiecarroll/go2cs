@@ -267,12 +267,12 @@ internal static slice<byte> tabs = slice<byte>("\t\t\t\t\t\t\t\t"u8);
             return; // tabs have no width - can't do any padding
         }
         // make cellw the smallest multiple of b.tabwidth
-        cellw = (cellw + b.tabwidth - 1) / b.tabwidth * b.tabwidth;
+        cellw = quo((cellw + b.tabwidth - 1), b.tabwidth) * b.tabwidth;
         nint n = cellw - textw; // amount of padding
         if (n < 0) {
             throw panic("internal error");
         }
-        b.writeN(tabs, (n + b.tabwidth - 1) / b.tabwidth);
+        b.writeN(tabs, quo((n + b.tabwidth - 1), b.tabwidth));
         return;
     }
     // padding is done with non-tab characters

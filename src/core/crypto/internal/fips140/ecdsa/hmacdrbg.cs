@@ -128,7 +128,7 @@ internal static void pad000(ж<hmac.HMAC> Ꮡh, nint writtenSoFar) {
 
     nint blockSize = h.BlockSize();
     {
-        nint rem = writtenSoFar % blockSize; if (rem != 0) {
+        nint rem = builtin.rem(writtenSoFar, blockSize); if (rem != 0) {
             h.Write(new slice<byte>(blockSize - rem));
         }
     }

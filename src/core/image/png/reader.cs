@@ -515,8 +515,8 @@ internal static readonly @string badFilterTypeˢ = "bad filter type"u8;
     if (d.interlace == itAdam7 && !allocateOnly) {
         var p = interlacing[pass];
         // Add the multiplication factor and subtract one, effectively rounding up.
-        width = (width - p.xOffset + p.xFactor - 1) / p.xFactor;
-        height = (height - p.yOffset + p.yFactor - 1) / p.yFactor;
+        width = quo((width - p.xOffset + p.xFactor - 1), p.xFactor);
+        height = quo((height - p.yOffset + p.yFactor - 1), p.yFactor);
         // A PNG image can't have zero width or height, but for an interlaced
         // image, an individual pass might have zero width or height. If so, we
         // shouldn't even read a per-row filter type byte, so return early.

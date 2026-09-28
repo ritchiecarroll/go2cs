@@ -89,8 +89,8 @@ internal static (@string, error) decode(@string encoded) {
         }
         var x = (int32)(len(output) + 1);
         bias = adapt(i - oldI, x, oldI == 0);
-        n += i / x;
-        i %= x;
+        n += quo(i, x);
+        i = rem(i, x);
         if (n < 0 || n > utf8.MaxRune) {
             return ("", punyError(encoded));
         }
@@ -160,8 +160,8 @@ internal static (@string, error) encode(@string prefix, @string s) {
                 if (q < t) {
                     break;
                 }
-                output = append(output, encodeDigit(t + (q - t) % (@base - t)));
-                q = (q - t) / (@base - t);
+                output = append(output, encodeDigit(t + rem((q - t), (@base - t))));
+                q = quo((q - t), (@base - t));
             }
             output = append(output, encodeDigit(q));
             bias = adapt(delta, h + 1, h == b);
@@ -218,13 +218,13 @@ internal static int32 adapt(int32 delta, int32 numPoints, bool firstTime) {
     } else {
         delta /= 2;
     }
-    delta += delta / numPoints;
+    delta += quo(delta, numPoints);
     var k = (int32)0;
     while (delta > ((@base - tmin) * tmax) / 2) {
         delta /= @base - tmin;
         k += @base;
     }
-    return k + (@base - tmin + 1) * delta / (delta + skew);
+    return k + quo((@base - tmin + 1) * delta, (delta + skew));
 }
 
 } // end idna_package

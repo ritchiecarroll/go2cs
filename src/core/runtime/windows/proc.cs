@@ -6117,7 +6117,7 @@ internal static ж<g> globrunqget(ж<Δp> Ꮡpp, int32 max) {
     if (sched.runqsize == 0) {
         return default!;
     }
-    var n = sched.runqsize / gomaxprocs + 1;
+    var n = quo(sched.runqsize, gomaxprocs) + 1;
     if (n > sched.runqsize) {
         n = sched.runqsize;
     }

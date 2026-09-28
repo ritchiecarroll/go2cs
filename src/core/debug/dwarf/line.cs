@@ -539,8 +539,8 @@ internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
     if (opcode >= r.opcodeBase) {
         // Special opcode [DWARF2 6.2.5.1, DWARF4 6.2.5.1]
         nint adjustedOpcode = opcode - r.opcodeBase;
-        r.advancePC(adjustedOpcode / r.lineRange);
-        nint lineDelta = r.lineBase + adjustedOpcode % r.lineRange;
+        r.advancePC(quo(adjustedOpcode, r.lineRange));
+        nint lineDelta = r.lineBase + rem(adjustedOpcode, r.lineRange);
         r.state.Line += lineDelta;
         goto emit;
     }
@@ -626,7 +626,7 @@ internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
         r.state.BasicBlock = true;
     }
     else if (exprᴛ1 == lnsConstAddPC) {
-        r.advancePC((255 - r.opcodeBase) / r.lineRange);
+        r.advancePC(quo((255 - r.opcodeBase), r.lineRange));
     }
     else if (exprᴛ1 == lnsFixedAdvancePC) {
         r.state.Address += (uint64)r.buf.uint16();
@@ -664,8 +664,8 @@ emit:
 // and OpIndex) in r.state by opAdvance steps.
 [GoRecv] internal static void advancePC(this ref ΔLineReader r, nint opAdvance) {
     nint opIndex = r.state.OpIndex + opAdvance;
-    r.state.Address += (uint64)(r.minInstructionLength * (opIndex / r.maxOpsPerInstruction));
-    r.state.OpIndex = opIndex % r.maxOpsPerInstruction;
+    r.state.Address += (uint64)(r.minInstructionLength * (quo(opIndex, r.maxOpsPerInstruction)));
+    r.state.OpIndex = rem(opIndex, r.maxOpsPerInstruction);
 }
 
 // A LineReaderPos represents a position in a line table.

@@ -70,7 +70,7 @@ public static void ReadGCStats(ж<GCStats> Ꮡstats) {
             slices.Sort<slice<time.Duration>, time.Duration>(sorted);
             nint nq = len(stats.PauseQuantiles) - 1;
             for (nint i = 0; i < nq; i++) {
-                stats.PauseQuantiles[i] = sorted[len(sorted) * i / nq];
+                stats.PauseQuantiles[i] = sorted[quo(len(sorted) * i, nq)];
             }
             stats.PauseQuantiles[nq] = sorted[len(sorted) - 1];
         }

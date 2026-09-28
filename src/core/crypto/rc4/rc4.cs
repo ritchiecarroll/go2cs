@@ -49,7 +49,7 @@ public static (ж<Cipher>, error) NewCipher(slice<byte> key) {
     }
     uint8 j = 0;
     for (nint i = 0; i < 256; i++) {
-        j += (uint8)((uint8)c.s[i] + key[i % k]);
+        j += (uint8)((uint8)c.s[i] + key[rem(i, k)]);
         (c.s[i], c.s[j]) = (c.s[j], c.s[i]);
     }
     return (Ꮡc, default!);

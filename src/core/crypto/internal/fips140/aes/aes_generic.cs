@@ -151,10 +151,10 @@ internal static void expandKeyGeneric(ж<blockExpanded> Ꮡc, slice<byte> key) {
     }
     for (; i < c.roundKeysSize(); i++) {
         var t = c.enc[i - 1];
-        if (i % nk == 0){
-            t = (uint32)(subw(rotw(t)) ^ (((uint32)powx[i / nk - 1] << (int)(24))));
+        if (rem(i, nk) == 0){
+            t = (uint32)(subw(rotw(t)) ^ (((uint32)powx[quo(i, nk) - 1] << (int)(24))));
         } else 
-        if (nk > 6 && i % nk == 4) {
+        if (nk > 6 && rem(i, nk) == 4) {
             t = subw(t);
         }
         c.enc[i] = (uint32)(c.enc[i - nk] ^ t);

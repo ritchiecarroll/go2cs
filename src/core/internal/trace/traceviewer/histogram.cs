@@ -72,7 +72,7 @@ public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Durati
             fmt.Fprintf(new strings_BuilderжWriter(w), @"<tr><td class=""histoTime"" align=""right"">%s</td>"u8, h.BucketMin(i));
         }
         // Bucket bar.
-        nint width = h.Buckets[i] * barWidth / maxCount;
+        nint width = quo(h.Buckets[i] * barWidth, maxCount);
         fmt.Fprintf(new strings_BuilderжWriter(w), @"<td><div style=""width:%dpx;background:blue;position:relative"">&nbsp;</div></td>"u8, width);
         // Bucket count.
         fmt.Fprintf(new strings_BuilderжWriter(w), @"<td align=""right""><div style=""position:relative"">%d</div></td>"u8, h.Buckets[i]);

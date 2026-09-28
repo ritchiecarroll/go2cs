@@ -1146,7 +1146,7 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now) {
     var delay = now - t.when;
     if (t.period > 0){
         // Leave in heap but adjust next time to fire.
-        next = t.when + t.period * (1 + delay / t.period);
+        next = t.when + t.period * (1 + quo(delay, t.period));
         if (next < 0) {
             // check for overflow.
             next = maxWhen;

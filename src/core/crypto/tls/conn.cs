@@ -332,7 +332,7 @@ internal static (nint toRemove, byte good) extractPadding(slice<byte> payload) {
 }
 
 internal static nint roundUp(nint a, nint b) {
-    return a + (b - a % b) % b;
+    return a + rem((b - rem(a, b)), b);
 }
 
 // cbcMode is an interface for block ciphers using cipher block chaining.
@@ -390,7 +390,7 @@ internal static nint roundUp(nint a, nint b) {
         case {} Δc when Δc._<cbcMode>(out var c): {
             nint blockSize = c.BlockSize();
             nint minPayload = explicitNonceLen + roundUp(hc.mac.Size() + 1, blockSize);
-            if (len(payload) % blockSize != 0 || len(payload) < minPayload) {
+            if (rem(len(payload), blockSize) != 0 || len(payload) < minPayload) {
                 return (default!, 0, alertBadRecordMAC);
             }
             if (explicitNonceLen > 0) {
@@ -548,7 +548,7 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
         var mac = tls10MAC(hc.mac, hc.scratchBuf[..0], hc.seq[..], record[..(int)(recordHeaderLen)], payload, default!);
         nint blockSize = c.BlockSize();
         nint plaintextLen = len(payload) + len(mac);
-        nint paddingLen = blockSize - plaintextLen % blockSize;
+        nint paddingLen = blockSize - rem(plaintextLen, blockSize);
         (record, dst) = sliceForAppend(record, plaintextLen + paddingLen);
         copy(dst, payload);
         copy(dst[(int)(len(payload))..], mac);

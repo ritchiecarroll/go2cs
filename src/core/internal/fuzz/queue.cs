@@ -34,7 +34,7 @@ partial class fuzz_package {
     var newElems = new slice<any>(newCap);
     nint oldLen = q.len;
     for (nint i = 0; i < oldLen; i++) {
-        newElems[i] = q.elems[(q.head + i) % oldCap];
+        newElems[i] = q.elems[rem((q.head + i), oldCap)];
     }
     q.elems = newElems;
     q.head = 0;
@@ -44,7 +44,7 @@ partial class fuzz_package {
     if (q.len + 1 > q.cap()) {
         q.grow();
     }
-    nint i = (q.head + q.len) % q.cap();
+    nint i = rem((q.head + q.len), q.cap());
     q.elems[i] = e;
     q.len++;
 }
@@ -55,7 +55,7 @@ partial class fuzz_package {
     }
     var e = q.elems[q.head];
     q.elems[q.head] = default!;
-    q.head = (q.head + 1) % q.cap();
+    q.head = rem((q.head + 1), q.cap());
     q.len--;
     return (e, true);
 }

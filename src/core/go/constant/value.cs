@@ -1455,10 +1455,10 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
             return makeRat(big.NewRat(a, b));
         }
         else if (exprᴛ2 == token.QUO_ASSIGN) {
-            c = a / b;
+            c = builtin.quo(a, b);
         }
         else if (exprᴛ2 == token.REM) {
-            c = a % b;
+            c = rem(a, b);
         }
         else if (exprᴛ2 == token.AND) {
             c = (int64)(a & b);

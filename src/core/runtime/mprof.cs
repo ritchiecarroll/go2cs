@@ -385,7 +385,7 @@ public static void blockevent(int64 cycles, nint skip) {
 // blocksampled returns true for all events where cycles >= rate. Shorter
 // events have a cycles/rate random chance of returning true.
 internal static bool blocksampled(int64 cycles, int64 rate) {
-    if (rate <= 0 || (rate > cycles && cheaprand64() % rate > cycles)) {
+    if (rate <= 0 || (rate > cycles && rem(cheaprand64(), rate) > cycles)) {
         return false;
     }
     return true;
@@ -513,10 +513,10 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
     if (rate != 0 && rate < lt.timeRate) {
         lt.timeRate = rate;
     }
-    if ((int64)cheaprand() % lt.timeRate == 0) {
+    if (rem((int64)cheaprand(), lt.timeRate) == 0) {
         lt.timeStart = nanotime();
     }
-    if (rate > 0 && (int64)cheaprand() % rate == 0) {
+    if (rate > 0 && rem((int64)cheaprand(), rate) == 0) {
         lt.tickStart = cputicks();
     }
 }
@@ -727,7 +727,7 @@ internal static void mutexevent(int64 cycles, nint skip) {
         cycles = 0;
     }
     var rate = (int64)atomic.Load64(Ꮡmutexprofilerate);
-    if (rate > 0 && cheaprand64() % rate == 0) {
+    if (rate > 0 && rem(cheaprand64(), rate) == 0) {
         saveblockevent(cycles, rate, skip + 1, mutexProfile);
     }
 }

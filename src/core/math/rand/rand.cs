@@ -141,7 +141,7 @@ public static void Seed(this ж<Rand> Ꮡr, int64 seed) {
     while (v > max) {
         v = r.Int63();
     }
-    return v % n;
+    return rem(v, n);
 }
 
 // Int31n returns, as an int32, a non-negative pseudo-random number in the half-open interval [0,n).
@@ -159,7 +159,7 @@ public static void Seed(this ж<Rand> Ꮡr, int64 seed) {
     while (v > max) {
         v = r.Int31();
     }
-    return v % n;
+    return rem(v, n);
 }
 
 // int31n returns, as an int32, a non-negative pseudo-random number in the half-open interval [0,n).

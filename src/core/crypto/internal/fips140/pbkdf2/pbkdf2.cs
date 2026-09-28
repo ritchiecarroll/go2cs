@@ -17,7 +17,7 @@ partial class pbkdf2_package {
 // is an int, which is safe as (x+y-1)/y should always fit, regardless
 // of the integer size.
 internal static nint divRoundUp(nint x, nint y) {
-    return (nint)(((int64)x + (int64)y - 1) / (int64)y);
+    return (nint)(quo(((int64)x + (int64)y - 1), (int64)y));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

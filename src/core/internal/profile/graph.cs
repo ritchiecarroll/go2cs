@@ -64,7 +64,7 @@ partial class profile_package {
     if (n.FlatDiv == 0) {
         return n.Flat;
     }
-    return n.Flat / n.FlatDiv;
+    return quo(n.Flat, n.FlatDiv);
 }
 
 // CumValue returns the inclusive value for this node, computing the
@@ -73,7 +73,7 @@ partial class profile_package {
     if (n.CumDiv == 0) {
         return n.Cum;
     }
-    return n.Cum / n.CumDiv;
+    return quo(n.Cum, n.CumDiv);
 }
 
 // AddToEdge increases the weight of an edge between two nodes. If
@@ -230,7 +230,7 @@ public static ж<Edge> FindTo(this EdgeMap em, ж<Node> Ꮡn) {
     if (e.WeightDiv == 0) {
         return e.Weight;
     }
-    return e.Weight / e.WeightDiv;
+    return quo(e.Weight, e.WeightDiv);
 }
 
 // NewGraph computes a graph from a profile.

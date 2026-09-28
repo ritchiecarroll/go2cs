@@ -191,7 +191,7 @@ internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж
                 sizeLeft = 1;
             } else 
             if (n > 0) {
-                sizeLeft /= n;
+                sizeLeft = quo(sizeLeft, n);
             }
             for (nint i = 0; i < n; i++) {
                 var (elem, okΔ9) = sizedValue(concrete.Field(i).Type, Ꮡrand, sizeLeft);

@@ -1730,12 +1730,12 @@ internal static bool isLeap(nint year) {
 //	0 <= nlo < base
 internal static (nint nhi, nint nlo) norm(nint hi, nint lo, nint @base) {
     if (lo < 0) {
-        nint n = (-lo - 1) / @base + 1;
+        nint n = quo((-lo - 1), @base) + 1;
         hi -= n;
         lo += n * @base;
     }
     if (lo >= @base) {
-        nint n = lo / @base;
+        nint n = quo(lo, @base);
         hi += n;
         lo -= n * @base;
     }
@@ -1852,14 +1852,14 @@ internal static (nint qmod2, Duration r) div(Time t, Duration d) {
     }
     switch (ᐧ) {
     case {} when d < ΔSecond && ΔSecond % (d + d) == 0: {
-        qmod2 = (nint)((nint)(nsec / (int32)(int64)d) & 1);
-        r = ((Duration)(int64)(nsec % (int32)(int64)d));
+        qmod2 = (nint)((nint)(quo(nsec, (int32)(int64)d)) & 1);
+        r = ((Duration)(int64)(rem(nsec, (int32)(int64)d)));
         break;
     }
     case {} when d % ΔSecond == 0: {
         var d1 = (int64)(d / ΔSecond);
-        qmod2 = (nint)((nint)(sec / d1) & 1);
-        r = ((Duration)(sec % d1)) * ΔSecond + ((Duration)(int64)nsec);
+        qmod2 = (nint)((nint)(quo(sec, d1)) & 1);
+        r = ((Duration)(rem(sec, d1))) * ΔSecond + ((Duration)(int64)nsec);
         break;
     }
     default: {

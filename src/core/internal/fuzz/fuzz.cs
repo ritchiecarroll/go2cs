@@ -781,8 +781,8 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
         return (input, true);
     }
     if (c.opts.Limit > 0) {
-        input.limit = c.opts.Limit / (int64)c.opts.Parallel;
-        if (c.opts.Limit % (int64)c.opts.Parallel > 0) {
+        input.limit = quo(c.opts.Limit, (int64)c.opts.Parallel);
+        if (rem(c.opts.Limit, (int64)c.opts.Parallel) > 0) {
             input.limit++;
         }
         var remaining = c.opts.Limit - c.count - c.countWaiting;
@@ -852,8 +852,8 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
         if (input.crasherMsg != ""u8){
             input.limit = c.opts.Limit;
         } else {
-            input.limit = c.opts.Limit / (int64)c.opts.Parallel;
-            if (c.opts.Limit % (int64)c.opts.Parallel > 0) {
+            input.limit = quo(c.opts.Limit, (int64)c.opts.Parallel);
+            if (rem(c.opts.Limit, (int64)c.opts.Parallel) > 0) {
                 input.limit++;
             }
         }

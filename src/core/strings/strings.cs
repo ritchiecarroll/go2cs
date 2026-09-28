@@ -508,7 +508,7 @@ public static @string Join(slice<@string> elems, @string sep) {
 
     nint n = default!;
     if (len(sep) > 0) {
-        if (len(sep) >= maxInt / (len(elems) - 1)) {
+        if (len(sep) >= quo(maxInt, (len(elems) - 1))) {
             throw panic("strings: Join output length overflow");
         }
         n += len(sep) * (len(elems) - 1);

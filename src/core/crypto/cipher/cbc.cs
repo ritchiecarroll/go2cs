@@ -82,7 +82,7 @@ internal static BlockMode newCBCGenericEncrypter(Block b, slice<byte> iv) {
 }
 
 [GoRecv] internal static void CryptBlocks(this ref cbcEncrypter x, slice<byte> dst, slice<byte> src) {
-    if (len(src) % x.blockSize != 0) {
+    if (rem(len(src), x.blockSize) != 0) {
         throw panic("crypto/cipher: input not full blocks");
     }
     if (len(dst) < len(src)) {
@@ -165,7 +165,7 @@ internal static BlockMode newCBCGenericDecrypter(Block b, slice<byte> iv) {
 }
 
 [GoRecv] internal static void CryptBlocks(this ref cbcDecrypter x, slice<byte> dst, slice<byte> src) {
-    if (len(src) % x.blockSize != 0) {
+    if (rem(len(src), x.blockSize) != 0) {
         throw panic("crypto/cipher: input not full blocks");
     }
     if (len(dst) < len(src)) {

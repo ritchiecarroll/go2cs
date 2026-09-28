@@ -15,9 +15,9 @@ partial class jpeg_package {
 // div returns a/b rounded to the nearest integer, instead of rounded to zero.
 internal static int32 div(int32 a, int32 b) {
     if (a >= 0) {
-        return (a + ((b >> (int)(1)))) / b;
+        return quo((a + ((b >> (int)(1)))), b);
     }
-    return -((-a + ((b >> (int)(1)))) / b);
+    return -(quo((-a + ((b >> (int)(1)))), b));
 }
 
 // bitCount counts the number of bits needed to hold an integer.
@@ -621,7 +621,7 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
     // Convert from a quality rating to a scaling factor.
     nint scale = default!;
     if (quality < 50){
-        scale = 5000 / quality;
+        scale = quo(5000, quality);
     } else {
         scale = 200 - quality * 2;
     }

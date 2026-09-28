@@ -401,7 +401,7 @@ internal static readonly @string lumaChromaSubsamplingˢ = "luma/chroma subsampl
                 break;
             }
             case 1: {
-                if (d.comp[0].h % h != 0 || d.comp[0].v % v != 0) {
+                if (rem(d.comp[0].h, h) != 0 || rem(d.comp[0].v, v) != 0) {
                     // Cb.
                     return errUnsupportedSubsamplingRatio;
                 }
@@ -826,7 +826,7 @@ internal static readonly @string unknownColorModel4ˢ = "unknown color model: 4-
 }
 
 [GoRecv] internal static (image.Image, error) convertToRGB(this ref decoder d) {
-    nint cScale = d.comp[0].h / d.comp[1].h;
+    nint cScale = quo(d.comp[0].h, d.comp[1].h);
     var bounds = d.img3.Bounds();
     var img = image.NewRGBA(bounds);
     for (nint y = bounds.Min.Y; y < bounds.Max.Y; y++) {
@@ -835,8 +835,8 @@ internal static readonly @string unknownColorModel4ˢ = "unknown color model: 4-
         nint co = d.img3.COffset(bounds.Min.X, y);
         for ((nint i, nint iMax) = (0, bounds.Max.X - bounds.Min.X); i < iMax; i++) {
             img.Value.Pix[po + 4 * i + 0] = (~d.img3).Y[yo + i];
-            img.Value.Pix[po + 4 * i + 1] = (~d.img3).Cb[co + i / cScale];
-            img.Value.Pix[po + 4 * i + 2] = (~d.img3).Cr[co + i / cScale];
+            img.Value.Pix[po + 4 * i + 1] = (~d.img3).Cb[co + quo(i, cScale)];
+            img.Value.Pix[po + 4 * i + 2] = (~d.img3).Cr[co + quo(i, cScale)];
             img.Value.Pix[po + 4 * i + 3] = 255;
         }
     }

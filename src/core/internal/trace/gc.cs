@@ -390,7 +390,7 @@ internal static mmuSeries newMMUSeries(slice<MutatorUtil> util) {
         numBands = len(util);
     }
     var dur = util[len(util) - 1].Time - util[0].Time;
-    var bandDur = (dur + (int64)numBands - 1) / (int64)numBands;
+    var bandDur = quo((dur + (int64)numBands - 1), (int64)numBands);
     if (bandDur < 1) {
         bandDur = 1;
     }
@@ -738,12 +738,12 @@ keep:;
     // minBands is the minimum number of bands a window can span
     // and maxBands is the maximum number of bands a window can
     // span in any alignment.
-    nint minBands = (nint)(((int64)window + c.bandDur - 1) / c.bandDur);
-    nint maxBands = (nint)(((int64)window + 2 * (c.bandDur - 1)) / c.bandDur);
+    nint minBands = (nint)(quo(((int64)window + c.bandDur - 1), c.bandDur));
+    nint maxBands = (nint)(quo(((int64)window + 2 * (c.bandDur - 1)), c.bandDur));
     if (window > 1 && maxBands < 2) {
         throw panic("maxBands < 2");
     }
-    var tailDur = (int64)window % c.bandDur;
+    var tailDur = rem((int64)window, c.bandDur);
     nint nUtil = len(c.bands) - maxBands + 1;
     if (nUtil < 0) {
         nUtil = 0;

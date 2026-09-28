@@ -38,7 +38,7 @@ public static Point Mul(this Point p, nint k) {
 
 // Div returns the vector p/k.
 public static Point Div(this Point p, nint k) {
-    return new Point(p.X / k, p.Y / k);
+    return new Point(quo(p.X, k), quo(p.Y, k));
 }
 
 // In reports whether p is in r.
@@ -52,11 +52,11 @@ public static Point Mod(this Point p, Rectangle r) {
     nint w = r.Dx();
     nint h = r.Dy();
     p = p.Sub(r.Min);
-    p.X = p.X % w;
+    p.X = rem(p.X, w);
     if (p.X < 0) {
         p.X += w;
     }
-    p.Y = p.Y % h;
+    p.Y = rem(p.Y, h);
     if (p.Y < 0) {
         p.Y += h;
     }

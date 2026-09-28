@@ -158,7 +158,7 @@ internal static int64 Sizeof(this ж<gcSizes> Ꮡs, ΔType T) {
         // esize > 0
         // Final size is esize * n; and size must be <= maxInt64.
         const int64 maxInt64 = /* 1<<63 - 1 */ 9223372036854775807;
-        if (esize > maxInt64 / n) {
+        if (esize > quo(maxInt64, n)) {
             return -1; // esize * n overflows
         }
         return esize * n;

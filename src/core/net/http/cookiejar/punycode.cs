@@ -88,8 +88,8 @@ internal static (@string, error) encode(@string prefix, @string s) {
                 if (q < t) {
                     break;
                 }
-                output = append(output, encodeDigit(t + (q - t) % (@base - t)));
-                q = (q - t) / (@base - t);
+                output = append(output, encodeDigit(t + rem((q - t), (@base - t))));
+                q = quo((q - t), (@base - t));
             }
             output = append(output, encodeDigit(q));
             bias = adapt(delta, h + 1, h == b);
@@ -122,13 +122,13 @@ internal static int32 adapt(int32 delta, int32 numPoints, bool firstTime) {
     } else {
         delta /= 2;
     }
-    delta += delta / numPoints;
+    delta += quo(delta, numPoints);
     var k = (int32)0;
     while (delta > ((@base - tmin) * tmax) / 2) {
         delta /= @base - tmin;
         k += @base;
     }
-    return k + (@base - tmin + 1) * delta / (delta + skew);
+    return k + quo((@base - tmin + 1) * delta, (delta + skew));
 }
 
 // Strictly speaking, the remaining code below deals with IDNA (RFC 5890 and

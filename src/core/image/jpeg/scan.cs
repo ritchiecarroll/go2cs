@@ -16,8 +16,8 @@ partial class jpeg_package {
     }
     nint h0 = d.comp[0].h;
     nint v0 = d.comp[0].v;
-    nint hRatio = h0 / d.comp[1].h;
-    nint vRatio = v0 / d.comp[1].v;
+    nint hRatio = quo(h0, d.comp[1].h);
+    nint vRatio = quo(v0, d.comp[1].v);
     image.YCbCrSubsampleRatio subsampleRatio = default!;
     switch ((nint)((hRatio << (int)(4)) | vRatio)) {
     case 0x11: {
@@ -175,8 +175,8 @@ internal static readonly @string excessiveDcComponentˢ = "excessive DC componen
     // mxx and myy are the number of MCUs (Minimum Coded Units) in the image.
     nint h0 = d.comp[0].h;
     nint v0 = d.comp[0].v; // The h and v values from the Y components.
-    nint mxx = (d.width + 8 * h0 - 1) / (8 * h0);
-    nint myy = (d.height + 8 * v0 - 1) / (8 * v0);
+    nint mxx = quo((d.width + 8 * h0 - 1), (8 * h0));
+    nint myy = quo((d.height + 8 * v0 - 1), (8 * v0));
     if (d.img1 == nil && d.img3 == nil) {
         d.makeImg(mxx, myy);
     }
@@ -229,12 +229,12 @@ internal static readonly @string excessiveDcComponentˢ = "excessive DC componen
                     //	0 1 2
                     //	3 4 5
                     if (nComp != 1){
-                        bx = hi * mx + j % hi;
-                        by = vi * my + j / hi;
+                        bx = hi * mx + rem(j, hi);
+                        by = vi * my + quo(j, hi);
                     } else {
                         nint q = mxx * hi;
-                        bx = blockCount % q;
-                        by = blockCount / q;
+                        bx = rem(blockCount, q);
+                        by = quo(blockCount, q);
                         blockCount++;
                         if (bx * 8 >= d.width || by * 8 >= d.height) {
                             continue;
@@ -331,7 +331,7 @@ internal static readonly @string excessiveDcComponentˢ = "excessive DC componen
                 } // for j
             } // for i
             mcu++;
-            if (d.ri > 0 && mcu % d.ri == 0 && mcu < mxx * myy) {
+            if (d.ri > 0 && rem(mcu, d.ri) == 0 && mcu < mxx * myy) {
                 // For well-formed input, the RST[0-7] restart marker follows
                 // immediately. For corrupt input, call findRST to try to
                 // resynchronize.
@@ -487,13 +487,13 @@ break_loop:;
     // The h0, mxx, by and bx variables have the same meaning as in the
     // processSOS method.
     nint h0 = d.comp[0].h;
-    nint mxx = (d.width + 8 * h0 - 1) / (8 * h0);
+    nint mxx = quo((d.width + 8 * h0 - 1), (8 * h0));
     for (nint i = 0; i < d.nComp; i++) {
         if (d.progCoeffs[i] == default!) {
             continue;
         }
-        nint v = 8 * d.comp[0].v / d.comp[i].v;
-        nint h = 8 * d.comp[0].h / d.comp[i].h;
+        nint v = quo(8 * d.comp[0].v, d.comp[i].v);
+        nint h = quo(8 * d.comp[0].h, d.comp[i].h);
         nint stride = mxx * d.comp[i].h;
         for (nint by = 0; by * v < d.height; by++) {
             for (nint bx = 0; bx * h < d.width; bx++) {

@@ -64,7 +64,7 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
         (values[2], values[3]) = scaleHeapSample(r.InUseObjects(), r.InUseBytes(), rate);
         int64 blockSize = default!;
         if (r.AllocObjects > 0) {
-            blockSize = r.AllocBytes / r.AllocObjects;
+            blockSize = quo(r.AllocBytes, r.AllocObjects);
         }
         var bʗ1 = b;
         b.pbSample(values, locs, () => {

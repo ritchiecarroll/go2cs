@@ -259,7 +259,7 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
         }
         // data[2] is sampling rate in Hz. Convert to sampling
         // period in nanoseconds.
-        b.period = 1000000000 / (int64)data[2];
+        b.period = quo(1000000000, (int64)data[2]);
         b.havePeriod = true;
         data = data[3..];
         // Consume tag slot. Note that there isn't a meaningful tag

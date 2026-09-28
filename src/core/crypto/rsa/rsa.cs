@@ -432,7 +432,7 @@ public static (ж<PrivateKey>, error) GenerateMultiPrimeKey(io.Reader random, ni
         return (default!, errors.New(cryptoRsaˢ));
     }
     if (bits < 64) {
-        var primeLimit = (float64)(((uint64)1).Lsh((nuint)(bits / nprimes)));
+        var primeLimit = (float64)(((uint64)1).Lsh((nuint)(quo(bits, nprimes))));
         // pi approximates the number of primes less than primeLimit
         var pi = primeLimit / (math.Log(primeLimit) - 1D);
         // Generated primes start with 11 (in binary) so we can only
@@ -465,7 +465,7 @@ NextSetOfPrimes:
         }
         for (nint i = 0; i < nprimes; i++) {
             error err = default!;
-            (primes[i], err) = rand.Prime(random, todo / (nprimes - i));
+            (primes[i], err) = rand.Prime(random, quo(todo, (nprimes - i)));
             if (err != default!) {
                 return (default!, err);
             }

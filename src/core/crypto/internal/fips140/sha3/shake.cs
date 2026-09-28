@@ -29,7 +29,7 @@ internal static slice<byte> bytepad(slice<byte> data, nint rate) {
     @out = appendꓸꓸꓸ(@out, leftEncode((uint64)rate));
     @out = appendꓸꓸꓸ(@out, data);
     {
-        nint padlen = rate - len(@out) % rate; if (padlen < rate) {
+        nint padlen = rate - rem(len(@out), rate); if (padlen < rate) {
             @out = appendꓸꓸꓸ(@out, makeꓸꓸꓸ<byte>(padlen));
         }
     }
