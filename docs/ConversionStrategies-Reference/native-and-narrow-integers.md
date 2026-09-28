@@ -151,7 +151,7 @@ panic.
 **Where the check lives.** Go itself checks for -1 at run time only where the divisor is a variable, so that
 is the only place the helper appears:
 
-- `quo` and `rem` ([`builtin.cs`](../../src/core/golib/builtin.cs)) have `nint`, `int32` and `int64`
+- `quo` and `rem` (golib's `builtin.cs`) have `nint`, `int32` and `int64`
   overloads: `b == -1 ? unchecked(-a) : a / b` and `b == -1 ? 0 : a % b`. Their XML documentation says why,
   so a hover over a call explains it.
 - A NAMED integer type keeps `a / b`: go2cs-gen's `NumericTypeTemplate` gives a wrapper over `int32`, `int64`,
