@@ -473,9 +473,15 @@ public static void TestDeflateInflateString(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dictᶜ = "hello world"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string textᶜ = "hello again world"u8;
+
 public static void TestReaderDict(ж<testing.T> Ꮡt) {
-    @string dict = "hello world"u8;
-    @string text = "hello again world"u8;
+    @string dict = dictᶜ;
+    @string text = textᶜ;
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var (w, err) = NewWriter(new flate_test_package.bytes_BufferжWriter(Ꮡb), 5);
     if (err != default!) {
@@ -496,9 +502,15 @@ public static void TestReaderDict(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dictᶜ1 = "hello world"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string textᶜ1 = "hello again world"u8;
+
 public static void TestWriterDict(ж<testing.T> Ꮡt) {
-    @string dict = "hello world"u8;
-    @string text = "hello again world"u8;
+    @string dict = dictᶜ1;
+    @string text = textᶜ1;
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var (w, err) = NewWriter(new flate_test_package.bytes_BufferжWriter(Ꮡb), 5);
     if (err != default!) {
@@ -979,12 +991,18 @@ internal static readonly @string writeˢ = "Write: "u8;
 internal static readonly @string writerCloseˢ = "Writer.Close: "u8;
 internal static readonly @string readAllˢ = "ReadAll: "u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string abcᶜ = "abcdefgh"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string xyzᶜ = "stuvwxyz"u8;
+
 public static void TestBestSpeedMaxMatchOffset(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.Parallel();
-    @string abc = "abcdefgh"u8;
-    @string xyz = "stuvwxyz"u8;
+    @string abc = abcᶜ;
+    @string xyz = xyzᶜ;
     foreach (var (_, matchBefore) in new bool[]{false, true}.slice()) {
         foreach (var (_, extra) in new nint[]{0, inputMargin - 1, inputMargin, inputMargin + 1, 2 * inputMargin}.slice()) {
             for (nint offsetAdjᴛ1 = -5; offsetAdjᴛ1 <= +5; offsetAdjᴛ1++) {

@@ -46,6 +46,9 @@ private static readonly @string monitorˢ = "monitor: "u8;
 private static readonly @string crashˢ = "*.crash"u8;
 private static readonly @string testRunˢ = "-test.run=ExampleSetCrashOutput_monitor"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+private static readonly @string monitorVarᶜ = "RUNTIME_DEBUG_MONITOR"u8;
+
 // monitor starts the monitor process, which performs automated
 // crash reporting. Call this function immediately within main.
 //
@@ -53,7 +56,7 @@ private static readonly @string testRunˢ = "-test.run=ExampleSetCrashOutput_mon
 // in a special mode. In that mode, the call to monitor will never
 // return.
 internal static void monitor() {
-    @string monitorVar = "RUNTIME_DEBUG_MONITOR"u8;
+    @string monitorVar = monitorVarᶜ;
     if (os.Getenv(monitorVar) != ""u8) {
         // This is the monitor (child) process.
         log.SetFlags(0);

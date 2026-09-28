@@ -37,7 +37,7 @@ using static global::go.regexp.syntax_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("regexp/syntax/parse_test.go", "parse_test.cs", "AM8BuAOCAA4egu6CAAkUggAJFIKokoKCgoKUlJSCgs6igoIAGDjSgpSYgpSkgpSUgoKCggAFHwADLIKUgraCtoK2pIKkgoKUpIKCgoKCgpTIpoKCgoKCgqaCgriClKaCgpSCgoKUlKaCgoKClIKUlIK4isKCgpSCAFCQAYKCgIKkgIK2goCCpICCtoKAgqSAgtqigoKCgpSUlIKCgpaC3IKCgpSCgpaCggAdOIKCgoKClIKC")]
-[assembly: go.GoPositionMap("regexp/syntax/prog_test.go", "prog_test.cs", "AJAB2gGCgoKCgoLKooKCgoKUAAgMooKCgqaClA==")]
+[assembly: go.GoPositionMap("regexp/syntax/prog_test.go", "prog_test.cs", "AJAB2gGCgoKCgoLKooKCgoKUAAsMooKCgqaClA==")]
 [assembly: go.GoPositionMap("regexp/syntax/simplify_test.go", "simplify_test.cs", "AI0BmgKCgoKCgpSCgg==")]
 // </GoSourcePositionMaps>
 

@@ -254,6 +254,9 @@ internal static readonly object keyTooSmallForˢ3 = (@string)"key too small for 
 internal static readonly object keyTooSmallForSignPSSˢ = (@string)"key too small for SignPSS with PSSSaltLengthAuto"u8;
 internal static readonly object keyTooSmallForSignPSSˢ2 = (@string)"key too small for SignPSS with PSSSaltLengthEqualsHash"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string hashMsgᶜ = "crypto/rsa: input must be hashed message"u8;
+
 internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpriv) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
@@ -300,7 +303,7 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
             Ꮡt.Errorf("got:%x want:%x (%+v)"u8, dec, msg, Ꮡpriv.OrTypedNil());
         }
     }
-    @string hashMsg = "crypto/rsa: input must be hashed message"u8;
+    @string hashMsg = hashMsgᶜ;
     (var sig, err) = SignPKCS1v15(default!, Ꮡpriv, crypto.SHA256, msg);
     if (err == default! || err.Error() != hashMsg) {
         Ꮡt.Errorf("SignPKCS1v15 with bad hash: err = %q, want %q"u8, err, hashMsg);

@@ -132,8 +132,8 @@ Inverting costs **zero** new project references here — `isw → runtime` alrea
 
 The PULL above is one of two directions, and the converter long handled only that one. A **PUSH** runs the
 other way: the *defining* package carries the body and names ANOTHER package's declaration as the symbol it
-defines, while the consuming side is an ordinary bodyless func under a **one-argument** `//go:linkname
-<thisFunc>` handle. `runtime/mgc.go` pushes into `unique`, `runtime/mheap.go` into `internal/weak`:
+defines, while the consuming side is an ordinary bodyless func under a **one-argument**
+`//go:linkname <thisFunc>` handle. `runtime/mgc.go` pushes into `unique`, `runtime/mheap.go` into `internal/weak`:
 
 ```go
 // unique/handle.go — the CONSUMER: bodyless, one-arg handle (Go's authorization for the push)

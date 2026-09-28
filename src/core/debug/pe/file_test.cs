@@ -680,6 +680,9 @@ public static void TestBuildingWindowsGUI(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingWindowsOnlyTestˢ2 = (@string)"skipping Windows-only test"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string filenameᶜ = "ws2_32.dll"u8;
+
 public static void TestImportTableInUnknownSection(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
@@ -688,7 +691,7 @@ public static void TestImportTableInUnknownSection(ж<testing.T> Ꮡt) {
         }
         // ws2_32.dll import table is located in ".rdata" section,
         // so it is good enough to test issue #16103.
-        @string filename = "ws2_32.dll"u8;
+        @string filename = filenameᶜ;
         var (path, err) = exec.LookPath(filename);
         if (err != default!) {
             Ꮡt.Fatalf("unable to locate required file %q in search path: %s"u8, filename, err);

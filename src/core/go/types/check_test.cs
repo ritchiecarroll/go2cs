@@ -106,6 +106,9 @@ internal static nint absDiff(nint x, nint y) {
     return x - y;
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string prefixᶜ = "//"u8;
+
 // parseFlags parses flags from the first line of the given source if the line
 // starts with "//" (line comment) followed by "-" (possibly with spaces
 // between). Otherwise the line is ignored.
@@ -113,7 +116,7 @@ internal static error parseFlags(slice<byte> src, ж<flag.FlagSet> Ꮡflags) {
     ref var flags = ref Ꮡflags.DerefOrNull();
 
     // we must have a line comment that starts with a "-"
-    @string prefix = "//"u8;
+    @string prefix = prefixᶜ;
     if (!bytes.HasPrefix(src, slice<byte>(prefix))) {
         return default!; // first line is not a line comment
     }
@@ -143,7 +146,7 @@ internal static error parseFlags(slice<byte> src, ж<flag.FlagSet> Ꮡflags) {
 //
 // If provided, opts may be used to mutate the Config before type-checking.
 internal static void testFiles(ж<testing.T> Ꮡt, slice<@string> filenames, slice<slice<byte>> srcs, bool manual, params Span<Action<ж<types.Config>>> optsʗp) {
-    var opts = optsʗp.slice();
+    var opts = optsʗp.sslice();
 
     // Alias types are enabled by default
     testFilesImpl(Ꮡt, filenames, srcs, manual, opts.ꓸꓸꓸ);
@@ -453,18 +456,24 @@ internal static Action<ж<types.Config>> withSizes(types.Sizes sizes) {
     };
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ12 = @"package index; var s []byte; var _ = s[int64 /* ERRORx ""int64\\(1\\) << 40 \\(.*\\) overflows int"" */ (1) << 40]"u8;
+
 // TestIndexRepresentability tests that constant index operands must
 // be representable as int even if they already have a type that can
 // represent larger values.
 public static void TestIndexRepresentability(ж<testing.T> Ꮡt) {
-    @string src = @"package index; var s []byte; var _ = s[int64 /* ERRORx ""int64\\(1\\) << 40 \\(.*\\) overflows int"" */ (1) << 40]"u8;
+    @string src = srcᶜ12;
     testFiles(Ꮡt, new @string[]{"index.go"u8}.slice(), new slice<byte>[]{slice<byte>(src)}.slice(), false, withSizes(new types.StdSizesжSizes(Ꮡ(new StdSizes(4, 4)))));
 }
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ13 = @"package issue47243; var a uint64; var _ = a << uint64(4294967296)"u8;
 
 public static void TestIssue47243_TypedRHS(ж<testing.T> Ꮡt) {
     // The RHS of the shift expression below overflows uint on 32bit platforms,
     // but this is OK as it is explicitly typed.
-    @string src = @"package issue47243; var a uint64; var _ = a << uint64(4294967296)"u8; // uint64(1<<32)
+    @string src = srcᶜ13;                                                    // uint64(1<<32)
     testFiles(Ꮡt, new @string[]{"p.go"u8}.slice(), new slice<byte>[]{slice<byte>(src)}.slice(), false, withSizes(new types.StdSizesжSizes(Ꮡ(new StdSizes(4, 4)))));
 }
 

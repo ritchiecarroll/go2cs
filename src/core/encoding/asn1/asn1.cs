@@ -122,8 +122,8 @@ internal static (int64 ret, error err) parseInt64(slice<byte> bytes) {
         ret |= (int64)((int64)bytes[bytesRead]);
     }
     // Shift up and down in order to sign extend the result.
-    ret <<= (int)(64 - (uint8)len(bytes) * 8);
-    ret >>= (int)(64 - (uint8)len(bytes) * 8);
+    ret.LshAssign((uint64)(64 - (uint8)len(bytes) * 8));
+    ret.RshAssign((uint64)(64 - (uint8)len(bytes) * 8));
     return (ret, err);
 }
 

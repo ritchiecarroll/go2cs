@@ -99,11 +99,17 @@ internal static readonly @string testˢ = ".TEST"u8;
 internal static readonly @string tesTˢ = ".tesT"u8;
 internal static readonly @string tesTˢ2 = ".TesT"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string customᶜ = "test/test; charset=iso-8859-1"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string capsᶜ = "test/test; WAS=ALLCAPS"u8;
+
 public static void TestTypeByExtensionCase(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string custom = "test/test; charset=iso-8859-1"u8;
-        @string caps = "test/test; WAS=ALLCAPS"u8;
+        @string custom = customᶜ;
+        @string caps = capsᶜ;
         var cleanup = setMimeInit(() => {
             clearMimeTypes();
             setType(testˢ, caps);

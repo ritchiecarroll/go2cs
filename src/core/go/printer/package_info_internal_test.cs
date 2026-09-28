@@ -30,8 +30,8 @@ using static go.go.printer_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/printer/performance_test.go", "performance_test.cs", "ABk6goCCypKEgoKWgoKWgoKCloKEuICCgoLcooKUgoKCuKKClIKCgg==")]
-[assembly: global::go.GoPositionMap("go/printer/printer_test.go", "printer_test.cs", "AClaxIKCqIKCqJKClIKYkoCCuIKAgqaokoKClKiSgpSmgoKCgpaCgoKogoCCpKiCgoKogIKCpriCgoKUgILalIKSgqi2AClKgoKCgoKCgoIABBTi7IKCgpaCgoSCgoKogoKCupKCgoCCyICC+pKCgoKClIKCgrzSgoKCpoCCpICCyO6yggARIoKCloKSkpaCgoLKgoCCpKiSgpKClKiSgoKU7NIADhyCgpiSgoK6goLOgoKClIKogoKEgqiCgoKoguyiAAsWAA4cgoKYkoKClJaCAAkUgoKCgpaCgoKWgoIAChaCgoKCloKCgpaCgsqiiLKCgpaCgpaCkqKCgpSCgoKUgoKUgqaCAAYSogAHFIKAgqSE2oLusgAJFIKAgqSAkgAJErKCgoKClILokoKCgoKUgoKUooKCgqaC3qLYgoLoggAVKoKCgpaEgoKWgpaEgoKWgriigoKCgpaCgoKCgqiCgrykkoKCgpiSgoKUloKUgoKClISCAA8Moo6CgoKogoKEgoCCpIKAggAICP6CgoKCgpbIgoCCpIK+wrKCgoKCgg==", "151-154:1;203-208:1;347-350:1;552-574:1")]
+[assembly: global::go.GoPositionMap("go/printer/performance_test.go", "performance_test.cs", "ABk6goCC+pKEgoKWgoKWgoKCloKEuICCgoLcooKUgoKCuKKClIKCgg==")]
+[assembly: global::go.GoPositionMap("go/printer/printer_test.go", "printer_test.cs", "AClaxIKCqIKCqJKClIKYkoCCuIKAgqaokoKClKiSgpSmgoKCgpaCgoKogoCCpKiCgoKogIKCpriCgoKUgILalIKSgqi2AClKgoKCgoKCgoIADRTijIKCgpaCgoSCgoKogoKCupKCgoCCyICCAA0KkoKCgoKUgoKCvNKCgoKmgIKkgILIABoOsoIAACKCgpaCkpKWgoKCyoKAgqSokoKSgpSokoKClAAWDLIAARyCgpiSgoK6goLOgoKClIKogoKEgqiCgoKoggAkDKIAABYAARyCgpiSgoKUloIACRSCgoKCloKCgpaCggAKFoKCgoKWgoKCloKC+qKIsoKCloKCloKSooKClIKCgpSCgpSCpoIADhKiAAcUgoCCpISKgu6yAAkUgoCCpICSAAkSsoKCgoKUggAJCJKCgoKClIKClKKCgoKmggANDqKIgoIAIgiCAAIqgoKCloSCgpaCloSCgpaCAAkIgoKCgoKWgoKCgoKogoLspJKCgoKYkoKClJaClIKCgpSEggAPDKKOgoKCqIKChIKAgqSCgIIACAj+goKCgoKWyIKAgqSCvsKygoKCgoI=", "151-154:1;203-208:1;347-350:1;552-574:1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

@@ -22,7 +22,7 @@ partial class slog_test_package {
 // Infof is an example of a user-defined logging function that wraps slog.
 // The log record contains the source position of the caller of Infof.
 [MethodImpl(MethodImplOptions.NoInlining)] public static void Infof(ж<Δslog.Logger> Ꮡlogger, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.slice();
+    var args = argsʗp.sslice();
 
     ref var logger = ref Ꮡlogger.DerefOrNull();
     if (!logger.Enabled(context.Background(), Δslog.LevelInfo)) {

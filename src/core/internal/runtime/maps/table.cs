@@ -732,8 +732,8 @@ internal static readonly @string concurrentMapIterationˢ = "concurrent map iter
         // Thus we can achieve this by adjusting it.dirIdx,
         // it.dirOffset, and it.m.dirLen individually.
         var orders = (uint8)((~it.m).globalDepth - it.globalDepth);
-        it.dirIdx <<= (int)(orders);
-        it.dirOffset <<= (int)(orders);
+        it.dirIdx.LshAssign((uint64)(orders));
+        it.dirOffset.LshAssign((uint64)(orders));
         // it.m.dirLen was already adjusted when the directory grew.
         it.globalDepth = it.m.Value.globalDepth;
     }

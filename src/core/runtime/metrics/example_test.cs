@@ -9,9 +9,12 @@ using global::go.runtime;
 
 partial class metrics_test_package {
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+private static readonly @string myMetricᶜ = "/memory/classes/heap/free:bytes"u8;
+
 public static void ExampleRead_readingOneMetric() {
     // Name of the metric we want to read.
-    @string myMetric = "/memory/classes/heap/free:bytes"u8;
+    @string myMetric = myMetricᶜ;
     // Create a sample for the metric.
     var sample = new slice<metrics.Sample>(1);
     sample[0].Name = myMetric;

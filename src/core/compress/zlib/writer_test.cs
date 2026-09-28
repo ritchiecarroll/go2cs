@@ -189,8 +189,11 @@ public static void TestWriterBig(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dictionaryᶜ = "0123456789."u8;
+
 public static void TestWriterDict(ж<testing.T> Ꮡt) {
-    @string dictionary = "0123456789."u8;
+    @string dictionary = dictionaryᶜ;
     foreach (var (i, fn) in filenames) {
         testFileLevelDict(Ꮡt, fn, DefaultCompression, dictionary);
         testFileLevelDict(Ꮡt, fn, NoCompression, dictionary);
@@ -207,8 +210,11 @@ public static void TestWriterDict(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dictionaryᶜ1 = "0123456789."u8;
+
 public static void TestWriterReset(ж<testing.T> Ꮡt) {
-    @string dictionary = "0123456789."u8;
+    @string dictionary = dictionaryᶜ1;
     foreach (var (_, fn) in filenames) {
         testFileLevelDictReset(Ꮡt, fn, NoCompression, default!);
         testFileLevelDictReset(Ꮡt, fn, DefaultCompression, default!);

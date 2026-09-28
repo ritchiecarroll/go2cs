@@ -104,7 +104,7 @@ internal static (uint32 sign, int32 exp, uint64 mantissa) split(uint64 b) {
     if (exp == 0){
         // Normalize value if subnormal.
         nuint shift = (nuint)(bits.LeadingZeros64(mantissa) - 11);
-        mantissa <<= (int)(shift);
+        mantissa.LshAssign(shift);
         exp = 1 - (int32)shift;
     } else {
         // Add implicit 1 bit

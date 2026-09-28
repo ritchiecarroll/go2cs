@@ -265,7 +265,7 @@ using static go.runtime_package;
 [assembly: go.GoPositionMap("runtime/tracecpu.go", "tracecpu.cs", "AA8YsoK4ggAHEILewoKmgoKSAAoWhJKUlIKCgqaU3LKCAAgUgoKCgpaWgoKCAAIgAA0ChIKCgpSClIKogoKCgIKkgoKolsqEpqiCgoKohpKSlKiWgoKCgoKElKq0gIKSgoKCAAUQ8qaUpgAGEIKCgpSCpoKUlorCppSUgpSWlJaAuKaWgg==", "42-68:1;199-204:1")]
 [assembly: go.GoPositionMap("runtime/traceevent.go", "traceevent.cs", "AE3yAQANAoCCpICCtKiyrLIAAhDkAAUSsqyyqJI=")]
 [assembly: go.GoPositionMap("runtime/traceexp.go", "traceexp.cs", "AAcSogACHAALAg==")]
-[assembly: go.GoPositionMap("runtime/tracemap.go", "tracemap.cs", "ADVyogACEuKClISCgoKCggAPIIKUgsqUgoKmgriUypaCgoKCrsKCgg==")]
+[assembly: go.GoPositionMap("runtime/tracemap.go", "tracemap.cs", "ADVyogACEuKClISCgoKCggAPIIKUgsqUgoKmggAFMsKCgg==")]
 [assembly: go.GoPositionMap("runtime/traceregion.go", "traceregion.cs", "AC1WsoKClIKogoKCgrqogoKCgoKogqiCgrqCloKCruKCgoKClICCgqQ=")]
 [assembly: go.GoPositionMap("runtime/traceruntime.go", "traceruntime.cs", "ABEokgAdRLaCgoKCgoKCggACEuIANpIBsq7CqJIAES7SgpQABRQACgiWuoKCAAcSgoIACRaCgoKClAACENIAAhDSgpSCgoKmrLKokqiSrLK4qLauwqauwqauwqaotqi2AAUUAAkGgoKUAAIWAAgCgoKCgpQABhLSgoKUgoKUqJKokqiygoKClKyygoKCgoK+sqiSqJKokq7CqMSCqtSCgoKClKrCuL7EgoIAAhgACQKCgoKClJQAAhAACASC3qYABxKCgoKClKiSqJKClJQAAhIACgaCAAISAAgGAAIS4oKUlIKssoKUlIIAAhLigpSUgpS0tKSCrLKClJSCAAISAAgCAAcSgoKUgoKCgqaCuJSCgoI=", "695-708:1")]
 [assembly: go.GoPositionMap("runtime/tracestack.go", "tracestack.cs", "ABVMAAwChpKCgqiClMq0gpS0gsqmlILugoKkuIKCABIkgoKUgriClIKUggAIFqKClIKssoKCgIKkgqaiqIKojtKCgqiCgoKCgoKCqIKCgpSUqqKCgoKCgoIACxqSgoSCgoKUgoKCgpSCqqKu4pSUlKiSAAIYAAkCgsiW3oKkgpSYgoKCgqaAgqSWgoKCpJKkxqyygoKUgoKU", "294-302:1")]

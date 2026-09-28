@@ -138,7 +138,7 @@ internal static void run<T>(T t, Action<T, testMode> f, params ꓸꓸꓸany opts
 //
 // The TB passed to f arranges for cleanup functions to be run in the synctest bubble.
 internal static void runSynctest(ж<testing.T> Ꮡt, Action<testing.TB, testMode> f, params ꓸꓸꓸany optsʗp) {
-    var opts = optsʗp.slice();
+    var opts = optsʗp.sslice();
 
     run<TжTBRun>(Ꮡt, (TжTBRun tΔ1Δp, testMode mode) => {
         var tΔ1 = (ж<testing.T>)tΔ1Δp;
@@ -365,7 +365,7 @@ internal static readonly @string http20ˢ = "HTTP/2.0"u8;
 }
 
 internal static void testNewClientServerTest(testing.TB t, testMode mode, params ꓸꓸꓸany optsʗp) {
-    var opts = optsʗp.slice();
+    var opts = optsʗp.sslice();
 
     ref var got = ref heap(new testNewClientServerTest_got(), out var Ꮡgot);
     var h = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
@@ -1033,8 +1033,11 @@ internal static readonly @string valuecˢ = "valuec"u8;
 internal static readonly @string serverTrailerNotDeclaredˢ = "Server-Trailer-NotDeclared"u8;
 internal static readonly @string shouldBeOmittedˢ = "should be omitted"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string bodyᶜ1 = "Some body"u8;
+
 internal static void testTrailersServerToClient(ж<testing.T> Ꮡt, testMode mode, bool flush) {
-    @string body = "Some body"u8;
+    @string body = bodyᶜ1;
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header().Set(trailerˢ, serverTrailerAServerˢ);
         w.Header().Add(trailerˢ, serverTrailerCˢ);
@@ -1104,8 +1107,11 @@ public static void TestResponseBodyReadAfterClose(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testResponseBodyReadAfterClose(Δp0, Δp1));
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string bodyᶜ2 = "Some body"u8;
+
 internal static void testResponseBodyReadAfterClose(ж<testing.T> Ꮡt, testMode mode) {
-    @string body = "Some body"u8;
+    @string body = bodyᶜ2;
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), body);
     })));
@@ -1128,13 +1134,19 @@ public static void TestConcurrentReadWriteReqBody(ж<testing.T> Ꮡt) {
 internal static readonly @string expectˢ = "Expect"u8;
 internal static readonly @string continueˢ = "100-continue"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string reqBodyᶜ = "some request body"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string resBodyᶜ = "some response body"u8;
+
 internal static void testConcurrentReadWriteReqBody(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        @string reqBody = "some request body"u8;
-        @string resBody = "some response body"u8;
+        @string reqBody = reqBodyᶜ;
+        @string resBody = resBodyᶜ;
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
             Ꮡwg.Add(2);
@@ -1673,12 +1685,15 @@ public static void TestInterruptWithPanic(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string createdByˢ = "created by "u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string msgᶜ = "hello"u8;
+
 internal static void testInterruptWithPanic(ж<testing.T> Ꮡt, testMode mode, any panicValue) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        @string msg = "hello"u8;
+        @string msg = msgᶜ;
         var testDone = new channel<EmptyStruct>(0);
         defer(ᴛ1 => builtin.close(ᴛ1), testDone, ref ᒐ);
         ref var errorLog = ref heap(new lockedBytesBuffer(), out var ᏑerrorLog);
@@ -2238,10 +2253,13 @@ public static void TestIdentityTransferEncoding(ж<testing.T> Ꮡt) {
 internal static readonly @string transferEncodingˢ = "Transfer-Encoding"u8;
 internal static readonly @string identityˢ = "identity"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string bodyᶜ3 = "body"u8;
+
 internal static void testIdentityTransferEncoding(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        @string body = "body"u8;
+        @string body = bodyᶜ3;
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var (gotBodyΔ1, _) = io.ReadAll((~r).Body);
             {

@@ -110,4 +110,80 @@ public static class GoShift
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int8 Lsh(this int8 x, uint64 n) => n >= 8 ? (int8)0 : (int8)(x << (int)n);
+
+    // ---- COMPOUND ASSIGNMENT: `x >>= n` / `x <<= n` ----------------------------------------------------
+    //
+    // The same guard for Go's compound shift-assign, whose native C# form (`x >>= (int)n`) masks the count
+    // exactly as the binary operator does -- runtime's softfloat fadd64 `gm >>= shift` with an exponent gap
+    // of 664 shifted by 24 (664 & 63) and TestFloat64 read "-1 + 1e-200 = sw -0.9999999543755939, hw -1".
+    // `ref this` so the converter emits `x.RshAssign(n)` and the target is evaluated ONCE: a field, a local,
+    // and golib's ref-returning element indexers all bind, where a rewrite to `x = x.Rsh(n)` would evaluate
+    // an indexed or selected target twice. Each delegates to its value twin above, so the two forms cannot
+    // disagree about Go's rule.
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this uint64 x, uint64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this uint64 x, uint64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this int64 x, uint64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this int64 x, uint64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this nuint x, uint64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this nuint x, uint64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this nint x, uint64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this nint x, uint64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this uintptr x, uint64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this uintptr x, uint64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this uint32 x, uint64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this uint32 x, uint64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this int32 x, uint64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this int32 x, uint64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this uint16 x, uint64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this uint16 x, uint64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this int16 x, uint64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this int16 x, uint64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this uint8 x, uint64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this uint8 x, uint64 n) => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign(ref this int8 x, uint64 n) => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign(ref this int8 x, uint64 n) => x = x.Lsh(n);
 }

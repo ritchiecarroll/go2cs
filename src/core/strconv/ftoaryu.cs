@@ -33,7 +33,7 @@ internal static void ryuFtoaFixed32(ref decimalSlice d, uint32 mant, nint exp, n
     nint e2 = exp;
     {
         nint b = bits.Len32(mant); if (b < 25) {
-            mant <<= (int)((nuint)(25 - b));
+            mant.LshAssign((nuint)(25 - b));
             e2 += b - 25;
         }
     }
@@ -229,7 +229,7 @@ internal static void ryuFtoaShortest(ref decimalSlice d, uint64 mant, nint exp, 
     // If input is an exact integer with fewer bits than the mantissa,
     // the previous and next integer are not admissible representations.
     if (exp <= 0 && bits.TrailingZeros64(mant) >= -exp) {
-        mant >>= (int)((nuint)(-exp));
+        mant.RshAssign((nuint)(-exp));
         ryuDigits(ref d, mant, mant, mant, true, false);
         return;
     }

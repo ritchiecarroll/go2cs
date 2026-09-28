@@ -576,8 +576,11 @@ internal static void checkTime(Δtime.Time time, ж<ParseTest> Ꮡtest, ж<Δtes
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string fmtᶜ = "Mon MST 2006-01-02T15:04:05Z07:00";
+
 public static void TestFormatAndParse(ж<Δtesting.T> Ꮡt) {
-    @string fmt = "Mon MST 2006-01-02T15:04:05Z07:00"; // all fields
+    @string fmt = fmtᶜ; // all fields
     var f = (int64 sec) => {
         var t1 = Unix(sec / 2, 0);
         if (t1.Year() < 1000 || t1.Year() > 9999 || t1.Unix() != sec) {
@@ -736,9 +739,12 @@ public static void TestParseErrors(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectᶜ = "12:00PM"u8;
+
 public static void TestNoonIs12PM(ж<Δtesting.T> Ꮡt) {
     var noon = Date(0, January, 1, 12, 0, 0, 0, ΔUTC);
-    @string expect = "12:00PM"u8;
+    @string expect = expectᶜ;
     @string got = noon.Format("3:04PM"u8);
     if (got != expect) {
         Ꮡt.Errorf("got %q; expect %q"u8, got, expect);

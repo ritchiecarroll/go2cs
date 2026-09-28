@@ -338,11 +338,14 @@ public static void TestMapCounter(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string issue527719ˢ = "issue527719"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string keyᶜ = "key"u8;
+
 public static void TestMapNil(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     RemoveAll();
-    @string key = "key"u8;
+    @string key = keyᶜ;
     var m = NewMap(issue527719ˢ);
     m.Set(key, default!);
     @string s = m.String();

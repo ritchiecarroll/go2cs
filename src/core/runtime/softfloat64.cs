@@ -247,7 +247,7 @@ internal static uint64 fadd64(uint64 f, uint64 g) {
     fm <<= (int)(2);
     gm <<= (int)(2);
     var trunc = (uint64)(gm & (((uint64)1).Lsh(shift) - 1));
-    gm >>= (int)(shift);
+    gm.RshAssign(shift);
     if (fs == gs){
         fm += gm;
     } else {

@@ -306,8 +306,11 @@ internal static nint simpleIndex(@string s, @string sep) {
     return -1;
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string charsᶜ = "abcdefghijklmnopqrstuvwxyz0123456789"u8;
+
 public static void TestIndexRandom(ж<testing.T> Ꮡt) {
-    @string chars = "abcdefghijklmnopqrstuvwxyz0123456789"u8;
+    @string chars = charsᶜ;
     for (nint times = 0; times < 10; times++) {
         for (nint strLen = 5 + rand.Intn(5); strLen < 140; strLen += 10) {
             // Arbitrary
@@ -1888,6 +1891,12 @@ internal static readonly @string asciiˢ = "ASCII"u8;
 internal static readonly @string unicodePrefixˢ = "UnicodePrefix"u8;
 internal static readonly @string unicodeSuffixˢ = "UnicodeSuffix"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string s1ᶜ = "abcdefghijKz"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string s2ᶜ = "abcDefGhijKz"u8;
+
 public static void BenchmarkEqualFold(ж<testing.B> Ꮡb) {
     Ꮡb.Run(testsˢ, (ж<testing.B> bΔ1) => {
         for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -1900,8 +1909,8 @@ public static void BenchmarkEqualFold(ж<testing.B> Ꮡb) {
             }
         }
     });
-    @string s1 = "abcdefghijKz"u8;
-    @string s2 = "abcDefGhijKz"u8;
+    @string s1 = s1ᶜ;
+    @string s2 = s2ᶜ;
     Ꮡb.Run(asciiˢ, (ж<testing.B> bΔ2) => {
         for (nint i = 0; i < (~bΔ2).N; i++) {
             EqualFold(s1, s2);

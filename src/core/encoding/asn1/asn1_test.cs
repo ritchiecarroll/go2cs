@@ -313,6 +313,9 @@ internal static slice<timeTest> utcTestData = new timeTest[]{
     new("1001020304-10Z"u8, false, new time.Time(nil))
 }.slice();
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string formatᶜ = "Jan _2 15:04:05 -0700 2006"u8;
+
 public static void TestUTCTime(ж<testing.T> Ꮡt) {
     foreach (var (i, test) in utcTestData) {
         var (ret, err) = parseUTCTime(slice<byte>(test.@in));
@@ -326,7 +329,7 @@ public static void TestUTCTime(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("#%d: parseUTCTime(%q) succeeded, should have failed"u8, i, test.@in);
             continue;
         }
-        @string format = "Jan _2 15:04:05 -0700 2006"u8; // ignore zone name, just offset
+        @string format = formatᶜ;            // ignore zone name, just offset
         @string have = ret.Format(format);
         @string want = test.@out.Format(format);
         if (have != want) {
@@ -1060,11 +1063,14 @@ public static void TestTruncatedExplicitTag(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object successfullyUnmarshaledˢ = (@string)"Successfully unmarshaled invalid UTF-8 data"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectedSubstringᶜ = "UTF"u8;
+
 public static void TestUnmarshalInvalidUTF8(ж<testing.T> Ꮡt) {
     var data = slice<byte>(((@string)(new byte[]{0x30, 0x05, 0x0c, 0x03, 0x61, 0xc9, 0x63})));
     ref var result = ref heap(new invalidUTF8Test(), out var Ꮡresult);
     var (_, err) = Unmarshal(data, Ꮡresult);
-    @string expectedSubstring = "UTF"u8;
+    @string expectedSubstring = expectedSubstringᶜ;
     if (err == default!){
         Ꮡt.Fatal(successfullyUnmarshaledˢ);
     } else 

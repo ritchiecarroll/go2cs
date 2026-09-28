@@ -979,6 +979,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	// after the RHS at every operator-emission site (each statement uses exactly one of them).
 	andNotUncheckedClose := false
 
+	// shiftAssignGuarded: a compound shift-assign rendered through golib's `ref this` guard (see the
+	// SHL_ASSIGN case) rather than the native operator. Its count is widened to uint64, never `(int)`-cast.
+	shiftAssignGuarded := false
+
 	switch assignStmt.Tok {
 	case token.ADD_ASSIGN:
 		operator = " += "
@@ -996,10 +1000,31 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		operator = " |= "
 	case token.XOR_ASSIGN:
 		operator = " ^= "
-	case token.SHL_ASSIGN:
+	case token.SHL_ASSIGN, token.SHR_ASSIGN:
 		operator = " <<= "
-	case token.SHR_ASSIGN:
-		operator = " >>= "
+
+		if assignStmt.Tok == token.SHR_ASSIGN {
+			operator = " >>= "
+		}
+
+		// Go's shift rule reaches the compound form too: a count at or past the LHS's width yields 0 (or
+		// the sign fill), where C#'s native `x >>= (int)n` MASKS the count. The binary operator already
+		// routes through golib's guard (emitGuardedShift); a compound shift-assign never did, so runtime's
+		// softfloat fadd64 `gm >>= shift` (an exponent gap of 664) shifted by 24 and TestFloat64 read
+		// "-1 + 1e-200 = sw -0.9999999543755939, hw -1". Same predicates, same widening: an unnamed basic
+		// LHS whose count is not provably in [0, width) renders `lhs.RshAssign(count)` -- golib's
+		// `ref this` twin, so the target is evaluated once -- and a bounded count stays native. The RHS
+		// arms close it through andNotUncheckedClose, the one post-RHS close every compound site writes.
+		if v.compoundShiftGuarded(assignStmt) {
+			operator = ".LshAssign("
+
+			if assignStmt.Tok == token.SHR_ASSIGN {
+				operator = ".RshAssign("
+			}
+
+			shiftAssignGuarded = true
+			andNotUncheckedClose = true
+		}
 	case token.AND_NOT_ASSIGN:
 		// C# doesn't have a direct AND NOT equivalent, so expand `&^=` to `&= ~`. The `~` promotes
 		// its operand to `int`, and `int` is not implicitly convertible to a narrower or unsigned LHS
@@ -1547,10 +1572,16 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			if bitwiseAssignOp {
 				if assignStmt.Tok == token.SHL_ASSIGN || assignStmt.Tok == token.SHR_ASSIGN {
-					// The shift count in a C# compound shift-assignment must be `int`;
-					// casting it to the RHS's own (possibly unsigned or native-width)
-					// type — e.g. `y <<= (nuint)s` — is rejected with CS0019.
-					binaryTypeName = "int"
+					if shiftAssignGuarded {
+						// The guard takes the count WIDENED to uint64, never `(int)`-truncated: its
+						// full magnitude is what the width comparison needs (emitGuardedShift's rule).
+						rhsExpr = v.shiftCountUint64Operand(rhs, rhsExpr)
+					} else {
+						// The shift count in a C# compound shift-assignment must be `int`;
+						// casting it to the RHS's own (possibly unsigned or native-width)
+						// type — e.g. `y <<= (nuint)s` — is rejected with CS0019.
+						binaryTypeName = "int"
+					}
 				} else {
 					binaryType := v.info.Types[rhs].Type
 
@@ -1846,7 +1877,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				// unsigned/native-width) type — `s.allocCache >>= (nuint)x` — is rejected (CS0019). A
 				// selector/pointer-field LHS routes through this block (its base ident is nil'd in the
 				// counting loop), so it needs the same `(int)` cast the simple-variable path applies.
-				shiftAssignCast := assignStmt.Tok == token.SHL_ASSIGN || assignStmt.Tok == token.SHR_ASSIGN
+				shiftAssignCast := (assignStmt.Tok == token.SHL_ASSIGN || assignStmt.Tok == token.SHR_ASSIGN) && !shiftAssignGuarded
+
+				// A GUARDED shift-assign (`lhs.RshAssign(`) takes the count widened to uint64 instead.
+				if shiftAssignGuarded {
+					rhsExpr = v.shiftCountUint64Operand(rhs, rhsExpr)
+				}
 
 				// A narrow-integer arithmetic RHS assigned to a narrow struct-field LHS (a pure
 				// selector, e.g. `it.i = i + 1`) routes through this block, so it needs the same narrow
@@ -1903,6 +1939,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					// A Go array copied by value over an existing variable takes golib's `.Clone()`
 					// for independent backing storage (see cloneValueCopy).
 					rhsExpr = v.cloneValueCopy(lhs, rhs, rhsExpr)
+
+					// A GUARDED shift-assign (`lhs.RshAssign(`) takes the count widened to uint64.
+					if shiftAssignGuarded {
+						rhsExpr = v.shiftCountUint64Operand(rhs, rhsExpr)
+					}
 
 					if lhsTypeIsInterface[i] {
 						result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))

@@ -347,6 +347,9 @@ internal static readonly object unexpectedZip64ˢ = (@string)"unexpected zip64"u
 internal static readonly @string uint32max1Zip64ˢ = "uint32max-1_Zip64"u8;
 internal static readonly object expectedZip64ˢ = (@string)"expected zip64"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string filenameᶜ = "huge.txt"u8;
+
 // Tests that we generate a zip64 file if the directory at offset
 // 0xFFFFFFFF, but not before.
 public static void TestZip64DirectoryOffset(ж<testing.T> Ꮡt) {
@@ -354,7 +357,7 @@ public static void TestZip64DirectoryOffset(ж<testing.T> Ꮡt) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
     Ꮡt.Parallel();
-    @string filename = "huge.txt"u8;
+    @string filename = filenameᶜ;
     Action<ж<global::go.archive.zip_package.Writer>> gen(uint64 wantOff) => (ж<global::go.archive.zip_package.Writer> w) => {
             w.Value.testHookCloseSizeOffset = (uint64 sizeΔ1, uint64 off) => {
                 if (off != wantOff) {
@@ -771,9 +774,12 @@ internal static void testValidHeader(ж<global::go.archive.zip_package.FileHeade
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string timeFormatᶜ = "20060102T150405.000.txt"u8;
+
 // Issue 4302.
 public static void TestHeaderInvalidTagAndSize(ж<testing.T> Ꮡt) {
-    @string timeFormat = "20060102T150405.000.txt"u8;
+    @string timeFormat = timeFormatᶜ;
     var ts = time.Now();
     @string filename = ts.Format(timeFormat);
     ref var h = ref heap<global::go.archive.zip_package.FileHeader>(out var Ꮡh);

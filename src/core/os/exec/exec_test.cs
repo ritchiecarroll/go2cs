@@ -159,7 +159,7 @@ internal static void maySkipHelperCommand(@string name) {
 
 // helperCommand returns an exec.Cmd that will run the named helper command.
 internal static ж<Δexec.Cmd> helperCommand(ж<testing.T> Ꮡt, @string name, params ꓸꓸꓸstring argsʗp) {
-    var args = argsʗp.slice();
+    var args = argsʗp.sslice();
 
     Ꮡt.Helper();
     return helperCommandContext(Ꮡt, default!, name, args.ꓸꓸꓸ);
@@ -169,7 +169,7 @@ internal static ж<Δexec.Cmd> helperCommand(ж<testing.T> Ꮡt, @string name, p
 // which to run the command.
 internal static ж<Δexec.Cmd> /*cmd*/ helperCommandContext(ж<testing.T> Ꮡt, context.Context ctx, @string name, params ꓸꓸꓸstring argsʗp) {
     ж<Δexec.Cmd> cmd = default!;
-    var args = argsʗp.slice();
+    var args = argsʗp.sslice();
 
     ᏑhelperCommandUsed.LoadOrStore(name, true);
     Ꮡt.Helper();
@@ -808,6 +808,9 @@ internal static readonly @string read3Exeˢ = "read3.exe"u8;
 internal static readonly @string buildˢ = "build"u8;
 internal static readonly @string read3Goˢ = "read3.go"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string textᶜ = "Hello, fd 3!"u8;
+
 public static void TestExtraFiles(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
@@ -881,7 +884,7 @@ public static void TestExtraFiles(ж<testing.T> Ꮡt) {
         defer(os.Remove, tf.Name(), ref ᒐ);
         var tfʗ1 = tf;
         defer(() => tfʗ1.Close(), ref ᒐ);
-        @string text = "Hello, fd 3!"u8;
+        @string text = textᶜ;
         (_, err) = tf.Write(slice<byte>(text));
         if (err != default!) {
             Ꮡt.Fatalf("Write: %v"u8, err);
@@ -1307,6 +1310,9 @@ public static void TestNoPath(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string alreadyStartedˢ = "already started"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string msgᶜ = "O:Hello, pipe!\n"u8;
+
 // TestDoubleStartLeavesPipesOpen checks for a regression in which calling
 // Start twice, which returns an error on the second call, would spuriously
 // close the pipes established in the first call.
@@ -1349,7 +1355,7 @@ public static void TestDoubleStartLeavesPipesOpen(ж<testing.T> Ꮡt) {
         }
         outcʗ1.ᐸꟷ(bΔ1);
     });
-    @string msg = "O:Hello, pipe!\n"u8;
+    @string msg = msgᶜ;
     (_, err) = io.WriteString(@in, msg);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -1478,7 +1484,7 @@ internal static ж<tickReader> newTickReader(time.Duration interval) {
 }
 
 internal static ж<Δexec.Cmd> startHang(ж<testing.T> Ꮡt, context.Context ctx, time.Duration hangTime, osꓸSignal interrupt, time.Duration waitDelay, params ꓸꓸꓸstring flagsʗp) {
-    var flags = flagsʗp.slice();
+    var flags = flagsʗp.sslice();
 
     Ꮡt.Helper();
     var args = appendꓸꓸꓸ(new @string[]{hangTime.String()}.slice(), flags);

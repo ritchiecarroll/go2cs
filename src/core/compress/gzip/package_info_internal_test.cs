@@ -30,7 +30,7 @@ using static go.compress.gzip_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("compress/gzip/fuzz_test.go", "fuzz_test.cs", "ABgiooKCgoKClIKClJaCgpSCgpSCgqiCgoKoloKCgoKWhIKAgqaAgqaCgoKUgoKUgIKkgII=", "56-91:1")]
-[assembly: go.GoPositionMap("compress/gzip/gunzip_test.go", "gunzip_test.cs", "APoCmAbYhIKUgoKCgpSSgpSCgoKUgoKogoKCgpSClIKCgpSCggAKCvyCgpSCgpSSgqKCgpSUlLQADQyUkqKCpoSCgoKAgqiUgoKCloCCpIKCgpaAgsimgoIACAiCABIugoKCgoKUlIKAgqSC3IKUgoKCuIKC", "463-471:1")]
+[assembly: go.GoPositionMap("compress/gzip/gunzip_test.go", "gunzip_test.cs", "APoCmAbYhIKUgoKCgpSSgpSCgoKUgoKogoKCgpSClIKCgpSCggAKCvyCgpSCgpSSgqKCgpSUlLQAEAyUkqKCpoSCgoKAgqiUgoKCloCCpIKCgpaAgsimgoIACAiCABIugoKCgoKUlIKAgqSC3IKUgoKCuIKC", "463-471:1")]
 [assembly: go.GoPositionMap("compress/gzip/gzip_test.go", "gzip_test.cs", "AA8ikoSAgqaCgpSAgqSCgpSClICCAAoMooSCgoKCgoCCpICCpoKClIKClIKUgpSClIKUgpSAgvqSgoKCgoKUgpaCgoCCpIKCAAgMogALHoKEgoKCgoKUgpaCgoKUgoKClIKClICCggAJCoKEgoKCgoSCgpaAgqaCgpaEgoKWgIKmgoKWgIL8koKCgoKCgoSCgpSCgriCgoKCgoKCgoKCggAHEIKAgoKkgqiShKKCgIKmgu6Agg==")]
 [assembly: go.GoPositionMap("compress/gzip/issue14937_test.go", "issue14937_test.cs", "ABs0AAwIgpSEgoKUgoKClIKUlIKClJSClIK4ooKCgpSSgoKClJKC", "40-48:1")]
 // </GoSourcePositionMaps>

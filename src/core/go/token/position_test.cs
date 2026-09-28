@@ -293,6 +293,9 @@ internal static readonly @string positionForUnadjustedˢ2 = "2. PositionFor unad
 internal static readonly @string positionForAdjustedˢ2 = "3. PositionFor adjusted"u8;
 internal static readonly @string positionˢ2 = "3. Position"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string filenameᶜ = "foo"u8;
+
 public static void TestPositionFor(ж<testing.T> Ꮡt) {
     var src = slice<byte>("""
 
@@ -305,7 +308,7 @@ foobar
 done
 
 """u8);
-    @string filename = "foo"u8;
+    @string filename = filenameᶜ;
     var fset = NewFileSet();
     var f = fset.AddFile(filename, fset.Base(), len(src));
     f.SetLinesForContent(src);
@@ -353,8 +356,11 @@ done
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string inputˢ = "input"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ = "one\ntwo\nthree\n"u8;
+
 public static void TestLineStart(ж<testing.T> Ꮡt) {
-    @string src = "one\ntwo\nthree\n"u8;
+    @string src = srcᶜ;
     var fset = NewFileSet();
     var f = fset.AddFile(inputˢ, -1, len(src));
     f.SetLinesForContent(slice<byte>(src));
@@ -417,6 +423,9 @@ public static void TestRemoveFile(ж<testing.T> Ꮡt) {
     checkNumFiles(1);
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string filenameᶜ1 = "test.go"u8;
+
 [GoType("dyn")] internal partial struct TestFileAddLineColumnInfo_tests {
     internal @string name;
     internal slice<global::go.go.token_package.lineInfo> infos;
@@ -424,7 +433,7 @@ public static void TestRemoveFile(ж<testing.T> Ꮡt) {
 }
 
 public static void TestFileAddLineColumnInfo(ж<testing.T> Ꮡt) {
-    @string filename = "test.go"u8;
+    @string filename = filenameᶜ1;
     UntypedInt filesize = 100;
     var tests = new TestFileAddLineColumnInfo_tests[]{
         new(

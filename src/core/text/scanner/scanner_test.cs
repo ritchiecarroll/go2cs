@@ -290,11 +290,17 @@ public static void TestScan(ж<testing.T> Ꮡt) {
     testScan(Ꮡt, (nuint)((nuint)GoTokens & ~(nuint)(nuint)SkipComments));
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ = "1.5e 1.5E 1e+ 1e- 1.5z"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = "exponent has no digits"u8;
+
 public static void TestInvalidExponent(ж<testing.T> Ꮡt) {
-    @string src = "1.5e 1.5E 1e+ 1e- 1.5z"u8;
+    @string src = srcᶜ;
     var s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_test_package.strings_ReaderжReader(strings.NewReader(src)));
     s.Value.Error = (ж<global::go.text.scanner_package.Scanner> sΔ1, @string msg) => {
-        @string want = "exponent has no digits"u8;
+        @string want = wantᶜ;
         if (msg != want) {
             Ꮡt.Errorf("%s: got error %q; want %q"u8, sΔ1.TokenText(), msg, want);
         }
@@ -396,8 +402,11 @@ public static void TestScanSelectedMask(ж<testing.T> Ꮡt) {
 internal static readonly @string b123ˢ = "b123"u8;
 internal static readonly @string a12ˢ = "a12"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ1 = "faab12345 a12b123 a12 3b"u8;
+
 public static void TestScanCustomIdent(ж<testing.T> Ꮡt) {
-    @string src = "faab12345 a12b123 a12 3b"u8;
+    @string src = srcᶜ1;
     var s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_test_package.strings_ReaderжReader(strings.NewReader(src)));
     // ident = ( 'a' | 'b' ) { digit } .
     // digit = '0' .. '3' .
@@ -725,13 +734,16 @@ public static void TestScanEOFHandling(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ1 = @""""u8;
+
 public static void TestIssue29723(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_test_package.strings_ReaderжReader(strings.NewReader(@"x """u8)));
     s.Value.Error = (ж<global::go.text.scanner_package.Scanner> sΔ1, @string _) => {
         @string got = sΔ1.TokenText(); // this call shouldn't panic
-        @string want = @""""u8;
+        @string want = wantᶜ1;
         if (got != want) {
             Ꮡt.Errorf("got %q; want %q"u8, got, want);
         }
@@ -937,6 +949,9 @@ internal static @string /*res*/ extractInts(@string t, nuint mode) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string helloWorldˢ = "hello \n\nworld\n!\n"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string Rᶜ = "hello world!"u8;
+
 public static void TestIssue50909(ж<testing.T> Ꮡt) {
     ref var s = ref heap(new global::go.text.scanner_package.Scanner(), out var Ꮡs);
     Ꮡs.Init(new scanner_test_package.strings_ReaderжReader(strings.NewReader(helloWorldˢ)));
@@ -947,7 +962,7 @@ public static void TestIssue50909(ж<testing.T> Ꮡt) {
         r += Ꮡs.TokenText();
         n++;
     }
-    @string R = "hello world!"u8;
+    @string R = Rᶜ;
     const nint N = 3;
     if (r != R || n != N) {
         Ꮡt.Errorf("got %q (n = %d); want %q (n = %d)"u8, r, n, R, (nint)(N));

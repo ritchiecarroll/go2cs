@@ -38,7 +38,7 @@ internal static (float64 f, bool ok) eiselLemire64(uint64 man, nint exp10, bool 
     }
     // Normalization.
     nint clz = bits.LeadingZeros64(man);
-    man <<= (int)((nuint)clz);
+    man.LshAssign((nuint)clz);
     const nint float64ExponentBias = 1023;
     var retExp2 = (uint64)((217706 * exp10 >> (int)(16)) + 64 + float64ExponentBias) - (uint64)clz;
     // Multiplication.
@@ -108,7 +108,7 @@ internal static (float32 f, bool ok) eiselLemire32(uint64 man, nint exp10, bool 
     }
     // Normalization.
     nint clz = bits.LeadingZeros64(man);
-    man <<= (int)((nuint)clz);
+    man.LshAssign((nuint)clz);
     const nint float32ExponentBias = 127;
     var retExp2 = (uint64)((217706 * exp10 >> (int)(16)) + 64 + float32ExponentBias) - (uint64)clz;
     // Multiplication.

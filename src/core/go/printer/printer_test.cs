@@ -214,6 +214,15 @@ public static void TestFiles(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ = """
+// comment 1
+	// comment 2
+	// comment 3
+	package main
+	
+"""u8;
+
 // TODO(gri) check that golden is idempotent
 //check(t, golden, golden, e.mode)
 
@@ -221,13 +230,7 @@ public static void TestFiles(ж<testing.T> Ꮡt) {
 // comments are properly terminated with a newline even if the AST position
 // information is incorrect.
 public static void TestLineComments(ж<testing.T> Ꮡt) {
-    @string src = """
-// comment 1
-	// comment 2
-	// comment 3
-	package main
-	
-"""u8;
+    @string src = srcᶜ;
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, ""u8, src, parser.ParseComments);
     if (err != default!) {
@@ -270,10 +273,16 @@ public static void TestLineComments(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedIllegalProgramˢ = (@string)"expected illegal program"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ1 = "package p\n("u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string resᶜ = "package p\nBadDecl\n"u8;
+
 // Verify that the printer doesn't crash if the AST contains BadXXX nodes.
 public static void TestBadNodes(ж<testing.T> Ꮡt) {
-    @string src = "package p\n("u8;
-    @string res = "package p\nBadDecl\n"u8;
+    @string src = srcᶜ1;
+    @string res = resᶜ;
     var (f, err) = parser.ParseFile(fset, ""u8, src, parser.ParseComments);
     if (err == default!) {
         Ꮡt.Error(expectedIllegalProgramˢ); // error in test
@@ -316,12 +325,8 @@ internal static void testComment(ж<testing.T> Ꮡt, ж<ast.File> Ꮡf, nint src
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedOffset1ˢ = (@string)"expected offset 1"u8;
 
-// Verify that the printer produces a correct program
-// even if the position information of comments introducing newlines
-// is incorrect.
-public static void TestBadComments(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ2 = """
 
 // first comment - text and position changed by test
 package p
@@ -339,6 +344,13 @@ func fibo(n int) {
 }
 
 """u8;
+
+// Verify that the printer produces a correct program
+// even if the position information of comments introducing newlines
+// is incorrect.
+public static void TestBadComments(ж<testing.T> Ꮡt) {
+    Ꮡt.Parallel();
+    @string src = srcᶜ2;
     var (f, err) = parser.ParseFile(fset, ""u8, src, parser.ParseComments);
     if (err != default!) {
         Ꮡt.Error(err); // error in test
@@ -391,13 +403,8 @@ internal static nint identCount(ж<ast.File> Ꮡf) {
 internal static readonly @string srcˢ = "src"u8;
 internal static readonly object gotNoIdentsˢ = (@string)"got no idents"u8;
 
-// Verify that the SourcePos mode emits correct //line directives
-// by testing that position information for matching identifiers
-// is maintained.
-public static void TestSourcePos(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ3 = """
 
 package p
 import ( "go/printer"; "math" )
@@ -411,6 +418,12 @@ func (t *t) foo(a, b, c int) int {
 }
 
 """u8;
+
+// Verify that the SourcePos mode emits correct //line directives
+// by testing that position information for matching identifiers
+// is maintained.
+public static void TestSourcePos(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ3;
     // parse original
     var (f1, err) = parser.ParseFile(fset, srcˢ, src, parser.ParseComments);
     if (err != default!) {
@@ -461,10 +474,8 @@ func (t *t) foo(a, b, c int) int {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string srcGoˢ = "src.go"u8;
 
-// Verify that the SourcePos mode doesn't emit unnecessary //line directives
-// before empty lines.
-public static void TestIssue5945(ж<testing.T> Ꮡt) {
-    @string orig = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string origᶜ = """
 
 package p   // line 2
 func f() {} // line 3
@@ -476,7 +487,9 @@ func g() { // line 8
 }
 
 """u8;
-    @string want = """
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = """
 //line src.go:2
 package p
 
@@ -490,6 +503,12 @@ func g() {
 }
 
 """u8;
+
+// Verify that the SourcePos mode doesn't emit unnecessary //line directives
+// before empty lines.
+public static void TestIssue5945(ж<testing.T> Ꮡt) {
+    @string orig = origᶜ;
+    @string want = wantᶜ;
     // parse original
     var (f1, err) = parser.ParseFile(fset, srcGoˢ, orig, 0);
     if (err != default!) {
@@ -556,6 +575,9 @@ public static void TestStmtLists(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string filenameᶜ1 = "printer.go"u8;
+
 public static void TestBaseIndent(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -563,7 +585,7 @@ public static void TestBaseIndent(ж<testing.T> Ꮡt) {
     // The testfile must not contain multi-line raw strings since those
     // are not indented (because their values must not change) and make
     // this test fail.
-    @string filename = "printer.go"u8;
+    @string filename = filenameᶜ1;
     var (src, err) = os.ReadFile(filename);
     if (err != default!) {
         throw panic(err); // error in test
@@ -603,6 +625,14 @@ public static void TestBaseIndent(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ1 = """
+package p
+
+func f()
+
+"""u8;
+
 // TestFuncType tests that an ast.FuncType with a nil Params field
 // can be printed (per go/ast specification). Test case for issue 3870.
 public static void TestFuncType(ж<testing.T> Ꮡt) {
@@ -621,12 +651,7 @@ public static void TestFuncType(ж<testing.T> Ꮡt) {
         }
     }
     @string got = Ꮡbuf.String();
-    @string want = """
-package p
-
-func f()
-
-"""u8;
+    @string want = wantᶜ1;
     if (got != want) {
         Ꮡt.Fatalf("got:\n%s\nwant:\n%s\n"u8, got, want);
     }
@@ -686,10 +711,13 @@ public static void TestChanType(ж<testing.T> Ꮡt) {
 internal static readonly object writesContinuedAfterˢ = (@string)"Writes continued after first error returned"u8;
 internal static readonly object expectedErrWhenErrCount0ˢ = (@string)"Expected err when errCount != 0"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string filenameᶜ2 = "printer.go"u8;
+
 // Test whether the printer stops writing after the first error
 public static void TestWriteErrors(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
-    @string filename = "printer.go"u8;
+    @string filename = filenameᶜ2;
     var (src, err) = os.ReadFile(filename);
     if (err != default!) {
         throw panic(err); // error in test
@@ -714,15 +742,18 @@ public static void TestWriteErrors(ж<testing.T> Ꮡt) {
     }
 }
 
-// TestX is a skeleton test that can be filled in for debugging one-off cases.
-// Do not remove.
-public static void TestX(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ4 = """
 
 package p
 func _() {}
 
 """u8;
+
+// TestX is a skeleton test that can be filled in for debugging one-off cases.
+// Do not remove.
+public static void TestX(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ4;
     var (_, err) = format(slice<byte>(src), 0);
     if (err != default!) {
         Ꮡt.Error(err);
@@ -732,8 +763,8 @@ func _() {}
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string inputGoˢ = "input.go"u8;
 
-public static void TestCommentedNode(ж<testing.T> Ꮡt) {
-    @string input = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string inputᶜ = """
 package main
 
 func foo() {
@@ -745,16 +776,25 @@ type bar int // comment2
 
 
 """u8;
-    @string foo = """
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string fooᶜ = """
 func foo() {
 	// comment inside func
 }
 """u8;
-    @string bar = """
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string barᶜ = """
 // leading comment
 type bar int	// comment2
 
 """u8;
+
+public static void TestCommentedNode(ж<testing.T> Ꮡt) {
+    @string input = inputᶜ;
+    @string foo = fooᶜ;
+    @string bar = barᶜ;
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, inputGoˢ, input, parser.ParseComments);
     if (err != default!) {
@@ -778,10 +818,14 @@ type bar int	// comment2
     }
 }
 
-public static void TestIssue11151(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ5 = "package p\t/*\r/1\r*\r/2*\r\r\r\r/3*\r\r+\r\r/4*/\n"u8;
 
-    @string src = "package p\t/*\r/1\r*\r/2*\r\r\r\r/3*\r\r+\r\r/4*/\n"u8;
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ2 = "package p\t/*/1*\r/2*\r/3*+/4*/\n"u8;
+
+public static void TestIssue11151(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ5;
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, ""u8, src, parser.ParseComments);
     if (err != default!) {
@@ -790,7 +834,7 @@ public static void TestIssue11151(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, f.OrTypedNil());
     @string got = Ꮡbuf.String();
-    @string want = "package p\t/*/1*\r/2*\r/3*+/4*/\n"u8; // \r following opening /* should be stripped
+    @string want = wantᶜ2;                    // \r following opening /* should be stripped
     if (got != want) {
         Ꮡt.Errorf("\ngot : %q\nwant: %q"u8, got, want);
     }
@@ -801,11 +845,14 @@ public static void TestIssue11151(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ6 = "package p; var ( a float64; b int )"u8;
+
 // If a declaration has multiple specifications, a parenthesized
 // declaration must be printed even if Lparen is token.NoPos.
 public static void TestParenthesizedDecl(ж<testing.T> Ꮡt) {
     // a package with multiple specs in a single declaration
-    @string src = "package p; var ( a float64; b int )"u8;
+    @string src = srcᶜ6;
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, ""u8, src, 0);
     if (err != default!) {

@@ -378,6 +378,9 @@ public static void TestRawTokenAltEncoding(ж<testing.T> Ꮡt) {
     testRawToken(Ꮡt, d, testInputAltEncoding, rawTokensAltEncoding);
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string encodingᶜ = "x-testing-uppercase"u8;
+
 public static void TestRawTokenAltEncodingNoConverter(ж<testing.T> Ꮡt) {
     var d = NewDecoder(new xml_test_package.strings_ReaderжReader(strings.NewReader(testInputAltEncoding)));
     var (token, err) = d.RawToken();
@@ -394,7 +397,7 @@ public static void TestRawTokenAltEncodingNoConverter(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Fatalf("expected an error on second RawToken call"u8);
     }
-    @string encoding = "x-testing-uppercase"u8;
+    @string encoding = encodingᶜ;
     if (!strings.Contains(err.Error(), encoding)) {
         Ꮡt.Errorf("expected error to contain %q; got error: %v"u8,
             encoding, err);

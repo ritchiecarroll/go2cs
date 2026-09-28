@@ -30,7 +30,7 @@ using static go.mime_internal_test_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("mime/encodedword_test.go", "encodedword_test.cs", "ABccopIADyqCgIIACgqCAAcYgoKCgoKCloKCAAsOggAOJoKCgoKClIKClIIACAqiABxAgoKCgpSCAAsKggAMJrKCpIKUgoKUgoKUhKaCgpSCAAkKgqyAgviiguiihIK4ooSC", "180-195:1;209-211:1")]
 [assembly: go.GoPositionMap("mime/mediatype_test.go", "mediatype_test.cs", "AA0agtyigoKCgrbcggALGKKCgoKCttyCAAwaooKCgoKCtrYAORi0koKClJaCAKIC4gSCgoKCgpSUgJKUpIKUggAfRIKCgoKClIKUgpSClIIAIUKCgoKClIKUgoKUgpSigoI=", "101-107:1")]
-[assembly: go.GoPositionMap("mime/type_test.go", "type_test.cs", "AA8egoKCgoK4gqaCgpSAgsiC7oSCgoIADArCgoKCgpSUAAcQgoKCAAwKooKEgoKClKaAgqSAgriAggAUCKKCgoKCgoKUlAAGFoKCgpSCgpSCgpSCAAwKgoKUgoKUgriigoTKgoKC7qKChMqCgoKAggANEKKClJSUroKCgoKUgg==", "18-21:1;56-61:1;84-88:1;106-113:1;150-153:1;168-174:1;169-173:1.1;187-195:1;188-194:1.1;200-204:1")]
+[assembly: go.GoPositionMap("mime/type_test.go", "type_test.cs", "AA8egoKCgoK4gqaCgpSAgsiC7oSCgoIADArCgoKCgpSUAAcQgoKCABIKooKEgoKClKaAgqSAgriAggAUCKKCgoKCgoKUlAAGFoKCgpSCgpSCgpSCAAwKgoKUgoKUgriigoTKgoKC7qKChMqCgoKAggANEKKClJSUroKCgoKUgg==", "18-21:1;56-61:1;84-88:1;106-113:1;150-153:1;168-174:1;169-173:1.1;187-195:1;188-194:1.1;200-204:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

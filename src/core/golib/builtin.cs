@@ -2090,10 +2090,11 @@ public static partial class builtin
     public static ж<T> Ꮡ<T>(in T target)
     {
         // a consumer type's box carries the field-view slot (ж.Views.cs)
-        if (BoxShape<T>.Slotted)
-            return new SlottedStandardBox<T>(target);
+        ж<T> box = BoxShape<T>.Slotted ? new SlottedStandardBox<T>(target) : new StandardBox<T>(target);
 
-        return new StandardBox<T>(target);
+        // `&T{}`, and through heap() an escaping local: a Go allocation (GoMemProfile).
+        GoMemProfile.Charge<T>(box, 1);
+        return box;
     }
 
     /// <summary>
@@ -2377,10 +2378,11 @@ public static partial class builtin
         T value = GoNewZero<T>.UseDefault ? default! : Activator.CreateInstance<T>();
 
         // the same type gate as Ꮡ<T>(): a consumer type's box carries the field-view slot
-        if (BoxShape<T>.Slotted)
-            return new SlottedStandardBox<T>(value);
+        ж<T> box = BoxShape<T>.Slotted ? new SlottedStandardBox<T>(value) : new StandardBox<T>(value);
 
-        return new StandardBox<T>(value);
+        // `new(T)`: a Go allocation (GoMemProfile).
+        GoMemProfile.Charge<T>(box, 1);
+        return box;
     }
 
     // Whether `new(T)` must take `default(T)` rather than run T's parameterless constructor.
@@ -2422,7 +2424,11 @@ public static partial class builtin
         // caller's params array and the boxes of its arguments are emitted at the call site and,
         // like every other compiler-emitted allocation in converted code, are not charged.
         AllocationCounter.Count();
-        return new StandardBox<T>((T)Activator.CreateInstance(typeof(T), inputs)!);
+        ж<T> box = new StandardBox<T>((T)Activator.CreateInstance(typeof(T), inputs)!);
+
+        // `new(T)`: a Go allocation (GoMemProfile).
+        GoMemProfile.Charge<T>(box, 1);
+        return box;
     }
 
     /// <summary>

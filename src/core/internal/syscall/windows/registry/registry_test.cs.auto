@@ -23,8 +23,11 @@ using static go.@internal.syscall.windows.registry_internal_test_package;
 
 partial class registry_test_package {
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string numbersᶜ = "0123456789"u8;
+
 internal static @string randKeyName(@string prefix) {
-    @string numbers = "0123456789"u8;
+    @string numbers = numbersᶜ;
     var buf = new slice<byte>(10);
     rand.Read(buf);
     foreach (var (i, b) in buf) {
@@ -574,7 +577,7 @@ public static void TestExpandString(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testInvalidValuesˢ = "TestInvalidValues_"u8;
 
-[GoType("dyn")] partial struct TestInvalidValues_type {
+[GoType("dyn")] internal partial struct TestInvalidValues_type {
     public uint32 Type;
     public @string Name;
     public slice<byte> Data;
@@ -645,7 +648,7 @@ public static void TestInvalidValues(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object getMUIStringValueˢ = (@string)"GetMUIStringValue:"u8;
 
-[GoType("dyn")] [GoLocalName("testType")] partial struct TestGetMUIStringValue_testType {
+[GoType("dyn")] [GoLocalName("testType")] internal partial struct TestGetMUIStringValue_testType {
     internal @string name;
     internal @string want;
 }
@@ -705,7 +708,9 @@ public static (uint32 rc, error err) GetDynamicTimeZoneInformation(ж<DynamicTim
     uint32 rc = default!;
     error err = default!;
 
-    var (r0, _, e1) = syscall.Syscall(procGetDynamicTimeZoneInformation.Addr(), 1, (uintptr)Ꮡdtzi, 0, 0);
+    var ᴋ0 = Ꮡdtzi;
+        var (r0, _, e1) = syscall.Syscall(procGetDynamicTimeZoneInformation.Addr(), 1, (uintptr)ᴋ0, 0, 0);
+    System.GC.KeepAlive(ᴋ0);
     rc = (uint32)r0;
     if (rc == 0xffffffffU) {
         if (e1 != 0){

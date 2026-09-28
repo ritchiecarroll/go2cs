@@ -184,7 +184,7 @@ internal static UntypedInt huffmanValueShift => 4;
         nextcode[n]++;
         var chunk = (uint32)((nint)((i << (int)(huffmanValueShift)) | n));
         nint reverse = (nint)bits.Reverse16((uint16)codeΔ1);
-        reverse >>= (int)((nuint)(16 - n));
+        reverse.RshAssign((nuint)(16 - n));
         if (n <= huffmanChunkBits){
             for (nint off = reverse; off < len(h.chunks); off += ((nint)1).Lsh((nuint)n)) {
                 // We should never need to overwrite
@@ -460,7 +460,7 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
             }
         }
         rep += (nint)((uint32)(f.b & (uint32)(((uint32)1).Lsh(nb) - 1)));
-        f.b >>= (int)(nb);
+        f.b.RshAssign(nb);
         f.nb -= nb;
         if (i + rep > n) {
             return ((CorruptInputError)f.roffset);
@@ -575,7 +575,7 @@ readLiteral:
                 }
             }
             length += (nint)((uint32)(f.b & (uint32)(((uint32)1).Lsh(n) - 1)));
-            f.b >>= (int)(n);
+            f.b.RshAssign(n);
             f.nb -= n;
         }
         nint dist = default!;
@@ -617,7 +617,7 @@ readLiteral:
                 }
             }
             extra |= (nint)((nint)((uint32)(f.b & (uint32)(((uint32)1).Lsh(nb) - 1))));
-            f.b >>= (int)(nb);
+            f.b.RshAssign(nb);
             f.nb -= nb;
             dist = ((nint)1).Lsh((nb + 1)) + 1 + extra;
             break;

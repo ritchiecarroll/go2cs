@@ -10,15 +10,24 @@ using static go.compress.flate_package;
 
 partial class flate_internal_test_package {
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string abcᶜ1 = "ABC\n"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string foxᶜ = "The quick brown fox jumped over the lazy dog!\n"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string poemᶜ = "The Road Not Taken\nRobert Frost\n\nTwo roads diverged in a yellow wood,\nAnd sorry I could not travel both\nAnd be one traveler, long I stood\nAnd looked down one as far as I could\nTo where it bent in the undergrowth;\n\nThen took the other, as just as fair,\nAnd having perhaps the better claim,\nBecause it was grassy and wanted wear;\nThough as for that the passing there\nHad worn them really about the same,\n\nAnd both that morning equally lay\nIn leaves no step had trodden black.\nOh, I kept the first for another day!\nYet knowing how way leads on to way,\nI doubted if I should ever come back.\n\nI shall be telling this with a sigh\nSomewhere ages and ages hence:\nTwo roads diverged in a wood, and I-\nI took the one less traveled by,\nAnd that has made all the difference.\n";
+
 [GoType("dyn")] internal partial struct TestDictDecoder_type {
     internal nint dist; // Backward distance (0 if this is an insertion)
     internal nint length; // Length of copy or insertion
 }
 
 public static void TestDictDecoder(ж<testing.T> Ꮡt) {
-    @string abc = "ABC\n"u8;
-    @string fox = "The quick brown fox jumped over the lazy dog!\n"u8;
-    @string poem = "The Road Not Taken\nRobert Frost\n\nTwo roads diverged in a yellow wood,\nAnd sorry I could not travel both\nAnd be one traveler, long I stood\nAnd looked down one as far as I could\nTo where it bent in the undergrowth;\n\nThen took the other, as just as fair,\nAnd having perhaps the better claim,\nBecause it was grassy and wanted wear;\nThough as for that the passing there\nHad worn them really about the same,\n\nAnd both that morning equally lay\nIn leaves no step had trodden black.\nOh, I kept the first for another day!\nYet knowing how way leads on to way,\nI doubted if I should ever come back.\n\nI shall be telling this with a sigh\nSomewhere ages and ages hence:\nTwo roads diverged in a wood, and I-\nI took the one less traveled by,\nAnd that has made all the difference.\n";
+    @string abc = abcᶜ1;
+    @string fox = foxᶜ;
+    @string poem = poemᶜ;
     slice<TestDictDecoder_type> poemRefs = new TestDictDecoder_type[]{
         new(0, 38), new(33, 3), new(0, 48), new(79, 3), new(0, 11), new(34, 5), new(0, 6), new(23, 7),
         new(0, 8), new(50, 3), new(0, 2), new(69, 3), new(34, 5), new(0, 4), new(97, 3), new(0, 4),

@@ -575,15 +575,24 @@ public static void TestInterlaced(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object gotNilErrorWantNonNilˢ = (@string)"got nil error, want non-nil"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string ihdrᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02, 0x08, 0x00, 0x00, 0x00, 0x00, 0xbc, 0xea, 0xe9, 0xfb}));
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string idatᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x00, 0x04, 0x00, 0x00, 0xff, 0xff, 0x00, 0x06, 0x00, 0x03, 0xfa, 0xd0, 0x59, 0xae}));
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string iendᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82}));
+
 public static void TestIncompleteIDATOnRowBoundary(ж<testing.T> Ꮡt) {
     // The following is an invalid 1x2 grayscale PNG image. The header is OK,
     // but the zlib-compressed IDAT payload contains two bytes "\x02\x00",
     // which is only one row of data (the leading "\x02" is a row filter).
-    @string ihdr = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02, 0x08, 0x00, 0x00, 0x00, 0x00, 0xbc, 0xea, 0xe9, 0xfb}));
+    @string ihdr = ihdrᶜ;
     
-    @string idat = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x00, 0x04, 0x00, 0x00, 0xff, 0xff, 0x00, 0x06, 0x00, 0x03, 0xfa, 0xd0, 0x59, 0xae}));
+    @string idat = idatᶜ;
     
-    @string iend = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82}));
+    @string iend = iendᶜ;
     var (_, err) = Decode(new png_test_package.strings_ReaderжReader(strings.NewReader(pngHeader + ihdr + idat + iend)));
     if (err == default!) {
         Ꮡt.Fatal(gotNilErrorWantNonNilˢ);
@@ -593,23 +602,38 @@ public static void TestIncompleteIDATOnRowBoundary(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object decodedImageFromTrailingˢ = (@string)"decoded image from trailing IDAT chunk"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string ihdrᶜ1 = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x00, 0x00, 0x00, 0x00, 0x3a, 0x7e, 0x9b, 0x55}));
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string idatWhiteᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0xfa, 0x0f, 0x08, 0x00, 0x00, 0xff, 0xff, 0x01, 0x05, 0x01, 0x02, 0x5a, 0xdd, 0x39, 0xcd}));
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string idatZeroᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x44, 0x41, 0x54, 0x35, 0xaf, 0x06, 0x1e}));
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string iendᶜ1 = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82}));
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string idatBlackᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x00, 0x04, 0x00, 0x00, 0xff, 0xff, 0x00, 0x06, 0x00, 0x03, 0xfa, 0xd0, 0x59, 0xae}));
+
 public static void TestTrailingIDATChunks(ж<testing.T> Ꮡt) {
     // The following is a valid 1x1 PNG image containing color.Gray{255} and
     // a trailing zero-length IDAT chunk (see PNG specification section 12.9):
-    @string ihdr = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x00, 0x00, 0x00, 0x00, 0x3a, 0x7e, 0x9b, 0x55}));
+    @string ihdr = ihdrᶜ1;
     
-    @string idatWhite = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0xfa, 0x0f, 0x08, 0x00, 0x00, 0xff, 0xff, 0x01, 0x05, 0x01, 0x02, 0x5a, 0xdd, 0x39, 0xcd}));
+    @string idatWhite = idatWhiteᶜ;
     
-    @string idatZero = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x44, 0x41, 0x54, 0x35, 0xaf, 0x06, 0x1e}));
+    @string idatZero = idatZeroᶜ;
     
-    @string iend = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82}));
+    @string iend = iendᶜ1;
     var (_, err) = Decode(new png_test_package.strings_ReaderжReader(strings.NewReader(pngHeader + ihdr + idatWhite + idatZero + iend)));
     if (err != default!) {
         Ꮡt.Fatalf("decoding valid image: %v"u8, err);
     }
     // Non-zero-length trailing IDAT chunks should be ignored (recoverable error).
     // The following chunk contains a single pixel with color.Gray{0}.
-    @string idatBlack = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x00, 0x04, 0x00, 0x00, 0xff, 0xff, 0x00, 0x06, 0x00, 0x03, 0xfa, 0xd0, 0x59, 0xae}));
+    @string idatBlack = idatBlackᶜ;
     (var img, err) = Decode(new png_test_package.strings_ReaderжReader(strings.NewReader(pngHeader + ihdr + idatWhite + idatBlack + iend)));
     if (err != default!) {
         Ꮡt.Fatalf("trailing IDAT not ignored: %v"u8, err);
@@ -618,6 +642,21 @@ public static void TestTrailingIDATChunks(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(decodedImageFromTrailingˢ);
     }
 }
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string ihdrᶜ2 = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x03, 0x00, 0x00, 0x00, 0x28, 0xcb, 0x34, 0xbb}));
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string plteᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x03, 0x50, 0x4c, 0x54, 0x45, 0xff, 0x00, 0x00, 0x19, 0xe2, 0x09, 0x37}));
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string trnsᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x01, 0x74, 0x52, 0x4e, 0x53, 0x7f, 0x80, 0x5c, 0xb4, 0xcb}));
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string idatᶜ1 = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x00, 0x04, 0x00, 0x00, 0xff, 0xff, 0x00, 0x06, 0x00, 0x03, 0xfa, 0xd0, 0x59, 0xae}));
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string iendᶜ2 = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82}));
 
 public static void TestMultipletRNSChunks(ж<testing.T> Ꮡt) {
     /*
@@ -632,15 +671,15 @@ public static void TestMultipletRNSChunks(ж<testing.T> Ꮡt) {
 			0000060: 4260 82                                  B`.
 		Dropping the tRNS chunk makes that color's alpha 0xff instead of 0x7f.
 	*/
-    @string ihdr = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x03, 0x00, 0x00, 0x00, 0x28, 0xcb, 0x34, 0xbb}));
+    @string ihdr = ihdrᶜ2;
     
-    @string plte = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x03, 0x50, 0x4c, 0x54, 0x45, 0xff, 0x00, 0x00, 0x19, 0xe2, 0x09, 0x37}));
+    @string plte = plteᶜ;
     
-    @string trns = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x01, 0x74, 0x52, 0x4e, 0x53, 0x7f, 0x80, 0x5c, 0xb4, 0xcb}));
+    @string trns = trnsᶜ;
     
-    @string idat = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x00, 0x04, 0x00, 0x00, 0xff, 0xff, 0x00, 0x06, 0x00, 0x03, 0xfa, 0xd0, 0x59, 0xae}));
+    @string idat = idatᶜ1;
     
-    @string iend = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82}));
+    @string iend = iendᶜ2;
     for (nint i = 0; i < 4; i++) {
         slice<byte> b = default!;
         b = append(b, pngHeader.ꓸꓸꓸ);
@@ -719,6 +758,12 @@ public static void TestPaletted8OutOfRangePixel(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string hexᶜ = "0123456789abcdef"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = ".. .. .. ce bd bd bd bd bd bd bd bd bd bd e6 \n.. .. .. 7b 84 94 94 94 94 94 94 94 94 6b bd \n.. .. .. 7b d6 .. .. .. .. .. .. .. .. 8c bd \n.. .. .. 7b d6 .. .. .. .. .. .. .. .. 8c bd \n.. .. .. 7b d6 .. .. .. .. .. .. .. .. 8c bd \ne6 bd bd 7b a5 bd bd f7 .. .. .. .. .. 8c bd \nbd 6b 94 94 94 94 5a ef .. .. .. .. .. 8c bd \nbd 8c .. .. .. .. 63 ad ad ad ad ad ad 73 bd \nbd 8c .. .. .. .. 63 9c 9c 9c 9c 9c 9c 9c de \nbd 6b 94 94 94 94 5a ef .. .. .. .. .. .. .. \ne6 b5 b5 b5 b5 b5 b5 f7 .. .. .. .. .. .. .. \n";
+
 public static void TestGray8Transparent(ж<testing.T> Ꮡt) {
     // These bytes come from https://golang.org/issues/19553
     var (m, err) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader(new byte[]{
@@ -739,7 +784,7 @@ public static void TestGray8Transparent(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("Decode: %v"u8, err);
     }
-    @string hex = "0123456789abcdef"u8;
+    @string hex = hexᶜ;
     slice<byte> got = default!;
     var bounds = m.Bounds();
     for (nint y = bounds.Min.Y; y < bounds.Max.Y; y++) {
@@ -760,7 +805,7 @@ public static void TestGray8Transparent(ж<testing.T> Ꮡt) {
         }
         got = append(got, (byte)((rune)'\n'));
     }
-    @string want = ".. .. .. ce bd bd bd bd bd bd bd bd bd bd e6 \n.. .. .. 7b 84 94 94 94 94 94 94 94 94 6b bd \n.. .. .. 7b d6 .. .. .. .. .. .. .. .. 8c bd \n.. .. .. 7b d6 .. .. .. .. .. .. .. .. 8c bd \n.. .. .. 7b d6 .. .. .. .. .. .. .. .. 8c bd \ne6 bd bd 7b a5 bd bd f7 .. .. .. .. .. 8c bd \nbd 6b 94 94 94 94 5a ef .. .. .. .. .. 8c bd \nbd 8c .. .. .. .. 63 ad ad ad ad ad ad 73 bd \nbd 8c .. .. .. .. 63 9c 9c 9c 9c 9c 9c 9c de \nbd 6b 94 94 94 94 5a ef .. .. .. .. .. .. .. \ne6 b5 b5 b5 b5 b5 b5 f7 .. .. .. .. .. .. .. \n";
+    @string want = wantᶜ;
     if (((sstring)got) != want) {
         Ꮡt.Errorf("got:\n%swant:\n%s"u8, got, want);
     }

@@ -120,12 +120,8 @@ internal static readonly @string srcGoˢ = "src.go"u8;
 internal static readonly @string srcTestGoˢ = "src_test.go"u8;
 internal static readonly @string exampleComPˢ = "example.com/p"u8;
 
-// This example illustrates how to use NewFromFiles
-// to compute package documentation with examples.
-public static void ExampleNewFromFiles() {
-    // src and test are two source files that make up
-    // a package whose documentation will be computed.
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ = """
 
 // This is the package comment.
 package p
@@ -138,7 +134,9 @@ func Greet(who string) {
 }
 
 """u8;
-    @string test = """
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testᶜ = """
 
 package p_test
 
@@ -148,6 +146,14 @@ func ExampleGreet_world() {
 }
 
 """u8;
+
+// This example illustrates how to use NewFromFiles
+// to compute package documentation with examples.
+public static void ExampleNewFromFiles() {
+    // src and test are two source files that make up
+    // a package whose documentation will be computed.
+    @string src = srcᶜ;
+    @string test = testᶜ;
     // Create the AST by parsing src and test.
     var fset = token.NewFileSet();
     var files = new ж<ast.File>[]{
@@ -164,12 +170,8 @@ func ExampleGreet_world() {
     fmt.Printf(" ⤷ example with suffix %q - %s"u8, (~(~(~p).Funcs[0]).Examples[0]).Suffix, (~(~(~p).Funcs[0]).Examples[0]).Doc);
 }
 
-// Output:
-// package p - This is the package comment.
-// func Greet - This comment is associated with the Greet function.
-//  ⤷ example with suffix "world" - This comment is associated with the ExampleGreet_world example.
-public static void TestClassifyExamples(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ1 = """
 
 package p
 
@@ -213,7 +215,9 @@ type GType[T any] int
 func (GType[T]) M() {}
 
 """u8;
-    @string test = """
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testᶜ1 = """
 
 package p_test
 
@@ -280,6 +284,14 @@ func ExampleGType_M() {}
 func ExampleGType_M_suffix() {}
 
 """u8;
+
+// Output:
+// package p - This is the package comment.
+// func Greet - This comment is associated with the Greet function.
+//  ⤷ example with suffix "world" - This comment is associated with the ExampleGreet_world example.
+public static void TestClassifyExamples(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ1;
+    @string test = testᶜ1;
     // Parse literal source code as a *doc.Package.
     var fset = token.NewFileSet();
     var files = new ж<ast.File>[]{

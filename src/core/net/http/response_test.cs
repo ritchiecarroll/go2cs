@@ -757,10 +757,13 @@ public static void TestResponseStatusStutter(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string shortBodyᶜ = "Short body, not 123 bytes."u8;
+
 public static void TestResponseContentLengthShortBody(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string shortBody = "Short body, not 123 bytes."u8;
+        @string shortBody = shortBodyᶜ;
         var br = bufio.NewReader(new http_test_package.strings_ReaderжReader(strings.NewReader("HTTP/1.1 200 OK\r\n" + "Content-Length: 123\r\n" + "\r\n" + shortBody)));
         var (res, err) = ReadResponse(br, Ꮡ(new Request(Method: "GET"u8)));
         if (err != default!) {
@@ -943,9 +946,12 @@ internal static error matchErr(error err, any wantErr) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string http10200OkAaaaˢ = "HTTP/1.0 200 OK\r\n\r\nAAAA"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string connectionCloseHeaderᶜ = "Connection: close"u8;
+
 // A response should only write out single Connection: close header. Tests #19499.
 public static void TestResponseWritesOnlySingleConnectionClose(ж<testing.T> Ꮡt) {
-    @string connectionCloseHeader = "Connection: close"u8;
+    @string connectionCloseHeader = connectionCloseHeaderᶜ;
     var (res, err) = ReadResponse(bufio.NewReader(new http_test_package.strings_ReaderжReader(strings.NewReader(http10200OkAaaaˢ))), nil);
     if (err != default!) {
         Ꮡt.Fatalf("ReadResponse failed %v"u8, err);

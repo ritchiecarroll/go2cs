@@ -49,6 +49,7 @@
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerPropertyClass_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)compoundShiftGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)commandLineOptions.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyAliasDot_test.go" />
@@ -157,6 +158,9 @@
     <None Include="$(MSBuildThisFileDirectory)internal\releasestamp\stamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\contextBudget_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsJekyllLiquid_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsKramdownRawHTML_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsSiteLinksTitles_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsKramdownBlocks_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\certContextReachGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\coreReferencesResolve_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\elidedConstraints_test.go" />
@@ -185,6 +189,7 @@
     <None Include="$(MSBuildThisFileDirectory)localValueIfaceCallConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)main.go" />
     <None Include="$(MSBuildThisFileDirectory)manualConversionDestination_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)manualConversionVars_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualConversionMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualConversionScope_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualTypeOperations.go" />

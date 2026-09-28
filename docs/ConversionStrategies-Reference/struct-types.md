@@ -396,6 +396,7 @@ package scope under a function-prefixed name. Two Go type-identity rules ride th
   makes the stamp movable, so it is written on the `package_info.cs` accessibility record and the
   lifted declaration reads as the plain lift it is
   ([Extended attributes](source-generators.md#extended-attributes-what-stays-on-the-declaration-and-what-moves)):
+
 ```go
 func TestNoFixedSize(t *testing.T) {
 	type Person struct { … }

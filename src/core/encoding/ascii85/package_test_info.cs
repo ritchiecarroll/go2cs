@@ -33,7 +33,7 @@ using static global::go.encoding.ascii85_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/ascii85/ascii85_test.go", "ascii85_test.cs", "ACZaooKCgpSmgoKCgoKCgqbWgoKCgoK4goKCgoKCAAkIgoKCgoKCgoKUgoKUgoIACQiCgoKCgoKCAAkIgoKCgoKUgoKC+oKCgoKCgoKCgpSClAAMCIIAAxKCgoKUxNqCgoKCgpSCgoKClIKClIKCloKCgoKmuIKCgoKUgII=")]
+[assembly: go.GoPositionMap("encoding/ascii85/ascii85_test.go", "ascii85_test.cs", "ACZaooKCgpSmgoKCgoKCgqbWgoKCgoK4goKCgoKCAAkIgoKCgoKCgoKUgoKUgoIACQiCgoKCgoKCAAkIgoKCgoKUgoKC+oKCgoKCgoKCgpSClAAMCIIAAxKCgoKUxAAICoKCgoKClIKCgoKUgoKUgoKWgoKCgqa4goKCgpSAgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

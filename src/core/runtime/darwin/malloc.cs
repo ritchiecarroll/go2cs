@@ -775,7 +775,7 @@ internal static gclinkptr nextFreeFast(ж<mspan> Ꮡs) {
             if ((uint16)(freeidx % 64) == 0 && freeidx != s.nelems) {
                 return 0;
             }
-            s.allocCache >>= (int)((nuint)(theBit + 1));
+            s.allocCache.RshAssign((nuint)(theBit + 1));
             s.freeindex = freeidx;
             s.allocCount++;
             return ((gclinkptr)((uintptr)result * s.elemsize + s.@base()));

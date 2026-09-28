@@ -529,7 +529,7 @@ public static (uint64 quo, uint64 rem) Div64(uint64 hi, uint64 lo, uint64 y) {
         return (lo / y, lo % y);
     }
     nuint s = (nuint)LeadingZeros64(y);
-    y <<= (int)(s);
+    y.LshAssign(s);
     UntypedInt two32 = /* 1 << 32 */ 4294967296;
     const uint64 mask32 = /* two32 - 1 */ 4294967295;
     var yn1 = (y >> (int)(32));

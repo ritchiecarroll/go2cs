@@ -526,10 +526,13 @@ public static void TestTransportReadToEndReusesConn(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testTransportReadToEndReusesConn(Δp0, Δp1));
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string msgᶜ1 = "foobar"u8;
+
 internal static void testTransportReadToEndReusesConn(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        @string msg = "foobar"u8;
+        @string msg = msgᶜ1;
         ref var addrSeen = ref heap<map<@string, nint>>(out var ᏑaddrSeen);
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             ᏑaddrSeen.ValueSlot[(~r).RemoteAddr]++;
@@ -1035,7 +1038,7 @@ internal static void testTransportServerClosingUnexpectedly(ж<testing.T> Ꮡt, 
     var tsʗ1 = ts;
     @string fetch(nint n, nint retries) {
         void condFatalf(@string format, params ꓸꓸꓸany argʗp) {
-            var arg = argʗp.slice();
+            var arg = argʗp.sslice();
             if (retries <= 0) {
                 Ꮡt.Fatalf(format, arg.ꓸꓸꓸ);
             }
@@ -1254,8 +1257,11 @@ public static void TestRoundTripGzip(ж<testing.T> Ꮡt) {
 internal static readonly @string expectAcceptˢ = "expect_accept"u8;
 internal static readonly @string testnumˢ = "testnum"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string responseBodyᶜ = "test response body"u8;
+
 internal static void testRoundTripGzip(ж<testing.T> Ꮡt, testMode mode) {
-    @string responseBody = "test response body"u8;
+    @string responseBody = responseBodyᶜ;
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter rw, ж<Δhttp.Request> req) => {
         @string accept = (~req).Header.Get(acceptEncodingˢ);
         {
@@ -1331,11 +1337,14 @@ public static void TestTransportGzip(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object httpsGoDevIssue56020ˢ = (@string)"https://go.dev/issue/56020"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testStringᶜ = "The test string aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"u8;
+
 internal static void testTransportGzip(ж<testing.T> Ꮡt, testMode mode) {
     if (mode == http2Mode) {
         Ꮡt.Skip(httpsGoDevIssue56020ˢ);
     }
-    @string testString = "The test string aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"u8;
+    @string testString = testStringᶜ;
     const int64 nRandBytes = /* 1024 * 1024 */ 1048576;
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter rw, ж<Δhttp.Request> req) => {
         GoFrame ᒐ = default;
@@ -2718,6 +2727,9 @@ public static void TestIssue3595(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testIssue3595(Δp0, Δp1), testNotParallel);
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string deniedMsgᶜ = "sorry, denied."u8;
+
 internal static void testIssue3595(ж<testing.T> Ꮡt, testMode mode) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -2735,7 +2747,7 @@ internal static void testIssue3595(ж<testing.T> Ꮡt, testMode mode) {
         try {
             http_internal_test_package.SetRSTAvoidanceDelay(tΔ1, timeout);
             tΔ1.Logf("set RST avoidance delay to %v"u8, timeout);
-            @string deniedMsg = "sorry, denied."u8;
+            @string deniedMsg = deniedMsgᶜ;
             var cst = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
                 Error(w, deniedMsg, StatusUnauthorized);
             })));
@@ -3167,7 +3179,7 @@ internal static readonly @string requestCancelˢ = "RequestCancel"u8;
 internal static readonly @string contextCancelˢ = "ContextCancel"u8;
 
 internal static void runCancelTest(ж<testing.T> Ꮡt, Action<ж<testing.T>, cancelTest> f, params ꓸꓸꓸany optsʗp) {
-    var opts = optsʗp.slice();
+    var opts = optsʗp.sslice();
 
     run<TжTBRun>(Ꮡt, (TжTBRun tΔ1Δp, testMode mode) => {
         var tΔ1 = (ж<testing.T>)tΔ1Δp;
@@ -3193,13 +3205,16 @@ public static void TestTransportCancelRequest(ж<testing.T> Ꮡt) {
 internal static readonly object skippingTestInShortModeˢ2 = (@string)"skipping test in -short mode"u8;
 internal static readonly @string bodyReadˢ = "Body.Read"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string msgᶜ2 = "Hello"u8;
+
 internal static void testTransportCancelRequest(ж<testing.T> Ꮡt, cancelTest test) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
             Ꮡt.Skip(skippingTestInShortModeˢ2);
         }
-        @string msg = "Hello"u8;
+        @string msg = msgᶜ2;
         var unblockc = new channel<bool>(0);
         var unblockcʗ1 = unblockc;
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), test.mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
@@ -3405,13 +3420,16 @@ public static void TestTransportCancelRequestWithBody(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string withbodyˢ = "withbody"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string msgᶜ3 = "Hello"u8;
+
 internal static void testTransportCancelRequestWithBody(ж<testing.T> Ꮡt, cancelTest test) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
             Ꮡt.Skip(skippingTestInShortModeˢ2);
         }
-        @string msg = "Hello"u8;
+        @string msg = msgᶜ3;
         var unblockc = new channel<EmptyStruct>(0);
         var unblockcʗ1 = unblockc;
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), test.mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
@@ -4695,7 +4713,7 @@ internal static void testRetryRequestsOnError(ж<testing.T> Ꮡt, testMode mode)
                 void logf(@string format, params ꓸꓸꓸany argsʗp) {
                     GoFrame ᒐ = default;
                     try {
-                        var args = argsʗp.slice();
+                        var args = argsʗp.sslice();
                         Ꮡmu.Lock();
                         defer(Ꮡmu.Unlock, ref ᒐ);
                         fmt.Fprintf(new http_test_package.strings_BuilderжWriter(Ꮡlogbuf), format, args.ꓸꓸꓸ);
@@ -5361,11 +5379,14 @@ public static void TestTransportContentEncodingCaseInsensitive(ж<testing.T> Ꮡ
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testTransportContentEncodingCaseInsensitive(Δp0, Δp1));
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string encodedStringᶜ = "Hello Gopher"u8;
+
 internal static void testTransportContentEncodingCaseInsensitive(ж<testing.T> Ꮡt, testMode mode) {
     foreach (var (_, ce) in new @string[]{"gzip"u8, "GZIP"u8}.slice()) {
         @string ceΔ1 = ce;
         Ꮡt.Run(ceΔ1, (ж<testing.T> tΔ1) => {
-            @string encodedString = "Hello Gopher"u8;
+            @string encodedString = encodedStringᶜ;
             var ts = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
                 w.Header().Set(contentEncodingˢ, ceΔ1);
                 var gz = gzip.NewWriter(new http_test_package.http_ResponseWriterᴠWriter(w));
@@ -6077,10 +6098,13 @@ internal static readonly @string wroteRequestErrNilˢ = "WroteRequest: {Err:<nil
 internal static readonly @string toUdpˢ = " to udp "u8;
 internal static readonly @string gettingConnForDnsIsFakedˢ = "Getting conn for dns-is-faked.golang:"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string resBodyᶜ1 = "some body"u8;
+
 internal static void testTransportEventTrace(ж<testing.T> Ꮡt, testMode mode, bool noHooks) {
     GoFrame ᒐ = default;
     try {
-        @string resBody = "some body"u8;
+        @string resBody = resBodyᶜ1;
         var gotWroteReqEvent = new channel<EmptyStruct>(500);
         var gotWroteReqEventʗ1 = gotWroteReqEvent;
 
@@ -6111,7 +6135,7 @@ internal static void testTransportEventTrace(ж<testing.T> Ꮡt, testMode mode, 
         void logf(@string format, params ꓸꓸꓸany argsʗp) {
             GoFrame ᒐ = default;
             try {
-                var args = argsʗp.slice();
+                var args = argsʗp.sslice();
                 Ꮡmu.Lock();
                 defer(Ꮡmu.Unlock, ref ᒐ);
                 fmt.Fprintf(new http_test_package.strings_BuilderжWriter(Ꮡbuf), format, args.ꓸꓸꓸ);
@@ -6330,7 +6354,7 @@ internal static void testTransportEventTraceTLSVerify(ж<testing.T> Ꮡt, testMo
     void logf(@string format, params ꓸꓸꓸany argsʗp) {
         GoFrame ᒐ = default;
         try {
-            var args = argsʗp.slice();
+            var args = argsʗp.sslice();
             Ꮡmu.Lock();
             defer(Ꮡmu.Unlock, ref ᒐ);
             fmt.Fprintf(new http_test_package.strings_BuilderжWriter(Ꮡbuf), format, args.ꓸꓸꓸ);
@@ -6430,7 +6454,7 @@ public static void TestTransportEventTraceRealDNS(ж<testing.T> Ꮡt) {
         void logf(@string format, params ꓸꓸꓸany argsʗp) {
             GoFrame ᒐ = default;
             try {
-                var args = argsʗp.slice();
+                var args = argsʗp.sslice();
                 Ꮡmu.Lock();
                 defer(Ꮡmu.Unlock, ref ᒐ);
                 fmt.Fprintf(new http_test_package.strings_BuilderжWriter(Ꮡbuf), format, args.ꓸꓸꓸ);
@@ -6880,13 +6904,19 @@ public static void TestTransportIDNA(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string hitHandlerˢ = "Hit-Handler"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string uniDomainᶜ = "гофер.го"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string punyDomainᶜ = "xn--c1ae0ajs.xn--c1aw"u8;
+
 internal static void testTransportIDNA(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        @string uniDomain = "гофер.го"u8;
-        @string punyDomain = "xn--c1ae0ajs.xn--c1aw"u8;
+        @string uniDomain = uniDomainᶜ;
+        @string punyDomain = punyDomainᶜ;
         @string port = default!;
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             @string want = punyDomain + ":" + port;
@@ -7146,11 +7176,14 @@ internal static slice<byte> rgz = new byte[]{
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object panickedExpectingAnErrorˢ = (@string)"panicked, expecting an error"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ3 = "unknown status code"u8;
+
 // Ensure that a missing status doesn't make the server panic
 // See Issue https://golang.org/issues/21701
 public static void TestMissingStatusNoPanic(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
-    @string want = "unknown status code"u8;
+    @string want = wantᶜ3;
     var ln = newLocalListener(Ꮡt);
     @string addr = ln.Addr().String();
     var done = new channel<bool>(0);
@@ -7526,10 +7559,13 @@ public static void TestTransportCONNECTBidi(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string connectˢ = "CONNECT"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string targetᶜ = "backend:443"u8;
+
 internal static void testTransportCONNECTBidi(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        @string target = "backend:443"u8;
+        @string target = targetᶜ;
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             GoFrame ᒐ = default;
             try {
@@ -7919,6 +7955,9 @@ public static void TestTransportIgnores408(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testTransportIgnores408(Δp0, Δp1), new testMode[]{http1Mode}.slice(), testNotParallel);
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string targetᶜ1 = "backend:443"u8;
+
 internal static void testTransportIgnores408(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
@@ -7926,7 +7965,7 @@ internal static void testTransportIgnores408(ж<testing.T> Ꮡt, testMode mode) 
         defer(log.SetOutput, log.Writer(), ref ᒐ);
         ref var logout = ref heap(new strings.Builder(), out var Ꮡlogout);
         log.SetOutput(new http_test_package.strings_BuilderжWriter(Ꮡlogout));
-        @string target = "backend:443"u8;
+        @string target = targetᶜ1;
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             GoFrame ᒐ = default;
             try {
@@ -8759,9 +8798,15 @@ public static void TestProxyAuthHeader(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string httpˢ4 = "http://_/"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string usernameᶜ = "u"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string passwordᶜ = "@/?!"u8;
+
 internal static void testProxyAuthHeader(ж<testing.T> Ꮡt, testMode mode) {
-    @string username = "u"u8;
-    @string password = "@/?!"u8;
+    @string username = usernameᶜ;
+    @string password = passwordᶜ;
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter rw, ж<Δhttp.Request> req) => {
         // Copy the Proxy-Authorization header to a new Request,
         // since Request.BasicAuth only parses the Authorization header.

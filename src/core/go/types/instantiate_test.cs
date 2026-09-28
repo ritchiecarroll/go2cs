@@ -136,8 +136,11 @@ public static void TestInstantiateEquality(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ17 = "package p; type T[P any] int"u8;
+
 public static void TestInstantiateNonEquality(ж<testing.T> Ꮡt) {
-    @string src = "package p; type T[P any] int"u8;
+    @string src = srcᶜ17;
     var pkg1 = mustTypecheck(src, nil, nil);
     var pkg2 = mustTypecheck(src, nil, nil);
     // We consider T1 and T2 to be distinct types, so their instances should not
@@ -161,13 +164,8 @@ public static void TestInstantiateNonEquality(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestMethodInstantiation_tests {
-    internal @string decl;
-    internal @string want;
-}
-
-public static void TestMethodInstantiation(ж<testing.T> Ꮡt) {
-    @string prefix = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string prefixᶜ1 = """
 package p
 
 type T[P any] struct{}
@@ -176,6 +174,14 @@ var X T[int]
 
 
 """u8;
+
+[GoType("dyn")] internal partial struct TestMethodInstantiation_tests {
+    internal @string decl;
+    internal @string want;
+}
+
+public static void TestMethodInstantiation(ж<testing.T> Ꮡt) {
+    @string prefix = prefixᶜ1;
     var tests = new TestMethodInstantiation_tests[]{
         new("func (r T[P]) m() P"u8, "func (T[int]).m() int"u8),
         new("func (r T[P]) m(P)"u8, "func (T[int]).m(int)"u8),
@@ -205,8 +211,8 @@ var X T[int]
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string funcTPMˢ = "func (T[P]).m()"u8;
 
-public static void TestImmutableSignatures(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ18 = """
 package p
 
 type T[P any] struct{}
@@ -216,6 +222,9 @@ func (T[P]) m() {}
 var _ T[int]
 
 """u8;
+
+public static void TestImmutableSignatures(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ18;
     var pkg = mustTypecheck(src, nil, nil);
     var typ = pkg.Scope().Lookup("T"u8).Type()._<ж<types.Named>>();
     var (obj, _, _) = LookupFieldOrMethod(new types.NamedжΔType(typ), false, pkg, "m"u8);

@@ -24,14 +24,20 @@ partial class time_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string asiaJerusalemˢ = "Asia/Jerusalem"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testZoneinfoᶜ = "foo.zip"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string envᶜ = "ZONEINFO"u8;
+
 public static void TestEnvVarUsage(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
         time_internal_test_package.ResetZoneinfoForTesting();
-        @string testZoneinfo = "foo.zip"u8;
-        @string env = "ZONEINFO"u8;
+        @string testZoneinfo = testZoneinfoᶜ;
+        @string env = envᶜ;
         Ꮡt.Setenv(env, testZoneinfo);
         // Result isn't important, we're testing the side effect of this command
         Δtime.LoadLocation(asiaJerusalemˢ);
@@ -59,9 +65,12 @@ public static void TestBadLocationErrMsg(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string envᶜ1 = "ZONEINFO"u8;
+
 public static void TestLoadLocationValidatesNames(ж<Δtesting.T> Ꮡt) {
     time_internal_test_package.ResetZoneinfoForTesting();
-    @string env = "ZONEINFO"u8;
+    @string env = envᶜ1;
     Ꮡt.Setenv(env, ""u8);
     var bad = new @string[]{
         "/usr/foo/Foo"u8,
@@ -92,6 +101,9 @@ public static void TestVersion3(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string formatᶜ = "Mon, 02 Jan 2006 15:04:05 -0700 (MST)"u8;
+
 [GoType("dyn")] internal partial struct TestFirstZone_type {
     internal @string zone;
     internal int64 unix;
@@ -108,7 +120,7 @@ public static void TestFirstZone(ж<Δtesting.T> Ꮡt) {
         var undo = time_internal_test_package.DisablePlatformSources();
         var undoʗ1 = undo;
         defer(undoʗ1, ref ᒐ);
-        @string format = "Mon, 02 Jan 2006 15:04:05 -0700 (MST)"u8;
+        @string format = formatᶜ;
         slice<TestFirstZone_type> tests = new TestFirstZone_type[]{
             new(
                 "PST8PDT"u8,
@@ -154,6 +166,9 @@ public static void TestLocationNames(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object failedToLocateTzinfoˢ = (@string)"Failed to locate tzinfo source in GOROOT."u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string locationNameᶜ = "Asia/Jerusalem"u8;
+
 public static void TestLoadLocationFromTZData(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
@@ -162,7 +177,7 @@ public static void TestLoadLocationFromTZData(ж<Δtesting.T> Ꮡt) {
         var undo = time_internal_test_package.DisablePlatformSources();
         var undoʗ1 = undo;
         defer(undoʗ1, ref ᒐ);
-        @string locationName = "Asia/Jerusalem"u8;
+        @string locationName = locationNameᶜ;
         var (reference, err) = Δtime.LoadLocation(locationName);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -190,6 +205,9 @@ public static void TestLoadLocationFromTZData(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string estˢ = "EST"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string locNameᶜ = "America/New_York"u8;
+
 // Issue 30099.
 public static void TestEarlyLocation(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
@@ -197,7 +215,7 @@ public static void TestEarlyLocation(ж<Δtesting.T> Ꮡt) {
         var undo = time_internal_test_package.DisablePlatformSources();
         var undoʗ1 = undo;
         defer(undoʗ1, ref ᒐ);
-        @string locName = "America/New_York"u8;
+        @string locName = locNameᶜ;
         var (loc, err) = Δtime.LoadLocation(locName);
         if (err != default!) {
             Ꮡt.Fatal(err);

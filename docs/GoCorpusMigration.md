@@ -799,6 +799,7 @@ inert.
 | `src/version.props` | the corpus pin guard reads it beside `core`; H5's root takes `<H2>`'s file — the pin AND the reset build number the emitted badges read — never a sed of the pin line; H4a's takes `<landing>`'s |
 | `docs/validation` | the README Tests and Source·C# badges read it with `version.props`; without either, both badges vanish corpus-wide |
 | `src/Directory.Build.props`, `src/gen` minus build dirs | to BUILD the root: `core/Directory.Build.props` imports the file above it (the TFM) and resolves the analyzer at `$(go2csPath)gen/go2cs-gen`, which the generated solution also lists |
+
 <!-- Lane R's seeding, 2026-09-07/08 and 2026-09-13: r-h5b-setup.sh:36-51, setup-convert.sh:38-51 (archived, sha256 in the rehearsal's
      archive manifest). Exclusions and the badge reason: .claude/skills/corpus-reconvert/SKILL.md:84-85; both seeds before either arm:
      same file :88; the binary proven at its invoked path and by its embedded release: same file :91. The tracked count: git quotes
@@ -1071,8 +1072,8 @@ one log per flavour carrying its `deleted …` lines and re-walked `after` arith
      merge, src/go2cs/platformEmit.go:420-422 and :873. A restore that rewrites mtimes reads as emission (R 46145d0a0, method note).
      COORD 210d49537 rule 4: a destructive step on a measurement tree takes a backup first. -->
 
-**6. C1's prepared patch, then `runtime`.** Apply C1's prepared patch — `src/apply-h5-c1-1-rederives.sh --verify
-<scratch>` (must name both defects on the unpatched tree), then apply, then `--verify` again (must pass), the
+**6. C1's prepared patch, then `runtime`.** Apply C1's prepared patch —
+`src/apply-h5-c1-1-rederives.sh --verify <scratch>` (must name both defects on the unpatched tree), then apply, then `--verify` again (must pass), the
 mcleanup hand-own body carried from `claude/c1-mcleanup-handown` or its successor — and only then build `runtime`.
 Without it the 1.24 build cannot get past `runtime`. **The carry hazard:** re-deriving `runtime2.cs`/`mfinal.cs`
 at H5 takes the hand-own body from `claude/c1-mcleanup-handown` (or its successor), never from the landing tree;
@@ -1272,8 +1273,8 @@ behavioral divergence, an added branch shows up as nothing.
 > the branches diverged was never on the release branch to be retired from it, and a baseline taken at
 > master's tip reports it as retired. Corrected in review by a second lane, who re-ran the ancestry test
 > on the first run's rows: six of seven survived, and the one that did not had landed on master after the
-> divergence. **Assert it per row** — `git merge-base --is-ancestor <the-commit-that-added-it>
-> <incoming-sha>` — because that assertion is what catches the class, not the choice of baseline alone.
+> divergence. **Assert it per row** —
+> `git merge-base --is-ancestor <the-commit-that-added-it> <incoming-sha>` — because that assertion is what catches the class, not the choice of baseline alone.
 >
 > ⚠ **And a row that fails that assertion is not discarded — it is RE-ROUTED.** It is not a hop
 > retirement; it is a **carry-forward gap**: a cure that exists on master and has never reached the
@@ -2468,8 +2469,8 @@ never moved, only the declaration's name did. **No proof file is moved, renamed 
 record is the record of a run, and an inherited anchor's record is the SOURCE's.
 
 
-**The recon leg invokes THE PIPELINE per package** — `go2cs -tests -test-action all
-<goroot>/src/<row> <tree>/src/core/<row>` in the worktree at the version tip, whose `src/core` is the
+**The recon leg invokes THE PIPELINE per package** —
+`go2cs -tests -test-action all <goroot>/src/<row> <tree>/src/core/<row>` in the worktree at the version tip, whose `src/core` is the
 seed — **and not the sweep script**, which is what H10's own line above decides: the sweep is the
 steady-state gate and this step invalidates its preconditions by design. One process per worker list
 with rows sequential, so the shared build cost falls on the first row: **emit that fact as a column**

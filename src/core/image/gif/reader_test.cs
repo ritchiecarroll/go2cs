@@ -53,6 +53,9 @@ internal static slice<byte> lzwEncode(slice<byte> @in) {
     return b.Bytes();
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string extraᶜ = "\x02\x02\x02\x02"u8;
+
 [GoType("dyn")] internal partial struct TestDecode_testCases {
     internal nint nPix; // The number of pixels in the image data.
     // If non-zero, write this many extra bytes inside the data sub-block
@@ -67,7 +70,7 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
     // extra contains superfluous bytes to inject into the GIF, either at the end
     // of an existing data sub-block (past the LZW End of Information code) or in
     // a separate data sub-block. The 0x02 values are arbitrary.
-    @string extra = "\x02\x02\x02\x02"u8;
+    @string extra = extraᶜ;
     var testCases = new TestDecode_testCases[]{
         new(0, 0, 0, errNotEnough),
         new(1, 0, 0, errNotEnough),

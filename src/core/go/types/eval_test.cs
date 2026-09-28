@@ -227,13 +227,8 @@ internal static (@string, @string) split(@string s, @string sep) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string evalˢ = "eval"u8;
 
-public static void TestCheckExpr(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
-    // Each comment has the form /* expr => object */:
-    // expr is an identifier or selector expression that is passed
-    // to CheckExpr at the position of the comment, and object is
-    // the string form of the object it denotes.
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ15 = """
 
 package p
 
@@ -261,6 +256,14 @@ func f(a int, s string) S {
 	return S{}
 }
 """u8;
+
+public static void TestCheckExpr(ж<testing.T> Ꮡt) {
+    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+    // Each comment has the form /* expr => object */:
+    // expr is an identifier or selector expression that is passed
+    // to CheckExpr at the position of the comment, and object is
+    // the string form of the object it denotes.
+    @string src = srcᶜ15;
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, "p"u8, src, parser.ParseComments);
     if (err != default!) {
@@ -335,13 +338,16 @@ func f(a int, s string) S {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string undefinedˢ = "undefined"u8;
 
-public static void TestIssue65898(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ16 = """
 
 package p
 func _[A any](A) {}
 
 """u8;
+
+public static void TestIssue65898(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ16;
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);

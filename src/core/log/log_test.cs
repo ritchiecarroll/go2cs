@@ -97,8 +97,11 @@ public static void TestAll(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testStringᶜ = "test"u8;
+
 public static void TestOutput(ж<testing.T> Ꮡt) {
-    @string testString = "test"u8;
+    @string testString = testStringᶜ;
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     var l = New(new log_test_package.strings_BuilderжWriter(Ꮡb), ""u8, 0);
     l.Println(testString);
@@ -262,10 +265,13 @@ public static void BenchmarkItoa(ж<testing.B> Ꮡb) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testStringᶜ1 = "test"u8;
+
 public static void BenchmarkPrintln(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    @string testString = "test"u8;
+    @string testString = testStringᶜ1;
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var l = New(new log_test_package.bytes_BufferжWriter(Ꮡbuf), ""u8, LstdFlags);
     b.ReportAllocs();
@@ -275,10 +281,13 @@ public static void BenchmarkPrintln(ж<testing.B> Ꮡb) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testStringᶜ2 = "test"u8;
+
 public static void BenchmarkPrintlnNoFlags(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    @string testString = "test"u8;
+    @string testString = testStringᶜ2;
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var l = New(new log_test_package.bytes_BufferжWriter(Ꮡbuf), ""u8, 0);
     b.ReportAllocs();

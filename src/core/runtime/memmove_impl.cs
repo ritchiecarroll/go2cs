@@ -21,6 +21,9 @@ namespace go;
 // TestMemmoveAtomicity (10,233 of 10,891 results in): `Memmove` and `MemclrNoHeapPointers` are
 // export_test.go aliases the suite calls directly, inside a goroutine.
 //
+// memequal (memequal_*.s) joined them later with the same three-way reading of a pointer; its
+// first reached caller is traceMap.put (tracemap_impl.cs).
+//
 // Hand-owned: there is no memmove_impl.go, so a -stdlib reconvert never regenerates this file.
 //
 // WHAT A POINTER IS HERE decides the copy, three ways:
@@ -83,6 +86,50 @@ partial class runtime_package
         }
 
         throw RefuseTokenBytes(ManagedPointerTokens.IsTaggedToken(dst) ? dst : src);
+    }
+
+    // memequal (runtime/memequal_*.s, declared bodyless in stubs.go) reports whether the size bytes at a
+    // and b are equal. The same three cases as memmove decide it: two real addresses compare as bytes;
+    // two order tokens over managed array elements compare element by element (the Go meaning of
+    // comparing size bytes of such arrays); anything else refuses by name. traceMap.put reaches it
+    // with the node's managed data slice and the caller's string bytes.
+    internal static partial bool memequal(unsafe_package.Pointer a, unsafe_package.Pointer b, uintptr size)
+    {
+        if (size.Value == 0)
+            return true;
+
+        nuint left = a is null ? 0 : a.Value.Value;
+        nuint right = b is null ? 0 : b.Value.Value;
+
+        if (left == 0 || right == 0)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        if (left == right)
+            return true;
+
+        if (!ManagedPointerTokens.IsTaggedToken(left) && !ManagedPointerTokens.IsTaggedToken(right))
+        {
+            unsafe
+            {
+                int n = checked((int)size.Value);
+                return new ReadOnlySpan<byte>((void*)left, n).SequenceEqual(new ReadOnlySpan<byte>((void*)right, n));
+            }
+        }
+
+        if (TryElementRange(a!, size, out IArray? leftArray, out int leftIndex, out int count) &&
+            TryElementRange(b!, size, out IArray? rightArray, out int rightIndex, out int rightCount) &&
+            count == rightCount && ElementTypeOf(leftArray!) == ElementTypeOf(rightArray!))
+        {
+            for (int i = 0; i < count; i++)
+            {
+                if (!Equals(leftArray![leftIndex + i], rightArray![rightIndex + i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        throw RefuseTokenBytes(ManagedPointerTokens.IsTaggedToken(left) ? left : right);
     }
 
     internal static partial void memclrNoHeapPointers(unsafe_package.Pointer ptr, uintptr n)

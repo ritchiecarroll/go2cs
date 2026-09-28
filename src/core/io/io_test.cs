@@ -624,8 +624,11 @@ public static void TestOffsetWriter_Seek(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string contentᶜ = "0123456789ABCDEF"u8;
+
 public static void TestOffsetWriter_WriteAt(ж<testing.T> Ꮡt) {
-    @string content = "0123456789ABCDEF"u8;
+    @string content = contentᶜ;
     var contentSize = (int64)len(content);
     @string tmpdir = Ꮡt.TempDir();
     void work(int64 off, int64 at) {
@@ -714,8 +717,11 @@ internal static readonly @string writeˢ = "Write"u8;
 internal static readonly @string copyˢ = "Copy"u8;
 internal static readonly @string writeOfCopyWriteToˢ = "Write_Of_Copy_WriteTo"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string contentᶜ1 = "0123456789ABCDEF"u8;
+
 public static void TestOffsetWriter_Write(ж<testing.T> Ꮡt) {
-    @string content = "0123456789ABCDEF"u8;
+    @string content = contentᶜ1;
     nint contentSize = len(content);
     @string tmpdir = Ꮡt.TempDir();
     (ж<Δio.OffsetWriter>, ж<os.File>) makeOffsetWriter(@string nameΔ1) {

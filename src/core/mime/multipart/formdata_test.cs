@@ -551,6 +551,9 @@ internal static readonly @string boundaryˢ = "boundary"u8;
     internal @string prefix;
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string eolᶜ = "\r\n"u8;
+
 public static void TestReadFormEndlessHeaderLine(ж<testing.T> Ꮡt) {
     foreach (var (_, vᴛ1) in new TestReadFormEndlessHeaderLine_type[]{new(
         name: "name"u8,
@@ -568,7 +571,7 @@ public static void TestReadFormEndlessHeaderLine(ж<testing.T> Ꮡt) {
 
         var testʗ1 = test;
         Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
-            @string eol = "\r\n"u8;
+            @string eol = eolᶜ;
             @string s = @"--boundary" + eol;
             s += @"Content-Disposition: form-data; name=""a""" + eol;
             s += @"Content-Type: text/plain" + eol;

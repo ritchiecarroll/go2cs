@@ -61,8 +61,8 @@ partial class json_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string somethingˢ = "something"u8;
 
-public static void TestOmitEmpty(ж<testing.T> Ꮡt) {
-    @string want = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ1 = """
 {
  "sr": "",
  "omitempty": 0,
@@ -75,6 +75,9 @@ public static void TestOmitEmpty(ж<testing.T> Ꮡt) {
  "sto": {}
 }
 """u8;
+
+public static void TestOmitEmpty(ж<testing.T> Ꮡt) {
+    @string want = wantᶜ1;
     ref var o = ref heap(new OptionalsEmpty(), out var Ꮡo);
     o.Sw = somethingˢ;
     o.Mr = new map<@string, any>{};
@@ -171,8 +174,8 @@ public static bool IsZero(this NonZeroStruct nzs) {
     public NoPanicStruct NoPanicStruct4;                                   // concrete type
 }
 
-public static void TestOmitZero(ж<testing.T> Ꮡt) {
-    @string want = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ2 = """
 {
  "sr": "",
  "omitzero": 0,
@@ -190,6 +193,9 @@ public static void TestOmitZero(ж<testing.T> Ꮡt) {
  "nps4": {}
 }
 """u8;
+
+public static void TestOmitZero(ж<testing.T> Ꮡt) {
+    @string want = wantᶜ2;
     ref var o = ref heap(new OptionalsZero(), out var Ꮡo);
     o.Sw = somethingˢ;
     o.SloNonNil = new slice<@string>(0);
@@ -213,8 +219,8 @@ public static void TestOmitZero(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestOmitZeroMap(ж<testing.T> Ꮡt) {
-    @string want = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ3 = """
 {
  "foo": {
   "sr": "",
@@ -230,6 +236,9 @@ public static void TestOmitZeroMap(ж<testing.T> Ꮡt) {
  }
 }
 """u8;
+
+public static void TestOmitZeroMap(ж<testing.T> Ꮡt) {
+    @string want = wantᶜ3;
     var m = new map<@string, OptionalsZero>{["foo"u8] = new()};
     var (got, err) = MarshalIndent(m, ""u8, " "u8);
     if (err != default!) {
@@ -284,8 +293,8 @@ public static void TestOmitZeroMap(ж<testing.T> Ꮡt) {
     public NonZeroStruct Nzs;
 }
 
-public static void TestOmitEmptyZero(ж<testing.T> Ꮡt) {
-    @string want = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ4 = """
 {
  "sr": "",
  "slr": null,
@@ -297,6 +306,9 @@ public static void TestOmitEmptyZero(ж<testing.T> Ꮡt) {
  "nzs": {}
 }
 """u8;
+
+public static void TestOmitEmptyZero(ж<testing.T> Ꮡt) {
+    @string want = wantᶜ4;
     ref var o = ref heap(new OptionalsEmptyZero(), out var Ꮡo);
     o.Sw = somethingˢ;
     o.SloNonNil = new slice<@string>(0);
@@ -589,6 +601,9 @@ public static (slice<byte>, error) MarshalText(this ValText _) {
     public ж<ValText> V3;
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ5 = @"{""R0"":""ref"",""R1"":""ref"",""R2"":""\""ref\"""",""R3"":""\""ref\"""",""V0"":""val"",""V1"":""val"",""V2"":""\""val\"""",""V3"":""\""val\""""}"u8;
+
 public static void TestRefValMarshal(ж<testing.T> Ꮡt) {
     ref var s = ref heap(new TestRefValMarshal_type(), out var Ꮡs);
 
@@ -602,7 +617,7 @@ public static void TestRefValMarshal(ж<testing.T> Ꮡt) {
         V2: 15,
         V3: @new<ValText>()
     );
-    @string want = @"{""R0"":""ref"",""R1"":""ref"",""R2"":""\""ref\"""",""R3"":""\""ref\"""",""V0"":""val"",""V1"":""val"",""V2"":""\""val\"""",""V3"":""\""val\""""}"u8;
+    @string want = wantᶜ5;
     var (b, err) = Marshal(Ꮡs);
     if (err != default!) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
@@ -1294,7 +1309,7 @@ internal static (slice<byte>, error) MarshalText(this textint i) {
 }
 
 internal static (slice<byte>, error) tenc(@string format, params ꓸꓸꓸany aʗp) {
-    var a = aʗp.slice();
+    var a = aʗp.sslice();
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     fmt.Fprintf(new json_test_package.bytes_BufferжWriter(Ꮡbuf), format, a.ꓸꓸꓸ);
@@ -1352,6 +1367,9 @@ public static void TestEncodeBytekind(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ6 = @"{""a:z"":3,""x:y"":1,""y:x"":2,""z:a"":4}"u8;
+
 public static void TestTextMarshalerMapKeysAreSorted(ж<testing.T> Ꮡt) {
     var (got, err) = Marshal(new map<unmarshalerText, nint>{
         [new("x"u8, "y"u8)] = 1,
@@ -1362,11 +1380,14 @@ public static void TestTextMarshalerMapKeysAreSorted(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
     }
-    @string want = @"{""a:z"":3,""x:y"":1,""y:x"":2,""z:a"":4}"u8;
+    @string want = wantᶜ6;
     if (((sstring)got) != want) {
         Ꮡt.Errorf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
     }
 }
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ7 = @"{"""":1,""A:B"":2}"u8;
 
 // https://golang.org/issue/33675
 public static void TestNilMarshalerTextMapKey(ж<testing.T> Ꮡt) {
@@ -1377,7 +1398,7 @@ public static void TestNilMarshalerTextMapKey(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
     }
-    @string want = @"{"""":1,""A:B"":2}"u8;
+    @string want = wantᶜ7;
     if (((sstring)got) != want) {
         Ꮡt.Errorf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
     }
@@ -1688,6 +1709,9 @@ public static void TestMarshalUncommonFieldNames(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testVariableˢ = "test variable"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string errTextᶜ = "json: test error"u8;
+
 [GoType("dyn")] internal partial struct TestMarshalerError_tests {
     public partial ref CaseName CaseName { get; }
     internal ж<global::go.encoding.json_package.MarshalerError> err;
@@ -1697,7 +1721,7 @@ internal static readonly @string testVariableˢ = "test variable"u8;
 public static void TestMarshalerError(ж<testing.T> Ꮡt) {
     @string s = testVariableˢ;
     var st = reflect.TypeOf(s);
-    @string errText = "json: test error"u8;
+    @string errText = errTextᶜ;
     var tests = new TestMarshalerError_tests[]{new(
         Name(""u8),
         Ꮡ(new MarshalerError(st, fmt.Errorf(errText), ""u8)),

@@ -2461,7 +2461,7 @@ loop:
         }
         var ttʗ1 = tt;
         void errorf(@string f, params ꓸꓸꓸany aʗp) {
-            var a = aʗp.slice();
+            var a = aʗp.sslice();
             Ꮡt.Errorf("#%d %s token #%d:%s"u8, i, ttʗ1.desc, len(ttʗ1.toks) - 1, fmt.Sprintf(f, a.ꓸꓸꓸ));
         }
         switch (ᐧ) {
@@ -2640,6 +2640,9 @@ public static void TestSimpleUseOfEncodeToken(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dataᶜ = @"<foo b=""HELLOWORLD""></foo>"u8;
+
 [GoType("dyn")] internal partial struct TestIssue16158_type {
     [GoTag(@"xml:""b,attr,omitempty""")]
     public byte B;
@@ -2647,7 +2650,7 @@ public static void TestSimpleUseOfEncodeToken(ж<testing.T> Ꮡt) {
 
 // Issue 16158. Decoder.unmarshalAttr ignores the return value of copyValue.
 public static void TestIssue16158(ж<testing.T> Ꮡt) {
-    @string data = @"<foo b=""HELLOWORLD""></foo>"u8;
+    @string data = dataᶜ;
     var err = Unmarshal(slice<byte>(data), Ꮡ(new TestIssue16158_type()));
     if (err == default!) {
         Ꮡt.Errorf("Unmarshal: expected error, got nil"u8);

@@ -146,7 +146,7 @@ internal static (slice<byte> d, @string s) formatBits(slice<byte> dst, uint64 u,
         while (u >= b) {
             i--;
             a[i] = digits[(int)((nuint)((nuint)u & m))];
-            u >>= (int)(shift);
+            u.RshAssign(shift);
         }
         // u < base
         i--;

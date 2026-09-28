@@ -263,7 +263,7 @@ public static (ж<Matcher>, error) New(@string pattern) {
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && (exprᴛ1 is (rune)'0' or (rune)'1')) { matchᴛ1 = true;
-            bits <<= (int)(wid);
+            bits.LshAssign((uint64)(wid));
             bits |= (uint64)((uint64)(c - (rune)'0'));
         }
         else if (exprᴛ1 is (rune)'a' or (rune)'b' or (rune)'c' or (rune)'d' or (rune)'e' or (rune)'f' or (rune)'A' or (rune)'B' or (rune)'C' or (rune)'D' or (rune)'E' or (rune)'F') { matchᴛ1 = true;

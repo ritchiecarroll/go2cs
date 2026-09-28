@@ -128,9 +128,8 @@ public static void TestNewMethodSet(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fooGoˢ = "foo.go"u8;
 
-// Test for go.dev/issue/52715
-public static void TestNewMethodSet_RecursiveGeneric(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ30 = """
 
 package pkg
 
@@ -145,6 +144,10 @@ type Node[T any] struct {
 type Instance = *Tree[int]
 
 """u8;
+
+// Test for go.dev/issue/52715
+public static void TestNewMethodSet_RecursiveGeneric(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ30;
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, fooGoˢ, src, 0);
     if (err != default!) {
@@ -164,14 +167,17 @@ type Instance = *Tree[int]
 internal static readonly @string pGoˢ = "p.go"u8;
 internal static readonly @string invalidReceiverTypeˢ = "invalid receiver type"u8;
 
-public static void TestIssue60634(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ31 = """
 
 package p
 type T *int
 func (T) m() {} // expected error: invalid receiver type
 
 """u8;
+
+public static void TestIssue60634(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ31;
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, pGoˢ, src, 0);
     if (err != default!) {

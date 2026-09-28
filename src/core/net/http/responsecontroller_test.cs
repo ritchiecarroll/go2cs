@@ -69,9 +69,15 @@ public static void TestResponseControllerHijack(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testResponseControllerHijack(Δp0, Δp1));
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string headerᶜ = "X-Header"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string valueᶜ = "set"u8;
+
 internal static void testResponseControllerHijack(ж<testing.T> Ꮡt, testMode mode) {
-    @string header = "X-Header"u8;
-    @string value = "set"u8;
+    @string header = headerᶜ;
+    @string value = valueᶜ;
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         var ctl = NewResponseController(w);
         var (c, _, errΔ1) = ctl.Hijack();

@@ -41,8 +41,11 @@ public static void TestWinSplitListTestsAreValid(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string systemRootˢ = "SystemRoot"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string cmdfileᶜ = @"printdir.cmd"u8;
+
 internal static void testWinSplitListTestIsValid(ж<testing.T> Ꮡt, nint ti, SplitListTest tt, @string comspec) {
-    @string cmdfile = @"printdir.cmd"u8;
+    @string cmdfile = cmdfileᶜ;
     fs.FileMode perm = /* 0700 */ 448;
     ref var tmp = ref heap<@string>(out var Ꮡtmp);
     tmp = Ꮡt.TempDir();

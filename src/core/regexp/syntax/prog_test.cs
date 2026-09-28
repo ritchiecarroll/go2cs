@@ -171,10 +171,13 @@ internal static any sink;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object benchmarkDidNotRunˢ = (@string)"Benchmark did not run"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string charsᶜ = "Don't communicate by sharing memory, share memory by communicating."u8;
+
 public static void BenchmarkIsWordChar(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    @string chars = "Don't communicate by sharing memory, share memory by communicating."u8;
+    @string chars = charsᶜ;
     for (nint i = 0; i < b.N; i++) {
         foreach (var (_, r) in (@string)chars) {
             sink = IsWordChar(r);

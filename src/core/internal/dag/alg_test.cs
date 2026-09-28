@@ -43,6 +43,9 @@ internal static readonly @string bACADBDCˢ = "b->a c->a d->b d->c"u8;
 internal static readonly @string chainˢ = "chain"u8;
 internal static readonly @string eDDCCBBAˢ = "e->d d->c c->b b->a"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string chainᶜ = @"NONE < a < b < c < d; a, d < e;"u8;
+
 public static void TestTransitiveReduction(ж<testing.T> Ꮡt) {
     Ꮡt.Run(diamondˢ, (ж<testing.T> tΔ1) => {
         var g = mustParse(tΔ1, diamond);
@@ -50,7 +53,7 @@ public static void TestTransitiveReduction(ж<testing.T> Ꮡt) {
         wantEdges(tΔ1, g, bACADBDCˢ);
     });
     Ꮡt.Run(chainˢ, (ж<testing.T> tΔ2) => {
-        @string chain = @"NONE < a < b < c < d; a, d < e;"u8;
+        @string chain = chainᶜ;
         var g = mustParse(tΔ2, chain);
         g.TransitiveReduction();
         wantEdges(tΔ2, g, eDDCCBBAˢ);

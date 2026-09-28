@@ -41,11 +41,8 @@ internal static void sendCtrlBreak(ж<testing.T> Ꮡt, nint pid) {
 internal static readonly @string ctlbreakˢ = "ctlbreak"u8;
 internal static readonly @string buildˢ = "build"u8;
 
-public static void TestCtrlBreak(ж<testing.T> Ꮡt) {
-    GoFrame ᒐ = default;
-    try {
-        // create source file
-        @string source = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string sourceᶜ = """
 
 package main
 
@@ -71,6 +68,12 @@ func main() {
 }
 
 """u8;
+
+public static void TestCtrlBreak(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        // create source file
+        @string source = sourceᶜ;
         @string tmp = Ꮡt.TempDir();
         // write ctrlbreak.go
         @string name = filepath.Join(tmp, ctlbreakˢ);

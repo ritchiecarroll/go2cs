@@ -72,6 +72,9 @@ public static void TestTempFile_pattern(ж<testing.T> Ꮡt) {
 // This string is from os.errPatternHasSeparator.
 internal static readonly @string patternHasSeparator = "pattern contains path separator"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+private static readonly @string sepᶜ = "\\";
+
 [GoType("dyn")] internal partial struct TestTempFile_BadPattern_tests {
     internal @string pattern;
     internal bool wantErr;
@@ -85,7 +88,7 @@ public static void TestTempFile_BadPattern(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         defer(os.RemoveAll, tmpDir, ref ᒐ);
-        @string sep = "\\";
+        @string sep = sepᶜ;
         var tests = new TestTempFile_BadPattern_tests[]{
             new("ioutil*test"u8, false),
             new("ioutil_test*foo"u8, false),
@@ -219,6 +222,9 @@ public static void TestTempDir_BadDir(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+private static readonly @string sepᶜ1 = "\\";
+
 [GoType("dyn")] internal partial struct TestTempDir_BadPattern_tests {
     internal @string pattern;
     internal bool wantErr;
@@ -232,7 +238,7 @@ public static void TestTempDir_BadPattern(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         defer(os.RemoveAll, tmpDir, ref ᒐ);
-        @string sep = "\\";
+        @string sep = sepᶜ1;
         var tests = new TestTempDir_BadPattern_tests[]{
             new("ioutil*test"u8, false),
             new("ioutil_test*foo"u8, false),

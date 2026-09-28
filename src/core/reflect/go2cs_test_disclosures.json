@@ -69,255 +69,39 @@
     },
     {
       "name": "TestChanAlloc",
-      "class": "alloc-profile",
+      "class": "alloc-count-semantics",
       "signature": "allocs per chan send/recv: want ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert on channel send/recv through reflect. The managed channel carries its element boxed, so a send allocates where Go copies into the ring buffer."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[6]uint8",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[][]uint8",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]bool",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]complex128",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]complex64",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]float32",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]float64",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]int",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]int16",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]int32",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]int64",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]int8",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]string",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]uint",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]uint16",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]uint32",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]uint64",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]uint8",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]uint8#01",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/[]uintptr",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/bool",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/complex128",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/complex64",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/float32",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/float64",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/int",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/int16",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/int32",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/int64",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/int8",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/string",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/uint",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/uint16",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/uint32",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/uint64",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/uint8",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
-    },
-    {
-      "name": "TestDeepEqualAllocs/uintptr",
-      "class": "alloc-profile",
-      "signature": ") allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert over DeepEqual of two identical values. Go proves both operands non-escaping and runs the comparison with no mallocs; the managed bridge boxes each operand into the interface DeepEqual takes, which is a CLR heap allocation per run and the one structural object the assert forbids. The CLR publishes no in-process malloc counter, so the reported figure is golib-site count, a LOWER bound."
+      "reason": "at-most-one AllocsPerRun assert on a reflect channel Send plus Recv of a `chan *int`: Go counts exactly one allocation per round-trip (the Value reflect.recv returns, which the test's own note calls a limitation of escape analysis) and requires 0.5 <= allocs <= 1.5 (all_test.go TestChanAlloc). The managed channel carries its element boxed, so a send allocates where Go copies into the ring buffer. [SUPERSEDED 2026-09-27: this entry previously called the assert want-zero; its want is ONE.] RELABEL 2026-09-27 (C1, on COORD's seat of 2026-09-27 11:50, ledger 9760611653, under the H10 rulings of ledger 2026-09-23 03:37): alloc-profile -> alloc-count-semantics. The run's own unit note is BYTES, golib's counter charging none of it, so no object count exists to compare with Go's one: the ladder's incomparable-unit arm. Nothing to retire and no plan.",
+      "reading": "3,200 bytes over 100 runs (32 B/run), unit BYTES, golib's counter charging none, at 02b1b58793 (TRAIN E), windows/amd64, Release with tiering off, COORD's battery (ledger 9760611653)"
     },
     {
       "name": "TestMapAlloc",
-      "class": "alloc-profile",
-      "signature": "allocs per map assignment: want ",
-      "reason": "alloc-profile: bounded AllocsPerRun assert on map assignment through reflect. The managed map stores boxed keys and values, so each assignment allocates where Go writes into the bucket in place."
+      "class": "deferred",
+      "signature": "allocs per map assignment: want at most 10 got ",
+      "reason": "block 2's bounded AllocsPerRun assert: MakeMapWithSize(map[int]int, 1000), then 500 x (val.SetInt(i); mv.SetMapIndex(val, val)). Block 1 (SetMapIndex of non-addressable values, want 0) reads 0 on both sides and passes, so the signature is PINNED to block 2's text; the old prefix also matched block 1's failure and would have absorbed a block-1 regression. RELABEL 2026-09-27 (COORD, on the i7 readings requested at ledger 2026-09-27 14:58): alloc-profile -> DEFERRED. MECHANISM, measured per site: 1,000 of the 1,002 counted objects per run are reflect's setKinded taking its op as a @string, which copies the \"SetInt\" literal into a fresh @string (32 B) and converts it to a System.String (40 B) for mustBeAssignable on EVERY successful call; the other 2 are the two dictionaries. The map itself stores nint unboxed (SetMapEntry allocates 0 B). The previous reason (the managed map boxes keys and values) is not what the counter measured. Go reads 6 per run on the same box, all from the Swiss map's make. After the fix the pass rests on the counter's documented coverage boundary: about 91 KB per run of uncounted allocation remains (nint/int64 boxes in SetInt and SetMapIndex's .live reads, and the dictionary's arrays).",
+      "want": "10 per run at most (block 2; block 1 wants 0 and passes)",
+      "reading": "1002 per run, unit COUNT -- 100,200 go2cs-runtime object allocations (12,717,936 bytes) over 100 runs at 1aebd6a885, windows/amd64, Release with tiering off; a LOWER BOUND (3,506 CLR objects per run in all). The record is docs/phase4/briefs/reflect-alloc-readings-2026-09-27.md section 3.",
+      "plan": "reflect/value_impl.cs setKinded takes the op as ReadOnlySpan<byte> and materializes it only on the panic path, as mustBeKind already does (value_impl.cs, 'As spans, the literal is copied into a @string only on the panic path'). A what-if arm of block 2 without the op materialization reads COUNT 2 per run, which passes. The seat is the i9's reflect-setter seat (ruled 2026-09-27, R reviews), with SetUint's missing kind check; this entry is deleted when the row re-sweeps passing on windows and linux at that seat."
     },
     {
       "name": "TestMapIterReset",
-      "class": "alloc-profile",
+      "class": "alloc-count-semantics",
       "signature": "MapIter.Reset allocated ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert on MapIter.Reset. Go reuses one hiter in place; the managed iterator must obtain a fresh enumerator from the map when it rebinds, because IEnumerator carries no reset-to-a-different-source operation. The allocation is the enumerator itself, charged outside golib (BCL internal), so the figure is reported in BYTES rather than as a count."
+      "reason": "want-zero AllocsPerRun assert on MapIter.Reset. Go reuses one hiter in place; the managed iterator must obtain a fresh enumerator from the map when it rebinds, because IEnumerator carries no reset-to-a-different-source operation. The allocation is the enumerator itself, charged outside golib (BCL internal), so the figure is reported in BYTES rather than as a count. RELABEL 2026-09-27 (C1, on COORD's seat of 2026-09-27 11:50, ledger 9760611653, under the H10 rulings of ledger 2026-09-23 03:37): alloc-profile -> alloc-count-semantics. The run's own unit note is BYTES -- the enumerator this reason names is BCL-internal and uncounted -- so no object count exists to compare with the want of zero: the ladder's incomparable-unit arm. Nothing to retire and no plan.",
+      "reading": "10,560 bytes over 10 runs (1,056 B/run), unit BYTES, golib's counter charging none, at 02b1b58793 (TRAIN E), windows/amd64, Release with tiering off, COORD's battery (ledger 9760611653)"
     },
     {
       "name": "TestMapIterSet",
-      "class": "alloc-profile",
+      "class": "structural",
       "signature": "wanted 0 alloc, got ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert on SetIterKey/SetIterValue. Go writes the entry through hiter with no allocation; the managed path reads the enumerator Current, which the BCL materializes as a KeyValuePair box per step. Reaching this assert at all is the correct behavior -- the same test previously failed before the operation ran."
+      "reason": "want-zero AllocsPerRun assert over SetIterKey/SetIterValue across one MapRange of a 22-key map. RELABEL 2026-09-27 (COORD, on the i7 readings requested at ledger 2026-09-27 14:58): alloc-profile -> STRUCTURAL. WANT: 0 allocations per run. READING: 1 per run, unit COUNT -- 10 go2cs-runtime object allocations (33,120 bytes) over 10 runs at 1aebd6a885, windows/amd64, Release with tiering off; Go reads 0 mallocs and 0 B on the same box. PROOF, with the object Go keeps off the heap NAMED: the one counted object is the *MapIter itself, a StandardBox<MapIter> (224 B) minted by the hand-owned MapRange and handed to every SetIterKey/SetIterValue call as a ж<MapIter> argument. Go keeps it off the heap only because MapRange is inlineable, so escape analysis stack-allocates the non-escaping iterator in the CALLER (the test's own comment says so). A managed implementation cannot do the same across the call boundary: C# cannot return a reference into a callee's stack frame, and a shared or pooled box would alias two live iterators, which Go forbids. The only route is inlining MapRange into its callers, and go2cs keeps Go's function boundaries one-for-one so the emitted code reads like the Go source. The CLR JIT does not remove the box at tiering off either (measured: 224 B and count 1 on every run). The reading equals that floor. NOTE, not part of the proof: the run also allocates 3,088 B of objects the counter does not see (the range iterator 72 B, the by-design range snapshot 24 + 24 x len, and 112 B per entry of KeyValuePair and key boxing through the non-generic IEnumerator.Current and PropertyInfo.GetValue). They are reducible, but reducing them retires nothing while the box exists, since a zero count with nonzero bytes moves this want-zero assert to the byte arm. The per-site table is in docs/phase4/briefs/reflect-alloc-readings-2026-09-27.md. The previous reason (one KeyValuePair box per step) omitted the counted object."
     },
     {
       "name": "TestSmallZero",
-      "class": "alloc-profile",
+      "class": "alloc-count-semantics",
       "signature": "Creating small zero values caused ",
-      "reason": "alloc-profile: want-zero AllocsPerRun assert on reflect.Zero for small values. Go returns a value whose data word fits inline and allocates nothing; the managed bridge must materialize a boxed zero for the same Value."
+      "reason": "want-zero AllocsPerRun assert on reflect.Zero for small values. Go returns a value whose data word fits inline and allocates nothing; the managed bridge must materialize a boxed zero for the same Value. RELABEL 2026-09-27 (C1, on COORD's seat of 2026-09-27 11:50, ledger 9760611653, under the H10 rulings of ledger 2026-09-23 03:37): alloc-profile -> alloc-count-semantics. The run's own unit note is BYTES, golib's counter charging none of it, so no object count exists to compare with the want of zero: the ladder's incomparable-unit arm. Nothing to retire and no plan.",
+      "reading": "5,600 bytes over 100 runs (56 B/run), unit BYTES, golib's counter charging none, at 02b1b58793 (TRAIN E), windows/amd64, Release with tiering off, COORD's battery (ledger 9760611653)"
     },
     {
       "name": "TestSliceAt",

@@ -201,6 +201,12 @@ public static void TestAttrs(ж<testing.T> Ꮡt) {
     check(attrsSlice((~h).r), Int("c"u8, 3));
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantFuncᶜ = "log/slog.TestCallDepth"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantFileᶜ = "logger_test.go"u8;
+
 public static void TestCallDepth(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
@@ -210,8 +216,8 @@ public static void TestCallDepth(ж<testing.T> Ꮡt) {
         var hʗ1 = h;
         void check(nint count) {
             Ꮡt.Helper();
-            @string wantFunc = "log/slog.TestCallDepth"u8;
-            @string wantFile = "logger_test.go"u8;
+            @string wantFunc = wantFuncᶜ;
+            @string wantFile = wantFileᶜ;
             nint wantLine = startLine + count * 2;
             var got = (~hʗ1).r.source();
             @string gotFile = filepath.Base((~got).File);

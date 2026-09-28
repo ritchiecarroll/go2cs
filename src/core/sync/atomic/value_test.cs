@@ -61,9 +61,15 @@ public static void TestValueLarge(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+private static readonly @string nilErrᶜ = "sync/atomic: store of nil value into Value"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+private static readonly @string badErrᶜ = "sync/atomic: store of inconsistently typed value into Value"u8;
+
 public static void TestValuePanic(ж<testing.T> Ꮡt) {
-    @string nilErr = "sync/atomic: store of nil value into Value"u8;
-    @string badErr = "sync/atomic: store of inconsistently typed value into Value"u8;
+    @string nilErr = nilErrᶜ;
+    @string badErr = badErrᶜ;
     ref var v = ref heap(new atomic.Value(), out var Ꮡv);
     ((Action)(() => {
         GoFrame ᒐ = default;

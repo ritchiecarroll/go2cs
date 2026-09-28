@@ -15,24 +15,29 @@
 // landed posix_spawn hand-own in syscall's exec_unix.cs was ever reached, and — before the OQ-6
 // replay fix — every caller of the once after the first saw the throw masked as `panic: nil`.
 //
-// Go's syscall.os_checkClonePidfd verifies clone(CLONE_PIDFD) by ACTUALLY CLONING: it forks a
-// child with CLONE_PIDFD, reads the pidfd back, and waits the child. That probe cannot be run
-// here by the same rule that displaced forkAndExecInChild (DESIGN-linux-exec.md §2, ratified
-// 2026-08-22): the child side between clone() and the probe's exit runs code, and no managed
-// instruction is async-signal-safe in a multithreaded CLR process. The design ruled the answer
-// for exactly this spot (§3.5 + OQ-4, re-affirmed by the JOB-024 amendment): the go2cs spawn maps
-// onto posix_spawn(3), which cannot request CLONE_PIDFD, so the AUTOMATIC pidfd path is honestly
-// UNSUPPORTED — one probe result, not a stub. Returning ENOSYS here is the same answer a
-// pidfd-less kernel gives Go, and it routes `ensurePidfd`/`pidfdWorks` onto Go's own complete
-// fallback: the wait4/waitid(WNOWAIT) road the landed keystone already carries.
+// Go's syscall.os_checkClonePidfd verifies clone(CLONE_PIDFD) by ACTUALLY CLONING, and it is the LAST
+// of checkPidfd's four steps: the first three already prove, on this process, that pidfd_open works
+// (on getpid()), that waitid(P_PIDFD) is supported (it answers ECHILD, "not our own parent"), and
+// that pidfd_send_signal works. Go needs the fourth because Go MINTS a child's pidfd through a
+// DIFFERENT door -- clone(CLONE_PIDFD) -- which a seccomp filter or an old kernel can refuse while
+// pidfd_open passes. The go2cs spawn has no such second door: posix_spawn cannot request
+// CLONE_PIDFD, so the seam mints the child's pidfd by pidfd_open(child) right after the spawn
+// (syscall/linux/exec_unix.cs), race-free because an unreaped child's pid cannot be reused. The
+// capability that path needs is exactly the one step one proved, so the faithful answer here is nil.
 //
-// This deliberately does NOT report what the three live checks before it prove (pidfd_open,
-// waitid(P_PIDFD) and pidfd_send_signal all work on this kernel through the keystone): those
-// verify the KERNEL, but Go's automatic pidfd path begins at clone(CLONE_PIDFD) in the spawn
-// itself, and posix_spawn cannot mint one. A caller that explicitly requests a pidfd via
-// SysProcAttr.PidFD is a different, user-opted door — the spawn hand-own fills it post-spawn via
-// pidfd_open(pid) (OQ-4's v2 door, opened there) — and is unaffected by this probe's answer.
-// If the pidfd path is ever billed by a roster row, this single body is where the revisit starts.
+// NOT by spawning a probe child, which was the first shape of this body and was MEASURED WRONG
+// (2026-09-27): Go's probe clones with exit signal 0 (CLONE_VFORK|CLONE_VM|CLONE_PIDFD, reaped with
+// WCLONE), so its child dies silently, while a posix_spawn child always raises SIGCHLD -- the extra
+// signal failed os/exec's TestSIGCHLD ("too many SIGCHLD signals"), because the first StartProcess
+// of a program that Notify's SIGCHLD runs this probe.
+//
+// Until 2026-09-27 this body returned ENOSYS (DESIGN-linux-exec.md §3.5 + OQ-4: "posix_spawn cannot
+// mint a CLONE_PIDFD, so the automatic pidfd path is unsupported"). COORD's ruling of that date
+// classed the resulting skip of os's TestFindProcessViaPidfd/TestStartProcessWithPidfd as a FEATURE
+// GAP under the owner's ruling #1 and ordered the feature: the pidfd the seam already minted for an
+// explicit SysProcAttr.PidFD is the same one the automatic path needs. With the probe passing, os
+// takes its pidfd paths for EVERY process operation (ensurePidfd sets SysProcAttr.PidFD on each
+// StartProcess; Wait, Signal and FindProcess go through the pidfd).
 //
 // `ignoreSIGSYS`/`restoreSIGSYS` beside the declaration stay bodyless on purpose: Go calls them
 // only on android around the SIGSYS-prone probe, that path is unreachable here, and a throwing
@@ -42,10 +47,5 @@ namespace go;
 
 partial class os_package
 {
-    internal static partial error checkClonePidfd()
-    {
-        // ENOSYS in Go's own error currency: the probe's callers test non-nil and fall back;
-        // anything that prints the reason names the unsupported syscall rather than a stub.
-        return NewSyscallError("clone(CLONE_PIDFD)"u8, (syscall_package.Errno)syscall_package.ENOSYS);
-    }
+    internal static partial error checkClonePidfd() => default!;
 }

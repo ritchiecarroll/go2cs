@@ -491,6 +491,18 @@ public static void TestQuo(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectedQ64ᶜ = "18446744073709551613"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectedR64ᶜ = "3138550867693340382088035895064302439801311770021610913807"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectedQ32ᶜ = "4294967293"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectedR32ᶜ = "39614081266355540837921718287"u8;
+
 public static void TestQuoStepD6(ж<testing.T> Ꮡt) {
     // See Knuth, Volume 2, section 4.3.1, exercise 21. This code exercises
     // a code path which only triggers 1 in 10^{-19} cases.
@@ -498,10 +510,10 @@ public static void TestQuoStepD6(ж<testing.T> Ꮡt) {
     var v = Ꮡ(new ΔInt(false, new nat(new global::go.math.big_package.Word[]{5, unchecked((nuint)(9223372036854775810UL)), (global::go.math.big_package.Word)((nuint)1 << (int)((_W - 1)))}.slice())));
     var r = @new<global::go.math.big_package.ΔInt>();
     (var q, r) = @new<global::go.math.big_package.ΔInt>().QuoRem(u, v, r);
-    @string expectedQ64 = "18446744073709551613"u8;
-    @string expectedR64 = "3138550867693340382088035895064302439801311770021610913807"u8;
-    @string expectedQ32 = "4294967293"u8;
-    @string expectedR32 = "39614081266355540837921718287"u8;
+    @string expectedQ64 = expectedQ64ᶜ;
+    @string expectedR64 = expectedR64ᶜ;
+    @string expectedQ32 = expectedQ32ᶜ;
+    @string expectedR32 = expectedR32ᶜ;
     if (q.String() != expectedQ64 && q.String() != expectedQ32 || r.String() != expectedR64 && r.String() != expectedR32) {
         Ꮡt.Errorf("got (%s, %s) want (%s, %s) or (%s, %s)"u8, q.OrTypedNil(), r.OrTypedNil(), expectedQ64, expectedR64, expectedQ32, expectedR32);
     }
@@ -1799,10 +1811,13 @@ public static void TestJacobi(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string failureMsgᶜ = "test failure"u8;
+
 public static void TestJacobiPanic(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string failureMsg = "test failure"u8;
+        @string failureMsg = failureMsgᶜ;
         defer(() => {
             var msg = recover();
             if (msg == default! || AreEqual(msg, failureMsg)) {

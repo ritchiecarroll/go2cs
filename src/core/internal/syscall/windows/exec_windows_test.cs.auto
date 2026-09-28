@@ -24,8 +24,8 @@ using io = io_package;
 partial class windows_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goWantHelperProcessˢ = "GO_WANT_HELPER_PROCESS"u8;
-internal static readonly @string testRunˢ = "-test.run=^TestRunAtLowIntegrity$"u8;
+private static readonly @string goWantHelperProcessˢ = "GO_WANT_HELPER_PROCESS"u8;
+private static readonly @string testRunˢ = "-test.run=^TestRunAtLowIntegrity$"u8;
 
 public static void TestRunAtLowIntegrity(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
@@ -94,7 +94,7 @@ internal static (@unsafe.Pointer, error) tokenGetInfo(syscall.Token t, uint32 @c
         var b = new slice<byte>((nint)(n));
         var e = syscall.GetTokenInformation(t, @class, Ꮡ(b, 0), (uint32)len(b), Ꮡn);
         if (e == default!) {
-            return (new @unsafe.Pointer(Ꮡ(b, 0)), default!);
+            return (@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), default!);
         }
         if (!AreEqual(e, syscall.ERROR_INSUFFICIENT_BUFFER)) {
             return (default!, e);

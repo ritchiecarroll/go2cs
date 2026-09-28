@@ -24,7 +24,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" href="{{ site.baseurl }}/images/go2cs.ico" type="image/x-icon">
     <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
-    <link rel="stylesheet" href="css/octicon.css">
+    <link rel="stylesheet" href="{{ '/css/octicon.css' | relative_url }}">
     {% unless page.light_mode %}
     <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.31/darkreader.min.js"></script>
     <script>
@@ -53,7 +53,7 @@
         {% if site.github.is_project_page %}
           <span class="site-footer-owner"><a href="{{ site.github.repository_url }}">{{ site.github.repository_name }}</a> is maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a>.</span>
         {% endif %}
-        <span class="site-footer-credits"><a href="SECURITY">security policy</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;<a href="coding-style">coding style</a></span>
+        <span class="site-footer-credits"><a href="{{ '/SECURITY' | relative_url }}">security policy</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;<a href="{{ '/coding-style' | relative_url }}">coding style</a></span>
       </footer>
     </main>
 

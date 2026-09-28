@@ -619,10 +619,13 @@ internal static readonly @string otherˢ = "/other"u8;
 internal static readonly @string wrongBodyˢ = "wrong body"u8;
 internal static readonly object expectedNonNilRequestˢ = (@string)"expected non-nil Request.Response"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string bodyᶜ = "Hello, world."u8;
+
 internal static void testClientRedirectUseResponse(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        @string body = "Hello, world."u8;
+        @string body = bodyᶜ;
         ref var ts = ref heap<ж<httptest.Server>>(out var Ꮡts);
         ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             if (strings.Contains((~(~r).URL).Path, otherˢ)){
@@ -704,10 +707,13 @@ public static void TestClientRedirect308NoGetBody(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string someBodyˢ = "some body"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string fakeURLᶜ = "https://localhost:1234/"u8;
+
 internal static void testClientRedirect308NoGetBody(ж<testing.T> Ꮡt, testMode mode) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    @string fakeURL = "https://localhost:1234/"u8; // won't be hit
+    @string fakeURL = fakeURLᶜ;        // won't be hit
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header().Set(locationˢ, fakeURL);
         w.WriteHeader(308);
@@ -935,7 +941,7 @@ internal static void logf(this ж<RecordingJar> Ꮡj, @string format, params ꓸ
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
-        var args = argsʗp.slice();
+        var args = argsʗp.sslice();
 
         ref var j = ref Ꮡj.DerefOrNull();
         j.mu.Lock();
@@ -1128,8 +1134,11 @@ public static void TestClientWithCorrectTLSServerName(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testClientWithCorrectTLSServerName(Δp0, Δp1), new testMode[]{https1Mode, http2Mode}.slice());
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string serverNameᶜ = "example.com"u8;
+
 internal static void testClientWithCorrectTLSServerName(ж<testing.T> Ꮡt, testMode mode) {
-    @string serverName = "example.com"u8;
+    @string serverName = serverNameᶜ;
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         if ((~(~r).TLS).ServerName != serverName) {
             Ꮡt.Errorf("expected client to set ServerName %q, got: %q"u8, serverName, (~(~r).TLS).ServerName);
@@ -1881,11 +1890,17 @@ internal static readonly @string cookieˢ = "Cookie"u8;
 internal static readonly @string fooBarˢ = "foo=bar"u8;
 internal static readonly @string secretpasswordˢ = "secretpassword"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string uaᶜ = "some-agent/1.2"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string xfooᶜ = "foo-val"u8;
+
 internal static void testClientCopyHeadersOnRedirect(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        @string ua = "some-agent/1.2"u8;
-        @string xfoo = "foo-val"u8;
+        @string ua = uaᶜ;
+        @string xfoo = xfooᶜ;
         @string ts2URL = default!;
         var ts1 = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var want = new httpꓸHeader(new map<@string, slice<@string>>{
@@ -2030,6 +2045,9 @@ internal static readonly @string httpˢ2 = "http://"u8;
 internal static readonly @string httpsˢ2 = "https://"u8;
 internal static readonly @string hopˢ = "/hop"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantBodyᶜ = "response body"u8;
+
 internal static void testClientCopyHostOnRedirect(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
@@ -2045,7 +2063,7 @@ internal static void testClientCopyHostOnRedirect(ж<testing.T> Ꮡt, testMode m
         virtualHost = strings.TrimPrefix(virtualHost, httpsˢ2);
         Ꮡt.Logf("Virtual host is %v"u8, virtualHost);
         // Actual hostname: should not receive any request.
-        @string wantBody = "response body"u8;
+        @string wantBody = wantBodyᶜ;
         @string tsURL = default!;
         @string tsHost = default!;
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
@@ -2683,6 +2701,9 @@ public static void TestProbeZeroLengthBody(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testProbeZeroLengthBody(Δp0, Δp1));
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string contentᶜ = "body"u8;
+
 internal static void testProbeZeroLengthBody(ж<testing.T> Ꮡt, testMode mode) {
     var reqc = new channel<EmptyStruct>(0);
     var reqcʗ1 = reqc;
@@ -2727,7 +2748,7 @@ internal static void testProbeZeroLengthBody(ж<testing.T> Ꮡt, testMode mode) 
     }}
     // Request should be sent after trying to probe the request body for 200ms.
     // Write the request body and wait for the request to complete.
-    @string content = "body"u8;
+    @string content = contentᶜ;
     bodyw.Write(slice<byte>(content));
     bodyw.Close();
     Ꮡwg.Wait();

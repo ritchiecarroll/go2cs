@@ -536,7 +536,7 @@ internal static slice<byte> fmtX(slice<byte> dst, nint prec, byte fmt, bool neg,
         exp = 0;
     }
     // Shift digits so leading 1 (if any) is at bit 1<<60.
-    mant <<= (int)(60 - flt.mantbits);
+    mant.LshAssign(60 - flt.mantbits);
     while (mant != 0 && (uint64)(mant & (((uint64)1 << (int)(60)))) == 0) {
         mant <<= (int)(1);
         exp--;
@@ -545,11 +545,11 @@ internal static slice<byte> fmtX(slice<byte> dst, nint prec, byte fmt, bool neg,
     if (prec >= 0 && prec < 15) {
         nuint shift = (nuint)(prec * 4);
         var extra = (uint64)((mant.Lsh(shift)) & ((uint64)(1152921504606846976L - 1)));
-        mant >>= (int)(60 - shift);
+        mant.RshAssign(60 - shift);
         if ((uint64)(extra | ((uint64)(mant & 1))) > ((uint64)1 << (int)(59))) {
             mant++;
         }
-        mant <<= (int)(60 - shift);
+        mant.LshAssign(60 - shift);
         if ((uint64)(mant & (((uint64)1 << (int)(61)))) != 0) {
             // Wrapped around.
             mant >>= (int)(1);

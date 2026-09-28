@@ -32,6 +32,12 @@ partial class rsa_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testdataPssVectTxtBz2ˢ = "testdata/pss-vect.txt.bz2"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string newKeyMarkerᶜ = "START NEW KEY"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string newSignatureMarkerᶜ = "START NEW SIGNATURE"u8;
+
 // TestPSSGolden tests all the test vectors in pss-vect.txt from
 // ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-1/pkcs-1v2-1-vec.zip
 public static void TestPSSGolden(ж<testing.T> Ꮡt) {
@@ -49,8 +55,8 @@ public static void TestPSSGolden(ж<testing.T> Ꮡt) {
         // signatures. A goroutine is used to preprocess the input by merging
         // lines, removing spaces in hex values and identifying the start of
         // new keys and signature blocks.
-        @string newKeyMarker = "START NEW KEY"u8;
-        @string newSignatureMarker = "START NEW SIGNATURE"u8;
+        @string newKeyMarker = newKeyMarkerᶜ;
+        @string newSignatureMarker = newSignatureMarkerᶜ;
         var values = new channel<@string>(0);
         var inFileʗ2 = inFile;
         var valuesʗ1 = values;

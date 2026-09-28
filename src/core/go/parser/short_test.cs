@@ -120,9 +120,12 @@ public static void TestValid(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ4 = @"package p; var _ = T{}"u8;
+
 // TestSingle is useful to track down a problem with a single short test program.
 public static void TestSingle(ж<testing.T> Ꮡt) {
-    @string src = @"package p; var _ = T{}"u8;
+    @string src = srcᶜ4;
     checkErrors(Ꮡt, src, src, (global::go.go.parser_package.Mode)(DeclarationErrors | AllErrors), true);
 }
 

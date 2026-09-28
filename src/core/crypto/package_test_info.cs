@@ -36,7 +36,7 @@ using static global::go.crypto_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("crypto/issue21104_test.go", "issue21104_test.cs", "ABAclIKCgpTUgtSC1ILUgqSUgpKCgpSC1MKCgoKSgoKUgoKm", "50-59:1")]
+[assembly: global::go.GoPositionMap("crypto/issue21104_test.go", "issue21104_test.cs", "ABAclIKCgpTUgtSC1ILUgqSUgpKCgpSCAAgEwoKCgpKCgpSCgqY=", "50-59:1")]
 [assembly: global::go.GoPositionMap("crypto/purego_test.go", "purego_test.cs", "ABoqwoKCgoKClISCgoKClIKCgpaCgpaCAAgQgoKUgpQ=")]
 // </GoSourcePositionMaps>
 

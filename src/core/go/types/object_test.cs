@@ -74,10 +74,13 @@ public static void TestIsAlias(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ35 = @"package p; type I interface { error }"u8;
+
 // TestEmbeddedMethod checks that an embedded method is represented by
 // the same Func Object as the original method. See also go.dev/issue/34421.
 public static void TestEmbeddedMethod(ж<testing.T> Ꮡt) {
-    @string src = @"package p; type I interface { error }"u8;
+    @string src = srcᶜ35;
     var pkg = mustTypecheck(src, nil, nil);
     // get original error.Error method
     var eface = Universe.Lookup(errorˢ3);

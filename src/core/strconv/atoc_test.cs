@@ -202,9 +202,12 @@ public static void TestParseComplex(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string sᶜ = "1.5e308+1.0e307i"u8;
+
 // Issue 42297: allow ParseComplex(s, not_32_or_64) for legacy reasons
 public static void TestParseComplexIncorrectBitSize(ж<testing.T> Ꮡt) {
-    @string s = "1.5e308+1.0e307i"u8;
+    @string s = sᶜ;
     complex128 want = /* 1.5e308 + 1.0e307i */ 1.5e+308D + 1e+307D.i();
     foreach (var (_, bitSize) in new nint[]{0, 10, 100, 256}.slice()) {
         var (c, err) = ParseComplex(s, bitSize);

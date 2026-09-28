@@ -577,7 +577,7 @@ internal static error checkSubsetTypes(bool allowAny, slice<driver.NamedValue> a
 }
 
 internal static error errf(@string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.slice();
+    var args = argsʗp.sslice();
 
     return errors.New("fakedb: "u8 + fmt.Sprintf(msg, args.ꓸꓸꓸ));
 }

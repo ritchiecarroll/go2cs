@@ -56,6 +56,7 @@ using go;
 // PLACEMENT. The three names are registered goosLinux in manualConversionFuncs (manualTypeOperations.go),
 // so a Linux -stdlib emission drops the auto bodies to placeholders and this file supplies them; the
 // other ~1,440 lines of signal_unix.cs keep reconverting. Darwin's copy stays auto until its own arc.
+// dieFromSignal joined them 2026-09-26 (goosLinux alone), for the SIGPIPE death -- see its body.
 // Design: docs/phase4/DESIGN-signal-posix-bridge.md (v2 amendment dated 2026-08-27).
 //
 // Q64 amendment (2026-09-05): sigignore installs the KERNEL SIG_IGN -- Go's setsig(sig, _SIG_IGN) --
@@ -309,6 +310,16 @@ partial class runtime_package
                 if (signum == 9 || signum == 19)
                     continue;
 
+                // SIGPIPE (13) is never seeded, for two reasons that agree. Go's own initsig seeds only
+                // the signals it declines to handle (sigInstallGoHandler respects an inherited SIG_IGN
+                // for SIGHUP and SIGINT alone) and installs its handler on SIGPIPE whatever it inherited,
+                // so a Go program started with SIGPIPE ignored still dies on EPIPE to stdout or stderr.
+                // And the SIG_IGN this read would see is not the parent's anyway: the CLR sets it at
+                // startup, before any managed code (rt_sigaction, old handler SIG_DFL -- measured
+                // 2026-09-26), so seeding it made runtime.sigpipe return in EVERY converted process.
+                if (signum == 13)
+                    continue;
+
                 if (sys_sigaction_read(signum, IntPtr.Zero, old) != 0)
                     continue;
 
@@ -500,4 +511,61 @@ partial class runtime_package
     // rest at sigignore's else branch.
     private static bool sigIgnoreInstallsKernelDisposition(uint32 sig)
         => sig == 10 || sig == 12 || sig == 20 || sig == 21 || sig == 22;
+
+    // linux/amd64 syscall numbers for Go's own raise (tgkill on the calling thread) and exit
+    // (exit_group), through libc's syscall(2) as the rtsigprocmask seam does.
+    private const long SYS_getpid = 39;
+    private const long SYS_gettid = 186;
+    private const long SYS_tgkill = 234;
+    private const long SYS_exit_group = 231;
+
+    [DllImport("libc", EntryPoint = "syscall", SetLastError = true)]
+    private static extern long sys_syscall(long number, long a1, long a2, long a3);
+
+    // dieFromSignal kills the program with sig by the kernel's DEFAULT action -- Go's
+    // dieFromSignal (signal_unix.go), in the shape the managed host can honor. Reached from
+    // runtime.sigpipe's die branch (EPIPE on stdout or stderr, SIGPIPE neither caught nor ignored in
+    // Go's model) and from crash()'s SIGABRT.
+    //
+    // Go's body raises FIRST, so a handler Go forwards to (fwdSig) sees the signal, and only then
+    // sets SIG_DFL and raises again. Here the "previous" disposition is the CLR's -- SIG_IGN for
+    // SIGPIPE, which would swallow that first raise -- so it is skipped and the order is: unblock sig
+    // on the raising thread, mark it unhandled, SIG_DFL, raise, and Go's exit(2) if still alive. The
+    // disposition changes only here, in a process that is dying: a living process keeps the CLR's
+    // SIGPIPE SIG_IGN, which .NET's own socket sends rely on (they carry no MSG_NOSIGNAL; with SIG_DFL
+    // a Socket.Send to a closed peer kills the process -- measured 2026-09-26).
+    //
+    // RESIDUALS, named (F5 L2, 2026-09-26):
+    //   * NOT a residual, though it was first sized as one: a program STARTED with SIGPIPE ignored.
+    //     Go also dies there -- initsig installs Go's handler on SIGPIPE whatever it inherited
+    //     (sigInstallGoHandler honors an inherited SIG_IGN only for SIGHUP and SIGINT) -- which is
+    //     exactly why InitPosixSignalBridge never seeds SIGPIPE.
+    //   * Notify(SIGPIPE) and a broken write to a NON-std fd: Go's handler receives the kernel's
+    //     SIGPIPE and delivers it to the channel; under the CLR's SIG_IGN the kernel never raises it,
+    //     so the channel stays empty. The write still returns EPIPE, as in Go. No row asserts the
+    //     delivery: the one Notify(SIGPIPE) in GOROOT outside cmd/ is os's TestStdPipe, whose fd-3
+    //     cases assert only EPIPE and a normal exit.
+    //   * crash()'s SIGABRT now ends the process by SIGABRT (Go's behaviour) instead of throwing
+    //     NotImplementedException from the `raise` stub.
+    //   * darwin keeps its own bridge seed and the converted dieFromSignal until its own arc; neither
+    //     is measured here (no darwin host).
+    internal static void dieFromSignal(uint32 sig)
+    {
+        unblocksig(sig);
+
+        // Mark the signal as unhandled to ensure it is forwarded.
+        atomic.Store(ᏑhandlingSig.at<uint32>((nint)(sig)), 0);
+
+        sys_signal((int)sig, SIG_DFL);
+        sys_syscall(SYS_tgkill, sys_syscall(SYS_getpid, 0, 0, 0), sys_syscall(SYS_gettid, 0, 0, 0), sig);
+
+        // The signal is thread-directed and unblocked, so the default action is taken before tgkill
+        // returns; the yields are Go's own allowance for a system that delivers it late.
+        System.Threading.Thread.Yield();
+        System.Threading.Thread.Yield();
+        System.Threading.Thread.Yield();
+
+        // If we are still somehow running, just exit with the wrong status.
+        sys_syscall(SYS_exit_group, 2, 0, 0);
+    }
 }

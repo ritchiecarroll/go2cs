@@ -24,16 +24,8 @@ internal static readonly @string buildˢ = "build"u8;
 internal static readonly @string xExeˢ = "x.exe"u8;
 internal static readonly object binaryContainsCodeThatˢ = (@string)"binary contains code that should be deadcode eliminated"u8;
 
-// Issue 36021: verify that text/template doesn't prevent the linker from removing
-// unused methods.
-public static void TestLinkerGC(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
-    }
-    testenv.MustHaveGoBuild(new template_test_package.testing_TжTB(Ꮡt));
-    @string prog = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string progᶜ = """
 package main
 
 import (
@@ -54,6 +46,15 @@ func main() {
 }
 
 """u8;
+
+// Issue 36021: verify that text/template doesn't prevent the linker from removing
+// unused methods.
+public static void TestLinkerGC(ж<testing.T> Ꮡt) {
+    if (testing.Short()) {
+        Ꮡt.Skip(skippingInShortModeˢ);
+    }
+    testenv.MustHaveGoBuild(new template_test_package.testing_TжTB(Ꮡt));
+    @string prog = progᶜ;
     @string td = Ꮡt.TempDir();
     {
         var errΔ1 = os.WriteFile(filepath.Join(td, xGoˢ), slice<byte>(prog), 420); if (errΔ1 != default!) {

@@ -300,7 +300,7 @@ internal static void renameSel(this renameMap m, ж<ast.SelectorExpr> Ꮡn) {
 // renameIdents renames identifiers: each renames entry is of the form "from->to".
 // Note: This doesn't change the use of the identifiers in comments.
 internal static void renameIdents(ж<ast.File> Ꮡf, params ꓸꓸꓸstring renamesʗp) {
-    var renames = renamesʗp.slice();
+    var renames = renamesʗp.sslice();
 
     var m = makeRenameMap(renames.ꓸꓸꓸ);
     var mʗ1 = m;
@@ -316,7 +316,7 @@ internal static void renameIdents(ж<ast.File> Ꮡf, params ꓸꓸꓸstring rena
 
 // renameSelectors is like renameIdents but only looks at selectors.
 internal static void renameSelectors(ж<ast.File> Ꮡf, params ꓸꓸꓸstring renamesʗp) {
-    var renames = renamesʗp.slice();
+    var renames = renamesʗp.sslice();
 
     var m = makeRenameMap(renames.ꓸꓸꓸ);
     var mʗ1 = m;
@@ -333,7 +333,7 @@ internal static void renameSelectors(ж<ast.File> Ꮡf, params ꓸꓸꓸstring r
 // renameSelectorExprs is like renameIdents but only looks at selector expressions.
 // Each renames entry must be of the form "x.a->y.b".
 internal static void renameSelectorExprs(ж<ast.File> Ꮡf, params ꓸꓸꓸstring renamesʗp) {
-    var renames = renamesʗp.slice();
+    var renames = renamesʗp.sslice();
 
     var m = makeRenameMap(renames.ꓸꓸꓸ);
     var mʗ1 = m;
@@ -349,7 +349,7 @@ internal static void renameSelectorExprs(ж<ast.File> Ꮡf, params ꓸꓸꓸstri
 
 // renameImportPath is like renameIdents but renames import paths.
 internal static void renameImportPath(ж<ast.File> Ꮡf, params ꓸꓸꓸstring renamesʗp) {
-    var renames = renamesʗp.slice();
+    var renames = renamesʗp.sslice();
 
     var m = makeRenameMap(renames.ꓸꓸꓸ);
     var mʗ1 = m;

@@ -30,6 +30,9 @@ internal static readonly @string writeFileˢ = "WriteFile"u8;
 internal static readonly @string fileˢ = "file"u8;
 internal static readonly object barˢ = (@string)"Bar"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string badURLᶜ = "file://../no-exist.txt"u8;
+
 public static void TestFileTransport(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
@@ -62,7 +65,7 @@ public static void TestFileTransport(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("for %s, got content %q, want %q"u8, urlstr, ((@string)slurp), barˢ);
             }
         }
-        @string badURL = "file://../no-exist.txt"u8;
+        @string badURL = badURLᶜ;
         (var res, err) = c.Get(badURL);
         check("Get " + badURL, err);
         if ((~res).StatusCode != 404) {
@@ -73,6 +76,9 @@ public static void TestFileTransport(ж<testing.T> Ꮡt) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string badURLᶜ1 = "file://../no-exist.txt"u8;
 
 public static void TestFileTransportFS(ж<testing.T> Ꮡt) {
     var check = checker(Ꮡt);
@@ -102,7 +108,7 @@ public static void TestFileTransportFS(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("for %s, got content %q, want %q"u8, urlstr, ((@string)slurp), barˢ);
         }
     }
-    @string badURL = "file://../no-exist.txt"u8;
+    @string badURL = badURLᶜ1;
     var (res, err) = c.Get(badURL);
     check("Get " + badURL, err);
     if ((~res).StatusCode != 404) {

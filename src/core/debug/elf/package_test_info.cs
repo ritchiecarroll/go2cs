@@ -52,7 +52,7 @@ using static global::go.debug.elf_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("debug/elf/elf_test.go", "elf_test.cs", "ACtYgoKCgg==")]
-[assembly: go.GoPositionMap("debug/elf/file_test.go", "file_test.cs", "AMgDiAeigoSCgoKCgIK2lIKClJKCgpSCgpSCgqaCgpSCgqaCgoKUgoKClIKCgpSClIKCgpSCpoKUggAIEMKCgpSSgoKUgoIAxgOGB4KCkpKCgoKUgoKUgoKCgpSCgoKmgoKClIKUgoKUggAJDqaCgpSCgpSCgoKCgpSClJSC+KaCgpSCAA4ggoKUgqiigoCCpICCpIKUgoKClKSkpIKClIKogoKUgoKUgoKClKaCuLSUpIKCgoKUgoKCpoKCgpSCuoKogoKElIIACQ6igoKClJSChIKCloKCgoLsADZohIKEAAoWlqiCgqiCgpSCgqiCgoKCgoKClIKClIKCqJQABxAABxAABxCCAAcQpgAJFO4AChYACRQABxAABxKEgoKUlAAIEoKWgoKWAAgSguiCiIKCuKKCgoKUlIKCloLohJKCgpSEgoKWgoKEgoKUgpSCgoSChIKCloKCgrjCgoKClJKCgoKClIL6woKCgpSSgoKCgpSC", "998-1036:1")]
+[assembly: go.GoPositionMap("debug/elf/file_test.go", "file_test.cs", "AMgDiAeigoSCgoKCgIK2lIKClJKCgpSCgpSCgqaCgpSCgqaCgoKUgoKClIKCgpSClIKCgpSCpoKUggAIEMKCgpSSgoKUgoIAxgOGB4KCkpKCgoKUgoKUgoKCgpSCgoKmgoKClIKUgoKUggAJDqaCgpSCgpSCgoKCgpSClJSC+KaCgpSCAA4ggoKUgqiigoCCpICCpIKUgoKClKSkpIKClIKogoKUgoKUgoKClKaCuLSUpIKCgoKUgoKCpoKCgpSCuoKogoKElIIADA6igoKClJSChIKCloKCgoLsADZohIKEAAoWlqiCgqiCgpSCgqiCgoKCgoKClIKClIKCqJQABxAABxAABxCCAAcQpgAJFO4AChYACRQABxAABxKEgoKUlAAIEoKWgoKWAAgSguiCiIKC6KKCgoKUlIKCloIADAiEkoKClISCgpaCgoSCgpSClIKChIKEgoKWgoKC6MKCgoKUkoKCgoKUggAKCsKCgoKUkoKCgoKUgg==", "998-1036:1")]
 [assembly: go.GoPositionMap("debug/elf/symbols_test.go", "symbols_test.cs", "AA0ekqKCgoKCgIK2lIKClJKCgoKklIKWgpSClICCAAgMgpSC", "16-55:1")]
 // </GoSourcePositionMaps>
 

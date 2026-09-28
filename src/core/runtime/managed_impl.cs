@@ -255,10 +255,115 @@ partial class runtime_package
     {
         nint previous = Volatile.Read(ref s_gomaxprocs);
 
-        if (n >= 1)
+        if (n < 1 || n == previous)
+            return previous;
+
+        lock (s_cpuStatsLock)
+        {
             Volatile.Write(ref s_gomaxprocs, n);
 
+            // procresize's time bookkeeping, verbatim (proc.go): sched.totaltime integrates
+            // gomaxprocs over time, and cpuStats.accumulate reads it and the gomaxprocs global to
+            // compute /cpu/classes/total. There are no Ps to resize, so this is all of procresize
+            // the managed host has.
+            int64 now = nanotime();
+            if (sched.procresizetime != 0)
+                sched.totaltime += (int64)gomaxprocs * (now - sched.procresizetime);
+            sched.procresizetime = now;
+            gomaxprocs = (int32)n;
+        }
+
         return previous;
+    }
+
+    // THE /cpu/classes ACCOUNTING. Go writes work.cpuStats only at gcMarkTermination
+    // (accumulateGCPauseTime, then accumulate, then sched.idleTime reset), which the managed host
+    // never runs, so every /cpu/classes metric and ReadCPUStats read 0. This feeds Go's own state
+    // from the CLR and leaves accumulate, accumulateGCPauseTime and cpuStatsAggregate.compute
+    // auto-converted:
+    //   - total: sched.totaltime/procresizetime, kept by GOMAXPROCS above and started below.
+    //   - GC pause: the interval's GC.GetTotalPauseDuration delta, times gomaxprocs, through
+    //     accumulateGCPauseTime (Go multiplies each pause by maxprocs the same way).
+    //   - idle: the interval's total, less the pause CPU, less the process CPU spent outside the
+    //     pauses, floored at 0. Go counts Ps sitting in _Pidle; with no Ps, the CPU the process did
+    //     not use is that time. User is accumulate's remainder, so every identity holds.
+    // The mark classes stay 0: runtime.GC() runs blocking CLR collections, which mark inside their
+    // pause, and a background CLR gen2's mark time is not separately measurable. The scavenge
+    // classes stay 0: there is no scavenger.
+    //
+    // WHEN (COORD ruling, ledger 2026-09-27 00:35): a LAZY CATCH-UP at the read point rather than a
+    // callback per collection. Go's values change only when a GC cycle completes; a Go cycle is a
+    // CLR gen2 (GcPauseRecorder's definition), so a reader accounts the interval since the last
+    // accounting only when the gen2 count has advanced. readMetricsManaged runs it before the
+    // metrics are computed, and runtime.GC() ends with it. No completed cycle, no change: the cost
+    // on that path is one CollectionCount read.
+    private static readonly object s_cpuStatsLock = new();
+    private static int s_cpuStatsGen2;
+    private static long s_cpuStatsPauseNs;
+    private static long s_cpuStatsProcessNs;
+    private static int64 s_cpuStatsTotal;
+
+    [ModuleInitializer]
+    internal static void ᴛStartCPUStats()
+    {
+        lock (s_cpuStatsLock)
+        {
+            // Go's schedinit calls procresize, which is where procresizetime first gets a value.
+            sched.procresizetime = nanotime();
+            s_cpuStatsGen2 = System.GC.CollectionCount(System.GC.MaxGeneration);
+            s_cpuStatsPauseNs = System.GC.GetTotalPauseDuration().Ticks * 100;
+            s_cpuStatsProcessNs = Environment.CpuUsage.TotalTime.Ticks * 100;
+        }
+    }
+
+    internal static void catchUpCPUStats()
+    {
+        if (System.GC.CollectionCount(System.GC.MaxGeneration) == Volatile.Read(ref s_cpuStatsGen2))
+            return;
+
+        lock (s_cpuStatsLock)
+        {
+            int gen2 = System.GC.CollectionCount(System.GC.MaxGeneration);
+
+            if (gen2 == s_cpuStatsGen2)
+                return;
+
+            int64 now = nanotime();
+            long pauseNs = System.GC.GetTotalPauseDuration().Ticks * 100;
+            long processNs = Environment.CpuUsage.TotalTime.Ticks * 100;
+            int64 total = sched.totaltime + (now - sched.procresizetime) * (int64)gomaxprocs;
+
+            int64 pause = pauseNs - s_cpuStatsPauseNs;
+            int64 pauseCPU = pause * (int64)gomaxprocs;
+            int64 busy = Math.Max(0L, processNs - s_cpuStatsProcessNs - pause);
+            int64 idle = Math.Max(0L, total - s_cpuStatsTotal - pauseCPU - busy);
+
+            ref cpuStats stats = ref work.cpuStats;
+            stats.accumulateGCPauseTime(pause, gomaxprocs);
+            Ꮡsched.of(schedt.ᏑidleTime).Store(idle);
+            stats.accumulate(now, false);
+            Ꮡsched.of(schedt.ᏑidleTime).Store(0);
+
+            s_cpuStatsTotal = total;
+            s_cpuStatsPauseNs = pauseNs;
+            s_cpuStatsProcessNs = processNs;
+            Volatile.Write(ref s_cpuStatsGen2, gen2);
+        }
+    }
+
+    /// <summary>
+    /// GolibTests' probe for the /cpu/classes accounting (RuntimeCPUStatsTests): reads work.cpuStats,
+    /// the snapshot runtime/metrics and the ReadCPUStats export report, plus the Go global gomaxprocs.
+    /// Order: GCAssist, GCDedicated, GCIdle, GCPause, GCTotal, ScavengeAssist, ScavengeBg,
+    /// ScavengeTotal, Idle, User, Total (all cpu-ns), then gomaxprocs.
+    /// </summary>
+    public static long[] GoCPUStatsProbe()
+    {
+        cpuStats s = work.cpuStats;
+
+        return [s.GCAssistTime, s.GCDedicatedTime, s.GCIdleTime, s.GCPauseTime, s.GCTotalTime,
+            s.ScavengeAssistTime, s.ScavengeBgTime, s.ScavengeTotalTime, s.IdleTime, s.UserTime,
+            s.TotalTime, gomaxprocs];
     }
 
     // Gosched yields the processor, allowing other goroutines to run. It does not suspend the
@@ -362,6 +467,9 @@ partial class runtime_package
         // whether or not the recorder is armed.
         GcPauseRecorder.Drain();
         GcPauseRecorder.NoteForcedGC();
+
+        // Go's cycle ends in gcMarkTermination, which is where work.cpuStats is written.
+        catchUpCPUStats();
     }
 
     // metricsLock/metricsUnlock protect the runtime metrics table (initMetrics' map and the agg
@@ -546,6 +654,9 @@ partial class runtime_package
 
         // Ensure the map is initialized.
         initMetrics();
+
+        // Account any GC cycle completed since the last reading (catchUpCPUStats above).
+        catchUpCPUStats();
 
         // Clear agg defensively.
         agg = new statAggregate(nil);
@@ -2327,5 +2438,41 @@ partial class runtime_package
     public static (ulong start, ulong end) GoSyntheticTextRange()
     {
         return ((ulong)s_callerSpanBase, ulong.MaxValue);
+    }
+
+    /// <summary>
+    /// GolibTests' probe for traceMap (RuntimeTraceMapTests): puts each string twice into a fresh
+    /// traceMap, as runtime's TraceMap export does, resets it, and repeats. Returns one line per put
+    /// ("s=id,inserted"), or what the puts raised.
+    /// </summary>
+    public static string GoTraceMapProbe(string[] values, int rounds)
+    {
+        StringBuilder reading = new();
+
+        try
+        {
+            ж<traceMap> tab = @new<traceMap>();
+
+            for (int round = 0; round < rounds; round++)
+            {
+                for (int pass = 0; pass < 2; pass++)
+                {
+                    foreach (string value in values)
+                    {
+                        @string s = value;
+                        (uint64 id, bool inserted) = tab.put(@unsafe.Pointer.FromPinnedBox(@unsafe.StringData(s)), (uintptr)len(s));
+                        reading.Append($"{value}={id},{inserted};");
+                    }
+                }
+
+                tab.reset();
+            }
+        }
+        catch (Exception ex)
+        {
+            reading.Append($"{ex.GetType().Name}: {ex.Message}");
+        }
+
+        return reading.ToString();
     }
 }

@@ -85,7 +85,7 @@ internal static UntypedInt flushBuffer => /* 1 << maxWidth */ 4096;
         r.nBits += 8;
     }
     var code = (uint16)((uint32)(r.bits & (((uint32)1).Lsh(r.width) - 1)));
-    r.bits >>= (int)(r.width);
+    r.bits.RshAssign(r.width);
     r.nBits -= r.width;
     return (code, default!);
 }
@@ -101,7 +101,7 @@ internal static UntypedInt flushBuffer => /* 1 << maxWidth */ 4096;
         r.nBits += 8;
     }
     var code = (uint16)(r.bits.Rsh((32 - r.width)));
-    r.bits <<= (int)(r.width);
+    r.bits.LshAssign(r.width);
     r.nBits -= r.width;
     return (code, default!);
 }

@@ -102,7 +102,7 @@ internal static (nint tableBits, nint roff, error err) readFSE(this Ð¶<Reader> á
         if ((nint)((uint32)(br.bits & (uint32)(threshold - 1))) < max){
             // A small value.
             count = (nint)((uint32)(br.bits & (uint32)(threshold - 1)));
-            br.bits >>= (int)(bitsNeeded - 1);
+            br.bits.RshAssign((uint64)(bitsNeeded - 1));
             br.cnt -= (uint32)(bitsNeeded - 1);
         } else {
             // A large value.
@@ -110,7 +110,7 @@ internal static (nint tableBits, nint roff, error err) readFSE(this Ð¶<Reader> á
             if (count >= threshold) {
                 count -= max;
             }
-            br.bits >>= (int)(bitsNeeded);
+            br.bits.RshAssign((uint64)(bitsNeeded));
             br.cnt -= (uint32)bitsNeeded;
         }
         count--;

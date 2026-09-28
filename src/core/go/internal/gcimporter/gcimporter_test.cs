@@ -48,7 +48,7 @@ private static readonly @string importcfgˢ = "-importcfg"u8;
 // and writes the output file to outdirname.
 // compile gives the resulting package a packagepath of testdata/<filebasename>.
 internal static @string compile(ж<testing.T> Ꮡt, @string dirname, @string filename, @string outdirname, map<@string, @string> packageFiles, params ꓸꓸꓸstring pkgImportsʗp) {
-    var pkgImports = pkgImportsʗp.slice();
+    var pkgImports = pkgImportsʗp.sslice();
 
     ref var t = ref Ꮡt.DerefOrNull();
     // filename must end with ".go"
@@ -281,6 +281,9 @@ private static readonly @string noLongerSupportedˢ = "no longer supported"u8;
 private static readonly @string newerVersionˢ = "newer version"u8;
 private static readonly @string versionSkewˢ = "version skew"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+private static readonly @string dirᶜ = "./testdata/versions"u8;
+
 public static void TestVersionHandling(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
@@ -291,7 +294,7 @@ public static void TestVersionHandling(ж<testing.T> Ꮡt) {
         if (runtime.Compiler != "gc") {
             Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
         }
-        @string dir = "./testdata/versions"u8;
+        @string dir = dirᶜ;
         var (list, err) = os.ReadDir(dir);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -855,6 +858,18 @@ internal static (ж<types.Package>, error) ΔImport(this importMap m, @string pa
 private static readonly @string issue69912Goˢ = "issue69912.go"u8;
 private static readonly @string testdataIssue69912ˢ = "./testdata/issue69912"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+private static readonly @string pSrcᶜ = """
+package p
+
+import . "issue69912"
+
+type S struct {
+	f T
+}
+
+"""u8;
+
 public static void TestIssue69912(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
     // This package only handles gc export data.
@@ -887,16 +902,7 @@ public static void TestIssue69912(ж<testing.T> Ꮡt) {
     }
     // Use the resulting package concurrently, via dot-imports, to exercise the
     // race of issue #69912.
-    @string pSrc = """
-package p
-
-import . "issue69912"
-
-type S struct {
-	f T
-}
-
-"""u8;
+    @string pSrc = pSrcᶜ;
     var importer = new importMap(new map<@string, ж<types.Package>>{
         ["issue69912"u8] = issue69912
     });

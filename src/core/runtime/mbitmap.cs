@@ -1150,7 +1150,7 @@ internal static readonly @string sFreeindexSNelemsˢ = "s.freeindex > s.nelems"u
         s.freeindex = snelems;
         return snelems;
     }
-    s.allocCache >>= (int)((nuint)(bitIndex + 1));
+    s.allocCache.RshAssign((nuint)(bitIndex + 1));
     sfreeindex = (uint16)(result + 1);
     if ((uint16)(sfreeindex % 64) == 0 && sfreeindex != snelems) {
         // We just incremented s.freeindex so it isn't 0.
@@ -1648,7 +1648,7 @@ Run:
             // Either way, we might now have too many instead of too few.
             // Discard the extra.
             if (npattern > n) {
-                pattern >>= (int)(npattern - n);
+                pattern.RshAssign((uint64)(npattern - n));
                 npattern = n;
             }
             // Replicate pattern to at most maxBits.

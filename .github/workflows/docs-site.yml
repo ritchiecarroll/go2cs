@@ -1,0 +1,102 @@
+name: Docs site
+# Builds docs/ with the toolchain GitHub Pages uses (actions/jekyll-build-pages, the github-pages gem),
+# checks the result, and deploys it ONLY when every check passes (owner ruling 2026-09-27, form b).
+# The deploy needs Settings -> Pages -> Source set to "GitHub Actions"; under "Deploy from a branch"
+# Pages would build and publish master's docs/ itself, with no check in front of it.
+#
+# The checks:
+#   liquid  -- TestDocsSurviveJekyllLiquid: no page carries a Liquid token that would break the build
+#              or render as empty text (.claude/rules/docs-records.md).
+#   build   -- the Pages build itself fails on a Liquid or Markdown error.
+#   rewrite -- .github/site-outside-links.py points links that climb out of docs/ (../src/..., ../CLAUDE.md)
+#              at the repository on GitHub at the commit being built; the Markdown keeps its relative links.
+#   links   -- .github/site-check.py over the BUILT site: broken internal links, broken #fragments and
+#              shared page titles, against .github/site-check-baseline.json (the findings the site
+#              already had when this check landed). A finding not in the baseline fails the run.
+#
+# Master pushes that touch the site deploy; pull requests run the checks only. Lane branches are not
+# triggers: a lane pushes many times a day, and the check that matters is the tree that lands.
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/docs-site.yml'
+      - '.github/site-check.py'
+      - '.github/site-check-baseline.json'
+      - '.github/site-outside-links.py'
+      - 'src/go2cs/internal/repoguard/docsJekyllLiquid_test.go'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - '.github/workflows/docs-site.yml'
+      - '.github/site-check.py'
+      - '.github/site-check-baseline.json'
+      - '.github/site-outside-links.py'
+      - 'src/go2cs/internal/repoguard/docsJekyllLiquid_test.go'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: docs-site-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  liquid:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: src/go2cs/go.mod
+          cache: false
+      - name: TestDocsSurviveJekyllLiquid
+        working-directory: src/go2cs
+        run: go test -buildvcs=false -count=1 -run '^TestDocsSurviveJekyllLiquid$' ./internal/repoguard/
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build docs/ with the Pages toolchain
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./docs
+          destination: ./_site
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Point links that climb out of docs/ at the repository on GitHub
+        # The Pages build runs in a container and leaves _site owned by root; take it back first.
+        run: |
+          sudo chown -R "$(id -u):$(id -g)" _site
+          python .github/site-outside-links.py _site . "${{ github.sha }}" "${{ github.repository }}"
+      - name: Check links, fragments and titles against the baseline
+        run: python .github/site-check.py _site site-check.json --baseline .github/site-check-baseline.json
+      - name: Keep the check's report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-check
+          path: site-check.json
+          retention-days: 14
+      - name: Package the site for Pages
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    needs: [liquid, build]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -43,13 +43,16 @@ internal static void cmdPipeHandle(params ꓸꓸꓸstring argsʗp) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string pipehandleˢ = "pipehandle"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string markerᶜ = "arrakis, dune, desert planet"u8;
+
 public static void TestPipePassing(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     var (r, w, err) = os.Pipe();
     if (err != default!) {
         Ꮡt.Error(err);
     }
-    @string marker = "arrakis, dune, desert planet"u8;
+    @string marker = markerᶜ;
     var childProc = helperCommand(Ꮡt, pipehandleˢ, strconv.FormatUint((uint64)w.Fd(), 16), marker);
     childProc.Value.SysProcAttr = Ꮡ(new syscall.SysProcAttr(AdditionalInheritedHandles: new syscallꓸHandle[]{((syscallꓸHandle)w.Fd())}.slice()));
     err = childProc.Start();

@@ -62,7 +62,7 @@ using static global::go.net.http.fcgi_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/fcgi/fcgi_test.go", "fcgi_test.cs", "AB44goKCgoKUgoKUggAkRoCkgoKCgoKCgoCCgqSUgoKUgoKUgoKUgoKCgIKCpICCgqSCAAoSgoLWgqaCpoKChIKCgoKWhoCCyIIACBSKgoSCgoIANWaCpoKs0rKCgoKCuoKCppSUAAgSgqiSAAcQgoIAK1qysoKCgoKogoCCtqSUggAMCIIAFDKykoKCgoKCqIKClIKCgIIADxaCpoKC2sKEgqK4gpSUooKWgoSYgpSEgoI=", "245-256:1;335-347:1;380-399:1;386-393:1.1;423-432:1;433-436:2;441-447:3")]
+[assembly: go.GoPositionMap("net/http/fcgi/fcgi_test.go", "fcgi_test.cs", "AB44goKCgoKUgoKUggAkRoCkgoKCgoKCgoCCgqSUgoKUgoKUgoKUgoKCgIKCpICCgqSCAAoSgoLWgqaC1oKChIKCgoKWhoCCyIIACBSKgoSCgoIANWaCpoKs0rKCgoKCuoKCppSUAAgSgqiSAAcQgoIAK1qysoKCgoKogoCCtqSUggAMCIIAFDKykoKCgoKCqIKClIKCgIIADxaCpoKC2sKEgqK4gpSUooKWgoSYgpSEgoI=", "245-256:1;335-347:1;380-399:1;386-393:1.1;423-432:1;433-436:2;441-447:3")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

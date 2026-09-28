@@ -300,7 +300,7 @@ internal static void gcwaitfin() {
 }
 
 //go:linkname runtime_blockUntilEmptyFinalizerQueue runtime.blockUntilEmptyFinalizerQueue
-internal static bool runtime_blockUntilEmptyFinalizerQueue(int64 _) {
+[global::System.Diagnostics.StackTraceHidden] internal static bool runtime_blockUntilEmptyFinalizerQueue(int64 _) {
     return Δruntime.blockUntilEmptyFinalizerQueue(_);
 }
 

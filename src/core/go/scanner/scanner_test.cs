@@ -676,12 +676,15 @@ public static void TestInit(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string file1ˢ = "File1"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ = "@\n@ @\n//line File2:20\n@\n//line File2:1\n@ @\n//line File1:1\n@ @ @";
+
 public static void TestStdErrorHandler(ж<testing.T> Ꮡt) {
 // illegal character, cause an error
 // two errors on the same line
 // different file, but same line
 // same file, decreasing line number
-    @string src = "@\n@ @\n//line File2:20\n@\n//line File2:1\n@ @\n//line File1:1\n@ @ @"; // original file, line 1 again
+    @string src = srcᶜ; // original file, line 1 again
     ref var list = ref heap<global::go.go.scanner_package.ErrorList>(out var Ꮡlist);
     var eh = (tokenꓸPosition pos, @string msg) => {
         Ꮡlist.ValueSlot.Add(pos, msg);
@@ -835,9 +838,8 @@ public static void TestScanErrors(ж<testing.T> Ꮡt) {
     }
 }
 
-// Verify that no comments show up as literal values when skipping comments.
-public static void TestIssue10213(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ1 = """
 
 		var (
 			A = 1 // foo
@@ -858,6 +860,10 @@ public static void TestIssue10213(ж<testing.T> Ꮡt) {
 		}
 	
 """u8;
+
+// Verify that no comments show up as literal values when skipping comments.
+public static void TestIssue10213(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ1;
     global::go.go.scanner_package.Scanner s = default!;
     s.Init(fset.AddFile(""u8, fset.Base(), len(src)), slice<byte>(src), default!, 0);
     while (ᐧ) {
@@ -872,10 +878,13 @@ public static void TestIssue10213(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ2 = "... .. 0.. .."u8;
+
 public static void TestIssue28112(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    @string src = "... .. 0.. .."u8; // make sure to have stand-alone ".." immediately before EOF to test EOF behavior
+    @string src = srcᶜ2; // make sure to have stand-alone ".." immediately before EOF to test EOF behavior
     var tokens = new token.Token[]{token.ELLIPSIS, token.PERIOD, token.PERIOD, token.FLOAT, token.PERIOD, token.PERIOD, token.PERIOD, token.EOF}.slice();
     global::go.go.scanner_package.Scanner s = default!;
     s.Init(fset.AddFile(""u8, fset.Base(), len(src)), slice<byte>(src), default!, 0);

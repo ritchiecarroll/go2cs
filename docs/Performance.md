@@ -1,5 +1,3 @@
-<!-- AUTO-COPIED from src/tests/Performance/README.md by run-performance.ps1 -- edit that file, not this one. -->
-
 # Go vs transpiled C# — runtime performance comparison
 
 A small, targeted benchmark suite answering the question people ask first: **how fast is transpiled
@@ -338,3 +336,5 @@ results section included.
 [`run-performance-floor.ps1`](https://github.com/ritchiecarroll/go2cs/blob/master/src/tests/Performance/run-performance-floor.ps1)
 is its measurement harness and is not part of the canonical suite above. (Links are absolute
 because this file mirrors verbatim to `docs/Performance.md` after each canonical run.)
+
+<!-- AUTO-COPIED from src/tests/Performance/README.md by run-performance.ps1 -- edit that file, not this one. -->

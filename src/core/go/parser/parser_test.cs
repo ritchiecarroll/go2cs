@@ -115,6 +115,12 @@ public static void TestIssue42951(ж<testing.T> Ꮡt) {
 internal static readonly @string structXIntˢ = "struct{x *int}"u8;
 internal static readonly @string aIXˢ = "a[i] := x"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string validExprᶜ = "a + b"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string anythingᶜ = "dh3*#D)#_"u8;
+
 public static void TestParseExpr(ж<testing.T> Ꮡt) {
     // just kicking the tires:
     // a valid arithmetic expression
@@ -176,8 +182,8 @@ public static void TestParseExpr(ж<testing.T> Ꮡt) {
         }
     }
     // various other stuff following a valid expression
-    @string validExpr = "a + b"u8;
-    @string anything = "dh3*#D)#_"u8;
+    @string validExpr = validExprᶜ;
+    @string anything = anythingᶜ;
     foreach (var (_, c) in (@string)"!)]};,"u8) {
         @string srcΔ1 = validExpr + ((@string)c) + anything;
         {
@@ -239,10 +245,8 @@ public static void TestVarScope(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestObjects(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ = """
 
 package p
 import fmt "fmt"
@@ -252,6 +256,11 @@ var x int
 func f() { L: }
 
 """u8;
+
+public static void TestObjects(ж<testing.T> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    @string src = srcᶜ;
     var (f, err) = ParseFile(token.NewFileSet(), ""u8, src, 0);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -592,8 +601,8 @@ internal static readonly @string fileGoˢ = "file.go"u8;
 internal static readonly @string fileGo11ˢ = "file.go:1:1"u8;
 internal static readonly @string fileGo1019ˢ = "file.go:10:19"u8;
 
-public static void TestFileStartEndPos(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ1 = """
 // Copyright
 
 //+build tag
@@ -606,6 +615,9 @@ var lastDecl int
 /* end of file */
 
 """u8;
+
+public static void TestFileStartEndPos(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ1;
     var fset = token.NewFileSet();
     var (f, err) = ParseFile(fset, fileGoˢ, src, 0);
     if (err != default!) {
@@ -630,6 +642,12 @@ var lastDecl int
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object foundNoAstSelectorExprˢ = (@string)"found no *ast.SelectorExpr"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantErrᶜ = "expected selector or type assertion"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantSelᶜ = "&{fmt _}"u8;
+
 // TestIncompleteSelection ensures that an incomplete selector
 // expression is parsed as a (blank) *ast.SelectorExpr, not a
 // *ast.BadExpr.
@@ -646,7 +664,7 @@ public static void TestIncompleteSelection(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("ParseFile(%s) succeeded unexpectedly"u8, src);
             continue;
         }
-        @string wantErr = "expected selector or type assertion"u8;
+        @string wantErr = wantErrᶜ;
         if (!strings.Contains(err.Error(), wantErr)) {
             Ꮡt.Errorf("ParseFile returned wrong error %q, want %q"u8, err, wantErr);
         }
@@ -663,7 +681,7 @@ public static void TestIncompleteSelection(ж<testing.T> Ꮡt) {
             Ꮡt.Error(foundNoAstSelectorExprˢ);
             continue;
         }
-        @string wantSel = "&{fmt _}"u8;
+        @string wantSel = wantSelᶜ;
         if (fmt.Sprint(sel.OrTypedNil()) != wantSel) {
             Ꮡt.Errorf("found selector %s, want %s"u8, sel.OrTypedNil(), wantSel);
             continue;
@@ -674,12 +692,15 @@ public static void TestIncompleteSelection(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object commentˢ = (@string)"// comment"u8;
 
-public static void TestLastLineComment(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ2 = """
 package main
 type x int // comment
 
 """u8;
+
+public static void TestLastLineComment(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ2;
     var fset = token.NewFileSet();
     var (f, err) = ParseFile(fset, ""u8, src, ParseComments);
     if (err != default!) {
@@ -985,8 +1006,11 @@ public static void TestIssue57490(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testGoˢ = "test.go"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ3 = "package p; type X[A (B),] struct{}"u8;
+
 public static void TestParseTypeParamsAsParenExpr(ж<testing.T> Ꮡt) {
-    @string src = "package p; type X[A (B),] struct{}"u8;
+    @string src = srcᶜ3;
     var fset = token.NewFileSet();
     var (f, err) = ParseFile(fset, testGoˢ, src, (global::go.go.parser_package.Mode)(ParseComments | SkipObjectResolution));
     if (err != default!) {

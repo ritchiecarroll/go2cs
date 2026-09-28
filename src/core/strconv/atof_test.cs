@@ -665,10 +665,13 @@ public static void TestRoundTrip32(ж<testing.T> Ꮡt) {
     Ꮡt.Logf("tested %d float32's"u8, count);
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string sᶜ1 = "1.5e308"u8;
+
 // Issue 42297: a lot of code in the wild accidentally calls ParseFloat(s, 10)
 // or ParseFloat(s, 0), so allow bitSize values other than 32 and 64.
 public static void TestParseFloatIncorrectBitSize(ж<testing.T> Ꮡt) {
-    @string s = "1.5e308"u8;
+    @string s = sᶜ1;
     const float64 want = 1.5e308;
     foreach (var (_, bitSize) in new nint[]{0, 10, 100, 128}.slice()) {
         var (f, err) = ParseFloat(s, bitSize);

@@ -68,6 +68,9 @@ internal static void testBlock(ж<testing.T> Ꮡt, @string name, Func<cipher.Blo
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string abcdefghijˢ = "abcdefghij"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+private static readonly @string plainᶜ = "0123456789"u8;
+
 internal static void test(ж<testing.T> Ꮡt, @string name, slice<byte> cipherText, Action<slice<byte>, slice<byte>> xor) {
     GoFrame ᒐ = default;
     try {
@@ -82,7 +85,7 @@ internal static void test(ж<testing.T> Ꮡt, @string name, slice<byte> cipherTe
             if (err == default!) {
                 Ꮡt.Errorf("%v XORKeyStream expected to panic on len(dst) < len(src), but didn't"u8, name);
             }
-            @string plain = "0123456789"u8;
+            @string plain = plainᶜ;
             if (plainTextʗ1[shorterLen] == plain[shorterLen]) {
                 Ꮡt.Errorf("%v XORKeyStream did out of bounds write, want %v, got %v"u8, name, want, ((@string)plainTextʗ1));
             }

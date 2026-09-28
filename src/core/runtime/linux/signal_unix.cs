@@ -873,34 +873,7 @@ internal static void sigpanic() {
     throw panic(((errorString)sigtable[(nint)((~gp).sig)].name));
 }
 
-// dieFromSignal kills the program with a signal.
-// This provides the expected exit status for the shell.
-// This is only called with fatal signals expected to kill the process.
-//
-//go:nosplit
-//go:nowritebarrierrec
-internal static void dieFromSignal(uint32 sig) {
-    unblocksig(sig);
-    // Mark the signal as unhandled to ensure it is forwarded.
-    atomic.Store(ᏑhandlingSig.at<uint32>((nint)(sig)), 0);
-    raise(sig);
-    // That should have killed us. On some systems, though, raise
-    // sends the signal to the whole process rather than to just
-    // the current thread, which means that the signal may not yet
-    // have been delivered. Give other threads a chance to run and
-    // pick up the signal.
-    osyield();
-    osyield();
-    osyield();
-    // If that didn't work, try _SIG_DFL.
-    setsig(sig, _SIG_DFL);
-    raise(sig);
-    osyield();
-    osyield();
-    osyield();
-    // If we are still somehow running, just exit with the wrong status.
-    exit(2);
-}
+// go2cs generated this placeholder — func dieFromSignal is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // raisebadsignal is called when a signal is received on a non-Go
 // thread, and the Go program does not want to handle it (that is, the

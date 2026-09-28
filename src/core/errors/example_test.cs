@@ -48,12 +48,15 @@ public static void ExampleNew() {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+private static readonly @string nameᶜ = "bimmler"u8;
+
 // Output: emit macho dwarf: elf header corrupted
 
 // The fmt package's Errorf function lets us use the package's formatting
 // features to create descriptive error messages.
 public static void ExampleNew_errorf() {
-    @string name = "bimmler"u8;
+    @string name = nameᶜ;
     const nint id = 17;
     var err = fmt.Errorf("user %q (id %d) not found"u8, name, (nint)(id));
     if (err != default!) {

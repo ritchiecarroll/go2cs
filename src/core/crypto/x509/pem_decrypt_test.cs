@@ -283,6 +283,9 @@ ai+OP1BZUetfK6AW4MiqB2FDyIdOAJ8XeWuZy21Wtsh8wPD6yYOFM/w7WZL8weX3Y0TSeG/T
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object badPemDataDecryptedˢ = (@string)"Bad PEM data decrypted successfully"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectedSubstrᶜ = "block size"u8;
+
 public static void TestIncompleteBlock(ж<testing.T> Ꮡt) {
     // incompleteBlockPEM contains ciphertext that is not a multiple of the
     // block size. This previously panicked. See #11215.
@@ -291,7 +294,7 @@ public static void TestIncompleteBlock(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Fatal(badPemDataDecryptedˢ);
     }
-    @string expectedSubstr = "block size"u8;
+    @string expectedSubstr = expectedSubstrᶜ;
     {
         @string e = err.Error(); if (!strings.Contains(e, expectedSubstr)) {
             Ꮡt.Fatalf("Expected error containing %q but got: %q"u8, expectedSubstr, e);

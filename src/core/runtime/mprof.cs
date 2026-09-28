@@ -764,7 +764,7 @@ internal static void mutexevent(int64 cycles, nint skip) {
 // memory profiling rate should do so just once, as early as
 // possible in the execution of the program (for example,
 // at the beginning of main).
-public static nint MemProfileRate = 512 * 1024;
+// go2cs generated this placeholder — var MemProfileRate is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // disableMemoryProfiling is set by the linker if memory profiling
 // is not used and the link type guarantees nobody else could use it

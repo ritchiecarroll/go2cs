@@ -175,6 +175,12 @@ public static void TestContentTypeWithVariousSources(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testContentTypeWithVariousSources(Δp0, Δp1));
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string inputᶜ = "\n<html>\n\t<head>\n"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectedᶜ = "text/html; charset=utf-8"u8;
+
 [GoType("dyn")] internal partial struct testContentTypeWithVariousSources_type {
     internal @string name;
     internal Action<Δhttp.ResponseWriter, ж<Δhttp.Request>> handler;
@@ -186,10 +192,8 @@ public static void TestContentTypeWithVariousSources(ж<testing.T> Ꮡt) {
 }
 
 internal static void testContentTypeWithVariousSources(ж<testing.T> Ꮡt, testMode mode) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    @string input = "\n<html>\n\t<head>\n"u8;
-    @string expected = "text/html; charset=utf-8"u8;
+    @string input = inputᶜ;
+    @string expected = expectedᶜ;
     foreach (var (_, vᴛ1) in new testContentTypeWithVariousSources_type[]{new(
         name: "write"u8,
         handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {

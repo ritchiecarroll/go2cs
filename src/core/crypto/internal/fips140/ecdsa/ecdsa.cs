@@ -463,7 +463,7 @@ internal static slice<byte> rightShift(slice<byte> b, nint shift) {
     }
     b = bytes.Clone(b);
     for (nint i = len(b) - 1; i >= 0; i--) {
-        b[i] >>= (int)(shift);
+        b[i].RshAssign((uint64)(shift));
         if (i > 0) {
             b[i] |= (byte)(b[i - 1].Lsh((uint64)((8 - shift))));
         }

@@ -21,6 +21,9 @@ partial class template_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string nameˢ = "name"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = "stuff"u8;
+
 public static void TestTemplateClone(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -33,7 +36,7 @@ public static void TestTemplateClone(ж<testing.T> Ꮡt) {
     if (len(clone.Templates()) != len(orig.Templates())) {
         Ꮡt.Fatalf("Invalid length of t.Clone().Templates()"u8);
     }
-    @string want = "stuff"u8;
+    @string want = wantᶜ;
     var (ᴛ1, ᴛ2) = clone.Parse(want);
     var parsed = Must(ᴛ1, ᴛ2);
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -181,6 +184,15 @@ internal static readonly @string jsStringIsJsonStringˢ = "JS string is JSON str
     internal @string name, @in;
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string prefixᶜ = @"<script type=""application/ld+json"">"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string suffixᶜ = @"</script>"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string templᶜ = "<script type=\"application/ld+json\">\"{{.}}\"</script>";
+
 public static void TestStringsInScriptsWithJsonContentTypeAreCorrectlyEscaped(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -197,9 +209,9 @@ public static void TestStringsInScriptsWithJsonContentTypeAreCorrectlyEscaped(ж
         new("Unicode"u8, "ʕ⊙ϖ⊙ʔ"u8),
         new("Pizza"u8, "🍕"u8)
     }.slice();
-    @string prefix = @"<script type=""application/ld+json"">"u8;
-    @string suffix = @"</script>"u8;
-    @string templ = "<script type=\"application/ld+json\">\"{{.}}\"</script>";
+    @string prefix = prefixᶜ;
+    @string suffix = suffixᶜ;
+    @string templ = templᶜ;
     var (ᴛ3, ᴛ4) = New(jsStringIsJsonStringˢ).Parse(templ);
     var tpl = Must(ᴛ3, ᴛ4);
     foreach (var (_, vᴛ1) in tests) {

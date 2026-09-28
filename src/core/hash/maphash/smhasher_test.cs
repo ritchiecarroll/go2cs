@@ -486,12 +486,15 @@ public static void TestSmhasherText(ж<testing.T> Ꮡt) {
     text(Ꮡt, h, ""u8, fooBarˢ);
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string Sᶜ = "ABCDEFGHIJKLMNOPQRSTabcdefghijklmnopqrst0123456789"u8;
+
 internal static void text(ж<testing.T> Ꮡt, ж<hashSet> Ꮡh, @string prefix, @string suffix) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     Ꮡt.Helper();
     const nint N = 4;
-    @string S = "ABCDEFGHIJKLMNOPQRSTabcdefghijklmnopqrst0123456789"u8;
+    @string S = Sᶜ;
     const nint L = /* len(S) */ 50;
     var b = new slice<byte>(len(prefix) + N + len(suffix));
     copy(b, prefix);

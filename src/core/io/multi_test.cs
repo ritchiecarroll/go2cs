@@ -329,13 +329,16 @@ internal static (nint n, error err) Read(this byteAndEOFReader b, slice<byte> p)
     return (1, EOF);
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = "ab"u8;
+
 // This used to yield bytes forever; issue 16795.
 public static void TestMultiReaderSingleByteWithEOF(ж<testing.T> Ꮡt) {
     var (got, err) = ReadAll(LimitReader(MultiReader(((byteAndEOFReader)(rune)'a'), ((byteAndEOFReader)(rune)'b')), 10));
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    @string want = "ab"u8;
+    @string want = wantᶜ;
     if (((sstring)got) != want) {
         Ꮡt.Errorf("got %q; want %q"u8, got, want);
     }

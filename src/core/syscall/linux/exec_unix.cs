@@ -21,7 +21,8 @@
 // someone else's sound native code: Go's child-side fd shuffle is computed PARENT-side as a
 // posix_spawn_file_actions list (the same shift-up-then-dup2 plan Go runs as code, expressed as
 // data), pgid/sid ride posix_spawnattr, the child signal mask is reset to empty (exec itself
-// resets caught handlers to default, so SETSIGDEF is not needed for the exec'd image), and
+// resets caught handlers to default; it KEEPS ignored ones, so SIGPIPE -- which the CLR ignores --
+// takes SETSIGDEF unless Go's model ignores it too), and
 // glibc's synchronous error reporting subsumes Go's status-pipe protocol — spawn and exec
 // failures return as errno from the call, so forkExecPipe/readlen and the child-status dance are
 // simply gone. SysProcAttr fields outside the mapped set fail with a NAMED error (§3's honest
@@ -447,6 +448,7 @@ internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@s
     IntPtr fileActions = IntPtr.Zero;
     IntPtr spawnAttr = IntPtr.Zero;
     IntPtr sigsetEmpty = IntPtr.Zero;
+    IntPtr sigsetDefault = IntPtr.Zero;
     IntPtr pathz = IntPtr.Zero;
     IntPtr dirz = IntPtr.Zero;
     IntPtr argvVec = IntPtr.Zero;
@@ -546,14 +548,31 @@ internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@s
         }
 
         // Attributes: an EMPTY child signal mask (exec itself resets caught handlers to default,
-        // so the mask is the only signal state that survives into the new image — an inherited
-        // CLR mask must not leak into a Go child), plus the billed pgid/sid requests.
+        // so the mask and any IGNORED disposition are the signal state that survives into the new
+        // image — an inherited CLR mask must not leak into a Go child; SIGPIPE's disposition follows
+        // below), plus the billed pgid/sid requests.
         sigsetEmpty = System.Runtime.InteropServices.Marshal.AllocHGlobal(128);
         sigemptyset(sigsetEmpty);
         short flags = POSIX_SPAWN_SETSIGMASK;
         rc = posix_spawnattr_setsigmask(spawnAttr, sigsetEmpty);
         if (rc != 0) {
             return (0, (Errno)(uintptr)rc);
+        }
+        // SIGPIPE's disposition, which exec does NOT reset: it resets CAUGHT handlers and keeps
+        // IGNORED ones, and the CLR holds SIGPIPE at SIG_IGN in every living process (its own socket
+        // sends rely on it). A Go parent catches SIGPIPE, so its child starts at SIG_DFL -- unless the
+        // program called signal.Ignore(SIGPIPE), whose SIG_IGN the child then inherits. The runtime's
+        // own view decides: default in the child exactly when Go's model does not ignore SIGPIPE.
+        // Without this every child inherited the CLR's SIG_IGN (measured 2026-09-26).
+        if (!Δruntime.signal_ignored((uint32)(int)SIGPIPE)) {
+            sigsetDefault = System.Runtime.InteropServices.Marshal.AllocHGlobal(128);
+            sigemptyset(sigsetDefault);
+            sigaddset(sigsetDefault, (int)SIGPIPE);
+            flags |= POSIX_SPAWN_SETSIGDEF;
+            rc = posix_spawnattr_setsigdefault(spawnAttr, sigsetDefault);
+            if (rc != 0) {
+                return (0, (Errno)(uintptr)rc);
+            }
         }
         if (sys.Setpgid || sys.Foreground) {
             flags |= POSIX_SPAWN_SETPGROUP;
@@ -667,6 +686,11 @@ internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@s
         }
 
         if (sys.PidFD != nil) {
+            // Race-free because the child is UNREAPED: its pid cannot be reused before this
+            // process's own wait, the only reaper. The one exception is a process that set SIGCHLD
+            // to SIG_IGN (or SA_NOCLDWAIT), where the kernel auto-reaps children and a fast child's
+            // pid could be recycled before this call -- the window pidfd_spawn/CLONE_PIDFD would
+            // close. Neither Go's runtime nor the CLR ignores SIGCHLD (the CLR reaps through it).
             long fdOrErr = syscallʟ(SYS_pidfd_open, childPid, 0, 0);
             sys.PidFD.Value = fdOrErr >= 0 ? ((nint)fdOrErr) : -1;
         }
@@ -676,6 +700,9 @@ internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@s
     finally {
         if (sigsetEmpty != IntPtr.Zero) {
             System.Runtime.InteropServices.Marshal.FreeHGlobal(sigsetEmpty);
+        }
+        if (sigsetDefault != IntPtr.Zero) {
+            System.Runtime.InteropServices.Marshal.FreeHGlobal(sigsetDefault);
         }
         if (spawnAttr != IntPtr.Zero) {
             posix_spawnattr_destroy(spawnAttr);
@@ -734,6 +761,7 @@ internal static void FreeStringVector(IntPtr vector) {
 
 // glibc flag values (spawn.h) and the pidfd_open syscall number (linux-x64).
 internal const short POSIX_SPAWN_SETSIGMASK = 0x08;
+internal const short POSIX_SPAWN_SETSIGDEF = 0x04;
 internal const short POSIX_SPAWN_SETPGROUP = 0x02;
 internal const short POSIX_SPAWN_SETSID = 0x80;
 internal const long SYS_pidfd_open = 434;
@@ -770,6 +798,9 @@ internal static extern int posix_spawnattr_setpgroup(IntPtr attrp, int pgroup);
 
 [System.Runtime.InteropServices.DllImport("libc", SetLastError = false)]
 internal static extern int posix_spawnattr_setsigmask(IntPtr attrp, IntPtr sigmask);
+
+[System.Runtime.InteropServices.DllImport("libc", SetLastError = false)]
+internal static extern int posix_spawnattr_setsigdefault(IntPtr attrp, IntPtr sigdefault);
 
 [System.Runtime.InteropServices.DllImport("libc", SetLastError = false)]
 internal static extern int sigemptyset(IntPtr set);

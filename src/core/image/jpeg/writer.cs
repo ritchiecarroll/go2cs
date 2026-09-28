@@ -250,7 +250,7 @@ internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Valu
 // The precondition is bits < 1<<nBits && nBits <= 16.
 [GoRecv] internal static void emit(this ref encoder e, uint32 bits, uint32 nBits) {
     nBits += e.nBits;
-    bits <<= (int)(32 - nBits);
+    bits.LshAssign((uint64)(32 - nBits));
     bits |= (uint32)(e.bits);
     while (nBits >= 8) {
         var b = (uint8)((bits >> (int)(24)));

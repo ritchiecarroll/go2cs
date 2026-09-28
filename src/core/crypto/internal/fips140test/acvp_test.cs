@@ -576,12 +576,24 @@ internal static readonly @string buildˢ = "build"u8;
 internal static readonly @string utilFipstoolsAcvpˢ = "./util/fipstools/acvp/acvptool"u8;
 internal static readonly @string utilFipstoolsAcvpˢ2 = "util/fipstools/acvp/acvptool/test/check_expected.go"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string bsslModuleᶜ = "boringssl.googlesource.com/boringssl.git"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string bsslVersionᶜ = "v0.0.0-20250108043213-d3f61eeacbf7"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string goAcvpModuleᶜ = "github.com/cpu/go-acvp"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string goAcvpVersionᶜ = "v0.0.0-20250102201911-6839fc40f9f8"u8;
+
 public static void TestACVP(ж<testing.T> Ꮡt) {
     testenv.SkipIfShortAndSlow(new fipstest_internal_test_package.testing_TжTB(Ꮡt));
-    @string bsslModule = "boringssl.googlesource.com/boringssl.git"u8;
-    @string bsslVersion = "v0.0.0-20250108043213-d3f61eeacbf7"u8;
-    @string goAcvpModule = "github.com/cpu/go-acvp"u8;
-    @string goAcvpVersion = "v0.0.0-20250102201911-6839fc40f9f8"u8;
+    @string bsslModule = bsslModuleᶜ;
+    @string bsslVersion = bsslVersionᶜ;
+    @string goAcvpModule = goAcvpModuleᶜ;
+    @string goAcvpVersion = goAcvpVersionᶜ;
     // In crypto/tls/bogo_shim_test.go the test is skipped if run on a builder with runtime.GOOS == "windows"
     // due to flaky networking. It may be necessary to do the same here.
     // Stat the acvp test config file so the test will be re-run if it changes, invalidating cached results

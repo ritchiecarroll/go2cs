@@ -76,7 +76,20 @@ public static unsafe class GoLibcCall
     /// <param name="errnoReader">The resolved <c>__error</c> (darwin) or <c>__errno_location</c> (glibc): a function returning <c>int*</c>.</param>
     /// <param name="errno">The errno value on failure, 0 otherwise — sign-extended from the int the reader points at, as Go's <c>MOVLQSX</c> does.</param>
     /// <returns>The call's integer result register.</returns>
-    public static nuint Call(nint fn, ReadOnlySpan<nuint> args, GoLibcErrnoRule rule, nint errnoReader, out nuint errno)
+    /// <remarks>
+    /// An argument carrying the managed-pointer-token tag (a pointer to a Go struct that holds managed
+    /// references) is marshalled first: <see cref="NativeStructMarshal.CallLibc"/> hands libc a Go-layout
+    /// native copy and decodes it back, under the darwin nil-pointer policy. A call with no token, which is
+    /// every call the standard library made before field views tokenized, takes the raw path below after
+    /// nine bit tests.
+    /// </remarks>
+    public static nuint Call(nint fn, ReadOnlySpan<nuint> args, GoLibcErrnoRule rule, nint errnoReader, out nuint errno) =>
+        NativeStructMarshal.AnyToken(args) ?
+            NativeStructMarshal.CallLibc(fn, args, rule, errnoReader, out errno) :
+            CallUnmarshalled(fn, args, rule, errnoReader, out errno);
+
+    /// <summary><see cref="Call"/> without the token marshal: the arguments reach libc exactly as given.</summary>
+    internal static nuint CallUnmarshalled(nint fn, ReadOnlySpan<nuint> args, GoLibcErrnoRule rule, nint errnoReader, out nuint errno)
     {
         if (fn == 0)
             throw new ArgumentException("go2cs: libc call through a null function pointer — the address was never resolved", nameof(fn));

@@ -279,19 +279,25 @@ internal static void testNoNewline(@string text, slice<@string> lines, ж<Δtest
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string textᶜ = "abcdefghijklmn\nopqrstuvwxyz"u8;
+
 // Test that the line splitter handles a final line without a newline.
 public static void TestScanLineNoNewline(ж<Δtesting.T> Ꮡt) {
-    @string text = "abcdefghijklmn\nopqrstuvwxyz"u8;
+    @string text = textᶜ;
     var lines = new @string[]{
         "abcdefghijklmn"u8,
         "opqrstuvwxyz"u8
     }.slice();
     testNoNewline(text, lines, Ꮡt);
 }
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string textᶜ1 = "abcdefghijklmn\nopqrstuvwxyz\r"u8;
 
 // Test that the line splitter handles a final line with a carriage return but no newline.
 public static void TestScanLineReturnButNoNewline(ж<Δtesting.T> Ꮡt) {
-    @string text = "abcdefghijklmn\nopqrstuvwxyz\r"u8;
+    @string text = textᶜ1;
     var lines = new @string[]{
         "abcdefghijklmn"u8,
         "opqrstuvwxyz"u8
@@ -299,9 +305,12 @@ public static void TestScanLineReturnButNoNewline(ж<Δtesting.T> Ꮡt) {
     testNoNewline(text, lines, Ꮡt);
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string textᶜ2 = "abcdefghijklmn\nopqrstuvwxyz\n\n"u8;
+
 // Test that the line splitter handles a final empty line.
 public static void TestScanLineEmptyFinalLine(ж<Δtesting.T> Ꮡt) {
-    @string text = "abcdefghijklmn\nopqrstuvwxyz\n\n"u8;
+    @string text = textᶜ2;
     var lines = new @string[]{
         "abcdefghijklmn"u8,
         "opqrstuvwxyz"u8,
@@ -310,9 +319,12 @@ public static void TestScanLineEmptyFinalLine(ж<Δtesting.T> Ꮡt) {
     testNoNewline(text, lines, Ꮡt);
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string textᶜ3 = "abcdefghijklmn\nopqrstuvwxyz\n\r"u8;
+
 // Test that the line splitter handles a final empty line with a carriage return but no newline.
 public static void TestScanLineEmptyFinalLineWithCR(ж<Δtesting.T> Ꮡt) {
-    @string text = "abcdefghijklmn\nopqrstuvwxyz\n\r"u8;
+    @string text = textᶜ3;
     var lines = new @string[]{
         "abcdefghijklmn"u8,
         "opqrstuvwxyz"u8,
@@ -322,6 +334,9 @@ public static void TestScanLineEmptyFinalLineWithCR(ж<Δtesting.T> Ꮡt) {
 }
 
 internal static error testError = errors.New("testError"u8);
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string textᶜ4 = "abcdefghijklmnopqrstuvwxyz"u8;
 
 // Test the correct error is returned when the split function errors out.
 public static void TestSplitError(ж<Δtesting.T> Ꮡt) {
@@ -341,7 +356,7 @@ public static void TestSplitError(ж<Δtesting.T> Ꮡt) {
         return (1, data[0..1], default!);
     };
     // Read the data.
-    @string text = "abcdefghijklmnopqrstuvwxyz"u8;
+    @string text = textᶜ4;
     var buf = strings.NewReader(text);
     var s = NewScanner(new bufio_test_package.slowReaderжReader(Ꮡ(new slowReader(1, new bufio_test_package.strings_ReaderжReader(buf)))));
     s.Split(new Func<slice<byte>, bool, (nint, slice<byte>, error)>(errorSplit));
@@ -432,8 +447,11 @@ public static void TestBadReader(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wordᶜ = "ipsum"u8;
+
 public static void TestScanWordsExcessiveWhiteSpace(ж<Δtesting.T> Ꮡt) {
-    @string word = "ipsum"u8;
+    @string word = wordᶜ;
     @string s = strings.Repeat(" "u8, 4 * smallMaxTokenSize) + word;
     var scanner = NewScanner(new bufio_test_package.strings_ReaderжReader(strings.NewReader(s)));
     scanner.MaxTokenSize(smallMaxTokenSize);

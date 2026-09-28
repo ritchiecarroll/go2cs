@@ -73,7 +73,7 @@ func main() {
 }
 
 internal static void p(this ж<gen> Ꮡg, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.slice();
+    var args = argsʗp.sslice();
 
     fmt.Fprintf(new types_test_package.bytes_BufferжWriter(Ꮡg.of(gen.ᏑBuffer)), format, args.ꓸꓸꓸ);
 }

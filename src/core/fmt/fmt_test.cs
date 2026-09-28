@@ -1800,8 +1800,11 @@ public static void TestMapPrinter(ж<Δtesting.T> Ꮡt) {
     presentInMap(Sprint(Ꮡm1), a, Ꮡt);
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string emptyMapStrᶜ = "map[]"u8;
+
 public static void TestEmptyMap(ж<Δtesting.T> Ꮡt) {
-    @string emptyMapStr = "map[]"u8;
+    @string emptyMapStr = emptyMapStrᶜ;
     map<@string, nint> m = default!;
     @string s = Sprint(m);
     if (s != emptyMapStr) {
@@ -2041,13 +2044,16 @@ internal static readonly @string sSSSSˢ = "%s %s %s %s %s"u8;
 [GoType("dyn")] internal partial struct TestNilDoesNotBecomeTyped_B {
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectᶜ = "%!s(<nil>) %!s(*fmt_test.A=<nil>) %!s(<nil>) {} %!s(<nil>)"u8;
+
 public static void TestNilDoesNotBecomeTyped(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     ж<TestNilDoesNotBecomeTyped_A> a = default!;
     TestNilDoesNotBecomeTyped_B b = new TestNilDoesNotBecomeTyped_B(nil);
     @string got = Sprintf(hideFromVet(sSSSSˢ), (any)(default!), a.OrTypedNil(), (any)(default!), b, (any)(default!));
-    @string expect = "%!s(<nil>) %!s(*fmt_test.A=<nil>) %!s(<nil>) {} %!s(<nil>)"u8;
+    @string expect = expectᶜ;
     if (got != expect) {
         Ꮡt.Errorf("expected:\n\t%q\ngot:\n\t%q"u8, expect, got);
     }

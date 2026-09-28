@@ -150,13 +150,8 @@ internal static readonly @string buildmodeˢ = "-buildmode"u8;
 internal static readonly @string cSharedˢ = "c-shared"u8;
 internal static readonly @string helloworldExeˢ = "helloworld.exe"u8;
 
-public static void TestStdioAreInheritable(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new syscall_test_package.testing_TжTB(Ꮡt));
-    testenv.MustHaveCGO(new syscall_test_package.testing_TжTB(Ꮡt));
-    testenv.MustHaveExecPath(new syscall_test_package.testing_TжTB(Ꮡt), gccˢ);
-    @string tmpdir = Ꮡt.TempDir();
-    // build go dll
-    @string dlltext = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dlltextᶜ = """
 
 package main
 
@@ -173,19 +168,9 @@ func HelloWorld() {
 func main() {}
 
 """u8;
-    @string dllsrc = filepath.Join(tmpdir, helloworldGoˢ);
-    var err = Δos.WriteFile(dllsrc, slice<byte>(dlltext), 420);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
-    }
-    @string dll = filepath.Join(tmpdir, helloworldDllˢ);
-    var cmd = exec.Command(testenv.GoToolPath(new syscall_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", dll, buildmodeˢ, cSharedˢ, dllsrc);
-    (var @out, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to build go library: %s\n%s"u8, err, @out);
-    }
-    // build c exe
-    @string exetext = """
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string exetextᶜ = """
 
 #include <stdlib.h>
 #include <windows.h>
@@ -198,6 +183,27 @@ int main(int argc, char *argv[])
 }
 
 """u8;
+
+public static void TestStdioAreInheritable(ж<testing.T> Ꮡt) {
+    testenv.MustHaveGoBuild(new syscall_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveCGO(new syscall_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveExecPath(new syscall_test_package.testing_TжTB(Ꮡt), gccˢ);
+    @string tmpdir = Ꮡt.TempDir();
+    // build go dll
+    @string dlltext = dlltextᶜ;
+    @string dllsrc = filepath.Join(tmpdir, helloworldGoˢ);
+    var err = Δos.WriteFile(dllsrc, slice<byte>(dlltext), 420);
+    if (err != default!) {
+        Ꮡt.Fatal(err);
+    }
+    @string dll = filepath.Join(tmpdir, helloworldDllˢ);
+    var cmd = exec.Command(testenv.GoToolPath(new syscall_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", dll, buildmodeˢ, cSharedˢ, dllsrc);
+    (var @out, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
+    if (err != default!) {
+        Ꮡt.Fatalf("failed to build go library: %s\n%s"u8, err, @out);
+    }
+    // build c exe
+    @string exetext = exetextᶜ;
     @string exe = filepath.Join(tmpdir, helloworldExeˢ);
     cmd = exec.Command(gccˢ, "-o"u8, exe, "-xc", "-");
     cmd.Value.Stdin = new syscall_test_package.strings_ReaderжReader(strings.NewReader(fmt.Sprintf(exetext, dll)));

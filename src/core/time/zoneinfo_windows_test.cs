@@ -53,10 +53,13 @@ internal static readonly @string muiDltˢ = "MUI_Dlt"u8;
 internal static readonly @string stdˢ = "Std"u8;
 internal static readonly @string dltˢ = "Dlt"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = "Central Europe Standard Time"u8;
+
 public static void TestToEnglishName(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string want = "Central Europe Standard Time"u8;
+        @string want = wantᶜ;
         var (k, err) = registry.OpenKey(registry.LOCAL_MACHINE, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones\" + want, registry.READ);
         if (err != default!) {
             Ꮡt.Fatalf("cannot open CEST time zone information from registry: %s"u8, err);

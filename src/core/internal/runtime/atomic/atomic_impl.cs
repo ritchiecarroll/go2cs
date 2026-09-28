@@ -308,8 +308,10 @@ partial class atomic_package
 
             // Two distinct Pointer objects addressing the same location ARE the same pointer to
             // Go, so the comparison is on the wrapped number (nil ⇔ null ⇔ 0).
-            uintptr currentValue = current is null ? default : current.Value;
-            uintptr oldValue = old is null ? default : old.Value;
+            // ValueSlot, not Value: a nil unsafe.Pointer is a Pointer box marked nil, and Value on
+            // it panics as a nil dereference, so a swap from nil (traceMap.put's first insert) died.
+            uintptr currentValue = current is null ? default : current.ValueSlot;
+            uintptr oldValue = old is null ? default : old.ValueSlot;
 
             if (currentValue != oldValue)
                 return false;

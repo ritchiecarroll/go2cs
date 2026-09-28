@@ -380,10 +380,16 @@ internal static @string nlines(@string s, nint n) {
     public float32 Y;
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string rawᶜ = @"[""\u0056"",null]"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ8 = @"{""X"":0.1,""Id"":[""\u0056"",null],""Y"":0.2}"u8;
+
 public static void TestRawMessage(ж<testing.T> Ꮡt) {
     ref var data = ref heap(new TestRawMessage_data(), out var Ꮡdata);
-    @string raw = @"[""\u0056"",null]"u8;
-    @string want = @"{""X"":0.1,""Id"":[""\u0056"",null],""Y"":0.2}"u8;
+    @string raw = rawᶜ;
+    @string want = wantᶜ8;
     var err = Unmarshal(slice<byte>(want), Ꮡdata);
     if (err != default!) {
         Ꮡt.Fatalf("Unmarshal error: %v"u8, err);
@@ -407,9 +413,12 @@ public static void TestRawMessage(ж<testing.T> Ꮡt) {
     public float32 Y;
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ9 = @"{""X"":0.1,""Id"":null,""IdPtr"":null,""Y"":0.2}"u8;
+
 public static void TestNullRawMessage(ж<testing.T> Ꮡt) {
     ref var data = ref heap(new TestNullRawMessage_data(), out var Ꮡdata);
-    @string want = @"{""X"":0.1,""Id"":null,""IdPtr"":null,""Y"":0.2}"u8;
+    @string want = wantᶜ9;
     var err = Unmarshal(slice<byte>(want), Ꮡdata);
     if (err != default!) {
         Ꮡt.Fatalf("Unmarshal error: %v"u8, err);
@@ -584,6 +593,9 @@ public static void TestDecodeInStream(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string rawᶜ1 = @"{ ""foo"": ""bar"" }"u8;
+
 [GoType("dyn")] internal partial struct TestHTTPDecoding_foo {
     public @string Foo;
 }
@@ -592,7 +604,7 @@ public static void TestDecodeInStream(ж<testing.T> Ꮡt) {
 public static void TestHTTPDecoding(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string raw = @"{ ""foo"": ""bar"" }"u8;
+        @string raw = rawᶜ1;
         var ts = httptest.NewServer(new json_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>(raw));
         })));

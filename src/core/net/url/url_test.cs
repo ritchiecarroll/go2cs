@@ -1784,9 +1784,12 @@ public static void TestRequestURI(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string urlᶜ = "%gh&%ij"u8;
+
 public static void TestParseFailure(ж<testing.T> Ꮡt) {
     // Test that the first parse error is returned.
-    @string url = "%gh&%ij"u8;
+    @string url = urlᶜ;
     var (_, err) = ParseQuery(url);
     @string errStr = fmt.Sprint(err);
     if (!strings.Contains(errStr, "%gh"u8)) {
@@ -2223,6 +2226,9 @@ public static void TestInvalidUserPassword(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantSubᶜ = "net/url: invalid control character in URL"u8;
+
 public static void TestRejectControlCharacters(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -2233,7 +2239,7 @@ public static void TestRejectControlCharacters(ж<testing.T> Ꮡt) {
     }.slice();
     foreach (var (_, s) in tests) {
         var (_, err) = Parse(s);
-        @string wantSub = "net/url: invalid control character in URL"u8;
+        @string wantSub = wantSubᶜ;
         {
             @string got = fmt.Sprint(err); if (!strings.Contains(got, wantSub)) {
                 Ꮡt.Errorf("Parse(%q) error = %q; want substring %q"u8, s, got, wantSub);

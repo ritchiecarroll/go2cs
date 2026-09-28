@@ -24,6 +24,9 @@ internal static readonly @string buildˢ = "build"u8;
 internal static readonly @string xExeˢ = "x.exe"u8;
 internal static readonly @string toolˢ = "tool"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = "runtime.main"u8;
+
 // Tests that the linker is able to remove references to Float, Rat,
 // and Int if unused (notably, not used by init).
 public static void TestLinkerGC(ж<testing.T> Ꮡt) {
@@ -58,7 +61,7 @@ func main() {}
     if (err != default!) {
         Ꮡt.Fatalf("nm: %v, %s"u8, err, nm);
     }
-    @string want = "runtime.main"u8;
+    @string want = wantᶜ;
     if (!bytes_package.Contains(nm, slice<byte>(want))) {
         // Test the test.
         Ꮡt.Errorf("expected symbol %q not found"u8, want);

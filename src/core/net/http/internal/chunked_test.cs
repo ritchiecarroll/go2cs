@@ -18,11 +18,17 @@ partial class internal_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string hello17Worldˢ = "7\r\nhello, \r\n17\r\nworld! 0123456789abcdef\r\n0\r\n"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string chunk1ᶜ = "hello, "u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string chunk2ᶜ = "world! 0123456789abcdef"u8;
+
 public static void TestChunk(ж<testing.T> Ꮡt) {
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var w = NewChunkedWriter(new internal_internal_test_package.bytes_BufferжWriter(Ꮡb));
-    @string chunk1 = "hello, "u8;
-    @string chunk2 = "world! 0123456789abcdef"u8;
+    @string chunk1 = chunk1ᶜ;
+    @string chunk2 = chunk2ᶜ;
     w.Write(slice<byte>(chunk1));
     w.Write(slice<byte>(chunk2));
     w.Close();
@@ -49,6 +55,12 @@ public static void TestChunk(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object foobarˢ = (@string)"foobar"u8;
 internal static readonly @string foo0ˢ = "3\r\nfoo\r\n0\r\n"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string fillBufChunkᶜ = "0123456789a"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string shortChunkᶜ = "foo"u8;
 
 public static void TestChunkReadMultiple(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -80,8 +92,8 @@ public static void TestChunkReadMultiple(ж<testing.T> Ꮡt) {
         // the same as the bufio ReaderSize below (the minimum), so even
         // though we're going to try to Read with a buffer larger enough to also
         // receive "foo", the second chunk header won't be read yet.
-        @string fillBufChunk = "0123456789a"u8;
-        @string shortChunk = "foo"u8;
+        @string fillBufChunk = fillBufChunkᶜ;
+        @string shortChunk = shortChunkᶜ;
         w.Write(slice<byte>(fillBufChunk));
         w.Write(slice<byte>(shortChunk));
         w.Close();
@@ -240,9 +252,12 @@ public static void TestChunkReadPartial(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string validᶜ = "4\r\nabcd\r\n5\r\nabc\r\n\r\n0\r\n";
+
 // Issue 48861: ChunkedReader should report incomplete chunks
 public static void TestIncompleteChunk(ж<testing.T> Ꮡt) {
-    @string valid = "4\r\nabcd\r\n5\r\nabc\r\n\r\n0\r\n";
+    @string valid = validᶜ;
     for (nint i = 0; i < len(valid); i++) {
         @string incomplete = valid[..(int)(i)];
         var rΔ1 = NewChunkedReader(new internal_internal_test_package.strings_ReaderжReader(strings.NewReader(incomplete)));

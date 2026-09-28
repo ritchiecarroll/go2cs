@@ -425,8 +425,11 @@ public static void TestUserDefinedFunc(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string helpᶜ = "HELP"u8;
+
 public static void TestUserDefinedForCommandLine(ж<testing.T> Ꮡt) {
-    @string help = "HELP"u8;
+    @string help = helpᶜ;
     @string result = default!;
     flag_internal_test_package.ResetForTesting(() => {
         result = help;
@@ -747,6 +750,9 @@ public static void TestIntFlagOverflow(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = "flag provided but not defined: -i\nUsage of app:\n"u8;
+
 // Issue 20998: Usage should respect CommandLine.output.
 public static void TestUsageOutput(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
@@ -759,7 +765,7 @@ public static void TestUsageOutput(ж<testing.T> Ꮡt) {
         }, Δos.Args, ref ᒐ);
         Δos.Args = new @string[]{"app"u8, "-i=1"u8, "-unknown"u8}.slice();
         Parse();
-        @string want = "flag provided but not defined: -i\nUsage of app:\n"u8;
+        @string want = wantᶜ;
         {
             @string got = buf.String(); if (got != want) {
                 Ꮡt.Errorf("output = %q; want %q"u8, got, want);

@@ -34,9 +34,8 @@ internal static ж<types.Struct> findStructTypeConfig(ж<testing.T> Ꮡt, @strin
     return default!;
 }
 
-// go.dev/issue/16316
-public static void TestMultipleSizeUse(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ36 = """
 
 package main
 
@@ -48,6 +47,10 @@ type S struct {
 }
 
 """u8;
+
+// go.dev/issue/16316
+public static void TestMultipleSizeUse(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ36;
     var ts = findStructType(Ꮡt, src);
     ref var sizes = ref heap<types.StdSizes>(out var Ꮡsizes);
     sizes = new types.StdSizes(WordSize: 4, MaxAlign: 4);
@@ -64,9 +67,8 @@ type S struct {
     }
 }
 
-// go.dev/issue/16464
-public static void TestAlignofNaclSlice(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ37 = """
 
 package main
 
@@ -76,6 +78,10 @@ var s struct {
 }
 
 """u8;
+
+// go.dev/issue/16464
+public static void TestAlignofNaclSlice(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ37;
     var ts = findStructType(Ꮡt, src);
     var sizes = Ꮡ(new types.StdSizes(WordSize: 4, MaxAlign: 8));
     slice<ж<types.Var>> fields = default!;
@@ -89,8 +95,8 @@ var s struct {
     }
 }
 
-public static void TestIssue16902(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ38 = """
 
 package a
 
@@ -99,6 +105,9 @@ import "unsafe"
 const _ = unsafe.Offsetof(struct{ x int64 }{}.x)
 
 """u8;
+
+public static void TestIssue16902(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ38;
     ref var info = ref heap<typesꓸInfo>(out var Ꮡinfo);
     info = new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>());
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
@@ -114,10 +123,8 @@ const _ = unsafe.Offsetof(struct{ x int64 }{}.x)
     }
 }
 
-// go.dev/issue/53884.
-public static void TestAtomicAlign(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt)); // The Go command is needed for the importer to determine the locations of stdlib .a files.
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ39 = """
 
 package main
 
@@ -130,6 +137,11 @@ var s struct {
 }
 
 """u8;
+
+// go.dev/issue/53884.
+public static void TestAtomicAlign(ж<testing.T> Ꮡt) {
+    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt)); // The Go command is needed for the importer to determine the locations of stdlib .a files.
+    @string src = srcᶜ39;
     var want = new int64[]{0, 8, 16}.slice();
     foreach (var (_, arch) in new @string[]{"386"u8, "amd64"u8}.slice()) {
         var wantʗ1 = want;

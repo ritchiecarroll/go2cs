@@ -82,6 +82,20 @@ func Unused() { {}; {{ var x int; _ = x }} } // make sure empty block scopes get
 internal static readonly @string celsiusGoˢ = "celsius.go"u8;
 internal static readonly @string celsiusˢ = "Celsius"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string inputᶜ = """
+
+package temperature
+import "fmt"
+type Celsius float64
+func (c Celsius) String() string  { return fmt.Sprintf("%g°C", c) }
+func (c *Celsius) SetF(f float64) { *c = Celsius(f - 32 / 9 * 5) }
+
+type S struct { I; m int }
+type I interface { m() byte }
+
+"""u8;
+
 // Output:
 // package "temperature" scope {
 // .  const temperature.Boiling temperature.Celsius
@@ -118,18 +132,7 @@ internal static readonly @string celsiusˢ = "Celsius"u8;
 // ExampleMethodSet prints the method sets of various types.
 public static void ExampleMethodSet() {
     // Parse a single source file.
-    @string input = """
-
-package temperature
-import "fmt"
-type Celsius float64
-func (c Celsius) String() string  { return fmt.Sprintf("%g°C", c) }
-func (c *Celsius) SetF(f float64) { *c = Celsius(f - 32 / 9 * 5) }
-
-type S struct { I; m int }
-type I interface { m() byte }
-
-"""u8;
+    @string input = inputᶜ;
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, celsiusGoˢ, input, 0);
     if (err != default!) {
@@ -164,6 +167,23 @@ internal static readonly @string fibˢ = "fib"u8;
 internal static readonly object defsAndUsesOfEachNamedˢ = (@string)"Defs and Uses of each named object:"u8;
 internal static readonly object typesAndValuesOfEachˢ = (@string)"Types and Values of each expression:"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string inputᶜ1 = """
+
+package fib
+
+type S string
+
+var a, b, c = len(b), S(c), "hello"
+
+func fib(x int) int {
+	if x < 2 {
+		return x
+	}
+	return fib(x-1) - fib(x-2)
+}
+"""u8;
+
 // Output:
 // Method set of temperature.Celsius:
 // method (temperature.Celsius) String() string
@@ -180,21 +200,7 @@ internal static readonly object typesAndValuesOfEachˢ = (@string)"Types and Val
 // and the type, value, and mode of every expression in the package.
 public static void ExampleInfo() {
     // Parse a single source file.
-    @string input = """
-
-package fib
-
-type S string
-
-var a, b, c = len(b), S(c), "hello"
-
-func fib(x int) int {
-	if x < 2 {
-		return x
-	}
-	return fib(x-1) - fib(x-2)
-}
-"""u8;
+    @string input = inputᶜ1;
     // We need a specific fileset in this test below for positions.
     // Cannot use typecheck helper.
     var fset = token.NewFileSet();

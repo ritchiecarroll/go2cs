@@ -50,6 +50,9 @@ private static nint errnoReader() {
     return s_errnoReader;
 }
 
+// A pointer to a Go struct holding managed references arrives here as an order token; GoLibcCall.Call
+// marshals it into a Go-layout native copy (NativeStructMarshal.CallLibc: nil pointer fields cross as 0,
+// a non-nil one keeps the token and EFAULT; the Msghdr/Iovec and Kevent_t.Udata follow-ups are named there).
 private static (uintptr r1, uintptr r2, Errno err) call(uintptr fn, ReadOnlySpan<nuint> args, GoLibcErrnoRule rule) {
     nuint r1 = GoLibcCall.Call(unchecked((nint)(nuint)fn), args, rule, errnoReader(), out nuint errno);
     return ((uintptr)r1, (uintptr)0, (Errno)(uintptr)errno);

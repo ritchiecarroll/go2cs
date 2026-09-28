@@ -249,8 +249,8 @@ call — so the disclosure covers the CLR's frame conservatism, not a retention 
 the investigation *did* find (SetFinalizer keying on the pointer box; `Ꮡ`'s `in` parameter pinning the
 array) were fixed at their layers first; only what remained was disclosed.
 
-The class's bar and its standing measurements live with the roster's disclosure classes in [Validated
-Test Packages](../ValidatedTestPackages.md): the 2026-08-30 tier-0 A/B found the first point above
+The class's bar and its standing measurements live with the roster's disclosure classes in
+[Validated Test Packages](../ValidatedTestPackages.md): the 2026-08-30 tier-0 A/B found the first point above
 disappears under a Release publish with `DOTNET_TieredCompilation=0`, so a row that needs that
 configuration says so on its own line, `execution: release-tc0` (`internal/weak` is the first). `sync`'s
 three `TestOnceXGC` subtest pins, and how they count toward its Disclosed column, are recorded in

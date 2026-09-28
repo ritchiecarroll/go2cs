@@ -238,7 +238,7 @@ public static void TestConversions(ж<testing.T> Ꮡt) {
         }
         var ctʗ1 = ct;
         void errf(@string format, params ꓸꓸꓸany argsʗp) {
-            var args = argsʗp.slice();
+            var args = argsʗp.sslice();
             @string @base = fmt.Sprintf("convertAssign #%d: for %v (%T) -> %T, "u8, n, ctʗ1.s, ctʗ1.s, ctʗ1.d);
             Ꮡt.Errorf(@base + format, args.ꓸꓸꓸ);
         }

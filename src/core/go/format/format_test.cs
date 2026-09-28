@@ -61,11 +61,17 @@ public static void TestNode(ж<testing.T> Ꮡt) {
     diff(Ꮡt, buf.Bytes(), src);
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ = "package p\n\nconst _ = 0000000123i\n"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string goldenᶜ = "package p\n\nconst _ = 123i\n"u8;
+
 // Node is documented to not modify the AST.
 // Test that it is so even when numbers are normalized.
 public static void TestNodeNoModify(ж<testing.T> Ꮡt) {
-    @string src = "package p\n\nconst _ = 0000000123i\n"u8;
-    @string golden = "package p\n\nconst _ = 123i\n"u8;
+    @string src = srcᶜ;
+    @string golden = goldenᶜ;
     var fset = token.NewFileSet();
     var (@file, err) = parser.ParseFile(fset, ""u8, src, parser.ParseComments);
     if (err != default!) {

@@ -23,6 +23,9 @@ partial class rand_test_package {
 internal static readonly object skippingStartingAnotherˢ = (@string)"skipping starting another executable in short mode"u8;
 internal static readonly @string testRunTestDefaultRaceˢ = "-test.run=TestDefaultRace"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string envᶜ = "GO_RAND_TEST_HELPER_CODE"u8;
+
 // Test that racy access to the default functions behaves reasonably.
 public static void TestDefaultRace(ж<testing.T> Ꮡt) {
     // Skip the test in short mode, but even in short mode run
@@ -31,7 +34,7 @@ public static void TestDefaultRace(ж<testing.T> Ꮡt) {
     if (testing.Short() && !race.Enabled) {
         Ꮡt.Skip(skippingStartingAnotherˢ);
     }
-    @string env = "GO_RAND_TEST_HELPER_CODE"u8;
+    @string env = envᶜ;
     {
         @string v = os.Getenv(env); if (v != ""u8) {
             doDefaultTest(Ꮡt, v);

@@ -429,6 +429,94 @@ internal static readonly @string ehloSmtputf8ˢ = "ehlo smtputf8"u8;
 internal static readonly @string userGmailComˢ2 = "user+📧@gmail.com"u8;
 internal static readonly @string ehlo8bitmimeSmtputf8ˢ = "ehlo 8bitmime smtputf8"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string basicServerᶜ = """
+250 mx.google.com at your service
+250 Sender OK
+221 Goodbye
+
+"""u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string basicClientᶜ = """
+HELO localhost
+MAIL FROM:<user@gmail.com>
+QUIT
+
+"""u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string basicServerᶜ1 = """
+250-mx.google.com at your service
+250 SIZE 35651584
+250 Sender OK
+221 Goodbye
+
+"""u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string basicClientᶜ1 = """
+EHLO localhost
+MAIL FROM:<user@gmail.com>
+QUIT
+
+"""u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string basicServerᶜ2 = """
+250-mx.google.com at your service
+250-SIZE 35651584
+250 8BITMIME
+250 Sender OK
+221 Goodbye
+
+"""u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string basicClientᶜ2 = """
+EHLO localhost
+MAIL FROM:<user@gmail.com> BODY=8BITMIME
+QUIT
+
+"""u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string basicServerᶜ3 = """
+250-mx.google.com at your service
+250-SIZE 35651584
+250 SMTPUTF8
+250 Sender OK
+221 Goodbye
+
+"""u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string basicClientᶜ3 = """
+EHLO localhost
+MAIL FROM:<user+📧@gmail.com> SMTPUTF8
+QUIT
+
+"""u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string basicServerᶜ4 = """
+250-mx.google.com at your service
+250-SIZE 35651584
+250-8BITMIME
+250 SMTPUTF8
+250 Sender OK
+221 Goodbye
+	
+"""u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string basicClientᶜ4 = """
+EHLO localhost
+MAIL FROM:<user+📧@gmail.com> BODY=8BITMIME SMTPUTF8
+QUIT
+
+"""u8;
+
 public static void TestExtensions(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -446,18 +534,8 @@ public static void TestExtensions(ж<testing.T> Ꮡt) {
     }
     var fakeʗ1 = fake;
     Ꮡt.Run(heloˢ, (ж<testing.T> tΔ1) => {
-        @string basicServer = """
-250 mx.google.com at your service
-250 Sender OK
-221 Goodbye
-
-"""u8;
-        @string basicClient = """
-HELO localhost
-MAIL FROM:<user@gmail.com>
-QUIT
-
-"""u8;
+        @string basicServer = basicServerᶜ;
+        @string basicClient = basicClientᶜ;
         var (c, bcmdbuf, cmdbuf) = fakeʗ1(basicServer);
         {
             var err = c.helo(); if (err != default!) {
@@ -484,19 +562,8 @@ QUIT
     });
     var fakeʗ2 = fake;
     Ꮡt.Run(ehloˢ, (ж<testing.T> tΔ2) => {
-        @string basicServer = """
-250-mx.google.com at your service
-250 SIZE 35651584
-250 Sender OK
-221 Goodbye
-
-"""u8;
-        @string basicClient = """
-EHLO localhost
-MAIL FROM:<user@gmail.com>
-QUIT
-
-"""u8;
+        @string basicServer = basicServerᶜ1;
+        @string basicClient = basicClientᶜ1;
         var (c, bcmdbuf, cmdbuf) = fakeʗ2(basicServer);
         {
             var err = c.Hello(localhostˢ); if (err != default!) {
@@ -532,20 +599,8 @@ QUIT
     });
     var fakeʗ3 = fake;
     Ꮡt.Run(ehlo8bitmimeˢ, (ж<testing.T> tΔ3) => {
-        @string basicServer = """
-250-mx.google.com at your service
-250-SIZE 35651584
-250 8BITMIME
-250 Sender OK
-221 Goodbye
-
-"""u8;
-        @string basicClient = """
-EHLO localhost
-MAIL FROM:<user@gmail.com> BODY=8BITMIME
-QUIT
-
-"""u8;
+        @string basicServer = basicServerᶜ2;
+        @string basicClient = basicClientᶜ2;
         var (c, bcmdbuf, cmdbuf) = fakeʗ3(basicServer);
         {
             var err = c.Hello(localhostˢ); if (err != default!) {
@@ -581,20 +636,8 @@ QUIT
     });
     var fakeʗ4 = fake;
     Ꮡt.Run(ehloSmtputf8ˢ, (ж<testing.T> tΔ4) => {
-        @string basicServer = """
-250-mx.google.com at your service
-250-SIZE 35651584
-250 SMTPUTF8
-250 Sender OK
-221 Goodbye
-
-"""u8;
-        @string basicClient = """
-EHLO localhost
-MAIL FROM:<user+📧@gmail.com> SMTPUTF8
-QUIT
-
-"""u8;
+        @string basicServer = basicServerᶜ3;
+        @string basicClient = basicClientᶜ3;
         var (c, bcmdbuf, cmdbuf) = fakeʗ4(basicServer);
         {
             var err = c.Hello(localhostˢ); if (err != default!) {
@@ -630,21 +673,8 @@ QUIT
     });
     var fakeʗ5 = fake;
     Ꮡt.Run(ehlo8bitmimeSmtputf8ˢ, (ж<testing.T> tΔ5) => {
-        @string basicServer = """
-250-mx.google.com at your service
-250-SIZE 35651584
-250-8BITMIME
-250 SMTPUTF8
-250 Sender OK
-221 Goodbye
-	
-"""u8;
-        @string basicClient = """
-EHLO localhost
-MAIL FROM:<user+📧@gmail.com> BODY=8BITMIME SMTPUTF8
-QUIT
-
-"""u8;
+        @string basicServer = basicServerᶜ4;
+        @string basicClient = basicClientᶜ4;
         var (c, bcmdbuf, cmdbuf) = fakeʗ5(basicServer);
         {
             var err = c.Hello(localhostˢ); if (err != default!) {
@@ -1119,6 +1149,9 @@ internal static readonly @string helloWorldˢ = "220 hello world"u8;
 internal static readonly @string mxGoogleComAtYourServiceˢ = "250 mx.google.com at your service"u8;
 internal static readonly object sendMailServerDoesnTˢ = (@string)"SendMail: Server doesn't support AUTH, expected to get an error, but got none "u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantMsgᶜ = "EHLO localhost"u8;
+
 public static void TestSendMailWithAuth(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
@@ -1151,7 +1184,7 @@ public static void TestSendMailWithAuth(ж<testing.T> Ꮡt) {
                     errChʗ1.ᐸꟷ(fmt.Errorf("ReadLine error: %v"u8, errΔ1));
                     return;
                 }
-                @string wantMsg = "EHLO localhost"u8;
+                @string wantMsg = wantMsgᶜ;
                 if (msg != wantMsg) {
                     errChʗ1.ᐸꟷ(fmt.Errorf("unexpected response %q; want %q"u8, msg, wantMsg));
                     return;

@@ -389,13 +389,19 @@ public static void TestFileServerEscapesNames(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testFileServerEscapesNames(Δp0, Δp1));
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dirListPrefixᶜ = "<!doctype html>\n<meta name=\"viewport\" content=\"width=device-width\">\n<pre>\n"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dirListSuffixᶜ = "\n</pre>\n"u8;
+
 [GoType("dyn")] internal partial struct testFileServerEscapesNames_tests {
     internal @string name, escaped;
 }
 
 internal static void testFileServerEscapesNames(ж<testing.T> Ꮡt, testMode mode) {
-    @string dirListPrefix = "<!doctype html>\n<meta name=\"viewport\" content=\"width=device-width\">\n<pre>\n"u8;
-    @string dirListSuffix = "\n</pre>\n"u8;
+    @string dirListPrefix = dirListPrefixᶜ;
+    @string dirListSuffix = dirListSuffixᶜ;
     var tests = new testFileServerEscapesNames_tests[]{
         new(@"simple_name"u8, @"<a href=""simple_name"">simple_name</a>"u8),
         new(@"""'<>&"u8, @"<a href=""%22%27%3C%3E&"">&#34;&#39;&lt;&gt;&amp;</a>"u8),
@@ -446,10 +452,13 @@ public static void TestFileServerSortsNames(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string aHrefAAAAHrefBBAˢ = "<a href=\"a\">a</a>\n<a href=\"b\">b</a>"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string contentsᶜ = "I am a fake file"u8;
+
 internal static void testFileServerSortsNames(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        @string contents = "I am a fake file"u8;
+        @string contents = contentsᶜ;
         ref var dirMod = ref heap<time.Time>(out var ᏑdirMod);
         dirMod = time.Unix(123, 0).UTC();
         var fileMod = time.Unix(1000000000, 0).UTC();
@@ -623,8 +632,11 @@ public static void TestServeFileContentType(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string overrideˢ = "override"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string ctypeᶜ = "icecream/chocolate"u8;
+
 internal static void testServeFileContentType(ж<testing.T> Ꮡt, testMode mode) {
-    @string ctype = "icecream/chocolate"u8;
+    @string ctype = ctypeᶜ;
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         var exprᴛ1 = r.FormValue(overrideˢ);
         if (exprᴛ1 == "1"u8) {
@@ -829,6 +841,9 @@ public static void TestServeIndexHtml(ж<testing.T> Ꮡt) {
 internal static readonly @string dirˢ = "Dir"u8;
 internal static readonly @string dirFSˢ = "DirFS"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = "index.html says hello\n"u8;
+
 internal static void testServeIndexHtml(ж<testing.T> Ꮡt, testMode mode) {
     for (nint i = 0; i < 2; i++) {
         ref var h = ref heap<httpꓸHandler>(out var Ꮡh);
@@ -846,7 +861,7 @@ internal static void testServeIndexHtml(ж<testing.T> Ꮡt, testMode mode) {
         }}
 
         Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
-            @string want = "index.html says hello\n"u8;
+            @string want = wantᶜ;
             var ts = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, Ꮡh.ValueSlot).Value.ts;
             foreach (var (_, path) in new @string[]{"/testdata/"u8, "/testdata/index.html"u8}.slice()) {
                 var (res, err) = ts.Client().Get((~ts).URL + path);
@@ -872,10 +887,13 @@ public static void TestServeIndexHtmlFS(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testServeIndexHtmlFS(Δp0, Δp1));
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ1 = "index.html says hello\n"u8;
+
 internal static void testServeIndexHtmlFS(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        @string want = "index.html says hello\n"u8;
+        @string want = wantᶜ1;
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer(((Δhttp.Dir)(@string)"."u8))).Value.ts;
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
@@ -1054,8 +1072,11 @@ public static void TestDirectoryIfNotModified(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string ifModifiedSinceˢ = "If-Modified-Since"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string indexContentsᶜ = "I am a fake index.html file"u8;
+
 internal static void testDirectoryIfNotModified(ж<testing.T> Ꮡt, testMode mode) {
-    @string indexContents = "I am a fake index.html file"u8;
+    @string indexContents = indexContentsᶜ;
     ref var fileMod = ref heap<time.Time>(out var ᏑfileMod);
     fileMod = time.Unix(1000000000, 0).UTC();
     @string fileModStr = fileMod.Format(TimeFormat);

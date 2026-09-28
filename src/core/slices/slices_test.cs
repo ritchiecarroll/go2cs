@@ -1184,7 +1184,7 @@ public static void TestReverse(ж<testing.T> Ꮡt) {
 internal static S naiveReplace<S, E>(S s, nint i, nint j, params Span<E> vʗp)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
-    var v = vʗp.slice();
+    var v = vʗp.sslice();
 
     s = Delete<S, E>(s, i, j);
     s = Insert(s, i, v.ꓸꓸꓸ);

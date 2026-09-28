@@ -181,6 +181,7 @@ it beside the proofs on every release.
 | `internal/saferio` | [`internal.saferio.md`](current/internal.saferio.md) | [`src/core/internal/saferio`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/saferio) |
 | `internal/singleflight` | [`internal.singleflight.md`](current/internal.singleflight.md) | [`src/core/internal/singleflight`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/singleflight) |
 | `internal/sync` | [`internal.sync.md`](current/internal.sync.md) | [`src/core/internal/sync`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/sync) |
+| `internal/synctest` | [`internal.synctest.md`](current/internal.synctest.md) | [`src/core/internal/synctest`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/synctest) |
 | `internal/syscall/windows` | [`internal.syscall.windows.md`](current/internal.syscall.windows.md) | [`src/core/internal/syscall/windows`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/syscall/windows) |
 | `internal/syscall/windows/registry` | [`internal.syscall.windows.registry.md`](current/internal.syscall.windows.registry.md) | [`src/core/internal/syscall/windows/registry`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/syscall/windows/registry) |
 | `internal/sysinfo` | [`internal.sysinfo.md`](current/internal.sysinfo.md) | [`src/core/internal/sysinfo`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/sysinfo) |
@@ -233,6 +234,7 @@ it beside the proofs on every release.
 | `path` | [`path.md`](current/path.md) | [`src/core/path`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/path) |
 | `path/filepath` | [`path.filepath.md`](current/path.filepath.md) | [`src/core/path/filepath`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/path/filepath) |
 | `plugin` | [`plugin.md`](current/plugin.md) | [`src/core/plugin`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/plugin) |
+| `reflect` | [`reflect.md`](current/reflect.md) | [`src/core/reflect`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/reflect) |
 | `regexp` | [`regexp.md`](current/regexp.md) | [`src/core/regexp`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/regexp) |
 | `regexp/syntax` | [`regexp.syntax.md`](current/regexp.syntax.md) | [`src/core/regexp/syntax`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/regexp/syntax) |
 | `runtime/debug` | [`runtime.debug.md`](current/runtime.debug.md) | [`src/core/runtime/debug`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/runtime/debug) |

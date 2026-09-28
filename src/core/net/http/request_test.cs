@@ -1141,6 +1141,9 @@ public static void TestMaxBytesReaderStickyError(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testStrᶜ = "1234"u8;
+
 [GoType("dyn")] internal partial struct TestMaxBytesReaderDifferentLimits_tests {
     internal int64 limit;
     internal nint lenP;
@@ -1153,7 +1156,7 @@ public static void TestMaxBytesReaderStickyError(ж<testing.T> Ꮡt) {
 public static void TestMaxBytesReaderDifferentLimits(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    @string testStr = "1234"u8;
+    @string testStr = testStrᶜ;
     var tests = new array<TestMaxBytesReaderDifferentLimits_tests>(11){
         [0] = new(
             limit: -123,

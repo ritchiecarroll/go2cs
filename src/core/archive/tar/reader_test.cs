@@ -1745,6 +1745,9 @@ public static void TestFileReader(ж<testing.T> Ꮡt) {
 internal static readonly @string godebugˢ = "GODEBUG"u8;
 internal static readonly @string tarinsecurepath0ˢ = "tarinsecurepath=0"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string securePathᶜ = "secure"u8;
+
 public static void TestInsecurePaths(ж<testing.T> Ꮡt) {
     Ꮡt.Setenv(godebugˢ, tarinsecurepath0ˢ);
     foreach (var (_, vᴛ1) in new @string[]{
@@ -1760,7 +1763,7 @@ public static void TestInsecurePaths(ж<testing.T> Ꮡt) {
         tw.WriteHeader(Ꮡ(new Header(
             Name: path
         )));
-        @string securePath = "secure"u8;
+        @string securePath = securePathᶜ;
         tw.WriteHeader(Ꮡ(new Header(
             Name: securePath
         )));
@@ -1788,11 +1791,14 @@ public static void TestInsecurePaths(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tarinsecurepath1ˢ = "tarinsecurepath=1"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string nameᶜ = "/foo"u8;
+
 public static void TestDisableInsecurePathCheck(ж<testing.T> Ꮡt) {
     Ꮡt.Setenv(godebugˢ, tarinsecurepath1ˢ);
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
-    @string name = "/foo"u8;
+    @string name = nameᶜ;
     tw.WriteHeader(Ꮡ(new Header(
         Name: name
     )));

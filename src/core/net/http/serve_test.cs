@@ -2135,6 +2135,9 @@ public static void TestTLSServerRejectHTTPRequests(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object unexpectedHttpsRequestˢ = (@string)"unexpected HTTPS request"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantPrefixᶜ = "HTTP/1.0 400 Bad Request\r\n"u8;
+
 internal static void testTLSServerRejectHTTPRequests(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
@@ -2155,7 +2158,7 @@ internal static void testTLSServerRejectHTTPRequests(ж<testing.T> Ꮡt, testMod
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
-        @string wantPrefix = "HTTP/1.0 400 Bad Request\r\n"u8;
+        @string wantPrefix = wantPrefixᶜ;
         if (!strings.HasPrefix(((@string)slurp), wantPrefix)) {
             Ꮡt.Errorf("response = %q; wanted prefix %q"u8, slurp, wantPrefix);
         }
@@ -4288,6 +4291,9 @@ public static void TestCloseNotifierPipelined(ж<testing.T> Ꮡt) {
 internal static readonly object unexpectedCloseNotifyˢ = (@string)"unexpected CloseNotify"u8;
 internal static readonly object tooManyRequestsˢ = (@string)"too many requests"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string reqᶜ = "GET / HTTP/1.1\r\nConnection: keep-alive\r\nHost: foo\r\n\r\n"u8;
+
 internal static void testCloseNotifierPipelined(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
@@ -4320,7 +4326,7 @@ internal static void testCloseNotifierPipelined(ж<testing.T> Ꮡt, testMode mod
         var connʗ1 = conn;
         var diecʗ1 = diec;
         goǃ(() => {
-            @string req = "GET / HTTP/1.1\r\nConnection: keep-alive\r\nHost: foo\r\n\r\n"u8;
+            @string req = reqᶜ;
             (_, Ꮡerr.ValueSlot) = io.WriteString(new http_test_package.net_ConnᴠWriter(connʗ1), req + req); // two requests
             if (Ꮡerr.ValueSlot != default!) {
                 Ꮡt.Error(Ꮡerr.ValueSlot);
@@ -6077,10 +6083,16 @@ public static void TestServerHandlersCanHandleH2PRI(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testServerHandlersCanHandleH2PRI(Δp0, Δp1), new testMode[]{http1Mode}.slice());
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string upgradeResponseᶜ = "upgrade here"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ2 = "SM\r\n\r\n"u8;
+
 internal static void testServerHandlersCanHandleH2PRI(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        @string upgradeResponse = "upgrade here"u8;
+        @string upgradeResponse = upgradeResponseᶜ;
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             GoFrame ᒐ = default;
             try {
@@ -6098,7 +6110,7 @@ internal static void testServerHandlersCanHandleH2PRI(ж<testing.T> Ꮡt, testMo
                 if (!(~r).Close) {
                     Ꮡt.Errorf("Request.Close = true; want false"u8);
                 }
-                @string want = "SM\r\n\r\n"u8;
+                @string want = wantᶜ2;
                 var buf = new slice<byte>(len(want));
                 (var n, errΔ1) = io.ReadFull(new http_test_package.bufio_ReadWriterжReader(br), buf);
                 if (errΔ1 != default! || ((sstring)(buf[..(int)(n)])) != want) {
@@ -6323,6 +6335,9 @@ internal static void testServerContext_LocalAddrContextKey(ж<testing.T> Ꮡt, t
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string hdrᶜ = "Transfer-Encoding: chunked"u8;
+
 // https://golang.org/issue/15960
 public static void TestHandlerSetTransferEncodingChunked(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
@@ -6335,7 +6350,7 @@ public static void TestHandlerSetTransferEncodingChunked(ж<testing.T> Ꮡt) {
             w.Write(slice<byte>("hello"u8));
         })));
         @string resp = Ꮡht.rawResponse(getHttp11HostFooˢ4);
-        @string hdr = "Transfer-Encoding: chunked"u8;
+        @string hdr = hdrᶜ;
         {
             nint n = strings.Count(resp, hdr); if (n != 1) {
                 Ꮡt.Errorf("want 1 occurrence of %q in response, got %v\nresponse: %v"u8, hdr, n, resp);
@@ -8252,13 +8267,19 @@ public static void TestWriteHeaderSwitchingProtocols(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string logˢ = "log: "u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantBodyᶜ1 = "want"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantUpgradeᶜ = "someProto"u8;
+
 internal static void testWriteHeaderSwitchingProtocols(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        @string wantBody = "want"u8;
-        @string wantUpgrade = "someProto"u8;
+        @string wantBody = wantBodyᶜ1;
+        @string wantUpgrade = wantUpgradeᶜ;
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> rΔ1) => {
             GoFrame ᒐ = default;
             try {
@@ -8606,6 +8627,9 @@ public static void TestParseFormCleanup(ж<testing.T> Ꮡt) {
 internal static readonly object httpsGoDevIssue20253ˢ = (@string)"https://go.dev/issue/20253"u8;
 internal static readonly object httpsGoDevIssue25965ˢ = (@string)"https://go.dev/issue/25965"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string keyᶜ = "file"u8;
+
 internal static void testParseFormCleanup(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
@@ -8613,7 +8637,7 @@ internal static void testParseFormCleanup(ж<testing.T> Ꮡt, testMode mode) {
             Ꮡt.Skip(httpsGoDevIssue20253ˢ);
         }
         UntypedInt maxMemory = 1024;
-        @string key = "file"u8;
+        @string key = keyᶜ;
         if (runtime.GOOS == "windows"u8) {
             // Windows sometimes refuses to remove a file that was just closed.
             Ꮡt.Skip(httpsGoDevIssue25965ˢ);
@@ -8813,10 +8837,13 @@ public static void TestErrorContentLength(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testErrorContentLength(Δp0, Δp1));
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string errorBodyᶜ = "an error occurred"u8;
+
 internal static void testErrorContentLength(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        @string errorBody = "an error occurred"u8;
+        @string errorBody = errorBodyᶜ;
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             w.Header().Set(contentLengthˢ, "1000"u8);
             Error(w, errorBody, 400);

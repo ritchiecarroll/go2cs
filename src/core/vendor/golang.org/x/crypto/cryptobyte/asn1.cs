@@ -390,8 +390,8 @@ internal static bool asn1Signed(ref int64 @out, slice<byte> n) {
         @out |= (int64)((int64)n[i]);
     }
     // Shift up and down in order to sign extend the result.
-    @out <<= (int)(64 - (uint8)length * 8);
-    @out >>= (int)(64 - (uint8)length * 8);
+    @out.LshAssign((uint64)(64 - (uint8)length * 8));
+    @out.RshAssign((uint64)(64 - (uint8)length * 8));
     return true;
 }
 

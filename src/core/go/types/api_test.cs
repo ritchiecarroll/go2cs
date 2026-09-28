@@ -65,9 +65,12 @@ internal static ж<types.Package> mustTypecheck(@string src, ж<types.Config> �
     return pkg;
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string kwᶜ = "package "u8;
+
 // pkgName extracts the package name from src, which must contain a package header.
 internal static @string pkgName(@string src) {
-    @string kw = "package "u8;
+    @string kw = kwᶜ;
     {
         nint i = strings.Index(src, kw); if (i >= 0) {
             @string after = src[(int)(i + len(kw))..];
@@ -195,6 +198,9 @@ public static void TestValuesInfo(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string brokenᶜ = "package broken_"u8;
+
 [GoType("dyn")] internal partial struct TestTypesInfo_type {
     internal @string src;
     internal @string expr; // expression
@@ -205,7 +211,7 @@ public static void TestTypesInfo(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Test sources that are not expected to typecheck must start with the broken prefix.
-    @string broken = "package broken_"u8;
+    @string broken = brokenᶜ;
 // single-valued expressions of untyped constants
 // uses of nil
 // comma-ok expressions
@@ -548,6 +554,16 @@ public static void TestTypesInfo(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string libᶜ = """
+package lib
+
+func F[P any](P) {}
+
+type T[P any] []P
+
+"""u8;
+
 [GoType("dyn")] internal partial struct TestInstanceInfo_testInst {
     internal @string name;
     internal slice<@string> targs;
@@ -564,14 +580,7 @@ public static void TestTypesInfo(ж<testing.T> Ꮡt) {
 }
 
 public static void TestInstanceInfo(ж<testing.T> Ꮡt) {
-    @string lib = """
-package lib
-
-func F[P any](P) {}
-
-type T[P any] []P
-
-"""u8;
+    @string lib = libᶜ;
 // reverse type inference
 // reverse3a not possible (cannot assign to generic function outside of argument passing)
     slice<TestInstanceInfo_type> tests = new TestInstanceInfo_type[]{
@@ -1120,14 +1129,8 @@ public static void TestImplicitsInfo(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPkgNameOf_type {
-    internal @string path; // path string enclosed in "'s
-    internal @string want;
-}
-
-public static void TestPkgNameOf(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ = """
 
 package p
 
@@ -1148,6 +1151,15 @@ var (
 )
 
 """u8;
+
+[GoType("dyn")] internal partial struct TestPkgNameOf_type {
+    internal @string path; // path string enclosed in "'s
+    internal @string want;
+}
+
+public static void TestPkgNameOf(ж<testing.T> Ꮡt) {
+    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+    @string src = srcᶜ;
     slice<TestPkgNameOf_type> tests = new TestPkgNameOf_type[]{
         new(@"""os"""u8, "."u8),
         new(@"""io"""u8, "_"u8),
@@ -1722,27 +1734,8 @@ internal static (ж<types.Package>, error) Import(this testImporter m, @string p
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string libˢ = "lib"u8;
 
-public static void TestSelection(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    var selections = new map<ж<ast.SelectorExpr>, ж<types.Selection>>();
-    // We need a specific fileset in this test below for positions.
-    // Cannot use typecheck helper.
-    var fset = token.NewFileSet();
-    var imports = new testImporter(0);
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new Config(Importer: imports);
-    var fsetʗ1 = fset;
-    var importsʗ1 = imports;
-    var selectionsʗ1 = selections;
-    void makePkg(@string path, @string src) {
-        var (pkg, err) = Ꮡconf.Check(path, fsetʗ1, new ж<ast.File>[]{mustParse(fsetʗ1, src)}.slice(), Ꮡ(new typesꓸInfo(Selections: selectionsʗ1)));
-        if (err != default!) {
-            Ꮡt.Fatal(err);
-        }
-        importsʗ1[path] = pkg;
-    }
-    @string libSrc = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string libSrcᶜ = """
 
 package lib
 type T float64
@@ -1752,7 +1745,9 @@ func F() {}
 func (T) M() {}
 
 """u8;
-    @string mainSrc = """
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string mainSrcᶜ = """
 
 package main
 import "lib"
@@ -1830,6 +1825,29 @@ func main() {
 	_ = G[string].m
 }
 """u8;
+
+public static void TestSelection(ж<testing.T> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    var selections = new map<ж<ast.SelectorExpr>, ж<types.Selection>>();
+    // We need a specific fileset in this test below for positions.
+    // Cannot use typecheck helper.
+    var fset = token.NewFileSet();
+    var imports = new testImporter(0);
+    ref var conf = ref heap<types.Config>(out var Ꮡconf);
+    conf = new Config(Importer: imports);
+    var fsetʗ1 = fset;
+    var importsʗ1 = imports;
+    var selectionsʗ1 = selections;
+    void makePkg(@string path, @string src) {
+        var (pkg, err) = Ꮡconf.Check(path, fsetʗ1, new ж<ast.File>[]{mustParse(fsetʗ1, src)}.slice(), Ꮡ(new typesꓸInfo(Selections: selectionsʗ1)));
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        importsʗ1[path] = pkg;
+    }
+    @string libSrc = libSrcᶜ;
+    @string mainSrc = mainSrcᶜ;
     var wantOut = new map<@string, array<@string>>{
         ["lib.T.M"u8] = new @string[]{"method expr (lib.T) M(lib.T)"u8, ".[0]"u8}.array(),
         ["A{}.B"u8] = new @string[]{"field (main.A) B *main.B"u8, ".[0]"u8}.array(),
@@ -1902,6 +1920,26 @@ func main() {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string libSrcᶜ1 = """
+
+package a
+import "missing"
+const C1 = foo
+const C2 = missing.C
+
+"""u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string mainSrcᶜ1 = """
+
+package main
+import "a"
+var _ = a.C1
+var _ = a.C2
+
+"""u8;
+
 public static void TestIssue8518(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -1919,25 +1957,28 @@ public static void TestIssue8518(ж<testing.T> Ꮡt) {
     void makePkg(@string path, @string src) {
         (importsʗ1[path], _) = Ꮡconf.Check(path, fsetʗ1, new ж<ast.File>[]{mustParse(fsetʗ1, src)}.slice(), nil); // errors logged via conf.Error
     }
-    @string libSrc = """
-
-package a
-import "missing"
-const C1 = foo
-const C2 = missing.C
-
-"""u8;
-    @string mainSrc = """
-
-package main
-import "a"
-var _ = a.C1
-var _ = a.C2
-
-"""u8;
+    @string libSrc = libSrcᶜ1;
+    @string mainSrc = mainSrcᶜ1;
     makePkg("a"u8, libSrc);
     makePkg(mainˢ, mainSrc); // don't crash when type-checking this package
 }
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string libSrcᶜ2 = """
+
+package a
+const C = foo
+
+"""u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string mainSrcᶜ2 = """
+
+package main
+import "a"
+const _ = a.C
+
+"""u8;
 
 public static void TestIssue59603(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -1956,29 +1997,21 @@ public static void TestIssue59603(ж<testing.T> Ꮡt) {
     void makePkg(@string path, @string src) {
         (importsʗ1[path], _) = Ꮡconf.Check(path, fsetʗ1, new ж<ast.File>[]{mustParse(fsetʗ1, src)}.slice(), nil); // errors logged via conf.Error
     }
-    @string libSrc = """
-
-package a
-const C = foo
-
-"""u8;
-    @string mainSrc = """
-
-package main
-import "a"
-const _ = a.C
-
-"""u8;
+    @string libSrc = libSrcᶜ2;
+    @string mainSrc = mainSrcᶜ2;
     makePkg("a"u8, libSrc);
     makePkg(mainˢ, mainSrc); // don't crash when type-checking this package
 }
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = "LookupFieldOrMethod on nil type"u8;
 
 public static void TestLookupFieldOrMethodOnNil(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // LookupFieldOrMethod on a nil type is expected to produce a run-time panic.
         defer(() => {
-            @string want = "LookupFieldOrMethod on nil type"u8;
+            @string want = wantᶜ;
             var p = recover();
             {
                 var (s, ok) = p._<@string>(ᐧ); if (!ok || s != want) {
@@ -2073,9 +2106,8 @@ public static void TestLookupFieldOrMethod(ж<testing.T> Ꮡt) {
 internal static readonly @string pkgˢ = "pkg"u8;
 internal static readonly @string instanceˢ = "Instance"u8;
 
-// Test for go.dev/issue/52715
-public static void TestLookupFieldOrMethod_RecursiveGeneric(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ1 = """
 
 package pkg
 
@@ -2092,6 +2124,10 @@ type Node[T any] struct {
 type Instance = *Tree[int]
 
 """u8;
+
+// Test for go.dev/issue/52715
+public static void TestLookupFieldOrMethod_RecursiveGeneric(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ1;
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
     var pkg = NewPackage(pkgˢ, (~(~f).Name).Name);
@@ -2321,8 +2357,11 @@ public static void TestNewAlias_Issue65455(ж<testing.T> Ꮡt) {
     alias.Underlying(); // must not panic
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ2 = "package p; func f() int16; var _ = f(undef)"u8;
+
 public static void TestIssue15305(ж<testing.T> Ꮡt) {
-    @string src = "package p; func f() int16; var _ = f(undef)"u8;
+    @string src = srcᶜ2;
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
@@ -2406,10 +2445,8 @@ public static void TestCompositeLitTypes(ж<testing.T> Ꮡt) {
     }
 }
 
-// TestObjectParents verifies that objects have parent scopes or not
-// as specified by the Object interface.
-public static void TestObjectParents(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ3 = """
 
 package p
 
@@ -2431,6 +2468,11 @@ func (*T1) m2() {}
 func f(x int) { y := x; print(y) }
 
 """u8;
+
+// TestObjectParents verifies that objects have parent scopes or not
+// as specified by the Object interface.
+public static void TestObjectParents(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ3;
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
     var info = Ꮡ(new typesꓸInfo(
@@ -2484,11 +2526,8 @@ func f(x int) { y := x; print(y) }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string couldNotImportˢ = "could not import"u8;
 
-// TestFailedImport tests that we don't get follow-on errors
-// elsewhere in a package due to failing to import a package.
-public static void TestFailedImport(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ4 = """
 
 package p
 
@@ -2500,6 +2539,12 @@ var v T = c
 func f(x T) T { return foo.F(x) }
 
 """u8;
+
+// TestFailedImport tests that we don't get follow-on errors
+// elsewhere in a package due to failing to import a package.
+public static void TestFailedImport(ж<testing.T> Ꮡt) {
+    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+    @string src = srcᶜ4;
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
     var files = new ж<ast.File>[]{f}.slice();
@@ -2552,9 +2597,12 @@ func f(x T) T { return foo.F(x) }
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ5 = "package p; type T[P any] *T[P]"u8;
+
 public static void TestInstantiate(ж<testing.T> Ꮡt) {
     // eventually we like more tests but this is a start
-    @string src = "package p; type T[P any] *T[P]"u8;
+    @string src = srcᶜ5;
     var pkg = mustTypecheck(src, nil, nil);
     // type T should have one type parameter
     var T = pkg.Scope().Lookup("T"u8).Type()._<ж<types.Named>>();
@@ -2577,8 +2625,8 @@ public static void TestInstantiate(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestInstantiateConcurrent(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ6 = """
 package p
 
 type I[P any] interface {
@@ -2593,6 +2641,9 @@ type Nested[P any] *interface{b(P)}
 type K = Nested[string]
 
 """u8;
+
+public static void TestInstantiateConcurrent(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ6;
     var pkg = mustTypecheck(src, nil, nil);
     var insts = new ж<types.Interface>[]{
         pkg.Scope().Lookup("J"u8).Type().Underlying()._<ж<types.Interface>>(),
@@ -2714,16 +2765,8 @@ public static void TestInstanceIdentity(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestInstantiatedObjects_tests {
-    internal @string name;
-    internal types.Object obj;
-}
-
-// TestInstantiatedObjects verifies properties of instantiated objects.
-public static void TestInstantiatedObjects(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ7 = """
 
 package p
 
@@ -2758,6 +2801,17 @@ func fn() {
 }
 
 """u8;
+
+[GoType("dyn")] internal partial struct TestInstantiatedObjects_tests {
+    internal @string name;
+    internal types.Object obj;
+}
+
+// TestInstantiatedObjects verifies properties of instantiated objects.
+public static void TestInstantiatedObjects(ж<testing.T> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    @string src = srcᶜ7;
     var info = Ꮡ(new typesꓸInfo(
         Defs: new map<ж<ast.Ident>, types.Object>()
     ));
@@ -2863,16 +2917,8 @@ internal static readonly @string integerˢ = "Integer"u8;
 internal static readonly @string emptyTypeSetˢ = "EmptyTypeSet"u8;
 internal static readonly @string badˢ = "Bad"u8;
 
-[GoType("dyn")] internal partial struct TestImplements_tests {
-    public typesꓸType V;
-    public ж<types.Interface> T;
-    internal bool want;
-}
-
-public static void TestImplements(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ8 = """
 
 package p
 
@@ -2911,6 +2957,17 @@ func (N4) m()
 type Bad Bad // invalid type
 
 """u8;
+
+[GoType("dyn")] internal partial struct TestImplements_tests {
+    public typesꓸType V;
+    public ж<types.Interface> T;
+    internal bool want;
+}
+
+public static void TestImplements(ж<testing.T> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    @string src = srcᶜ8;
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
@@ -2984,8 +3041,8 @@ type Bad Bad // invalid type
     }
 }
 
-public static void TestMissingMethodAlternative(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ9 = """
 
 package p
 type T interface {
@@ -3007,6 +3064,9 @@ type V4 struct{}
 func (V4) M()
 
 """u8;
+
+public static void TestMissingMethodAlternative(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ9;
     var pkg = mustTypecheck(src, nil, nil);
     var T = pkg.Scope().Lookup("T"u8).Type().Underlying()._<ж<types.Interface>>();
     var Tʗ1 = T;
@@ -3040,28 +3100,34 @@ internal static readonly @string goDevESˢ = " [go.dev/e/%s]"u8;
 internal static readonly @string goDevEUndeclaredNameˢ = " [go.dev/e/UndeclaredName]"u8;
 internal static readonly @string goDevEWrongArgCountˢ = " [go.dev/e/WrongArgCount]\n"u8;
 
-public static void TestErrorURL(ж<testing.T> Ꮡt) {
-    ref var conf = ref heap(new types.Config(), out var Ꮡconf);
-    stringFieldAddr(Ꮡconf, errorURLˢ).Value = goDevESˢ;
-    // test case for a one-line error
-    @string src1 = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string src1ᶜ = """
 
 package p
 var _ T
 
 """u8;
-    var (_, err) = typecheck(src1, Ꮡconf, nil);
-    if (err == default! || !strings.HasSuffix(err.Error(), goDevEUndeclaredNameˢ)) {
-        Ꮡt.Errorf("src1: unexpected error: got %v"u8, err);
-    }
-    // test case for a multi-line error
-    @string src2 = """
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string src2ᶜ = """
 
 package p
 func f() int { return 0 }
 var _ = f(1, 2)
 
 """u8;
+
+public static void TestErrorURL(ж<testing.T> Ꮡt) {
+    ref var conf = ref heap(new types.Config(), out var Ꮡconf);
+    stringFieldAddr(Ꮡconf, errorURLˢ).Value = goDevESˢ;
+    // test case for a one-line error
+    @string src1 = src1ᶜ;
+    var (_, err) = typecheck(src1, Ꮡconf, nil);
+    if (err == default! || !strings.HasSuffix(err.Error(), goDevEUndeclaredNameˢ)) {
+        Ꮡt.Errorf("src1: unexpected error: got %v"u8, err);
+    }
+    // test case for a multi-line error
+    @string src2 = src2ᶜ;
     (_, err) = typecheck(src2, Ꮡconf, nil);
     if (err == default! || !strings.Contains(err.Error(), goDevEWrongArgCountˢ)) {
         Ꮡt.Errorf("src1: unexpected error: got %v"u8, err);
@@ -3264,10 +3330,8 @@ public static void TestTooNew(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string aTAAˢ = "a.T[a.A]"u8;
 
-// This is a regression test for #66704.
-public static void TestUnaliasTooSoonInCycle(ж<testing.T> Ꮡt) {
-    setGotypesalias(Ꮡt, true);
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ10 = """
 package a
 
 var x T[B] // this appears to cause Unalias to be called on B while still Invalid
@@ -3277,6 +3341,11 @@ type A T[B]
 type B = T[A]
 
 """u8;
+
+// This is a regression test for #66704.
+public static void TestUnaliasTooSoonInCycle(ж<testing.T> Ꮡt) {
+    setGotypesalias(Ꮡt, true);
+    @string src = srcᶜ10;
     var pkg = mustTypecheck(src, nil, nil);
     var B = pkg.Scope().Lookup("B"u8);
     @string got = Unalias(B.Type()).String();
@@ -3286,9 +3355,8 @@ type B = T[A]
     }
 }
 
-public static void TestAlias_Rhs(ж<testing.T> Ꮡt) {
-    setGotypesalias(Ꮡt, true);
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ11 = """
 package p
 
 type A = B
@@ -3296,6 +3364,10 @@ type B = C
 type C = int
 
 """u8;
+
+public static void TestAlias_Rhs(ж<testing.T> Ꮡt) {
+    setGotypesalias(Ꮡt, true);
+    @string src = srcᶜ11;
     var pkg = mustTypecheck(src, nil, nil);
     var A = pkg.Scope().Lookup("A"u8);
     @string got = A.Type()._<ж<types.Alias>>().Rhs().String();

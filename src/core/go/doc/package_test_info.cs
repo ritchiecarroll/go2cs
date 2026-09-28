@@ -48,7 +48,7 @@ using static global::go.go.doc_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/doc/example_test.go", "example_test.cs", "ACAugoKCgpSCgoKCgpSCgoKUgoKogoKUgoKAgu6CgoKUgoKWgpSmpKaCAAoQgoKClIKAgqT6pgAOFgAKFILMgoKWgoIAAhDCACtUAEOGAYK4goKogoKClIKCgpSCqAASMoKClJSCuKKClKaCgoKU", "30-87:1")]
+[assembly: global::go.GoPositionMap("go/doc/example_test.go", "example_test.cs", "ACAugoKCgpSCgoKCgpSCgoKUgoKogoKUgoKAgu6CgoKUgoKWgpSmpKaCAAoQgoKClIKAgqQAIgqmAAIWAAEUgsyCgpaCggB1EMIAAFQAAYYBgriCgqiCgoKUgoKClIKoABIygoKUlIK4ooKUpoKCgpQ=", "30-87:1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

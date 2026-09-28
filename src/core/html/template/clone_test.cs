@@ -68,13 +68,16 @@ internal static readonly @string lhsˢ = "lhs"u8;
 internal static readonly object t0LookupLhsCloneGotNilˢ = (@string)@"t0.Lookup(""lhs"").Clone(): got nil err want non-nil"u8;
 internal static readonly @string styleZgotmplZStyleˢ = @" <style> ZgotmplZ </style> "u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string tmplᶜ = @"{{define ""a""}}{{template ""lhs""}}{{.}}{{template ""rhs""}}{{end}}"u8;
+
 public static void TestClone(ж<testing.T> Ꮡt) {
     // The {{.}} will be executed with data "<i>*/" in different contexts.
     // In the t0 template, it will be in a text context.
     // In the t1 template, it will be in a URL context.
     // In the t2 template, it will be in a JavaScript context.
     // In the t3 template, it will be in a CSS context.
-    @string tmpl = @"{{define ""a""}}{{template ""lhs""}}{{.}}{{template ""rhs""}}{{end}}"u8;
+    @string tmpl = tmplᶜ;
     var b = @new<strings.Builder>();
     // Create an incomplete template t0.
     var (ᴛ5, ᴛ6) = New("t0"u8).Parse(tmpl);
@@ -199,15 +202,18 @@ public static void TestClone(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object couldNotFindTemplateˢ = (@string)"could not find template"u8;
 
-public static void TestTemplates(ж<testing.T> Ꮡt) {
-    var names = new @string[]{"t0"u8, "a"u8, "lhs"u8, "rhs"u8}.slice();
-    // Some template definitions borrowed from TestClone.
-    @string tmpl = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string tmplᶜ1 = """
 
 		{{define "a"}}{{template "lhs"}}{{.}}{{template "rhs"}}{{end}}
 		{{define "lhs"}} <a href=" {{end}}
 		{{define "rhs"}} "></a> {{end}}
 """u8;
+
+public static void TestTemplates(ж<testing.T> Ꮡt) {
+    var names = new @string[]{"t0"u8, "a"u8, "lhs"u8, "rhs"u8}.slice();
+    // Some template definitions borrowed from TestClone.
+    @string tmpl = tmplᶜ1;
     var (ᴛ31, ᴛ32) = New("t0"u8).Parse(tmpl);
     var t0 = Must(ᴛ31, ᴛ32);
     var templates = t0.Templates();
@@ -296,10 +302,16 @@ public static void TestFuncMapWorksAfterClone(ж<testing.T> Ꮡt) {
 internal static readonly @string outerˢ = "outer"u8;
 internal static readonly object dataˢ = (@string)"data"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string inputᶜ = @"<title>{{block ""a"" .}}a{{end}}</title><body>{{block ""b"" .}}b{{end}}<body>"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string overlayᶜ = @"{{define ""b""}}A{{end}}"u8;
+
 // https://golang.org/issue/16101
 public static void TestTemplateCloneExecuteRace(ж<testing.T> Ꮡt) {
-    @string input = @"<title>{{block ""a"" .}}a{{end}}</title><body>{{block ""b"" .}}b{{end}}<body>"u8;
-    @string overlay = @"{{define ""b""}}A{{end}}"u8;
+    @string input = inputᶜ;
+    @string overlay = overlayᶜ;
     var (ᴛ47, ᴛ48) = New(outerˢ).Parse(input);
     var outer = Must(ᴛ47, ᴛ48);
     var (ᴛ49, ᴛ50) = outer.Clone();
@@ -365,15 +377,21 @@ public static void TestCloneGrowth(ж<testing.T> Ꮡt) {
     }
 }
 
-// https://golang.org/issue/17735
-public static void TestCloneRedefinedName(ж<testing.T> Ꮡt) {
-    @string @base = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string @baseᶜ = """
 
 {{ define "a" -}}<title>{{ template "b" . -}}</title>{{ end -}}
 {{ define "b" }}{{ end -}}
 
 """u8;
-    @string page = @"{{ template ""a"" . }}"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string pageᶜ = @"{{ template ""a"" . }}"u8;
+
+// https://golang.org/issue/17735
+public static void TestCloneRedefinedName(ж<testing.T> Ꮡt) {
+    @string @base = @baseᶜ;
+    @string page = pageᶜ;
     var (ᴛ63, ᴛ64) = New("a"u8).Parse(@base);
     var t1 = Must(ᴛ63, ᴛ64);
     for (nint i = 0; i < 2; i++) {

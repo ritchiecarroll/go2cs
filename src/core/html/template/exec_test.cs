@@ -224,7 +224,7 @@ internal static ж<@string> newString(@string sʗp) {
 }
 
 internal static ж<slice<nint>> newIntSlice(params ꓸꓸꓸnint nʗp) {
-    var n = nʗp.slice();
+    var n = nʗp.sslice();
 
     var p = @new<slice<nint>>();
     p.ValueSlot = new slice<nint>(len(n));
@@ -876,12 +876,15 @@ internal static slice<@string> delimPairs = new @string[]{
 internal static readonly @string strˢ = ".Str"u8;
 internal static readonly @string delimsˢ = "delims"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string helloᶜ = "Hello, world"u8;
+
 [GoType("dyn")] internal partial struct TestDelims_type {
     public @string Str;
 }
 
 public static void TestDelims(ж<testing.T> Ꮡt) {
-    @string hello = "Hello, world"u8;
+    @string hello = helloᶜ;
     TestDelims_type value = new TestDelims_type(hello);
     for (nint i = 0; i < len(delimPairs); i += 2) {
         @string text = strˢ;
@@ -956,6 +959,9 @@ line 3
 internal static readonly @string topˢ = "top"u8;
 internal static readonly object parseErrorˢ = (@string)"parse error:"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ2 = @"template: top:7:20: executing ""three"" at <index ""hi"" $>: error calling index: index out of range: 5"u8;
+
 // Check that an error from a nested template contains all the relevant information.
 public static void TestExecError(ж<testing.T> Ꮡt) {
     var (tmpl, err) = New(topˢ).Parse(execErrorText);
@@ -967,7 +973,7 @@ public static void TestExecError(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Fatal(expectedErrorˢ);
     }
-    @string want = @"template: top:7:20: executing ""three"" at <index ""hi"" $>: error calling index: index out of range: 5"u8;
+    @string want = wantᶜ2;
     @string got = err.Error();
     if (got != want) {
         Ꮡt.Errorf("expected\n%q\ngot\n%q"u8, want, got);
@@ -1025,6 +1031,9 @@ internal static readonly @string treeTemplate = """
 internal static readonly @string treeˢ = "tree"u8;
 internal static readonly object execErrorˢ = (@string)"exec error:"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectᶜ1 = "[1[2[3[4]][5[6]]][7[8[9]][10[11]]]]"u8;
+
 public static void TestTree(ж<testing.T> Ꮡt) {
     ж<Tree> tree = Ꮡ(new Tree(
         1,
@@ -1067,7 +1076,7 @@ public static void TestTree(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(parseErrorˢ, err);
     }
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-    @string expect = "[1[2[3[4]][5[6]]][7[8[9]][10[11]]]]"u8;
+    @string expect = expectᶜ1;
     // First by looking up the template.
     err = tmpl.Lookup(treeˢ).Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), tree.OrTypedNil());
     if (err != default!) {
@@ -1530,11 +1539,23 @@ internal static void testBadFuncName(@string name, ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object goodbyeˢ = (@string)"goodbye"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string inputᶜ1 = @"a({{block ""inner"" .}}bar({{.}})baz{{end}})b"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ3 = @"a(bar(hello)baz)b"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string overlayᶜ1 = @"{{define ""inner""}}foo({{.}})bar{{end}}"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string want2ᶜ = @"a(foo(goodbye)bar)b"u8;
+
 public static void TestBlock(ж<testing.T> Ꮡt) {
-    @string input = @"a({{block ""inner"" .}}bar({{.}})baz{{end}})b"u8;
-    @string want = @"a(bar(hello)baz)b"u8;
-    @string overlay = @"{{define ""inner""}}foo({{.}})bar{{end}}"u8;
-    @string want2 = @"a(foo(goodbye)bar)b"u8;
+    @string input = inputᶜ1;
+    @string want = wantᶜ3;
+    @string overlay = overlayᶜ1;
+    @string want2 = want2ᶜ;
     var (tmpl, err) = New(outerˢ).Parse(input);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -1646,6 +1667,9 @@ public static void TestEvalFieldErrors(ж<testing.T> Ꮡt) {
 internal static readonly object skippingInShortModeˢ = (@string)"skipping in -short mode"u8;
 internal static readonly @string templateTmplˢ = @"{{template ""tmpl"" .}}"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ4 = "exceeded maximum template depth"u8;
+
 public static void TestMaxExecDepth(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ);
@@ -1657,7 +1681,7 @@ public static void TestMaxExecDepth(ж<testing.T> Ꮡt) {
     if (err != default!) {
         got = err.Error();
     }
-    @string want = "exceeded maximum template depth"u8;
+    @string want = wantᶜ4;
     if (!strings.Contains(got, want)) {
         Ꮡt.Errorf("got error %q; want %q"u8, got, want);
     }
@@ -1838,12 +1862,18 @@ internal static readonly object brokenInHtmlTemplateˢ = (@string)"broken in htm
 internal static readonly @string resultˢ = "result"u8;
 internal static readonly object expectedErrorWithNoCallˢ = (@string)"expected error with no call, got none"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string textᶜ = "{{ (.)  }}"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string textCallᶜ = "{{ (call .)  }}"u8;
+
 // Issue 31810. Check that a parenthesized first argument behaves properly.
 public static void TestIssue31810(ж<testing.T> Ꮡt) {
     Ꮡt.Skip(brokenInHtmlTemplateˢ);
     // A simple value with no arguments is fine.
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-    @string text = "{{ (.)  }}"u8;
+    @string text = textᶜ;
     var (tmpl, err) = New(""u8).Parse(text);
     if (err != default!) {
         Ꮡt.Error(err);
@@ -1863,7 +1893,7 @@ public static void TestIssue31810(ж<testing.T> Ꮡt) {
         Ꮡt.Error(expectedErrorWithNoCallˢ);
     }
     // Works if the function is explicitly called.
-    @string textCall = "{{ (call .)  }}"u8;
+    @string textCall = textCallᶜ;
     (tmpl, err) = New(""u8).Parse(textCall);
     b.Reset();
     err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), (f).OrTypedNilFunc());

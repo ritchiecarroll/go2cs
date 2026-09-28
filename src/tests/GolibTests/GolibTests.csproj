@@ -44,6 +44,7 @@
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux'">
     <Compile Remove="LinuxSpawnSeamTests.cs" />
     <Compile Remove="LinuxSignalMaskTests.cs" />
+    <Compile Remove="LinuxSigpipeTests.cs" />
     <Compile Remove="LinuxSyscallClockTests.cs" />
     <Compile Remove="LibcCallDispatchTests.cs" />
     <Compile Remove="DarwinSigmaskContractTests.cs" />
@@ -62,6 +63,9 @@
     <!-- RLIMIT_NOFILE is 7 and /proc/self/fd exists only on linux; the host restore it guards is
          exercised by syscall's linux-only TestPrlimitFileLimit. -->
     <Compile Remove="LinuxDescriptorLimitTests.cs" />
+
+    <!-- pidfd_open/waitid(P_PIDFD)/pidfd_send_signal: linux-only kernel surface. -->
+    <Compile Remove="LinuxPidfdTests.cs" />
 
     <!-- GetRandom (and its runtime.vgetrandom pull) is declared by getrandom.go, whose build tags
          select only the linux flavour of internal/syscall/unix. -->

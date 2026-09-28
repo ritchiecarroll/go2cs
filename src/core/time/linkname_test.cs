@@ -11,18 +11,18 @@ using static go.time_internal_test_package;
 partial class time_test_package {
 
 //go:linkname timeAbs time.Time.abs
-internal static uint64 timeAbs(Δtime.Time _) {
+[global::System.Diagnostics.StackTraceHidden] internal static uint64 timeAbs(Δtime.Time _) {
     return Δtime.legacyTimeTimeAbs(_);
 }
 
 //go:linkname absClock time.absClock
-internal static (nint hour, nint min, nint sec) absClock(uint64 _) {
+[global::System.Diagnostics.StackTraceHidden] internal static (nint hour, nint min, nint sec) absClock(uint64 _) {
     var (ᴛ1, ᴛ2, ᴛ3) = Δtime.legacyAbsClock(_);
     return (ᴛ1, ᴛ2, ᴛ3);
 }
 
 //go:linkname absDate time.absDate
-internal static (nint year, timeꓸMonth month, nint day, nint yday) absDate(uint64 _Δp0, bool _Δp1) {
+[global::System.Diagnostics.StackTraceHidden] internal static (nint year, timeꓸMonth month, nint day, nint yday) absDate(uint64 _Δp0, bool _Δp1) {
     var (ᴛ1, ᴛ2, ᴛ3, ᴛ4) = Δtime.legacyAbsDate(_Δp0, _Δp1);
     return (ᴛ1, ᴛ2, ᴛ3, ᴛ4);
 }

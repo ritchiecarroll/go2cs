@@ -31,9 +31,12 @@ internal static void testprint(io.Writer @out, ast.Node node) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string filenameᶜ = "testdata/parser.go"u8;
+
 // cannot initialize in init because (printer) Fprint launches goroutines.
 internal static void initialize() {
-    @string filename = "testdata/parser.go"u8;
+    @string filename = filenameᶜ;
     var (src, err) = os.ReadFile(filename);
     if (err != default!) {
         log.Fatalf("%s"u8, err);

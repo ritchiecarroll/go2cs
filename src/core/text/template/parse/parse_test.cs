@@ -692,10 +692,19 @@ internal static readonly @string outerˢ = "outer"u8;
 internal static readonly @string innerˢ = "inner"u8;
 internal static readonly object blockDidNotDefineˢ = (@string)"block did not define template"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string inputᶜ = @"a{{block ""inner"" .}}bar{{.}}baz{{end}}b"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string outerᶜ = @"a{{template ""inner"" .}}b"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string innerᶜ = @"bar{{.}}baz"u8;
+
 public static void TestBlock(ж<testing.T> Ꮡt) {
-    @string input = @"a{{block ""inner"" .}}bar{{.}}baz{{end}}b"u8;
-    @string outer = @"a{{template ""inner"" .}}b"u8;
-    @string inner = @"bar{{.}}baz"u8;
+    @string input = inputᶜ;
+    @string outer = outerᶜ;
+    @string inner = innerᶜ;
     var treeSet = new map<@string, ж<global::go.text.template.parse_package.Tree>>();
     var (tmpl, err) = New(outerˢ).Parse(input, ""u8, ""u8, treeSet, (map<@string, any>)(default!));
     if (err != default!) {

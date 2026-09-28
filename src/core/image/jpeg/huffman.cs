@@ -78,7 +78,7 @@ internal static FormatError errShortHuffmanData = ((FormatError)(@string)"short 
         }
     }
     d.bits.n -= (int32)t;
-    d.bits.m >>= (int)(t);
+    d.bits.m.RshAssign((uint64)(t));
     var s = ((int32)1).Lsh((uint64)(t));
     var x = (int32)((int32)(d.bits.a.Rsh((uint64)((uint8)d.bits.n))) & (s - 1));
     if (x < (s >> (int)(1))) {
@@ -214,7 +214,7 @@ internal static readonly @string badHuffmanCodeˢ = "bad Huffman code"u8;
         var v = h.lut[(nint)((uint32)((d.bits.a.Rsh((uint64)((uint32)(d.bits.n - (int32)lutSize)))) & 0xff))]; if (v != 0) {
             var n = (uint16)(((uint16)(v & 0xff)) - 1);
             d.bits.n -= (int32)n;
-            d.bits.m >>= (int)(n);
+            d.bits.m.RshAssign((uint64)(n));
             return ((uint8)((v >> (int)(8))), default!);
         }
     }
@@ -267,7 +267,7 @@ break_slowPath:;
     var ret = d.bits.a.Rsh((uint64)((uint32)(d.bits.n - n)));
     ret &= (uint32)((((uint32)1).Lsh((uint64)((uint32)n))) - 1);
     d.bits.n -= n;
-    d.bits.m >>= (int)((uint32)n);
+    d.bits.m.RshAssign((uint64)((uint32)n));
     return (ret, default!);
 }
 

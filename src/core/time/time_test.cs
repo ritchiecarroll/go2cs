@@ -1948,8 +1948,11 @@ public static void TestWeekdayString(ж<Δtesting.T> Ꮡt) {
 internal static readonly object skippingTestWithoutADevˢ = (@string)"skipping test without a /dev/zero"u8;
 internal static readonly @string isTooLargeˢ = "is too large"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string zeroᶜ = "/dev/zero"u8;
+
 public static void TestReadFileLimit(ж<Δtesting.T> Ꮡt) {
-    @string zero = "/dev/zero"u8;
+    @string zero = zeroᶜ;
     {
         var (_, errΔ1) = Δos.Stat(zero); if (errΔ1 != default!) {
             Ꮡt.Skip(skippingTestWithoutADevˢ);

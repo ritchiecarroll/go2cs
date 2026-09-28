@@ -51,7 +51,7 @@ using static global::go.syscall_test_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("syscall/exec_windows_test.go", "exec_windows_test.cs", "ABgiggAWMoKAggALCqKogpaUgoKClIKCgpSqgoKCgpSSgqqCgoKkgpSEgqaCgoKUgoKUgJI=", "82-85:1")]
 [assembly: go.GoPositionMap("syscall/syscall_test.go", "syscall_test.cs", "AA8egoKClIKClIL4gpSqooSCgoLogoKUgoCCpII=")]
-[assembly: go.GoPositionMap("syscall/syscall_windows_test.go", "syscall_windows_test.cs", "ABskgoSCgoKClIQACh6CgoKUgvqCgoKUggAMCIKEgoKClISOlIKCgpSCgpaCuIIACAaigoKUgoKClIKCgoLWgoIADAiCgoKEhgARHoKCgpSCgoKCmAANFoKCgoKClIKCloKCloKCgoK4tIK6goSCgpSCgpamgoKClPjCuoKClIKCgpaCgoKAgraCuoKCgpSUgoKClOiigoKCgoKChIKCgoKUlISClII=", "246-257:1;247-256:1.1;248-252:1.1.1;259-265:2;266-272:3;284-300:1")]
+[assembly: go.GoPositionMap("syscall/syscall_windows_test.go", "syscall_windows_test.cs", "ABskgoSCgoKClIQACh6CgoKUgvqCgoKUggAMCIKEgoKClISOlIKCgpSCgpaCuIIACAaigoKUgoKClIKCgoLWgoIALgiCgoKEhgABHoKCgpSCgoKCmAABFoKCgoKClIKCloKCloKCgoK4tIK6goSCgpSCgpamgoKClPjCuoKClIKCgpaCgoKAgraCuoKCgpSUgoKClOiigoKCgoKChIKCgoKUlISClII=", "246-257:1;247-256:1.1;248-252:1.1.1;259-265:2;266-272:3;284-300:1")]
 [assembly: go.GoPositionMap("syscall/wtf8_windows_test.go", "wtf8_windows_test.cs", "AIUBjAKCspKCgoLcgrKSgoLcooKUlIKCuIKC3KKCgpSCgoK4goK4goI=", "136-142:1;148-153:1;161-174:1;182-199:1")]
 // </GoSourcePositionMaps>
 

@@ -342,6 +342,12 @@ internal static readonly @string methodArithAddId123ˢ = @"{""method"": ""Arith.
     public io_package.Closer Closer;
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string valueTextᶜ = "the value we don't want to see"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string errorTextᶜ = "some error"u8;
+
 public static void TestServerErrorHasNullResult(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -357,8 +363,8 @@ public static void TestServerErrorHasNullResult(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(errΔ1);
         }
     }
-    @string valueText = "the value we don't want to see"u8;
-    @string errorText = "some error"u8;
+    @string valueText = valueTextᶜ;
+    @string errorText = errorTextᶜ;
     var err = sc.WriteResponse(Ꮡ(new rpc.Response(
         ServiceMethod: "Method"u8,
         Seq: 1,

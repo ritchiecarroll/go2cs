@@ -163,6 +163,9 @@ internal static slice<@string> badFIPS = new @string[]{
     "x1.0.0"u8
 }.slice();
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string vᶜ = "v1.2.3"u8;
+
 public static void TestIsFIPSVersion(ж<testing.T> Ꮡt) {
     // good
     foreach (var (_, s) in goodFIPS) {
@@ -171,7 +174,7 @@ public static void TestIsFIPSVersion(ж<testing.T> Ꮡt) {
         }
     }
     // truncated
-    @string v = "v1.2.3"u8;
+    @string v = vᶜ;
     for (nint i = 0; i < len(v); i++) {
         if (isFIPSVersion(v[..(int)(i)])) {
             Ꮡt.Errorf("isFIPSVersion(%q) = true, want false"u8, v[..(int)(i)]);

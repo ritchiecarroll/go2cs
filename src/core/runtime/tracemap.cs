@@ -110,21 +110,7 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
     }
 }
 
-internal static ж<traceMapNode> newTraceMapNode(this ж<traceMap> Ꮡtab, @unsafe.Pointer data, uintptr size, uintptr hash, uint64 id) {
-    // Create data array.
-    var sl = new notInHeapSlice(
-        Δarray: Ꮡtab.of(traceMap.Ꮡmem).alloc(size),
-        len: (nint)size,
-        cap: (nint)size
-    );
-    memmove(@unsafe.Pointer.FromPinnedBox(sl.Δarray), data, size);
-    // Create metadata structure.
-    var meta = Ꮡtab.of(traceMap.Ꮡmem).alloc(/* unsafe.Sizeof(traceMapNode{}) */ (uintptr)72).Reinterpret<notInHeap, traceMapNode>();
-    (meta.of(traceMapNode.Ꮡdata).Reinterpret<slice<byte>, notInHeapSlice>()).Value = sl;
-    meta.Value.id = id;
-    meta.Value.hash = hash;
-    return meta;
-}
+// go2cs generated this placeholder — func newTraceMapNode is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // reset drops all allocated memory from the table and resets it.
 //

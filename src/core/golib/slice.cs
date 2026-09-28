@@ -466,6 +466,9 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_low = low;
         m_length = length;
         m_capacity = capacity - low;
+
+        // `make([]T, len, cap)`: a Go allocation (GoMemProfile).
+        GoMemProfile.Charge<T>(m_array, capacity);
     }
 
     // A `make([]T, len[, cap])` whose ELEMENT zero value must itself be constructed, because
@@ -1312,6 +1315,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         if (slice == nil)
         {
             newArray = AllocationCounter.NewArray<T>(elems.Length);
+            GoMemProfile.Charge<T>(newArray, elems.Length);
             elems.CopyTo(newArray);
             return new slice<T>(newArray);
         }
@@ -1347,6 +1351,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // aliases it. The mapping plays the role of "the old array" in Go's own spec.
         nint newCapacity = CalculateNewCapacity(slice, slice.Length + elems.Length);
         newArray = AllocationCounter.NewArray<T>(newCapacity);
+        GoMemProfile.Charge<T>(newArray, newCapacity);
 
         slice.ToSpan().CopyTo(newArray);
         elems.CopyTo(newArray.AsSpan((int)slice.Length));
@@ -1451,6 +1456,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         if (slice == nil)
         {
             newArray = AllocationCounter.NewArray<T>(count);
+            GoMemProfile.Charge<T>(newArray, count);
             return new slice<T>(newArray);
         }
 
@@ -1473,6 +1479,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
         nint newCapacity = CalculateNewCapacity(slice, slice.Length + count);
         newArray = AllocationCounter.NewArray<T>(newCapacity);
+        GoMemProfile.Charge<T>(newArray, newCapacity);
 
         slice.ToSpan().CopyTo(newArray);
 

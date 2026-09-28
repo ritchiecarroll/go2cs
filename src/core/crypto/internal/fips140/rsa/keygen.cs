@@ -199,7 +199,7 @@ internal static (slice<byte>, error) randomPrime(io.Reader rand, nint bits) {
         }
         {
             nint excess = len(b) * 8 - bits; if (excess != 0) {
-                b[0] >>= (int)(excess);
+                b[0].RshAssign((uint64)(excess));
             }
         }
         // Don't let the value be too small: set the most significant two bits.
@@ -314,7 +314,7 @@ internal static bool isPrime(slice<byte> w) {
         drbg.Read(b);
         {
             nint excess = len(b) * 8 - bits; if (excess != 0) {
-                b[0] >>= (int)(excess);
+                b[0].RshAssign((uint64)(excess));
             }
         }
         var (result, errΔ1) = millerRabinIteration(ref (mr).DerefOrNull(), b);

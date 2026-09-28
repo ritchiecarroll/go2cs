@@ -37,11 +37,14 @@ internal static readonly @string lookupCustomˢ = "LookupCustom"u8;
 internal static readonly object notSupportedByˢ = (@string)"not supported by GOEXPERIMENT=unified; see go.dev/cl/406319"u8;
 internal static readonly @string mathBiggerˢ = "math/bigger"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string thePackageᶜ = "math/big"u8;
+
 public static void TestForCompiler(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     testenv.MustHaveGoBuild(new importer_internal_test_package.testing_TжTB(Ꮡt));
-    @string thePackage = "math/big"u8;
+    @string thePackage = thePackageᶜ;
     var (@out, err) = testenv.Command(new importer_internal_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new importer_internal_test_package.testing_TжTB(Ꮡt)), listˢ, exportˢ, fContextCompilerExportˢ, thePackage).CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("go list %s: %v\n%s"u8, thePackage, err, @out);

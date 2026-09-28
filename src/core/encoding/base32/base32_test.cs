@@ -45,7 +45,7 @@ internal static testpair bigtest = new testpair(
 );
 
 internal static bool testEqual(ж<testing.T> Ꮡt, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.slice();
+    var args = argsʗp.sslice();
 
     Ꮡt.Helper();
     if (!AreEqual(args[len(args) - 2], args[len(args) - 1])) {
@@ -451,10 +451,13 @@ public static void TestDecodeCorrupt(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string alphaᶜ = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"u8;
+
 public static void TestBig(ж<testing.T> Ꮡt) {
     nint n = 3 * 1000 + 1;
     var raw = new slice<byte>(n);
-    @string alpha = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"u8;
+    @string alpha = alphaᶜ;
     for (nint i = 0; i < n; i++) {
         raw[i] = alpha[i % len(alpha)];
     }

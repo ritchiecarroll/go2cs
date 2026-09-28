@@ -56,8 +56,11 @@ public static void TestGet(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+private static readonly @string nameᶜ = "http2client"u8;
+
 public static void TestMetrics(ж<testing.T> Ꮡt) {
-    @string name = "http2client"u8; // must be a real name so runtime will accept it
+    @string name = nameᶜ; // must be a real name so runtime will accept it
     array<metrics.Sample> m = new(1);
     m[0].Name = "/godebug/non-default-behavior/" + name + ":events";
     metrics.Read(m[..]);

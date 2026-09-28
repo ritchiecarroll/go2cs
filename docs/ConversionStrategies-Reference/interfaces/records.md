@@ -193,8 +193,8 @@ production-inertness identity.)
 
 #### The promoted-method twins class is named for the PACKAGE and the pair, not the pair alone
 
-A struct that satisfies an interface member by **promotion** gets an `internal static class
-<pkg>ᴛ<struct>ᴛ<iface>ᴛpromoted` of extension twins, because go2cs's runtime method set is built from
+A struct that satisfies an interface member by **promotion** gets an
+`internal static class <pkg>ᴛ<struct>ᴛ<iface>ᴛpromoted` of extension twins, because go2cs's runtime method set is built from
 extension methods and a promoted method is the one kind of Go method that never became one. The class
 sits at NAMESPACE scope — deliberately a sibling of the package class, so its twins cannot intercept a
 bare-name call — and it was named for the (struct, interface) pair alone.

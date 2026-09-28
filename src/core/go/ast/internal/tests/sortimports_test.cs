@@ -18,9 +18,8 @@ internal static readonly @string oneImportStatementˢ = "one import statement"u8
 internal static readonly @string testGoˢ = "test.go"u8;
 internal static readonly @string multipleImportStatementsˢ = "multiple import statements"u8;
 
-public static void TestSortImportsUpdatesFileImportsField(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(oneImportStatementˢ, (ж<testing.T> tΔ1) => {
-        @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ = """
 package test
 
 import (
@@ -29,6 +28,28 @@ import (
 )
 
 """u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ1 = """
+package test
+
+import "unsafe"
+
+import (
+	"package"
+	"package"
+)
+
+import (
+	"test"
+	"test"
+)
+
+"""u8;
+
+public static void TestSortImportsUpdatesFileImportsField(ж<testing.T> Ꮡt) {
+    Ꮡt.Run(oneImportStatementˢ, (ж<testing.T> tΔ1) => {
+        @string src = srcᶜ;
         var fset = token.NewFileSet();
         var (f, err) = parser.ParseFile(fset, testGoˢ, src, (parser.Mode)(parser.ParseComments | parser.SkipObjectResolution));
         if (err != default!) {
@@ -46,22 +67,7 @@ import (
         }
     });
     Ꮡt.Run(multipleImportStatementsˢ, (ж<testing.T> tΔ2) => {
-        @string src = """
-package test
-
-import "unsafe"
-
-import (
-	"package"
-	"package"
-)
-
-import (
-	"test"
-	"test"
-)
-
-"""u8;
+        @string src = srcᶜ1;
         var fset = token.NewFileSet();
         var (f, err) = parser.ParseFile(fset, testGoˢ, src, (parser.Mode)(parser.ParseComments | parser.SkipObjectResolution));
         if (err != default!) {

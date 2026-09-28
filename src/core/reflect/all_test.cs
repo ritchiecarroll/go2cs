@@ -832,18 +832,24 @@ public static void TestValueToString(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = "[10]int{1, 2, 3, 4, 123, 6, 7, 8, 9, 10}"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string want1ᶜ = "[]int{1, 2, 3, 4, 123, 6, 7, 8, 9, 10}"u8;
+
 public static void TestArrayElemSet(ж<Δtesting.T> Ꮡt) {
     var v = ValueOf(Ꮡ(new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.array())).Elem();
     v.Index(4).SetInt(123);
     @string s = valueToString(v);
-    @string want = "[10]int{1, 2, 3, 4, 123, 6, 7, 8, 9, 10}"u8;
+    @string want = wantᶜ;
     if (s != want) {
         Ꮡt.Errorf("[10]int: have %#q want %#q"u8, s, want);
     }
     v = ValueOf(new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.slice());
     v.Index(4).SetInt(123);
     s = valueToString(v);
-    @string want1 = "[]int{1, 2, 3, 4, 123, 6, 7, 8, 9, 10}"u8;
+    @string want1 = want1ᶜ;
     if (s != want1) {
         Ꮡt.Errorf("[]int: have %#q want %#q"u8, s, want1);
     }
@@ -1053,7 +1059,7 @@ public static void TestGrow(ж<Δtesting.T> Ꮡt) {
         slice<byte> b = default!;
         var vΔ2 = ValueOf(@new<slice<byte>>()).Elem();
         for (nint i = 0; i < 10; i++) {
-            b = appendꓸꓸꓸ(b[..(int)(cap(b))], new slice<byte>(1));
+            b = appendꓸꓸꓸ(b[..(int)(cap(b))], makeꓸꓸꓸ<byte>(1));
             vΔ2.SetLen(vΔ2.Cap());
             vΔ2.Grow(1);
             if (vΔ2.Cap() != cap(b)) {
@@ -1956,7 +1962,7 @@ public static void TestIsZero(ж<Δtesting.T> Ꮡt) {
         new(new TestIsZero_typeᴛ8(), true),
         new(setField(new TestIsZero_typeᴛ8(), 0 * /* unsafe.Sizeof(int64(0)) */ (uintptr)8, (int64)1), true), // UnsafePointer
 
-        new((@unsafe.Pointer)default!, true),
+        new(@unsafe.Pointer.OrTypedNil((@unsafe.Pointer)default!), true),
         new(@unsafe.Pointer.FromPinnedBox(@new<nint>()), false)
     }.slice()) {
         reflectꓸValue x = new(nil);
@@ -3942,7 +3948,7 @@ public static void TestNestedMethods(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Errorf("Wrong method table for outer: (M=%p)"u8, ((Action<ж<outer>>)(M)));
         for (nint i = 0; i < typ.NumMethod(); i++) {
             var m = typ.Method(i);
-            Ꮡt.Errorf("\t%d: %s %p\n"u8, i, m.Name, (uintptr)m.Func.UnsafePointer());
+            Ꮡt.Errorf("\t%d: %s %p\n"u8, i, m.Name, @unsafe.Pointer.OrTypedNil((uintptr)m.Func.UnsafePointer()));
         }
     }
 }
@@ -3998,7 +4004,7 @@ public static void TestEmbeddedMethods(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Errorf("Wrong method table for OuterInt: (m=%p)"u8, ((Func<ж<OuterInt>, nint>)(M)));
         for (nint iΔ1 = 0; iΔ1 < typ.NumMethod(); iΔ1++) {
             var m = typ.Method(iΔ1);
-            Ꮡt.Errorf("\t%d: %s %p\n"u8, iΔ1, m.Name, (uintptr)m.Func.UnsafePointer());
+            Ꮡt.Errorf("\t%d: %s %p\n"u8, iΔ1, m.Name, @unsafe.Pointer.OrTypedNil((uintptr)m.Func.UnsafePointer()));
         }
     }
     var i = Ꮡ(new InnerInt(3));
@@ -4270,7 +4276,7 @@ public static void TestSlice(ж<Δtesting.T> Ꮡt) {
     rv = rv.Slice(5, 5);
     @unsafe.Pointer ptr3 = (uintptr)rv.UnsafePointer();
     if (ptr3 != ptr2) {
-        Ꮡt.Errorf("xs.Slice(3,4).Slice3(5,5).UnsafePointer() = %p, want %p"u8, ptr3, ptr2);
+        Ꮡt.Errorf("xs.Slice(3,4).Slice3(5,5).UnsafePointer() = %p, want %p"u8, @unsafe.Pointer.OrTypedNil(ptr3), @unsafe.Pointer.OrTypedNil(ptr2));
     }
 }
 
@@ -4336,7 +4342,7 @@ public static void TestSlice3(ж<Δtesting.T> Ꮡt) {
     rv = rv.Slice3(4, 4, 4);
     @unsafe.Pointer ptr3 = (uintptr)rv.UnsafePointer();
     if (ptr3 != ptr2) {
-        Ꮡt.Errorf("xs.Slice3(3,5,7).Slice3(4,4,4).UnsafePointer() = %p, want %p"u8, ptr3, ptr2);
+        Ꮡt.Errorf("xs.Slice3(3,5,7).Slice3(4,4,4).UnsafePointer() = %p, want %p"u8, @unsafe.Pointer.OrTypedNil(ptr3), @unsafe.Pointer.OrTypedNil(ptr2));
     }
 }
 
@@ -6606,6 +6612,9 @@ public static void TestSliceOfGC(ж<Δtesting.T> Ꮡt) {
 internal static readonly @string hasInvalidNameˢ = "has invalid name"u8;
 internal static readonly @string hasNoNameˢ = "has no name"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string structStrᶜ = @"struct { φ string; ValidName string; Val1dNam5 string }"u8;
+
 public static void TestStructOfFieldName(ж<Δtesting.T> Ꮡt) {
     // invalid field name "1nvalid"
     shouldPanic(hasInvalidNameˢ, () => {
@@ -6643,7 +6652,7 @@ public static void TestStructOfFieldName(ж<Δtesting.T> Ꮡt) {
         )
     }.slice();
     var validStruct = StructOf(validFields);
-    @string structStr = @"struct { φ string; ValidName string; Val1dNam5 string }"u8;
+    @string structStr = structStrᶜ;
     {
         @string got = validStruct.String();
         @string want = structStr; if (got != want) {
@@ -6654,6 +6663,9 @@ public static void TestStructOfFieldName(ж<Δtesting.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string duplicateFieldˢ = "duplicate field"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string stStrᶜ = @"struct { S string ""s""; X uint8 ""x""; Y uint64; Z [3]uint16 }"u8;
 
 [GoType("dyn")] internal partial struct TestStructOf_i {
     public @string String;
@@ -6708,7 +6720,7 @@ public static void TestStructOf(ж<Δtesting.T> Ꮡt) {
     if (s != want) {
         Ꮡt.Errorf("constructed struct = %s, want %s"u8, s, want);
     }
-    @string stStr = @"struct { S string ""s""; X uint8 ""x""; Y uint64; Z [3]uint16 }"u8;
+    @string stStr = stStrᶜ;
     {
         @string got = st.String();
         @string wantΔ1 = stStr; if (got != wantΔ1) {
@@ -10500,7 +10512,7 @@ public static void TestValuePointerAndUnsafePointer(ж<Δtesting.T> Ꮡt) {
         new("pointer"u8, ValueOf(ptr.OrTypedNil()), @unsafe.Pointer.FromPinnedBox(ptr)),
         new("channel"u8, ValueOf(ch), ~Ꮡ(new @unsafe.Pointer((uintptr)Ꮡch))),
         new("map"u8, ValueOf(m), ~Ꮡ(new @unsafe.Pointer((uintptr)Ꮡm))),
-        new("unsafe.Pointer"u8, ValueOf(unsafePtr), unsafePtr.Value),
+        new("unsafe.Pointer"u8, ValueOf(@unsafe.Pointer.OrTypedNil(unsafePtr)), unsafePtr.Value),
         new("function"u8, ValueOf((fn).OrTypedNilFunc()), (~Ꮡ(Ꮡ(new @unsafe.Pointer((uintptr)Ꮡfn)))).Value),
         new("slice"u8, ValueOf(Δslice), @unsafe.Pointer.FromPinnedBox(@unsafe.SliceData(Δslice))),
         new("string"u8, ValueOf(s), @unsafe.Pointer.FromPinnedBox(@unsafe.StringData(s)))
@@ -10517,7 +10529,7 @@ public static void TestValuePointerAndUnsafePointer(ж<Δtesting.T> Ꮡt) {
             }
             {
                 @unsafe.Pointer got = (uintptr)tcʗ1.val.UnsafePointer(); if (got != tcʗ1.wantUnsafePointer) {
-                    tΔ1.Errorf("unexpected unsafe.Pointer result, got %#x, want %#x"u8, got, tcʗ1.wantUnsafePointer);
+                    tΔ1.Errorf("unexpected unsafe.Pointer result, got %#x, want %#x"u8, @unsafe.Pointer.OrTypedNil(got), @unsafe.Pointer.OrTypedNil(tcʗ1.wantUnsafePointer));
                 }
             }
         });

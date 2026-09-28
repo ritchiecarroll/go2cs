@@ -718,10 +718,13 @@ public static void TestCookieValid(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantCookieStringᶜ = @"cookie-9=i3e01nf61b6t23bvfmplnanol3; Path=/restricted/; Domain=example.com; Expires=Tue, 10 Nov 2009 23:00:00 GMT; Max-Age=3600"u8;
+
 public static void BenchmarkCookieString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    @string wantCookieString = @"cookie-9=i3e01nf61b6t23bvfmplnanol3; Path=/restricted/; Domain=example.com; Expires=Tue, 10 Nov 2009 23:00:00 GMT; Max-Age=3600"u8;
+    @string wantCookieString = wantCookieStringᶜ;
     var c = Ꮡ(new ΔCookie(
         Name: "cookie-9"u8,
         Value: "i3e01nf61b6t23bvfmplnanol3"u8,

@@ -29,10 +29,19 @@ using static go.archive.tar_package;
 
 partial class tar_internal_test_package {
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string uniqueAᶜ = "-  "u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string uniqueBᶜ = "+  "u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string identityᶜ = "   "u8;
+
 internal static @string bytediff(slice<byte> a, slice<byte> b) {
-    @string uniqueA = "-  "u8;
-    @string uniqueB = "+  "u8;
-    @string identity = "   "u8;
+    @string uniqueA = uniqueAᶜ;
+    @string uniqueB = uniqueBᶜ;
+    @string identity = identityᶜ;
     slice<@string> ss = default!;
     var sa = strings.Split(strings.TrimSpace(hex.Dump(a)), "\n"u8);
     var sb = strings.Split(strings.TrimSpace(hex.Dump(b)), "\n"u8);

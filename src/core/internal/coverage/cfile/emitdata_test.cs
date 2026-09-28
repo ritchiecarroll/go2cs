@@ -498,6 +498,9 @@ internal static void testEmitWithCounterClearNonAtomic(ж<testing.T> Ꮡt, @stri
 internal static readonly @string nocoverˢ = "nocover"u8;
 internal static readonly @string emitDirNoˢ = "emitDirNo"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = "not built with -cover"u8;
+
 public static void TestApisOnNocoverBinary(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skipf("skipping test: too long for short mode"u8);
@@ -512,7 +515,7 @@ public static void TestApisOnNocoverBinary(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Fatalf("expected error on TestApisOnNocoverBinary harness run"u8);
     }
-    @string want = "not built with -cover"u8;
+    @string want = wantᶜ;
     if (!strings.Contains(output, want)) {
         Ꮡt.Errorf("error output does not contain %q: %s"u8, want, output);
     }

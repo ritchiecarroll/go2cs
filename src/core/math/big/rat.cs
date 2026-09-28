@@ -142,7 +142,7 @@ internal static (float32 f, bool exact) quotToFloat32(nat a, nat b) {
         nuint shift = (nuint)((nint)Emin - (exp - 1)); // [1..Esize1)
         var lostbits = (uint32)(mantissa & (((uint32)1).Lsh(shift) - 1));
         haveRem = haveRem || lostbits != 0;
-        mantissa >>= (int)(shift);
+        mantissa.RshAssign(shift);
         exp = 2 - Ebias; // == exp + shift
     }
     // Round q using round-half-to-even.
@@ -236,7 +236,7 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
         nuint shift = (nuint)((nint)Emin - (exp - 1)); // [1..Esize1)
         var lostbits = (uint64)(mantissa & (((uint64)1).Lsh(shift) - 1));
         haveRem = haveRem || lostbits != 0;
-        mantissa >>= (int)(shift);
+        mantissa.RshAssign(shift);
         exp = 2 - Ebias; // == exp + shift
     }
     // Round q using round-half-to-even.

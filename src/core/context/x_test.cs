@@ -566,7 +566,7 @@ internal static void testLayers(ж<testing.T> Ꮡt, int64 seed, bool testTimeout
         var r = rand.New(rand.NewSource(seed));
         @string prefix = fmt.Sprintf("seed=%d"u8, seed);
         void errorf(@string format, params ꓸꓸꓸany aʗp) {
-            var a = aʗp.slice();
+            var a = aʗp.sslice();
             Ꮡt.Errorf(prefix + format, a.ꓸꓸꓸ);
         }
         const nint minLayers = 30;

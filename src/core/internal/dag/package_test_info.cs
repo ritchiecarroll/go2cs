@@ -31,7 +31,7 @@ using static global::go.@internal.dag_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/dag/alg_test.go", "alg_test.cs", "AA8agoKC1oKC7oKCAAkIgoKCgpSCgoKC", "35-39:1;40-45:2")]
+[assembly: go.GoPositionMap("internal/dag/alg_test.go", "alg_test.cs", "AA8agoKC1oKC7oKCAAwIgoKCgpSCgoKC", "35-39:1;40-45:2")]
 [assembly: go.GoPositionMap("internal/dag/parse_test.go", "parse_test.cs", "ABIigoKCgpSmooSCgoKWgoKCgoKkpAAJDJSEgoKo")]
 // </GoSourcePositionMaps>
 

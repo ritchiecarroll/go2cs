@@ -192,8 +192,11 @@ public static void TestReaderWriteTo(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dataᶜ = "hello world"u8;
+
 public static void TestReaderLen(ж<testing.T> Ꮡt) {
-    @string data = "hello world"u8;
+    @string data = dataᶜ;
     var r = NewReader(slice<byte>(data));
     {
         nint got = r.Len();
@@ -327,6 +330,9 @@ public static void TestReaderLenSize(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = "abcdef"u8;
+
 public static void TestReaderReset(ж<testing.T> Ꮡt) {
     var r = NewReader(slice<byte>("世界"u8));
     {
@@ -334,7 +340,7 @@ public static void TestReaderReset(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("ReadRune: unexpected error: %v"u8, errΔ1);
         }
     }
-    @string want = "abcdef"u8;
+    @string want = wantᶜ;
     r.Reset(slice<byte>(want));
     {
         var errΔ2 = r.UnreadRune(); if (errΔ2 == default!) {

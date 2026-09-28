@@ -959,8 +959,11 @@ public static void TestWriteStringStringWriter(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string longStringᶜ = "And now, hello, world! It is the time for all good men to come to the aid of their party"u8;
+
 public static void TestBufferFull(ж<Δtesting.T> Ꮡt) {
-    @string longString = "And now, hello, world! It is the time for all good men to come to the aid of their party"u8;
+    @string longString = longStringᶜ;
     var buf = NewReaderSize(new bufio_test_package.strings_ReaderжReader(strings.NewReader(longString)), minReadBufferSize);
     var (line, err) = buf.ReadSlice((rune)'!');
     if (((sstring)line) != "And now, hello, "u8 || !AreEqual(err, ErrBufferFull)) {

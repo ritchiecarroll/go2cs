@@ -92,9 +92,15 @@ public static void TestParsePKCS1PrivateKey(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string pkixPublicKeyᶜ = "30820122300d06092a864886f70d01010105000382010f003082010a0282010100dd5a0f37d3ca5232852ccc0e81eebec270e2f2c6c44c6231d852971a0aad00aa7399e9b9de444611083c59ea919a9d76c20a7be131a99045ec19a7bb452d647a72429e66b87e28be9e8187ed1d2a2a01ef3eb2360706bd873b07f2d1f1a72337aab5ec94e983e39107f52c480d404915e84d75a3db2cfd601726a128cb1d7f11492d4bdb53272e652276667220795c709b8a9b4af6489cbf48bb8173b8fb607c834a71b6e8bf2d6aab82af3c8ad7ce16d8dcf58373a6edc427f7484d09744d4c08f4e19ed07adbf6cb31243bc5d0d1145e77a08a6fc5efd208eca67d6abf2d6f38f58b6fdd7c28774fb0cc03fc4935c6e074842d2e1479d3d8787249258719f90203010001"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string errorContainsᶜ = "use ParsePKIXPublicKey instead"u8;
+
 public static void TestPKCS1MismatchPublicKeyFormat(ж<testing.T> Ꮡt) {
-    @string pkixPublicKey = "30820122300d06092a864886f70d01010105000382010f003082010a0282010100dd5a0f37d3ca5232852ccc0e81eebec270e2f2c6c44c6231d852971a0aad00aa7399e9b9de444611083c59ea919a9d76c20a7be131a99045ec19a7bb452d647a72429e66b87e28be9e8187ed1d2a2a01ef3eb2360706bd873b07f2d1f1a72337aab5ec94e983e39107f52c480d404915e84d75a3db2cfd601726a128cb1d7f11492d4bdb53272e652276667220795c709b8a9b4af6489cbf48bb8173b8fb607c834a71b6e8bf2d6aab82af3c8ad7ce16d8dcf58373a6edc427f7484d09744d4c08f4e19ed07adbf6cb31243bc5d0d1145e77a08a6fc5efd208eca67d6abf2d6f38f58b6fdd7c28774fb0cc03fc4935c6e074842d2e1479d3d8787249258719f90203010001"u8;
-    @string errorContains = "use ParsePKIXPublicKey instead"u8;
+    @string pkixPublicKey = pkixPublicKeyᶜ;
+    @string errorContains = errorContainsᶜ;
     var (derBytes, _) = hex.DecodeString(pkixPublicKey);
     var (_, err) = ParsePKCS1PublicKey(derBytes);
     if (!strings.Contains(err.Error(), errorContains)) {
@@ -216,9 +222,15 @@ MCowBQYDK2VuAyEA5yGXrH/6OzxuWEhEWS01/f4OP+Of3Yrddy6/J1kDTVM=
 
 """u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string pkcs1PublicKeyᶜ = "308201080282010100817cfed98bcaa2e2a57087451c7674e0c675686dc33ff1268b0c2a6ee0202dec710858ee1c31bdf5e7783582e8ca800be45f3275c6576adc35d98e26e95bb88ca5beb186f853b8745d88bc9102c5f38753bcda519fb05948d5c77ac429255ff8aaf27d9f45d1586e95e2e9ba8a7cb771b8a09dd8c8fed3f933fd9b439bc9f30c475953418ef25f71a2b6496f53d94d39ce850aa0cc75d445b5f5b4f4ee4db78ab197a9a8d8a852f44529a007ac0ac23d895928d60ba538b16b0b087a7f903ed29770e215019b77eaecc360f35f7ab11b6d735978795b2c4a74e5bdea4dc6594cd67ed752a108e666729a753ab36d6c4f606f8760f507e1765be8cd744007e629020103"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string errorContainsᶜ1 = "use ParsePKCS1PublicKey instead"u8;
+
 public static void TestPKIXMismatchPublicKeyFormat(ж<testing.T> Ꮡt) {
-    @string pkcs1PublicKey = "308201080282010100817cfed98bcaa2e2a57087451c7674e0c675686dc33ff1268b0c2a6ee0202dec710858ee1c31bdf5e7783582e8ca800be45f3275c6576adc35d98e26e95bb88ca5beb186f853b8745d88bc9102c5f38753bcda519fb05948d5c77ac429255ff8aaf27d9f45d1586e95e2e9ba8a7cb771b8a09dd8c8fed3f933fd9b439bc9f30c475953418ef25f71a2b6496f53d94d39ce850aa0cc75d445b5f5b4f4ee4db78ab197a9a8d8a852f44529a007ac0ac23d895928d60ba538b16b0b087a7f903ed29770e215019b77eaecc360f35f7ab11b6d735978795b2c4a74e5bdea4dc6594cd67ed752a108e666729a753ab36d6c4f606f8760f507e1765be8cd744007e629020103"u8;
-    @string errorContains = "use ParsePKCS1PublicKey instead"u8;
+    @string pkcs1PublicKey = pkcs1PublicKeyᶜ;
+    @string errorContains = errorContainsᶜ1;
     var (derBytes, _) = hex.DecodeString(pkcs1PublicKey);
     var (_, err) = ParsePKIXPublicKey(derBytes);
     if (!strings.Contains(err.Error(), errorContains)) {
@@ -655,6 +667,9 @@ public static void TestCertificateEqualOnNil(ж<testing.T> Ꮡt) {
 internal static readonly object failedToFindPemBlockˢ = (@string)"Failed to find PEM block"u8;
 internal static readonly object checkSignatureˢ = (@string)"CheckSignature unexpectedly return no error"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectedSubstringᶜ = " but have public key of type "u8;
+
 public static void TestMismatchedSignatureAlgorithm(ж<testing.T> Ꮡt) {
     var (der, _) = pem.Decode(slice<byte>(rsaPSSSelfSignedPEM));
     if (der == nil) {
@@ -669,7 +684,7 @@ public static void TestMismatchedSignatureAlgorithm(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(checkSignatureˢ);
         }
     }
-    @string expectedSubstring = " but have public key of type "u8;
+    @string expectedSubstring = expectedSubstringᶜ;
     if (!strings.Contains(err.Error(), expectedSubstring)) {
         Ꮡt.Errorf("Expected error containing %q, but got %q"u8, expectedSubstring, err);
     }
@@ -1683,6 +1698,9 @@ public static void TestParseCertificateRequest(ж<testing.T> Ꮡt) {
 internal static readonly @string maybAf8CAQAˢ = "MAYBAf8CAQA="u8;
 internal static readonly @string awIChAˢ = "AwIChA=="u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string csrBase64ᶜ = "MIICrTCCAZUCAQIwMzEgMB4GA1UEAwwXU0NFUCBDQSBmb3IgRGV2ZWxlciBTcmwxDzANBgNVBAsMBjQzNTk3MTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALFMAJ7Zy9YyfgbNlbUWAW0LalNRMPs7aXmLANsCpjhnw3lLlfDPaLeWyKh1nK5I5ojaJOW6KIOSAcJkDUe3rrE0wR0RVt3UxArqs0R/ND3u5Q+bDQY2X1HAFUHzUzcdm5JRAIA355v90teMckaWAIlkRQjDE22Lzc6NAl64KOd1rqOUNj8+PfX6fSo20jm94Pp1+a6mfk3G/RUWVuSm7owO5DZI/Fsi2ijdmb4NUar6K/bDKYTrDFkzcqAyMfP3TitUtBp19Mp3B1yAlHjlbp/r5fSSXfOGHZdgIvp0WkLuK2u5eQrX5l7HMB/5epgUs3HQxKY6ljhh5wAjDwz//LsCAwEAAaA1MDMGCSqGSIb3DQEJDjEmMCQwEgYDVR0TAQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAoQwDQYJKoZIhvcNAQEFBQADggEBAAMq3bxJSPQEgzLYR/yaVvgjCDrc3zUbIwdOis6Go06Q4RnjH5yRaSZAqZQTDsPurQcnz2I39VMGEiSkFJFavf4QHIZ7QFLkyXadMtALc87tm17Ej719SbHcBSSZayR9VYJUNXRLayI6HvyUrmqcMKh+iX3WY3ICr59/wlM0tYa8DYN4yzmOa2Onb29gy3YlaF5A2AKAMmk003cRT9gY26mjpv7d21czOSSeNyVIoZ04IR9ee71vWTMdv0hu/af5kSjQ+ZG5/Qgc0+mnECLz/1gtxt1srLYbtYQ/qAY8oX1DCSGFS61tN/vl+4cxGMD/VGcGzADRLRHSlVqy2Qgss6Q="u8;
+
 [GoType("dyn")] internal partial struct TestCriticalFlagInCSRRequestedExtensions_expected {
     public asn1.ObjectIdentifier Id;
     public slice<byte> Value;
@@ -1691,7 +1709,7 @@ internal static readonly @string awIChAˢ = "AwIChA=="u8;
 public static void TestCriticalFlagInCSRRequestedExtensions(ж<testing.T> Ꮡt) {
     // This CSR contains an extension request where the extensions have a
     // critical flag in them. In the past we failed to handle this.
-    @string csrBase64 = "MIICrTCCAZUCAQIwMzEgMB4GA1UEAwwXU0NFUCBDQSBmb3IgRGV2ZWxlciBTcmwxDzANBgNVBAsMBjQzNTk3MTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALFMAJ7Zy9YyfgbNlbUWAW0LalNRMPs7aXmLANsCpjhnw3lLlfDPaLeWyKh1nK5I5ojaJOW6KIOSAcJkDUe3rrE0wR0RVt3UxArqs0R/ND3u5Q+bDQY2X1HAFUHzUzcdm5JRAIA355v90teMckaWAIlkRQjDE22Lzc6NAl64KOd1rqOUNj8+PfX6fSo20jm94Pp1+a6mfk3G/RUWVuSm7owO5DZI/Fsi2ijdmb4NUar6K/bDKYTrDFkzcqAyMfP3TitUtBp19Mp3B1yAlHjlbp/r5fSSXfOGHZdgIvp0WkLuK2u5eQrX5l7HMB/5epgUs3HQxKY6ljhh5wAjDwz//LsCAwEAAaA1MDMGCSqGSIb3DQEJDjEmMCQwEgYDVR0TAQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAoQwDQYJKoZIhvcNAQEFBQADggEBAAMq3bxJSPQEgzLYR/yaVvgjCDrc3zUbIwdOis6Go06Q4RnjH5yRaSZAqZQTDsPurQcnz2I39VMGEiSkFJFavf4QHIZ7QFLkyXadMtALc87tm17Ej719SbHcBSSZayR9VYJUNXRLayI6HvyUrmqcMKh+iX3WY3ICr59/wlM0tYa8DYN4yzmOa2Onb29gy3YlaF5A2AKAMmk003cRT9gY26mjpv7d21czOSSeNyVIoZ04IR9ee71vWTMdv0hu/af5kSjQ+ZG5/Qgc0+mnECLz/1gtxt1srLYbtYQ/qAY8oX1DCSGFS61tN/vl+4cxGMD/VGcGzADRLRHSlVqy2Qgss6Q="u8;
+    @string csrBase64 = csrBase64ᶜ;
     var csrBytes = fromBase64(csrBase64);
     var (csr, err) = ParseCertificateRequest(csrBytes);
     if (err != default!) {
@@ -2220,13 +2238,16 @@ o+WoY6IsCKXV/g==
 -----END CERTIFICATE-----
 """u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectedᶜ = "empty name constraints"u8;
+
 public static void TestEmptyNameConstraints(ж<testing.T> Ꮡt) {
     var (block, _) = pem.Decode(slice<byte>(emptyNameConstraintsPEM));
     var (_, err) = ParseCertificate((~block).Bytes);
     if (err == default!) {
         Ꮡt.Fatal(unexpectedSuccessˢ);
     }
-    @string expected = "empty name constraints"u8;
+    @string expected = expectedᶜ;
     {
         @string str = err.Error(); if (!strings.Contains(str, expected)) {
             Ꮡt.Errorf("expected %q in error but got %q"u8, expected, str);
@@ -2420,13 +2441,16 @@ pdX+
 -----END CERTIFICATE-----
 """u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectedᶜ1 = "contained invalid mask"u8;
+
 public static void TestBadIPMask(ж<testing.T> Ꮡt) {
     var (block, _) = pem.Decode(slice<byte>(badIPMaskPEM));
     var (_, err) = ParseCertificate((~block).Bytes);
     if (err == default!) {
         Ꮡt.Fatalf("unexpected success"u8);
     }
-    @string expected = "contained invalid mask"u8;
+    @string expected = expectedᶜ1;
     if (!strings.Contains(err.Error(), expected)) {
         Ꮡt.Fatalf("expected %q in error but got: %s"u8, expected, err);
     }
@@ -2731,7 +2755,7 @@ public static void TestCreateRevocationList(ж<testing.T> Ꮡt) {
             template: Ꮡ(new RevocationList(
                 ThisUpdate: new time.Time(nil).Add((time.Duration)(86400000000000L)),
                 NextUpdate: new time.Time(nil).Add((time.Duration)(172800000000000L)),
-                Number: big.NewInt(0).SetBytes(appendꓸꓸꓸ(new byte[]{1}.slice(), new slice<byte>(20)))
+                Number: big.NewInt(0).SetBytes(appendꓸꓸꓸ(new byte[]{1}.slice(), makeꓸꓸꓸ<byte>(20)))
             )),
             expectedError: "x509: CRL number exceeds 20 octets"u8
         ),
@@ -2748,7 +2772,7 @@ public static void TestCreateRevocationList(ж<testing.T> Ꮡt) {
             template: Ꮡ(new RevocationList(
                 ThisUpdate: new time.Time(nil).Add((time.Duration)(86400000000000L)),
                 NextUpdate: new time.Time(nil).Add((time.Duration)(172800000000000L)),
-                Number: big.NewInt(0).SetBytes(appendꓸꓸꓸ(new byte[]{255}.slice(), new slice<byte>(19)))
+                Number: big.NewInt(0).SetBytes(appendꓸꓸꓸ(new byte[]{255}.slice(), makeꓸꓸꓸ<byte>(19)))
             )),
             expectedError: "x509: CRL number exceeds 20 octets"u8
         ),
@@ -3162,8 +3186,11 @@ public static void TestRSAPSAParameters(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string errorContainsᶜ2 = "unknown extended key usage"u8;
+
 public static void TestUnknownExtKey(ж<testing.T> Ꮡt) {
-    @string errorContains = "unknown extended key usage"u8;
+    @string errorContains = errorContainsᶜ2;
     var template = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(10),
         DNSNames: new @string[]{"foo"u8}.slice(),

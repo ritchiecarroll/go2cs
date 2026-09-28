@@ -46,7 +46,7 @@ internal static bitReader makeBitReader(this ж<Reader> Ꮡr, block data, nint o
 // val is called to fetch a value of b bits.
 [GoRecv] internal static uint32 val(this ref bitReader br, uint8 b) {
     var r = (uint32)(br.bits & ((((uint32)1).Lsh((uint64)(b))) - 1));
-    br.bits >>= (int)(b);
+    br.bits.RshAssign((uint64)(b));
     br.cnt -= (uint32)b;
     return r;
 }

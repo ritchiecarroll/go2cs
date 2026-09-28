@@ -1791,11 +1791,14 @@ public static void TestInsecurePaths(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string zipinsecurepath1ˢ = "zipinsecurepath=1"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string nameᶜ = "/foo"u8;
+
 public static void TestDisableInsecurePathCheck(ж<testing.T> Ꮡt) {
     Ꮡt.Setenv(godebugˢ, zipinsecurepath1ˢ);
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var zw = NewWriter(new zip_test_package.bytes_BufferжWriter(Ꮡbuf));
-    @string name = "/foo"u8;
+    @string name = nameᶜ;
     var (_, err) = zw.Create(name);
     if (err != default!) {
         Ꮡt.Fatalf("zw.Create(%q) = %v"u8, name, err);

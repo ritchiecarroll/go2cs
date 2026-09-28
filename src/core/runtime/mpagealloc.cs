@@ -695,7 +695,7 @@ nextLevel:
         nuint logMaxPages = levelLogPages[l];
         // We've moved into a new level, so let's update i to our new
         // starting index. This is a no-op for level 0.
-        i <<= (int)(levelBits[l]);
+        i.LshAssign(levelBits[l]);
         // Slice out the block of entries we care about.
         var entries = Δp.summary[l][(int)(i)..(int)(i + entriesPerBlock)];
         // Determine j0, the first index we should start iterating from.

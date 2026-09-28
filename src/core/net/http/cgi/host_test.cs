@@ -53,7 +53,7 @@ internal static ж<http.Request> newRequest(@string httpreq) {
 }
 
 internal static ж<httptest.ResponseRecorder> runCgiTest(ж<testing.T> Ꮡt, ж<global::go.net.http.cgi_package.Handler> Ꮡh, @string httpreq, map<@string, @string> expectedMap, params Span<Action<map<@string, @string>>> checksʗp) {
-    var checks = checksʗp.slice();
+    var checks = checksʗp.sslice();
 
     var rw = httptest.NewRecorder();
     var req = newRequest(httpreq);

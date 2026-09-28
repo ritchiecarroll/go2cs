@@ -206,7 +206,7 @@ public static void TestDriverPanic(ж<testing.T> Ꮡt) {
 }
 
 internal static void exec(testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.slice();
+    var args = argsʗp.sslice();
 
     t.Helper();
     var (_, err) = Ꮡdb.Exec(query, args.ꓸꓸꓸ);

@@ -32,7 +32,7 @@ using static global::go.text.template.parse_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("text/template/parse/lex_test.go", "lex_test.cs", "ADBkgoKClAAIEoIAxQKUBcKCyoKCgoKmpoKClIKClIKUgpSCpqaisoKCgpQAGzqisoKCAAkKogAJEISCuKIAChKEggA0bsKygoKClIKCgoIACBYACQKCgoKCgoI=")]
-[assembly: go.GoPositionMap("text/template/parse/parse_test.go", "parse_test.cs", "AFuyAaKGooKCgpSCgqaCgoKClIKClIKClJSClIKClIK2lIKClIK2lIKClIK2lIKClIK2AK4B4ALCgoCSgoKUgrSCtpKUtIKClJSC+oKokqbCgoCS3LKSgoKCgpSAggAMDPiCgJSChsaCgqimgoIACwrCgoKAkoKCgoKUgoCCABsqooKUgoKCgpSAggAICoKCgpSCgoKClIIAatYBgrKSgoKUggAKDIKqgoKClICSpIKClICSAAgIhJKCgoK4goKUgoKUgoLKooKCgoIACg6ipoKCgpSCABkIogAAJIKClIKCgpSC", "339-339:1;379-379:1;387-397:2;406-406:1;413-413:2;434-434:1;601-609:1")]
+[assembly: go.GoPositionMap("text/template/parse/parse_test.go", "parse_test.cs", "AFuyAaKGooKCgpSCgqaCgoKClIKClIKClJSClIKClIK2lIKClIK2lIKClIK2lIKClIK2AK4B4ALCgoCSgoKUgrSCtpKUtIKClJSC+oKokqbCgoCS3LKSgoKCgpSAggAMDPiCgJSChsaCgqimgoIACwrCgoKAkoKCgoKUgoCCABsqooKUgoKCgpSAggAICoKCgpSCgoKClIIAatYBgrKSgoKUggATDIKqgoKClICSpIKClICSAAgIhJKCgoK4goKUgoKUgoLKooKCgoIACg6ipoKCgpSCABkIogAAJIKClIKCgpSC", "339-339:1;379-379:1;387-397:2;406-406:1;413-413:2;434-434:1;601-609:1")]
 // </GoSourcePositionMaps>
 
 namespace go.text.template;

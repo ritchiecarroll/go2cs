@@ -310,8 +310,11 @@ public static void TestErrReader(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string msgᶜ = "Now is the time for all good gophers."u8;
+
 public static void TestStringsReader(ж<testing.T> Ꮡt) {
-    @string msg = "Now is the time for all good gophers."u8;
+    @string msg = msgᶜ;
     var r = strings.NewReader(msg);
     {
         var err = TestReader(new iotest_test_package.strings_ReaderжReader(r), slice<byte>(msg)); if (err != default!) {

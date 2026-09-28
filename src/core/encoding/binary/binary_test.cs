@@ -630,6 +630,9 @@ public static void TestReadErrorMsg(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dataᶜ = "0123456789abcdef"u8;
+
 [GoType("dyn")] internal partial struct TestReadTruncated_b2 {
     public byte A, B, C, D;
     public int32 E;
@@ -637,7 +640,7 @@ public static void TestReadErrorMsg(ж<testing.T> Ꮡt) {
 }
 
 public static void TestReadTruncated(ж<testing.T> Ꮡt) {
-    @string data = "0123456789abcdef"u8;
+    @string data = dataᶜ;
     ref var b1 = ref heap<slice<int32>>(out var Ꮡb1);
 
     b1 = new slice<int32>(4);

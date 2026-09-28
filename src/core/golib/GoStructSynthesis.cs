@@ -158,13 +158,15 @@ public static class GoStructSynthesis
     private const string DynamicAssemblyName = "go2cs.SynthesizedStructs";
 
     /// <summary>
-    /// The ONE dynamic module golib mints into — this file's structs and
-    /// <see cref="GoDelegateSynthesis"/>'s func types alike.
+    /// The CURRENT dynamic module golib mints into — this file's structs and
+    /// <see cref="GoDelegateSynthesis"/>'s func types alike. It rotates to a fresh same-named assembly
+    /// every <see cref="ShardCapacity"/> types (see there); the NAME below is what every shard shares.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The assembly NAME is the load-bearing part, and it is why there is one module rather than two:
-    /// every converted csproj carries exactly one friend grant for a golib mint —
+    /// The assembly NAME is the load-bearing part, and it is why the struct and func mints share one
+    /// name rather than two (and why every shard reuses it): every converted csproj carries exactly one
+    /// friend grant for a golib mint —
     /// <c>&lt;InternalsVisibleTo Include="go2cs.SynthesizedStructs" /&gt;</c>, emitted by the
     /// converter (<c>projectFileWriter.go</c>) and by the test-project template — which is what lets
     /// a minted type's field or signature name an <c>internal</c> converted type, i.e. an unexported
@@ -183,12 +185,47 @@ public static class GoStructSynthesis
         {
             lock (s_mintLock)
             {
-                return s_module ??= AssemblyBuilder
-                    .DefineDynamicAssembly(new AssemblyName(DynamicAssemblyName), AssemblyBuilderAccess.Run)
-                    .DefineDynamicModule(DynamicAssemblyName);
+                // SHARDED: every call is one type about to be defined, and a module holding
+                // ShardCapacity types rotates to a fresh, SAME-NAMED dynamic assembly. See ShardCapacity.
+                if (s_module is null || ++s_shardTypes > ShardCapacity)
+                {
+                    s_module = AssemblyBuilder
+                        .DefineDynamicAssembly(new AssemblyName(DynamicAssemblyName), AssemblyBuilderAccess.Run)
+                        .DefineDynamicModule(DynamicAssemblyName);
+
+                    s_shardTypes = 1;
+                    s_containers.Clear();
+                    s_createdContainers.Clear();
+                }
+
+                return s_module;
             }
         }
     }
+
+    // THE SHARD BOUND (option (b); ruled 2026-09-27). One dynamic module made every mint O(n) in the
+    // types already minted -- two costs grow with the module, both measured with dotnet-stack: a custom-
+    // attribute read on a synthesized type (abi.synthType -> TypeStampedDims ->
+    // GetCustomAttributeRecords) scans the module's UNINDEXED custom-attribute table, and
+    // RuntimeTypeBuilder.CreateTypeNoLock grows with it. Per type that read 0.95 / 8.4 / 19.6 ms at
+    // 5k / 20k / 40k types, so internal/synctest's TestReflectFuncOf (100,000 distinct StructOf types)
+    // extrapolated to ~2,600 s and held its host to the deadline.
+    //
+    // Rotating to a fresh assembly every ShardCapacity types bounds both. Measured, 100,000 of the
+    // test's mkfunc on R-LAPTOP (Release, tiering off): K=128 flat ~112 us/type, 11.1 / 11.2 s, peak
+    // working set 486 / 496 MB; K=512 15.9 / 16.3 s, 487 / 496 MB; K=2048 41.0 s. 128 is the fastest
+    // with no working-set cost.
+    //
+    // WHAT DOES NOT CHANGE. Identity: s_byShape (and GoDelegateSynthesis's s_bySignature) stay ONE
+    // intern above the shards, so StructOf of one shape is one Type whichever shard minted it. The
+    // FRIEND GRANT: every shard carries the same simple name, and a converted csproj's
+    // `InternalsVisibleTo go2cs.SynthesizedStructs` matches by that name (no key), so a later shard can
+    // still name an unexported converted type. Nothing finds a synthesized type by name or assembly;
+    // every consumer holds the Type itself. The pkgpath containers are per module (a nested type must
+    // live beside its container) and reset with the shard; GoPackagePath reads only a container's NAME.
+    private const int ShardCapacity = 128;
+
+    private static int s_shardTypes;
 
     // A synthesized ARRAY field's zero value, reached from the emitted parameterless constructor by
     // slot. It is a fresh value per call, never a shared prototype: ZeroValueOf builds real backing

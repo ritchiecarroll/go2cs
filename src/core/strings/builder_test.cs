@@ -174,6 +174,9 @@ public static void TestBuilderGrow(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string s0ᶜ = "hello 世界"u8;
+
 [GoType("dyn")] internal partial struct TestBuilderWrite2_type {
     internal @string name;
     internal Func<ж<strings.Builder>, (nint, error)> fn;
@@ -182,7 +185,7 @@ public static void TestBuilderGrow(ж<testing.T> Ꮡt) {
 }
 
 public static void TestBuilderWrite2(ж<testing.T> Ꮡt) {
-    @string s0 = "hello 世界"u8;
+    @string s0 = s0ᶜ;
     foreach (var (_, vᴛ1) in new TestBuilderWrite2_type[]{
         new(
             "Write"u8,

@@ -165,8 +165,11 @@ public static void TestEmptyReaderConcurrent(ж<testing.T> Ꮡt) {
     Ꮡwg.Wait();
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string strᶜ = "0123456789"u8;
+
 public static void TestWriteTo(ж<testing.T> Ꮡt) {
-    @string str = "0123456789"u8;
+    @string str = strᶜ;
     for (nint i = 0; i <= len(str); i++) {
         @string s = str[(int)(i)..];
         var r = strings.NewReader(s);
@@ -204,6 +207,9 @@ public static void TestReaderLenSize(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = "abcdef"u8;
+
 public static void TestReaderReset(ж<testing.T> Ꮡt) {
     var r = strings.NewReader("世界"u8);
     {
@@ -211,7 +217,7 @@ public static void TestReaderReset(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("ReadRune: unexpected error: %v"u8, errΔ1);
         }
     }
-    @string want = "abcdef"u8;
+    @string want = wantᶜ;
     r.Reset(want);
     {
         var errΔ2 = r.UnreadRune(); if (errΔ2 == default!) {

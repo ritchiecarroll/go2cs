@@ -1,0 +1,160 @@
+<Project>
+
+  <!-- The test project shares its directory with the production project, and NuGet writes each
+       project's restore artifacts (project.assets.json) under MSBuildProjectExtensionsPath, which
+       defaults to obj/ for both. Sharing one path makes the two projects overwrite each other's
+       assets: a production project pulled into the test build graph then reads the TEST project's
+       assets and appears to reference itself through the test closure — MSB4006, "circular
+       dependency involving ResolveProjectReferences". These roots give each project its own. They
+       must be set BEFORE Sdk.props, hence the explicit SDK imports rather than the Sdk attribute. -->
+  <PropertyGroup>
+    <MSBuildProjectExtensionsPath>obj/tests/</MSBuildProjectExtensionsPath>
+    <BaseIntermediateOutputPath>obj/tests/</BaseIntermediateOutputPath>
+    <BaseOutputPath>bin/tests/</BaseOutputPath>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
+    <RootNamespace>go.@internal</RootNamespace>
+    <AssemblyName>internal.synctest.tests</AssemblyName>
+    <Product>go2cs</Product>
+    <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
+    <AssemblyTitle>$(Description)</AssemblyTitle>
+    <Authors>$(Product) Authors</Authors>
+    <Company>The $(Authors)</Company>
+    <Copyright>Copyright © 2018-2026 $(Company)</Copyright>
+    <RepositoryUrl>https://github.com/ritchiecarroll/go2cs</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <ApplicationIcon>go2cs.ico</ApplicationIcon>
+    <!-- Same rationale as the production template (csproj-template.xml): `annotations` because Go
+         has no non-nullable reference type, and a NoWarn list of the diagnostics that are structural
+         to the Go emission model rather than defects. The two lists must stay in step. -->
+    <Nullable>annotations</Nullable>
+    <NoWarn>CS0162;CS0164;CS0282;CS0660;CS0661;CS1717;CS1718;CS8618;CS8860;CS8974;CS8981;IDE0060;IDE1006;CA2255</NoWarn>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <IsPackable>false</IsPackable>
+    <!-- The compile view must be EXACTLY the direct references the test converter computed: a
+         transitive project reference that contributes a child `go.<pkg>` namespace (e.g.
+         internal/testenv dragging io/fs, namespace go.io) collides with the converter's
+         in-namespace `using io = io_package;` alias emission (CS0576) — the alias machinery is
+         computed against the direct import closure only. -->
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+  </PropertyGroup>
+
+  <!-- reflect.StructOf mints synthesized structs into the fixed-name dynamic assembly
+       go2cs.SynthesizedStructs, and a Go test that calls StructOf over a type declared in its OWN
+       package hands it a field type internal to THIS assembly. Without the grant that type cannot be
+       loaded from there: CreateType throws a bare TypeLoadException naming nothing, and the
+       half-built TypeBuilder then poisons the synthesis assembly for every later GetTypes().
+       Measured — reflect's TestStructOfExportRules fails on
+       `S1 : TestStructOfExportRules_S1  asm=reflect.tests  public=False`, which the production-side
+       grant cannot reach because the type lives HERE. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="go2cs.SynthesizedStructs" />
+  </ItemGroup>
+
+  <!-- Must defer to the bin/tests/ BaseOutputPath above: build outputs are copied to $(OutDir), so
+       an unconditional pin here would put the test host in the PRODUCTION project's bin/. -->
+  <PropertyGroup Condition="'$(OutDir)'=='' AND '$(BaseOutputPath)'==''">
+    <OutDir>bin/$(Configuration)/$(TargetFramework)/</OutDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(USERPROFILE)'==''">
+    <USERPROFILE>$(HOME)</USERPROFILE>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(go2csPath)'==''">
+    <go2csPath Condition="'$(Configuration)'!='Debug'">$(USERPROFILE)/go2cs/</go2csPath>
+    <go2csPath Condition="'$(Configuration)'=='Debug' and '$(SolutionDir)'!=''">$(SolutionDir)</go2csPath>
+    <go2csPath Condition="'$(go2csPath)'==''">$(MSBuildThisFileDirectory)../../../</go2csPath>
+  </PropertyGroup>
+
+  <!-- Expose output of source generators as local files -->
+  <PropertyGroup>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+
+  <!-- THE RELOCATABLE SINGLE-FILE TEST HOST (the host-limit retirement). Go's test binary is
+       statically linked, so os/exec-style tests copy it to a temp directory and run the copy; a
+       framework-dependent apphost is build-bound to a same-basename assembly beside it and a lone
+       relocated file dies in hostfxr. Publishing this project therefore produces ONE self-contained
+       executable that survives lone-file relocation — the deployment property the disclosure class
+       named as its own retirement condition. Publish-gated so ordinary build/run keep the fast
+       framework-dependent shape; the RID is the HOST's own (the pipeline runs and relocates the
+       host on the machine that published it — Windows and Linux flavors each publish theirs).
+       Trimming stays OFF: the host's reflection surface (GoReflect, the witness tables) does not
+       trim, per the perf tree's TrimMode lessons. -->
+  <PropertyGroup Condition="'$(_IsPublishing)'=='true'">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)'==''">$(NETCoreSdkRuntimeIdentifier)</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <!-- Explicit compile items only (EnableDefaultCompileItems=false): the production sources are
+       recompiled into the test assembly alongside the converted test sources; nothing else in the
+       shared directory (Generated/**, *.cs.auto review siblings, the production package_info.cs)
+       can leak in because it is never listed. -->
+  <ItemGroup>
+    <Compile Include="go2cs_test_host.cs" />
+    <Compile Include="package_test_info.cs" />
+    <Compile Include="synctest_test.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="synctest.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="synctest_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
+    <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
+    <ProjectReference Include="$(go2csPath)core/iter/iter.csproj" />
+    <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
+    <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
+    <ProjectReference Include="$(go2csPath)core/strconv/strconv.csproj" />
+    <ProjectReference Include="$(go2csPath)core/sync/sync.csproj" />
+    <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
+    <ProjectReference Include="$(go2csPath)core/time/time.csproj" />
+    <ProjectReference Include="internal.synctest.csproj" />
+    <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
+  </ItemGroup>
+
+  <!-- Define Go type aliases -->
+  <ItemGroup>
+    <Using Include="go.builtin" Static="True" />
+    <Using Include="System" />
+    <Using Include="System.Numerics" />
+    <Using Include="System.Object" Alias="any" />
+    <Using Include="System.Byte" Alias="uint8" />
+    <Using Include="System.UInt16" Alias="uint16" />
+    <Using Include="System.UInt32" Alias="uint32" />
+    <Using Include="System.UInt64" Alias="uint64" />
+    <Using Include="System.SByte" Alias="int8" />
+    <Using Include="System.Int16" Alias="int16" />
+    <Using Include="System.Int32" Alias="int32" />
+    <Using Include="System.Int64" Alias="int64" />
+    <Using Include="System.Single" Alias="float32" />
+    <Using Include="System.Double" Alias="float64" />
+    <Using Include="System.Numerics.Complex" Alias="complex128" />
+    <Using Include="System.Int32" Alias="rune" />
+    <Using Include="System.Numerics.BigInteger" Alias="GoBigConst" />
+    <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
+    <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
+  </ItemGroup>
+
+  <!-- THE OPT-IN CPU SAMPLER (section 11.3 of docs/phase4/DESIGN-managed-profiling.md). The converter
+       sets <GoCpuProfiler>true</GoCpuProfiler> above only for a package in cpuProfilerTestPackages
+       (testConversion.go); without it this Import is skipped and the host carries neither the
+       go2cs.CpuProfiler companion nor its diagnostics dependency. -->
+  <Import Project="$(go2csPath)core/go2cs.CpuProfiler/GoCpuProfiler.targets" Condition="'$(GoCpuProfiler)'=='true'" />
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+</Project>

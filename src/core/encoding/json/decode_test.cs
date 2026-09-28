@@ -1545,9 +1545,15 @@ public static void TestUnmarshalPtrPtr(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string inputᶜ = "\"foobar\"<html> [\u2028 \u2029]";
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = @"""\""foobar\""\u003chtml\u003e [\u2028 \u2029]"""u8;
+
 public static void TestEscape(ж<testing.T> Ꮡt) {
-    @string input = "\"foobar\"<html> [\u2028 \u2029]";
-    @string want = @"""\""foobar\""\u003chtml\u003e [\u2028 \u2029]"""u8;
+    @string input = inputᶜ;
+    @string want = wantᶜ;
     var (got, err) = Marshal(input);
     if (err != default!) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);

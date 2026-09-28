@@ -1235,10 +1235,13 @@ public static void TestNoSectionOverlaps(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string bssˢ = ".bss"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testdataᶜ = "testdata/gcc-amd64-linux-exec"u8;
+
 public static void TestNobitsSection(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string testdata = "testdata/gcc-amd64-linux-exec"u8;
+        @string testdata = testdataᶜ;
         var (f, err) = Open(testdata);
         if (err != default!) {
             Ꮡt.Fatalf("could not read %s: %v"u8, testdata, err);
@@ -1508,10 +1511,13 @@ public static void TestIssue10996(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testdataᶜ1 = "testdata/gcc-amd64-linux-exec"u8;
+
 public static void TestDynValue(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string testdata = "testdata/gcc-amd64-linux-exec"u8;
+        @string testdata = testdataᶜ1;
         var (f, err) = Open(testdata);
         if (err != default!) {
             Ꮡt.Fatalf("could not read %s: %v"u8, testdata, err);
@@ -1530,9 +1536,15 @@ public static void TestDynValue(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string origᶜ = "testdata/compressed-64.obj"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = "decoding dwarf section info"u8;
+
 public static void TestIssue59208(ж<testing.T> Ꮡt) {
     // corrupted dwarf data should raise invalid dwarf data instead of invalid zlib
-    @string orig = "testdata/compressed-64.obj"u8;
+    @string orig = origᶜ;
     var (f, err) = Open(orig);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -1561,19 +1573,22 @@ public static void TestIssue59208(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Error(err);
     }
-    @string want = "decoding dwarf section info"u8;
+    @string want = wantᶜ;
     (_, err) = nf.DWARF();
     if (err == default! || !strings.Contains(err.Error(), want)) {
         Ꮡt.Errorf("DWARF = %v; want %q"u8, err, want);
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testdataᶜ2 = "testdata/gcc-amd64-linux-exec"u8;
+
 public static void BenchmarkSymbols64(ж<testing.B> Ꮡb) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
 
-        @string testdata = "testdata/gcc-amd64-linux-exec"u8;
+        @string testdata = testdataᶜ2;
         var (f, err) = Open(testdata);
         if (err != default!) {
             Ꮡb.Fatalf("could not read %s: %v"u8, testdata, err);
@@ -1595,12 +1610,15 @@ public static void BenchmarkSymbols64(ж<testing.B> Ꮡb) {
     finally { ᒐ.Run(); }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testdataᶜ3 = "testdata/gcc-386-freebsd-exec"u8;
+
 public static void BenchmarkSymbols32(ж<testing.B> Ꮡb) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
 
-        @string testdata = "testdata/gcc-386-freebsd-exec"u8;
+        @string testdata = testdataᶜ3;
         var (f, err) = Open(testdata);
         if (err != default!) {
             Ꮡb.Fatalf("could not read %s: %v"u8, testdata, err);

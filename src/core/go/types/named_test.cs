@@ -19,13 +19,8 @@ internal static readonly @string instˢ = "Inst"u8;
 internal static readonly @string underlyingˢ = "Underlying"u8;
 internal static readonly @string newMethodSetˢ = "NewMethodSet"u8;
 
-[GoType("dyn")] internal partial struct BenchmarkNamed_tests {
-    internal @string name;
-    internal typesꓸType typ;
-}
-
-public static void BenchmarkNamed(ж<testing.B> Ꮡb) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ32 = """
 
 package p
 
@@ -46,6 +41,14 @@ func (G[P]) N() (p P) { return }
 type Inst = G[int]
 	
 """u8;
+
+[GoType("dyn")] internal partial struct BenchmarkNamed_tests {
+    internal @string name;
+    internal typesꓸType typ;
+}
+
+public static void BenchmarkNamed(ж<testing.B> Ꮡb) {
+    @string src = srcᶜ32;
     var pkg = mustTypecheck(src, nil, nil);
     typesꓸType T = pkg.Scope().Lookup("T"u8).Type();
     typesꓸType G = pkg.Scope().Lookup("G"u8).Type();
@@ -103,9 +106,8 @@ internal static typesꓸType mustInstantiate(testing.TB tb, typesꓸType orig, p
     return inst;
 }
 
-// Test that types do not expand infinitely, as in go.dev/issue/52715.
-public static void TestFiniteTypeExpansion(ж<testing.T> Ꮡt) {
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ33 = """
 
 package p
 
@@ -124,6 +126,10 @@ func (Node[Q]) M(Q) {}
 type Inst = *Tree[int]
 
 """u8;
+
+// Test that types do not expand infinitely, as in go.dev/issue/52715.
+public static void TestFiniteTypeExpansion(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ33;
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
     var pkg = NewPackage("p"u8, (~(~f).Name).Name);
@@ -144,13 +150,8 @@ type Inst = *Tree[int]
     }
 }
 
-// TestMethodOrdering is a simple test verifying that the indices of methods of
-// a named type remain the same as long as the same source and AddMethod calls
-// are presented to the type checker in the same order (go.dev/issue/61298).
-public static void TestMethodOrdering(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ34 = """
 
 package p
 
@@ -161,6 +162,14 @@ func (T) c() {}
 func (T) b() {}
 
 """u8;
+
+// TestMethodOrdering is a simple test verifying that the indices of methods of
+// a named type remain the same as long as the same source and AddMethod calls
+// are presented to the type checker in the same order (go.dev/issue/61298).
+public static void TestMethodOrdering(ж<testing.T> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    @string src = srcᶜ34;
     // should get the same method order each time
     slice<@string> methods = default!;
     for (nint i = 0; i < 5; i++) {

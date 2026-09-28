@@ -2138,6 +2138,9 @@ public static @string SomeMethod(this Issue7379 _, nint x) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string html0SomeMethodHtmlˢ = "<html>{{0 | .SomeMethod}}</html>\n"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectᶜ = "<html>&lt;0&gt;</html>\n"u8;
+
 // This is a test for issue 7379: type assertion error caused panic, and then
 // the code to handle the panic breaks escaping. It's hard to see the second
 // problem once the first is fixed, but its fix is trivial so we let that go. See
@@ -2164,7 +2167,7 @@ public static void TestPipeToMethodIsEscaped(ж<testing.T> Ꮡt) {
     }
     for (nint i = 0; i < 3; i++) {
         @string str = tryExec();
-        @string expect = "<html>&lt;0&gt;</html>\n"u8;
+        @string expect = expectᶜ;
         if (str != expect) {
             Ꮡt.Errorf("expected %q got %q"u8, expect, str);
         }
@@ -2255,6 +2258,12 @@ internal static readonly @string barˢ = @"bar"u8;
 internal static readonly object javascriptAlert1ˢ = (@string)"javascript:alert(1)"u8;
 internal static readonly object expectedErrorExecutingT1ˢ = (@string)"expected error executing t1"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantErrorᶜ = @"template: ""foo"" is an incomplete or empty template"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = "bar"u8;
+
 // Covers issue 22780.
 public static void TestOrphanedTemplate(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -2264,7 +2273,7 @@ public static void TestOrphanedTemplate(ж<testing.T> Ꮡt) {
     var (ᴛ21, ᴛ22) = t1.New(fooˢ2).Parse(barˢ);
     var t2 = Must(ᴛ21, ᴛ22);
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-    @string wantError = @"template: ""foo"" is an incomplete or empty template"u8;
+    @string wantError = wantErrorᶜ;
     {
         var err = t1.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), javascriptAlert1ˢ); if (err == default!){
             Ꮡt.Fatal(expectedErrorExecutingT1ˢ);
@@ -2281,7 +2290,7 @@ public static void TestOrphanedTemplate(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("error executing t2: %s"u8, err);
         }
     }
-    @string want = "bar"u8;
+    @string want = wantᶜ;
     {
         @string got = b.String(); if (got != want) {
             Ꮡt.Fatalf("t2 rendered %q, want %q"u8, got, want);
@@ -2292,11 +2301,20 @@ public static void TestOrphanedTemplate(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string barˢ2 = "bar"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string tmplTextᶜ = @"{{.}}"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dataᶜ = @"<baz>"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ1 = @"&lt;baz&gt;"u8;
+
 // Covers issue 21844.
 public static void TestAliasedParseTreeDoesNotOverescape(ж<testing.T> Ꮡt) {
-    @string tmplText = @"{{.}}"u8;
-    @string data = @"<baz>"u8;
-    @string want = @"&lt;baz&gt;"u8;
+    @string tmplText = tmplTextᶜ;
+    @string data = dataᶜ;
+    @string want = wantᶜ1;
     // Templates "foo" and "bar" both alias the same underlying parse tree.
     var (ᴛ23, ᴛ24) = New(fooˢ2).Parse(tmplText);
     var tpl = Must(ᴛ23, ᴛ24);

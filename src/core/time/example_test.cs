@@ -437,6 +437,12 @@ internal static readonly @string feb32013At754pmPstˢ = "Feb 3, 2013 at 7:54pm (
 internal static readonly @string feb03ˢ = "2013-Feb-03"u8;
 internal static readonly object errorˢ = (@string)"error"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string longFormᶜ = "Jan 2, 2006 at 3:04pm (MST)"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string shortFormᶜ = "2006-Jan-02"u8;
+
 // Output:
 // time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 // time.Date(2009, time.November, 10, 23, 1, 0, 0, time.UTC)
@@ -448,13 +454,13 @@ public static void ExampleParse() {
     // Format use the same model to describe their input and output.
     // longForm shows by example how the reference time would be represented in
     // the desired layout.
-    @string longForm = "Jan 2, 2006 at 3:04pm (MST)"u8;
+    @string longForm = longFormᶜ;
     var (t, _) = Δtime.Parse(longForm, feb32013At754pmPstˢ);
     fmt.Println(t);
     // shortForm is another way the reference time would be represented
     // in the desired layout; it has no time zone present.
     // Note: without explicit zone, returns time in UTC.
-    @string shortForm = "2006-Jan-02"u8;
+    @string shortForm = shortFormᶜ;
     (t, _) = Δtime.Parse(shortForm, feb03ˢ);
     fmt.Println(t);
     // Some valid layouts are invalid time values, due to format specifiers
@@ -476,6 +482,12 @@ internal static readonly @string europeBerlinˢ = "Europe/Berlin"u8;
 internal static readonly @string jul92012At502amCestˢ = "Jul 9, 2012 at 5:02am (CEST)"u8;
 internal static readonly @string jul09ˢ = "2012-Jul-09"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string longFormᶜ1 = "Jan 2, 2006 at 3:04pm (MST)"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string shortFormᶜ1 = "2006-Jan-02"u8;
+
 // Output:
 // 2013-02-03 19:54:00 -0800 PST
 // 2013-02-03 00:00:00 +0000 UTC
@@ -485,11 +497,11 @@ internal static readonly @string jul09ˢ = "2012-Jul-09"u8;
 public static void ExampleParseInLocation() {
     var (loc, _) = Δtime.LoadLocation(europeBerlinˢ);
     // This will look for the name CEST in the Europe/Berlin time zone.
-    @string longForm = "Jan 2, 2006 at 3:04pm (MST)"u8;
+    @string longForm = longFormᶜ1;
     var (t, _) = Δtime.ParseInLocation(longForm, jul92012At502amCestˢ, loc);
     fmt.Println(t);
     // Note: without explicit zone, returns time in given location.
-    @string shortForm = "2006-Jan-02"u8;
+    @string shortForm = shortFormᶜ1;
     (t, _) = Δtime.ParseInLocation(shortForm, jul09ˢ, loc);
     fmt.Println(t);
 }

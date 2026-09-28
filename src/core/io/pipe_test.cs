@@ -378,8 +378,11 @@ public static void TestPipeCloseError(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string readˢ = "Read"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string inputᶜ = "0123456789abcdef"u8;
+
 public static void TestPipeConcurrent(ж<testing.T> Ꮡt) {
-    @string input = "0123456789abcdef"u8;
+    @string input = inputᶜ;
     UntypedInt count = 8;
     UntypedInt readSize = 2;
     Ꮡt.Run(writeˢ, (ж<testing.T> tΔ1) => {

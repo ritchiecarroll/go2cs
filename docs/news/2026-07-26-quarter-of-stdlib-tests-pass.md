@@ -1,6 +1,6 @@
-![go2cs](../images/go2cs-small.png)
-
 # More than a quarter of the standard library's test suites pass in C#
+
+![go2cs](../images/go2cs-small.png)
 
 > Full text of the July 26, 2026 announcement, condensed in the
 > [go2cs News Archive](../NEWS.md#july-26-2026--more-than-a-quarter-of-the-standard-librarys-test-suites-pass-in-c).

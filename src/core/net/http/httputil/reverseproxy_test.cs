@@ -59,12 +59,15 @@ internal static readonly @string shouldBeDeletedˢ = "should be deleted"u8;
 internal static readonly @string setCookieˢ = "Set-Cookie"u8;
 internal static readonly @string xUnannouncedTrailerˢ = "X-Unannounced-Trailer"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string backendResponseᶜ = "I am the backend"u8;
+
 public static void TestReverseProxy(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        @string backendResponse = "I am the backend"u8;
+        @string backendResponse = backendResponseᶜ;
         const nint backendStatus = 404;
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             if ((~r).Method == "GET"u8 && r.FormValue(modeˢ) == "hangup"u8) {
@@ -223,16 +226,25 @@ public static void TestReverseProxy(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string fakeConnectionTokenᶜ = "X-Fake-Connection-Token"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string backendResponseᶜ1 = "I am the backend"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string someConnHeaderᶜ = "X-Some-Conn-Header"u8;
+
 // Issue 16875: remove any proxied headers mentioned in the "Connection"
 // header value.
 public static void TestReverseProxyStripHeadersPresentInConnection(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string fakeConnectionToken = "X-Fake-Connection-Token"u8;
-        @string backendResponse = "I am the backend"u8;
+        @string fakeConnectionToken = fakeConnectionTokenᶜ;
+        @string backendResponse = backendResponseᶜ1;
         // someConnHeader is some arbitrary header to be declared as a hop-by-hop header
         // in the Request's Connection header.
-        @string someConnHeader = "X-Some-Conn-Header"u8;
+        @string someConnHeader = someConnHeaderᶜ;
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             {
                 @string c = (~r).Header.Get(connectionˢ); if (c != ""u8) {
@@ -338,14 +350,20 @@ public static void TestReverseProxyStripHeadersPresentInConnection(ж<testing.T>
     finally { ᒐ.Run(); }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string backendResponseᶜ2 = "I am the backend"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string someConnHeaderᶜ1 = "X-Some-Conn-Header"u8;
+
 public static void TestReverseProxyStripEmptyConnection(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // See Issue 46313.
-        @string backendResponse = "I am the backend"u8;
+        @string backendResponse = backendResponseᶜ2;
         // someConnHeader is some arbitrary header to be declared as a hop-by-hop header
         // in the Request's Connection header.
-        @string someConnHeader = "X-Some-Conn-Header"u8;
+        @string someConnHeader = someConnHeaderᶜ1;
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             {
                 var c = (~r).Header.Values(connectionˢ); if (len(c) != 0) {
@@ -418,13 +436,19 @@ public static void TestReverseProxyStripEmptyConnection(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string closeˢ = "close"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string prevForwardedForᶜ = "client ip"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string backendResponseᶜ3 = "I am the backend"u8;
+
 public static void TestXForwardedFor(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        @string prevForwardedFor = "client ip"u8;
-        @string backendResponse = "I am the backend"u8;
+        @string prevForwardedFor = prevForwardedForᶜ;
+        @string backendResponse = backendResponseᶜ3;
         const nint backendStatus = 404;
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             if ((~r).Header.Get(xForwardedForˢ) == ""u8) {
@@ -616,10 +640,13 @@ public static void TestReverseProxyQuery(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectedᶜ = "hi"u8;
+
 public static void TestReverseProxyFlushInterval(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string expected = "hi"u8;
+        @string expected = expectedᶜ;
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>(expected));
         })));
@@ -669,10 +696,13 @@ public static void TestReverseProxyFlushInterval(ж<testing.T> Ꮡt) {
     return w.ResponseWriter;
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectedᶜ1 = "hi"u8;
+
 public static void TestReverseProxyResponseControllerFlushInterval(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string expected = "hi"u8;
+        @string expected = expectedᶜ1;
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>(expected));
         })));
@@ -719,10 +749,13 @@ public static void TestReverseProxyResponseControllerFlushInterval(ж<testing.T>
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string myHeaderˢ = "MyHeader"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectedᶜ2 = "hi"u8;
+
 public static void TestReverseProxyFlushIntervalHeaders(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string expected = "hi"u8;
+        @string expected = expectedᶜ2;
         var stopCh = new channel<EmptyStruct>(0);
         var stopChʗ1 = stopCh;
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
@@ -767,10 +800,13 @@ public static void TestReverseProxyFlushIntervalHeaders(ж<testing.T> Ꮡt) {
 internal static readonly object handlerNeverSawˢ = (@string)"Handler never saw CloseNotify"u8;
 internal static readonly object serverClientDoReturnedˢ = (@string)"Server.Client().Do() returned nil error; want non-nil error"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string backendResponseᶜ4 = "I am the backend"u8;
+
 public static void TestReverseProxyCancellation(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string backendResponse = "I am the backend"u8;
+        @string backendResponse = backendResponseᶜ4;
         var reqInFlight = new channel<EmptyStruct>(0);
         var reqInFlightʗ1 = reqInFlight;
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
@@ -937,10 +973,13 @@ internal static void Put(this bufferPool bp, slice<byte> v) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string getBufˢ = "getBuf"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string msgᶜ = "hi"u8;
+
 public static void TestReverseProxyGetPutBuffer(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string msg = "hi"u8;
+        @string msg = msgᶜ;
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             io.WriteString(new httputil_test_package.http_ResponseWriterᴠWriter(w), msg);
         })));
@@ -1008,10 +1047,13 @@ public static void TestReverseProxyGetPutBuffer(ж<testing.T> Ꮡt) {
 internal static readonly object backendReadWrongRequestˢ = (@string)"Backend read wrong request body."u8;
 internal static readonly @string postˢ = "POST"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string backendResponseᶜ5 = "I am the backend"u8;
+
 public static void TestReverseProxy_Post(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string backendResponse = "I am the backend"u8;
+        @string backendResponse = backendResponseᶜ5;
         const nint backendStatus = 200;
         slice<byte> requestBody = bytes.Repeat(slice<byte>("a"u8), (1 << (int)(20)));
         var requestBodyʗ1 = requestBody;
@@ -2130,10 +2172,13 @@ public static void TestJoinURLPath(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string contentᶜ = "response_content"u8;
+
 public static void TestReverseProxyRewriteReplacesOut(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string content = "response_content"u8;
+        @string content = contentᶜ;
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>(content));
         })));
@@ -2357,6 +2402,9 @@ public static void TestReverseProxyQueryParameterSmugglingRewritePreservesRawQue
         )));
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string contentᶜ1 = "response_content"u8;
+
 [GoType("dyn")] internal partial struct testReverseProxyQueryParameterSmuggling_type {
     internal @string rawQuery;
     internal @string cleanQuery;
@@ -2367,7 +2415,7 @@ internal static void testReverseProxyQueryParameterSmuggling(ж<testing.T> Ꮡt,
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        @string content = "response_content"u8;
+        @string content = contentᶜ1;
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>((~(~r).URL).RawQuery));
         })));

@@ -19,9 +19,32 @@ import (
 	"unicode/utf8"
 )
 
+// varPlaceholderFormat is the line the converter writes where a manualConversionVars registration
+// displaces a package-level var declaration (funcPlaceholderFormat's twin for vars).
+const varPlaceholderFormat = "// go2cs generated this placeholder — var %s is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])"
+
 func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup, tok token.Token) {
 	v.outputBuilder.WriteString(v.newline)
 	v.writeDoc(doc, valueSpec.End())
+
+	// A var displaced by manualConversionVars: its hand-owned member replaces the declaration. Only a
+	// spec that declares that one name can be displaced; a registered name sharing a spec is refused
+	// rather than split, since nothing in the corpus needs it.
+	if tok == token.VAR && !v.inFunction {
+		for _, name := range valueSpec.Names {
+			if !v.isManualVar(name.Name) {
+				continue
+			}
+
+			if len(valueSpec.Names) != 1 {
+				panic(fmt.Sprintf("@visitValueSpec - manualConversionVars entry %s shares its spec with other names; declare it alone", name.Name))
+			}
+
+			v.writeOutput(varPlaceholderFormat, name.Name)
+			v.discardStandAloneComments(valueSpec.Pos(), valueSpec.End())
+			return
+		}
+	}
 
 	if tok == token.VAR {
 		// A PACKAGE-LEVEL var whose initializer contains a func LITERAL (`var Support =

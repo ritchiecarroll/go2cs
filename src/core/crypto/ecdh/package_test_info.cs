@@ -54,8 +54,8 @@ using static go.crypto.ecdh_test_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<PrivateKey, _ᴛ2>(Pointer = true)]
-[assembly: GoImplement<nistCurve, ΔCurve>(Pointer = true)]
-[assembly: GoImplement<x25519Curve, ΔCurve>(Pointer = true)]
+[assembly: GoImplement<nistCurve, ΔCurve>(Pointer = true, Production = true)]
+[assembly: GoImplement<x25519Curve, ΔCurve>(Pointer = true, Production = true)]
 [assembly: GoImplement<ΔPublicKey, _ᴛ1>(Pointer = true)]
 // </InterfaceImplementations>
 

@@ -482,6 +482,9 @@ public static void TestIssue6550(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object cannotFindHelloTxtX2Inˢ = (@string)"cannot find hello.txt x2 in gunzip tests"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string helloᶜ = "hello world\n"u8;
+
 // ok
 public static void TestMultistreamFalse(ж<testing.T> Ꮡt) {
     // Find concatenation test.
@@ -503,7 +506,7 @@ Found:
         }
     }
     // Expect two streams with "hello world\n", then real EOF.
-    @string hello = "hello world\n"u8;
+    @string hello = helloᶜ;
     r.Multistream(false);
     var (data, err) = io.ReadAll(new gzip_test_package.gzip_ReaderжReader(Ꮡr));
     if (((sstring)data) != hello || err != default!) {

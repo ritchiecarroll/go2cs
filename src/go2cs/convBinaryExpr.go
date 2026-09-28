@@ -292,7 +292,59 @@ func (v *Visitor) shiftGuardWidth(binaryExpr *ast.BinaryExpr) (*types.Basic, int
 		return nil, 0, false
 	}
 
-	basic, ok := tv.Type.(*types.Basic)
+	return shiftGuardWidthOfType(tv.Type)
+}
+
+// compoundShiftGuarded reports whether a compound shift-assign (`x <<= n` / `x >>= n`) takes golib's
+// Go-semantics guard (`x.LshAssign(n)` / `x.RshAssign(n)`, GoShift's `ref this` twins) rather than the
+// native C# operator, which MASKS the count. The rule is the binary shift's own -- an UNNAMED basic
+// integer target (shiftGuardWidthOfType) whose count shiftCountGuarded cannot prove to lie in
+// [0, width) -- so the two forms of one shift can never disagree.
+//
+// One target shape is OUT of scope and keeps the native form: a MAP INDEX (`m[k] >>= n`), which renders
+// through golib's value-returning map indexer, where a `ref this` call cannot bind (CS1510) and a
+// rewrite to `m[k] = m[k].Rsh(n)` would evaluate the key twice.
+func (v *Visitor) compoundShiftGuarded(assignStmt *ast.AssignStmt) bool {
+	if len(assignStmt.Lhs) != 1 || len(assignStmt.Rhs) != 1 {
+		return false
+	}
+
+	lhs := assignStmt.Lhs[0]
+	target := lhs
+
+	for {
+		paren, ok := target.(*ast.ParenExpr)
+
+		if !ok {
+			break
+		}
+
+		target = paren.X
+	}
+
+	if index, ok := target.(*ast.IndexExpr); ok {
+		if containerType := v.info.TypeOf(index.X); containerType != nil {
+			if _, isMap := containerType.Underlying().(*types.Map); isMap {
+				return false
+			}
+		}
+	}
+
+	lhsType := v.info.TypeOf(lhs)
+
+	if lhsType == nil {
+		return false
+	}
+
+	_, width, ok := shiftGuardWidthOfType(types.Unalias(lhsType))
+
+	return ok && v.shiftCountGuarded(assignStmt.Rhs[0], width)
+}
+
+// shiftGuardWidthOfType is shiftGuardWidth for a caller holding the shifted operand's TYPE rather than a
+// binary shift node -- a compound shift-assign, whose result type is its left-hand side's.
+func shiftGuardWidthOfType(t types.Type) (*types.Basic, int, bool) {
+	basic, ok := t.(*types.Basic)
 
 	if !ok || basic.Info()&types.IsInteger == 0 || basic.Info()&types.IsUntyped != 0 {
 		return nil, 0, false

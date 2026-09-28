@@ -231,6 +231,9 @@ internal static @string firstComment(@string filename) {
 internal static readonly @string versionˢ = "VERSION"u8;
 internal static readonly @string goexperimentˢ2 = "-goexperiment"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string prefixᶜ3 = "-lang="u8;
+
 // continue as we may still see build tags
 internal static void testTestDir(ж<testing.T> Ꮡt, @string path, params ꓸꓸꓸstring ignoreʗp) {
     var ignore = ignoreʗp.sslice();
@@ -287,7 +290,7 @@ internal static void testTestDir(ж<testing.T> Ꮡt, @string path, params ꓸꓸ
                             expectErrors = false;
                             break;
                         }
-                        @string prefix = "-lang="u8;
+                        @string prefix = prefixᶜ3;
                         if (strings.HasPrefix(arg, prefix)) {
                             goVersion = arg[(int)(len(prefix))..];
                         }
