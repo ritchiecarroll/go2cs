@@ -18,6 +18,12 @@ ORIGPATH="$PATH"
 export PATH="$HOME/sdk/go1.24.13/bin:$HOME/dotnet10:$PATH"
 export GOROOT="$(cygpath -w "$HOME/sdk/go1.24.13")" GOTOOLCHAIN=local CGO_ENABLED=0 GOFLAGS=
 export DOTNET_ROOT="$(cygpath -w "$HOME/dotnet10")" MSBUILDDISABLENODEREUSE=1 DOTNET_CLI_TELEMETRY_OPTOUT=1
+# Keep the system drive out of the battery (2026-09-27: C: filled to 0 bytes mid-run): temp files, the Go build
+# cache and NuGet packages all live on H:.
+mkdir -p /h/go2cs-tmp-coord/coord-scratch/tmp /h/go-cache/go-build /h/nuget/packages
+export TEMP="H:\go2cs-tmp-coord\coord-scratch\tmp" TMP="H:\go2cs-tmp-coord\coord-scratch\tmp" TMPDIR=/h/go2cs-tmp-coord/coord-scratch/tmp
+export GOCACHE="H:\go-cache\go-build" GOTMPDIR="H:\go2cs-tmp-coord\coord-scratch\tmp" NUGET_PACKAGES="H:\nuget\packages"
+cfree(){ powershell -NoProfile -Command "[int]((Get-PSDrive C).Free/1GB)" 2>/dev/null | tr -d '\r'; }
 PWSH=$HOME/.dotnet/tools/pwsh
 
 cd "$W" || { stamp "ABORT: no worktree $W"; exit 2; }
@@ -31,6 +37,7 @@ leg(){ # name, logfile-suffix, command...
   local name=$1 suf=$2; shift 2
   local L="$LOGDIR/$suf.log" t0=$(date +%s) f
   f=$(freegb); [ "${f:-0}" -ge 30 ] || { stamp "LEG $name ABORT: free disk ${f}G < 30G"; exit 3; }
+  c=$(cfree); [ "${c:-0}" -ge 8 ] || { stamp "LEG $name ABORT: C: free ${c}G < 8G"; exit 3; }
   "$@" > "$L" 2>&1 < /dev/null; local rc=$?
   stamp "LEG $name rc=$rc wall=$(( $(date +%s) - t0 ))s free=$(freegb)G log=$suf.log"
   return $rc
