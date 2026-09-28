@@ -999,6 +999,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	// SHL_ASSIGN case) rather than the native operator. Its count is widened to uint64, never `(int)`-cast.
 	shiftAssignGuarded := false
 
+	// signedAssignTarget and signedAssignOmitOperand: a governed compound `x /= b` or `x %= b` (see
+	// signedCompoundAssign) may write its own target text (a map element's `m`) and may leave the
+	// right operand out (a -1 fold such as `x = 0`).
+	signedAssignTarget := ""
+	signedAssignOmitOperand := false
+
 	switch assignStmt.Tok {
 	case token.ADD_ASSIGN:
 		operator = " += "
@@ -1013,21 +1019,15 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			operator = " %= "
 		}
 
-		// A signed int/int32/int64 `x /= b` or `x %= b` that Go must check for a -1 divisor at run
-		// time takes golib's helper as `x = quo(x, b)` (see signedDivisionOperations.go) when x can be
-		// read twice without effect. The call's `)` is the post-RHS close every compound site writes.
-		if len(assignStmt.Lhs) == 1 && len(assignStmt.Rhs) == 1 && isSideEffectFreeLvalue(assignStmt.Lhs[0]) &&
-			signedDivisionGuardKind(v.info.TypeOf(assignStmt.Lhs[0])) {
-			if guard, minusOne := v.signedDivisorClass(assignStmt.Rhs[0]); guard || minusOne {
-				name := "quo"
-
-				if assignStmt.Tok == token.REM_ASSIGN {
-					name = "rem"
-				}
-
-				operator = fmt.Sprintf(" = %s(%s, ", v.signedDivisionHelperName(name), v.convExpr(assignStmt.Lhs[0], nil))
-				andNotUncheckedClose = true
-			}
+		// A signed int/int32/int64 `x /= b` or `x %= b` never reaches C#'s throwing operator: a -1
+		// divisor folds, and a divisor that may be -1 takes golib's quo/rem, with the target evaluated
+		// once (see signedCompoundAssign). A helper call's `)` is the post-RHS close every compound
+		// site writes.
+		if form, ok := v.signedCompoundAssign(assignStmt); ok {
+			operator = form.operator
+			signedAssignTarget = form.target
+			signedAssignOmitOperand = form.omitOperand
+			andNotUncheckedClose = form.close
 		}
 	case token.AND_ASSIGN:
 		operator = " &= "
@@ -1312,6 +1312,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			}
 
 			lhsExpr := v.convExpr(lhs, lhsElemContexts)
+
+			if len(signedAssignTarget) > 0 {
+				lhsExpr = signedAssignTarget
+			}
+
 			leftExprs.Add(lhsExpr)
 
 			// Per-element `var` for the newly-declared members of a mixed redeclaration tuple. An
@@ -1533,6 +1538,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			}
 
 			rhsExpr := v.convExpr(rhs, v.appendNilArrayDimsContext(contexts, rhs, lhs))
+
+			if signedAssignOmitOperand {
+				rhsExpr = ""
+			}
 
 			if assignStmt.Tok == token.DEFINE && ident != nil && !v.isReassignment(ident) {
 				rhsExpr = v.materializeDefaultTypedConstDeclValue(ident, rhs, rhsExpr)
@@ -1892,10 +1901,19 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					lhsContexts = append(lhsContexts, starExprContext)
 				}
 
-				result.WriteString(v.convExpr(lhs, lhsContexts))
+				if len(signedAssignTarget) > 0 {
+					result.WriteString(signedAssignTarget)
+				} else {
+					result.WriteString(v.convExpr(lhs, lhsContexts))
+				}
+
 				result.WriteString(operator)
 
 				rhsExpr := v.convExpr(rhs, v.appendNilArrayDimsContext(v.appendEmptyIfaceLitContext(v.appendRhsPtrContext(contexts, rhs), lhs), rhs, lhs))
+
+				if signedAssignOmitOperand {
+					rhsExpr = ""
+				}
 
 				// Box an untyped CONSTANT assigned to an EMPTY-interface LHS at Go's default type (the
 				// numeric twin of appendEmptyIfaceLitContext's @string boxing); a no-op for a non-empty
@@ -1960,10 +1978,19 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			} else {
 				if v.isReassignment(ident) {
-					result.WriteString(v.convExpr(lhs, lhsContexts))
+					if len(signedAssignTarget) > 0 {
+						result.WriteString(signedAssignTarget)
+					} else {
+						result.WriteString(v.convExpr(lhs, lhsContexts))
+					}
+
 					result.WriteString(operator)
 
 					rhsExpr := v.convExpr(rhs, v.appendNilArrayDimsContext(v.appendEmptyIfaceLitContext(v.appendRhsPtrContext(contexts, rhs), lhs), rhs, lhs))
+
+					if signedAssignOmitOperand {
+						rhsExpr = ""
+					}
 
 					// Box an untyped CONSTANT reassigned to an EMPTY-interface LHS at Go's default type
 					// (twin of appendEmptyIfaceLitContext's @string boxing); a no-op otherwise. The

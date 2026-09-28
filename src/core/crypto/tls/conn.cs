@@ -390,7 +390,7 @@ internal static nint roundUp(nint a, nint b) {
         case {} Δc when Δc._<cbcMode>(out var c): {
             nint blockSize = c.BlockSize();
             nint minPayload = explicitNonceLen + roundUp(hc.mac.Size() + 1, blockSize);
-            if (rem(len(payload), blockSize) != 0 || len(payload) < minPayload) {
+            if (len(payload) % blockSize != 0 || len(payload) < minPayload) {
                 return (default!, 0, alertBadRecordMAC);
             }
             if (explicitNonceLen > 0) {

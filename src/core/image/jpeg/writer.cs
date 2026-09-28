@@ -621,7 +621,7 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
     // Convert from a quality rating to a scaling factor.
     nint scale = default!;
     if (quality < 50){
-        scale = quo(5000, quality);
+        scale = 5000 / quality;
     } else {
         scale = 200 - quality * 2;
     }

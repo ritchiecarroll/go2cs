@@ -167,7 +167,7 @@ public static (slice<byte>, error) DecryptPEMBlock(ж<pem.Block> Ꮡb, slice<byt
     if (err != default!) {
         return (default!, err);
     }
-    if (rem(builtin.len(b.Bytes), block.BlockSize()) != 0) {
+    if (builtin.len(b.Bytes) % block.BlockSize() != 0) {
         return (default!, errors.New(x509EncryptedPemDataIsˢ));
     }
     var data = new slice<byte>(builtin.len(b.Bytes));
@@ -224,7 +224,7 @@ public static (ж<pem.Block>, error) EncryptPEMBlock(io.Reader rand, @string blo
         return (default!, err);
     }
     var enc = cipher.NewCBCEncrypter(block, iv);
-    nint pad = (~ciph).blockSize - rem(builtin.len(data), (~ciph).blockSize);
+    nint pad = (~ciph).blockSize - builtin.len(data) % (~ciph).blockSize;
     var encrypted = new slice<byte>(builtin.len(data), builtin.len(data) + pad);
     // We could save this copy by encrypting all the whole blocks in
     // the data separately, but it doesn't seem worth the additional

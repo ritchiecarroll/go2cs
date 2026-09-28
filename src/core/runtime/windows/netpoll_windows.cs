@@ -199,7 +199,7 @@ internal static (gList, int32) netpoll(int64 delay) {
         wait = (uint32)(delay / 1000000);
     }
     ref var n = ref heap<nint>(out var Ꮡn);
-    n = quo(len(entries), (nint)gomaxprocs);
+    n = len(entries) / (nint)gomaxprocs;
     if (n < 8) {
         n = 8;
     }

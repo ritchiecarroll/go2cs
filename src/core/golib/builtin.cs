@@ -1537,20 +1537,28 @@ public static partial class builtin
         return m is IMap source ? source.CloneMap() : m;
     }
 
-    // Go's integer DIVISION and REMAINDER for a signed int, int32 or int64 divisor that is not a
-    // constant. The converter emits these only there; see quo(nint, nint) for why.
+    // Go's integer DIVISION and REMAINDER for a signed int, int32 or int64 where the divisor may be -1
+    // and the dividend may be the most negative value. See quo(nint, nint) for why.
 
     /// <summary>
     /// Go's <c>a / b</c> on a signed integer: truncated toward zero, and <c>MinInt / -1</c> is
     /// <c>MinInt</c>.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Go's spec wraps the one overflowing quotient, the most negative value divided by -1, to that
     /// same value, with no panic. .NET throws <see cref="OverflowException"/> instead, and that is not
-    /// a Go panic: a deferred <c>recover()</c> cannot see it, so the program dies. The converter emits
-    /// <c>quo</c> only where Go itself must check at run time, a signed division whose divisor is not a
-    /// constant; a constant -1 divisor is folded when converting. Division by zero still throws
-    /// <see cref="DivideByZeroException"/>, which golib reports as Go's integer divide-by-zero panic.
+    /// a Go panic: a deferred <c>recover()</c> cannot see it, so the program dies. Division by zero
+    /// still throws <see cref="DivideByZeroException"/>, which golib reports as Go's integer
+    /// divide-by-zero panic.
+    /// </para>
+    /// <para>
+    /// The converter emits <c>quo</c> only where the overflow is possible: the divisor is not a
+    /// constant (a constant -1 is folded when converting, any other constant cannot overflow) and the
+    /// dividend is not a constant other than the most negative value, nor <c>len</c> or <c>cap</c>
+    /// (never negative). Everywhere else the plain operator stays. A named integer type carries the
+    /// same rule inside its generated operator instead.
+    /// </para>
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static nint quo(nint a, nint b) => b == -1 ? unchecked(-a) : a / b;
@@ -1569,10 +1577,9 @@ public static partial class builtin
     /// <remarks>
     /// Go's spec makes any value modulo -1 zero, the most negative value included. .NET throws
     /// <see cref="OverflowException"/> for <c>MinInt % -1</c>, and that is not a Go panic: a deferred
-    /// <c>recover()</c> cannot see it, so the program dies. The converter emits <c>rem</c> only where
-    /// Go itself must check at run time, a signed remainder whose divisor is not a constant; a
-    /// constant -1 divisor is folded when converting. A zero divisor still throws
+    /// <c>recover()</c> cannot see it, so the program dies. A zero divisor still throws
     /// <see cref="DivideByZeroException"/>, which golib reports as Go's integer divide-by-zero panic.
+    /// The converter emits <c>rem</c> exactly where it emits <see cref="quo(nint, nint)"/>.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static nint rem(nint a, nint b) => b == -1 ? 0 : a % b;
@@ -1584,6 +1591,102 @@ public static partial class builtin
     /// <inheritdoc cref="rem(nint, nint)"/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int64 rem(int64 a, int64 b) => b == -1 ? 0 : a % b;
+
+    /// <summary>
+    /// Go's <c>a / b</c> over a type parameter whose type set holds a signed int, int32 or int64:
+    /// <see cref="quo(nint, nint)"/> when <typeparamref name="T"/> is one of those, the type's own
+    /// division otherwise.
+    /// </summary>
+    /// <remarks>
+    /// A generic body divides through <see cref="System.Numerics.IDivisionOperators{TSelf, TOther, TResult}"/>, which
+    /// for <c>long</c>, <c>int</c> and <c>nint</c> is .NET's throwing division. The type tests are
+    /// JIT-time constants for a value-type <typeparamref name="T"/>, so each instantiation compiles to
+    /// one of the arms with no boxing. A narrower or unsigned type cannot overflow here (C# promotes
+    /// the narrower ones), and a named integer type carries the rule in its generated operator.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T quo<T>(T a, T b) where T : System.Numerics.IDivisionOperators<T, T, T>
+    {
+        if (typeof(T) == typeof(int64))
+            return (T)(object)quo((int64)(object)a!, (int64)(object)b!);
+
+        if (typeof(T) == typeof(int32))
+            return (T)(object)quo((int32)(object)a!, (int32)(object)b!);
+
+        if (typeof(T) == typeof(nint))
+            return (T)(object)quo((nint)(object)a!, (nint)(object)b!);
+
+        return a / b;
+    }
+
+    /// <summary>
+    /// Go's <c>a % b</c> over a type parameter whose type set holds a signed int, int32 or int64:
+    /// <see cref="rem(nint, nint)"/> when <typeparamref name="T"/> is one of those, the type's own
+    /// remainder otherwise.
+    /// </summary>
+    /// <remarks>See <see cref="quo{T}(T, T)"/>.</remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T rem<T>(T a, T b) where T : System.Numerics.IModulusOperators<T, T, T>
+    {
+        if (typeof(T) == typeof(int64))
+            return (T)(object)rem((int64)(object)a!, (int64)(object)b!);
+
+        if (typeof(T) == typeof(int32))
+            return (T)(object)rem((int32)(object)a!, (int32)(object)b!);
+
+        if (typeof(T) == typeof(nint))
+            return (T)(object)rem((nint)(object)a!, (nint)(object)b!);
+
+        return a % b;
+    }
+
+    // Go's compound `x /= b` and `x %= b` on a target that cannot be read twice without effect (`*p`,
+    // `a[f()]`, `a[i+1]`, `f().x`): a `ref this` twin, so the target is evaluated ONCE -- a field, a
+    // local, a pointer's value and golib's ref-returning element indexers all bind -- exactly as the
+    // guarded compound shift's LshAssign/RshAssign are. A map element has no ref, so its twins take
+    // the map and the key, which is again evaluated once. Each delegates to quo/rem above.
+
+    /// <summary>Go's <c>x /= b</c> on a signed integer target evaluated once; see <see cref="quo(nint, nint)"/>.</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void QuoAssign(ref this nint x, nint b) => x = quo(x, b);
+
+    /// <inheritdoc cref="QuoAssign(ref nint, nint)"/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void QuoAssign(ref this int32 x, int32 b) => x = quo(x, b);
+
+    /// <inheritdoc cref="QuoAssign(ref nint, nint)"/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void QuoAssign(ref this int64 x, int64 b) => x = quo(x, b);
+
+    /// <summary>Go's <c>x %= b</c> on a signed integer target evaluated once; see <see cref="rem(nint, nint)"/>.</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RemAssign(ref this nint x, nint b) => x = rem(x, b);
+
+    /// <inheritdoc cref="RemAssign(ref nint, nint)"/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RemAssign(ref this int32 x, int32 b) => x = rem(x, b);
+
+    /// <inheritdoc cref="RemAssign(ref nint, nint)"/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RemAssign(ref this int64 x, int64 b) => x = rem(x, b);
+
+    /// <summary>Go's <c>m[key] /= b</c> with the key evaluated once; see <see cref="quo(nint, nint)"/>.</summary>
+    public static void QuoAssign<TKey>(this IMap<TKey, nint> m, TKey key, nint b) where TKey : notnull => m[key] = quo(m[key], b);
+
+    /// <inheritdoc cref="QuoAssign{TKey}(IMap{TKey, nint}, TKey, nint)"/>
+    public static void QuoAssign<TKey>(this IMap<TKey, int32> m, TKey key, int32 b) where TKey : notnull => m[key] = quo(m[key], b);
+
+    /// <inheritdoc cref="QuoAssign{TKey}(IMap{TKey, nint}, TKey, nint)"/>
+    public static void QuoAssign<TKey>(this IMap<TKey, int64> m, TKey key, int64 b) where TKey : notnull => m[key] = quo(m[key], b);
+
+    /// <summary>Go's <c>m[key] %= b</c> with the key evaluated once; see <see cref="rem(nint, nint)"/>.</summary>
+    public static void RemAssign<TKey>(this IMap<TKey, nint> m, TKey key, nint b) where TKey : notnull => m[key] = rem(m[key], b);
+
+    /// <inheritdoc cref="RemAssign{TKey}(IMap{TKey, nint}, TKey, nint)"/>
+    public static void RemAssign<TKey>(this IMap<TKey, int32> m, TKey key, int32 b) where TKey : notnull => m[key] = rem(m[key], b);
+
+    /// <inheritdoc cref="RemAssign{TKey}(IMap{TKey, nint}, TKey, nint)"/>
+    public static void RemAssign<TKey>(this IMap<TKey, int64> m, TKey key, int64 b) where TKey : notnull => m[key] = rem(m[key], b);
 
     /// <summary>
     /// Returns the smaller of two values via comparison operators — the form a constrained type

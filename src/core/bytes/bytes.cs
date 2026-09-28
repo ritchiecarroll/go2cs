@@ -588,7 +588,7 @@ public static slice<byte> Join(slice<slice<byte>> s, slice<byte> sep) {
     }
     nint n = default!;
     if (len(sep) > 0) {
-        if (len(sep) >= quo(maxInt, (len(s) - 1))) {
+        if (len(sep) >= maxInt / (len(s) - 1)) {
             throw panic("bytes: Join output length overflow");
         }
         n += len(sep) * (len(s) - 1);

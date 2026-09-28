@@ -2243,20 +2243,21 @@ that generated operator applies the same Go rule.
 **Division and remainder check for -1.** Go defines the one signed division that overflows: the most
 negative value divided by -1 wraps back to itself, and any value modulo -1 is 0. .NET throws an
 `OverflowException` there instead, which a deferred `recover()` cannot catch. So a signed `int`, `int32` or
-`int64` division or remainder whose divisor is a variable calls golib's `quo` or `rem`. Each checks for -1
-and otherwise uses C#'s own `/` or `%`:
+`int64` division or remainder where the divisor may be -1 and the dividend may be the most negative value
+calls golib's `quo` or `rem`. Each checks for -1 and otherwise uses C#'s own `/` or `%`:
 
-<!-- source: GOROOT/src/crypto/cipher/cbc.go:80 -->
+<!-- source: GOROOT/src/image/geom.go:40 -->
 ```go
-if len(src)%x.blockSize != 0 {
+return Point{p.X / k, p.Y / k}
 ```
-<!-- source: src/core/crypto/cipher/cbc.cs:85 -->
+<!-- source: src/core/image/geom.cs:41 -->
 ```csharp
-if (rem(len(src), x.blockSize) != 0) {
+return new Point(quo(p.X, k), quo(p.Y, k));
 ```
 
-A constant divisor keeps the plain operator, and so does a named integer type, whose generated operators
-carry the same check.
+A constant divisor keeps the plain operator (a constant -1 folds), and so does a constant dividend other
+than the most negative value, a `len` or `cap` dividend, and a named integer type, whose generated
+operators carry the same check.
 
 **Division by zero panics as in Go.** C# throws a `DivideByZeroException` for a zero divisor, from the plain
 operators and from `quo` and `rem` alike. When golib's panic handling catches that exception, it turns it

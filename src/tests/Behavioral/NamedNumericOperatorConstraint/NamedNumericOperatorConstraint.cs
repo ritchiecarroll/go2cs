@@ -15,7 +15,7 @@ internal static K mix<K>(K id, K step)
     h = (K)(h ^ ((h >> (int)(2))));
     h = (K)(h | ((step << (int)(1))));
     h = (K)(h & step);
-    h = h % (step + ConvertToType<K>(7));
+    h = rem(h, (step + ConvertToType<K>(7)));
     return h;
 }
 

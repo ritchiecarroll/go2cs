@@ -83,8 +83,9 @@ internal static class NumericTypeTemplate
     // with no panic; .NET throws OverflowException for both at 32 and 64 bits, which a deferred
     // recover() cannot see. The -1 arm lives here, inside the named type's own operators, so a named
     // integer's `a / b` keeps its Go spelling; the converter emits golib's quo/rem only for an UNNAMED
-    // signed division by a non-constant divisor. A narrower underlying needs no arm: C# promotes it to
-    // int, and the wrapper's own cast back wraps the quotient exactly as Go does.
+    // signed division (or a type parameter's) where the divisor may be -1 and the dividend may be the
+    // most negative value. A narrower underlying needs no arm: C# promotes it to int, and the
+    // wrapper's own cast back wraps the quotient exactly as Go does.
     private static bool IsSignedWideType(string typeName) =>
         typeName is "int32" or "int64" or "nint" or "rune" or "int" or "long";
 

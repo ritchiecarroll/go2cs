@@ -143,18 +143,26 @@ rule), `NarrowArithmeticCompileSinks` (the consumers that did not compile before
      1aebd6a885 and NarrowArithmeticCompileSinks failed CS1503 x3 / CS0266 x3. The inline empty-interface
      rejection is independent of arithmetic (a plain int8 value fails CS0029 the same way at master). -->
 
-## A signed division or remainder by a variable divisor calls golib's `quo` or `rem`
+## A signed division or remainder that can overflow calls golib's `quo` or `rem`
 
-An unnamed `int`, `int32` or `int64` (so also `rune` and C#'s `nint`) division or remainder whose divisor is
-not a constant, and not `len` or `cap`, becomes golib's `quo(a, b)` or `rem(a, b)`; `x /= b` and `x %= b`
-become `x = quo(x, b)` and `x = rem(x, b)`. A constant -1 divisor folds when converting: `a / -1` is
-`unchecked(-a)` and `a % -1` is zero. Every other divisor keeps C#'s operator.
+An unnamed `int`, `int32` or `int64` (so also `rune` and C#'s `nint`) division or remainder, or one over a
+type parameter whose type set holds one of those, becomes golib's `quo(a, b)` or `rem(a, b)` where the
+divisor may be -1 and the dividend may be the most negative value:
 
-<!-- source: src/tests/Behavioral/MinIntDivide/main.go:59 -->
+- The divisor is not a constant, and not `len` or `cap`, which is never negative.
+- The dividend is not a constant other than the most negative value, and not `len` or `cap`: `5000 / b`
+  and `len(s) % b` keep C#'s operator, as they keep Go's plain `IDIV`.
+
+A constant -1 divisor folds when converting. `a / -1` is `unchecked(-a)`. `a % -1` is zero, spelled
+`(T)0` when reading `a` can neither panic nor have an effect (an identifier, a literal, or a field chain
+that never goes through a pointer). Otherwise it is `a * 0`, so `f() % -1` still calls `f` and
+`p.x % -1` with a nil `p` still panics. Every other division keeps C#'s operator.
+
+<!-- source: src/tests/Behavioral/MinIntDivide/main.go:121 -->
 ```go
 arm("int64", func() string { return fmt.Sprint(i64/int64(m1), " ", i64%int64(m1)) })
 ```
-<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:73 -->
+<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:163 -->
 ```csharp
 arm(int64ˢ, () => fmt.Sprint(quo(i64, (int64)m1), (@string)" "u8, rem(i64, (int64)m1)));
 ```
@@ -162,18 +170,40 @@ arm(int64ˢ, () => fmt.Sprint(quo(i64, (int64)m1), (@string)" "u8, rem(i64, (int
 Here `i64` holds `math.MinInt64`, `m1` is an `int` holding -1, `arm` runs the function under `recover` and
 prints its result under the label, and `int64ˢ` is the hoisted `"int64"` literal.
 
+**Compound assignment never reaches C#'s `/=` or `%=`.** Its target is evaluated once:
+
+- A target that can be read twice without effect (an identifier, a field chain of identifiers, or an
+  index of such a base by such an index) takes `x = quo(x, b)` or `x = rem(x, b)`.
+- Any other target takes golib's `ref this` twin, `x.QuoAssign(b)` or `x.RemAssign(b)`, as a guarded
+  compound shift takes `RshAssign`: a pointer's value, a field of a call's result, and golib's
+  ref-returning element indexers all bind.
+- A map element has no ref, so it takes the map and the key: `m.QuoAssign(key, b)`.
+- A constant -1 folds: `x /= -1` is `x *= -1` (C#'s unchecked multiply wraps the most negative value to
+  itself, as Go's quotient does), and `x %= -1` is `x = 0`.
+
+<!-- source: src/tests/Behavioral/MinIntDivide/main.go:156 -->
+```go
+sl[counted(1)] /= m1
+```
+<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:199 -->
+```csharp
+sl[counted(1)].QuoAssign(m1);
+```
+
 **Why.** Go's spec wraps the one overflowing signed quotient, the most negative value divided by -1, to that
 same value, and makes any value modulo -1 zero, with no panic. .NET throws `OverflowException` for both at
 32 and 64 bits. That is not a Go panic: `recover()` cannot see it, and the program dies. Division by zero is
 unaffected: it still throws `DivideByZeroException`, which golib reports as Go's integer divide-by-zero
 panic.
 
-**Where the check lives.** Go itself checks for -1 at run time only where the divisor is a variable, so that
-is the only place the helper appears:
+**Where the check lives.** Go's own code generator emits the -1 check only where the divisor may be -1 and
+the dividend may be the most negative value, so that is the only place the helper appears:
 
 - `quo` and `rem` (golib's `builtin.cs`) have `nint`, `int32` and `int64`
   overloads: `b == -1 ? unchecked(-a) : a / b` and `b == -1 ? 0 : a % b`. Their XML documentation says why,
-  so a hover over a call explains it.
+  so a hover over a call explains it. A generic overload serves a type parameter: it takes the -1 arm
+  when the type argument is `long`, `int` or `nint` and the type's own operator otherwise, with the type
+  test folded by the JIT.
 - A NAMED integer type keeps `a / b`: go2cs-gen's `NumericTypeTemplate` gives a wrapper over `int32`, `int64`,
   `nint` or `rune` the same -1 arm inside its own `/` and `%` operators.
 - A narrower signed type needs nothing: C# promotes it to `int`, where `-128 / -1` is 128, and the
@@ -184,21 +214,30 @@ is the only place the helper appears:
 before the `using static go.builtin` import, and a C# local is in scope in its whole block, including its
 own initializer. So the helper is written `builtin.quo` or `builtin.rem` when the package declares a
 function, method, variable or constant of that name (`go/constant` declares its own `quo`), or when the
-enclosing function declares a variable of that name anywhere (`if rem := n % size; rem != 0` in
-`crypto/internal/fips140/ecdsa`):
+enclosing function declares anything of that name anywhere: a variable (`if rem := n % size; rem != 0` in
+`crypto/internal/fips140/ecdsa`), a constant, a type, or a type-switch binding:
 
 <!-- source: src/tests/Behavioral/MinIntDivideShadow/main.cs.target:19 -->
 ```csharp
 fmt.Println(builtin.quo(i32, (int32)m1), builtin.rem(i32, (int32)m1));
 ```
 
-**Limits.** A compound `x /= b` whose target has a side effect when read (an index by a call, say) keeps
-C#'s `/=`: it cannot be read twice. No standard-library site has that shape.
+**Limits.** A compound `x /= b` on a type parameter whose target cannot be read twice keeps C#'s `/=`: a
+`ref this` receiver of a type parameter needs a `struct` constraint that a Go constraint never carries.
+No standard-library site has that shape.
 
-Guarded by: `MinIntDivide` (int, int32, int64, rune, named int64 and int32, the narrow types, compound
-assignment, the constant -1 fold, ordinary divisors, a local named `rem`, and division by zero, each arm
-under `recover`), `MinIntDivideShadow` (a package declaring its own `quo` and `rem`), and GolibTests'
-`SignedDivisionTests` (the helpers, and a control proving the plain operators throw).
+Guarded by:
+- `MinIntDivide`, with each arm under `recover`:
+  - the types: int, int32, int64, rune, named int64 and int32, the narrow types, and type parameters;
+  - compound assignment through every target shape: a pointer, an index expression, an index by a
+    call, a map key by a call, a field of a call's result, and a promoted field;
+  - the constant -1 folds, including a nil selector, an effectful dividend and an out-of-range index;
+  - constant and `len`/`cap` dividends, and ordinary divisors;
+  - a local `rem`, a local constant, and a type-switch binding named `quo`;
+  - division by zero.
+- `MinIntDivideShadow`: a package declaring its own `quo` and `rem`.
+- GolibTests' `SignedDivisionTests`: the helpers, the generic and compound twins, and a control proving
+  the plain operators throw.
 <!-- Owner ruling 2026-09-27 (ledger 15:42, mailbox 446950ea43), from C2's sizing (inbox COORD
      20260927T193256Z-C2): at master every int, int32, int64 and named-over-int64 arm died with
      OverflowException (exit 2), unseen by recover(). Measured cost 0-3% on a 4M-element micro-benchmark. -->

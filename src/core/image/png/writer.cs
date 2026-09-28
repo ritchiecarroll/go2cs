@@ -447,7 +447,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
                 var pi = m._<image.PalettedImage>();
                 uint8 a = default!;
                 nint c = default!;
-                nint pixelsPerByte = quo(8, bitsPerPixel);
+                nint pixelsPerByte = 8 / bitsPerPixel;
                 for (nint x = b.Min.X; x < b.Max.X; x++) {
                     a = (uint8)(a.Lsh((nuint)bitsPerPixel) | pi.ColorIndexAt(x, y));
                     c++;

@@ -1817,7 +1817,7 @@ internal static readonly @string lengthOfDynamicSectionIsˢ = "length of dynamic
     if (f.Class == ELFCLASS64) {
         dynSize = 16;
     }
-    if (rem(len(d), dynSize) != 0) {
+    if (len(d) % dynSize != 0) {
         return (default!, errors.New(lengthOfDynamicSectionIsˢ));
     }
     (var str, err) = f.stringTable((~ds).Link);
@@ -1865,7 +1865,7 @@ internal static readonly @string lengthOfDynamicSectionIsˢ = "length of dynamic
     if (f.Class == ELFCLASS64) {
         dynSize = 16;
     }
-    if (rem(len(d), dynSize) != 0) {
+    if (len(d) % dynSize != 0) {
         return (default!, errors.New(lengthOfDynamicSectionIsˢ));
     }
     // Parse the .dynamic section as a string of bytes.

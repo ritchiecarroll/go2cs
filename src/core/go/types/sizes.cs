@@ -226,7 +226,7 @@ public static int64 Sizeof(this ж<StdSizes> Ꮡs, ΔType T) {
 
         // Final size is ea*n1 + esize; and size must be <= maxInt64.
         const int64 maxInt64 = /* 1<<63 - 1 */ 9223372036854775807;
-        if (n1 > 0 && ea > quo(maxInt64, n1)) {
+        if (n1 > 0 && ea > maxInt64 / n1) {
             return -1; // ea*n1 overflows
         }
         return ea * n1 + esize; // may still overflow to < 0 which is ok

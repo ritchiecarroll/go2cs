@@ -174,13 +174,13 @@ internal static UntypedInt runeSize => 4; // rune is int32
             if (n <= 0) {
                 n = 1;
             }
-            if ((int64)n > quo((int64)maxSize, p.repeats)){
+            if ((int64)n > (int64)maxSize / p.repeats){
                 p.repeats = maxSize;
             } else {
                 p.repeats *= (int64)n;
             }
         }
-        if ((int64)p.numRegexp < quo((int64)maxSize, p.repeats)) {
+        if ((int64)p.numRegexp < (int64)maxSize / p.repeats) {
             return;
         }
         // We need to start tracking size.
