@@ -546,8 +546,9 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     }
 
     // A native window whose base is a number this runtime MINTED (bit 63: caller or order token,
-    // synthetic PC) names no memory, and reading it faults: fatally on Windows, where linux catches
-    // it as a nil dereference. Refused as linux answers, at every read funnel of a native window. See
+    // synthetic PC) names no memory, and touching it faults: fatally on Windows, where linux catches
+    // it as a nil dereference. Refused as linux answers, at every read funnel of a native window and at
+    // the in-capacity append arms, which write into it. See
     // ManagedPointerTokens.NamesNoUserMemory for the class and the threshold. NativeElementAddress
     // does not ask: forming a pointer is not a read, and Go does not fault on it either.
     private static void RefuseNoUserMemory(nuint nativeBase)
@@ -1347,8 +1348,11 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
             // visible to every slice sharing it — and the result is the same view, one longer.
             // A native backing appends into the mapping itself: the capacity window over native
             // memory is storage like any other (design §2.3).
+            // Writing it is an access like any read, so a minted base is refused here too.
             if (slice.m_nativeBase != 0)
             {
+                RefuseNoUserMemory(slice.m_nativeBase);
+
                 unsafe
                 {
                     elems.CopyTo(new Span<T>(slice.NativeElementPointer(slice.m_length), elems.Length));
@@ -1485,6 +1489,8 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         {
             if (slice.m_nativeBase != 0)
             {
+                RefuseNoUserMemory(slice.m_nativeBase);
+
                 unsafe
                 {
                     new Span<T>(slice.NativeElementPointer(slice.m_length), (int)count).Clear();
