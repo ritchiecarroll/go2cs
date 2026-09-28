@@ -1006,10 +1006,29 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		operator = " -= "
 	case token.MUL_ASSIGN:
 		operator = " *= "
-	case token.QUO_ASSIGN:
+	case token.QUO_ASSIGN, token.REM_ASSIGN:
 		operator = " /= "
-	case token.REM_ASSIGN:
-		operator = " %= "
+
+		if assignStmt.Tok == token.REM_ASSIGN {
+			operator = " %= "
+		}
+
+		// A signed int/int32/int64 `x /= b` or `x %= b` that Go must check for a -1 divisor at run
+		// time takes golib's helper as `x = quo(x, b)` (see signedDivisionOperations.go) when x can be
+		// read twice without effect. The call's `)` is the post-RHS close every compound site writes.
+		if len(assignStmt.Lhs) == 1 && len(assignStmt.Rhs) == 1 && isSideEffectFreeLvalue(assignStmt.Lhs[0]) &&
+			signedDivisionGuardKind(v.info.TypeOf(assignStmt.Lhs[0])) {
+			if guard, minusOne := v.signedDivisorClass(assignStmt.Rhs[0]); guard || minusOne {
+				name := "quo"
+
+				if assignStmt.Tok == token.REM_ASSIGN {
+					name = "rem"
+				}
+
+				operator = fmt.Sprintf(" = %s(%s, ", v.signedDivisionHelperName(name), v.convExpr(assignStmt.Lhs[0], nil))
+				andNotUncheckedClose = true
+			}
+		}
 	case token.AND_ASSIGN:
 		operator = " &= "
 	case token.OR_ASSIGN:

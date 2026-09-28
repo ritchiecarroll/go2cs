@@ -1913,6 +1913,17 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			return fmt.Sprintf("((%s)((bool)%s %s (bool)%s))", typeName, leftOperand, binaryOp, rightOperand)
 		}
 
+		// A signed int/int32/int64 division or remainder that Go must check for a -1 divisor at run
+		// time (MinInt / -1 wraps in Go and throws OverflowException in .NET) — see
+		// signedDivisionOperations.go
+		if binaryExpr.Op == token.QUO || binaryExpr.Op == token.REM {
+			if tv, ok := v.info.Types[binaryExpr]; ok && tv.Value == nil {
+				if guarded, ok := v.signedDivisionExpr(binaryExpr.Op == token.QUO, tv.Type, binaryExpr.X, binaryExpr.Y, leftOperand, rightOperand); ok {
+					return guarded
+				}
+			}
+		}
+
 		return fmt.Sprintf("%s%s%s", leftOperand, binaryOp, rightOperand)
 	}
 

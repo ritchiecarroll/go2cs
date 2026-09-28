@@ -1537,6 +1537,54 @@ public static partial class builtin
         return m is IMap source ? source.CloneMap() : m;
     }
 
+    // Go's integer DIVISION and REMAINDER for a signed int, int32 or int64 divisor that is not a
+    // constant. The converter emits these only there; see quo(nint, nint) for why.
+
+    /// <summary>
+    /// Go's <c>a / b</c> on a signed integer: truncated toward zero, and <c>MinInt / -1</c> is
+    /// <c>MinInt</c>.
+    /// </summary>
+    /// <remarks>
+    /// Go's spec wraps the one overflowing quotient, the most negative value divided by -1, to that
+    /// same value, with no panic. .NET throws <see cref="OverflowException"/> instead, and that is not
+    /// a Go panic: a deferred <c>recover()</c> cannot see it, so the program dies. The converter emits
+    /// <c>quo</c> only where Go itself must check at run time, a signed division whose divisor is not a
+    /// constant; a constant -1 divisor is folded when converting. Division by zero still throws
+    /// <see cref="DivideByZeroException"/>, which golib reports as Go's integer divide-by-zero panic.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static nint quo(nint a, nint b) => b == -1 ? unchecked(-a) : a / b;
+
+    /// <inheritdoc cref="quo(nint, nint)"/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int32 quo(int32 a, int32 b) => b == -1 ? unchecked(-a) : a / b;
+
+    /// <inheritdoc cref="quo(nint, nint)"/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int64 quo(int64 a, int64 b) => b == -1 ? unchecked(-a) : a / b;
+
+    /// <summary>
+    /// Go's <c>a % b</c> on a signed integer: the sign of <c>a</c>, and <c>MinInt % -1</c> is 0.
+    /// </summary>
+    /// <remarks>
+    /// Go's spec makes any value modulo -1 zero, the most negative value included. .NET throws
+    /// <see cref="OverflowException"/> for <c>MinInt % -1</c>, and that is not a Go panic: a deferred
+    /// <c>recover()</c> cannot see it, so the program dies. The converter emits <c>rem</c> only where
+    /// Go itself must check at run time, a signed remainder whose divisor is not a constant; a
+    /// constant -1 divisor is folded when converting. A zero divisor still throws
+    /// <see cref="DivideByZeroException"/>, which golib reports as Go's integer divide-by-zero panic.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static nint rem(nint a, nint b) => b == -1 ? 0 : a % b;
+
+    /// <inheritdoc cref="rem(nint, nint)"/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int32 rem(int32 a, int32 b) => b == -1 ? 0 : a % b;
+
+    /// <inheritdoc cref="rem(nint, nint)"/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int64 rem(int64 a, int64 b) => b == -1 ? 0 : a % b;
+
     /// <summary>
     /// Returns the smaller of two values via comparison operators — the form a constrained type
     /// parameter satisfies (Go's <c>cmp.Ordered</c> lifts to IComparisonOperators; such a

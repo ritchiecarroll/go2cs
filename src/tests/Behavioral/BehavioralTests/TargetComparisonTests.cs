@@ -1030,6 +1030,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMethodlessFuncTypeAssert() => CheckTarget("MethodlessFuncTypeAssert");
 
     [TestMethod]
+    public void CheckMinIntDivide() => CheckTarget("MinIntDivide");
+
+    [TestMethod]
+    public void CheckMinIntDivideShadow() => CheckTarget("MinIntDivideShadow");
+
+    [TestMethod]
     public void CheckMinMaxBuiltin() => CheckTarget("MinMaxBuiltin");
 
     [TestMethod]

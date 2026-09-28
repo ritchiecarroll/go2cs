@@ -34,7 +34,7 @@ internal static class NumericTypeTemplate
                 
                 public static {{targetTypeName}} operator *({{targetTypeName}} left, {{targetTypeName}} right) => ({{targetTypeName}})(left.m_value * right.m_value);
                 
-                public static {{targetTypeName}} operator /({{targetTypeName}} left, {{targetTypeName}} right) => ({{targetTypeName}})(left.m_value / right.m_value);{{GetModulusOperator(typeName, targetTypeName)}}
+                public static {{targetTypeName}} operator /({{targetTypeName}} left, {{targetTypeName}} right) => {{GetDivisionBody(typeName, targetTypeName)}};{{GetModulusOperator(typeName, targetTypeName)}}
 
                 public static {{targetTypeName}} operator ++({{targetTypeName}} value) => ({{targetTypeName}})(value.m_value + ({{typeName}})1);
 
@@ -76,8 +76,25 @@ internal static class NumericTypeTemplate
        $"""
 
 
-                public static {targetTypeName} operator %({targetTypeName} left, {targetTypeName} right) => ({targetTypeName})(left.m_value % right.m_value);
+                public static {targetTypeName} operator %({targetTypeName} left, {targetTypeName} right) => {GetRemainderBody(typeName, targetTypeName)};
         """;
+
+    // Go wraps the one overflowing signed quotient, MinInt / -1, to MinInt and makes MinInt % -1 zero,
+    // with no panic; .NET throws OverflowException for both at 32 and 64 bits, which a deferred
+    // recover() cannot see. The -1 arm lives here, inside the named type's own operators, so a named
+    // integer's `a / b` keeps its Go spelling; the converter emits golib's quo/rem only for an UNNAMED
+    // signed division by a non-constant divisor. A narrower underlying needs no arm: C# promotes it to
+    // int, and the wrapper's own cast back wraps the quotient exactly as Go does.
+    private static bool IsSignedWideType(string typeName) =>
+        typeName is "int32" or "int64" or "nint" or "rune" or "int" or "long";
+
+    private static string GetDivisionBody(string typeName, string targetTypeName) => IsSignedWideType(typeName) ?
+        $"right.m_value == -1 ? ({targetTypeName})unchecked(-left.m_value) : ({targetTypeName})(left.m_value / right.m_value)" :
+        $"({targetTypeName})(left.m_value / right.m_value)";
+
+    private static string GetRemainderBody(string typeName, string targetTypeName) => IsSignedWideType(typeName) ?
+        $"right.m_value == -1 ? ({targetTypeName})({typeName})0 : ({targetTypeName})(left.m_value % right.m_value)" :
+        $"({targetTypeName})(left.m_value % right.m_value)";
 
     // Bitwise complement keeps the WRAPPER type (Go `^T(0)` all-ones idiom - os exec_windows'
     // ^syscall.Handle(0) passed to a Handle parameter; the implicit-to-underlying conversion

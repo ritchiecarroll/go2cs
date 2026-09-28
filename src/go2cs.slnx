@@ -617,6 +617,8 @@
     <Project Path="tests/Behavioral/MethodValueReceiverSnapshot/MethodValueReceiverSnapshot.csproj" />
     <Project Path="tests/Behavioral/MethodlessFuncType/MethodlessFuncType.csproj" />
     <Project Path="tests/Behavioral/MethodlessFuncTypeAssert/MethodlessFuncTypeAssert.csproj" />
+    <Project Path="tests/Behavioral/MinIntDivide/MinIntDivide.csproj" />
+    <Project Path="tests/Behavioral/MinIntDivideShadow/MinIntDivideShadow.csproj" />
     <Project Path="tests/Behavioral/MinMaxBuiltin/MinMaxBuiltin.csproj" />
     <Project Path="tests/Behavioral/MixedEmbedKindPromotion/MixedEmbedKindPromotion.csproj" />
     <Project Path="tests/Behavioral/MultiFileInitOrder/MultiFileInitOrder.csproj" />
