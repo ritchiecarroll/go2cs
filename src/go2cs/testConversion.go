@@ -8930,6 +8930,13 @@ func runCommandWithTimeoutEnv(timeout time.Duration, workingDir string, options 
 		// exports the root it converted from. Duplicate keys are fine: os/exec takes the last value.
 		cmd.Env = append(cmd.Env, "GOROOT="+options.goRoot)
 
+		// And the LINK-TIME root through its own channel: the host's runtime copies it into
+		// defaultGOROOT once at start-up (goenvs_impl.cs), as cmd/link bakes it into Go's binary. A
+		// child a test launches with `GOROOT=` (runtime/debug's TestStack) then answers this root
+		// from runtime.GOROOT() as Go's does, and standard-library frames root against it rather
+		// than against whatever GOROOT the environment names.
+		cmd.Env = append(cmd.Env, "GO2CS_DEFAULT_GOROOT="+options.goRoot)
+
 		// `go test` PREPENDS $GOROOT/bin to the test binary's PATH, so a test that shells out to
 		// `go` gets the toolchain matching the GOROOT it was built against. Measured against Go
 		// 1.23.1: inside a test, PATH[0] is $GOROOT/bin and exec.LookPath("go") resolves there.

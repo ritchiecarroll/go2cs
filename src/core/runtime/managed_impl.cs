@@ -1387,6 +1387,31 @@ partial class runtime_package
         return records;
     }
 
+    // resolveRecordedGoFile roots a recorded Go source identity (see GoPositionMapRecord.ResolveGoFile):
+    // a bare file name against the C# file's directory, a GOROOT-relative form against linkRoot's src
+    // directory when there is a link-time root, an absolute path verbatim.
+    private static string resolveRecordedGoFile(string goFile, string csPath, string linkRoot)
+    {
+        if (goFile.Length == 0 || GoPositionMapRecord.isRootedGoPath(goFile))
+            return goFile;
+
+        if (goFile.IndexOf('/') < 0)
+        {
+            int separator = csPath.LastIndexOf('/');
+            return separator > 0 ? string.Concat(csPath.AsSpan(0, separator + 1), goFile) : goFile;
+        }
+
+        string root = linkRoot.Replace('\\', '/').TrimEnd('/');
+        return root.Length > 0 ? string.Concat(root, "/src/", goFile) : goFile;
+    }
+
+    /// <summary>
+    /// GolibTests' probe (CallerFrameTestVariantNamingTests): how a recorded Go source identity is
+    /// rooted for a frame of <paramref name="csPath"/> under the link-time root <paramref name="linkRoot"/>.
+    /// </summary>
+    public static string GoResolveRecordedFileProbe(string goFile, string csPath, string linkRoot) =>
+        resolveRecordedGoFile(goFile, csPath, linkRoot);
+
     // One converted file's recorded position map.
     private sealed class GoPositionMapRecord(string goFile, string table, string funcLits = "")
     {
@@ -1403,39 +1428,19 @@ partial class runtime_package
         //   - a bare file name, which the converter writes when the Go source sits BESIDE the C# it
         //     emitted, against the C# file's own compile-time directory;
         //   - the GOROOT-relative form of a standard-library source (`runtime/extern.go`, always
-        //     carrying a separator), against runtime.GOROOT()'s src directory: default `go test` and
-        //     `go build` bake the absolute GOROOT path, so runtime.Caller, Frame.File and the
-        //     traceback answer it too, and a program that opens its own source through them (the
-        //     re-exec child of TestTracebackSystem) finds the file. With no GOROOT to root against,
-        //     the recorded form is answered as it was recorded;
+        //     carrying a separator), against the LINK-TIME root's src directory, defaultGOROOT, which
+        //     the -tests pipeline hands the host (goenvs_impl.cs): default `go test` and `go build`
+        //     bake that absolute path, so runtime.Caller, Frame.File and the traceback answer it too,
+        //     and a program that opens its own source through them (the re-exec child of
+        //     TestTracebackSystem) finds the file. Never the ambient GOROOT: Go's frames do not move
+        //     with it (runtime/debug's TestStack runs its child with `GOROOT=` and expects the same
+        //     frames), and it can name another Go install whose files do not match the recorded lines.
+        //     With no link-time root, the recorded form is answered as recorded, which is Go's
+        //     -trimpath form;
         //   - an already-absolute path, verbatim.
         public string ResolveGoFile(string csPath)
         {
-            if (m_resolvedGoFile is not null)
-                return m_resolvedGoFile;
-
-            string resolved = goFile;
-
-            if (goFile.Length > 0 && !isRootedGoPath(goFile))
-            {
-                if (goFile.IndexOf('/') < 0)
-                {
-                    int separator = csPath.LastIndexOf('/');
-
-                    if (separator > 0)
-                        resolved = string.Concat(csPath.AsSpan(0, separator + 1), goFile);
-                }
-                else
-                {
-                    string goroot = GOROOT().ToString().Replace('\\', '/').TrimEnd('/');
-
-                    if (goroot.Length > 0)
-                        resolved = string.Concat(goroot, "/src/", goFile);
-                }
-            }
-
-            m_resolvedGoFile = resolved;
-            return resolved;
+            return m_resolvedGoFile ??= resolveRecordedGoFile(goFile, csPath, defaultGOROOT.ToString());
         }
 
         // GoLineFor answers the Go line the given emitted C# line was converted for — a PREDECESSOR
@@ -1639,7 +1644,7 @@ partial class runtime_package
         // isRootedGoPath recognizes the absolute recorded form on either platform shape: a leading
         // slash, or a Windows drive letter. Go spells every recorded path with forward slashes, so
         // there is only ever one separator to consider.
-        private static bool isRootedGoPath(string path)
+        internal static bool isRootedGoPath(string path)
         {
             if (path.Length > 0 && path[0] == '/')
                 return true;

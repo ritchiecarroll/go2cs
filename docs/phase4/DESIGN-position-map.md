@@ -209,6 +209,22 @@ The three are distinguishable without a discriminator field, and deliberately so
 always carries a separator (it is `<import path>/<stem>.go`), the beside-the-C# form never does, and
 the absolute form is rooted.
 
+> **Amendment 2026-09-28 (C2, C5 SOURCE PATHS, re-cut after COORD's review of `ff6b555e00`).** The
+> premise that `cmd/go` builds std with `-trimpath` is false by measurement at go1.24.13: default
+> `go test` and `go build` bake the ABSOLUTE `GOROOT/src/...` path into std frames, and only a
+> `-trimpath` build answers the relative form. `TestStack` does not assert the relative form either:
+> it re-runs itself with `GOROOT=` and requires each frame to start with the child's
+> `runtime.GOROOT()` + `/src/`, which is empty (so the relative form) only when no link-time root
+> exists. The RECORD is unchanged: std is still recorded GOROOT/src-relative, since no host path may
+> go into a committed artifact (§5.1). What changes is the run-time READ: the runtime roots a
+> GOROOT-relative record against the LINK-TIME root, `runtime.defaultGOROOT`, which the `-tests`
+> pipeline hands the host through its own variable, `GO2CS_DEFAULT_GOROOT`, copied once at start-up
+> (`goenvs_impl.cs`). It never roots against the ambient `GOROOT`: Go's frames do not move with it,
+> and it can name another Go install whose files do not carry the recorded lines, which would be a
+> position in neither tree. With no link-time root (a program run outside the pipeline), the recorded
+> form is answered, which is Go's `-trimpath` form. The first cut rooted against `runtime.GOROOT()`
+> and brought back four `TestStack` assertion failures in the banked `runtime/debug` row.
+
 The **`GOROOT/src` test is the discriminator, not the conversion MODE.** That matters: the `-tests`
 pipeline converts GOROOT packages through a single-package run, not `-stdlib`, and it is the run that
 produces `log`, `flag` and `runtime/debug`. A mode-keyed rule would give those three absolute GOROOT
