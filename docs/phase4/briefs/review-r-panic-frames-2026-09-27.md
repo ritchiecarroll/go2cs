@@ -1190,3 +1190,591 @@ Arms owed, each shown red first:
 
 No predicted runtime row reaches these shapes, so the 10-row prediction is unaffected. I did not run the C# suites; every C# outcome above is by reading.
 
+
+
+---
+
+## ADDENDUM 2 (2026-09-28): the second verification, at 28fd1e3218
+
+R's third revision: 59f54667e7 RED (19 arms red at e266debe65), 4597c097d8 FIX (the popped delegate's Method is the catcher; a SiteOwnerThread token beside the activation; the fault kind tagged at the raise site; MarkGoroutineExiting; an ends-at-Run site accepted only for the zero-arg nil thunk or the delegate re-raise; and a DESIGN CHANGE refusing every panic a deferred call raises directly, which COORD accepts as the safe direction), and 28fd1e3218 (the residuals amended). 9 agents; go1.24.13 ground truth and standalone net10 repros.
+
+**CLOSED:** B1 (0 false accepts across every shape, at TC0 and after tier-up; generic instantiations can never alias), C1 (the thread token plus the activation make a foreign owner impossible), and B2.
+
+**STILL WRONG (three narrow shapes, each with a fix verified in scratch):**
+1. C2: sites raised through builtin.panic, and so tagged Explicit, where Go's panic is runtime-raised: R1's six sites, hashtriemap.cs:608 (ComparingUncomparableType also fixes Go's "runtime error: " text), math/bits Div64/Div (bits.cs:522/525, via a bits_impl.cs hand-own; a Divide tag would keep a frame Go's intrinsic lacks), and panicwrap on a nil box in the go2cs-gen adapter forwarders and the (*T).M wrapper. Raise them Unmodelled, with an arm each expecting no splice. The general rule: builtin.panic is Explicit only when Go's own frames are Go source too.
+2. C3: a Goexit in a range-over-func loop body is not carried to the coro. Fix: YieldFunctionEnumerator.Dispose records GoexitException.Started before the switch, and yield() marks the goroutine on resume. A PANIC in the loop body splices on the unmarked coro; refuse any coro splice while m_stopped is set.
+3. A zero-argument nil deferred func run after a COMPLETED recovery (no newer panic running) splices without Go's runtime.deferreturn frame. Leave that thunk's panic unstamped, or add deferreturn; DNILAR (a later panic calls the nil func) must stay spliced.
+
+**OWED AS STATEMENTS (the safe direction):** the missing splices the design now makes, named in PREDICTION's residuals: `defer G(args)` through golib's defer<T...> rung, pointer-receiver method groups (the ж twin), value-receiver method values (emitted as lambdas), every generic catcher (StackFrame reports the open definition), and directly deferred named functions and methods. The PREDICTION's "never a partial list" is false for the ruled deferreturn residual; restate it. The tail-call arms guard B1 in the OPTIMIZED (Release) build only; say so on the gate line.
+
+**FOUND IN PASSING, PRE-EXISTING (on master), its own task:** `defer runtime.Goexit()` skips the frame's earlier-registered deferred calls. Run's loop catches only IsPanic, so the GoexitException leaves with defers unrun. Go runs them.
+
+## Appendix C: the second verification's results
+
+### B1: verifier closed
+
+**Evidence.** READ at 28fd1e3218 after a fetch.
+- GoFrame.Run sets `deferred = Pop(); deferred();` inside the inner try. Its catch calls `ReRaisedByTheDeferredDelegate(deferred, raised)`, which is now `deferred is not null && Catches == 2 && !SiteEndsAtRun && catcher = SiteTrace[^1].GetMethod() && catcher != RunMethod && deferred.Method == catcher`.
+- The old `new StackTrace(ex)` walk and IsMachinery are deleted, so nothing is inferred from the trace any more. `SiteOwner != 0` was dropped, which is what accepts M0.
+- An accepted re-raise sets `SiteIsTheDeferredCall`. splicePanic accepts an ends-at-Run link only for that flag or for the zero-arg nil thunk (checked by method).
+- The fix commit 4597c097d8 touches no test file. The arms were added red-first in 59f54667e7:
+  - ShapeA's closure is now `[AggressiveOptimization]`.
+  - New arm `ATailCallingForwarderDeferredIsNotTheCatcher` uses dForward, which is AO and calls the NoInlining gDeferPanics. It expects no splice.
+  - New arm `ACatcherWhoseRunRegisteredNoDeferIsStillTheDeferredCall` (M0) expects Go's list.
+  - D2 (deferTheCatcher) still expects Go's list.
+
+WHY IT IS SOUND:
+- Equal methods plus Catches==2 imply the delegate's own activation caught first. If a deeper activation of the same method had caught first, the delegate target's own emitted filter, or its Run's inner catch, would count a third catch.
+- delegate.Method is fixed when the delegate is created, so a tail call cannot change it. A catcher always contains a try region, so the JIT cannot tail-call its frame out of the trace.
+
+MEASURED. A standalone net10 (10.0.11) Release repro in <scratch> MiniGolib\GoFrame.cs copies Run's catch decision and ReRaised verbatim from 28fd1e3218, in a separate "golib" assembly with the ladder rung `frame.Push(() => action(arg))`. The probes use the emission shape (try, `catch when IsPanic`, `finally ᒐ.Run()`) and are unmarked unless named. Outputs are the out-*.txt files beside it.
+- At DOTNET_TieredCompilation=0, one call per shape:
+  - Refused: the closure `func(){G()}` (unmarked and AO), the forwarder D (unmarked, AO and NI), the M0 variants, and R's exact shapes (AO closure or forwarder calling a NoInlining catcher).
+  - The old trace rule would have accepted every one of those except D_NI, because the closure and D frames vanish from the re-raise trace.
+  - Accepted, which is Go's list: the direct `defer G()`, G_NI, Gm0 (M0), and the non-generic closure-catcher.
+- Default tiering, 3000 calls per shape with sleeps for tier-up: the new rule had 0 false accepts at every call. The old rule accepted unmarked closures and forwarders about 1600 to 1800 of 3000 times after tier-up, and AO shapes 3000 of 3000, including the first call.
+- G's frame was never lost in any run: its EH and filter keep it from being inlined, even with PGO.
+- So both B1 arms go red if the trace rule comes back, at TC0 and on MSTest's default one-shot tier, because AO is tail-called on the first call.
+
+LADDER: the delegate's Method is golib's `builtin+<>c__DisplayClass2_0<IntPtr>::<defer>b__0`. It never equals the catcher, so `defer G1(1)` is always REFUSED. The wrapped delegate is not unwrapped. This is safe, but it is a missing splice: Go 1.24.13 shows `Ladder.func1 | gopanic | G1 | gopanic | Ladder`.
+
+METHOD VALUES:
+- A class-instance delegate or a boxed-struct delegate compares EQUAL, and is correctly accepted.
+- The converter does not emit those forms:
+  - Value-receiver method values are emitted as lambdas (`() => aʗ1.label()`, MethodValueReceiverSnapshot golden).
+  - Pointer-receiver groups bind RecvGenerator's ж twin forwarder (`defer(Ꮡs.release, ref ᒐ)`, DeferCallOrder golden). The repro shows the twin and the ref body, both named M, correctly UNEQUAL.
+- Both forms are refused. Go shows `gopanic | main.(*T).PM | gopanic | owner` and `main.T.VM`, the same for a stored method value. Measured plain and with -gcflags=all=-l.
+
+GENERICS: in .NET 10, StackFrame.GetMethod() returns the generic method DEFINITION, `Gg<T>` (IsGenericMethodDefinition=true). For a closure inside a generic function it returns the OPEN type, `<>c__DisplayClass19_0`1[T]`.
+- This holds for nint, string, object and class type arguments alike, for exception traces and live walks, at TC0 and after tier-up.
+- delegate.Method is always the closed instantiation, even when the delegate is built in shared code (`Gg<String>`).
+- So two different instantiations can never compare equal. The matrix was all unequal, and Gg<string> vs Gg<object> is False.
+- But one instantiation ALWAYS compares unequal to itself. Every generic catcher, and every closure-catcher inside a generic function, is refused. Go shows `gopanic | main.Gg[...] | gopanic | GenInt` and `OG[...].func2`.
+- Across every shape: 0 false accepts.
+
+**Residual.** No correctness hole remains in B1. What is owed is disclosure plus one caveat about the gate leg.
+1. These shapes are now missing splices, the safe direction. Go shows `gopanic | catcher | gopanic | owner` for each (measured). None is named in PREDICTION.md's AMENDED residual list; they are only implied by "the deferred delegate that is itself the first catcher":
+   - `defer G(args)` through golib's defer<T...> rung. The addendum asked to compare the wrapped delegate's Method, and that was not done.
+   - Pointer-receiver method groups, which bind the ж twin forwarder.
+   - Value-receiver method values, which are emitted as lambdas.
+   - Every generic catcher, because StackFrame reports the open generic definition while delegate.Method is closed.
+   The fix is to state them as residuals, or unwrap the ladder closure. Note that unwrapping alone would still refuse generics.
+2. The tail-call arms (ShapeA's AO closure and dForward) guard B1 only in an OPTIMIZED build. In a Debug build of the same repro, AggressiveOptimization is ignored (debuggable code), and the old trace rule also refuses, so both arms stay green whichever rule is in place. PREDICTION states GolibTests as "Release and Debug". Only the Release leg carries the B1 guard, and the gate line should say so.
+3. Not measured: the real golib at 28fd1e3218, since the repro is a verbatim copy of the decision logic in a mimic, and non-x64 JITs. No C# suite was built or run. Scratch bin/obj folders and caches were purged; sources and outputs are kept in <scratch>
+
+### C1: verifier closed
+
+**Evidence.** Checked by reading the code at 28fd1e3218, then confirmed with Go 1.24.13 ground truth and a tiny net10 repro. The C# suites were not built or run.
+
+1. STAMP AND CHECK
+- The owner fields are written in exactly two places: GoFrame.cs:187-191 (the first catch) and :283-286 (the Run loop's catch). Each sets SiteOwner = t_sequences[sequence].Activation and SiteOwnerThread = ThreadToken together.
+- A git grep over src finds no other writer of SiteOwner, SiteOwnerThread or t_lastActivation.
+- splicePanic (managed_impl.cs:2065) refuses any link unless both of these hold:
+  - SiteOwner equals the activation of the Run being walked, read from this thread's t_sequences;
+  - ReferenceEquals(SiteOwnerThread, GoFrame.ThreadToken).
+- So a link passes only when the Run that stamped it is on this thread and has this number.
+
+2. NUMBERS AND TOKENS ARE UNIQUE
+- t_lastActivation has one writer, `++` in PushSequence (:369).
+- The pool's ResetForReuse calls GoFuncRoot.ResetThread, which calls ResetSequences. That clears the entries and the depth only. The counter and t_threadToken are never reset, and the census lists both as KeptThreadResource.
+- The token is an object, so it is distinct per thread. Any exception that holds it keeps it alive, so it cannot be recycled the way a ManagedThreadId can.
+- The net10 repro confirms this: a worker's token differs from the main thread's, and from the token of a new thread started after the worker ended.
+
+3. RANGE-OVER-FUNC HANDOFF
+- Only one path hands the same PanicException object to another thread: YieldFunctionEnumerator. Its run() has a plain catch, captures with ExceptionDispatchInfo, and rethrowFailure throws on the ranging goroutine.
+- The other rethrow sites are safe:
+  - GoFrame's foreignRethrow, and the TargetInvocation unwrap in PanicException.cs:162 and reflect, stay on one thread;
+  - sync.oncefunc replays only foreign exceptions;
+  - ActionExtensions throws an AggregateException, which is not a panic.
+- The handoff runs one way only, coro to ranger. A panic in the loop body disposes the enumerator and never crosses to the coro.
+- A link stamped on the coro carries the worker's token, so the ranger refuses it.
+- The ranger cannot re-stamp it:
+  - firstHere needs Catches==1, but the coro side has already counted one catch;
+  - reRaised needs Catches==2 and a popped delegate whose Method is the first catcher. That delegate's body is the catcher's own method, and its emitted catch sits between rethrowFailure and the Run loop, so Catches is at least 3.
+- Go 1.24.13, run in my scratch folder, gives these lists:
+  - R1: rangerR1.func1|gopanic|panicmem|sigpanic|seqR1|rangerR1
+  - Y: F.func1|gopanic|F|F.func2|F
+- On a collision, the cut without the token would drop seqR1 from R1, and F plus F.func2 from Y. At the fix both are refused, and PREDICTION.md's amended residuals state that.
+
+4. POOLED-THREAD REUSE
+- Yes: the next goroutine on the same worker reuses the same token object. That is by design.
+- It cannot match an old panic, because that goroutine's Runs get numbers from the same never-reset counter, so they are all larger than the old stamp. splicePanic needs a live Run with exactly the stamped number, and the stamping Run has already returned.
+- The old object also never gets back to its worker. The handoff is one way, and every thread in a range chain is live and blocked while the object is in transit, so none of them can be reused meanwhile.
+
+5. THE PLANTED-COLLISION ARM
+- The arm is ASiteOwnedOnAnotherThreadSplicesNothingEvenWhenActivationsCollide, with probes crossThreadOwner and seqDeferringNil.
+- Each thread plants t_lastActivation=1_000_000 inside its own deferring function. After that, each pushes exactly one sequence, so both activations are 1_000_001:
+  - golib itself has no GoFrame.Run;
+  - the park path (casgstatus, readgstatus, getg) has no defers.
+- The net10 repro confirms that reflection's SetValue on a [ThreadStatic] field writes only the calling thread's slot.
+- The raiser is the zero-argument nil-func thunk, the one ends-at-Run site the fix still accepts (Memory kind, no Go frames, raw[0] == NilDeferredCallMethod). With the token check removed, every other check passes and the arm would read gopanic|panicmem|sigpanic|crossThreadOwner, which is RED.
+- The same class's longThunkChain 64 and 65 arms are the positive control: they show the nil-thunk splice path is live.
+- R reports the arm red at e266debe65, which is consistent: the collision works.
+
+6. A CROSS-THREAD SITE UNDER A LOCAL STAMP IS CORRECT (Z0)
+- Z0 is a seq that panics with no catch of its own. The ranger's own Run on the ranger's thread stamps it.
+- The repro shows that new StackTrace(ex) after an ExceptionDispatchInfo rethrow on another thread includes the worker's frames.
+- So the splice reads gopanic|seqZ0|rangerZ0, which matches Go. The yield-first variant Z0b matches Go too.
+
+Scratch files: <scratch> and ...\netrepro\Program.cs. bin, obj and caches are purged, and the repo tree is unchanged.
+
+**Residual.** Nothing blocking on C1. Three notes:
+
+1. Minor arm gap. There is no cross-thread arm for a site that ends at the deferring function (the review's shape Y). The token check is one condition in the guard every link shares, so R1 alone goes red if it is removed. A future change that moved the check into one branch would not be caught.
+
+2. No arm resets t_lastActivation on pooled reuse. That case cannot be reached anyway, because the handoff runs one way.
+
+3. Outside C1, already present at every cut, found by reading. A panic raised in a range-over-func LOOP BODY gives a partial splice, which is a wrong splice.
+   - Setup: the body is inline in the ranger's foreach, and Callers is read from the ranger's deferred call.
+   - The cut gives rangerL.func1|gopanic|rangerL.
+   - Go 1.24.13 (run) gives rangerL.func1|runtime.gopanic|main.rangerL-range1|main.seqL|main.rangerL, so rangerL-range1 and seqL are missing.
+   - Nothing refuses it: the kind is Explicit, the thrower rangerL is Go source, and site=[rangerL] equals the owner.
+   - This contradicts the stated "never a partial list". I found no predicted row that uses it.
+   - Fix: refuse the splice when the site's owner is inside a range-over-func loop body (converter or golib marker), or state it as a residual, and add a red-first arm expecting no splice.
+
+### C2: verifier partial
+
+**Evidence.** Read-only against 28fd1e3218 (git diff e266debe65..28fd1e3218, git show, git grep). No C# build. Go lists were measured with go1.24.13 using the probes in <scratch>,iface,refl,rclose}; the Go cache was purged afterwards.
+
+WHERE THE TAG IS SET. FaultKind is an internal init property. Its enum default (value 0) is Unmodelled (PanicException.cs:339). A git grep of all src finds exactly three places that set it:
+- builtin.panic sets Explicit (builtin.cs:271).
+- RuntimeErrorPanic.NilPointerDereference sets Memory (RuntimeErrorPanic.cs:23).
+- RuntimeErrorPanic.IntegerDivideByZero sets Divide (:171).
+TryAsPanic maps NullReferenceException and DivideByZeroException through those two factories. It is the only place a CLR exception becomes a panic, and no other catch maps IndexOutOfRange, InvalidCast or Overflow exceptions.
+
+splicePanic:
+- refuses Unmodelled for every link, stack-free (managed_impl.cs:2068);
+- keeps the stack test only for Explicit (:2083);
+- adds panicmem+sigpanic for Memory and panicdivide for Divide.
+
+GOLIB RAISE SITES, all correct:
+- Every `new PanicException(...)` keeps the default Unmodelled, so all are refused. This covers:
+  - index (array/slice/sslice/string/sstring), SliceBounds (x9), ArrayConversionLength, MakeSlice len/cap, growslice, zero-size ceiling;
+  - map nil write (map.cs:310/373/389);
+  - channel send-on-closed, close of closed and nil, synctest and timer sites (17);
+  - type assertion (builtin.cs:2576, error.cs:284);
+  - ComparingUncomparableType and hash-of-unhashable (GoEqualityComparer:91/235);
+  - RangeFunctionContinued;
+  - the unsafe, native and header refusals, and Goroutine/SyncTestBubble internals;
+  - the 18 `new PanicException` sites in runtime *_impl.cs.
+- golib's seven builtin.panic callers (SyncTestBubble x6, NativeStructMarshal:207) are Explicit but thrown from non-`_package` golib methods that are large or hold try/lock, so the second guard refuses them. testing's TestExecution sites are refused the same way.
+- NilPointerDereference call sites (ж operator~/NilBox Value, nonnil, NativeBox, GoFrame thunk, reflection writeSlot) are genuine sigpanic shapes, and none is refused on kind.
+
+CONVERTER: it emits `throw panic(v)` only for Go's own panic(v) (convCallExpr.go:3004/3007) and for go2cs stubs. Type assertion goes through `._<T>()`, which is Unmodelled.
+
+ARMS:
+- PanicFramesVerificationTests.AnUnmodelledRuntimeErrorSplicesNothing has 6 rows (array, string, nil map, double close, failed _<T>, slice bounds). The probe is AggressiveOptimization|NoInlining, so it does not depend on JIT tier. Deleting line 2068 turns all 6 red; reverting to stack inference turns the inlined rows red. The old indexPanic arm is also still there.
+- The positive arms plainPanic, nilPointerPanic and divZeroPanic (PanicFramesTests:43/61/66) go red if any modelled tag is lost.
+
+WHAT IS NOT CLOSED (both are wrong splices, not missing ones):
+- R1: hand-owned C# inside a `<pkg>_package` class raises Go runtime-frame panics through builtin.panic, so they are tagged Explicit. isGoSourceFrame counts every `_package` class as Go source, so the second guard passes them. Sites: unsafe.cs:923/930 (unsafe.Slice), 1031/1046 (unsafe.String), reflect/value_impl.cs:1703 (Value.Close on a nil chan), 1787 (SetMapIndex on a nil map). go2cs splices `gopanic | unsafe.Slice | owner`; Go gives `gopanic | runtime.panicunsafeslicelen1 | runtime.panicunsafeslicelen | owner`. For SetMapIndex Go gives `gopanic | runtime.mapassign_faststr | reflect.mapassign_faststr0 | reflect.mapassign_faststr | reflect.Value.SetMapIndex | owner`, and for Close `gopanic | runtime.closechan | reflect.chanclose | reflect.Value.Close | owner`; go2cs keeps only the reflect method.
+- R2: panicwrap. A nil *T called through a non-empty interface goes through the adapter's `m_box.Value` (NilBox, a StandardBox, throws NilPointerDereference). Through the `(*T).M` method-expression wrapper it goes through `p0.Value` (convSelectorExpr.go:925). Both are tagged Memory. go2cs splices `gopanic | panicmem | sigpanic [| main.(*T).M] | owner`; Go gives `gopanic | runtime.panicwrap | main.(*T).M | owner`, and its panic message is "value method main.T.M called using nil *T pointer".
+- Both existed before the fix: at e266debe65 these sites also had no kind and a Go-source thrower, so they spliced the same way. Neither is on the 10-row path.
+
+**Residual.** 1) R1, six sites: raise them as Unmodelled, by `new PanicException(...)` or a RuntimeErrorPanic factory, not builtin.panic. The sites are unsafe.cs:923/930/1031/1046 and reflect/value_impl.cs:1703/1787. Go's unsafe texts are "unsafe.Slice: len out of range" / "unsafe.Slice: ptr is nil and len is not zero" and the unsafe.String pair; its values satisfy runtime.Error; go2cs's "len is negative" diverges separately. Add one arm, say unsafe.Slice with len -1 in a deferring probe, expecting NO splice. The general hazard: the Explicit second guard cannot see hand-owned `_package` code. Audit any future hand-own that reproduces a runtime-raised panic text.
+2) R2: raise panicwrap as its own Unmodelled panic, with Go's message, when the box is nil. This applies in the go2cs-gen adapter forwarders that use `m_box.Value` and in the `(*T).M` method-expression wrapper. Add an arm with a nil *T through an interface, value-receiver method, expecting NO splice. Go's list was measured: `gopanic | runtime.panicwrap | main.(*T).M | owner`.
+3) Minor: no arm exercises the Explicit second guard (a golib or host explicit panic refused). Deleting managed_impl.cs:2083 would stay green. It is load-bearing for testing's TestExecution panics and SyncTestBubble.
+Nothing modelled is refused on kind. Closure-raised Memory/Divide sites are refused only by the announced design change.
+
+**Skeptic: partial.** Read-only at 28fd1e3218 after a fetch: git diff from e266debe65, git show and git grep. No C# was built. Go lists were measured with go1.24.13 windows/amd64 using my own probes in <scratch>,probe2}\main.go. GOCACHE and TEMP pointed at that folder and were purged afterwards; nothing was written to C:.
+
+THE FIXED PART HOLDS, AND AN ARM WOULD CATCH ITS RETURN.
+- FaultKind is init-only, and its default is Unmodelled (PanicException.cs:339). A git grep of all src finds exactly three places that set it: builtin.cs:271 (Explicit), RuntimeErrorPanic.cs:23 (Memory) and RuntimeErrorPanic.cs:171 (Divide).
+- There is no subclass and no copy of a PanicException. The range-over-func rethrow re-raises the same instance, so it keeps its kind.
+- TryAsPanic is the only place a CLR exception becomes a panic: NullReferenceException becomes Memory and DivideByZeroException becomes Divide. The only other CLR catch in golib is Goroutine.cs:1026, which parses a number and raises no panic.
+- Every `new PanicException` keeps the default kind, so it is refused at managed_impl.cs:2068 before the trace is read. That is 57 sites in golib and 17 in runtime's *_impl.cs (the verifier said 18).
+- golib's 7 builtin.panic callers are SyncTestBubble x6 and NativeStructMarshal:207. testing's TestExecution is in go.testing_runtime, not a `_package` class. The second guard at :2083 refuses all of them.
+- The Memory sites are genuine sigpanic shapes: the ж operator~ and nil-box Value, nonnil, NativeBox, slice RefuseNoUserMemory, the GoFrame thunk, GoReflect writeSlot, and runtime memmove/memequal/memclr.
+- No regression: at e266 both builtin.panic and `new PanicException` had kind None. The refusal is now strictly wider for unmodelled panics, the same for builtin.panic, and unchanged for Memory and Divide.
+- Arms, by reading:
+  - With line 2068 deleted, nothing else checks for an Unmodelled panic. All 6 rows of PanicFramesVerificationTests.AnUnmodelledRuntimeErrorSplicesNothing would then splice gopanic, so they go red whatever the JIT tier.
+  - plainPanic (an Explicit arm), nilPointerPanic and divZeroPanic go red if a modelled tag is lost.
+  - The old indexPanic arm is still there.
+
+NOT CLOSED. Each of these is a wrong splice, not a missing one: a panic whose Go form passes through an unmodelled frame is tagged Explicit or Memory.
+- R1 confirmed at all six sites (unsafe.cs:923/930/1031/1046, reflect/value_impl.cs:1703/1787). unsafe_package and reflect_package are `_package` classes in namespace go. My own Go lists:
+  - unsafe.Slice(&b, -1): `gopanic | runtime.panicunsafeslicelen1 | runtime.panicunsafeslicelen | owner`
+  - unsafe.String(nil, 3): `gopanic | runtime.panicunsafestringnilptr | owner`
+  - Value.Close on a nil chan: `gopanic | runtime.closechan | reflect.chanclose | reflect.Value.Close | owner`
+  - SetMapIndex on a nil map: `gopanic | runtime.mapassign_faststr | reflect.mapassign_faststr0 | reflect.mapassign_faststr | reflect.Value.SetMapIndex | owner`
+- R2 confirmed, with one caveat:
+  - The method expression `(*T).M` always gives `gopanic | runtime.panicwrap | main.(*T).M | owner`, with the message "value method main.T.M called using nil *T pointer". go2cs goes through p0.Value in the wrapper (convSelectorExpr.go:925) and tags it Memory.
+  - Through an interface, Go's answer depends on its compiler. With `var i I = p; i.M()` Go devirtualizes the call and gives `gopanic | panicmem | sigpanic | owner`, which is exactly go2cs's answer. With the interface returned from a noinline function it gives the panicwrap list. The adapter's `m_box.Value` (ImplementGenerator.cs:559) is wrong for the usual case.
+- NEW, same class, missing from the verifier's list:
+  (a) internal/sync/hashtriemap.cs:608 (mustBeComparable). It is hand-owned in `go.internal.sync_package` and raises `throw panic("comparing uncomparable type ...")`, so it is tagged Explicit and accepted. User code reaches it through sync.Map.CompareAndSwap or CompareAndDelete when the stored value is a []int.
+    - Go, CompareAndSwap: `gopanic | runtime.efaceeq | runtime.nilinterequal | internal/sync.(*entry[...]).lookupWithValue | internal/sync.(*HashTrieMap[...]).find | internal/sync.(*HashTrieMap[...]).CompareAndSwap | sync.(*Map).CompareAndSwap | owner`
+    - Go, CompareAndDelete: `... | runtime.efaceeq | runtime.nilinterequal | internal/sync.(*entry[...]).compareAndDelete | internal/sync.(*HashTrieMap[...]).CompareAndDelete | sync.(*Map).CompareAndDelete | owner`
+    - The go2cs message also lacks Go's "runtime error: " prefix, and its value is not a runtime.Error.
+  (b) Converted math/bits: bits.cs:522/525 (`panic(divideError)` and `panic(overflowError)` in Div64, which Div reaches too). Both are Explicit Go-source panics and are accepted. But Go on amd64 replaces Div64 with an intrinsic (intrinsics.go:1191-1201, and Div is an alias on ArchAMD64).
+    - Measured: Div64(0,1,0) gives `gopanic | runtime.panicdivide | owner`; Div64(2,0,1) gives `gopanic | runtime.panicoverflow | owner`; Div(0,1,0) gives `gopanic | runtime.panicdivide | owner`.
+    - go2cs splices `gopanic | math/bits.Div64 [| math/bits.Div] | owner`.
+    - Div32's overflow is not an intrinsic, and it matches Go: `gopanic | math/bits.Div32 | owner`.
+    - This is the converted-code path the item asked about.
+  (c) Refusal paths in hand-owned code that Go treats as a fault, raised as Explicit: unsafe.cs:587 (Pointer.LoadThrough "nil pointer dereference") and runtime/hash_impl.cs:266 (a nil pointer with a non-zero size). Go takes sigpanic in both. Few callers can reach them.
+- Converter emission is otherwise clean:
+  - `throw panic(v)` only for Go's own panic (convCallExpr.go:3004/3007) and the "go2cs:" stubs (visitFuncDecl.go:2433).
+  - It never emits RuntimeErrorPanic or `new PanicException` directly.
+  - `._<T>()` is Unmodelled.
+- Minor: no arm reaches the second guard. No PanicFrames* test raises a golib or host explicit panic, so deleting :2083 would stay green.
+
+**Skeptic residual.** 1) Raise these as Unmodelled (a RuntimeErrorPanic factory or `new PanicException`), not through builtin.panic:
+   - R1's six sites.
+   - hashtriemap.cs:608. RuntimeErrorPanic.ComparingUncomparableType also fixes Go's "runtime error: " text.
+   - Optionally unsafe.cs:587, hash_impl.cs:266, and the go2cs-only refusal texts raised through builtin.panic in hand-owned `_package` code (unsafe.cs:546/573/584/595 and hash_impl.cs's refusals). Go has no such panic, so tagging them "Go's panic(v)" makes a false claim.
+2) math/bits Div64 and Div (bits.cs:522/525): raise Unmodelled, through a hand-own in bits_impl.cs. A Divide tag would still be wrong: the site would keep a math/bits.Div64 frame that Go's amd64 intrinsic does not have.
+3) R2: raise panicwrap as its own Unmodelled panic, with Go's message, when the box is nil. This applies in the go2cs-gen adapter forwarders that use `m_box.Value` and in the `(*T).M` method-expression wrapper.
+4) Arms, each in a deferring probe expecting NO splice:
+   - unsafe.Slice(&b, -1)
+   - sync.Map CompareAndSwap on a stored []int
+   - bits.Div64(0,1,0)
+   - a nil *T through the method expression `(*T).M`
+   - plus one arm for the Explicit second guard, for example a golib explicit raiser such as SyncTestBubble.Wait outside a bubble.
+5) The general rule these break: "builtin.panic = Explicit" is right only when Go's own frames are Go source too. Hand-owned `_package` code and compiler-intrinsic converted Go both break it, and the second guard sees neither. Audit any hand-own that reproduces a runtime-raised panic.
+None of this is on the 10-row path. Every item existed at e266debe65 as well. Nothing modelled is refused on kind; closure-raised Memory and Divide sites are refused only by the announced design change.
+
+### C3: verifier partial
+
+**Evidence.** Method: I read git diff e266debe65 28fd1e3218 and the files at the tip. I ran Go ground truth on go1.24.13 windows/amd64, with and without -gcflags=all=-l; both gave identical lists. I built a standalone net10 repro against a golib.dll compiled from a git archive of the tip, with the assembly named GolibTests so it gets golib's InternalsVisibleTo access. Inside the recoverer it evaluates splicePanic's per-link clauses (managed_impl.cs:2062-2091) against the live state: SequenceFromTop(0), ThreadToken, FaultKind, the raw SiteTrace and the ends-at-Run clause. Results were identical at the default tiering and at DOTNET_TieredCompilation=0. I did not run the C# suites. All scratch bin/obj folders and caches have been purged, and the repo is untouched.
+
+WHAT IS CLOSED
+1. **runtime.Goexit.** managed_impl.cs:743 throws `new GoexitException()`, and the constructor calls MarkGoroutineExiting (GoexitException.cs:43). iter.Pull is converted Go and re-raises seq's Goexit through runtime.Goexit() in next and stop (iter.cs:326 and :345), so the caller's thread is marked too. The arm is ANilDeferredFuncFaultingDuringGoexitSplicesNothing.
+2. **The test host.**
+   - TestExecution.FailNow sets the mark at :349 and SkipNow at :367, immediately before `throw new TestAbortException()`.
+   - It is set only after TryEnsureOwner passes. It is not set if Fail() panics first, or when a non-owner call returns without unwinding.
+   - The InOwnersBubble branches (:341 and :360) throw GoexitException, so the constructor marks.
+   - T.Fatal, Fatalf, Skip, Skipf and SkipNow all call execution.FailNow or SkipNow (testing.cs:285-333). The TB adapter forwards to the same calls, and B and F are no-ops.
+   - The arm is ANilDeferredFuncFaultingDuringTheTestHostsGoexitSplicesNothing, with FailNow and SkipNow rows run through a real child TestExecution thread.
+3. **The range-over-func rethrow.** rethrowFailure marks the ranging thread when SourceException is a GoexitException (YieldFunctionEnumerator.cs:129-130). Both re-raise points go through it: MoveNext (:84) and Dispose (:149). A seq cannot carry a TestAbortException across, because t.FailNow on the coro thread fails TryEnsureOwner and does not throw.
+   - The arm is ANilDeferredFuncFaultingDuringARangeFuncsGoexitSplicesNothing.
+   - I confirmed it would go red: FWD-GX refuses (Started=True, SiteOwner=0). A mutant that clears the mark before the nil thunk runs gives Started=False, SiteOwner=activation, EndsAtRun, ACCEPTS.
+4. **Goexit inside a deferred call.** The constructor marks whichever thread runs the deferred call, since GoFrame.Run invokes defers inline. If the call belongs to a seq, rethrowFailure carries the mark across. Run's catch is the only place the mark is read (GoFrame.cs:281, `running is null && Started`). A link raised unstamped under the Goexit refuses any chain above it at splicePanic:2065.
+5. **Scoping.**
+   - Pooled coro workers reset after every body: GoroutineThreadPool.cs:140, then ResetForReuse, then GoFuncRoot.ResetThread (:71), then GoexitException.ResetThread.
+   - Goroutines get a new Thread each (Goroutine.cs:830), and so does each test or subtest (TestExecution.cs:201-232).
+   - The census arm plants t_started=true after a body (ThreadStateCensusTests.cs:317 and :347).
+   - The repro confirmed it: a Goexiting seq's worker was reused for the next seq and read Started=False.
+   - All four marking sites set the mark immediately before a throw. The only Go code that then runs marked is Goexit-time code: defers, and the test cleanups after FailNow, which Go also runs under Goexit. So any extra refusal is safe.
+
+WHAT IS STILL OPEN: A GOEXIT IN THE LOOP BODY IS NEVER MARKED ON THE CORO THREAD
+This is the mirror of the path R fixed. R's own doc comment on MarkGoroutineExiting says every Goexit that unwinds "on a different thread than the one that raised it" must mark.
+- runtime.Goexit, or t.FailNow / SkipNow / Fatal / Skip, can be raised in a range-over-func loop body on the ranging goroutine.
+- The foreach's Dispose (YieldFunctionEnumerator.cs:140-150) then sets m_stopped and switches. seq's yield returns false (:117), and seq's deferred calls run as a normal return on the coro worker, which is not marked.
+- Both ends-at-Run shapes the splice still accepts are then spliced: the nil-func thunk, and the `defer D()` delegate re-raise.
+
+Go 1.24.13 (gorev/main.go):
+- RB-Goexit/nil: `seqNil.func1 | runtime.gopanic | runtime.panicmem | runtime.sigpanic | runtime.Goexit:636 | RBGoexit-range1 | seqNil | RBGoexit | runtime.goexit`
+- RB-Goexit/named: `seqNamed.func1 | gopanic | dNamed | runtime.Goexit | RBGoexit-range1 | seqNamed | ...`
+
+The repro at the tip:
+- RB-Goexit/nil, RB-FailNow/nil (the body does exactly what FailNow does at lines 349-350), RB-Goexit/named and RB-FailNow/named all give: coro thread, Goexit.Started=False, SiteOwner=activation, thread token matches, EndsAtRun=True, Memory with first frame == NilDeferredCallMethod (or IsTheDeferredCall=True for named), result ACCEPTS.
+- So by reading, go2cs gives `seqNil.func1 | gopanic | panicmem | sigpanic | seqNil | ...`. That drops runtime.Goexit and the range body between sigpanic and seqNil: a partial list, which the stated residual promises never happens.
+- For the named shape, the repro did not evaluate the Explicit second guard, because isGoSourceFrame lives in runtime. In the corpus dNamed is a Go-source frame, so that guard passes.
+- Control: RB-Break gives the identical state. There Go really does splice straight onto seq (`sigpanic | seqNil:33 | RBBreak`), so the coro side currently cannot tell a break from a Goexit.
+- No arm covers this. The shape was already spliced this way at e266debe65, so it is not a regression from R's fix, but C3 is not closed.
+- None of the 10 predicted runtime rows reaches this shape.
+
+**Residual.** 1. OPEN (C3): Dispose needs to carry the Goexit to the coro side. Suggested fix:
+   - In YieldFunctionEnumerator.Dispose, read GoexitException.Started on the ranging thread into a field before m_coro.Switch(). A body Goexit, or the host's FailNow/SkipNow, has already set it at this point.
+   - In yield(), when it resumes with m_stopped set and that field true, call GoexitException.MarkGoroutineExiting() on the coro thread.
+   - The worker is reset after the body, so scoping still holds.
+   Arms, red first:
+   - RB-Goexit/nil: the body throws GoexitException; seq defers a recoverer and then a nil func. Expect NO splice.
+   - The same with the body doing MarkGoroutineExiting + throw, or a real child TestExecution calling FailNow and SkipNow.
+   - RB-Break/nil as the control: expect Go's `gopanic | panicmem | sigpanic | seqNil`, so the fix cannot pass by refusing everything.
+   Either fix it, or add it to PREDICTION.md's Goexit residual together with its arm.
+2. OUT OF C3's SCOPE, same mechanism: a PANIC in the loop body.
+   - Go: `seqNil.func1 | gopanic | panicmem | sigpanic | runtime.gopanic | RBPanic-range1 | seqNil | RBPanic | main`.
+   - The repro also gives ACCEPTS on the unmarked coro thread, with running null. By reading, go2cs gives `... sigpanic | seqNil`, dropping `gopanic | RBPanic-range1`.
+   - The body's panic is never handed to seq's Runs as the panic they are running. This belongs with the cross-thread items (C1) and should be stated or refused the same way.
+3. Minor, safe: Fatal, Fatalf, Skip and Skipf have no arm of their own. They are one-line wrappers over the armed FailNow/SkipNow (testing.cs:289-330). The earlier safe over-refusal (a nested normal-return splice under a Goexit comes back missing, never wrong) still stands.
+Files: <scratch> (Go ground truth) and <scratch> (net10 repro; bin/obj purged).
+
+**Skeptic: partial.** Method. I read the addendum on origin/claude/coord-handover 886eb16694, git diff e266debe65 28fd1e3218, and the files at 28fd1e3218, after a fetch. I ran my own Go programs on go1.24.13 windows/amd64, with and without -gcflags=all=-l (same lists both ways), plus go test for the test-host forms. I built golib from a git archive of the tip, and a separate net10 console repro (assembly named GolibTests, so it gets golib's internals). Its Probe.Callers repeats captureCallers' walk and splicePanic's per-link rules (managed_impl.cs:1900-1979 and 2050-2125) exactly, over the live stack, so each shape prints the list go2cs would give. I ran it at default tiering and at DOTNET_TieredCompilation=0; the results were identical. I did not build or run the C# suites. The repo is untouched and all bin/obj/build/tmp folders are purged.
+
+CLOSED (checked by reading, and by the repro where marked):
+1. runtime.Goexit. The GoexitException constructor calls MarkGoroutineExiting (GoexitException.cs:43). Repro: the same-thread Goexit with a nil deferred func is REFUSED, with Started=True.
+2. The test host. TestExecution.FailNow sets the mark at :349 and SkipNow at :367, just before `throw new TestAbortException()`. The InOwnersBubble branches throw GoexitException, so the constructor marks there. T.Fatal, Fatalf, Skip and Skipf all go through execution.FailNow or SkipNow (testing.cs:285-333). Arm: ANilDeferredFuncFaultingDuringTheTestHostsGoexitSplicesNothing.
+3. seq's Goexit carried to the ranging goroutine. rethrowFailure marks when SourceException is a GoexitException (YieldFunctionEnumerator.cs:129-130). Both MoveNext and Dispose go through it. Repro: FWD GX is REFUSED, with Started=True on the ranging thread. Arm: ANilDeferredFuncFaultingDuringARangeFuncsGoexitSplicesNothing.
+4. Goexit inside a deferred call. The constructor marks the thread that runs the deferred call, which is the goroutine's own thread, because Run calls defers inline.
+5. Scoping.
+   - Pooled workers reset after every body: GoroutineThreadPool.cs:140, then ResetForReuse, then GoFuncRoot.ResetThread:71, then GoexitException.ResetThread.
+   - Goroutines get a new Thread each (Goroutine.cs:830), and so does each test.
+   - Repro: a worker that ran a seq which called Goexit was reused for the next seq and read Started=False.
+
+OPEN, confirmed independently: a Goexit raised in a range-over-func LOOP BODY is never marked on the coro thread. The body runs on the ranging thread, so the mark lands there. The foreach's Dispose (YieldFunctionEnumerator.cs:140-150) then sets m_stopped and switches to the coro. There seq's yield returns false (:117), and seq's defers run as an ordinary normal return on an unmarked worker. Both site shapes the splice still accepts at a Run are then spliced: the zero-arg nil thunk, and the `defer D()` delegate re-raise.
+
+Go 1.24.13 (my gotruth/main.go and body_test.go):
+- A goexit: seqA.func1 | gopanic | panicmem | sigpanic | runtime.Goexit | goexitBody-range1 | seqA | goexitBody
+- B goexit: seqB.func1 | gopanic | dB | runtime.Goexit | goexitBody-range1 | seqB
+- FailNow: ... sigpanic | runtime.Goexit | testing.(*common).FailNow | TestFailNowBody-range1 | seqA
+- SkipNow: the same shape with SkipNow.
+- Fatal on B: ... dB | runtime.Goexit | FailNow | Fatal | range1 | seqB
+- Control, A break: ... sigpanic | seqA | breakBody
+
+go2cs at the tip (repro, both tierings):
+- A goexit, A failnow, A skipnow: `seqA.func | gopanic | panicmem | sigpanic | seqA`, on the coro thread with Goexit.Started=False, spliced.
+- B goexit, B failnow: `seqB.func | gopanic | dB | seqB`, spliced.
+- A break and B break give exactly the same lists.
+
+So the splice drops runtime.Goexit, the test host's frame and the range body between the fault frames and seq: a partial list. That breaks R's amended PREDICTION line, "A deferred call's panic during ANY Goexit ... splices NOTHING, never a partial list". No arm covers this direction; every Goexit probe raises the Goexit on the ranging side or inside seq, never in the body. It is not a regression from R's fix: e266debe65 accepted the same two site shapes. None of the 10 predicted rows reaches it.
+
+The fix works in a scratch experiment. I patched a copy of golib: Dispose records GoexitException.Started into a field before m_coro.Switch(), and yield calls MarkGoroutineExiting when it resumes with m_stopped set and that field true. With that patch:
+- A goexit, A failnow, A skipnow, B goexit and B failnow are all REFUSED.
+- A break and B break still splice Go's lists.
+- The scoping check still reads Started=False.
+So an arm built this way would read red at the tip and green with the fix.
+
+Scratch files: <scratch> (main.go, body_test.go, gd\main.go), repro\Program.cs (tip) and reprofix\Program.cs (the same source, built against the patched golib).
+
+**Skeptic residual.** 1. OPEN, C3's own scope: a Goexit in a range-over-func loop body is not carried to the coro. This covers runtime.Goexit, and t.FailNow, SkipNow, Fatal and Skip on the test's thread.
+   - Fix, verified in scratch: in YieldFunctionEnumerator.Dispose, record GoexitException.Started into a field before m_coro.Switch(). In yield(), when it resumes with m_stopped set and that field true, call GoexitException.MarkGoroutineExiting(). The pooled worker's reset keeps this scoped.
+   - Arms, red first. All run with seq deferring a recoverer that reads Callers, and then either a nil func or `defer dB()` (dB defers and panics):
+     - Body throws GoexitException: expect no splice.
+     - Body does MarkGoroutineExiting and then throws, or a real child TestExecution calls FailNow and then SkipNow: expect no splice.
+     - Control, body breaks: expect Go's `gopanic | panicmem | sigpanic | seqA` and `gopanic | dB | seqB`, so the fix cannot pass by refusing everything.
+   - If R does not fix it, state it in PREDICTION.md's Goexit residual with an arm that pins the refusal.
+2. Same mechanism, outside C3's wording: a PANIC in the loop body.
+   - Go: `seqA.func1 | gopanic | panicmem | sigpanic | runtime.gopanic | panicBody-range1 | seqA`.
+   - The tip gives `... sigpanic | seqA`, spliced on the unmarked coro. The body's panic is never handed to seq's Run as the panic it is running.
+   - Dispose cannot tell this from a break, so it needs either a stated residual or a refusal: for example, refuse any splice on the coro while m_stopped is set. That would also make the break case a missing splice.
+3. Pre-existing, found in passing (it is on origin/master too), and a Go-semantics gap, not a splice one: `defer runtime.Goexit()` skips the frame's earlier-registered deferred calls.
+   - Run's loop catches only IsPanic, so the GoexitException leaves the loop with defers still unrun.
+   - Go runs them: `defer func(){ got = "ran" }(); defer runtime.Goexit()` gives "ran" in Go, and in go2cs the earlier defer never runs.
+   - The mark is still right for the outer frames, which refuse safely. This needs its own task, not this seat.
+4. Minor and safe: Fatal, Fatalf, Skip and Skipf have no arm of their own. They are one-line forwarders to the armed FailNow and SkipNow.
+
+### B2: verifier closed
+
+**Evidence.** Read at 28fd1e3218 after a fetch (git diff e266debe65 28fd1e3218, git show of GoFrame.cs, PanicException.cs, managed_impl.cs, builtin.DeferRegistrations.cs, visitDeferStmt.go, the arms and PREDICTION.md). Nothing in the repo or in tG was touched.
+
+THE GATE, BY READING
+- managed_impl.cs:2087-2089 (splicePanic, in the per-link loop) refuses the whole splice when `link.SiteEndsAtRun && !link.SiteIsTheDeferredCall && !(site.Count == 0 && FaultKind == Memory && firstMethodOf(raw) == GoFrame.NilDeferredCallMethod)`.
+- It returns [] for the whole splice, never a partial list.
+- There is exactly one writer of either flag: GoFrame.cs:285-286 in Run's catch, which sets SiteEndsAtRun = true and SiteIsTheDeferredCall = reRaised.
+- reRaised is computed only when !firstHere. It requires `deferred.Method == site[^1].GetMethod()`, where `deferred` is the delegate Run just popped.
+- A stamped link is never stamped again: firstHere needs SiteOwner 0, and ReRaised returns false once SiteEndsAtRun is set.
+- So an ends-at-Run site passes only in two cases: when the thunk's method is the site's first raw frame, or when the popped delegate's own method is the first catcher.
+- NilDeferredCallMethod is s_nilDeferredCall.Method (GoFrame.cs:406). Push(null) is the only route to that thunk, and the ladder's only direct `frame.Push(action)` is the nullary rung (DeferRegistrations:57). Every argument rung pushes a golib closure.
+
+MEASURED
+- I built the real golib from `git archive 28fd1e3218` under <scratch>
+- The net10 console repro is an assembly named GolibTests (so golib's InternalsVisibleTo applies) at ...\b2wrap\repro\Program.cs.
+- It copies captureCallers, splicePanic, firstMethodOf and isGoSourceFrame VERBATIM from the tip. The only change is that PC interning is replaced by names.
+- A negative control, GateOff, removes only the ends-at-Run gate.
+- Configurations: default tiering, DOTNET_TieredCompilation=0, and default tiering warmed 3000x.
+- All three configurations gave identical verdicts. Outputs are in ...\b2wrap\out\{default,tc0,warm3000,go}.txt.
+- Go ground truth is go1.24.13, run plain and with -gcflags=all=-l (identical), from ...\b2wrap\go\main.go.
+
+Nil thunk (still Go's list, in every tier):
+- In the thunk's trace, raw=[GoFrame+<>c.<.cctor>b__32_0, GoFrame.Run], and first==NilDeferredCallMethod is True.
+- N gives gopanic|panicmem|sigpanic|gopanic|N. That matches Go: N.func1|gopanic|panicmem|sigpanic|gopanic|N.
+- NR (TestCallersDeferNilFuncPanic's shape) gives gopanic|panicmem|sigpanic|NR, which matches Go.
+- N3, three thunks, gives (gopanic|panicmem|sigpanic)x3|gopanic|N3, which matches Go.
+- The converted callers_test.cs emits `defer(fʗ1, ref ᒐ)`, the same path as NR, so the predicted row keeps its mechanism.
+
+Nil func with arguments (now refused, in every tier):
+- NA, NAR, NA2 and NAF (the Func<T,TResult> rung) all have raw[0] = builtin+<>c__DisplayClass*.<defer>b__0, and the tip splices nothing.
+- With the gate off they splice e266's wrong list: NA gives gopanic|panicmem|sigpanic|gopanic|NA, where Go has sigpanic|NA.deferwrap1|gopanic|NA.
+- Converter lambdas are refused too:
+  - NT is the temp-param `ᴛ1 => fn(ᴛ1)`. At TC0 the JIT tail-called the golib closure out of its trace, and it is refused anyway.
+  - NC and NCR are `() => c()`.
+  - NF is `() => f()` for a func() int. Go shows NF.deferwrap1 there.
+- With the gate off, each of these splices the lambda as an extra frame.
+
+WOULD AN ARM CATCH ITS RETURN? Yes.
+- AssertNoSplice requires below == [owner].
+- Removing the gate reproduces the wrong lists above. That reddens ANilFuncWithArgumentsWhilePanickingSplicesNothing, ...OnANormalReturnSplicesNothing and ANilNamedFuncTypeThroughTheConvertersLambdaSplicesNothing.
+- Relaxing the thunk check to "any site-less Memory link" re-accepts NA and NAR, and those arms go red.
+- The thunk's acceptance is pinned with exact lists by these arms, all unchanged: ANilDeferredFuncFaultsFromTheDeferringFunctionsExit, ANilDeferredFuncFaultingWhileAPanicRunsKeepsTheOlderGopanic, ALongChainThroughASmallBufferFillsFromTheTop and A65LinkChainIsSplicedWhole.
+- Every one of these gate-off readings agrees by reading with the e266 splice, which confirms the RED commit's claim for NA, NAR and NC.
+
+**Residual.** None of these is a wrong splice, and none touches the 10 predicted rows.
+
+(1) The PREDICTION wording is narrower than the code. The 2026-09-28 amendment says "EVERY panic a deferred call raises from a closure". The gate actually refuses every panic a deferred call raises directly, including a named function or method value deferred as a method group: `defer g()`, `defer g1(1)`, `defer t.m()`.
+- Go 1.24.13 (measured): DG gives DG.func1|gopanic|g|gopanic|DG; DGR gives ...|gopanic|g|DGR; DG1R gives ...|gopanic|g1|DG1R.
+- e266 matched these. My gate-off control reproduces Go's list exactly, and the C3 verifier had marked them "checked and found fine".
+- The tip splices nothing for all three, in every tier. That is a safe-direction missing splice, but it should be named in the residuals.
+
+(2) NC is a determinable missing splice. For a nil named-func-type value called with no arguments, Go's list is the SAME as the thunk's: NC.func1|gopanic|panicmem|sigpanic|gopanic|NC, with no deferwrap. go2cs refuses only because the converter wraps the call in `() => c()`. This fits the stated "until the converter marks its wrappers", and emitting a delegate conversion instead would recover it.
+
+(3) There is no dedicated arm for the Func<T,TResult> rung, the temp-param lambda or the `() => f()` results lambda. All three go through the same single gate that the NA, NAR and NC arms cover.
+
+(4) As instructed, the real GolibTests arms were not built or run. The repro runs real tip golib, but its splice is a verbatim copy of the tip's managed_impl.cs, not the runtime assembly itself. It also names frames by CLR name rather than by goFrameName. Scratch bin/obj and caches were purged.
+
+### THE: verifier partial
+
+**Evidence.** Everything was read at 28fd1e3218 after a fetch, with `git diff e266debe65 28fd1e3218` and `git show`. No C# was built or run. Go lists come from go1.24.13 windows/amd64, run both plain and with `-gcflags=all=-l`, and the two runs gave the same lists. The probes are <scratch> and dc\b\main.go (the Go cache was purged, no bin/obj was created, and the repo is untouched).
+
+(1) THE REFUSAL ONLY EVER MAKES A SPLICE MISSING.
+- The whole change in splicePanic (managed_impl.cs ~2087) is one added `return []`: `if (link.SiteEndsAtRun && !link.SiteIsTheDeferredCall && !(site.Count==0 && FaultKind==Memory && firstMethodOf(raw)==GoFrame.NilDeferredCallMethod)) return [];`.
+- `git grep` finds no reader of SiteEndsAtRun, SiteIsTheDeferredCall, Beneath or SiteOwnerThread other than splicePanic.
+- splicePanic has one caller, captureCallers, reached from Callers and from callers() (Caller). On `[]` it simply continues the live walk. Its Run-to-sequence pairing (sequencesMet++) does not depend on the splice result.
+- Beneath is set only together with SiteEndsAtRun, in Run's inner catch. Every link is checked before any frame is emitted, so refusing one link refuses the whole chain and can never leave a partial list.
+- The accepted set is a subset of e266's: the nil thunk was already accepted as site-less, and the re-raise is now decided by method.
+- An arm would catch its removal. Six arms now expect no splice: normalReturnPanic, panicAfterRecovery, deferPanicArg, twoLinkChain, recoverThenPanic and replacedPanic. So do the NA, NAR and NC arms.
+
+WHAT KEEPS THIS PARTIAL: the design keeps the nil-thunk exception, and it still splices a WRONG list. It was already wrong at a419543c14 and e266debe65; the design change did not introduce it.
+- NILAR: `var f func(); defer f()` runs after a completed recovery, in an open-coded function.
+  - Go: `NILAR.func1 | gopanic | panicmem | sigpanic | runtime.deferreturn | NILAR`
+  - The cut, by reading: SetSequence(null) makes running null, so firstHere holds, the exception accepts the link, and the splice is `gopanic | panicmem | sigpanic | NILAR`.
+  - InheritThrowSite touches only PanicTrace, so this is exactly the path that ANilDeferredFuncFaultsFromTheDeferringFunctionsExit asserts.
+- NILAR2 (two nil funcs after a recovery) and NILARL (the loop form) also lack deferreturn.
+- NILNR, the same function without the recovery, shows no deferreturn. So the recovery causes it, not open-coding. The ruled open-coding hint (DESIGN-panic-stack-frames: no loop, 8 defers or fewer, returns×defers 15 or fewer) cannot close it. It is not stated anywhere, and no arm covers it.
+- The ruled normal-return shapes also splice a partial list: NILL (WithLoop), NIL9 (more than 8 defers) and NILRET (returns×defers over 15). PREDICTION says the residuals "splice NOTHING, never a partial list", which is wrong for these.
+- The re-raise exception is right everywhere I measured, because Go shows deferreturn only when the nil call itself faults:
+  - DDNR, DDL, DDAR: `gopanic | D | owner`
+  - DDP: `gopanic | D | gopanic | DDP`
+  - DCDP: `gopanic | DCDP.func2 | gopanic | DCDP`
+  - DCDNR: `gopanic | DCDNR.func2 | DCDNR`
+
+(2) NONE OF THE 10 ROWS NEEDS A REFUSED LINK. Read from the converted callers_test.cs and stack_test.cs:
+- TestCallersPanic, NilPointerPanic, DivZeroPanic: the body raises the panic (f1→f2→f3, `p.Value`, `5/n`). The test's own emitted catch catches it first, so it is stamped at Run entry with SiteEndsAtRun false.
+- TestCallersDoublePanic: a deferred closure (func1) raises p2, but func1 defers, so its own catch is first (Catches 1) and func1's Run stamps p2 at entry. p1 stays the test's entry because func1 has not returned. That gives two ends-at-owner links: `func1.1 | gopanic | func1 | gopanic | Test`.
+- TestCallersDeferNilFuncPanic: the emission is `defer(fʗ1, ref ᒐ)` with a null Action. The nullary rung calls `frame.Push(action)`, which becomes s_nilDeferredCall. The site is empty, the kind is Memory and raw[0] is the thunk, so the exception accepts it. The test checks only up to sigpanic.
+- Both /CallersFrames subtests: the NRE comes from `(p0) => p0.M()` or `(p0) => nop(p0.Value)` under cb(), and the t.Run literal's own catch catches it first. /Stack uses runtime.Stack, which does not go through captureCallers.
+- The rows predicted to stay still stay:
+  - AfterRecovery and AbortedPanic2 read a null entry.
+  - AbortedPanic's p2 is refusable, but func3 recovers it and SetSequence(null) runs before the reader.
+  - FromWrapper has no panic.
+  - WithLoop stays FAIL (the partial list without deferreturn).
+- The wording "every panic a deferred CLOSURE raises" is broader than the code. The code refuses only sites that end at the Run, and DoublePanic survives because of that.
+
+(3) SPLICES GIVEN UP (they matched Go at e266; Go's lists as measured):
+- NR and NRL: `NR.func1 | gopanic | NR.func2 | NR`. The loop form is the same, with no deferreturn.
+- AR: `AR.func1 | gopanic | AR.func2 | AR`
+- RP: `RP.func1 | gopanic | RP.func2 | gopanic | RP`
+- REPL (the replaced panic): `REPL.func2 | gopanic | REPL.func3 | gopanic | REPL`
+- CH2 and any closure chain of n links: `gopanic | CH2.func2 | gopanic | CH2.func3 | gopanic | CH2`
+- DERR (a fault inside a deferred closure): `gopanic | panicmem | sigpanic | DERR.func2 | DERR`
+- DCALLEE: `gopanic | hNI | DCALLEE.func2 | DCALLEE`. This one was right at e266 only when no TC0 tail call removed the closure frame.
+- Not only closures: a named function, method or method value deferred directly that panics itself.
+  - DG0: `gopanic | g0 | DG0`
+  - DG0P: `gopanic | g0 | gopanic | DG0P`
+  - DG1: `gopanic | g1 | DG1`
+  - DM and DMV: `gopanic | T.m | DM`
+  - A non-nil `defer f()`, and for example `defer wg.Done()` panicking on a negative counter.
+
+Wrong at e266 and missing now (gains):
+- `defer panic(v)` (named funcN where Go shows deferwrap1).
+- NC, the converter's `() => c()`.
+- NA, NA2 and NAR, which lacked deferwrap1.
+- Converter wrappers around a panicking callee, such as `() => fʗ1.Close()`.
+- Closure frames lost to TC0 tail calls.
+
+**Residual.** 1. A nil deferred func after a COMPLETED RECOVERY still splices a WRONG list, missing `runtime.deferreturn`, in any function, including open-coded ones.
+   - Go: `... | sigpanic | runtime.deferreturn | owner`. The cut: `... | sigpanic | owner`.
+   - It is not stated, no arm covers it, and the open-coding hint the ruling names cannot close it.
+   - It is the run-time fact "a recovery completed in this sequence", which golib already knows.
+   - Fix: in Run, keep a local bool set where `SetSequence(sequence, null)` runs. When running is null and that bool is set, leave the nil-thunk panic unstamped, so it splices nothing. Or model the frame: after a recovery, Go always shows runtime.deferreturn beneath the bottom link.
+   - Arm, red first: `defer reader; var f func(); defer f(); defer func(){ recover() }(); panic("p")`, expecting no splice (or Go's list with deferreturn).
+2. PREDICTION wording.
+   - The deferreturn residual is a PARTIAL list, not "splices NOTHING": the loop form, more than 8 defers, returns×defers over 15, and after a recovery.
+   - The closure residual should say what the code does: it refuses every panic the Run catches first, whether the deferred call is a closure, a named function, a method value or a golib/converter wrapper, with no deferring frame between. The exceptions are the zero-arg nil thunk and a directly deferred first catcher.
+   - It should name the given-up direct named-function shapes (DG0, DG1, DM).
+3. Out of scope, noted: at TC0, frames inlined or tail-called out of a SiteTrace are lost from every accepted site, including the re-raise exception. This predates the cut; it is the C2 skeptic's item 4.
+
+None of this touches the 10-row runtime prediction, which stands.
+
+**Skeptic: partial.** Everything was read at 28fd1e3218 after a fetch, using `git diff e266debe65 28fd1e3218` and `git show` of managed_impl.cs, GoFrame.cs, PanicException.cs, builtin.DeferRegistrations.cs, the GolibTests arms, and the converted runtime callers_test.cs and stack_test.cs. No C# was built or run. The Go ground truth is go1.24.13 windows/amd64, run plain and with -gcflags=all=-l; both runs gave identical lists. My probe is <scratch> (output in plain.txt and l.txt). I also re-ran the verifier's two probes as dcsk\v1 and dcsk\v2, and they reproduced every list the verifier quoted. The Go cache and temp folders were purged, no bin/obj was created, and the repo is untouched.
+
+(1) THE REFUSAL ONLY EVER REMOVES A SPLICE; IT NEVER MAKES ONE WRONG.
+- The change is one added early return, `return []`, in splicePanic (managed_impl.cs:2087-2089). It fires before any frame is emitted, and it discards the whole list built so far, so it cannot leave a partial list.
+- splicePanic is only called from captureCallers (:1925). The Run-to-sequence pairing (sequencesMet++, :1923) happens before the splice and does not depend on its result. runtime.Stack goes through renderStack, not captureCallers.
+- git grep finds SiteEndsAtRun, SiteIsTheDeferredCall, Beneath, SiteOwnerThread and NilDeferredCallMethod read only in splicePanic.
+- The base e6fc210500 did no splicing at all. So a refused Run gives exactly the base's output for that Run: the refusal cannot cause a row to move that was not predicted.
+- Arms pin both sides:
+  - Removing the refusal turns six arms red: normalReturnPanic, panicAfterRecovery, deferPanicArg, twoLinkChain, recoverThenPanic and replacedPanic, plus the NA, NAR and NC arms.
+  - Widening it to refuse the two accepted shapes also turns arms red:
+    - the nil thunk: ANilDeferredFuncFaultsFromTheDeferringFunctionsExit, nilDeferWhilePanicking, longThunkChain(65);
+    - the re-raise: deferTheCatcher, deferACatcherWithNoDefer.
+- I also looked for a wrong splice in the re-raise exception (SiteIsTheDeferredCall) and found none by reading:
+  - the same D deferred twice;
+  - D replaced by its own deferred panic (SiteEndsAtRun refuses);
+  - nested direct re-raises (Catches 3 refuses);
+  - D recovering and then panicking;
+  - a promoted method.
+- Go agrees wherever I measured:
+  - DDAR: gopanic | D | DDAR
+  - DDL: gopanic | D | DDL
+  - DNILAR: gopanic | panicmem | sigpanic | gopanic | D | DNILAR
+  - DDP, DCDP, DCDNR as the verifier listed.
+  - Go's runtime.deferreturn is a wrapper function (cmd/internal/objabi/funcid.go:36, "deferreturn": abi.FuncIDWrapper). Tracebacks drop it unless it called gopanic, sigpanic or panicwrap, so it never shows under D.
+
+WHY PARTIAL: the design keeps the nil-thunk exception, and that exception still produces a WRONG list after a completed recovery. The change did not introduce this (it was already there at e266debe65 and at a419543c14), but it contradicts the design's claim that every residual "splices NOTHING, never a partial list". It is not stated anywhere and no arm covers it.
+- NILAR (`var f func(); defer f(); defer func(){recover()}(); panic`), traced by reading:
+  - Run calls SetSequence(null) after the recovering call returns, so `running` is null.
+  - The thunk's panic is its first catch, so it is stamped with SiteEndsAtRun and no Beneath.
+  - :2088 accepts it: the site is empty, the kind is Memory, and raw[0] is the thunk.
+  - go2cs splices: gopanic | panicmem | sigpanic | NILAR
+  - Go:            gopanic | panicmem | sigpanic | runtime.deferreturn | NILAR
+- New instances of the same class, measured in Go:
+  - NILARC: a closure's panic on a normal return is recovered, then the nil func runs. Go shows ... | sigpanic | runtime.deferreturn | NILARC.
+  - NILINCAR: the same inside a deferred closure's own sequence. Go shows ... | sigpanic | runtime.deferreturn | NILINCAR.func1 | NILINCAR.
+  - NILAR3: two nil funcs after a recovery. Go shows the chain, then runtime.deferreturn.
+  - NILAR2 and NILARL (the verifier's) reproduce.
+- Control shapes that match go2cs today:
+  - RAR (TestCallersAfterRecovery's shape): no deferreturn.
+  - NILNR (no recovery): no deferreturn.
+  - NILINC (nil func in a closure's own sequence while the owner panics): no deferreturn.
+- The ruled normal-return residuals also splice a PARTIAL list, not nothing: NILL (TestCallersDeferNilFuncPanicWithLoop, predicted to stay FAIL), NIL9 and NILRET all show deferreturn in Go.
+
+(2) THE 10 PREDICTED ROWS STAND. None of them needs a refused link. From the converted sources:
+- TestCallersPanic: the panic is thrown in f3 (NoInlining) and first caught by the test's own catch, so its site ends at the function.
+- TestCallersNilPointerPanic: p.Value on a null box raises NullReferenceException in the test body (Memory).
+- TestCallersDivZeroPanic: 5/n in the body (Divide).
+- TestCallersDoublePanic: func1 has its own GoFrame. Its catch catches p2 first, so func1's Run owns p2 with its site ending at func1. p1 is still Test's running panic, because SetSequence(null) happens only after func1 returns. Traced result: Callers | func1.1 | gopanic | func1 | gopanic | Test, which is want.
+- TestCallersDeferNilFuncPanic: the emission is `defer(fʗ1, ref ᒐ)` with a null Action. The nullary rung calls frame.Push, which substitutes s_nilDeferredCall, and :2088 accepts it. The test checks only up to sigpanic. R's 106/106 green, which includes longThunkChain, shows that the method-equality test holds at run time.
+- Both /CallersFrames subtests: the fault comes from cb() in the t.Run literal's body, and that literal's own catch catches it first, so the site ends at the function. /Stack does not go through captureCallers.
+- The two intermediate parents and TestStackWrapperStackPanic follow from their subtests.
+- The rows predicted to stay:
+  - AfterRecovery and AbortedPanic2 read a null sequence entry.
+  - AbortedPanic's p2 is an ends-at-Run closure link, but func3 recovers it and SetSequence(null) runs before the reader.
+  - FromWrapper has no panic.
+  - WithLoop stays FAIL.
+
+(3) SPLICES GIVEN UP. Each matched Go at e266 and is refused now; Go's lists are re-measured:
+- Closures raising:
+  - NR and NRL: gopanic | NR.func2 | NR
+  - AR: gopanic | AR.func2 | AR
+  - RP: gopanic | RP.func2 | gopanic | RP
+  - REPL: gopanic | REPL.func3 | gopanic | REPL
+  - CH2: gopanic | CH2.func2 | gopanic | CH2.func3 | gopanic | CH2, and any chain of n closure raisers
+  - DERR: gopanic | panicmem | sigpanic | DERR.func2 | DERR
+  - DCALLEE: gopanic | hNI | DCALLEE.func2 | DCALLEE (it was right at e266 only when the JIT did not tail-call the closure away)
+- Not only closures: named functions and methods deferred directly that panic themselves:
+  - DG0: gopanic | g0 | DG0
+  - DG0P: gopanic | g0 | gopanic | DG0P
+  - DG1: gopanic | g1 | DG1
+  - DM and DMV: gopanic | T.m | DM
+- Any nil thunk or re-raise stacked on one of the shapes above, because the whole chain is refused.
+
+Wrong at e266 and missing now (gains): `defer panic(v)` (Go shows deferwrap1), NC's `() => c()`, NA, NA2 and NAR (missing deferwrap1), converter wrappers around a panicking callee (`() => fʗ1.Close()`), and closure frames lost to TC0 tail calls.
+
+Wording: "every panic a deferred CLOSURE raises" is broader than the code in one direction and narrower in another.
+- Broader: closures that defer and then panic are still spliced, correctly (DoublePanic, DCDP, DCDNR).
+- Narrower: it leaves out the named-function, method-value and golib-ladder shapes that are refused.
+
+**Skeptic residual.** 1. Nil func after a completed recovery. The nil-thunk exception still produces a WRONG list, missing runtime.deferreturn: Go shows `... | sigpanic | runtime.deferreturn | owner`, go2cs `... | sigpanic | owner`.
+   - It happens whenever a zero-argument nil deferred func runs after a recovery has completed in the same Run sequence and no newer panic is running, in open-coded functions too.
+   - Measured shapes: NILAR, NILAR2, NILAR3, NILARL, NILARC, NILINCAR.
+   - Fix: in Run, keep a local bool that is set where `SetSequence(sequence, null)` runs after a recovery. When that bool is set and `running` is null, leave the thunk's panic unstamped, so the chain splices nothing. Or add the runtime.deferreturn frame: Go always shows it there.
+   - Do NOT refuse when `running` is not null. DNILAR, where the nil func is called by a later panic after the recovery, has no deferreturn in Go and splices correctly today.
+   - Arms, red first, each expecting no splice (or Go's list with deferreturn):
+     - NILAR: `defer reader; var f func(); defer f(); defer func(){recover()}(); panic("p")`
+     - NILARC: the recovered panic is a closure's, on a normal return
+     - DNILAR as a control that must stay spliced
+   - Then ANilDeferredFuncFaultsFromTheDeferringFunctionsExit (normal return, no recovery) must stay green.
+
+2. PREDICTION wording.
+   - The heading "each still splices NOTHING, never a partial list" is false for the deferreturn residual. The ruled normal-return shapes (WithLoop/NILL, more than 8 defers/NIL9, returns×defers over 15/NILRET) and the after-recovery shapes in item 1 all splice a partial list. So does panicwrap, whose fault frames are named but not modelled.
+   - The closure residual should say what the code does:
+     - It refuses every panic whose first catch is the Run itself: a closure, a named function or method deferred directly (DG0, DG0P, DM, DMV), or a golib/converter wrapper (DG1, NA, NC, `defer panic(v)`).
+     - The only exceptions are the zero-argument nil thunk and a directly deferred first catcher.
+     - Closures that defer and then panic are still spliced, correctly (DoublePanic, DCDP, DCDNR).
+
+3. Optional, not owed. The directly deferred named-function shapes could be recovered without the converter's help: accept an ends-at-Run site when the popped delegate's Method is a non-compiler-generated method equal to the site's last Go frame (DG0, DG0P, method-group DM). No converter wrapper is a named method, and go2cs-gen forwarders are already excluded from the site.
+
+4. Out of scope, noted. At TC0, frames inlined or tail-called out of a SiteTrace are lost from every accepted site. This predates the cut; it is the C2 skeptic's item 4.
+
+None of this changes the 10-row runtime prediction, which stands.
+
