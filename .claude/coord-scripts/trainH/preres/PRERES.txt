@@ -1,0 +1,6 @@
+i9-disclosure-record-pin|src/core/testing/TestExecution.cs|keep both: the seat's LogRecords method, then master's GoStackRoot/NoInlining attributes above Execute
+c2-source-paths|src/core/runtime/goenvs_impl.cs|keep both: defaultGOROOT set right after envs, then R's parsedebugvars block; C5's GoDefaultGorootVariable const, then R's test seams
+c2-negative-shift|src/core/runtime/panicvalues_impl.cs|keep both: divideError, then C2's ShiftErrorValue, then R's NilPanicValue block
+c1-runtime-error-factories|src/core/runtime/panicvalues_impl.cs (saved as panicvalues_impl.c1.cs)|keep all: divideError, shiftError, NilPanicValue block, then C1's PlainErrorValue/BoundsErrorValue block
+c1-unsigned-index-ulong|src/core/math/bits/bits.cs|COMPOSED emission: c2-narrow's (byte) wrap of OnesCount32's sum + C1's bare unsigned indices; the union emit check verifies it
+r-panic-frames|src/core/reflect/value_impl.cs + src/core/runtime/hash_impl.cs|reflect: C1's PlainError at both sites (plainError value, and a direct PanicException keeps R's unmodelled fault kind); hash: c2-aeshash's zero-size early return (corrected 2026-09-28 by the merge review; not master's), R's RuntimeRaised for the nil-pointer panic
