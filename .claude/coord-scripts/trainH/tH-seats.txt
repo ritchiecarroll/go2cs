@@ -23,5 +23,5 @@ g-block-event-frames|f772251384|G: M4 (a) + class F (iii) + (a), stack-walk hops
 g-serial-external-code|44184dbc04|G: /serial, non-Go thread CPU charged to [runtime._ExternalCode] (on the TRAIN G union; limits stated)
 r-panic-frames|af2c57f41a|R: panic-path frames B, round 4 + NilBox fix (closing reading MET; defer cost owed before the final release)
 r-defer-cost|06cfbe0044|R: defer cost, one [ThreadStatic] GoThreadState holder -- the defer path 3.85 ns below the pre-B base (stacked on r-panic-frames)
-i9-slice-bounds-escape|7af8633b3b|the i9: slice-bounds S-a/S-b -- element-address overloads check the full index against the length, bare unsigned, LiteralByteAt, G1 string range (stacked on c1-unsigned-index-ulong)
+i9-slice-bounds-escape|2f5772610b|the i9: slice-bounds S-a/S-b -- element-address overloads check the full index against the length, bare unsigned, LiteralByteAt, G1 string range (stacked on c1-unsigned-index-ulong)
 i9-defined-struct-conversion-copy|18b51c075b|the i9: counts(c), a defined-over-struct conversion copies its value-clone fields both ways (stacked on Tally)

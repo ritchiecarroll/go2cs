@@ -1,0 +1,155 @@
+diff --git a/src/core/golib/runtime/RuntimeErrorPanic.cs b/src/core/golib/runtime/RuntimeErrorPanic.cs
+index b78ef58f54..ec7aaa1bdb 100644
+--- a/src/core/golib/runtime/RuntimeErrorPanic.cs
++++ b/src/core/golib/runtime/RuntimeErrorPanic.cs
+@@ -300,7 +300,7 @@ public static class RuntimeErrorPanic
+ 
+     /// <summary>
+     /// A panic Go raises from a RUNTIME frame, reproduced by hand-owned C# (unsafe.Slice's length checks,
+-    /// reflect's nil-map and nil-channel refusals, runtime's hash refusals). The value is converted exactly
++    /// runtime's hash refusals; reflect's nil-map write and nil-channel close raise Go's plainError through PlainError, which is equally unspliced). The value is converted exactly
+     /// as <see cref="builtin.panic"/> converts it, but the panic keeps the default fault kind
+     /// (<see cref="PanicFaultKind.Unmodelled"/>), so runtime.Callers does not splice it as Go source.
+     /// </summary>
+diff --git a/src/go2cs.slnx b/src/go2cs.slnx
+index 2e7e2c1d69..9de96dc46e 100644
+--- a/src/go2cs.slnx
++++ b/src/go2cs.slnx
+@@ -699,6 +699,7 @@
+     <Project Path="tests/Behavioral/NativeIntConstMask/NativeIntConstMask.csproj" />
+     <Project Path="tests/Behavioral/NativeIntWideConstAssign/NativeIntWideConstAssign.csproj" />
+     <Project Path="tests/Behavioral/NativeIntWideConstElement/NativeIntWideConstElement.csproj" />
++    <Project Path="tests/Behavioral/NegativeShiftCount/NegativeShiftCount.csproj" />
+     <Project Path="tests/Behavioral/NestedAliasUser/NestedAliasUser.csproj" />
+     <Project Path="tests/Behavioral/NestedAliasUser/inner/NestedAliasUser.inner.csproj" />
+     <Project Path="tests/Behavioral/NestedEmbeddingPromotion/NestedEmbeddingPromotion.csproj" />
+@@ -974,6 +975,7 @@
+     <Project Path="tests/Behavioral/UnsafePointerArgPassing/UnsafePointerArgPassing.csproj" />
+     <Project Path="tests/Behavioral/UnsafePointerInferredNoImport/UnsafePointerInferredNoImport.csproj" />
+     <Project Path="tests/Behavioral/UnsafePointerKeywordParam/UnsafePointerKeywordParam.csproj" />
++    <Project Path="tests/Behavioral/UnsafePointerParamAssign/UnsafePointerParamAssign.csproj" />
+     <Project Path="tests/Behavioral/UnsafePointerParamPin/UnsafePointerParamPin.csproj" />
+     <Project Path="tests/Behavioral/UnsafePointerPrint/UnsafePointerPrint.csproj" />
+     <Project Path="tests/Behavioral/UnsafePointerReinterpret/UnsafePointerReinterpret.csproj" />
+diff --git a/src/tests/Behavioral/MixedUntypedConstArithmetic/main.cs b/src/tests/Behavioral/MixedUntypedConstArithmetic/main.cs
+index de8f629049..fca2b1b1d0 100644
+--- a/src/tests/Behavioral/MixedUntypedConstArithmetic/main.cs
++++ b/src/tests/Behavioral/MixedUntypedConstArithmetic/main.cs
+@@ -20,12 +20,12 @@ internal static UntypedFloat quadrillion => 1e15;
+ 
+ internal static void Main() {
+     uint64 capacity = 14000000000UL;
+-    fmt.Println(capacity == (uint64)(procs * capacityPerProc), capacity == (uint64)(capacityPerProc * procs));
+-    fmt.Println((uint64)(procs * capacityPerProc), (uint64)(capacityPerProc * procs));
++    fmt.Println(capacity == (uint64)(/* procs * capacityPerProc */ 14000000000UL), capacity == (uint64)(/* capacityPerProc * procs */ 14000000000UL));
++    fmt.Println((uint64)(/* procs * capacityPerProc */ 14000000000UL), (uint64)(/* capacityPerProc * procs */ 14000000000UL));
+     fmt.Println((float64)(/* three * half */ 1.5D), (float64)(/* half * three */ 1.5D), /* three * half */ 1.5D, /* half * three */ 1.5F);
+     fmt.Println(three < half * seven, half * seven > three, three == seven * half - half, half * seven != three);
+-    fmt.Println((float64)(/* seven / two */ 3.5D), two / seven > 0, /* seven / two */ 3.5D, (nint)(seven / two * two), (nint)(seven / three));
+-    fmt.Println((uint64)(procs * quadrillion), (uint64)(quadrillion * procs));
++    fmt.Println((float64)(/* seven / two */ 3.5D), two / seven > 0, /* seven / two */ 3.5D, (nint)((nint)(/* seven / two * two */ 7L)), (nint)(seven / three));
++    fmt.Println((uint64)(/* procs * quadrillion */ 14000000000000000UL), (uint64)(/* quadrillion * procs */ 14000000000000000UL));
+ }
+ 
+ } // end main_package
+diff --git a/src/tests/Behavioral/MixedUntypedConstArithmetic/main.cs.target b/src/tests/Behavioral/MixedUntypedConstArithmetic/main.cs.target
+index de8f629049..fca2b1b1d0 100644
+--- a/src/tests/Behavioral/MixedUntypedConstArithmetic/main.cs.target
++++ b/src/tests/Behavioral/MixedUntypedConstArithmetic/main.cs.target
+@@ -20,12 +20,12 @@ internal static UntypedFloat quadrillion => 1e15;
+ 
+ internal static void Main() {
+     uint64 capacity = 14000000000UL;
+-    fmt.Println(capacity == (uint64)(procs * capacityPerProc), capacity == (uint64)(capacityPerProc * procs));
+-    fmt.Println((uint64)(procs * capacityPerProc), (uint64)(capacityPerProc * procs));
++    fmt.Println(capacity == (uint64)(/* procs * capacityPerProc */ 14000000000UL), capacity == (uint64)(/* capacityPerProc * procs */ 14000000000UL));
++    fmt.Println((uint64)(/* procs * capacityPerProc */ 14000000000UL), (uint64)(/* capacityPerProc * procs */ 14000000000UL));
+     fmt.Println((float64)(/* three * half */ 1.5D), (float64)(/* half * three */ 1.5D), /* three * half */ 1.5D, /* half * three */ 1.5F);
+     fmt.Println(three < half * seven, half * seven > three, three == seven * half - half, half * seven != three);
+-    fmt.Println((float64)(/* seven / two */ 3.5D), two / seven > 0, /* seven / two */ 3.5D, (nint)(seven / two * two), (nint)(seven / three));
+-    fmt.Println((uint64)(procs * quadrillion), (uint64)(quadrillion * procs));
++    fmt.Println((float64)(/* seven / two */ 3.5D), two / seven > 0, /* seven / two */ 3.5D, (nint)((nint)(/* seven / two * two */ 7L)), (nint)(seven / three));
++    fmt.Println((uint64)(/* procs * quadrillion */ 14000000000000000UL), (uint64)(/* quadrillion * procs */ 14000000000000000UL));
+ }
+ 
+ } // end main_package
+diff --git a/src/tests/Behavioral/NarrowArithmeticSinks/main.cs b/src/tests/Behavioral/NarrowArithmeticSinks/main.cs
+index 5eaef9025e..34ee27cfca 100644
+--- a/src/tests/Behavioral/NarrowArithmeticSinks/main.cs
++++ b/src/tests/Behavioral/NarrowArithmeticSinks/main.cs
+@@ -231,7 +231,7 @@ internal static void Main() {
+     arm(invariantˢ, () => fmt.Sprint((int8)(u + u), (@string)" "u8, (int8)(a + a + a), (@string)" "u8, (uint8)(w + w)));
+     arm(builtinArgˢ, () => {
+         var b = append(new byte[]{}.slice(), (byte)(u + u), (byte)(u * 2), (byte)(u - 1));
+-        return fmt.Sprint(min((int8)(a + a), 0), (@string)" "u8, max((uint8)(u + u), 0), (@string)" "u8, b);
++        return fmt.Sprint(min((int8)(a + a), (int8)(0)), (@string)" "u8, max((uint8)(u + u), (uint8)(0)), (@string)" "u8, b);
+     });
+     arm(parenDefineˢ, () => {
+         var t2 = (int8)(a + a);
+diff --git a/src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target b/src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target
+index 5eaef9025e..34ee27cfca 100644
+--- a/src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target
++++ b/src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target
+@@ -231,7 +231,7 @@ internal static void Main() {
+     arm(invariantˢ, () => fmt.Sprint((int8)(u + u), (@string)" "u8, (int8)(a + a + a), (@string)" "u8, (uint8)(w + w)));
+     arm(builtinArgˢ, () => {
+         var b = append(new byte[]{}.slice(), (byte)(u + u), (byte)(u * 2), (byte)(u - 1));
+-        return fmt.Sprint(min((int8)(a + a), 0), (@string)" "u8, max((uint8)(u + u), 0), (@string)" "u8, b);
++        return fmt.Sprint(min((int8)(a + a), (int8)(0)), (@string)" "u8, max((uint8)(u + u), (uint8)(0)), (@string)" "u8, b);
+     });
+     arm(parenDefineˢ, () => {
+         var t2 = (int8)(a + a);
+diff --git a/src/tests/Behavioral/NegativeShiftCount/package_info.cs b/src/tests/Behavioral/NegativeShiftCount/package_info.cs
+index c0a30d153e..adfdf6ef38 100644
+--- a/src/tests/Behavioral/NegativeShiftCount/package_info.cs
++++ b/src/tests/Behavioral/NegativeShiftCount/package_info.cs
+@@ -61,6 +61,7 @@ using static go.main_package;
+ namespace go;
+ 
+ [GoPackage("main")]
++[GoTestMatchingConsoleOutput]
+ public static partial class main_package
+ {
+     // C# nested types declared with no access modifier are always private, and the
+diff --git a/src/tests/Behavioral/UnarySignStack/main.cs b/src/tests/Behavioral/UnarySignStack/main.cs
+index b2fafd0b30..5f49965788 100644
+--- a/src/tests/Behavioral/UnarySignStack/main.cs
++++ b/src/tests/Behavioral/UnarySignStack/main.cs
+@@ -15,8 +15,8 @@ internal static void Main() {
+     fmt.Println(- -a, a);
+     fmt.Println(+ +a, a);
+     int8 b = -7;
+-    fmt.Println(- -b, b);
+-    fmt.Println(+ +b, b);
++    fmt.Println((int8)(- -b), b);
++    fmt.Println((int8)(+ +b), b);
+     float64 f = 2.5D;
+     fmt.Println(- -f, f);
+     fmt.Println(+ +f, f);
+diff --git a/src/tests/Behavioral/UnarySignStack/main.cs.target b/src/tests/Behavioral/UnarySignStack/main.cs.target
+index b2fafd0b30..5f49965788 100644
+--- a/src/tests/Behavioral/UnarySignStack/main.cs.target
++++ b/src/tests/Behavioral/UnarySignStack/main.cs.target
+@@ -15,8 +15,8 @@ internal static void Main() {
+     fmt.Println(- -a, a);
+     fmt.Println(+ +a, a);
+     int8 b = -7;
+-    fmt.Println(- -b, b);
+-    fmt.Println(+ +b, b);
++    fmt.Println((int8)(- -b), b);
++    fmt.Println((int8)(+ +b), b);
+     float64 f = 2.5D;
+     fmt.Println(- -f, f);
+     fmt.Println(+ +f, f);
+diff --git a/src/tests/Behavioral/UnsafePointerParamAssign/package_info.cs b/src/tests/Behavioral/UnsafePointerParamAssign/package_info.cs
+index b4b22f0065..0c10fa6d09 100644
+--- a/src/tests/Behavioral/UnsafePointerParamAssign/package_info.cs
++++ b/src/tests/Behavioral/UnsafePointerParamAssign/package_info.cs
+@@ -55,6 +55,7 @@ using static go.main_package;
+ namespace go;
+ 
+ [GoPackage("main")]
++[GoTestMatchingConsoleOutput]
+ public static partial class main_package
+ {
+     // C# nested types declared with no access modifier are always private, and the
