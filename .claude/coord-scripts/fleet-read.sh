@@ -39,7 +39,12 @@
 # and a mixed directory must still sort chronologically: both normalise to the same 14-digit key
 # before anything is compared. Names order the printing; they never decide membership.
 #
-# Env: FLEET_MAILBOX_CLONE (a clone of the repo; default: the clone this is run from).
+# Ledger lines print to their first 200 characters; FLEET_LEDGER_FULL=1 prints them whole. An idle lane
+# waits with fleet-watch.sh (zero tokens) rather than a timed wake loop. These are TOOLS, not a design
+# surface: a lane reports a defect to COORD in one line and keeps working; COORD owns the fix.
+#
+# Env: FLEET_MAILBOX_CLONE (a clone of the repo; default: the clone this is run from);
+#      FLEET_LEDGER_FULL=1 (print whole ledger lines).
 # =================================================================================================
 set -u
 
@@ -177,7 +182,14 @@ fi
 # ---- the ledger: the lines ADDED in the range, whatever they are stamped -------------------------
 LINES=0
 OUT=""
-add_line() { local l="${1%$'\r'}"; OUT="$OUT$l"$'\n'; LINES=$((LINES + 1)); }
+# A ledger line is printed to its first 200 characters (FLEET_LEDGER_FULL=1 prints it whole). The ledger
+# is COORD's record; every ruling that binds a lane ALSO arrives in that lane's inbox, so a tick needs
+# only a line's head to know what happened (owner order 2026-09-28: the channel stays cheap per tick).
+add_line() {
+    local l="${1%$'\r'}"
+    if [ "${FLEET_LEDGER_FULL:-0}" != 1 ] && [ "${#l}" -gt 200 ]; then l="${l:0:200} ..."; fi
+    OUT="$OUT$l"$'\n'; LINES=$((LINES + 1))
+}
 if [ -n "$BASE" ]; then
     DIFF="$(git -C "$CLONE" diff --no-color --no-ext-diff --unified=0 "$BASE" "$TIP" -- "$LEDGERP" 2>/dev/null)"; rc=$?
     [ "$rc" -eq 0 ] || die "could not diff $LEDGERP between $BASE and $TIP"
