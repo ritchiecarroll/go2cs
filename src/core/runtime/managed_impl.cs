@@ -1405,12 +1405,18 @@ partial class runtime_package
         private string[]? m_litSuffixes;
         private string? m_resolvedGoFile;
 
-        // ResolveGoFile spells the recorded identity as an absolute path where the record is a bare
-        // file name, which the converter writes when the Go source sits BESIDE the C# it emitted.
-        // Rooting it against the C# file's own compile-time directory is what lets a converted user
-        // program answer the rooted path Go answers, without a machine-specific path having been
-        // baked into a committed artifact. The two other recorded forms — the GOROOT-relative form,
-        // which always carries a separator, and an already-absolute path — are reported verbatim.
+        // ResolveGoFile spells the recorded identity as the absolute path Go answers, without a
+        // machine-specific path having been baked into a committed artifact. Each recorded form is
+        // rooted at run time:
+        //   - a bare file name, which the converter writes when the Go source sits BESIDE the C# it
+        //     emitted, against the C# file's own compile-time directory;
+        //   - the GOROOT-relative form of a standard-library source (`runtime/extern.go`, always
+        //     carrying a separator), against runtime.GOROOT()'s src directory: default `go test` and
+        //     `go build` bake the absolute GOROOT path, so runtime.Caller, Frame.File and the
+        //     traceback answer it too, and a program that opens its own source through them (the
+        //     re-exec child of TestTracebackSystem) finds the file. With no GOROOT to root against,
+        //     the recorded form is answered as it was recorded;
+        //   - an already-absolute path, verbatim.
         public string ResolveGoFile(string csPath)
         {
             if (m_resolvedGoFile is not null)
@@ -1418,12 +1424,22 @@ partial class runtime_package
 
             string resolved = goFile;
 
-            if (goFile.Length > 0 && goFile.IndexOf('/') < 0 && !isRootedGoPath(goFile))
+            if (goFile.Length > 0 && !isRootedGoPath(goFile))
             {
-                int separator = csPath.LastIndexOf('/');
+                if (goFile.IndexOf('/') < 0)
+                {
+                    int separator = csPath.LastIndexOf('/');
 
-                if (separator > 0)
-                    resolved = string.Concat(csPath.AsSpan(0, separator + 1), goFile);
+                    if (separator > 0)
+                        resolved = string.Concat(csPath.AsSpan(0, separator + 1), goFile);
+                }
+                else
+                {
+                    string goroot = GOROOT().ToString().Replace('\\', '/').TrimEnd('/');
+
+                    if (goroot.Length > 0)
+                        resolved = string.Concat(goroot, "/src/", goFile);
+                }
             }
 
             m_resolvedGoFile = resolved;

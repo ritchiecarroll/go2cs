@@ -205,6 +205,20 @@ namespace GolibTests
             Assert.IsTrue(frame.Line >= 100 && frame.Line <= 120, $"a Go line inside the recorded span, got {frame.Line}");
         }
 
+        // A GOROOT-relative record (a standard-library source, recorded without a host path) is ROOTED
+        // at run time against runtime.GOROOT()'s src directory: default `go test` bakes the absolute
+        // GOROOT path, and a re-exec child that opens its own source through runtime.Caller
+        // (TestTracebackSystem) needs a path that exists. With no GOROOT, the recorded form stands.
+        [TestMethod]
+        public void AGorootRelativeRecordResolvesAgainstGoroot()
+        {
+            var frame = SyntheticFrame(LiteralOf(typeof(go.litguard.probe_package), nameof(go.litguard.probe_package.recordedOuterLiteralFrame)));
+            string goroot = go.runtime_package.GOROOT().ToString().Replace('\\', '/').TrimEnd('/');
+            string expected = goroot.Length == 0 ? "litguard/probe/probe.go" : goroot + "/src/litguard/probe/probe.go";
+
+            Assert.AreEqual(expected, frame.File.ToString(), $"the recorded file rooted at GOROOT ({(goroot.Length == 0 ? "none set" : goroot)})");
+        }
+
         [TestMethod]
         public void SyntheticPCOfAnUnrecordedFunctionReportsItsConvertedPosition()
         {
