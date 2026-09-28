@@ -161,4 +161,17 @@ public class MintedAddressSinkTests
         Assert.AreEqual((nuint)CallerTokenByteBefore, window.NativeElementAddress(0));
         Assert.AreEqual((nuint)CallerTokenByteBefore + 3 * sizeof(ulong), window.NativeElementAddress(3));
     }
+
+    // The write-side follow-up (ledger 18:56): an append that fits in a native window's capacity
+    // writes into the mapping itself, so over a minted base it is refused like every other access.
+
+    [TestMethod]
+    public void AnInCapacityAppendIntoAMintedWindowIsRefused()
+    {
+        // len 0, cap 4: `unsafe.Slice(p, 4)[:0]`, the only shape that reaches the in-capacity arm.
+        go.slice<byte> window = go.slice<byte>.OverNativeMemory((nuint)CallerTokenByteBefore, 0, 4);
+
+        StringAssert.Contains(Assert.ThrowsException<PanicException>(() => go.slice<byte>.Append(window, (byte)1)).Message, "nil pointer dereference");
+        StringAssert.Contains(Assert.ThrowsException<PanicException>(() => go.slice<byte>.AppendZeroed(window, 2)).Message, "nil pointer dereference");
+    }
 }
