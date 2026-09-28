@@ -1,6 +1,6 @@
-![go2cs](../images/go2cs-small.png)
-
 # The converted standard library moves to Go 1.24.13
+
+![go2cs](../images/go2cs-small.png)
 
 > Full text of the September 24, 2026 announcement, condensed in the
 > [go2cs News Archive](../NEWS.md#september-24-2026--the-converted-standard-library-moves-to-go-12413-and-218-packages-validate-against-it).

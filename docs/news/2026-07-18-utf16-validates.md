@@ -1,6 +1,6 @@
-![go2cs](../images/go2cs-small.png)
-
 # `unicode/utf16` validates; disclosed-divergence generalizes
+
+![go2cs](../images/go2cs-small.png)
 
 > Full text of the July 18, 2026 announcement, condensed in the
 > [go2cs News Archive](../NEWS.md#july-18-2026--unicodeutf16-validates-disclosed-divergence-generalizes).

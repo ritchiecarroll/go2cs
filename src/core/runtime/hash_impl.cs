@@ -65,12 +65,22 @@
 // goenvs/cpu precedent of a hand-own performing the init the scheduler would have. Idempotent, and
 // a non-zero key already present (alginit having run) is left alone.
 //
-// useAeshash STAYS FALSE. The managed runtime has no AES hash implementation; setting the flag to
-// mirror the host's CPU would make TestMemHash32/64Equality skip as Go does on an AES host while
-// the arithmetic underneath stayed the fallback — a body that looks truthful, which this corpus
-// refuses. The consequence is stated on the row: on an AES host Go SKIPS those two tests and the
-// converted runtime RUNS them (a host-conditional shape for the coordinator to rule), and
-// TestMemHashGlobalSeed reads `No AES` on both counts.
+// AESHASH. Go's alginit installs the AES hash when `(GOARCH == "386" || GOARCH == "amd64") &&
+// cpu.X86.HasAES && cpu.X86.HasSSSE3 && cpu.X86.HasSSE41` (and on arm64 when cpu.ARM64.HasAES), and
+// then memhash/memhash32/memhash64/strhash jump to asm_amd64.s's aeshashbody instead of the fallback.
+// initHashAlgorithm below runs that same selection once, at load (schedinit never runs here), over
+// the same flags: internal/cpu fills cpu.X86 from System.Runtime.Intrinsics and applies GODEBUG's
+// cpu.* options (so GODEBUG=cpu.aes=off selects the fallback, as TestMemHashGlobalSeed/noaes and
+// TestIssue66841 rely on). The selected branch seeds its own key exactly as Go's does: aeskeysched's
+// 128 random bytes for AES, the four hashkey words for the fallback. The AES bodies are
+// aeshashbody, memhash32 and memhash64 ported instruction for instruction onto
+// System.Runtime.Intrinsics.X86.Aes: Go's `AESENC src, dst` is `dst = Aes.Encrypt(dst, src)`. They are
+// bit-reproducible against Go for the same key schedule (GolibTests' AesHashMatchesGo compares a fixed
+// schedule against a table taken from Go itself). The corpus is converted for GOARCH=amd64, so on an
+// arm64 host cpu.X86's flags are false and Go's own condition selects the fallback: the arm64
+// aeshashbody (asm_arm64.s, a different schedule) is not reachable from this corpus and not ported.
+// Consequence, matching Go on an AES host: TestMemHash32/64Equality SKIP, TestMemHashGlobalSeed/aes
+// runs, and the Smhasher tests that Go enables only under AES run too.
 //
 // 64-bit only: this is hash64.go. hash32.go's schedule is not ported; a 32-bit host throws at first
 // use rather than hashing with the wrong constants.
@@ -89,10 +99,13 @@ namespace go;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using Aes = System.Runtime.Intrinsics.X86.Aes;
 using System.Security.Cryptography;
 using System.Threading;
 using go.golib;
 using @unsafe = go.unsafe_package;
+using cpu = go.@internal.cpu_package;
 
 partial class runtime_package {
 
@@ -132,6 +145,149 @@ private static void ensureHashKey() {
         Volatile.Write(ref s_hashKeySeeded, true);
     }
 }
+
+// Go's alginit, performed once at load: the AES branch when the CPU flags (after GODEBUG's cpu.*
+// options) allow it, the fallback's hashkey otherwise. The fallback key is seeded either way, because
+// the public fallback bodies below (GoMemhash and friends) are callable directly by guards.
+[ModuleInitializer]
+internal static void initHashAlgorithm() {
+    if ((GOARCH == "386"u8 || GOARCH == "amd64"u8) && cpu.X86.HasAES && cpu.X86.HasSSSE3 && cpu.X86.HasSSE41 &&
+        System.Runtime.Intrinsics.X86.Aes.IsSupported && System.Runtime.Intrinsics.X86.Sse41.IsSupported) {
+        Span<byte> random = stackalloc byte[128];
+        RandomNumberGenerator.Fill(random);
+        for (int i = 0; i < 128; i++)
+            aeskeysched[i] = random[i];
+        useAeshash = true;
+    }
+
+    ensureHashKey();
+}
+
+// ---- aeshash: asm_amd64.s's aeshashbody, memhash32 and memhash64 over System.Runtime.Intrinsics ----
+
+private static Vector128<byte> aesKey(ReadOnlySpan<byte> schedule, int block) =>
+    Vector128.Create(schedule.Slice(block * 16, 16));
+
+private static Vector128<byte> aesLoad(ReadOnlySpan<byte> data, int offset) =>
+    Vector128.Create(data.Slice(offset, 16));
+
+// AESENC X, X: one round keyed by the state itself
+private static Vector128<byte> aesSelf(Vector128<byte> x) => Aes.Encrypt(x, x);
+
+private static ulong aesLow(Vector128<byte> x) => x.AsUInt64().ToScalar();
+
+/// <summary>
+/// Go's <c>aeshashbody</c> (asm_amd64.s) over <paramref name="data"/> with <paramref name="seed"/> and
+/// the 128-byte key <paramref name="schedule"/>: the hash <c>runtime.memhash</c> and
+/// <c>runtime.strhash</c> answer on an AES host. Public so a guard can compare it against Go's own
+/// output for a fixed schedule.
+/// </summary>
+public static ulong GoAeshash(ReadOnlySpan<byte> data, ulong seed, ReadOnlySpan<byte> schedule) {
+    int n = data.Length;
+
+    // MOVQ BX, X0; PINSRW $4, CX, X0; PSHUFHW $0, X0, X0: the seed, then the length's low 16 bits
+    // four times in the high quadword
+    ulong lengthWords = (ulong)(ushort)n * 0x0001000100010001UL;
+    Vector128<byte> x1 = Vector128.Create(seed, lengthWords).AsByte();
+    Vector128<byte> x0 = aesSelf(x1 ^ aesKey(schedule, 0));
+
+    if (n == 0)
+        return aesLow(aesSelf(x0));
+
+    if (n <= 16) {
+        Vector128<byte> block;
+
+        if (n == 16) {
+            block = aesLoad(data, 0);
+        } else {
+            // The masked (or page-end shuffled) load: the data bytes, zero above
+            Span<byte> padded = stackalloc byte[16];
+            data.CopyTo(padded);
+            block = Vector128.Create((ReadOnlySpan<byte>)padded);
+        }
+
+        block ^= x0;
+        return aesLow(aesSelf(aesSelf(aesSelf(block))));
+    }
+
+    if (n <= 32) {
+        x1 = aesSelf(x1 ^ aesKey(schedule, 1));
+        Vector128<byte> x2 = aesLoad(data, 0) ^ x0;
+        Vector128<byte> x3 = aesLoad(data, n - 16) ^ x1;
+        x2 = aesSelf(aesSelf(aesSelf(x2)));
+        x3 = aesSelf(aesSelf(aesSelf(x3)));
+        return aesLow(x2 ^ x3);
+    }
+
+    if (n <= 64) {
+        Vector128<byte> s1 = aesSelf(x1 ^ aesKey(schedule, 1));
+        Vector128<byte> s2 = aesSelf(x1 ^ aesKey(schedule, 2));
+        Vector128<byte> s3 = aesSelf(x1 ^ aesKey(schedule, 3));
+        Vector128<byte> x4 = aesSelf(aesSelf(aesSelf(aesLoad(data, 0) ^ x0)));
+        Vector128<byte> x5 = aesSelf(aesSelf(aesSelf(aesLoad(data, 16) ^ s1)));
+        Vector128<byte> x6 = aesSelf(aesSelf(aesSelf(aesLoad(data, n - 32) ^ s2)));
+        Vector128<byte> x7 = aesSelf(aesSelf(aesSelf(aesLoad(data, n - 16) ^ s3)));
+        return aesLow((x4 ^ x6) ^ (x5 ^ x7));
+    }
+
+    // 65 and up: seven more seeds from the unscrambled seed, X0 unchanged
+    Span<Vector128<byte>> seeds = stackalloc Vector128<byte>[8];
+    seeds[0] = x0;
+
+    for (int i = 1; i < 8; i++)
+        seeds[i] = aesSelf(x1 ^ aesKey(schedule, i));
+
+    Span<Vector128<byte>> state = stackalloc Vector128<byte>[8];
+
+    if (n <= 128) {
+        for (int i = 0; i < 4; i++)
+            state[i] = aesLoad(data, 16 * i) ^ seeds[i];
+
+        for (int i = 4; i < 8; i++)
+            state[i] = aesLoad(data, n - 64 + 16 * (i - 4)) ^ seeds[i];
+    } else {
+        // Start with the last (possibly overlapping) 128-byte block, then fold in every full block
+        // from the front, (n - 1) / 128 of them
+        for (int i = 0; i < 8; i++)
+            state[i] = aesLoad(data, n - 128 + 16 * i) ^ seeds[i];
+
+        int blocks = (n - 1) >> 7;
+
+        for (int offset = 0; blocks != 0; blocks--, offset += 128) {
+            for (int i = 0; i < 8; i++)
+                state[i] = Aes.Encrypt(aesSelf(state[i]), aesLoad(data, offset + 16 * i));
+        }
+    }
+
+    for (int i = 0; i < 8; i++)
+        state[i] = aesSelf(aesSelf(aesSelf(state[i])));
+
+    Vector128<byte> a = state[0] ^ state[4], b = state[1] ^ state[5], c = state[2] ^ state[6], d = state[3] ^ state[7];
+    return aesLow((a ^ c) ^ (b ^ d));
+}
+
+/// <summary>Go's AES <c>memhash32</c>: the four data bytes in the seed's third dword, three rounds keyed
+/// by the schedule's first three blocks.</summary>
+public static ulong GoAeshash32(uint data, ulong seed, ReadOnlySpan<byte> schedule) {
+    Vector128<byte> x = Vector128.Create(seed, (ulong)data).AsByte();
+    x = Aes.Encrypt(x, aesKey(schedule, 0));
+    x = Aes.Encrypt(x, aesKey(schedule, 1));
+    return aesLow(Aes.Encrypt(x, aesKey(schedule, 2)));
+}
+
+/// <summary>Go's AES <c>memhash64</c>: the eight data bytes in the seed's high quadword, three rounds
+/// keyed by the schedule's first three blocks.</summary>
+public static ulong GoAeshash64(ulong data, ulong seed, ReadOnlySpan<byte> schedule) {
+    Vector128<byte> x = Vector128.Create(seed, data).AsByte();
+    x = Aes.Encrypt(x, aesKey(schedule, 0));
+    x = Aes.Encrypt(x, aesKey(schedule, 1));
+    return aesLow(Aes.Encrypt(x, aesKey(schedule, 2)));
+}
+
+/// <summary>Whether this process selected the AES hash (Go's <c>useAeshash</c>).</summary>
+public static bool GoUsesAeshash => useAeshash;
+
+private static ReadOnlySpan<byte> aesSchedule => aeskeysched.ToSpan();
 
 // ---- the arithmetic: hash64.go verbatim over a byte span ----
 
@@ -260,11 +416,13 @@ private static ReadOnlySpan<byte> referentBytes(string caller, @unsafe.Pointer p
     if (size > int.MaxValue)
         throw panic($"runtime.{caller}: a {size}-byte hash is outside what a managed span can address");
 
-    if (p is null || p.IsNull) {
-        if (size == 0)
-            return ReadOnlySpan<byte>.Empty;
+    // Go reads nothing for a zero size, whatever the pointer names (computeHash hashes a pointer to
+    // an empty struct{} with size 0)
+    if (size == 0)
+        return ReadOnlySpan<byte>.Empty;
+
+    if (p is null || p.IsNull)
         throw panic($"runtime.{caller}: nil pointer with a non-zero size ({size})");
-    }
 
     object? referent = recoverReferent(p);
     if (referent is null)
@@ -328,6 +486,11 @@ public static ulong GoMemhash64Pointer(@unsafe.Pointer p, ulong seed) {
 /// <summary><c>runtime.strhash(p, seed)</c> for a pointer to a string: Go's strhashFallback hashes
 /// the string's content (x.str, x.len), so the referent must be a <c>@string</c> box.</summary>
 public static ulong GoStrhashPointer(@unsafe.Pointer p, ulong seed) {
+    return GoMemhash(strhashContent(p), seed);
+}
+
+// The content of the string a strhash pointer names, or a panic naming why not.
+private static ReadOnlySpan<byte> strhashContent(@unsafe.Pointer p) {
     refuseNonPointer("strhash", p);
 
     if (p is null || p.IsNull)
@@ -335,7 +498,7 @@ public static ulong GoStrhashPointer(@unsafe.Pointer p, ulong seed) {
 
     object? referent = recoverReferent(p);
     if (referent is ж<@string> str)
-        return GoMemhash(str.Value.ToSpan(), seed);
+        return str.Value.ToSpan();
 
     if (referent is null)
         throw panic("runtime.strhash: the pointer carries no recoverable managed referent — a @string box is reference-bearing, so the provenance record cannot resolve it through the uintptr bridge the emitted stringHash uses (SUB-Q42's class, Q44's fix); stringHash stays red until the header seam or Q44 lands");
@@ -343,19 +506,33 @@ public static ulong GoStrhashPointer(@unsafe.Pointer p, ulong seed) {
     throw panic($"runtime.strhash: the referent is a {referent.GetType().Name}, not a string box");
 }
 
+// The four dispatchers, as asm_amd64.s's: aeshashbody when useAeshash is set, the fallback otherwise.
+
 internal static partial uintptr memhash(@unsafe.Pointer Δp, uintptr h, uintptr s) {
+    if (useAeshash)
+        return (nuint)GoAeshash(referentBytes("memhash", Δp, s.Value), h.Value, aesSchedule);
+
     return (nuint)GoMemhashPointer(Δp, h.Value, s.Value);
 }
 
 internal static partial uintptr memhash32(@unsafe.Pointer Δp, uintptr h) {
+    if (useAeshash)
+        return (nuint)GoAeshash32(MemoryMarshal.Read<uint>(referentBytes("memhash32", Δp, 4)), h.Value, aesSchedule);
+
     return (nuint)GoMemhash32Pointer(Δp, h.Value);
 }
 
 internal static partial uintptr memhash64(@unsafe.Pointer Δp, uintptr h) {
+    if (useAeshash)
+        return (nuint)GoAeshash64(MemoryMarshal.Read<ulong>(referentBytes("memhash64", Δp, 8)), h.Value, aesSchedule);
+
     return (nuint)GoMemhash64Pointer(Δp, h.Value);
 }
 
 internal static partial uintptr strhash(@unsafe.Pointer Δp, uintptr h) {
+    if (useAeshash)
+        return (nuint)GoAeshash(strhashContent(Δp), h.Value, aesSchedule);
+
     return (nuint)GoStrhashPointer(Δp, h.Value);
 }
 

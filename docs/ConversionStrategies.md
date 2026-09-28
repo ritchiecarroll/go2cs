@@ -2037,8 +2037,8 @@ Its use with `unsafe.Pointer` is covered in [`unsafe.Pointer` and `uintptr`](#un
      src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:93 (`case uintptr:` beside `case nuint:`). -->
 
 **Narrow arithmetic is cast back to its type.** Go computes `int8`, `uint8`, `int16` and `uint16` arithmetic at
-that width, so the `uint8` sum `200 + 100` wraps to 44. C# promotes these types to `int` first, so the sum is
-300. The converter casts the result back to the narrow type, which restores Go's wrapped value.
+that width, so the `uint8` sum `200 + 100` wraps to 44. C# promotes these types to `int` first, so the sum is 300.
+The converter casts the result back to the narrow type, which restores Go's wrapped value.
 
 In this example, `takeU8` is a function that takes a `uint8`. In the C#, `fmt` is Go's `fmt` package,
 converted to C# like any other package ([Package Conversion](#package-conversion)):
@@ -2923,6 +2923,7 @@ fmt.Println(n);
 through unchanged. An unbuffered channel gets an explicit capacity of `0`:
 
 <!-- source: src/tests/Behavioral/AppendOfMake/AppendOfMake.go:40 + AppendOfMake.cs.target:55 · src/tests/Behavioral/AnyKeyMap/AnyKeyMap.go:8 + AnyKeyMap.cs.target:9 · src/tests/Behavioral/ChannelCapLen/main.go:11,24 + main.cs.target:8,20 -->
+
 | Go | C# |
 |---|---|
 | `s := make([]int, 2, 4)` | `var s = new slice<nint>(2, 4);` |

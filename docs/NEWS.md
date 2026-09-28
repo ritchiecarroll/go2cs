@@ -1,6 +1,6 @@
-![go2cs](images/go2cs-small.png)
-
 # 📰 go2cs News Archive
+
+![go2cs](images/go2cs-small.png)
 
 All project announcements, newest first. The [README](README.md) summarizes where the project stands
 today; every announcement is recorded here, and the detail-heavy ones link to a companion page carrying
@@ -233,8 +233,8 @@ allocation and structural interface assertion behave the way Go specifies, and c
 performance figures that had been measuring the wrong artifact. Per-package counts are in
 [Validated Test Packages](ValidatedTestPackages.md); the measured numbers in [Performance](Performance.md).
 
-*Full story: [More than a quarter of the standard library's test suites pass in
-C#](news/2026-07-26-quarter-of-stdlib-tests-pass.md) · commit `44fcc4f04` · reproduce any row from a
+*Full story:
+[More than a quarter of the standard library's test suites pass in C#](news/2026-07-26-quarter-of-stdlib-tests-pass.md) · commit `44fcc4f04` · reproduce any row from a
 clone via [Try it yourself](README.md#try-it-yourself--validate-a-converted-test-suite)*
 
 ---
@@ -252,8 +252,8 @@ as a **general tool** rather than a two-package special case, pinning that one `
 exact failure signature while a separate test proved the decoded output correct — a mechanism that
 generalizes cleanly is a mechanism that was designed right.
 
-*Full story: [`unicode/utf16` validates; disclosed-divergence
-generalizes](news/2026-07-18-utf16-validates.md) · Phase-4 package #5 · 8 + 1 disclosed (alloc-profile)
+*Full story:
+[`unicode/utf16` validates; disclosed-divergence generalizes](news/2026-07-18-utf16-validates.md) · Phase-4 package #5 · 8 + 1 disclosed (alloc-profile)
 · reproduce from a clone via [Try it yourself](README.md#try-it-yourself--validate-a-converted-test-suite)*
 
 ---
@@ -272,8 +272,8 @@ signature}`, and the differential oracle reclassifies a result only when both th
 pinned signature match — an integrity guard, not a blanket exemption. Packages without a manifest
 compare strictly.
 
-*Full story: [`bytes` and `strings` tests pass, with
-disclosed-divergence](news/2026-07-18-bytes-strings-disclosed-divergence.md) · Phase-4 packages #3 and
+*Full story:
+[`bytes` and `strings` tests pass, with disclosed-divergence](news/2026-07-18-bytes-strings-disclosed-divergence.md) · Phase-4 packages #3 and
 #4 · `sort` 63/63, `bytes` 81, `strings` 68 · reproduce from a clone via
 [Try it yourself](README.md#try-it-yourself--validate-a-converted-test-suite)*
 

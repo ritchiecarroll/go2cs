@@ -97,6 +97,7 @@ more). So "green the loop" means **green `fmt`'s closure**, bottom-up.
 - **Baseline build status: 18 / 57 compile clean** out of the box (built in place in `go-src-converted`
   against current `golib`). The pipeline works; failures are concentrated converter defects, not intractability.
 - **Prioritized converter-defect roadmap** (own-errors across a probe of failing leaf/mid packages):
+
   | Count | Code | Meaning | Status |
   |---|---|---|---|
   | 48 | CS0106 | invalid modifier (`static readonly` on a function-local named-type const) | **FIXED** — `visitValueSpec.go`, verified math/bits 16→0 |
@@ -106,6 +107,7 @@ more). So "green the loop" means **green `fmt`'s closure**, bottom-up.
   | 18 | CS1003 | syntax error, X expected | open (syntax cluster) |
   | 18 | CS0051 | inconsistent accessibility (param type less accessible) | open |
   | — | CS0103 | missing package-level lookup tables (e.g. `ntz8tab`/`pop8tab` in math/bits) | open |
+
 - **Converter-improvement loop (proven end-to-end):** edit `src/go2cs/*.go` → `go build` (Go 1.24.13) →
   re-transpile → `dotnet build`. (For behavioral tests the harness runs this loop itself — see
   [`/CLAUDE.md`](../CLAUDE.md) "Test-harness mechanics".)

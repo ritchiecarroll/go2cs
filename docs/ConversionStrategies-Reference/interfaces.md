@@ -945,8 +945,8 @@ pointer/slice/array/map/chan) and downgrades to `internal` on a hit; the product
 and the self-contained-assembly reasoning carry over unchanged.
 
 This half only became reachable when the white-box **bridge class** started carrying an access
-modifier. Before [the unconditional bridge metadata
-unit](shadowing.md#test-suites-reference-the-production-project-instead-of-recompiling-it), an internal
+modifier. Before
+[the unconditional bridge metadata unit](shadowing.md#test-suites-reference-the-production-project-instead-of-recompiling-it), an internal
 test file's `partial class cpu_internal_test_package {` was the class's ONLY declaration, and a
 top-level C# class with no modifier is `internal` — so its `public` members were internal *in
 effect* and the inconsistency never arose. Making the bridge `public static partial` (which a
@@ -1314,8 +1314,8 @@ production-inertness identity.)
 
 ### The promoted-method twins class is named for the PACKAGE and the pair, not the pair alone
 
-A struct that satisfies an interface member by **promotion** gets an `internal static class
-<pkg>ᴛ<struct>ᴛ<iface>ᴛpromoted` of extension twins, because go2cs's runtime method set is built from
+A struct that satisfies an interface member by **promotion** gets an
+`internal static class <pkg>ᴛ<struct>ᴛ<iface>ᴛpromoted` of extension twins, because go2cs's runtime method set is built from
 extension methods and a promoted method is the one kind of Go method that never became one. The class
 sits at NAMESPACE scope — deliberately a sibling of the package class, so its twins cannot intercept a
 bare-name call — and it was named for the (struct, interface) pair alone.

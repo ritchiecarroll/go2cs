@@ -65,6 +65,7 @@
 // separate too, which is why doinit leaves the sse3/avx/avx512 knobs switchable at level 1.
 // ---------------------------------------------------------------------------------------------
 
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 using go;
@@ -112,5 +113,58 @@ partial class cpu_package
         X86.HasSSE41 = Sse41.IsSupported;
         X86.HasSSE42 = Sse42.IsSupported;
         X86.HasSSSE3 = Ssse3.IsSupported;
+
+        // Go's Initialize(env) runs doinit and then processOptions(GODEBUG), so GODEBUG's cpu.* options
+        // (cpu.aes=off, cpu.all=off, ...) turn features off before any consumer reads them: the
+        // runtime's alginit picks its hash from these flags, and TestMemHashGlobalSeed/noaes and
+        // TestIssue66841 re-exec with GODEBUG=cpu.aes=off to reach the fallback. doinit's option table
+        // is registered here with the same names and the same level gates, then the converted
+        // processOptions applies the process's own GODEBUG.
+        registerX86Options();
+        processOptions(Environment.GetEnvironmentVariable("GODEBUG") ?? "");
+    }
+
+    // cpu_x86.go doinit's option table, gated on getGOAMD64level exactly as doinit gates it.
+    private static void registerX86Options()
+    {
+        options = new option[]{
+            new(Name: "adx"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasADX)),
+            new(Name: "aes"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAES)),
+            new(Name: "erms"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasERMS)),
+            new(Name: "fsrm"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasFSRM)),
+            new(Name: "pclmulqdq"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasPCLMULQDQ)),
+            new(Name: "rdtscp"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasRDTSCP)),
+            new(Name: "sha"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSHA))
+        }.slice();
+
+        var level = getGOAMD64level();
+
+        if (level < 2)
+        {
+            options = append(options,
+                new option(Name: "popcnt"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasPOPCNT)),
+                new option(Name: "sse3"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE3)),
+                new option(Name: "sse41"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE41)),
+                new option(Name: "sse42"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE42)),
+                new option(Name: "ssse3"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSSE3)));
+        }
+
+        if (level < 3)
+        {
+            options = append(options,
+                new option(Name: "avx"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX)),
+                new option(Name: "avx2"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX2)),
+                new option(Name: "bmi1"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasBMI1)),
+                new option(Name: "bmi2"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasBMI2)),
+                new option(Name: "fma"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasFMA)));
+        }
+
+        if (level < 4)
+        {
+            options = append(options,
+                new option(Name: "avx512f"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512F)),
+                new option(Name: "avx512bw"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512BW)),
+                new option(Name: "avx512vl"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VL)));
+        }
     }
 }

@@ -111,7 +111,7 @@ jobs:
       dotnet: ${{ steps.derive.outputs.dotnet }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Derive toolchain pin and target matrix
         id: derive
@@ -267,17 +267,17 @@ jobs:
       STAGE: ${{ needs.plan.outputs.stage }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Go (pinned to the corpus release)
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ needs.plan.outputs.go-version }}
           check-latest: false
           cache-dependency-path: src/go2cs/go.sum
 
       - name: Set up .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           # Channel comes from the `dotnet` input; the default is 10.0.x, the corpus TFM's own
           # runtime since the Stage-2 hop. Selecting 9.0.x against a net10.0 reference FAILS with
@@ -1032,7 +1032,7 @@ jobs:
       # -------------------------------------------------------------------------------------
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: os-matrix-${{ needs.plan.outputs.stage }}-${{ matrix.goos }}-${{ matrix.rid }}
           path: artifacts/

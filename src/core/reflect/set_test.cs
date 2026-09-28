@@ -96,7 +96,7 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> Ꮡt) {
         }
         {
             @unsafe.Pointer p = (uintptr)mv.MapIndex(ValueOf(b1.OrTypedNil())).Elem().UnsafePointer(); if (p != @unsafe.Pointer.FromPinnedBox(b2)) {
-                Ꮡt.Errorf("#5 MapIndex(b1) = %#x want %p"u8, p, b2.OrTypedNil());
+                Ꮡt.Errorf("#5 MapIndex(b1) = %#x want %p"u8, @unsafe.Pointer.OrTypedNil(p), b2.OrTypedNil());
             }
         }
     }
@@ -113,7 +113,7 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> Ꮡt) {
         }
         {
             @unsafe.Pointer p = (uintptr)mv.MapIndex(ValueOf(c1)).UnsafePointer(); if (p != (uintptr)ValueOf(c2).UnsafePointer()) {
-                Ꮡt.Errorf("#6 MapIndex(c1) = %#x want %p"u8, p, c2);
+                Ꮡt.Errorf("#6 MapIndex(c1) = %#x want %p"u8, @unsafe.Pointer.OrTypedNil(p), c2);
             }
         }
     }
@@ -129,7 +129,7 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> Ꮡt) {
         }
         {
             @unsafe.Pointer p = (uintptr)mv.MapIndex(ValueOf(b1.OrTypedNil())).UnsafePointer(); if (p != @unsafe.Pointer.FromPinnedBox(b2)) {
-                Ꮡt.Errorf("#7 MapIndex(b1) = %#x want %p"u8, p, b2.OrTypedNil());
+                Ꮡt.Errorf("#7 MapIndex(b1) = %#x want %p"u8, @unsafe.Pointer.OrTypedNil(p), b2.OrTypedNil());
             }
         }
     }

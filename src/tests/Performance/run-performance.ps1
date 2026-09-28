@@ -65,11 +65,13 @@ $runnerExit = $LASTEXITCODE
 
 # Mirror the README into docs/ so it is reachable from the GitHub Pages site, which only
 # publishes the docs folder. This README.md is the master; docs/Performance.md is the copy.
+# The banner goes at the END: jekyll-titles-from-headings takes a page's title only from a heading
+# at the very start of the file, so a banner above the H1 published the page with the site's default title.
 if ($runnerExit -eq 0) {
     $readme   = Join-Path $PSScriptRoot "README.md"
     $docsCopy = Join-Path $RepoRoot 'docs/Performance.md'
-    $banner   = "<!-- AUTO-COPIED from src/tests/Performance/README.md by run-performance.ps1 -- edit that file, not this one. -->`r`n`r`n"
-    [IO.File]::WriteAllText($docsCopy, $banner + [IO.File]::ReadAllText($readme))
+    $banner   = "`r`n<!-- AUTO-COPIED from src/tests/Performance/README.md by run-performance.ps1 -- edit that file, not this one. -->`r`n"
+    [IO.File]::WriteAllText($docsCopy, [IO.File]::ReadAllText($readme) + $banner)
     Write-Host "==> mirrored README.md to docs/Performance.md" -ForegroundColor Cyan
 }
 exit $runnerExit
