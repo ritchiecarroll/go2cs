@@ -528,14 +528,6 @@ partial class runtime_package
     internal static void shrinkstack(ж<g> Ꮡgp) =>
         throw new PanicException("runtime: shrinkstack: goroutines are CLR threads with no Go stack to shrink");
 
-    // newUserArena (arena.go) REFUSES BY NAME. Go's body carves arena chunks from the Go heap
-    // (mheap.allocUserArenaChunk -> sysAlloc -> fixalloc). There is no Go heap here (mallocinit
-    // never runs), so the converted body reached fixalloc before FixAlloc_Init and threw "runtime:
-    // internal error", which exited the process: the runtime row lost every test after the first
-    // TestUserArena* test. Its production caller is arena.NewArena (GOEXPERIMENT=arenas).
-    internal static ж<userArena> newUserArena() =>
-        throw new PanicException("runtime: newUserArena: the managed host has no Go heap to allocate user arena chunks from");
-
     // NumCgoCall returns the number of cgo calls made by the current process. Go's body walks the
     // scheduler's `allm` thread list summing per-m counters — a list the managed model never
     // populates (the walk nil-derefs where Go always has at least m0). The managed model makes no
@@ -2412,14 +2404,6 @@ partial class runtime_package
     /// </summary>
     public static string? GoShrinkstackRefusalProbe(int timeoutMs) =>
         RunRefusalProbe(timeoutMs, "shrinkstack", () => shrinkstack(getg()));
-
-    /// <summary>
-    /// GolibTests' probe for newUserArena's refusal (RuntimeHostFatalRefusalTests): creates a user
-    /// arena, as runtime's NewUserArena export does, and returns what it raised, or null if it
-    /// returned.
-    /// </summary>
-    public static string? GoNewUserArenaRefusalProbe(int timeoutMs) =>
-        RunRefusalProbe(timeoutMs, "newUserArena", () => newUserArena());
 
     private static string? RunRefusalProbe(int timeoutMs, string name, Action call)
     {

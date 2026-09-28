@@ -8,8 +8,8 @@ namespace GolibTests;
 /// process and loses every later test in the runtime row. Each refuses by name instead, as a
 /// PanicException the calling test can report. shrinkstack threw "missing stack in shrinkstack"
 /// (goroutines are CLR threads with no Go stack; TestSystemstackFramePointerAdjust). newUserArena
-/// reached fixalloc before FixAlloc_Init and threw "runtime: internal error" (the managed host has
-/// no Go heap to carve arena chunks from; the six TestUserArena* tests).
+/// refused here too until user arenas were implemented over managed allocations
+/// (RuntimeUserArenaTests).
 /// </summary>
 [TestClass]
 public class RuntimeHostFatalRefusalTests
@@ -23,14 +23,5 @@ public class RuntimeHostFatalRefusalTests
 
         Assert.IsNotNull(failure, "shrinkstack returned");
         StringAssert.StartsWith(failure, "PanicException: runtime: shrinkstack:", failure);
-    }
-
-    [TestMethod]
-    public void NewUserArenaRefusesByName()
-    {
-        string? failure = GoNewUserArenaRefusalProbe(TimeoutMs);
-
-        Assert.IsNotNull(failure, "newUserArena returned");
-        StringAssert.StartsWith(failure, "PanicException: runtime: newUserArena:", failure);
     }
 }

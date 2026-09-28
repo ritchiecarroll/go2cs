@@ -142,64 +142,7 @@ internal static void arena_arena_Free(@unsafe.Pointer arena) {
     (((ж<userArena>)(uintptr)(arena))).free();
 }
 
-// arena_heapify takes a value that lives in an arena and makes a copy
-// of it on the heap. Values that don't live in an arena are returned unmodified.
-//
-//go:linkname arena_heapify arena.runtime_arena_heapify
-internal static any arena_heapify(any sʗp) {
-    ref var s = ref heap(sʗp, out var Ꮡs);
-
-    @unsafe.Pointer v = default!;
-    var e = efaceOf(Ꮡs);
-    var t = e.Value._type;
-    var exprᴛ1 = (abiꓸKind)((~t).Kind_ & abi.KindMask);
-    if (exprᴛ1 == abi.ΔString) {
-        v = stringStructOf((ж<@string>)(uintptr)((~e).data)).Value.str;
-    }
-    else if (exprᴛ1 == abi.Slice) {
-        v = ((ж<Δsliceᴛ>)(uintptr)((~e).data)).Value.Δarray;
-    }
-    else if (exprᴛ1 == abi.Pointer) {
-        v = e.Value.data;
-    }
-    else { /* default: */
-        throw panic("arena: Clone only supports pointers, slices, and strings");
-    }
-
-    var span = spanOf((uintptr)v);
-    if (span == nil || !(~span).isUserArenaChunk) {
-        // Not stored in a user arena chunk.
-        return s;
-    }
-    // Heap-allocate storage for a copy.
-    ref var x = ref heap<any>(out var Ꮡx);
-    var exprᴛ2 = (abiꓸKind)((~t).Kind_ & abi.KindMask);
-    if (exprᴛ2 == abi.ΔString) {
-        @string s1 = s._<@string>();
-        var (s2, b) = rawstring(len(s1));
-        copy(b, s1);
-        x = s2;
-    }
-    else if (exprᴛ2 == abi.Slice) {
-        nint lenΔ2 = ((ж<Δsliceᴛ>)(uintptr)((~e).data)).Value.len;
-        var et = (t.Reinterpret<_type, slicetype>()).Value.Elem;
-        var sl = @new<Δsliceᴛ>();
-        sl.Value = new Δsliceᴛ((uintptr)makeslicecopy(et, lenΔ2, lenΔ2, ((ж<Δsliceᴛ>)(uintptr)((~e).data)).Value.Δarray), lenΔ2, lenΔ2);
-        var xe = efaceOf(Ꮡx);
-        xe.Value._type = t;
-        xe.Value.data = @unsafe.Pointer.FromPinnedBox(sl);
-    }
-    else if (exprᴛ2 == abi.Pointer) {
-        var et = (t.Reinterpret<_type, ptrtype>()).Value.Elem;
-        @unsafe.Pointer e2 = (uintptr)newobject(et);
-        typedmemmove(et, e2, (~e).data);
-        var xe = efaceOf(Ꮡx);
-        xe.Value._type = t;
-        xe.Value.data = e2;
-    }
-
-    return x;
-}
+// go2cs generated this placeholder — func arena_heapify is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static UntypedInt userArenaChunkBytesMax => /* 8 << 20 */ 8388608;
 internal static uintptr userArenaChunkBytes => /* uintptr(int64(userArenaChunkBytesMax-heapArenaBytes)&(int64(userArenaChunkBytesMax-heapArenaBytes)>>63) + heapArenaBytes) */ 4194304; // min(userArenaChunkBytesMax, heapArenaBytes)
@@ -261,97 +204,11 @@ internal static uintptr userArenaChunkReserveBytes() {
 
 // go2cs generated this placeholder — func newUserArena is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// new allocates a new object of the provided type into the arena, and returns
-// its pointer.
-//
-// This operation is not safe to call concurrently with other operations on the
-// same arena.
-[GoRecv] internal static @unsafe.Pointer @new(this ref userArena a, ж<_type> Ꮡtyp) {
-    return (uintptr)a.alloc(Ꮡtyp, -1);
-}
+// go2cs generated this placeholder — func new is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// slice allocates a new slice backing store. slice must be a pointer to a slice
-// (i.e. *[]T), because userArenaSlice will update the slice directly.
-//
-// cap determines the capacity of the slice backing store and must be non-negative.
-//
-// This operation is not safe to call concurrently with other operations on the
-// same arena.
-[GoRecv] internal static void Δslice(this ref userArena a, any slʗp, nint cap) {
-    ref var sl = ref heap(slʗp, out var Ꮡsl);
+// go2cs generated this placeholder — func slice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-    if (cap < 0) {
-        throw panic("userArena.slice: negative cap");
-    }
-    var i = efaceOf(Ꮡsl);
-    var typ = i.Value._type;
-    if ((abiꓸKind)((~typ).Kind_ & abi.KindMask) != abi.Pointer) {
-        throw panic("slice result of non-ptr type");
-    }
-    typ = (typ.Reinterpret<_type, ptrtype>()).Value.Elem;
-    if ((abiꓸKind)((~typ).Kind_ & abi.KindMask) != abi.Slice) {
-        throw panic("slice of non-ptr-to-slice type");
-    }
-    typ = (typ.Reinterpret<_type, slicetype>()).Value.Elem;
-    // t is now the element type of the slice we want to allocate.
-    ((ж<Δsliceᴛ>)(uintptr)((~i).data)).Value = new Δsliceᴛ((uintptr)a.alloc(typ, cap), cap, cap);
-}
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fullListDoesnTMatchRefsˢ = "full list doesn't match refs list in length"u8;
-
-// free returns the userArena's chunks back to mheap and marks it as defunct.
-//
-// Must be called at most once for any given arena.
-//
-// This operation is not safe to call concurrently with other operations on the
-// same arena.
-internal static void free(this ж<userArena> Ꮡa) {
-    ref var a = ref Ꮡa.DerefOrNull();
-
-    // Check for a double-free.
-    if (Ꮡa.of(userArena.Ꮡdefunct).Load()) {
-        throw panic("arena double free");
-    }
-    // Mark ourselves as defunct.
-    Ꮡa.of(userArena.Ꮡdefunct).Store(true);
-    SetFinalizer(Ꮡa.OrTypedNil(), default!);
-    // Free all the full arenas.
-    //
-    // The refs on this list are in reverse order from the second-to-last.
-    var s = a.fullList;
-    nint i = len(a.refs) - 2;
-    while (s != nil) {
-        a.fullList = s.Value.next;
-        s.Value.next = default!;
-        freeUserArenaChunk(s, a.refs[i]);
-        s = a.fullList;
-        i--;
-    }
-    if (a.fullList != nil || i >= 0) {
-        // There's still something left on the full list, or we
-        // failed to actually iterate over the entire refs list.
-        @throw(fullListDoesnTMatchRefsˢ);
-    }
-    // Put the active chunk onto the reuse list.
-    //
-    // Note that active's reference is always the last reference in refs.
-    s = a.active;
-    if (s != nil) {
-        if (raceenabled || msanenabled || asanenabled){
-            // Don't reuse arenas with sanitizers enabled. We want to catch
-            // any use-after-free errors aggressively.
-            freeUserArenaChunk(s, a.refs[len(a.refs) - 1]);
-        } else {
-            @lock(ᏑuserArenaState.of(userArenaStateᴛ1.Ꮡlock));
-            userArenaState.reuse = append(userArenaState.reuse, new liveUserArenaChunk(s, a.refs[len(a.refs) - 1]));
-            unlock(ᏑuserArenaState.of(userArenaStateᴛ1.Ꮡlock));
-        }
-    }
-    // nil out a.active so that a race with freeing will more likely cause a crash.
-    a.active = default!;
-    a.refs = default!;
-}
+// go2cs generated this placeholder — func free is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // alloc reserves space in the current chunk or calls refill and reserves space
 // in a new chunk. If cap is negative, the type will be taken literally, otherwise

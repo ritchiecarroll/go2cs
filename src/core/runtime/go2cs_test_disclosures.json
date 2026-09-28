@@ -43,6 +43,18 @@
       "class": "host-fatal",
       "signature": "",
       "reason": "host-fatal CRASH member (coordinator ruling 2026-09-26, the P1 host-fatal seat). runtime_test.go sets debug.SetPanicOnFault(true) and then reads one byte through (*byte)(unsafe.Pointer(addr)) for each of the 19 faultAddrs (0, 1, 0xfff and 16 high kernel or malformed addresses), recovering each fault as a panic and failing only if none faulted. Go turns the SIGSEGV into a recoverable panic; the CLR does not. MEASURED on linux (P1, the stack 959a88df3 plus the metrics-histogram fix 0a074655e, Release, tiered off): the host dies with \"Fatal error. System.AccessViolationException: Attempted to read or write protected memory\" at ж<byte>.op_OnesComplement inside testSetPanicOnFault, no verdict is written, and every later test in the phase is lost. .NET treats an access violation as a corrupted-state fault that managed code cannot catch, so there is no managed refusal to prefer over a skip here: the fault happens inside the read, not in any runtime function that could refuse first. Which of the addresses faulted first is NOT measured (the test logs an address only after a read succeeds). Windows and darwin are NOT measured; the entry carries no platforms field because the uncatchable access violation is a property of the CLR on every target, which is inferred, not read. runtime/debug's TestPanicOnFault is the same fault class and the first member of this class. Withdrawn from BOTH sides by the one --skip/-skip regexp and COUNTED IN DISCLOSED. RETIRES when the managed runtime can recover a hardware fault as a panic."
+    },
+    {
+      "name": "TestUserArenaLiveness/Free",
+      "class": "codegen-liveness",
+      "signature": "expected arena-referenced object to be finalized",
+      "reason": "the test gives an arena object v a pointer to a heap object with a finalizer, drops v (`v = nil`), frees the arena (or, in /Finalizer, drops it), and then requires that finalizer to run, from inside the same still-running frame. Go's per-safepoint liveness maps drop v at its last use; the CLR reports the slots of a frame with exception handling (the converted defer's try/finally) live for the frame's whole lifetime, so v and everything it references stay rooted while the test is looking. The arena itself releases everything it allocated (arena_impl.cs, C2 C3 USER ARENAS). Measured on linux, Release, tiered off, as a one-axis A/B over the frame alone: the identical sequence (allocate smallPointerMix through UserArena.New, set its C to a fresh heap object, SetFinalizer on it, Free, runtime.GC() twice) run behind a RETURNED NoInlining call leaves v, v.C and the arena all collected (weak references dead), while inline in the test frame v and v.C stay alive even with the test's `x` and `v` explicitly cleared and v held past the clearing store. GolibTests' RuntimeUserArenaTests.AnObjectReachableOnlyFromTheArenaLivesUntilFree guards the arena half. The same class as runtime/debug's TestFreeOSMemory. RETIRES when the host reports frame liveness per safepoint, or the converter can end a local's lifetime at its last use."
+    },
+    {
+      "name": "TestUserArenaLiveness/Finalizer",
+      "class": "codegen-liveness",
+      "signature": "expected arena-referenced object to be finalized",
+      "reason": "Same frame-liveness retention as TestUserArenaLiveness/Free, with the arena dropped instead of freed (its handle unreachable after `arena = nil`): the arena and its allocation list are collected, and v, still reported live by the test frame, keeps the finalizer's object alive. Measured in the same A/B as /Free."
     }
   ]
 }

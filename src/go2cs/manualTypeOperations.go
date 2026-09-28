@@ -519,13 +519,22 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// throwing GetCallerSP/GetCallerPC intrinsics while holding both. See managed_impl.cs.
 		"stopTheWorld":               goosAny,
 		"goroutineProfileWithLabels": goosAny,
-		// Two HOST-FATAL throws turned into refusals by name (managed_impl.cs). shrinkstack
-		// throws "missing stack in shrinkstack" because a goroutine here is a CLR thread with no
-		// Go stack (stack.lo is 0); newUserArena reaches fixalloc before FixAlloc_Init and throws
-		// "runtime: internal error" because there is no Go heap to carve arena chunks from. Each
-		// throw exited the process and lost every later test in the runtime row.
-		"shrinkstack":  goosAny,
-		"newUserArena": goosAny,
+		// A HOST-FATAL throw turned into a refusal by name (managed_impl.cs): shrinkstack throws
+		// "missing stack in shrinkstack" because a goroutine here is a CLR thread with no Go stack
+		// (stack.lo is 0), which exited the process and lost every later test in the runtime row.
+		"shrinkstack": goosAny,
+		// User arenas over managed allocations (arena_impl.cs). Go carves them from its own heap:
+		// newUserArena reached fixalloc before FixAlloc_Init and threw. The arena keeps a strong list
+		// of its allocations, made through reflect's bridge, and arena_heapify tests membership on
+		// each allocation's referent object. UserArena.New is export_test.go's: it reads the
+		// interface's type word and writes its data word through efaceOf, which is inert here, so it
+		// is hand-owned in export_impl_test.cs over the same allocation.
+		"newUserArena":    goosAny,
+		"userArena.new":   goosAny,
+		"userArena.slice": goosAny,
+		"userArena.free":  goosAny,
+		"arena_heapify":   goosAny,
+		"UserArena.New":   goosAny,
 		// traceMap's node lives in Go-layout memory: newTraceMapNode reinterprets traceRegionAlloc
 		// bytes as a reference-bearing traceMapNode. It is allocated managed instead (tracemap_impl.cs).
 		"traceMap.newTraceMapNode": goosAny,

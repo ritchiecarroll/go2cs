@@ -1882,15 +1882,7 @@ public static ж<UserArena> NewUserArena() {
     return Ꮡ(new UserArena(newUserArena()));
 }
 
-[GoRecv] public static void New(this ref UserArena a, ж<any> Ꮡout) {
-    var i = efaceOf(Ꮡout);
-    var typ = i.Value._type;
-    if ((abiꓸKind)((~typ).Kind_ & abi.KindMask) != abi.Pointer) {
-        throw panic("new result of non-ptr type");
-    }
-    typ = (typ.Reinterpret<abi.Type, abi.PtrType>()).Value.Elem;
-    i.Value.data = (uintptr)a.arena.@new(typ);
-}
+// go2cs generated this placeholder — func New is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 [GoRecv] public static void Slice(this ref UserArena a, any sl, nint cap) {
     a.arena.Δslice(sl, cap);
