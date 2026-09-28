@@ -1,0 +1,19 @@
+{
+  "added_lines": [
+    "Phase-4 testing shim).**"
+  ],
+  "split_lines": [
+    {
+      "orig": "managed Swapper, and its closing `SliceIsSorted` check reads length through the same `ValueOf` path. Go's version counts",
+      "prefix": "**`testing.AllocsPerRun` (`core/testing/testing.cs`, Phase-4 testing shim).** "
+    },
+    {
+      "orig": "Guarded by `NamedPointerReinterpret` (`tail`/`consume`). The **deferring-receiver rule** is a",
+      "prefix": ""
+    },
+    {
+      "orig": "`((printFlags)0)`, CS1503) and **empty-interface switch tags compare via AreEqual**",
+      "prefix": ""
+    }
+  ]
+}
