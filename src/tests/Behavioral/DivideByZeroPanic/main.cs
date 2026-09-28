@@ -20,7 +20,7 @@ internal static (nint result, bool recovered) safeDiv(nint a, nint b) {
                 }
             }
         }, ref ᒐ);
-        result = a / b;
+        result = quo(a, b);
         (result, recovered) = (result, false);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -40,7 +40,7 @@ internal static (nint result, bool recovered) safeMod(nint a, nint b) {
                 }
             }
         }, ref ᒐ);
-        result = a % b;
+        result = rem(a, b);
         (result, recovered) = (result, false);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -49,7 +49,7 @@ internal static (nint result, bool recovered) safeMod(nint a, nint b) {
 }
 
 internal static nint divide(nint a, nint b) {
-    return a / b;
+    return quo(a, b);
 }
 
 internal static bool /*ok*/ outerGuard(nint a, nint b) {

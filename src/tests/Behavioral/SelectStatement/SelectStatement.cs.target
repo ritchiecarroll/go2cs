@@ -69,7 +69,7 @@ internal static void generate(channel/*<-*/<nint> ch) {
 
 internal static void filter(/*<-*/channel<nint> src, channel/*<-*/<nint> dst, nint prime) {
     foreach (var i in src) {
-        if (i % prime != 0) {
+        if (rem(i, prime) != 0) {
             dst.ᐸꟷ(i);
         }
     }

@@ -53,7 +53,7 @@ internal static void Main() {
                     }
                 }
             }, ref ᒐ);
-            fmt.Println(a / b);
+            fmt.Println(quo(a, b));
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
@@ -71,7 +71,7 @@ internal static void Main() {
                     }
                 }
             }, ref ᒐ);
-            result = a / b; goto ᒐdone;
+            result = quo(a, b); goto ᒐdone;
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
