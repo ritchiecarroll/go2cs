@@ -95,6 +95,11 @@ partial class cpu_package
     [ModuleInitializer]
     internal static void initX86FeatureDetection()
     {
+        // Go's cpuinit sets DebugOptions to true for the same GOOS list getGodebugEarly answers
+        // GODEBUG for, right before cpu.Initialize, so internal/cpu's own GODEBUG tests
+        // (TestDisableAllCapabilities, TestDisableSSE3) run exactly where the options are applied.
+        DebugOptions = GoCpuAppliesGodebug;
+
         if (!X86Base.IsSupported)
             return;
 
@@ -114,14 +119,53 @@ partial class cpu_package
         X86.HasSSE42 = Sse42.IsSupported;
         X86.HasSSSE3 = Ssse3.IsSupported;
 
-        // Go's Initialize(env) runs doinit and then processOptions(GODEBUG), so GODEBUG's cpu.* options
-        // (cpu.aes=off, cpu.all=off, ...) turn features off before any consumer reads them: the
-        // runtime's alginit picks its hash from these flags, and TestMemHashGlobalSeed/noaes and
-        // TestIssue66841 re-exec with GODEBUG=cpu.aes=off to reach the fallback. doinit's option table
-        // is registered here with the same names and the same level gates, then the converted
-        // processOptions applies the process's own GODEBUG.
+        // Go's Initialize(env) runs doinit, which fills the option table on every OS, and then
+        // processOptions(env). The env is runtime.getGodebugEarly's answer, which is GODEBUG only on
+        // the Unix-like systems (aix, darwin, ios, dragonfly, freebsd, netbsd, openbsd, illumos,
+        // solaris, linux) and "" everywhere else, Windows included. So off Windows, GODEBUG's cpu.*
+        // options (cpu.aes=off, cpu.all=off, ...) turn features off before any consumer reads them:
+        // the runtime's alginit picks its hash from these flags, and TestMemHashGlobalSeed/noaes and
+        // TestIssue66841 re-exec with GODEBUG=cpu.aes=off to reach the fallback there. On Windows Go
+        // ignores cpu.* entirely, and so does this.
         registerX86Options();
-        processOptions(Environment.GetEnvironmentVariable("GODEBUG") ?? "");
+
+        if (GoCpuAppliesGodebug)
+            processOptions(Environment.GetEnvironmentVariable("GODEBUG") ?? "");
+    }
+
+    /// <summary>
+    /// Whether this process applies GODEBUG's cpu.* options at start-up: runtime.getGodebugEarly
+    /// answers GODEBUG only on the Unix-like systems, so everywhere but Windows among the corpus's
+    /// targets.
+    /// </summary>
+    public static bool GoCpuAppliesGodebug => !OperatingSystem.IsWindows();
+
+    /// <summary>
+    /// GolibTests' probe (InternalCpuGodebugTests): applies <paramref name="godebug"/> through
+    /// processOptions over doinit's option table exactly as start-up does off Windows, returns each
+    /// option's name and resulting flag, then restores the flags and the table.
+    /// </summary>
+    public static (string name, bool enabled)[] GoCpuOptionsProbe(string godebug)
+    {
+        X86ᴛ1 saved = X86;
+
+        try
+        {
+            registerX86Options();
+            processOptions(godebug);
+
+            (string, bool)[] result = new (string, bool)[len(options)];
+
+            for (int i = 0; i < result.Length; i++)
+                result[i] = (options[i].Name.ToString(), options[i].Feature.Value);
+
+            return result;
+        }
+        finally
+        {
+            X86 = saved;
+            registerX86Options();
+        }
     }
 
     // cpu_x86.go doinit's option table, gated on getGOAMD64level exactly as doinit gates it.

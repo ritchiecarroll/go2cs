@@ -69,25 +69,28 @@
 // cpu.X86.HasAES && cpu.X86.HasSSSE3 && cpu.X86.HasSSE41` (and on arm64 when cpu.ARM64.HasAES), and
 // then memhash/memhash32/memhash64/strhash jump to asm_amd64.s's aeshashbody instead of the fallback.
 // initHashAlgorithm below runs that same selection once, at load (schedinit never runs here), over
-// the same flags: internal/cpu fills cpu.X86 from System.Runtime.Intrinsics and applies GODEBUG's
-// cpu.* options (so GODEBUG=cpu.aes=off selects the fallback, as TestMemHashGlobalSeed/noaes and
-// TestIssue66841 rely on). The selected branch seeds its own key exactly as Go's does: aeskeysched's
-// 128 random bytes for AES, the four hashkey words for the fallback. The AES bodies are
+// the same flags: internal/cpu fills cpu.X86 from System.Runtime.Intrinsics and, off Windows only as
+// Go's getGodebugEarly does, applies GODEBUG's cpu.* options (so on Linux and Darwin GODEBUG=
+// cpu.aes=off selects the fallback, as TestMemHashGlobalSeed/noaes and TestIssue66841 rely on; on
+// Windows Go ignores it and keeps aeshash, and so does this). The AES branch fills aeskeysched with
+// 128 random bytes, as Go's does. The four fallback hashkey words are seeded either way, where Go
+// leaves them zero under AES (no Go code can observe it), because the public fallback bodies below
+// are callable directly by guards. The AES bodies are
 // aeshashbody, memhash32 and memhash64 ported instruction for instruction onto
 // System.Runtime.Intrinsics.X86.Aes: Go's `AESENC src, dst` is `dst = Aes.Encrypt(dst, src)`. They are
 // bit-reproducible against Go for the same key schedule (GolibTests' AesHashMatchesGo compares a fixed
 // schedule against a table taken from Go itself). The corpus is converted for GOARCH=amd64, so on an
 // arm64 host cpu.X86's flags are false and Go's own condition selects the fallback: the arm64
 // aeshashbody (asm_arm64.s, a different schedule) is not reachable from this corpus and not ported.
-// Consequence, matching Go on an AES host: TestMemHash32/64Equality SKIP, TestMemHashGlobalSeed/aes
-// runs, and the Smhasher tests that Go enables only under AES run too.
+// Consequence, matching Go on an AES host: TestMemHash32/64Equality SKIP (memhash32 is not memhash
+// over four bytes under AES) and TestMemHashGlobalSeed/aes runs.
 //
 // 64-bit only: this is hash64.go. hash32.go's schedule is not ported; a 32-bit host throws at first
 // use rather than hashing with the wrong constants.
 //
 // SCOPE — exactly the four flat bodyless partials named in the first line. NOT here: getg (Q40/Q47),
-// memmove, getfp, testSPWrite, memclrNoHeapPointers and every other flat stub in stubs.cs; the AES
-// path (aeshashbody, initAlgAES); `fastrand`, which is not a runtime stub at all (rand_test.go's own
+// memmove, getfp, testSPWrite, memclrNoHeapPointers and every other flat stub in stubs.cs; arm64's
+// aeshashbody; `fastrand`, which is not a runtime stub at all (rand_test.go's own
 // pull of the push-renamed legacy_fastrand lands in the TEST assembly, and behind any forwarder it
 // reaches rand() -> getg().m.chacha8); and the two header-reading adapters bytesHash/stringHash,
 // which stay converted and are refused by rule 1 above until the header seam lands.
@@ -147,7 +150,7 @@ private static void ensureHashKey() {
 }
 
 // Go's alginit, performed once at load: the AES branch when the CPU flags (after GODEBUG's cpu.*
-// options) allow it, the fallback's hashkey otherwise. The fallback key is seeded either way, because
+// options, which internal/cpu applies off Windows) allow it, the fallback's hashkey otherwise. The fallback key is seeded either way, because
 // the public fallback bodies below (GoMemhash and friends) are callable directly by guards.
 [ModuleInitializer]
 internal static void initHashAlgorithm() {
@@ -505,6 +508,24 @@ private static ReadOnlySpan<byte> strhashContent(@unsafe.Pointer p) {
 
     throw panic($"runtime.strhash: the referent is a {referent.GetType().Name}, not a string box");
 }
+
+// GolibTests' dispatcher probes (RuntimeAesHashTests): the four dispatchers below exactly as the
+// emitted code calls them, and the process's own key schedule to compare them against.
+
+/// <summary><c>runtime.memhash(p, seed, size)</c> through its dispatcher.</summary>
+public static ulong GoMemhashDispatch(@unsafe.Pointer p, ulong seed, ulong size) => memhash(p, (nuint)seed, (nuint)size).Value;
+
+/// <summary><c>runtime.memhash32(p, seed)</c> through its dispatcher.</summary>
+public static ulong GoMemhash32Dispatch(@unsafe.Pointer p, ulong seed) => memhash32(p, (nuint)seed).Value;
+
+/// <summary><c>runtime.memhash64(p, seed)</c> through its dispatcher.</summary>
+public static ulong GoMemhash64Dispatch(@unsafe.Pointer p, ulong seed) => memhash64(p, (nuint)seed).Value;
+
+/// <summary><c>runtime.strhash(p, seed)</c> through its dispatcher.</summary>
+public static ulong GoStrhashDispatch(@unsafe.Pointer p, ulong seed) => strhash(p, (nuint)seed).Value;
+
+/// <summary>A copy of this process's aeskeysched, the schedule the AES dispatchers hash under.</summary>
+public static byte[] GoAesKeySchedule() => aesSchedule.ToArray();
 
 // The four dispatchers, as asm_amd64.s's: aeshashbody when useAeshash is set, the fallback otherwise.
 

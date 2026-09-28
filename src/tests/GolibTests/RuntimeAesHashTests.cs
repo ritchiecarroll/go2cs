@@ -383,6 +383,54 @@ public class RuntimeAesHashTests
     }
 
     [TestMethod]
+    public void TheDispatchersHashUnderTheProcessSchedule()
+    {
+        // The shipped path: memhash/memhash32/memhash64/strhash as the emitted code calls them, each
+        // equal to its aeshash body under this process's own aeskeysched.
+        RequireAes();
+        Assert.IsTrue(GoUsesAeshash, "no GODEBUG cpu.* option is set in the test host");
+        byte[] schedule = GoAesKeySchedule();
+        Random random = new(4242);
+
+        foreach (int size in new[] { 1, 7, 15, 16, 17, 31, 32, 33, 63, 64, 65, 127, 128, 129, 300 })
+        {
+            byte[] data = new byte[size];
+            random.NextBytes(data);
+            ulong seed = (ulong)random.NextInt64();
+            ref array<byte> a = ref heap(new array<byte>(data), out ж<array<byte>> Ꮡa);
+
+            Assert.AreEqual(GoAeshash(data, seed, schedule), GoMemhashDispatch(@unsafe.Pointer.FromPinnedBox(Ꮡa), seed, (ulong)size), $"memhash over {size} bytes");
+        }
+
+        for (int i = 0; i < 20; i++)
+        {
+            byte[] four = new byte[4], eight = new byte[8];
+            random.NextBytes(four);
+            random.NextBytes(eight);
+            ulong seed = (ulong)random.NextInt64();
+            ref array<byte> a4 = ref heap(new array<byte>(four), out ж<array<byte>> Ꮡa4);
+            ref array<byte> a8 = ref heap(new array<byte>(eight), out ж<array<byte>> Ꮡa8);
+            @unsafe.Pointer p4 = @unsafe.Pointer.FromPinnedBox(Ꮡa4), p8 = @unsafe.Pointer.FromPinnedBox(Ꮡa8);
+
+            Assert.AreEqual(GoAeshash32(BitConverter.ToUInt32(four), seed, schedule), GoMemhash32Dispatch(p4, seed), "memhash32");
+            Assert.AreEqual(GoAeshash64(BitConverter.ToUInt64(eight), seed, schedule), GoMemhash64Dispatch(p8, seed), "memhash64");
+
+            // Go's reason for skipping TestMemHash32Equality and TestMemHash64Equality under AES.
+            Assert.AreNotEqual(GoMemhashDispatch(p4, seed, 4), GoMemhash32Dispatch(p4, seed), "memhash32 is not memhash over four bytes under AES");
+            Assert.AreNotEqual(GoMemhashDispatch(p8, seed, 8), GoMemhash64Dispatch(p8, seed), "memhash64 is not memhash over eight bytes under AES");
+        }
+
+        foreach (string text in s_strings.Where(s => s.Length > 0))
+        {
+            ulong seed = (ulong)random.NextInt64();
+            byte[] content = Encoding.Latin1.GetBytes(text);
+            ref @string s = ref heap(new @string(content), out ж<@string> Ꮡs);
+
+            Assert.AreEqual(GoAeshash(content, seed, schedule), GoStrhashDispatch(@unsafe.Pointer.FromPinnedBox(Ꮡs), seed), $"strhash of the {text.Length}-byte string's content");
+        }
+    }
+
+    [TestMethod]
     public void AZeroSizeHashReadsNothing()
     {
         // TestMemHashGlobalSeed's computeHash: MemHash(unsafe.Pointer(&v), 0, 0) for v struct{}; Go
