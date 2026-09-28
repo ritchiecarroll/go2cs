@@ -3,6 +3,7 @@ global using I = object;
 namespace go;
 
 using fmt = fmt_package;
+using os = os_package;
 using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {
@@ -14,6 +15,8 @@ partial class main_package {
     internal any v;
 }
 
+// type byteFunc is a methodless func type — rendered inline as its base delegate
+
 internal static int8 a = 100;
 internal static uint8 u = 200;
 internal static int16 w = 30000;
@@ -22,6 +25,9 @@ internal static byte c = (rune)'/';
 internal static uint8 d = 250;
 internal static int8 m8 = -128;
 internal static int8 n1 = -1;
+internal static int8 h = 101;
+internal static nuint n = 1;
+internal static uint8 w8 = 100;
 
 internal static @string show(any x) {
     return fmt.Sprintf("%v %T"u8, x, x);
@@ -44,6 +50,9 @@ internal static @string gen<T>(T x) {
 internal static void arm(@string @class, Func<@string> f) {
     GoFrame ᒐ = default;
     try {
+        if (len(os.Args) > 1 && os.Args[1] != @class) {
+            return;
+        }
         defer(() => {
             {
                 var r = recover(); if (r != default!) {
@@ -82,9 +91,21 @@ private static readonly @string parenCompareˢ = "paren compare"u8;
 private static readonly @string switchTagˢ = "switch tag"u8;
 private static readonly @string case144ˢ = "case 144"u8;
 private static readonly @string defaultˢ = "default"u8;
-private static readonly @string caseValueˢ = "case value"u8;
+private static readonly @string caseComparisonˢ = "case comparison"u8;
 private static readonly @string wrappedˢ = "wrapped"u8;
 private static readonly @string unwrappedˢ = "unwrapped"u8;
+private static readonly @string caseValueˢ = "case value"u8;
+private static readonly @string interfaceCaseˢ = "interface case"u8;
+private static readonly @string nomatchˢ = "nomatch"u8;
+private static readonly @string matchˢ = "match"u8;
+private static readonly @string guardedShrˢ = "guarded shr"u8;
+private static readonly @string guardedShlˢ = "guarded shl"u8;
+private static readonly @string unaryXorPlusˢ = "unary xor plus"u8;
+private static readonly @string makeAndBoundsˢ = "make and bounds"u8;
+private static readonly @string divisorˢ = "divisor"u8;
+private static readonly @string negatedMinimumˢ = "negated minimum"u8;
+private static readonly @string namedFuncParamˢ = "named func param"u8;
+private static readonly @string invariantˢ = "invariant"u8;
 private static readonly @string builtinArgˢ = "builtin arg"u8;
 private static readonly @string parenDefineˢ = "paren define"u8;
 
@@ -101,8 +122,8 @@ internal static void Main() {
     arm(compositeAnyˢ, () => {
         var s = new any[]{(int8)(a + a), (uint8)(u + u)}.slice();
         var m = new map<@string, any>{["k"u8] = (int16)(w + w)};
-        var h = new holder(v: (uint16)(z + z));
-        return fmt.Sprint(s, m, h.v, ((any)((int8)(a + a))));
+        var hΔ1 = new holder(v: (uint16)(z + z));
+        return fmt.Sprint(s, m, hΔ1.v, ((any)((int8)(a + a))));
     });
     arm(chanAnyˢ, () => {
         var ch = new channel<any>(1);
@@ -147,7 +168,7 @@ internal static void Main() {
 
         return defaultˢ;
     });
-    arm(caseValueˢ, () => {
+    arm(caseComparisonˢ, () => {
         switch (ᐧ) {
         case {} when (uint8)(u + u) is < 150: {
             return wrappedˢ;
@@ -155,6 +176,59 @@ internal static void Main() {
 
         return unwrappedˢ;
     });
+    arm(caseValueˢ, () => {
+        uint8 v = 144;
+        var exprᴛ1 = v;
+        if (exprᴛ1 == (uint8)(u + u)) {
+            return wrappedˢ;
+        }
+
+        return unwrappedˢ;
+    });
+    arm(interfaceCaseˢ, () => {
+        any x = (int8)50;
+        any y = (uint8)66;
+        @string r = nomatchˢ;
+        var exprᴛ2 = x;
+        if (AreEqual(exprᴛ2, (int8)((h >> (int)(1))))) {
+            r = matchˢ;
+        }
+
+        var exprᴛ3 = y;
+        if (AreEqual(exprᴛ3, (uint8)(u / 3))) {
+            r += " match"u8;
+        }
+
+        return r;
+    });
+    arm(guardedShrˢ, () => {
+        int8 x = (int8)(((int8)(a + a)).Rsh(n));
+        any y = ((uint8)(u + u)).Rsh(n);
+        return fmt.Sprint(x, (@string)" "u8, y, (@string)" "u8, (int8)(((int8)(a + a)).Rsh(n)) == -28, (@string)" "u8, ((int8)(m8 / n1)).Rsh(n), (@string)" "u8, ((int8)(-(a + a))).Rsh(n), (@string)" "u8, ((int8)(a + a)).Rsh((uint64)(10)));
+    });
+    arm(guardedShlˢ, () => {
+        any y = ((int8)(a + a)).Lsh(n);
+        return fmt.Sprint((nint)(((int8)(a + a)).Lsh(n)), (@string)" "u8, y, (@string)" "u8, (int8)((((int8)(a + a)).Lsh(n)) / 3), (@string)" "u8, (nint)(((int8)((h >> (int)(1)))).Lsh((n + 1))), (@string)" "u8, ((uint8)(u + w8)).Lsh((uint64)(8)));
+    });
+    var tblʗ3 = tbl;
+    arm(unaryXorPlusˢ, () => {
+        int8 q = (int8)((int8)(~(a + a)) / 2);
+        return fmt.Sprint((nint)((int8)(~(a + a))), (@string)" "u8, q, (@string)" "u8, (int8)(((int8)(~(a + a)) >> (int)(1))), (@string)" "u8, tblʗ3[(uint8)(+(u + u))], (@string)" "u8, (nint)((int8)(+(a * a))));
+    });
+    var tblʗ4 = tbl;
+    arm(makeAndBoundsˢ, () => fmt.Sprint(len(new slice<nint>((uint8)(u + u))), (@string)" "u8, cap(new slice<nint>(0, (uint8)(u + u))), (@string)" "u8, cap(tblʗ4.slice(0, 1, (uint8)(u + u)))));
+    arm(divisorˢ, () => {
+        var q = d;
+        q /= (uint8)(u + u);
+        return fmt.Sprint((uint8)(d / (uint8)(u + u)), (@string)" "u8, (uint8)(d % (uint8)(u + u)), (@string)" "u8, q);
+    });
+    arm(negatedMinimumˢ, () => fmt.Sprint((nint)((int8)(-m8)), (@string)" "u8, (int64)((int8)(-m8))));
+    arm(namedFuncParamˢ, () => {
+
+        Func<byte, @string> f = (byte b) => fmt.Sprint(b);
+        return f((byte)(u + w8)) + " "u8 + f((byte)((u >> (int)(1))));
+    });
+    arm(invariantˢ, () => fmt.Sprint((int8)(u + u), (@string)" "u8, (int8)(a + a + a), (@string)" "u8, (uint8)(w + w)));
     arm(builtinArgˢ, () => {
         var b = append(new byte[]{}.slice(), (byte)(u + u), (byte)(u * 2), (byte)(u - 1));
         return fmt.Sprint(min((int8)(a + a), 0), (@string)" "u8, max((uint8)(u + u), 0), (@string)" "u8, b);

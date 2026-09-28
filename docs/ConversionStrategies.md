@@ -2090,11 +2090,11 @@ fmt.Println((uint8)(a + b) == 44);
 an index, or converted to a wider type, the cast sits on the arithmetic itself. An `any` value keeps Go's type
 too, so `%T` reports `int8`, not `int32`. Here `a` is an `int8` holding 100, so Go's `a + a` is -56:
 
-<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.go:50 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.go:63 -->
 ```go
 var x any = a + a
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:95 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:116 -->
 ```csharp
 any x = (int8)(a + a);
 ```

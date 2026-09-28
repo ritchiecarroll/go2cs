@@ -4,6 +4,14 @@ using fmt = fmt_package;
 
 partial class main_package {
 
+internal static int8 h = 101;
+
+internal static @string genericKey<M>(M m)
+    where M : /* ~map[int8]string */ IMap<int8, @string>, ISupportMake<M>, new()
+{
+    return m[(int8)((h >> (int)(1)))];
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object mapKeyˢ = (@string)"map key:"u8;
 private static readonly object rangeBoundˢ = (@string)"range bound:"u8;
@@ -11,6 +19,8 @@ private static readonly object chanSendˢ = (@string)"chan send:"u8;
 private static readonly object mapValueˢ = (@string)"map value:"u8;
 private static readonly object keyedArrayElementˢ = (@string)"keyed array element:"u8;
 private static readonly object parenAssignˢ = (@string)"paren assign:"u8;
+private static readonly object mapLiteralKeyˢ = (@string)"map-literal key:"u8;
+private static readonly object typeParameterMapKeyˢ = (@string)"type-parameter map key:"u8;
 
 internal static void Main() {
     uint8 u = 200;
@@ -33,6 +43,9 @@ internal static void Main() {
     uint8 x = default!;
     x = (uint8)(u + u);
     fmt.Println(parenAssignˢ, x);
+    var mk2 = new map<uint8, @string>{[(uint8)(u + u)] = "wrapped key"u8};
+    fmt.Println(mapLiteralKeyˢ, mk2[144]);
+    fmt.Println(typeParameterMapKeyˢ, genericKey(new map<int8, @string>{[50] = "ok"u8}));
 }
 
 } // end main_package

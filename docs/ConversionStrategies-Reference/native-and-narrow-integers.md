@@ -57,21 +57,21 @@ or case value, a map key, a channel send, a map-literal value, a keyed array ele
 operand. In these examples `a` is an `int8` holding 100 and `u` is a `uint8` holding 200, so Go's `a + a` is
 -56 and `u + u` is 144.
 
-<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.go:50 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.go:63 -->
 ```go
 var x any = a + a
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:95 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:116 -->
 ```csharp
 any x = (int8)(a + a);
 ```
 
-<!-- source: src/tests/Behavioral/NarrowArithmeticCompileSinks/main.go:16 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticCompileSinks/main.go:22 -->
 ```go
 mk := map[uint8]string{144: "wrapped"}
 fmt.Println("map key:", mk[u+u])
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticCompileSinks/main.cs.target:19 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticCompileSinks/main.cs.target:29 -->
 ```csharp
 var mk = new map<uint8, @string>{[144] = "wrapped"u8};
 fmt.Println(mapKeyˢ, mk[(uint8)(u + u)]);
@@ -90,27 +90,47 @@ channel send, map-literal value or keyed array element does not compile.
 parentheses, and `convBinaryExpr` / `convUnaryExpr` emit the cast on the expression itself:
 
 - **Wrap-invariant** consumers add nothing: a same-width `+ - * & | ^ &^` (and its compound assignment,
-  `x += e`), the left operand of `<<`, a unary `- ^ +`, or a conversion to an integer no wider than the
-  operand. Each reads only the low bits, and the result above it is narrowed in turn.
+  `x += e`), the left operand of a native `<<`, a unary `- ^ +`, or a conversion to an integer no wider than
+  the operand. Each reads only the low bits, and the result above it is narrowed in turn. A unary `+` or
+  signed `^` therefore passes its operand's risk up: `^(a + b)` counts as a result that can leave the range.
 - **Value** consumers read the whole value but not its C# type: a widening or float conversion, an index, a
-  slice bound, a shift count (including the right side of `<<=` / `>>=`), a `/`, `%` or `>>` operand (and
-  the right side of `/=` / `%=`), a switch tag or case value. Only a result that can leave the narrow range in C# takes the cast: `+`, `-`, `*`, a
+  slice bound, a shift count (including the right side of `<<=` / `>>=`), a `/`, `%` or native `>>` operand
+  (and the right side of `/=` / `%=`), a switch tag or case value. Only a result that can leave the narrow range in C# takes the cast: `+`, `-`, `*`, a
   unary `-`, and a signed `/` (`int8(-128) / -1` is 128 in C#).
 - **Typed** consumers take the value at its Go type: every other consumer, including a comparison, an
-  interface or generic argument, and every typed destination. Here every narrow result takes the cast,
+  interface or generic argument, a map key (a type parameter with a map core included), a switch case
+  value or tag compared through an interface, the receiver of a guarded shift (below), and every typed
+  destination. Here every narrow result takes the cast,
   because a result that is only int-TYPED (`>>`, `%`, an unsigned `/`, a signed unary `^`, a unary `+`) still
   boxes, infers and binds as `int32`.
 
+**A guarded shift's receiver.** A shift whose count is not provably below the width renders as golib's
+`receiver.Rsh(n)` or `receiver.Lsh(n)`, and the receiver's C# type picks the overload. An int-promoted
+receiver would bind the `int32` one, which neither wraps nor narrows, so the receiver is cast and
+parenthesized: `(a + a) >> n` becomes `((int8)(a + a)).Rsh(n)`. The narrow overload then returns Go's type
+and width, so a guarded shift needs no cast of its own.
+
+<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.go:166 -->
+```go
+var x int8 = (a + a) >> n
+```
+<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:205 -->
+```csharp
+int8 x = (int8)(((int8)(a + a)).Rsh(n));
+```
+
 At a typed destination of the identical Go type the cast takes the destination's own spelling (`byte` for a
 `[]byte` element fed `uint8` arithmetic), so the destination casts described above see a whole-expression cast
-of their own type and add nothing: their emission does not change. For the same reason the cast is always
+of their own type and add nothing: their emission does not change. A value consumer whose destination has
+the identical type (the divisor of `x /= e`, a parameter of a named func type) takes its spelling too. For the same reason the cast is always
 written `(T)(…)`, even around a rendering that is already parenthesized. A parenthesized Go operand drops its
 own parentheses once its content is a cast: `(a+a)/2` becomes `(int8)((int8)(a + a) / 2)` when the quotient
-itself reaches a typed consumer.
+itself reaches a typed consumer. The one exception is a guarded shift's receiver, which is parenthesized
+again because a cast binds looser than the `.Rsh(n)` member access.
 
 **Not covered here.** A named narrow type (`type T uint8`) is excluded: its `[GoType]` wrapper operators already
-cast back. So are the operators whose emission already narrows its whole result, `& | ^ &^`, `<<` and an
-unsigned unary `^`, and a constant expression, which cannot overflow its type in Go (and whose cast would be
+cast back. So are the operators whose emission already narrows its whole result: `& | ^ &^`, a native
+`<<`, a guarded `>>` or `<<`, and an unsigned unary `^`. So is a constant expression, which cannot overflow its type in Go (and whose cast would be
 CS0221). A named interface declared inline, `type I interface{}`, rejects every basic value, narrow or not,
 because it emits as a C# interface; `type I any` emits as `object` and is covered.
 

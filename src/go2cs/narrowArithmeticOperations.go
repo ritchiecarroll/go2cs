@@ -66,19 +66,16 @@ func (v *Visitor) markNarrowArithmeticContexts(file *ast.File) {
 
 		if expr, ok := n.(ast.Expr); ok {
 			if castType, wrapRisk, ok := v.narrowArithmeticProducer(expr); ok {
-				switch v.narrowConsumerOf(expr, stack) {
-				case narrowConsumerTyped:
-					// A typed destination of the identical Go type spells the cast its own way, which is
-					// how its existing arm spells it: a []byte element fed uint8 arithmetic reads (byte)
+				consumer := v.narrowConsumerOf(expr, stack)
+
+				if consumer == narrowConsumerTyped || consumer == narrowConsumerValue && wrapRisk {
+					// A destination of the identical Go type spells the cast its own way, which is how its
+					// existing arm spells it: a []byte element fed uint8 arithmetic reads (byte)
 					if destType := v.narrowDestinationType(expr, stack); destType != nil && types.Identical(destType, v.info.TypeOf(expr)) {
 						castType = convertToCSTypeName(v.getAliasQualifiedTypeName(destType, false))
 					}
 
 					v.markNarrowArithmetic(expr, castType)
-				case narrowConsumerValue:
-					if wrapRisk {
-						v.markNarrowArithmetic(expr, castType)
-					}
 				}
 			}
 		}
@@ -146,6 +143,20 @@ func (v *Visitor) narrowArithmeticProducer(expr ast.Expr) (castType string, wrap
 		return "", false, false
 	}
 
+	if binary, isBinary := expr.(*ast.BinaryExpr); isBinary && binary.Op == token.SHR && v.narrowShiftGuarded(binary) {
+		// A guarded `>>` renders `receiver.Rsh(n)` on a receiver of the operand's own narrow type (see
+		// narrowConsumerOf), so GoShift's narrow overload already returns Go's type and width
+		return "", false, false
+	}
+
+	if unary, isUnary := expr.(*ast.UnaryExpr); isUnary && (unary.Op == token.ADD || unary.Op == token.XOR) {
+		// A unary `+` or signed `^` leaves its operand unwrapped (the operand's consumer is invariant),
+		// so an operand that can leave the range carries that risk up: `^(a + b)` is ~200 = -201 in C#
+		if _, operandRisk, isProducer := v.narrowArithmeticProducer(ast.Unparen(unary.X)); isProducer && operandRisk {
+			wrapRisk = true
+		}
+	}
+
 	if binary, isBinary := expr.(*ast.BinaryExpr); isBinary && binary.Op == token.QUO && !unsigned {
 		// int8(-128) / -1 is 128 in C#; Go wraps it to -128
 		wrapRisk = true
@@ -179,13 +190,26 @@ func (v *Visitor) narrowConsumerOf(expr ast.Expr, stack []ast.Node) narrowConsum
 		switch parent.Op {
 		case token.ADD, token.SUB, token.MUL, token.AND, token.OR, token.XOR, token.AND_NOT:
 			return narrowConsumerInvariant
-		case token.SHL:
-			if child == parent.X {
+		case token.SHL, token.SHR:
+			if child != parent.X {
+				// A shift count
+				return narrowConsumerValue
+			}
+
+			if v.narrowShiftGuarded(parent) {
+				// A guarded shift renders `receiver.Lsh(n)` / `receiver.Rsh(n)`: the receiver's C# TYPE picks
+				// GoShift's overload, so an int-promoted receiver would bind the int32 one and neither wrap nor
+				// narrow. Cast it, and the narrow overload does both.
+				return narrowConsumerTyped
+			}
+
+			if parent.Op == token.SHL {
+				// A native `<<` narrows its whole result: `(int8)(x << (int)(1))`
 				return narrowConsumerInvariant
 			}
 
 			return narrowConsumerValue
-		case token.QUO, token.REM, token.SHR:
+		case token.QUO, token.REM:
 			return narrowConsumerValue
 		}
 
@@ -206,14 +230,26 @@ func (v *Visitor) narrowConsumerOf(expr ast.Expr, stack []ast.Node) narrowConsum
 			return v.narrowConversionConsumer(tv.Type, v.info.TypeOf(expr))
 		}
 	case *ast.IndexExpr:
-		if child == parent.Index {
-			if _, isMap := v.info.TypeOf(parent.X).Underlying().(*types.Map); !isMap {
-				return narrowConsumerValue
-			}
+		if child == parent.Index && narrowMapType(v.info.TypeOf(parent.X)) == nil {
+			return narrowConsumerValue
 		}
 	case *ast.SliceExpr:
 		return narrowConsumerValue
-	case *ast.SwitchStmt, *ast.CaseClause:
+	case *ast.CaseClause:
+		// A case value is compared at the tag's type: through an interface tag, Go compares dynamic types
+		if i >= 2 {
+			if switchStmt, ok := stack[i-2].(*ast.SwitchStmt); ok && switchStmt.Tag != nil && isInterfaceType(v.info.TypeOf(switchStmt.Tag)) {
+				return narrowConsumerTyped
+			}
+		}
+
+		return narrowConsumerValue
+	case *ast.SwitchStmt:
+		// A tag compared against an interface-typed case value is compared by dynamic type
+		if child == parent.Tag && v.switchHasInterfaceCase(parent) {
+			return narrowConsumerTyped
+		}
+
 		return narrowConsumerValue
 	case *ast.AssignStmt:
 		switch parent.Tok {
@@ -293,7 +329,11 @@ func (v *Visitor) narrowDestinationType(expr ast.Expr, stack []ast.Node) types.T
 		}
 	case *ast.CallExpr:
 		k := indexOf(parent.Args)
-		signature, _ := types.Unalias(v.info.TypeOf(parent.Fun)).(*types.Signature)
+		var signature *types.Signature
+
+		if funType := v.info.TypeOf(parent.Fun); funType != nil {
+			signature, _ = funType.Underlying().(*types.Signature)
+		}
 
 		if k < 0 || signature == nil {
 			return nil
@@ -339,7 +379,7 @@ func (v *Visitor) narrowDestinationType(expr ast.Expr, stack []ast.Node) types.T
 			return chanType.Elem()
 		}
 	case *ast.IndexExpr:
-		if mapType, ok := v.info.TypeOf(parent.X).Underlying().(*types.Map); ok {
+		if mapType := narrowMapType(v.info.TypeOf(parent.X)); mapType != nil {
 			return mapType.Key()
 		}
 	}
@@ -374,6 +414,58 @@ func (v *Visitor) compositeElementType(composite *ast.CompositeLit, index int, k
 	}
 
 	return nil
+}
+
+// narrowShiftGuarded reports whether a shift with a narrow basic result takes golib's guarded form,
+// `receiver.Lsh(n)` / `receiver.Rsh(n)` (emitGuardedShift), rather than the native C# operator.
+func (v *Visitor) narrowShiftGuarded(shift *ast.BinaryExpr) bool {
+	basic, width, ok := v.shiftGuardWidth(shift)
+
+	return ok && isNarrowIntegerKind(basic.Kind()) && v.shiftCountGuarded(shift.Y, width) && !v.shiftLeftRendersAsUntypedWrapper(shift.X)
+}
+
+// switchHasInterfaceCase reports whether any case value of a tagged switch has an interface type.
+func (v *Visitor) switchHasInterfaceCase(switchStmt *ast.SwitchStmt) bool {
+	for _, stmt := range switchStmt.Body.List {
+		if clause, ok := stmt.(*ast.CaseClause); ok {
+			for _, value := range clause.List {
+				if isInterfaceType(v.info.TypeOf(value)) {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+}
+
+// isInterfaceType reports whether t's underlying type is an interface (a type parameter is not).
+func isInterfaceType(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+
+	if _, isTypeParam := types.Unalias(t).(*types.TypeParam); isTypeParam {
+		return false
+	}
+
+	_, ok := t.Underlying().(*types.Interface)
+	return ok
+}
+
+// narrowMapType returns the map type an index expression's container resolves to, through a type
+// parameter's map core (`M ~map[int8]string`), or nil when the container is not a map.
+func narrowMapType(t types.Type) *types.Map {
+	if t == nil {
+		return nil
+	}
+
+	if typeParam, ok := types.Unalias(t).(*types.TypeParam); ok {
+		return typeParamMapCore(typeParam)
+	}
+
+	mapType, _ := t.Underlying().(*types.Map)
+	return mapType
 }
 
 // narrowConversionConsumer classifies a Go conversion T(expr): truncating to an integer no wider
@@ -432,9 +524,17 @@ func (v *Visitor) narrowArithmeticSelfCast(expr ast.Expr, rendered string) strin
 // narrowArithmeticParenSelfCast reports whether a ParenExpr's rendering can drop its own parens
 // because its inner expression rendered as its whole narrowing cast: `(a + a) / 2` then reads
 // `(int8)(a + a) / 2` instead of `((int8)(a + a)) / 2`. A cast expression binds tighter than any
-// binary operator, and a narrow integer is never the target of a member access, index or call.
+// binary operator. It binds LOOSER than a member access, so the one place a narrow operand becomes a
+// receiver, a guarded shift's `.Rsh(n)` / `.Lsh(n)`, parenthesizes it again (emitGuardedShift).
 func (v *Visitor) narrowArithmeticParenSelfCast(parenExpr *ast.ParenExpr, rendered string) bool {
 	castType, ok := v.narrowArithmeticCasts[ast.Unparen(parenExpr)]
+	return ok && wholeExprIsCastOfType(rendered, castType)
+}
+
+// narrowArithmeticRendersAsCast reports whether expr (seen through parentheses) narrowed itself and
+// rendered as that whole cast, so a member access on it would bind inside the cast.
+func (v *Visitor) narrowArithmeticRendersAsCast(expr ast.Expr, rendered string) bool {
+	castType, ok := v.narrowArithmeticCasts[ast.Unparen(expr)]
 	return ok && wholeExprIsCastOfType(rendered, castType)
 }
 

@@ -32,8 +32,8 @@ internal static void Main() {
     fmt.Println(s8.Lsh(k));
     fmt.Println(s16.Lsh(k));
     fmt.Println((nb)(byte)(n << (int)(k)));
-    fmt.Println((byte)(cb.Rsh(k)));
-    fmt.Println((int8)(s8.Rsh(k)));
+    fmt.Println(cb.Rsh(k));
+    fmt.Println(s8.Rsh(k));
     var x = (byte)(cb.Lsh(k));
     fmt.Println((byte)(x + b));
 }

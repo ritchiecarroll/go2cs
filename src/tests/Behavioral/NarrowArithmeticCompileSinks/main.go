@@ -4,9 +4,15 @@ import "fmt"
 
 // Narrow-integer arithmetic (int8/uint8/int16/uint16) reaching a consumer that takes it at its Go
 // type, where C#'s int-promoted result does not even compile: a map key, a range-over-int bound, a
-// channel send, a map-literal value, a keyed array element and a parenthesized assignment. The
+// channel send, a map-literal value or key, a keyed array element, a parenthesized assignment and a
+// map indexed through a type parameter's map core. The
 // converter narrows the result at its own width, so each compiles and wraps as Go does.
 // NarrowArithmeticSinks holds the consumers that compiled but read the unwrapped value.
+
+var h int8 = 101
+
+// genericKey indexes a map through a type parameter; the key h>>1 is int-typed in C# until narrowed.
+func genericKey[M ~map[int8]string](m M) string { return m[h>>1] }
 
 func main() {
 	var u uint8 = 200
@@ -35,4 +41,9 @@ func main() {
 	var x uint8
 	x = (u + u)
 	fmt.Println("paren assign:", x)
+
+	mk2 := map[uint8]string{u + u: "wrapped key"}
+	fmt.Println("map-literal key:", mk2[144])
+
+	fmt.Println("type-parameter map key:", genericKey(map[int8]string{50: "ok"}))
 }

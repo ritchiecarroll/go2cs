@@ -10,6 +10,11 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using osꓸDirEntry = go.io.fs_package.DirEntry;
+global using osꓸFileInfo = go.io.fs_package.FileInfo;
+global using osꓸFileMode = go.io.fs_package.FileMode;
+global using osꓸPathError = go.io.fs_package.PathError;
+global using osꓸSignal = go.os_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "ABk2gKSApKCkgKSigoCCuAAkBoSCgoKClIKCgoKCgoKUgoKClIaCgpiGioKClJKCkpKCloKCgpiCgoaGgpSklIKUpJiCgpiCgg==", "36-40:1;47-47:1;48-48:2;49-52:3;53-53:4;54-54:5;55-55:6;56-61:7;62-66:8;67-67:9;70-73:10;76-76:11;79-81:12;90-90:13;91-91:14;92-92:15;93-93:16;96-100:17;103-103:18;104-104:19;105-105:20;108-108:21;111-117:22;118-124:23;127-130:24;133-136:25")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "AB9IgKSApKCkgKSigpaCgIK4ADAGhIKCgoKUgoKCgoKCgpSCgoKUhoKCmIaKgoKUkoKSkoKWgoKCmIKChoaClKSUgpSklIKClKSYgoKCgpSklKSagoKClIKCmJKCmJaCgoKUgoKSmIaCgpiCgg==", "49-53:1;60-60:1;61-61:2;62-65:3;66-66:4;67-67:5;68-68:6;69-74:7;75-79:8;80-80:9;83-86:10;89-89:11;92-94:12;103-103:13;104-104:14;105-105:15;106-106:16;109-113:17;116-116:18;117-117:19;118-118:20;121-121:21;124-130:22;131-137:23;138-145:24;148-161:25;165-169:26;170-173:27;176-179:28;182-184:29;185-189:30;190-190:31;191-194:32;192-192:32.1;197-197:33;200-203:34;206-209:35")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -77,5 +82,6 @@ public static partial class main_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     // </ImportInitializers>
 }

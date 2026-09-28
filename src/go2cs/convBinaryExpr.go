@@ -474,9 +474,10 @@ func (v *Visitor) emitGuardedShift(binaryExpr *ast.BinaryExpr, leftOperand, rawC
 		} else {
 			receiver = fmt.Sprintf("((%s)%s)", underlyingCS, leftOperand)
 		}
-	} else if v.needsParentheses(binaryExpr.X) || v.shiftReceiverRendersAsCast(binaryExpr.X) {
-		// A compound expression, or a Go type CONVERSION whose render is a low-precedence C# cast
-		// (`uint64(1)` → `(uint64)1`), on which a trailing `.Lsh(…)` would mis-bind to the inner
+	} else if v.needsParentheses(binaryExpr.X) || v.shiftReceiverRendersAsCast(binaryExpr.X) || v.narrowArithmeticRendersAsCast(binaryExpr.X, leftOperand) {
+		// A compound expression, a Go type CONVERSION whose render is a low-precedence C# cast
+		// (`uint64(1)` → `(uint64)1`), or a parenthesized narrow operand that rendered as its own
+		// narrowing cast (`(int8)(a + b)`), on which a trailing `.Lsh(…)` would mis-bind to the inner
 		// operand — parenthesize so the method binds to the whole converted value.
 		receiver = "(" + leftOperand + ")"
 	} else {

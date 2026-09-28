@@ -1,17 +1,23 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 // Go evaluates narrow-integer arithmetic (int8/uint8/int16/uint16) at the operand's own width, so an
 // overflowing intermediate wraps: int8 100+100 is -56 and uint8 200+200 is 144. C# promotes sub-int
 // arithmetic to int, so the converter narrows the result wherever its consumer is not wrap-invariant.
 // A typed narrow destination already did (NarrowArithmeticArg); each arm below is a consumer that did
 // not, printed under its class name, and run under recover so one class's panic cannot hide the next.
+// An argument runs only the arm of that name, so each class can be read on its own.
 // NarrowArithmeticCompileSinks holds the consumers whose unnarrowed form did not compile at all.
 
 type I any
 
 type holder struct{ v any }
+
+type byteFunc func(byte) string
 
 var (
 	a  int8   = 100
@@ -22,6 +28,9 @@ var (
 	d  uint8  = 250
 	m8 int8   = -128
 	n1 int8   = -1
+	h  int8   = 101
+	n  uint   = 1
+	w8 uint8  = 100
 )
 
 func show(x any) string { return fmt.Sprintf("%v %T", x, x) }
@@ -33,6 +42,10 @@ func variadic(xs ...any) string { return fmt.Sprint(xs...) }
 func gen[T any](x T) string { return fmt.Sprintf("%v %T", x, x) }
 
 func arm(class string, f func() string) {
+	if len(os.Args) > 1 && os.Args[1] != class {
+		return
+	}
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println(class+": panic:", r)
@@ -115,13 +128,73 @@ func main() {
 		}
 		return "default"
 	})
-	arm("case value", func() string {
+	arm("case comparison", func() string {
 		switch {
 		case u+u < 150:
 			return "wrapped"
 		}
 		return "unwrapped"
 	})
+	arm("case value", func() string {
+		var v uint8 = 144
+		switch v {
+		case u + u:
+			return "wrapped"
+		}
+		return "unwrapped"
+	})
+
+	// A switch through an interface tag compares dynamic types, so a case value takes Go's type.
+	arm("interface case", func() string {
+		var x any = int8(50)
+		var y any = uint8(66)
+		r := "nomatch"
+		switch x {
+		case h >> 1:
+			r = "match"
+		}
+		switch y {
+		case u / 3:
+			r += " match"
+		}
+		return r
+	})
+
+	// A shift whose count is not provably below the width renders receiver.Rsh(n) / receiver.Lsh(n):
+	// the receiver must carry Go's width, or the int32 overload runs on the unwrapped value.
+	arm("guarded shr", func() string {
+		var x int8 = (a + a) >> n
+		var y any = (u + u) >> n
+		return fmt.Sprint(x, " ", y, " ", (a+a)>>n == -28, " ", (m8/n1)>>n, " ", (-(a + a))>>n, " ", (a+a)>>10)
+	})
+	arm("guarded shl", func() string {
+		var y any = (a + a) << n
+		return fmt.Sprint(int((a+a)<<n), " ", y, " ", ((a+a)<<n)/3, " ", int((h>>1)<<(n+1)), " ", (u+w8)<<8)
+	})
+
+	// A unary + or signed ^ over a result that left the range carries it to its own consumer.
+	arm("unary xor plus", func() string {
+		var q int8 = (^(a + a)) / 2
+		return fmt.Sprint(int(^(a + a)), " ", q, " ", (^(a+a))>>1, " ", tbl[+(u+u)], " ", int(+(a*a)))
+	})
+
+	// Sizes, capacities, a divisor, a negated minimum and a named func type's parameter.
+	arm("make and bounds", func() string {
+		return fmt.Sprint(len(make([]int, u+u)), " ", cap(make([]int, 0, u+u)), " ", cap(tbl[0:1:u+u]))
+	})
+	arm("divisor", func() string {
+		q := d
+		q /= u + u
+		return fmt.Sprint(d/(u+u), " ", d%(u+u), " ", q)
+	})
+	arm("negated minimum", func() string { return fmt.Sprint(int(-m8), " ", int64(-m8)) })
+	arm("named func param", func() string {
+		var f byteFunc = func(b byte) string { return fmt.Sprint(b) }
+		return f(u+w8) + " " + f(u>>1)
+	})
+
+	// Invariant consumers read only the low bits and take no cast.
+	arm("invariant", func() string { return fmt.Sprint(int8(u+u), " ", a+a+a, " ", uint8(w+w)) })
 
 	// Builtin arguments: min/max already narrowed, append's later elements did not.
 	arm("builtin arg", func() string {
