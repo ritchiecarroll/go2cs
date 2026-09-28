@@ -26,6 +26,9 @@ The allow file is {"added_lines": [substring, ...], "split_lines": [{"orig": sub
 an added line containing a listed substring may add inventory; a base line containing `orig` that is
 missing is accounted for only when it equals exactly <a current line> + " " + <the rest of a current
 line that starts with `prefix`> (a line split in two with a restored lead in front of its tail).
+A PROSE pass rewords lines on purpose, which (b) would otherwise read as loss: "edited_lines": [{"orig":
+substring, "now": substring}] accounts for a missing base line containing `orig` only when some current
+line contains `now`, so every reworded line is named, old and new, in the allow file.
 
 Exit 0 only when all three checks pass.
 """
@@ -235,6 +238,9 @@ def check_lines(base_c, cur_c, allow):
             tails = [c[len(pre):] for c in cur_norm if c.startswith(pre)]
             if any(h + ' ' + t == l for h in heads for t in tails):
                 continue
+        edit = [e for e in allow.get('edited_lines', []) if e['orig'] in l]
+        if edit and n == 1 and any(edit[0]['now'] in c for c in cur_norm):
+            continue
         site = next(f'{x[0]}:{x[1] + 1}' for x in base_c if x[3] == l)
         errors.append(f'(b) base line missing x{n} (base {site}): {l[:140]!r}')
     return errors
