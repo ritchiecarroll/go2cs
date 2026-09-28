@@ -533,7 +533,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
         }
         for (var i = (uintptr)0; i < (~at).Len; i++) {
             cgoCheckArg((~at).Elem, Δp, true, top, msg);
-            Δp.Value = (uintptr)add(Δp, (~(~at).Elem).Size_);
+            Δp = (uintptr)add(Δp, (~(~at).Elem).Size_);
         }
     }
     else if (exprᴛ1 == abi.Chan || exprᴛ1 == abi.Map) {
@@ -544,7 +544,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
             // These types contain internal pointers that will
             // always be allocated in the Go heap. It's never OK
             // to pass them to C.
-            Δp.Value = ~(ж<@unsafe.Pointer>)(uintptr)(Δp);
+            Δp = ~(ж<@unsafe.Pointer>)(uintptr)(Δp);
         }
         if (!cgoIsGoPointer(Δp)) {
             return;
@@ -562,7 +562,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
             // in the heap and will not be OK.
             throw panic(((errorString)msg));
         }
-        Δp.Value = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)add(Δp, goarch.PtrSize));
+        Δp = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)add(Δp, goarch.PtrSize));
         if (!cgoIsGoPointer(Δp)) {
             return;
         }
@@ -574,7 +574,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
     else if (exprᴛ1 == abi.Slice) {
         var st = Ꮡt.Reinterpret<_type, slicetype>();
         var s = (ж<Δsliceᴛ>)(uintptr)(Δp);
-        Δp.Value = s.Value.Δarray;
+        Δp = s.Value.Δarray;
         if (Δp == nil || !cgoIsGoPointer(Δp)) {
             return;
         }
@@ -586,7 +586,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
         }
         for (nint i = 0; i < (~s).cap; i++) {
             cgoCheckArg((~st).Elem, Δp, true, false, msg);
-            Δp.Value = (uintptr)add(Δp, (~(~st).Elem).Size_);
+            Δp = (uintptr)add(Δp, (~(~st).Elem).Size_);
         }
     }
     else if (exprᴛ1 == abi.ΔString) {
@@ -616,7 +616,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
     }
     else if (exprᴛ1 == abi.Pointer || exprᴛ1 == abi.UnsafePointer) {
         if (indir) {
-            Δp.Value = ~(ж<@unsafe.Pointer>)(uintptr)(Δp);
+            Δp = ~(ж<@unsafe.Pointer>)(uintptr)(Δp);
             if (Δp == nil) {
                 return;
             }

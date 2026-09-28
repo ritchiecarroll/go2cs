@@ -257,7 +257,7 @@ internal static nint /*i*/ fpTracebackPCs(@unsafe.Pointer fp, slice<uintptr> pcB
         // return addr sits one word above the frame pointer
         pcBuf[i] = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)((uintptr)fp + (uintptr)goarch.PtrSize));
         // follow the frame pointer to the next one
-        fp.Value = (@unsafe.Pointer)(~(ж<uintptr>)(uintptr)(fp));
+        fp = (@unsafe.Pointer)(~(ж<uintptr>)(uintptr)(fp));
     }
     return i;
 }

@@ -57,13 +57,13 @@ internal static uintptr memhashFallback(@unsafe.Pointer Δp, uintptr seed, uintp
                 seed = mix((uintptr)(r8(Δp) ^ hashkey[1]), (uintptr)(r8((uintptr)add(Δp, 8)) ^ seed));
                 seed1 = mix((uintptr)(r8((uintptr)add(Δp, 16)) ^ hashkey[2]), (uintptr)(r8((uintptr)add(Δp, 24)) ^ seed1));
                 seed2 = mix((uintptr)(r8((uintptr)add(Δp, 32)) ^ hashkey[3]), (uintptr)(r8((uintptr)add(Δp, 40)) ^ seed2));
-                Δp.Value = (uintptr)add(Δp, 48);
+                Δp = (uintptr)add(Δp, 48);
             }
             seed ^= (uintptr)((uintptr)(seed1 ^ seed2));
         }
         for (; l > 16; l -= 16) {
             seed = mix((uintptr)(r8(Δp) ^ hashkey[1]), (uintptr)(r8((uintptr)add(Δp, 8)) ^ seed));
-            Δp.Value = (uintptr)add(Δp, 16);
+            Δp = (uintptr)add(Δp, 16);
         }
         a = r8((uintptr)add(Δp, l - 16));
         b = r8((uintptr)add(Δp, l - 8));

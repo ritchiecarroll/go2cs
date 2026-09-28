@@ -280,7 +280,7 @@ internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡds
     }
     case {} when implements(Ꮡdst, v.typ()): {
         if (target == nil) {
-            target.Value = (uintptr)unsafe_New(Ꮡdst);
+            target = (uintptr)unsafe_New(Ꮡdst);
         }
         if (v.Kind() == abi.Interface && v.IsNil()) {
             // A nil ReadWriter passed to nil Reader is OK,

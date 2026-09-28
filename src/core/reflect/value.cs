@@ -1831,7 +1831,7 @@ internal static ΔValue assignTo(this ΔValue v, @string context, ж<abi.Type> �
         }
         var x = valueInterface(v, false);
         if (target == nil) {
-            target.Value = (uintptr)unsafe_New(Ꮡdst);
+            target = (uintptr)unsafe_New(Ꮡdst);
         }
         if (Ꮡdst.NumMethod() == 0){
             ((ж<any>)(uintptr)(target)).ValueSlot = x;

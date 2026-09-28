@@ -442,6 +442,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDivideByZeroPanic() => CheckTarget("DivideByZeroPanic");
 
     [TestMethod]
+    public void CheckUnsafePointerParamAssign() => CheckTarget("UnsafePointerParamAssign");
+
+    [TestMethod]
     public void CheckDotImportRenamedPackage() => CheckTarget("DotImportRenamedPackage");
 
     [TestMethod]

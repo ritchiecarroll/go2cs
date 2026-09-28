@@ -159,7 +159,7 @@ internal static void cgoCheckBits(@unsafe.Pointer src, ж<byte> Ꮡgcbits, uintp
     var skipMask = off / (uintptr)goarch.PtrSize / 8;
     var skipBytes = skipMask * (uintptr)goarch.PtrSize * 8;
     var ptrmask = addb(Ꮡgcbits, skipMask);
-    src.Value = (uintptr)add(src, skipBytes);
+    src = (uintptr)add(src, skipBytes);
     off -= skipBytes;
     size += off;
     uint32 bits = default!;

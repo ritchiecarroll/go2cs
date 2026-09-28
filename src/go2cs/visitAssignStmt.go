@@ -1297,7 +1297,15 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			// `Ꮡbits` on the LHS so the pointer-reassignment path below repoints it and re-aliases the
 			// value var (`Ꮡbits = addb(Ꮡbits, n); bits = ref Ꮡbits.Value;`). The RHS already references
 			// the box form. (The `&`-RHS case above is a subset; setting isPointer twice is harmless.)
-			if elemIsReassigned && v.identIsParameter(ident) && v.isPointer(ident) && rhsElemIsPointer(i) {
+			//
+			// Only a GENUINE `*T` parameter (or an erased pointer-core type parameter) has that box.
+			// An unsafe.Pointer parameter is a plain VALUE parameter with no box (isPointer counts it,
+			// paramPointerType does not, as visitReturnStmt's `return p` already asks), and the
+			// pointer context rendered it `p.Value`: golib's unsafe.Pointer is a class whose Value is
+			// the address it carries, so `p = q` became `p.Value = q`, a SILENT WRITE into the
+			// caller's own pointer object instead of a rebinding of the parameter
+			// (runtime fpTracebackPCs, fpTracebackPartialExpand; internal/runtime/maps dump).
+			if _, isRealPointer := v.paramPointerType(v.getIdentType(ident)); elemIsReassigned && v.identIsParameter(ident) && isRealPointer && rhsElemIsPointer(i) {
 				context.isPointer = true
 			}
 

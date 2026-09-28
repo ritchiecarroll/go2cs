@@ -45,7 +45,7 @@ internal static void sysUnusedOS(@unsafe.Pointer v, uintptr n) {
             print((@string)"runtime: VirtualFree of "u8, small, (@string)" bytes failed with errno="u8, getlasterror(), (@string)"\n"u8);
             @throw(runtimeFailedToDecommitˢ);
         }
-        v.Value = (uintptr)add(v, small);
+        v = (uintptr)add(v, small);
         n -= small;
     }
 }
@@ -81,7 +81,7 @@ internal static void sysUsedOS(@unsafe.Pointer v, uintptr n) {
             }
 
         }
-        v.Value = (uintptr)add(v, small);
+        v = (uintptr)add(v, small);
         k -= small;
     }
 }
@@ -106,7 +106,7 @@ internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n) {
     // v is just a hint.
     // First try at v.
     // This will fail if any of [v, v+n) is already reserved.
-    v.Value = (@unsafe.Pointer)stdcall4(_VirtualAlloc, (uintptr)v, n, _MEM_RESERVE, _PAGE_READWRITE);
+    v = (@unsafe.Pointer)stdcall4(_VirtualAlloc, (uintptr)v, n, _MEM_RESERVE, _PAGE_READWRITE);
     if (v != nil) {
         return v;
     }

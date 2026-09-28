@@ -437,7 +437,7 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
             n++;
         }
         // follow the frame pointer to the next one
-        fp.Value = (@unsafe.Pointer)(~(ж<uintptr>)(uintptr)(fp));
+        fp = (@unsafe.Pointer)(~(ж<uintptr>)(uintptr)(fp));
     }
     return n;
 }

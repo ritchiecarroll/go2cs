@@ -144,7 +144,7 @@ table{
 internal static void dump(@unsafe.Pointer ptr, uintptr size) {
     while (size > 0) {
         print(~(ж<byte>)(uintptr)(ptr), (@string)" "u8);
-        ptr.Value = (@unsafe.Pointer)((uintptr)ptr + 1);
+        ptr = (@unsafe.Pointer)((uintptr)ptr + 1);
         size--;
     }
 }
