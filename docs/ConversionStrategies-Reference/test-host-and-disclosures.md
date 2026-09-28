@@ -31,7 +31,7 @@ attributes it to two shapes, both in shared machinery and both removable:
 
 | Shape | Cost | Why | Status |
 |:--|--:|:--|:--|
-| `s[a:b]` on a `string \| []byte`-constrained value | 48 B each | `IByteSeq<T>`'s range indexer returned the **interface**, so the `@string`/`slice<byte>` struct result was boxed | **fixed** — self-referential `IByteSeq<TSelf, T>` |
+| `s[a:b]` on a <code>string &#124; &#91;&#93;byte</code>-constrained value | 48 B each | `IByteSeq<T>`'s range indexer returned the **interface**, so the `@string`/`slice<byte>` struct result was boxed | **fixed** — self-referential `IByteSeq<TSelf, T>` |
 | `[]byte(s)` on the same (`new slice<byte>(sΔ1)`) | 48 B each | boxed the type-parameter value again to reach the interface | **fixed** — `ToSlice` extension |
 | `len(s)` on the same | 48 B each | the `len<T>(IByteSeq<T>)` overload took an interface parameter | **fixed** — `len<TSeq>(TSeq) where TSeq : IByteSeq` |
 | `for i, c := range s` over a `slice<T>` | **136 B, fixed** | the range enumerator allocated once per loop, independent of length; the indexed form allocates **0** | **fixed** — struct enumerator |

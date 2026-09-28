@@ -349,12 +349,12 @@ dependency's import path was a single segment:
 
 | dependency | load side | use side | |
 |:--|:--|:--|:--|
-| `io` | `io\|noBody\|io_package.ReadCloser` | `io\|noBody\|io_package.ReadCloser` | match |
-| `encoding/binary` | `binary\|bigEndian\|binary_package.ByteOrder` | `binary\|bigEndian\|encoding.binary_package.ByteOrder` | **miss** |
-| `image/color` | `color\|ΔRGBA\|color_package.Color` | `color\|RGBA\|image.color_package.Color` | **miss** |
-| `text/template/parse` (ptr) | `parse\|ListNode\|parse_package.Node` | `parse\|ListNode\|text.template.parse_package.Node` | **miss** |
-| `go/types` (ptr) | `types\|TypeName\|go.types_package.Object` | `types\|TypeName\|types_package.Object` | **miss** |
-| `image` (ptr) | `image\|ΔRGBA\|image_package.Image` | `image\|RGBA\|image_package.Image` | **miss** |
+| `io` | <code>io&#124;noBody&#124;io&#95;package.ReadCloser</code> | <code>io&#124;noBody&#124;io&#95;package.ReadCloser</code> | match |
+| `encoding/binary` | <code>binary&#124;bigEndian&#124;binary&#95;package.ByteOrder</code> | <code>binary&#124;bigEndian&#124;encoding.binary&#95;package.ByteOrder</code> | **miss** |
+| `image/color` | <code>color&#124;ΔRGBA&#124;color&#95;package.Color</code> | <code>color&#124;RGBA&#124;image.color&#95;package.Color</code> | **miss** |
+| `text/template/parse` (ptr) | <code>parse&#124;ListNode&#124;parse&#95;package.Node</code> | <code>parse&#124;ListNode&#124;text.template.parse&#95;package.Node</code> | **miss** |
+| `go/types` (ptr) | <code>types&#124;TypeName&#124;go.types&#95;package.Object</code> | <code>types&#124;TypeName&#124;types&#95;package.Object</code> | **miss** |
+| `image` (ptr) | <code>image&#124;ΔRGBA&#124;image&#95;package.Image</code> | <code>image&#124;RGBA&#124;image&#95;package.Image</code> | **miss** |
 
 Two divergences, and the second is easy to miss because it only shows on a collision-renamed type.
 (1) The INTERFACE side: a parsed record names the recording package's own interface BARE and a foreign

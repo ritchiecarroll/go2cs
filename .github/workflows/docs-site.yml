@@ -44,8 +44,8 @@ jobs:
   liquid:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: src/go2cs/go.mod
           cache: false
@@ -55,13 +55,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build docs/ with the Pages toolchain
         uses: actions/jekyll-build-pages@v1
         with:
           source: ./docs
           destination: ./_site
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - name: Point links that climb out of docs/ at the repository on GitHub
@@ -73,14 +73,14 @@ jobs:
         run: python .github/site-check.py _site site-check.json --baseline .github/site-check-baseline.json
       - name: Keep the check's report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: site-check
           path: site-check.json
           retention-days: 14
       - name: Package the site for Pages
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: _site
   deploy:
@@ -99,4 +99,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

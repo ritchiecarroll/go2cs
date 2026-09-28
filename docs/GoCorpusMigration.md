@@ -839,15 +839,15 @@ rc=$?; echo "  exit $rc after $(( $(date +%s) - START ))s"
 | check | read | want |
 |:--|:--|:--|
 | exit and wall | `$rc`, the elapsed line | 0; wall posted |
-| log encoding | `head -c 200 "$LOG" \| tr -d -c '\000' \| wc -c` | 0 — otherwise every grep below lies |
+| log encoding | <code>head -c 200 "$LOG" &#124; tr -d -c '&#92;000' &#124; wc -c</code> | 0 — otherwise every grep below lies |
 | degraded packages | `grep -ac 'did not fully type-check' "$LOG"` | 0 |
 | per-target failures | `grep -a 'Failed:' "$LOG"` | three lines, each `Failed: 0` |
 | warnings | `grep -a WARNING "$LOG"` | posted verbatim, uncounted and never gated (147 lines read on lane R's box, 2026-09-13: a reading, not a want) |
 | what was read | `grep -a 'toolchain: GOROOT' "$LOG"` | provenance AVAILABLE (Block C): `VERSION go1.24.13` (H4a `go1.23.12`). NOT AVAILABLE: no line, and the row reads NOT AVAILABLE, never pass |
-| emission | `find "<stage>/$R/src/core" -name '*.cs' -newer "$SENT" \| wc -l` | non-zero — zero is an arm that emitted nothing: abort |
-| per target | `find "$ST/<goos>-amd64" -name '*.cs' \| wc -l`, three goos | reported |
-| misrouted emission | `grep -rl --include='*.cs' -E '^namespace go[.]std' "<stage>/$R/src/core" \| wc -l` | 0 (floor 6) |
-| release, second arm | `find "<stage>/$R/src/core/runtime" -name 'mcleanup.cs*' \| wc -l` | H5 ≥ 1, H4a 0 (minor-level only) |
+| emission | <code>find "&lt;stage&gt;/$R/src/core" -name '&#42;.cs' -newer "$SENT" &#124; wc -l</code> | non-zero — zero is an arm that emitted nothing: abort |
+| per target | <code>find "$ST/&lt;goos&gt;-amd64" -name '&#42;.cs' &#124; wc -l</code>, three goos | reported |
+| misrouted emission | <code>grep -rl --include='&#42;.cs' -E '^namespace go&#91;.&#93;std' "&lt;stage&gt;/$R/src/core" &#124; wc -l</code> | 0 (floor 6) |
+| release, second arm | <code>find "&lt;stage&gt;/$R/src/core/runtime" -name 'mcleanup.cs&#42;' &#124; wc -l</code> | H5 ≥ 1, H4a 0 (minor-level only) |
 | a Go root in emitted metadata | below: the box's own GOROOT basenames, not a guessed name shape | 0 before any overlay (0 read on lane R's box, 2026-09-13: a reading, not a want) |
 | marker gate | below | 0 violations, 0 missing |
 

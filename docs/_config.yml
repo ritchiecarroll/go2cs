@@ -1,5 +1,6 @@
 #theme: jekyll-theme-cayman
-remote_theme: chris1111/cayman-dark
+# Pinned to a commit (the fork's HEAD on 2026-09-28): unpinned, every build fetched whatever HEAD was.
+remote_theme: chris1111/cayman-dark@fe3525069a05f3ca4a012cfeccdcc8526c321044
 title: go2cs
 description: Golang to C# Converter
 github:
