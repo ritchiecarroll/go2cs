@@ -51,6 +51,165 @@
     hash-token band after TRAIN G. C2: the narrow-arithmetic pre-pass, then MinInt/-1.
   - The C: disk scout (owner ask) is running as a read-only workflow.
 
+#### 1d.00 update, 2026-09-28 10:31 (TRAIN G landed; the ledger wins over everything below it)
+
+- MASTER NOW = 5056089872. TRAIN G LANDED at 10:20 (ledger LAND, mailbox 2cd25ef457), fast-forward from ec23ad9f6b.
+  Master since the 18:55 update: e798b3e7fb -> 1debfd4805 (the kramdown raw-HTML fix, 19:37) -> 7eed37a43a (the
+  Pages-audit visitor fixes, 20:38) -> ec23ad9f6b (the site-hygiene batch, 00:21) -> 5056089872 (TRAIN G). The battery
+  of record is run 3 (ledger e2447c28c0), with the pre-landing controls at 61f422cc23.
+  - ROSTER: 221 of 230 testable (96.1%), 221 of 225 implementable (98.2%); linux 219 of 219 applicable rows.
+    runtime/trace BANKS at 2 + 0 (linux 2) and leaves E4, so the implementable denominator is 225. os/signal linux 29 + 1.
+  - runtime/debug is UNBANKED: TestStack's substring signature absorbed five misaligned assert lines on both OSes (ledger
+    299250e147; the disclosure-completeness hole, live on a banked row). RE-BANK PATH: TRAIN H's class F (iii)
+    (g-block-event-frames f772251384) brings TestStack back to its one host-identity line, and G's printer seat
+    (claude/g-traceback-go-frames e7dd6cd45b, approved 09:33, ledger b8c96a0375, gates owed) makes TestStack a PLAIN PASS
+    on both OSes and RETIRES that disclosure. DESIGN-position-map.md gains a dated amendment ([GoStackRoot] host frames
+    are modelled Go frames in Callers and the printer, not recorded positions); COORD lands it with the printer seat.
+  - LANDING NEXT (COORD, in progress): class F's small landing, branch claude/coord-classf-land in the tG worktree on the
+    i7 (LOCAL, unpushed: merge 2b8b1fb759 of claude/g-class-f 435557647c onto 5056089872; the bank edits are uncommitted).
+    It carries the net/http/pprof bank (15, linux 15; hold lifted on G's solo proof, TestDeltaProfile 20/20 on both OSes,
+    ledger c1ce779a90) and log/slog's re-bank (count 199; the orphaned TestAlloc/2_pairs_disabled_inline and
+    TestRecordSource disclosures retire; the new verdict is named by comparing test lists). Its record states that class F
+    does NOT fix runtime/pprof's TestMutexBlockFullAggregation (the earlier passes were order luck, withdrawn at 09:47,
+    ledger c3ec4e8fb6). If the i7 tree is lost, re-cut from claude/g-class-f 435557647c on master 5056089872. Then TRAIN H.
+  - The Pages OWNER HAND is CLOSED (03:01, ledger 03e20ef801): the source is GitHub Actions, and every master push that
+    touches docs/ deploys through the site-check gate against its 37-finding baseline.
+- OWNER RULINGS 2026-09-28:
+  - STOP-THE-WORLD (00:40, ledger a6ae34c110): the contract model (worldsema plus /sched/pauses samples; other goroutines
+    are not suspended, documented as the managed model) PLUS managed STW region bodies for the census's 18 rows. C1's seat.
+  - runtime/pprof CAPABILITY SKIPS (03:17, ledger f96d281090): TestCPUProfileRecursion, TestLabelSystemstack and
+    TestMorestack are ADMITTED as disclosed Go-PASS / C#-SKIP runtime-capability divergences. testenv.CPUProfilingBroken()
+    stays true (Go's own 10 s bound and issue-13841 skip path); each disclosure cites G's 03:14 reading (2,606 s for one
+    test under Go's per-OS false) and is re-read every sweep; a skip-shape harness arm rides the bank, red first.
+  - POST-100% ROADMAP (03:38, ledger f6cf406f7b): every COORD recommendation is accepted. A dated 1.24 FREEZE in late
+    October, planning date 2026-10-24; runtime work still open then re-banks at 1.25. PARITY RE-RULED: the exit criterion
+    is Windows and Linux at 100% honest validation, Darwin COMPILE-ONLY until a Mac run layer exists (amends the
+    2026-08-26 ruling). Hops 1.25.14, then 1.26.x, separately, then 1.27 by about 2027-02. net10.0 stays the published TFM;
+    the .NET pin and the identifier escape land before 2026-11-10. First targets google/uuid v1.6.0, itchyny/gojq v0.12.19
+    with timefmt-go v0.1.8, and golang-jwt/jwt/v5 v5.3.1. The side seats S1-S6 run on idle capacity only (ledger
+    c168156ad7). The rest (seed gate, cgo, TypeScript 7.0.x, the announcement) is in the brief's owner-ruling block.
+  - THE i9 BACK ON HEAVY WORK (07:37, ledger 3e57b54d2b), before its CPU replacement; it supersedes COORD's 05:55
+    light-only interim. Start at dotnet -m:4 / go -p 4 and raise stepwise while stable. Corrected machine checks (WHEA 19)
+    are counted and reported, not a stop. A reboot or bugcheck is reported and the run is never retried at once; two
+    reboots within 24 hours sends the i9 back to light-only and COORD tells the owner. crypto/tls and the net suite stay
+    EXCLUDED. The i9 gates its own seats again; the i7 keeps the union batteries.
+  - STILL OPEN, the owner's (roadmap item 5, ledger f6cf406f7b): the nugetgo publishing account or org, the package-ID
+    form, the version scheme, the public go. prefix request, creating the nugetgo repo and moving the DNS, and relicensing
+    HashSet from AGPL-3.0 to MIT.
+- TRAIN H: the draft is .claude/coord-scripts/trainH/tH-seats-draft.txt on this branch, 24 seats, not yet rehearsed:
+
+  ```
+  ref|tip|summary
+  r-pkgpath-verbatim|8f2b7292b9|R: option A, the verbatim import path (vendored packages stamp Go's vendor/ path)
+  r-godebug-at-start|c4504322e1|R: parsedebugvars at start (GODEBUG read in Go's start order)
+  i9-unary-sign-stack|b189f5739b|the i9: D7, gofmt's space kept between stacked unary signs
+  i9-minmax-const-type|af73da77d9|the i9: min/max over an untyped-constant argument takes Go's result type
+  i9-named-empty-iface|3b36189d90|the i9: a named empty interface emits as its own type (carries a re-baseline)
+  i9-defined-struct-arrays|36aee78466|the i9: A10, a defined-over-struct type (and a field of one) constructs its arrays
+  i9-two-level-defined-struct|2f31843c0a|the i9: Tally, two-level defined structs (on A10)
+  i9-mixed-untyped-arith|9598083d48|the i9: A14, an untyped int widens implicitly to an untyped float
+  i9-reflect-setter|6bd0ab2631|the i9: reflect setKinded span; reflect banks 396 + 22 at landing (TestMapAlloc retired)
+  i9-untyped-int-float-fold|3656e9fada|the i9: shape B fold (heavy gates green on the i9: 1 prod site per target)
+  i9-disclosure-record-pin|3d56a90fbe|the i9: disclosure guard phase A, host records as data + count pins (no verdict moves)
+  c2-narrow|ece9f720cc|C2: narrow arithmetic, the narrow-only restack (no MinInt/-1)
+  c2-user-arenas|4c5226eefa|C2: C3 user arenas (17/24 + 3 disclosed codegen-liveness; 4 owed to Z)
+  c2-aeshash|29d7e4ec1e|C2: C4 aeshash on amendment (internal/cpu linux 8 validated, manifest removed)
+  c2-source-paths|6ba1eb18b9|C2: C5 source paths re-cut, rooted at the link-time defaultGOROOT
+  c2-minint|2b2bbc4bf8|C2: MinInt/-1 re-cut, stacked on c2-narrow (27/27 arms)
+  c2-negative-shift|b70c59a3e4|C2: (d) negative shift counts panic like Go, stacked on c2-minint
+  c1-runtime-error-factories|2c97dd9bce|C1: runtime.Error factories plus the review follow-up
+  c1-unsigned-index-ulong|05c0699fb2|C1: (c) unsigned indices bare onto this[ulong], on the factories (124 corpus paths)
+  c1-runtime2-zero-residue|c88a76b211|C1: Q7, sched and forcegc take new T() in the hand-owned runtime2.cs
+  g-block-event-frames|f772251384|G: M4 (a) + class F (iii) + (a), stack-walk hops never inlined (contains 5cb1b24322)
+  g-serial-external-code|44184dbc04|G: /serial, non-Go thread CPU charged to [runtime._ExternalCode]
+  r-panic-frames|af2c57f41a|R: panic-path frames B, round 4 + the NilBox fix (closing reading MET)
+  r-defer-cost|833af5f60f|R: defer cost cut to +3.8 ns (55% of B), stacked on r-panic-frames
+  ```
+
+  - PENDING: the draft's own line reads none, but two rows carry an i7 gate. i9-disclosure-record-pin needs a
+    BehavioralTests leg filtered to TestingRuntimeTests plus GolibTests in both flavours; c2-source-paths needs runtime/debug
+    on windows with TestStack's failure output exactly its one fifth-frame line.
+  - SWAPS, if gated before assembly: R's GoThreadState holder cut replaces r-defer-cost 833af5f60f (ledger f1f5da2c59);
+    G's printer seat claude/g-traceback-go-frames e7dd6cd45b joins once its gates are read. NOT HERE: class F 435557647c,
+    which lands first as its own small landing.
+  - BATTERY NOTES (the draft's): add the TestingRuntimeTests leg (guard phase A); the corpus-wide compile binds A14 (a
+    CS0121 or CS9342 anywhere fails the seat); the behavioral leg binds Tally, whose PASS was read under the i9's fault.
+    From the ledger: the rehearsal watches runtime's panicvalues_impl.cs between c2-negative-shift and C1's factories;
+    the full windows runtime row at the union is owed for r-godebug-at-start, and G's lane reads the linux row at the union;
+    r-pkgpath-verbatim's linux and darwin readings come from H7 and G's linux lane; TRAIN G's battery script (the
+    template) keeps temp, the Go cache and NuGet on H: and aborts a leg below 8 GB free on C:; TRAIN G's 2t leg
+    (dotnet test go2cs.slnx) timed out at 4 h inside BehavioralTests, recorded at its landing. AT LANDING: reflect 396 + 22
+    (windows and linux), internal/cpu's linux annotation, and runtime/debug's re-bank if the printer seat is seated.
+- LANES (each lane's order from the ledger's latest rulings):
+  - R (R-LAPTOP) owns the PAGE-ALLOCATOR family (ledger c3fde8ba8d). (1) Cut the one [ThreadStatic] GoThreadState holder
+    on claude/r-defer-cost over 833af5f60f (ledger f1f5da2c59): its attribution arm read 3.4 to 4.0 ns BELOW base; range
+    base minus 3 to minus 4.5 ns; the falsifier is a reading above base or disagreeing base arms; gates are GolibTests
+    pinned in both flavours, the filtered runtime family unchanged against af2c57f41a, the converter suite and PerfDefer.
+    (2) W1, the windows pre-blockers (ledger 7994f661b6): mem_windows_impl.cs's hand-own extends to sysReserveOS,
+    sysUsedOS and sysUnusedOS over VirtualAlloc, and a module initializer sets physPageSize; gated by the family re-probe.
+    (3) The family pair: A16 (a) the managed chunk store, plus A17 (b) Go-sized explicit layout for the zero-size-field
+    atomic carriers, plus the OverNativeMemory size guard, with an atomic-heavy microbench A/B owed before landing; then
+    the re-probe. The defer target (at most +2 ns) is owed before the final 1.24.13.N release. The runtime row banking
+    before 2026-10-24 is UNLIKELY (ledger c3fde8ba8d); its remaining work re-banks at 1.25.
+  - G (G-LAPTOP plus WSL): the printer seat's gates (ledger b8c96a0375): GolibTests windows and linux; the runtime row on
+    both OSes with census A6 scored as predicted (4 pass, 5 re-file to B4); runtime/debug on both OSes (TestStack PASS,
+    the entry retired as an orphan); sync and context on both OSes; net/http on linux. Then root TestMutexBlockFullAggregation,
+    class F (i)'s defect and G's (ledger c1ce779a90). The runtime/pprof bank follows TRAIN H: its rehearsal residuals
+    equal the plan (ledger c3ec4e8fb6), and its two tooling arms go red first at the bank (runtime-capability admitted
+    in the skip shape; the ruled `halves` two-half entry). Also G's: the linux runtime row at the TRAIN H union; the
+    sink-guard follow-up seat, now cuttable on master (ledger b52f6aa665); the TestSetPanicOnFault probe; class F (ii).
+  - The i9 (heavy again, under the 07:37 rules): the slice-bounds S-a + S-b seat (moved from C1; on C1's
+    claude/c1-unsigned-index-ulong 05c0699fb2) and the S-c candidate-forms write-up,
+    docs/phase4/briefs/sizing-slice-bounds-2026-09-28.md on its seat ref, for COORD's design review; then the counts(c)
+    seat (generator-only, through ΔClone; ledger 8cc81d2169); then the GoZero seat (ledger e8ae0e03af), comparing the
+    annotation sweep against the trim-safe generated zero-factory registry on evidence (IL2091 count, per-call cost,
+    footprint) before cutting; then the disclosure guard's phases B and C once phase A lands.
+  - C1 (cloud; runs .NET gates now): the owner-ruled STW seat, stacked on Q7 c88a76b211 (ledgers 7d93080669,
+    7aa1901da0): red first on the 18 rows plus the leak arm (a golib hook releases worldsema, and metricsSema, when the
+    adopting thread is the recorded holder), refuse-before-STW for the platform bodies, the 3-target footprint and CNR.
+    Then the trace.Start pair (Q5, its one-line follow-up now that TRAIN G has landed) and the reflect hash-token band cut
+    (ledger 63addccb12; G reviews; two amendments), into which the roadmap folds gojq's unique map/slice identity tokens.
+  - C2 (cloud): the unsafe.Pointer PARAMETER-assignment converter seat (any assignment to an unsafe.Pointer parameter
+    emits `p.Value = ...`, a silent memory write; ledger 7994f661b6), then the Z (zerobase) sizing (ledger 80d5c388de).
+    Queued from the narrow review: constant compound receivers of a guarded shift, D4's tag mirror and the non-constant
+    unary case label, and the D6/D9 arms. Its C5 seat waits on the i7 gate above.
+- OPEN FINDINGS AND QUEUE (COORD's local queue, mirrored here):
+  - THE i7 ENVIRONMENT (ledger 61f422cc23): the repo and TEMP are on H: (ReFS) while GOROOT is on C: (NTFS). os
+    TestFileReadDir/. (SameFile false; Go itself does this on ReFS) and testing TestChdir/relative (Go skips) are
+    environment divergences, reproduced at master; both rows stay banked on their recorded hosts, and i7 sweeps read them
+    as NAMED divergences, never absorbed. THE FIX, after the landings: copy the go1.24.13 SDK to H: and pin GOROOT there,
+    spelled as `go env GOROOT` prints it, comparing one package's emission both ways before any battery uses it. Predicted:
+    testing matches, and os TestFileReadDir fails on both sides.
+  - SLICE BOUNDS (ledger 8b09556696): S-a (@string.this[Range] raises Go's panic) rides S-b (R2, R3, R4-foreign, about 150
+    sites per target). S-c, the two-index bounds inside a C# Range (about 4k sites per target; a negative bound or a string
+    sliced past its end kills the process today), is an emitted-form choice: the i9's write-up, then COORD's design review,
+    then the owner sees the shortlist (reads-like-Go against runs-like-Go).
+  - THE DISCLOSURE-COMPLETENESS GUARD (finding 3f9bc1988a, design 1399187a38): phase A (TRAIN H) moves no verdict. Phase
+    B mints count pins from a banked re-run (an i7 battery re-running every banked row; the real-host plant at the first
+    mint); COORD hands the i9 the TRAIN G battery's retained sweep results for the census. Phase C (schemaVersion 2)
+    refuses unpinned fail/skip entries. Until then, a seat that touches a disclosed test reads that test's failure output
+    at the tip, not only its verdict.
+  - SMALLS: a closure-declared `var h hist` with h.counts[i].Add taken emits `Ꮡh` (CS0103); UpdateTestTargets drops
+    OutputComparisonTests' CheckAppendOfMake and CheckValuePunBits (their package_info.cs carries no
+    [GoTestMatchingConsoleOutput]); SetegidBroadcastSeam is an undocumented linux alias-drift member (CNR exits 1 on linux
+    in both arms); `defer runtime.Goexit()` skips the frame's earlier defers (pre-existing, ledger 28631411d2); TRAIN F's
+    nistec cost-canary A/B is still owed.
+  - DOCTRINE OWED at the next batch: the `-test-action run` results-file trap (gate-forensics, ledger 6cdde13b2c); base
+    arms agreeing within a stated tolerance before any A/B delta is scored (measurement-discipline, ledger f40b2f449c); a
+    footprint prediction separates -stdlib production sites from -tests test-file sites (corpus-reconvert, ledger
+    da170c7e79).
+  - SIDE SEATS S1-S6 (ledger c168156ad7): S1 the .NET pin and S2 the identifier escape (both dated, before 2026-11-10);
+    S3 cgo's loud refusal; S4 hop readiness (NOTES-next-hop.md, the -Hop sweep mode); S5 the TS 7.0 recon note; S6 the
+    google/uuid pilot J0. COORD assigns them as lanes free up or runs them as opus sub-agents on the i7, never ahead of the
+    objective.
+- THE POST-100% ROADMAP lives at docs/phase4/briefs/roadmap-post100-2026-09-28.md on this branch (636e491d81, with its
+  dated owner-ruling block at e4a93b14c0). The review records beside it: review-c2-narrow-arith-2026-09-27.md,
+  review-r-panic-frames-2026-09-27.md, review-cloud-seats-2026-09-28.md and review-c2-aeshash-paths-2026-09-28.md. The map
+  to 100% is G's docs/phase4/CENSUS-runtime-divergences-2026-09-28.md on claude/g-runtime-divergence-census bcb532185b
+  (ledger e7a778dab5).
+- NEXT for COORD: the class F landing (net/http/pprof bank, log/slog re-bank); hand the i9 the sweep results; TRAIN H's
+  rehearsal, assembly and battery; the i7 GOROOT-on-H: fix; the side seats on idle capacity.
+
 ### 1d.0 COORD: STATE BLOCK
 
 ```

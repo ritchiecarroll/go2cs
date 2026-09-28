@@ -1,0 +1,28 @@
+r-pkgpath-verbatim|8f2b7292b9|R: option A, verbatim import path (a GOROOT-vendored package stamps Go's vendor/ path); runtime rows owed at the union
+r-godebug-at-start|c4504322e1|R: parsedebugvars at start (GODEBUG read in Go's start order)
+i9-unary-sign-stack|b189f5739b|the i9: D7, gofmt's space kept between stacked unary signs
+i9-minmax-const-type|af73da77d9|the i9: min/max over an untyped-constant argument takes Go's result type
+i9-named-empty-iface|3b36189d90|the i9: a named empty interface emits as its own type (carries re-baseline)
+i9-defined-struct-arrays|36aee78466|the i9: A10, a defined-over-struct type (and a field of one) constructs its fixed arrays (G census A10)
+i9-two-level-defined-struct|2f31843c0a|the i9: Tally, two-level defined structs (stacked on A10; converter keyed literal wraps the innermost named struct; behavioral PASS taken under the i9 fault, confirmed by this battery)
+i9-mixed-untyped-arith|9598083d48|the i9: A14, an untyped int widens implicitly to an untyped float (corpus compile owed in the battery)
+i9-reflect-setter|6bd0ab2631|the i9: reflect setKinded span; bank reflect at 396 + 22 at landing (TestMapAlloc disclosure retired)
+i9-untyped-int-float-fold|3656e9fada|the i9: shape B fold (heavy gates green on the i9: 1 prod site per target, CNR 0, behavioral PASS)
+i9-disclosure-record-pin|3d56a90fbe|the i9: disclosure guard phase A, host records as data + count pins (no verdict changes; PENDING TestingRuntimeTests + GolibTests legs)
+c2-narrow|ece9f720cc|C2: narrow arithmetic, narrow-only restack (no MinInt/-1)
+c2-user-arenas|4c5226eefa|C2: C3 user arenas over managed allocations (17/24 + 3 disclosed codegen-liveness; 4 owed to Z)
+c2-aeshash|29d7e4ec1e|C2: C4 aeshash on amendment (GODEBUG cpu.* off windows; internal/cpu linux 8 validated, manifest removed; roster linux annotation at landing)
+c2-source-paths|6ba1eb18b9|C2: C5 source paths re-cut, link-time defaultGOROOT (PENDING i7 windows runtime/debug TestStack one-line gate)
+c2-minint|2b2bbc4bf8|C2: MinInt/-1 re-cut stacked on c2-narrow (27/27 arms; 18 sites/target back to the plain operator)
+c2-negative-shift|b70c59a3e4|C2: (d) negative shift counts panic like Go (stacked on c2-minint; watch panicvalues_impl.cs vs C1 factories)
+c2-unsafe-param|454198967f|C2: an unsafe.Pointer parameter assignment rebinds instead of writing through the caller (15/15/18 sites; watch memhashFallback/cgocheck rows)
+c1-runtime-error-factories|2c97dd9bce|C1: runtime.Error factories plus the review follow-up
+c1-unsigned-index-ulong|05c0699fb2|C1: (c) unsigned indices bare onto this[ulong] (stacked on the factories follow-up; 124 corpus paths)
+c1-runtime2-zero-residue|c88a76b211|C1: Q7, sched and forcegc take new T() in the hand-owned runtime2.cs
+g-block-event-frames|f772251384|G: M4 (a) + class F (iii) + (a), stack-walk hops never inlined (contains g-m4-alloc-frames 5cb1b24322; on the TRAIN G union)
+g-serial-external-code|44184dbc04|G: /serial, non-Go thread CPU charged to [runtime._ExternalCode] (on the TRAIN G union; limits stated)
+r-panic-frames|af2c57f41a|R: panic-path frames B, round 4 + NilBox fix (closing reading MET; defer cost owed before the final release)
+r-defer-cost|833af5f60f|R: defer cost cut to +3.8 ns (55% of B), stacked on r-panic-frames; outlined cold path may follow
+# PENDING: none
+# NOT HERE: G class F 435557647c lands immediately after TRAIN G as its own small landing (net/http/pprof bank)
+# BATTERY NOTES: add a BehavioralTests leg filtered to TestingRuntimeTests (guard phase A); corpus compile binds A14; behavioral binds Tally
