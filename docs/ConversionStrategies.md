@@ -1994,18 +1994,19 @@ Go's platform-sized `int` and `uint` become C#'s native-sized `nint` and `nuint`
 bits wide depending on the target platform. The fixed-width types keep their Go names, so most arithmetic
 reads as it does in Go:
 
-<!-- source: src/tests/Behavioral/DivideByZeroPanic/main.go:36 -->
+<!-- source: src/tests/Behavioral/MethodGroupGenericArg/main.go:5 -->
 ```go
-func divide(a, b int) int { return a / b }
+func addInt(a, b int) int { return a + b }
 ```
-<!-- source: src/tests/Behavioral/DivideByZeroPanic/main.cs.target:51 -->
+<!-- source: src/tests/Behavioral/MethodGroupGenericArg/main.cs.target:7 -->
 ```csharp
-internal static nint divide(nint a, nint b) {
-    return a / b;
+internal static nint addInt(nint a, nint b) {
+    return a + b;
 }
 ```
 
-In a few places C# arithmetic behaves differently from Go's: narrow types, unsigned negation and shifts.
+In a few places C# arithmetic behaves differently from Go's: narrow types, unsigned negation, shifts and a
+signed division by -1.
 There the converter adds a cast, rewrites the expression or calls the
 [golib](#the-golib-runtime-library) runtime library. Division by zero and slice bounds also need care. Each
 case has its own paragraph in this section.
@@ -2239,9 +2240,27 @@ time ([Named Numeric Types](#named-numeric-types-and-constant-contexts),
 [Source Generators](#source-generators)). A shift on it keeps the plain `>>` in the converted code, because
 that generated operator applies the same Go rule.
 
-**Division by zero panics as in Go.** Division and remainder keep C#'s `/` and `%` unchanged, as `divide`
-shows at the start of this section. C# throws a `DivideByZeroException` for a zero divisor. When golib's
-panic handling catches that exception, it turns it into Go's `runtime error: integer divide by zero` panic.
+**Division and remainder check for -1.** Go defines the one signed division that overflows: the most
+negative value divided by -1 wraps back to itself, and any value modulo -1 is 0. .NET throws an
+`OverflowException` there instead, which a deferred `recover()` cannot catch. So a signed `int`, `int32` or
+`int64` division or remainder whose divisor is a variable calls golib's `quo` or `rem`. Each checks for -1
+and otherwise uses C#'s own `/` or `%`:
+
+<!-- source: GOROOT/src/crypto/cipher/cbc.go:80 -->
+```go
+if len(src)%x.blockSize != 0 {
+```
+<!-- source: src/core/crypto/cipher/cbc.cs:85 -->
+```csharp
+if (rem(len(src), x.blockSize) != 0) {
+```
+
+A constant divisor keeps the plain operator, and so does a named integer type, whose generated operators
+carry the same check.
+
+**Division by zero panics as in Go.** C# throws a `DivideByZeroException` for a zero divisor, from the plain
+operators and from `quo` and `rem` alike. When golib's panic handling catches that exception, it turns it
+into Go's `runtime error: integer divide by zero` panic.
 So [`recover`](#defer--panic--recover) catches it as in Go, and an unrecovered one reports Go's message.
 <!-- golden: src/tests/Behavioral/DivideByZeroPanic (safeDiv/safeMod recover, outerGuard crosses a frame);
      mapping: src/core/golib/runtime/RuntimeErrorPanic.cs:239 (TryAsPanic adopts DivideByZeroException as
@@ -7760,7 +7779,8 @@ then run the deferred `recover()`, and `pick` would return `nil`. If no deferred
 
 **A panic travels up through callers until a deferred `recover()` stops it.** When no deferred call in a
 frame recovers, `ᒐ.Run()` throws the panic again after the deferred calls finish. The caller's frame then
-catches it the same way. Here `divide` has no `defer`, so it has no frame, and `outerGuard` recovers:
+catches it the same way. Here `divide` has no `defer`, so it has no frame, and `outerGuard` recovers. (`quo`
+is golib's signed division, see [Integer Types and Arithmetic](#integer-types-and-arithmetic).)
 
 <!-- source: src/tests/Behavioral/DivideByZeroPanic/main.go:36 -->
 ```go
@@ -7780,7 +7800,7 @@ func outerGuard(a, b int) (ok bool) {
 <!-- source: src/tests/Behavioral/DivideByZeroPanic/main.cs.target:51 -->
 ```csharp
 internal static nint divide(nint a, nint b) {
-    return a / b;
+    return quo(a, b);
 }
 
 internal static bool /*ok*/ outerGuard(nint a, nint b) {

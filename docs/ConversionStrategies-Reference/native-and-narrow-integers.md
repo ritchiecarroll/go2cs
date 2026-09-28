@@ -123,6 +123,66 @@ rule), `NarrowArithmeticCompileSinks` (the consumers that did not compile before
      1aebd6a885 and NarrowArithmeticCompileSinks failed CS1503 x3 / CS0266 x3. The inline empty-interface
      rejection is independent of arithmetic (a plain int8 value fails CS0029 the same way at master). -->
 
+## A signed division or remainder by a variable divisor calls golib's `quo` or `rem`
+
+An unnamed `int`, `int32` or `int64` (so also `rune` and C#'s `nint`) division or remainder whose divisor is
+not a constant, and not `len` or `cap`, becomes golib's `quo(a, b)` or `rem(a, b)`; `x /= b` and `x %= b`
+become `x = quo(x, b)` and `x = rem(x, b)`. A constant -1 divisor folds when converting: `a / -1` is
+`unchecked(-a)` and `a % -1` is zero. Every other divisor keeps C#'s operator.
+
+<!-- source: src/tests/Behavioral/MinIntDivide/main.go:59 -->
+```go
+arm("int64", func() string { return fmt.Sprint(i64/int64(m1), " ", i64%int64(m1)) })
+```
+<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:73 -->
+```csharp
+arm(int64ˢ, () => fmt.Sprint(quo(i64, (int64)m1), (@string)" "u8, rem(i64, (int64)m1)));
+```
+
+Here `i64` holds `math.MinInt64`, `m1` is an `int` holding -1, `arm` runs the function under `recover` and
+prints its result under the label, and `int64ˢ` is the hoisted `"int64"` literal.
+
+**Why.** Go's spec wraps the one overflowing signed quotient, the most negative value divided by -1, to that
+same value, and makes any value modulo -1 zero, with no panic. .NET throws `OverflowException` for both at
+32 and 64 bits. That is not a Go panic: `recover()` cannot see it, and the program dies. Division by zero is
+unaffected: it still throws `DivideByZeroException`, which golib reports as Go's integer divide-by-zero
+panic.
+
+**Where the check lives.** Go itself checks for -1 at run time only where the divisor is a variable, so that
+is the only place the helper appears:
+
+- `quo` and `rem` ([`builtin.cs`](../../src/core/golib/builtin.cs)) have `nint`, `int32` and `int64`
+  overloads: `b == -1 ? unchecked(-a) : a / b` and `b == -1 ? 0 : a % b`. Their XML documentation says why,
+  so a hover over a call explains it.
+- A NAMED integer type keeps `a / b`: go2cs-gen's `NumericTypeTemplate` gives a wrapper over `int32`, `int64`,
+  `nint` or `rune` the same -1 arm inside its own `/` and `%` operators.
+- A narrower signed type needs nothing: C# promotes it to `int`, where `-128 / -1` is 128, and the
+  narrow-arithmetic rule above casts the result back to Go's wrapped value.
+- A `len` or `cap` divisor is never negative, and a constant divisor is known when converting.
+
+**When a Go name would bind first.** C# resolves a bare `quo` or `rem` to a member of the package class
+before the `using static go.builtin` import, and a C# local is in scope in its whole block, including its
+own initializer. So the helper is written `builtin.quo` or `builtin.rem` when the package declares a
+function, method, variable or constant of that name (`go/constant` declares its own `quo`), or when the
+enclosing function declares a variable of that name anywhere (`if rem := n % size; rem != 0` in
+`crypto/internal/fips140/ecdsa`):
+
+<!-- source: src/tests/Behavioral/MinIntDivideShadow/main.cs.target:19 -->
+```csharp
+fmt.Println(builtin.quo(i32, (int32)m1), builtin.rem(i32, (int32)m1));
+```
+
+**Limits.** A compound `x /= b` whose target has a side effect when read (an index by a call, say) keeps
+C#'s `/=`: it cannot be read twice. No standard-library site has that shape.
+
+Guarded by: `MinIntDivide` (int, int32, int64, rune, named int64 and int32, the narrow types, compound
+assignment, the constant -1 fold, ordinary divisors, a local named `rem`, and division by zero, each arm
+under `recover`), `MinIntDivideShadow` (a package declaring its own `quo` and `rem`), and GolibTests'
+`SignedDivisionTests` (the helpers, and a control proving the plain operators throw).
+<!-- Owner ruling 2026-09-27 (ledger 15:42, mailbox 446950ea43), from C2's sizing (inbox COORD
+     20260927T193256Z-C2): at master every int, int32, int64 and named-over-int64 arm died with
+     OverflowException (exit 2), unseen by recover(). Measured cost 0-3% on a 4M-element micro-benchmark. -->
+
 ---
 
 [← Constant Values](constants.md) · [Index](README.md) · [Named Numeric Types and Constant Contexts →](named-numeric-types.md)
