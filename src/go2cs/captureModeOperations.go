@@ -1736,11 +1736,12 @@ func (v *Visitor) bodyCallsCaptureModeMethodOn(ident *ast.Ident, body ast.Node) 
 // bodyCallsCaptureModeMethodOnObject is bodyCallsCaptureModeMethodOn keyed by the resolved
 // object — the form a type-switch case binding needs, whose defining ident carries no object
 // (go/types records the per-case *types.Var in Implicits, and ObjectOf on the guard ident
-// answers nil). The receiver operand may be the bare ident OR a value-field chain rooted at it
-// (`x.i.Add(delta)` — the sync/atomic shape): Go's implicit `&x.i` for the chain form addresses
+// answers nil). The receiver operand may be the bare ident OR a value chain rooted at it, through
+// fields and array elements (`x.i.Add(delta)`, `h.counts[i].Add(1)`, `a[i].Add(1)` — the
+// sync/atomic shapes): Go's implicit `&x.i` for the chain form addresses
 // the local's own storage exactly as `&x` does, so leaving the chain unrecognized let emission
 // fall to the `Ꮡ(x).of(…)` copy-box and silently dropped every write the capture-mode method
-// made. The chain walk is selectorChainRootsAtIdent — the same root walk the explicit-`&` arm
+// made. The chain walk is storageChainRootsAtIdent — the same root walk the explicit-`&` arm
 // and selectsPointerMethodOn (the method-VALUE analogue of this call form) already use, whose
 // Selection.Indirect() gate excludes any chain that crosses a pointer (the address then lands
 // in the pointee, not in the local).
@@ -1776,7 +1777,7 @@ func (v *Visitor) bodyCallsCaptureModeMethodOnObject(target types.Object, body a
 				return true
 			}
 		} else {
-			if !selectorChainRootsAtIdent(recvExpr, target, v.info) {
+			if !storageChainRootsAtIdent(recvExpr, target, v.info) {
 				return true
 			}
 

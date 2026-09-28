@@ -734,9 +734,11 @@ func (v *Visitor) objectAddressTaken(obj types.Object, body ast.Node, directOnly
 		case *ast.IndexExpr:
 			if id, ok := x.X.(*ast.Ident); !directOnly && ok && v.info.ObjectOf(id) == obj {
 				found = true
+			} else if !directOnly && storageChainRootsAtIdent(x, obj, v.info) {
+				found = true
 			}
 		case *ast.SelectorExpr:
-			if !directOnly && selectorChainRootsAtIdent(x, obj, v.info) {
+			if !directOnly && storageChainRootsAtIdent(x, obj, v.info) {
 				found = true
 			}
 		}
@@ -866,7 +868,7 @@ func (v *Visitor) performEscapeAnalysisForObject(identObj types.Object, parentBl
 				// left the local unboxed and the emitted `Ꮡ(x).of(T.Ꮡval)` boxed a COPY,
 				// silently dropping writes made through the pointer (Go reads the write back
 				// through `x`; C# did not).
-				if selectorChainRootsAtIdent(n.X, identObj, v.info) {
+				if storageChainRootsAtIdent(n.X, identObj, v.info) {
 					escapes = true
 					return false
 				}
@@ -1204,8 +1206,9 @@ func (v *Visitor) pointerMethodValueAddressTaken(obj types.Object, body ast.Node
 }
 
 // selectsPointerMethodOn reports whether sel selects a pointer-receiver method whose receiver
-// operand is obj's own storage — the bare ident, or a non-indirect value-field chain rooted at it
-// (selectorChainRootsAtIdent, the same root walk the explicit-`&` arm uses). Call position is NOT
+// operand is obj's own storage — the bare ident, or a value chain rooted at it (non-indirect
+// fields and array elements: storageChainRootsAtIdent, the same root walk the explicit-`&` arm
+// uses). Call position is NOT
 // considered here; pointerMethodValueAddressTaken filters that.
 func (v *Visitor) selectsPointerMethodOn(sel *ast.SelectorExpr, obj types.Object) bool {
 	base := ast.Unparen(sel.X)
@@ -1214,7 +1217,7 @@ func (v *Visitor) selectsPointerMethodOn(sel *ast.SelectorExpr, obj types.Object
 		if v.info.ObjectOf(ident) != obj {
 			return false
 		}
-	} else if !selectorChainRootsAtIdent(base, obj, v.info) {
+	} else if !storageChainRootsAtIdent(base, obj, v.info) {
 		return false
 	}
 
@@ -1282,47 +1285,55 @@ func argRootIsIdent(arg ast.Expr, identObj types.Object, info *types.Info) bool 
 	return false
 }
 
-// selectorChainRootsAtIdent reports whether expr is a struct-field selector chain
-// (`x.f1.…fn`, n>=1) whose peeled root is the ident under analysis, with every hop a
-// direct VALUE field selection. Taking such a chain's address aliases the root local's
-// OWN storage, so the local must be heap-boxed — the `Ꮡ(x).of(T.Ꮡval)` copy-box
-// fallback otherwise orphans writes made through the pointer. A hop that crosses a
-// pointer — an explicit `ptr.field` deref or a field promoted through an embedded
-// pointer (both are Selection.Indirect()) — aliases the POINTEE's storage instead, so
-// the root must NOT be boxed: the pointer value already routes through `.of(…)` (see
-// convUnaryExpr). A missing Selections entry is a package qualifier, and a method
-// value cannot stand under `&`, so both stop the walk.
-func selectorChainRootsAtIdent(expr ast.Expr, identObj types.Object, info *types.Info) bool {
-	sel, ok := expr.(*ast.SelectorExpr)
-
-	if !ok {
-		return false
-	}
+// storageChainRootsAtIdent reports whether expr is a chain of VALUE hops, at least one long, whose
+// peeled root is the ident under analysis: struct-field selections (`x.f1.…fn`) and ARRAY element
+// indexes (`x[i]`, `x.f[i].g[j]`). Every such hop stays inside the root's own storage, so taking
+// the chain's address (explicitly, or as a pointer method's implicit receiver) aliases the root
+// local, and the local must be heap-boxed. The `Ꮡ(x).of(T.Ꮡval)` copy-box fallback otherwise
+// orphans writes made through the pointer (Go reads the write back through `x`; C# did not).
+//
+// A hop that leaves the root's storage stops the walk and answers false:
+//   - a field reached through a pointer (an explicit `ptr.field`, or one promoted through an
+//     embedded pointer; both are Selection.Indirect()) aliases the POINTEE, and the pointer value
+//     already routes through `.of(…)` (see convUnaryExpr);
+//   - an index into a SLICE, a map, a string or a pointer-to-array names the backing store, never
+//     the root's own storage (an `x.s[i]` slice element needs no box of x);
+//   - a missing Selections entry is a package qualifier, and a method value cannot stand under `&`.
+//
+// The array-index hop was missing until 2026-09-28: `&h.counts[i]`, an imported pointer method
+// called on `h.counts[i]` or on a local array's `a[i]`, and the method value `h.local[i].inc` all
+// left the local unboxed while emission addressed it through `Ꮡh`, a name nothing declared (CS0103;
+// the i9 found it on a closure-local, and the shape does not depend on the closure).
+func storageChainRootsAtIdent(expr ast.Expr, identObj types.Object, info *types.Info) bool {
+	hops := 0
 
 	for {
-		if selection, ok := info.Selections[sel]; !ok || selection.Kind() != types.FieldVal || selection.Indirect() {
-			return false
-		}
-
-		base := sel.X
-
-		for {
-			if paren, ok := base.(*ast.ParenExpr); ok {
-				base = paren.X
-				continue
+		switch e := ast.Unparen(expr).(type) {
+		case *ast.SelectorExpr:
+			if selection, ok := info.Selections[e]; !ok || selection.Kind() != types.FieldVal || selection.Indirect() {
+				return false
 			}
 
-			break
-		}
+			expr = e.X
+		case *ast.IndexExpr:
+			containerType := info.TypeOf(e.X)
 
-		switch base := base.(type) {
-		case *ast.SelectorExpr:
-			sel = base
+			if containerType == nil {
+				return false
+			}
+
+			if _, isArray := containerType.Underlying().(*types.Array); !isArray {
+				return false
+			}
+
+			expr = e.X
 		case *ast.Ident:
-			return info.ObjectOf(base) == identObj
+			return hops > 0 && info.ObjectOf(e) == identObj
 		default:
 			return false
 		}
+
+		hops++
 	}
 }
 
