@@ -29,6 +29,7 @@
   - TRAIN H union 9a21c08481: in its battery; the landing follows.
   - TRAIN I: a draft of 13 seats plus pending ones, at `.claude/coord-scripts/trainI/tI-seats-draft.txt` on this branch.
 - **Base for your cuts.** TRAIN H's landed master once COORD posts the landing to your inbox. Until then, the pushed union 9a21c08481 (the ledger's 17:03 precedent).
+- **2026-09-28 20:00: TRAIN H LANDED.** master 15da8805b2 -> 2ff42f7a16 (ledger e058615076; posted to inbox/FLEET). **Base for every cut: master 2ff42f7a16.** The TRAIN I draft holds 17 seats.
 
 ### 1e.1 THE MAILBOX-ONLY PROTOCOL (R, C1, C2, P1, P2)
 
