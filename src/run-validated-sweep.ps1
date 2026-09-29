@@ -187,13 +187,13 @@ $table = Join-Path $repo 'docs/ValidatedTestPackages.md'
 # The -Hop row population. A separate path rather than a re-pointed $table, because the two files are
 # different KINDS: the roster is the record of what is banked, the skeleton the record of what is
 # ELIGIBLE at the incoming release. -Hop reads the second and writes nothing; the roster stays the
-# single source of truth for banked counts, and H10 banks into it from a hop run's record.
-$hopSkeleton = Join-Path $repo 'docs/phase4/CENSUS-h10-eligibility-go124.md'
+# single source of truth for banked counts, and H10 banks into it from a hop run's record. The path is
+# PER RELEASE and derived below, once the release this run reads is known (see "-Hop row population").
+$hopSkeleton = $null
 $exe = $Go2csExe
 $goroot = (& go env GOROOT).Trim()
 
 if (-not (Test-Path $table)) { throw "Cannot find the validated-package table at $table" }
-if ($Hop -and -not (Test-Path $hopSkeleton)) { throw "Cannot find the H10 eligibility census at $hopSkeleton" }
 if (-not $goroot) { throw 'Could not resolve GOROOT -- is the Go toolchain on PATH?' }
 
 # ---- toolchain pin ------------------------------------------------------------------------------
@@ -219,6 +219,30 @@ if (Test-Path $gorootVersionFile) {
     $firstLine = Get-Content $gorootVersionFile -TotalCount 1
 
     if ($firstLine) { $goversion = $firstLine.Trim() }
+}
+
+# ---- -Hop row population: the INCOMING release's own skeleton ------------------------------------
+# The eligible population differs per release, so the skeleton is derived from the release this run
+# actually READS ($goversion, GOROOT's VERSION first -- the same answer the pin guard below trusts) and
+# refused BY NAME when that release has none. Never a fallback to another release's skeleton: with the
+# path hardcoded to go124, a -Hop run at the Go 1.25 hop would have swept the 1.24 eligible population
+# and read as a clean hop run (S4, ruled 2026-09-29). Checked BEFORE the pin guard, so a hop attempted
+# without its skeleton is refused for that cause rather than for the version bump it also still owes.
+if ($Hop) {
+    if ($goversion -notmatch '^go(\d+)\.(\d+)(\.\d+)?$') {
+        throw "-Hop: cannot derive the incoming release from the Go tree's version '$goversion' (GOROOT $goroot), so no eligibility skeleton can be chosen."
+    }
+
+    $hopRelease = "go$($Matches[1])$($Matches[2])"
+    $hopSkeleton = Join-Path $repo "docs/phase4/CENSUS-h10-eligibility-$hopRelease.md"
+
+    if (-not (Test-Path $hopSkeleton)) {
+        throw ("-Hop: no eligibility skeleton for $goversion -- expected $hopSkeleton. The hop's row " +
+            "population is the INCOMING release's eligible set, and no other release's skeleton may stand " +
+            "in for it; build that release's skeleton first.")
+    }
+
+    Write-Host "hop skeleton: $hopSkeleton (Go tree $goversion)"
 }
 
 $versionProps = Join-Path $src 'version.props'
