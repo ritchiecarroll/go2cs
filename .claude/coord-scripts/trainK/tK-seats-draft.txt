@@ -1,3 +1,4 @@
 # TRAIN K draft (base: TRAIN J's landed master). Seats accepted so far:
 p1-s1-dotnet-pin|272afeef93|P1: S1 .NET pin SOURCE half (global.json 10.0.100 latestFeature; LangVersion 14 conditioned in both templates + props; 9 hand-written csproj; go2cs-gen unconditional 14); SEATS WITH the 1,351-csproj regeneration taken at TRAIN K's base (+ TRAIN J's new projects)
+r-s2-cs15-escape|ac2fefdf88|R: S2 C# 15 escape (closed/union/safe reserved TYPE names Delta-renamed package-wide incl. aliases and type params; with( needs no code, arrays not collection exprs); footprint 0 (windows measured), CNR 0; on master a1f133c3a9
 # PENDING: C1 hash tokens (option 2, monotonic ids; a69c56b13e); C1 option-3 zh-token sizing; P1 S3 cgo loud refusal; G A3 runtime-lock profile (if not in J); R A17 fix (if not in J); P2 created-by (if not in J); the runtime row bank; the R1-A commit 2 (the i9, after TRAIN I lands); E2 string refusal (queued)
