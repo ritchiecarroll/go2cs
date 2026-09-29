@@ -1810,6 +1810,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckSliceBoundsEscapeRoutes() => CheckTarget("SliceBoundsEscapeRoutes");
 
     [TestMethod]
+    public void CheckSliceBoundsRecover() => CheckTarget("SliceBoundsRecover");
+
+    [TestMethod]
     public void CheckSliceElementFieldAddress() => CheckTarget("SliceElementFieldAddress");
 
     [TestMethod]

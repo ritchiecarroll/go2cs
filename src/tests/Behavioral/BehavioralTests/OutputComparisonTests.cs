@@ -1736,6 +1736,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSliceBoundsEscapeRoutes() => CheckTarget("SliceBoundsEscapeRoutes");
 
     [TestMethod]
+    public void CheckSliceBoundsRecover() => CheckTarget("SliceBoundsRecover");
+
+    [TestMethod]
     public void CheckSliceElementFieldAddress() => CheckTarget("SliceElementFieldAddress");
 
     [TestMethod]

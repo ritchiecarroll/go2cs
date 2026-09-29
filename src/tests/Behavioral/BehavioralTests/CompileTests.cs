@@ -1807,6 +1807,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckSliceBoundsEscapeRoutes() => CheckTarget("SliceBoundsEscapeRoutes");
 
     [TestMethod]
+    public void CheckSliceBoundsRecover() => CheckTarget("SliceBoundsRecover");
+
+    [TestMethod]
     public void CheckSliceElementFieldAddress() => CheckTarget("SliceElementFieldAddress");
 
     [TestMethod]
