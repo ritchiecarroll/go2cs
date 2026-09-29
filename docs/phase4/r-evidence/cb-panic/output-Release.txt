@@ -1,0 +1,16 @@
+[failfast] exit=0x80131623
+  err: Process terminated.
+       probe control: fail-fast inside the callback
+          at System.Environment.FailFast(System.Runtime.CompilerServices.StackCrawlMarkHandle, System.String, System.Runtime.CompilerServices.ObjectHandleOnStack, System.String)
+          at System.Environment.FailFast(System.Threading.StackCrawlMark ByRef, System.String, System.Exception, System.String)
+          at System.Environment.FailFast(System.String)
+          at Probe+<>c.<Main>b__7_1(UIntPtr, UIntPtr)
+
+[uco] exit=0x00000000
+  out: uco: returned to caller, caught=True (the control did NOT fail fast)
+[main] exit=0x00000000
+  out: main-thread: CAUGHT GoLikePanic("callback panic") finallyRan=True calls=1
+[thread] exit=0x00000000
+  out: new-thread: CAUGHT GoLikePanic("callback panic") finallyRan=True calls=1
+[loop] exit=0x00000000
+  out: loop-100000: caught=100000 last=CAUGHT GoLikePanic("callback panic") finallyRan=True calls=100000 ms=659 ws=35MB
