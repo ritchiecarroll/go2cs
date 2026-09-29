@@ -20,7 +20,7 @@
     <RepositoryUrl>https://github.com/ritchiecarroll/go2cs</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
+    <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
     <!-- The registration file is compiled into the OPTED-IN PROGRAM (GoCpuProfiler.targets links it),
          never into this assembly: a referenced assembly's module initializer does not run until
          something loads it, and the program's own always does. -->
