@@ -91,6 +91,7 @@
     <None Include="$(MSBuildThisFileDirectory)convUnaryExpr.go" />
     <None Include="$(MSBuildThisFileDirectory)corpusReferenceClosure_test.go" />
     <None Include="$(MSBuildThisFileDirectory)crossAssemblyLiftDedup_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)csReservedTypeNames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)csprojMetadata_test.go" />
     <None Include="$(MSBuildThisFileDirectory)csprojTemplate_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deadPointerParamAlias_test.go" />
