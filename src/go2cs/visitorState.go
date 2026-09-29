@@ -204,6 +204,13 @@ type Visitor struct {
 	// initializers run in textual order). Only the tuple-spread arm writes to it.
 	globalDeclHoist *strings.Builder
 
+	// globalDeclHoistStatements makes that spill a LOCAL statement (`var (ᴛ1, ᴛ2) = call;`)
+	// instead of a hidden field: set for a package var whose initializer is relocated into its
+	// per-file init method (collectMovedInitVars), so the spill moves into the method WITH the
+	// var. A field keeps its own initializer and runs in file order, ahead of the dependencies
+	// the relocation exists to wait for.
+	globalDeclHoistStatements bool
+
 	// ImportSpec variables
 	currentImportPath     string
 	packageImports        *strings.Builder

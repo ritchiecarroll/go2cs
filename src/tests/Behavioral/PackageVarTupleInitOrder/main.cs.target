@@ -28,12 +28,18 @@ internal static Sum must(Sum s, error err) {
     return s.Clone();
 }
 
-internal static (Sum, error) tupleᴛ1ʗ = build(B);
-public static Sum A = must(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2);
+public static Sum A;
+internal static void initᴛA() {
+    var (ᴛ1, ᴛ2) = build(B);
+    A = must(ᴛ1, ᴛ2);
+}
 
-internal static (Sum, error) tupleᴛ2ʗ = build(B);
-public static ж<Sum> ᏑAddressed = new StandardBox<Sum>(must(tupleᴛ2ʗ.Item1, tupleᴛ2ʗ.Item2));
+public static ж<Sum> ᏑAddressed = new StandardBox<Sum>(default(Sum));
 public static ref Sum Addressed => ref ᏑAddressed.Value;
+internal static void initᴛAddressed() {
+    var (ᴛ3, ᴛ4) = build(B);
+    Addressed = must(ᴛ3, ᴛ4);
+}
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object addressedˢ = (@string)"Addressed:"u8;
