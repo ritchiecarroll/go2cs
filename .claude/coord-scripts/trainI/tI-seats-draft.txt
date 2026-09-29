@@ -17,3 +17,7 @@ i9-frame-func|2e399551c0|the i9: A2 D3 Frame.Func (interned per name) + startLin
 coord-census-funclits|83d447317b|COORD: identifier census rule 6 (GoPositionMap funcLits suffix, DELTA only); self-test 205/0; adversarially verified; on master 15da8805b2
 g-mutex-contention|5f736dc12e|G: class F (i) mutex contention: Wait(0) fast path + handoff restart (profiling-on only); TestMutexBlockFullAggregation fail->pass windows, 20/20 solo both OSes; R accepted; on master 15da8805b2
 # PENDING, seat when accepted:
+# RUN 2 ADDITIONS (merge onto claude/coord-trainI 9e1594dcd2 after run 1 ends; then run 2):
+#   r-zerosize-view-address|18135e1311|R: A17 view-address fix (os/user, internal/syscall/windows regression) -- ON the union
+#   c1-heapdump-managed-write|31862ce991|C1: WriteHeapDump through a managed write (windows asmcgocall) -- ON the union
+#   i9-gozero-parked|377ee48a63|the i9: channel.cs parked receive -> GoZero<T>() (seat 5 correction); RE-EMIT ZeroValueNeedyStructPaths/package_info.cs at the merge
