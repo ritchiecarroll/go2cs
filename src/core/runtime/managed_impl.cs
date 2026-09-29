@@ -1341,6 +1341,11 @@ partial class runtime_package
             appendGoFrames(trace, panicSite);
         }
 
+        // Go ends the calling goroutine's block, like every other, with the `go` statement that started
+        // it (traceback1's printcreatedby): the line a child reads to name its parent.
+        if (current is not null)
+            appendCreatedBy(trace, current);
+
         if (all)
         {
             // Every OTHER live goroutine, in goid order, as Go dumps them: one blank-line-separated
@@ -1374,14 +1379,20 @@ partial class runtime_package
         return trace.ToString();
     }
 
-    // Go's printcreatedby1 (runtime/traceback.go): `created by <func> in goroutine <parentGoid>` --
-    // the one line of a foreign goroutine's block this runtime CAN state truthfully, because the
-    // registry records the creator at launch (Goroutine.Creator). It is what a leak filter reads:
-    // net/http's interestingGoroutines drops blocks by `created by testing.RunTests`, `created by
-    // runtime.gc`, and an operator reading a dump learns which `go` statement left the goroutine
-    // behind. Go's position line beneath it is deliberately omitted: it would cost a file-info
-    // capture on every `go` statement, and nothing matches on it. Absent for the main goroutine
+    // Go's printcreatedby1 (runtime/traceback.go): `created by <func> in goroutine <parentGoid>`, then
+    // the `go` statement's position on a tab-indented line -- the one part of a foreign goroutine's
+    // block this runtime CAN state truthfully, because the registry records the creator at launch
+    // (Goroutine.Creator). The first line is what a leak filter reads: net/http's
+    // interestingGoroutines drops blocks by `created by testing.RunTests`, `created by runtime.gc`.
+    // The second is what runtime's parseTraceback requires under it. Absent for the main goroutine
     // and for a host-entered thread, exactly as Go prints none for goroutine 1.
+    //
+    // The position is resolved HERE, at print time, from the IL offset captured at the `go`
+    // statement (Goroutine.CreatorILOffset), through the same PDB reader and the same Go position
+    // map every frame line reads (goCreatorPosition). Where no position can be named (no portable
+    // PDB beside the assembly or embedded, as under native AOT) the line is Go's own spelling for an
+    // unknown PC, `?:0` (funcline1), rather than omitted: a created-by with no line beneath it is a
+    // malformed block to Go's parser.
     private static void appendCreatedBy(StringBuilder trace, Goroutine goroutine)
     {
         if (goroutine.Creator is not System.Reflection.MethodBase creator)
@@ -1392,7 +1403,26 @@ partial class runtime_package
         if (goroutine.ParentId != 0)
             trace.Append(" in goroutine ").Append(goroutine.ParentId);
 
-        trace.Append('\n');
+        (string file, int line) = goCreatorPosition(creator, goroutine.CreatorILOffset);
+
+        trace.Append("\n\t").Append(file).Append(':').Append(line).Append('\n');
+    }
+
+    // The `go` statement's position: the sequence point at or before the captured IL offset in the
+    // creator's portable PDB, mapped to Go by the frame lines' own lookup (goSourcePosition).
+    //
+    // PRECISION LIMIT, the one every frame line already has: in optimized JIT code a non-leaf frame's
+    // IL offset can read 0 where the JIT kept no mapping for the call site, and then the line named is
+    // the creator's FIRST statement rather than the `go` statement. StackTrace(true) reads the same
+    // offset and names the same line, so this adds no error of its own.
+    private static (string file, int line) goCreatorPosition(System.Reflection.MethodBase creator, int ilOffset)
+    {
+        (string? csFile, int csLine) = methodSourcePosition(creator, ilOffset);
+
+        if (csFile is null || csLine <= 0)
+            return ("?", 0);
+
+        return goSourcePosition(creator, csFile, csLine);
     }
 
     // Go's goroutineheader (runtime/traceback.go): `goroutine <goid> [<status>]:`, where the status
@@ -1746,8 +1776,10 @@ partial class runtime_package
     private static readonly object s_pdbLock = new();
     private static readonly Dictionary<System.Reflection.Assembly, System.Reflection.Metadata.MetadataReaderProvider?> s_pdbs = new();
 
-    // A method's first non-hidden sequence point (document name, line), or (null, 0).
-    private static (string? file, int line) methodSourcePosition(System.Reflection.MethodBase method)
+    // A method's first non-hidden sequence point (document name, line), or (null, 0). Given an IL
+    // offset (not StackFrame.OFFSET_UNKNOWN), the last non-hidden sequence point at or before it
+    // instead -- the lookup StackTrace(true) makes for a live frame -- falling back to the first.
+    private static (string? file, int line) methodSourcePosition(System.Reflection.MethodBase method, int ilOffset = StackFrame.OFFSET_UNKNOWN)
     {
         System.Reflection.Assembly assembly = method.Module.Assembly;
         System.Reflection.Metadata.MetadataReaderProvider? provider;
@@ -1772,13 +1804,21 @@ partial class runtime_package
                 var definition = System.Reflection.Metadata.Ecma335.MetadataTokens.MethodDefinitionHandle(method.MetadataToken);
                 System.Reflection.Metadata.MethodDebugInformation information = pdb.GetMethodDebugInformation(definition.ToDebugInformationHandle());
 
+                System.Reflection.Metadata.SequencePoint? found = null;
+
                 foreach (System.Reflection.Metadata.SequencePoint point in information.GetSequencePoints())
                 {
                     if (point.IsHidden)
                         continue;
 
-                    return (pdb.GetString(pdb.GetDocument(point.Document).Name), point.StartLine);
+                    if (found is not null && (ilOffset < 0 || point.Offset > ilOffset))
+                        break;
+
+                    found = point;
                 }
+
+                if (found is System.Reflection.Metadata.SequencePoint at)
+                    return (pdb.GetString(pdb.GetDocument(at.Document).Name), at.StartLine);
             }
         }
         catch (Exception)
@@ -1934,10 +1974,14 @@ partial class runtime_package
     // goFramePosition spells one frame's source position: the Go one the conversion recorded, or the
     // converted C# one when it recorded none. The single funnel both consumers read, so a traceback
     // and a runtime.Caller on the same frame can never disagree about where it is.
-    private static (string file, int line) goFramePosition(System.Reflection.MethodBase method, StackFrame frame)
+    private static (string file, int line) goFramePosition(System.Reflection.MethodBase method, StackFrame frame) =>
+        goSourcePosition(method, frame.GetFileName(), frame.GetFileLineNumber());
+
+    // The mapping itself, from a C# position however it was read: a live frame's file info, or a PDB
+    // sequence point read at print time (goCreatorPosition).
+    private static (string file, int line) goSourcePosition(System.Reflection.MethodBase method, string? csFile, int csLine)
     {
-        string csPath = goSourcePath(frame.GetFileName());
-        int csLine = frame.GetFileLineNumber();
+        string csPath = goSourcePath(csFile);
 
         if (csPath.Length == 0)
             return (csPath, csLine);

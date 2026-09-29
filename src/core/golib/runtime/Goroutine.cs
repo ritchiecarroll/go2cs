@@ -101,11 +101,12 @@ public sealed class Goroutine
     // The panic observer, when a HOST installed one. Read once per escaping panic and never cleared.
     private static Action<PanicException>? s_panicObserver;
 
-    private Goroutine(long id, bool isMain, System.Reflection.MethodBase? creator, long parentId, System.Reflection.MethodBase? entry)
+    private Goroutine(long id, bool isMain, System.Reflection.MethodBase? creator, int creatorILOffset, long parentId, System.Reflection.MethodBase? entry)
     {
         Id = id;
         IsMain = isMain;
         Creator = creator;
+        CreatorILOffset = creatorILOffset;
         ParentId = parentId;
         Entry = entry;
         IsSystem = !isMain && IsSystemCreator(creator);
@@ -204,11 +205,15 @@ public sealed class Goroutine
     // The function that executed the `go` statement -- Go's gp.gopc, resolved to its function -- and
     // the goroutine it ran on (gp.parentGoid). Captured on the CREATING thread at Start, by an
     // identity-located walk past golib's own launcher frames, WITHOUT file info (a per-launch PDB
-    // read would price every `go` statement; the traceback consumers that matter -- net/http's
-    // goroutine-leak filter among them -- match the `created by <func>` text, never its position).
-    // Null for the main goroutine and for a thread a host entered directly: Go prints no creator
-    // for goroutine 1 either.
+    // read would price every `go` statement). Null for the main goroutine and for a thread a host
+    // entered directly: Go prints no creator for goroutine 1 either.
     internal System.Reflection.MethodBase? Creator { get; }
+
+    // The IL offset of the `go` statement within Creator, from the same walk (Go's gp.gopc itself,
+    // before it is resolved to a line): read from the frame the walk already holds, so it adds nothing
+    // to a `go` statement. The traceback resolves it to a file and line only when it prints
+    // (runtime's appendCreatedBy). StackFrame.OFFSET_UNKNOWN (-1) where the frame carries none.
+    internal int CreatorILOffset { get; }
 
     internal long ParentId { get; }
 
@@ -779,7 +784,8 @@ public sealed class Goroutine
         // Captured HERE, on the thread executing the `go` statement -- the new thread's first frame
         // is Run, which knows nothing about who asked for it. `body` IS the goroutine's start
         // function on this overload: nothing wrapped it, so its Method names the Go function.
-        StartWithCreator(body, CreatorFrame(), body.Method);
+        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorFrame();
+        StartWithCreator(body, creator, ilOffset, body.Method);
     }
 
     /// <summary>
@@ -795,16 +801,18 @@ public sealed class Goroutine
     /// </remarks>
     public static void Start(Action body, Delegate entry)
     {
-        StartWithCreator(body, CreatorFrame(), entry.Method);
+        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorFrame();
+        StartWithCreator(body, creator, ilOffset, entry.Method);
     }
 
     /// <summary>
     /// The guard seam for <see cref="Start"/>: the same launch with the creator SUPPLIED, so a test can
     /// register a goroutine as the runtime's own without a runtime function to execute the `go`.
     /// </summary>
-    internal static void StartForGuard(Action body, System.Reflection.MethodBase? creator) => StartWithCreator(body, creator, body.Method);
+    internal static void StartForGuard(Action body, System.Reflection.MethodBase? creator) =>
+        StartWithCreator(body, creator, System.Diagnostics.StackFrame.OFFSET_UNKNOWN, body.Method);
 
-    private static void StartWithCreator(Action body, System.Reflection.MethodBase? creator, System.Reflection.MethodBase? entry)
+    private static void StartWithCreator(Action body, System.Reflection.MethodBase? creator, int creatorILOffset, System.Reflection.MethodBase? entry)
     {
         long parentId = t_current?.Id ?? 0;
 
@@ -820,7 +828,7 @@ public sealed class Goroutine
         // out of NumGoroutine, runtime.Stack(all) and the goroutine profile until that thread was
         // scheduled -- which runtime/pprof's "goroutine launches" subtest reads as a missing child.
         // The labels are this thread's AsyncLocal, the value the child's flowed context would hold.
-        Goroutine goroutine = Register(isMain: false, creator, parentId, entry);
+        Goroutine goroutine = Register(isMain: false, creator, parentId, entry, creatorILOffset);
         goroutine.m_profileLabels = s_profileLabels.Value;
 
         // Go's newproc traces the create on the creating thread (ExecutionTracer, Q28).
@@ -916,9 +924,10 @@ public sealed class Goroutine
     // The first frame above golib's own launch machinery -- the `goǃ` rungs live on `builtin`, Start
     // and this walk on Goroutine -- located by IDENTITY rather than by a skip count, so a rung the
     // JIT inlines (they are one-line bodies, exactly the shape it inlines eagerly) cannot shift the
-    // answer onto the wrong function. No file info: see Creator.
+    // answer onto the wrong function. No file info: see Creator. The frame's IL offset rides along
+    // (see CreatorILOffset).
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-    private static System.Reflection.MethodBase? CreatorFrame()
+    private static (System.Reflection.MethodBase? method, int ilOffset) CreatorFrame()
     {
         foreach (System.Diagnostics.StackFrame frame in new System.Diagnostics.StackTrace(fNeedFileInfo: false).GetFrames())
         {
@@ -932,15 +941,16 @@ public sealed class Goroutine
             if (declaring == typeof(Goroutine) || declaring == typeof(builtin))
                 continue;
 
-            return method;
+            return (method, frame.GetILOffset());
         }
 
-        return null;
+        return (null, System.Diagnostics.StackFrame.OFFSET_UNKNOWN);
     }
 
-    private static Goroutine Register(bool isMain, System.Reflection.MethodBase? creator, long parentId, System.Reflection.MethodBase? entry)
+    private static Goroutine Register(bool isMain, System.Reflection.MethodBase? creator, long parentId, System.Reflection.MethodBase? entry,
+        int creatorILOffset = System.Diagnostics.StackFrame.OFFSET_UNKNOWN)
     {
-        Goroutine goroutine = new(Interlocked.Increment(ref s_nextId), isMain, creator, parentId, entry);
+        Goroutine goroutine = new(Interlocked.Increment(ref s_nextId), isMain, creator, creatorILOffset, parentId, entry);
 
         s_live[goroutine.Id] = goroutine;
         Interlocked.Increment(ref s_count);
