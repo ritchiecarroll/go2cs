@@ -1,7 +1,7 @@
 TRAIN J PRE-RESOLUTIONS (conflict map on the TRAIN I run 2 union 61cf81290c, draft order, 13 seats; tJ-conflict-map.sh, 2026-09-29 03:45)
 The map ABORTS a conflicting seat, so a later seat's conflict is against the base plus the clean seats before it.
 
-SEAT 2 c2-noinline -- 3 behavioral position maps (GlobalShadowedByLocal, NativeIntWideConstElement, ZeroValueArrayNamedResult
+SEAT 2 (SUPERSEDED 04:35: g-inline-locations 6f2240e680 now takes slot 2 and CARRIES c2-noinline with these three maps already re-emitted by its merged converter at fb490a5817, plus FrameFuncIdentity re-baselined; c2-noinline and g-pprof-bank then read already-contained. Keep the regenerate rule only if a byte check disagrees.) c2-noinline -- 3 behavioral position maps (GlobalShadowedByLocal, NativeIntWideConstElement, ZeroValueArrayNamedResult
   package_info.cs): REGENERATE with the union converter (-go2cspath, GOROOT pinned); main.cs must equal its golden. Never hand-merge.
 
 SEAT 4 c2-a8 -- src/core/golib/runtime/RuntimeErrorPanic.cs. It conflicts with TRAIN I ALONE (003c9def02, the slice-bounds
