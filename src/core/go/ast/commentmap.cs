@@ -102,7 +102,7 @@ internal static slice<Node> nodeList(Node n) {
         top = (s)[i - 1];
         i--;
     }
-    s = (s)[0..(int)(i)];
+    s = (s).slice(0, i);
     return top;
 }
 

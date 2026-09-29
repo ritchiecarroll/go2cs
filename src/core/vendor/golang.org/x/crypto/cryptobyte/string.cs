@@ -27,8 +27,8 @@ partial class cryptobyte_package {
     if (len(s) < n || n < 0) {
         return default!;
     }
-    var v = (s)[..(int)(n)];
-    s = (s)[(int)(n)..];
+    var v = (s).slice(0, n);
+    s = (s).slice(n);
     return v;
 }
 

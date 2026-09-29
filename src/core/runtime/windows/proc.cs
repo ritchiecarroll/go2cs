@@ -431,7 +431,7 @@ internal static ж<sudog> acquireSudog() {
     nint n = len((~pp).sudogcache);
     var s = (~pp).sudogcache[n - 1];
     pp.Value.sudogcache[n - 1] = default!;
-    pp.Value.sudogcache = (~pp).sudogcache[..(int)(n - 1)];
+    pp.Value.sudogcache = (~pp).sudogcache.slice(0, n - 1);
     if ((~s).elem != nil) {
         @throw(acquireSudogFoundSElemˢ);
     }
@@ -484,7 +484,7 @@ internal static void releaseSudog(ж<sudog> Ꮡs) {
             nint n = len((~pp).sudogcache);
             var Δp = (~pp).sudogcache[n - 1];
             pp.Value.sudogcache[n - 1] = default!;
-            pp.Value.sudogcache = (~pp).sudogcache[..(int)(n - 1)];
+            pp.Value.sudogcache = (~pp).sudogcache.slice(0, n - 1);
             if (first == nil){
                 first = Δp;
             } else {
@@ -647,7 +647,7 @@ internal static slice<ж<g>> allGsSnapshot() {
     // monotonically and existing entries never change, so we can
     // simply return a copy of the slice header. For added safety,
     // we trim everything past len because that can still change.
-    return allgs.slice(-1, len(allgs), len(allgs));
+    return allgs.slice(0, len(allgs), len(allgs));
 }
 
 // atomicAllG returns &allgs[0] and len(allgs) for use with atomicAllGIndex.
@@ -5026,7 +5026,7 @@ internal static void sigprof(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp, ж
             while (cgoOff < 32 && mp.cgoCallers.Value[cgoOff] != 0) {
                 cgoOff++;
             }
-            n += copy(stk[..], (~mp.cgoCallers).Value[..(int)(cgoOff)]);
+            n += copy(stk[..], (~mp.cgoCallers).Value.slice(0, cgoOff));
             mp.cgoCallers.Value[0] = 0;
         }
         // Collect Go stack that leads to the cgo call.
@@ -5044,7 +5044,7 @@ internal static void sigprof(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp, ж
     } else {
         Ꮡu.initAt(pc, sp, lr, Ꮡgp, (unwindFlags)((unwindFlags)(unwindSilentErrors | unwindTrap) | unwindJumpStack));
     }
-    n += tracebackPCs(Ꮡu, 0, stk[(int)(n)..]);
+    n += tracebackPCs(Ꮡu, 0, stk.slice(n));
     if (n <= 0) {
         // Normal traceback is impossible or has failed.
         // Account it against abstract "System" or "GC".
@@ -5071,7 +5071,7 @@ internal static void sigprof(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp, ж
         if (Ꮡgp != nil && gp.m != nil && (~gp.m).curg != nil) {
             tagPtr = (~gp.m).curg.of(g.Ꮡlabels);
         }
-        cpuprof.add(tagPtr, stk[..(int)(n)]);
+        cpuprof.add(tagPtr, stk.slice(0, n));
         var gprof = Ꮡgp;
         ж<m> mpΔ1 = default!;
         ж<Δp> pp = default!;
@@ -5082,7 +5082,7 @@ internal static void sigprof(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp, ж
             mpΔ1 = gp.m;
             pp = (~gp.m).p.ptr();
         }
-        traceCPUSample(gprof, mpΔ1, pp, stk[..(int)(n)]);
+        traceCPUSample(gprof, mpΔ1, pp, stk.slice(0, n));
     }
     getg().Value.m.Value.mallocing--;
 }
@@ -5268,17 +5268,17 @@ internal static ж<Δp> procresize(int32 nprocs) {
         // concurrently since it doesn't run on a P.
         @lock(ᏑallpLock);
         if (nprocs <= (int32)cap(allp)){
-            allp = allp[..(int)(nprocs)];
+            allp = allp.slice(0, nprocs);
         } else {
             var nallp = new slice<ж<Δp>>(nprocs);
             // Copy everything up to allp's cap so we
             // never lose old allocated Ps.
-            copy(nallp, allp[..(int)(cap(allp))]);
+            copy(nallp, allp.slice(0, cap(allp)));
             allp = nallp;
         }
         if (maskWords <= (int32)cap(idlepMask)){
-            idlepMask = idlepMask[..(int)(maskWords)];
-            timerpMask = timerpMask[..(int)(maskWords)];
+            idlepMask = idlepMask.slice(0, maskWords);
+            timerpMask = timerpMask.slice(0, maskWords);
         } else {
             var nidlepMask = new slice<uint32>(maskWords);
             // No need to copy beyond len, old Ps are irrelevant.
@@ -5344,9 +5344,9 @@ internal static ж<Δp> procresize(int32 nprocs) {
     // Trim allp.
     if ((int32)len(allp) != nprocs) {
         @lock(ᏑallpLock);
-        allp = allp[..(int)(nprocs)];
-        idlepMask = idlepMask[..(int)(maskWords)];
-        timerpMask = timerpMask[..(int)(maskWords)];
+        allp = allp.slice(0, nprocs);
+        idlepMask = idlepMask.slice(0, maskWords);
+        timerpMask = timerpMask.slice(0, maskWords);
         unlock(ᏑallpLock);
     }
     ж<Δp> runnablePs = default!;

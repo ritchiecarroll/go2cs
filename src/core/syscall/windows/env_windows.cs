@@ -21,7 +21,7 @@ public static (@string value, bool found) Getenv(@string key) {
             return ("", false);
         }
         if (n <= (uint32)len(b)) {
-            return (UTF16ToString(b[..(int)(n)]), true);
+            return (UTF16ToString(b.slice(0, (nint)(n))), true);
         }
     }
 }
@@ -63,7 +63,7 @@ public static void Clearenv() {
         // https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133
         for (nint j = 1; j < len(s); j++) {
             if (s[j] == (rune)'=') {
-                Unsetenv(s[0..(int)(j)]);
+                Unsetenv(s.slice(0, j));
                 break;
             }
         }

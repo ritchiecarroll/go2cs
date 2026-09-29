@@ -24,7 +24,7 @@ public static nint XORBytes(slice<byte> dst, slice<byte> x, slice<byte> y) {
     if (n > len(dst)) {
         throw panic("subtle.XORBytes: dst too short");
     }
-    if (alias.InexactOverlap(dst[..(int)(n)], x[..(int)(n)]) || alias.InexactOverlap(dst[..(int)(n)], y[..(int)(n)])) {
+    if (alias.InexactOverlap(dst.slice(0, n), x.slice(0, n)) || alias.InexactOverlap(dst.slice(0, n), y.slice(0, n))) {
         throw panic("subtle.XORBytes: invalid overlap");
     }
     xorBytes(Ꮡ(dst, 0), Ꮡ(x, 0), Ꮡ(y, 0), n); // arch-specific

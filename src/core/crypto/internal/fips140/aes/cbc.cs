@@ -38,7 +38,7 @@ public static void CryptBlocks(this ж<CBCEncrypter> Ꮡc, slice<byte> dst, slic
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }
-    if (alias.InexactOverlap(dst[..(int)(len(src))], src)) {
+    if (alias.InexactOverlap(dst.slice(0, len(src)), src)) {
         throw panic("crypto/cipher: invalid buffer overlap");
     }
     fips140.RecordApproved();
@@ -99,7 +99,7 @@ public static void CryptBlocks(this ж<CBCDecrypter> Ꮡc, slice<byte> dst, slic
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }
-    if (alias.InexactOverlap(dst[..(int)(len(src))], src)) {
+    if (alias.InexactOverlap(dst.slice(0, len(src)), src)) {
         throw panic("crypto/cipher: invalid buffer overlap");
     }
     fips140.RecordApproved();
@@ -127,14 +127,14 @@ internal static void cryptBlocksDecGeneric(ref Block b, [GoArrayDims(16)] ж<arr
     nint prev = start - (nint)ΔBlockSize;
     // Copy the last block of ciphertext as the IV of the next call.
     var iv = civ.Clone();
-    copy(civ[..], src[(int)(start)..(int)(end)]);
+    copy(civ[..], src.slice(start, end));
     while (start >= 0) {
-        decryptBlock(ref b, dst[(int)(start)..(int)(end)], src[(int)(start)..(int)(end)]);
+        decryptBlock(ref b, dst.slice(start, end), src.slice(start, end));
         if (start > 0){
-            subtle.XORBytes(dst[(int)(start)..(int)(end)], dst[(int)(start)..(int)(end)], src[(int)(prev)..(int)(start)]);
+            subtle.XORBytes(dst.slice(start, end), dst.slice(start, end), src.slice(prev, start));
         } else {
             // The first block is special because it uses the saved iv.
-            subtle.XORBytes(dst[(int)(start)..(int)(end)], dst[(int)(start)..(int)(end)], iv[..]);
+            subtle.XORBytes(dst.slice(start, end), dst.slice(start, end), iv[..]);
         }
         end -= ΔBlockSize;
         start -= ΔBlockSize;

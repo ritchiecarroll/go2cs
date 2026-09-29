@@ -151,7 +151,7 @@ internal static void pad000(ж<hmac.HMAC> Ꮡh, nint writtenSoFar) {
         d.hK.Reset();
         d.hK.Write(d.V);
         d.V = d.hK.Sum(d.V[..0]);
-        tlen += copy(@out[(int)(tlen)..], d.V);
+        tlen += copy(@out.slice(tlen), d.V);
     }
     // Note that if this function shows up on ECDSA-level profiles, this can be
     // optimized in the common case by deferring the rest to the next Generate

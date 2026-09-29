@@ -242,7 +242,7 @@ internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
             switch (select(selᴛ24, ᐸꟷ(selᴛ25, ꓸꓸꓸ), ᐸꟷ(selᴛ26, ꓸꓸꓸ), ᐸꟷ(selᴛ27, ꓸꓸꓸ))) {
             case 0: {
                 nint nw = ᐸꟷ(p.wrRx);
-                b = b[(int)(nw)..];
+                b = b.slice(nw);
                 n += nw;
                 break;
             }

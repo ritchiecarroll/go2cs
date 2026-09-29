@@ -21,12 +21,12 @@ public static iter.Seq<slice<byte>> Lines(slice<byte> s) {
             slice<byte> line = default!;
             {
                 nint i = IndexByte(s, (rune)'\n'); if (i >= 0){
-                    (line, s) = (s[..(int)(i + 1)], s[(int)(i + 1)..]);
+                    (line, s) = (s.slice(0, i + 1), s.slice(i + 1));
                 } else {
                     (line, s) = (s, default!);
                 }
             }
-            if (!yield(line.slice(-1, len(line), len(line)))) {
+            if (!yield(line.slice(0, len(line), len(line)))) {
                 return;
             }
         }
@@ -39,10 +39,10 @@ internal static iter.Seq<slice<byte>> explodeSeq(slice<byte> s) {
     return (Func<slice<byte>, bool> yield) => {
         while (len(s) > 0) {
             var (_, size) = utf8.DecodeRune(s);
-            if (!yield(s.slice(-1, size, size))) {
+            if (!yield(s.slice(0, size, size))) {
                 return;
             }
-            s = s[(int)(size)..];
+            s = s.slice(size);
         }
     };
 }
@@ -60,13 +60,13 @@ internal static iter.Seq<slice<byte>> splitSeq(slice<byte> s, slice<byte> sep, n
             if (i < 0) {
                 break;
             }
-            var frag = s[..(int)(i + sepSave)];
-            if (!yield(frag.slice(-1, len(frag), len(frag)))) {
+            var frag = s.slice(0, i + sepSave);
+            if (!yield(frag.slice(0, len(frag), len(frag)))) {
                 return;
             }
-            s = s[(int)(i + len(sepʗ1))..];
+            s = s.slice(i + len(sepʗ1));
         }
-        yield(s.slice(-1, len(s), len(s)));
+        yield(s.slice(0, len(s), len(s)));
     };
 }
 
@@ -99,7 +99,7 @@ public static iter.Seq<slice<byte>> FieldsSeq(slice<byte> s) {
             var r = (rune)sʗ1[i];
             var isSpace = asciiSpace[sʗ1[i]] != 0;
             if (r >= utf8.RuneSelf) {
-                (r, size) = utf8.DecodeRune(sʗ1[(int)(i)..]);
+                (r, size) = utf8.DecodeRune(sʗ1.slice(i));
                 isSpace = Δunicode.IsSpace(r);
             }
             if (isSpace){
@@ -133,7 +133,7 @@ public static iter.Seq<slice<byte>> FieldsFuncSeq(slice<byte> s, Func<rune, bool
             nint size = 1;
             var r = (rune)sʗ1[i];
             if (r >= utf8.RuneSelf) {
-                (r, size) = utf8.DecodeRune(sʗ1[(int)(i)..]);
+                (r, size) = utf8.DecodeRune(sʗ1.slice(i));
             }
             if (f(r)){
                 if (start >= 0) {

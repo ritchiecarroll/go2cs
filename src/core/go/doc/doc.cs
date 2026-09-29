@@ -160,7 +160,7 @@ public static ж<Package> New(ж<ast.Package> Ꮡpkg, @string importPath, Mode m
             @string r = strings.TrimPrefix((~f).Recv, "*"u8);
             {
                 nint i = strings.IndexByte(r, (rune)'['); if (i >= 0) {
-                    r = r[..(int)(i)]; // remove type parameters
+                    r = r.slice(0, i); // remove type parameters
                 }
             }
             p.syms[r + "."u8 + (~f).Name] = true;
@@ -265,7 +265,7 @@ internal static (ж<ast.Object>, error) simpleImporter(map<@string, ж<ast.Objec
     var pkg = imports[path];
     if (pkg == nil) {
         // note that strings.LastIndex returns -1 if there is no "/"
-        pkg = ast.NewObj(ast.Pkg, path[(int)(strings.LastIndex(path, "/"u8) + 1)..]);
+        pkg = ast.NewObj(ast.Pkg, path.slice(strings.LastIndex(path, "/"u8) + 1));
         pkg.Value.Data = ast.NewScope(nil).OrTypedNil(); // required by ast.NewPackage for dot-import
         imports[path] = pkg;
     }

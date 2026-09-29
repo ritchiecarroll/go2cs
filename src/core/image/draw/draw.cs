@@ -207,7 +207,7 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                     nint d0 = dst0.PixOffset(r.Min.X, r.Min.Y);
                     nint s0 = src0.PixOffset(sp.X, sp.Y);
                     drawCopySrc(
-                        (~dst0).Pix[(int)(d0)..], (~dst0).Stride, r, (~src0).Pix[(int)(s0)..], (~src0).Stride, sp, 4 * r.Dx());
+                        (~dst0).Pix.slice(d0), (~dst0).Stride, r, (~src0).Pix.slice(s0), (~src0).Stride, sp, 4 * r.Dx());
                     return;
                 }
                 case ж<image.NRGBA> src0: {
@@ -243,11 +243,11 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                     for (nint i = i0; i < i1; i++) {
                         dst0.Value.Pix[i] = colorIndex;
                     }
-                    var firstRow = (~dst0).Pix[(int)(i0)..(int)(i1)];
+                    var firstRow = (~dst0).Pix.slice(i0, i1);
                     for (nint y = r.Min.Y + 1; y < r.Max.Y; y++) {
                         i0 += dst0.Value.Stride;
                         i1 += dst0.Value.Stride;
-                        copy((~dst0).Pix[(int)(i0)..(int)(i1)], firstRow);
+                        copy((~dst0).Pix.slice(i0, i1), firstRow);
                     }
                     return;
                 } else 
@@ -266,7 +266,7 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                     nint d0 = dst0.PixOffset(r.Min.X, r.Min.Y);
                     nint s0 = src0.PixOffset(sp.X, sp.Y);
                     drawCopySrc(
-                        (~dst0).Pix[(int)(d0)..], (~dst0).Stride, r, (~src0).Pix[(int)(s0)..], (~src0).Stride, sp, 4 * r.Dx());
+                        (~dst0).Pix.slice(d0), (~dst0).Stride, r, (~src0).Pix.slice(s0), (~src0).Stride, sp, 4 * r.Dx());
                     return;
                 }
             }
@@ -280,7 +280,7 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                     nint d0 = dst0.PixOffset(r.Min.X, r.Min.Y);
                     nint s0 = src0.PixOffset(sp.X, sp.Y);
                     drawCopySrc(
-                        (~dst0).Pix[(int)(d0)..], (~dst0).Stride, r, (~src0).Pix[(int)(s0)..], (~src0).Stride, sp, 8 * r.Dx());
+                        (~dst0).Pix.slice(d0), (~dst0).Stride, r, (~src0).Pix.slice(s0), (~src0).Stride, sp, 8 * r.Dx());
                     return;
                 }
             }
@@ -480,11 +480,11 @@ internal static void drawFillSrc(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, uin
         dst.Pix[i + 2] = sb8;
         dst.Pix[i + 3] = sa8;
     }
-    var firstRow = dst.Pix[(int)(i0)..(int)(i1)];
+    var firstRow = dst.Pix.slice(i0, i1);
     for (nint y = r.Min.Y + 1; y < r.Max.Y; y++) {
         i0 += dst.Stride;
         i1 += dst.Stride;
-        copy(dst.Pix[(int)(i0)..(int)(i1)], firstRow);
+        copy(dst.Pix.slice(i0, i1), firstRow);
     }
 }
 
@@ -515,8 +515,8 @@ internal static void drawCopyOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, ж
         (i0, i1, idelta) = ((dx - 1) * 4, -4, -4);
     }
     for (; dy > 0; dy--) {
-        var dpix = dst.Pix[(int)(d0)..];
-        var spix = src.Pix[(int)(s0)..];
+        var dpix = dst.Pix.slice(d0);
+        var spix = src.Pix.slice(s0);
         for (nint i = i0; i != i1; i += idelta) {
             var s = spix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
             var sr = (uint32)s[0] * 0x101;
@@ -557,7 +557,7 @@ internal static void drawCopySrc(slice<byte> dstPix, nint dstStride, image.Recta
         sdelta = -srcStride;
     }
     for (; dy > 0; dy--) {
-        copy(dstPix[(int)(d0)..(int)(d0 + bytesPerRow)], srcPix[(int)(s0)..(int)(s0 + bytesPerRow)]);
+        copy(dstPix.slice(d0, d0 + bytesPerRow), srcPix.slice(s0, s0 + bytesPerRow));
         d0 += ddelta;
         s0 += sdelta;
     }
@@ -571,8 +571,8 @@ internal static void drawNRGBAOver(ref imageꓸRGBA dst, image.Rectangle r, ref 
     nint y = r.Min.Y - dst.Rect.Min.Y;
     nint sy = sp.Y - src.Rect.Min.Y;
     for (; y != yMax; (y, sy) = (y + 1, sy + 1)) {
-        var dpix = dst.Pix[(int)(y * dst.Stride)..];
-        var spix = src.Pix[(int)(sy * src.Stride)..];
+        var dpix = dst.Pix.slice(y * dst.Stride);
+        var spix = src.Pix.slice(sy * src.Stride);
         for ((nint i, nint si) = (i0, si0); i < i1; (i, si) = (i + 4, si + 4)) {
             // Convert from non-premultiplied color to pre-multiplied color.
             var s = spix.slice(si, si + 4, si + 4); // Small cap improves performance, see https://golang.org/issue/27857
@@ -603,8 +603,8 @@ internal static void drawNRGBASrc(ref imageꓸRGBA dst, image.Rectangle r, ref i
     nint y = r.Min.Y - dst.Rect.Min.Y;
     nint sy = sp.Y - src.Rect.Min.Y;
     for (; y != yMax; (y, sy) = (y + 1, sy + 1)) {
-        var dpix = dst.Pix[(int)(y * dst.Stride)..];
-        var spix = src.Pix[(int)(sy * src.Stride)..];
+        var dpix = dst.Pix.slice(y * dst.Stride);
+        var spix = src.Pix.slice(sy * src.Stride);
         for ((nint i, nint si) = (i0, si0); i < i1; (i, si) = (i + 4, si + 4)) {
             // Convert from non-premultiplied color to pre-multiplied color.
             var s = spix.slice(si, si + 4, si + 4); // Small cap improves performance, see https://golang.org/issue/27857
@@ -629,8 +629,8 @@ internal static void drawGray(ref imageꓸRGBA dst, image.Rectangle r, ref image
     nint y = r.Min.Y - dst.Rect.Min.Y;
     nint sy = sp.Y - src.Rect.Min.Y;
     for (; y != yMax; (y, sy) = (y + 1, sy + 1)) {
-        var dpix = dst.Pix[(int)(y * dst.Stride)..];
-        var spix = src.Pix[(int)(sy * src.Stride)..];
+        var dpix = dst.Pix.slice(y * dst.Stride);
+        var spix = src.Pix.slice(sy * src.Stride);
         for ((nint i, nint si) = (i0, si0); i < i1; (i, si) = (i + 4, si + 1)) {
             var p = spix[si];
             var d = dpix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
@@ -650,8 +650,8 @@ internal static void drawCMYK(ref imageꓸRGBA dst, image.Rectangle r, ref image
     nint y = r.Min.Y - dst.Rect.Min.Y;
     nint sy = sp.Y - src.Rect.Min.Y;
     for (; y != yMax; (y, sy) = (y + 1, sy + 1)) {
-        var dpix = dst.Pix[(int)(y * dst.Stride)..];
-        var spix = src.Pix[(int)(sy * src.Stride)..];
+        var dpix = dst.Pix.slice(y * dst.Stride);
+        var spix = src.Pix.slice(sy * src.Stride);
         for ((nint i, nint si) = (i0, si0); i < i1; (i, si) = (i + 4, si + 4)) {
             var s = spix.slice(si, si + 4, si + 4); // Small cap improves performance, see https://golang.org/issue/27857
             var d = dpix.slice(i, i + 4, i + 4);
@@ -1040,7 +1040,7 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
                 palette[i][2] = (int32)b;
                 palette[i][3] = (int32)a;
             }
-            (pix, stride) = ((~p).Pix[(int)(p.PixOffset(r.Min.X, r.Min.Y))..], p.Value.Stride);
+            (pix, stride) = ((~p).Pix.slice(p.PixOffset(r.Min.X, r.Min.Y)), p.Value.Stride);
         }
     }
     // quantErrorCurr and quantErrorNext are the Floyd-Steinberg quantization

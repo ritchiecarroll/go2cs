@@ -142,7 +142,7 @@ internal delegate stateFn stateFn(ж<lexer> _);
         l.atEOF = true;
         return eof;
     }
-    var (r, w) = utf8.DecodeRuneInString(l.input[(int)(nint)(l.pos)..]);
+    var (r, w) = utf8.DecodeRuneInString(l.input.slice(l.pos));
     l.pos += ((Pos)w);
     if (r == (rune)'\n') {
         l.line++;
@@ -160,7 +160,7 @@ internal delegate stateFn stateFn(ж<lexer> _);
 // backup steps back one rune.
 [GoRecv] internal static void backup(this ref lexer l) {
     if (!l.atEOF && l.pos > 0) {
-        var (r, w) = utf8.DecodeLastRuneInString(l.input[..(int)(nint)(l.pos)]);
+        var (r, w) = utf8.DecodeLastRuneInString(l.input.slice(0, l.pos));
         l.pos -= ((Pos)w);
         // Correct newline count.
         if (r == (rune)'\n') {
@@ -172,7 +172,7 @@ internal delegate stateFn stateFn(ж<lexer> _);
 // thisItem returns the item at the current input point with the specified type
 // and advances the input.
 [GoRecv] internal static item thisItem(this ref lexer l, itemType t) {
-    var i = new item(t, l.start, l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)], l.startLine);
+    var i = new item(t, l.start, l.input.slice(l.start, l.pos), l.startLine);
     l.start = l.pos;
     l.startLine = l.line;
     return i;
@@ -193,7 +193,7 @@ internal delegate stateFn stateFn(ж<lexer> _);
 // It tracks newlines in the ignored text, so use it only
 // for text that is skipped without calling l.next.
 [GoRecv] internal static void ignore(this ref lexer l) {
-    l.line += strings.Count(l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)], "\n"u8);
+    l.line += strings.Count(l.input.slice(l.start, l.pos), "\n"u8);
     l.start = l.pos;
     l.startLine = l.line;
 }
@@ -275,17 +275,17 @@ internal static stateFn lexText(ж<lexer> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     {
-        nint x = strings.Index(l.input[(int)(nint)(l.pos)..], l.leftDelim); if (x >= 0) {
+        nint x = strings.Index(l.input.slice(l.pos), l.leftDelim); if (x >= 0) {
             if (x > 0) {
                 l.pos += ((Pos)x);
                 // Do we trim any trailing space?
                 Pos trimLength = ((Pos)0);
                 Pos delimEnd = l.pos + ((Pos)len(l.leftDelim));
-                if (hasLeftTrimMarker(l.input[(int)(nint)(delimEnd)..])) {
-                    trimLength = rightTrimLength(l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)]);
+                if (hasLeftTrimMarker(l.input.slice(delimEnd))) {
+                    trimLength = rightTrimLength(l.input.slice(l.start, l.pos));
                 }
                 l.pos -= trimLength;
-                l.line += strings.Count(l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)], "\n"u8);
+                l.line += strings.Count(l.input.slice(l.start, l.pos), "\n"u8);
                 var i = l.thisItem(itemText);
                 l.pos += trimLength;
                 l.ignore();
@@ -299,7 +299,7 @@ internal static stateFn lexText(ж<lexer> Ꮡl) {
     l.pos = ((Pos)len(l.input));
     // Correctly reached EOF.
     if (l.pos > l.start) {
-        l.line += strings.Count(l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)], "\n"u8);
+        l.line += strings.Count(l.input.slice(l.start, l.pos), "\n"u8);
         return l.emit(itemText);
     }
     return l.emit(itemEOF);
@@ -312,11 +312,11 @@ internal static Pos rightTrimLength(@string s) {
 
 // atRightDelim reports whether the lexer is at a right delimiter, possibly preceded by a trim marker.
 [GoRecv] internal static (bool delim, bool trimSpaces) atRightDelim(this ref lexer l) {
-    if (hasRightTrimMarker(l.input[(int)(nint)(l.pos)..]) && strings.HasPrefix(l.input[(int)(nint)(l.pos + trimMarkerLen)..], l.rightDelim)) {
+    if (hasRightTrimMarker(l.input.slice(l.pos)) && strings.HasPrefix(l.input.slice(l.pos + trimMarkerLen), l.rightDelim)) {
         // With trim marker.
         return (true, true);
     }
-    if (strings.HasPrefix(l.input[(int)(nint)(l.pos)..], l.rightDelim)) {
+    if (strings.HasPrefix(l.input.slice(l.pos), l.rightDelim)) {
         // Without trim marker.
         return (true, false);
     }
@@ -334,12 +334,12 @@ internal static stateFn lexLeftDelim(ж<lexer> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     l.pos += ((Pos)len(l.leftDelim));
-    var trimSpace = hasLeftTrimMarker(l.input[(int)(nint)(l.pos)..]);
+    var trimSpace = hasLeftTrimMarker(l.input.slice(l.pos));
     Pos afterMarker = ((Pos)0);
     if (trimSpace) {
         afterMarker = trimMarkerLen;
     }
-    if (strings.HasPrefix(l.input[(int)(nint)(l.pos + afterMarker)..], leftComment)) {
+    if (strings.HasPrefix(l.input.slice(l.pos + afterMarker), leftComment)) {
         l.pos += afterMarker;
         l.ignore();
         return lexComment;
@@ -357,7 +357,7 @@ internal static stateFn lexComment(ж<lexer> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     l.pos += ((Pos)len(leftComment));
-    nint x = strings.Index(l.input[(int)(nint)(l.pos)..], rightComment);
+    nint x = strings.Index(l.input.slice(l.pos), rightComment);
     if (x < 0) {
         return l.errorf("unclosed comment"u8);
     }
@@ -366,14 +366,14 @@ internal static stateFn lexComment(ж<lexer> Ꮡl) {
     if (!delim) {
         return l.errorf("comment ends before closing delimiter"u8);
     }
-    l.line += strings.Count(l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)], "\n"u8);
+    l.line += strings.Count(l.input.slice(l.start, l.pos), "\n"u8);
     var i = l.thisItem(itemComment);
     if (trimSpace) {
         l.pos += trimMarkerLen;
     }
     l.pos += ((Pos)len(l.rightDelim));
     if (trimSpace) {
-        l.pos += leftTrimLength(l.input[(int)(nint)(l.pos)..]);
+        l.pos += leftTrimLength(l.input.slice(l.pos));
     }
     l.ignore();
     if (l.options.emitComment) {
@@ -394,7 +394,7 @@ internal static stateFn lexRightDelim(ж<lexer> Ꮡl) {
     l.pos += ((Pos)len(l.rightDelim));
     var i = l.thisItem(itemRightDelim);
     if (trimSpace) {
-        l.pos += leftTrimLength(l.input[(int)(nint)(l.pos)..]);
+        l.pos += leftTrimLength(l.input.slice(l.pos));
         l.ignore();
     }
     l.insideAction = false;
@@ -507,7 +507,7 @@ internal static stateFn lexSpace(ж<lexer> Ꮡl) {
     }
     // Be careful about a trim-marked closing delimiter, which has a minus
     // after a space. We know there is a space, so check for the '-' that might follow.
-    if (hasRightTrimMarker(l.input[(int)(nint)(l.pos - 1)..]) && strings.HasPrefix(l.input[(int)(nint)(l.pos - 1 + trimMarkerLen)..], l.rightDelim)) {
+    if (hasRightTrimMarker(l.input.slice(l.pos - 1)) && strings.HasPrefix(l.input.slice(l.pos - 1 + trimMarkerLen), l.rightDelim)) {
         l.backup(); // Before the space.
         if (numSpaces == 1) {
             return lexRightDelim; // On the delim, so go right to that.
@@ -529,7 +529,7 @@ internal static stateFn lexIdentifier(ж<lexer> Ꮡl) {
             }
             default: {
                 l.backup();
-                @string word = l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)];
+                @string word = l.input.slice(l.start, l.pos);
                 if (!l.atTerminator()) {
                     // absorb.
                     return l.errorf("bad character %#U"u8, r);
@@ -617,7 +617,7 @@ internal static stateFn lexFieldOrVariable(ж<lexer> Ꮡl, itemType typ) {
         return true;
     }
 
-    return strings.HasPrefix(l.input[(int)(nint)(l.pos)..], l.rightDelim);
+    return strings.HasPrefix(l.input.slice(l.pos), l.rightDelim);
 }
 
 // lexChar scans a character constant. The initial quote is already
@@ -660,13 +660,13 @@ internal static stateFn lexNumber(ж<lexer> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!l.scanNumber()) {
-        return l.errorf("bad number syntax: %q"u8, l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)]);
+        return l.errorf("bad number syntax: %q"u8, l.input.slice(l.start, l.pos));
     }
     {
         var sign = l.peek(); if (sign == (rune)'+' || sign == (rune)'-') {
             // Complex: 1+2i. No spaces, must end in 'i'.
             if (!l.scanNumber() || l.input[l.pos - 1] != (rune)'i') {
-                return l.errorf("bad number syntax: %q"u8, l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)]);
+                return l.errorf("bad number syntax: %q"u8, l.input.slice(l.start, l.pos));
             }
             return l.emit(itemComplex);
         }

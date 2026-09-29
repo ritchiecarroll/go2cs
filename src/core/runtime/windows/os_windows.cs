@@ -604,7 +604,7 @@ internal static unsafe nint writeConsole(uintptr handle, @unsafe.Pointer buf, in
         var r = rᴛ1;
 
         if (w >= len(utf16tmp) - 2) {
-            writeConsoleUTF16(handle, utf16tmp[..(int)(w)]);
+            writeConsoleUTF16(handle, utf16tmp.slice(0, w));
             w = 0;
         }
         if (r < 0x10000){
@@ -617,7 +617,7 @@ internal static unsafe nint writeConsole(uintptr handle, @unsafe.Pointer buf, in
             w += 2;
         }
     }
-    writeConsoleUTF16(handle, utf16tmp[..(int)(w)]);
+    writeConsoleUTF16(handle, utf16tmp.slice(0, w));
     unlock(Ꮡutf16ConsoleBackLock);
     return total;
 }

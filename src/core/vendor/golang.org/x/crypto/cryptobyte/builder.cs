@@ -62,7 +62,7 @@ public static ж<Builder> NewFixedBuilder(slice<byte> buffer) {
     if (b.err != default!) {
         return (default!, b.err);
     }
-    return (b.result[(int)(b.offset)..], default!);
+    return (b.result.slice(b.offset), default!);
 }
 
 // BytesOrPanic returns the bytes written by the builder or panics if an error
@@ -71,7 +71,7 @@ public static ж<Builder> NewFixedBuilder(slice<byte> buffer) {
     if (b.err != default!) {
         throw panic(b.err);
     }
-    return b.result[(int)(b.offset)..];
+    return b.result.slice(b.offset);
 }
 
 // AddUint8 appends an 8-bit value to the byte string.
@@ -254,7 +254,7 @@ private static readonly @string pendingAsn1ChildTooLongˢ = "pending ASN.1 child
         if (extraBytes != 0) {
             child.add(new slice<byte>(extraBytes).ꓸꓸꓸ);
             nint childStart = (~child).offset + (~child).pendingLenLen;
-            copy((~child).result[(int)(childStart + extraBytes)..], (~child).result[(int)(childStart)..]);
+            copy((~child).result.slice(childStart + extraBytes), (~child).result.slice(childStart));
         }
         child.Value.offset++;
         child.Value.pendingLenLen = extraBytes;
@@ -317,7 +317,7 @@ private static readonly @string cryptobyteBuilderIsˢ = "cryptobyte: Builder is 
     if (n > length) {
         throw panic("cryptobyte: attempted to unwrite more than was written");
     }
-    b.result = b.result[..(int)(len(b.result) - n)];
+    b.result = b.result.slice(0, len(b.result) - n);
 }
 
 // A MarshalingValue marshals itself into a Builder.

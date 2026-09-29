@@ -70,7 +70,7 @@ internal static uintptr vgetrandomGetState() {
         }
     }
     var state = vgetrandomAlloc.states[len(vgetrandomAlloc.states) - 1];
-    vgetrandomAlloc.states = vgetrandomAlloc.states[..(int)(len(vgetrandomAlloc.states) - 1)];
+    vgetrandomAlloc.states = vgetrandomAlloc.states.slice(0, len(vgetrandomAlloc.states) - 1);
     unlock(ᏑvgetrandomAlloc.of(vgetrandomAllocᴛ1.ᏑstatesLock));
     return state;
 }

@@ -67,9 +67,9 @@ internal static UntypedInt realMaxData32 => /* math.MaxInt32 */ 2147483647;
 
 [GoRecv] internal static ints Δslice(this ref ints a, nint i, nint j) {
     if (a.int32 != default!) {
-        return new ints(a.int32[(int)(i)..(int)(j)], default!);
+        return new ints(a.int32.slice(i, j), default!);
     }
-    return new ints(default!, a.int64[(int)(i)..(int)(j)]);
+    return new ints(default!, a.int64.slice(i, j));
 }
 
 // New creates a new [Index] for data.
@@ -110,12 +110,12 @@ internal static (nint n, error err) writeSlice(io.Writer w, slice<byte> buf, int
     nint p = binary.MaxVarintLen64;
     nint m = data.len();
     for (; n < m && p + (nint)binary.MaxVarintLen64 <= builtin.len(buf); n++) {
-        p += binary.PutUvarint(buf[(int)(p)..], (uint64)data.get(n));
+        p += binary.PutUvarint(buf.slice(p), (uint64)data.get(n));
     }
     // update buffer size
     binary.PutVarint(buf, (int64)p);
     // write buffer
-    (_, err) = w.Write(buf[0..(int)(p)]);
+    (_, err) = w.Write(buf.slice(0, p));
     return (n, err);
 }
 
@@ -140,13 +140,13 @@ internal static (nint n, error err) readSlice(io.Reader r, slice<byte> buf, ints
     nint size = (nint)size64;
     // read buffer w/o the size
     {
-        (_, err) = io.ReadFull(r, buf[(int)(binary.MaxVarintLen64)..(int)(size)]); if (err != default!) {
+        (_, err) = io.ReadFull(r, buf.slice(binary.MaxVarintLen64, size)); if (err != default!) {
             return (n, err);
         }
     }
     // decode as many elements as present in buf
     for (nint p = binary.MaxVarintLen64; p < size; n++) {
-        var (x, w) = binary.Uvarint(buf[(int)(p)..]);
+        var (x, w) = binary.Uvarint(buf.slice(p));
         data.set(n, (int64)x);
         p += w;
     }
@@ -182,7 +182,7 @@ internal static UntypedInt bufSize => /* 16 << 10 */ 16384; // reasonable for Be
         }
     } else {
         // re-use existing buffers
-        x.data = x.data[0..(int)(n)];
+        x.data = x.data.slice(0, n);
         x.sa = x.sa.Δslice(0, n);
     }
     // read data
@@ -238,7 +238,7 @@ internal static UntypedInt bufSize => /* 16 << 10 */ 16384; // reasonable for Be
 }
 
 [GoRecv] internal static slice<byte> at(this ref Index x, nint i) {
-    return x.data[(int)(x.sa.get(i))..];
+    return x.data.slice((nint)(x.sa.get(i)));
 }
 
 // lookupAll returns a slice into the matching region of the index.
@@ -335,12 +335,12 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
                     nint j = 2 * count;
                     pairs[j + 0] = i;
                     pairs[j + 1] = i + builtin.len(lit);
-                    result[count] = pairs[(int)(j)..(int)(j + 2)];
+                    result[count] = pairs.slice(j, j + 2);
                     count++;
                     prev = i + builtin.len(lit);
                 }
             }
-            result = result[0..(int)(count)];
+            result = result.slice(0, count);
             if (builtin.len(result) >= n || builtin.len(indices) != n1) {
                 // found all matches or there's no chance to find more
                 // (n and n1 can be negative)
@@ -371,7 +371,7 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
             if (builtin.len(result) == n) {
                 break;
             }
-            var m = Ꮡr.FindIndex(x.data[(int)(i)..]); // anchored search - will not run off
+            var m = Ꮡr.FindIndex(x.data.slice(i)); // anchored search - will not run off
             // ignore indices leading to overlapping matches
             if (m != default! && prev <= i) {
                 m[0] = i; // correct m

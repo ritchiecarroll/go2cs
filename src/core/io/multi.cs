@@ -71,7 +71,7 @@ internal static (nint, error) Read(this eofReader _Δp0, slice<byte> _Δp1) {
         }
         sum += n;
         if (err != default!) {
-            mr.readers = mr.readers[(int)(i)..]; // permit resume / retry after error
+            mr.readers = mr.readers.slice(i); // permit resume / retry after error
             return (sum, err);
         }
         mr.readers[i] = default!; // permit early GC

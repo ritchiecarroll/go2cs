@@ -39,14 +39,14 @@ internal static slice<@string> splitList(@string path) {
                 break;
             }
             case {} when c == ListSeparator && !quo: {
-                list = append(list, path[(int)(start)..(int)(i)]);
+                list = append(list, path.slice(start, i));
                 start = i + 1;
                 break;
             }}
         }
 
     }
-    list = append(list, path[(int)(start)..]);
+    list = append(list, path.slice(start));
     // Remove quotes.
     foreach (var (i, s) in list) {
         list[i] = strings.ReplaceAll(s, @""""u8, @""u8);

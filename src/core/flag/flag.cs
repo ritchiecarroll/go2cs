@@ -654,8 +654,8 @@ public static (@string name, @string usage) UnquoteUsage(ж<Flag> Ꮡflag) {
         if (usage[i] == (rune)'`') {
             for (nint j = i + 1; j < len(usage); j++) {
                 if (usage[j] == (rune)'`') {
-                    name = usage[(int)(i + 1)..(int)(j)];
-                    usage = usage[..(int)(i)] + name + usage[(int)(j + 1)..];
+                    name = usage.slice(i + 1, j);
+                    usage = usage.slice(0, i) + name + usage.slice(j + 1);
                     return (name, usage);
                 }
             }
@@ -1224,7 +1224,7 @@ internal static (bool, error) parseOne(this ж<FlagSet> Ꮡf) {
             return (false, default!);
         }
     }
-    @string name = s[(int)(numMinuses)..];
+    @string name = s.slice(numMinuses);
     if (len(name) == 0 || name[0] == (rune)'-' || name[0] == (rune)'=') {
         return (false, Ꮡf.failf("bad flag syntax: %s"u8, s));
     }
@@ -1235,9 +1235,9 @@ internal static (bool, error) parseOne(this ж<FlagSet> Ꮡf) {
     for (nint i = 1; i < len(name); i++) {
         // equals cannot be first
         if (name[i] == (rune)'=') {
-            value = name[(int)(i + 1)..];
+            value = name.slice(i + 1);
             hasValue = true;
-            name = name[0..(int)(i)];
+            name = name.slice(0, i);
             break;
         }
     }

@@ -377,7 +377,7 @@ internal static (termlist, bool) intersectTermLists(termlist xterms, bool xcomp,
                 i++;
             }
         }
-        terms = terms[..(int)(i)];
+        terms = terms.slice(0, i);
         if (!terms.isAll()) {
             comp = false;
         }

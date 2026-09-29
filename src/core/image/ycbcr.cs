@@ -146,9 +146,9 @@ public static @string String(this YCbCrSubsampleRatio s) {
     nint yi = p.YOffset(r.Min.X, r.Min.Y);
     nint ci = p.COffset(r.Min.X, r.Min.Y);
     return new YCbCrжImage(Ꮡ(new YCbCr(
-        Y: p.Y[(int)(yi)..],
-        Cb: p.Cb[(int)(ci)..],
-        Cr: p.Cr[(int)(ci)..],
+        Y: p.Y.slice(yi),
+        Cb: p.Cb.slice(ci),
+        Cr: p.Cr.slice(ci),
         SubsampleRatio: p.SubsampleRatio,
         YStride: p.YStride,
         CStride: p.CStride,
@@ -215,7 +215,7 @@ public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio
     nint i2 = w * h + 2 * cw * ch;
     var b = new slice<byte>(i2);
     return Ꮡ(new YCbCr(
-        Y: b.slice(-1, i0, i0),
+        Y: b.slice(0, i0, i0),
         Cb: b.slice(i0, i1, i1),
         Cr: b.slice(i1, i2, i2),
         SubsampleRatio: subsampleRatio,
@@ -289,15 +289,15 @@ public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio
     nint ai = p.AOffset(r.Min.X, r.Min.Y);
     return new NYCbCrAжImage(Ꮡ(new NYCbCrA(
         YCbCr: new YCbCr(
-            Y: p.Y[(int)(yi)..],
-            Cb: p.Cb[(int)(ci)..],
-            Cr: p.Cr[(int)(ci)..],
+            Y: p.Y.slice(yi),
+            Cb: p.Cb.slice(ci),
+            Cr: p.Cr.slice(ci),
             SubsampleRatio: p.SubsampleRatio,
             YStride: p.YStride,
             CStride: p.CStride,
             Rect: r
         ),
-        A: p.A[(int)(ai)..],
+        A: p.A.slice(ai),
         AStride: p.AStride
     )));
 }
@@ -310,7 +310,7 @@ public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio
     nint i0 = 0;
     nint i1 = p.Rect.Dx();
     for (nint y = p.Rect.Min.Y; y < p.Rect.Max.Y; y++) {
-        foreach (var (_, a) in p.A[(int)(i0)..(int)(i1)]) {
+        foreach (var (_, a) in p.A.slice(i0, i1)) {
             if (a != 0xff) {
                 return false;
             }
@@ -340,7 +340,7 @@ public static ж<NYCbCrA> NewNYCbCrA(Rectangle r, YCbCrSubsampleRatio subsampleR
     var b = new slice<byte>(i3);
     return Ꮡ(new NYCbCrA(
         YCbCr: new YCbCr(
-            Y: b.slice(-1, i0, i0),
+            Y: b.slice(0, i0, i0),
             Cb: b.slice(i0, i1, i1),
             Cr: b.slice(i1, i2, i2),
             SubsampleRatio: subsampleRatio,
@@ -348,7 +348,7 @@ public static ж<NYCbCrA> NewNYCbCrA(Rectangle r, YCbCrSubsampleRatio subsampleR
             CStride: cw,
             Rect: r
         ),
-        A: b[(int)(i2)..],
+        A: b.slice(i2),
         AStride: w
     ));
 }

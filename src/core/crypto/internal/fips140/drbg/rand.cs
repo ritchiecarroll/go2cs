@@ -47,7 +47,7 @@ public static void Read(slice<byte> b) {
         while (len(b) > 0) {
             nint size = min(len(b), (nint)(maxRequestSize));
             {
-                var reseedRequired = drbg.Generate(b[..(int)(size)], additionalInput); if (reseedRequired) {
+                var reseedRequired = drbg.Generate(b.slice(0, size), additionalInput); if (reseedRequired) {
                     // See SP 800-90A Rev. 1, Section 9.3.1, Steps 6-8, as explained in
                     // Section 9.3.2: if Generate reports a reseed is required, the
                     // additional input is passed to Reseed along with the entropy and
@@ -60,7 +60,7 @@ public static void Read(slice<byte> b) {
                     continue;
                 }
             }
-            b = b[(int)(size)..];
+            b = b.slice(size);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

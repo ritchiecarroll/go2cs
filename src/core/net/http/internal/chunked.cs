@@ -139,12 +139,12 @@ internal static readonly @string malformedChunkedEncodingˢ = "malformed chunked
         }
         var rbuf = b;
         if ((uint64)len(rbuf) > cr.n) {
-            rbuf = rbuf[..(int)(cr.n)];
+            rbuf = rbuf.slice(0, (nint)(cr.n));
         }
         nint n0 = default!;
         (n0, cr.err) = cr.r.Read(rbuf);
         n += n0;
-        b = b[(int)(n0)..];
+        b = b.slice(n0);
         cr.n -= (uint64)n0;
         // If we're at the end of a chunk, read the next two
         // bytes to verify they are "\r\n".
@@ -194,7 +194,7 @@ internal static (slice<byte>, error) readChunkLine(ж<bufio.Reader> Ꮡb) {
             return (default!, errors.New(invalidCrInChunkedLineˢ));
         }
     }
-    p = p[..(int)(len(p) - 2)]; // trim CRLF
+    p = p.slice(0, len(p) - 2); // trim CRLF
     if (len(p) >= maxLineLength) {
         return (default!, ErrLineTooLong);
     }
@@ -203,7 +203,7 @@ internal static (slice<byte>, error) readChunkLine(ж<bufio.Reader> Ꮡb) {
 
 internal static slice<byte> trimTrailingWhitespace(slice<byte> b) {
     while (len(b) > 0 && isOWS(b[len(b) - 1])) {
-        b = b[..(int)(len(b) - 1)];
+        b = b.slice(0, len(b) - 1);
     }
     return b;
 }

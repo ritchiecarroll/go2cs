@@ -25,7 +25,7 @@ public static @string String(this RoundingMode i) {
     if (i >= ((RoundingMode)(byte)(len(_RoundingMode_index) - 1))) {
         return "RoundingMode("u8 + strconv.FormatInt((int64)(byte)i, 10) + ")"u8;
     }
-    return _RoundingMode_name[(int)(_RoundingMode_index[i])..(int)(_RoundingMode_index[i + 1])];
+    return _RoundingMode_name.slice(_RoundingMode_index[i], _RoundingMode_index[i + 1]);
 }
 
 } // end big_package

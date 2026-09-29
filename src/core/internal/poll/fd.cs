@@ -93,7 +93,7 @@ internal static void consume(ref slice<slice<byte>> v, int64 n) {
     while (len(v) > 0) {
         var ln0 = (int64)len((v)[0]);
         if (ln0 > n) {
-            (v)[0] = (v)[0][(int)(n)..];
+            (v)[0] = (v)[0].slice((nint)(n));
             return;
         }
         n -= ln0;

@@ -292,10 +292,10 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
 
         return (network, 0, default!);
     }
-    afnet = network[..(int)(i)];
+    afnet = network.slice(0, i);
     var exprᴛ2 = afnet;
     if (exprᴛ2 == "ip"u8 || exprᴛ2 == "ip4"u8 || exprᴛ2 == "ip6"u8) {
-        @string protostr = network[(int)(i + 1)..];
+        @string protostr = network.slice(i + 1);
         var (protoΔ2, iΔ2, ok) = dtoi(protostr);
         if (!ok || iΔ2 != len(protostr)) {
             (protoΔ2, err) = lookupProtocol(ctx, protostr);

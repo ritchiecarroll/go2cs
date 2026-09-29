@@ -884,7 +884,7 @@ public static (@string value, bool ok) Lookup(this StructTag tag, @string key) {
         while (i < len(tag) && tag[i] == (rune)' ') {
             i++;
         }
-        tag = tag[(int)(i)..];
+        tag = tag.slice(i);
         if (tag == ""u8) {
             break;
         }
@@ -899,8 +899,8 @@ public static (@string value, bool ok) Lookup(this StructTag tag, @string key) {
         if (i == 0 || i + 1 >= len(tag) || tag[i] != (rune)':' || tag[i + 1] != (rune)'"') {
             break;
         }
-        @string name = ((@string)(tag[..(int)(i)]));
-        tag = tag[(int)(i + 1)..];
+        @string name = ((@string)(tag.slice(0, i)));
+        tag = tag.slice(i + 1);
         // Scan quoted string to find value.
         i = 1;
         while (i < len(tag) && tag[i] != (rune)'"') {
@@ -912,8 +912,8 @@ public static (@string value, bool ok) Lookup(this StructTag tag, @string key) {
         if (i >= len(tag)) {
             break;
         }
-        @string qvalue = ((@string)(tag[..(int)(i + 1)]));
-        tag = tag[(int)(i + 1)..];
+        @string qvalue = ((@string)(tag.slice(0, i + 1)));
+        tag = tag.slice(i + 1);
         if (key == name) {
             var (valueΔ1, err) = strconv.Unquote(qvalue);
             if (err != default!) {

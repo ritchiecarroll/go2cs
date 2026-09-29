@@ -20,7 +20,7 @@ internal static slice<ж<ast.Ident>> filterIdentList(slice<ж<ast.Ident>> list) 
             j++;
         }
     }
-    return list[0..(int)(j)];
+    return list.slice(0, j);
 }
 
 internal static ж<ast.Ident> underscore = ast.NewIdent("_"u8);
@@ -57,7 +57,7 @@ internal static slice<ast.Expr> filterExprList(slice<ast.Expr> list, Func<@strin
         list[j] = exp;
         j++;
     }
-    return list[0..(int)(j)];
+    return list.slice(0, j);
 }
 
 // updateIdentList replaces all unexported identifiers with underscore
@@ -109,7 +109,7 @@ internal static void removeAnonymousField(@string name, ref ast.InterfaceType it
     if (j < len(list)) {
         ityp.Incomplete = true;
     }
-    ityp.Methods.Value.List = list[0..(int)(j)];
+    ityp.Methods.Value.List = list.slice(0, j);
 }
 
 // filterFieldList removes unexported fields (field names) from the field list
@@ -169,7 +169,7 @@ internal static void removeAnonymousField(@string name, ref ast.InterfaceType it
     if (j < len(list)) {
         removedFields = true;
     }
-    fields.List = list[0..(int)(j)];
+    fields.List = list.slice(0, j);
     return removedFields;
 }
 
@@ -347,7 +347,7 @@ internal static ast.Expr copyConstType(ast.Expr typ, tokenꓸPos pos) {
             j++;
         }
     }
-    return list[0..(int)(j)];
+    return list.slice(0, j);
 }
 
 [GoRecv] internal static bool filterDecl(this ref reader r, ast.Decl decl) {
@@ -377,7 +377,7 @@ internal static ast.Expr copyConstType(ast.Expr typ, tokenꓸPos pos) {
             j++;
         }
     }
-    src.Decls = src.Decls[0..(int)(j)];
+    src.Decls = src.Decls.slice(0, j);
 }
 
 } // end doc_package

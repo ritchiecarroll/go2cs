@@ -157,7 +157,7 @@ internal static orderEvent Pop(this ж<orderEventList> Ꮡh) {
     ((h)[0], (h)[n]) = ((h)[n].ΔClone(), (h)[0].ΔClone());
     heapDown(Ꮡh, 0, n);
     var x = (h)[len(h) - 1].ΔClone();
-    h = (h)[..(int)(len(h) - 1)];
+    h = (h).slice(0, len(h) - 1);
     return x.ΔClone();
 }
 

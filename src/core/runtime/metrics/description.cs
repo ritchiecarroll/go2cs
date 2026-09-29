@@ -383,7 +383,7 @@ internal static slice<Description> allDesc = new Description[]{
             ));
         }
     }
-    allDesc = appendꓸꓸꓸ(more, allDesc[(int)(i)..]);
+    allDesc = appendꓸꓸꓸ(more, allDesc.slice(i));
 }
 
 // All returns a slice of containing metric descriptions for all supported metrics.

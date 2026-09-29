@@ -231,16 +231,16 @@ internal static rune next(this ж<Scanner> Ꮡs) {
     nint width = 1;
     if (ch >= utf8.RuneSelf) {
         // uncommon case: not ASCII or not enough bytes
-        while (s.srcPos + (nint)utf8.UTFMax > s.srcEnd && !utf8.FullRune(s.srcBuf[(int)(s.srcPos)..(int)(s.srcEnd)])) {
+        while (s.srcPos + (nint)utf8.UTFMax > s.srcEnd && !utf8.FullRune(s.srcBuf.slice(s.srcPos, s.srcEnd))) {
             // not enough bytes: read some more, but first
             // save away token text if any
             if (s.tokPos >= 0) {
-                s.tokBuf.Write(s.srcBuf[(int)(s.tokPos)..(int)(s.srcPos)]);
+                s.tokBuf.Write(s.srcBuf.slice(s.tokPos, s.srcPos));
                 s.tokPos = 0;
             }
             // s.tokEnd is set by Scan()
             // move unread bytes to beginning of buffer
-            copy(s.srcBuf[0..], s.srcBuf[(int)(s.srcPos)..(int)(s.srcEnd)]);
+            copy(s.srcBuf[0..], s.srcBuf.slice(s.srcPos, s.srcEnd));
             s.srcBufOffset += s.srcPos;
             // read more bytes
             // (an io.Reader must return io.EOF when it reaches
@@ -248,7 +248,7 @@ internal static rune next(this ж<Scanner> Ꮡs) {
             // n == 0 will make this loop retry forever; but the
             // error is in the reader implementation in that case)
             nint i = s.srcEnd - s.srcPos;
-            var (n, err) = s.src.Read(s.srcBuf[(int)(i)..(int)(bufLen)]);
+            var (n, err) = s.src.Read(s.srcBuf.slice(i, bufLen));
             s.srcPos = 0;
             s.srcEnd = i + n;
             s.srcBuf[s.srcEnd] = utf8.RuneSelf; // sentinel
@@ -275,7 +275,7 @@ internal static rune next(this ж<Scanner> Ꮡs) {
         ch = (rune)s.srcBuf[s.srcPos];
         if (ch >= utf8.RuneSelf) {
             // uncommon case: not ASCII
-            (ch, width) = utf8.DecodeRune(s.srcBuf[(int)(s.srcPos)..(int)(s.srcEnd)]);
+            (ch, width) = utf8.DecodeRune(s.srcBuf.slice(s.srcPos, s.srcEnd));
             if (ch == utf8.RuneError && width == 1) {
                 // advance for correct error position
                 s.srcPos += width;
@@ -888,11 +888,11 @@ public static @string TokenText(this ж<Scanner> Ꮡs) {
     // s.tokEnd >= s.tokPos
     if (s.tokBuf.Len() == 0) {
         // common case: the entire token text is still in srcBuf
-        return ((@string)(s.srcBuf[(int)(s.tokPos)..(int)(s.tokEnd)]));
+        return ((@string)(s.srcBuf.slice(s.tokPos, s.tokEnd)));
     }
     // part of the token text was saved in tokBuf: save the rest in
     // tokBuf as well and return its content
-    s.tokBuf.Write(s.srcBuf[(int)(s.tokPos)..(int)(s.tokEnd)]);
+    s.tokBuf.Write(s.srcBuf.slice(s.tokPos, s.tokEnd));
     s.tokPos = s.tokEnd; // ensure idempotency of TokenText() call
     return Ꮡs.of(Scanner.ᏑtokBuf).String();
 }

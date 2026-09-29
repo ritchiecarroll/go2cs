@@ -408,7 +408,7 @@ internal static bool decStringSlice(ж<decoderState> Ꮡstate, reflectꓸValue v
         if (len(data) < n) {
             errorf("invalid string length %d: exceeds input size %d"u8, n, len(data));
         }
-        Δslice[i] = ((@string)(data[..(int)(n)]));
+        Δslice[i] = ((@string)(data.slice(0, n)));
         state.b.Drop(n);
     }
     return true;
@@ -590,7 +590,7 @@ internal static void growSlice<E>(reflectꓸValue v, ref slice<E> ps, nint lengt
     if (cp > length) {
         cp = length;
     }
-    s = s[..(int)(cp)];
+    s = s.slice(0, cp);
     v.Set(reflect.ValueOf(s));
     ps = s;
 }

@@ -123,7 +123,7 @@ internal static slice<compressionLevel> levels = new compressionLevel[]{
             }
         }
     }
-    nint n = copy(d.window[(int)(d.windowEnd)..], b);
+    nint n = copy(d.window.slice(d.windowEnd), b);
     d.windowEnd += n;
     return n;
 }
@@ -132,7 +132,7 @@ internal static slice<compressionLevel> levels = new compressionLevel[]{
     if (index > 0) {
         slice<byte> window = default!;
         if (d.blockStart <= index) {
-            window = d.window[(int)(d.blockStart)..(int)(index)];
+            window = d.window.slice(d.blockStart, index);
         }
         d.blockStart = index;
         d.w.writeBlock(tokens, false, window);
@@ -155,7 +155,7 @@ internal static slice<compressionLevel> levels = new compressionLevel[]{
     }
     // If we are given too much, cut it.
     if (len(b) > windowSize) {
-        b = b[(int)(len(b) - (nint)windowSize)..];
+        b = b.slice(len(b) - (nint)windowSize);
     }
     // Add all to window.
     nint n = copy(d.window, b);
@@ -167,12 +167,12 @@ internal static slice<compressionLevel> levels = new compressionLevel[]{
         if (end > n) {
             end = n;
         }
-        var toCheck = d.window[(int)(index)..(int)(end)];
+        var toCheck = d.window.slice(index, end);
         nint dstSize = len(toCheck) - (nint)minMatchLength + 1;
         if (dstSize <= 0) {
             continue;
         }
-        var dst = d.hashMatch[..(int)(dstSize)];
+        var dst = d.hashMatch.slice(0, dstSize);
         d.bulkHasher(toCheck, dst);
         foreach (var (i, val) in dst) {
             nint di = i + index;
@@ -200,7 +200,7 @@ internal static slice<compressionLevel> levels = new compressionLevel[]{
     if (lookahead < minMatchLook) {
         minMatchLook = lookahead;
     }
-    var win = d.window[0..(int)(pos + minMatchLook)];
+    var win = d.window.slice(0, pos + minMatchLook);
     // We quit when we get a match that's at least nice long
     nint nice = len(win) - pos;
     if (d.nice < nice) {
@@ -213,11 +213,11 @@ internal static slice<compressionLevel> levels = new compressionLevel[]{
         tries >>= (int)(2);
     }
     var wEnd = win[pos + length];
-    var wPos = win[(int)(pos)..];
+    var wPos = win.slice(pos);
     nint minIndex = pos - (nint)windowSize;
     for (nint i = prevHead; tries > 0; tries--) {
         if (wEnd == win[i + length]) {
-            nint n = matchLen(win[(int)(i)..], wPos, minMatchLook);
+            nint n = matchLen(win.slice(i), wPos, minMatchLook);
             if (n > length && (n > minMatchLength || pos - i <= 4096)) {
                 length = n;
                 offset = pos - i;
@@ -279,8 +279,8 @@ internal static void bulkHash4(slice<byte> b, slice<uint32> dst) {
 // up to length 'max'. Both slices must be at least 'max'
 // bytes in size.
 internal static nint matchLen(slice<byte> a, slice<byte> b, nint max) {
-    a = a[..(int)(max)];
-    b = b[..(int)(len(a))];
+    a = a.slice(0, max);
+    b = b.slice(0, len(a));
     foreach (var (i, av) in a) {
         if (b[i] != av) {
             return i;
@@ -305,11 +305,11 @@ internal static nint matchLen(slice<byte> a, slice<byte> b, nint max) {
                 return;
             }
             case {} when d.windowEnd is <= 16: {
-                d.err = d.writeStoredBlock(d.window[..(int)(d.windowEnd)]);
+                d.err = d.writeStoredBlock(d.window.slice(0, d.windowEnd));
                 break;
             }
             default: {
-                d.w.writeBlockHuff(false, d.window[..(int)(d.windowEnd)]);
+                d.w.writeBlockHuff(false, d.window.slice(0, d.windowEnd));
                 d.err = d.w.Value.err;
                 break;
             }}
@@ -320,12 +320,12 @@ internal static nint matchLen(slice<byte> a, slice<byte> b, nint max) {
         }
     }
     // Encode the block.
-    d.tokens = d.bestSpeed.encode(d.tokens[..0], d.window[..(int)(d.windowEnd)]);
+    d.tokens = d.bestSpeed.encode(d.tokens[..0], d.window.slice(0, d.windowEnd));
     // If we removed less than 1/16th, Huffman compress the block.
     if (len(d.tokens) > d.windowEnd - ((d.windowEnd >> (int)(4)))){
-        d.w.writeBlockHuff(false, d.window[..(int)(d.windowEnd)]);
+        d.w.writeBlockHuff(false, d.window.slice(0, d.windowEnd));
     } else {
-        d.w.writeBlockDynamic(d.tokens, false, d.window[..(int)(d.windowEnd)]);
+        d.w.writeBlockDynamic(d.tokens, false, d.window.slice(0, d.windowEnd));
     }
     d.err = d.w.Value.err;
     d.windowEnd = 0;
@@ -381,7 +381,7 @@ Loop:
         }
         if (d.index < d.maxInsertIndex) {
             // Update the hash
-            var hash = hash4(d.window[(int)(d.index)..(int)(d.index + (nint)minMatchLength)]);
+            var hash = hash4(d.window.slice(d.index, d.index + (nint)minMatchLength));
             var hh = Ꮡ(d.hashHead, (uint32)(hash & (uint32)hashMask));
             d.chainHead = (nint)(hh.Value);
             d.hashPrev[(nint)(d.index & (nint)windowMask)] = (uint32)d.chainHead;
@@ -425,7 +425,7 @@ Loop:
                 nint index = d.index;
                 for (index++; index < newIndex; index++) {
                     if (index < d.maxInsertIndex) {
-                        var hash = hash4(d.window[(int)(index)..(int)(index + (nint)minMatchLength)]);
+                        var hash = hash4(d.window.slice(index, index + (nint)minMatchLength));
                         // Get previous value with the same hash.
                         // Our chain should point to the previous value.
                         var hh = Ꮡ(d.hashHead, (uint32)(hash & (uint32)hashMask));
@@ -480,14 +480,14 @@ break_Loop:;
 }
 
 [GoRecv] internal static nint fillStore(this ref compressor d, slice<byte> b) {
-    nint n = copy(d.window[(int)(d.windowEnd)..], b);
+    nint n = copy(d.window.slice(d.windowEnd), b);
     d.windowEnd += n;
     return n;
 }
 
 [GoRecv] internal static void store(this ref compressor d) {
     if (d.windowEnd > 0 && (d.windowEnd == maxStoreBlockSize || d.sync)) {
-        d.err = d.writeStoredBlock(d.window[..(int)(d.windowEnd)]);
+        d.err = d.writeStoredBlock(d.window.slice(0, d.windowEnd));
         d.windowEnd = 0;
     }
 }
@@ -499,7 +499,7 @@ break_Loop:;
     if (d.windowEnd < len(d.window) && !d.sync || d.windowEnd == 0) {
         return;
     }
-    d.w.writeBlockHuff(false, d.window[..(int)(d.windowEnd)]);
+    d.w.writeBlockHuff(false, d.window.slice(0, d.windowEnd));
     d.err = d.w.Value.err;
     d.windowEnd = 0;
 }
@@ -514,7 +514,7 @@ internal static (nint n, error err) write(this ж<compressor> Ꮡd, slice<byte> 
     n = len(b);
     while (len(b) > 0) {
         d.step(Ꮡd);
-        b = b[(int)(d.fill(Ꮡd, b))..];
+        b = b.slice(d.fill(Ꮡd, b));
         if (d.err != default!) {
             return (0, d.err);
         }

@@ -280,7 +280,7 @@ public static (ж<Receipient>, error) SetupReceipient(uint16 kemID, uint16 kdfID
 }
 
 [GoRecv] internal static slice<byte> nextNonce(this ref context ctx) {
-    var nonce = ctx.seqNum.bytes()[(int)(16 - ctx.aead.NonceSize())..];
+    var nonce = ctx.seqNum.bytes().slice(16 - ctx.aead.NonceSize());
     foreach (var (i, _) in ctx.baseNonce) {
         nonce[i] ^= (byte)(ctx.baseNonce[i]);
     }

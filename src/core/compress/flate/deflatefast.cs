@@ -119,7 +119,7 @@ internal static ж<deflateFast> newDeflateFast() {
         // A 4-byte match has been found. We'll later see if more than 4 bytes
         // match. But, prior to the match, src[nextEmit:s] are unmatched. Emit
         // them as literal bytes.
-        dst = emitLiteral(dst, src[(int)(nextEmit)..(int)(s)]);
+        dst = emitLiteral(dst, src.slice(nextEmit, s));
         // Call emitCopy, and then see if another emitCopy could be our next
         // move. Repeat until we find no match for the input immediately after
         // what was consumed by the last emitCopy call.
@@ -167,10 +167,10 @@ internal static ж<deflateFast> newDeflateFast() {
     }
 emitRemainder:
     if ((nint)nextEmit < len(src)) {
-        dst = emitLiteral(dst, src[(int)(nextEmit)..]);
+        dst = emitLiteral(dst, src.slice(nextEmit));
     }
     e.cur += (int32)len(src);
-    e.prev = e.prev[..(int)(len(src))];
+    e.prev = e.prev.slice(0, len(src));
     copy(e.prev, src);
     return dst;
 }
@@ -192,9 +192,9 @@ internal static slice<token> emitLiteral(slice<token> dst, slice<byte> lit) {
     }
     // If we are inside the current block
     if (t >= 0) {
-        var bΔ1 = src[(int)(t)..];
-        var aΔ1 = src[(int)(s)..(int)(s1)];
-        bΔ1 = bΔ1[..(int)(len(aΔ1))];
+        var bΔ1 = src.slice(t);
+        var aΔ1 = src.slice(s, s1);
+        bΔ1 = bΔ1.slice(0, len(aΔ1));
         // Extend the match to be as long as possible.
         foreach (var (i, _) in aΔ1) {
             if (aΔ1[i] != bΔ1[i]) {
@@ -209,12 +209,12 @@ internal static slice<token> emitLiteral(slice<token> dst, slice<byte> lit) {
         return 0;
     }
     // Extend the match to be as long as possible.
-    var a = src[(int)(s)..(int)(s1)];
-    var b = e.prev[(int)(tp)..];
+    var a = src.slice(s, s1);
+    var b = e.prev.slice(tp);
     if (len(b) > len(a)) {
-        b = b[..(int)(len(a))];
+        b = b.slice(0, len(a));
     }
-    a = a[..(int)(len(b))];
+    a = a.slice(0, len(b));
     foreach (var (i, _) in b) {
         if (a[i] != b[i]) {
             return (int32)i;
@@ -227,8 +227,8 @@ internal static slice<token> emitLiteral(slice<token> dst, slice<byte> lit) {
         return n;
     }
     // Continue looking for more matches in the current block.
-    a = src[(int)(s + n)..(int)(s1)];
-    b = src[..(int)(len(a))];
+    a = src.slice(s + n, s1);
+    b = src.slice(0, len(a));
     foreach (var (i, _) in a) {
         if (a[i] != b[i]) {
             return (int32)i + n;

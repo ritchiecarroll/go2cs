@@ -23,7 +23,7 @@ internal static @string String(this urlPart i) {
     if (i >= ((urlPart)(uint8)(len(_urlPart_index) - 1))) {
         return "urlPart("u8 + strconv.FormatInt((int64)(uint8)i, 10) + ")"u8;
     }
-    return _urlPart_name[(int)(_urlPart_index[i])..(int)(_urlPart_index[i + 1])];
+    return _urlPart_name.slice(_urlPart_index[i], _urlPart_index[i + 1]);
 }
 
 } // end template_package

@@ -47,7 +47,7 @@ public static uint64 Bytes(ΔSeed seed, slice<byte> b) {
         throw panic("maphash: use of uninitialized Seed");
     }
     if (len(b) > bufSize) {
-        b = b.slice(-1, len(b), len(b)); // merge len and cap calculations when reslicing
+        b = b.slice(0, len(b), len(b)); // merge len and cap calculations when reslicing
         while (len(b) > bufSize) {
             state = rthash(b[..(int)(bufSize)], state);
             b = b[(int)(bufSize)..];
@@ -145,13 +145,13 @@ internal static UntypedInt bufSize => 128;
     // h.n <= bufSize is always true.
     // Checking it is ~free and it lets the compiler eliminate a bounds check.
     if (h.n > 0 && h.n <= bufSize) {
-        nint k = copy(h.buf[(int)(h.n)..], b);
+        nint k = copy(h.buf.slice(h.n), b);
         h.n += k;
         if (h.n < bufSize) {
             // Copied the entirety of b to h.buf.
             return (size, default!);
         }
-        b = b[(int)(k)..];
+        b = b.slice(k);
         h.flush();
     }
     // No need to set h.n = 0 here; it happens just before exit.
@@ -175,12 +175,12 @@ internal static UntypedInt bufSize => 128;
     // WriteString mirrors Write. See Write for comments.
     nint size = len(s);
     if (h.n > 0 && h.n <= bufSize) {
-        nint k = copy(h.buf[(int)(h.n)..], s);
+        nint k = copy(h.buf.slice(h.n), s);
         h.n += k;
         if (h.n < bufSize) {
             return (size, default!);
         }
-        s = s[(int)(k)..];
+        s = s.slice(k);
         h.flush();
     }
     if (len(s) > bufSize) {
@@ -229,7 +229,7 @@ internal static UntypedInt bufSize => 128;
         throw panic("maphash: flush of partially full buffer");
     }
     h.initSeed();
-    h.state.s = rthash(h.buf[..(int)(h.n)], h.state.s);
+    h.state.s = rthash(h.buf.slice(0, h.n), h.state.s);
     h.n = 0;
 }
 
@@ -242,7 +242,7 @@ internal static UntypedInt bufSize => 128;
 // by using bit masking, shifting, or modular arithmetic.
 [GoRecv] public static uint64 Sum64(this ref Hash h) {
     h.initSeed();
-    return rthash(h.buf[..(int)(h.n)], h.state.s);
+    return rthash(h.buf.slice(0, h.n), h.state.s);
 }
 
 // MakeSeed returns a new random seed.

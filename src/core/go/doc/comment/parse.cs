@@ -304,10 +304,10 @@ public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) {
         Block b = default!;
         var exprᴛ1 = s.kind;
         if (exprᴛ1 == spanList) {
-            b = new ListжBlock(d.list(lines[(int)(s.start)..(int)(s.end)], prev.end < s.start));
+            b = new ListжBlock(d.list(lines.slice(s.start, s.end), prev.end < s.start));
         }
         else if (exprᴛ1 == spanCode) {
-            b = new CodeжBlock(d.code(lines[(int)(s.start)..(int)(s.end)]));
+            b = new CodeжBlock(d.code(lines.slice(s.start, s.end)));
         }
         else if (exprᴛ1 == spanOldHeading) {
             b = d.oldHeading(lines[s.start]);
@@ -316,7 +316,7 @@ public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) {
             b = d.heading(lines[s.start]);
         }
         else if (exprᴛ1 == spanPara) {
-            b = d.paragraph(lines[(int)(s.start)..(int)(s.end)]);
+            b = d.paragraph(lines.slice(s.start, s.end));
         }
         else { /* default: */
             throw panic("go/doc/comment: internal error: unknown span kind");
@@ -513,7 +513,7 @@ internal static slice<@string> unindent(slice<@string> lines) {
         lines = lines[1..];
     }
     while (len(lines) > 0 && isBlank(lines[len(lines) - 1])) {
-        lines = lines[..(int)(len(lines) - 1)];
+        lines = lines.slice(0, len(lines) - 1);
     }
     if (len(lines) == 0) {
         return default!;
@@ -539,7 +539,7 @@ internal static slice<@string> unindent(slice<@string> lines) {
         @out = @out[1..];
     }
     while (len(@out) > 0 && @out[len(@out) - 1] == "") {
-        @out = @out[..(int)(len(@out) - 1)];
+        @out = @out.slice(0, len(@out) - 1);
     }
     return @out;
 }
@@ -555,7 +555,7 @@ internal static @string commonPrefix(@string a, @string b) {
     while (i < len(a) && i < len(b) && a[i] == b[i]) {
         i++;
     }
-    return a[0..(int)(i)];
+    return a.slice(0, i);
 }
 
 // leadingSpace returns the longest prefix of s consisting of spaces and tabs.
@@ -564,7 +564,7 @@ internal static @string leadingSpace(@string s) {
     while (i < len(s) && (s[i] == (rune)' ' || s[i] == (rune)'\t')) {
         i++;
     }
-    return s[..(int)(i)];
+    return s.slice(0, i);
 }
 
 // isOldHeading reports whether line is an old-style section heading.
@@ -674,11 +674,11 @@ internal static (ж<LinkDef>, bool) parseLink(@string line) {
         return (default!, false);
     }
     ref var text = ref heap<@string>(out var Ꮡtext);
-    text = line[1..(int)(i)];
+    text = line.slice(1, i);
     ref var url = ref heap<@string>(out var Ꮡurl);
-    url = strings.TrimSpace(line[(int)(i + 3)..]);
+    url = strings.TrimSpace(line.slice(i + 3));
     nint j = strings.Index(url, "://"u8);
-    if (j < 0 || !isScheme(url[..(int)(j)])) {
+    if (j < 0 || !isScheme(url.slice(0, j))) {
         return (default!, false);
     }
     // Line has right form and has valid scheme://.
@@ -745,7 +745,7 @@ internal static (@string num, @string rest, bool ok) listMarker(@string line) {
     // Can we find a marker?
     {
         var (r, n) = utf8.DecodeRuneInString(line); if (r == (rune)'•' || r == (rune)'*' || r == (rune)'+' || r == (rune)'-'){
-            (num, rest) = ("", line[(int)(n)..]);
+            (num, rest) = ("", line.slice(n));
         } else 
         if ((rune)'0' <= line[0] && line[0] <= (rune)'9'){
             nint nΔ1 = 1;
@@ -755,7 +755,7 @@ internal static (@string num, @string rest, bool ok) listMarker(@string line) {
             if (nΔ1 >= len(line) || (line[nΔ1] != (rune)'.' && line[nΔ1] != (rune)')')) {
                 return ("", "", false);
             }
-            (num, rest) = (line[..(int)(nΔ1)], line[(int)(nΔ1 + 1)..]);
+            (num, rest) = (line.slice(0, nΔ1), line.slice(nΔ1 + 1));
         } else {
             return ("", "", false);
         }
@@ -791,7 +791,7 @@ internal static slice<ΔText> parseLinkedText(this ж<parseDoc> Ꮡd, @string te
     nint wrote = 0;
     void flush(nint i) {
         if (wrote < i) {
-            Ꮡout.ValueSlot = Ꮡd.Value.parseText(Ꮡout.ValueSlot, text[(int)(wrote)..(int)(i)], true);
+            Ꮡout.ValueSlot = Ꮡd.Value.parseText(Ꮡout.ValueSlot, text.slice(wrote, i), true);
             wrote = i;
         }
     }
@@ -814,15 +814,15 @@ internal static slice<ΔText> parseLinkedText(this ж<parseDoc> Ꮡd, @string te
                         def.Value.Used = true;
                         flush(start);
                         @out = append(@out, (ΔText)(new LinkжΔText(Ꮡ(new Link(
-                            Text: d.parseText(default!, text[(int)(start + 1)..(int)(i)], false),
+                            Text: d.parseText(default!, text.slice(start + 1, i), false),
                             URL: (~def).URL
                         )))));
                         wrote = i + 1;
                     } else 
                     {
-                        var (link, okΔ1) = d.docLink(text[(int)(start + 1)..(int)(i)], text[..(int)(start)], text[(int)(i + 1)..]); if (okΔ1) {
+                        var (link, okΔ1) = d.docLink(text.slice(start + 1, i), text.slice(0, start), text.slice(i + 1)); if (okΔ1) {
                             flush(start);
-                            link.Value.Text = d.parseText(default!, text[(int)(start + 1)..(int)(i)], false);
+                            link.Value.Text = d.parseText(default!, text.slice(start + 1, i), false);
                             @out = append(@out, (ΔText)(new DocLinkжΔText(link)));
                             wrote = i + 1;
                         }
@@ -901,12 +901,12 @@ internal static (@string before, @string name, bool foundDot) splitDocName(@stri
     @string name = default!;
 
     nint i = strings.LastIndex(text, "."u8);
-    name = text[(int)(i + 1)..];
+    name = text.slice(i + 1);
     if (!isName(name)) {
         return (text, "", false);
     }
     if (i >= 0) {
-        before = text[..(int)(i)];
+        before = text.slice(0, i);
     }
     return (before, name, true);
 }
@@ -921,7 +921,7 @@ internal static (@string before, @string name, bool foundDot) splitDocName(@stri
     ref var w = ref heap(new strings.Builder(), out var Ꮡw);
     nint wrote = 0;
     void writeUntil(nint i) {
-        Ꮡw.WriteString(s[(int)(wrote)..(int)(i)]);
+        Ꮡw.WriteString(s.slice(wrote, i));
         wrote = i;
     }
     var writeUntilʗ1 = writeUntil;
@@ -933,7 +933,7 @@ internal static (@string before, @string name, bool foundDot) splitDocName(@stri
         }
     }
     for (nint i = 0; i < len(s); ) {
-        @string t = s[(int)(i)..];
+        @string t = s.slice(i);
         if (autoLink) {
             {
                 ref var url = ref heap<@string>(out var Ꮡurl);
@@ -1037,11 +1037,11 @@ internal static (@string url, bool ok) autoURL(@string s) {
         return ("", false);
     }}
 
-    if (i + 3 > len(s) || s[(int)(i)..(int)(i + 3)] != "://") {
+    if (i + 3 > len(s) || s.slice(i, i + 3) != "://") {
         return ("", false);
     }
     // Check valid scheme.
-    if (!isScheme(s[..(int)(i)])) {
+    if (!isScheme(s.slice(0, i))) {
         return ("", false);
     }
     // Scan host part. Must have at least one byte,
@@ -1093,7 +1093,7 @@ Path:
             if (len(stk) == 0 || stk[len(stk) - 1] != s[i]) {
                 goto break_Path;
             }
-            stk = stk[..(int)(len(stk) - 1)];
+            stk = stk.slice(0, len(stk) - 1);
             break;
         }}
 
@@ -1103,7 +1103,7 @@ Path:
 continue_Path:;
     }
 break_Path:;
-    return (s[..(int)(end)], true);
+    return (s.slice(0, end), true);
 }
 
 // isScheme reports whether s is a recognized URL scheme.
@@ -1224,14 +1224,14 @@ internal static (@string id, bool ok) ident(@string s) {
                 break;
             }
         }
-        var (r, nr) = utf8.DecodeRuneInString(s[(int)(n)..]);
+        var (r, nr) = utf8.DecodeRuneInString(s.slice(n));
         if (unicode.IsLetter(r)) {
             n += nr;
             continue;
         }
         break;
     }
-    return (s[..(int)(n)], n > 0);
+    return (s.slice(0, n), n > 0);
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
@@ -1273,13 +1273,13 @@ internal static bool validImportPath(@string path) {
     nint elemStart = 0;
     foreach (var (i, r) in path) {
         if (r == (rune)'/') {
-            if (!validImportPathElem(path[(int)(elemStart)..(int)(i)])) {
+            if (!validImportPathElem(path.slice(elemStart, i))) {
                 return false;
             }
             elemStart = i + 1;
         }
     }
-    return validImportPathElem(path[(int)(elemStart)..]);
+    return validImportPathElem(path.slice(elemStart));
 }
 
 internal static bool validImportPathElem(@string elem) {

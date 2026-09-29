@@ -16,8 +16,8 @@ internal static @string gogetenv(@string key) {
         @throw(getenvBeforeEnvInitˢ);
     }
     foreach (var (_, s) in env) {
-        if (len(s) > len(key) && s[len(key)] == (rune)'=' && envKeyEqual(s[..(int)(len(key))], key)) {
-            return s[(int)(len(key) + 1)..];
+        if (len(s) > len(key) && s[len(key)] == (rune)'=' && envKeyEqual(s.slice(0, len(key)), key)) {
+            return s.slice(len(key) + 1);
         }
     }
     return ""u8;

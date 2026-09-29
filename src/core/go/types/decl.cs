@@ -256,7 +256,7 @@ internal static bool /*valid*/ validCycle(this ж<Checker> Ꮡcheck, Object obj)
         // Count cycle objects.
         assert(obj.color() >= grey);
         var start = obj.color() - grey; // index of obj in objPath
-        var cycle = check.objPath[(int)(uint32)(start)..];
+        var cycle = check.objPath.slice((nint)(uint32)(start));
         var tparCycle = false; // if set, the cycle is through a type parameter list
         nint nval = 0; // number of (constant or variable) values in the cycle; valid if !generic
         nint ndef = 0; // number of type definitions in the cycle; valid if !generic

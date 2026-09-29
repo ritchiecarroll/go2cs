@@ -553,7 +553,7 @@ internal static void deleteMin(this ж<timers> Ꮡts) {
         ts.heap[0] = ts.heap[last];
     }
     ts.heap[last] = new timerWhen(nil);
-    ts.heap = ts.heap[..(int)(last)];
+    ts.heap = ts.heap.slice(0, last);
     if (last > 0) {
         ts.siftDown(0);
     }
@@ -781,7 +781,7 @@ internal static void cleanHead(this ж<timers> Ꮡts) {
                     tΔ1.Value.ts = default!;
                     Ꮡts.of(timers.Ꮡzombies).Add(-1);
                     ts.heap[n - 1] = new timerWhen(nil);
-                    ts.heap = ts.heap[..(int)(n - 1)];
+                    ts.heap = ts.heap.slice(0, n - 1);
                 }
                 tΔ1.unlock();
                 continue;
@@ -944,7 +944,7 @@ internal static void adjust(this ж<timers> Ꮡts, int64 now, bool force) {
             nint n = len(ts.heap);
             ts.heap[i] = ts.heap[n - 1];
             ts.heap[n - 1] = new timerWhen(nil);
-            ts.heap = ts.heap[..(int)(n - 1)];
+            ts.heap = ts.heap.slice(0, n - 1);
             t.Value.ts = default!;
             i--;
             changed = true;
@@ -1382,7 +1382,7 @@ internal static UntypedInt timerHeapN => 4;
         }
         var w = when;
         nint c = -1;
-        foreach (var (j, twΔ1) in heap[(int)(leftChild)..(int)(min(leftChild + (nint)timerHeapN, n))]) {
+        foreach (var (j, twΔ1) in heap.slice(leftChild, min(leftChild + (nint)timerHeapN, n))) {
             if (twΔ1.when < w) {
                 w = twΔ1.when;
                 c = leftChild + j;

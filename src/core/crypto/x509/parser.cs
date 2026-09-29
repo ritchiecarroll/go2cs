@@ -88,7 +88,7 @@ internal static (@string, error) parseASN1String(cryptobyte_asn1.Tag tag, slice<
         {
             nint l = builtin.len(value); if (l >= 2 && value[l - 1] == 0 && value[l - 2] == 0) {
                 // Strip terminator if present.
-                value = value[..(int)(l - 2)];
+                value = value.slice(0, l - 2);
             }
         }
         var s = new slice<uint16>(0, builtin.len(value) / 2);
@@ -1246,7 +1246,7 @@ public static (slice<ж<Certificate>>, error) ParseCertificates(slice<byte> der)
             return (default!, err);
         }
         certs = append(certs, cert);
-        der = der[(int)(builtin.len((~cert).Raw))..];
+        der = der.slice(builtin.len((~cert).Raw));
     }
     return (certs, default!);
 }

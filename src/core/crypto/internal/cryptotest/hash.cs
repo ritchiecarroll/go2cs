@@ -41,13 +41,13 @@ public static void TestHash(ж<testing.T> Ꮡt, Func<hash.Hash> mh) {
             h.Reset();
             var sum = getSum(tΔ1, h, prefix); // Append new digest to prefix
             // Check that Sum didn't alter the prefix
-            if (!bytes.Equal(sum[..(int)(len(prefix))], prefix)) {
-                tΔ1.Errorf("Sum alters passed buffer instead of appending; got %x, want %x"u8, sum[..(int)(len(prefix))], prefix);
+            if (!bytes.Equal(sum.slice(0, len(prefix)), prefix)) {
+                tΔ1.Errorf("Sum alters passed buffer instead of appending; got %x, want %x"u8, sum.slice(0, len(prefix)), prefix);
             }
             // Check that the appended sum wasn't affected by the prefix
             {
-                var expectedSum = getSum(tΔ1, h, default!); if (!bytes.Equal(sum[(int)(len(prefix))..], expectedSum)) {
-                    tΔ1.Errorf("Sum behavior affected by data in the input buffer; got %x, want %x"u8, sum[(int)(len(prefix))..], expectedSum);
+                var expectedSum = getSum(tΔ1, h, default!); if (!bytes.Equal(sum.slice(len(prefix)), expectedSum)) {
+                    tΔ1.Errorf("Sum behavior affected by data in the input buffer; got %x, want %x"u8, sum.slice(len(prefix)), expectedSum);
                 }
             }
             // Check size of append
@@ -101,10 +101,10 @@ public static void TestHash(ж<testing.T> Ꮡt, Func<hash.Hash> mh) {
         var buff = new slice<byte>(blockSize * 3);
         nint endOfPrefix = blockSize;
         nint startOfSuffix = blockSize * 2;
-        copy(buff[(int)(endOfPrefix)..(int)(startOfSuffix)], msg);
-        rng.Read(buff[..(int)(endOfPrefix)]);
-        rng.Read(buff[(int)(startOfSuffix)..]);
-        writeToHash(tΔ4, h, buff[(int)(endOfPrefix)..(int)(startOfSuffix)]);
+        copy(buff.slice(endOfPrefix, startOfSuffix), msg);
+        rng.Read(buff.slice(0, endOfPrefix));
+        rng.Read(buff.slice(startOfSuffix));
+        writeToHash(tΔ4, h, buff.slice(endOfPrefix, startOfSuffix));
         var testDigest = getSum(tΔ4, h, default!);
         if (!bytes.Equal(testDigest, expectedDigest)) {
             tΔ4.Errorf("Write affected by data outside of input slice bounds; got %x, want %x"u8, testDigest, expectedDigest);

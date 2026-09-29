@@ -54,7 +54,7 @@ internal static @string toASCII(@string s) {
 [GoRecv] internal static @string parseString(this ref parser _, slice<byte> b) {
     {
         nint i = bytes.IndexByte(b, 0); if (i >= 0) {
-            return ((@string)(b[..(int)(i)]));
+            return ((@string)(b.slice(0, i)));
         }
     }
     return ((@string)b);
@@ -73,7 +73,7 @@ internal static @string toASCII(@string s) {
     // in the V7 path field as a directory even though the full path
     // recorded elsewhere (e.g., via PAX record) contains no trailing slash.
     if (len(s) > len(b) && b[len(b) - 1] == (rune)'/') {
-        nint n = len(strings.TrimRight(s[..(int)(len(b) - 1)], "/"u8));
+        nint n = len(strings.TrimRight(s.slice(0, len(b) - 1), "/"u8));
         b[n] = 0; // Replace trailing slash with NUL terminator
     }
 }
@@ -263,9 +263,9 @@ internal static (@string k, @string v, @string r, error err) parsePAXRecord(@str
         return ("", "", s, ErrHeader);
     }
     // Extract everything between the space and the final newline.
-    @string rec = rest[..(int)(n - 1)];
-    @string nl = rest[(int)(n - 1)..(int)(n)];
-    @string rem = rest[(int)(n)..];
+    @string rec = rest.slice(0, (nint)(n - 1));
+    @string nl = rest.slice((nint)(n - 1), (nint)(n));
+    @string rem = rest.slice((nint)(n));
     if (nl != "\n"u8) {
         return ("", "", s, ErrHeader);
     }

@@ -187,7 +187,7 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
                             i++;
                         }
                     }
-                    ᏑfwdJumps.ValueSlot = ᏑfwdJumps.ValueSlot[..(int)(i)];
+                    ᏑfwdJumps.ValueSlot = ᏑfwdJumps.ValueSlot.slice(0, i);
                     Ꮡlstmt = sΔ1;
                 }
             }

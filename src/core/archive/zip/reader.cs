@@ -315,7 +315,7 @@ public static (io.ReadCloser, error) Open(this ж<File> Ꮡf) {
         return (0, r.err);
     }
     (n, err) = r.rc.Read(b);
-    r.hash.Write(b[..(int)(n)]);
+    r.hash.Write(b.slice(0, n));
     r.nread += (uint64)n;
     if (r.nread > (~r.f).UncompressedSize64) {
         return (0, ErrFormat);
@@ -417,9 +417,9 @@ internal static error readDirectoryHeader(ref File f, io.Reader r) {
             return err;
         }
     }
-    f.Name = ((@string)(d[..(int)(filenameLen)]));
-    f.Extra = d[(int)(filenameLen)..(int)(filenameLen + extraLen)];
-    f.Comment = ((@string)(d[(int)(filenameLen + extraLen)..]));
+    f.Name = ((@string)(d.slice(0, filenameLen)));
+    f.Extra = d.slice(filenameLen, filenameLen + extraLen);
+    f.Comment = ((@string)(d.slice(filenameLen + extraLen)));
     // Determine the character encoding.
     var (utf8Valid1, utf8Require1) = detectUTF8(f.Name);
     var (utf8Valid2, utf8Require2) = detectUTF8(f.Comment);
@@ -587,7 +587,7 @@ internal static error readDataDescriptor(io.Reader r, ref File f) {
         off += 4;
     }
     {
-        var (_, err) = io.ReadFull(r, buf[(int)(off)..12]); if (err != default!) {
+        var (_, err) = io.ReadFull(r, buf.slice(off, 12)); if (err != default!) {
             return err;
         }
     }
@@ -626,7 +626,7 @@ internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirector
         }
         {
             nint p = findSignatureInBlock(buf); if (p >= 0) {
-                buf = buf[(int)(p)..];
+                buf = buf.slice(p);
                 directoryEndOffset = size - bLen + (int64)p;
                 break;
             }
@@ -650,7 +650,7 @@ internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirector
     if (l > len(b)) {
         return (default!, 0, errors.New(zipInvalidCommentLengthˢ));
     }
-    d.Value.comment = ((@string)(slice<byte>)b[..(int)(l)]);
+    d.Value.comment = ((@string)(slice<byte>)b.slice(0, l));
     // These values mean that the file can be a zip64 file
     if ((~d).directoryRecords == 0xffff || (~d).directorySize == 0xffff || (~d).directoryOffset == 0xffffffffU) {
         var (p, errΔ2) = findDirectory64End(r, directoryEndOffset);
@@ -791,8 +791,8 @@ internal static nint findSignatureInBlock(slice<byte> b) {
 }
 
 [GoRecv] internal static readBuf sub(this ref readBuf b, nint n) {
-    var b2 = (b)[..(int)(n)];
-    b = (b)[(int)(n)..];
+    var b2 = (b).slice(0, n);
+    b = (b).slice(n);
     return b2;
 }
 
@@ -911,7 +911,7 @@ internal static void initFileList(this ж<Reader> Ꮡr) {
                     nint idxΔ3 = strings.LastIndex(dir, "/"u8); if (idxΔ3 < 0){
                         break;
                     } else {
-                        dir = dir[..(int)(idxΔ3)];
+                        dir = dir.slice(0, idxΔ3);
                     }
                 }
                 if (dirs[dir]) {
@@ -996,7 +996,7 @@ internal static (@string dir, @string elem, bool isDir) split(@string name) {
     if (i < 0) {
         return (".", name, isDir);
     }
-    return (name[..(int)(i)], name[(int)(i + 1)..], isDir);
+    return (name.slice(0, i), name.slice(i + 1), isDir);
 }
 
 internal static ж<fileListEntry> dotFile = Ꮡ(new fileListEntry(name: "./"u8, isDir: true));
@@ -1016,7 +1016,7 @@ internal static ж<fileListEntry> dotFile = Ꮡ(new fileListEntry(name: "./"u8, 
     });
     if (i < len(files)) {
         @string fname = files[i].name;
-        if (fname == name || len(fname) == len(name) + 1 && fname[len(name)] == (rune)'/' && fname[..(int)(len(name))] == name) {
+        if (fname == name || len(fname) == len(name) + 1 && fname[len(name)] == (rune)'/' && fname.slice(0, len(name)) == name) {
             return Ꮡ(files, i);
         }
     }
@@ -1041,7 +1041,7 @@ internal static ж<fileListEntry> dotFile = Ꮡ(new fileListEntry(name: "./"u8, 
         // find the last entry with dir
         return -1;
     });
-    return files[(int)(i)..(int)(j)];
+    return files.slice(i, j);
 }
 
 [GoType] partial struct openDir {

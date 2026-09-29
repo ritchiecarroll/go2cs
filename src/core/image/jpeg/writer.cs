@@ -331,7 +331,7 @@ internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Valu
             e.buf[3 * i + 8] = LiteralByteAt("\x00\x01\x01"u8, i);
         }
     }
-    e.write(e.buf[..(int)(3 * (nComponent - 1) + 9)]);
+    e.write(e.buf.slice(0, 3 * (nComponent - 1) + 9));
 }
 
 // writeDHT writes the Define Huffman Table marker.
@@ -440,7 +440,7 @@ internal static void rgbaToYCbCr(ж<imageꓸRGBA> Ꮡm, image.Point p, ref block
             if (sx > xmax) {
                 sx = xmax;
             }
-            var pix = m.Pix[(int)(offset + sx * 4)..];
+            var pix = m.Pix.slice(offset + sx * 4);
             var (yy, cb, cr) = color.RGBToYCbCr(pix[0], pix[1], pix[2]);
             yBlock[8 * j + i] = (int32)yy;
             cbBlock[8 * j + i] = (int32)cb;

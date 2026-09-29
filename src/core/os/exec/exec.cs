@@ -406,14 +406,14 @@ internal static readonly @string godebugExecwait2Detectedˢ = "GODEBUG=execwait=
                 while (ᐧ) {
                     nint n = runtime.Stack(stack, false);
                     if (n < len(stack)) {
-                        stack = stack[..(int)(n)];
+                        stack = stack.slice(0, n);
                         break;
                     }
                     stack = new slice<byte>(2 * len(stack));
                 }
                 {
                     nint i = bytes.Index(stack, slice<byte>("\nos/exec.Command("u8)); if (i >= 0) {
-                        stack = stack[(int)(i + 1)..];
+                        stack = stack.slice(i + 1);
                     }
                 }
                 cmd.Value.createdByStack = stack;
@@ -1202,7 +1202,7 @@ internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice
     // Only keep the last w.N bytes of suffix data.
     {
         nint overage = len(p) - w.N; if (overage > 0) {
-            p = p[(int)(overage)..];
+            p = p.slice(overage);
             w.skipped += (int64)overage;
         }
     }
@@ -1210,8 +1210,8 @@ internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice
     // w.suffix is full now if p is non-empty. Overwrite it in a circle.
     while (len(p) > 0) {
         // 0, 1, or 2 iterations.
-        nint nΔ1 = copy(w.suffix[(int)(w.suffixOff)..], p);
-        p = p[(int)(nΔ1)..];
+        nint nΔ1 = copy(w.suffix.slice(w.suffixOff), p);
+        p = p.slice(nΔ1);
         w.skipped += (int64)nΔ1;
         w.suffixOff += nΔ1;
         if (w.suffixOff == w.N) {
@@ -1229,8 +1229,8 @@ internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice
     {
         nint remain = w.N - len(dst); if (remain > 0) {
             nint add = min(len(p), remain);
-            dst = appendꓸꓸꓸ(dst, p[..(int)(add)]);
-            p = p[(int)(add)..];
+            dst = appendꓸꓸꓸ(dst, p.slice(0, add));
+            p = p.slice(add);
         }
     }
     return p;
@@ -1253,8 +1253,8 @@ internal static readonly @string bytesˢ = " bytes ...\n"u8;
     buf.WriteString(omittingˢ);
     buf.WriteString(strconv.FormatInt(w.skipped, 10));
     buf.WriteString(bytesˢ);
-    buf.Write(w.suffix[(int)(w.suffixOff)..]);
-    buf.Write(w.suffix[..(int)(w.suffixOff)]);
+    buf.Write(w.suffix.slice(w.suffixOff));
+    buf.Write(w.suffix.slice(0, w.suffixOff));
     return buf.Bytes();
 }
 
@@ -1357,7 +1357,7 @@ internal static (slice<@string>, error) dedupEnvCase(bool caseInsensitive, bool 
             }
             continue;
         }
-        @string k = kv[..(int)(i)];
+        @string k = kv.slice(0, i);
         if (caseInsensitive) {
             k = strings.ToLower(k);
         }

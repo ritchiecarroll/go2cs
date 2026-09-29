@@ -162,7 +162,7 @@ internal static slice<sniffSig> sniffSignatures = new sniffSig[]{((htmlSig)slice
     // pattern matching algorithm section 6
     // https://mimesniff.spec.whatwg.org/#pattern-matching-algorithm
     if (m.skipWS) {
-        data = data[(int)(firstNonWS)..];
+        data = data.slice(firstNonWS);
     }
     if (builtin.len(m.pat) != builtin.len(m.mask)) {
         return ""u8;
@@ -182,7 +182,7 @@ internal static slice<sniffSig> sniffSignatures = new sniffSig[]{((htmlSig)slice
 [GoType("[]byte")] partial struct htmlSig;
 
 internal static @string match(this htmlSig h, slice<byte> data, nint firstNonWS) {
-    data = data[(int)(firstNonWS)..];
+    data = data.slice(firstNonWS);
     if (builtin.len(data) < builtin.len(h) + 1) {
         return ""u8;
     }
@@ -230,7 +230,7 @@ internal static @string match(this mp4Sig _, slice<byte> data, nint firstNonWS) 
             // Ignores the four bytes that correspond to the version number of the "major brand".
             continue;
         }
-        if (bytes.Equal(data[(int)(st)..(int)(st + 3)], mp4)) {
+        if (bytes.Equal(data.slice(st, st + 3), mp4)) {
             return videoMp4ˢ;
         }
     }
@@ -242,7 +242,7 @@ internal static @string match(this mp4Sig _, slice<byte> data, nint firstNonWS) 
 
 internal static @string match(this textSig _, slice<byte> data, nint firstNonWS) {
     // c.f. section 5, step 4.
-    foreach (var (_, b) in data[(int)(firstNonWS)..]) {
+    foreach (var (_, b) in data.slice(firstNonWS)) {
         switch (ᐧ) {
         case {} when (b <= 0x08) || (b == 0x0B) || (0x0E <= b && b <= 0x1A) || (0x1C <= b && b <= 0x1F): {
             return ""u8;

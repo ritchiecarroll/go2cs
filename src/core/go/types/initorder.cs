@@ -336,7 +336,7 @@ internal static bool Less(this nodeQueue a, nint i, nint j) {
     nint n = len(a);
     var x = (a)[n - 1];
     x.Value.index = -1; // for safety
-    a = (a)[..(int)(n - 1)];
+    a = (a).slice(0, n - 1);
     return x.OrTypedNil();
 }
 

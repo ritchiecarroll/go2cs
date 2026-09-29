@@ -42,7 +42,7 @@ internal static (bool ok, error err) nextEvent(this ж<batchCursor> Ꮡb, slice<
         b.lastTs = freq.mul(batches[b.idx].time);
     }
     // Read an event out.
-    (var n, var tsdiff, err) = readTimedBaseEvent(batches[b.idx].data[(int)(b.dataOff)..], ref nonnil(ref b).ev);
+    (var n, var tsdiff, err) = readTimedBaseEvent(batches[b.idx].data.slice(b.dataOff), ref nonnil(ref b).ev);
     if (err != default!) {
         return (false, err);
     }
@@ -83,14 +83,14 @@ internal static (nint, timestamp, error) readTimedBaseEvent(slice<byte> b, ref b
     }
     nint n = 1;
     // Read timestamp diff.
-    var (ts, nb) = binary.Uvarint(b[(int)(n)..]);
+    var (ts, nb) = binary.Uvarint(b.slice(n));
     if (nb <= 0) {
         return (0, 0, fmt.Errorf("found invalid uvarint for timestamp"u8));
     }
     n += nb;
     // Read the rest of the arguments.
     for (nint i = 0; i < len((~spec).Args) - 1; i++) {
-        var (arg, nbΔ1) = binary.Uvarint(b[(int)(n)..]);
+        var (arg, nbΔ1) = binary.Uvarint(b.slice(n));
         if (nbΔ1 <= 0) {
             return (0, 0, fmt.Errorf("found invalid uvarint"u8));
         }
@@ -125,7 +125,7 @@ internal static slice<ж<batchCursor>> heapRemove(slice<ж<batchCursor>> heap, n
     }
     // Swap the root with the last element, then remove it.
     (heap[0], heap[len(heap) - 1]) = (heap[len(heap) - 1], heap[0]);
-    heap = heap[..(int)(len(heap) - 1)];
+    heap = heap.slice(0, len(heap) - 1);
     // Sift the root down.
     heapSiftDown(heap, 0);
     return heap;

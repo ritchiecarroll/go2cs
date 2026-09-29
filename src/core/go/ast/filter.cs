@@ -50,7 +50,7 @@ internal static slice<ж<Ident>> filterIdentList(slice<ж<Ident>> list, Func<@st
             j++;
         }
     }
-    return list[0..(int)(j)];
+    return list.slice(0, j);
 }
 
 // fieldName assumes that x is the type of an anonymous field and
@@ -109,7 +109,7 @@ internal static bool /*removedFields*/ filterFieldList(ж<FieldList> Ꮡfields, 
     if (j < len(list)) {
         removedFields = true;
     }
-    fields.List = list[0..(int)(j)];
+    fields.List = list.slice(0, j);
     return removedFields;
 }
 
@@ -145,7 +145,7 @@ internal static slice<Expr> filterExprList(slice<Expr> list, Func<@string, bool>
         list[j] = exp;
         j++;
     }
-    return list[0..(int)(j)];
+    return list.slice(0, j);
 }
 
 internal static bool filterParamList(ж<FieldList> Ꮡfields, Func<@string, bool> filter, bool export) {
@@ -243,7 +243,7 @@ internal static slice<Spec> filterSpecList(slice<Spec> list, Func<@string, bool>
             j++;
         }
     }
-    return list[0..(int)(j)];
+    return list.slice(0, j);
 }
 
 // FilterDecl trims the AST for a Go declaration in place by removing
@@ -289,7 +289,7 @@ internal static bool filterFile(ref File src, Func<@string, bool> f, bool export
             j++;
         }
     }
-    src.Decls = src.Decls[0..(int)(j)];
+    src.Decls = src.Decls.slice(0, j);
     return j > 0;
 }
 
@@ -478,7 +478,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
                     iΔ2++;
                 }
             }
-            decls = decls[0..(int)(iΔ2)];
+            decls = decls.slice(0, iΔ2);
         }
     }
     // Collect import specs from all package files.
@@ -517,7 +517,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
         nint iΔ3 = 0;
         foreach (var (_, filename) in filenames) {
             var f = pkg.Files[filename];
-            iΔ3 += copy(comments[(int)(iΔ3)..], (~f).Comments);
+            iΔ3 += copy(comments.slice(iΔ3), (~f).Comments);
         }
     }
     // TODO(gri) need to compute unresolved identifiers!

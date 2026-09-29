@@ -141,7 +141,7 @@ internal static Δsockaddr toLocal(this ж<UnixAddr> Ꮡa, @string net) {
     syscall.Sockaddr sa = default!;
     (n, oobn, flags, sa, err) = c.fd.readMsg(b, oob, readMsgFlags);
     if (readMsgFlags == 0 && err == default! && oobn > 0) {
-        setReadMsgCloseOnExec(oob[..(int)(oobn)]);
+        setReadMsgCloseOnExec(oob.slice(0, oobn));
     }
     switch (sa.type()) {
     case ж<syscall.SockaddrUnix> saΔ1: {

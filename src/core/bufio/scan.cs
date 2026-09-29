@@ -117,7 +117,7 @@ public static error ErrFinalToken = errors.New("final token"u8);
         // If we've run out of data but have an error, give the split function
         // a chance to recover any remaining, possibly empty token.
         if (s.end > s.start || s.err != default!) {
-            var (advance, token, err) = s.split(s.buf[(int)(s.start)..(int)(s.end)], s.err != default!);
+            var (advance, token, err) = s.split(s.buf.slice(s.start, s.end), s.err != default!);
             if (err != default!) {
                 if (AreEqual(err, ErrFinalToken)) {
                     s.token = token;
@@ -159,7 +159,7 @@ public static error ErrFinalToken = errors.New("final token"u8);
         // First, shift data to beginning of buffer if there's lots of empty space
         // or space is needed.
         if (s.start > 0 && (s.end == len(s.buf) || s.start > len(s.buf) / 2)) {
-            copy(s.buf, s.buf[(int)(s.start)..(int)(s.end)]);
+            copy(s.buf, s.buf.slice(s.start, s.end));
             s.end -= s.start;
             s.start = 0;
         }
@@ -177,7 +177,7 @@ public static error ErrFinalToken = errors.New("final token"u8);
             }
             newSize = min(newSize, s.maxTokenSize);
             var newBuf = new slice<byte>(newSize);
-            copy(newBuf, s.buf[(int)(s.start)..(int)(s.end)]);
+            copy(newBuf, s.buf.slice(s.start, s.end));
             s.buf = newBuf;
             s.end -= s.start;
             s.start = 0;
@@ -186,7 +186,7 @@ public static error ErrFinalToken = errors.New("final token"u8);
         // a misbehaving Reader. Officially we don't need to do this, but let's
         // be extra careful: Scanner is for safe, simple jobs.
         for (nint loop = 0; ᐧ ; ) {
-            var (n, err) = s.r.Read(s.buf[(int)(s.end)..(int)(len(s.buf))]);
+            var (n, err) = s.r.Read(s.buf.slice(s.end, len(s.buf)));
             if (n < 0 || len(s.buf) - s.end < n) {
                 s.setErr(ErrBadReadCount);
                 break;
@@ -243,7 +243,7 @@ public static error ErrFinalToken = errors.New("final token"u8);
     if (s.scanCalled) {
         throw panic("Buffer called after Scan");
     }
-    s.buf = buf[0..(int)(cap(buf))];
+    s.buf = buf.slice(0, cap(buf));
     s.maxTokenSize = max;
 }
 
@@ -289,7 +289,7 @@ public static (nint advance, slice<byte> token, error err) ScanRunes(slice<byte>
     if (width > 1) {
         // It's a valid encoding. Width cannot be one for a correctly encoded
         // non-ASCII rune.
-        return (width, data[0..(int)(width)], default!);
+        return (width, data.slice(0, width), default!);
     }
     // We know it's an error: we have width==1 and implicitly r==utf8.RuneError.
     // Is the error because there wasn't a full rune to be decoded?
@@ -307,7 +307,7 @@ public static (nint advance, slice<byte> token, error err) ScanRunes(slice<byte>
 // dropCR drops a terminal \r from the data.
 internal static slice<byte> dropCR(slice<byte> data) {
     if (len(data) > 0 && data[len(data) - 1] == (rune)'\r') {
-        return data[0..(int)(len(data) - 1)];
+        return data.slice(0, len(data) - 1);
     }
     return data;
 }
@@ -325,7 +325,7 @@ public static (nint advance, slice<byte> token, error err) ScanLines(slice<byte>
     {
         nint i = bytes.IndexByte(data, (rune)'\n'); if (i >= 0) {
             // We have a full newline-terminated line.
-            return (i + 1, dropCR(data[0..(int)(i)]), default!);
+            return (i + 1, dropCR(data.slice(0, i)), default!);
         }
     }
     // If we're at EOF, we have a final, non-terminated line. Return it.
@@ -373,7 +373,7 @@ public static (nint advance, slice<byte> token, error err) ScanWords(slice<byte>
     nint start = 0;
     for (nint width = 0; start < len(data); start += width) {
         rune r = default!;
-        (r, width) = utf8.DecodeRune(data[(int)(start)..]);
+        (r, width) = utf8.DecodeRune(data.slice(start));
         if (!isSpace(r)) {
             break;
         }
@@ -381,14 +381,14 @@ public static (nint advance, slice<byte> token, error err) ScanWords(slice<byte>
     // Scan until space, marking end of word.
     for ((nint width, nint i) = (0, start); i < len(data); i += width) {
         rune r = default!;
-        (r, width) = utf8.DecodeRune(data[(int)(i)..]);
+        (r, width) = utf8.DecodeRune(data.slice(i));
         if (isSpace(r)) {
-            return (i + width, data[(int)(start)..(int)(i)], default!);
+            return (i + width, data.slice(start, i), default!);
         }
     }
     // If we're at EOF, we have a final, non-empty, non-terminated word. Return it.
     if (atEOF && len(data) > start) {
-        return (len(data), data[(int)(start)..], default!);
+        return (len(data), data.slice(start), default!);
     }
     // Request more data.
     return (start, default!, default!);

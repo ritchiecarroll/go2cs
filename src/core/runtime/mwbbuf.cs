@@ -182,7 +182,7 @@ internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
     // Get the buffered pointers.
     var start = (uintptr)@unsafe.Pointer.FromBox(Ꮡpp.of(runtime_package.Δp.ᏑwbBuf).at(wbBuf.Ꮡbuf, 0));
     var n = (pp.wbBuf.next - start) / /* unsafe.Sizeof(pp.wbBuf.buf[0]) */ (uintptr)8;
-    var ptrs = pp.wbBuf.buf[..(int)(n)];
+    var ptrs = pp.wbBuf.buf.slice(0, (nint)(n));
     // Poison the buffer to make extra sure nothing is enqueued
     // while we're processing the buffer.
     pp.wbBuf.next = 0;
@@ -244,7 +244,7 @@ internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
         pos++;
     }
     // Enqueue the greyed objects.
-    gcw.putBatch(ptrs[..(int)(pos)]);
+    gcw.putBatch(ptrs.slice(0, pos));
     pp.wbBuf.reset();
 }
 

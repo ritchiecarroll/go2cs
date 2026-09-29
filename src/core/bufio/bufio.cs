@@ -101,7 +101,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 [GoRecv] internal static void fill(this ref Reader b) {
     // Slide existing data to beginning.
     if (b.r > 0) {
-        copy(b.buf, b.buf[(int)(b.r)..(int)(b.w)]);
+        copy(b.buf, b.buf.slice(b.r, b.w));
         b.w -= b.r;
         b.r = 0;
     }
@@ -110,7 +110,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
     }
     // Read new data: try a limited number of times.
     for (nint i = maxConsecutiveEmptyReads; i > 0; i--) {
-        var (n, err) = b.rd.Read(b.buf[(int)(b.w)..]);
+        var (n, err) = b.rd.Read(b.buf.slice(b.w));
         if (n < 0) {
             throw panic(errNegativeRead);
         }
@@ -150,7 +150,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
         b.fill(); // b.w-b.r < len(b.buf) => buffer is not full
     }
     if (n > len(b.buf)) {
-        return (b.buf[(int)(b.r)..(int)(b.w)], ErrBufferFull);
+        return (b.buf.slice(b.r, b.w), ErrBufferFull);
     }
     // 0 <= n <= len(b.buf)
     error err = default!;
@@ -164,7 +164,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
             }
         }
     }
-    return (b.buf[(int)(b.r)..(int)(b.r + n)], err);
+    return (b.buf.slice(b.r, b.r + n), err);
 }
 
 // Discard skips the next n bytes, returning the number of bytes discarded.
@@ -255,7 +255,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
     // copy as much as we can
     // Note: if the slice panics here, it is probably because
     // the underlying reader returned a bad count. See issue 49795.
-    n = copy(p, b.buf[(int)(b.r)..(int)(b.w)]);
+    n = copy(p, b.buf.slice(b.r, b.w));
     b.r += n;
     b.lastByte = (nint)b.buf[b.r - 1];
     b.lastRuneSize = -1;
@@ -307,7 +307,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
     rune r = default!;
     nint size = default!;
 
-    while (b.r + (nint)utf8.UTFMax > b.w && !utf8.FullRune(b.buf[(int)(b.r)..(int)(b.w)]) && b.err == default! && b.w - b.r < len(b.buf)) {
+    while (b.r + (nint)utf8.UTFMax > b.w && !utf8.FullRune(b.buf.slice(b.r, b.w)) && b.err == default! && b.w - b.r < len(b.buf)) {
         b.fill(); // b.w-b.r < len(buf) => buffer is not full
     }
     b.lastRuneSize = -1;
@@ -316,7 +316,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
     }
     (r, size) = ((rune)b.buf[b.r], 1);
     if (r >= utf8.RuneSelf) {
-        (r, size) = utf8.DecodeRune(b.buf[(int)(b.r)..(int)(b.w)]);
+        (r, size) = utf8.DecodeRune(b.buf.slice(b.r, b.w));
     }
     b.r += size;
     b.lastByte = (nint)b.buf[b.r - 1];
@@ -361,16 +361,16 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
     while (ᐧ) {
         // Search buffer.
         {
-            nint i = bytes.IndexByte(b.buf[(int)(b.r + s)..(int)(b.w)], delim); if (i >= 0) {
+            nint i = bytes.IndexByte(b.buf.slice(b.r + s, b.w), delim); if (i >= 0) {
                 i += s;
-                line = b.buf[(int)(b.r)..(int)(b.r + i + 1)];
+                line = b.buf.slice(b.r, b.r + i + 1);
                 b.r += i + 1;
                 break;
             }
         }
         // Pending error?
         if (b.err != default!) {
-            line = b.buf[(int)(b.r)..(int)(b.w)];
+            line = b.buf.slice(b.r, b.w);
             b.r = b.w;
             err = b.readErr();
             break;
@@ -427,7 +427,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
                 throw panic("bufio: tried to rewind past start of buffer");
             }
             b.r--;
-            line = line[..(int)(len(line) - 1)];
+            line = line.slice(0, len(line) - 1);
         }
         return (line, true, default!);
     }
@@ -443,7 +443,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
         if (len(line) > 1 && line[len(line) - 2] == (rune)'\r') {
             drop = 2;
         }
-        line = line[..(int)(len(line) - drop)];
+        line = line.slice(0, len(line) - drop);
     }
     return (line, isPrefix, err);
 }
@@ -497,9 +497,9 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
     n = 0;
     // Copy full pieces and fragment in.
     foreach (var (i, _) in full) {
-        n += copy(buf[(int)(n)..], full[i]);
+        n += copy(buf.slice(n), full[i]);
     }
-    copy(buf[(int)(n)..], frag);
+    copy(buf.slice(n), frag);
     return (buf, err);
 }
 
@@ -573,7 +573,7 @@ internal static error errNegativeWrite = errors.New("bufio: writer returned nega
 
 // writeBuf writes the [Reader]'s buffer to the writer.
 [GoRecv] internal static (int64, error) writeBuf(this ref Reader b, io.Writer w) {
-    var (n, err) = w.Write(b.buf[(int)(b.r)..(int)(b.w)]);
+    var (n, err) = w.Write(b.buf.slice(b.r, b.w));
     if (n < 0) {
         throw panic(errNegativeWrite);
     }
@@ -656,13 +656,13 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
     if (b.n == 0) {
         return default!;
     }
-    var (n, err) = b.wr.Write(b.buf[0..(int)(b.n)]);
+    var (n, err) = b.wr.Write(b.buf.slice(0, b.n));
     if (n < b.n && err == default!) {
         err = io.ErrShortWrite;
     }
     if (err != default!) {
         if (n > 0 && n < b.n) {
-            copy(b.buf[0..(int)(b.n - n)], b.buf[(int)(n)..(int)(b.n)]);
+            copy(b.buf.slice(0, b.n - n), b.buf.slice(n, b.n));
         }
         b.n -= n;
         b.err = err;
@@ -682,7 +682,7 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
 // passed to an immediately succeeding [Writer.Write] call.
 // The buffer is only valid until the next write operation on b.
 [GoRecv] public static slice<byte> AvailableBuffer(this ref Writer b) {
-    return b.buf[(int)(b.n)..][..0];
+    return b.buf.slice(b.n)[..0];
 }
 
 // Buffered returns the number of bytes that have been written into the current buffer.
@@ -704,17 +704,17 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
             // Write directly from p to avoid copy.
             (nΔ1, b.err) = b.wr.Write(p);
         } else {
-            nΔ1 = copy(b.buf[(int)(b.n)..], p);
+            nΔ1 = copy(b.buf.slice(b.n), p);
             b.n += nΔ1;
             b.Flush();
         }
         nn += nΔ1;
-        p = p[(int)(nΔ1)..];
+        p = p.slice(nΔ1);
     }
     if (b.err != default!) {
         return (nn, b.err);
     }
-    nint n = copy(b.buf[(int)(b.n)..], p);
+    nint n = copy(b.buf.slice(b.n), p);
     b.n += n;
     nn += n;
     return (nn, default!);
@@ -763,7 +763,7 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
             return b.WriteString(((@string)r));
         }
     }
-    size = utf8.EncodeRune(b.buf[(int)(b.n)..], r);
+    size = utf8.EncodeRune(b.buf.slice(b.n), r);
     b.n += size;
     return (size, default!);
 }
@@ -788,17 +788,17 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
             // This avoids an extra copy.
             (nΔ1, b.err) = sw.WriteString(s);
         } else {
-            nΔ1 = copy(b.buf[(int)(b.n)..], s);
+            nΔ1 = copy(b.buf.slice(b.n), s);
             b.n += nΔ1;
             b.Flush();
         }
         nn += nΔ1;
-        s = s[(int)(nΔ1)..];
+        s = s.slice(nΔ1);
     }
     if (b.err != default!) {
         return (nn, b.err);
     }
-    nint n = copy(b.buf[(int)(b.n)..], s);
+    nint n = copy(b.buf.slice(b.n), s);
     b.n += n;
     nn += n;
     return (nn, default!);
@@ -833,7 +833,7 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
         }
         nint nr = 0;
         while (nr < maxConsecutiveEmptyReads) {
-            (m, err) = r.Read(b.buf[(int)(b.n)..]);
+            (m, err) = r.Read(b.buf.slice(b.n));
             if (m != 0 || err != default!) {
                 break;
             }

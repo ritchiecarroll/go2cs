@@ -63,7 +63,7 @@ public static @string String(this SignatureScheme i) {
     }
     case {} when 2052 <= i && i <= 2055: {
         i -= 2052;
-        return _SignatureScheme_name_8[(int)(_SignatureScheme_index_8[i])..(int)(_SignatureScheme_index_8[i + 1])];
+        return _SignatureScheme_name_8.slice(_SignatureScheme_index_8[i], _SignatureScheme_index_8[i + 1]);
     }
     default: {
         return "SignatureScheme("u8 + strconv.FormatInt((int64)(uint16)i, 10) + ")"u8;
@@ -92,7 +92,7 @@ public static @string String(this CurveID i) {
     switch (ᐧ) {
     case {} when 23 <= i && i <= 25: {
         i -= 23;
-        return _CurveID_name_0[(int)(_CurveID_index_0[i])..(int)(_CurveID_index_0[i + 1])];
+        return _CurveID_name_0.slice(_CurveID_index_0[i], _CurveID_index_0[i + 1]);
     }
     case {} when i == 29: {
         return _CurveID_name_1;
@@ -125,7 +125,7 @@ public static @string String(this ClientAuthType i) {
     if (i < 0 || i >= ((ClientAuthType)(len(_ClientAuthType_index) - 1))) {
         return "ClientAuthType("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
     }
-    return _ClientAuthType_name[(int)(_ClientAuthType_index[i])..(int)(_ClientAuthType_index[i + 1])];
+    return _ClientAuthType_name.slice(_ClientAuthType_index[i], _ClientAuthType_index[i + 1]);
 }
 
 } // end tls_package

@@ -45,7 +45,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
         // Simple writes are done in batch.
         if (i > n) {
             {
-                var errΔ1 = w.write(p[(int)(n)..(int)(i)]); if (errΔ1 != default!) {
+                var errΔ1 = w.write(p.slice(n, i)); if (errΔ1 != default!) {
                     return (n, errΔ1);
                 }
             }
@@ -62,7 +62,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
         return (n, default!);
     }
     {
-        var errΔ3 = w.write(p[(int)(n)..]); if (errΔ3 != default!) {
+        var errΔ3 = w.write(p.slice(n)); if (errΔ3 != default!) {
             return (n, errΔ3);
         }
     }
@@ -167,7 +167,7 @@ internal static readonly @string upperhex = "0123456789ABCDEF"u8;
 
 [GoRecv] internal static error flush(this ref Writer w) {
     {
-        var (_, err) = w.w.Write(w.line[..(int)(w.i)]); if (err != default!) {
+        var (_, err) = w.w.Write(w.line.slice(0, w.i)); if (err != default!) {
             return err;
         }
     }

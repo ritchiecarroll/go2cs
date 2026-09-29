@@ -343,7 +343,7 @@ public static @string String(this ΔMonth m) {
     }
     var buf = new slice<byte>(20);
     nint n = fmtInt(buf, (uint64)(nint)m);
-    return "%!Month("u8 + ((sstring)(buf[(int)(n)..])) + ")"u8;
+    return "%!Month("u8 + ((sstring)(buf.slice(n))) + ")"u8;
 }
 
 [GoType("num:nint")] partial struct ΔWeekday;
@@ -363,7 +363,7 @@ public static @string String(this ΔWeekday d) {
     }
     var buf = new slice<byte>(20);
     nint n = fmtInt(buf, (uint64)(nint)d);
-    return "%!Weekday("u8 + ((sstring)(buf[(int)(n)..])) + ")"u8;
+    return "%!Weekday("u8 + ((sstring)(buf.slice(n))) + ")"u8;
 }
 
 // Computations on Times
@@ -945,7 +945,7 @@ public static @string String(this Duration d) {
     // Thus, the caller can decide whether a string must be heap allocated.
     ref var arr = ref heap(new array<byte>(32), out var Ꮡarr);
     nint n = d.format(Ꮡarr);
-    return ((@string)(arr[(int)(n)..]));
+    return ((@string)(arr.slice(n)));
 }
 
 // format formats the representation of d into the end of buf and
@@ -980,7 +980,7 @@ internal static nint format(this Duration d, [GoArrayDims(32)] ж<array<byte>> �
         case {} when u < (uint64)(int64)Millisecond: {
             prec = 3;
             w--; // Need room for two bytes.
-            copy(buf[(int)(w)..], // print nanoseconds
+            copy(buf.slice(w), // print nanoseconds
  // print microseconds
  // U+00B5 'µ' micro sign == 0xC2 0xB5
  "µ"u8);
@@ -993,27 +993,27 @@ internal static nint format(this Duration d, [GoArrayDims(32)] ж<array<byte>> �
         }}
 
         // print milliseconds
-        (w, u) = fmtFrac(buf[..(int)(w)], u, prec);
-        w = fmtInt(buf[..(int)(w)], u);
+        (w, u) = fmtFrac(buf.slice(0, w), u, prec);
+        w = fmtInt(buf.slice(0, w), u);
     } else {
         w--;
         buf[w] = (rune)'s';
-        (w, u) = fmtFrac(buf[..(int)(w)], u, 9);
+        (w, u) = fmtFrac(buf.slice(0, w), u, 9);
         // u is now integer seconds
-        w = fmtInt(buf[..(int)(w)], u % 60);
+        w = fmtInt(buf.slice(0, w), u % 60);
         u /= 60;
         // u is now integer minutes
         if (u > 0) {
             w--;
             buf[w] = (rune)'m';
-            w = fmtInt(buf[..(int)(w)], u % 60);
+            w = fmtInt(buf.slice(0, w), u % 60);
             u /= 60;
             // u is now integer hours
             // Stop at hours because days can be different lengths.
             if (u > 0) {
                 w--;
                 buf[w] = (rune)'h';
-                w = fmtInt(buf[..(int)(w)], u);
+                w = fmtInt(buf.slice(0, w), u);
             }
         }
     }
@@ -1632,7 +1632,7 @@ internal static readonly @string timeUnmarshalJSONInputIsˢ = "Time.UnmarshalJSO
     if (len(data) < 2 || data[0] != (rune)'"' || data[len(data) - 1] != (rune)'"') {
         return errors.New(timeUnmarshalJSONInputIsˢ);
     }
-    data = data[(int)(len(@""""))..(int)(len(data) - len(@""""))];
+    data = data.slice(len(@""""), len(data) - len(@""""));
     error err = default!;
     (t, err) = parseStrictRFC3339(data);
     return err;

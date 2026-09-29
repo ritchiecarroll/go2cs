@@ -1430,7 +1430,7 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
     // Adding another extension here? Remember to update the maximum number
     // of elements in the make() at the top of the function and the list of
     // template fields used in CreateCertificate documentation.
-    return (appendꓸꓸꓸ(ret[..(int)(n)], template.ExtraExtensions), default!);
+    return (appendꓸꓸꓸ(ret.slice(0, n), template.ExtraExtensions), default!);
 }
 
 internal static (pkix.Extension, error) marshalKeyUsage(KeyUsage ku) {
@@ -1442,7 +1442,7 @@ internal static (pkix.Extension, error) marshalKeyUsage(KeyUsage ku) {
     if (a[1] != 0) {
         l = 2;
     }
-    var bitString = a[..(int)(l)];
+    var bitString = a.slice(0, l);
     error err = default!;
     (ext.Value, err) = asn1.Marshal(new asn1.BitString(Bytes: bitString, BitLength: asn1BitLength(bitString)));
     return (ext, err);
@@ -1463,7 +1463,7 @@ internal static (pkix.Extension, error) marshalExtKeyUsage(slice<ExtKeyUsage> ex
             }
         }
     }
-    copy(oids[(int)(builtin.len(extUsages))..], unknownUsages);
+    copy(oids.slice(builtin.len(extUsages)), unknownUsages);
     error err = default!;
     (ext.Value, err) = asn1.Marshal(oids);
     return (ext, err);

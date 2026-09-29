@@ -828,7 +828,7 @@ internal static slice<byte> doctypeBytes = slice<byte>("<!DOCTYPE"u8);
     nint i = 0;
     var b = @new<bytes.Buffer>();
     while (i != len(s)) {
-        var (c1, nread) = contextAfterText(c, s[(int)(i)..]);
+        var (c1, nread) = contextAfterText(c, s.slice(i));
         nint i1 = i + nread;
         if (c.state == stateText || c.state == stateRCDATA){
             nint end = i1;
@@ -841,8 +841,8 @@ internal static slice<byte> doctypeBytes = slice<byte>("<!DOCTYPE"u8);
                 }
             }
             for (nint j = i; j < end; j++) {
-                if (s[j] == (rune)'<' && !bytes.HasPrefix(bytes.ToUpper(s[(int)(j)..]), doctypeBytes)) {
-                    b.Write(s[(int)(written)..(int)(j)]);
+                if (s[j] == (rune)'<' && !bytes.HasPrefix(bytes.ToUpper(s.slice(j)), doctypeBytes)) {
+                    b.Write(s.slice(written, j));
                     b.WriteString("&lt;"u8);
                     written = j + 1;
                 }
@@ -851,7 +851,7 @@ internal static slice<byte> doctypeBytes = slice<byte>("<!DOCTYPE"u8);
         if (isComment(c.state) && c.delim == delimNone) {
             var exprᴛ1 = c.state;
             if (exprᴛ1 == stateJSBlockCmt) {
-                if (bytes.ContainsAny(s[(int)(written)..(int)(i1)], // https://es5.github.io/#x7.4:
+                if (bytes.ContainsAny(s.slice(written, i1), // https://es5.github.io/#x7.4:
  // "Comments behave like white space and are
  // discarded except that, if a MultiLineComment
  // contains a line terminator character, then
@@ -881,22 +881,22 @@ internal static slice<byte> doctypeBytes = slice<byte>("<!DOCTYPE"u8);
                 // "-->" instead of "/*" or "//"
                 cs -= 1;
             }
-            b.Write(s[(int)(written)..(int)(cs)]);
+            b.Write(s.slice(written, cs));
             written = i1;
         }
-        if (isInScriptLiteral(c.state) && containsSpecialScriptTag(s[(int)(i)..(int)(i1)])) {
-            b.Write(s[(int)(written)..(int)(i)]);
-            b.Write(escapeSpecialScriptTags(s[(int)(i)..(int)(i1)]));
+        if (isInScriptLiteral(c.state) && containsSpecialScriptTag(s.slice(i, i1))) {
+            b.Write(s.slice(written, i));
+            b.Write(escapeSpecialScriptTags(s.slice(i, i1)));
             written = i1;
         }
         if (i == i1 && c.state == c1.state) {
-            throw panic(fmt.Sprintf("infinite loop from %v to %v on %q..%q"u8, c, c1, s[..(int)(i)], s[(int)(i)..]));
+            throw panic(fmt.Sprintf("infinite loop from %v to %v on %q..%q"u8, c, c1, s.slice(0, i), s.slice(i)));
         }
         (c, i) = (c1, i1);
     }
     if (written != 0 && c.state != stateError) {
         if (!isComment(c.state) || c.delim != delimNone) {
-            b.Write(n.Text[(int)(written)..]);
+            b.Write(n.Text.slice(written));
         }
         e.editTextNode(Ꮡn, b.Bytes());
     }
@@ -914,7 +914,7 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
             return (c1, 0);
         }
         // Consider all content up to any end tag.
-        return transitionFunc[c.state](c, s[..(int)(iΔ1)]);
+        return transitionFunc[c.state](c, s.slice(0, iΔ1));
     }
     // We are at the beginning of an attribute value.
     nint i = bytes.IndexAny(s, delimEnds[c.delim]);
@@ -930,10 +930,10 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
         // "<a style=font:'Arial'" needs open-quote fixup.
         // IE treats '`' as a quotation character.
         {
-            nint j = bytes.IndexAny(s[..(int)(i)], "\"'<=`"u8); if (j >= 0) {
+            nint j = bytes.IndexAny(s.slice(0, i), "\"'<=`"u8); if (j >= 0) {
                 return (new context(
                     state: stateError,
-                    err: errorf(ErrBadHTML, default!, 0, "%q in unquoted attr: %q"u8, s[(int)(j)..(int)(j + 1)], s[..(int)(i)])
+                    err: errorf(ErrBadHTML, default!, 0, "%q in unquoted attr: %q"u8, s.slice(j, j + 1), s.slice(0, i))
                 ), len(s));
             }
         }
@@ -945,13 +945,13 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
         // without having to entity decode token boundaries.
         for (var u = slice<byte>(html.UnescapeString(((@string)s))); len(u) != 0; ) {
             var (c1, i1) = transitionFunc[c.state](c, u);
-            (c, u) = (c1, u[(int)(i1)..]);
+            (c, u) = (c1, u.slice(i1));
         }
         return (c, len(s));
     }
     var element = c.element;
     // If this is a non-JS "type" attribute inside "script" tag, do not treat the contents as JS.
-    if (c.state == stateAttr && c.element == elementScript && c.attr == attrScriptType && !isJSType(((@string)(s[..(int)(i)])))) {
+    if (c.state == stateAttr && c.element == elementScript && c.attr == attrScriptType && !isJSType(((@string)(s.slice(0, i))))) {
         element = elementNone;
     }
     if (c.delim != delimSpaceOrTagEnd) {

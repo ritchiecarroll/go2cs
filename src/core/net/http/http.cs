@@ -161,7 +161,7 @@ internal static @string hexEscapeNonASCII(@string s) {
     for (nint i = 0; i < builtin.len(s); i++) {
         if (s[i] >= utf8.RuneSelf) {
             if (pos < i) {
-                b = append(b, s[(int)(pos)..(int)(i)].ꓸꓸꓸ);
+                b = append(b, s.slice(pos, i).ꓸꓸꓸ);
             }
             b = append(b, (byte)((rune)'%'));
             b = strconv.AppendInt(b, (int64)s[i], 16);
@@ -169,7 +169,7 @@ internal static @string hexEscapeNonASCII(@string s) {
         }
     }
     if (pos < builtin.len(s)) {
-        b = append(b, s[(int)(pos)..].ꓸꓸꓸ);
+        b = append(b, s.slice(pos).ꓸꓸꓸ);
     }
     return ((@string)b);
 }

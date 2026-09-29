@@ -335,7 +335,7 @@ internal static (nint, error) Read(this ж<decompressor> Ꮡf, slice<byte> b) {
     while (ᐧ) {
         if (len(f.toRead) > 0) {
             nint n = copy(b, f.toRead);
-            f.toRead = f.toRead[(int)(n)..];
+            f.toRead = f.toRead.slice(n);
             if (len(f.toRead) == 0) {
                 return (n, f.err);
             }
@@ -470,7 +470,7 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
             i++;
         }
     }
-    if (!f.h1.init((~f.bits)[0..(int)(nlit)]) || !f.h2.init((~f.bits)[(int)(nlit)..(int)(nlit + ndist)])) {
+    if (!f.h1.init((~f.bits).slice(0, nlit)) || !f.h2.init((~f.bits).slice(nlit, nlit + ndist))) {
         return ((CorruptInputError)f.roffset);
     }
     // As an optimization, we can initialize the min bits to read at a time
@@ -686,7 +686,7 @@ copyHistory:
 [GoRecv] internal static void copyData(this ref decompressor f) {
     var buf = f.dict.writeSlice();
     if (len(buf) > f.copyLen) {
-        buf = buf[..(int)(f.copyLen)];
+        buf = buf.slice(0, f.copyLen);
     }
     var (cnt, err) = io.ReadFull(f.r, buf);
     f.roffset += (int64)cnt;

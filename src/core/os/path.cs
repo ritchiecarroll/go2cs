@@ -44,7 +44,7 @@ public static error MkdirAll(@string path, FileMode perm) {
     // If there is a parent directory, and it is not the volume name,
     // recurse to ensure parent directory exists.
     {
-        @string parent = path[..(int)(i)]; if (len(parent) > len(filepathlite.VolumeName(path))) {
+        @string parent = path.slice(0, i); if (len(parent) > len(filepathlite.VolumeName(path))) {
             err = MkdirAll(parent, perm);
             if (err != default!) {
                 return err;

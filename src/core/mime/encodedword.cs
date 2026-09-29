@@ -80,18 +80,18 @@ internal static void bEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @st
     for (nint i = 0; i < len(s); i += runeLen) {
         // Multi-byte characters must not be split across encoded-words.
         // See RFC 2047, section 5.3.
-        (_, runeLen) = utf8.DecodeRuneInString(s[(int)(i)..]);
+        (_, runeLen) = utf8.DecodeRuneInString(s.slice(i));
         if (currentLen + runeLen <= maxBase64Len){
             currentLen += runeLen;
         } else {
-            Δio.WriteString(w, s[(int)(last)..(int)(i)]);
+            Δio.WriteString(w, s.slice(last, i));
             w.Close();
             e.splitWord(Ꮡbuf, charset);
             last = i;
             currentLen = runeLen;
         }
     }
-    Δio.WriteString(w, s[(int)(last)..]);
+    Δio.WriteString(w, s.slice(last));
     w.Close();
 }
 
@@ -113,14 +113,14 @@ internal static void qEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @st
         if (b >= (rune)' ' && b <= (rune)'~' && b != (rune)'=' && b != (rune)'?' && b != (rune)'_'){
             (runeLen, encLen) = (1, 1);
         } else {
-            (_, runeLen) = utf8.DecodeRuneInString(s[(int)(i)..]);
+            (_, runeLen) = utf8.DecodeRuneInString(s.slice(i));
             encLen = 3 * runeLen;
         }
         if (currentLen + encLen > maxContentLen) {
             e.splitWord(Ꮡbuf, charset);
             currentLen = 0;
         }
-        writeQString(Ꮡbuf, s[(int)(i)..(int)(i + runeLen)]);
+        writeQString(Ꮡbuf, s.slice(i, i + runeLen));
         currentLen += encLen;
     }
 }
@@ -198,7 +198,7 @@ internal static readonly @string upperhex = "0123456789ABCDEF"u8;
     if (len(word) < 8 || !strings.HasPrefix(word, "=?"u8) || !strings.HasSuffix(word, "?="u8) || strings.Count(word, "?"u8) != 4) {
         return ("", errInvalidWord);
     }
-    word = word[2..(int)(len(word) - 2)];
+    word = word.slice(2, len(word) - 2);
     // split word "UTF-8?q?text" into "UTF-8", 'q', and "text"
     var (charset, text, _) = strings.Cut(word, "?"u8);
     if (charset == ""u8) {
@@ -230,8 +230,8 @@ internal static readonly @string upperhex = "0123456789ABCDEF"u8;
         return (header, default!);
     }
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    Ꮡbuf.WriteString(header[..(int)(i)]);
-    header = header[(int)(i)..];
+    Ꮡbuf.WriteString(header.slice(0, i));
+    header = header.slice(i);
     var betweenWords = false;
     while (ᐧ) {
         nint start = strings.Index(header, "=?"u8);
@@ -239,11 +239,11 @@ internal static readonly @string upperhex = "0123456789ABCDEF"u8;
             break;
         }
         nint cur = start + len("=?");
-        nint iΔ1 = strings.Index(header[(int)(cur)..], "?"u8);
+        nint iΔ1 = strings.Index(header.slice(cur), "?"u8);
         if (iΔ1 == -1) {
             break;
         }
-        @string charset = header[(int)(cur)..(int)(cur + iΔ1)];
+        @string charset = header.slice(cur, cur + iΔ1);
         cur += iΔ1 + len("?");
         if (len(header) < cur + len("Q??=")) {
             break;
@@ -254,30 +254,30 @@ internal static readonly @string upperhex = "0123456789ABCDEF"u8;
             break;
         }
         cur++;
-        nint j = strings.Index(header[(int)(cur)..], "?="u8);
+        nint j = strings.Index(header.slice(cur), "?="u8);
         if (j == -1) {
             break;
         }
-        @string text = header[(int)(cur)..(int)(cur + j)];
+        @string text = header.slice(cur, cur + j);
         nint end = cur + j + len("?=");
         var (content, err) = decode(encoding, text);
         if (err != default!) {
             betweenWords = false;
-            Ꮡbuf.WriteString(header[..(int)(start + 2)]);
-            header = header[(int)(start + 2)..];
+            Ꮡbuf.WriteString(header.slice(0, start + 2));
+            header = header.slice(start + 2);
             continue;
         }
         // Write characters before the encoded-word. White-space and newline
         // characters separating two encoded-words must be deleted.
-        if (start > 0 && (!betweenWords || hasNonWhitespace(header[..(int)(start)]))) {
-            Ꮡbuf.WriteString(header[..(int)(start)]);
+        if (start > 0 && (!betweenWords || hasNonWhitespace(header.slice(0, start)))) {
+            Ꮡbuf.WriteString(header.slice(0, start));
         }
         {
             var errΔ1 = d.convert(Ꮡbuf, charset, content); if (errΔ1 != default!) {
                 return ("", errΔ1);
             }
         }
-        header = header[(int)(end)..];
+        header = header.slice(end);
         betweenWords = true;
     }
     if (len(header) > 0) {
@@ -399,7 +399,7 @@ internal static (slice<byte>, error) qDecode(@string s) {
 
         n++;
     }
-    return (dec[..(int)(n)], default!);
+    return (dec.slice(0, n), default!);
 }
 
 // readHexByte returns the byte from its quoted-printable representation.

@@ -27,7 +27,7 @@ internal static void copyenv() {
     foreach (var (i, s) in envs) {
         for (nint j = 0; j < len(s); j++) {
             if (s[j] == (rune)'=') {
-                @string key = s[..(int)(j)];
+                @string key = s.slice(0, j);
                 {
                     var (_, ok) = env[key, ꟷ]; if (!ok){
                         env[key] = i; // first mention of key
@@ -82,7 +82,7 @@ public static (@string value, bool found) Getenv(@string key) {
         @string s = envs[i];
         for (nint iΔ1 = 0; iΔ1 < len(s); iΔ1++) {
             if (s[iΔ1] == (rune)'=') {
-                (value, found) = (s[(int)(iΔ1 + 1)..], true); goto ᒐdone;
+                (value, found) = (s.slice(iΔ1 + 1), true); goto ᒐdone;
             }
         }
         (value, found) = ("", false);

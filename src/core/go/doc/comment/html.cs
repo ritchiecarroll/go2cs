@@ -182,38 +182,38 @@ internal static readonly @string aposˢ = "&apos;"u8;
     for (nint i = 0; i < len(s); i++) {
         switch (s[i]) {
         case (rune)'<': {
-            @out.WriteString(s[(int)(start)..(int)(i)]);
+            @out.WriteString(s.slice(start, i));
             @out.WriteString("&lt;"u8);
             start = i + 1;
             break;
         }
         case (rune)'&': {
-            @out.WriteString(s[(int)(start)..(int)(i)]);
+            @out.WriteString(s.slice(start, i));
             @out.WriteString(ampˢ);
             start = i + 1;
             break;
         }
         case (rune)'"': {
-            @out.WriteString(s[(int)(start)..(int)(i)]);
+            @out.WriteString(s.slice(start, i));
             @out.WriteString(quotˢ);
             start = i + 1;
             break;
         }
         case (rune)'\'': {
-            @out.WriteString(s[(int)(start)..(int)(i)]);
+            @out.WriteString(s.slice(start, i));
             @out.WriteString(aposˢ);
             start = i + 1;
             break;
         }
         case (rune)'>': {
-            @out.WriteString(s[(int)(start)..(int)(i)]);
+            @out.WriteString(s.slice(start, i));
             @out.WriteString("&gt;"u8);
             start = i + 1;
             break;
         }}
 
     }
-    @out.WriteString(s[(int)(start)..]);
+    @out.WriteString(s.slice(start));
 }
 
 } // end comment_package

@@ -65,7 +65,7 @@ internal static void copyCheck(this ж<Builder> Ꮡb) {
 // grow copies the buffer to a new, larger buffer so that there are at least n
 // bytes of capacity beyond len(b.buf).
 [GoRecv] internal static void grow(this ref Builder b, nint n) {
-    var buf = bytealg.MakeNoZero(2 * cap(b.buf) + n)[..(int)(len(b.buf))];
+    var buf = bytealg.MakeNoZero(2 * cap(b.buf) + n).slice(0, len(b.buf));
     copy(buf, b.buf);
     b.buf = buf;
 }

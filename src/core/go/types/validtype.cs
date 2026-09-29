@@ -148,7 +148,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
                     // index of t in nest. Search again.
                     foreach (var (start, p) in path) {
                         if (Identical(new NamedжΔType(p), new NamedжΔType(t))) {
-                            Ꮡcheck.cycleError(makeObjList(path[(int)(start)..]), 0);
+                            Ꮡcheck.cycleError(makeObjList(path.slice(start)), 0);
                             return false;
                         }
                     }
@@ -186,7 +186,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
                             // the current (instantiated) type (see the example
                             // at the end of this file).
                             // For error reporting we keep the full path.
-                            var res = Ꮡcheck.validType0(pos, targ, nest[..(int)(d)], path);
+                            var res = Ꮡcheck.validType0(pos, targ, nest.slice(0, d), path);
                             // The check.validType0 call with nest[:d] may have
                             // overwritten the entry at the current depth d.
                             // Restore the entry (was issue go.dev/issue/66323).

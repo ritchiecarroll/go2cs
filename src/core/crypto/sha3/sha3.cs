@@ -69,7 +69,7 @@ internal static slice<byte> sumSHAKE128(slice<byte> @out, slice<byte> data, nint
     if (len(@out) < length){
         @out = new slice<byte>(length);
     } else {
-        @out = @out[..(int)(length)];
+        @out = @out.slice(0, length);
     }
     var h = sha3.NewShake128();
     h.Write(data);
@@ -89,7 +89,7 @@ internal static slice<byte> sumSHAKE256(slice<byte> @out, slice<byte> data, nint
     if (len(@out) < length){
         @out = new slice<byte>(length);
     } else {
-        @out = @out[..(int)(length)];
+        @out = @out.slice(0, length);
     }
     var h = sha3.NewShake256();
     h.Write(data);

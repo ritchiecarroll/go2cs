@@ -411,7 +411,7 @@ internal static void traceAdvance(bool stopTrace) {
     // events to indicate whether a P exists, rather than just making its
     // existence implicit.
     mp = acquirem();
-    foreach (var (_, pp) in allp[(int)(len(allp))..(int)(cap(allp))]) {
+    foreach (var (_, pp) in allp.slice(len(allp), cap(allp))) {
         pp.of(runtime_package.Δp.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).readyNextGen(traceNextGen(gen));
     }
     releasem(ref (mp).DerefOrNull());
@@ -491,7 +491,7 @@ internal static void traceAdvance(bool stopTrace) {
         // bad state on dead Ps too. Prevent a STW and a concurrent GOMAXPROCS that
         // might mutate allp by making ourselves briefly non-preemptible.
         var mpΔ5 = acquirem();
-        foreach (var (_, pp) in allp[..(int)(cap(allp))]) {
+        foreach (var (_, pp) in allp.slice(0, cap(allp))) {
             pp.Value.trace.inSweep = false;
             pp.Value.trace.maySweep = false;
             pp.Value.trace.swept = 0;
@@ -662,7 +662,7 @@ internal static (slice<byte> buf, bool park) readTrace0() {
         var tbuf = Δtrace.full[gen % 2].pop();
         Δtrace.reading = tbuf;
         unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-        (buf, park) = ((~tbuf).arr[..(int)((~tbuf).pos)], false);
+        (buf, park) = ((~tbuf).arr.slice(0, (~tbuf).pos), false);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

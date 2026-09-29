@@ -34,9 +34,9 @@ internal static (slice<@string>, error) listGroups(ref User u) {
             }
         }
     }
-    gidsC = gidsC[..(int)(n)];
+    gidsC = gidsC.slice(0, n);
     var gids = new slice<@string>(0, n);
-    foreach (var (_, g) in gidsC[..(int)(n)]) {
+    foreach (var (_, g) in gidsC.slice(0, n)) {
         gids = append(gids, strconv.Itoa((nint)g));
     }
     return (gids, default!);

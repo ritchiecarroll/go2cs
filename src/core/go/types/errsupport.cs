@@ -125,7 +125,7 @@ internal static @string lookupError(this ж<Checker> Ꮡcheck, ΔType typ, @stri
 internal static @string tail(@string s) {
     foreach (var (i, _) in s) {
         if (i > 0) {
-            return s[(int)(i)..];
+            return s.slice(i);
         }
     }
     return s;

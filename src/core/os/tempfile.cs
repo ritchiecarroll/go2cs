@@ -73,7 +73,7 @@ internal static (@string prefix, @string suffix, error err) prefixAndSuffix(@str
     }
     {
         nint pos = bytealg.LastIndexByteString(pattern, (rune)'*'); if (pos != -1){
-            (prefix, suffix) = (pattern[..(int)(pos)], pattern[(int)(pos + 1)..]);
+            (prefix, suffix) = (pattern.slice(0, pos), pattern.slice(pos + 1));
         } else {
             prefix = pattern;
         }

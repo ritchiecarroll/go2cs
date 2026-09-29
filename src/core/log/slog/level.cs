@@ -145,8 +145,8 @@ internal static error /*err*/ parse(this ж<ΔLevel> Ꮡl, @string s) {
         nint offset = 0;
         {
             nint i = strings.IndexAny(s, "+-"u8); if (i >= 0) {
-                name = s[..(int)(i)];
-                (offset, err) = strconv.Atoi(s[(int)(i)..]);
+                name = s.slice(0, i);
+                (offset, err) = strconv.Atoi(s.slice(i));
                 if (err != default!) {
                     goto ᒐdone;
                 }

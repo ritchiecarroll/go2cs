@@ -202,7 +202,7 @@ internal static readonly @string exceededMaxDepthˢ = "exceeded max depth"u8;
 // and updates s.step accordingly.
 [GoRecv] internal static void popParseState(this ref scanner s) {
     nint n = len(s.parseState) - 1;
-    s.parseState = s.parseState[0..(int)(n)];
+    s.parseState = s.parseState.slice(0, n);
     if (n == 0){
         s.step = stateEndTop;
         s.endTop = true;
@@ -753,7 +753,7 @@ internal static @string quoteChar(byte c) {
     }
     // use quoted string with different quotation marks
     @string s = strconv.Quote(((@string)c));
-    return "'" + s[1..(int)(len(s) - 1)] + "'";
+    return "'" + s.slice(1, len(s) - 1) + "'";
 }
 
 } // end json_package

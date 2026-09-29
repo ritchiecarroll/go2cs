@@ -105,7 +105,7 @@ loopItems:
                 }
                 return (names, err);
             }
-            names = append(names, syscall.UTF16ToString(buf[..(int)(l)]));
+            names = append(names, syscall.UTF16ToString(buf.slice(0, (nint)(l))));
 continue_loopItems:;
         }
 break_loopItems:;

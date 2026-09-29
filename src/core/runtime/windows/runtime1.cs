@@ -519,7 +519,7 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
             if (iΔ1 < 0){
                 (field, Δp) = (Δp, "");
             } else {
-                (field, Δp) = (Δp[..(int)(iΔ1)], Δp[(int)(iΔ1 + 1)..]);
+                (field, Δp) = (Δp.slice(0, iΔ1), Δp.slice(iΔ1 + 1));
             }
         } else {
             // incremental update: process right to left, updating and skipping seen
@@ -530,15 +530,15 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
             if (iΔ2 < 0){
                 (Δp, field) = ("", Δp);
             } else {
-                (Δp, field) = (Δp[..(int)(iΔ2)], Δp[(int)(iΔ2 + 1)..]);
+                (Δp, field) = (Δp.slice(0, iΔ2), Δp.slice(iΔ2 + 1));
             }
         }
         nint i = bytealg.IndexByteString(field, (rune)'=');
         if (i < 0) {
             continue;
         }
-        @string key = field[..(int)(i)];
-        @string value = field[(int)(i + 1)..];
+        @string key = field.slice(0, i);
+        @string value = field.slice(i + 1);
         if (seen[key]) {
             continue;
         }

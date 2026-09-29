@@ -77,11 +77,11 @@ internal static void XORKeyStream(this aesCtrWrapper x, slice<byte> dst, slice<b
 
 [GoRecv] internal static void refill(this ref ctr x) {
     nint remain = len(x.@out) - x.outUsed;
-    copy(x.@out, x.@out[(int)(x.outUsed)..]);
-    x.@out = x.@out[..(int)(cap(x.@out))];
+    copy(x.@out, x.@out.slice(x.outUsed));
+    x.@out = x.@out.slice(0, cap(x.@out));
     nint bs = x.b.BlockSize();
     while (remain <= len(x.@out) - bs) {
-        x.b.Encrypt(x.@out[(int)(remain)..], x.Δctr);
+        x.b.Encrypt(x.@out.slice(remain), x.Δctr);
         remain += bs;
         // Increment counter
         for (nint i = len(x.Δctr) - 1; i >= 0; i--) {
@@ -91,7 +91,7 @@ internal static void XORKeyStream(this aesCtrWrapper x, slice<byte> dst, slice<b
             }
         }
     }
-    x.@out = x.@out[..(int)(remain)];
+    x.@out = x.@out.slice(0, remain);
     x.outUsed = 0;
 }
 
@@ -99,7 +99,7 @@ internal static void XORKeyStream(this aesCtrWrapper x, slice<byte> dst, slice<b
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }
-    if (alias.InexactOverlap(dst[..(int)(len(src))], src)) {
+    if (alias.InexactOverlap(dst.slice(0, len(src)), src)) {
         throw panic("crypto/cipher: invalid buffer overlap");
     }
     {
@@ -111,9 +111,9 @@ internal static void XORKeyStream(this aesCtrWrapper x, slice<byte> dst, slice<b
         if (x.outUsed >= len(x.@out) - x.b.BlockSize()) {
             x.refill();
         }
-        nint n = subtle.XORBytes(dst, src, x.@out[(int)(x.outUsed)..]);
-        dst = dst[(int)(n)..];
-        src = src[(int)(n)..];
+        nint n = subtle.XORBytes(dst, src, x.@out.slice(x.outUsed));
+        dst = dst.slice(n);
+        src = src.slice(n);
         x.outUsed += n;
     }
 }

@@ -114,16 +114,16 @@ internal static readonly @string addAttrsUnsafelyCalledOnˢ = "AddAttrs unsafely
     // Check if a copy was modified by slicing past the end
     // and seeing if the Attr there is non-zero.
     if (cap(r.back) > len(r.back)) {
-        var end = r.back[..(int)(len(r.back) + 1)][len(r.back)];
+        var end = r.back.slice(0, len(r.back) + 1)[len(r.back)];
         if (!end.isEmpty()) {
             // Don't panic; copy and muddle through.
             r.back = slices.Clip<slice<Attr>, Attr>(r.back);
             r.back = builtin.append(r.back, String(bugˢ, addAttrsUnsafelyCalledOnˢ));
         }
     }
-    nint ne = countEmptyGroups(attrs[(int)(i)..]);
-    r.back = slices.Grow<slice<Attr>, Attr>(r.back, len(attrs[(int)(i)..]) - ne);
-    foreach (var (_, a) in attrs[(int)(i)..]) {
+    nint ne = countEmptyGroups(attrs.slice(i));
+    r.back = slices.Grow<slice<Attr>, Attr>(r.back, len(attrs.slice(i)) - ne);
+    foreach (var (_, a) in attrs.slice(i)) {
         if (!a.Value.isEmptyGroup()) {
             r.back = builtin.append(r.back, a);
         }

@@ -114,7 +114,7 @@ public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> p) {
             return (0, err);
         }
     }
-    nint n = copy(p, r.buffer[(int)(r.off)..]);
+    nint n = copy(p, r.buffer.slice(r.off));
     r.off += n;
     return (n, default!);
 }
@@ -234,7 +234,7 @@ retry:
     relativeOffset++;
     nint headerSize = windowDescriptorSize + dictionaryIdSize + fcsFieldSize;
     {
-        var (_, err) = io.ReadFull(r.r, r.scratch[..(int)(headerSize)]); if (err != default!) {
+        var (_, err) = io.ReadFull(r.r, r.scratch.slice(0, headerSize)); if (err != default!) {
             return r.wrapNonEOFError(relativeOffset, err);
         }
     }
@@ -257,7 +257,7 @@ retry:
     }
     // Dictionary_ID. RFC 3.1.1.1.3.
     if (dictionaryIdSize != 0) {
-        var dictionaryId = r.scratch[(int)(windowDescriptorSize)..(int)(windowDescriptorSize + dictionaryIdSize)];
+        var dictionaryId = r.scratch.slice(windowDescriptorSize, windowDescriptorSize + dictionaryIdSize);
         // Allow only zero Dictionary ID.
         foreach (var (_, b) in dictionaryId) {
             if (b != 0) {
@@ -268,7 +268,7 @@ retry:
     // Frame_Content_Size. RFC 3.1.1.1.4.
     r.frameSizeUnknown = false;
     r.remainingFrameSize = 0;
-    var fb = r.scratch[(int)(windowDescriptorSize + dictionaryIdSize)..];
+    var fb = r.scratch.slice(windowDescriptorSize + dictionaryIdSize);
     switch (fcsFieldSize) {
     case 0: {
         r.frameSizeUnknown = true;
@@ -480,9 +480,9 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
 [GoRecv] internal static void setBufferSize(this ref Reader r, nint size) {
     if (cap(r.buffer) < size) {
         nint need = size - cap(r.buffer);
-        r.buffer = appendꓸꓸꓸ(r.buffer[..(int)(cap(r.buffer))], makeꓸꓸꓸ<byte>(need));
+        r.buffer = appendꓸꓸꓸ(r.buffer.slice(0, cap(r.buffer)), makeꓸꓸꓸ<byte>(need));
     }
-    r.buffer = r.buffer[..(int)(size)];
+    r.buffer = r.buffer.slice(0, size);
 }
 
 // zstdError is an error while decompressing.

@@ -148,12 +148,12 @@ internal static bool traceReadCPU(uintptr gen) {
         }
         var goid = data[3];
         var mpid = data[4];
-        var stk = data[5..(int)(recordLen)];
+        var stk = data.slice(5, (nint)(recordLen));
         // Overflow records always have their headers contain
         // all zeroes.
         var isOverflowRecord = len(stk) == 1 && data[2] == 0 && data[3] == 0 && data[4] == 0;
         // Move the data iterator forward.
-        data = data[(int)(recordLen)..];
+        data = data.slice((nint)(recordLen));
         // No support here for reporting goroutine tags at the moment; if
         // that information is to be part of the execution trace, we'd
         // probably want to see when the tags are applied and when they
@@ -181,7 +181,7 @@ internal static bool traceReadCPU(uintptr gen) {
             w.@byte((byte)traceEvCPUSamples);
         }
         // Add the stack to the table.
-        var stackID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(gen % 2)).put(pcBuf[..(int)(nstk)]);
+        var stackID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(gen % 2)).put(pcBuf.slice(0, nstk));
         // Write out the CPU sample.
         w.@byte((byte)traceEvCPUSample);
         w.varint(timestamp);

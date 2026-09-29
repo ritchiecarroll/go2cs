@@ -283,7 +283,7 @@ internal static bool aliasAny() {
     nint i = len(check.objPath) - 1;
     var obj = check.objPath[i];
     check.objPath[i] = default!;
-    check.objPath = check.objPath[..(int)(i)];
+    check.objPath = check.objPath.slice(0, i);
     return obj;
 }
 
@@ -601,7 +601,7 @@ internal static void processDelayed(this ж<Checker> Ꮡcheck, nint top) {
         }
     }
     assert(top <= len(check.delayed)); // stack must not have shrunk
-    check.delayed = check.delayed[..(int)(top)];
+    check.delayed = check.delayed.slice(0, top);
     check.version = savedVersion;
 }
 

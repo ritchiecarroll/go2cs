@@ -156,15 +156,15 @@ internal static void vdsoInitFromSysinfoEhdr(ref vdsoInfo info, ж<elfEhdr> Ꮡh
         var nbucket = gnuhash.Value[0];
         info.symOff = gnuhash.Value[1];
         var bloomSize = gnuhash.Value[2];
-        info.bucket = (~gnuhash)[(int)(4 + bloomSize * (uint32)vdsoBloomSizeScale)..][..(int)(nbucket)];
-        info.chain = (~gnuhash)[(int)(4 + bloomSize * (uint32)vdsoBloomSizeScale + nbucket)..];
+        info.bucket = (~gnuhash).slice((nint)(4 + bloomSize * (uint32)vdsoBloomSizeScale)).slice(0, (nint)(nbucket));
+        info.chain = (~gnuhash).slice((nint)(4 + bloomSize * (uint32)vdsoBloomSizeScale + nbucket));
         info.isGNUHash = true;
     } else {
         // Parse the hash table header.
         var nbucket = hash.Value[0];
         var nchain = hash.Value[1];
-        info.bucket = (~hash)[2..(int)(2 + nbucket)];
-        info.chain = (~hash)[(int)(2 + nbucket)..(int)(2 + nbucket + nchain)];
+        info.bucket = (~hash).slice(2, (nint)(2 + nbucket));
+        info.chain = (~hash).slice((nint)(2 + nbucket), (nint)(2 + nbucket + nchain));
     }
     // That's all we need.
     info.valid = true;

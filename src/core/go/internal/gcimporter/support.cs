@@ -68,7 +68,7 @@ internal static UntypedInt maxlines => /* 64 * 1024 */ 65536;
         }
     });
     foreach (var (_, f) in s.files) {
-        (~f).@file.SetLines(fakeLines[..(int)((~f).lastline)]);
+        (~f).@file.SetLines(fakeLines.slice(0, (~f).lastline));
     }
 }
 
@@ -98,9 +98,9 @@ internal static (@string @base, @string suffix) splitVargenSuffix(@string name) 
         i--;
     }
     @string dot = dotᶜ;
-    if (i >= len(dot) && name[(int)(i - len(dot))..(int)(i)] == dot) {
+    if (i >= len(dot) && name.slice(i - len(dot), i) == dot) {
         i -= len(dot);
-        return (name[..(int)(i)], name[(int)(i)..]);
+        return (name.slice(0, i), name.slice(i));
     }
     return (name, "");
 }

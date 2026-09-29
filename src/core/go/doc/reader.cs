@@ -563,7 +563,7 @@ internal static @string clean(@string s) {
     // remove trailing blank, if any
     {
         nint n = len(b); if (n > 0 && p == (rune)' ') {
-            b = b[0..(int)(n - 1)];
+            b = b.slice(0, n - 1);
         }
     }
     return ((@string)b);
@@ -579,13 +579,13 @@ internal static @string clean(@string s) {
             // get spurious line breaks/indentation when
             // showing the TODO body.
             ref var body = ref heap<@string>(out var Ꮡbody);
-            body = clean(text[(int)(m[1])..]);
+            body = clean(text.slice(m[1]));
             if (body != ""u8) {
-                @string marker = text[(int)(m[2])..(int)(m[3])];
+                @string marker = text.slice(m[2], m[3]);
                 r.notes[marker] = append(r.notes[marker], Ꮡ(new Note(
                     Pos: list[0].Pos(),
                     End: list[len(list) - 1].End(),
-                    UID: text[(int)(m[4])..(int)(m[5])],
+                    UID: text.slice(m[4], m[5]),
                     Body: body
                 )));
             }
@@ -605,13 +605,13 @@ internal static @string clean(@string s) {
         foreach (var (j, c) in list) {
             if (noteCommentRx.MatchString((~c).Text)) {
                 if (i >= 0) {
-                    r.readNote(list[(int)(i)..(int)(j)]);
+                    r.readNote(list.slice(i, j));
                 }
                 i = j;
             }
         }
         if (i >= 0) {
-            r.readNote(list[(int)(i)..]);
+            r.readNote(list.slice(i));
         }
     }
 }
@@ -926,7 +926,7 @@ internal static slice<ж<Value>> sortedValues(slice<ж<Value>> m, token.Token to
             i++;
         }
     }
-    list = list[0..(int)(i)];
+    list = list.slice(0, i);
     slices.SortFunc(list, (ж<Value> a, ж<Value> b) => {
         nint r = strings.Compare(sortingName(ref ((~a).Decl).DerefOrNull()), sortingName(ref ((~b).Decl).DerefOrNull()));
         if (r != 0) {
@@ -982,7 +982,7 @@ internal static slice<ж<Func>> sortedFuncs(methodSet m, bool allMethods) {
     // exclude conflict entry
     // forced inclusion, method not embedded, or method
     // embedded but original receiver type not exported
-    list = list[0..(int)(i)];
+    list = list.slice(0, i);
     slices.SortFunc(list, (ж<Func> a, ж<Func> b) => strings.Compare((~a).Name, (~b).Name));
     return list;
 }
@@ -1077,7 +1077,7 @@ internal static @string assumedPackageName(@string importPath) {
     @base = strings.TrimPrefix(@base, "go-"u8);
     {
         nint i = strings.IndexFunc(@base, notIdentifier); if (i >= 0) {
-            @base = @base[..(int)(i)];
+            @base = @base.slice(0, i);
         }
     }
     return @base;

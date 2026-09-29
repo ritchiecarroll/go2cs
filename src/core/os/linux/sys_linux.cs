@@ -25,7 +25,7 @@ internal static (@string name, error err) hostname() {
         foreach (var (i, b) in un.Nodename[..]) {
             buf[i] = (uint8)b;
             if (b == 0) {
-                name = ((@string)(buf[..(int)(i)]));
+                name = ((@string)(buf.slice(0, i)));
                 break;
             }
         }
@@ -53,7 +53,7 @@ internal static (@string name, error err) hostname() {
         if (n > 0 && buf[n - 1] == (rune)'\n') {
             n--;
         }
-        (name, err) = (((@string)(buf[..(int)(n)])), default!);
+        (name, err) = (((@string)(buf.slice(0, n))), default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

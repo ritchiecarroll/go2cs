@@ -35,7 +35,7 @@ public static @string FormatFileInfo(FileInfo info) {
         usize = q;
     }
     buf[i] = (byte)((rune)'0' + usize);
-    b = appendꓸꓸꓸ(b, buf[(int)(i)..]);
+    b = appendꓸꓸꓸ(b, buf.slice(i));
     b = append(b, (byte)((rune)' '));
     b = append(b, info.ModTime().Format(time.DateTime).ꓸꓸꓸ);
     b = append(b, (byte)((rune)' '));
@@ -58,7 +58,7 @@ public static @string FormatDirEntry(DirEntry dir) {
     // The Type method does not return any permission bits,
     // so strip them from the string.
     @string mode = dir.Type().String();
-    mode = mode[..(int)(len(mode) - 9)];
+    mode = mode.slice(0, len(mode) - 9);
     b = append(b, mode.ꓸꓸꓸ);
     b = append(b, (byte)((rune)' '));
     b = append(b, name.ꓸꓸꓸ);

@@ -145,13 +145,13 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
 
     {
         nint total = len(@in) + n; if (cap(@in) >= total){
-            head = @in[..(int)(total)];
+            head = @in.slice(0, total);
         } else {
             head = new slice<byte>(total);
             copy(head, @in);
         }
     }
-    tail = head[(int)(len(@in))..];
+    tail = head.slice(len(@in));
     return (head, tail);
 }
 

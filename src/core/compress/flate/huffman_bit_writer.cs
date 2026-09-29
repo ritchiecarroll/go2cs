@@ -110,7 +110,7 @@ internal static ж<huffmanBitWriter> newHuffmanBitWriter(io.Writer w) {
         n++;
     }
     w.bits = 0;
-    w.write(w.bytes[..(int)(n)]);
+    w.write(w.bytes.slice(0, n));
     w.nbytes = 0;
 }
 
@@ -132,7 +132,7 @@ internal static ж<huffmanBitWriter> newHuffmanBitWriter(io.Writer w) {
         w.bits >>= (int)(48);
         w.nbits -= 48;
         nint n = w.nbytes;
-        var bytes = w.bytes[(int)(n)..(int)(n + 6)];
+        var bytes = w.bytes.slice(n, n + 6);
         bytes[0] = (byte)bits;
         bytes[1] = (byte)((bits >> (int)(8)));
         bytes[2] = (byte)((bits >> (int)(16)));
@@ -141,7 +141,7 @@ internal static ж<huffmanBitWriter> newHuffmanBitWriter(io.Writer w) {
         bytes[5] = (byte)((bits >> (int)(40)));
         n += 6;
         if (n >= bufferFlushSize) {
-            w.write(w.bytes[..(int)(n)]);
+            w.write(w.bytes.slice(0, n));
             n = 0;
         }
         w.nbytes = n;
@@ -167,7 +167,7 @@ internal static readonly @string writeBytesWithUnfinishedˢ = "writeBytes with u
         n++;
     }
     if (n != 0) {
-        w.write(w.bytes[..(int)(n)]);
+        w.write(w.bytes.slice(0, n));
     }
     w.nbytes = 0;
     w.write(bytes);
@@ -196,11 +196,11 @@ internal static readonly @string writeBytesWithUnfinishedˢ = "writeBytes with u
     // so far.
     var codegen = w.codegen; // cache
     // Copy the concatenated code sizes to codegen. Put a marker at the end.
-    var cgnl = codegen[..(int)(numLiterals)];
+    var cgnl = codegen.slice(0, numLiterals);
     foreach (var (i, _) in cgnl) {
         cgnl[i] = (uint8)litEnc.codes[i].len;
     }
-    cgnl = codegen[(int)(numLiterals)..(int)(numLiterals + numOffsets)];
+    cgnl = codegen.slice(numLiterals, numLiterals + numOffsets);
     foreach (var (i, _) in cgnl) {
         cgnl[i] = (uint8)offEnc.codes[i].len;
     }
@@ -316,7 +316,7 @@ internal static readonly @string writeBytesWithUnfinishedˢ = "writeBytes with u
         w.bits >>= (int)(48);
         w.nbits -= 48;
         nint n = w.nbytes;
-        var bytes = w.bytes[(int)(n)..(int)(n + 6)];
+        var bytes = w.bytes.slice(n, n + 6);
         bytes[0] = (byte)bits;
         bytes[1] = (byte)((bits >> (int)(8)));
         bytes[2] = (byte)((bits >> (int)(16)));
@@ -325,7 +325,7 @@ internal static readonly @string writeBytesWithUnfinishedˢ = "writeBytes with u
         bytes[5] = (byte)((bits >> (int)(40)));
         n += 6;
         if (n >= bufferFlushSize) {
-            w.write(w.bytes[..(int)(n)]);
+            w.write(w.bytes.slice(0, n));
             n = 0;
         }
         w.nbytes = n;
@@ -629,7 +629,7 @@ internal static ж<huffmanEncoder> huffOffset;
         var bits = w.bits;
         w.bits >>= (int)(48);
         w.nbits -= 48;
-        var bytes = w.bytes[(int)(n)..(int)(n + 6)];
+        var bytes = w.bytes.slice(n, n + 6);
         bytes[0] = (byte)bits;
         bytes[1] = (byte)((bits >> (int)(8)));
         bytes[2] = (byte)((bits >> (int)(16)));
@@ -640,7 +640,7 @@ internal static ж<huffmanEncoder> huffOffset;
         if (n < bufferFlushSize) {
             continue;
         }
-        w.write(w.bytes[..(int)(n)]);
+        w.write(w.bytes.slice(0, n));
         if (w.err != default!) {
             return; // Return early in the event of write failures
         }

@@ -243,7 +243,7 @@ internal static error walksymtab(slice<byte> data, nint ptrsz, Func<sym, error> 
         }
         switch (typ) {
         case (rune)'z' or (rune)'Z': {
-            p = p[(int)(i + nnul)..];
+            p = p.slice(i + nnul);
             for (i = 0; i + 2 <= len(p); i += 2) {
                 if (p[i] == 0 && p[i + 1] == 0) {
                     nnul = 2;
@@ -256,9 +256,9 @@ internal static error walksymtab(slice<byte> data, nint ptrsz, Func<sym, error> 
         if (len(p) < i + nnul) {
             return new formatErrorжerror(Ꮡ(new formatError(len(data), "unexpected EOF"u8, default!)));
         }
-        s.name = p[0..(int)(i)];
+        s.name = p.slice(0, i);
         i += nnul;
-        p = p[(int)(i)..];
+        p = p.slice(i);
         fn(s);
     }
     return default!;
@@ -281,7 +281,7 @@ internal static (slice<Sym>, error) newTable(slice<byte> symtab, nint ptrsz) {
     var fnameʗ1 = fname;
     err = walksymtab(symtab, ptrsz, error (sym s) => {
         nint nΔ1 = len(Ꮡsyms.ValueSlot);
-        Ꮡsyms.ValueSlot = Ꮡsyms.ValueSlot[0..(int)(nΔ1 + 1)];
+        Ꮡsyms.ValueSlot = Ꮡsyms.ValueSlot.slice(0, nΔ1 + 1);
         var ts = Ꮡ(Ꮡsyms.ValueSlot, nΔ1);
         ts.Value.Type = (rune)s.typ;
         ts.Value.Value = s.value;
@@ -293,7 +293,7 @@ internal static (slice<Sym>, error) newTable(slice<byte> symtab, nint ptrsz) {
         case (rune)'z' or (rune)'Z': {
             for (nint i = 0; i < len(s.name); i += 2) {
                 ref var eltIdx = ref heap<uint16>(out var ᏑeltIdx);
-                eltIdx = binary.BigEndian.Uint16(s.name[(int)(i)..(int)(i + 2)]);
+                eltIdx = binary.BigEndian.Uint16(s.name.slice(i, i + 2));
                 var (elt, ok) = fnameʗ1[eltIdx, ꟷ];
                 if (!ok) {
                     return new formatErrorжerror(Ꮡ(new formatError(-1, "bad filename code"u8, eltIdx)));

@@ -79,7 +79,7 @@ public static nint IndexRabinKarp<T>(T s, T sep)
     for (nint i = 0; i < n; i++) {
         h = h * (uint32)PrimeRK + (uint32)s[i];
     }
-    if (h == hashss && s[..(int)(n)].ToGoString() == sep.ToGoString()) {
+    if (h == hashss && s.slice(0, n).ToGoString() == sep.ToGoString()) {
         return 0;
     }
     for (nint i = n; i < len(s); ) {
@@ -87,7 +87,7 @@ public static nint IndexRabinKarp<T>(T s, T sep)
         h += (uint32)s[i];
         h -= pow * (uint32)s[i - n];
         i++;
-        if (h == hashss && s[(int)(i - n)..(int)(i)].ToGoString() == sep.ToGoString()) {
+        if (h == hashss && s.slice(i - n, i).ToGoString() == sep.ToGoString()) {
             return i - n;
         }
     }
@@ -107,14 +107,14 @@ public static nint LastIndexRabinKarp<T>(T s, T sep)
     for (nint i = len(s) - 1; i >= last; i--) {
         h = h * (uint32)PrimeRK + (uint32)s[i];
     }
-    if (h == hashss && s[(int)(last)..].ToGoString() == sep.ToGoString()) {
+    if (h == hashss && s.slice(last).ToGoString() == sep.ToGoString()) {
         return last;
     }
     for (nint i = last - 1; i >= 0; i--) {
         h *= PrimeRK;
         h += (uint32)s[i];
         h -= pow * (uint32)s[i + n];
-        if (h == hashss && s[(int)(i)..(int)(i + n)].ToGoString() == sep.ToGoString()) {
+        if (h == hashss && s.slice(i, i + n).ToGoString() == sep.ToGoString()) {
             return i;
         }
     }

@@ -110,8 +110,8 @@ public static ΔHeader Clone(this ΔHeader h) {
             continue;
         }
         nint n = copy(sv, vv);
-        h2[k] = sv.slice(-1, n, n);
-        sv = sv[(int)(n)..];
+        h2[k] = sv.slice(0, n, n);
+        sv = sv.slice(n);
     }
     return h2;
 }
@@ -281,7 +281,7 @@ internal static bool hasToken(@string v, @string token) {
                 continue;
             }
         }
-        if (ascii.EqualFold(v[(int)(sp)..(int)(sp + builtin.len(token))], token)) {
+        if (ascii.EqualFold(v.slice(sp, sp + builtin.len(token)), token)) {
             return true;
         }
     }

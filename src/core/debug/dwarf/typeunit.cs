@@ -125,7 +125,7 @@ internal static (ΔType, error) sigToType(this ж<Data> Ꮡd, uint64 sig) {
         tur.err = fmt.Errorf("%s: offset %d out of range; max %d"u8, (~tur.tu).name, doff, len((~tur.tu).data));
         return;
     }
-    tur.b = makeBuf(tur.d, new typeUnitжdataFormat(tur.tu), (~tur.tu).name, off, (~tur.tu).data[(int)(uint32)(doff)..]);
+    tur.b = makeBuf(tur.d, new typeUnitжdataFormat(tur.tu), (~tur.tu).name, off, (~tur.tu).data.slice((nint)(uint32)(doff)));
 }
 
 // AddressSize returns the size in bytes of addresses in the current type unit.

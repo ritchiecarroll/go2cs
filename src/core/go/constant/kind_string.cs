@@ -25,7 +25,7 @@ public static @string String(this ΔKind i) {
     if (i < 0 || i >= ((ΔKind)(len(_Kind_index) - 1))) {
         return "Kind("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
     }
-    return _Kind_name[(int)(_Kind_index[i])..(int)(_Kind_index[i + 1])];
+    return _Kind_name.slice(_Kind_index[i], _Kind_index[i + 1]);
 }
 
 } // end constant_package

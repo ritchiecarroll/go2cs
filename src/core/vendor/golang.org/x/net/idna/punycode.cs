@@ -44,11 +44,11 @@ internal static (@string, error) decode(@string encoded) {
         return ("", punyError(encoded));
     }
     if (pos == len(encoded)) {
-        return (encoded[..(int)(len(encoded) - 1)], default!);
+        return (encoded.slice(0, len(encoded) - 1), default!);
     }
     var output = new slice<rune>(0, len(encoded));
     if (pos != 0) {
-        foreach (var (_, r) in encoded[..(int)(pos - 1)]) {
+        foreach (var (_, r) in encoded.slice(0, pos - 1)) {
             output = append(output, r);
         }
     }
@@ -95,7 +95,7 @@ internal static (@string, error) decode(@string encoded) {
             return ("", punyError(encoded));
         }
         output = append(output, (rune)(0));
-        copy(output[(int)(i + 1)..], output[(int)(i)..]);
+        copy(output.slice(i + 1), output.slice(i));
         output[i] = n;
         i++;
     }

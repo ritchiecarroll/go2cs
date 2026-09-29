@@ -46,13 +46,13 @@ internal static UntypedInt xxhPrime64c5 => 0x27d4eb2f165667c5;
 [GoRecv] internal static void update(this ref xxhash64 xh, slice<byte> b) {
     xh.len += (uint64)builtin.len(b);
     if (xh.cnt + builtin.len(b) < builtin.len(xh.buf)) {
-        copy(xh.buf[(int)(xh.cnt)..], b);
+        copy(xh.buf.slice(xh.cnt), b);
         xh.cnt += builtin.len(b);
         return;
     }
     if (xh.cnt > 0) {
-        nint n = copy(xh.buf[(int)(xh.cnt)..], b);
-        b = b[(int)(n)..];
+        nint n = copy(xh.buf.slice(xh.cnt), b);
+        b = b.slice(n);
         xh.v[0] = xh.round(xh.v[0], binary.LittleEndian.Uint64(xh.buf[..]));
         xh.v[1] = xh.round(xh.v[1], binary.LittleEndian.Uint64(xh.buf[8..]));
         xh.v[2] = xh.round(xh.v[2], binary.LittleEndian.Uint64(xh.buf[16..]));

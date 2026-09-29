@@ -26,8 +26,8 @@ internal static (slice<byte> s1, slice<byte> s2) splitPreMasterSecret(slice<byte
     slice<byte> s1 = default!;
     slice<byte> s2 = default!;
 
-    s1 = secret[0..(int)((len(secret) + 1) / 2)];
-    s2 = secret[(int)(len(secret) / 2)..];
+    s1 = secret.slice(0, (len(secret) + 1) / 2);
+    s2 = secret.slice(len(secret) / 2);
     return (s1, s2);
 }
 
@@ -42,7 +42,7 @@ internal static void pHash(slice<byte> result, slice<byte> secret, slice<byte> s
         h.Write(a);
         h.Write(seed);
         var b = h.Sum(default!);
-        copy(result[(int)(j)..], b);
+        copy(result.slice(j), b);
         j += len(b);
         h.Reset();
         h.Write(a);
@@ -57,7 +57,7 @@ internal static slice<byte> prf10(slice<byte> secret, @string label, slice<byte>
     var hashMD5 = md5.New;
     var labelAndSeed = new slice<byte>(len(label) + len(seed));
     copy(labelAndSeed, label);
-    copy(labelAndSeed[(int)(len(label))..], seed);
+    copy(labelAndSeed.slice(len(label)), seed);
     var (s1, s2) = splitPreMasterSecret(secret);
     pHash(result, s1, labelAndSeed, hashMD5);
     var result2 = new slice<byte>(len(result));
@@ -146,17 +146,17 @@ internal static (slice<byte> clientMAC, slice<byte> serverMAC, slice<byte> clien
     seed = appendꓸꓸꓸ(seed, clientRandom);
     nint n = 2 * macLen + 2 * keyLen + 2 * ivLen;
     var keyMaterial = prfForVersion(version, ref suite)(masterSecret, keyExpansionLabel, seed, n);
-    clientMAC = keyMaterial[..(int)(macLen)];
-    keyMaterial = keyMaterial[(int)(macLen)..];
-    serverMAC = keyMaterial[..(int)(macLen)];
-    keyMaterial = keyMaterial[(int)(macLen)..];
-    clientKey = keyMaterial[..(int)(keyLen)];
-    keyMaterial = keyMaterial[(int)(keyLen)..];
-    serverKey = keyMaterial[..(int)(keyLen)];
-    keyMaterial = keyMaterial[(int)(keyLen)..];
-    clientIV = keyMaterial[..(int)(ivLen)];
-    keyMaterial = keyMaterial[(int)(ivLen)..];
-    serverIV = keyMaterial[..(int)(ivLen)];
+    clientMAC = keyMaterial.slice(0, macLen);
+    keyMaterial = keyMaterial.slice(macLen);
+    serverMAC = keyMaterial.slice(0, macLen);
+    keyMaterial = keyMaterial.slice(macLen);
+    clientKey = keyMaterial.slice(0, keyLen);
+    keyMaterial = keyMaterial.slice(keyLen);
+    serverKey = keyMaterial.slice(0, keyLen);
+    keyMaterial = keyMaterial.slice(keyLen);
+    clientIV = keyMaterial.slice(0, ivLen);
+    keyMaterial = keyMaterial.slice(ivLen);
+    serverIV = keyMaterial.slice(0, ivLen);
     return (clientMAC, serverMAC, clientKey, serverKey, clientIV, serverIV);
 }
 

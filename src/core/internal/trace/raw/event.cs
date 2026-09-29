@@ -43,7 +43,7 @@ private static readonly @string dataˢ = "\n\tdata="u8;
         Ꮡs.WriteString(strconv.FormatUint(e.Args[i], 10));
     }
     if (spec.IsStack) {
-        var frames = e.Args[(int)(len(spec.Args))..];
+        var frames = e.Args.slice(len(spec.Args));
         for (nint i = 0; i < len(frames); i++) {
             if (i % 4 == 0){
                 Ꮡs.WriteString("\n\t"u8);

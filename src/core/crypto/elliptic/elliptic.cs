@@ -112,8 +112,8 @@ public static slice<byte> Marshal(Curve curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt>
     nint byteLen = ((~curve.Params()).BitSize + 7) / 8;
     var ret = new slice<byte>(1 + 2 * byteLen);
     ret[0] = 4; // uncompressed point
-    x.FillBytes(ret[1..(int)(1 + byteLen)]);
-    y.FillBytes(ret[(int)(1 + byteLen)..(int)(1 + 2 * byteLen)]);
+    x.FillBytes(ret.slice(1, 1 + byteLen));
+    y.FillBytes(ret.slice(1 + byteLen, 1 + 2 * byteLen));
     return ret;
 }
 
@@ -168,8 +168,8 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) Unmarshal(Curve curve, slice<by
         return (default!, default!);
     }
     var p = curve.Params().Value.P;
-    x = @new<bigꓸInt>().SetBytes(data[1..(int)(1 + byteLen)]);
-    y = @new<bigꓸInt>().SetBytes(data[(int)(1 + byteLen)..]);
+    x = @new<bigꓸInt>().SetBytes(data.slice(1, 1 + byteLen));
+    y = @new<bigꓸInt>().SetBytes(data.slice(1 + byteLen));
     if (x.Cmp(p) >= 0 || y.Cmp(p) >= 0) {
         return (default!, default!);
     }

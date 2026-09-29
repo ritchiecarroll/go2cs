@@ -113,7 +113,7 @@ internal static void close(this blockWriter b) {
     } else {
         nuint n = (nuint)(~b.e).buf[0];
         b.e.Value.buf[n + 1] = 0;
-        b.e.write((~b.e).buf[..(int)(n + 2)]);
+        b.e.write((~b.e).buf.slice(0, (nint)(n + 2)));
     }
     b.e.flush();
 }
@@ -168,7 +168,7 @@ internal static readonly @string netscape20ˢ = "NETSCAPE2.0"u8;
                 e.err = err;
                 return;
             }
-            e.write(e.globalColorTable[..(int)(e.globalCT)]);
+            e.write(e.globalColorTable.slice(0, e.globalCT));
         } else {
             // All frames have a local color table, so a global color table
             // is not needed.
@@ -229,7 +229,7 @@ internal static (nint, error) encodeColorTable(slice<byte> dst, Δcolor.Palette 
     nint n = log2Lookup[size];
     if (n > len(p)) {
         // Pad with black.
-        clear(dst[(int)(3 * len(p))..(int)(3 * n)]);
+        clear(dst.slice(3 * len(p), 3 * n));
     }
     return (3 * n, default!);
 }
@@ -238,9 +238,9 @@ internal static (nint, error) encodeColorTable(slice<byte> dst, Δcolor.Palette 
     nint localSize = 3 * localLen;
     if (transparentIndex >= 0) {
         nint trOff = 3 * transparentIndex;
-        return bytes.Equal(e.globalColorTable[..(int)(trOff)], e.localColorTable[..(int)(trOff)]) && bytes.Equal(e.globalColorTable[(int)(trOff + 3)..(int)(localSize)], e.localColorTable[(int)(trOff + 3)..(int)(localSize)]);
+        return bytes.Equal(e.globalColorTable.slice(0, trOff), e.localColorTable.slice(0, trOff)) && bytes.Equal(e.globalColorTable.slice(trOff + 3, localSize), e.localColorTable.slice(trOff + 3, localSize));
     }
-    return bytes.Equal(e.globalColorTable[..(int)(localSize)], e.localColorTable[..(int)(localSize)]);
+    return bytes.Equal(e.globalColorTable.slice(0, localSize), e.localColorTable.slice(0, localSize));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -330,7 +330,7 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
             } else {
                 // Use a local color table.
                 e.writeByte((byte)((uint8)((uint8)fColorTable | (uint8)paddedSize)));
-                e.write(e.localColorTable[..(int)(ct)]);
+                e.write(e.localColorTable.slice(0, ct));
             }
         }
     }
@@ -344,14 +344,14 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
     var lzww = lzw.NewWriter(bw, lzw.LSB, litWidth);
     {
         nint dx = b.Dx(); if (dx == pm.Stride){
-            (_, e.err) = lzww.Write(pm.Pix[..(int)(dx * b.Dy())]);
+            (_, e.err) = lzww.Write(pm.Pix.slice(0, dx * b.Dy()));
             if (e.err != default!) {
                 lzww.Close();
                 return;
             }
         } else {
             for ((nint i, nint y) = (0, b.Min.Y); y < b.Max.Y; (i, y) = (i + pm.Stride, y + 1)) {
-                (_, e.err) = lzww.Write(pm.Pix[(int)(i)..(int)(i + dx)]);
+                (_, e.err) = lzww.Write(pm.Pix.slice(i, i + dx));
                 if (e.err != default!) {
                     lzww.Close();
                     return;
@@ -473,7 +473,7 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
         // might not start at (0, 0).
         //
         // TODO: Pick a better sub-sample of the Plan 9 palette.
-        pm = image.NewPaletted(b, palette.Plan9[..(int)(opts.NumColors)]);
+        pm = image.NewPaletted(b, palette.Plan9.slice(0, opts.NumColors));
         if (opts.Quantizer != default!) {
             pm.Value.Palette = opts.Quantizer.Quantize(new Δcolor.Palette(0, opts.NumColors), m);
         }

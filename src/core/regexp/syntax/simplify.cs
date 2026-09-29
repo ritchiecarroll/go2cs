@@ -29,7 +29,7 @@ public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
                 nre = @new<Regexp>();
                 nre.Value = re.ΔClone();
                 nre.Value.Rune = default!;
-                nre.Value.Sub = builtin.appendꓸꓸꓸ((~nre).Sub0[..0], re.Sub[..(int)(i)]);
+                nre.Value.Sub = builtin.appendꓸꓸꓸ((~nre).Sub0[..0], re.Sub.slice(0, i));
             }
             if (nre != Ꮡre) {
                 nre.Value.Sub = builtin.append((~nre).Sub, nsub);

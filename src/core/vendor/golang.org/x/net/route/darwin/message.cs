@@ -43,14 +43,14 @@ public static (slice<Message>, error) ParseRIB(RIBType typ, slice<byte> b) {
             return (default!, errMessageTooShort);
         }
         if (b[2] != rtmVersion) {
-            b = b[(int)(l)..];
+            b = b.slice(l);
             continue;
         }
         {
             var (w, ok) = wireFormats[(nint)b[3], ꟷ]; if (!ok){
                 nskips++;
             } else {
-                var (m, err) = (~w).parse(typ, b[..(int)(l)]);
+                var (m, err) = (~w).parse(typ, b.slice(0, l));
                 if (err != default!) {
                     return (default!, err);
                 }
@@ -61,7 +61,7 @@ public static (slice<Message>, error) ParseRIB(RIBType typ, slice<byte> b) {
                 }
             }
         }
-        b = b[(int)(l)..];
+        b = b.slice(l);
     }
     // We failed to parse any of the messages - version mismatch?
     if (nmsgs != len(msgs) + nskips) {

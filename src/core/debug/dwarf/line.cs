@@ -148,7 +148,7 @@ public static (ж<ΔLineReader>, error) LineReader(this ж<Data> Ꮡd, ж<Entry>
     var (compDir, _) = cu.Val(AttrCompDir)._<@string>(ᐧ);
     // Create the LineReader.
     var u = Ꮡ(d.unit, Ꮡd.offsetToUnit(cu.Offset));
-    var buf = makeBuf(Ꮡd, new unitжdataFormat(u), lineˢ, ((Offset)(uint32)off), d.line[(int)(off)..]);
+    var buf = makeBuf(Ꮡd, new unitжdataFormat(u), lineˢ, ((Offset)(uint32)off), d.line.slice((nint)(off)));
     // The compilation directory is implicitly directories[0].
     ref var r = ref heap<ΔLineReader>(out var Ꮡr);
     r = new ΔLineReader(
@@ -462,7 +462,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
     // avoids an allocation and potential racy access to the slice
     // backing store if the user called Files.
     if (len(r.fileEntries) < cap(r.fileEntries)) {
-        var fe = r.fileEntries[..(int)(len(r.fileEntries) + 1)];
+        var fe = r.fileEntries.slice(0, len(r.fileEntries) + 1);
         if (fe[len(fe) - 1] != nil) {
             // We already processed this addition.
             r.fileEntries = fe;
@@ -691,8 +691,8 @@ emit:
 // line table.
 [GoRecv] public static void Seek(this ref ΔLineReader r, LineReaderPos pos) {
     r.buf.off = pos.off;
-    r.buf.data = r.section[(int)(uint32)(r.buf.off)..(int)(uint32)(r.endOffset)];
-    r.fileEntries = r.fileEntries[..(int)(pos.numFileEntries)];
+    r.buf.data = r.section.slice((nint)(uint32)(r.buf.off), (nint)(uint32)(r.endOffset));
+    r.fileEntries = r.fileEntries.slice(0, pos.numFileEntries);
     r.state = pos.state;
     r.fileIndex = pos.fileIndex;
 }
@@ -702,9 +702,9 @@ emit:
 [GoRecv] public static void Reset(this ref ΔLineReader r) {
     // Reset buffer to the line number program offset.
     r.buf.off = r.programOffset;
-    r.buf.data = r.section[(int)(uint32)(r.buf.off)..(int)(uint32)(r.endOffset)];
+    r.buf.data = r.section.slice((nint)(uint32)(r.buf.off), (nint)(uint32)(r.endOffset));
     // Reset file entries list.
-    r.fileEntries = r.fileEntries[..(int)(r.initialFileEntries)];
+    r.fileEntries = r.fileEntries.slice(0, r.initialFileEntries);
     // Reset line number program state.
     r.resetState();
 }
@@ -872,9 +872,9 @@ internal static (@string drive, @string rest) splitDrive(@string path) {
         nint slash1 = strings.IndexByte(npath[2..], (rune)'\\') + 2;
         if (slash1 > 2) {
             // Get the mount-point part, which must be non-empty.
-            nint slash2 = strings.IndexByte(npath[(int)(slash1 + 1)..], (rune)'\\') + slash1 + 1;
+            nint slash2 = strings.IndexByte(npath.slice(slash1 + 1), (rune)'\\') + slash1 + 1;
             if (slash2 > slash1) {
-                return (path[..(int)(slash2)], path[(int)(slash2)..]);
+                return (path.slice(0, slash2), path.slice(slash2));
             }
         }
     }

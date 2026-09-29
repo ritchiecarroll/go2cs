@@ -63,9 +63,9 @@ public static (nint n, error err) Read(this ж<ChaCha8> Ꮡc, slice<byte> p) {
 
     ref var c = ref Ꮡc.DerefOrNull();
     if (c.readLen > 0) {
-        n = copy(p, c.readBuf[(int)(len(c.readBuf) - c.readLen)..]);
+        n = copy(p, c.readBuf.slice(len(c.readBuf) - c.readLen));
         c.readLen -= n;
-        p = p[(int)(n)..];
+        p = p.slice(n);
     }
     while (len(p) >= 8) {
         byteorder.LEPutUint64(p, Ꮡc.Uint64());
@@ -94,23 +94,23 @@ public static error UnmarshalBinary(this ж<ChaCha8> Ꮡc, slice<byte> data) {
         if (!ok) {
             return errors.New(invalidChaCha8ReadBufferˢ);
         }
-        c.readLen = copy(c.readBuf[(int)(len(c.readBuf) - len(buf))..], buf);
+        c.readLen = copy(c.readBuf.slice(len(c.readBuf) - len(buf)), buf);
     }
     return chacha8rand.Unmarshal(Ꮡc.of(ChaCha8.Ꮡstate), data);
 }
 
 internal static (slice<byte> after, bool found) cutPrefix(slice<byte> s, slice<byte> prefix) {
-    if (len(s) < len(prefix) || ((sstring)(s[..(int)(len(prefix))])) != ((sstring)prefix)) {
+    if (len(s) < len(prefix) || ((sstring)(s.slice(0, len(prefix)))) != ((sstring)prefix)) {
         return (s, false);
     }
-    return (s[(int)(len(prefix))..], true);
+    return (s.slice(len(prefix)), true);
 }
 
 internal static (slice<byte> buf, slice<byte> rest, bool ok) readUint8LengthPrefixed(slice<byte> b) {
     if (len(b) == 0 || len(b) < (nint)((byte)(1 + b[0]))) {
         return (default!, default!, false);
     }
-    return (b[1..(int)((byte)(1 + b[0]))], b[(int)((byte)(1 + b[0]))..], true);
+    return (b.slice(1, (byte)(1 + b[0])), b.slice((byte)(1 + b[0])), true);
 }
 
 // AppendBinary implements the [encoding.BinaryAppender] interface.
@@ -120,7 +120,7 @@ public static (slice<byte>, error) AppendBinary(this ж<ChaCha8> Ꮡc, slice<byt
     if (c.readLen > 0) {
         b = append(b, ((@string)"readbuf:"u8).ꓸꓸꓸ);
         b = append(b, (uint8)c.readLen);
-        b = appendꓸꓸꓸ(b, c.readBuf[(int)(len(c.readBuf) - c.readLen)..]);
+        b = appendꓸꓸꓸ(b, c.readBuf.slice(len(c.readBuf) - c.readLen));
     }
     return (appendꓸꓸꓸ(b, chacha8rand.Marshal(Ꮡc.of(ChaCha8.Ꮡstate))), default!);
 }

@@ -36,12 +36,12 @@ internal static nat norm(this nat z) {
     while (i > 0 && z[i - 1] == 0) {
         i--;
     }
-    return z[0..(int)(i)];
+    return z.slice(0, i);
 }
 
 internal static nat make(this nat z, nint n) {
     if (n <= cap(z)) {
-        return z[..(int)(n)]; // reuse z
+        return z.slice(0, n); // reuse z
     }
     if (n == 1) {
         // Most nats start small and stay that way; don't over-allocate.
@@ -100,9 +100,9 @@ internal static nat add(this nat z, nat x, nat y) {
     // result is x
     // m > 0
     z = z.make(m + 1);
-    Word c = addVV(z[0..(int)(n)], x, y);
+    Word c = addVV(z.slice(0, n), x, y);
     if (m > n) {
-        c = addVW(z[(int)(n)..(int)(m)], x[(int)(n)..], c);
+        c = addVW(z.slice(n, m), x.slice(n), c);
     }
     z[m] = c;
     return z.norm();
@@ -127,9 +127,9 @@ internal static nat sub(this nat z, nat x, nat y) {
     // result is x
     // m > 0
     z = z.make(m);
-    Word c = subVV(z[0..(int)(n)], x, y);
+    Word c = subVV(z.slice(0, n), x, y);
     if (m > n) {
-        c = subVW(z[(int)(n)..], x[(int)(n)..], c);
+        c = subVW(z.slice(n), x.slice(n), c);
     }
     if (c != 0) {
         throw panic("underflow");
@@ -179,17 +179,17 @@ internal static nat mulAddWW(this nat z, nat x, Word y, Word r) {
     }
     // m > 0
     z = z.make(m + 1);
-    z[m] = mulAddVWW(z[0..(int)(m)], x, y, r);
+    z[m] = mulAddVWW(z.slice(0, m), x, y, r);
     return z.norm();
 }
 
 // basicMul multiplies x and y and leaves the result in z.
 // The (non-normalized) result is placed in z[0 : len(x) + len(y)].
 internal static void basicMul(nat z, nat x, nat y) {
-    clear(z[0..(int)(len(x) + len(y))]); // initialize z
+    clear(z.slice(0, len(x) + len(y))); // initialize z
     foreach (var (i, d) in y) {
         if (d != 0) {
-            z[len(x) + i] = addMulVVW(z[(int)(i)..(int)(i + len(x))], x, d);
+            z[len(x) + i] = addMulVVW(z.slice(i, i + len(x)), x, d);
         }
     }
 }
@@ -216,9 +216,9 @@ internal static nat montgomery(this nat z, nat x, nat y, nat m, Word k, nint n) 
     Word c = default!;
     for (nint i = 0; i < n; i++) {
         Word d = y[i];
-        Word c2 = addMulVVW(z[(int)(i)..(int)(n + i)], x, d);
+        Word c2 = addMulVVW(z.slice(i, n + i), x, d);
         Word t = z[i] * k;
-        Word c3 = addMulVVW(z[(int)(i)..(int)(n + i)], m, t);
+        Word c3 = addMulVVW(z.slice(i, n + i), m, t);
         Word cx = c + c2;
         Word cy = cx + c3;
         z[n + i] = cy;
@@ -229,19 +229,19 @@ internal static nat montgomery(this nat z, nat x, nat y, nat m, Word k, nint n) 
         }
     }
     if (c != 0){
-        subVV(z[..(int)(n)], z[(int)(n)..], m);
+        subVV(z.slice(0, n), z.slice(n), m);
     } else {
-        copy(z[..(int)(n)], z[(int)(n)..]);
+        copy(z.slice(0, n), z.slice(n));
     }
-    return z[..(int)(n)];
+    return z.slice(0, n);
 }
 
 // Fast version of z[0:n+n>>1].add(z[0:n+n>>1], x[0:n]) w/o bounds checks.
 // Factored out for readability - do not use outside karatsuba.
 internal static void karatsubaAdd(nat z, nat x, nint n) {
     {
-        Word c = addVV(z[0..(int)(n)], z, x); if (c != 0) {
-            addVW(z[(int)(n)..(int)(n + (n >> (int)(1)))], z[(int)(n)..], c);
+        Word c = addVV(z.slice(0, n), z, x); if (c != 0) {
+            addVW(z.slice(n, n + (n >> (int)(1))), z.slice(n), c);
         }
     }
 }
@@ -249,8 +249,8 @@ internal static void karatsubaAdd(nat z, nat x, nint n) {
 // Like karatsubaAdd, but does subtract.
 internal static void karatsubaSub(nat z, nat x, nint n) {
     {
-        Word c = subVV(z[0..(int)(n)], z, x); if (c != 0) {
-            subVW(z[(int)(n)..(int)(n + (n >> (int)(1)))], z[(int)(n)..], c);
+        Word c = subVV(z.slice(0, n), z, x); if (c != 0) {
+            subVW(z.slice(n, n + (n >> (int)(1))), z.slice(n), c);
         }
     }
 }
@@ -298,8 +298,8 @@ internal static void karatsuba(nat z, nat x, nat y) {
     //      = x1*y0                 + x0*y1
     // split x, y into "digits"
     nint n2 = (n >> (int)(1)); // n2 >= 1
-    var (x1, x0) = (x[(int)(n2)..], x[0..(int)(n2)]); // x = x1*b + y0
-    var (y1, y0) = (y[(int)(n2)..], y[0..(int)(n2)]); // y = y1*b + y0
+    var (x1, x0) = (x.slice(n2), x.slice(0, n2)); // x = x1*b + y0
+    var (y1, y0) = (y.slice(n2), y.slice(0, n2)); // y = y1*b + y0
     // z is used for the result and temporary storage:
     //
     //   6*n     5*n     4*n     3*n     2*n     1*n     0*n
@@ -310,17 +310,17 @@ internal static void karatsuba(nat z, nat x, nat y) {
     // caller's z.
     // compute z0 and z2 with the result "in place" in z
     karatsuba(z, x0, y0); // z0 = x0*y0
-    karatsuba(z[(int)(n)..], x1, y1); // z2 = x1*y1
+    karatsuba(z.slice(n), x1, y1); // z2 = x1*y1
     // compute xd (or the negative value if underflow occurs)
     nint s = 1; // sign of product xd*yd
-    var xd = z[(int)(2 * n)..(int)(2 * n + n2)];
+    var xd = z.slice(2 * n, 2 * n + n2);
     if (subVV(xd, x1, x0) != 0) {
         // x1-x0
         s = -s;
         subVV(xd, x0, x1); // x0-x1
     }
     // compute yd (or the negative value if underflow occurs)
-    var yd = z[(int)(2 * n + n2)..(int)(3 * n)];
+    var yd = z.slice(2 * n + n2, 3 * n);
     if (subVV(yd, y0, y1) != 0) {
         // y0-y1
         s = -s;
@@ -328,12 +328,12 @@ internal static void karatsuba(nat z, nat x, nat y) {
     }
     // p = (x1-x0)*(y0-y1) == x1*y0 - x1*y1 - x0*y0 + x0*y1 for s > 0
     // p = (x0-x1)*(y0-y1) == x0*y0 - x0*y1 - x1*y0 + x1*y1 for s < 0
-    var p = z[(int)(n * 3)..];
+    var p = z.slice(n * 3);
     karatsuba(p, xd, yd);
     // save original z2:z0
     // (ok to use upper half of z since we're done recurring)
-    var r = z[(int)(n * 4)..];
-    copy(r, z[..(int)(n * 2)]);
+    var r = z.slice(n * 4);
+    copy(r, z.slice(0, n * 2));
     // add up all partial products
     //
     //   2*n     n     0
@@ -342,12 +342,12 @@ internal static void karatsuba(nat z, nat x, nat y) {
     //   +    [ z2  ]
     //   +    [  p  ]
     //
-    karatsubaAdd(z[(int)(n2)..], r, n);
-    karatsubaAdd(z[(int)(n2)..], r[(int)(n)..], n);
+    karatsubaAdd(z.slice(n2), r, n);
+    karatsubaAdd(z.slice(n2), r.slice(n), n);
     if (s > 0){
-        karatsubaAdd(z[(int)(n2)..], p, n);
+        karatsubaAdd(z.slice(n2), p, n);
     } else {
-        karatsubaSub(z[(int)(n2)..], p, n);
+        karatsubaSub(z.slice(n2), p, n);
     }
 }
 
@@ -358,7 +358,7 @@ internal static void karatsuba(nat z, nat x, nat y) {
 // no 3-operand slice expressions in this code (or worse,
 // reflect-based operations to the same effect).
 internal static bool alias(nat x, nat y) {
-    return cap(x) > 0 && cap(y) > 0 && Ꮡ(x[0..(int)(cap(x))], cap(x) - 1) == Ꮡ(y[0..(int)(cap(y))], cap(y) - 1);
+    return cap(x) > 0 && cap(y) > 0 && Ꮡ(x.slice(0, cap(x)), cap(x) - 1) == Ꮡ(y.slice(0, cap(y)), cap(y) - 1);
 }
 
 // addAt implements z += x<<(_W*i); z must be long enough.
@@ -368,10 +368,10 @@ internal static void addAt(nat z, nat x, nint i) {
     {
         nint n = len(x); if (n > 0) {
             {
-                Word c = addVV(z[(int)(i)..(int)(i + n)], z[(int)(i)..], x); if (c != 0) {
+                Word c = addVV(z.slice(i, i + n), z.slice(i), x); if (c != 0) {
                     nint j = i + n;
                     if (j < len(z)) {
-                        addVW(z[(int)(j)..], z[(int)(j)..], c);
+                        addVW(z.slice(j), z.slice(j), c);
                     }
                 }
             }
@@ -427,12 +427,12 @@ internal static nat mul(this nat z, nat x, nat y) {
     nint k = karatsubaLen(n, karatsubaThreshold);
     // k <= n
     // multiply x0 and y0 via Karatsuba
-    var x0 = x[0..(int)(k)]; // x0 is not normalized
-    var y0 = y[0..(int)(k)]; // y0 is not normalized
+    var x0 = x.slice(0, k); // x0 is not normalized
+    var y0 = y.slice(0, k); // y0 is not normalized
     z = z.make(max(6 * k, m + n)); // enough space for karatsuba of x0*y0 and full result of x*y
     karatsuba(z, x0, y0);
-    z = z[0..(int)(m + n)]; // z has final length but may be incomplete
-    clear(z[(int)(2 * k)..]); // upper portion of z is garbage (and 2*k <= m+n since k <= n <= m)
+    z = z.slice(0, m + n); // z has final length but may be incomplete
+    clear(z.slice(2 * k)); // upper portion of z is garbage (and 2*k <= m+n since k <= n <= m)
     // If xh != 0 or yh != 0, add the missing terms to z. For
     //
     //   xh = xi*b^i + ... + x2*b^2 + x1*b (0 <= xi < b)
@@ -451,15 +451,15 @@ internal static nat mul(this nat z, nat x, nat y) {
         var t = tp.ValueSlot;
         // add x0*y1*b
         var x0Δ1 = x0.norm();
-        var y1 = y[(int)(k)..]; // y1 is normalized because y is
+        var y1 = y.slice(k); // y1 is normalized because y is
         t = t.mul(x0Δ1, y1); // update t so we don't lose t's underlying array
         addAt(z, t, k);
         // add xi*y0<<i, xi*y1*b<<(i+k)
         var y0Δ1 = y0.norm();
         for (nint i = k; i < len(x); i += k) {
-            var xi = x[(int)(i)..];
+            var xi = x.slice(i);
             if (len(xi) > k) {
-                xi = xi[..(int)(k)];
+                xi = xi.slice(0, k);
             }
             xi = xi.norm();
             t = t.mul(xi, y0Δ1);
@@ -487,9 +487,9 @@ internal static void basicSqr(nat z, nat x) {
         // z collects the squares x[i] * x[i]
         (z[2 * i + 1], z[2 * i]) = mulWW(d, d);
         // t collects the products x[i] * x[j] where j < i
-        t[2 * i] = addMulVVW(t[(int)(i)..(int)(2 * i)], x[0..(int)(i)], d);
+        t[2 * i] = addMulVVW(t.slice(i, 2 * i), x.slice(0, i), d);
     }
-    t[2 * n - 1] = shlVU(t[1..(int)(2 * n - 1)], t[1..(int)(2 * n - 1)], 1); // double the j < i products
+    t[2 * n - 1] = shlVU(t.slice(1, 2 * n - 1), t.slice(1, 2 * n - 1), 1); // double the j < i products
     addVV(z, z, t); // combine the result
     putNat(tp);
 }
@@ -502,25 +502,25 @@ internal static void basicSqr(nat z, nat x) {
 internal static void karatsubaSqr(nat z, nat x) {
     nint n = len(x);
     if ((nint)(n & 1) != 0 || n < karatsubaSqrThreshold || n < 2) {
-        basicSqr(z[..(int)(2 * n)], x);
+        basicSqr(z.slice(0, 2 * n), x);
         return;
     }
     nint n2 = (n >> (int)(1));
-    var (x1, x0) = (x[(int)(n2)..], x[0..(int)(n2)]);
+    var (x1, x0) = (x.slice(n2), x.slice(0, n2));
     karatsubaSqr(z, x0);
-    karatsubaSqr(z[(int)(n)..], x1);
+    karatsubaSqr(z.slice(n), x1);
     // s = sign(xd*yd) == -1 for xd != 0; s == 1 for xd == 0
-    var xd = z[(int)(2 * n)..(int)(2 * n + n2)];
+    var xd = z.slice(2 * n, 2 * n + n2);
     if (subVV(xd, x1, x0) != 0) {
         subVV(xd, x0, x1);
     }
-    var p = z[(int)(n * 3)..];
+    var p = z.slice(n * 3);
     karatsubaSqr(p, xd);
-    var r = z[(int)(n * 4)..];
-    copy(r, z[..(int)(n * 2)]);
-    karatsubaAdd(z[(int)(n2)..], r, n);
-    karatsubaAdd(z[(int)(n2)..], r[(int)(n)..], n);
-    karatsubaSub(z[(int)(n2)..], p, n); // s == -1 for p != 0; s == 1 for p == 0
+    var r = z.slice(n * 4);
+    copy(r, z.slice(0, n * 2));
+    karatsubaAdd(z.slice(n2), r, n);
+    karatsubaAdd(z.slice(n2), r.slice(n), n);
+    karatsubaSub(z.slice(n2), p, n); // s == -1 for p != 0; s == 1 for p == 0
 }
 
 // Operands that are shorter than basicSqrThreshold are squared using
@@ -561,16 +561,16 @@ internal static nat sqr(this nat z, nat x) {
     // The algorithm and layout of z are the same as for mul.
     // z = (x1*b + x0)^2 = x1^2*b^2 + 2*x1*x0*b + x0^2
     nint k = karatsubaLen(n, karatsubaSqrThreshold);
-    var x0 = x[0..(int)(k)];
+    var x0 = x.slice(0, k);
     z = z.make(max(6 * k, 2 * n));
     karatsubaSqr(z, x0); // z = x0^2
-    z = z[0..(int)(2 * n)];
-    clear(z[(int)(2 * k)..]);
+    z = z.slice(0, 2 * n);
+    clear(z.slice(2 * k));
     if (k < n) {
         var tp = getNat(2 * k);
         var t = tp.ValueSlot;
         var x0Δ1 = x0.norm();
-        var x1 = x[(int)(k)..];
+        var x1 = x.slice(k);
         t = t.mul(x0Δ1, x1);
         addAt(z, t, k);
         addAt(z, t, k); // z = 2*x1*x0*b + x0^2
@@ -700,8 +700,8 @@ internal static nat shl(this nat z, nat x, nuint s) {
     // m > 0
     nint n = m + (nint)(s / (nuint)_W);
     z = z.make(n + 1);
-    z[n] = shlVU(z[(int)(n - m)..(int)(n)], x, s % (nuint)_W);
-    clear(z[0..(int)(n - m)]);
+    z[n] = shlVU(z.slice(n - m, n), x, s % (nuint)_W);
+    clear(z.slice(0, n - m));
     return z.norm();
 }
 
@@ -722,7 +722,7 @@ internal static nat shr(this nat z, nat x, nuint s) {
     }
     // n > 0
     z = z.make(n);
-    shrVU(z, x[(int)(m - n)..], s % (nuint)_W);
+    shrVU(z, x.slice(m - n), s % (nuint)_W);
     return z.norm();
 }
 
@@ -744,7 +744,7 @@ internal static nat setBit(this nat z, nat x, nuint i, nuint b) {
     case 1: {
         if (j >= n){
             z = z.make(j + 1);
-            clear(z[(int)(n)..]);
+            clear(z.slice(n));
         } else {
             z = z.make(n);
         }
@@ -778,7 +778,7 @@ internal static nuint sticky(this nat x, nuint i) {
         return 1;
     }
     // 0 <= j < len(x)
-    foreach (var (_, xΔ1) in x[..(int)(j)]) {
+    foreach (var (_, xΔ1) in x.slice(0, (nint)(j))) {
         if (xΔ1 != 0) {
             return 1;
         }
@@ -828,7 +828,7 @@ internal static nat andNot(this nat z, nat x, nat y) {
     for (nint i = 0; i < n; i++) {
         z[i] = (Word)(x[i] & ~y[i]);
     }
-    copy(z[(int)(n)..(int)(m)], x[(int)(n)..(int)(m)]);
+    copy(z.slice(n, m), x.slice(n, m));
     return z.norm();
 }
 
@@ -845,7 +845,7 @@ internal static nat or(this nat z, nat x, nat y) {
     for (nint i = 0; i < n; i++) {
         z[i] = (Word)(x[i] | y[i]);
     }
-    copy(z[(int)(n)..(int)(m)], s[(int)(n)..(int)(m)]);
+    copy(z.slice(n, m), s.slice(n, m));
     return z.norm();
 }
 
@@ -862,7 +862,7 @@ internal static nat xor(this nat z, nat x, nat y) {
     for (nint i = 0; i < n; i++) {
         z[i] = (Word)(x[i] ^ y[i]);
     }
-    copy(z[(int)(n)..(int)(m)], s[(int)(n)..(int)(m)]);
+    copy(z.slice(n, m), s.slice(n, m));
     return z.norm();
 }
 
@@ -1271,7 +1271,7 @@ internal static nat setBytes(this nat z, slice<byte> buf) {
     z = z.make((len(buf) + (nint)_S - 1) / (nint)_S);
     nint i = len(buf);
     for (nint k = 0; i >= _S; k++) {
-        z[k] = bigEndianWord(buf[(int)(i - (nint)_S)..(int)(i)]);
+        z[k] = bigEndianWord(buf.slice(i - (nint)_S, i));
         i -= _S;
     }
     if (i > 0) {

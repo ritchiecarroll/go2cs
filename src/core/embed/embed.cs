@@ -197,7 +197,7 @@ internal static (@string dir, @string elem, bool isDir) split(@string name) {
     if (i < 0) {
         return (".", name, isDir);
     }
-    return (name[..(int)(i)], name[(int)(i + 1)..], isDir);
+    return (name.slice(0, i), name.slice(i + 1), isDir);
 }
 
 internal static fs.ReadDirFS _ᴛ1ʗ = new FS(nil);
@@ -308,7 +308,7 @@ internal static slice<@file> readDir(this FS f, @string dir) {
         var (jdir, _, _) = split(filesʗ2[jΔ1].name);
         return jdir > dir;
     });
-    return files[(int)(i)..(int)(j)];
+    return files.slice(i, j);
 }
 
 // Open opens the named file for reading and returns it as an [fs.File].
@@ -385,7 +385,7 @@ internal static Δio.ReaderAt _ᴛ6ʗ = new openFileжReaderAt(((ж<openFile>)ni
     if (f.offset < 0) {
         return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: (~f.f).name, Err: fs.ErrInvalid))));
     }
-    nint n = copy(b, (~f.f).data[(int)(f.offset)..]);
+    nint n = copy(b, (~f.f).data.slice((nint)(f.offset)));
     f.offset += (int64)n;
     return (n, default!);
 }
@@ -416,7 +416,7 @@ internal static Δio.ReaderAt _ᴛ6ʗ = new openFileжReaderAt(((ж<openFile>)ni
     if (offset < 0 || offset > (int64)len((~f.f).data)) {
         return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: (~f.f).name, Err: fs.ErrInvalid))));
     }
-    nint n = copy(b, (~f.f).data[(int)(offset)..]);
+    nint n = copy(b, (~f.f).data.slice((nint)(offset)));
     if (n < len(b)) {
         return (n, Δio.EOF);
     }

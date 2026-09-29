@@ -164,8 +164,8 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(Ð¶<huffmanTree> á
             break;
         }
     }
-    var left = codes[..(int)(firstRightIndex)];
-    var right = codes[(int)(firstRightIndex)..];
+    var left = codes.slice(0, firstRightIndex);
+    var right = codes.slice(firstRightIndex);
     if (len(left) == 0 || len(right) == 0) {
         // There is a superfluous level in the Huffman tree indicating
         // a bug in the encoder. However, this bug has been observed in

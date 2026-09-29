@@ -380,7 +380,7 @@ internal static (@string, @string, bool) tzsetName(@string s) {
                 if (i < 3) {
                     return ("", "", false);
                 }
-                return (s[..(int)(i)], s[(int)(i)..], true);
+                return (s.slice(0, i), s.slice(i), true);
             }}
 
         }
@@ -391,7 +391,7 @@ internal static (@string, @string, bool) tzsetName(@string s) {
     } else {
         foreach (var (i, r) in s) {
             if (r == (rune)'>') {
-                return (s[1..(int)(i)], s[(int)(i + 1)..], true);
+                return (s.slice(1, i), s.slice(i + 1), true);
             }
         }
         return ("", "", false);
@@ -541,7 +541,7 @@ internal static (nint num, @string rest, bool ok) tzsetNum(@string s, nint min, 
             if (i == 0 || num < min) {
                 return (0, "", false);
             }
-            return (num, s[(int)(i)..], true);
+            return (num, s.slice(i), true);
         }
         num *= 10;
         num += (nint)r - (rune)'0';

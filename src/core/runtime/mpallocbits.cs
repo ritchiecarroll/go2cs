@@ -85,7 +85,7 @@ partial struct pageBits;
     _ = b.Value[j / 64];
     // Clear leading bits.
     b.Value[i / 64] &= unchecked((uint64)~(uint64)((~(uint64)0 << (int)((i % 64)))));
-    builtin.clear(b.Value[(int)(i / 64 + 1)..(int)(j / 64)]);
+    builtin.clear(b.Value.slice((nint)(i / 64 + 1), (nint)(j / 64)));
     // Clear trailing bits.
     b.Value[j / 64] &= unchecked((uint64)~(uint64)((((uint64)1).Lsh((j % 64 + 1))) - 1));
 }

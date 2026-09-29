@@ -813,7 +813,7 @@ internal static (ΔType, error) readType(this ж<Data> Ꮡd, @string name, typeR
                         copy(val, (~t).Val);
                         t.Value.Val = val;
                     }
-                    t.Value.Val = (~t).Val[0..(int)(n + 1)];
+                    t.Value.Val = (~t).Val.slice(0, n + 1);
                     t.Value.Val[n] = f;
                 }
             }

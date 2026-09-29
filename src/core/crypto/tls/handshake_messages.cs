@@ -420,7 +420,7 @@ internal static (slice<byte>, error) marshalWithoutBinders(this ж<clientHelloMs
             return (default!, err);
         }
     }
-    return (fullMessage[..(int)(len(fullMessage) - bindersLen)], default!);
+    return (fullMessage.slice(0, len(fullMessage) - bindersLen), default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1462,7 +1462,7 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
         y[1] = (uint8)((len(Δslice) >> (int)(8)));
         y[2] = (uint8)len(Δslice);
         copy(y[3..], Δslice);
-        y = y[(int)(3 + len(Δslice))..];
+        y = y.slice(3 + len(Δslice));
     }
     return (x, default!);
 }
@@ -1485,7 +1485,7 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
         if ((uint32)len(d) < 3 + certLen) {
             return false;
         }
-        d = d[(int)(3 + certLen)..];
+        d = d.slice((nint)(3 + certLen));
         certsLen -= 3 + certLen;
         numCerts++;
     }
@@ -1493,8 +1493,8 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
     d = data[7..];
     for (nint i = 0; i < numCerts; i++) {
         var certLen = (uint32)((uint32)(((uint32)d[0] << (int)(16)) | ((uint32)d[1] << (int)(8))) | (uint32)d[2]);
-        m.certificates[i] = d[3..(int)(3 + certLen)];
-        d = d[(int)(3 + certLen)..];
+        m.certificates[i] = d.slice(3, (nint)(3 + certLen));
+        d = d.slice((nint)(3 + certLen));
     }
     return true;
 }
@@ -1783,7 +1783,7 @@ internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
     x[3] = (uint8)length;
     x[4] = (uint8)len(m.certificateTypes);
     copy(x[5..], m.certificateTypes);
-    var y = x[(int)(5 + len(m.certificateTypes))..];
+    var y = x.slice(5 + len(m.certificateTypes));
     if (m.hasSignatureAlgorithm) {
         nint n = len(m.supportedSignatureAlgorithms) * 2;
         y[0] = (uint8)((n >> (int)(8)));
@@ -1803,7 +1803,7 @@ internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
         y[1] = (uint8)len(ca);
         y = y[2..];
         copy(y, ca);
-        y = y[(int)(len(ca))..];
+        y = y.slice(len(ca));
     }
     return (x, default!);
 }
@@ -1825,7 +1825,7 @@ internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
     if (copy(m.certificateTypes, data) != numCertTypes) {
         return false;
     }
-    data = data[(int)(numCertTypes)..];
+    data = data.slice(numCertTypes);
     if (m.hasSignatureAlgorithm) {
         if (len(data) < 2) {
             return false;
@@ -1855,7 +1855,7 @@ internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
     }
     var cas = new slice<byte>(casLength);
     copy(cas, data);
-    data = data[(int)(casLength)..];
+    data = data.slice(casLength);
     m.certificateAuthorities = default!;
     while (len(cas) > 0) {
         if (len(cas) < 2) {
@@ -1866,8 +1866,8 @@ internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
         if (len(cas) < (nint)caLen) {
             return false;
         }
-        m.certificateAuthorities = append(m.certificateAuthorities, cas[..(int)(caLen)]);
-        cas = cas[(int)(caLen)..];
+        m.certificateAuthorities = append(m.certificateAuthorities, cas.slice(0, caLen));
+        cas = cas.slice(caLen);
     }
     return len(data) == 0;
 }

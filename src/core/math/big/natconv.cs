@@ -347,7 +347,7 @@ internal static slice<byte> itoa(this nat x, bool neg, nint @base) {
         i--;
         s[i] = (rune)'-';
     }
-    return s[(int)(i)..];
+    return s.slice(i);
 }
 
 // Convert words of q to base b digits in s. If q is large, it is recursively "split in half"
@@ -388,8 +388,8 @@ internal static void convertWords(this nat q, slice<byte> s, Word b, nint ndigit
             (q, rΔ1) = q.div(rΔ1, q, table[index].bbb);
             // convert subblocks and collect results in s[:h] and s[h:]
             nint h = len(s) - table[index].ndigits;
-            rΔ1.convertWords(s[(int)(h)..], b, ndigits, bb, table[0..(int)(index)]);
-            s = s[..(int)(h)]; // == q.convertWords(s, b, ndigits, bb, table[0:index+1])
+            rΔ1.convertWords(s.slice(h), b, ndigits, bb, table.slice(0, index));
+            s = s.slice(0, h); // == q.convertWords(s, b, ndigits, bb, table[0:index+1])
         }
     }
     // having split any large blocks now process the remaining (small) block iteratively
@@ -470,7 +470,7 @@ internal static slice<divisor> divisors(nint m, Word b, nint ndigits, Word bb) {
     slice<divisor> table = default!;               // for b == 10, table overlaps with cacheBase10.table
     if (b == 10){
         ᏑcacheBase10.of(cacheBase10ᴛ1.ᏑMutex).Lock();
-        table = cacheBase10.table[0..(int)(k)]; // reuse old table for this conversion
+        table = cacheBase10.table.slice(0, k); // reuse old table for this conversion
     } else {
         table = new slice<divisor>(k); // create new table for this conversion
     }

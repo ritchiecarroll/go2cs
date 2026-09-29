@@ -660,8 +660,8 @@ internal static (ж<service> svc, ж<methodType> mtype, ж<Request> req, bool ke
         err = errors.New("rpc: service/method request ill-formed: "u8 + (~req).ServiceMethod);
         return (svc, mtype, req, keepReading, err);
     }
-    @string serviceName = (~req).ServiceMethod[..(int)(dot)];
-    @string methodName = (~req).ServiceMethod[(int)(dot + 1)..];
+    @string serviceName = (~req).ServiceMethod.slice(0, dot);
+    @string methodName = (~req).ServiceMethod.slice(dot + 1);
     // Look up the request.
     var (svci, ok) = Ꮡserver.of(Server.ᏑserviceMap).Load(serviceName);
     if (!ok) {

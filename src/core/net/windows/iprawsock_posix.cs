@@ -74,7 +74,7 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
     if ((byte)((b[0] >> (int)(4))) != 4) {
         return n;
     }
-    copy(b, b[(int)(l)..]);
+    copy(b, b.slice(l));
     return n - l;
 }
 

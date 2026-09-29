@@ -345,7 +345,7 @@ public static float64 Snapshot() {
             if (cst + (nint)nCtrs > len(sd)) {
                 break;
             }
-            var counters = sd[(int)(cst)..(int)(cst + (nint)nCtrs)];
+            var counters = sd.slice(cst, cst + (nint)nCtrs);
             foreach (var (iΔ1, _) in counters) {
                 if (Ꮡ(counters, iΔ1).Load() != 0) {
                     totExec++;

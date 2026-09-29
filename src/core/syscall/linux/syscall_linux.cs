@@ -388,7 +388,7 @@ public static (@string wd, error err) Getwd() {
     if (buf[0] != (rune)'/') {
         return ("", ENOENT);
     }
-    return (((@string)(buf[0..(int)(n - 1)])), default!);
+    return (((@string)(buf.slice(0, n - 1))), default!);
 }
 
 public static (slice<nint> gids, error err) Getgroups() {
@@ -412,7 +412,7 @@ public static (slice<nint> gids, error err) Getgroups() {
         return (default!, err);
     }
     gids = new slice<nint>(n);
-    foreach (var (i, v) in a[0..(int)(n)]) {
+    foreach (var (i, v) in a.slice(0, n)) {
         gids[i] = (nint)(uint32)v;
     }
     return (gids, err);
@@ -697,8 +697,8 @@ internal static (nint count, error err) ptracePeek(nint req, nint pid, uintptr a
         if (err != default!) {
             return (0, err);
         }
-        n += copy(@out, buf[(int)(addr % (uintptr)sizeofPtr)..]);
-        @out = @out[(int)(n)..];
+        n += copy(@out, buf.slice((nint)(addr % (uintptr)sizeofPtr)));
+        @out = @out.slice(n);
     }
     // Remainder.
     while (len(@out) > 0) {
@@ -710,7 +710,7 @@ internal static (nint count, error err) ptracePeek(nint req, nint pid, uintptr a
         }
         nint copied = copy(@out, buf[0..]);
         n += copied;
-        @out = @out[(int)(copied)..];
+        @out = @out.slice(copied);
     }
     return (n, default!);
 }
@@ -736,13 +736,13 @@ internal static (nint count, error err) ptracePoke(nint pokeReq, nint peekReq, n
         if (err != default!) {
             return (0, err);
         }
-        n += copy(buf[(int)(addr % (uintptr)sizeofPtr)..], data);
+        n += copy(buf.slice((nint)(addr % (uintptr)sizeofPtr)), data);
         var word = (Ꮡbuf.at<byte>(0).Reinterpret<byte, uintptr>()).Value;
         err = ptrace(pokeReq, pid, addr - addr % (uintptr)sizeofPtr, word);
         if (err != default!) {
             return (0, err);
         }
-        data = data[(int)(n)..];
+        data = data.slice(n);
     }
     // Interior.
     while (len(data) > sizeofPtr) {

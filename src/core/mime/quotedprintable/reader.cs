@@ -103,8 +103,8 @@ internal static slice<byte> softSuffix = slice<byte>("="u8);
             var wholeLine = r.line;
             r.line = bytes.TrimRightFunc(wholeLine, isQPDiscardWhitespace);
             if (bytes.HasSuffix(r.line, softSuffix)){
-                var rightStripped = wholeLine[(int)(len(r.line))..];
-                r.line = r.line[..(int)(len(r.line) - 1)];
+                var rightStripped = wholeLine.slice(len(r.line));
+                r.line = r.line.slice(0, len(r.line) - 1);
                 if (!bytes.HasPrefix(rightStripped, lf) && !bytes.HasPrefix(rightStripped, crlf) && !(len(rightStripped) == 0 && len(r.line) > 0 && AreEqual(r.rerr, io.EOF))) {
                     r.rerr = fmt.Errorf("quotedprintable: invalid bytes after =: %q"u8, rightStripped);
                 }

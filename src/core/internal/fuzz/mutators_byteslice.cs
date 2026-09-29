@@ -17,8 +17,8 @@ internal static slice<byte> byteSliceRemoveBytes(ж<mutator> Ꮡm, slice<byte> b
     }
     nint pos0 = m.rand(len(b));
     nint pos1 = pos0 + m.chooseLen(len(b) - pos0);
-    copy(b[(int)(pos0)..], b[(int)(pos1)..]);
-    b = b[..(int)(len(b) - (pos1 - pos0))];
+    copy(b.slice(pos0), b.slice(pos1));
+    b = b.slice(0, len(b) - (pos1 - pos0));
     return b;
 }
 
@@ -32,8 +32,8 @@ internal static slice<byte> byteSliceInsertRandomBytes(ж<mutator> Ꮡm, slice<b
     if (len(b) + n >= builtin.cap(b)) {
         return default!;
     }
-    b = b[..(int)(len(b) + n)];
-    copy(b[(int)(pos + n)..], b[(int)(pos)..]);
+    b = b.slice(0, len(b) + n);
+    copy(b.slice(pos + n), b.slice(pos));
     for (nint i = 0; i < n; i++) {
         b[pos + i] = (byte)m.rand(256);
     }
@@ -63,16 +63,16 @@ internal static slice<byte> byteSliceDuplicateBytes(ж<mutator> Ꮡm, slice<byte
     nint end = len(b);
     // Increase the size of b to fit the duplicated block as well as
     // some extra working space
-    b = b[..(int)(end + (n * 2))];
+    b = b.slice(0, end + (n * 2));
     // Copy the block of bytes we want to duplicate to the end of the
     // slice
-    copy(b[(int)(end + n)..], b[(int)(src)..(int)(src + n)]);
+    copy(b.slice(end + n), b.slice(src, src + n));
     // Shift the bytes after the splice point n positions to the right
     // to make room for the new block
-    copy(b[(int)(dst + n)..(int)(end + n)], b[(int)(dst)..(int)(end)]);
+    copy(b.slice(dst + n, end + n), b.slice(dst, end));
     // Insert the duplicate block into the splice point
-    copy(b[(int)(dst)..], b[(int)(end + n)..]);
-    b = b[..(int)(end + n)];
+    copy(b.slice(dst), b.slice(end + n));
+    b = b.slice(0, end + n);
     return b;
 }
 
@@ -89,7 +89,7 @@ internal static slice<byte> byteSliceOverwriteBytes(ж<mutator> Ꮡm, slice<byte
         dst = m.rand(len(b));
     }
     nint n = m.chooseLen(len(b) - src - 1);
-    copy(b[(int)(dst)..], b[(int)(src)..(int)(src + n)]);
+    copy(b.slice(dst), b.slice(src, src + n));
     return b;
 }
 
@@ -166,7 +166,7 @@ internal static slice<byte> byteSliceArithmeticUint16(ж<mutator> Ꮡm, slice<by
     }
     nint pos = m.rand(len(b) - 1);
     var enc = m.randByteOrder();
-    enc.PutUint16(b[(int)(pos)..], (uint16)(enc.Uint16(b[(int)(pos)..]) + v));
+    enc.PutUint16(b.slice(pos), (uint16)(enc.Uint16(b.slice(pos)) + v));
     return b;
 }
 
@@ -183,7 +183,7 @@ internal static slice<byte> byteSliceArithmeticUint32(ж<mutator> Ꮡm, slice<by
     }
     nint pos = m.rand(len(b) - 3);
     var enc = m.randByteOrder();
-    enc.PutUint32(b[(int)(pos)..], enc.Uint32(b[(int)(pos)..]) + v);
+    enc.PutUint32(b.slice(pos), enc.Uint32(b.slice(pos)) + v);
     return b;
 }
 
@@ -200,7 +200,7 @@ internal static slice<byte> byteSliceArithmeticUint64(ж<mutator> Ꮡm, slice<by
     }
     nint pos = m.rand(len(b) - 7);
     var enc = m.randByteOrder();
-    enc.PutUint64(b[(int)(pos)..], enc.Uint64(b[(int)(pos)..]) + v);
+    enc.PutUint64(b.slice(pos), enc.Uint64(b.slice(pos)) + v);
     return b;
 }
 
@@ -227,7 +227,7 @@ internal static slice<byte> byteSliceOverwriteInterestingUint16(ж<mutator> Ꮡm
     }
     nint pos = m.rand(len(b) - 1);
     var v = (uint16)interesting16[m.rand(len(interesting16))];
-    m.randByteOrder().PutUint16(b[(int)(pos)..], v);
+    m.randByteOrder().PutUint16(b.slice(pos), v);
     return b;
 }
 
@@ -241,7 +241,7 @@ internal static slice<byte> byteSliceOverwriteInterestingUint32(ж<mutator> Ꮡm
     }
     nint pos = m.rand(len(b) - 3);
     var v = (uint32)interesting32[m.rand(len(interesting32))];
-    m.randByteOrder().PutUint32(b[(int)(pos)..], v);
+    m.randByteOrder().PutUint32(b.slice(pos), v);
     return b;
 }
 
@@ -265,8 +265,8 @@ internal static slice<byte> byteSliceInsertConstantBytes(ж<mutator> Ꮡm, slice
     if (len(b) + n >= builtin.cap(b)) {
         return default!;
     }
-    b = b[..(int)(len(b) + n)];
-    copy(b[(int)(dst + n)..], b[(int)(dst)..]);
+    b = b.slice(0, len(b) + n);
+    copy(b.slice(dst + n), b.slice(dst));
     var rb = (byte)m.rand(256);
     for (nint i = dst; i < dst + n; i++) {
         b[i] = rb;
@@ -344,11 +344,11 @@ internal static slice<byte> byteSliceSwapBytes(ж<mutator> Ꮡm, slice<byte> b) 
         return default!;
     }
     nint end = len(b);
-    b = b[..(int)(end + n)];
-    copy(b[(int)(end)..], b[(int)(dst)..(int)(dst + n)]);
-    copy(b[(int)(dst)..], b[(int)(src)..(int)(src + n)]);
-    copy(b[(int)(src)..], b[(int)(end)..]);
-    b = b[..(int)(end)];
+    b = b.slice(0, end + n);
+    copy(b.slice(end), b.slice(dst, dst + n));
+    copy(b.slice(dst), b.slice(src, src + n));
+    copy(b.slice(src), b.slice(end));
+    b = b.slice(0, end);
     return b;
 }
 

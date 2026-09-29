@@ -1264,7 +1264,7 @@ internal static (nint num, bool isInt, nint newArgNum) intFromArg(slice<any> a, 
         return (argNum, i, false);
     }
     p.reordered = true;
-    var (index, wid, ok) = parseArgNumber(format[(int)(i)..]);
+    var (index, wid, ok) = parseArgNumber(format.slice(i));
     if (ok && 0 <= index && index < numArgs) {
         return (index, i + wid, true);
     }
@@ -1299,7 +1299,7 @@ formatLoop:
             i++;
         }
         if (i > lasti) {
-            p.buf.writeString(format[(int)(lasti)..(int)(i)]);
+            p.buf.writeString(format.slice(lasti, i));
         }
         if (i >= end) {
             // done processing format string
@@ -1427,7 +1427,7 @@ break_simpleFormat:;
         var verb = (rune)format[i];
         nint size = 1;
         if (verb >= utf8.RuneSelf) {
-            (verb, size) = utf8.DecodeRuneInString(format[(int)(i)..]);
+            (verb, size) = utf8.DecodeRuneInString(format.slice(i));
         }
         i += size;
         var matchᴛ2 = false;
@@ -1469,7 +1469,7 @@ break_formatLoop:;
     if (!p.reordered && argNum < len(a)) {
         p.fmt.clearflags();
         p.buf.writeString(extraString);
-        foreach (var (i, arg) in a[(int)(argNum)..]) {
+        foreach (var (i, arg) in a.slice(argNum)) {
             if (i > 0) {
                 p.buf.writeString(commaSpaceString);
             }

@@ -45,7 +45,7 @@ internal static slice<byte> leftEncode(uint64 x) {
     // Return n || x with n as a byte and x an n bytes in big-endian order.
     var b = new slice<byte>(9);
     byteorder.BEPutUint64(b[1..], x);
-    b = b[(int)(9 - n - 1)..];
+    b = b.slice(9 - n - 1);
     b[0] = (byte)n;
     return b;
 }

@@ -317,9 +317,9 @@ internal static void mProf_PostSweep() {
     }
     // Only use the part of mp.profStack we need and ignore the extra space
     // reserved for delayed inline expansion with frame pointer unwinding.
-    nint nstk = callers(5, mp.profStack[..(int)(debug.profstackdepth)]);
+    nint nstk = callers(5, mp.profStack.slice(0, debug.profstackdepth));
     var index = (ᏑmProfCycle.read() + 2) % (uint32)len(new memRecord(nil).future);
-    var b = stkbucket(memProfile, size, mp.profStack[..(int)(nstk)], true);
+    var b = stkbucket(memProfile, size, mp.profStack.slice(0, nstk), true);
     var mr = b.mp();
     var mpc = mr.at(memRecord.Ꮡfuture, (ulong)(index));
     @lock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
@@ -667,7 +667,7 @@ internal static void captureStack(this ж<mLockProfile> Ꮡprof) {
     (prof.cycles, prof.cyclesLost) = (0, 0);
     prof.haveStack = false;
     var rate = (int64)atomic.Load64(Ꮡmutexprofilerate);
-    saveBlockEventStack(cycles, rate, prof.stack[..(int)(nstk)], mutexProfile);
+    saveBlockEventStack(cycles, rate, prof.stack.slice(0, nstk), mutexProfile);
     if (lost > 0) {
         var lostStk = new uintptr[]{
             logicalStackSentinel,
@@ -745,7 +745,7 @@ public static nint SetMutexProfileFraction(nint rate) {
 [GoRecv] public static slice<uintptr> Stack(this ref StackRecord r) {
     foreach (var (i, v) in r.Stack0.ΔRangeSnapshot()) {
         if (v == 0) {
-            return r.Stack0[0..(int)(i)];
+            return r.Stack0.slice(0, i);
         }
     }
     return r.Stack0[0..];
@@ -796,7 +796,7 @@ internal static bool disableMemoryProfiling;
 [GoRecv] public static slice<uintptr> Stack(this ref MemProfileRecord r) {
     foreach (var (i, v) in r.Stack0.ΔRangeSnapshot()) {
         if (v == 0) {
-            return r.Stack0[0..(int)(i)];
+            return r.Stack0.slice(0, i);
         }
     }
     return r.Stack0[0..];
@@ -920,7 +920,7 @@ internal static void copyMemProfileRecord(ж<MemProfileRecord> Ꮡdst, profilere
         asanwrite(@unsafe.Pointer.FromBox(Ꮡdst.at(MemProfileRecord.ᏑStack0, 0)), /* unsafe.Sizeof(dst.Stack0) */ (uintptr)256);
     }
     nint i = copy(dst.Stack0[..], src.Stack);
-    builtin.clear(dst.Stack0[(int)(i)..]);
+    builtin.clear(dst.Stack0.slice(i));
 }
 
 //go:linkname pprof_memProfileInternal
@@ -967,7 +967,7 @@ public static (nint n, bool ok) BlockProfile(slice<BlockProfileRecord> Δp) {
         m++;
     });
     if (ok) {
-        expandFrames(Δp[..(int)(n)]);
+        expandFrames(Δp.slice(0, n));
     }
     return (n, ok);
 }
@@ -987,8 +987,8 @@ public static (nint n, bool ok) BlockProfile(slice<BlockProfileRecord> Δp) {
                 break;
             }
         }
-        nint k = copy(Δp[i].Stack0[..], expandedStack[..(int)(j)]);
-        builtin.clear(Δp[i].Stack0[(int)(k)..]);
+        nint k = copy(Δp[i].Stack0[..], expandedStack.slice(0, j));
+        builtin.clear(Δp[i].Stack0.slice(k));
     }
 }
 
@@ -1047,7 +1047,7 @@ internal static void copyBlockProfileRecord(ж<BlockProfileRecord> Ꮡdst, profi
     // since this function is called under the profile lock,
     // and doing something that might allocate can violate lock ordering.
     nint i = copy(dst.Stack0[..], src.Stack);
-    builtin.clear(dst.Stack0[(int)(i)..]);
+    builtin.clear(dst.Stack0.slice(i));
 }
 
 //go:linkname pprof_blockProfileInternal
@@ -1075,7 +1075,7 @@ public static (nint n, bool ok) MutexProfile(slice<BlockProfileRecord> Δp) {
         m++;
     });
     if (ok) {
-        expandFrames(Δp[..(int)(n)]);
+        expandFrames(Δp.slice(0, n));
     }
     return (n, ok);
 }
@@ -1125,7 +1125,7 @@ public static (nint n, bool ok) pprof_mutexProfileInternal(slice<profilerecord.B
 public static (nint n, bool ok) ThreadCreateProfile(slice<StackRecord> Δp) {
     return threadCreateProfileInternal(len(Δp), (profilerecord.StackRecord r) => {
         nint i = copy(Δp[0].Stack0[..], r.Stack);
-        builtin.clear(Δp[0].Stack0[(int)(i)..]);
+        builtin.clear(Δp[0].Stack0.slice(i));
         Δp = Δp[1..];
     });
 }
@@ -1505,9 +1505,9 @@ public static (nint n, bool ok) GoroutineProfile(slice<StackRecord> Δp) {
     if (!ok) {
         return (n, ok);
     }
-    foreach (var (i, mr) in records[0..(int)(n)]) {
+    foreach (var (i, mr) in records.slice(0, n)) {
         nint l = copy(Δp[i].Stack0[..], mr.Stack);
-        builtin.clear(Δp[i].Stack0[(int)(l)..]);
+        builtin.clear(Δp[i].Stack0.slice(l));
     }
     return (n, ok);
 }

@@ -337,7 +337,7 @@ break_loop:;
     if (mantissa != 0) {
         exp = dp - ndMant;
     }
-    if (underscores && !underscoreOK(s[..(int)(i)])) {
+    if (underscores && !underscoreOK(s.slice(0, i))) {
         return (mantissa, exp, neg, trunc, hex, i, ok);
     }
     ok = true;
@@ -623,7 +623,7 @@ internal static (float32 f, nint n, error err) atof32(@string s) {
         return (0F, n, new NumErrorжerror(syntaxError(fnParseFloat, s)));
     }
     if (hex) {
-        var (fΔ1, errΔ1) = atofHex(s[..(int)(n)], Ꮡfloat32info, mantissa, exp, neg, trunc);
+        var (fΔ1, errΔ1) = atofHex(s.slice(0, n), Ꮡfloat32info, mantissa, exp, neg, trunc);
         return ((float32)fΔ1, n, errΔ1);
     }
     if (optimize) {
@@ -652,7 +652,7 @@ internal static (float32 f, nint n, error err) atof32(@string s) {
     }
     // Slow fallback.
     ref var d = ref heap(new @decimal(), out var Ꮡd);
-    if (!d.set(s[..(int)(n)])) {
+    if (!d.set(s.slice(0, n))) {
         return (0F, n, new NumErrorжerror(syntaxError(fnParseFloat, s)));
     }
     var (b, ovf) = Ꮡd.floatBits(Ꮡfloat32info);
@@ -678,7 +678,7 @@ internal static (float64 f, nint n, error err) atof64(@string s) {
         return (0D, n, new NumErrorжerror(syntaxError(fnParseFloat, s)));
     }
     if (hex) {
-        var (fΔ1, errΔ1) = atofHex(s[..(int)(n)], Ꮡfloat64info, mantissa, exp, neg, trunc);
+        var (fΔ1, errΔ1) = atofHex(s.slice(0, n), Ꮡfloat64info, mantissa, exp, neg, trunc);
         return (fΔ1, n, errΔ1);
     }
     if (optimize) {
@@ -707,7 +707,7 @@ internal static (float64 f, nint n, error err) atof64(@string s) {
     }
     // Slow fallback.
     ref var d = ref heap(new @decimal(), out var Ꮡd);
-    if (!d.set(s[..(int)(n)])) {
+    if (!d.set(s.slice(0, n))) {
         return (0D, n, new NumErrorжerror(syntaxError(fnParseFloat, s)));
     }
     var (b, ovf) = Ꮡd.floatBits(Ꮡfloat64info);

@@ -469,7 +469,7 @@ internal static void recordspan(@unsafe.Pointer vh, @unsafe.Pointer Δp) {
             sysFree(@unsafe.Pointer.FromBox(Ꮡ(oldAllspans, 0)), (uintptr)cap(oldAllspans) * /* unsafe.Sizeof(oldAllspans[0]) */ (uintptr)8, Ꮡmemstats.of(mstats.Ꮡother_sys));
         }
     }
-    h.Value.allspans = (~h).allspans[..(int)(len((~h).allspans) + 1)];
+    h.Value.allspans = (~h).allspans.slice(0, len((~h).allspans) + 1);
     h.Value.allspans[len((~h).allspans) - 1] = s;
 }
 
@@ -793,11 +793,11 @@ internal static uintptr reclaimChunk(this ж<mheap> Ꮡh, slice<arenaIdx> arenas
         var ha = h.arenas[ai.l1()].Value[ai.l2()];
         // Get a chunk of the bitmap to work on.
         nuint arenaPage = (nuint)(pageIdx % (uintptr)pagesPerArena);
-        var inUse = (~ha).pageInUse[(int)(arenaPage / 8)..];
-        var marked = (~ha).pageMarks[(int)(arenaPage / 8)..];
+        var inUse = (~ha).pageInUse.slice((nint)(arenaPage / 8));
+        var marked = (~ha).pageMarks.slice((nint)(arenaPage / 8));
         if ((uintptr)len(inUse) > n / 8) {
-            inUse = inUse[..(int)(n / 8)];
-            marked = marked[..(int)(n / 8)];
+            inUse = inUse.slice(0, (nint)(n / 8));
+            marked = marked.slice(0, (nint)(n / 8));
         }
         // Scan this bitmap chunk for spans that are in-use
         // but have no marked objects on them.

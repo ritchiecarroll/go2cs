@@ -13,7 +13,7 @@ internal static slice<byte> appendMapping(this info c, slice<byte> b, @string s)
     nint index = (nint)(uint16)((c >> (int)(indexShift)));
     if ((info)(c & (uint16)xorBit) == 0) {
         nint p = index;
-        return append(b, mappings[(int)(mappingIndex[p])..(int)(mappingIndex[p + 1])].ꓸꓸꓸ);
+        return append(b, mappings.slice(mappingIndex[p], mappingIndex[p + 1]).ꓸꓸꓸ);
     }
     b = append(b, s.ꓸꓸꓸ);
     if ((info)(c & (uint16)inlineXOR) == inlineXOR){

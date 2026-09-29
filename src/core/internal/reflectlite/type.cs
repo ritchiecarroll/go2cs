@@ -264,7 +264,7 @@ internal static @string Name(this rtype t) {
 
         i--;
     }
-    return s[(int)(i + 1)..];
+    return s.slice(i + 1);
 }
 
 internal static rtype toRType(ж<abi.Type> Ꮡt) {

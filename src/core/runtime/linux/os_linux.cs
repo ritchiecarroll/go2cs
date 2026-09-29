@@ -109,7 +109,7 @@ internal static int32 getproccount() {
         return 1;
     }
     var n = (int32)0;
-    foreach (var (_, vᴛ1) in buf[..(int)(r)]) {
+    foreach (var (_, vᴛ1) in buf.slice(0, r)) {
         var v = vᴛ1;
 
         while (v != 0) {
@@ -269,7 +269,7 @@ internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
     var auxvp = (ж<array<uintptr>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡargv), (uintptr)n * (uintptr)goarch.PtrSize));
     {
         nint pairsΔ1 = sysauxv((~auxvp)[..]); if (pairsΔ1 != 0) {
-            auxv = (~auxvp).slice(-1, pairsΔ1 * 2, pairsΔ1 * 2);
+            auxv = (~auxvp).slice(0, pairsΔ1 * 2, pairsΔ1 * 2);
             return;
         }
     }
@@ -310,7 +310,7 @@ internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
     // the whole file.
     auxvreadbuf[len(auxvreadbuf) - 2] = _AT_NULL;
     nint pairs = sysauxv(auxvreadbuf[..]);
-    auxv = auxvreadbuf.slice(-1, pairs * 2, pairs * 2);
+    auxv = auxvreadbuf.slice(0, pairs * 2, pairs * 2);
 }
 
 // secureMode holds the value of AT_SECURE passed in the auxiliary vector.

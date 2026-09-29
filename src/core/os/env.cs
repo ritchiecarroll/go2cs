@@ -21,8 +21,8 @@ public static @string Expand(@string s, Func<@string, @string> mapping) {
             if (buf == default!) {
                 buf = new slice<byte>(0, 2 * len(s));
             }
-            buf = append(buf, s[(int)(i)..(int)(j)].ꓸꓸꓸ);
-            var (name, w) = getShellName(s[(int)(j + 1)..]);
+            buf = append(buf, s.slice(i, j).ꓸꓸꓸ);
+            var (name, w) = getShellName(s.slice(j + 1));
             if (name == ""u8 && w > 0){
             } else 
             if (name == ""u8){
@@ -41,7 +41,7 @@ public static @string Expand(@string s, Func<@string, @string> mapping) {
     if (buf == default!) {
         return s;
     }
-    return ((sstring)buf) + s[(int)(i)..];
+    return ((sstring)buf) + s.slice(i);
 }
 
 // ExpandEnv replaces ${var} or $var in the string according to the values
@@ -82,7 +82,7 @@ internal static (@string, nint) getShellName(@string s) {
                 if (iΔ2 == 1) {
                     return ("", 2); // Bad syntax; eat "${}"
                 }
-                return (s[1..(int)(iΔ2)], iΔ2 + 1);
+                return (s.slice(1, iΔ2), iΔ2 + 1);
             }
         }
         return ("", 1); // Bad syntax; eat "${"
@@ -95,7 +95,7 @@ internal static (@string, nint) getShellName(@string s) {
     nint i = default!;
     for (i = 0; i < len(s) && isAlphaNum(s[i]); i++) {
     }
-    return (s[..(int)(i)], i);
+    return (s.slice(0, i), i);
 }
 
 // Getenv retrieves the value of the environment variable named by the key.

@@ -72,12 +72,12 @@ public static (ж<Cipher>, error) NewCipher(slice<byte> key) {
     if (len(src) == 0) {
         return;
     }
-    if (alias.InexactOverlap(dst[..(int)(len(src))], src)) {
+    if (alias.InexactOverlap(dst.slice(0, len(src)), src)) {
         throw panic("crypto/rc4: invalid buffer overlap");
     }
     var (i, j) = (c.i, c.j);
     _ = dst[len(src) - 1];
-    dst = dst[..(int)(len(src))]; // eliminate bounds check from loop
+    dst = dst.slice(0, len(src)); // eliminate bounds check from loop
     foreach (var (k, v) in src) {
         i += 1;
         var x = c.s[i];

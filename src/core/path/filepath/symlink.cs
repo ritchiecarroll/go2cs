@@ -23,7 +23,7 @@ internal static (@string, error) walkSymlinks(@string path) {
     if (volLen < len(path) && os.IsPathSeparator(path[volLen])) {
         volLen++;
     }
-    @string vol = path[..(int)(volLen)];
+    @string vol = path.slice(0, volLen);
     @string dest = vol;
     nint linksWalked = 0;
     for ((nint start, nint end) = (volLen, volLen); start < len(path); start = end) {
@@ -37,17 +37,17 @@ internal static (@string, error) walkSymlinks(@string path) {
         // On Windows, "." can be a symlink.
         // We look it up, and use the value if it is absolute.
         // If not, we just return ".".
-        var isWindowsDot = runtime.GOOS == "windows"u8 && path[(int)(filepathlite.VolumeNameLen(path))..] == ".";
+        var isWindowsDot = runtime.GOOS == "windows"u8 && path.slice(filepathlite.VolumeNameLen(path)) == ".";
         // The next path component is in path[start:end].
         if (end == start){
             // No more path components.
             break;
         } else 
-        if (path[(int)(start)..(int)(end)] == "." && !isWindowsDot){
+        if (path.slice(start, end) == "." && !isWindowsDot){
             // Ignore path component ".".
             continue;
         } else 
-        if (path[(int)(start)..(int)(end)] == "..") {
+        if (path.slice(start, end) == "..") {
             // Back up to previous component if possible.
             // Note that volLen includes any leading slash.
             // Set r to the index of the last slash in dest,
@@ -58,7 +58,7 @@ internal static (@string, error) walkSymlinks(@string path) {
                     break;
                 }
             }
-            if (r < volLen || dest[(int)(r + 1)..] == ".."){
+            if (r < volLen || dest.slice(r + 1) == ".."){
                 // Either path has no slashes
                 // (it's empty or just "C:")
                 // or it ends in a ".." we had to keep.
@@ -69,7 +69,7 @@ internal static (@string, error) walkSymlinks(@string path) {
                 dest += ".."u8;
             } else {
                 // Discard everything since the last slash.
-                dest = dest[..(int)(r)];
+                dest = dest.slice(0, r);
             }
             continue;
         }
@@ -77,7 +77,7 @@ internal static (@string, error) walkSymlinks(@string path) {
         if (len(dest) > filepathlite.VolumeNameLen(dest) && !os.IsPathSeparator(dest[len(dest) - 1])) {
             dest += pathSeparator;
         }
-        dest += path[(int)(start)..(int)(end)];
+        dest += path.slice(start, end);
         // Resolve symlink.
         var (fi, err) = os.Lstat(dest);
         if (err != default!) {
@@ -103,14 +103,14 @@ internal static (@string, error) walkSymlinks(@string path) {
             // just return ".".
             break;
         }
-        path = link + path[(int)(end)..];
+        path = link + path.slice(end);
         nint v = filepathlite.VolumeNameLen(link);
         if (v > 0){
             // Symlink to drive name is an absolute path.
             if (v < len(link) && os.IsPathSeparator(link[v])) {
                 v++;
             }
-            vol = link[..(int)(v)];
+            vol = link.slice(0, v);
             dest = vol;
             end = len(vol);
         } else 
@@ -132,7 +132,7 @@ internal static (@string, error) walkSymlinks(@string path) {
             if (r < volLen){
                 dest = vol;
             } else {
-                dest = dest[..(int)(r)];
+                dest = dest.slice(0, r);
             }
             end = 0;
         }

@@ -288,7 +288,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "invalid command block size"u8, default!))));
         }
         slice<byte> cmddat = default!;
-        (cmddat, dat) = (dat[0..(int)(siz)], dat[(int)(siz)..]);
+        (cmddat, dat) = (dat.slice(0, (nint)(siz)), dat.slice((nint)(siz)));
         offset += (int64)siz;
         ж<ΔSegment> s = default!;
         var exprᴛ2 = cmd;
@@ -304,7 +304,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             if (hdr.Path >= (uint32)len(cmddat)) {
                 return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "invalid path in rpath command"u8, hdr.Path))));
             }
-            l.Value.Path = cstring(cmddat[(int)(hdr.Path)..]);
+            l.Value.Path = cstring(cmddat.slice((nint)(hdr.Path)));
             l.Value.LoadBytes = ((LoadBytes)cmddat);
             f.Value.Loads = append((~f).Loads, (Load)(new RpathжLoad(l)));
         }
@@ -320,7 +320,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             if (hdr.Name >= (uint32)len(cmddat)) {
                 return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "invalid name in dynamic library command"u8, hdr.Name))));
             }
-            l.Value.Name = cstring(cmddat[(int)(hdr.Name)..]);
+            l.Value.Name = cstring(cmddat.slice((nint)(hdr.Name)));
             l.Value.Time = hdr.Time;
             l.Value.CurrentVersion = hdr.CurrentVersion;
             l.Value.CompatVersion = hdr.CompatVersion;
@@ -539,7 +539,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "invalid name in symbol table"u8, n.Name))));
         }
         // We add "_" to Go symbols. Strip it here. See issue 33808.
-        @string name = cstring(strtab[(int)(n.Name)..]);
+        @string name = cstring(strtab.slice((nint)(n.Name)));
         if (strings.Contains(name, "."u8) && name[0] == (rune)'_') {
             name = name[1..];
         }
@@ -625,7 +625,7 @@ internal static @string cstring(slice<byte> b) {
     if (i == -1) {
         i = len(b);
     }
-    return ((@string)(b[0..(int)(i)]));
+    return ((@string)(b.slice(0, i)));
 }
 
 // Segment returns the first Segment with the given name, or nil if no such segment exists.
@@ -694,7 +694,7 @@ internal static readonly @string strˢ = "str"u8;
                 break;
             }
         }
-        return sectname[(int)(pfx)..];
+        return sectname.slice(pfx);
     }
     (slice<byte>, error) sectionData(ж<ΔSection> s) {
         var (b, errΔ1) = s.Data();
@@ -784,7 +784,7 @@ internal static readonly @string strˢ = "str"u8;
     var st = f.Symtab;
     var dt = f.Dysymtab;
     slice<@string> all = default!;
-    foreach (var (_, s) in (~st).Syms[(int)((~dt).Iundefsym)..(int)((~dt).Iundefsym + (~dt).Nundefsym)]) {
+    foreach (var (_, s) in (~st).Syms.slice((nint)((~dt).Iundefsym), (nint)((~dt).Iundefsym + (~dt).Nundefsym))) {
         all = append(all, s.Name);
     }
     return (all, default!);

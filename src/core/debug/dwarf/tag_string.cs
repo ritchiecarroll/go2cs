@@ -96,25 +96,25 @@ public static @string String(this Tag i) {
     switch (ᐧ) {
     case {} when 1 <= i && i <= 5: {
         i -= 1;
-        return _Tag_name_0[(int)(_Tag_index_0[i])..(int)(_Tag_index_0[i + 1])];
+        return _Tag_name_0.slice(_Tag_index_0[i], _Tag_index_0[i + 1]);
     }
     case {} when i == 8: {
         return _Tag_name_1;
     }
     case {} when 10 <= i && i <= 11: {
         i -= 10;
-        return _Tag_name_2[(int)(_Tag_index_2[i])..(int)(_Tag_index_2[i + 1])];
+        return _Tag_name_2.slice(_Tag_index_2[i], _Tag_index_2[i + 1]);
     }
     case {} when i == 13: {
         return _Tag_name_3;
     }
     case {} when 15 <= i && i <= 19: {
         i -= 15;
-        return _Tag_name_4[(int)(_Tag_index_4[i])..(int)(_Tag_index_4[i + 1])];
+        return _Tag_name_4.slice(_Tag_index_4[i], _Tag_index_4[i + 1]);
     }
     case {} when 21 <= i && i <= 75: {
         i -= 21;
-        return _Tag_name_5[(int)(_Tag_index_5[i])..(int)(_Tag_index_5[i + 1])];
+        return _Tag_name_5.slice(_Tag_index_5[i], _Tag_index_5[i + 1]);
     }
     default: {
         return "Tag("u8 + strconv.FormatInt((int64)(uint32)i, 10) + ")"u8;

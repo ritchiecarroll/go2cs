@@ -57,14 +57,14 @@ public static Stream NewOFB(Block b, slice<byte> iv) {
     if (remain > x.outUsed) {
         return;
     }
-    copy(x.@out, x.@out[(int)(x.outUsed)..]);
-    x.@out = x.@out[..(int)(cap(x.@out))];
+    copy(x.@out, x.@out.slice(x.outUsed));
+    x.@out = x.@out.slice(0, cap(x.@out));
     while (remain < len(x.@out) - bs) {
         x.b.Encrypt(x.cipher, x.cipher);
-        copy(x.@out[(int)(remain)..], x.cipher);
+        copy(x.@out.slice(remain), x.cipher);
         remain += bs;
     }
-    x.@out = x.@out[..(int)(remain)];
+    x.@out = x.@out.slice(0, remain);
     x.outUsed = 0;
 }
 
@@ -72,16 +72,16 @@ public static Stream NewOFB(Block b, slice<byte> iv) {
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }
-    if (alias.InexactOverlap(dst[..(int)(len(src))], src)) {
+    if (alias.InexactOverlap(dst.slice(0, len(src)), src)) {
         throw panic("crypto/cipher: invalid buffer overlap");
     }
     while (len(src) > 0) {
         if (x.outUsed >= len(x.@out) - x.b.BlockSize()) {
             x.refill();
         }
-        nint n = subtle.XORBytes(dst, src, x.@out[(int)(x.outUsed)..]);
-        dst = dst[(int)(n)..];
-        src = src[(int)(n)..];
+        nint n = subtle.XORBytes(dst, src, x.@out.slice(x.outUsed));
+        dst = dst.slice(n);
+        src = src.slice(n);
         x.outUsed += n;
     }
 }

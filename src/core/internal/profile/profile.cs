@@ -273,7 +273,7 @@ public static error Write(this ж<Profile> Ꮡp, io.Writer w) {
     if (!inlineFrame || !address || !linenumber) {
         foreach (var (_, l) in p.Location) {
             if (!inlineFrame && len((~l).Line) > 1) {
-                l.Value.Line = (~l).Line[(int)(len((~l).Line) - 1)..];
+                l.Value.Line = (~l).Line.slice(len((~l).Line) - 1);
             }
             if (!linenumber) {
                 foreach (var (i, _) in (~l).Line) {

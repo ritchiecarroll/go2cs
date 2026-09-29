@@ -88,7 +88,7 @@ internal static BlockMode newCBCGenericEncrypter(Block b, slice<byte> iv) {
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }
-    if (alias.InexactOverlap(dst[..(int)(len(src))], src)) {
+    if (alias.InexactOverlap(dst.slice(0, len(src)), src)) {
         throw panic("crypto/cipher: invalid buffer overlap");
     }
     {
@@ -99,12 +99,12 @@ internal static BlockMode newCBCGenericEncrypter(Block b, slice<byte> iv) {
     var iv = x.iv;
     while (len(src) > 0) {
         // Write the xor to dst, then encrypt in place.
-        subtle.XORBytes(dst[..(int)(x.blockSize)], src[..(int)(x.blockSize)], iv);
-        x.b.Encrypt(dst[..(int)(x.blockSize)], dst[..(int)(x.blockSize)]);
+        subtle.XORBytes(dst.slice(0, x.blockSize), src.slice(0, x.blockSize), iv);
+        x.b.Encrypt(dst.slice(0, x.blockSize), dst.slice(0, x.blockSize));
         // Move to the next block with this block as the next iv.
-        iv = dst[..(int)(x.blockSize)];
-        src = src[(int)(x.blockSize)..];
-        dst = dst[(int)(x.blockSize)..];
+        iv = dst.slice(0, x.blockSize);
+        src = src.slice(x.blockSize);
+        dst = dst.slice(x.blockSize);
     }
     // Save the iv for the next CryptBlocks call.
     copy(x.iv, iv);
@@ -171,7 +171,7 @@ internal static BlockMode newCBCGenericDecrypter(Block b, slice<byte> iv) {
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }
-    if (alias.InexactOverlap(dst[..(int)(len(src))], src)) {
+    if (alias.InexactOverlap(dst.slice(0, len(src)), src)) {
         throw panic("crypto/cipher: invalid buffer overlap");
     }
     {
@@ -188,18 +188,18 @@ internal static BlockMode newCBCGenericDecrypter(Block b, slice<byte> iv) {
     nint start = end - x.blockSize;
     nint prev = start - x.blockSize;
     // Copy the last block of ciphertext in preparation as the new iv.
-    copy(x.tmp, src[(int)(start)..(int)(end)]);
+    copy(x.tmp, src.slice(start, end));
     // Loop over all but the first block.
     while (start > 0) {
-        x.b.Decrypt(dst[(int)(start)..(int)(end)], src[(int)(start)..(int)(end)]);
-        subtle.XORBytes(dst[(int)(start)..(int)(end)], dst[(int)(start)..(int)(end)], src[(int)(prev)..(int)(start)]);
+        x.b.Decrypt(dst.slice(start, end), src.slice(start, end));
+        subtle.XORBytes(dst.slice(start, end), dst.slice(start, end), src.slice(prev, start));
         end = start;
         start = prev;
         prev -= x.blockSize;
     }
     // The first block is special because it uses the saved iv.
-    x.b.Decrypt(dst[(int)(start)..(int)(end)], src[(int)(start)..(int)(end)]);
-    subtle.XORBytes(dst[(int)(start)..(int)(end)], dst[(int)(start)..(int)(end)], x.iv);
+    x.b.Decrypt(dst.slice(start, end), src.slice(start, end));
+    subtle.XORBytes(dst.slice(start, end), dst.slice(start, end), x.iv);
     // Set the new iv to the first block we copied earlier.
     (x.iv, x.tmp) = (x.tmp, x.iv);
 }

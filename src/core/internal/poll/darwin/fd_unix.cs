@@ -489,7 +489,7 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> p) {
             if (fd.IsStream && max - nn > maxRW) {
                 max = nn + (nint)maxRW;
             }
-            var (n, err) = ignoringEINTRIO(Δsyscall.Write, fd.Sysfd, p[(int)(nn)..(int)(max)]);
+            var (n, err) = ignoringEINTRIO(Δsyscall.Write, fd.Sysfd, p.slice(nn, max));
             if (n > 0) {
                 if (n > max - nn) {
                     // This can reportedly happen when using
@@ -545,7 +545,7 @@ public static (nint, error) Pwrite(this ж<FD> Ꮡfd, slice<byte> p, int64 off) 
             if (fd.IsStream && max - nn > maxRW) {
                 max = nn + (nint)maxRW;
             }
-            var (n, err) = Δsyscall.Pwrite(fd.Sysfd, p[(int)(nn)..(int)(max)], off + (int64)nn);
+            var (n, err) = Δsyscall.Pwrite(fd.Sysfd, p.slice(nn, max), off + (int64)nn);
             if (AreEqual(err, Δsyscall.EINTR)) {
                 continue;
             }

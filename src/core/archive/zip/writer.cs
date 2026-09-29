@@ -245,7 +245,7 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
     bool require = default!;
 
     for (nint i = 0; i < len(s); ) {
-        var (r, size) = utf8.DecodeRuneInString(s[(int)(i)..]);
+        var (r, size) = utf8.DecodeRuneInString(s.slice(i));
         i += size;
         // Officially, ZIP uses CP-437, but many readers use the system's
         // local character encoding. Most encoding are compatible with a large

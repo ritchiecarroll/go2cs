@@ -88,7 +88,7 @@ internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) {
             }
         }
         {
-            var (_, errΔ2) = tryReadFull(tr.r, tr.blk[..(int)(tr.pad)]); if (errΔ2 != default!) {
+            var (_, errΔ2) = tryReadFull(tr.r, tr.blk.slice(0, (nint)(tr.pad))); if (errΔ2 != default!) {
                 return (default!, errΔ2);
             }
         }
@@ -731,7 +731,7 @@ internal static (sparseDatas, error) readGNUSparseMap0x1(map<@string, @string> p
     error err = default!;
 
     if ((int64)len(b) > fr.nb) {
-        b = b[..(int)(fr.nb)];
+        b = b.slice(0, (nint)(fr.nb));
     }
     if (len(b) > 0) {
         (n, err) = fr.r.Read(b);
@@ -781,7 +781,7 @@ internal static int64 physicalRemaining(this regFileReader fr) {
 
     var finished = (int64)len(b) >= sr.logicalRemaining();
     if (finished) {
-        b = b[..(int)(sr.logicalRemaining())];
+        b = b.slice(0, (nint)(sr.logicalRemaining()));
     }
     var b0 = b;
     var endPos = sr.pos + (int64)len(b);
@@ -790,14 +790,14 @@ internal static int64 physicalRemaining(this regFileReader fr) {
         var (holeStart, holeEnd) = (sr.sp[0].Offset, sr.sp[0].endOffset());
         if (sr.pos < holeStart){
             // In a data fragment
-            var bf = b[..(int)(min((int64)len(b), holeStart - sr.pos))];
+            var bf = b.slice(0, (nint)(min((int64)len(b), holeStart - sr.pos)));
             (nf, err) = tryReadFull(sr.fr, bf);
         } else {
             // In a hole fragment
-            var bf = b[..(int)(min((int64)len(b), holeEnd - sr.pos))];
+            var bf = b.slice(0, (nint)(min((int64)len(b), holeEnd - sr.pos)));
             (nf, err) = tryReadFull(new zeroReader(nil), bf);
         }
-        b = b[(int)(nf)..];
+        b = b.slice(nf);
         sr.pos += (int64)nf;
         if (sr.pos >= holeEnd && len(sr.sp) > 1) {
             sr.sp = sr.sp[1..]; // Ensure last fragment always remains
@@ -919,7 +919,7 @@ internal static (nint n, error err) tryReadFull(io.Reader r, slice<byte> b) {
 
     while (len(b) > n && err == default!) {
         nint nn = default!;
-        (nn, err) = r.Read(b[(int)(n)..]);
+        (nn, err) = r.Read(b.slice(n));
         n += nn;
     }
     if (len(b) == n && AreEqual(err, io.EOF)) {
