@@ -596,6 +596,23 @@ func isGo2CSRoot(dir string) bool {
 	return err == nil
 }
 
+// comparisonRecordPackage is the "package" key a comparison record carries.
+func comparisonRecordPackage(manifest testManifest, inputPath string) string {
+	return filepath.Base(inputPath)
+}
+
+// packageModulePath is the Go module a loaded package belongs to, or "" for a standard-library
+// package (go/packages gives those no Module). It fills testManifest.ModulePath (`omitempty`), so every
+// standard-library manifest stays byte-identical, and a third-party package's proof page is keyed by it
+// (validationProofDestination).
+func packageModulePath(pkg *packages.Package) string {
+	if pkg == nil || pkg.Module == nil {
+		return ""
+	}
+
+	return pkg.Module.Path
+}
+
 // findGo2CSRootAbove walks dir's ancestor chain (inclusive) and returns the first go2cs
 // project-reference root, or "" when none exists above dir.
 func findGo2CSRootAbove(dir string) string {
@@ -637,6 +654,7 @@ type testManifest struct {
 	SchemaVersion           int               `json:"schemaVersion"`
 	CapabilitiesVersion     int               `json:"capabilitiesVersion"`
 	PackageImportPath       string            `json:"packageImportPath"`
+	ModulePath              string            `json:"modulePath,omitempty"`
 	ProjectName             string            `json:"projectName"`
 	TestProject             string            `json:"testProject"`
 	GoVersion               string            `json:"goVersion"`
@@ -700,7 +718,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	}
 
 	cfg := &packages.Config{
-		Mode:       packages.LoadAllSyntax,
+		Mode:       packages.LoadAllSyntax | packages.NeedModule,
 		Dir:        inputPath,
 		Tests:      true,
 		BuildFlags: options.loaderBuildFlags(),
@@ -943,6 +961,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 		SchemaVersion:           1,
 		CapabilitiesVersion:     1,
 		PackageImportPath:       production.PkgPath,
+		ModulePath:              packageModulePath(production),
 		ProjectName:             projectName,
 		TestProject:             testProjectName,
 		GoVersion:               runtime.Version(),
@@ -6330,7 +6349,7 @@ func testInputDigest(inputPath, outputPath string, options Options, revision str
 func writeNoTestsManifest(production *packages.Package, inputPath, outputPath string, target []string, options Options) error {
 	projectName, _ := getProjectName(inputPath, options)
 	manifest := testManifest{
-		SchemaVersion: 1, CapabilitiesVersion: 1, PackageImportPath: production.PkgPath,
+		SchemaVersion: 1, CapabilitiesVersion: 1, PackageImportPath: production.PkgPath, ModulePath: packageModulePath(production),
 		ProjectName: projectName, TestProject: projectFileBaseName(projectName) + ".tests.csproj", GoVersion: runtime.Version(),
 		TargetGOOS: target[0], TargetGOARCH: target[1], SourceRevision: gitRevision(inputPath),
 		ConverterRevision: converterRevision(), ProductionFiles: []string{}, TestSources: []testSource{},
@@ -6468,7 +6487,7 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 	// Individually blocked tests among runnable siblings are excluded-disclosed instead (F4).
 	if blocked := manifestCapabilityBlock(manifest); len(blocked) > 0 {
 		result := map[string]any{
-			"package": filepath.Base(inputPath), "status": "infrastructure-blocked", "matched": false,
+			"package": comparisonRecordPackage(manifest, inputPath), "status": "infrastructure-blocked", "matched": false,
 			"errors": []string{"unsupported testing capabilities: " + strings.Join(blocked, ", ")},
 		}
 		if err := writeComparisonRecord(outputPath, result, options.testFilter); err != nil {
@@ -6479,7 +6498,7 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 
 	if !manifestHasEligibleTests(manifest) {
 		if options.testAction == "all" || options.testAction == "compare" {
-			result := map[string]any{"package": filepath.Base(inputPath), "status": "not-applicable", "matched": true, "errors": []string{}}
+			result := map[string]any{"package": comparisonRecordPackage(manifest, inputPath), "status": "not-applicable", "matched": true, "errors": []string{}}
 			if err := writeComparisonRecord(outputPath, result, options.testFilter); err != nil {
 				return err
 			}
@@ -8956,7 +8975,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	environment.OracleGoVersion = oracleVersion
 	environment.Terminal = terminal
 	result := testComparison{
-		Package: filepath.Base(inputPath), Status: status, Go: goResults, CSharp: csResults,
+		Package: comparisonRecordPackage(manifest, inputPath), Status: status, Go: goResults, CSharp: csResults,
 		Matched: true, Skipped: []string{}, Disclosed: []string{}, Excluded: excludedDeclarations(manifest), Errors: []string{},
 		Gated: gated, Withdrawn: []string{}, Environment: environment,
 	}

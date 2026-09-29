@@ -782,17 +782,13 @@ func emitValidationProofPage(outputPath string, comparison testComparison, manif
 		return nil
 	}
 
-	root := findGo2CSRootAbove(outputPath)
+	destination := validationProofDestination(outputPath, manifest)
 
-	if root == "" {
+	if destination.docsPath == "" {
 		return nil
 	}
 
-	docsPath := filepath.Join(filepath.Dir(root), "docs")
-
-	if info, err := os.Stat(docsPath); err != nil || !info.IsDir() {
-		return nil
-	}
+	docsPath := destination.docsPath
 
 	goVersion := strings.TrimPrefix(manifest.GoVersion, "go")
 
@@ -805,10 +801,35 @@ func emitValidationProofPage(outputPath string, comparison testComparison, manif
 		goVersion:  goVersion,
 		platform:   options.targetPlatform,
 		date:       time.Now().UTC().Format("2006-01-02"),
-		commit:     shortGitRevision(filepath.Dir(root)),
+		commit:     shortGitRevision(filepath.Dir(docsPath)),
 	}
 
 	return writeValidationProofPage(docsPath, provenance, comparison, disclosures, notes)
+}
+
+// proofDestination is where a validated package's proof page is published: the go2cs checkout's
+// docs/ tree (the standard-library roster, its index and pages), or a page file written beside a
+// third-party conversion. Both empty means no page is written.
+type proofDestination struct {
+	docsPath string
+	pagePath string
+}
+
+// validationProofDestination decides a validated package's proof-page destination.
+func validationProofDestination(outputPath string, manifest testManifest) proofDestination {
+	root := findGo2CSRootAbove(outputPath)
+
+	if root == "" {
+		return proofDestination{}
+	}
+
+	docsPath := filepath.Join(filepath.Dir(root), "docs")
+
+	if info, err := os.Stat(docsPath); err != nil || !info.IsDir() {
+		return proofDestination{}
+	}
+
+	return proofDestination{docsPath: docsPath}
 }
 
 // goVersionFromToolchain is the fallback when the test manifest recorded no Go version.

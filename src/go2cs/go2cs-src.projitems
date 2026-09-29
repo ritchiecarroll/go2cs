@@ -206,6 +206,7 @@
     <None Include="$(MSBuildThisFileDirectory)moduleConverter_integration_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleConverter_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleNamespaceAgreement_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)moduleProofPages_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nameCollisionAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)namedResultLiveness.go" />
     <None Include="$(MSBuildThisFileDirectory)namedResultLiveness_test.go" />
