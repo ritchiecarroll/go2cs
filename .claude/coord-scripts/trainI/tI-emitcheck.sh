@@ -29,7 +29,7 @@ for arm in M U; do for os in windows linux darwin; do
   echo "seed $arm-$os: $(find "$R/src/core" -name '*.cs' | wc -l) .cs"
   touch "$T/sentinel-$arm-$os"; sleep 1
   "$T/go2cs-$arm.exe" -stdlib -comments -platforms "$os/amd64" -go2cspath "$R/src" > "$T/emit-$arm-$os.log" 2>&1; rc=$?
-  python "$(cygpath -w "/h/go2cs-tmp-coord/hnd/.claude/coord-scripts/trainH")/emitdrift.py" "$(cygpath -w "$R")" "$(cygpath -w "$T/seed-$arm")" "$(cygpath -w "$T/sentinel-$arm-$os")" "$(cygpath -w "$T/written-$arm-$os.txt")" "$(cygpath -w "$T/drift-$arm-$os.txt")" > /dev/null || { echo "ABORT drift $arm $os"; exit 3; }
+  python "$(cygpath -w "$(dirname "$0")")/emitdrift.py" "$(cygpath -w "$R")" "$(cygpath -w "$T/seed-$arm")" "$(cygpath -w "$T/sentinel-$arm-$os")" "$(cygpath -w "$T/written-$arm-$os.txt")" "$(cygpath -w "$T/drift-$arm-$os.txt")" > /dev/null || { echo "ABORT drift $arm $os"; exit 3; }
   echo "EMIT $arm-$os rc=$rc wall=$(( $(date +%s) - s ))s written=$(wc -l < "$T/written-$arm-$os.txt") drift=$(wc -l < "$T/drift-$arm-$os.txt") :: $(tail -n 1 "$T/emit-$arm-$os.log" | tr -d '\r' | cut -c1-160)"
 done; done
 echo "--- UNION-ATTRIBUTABLE (per target)"
