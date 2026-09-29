@@ -12,4 +12,5 @@ c2-trainI-comments|f219bedb39|C2: comment-only corrections (netpoll_epoll_impl, 
 g-pprof-bank|33f5f8ff22|G: runtime/pprof bank manifest (3 capability skips + HashKey halves); ON the TRAIN I union; residuals TestHeapRuntimeFrames + TestGenericsInlineLocations; windows flake TestGoroutineProfileConcurrency rate owed
 p2-traceback-decoration|0b7492b33a|P2: A7 generic [...] half (TestTracebackGeneric); created-by half held; ON master + printer seat d0ecb25644; 7 hand-owned generic helpers stated as residual
 c2-zerosize-one-source|1d6506c6cf|C2: zero-size predicate one source (non-generic GoZeroSizeFacts.Classify; GoLayoutFacts calls it; copy deleted); ON the TRAIN I union; windows GolibTests owed at the battery
-# PENDING: P2 map-growth (RULED (a) startup toggle 78dd6b0fb8; re-cut owed), P2 A7, C1 A9/A11/A15, R cookie+lowering, C2 manual-signature lift seat (for P1 Smhasher), G runtime/pprof bank; R1-A commit 2 after TRAIN I lands
+c2-manual-sig-lift|9c6305277f|C2: manual-function signature lift (one helper; footprint 0/0/0; CNR 0); unblocks P1 ifaceHash; on master 2ff42f7a16
+# PENDING: P2 map-growth (RULED (a) startup toggle 78dd6b0fb8; re-cut owed), P2 A7, C1 A9/A11/A15, R cookie+lowering, G runtime/pprof bank; R1-A commit 2 after TRAIN I lands
