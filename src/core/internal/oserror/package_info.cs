@@ -49,6 +49,7 @@ using static go.@internal.oserror_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
+[assembly: go.GoPositionMap("internal/oserror/errors.go", "errors.cs", "AA0agoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

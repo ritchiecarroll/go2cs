@@ -40,6 +40,9 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using @unsafe = go.unsafe_package;
 
+using System.Threading;
+using go.golib;
+
 [module: go.GoManualConversion]
 
 namespace go;
@@ -126,4 +129,48 @@ partial class runtime_package
     public static nint GoGetpidProbe() => getpid();
 
     public static void GoTgkillProbe() => tgkill(0, 0, 0);
+
+    // syscall.AllThreadsSyscall's runtime half (os_linux.go), REFUSED BY NAME BEFORE THE WORLD IS
+    // STOPPED (ruling 2026-09-28 02:10, Q6). Go stops the world and then runs the system call on
+    // every M, signalling each thread to run it too. There are no Ms to signal here, and under the
+    // stop-the-world contract the stop now succeeds, so the converted body would run the call on the
+    // calling thread alone and report success: a credential change that reached one thread. Go
+    // refuses the same way under cgo, where it cannot see every thread either. The credential
+    // setters do not come through here (syscall/linux/cgocaller_linux_impl.cs), and
+    // AllThreadsSyscall answers ENOTSUP before it would, as a cgo build's does.
+    internal static (uintptr r1, uintptr r2, uintptr err) syscall_runtime_doAllThreadsSyscall(uintptr trap, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) =>
+        throw new PanicException("runtime: doAllThreadsSyscall: the managed host cannot run a system call on every thread (goroutines are CLR threads with no Ms to signal), so it is refused before the world is stopped");
+
+    /// <summary>
+    /// syscall.AllThreadsSyscall's runtime half, syscall_runtime_doAllThreadsSyscall, called the way
+    /// Setuid/Setgid reach it (the trap is getpid; amd64's number, and it is never executed: the
+    /// call refuses before it could run). Returns what it raised by type and message, or null if it
+    /// returned, and whether worldsema was free afterwards: a plain acquire on another goroutine
+    /// within the timeout.
+    /// </summary>
+    public static (string? failure, bool worldsemaFree) GoAllThreadsSyscallProbe(int timeoutMs)
+    {
+        string? failure = null;
+
+        try
+        {
+            syscall_runtime_doAllThreadsSyscall((uintptr)39, 0, 0, 0, 0, 0, 0);
+        }
+        catch (Exception ex)
+        {
+            failure = $"{ex.GetType().Name}: {ex.Message}";
+        }
+
+        ManualResetEventSlim acquired = new(false);
+
+        Goroutine.Start(() =>
+        {
+            semacquire(Ꮡworldsema);
+            acquired.Set();
+            semrelease(Ꮡworldsema);
+        });
+
+        // The event is not disposed: on a leak the parked goroutine still holds it.
+        return (failure, acquired.Wait(timeoutMs));
+    }
 }

@@ -99,7 +99,7 @@ partial interface Ordered<ΔT> {
 internal static T firstOf<T>(slice<T> p)
     where T : /* RecordUnion */ new()
 {
-    T zero = default!;
+    T zero = GoZero<T>();
     if (len(p) == 0) {
         return zero;
     }

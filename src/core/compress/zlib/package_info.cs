@@ -52,7 +52,7 @@ using static go.compress.zlib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("compress/zlib/reader.go", "reader.cs", "AD6UAfIAAhDSgoKClKaCgpaCgoKUqICCgpSCtoKCgpSssoKUgqaCgoCClLiCgoKUlIKCgpSCgoKCgpSUgoKCqIKClKaUgg==")]
+[assembly: go.GoPositionMap("compress/zlib/reader.go", "reader.cs", "AClWhIQAEjbyAAIQ0oKCgpSmgoKWgoKClKiAgoKUgraCgoKUrLKClIKmgoKAgpS4goKClJSCgoKUgoKCgoKUlIKCgqiCgpSmlII=")]
 [assembly: go.GoPositionMap("compress/zlib/writer.go", "writer.cs", "ACpY0oIAAhLiAAIQ0oKUAAYUspSClIKUgoKosrjKlKSkpKSkgpSCgIKklIKAgramgoKUlKzigpSClIKUgoKClIKokoKUgpSCqqKClIKUgoKUlIKC")]
 // </GoSourcePositionMaps>
 

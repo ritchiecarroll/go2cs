@@ -83,6 +83,11 @@ partial class runtime_package
         {
             @throw($"parsedebugvars at startup: {ex.GetType().FullName}: {ex.Message}");
         }
+
+        // schedinit's order continues: parsedebugvars above, then gcinit, whose pacer reads GOGC and GOMEMLIMIT through
+        // gogetenv. It runs in this initializer because C# does not order one module initializer
+        // against another (managed_impl.cs, gcinitController).
+        gcinitController();
     }
 
     /// <summary>

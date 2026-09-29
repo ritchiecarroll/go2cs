@@ -428,6 +428,33 @@ diagnostic output and must never be the thing that takes a program down.
   is not that the host declines to claim `testing/testing.go`, it is that no conversion ever recorded
   a position for it.
 
+  > **Amendment, 2026-09-28 (lane `claude/g-traceback-go-frames`, coordinator-ruled).** "Reports
+  > `.cs`" stays true of every host frame except one class the design had not met when it was
+  > written. A host method marked `[GoStackRoot]` (golib `runtime/GoStackRootAttribute`) is a
+  > MODELLED Go frame: it stands in, one-for-one, for the Go frame the host replaces. Both
+  > instruments of the frame property report it as that frame: `runtime.Callers`/`CallersFrames`
+  > (lane `claude/p2-stack-roots`, accepted 2026-09-27) and the traceback printer that
+  > `runtime.Stack`, `debug.Stack`, the crash traceback and the fatal report share (this lane).
+  > Today one method carries it: `TestExecution.Execute`, as `testing.tRunner` at
+  > `testing/testing.go:1792`, the `fn(t)` call inside `tRunner` in Go's tree at the corpus's pinned
+  > release (go1.24.13), which is where Go's own frame sits. The main goroutine's `runtime.main` root
+  > is not modelled.
+  >
+  > This is NOT a recorded position, and it does not contradict §1's "no fabricated positions". The
+  > `file:line` exists in the tree it names (Go's `testing/testing.go` at the pinned release), and
+  > the identity is a release fact carried as a constant on the attribute, not a composite minted at
+  > run time. Three consequences follow.
+  >
+  > 1. Printing the frame `Callers` already returns is parity between two instruments of one
+  >    property, not new fabrication. `runtime/debug`'s `TestStack` disclosure, whose premise was
+  >    "the fabrication the position-map ruling forbids", predates the modelled root; it retires with
+  >    this lane, and `TestStack` passes on both OSes.
+  > 2. The constant is release-pinned. At each Go release hop the attribute's function, file and
+  >    line are re-derived against the new release's `testing/testing.go`, the same discipline as any
+  >    hand-owned file that tracks Go source.
+  > 3. A NEW `[GoStackRoot]` use is a design decision, ruled case by case. The attribute is admitted
+  >    only where a host method replaces a Go frame one-for-one.
+
 ---
 
 ## 9. Measurements

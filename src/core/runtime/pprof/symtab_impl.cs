@@ -68,15 +68,13 @@ partial class pprof_package
     // approximation of it.
     internal static partial @string runtime_FrameSymbolName(ж<runtime.Frame> f) => f.Value.Function;
 
-    // Go's body is `return f.startLine`, unconditionally. Two facts make 0 the EXACT answer rather
-    // than a stand-in: `Frame.startLine` is `internal` to the runtime assembly, so this one cannot
-    // read it across the boundary at all; and nothing in the corpus ever ASSIGNS it — a census of
-    // `startLine` writes finds exactly one occurrence corpus-wide and it is this function's own
-    // caller reading the value back (pprof/proto.cs:633). The field is therefore always its zero
-    // value, and 0 is what Go's body would return.
+    // Go's body is `return f.startLine`, unconditionally. `Frame.startLine` is `internal` to the
+    // runtime assembly, so this one cannot read it across the boundary, and it answers 0.
     //
-    // It is honest for the same reason the frame carries no file or line: a synthetic PC knows WHICH
-    // FUNCTION and not which instruction, so there is no start line to know. When a consumer measures
-    // a need for one, the converter's per-method record is the route — see DESIGN-pc-readback.md §3.1.
+    // STATED RESIDUAL (census A2, D3, 2026-09-28): runtime's Frames.Next now ASSIGNS startLine (the
+    // function's `func` keyword line; runtime.FrameStartLine reads it), so 0 is no longer what Go's
+    // body would return for a runtime-built frame, and a profile's Function.start_line (proto.cs) stays
+    // 0. Routing the value across the assembly boundary is a separate change, taken when a consumer
+    // measures the need; no runtime/pprof test reads start_line (go1.24.13's *_test.go, grepped).
     internal static partial nint runtime_FrameStartLine(ж<runtime.Frame> f) => 0;
 }

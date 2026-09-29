@@ -850,7 +850,7 @@ internal static bool seen(this ж<dedup> Ꮡd, uint64 h) {
     foreach (var (_, x) in cache.Value) {
         ch = fnvUint64(ch, x);
     }
-    atomic.StoreUint64(cache.at<uint64>((nint)((nuint)ch % (nuint)4)), h);
+    atomic.StoreUint64(cache.at<uint64>((ulong)((nuint)ch % (nuint)4)), h);
     return false;
 }
 

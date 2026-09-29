@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "ABFMooKCpoKCAAMQsoKCgqyigoKCrsKClIIACAqCrrKCpoKChIKClIKEgoSChIKEgg==", "76-78:1")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "ABFMooKCpoKCAAMQsoKCgqyigoKCrsKClILokoKusoKmgoKEgoKUgoSChIKEgoSC", "76-78:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

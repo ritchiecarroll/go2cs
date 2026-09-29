@@ -1587,7 +1587,7 @@ internal static void greyobject(uintptr obj, uintptr @base, uintptr off, ж<mspa
         // Mark span.
         var (arena, pageIdx, pageMask) = pageIndexOf(span.@base());
         if ((uint8)((~arena).pageMarks[pageIdx] & pageMask) == 0) {
-            atomic.Or8(arena.at(heapArena.ᏑpageMarks, (nint)(pageIdx)), pageMask);
+            atomic.Or8(arena.at(heapArena.ᏑpageMarks, (ulong)(pageIdx)), pageMask);
         }
         // If this is a noscan object, fast-track it to black
         // instead of greying it.
@@ -1682,7 +1682,7 @@ internal static void gcmarknewobject(ж<mspan> Ꮡspan, uintptr obj) {
     // Mark span.
     var (arena, pageIdx, pageMask) = pageIndexOf(span.@base());
     if ((uint8)((~arena).pageMarks[pageIdx] & pageMask) == 0) {
-        atomic.Or8(arena.at(heapArena.ᏑpageMarks, (nint)(pageIdx)), pageMask);
+        atomic.Or8(arena.at(heapArena.ᏑpageMarks, (ulong)(pageIdx)), pageMask);
     }
     var gcw = (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡgcw);
     gcw.Value.bytesMarked += (uint64)span.elemsize;

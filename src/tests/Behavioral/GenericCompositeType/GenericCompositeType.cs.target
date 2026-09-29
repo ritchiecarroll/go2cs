@@ -17,7 +17,7 @@ public static Option<T> NewOption<T>(T value) {
 }
 
 public static Option<T> NewEmptyOption<T>() {
-    T zero = default!;
+    T zero = GoZero<T>();
     return new Option<T>(
         value: zero,
         valid: false

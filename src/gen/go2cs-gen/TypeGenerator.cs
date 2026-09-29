@@ -121,6 +121,7 @@ public class TypeGenerator : ISourceGenerator
                             FullyQualifiedStructType = fullyQualifiedIdentifier,
                             StructMembers = structDeclaration.GetStructMembers(context.Compilation, true),
                             ChanDirInitializerMembers = structDeclaration.GetChanDirInitializerMembers(),
+                            ReadOnlyZeroSizeMembers = structDeclaration.GetReadOnlyExplicitLayoutMembers(),
                             HasEqualityOperators = hasEqualityOperators,
                             // A generic struct that failed the whole-struct constraint gate still
                             // gets a real memberwise Equals: each member whose type supports ==

@@ -82,9 +82,9 @@ using static go.net.rpc_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("net/rpc/client.go", "client.cs", "ABQsggAtYOKCloKCgoKClIKCgpaCgoKCgoKCgoKCAAoKooKCgoKCgpSCgoKChJ6C0syCgrKUtIKClNiCgoKCgoKUpoKClIKCguii3LIABRwACQKCgqqiuJIACRSigIKkgIKkpoKmgqaCqqKqooKClKiCgpSClIIABxKSgoKUqsKCgoKUgoLewoKCgoKC3IKmgoKokoI=")]
-[assembly: global::go.GoPositionMap("net/rpc/debug.go", "debug.cs", "AD94gKKAooCkgKKAooAACQ6UkoKCgoKUhoKUhoKC", "76-87:1;82-84:1.1;88-90:2")]
-[assembly: global::go.GoPositionMap("net/rpc/server.go", "server.cs", "AMIBiAOS3pKCuAACHAALAqqi7oKCgoKCgpSCgoKUgoKClJaEgpaCgpSUgpaAgqSqooKCkoKUgqaCgpSmgoKClKaCgoKUpoKClKaCgpSmgIKClKSUAAoQopSCgoKUgoKCgpSCprKCgoKm0oKUgoKClJSCgoKUggANFoKmguaigIKmgpSkgIKmgpSkpoKUlIIAAhLigtzaooKCgqKCgpSCpoKClJSCyIKqooKCgoKmgoKUlIKmooKCgpSClIKmsoKCgqaigoKClIKUgqaygoKCpgAIAoKCgqaCqIKClIKmgIKkgpaElKSkpgAIBIKCgoKClIK6hIKCgpSCloKCgpSCgoKU3sKCgoKClLqQqKIAEjTiqqKqoqywAAsMsoKCgoKUgoKClIKssoKssg==")]
+[assembly: global::go.GoPositionMap("net/rpc/client.go", "client.cs", "ABQsgqYAKlrigpaCgoKCgpSCgoKWgoKCgoKCgoKCgsbUooKCgoKCgpSCgoKChJ6C0syCgrKUtIKClNiCgoKCgoKUpoKClIKCguii3LIABRwACQKCgqqiuJIACRSigIKkgIKkpoKmgqaCqqKqooKClKiCgpSClIIABxKSgoKUqsKCgoKUgoLewoKCgoKC3IKmgoKokoI=")]
+[assembly: global::go.GoPositionMap("net/rpc/debug.go", "debug.cs", "ACpQABQogKKAooCkgKKAooAACQ6UkoKCgoKUhoKUhoKC", "76-87:1;82-84:1.1;88-90:2")]
+[assembly: global::go.GoPositionMap("net/rpc/server.go", "server.cs", "AJUBrAIALFySuJaSgrgAAhwACwKqou6CgoKCgoKUgoKClIKCgpSWhIKWgoKUlIKWgIKkqqKCgpKClIKmgoKUpoKCgpSmgoKClKaCgpSmgoKUpoCCgpSklNzEopSCgoKUgoKCgpSCprKCgoKm0oKUgoKClJSCgoKUgqIAChSCpoLmooCCpoKUpICCpoKUpKaClJSCAAIS4oLc2qKCgoKigoKUgqaCgpSUgsiCqqKCgoKCpoKClJSCpqKCgoKUgpSCprKCgoKmooKCgpSClIKmsoKCgqYACAKCgoKmgqiCgpSCpoCCpIKWhJSkpKYACASCgoKCgpSCuoSCgoKUgpaCgoKUgoKClN7CgoKCgpS6kKiiABI04qqiqqKssAALDLKCgoKClIKCgpSCrLKCrLI=")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

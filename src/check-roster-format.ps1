@@ -1468,48 +1468,71 @@ foreach ($manifestFile in $manifestFiles) {
         if ($null -eq $entry) { continue }
         $entriesChecked++
         $name = [string]$entry.name
-        $class = [string]$entry.class
 
-        if ($class -eq $deferredClass) {
-            # Each field separately, so the failure NAMES the missing one.
-            foreach ($field in 'want', 'reading', 'plan') {
-                $value = [string]$entry.$field
-                Assert-Equal "deferred entry names its $($field): $pkg/$name" $true (-not [string]::IsNullOrWhiteSpace($value))
+        # A TWO-HALF entry (testDisclosure.Halves in the Go loader, ruled 2026-09-28 09:47) carries its
+        # class-bound fields per half, so each half is checked under the rules a plain entry is, and
+        # labelled by its position. The halves REPLACE the entry's class and signature, and there are
+        # at least two. The entry's own platforms, if any, are checked as a plain entry's are.
+        $reasons = @($entry)
+        $labels = @($name)
+        if ($null -ne $entry.halves) {
+            $halves = @($entry.halves)
+            Assert-Equal "a two-half entry carries at least two halves and no class or signature of its own: $pkg/$name" $true `
+                ($halves.Count -ge 2 -and [string]::IsNullOrWhiteSpace([string]$entry.class) -and [string]::IsNullOrWhiteSpace([string]$entry.signature))
+            if ($null -ne $entry.platforms) {
+                $platformViolations = @(Get-DisclosurePlatformViolations -Name "$pkg/$name" -Platforms $entry.platforms)
+                Assert-Equal "platforms names only corpus targets, without duplicates: $pkg/$name ($($platformViolations -join '; '))" 0 $platformViolations.Count
             }
+            $reasons = $halves
+            $labels = @(for ($h = 1; $h -le $halves.Count; $h++) { "$name half $h" })
         }
 
+        for ($r = 0; $r -lt $reasons.Count; $r++) {
+            $reason = $reasons[$r]
+            $label = $labels[$r]
+            $class = [string]$reason.class
 
-        # The FLOOR (ruling 2026-09-05): a deferred entry may carry an object count GREATER than its
-        # want, with its own proof sketch, naming the part of the reading no plan can remove. Same
-        # three refusals as the loader, mirrored here so the whole tree is checked in one pass.
-        $floor = 0
-        if ($null -ne $entry.floor) { $floor = [int]$entry.floor }
-
-        if ($floor -ne 0) {
-            Assert-Equal "a floor belongs to a deferred entry, never a structural one: $pkg/$name" $false ($class -eq $structuralClass)
-            Assert-Equal "floor is a positive object count: $pkg/$name" $true ($floor -gt 0)
-            Assert-Equal "a floor names its proof (a claim the census can falsify): $pkg/$name" $true (-not [string]::IsNullOrWhiteSpace([string]$entry.proof))
-
-            # The want must LEAD with the number the floor is compared against; refusing an
-            # uncheckable pairing is the difference between a guard and a decoration.
-            $wantText = ([string]$entry.want).Trim()
-            $wantMatch = [regex]::Match($wantText, '^\d+')
-            Assert-Equal "a floored entry's want leads with its number: $pkg/$name" $true $wantMatch.Success
-            if ($wantMatch.Success) {
-                Assert-Equal "floor exceeds the want (else nothing is deferred and the entry is structural): $pkg/$name" $true ($floor -gt [int]$wantMatch.Value)
+            if ($class -eq $deferredClass) {
+                # Each field separately, so the failure NAMES the missing one.
+                foreach ($field in 'want', 'reading', 'plan') {
+                    $value = [string]$reason.$field
+                    Assert-Equal "deferred entry names its $($field): $pkg/$label" $true (-not [string]::IsNullOrWhiteSpace($value))
+                }
             }
-        }
-        if ($class -eq $structuralClass) {
-            Assert-Equal "structural entry names NO retirement plan (its claim is the assertion cannot be met): $pkg/$name" $true ([string]::IsNullOrWhiteSpace([string]$entry.plan))
-        }
 
-        # The PLATFORM SCOPE, conditional like the arms above: an entry with no `platforms` key fires
-        # nothing, which is every entry in the tree today. That is why the fixture arms exist -- this
-        # loop currently adds coverage without adding checks, exactly as the plain alloc-profile
-        # entries do, and a scope arriving tomorrow is validated the day it lands.
-        if ($null -ne $entry.platforms) {
-            $platformViolations = @(Get-DisclosurePlatformViolations -Name "$pkg/$name" -Platforms $entry.platforms)
-            Assert-Equal "platforms names only corpus targets, without duplicates: $pkg/$name ($($platformViolations -join '; '))" 0 $platformViolations.Count
+
+            # The FLOOR (ruling 2026-09-05): a deferred entry may carry an object count GREATER than its
+            # want, with its own proof sketch, naming the part of the reading no plan can remove. Same
+            # three refusals as the loader, mirrored here so the whole tree is checked in one pass.
+            $floor = 0
+            if ($null -ne $reason.floor) { $floor = [int]$reason.floor }
+
+            if ($floor -ne 0) {
+                Assert-Equal "a floor belongs to a deferred entry, never a structural one: $pkg/$label" $false ($class -eq $structuralClass)
+                Assert-Equal "floor is a positive object count: $pkg/$label" $true ($floor -gt 0)
+                Assert-Equal "a floor names its proof (a claim the census can falsify): $pkg/$label" $true (-not [string]::IsNullOrWhiteSpace([string]$reason.proof))
+
+                # The want must LEAD with the number the floor is compared against; refusing an
+                # uncheckable pairing is the difference between a guard and a decoration.
+                $wantText = ([string]$reason.want).Trim()
+                $wantMatch = [regex]::Match($wantText, '^\d+')
+                Assert-Equal "a floored entry's want leads with its number: $pkg/$label" $true $wantMatch.Success
+                if ($wantMatch.Success) {
+                    Assert-Equal "floor exceeds the want (else nothing is deferred and the entry is structural): $pkg/$label" $true ($floor -gt [int]$wantMatch.Value)
+                }
+            }
+            if ($class -eq $structuralClass) {
+                Assert-Equal "structural entry names NO retirement plan (its claim is the assertion cannot be met): $pkg/$label" $true ([string]::IsNullOrWhiteSpace([string]$reason.plan))
+            }
+
+            # The PLATFORM SCOPE, conditional like the arms above: an entry with no `platforms` key fires
+            # nothing, which is every entry in the tree today. That is why the fixture arms exist -- this
+            # loop currently adds coverage without adding checks, exactly as the plain alloc-profile
+            # entries do, and a scope arriving tomorrow is validated the day it lands.
+            if ($null -ne $reason.platforms) {
+                $platformViolations = @(Get-DisclosurePlatformViolations -Name "$pkg/$label" -Platforms $reason.platforms)
+                Assert-Equal "platforms names only corpus targets, without duplicates: $pkg/$label ($($platformViolations -join '; '))" 0 $platformViolations.Count
+            }
         }
     }
 }

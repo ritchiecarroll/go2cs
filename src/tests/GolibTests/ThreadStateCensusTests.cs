@@ -77,6 +77,7 @@ public class ThreadStateCensusTests
         ("golib/GoMemProfile.cs|t_recording", Disposition.Registered, "GoroutineThreadState.Register(static () => t_recording = false)", "true only while this thread records a memory-profile sample (also cleared in its finally)"),
         ("golib/GoMemProfile.cs|t_nextSample", Disposition.KeptThreadResource, "private static long t_nextSample;", "the bytes left until this thread's next memory-profile sample: Go keeps it on the M (mcache.nextSample), a thread, so it carries across goroutines as in Go"),
         ("golib/GoMemProfile.cs|t_seeded", Disposition.KeptThreadResource, "private static bool t_seeded;", "whether this thread's sample countdown is seeded, as Go seeds it once per mcache"),
+        ("golib/GoCheapRand.cs|t_state", Disposition.KeptThreadResource, "private static ulong t_state;", "Go's cheaprand state (where each map range starts): Go keeps it on the M (m.cheaprand), a thread, so it carries across goroutines as in Go"),
         ("runtime/cpusampler_impl.cs|t_cpuSamplerDraining", Disposition.Registered, "GoroutineThreadState.Register(static () => t_cpuSamplerDraining = false)", "true only inside a CPU sampler's Stop drain (also cleared in its finally)"),
         ("runtime/debug/stubs_impl.cs|t_panicOnFault", Disposition.Registered, "GoroutineThreadState.Register(static () => t_panicOnFault = false)", "debug.SetPanicOnFault, per goroutine in Go"),
         ("runtime/lock_managed_impl.cs|t_heldLocks", Disposition.Registered, "Array.Clear(held);", "the runtime locks this goroutine holds"),

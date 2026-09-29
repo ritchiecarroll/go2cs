@@ -59,7 +59,7 @@ internal static (T, error) doBlockingWithCtx<T>(context.Context ctx, @string loo
     try {
         {
             var err = acquireThread(ctx); if (err != default!) {
-                T zero = default!;
+                T zero = GoZero<T>();
                 return (zero, new DNSErrorжerror(Ꮡ(new DNSError(
                     Name: lookupName,
                     Err: mapErr(err).Error(),
@@ -91,7 +91,7 @@ internal static (T, error) doBlockingWithCtx<T>(context.Context ctx, @string loo
             return (r.res, r.err);
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {
-            T zero = default!;
+            T zero = GoZero<T>();
             return (zero, new DNSErrorжerror(Ꮡ(new DNSError(
                 Name: lookupName,
                 Err: mapErr(ctx.Err()).Error(),

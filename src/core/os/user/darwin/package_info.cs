@@ -60,7 +60,7 @@ using static go.os.user_package;
 [assembly: go.GoPositionMap("os/user/cgo_lookup_syscall.go", "cgo_lookup_syscall.cs", "ABUugKKAooCigKKAooCigKSAooCkgKSygoKmsoKCprKCgqaygoIABRCA")]
 [assembly: go.GoPositionMap("os/user/cgo_lookup_unix.go", "cgo_lookup_unix.cs", "AA8kgqaCgoKChJKClJSClIKUpoKCgpSmgoKEgoKUlIKUgpSmggAKFoKmgoKEgoSSgpSUgpSClKaCgoKUpoKChIKClJSClIKUpoK4AAcUgoK4lJSUrLKCgoKC6pSCgpTcgqiSkoKC", "28-33:1;55-60:1;93-98:1;120-125:1")]
 [assembly: go.GoPositionMap("os/user/getgrouplist_syscall.go", "getgrouplist_syscall.cs", "AAsagoKClA==")]
-[assembly: go.GoPositionMap("os/user/lookup.go", "lookup.cs", "AA4q0oCSgpSSAAwYooCCpKqigIKkqqKqoqiS", "22-22:1")]
+[assembly: go.GoPositionMap("os/user/lookup.go", "lookup.cs", "AAwcntKAkoKUkgAMGKKAgqSqooCCpKqiqqKokg==", "22-22:1")]
 [assembly: go.GoPositionMap("os/user/user.go", "user.cs", "AEOKAYLOgs6CzoI=")]
 // </GoSourcePositionMaps>
 

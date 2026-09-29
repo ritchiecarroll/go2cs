@@ -811,32 +811,6 @@ internal static void readMetrics(@unsafe.Pointer samplesp, nint len, nint cap) {
     metricsUnlock();
 }
 
-// readMetricsLocked is the internal, locked portion of readMetrics.
-//
-// Broken out for more robust testing. metricsLock must be held and
-// initMetrics must have been called already.
-internal static void readMetricsLocked(@unsafe.Pointer samplesp, nint len, nint cap) {
-    // Construct a slice from the args.
-    ref var sl = ref heap<Δsliceᴛ>(out var Ꮡsl);
-    sl = new Δsliceᴛ(samplesp.Value, len, cap);
-    var samples = ~Ꮡsl.Reinterpret<Δsliceᴛ, slice<metricSample>>();
-    // Clear agg defensively.
-    agg = new statAggregate(nil);
-    // Sample.
-    foreach (var (i, _) in samples) {
-        var sample = Ꮡ(samples, i);
-        ref var data = ref heap<metricData>(out var Ꮡdata);
-        (data, var ok) = metrics[(~sample).name, ꟷ];
-        if (!ok) {
-            sample.Value.value.kind = metricKindBad;
-            continue;
-        }
-        // Ensure we have all the stats we need.
-        // agg is populated lazily.
-        Ꮡagg.ensure(Ꮡdata.of(metricData.Ꮡdeps));
-        // Compute the value based on the stats we have.
-        data.compute(Ꮡagg, sample.of(metricSample.Ꮡvalue));
-    }
-}
+// go2cs generated this placeholder — func readMetricsLocked is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 } // end runtime_package

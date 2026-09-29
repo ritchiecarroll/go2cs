@@ -113,6 +113,166 @@ func (v *Visitor) writePositionSentinel(goPos token.Pos) {
 	v.outputBuilder.WriteString(PositionSentinel + strconv.Itoa(line) + PositionSentinel)
 }
 
+// positionSentinelText is writePositionSentinel's text, for an emission built as a string before it is
+// written (goFrameTail). "" when goPos has no line.
+func (v *Visitor) positionSentinelText(goPos token.Pos) string {
+	if !goPos.IsValid() || v.fset == nil {
+		return ""
+	}
+
+	line := v.fset.Position(goPos).Line
+
+	if line <= 0 {
+		return ""
+	}
+
+	return PositionSentinel + strconv.Itoa(line) + PositionSentinel
+}
+
+// deferEpilogueEndPos is the Go position the frame-form epilogue (`finally { ᒐ.Run(); }`) is marked
+// with: the function's closing brace when its body CAN FALL OFF THE END, and NoPos otherwise. Go
+// reports a deferred call's caller at the line of the exit that ran it: the closing brace when the
+// function falls off the end (deferreturn), and the `return` statement's own line at an explicit return
+// (measured, go1.24.13). Every exit shares the one epilogue, so the brace marks it only where falling off
+// is possible. A body ending in a terminating statement keeps the epilogue's inherited marker, the last
+// statement's line, which is its final exit's line.
+//
+// STATED RESIDUALS: an EARLY return in a function that can also fall off the end reports the brace, where
+// Go reports that return's line. And the epilogue line is only what an OPTIMIZED frame reports: under
+// tiered compilation a frame whose return address is inside the `finally` funclet reports IL offset 0,
+// so a deferred call's caller reads its function's first line whatever this marker says (measured, .NET
+// 10.0.12; TC=0 maps the finally line).
+func deferEpilogueEndPos(body *ast.BlockStmt) token.Pos {
+	if body == nil || isGoSpecTerminatingList(body.List, "") {
+		return token.NoPos
+	}
+
+	return body.Rbrace
+}
+
+// isGoSpecTerminating is the Go specification's "terminating statement", as go/types checks it (its
+// isTerminating is unexported). isTerminatingStmt (visitSwitchStmt.go) is deliberately CONSERVATIVE for
+// its own use: it reports every for/switch/select as not terminating. Whether a body can fall off its end
+// needs the exact rule: a `for` with no condition and no break, a switch or type switch with a default
+// whose every clause terminates or falls through and none breaks out, and a select whose every clause
+// terminates and none breaks out. label names the enclosing labeled statement, if any.
+func isGoSpecTerminating(s ast.Stmt, label string) bool {
+	switch s := s.(type) {
+	case *ast.ReturnStmt:
+		return true
+	case *ast.BranchStmt:
+		return s.Tok == token.GOTO || s.Tok == token.FALLTHROUGH
+	case *ast.ExprStmt:
+		// A call to the predeclared panic. A declaration shadowing it is not resolved here; a false
+		// "terminating" only keeps the epilogue's inherited marker.
+		if call, ok := ast.Unparen(s.X).(*ast.CallExpr); ok {
+			if ident, ok := call.Fun.(*ast.Ident); ok && ident.Name == "panic" {
+				return true
+			}
+		}
+	case *ast.BlockStmt:
+		return isGoSpecTerminatingList(s.List, "")
+	case *ast.IfStmt:
+		return s.Else != nil && isGoSpecTerminating(s.Body, "") && isGoSpecTerminating(s.Else, "")
+	case *ast.LabeledStmt:
+		return isGoSpecTerminating(s.Stmt, s.Label.Name)
+	case *ast.ForStmt:
+		return s.Cond == nil && !hasBreak(s.Body, label, true)
+	case *ast.SwitchStmt:
+		return isGoSpecTerminatingSwitch(s.Body, label)
+	case *ast.TypeSwitchStmt:
+		return isGoSpecTerminatingSwitch(s.Body, label)
+	case *ast.SelectStmt:
+		for _, clause := range s.Body.List {
+			cc := clause.(*ast.CommClause)
+
+			if !isGoSpecTerminatingList(cc.Body, "") || hasBreakList(cc.Body, label, true) {
+				return false
+			}
+		}
+
+		return true
+	}
+
+	return false
+}
+
+func isGoSpecTerminatingList(list []ast.Stmt, label string) bool {
+	// Trailing empty statements are permitted.
+	for i := len(list) - 1; i >= 0; i-- {
+		if _, empty := list[i].(*ast.EmptyStmt); !empty {
+			return isGoSpecTerminating(list[i], label)
+		}
+	}
+
+	return false
+}
+
+func isGoSpecTerminatingSwitch(body *ast.BlockStmt, label string) bool {
+	hasDefault := false
+
+	for _, clause := range body.List {
+		cc := clause.(*ast.CaseClause)
+
+		if cc.List == nil {
+			hasDefault = true
+		}
+
+		if !isGoSpecTerminatingList(cc.Body, "") || hasBreakList(cc.Body, label, true) {
+			return false
+		}
+	}
+
+	return hasDefault
+}
+
+// hasBreak reports whether s holds a break that leaves the statement labeled label (or, when implicit,
+// the innermost enclosing for/switch/select), not looking into function literals.
+func hasBreak(s ast.Stmt, label string, implicit bool) bool {
+	switch s := s.(type) {
+	case *ast.BranchStmt:
+		if s.Tok == token.BREAK {
+			if s.Label == nil {
+				return implicit
+			}
+
+			return s.Label.Name == label
+		}
+	case *ast.LabeledStmt:
+		return hasBreak(s.Stmt, label, implicit)
+	case *ast.BlockStmt:
+		return hasBreakList(s.List, label, implicit)
+	case *ast.IfStmt:
+		return hasBreak(s.Body, label, implicit) || (s.Else != nil && hasBreak(s.Else, label, implicit))
+	case *ast.CaseClause:
+		return hasBreakList(s.Body, label, implicit)
+	case *ast.CommClause:
+		return hasBreakList(s.Body, label, implicit)
+	case *ast.SwitchStmt:
+		return label != "" && hasBreak(s.Body, label, false)
+	case *ast.TypeSwitchStmt:
+		return label != "" && hasBreak(s.Body, label, false)
+	case *ast.SelectStmt:
+		return label != "" && hasBreak(s.Body, label, false)
+	case *ast.ForStmt:
+		return label != "" && hasBreak(s.Body, label, false)
+	case *ast.RangeStmt:
+		return label != "" && hasBreak(s.Body, label, false)
+	}
+
+	return false
+}
+
+func hasBreakList(list []ast.Stmt, label string, implicit bool) bool {
+	for _, s := range list {
+		if hasBreak(s, label, implicit) {
+			return true
+		}
+	}
+
+	return false
+}
+
 // finalizePositionMap turns the sentinels the walk left in the finished file text into this file's
 // position-map record, and strips them. Called once per emitted file, after every marker
 // substitution, with the path the file is about to be written to.

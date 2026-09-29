@@ -7010,13 +7010,35 @@ const (
 // root withdraws nothing, exactly as before.
 const compilerPropertyClass = "compiler-property"
 
-// classAdmitsSkipShape reports whether a disclosure class may absorb a Go=pass / C#=skip pair.
-// ONE predicate, read by BOTH arms below -- the skip arm's admission and the generic arm's
-// exclusion -- so the two can never drift apart again. Drift is exactly what let cgo-configuration
-// be admitted by neither: the shape was named in one arm by a bare class comparison and excluded
-// in the other by a second, and a class that matched neither list simply fell through.
-func classAdmitsSkipShape(class string) bool {
+// runtimeCapabilityClass names a Go assertion the managed host lacks the runtime capability to meet:
+// runtime's TestCaller (an opaque PC token has no entry address below it) is the first of the family.
+// It is the one class that admits BOTH shapes (ruling of 2026-09-28 09:47, ledger 435557647c, item
+// 3a): the pass/fail pair it always has, and the pass/skip pair, its signature read from the skip
+// output, for a test the converted side skips at a check for that capability (runtime/pprof's
+// TestCPUProfileRecursion, TestLabelSystemstack and TestMorestack are the first).
+const runtimeCapabilityClass = "runtime-capability"
+
+// classIsSkipOnly reports whether a class admits the Go=pass / C#=skip pair ALONE, so a failure of
+// its test is a mismatch even when the failure text carries the pinned skip message.
+func classIsSkipOnly(class string) bool {
 	return class == platformSkipClass || class == cgoConfigurationClass || class == compilerPropertyClass
+}
+
+// classAdmitsSkipShape reports whether a disclosure class may absorb a Go=pass / C#=skip pair, and
+// classAdmitsFailShape whether it may absorb a Go=pass / C#=fail pair. The skip arm below reads the
+// first and the generic arm the second, and BOTH derive from classIsSkipOnly, so admission and
+// exclusion can never drift apart again. Drift is exactly what let cgo-configuration be admitted
+// by neither: the shape was named in one arm by a bare class comparison and excluded in the other
+// by a second, and a class that matched neither list simply fell through. The split is also what
+// lets runtime-capability join the skip shape without leaving the fail shape: the fail arm used to
+// exclude every class the skip predicate admitted, which would have dropped TestCaller and its
+// siblings the moment runtime-capability was added.
+func classAdmitsSkipShape(class string) bool {
+	return classIsSkipOnly(class) || class == runtimeCapabilityClass
+}
+
+func classAdmitsFailShape(class string) bool {
+	return !classIsSkipOnly(class) && class != hostFatalClass
 }
 
 // hostFatalClass names a test the converted host cannot RUN AT ALL -- not one whose verdict
@@ -7332,7 +7354,7 @@ func orphanedDisclosures(disclosures map[string]testDisclosure, goResults, csRes
 
 		out = append(out, orphanedDisclosure{
 			Name:   name,
-			Class:  disclosure.Class,
+			Class:  disclosure.classLabel(),
 			Go:     goResults[name],
 			CSharp: "pass",
 			GOOS:   goos,
@@ -7541,6 +7563,188 @@ type testDisclosure struct {
 	// disclosed test's non-signature records at each sweep (disclosedRecords), and per-record
 	// signatures are reconsidered at phase C.
 	Records int `json:"records,omitempty"`
+
+	// Halves carries a test that fails for TWO reasons, each with its own class (the two-half shape,
+	// ruled 2026-09-28 09:47, ledger 435557647c, item 3b; per-half platforms added at 17:56, ledger
+	// a4dbed7620). runtime's TestReadMetricsConsistency is the first: its linux-only mark-class check
+	// is runtime-capability and its scan-bytes check structural. Without halves the entry had one
+	// class and one signature, a second entry of the same name is refused, and the signature is a
+	// substring of the WHOLE log, so pinning either line alone would absorb any change in the other.
+	//
+	// Halves REPLACE the entry's own class, signature and retirement fields (the loader refuses both
+	// forms on one entry), and there are at least two. EVERY in-scope half must match, each against a
+	// DISTINCT record once the host's record list is present (halvesMatchDistinctRecords), and against
+	// the whole log otherwise. The record-count pin above stays the ENTRY's, so it covers the whole
+	// test. A half's own platforms scope that half at load (scopeDisclosures); an entry none of whose
+	// halves apply is out of scope as a whole. The proof page reports each half on its own row.
+	Halves []disclosureHalf `json:"halves,omitempty"`
+}
+
+// disclosureHalf is one reason of a two-half entry (testDisclosure.Halves): the class, signature,
+// reason and retirement fields an entry carries, held to the same rules, plus a platform scope of its
+// own.
+type disclosureHalf struct {
+	Class     string    `json:"class"`
+	Signature string    `json:"signature"`
+	Reason    string    `json:"reason"`
+	Want      string    `json:"want,omitempty"`
+	Reading   string    `json:"reading,omitempty"`
+	Plan      string    `json:"plan,omitempty"`
+	Floor     int       `json:"floor,omitempty"`
+	Proof     string    `json:"proof,omitempty"`
+	Platforms goosScope `json:"platforms,omitempty"`
+}
+
+// parts answers the reasons an entry pins: its halves, or the entry itself as its one reason. Every
+// consumer that reads a class, a signature or a reason reads it through here, so a two-half entry
+// can never be mistaken for a plain one with empty fields.
+func (d testDisclosure) parts() []disclosureHalf {
+	if len(d.Halves) > 0 {
+		return d.Halves
+	}
+
+	return []disclosureHalf{{Class: d.Class, Signature: d.Signature, Reason: d.Reason, Want: d.Want, Reading: d.Reading,
+		Plan: d.Plan, Floor: d.Floor, Proof: d.Proof}}
+}
+
+func (d testDisclosure) signatures() []string {
+	var signatures []string
+	for _, part := range d.parts() {
+		signatures = append(signatures, part.Signature)
+	}
+	return signatures
+}
+
+func (d testDisclosure) hasClass(class string) bool {
+	for _, part := range d.parts() {
+		if part.Class == class {
+			return true
+		}
+	}
+	return false
+}
+
+// admitsSkipShape and admitsFailShape answer for the whole entry: a test either skips or fails, so an
+// entry admits a shape only when EVERY half does (the loader refuses halves with no common shape).
+func (d testDisclosure) admitsSkipShape() bool {
+	for _, part := range d.parts() {
+		if !classAdmitsSkipShape(part.Class) {
+			return false
+		}
+	}
+	return true
+}
+
+func (d testDisclosure) admitsFailShape() bool {
+	for _, part := range d.parts() {
+		if !classAdmitsFailShape(part.Class) {
+			return false
+		}
+	}
+	return true
+}
+
+// classLabel and signatureLabel render the entry for a message: the one class and quoted signature
+// of a plain entry, unchanged, or each half's joined by " + " in manifest order.
+func (d testDisclosure) classLabel() string {
+	var classes []string
+	for _, part := range d.parts() {
+		classes = append(classes, part.Class)
+	}
+	return strings.Join(classes, " + ")
+}
+
+func (d testDisclosure) signatureLabel() string {
+	var quoted []string
+	for _, part := range d.parts() {
+		quoted = append(quoted, strconv.Quote(part.Signature))
+	}
+	return strings.Join(quoted, " + ")
+}
+
+func (d testDisclosure) reasonLabel() string {
+	var reasons []string
+	for _, part := range d.parts() {
+		reasons = append(reasons, part.Reason)
+	}
+	return strings.Join(reasons, " + ")
+}
+
+// signatureMatches reports whether the C# side's terminal output carries what the entry pins: a plain
+// entry's signature anywhere in the log, exactly as before; a two-half entry's EVERY signature, each in
+// a record of its own when the host's record list is present, and in the whole log otherwise.
+func signatureMatches(name string, disclosure testDisclosure, csOutput string, csRecords map[string]testRecords) bool {
+	if len(disclosure.Halves) == 0 {
+		return strings.Contains(csOutput, disclosure.Signature)
+	}
+
+	if records, ok := csRecords[name]; ok && records.Present {
+		return halvesMatchDistinctRecords(disclosure.Halves, records.Records)
+	}
+
+	for _, half := range disclosure.Halves {
+		if !strings.Contains(csOutput, half.Signature) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// halvesMatchDistinctRecords reports whether every half can be matched to a record of its OWN that
+// contains its signature: a bipartite matching (augmenting paths), because a greedy pass could spend
+// the only record a later half fits on an earlier half that fits several.
+func halvesMatchDistinctRecords(halves []disclosureHalf, records []string) bool {
+	owner := make([]int, len(records)) // half index + 1 per record, 0 while the record is unclaimed
+
+	var claim func(half int, visited []bool) bool
+	claim = func(half int, visited []bool) bool {
+		for index, record := range records {
+			if visited[index] || !strings.Contains(record, halves[half].Signature) {
+				continue
+			}
+
+			visited[index] = true
+
+			if owner[index] == 0 || claim(owner[index]-1, visited) {
+				owner[index] = half + 1
+				return true
+			}
+		}
+
+		return false
+	}
+
+	for half := range halves {
+		if !claim(half, make([]bool, len(records))) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// signatureMismatchDetail explains a failed signature match for the mismatch text: a plain entry's
+// wording is unchanged, and a two-half entry names the halves missing from the log, or says that the
+// halves are all present but cannot each have a record of their own.
+func signatureMismatchDetail(name, verb string, disclosure testDisclosure, csOutput string, csRecords map[string]testRecords) string {
+	if len(disclosure.Halves) == 0 {
+		return fmt.Sprintf("%s does not match the disclosed %s signature %q", verb, disclosure.Class, disclosure.Signature)
+	}
+
+	var missing []string
+	for index, half := range disclosure.Halves {
+		if !strings.Contains(csOutput, half.Signature) {
+			missing = append(missing, fmt.Sprintf("half %d (%s) %q", index+1, half.Class, half.Signature))
+		}
+	}
+
+	if len(missing) > 0 {
+		return fmt.Sprintf("%s does not match every half of the disclosed %s entry: missing %s", verb, disclosure.classLabel(), strings.Join(missing, ", "))
+	}
+
+	return fmt.Sprintf("%s carries every half of the disclosed %s entry, but they cannot each be matched in a record of their own: %s",
+		verb, disclosure.classLabel(), disclosure.signatureLabel())
 }
 
 
@@ -7624,11 +7828,17 @@ func readTestDisclosureManifest(outputPath string) (map[string]testDisclosure, [
 		// string nothing can ever match -- worse than useless, because it would read as a pin.
 		// Every other class keeps the requirement: the signature IS the integrity guard that stops
 		// a disclosure absorbing a regression beyond the documented divergence.
-		if disclosure.Name == "" || disclosure.Class == "" || disclosure.Reason == "" {
-			return nil, nil, fmt.Errorf("disclosure entries require name, class, and reason: %+v", disclosure)
-		}
-		if disclosure.Signature == "" && disclosure.Class != hostFatalClass {
-			return nil, nil, fmt.Errorf("disclosure entries require a signature except for %s: %+v", hostFatalClass, disclosure)
+		if len(disclosure.Halves) > 0 {
+			if err := validateDisclosureHalves(disclosure); err != nil {
+				return nil, nil, err
+			}
+		} else {
+			if disclosure.Name == "" || disclosure.Class == "" || disclosure.Reason == "" {
+				return nil, nil, fmt.Errorf("disclosure entries require name, class, and reason: %+v", disclosure)
+			}
+			if disclosure.Signature == "" && disclosure.Class != hostFatalClass {
+				return nil, nil, fmt.Errorf("disclosure entries require a signature except for %s: %+v", hostFatalClass, disclosure)
+			}
 		}
 
 		// The record-count pin (Records): a count of log records, so never negative, and never on a
@@ -7640,59 +7850,13 @@ func readTestDisclosureManifest(outputPath string) (map[string]testDisclosure, [
 			return nil, nil, fmt.Errorf("disclosure %s pins %d record(s), but a %s test is withdrawn from both sides and logs nothing to count", disclosure.Name, disclosure.Records, hostFatalClass)
 		}
 
-		// The DEFERRED class's contract, enforced where every other required field is (coordinator
-		// ruling 2026-09-05, owner-ratified): a deferred entry is a COMMITMENT to reach the
-		// assertion, so an entry that names no plan is refused outright rather than accepted as a
-		// quieter disclosure. Want and Reading are required with it because a plan with no bound
-		// and no measured starting point cannot be scored at the next sweep -- the sweep prints the
-		// reading beside the want, and a reading moving AWAY from the want fails the row exactly as
-		// a matched verdict flipping would.
-		if disclosure.Class == deferredClass {
-			missing := []string{}
-			if strings.TrimSpace(disclosure.Want) == "" {
-				missing = append(missing, "want")
-			}
-			if strings.TrimSpace(disclosure.Reading) == "" {
-				missing = append(missing, "reading")
-			}
-			if strings.TrimSpace(disclosure.Plan) == "" {
-				missing = append(missing, "plan")
-			}
-			if len(missing) > 0 {
-				return nil, nil, fmt.Errorf("deferred disclosure %s requires %s: a deferred entry is a commitment to reach the assertion, and one that names no plan is refused", disclosure.Name, strings.Join(missing, ", "))
-			}
+		// The retirement fields' rules (the deferred contract, the floor, the structural refusal of a
+		// plan), shared with each half of a two-half entry. Vacuous for a two-half entry itself,
+		// whose own fields are refused above.
+		if err := validateDisclosureRetirement(disclosure.Name, disclosure.Class, disclosure.Want, disclosure.Reading, disclosure.Plan, disclosure.Floor, disclosure.Proof); err != nil {
+			return nil, nil, err
 		}
 
-
-		// The FLOOR's own contract (ruling 2026-09-05). A floor is only meaningful where the want is
-		// a number the reading can be compared against, so the want must LEAD with its integer for
-		// the relation to be checkable at all -- refusing an uncheckable pairing is the difference
-		// between a guard and a decoration.
-		if disclosure.Floor != 0 {
-			if disclosure.Class == structuralClass {
-				return nil, nil, fmt.Errorf("structural disclosure %s must not name a floor: that label claims the reading cannot be reduced, so an excess above a floor belongs to the deferred class", disclosure.Name)
-			}
-			if disclosure.Floor < 0 {
-				return nil, nil, fmt.Errorf("disclosure %s has a negative floor (%d): a floor is an object count", disclosure.Name, disclosure.Floor)
-			}
-			if strings.TrimSpace(disclosure.Proof) == "" {
-				return nil, nil, fmt.Errorf("disclosure %s names a floor but no proof: a floor is a CLAIM the census can falsify, and one with no sketch cannot be", disclosure.Name)
-			}
-
-			wantValue, ok := leadingInteger(disclosure.Want)
-			if !ok {
-				return nil, nil, fmt.Errorf("disclosure %s names a floor, so its want must LEAD with the number the floor is compared against (got %q)", disclosure.Name, disclosure.Want)
-			}
-			if disclosure.Floor <= wantValue {
-				return nil, nil, fmt.Errorf("disclosure %s has a floor (%d) that does not exceed its want (%d): a floor names the part of the reading no plan can remove, so an entry whose floor equals its want has nothing deferred and is simply structural", disclosure.Name, disclosure.Floor, wantValue)
-			}
-		}
-		// A structural entry claims no managed implementation can meet the assertion; naming a plan
-		// to meet it contradicts that claim in the same entry, and the pairing is the shape a
-		// mislabelled copy-paste takes. Refused so the two labels cannot blur back together.
-		if disclosure.Class == structuralClass && strings.TrimSpace(disclosure.Plan) != "" {
-			return nil, nil, fmt.Errorf("structural disclosure %s must not name a retirement plan: its claim is that the assertion cannot be met, so a plan to meet it belongs to the deferred class", disclosure.Name)
-		}
 		// The PLATFORM SCOPE's own contract (increment 2). Absent or empty means every platform, so
 		// there is nothing to check on the 46 manifests that omit it; a list that IS present is
 		// validated strictly, because every way of getting it wrong produces the same silent outcome
@@ -7702,19 +7866,8 @@ func readTestDisclosureManifest(outputPath string) (map[string]testDisclosure, [
 		//
 		// A misspelled GOOS is the likely mistake and the one worth naming loudly, so the refusal
 		// prints the offending value AND the accepted set rather than saying the entry is invalid.
-		seenPlatforms := map[string]bool{}
-		for _, platform := range disclosure.Platforms {
-			if !disclosurePlatformTargets.includes(platform) {
-				return nil, nil, fmt.Errorf("disclosure %s names platform %q, which is not one of %s: a scope naming a target this corpus does not build could never be in scope on any run, so it would disable the entry's absorption silently and forever",
-					disclosure.Name, platform, strings.Join(disclosurePlatformTargets, ", "))
-			}
-			// A duplicate changes no behaviour — membership is membership — which is exactly why it
-			// is refused rather than tolerated: it is evidence the list was edited without being
-			// read, and the next such edit may be the one that changes meaning.
-			if seenPlatforms[platform] {
-				return nil, nil, fmt.Errorf("disclosure %s names platform %q twice: a duplicate changes nothing about the scope, so it is a sign the list was edited unread", disclosure.Name, platform)
-			}
-			seenPlatforms[platform] = true
+		if err := validateDisclosurePlatforms(disclosure.Name, disclosure.Platforms); err != nil {
+			return nil, nil, err
 		}
 
 		if _, exists := disclosures[disclosure.Name]; exists {
@@ -7747,6 +7900,154 @@ func readTestDisclosureManifest(outputPath string) (map[string]testDisclosure, [
 	return disclosures, manifest.Notes, nil
 }
 
+// validateDisclosureRetirement holds one reason's class-bound fields to the rules every disclosure
+// reason keeps: the deferred contract, the floor's, and the structural refusal of a plan. It reads an
+// entry's own fields or one half's (testDisclosure.Halves); label names the reason in a refusal,
+// the entry's name for a plain entry, so those refusals read exactly as they always have.
+func validateDisclosureRetirement(label, class, want, reading, plan string, floor int, proof string) error {
+	// The DEFERRED class's contract, enforced where every other required field is (coordinator
+	// ruling 2026-09-05, owner-ratified): a deferred entry is a COMMITMENT to reach the
+	// assertion, so an entry that names no plan is refused outright rather than accepted as a
+	// quieter disclosure. Want and Reading are required with it because a plan with no bound
+	// and no measured starting point cannot be scored at the next sweep -- the sweep prints the
+	// reading beside the want, and a reading moving AWAY from the want fails the row exactly as
+	// a matched verdict flipping would.
+	if class == deferredClass {
+		missing := []string{}
+		if strings.TrimSpace(want) == "" {
+			missing = append(missing, "want")
+		}
+		if strings.TrimSpace(reading) == "" {
+			missing = append(missing, "reading")
+		}
+		if strings.TrimSpace(plan) == "" {
+			missing = append(missing, "plan")
+		}
+		if len(missing) > 0 {
+			return fmt.Errorf("deferred disclosure %s requires %s: a deferred entry is a commitment to reach the assertion, and one that names no plan is refused", label, strings.Join(missing, ", "))
+		}
+	}
+
+	// The FLOOR's own contract (ruling 2026-09-05). A floor is only meaningful where the want is
+	// a number the reading can be compared against, so the want must LEAD with its integer for
+	// the relation to be checkable at all -- refusing an uncheckable pairing is the difference
+	// between a guard and a decoration.
+	if floor != 0 {
+		if class == structuralClass {
+			return fmt.Errorf("structural disclosure %s must not name a floor: that label claims the reading cannot be reduced, so an excess above a floor belongs to the deferred class", label)
+		}
+		if floor < 0 {
+			return fmt.Errorf("disclosure %s has a negative floor (%d): a floor is an object count", label, floor)
+		}
+		if strings.TrimSpace(proof) == "" {
+			return fmt.Errorf("disclosure %s names a floor but no proof: a floor is a CLAIM the census can falsify, and one with no sketch cannot be", label)
+		}
+
+		wantValue, ok := leadingInteger(want)
+		if !ok {
+			return fmt.Errorf("disclosure %s names a floor, so its want must LEAD with the number the floor is compared against (got %q)", label, want)
+		}
+		if floor <= wantValue {
+			return fmt.Errorf("disclosure %s has a floor (%d) that does not exceed its want (%d): a floor names the part of the reading no plan can remove, so an entry whose floor equals its want has nothing deferred and is simply structural", label, floor, wantValue)
+		}
+	}
+	// A structural entry claims no managed implementation can meet the assertion; naming a plan
+	// to meet it contradicts that claim in the same entry, and the pairing is the shape a
+	// mislabelled copy-paste takes. Refused so the two labels cannot blur back together.
+	if class == structuralClass && strings.TrimSpace(plan) != "" {
+		return fmt.Errorf("structural disclosure %s must not name a retirement plan: its claim is that the assertion cannot be met, so a plan to meet it belongs to the deferred class", label)
+	}
+
+	return nil
+}
+
+// validateDisclosurePlatforms holds a platform scope, an entry's or one half's, to the rules above:
+// only corpus targets, and no duplicates. label names the scope's owner in a refusal.
+func validateDisclosurePlatforms(label string, platforms goosScope) error {
+	seenPlatforms := map[string]bool{}
+	for _, platform := range platforms {
+		if !disclosurePlatformTargets.includes(platform) {
+			return fmt.Errorf("disclosure %s names platform %q, which is not one of %s: a scope naming a target this corpus does not build could never be in scope on any run, so it would disable the entry's absorption silently and forever",
+				label, platform, strings.Join(disclosurePlatformTargets, ", "))
+		}
+		// A duplicate changes no behaviour — membership is membership — which is exactly why it
+		// is refused rather than tolerated: it is evidence the list was edited without being
+		// read, and the next such edit may be the one that changes meaning.
+		if seenPlatforms[platform] {
+			return fmt.Errorf("disclosure %s names platform %q twice: a duplicate changes nothing about the scope, so it is a sign the list was edited unread", label, platform)
+		}
+		seenPlatforms[platform] = true
+	}
+
+	return nil
+}
+
+// validateDisclosureHalves holds a two-half entry (testDisclosure.Halves) to the shape's rules. The
+// halves REPLACE the entry's own class, signature and retirement fields, so an entry carrying both
+// forms is refused rather than read one way or the other. There are at least two, because one half is
+// a plain entry. The entry cannot be host-conditional: that annotation's second accepted shape is
+// pinned by a primary signature the halves no longer have. No half may be host-fatal, whose test runs
+// on neither side, or compiler-property, whose signature-matched ROOT withdraws the whole test's
+// fan-out, which no single half can claim. Every half keeps an entry's required fields and its
+// retirement and platform rules. And the halves must admit a COMMON shape, since a test either skips
+// or fails: a skip-only half beside a half that cannot skip could never match.
+func validateDisclosureHalves(disclosure testDisclosure) error {
+	if disclosure.Name == "" {
+		return fmt.Errorf("disclosure entries require name, class, and reason: %+v", disclosure)
+	}
+
+	var replaced []string
+	for field, value := range map[string]string{"class": disclosure.Class, "signature": disclosure.Signature, "want": disclosure.Want,
+		"reading": disclosure.Reading, "plan": disclosure.Plan, "proof": disclosure.Proof} {
+		if value != "" {
+			replaced = append(replaced, field)
+		}
+	}
+	if disclosure.Floor != 0 {
+		replaced = append(replaced, "floor")
+	}
+	if len(replaced) > 0 {
+		sort.Strings(replaced)
+		return fmt.Errorf("disclosure %s carries both halves and its own %s: halves replace the entry's class, signature and retirement fields, so each belongs in the half it describes",
+			disclosure.Name, strings.Join(replaced, ", "))
+	}
+
+	if disclosure.HostConditional != "" || disclosure.HostConditionalSignature != "" {
+		return fmt.Errorf("disclosure %s is host-conditional, which the two-half shape does not take: that annotation's second shape is pinned by a primary signature the halves replace", disclosure.Name)
+	}
+
+	if len(disclosure.Halves) < 2 {
+		return fmt.Errorf("disclosure %s carries %d half: an entry needs at least two halves, and a single reason is a plain entry", disclosure.Name, len(disclosure.Halves))
+	}
+
+	for index, half := range disclosure.Halves {
+		label := fmt.Sprintf("%s half %d", disclosure.Name, index+1)
+
+		if half.Class == "" || half.Signature == "" || half.Reason == "" {
+			return fmt.Errorf("disclosure %s requires class, signature, and reason: %+v", label, half)
+		}
+		if half.Class == hostFatalClass {
+			return fmt.Errorf("disclosure %s is %s: that test is withdrawn from both sides, so no half of it can ever be matched", label, hostFatalClass)
+		}
+		if half.Class == compilerPropertyClass {
+			return fmt.Errorf("disclosure %s is %s: that class's matched root withdraws its whole test's fan-out, which one half cannot claim", label, compilerPropertyClass)
+		}
+		if err := validateDisclosureRetirement(label, half.Class, half.Want, half.Reading, half.Plan, half.Floor, half.Proof); err != nil {
+			return err
+		}
+		if err := validateDisclosurePlatforms(label, half.Platforms); err != nil {
+			return err
+		}
+	}
+
+	if !disclosure.admitsSkipShape() && !disclosure.admitsFailShape() {
+		return fmt.Errorf("disclosure %s has halves admitting no common shape (%s): a test either skips or fails, so every half must admit the shape its test takes",
+			disclosure.Name, disclosure.classLabel())
+	}
+
+	return nil
+}
+
 // scopeDisclosures splits a validated manifest into the entries that apply to THIS run's target and
 // the entries that do not (see testDisclosure.Platforms). Pure, so every arm of the scope rule is
 // table-testable without a manifest file, a run, or a platform.
@@ -7775,6 +8076,28 @@ func scopeDisclosures(entries map[string]testDisclosure, goos string) (map[strin
 	var outOfScope []outOfScopeDisclosure
 
 	for name, entry := range entries {
+		// A two-half entry's halves are scoped first, each by its own platforms, under the same rule
+		// as an entry's: none in scope makes the whole entry out of scope, and a scoped half with no
+		// GOOS to read is an error. The entry's own platforms, if any, then apply below as ever.
+		if len(entry.Halves) > 0 {
+			scoped, err := scopeDisclosureHalves(name, entry.Halves, goos)
+			if err != nil {
+				return nil, nil, err
+			}
+
+			if len(scoped) == 0 {
+				var platforms goosScope
+				for _, half := range entry.Halves {
+					platforms = append(platforms, half.Platforms...)
+				}
+
+				outOfScope = append(outOfScope, outOfScopeDisclosure{Name: name, Class: entry.classLabel(), Platforms: platforms, GOOS: goos})
+				continue
+			}
+
+			entry.Halves = scoped
+		}
+
 		if len(entry.Platforms) == 0 {
 			// The unscoped case, and the one every committed manifest is in: applies everywhere,
 			// exactly as it did before this field existed. Deliberately short-circuited ahead of the
@@ -7795,7 +8118,7 @@ func scopeDisclosures(entries map[string]testDisclosure, goos string) (map[strin
 
 		outOfScope = append(outOfScope, outOfScopeDisclosure{
 			Name:      name,
-			Class:     entry.Class,
+			Class:     entry.classLabel(),
 			Platforms: entry.Platforms,
 			GOOS:      goos,
 		})
@@ -7806,6 +8129,31 @@ func scopeDisclosures(entries map[string]testDisclosure, goos string) (map[strin
 	sort.Slice(outOfScope, func(i, j int) bool { return outOfScope[i].Name < outOfScope[j].Name })
 
 	return inScope, outOfScope, nil
+}
+
+// scopeDisclosureHalves answers the halves of one entry that apply on goos: an unscoped half applies
+// everywhere, and a scoped one where its platforms include goos. A scoped half with no GOOS to read
+// is refused, for the reason scopeDisclosures refuses a scoped entry.
+func scopeDisclosureHalves(name string, halves []disclosureHalf, goos string) ([]disclosureHalf, error) {
+	scoped := make([]disclosureHalf, 0, len(halves))
+
+	for index, half := range halves {
+		if len(half.Platforms) == 0 {
+			scoped = append(scoped, half)
+			continue
+		}
+
+		if goos == "" {
+			return nil, fmt.Errorf("disclosure %s half %d is scoped to %s but the run named no target platform: a scoped half cannot be applied or skipped without one, and guessing either way changes the oracle silently",
+				name, index+1, strings.Join(half.Platforms, ", "))
+		}
+
+		if half.Platforms.includes(goos) {
+			scoped = append(scoped, half)
+		}
+	}
+
+	return scoped, nil
 }
 
 // loadTestDisclosures is the production door: read, validate, and scope to the run's target. Every
@@ -7930,13 +8278,21 @@ func terminalTestRecords(output string) map[string]testRecords {
 	return result
 }
 
-// nonSignatureRecords answers the records that do not contain the disclosure's signature, the part
-// a signature alone cannot pin: what a count mismatch names, and what the comparison record publishes
-// for every disclosed test so a substitution at an unchanged count is still visible to a reader.
-func nonSignatureRecords(records []string, signature string) []string {
+// nonSignatureRecords answers the records that contain none of the disclosure's signatures (a plain
+// entry's one, or each half's), the part a signature alone cannot pin: what a count mismatch names,
+// and what the comparison record publishes for every disclosed test so a substitution at an
+// unchanged count is still visible to a reader. An empty signature matches no record.
+func nonSignatureRecords(records []string, signatures ...string) []string {
 	others := []string{}
 	for _, record := range records {
-		if signature == "" || !strings.Contains(record, signature) {
+		pinned := false
+		for _, signature := range signatures {
+			if signature != "" && strings.Contains(record, signature) {
+				pinned = true
+				break
+			}
+		}
+		if !pinned {
 			others = append(others, record)
 		}
 	}
@@ -7957,20 +8313,20 @@ func recordPinFailure(name string, disclosure testDisclosure, csRecords map[stri
 	records, ok := csRecords[name]
 
 	if !ok || !records.Present {
-		return fmt.Sprintf("%s: the %s disclosure pins %d log record(s), but the C# terminal event carries no record list", name, disclosure.Class, disclosure.Records)
+		return fmt.Sprintf("%s: the %s disclosure pins %d log record(s), but the C# terminal event carries no record list", name, disclosure.classLabel(), disclosure.Records)
 	}
 
 	if records.Dropped == 0 && len(records.Records) == disclosure.Records {
 		return ""
 	}
 
-	text := fmt.Sprintf("%s: C# logged %d record(s) where the %s disclosure pins %d", name, len(records.Records), disclosure.Class, disclosure.Records)
+	text := fmt.Sprintf("%s: C# logged %d record(s) where the %s disclosure pins %d", name, len(records.Records), disclosure.classLabel(), disclosure.Records)
 
 	if records.Dropped > 0 {
 		text += fmt.Sprintf(", and the host's log cap dropped %d more", records.Dropped)
 	}
 
-	return text + fmt.Sprintf("; records outside the signature: %q", nonSignatureRecords(records.Records, disclosure.Signature))
+	return text + fmt.Sprintf("; records outside the signature: %q", nonSignatureRecords(records.Records, disclosure.signatures()...))
 }
 
 // matchTerminalStatuses is matchTerminalStatusesWithRecords without a record stream: every
@@ -8036,7 +8392,7 @@ func matchTerminalStatusesWithRecords(names []string, goResults, csResults map[s
 		// A root must hold its record-count pin as well as its signature: a root whose record count
 		// moved is itself a mismatch below, so its fan-out is not its mechanical consequence and
 		// compares strictly.
-		if goResults[name] == "pass" && strings.Contains(csOutputs[name], disclosure.Signature) {
+		if goResults[name] == "pass" && signatureMatches(name, disclosure, csOutputs[name], csRecords) {
 			if recordPinFailure(name, disclosure, csRecords) == "" {
 				disclosureRoots.Add(name)
 			}
@@ -8106,9 +8462,9 @@ func matchTerminalStatusesWithRecords(names []string, goResults, csResults map[s
 			// (platform-skip and cgo-configuration); the signature requirement below is identical
 			// for both, so admitting a second class widens WHICH manifests may absorb a skip and
 			// nothing about WHAT is absorbed.
-			if disclosure, ok := disclosures[name]; ok && classAdmitsSkipShape(disclosure.Class) &&
+			if disclosure, ok := disclosures[name]; ok && disclosure.admitsSkipShape() &&
 				goOK && csOK && goStatus == "pass" && csStatus == "skip" {
-				if strings.Contains(csOutputs[name], disclosure.Signature) {
+				if signatureMatches(name, disclosure, csOutputs[name], csRecords) {
 					if failure := recordPinFailure(name, disclosure, csRecords); failure != "" {
 						mismatches = append(mismatches, failure)
 						mismatchNames.Add(name)
@@ -8120,8 +8476,8 @@ func matchTerminalStatusesWithRecords(names []string, goResults, csResults map[s
 					continue
 				}
 
-				mismatches = append(mismatches, fmt.Sprintf("%s: Go=%q C#=%q (skip does not match the disclosed %s signature %q)",
-					name, goStatus, csStatus, disclosure.Class, disclosure.Signature))
+				mismatches = append(mismatches, fmt.Sprintf("%s: Go=%q C#=%q (%s)",
+					name, goStatus, csStatus, signatureMismatchDetail(name, "skip", disclosure, csOutputs[name], csRecords)))
 				mismatchNames.Add(name)
 				continue
 			}
@@ -8139,10 +8495,9 @@ func matchTerminalStatusesWithRecords(names []string, goResults, csResults map[s
 			// either side and there is no status pair here for it to absorb. If one ever reaches
 			// this arm the exclusion did not take -- the test RAN -- and reading it as disclosed
 			// would hide exactly that. It must fall through to a mismatch and be seen.
-			if disclosure, ok := disclosures[name]; ok &&
-				!classAdmitsSkipShape(disclosure.Class) && disclosure.Class != hostFatalClass &&
+			if disclosure, ok := disclosures[name]; ok && disclosure.admitsFailShape() &&
 				goStatus == "pass" && csStatus == "fail" {
-				if strings.Contains(csOutputs[name], disclosure.Signature) {
+				if signatureMatches(name, disclosure, csOutputs[name], csRecords) {
 					// The signature is a substring of the test's WHOLE log, so it proves the pinned
 					// failure is present, not that it is the only one: the record-count pin does that.
 					if failure := recordPinFailure(name, disclosure, csRecords); failure != "" {
@@ -8155,8 +8510,8 @@ func matchTerminalStatusesWithRecords(names []string, goResults, csResults map[s
 					disclosedNames.Add(name)
 					continue
 				}
-				mismatches = append(mismatches, fmt.Sprintf("%s: Go=%q C#=%q (failure does not match the disclosed %s signature %q)",
-					name, goStatus, csStatus, disclosure.Class, disclosure.Signature))
+				mismatches = append(mismatches, fmt.Sprintf("%s: Go=%q C#=%q (%s)",
+					name, goStatus, csStatus, signatureMismatchDetail(name, "failure", disclosure, csOutputs[name], csRecords)))
 				mismatchNames.Add(name)
 				continue
 			}
@@ -8635,7 +8990,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	result.Skipped = append(result.Skipped, skipped...)
 	for _, name := range disclosed {
 		disclosure, own := disclosures[name]
-		result.Disclosed = append(result.Disclosed, fmt.Sprintf("%s (%s): %s", name, disclosure.Class, disclosure.Reason))
+		result.Disclosed = append(result.Disclosed, fmt.Sprintf("%s (%s): %s", name, disclosure.classLabel(), disclosure.reasonLabel()))
 
 		// An aggregated ancestor is disclosed through its children and has no entry of its own, so
 		// only an OWN entry has records to publish or a pin to lack.
@@ -8651,7 +9006,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 				result.DisclosedRecords = map[string][]string{}
 			}
 
-			result.DisclosedRecords[name] = nonSignatureRecords(records.Records, disclosure.Signature)
+			result.DisclosedRecords[name] = nonSignatureRecords(records.Records, disclosure.signatures()...)
 		}
 
 		if disclosure.Records == 0 {
@@ -8831,7 +9186,15 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	if len(disclosed) > 0 {
 		classes := HashSet[string]{}
 		for _, name := range disclosed {
-			classes.Add(disclosures[name].Class)
+			// A disclosed ancestor rolled up from its children has no entry, and adds its empty class as
+			// it always has; a two-half entry adds each half's.
+			if disclosure, own := disclosures[name]; own {
+				for _, part := range disclosure.parts() {
+					classes.Add(part.Class)
+				}
+			} else {
+				classes.Add("")
+			}
 		}
 		classList := classes.Keys()
 		sort.Strings(classList)

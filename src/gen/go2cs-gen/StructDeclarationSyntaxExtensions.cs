@@ -330,6 +330,37 @@ public static class StructDeclarationSyntaxExtensions
         return chanDirMembers;
     }
 
+    /// <summary>
+    /// The members the converter emitted READONLY under an explicit layout: the Go ZERO-SIZE fields of the
+    /// zero-size-field layout arc (src/go2cs/zeroSizeFieldLayout.go). Only that arc emits `readonly` fields
+    /// under <c>[StructLayout(LayoutKind.Explicit)]</c>, and the arc is bounded to unmanaged structs, so the
+    /// constructor-initialized readonly embed boxes (managed) can never appear here.
+    /// </summary>
+    public static HashSet<string> GetReadOnlyExplicitLayoutMembers(
+        this StructDeclarationSyntax structDeclaration)
+    {
+        HashSet<string> members = new(StringComparer.Ordinal);
+
+        bool explicitLayout = structDeclaration.AttributeLists
+            .SelectMany(list => list.Attributes)
+            .Any(attribute => attribute.Name.ToString() is "StructLayout" or "StructLayoutAttribute" or "System.Runtime.InteropServices.StructLayout" &&
+                              attribute.ArgumentList?.Arguments.FirstOrDefault()?.ToString().EndsWith("Explicit", StringComparison.Ordinal) == true);
+
+        if (!explicitLayout)
+            return members;
+
+        foreach (MemberDeclarationSyntax member in structDeclaration.Members)
+        {
+            if (member is not FieldDeclarationSyntax fieldDeclaration || !fieldDeclaration.Modifiers.Any(SyntaxKind.ReadOnlyKeyword))
+                continue;
+
+            foreach (VariableDeclaratorSyntax variable in fieldDeclaration.Declaration.Variables)
+                members.Add(variable.Identifier.Text);
+        }
+
+        return members;
+    }
+
     // A Go interface value: a C# interface, or `object` — which is how `any` is spelled.
     private static bool IsGoInterfaceValue(ITypeSymbol? type)
     {

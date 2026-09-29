@@ -13,6 +13,7 @@ using race = @internal.race_package;
 using atomic = go.sync.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
+using System.Runtime.InteropServices;
 using go.sync;
 
 partial class sync_package {
@@ -29,10 +30,10 @@ partial class sync_package {
 // “synchronizes before” the return of any Wait call that it unblocks.
 //
 // [the Go memory model]: https://go.dev/ref/mem
-[GoType] partial struct WaitGroup {
-    internal noCopy noCopy;
-    internal atomic.Uint64 state; // high 32 bits are counter, low 32 bits are waiter count.
-    internal uint32 sema;
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 16)] partial struct WaitGroup {
+    [FieldOffset(0)] internal readonly noCopy noCopy;
+    [FieldOffset(0)] internal atomic.Uint64 state; // high 32 bits are counter, low 32 bits are waiter count.
+    [FieldOffset(8)] internal uint32 sema;
 }
 
 // Add adds delta, which may be negative, to the [WaitGroup] counter.

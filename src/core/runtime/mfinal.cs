@@ -504,6 +504,13 @@ public static void SetFinalizer(any obj, any finalizer) {
     // allocation, and a boxed value to the box itself, so the registration tracks exactly the
     // allocation Go would finalize - and two boxes for the same address share one registration.
     object referent = ReferentOf(obj);
+    // Go's findObject finds no span for the ZEROBASE, and isGoPointerWithoutSpan ("0-length objects
+    // are okay") returns before any finalizer check -- even "finalizer already set" and a mismatched
+    // finalizer type. Every zero-size allocation is that one pointer (golib's GoZeroBase), so a
+    // registration here would collide across unrelated allocations.
+    if (GoZeroBase.Is(referent)) {
+        return;
+    }
     if (finalizer is null or NilType) {
         // SetFinalizer(obj, nil) clears any previously registered finalizer.
         if (s_finalizerRegistry.TryGetValue(referent, out GoFinalizerSentinel? cleared)) {

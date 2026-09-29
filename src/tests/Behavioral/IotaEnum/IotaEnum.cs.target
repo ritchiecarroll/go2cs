@@ -122,7 +122,7 @@ public static ж<Type> TypeOf(any aʗp) {
 }
 
 public static ж<Type> TypeFor<T>() {
-    T v = default!;
+    T v = GoZero<T>();
     {
         var t = TypeOf(v); if (t != nil) {
             return t;

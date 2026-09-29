@@ -645,7 +645,7 @@ mapped:
         // new heap arena becomes visible before the heap lock
         // is released (which shouldn't happen, but there's
         // little downside to this).
-        atomic.StorepNoWB(@unsafe.Pointer.FromBox(l2.at<ж<heapArena>>((nint)(ri.l2()))), @unsafe.Pointer.FromPinnedBox(r));
+        atomic.StorepNoWB(@unsafe.Pointer.FromBox(l2.at<ж<heapArena>>((ulong)(ri.l2()))), @unsafe.Pointer.FromPinnedBox(r));
 continue_mapped:;
     }
 break_mapped:;
@@ -759,8 +759,7 @@ internal static void enableMetadataHugePages(this ж<mheap> Ꮡh) {
 }
 
 // base address for all 0-byte allocations
-internal static ж<uintptr> Ꮡzerobase = new StandardBox<uintptr>(default(uintptr));
-internal static ref uintptr zerobase => ref Ꮡzerobase.Value;
+// go2cs generated this placeholder — var zerobase is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // nextFreeFast returns the next free object if one is quickly available.
 // Otherwise it returns 0.

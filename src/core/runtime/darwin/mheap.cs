@@ -1374,7 +1374,7 @@ internal static void initSpan(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType
         // it's imperative that the span be completely initialized
         // prior to this line.
         var (arena, pageIdx, pageMask) = pageIndexOf(s.@base());
-        atomic.Or8(arena.at(heapArena.ᏑpageInUse, (nint)(pageIdx)), pageMask);
+        atomic.Or8(arena.at(heapArena.ᏑpageInUse, (ulong)(pageIdx)), pageMask);
         // Update related page sweeper stats.
         Ꮡh.of(mheap.ᏑpagesInUse).Add(npages);
     }
@@ -1552,7 +1552,7 @@ internal static void freeSpanLocked(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAll
         }
         Ꮡh.of(mheap.ᏑpagesInUse).Add(((uintptr)0 - s.npages));
         var (arena, pageIdx, pageMask) = pageIndexOf(s.@base());
-        atomic.And8(arena.at(heapArena.ᏑpageInUse, (nint)(pageIdx)), // Clear in-use bit in arena page bitmap.
+        atomic.And8(arena.at(heapArena.ᏑpageInUse, (ulong)(pageIdx)), // Clear in-use bit in arena page bitmap.
  (uint8)(((uint8)(~pageMask))));
     }
     else { /* default: */
@@ -1780,7 +1780,7 @@ internal static void spanHasSpecials(ж<mspan> Ꮡs) {
     var arenaPage = (s.@base() / (uintptr)pageSize) % (uintptr)pagesPerArena;
     arenaIdx ai = arenaIndex(s.@base());
     var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
-    atomic.Or8(ha.at(heapArena.ᏑpageSpecials, (nint)(arenaPage / 8)), (uint8)((uint8)1 << (int)((arenaPage % 8))));
+    atomic.Or8(ha.at(heapArena.ᏑpageSpecials, (ulong)(arenaPage / 8)), (uint8)((uint8)1 << (int)((arenaPage % 8))));
 }
 
 // spanHasNoSpecials marks a span as having no specials in the arena bitmap.
@@ -1790,7 +1790,7 @@ internal static void spanHasNoSpecials(ж<mspan> Ꮡs) {
     var arenaPage = (s.@base() / (uintptr)pageSize) % (uintptr)pagesPerArena;
     arenaIdx ai = arenaIndex(s.@base());
     var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
-    atomic.And8(ha.at(heapArena.ᏑpageSpecials, (nint)(arenaPage / 8)), (uint8)(((uint8)(~((uint8)((uint8)1 << (int)((arenaPage % 8))))))));
+    atomic.And8(ha.at(heapArena.ᏑpageSpecials, (ulong)(arenaPage / 8)), (uint8)(((uint8)(~((uint8)((uint8)1 << (int)((arenaPage % 8))))))));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

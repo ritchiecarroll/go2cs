@@ -149,3 +149,14 @@ Report-only — no code changed to produce this bill. The classifier itself (`bc
 carries its own gates (build/vet/test). The `-tests` run that produced the input data used
 `claude/i9-runtime-regen`'s own tip directly (no scratch-seed overlay), avoiding the seed-gap class
 of false reading from the earlier 1,925-error measurement.
+
+## Amendment 2026-09-28 -- Frame.Func reopened (census A2, D3)
+
+runtime/managed_impl.cs cited this record for leaving `firstmoduledata` and `Frame.Func` unchanged when
+FuncForPC's *Func gained Name/Entry/FileLine. COORD's ruling on census A2 (2026-09-28) REOPENED the Frame.Func
+half: Go leaves `Frame.Func` nil only for an INLINED frame, go2cs keeps Go's function boundaries one-for-one so no
+frame is inlined, and runtime's TestStartLine reads `frame.Func == nil` as "inlined". Frames.Next now sets
+Frame.Func for every Go frame, one *Func interned per Go function name, and sets Frame.startLine (the function's
+`func` keyword line, from the frame's GoPositionMap record, or a go1.24.13 constant for a root frame). The
+`firstmoduledata` half of the original decision stands unchanged: there is still no pclntab, and a *Func is
+still a record keyed by its box, not a window onto a symbol table. Seat: claude/i9-frame-func.

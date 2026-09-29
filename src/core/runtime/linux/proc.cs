@@ -1418,34 +1418,7 @@ internal static worldStop stopTheWorldContext;
 
 // go2cs generated this placeholder — func stopTheWorld is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// startTheWorld undoes the effects of stopTheWorld.
-//
-// w must be the worldStop returned by stopTheWorld.
-internal static void startTheWorld(worldStop w) {
-    var wʗ1 = w;
-    systemstack(() => {
-        startTheWorldWithSema(0, wʗ1);
-    });
-    // worldsema must be held over startTheWorldWithSema to ensure
-    // gomaxprocs cannot change while worldsema is held.
-    //
-    // Release worldsema with direct handoff to the next waiter, but
-    // acquirem so that semrelease1 doesn't try to yield our time.
-    //
-    // Otherwise if e.g. ReadMemStats is being called in a loop,
-    // it might stomp on other attempts to stop the world, such as
-    // for starting or ending GC. The operation this blocks is
-    // so heavy-weight that we should just try to be as fair as
-    // possible here.
-    //
-    // We don't want to just allow us to get preempted between now
-    // and releasing the semaphore because then we keep everyone
-    // (including, for example, GCs) waiting longer.
-    var mp = acquirem();
-    mp.Value.preemptoff = ""u8;
-    semrelease1(Ꮡworldsema, true, 0);
-    releasem(ref (mp).DerefOrNull());
-}
+// go2cs generated this placeholder — func startTheWorld is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // stopTheWorldGC has the same effect as stopTheWorld, but blocks
 // until the GC is not running. It also blocks a GC from starting

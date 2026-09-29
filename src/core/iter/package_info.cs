@@ -50,7 +50,7 @@ using static go.iter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("iter/iter.go", "iter.cs", "AOAB0AOmAAIwABkCAAYSooKCgpSCgpSClIKCgoKCpoKAgqSkgpSCgoLEsoSClIKUgoKCloKUlKaUkoSCgoKCloKUlMoAAjIAGQIABxSigoKClIKClIKUgoKCgoKmgoCCpKSClIKCgoLEwoSClIKUgoKCloKUlKaUkoSCgoKCloKUlMo=", "269-303:1;275-288:1.1;290-298:1.2;304-328:2;329-348:3;385-420:1;391-404:1.1;406-414:1.2;421-445:2;446-465:3")]
+[assembly: go.GoPositionMap("iter/iter.go", "iter.cs", "AOAB0AOmAAIwABkCAAYSooKCgpSCgpSClIKCgoKCpoKAgqSkgpSCgoKikrKEgpSClIKCgpaClJSmlJKEgoKCgpaClJTKAAIyABkCAAcUooKCgpSCgpSClIKCgoKCpoKAgqSkgpSCgoKCopLChIKUgpSCgoKWgpSUppSShIKCgoKWgpSUyso=", "269-303:1;275-288:1.1;290-298:1.2;304-328:2;329-348:3;385-420:1;391-404:1.1;406-414:1.2;421-445:2;446-465:3")]
 // </GoSourcePositionMaps>
 
 namespace go;

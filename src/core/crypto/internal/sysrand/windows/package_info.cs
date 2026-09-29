@@ -58,7 +58,7 @@ using static go.crypto.@internal.sysrand_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/sysrand/rand.go", "rand.cs", "ABQmgqwACxDipoKkgIKCgpSUggASFIKClIKUgriClJQ=", "60-62:1")]
+[assembly: go.GoPositionMap("crypto/internal/sysrand/rand.go", "rand.cs", "ABQmgqwACxDipoKkgIKCgpSUgsQADRCCgpSClIK4gpSU", "60-62:1")]
 [assembly: go.GoPositionMap("crypto/internal/sysrand/rand_windows.go", "rand_windows.cs", "AAoSgg==")]
 // </GoSourcePositionMaps>
 

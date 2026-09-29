@@ -51,8 +51,8 @@ using static go.@internal.zstd_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/zstd/bits.go", "bits.cs", "ABU0kgAGEqKCgpSCgoKUqJKCgoKokoKCupIADyDSgoKUAAcQqJKCloKCrLKCgpSCgoKClKiS")]
-[assembly: go.GoPositionMap("internal/zstd/block.go", "block.cs", "AA8i0oK4gpaAgqaCgoSCgpSEhIKClpSCloSWADFo0oKWgoKCloKCpIKUgpSClIKqgpSCgpSYgoKCloKCloKCltzSgpaCgqiilIKI/oKUgoCCpoKCqJKUhIKClISClISAgqaCgqiSlKT4xpKCloKCloKCloKCqoKCgpaCgoSCgpSEgoKUhIKClKiCgoKUgpSUtIKCtIKCgrSCgoLIgpSCgpSEgoKUhIKClKqCqIKUgoKWgoCCyoSCluiyggAGEIKCgoKCgpSCgpSClLqCgoKUgpQ=")]
-[assembly: go.GoPositionMap("internal/zstd/fse.go", "fse.cs", "ABcwAAgCgoCCpoKCurqWlpaEhIKAgqa4goKCgoKAgraCgoKCgILehIKWgpaCloKClIKCpoKClIKWgoKUlIKUgoSEgoKogpaCloSAgqbssoKEhIKClIKCqIKCgoKCgoKCuIKWgoKChIKWhIKClgAuXJKCuIKClIKUgoKClJTYkoK4ggASKoKClIKUAB9EkoK4goKUgpSCgoKUlA==")]
+[assembly: go.GoPositionMap("internal/zstd/block.go", "block.cs", "AA8i0oK4gpaAgqaCgoSCgpSEhIKClpSCloSWABYyABo20oKWgoKCloKCpIKUgpSClIKqgpSCgpSYgoKCloKCloKCltzSgpaCgqiilIKI/oKUgoCCpoKCqJKUhIKClISClISAgqaCgqiSlKT4xpKCloKCloKCloKCqoKCgpaCgoSCgpSEgoKUhIKClKiCgoKUgpSUtIKCtIKCgrSCgoLIgpSCgpSEgoKUhIKClKqCqIKUgoKWgoCCyoSCluiyggAGEIKCgoKCgpSCgpSClLqCgoKUgpQ=")]
+[assembly: go.GoPositionMap("internal/zstd/fse.go", "fse.cs", "ABcwAAgCgoCCpoKCurqWlpaEhIKAgqa4goKCgoKAgraCgoKCgILehIKWgpaCloKClIKCpoKClIKWgoKUlIKUgoSEgoKogpaCloSAgqbssoKEhIKClIKCqIKCgoKCgoKCuIKWgoKChIKWhIKClgAULAAZMJKCuIKClIKUgoKClJTYkoK4ggASKoKClIKUAAcSABcykoK4goKUgpSCgoKUlNwAGzgAECI=")]
 [assembly: go.GoPositionMap("internal/zstd/huff.go", "huff.cs", "ABQuAAsCgpaChIKClIKUgoKUhIKWgoKWgoKWgoK8goKCgpSCgoKWgoKUhIKWgoSEgoKUgoKCloKClISCloKWqIKClIKCgoK8goKCgpSCgqaCloKCloK6goKUgoKUgpSCgoSCzIKCgoKWgoKUgoKCgpSW")]
 [assembly: go.GoPositionMap("internal/zstd/literals.go", "literals.cs", "AAoc0oKogoSClAAIDKKEgpS0gpSCtIKUguyClpSClIKmgpSCgoKo6sKqlIKUgoKCgpTGgpSCgoK0gpSCgoLsgpaCgpaCqIKWgoKUhIKUgriCzoKClJaCltjWgoKWgoKEgoKWgoKCgpbq5oKUgtyCgpaCgoKEgoKUhIKChIKEgoSCqpKClpKClpKClpKCloKCgoSEhIKChIKEkoKUgpaCgpaCgpaCgpaCgoKUgoKWgoKEgoKEgoKW", "289-295:1")]
 [assembly: go.GoPositionMap("internal/zstd/window.go", "window.cs", "ABQqkoKClIKCqJKokoKUgpaCgoKCqIKCgoKUpoKUgs6igoKEgoKClIKCloKClA==")]

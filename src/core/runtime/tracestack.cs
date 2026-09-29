@@ -124,7 +124,7 @@ internal static readonly @string attemptedToTraceStackOfAˢ = "attempted to trac
     if (nstk > 0 && gp.goid == 1) {
         nstk--; // skip runtime.main
     }
-    var id = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (nint)(gen % 2)).put(pcBuf[..(int)(nstk)]);
+    var id = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(gen % 2)).put(pcBuf[..(int)(nstk)]);
     return id;
 }
 
@@ -231,13 +231,13 @@ internal static traceFrame makeTraceFrame(uintptr gen, Frame f) {
     if (len(fn) > maxLen) {
         fn = fn[(int)(len(fn) - maxLen)..];
     }
-    frame.funcID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(gen % 2)).put(gen, fn);
+    frame.funcID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, fn);
     frame.line = (uint64)f.Line;
     @string @file = f.File;
     if (len(@file) > maxLen) {
         @file = @file[(int)(len(@file) - maxLen)..];
     }
-    frame.fileID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(gen % 2)).put(gen, @file);
+    frame.fileID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, @file);
     return frame;
 }
 

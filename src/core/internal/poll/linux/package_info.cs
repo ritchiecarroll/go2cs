@@ -56,24 +56,27 @@ using static go.@internal.poll_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/poll/copy_file_range_linux.go", "copy_file_range_linux.cs", "AA0aguiIAAoWggABFAACLqQAIQqC7g==")]
+[assembly: go.GoPositionMap("internal/poll/copy_file_range_linux.go", "copy_file_range_linux.cs", "AA0agtaCiAAKFoIAARQAAi6kACEKgu4=")]
 [assembly: go.GoPositionMap("internal/poll/copy_file_range_unix.go", "copy_file_range_unix.cs", "AAsa4oKWgoKClIKCgpSCgqioABgogIKkgoCCpIKCgg==", "66-69:1")]
 [assembly: go.GoPositionMap("internal/poll/errno_unix.go", "errno_unix.cs", "ABIqopSkpKSk")]
-[assembly: go.GoPositionMap("internal/poll/fd.go", "fd.cs", "ABcwwKSAooAADh6SgpQADRzAooCigO6SgoKCgpSCgg==")]
+[assembly: go.GoPositionMap("internal/poll/fd.go", "fd.cs", "ABcwwKSAooDIuLiWkoKUygAIEsCigKKAyJaSgoKCgpSCgso=")]
 [assembly: go.GoPositionMap("internal/poll/fd_fsync_posix.go", "fd_fsync_posix.cs", "AAoYwoCCpII=", "17-19:1")]
 [assembly: go.GoPositionMap("internal/poll/fd_mutex.go", "fd_mutex.cs", "AC5qAA4CgoKClIKClIIABkyigoKClIKCAAisAaKYwoKUrLKClKrCgpSs0oK8woKUrNKC")]
 [assembly: go.GoPositionMap("internal/poll/fd_poll_runtime.go", "fd_poll_runtime.cs", "AA8oxJKSkpKSkpKSAAgQooKCgpSCpoKClIKokoKUpoKClIKmgqaC1oKClIKmgqaCpoKClKaCAAwYgpSkpKSkgqiSqJKokqbCgoKCgqaAgqSCgpSCAAUeAAwC")]
 [assembly: go.GoPositionMap("internal/poll/fd_posix.go", "fd_posix.cs", "AAsgooKUqOKAgqSC2MKAgqSC3MKAgqSC3vKAgqSCggAFFPKCgoLMkoKCgg==", "38-40:1;49-51:1")]
 [assembly: go.GoPositionMap("internal/poll/fd_unix.go", "fd_unix.cs", "ACpu8paClIKClIKmlKrmhISCgqrCggAGEKgABhCClqjigIKkuIIADBbigIKkgtyUgIKkgpSCgoKCgoCCyILq6ICCpIKUmIKCgqaClIKCqOKAgqSCgIKkgoKCgpSCgoCCyILq4oCCpIKAgqSCgoKClIKCgILIgurigIKkgoCCpIKCgoKUgoKAgsiC6uKAgqSCgIKkgoKCgqaCgILIgurigIKkgoCCpIKCgoKmgoCCyILq4oCCpIKAgqSCgoKCpoKAgsiC6uKAgqSCgIKkgoKCgpSCgtyUlIKUgoCCtoKUgvwACQiAgqSCgoKCgpSCgpSClIKUgpSC/OKAgqSCgIKkgoKClIKAgraClOrigIKkgoCCpIKCgpSCgIK2gpTq4oCCpIKAgqSCgoKUgoCCtoKU6uKAgqSCgIKkgoKClIKAgraClOrigIKkgoCCpIKCgpSCgIK2gpTq4oCCpIKAgqSCgoKUgoCCtoKU6uKAgqSEgIKkgoKClJSkgoCC3tTqwoCCpILcwoCCpIIADBKSgoKClJqk5qjigIKkgtyyqOKAgqSC2OKAgqSCgIKkgoKUgIIACAzigIKkgoCCpIKClICCAAgMkoKCgg==", "640-642:1;651-653:1")]
 [assembly: go.GoPositionMap("internal/poll/fd_unixjs.go", "fd_unixjs.cs", "ABAgpNzawoKCgoKUgtjigIKkgtwACAKAgqSCgoKCgoKAgtrq4oCCpII=")]
+[assembly: go.GoPositionMap("internal/poll/hook_cloexec.go", "hook_cloexec.cs", "AAsY")]
+[assembly: go.GoPositionMap("internal/poll/hook_unix.go", "hook_unix.cs", "AAsYpg==")]
 [assembly: go.GoPositionMap("internal/poll/iovec_unix.go", "iovec_unix.cs", "AAoWgg==")]
+[assembly: go.GoPositionMap("internal/poll/sendfile.go", "sendfile.cs", "/g==")]
 [assembly: go.GoPositionMap("internal/poll/sendfile_unix.go", "sendfile_unix.cs", "AAw8ABMCgLjchoKWkoKCmKgACAKClICCpISAgqaCyoKClIKCgpQAARDivsKUgIIABhSsAAoCmAAJCtKWtoKSAAAaAAwCtoKCyrY=", "41-43:1;51-53:2;60-62:1")]
 [assembly: go.GoPositionMap("internal/poll/sock_cloexec.go", "sock_cloexec.cs", "AA8gooKClA==")]
 [assembly: go.GoPositionMap("internal/poll/sockopt.go", "sockopt.cs", "AAoY4oCCpILY8oCCpILY4oCCpILY4oCCpII=")]
 [assembly: go.GoPositionMap("internal/poll/sockopt_linux.go", "sockopt_linux.cs", "AAkU4oCCpII=")]
 [assembly: go.GoPositionMap("internal/poll/sockopt_unix.go", "sockopt_unix.cs", "AAoY4oCCpII=")]
 [assembly: go.GoPositionMap("internal/poll/sockoptip.go", "sockoptip.cs", "AAoY4oCCpILY4oCCpII=")]
-[assembly: go.GoPositionMap("internal/poll/splice_linux.go", "splice_linux.cs", "ABJEAAwCgoKUgpKCgoKUAAsYgoKUhIKCgoKmgpQABhoADgKAgqSCgIKkyoKClIKUgoCCAAkmABECgIKkgoCCpILKgoK4goKClIKUgoCCyN7CggAWLKaCgpSCqJKCgpSmxoKCgpSokoKAggAHEISosoI=")]
+[assembly: go.GoPositionMap("internal/poll/splice_linux.go", "splice_linux.cs", "ABJEAAwCgoKUgpKCgoKUAAsYgoKUhIKCgoKmgpQABhoADgKAgqSCgIKkyoKClIKUgoCCAAkmABECgIKkgoCCpILKgoK4goKClIKUgoCCyN7CggAUKJSmgoKUgqiSgoKUpsaCgoKUqJKCgIIABxCEqLKC")]
 [assembly: go.GoPositionMap("internal/poll/writev.go", "writev.cs", "AAwg8oCCpIKAgqaCgsqClJaCgoKCgoKUgoKClIKCpoKUgpSEgoKClIKCgoKCgpSCgIK2lIKCpg==")]
 // </GoSourcePositionMaps>
 

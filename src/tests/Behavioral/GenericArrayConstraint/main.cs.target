@@ -13,7 +13,7 @@ partial class main_package {
 internal static T /*s*/ addPoly<T>(T a, T b)
     where T : /* ~[4]go2cs/GenericArrayConstraint.fieldElement */ IArray<fieldElement>, new()
 {
-    T s = default!;
+    T s = GoZero<T>();
 
     foreach (var (i, _) in s) {
         s[i] = (fieldElement)(a[i] + b[i]);
@@ -24,7 +24,7 @@ internal static T /*s*/ addPoly<T>(T a, T b)
 internal static T scalePoly<T>(T a, fieldElement k)
     where T : /* ~[4]go2cs/GenericArrayConstraint.fieldElement */ IArray<fieldElement>, new()
 {
-    T f = default!;
+    T f = GoZero<T>();
     foreach (var (i, _) in a) {
         f[i] = (fieldElement)(a[i] * k);
     }

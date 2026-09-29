@@ -485,6 +485,11 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         if (box is null || box.IsNilPointer)
             return new Pointer(nil);
 
+        // A zerobase pointer's number is the zerobase's one address (GoZeroBase), the number every
+        // other conversion of it answers; the box still rides along as the referent.
+        if (box.NamesZeroBase)
+            return new Pointer(GoZeroBase.Address, box);
+
         // A native alias's number IS its meaning — carry it exactly; the retained box still rides
         // along so a store through it reaches the aliased memory via the box's own slot access.
         if (box.NativeAddress != 0)

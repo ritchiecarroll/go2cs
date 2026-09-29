@@ -1519,6 +1519,30 @@ public static partial class builtin
     }
 
     /// <summary>
+    /// Gets the Go zero value of <typeparamref name="T"/> where there is no instance to take its shape from: a map
+    /// read that misses, a receive from a closed channel, a failed comma-ok type assertion, and a generic
+    /// <c>var z T</c> or named result.
+    /// </summary>
+    /// <typeparam name="T">Type whose Go zero value is wanted.</typeparam>
+    /// <returns>The Go zero value of <typeparamref name="T"/>.</returns>
+    /// <remarks>
+    /// <para>
+    /// <c>default(T)</c> is the Go zero value for everything EXCEPT a converted struct whose zero must be
+    /// CONSTRUCTED: a fixed-size array field (whose length lives only in the instance) or a promoted-embed box,
+    /// directly or through a nested field. For each such struct go2cs-gen registers a factory in a module
+    /// initializer (<see cref="GoZeroFactory{T}"/>), so this is a static lookup: no reflection, and no trimming
+    /// annotation on <typeparamref name="T"/>, which would otherwise cascade onto every generic declaration that
+    /// reaches here (the GoZero ruling of 2026-09-28, measured).
+    /// </para>
+    /// <para>
+    /// STATED RESIDUAL: a GENERIC needy struct cannot be registered (a module initializer cannot name an open
+    /// generic), so its zero stays <c>default</c> here, as it was before this method existed. A census found no
+    /// std path that reaches one; GolibTests' GoZeroResidualTests pins the behaviour.
+    /// </para>
+    /// </remarks>
+    public static T GoZero<T>() => GoZeroFactory<T>.Create is { } create ? create() : default!;
+
+    /// <summary>
     /// Determines whether <c>default(T)</c> is already the Go zero value for <typeparamref name="T"/>
     /// — the per-T fact behind <see cref="GoZero{T}"/>, exposed for containers that fill their own
     /// backing (see <see cref="array{T}"/>).
@@ -2492,9 +2516,18 @@ public static partial class builtin
         {
             unsafe
             {
-                return new NativeBox<T>(target.NativeElementAddress(index));
+                // Unchecked here too: the length-checked NativeElementAddress refused SliceData over an
+                // empty native window.
+                return new NativeBox<T>(target.NativeElementAddressUnchecked(index));
             }
         }
+
+        // A ZERO-CAPACITY slice has no underlying element to name: Go's SliceData answers "a non-nil
+        // pointer to an unspecified memory address" there (zerobase, for a make), and an element box
+        // at the slice's low index would name a slot past the end of its backing, faulting on the
+        // first read or conversion. The shared per-type element is that non-nil address.
+        if (target.Capacity == 0)
+            return GoZeroCapacityElement<T>.Element;
 
         // ONE object: the box (charged in its ctor). No header temp exists to charge.
         return new ElemRefBox<T>(target, index);
@@ -2638,6 +2671,11 @@ public static partial class builtin
     /// </remarks>
     public static ж<array<T>> NativeArrayPointer<T>(nuint address, nint length)
     {
+        // A reference-bearing element cannot alias native bytes: its elements live in a managed store that
+        // SHADOWS the block, whose address stays the pointer's (A16; see ShadowArrayBox).
+        if (ShadowArrayBox<T>.Needed)
+            return ShadowArrayBox<T>.Over(address, length);
+
         return NativeArrayBox<T>.Over(address, length);
     }
 
@@ -2656,7 +2694,9 @@ public static partial class builtin
     /// </remarks>
     public static ref T heap<T>(out ж<T> pointer)
     {
-        pointer = Ꮡ<T>(default!);
+        // GoZero, not `default`: this is how the converter declares an address-taken or closure-written local
+        // (`var z T` in generic code, iter.Pull's state), so a needy T must get its constructed zero here too.
+        pointer = Ꮡ<T>(GoZero<T>());
         // ValueSlot, not Value: the box was just allocated, so it is structurally a non-nil pointer —
         // the Value getter's nil-pointer-dereference check is always spurious here. For a value-type T
         // this is identical to Value; for a reference-type T (a heap-boxed pointer/slice/map local whose
@@ -3243,7 +3283,7 @@ public static partial class builtin
         DynamicallyAccessedMemberTypes.PublicFields
     )] T>(this object target, bool _)
     {
-        return TryTypeAssert(target, out T? value) ? (value, true) : (default, false);
+        return TryTypeAssert(target, out T? value) ? (value, true) : (GoZero<T>(), false);
     }
 
     /// <summary>
@@ -3259,7 +3299,11 @@ public static partial class builtin
         DynamicallyAccessedMemberTypes.PublicFields
     )] T>(this object target, out T? value)
     {
-        return TryTypeAssert(target, out value);
+        if (TryTypeAssert(target, out value))
+            return true;
+
+        value = GoZero<T>();
+        return false;
     }
 
     /// <summary>

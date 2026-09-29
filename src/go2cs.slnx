@@ -454,6 +454,7 @@
     <Project Path="tests/Behavioral/ForLoopPerIterationVars/ForLoopPerIterationVars.csproj" />
     <Project Path="tests/Behavioral/ForMethodInitPost/ForMethodInitPost.csproj" />
     <Project Path="tests/Behavioral/ForVarMasksBlockLevel/ForVarMasksBlockLevel.csproj" />
+    <Project Path="tests/Behavioral/FrameFuncIdentity/FrameFuncIdentity.csproj" />
     <Project Path="tests/Behavioral/ForVarMasksFuncLevel/ForVarMasksFuncLevel.csproj" />
     <Project Path="tests/Behavioral/ForVariants/ForVariants.csproj" />
     <Project Path="tests/Behavioral/FormatTypeAdapters/FormatTypeAdapters.csproj" />
@@ -580,6 +581,8 @@
     <Project Path="tests/Behavioral/LiftAccessibilityTier/LiftAccessibilityTier.csproj" />
     <Project Path="tests/Behavioral/LiftedLocalTypes/LiftedLocalTypes.csproj" />
     <Project Path="tests/Behavioral/LibraryImportPartial/LibraryImportPartial.csproj" />
+    <Project Path="tests/Behavioral/LineMarkerDeferEndTC0/LineMarkerDeferEndTC0.csproj" />
+    <Project Path="tests/Behavioral/LineMarkerPackageVars/LineMarkerPackageVars.csproj" />
     <Project Path="tests/Behavioral/LinknameVarPull/LinknameVarPull.csproj" />
     <Project Path="tests/Behavioral/LinknameVarPullLib/LinknameVarPullLib.csproj" />
     <Project Path="tests/Behavioral/LinuxSpawnBasics/LinuxSpawnBasics.csproj" />
@@ -748,6 +751,7 @@
     <Project Path="tests/Behavioral/PipeCloseUnblocksRead/PipeCloseUnblocksRead.csproj" />
     <Project Path="tests/Behavioral/PointerArraySlice/PointerArraySlice.csproj" />
     <Project Path="tests/Behavioral/PointerEmbedValueChainPromotion/PointerEmbedValueChainPromotion.csproj" />
+    <Project Path="tests/Behavioral/PointerElementAtUnsignedIndex/PointerElementAtUnsignedIndex.csproj" />
     <Project Path="tests/Behavioral/PointerParamWalk/PointerParamWalk.csproj" />
     <Project Path="tests/Behavioral/PointerArrayRange/PointerArrayRange.csproj" />
     <Project Path="tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.csproj" />
@@ -1014,6 +1018,7 @@
     <Project Path="tests/Behavioral/ZeroSizeFieldLayout/ZeroSizeFieldLayout.csproj" />
     <Project Path="tests/Behavioral/ZeroValueArrayField/ZeroValueArrayField.csproj" />
     <Project Path="tests/Behavioral/ZeroValueArrayNamedResult/ZeroValueArrayNamedResult.csproj" />
+    <Project Path="tests/Behavioral/ZeroValueNeedyStructPaths/ZeroValueNeedyStructPaths.csproj" />
     <Project Path="tests/Behavioral/ZeroValueStructVar/ZeroValueStructVar.csproj" />
   </Folder>
   <Folder Name="/tests/library/">

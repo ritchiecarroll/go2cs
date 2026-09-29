@@ -115,7 +115,24 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted
     /// </para>
     /// </remarks>
     internal unsafe nuint NativeSlotAddress =>
-        m_source is INativeRooted { IsNativeRooted: true } ? (nuint)Unsafe.AsPointer(ref ValueSlot) : 0;
+        !TargetsSharedZeroSizeSlot && m_source is INativeRooted { IsNativeRooted: true } ? (nuint)Unsafe.AsPointer(ref ValueSlot) : 0;
+
+    // A Go ZERO-SIZE field's ref target is not its storage: a readonly zero-size field laid out at Go's
+    // offset answers golib's shared per-type slot (GoZeroSizeSlot, A17), so the TARGET's address names no
+    // field at all. Identity stays (source, field): NativeSlotAddress answers 0 above, and StorageKind None
+    // below makes ж -> uintptr hand out the order token (source base + Go field offset). &x.f != &y.f for
+    // distinct x and y, as in Go (C2's Z2 field-stays-distinct rule).
+    //
+    // The test is the TARGET, not the TYPE. This kind also carries golib's aliasing REINTERPRET VIEW
+    // (`(*SID)(unsafe.Pointer(&b[0]))` -- Windows' variable-length SID over a byte buffer, Go's opaque
+    // zero-size struct), whose target IS the buffer's storage and whose uintptr is that address. Keying
+    // on the zero-size TYPE tokenised the view, and the syscall door refused CopySid at argument 1 --
+    // os/user's TestLookupGroup family and internal/syscall/windows' TestRunAtLowIntegrity, regressed at
+    // the TRAIN I union. Only a ref that lands ON the shared slot is a zero-size FIELD. It costs no
+    // instance state: GoZeroSizeFacts<T>.IsZeroSize is a static readonly per T, so every other type
+    // folds the whole test away at JIT time.
+    private bool TargetsSharedZeroSizeSlot =>
+        GoZeroSizeFacts<T>.IsZeroSize && Unsafe.AreSame(ref ValueSlot, ref GoZeroSizeSlot<T>.Ref);
 
     /// <inheritdoc/>
     public override bool Equals(ж<T>? other)
@@ -175,7 +192,7 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted
     // A token is refused by the kernel (EFAULT) and carried by the linux keystone's marshal. The
     // repair above is untouched: the TCP dial's Sysfd is reference-free and keeps its address.
     public override PointerStorage StorageKind =>
-        RuntimeHelpers.IsReferenceOrContainsReferences<T>() ? PointerStorage.None :
+        RuntimeHelpers.IsReferenceOrContainsReferences<T>() || TargetsSharedZeroSizeSlot ? PointerStorage.None :
         PinnableStorage is null ? PointerStorage.Unpinnable : PointerStorage.Pinnable;
 
     /// <inheritdoc/>

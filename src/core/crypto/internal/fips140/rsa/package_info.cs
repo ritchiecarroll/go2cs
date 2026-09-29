@@ -51,11 +51,11 @@ using static go.crypto.@internal.fips140.rsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/cast.go", "cast.cs", "ABAglAAgQgAgQgAQIgAQIgAQIgAQIgAQIgAKFoKC3AAhRIKClICCpIKU")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/keygen.go", "keygen.cs", "ABciooKUgoKWgoKClIKCloKClIKCloKWgoKUggANHoKUlIKWgoIABxCWggANIIKCloKS3IKClKgACxDCAAUQkoKUloKClIIABhCClIKUgIKm2qKCloKCgIKkgILugIKUgrgADiSCAAQY8oKUlqaCgqYADyKCgpS0tLS0tLS0toKCgoCCpIKUlIKUgoIAHDailoKClIKUloKClKiCgoKWAAoMlIKUgoCCpIIABhKCgqiCgoKUlKg=", "114-126:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15.go", "pkcs1v15.cs", "AClcwoKChKaCgoKW1qSSgoKCgrqCgpSCgoKUgoKuwoKChKaigIKk3IKWgoKWgoKUgpamgrg=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/cast.go", "cast.cs", "ABAglAAgQgAgQgAQIgAQIgAQIgAQIgAQIgAJFIKCgtwAIUSCgpSAgqSClA==")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/keygen.go", "keygen.cs", "ABciooKUgoKWgoKClIKCloKClIKCloKWgoKUggANHoKUlIKWgoIABxCWggANIIKCloKS3IKClKjK5sIABRCSgpSWgoKUggAGEIKUgpSAgqbaooKWgoKAgqSAgu6AgpSCuAAOJIIABBjygpSWpoKCpgAPIoKClLS0tLS0tLS2goKCgIKkgpSUgpSCggALGAAQHqKWgoKUgpSWgoKUqIKCgpYACgyUgpSCgIKkggAGEoKCqIKCgpSUqA==", "114-126:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15.go", "pkcs1v15.cs", "ABgyABAqwoKChKaCgoKW1qSSgoKCgrqCgpSCgoKUgoKuwoKChKaigIKk3IKWgoKWgoKUgpamgrg=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22.go", "pkcs1v22.cs", "ABVIAA4CgIKkgIKkgIKkqqKChIKCgoKChIKClOiWgoIABRCCqoKWgoKCAAoahIKCgoQABRCCvKqWlvqWgoKCAAYQgqiCuoK6goqygsyoloKCgpS6gt6CgoKmgqgABhCCgoKChJaSlKrCgoK4gpTYsoKCAAUQgriClIKAgqaCgoIACBSAkoKCpqiSqJKClKaigoKCgIKkpoKWgoKCggAGEIKClJamgubaAAgOgoKCgIKkpIKCloKChIKChIKChICCpoKEqLKCgoSChJaCgpaCgoSEgoSChMyO8oKEgoKCgoKWgpY=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/rsa.go", "rsa.cs", "ABMqogAVLIKuwoKClIKClIKClIKClNaygoKClISCgoKUqJSUgoKE7oCCpKqigoKUgoKUgoKUgoKUgoKW7oCCpKyygoKUgoKU3ICCpK4ADQKCgoKClIKCgoKCAAsKooSAgqSmlIKWgoKWgqiCgIKkgoCCpIIAChiCgpSCgpSCgoKCloKClIKClIKCgqiClJSCAAcSgoCUgoKmuMiCAAcSgpYACQaigoKUgsqClIKUgriCuILcgpSokoKAgqSmgoKClAAMFpKCqqKCrLKCloKUgoKWlIKWgpSUlJSUlJaCgoKo")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/rsa.go", "rsa.cs", "ABMqogAVLIKuwoKClIKClIKClIKClNaygoKClISCgoKUqJSUgoKE7oCCpKqigoKUgoKUgoKUgoKUgoKW7oCCpKyygoKUgoKU3ICCpK4ADQKCgoKClIKCgoKCAAsKooSAgqSmlIKWgoKWgqiCgIKkgoCCpIIAChiCgpSCgpSCgoKCloKClIKClIKCgqiClJSCAAcSgoCUgoKmuMiCAAcSgpYACQaigoKUgsqClIKUgriCuILcgpSokoKAgqSmgoKClKaSktySgqqigqyygpaClIKClpSCloKUlJSUlJSWgoKCqA==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

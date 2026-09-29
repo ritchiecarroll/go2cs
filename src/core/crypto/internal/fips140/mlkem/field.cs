@@ -123,7 +123,7 @@ partial struct ringElement;
 internal static T /*s*/ polyAdd<T>(T a, T b)
     where T : /* ~[256]crypto/internal/fips140/mlkem.fieldElement */ IArray<fieldElement>, new()
 {
-    T s = default!;
+    T s = GoZero<T>();
 
     foreach (var (i, _) in s) {
         s[i] = fieldAdd(a[i], b[i]);
@@ -135,7 +135,7 @@ internal static T /*s*/ polyAdd<T>(T a, T b)
 internal static T /*s*/ polySub<T>(T a, T b)
     where T : /* ~[256]crypto/internal/fips140/mlkem.fieldElement */ IArray<fieldElement>, new()
 {
-    T s = default!;
+    T s = GoZero<T>();
 
     foreach (var (i, _) in s) {
         s[i] = fieldSub(a[i], b[i]);
@@ -175,7 +175,7 @@ internal static (T, error) polyByteDecode<T>(slice<byte> b)
     if (len(b) != encodingSize12) {
         return (new T{}, errors.New(mlkemInvalidEncodingˢ));
     }
-    T f = default!;
+    T f = GoZero<T>();
     for (nint i = 0; i < n; i += 2) {
         var d = (uint32)((uint32)((uint32)b[0] | ((uint32)b[1] << (int)(8))) | ((uint32)b[2] << (int)(16)));
         const uint32 mask12 = 0b1111_1111_1111;

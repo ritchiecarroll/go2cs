@@ -263,9 +263,9 @@ internal static void mProf_Flush() {
     }
     var index = cycle % (uint32)len(new memRecord(nil).future);
     @lock(ᏑprofMemActiveLock);
-    @lock(ᏑprofMemFutureLock.at<mutex>((nint)(index)));
+    @lock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     mProf_FlushLocked(index);
-    unlock(ᏑprofMemFutureLock.at<mutex>((nint)(index)));
+    unlock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     unlock(ᏑprofMemActiveLock);
 }
 
@@ -275,13 +275,13 @@ internal static void mProf_Flush() {
 // (profMemFutureLock[index]).
 internal static void mProf_FlushLocked(uint32 index) {
     assertLockHeld(ᏑprofMemActiveLock);
-    assertLockHeld(ᏑprofMemFutureLock.at<mutex>((nint)(index)));
+    assertLockHeld(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     var head = (ж<bucket>)(uintptr)(Ꮡmbuckets.Load());
     for (var b = head; b != nil; b = b.Value.allnext) {
         var mp = b.mp();
         // Flush cycle C into the published profile and clear
         // it for reuse.
-        var mpc = mp.at(memRecord.Ꮡfuture, (nint)(index));
+        var mpc = mp.at(memRecord.Ꮡfuture, (ulong)(index));
         mp.of(memRecord.Ꮡactive).add(mpc);
         mpc.Value = new memRecordCycle(nil);
     }
@@ -300,9 +300,9 @@ internal static void mProf_PostSweep() {
     var cycle = ᏑmProfCycle.read() + 1;
     var index = cycle % (uint32)len(new memRecord(nil).future);
     @lock(ᏑprofMemActiveLock);
-    @lock(ᏑprofMemFutureLock.at<mutex>((nint)(index)));
+    @lock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     mProf_FlushLocked(index);
-    unlock(ᏑprofMemFutureLock.at<mutex>((nint)(index)));
+    unlock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     unlock(ᏑprofMemActiveLock);
 }
 
@@ -321,11 +321,11 @@ internal static void mProf_PostSweep() {
     var index = (ᏑmProfCycle.read() + 2) % (uint32)len(new memRecord(nil).future);
     var b = stkbucket(memProfile, size, mp.profStack[..(int)(nstk)], true);
     var mr = b.mp();
-    var mpc = mr.at(memRecord.Ꮡfuture, (nint)(index));
-    @lock(ᏑprofMemFutureLock.at<mutex>((nint)(index)));
+    var mpc = mr.at(memRecord.Ꮡfuture, (ulong)(index));
+    @lock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     mpc.Value.allocs++;
     mpc.Value.alloc_bytes += size;
-    unlock(ᏑprofMemFutureLock.at<mutex>((nint)(index)));
+    unlock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     // Setprofilebucket locks a bunch of other mutexes, so we call it outside of
     // the profiler locks. This reduces potential contention and chances of
     // deadlocks. Since the object must be alive during the call to
@@ -340,11 +340,11 @@ internal static void mProf_PostSweep() {
 internal static void mProf_Free(ж<bucket> Ꮡb, uintptr size) {
     var index = (ᏑmProfCycle.read() + 1) % (uint32)len(new memRecord(nil).future);
     var mp = Ꮡb.mp();
-    var mpc = mp.at(memRecord.Ꮡfuture, (nint)(index));
-    @lock(ᏑprofMemFutureLock.at<mutex>((nint)(index)));
+    var mpc = mp.at(memRecord.Ꮡfuture, (ulong)(index));
+    @lock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     mpc.Value.frees++;
     mpc.Value.free_bytes += size;
-    unlock(ᏑprofMemFutureLock.at<mutex>((nint)(index)));
+    unlock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
 }
 
 internal static ж<uint64> Ꮡblockprofilerate = new StandardBox<uint64>(default(uint64));
@@ -850,9 +850,9 @@ internal static (nint n, bool ok) memProfileInternal(nint size, bool inuseZero, 
     // at the active profile below.
     var index = cycle % (uint32)len(new memRecord(nil).future);
     @lock(ᏑprofMemActiveLock);
-    @lock(ᏑprofMemFutureLock.at<mutex>((nint)(index)));
+    @lock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     mProf_FlushLocked(index);
-    unlock(ᏑprofMemFutureLock.at<mutex>((nint)(index)));
+    unlock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     var clear = true;
     var head = (ж<bucket>)(uintptr)(Ꮡmbuckets.Load());
     for (var b = head; b != nil; b = b.Value.allnext) {

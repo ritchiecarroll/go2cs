@@ -11,7 +11,7 @@ internal static nint addInt(nint a, nint b) {
 internal static E foldSlice<S, E>(S s, Func<E, E, E> combine)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
-    E acc = default!;
+    E acc = GoZero<E>();
     foreach (var (_, v) in s) {
         acc = combine(acc, v);
     }

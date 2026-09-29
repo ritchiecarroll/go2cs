@@ -49,7 +49,7 @@ using static go.log.slog.@internal.buffer_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("log/slog/internal/buffer/buffer.go", "buffer.cs", "ABAmgsiCpqSSgoK4gqaCgqaCgqaCgqaCpoKmgg==")]
+[assembly: go.GoPositionMap("log/slog/internal/buffer/buffer.go", "buffer.cs", "AA4ilILIgqakkoKCuIKmgoKmgoKmgoKmgqaCpoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.log.slog.@internal;

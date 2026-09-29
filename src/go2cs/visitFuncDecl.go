@@ -1428,9 +1428,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 				exitLabel = v.goFrameExitLabel() + ": "
 			}
 
-			v.writeOutputLn("%s%s%s%sreturn %s;%s%s}", v.goFrameTail(savedIndent, catchReturn), v.newline, v.indent(savedIndent+1), exitLabel, returnExpr, v.newline, v.indent(savedIndent))
+			v.writeOutputLn("%s%s%s%sreturn %s;%s%s}", v.goFrameTail(savedIndent, catchReturn, deferEpilogueEndPos(funcDecl.Body)), v.newline, v.indent(savedIndent+1), exitLabel, returnExpr, v.newline, v.indent(savedIndent))
 		} else {
-			v.writeOutputLn("%s%s%s}", v.goFrameTail(savedIndent, catchReturn), v.newline, v.indent(savedIndent))
+			v.writeOutputLn("%s%s%s}", v.goFrameTail(savedIndent, catchReturn, deferEpilogueEndPos(funcDecl.Body)), v.newline, v.indent(savedIndent))
 		}
 
 		v.indentLevel = savedIndent

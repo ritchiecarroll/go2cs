@@ -15,9 +15,12 @@
 // with exact ticket semantics — and cannot be reproduced faithfully on top of any .NET primitive
 // (an emulated semaphore trips "inconsistent mutex state" / "unlock of unlocked mutex" under sustained
 // contention). So the whole type is reimplemented natively: a Mutex is a lazily-created binary
-// SemaphoreSlim, which the CLR implements correctly — FIFO wakeups, release permitted from any thread
-// (Go allows unlock on a different goroutine), and non-reentrant (a second Lock on the same thread
-// blocks, matching Go's self-deadlock). See runtime_impl.cs for the shared rationale.
+// SemaphoreSlim, which the CLR implements correctly — wakeups in its monitor's pulse order (not a
+// FIFO handoff: a free count goes to whichever thread takes it first, queued or not), release
+// permitted from any thread (Go allows unlock on a different goroutine), and non-reentrant (a second
+// Lock on the same thread blocks, matching Go's self-deadlock). See runtime_impl.cs for the shared
+// rationale.
+using System.Runtime.CompilerServices;
 using System.Threading;
 // Aliased rather than imported wholesale: this file needs exactly three golib types, and a blanket
 // `using go.golib` would also pull that namespace's extension methods into a hand-owned file sitting
@@ -98,42 +101,57 @@ private static SemaphoreSlim gateOf(ref Mutex m) {
 // If the lock is already in use, the calling goroutine blocks until the mutex is available.
 //
 // The park scope is ACCOUNTING ONLY (DESIGN-cooperative-scheduler.md §5.3): it names the wait for a
-// traceback and touches neither the gate nor the order in which waiters reach it. It wraps the whole
-// Wait rather than only a contended one BECAUSE the fast path would have to be a Wait(0), and that
-// is a protocol change — a newcomer barging ahead of the queue — where this cut is required to
-// change no protocol at all. The cost is therefore two volatile stores on every Lock, contended or
-// not, measured by the cost canary named in this arc's commit.
+// traceback and touches neither the gate nor the order in which waiters reach it. With every profile
+// rate at zero it wraps the whole Wait, contended or not: two volatile stores on every Lock, measured
+// by the cost canary named in that arc's commit. (That arc declined a Wait(0) fast path as "a newcomer
+// barging ahead of the queue". The premise was wrong: SemaphoreSlim.Wait() already takes any free count
+// ahead of queued or pulsed waiters, and a failed Wait(0) has no side effect, so a try-then-Wait grants
+// in exactly the cases Wait does. The profiling path below uses one; the rate-off path is unchanged.)
 //
 // PROFILING (class F; DESIGN-managed-profiling I4 and the Mutex slice of I3). Go records a contended
 // acquire in semacquire1 -- a block event on the waiter, and the waiter's acquire time for the mutex
 // event its unlocker records -- and an uncontended one not at all, because cansemacquire returns first.
 // This gate never reaches semacquire1, so Lock does the same accounting itself, and only while a
-// profile rate is on (Go stamps t0 only then): the default path adds two static reads. "Contended" is
-// the gate's CurrentCount seen at 0, a SNAPSHOT rather than a Wait(0), so the protocol above stays
-// untouched even while profiling. STATED DEVIATIONS from Go's accounting, each accepted as such:
-// - the snapshot can race a release and stamp a wait that then does not block; that records one short
-//   block event where Go records none (its stamp is cleared when it acquires; see WaitStamps.Acquired);
+// profile rate is on (Go stamps t0 only then): the rate-off path adds two static reads. "Contended"
+// is Go's own test: the fast-path try (Wait(0), cansemacquire's counterpart) FAILED, so a Lock that
+// blocks has always stamped. The stamp precedes the park, and a successful try returns with no stamp,
+// no park and no event. STATED DEVIATIONS from Go's accounting (dated amendment 2026-09-28 in
+// DESIGN-managed-profiling.md), each accepted as such:
+// - a failed try that then acquires inside Wait()'s own spin records a short block event (and can
+//   draw a short mutex charge) where Go's lockSlow spin records none;
 // - the block event's cycles end when this waiter wakes, where Go's end at the releaser's readyWithTime;
-// - one block event per Lock, where Go records one per semacquire, so a waiter that loses a barge and
-//   re-queues records again in Go;
+// - one block event per Lock, where Go records one per semacquire;
+// - every Unlock while a stamped waiter is outstanding charges the head wait (see TryHandoff), where
+//   Go charges only an Unlock that semreleases to a waiter, so event COUNTS differ and a woken waiter's
+//   run gap is included in its next charge;
 // - a handoff charges the OLDEST stamped wait (Go's dequeued head), not necessarily the waiter the gate
 //   actually wakes;
-// - a blocked waiter that stamped nothing (a rate turned on mid-wait, or a snapshot that saw the gate
-//   free and then blocked) is invisible to both profiles.
-[GoRecv] public static void Lock(this ref Mutex m) {
+// - a blocked waiter that stamped nothing is invisible to both profiles; with the try that narrows to
+//   a rate turned on mid-wait;
+// - an uncontended Lock with a rate on skips the park scope, so tracer and traceback output differ by
+//   rate (closer to Go, which parks only a contended waiter);
+// - the try's equivalence to Wait() rests on SemaphoreSlim internals, re-verified at each .NET major hop.
+//
+// NoInlining: GoSyncBlockEvent's skip counts this method's frame as the block event's top frame (Go's
+// sync.(*Mutex).Lock), and .NET 10 can inline a method with try/finally.
+[GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Lock(this ref Mutex m) {
     SemaphoreSlim gate = gateOf(ref m);
     bool block = runtime_package.GoBlockProfileOn;
     bool mutex = runtime_package.GoMutexProfileOn;
-    int64 t0 = 0;
-    WaitStamps? stamps = null;
-    if ((block || mutex) && gate.CurrentCount == 0) {
-        t0 = runtime_package.GoCputicks();
-        if (mutex) {
-            stamps = s_waitStamps.GetValue(gate, static _ => new WaitStamps());
-            stamps.Enqueue(t0);
+    if (!(block || mutex)) {
+        using (Goroutine.Park(WaitReason.SyncMutexLock)) {
+            gate.Wait();
         }
-    } else {
-        block = false;
+        return;
+    }
+    if (gate.Wait(0)) {
+        return;
+    }
+    int64 t0 = runtime_package.GoCputicks();
+    WaitStamps? stamps = null;
+    if (mutex) {
+        stamps = s_waitStamps.GetValue(gate, static _ => new WaitStamps());
+        stamps.Enqueue(t0);
     }
     // try/finally: a Wait that throws must still retire its stamp, or s_outstanding stays above zero
     // and every later Unlock pays the side-table lookup.
@@ -173,8 +191,8 @@ private sealed class WaitStamps {
     }
 
     // The last stamped waiter leaving clears the stamps, handoff or not: a stamp that acquired without a
-    // handoff (the snapshot race) must not survive into the next contention episode, whose handoff would
-    // otherwise charge the whole idle gap since it.
+    // handoff (a failed try that took the gate inside Wait()'s own spin) must not survive into the next
+    // contention episode, whose handoff would otherwise charge the whole idle gap since it.
     internal void Acquired() {
         lock (this) {
             if (--m_waiters == 0) {
@@ -186,8 +204,16 @@ private sealed class WaitStamps {
     }
 
     // Go's semrelease1 over dequeue: the dequeued waiter's wait (dt0) plus the tail-average estimate
-    // for the waiters still queued, (dtail + dt0) / 2 each, after which the remaining waiters' acquire
-    // times restart at now so no wait is charged twice.
+    // for the waiters still queued, (dtail + dt0) / 2 each. Then the acquire times restart at now, so
+    // every release that finds a stamped waiter is charged from the previous charge and the charges
+    // telescope with no wait counted twice. For the waiters still queued that is go1.24.13 sema.go's
+    // dequeue, which resets the remaining list's head and tail to now (L438-440; a waiter queued behind
+    // them inherits that clock, L311). For a sole waiter it is lockSlow's re-call of
+    // runtime_SemacquireMutex on every failed wake (internal/sync/mutex.go:149), a fresh semacquire1
+    // whose own t0 (sema.go:169-173) is about the wake time: `now` approximates that t0, early by the
+    // wake latency (R's review). The stamp is NOT cleared here: SemaphoreSlim lets the releasing thread take the
+    // gate straight back, and the woken waiter then stays blocked in the same Wait() with its stamp,
+    // exactly the waiter Go re-queues. Only Acquired, when the last stamped waiter leaves, clears it.
     internal bool TryHandoff(out int64 dt) {
         lock (this) {
             if (m_waiters == 0 || m_head == 0) {
@@ -200,12 +226,9 @@ private sealed class WaitStamps {
             int remaining = m_waiters - 1;
             if (remaining > 0) {
                 dt += (now - m_tail + dt0) / 2 * remaining;
-                m_head = now;
-                m_tail = now;
-            } else {
-                m_head = 0;
-                m_tail = 0;
             }
+            m_head = now;
+            m_tail = now;
             return true;
         }
     }
@@ -222,8 +245,9 @@ private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Sem
 // then arrange for another goroutine to unlock it.
 //
 // A handoff to a stamped waiter records Go's mutex event first, on this unlocker's stack, as
-// semrelease1 does before it readies the waiter.
-[GoRecv] public static void Unlock(this ref Mutex m) {
+// semrelease1 does before it readies the waiter. NoInlining for the same reason as Lock: this frame is
+// the mutex event's top frame (Go's sync.(*Mutex).Unlock).
+[GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Unlock(this ref Mutex m) {
     SemaphoreSlim gate = gateOf(ref m);
     if (Volatile.Read(ref WaitStamps.s_outstanding) != 0 &&
         s_waitStamps.TryGetValue(gate, out WaitStamps? stamps) && stamps.TryHandoff(out int64 dt)) {

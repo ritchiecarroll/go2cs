@@ -32,7 +32,7 @@ public static nint DeferredCount<T>(params Span<T> valsʗp) {
 public static T Or<T>(params Span<T> valsʗp) {
     var vals = valsʗp.sslice();
 
-    T zero = default!;
+    T zero = GoZero<T>();
     foreach (var (_, v) in vals) {
         if (!AreEqual(v, zero)) {
             return v;

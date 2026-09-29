@@ -43,7 +43,8 @@
 #     and the cost of the strict reading falls on the writer, as one rewrite of their own post. Its
 #     ONE exclusion here is the release_literal ADMIT SET (rule 5), which is read on the quad's own
 #     characters -- a SHAPE, which no surrounding sentence can arrange, and so not a context rule.
-#   tree (DELTA): the four IPv4 context rules below apply, so the pre-existing hits of a long shared
+#   tree (DELTA): the four IPv4 context rules below apply, and rule 6 (the position-map
+#     function-literal rule, 2026-09-28) with them, so the pre-existing hits of a long shared
 #     surface are CLASSIFIED in the report rather than dumped as an undifferentiated total. An
 #     unclassified total is a number, never a finding.
 #   Every other arm is identical in both modes.
@@ -150,11 +151,20 @@ host_ctx	(host|hostname|computername)[[:space:]]*[=:][a-z0-9][a-z0-9._-]*	refuse
 #      Consulted in BOTH modes, and LAST in delta mode so every occurrence an existing rule already
 #      disposes of keeps ITS reason in the EXCLUSIONS block -- a new rule must not silently
 #      re-attribute what the older ones were measured on.
-#   6. Otherwise a HIT.
+#   6. POSITION-MAP FUNCTION LITERAL. If the line is a GoPositionMap record (ipv4_posmap), the quad
+#      lies inside the record's FOURTH string argument (its funcLits list), and the quad is EXACTLY
+#      the suffix of one well-formed entry -- immediately preceded by <digits>-<digits>: that opens
+#      the argument or follows a ';', and immediately followed by a ';' or the closing quote --
+#      EXCLUDED and counted as position-map-funclit. DELTA MODE ONLY: it reads the record around the
+#      quad, so it is a context rule, and a lane can write its sentence as a record. Consulted after
+#      rule 5 for rule 5's reason.
+#   7. Otherwise a HIT.
 # STATED RESIDUALS OF DELTA MODE: a quad immediately preceded by a dot is excluded by rule 2, and a
-# real address written within 56/32 characters of a version marker is excluded by rule 4. Neither is
-# closed here. What covers them is that delta mode refuses on what a post ADDS, never on what the
-# surface already holds, and that the post that would add one is censused in STRICT mode first.
+# real address written within 56/32 characters of a version marker is excluded by rule 4, and a real
+# address spelled as the suffix of a funcLits entry inside a well-formed GoPositionMap record is
+# excluded by rule 6. None of them is closed here. What covers them is that delta mode refuses on
+# what a post ADDS, never on what the surface already holds, and that the post that would add one
+# is censused in STRICT mode first.
 # RULE 5 IS THE ONE STRICT MODE DOES NOT BACKSTOP, because rule 5 runs in strict mode too: a real
 # address spelled in exactly that shape clears both gates. That residual is taken knowingly, it is
 # bounded to the one shape, and it is the whole of what this widening costs.
@@ -163,6 +173,7 @@ ipv4_arm_re	(^|[^0-9.a-z_])[a-z_]*=?(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]
 ipv4_prefix_ex	^([^0-9a-z_]?([v][0-9]|version=[0-9])|-[0-9])	context	[CONSULTED-ONLY] C2's exemption, carried verbatim. CONSULTED by ipv4 as rule 1, IN DELTA MODE ONLY, read against the reconstructed prefix-plus-quad.
 ipv4_doc	(127\.0\.0\.1|0\.0\.0\.0|255\.255\.255\.255)	context	[CONSULTED-ONLY] CONSULTED by ipv4 as rule 3, IN BOTH MODES since 2026-09-20 (COORD fc4edcd8c) -- it is a SHAPE admit read anchored whole on the quad's own characters, so it cannot be arranged by the sentence a lane writes, which is rule 5's own test for what STRICT may admit; an evidence record is not the lane's prose and cannot be rewritten to satisfy a context rule. Loopback, unspecified, broadcast: documentation constants by declaration, not addresses. In STRICT mode they are hits like any other quad. Reported so a zero is still looking.
 ipv4_vercontext	(version|assembly|nuget|exception|validation|sdk|dotnet|package|framework|release|toolchain)	context	[CONSULTED-ONLY] CONSULTED by ipv4 as rule 4, IN DELTA MODE ONLY, AND BY ADJACENCY -- NOT BY A WINDOW. The first draft scanned 56 characters before and 32 after, and C2's A/B showed what that buys: a routable-shaped quad ALONE is refused, and THE SAME QUAD with any version word loose in the window reads CLEAN. A window is a laundering surface -- it lets a sentence exonerate an address that has nothing to do with it. Rule 4 now fires only when the quad's OWN whitespace-delimited word carries a context word (Version=<quad>), or the IMMEDIATELY preceding or IMMEDIATELY following whitespace-separated word is one. A context word two or more words away no longer excludes anything. MEASURED CONSEQUENCE, stated: two genuine version quads on the live mailbox surface -- one in exception prose whose nearest context word is three words back, one in a census table whose neighbours are a backtick and a count -- flip from excluded to HIT. That is the intended direction of the trade: a false refusal costs its writer one rewrite, a false pass costs a scrub. MEASURED on the live mailbox surface: rule 4 excluded 5 occurrences under the window and excludes 3 under adjacency. WHICH of the eleven markers did the excluding is NOT instrumented -- the EXCLUSIONS block counts by REASON, not by marker -- so no claim is made here about which markers are live, and none should be made from this file. release and toolchain were added with this narrowing and have never been measured at all. NOTE that "documentation" is deliberately NOT a marker: an «ipv4» used as a byte-layout example is handled by the delta, never by an exemption.
+ipv4_posmap	^[[:space:]]*\[assembly: (global::)?go\.gopositionmap\(	context	[CONSULTED-ONLY] CONSULTED by ipv4 as rule 6, IN DELTA MODE ONLY (2026-09-28). The RECOGNISER for a GoPositionMap record line -- the attribute prefix, anchored at the line's start, in the two spellings the converter emits (positionMapOperations.go: go.GoPositionMap, and global::go.GoPositionMap when the root namespace is shadowed; MEASURED at 15da8805b2, both occur under src/ and no other spelling does). The recogniser alone admits nothing: the consumer then parses the argument list as exactly four C# string literals joined by ", " and closed by ")]", and excludes a quad ONLY when it lies inside the FOURTH argument (the funcLits list) and is EXACTLY the closure-counter suffix of one well-formed "<startLine>-<endLine>:<suffix>" entry -- preceded by the entry's own <digits>-<digits>: prefix, which opens the argument or follows a ';', and followed by a ';' or the closing quote. Per OCCURRENCE, never per line: a quad in the Go file identity, the C# file name, the encoded table, after the ")]", or anywhere in the fourth argument that is not such a suffix still refuses. MEASURED NEED: Go names a closure nested four deep with four dotted counters, so the aead.go record in crypto/internal/cryptotest's package_info.cs read four ipv4 hits, every one a converter-generated closure counter and none an address. WHY DELTA ONLY: the rule reads the record AROUND the quad, so it is a context rule by rule 5's own test -- a lane can write its sentence as a record -- and STRICT refuses context rules. STATED RESIDUAL: a real address spelled as such a suffix inside such a record clears delta mode, backstopped as rules 1, 2 and 4 are, by the post being censused in STRICT first. NOT A RESIDUAL, and measured rather than assumed: a suffix nested FIVE or more deep is not this rule's (its leading four components are followed by a '.'), and rule 2 has already excluded it, the token run being the whole suffix -- the four such entries at the same tip (three in crypto/tls's package_info.cs, one in runtime's package_test_info.cs) read token-run in delta, and the twenty four-deep ones read position-map-funclit.
 # ------------------------------------------------------------------------------------------------
 # ACCOUNT, OWNER AND MACHINE NAMES (class 5) -- RUN-TIME ONLY, NEVER COMMITTED, NEVER PRINTED
 # This file must not carry what it forbids. The AUTHORITY on which names are denied is the hashed

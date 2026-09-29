@@ -64,7 +64,7 @@ using static go.os.user_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("os/user/listgroups_unix.go", "listgroups_unix.cs", "ABMmgoKUgoKWgoKCloSCgoKCgoKUAAcUgroABhCClJSUlJSCqIKClJSCgpaWpqKCgpSU")]
-[assembly: go.GoPositionMap("os/user/lookup.go", "lookup.cs", "AA4q0oCSgpSSAAwYooCCpKqigIKkqqKqoqiS", "22-22:1")]
+[assembly: go.GoPositionMap("os/user/lookup.go", "lookup.cs", "AAwcntKAkoKUkgAMGKKAgqSqooCCpKqiqqKokg==", "22-22:1")]
 [assembly: go.GoPositionMap("os/user/lookup_stubs.go", "lookup_stubs.cs", "ABUugraCgpaSAAgQlIKUgtqClIKClIKClJSmgoCC2qaCgIKk")]
 [assembly: go.GoPositionMap("os/user/lookup_unix.go", "lookup_unix.cs", "ABI4AAkCloKCuoKChKaClLqCgpaogt6CgpSCgqiClIKU3IKCgpSCsoKmgsyUgIKkuIKAgqSkpoKAgqSkqqKCgpSCsoKmgoSUgIKkgIKkAAoWgriCgoKUgIKkpKaCgIKkpKaigoKUktaigoKUktaigoKUktaigoKUkg==", "99-117:1;146-175:1")]
 [assembly: go.GoPositionMap("os/user/user.go", "user.cs", "AEOKAYLOgs6CzoI=")]

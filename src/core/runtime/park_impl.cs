@@ -48,9 +48,16 @@ partial class runtime_package
     // golib's WaitReason for a runtime waitReason: the inverse of stubs_impl.cs's mapWaitReason, so the
     // two cannot drift. A reason golib does not carry is refused by name rather than parked under a
     // wrong word (a traceback would print it) -- golib adds a member when a park first needs one.
+    //
+    // The candidate set is taken ONCE: WaitReasons.Parked() builds two fresh arrays per call, and every
+    // semacquire passes through here, including the uncontended stop-the-world acquire inside
+    // ReadMemStats, which is held to zero allocations per call (GolibTests'
+    // ReadMemStatsPerCallAllocation).
+    private static readonly WaitReason[] s_parkedWaitReasons = WaitReasons.Parked();
+
     private static WaitReason golibWaitReasonOf(waitReason reason)
     {
-        foreach (WaitReason candidate in WaitReasons.Parked())
+        foreach (WaitReason candidate in s_parkedWaitReasons)
         {
             if (mapWaitReason(candidate) == reason)
                 return candidate;

@@ -350,7 +350,7 @@ public class CrashReportTests
 
         try
         {
-            throw raised;
+            tracebackprobe_package.Raise(raised);
         }
         catch (PanicException caught)
         {
@@ -358,9 +358,11 @@ public class CrashReportTests
 
             // The header Go writes above a traceback, and the blank line above it — composed from
             // the SAME appendGoFrames debug.Stack() uses, so a frame here is spelled exactly as
-            // runtime/debug's banked TestStack requires.
+            // runtime/debug's banked TestStack requires. The Go frame that raised the panic prints;
+            // this test method is a host frame, which Go's traceback has no place for.
             StringAssert.StartsWith(report, "panic: oops\n\ngoroutine 1 [running]:\n");
-            StringAssert.Contains(report, nameof(TheConvertedRuntimeRegistersTheTracebackRenderer));
+            StringAssert.Contains(report, "tracebackprobe.Raise()\n");
+            Assert.IsFalse(report.Contains(nameof(TheConvertedRuntimeRegistersTheTracebackRenderer)), report);
         }
     }
 }

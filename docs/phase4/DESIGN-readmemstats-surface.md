@@ -1116,6 +1116,10 @@ Each carries this lane's recommendation. None is self-ruled.
   and on the board, defer the wiring until a consumer demands it.** It converts auto-converted compute
   closures into hand-owns on a banked package for no consuming test. The cost of deferring is a stated
   incoherence, which is cheaper than an unstated one.
+  > ⚠ **Amended 2026-09-28 (ledger 96edeb700a): the trigger has FIRED.** runtime's `TestReadMetrics`
+  > (`0 < /gc/heap/live:bytes <= HeapSys`) is the consuming test, and metrics exporters the real-world
+  > one, so the wiring is owed. Its "live bytes is 0" line is disclosed DEFERRED until then. The design:
+  > [`DESIGN-oq4-heap-accounting-snapshot.md`](DESIGN-oq4-heap-accounting-snapshot.md).
 * **⟨OQ-5⟩ — `PauseTotalNs` redefinition** (§2, §4.2). *Recommendation:* **the ring's gen2 running
   sum**, replacing today's all-generation `GC.GetTotalPauseDuration()`. It follows from the one
   definition of a Go cycle; it makes an existing answer smaller; nothing banked reads it (`sync`'s

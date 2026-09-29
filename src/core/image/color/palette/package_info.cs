@@ -50,6 +50,7 @@ using static go.image.color.palette_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
+[assembly: go.GoPositionMap("image/color/palette/palette.go", "palette.cs", "ABcuAAaOBA==")]
 // </GoSourcePositionMaps>
 
 namespace go.image.color;

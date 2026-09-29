@@ -65,12 +65,12 @@ public sealed class ElemRefBox<T> : ж<T>
             // after, in the family of the ISlice : IArray one. Q58.
             case slice<T> slice when !slice.IsNativeBacked && slice.m_array is not null:
                 m_backing = slice.m_array;
-                m_index = slice.Low + index;
+                m_index = FastIndex(slice.m_array, slice.Low + index);
                 break;
 
             case ISlice<T> view when view.Slice((nint)0, view.Length) is slice<T> shared && !shared.IsNativeBacked && shared.m_array is not null:
                 m_backing = shared.m_array;
-                m_index = shared.Low + index;
+                m_index = FastIndex(shared.m_array, shared.Low + index);
                 break;
 
             case array<T> arr when arr.Source is not null:
@@ -111,10 +111,20 @@ public sealed class ElemRefBox<T> : ж<T>
         else
         {
             m_backing = slice.m_array;
-            m_index = slice.Low + index;
+            m_index = FastIndex(slice.m_array, slice.Low + index);
         }
 
         AllocationCounter.Count();
+    }
+
+    // A slice of a ZERO-SIZE element type carries ONE shared element (GoZeroSizeFacts<T>.Storage, a
+    // one-slot array) whatever its length or window, so every element index names that slot: Go's
+    // &s[i] is data + i*0. The absolute index would address slot i of a one-slot array and fault on
+    // the first read or conversion. A zero-size slice over a REAL backing (a slice of an array<T>)
+    // keeps its index, which is in range there.
+    private static nint FastIndex(T[] backing, nint absoluteIndex)
+    {
+        return GoZeroSizeFacts<T>.IsZeroSize && ReferenceEquals(backing, GoZeroSizeFacts<T>.Storage) ? 0 : absoluteIndex;
     }
 
     internal ElemRefBox(array<T> array, int index)
@@ -182,6 +192,9 @@ public sealed class ElemRefBox<T> : ж<T>
     {
         get
         {
+            if (NamesZeroBase)
+                return GoZeroBase.Token;
+
             if (nativeElementIdentity() is var addr and not 0)
                 return addr;
 
@@ -198,6 +211,10 @@ public sealed class ElemRefBox<T> : ж<T>
 
         if (ReferenceEquals(this, other))
             return true;
+
+        // Every zerobase pointer is one pointer, whichever kind names it.
+        if (NamesZeroBase || other.NamesZeroBase)
+            return NamesZeroBase && other.NamesZeroBase;
 
         if (other is not ElemRefBox<T> er)
             return false;
@@ -220,6 +237,9 @@ public sealed class ElemRefBox<T> : ж<T>
     /// <inheritdoc/>
     public override int GetHashCode()
     {
+        if (NamesZeroBase)
+            return GoZeroBase.HashCode;
+
         if (nativeElementIdentity() is var addr and not 0)
             return addr.GetHashCode();
 
@@ -255,7 +275,17 @@ public sealed class ElemRefBox<T> : ж<T>
     /// <inheritdoc/>
     // The referent is the canonical backing storage (so `Ꮡ(buf, 0)`'s throwaway box resolves to
     // buf's own array).
-    public override object ReferentObject => CanonicalPair().storage;
+    public override object ReferentObject => NamesZeroBase ? GoZeroBase.Box : CanonicalPair().storage;
+
+    /// <inheritdoc/>
+    // An element of the shared zero-size slot is Go's data + i*0 over zerobase, and the zero-capacity
+    // slot is make([]T, 0)'s data word, which Go answers with zerobase too. Any other backing is an
+    // allocation of its own. The zero-size test comes first: for an ordinary T the shared slot is the
+    // empty array every zero-length backing shares, and an element box over THAT is not the zerobase.
+    internal override bool NamesZeroBase =>
+        m_backing is not null &&
+        ((GoZeroSizeFacts<T>.IsZeroSize && ReferenceEquals(m_backing, GoZeroSizeFacts<T>.Storage)) ||
+         ReferenceEquals(m_backing, GoZeroCapacitySlot<T>.Backing));
 
     /// <inheritdoc/>
     // The fast arm collapsed its source to (backing, absolute index), so it re-mints a whole-array

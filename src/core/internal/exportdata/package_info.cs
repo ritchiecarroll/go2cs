@@ -56,7 +56,7 @@ using static go.@internal.exportdata_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("internal/exportdata/exportdata.go", "exportdata.cs", "ACJuACEGooSCgpSEgoKUgoKWgoKUhpKEgoKogoKYkoKClICCgqYABRYADgiCgoKogoKogoKClgAFEgALBraAgoKkloKCqJSCgpSCqIKClAADFAALBIKCloKUgqaCgoKWztLIgqaC3gAIAoKWgpiAsqSCgoKCgoKUgqaUlLiSvILmkoK6goKCgpSCqIKClAANHPKCgqqCgoKCgoKCgoCCpJaCgoKWlqg=", "327-351:1;328-348:1.1")]
+[assembly: global::go.GoPositionMap("internal/exportdata/exportdata.go", "exportdata.cs", "ACJuACEGooSCgpSEgoKUgoKWgoKUhpKEgoKogoKYkoKClICCgqYABRYADgiCgoKogoKogoKClgAFEgALBraAgoKkloKCqJSCgpSCqIKClAADFAALBIKCloKUgqaCgoKWztLIgqaC3gAIAoKWgpiAsqSCgoKCgoKUgqaUlLiSvILmkoK6goKCgpSCqIKClKYAChbygoKqgoKCgoKCgoKAgqSWgoKClpao", "327-351:1;328-348:1.1")]
 [assembly: global::go.GoPositionMap("internal/exportdata/support.go", "support.cs", "AA0ilJSCgIKkgoKUgoI=")]
 // </GoSourcePositionMaps>
 

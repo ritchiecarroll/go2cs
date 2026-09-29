@@ -65,10 +65,10 @@ using static go.@internal.testenv_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/testenv/exec.go", "exec.cs", "ABpCAAwCgIKCgpSCABQKuAACGIiagoKUgoKuwoSCgoKClJQABxiyhIKCgpSCggAHFAAIAoKUpoKmgpSUAAsWAAoCgoSagIiApoKAgoKClMqCgIIACxiEgLjqgqLc3JSUhKKClIKoqsKC", "206-222:1;225-232:2")]
+[assembly: go.GoPositionMap("internal/testenv/exec.go", "exec.cs", "ABpCAAwCgIKCgpSCABMIgrgAAhiImoKClIKCrsKEgoKCgpSUpgAEErKEgoKClIKCAAcUAAgCgpSmgqaClJQACxYACgKChJqAiICmgoCCgoKUyoKAggALGISAuOqCotzclJSEooKUgqiqwoI=", "206-222:1;225-232:2")]
 [assembly: go.GoPositionMap("internal/testenv/opt.go", "opt.cs", "AAgUkg==")]
-[assembly: go.GoPositionMap("internal/testenv/testenv.go", "testenv.cs", "AC5SwtqiypYAERKCgpSCgoKClIKClICCpgAAEoKCgoKClIKClIKmrLKCgpSCgrqkqqKCgr6ylKSqooKCAAMQwoKCgsqClAAXCICMAAIegoKWgoKChJaAgoKmgoKCgpSUhIKCgoKEAAUa8oKCgpSClNiSgpQABBKilILMoqyygoKUgoK6kriCgpSCgoKClIKClKiSgoK8oqyygoKClL6ygoK+soKCupKCqqKCgoK6yKqigoLcgoKC+IKAgoLKkpSkrsKCguqSgoIAChQACAKEgoKClpSCgoKCgpaCgpSCgpSCuoCCzKKssoKU")]
-[assembly: go.GoPositionMap("internal/testenv/testenv_notwin.go", "testenv_notwin.cs", "ABsklK6CgpSClIKAgqSAgoKUyA==")]
+[assembly: go.GoPositionMap("internal/testenv/testenv.go", "testenv.cs", "AClGzMLaosqWABAGjIKClIKCgoKUgoKUgIKmAAASgoKCgoKUgoKUgqassoKClIKCuqSqooKCvrKUpKqigoIAAxDCgoKCyoKUABUGkoCMAAIegoKWgoKChJaAgoKmgoKCgpSUhIKCgoKEAAUa8oKCgpSClNiSgpSmnKKUgsyirLKCgpSCgrqSpoKCgpSCgoKClIKClKiSgoK8oqyygoKClL6ygoK+soKCupKCqqKCgoK6yKqigoK4lIKCgviCgIKCypKUpK7CgoLqkoKCAAoUAAgChIKCgpaUgoKCgoKWgoKUgoKUgrqAgsyirLKClA==")]
+[assembly: go.GoPositionMap("internal/testenv/testenv_notwin.go", "testenv_notwin.cs", "ABYiwpSugoKUgpSCgIKkgIKClMg=")]
 [assembly: go.GoPositionMap("internal/testenv/testenv_unix.go", "testenv_unix.cs", "ABEmgoKWgoKYqPiClg==")]
 // </GoSourcePositionMaps>
 

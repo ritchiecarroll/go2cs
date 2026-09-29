@@ -6,9 +6,10 @@ using go;
 using go.golib;
 
 // Hand-finished conversion of trace.go's StartTrace, StopTrace and ReadTrace — the platform-neutral
-// managed tracer seam. This file exists as TWO copies, runtime/windows/trace_impl.cs and
-// runtime/linux/trace_impl.cs, and the copies are byte-identical BY CONTRACT: a change to one is a
-// change to both (the routing note at the end of this header says why).
+// managed tracer seam. This file exists as THREE copies, runtime/windows/trace_impl.cs,
+// runtime/linux/trace_impl.cs and runtime/darwin/trace_impl.cs, and the copies are byte-identical BY
+// CONTRACT: a change to one is a change to all three (the routing note at the end of this header says
+// why).
 //
 // Go's execution tracer is a serialization of the scheduler: the converted StartTrace stops the
 // world through semacquire, whose first step is getg, and the converted ReadTrace parks the reader
@@ -20,19 +21,22 @@ using go.golib;
 // GC, heap, syscall, steal or CPU-sample events and no stacks. Go's own parser (`go tool trace
 // -d=parsed`) is the acceptance oracle. Until then StartTrace answered a named tracing-not-supported
 // error (the measured consumers were runtime's TestCrashWhileTracing on windows and os/signal's
-// TestSignalTrace on linux, whose readings move with this change).
+// TestSignalTrace on linux, whose readings move with this change). Since 2026-09-28 (Q5) StartTrace
+// starts the tracer inside the stop-the-world pair, as Go's does, so the start is counted as a pause.
 //
-// Registration and routing. The three names are registered goosWindowsLinux in manualConversionFuncs
-// (manualTypeOperations.go): StartTrace and StopTrace since 2026-09-02, ReadTrace since 2026-09-27. On
-// each of those two targets the -stdlib emission drops the auto bodies in <goos>/trace.cs to
-// placeholders and this file supplies them; the darwin emission displaces none of them (darwin/trace.cs
-// keeps the auto bodies), so no darwin copy exists. Layout L3 routes a hand-own by DISPLACEMENT, not by
-// where its principal is built (handOwnEmitters in platformHandOwn.go, pinned by
-// platformHandOwn_test.go): trace.cs is emitted per-GOOS on all three targets, but a target needs this
-// companion exactly when its own trace.cs carries the placeholders -- windows and linux -- so the
-// three-target merge places one copy in each of those two folders and refuses, by raw byte comparison,
-// to choose between two hand-maintained copies that differ. Nothing here is platform-specific, which is
-// why one header serves both copies verbatim.
+// Registration and routing. The three names are registered goosAny in manualConversionFuncs
+// (manualTypeOperations.go). StartTrace and StopTrace were scoped goosWindowsLinux from 2026-09-02 and
+// ReadTrace joined them 2026-09-27; darwin joined all three 2026-09-28, when the stop-the-world seat
+// (ruling 02:10, Q6) displaced darwin's StartTrace and StopTrace -- under the stop-the-world contract
+// the converted StartTrace would stop the world and enter a tracer the managed host does not have --
+// and the copies had to stay byte-identical, which carries ReadTrace with them. On each target the
+// -stdlib emission drops the three auto bodies in <goos>/trace.cs to placeholders and this file
+// supplies them. Layout L3 routes a hand-own by DISPLACEMENT, not by where its principal is built
+// (handOwnEmitters in platformHandOwn.go, pinned by platformHandOwn_test.go): trace.cs is emitted
+// per-GOOS on all three targets, a target needs this companion exactly when its own trace.cs carries
+// the placeholders -- all three now -- so the three-target merge places one copy in each folder and
+// refuses, by raw byte comparison, to choose between hand-maintained copies that differ. Nothing here
+// is platform-specific, which is why one header serves every copy verbatim.
 
 [module: GoManualConversion]
 
@@ -47,10 +51,26 @@ partial class runtime_package
     // -test.trace flag instead of calling StartTrace directly.
     public static error StartTrace()
     {
-        // Go's own text for the one refusal: a trace is running (or its data is still being read). Not a
+        // Go refuses BEFORE it stops the world (traceEnabled() || traceShuttingDown()), so a refused
+        // StartTrace records no pause.
+        if (ExecutionTracer.Enabled)
+            return ((errorString)("tracing is already enabled"u8));
+
+        // Go enables the tracer inside stopTheWorld(stwStartTrace), so that every goroutine's next
+        // traceAcquire sees it. Under the stop-the-world contract (managed_impl.cs) the pair keeps
+        // worldsema's exclusion among stoppers and records the /sched/pauses "other" sample that
+        // TestSchedPauseMetrics' runtime/trace.Start subtest counts; other goroutines run on, and the
+        // tracer's own lock orders its start against their lifecycle hooks. StopTrace stops no world
+        // in Go either (traceAdvance takes no pair).
+        worldStop stw = stopTheWorld(stwStartTrace);
+        bool started = ExecutionTracer.Start();
+        startTheWorld(stw);
+
+        // Go's own text for the one refusal: a trace is running (or its data is still being read); a
+        // start that lost a race with another, or with a stop still draining, lands here. Not a
         // conditional expression: `ok ? default! : (errorString)...` types as errorString, and its default
         // boxes to a NON-nil error whose text is empty -- the first cut did exactly that.
-        if (ExecutionTracer.Start())
+        if (started)
             return default!;
 
         return ((errorString)("tracing is already enabled"u8));

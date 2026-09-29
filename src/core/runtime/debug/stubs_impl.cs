@@ -19,13 +19,21 @@
 // sync runtime layer took — reimplement the SEMANTIC on managed primitives at the API boundary,
 // never emulate the mechanism.
 //
+// ⚠ AMENDED 2026-09-28 (M1): for setGCPercent and setMemoryLimit that no longer holds, and they
+// forward. systemstack is fn() and the heap lock is managed, and gcWaitOnMark returns at once with
+// no mark phase, so runtime's own bodies run as written. The private copies they replace were a
+// second source of truth: runtime's /gc/gogc:percent and /gc/gomemlimit:bytes metrics read
+// gcController, which nothing wrote, so runtime's TestReadMetrics read 0 for both.
+//
 // What each knob means here, and where it honestly diverges:
 //   - setGCPercent / setMemoryLimit / setMaxStack / setMaxThreads are TUNING knobs. The CLR's GC
 //     and thread pool expose no equivalent runtime-settable analog, so each keeps Go's documented
 //     GET/SET CONTRACT (remember the value, return the previous one, negative input = query only
 //     where Go says so) and has no effect on collection. Programs that only save-and-restore them
 //     — `defer debug.SetGCPercent(debug.SetGCPercent(-1))`, the standard test idiom — are exactly
-//     right; a program that *asserts collection behaviour changed* is capability-divergent.
+//     right; a program that *asserts collection behaviour changed* is capability-divergent. The two
+//     GC knobs are remembered where Go remembers them, in runtime's gcController, which starts from
+//     GOGC and GOMEMLIMIT as Go's does (runtime's SetGCPercentManaged / SetMemoryLimitManaged).
 //   - freeOSMemory is a REAL operation: a blocking full collect plus a compacting LOH pass is the
 //     managed equivalent of "collect and return memory to the OS".
 //   - setPanicOnFault is per-GOROUTINE in Go, so it is [ThreadStatic] here (a goroutine is a
@@ -72,9 +80,8 @@ partial class debug_package
         GcPauseRecorder.Arm();
     }
 
-    // Go's own defaults, so a first GET returns what Go would report.
-    private static int32 s_gcPercent = 100;                 // GOGC=100
-    private static int64 s_memoryLimit = int64.MaxValue;    // math.MaxInt64 — "no limit"
+    // Go's own defaults, so a first GET returns what Go would report. GOGC and GOMEMLIMIT live in
+    // runtime's gcController (setGCPercent, setMemoryLimit below).
     private static nint s_maxStack = 1_000_000_000;         // runtime.maxstacksize on 64-bit
     private static nint s_maxThreads = 10_000;              // runtime sched.maxmcount
 
@@ -87,7 +94,7 @@ partial class debug_package
 
     internal static partial int32 setGCPercent(int32 @in)
     {
-        int32 old = Interlocked.Exchange(ref s_gcPercent, @in);
+        int32 old = global::go.runtime_package.SetGCPercentManaged(@in);
 
         // Go's setGCPercent waits out any in-flight mark when GC is being disabled, so the caller
         // returns with no collection running. Draining pending finalizers is the closest managed
@@ -100,8 +107,9 @@ partial class debug_package
 
     internal static partial int64 setMemoryLimit(int64 @in)
     {
-        // Documented: a negative input does not adjust the limit, it only reads it back.
-        return @in < 0 ? Interlocked.Read(ref s_memoryLimit) : Interlocked.Exchange(ref s_memoryLimit, @in);
+        // Documented: a negative input does not adjust the limit, it only reads it back (runtime's
+        // gcControllerState.setMemoryLimit stores only a non-negative input).
+        return global::go.runtime_package.SetMemoryLimitManaged(@in);
     }
 
     internal static partial nint setMaxStack(nint @in)
@@ -181,9 +189,12 @@ partial class debug_package
         return ""u8;
     }
 
+    // Go's WriteHeapDump is a //go:linkname push into runtime (heapdump.go), which has no
+    // cross-assembly form, so it forwards through the runtime's public crossing: the stop-the-world
+    // pair and a well-formed minimal dump (runtime managed_impl.cs, runtime_debug_WriteHeapDump).
     public static partial void WriteHeapDump(uintptr fd)
     {
-        throw panic((@string)"runtime/debug: WriteHeapDump is not supported by the managed runtime"u8);
+        global::go.runtime_package.WriteHeapDumpManaged(fd);
     }
 
     public static partial void SetTraceback(@string level)

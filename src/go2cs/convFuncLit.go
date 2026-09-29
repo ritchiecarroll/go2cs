@@ -961,7 +961,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			namedDecls,
 			v.newline, v.indent(v.indentLevel+1), v.goFrameName(),
 			v.newline, v.indent(v.indentLevel+1), body,
-			v.goFrameTail(v.indentLevel, catchReturn), exitAndClose)
+			v.goFrameTail(v.indentLevel, catchReturn, deferEpilogueEndPos(funcLit.Body)), exitAndClose)
 	default:
 		inner = body
 	}

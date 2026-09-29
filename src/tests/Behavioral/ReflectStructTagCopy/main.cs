@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using reflect = reflect_package;
+using System.Runtime.InteropServices;
 
 partial class main_package {
 
@@ -29,11 +30,11 @@ partial class main_package {
 [GoType] partial struct empty {
 }
 
-[GoType] partial struct layout {
-    internal empty pad;
-    internal uint32 small;
-    internal int64 big;
-    internal uint8 tail;
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 24)] partial struct layout {
+    [FieldOffset(0)] internal readonly empty pad;
+    [FieldOffset(0)] internal uint32 small;
+    [FieldOffset(8)] internal int64 big;
+    [FieldOffset(16)] internal uint8 tail;
 }
 
 [GoType] partial struct inner {

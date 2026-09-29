@@ -59,6 +59,8 @@
     <Compile Remove="RuntimeBootstrapConstantsTests.cs" />
     <!-- GoBadOpenProbe/GoPipe2RoundTripProbe/GoMincoreErrorSignProbe (runtime/linux/stubs2_impl.cs). -->
     <Compile Remove="RuntimeFdSyscallTests.cs" />
+    <!-- GoAllThreadsSyscallProbe (runtime/linux/os_linux_impl.cs). -->
+    <Compile Remove="LinuxAllThreadsSyscallRefusalTests.cs" />
 
     <!-- RLIMIT_NOFILE is 7 and /proc/self/fd exists only on linux; the host restore it guards is
          exercised by syscall's linux-only TestPrlimitFileLimit. -->
@@ -319,6 +321,9 @@
          unconditional and only the gate FILE is (the os/user precedent above). -->
     <ProjectReference Include="..\..\core\internal\syscall\unix\internal.syscall.unix.csproj" />
     <ProjectReference Include="..\..\core\crypto\rand\crypto.rand.csproj" />
+    <!-- GoZeroResidualTests: unique.uniqueMap[T] is the converted std's one GENERIC struct that go2cs-gen
+         calls needy, so it is the real subject of the "no registration for a generic struct" arm. -->
+    <ProjectReference Include="..\..\core\unique\unique.csproj" />
   </ItemGroup>
 
 </Project>

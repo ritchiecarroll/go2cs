@@ -44,7 +44,9 @@ import (
 //     still agree with Go. A whole-struct assignment writes all Size bytes and stays correct.
 //
 // go2cs-gen's TypeGenerator skips the `Ꮡ<field>` accessor for the whole all-underscores blank family
-// (see IsGoBlankMemberName), which is what keeps a readonly blank field from needing a writable ref.
+// (see IsGoBlankMemberName), which is what keeps a readonly blank field from needing a writable ref. A
+// NAMED readonly zero-size field keeps its accessor, which returns golib's shared per-type zero-size slot
+// (see structZeroSizeLayout).
 
 // underlyingStruct resolves the `*types.Struct` behind a declared struct type, through a named type
 // or an alias. Reports nil for anything else, which drops the caller out of the layout arc.
@@ -124,19 +126,18 @@ func (v *Visitor) structZeroSizeLayout(structType *types.Struct, named types.Typ
 
 		if sizes.Sizeof(field.Type()) == 0 {
 			// A zero-size field is emitted READONLY so it cannot write its one C# byte over the field
-			// it shares an offset with — but only a BLANK one may be. Go makes `&s.pad` a legal
-			// pointer for a NAMED zero-size field, so go2cs-gen emits a writable `Ꮡpad` ref accessor
-			// for it, and a writable ref to a readonly field is CS8160 (measured: the
-			// ReflectStructTagCopy behavioral test, whose `layout` carries a named `pad empty`).
+			// it shares an offset with. A BLANK one has no accessor (Go says it has no address). A NAMED
+			// one does: Go makes `&s.pad` a legal pointer, and a writable ref to a readonly field is
+			// CS8160 (measured: the ReflectStructTagCopy behavioral test, whose `layout` carries a named
+			// `pad empty`). So go2cs-gen's `Ꮡpad` for a readonly zero-size member returns a ref to golib's
+			// shared per-type zero-size slot (GoZeroSizeSlot), never `ref instance.pad` (A17, COORD
+			// 2026-09-28). That is faithful: a write through a zero-size address stores nothing, and the
+			// pointer's IDENTITY is not the slot -- a FieldRefBox names (source, field), and for a Go
+			// zero-size T its uintptr is the order token (base + Go offset), never the slot's address.
 			//
-			// Blank fields have no such accessor — Go says they have no address at all, and the
-			// generator has always skipped them — so they take the readonly form safely. A struct
-			// with a NAMED zero-size field therefore leaves the arc entirely rather than choosing
-			// between a broken accessor and a field that can silently corrupt its neighbour.
-			if field.Name() != "_" {
-				return structZeroSizeLayout{}, false
-			}
-
+			// Before that door a struct with a NAMED zero-size field left the arc entirely, which is
+			// what kept internal/runtime/atomic's `noCopy noCopy` carriers (and the page allocator's
+			// atomicScavChunkData through them) at twice Go's size.
 			zeroSize[i] = true
 			anyZero = true
 		}

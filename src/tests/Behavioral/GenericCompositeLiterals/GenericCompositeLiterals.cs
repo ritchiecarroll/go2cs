@@ -13,7 +13,7 @@ partial class main_package {
 }
 
 [GoRecv] public static (T, bool) Dequeue<T>(this ref Queue<T> q) {
-    T zero = default!;
+    T zero = GoZero<T>();
     if (len(q.items) == 0) {
         return (zero, false);
     }

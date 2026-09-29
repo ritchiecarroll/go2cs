@@ -75,23 +75,23 @@ using static go.html.template_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("html/template/attr.go", "attr.cs", "AI4BmAKiuKKCgqakgIK2ggAJFoaU")]
-[assembly: go.GoPositionMap("html/template/attr_string.go", "attr_string.cs", "/oaigoKCgoLugoKU")]
-[assembly: go.GoPositionMap("html/template/content.go", "content.cs", "ACXmAaKClICUpIKClAAFFrKClIKClKrCgpSkpKSkpKSkpoK4gpaClA==")]
+[assembly: go.GoPositionMap("html/template/attr.go", "attr.cs", "ABQmAHnyAaK4ooKCpqSAgraCAAkWhpQ=")]
+[assembly: go.GoPositionMap("html/template/attr_string.go", "attr_string.cs", "/oaigoKCgoLKlIKClA==")]
+[assembly: go.GoPositionMap("html/template/content.go", "content.cs", "ACXmAaKClICUpIKClKiCnLKClIKClKrCgpSkpKSkpKSkpoK4gpaClA==")]
 [assembly: go.GoPositionMap("html/template/context.go", "context.cs", "ACJGgoKClKiSAAIWtIKUgoKUgpSClIKUgpQAI7ABopSkqJKUpKzolKQ=")]
-[assembly: go.GoPositionMap("html/template/css.go", "css.cs", "AA8iooKUlIKClAAHEKjIAAIe4oKCyoKCgoKUgoK4poKClIKClLimgqaokqiSgoKClLS0tMaokoKmlKqylKSokpSkqLKCgqKUgoKUtLSClIKCgoKmgpSCAB5G8oKClAALGoKUqKLGgtiCgpQ=")]
-[assembly: go.GoPositionMap("html/template/delim_string.go", "delim_string.cs", "/oaigoKC7oKClA==")]
-[assembly: go.GoPositionMap("html/template/element_string.go", "element_string.cs", "/oaigoKCgu6CgpQ=")]
+[assembly: go.GoPositionMap("html/template/css.go", "css.cs", "AA8iooKUlIKClAAHEKjIAAIe4oKCyoKCgoKUgoK4poKClIKClLimgqaokqiSgoKClLS0tMaokoKmlKqylKSokpSkqLKCgqKUgoKUtLSClIKCgoKmgpSCxgAVMJKe8oKClAALGoKUqKLGgtiCgpQ=")]
+[assembly: go.GoPositionMap("html/template/delim_string.go", "delim_string.cs", "/oaigoKCypSCgpQ=")]
+[assembly: go.GoPositionMap("html/template/element_string.go", "element_string.cs", "/oaigoKCgsqUgoKU")]
 [assembly: go.GoPositionMap("html/template/error.go", "error.cs", "AEfOA4KUgqSkpKrC")]
-[assembly: go.GoPositionMap("html/template/escape.go", "escape.cs", "ABUw8oKCgqSUlICCgoKklIKAgoKkqtSCgIK2gpQANm6SABYokpSkgoKkpIKCpKSkpKSklMyylJSUgoIABxCUgoCChP6ClKSkgqSUpMak2saEpLSkpKSkyIK0pIKUtri0pILc0pTKgoKCgIKAlNyCgriCgoKCpqb8goKCgoKAgraCyqYAHkCSqqKAgqQAFDrCgIKCgoK2qJIABTAAFAKWpqbUrLKClIKUgpSClIKWgoKUgpaCgpSCAAYQgIKAgsjesoKUgoKClIKCzIKCgoK4goKUgoKCpoKmuIKCgoKCpoKCgoKCpqiygpSCgoKmrsKSlIKCgpSCgoKClIKUgqaosoKClKrGkoKAlKSCpoLKyqaCgoKClJSq1IKUgILIgsqs0pKUlKam3IIAEzqCpoLMsrKCgoKCgoKCgoK4goKCgsgAARLylLaklJSClLaUgpSCgoKUgpSWgoKUlKqigoKmpqqCgpQABxCAguzKgoKUlpaClpS4qJKAgqSokoCCpKiSgIKkqqKCuIKCgIK2gpSClIK4goKCqLaCgpSqooKUrsKokqrCqJKokqrCqsI=", "687-699:1")]
-[assembly: go.GoPositionMap("html/template/html.go", "html.cs", "AA8esoKClIKUqLKCgpSosoKClKiygoKUAFu8AaKSkriCgoCCgpSCggAIDIKUgqaClIKqooLWgoKUgpSCgpSCgoKCgriUlIKUgoKUlJSUgqSUqsKCgpTclIKAlKSC+LYAAhIACAI=")]
-[assembly: go.GoPositionMap("html/template/js.go", "js.cs", "ABdEAA0EgoKogLiEspSmlKaSlKioqKgAAhqoggAVApSCAAgMABc06oKWgoKUAAoOwoKCgpSm2NaClLiCABQqgoKCggAGEKaUgoKmgoKUpoKCgoKklIKCgpSUgoKClJSs0oKClKaigq7igoKUlAACENKCopSCgpS0tLS0tIKUgoKUgpSCAHfsAcKUpKSkpKSsAAkOgoKCAAEqpA==")]
-[assembly: go.GoPositionMap("html/template/jsctx_string.go", "jsctx_string.cs", "/oaigoLugoKU")]
-[assembly: go.GoPositionMap("html/template/state_string.go", "state_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgu6CgpQ=")]
-[assembly: go.GoPositionMap("html/template/template.go", "template.cs", "ADFc4oKCpIKClAAFKgAVAoKq4oKUgoKClNjSgoKCgoKUgILGlAAFFAAJAoCCpAACFPKCgpSsAAkCgoKCgoKUgpSClIKUgpTcsgACHAAPAoCCpoKCzIKCgoKCgpSClN4ACAKAgqaCgoKClNyCAAUWAAwCgoKClIKClIKC3IKCgoKClIIABxDYkoKC3IIAAhQACwKCgtiS3ICCgqSCqJIAAhTyggACEPKCquKCggAFENKClAACGAALAgACFgAKAqrSgIKmlJSCgoKUjuKClIKUlIKCpgACGAAJAgACGgAKAqiSgIKkgoKUgpSssq7iruKmgoKCgoKUgpSUpsKCgqaCsoKC", "525-529:1")]
-[assembly: go.GoPositionMap("html/template/transition.go", "transition.cs", "ADNmkoKCgoKklIKCgoKUlIKCgqaUAAsapIKClILKgoKUgoLMgoKUlKSkpLiClJSokoKCpJSopIKCtoKUlAALGpKCgqaClLS0gqiSgIKkAA4moqaClICCtqiSgoKUgoKUlIKUgpSUlKiSqJKCyJSokoKUgpSClLS0tJS0tLS0AAga8saCyJLKopS0gpyCwpSCtLSmgoKCgoKUlIKC/IKCgsiCtJaqooKUpKaSgoKClJSCgvy0urKkgsiSgsaWpszMkoKClJSkpKSokoKClKQAAhIACQaCgpTcqAAbOIKCgoKUlpKCgpS0tLTGgpSCpILogqSCpLqSgpSkqKTGgoKCgoKUgoKC3IKUgrqSrsKClKoACgoACRaSqJKokoKUgoKCgoKmgoKUlKiSgsjG")]
+[assembly: go.GoPositionMap("html/template/escape.go", "escape.cs", "ABUw8oKCgqSUlICCgoKklIKAgoKkqtSCgIK2gpTIADFmkgAWKJKUpIKCpKSCgqSkpKSkpJSmlrKUlJSCggAHEJSCgIKE/oKUpKSCpJSkxqTaxoSktKSkpKTIgrSkgpS2uLSkgtzSlMqCgoKAgoCU3IKCuIKCgoKmpvyCgoKCgoCCtoLKpsoAEQ4AByiSqqKAgqTKAA8wwoCCgoKCtqiSAAUwABQClqam1KyygpSClIKUgpSCloKClIKWgoKUggAGEICCgILI3rKClIKCgpSCgsyCgoKCuIKClIKCgqaCpriCgoKCgqaCgoKCgqaosoKUgoKCpq7CkpSCgoKUgoKCgpSClIKmqLKCgpSqxpKCgJSkgqaCysqmgoKCgpSUqtSClICCyILKrNKSlJSmptyCAAoIAAUqgpaCpoKmlrKygoKCgoKCgoKCuIKCgoLIAAES8pS2pJSUgpS2lIKUgoKClIKUloKClJSqooKCpqaqgoKUAAcQgILsyoKClJaWgpaUuKiSgIKkqJKAgqSokoCCpKqigriCgoCCtoKUgpSCuIKCgqi2goKUqqKClK7CqJKqwqiSqJKqwqrC", "687-699:1")]
+[assembly: go.GoPositionMap("html/template/html.go", "html.cs", "AA8esoKClIKUqLKCgpSosoKClKiygoKUAAoKAAskABw0ABYuABAsopKSuIKCgIKClIKCAAgMgpSCpoKUgqqigtaCgpSClIKClIKCgoKCuJSUgpSCgpSUlJSCpJSqwoKClNyUgoCUpIL4tgACEgAIAg==")]
+[assembly: go.GoPositionMap("html/template/js.go", "js.cs", "ABdEAA0EgoKogLiEspSmlKaSlKioqKgAAhqoggAVApSCAAgMygAQIpjqgpaCgpSm+MKCgoKUptjWgpS4ggAUKoKCgoIABhCmlIKCpoKClKaCgoKCpJSCgoKUlIKCgpSUrNKCgpSmooKu4oKClJQAAhDSgqKUgoKUtLS0tLSClIKClIKUgrYAEBwAFiwAGTIAEyQAHUjClKSkpKSkrAAJDoKCggABKqQ=")]
+[assembly: go.GoPositionMap("html/template/jsctx_string.go", "jsctx_string.cs", "/oaigoLKlIKClA==")]
+[assembly: go.GoPositionMap("html/template/state_string.go", "state_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgsqUgoKU")]
+[assembly: go.GoPositionMap("html/template/template.go", "template.cs", "ACdEAAkY4oKCpIKClAAFKgAVAoKq4oKUgoKClNjSgoKCgoKUgILGlAAFFAAJAoCCpAACFPKCgpSsAAkCgoKCgoKUgpSClIKUgpTcsgACHAAPAoCCpoKCzIKCgoKCgpSClN4ACAKAgqaCgoKClNyCAAUWAAwCgoKClIKClIKC3IKCgoKClIIABxDYkoKC3IIAAhQACwKCgtiS3ICCgqSCqJIAAhTyggACEPKCquKCggAFENKClAACGAALAgACFgAKAqrSgIKmlJSCgoKUjuKClIKUlIKCpgACGAAJAgACGgAKAqiSgIKkgoKUgpSssq7iruKmgoKCgoKUgpSUpsKCgqaCsoKC", "525-529:1")]
+[assembly: go.GoPositionMap("html/template/transition.go", "transition.cs", "ABAgAB4+kpaSgoKCgqSUgoKCgpSUgoKCppS4AAcSpIKClILKgoKUgoLMgoKUlKSkpLiClJSokoKCpJSopIKCtoKUlKYACBSSgoKmgpS0tIKokoCCpMoABhCCmqKmgpSAgraokoKClIKClJSClIKUlJSokqiSgsiUqJKClIKUgpS0tLSUtLS0tAAIGvLGgsiSyqKUtIKcgsKUgrS0poKCgoKClJSCgvyCgoLIgrSWqqKClKSmkoKCgpSUgoL8tLqypILIkoLGlqbMppaSgoKUlKSkpKiSgoKUpAACEgAJBoKClNyoABs4goKCgpSWkoKClLS0tMaClIKkguiCpIKkupKClKSopMaCgoKCgpSCgoLcgpSCupKuwoKUqgAKCqYABhCSqJKokoKUgoKCgoKmgoKUlKiSgsjG")]
 [assembly: go.GoPositionMap("html/template/url.go", "url.cs", "AAxEABgCgoKUgpT6ooCCgraqwgACEPKqwoKClIKClKqigu6CggABEOIABBC24siSlIKUgsaCgpSCqsKClKiigpa2goKCgoKCpoIABRCipoKmgoKClIKCgoKmgKaCgoKCpoKCgoK2gg==")]
-[assembly: go.GoPositionMap("html/template/urlpart_string.go", "urlpart_string.cs", "/oaigoKC7oKClA==")]
+[assembly: go.GoPositionMap("html/template/urlpart_string.go", "urlpart_string.cs", "/oaigoKCypSCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.html;

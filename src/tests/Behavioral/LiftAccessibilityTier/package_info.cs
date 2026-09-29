@@ -52,7 +52,7 @@ using static go.main_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("a_shape.go", "a_shape.cs", "AAoYgg==")]
-[assembly: go.GoPositionMap("b_shape.go", "b_shape.cs", "ABMggoI=")]
+[assembly: go.GoPositionMap("b_shape.go", "b_shape.cs", "AA4YyIKC")]
 // </GoSourcePositionMaps>
 
 namespace go;

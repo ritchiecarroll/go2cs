@@ -15,25 +15,7 @@ using @internal;
 
 partial class runtime_package {
 
-//go:linkname runtime_debug_WriteHeapDump runtime/debug.WriteHeapDump
-internal static void runtime_debug_WriteHeapDump(uintptr fd) {
-    var stw = stopTheWorld(stwWriteHeapDump);
-    // Keep m on this G's stack instead of the system stack.
-    // Both readmemstats_m and writeheapdump_m have pretty large
-    // peak stack depths and we risk blowing the system stack.
-    // This is safe because the world is stopped, so we don't
-    // need to worry about anyone shrinking and therefore moving
-    // our stack.
-    ref var m = ref heap(new MemStats(), out var Ꮡm);
-    systemstack(() => {
-        // Call readmemstats_m here instead of deeper in
-        // writeheapdump_m because we might blow the system stack
-        // otherwise.
-        readmemstats_m(ref (Ꮡm).DerefOrNull());
-        writeheapdump_m(fd, ref (Ꮡm).DerefOrNull());
-    });
-    startTheWorld(stw);
-}
+// go2cs generated this placeholder — func runtime_debug_WriteHeapDump is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static UntypedInt fieldKindEol => 0;
 internal static UntypedInt fieldKindPtr => 1;
@@ -166,7 +148,7 @@ internal static void dumptype(ж<_type> Ꮡt) {
     }
     // If we've definitely serialized the type before,
     // no need to do it again.
-    var b = Ꮡtypecache.at<typeCacheBucket>((nint)((uint32)(t.Hash & (uint32)((typeCacheBuckets - 1)))));
+    var b = Ꮡtypecache.at<typeCacheBucket>((ulong)((uint32)(t.Hash & (uint32)((typeCacheBuckets - 1)))));
     if (Ꮡt == (~b).t[0]) {
         return;
     }

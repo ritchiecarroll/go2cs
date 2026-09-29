@@ -55,7 +55,7 @@ using static go.@internal.txtar_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/txtar/archive.go", "archive.cs", "ADVy4oKCgoKUqJKCgpSqooKCgoKCgpQABhrygoKAgqSCgpS+0oKUgIKkgpSqooKUgoKC")]
+[assembly: go.GoPositionMap("internal/txtar/archive.go", "archive.cs", "ADVy4oKCgoKUqJKCgpSqooKCgoKCgpSogoKe8oKCgIKkgoKUvtKClICCpIKUqqKClIKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"strconv"
 	"strings"
@@ -156,16 +157,18 @@ func (v *Visitor) goFrameHead(indentLevel int, namedResultDecls string) string {
 // resultsZeroValue is the `return` the catch arm ends with for a value-returning function whose
 // results are UNNAMED: a recovered panic returns Go's zero results, and an UNrecovered one never
 // reaches the return because Run() re-throws from the finally. It is empty for a void function and
-// for the named-result form, whose exit runs through the label instead.
-func (v *Visitor) goFrameTail(indentLevel int, catchReturn string) string {
+// for the named-result form, whose exit runs through the label instead. endPos, when valid, marks the
+// finally line with that Go position: the closing brace of a body that can fall off its end (see
+// deferEpilogueEndPos), the line Go reports for a deferred call's caller on that exit.
+func (v *Visitor) goFrameTail(indentLevel int, catchReturn string, endPos token.Pos) string {
 	if catchReturn != "" {
 		catchReturn = " " + catchReturn
 	}
 
 	// Lowered defers run BEFORE Run(): Run() re-throws an unrecovered panic, which would leave
 	// anything after it in the finally unexecuted. They are already in Go's LIFO order.
-	return fmt.Sprintf("%s%scatch (Exception %s) when (GoFrame.IsPanic(%s, out PanicException? %s)) { GoFrame.Capture(%s);%s }%s%sfinally { %s%s.Run(); }",
+	return fmt.Sprintf("%s%scatch (Exception %s) when (GoFrame.IsPanic(%s, out PanicException? %s)) { GoFrame.Capture(%s);%s }%s%s%sfinally { %s%s.Run(); }",
 		v.newline, v.indent(indentLevel+1),
 		v.goFrameExceptionName(), v.goFrameExceptionName(), v.goFramePanicName(), v.goFramePanicName(), catchReturn,
-		v.newline, v.indent(indentLevel+1), v.goFrameLoweredFinallyCalls(), v.goFrameName())
+		v.newline, v.indent(indentLevel+1), v.positionSentinelText(endPos), v.goFrameLoweredFinallyCalls(), v.goFrameName())
 }

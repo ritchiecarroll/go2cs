@@ -557,17 +557,7 @@ internal static void flushmcache(nint i) {
     stackcache_clear(ref (c).DerefOrNull());
 }
 
-// flushallmcaches flushes the mcaches of all Ps.
-//
-// The world must be stopped.
-//
-//go:nowritebarrier
-internal static void flushallmcaches() {
-    assertWorldStopped();
-    for (nint i = 0; i < (nint)gomaxprocs; i++) {
-        flushmcache(i);
-    }
-}
+// go2cs generated this placeholder — func flushallmcaches is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 [GoType("num:uint64")] partial struct sysMemStat;
 

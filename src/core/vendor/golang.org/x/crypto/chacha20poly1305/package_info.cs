@@ -53,7 +53,7 @@ using static go.vendor.golang.org.x.crypto.chacha20poly1305_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305.go", "chacha20poly1305.cs", "ABtQkoKUgoKmgqaCpoKCloKWyoKClIKUgpau8oCClIKkgg==")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305.go", "chacha20poly1305.cs", "ABtQkoKUgoKmgqaCpoKCloKWppSCgpSClIKWrvKAgpSCpII=")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_generic.go", "chacha20poly1305_generic.cs", "AA8egoKAgoKCyIKCgqaCgoKCloKCgoKEgoKCgoKEpoKChIKCgoSCgoKChIKClIKClJaC")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_noasm.go", "chacha20poly1305_noasm.cs", "AAgSgqaC")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/xchacha20poly1305.go", "xchacha20poly1305.cs", "ABEw4oKUgoKmgqaCpoKCAAYQgpaCgpaChKaCgpSClIKWgoKWgoQ=")]

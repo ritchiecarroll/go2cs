@@ -595,6 +595,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckFormatTypeAdapters() => CheckTarget("FormatTypeAdapters");
 
     [TestMethod]
+    public void CheckFrameFuncIdentity() => CheckTarget("FrameFuncIdentity");
+
+    [TestMethod]
     public void CheckFuncFieldNestedTupleParam() => CheckTarget("FuncFieldNestedTupleParam");
 
     [TestMethod]
@@ -920,6 +923,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckLiftedLocalTypes() => CheckTarget("LiftedLocalTypes");
+
+    [TestMethod]
+    public void CheckLineMarkerDeferEndTC0() => CheckTarget("LineMarkerDeferEndTC0");
+
+    [TestMethod]
+    public void CheckLineMarkerPackageVars() => CheckTarget("LineMarkerPackageVars");
 
     [TestMethod]
     public void CheckLinknameVarPull() => CheckTarget("LinknameVarPull");
@@ -1412,6 +1421,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPointerCoreConstraints() => CheckTarget("PointerCoreConstraints");
+
+    [TestMethod]
+    public void CheckPointerElementAtUnsignedIndex() => CheckTarget("PointerElementAtUnsignedIndex");
 
     [TestMethod]
     public void CheckPointerEmbedBoxReceiver() => CheckTarget("PointerEmbedBoxReceiver");
@@ -2195,6 +2207,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckZeroValueArrayNamedResult() => CheckTarget("ZeroValueArrayNamedResult");
+
+    [TestMethod]
+    public void CheckZeroValueNeedyStructPaths() => CheckTarget("ZeroValueNeedyStructPaths");
 
     [TestMethod]
     public void CheckZeroValueStructVar() => CheckTarget("ZeroValueStructVar");

@@ -49,7 +49,7 @@ using static go.@internal.syscall.windows.sysdll_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/syscall/windows/sysdll/sysdll.go", "sysdll.cs", "ABg2soI=")]
+[assembly: go.GoPositionMap("internal/syscall/windows/sysdll/sysdll.go", "sysdll.cs", "ABYsmrKC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.syscall.windows;

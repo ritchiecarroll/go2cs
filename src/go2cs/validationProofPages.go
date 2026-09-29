@@ -310,8 +310,13 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 				// compiler-property shares platform-skip's pass/skip shape, so the "not a skipped test" clause
 				// is false of it too. (cgo-configuration has the same shape and is NOT added here: that would
 				// re-word a banked page at its next regeneration, so it is named for its own ruling instead.)
-				hasPlatformSkip = hasPlatformSkip || disclosure.Class == platformSkipClass || disclosure.Class == compilerPropertyClass
-				hasDeferred = hasDeferred || disclosure.Class == deferredClass
+				hasPlatformSkip = hasPlatformSkip || disclosure.hasClass(platformSkipClass) || disclosure.hasClass(compilerPropertyClass)
+				hasDeferred = hasDeferred || disclosure.hasClass(deferredClass)
+
+				// runtime-capability admits the pass/skip shape too (ruling 2026-09-28 09:47, item 3a). Only a
+				// row that actually skipped makes the clause false, so every existing runtime-capability
+				// failure row keeps its page's wording byte for byte.
+				hasPlatformSkip = hasPlatformSkip || (disclosure.hasClass(runtimeCapabilityClass) && comparison.CSharp[name] == "skip")
 			}
 		}
 
@@ -348,17 +353,21 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 
 		for _, name := range disclosed {
 			disclosure, pinned := disclosures[name]
-			class, reason := disclosure.Class, disclosure.Reason
 
 			if !pinned {
 				// A parent whose Go=pass/C#=fail divergence is purely the roll-up of disclosed
 				// subtests carries no manifest entry of its own (matchTerminalStatuses' aggregation
 				// rule), so say what it actually is rather than rendering two empty cells.
-				class = "aggregate"
-				reason = "no failure text of its own — the roll-up of this test's disclosed subtests"
+				fmt.Fprintf(&page, "| `%s` | `%s` | %s |\n", escapeProofCell(name), "aggregate",
+					escapeProofCell("no failure text of its own — the roll-up of this test's disclosed subtests"))
+				continue
 			}
 
-			fmt.Fprintf(&page, "| `%s` | `%s` | %s |\n", escapeProofCell(name), escapeProofCell(class), escapeProofCell(reason))
+			// One row per reason: a plain entry's one, or each half of a two-half entry (ruling
+			// 2026-09-28 09:47, item 3b: the page reports each half).
+			for _, part := range disclosure.parts() {
+				fmt.Fprintf(&page, "| `%s` | `%s` | %s |\n", escapeProofCell(name), escapeProofCell(part.Class), escapeProofCell(part.Reason))
+			}
 		}
 
 		// A platform-skip row's own note. The ruling's anti-laundering clause requires the verdict
@@ -368,7 +377,7 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 		for _, name := range disclosed {
 			disclosure, pinned := disclosures[name]
 
-			if !pinned || disclosure.Class != platformSkipClass {
+			if !pinned || !disclosure.hasClass(platformSkipClass) {
 				continue
 			}
 
@@ -392,6 +401,22 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 				"suite reports **skip**, at the test's own upstream check for a decision of the Go compiler (inlining)\n"+
 				"that the converted program does not carry; the owner ruled the family structural. It is pinned to that\n"+
 				"upstream message, and any subtest Go ran beneath it is listed as withdrawn, never counted as matched.\n", escapeProofCell(name))
+		}
+
+		// A runtime-capability SKIP's own note, for the same anti-laundering reason: that class admits the
+		// pass/skip shape as well as pass/fail (ruling 2026-09-28 09:47, item 3a), and where the converted
+		// side skipped, a reader must see in words that Go ran the test.
+		for _, name := range disclosed {
+			disclosure, pinned := disclosures[name]
+
+			if !pinned || !disclosure.hasClass(runtimeCapabilityClass) || comparison.CSharp[name] != "skip" {
+				continue
+			}
+
+			fmt.Fprintf(&page, "\n`%s` is a **runtime-capability skip**: `go test` reports **pass** and the converted\n"+
+				"suite reports **skip**, at a check for a runtime capability the managed host does not have. It is\n"+
+				"pinned to that skip message, so the row moves to a hard mismatch if the converted side ever skips\n"+
+				"for a different reason, or stops skipping.\n", escapeProofCell(name))
 		}
 
 		// A host-conditional row's own note, modeled on the roster's internal/zstd row: name the

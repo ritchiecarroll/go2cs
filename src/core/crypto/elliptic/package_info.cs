@@ -64,8 +64,8 @@ using static go.crypto.elliptic_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/elliptic/elliptic.go", "elliptic.cs", "AEGWAQAKAoKCgoSCgoK4ppaClpQAAhIACQKEhIKEgoSs4oKCgoKCAA4qAAkCgIKmgoKUkpSCgoKClIKUrOKAgqaCgpSSlIKCgqaCgoKUgpSClKbWgpaC7IKCgoIAAhTyggACFgAIAoIAAhTyggACFPKC")]
-[assembly: go.GoPositionMap("crypto/elliptic/nistec.go", "nistec.cs", "ABEiggAUKIIADyCCAA8qggAmXqKm9oKUguYACAaCpoKUgqaCgoKCgqbSgqaUgoKCpqKCgpSCgpSmooKClKrCgoKUgoKUgqaigoKUgoKClKaigoKClKrCgoKClIKClIKCgpSm0oKmgoLKgoKCpqKClIKClKaCgoKUpoKCgpQ=")]
+[assembly: go.GoPositionMap("crypto/elliptic/elliptic.go", "elliptic.cs", "AD+IAZ4ACgKCgoKEgoKCuKaWgpaUAAISAAkChISChIKErOKCgoKCggAMGgABEAAJAoCCpoKClJKUgoKCgpSClKzigIKmgoKUkpSCgoKmgoKClIKUgpSm1oKWguyCgoKCAAIU8oIAAhYACAKCAAIU8oIAAhTygg==")]
+[assembly: go.GoPositionMap("crypto/elliptic/nistec.go", "nistec.cs", "AA0auIIADyDIggALGLiCAAsiuIIAJl6ipvaClILmAAgGgqaClIKmgoKCgoKm0oKmlIKCgqaigoKUgoKUpqKCgpSqwoKClIKClIKmooKClIKCgpSmooKCgpSqwoKCgpSCgpSCgoKUptKCpoKCyoKCgqaigpSCgpSmgoKClKaCgoKU")]
 [assembly: go.GoPositionMap("crypto/elliptic/nistec_p256.go", "nistec_p256.cs", "AA0copSUlJSCgoKU")]
 [assembly: go.GoPositionMap("crypto/elliptic/params.go", "params.cs", "ABkwggACFgAIAoKEgoSCgoQAAhIADAaAgqaEqIKErOKCgpSq4oKWgoSCgoKCggACEgAKBoCCpIKEgoK65IKCgoKClIKCgoKWgoKChIKCgoKCgoKUgoKEgoKCgoKCgoKUgoKUgoSCgoKCgoSCgoKCgoKEgoKCgoKEAAISAAoGgIKkhIK6tIKCgoKCgpSCgoKChISCgoKCgpSEgoKCgpSCgpSEgoKClISCgoSCgpSEAAISAAoGgIKkhIKEooKCgpSoAAISAAoGgIKmpoKCgqY=")]
 // </GoSourcePositionMaps>

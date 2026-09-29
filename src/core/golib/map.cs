@@ -303,7 +303,7 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
     {
         // Reading from a nil map yields the zero value in Go, so route through the
         // null-safe TryGetValue rather than dereferencing m_map directly.
-        get => TryGetValue(key, out TValue? value) ? value : default!;
+        get => TryGetValue(key, out TValue? value) ? value : GoZero<TValue>();
         set
         {
             // Writing to a nil map panics in Go ("assignment to entry in nil map").
@@ -324,7 +324,7 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
     public (TValue, bool) this[TKey key, bool _]
     {
         // Comma-ok read of a nil (or absent) key yields (zero, false).
-        get => TryGetValue(key, out TValue? value) ? (value!, true) : (default!, false);
+        get => TryGetValue(key, out TValue? value) ? (value!, true) : (GoZero<TValue>(), false);
     }
 
     /// <summary>
@@ -646,6 +646,13 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
     // enough to care, the snapshot is the one thing to pool here — the shape above does not
     // change.
     //
+    // THE ORDER IS RANDOMIZED, as Go's is: each range starts the snapshot walk at a random entry and
+    // wraps, the way Go's iterator starts at a random group and slot (runtime's TestMapIterOrder and
+    // TestMapSparseIterOrder assert two ranges can differ). Only the START moves, so everything above
+    // holds whatever it is. The walk is two passes, start..count then 0..start, so no entry pays a
+    // wrap test, and the start comes from GoCheapRand (Go's cheaprand, thread-static): no allocation,
+    // and a map of 0 or 1 entries draws nothing.
+    //
     // The nil-key entry goes first. Go's range order over a map is unspecified (and deliberately
     // randomized), so the position is free.
     private static IEnumerator<KeyValuePair<TKey, TValue>> enumerateStore(NilKeyDictionary store)
@@ -665,8 +672,13 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
         if (!typeof(TKey).IsValueType && store.HasNilKey)
             yield return new KeyValuePair<TKey, TValue>(default!, store.NilKeyValue);
 
-        foreach (KeyValuePair<TKey, TValue> entry in entries)
+        int start = count > 1 ? (int)GoCheapRand.Next((uint)count) : 0;
+
+        for (int pass = 0, from = start, to = count; pass < 2; pass++, from = 0, to = start)
+        for (int index = from; index < to; index++)
         {
+            KeyValuePair<TKey, TValue> entry = entries[index];
+
             // Re-read rather than carrying the value from the snapshot: the body may have
             // overwritten it, and Go reads the bucket on arrival.
             if (store.TryGetValue(entry.Key, out TValue? value))

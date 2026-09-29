@@ -57,7 +57,7 @@ using static go.@internal.poll_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/poll/errno_unix.go", "errno_unix.cs", "ABIqopSkpKSk")]
-[assembly: go.GoPositionMap("internal/poll/fd.go", "fd.cs", "ABcwwKSAooAADh6SgpQADRzAooCigO6SgoKCgpSCgg==")]
+[assembly: go.GoPositionMap("internal/poll/fd.go", "fd.cs", "ABcwwKSAooDIuLiWkoKUygAIEsCigKKAyJaSgoKCgpSCgso=")]
 [assembly: go.GoPositionMap("internal/poll/fd_fsync_darwin.go", "fd_fsync_darwin.cs", "AAwg4oCCpIKCuoKU", "21-31:1")]
 [assembly: go.GoPositionMap("internal/poll/fd_mutex.go", "fd_mutex.cs", "AC5qAA4CgoKClIKClIIABkyigoKClIKCAAisAaKYwoKUrLKClKrCgpSs0oK8woKUrNKC")]
 [assembly: go.GoPositionMap("internal/poll/fd_opendir_darwin.go", "fd_opendir_darwin.cs", "AA0e1oKClIKCgoKmgoKUrA==")]
@@ -66,7 +66,9 @@ using static go.@internal.poll_package;
 [assembly: go.GoPositionMap("internal/poll/fd_unix.go", "fd_unix.cs", "ACpu8paClIKClIKmlKrmhISCgqrCggAGEKgABhCClqjigIKkuIIADBbigIKkgtyUgIKkgpSCgoKCgoCCyILq6ICCpIKUmIKCgqaClIKCqOKAgqSCgIKkgoKCgpSCgoCCyILq4oCCpIKAgqSCgoKClIKCgILIgurigIKkgoCCpIKCgoKUgoKAgsiC6uKAgqSCgIKkgoKCgqaCgILIgurigIKkgoCCpIKCgoKmgoCCyILq4oCCpIKAgqSCgoKCpoKAgsiC6uKAgqSCgIKkgoKCgpSCgtyUlIKUgoCCtoKUgvwACQiAgqSCgoKCgpSCgpSClIKUgpSC/OKAgqSCgIKkgoKClIKAgraClOrigIKkgoCCpIKCgpSCgIK2gpTq4oCCpIKAgqSCgoKUgoCCtoKU6uKAgqSCgIKkgoKClIKAgraClOrigIKkgoCCpIKCgpSCgIK2gpTq4oCCpIKAgqSCgoKUgoCCtoKU6uKAgqSEgIKkgoKClJSkgoCC3tTqwoCCpILcwoCCpIIADBKSgoKClJqk5qjigIKkgtyyqOKAgqSC2OKAgqSCgIKkgoKUgIIACAzigIKkgoCCpIKClICCAAgMkoKCgg==", "640-642:1;651-653:1")]
 [assembly: go.GoPositionMap("internal/poll/fd_unixjs.go", "fd_unixjs.cs", "ABAgpNzawoKCgoKUgtjigIKkgtwACAKAgqSCgoKCgoKAgtrq4oCCpII=")]
 [assembly: go.GoPositionMap("internal/poll/fd_writev_libc.go", "fd_writev_libc.cs", "AAse")]
+[assembly: go.GoPositionMap("internal/poll/hook_unix.go", "hook_unix.cs", "AAsYpg==")]
 [assembly: go.GoPositionMap("internal/poll/iovec_unix.go", "iovec_unix.cs", "AAoWgg==")]
+[assembly: go.GoPositionMap("internal/poll/sendfile.go", "sendfile.cs", "/g==")]
 [assembly: go.GoPositionMap("internal/poll/sendfile_unix.go", "sendfile_unix.cs", "AAw8ABMCgLjchoKWkoKCmKgACAKClICCpISAgqaCyoKClIKCgpQAARDivsKUgIIABhSsAAoCmAAJCtKWtoKSAAAaAAwCtoKCyrY=", "41-43:1;51-53:2;60-62:1")]
 [assembly: go.GoPositionMap("internal/poll/sockopt.go", "sockopt.cs", "AAoY4oCCpILY8oCCpILY4oCCpILY4oCCpII=")]
 [assembly: go.GoPositionMap("internal/poll/sockopt_unix.go", "sockopt_unix.cs", "AAoY4oCCpII=")]

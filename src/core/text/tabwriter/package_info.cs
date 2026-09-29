@@ -49,7 +49,7 @@ using static go.text.tabwriter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("text/tabwriter/tabwriter.go", "tabwriter.cs", "AGveAeiAgoKUpsqAgoCC/pKCgoKCgoIAJoQBAA8CgpSCgoKCgpSUlISEqJKCgoKCgpSUAAgSgoKClIK4goKClAAFEIKUgqaCgoKUgqjKooKCloSClJaUgriCkoKCgraClIK6poKmpq7igoKChIIACBSCloKCgoKCppSAgraCzIK6goKCqKiSgqiSggAKGJKUpKQABBDClIKC2LSCqqKCgoKCptKAgpSUgIKCpAAHEMLaAAgCgoLsxIKUlKiCAAcQAAoCloKClJaCgoKCpILcgpTegoKCkpSopIKCgtyUgoKUgoLMgoLaog==")]
+[assembly: go.GoPositionMap("text/tabwriter/tabwriter.go", "tabwriter.cs", "AGveAeiAgoKUpsqAgoCC/pKCgoKCgoIAJoQBAA8CgpSCgoKCgpSUlISEqJKCgoKCgpSUAAgSgoKClIK4goKClKiCloKUgqaCgoKUgqimlKKCgpaEgpSWlIK4gpKCgoK2gpSCuqaCpqau4oKCgoSCAAgUgpaCgoKCgqaUgIK2gsyCuoKCgqiokoKokoIAChiSlKSkAAQQwpSCgti0gqqigoKCgqbSgIKUlICCgqTErMLaAAgCgoLsxIKUlKiCpsoACgKWgoKUloKCgoKkgtyClN6CgoKSlKikgoKC3JSCgpSCgsyCgtqi")]
 // </GoSourcePositionMaps>
 
 namespace go.text;

@@ -135,7 +135,16 @@ public class StandardBox<T> : ж<T>
     // something an address does). Offset 0 within itself, which is also why `&s` and
     // `&s.firstField` token alike — as Go's addresses do.
     public override nuint PointerOrderToken =>
-        IsNilPointer ? 0 : AllocationBase(RuntimeHelpers.GetHashCode(this));
+        IsNilPointer ? 0 : NamesZeroBase ? GoZeroBase.Token : AllocationBase(RuntimeHelpers.GetHashCode(this));
+
+    /// <inheritdoc/>
+    // A ZERO-SIZE heap allocation is Go's zerobase: mallocgc(0) answers &zerobase for every one of
+    // them, so two news of struct{} are one pointer (GoZeroBase). Nil is never the zerobase.
+    internal override bool NamesZeroBase => GoZeroSizeFacts<T>.IsZeroSize && !m_isNull;
+
+    /// <inheritdoc/>
+    // The zerobase's referent is the zerobase, which runtime treats as outside every heap span.
+    public override object ReferentObject => NamesZeroBase ? GoZeroBase.Box : this;
 
     /// <inheritdoc/>
     public override bool Equals(ж<T>? other)
@@ -152,6 +161,10 @@ public class StandardBox<T> : ж<T>
         if (m_isNull || other.IsNilPointer)
             return m_isNull && other.IsNilPointer;
 
+        // Every zerobase pointer is one pointer, whichever kind names it.
+        if (NamesZeroBase || other.NamesZeroBase)
+            return NamesZeroBase && other.NamesZeroBase;
+
         // Go pointer comparison is by identity — the same storage location — never by the
         // pointed-to value (which would be wrong, and unsound: self-referential structs recurse).
         // Reference equality already answered false above; a standard box equals no other kind.
@@ -159,7 +172,7 @@ public class StandardBox<T> : ж<T>
     }
 
     /// <inheritdoc/>
-    public override int GetHashCode() => IsNilPointer ? 0 : RuntimeHelpers.GetHashCode(this);
+    public override int GetHashCode() => IsNilPointer ? 0 : NamesZeroBase ? GoZeroBase.HashCode : RuntimeHelpers.GetHashCode(this);
 
     /// <inheritdoc/>
     // The pinnable value slot, when T admits one — what EnsureStableAddress pins on address-take.
@@ -175,4 +188,24 @@ public class StandardBox<T> : ж<T>
 
     // FieldInfo access for the contracts IL builder (ж.Contracts.cs) — the fields the split moved
     // here from the old single-class box; the builder targets THIS type now.
+}
+
+/// <summary>
+/// A heap box that is a HANDLE rather than an allocation: its identity is its own even when
+/// <typeparamref name="T"/> is zero-size, so it never names <see cref="GoZeroBase"/>.
+/// </summary>
+/// <remarks>
+/// runtime's <c>*Func</c> is the case: <c>Func</c> is zero-size in Go, but a <c>*Func</c> points into
+/// the pclntab at the function it describes, never at zerobase, so two functions' <c>*Func</c> are two
+/// pointers. A plain <see cref="StandardBox{T}"/> of <c>Func</c> would be the zerobase, and every
+/// <c>FuncForPC</c> answer would compare equal to every other.
+/// </remarks>
+/// <typeparam name="T">Pointee type.</typeparam>
+internal sealed class HandleBox<T> : StandardBox<T>
+{
+    internal HandleBox(in T value) : base(value)
+    {
+    }
+
+    internal override bool NamesZeroBase => false;
 }

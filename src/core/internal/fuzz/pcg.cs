@@ -9,6 +9,7 @@ using strconv = strconv_package;
 using strings = strings_package;
 using atomic = global::go.sync.atomic_package;
 using time = time_package;
+using System.Runtime.InteropServices;
 using global::go.math;
 using global::go.sync;
 
@@ -35,10 +36,10 @@ internal const uint64 multiplier = 6364136223846793005;
 
 // pcgRand is a PRNG. It should not be copied or shared. No Rand methods are
 // concurrency safe.
-[GoType] partial struct pcgRand {
-    internal noCopy noCopy; // help avoid mistakes: ask vet to ensure that we don't make a copy
-    internal uint64 state;
-    internal uint64 inc;
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 16)] partial struct pcgRand {
+    [FieldOffset(0)] internal readonly noCopy noCopy; // help avoid mistakes: ask vet to ensure that we don't make a copy
+    [FieldOffset(0)] internal uint64 state;
+    [FieldOffset(8)] internal uint64 inc;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

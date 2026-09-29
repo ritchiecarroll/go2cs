@@ -32,7 +32,61 @@ internal class StructTypeTemplate : TemplateBase
     // assignment for these when the argument is nil, so the field initializer that already ran
     // stands, exactly as the fixed-array member case preserves its own `= new(N)` initializer.
     public HashSet<string> ChanDirInitializerMembers = [];
+    // The Go ZERO-SIZE fields the converter laid out READONLY at Go's offsets (the zero-size-field layout
+    // arc; see GetReadOnlyExplicitLayoutMembers). Their `Ꮡ<field>` answers golib's shared per-type slot
+    // (GoZeroSizeSlot<T>), since a writable ref to a readonly field is CS8160 and a zero-size write stores
+    // nothing (A17, COORD ruling 2026-09-28).
+    public HashSet<string> ReadOnlyZeroSizeMembers = [];
     public string[] ValueCloneFields = [];
+
+    // The readonly zero-size members of a promoted (embedded) struct type, cached per type: from its
+    // declaration when it is in this compilation, else from metadata, where a readonly INSTANCE field of a
+    // converted struct can only be one of the arc's (embeds are `partial ref` properties, not fields).
+    private readonly Dictionary<string, HashSet<string>> m_embedReadOnlyZeroSize = new(StringComparer.Ordinal);
+
+    private bool IsReadOnlyZeroSizeMemberOf(string structTypeName, string memberName)
+    {
+        if (!m_embedReadOnlyZeroSize.TryGetValue(structTypeName, out HashSet<string>? members))
+        {
+            (StructDeclarationSyntax? declaration, _) = Context.GetStructDeclaration(structTypeName);
+            members = declaration is not null ? declaration.GetReadOnlyExplicitLayoutMembers() : ReadOnlyInstanceFieldsFromMetadata(structTypeName);
+            m_embedReadOnlyZeroSize[structTypeName] = members;
+        }
+
+        return members.Contains(memberName);
+    }
+
+    private HashSet<string> ReadOnlyInstanceFieldsFromMetadata(string structTypeName)
+    {
+        HashSet<string> members = new(StringComparer.Ordinal);
+
+        // The same source-form -> CLR metadata name normalization as getMetadataStructFields.
+        string metadataName = GeneratorExecutionContextExtensions.GetUnderlyingTypeName(structTypeName).Replace("global::", "").Replace("@", "");
+
+        if (!metadataName.StartsWith("go.", StringComparison.Ordinal))
+            metadataName = $"go.{metadataName}";
+
+        int lastDot = metadataName.LastIndexOf('.');
+
+        if (lastDot < 0)
+            return members;
+
+        INamedTypeSymbol? typeSymbol = Context.Compilation.GetTypeByMetadataName($"{metadataName[..lastDot]}+{metadataName[(lastDot + 1)..]}");
+
+        if (typeSymbol is null)
+            return members;
+
+        foreach (IFieldSymbol field in typeSymbol.GetMembers().OfType<IFieldSymbol>())
+        {
+            if (field.IsReadOnly && !field.IsStatic)
+                members.Add(field.Name);
+        }
+
+        return members;
+    }
+
+    // The ref target a readonly zero-size member's accessor answers (see ReadOnlyZeroSizeMembers).
+    private static string ZeroSizeSlotRef(string typeName) => $"ref global::go.GoZeroSizeSlot<{typeName}>.Ref";
 
     private string? m_nonGenericStructName;
     public string NonGenericStructName => m_nonGenericStructName ??= GetSimpleName(StructName, true);
@@ -62,7 +116,7 @@ internal class StructTypeTemplate : TemplateBase
 
                 // Constructors
                 {{Constructors}}
-                {{ValueCloneImplementation}}
+                {{ValueCloneImplementation}}{{GoZeroRegistration}}
                 // Handle comparisons between struct '{{NonGenericStructName}}' instances
                 public bool Equals({{StructName}} other) =>
                     {{CompareFields}};
@@ -92,6 +146,28 @@ internal class StructTypeTemplate : TemplateBase
                 ]), "}");
             }{{PromotedStructReceivers()}}
         """;
+
+    // A struct whose `default` is NOT its Go zero value (see IsNeedy) registers its parameterless
+    // constructor, which runs the field initializers and builds the embed boxes, as golib's
+    // GoZeroFactory<T>. Generic code reads that registration through builtin.GoZero<T>() wherever
+    // Go produces a zero of a type parameter (`var z T`, a named result, a map miss, a closed-channel
+    // receive, a failed comma-ok assertion), where `default` is wrong only for a needy T. A GENERIC
+    // struct cannot host a module initializer and has no closed type to register, so it keeps
+    // `default`: the residual option B states (pinned by GolibTests' GoZeroResidualTests).
+    private string GoZeroRegistration =>
+        StructName.Contains('<') || !IsNeedy
+            ? string.Empty
+            : $"\r\n{TypeElemIndent}[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n" +
+              $"{TypeElemIndent}internal static void {TempVarMarker}RegisterGoZero() =>\r\n" +
+              $"{TypeElemIndent}    global::go.GoZeroFactory<{StructName}>.Create = static () => new {StructName}();\r\n";
+
+    // The rule NeedsConstruction applies to a FIELD of this type, asked of this struct's own members:
+    // a promoted embed (its box is constructor-built), a fixed-size array field (`default` skips its
+    // `= new(N)` initializer), or a value field whose own type needs construction.
+    private bool IsNeedy => StructMembers.Any(member =>
+        GetSimpleName(member.memberName) != "_" &&
+        (member.isPromotedStruct ||
+         !member.isReferenceType && (member.typeName.Contains("go.array<") || StructTypeNeedsConstruction(member.typeName))));
 
     // A Go struct carrying FIXED-SIZE ARRAY fields is not completely copied by a plain C# struct
     // assignment: `array<T>` (and the generated named-array wrapper) is a struct over a shared T[]
@@ -280,7 +356,16 @@ internal class StructTypeTemplate : TemplateBase
                     // Like the Ꮡ-prefixed accessors below, the Δ-prefixed NAME composes on the
                     // UNESCAPED member name — `Δ@base` is invalid ('@' only leads).
                     string accessorName = GetSimpleName(memberName) == NonGenericStructName ? $"{ShadowVarMarker}{GetUnsanitizedIdentifier(memberName)}" : memberName;
-                    result.Append($"\r\n{TypeElemIndent}[global::System.Diagnostics.CodeAnalysis.UnscopedRef] {typeScope} ref {SubstituteTypeParameters(typeName, typeArgMap)} {accessorName} => ref {EmbedHop(promotedStructType, promotedMemberName)}.{memberName};");
+                    string promotedType = SubstituteTypeParameters(typeName, typeArgMap);
+
+                    // A depth-1 member that is a readonly zero-size field of the embed answers the shared slot
+                    // (a writable ref to it is CS8160); deeper ones resolve through the intermediate type's own
+                    // promoted accessor, which applies this same rule.
+                    string promotedTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName)
+                        ? ZeroSizeSlotRef(promotedType)
+                        : $"ref {EmbedHop(promotedStructType, promotedMemberName)}.{memberName}";
+
+                    result.Append($"\r\n{TypeElemIndent}[global::System.Diagnostics.CodeAnalysis.UnscopedRef] {typeScope} ref {promotedType} {accessorName} => {promotedTarget};");
                 }
             }
 
@@ -335,8 +420,13 @@ internal class StructTypeTemplate : TemplateBase
                     // live in the enclosing allocation, so the existing rooting is already right.
                     string pointerEmbedInnerType = PointerEmbedInnerType(promotedStructType, promotedMemberName);
 
+                    // A depth-1 readonly zero-size member answers the shared slot, as the ref property above.
+                    string promotedRefTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName)
+                        ? ZeroSizeSlotRef(promotedFieldType)
+                        : $"ref instance.{EmbedHop(promotedStructType, promotedMemberName)}.{memberName}";
+
                     result.Append(pointerEmbedInnerType is null
-                        ? $"\r\n{TypeElemIndent}{typeScope} static ref {promotedFieldType} {accessorRef}(ref {StructName} instance) => ref instance.{EmbedHop(promotedStructType, promotedMemberName)}.{memberName};"
+                        ? $"\r\n{TypeElemIndent}{typeScope} static ref {promotedFieldType} {accessorRef}(ref {StructName} instance) => {promotedRefTarget};"
                         : $"\r\n{TypeElemIndent}{typeScope} static {PointerPrefix}<{promotedFieldType}> {accessorRef}(ref {StructName} instance) => instance.{promotedMemberName}.of({pointerEmbedInnerType}.{accessorRef});");
                 }
             }
@@ -1387,7 +1477,10 @@ internal class StructTypeTemplate : TemplateBase
                 // `internal`, making `other.of(ITab.ᏑFun)` unreachable, CS0117). Derive the scope from
                 // the member name (its exportedness), as the field declaration itself does.
                 string fieldScope = GetScope(GetSimpleName(memberName));
-                result.Append($"{fieldScope} static ref {typeName} {AddressPrefix}{GetUnsanitizedIdentifier(memberName)}(ref {StructName} instance) => ref instance.{memberName};");
+
+                // A readonly zero-size field answers the shared per-type slot (see ReadOnlyZeroSizeMembers).
+                string target = ReadOnlyZeroSizeMembers.Contains(memberName) ? ZeroSizeSlotRef(typeName) : $"ref instance.{memberName}";
+                result.Append($"{fieldScope} static ref {typeName} {AddressPrefix}{GetUnsanitizedIdentifier(memberName)}(ref {StructName} instance) => {target};");
             }
 
             return result.ToString();

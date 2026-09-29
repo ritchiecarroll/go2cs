@@ -170,14 +170,9 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
     private static object ElementZero<X>(IArray array)
     {
         if (((slice<X>)array).Capacity == 0)
-            return ZeroCapacityBase<X>.Element;
+            return GoZeroCapacityElement<X>.Element;
 
         return new ElemRefBox<X>(array, 0);
-    }
-
-    private static class ZeroCapacityBase<X>
-    {
-        internal static readonly object Element = new ElemRefBox<X>(new slice<X>(new X[1]), 0);
     }
 
     internal static ж<TDst> Mint(ж<T> source)

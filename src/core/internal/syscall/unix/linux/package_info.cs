@@ -55,6 +55,7 @@ using static go.@internal.syscall.unix_package;
 [assembly: go.GoPositionMap("internal/syscall/unix/at_fstatat.go", "at_fstatat.cs", "AAscgoKCgpbCgpY=")]
 [assembly: go.GoPositionMap("internal/syscall/unix/copy_file_range_unix.go", "copy_file_range_unix.cs", "AAscsgAEEIKClA==")]
 [assembly: go.GoPositionMap("internal/syscall/unix/eaccess.go", "eaccess.cs", "AAscgtyU")]
+[assembly: go.GoPositionMap("internal/syscall/unix/faccessat_syscall.go", "faccessat_syscall.cs", "AAoW")]
 [assembly: go.GoPositionMap("internal/syscall/unix/fcntl_unix.go", "fcntl_unix.cs", "AAsi9IKCgpQ=")]
 [assembly: go.GoPositionMap("internal/syscall/unix/getrandom.go", "getrandom.cs", "AA0iAAsQkoKCgpSUgpSogoKUlA==")]
 [assembly: go.GoPositionMap("internal/syscall/unix/kernel_version_linux.go", "kernel_version_linux.cs", "AAkc4oKAgqaogoK4goKClKg=")]

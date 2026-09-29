@@ -57,13 +57,13 @@ using static go.io.fs_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("io/fs/format.go", "format.cs", "AAki4oKCgoSCgoKUgpSCgoKCgoKUgoKEgoSCgpYAAhLigqiChIKCgoKU")]
-[assembly: go.GoPositionMap("io/fs/fs.go", "fs.cs", "ACtsAA0CgpaUqIKCgpSCgpSClABIlAGAooCigKKAooAAN16CgoKCgoKCpoKClIKCgpSUlKqiqqKokqiSAAkUgKSA5pKC")]
+[assembly: go.GoPositionMap("io/fs/fs.go", "fs.cs", "ACtsAA0CgpaUqIKCgpSCgpSClAA+hgGSkpKSloCigKKAooCigAA3XoKCgoKCgoKmgoKUgoKClJSUqqKqoqiSqJIACRSApIDmkoI=")]
 [assembly: go.GoPositionMap("io/fs/glob.go", "glob.cs", "ABNCAAwCpraigpSAgriAgqSCgIKkloKEgqiCloKCgpSCgoKmqJKUpAAEEPKCgoKWgoKCgpSCpqqigpS2")]
 [assembly: go.GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABk6AAgCgIKmgoKUlIKCloKGAAoQgqaCpoKmgqaCqqKClA==", "46-48:1")]
 [assembly: go.GoPositionMap("io/fs/readfile.go", "readfile.cs", "ABhAAAoCgIKmgoKUlIKAgoKCuIKCgoKUgoKCgpQ=")]
 [assembly: go.GoPositionMap("io/fs/stat.go", "stat.cs", "ABAo4oCCpoKClJI=")]
 [assembly: go.GoPositionMap("io/fs/sub.go", "sub.cs", "ABJEAA4CgpSClICCpAAHEpKClKiSgpSClKiSgIKAgsbWgoKClILWgoKClIKmgoKClIKmlICCpIKWgoKCgoKUlNaigpSSgpQ=")]
-[assembly: go.GoPositionMap("io/fs/walk.go", "walk.cs", "ABaQAZKAgpSUpoKUgoKClKiCgoCCgpS2AAIeAAwCgoKUlIKU")]
+[assembly: go.GoPositionMap("io/fs/walk.go", "walk.cs", "AA0eygADaJKAgpSUpoKUgoKClKiCgoCCgpS2AAIeAAwCgoKUlIKU")]
 // </GoSourcePositionMaps>
 
 namespace go.io;

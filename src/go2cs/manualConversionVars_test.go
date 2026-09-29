@@ -11,9 +11,10 @@
 //
 //   - the var exists in Go's source for that package, declared alone in its spec (visitValueSpec
 //     refuses to split a spec);
-//   - Go never takes its address in that package: the hand-owned member is a ref property, which has
-//     no address of its own, so an `&Name` would emit a box nothing declares;
-//   - a hand-owned file the package compiles declares a member of that name, the destination.
+//   - a hand-owned file the package compiles declares a member of that name, the destination;
+//   - and where Go takes its address in that package, the same file set also declares the `ᏑName`
+//     box every `&Name` emits: the name member is a ref property with no address of its own, so an
+//     undeclared box would leave each `&Name` naming nothing.
 
 package main
 
@@ -100,14 +101,12 @@ func TestManualConversionVarsAreDisplacedAndDeclared(t *testing.T) {
 				t.Errorf("%s.%s: shares its var spec with other names; visitValueSpec refuses to split a spec", pkg, name)
 			}
 
-			if addressed != 0 {
-				t.Errorf("%s.%s: Go takes its address %d times; a ref property has no address", pkg, name, addressed)
-			}
-
-			// A static member declaration on a line that is not a comment.
+			// A static member declaration on a line that is not a comment. The box twin is matched the
+			// same way; `Ꮡ` is not a \b word boundary in RE2, so the twin anchors on the space before it.
 			member := regexp.MustCompile(`(?m)^[ \t]*[^/\s][^\n]*\bstatic\b[^\n]*\b` + regexp.QuoteMeta(name) + `\s*(=>|\{|=|;)`)
+			boxMember := regexp.MustCompile(`(?m)^[ \t]*[^/\s][^\n]*\bstatic\b[^\n]* Ꮡ` + regexp.QuoteMeta(name) + `\s*(=>|\{|=|;)`)
 			packageDir := filepath.Join(coreDir, filepath.FromSlash(pkg))
-			found := false
+			found, boxFound := false, false
 
 			_ = filepath.WalkDir(packageDir, func(path string, entry os.DirEntry, err error) error {
 				if err != nil {
@@ -124,8 +123,9 @@ func TestManualConversionVarsAreDisplacedAndDeclared(t *testing.T) {
 
 				content, readErr := os.ReadFile(path)
 
-				if readErr == nil && strings.Contains(string(content), "GoManualConversion") && member.Match(content) {
-					found = true
+				if readErr == nil && strings.Contains(string(content), "GoManualConversion") {
+					found = found || member.Match(content)
+					boxFound = boxFound || boxMember.Match(content)
 				}
 
 				return nil
@@ -133,6 +133,10 @@ func TestManualConversionVarsAreDisplacedAndDeclared(t *testing.T) {
 
 			if !found {
 				t.Errorf("%s.%s: no hand-owned *_impl.cs under %s declares it; the displaced declaration has no destination", pkg, name, packageDir)
+			}
+
+			if addressed != 0 && !boxFound {
+				t.Errorf("%s.%s: Go takes its address %d times, and no hand-owned *_impl.cs under %s declares its Ꮡ%s box", pkg, name, addressed, packageDir, name)
 			}
 		}
 	}

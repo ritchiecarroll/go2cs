@@ -808,7 +808,7 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
                 // different offsets for the same targetpc
                 // than the other way around, so we'll usually
                 // fail in the first clause.
-                var ent = cache.at(pcvalueCache.Ꮡentries, (nint)(ck)).at<pcvalueCacheEnt>(i);
+                var ent = cache.at(pcvalueCache.Ꮡentries, (ulong)(ck)).at<pcvalueCacheEnt>(i);
                 if ((~ent).off == off && (~ent).targetpc == targetpc) {
                     var (valΔ1, pcΔ1) = (ent.Value.val, ent.Value.valPC);
                     if (debugCheckCache){
@@ -865,7 +865,7 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
                 var cache = mp.of(m.ᏑpcvalueCache);
                 cache.Value.inUse++;
                 if ((~cache).inUse == 1) {
-                    var e = cache.at(pcvalueCache.Ꮡentries, (nint)(ck));
+                    var e = cache.at(pcvalueCache.Ꮡentries, (ulong)(ck));
                     var ci = cheaprandn((uint32)len((~cache).entries[ck]));
                     e.Value[ci] = e.Value[0];
                     e.Value[0] = new pcvalueCacheEnt(

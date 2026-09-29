@@ -1836,7 +1836,7 @@ internal static (ж<abi.Type> frametype, ж<Δsync.Pool> framePool, abiDesc abid
 
 // TypeFor returns the [Type] that represents the type argument T.
 public static ΔType TypeFor<T>() {
-    T v = default!;
+    T v = GoZero<T>();
     {
         var t = TypeOf(v); if (t != default!) {
             return t; // optimize for T being a non-interface kind

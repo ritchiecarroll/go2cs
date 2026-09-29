@@ -5,13 +5,14 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-// The runtime's Windows osinit residue - the two snapshots a managed program can take for itself,
-// standing in for the two initializers Go runs before any user code and go2cs emits already
+// The runtime's Windows osinit residue - the snapshots a managed program can take for itself,
+// standing in for the initializers Go runs before any user code and go2cs emits already
 // marked not-run. The Windows sibling of goenvs_impl.cs and goargs_impl.cs in the parent folder,
 // for the same reason and in the same shape.
 //
 // (1) THE SYSTEM DIRECTORY - initSysDirectory, below.
-// (2) LONG-PATH AWARENESS  - initLongPathSupport, at the end of this file.
+// (2) LONG-PATH AWARENESS  - initLongPathSupport, after it.
+// (3) THE PHYSICAL PAGE SIZE - physPageSize, at the end of this file.
 //
 // Go fills `runtime.sysDirectory` in initSysDirectory(), which osinit() calls before any user code:
 // `stdcall2(_GetSystemDirectoryA, &sysDirectory[0], len(sysDirectory)-1)`, then it appends a
@@ -129,5 +130,19 @@ partial class runtime_package
     internal static void ᴛInitLongPathSupport()
     {
         canUseLongPaths = builtin.WindowsLongPathsEnabled;
+    }
+
+    // The physical page size, the third piece of Go's Windows osinit (W1, COORD ruling 2026-09-28), and
+    // the Windows twin of linux's os_linux_impl.cs. Go sets `physPageSize = getPageSize()` in osinit, from
+    // GetSystemInfo's dwPageSize, before any Go code; osinit never runs here, so every reader saw 0. That
+    // is not a harmless absence: mallocinit's own guard (`if physPageSize == 0`) and every
+    // alignUp(n, physPageSize) answer 0, so the page allocator's summary reservation asked the kernel
+    // for 0 bytes and threw "failed to reserve page summary memory" on the first page-allocator row.
+    // Environment.SystemPageSize IS dwPageSize on Windows. physHugePageSize stays 0, as Go leaves it on
+    // Windows.
+    [ModuleInitializer]
+    internal static void ᴛInitPhysPageSize()
+    {
+        physPageSize = (uintptr)(nuint)Environment.SystemPageSize;
     }
 }

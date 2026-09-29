@@ -122,7 +122,7 @@ public static nint SliceCapWithSize(uint64 size, uint64 c) {
 
 // SliceCap is like SliceCapWithSize but using generics.
 public static nint SliceCap<E>(uint64 c) {
-    E v = default!;
+    E v = GoZero<E>();
     var size = (uint64)@unsafe.Sizeof(v);
     return SliceCapWithSize(size, c);
 }

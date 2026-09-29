@@ -61,7 +61,7 @@ using static go.net.rpc.jsonrpc_package;
 
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("net/rpc/jsonrpc/client.go", "client.cs", "ACNKkgAQHLKCgoKCgoIACxKCgoLWsoKAgqaCgoKEgoKCgoKUgpSUpoKClKaCqqKokoKClA==")]
-[assembly: global::go.GoPositionMap("net/rpc/jsonrpc/server.go", "server.cs", "ACJKkgAQHIKCggALErKCgIKkuoKCgoKChKaCgpSCnMKCAAgKsoKCgoKUgoSUlIKClJSmgqyy")]
+[assembly: global::go.GoPositionMap("net/rpc/jsonrpc/server.go", "server.cs", "AA8eABIskgAQHIKCggALErKCgIKkuoKCgoKChKaCgpSCnMKCptSygoKCgpSChJSUgoKUlKaCrLI=")]
 // </GoSourcePositionMaps>
 
 namespace go.net.rpc;

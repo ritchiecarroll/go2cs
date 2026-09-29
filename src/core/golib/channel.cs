@@ -535,7 +535,9 @@ internal sealed class ChanCore<T> : ChanCore
         if (Closed && Qcount == 0)
         {
             Monitor.Exit(SyncRoot);
-            value = default!;
+            // A receive from a closed, drained channel yields the element type's Go ZERO value, which for a
+            // needy struct must be constructed (builtin.GoZero).
+            value = builtin.GoZero<T>();
             ok = false;
             return true;
         }
@@ -612,7 +614,10 @@ internal sealed class ChanCore<T> : ChanCore
             parked.Park.Wait();
         }
 
-        value = parked.Elem is null ? default! : (T)parked.Elem;
+        // Woken by a send, Elem is the value; woken by close, it is null and the receive yields the element type's
+        // Go ZERO value, which for a needy struct must be constructed (builtin.GoZero), exactly as the arm above for
+        // a channel that was already closed. The zero must not depend on whether this receive parked first.
+        value = parked.Elem is null ? builtin.GoZero<T>() : (T)parked.Elem;
         ok = parked.Ok;
         return true;
     }
@@ -1698,7 +1703,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     {
         if (SelectPending.TryConsume(m_core, out object? pending, out _))
         {
-            value = pending is null ? default! : (T)pending;
+            value = pending is null ? builtin.GoZero<T>() : (T)pending;
             return true;
         }
 
@@ -1725,7 +1730,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     {
         if (SelectPending.TryConsume(m_core, out object? pending, out ok))
         {
-            value = pending is null ? default! : (T)pending;
+            value = pending is null ? builtin.GoZero<T>() : (T)pending;
             return true;
         }
 

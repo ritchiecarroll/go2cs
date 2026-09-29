@@ -41,7 +41,11 @@ internal static class PointerTypeTemplate
                 public {{PointerPrefix}}<TElem> of<TElem>(FieldRefFunc<{{targetTypeName}}, TElem> fieldRefFunc) => m_value.of(fieldRefFunc);
                 
                 public {{PointerPrefix}}<TElem> at<TElem>(nint index) => m_value.at<TElem>(index);
-                
+
+                public {{PointerPrefix}}<TElem> at<TElem>(int index) => m_value.at<TElem>(index);
+
+                public {{PointerPrefix}}<TElem> at<TElem>(ulong index) => m_value.at<TElem>(index);
+
                 static {{targetTypeName}} IPointer<{{targetTypeName}}>.operator ~(IPointer<{{targetTypeName}}> value) => value.Value;
 
                 public static unsafe implicit operator {{className}}(uintptr value)

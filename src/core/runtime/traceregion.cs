@@ -59,7 +59,7 @@ internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) {
     if (block != nil) {
         var r = block.of(traceRegionAllocBlock.Ꮡoff).Add(n);
         if (r <= (uintptr)len((~block).data)) {
-            return block.at(traceRegionAllocBlock.Ꮡdata, (nint)(r - n)).Reinterpret<byte, notInHeap>();
+            return block.at(traceRegionAllocBlock.Ꮡdata, (ulong)(r - n)).Reinterpret<byte, notInHeap>();
         }
     }
     // Try to install a new block.
@@ -71,7 +71,7 @@ internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) {
         var r = block.of(traceRegionAllocBlock.Ꮡoff).Add(n);
         if (r <= (uintptr)len((~block).data)) {
             unlock(Ꮡa.of(traceRegionAlloc.Ꮡlock));
-            return block.at(traceRegionAllocBlock.Ꮡdata, (nint)(r - n)).Reinterpret<byte, notInHeap>();
+            return block.at(traceRegionAllocBlock.Ꮡdata, (ulong)(r - n)).Reinterpret<byte, notInHeap>();
         }
         // Add the existing block to the full list.
         block.Value.next = a.full;

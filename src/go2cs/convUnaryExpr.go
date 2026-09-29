@@ -66,13 +66,16 @@ func (v *Visitor) lazyArrayBackingProjection(baseType types.Type) string {
 	return ".Value"
 }
 
-// convArrayIndex emits an array/slice index expression for the golib `ж.at<T>(nint)`
-// element-address accessor. Go permits any integer type as an array/slice index and
-// converts it to `int` for the access; the `at` accessor takes `nint`, but C# has no
-// implicit nuint/uint/ulong→nint conversion, so a non-`int` index (e.g. a `uintptr`
-// loop var, or a `uint % 2` whose C# result type widens to `long`) must be narrowed
-// explicitly. An `int` index, or an untyped int constant (which renders as a plain int
-// literal), needs no cast. Mirrors Go's index-to-int conversion in the emitted C#.
+// convArrayIndex emits an array/slice index expression for the golib `ж.at<T>(…)`
+// element-address accessor, whose int, nint and ulong overloads each bounds-check the index
+// before any narrowing. A wide UNSIGNED index (uint/uint32/uint64/uintptr) takes `(ulong)` and
+// binds `at(ulong)`, so it keeps its full value as Go's does (goPanicIndexU): a `(nint)` cast
+// read an index at or above 2^63 as negative and reported `[-N]` without the length. It is a cast
+// rather than bare because the C# expression can be wider than its Go type (a `uint % 2` is a
+// C# long, which binds no overload bare), and widening to ulong loses no value. Any other
+// non-`int` integer index (int64, or a small kind such as a `uint8`) keeps its explicit `(nint)`
+// narrowing, which loses nothing. An `int` index, or an untyped int constant (which renders as a
+// plain int literal), needs no cast.
 func (v *Visitor) convArrayIndex(index ast.Expr) string {
 	expr := v.convExpr(index, nil)
 
@@ -80,6 +83,11 @@ func (v *Visitor) convArrayIndex(index ast.Expr) string {
 		info := basic.Info()
 
 		if info&types.IsInteger != 0 && info&types.IsUntyped == 0 && basic.Kind() != types.Int {
+			switch basic.Kind() {
+			case types.Uint, types.Uint32, types.Uint64, types.Uintptr:
+				return fmt.Sprintf("(ulong)(%s)", expr)
+			}
+
 			return fmt.Sprintf("(nint)(%s)", expr)
 		}
 	}

@@ -393,9 +393,9 @@ internal static void traceAdvance(bool stopTrace) {
     // Ordering is important here. traceCPUFlush may generate new stacks and dumping
     // stacks may generate new strings.
     traceCPUFlush(gen);
-    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (nint)(gen % 2)).dump(gen);
-    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑtypeTab, (nint)(gen % 2)).dump(gen);
-    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(gen % 2)).reset(gen);
+    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(gen % 2)).dump(gen);
+    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑtypeTab, (ulong)(gen % 2)).dump(gen);
+    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).reset(gen);
     // That's it. This generation is done producing buffers.
     systemstack(() => {
         @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
@@ -448,9 +448,9 @@ internal static void traceAdvance(bool stopTrace) {
         semrelease(Ꮡworldsema);
     }
     // Block until the trace reader has finished processing the last generation.
-    semacquire(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (nint)(gen % 2)));
+    semacquire(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2)));
     if (raceenabled) {
-        raceacquire(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (nint)(gen % 2))));
+        raceacquire(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2))));
     }
     // Double-check that things look as we expect after advancing and perform some
     // final cleanup if the trace has fully stopped.
@@ -529,13 +529,13 @@ internal static uintptr traceNextGen(uintptr gen) {
 // generation. Note: the provided generation must not have started yet.
 internal static void traceRegisterLabelsAndReasons(uintptr gen) {
     foreach (var (i, label) in gcMarkWorkerModeStrings[..]) {
-        Δtrace.markWorkerLabels[gen % 2][i] = ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(gen % 2)).put(gen, label));
+        Δtrace.markWorkerLabels[gen % 2][i] = ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, label));
     }
     foreach (var (i, str) in traceBlockReasonStrings[..]) {
-        Δtrace.goBlockReasons[gen % 2][i] = ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(gen % 2)).put(gen, str));
+        Δtrace.goBlockReasons[gen % 2][i] = ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, str));
     }
     foreach (var (i, str) in traceGoStopReasonStrings[..]) {
-        Δtrace.goStopReasons[gen % 2][i] = ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(gen % 2)).put(gen, str));
+        Δtrace.goStopReasons[gen % 2][i] = ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, str));
     }
 }
 
@@ -620,9 +620,9 @@ internal static (slice<byte> buf, bool park) readTrace0() {
                         // Model synchronization on trace.doneSema, which te race
                         // detector does not see. This is required to avoid false
                         // race reports on writer passed to trace.Start.
-                        racerelease(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (nint)(gen % 2))));
+                        racerelease(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2))));
                     }
-                    semrelease(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (nint)(gen % 2)));
+                    semrelease(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2)));
                     // We're shutting down, and the last generation is fully
                     // read. We're done.
                     (buf, park) = (default!, false); goto ᒐdone;
@@ -638,9 +638,9 @@ internal static (slice<byte> buf, bool park) readTrace0() {
                 // advance until we've read it.
                 if (raceenabled) {
                     // See comment above in the shutdown case.
-                    racerelease(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (nint)(gen % 2))));
+                    racerelease(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2))));
                 }
-                semrelease(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (nint)(gen % 2)));
+                semrelease(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2)));
                 // Reacquire the lock and go back to the top of the loop.
                 @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
                 continue;

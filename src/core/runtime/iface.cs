@@ -406,7 +406,7 @@ internal static @unsafe.Pointer /*x*/ convT32(uint32 val) {
     @unsafe.Pointer x = default!;
 
     if (val < (uint32)len(staticuint64s)){
-        x = @unsafe.Pointer.FromPinnedBox(Ꮡstaticuint64s.at<uint64>((nint)(val)));
+        x = @unsafe.Pointer.FromPinnedBox(Ꮡstaticuint64s.at<uint64>((ulong)(val)));
         if (goarch.BigEndian) {
             x = (uintptr)add(x, 4);
         }
@@ -430,7 +430,7 @@ internal static @unsafe.Pointer /*x*/ convT64(uint64 val) {
     @unsafe.Pointer x = default!;
 
     if (val < (uint64)len(staticuint64s)){
-        x = @unsafe.Pointer.FromPinnedBox(Ꮡstaticuint64s.at<uint64>((nint)(val)));
+        x = @unsafe.Pointer.FromPinnedBox(Ꮡstaticuint64s.at<uint64>((ulong)(val)));
     } else {
         x = (uintptr)mallocgc(8, uint64Type, false);
         ((ж<uint64>)(uintptr)(x)).Value = val;

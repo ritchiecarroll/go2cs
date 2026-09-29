@@ -75,7 +75,7 @@ using static go.vendor.golang.org.x.net.route_package;
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/route/interface_classic.go", "interface_classic.cs", "AAscgoKUgoKUgoKUAAgSgoKUgoKmgoKUgoKU3IKUlIKCgpQ=")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/route/interface_multicast.go", "interface_multicast.cs", "AAgSgoKUgoKU7oKCgpQ=")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/route/message.go", "message.cs", "ABpCooKUgpKCgoKClIKUgoKUgIKUgoKUgpS2poKU")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/route/route.go", "route.cs", "AFGuAZIACioACgKCgoKCkoCCpIKUgoCIsoKUpA==")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/route/route.go", "route.cs", "ABMsgoKCgoIAOHiSAAoqAAoCgoKCgpKAgqSClIKAiLKClKQ=")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/route/route_classic.go", "route_classic.cs", "AAscgoKClIKmlIKCgpSUgoKCgoKCgpSClKaCgpSCgpQACRSCgpSCgoKU")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/route/sys.go", "sys.cs", "ABJEgoKU")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/route/sys_darwin.go", "sys_darwin.cs", "AAkSgpSkAAkUkKaSAAsckKaSAAYQgoKSgpKCkoKSgpKCkoKk")]

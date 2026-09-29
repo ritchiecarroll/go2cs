@@ -49,6 +49,7 @@ using static go.@internal.syslist_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
+[assembly: go.GoPositionMap("internal/syslist/syslist.go", "syslist.cs", "ABAiABcwABAi")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

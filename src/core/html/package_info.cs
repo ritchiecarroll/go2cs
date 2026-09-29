@@ -49,8 +49,8 @@ using static go.html_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("html/entity.go", "entity.cs", "ABssANsQuiEAXMIB")]
-[assembly: go.GoPositionMap("html/escape.go", "escape.cs", "ADdw4qqUgoKWgpKClIKCgoKCloKCgoKCgoKkgqSCtoKUgpSWkoKWlLaWvIKClIKUgpSWgsiiooKCpIKClIKAguqCggALHsIAAhDShIKWgoKCgoKUlIKCloKUlA==")]
+[assembly: go.GoPositionMap("html/entity.go", "entity.cs", "ABgqogDbELohAFzCAQ==")]
+[assembly: go.GoPositionMap("html/escape.go", "escape.cs", "ABQgACJQ4qqUgoKWgpKClIKCgoKCloKCgoKCgoKkgqSCtoKUgpSWkoKWlLaWvIKClIKUgpSWgsiiooKCpIKClIKAguqCgsYABhjCAAIQ0oSCloKCgoKClJSCgpaClJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -36,7 +36,7 @@ partial interface Number<ΔT> {
 public static T Sum<T>(slice<T> xs)
     where T : /* Number */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
-    T s = default!;
+    T s = GoZero<T>();
     foreach (var (_, x) in xs) {
         s += x;
     }

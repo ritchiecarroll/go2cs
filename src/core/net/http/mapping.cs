@@ -42,7 +42,7 @@ internal static nint maxSlice = 8;
 // The second return value is false if there is no value
 // with that key.
 internal static (V v, bool found) find<K, V>(this ж<mapping<K, V>> Ꮡh, K k) {
-    V v = default!;
+    V v = GoZero<V>();
     bool found = default!;
 
     ref var h = ref Ꮡh.DerefOrNull();

@@ -59,8 +59,8 @@ using static go.crypto.ecdh_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/ecdh/ecdh.go", "ecdh.cs", "AEKIAZaiAAIU8oKClKiCABI2AA4CgpSolqIAAhTygoKUqIKmgqqi")]
-[assembly: go.GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "ABkwgtaigoKClIKClNyWgpaCgpYACRSCgoKUgoKUgpTWooKCgpSCgpTcloKClAAJFNbGgpS4goKClJSCgpSUpgAJEIKUAAIQ0AAIHAADEtAACBwAAxLQAAgc")]
-[assembly: go.GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABQ20AAKDILWgoKUgoKAgqTWgoKUgpSCgrjugoKUgpQACAyygoKClKaChIKCgoTigoKChIKCgoKCgoKEgoKCgoKCgoKCgoKChIKCgoKWgoSCgqiSgoKU")]
+[assembly: go.GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "ABkwgtaigoKClIKClNyWgpaCgpYACRSCgoKUgoKUgpTWooKCgpSCgpTcloKClAAJFNbGgpS4goKClJSCgpSUpgAJEIKUAAIQ0KQABRgAAxLQpAAFGAADEtCkAAUY")]
+[assembly: go.GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABQ20KT4gtaCgpSCgoCCpNaCgpSClIKCuO6CgpSClAAIDLKCgoKUpoKEgoKChOKCgoKEgoKCgoKCgoSCgoKCgoKCgoKCgoKEgoKCgpaChIKCqJKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

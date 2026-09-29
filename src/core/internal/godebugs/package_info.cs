@@ -49,7 +49,7 @@ using static go.@internal.godebugs_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/godebugs/table.go", "table.cs", "AE6YAaSCgoKCgoKUgpSm")]
+[assembly: go.GoPositionMap("internal/godebugs/table.go", "table.cs", "AB42AC9ipIKCgoKCgpSClKY=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

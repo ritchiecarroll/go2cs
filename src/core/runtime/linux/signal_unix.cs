@@ -122,7 +122,7 @@ internal static void initsig(bool preinit) {
         return;
     }
     for (var i = (uint32)0; i < _NSIG; i++) {
-        var t = Ꮡsigtable.at<sigTabT>((nint)(i));
+        var t = Ꮡsigtable.at<sigTabT>((ulong)(i));
         if ((~t).flags == 0 || (int32)((~t).flags & (int32)_SigDefault) != 0) {
             continue;
         }
@@ -153,7 +153,7 @@ internal static bool sigInstallGoHandler(uint32 sig) {
     // Even these signals can be fetched using the os/signal package.
     var exprᴛ1 = sig;
     if (exprᴛ1 == _SIGHUP || exprᴛ1 == _SIGINT) {
-        if (atomic.Loaduintptr(ᏑfwdSig.at<uintptr>((nint)(sig))) == _SIG_IGN) {
+        if (atomic.Loaduintptr(ᏑfwdSig.at<uintptr>((ulong)(sig))) == _SIG_IGN) {
             return false;
         }
     }
@@ -164,7 +164,7 @@ internal static bool sigInstallGoHandler(uint32 sig) {
         // in non-cgo binaries.
         return true;
     }
-    var t = Ꮡsigtable.at<sigTabT>((nint)(sig));
+    var t = Ꮡsigtable.at<sigTabT>((ulong)(sig));
     if ((int32)((~t).flags & (int32)_SigSetStack) != 0) {
         return false;
     }
@@ -191,7 +191,7 @@ internal static bool sigInstallGoHandler(uint32 sig) {
 //go:nowritebarrierrec
 internal static void clearSignalHandlers() {
     for (var i = (uint32)0; i < _NSIG; i++) {
-        if (atomic.Load(ᏑhandlingSig.at<uint32>((nint)(i))) != 0) {
+        if (atomic.Load(ᏑhandlingSig.at<uint32>((ulong)(i))) != 0) {
             setsig(i, _SIG_DFL);
         }
     }
@@ -890,7 +890,7 @@ internal static void raisebadsignal(uint32 sig, ж<sigctxt> Ꮡc) {
     if (sig >= _NSIG){
         handler = _SIG_DFL;
     } else {
-        handler = atomic.Loaduintptr(ᏑfwdSig.at<uintptr>((nint)(sig)));
+        handler = atomic.Loaduintptr(ᏑfwdSig.at<uintptr>((ulong)(sig)));
         flags = sigtable[sig].flags;
     }
     // If the signal is ignored, raising the signal is no-op.
@@ -1069,10 +1069,10 @@ internal static bool sigfwdgo(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer c
     if (sig >= (uint32)len(sigtable)) {
         return false;
     }
-    var fwdFn = atomic.Loaduintptr(ᏑfwdSig.at<uintptr>((nint)(sig)));
+    var fwdFn = atomic.Loaduintptr(ᏑfwdSig.at<uintptr>((ulong)(sig)));
     var flags = sigtable[sig].flags;
     // If we aren't handling the signal, forward it.
-    if (atomic.Load(ᏑhandlingSig.at<uint32>((nint)(sig))) == 0 || !signalsOK) {
+    if (atomic.Load(ᏑhandlingSig.at<uint32>((ulong)(sig))) == 0 || !signalsOK) {
         // If the signal is ignored, doing nothing is the same as forwarding.
         if (fwdFn == _SIG_IGN || (fwdFn == _SIG_DFL && (int32)(flags & (int32)_SigIgn) != 0)) {
             return true;

@@ -52,8 +52,8 @@ using static go.vendor.golang.org.x.net.http.httpguts_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/http/httpguts/guts.go", "guts.cs", "ABEosoKClA==")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/http/httpguts/httplex.go", "httplex.cs", "AF6+AYKqooKCpqqgqOqClIKUrsKCgpSUqJKClKiSgpSClJSCpq7ArtKCAAIcAAsCgpSCgqaoAAwYgoKmADSaAQAmAoKCgqamgoKCpqqigpaCuIKUgqaUgpQ=")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/http/httpguts/guts.go", "guts.cs", "ABEosoKClKY=")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/http/httpguts/httplex.go", "httplex.cs", "AA4eAE+gAYKqooKCpqqgqOqClIKUrsKCgpSUqJKClKiSgpSClJSCpq7ArtKCAAIcAAsCgpSCgqaoAAwYgoKmABQIAB+SAQAmAoKCgqamgoKCpqqigpaCuIKUgqaUgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.net.http;

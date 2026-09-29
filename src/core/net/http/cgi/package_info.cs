@@ -76,7 +76,7 @@ using static go.net.http.cgi_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("net/http/cgi/cgi_main.go", "cgi_main.cs", "ABgmgpSCpPqigoKWgoKWgoKCloKCgoSClpSCgpSWhIKWgoKWgsqCgpQADAiSlJSUpIKkgqSCgoKUgoKClICCgqSCgoKmgoKCpoKm", "105-134:1")]
 [assembly: go.GoPositionMap("net/http/cgi/child.go", "child.cs", "ABc4woKClIKUpoKCgoCCtgAQCqKCgoKWgoKCgpaCgoSEgIKCgpSmgIK4goKUgIK4gpSCgoLMgIKmlIKClJSCgpS4goKClLqChK7CgoKUgpSClMqCgoCCpAALGIKmgqaCgpSClKaClIKUgq7CgpSCgoCCpIKC")]
-[assembly: go.GoPositionMap("net/http/cgi/host.go", "host.cs", "ACpOlKSkpKSkpAAbPoKClAACFAAJAoKCgIKCgoKCyIKm9tKCgoKWgoSCgpSAgqYADByAgqamgIKUpoKWooKUlIKClJaClICCpoKClISCgIK4goCCuIKWhJKCgpSUgpaCgpbugpSCgoKWgoKClICCpJKUgoKCgoKCgoKCgpSClIKCgpSCgpSCgoKClIKClIKUgoKUgoKCgpS0xoKCgpaAgoKClIK4goKCloLMgoKohIKC7uiigpS4ooKCgoIAChYAChamgpSkquY=", "221-224:1")]
+[assembly: go.GoPositionMap("net/http/cgi/host.go", "host.cs", "ACdIlIKUpKSkpKSkABs+goKUAAIUAAkCgoKAgoKCgoLIgqb20oKCgpaChIKClICCpgAMHICCpqaAgpSmgpaigpSUgoKUloKUgIKmgoKUhIKAgriCgIK4gpaEkoKClJSCloKClu6ClIKCgpaCgoKUgIKkkpSCgoKCgoKCgoKClIKUgoKClIKClIKCgoKUgoKUgpSCgpSCgoKClLTGgoKCloCCgoKUgriCgoKWgsyCgqiEgoLutKSigpS4ooKCgoIAChYAChamgpSkquY=", "221-224:1")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

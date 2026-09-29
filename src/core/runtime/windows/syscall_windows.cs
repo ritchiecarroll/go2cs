@@ -406,7 +406,7 @@ internal static void callbackWrap(ref callbackArgs a) {
     // If it's on the stack, then we will have reserved space for it
     // at the end of the frame, otherwise it was passed in a register.
     if (c.abiMap.dstStackSize != c.abiMap.retOffset){
-        a.result = ~Ꮡframe.at<byte>((nint)(c.abiMap.retOffset)).Reinterpret<byte, uintptr>();
+        a.result = ~Ꮡframe.at<byte>((ulong)(c.abiMap.retOffset)).Reinterpret<byte, uintptr>();
     } else {
         nint zero = default!;
         // On architectures with no registers, Ints[0] would be a compile error,

@@ -141,6 +141,12 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp
         // Return a noop cleanup.
         return new Cleanup(nil);
     }
+    // Go's findObject finds no span for the ZEROBASE, and isGoPointerWithoutSpan makes the cleanup a
+    // no-op (`return Cleanup{}`). Every zero-size allocation is that one pointer (golib's GoZeroBase),
+    // so registering against it would tie the cleanup to a referent that never dies.
+    if (GoZeroBase.Is(referent)) {
+        return new Cleanup(nil);
+    }
     // Go: `fn := func() { cleanup(arg) }`, closed over arg at registration. The closure is the whole
     // reason a cleanup needs no argument binding at dispatch, unlike a finalizer.
     S arg = argʗp;

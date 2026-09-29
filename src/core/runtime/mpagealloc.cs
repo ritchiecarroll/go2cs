@@ -308,14 +308,14 @@ internal static void init(this ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sy
     if (l2 == nil) {
         return default!;
     }
-    return l2.at<pallocData>((nint)(ci.l2()));
+    return l2.at<pallocData>((ulong)(ci.l2()));
 }
 
 // chunkOf returns the chunk at the given chunk index.
 //
 // The chunk index must be valid or this method may throw.
 [GoRecv] internal static ж<pallocData> chunkOf(this ref pageAlloc Δp, chunkIdx ci) {
-    return Δp.chunks[ci.l1()].at<pallocData>((nint)(ci.l2()));
+    return Δp.chunks[ci.l1()].at<pallocData>((ulong)(ci.l2()));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

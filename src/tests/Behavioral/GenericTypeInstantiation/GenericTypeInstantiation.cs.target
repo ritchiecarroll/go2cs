@@ -19,7 +19,7 @@ partial class main_package {
 [GoRecv] public static (T, bool) Pop<T>(this ref Stack<T> s)
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
-    T zero = default!;
+    T zero = GoZero<T>();
     if (len(s.elements) == 0) {
         return (zero, false);
     }
@@ -48,7 +48,7 @@ internal static bool consume<K, V>(Seq2Like<K, V> s, K k, V v) {
 }
 
 internal static @string describe<T>(@string label) {
-    T zero = default!;
+    T zero = GoZero<T>();
     _ = zero;
     return label;
 }

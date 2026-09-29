@@ -49,7 +49,7 @@ using static go.@internal.runtime.sys_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/sys/intrinsics.go", "intrinsics.cs", "ABpYkoKmqJKCAAwaqJIABDTygoKUgoKUgoKUAAkUAAEoABMCgoKCgoKCqJCmkKaSqqKCgoKCgoKCgoKCgoKqooKCgoKCgoKCAAIQAAcQAAgyABcEAAEq")]
+[assembly: go.GoPositionMap("internal/runtime/sys/intrinsics.go", "intrinsics.cs", "AAgS7gAKOJKCpqiSggAMGqiSAAQ08oKClIKClIKClAAJFAABKAATAoKCgoKCgqiQppCmkqqigoKCgoKCgoKCgoKCqqKCgoKCgoKCggACEAAHEAAIMgAXBAABKg==")]
 [assembly: go.GoPositionMap("internal/runtime/sys/no_dit.go", "no_dit.cs", "AAoWgKKAog==")]
 // </GoSourcePositionMaps>
 

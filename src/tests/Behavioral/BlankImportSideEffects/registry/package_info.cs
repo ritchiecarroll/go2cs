@@ -49,7 +49,7 @@ using static go.BlankImportSideEffects.registry_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("registry.go", "registry.cs", "AAYUgqiCgqiC")]
+[assembly: go.GoPositionMap("registry.go", "registry.cs", "zpaCqIKCqII=")]
 // </GoSourcePositionMaps>
 
 namespace go.BlankImportSideEffects;

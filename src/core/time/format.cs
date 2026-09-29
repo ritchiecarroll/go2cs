@@ -1722,7 +1722,7 @@ internal static (uint64 x, bytes rem, error err) leadingInt<bytes>(bytes s)
     where bytes : /* []byte | string */ IByteSeq<bytes, byte>, new()
 {
     uint64 x = default!;
-    bytes rem = default!;
+    bytes rem = GoZero<bytes>();
 
     nint i = 0;
     for (; i < len(s); i++) {

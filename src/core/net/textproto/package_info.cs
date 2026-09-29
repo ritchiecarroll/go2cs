@@ -62,9 +62,9 @@ using static go.net.textproto_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("net/textproto/header.go", "header.cs", "AAkaooKssgACENKClIKClAACENKClKiS")]
 [assembly: go.GoPositionMap("net/textproto/pipeline.go", "pipeline.cs", "ACFIsoKCgoKqoqqiqqKqogAMINKCgoKUgoKUgoKs0oKCgpSCgoKUgoKUgoI=")]
-[assembly: go.GoPositionMap("net/textproto/reader.go", "reader.cs", "AB5K0qqigqiSgoKUrLKCgoKCgpSCpoKUgoKmAAIqABICgqqigoKUgoKUqqKCgpQAAhDSgqiCgpSSloCC7oKChMyEgpSWgoKClIKClJSokoKCgpSUgoKUlKbSgoKUptKCgpSCgoKClIKGlAACKAAVAoKClAACOgAeAoKCgoKCgoKWgoKCgoKCgpSClIKUlAACJgASAoKCAAcS2AANEIKCgoKCgpSUlIKClIKClKaCgpSCgpSmgoKYgoK2ooKWgoK2koKUgraClIKUgpSqooKUgqa+sq7IsoKCgoKCgpSogoKUlJQABDAAEwIAAhD4soKCgpSWuoKWgIKCgoKUpoKCgqiCgpSCgpSCgqiCgqiEgoKClIKClMqCgpSWgs6gqrKClM7UgoKClIKCgoKUlJSUlAACFgAJBIKCgoKUgoKUgoKUlAAHGgAICgAXJgAFIAAMDAALCAACHAAKAoKogoKCpriClJSCloLqgqSUgpS4gIKkAAgQgoIAKFI=")]
+[assembly: go.GoPositionMap("net/textproto/reader.go", "reader.cs", "ABQsAAke0qqigqiSgoKUrLKCgoKCgpSCpoKUgoKmAAIqABICgqqigoKUgoKUqqKCgpQAAhDSgqiCgpSSloCC7oKChMyEgpSWgoKClIKClJSokoKCgpSUgoKUlKbSgoKUptKCgpSCgoKClIKGlAACKAAVAoKClAACOgAeAoKCgoKCgoKWgoKCgoKCgpSClIKUlAACJgASAoKCAAcS2AANEIKCgoKCgpSUlIKClIKClKaCgpSCgpSmgoKYgoK2ooKWgoK2koKUgraClIKUgpSqooKUgqa+sq7IsoKCgoKCgpSogoKUlJSmAAEqABMCAAIQ+LKCgoKUlrqCloCCgoKClKaCgoKogoKUgoKUgoKogoKohIKCgpSCgpTKgoKUloLOoKqygpSmmNSCgoKUgoKCgpSUlJSUAAIWAAkEgoKCgpSCgpSCgpSUAAcaAAgKABcmAAUgAAwMAAsIAAIcAAoCgqiCgoKmuIKUlIKWguqCpJSClLiAgqQACBCCggAoUg==")]
 [assembly: go.GoPositionMap("net/textproto/textproto.go", "textproto.cs", "AChQgs6CAA4gkgAGEJKqooKClAACNgAcAoKCgoKClKiSgpSClKiSgpSClKaCpoKC")]
-[assembly: go.GoPositionMap("net/textproto/writer.go", "writer.cs", "ABMqku6ygoKCAAIUAAkCgoKmgoIADSCygoKCpIKUlKaClIKCuIKCtoCCpJSmooKUgrSCpIKkpA==")]
+[assembly: go.GoPositionMap("net/textproto/writer.go", "writer.cs", "ABMqkqaSlrKCgoIAAhQACQKCgqaCggANILKCgoKkgpSUpoKUgoK4goK2gIKklKaigpSCtIKkgqSk")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

@@ -297,7 +297,7 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
                 race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
             }, ref ᒐ);
             seq(yield);
-            V v0 = default!;
+            V v0 = GoZero<V>();
             (Ꮡv.ValueSlot, ok) = (v0, false);
             seqDone = true;
         }
@@ -306,7 +306,7 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
     });
     var cʗ1 = c;
     next = () => {
-        V v1 = default!;
+        V v1 = GoZero<V>();
         bool ok1 = default!;
         race.Write(@unsafe.Pointer.FromPinnedBox(Ꮡracer)); // detect races
         if (done) {
@@ -422,8 +422,8 @@ public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
                 race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
             }, ref ᒐ);
             seq(yield);
-            K k0 = default!;
-            V v0 = default!;
+            K k0 = GoZero<K>();
+            V v0 = GoZero<V>();
             (Ꮡk.ValueSlot, Ꮡv.ValueSlot, ok) = (k0, v0, false);
             seqDone = true;
         }
@@ -432,8 +432,8 @@ public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
     });
     var cʗ1 = c;
     next = () => {
-        K k1 = default!;
-        V v1 = default!;
+        K k1 = GoZero<K>();
+        V v1 = GoZero<V>();
         bool ok1 = default!;
         race.Write(@unsafe.Pointer.FromPinnedBox(Ꮡracer)); // detect races
         if (done) {

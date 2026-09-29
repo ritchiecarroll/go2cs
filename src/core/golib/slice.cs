@@ -131,6 +131,10 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         return (nuint)NativeElementPointer(index);
     }
 
+    // The same address WITHOUT the length check, for builtin.ElementAddressUnchecked alone: Go's
+    // unsafe.SliceData is `&s[:1][0]`, the window's first element even when len(s) is 0 and cap(s) is not.
+    internal unsafe nuint NativeElementAddressUnchecked(nint index) => (nuint)NativeElementPointer(index);
+
     private slice(nuint nativeBase, nint low, nint high, nint max)
     {
         m_array = [];
@@ -166,6 +170,12 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     {
         if (System.Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             throw new PanicException($"native-backed slice: element type {typeof(T).Name} contains managed references and cannot alias native memory");
+
+        // A native view strides by the C# size, and Go laid the memory out by Go's: refuse a type whose two
+        // sizes differ (a Go zero-size field without the arc's explicit layout) rather than read and write
+        // past Go's elements (A17: 16-byte atomicScavChunkData over an 8-byte Go stride). See GoLayoutFacts.
+        if (GoLayoutFacts<T>.SizeDiverges)
+            throw new PanicException($"native-backed slice: element type {typeof(T).Name} is {System.Runtime.CompilerServices.Unsafe.SizeOf<T>()} bytes in C# but smaller in Go (a Go zero-size field without Go's explicit layout), so a native stride would not be Go's");
 
         if (baseAddress == 0 || length < 0)
             throw new PanicException("native-backed slice: nil base or negative length");

@@ -55,6 +55,7 @@ using static go.crypto.des_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/des/block.go", "block.cs", "AAsYgoKChIKEgoKmgqiCloKqooSCioKKgoqCigAJFLKCgpSmgoKCgoKogoKWhAAFELSCgpaCggAKGoKCAAkYgoIAChqCAAkWqsaChIKChIKChIKChIKCgqrCgoKUgoKClKiSloKWgpaUlL6y")]
 [assembly: go.GoPositionMap("crypto/des/cipher.go", "cipher.cs", "ABcqggAKEpKCloKWgoKmgKSCgpSClIKUpoKClIKUgpQAChKSgpaCloKCgoKmgKSCgpSClIKWgoKEgoSClIKUgpaChIKmgoKUgpSCloKChIKEgpSClIKWgoSC")]
+[assembly: go.GoPositionMap("crypto/des/const.go", "const.cs", "AA8cAAwaAAwaAAkUAAgSAAsYABIWACt4")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

@@ -78,7 +78,7 @@ internal static bool sigsend(uint32 s) {
     Ꮡsig.of(sigᴛ1.Ꮡdelivering).Add(1);
     // We are running in the signal handler; defer is not available.
     {
-        var w = atomic.Load(Ꮡsig.at(sigᴛ1.Ꮡwanted, (nint)(s / 32))); if ((uint32)(w & bit) == 0) {
+        var w = atomic.Load(Ꮡsig.at(sigᴛ1.Ꮡwanted, (ulong)(s / 32))); if ((uint32)(w & bit) == 0) {
             Ꮡsig.of(sigᴛ1.Ꮡdelivering).Add(-1);
             return false;
         }
@@ -90,7 +90,7 @@ internal static bool sigsend(uint32 s) {
             Ꮡsig.of(sigᴛ1.Ꮡdelivering).Add(-1);
             return true; // signal already in queue
         }
-        if (atomic.Cas(Ꮡsig.at(sigᴛ1.Ꮡmask, (nint)(s / 32)), mask, (uint32)(mask | bit))) {
+        if (atomic.Cas(Ꮡsig.at(sigᴛ1.Ꮡmask, (ulong)(s / 32)), mask, (uint32)(mask | bit))) {
             break;
         }
     }
@@ -222,10 +222,10 @@ public static void signal_enable(uint32 s) {
     }
     var w = sig.wanted[s / 32];
     w |= (uint32)(((uint32)1 << (int)(((uint32)(s & 31)))));
-    atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡwanted, (nint)(s / 32)), w);
+    atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡwanted, (ulong)(s / 32)), w);
     var i = sig.ignored[s / 32];
     i &= unchecked((uint32)~(uint32)(((uint32)1 << (int)(((uint32)(s & 31))))));
-    atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡignored, (nint)(s / 32)), i);
+    atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡignored, (ulong)(s / 32)), i);
     sigenable(s);
 }
 
@@ -239,7 +239,7 @@ public static void signal_disable(uint32 s) {
     sigdisable(s);
     var w = sig.wanted[s / 32];
     w &= unchecked((uint32)~(uint32)(((uint32)1 << (int)(((uint32)(s & 31))))));
-    atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡwanted, (nint)(s / 32)), w);
+    atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡwanted, (ulong)(s / 32)), w);
 }
 
 // Must only be called from a single goroutine at a time.
@@ -252,10 +252,10 @@ public static void signal_ignore(uint32 s) {
     sigignore(s);
     var w = sig.wanted[s / 32];
     w &= unchecked((uint32)~(uint32)(((uint32)1 << (int)(((uint32)(s & 31))))));
-    atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡwanted, (nint)(s / 32)), w);
+    atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡwanted, (ulong)(s / 32)), w);
     var i = sig.ignored[s / 32];
     i |= (uint32)(((uint32)1 << (int)(((uint32)(s & 31)))));
-    atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡignored, (nint)(s / 32)), i);
+    atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡignored, (ulong)(s / 32)), i);
 }
 
 // sigInitIgnored marks the signal as already ignored. This is called at
@@ -266,14 +266,14 @@ public static void signal_ignore(uint32 s) {
 internal static void sigInitIgnored(uint32 s) {
     var i = sig.ignored[s / 32];
     i |= (uint32)(((uint32)1 << (int)(((uint32)(s & 31)))));
-    atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡignored, (nint)(s / 32)), i);
+    atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡignored, (ulong)(s / 32)), i);
 }
 
 // Checked by signal handlers.
 //
 //go:linkname signal_ignored os/signal.signal_ignored
 public static bool signal_ignored(uint32 s) {
-    var i = atomic.Load(Ꮡsig.at(sigᴛ1.Ꮡignored, (nint)(s / 32)));
+    var i = atomic.Load(Ꮡsig.at(sigᴛ1.Ꮡignored, (ulong)(s / 32)));
     return (uint32)(i & (((uint32)1 << (int)(((uint32)(s & 31)))))) != 0;
 }
 

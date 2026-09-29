@@ -53,8 +53,8 @@ using static go.compress.lzw_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("compress/lzw/reader.go", "reader.cs", "AEy0AZKCgoKUgpSCgoKokoKCgpSClIKCgqiygoKCgpSClO7kgoKCgoKUgpSWgoKkgsaCgoKCtIK0kriCgpSCgpaSgoKUgoKUgsaCtIKCgpSCuJSCpoLYgs6igqqiggACHgAMAqaCgoLWgpSkpIKkgoKWgoKUgoKCgoKC")]
-[assembly: go.GoPositionMap("compress/lzw/writer.go", "writer.cs", "ADeCAZKCgoKAgqSClKiSgoKCgIKkgpQABhTSgoKClIKCgIKkgoKCgpSU2MKClIKUgIKCgoLIgoIABxCCgILIlIKCgqaCgoKClIK4gIKkpoCCgpSCtoKCgpTGgqrCgoKUppSCgIKkgILIgoCCyIKAgraCgpSAgraqooIAAhgACQKmgoKCpoKUpKSCpIKClIKClIKCgoKCgoI=")]
+[assembly: go.GoPositionMap("compress/lzw/reader.go", "reader.cs", "AEy0AZKCgoKUgpSCgoKokoKCgpSClIKCgqiygoKCgpSClO7kgoKCgoKUgpSWgoKkgsaCgoKCtIK0kriCgpSCgpaSgoKUgoKUgsaCtIKCgpSCuJSCpoLYgqaYooKqooIAAh4ADAKmgoKC1oKUpKSCpIKCloKClIKCgoKCgg==")]
+[assembly: go.GoPositionMap("compress/lzw/writer.go", "writer.cs", "ADeCAZKCgoKAgqSClKiSgoKCgIKkgpTKmtKCgoKUgoKAgqSCgoKClJTYwoKUgpSAgoKCgsiCggAHEIKAgsiUgoKCpoKCgoKUgriAgqSmgIKClIK2goKClMaCqsKCgpSmlIKAgqSAgsiCgILIgoCCtoKClICCtqqiggACGAAJAqaCgoKmgpSkpIKkgoKUgoKUgoKCgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;

@@ -420,6 +420,49 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         return new ElemRefBox<Telem>(array, (int)index);
     }
 
+    /// <summary>
+    /// <see cref="at{Telem}(nint)"/> for an UNSIGNED index, checked at its full value before any narrowing
+    /// (goPanicIndexU): the converter emits a uint/uint32/uint64/uintptr index bare onto this overload,
+    /// where a <c>(nint)</c> cast read an index at or above 2^63 as negative.
+    /// </summary>
+    // The int form completes Ꮡ(x, i)'s int/nint/ulong set, so a literal or a small-integer index keeps binding
+    // exactly with the ulong overload beside it.
+    public ж<Telem> at<Telem>(int index) => at<Telem>((nint)index);
+
+    public ж<Telem> at<Telem>(ulong index)
+    {
+        IArray<Telem> array = arrayView<Telem>();
+
+        if (index >= (ulong)array.Length)
+            throw RuntimeErrorPanic.IndexOutOfRange(index, array.Length);
+
+        return new ElemRefBox<Telem>(array, (int)index);
+    }
+
+    public ж<TElem> at<TElem>(FieldRefFunc<T, array<TElem>> fieldRefFunc, int index) => of(fieldRefFunc).at<TElem>(index);
+
+    public ж<TElem> at<TElem>(FieldRefFunc<array<TElem>> fieldRefFunc, int index) => of(fieldRefFunc).at<TElem>(index);
+
+    public ж<TElem> at<TElem>(FieldRefFunc<T, slice<TElem>> fieldRefFunc, int index) => of(fieldRefFunc).at<TElem>(index);
+
+    public ж<TElem> at<TElem>(FieldRefFunc<slice<TElem>> fieldRefFunc, int index) => of(fieldRefFunc).at<TElem>(index);
+
+    public ж<TElem> at<TElem>(FieldPtrFunc<T, array<TElem>> fieldPtrFunc, int index) => of(fieldPtrFunc).at<TElem>(index);
+
+    public ж<TElem> at<TElem>(FieldPtrFunc<T, slice<TElem>> fieldPtrFunc, int index) => of(fieldPtrFunc).at<TElem>(index);
+
+    public ж<TElem> at<TElem>(FieldRefFunc<T, array<TElem>> fieldRefFunc, ulong index) => of(fieldRefFunc).at<TElem>(index);
+
+    public ж<TElem> at<TElem>(FieldRefFunc<array<TElem>> fieldRefFunc, ulong index) => of(fieldRefFunc).at<TElem>(index);
+
+    public ж<TElem> at<TElem>(FieldRefFunc<T, slice<TElem>> fieldRefFunc, ulong index) => of(fieldRefFunc).at<TElem>(index);
+
+    public ж<TElem> at<TElem>(FieldRefFunc<slice<TElem>> fieldRefFunc, ulong index) => of(fieldRefFunc).at<TElem>(index);
+
+    public ж<TElem> at<TElem>(FieldPtrFunc<T, array<TElem>> fieldPtrFunc, ulong index) => of(fieldPtrFunc).at<TElem>(index);
+
+    public ж<TElem> at<TElem>(FieldPtrFunc<T, slice<TElem>> fieldPtrFunc, ulong index) => of(fieldPtrFunc).at<TElem>(index);
+
     public ж<TElem> at<TElem>(FieldRefFunc<T, array<TElem>> fieldRefFunc, nint index) => of(fieldRefFunc).at<TElem>(index);
 
     public ж<TElem> at<TElem>(FieldRefFunc<array<TElem>> fieldRefFunc, nint index) => of(fieldRefFunc).at<TElem>(index);
@@ -504,6 +547,14 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// box (and a native alias, which names no managed allocation) → the box itself.
     /// </remarks>
     public virtual object ReferentObject => this;
+
+    /// <summary>
+    /// Whether this pointer is <see cref="GoZeroBase"/>, the one address Go answers for every zero-byte
+    /// allocation. Only a heap box of a zero-size type and an element reference over the shared
+    /// zero-size or zero-capacity slot say yes; every other kind names its own storage. When it is true
+    /// the pointer's equality, hash, order token, referent and address are all the zerobase's.
+    /// </summary>
+    internal virtual bool NamesZeroBase => false;
 
     // The address this box converts to, minted by the same operator every `uintptr(p)` uses (nil -> 0,
     // native -> its address, fixed array -> its pinned data, value slot -> its stable address, all
@@ -769,6 +820,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
             return aliased;
         }
 
+        // The zerobase's address, read back as a pointer to a zero-size type: a zerobase pointer of
+        // that type, exactly what converting one to a number and back is in Go. The box answers the
+        // zerobase's identity (GoZeroBase), and a zero-size value has nothing to read or write.
+        if (GoZeroSizeFacts<T>.IsZeroSize && GoZeroBase.Is(resolved))
+            return new StandardBox<T>(default(T)!);
+
         // ARM 2 (§10.3): the token named a LIVE box whose pointee type is not T. COUNTED FIRST and
         // unconditionally, so the census still reports every arrival at this arm -- including the 2a
         // subset the line below now diverts. An instrument that stops counting the cases a fix
@@ -975,6 +1032,11 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         if (value is null || value.IsNull)
             return default;
 
+        // Every zerobase pointer is ONE address, the zerobase's own (GoZeroBase): Go's
+        // uintptr(unsafe.Pointer(new(struct{}))) is &zerobase for every such allocation.
+        if (value.NamesZeroBase)
+            return GoZeroBase.Address;
+
         // A pointer to a Go fixed array (`unsafe.Pointer(&arr)`): the native address must reference the
         // array's DATA (element 0), pinned so a syscall can fill it in and the managed reads afterward
         // observe the result — not the transient address of the `array<T>` struct wrapper. Slices keep
@@ -1050,6 +1112,10 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
         if (value is null || value.IsNull)
             return null;
+
+        // The zerobase's one address, as in the uintptr operator above.
+        if (value.NamesZeroBase)
+            return (void*)GoZeroBase.Address;
 
         // A pointer to a Go fixed array resolves to the pinned address of the array data — see the
         // uintptr operator above for the full rationale, including why the address is REGISTERED

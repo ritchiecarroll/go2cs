@@ -212,3 +212,16 @@ tracer, and net/http/pprof's trace subtest moves with it (COORD: that row banks 
 tracer). Darwin keeps its converted StartTrace (it has no hand-own); out of scope and named.
 
 -- G, 2026-09-27
+
+> **Amendment, 2026-09-28 (lane `claude/c1-q5-trace-start-pair`, coordinator-recorded).** "Darwin
+> keeps its converted StartTrace" is superseded. C1's stop-the-world seat displaced darwin's
+> StartTrace/StopTrace, and under layout L3 one `trace_impl.cs` body cannot both refuse and run the
+> tracer. So the merge of that seat into this design made the managed tracer the content of all
+> three `<goos>/trace_impl.cs` copies, byte-identical, and darwin now drives `ExecutionTracer` as
+> windows and linux do. That forced the `ReadTrace` registration from `goosWindowsLinux` to `goosAny`.
+> Its measured footprint is darwin only: `trace.cs` and the re-encoded `package_info.cs` map. After
+> it, darwin's `trace.cs` is blob-identical to linux's. The same lane brackets
+> `ExecutionTracer.Start()` with `stopTheWorld(stwStartTrace)`/`startTheWorld`, answering a refused
+> start before the stop, as Go does. `StopTrace` takes no pair, since Go's `traceAdvance` stops no
+> world. The design above is otherwise unchanged; darwin's tracer runs untested until the darwin run
+> layer exists.

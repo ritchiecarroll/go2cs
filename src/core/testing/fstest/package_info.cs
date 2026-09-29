@@ -61,8 +61,8 @@ using static go.testing.fstest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("testing/fstest/mapfs.go", "mapfs.cs", "AB1ekoKUgpSewoKCgoKCgoKCpriCgoKCgoKClO6CpoKUgpSIgpQADBaCpoKmgqaC7qSSAAgSgKKAooCigKKAooCigKKApIIACRSApICkgoKUgpSCgqaCyLTEgpSCpoKClIKClAAKFoCigKKCpoKCgpSClIKClII=", "103-105:1")]
-[assembly: go.GoPositionMap("testing/fstest/testfs.go", "testfs.cs", "ABlIABICgIKkgoCCkoKCgqaCgpSAgqS2pqKSgoKCgpSClIKCgoKUlIKCpoKUAAoYsqaCgoKClIKCgoKUAAgK9IKCgpSCgoKCmJKClJSCgpSCtIK0grSCgoKClLqCgoKCqIKCgoKogILKloCCpJKCgoKUloCCpJKCgoKClIKCgpSCgpSCgpSCgqaWgIKCgoKUhIKC3IKCgpSEgoKo2JKokqiSqJKAgqiSgoKCgoKCgpSUtLS0tMaUuoCCuIKCgoKClKaCpoKUhIKCgqiCgoKUgpaCgpaCgpS0grSCxqqigoKClIKCgoKUgpSCloKCgpSCpoKCpoKCuoKCgpSCgpaAgoKCgpSCgt7CgoKCgpS6goKWgoKCgoKClIKUlIKWgpaCgpSWAAgI0paCgoKWgoKCgpaAgsqWgIKCgoKUqIKUgoKClISigMiCgoKUloKCgpSSgIL4goKC6rKCgoKUupK4gpSAgu6AggAGEIKAgg==", "449-457:1;485-490:2;543-543:1;575-581:1")]
+[assembly: go.GoPositionMap("testing/fstest/mapfs.go", "mapfs.cs", "ABlWkpaSgpSClJ7CgoKCgoKCgoKmuIKCgoKCgoKU7oKmgpSClIiClAAMFoKmgqaCpoLupJIACBKAooCigKKAooCigKKAooCkggAJFICkgKSCgpSClIKCpoLItMSClIKmgoKUgoKUAAoWgKKAooKmgoKClIKUgoKUgg==", "103-105:1")]
+[assembly: go.GoPositionMap("testing/fstest/testfs.go", "testfs.cs", "ABlIABICgIKkgoCCkoKCgqaCgpSAgqS2pqKSgoKCgpSClIKCgoKUlIKCpoKUAAoYsqaCgoKClIKCgoKUAAgK9IKCgpSCgoKCmJKClJSCgpSCtIK0grSCgoKClLqCgoKCqIKCgoKogILKloCCpJKCgoKUloCCpJKCgoKClIKCgpSCgpSCgpSCgqaWgIKCgoKUhIKC3IKCgpSEgoKooqaSqJKokqiSgIKokoKCgoKCgoKUlLS0tLTGlLqAgriCgoKCgpSmgqaClISCgoKogoKClIKWgoKWgoKUtIK0gsaqooKCgpSCgoKClIKUgpaCgoKUgqaCgqaCgrqCgoKUgoKWgIKCgoKUgoLewoKCgoKUuoKCloKCgoKCgpSClJSCloKWgoKUlgAICNKWgoKCloKCgoKWgILKloCCgoKClKiClIKCgpSEooDIgoKClJaCgoKUkoCCxKSCgoLqsoKCgpS6kriClICC7oCCAAYQgoCC", "449-457:1;485-490:2;543-543:1;575-581:1")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

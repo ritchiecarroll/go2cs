@@ -76,7 +76,7 @@ internal static bool isNaN<T>(T x)
 public static T Or<T>(params Span<T> valsʗp) {
     var vals = valsʗp.sslice();
 
-    T zero = default!;
+    T zero = GoZero<T>();
     foreach (var (_, val) in vals) {
         if (!AreEqual(val, zero)) {
             return val;

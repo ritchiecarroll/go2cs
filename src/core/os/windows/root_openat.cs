@@ -111,7 +111,7 @@ internal static error rootRemove(ref Root r, @string name) {
 // then f must return errSymlink.
 // doInRoot will follow the symlink and call f again.
 internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, Func<syscallꓸHandle, @string, (T, error)> f) {
-    T ret = default!;
+    T ret = GoZero<T>();
     error err = default!;
     GoFrame ᒐ = default;
     try {

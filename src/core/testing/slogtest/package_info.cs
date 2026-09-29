@@ -63,7 +63,7 @@ using static go.testing.slogtest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("testing/slogtest/slogtest.go", "slogtest.cs", "ACpSAAsYAAkUAAsYpAAJEgAKFgALGAALGAALGgANHAAOHgAOHgAHEAANHIIABxCmAAoWpAAHNAAUBIKCgpSCmJKCgJKkgoKCgILIrsKykoKClIKCgoKAggAJEoKCgIKkuIKCgIKkuIKCgIKkgoKUuIKCgoKUgoKUABQSooKmgoKClO6ApII=", "285-298:1;305-310:1;314-319:1;323-332:1;336-346:1")]
+[assembly: go.GoPositionMap("testing/slogtest/slogtest.go", "slogtest.cs", "ACVIygALGAAJFAALGKQACRIAChYACxgACxgACxoADRwADh4ADh4ABxAADRyCAAcQpgAKFqQABzQAFASCgoKUgpiSgoCSpIKCgoCCyK7CspKCgpSCgoKCgIIACRKCgoCCpLiCgoCCpLiCgoCCpIKClLiCgoKClIKClAAUEqKCpoKCgpTugKSC", "285-298:1;305-310:1;314-319:1;323-332:1;336-346:1")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

@@ -85,3 +85,86 @@ internal static class GoZeroSizeFacts<T>
         return true;
     }
 }
+
+/// <summary>
+/// The element a non-nil ZERO-CAPACITY <see cref="slice{T}"/>'s data pointer names — golib's stand-in
+/// for the <c>zerobase</c> Go's <c>make([]T, 0)</c> answers.
+/// </summary>
+/// <remarks>
+/// <c>unsafe.SliceData</c> over a non-nil slice of capacity 0 returns "a non-nil pointer to an
+/// unspecified memory address", and no correct program reaches an element through it, because there
+/// is none. Minting element 0 of the slice's own backing named a slot that does not exist (a zero-length
+/// backing, or one past the end of a <c>s[len:len]</c> window), so reading or converting the pointer
+/// raised <see cref="IndexOutOfRangeException"/> — a host fault Go has no equivalent of. This element is
+/// real storage instead: one slot per element type, never charged to a Go allocation, and for a
+/// zero-size <typeparamref name="T"/> the very slot <see cref="GoZeroSizeFacts{T}.Storage"/> every
+/// element of every such slice already is.
+/// </remarks>
+/// <typeparam name="T">Element type of the zero-capacity slice.</typeparam>
+internal static class GoZeroCapacityElement<T>
+{
+    /// <summary>The shared element pointer.</summary>
+    internal static readonly ж<T> Element = new ElemRefBox<T>(new slice<T>(GoZeroCapacitySlot<T>.Backing), 0);
+}
+
+/// <summary>
+/// The one slot <see cref="GoZeroCapacityElement{T}"/> names. Its own class so that asking whether an
+/// element reference is over it (<see cref="ж{T}.NamesZeroBase"/>) never mints the element box, an
+/// allocation the counter would charge to whichever operation first asked.
+/// </summary>
+/// <typeparam name="T">Element type of the zero-capacity slice.</typeparam>
+internal static class GoZeroCapacitySlot<T>
+{
+    /// <summary>The slot; an element reference over it names <see cref="GoZeroBase"/>.</summary>
+    internal static readonly T[] Backing = GoZeroSizeFacts<T>.IsZeroSize ? GoZeroSizeFacts<T>.Storage : new T[1];
+}
+
+/// <summary>
+/// golib's <c>runtime.zerobase</c>: the ONE address Go's mallocgc answers for every zero-byte
+/// allocation, and the pointer every zero-size allocation here compares, hashes, orders and converts as.
+/// </summary>
+/// <remarks>
+/// <para>
+/// Go measured (go1.24.13, escaping values): <c>new(struct{})</c>, a named empty struct, a struct of
+/// only zero-size fields, every element of a <c>[]struct{}</c> and the data word of a
+/// <c>make([]T, 0)</c> are all <c>&amp;zerobase</c>, so they are one pointer, and a
+/// <c>map[*struct{}]V</c> keeps one key for two <c>new</c>s. runtime's own
+/// <c>var zerobase uintptr</c> is this box (runtime/malloc_impl.cs, a manualConversionVars
+/// registration), which is what makes runtime's <c>ZeroBase</c> equal to them.
+/// </para>
+/// <para>
+/// <b>Which pointers name it</b> (<see cref="ж{T}.NamesZeroBase"/>): a non-nil heap box of a zero-size
+/// type (<see cref="StandardBox{T}"/>), and an element reference over the shared zero-size slot or the
+/// zero-capacity slot (<see cref="GoZeroSizeFacts{T}.Storage"/>, <see cref="GoZeroCapacitySlot{T}"/>).
+/// <b>Which never do</b>: a field reference (Go points a zero-size field at the end of its struct), a
+/// native alias, a reinterpreting view, a zero-length ARRAY type (<see cref="GoZeroSizeFacts{T}"/>'s
+/// documented divergence), and a <see cref="HandleBox{T}"/>, runtime's opaque <c>*Func</c>, which is
+/// zero-size in Go but names a function rather than an allocation.
+/// </para>
+/// <para>
+/// Box OBJECTS stay distinct: nothing about allocation changes, so every table keyed on a box object
+/// answers as before. Only the answers to "which pointer is this" change: equality, hash, order token,
+/// referent and address. runtime treats the referent as Go treats zerobase, outside every heap span:
+/// SetFinalizer and AddCleanup register nothing and a Pinner ignores it.
+/// </para>
+/// </remarks>
+internal static class GoZeroBase
+{
+    /// <summary>The storage: runtime's <c>zerobase</c> word.</summary>
+    internal static readonly StandardBox<uintptr> Box = new(default(uintptr));
+
+    /// <summary>The order token every zerobase pointer answers: <see cref="Box"/>'s own.</summary>
+    internal static readonly nuint Token = Box.PointerOrderToken;
+
+    /// <summary>The hash every zerobase pointer answers.</summary>
+    internal static readonly int HashCode = System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(Box);
+
+    /// <summary>
+    /// The address every zerobase pointer converts to: <see cref="Box"/>'s pinned slot, pinned and
+    /// registered once by the ordinary conversion, so the number resolves back to <see cref="Box"/>.
+    /// </summary>
+    internal static readonly uintptr Address = (uintptr)(ж<uintptr>)Box;
+
+    /// <summary>Whether <paramref name="referent"/> is the zerobase allocation.</summary>
+    internal static bool Is(object? referent) => ReferenceEquals(referent, Box);
+}

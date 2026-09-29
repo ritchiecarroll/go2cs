@@ -211,7 +211,12 @@ private static object? goReferentOfBox(INilPointer box)
     if (isNativeAlias(box))
         return null;
 
-    return box.ReferentObject;
+    object referent = box.ReferentObject;
+
+    // The ZEROBASE, which every zero-size allocation is (golib's GoZeroBase), is outside every heap
+    // span in Go: setPinned "silently ignores" it and isPinned answers true. Not a Go pointer here
+    // either, so a pin never counts against it and a count never accrues across allocations.
+    return GoZeroBase.Is(referent) ? null : referent;
 }
 
 // NativeBox<T> is the one box kind that aliases a native address (the only override of

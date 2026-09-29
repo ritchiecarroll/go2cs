@@ -180,7 +180,7 @@ internal static int32 vdsoFindVersion(ж<vdsoInfo> Ꮡinfo, ref vdsoVersionKey v
     while (ᐧ) {
         if ((uint16)((~def).vd_flags & (uint16)_VER_FLG_BASE) == 0) {
             var aux = (ж<elfVerdaux>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(def), (uintptr)(~def).vd_aux));
-            if ((~def).vd_hash == ver.verHash && ver.version == gostringnocopy(info.symstrings.at<byte>((nint)((~aux).vda_name)))) {
+            if ((~def).vd_hash == ver.verHash && ver.version == gostringnocopy(info.symstrings.at<byte>((ulong)((~aux).vda_name)))) {
                 return (int32)((uint16)((~def).vd_ndx & 0x7fff));
             }
         }
@@ -199,14 +199,14 @@ internal static void vdsoParseSymbols(ж<vdsoInfo> Ꮡinfo, int32 version) {
         return;
     }
     bool apply(uint32 symIndex, vdsoSymbolKey k) {
-        var sym = Ꮡinfo.Value.symtab.at<elfSym>((nint)(symIndex));
+        var sym = Ꮡinfo.Value.symtab.at<elfSym>((ulong)(symIndex));
         var typ = _ELF_ST_TYPE((~sym).st_info);
         var bind = _ELF_ST_BIND((~sym).st_info);
         // On ppc64x, VDSO functions are of type _STT_NOTYPE.
         if (typ != _STT_FUNC && typ != _STT_NOTYPE || bind != _STB_GLOBAL && bind != _STB_WEAK || (~sym).st_shndx == _SHN_UNDEF) {
             return false;
         }
-        if (k.name != gostringnocopy(Ꮡinfo.Value.symstrings.at<byte>((nint)((~sym).st_name)))) {
+        if (k.name != gostringnocopy(Ꮡinfo.Value.symstrings.at<byte>((ulong)((~sym).st_name)))) {
             return false;
         }
         // Check symbol version.

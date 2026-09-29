@@ -22,7 +22,7 @@ namespace GolibTests;
 /// the entry and adds it back under the new key. That preserves the entry's position ONLY because
 /// Remove puts the freed entry on the dictionary's free list and the next Add takes it -- an
 /// implementation detail of the BCL, not a documented contract. If it ever changes, the replaced
-/// entry moves to the end, golib's insertion-ordered range reorders under an ordinary overwrite, and
+/// entry moves to the end, the map's Keys and Values views reorder under an ordinary overwrite, and
 /// nothing else fails. These rows fail LOUDLY instead.
 /// </para>
 /// <para>
@@ -35,6 +35,13 @@ public class MapKeyReplacementTests
 {
     private static readonly double NegZero = Math.CopySign(0.0, -1.0);
 
+    // The STORAGE order, read through the map's IDictionary Keys view, which is the dictionary's own.
+    // A range no longer shows it: each range starts at a random entry, as Go's does (map.cs,
+    // enumerateStore), so these rows read the slots directly. The mechanism they guard is unchanged:
+    // it is still what every Keys/Values view and IDictionary cast of a map exposes.
+    private static IEnumerable<TKey> Slots<TKey, TValue>(map<TKey, TValue> m) where TKey : notnull =>
+        ((IDictionary<TKey, TValue>)m).Keys;
+
     [TestMethod]
     public void Float64KeyReplacement_KeepsTheEntryPosition()
     {
@@ -44,11 +51,11 @@ public class MapKeyReplacementTests
         m[7.0] = 3;
         m[-1.0] = 4;
 
-        double[] before = m.Select(static kvp => (double)kvp.Key).ToArray();
+        double[] before = Slots(m).Select(static key => (double)key).ToArray();
 
         m[NegZero] = 20;
 
-        double[] after = m.Select(static kvp => (double)kvp.Key).ToArray();
+        double[] after = Slots(m).Select(static key => (double)key).ToArray();
 
         Assert.AreEqual(4, m.Count, "an overwrite adds no entry");
         CollectionAssert.AreEqual(before, after,
@@ -66,11 +73,11 @@ public class MapKeyReplacementTests
         m[(nint)5] = 3;
         m[(@string)"b"] = 4;
 
-        object[] before = m.Select(static kvp => kvp.Key).ToArray();
+        object[] before = Slots(m).ToArray();
 
         m[NegZero] = 20;
 
-        object[] after = m.Select(static kvp => kvp.Key).ToArray();
+        object[] after = Slots(m).ToArray();
 
         Assert.AreEqual(4, m.Count, "an overwrite adds no entry");
         Assert.AreEqual(before.Length, after.Length);
@@ -97,13 +104,13 @@ public class MapKeyReplacementTests
         for (int i = 9; i <= 16; i++)
             m[(double)i] = i;
 
-        int zeroIndex = m.Select(static kvp => (double)kvp.Key).ToList().IndexOf(0.0);
+        int zeroIndex = Slots(m).Select(static key => (double)key).ToList().IndexOf(0.0);
 
         for (int flip = 0; flip < 100; flip++)
             m[flip % 2 == 0 ? NegZero : 0.0] = flip;
 
         Assert.AreEqual(17, m.Count);
-        Assert.AreEqual(zeroIndex, m.Select(static kvp => (double)kvp.Key).ToList().IndexOf(0.0),
+        Assert.AreEqual(zeroIndex, Slots(m).Select(static key => (double)key).ToList().IndexOf(0.0),
             "the zero entry moved after repeated key replacement");
     }
 }

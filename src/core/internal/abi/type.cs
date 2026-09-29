@@ -132,7 +132,7 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
 
 // TypeFor returns the abi.Type for a type parameter.
 public static ж<Type> TypeFor<T>() {
-    T v = default!;
+    T v = GoZero<T>();
     {
         var t = TypeOf(v); if (t != nil) {
             return t; // optimize for T being a non-interface kind

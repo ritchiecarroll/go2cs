@@ -57,8 +57,8 @@ using static go.crypto.@internal.fips140.ecdh_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/ecdh/cast.go", "cast.cs", "ABIigtwAChbcgoKCgpSClA==")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/ecdh/ecdh.go", "ecdh.cs", "AB48gqaCAAcQggAcOIIADRyCAA0cggAPIIIAFSbSqIKCgILaqIKWgoIAChiSgoKUgpSW6PiCloKmloK4loLW1ILegIKmpqKCguaigpSCzoK6goKogILKqJKCgpSqooLMgpSCgpiSgoKo", "174-183:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/ecdh/cast.go", "cast.cs", "ABEehILcAAoW3IKCgoKUgpQ=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/ecdh/ecdh.go", "ecdh.cs", "AB48gqaCAAcQggAcOILu7oLu7oLuAAgSgu4ADhjSqIKCgILaqIKWgoIAChiSgoKUgpSW6PiCloKmloK4loLW1ILegIKmpqKCguaigpSCzoK6goKogILKqJKCgpSqooLMgpSCgpiSgoKo", "174-183:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

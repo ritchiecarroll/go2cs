@@ -124,7 +124,7 @@ retry:
     }
     // We have a block. Insert the span atomically, since there may be
     // concurrent readers via the block API.
-    block.at(spanSetBlock.Ꮡspans, (nint)(bottom)).StoreNoWB(Ꮡs);
+    block.at(spanSetBlock.Ꮡspans, (ulong)(bottom)).StoreNoWB(Ꮡs);
 }
 
 // pop removes and returns a span from buffer b, or nil if b is empty.
@@ -178,17 +178,17 @@ break_claimLoop:;
     // see a nil block here, since the length is always updated after
     // the block is set.
     var block = blockp.Load();
-    var s = block.at(spanSetBlock.Ꮡspans, (nint)(bottom)).Load();
+    var s = block.at(spanSetBlock.Ꮡspans, (ulong)(bottom)).Load();
     while (s == nil) {
         // We raced with the span actually being set, but given that we
         // know a block for this span exists, the race window here is
         // extremely small. Try again.
-        s = block.at(spanSetBlock.Ꮡspans, (nint)(bottom)).Load();
+        s = block.at(spanSetBlock.Ꮡspans, (ulong)(bottom)).Load();
     }
     // Clear the pointer. This isn't strictly necessary, but defensively
     // avoids accidentally re-using blocks which could lead to memory
     // corruption. This way, we'll get a nil pointer access instead.
-    block.at(spanSetBlock.Ꮡspans, (nint)(bottom)).StoreNoWB(nil);
+    block.at(spanSetBlock.Ꮡspans, (ulong)(bottom)).StoreNoWB(nil);
     // Increase the popped count. If we are the last possible popper
     // in the block (note that bottom need not equal spanSetBlockEntries-1
     // due to races) then it's our responsibility to free the block.

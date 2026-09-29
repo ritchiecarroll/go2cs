@@ -58,8 +58,107 @@ partial class runtime_package
         }
     }
 
+    // sysReserveOS / sysUsedOS / sysUnusedOS (W1, COORD ruling 2026-09-28): the page allocator's reserve,
+    // commit and decommit, reached once a row gets past sysAlloc. Go's bodies, their kernel calls made
+    // directly. sysReserveOS's converted body also wrote through its own parameter (`v = ...` on an
+    // unsafe.Pointer PARAMETER emitted as `v.Value = ...`, a converter defect routed separately), which
+    // this hand-own leaves behind.
+
+    internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n)
+    {
+        // v is just a hint. First try at v; this fails if any of [v, v+n) is already reserved.
+        nint p = VirtualAlloc((nint)(nuint)(uintptr)v, (nuint)n, (uint)_MEM_RESERVE, (uint)_PAGE_READWRITE);
+
+        if (p != 0)
+            return new @unsafe.Pointer((nuint)p);
+
+        // Next let the kernel choose the address.
+        p = VirtualAlloc(0, (nuint)n, (uint)_MEM_RESERVE, (uint)_PAGE_READWRITE);
+
+        return p == 0 ? nil : new @unsafe.Pointer((nuint)p);
+    }
+
+    internal static void sysUsedOS(@unsafe.Pointer v, uintptr n)
+    {
+        nint @base = (nint)(nuint)(uintptr)v;
+
+        if (VirtualAlloc(@base, (nuint)n, (uint)_MEM_COMMIT, (uint)_PAGE_READWRITE) == @base)
+            return;
+
+        // Commit failed: usually a range merged from two VirtualAlloc reservations, which one VirtualAlloc
+        // cannot span. Commit successively smaller pieces, exactly as Go does (see sysUnusedOS).
+        nuint k = (nuint)n;
+
+        while (k > 0)
+        {
+            nuint small = k;
+
+            while (small >= 4096 && VirtualAlloc(@base, small, (uint)_MEM_COMMIT, (uint)_PAGE_READWRITE) == 0)
+            {
+                small /= 2;
+                small &= ~(nuint)(4096 - 1);
+            }
+
+            if (small < 4096)
+            {
+                uint32 errno = (uint32)Marshal.GetLastPInvokeError();
+
+                if (errno == _ERROR_NOT_ENOUGH_MEMORY || errno == _ERROR_COMMITMENT_LIMIT)
+                {
+                    print((@string)"runtime: VirtualAlloc of "u8, n, (@string)" bytes failed with errno="u8, errno, (@string)"\n"u8);
+                    @throw((@string)"out of memory"u8);
+                }
+
+                print((@string)"runtime: VirtualAlloc of "u8, (uintptr)small, (@string)" bytes failed with errno="u8, errno, (@string)"\n"u8);
+                @throw((@string)"runtime: failed to commit pages"u8);
+            }
+
+            @base += (nint)small;
+            k -= small;
+        }
+    }
+
+    internal static void sysUnusedOS(@unsafe.Pointer v, uintptr n)
+    {
+        nint @base = (nint)(nuint)(uintptr)v;
+
+        if (VirtualFree(@base, (nuint)n, (uint)_MEM_DECOMMIT))
+            return;
+
+        // Decommit failed: usually memory merged from two different VirtualAlloc calls, and Windows lets
+        // each VirtualFree handle pages from a single VirtualAlloc. Free successively smaller pieces until
+        // something is freed, then repeat (Go's own O(n log n) walk).
+        nuint remaining = (nuint)n;
+
+        while (remaining > 0)
+        {
+            nuint small = remaining;
+
+            while (small >= 4096 && !VirtualFree(@base, small, (uint)_MEM_DECOMMIT))
+            {
+                small /= 2;
+                small &= ~(nuint)(4096 - 1);
+            }
+
+            if (small < 4096)
+            {
+                print((@string)"runtime: VirtualFree of "u8, (uintptr)small, (@string)" bytes failed with errno="u8, (uint32)Marshal.GetLastPInvokeError(), (@string)"\n"u8);
+                @throw((@string)"runtime: failed to decommit pages"u8);
+            }
+
+            @base += (nint)small;
+            remaining -= small;
+        }
+    }
+
     // TEST SEAMS (pinner_impl.cs's pattern; GolibTests is not in the InternalsVisibleTo grant).
     public static nuint GoSysAllocOS(nuint n) => ((uintptr)sysAllocOS(n)).Value;
 
     public static void GoSysFreeOS(nuint v, nuint n) => sysFreeOS(new @unsafe.Pointer(v), n);
+
+    public static nuint GoSysReserveOS(nuint v, nuint n) => ((uintptr)sysReserveOS(new @unsafe.Pointer(v), n)).Value;
+
+    public static void GoSysUsedOS(nuint v, nuint n) => sysUsedOS(new @unsafe.Pointer(v), n);
+
+    public static void GoSysUnusedOS(nuint v, nuint n) => sysUnusedOS(new @unsafe.Pointer(v), n);
 }

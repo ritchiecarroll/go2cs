@@ -126,10 +126,14 @@ func (scope goosScope) includes(goos string) bool {
 // on every allocation, and allocation here is a golib constructor that cannot reach runtime, so the
 // storage is golib's GoMemProfile.Rate and runtime declares `public static ref nint MemProfileRate`
 // over it (class M, piece M1, COORD ruling 2026-09-27). A ref property has no address of its own, so a
-// registered var must never be address-taken; TestManualConversionVarsAreDisplacedAndDeclared checks it.
+// registered var that Go takes the address of must have its impl declare the heap box too: the `Ꮡname`
+// member every `&name` emits. runtime's zerobase is that case: its storage is golib's GoZeroBase, the one
+// address every zero-size allocation shares, so `Ꮡzerobase` IS that box (Z, COORD ruling 2026-09-28).
+// TestManualConversionVarsAreDisplacedAndDeclared checks both members.
 var manualConversionVars = map[string]map[string]goosScope{
 	"runtime": {
 		"MemProfileRate": goosAny,
+		"zerobase":       goosAny,
 	},
 }
 
@@ -307,6 +311,14 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// flavour's mmap precedent). The other sys*OS bodies are displaced only when a row reaches them.
 		"sysAllocOS": goosWindows,
 		"sysFreeOS":  goosWindows,
+		// sysReserveOS / sysUsedOS / sysUnusedOS on WINDOWS (W1, COORD ruling 2026-09-28): the page
+		// allocator's reserve / commit / decommit, reached once the page-allocator rows got past sysAlloc.
+		// Same stdcall4 -> asmcgocall wall; mem_windows_impl.cs makes Go's kernel calls directly, with Go's
+		// halving retry and messages. sysReserveOS's converted body also wrote through its own unsafe.Pointer
+		// parameter (a converter defect, routed to its own seat).
+		"sysReserveOS": goosWindows,
+		"sysUsedOS":    goosWindows,
+		"sysUnusedOS":  goosWindows,
 		// addrRanges.init / add / cloneInto (increment 7 of the runtime row, W2a, 2026-09-05): the three
 		// writers that build a notInHeapSlice header FIELD BY FIELD over the managed a.ranges --
 		// `ranges := (*notInHeapSlice)(unsafe.Pointer(&a.ranges)); ranges.len = …; ranges.cap = …;
@@ -390,10 +402,10 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// pointer word ENDS and the mask reports WHICH words they are. GoReflect.GoGCMaskOf answers
 		// from that walk, so the hand-own reports the same truth at finer resolution rather than
 		// substituting a plausible one. runtime/mbitmap_impl.cs holds the body.
-		"pointerMask":  goosAny,
-		"g.guintptr": goosAny,
-		"setGNoWB":   goosAny,
-		"setMNoWB":   goosAny,
+		"pointerMask": goosAny,
+		"g.guintptr":  goosAny,
+		"setGNoWB":    goosAny,
+		"setMNoWB":    goosAny,
 		// runqempty reads runnext as `(*uintptr)(unsafe.Pointer(&pp.runnext))` -- a guintptr viewed as the
 		// number it hides, which the managed guintptr (it holds the ж<g> box) cannot give: golib refuses
 		// the reinterpret and the address route's Loaduintptr dereferences an order token (arm-2a, host
@@ -503,9 +515,12 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// trace output fails cleanly with a disclosable signature (runtime's own TestCrashWhileTracing
 		// and os/signal's TestSignalTrace are the measured consumers). Scoped windowsLinux — extended
 		// from linux-only 2026-09-02 once TestCrashWhileTracing showed windows hitting the identical
-		// gap; darwin's copy stays auto until its own arc (the lock_sema_impl.cs precedent: one
-		// hand-own, routed by L3 into a copy per targeted platform).
-		"StartTrace": goosWindowsLinux,
+		// gap, and to every target by the stop-the-world seat (ruling 2026-09-28 02:10, Q6): under the
+		// stop-the-world contract darwin's converted body would stop the world and enter a tracer the
+		// host does not have (the lock_sema_impl.cs precedent: one hand-own, routed by L3 into a
+		// byte-identical copy per targeted platform). The refusal described above is the pre-Q28
+		// state; see ReadTrace below for the managed tracer every copy now drives.
+		"StartTrace": goosAny,
 		// runtime.StopTrace, StartTrace's companion and registered for the same reason one level
 		// down. StartTrace's own hand-own comment claimed "StopTrace and the rest of the tracer stay
 		// auto: they are unreachable while StartTrace refuses" — MEASURED FALSE 2026-09-02, and the
@@ -520,7 +535,7 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// early-return at its own gen==0 check even if semacquire worked, so nothing observable is
 		// being skipped. ReadTrace and the rest of the tracer genuinely do stay auto: they are
 		// reached only from the goroutine trace.Start spawns AFTER it succeeds, which it never does.
-		"StopTrace": goosWindowsLinux,
+		"StopTrace": goosAny,
 		// runtime.ReadTrace joins them 2026-09-27 (Q28, the managed execution tracer): StartTrace now
 		// SUCCEEDS on these two flavors -- golib's ExecutionTracer writes Go's v2 trace from the
 		// goroutine registry -- so the goroutine trace.Start spawns reaches ReadTrace, whose converted
@@ -528,14 +543,36 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// waitReasonTraceReaderBlocked). The hand-own reads golib's buffered batches instead. The
 		// sentences above about refusal and unreachability describe the pre-Q28 state; the rest of the
 		// converted tracer stays auto and unreachable.
-		"ReadTrace": goosWindowsLinux,
-		// stopTheWorld refuses by name BEFORE it takes worldsema: the converted stopTheWorldWithSema
-		// died on the nil P while worldsema was held, which leaked the permit to every later caller
-		// once runtime's semaphore could park (sema_impl.cs). goroutineProfileWithLabels refuses by
-		// name before taking goroutineProfile.sema or the world, since its collector reads the
-		// throwing GetCallerSP/GetCallerPC intrinsics while holding both. See managed_impl.cs.
-		"stopTheWorld":               goosAny,
-		"goroutineProfileWithLabels": goosAny,
+		// All three names widened to every target 2026-09-28, reconciling the stop-the-world seat
+		// (which had displaced darwin's StartTrace and StopTrace) with the managed tracer: the
+		// <goos>/trace_impl.cs copies are byte-identical by L3's contract, so darwin takes the managed
+		// tracer and ReadTrace with it.
+		"ReadTrace": goosAny,
+		// THE STOP-THE-WORLD CONTRACT (owner ruling 2026-09-28 00:40; COORD's Q1-Q6 at 02:10). The
+		// pair keeps worldsema and records /sched/pauses; other goroutines are not suspended. Each
+		// region the runtime row reaches is managed or refuses BEFORE the world: flushallmcaches has
+		// no Ps to flush; the debug log (dlogImpl, dloggerImpl.s, debugLogReader.printVal,
+		// printDebugLogImpl, printDebugLogPC) is managed memory, prints through the runtime's own
+		// printer so DumpDebugLog captures it, and symbolizes through the caller records
+		// (debuglog_impl.cs); readMetricsLocked
+		// crosses through runtime/metrics; runtime_debug_WriteHeapDump writes a minimal dump inside
+		// the pair; goroutineProfileWithLabels keeps its count path and refuses its fill path before
+		// any semaphore. See managed_impl.cs.
+		"stopTheWorld":                goosAny,
+		"startTheWorld":               goosAny,
+		"flushallmcaches":             goosAny,
+		"goroutineProfileWithLabels":  goosAny,
+		"runtime_debug_WriteHeapDump": goosAny,
+		"readMetricsLocked":           goosAny,
+		"dlogImpl":                    goosAny,
+		"dloggerImpl.s":               goosAny,
+		"debugLogReader.printVal":     goosAny,
+		"printDebugLogImpl":           goosAny,
+		"printDebugLogPC":             goosAny,
+		// syscall.AllThreadsSyscall's runtime half refuses by name BEFORE the world (Q6): there are
+		// no Ms to signal, so a stop that now succeeds would run the call on one thread and report
+		// success. linux-only: the function exists only in os_linux.go (linux/os_linux_impl.cs).
+		"syscall_runtime_doAllThreadsSyscall": goosLinux,
 		// A HOST-FATAL throw turned into a refusal by name (managed_impl.cs): shrinkstack throws
 		// "missing stack in shrinkstack" because a goroutine here is a CLR thread with no Go stack
 		// (stack.lo is 0), which exited the process and lost every later test in the runtime row.

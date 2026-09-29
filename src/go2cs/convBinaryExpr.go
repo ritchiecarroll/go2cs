@@ -139,11 +139,16 @@ func (v *Visitor) foldedNamedFloatConstLiteral(operand ast.Expr, targetCSType st
 // INTEGER — explicitly (`uint64(1.0 / (retainExtraPercent / 100.0))`) or by its context (an operand
 // compared against a uint64, an int64 assignment) — when it mixes a NAMED untyped-int constant with a
 // float operand (a float literal or a named untyped-float constant). It returns "" for anything else.
-// The named int constant emits as an UntypedInt wrapper, and C# then binds the WRONG operator: with a
-// double literal, UntypedInt's own (the literal converted to UntypedInt, truncated: 10 / 100.0 is 0,
-// then 1 / 0 throws); with an UntypedFloat, no user-defined operator applies and C# falls back to
-// int32 arithmetic. Go's constant is exact and, under an integer type, integral, so the fold renders
-// that value in the float fold's comment form, typed the way overflowingConstLiteral types its folds.
+// The named int constant emits as an UntypedInt wrapper, and C# then binds the WRONG operator for a
+// double literal: UntypedInt's own (the literal converted to UntypedInt, truncated: 10 / 100.0 is 0,
+// then 1 / 0 throws). Beside a named untyped-FLOAT constant, golib's implicit UntypedInt -> UntypedFloat
+// widening (the mixed-untyped-arithmetic seat, 9598083d48) binds UntypedFloat's operator, so such a pair
+// computes in float64 rather than int32. That widening reaches these sites too, but float64 rounds where
+// Go's constant is exact (a product past 2^53 loses its low bits, the widening seat's stated limit). So
+// the fold runs FIRST and stays the answer at every site it takes, whichever operator C# would bind
+// otherwise: Go's constant is exact
+// and, under an integer type, integral, so the fold renders that value in the float fold's comment form,
+// typed the way overflowingConstLiteral types its folds.
 // Pure-integer and pure-float expressions, and a float operand beside only integer LITERALS, keep
 // their emission: C# already evaluates those correctly.
 func (v *Visitor) foldedMixedIntegerConstLiteral(expr ast.Expr) string {

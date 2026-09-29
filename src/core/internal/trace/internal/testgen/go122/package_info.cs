@@ -67,7 +67,7 @@ using static go.@internal.trace.@internal.testgen.testkit_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/internal/testgen/go122/trace.go", "trace.cs", "ABsutIKClKaWloCCABw2koIABhKigqiSrNKssq7i3IKolJKCgqiCqIKogoKoAAcQooKCgIK2ABtE0oKUyoKuwoKUgIKkgoKuwoKUgpSCgoKAgqSCgqjEgqiCgpaCgqKCgoKUloKCppaCgoKWgoKmpoIACx7SgoKUgoKCgpSUlIKAgqSClKaCgoKClIKUpKSkpKSkpKSkpKSs0paCgoKUgoKoqLLKgg==")]
+[assembly: go.GoPositionMap("internal/trace/internal/testgen/go122/trace.go", "trace.cs", "ABsutIKClKaWloCCxAAXMpKCAAYSooKokqzSrLKu4tyCqJSSgoKogqiCqIKCqAAHEKKCgoCCtgANHgANJtKClMqCrsKClICCpIKCrsKClIKUgoKCgIKkgoKoxIKogoKWgoKigoKClJaCgqaWgoKCloKCpqaCAAse0oKClIKCgoKUlJSCgIKkgpSmgoKCgpSClKSkpKSkpKSkpKSkrNKWgoKClIKCqKiyyoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace.@internal.testgen;

@@ -74,12 +74,12 @@ using static go.@internal.pkgbits_package;
 
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("internal/pkgbits/codes.go", "codes.cs", "ABQsgKKAAA0igKKAABMugKKA")]
-[assembly: global::go.GoPositionMap("internal/pkgbits/decoder.go", "decoder.cs", "ADh+sKaQqrLOhIKChIKWgoKCloSChIKEhIKEqJKCgpSokqiSgoKqooKClIKUqqKEgoKUhKiSqqKSgq7CkoKmooKs0tyCgoKCgpamotyCgoKCgpSUgoKWAAwegoK4ooKCrNKCgoKCgoKUlIKClJSClMqCloKClKaCgoKu4oKWgoKCgpaCABAmhIKClIKWgoKCgsyosoKCgoKokoKokoKokICAgKaQgICAppCAgIAAAhLygqrCgqrCgqqigoKUqqKCgoKClKaCgKqkpKSkgoKkAAIdAAUmgoKClKaCgoIAAhQACAKCgpKClIKUqsKCgoKCkoKCgoKCloKEhKiQ")]
+[assembly: global::go.GoPositionMap("internal/pkgbits/decoder.go", "decoder.cs", "ADh+sKaQqrLOhIKChIKWgoKCloSChIKEhIKEqJKCgpSokqiSgoKqooKClIKUqqKEgoKUhKiSqqKSgq7CkoKmooKs0tyCgoKCgpamotyCgoKCgpSUgoKWAAwegoK4ooKCrNKCgoKCgoKUlIKClJSClKaUgpaCgpSmgoKCruKCloKCgoKWggAQJoSCgpSCloKCgoLMqLKCgoKCqJKCqJKCqJCAgICmkICAgKaQgICAAAIS8oKqwoKqwoKqooKClKqigoKCgpSmgoCqpKSkpIKCpAACHQAFJoKCgpSmgoKCAAIUAAgCgoKSgpSClKrCgoKCgpKCgoKCgpaChISokA==")]
 [assembly: global::go.GoPositionMap("internal/pkgbits/encoder.go", "encoder.cs", "ACZMkAACEvIABhLSgoSSloSCgoKUmJKCgqiCgoKCuoKCgrqCgoSqooCCgqaCgoKssoKCruKChAASLrKGkrqClIKCgoKCgpaCgoSmgoK4goKCgqaUgoKWpoKCgoCCtpaCgoKmgoKewoKCgrqCgoIAAyIADQKCgoKUgoKokoKokoKokICmkKaQAAIQ4oKokoIAAhLiqqKCqqKCgryigoKClLiCtLSCtIK0grSCtIKCtILIooKCpoKCqJA=", "61-63:1")]
 [assembly: global::go.GoPositionMap("internal/pkgbits/support.go", "support.cs", "AAoSgoK4og==")]
 [assembly: global::go.GoPositionMap("internal/pkgbits/sync.go", "sync.cs", "AA8cspKUhJQABBCygpaCgoKCgg==", "16-21:1")]
-[assembly: global::go.GoPositionMap("internal/pkgbits/syncmarker_string.go", "syncmarker_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoLugoKClA==")]
-[assembly: global::go.GoPositionMap("internal/pkgbits/version.go", "version.cs", "ACamAZI=")]
+[assembly: global::go.GoPositionMap("internal/pkgbits/syncmarker_string.go", "syncmarker_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoLKlIKCgpQ=")]
+[assembly: global::go.GoPositionMap("internal/pkgbits/version.go", "version.cs", "ABiIAQAHEN6S")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

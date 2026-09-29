@@ -462,6 +462,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A COMPLEX constant expression must be FOLDED — .NET's mixed operators are not Go's arithmetic](manual-conversions.md#a-complex-constant-expression-must-be-folded--nets-mixed-operators-are-not-gos-arithmetic)
   - [Realizing the runtime TIMER contract (`Sleep` / `newTimer` / `stopTimer` / `resetTimer`)](manual-conversions.md#realizing-the-runtime-timer-contract-sleep--newtimer--stoptimer--resettimer)
   - [The runtime's PROCESS-CONTROL surface: implement the CONTRACT, never the mechanism](manual-conversions.md#the-runtimes-process-control-surface-implement-the-contract-never-the-mechanism)
+  - [Stop-the-world: the CONTRACT model, and the regions that run without Ps](manual-conversions.md#stop-the-world-the-contract-model-and-the-regions-that-run-without-ps)
   - [The GC measurement surface — one recorder, one ring, one snapshot](manual-conversions.md#the-gc-measurement-surface--one-recorder-one-ring-one-snapshot)
   - [`iter.Pull`'s coro — a symmetric handoff between two threads, and the goroutine count that had never been wired](manual-conversions.md#iterpulls-coro--a-symmetric-handoff-between-two-threads-and-the-goroutine-count-that-had-never-been-wired)
   - [`sync.Pool` — a managed-reference ring slot, and a thread-affine stand-in for the P pin](manual-conversions.md#syncpool--a-managed-reference-ring-slot-and-a-thread-affine-stand-in-for-the-p-pin)

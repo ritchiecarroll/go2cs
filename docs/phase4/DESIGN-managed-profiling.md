@@ -191,6 +191,54 @@ it is predicted to move (linux). "Predicted" means read from code, not measured,
 >   pull companions instead of the semaphore is the alternative, and R decides between them.
 > Neither lane writes the other's file: P1's `sema_impl.cs` stays as it is.
 
+> **AMENDED 2026-09-28 (G, lane `claude/g-mutex-contention`; ruled by COORD, ledger 17:01).** The
+> `sync.Mutex` half as landed with class F (`435557647c`) did not record `TestMutexBlockFullAggregation`'s
+> contention: solo it passed 3/20 on windows at that commit and 0/20 on linux at the union, and its
+> full-row passes were borrowed from earlier tests' records (the assert reads the cumulative profile).
+> A probe in its two workers found 198-200 of 200 Locks classed uncontended while both overlapped
+> throughout. Two defects, each insufficient alone (the fast-path try alone left the guard arm at 2-8
+> events per 100 Locks; the restart alone left the real test at 3/20 solo):
+> - **Contention was a CurrentCount snapshot.** A Lock issued nanoseconds after its own thread's
+>   Release reads the gate free (the woken waiter has not consumed the release) and goes unstamped,
+>   then blocks. Now the profiling path tries `Wait(0)` first, Go's `cansemacquire` counterpart, and
+>   stamps only when it fails. Class F declined `Wait(0)` as "a newcomer barging ahead of the queue";
+>   that premise was wrong: .NET 10's `SemaphoreSlim.Wait()` already takes any free count ahead of
+>   queued or pulsed waiters, and a failed `Wait(0)` has no side effect, so try-then-`Wait()` grants
+>   in exactly the cases `Wait()` does. The rate-off path is unchanged.
+> - **The handoff cleared the waiter's stamp after one charge.** `SemaphoreSlim` lets the releaser take
+>   the gate straight back, and the woken waiter stays blocked in the same `Wait()` with its stamp gone,
+>   so no later Unlock records. Now `TryHandoff` restarts head and tail at `now`. For the waiters still
+>   queued that is go1.24.13 sema.go's dequeue, which resets the remaining list's head and tail to now
+>   (L438-440; a waiter queued behind them inherits that clock, L311); for a sole waiter it is lockSlow's
+>   re-call of `runtime_SemacquireMutex` on every failed wake (internal/sync/mutex.go:149), a fresh
+>   `semacquire1` whose own t0 (sema.go:169-173) `now` approximates, early by the wake latency (R's
+>   review, citation corrected 2026-09-28). Charges telescope; only `Acquired`, when the last stamped
+>   waiter leaves, clears the stamps.
+>
+> Stated deviations from Go's accounting, each accepted as such (the full list also stands at the site,
+> `sync/mutex.cs`):
+> 1. A failed try that then acquires inside `Wait()`'s own spin records a short block event, and can
+>    draw a short mutex charge, where Go's `lockSlow` spin records none.
+> 2. A blocked waiter that stamped nothing is invisible to both profiles; with the try this narrows to a
+>    rate turned on mid-wait.
+> 3. golib charges every Unlock while a stamped waiter is outstanding, where Go charges only an Unlock
+>    that semreleases to a waiter, so event COUNTS differ, and a woken waiter's run gap is included in
+>    its next charge.
+> 4. A waiter stamped after a charge but before the charged waiter retires is measured from the charge
+>    time (bounded by wake latency).
+> 5. Go's 1.5*dt0 and 2*dt0 accounting quirks are not replicated.
+> 6. An uncontended Lock with a rate on skips the park scope, so tracer and traceback output differ by
+>    rate (closer to Go, which parks only a contended waiter).
+> 7. The try's equivalence to `Wait()` rests on `SemaphoreSlim` internals; re-verify it at each .NET
+>    major hop.
+>
+> Unchanged from class F: the block event's cycles end at wake (Go's at the releaser's
+> `readyWithTime`); one block event per Lock (Go's per `semacquire`); a handoff charges the OLDEST
+> stamp, not necessarily the waiter the gate wakes. `Lock` and `Unlock` are now `NoInlining`, since
+> each is its event's top frame (.NET 10 can inline a method with try/finally). Still unlanded and out
+> of this scope: the `RWMutex` / `WaitGroup` / `RuntimeSemaphore` half above; `s_outstanding` is
+> process-wide; the rate-off park around an uncontended `Wait` could be revisited as its own priced cut.
+
 **After I1 + I2 + I4, `net/http/pprof` is predicted bankable on linux** if class T is disclosed (§5):
 its only remaining divergences would be `/debug/pprof/trace` and the `TestHandlers` parent that rides
 it. Not measured; the Windows reading is owed at bank time.

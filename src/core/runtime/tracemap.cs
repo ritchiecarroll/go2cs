@@ -105,7 +105,7 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
                 return ((~n).id, false);
             }
         }
-        m = n.at(traceMapNode.Ꮡchildren, (nint)((hashIter >> (int)((8 * goarch.PtrSize - 2)))));
+        m = n.at(traceMapNode.Ꮡchildren, (ulong)((hashIter >> (int)((8 * goarch.PtrSize - 2)))));
         hashIter <<= (int)(2);
     }
 }

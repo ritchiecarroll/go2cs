@@ -83,10 +83,10 @@ using static go.image_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/format.go", "format.cs", "AB9K4oKCggAJFJKAgqSokoKUgoKmqJKCgoKCpq7CgoKClIKuwoKCgpSC")]
+[assembly: go.GoPositionMap("image/format.go", "format.cs", "AA8gAA8q4oKCggAJFJKAgqSokoKUgoKmqJKCgoKCpq7CgoKClIKuwoKCgpSC")]
 [assembly: go.GoPositionMap("image/geom.go", "geom.cs", "ABImkqiSqJKokqiSqJKsopKCgoKUgoKUqJIABxKSAA4gkqiSqJKokt6S3pIABRKygoKUgpSCgpSClKqigpSClIKUgtyClKiSgpSClIKUgpSClIKUqJKqoqiSrJKCuKyigpSClKiSgpSokoKUqJKokgAHFrKClIKUqqKClIKClIKClIKClKqigpSCgpQ=")]
 [assembly: go.GoPositionMap("image/image.go", "image.cs", "AFi6AfKCgpQADRyApICkgqaCgpSCgoKCgoIABxCCgpSCgqqipoKClIKCgoKCgqaCgpSCgoKCgqaCgpSCgoKCgqqiuIKUggAGEJKClJKCgoKmgpTYkgARJICkgKSCpoKClIKCAAcUoqaCgpSCgoKCgoKCgoKCpoKClIKCgoKCgoKCgqqiuIKUggAGEJKClJKCgoKmgpTYkgARJICkgKSCpoKCpoKClIKCqqKmgoKUgoKCgoKCpoKClIKCgoKUgoKCgoKmgoKUgoKCgoKqoriClIIABhCSgpSSgoKCpoKU2JIAESSApICkgqaCgqaCgpSCggAHFKKmgoKUgoKCgoKCgoKCgqaCgpSCgoKClIKCgoKCgoKCgqaCgpSCgoKCgoKCgoKqoriClIIABhCSgpSSgoKCpoKU2JIAESSApICkgqaCgoKmgoKUgqqipoKClIKmgoKUgqaCgpSCqqK4gpSCAAYQkoKUkoKCgqaClNiSABEkgKSApIKmgoKmgoKUgqqipoKClIKCgqaCgpSCgqaCgpSCgqqiuIKUggAGEJKClJKCgoKmgpTYkgARJICkgKSCpoKCgqaCgpSCqqKmgoKUgqaCgqaCgqaCgpSCqqK4gpSCAAYQktiSABEkgKSApIKmgoKmgoKUgqqipoKClIKCgqaCgqaCgoKmgoKUgoKqoriClIIABhCS2JIAESSApICkgqaCgqaCgpSCgqqipoKClIKCgoKCgqaCgpSCgoKCgoKmgoKUgoKCgoKqoriClIIABhCS2JIAEyiApICkgoKUgpSCpoKClIKClIKUggAHFKKmgoKUgqaCgpSCpoKClIKmgoKUgqqiuIK4ggAHEpKCkoKClIKUgoKUgoKm2qI=")]
-[assembly: go.GoPositionMap("image/names.go", "names.cs", "ABU4gqaCpoKmgKSApIKCqJKCqJI=")]
+[assembly: go.GoPositionMap("image/names.go", "names.cs", "AAoahISEAAcSgqaCpoKmgKSApIKCqJKCqJI=")]
 [assembly: go.GoPositionMap("image/ycbcr.go", "ycbcr.cs", "ABsugpSkpKSkpKQAGDKCpoKmgqaCgqaCgpSCggAGEqKqopSkpKSktqqiuIK4goIAChaCptKClIKkgqSCpIKkgqaCtKqitqiCloKCgoIAEyiCpoKmgoKmgoKUgoKCAAkYoqqiuILcgoKCAA4gkoKUkoKCgqaClKqipqiCloKCgoKC")]
 // </GoSourcePositionMaps>
 

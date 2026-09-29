@@ -82,6 +82,11 @@ public static void Read(slice<Sample> m) {
 
     global::go.runtime_package.readMetricsManaged(names, kinds, scalars, histCounts, histBuckets);
 
+    writeValues(m, kinds, scalars, histCounts, histBuckets);
+}
+
+// writeValues stores what the runtime computed into the caller's samples, index-aligned.
+internal static void writeValues(slice<Sample> m, slice<nint> kinds, slice<uint64> scalars, slice<slice<uint64>> histCounts, slice<slice<float64>> histBuckets) {
     for (nint i = 0; i < len(m); i++) {
         m[i].Value.kind = (ValueKind)kinds[i];
         m[i].Value.scalar = scalars[i];
@@ -99,6 +104,32 @@ public static void Read(slice<Sample> m) {
             m[i].Value.pointer = @unsafe.Pointer.FromPinnedBox(hist);
         }
     }
+}
+
+// The REVERSED crossing (ruling 2026-09-28 02:10, Q2). runtime's readMetricsLocked receives the
+// RAW ADDRESS of a []Sample backing store (ReadMetricsSlow, behind TestReadMetrics), and cannot
+// name Sample; this package registers the one piece it lacks. The address is the pinned box of the
+// first element, so unsafe.Slice rebuilds a window that ALIASES the caller's storage, and the values
+// land where Go's readMetricsLocked writes them. runtime runs its batch under the lock it holds.
+[global::System.Runtime.CompilerServices.ModuleInitializer]
+internal static void ᴛRegisterSampleCrossing() {
+    global::go.runtime_package.MetricSamplesCrossing = static (samplesp, n, batch) => {
+        ж<Sample> first = samplesp.RetainedSource as ж<Sample> ?? (ж<Sample>)(uintptr)samplesp;
+        slice<Sample> m = @unsafe.Slice(first, n);
+
+        var names = new slice<@string>(len(m));
+        var kinds = new slice<nint>(len(m));
+        var scalars = new slice<uint64>(len(m));
+        var histCounts = new slice<slice<uint64>>(len(m));
+        var histBuckets = new slice<slice<float64>>(len(m));
+
+        for (nint i = 0; i < len(m); i++) {
+            names[i] = m[i].Name;
+        }
+
+        batch(names, kinds, scalars, histCounts, histBuckets);
+        writeValues(m, kinds, scalars, histCounts, histBuckets);
+    };
 }
 
 } // end metrics_package

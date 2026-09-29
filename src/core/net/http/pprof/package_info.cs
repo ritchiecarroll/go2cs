@@ -68,7 +68,7 @@ using static go.net.http.pprof_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/pprof/pprof.go", "pprof.cs", "AGG+AYKCgpSCgoKCAAgMsoKCpqIACgyigoKEgviCgoKCgvyygoKClqiCgoCUlKSC3LKCgoKWqIKCgJSUpIKs0oKI2oSCgpSWgoKClIKCgoLMgoKUqKqiAAgKgoKCgoKUgIKCpIKClIKClIKUAAkGwoKCgqaCgpaEgoKClIKCgpaClLSCgqSUyIKCgpSChISCgoKWgoSCgtaCgoCCpIKCgpSCACNI4oCCgoK4goSCggAHEoLeiICCACoIgoIAACiCgpaOgpSKgg==", "416-418:1")]
+[assembly: go.GoPositionMap("net/http/pprof/pprof.go", "pprof.cs", "AGG+AYKCgpSCgoKCAAgMsoKCpqIACgyigoKEgviCgoKCgvyygoKClqiCgoCUlKSC3LKCgoKWqIKCgJSUpIKs0oKI2oSCgpSWgoKClIKCgoLMgoKUqKqiAAgKgoKCgoKUgIKCpIKClIKClIKUAAkGwoKCgqaCgpaEgoKClIKCgpaClLSCgqSUyIKCgpSChISCgoKWgoSCgqKkgoKAgqSCgoKUgqYACBIAFzDigIKCgriChIKCAAcSgt6IgIIAKgiCggAAKIKClo6ClIqC", "416-418:1")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

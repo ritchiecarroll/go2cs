@@ -80,7 +80,7 @@ internal static T orZero<T>(ж<T> Ꮡp)
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (Ꮡp == nil) {
-        T z = default!;
+        T z = GoZero<T>();
         return z;
     }
     return p;

@@ -4,15 +4,16 @@
 namespace go.@internal.runtime;
 
 using @unsafe = unsafe_package;
+using System.Runtime.InteropServices;
 
 partial class atomic_package {
 
 // Int32 is an atomically accessed int32 value.
 //
 // An Int32 must not be copied.
-[GoType] partial struct Int32 {
-    internal noCopy noCopy;
-    internal int32 value;
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Int32 {
+    [FieldOffset(0)] internal readonly noCopy noCopy;
+    [FieldOffset(0)] internal int32 value;
 }
 
 // Load accesses and returns the value atomically.
@@ -62,10 +63,10 @@ public static int32 Add(this ж<Int32> Ꮡi, int32 delta) {
 // 8-byte aligned on all platforms, unlike a regular int64.
 //
 // An Int64 must not be copied.
-[GoType] partial struct Int64 {
-    internal noCopy noCopy;
-    internal align64 _;
-    internal int64 value;
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Int64 {
+    [FieldOffset(0)] internal readonly noCopy noCopy;
+    [FieldOffset(0)] internal readonly align64 _;
+    [FieldOffset(0)] internal int64 value;
 }
 
 // Load accesses and returns the value atomically.
@@ -113,9 +114,9 @@ public static int64 Add(this ж<Int64> Ꮡi, int64 delta) {
 // Uint8 is an atomically accessed uint8 value.
 //
 // A Uint8 must not be copied.
-[GoType] partial struct Uint8 {
-    internal noCopy noCopy;
-    internal uint8 value;
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 1)] partial struct Uint8 {
+    [FieldOffset(0)] internal readonly noCopy noCopy;
+    [FieldOffset(0)] internal uint8 value;
 }
 
 // Load accesses and returns the value atomically.
@@ -183,9 +184,9 @@ public static void Store(this ж<Bool> Ꮡb, bool value) {
 // Uint32 is an atomically accessed uint32 value.
 //
 // A Uint32 must not be copied.
-[GoType] partial struct Uint32 {
-    internal noCopy noCopy;
-    internal uint32 value;
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Uint32 {
+    [FieldOffset(0)] internal readonly noCopy noCopy;
+    [FieldOffset(0)] internal uint32 value;
 }
 
 // Load accesses and returns the value atomically.
@@ -297,10 +298,10 @@ public static uint32 Add(this ж<Uint32> Ꮡu, int32 delta) {
 // 8-byte aligned on all platforms, unlike a regular uint64.
 //
 // A Uint64 must not be copied.
-[GoType] partial struct Uint64 {
-    internal noCopy noCopy;
-    internal align64 _;
-    internal uint64 value;
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Uint64 {
+    [FieldOffset(0)] internal readonly noCopy noCopy;
+    [FieldOffset(0)] internal readonly align64 _;
+    [FieldOffset(0)] internal uint64 value;
 }
 
 // Load accesses and returns the value atomically.
@@ -348,9 +349,9 @@ public static uint64 Add(this ж<Uint64> Ꮡu, int64 delta) {
 // Uintptr is an atomically accessed uintptr value.
 //
 // A Uintptr must not be copied.
-[GoType] partial struct Uintptr {
-    internal noCopy noCopy;
-    internal uintptr value;
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Uintptr {
+    [FieldOffset(0)] internal readonly noCopy noCopy;
+    [FieldOffset(0)] internal uintptr value;
 }
 
 // Load accesses and returns the value atomically.

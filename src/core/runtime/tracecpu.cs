@@ -181,7 +181,7 @@ internal static bool traceReadCPU(uintptr gen) {
             w.@byte((byte)traceEvCPUSamples);
         }
         // Add the stack to the table.
-        var stackID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (nint)(gen % 2)).put(pcBuf[..(int)(nstk)]);
+        var stackID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(gen % 2)).put(pcBuf[..(int)(nstk)]);
         // Write out the CPU sample.
         w.@byte((byte)traceEvCPUSample);
         w.varint(timestamp);
@@ -271,7 +271,7 @@ internal static void traceCPUSample(ж<g> Ꮡgp, ж<m> Ꮡmp, ж<Δp> Ꮡpp, sli
         osyield();
     }
     {
-        var log = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑcpuLogWrite, (nint)(gen % 2)).Load(); if (log != nil) {
+        var log = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑcpuLogWrite, (ulong)(gen % 2)).Load(); if (log != nil) {
             // Note: we don't pass a tag pointer here (how should profiling tags
             // interact with the execution tracer?), but if we did we'd need to be
             // careful about write barriers. See the long comment in profBuf.write.

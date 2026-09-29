@@ -57,9 +57,9 @@ using static go.errors_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("errors/errors.go", "errors.cs", "AD+AAaIABxCC")]
+[assembly: go.GoPositionMap("errors/errors.go", "errors.cs", "AD+AAaIABxCCAA8g")]
 [assembly: go.GoPositionMap("errors/join.go", "join.cs", "AAomAAoCgoKCpoKUpoKCpu6mgpaCgoKmpoI=")]
-[assembly: go.GoPositionMap("errors/wrap.go", "wrap.cs", "AA8i4oaClAACKAARAoKWggAKBoKCgpSAgqSUgoLGgoKmtAAELAARAoKUgpSCgoKUgoKU5oKCgoKUgIKklIKCxoKClIKmtA==")]
+[assembly: go.GoPositionMap("errors/wrap.go", "wrap.cs", "AA8i4oaClAACKAARAoKWggAKBoKCgpSAgqSUgoLGgoKmtAAELAARAoKUgpSCgoKUgoKU5oKCgoKUgIKklIKCxoKClIKmtMo=")]
 // </GoSourcePositionMaps>
 
 namespace go;

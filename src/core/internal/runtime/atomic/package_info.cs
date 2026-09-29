@@ -51,7 +51,7 @@ using static go.@internal.runtime.atomic_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/runtime/atomic/atomic_amd64.go", "atomic_amd64.cs", "ABpopqampqamAAQSpqampqampqamqsampqampqas")]
 [assembly: go.GoPositionMap("internal/runtime/atomic/stubs.go", "stubs.cs", "AAoYpqampqampqamqsampqam")]
-[assembly: go.GoPositionMap("internal/runtime/atomic/types.go", "types.cs", "ABEosqyyAAIQ0q7CAAIU8gANIrKssgACENKuwgACFPIAChyyrLIAAhTyAAIU8gAKHLKssoKClAAKHLIAAhgACQKssgACGAAJAgACENIAAhoACgKuwgACFPIAAhTyAAIU8gANIrKssgACENKuwgACFPIAChyyAAIYAAkCrLIAAhgACQIAAhDSrsIAAhTyAAwgsoKssgAQKLIAAhgACQKokqwABBwADAKssqYABhSyAAIYAAkCrLIAAh4ADAKuwgAKFrI=")]
+[assembly: go.GoPositionMap("internal/runtime/atomic/types.go", "types.cs", "ABIosqyyAAIQ0q7CAAIU8gANIrKssgACENKuwgACFPIAChyyrLIAAhTyAAIU8gAKHLKssoKClAAKHLIAAhgACQKssgACGAAJAgACENIAAhoACgKuwgACFPIAAhTyAAIU8gANIrKssgACENKuwgACFPIAChyyAAIYAAkCrLIAAhgACQIAAhDSrsIAAhTyAAwgsoKssgAQKLIAAhgACQKokqwABBwADAKssqYABhSyAAIYAAkCrLIAAh4ADAKuwgAKFrI=")]
 [assembly: go.GoPositionMap("internal/runtime/atomic/types_64bit.go", "types_64bit.cs", "AAgkAAkCAAIYAAkC")]
 [assembly: go.GoPositionMap("internal/runtime/atomic/unaligned.go", "unaligned.cs", "/oI=")]
 // </GoSourcePositionMaps>

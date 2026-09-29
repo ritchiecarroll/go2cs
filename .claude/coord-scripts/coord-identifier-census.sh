@@ -152,7 +152,12 @@
 # the cost of the strict reading falls on the writer, as one rewrite of their own post. The version,
 # branch, assembly and documentation-constant context rules apply ONLY in tree mode, where their job
 # is to CLASSIFY the pre-existing hits of a long shared surface -- an unclassified total is a number,
-# never a finding. THE ONE EXCLUSION STRICT MODE TAKES is the release_literal ADMIT SET (rule 5): it
+# never a finding. So does rule 6, the POSITION-MAP FUNCTION-LITERAL rule (2026-09-28): a quad that is
+# exactly the closure-counter suffix of one funcLits entry, inside the FOURTH argument of a
+# GoPositionMap record, is excluded and counted as `position-map-funclit`. It reads the record around
+# the quad, so it is a context rule, and STRICT refuses it for the reason it refuses the others -- a
+# lane can write its sentence as a record. The reasoning is on the rule, in scanIpv4.
+# THE ONE EXCLUSION STRICT MODE TAKES is the release_literal ADMIT SET (rule 5): it
 # is read on the QUAD'S OWN CHARACTERS and on nothing around it, so unlike a context rule it cannot
 # be arranged by the sentence a lane writes -- which is exactly why a context rule is refused here
 # and a shape admit is not. What it costs is stated on that arm's own line in the definition.
@@ -760,7 +765,9 @@ function scanArm(arm, lineno, text, lo, pass, joinAt,   pos, s, e, mt, tok, ok) 
 
 # ---- the IPv4 arm --------------------------------------------------------------------------------
 # STRICT (entry/subject): no CONTEXT exclusion of any kind; the release_literal ADMIT SET (rule 5),
-# read on the quad's own shape, is the one exclusion it takes. DELTA (tree): rules 1-4, then rule 5.
+# read on the quad's own shape, is the one exclusion it takes. DELTA (tree): rules 1-4, then rule 5,
+# then rule 6 (a GoPositionMap record's function-literal suffix), which is a context rule and so
+# DELTA ONLY.
 # ipv4ParseAt walks a four-octet quad BY HAND from position p and sets IPV4E to the position of its
 # last digit. It returns 0 unless all four octets are there, 0-255, unpadded, and not followed by a
 # fifth digit -- the same acceptance the ipv4 ERE has, derived without the ERE.
@@ -831,6 +838,65 @@ function ipv4Extent(lo, rstart,   s) {
     }
     return 0
 }
+# csStrEnd walks ONE C# regular string literal whose opening quote is at p and returns the position
+# of its closing quote, or 0 if there is none on the line. A backslash escapes the character after
+# it, which is exactly how the converter's csharpStringLiteral writes the two it escapes (a quote and
+# a backslash), so an escaped quote inside an earlier argument can never be read as that argument's
+# end and shift the fourth argument's span.
+function csStrEnd(lo, p,   L, c) {
+    L = length(lo)
+    if (substr(lo, p, 1) != "\"") return 0
+    p++
+    while (p <= L) {
+        c = substr(lo, p, 1)
+        if (c == "\\") { p += 2; continue }
+        if (c == "\"") return p
+        p++
+    }
+    return 0
+}
+# posmapFunclit is RULE 6's whole decision, per OCCURRENCE: 1 only when ALL THREE hold.
+#   (1) the line IS a GoPositionMap record -- ipv4_posmap, the recogniser the DEFINITION carries,
+#       anchored at the line's start, and its argument list parses as exactly FOUR C# string
+#       literals joined by ", " and closed by ")]", as positionMapOperations.go emits it;
+#   (2) the candidate lies wholly INSIDE THE FOURTH argument -- the funcLits list -- and not in the
+#       Go file identity, the C# file name, the encoded table, or anything after the ")]";
+#   (3) it is EXACTLY THE SUFFIX of one well-formed entry: immediately preceded by
+#       <digits>-<digits>: whose first digit opens the argument or follows a ';', and immediately
+#       followed by a ';' or by the argument's closing quote.
+# The opening parenthesis is found by index() on the characters, never from RLENGTH: this file's
+# doctrine is that an engine's reported extent is an assumption (see ipv4Extent), and the prefix the
+# recogniser matched is one literal the line has to spell anyway.
+function posmapFunclit(lo, s, e,   p, i, q, open4, k) {
+    if (!("ipv4_posmap" in RE)) return 0
+    if (lo !~ RE["ipv4_posmap"]) return 0
+    p = index(lo, "gopositionmap(")
+    if (p == 0) return 0
+    p = p + length("gopositionmap(")
+    open4 = 0; q = 0
+    for (i = 1; i <= 4; i++) {
+        if (i > 1) { if (substr(lo, p, 2) != ", ") return 0; p = p + 2 }
+        q = csStrEnd(lo, p)
+        if (q == 0) return 0
+        if (i == 4) open4 = p
+        p = q + 1
+    }
+    if (substr(lo, p, 2) != ")]") return 0
+    # (2) q is now the FOURTH argument's closing quote and open4 its opening one.
+    if (s <= open4 || e >= q) return 0
+    # (3) the terminator, then the entry prefix read backwards from the candidate's own start.
+    if (!(substr(lo, e + 1, 1) == ";" || e + 1 == q)) return 0
+    k = s - 1
+    if (substr(lo, k, 1) != ":") return 0
+    k--
+    if (substr(lo, k, 1) !~ /[0-9]/) return 0
+    while (substr(lo, k, 1) ~ /[0-9]/) k--
+    if (substr(lo, k, 1) != "-") return 0
+    k--
+    if (substr(lo, k, 1) !~ /[0-9]/) return 0
+    while (substr(lo, k, 1) ~ /[0-9]/) k--
+    return (k == open4 || substr(lo, k, 1) == ";")
+}
 function scanIpv4(lineno, text, lo, pass, joinAt,   pos, s, e, quad, lq, k, b, cand, rs, rr, run, own, before, after, rstart, lastEnd) {
     pos = 0; lastEnd = 0
     while (1) {
@@ -899,6 +965,40 @@ function scanIpv4(lineno, text, lo, pass, joinAt,   pos, s, e, quad, lq, k, b, c
         # EXCLUSIONS block, so adding a rule cannot silently re-attribute what the others were
         # measured on. Per ARM: no other arm consults this set, and none of them gains an admit.
         if (admitted("release_literal", lq)) { EXC["ipv4\trelease-literal"]++; continue }
+
+        # RULE 6 -- a GoPositionMap record's FUNCTION-LITERAL SUFFIX, and IN DELTA MODE ONLY. The
+        # fourth argument of every record the converter emits into an info file is its funcLits list,
+        # "<startLine>-<endLine>:<suffix>" entries joined by ';', and the suffix is Go's own closure
+        # counter: a literal nested four deep carries four dotted integers, which is a quad to the
+        # candidate matcher and was refused as one. MEASURED 2026-09-28 at 15da8805b2: the aead.go record in
+        # crypto/internal/cryptotest's package_info.cs read four ipv4 hits in BOTH modes, all four of
+        # them depth-four suffixes; corpus-wide, six records carry such suffixes (two production
+        # package_info.cs, four package_test_info.cs). Every condition is per OCCURRENCE, never per
+        # line -- see posmapFunclit -- so a quad anywhere else on the same record still refuses.
+        #
+        # ⚠ WHY NOT IN STRICT, and it is rule 5's own test applied rather than a preference. This rule
+        # reads the LINE AROUND the quad -- the record's prefix, which argument it sits in, and the
+        # characters either side of it -- and a lane can arrange every one of those by writing its
+        # sentence AS A RECORD. That is a CONTEXT rule, exactly as rules 1, 2 and 4 are, and STRICT
+        # refuses context rules by design. The authorship argument is real -- nobody writes these by
+        # hand, and a rewritten suffix corrupts the frame names the runtime derives from it -- but this
+        # file's answer to "the lane did not author these bytes" is a MODE whose door is a property of
+        # the INPUT'S PATH (`converted`), never a context rule inside `entry`: package_test_info.cs and
+        # package_info_internal_test.cs are through that door already, where the quad arm is reported
+        # and cannot refuse. A production package_info.cs is not, and widening the door to it is a
+        # ruling, not this rule.
+        #
+        # ⚠ CONSULTED LAST, after rule 5, for rule 5's stated reason: an occurrence an older rule
+        # already disposes of keeps ITS reason in the EXCLUSIONS block, so adding this rule cannot
+        # re-attribute anything the others were measured on.
+        #
+        # A suffix nested FIVE or more deep is NOT rule 6's, and needs no rule: its leading four
+        # components are the candidate and are followed by a '.', so condition (3) fails -- but rule 2
+        # has already excluded it, because the token run is the whole dotted suffix and not exactly
+        # the quad. MEASURED at the same tip: the four such entries corpus-wide (three in crypto/tls's
+        # package_info.cs, one in runtime's package_test_info.cs) read token-run, and the twenty
+        # four-deep suffixes read position-map-funclit, in delta. A self-test case pins both.
+        if (STRICT == 0 && posmapFunclit(lo, s, e)) { EXC["ipv4\tposition-map-funclit"]++; continue }
 
         if (armRefuses("ipv4")) record("ipv4", pass, lineno, quad, text); else DOWN["ipv4"]++
     }
@@ -1884,6 +1984,64 @@ idc_mode_selftest() {
     idc_st_exc "  by ADJACENCY on the neighbouring words"         "ipv4|version-context" "$IDC_TMP/st.status"
 
     echo
+    echo "  B4. THE POSITION-MAP FUNCLIT RULE (rule 6) -- BOTH DIRECTIONS, IN THE MODE IT LIVES IN (DELTA)"
+    echo "      (every PASS asserts rule 6 is what excluded it; every REFUSE plant carries a genuine"
+    echo "       four-deep suffix too and asserts rule 6 fired on THAT, so each plant proves per"
+    echo "       OCCURRENCE -- the suffix beside it admitted, the planted quad still a hit)"
+    # The record exactly as positionMapOperations.go emits one: four C# string literals joined by
+    # ", ", the fourth the funcLits list. The file names and the table are synthetic and carry no
+    # context word, so no older rule can dispose of an occurrence here and read green for rule 6.
+    # The suffix is mid-list here (terminated by ';') and LAST in m02 (terminated by the closing
+    # quote), and m02 carries the global::-qualified spelling -- the two terminators and the two
+    # spellings, one case each.
+    printf '[assembly: go.GoPositionMap("x/lits/lits.go", "lits.cs", "AB8wwoKClqaC", "30-54:1;35-51:1.1;62-79:2.1.1;116-140:%d.%d.%d.%d;142-175:3.1.2")]\n' 3 1 1 1 > "$d/m01"
+    idc_st_case "DELTA admits a four-deep funclit suffix (mid-list)" "" "$d/m01" 0
+    idc_st_exc "  and RULE 6 is what admitted it"                 "ipv4|position-map-funclit" "$IDC_TMP/st.status"
+    printf '[assembly: global::go.GoPositionMap("x/lits/lits.go", "lits.cs", "AB8wwoKClqaC", "30-54:1;134-134:%d.%d.%d.%d")]\n' 3 1 1 2 > "$d/m02"
+    idc_st_case "DELTA admits it LAST in the list (global::)" "" "$d/m02" 0
+    idc_st_exc "  and RULE 6 is what admitted it"                 "ipv4|position-map-funclit" "$IDC_TMP/st.status"
+    # STRICT KEEPS ITS SEMANTICS, pinned: the same bytes at `entry` still refuse. Rule 6 reads the
+    # record around the quad, so it is a context rule, and STRICT takes none.
+    idc_st_case "STRICT still refuses the SAME record"          "ipv4" "$d/m01" 1
+    # THE REFUSE DIRECTION. Each plant is the same record shape with ONE real-looking quad placed
+    # where rule 6 must not reach, beside a genuine suffix that it must.
+    # 1st argument. It carries a SPACE on purpose, so the quad is not in the record's FIRST WORD: the
+    # word before that one is `[assembly:`, which rule 4 reads as a version context (it is how an
+    # assembly-version attribute is excused), and a plant an older rule disposes of first proves
+    # nothing about rule 6.
+    printf '[assembly: go.GoPositionMap("x/go work/%d.%d.%d.%d/lits.go", "lits.cs", "AB8wwoKClqaC", "30-54:1;134-134:%d.%d.%d.%d")]\n' 192 168 4 20 3 1 1 1 > "$d/m03"
+    idc_st_case "a quad in the 1st argument STILL REFUSES"      "ipv4" "$d/m03" 0
+    idc_st_exc "  while the suffix beside it was admitted"        "ipv4|position-map-funclit" "$IDC_TMP/st.status"
+    # 3rd argument, and the SHARPEST of the four: its content IS a well-formed entry -- the <digits>-
+    # <digits>: prefix opening the argument, the closing quote right after the quad -- so condition
+    # (2), WHICH ARGUMENT, is the only thing that can refuse it. RED-CONTROLLED 2026-09-28: removing
+    # the range test ALONE leaves this case green, because the follower and anchor tests compare
+    # against the fourth argument's own quotes too; removing all three reds this case and only it.
+    printf '[assembly: go.GoPositionMap("x/lits/lits.go", "lits.cs", "30-54:%d.%d.%d.%d", "30-54:1;134-134:%d.%d.%d.%d")]\n' 10 7 7 7 3 1 1 1 > "$d/m04"
+    idc_st_case "an entry-shaped quad in the 3rd argument REFUSES" "ipv4" "$d/m04" 0
+    idc_st_exc "  while the suffix beside it was admitted"        "ipv4|position-map-funclit" "$IDC_TMP/st.status"
+    # After the record, as a trailing comment: outside the argument list altogether.
+    printf '[assembly: go.GoPositionMap("x/lits/lits.go", "lits.cs", "AB8wwoKClqaC", "30-54:1;134-134:%d.%d.%d.%d")] // %d.%d.%d.%d\n' 3 1 1 1 192 168 1 20 > "$d/m05"
+    idc_st_case "a quad in a trailing comment STILL REFUSES"    "ipv4" "$d/m05" 0
+    idc_st_exc "  while the suffix beside it was admitted"        "ipv4|position-map-funclit" "$IDC_TMP/st.status"
+    # INSIDE the 4th argument but not preceded by <digits>-<digits>: -- a bare element of the list.
+    printf '[assembly: go.GoPositionMap("x/lits/lits.go", "lits.cs", "AB8wwoKClqaC", "30-54:1;%d.%d.%d.%d;134-134:%d.%d.%d.%d")]\n' 10 20 30 40 3 1 1 1 > "$d/m06"
+    idc_st_case "a 4th-argument quad without the entry prefix REFUSES" "ipv4" "$d/m06" 0
+    idc_st_exc "  while the suffix beside it was admitted"        "ipv4|position-map-funclit" "$IDC_TMP/st.status"
+    # ⚠ THE BOUND ON THE OTHER SIDE: preceded by the entry prefix, but followed by neither a ';' nor
+    # the closing quote. The follower is a ':' so that rule 2 cannot take it first -- a follower in
+    # the token-run class would be disposed of there, and this case would read green for rule 2.
+    printf '[assembly: go.GoPositionMap("x/lits/lits.go", "lits.cs", "AB8wwoKClqaC", "30-54:1;134-134:%d.%d.%d.%d:9;142-175:%d.%d.%d.%d")]\n' 10 20 30 40 3 1 1 2 > "$d/m07"
+    idc_st_case "an entry-prefixed quad with a wrong follower REFUSES" "ipv4" "$d/m07" 0
+    idc_st_exc "  while the suffix beside it was admitted"        "ipv4|position-map-funclit" "$IDC_TMP/st.status"
+    # A suffix nested FIVE deep is NOT rule 6's (its candidate is followed by a '.'), and it needs no
+    # rule: rule 2 disposes of it first, since the token run is the whole suffix, and it keeps that
+    # reason. Four such entries exist corpus-wide; this is the case that says delta covers them.
+    printf '[assembly: go.GoPositionMap("x/lits/lits.go", "lits.cs", "AB8wwoKClqaC", "30-54:1;139-139:%d.%d.%d.%d.%d")]\n' 3 1 1 1 2 > "$d/m08"
+    idc_st_case "a five-deep suffix is excused by rule 2 first" "" "$d/m08" 0
+    idc_st_exc "  and keeps rule 2's reason"                      "ipv4|token-run" "$IDC_TMP/st.status"
+
+    echo
     echo "  B2. THE SHORT-MATCH PATH -- the same cases with the engine's reported start PERTURBED"
     echo "      (mawk 1.3.4's match() is not leftmost-longest and returns RLENGTH=7 on a four-octet"
     echo "       quad; this forces a strictly harder perturbation so gawk exercises the same code)"
@@ -1896,6 +2054,11 @@ idc_mode_selftest() {
     idc_st_exc "  still excluded BY THE TOKEN RUN, from the right end" "ipv4|token-run" "$IDC_TMP/st.status"
     idc_st_case "loopback constant (short match)"                    "" "$d/n06" 0
     idc_st_exc "  still excluded AS A DOC CONSTANT (exact quad)"    "ipv4|doc-constant" "$IDC_TMP/st.status"
+    # Rule 6 reads the quad's start and end from both sides of it, so it is exactly the kind of rule
+    # a short extent would break.
+    idc_st_case "position-map funclit suffix (short match)"         "" "$d/m01" 0
+    idc_st_exc "  still excluded BY RULE 6, from the derived extent" "ipv4|position-map-funclit" "$IDC_TMP/st.status"
+    idc_st_case "a 1st-argument quad (short match)"                  "ipv4" "$d/m03" 0
     # The refuse direction: the perturbation must not make the arm go BLIND, which an all-negative
     # short-match battery would read as green.
     idc_st_case "a real quad is STILL a hit under a short match"     "ipv4" "$d/p02" 1

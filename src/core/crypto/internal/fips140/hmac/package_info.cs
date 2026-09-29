@@ -51,7 +51,7 @@ using static go.crypto.@internal.fips140.hmac_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/hmac/cast.go", "cast.cs", "AA4cgoK43IKCgoCCpA==", "15-33:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/hmac/hmac.go", "hmac.cs", "ACtYuIKU5raChIKAgraClIKmgqaAooCkgoKAgqSWggANHoKClIKCloKCloKCgoKogoKosoKCgoKylJSC1oKUgoKClIKUgoKClIKUhKiy", "136-144:1;137-140:1.1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/hmac/hmac.go", "hmac.cs", "ACtYuIKU5raChIKAgraClIKmgqaAooCkgoKAgqSWggANHoKClIKCloKCloKCgoKogoKosoKCgoKylJSCtJKClIKCgpSClIKCgpSClISosg==", "136-144:1;137-140:1.1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

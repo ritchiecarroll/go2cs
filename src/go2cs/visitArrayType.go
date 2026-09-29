@@ -301,6 +301,10 @@ func (v *Visitor) zeroValueInitializer(t types.Type) string {
 		return "default!"
 	}
 
+	if zero := v.typeParamZero(t); zero != "" {
+		return zero
+	}
+
 	if _, isNamed := types.Unalias(t).(*types.Named); !isNamed {
 		if array, isArray := t.Underlying().(*types.Array); isArray {
 			return fmt.Sprintf("new(%s)", v.arrayZeroValueArgs(strconv.FormatInt(array.Len(), 10), array))
@@ -323,6 +327,19 @@ func (v *Visitor) zeroValueInitializer(t types.Type) string {
 	}
 
 	return "default!"
+}
+
+// typeParamZero renders the zero value of a TYPE PARAMETER, or "" when t is not one. The rungs above
+// decide from the static type, and a type parameter has none to decide from: its type argument can
+// be a struct whose `default` is broken (a fixed-array field, a promoted embed). golib's GoZero<T>()
+// reads the construction go2cs-gen registers for each such non-generic struct and is `default` for
+// every other type argument.
+func (v *Visitor) typeParamZero(t types.Type) string {
+	if _, isTypeParam := types.Unalias(t).(*types.TypeParam); !isTypeParam {
+		return ""
+	}
+
+	return fmt.Sprintf("GoZero<%s>()", v.getCSharpTypeName(t))
 }
 
 // arrayElemFactory renders the target-typed construction expression for one element of a

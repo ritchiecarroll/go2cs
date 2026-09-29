@@ -132,160 +132,9 @@ internal static ref uint32 traceAdvanceSema => ref ᏑtraceAdvanceSema.Value;
 internal static ж<uint32> ᏑtraceShutdownSema = new StandardBox<uint32>(1);
 internal static ref uint32 traceShutdownSema => ref ᏑtraceShutdownSema.Value;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tracingIsAlreadyEnabledˢ = "tracing is already enabled"u8;
+// go2cs generated this placeholder — func StartTrace is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// StartTrace enables tracing for the current process.
-// While tracing, the data will be buffered and available via [ReadTrace].
-// StartTrace returns an error if tracing is already enabled.
-// Most clients should use the [runtime/trace] package or the [testing] package's
-// -test.trace flag instead of calling StartTrace directly.
-public static error StartTrace() {
-    if (traceEnabled() || traceShuttingDown()) {
-        return ((errorString)(@string)tracingIsAlreadyEnabledˢ);
-    }
-    // Block until cleanup of the last trace is done.
-    semacquire(ᏑtraceShutdownSema);
-    semrelease(ᏑtraceShutdownSema);
-    // Hold traceAdvanceSema across trace start, since we'll want it on
-    // the other side of tracing being enabled globally.
-    semacquire(ᏑtraceAdvanceSema);
-    // Initialize CPU profile -> trace ingestion.
-    traceInitReadCPU();
-    // Compute the first generation for this StartTrace.
-    //
-    // Note: we start from the last non-zero generation rather than 1 so we
-    // can avoid resetting all the arrays indexed by gen%2 or gen%3. There's
-    // more than one of each per m, p, and goroutine.
-    var firstGen = traceNextGen(Δtrace.lastNonZeroGen);
-    // Reset GC sequencer.
-    Δtrace.seqGC = 1;
-    // Reset trace reader state.
-    Δtrace.headerWritten = false;
-    ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑreaderGen).Store(firstGen);
-    ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑflushedGen).Store(0);
-    // Register some basic strings in the string tables.
-    traceRegisterLabelsAndReasons(firstGen);
-    // Stop the world.
-    //
-    // The purpose of stopping the world is to make sure that no goroutine is in a
-    // context where it could emit an event by bringing all goroutines to a safe point
-    // with no opportunity to transition.
-    //
-    // The exception to this rule are goroutines that are concurrently exiting a syscall.
-    // Those will all be forced into the syscalling slow path, and we'll just make sure
-    // that we don't observe any goroutines in that critical section before starting
-    // the world again.
-    //
-    // A good follow-up question to this is why stopping the world is necessary at all
-    // given that we have traceAcquire and traceRelease. Unfortunately, those only help
-    // us when tracing is already active (for performance, so when tracing is off the
-    // tracing seqlock is left untouched). The main issue here is subtle: we're going to
-    // want to obtain a correct starting status for each goroutine, but there are windows
-    // of time in which we could read and emit an incorrect status. Specifically:
-    //
-    //	trace := traceAcquire()
-    //  // <----> problem window
-    //	casgstatus(gp, _Gwaiting, _Grunnable)
-    //	if trace.ok() {
-    //		trace.GoUnpark(gp, 2)
-    //		traceRelease(trace)
-    //	}
-    //
-    // More precisely, if we readgstatus for a gp while another goroutine is in the problem
-    // window and that goroutine didn't observe that tracing had begun, then we might write
-    // a GoStatus(GoWaiting) event for that goroutine, but it won't trace an event marking
-    // the transition from GoWaiting to GoRunnable. The trace will then be broken, because
-    // future events will be emitted assuming the tracer sees GoRunnable.
-    //
-    // In short, what we really need here is to make sure that the next time *any goroutine*
-    // hits a traceAcquire, it sees that the trace is enabled.
-    //
-    // Note also that stopping the world is necessary to make sure sweep-related events are
-    // coherent. Since the world is stopped and sweeps are non-preemptible, we can never start
-    // the world and see an unpaired sweep 'end' event. Other parts of the tracer rely on this.
-    var stw = stopTheWorld(stwStartTrace);
-    // Prevent sysmon from running any code that could generate events.
-    @lock(Ꮡsched.of(schedt.Ꮡsysmonlock));
-    // Grab the minimum page heap address. All Ps are stopped, so it's safe to read this since
-    // nothing can allocate heap memory.
-    Δtrace.minPageHeapAddr = (uint64)mheap_.pages.inUse.ranges[0].@base.addr();
-    // Reset mSyscallID on all Ps while we have them stationary and the trace is disabled.
-    foreach (var (_, pp) in allp) {
-        pp.Value.trace.mSyscallID = -1;
-    }
-    // Start tracing.
-    //
-    // Set trace.enabled. This is *very* subtle. We need to maintain the invariant that if
-    // trace.gen != 0, then trace.enabled is always observed as true. Simultaneously, for
-    // performance, we need trace.enabled to be read without any synchronization.
-    //
-    // We ensure this is safe by stopping the world, which acts a global barrier on almost
-    // every M, and explicitly synchronize with any other Ms that could be running concurrently
-    // with us. Today, there are only two such cases:
-    // - sysmon, which we synchronized with by acquiring sysmonlock.
-    // - goroutines exiting syscalls, which we synchronize with via trace.exitingSyscall.
-    //
-    // After trace.gen is updated, other Ms may start creating trace buffers and emitting
-    // data into them.
-    Δtrace.enabled = true;
-    if (Ꮡdebug.of(debugᴛ1.Ꮡtraceallocfree).Load() != 0) {
-        // Enable memory events since the GODEBUG is set.
-        Δtrace.debugMalloc = debug.malloc;
-        Δtrace.enabledWithAllocFree = true;
-        debug.malloc = true;
-    }
-    ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡgen).Store(firstGen);
-    // Wait for exitingSyscall to drain.
-    //
-    // It may not monotonically decrease to zero, but in the limit it will always become
-    // zero because the world is stopped and there are no available Ps for syscall-exited
-    // goroutines to run on.
-    //
-    // Because we set gen before checking this, and because exitingSyscall is always incremented
-    // *before* traceAcquire (which checks gen), we can be certain that when exitingSyscall is zero
-    // that any goroutine that goes to exit a syscall from then on *must* observe the new gen as
-    // well as trace.enabled being set to true.
-    //
-    // The critical section on each goroutine here is going to be quite short, so the likelihood
-    // that we observe a zero value is high.
-    while (ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑexitingSyscall).Load() != 0) {
-        osyield();
-    }
-    // Record some initial pieces of information.
-    //
-    // N.B. This will also emit a status event for this goroutine.
-    var tl = traceAcquire();
-    tl.Gomaxprocs(gomaxprocs); // Get this as early in the trace as possible. See comment in traceAdvance.
-    tl.STWStart(stwStartTrace); // We didn't trace this above, so trace it now.
-    // Record the fact that a GC is active, if applicable.
-    if (gcphase == _GCmark || gcphase == _GCmarktermination) {
-        tl.GCActive();
-    }
-    // Dump a snapshot of memory, if enabled.
-    if (Δtrace.enabledWithAllocFree) {
-        traceSnapshotMemory(firstGen);
-    }
-    // Record the heap goal so we have it at the very beginning of the trace.
-    tl.HeapGoal();
-    // Make sure a ProcStatus is emitted for every P, while we're here.
-    foreach (var (_, pp) in allp) {
-        tl.writer().writeProcStatusForP(pp, pp == (~tl.mp).p.ptr()).end();
-    }
-    traceRelease(tl);
-    unlock(Ꮡsched.of(schedt.Ꮡsysmonlock));
-    startTheWorld(stw);
-    traceStartReadCPU();
-    ᏑtraceAdvancer.start();
-    semrelease(ᏑtraceAdvanceSema);
-    return default!;
-}
-
-// StopTrace stops tracing, if it was previously enabled.
-// StopTrace only returns after all the reads for the trace have completed.
-public static void StopTrace() {
-    traceAdvance(true);
-}
+// go2cs generated this placeholder — func StopTrace is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string traceNonEmptyFullTraceˢ = "trace: non-empty full trace buffer for done generation"u8;
@@ -544,9 +393,9 @@ internal static void traceAdvance(bool stopTrace) {
     // Ordering is important here. traceCPUFlush may generate new stacks and dumping
     // stacks may generate new strings.
     traceCPUFlush(gen);
-    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (nint)(gen % 2)).dump(gen);
-    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑtypeTab, (nint)(gen % 2)).dump(gen);
-    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(gen % 2)).reset(gen);
+    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(gen % 2)).dump(gen);
+    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑtypeTab, (ulong)(gen % 2)).dump(gen);
+    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).reset(gen);
     // That's it. This generation is done producing buffers.
     systemstack(() => {
         @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
@@ -599,9 +448,9 @@ internal static void traceAdvance(bool stopTrace) {
         semrelease(Ꮡworldsema);
     }
     // Block until the trace reader has finished processing the last generation.
-    semacquire(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (nint)(gen % 2)));
+    semacquire(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2)));
     if (raceenabled) {
-        raceacquire(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (nint)(gen % 2))));
+        raceacquire(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2))));
     }
     // Double-check that things look as we expect after advancing and perform some
     // final cleanup if the trace has fully stopped.
@@ -680,57 +529,17 @@ internal static uintptr traceNextGen(uintptr gen) {
 // generation. Note: the provided generation must not have started yet.
 internal static void traceRegisterLabelsAndReasons(uintptr gen) {
     foreach (var (i, label) in gcMarkWorkerModeStrings[..]) {
-        Δtrace.markWorkerLabels[gen % 2][i] = ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(gen % 2)).put(gen, label));
+        Δtrace.markWorkerLabels[gen % 2][i] = ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, label));
     }
     foreach (var (i, str) in traceBlockReasonStrings[..]) {
-        Δtrace.goBlockReasons[gen % 2][i] = ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(gen % 2)).put(gen, str));
+        Δtrace.goBlockReasons[gen % 2][i] = ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, str));
     }
     foreach (var (i, str) in traceGoStopReasonStrings[..]) {
-        Δtrace.goStopReasons[gen % 2][i] = ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(gen % 2)).put(gen, str));
+        Δtrace.goStopReasons[gen % 2][i] = ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, str));
     }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unexpectedTraceReaderˢ = "unexpected trace reader"u8;
-
-// ReadTrace returns the next chunk of binary tracing data, blocking until data
-// is available. If tracing is turned off and all the data accumulated while it
-// was on has been returned, ReadTrace returns nil. The caller must copy the
-// returned data before calling ReadTrace again.
-// ReadTrace must be called from one goroutine at a time.
-public static slice<byte> ReadTrace() {
-top:
-    ref var buf = ref heap<slice<byte>>(out var Ꮡbuf);
-    bool park = default!;
-    systemstack(() => {
-        (Ꮡbuf.ValueSlot, park) = readTrace0();
-    });
-    if (park) {
-        gopark((ж<g> gp, @unsafe.Pointer _) => {
-            if (!ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡreader).CompareAndSwapNoWB(nil, gp)) {
-                // We're racing with another reader.
-                // Wake up and handle this case.
-                return false;
-            }
-            {
-                var g2 = traceReader(); if (gp == g2){
-                    // New data arrived between unlocking
-                    // and the CAS and we won the wake-up
-                    // race, so wake up directly.
-                    return false;
-                } else 
-                if (g2 != nil) {
-                    printlock();
-                    println((@string)"runtime: got trace reader"u8, g2.OrTypedNil(), (~g2).goid);
-                    @throw(unexpectedTraceReaderˢ);
-                }
-            }
-            return true;
-        }, nil, waitReasonTraceReaderBlocked, traceBlockSystemGoroutine, 2);
-        goto top;
-    }
-    return buf;
-}
+// go2cs generated this placeholder — func ReadTrace is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string expectedRacectx0ˢ = "expected racectx == 0"u8;
@@ -811,9 +620,9 @@ internal static (slice<byte> buf, bool park) readTrace0() {
                         // Model synchronization on trace.doneSema, which te race
                         // detector does not see. This is required to avoid false
                         // race reports on writer passed to trace.Start.
-                        racerelease(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (nint)(gen % 2))));
+                        racerelease(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2))));
                     }
-                    semrelease(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (nint)(gen % 2)));
+                    semrelease(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2)));
                     // We're shutting down, and the last generation is fully
                     // read. We're done.
                     (buf, park) = (default!, false); goto ᒐdone;
@@ -829,9 +638,9 @@ internal static (slice<byte> buf, bool park) readTrace0() {
                 // advance until we've read it.
                 if (raceenabled) {
                     // See comment above in the shutdown case.
-                    racerelease(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (nint)(gen % 2))));
+                    racerelease(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2))));
                 }
-                semrelease(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (nint)(gen % 2)));
+                semrelease(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2)));
                 // Reacquire the lock and go back to the top of the loop.
                 @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
                 continue;

@@ -124,6 +124,12 @@ partial class atomic_package
     public static partial void Store64(ж<uint64> ptr, uint64 val) =>
         Volatile.Write(ref ptr.Value, val);
 
+    // The ADDRESS of a Uint64's word, taken once. Uint64's methods (types.cs) take a fresh
+    // field-reference box of the word on every call (`Xadd64(Ꮡu.of(Uint64.Ꮡvalue), delta)`), so a
+    // caller that adds on an ALLOCATION-FREE path caches this box and adds through Xadd64 instead:
+    // runtime's stop-the-world pause recorder, which ReadMemStats reaches (managed_impl.cs, StwPauses).
+    public static ж<uint64> WordAddress(this ж<Uint64> u) => u.of(Uint64.Ꮡvalue);
+
     public static partial void StoreRel64(ж<uint64> ptr, uint64 val) =>
         Volatile.Write(ref ptr.Value, val);
 
