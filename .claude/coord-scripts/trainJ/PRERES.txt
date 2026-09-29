@@ -24,3 +24,4 @@ NOT YET IN THE DRAFT, will add conflicts: C2's manual-signature lift (converter)
 
 FIXUP DUTY (ruling 857afcb47e): the fixup REFRESHES every review sibling (*.cs.auto) in tJ-emitcheck.sh's U-arm list from the U arm (flat siblings from U-windows, per-GOOS from their own target), after the CONTROL line reads OK on all three targets. A FAILED control stops the refresh until it is explained.
 KNOWN LATENT DEFECTS carried by TRAIN I (ruling b014a244fe): A17 W (a reflect write of a zero-size field corrupts its neighbour) and C (CS0191 on assigning a named zero-size field). R's fix seats EARLY in TRAIN J.
+BATTERY OWES (from accepted seats): windows runtime/pprof row (P2 map-growth); one Performance project published native AOT (no new ILC warning; toggle false); the banked testing row + windows GolibTests for c2-console-atomic; the real CNR, behavioral MSTest, slnx for c2-zh.
