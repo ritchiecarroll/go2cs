@@ -15,4 +15,5 @@ g-pprof-bank|33f5f8ff22|G: runtime/pprof bank manifest (3 capability skips + Has
 p2-traceback-decoration|0b7492b33a|P2: A7 generic [...] half (TestTracebackGeneric); created-by half held; ON master + printer seat d0ecb25644; 7 hand-owned generic helpers stated as residual
 c2-zerosize-one-source|1d6506c6cf|C2: zero-size predicate one source (non-generic GoZeroSizeFacts.Classify; GoLayoutFacts calls it; copy deleted); ON the TRAIN I union; windows GolibTests owed at the battery
 c2-manual-sig-lift|9c6305277f|C2: manual-function signature lift (one helper; footprint 0/0/0; CNR 0); unblocks P1 ifaceHash; on master 2ff42f7a16
-# PENDING: P2 map-growth (RULED (a) startup toggle 78dd6b0fb8; re-cut owed), P2 A7, C1 A9/A11/A15, R cookie+lowering, G runtime/pprof bank; R1-A commit 2 after TRAIN I lands
+r-func-cookie|d2f1759818|R: W1 func cookie (stored-word lowering + GoFuncCookie + Reinterpret arm); 6 callback rows red->green; footprint 3 runtime files x3 MET; merges clean on 61cf81290c; on master 2ff42f7a16
+# PENDING: P2 map-growth (RULED (a) startup toggle 78dd6b0fb8; re-cut owed), P2 A7, C1 A9/A11/A15, G runtime/pprof bank; R1-A commit 2 after TRAIN I lands
