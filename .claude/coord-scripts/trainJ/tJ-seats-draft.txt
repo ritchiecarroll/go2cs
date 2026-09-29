@@ -8,6 +8,7 @@ c1-print-separator|51368db4c3|C1: golib builtin.print concatenates (Go print), p
 c2-zh|4b38783819|C2: Ꮡh storageChainRootsAtIdent (field + array-index hops, 4 callers); footprint 0/0 met; behavioral IndexChainAddressBox; on master 2ff42f7a16
 p1-runtime-disclosures|7c27acb6c5|P1 (Sonnet 5.5 pilot): 41 runtime disclosures (21 runtime-capability, 20 deferred) + spanOf nil + 4 refusals by name + DESIGN-iface-conversion-boxing; MERGE WATCH: runtime package_info x3 re-emit, manualTypeOperations.go union, disclosures json keep-both
 c2-a12|340dfc424c|C2: A12 row 1 TestReporter bare PASS/FAIL for a package summary (+1 runtime), row 2 TestLockRankGenerated host-identity disclosure; MERGE WATCH runtime disclosures json keep-both
+c2-console-atomic|7c204adefd|C2: testing-host event line = ONE stdout write (the i9 console-writer hazard); STACKED ON c2-a12; OWED: guard arm for the private s_isOutTextWriterRedirected (tip moves)
 c2-idc-strict-hole|32d6597bb0|C2: identifier census STRICT hole closed (back-scan floored at lastEnd+1; 5 plants); merged with coord-census-funclits (TRAIN I seat 17) the self-test reads 211/0 on the i7
 c2-trainI-comments|f219bedb39|C2: comment-only corrections (netpoll_epoll_impl, iter_impl side-table premise, GoZero bare-array residual); ON the TRAIN I union
 g-pprof-bank|33f5f8ff22|G: runtime/pprof bank manifest (3 capability skips + HashKey halves); ON the TRAIN I union; residuals TestHeapRuntimeFrames + TestGenericsInlineLocations; windows flake TestGoroutineProfileConcurrency rate owed
