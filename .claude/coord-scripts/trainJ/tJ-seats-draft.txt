@@ -17,5 +17,6 @@ c2-zerosize-one-source|1d6506c6cf|C2: zero-size predicate one source (non-generi
 c2-manual-sig-lift|9c6305277f|C2: manual-function signature lift (one helper; footprint 0/0/0; CNR 0); unblocks P1 ifaceHash; on master 2ff42f7a16
 r-func-cookie|d2f1759818|R: W1 func cookie (stored-word lowering + GoFuncCookie + Reinterpret arm); 6 callback rows red->green; footprint 3 runtime files x3 MET; merges clean on 61cf81290c; on master 2ff42f7a16
 p2-map-growth-profile|ea8df5ca5b|P2: map-growth model under a pprof-reachability startup toggle (one golib predicate; off arm folded at TC0 by codegen); TestHeapRuntimeFrames PASS; OWED windows pprof row + one AOT publish (COORD battery); merges clean on 61cf81290c
+c1-a9-goroutine-profile|b415d4d9d9|C1: A9 runtime goroutineProfileWithLabels fills the profile behind stopTheWorld (pprof delegates; pprof_impl.cs deleted); runtime +2; ON M1 (in the TRAIN I union); CONFLICTS on runtime/pprof x3 package_info -> REGENERATE
 c1-a11-cleanup-after-finalizer|7db31a5470|C1: A11 cleanup waits for its finalizer and the next death (GoFinalizerGate) + the finalizer runner no longer roots each item; TestCleanupAfterFinalizer PASS; ON the TRAIN I union; merges clean on 61cf81290c
-# PENDING: P2 A7, C1 A9/A11/A15, G runtime/pprof bank; R1-A commit 2 after TRAIN I lands
+# PENDING: P2 A7, C1 A15, G runtime/pprof bank; R1-A commit 2 after TRAIN I lands
