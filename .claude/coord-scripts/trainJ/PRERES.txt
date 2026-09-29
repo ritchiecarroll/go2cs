@@ -4,7 +4,7 @@ The map ABORTS a conflicting seat, so a later seat's conflict is against the bas
 SEAT 2 (SUPERSEDED 04:35: g-inline-locations 6f2240e680 now takes slot 2 and CARRIES c2-noinline with these three maps already re-emitted by its merged converter at fb490a5817, plus FrameFuncIdentity re-baselined; c2-noinline and g-pprof-bank then read already-contained. Keep the regenerate rule only if a byte check disagrees.) c2-noinline -- 3 behavioral position maps (GlobalShadowedByLocal, NativeIntWideConstElement, ZeroValueArrayNamedResult
   package_info.cs): REGENERATE with the union converter (-go2cspath, GOROOT pinned); main.cs must equal its golden. Never hand-merge.
 
-SEAT 4 c2-a8 -- src/core/golib/runtime/RuntimeErrorPanic.cs. It conflicts with TRAIN I ALONE (003c9def02, the slice-bounds
+SEAT 4 c2-a8 (SUPERSEDED 05:58: C2 pre-resolved it as claude/c2-a8-r1a 7eeb468c76, which takes this slot; the plan below is what C2 executed) -- src/core/golib/runtime/RuntimeErrorPanic.cs. It conflicts with TRAIN I ALONE (003c9def02, the slice-bounds
   follow-ups) and again after seat 3 (i9-r1a rewrites every slice builder through SliceBoundsError). RESOLUTION: take seat 3's
   side (R1-A's builders) and put A8's stamp in the ONE constructor every slice builder reaches:
   `new PanicException(...) { RuntimeThrowText = "slice bounds out of range" }` inside SliceBoundsError. Keep A8's other stamps
