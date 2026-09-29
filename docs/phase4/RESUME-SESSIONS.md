@@ -30,6 +30,7 @@
   - TRAIN I: a draft of 13 seats plus pending ones, at `.claude/coord-scripts/trainI/tI-seats-draft.txt` on this branch.
 - **Base for your cuts.** TRAIN H's landed master once COORD posts the landing to your inbox. Until then, the pushed union 9a21c08481 (the ledger's 17:03 precedent).
 - **2026-09-28 20:00: TRAIN H LANDED.** master 15da8805b2 -> 2ff42f7a16 (ledger e058615076; posted to inbox/FLEET). **Base for every cut: master 2ff42f7a16.** The TRAIN I draft holds 17 seats.
+- **2026-09-29 11:03: TRAIN I LANDED, then the ROADMAP.** master 2ff42f7a16 -> 61cf81290c (TRAIN I, a fast-forward of the gated union; ledger e781604516) -> a1f133c3a9 (the owner-approved roadmap rewrite, docs only; ledger 7fcd38c9a2). Still 222/225. **Base for every cut: master a1f133c3a9** (seats cut on 61cf81290c merge unchanged). TRAIN J draft: `.claude/coord-scripts/trainJ/tJ-seats-draft.txt` (30 lines) with `trainJ/PRERES.txt` and `trainJ/tJ-emitcheck.sh` (the review-sibling class); TRAIN K opened at `.claude/coord-scripts/trainK/tK-seats-draft.txt`. Lane model class and effort are COORD's call (owner, 2026-09-29): P1 Sonnet 5.5 high; everyone else Opus 5.5 high; the owner switches on request. Post-100% side seats S1-S6 run on idle capacity (S1 source half is cut for TRAIN K; S2 is sized by R; S3 is cut by P1). The OSR crash report (owner decision on filing) waits on C2's linux provenance A/B.
 
 ### 1e.1 THE MAILBOX-ONLY PROTOCOL (R, C1, C2, P1, P2)
 
