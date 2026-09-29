@@ -1,5 +1,6 @@
 # TRAIN J draft (base: TRAIN I's landed master). Seats accepted so far:
 g-root-frame-path-m|dc77e4a4ef|G: every interned root frame rooted (tRunner, goexit, gopanic...); merges the printer seat (no-op after TRAIN I); runtime/debug TestStack PASS in the env branch -> runtime/debug BANKS in TRAIN J; MERGE WATCH goenvs_impl.cs (+10) and managed_impl.cs
+r-a17-zerosize-writes|c4bd66a07b|R: A17 latent defects closed (assignment to a readonly zero-size field lowered to the zero-size slot; reflect accessor answers GoZeroSizeSlot); footprint 0 x3, CNR 0, behavioral 725/725; ON the run 2 union; EARLY SEAT
 g-inline-locations|6f2240e680|G: TestGenericsInlineLocations (generic caller of a seeded thin allocator -> NoInlining; shape-half disclosure); CARRIES c2-noinline + g-pprof-bank (merge fb490a5817 re-emits seat 2 maps) + FrameFuncIdentity re-baseline; footprint 0/0/0, CNR 0; merges clean on 61cf81290c
 c2-noinline|04c4e6ae31|C2: //go:noinline -> NoInlining (79 prod sites, 47 behavioral goldens); A8a needs it at TC0
 i9-r1a|13f8531ca3|the i9: S-c R1-A commit 1 (golib + gen, zero emission): slice-bound panics are runtime.boundsError with Go codes; sentinel-free slice(low[,high]); ON a merge of master + i9-slice-bounds-followups (TRAIN I seat 12)
