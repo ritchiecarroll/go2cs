@@ -108,6 +108,11 @@ docs/phase4/DATA-h10-shardmap-projection-go124.md text eol=lf
 # (2026-09-13). Blobs are already LF, so this pin rewrites nothing
 # (`git add --renormalize` over the directory stages nothing).
 docs/phase4/hopA-inputs/recon-lists/*.txt text eol=lf
+
+# 2026-09-29, S4: -Hop's machine-read inputs (genpopulation's population-<release>.txt and the
+# relocations-<release>.tsv table). The same reason as the line above: a CR rides into a package name.
+docs/phase4/data/*.txt text eol=lf
+docs/phase4/data/*.tsv text eol=lf
 docs/phase4/hopA-inputs/*.tsv text eol=lf
 
 # ---------------------------------------------------------------------------

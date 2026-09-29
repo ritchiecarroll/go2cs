@@ -83,7 +83,8 @@ param(
     # -Hop run attempted before H2 refuses on that unmodified guard, correctly.
     #
     # Two further properties, each ruled rather than chosen here:
-    #   * the row population is the census SKELETON, not the banked roster (Get-HopSkeletonRows)
+    #   * the row population is the incoming release's generated POPULATION minus the exclusion ledger,
+    #     not the banked roster (Get-HopPopulationRows; S4 retired the census-skeleton read)
     #   * "ran and produced counts" and "ran here, and there are no eligible tests" are TWO WORDS in
     #     the record, decided by what the run PRODUCED and never by a table -- because the incoming
     #     release's `n/a` annotations are DERIVED from the second word, and a broken row that
@@ -185,11 +186,12 @@ $src = $SrcRoot
 $repo = $RepoRoot
 $table = Join-Path $repo 'docs/ValidatedTestPackages.md'
 # The -Hop row population. A separate path rather than a re-pointed $table, because the two files are
-# different KINDS: the roster is the record of what is banked, the skeleton the record of what is
+# different KINDS: the roster is the record of what is banked, the population the record of what is
 # ELIGIBLE at the incoming release. -Hop reads the second and writes nothing; the roster stays the
-# single source of truth for banked counts, and H10 banks into it from a hop run's record. The path is
+# single source of truth for banked counts, and H10 banks into it from a hop run's record. The paths are
 # PER RELEASE and derived below, once the release this run reads is known (see "-Hop row population").
-$hopSkeleton = $null
+$hopPopulation = $null
+$hopRelocations = $null
 $exe = $Go2csExe
 $goroot = (& go env GOROOT).Trim()
 
@@ -221,28 +223,36 @@ if (Test-Path $gorootVersionFile) {
     if ($firstLine) { $goversion = $firstLine.Trim() }
 }
 
-# ---- -Hop row population: the INCOMING release's own skeleton ------------------------------------
-# The eligible population differs per release, so the skeleton is derived from the release this run
-# actually READS ($goversion, GOROOT's VERSION first -- the same answer the pin guard below trusts) and
-# refused BY NAME when that release has none. Never a fallback to another release's skeleton: with the
-# path hardcoded to go124, a -Hop run at the Go 1.25 hop would have swept the 1.24 eligible population
-# and read as a clean hop run (S4, ruled 2026-09-29). Checked BEFORE the pin guard, so a hop attempted
-# without its skeleton is refused for that cause rather than for the version bump it also still owes.
+# ---- -Hop row population: the INCOMING release's own DATA ------------------------------------------
+# The eligible population differs per release, so it is read from the release this run actually READS
+# ($goversion, GOROOT's VERSION first -- the same answer the pin guard below trusts), from machine-read
+# DATA the generator produces (src/go2cs/internal/genpopulation), and refused BY NAME when that release
+# has none. Never a fallback to another release's population, and never a CENSUS record: with the path
+# hardcoded to the go124 census, a -Hop run at the Go 1.25 hop would have swept the 1.24 eligible
+# population and read as a clean hop run (S4, ruled 2026-09-29). Checked BEFORE the pin guard, so a hop
+# attempted without its population is refused for that cause rather than for the version bump it owes.
 if ($Hop) {
-    if ($goversion -notmatch '^go(\d+)\.(\d+)(\.\d+)?$') {
-        throw "-Hop: cannot derive the incoming release from the Go tree's version '$goversion' (GOROOT $goroot), so no eligibility skeleton can be chosen."
+    if ($goversion -notmatch '^go\d+\.\d+(\.\d+)?$') {
+        throw "-Hop: cannot derive the incoming release from the Go tree's version '$goversion' (GOROOT $goroot), so no hop population can be chosen."
     }
 
-    $hopRelease = "go$($Matches[1])$($Matches[2])"
-    $hopSkeleton = Join-Path $repo "docs/phase4/CENSUS-h10-eligibility-$hopRelease.md"
+    $hopPopulation = Join-Path $repo "docs/phase4/data/population-$goversion.txt"
 
-    if (-not (Test-Path $hopSkeleton)) {
-        throw ("-Hop: no eligibility skeleton for $goversion -- expected $hopSkeleton. The hop's row " +
-            "population is the INCOMING release's eligible set, and no other release's skeleton may stand " +
-            "in for it; build that release's skeleton first.")
+    if (-not (Test-Path $hopPopulation)) {
+        throw ("-Hop: no population of record for $goversion -- expected $hopPopulation. The hop's row " +
+            "population is the INCOMING release's eligible set, and no other release's may stand in for " +
+            "it; generate it first (go run ./internal/genpopulation -goroot <that release's GOROOT> -out ...).")
     }
 
-    Write-Host "hop skeleton: $hopSkeleton (Go tree $goversion)"
+    # Relocations are PROVENANCE (Receives), so an absent table is stated, never refused.
+    $hopRelocations = Join-Path $repo "docs/phase4/data/relocations-$goversion.tsv"
+
+    if (-not (Test-Path $hopRelocations)) {
+        Write-Host "hop relocations: none for $goversion ($hopRelocations absent) -- every Receives cell is blank" -ForegroundColor DarkYellow
+        $hopRelocations = $null
+    }
+
+    Write-Host "hop population: $hopPopulation (Go tree $goversion)"
 }
 
 $versionProps = Join-Path $src 'version.props'
@@ -284,12 +294,16 @@ if ($pinnedRelease -and $goversion) {
 # annotation is a rule with an arithmetic consequence, and a rule with a consequence needs a guard
 # that can exercise it without running this multi-hour gate. That guard is src\check-roster-format.ps1.
 #
-# Under -Hop the SOURCE switches and nothing else about the row pipeline does: Get-HopSkeletonRows
+# Under -Hop the SOURCE switches and nothing else about the row pipeline does: Get-HopPopulationRows
 # returns the same property shape, so Filter/Exact, the sharding, the invocation and every verdict
 # path below read a hop row exactly as they read a roster row. The roster is not consulted at all on
 # a hop run -- it holds the OUTGOING release's counts, and comparing against those is the one thing
 # this mode exists to stop doing.
-$rows = if ($Hop) { Get-HopSkeletonRows -Path $hopSkeleton } else { Get-ValidatedRosterRows -Path $table }
+$rows = if ($Hop) {
+    Get-HopPopulationRows -PopulationPath $hopPopulation -RosterPath $table -RelocationsPath $hopRelocations
+} else {
+    Get-ValidatedRosterRows -Path $table
+}
 
 if ($Filter) {
     $rows = if ($Exact) { $rows | Where-Object { $_.Package -eq $Filter } }
@@ -299,7 +313,7 @@ if ($Filter) {
 # which has no .Count and would print a blank package count.
 $rows = @($rows)
 if (-not $rows) {
-    $population = if ($Hop) { 'eligible packages (hop skeleton)' } else { 'banked packages' }
+    $population = if ($Hop) { 'eligible packages (hop population)' } else { 'banked packages' }
     throw "No $population matched$(if ($Filter) { " filter '$Filter'" })."
 }
 
@@ -315,7 +329,7 @@ if (-not $rows) {
 $targetGoos = Get-SweepTargetGoos
 
 foreach ($row in $rows) {
-    # A hop row has no expectation to resolve, in EITHER direction: no columns (the skeleton's counts
+    # A hop row has no expectation to resolve, in EITHER direction: no columns (the population's counts
     # are blank by design) and no per-OS annotation (it carries none at the incoming release -- those
     # annotations are what a hop run's record lets H10 derive). So Get-RosterRowExpectation is not
     # consulted; the row is given an expectation that is honest about being absent, and Applicable is
@@ -388,7 +402,7 @@ $expectedTotal = if ($Hop) { 0 } else { ($rows | ForEach-Object { $_.Effective.E
 # run is instead, including how many of its rows arrive carrying a predecessor.
 if ($Hop) {
     $receivingRows = @($rows | Where-Object { $_.Receives })
-    Write-Host ("HOP re-derivation: $($rows.Count) eligible package(s) from the census skeleton, " +
+    Write-Host ("HOP re-derivation: $($rows.Count) eligible package(s) from the release's population, " +
         "NO banked expectation in force, timeout $TestTimeout, test-config $sweepConfigLabel") -ForegroundColor Magenta
     Write-Host ('  every row records what it measures; nothing is compared against a floor. Everything ' +
         'that is not a count comparison still fails: build, host death, empty results, deadline, pin.') -ForegroundColor DarkGray
