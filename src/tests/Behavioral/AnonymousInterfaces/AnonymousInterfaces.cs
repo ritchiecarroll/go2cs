@@ -54,7 +54,7 @@ private static readonly object funcParamReadˢ = (@string)"FuncParam: Read ="u8;
 internal static void takesReader(takesReader_r r) {
     var buf = new slice<byte>(4);
     var (n, _) = r.Read(buf);
-    fmt.Println(funcParamReadˢ, ((@string)(buf[..(int)(n)])));
+    fmt.Println(funcParamReadˢ, ((@string)(buf.slice(0, n))));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -64,7 +64,7 @@ internal static void testCompositeLiteral() {
     var readers = new takesReader_r[]{new fakeReader(nil)}.slice();
     var buf = new slice<byte>(4);
     var (n, _) = readers[0].Read(buf);
-    fmt.Println(compositeLiteralReadˢ, ((@string)(buf[..(int)(n)])));
+    fmt.Println(compositeLiteralReadˢ, ((@string)(buf.slice(0, n))));
 }
 
 [GoType("dyn")] partial interface WithInlineField_R {
@@ -82,7 +82,7 @@ internal static void testInlineField() {
     var s = new WithInlineField(R: new fakeReader(nil));
     var buf = new slice<byte>(4);
     var (n, _) = s.R.Read(buf);
-    fmt.Println(inlineFieldReadˢ, ((@string)(buf[..(int)(n)])));
+    fmt.Println(inlineFieldReadˢ, ((@string)(buf.slice(0, n))));
 }
 
 [GoType("dyn")] partial interface Δtype {

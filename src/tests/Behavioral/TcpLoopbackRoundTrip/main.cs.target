@@ -77,7 +77,7 @@ internal static void roundTrip(@string label, @string network, @string address) 
                 echoedʗ1.ᐸꟷ(-1);
                 return;
             }
-            (var m, errΔ2) = serverʗ2.Write(buf[..(int)(n)]);
+            (var m, errΔ2) = serverʗ2.Write(buf.slice(0, n));
             if (errΔ2 != default!) {
                 echoedʗ1.ᐸꟷ(-2);
                 return;

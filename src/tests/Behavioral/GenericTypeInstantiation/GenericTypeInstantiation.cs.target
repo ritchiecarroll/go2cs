@@ -25,7 +25,7 @@ partial class main_package {
     }
     nint index = len(s.elements) - 1;
     var element = s.elements[index];
-    s.elements = s.elements[..(int)(index)];
+    s.elements = s.elements.slice(0, index);
     return (element, true);
 }
 

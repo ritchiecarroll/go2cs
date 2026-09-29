@@ -25,7 +25,7 @@ internal static void Main() {
     fmt.Println(ints[0], ints[1], ints[2]);
     slice<any> anys = default!;
     var data = new byte[]{7, 8, 9}.slice();
-    anys = append(anys.slice(-1, len(anys), len(anys)), (any)(data));
+    anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));
     anys = append(anys, (any)(5));
     fmt.Println(len(anys), len(anys[0]._<slice<byte>>()), anys[1]);
 }

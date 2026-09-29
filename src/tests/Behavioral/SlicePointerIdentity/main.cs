@@ -46,7 +46,7 @@ internal static void Main() {
     fmt.Println(reslice2ˢ, Ꮡ(t, 2) == Ꮡ(s, 3));
     var u = t[1..];
     fmt.Println(reslice2ˢ2, Ꮡ(u, 0) == Ꮡ(s, 2));
-    var w = append(s.slice(-1, 0, 1), (nint)(99));
+    var w = append(s.slice(0, 0, 1), (nint)(99));
     fmt.Println(appendSameˢ, Ꮡ(w, 0) == Ꮡ(s, 0));
     ref var a = ref heap(new array<nint>(4), out var Ꮡa);
     var v = a[..];

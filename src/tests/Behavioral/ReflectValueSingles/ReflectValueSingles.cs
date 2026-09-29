@@ -248,7 +248,7 @@ internal static void Main() {
     expectPanic(arraySetCapˢ, setCapˢ, () => {
         vaʗ2.SetCap(8);
     });
-    var backing = xs[..(int)(cap(xs))];
+    var backing = xs.slice(0, cap(xs));
     backing[0] = 99;
     fmt.Println(writeThroughTheReCappedˢ, xs[0] == 99);
     expectPanic(bytesOnIntˢ, onIntValueˢ, () => {

@@ -101,7 +101,7 @@ internal static void Main() {
         fmt.Printf("plain %-12s name=%q pkg=%q\n"u8, rt.Kind(), rt.Name(), rt.PkgPath());
     }
     @string nm = reflect.TypeOf(new intSET(new nint[]{}.slice())).Name();
-    fmt.Println(setSuffixˢ, len(nm) >= 3 && nm[(int)(len(nm) - 3)..] == "SET");
+    fmt.Println(setSuffixˢ, len(nm) >= 3 && nm.slice(len(nm) - 3) == "SET");
     var lt = reflect.TypeOf(new layout(nil));
     for (nint i = 0; i < lt.NumField(); i++) {
         var fΔ2 = lt.Field(i);

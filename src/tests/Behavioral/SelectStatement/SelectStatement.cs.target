@@ -173,8 +173,8 @@ internal static void Main() {
     }}
     var s = new nint[]{7, 2, 8, -9, 4, 0}.slice();
     var c = new channel<nint>(0);
-    goǃ(sum, s[..(int)(len(s) / 2)], c);
-    goǃ(sum, s[(int)(len(s) / 2)..], c);
+    goǃ(sum, s.slice(0, len(s) / 2), c);
+    goǃ(sum, s.slice(len(s) / 2), c);
     goǃ(sum, s[2..5], c);
     nint x = ᐸꟷ(c);
     nint y = ᐸꟷ(c);

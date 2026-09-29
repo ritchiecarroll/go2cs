@@ -119,92 +119,92 @@ internal static void Main() {
         var sʗ16 = s;
     var cases = new main_cases[]{
         new("slice [:hi>cap]"u8, () => {
-            sink = sʗ1[..(int)(hi11)];
+            sink = sʗ1.slice(0, hi11);
         }),
         new("slice [:len<hi<=cap]"u8, () => {
-            sink = len(sʗ2[..(int)(hi5)]);
+            sink = len(sʗ2.slice(0, hi5));
         }),
         new("slice [:-1]"u8, () => {
-            sink = sʗ3[..(int)(neg)];
+            sink = sʗ3.slice(0, neg);
         }),
         new("slice [-1:]"u8, () => {
-            sink = sʗ4[(int)(neg)..];
+            sink = sʗ4.slice(neg);
         }),
         new("slice [-1:2]"u8, () => {
-            sink = sʗ5[(int)(neg)..(int)(hi2)];
+            sink = sʗ5.slice(neg, hi2);
         }),
         new("slice [4:2]"u8, () => {
-            sink = sʗ6[(int)(lo4)..(int)(hi2)];
+            sink = sʗ6.slice(lo4, hi2);
         }),
         new("slice [4:]"u8, () => {
-            sink = sʗ7[(int)(lo4)..];
+            sink = sʗ7.slice(lo4);
         }),
         new("slice [:big]"u8, () => {
-            sink = sʗ8[..(int)(big)];
+            sink = sʗ8.slice(0, big);
         }),
         new("slice [big:]"u8, () => {
-            sink = sʗ9[(int)(big)..];
+            sink = sʗ9.slice(big);
         }),
         new("slice [:i64]"u8, () => {
-            sink = sʗ10[..(int)(i64)];
+            sink = sʗ10.slice(0, (nint)(i64));
         }),
         new("slice [:u64]"u8, () => {
-            sink = sʗ11[..(int)(u64)];
+            sink = sʗ11.slice(0, (nint)(u64));
         }),
         new("slice [:u32]"u8, () => {
-            sink = sʗ12[..(int)(u32)];
+            sink = sʗ12.slice(0, (nint)(u32));
         }),
         new("named [:-1]"u8, () => {
-            sink = nʗ1[..(int)(neg)];
+            sink = nʗ1.slice(0, neg);
         }),
         new("named [4:2]"u8, () => {
-            sink = nʗ2[(int)(lo4)..(int)(hi2)];
+            sink = nʗ2.slice(lo4, hi2);
         }),
         new("array [:5]"u8, () => {
-            sink = Ꮡa.Value[..(int)(hi5)];
+            sink = Ꮡa.Value.slice(0, hi5);
         }),
         new("array [:-1]"u8, () => {
-            sink = Ꮡa.Value[..(int)(neg)];
+            sink = Ꮡa.Value.slice(0, neg);
         }),
         new("array [4:2]"u8, () => {
-            sink = Ꮡa.Value[(int)(lo4)..(int)(hi2)];
+            sink = Ꮡa.Value.slice(lo4, hi2);
         }),
         new("array [4:]"u8, () => {
-            sink = Ꮡa.Value[(int)(lo4)..];
+            sink = Ꮡa.Value.slice(lo4);
         }),
         new("ptrarray [:5]"u8, () => {
-            sink = (~pʗ1)[..(int)(hi5)];
+            sink = (~pʗ1).slice(0, hi5);
         }),
         new("namedarr [:5]"u8, () => {
-            sink = naʗ1[..(int)(hi5)];
+            sink = naʗ1.slice(0, hi5);
         }),
         new("string [:5]"u8, () => {
-            sink = str[..(int)(hi5)];
+            sink = str.slice(0, hi5);
         }),
         new("string [:-1]"u8, () => {
-            sink = str[..(int)(neg)];
+            sink = str.slice(0, neg);
         }),
         new("string [-1:]"u8, () => {
-            sink = str[(int)(neg)..];
+            sink = str.slice(neg);
         }),
         new("string [4:2]"u8, () => {
-            sink = str[(int)(lo4)..(int)(hi2)];
+            sink = str.slice(lo4, hi2);
         }),
         new("string [4:]"u8, () => {
-            sink = str[(int)(lo4)..];
+            sink = str.slice(lo4);
         }),
         new("string [:big]"u8, () => {
-            sink = str[..(int)(big)];
+            sink = str.slice(0, big);
         }),
         new("namedstr [:5]"u8, () => {
-            sink = ns[..(int)(hi5)];
+            sink = ns.slice(0, hi5);
         }),
         new("strlit [:5]"u8, () => {
-            @string t = "abc"u8[..(int)(hi5)];
+            @string t = "abc"u8.slice(0, hi5);
             sink = t;
         }),
         new("strlit [-1:]"u8, () => {
-            @string t = "abc"u8[(int)(neg)..];
+            @string t = "abc"u8.slice(neg);
             sink = t;
         }),
         new("slice3 [-1:2:5]"u8, () => {
@@ -233,7 +233,7 @@ internal static void Main() {
             fmt.Println(lenˢ, len(t), capˢ, cap(t));
         }),
         new("slice3 [:2:5] in range"u8, () => {
-            var t = sʗ16.slice(-1, two, five);
+            var t = sʗ16.slice(0, two, five);
             sink = t;
             fmt.Println(lenˢ, len(t), capˢ, cap(t));
         })
