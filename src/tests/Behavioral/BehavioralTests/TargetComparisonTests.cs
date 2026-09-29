@@ -1738,6 +1738,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckSelectSendRecvMix() => CheckTarget("SelectSendRecvMix");
 
     [TestMethod]
+    public void CheckSelectSendTupleSpread() => CheckTarget("SelectSendTupleSpread");
+
+    [TestMethod]
     public void CheckSelectSingleFire() => CheckTarget("SelectSingleFire");
 
     [TestMethod]

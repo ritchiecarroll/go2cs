@@ -1735,6 +1735,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckSelectSendRecvMix() => CheckTarget("SelectSendRecvMix");
 
     [TestMethod]
+    public void CheckSelectSendTupleSpread() => CheckTarget("SelectSendTupleSpread");
+
+    [TestMethod]
     public void CheckSelectSingleFire() => CheckTarget("SelectSingleFire");
 
     [TestMethod]
