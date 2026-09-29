@@ -1,0 +1,23 @@
+TRAIN J PRE-RESOLUTIONS (conflict map on the TRAIN I run 2 union 61cf81290c, draft order, 13 seats; tJ-conflict-map.sh, 2026-09-29 03:45)
+The map ABORTS a conflicting seat, so a later seat's conflict is against the base plus the clean seats before it.
+
+SEAT 2 c2-noinline -- 3 behavioral position maps (GlobalShadowedByLocal, NativeIntWideConstElement, ZeroValueArrayNamedResult
+  package_info.cs): REGENERATE with the union converter (-go2cspath, GOROOT pinned); main.cs must equal its golden. Never hand-merge.
+
+SEAT 4 c2-a8 -- src/core/golib/runtime/RuntimeErrorPanic.cs. It conflicts with TRAIN I ALONE (003c9def02, the slice-bounds
+  follow-ups) and again after seat 3 (i9-r1a rewrites every slice builder through SliceBoundsError). RESOLUTION: take seat 3's
+  side (R1-A's builders) and put A8's stamp in the ONE constructor every slice builder reaches:
+  `new PanicException(...) { RuntimeThrowText = "slice bounds out of range" }` inside SliceBoundsError. Keep A8's other stamps
+  (index out of range x2, the array-conversion length, the negative shift), which merge outside the hunk.
+  CENSUS after the resolution: every `new PanicException(` in the file that A8 stamped still carries RuntimeThrowText, with
+  the same text; count A8's stamps at 89b2e846c7 against the union and state both numbers. GATES: GolibTests x2, the runtime row
+  by name for A8's rows (+2 at TC0 with noinline), and R1-A's 29-shape table unchanged.
+
+SEAT 7 p1-runtime-disclosures -- runtime/{windows,linux,darwin}/package_info.cs: REGENERATE (seeded, union converter, 3 GOOS).
+  go2cs_test_disclosures.json: KEEP BOTH (TRAIN I's dated TestCrashWhileTracing amendment plus P1's 41 entries); validate the
+  JSON parses and no test name appears twice.
+
+SEAT 8 c2-a12 -- go2cs_test_disclosures.json: KEEP BOTH (TestLockRankGenerated host-identity entry); same parse/duplicate check.
+
+NOT YET IN THE DRAFT, will add conflicts: C2's manual-signature lift (converter), P1's fixable ref (claude/p1-runtime-fixable,
+  growing), P2 map-growth (held on cost), C1 A9/A11/A15, R cookie+lowering, G InlineLocations (stacks on c2-noinline).
