@@ -878,7 +878,7 @@ if ($implementable -gt 0) {
 # right" over a membership nobody can check.
 #
 # It is checkable now because the population is ENUMERATED:
-# docs/phase4/hopA-inputs/recon-lists/population-go1.24.13.txt holds all N import paths. Four
+# docs/phase4/data/population-go<pinned release>.txt holds all N import paths. Four
 # assertions follow from having it, and none of them can be satisfied by editing the header alone:
 #   1. |population| == the header's N.
 #   2. every BANKED row is a population member -- a row validated outside the denominator it is
@@ -893,7 +893,20 @@ if ($implementable -gt 0) {
 # one trims instead: it is the roster's guard and runs on any checkout, and a lane whose clone
 # predates the .gitattributes pin should get the arithmetic it asked for, not a line-endings lecture
 # from the wrong instrument. Two guards, two questions.
-$populationPath = Join-Path $repo 'docs/phase4/hopA-inputs/recon-lists/population-go1.24.13.txt'
+#
+# The file is the PINNED release's (version.props <GoStdLibVersion>, the release the roster's counts are
+# banked at), generated into docs/phase4/data/ by src/go2cs/internal/genpopulation, and REFUSED BY NAME
+# when absent -- never another release's (S4 follow-up, 2026-09-29). The pin, not the running Go tree,
+# because this guard reads no Go sources and runs on any checkout; the sweep's own pin guard is what
+# holds the running tree equal to it. hopA-inputs/recon-lists keeps hop A's dated copy, no longer read.
+$rosterPinText = [System.IO.File]::ReadAllText((Join-Path $repo 'src/version.props'))
+if ($rosterPinText -notmatch '<GoStdLibVersion>([^<]+)</GoStdLibVersion>') {
+    throw 'check-roster-format: src/version.props carries no <GoStdLibVersion>, so the population of record cannot be chosen'
+}
+$populationPath = Join-Path $repo "docs/phase4/data/population-go$($Matches[1].Trim()).txt"
+if (-not (Test-Path $populationPath)) {
+    throw "check-roster-format: no population of record for the pinned release -- expected $populationPath (generate it with src/go2cs/internal/genpopulation)"
+}
 
 # Get-PopulationRows, the reader, lives in _roster.ps1 (2026-09-23): push-nuget.ps1's release census
 # reads the rowless-candidate class through it too, and one reader is what keeps the two agreeing.
