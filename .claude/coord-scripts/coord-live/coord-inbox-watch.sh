@@ -5,11 +5,11 @@
 # it fetches, never pulls, so COORD's own posts are never raced.
 M=/h/Projects/go2cs-mailbox
 CUR=${COORD_SCRATCH:?set COORD_SCRATCH to the COORD scratch directory}/watch-cursor.txt
-git -C "$M" fetch -q origin claude/mailbox 2>/dev/null
+git -C "$M" fetch -q --no-write-fetch-head origin claude/mailbox 2>/dev/null
 base=$(cat "$CUR" 2>/dev/null); [ -n "$base" ] || base=$(git -C "$M" rev-parse origin/claude/mailbox)
 echo "WATCH armed $(date '+%H:%M:%S') from $(echo $base | cut -c1-10)"
 while true; do
-  git -C "$M" fetch -q origin claude/mailbox 2>/dev/null
+  git -C "$M" fetch -q --no-write-fetch-head origin claude/mailbox 2>/dev/null
   tip=$(git -C "$M" rev-parse origin/claude/mailbox)
   if [ "$tip" != "$base" ]; then
     new=$(git -C "$M" diff --name-only --diff-filter=A "$base" "$tip" -- docs/phase4/inbox/COORD/ | grep -v README.md)
