@@ -15,6 +15,9 @@
 # This is a TOOL, not a design surface: a lane that finds a defect reports it to COORD in one line
 # and keeps working; COORD owns the fix (owner order 2026-09-28).
 #
+# It never writes FETCH_HEAD (--no-write-fetch-head): a post tool's pull in the same clone reads that file, and
+# a concurrent write made the pull fail with "Cannot rebase onto multiple branches" (COORD, 2026-09-28).
+#
 # Env: FLEET_MAILBOX_CLONE (a clone of the repo; default: the clone this is run from);
 #      FLEET_WATCH_MAX (seconds before the IDLE exit).
 # =================================================================================================
@@ -28,7 +31,7 @@ CLONE="${FLEET_MAILBOX_CLONE:-$(git rev-parse --show-toplevel 2>/dev/null)}"
 { [ -n "$CLONE" ] && git -C "$CLONE" rev-parse --git-dir >/dev/null 2>&1; } || { echo "REFUSED: not inside a clone and FLEET_MAILBOX_CLONE is unset" >&2; exit 2; }
 
 REF="refs/remotes/origin/claude/mailbox"
-fetch() { git -C "$CLONE" fetch --quiet origin "+refs/heads/claude/mailbox:$REF" >/dev/null 2>&1; }
+fetch() { git -C "$CLONE" fetch --quiet --no-write-fetch-head origin "+refs/heads/claude/mailbox:$REF" >/dev/null 2>&1; }
 fetch
 BASE="$(git -C "$CLONE" rev-parse --verify --quiet "$SINCE^{commit}")" || BASE=""
 [ -n "$BASE" ] || { echo "REFUSED: SINCE '$SINCE' is not a commit in this clone -- pass the NEXT-SINCE fleet-read.sh printed" >&2; exit 2; }

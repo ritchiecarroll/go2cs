@@ -43,6 +43,9 @@
 # waits with fleet-watch.sh (zero tokens) rather than a timed wake loop. These are TOOLS, not a design
 # surface: a lane reports a defect to COORD in one line and keeps working; COORD owns the fix.
 #
+# It never writes FETCH_HEAD (--no-write-fetch-head): a post tool's pull in the same clone reads that file, and
+# a concurrent write made the pull fail with "Cannot rebase onto multiple branches" (COORD, 2026-09-28).
+#
 # Env: FLEET_MAILBOX_CLONE (a clone of the repo; default: the clone this is run from);
 #      FLEET_LEDGER_FULL=1 (print whole ledger lines).
 # =================================================================================================
@@ -91,7 +94,7 @@ if [ -z "$CLONE" ]; then
 fi
 git -C "$CLONE" rev-parse --git-dir >/dev/null 2>&1; rc=$?
 [ "$rc" -eq 0 ] || die "'$CLONE' is not a git clone"
-git -C "$CLONE" fetch --quiet origin "+refs/heads/claude/mailbox:refs/remotes/origin/claude/mailbox" >/dev/null 2>&1; frc=$?
+git -C "$CLONE" fetch --quiet --no-write-fetch-head origin "+refs/heads/claude/mailbox:refs/remotes/origin/claude/mailbox" >/dev/null 2>&1; frc=$?
 [ "$frc" -eq 0 ] || echo "  note: the fetch failed (rc=$frc) -- reading the local $REF, which may be behind" >&2
 TIP="$(git -C "$CLONE" rev-parse --verify --quiet "$REF^{commit}" 2>/dev/null)"; rc=$?
 { [ "$rc" -eq 0 ] && [ -n "$TIP" ]; } || die "$REF does not exist in '$CLONE' -- nothing to read"
