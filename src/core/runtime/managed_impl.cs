@@ -1415,8 +1415,15 @@ partial class runtime_package
     // IL offset can read 0 where the JIT kept no mapping for the call site, and then the line named is
     // the creator's FIRST statement rather than the `go` statement. StackTrace(true) reads the same
     // offset and names the same line, so this adds no error of its own.
+    //
+    // A creator with no captured offset (one a host supplied: the test host's testing.(*T).Run, the
+    // finalizer's starter) names no `go` statement at all, so its position is the unknown one too,
+    // not the creator's first line.
     private static (string file, int line) goCreatorPosition(System.Reflection.MethodBase creator, int ilOffset)
     {
+        if (ilOffset < 0)
+            return ("?", 0);
+
         (string? csFile, int csLine) = methodSourcePosition(creator, ilOffset);
 
         if (csFile is null || csLine <= 0)

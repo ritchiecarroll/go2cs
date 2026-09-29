@@ -363,6 +363,21 @@ public sealed class Goroutine
     public static Scope Enter() => Enter(creator: null, parentId: 0, entry: null);
 
     /// <summary>
+    /// Marks the calling thread as a goroutine that <paramref name="creator"/> started from
+    /// <paramref name="parent"/>, for a host thread that stands in for a Go <c>go</c> statement the
+    /// host itself executes.
+    /// </summary>
+    /// <remarks>
+    /// The converted-test host runs each test on a thread it creates, where Go's
+    /// <c>testing.(*T).Run</c> executes <c>go tRunner(t, f)</c>: the traceback's
+    /// <c>created by</c> line names that creator and the parent's goroutine, as Go's does.
+    /// <paramref name="parent"/> is read on the CREATING thread (<see cref="Current"/> there) and
+    /// handed across. No IL offset is known for a creator given this way, so the position beneath
+    /// the line is the unknown one. Otherwise exactly <see cref="Enter()"/>.
+    /// </remarks>
+    public static Scope Enter(System.Reflection.MethodBase creator, Goroutine? parent) => Enter(creator, parent?.Id ?? 0, entry: null);
+
+    /// <summary>
     /// Marks the calling thread as running one of the RUNTIME's own goroutines — a system goroutine,
     /// in Go's terms — started by <paramref name="starter"/>.
     /// </summary>

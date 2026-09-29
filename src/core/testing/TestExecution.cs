@@ -188,6 +188,11 @@ public sealed class TestExecution
             return m_parallelChildren.ToArray();
     }
 
+    // testing.(*T).Run, the function that executes Go's `go tRunner(t, f)`.
+    private static readonly System.Reflection.MethodBase s_tRunCreator =
+        typeof(testing_package).GetMethod(nameof(testing_package.Run),
+            [typeof(testing_package.T).MakeByRefType(), typeof(@string), typeof(Action<ж<testing_package.T>>)])!;
+
     internal void Start(Action<ж<testing_package.T>> action)
     {
         TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -199,12 +204,20 @@ public sealed class TestExecution
         // (injection is ~1 thread/s) — stalling both the suite and any converted goroutines the
         // tests spawn, which golib queues on that same pool. Dedicated threads keep test parking
         // and goroutine scheduling independent at stdlib-suite scale.
+        // Go starts the test's goroutine inside testing.(*T).Run (`go tRunner(t, f)`), from the
+        // goroutine that called Run: the main goroutine for a top-level test, the parent test's for a
+        // subtest. Read here, on that calling thread.
+        Goroutine? creatorGoroutine = Goroutine.Current;
+
         Thread thread = new(() =>
         {
             // This dedicated thread IS the test's goroutine (Go's tRunner runs every test in one),
             // so mark it as such: runtime.Goexit — which testing.T.FailNow is specified in terms
-            // of — is supported from a goroutine and gated from the main goroutine.
-            using Goroutine.Scope goroutine = Goroutine.Enter();
+            // of — is supported from a goroutine and gated from the main goroutine. Its creator is
+            // testing.(*T).Run, so a traceback ends with Go's `created by testing.(*T).Run in
+            // goroutine N`; the hand-owned testing has no Go position map, so the position line
+            // beneath it is Go's unknown one, `?:0`.
+            using Goroutine.Scope goroutine = Goroutine.Enter(s_tRunCreator, creatorGoroutine);
 
             try
             {
