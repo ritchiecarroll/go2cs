@@ -1,0 +1,15 @@
+# TRAIN J draft (base: TRAIN I's landed master). Seats accepted so far:
+g-root-frame-path-m|dc77e4a4ef|G: every interned root frame rooted (tRunner, goexit, gopanic...); merges the printer seat (no-op after TRAIN I); runtime/debug TestStack PASS in the env branch -> runtime/debug BANKS in TRAIN J; MERGE WATCH goenvs_impl.cs (+10) and managed_impl.cs
+c2-noinline|04c4e6ae31|C2: //go:noinline -> NoInlining (79 prod sites, 47 behavioral goldens); A8a needs it at TC0
+i9-r1a|13f8531ca3|the i9: S-c R1-A commit 1 (golib + gen, zero emission): slice-bound panics are runtime.boundsError with Go codes; sentinel-free slice(low[,high]); ON a merge of master + i9-slice-bounds-followups (TRAIN I seat 12)
+c2-a8|89b2e846c7|C2: A8 at recover time (panicCheck1 decided in recover() and the unrecovered report from the SiteTrace; no walk at the raise) + A8b; runtime +2 at TC0 WITH c2-noinline (seat after it); on master 2ff42f7a16
+c1-print-separator|51368db4c3|C1: golib builtin.print concatenates (Go print), println unchanged; runtime row 0 moved; on master 2ff42f7a16
+c2-zh|4b38783819|C2: Ꮡh storageChainRootsAtIdent (field + array-index hops, 4 callers); footprint 0/0 met; behavioral IndexChainAddressBox; on master 2ff42f7a16
+p1-runtime-disclosures|7c27acb6c5|P1 (Sonnet 5.5 pilot): 41 runtime disclosures (21 runtime-capability, 20 deferred) + spanOf nil + 4 refusals by name + DESIGN-iface-conversion-boxing; MERGE WATCH: runtime package_info x3 re-emit, manualTypeOperations.go union, disclosures json keep-both
+c2-a12|340dfc424c|C2: A12 row 1 TestReporter bare PASS/FAIL for a package summary (+1 runtime), row 2 TestLockRankGenerated host-identity disclosure; MERGE WATCH runtime disclosures json keep-both
+c2-idc-strict-hole|32d6597bb0|C2: identifier census STRICT hole closed (back-scan floored at lastEnd+1; 5 plants); merged with coord-census-funclits (TRAIN I seat 17) the self-test reads 211/0 on the i7
+c2-trainI-comments|f219bedb39|C2: comment-only corrections (netpoll_epoll_impl, iter_impl side-table premise, GoZero bare-array residual); ON the TRAIN I union
+g-pprof-bank|33f5f8ff22|G: runtime/pprof bank manifest (3 capability skips + HashKey halves); ON the TRAIN I union; residuals TestHeapRuntimeFrames + TestGenericsInlineLocations; windows flake TestGoroutineProfileConcurrency rate owed
+p2-traceback-decoration|0b7492b33a|P2: A7 generic [...] half (TestTracebackGeneric); created-by half held; ON master + printer seat d0ecb25644; 7 hand-owned generic helpers stated as residual
+c2-zerosize-one-source|1d6506c6cf|C2: zero-size predicate one source (non-generic GoZeroSizeFacts.Classify; GoLayoutFacts calls it; copy deleted); ON the TRAIN I union; windows GolibTests owed at the battery
+# PENDING: P2 map-growth (RULED (a) startup toggle 78dd6b0fb8; re-cut owed), P2 A7, C1 A9/A11/A15, R cookie+lowering, C2 manual-signature lift seat (for P1 Smhasher), G runtime/pprof bank; R1-A commit 2 after TRAIN I lands

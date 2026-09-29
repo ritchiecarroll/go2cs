@@ -4,7 +4,7 @@
 # output is the full conflict map in one pass; the real rehearsal resolves them in order afterwards.
 set -u
 WT=/h/go2cs-tmp-coord/tJ-map
-SEATS=/h/go2cs-tmp-coord/hnd/.claude/coord-scripts/trainJ-draft.txt
+SEATS=/h/go2cs-tmp-coord/hnd/.claude/coord-scripts/trainJ/tJ-seats-draft.txt
 BASE=61cf81290c190e2b3e495cfa8375b8b33809ed2d
 cd /h/Projects/go2cs || exit 1
 git fetch -q origin || exit 1
