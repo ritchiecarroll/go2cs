@@ -20,4 +20,6 @@ r-func-cookie|d2f1759818|R: W1 func cookie (stored-word lowering + GoFuncCookie 
 p2-map-growth-profile|ea8df5ca5b|P2: map-growth model under a pprof-reachability startup toggle (one golib predicate; off arm folded at TC0 by codegen); TestHeapRuntimeFrames PASS; OWED windows pprof row + one AOT publish (COORD battery); merges clean on 61cf81290c
 c1-a9-goroutine-profile|b415d4d9d9|C1: A9 runtime goroutineProfileWithLabels fills the profile behind stopTheWorld (pprof delegates; pprof_impl.cs deleted); runtime +2; ON M1 (in the TRAIN I union); CONFLICTS on runtime/pprof x3 package_info -> REGENERATE
 c1-a11-cleanup-after-finalizer|7db31a5470|C1: A11 cleanup waits for its finalizer and the next death (GoFinalizerGate) + the finalizer runner no longer roots each item; TestCleanupAfterFinalizer PASS; ON the TRAIN I union; merges clean on 61cf81290c
+i9-runtime-endgame-census|9c9f02bf75|the i9: RECORD, docs/phase4/CENSUS-runtime-endgame-windows-2026-09-29.md (docs only; on master 2ff42f7a16)
+c2-runtime-bank-ledger|151b9eb01b|C2: RECORD, docs/phase4/CENSUS-runtime-bank-ledger-2026-09-29.md (docs only; after TRAIN J 14 pass / 47 disclosed / 33 failing; on master 2ff42f7a16)
 # PENDING: P2 A7, C1 A15, G runtime/pprof bank; R1-A commit 2 after TRAIN I lands
