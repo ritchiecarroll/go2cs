@@ -19,6 +19,16 @@
 // interface value's dynamic type, read through abi's bridge exactly as the arena reads it
 // (arena_impl.cs), and the allocation is stored into the interface itself.
 //
+// Three helpers REFUSE BY NAME at their representational point (coordinator ruling 2026-09-28 22:01,
+// the P1 disclosure seat), so the tests that reach them fail on a text that says why rather than on an
+// anonymous nil dereference or an intrinsic stub. KeepNArenaHints walks mheap_.arenaHints, which the
+// managed model never builds because it has no Go heap arenas. TracebackSystemstack recurses through
+// systemstack and unwinds from sys.GetCallerPC/GetCallerSP, expecting the traceback to cross the
+// system-stack switch; a goroutine here is a CLR thread with one stack, so there is no switch to
+// cross. G0StackOverflow shrinks g0's stack bounds and recurses until morestack reports the overflow
+// on g0; a CLR thread has no g0 stack. Q53 (docs/phase4/DESIGN-getcallerpc.md) would give the two
+// intrinsics bodies, which moves nothing here: the refusals sit behind them, at the missing stacks.
+//
 // Hand-owned (no export_impl_test.go exists, so a reconvert never regenerates this file).
 
 namespace go;
@@ -40,4 +50,13 @@ partial class runtime_internal_test_package
 
         Ꮡout.Value = userArenaNew(ref a.arena.Value, abi.Elem(typ));
     }
+
+    public static void KeepNArenaHints(nint n) =>
+        throw panic("runtime: KeepNArenaHints: the managed host has no Go heap arenas, so there are no arena hints to keep");
+
+    public static nint TracebackSystemstack(slice<uintptr> stk, nint i) =>
+        throw panic("runtime: TracebackSystemstack: goroutines are CLR threads with one stack, so no traceback crosses a system-stack switch");
+
+    public static void G0StackOverflow() =>
+        throw panic("runtime: G0StackOverflow: goroutines are CLR threads with no g0 stack to overflow");
 }

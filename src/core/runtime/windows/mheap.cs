@@ -576,46 +576,7 @@ internal static bool inHeapOrStack(uintptr b) {
 
 }
 
-// spanOf returns the span of p. If p does not point into the heap
-// arena or no span has ever contained p, spanOf returns nil.
-//
-// If p does not point to allocated memory, this may return a non-nil
-// span that does *not* contain p. If this is a possibility, the
-// caller should either call spanOfHeap or check the span bounds
-// explicitly.
-//
-// Must be nosplit because it has callers that are nosplit.
-//
-//go:nosplit
-internal static ж<mspan> spanOf(uintptr Δp) {
-    // This function looks big, but we use a lot of constant
-    // folding around arenaL1Bits to get it under the inlining
-    // budget. Also, many of the checks here are safety checks
-    // that Go needs to do anyway, so the generated code is quite
-    // short.
-    arenaIdx ri = arenaIndex(Δp);
-    if (arenaL1Bits == 0){
-        // If there's no L1, then ri.l1() can't be out of bounds but ri.l2() can.
-        if (ri.l2() >= (nuint)1048576) {
-            return default!;
-        }
-    } else {
-        // If there's an L1, then ri.l1() can be out of bounds but ri.l2() can't.
-        if (ri.l1() >= (nuint)len(mheap_.arenas)) {
-            return default!;
-        }
-    }
-    var l2 = mheap_.arenas[ri.l1()];
-    if (arenaL1Bits != 0 && l2 == nil) {
-        // Should never happen if there's no L1.
-        return default!;
-    }
-    var ha = l2.Value[ri.l2()];
-    if (ha == nil) {
-        return default!;
-    }
-    return (~ha).spans[(Δp / (uintptr)pageSize) % (uintptr)pagesPerArena];
-}
+// go2cs generated this placeholder — func spanOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // spanOfUnchecked is equivalent to spanOf, but the caller must ensure
 // that p points into an allocated heap arena.
