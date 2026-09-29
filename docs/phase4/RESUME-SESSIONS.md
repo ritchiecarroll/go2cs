@@ -11,10 +11,193 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-27 17:09 FLEET SHUT DOWN (owner order; credits reset 2026-09-28 16:00 Central; the remaining credit is held for emergencies). FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
+> **Status of this revision:** 2026-09-28 19:10 TRANSITION (owner order 18:40): section **1e** is START HERE for R, C1, C2, P1 and P2, who run the MAILBOX-ONLY protocol (1e.1) with the models in 1e.2; G, the i9 and COORD continue from 1d.00 and the ledger. Earlier: 2026-09-27 17:09 FLEET SHUT DOWN (owner order; credits reset 2026-09-28 16:00 Central; the remaining credit is held for emergencies). FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
+
+---
+
+## 1e. TRANSITION 2026-09-28 (owner order, 18:40): R, C1 and C2 move to new sessions and P1 and P2 return, all five on the MAILBOX ONLY. START HERE for those five lanes. G, the i9 and COORD are unchanged (section 1d.00 and the ledger).
+
+### 1e.0 What changed
+
+- **Owner order 18:40.** R, C1 and C2 wound down. C1 and C2 posted final STATE BLOCKs; R's session was offline, so its block is COORD-written from origin. All three move to new sessions, and P1 and P2 come back online from a separate session. All five run the MAILBOX-ONLY protocol in 1e.1.
+- **Owner order, same evening.** The mailbox is a simple tool that just works. Lanes never spend tokens designing or improving it: a lane reports a defect in one line and stays on task, and COORD owns every fix. ("One week we burned 60% of our credits on mailbox protocol alone.") The tools are at claude/mailbox b81ef5daeb.
+- **State at the transition** (read at 19:00):
+  - master 15da8805b2: 222 of 225 implementable rows; the three left are runtime, runtime/debug and runtime/pprof.
+  - TRAIN H union 9a21c08481: in its battery; the landing follows.
+  - TRAIN I: a draft of 13 seats plus pending ones, at `.claude/coord-scripts/trainI/tI-seats-draft.txt` on this branch.
+- **Base for your cuts.** TRAIN H's landed master once COORD posts the landing to your inbox. Until then, the pushed union 9a21c08481 (the ledger's 17:03 precedent).
+
+### 1e.1 THE MAILBOX-ONLY PROTOCOL (R, C1, C2, P1, P2)
+
+This replaces section 0a.0 rules 1, 7 and 9 for these five lanes. Every other rule in 0a stands.
+
+1. **SETUP, once per session.** Use a dedicated clone for the channel, never a build clone:
+   `git clone --single-branch --branch claude/mailbox <the repo's origin URL> <mbx> && git -C <mbx> config fetch.unpackLimit 1`.
+   The tools are in `<mbx>/.claude/coord-scripts/`. Your build clone never fetches claude/mailbox.
+2. **READ, at the start of every tick.** `FLEET_MAILBOX_CLONE=<mbx> bash <mbx>/.claude/coord-scripts/fleet-read.sh YOU [NEXT-SINCE]`
+   - It prints the files added to `docs/phase4/inbox/YOU/` and `inbox/FLEET/` since NEXT-SINCE, then the HEADS of new ledger lines (200 characters each; the ledger is COORD's record, and you never read it whole), then a `NEXT-SINCE <sha>` line.
+   - Keep that SHA for the next read.
+   - The first read of a session takes no NEXT-SINCE: it prints your 10 newest files and the ledger's last 20 heads.
+3. **POST, one message per deliverable.** `FLEET_LANE=YOU FLEET_MAILBOX_CLONE=<mbx> bash <mbx>/.claude/coord-scripts/fleet-msg.sh COORD "SUBJECT" BODYFILE`
+   - At most 40 lines: WHAT (1 line), EVIDENCE (at most 10), then ASK or NEXT (1).
+   - Long evidence is a file on your ref, named by path.
+   - The tool runs the identifier census on the body, commits and pushes with a rebase retry, and refuses a clone with modified tracked files.
+4. **WAIT, at zero tokens.** When a turn has nothing left to do, run IN THE BACKGROUND: `FLEET_MAILBOX_CLONE=<mbx> bash <mbx>/.claude/coord-scripts/fleet-watch.sh YOU <NEXT-SINCE>`
+   - It exits NEW when a file lands in your inbox; then run fleet-read.sh with the same NEXT-SINCE.
+   - Otherwise it exits IDLE after 25 minutes; re-arm it with the same NEXT-SINCE.
+   - While you work, read between steps. Never poll inside a turn, and never run a timed wake loop.
+5. **COORD writes to you ONLY through your inbox.** Every ruling that binds you arrives there, beside its ledger line. Silence after your message is acknowledgement: proceed.
+6. **THE TOOLS ARE NOT YOURS TO CHANGE.**
+   - Never edit fleet-read.sh, fleet-msg.sh or fleet-watch.sh, never build another post or watch tool, and never propose a protocol change.
+   - If a tool misbehaves, put one line in your next message to COORD (what happened, the command, the output line) and carry on with your work. COORD fixes it.
+7. **OWNER HANDS.** One line in a message to COORD: `OWNER-HAND: <what> -- <why> -- <exact command or click>` (0a.0 rule 8).
+8. **RESUME ACK, your first post to COORD.** Your GPG state, the master and handover tips you read, your model and effort, and your first item.
+
+### 1e.2 Model and effort (COORD's recommendation; the owner sets both when opening each session)
+
+| Lane | Model | Effort | Why |
+|---|---|---|---|
+| R | Opus 5.5 | high | A converter seat that removes a SILENT WRONG VALUE in production (`runtime/tracetype.cs:55`), a native-frame interop measurement, and a golib cookie across the syscall door. Deep, cross-layer reasoning. |
+| C1 | Opus 5.5 | high | Runtime hand-owns: the print path, atomic field boxes, then small runtime families. The OQ-4 heap-accounting design follows, which carries a host-fatal risk. |
+| C2 | Opus 5.5 | high | Go's fatal-panic semantics (A8) and a converter escape-analysis fix (Ꮡh) whose zero-footprint prediction has named falsifier sites. |
+| P1 | **Sonnet 5.5** | high | **PILOT.** The runtime bank's disclosure entries: precise, bounded work that the tooling checks mechanically (the manifest loads, each entry absorbs exactly its row's failure, 0 orphans). COORD reviews the sizing before any cut. The pilot is scored on sizing accuracy and review findings. If it holds, Sonnet 5.5 takes more sizing-shaped work; if not, P1 returns to Opus 5.5. |
+| P2 | Opus 5.5 | high | A MODEL of Go's map table growth against the CLR's (TestHeapRuntimeFrames), and traceback decoration inside G's printer. Subtle, and interacting with a seated train. |
+
+G stays on Opus 5.5 at high and the i9 on Opus 5.5 as it runs now; both are unchanged by this transition. COORD is Opus 5.5, max.
+
+### 1e.3 PASTE PROMPTS (one per lane; the owner sets the model and effort from 1e.2 first)
+
+Every lane uses the same prompt with its own name and host in place of LANE and HOST:
+
+```
+RESUME 2026-09-28 (owner transition). You are lane LANE of the go2cs fleet, on HOST.
+Model and effort: as set for this session from section 1e.2 (name them in your ACK).
+Read, from origin, reading every tip by ls-remote:
+ - CLAUDE.md;
+ - on branch claude/coord-handover, docs/phase4/RESUME-SESSIONS.md: section 0a (the shared preamble:
+   security, refs, pins, the floor -- its comms rules 1, 7 and 9 are REPLACED for you by 1e.1),
+   section 1e.1 (the MAILBOX-ONLY protocol), and your STATE BLOCK in section 1e.4 with the
+   READ-FIRST items it names.
+Comms are the mailbox ONLY (1e.1): read with fleet-read.sh, post with fleet-msg.sh, and wait with
+fleet-watch.sh in the background. The tools are not yours to change: report a defect to COORD in one
+line and keep working.
+First action: set up the mailbox clone (1e.1 step 1), read your inbox, then post your ACK to COORD
+(1e.1 step 8). Then start your NEXT.
+```
+
+| Lane | LANE | HOST |
+|---|---|---|
+| R | R | R-LAPTOP (plus its WSL linux arm) |
+| C1 | C1 | a cloud container |
+| C2 | C2 | a cloud container |
+| P1 | P1 | a cloud container (linux) |
+| P2 | P2 | a cloud container (linux) |
+
+### 1e.4 STATE BLOCKS
+
+#### R
+
+```
+LANE: R   MODEL: Opus 5.5/high   HOST: R-LAPTOP (+ its WSL Ubuntu-22.04 linux arm)
+BRANCH: claude/r-panic-frames af2c57f41aa4daf48d1f2c00def9fe3a98c7769c on-origin yes seated TRAIN H -- panic-path frames B (ledger 2026-09-28 06:32)
+BRANCH: claude/r-defer-cost 06cfbe00441a9dbb2dd4b7902439c9e365292187 on-origin yes seated TRAIN H -- one [ThreadStatic] GoThreadState holder, stacked on r-panic-frames (11:18)
+BRANCH: claude/r-pkgpath-verbatim 8f2b7292b96b27cb1ff6dec1da7a15641007be6d on-origin yes seated TRAIN H -- option A, the verbatim import path (2026-09-27 20:52)
+BRANCH: claude/r-godebug-at-start c4504322e1548c0c4f56a91bf6f9b97241139284 on-origin yes seated TRAIN H -- parsedebugvars at start (2026-09-28 00:19)
+BRANCH: claude/r-w1-windows-mem aaa7c842224c9a5379c43d559056430b9df5589f on-origin yes seated TRAIN I draft -- W1, windows sysReserveOS/sysUsedOS/sysUnusedOS (13:13)
+BRANCH: claude/r-a16-a17-pair fbf5fac09ce81bf15afae4b46d99d5cd1810fd64 on-origin yes seated TRAIN I draft -- A16 ShadowArrayBox + A17; page allocator 257/258 windows, 259/260 linux (14:52)
+NOTE: landed with TRAIN G (master 5056089872): r-memclr-zerocap-key a46672209f, r-recover-model f8dfffc99a, r-runtime-claims 3fae75de81. Records: r-panic-frames-design f4b6da3c32, r-recover-design f019adfead, r-gopark-synctest-design 2530d43645, r-tls-bogo-evidence 7462befde0, r-p2-sweep-evidence 45ae823fa0. Superseded: r-s4-synctest-pulls 7984c46149.
+LOCAL-ONLY: UNKNOWN -- COORD-written from origin (the session went offline before a final block). First act on resume: list local-only branches and worktrees, push or bundle anything unpushed, and name them in the ACK.
+WORKTREE: R-LAPTOP -- re-inventory on resume (the 2026-09-27 block listed seven seat trees, all clean at their pushed tips).
+NEXT: (1) READ-ONLY MEASUREMENT (ledger 2026-09-28 15:03 (3)), on master or the TRAIN H union: does a managed panic raised inside a Windows callback propagate through EnumTimeFormatsEx's native frames via the reverse-P/Invoke shim, or fail fast? One reading message. (2) CUT the DOUBLE-DEREF LOWERING converter seat (15:03 (1)): lower `*(*unsafe.Pointer)(unsafe.Pointer(&x))` as a READ of x's storage, never a boxed pointer. The silent wrong value is at runtime/tracetype.cs:55 (production), reflect/all_test.cs:10513-14 and runtime/syscall_windows_test.cs:207. Red first, then the two-seeded 3-target footprint plus a -tests emission census, then CNR; check the func-as-a-word read-backs at runtime/proc.go:7409/7418 and mfinal.go:212. (3) CUT the FUNC COOKIE seat (15:03 (2), approved as designed) after (1)'s reading; the 3 panic rows are gated on (1). (4) When COORD sends G's mutex-contention diff to your inbox, read it (your sync review and leak arm, ruling c388a6efbd (f)) and reply.
+READ-FIRST: ledger 2026-09-28 15:03 (R's CB SIZING, four rulings: the layout half is DISCLOSED at the runtime bank, not yours to cut); ledger c388a6efbd (G's mutex fix; your review condition); docs/phase4/DESIGN-panic-stack-frames.md; .claude/rules/golib-gen.md
+BLOCKED-ON: none
+TOOLS: GOROOT go1.24.13 WITH GOTOOLCHAIN=local (R-LAPTOP's ambient GOTOOLCHAIN is go1.23.1 and switches silently without the pin); DOTNET_ROOT .NET SDK 10.0.400; python 3.11.15; linux arm: WSL Ubuntu-22.04 with go1.24.13 and dotnet10, driven by script files only
+NOTE: the internRootFrame ROOTING item (the TRAIN H hazard review, ledger 11:58) MOVED TO G, merged with G's TestStack GoStackRoot rooting follow-up: one owner for one interning path.
+```
+
+#### C1
+
+```
+LANE: C1   MODEL: Opus 5.5/high   HOST: a cloud container (linux)
+BRANCH: claude/c1-q5-trace-start-pair 047bac23376a5be6ff93c59c78dae0a655ef82ac on-origin yes seated TRAIN I -- Q5, the trace.Start STW pair; MERGES claude/c1-stw-contract 87c15d8b6f7eabe1b6dfdfcc123b4db7985d1b8e (STW), which it replaces in the draft
+BRANCH: claude/c1-gcpacer-knobs 5dd6bce97b399b308dc944976d881bf9d369ed93 on-origin yes seated TRAIN I -- M1, GOGC/GOMEMLIMIT one home (stacked on Q5)
+BRANCH: claude/c1-disclosure-halves d1e37a763a6b6bf592ff80c5126ee76af3b41824 on-origin yes seated TRAIN I -- the `halves` shape (+platforms) and the runtime-capability skip shape
+BRANCH: claude/c1-runtime-metrics-disclosures f7d2b01e539eade5bfe1babb470c2f78f5268874 on-origin yes seated TRAIN I -- TestReadMetrics DEFERRED, TestReadMetricsConsistency two halves, and the OQ-4 design (docs only on top); seats after c1-disclosure-halves
+BRANCH: claude/c1-runtime-error-factories 2c97dd9bce78a05abb69e4c84e2b52dc87568820 on-origin yes seated TRAIN H -- the runtime.Error factories
+BRANCH: claude/c1-runtime2-zero-residue c88a76b21183638c6f613aa7a264a544de6ef4ab on-origin yes seated TRAIN H -- Q7
+BRANCH: claude/c1-unsigned-index-ulong 05c0699fb2843bc33605e4eb269c50de56d3a772 on-origin yes seated TRAIN H
+BRANCH: claude/c1-reflect-hash-token-sizing 652745506c7b69f9516ed6a4f7bbe339a97e7666 on-origin yes accepted -- the reflect hash-token band sizing; G reviewed it OK TO CUT AS DESIGNED with two amendments (ledger 2026-09-27 19:00); NOT YET CUT
+NOTE: record refs (sizings, censuses, classings; not seats): c1-alloc-relabel-sizing, c1-board-goroot, c1-fips140test-classing, c1-h6-rewrites, c1-hop-lessons-outline, c1-linux-annotation-sizing, c1-synctest-sizing, c1-literal-tier-ruling, c1-mcleanup-handown, c1-orphan-census, c1-reflect-divergence-classing, c1-runtime-error-factories-sizing, c1-tests-production-alias-sizing
+LOCAL-ONLY: none (a cloud container keeps nothing; COORD-written from origin until C1's own final block is folded)
+WORKTREE: none survives a new cloud container; start from a fresh clone
+NEXT: (1) ACK. (2) SIZE, read-only, your three routed findings in ONE message, naming the runtime rows each moves. (a) runtime's printstring, printbool, printnl and printint's sign die because bytes(s) reinterprets a string header; a hand-own of bytes() fixes every caller. (b) A converted print(...) in runtime binds golib's builtin (stderr), so runtime output never reaches writebuf. (c) internal/runtime/atomic's Uint64/Uint32 methods allocate a field box per call (M1 added WordAddress for one hot path). (3) SIZE census families A9 (runtime.GoroutineProfile refuses where runtime/pprof's goroutine profile has a managed body; 2 rows), A11 (a cleanup runs before the finalizer; 1) and A15 (no forced periodic GC, a sysmon-shaped timer; 1), from docs/phase4/CENSUS-runtime-divergences-2026-09-28.md. (4) CUT the reflect hash-token band as designed (0xC000_0000_0000_0000 | hash), with G's two amendments (the section 3.3 table note; the disjointness guard under Native AOT, or UNMEASURED stated); G reviews. OQ-4's six asks (docs/phase4/DESIGN-oq4-heap-accounting-snapshot.md section 7) wait for COORD's scheduling after the objective banks.
+READ-FIRST: inbox COORD 20260928T200128Z-C1 (the STW push, and the findings' source); ledger 2026-09-28 16:35 (the M1/OQ-4/A5 rulings) and 18:30 (the halves seat); ledger 2026-09-27 19:00 (G's hash-token review)
+BLOCKED-ON: none
+TOOLS: GOTOOLCHAIN=go1.24.13 (linux/amd64); .NET SDK 10 (install from the dotnet-install script if the container lacks it; the last container carried it); python 3.11; no pwsh (the roster guard and CNR are COORD's at the union)
+```
+
+#### C2
+
+```
+LANE: C2   MODEL: Opus 5.5/high   HOST: cloud container (linux; no pwsh; CNR emulated)
+BRANCH: claude/c2-user-arenas 4c5226eefac42cf0226d98fbe1a237e2ea8044ae on-origin yes accepted -- C3 user arenas (TRAIN H)
+BRANCH: claude/c2-aeshash 29d7e4ec1e28d2e4331915f12a7444e420a07bd3 on-origin yes accepted -- C4 amendments (TRAIN H)
+BRANCH: claude/c2-source-paths 6ba1eb18b98f25bf964fb31262fc987f5a1d5f64 on-origin yes accepted -- C5 (TRAIN H; the i7 gate answered by the battery, TestStack's residual is G's printer seat)
+BRANCH: claude/c2-minint 2b2bbc4bf8add6df74264585a5ccebc7ebb184cc on-origin yes accepted -- MinInt/-1 re-cut (TRAIN H)
+BRANCH: claude/c2-negative-shift b70c59a3e40b4b5a8b87beb79fa3e286a1ff20a6 on-origin yes accepted -- (d) negative shift counts (TRAIN H)
+BRANCH: claude/c2-unsafe-param 454198967fb4f0053f8d88256d19e8bb120e7963 on-origin yes accepted -- defect R (TRAIN H)
+BRANCH: claude/c2-zero-size-addresses ebba154d443cb2fe8aa773fd0ef5e90c4f4b93fc on-origin yes accepted -- Z seat 1, D1/D2 (TRAIN I)
+BRANCH: claude/c2-zerobase 6858ae0b9b79cc1121f50ac8cf6d02034acab67f on-origin yes accepted -- Z seat 2, Z1-Z5 (TRAIN I; go2cs.slnx owed at the union)
+BRANCH: claude/c2-map-range-order 7871d1ff07a8e3efade2fe014a4600eb4cc1ec36 on-origin yes accepted -- A13 (TRAIN I)
+BRANCH: claude/bold-thompson-e4gztv 48e4584cff30b5daa9bb80c64abe91b71730c18c on-origin yes harness -- every C2 commit reachable; its last merges are strategy-ours, reachability only
+BRANCH: claude/c2-a8-wip 3253b2db6441db22d8530117629d813bc9a4e723 on-origin yes wip -- A8 count-only instrument on claude/coord-trainH 9a21c08481, NOT a seat
+BRANCH: claude/c2-zh-wip ade9212a78c350da9f5982a53e52a2fcc2c9e80a on-origin yes wip -- Ꮡh converter change + untranspiled IndexChainAddressBox program on master 15da8805b2, NOT a seat
+LOCAL-ONLY: none (the census tools under /tmp and the scratch probes die with the container; each census's method and counts are in its inbox post)
+WORKTREE: none survives (cloud container)
+NEXT: (1) A8. Re-probe TestRuntimePanic's child directly with GO2CS_A8_COUNT_LOG set: its expected HIT was ABSENT from the full-row count run (inbox 20260928T233933Z). Fix the instrument or find the raise path, re-read, then enable the fatal half (FatalReport.Fatal on a HIT), do A8b (nil *Func Entry/FileLine panic), and gate against COORD's 4 conditions. (2) Then Ꮡh as sized: red with master's converter, then ade9212a78's change, the 3-target footprint (0/0 predicted; the falsifier sites are named) and CNR.
+READ-FIRST: inbox C2 posts 20260928T200518Z (A8 sizing), 20260928T233933Z (A8 count reading), 20260929T002447Z (A8 count addendum: all legs 22 calls 0 HITs, all correct MISS; condition 2 census = slices 20 recovered bounds panics, nothing else; the per-call walk microbenchmark is owed in the cut), 20260928T213258Z (Ꮡh sizing); the ledger's A8 conditions (80cb034f5d) and Ꮡh approval (3e3b32bd88); the two WIP commit messages.
+BLOCKED-ON: none
+TOOLS: GOTOOLCHAIN=go1.24.13; dotnet SDK 10; python 3.11; no pwsh (CNR emulated: in-place transpile of all behavioral packages plus a git diff, ignoring the linux env pair SetegidBroadcastSeam/SyscallKeystonePulls)
+CARRY: in this container the full go2cs.slnx build exceeds the disk allowance (ENOSPC twice); purge bin/obj between -tests legs, and set CGO_ENABLED=0 for reflect (nih_test.go needs runtime/cgo).
+```
+
+#### P1
+
+```
+LANE: P1   MODEL: Sonnet 5.5/high (PILOT, section 1e.2)   HOST: a cloud container (linux)
+BRANCH: claude/p1-memclr a89ca65276c62740eaa6573220e61d872ecff3f1 on-origin yes landed -- through R's claude/r-memclr-zerocap-key a46672209f (TRAIN G)
+BRANCH: claude/p1-runtime-linkname cd4fe9f1f7c8d1800107653f3b951327fb06d421 on-origin yes landed -- TRAIN G
+BRANCH: claude/p1-stw-contract 9be90cc4da3f797e2d2ad709bdaf683b871fe242 on-origin yes superseded -- C1's independent re-cut (claude/c1-stw-contract, carried by claude/c1-q5-trace-start-pair in TRAIN I); kept as a record
+NOTE: everything on your 2026-09-27 queue was done by others while you were out: TestMemclr by R (TRAIN G), the memequal reorder by the i9 (TRAIN G), the runtime.Error factories by C1 (TRAIN H), the STW contract by C1 (TRAIN I), and A5 (/cpu/classes GC work) as C1's disclosures.
+LOCAL-ONLY: none
+WORKTREE: none survives a new cloud container; start from a fresh clone
+NEXT: (1) ACK. (2) SIZE, READ-ONLY, the runtime bank's disclosure entries that no other seat owns. Read them on linux at TRAIN H's landed master (or the TRAIN H union 9a21c08481 until COORD posts the landing), from G's census docs/phase4/CENSUS-runtime-divergences-2026-09-28.md (branch claude/g-runtime-divergence-census): B1 escape analysis and allocation counts (25 rows; AllocsPerRun-shaped rows take the DEFERRED class per the 2026-09-05 alloc ruling), B3 no Go machine code (2), B5 debugger call injection (6, linux only), B6 no Go scheduler or stack substrate (7), B7 no Go heap layout (10), B4's original 2 (TestTracebackArgs, TestInlineUnwinder), and C6 TestMemStats (runtime-capability, ledger 2026-09-28 00:30). For EACH row give: the current failure text read from the row's own output (never from the census), the class, the exact signature (pin both halves of the exact line), the record count, the reason, and the retirement plan. One sizing message, with the table as a file on your ref. NOT YOURS: the i9 mints /inline, /inline-closure, parent TestStartLine and TestLineNumber with D3; C1 minted TestReadMetrics and TestReadMetricsConsistency; G mints the 5 rows its printer seat re-filed to B4; COORD reads the 2 windows-only CB layout rows. (3) After COORD rules on the sizing, CUT the entries as ONE seat: the manifest loads (TestEveryCommittedManifestLoadsUnchanged), a runtime row filtered to the entries reads each one disclosed, and there are 0 orphans.
+READ-FIRST: .claude/skills/validation-bank/SKILL.md (disclosure classes, signatures, pins); ledger 2026-09-28 00:30 (the census accepted, class rulings), 09:47 (the `halves` shape), 18:30 (the halves tooling seat, claude/c1-disclosure-halves d1e37a763a); memory rule of record: a SIGNATURE that is a SUBSTRING of a line can absorb a whole misaligned failure (pin both halves of the exact line)
+BLOCKED-ON: none
+TOOLS: GOTOOLCHAIN=go1.24.13 (linux/amd64); .NET SDK 10 (install from the dotnet-install script if the container lacks it); python 3.11; no pwsh (the roster guard and CNR are COORD's at the union)
+```
+
+#### P2
+
+```
+LANE: P2   MODEL: Opus 5.5/high   HOST: a cloud container (linux)
+BRANCH: claude/p2-method-wrapper fc6461fae3e168512a2e4716b20d0e43501eaf27 on-origin yes landed -- F, method-expression wrapper frames (4d427a3afb is its ancestor)
+BRANCH: claude/p2-stack-roots b9d7f64248de8f1ca03c1065171ef9e80f69d1d7 on-origin yes landed -- M3 stack roots, carrying M2b (TRAIN G)
+BRANCH: claude/p2-mem-reader cf953308478712e659dfc71b31a41a3110d9165f on-origin yes landed -- M2b, carried by M3
+BRANCH: claude/p2-mem-frees 04f0820e940353d8e1c91efba2da026155f20f3a on-origin yes landed -- M2
+BRANCH: claude/p2-creator-flake 29b5e0b02869ec11db36df85e89d9c416d74b77c on-origin yes landed -- the creator flake fix (TRAIN G)
+BRANCH: claude/p2-serial-billing c923fad3c762a0c82aee7d31a46ad093f2b953a7 on-origin yes superseded -- /serial; G's claude/g-serial-external-code (TRAIN H) carries your red
+NOTE: taken by others while you were out: E (mint *Func, start lines) is the i9's A2 D3; D (TestLineNumber) is the i9's D1a plus an owner-ruled STRUCTURAL disclosure; R's B review was done by COORD (B seated in TRAIN H); M4 (a), /serial and class F (TestMutexBlockFullAggregation) are G's.
+LOCAL-ONLY: none
+WORKTREE: none survives a new cloud container; start from a fresh clone
+NEXT: (1) ACK. (2) SIZE, READ-ONLY, the MAP-GROWTH MODEL for runtime/pprof TestHeapRuntimeFrames, the one item held for you (ledger 2026-09-27 17:27; ruled 2026-09-26 19:01 as a MODEL of Go's table growth, not an observation). Measure it on linux at TRAIN H's landed master, which carries G's M4 (a) and class F (iii) frames, reading the row's current C# failure text before designing anything. Name G in the message, since G holds runtime/pprof's bank. (3) SIZE census family A7, traceback decoration (2 rows: TestTracebackGeneric's `[...]` for a generic function, and a goroutine's `created by ... in goroutine N` parent id). It lives in G's printer (claude/g-traceback-go-frames d0ecb25644, seated in TRAIN I), so size it against a merge of that seat and the TRAIN H union.
+READ-FIRST: docs/phase4/DESIGN-managed-profiling.md (around line 241, TestHeapRuntimeFrames' cause); G's census family P-b and A7 (docs/phase4/CENSUS-runtime-divergences-2026-09-28.md on claude/g-runtime-divergence-census); ledger 2026-09-28 09:47 (G's runtime/pprof bank rehearsal and its residuals); ledger d0ecb25644's SEAT line (G's printer)
+BLOCKED-ON: none
+TOOLS: GOROOT go1.24.13 (GOTOOLCHAIN=local, or GOTOOLCHAIN=go1.24.13 in a fresh container); dotnet SDK 10; python 3.11; GoTargetOS=linux, CGO_ENABLED=0; no pwsh (CNR emulated as a two-arm in-place transpile plus a diff)
+```
 
 ---
 
