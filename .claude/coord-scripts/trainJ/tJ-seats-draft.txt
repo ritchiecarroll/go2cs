@@ -7,7 +7,7 @@ c2-a8-r1a|7eeb468c76|C2: A8 PRE-RESOLVED (61cf81290c + i9-r1a + g-inline-locatio
 # (superseded by c2-a8-r1a, kept for provenance) c2-a8|89b2e846c7|C2: A8 at recover time (panicCheck1 decided in recover() and the unrecovered report from the SiteTrace; no walk at the raise) + A8b; runtime +2 at TC0 WITH c2-noinline (seat after it); on master 2ff42f7a16
 c1-print-separator|51368db4c3|C1: golib builtin.print concatenates (Go print), println unchanged; runtime row 0 moved; on master 2ff42f7a16
 c2-zh|4b38783819|C2: Ꮡh storageChainRootsAtIdent (field + array-index hops, 4 callers); footprint 0/0 met; behavioral IndexChainAddressBox; on master 2ff42f7a16
-p1-runtime-union|b0b7e776e8|P1: UNION (fixable + TRAIN I + disclosure seat; 71 manifest entries, TestCaller retired); PENDING a fast-forward folding in p1-runtime-ifacehash c1dfca97e5 (manualTypeOperations.go keep-both)
+p1-runtime-union|b0b7e776e8|P1: UNION (fixable + TRAIN I + disclosure seat; 71 manifest entries, TestCaller retired); the P1 stack (ifacehash, unsafe) merges on top with ONE keep-both conflict in manualTypeOperations.go (COORD resolves at assembly)
 # (contained in p1-runtime-union) p1-runtime-disclosures|7c27acb6c5|P1 (Sonnet 5.5 pilot): 41 runtime disclosures (21 runtime-capability, 20 deferred) + spanOf nil + 4 refusals by name + DESIGN-iface-conversion-boxing; MERGE WATCH: runtime package_info x3 re-emit, manualTypeOperations.go union, disclosures json keep-both
 c2-a12|340dfc424c|C2: A12 row 1 TestReporter bare PASS/FAIL for a package summary (+1 runtime), row 2 TestLockRankGenerated host-identity disclosure; MERGE WATCH runtime disclosures json keep-both
 c2-console-atomic|fda11aa22e|C2: testing-host event line = ONE stdout write (the i9 console-writer hazard); STACKED ON c2-a12; + field-resolution guard (named on failure)
@@ -28,4 +28,5 @@ p1-runtime-ifacehash|c1dfca97e5|P1: ifaceHash hand-owned over the lifted ifaceHa
 i9-windows-refusals|0df1378977|the i9: windows refusals + disclosures (SEH x5, W1 arg-0 pair, TestNetpollBreak linux+windows ONE entry), TestNumCPU FIXED; exactly 9 windows rows moved; CONFLICTS runtime manifest (keep both, DROP P1 linux TestNetpollBreak dup) + runtime/windows/package_info.cs (regenerate)
 i9-slice-bounds-probe|d96533d899|the i9: RECORD/PROBE, docs/phase4/probes/i9-slice-bounds-shapes (29 shapes + runner + recorded readings); on master 2ff42f7a16
 i9-golib-int32-census|31465fe654|the i9: RECORD, docs/phase4/CENSUS-golib-int32-narrowings-2026-09-29.md (126 sites; 14 silent-wrap, 6 roots); on master 2ff42f7a16
-# PENDING: i9 native-door + append refusal seat (ruled), P1 unsafe Slice/String/Add refusals + TestMemmoveOverflow, P2 A7, C1 A15, G runtime/pprof bank; R1-A commit 2 after TRAIN I lands
+p1-unsafe-slice-length|6ebf21b99c|P1: unsafe.Slice/String refuse a length past Int32 by name (SpanLength), TestMemmoveOverflow structural; stacks on p1-runtime-ifacehash; OWED fast-forward: unsafe.Add over zh (S3)
+# PENDING: i9 native-door + append refusal seat (ruled), P1 unsafe.Add fast-forward, P2 A7, C1 A15, G runtime/pprof bank; R1-A commit 2 after TRAIN I lands
