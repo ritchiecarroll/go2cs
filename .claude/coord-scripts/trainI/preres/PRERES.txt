@@ -1,0 +1,8 @@
+TRAIN I rehearsal pre-resolutions (union claude/coord-trainI, local, tip 4d270a3f09 on master 2ff42f7a16):
+- seat 1 NoUncounted.s1.cs: keep-both (master's GoFrame + SliceHeaderBox rows, seat 1's Backing() row)
+- seat 2 NoUncounted.s2.cs: master's GoFrame row + seat 2's Backing FIELD row; drops seat 1's Backing() method row (replaced by seat 2) and master's SliceHeaderBox row (its line removed by seat 2)
+- seat 3 mem_windows.s3.cs: R's placeholders by hunk (equals W1's file; R's hand-own avoids the v.Value defect master fixed)
+- seat 6 manualTypeOperations.go.s6: C1's ReadTrace/STW block + master's shrinkstack and user-arena rows (each key once; gofmt; go vet ok); debuglog.cs.s6: C1's printVal placeholder by hunk (master's unsigned-index edits kept elsewhere)
+- seat 6 and 15 runtime/{windows,linux,darwin}/package_info.cs: PROVISIONAL (theirs); RE-EMIT owed (REEMIT.txt)
+- seat 8 goenvs_impl.s8.cs: defaultGOROOT, parsedebugvars (try/catch), gcinitController, in Go's schedinit order
+- seats 14 and 16 runtime_disclosures.s14/.s16.json: keep-both appends; valid JSON, 15 entries, no duplicates
