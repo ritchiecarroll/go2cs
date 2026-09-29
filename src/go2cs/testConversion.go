@@ -596,8 +596,16 @@ func isGo2CSRoot(dir string) bool {
 	return err == nil
 }
 
-// comparisonRecordPackage is the "package" key a comparison record carries.
+// comparisonRecordPackage is the "package" key a comparison record carries: the package's FULL import
+// path, so two packages named alike in different directories never share a key -- a module's `request`
+// and another's, or even the standard library's own crypto/rand and math/rand, which the bare directory
+// name conflated (the multi-package module design, D2). A manifest that never reached the package keeps
+// the directory name.
 func comparisonRecordPackage(manifest testManifest, inputPath string) string {
+	if manifest.PackageImportPath != "" {
+		return manifest.PackageImportPath
+	}
+
 	return filepath.Base(inputPath)
 }
 
