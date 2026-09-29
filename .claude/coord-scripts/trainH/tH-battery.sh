@@ -81,7 +81,7 @@ leg GN gentests bash -c "dotnet build src/tests/GenTests/GenTests.csproj -c Debu
 stamp "  GN: $(grep -aE '(Passed|Failed)!' "$LOGDIR/gentests.log" | tail -n 1 | cut -c1-200) :: failed-names: $(grep -aE '^\s+Failed [A-Za-z]' "$LOGDIR/gentests.log" | sed 's/^ *Failed //' | cut -d' ' -f1 | tr '\n' ' ' | cut -c1-300)"
 
 # LEG TR -- BehavioralTests filtered to TestingRuntimeTests (the i9 disclosure guard phase A changes the testing host)
-leg TR testing-runtime bash -c "dotnet build src/tests/Behavioral/BehavioralTests/BehavioralTests.csproj -c Debug -p:UseSharedCompilation=false && dotnet test src/tests/Behavioral/BehavioralTests/BehavioralTests.csproj -c Debug --no-build --filter FullyQualifiedName~TestingRuntimeTests"
+leg TR testing-runtime bash -c "dotnet build src/tests/Behavioral/BehavioralTests/BehavioralTests.csproj -c Debug -p:UseSharedCompilation=false -p:go2csPath=H:/go2cs-tmp-coord/tH/src/ && dotnet test src/tests/Behavioral/BehavioralTests/BehavioralTests.csproj -c Debug --no-build -p:go2csPath=H:/go2cs-tmp-coord/tH/src/ --filter FullyQualifiedName~TestingRuntimeTests"
 stamp "  TR: $(grep -aE '(Passed|Failed)!' "$LOGDIR/testing-runtime.log" | tail -n 1 | cut -c1-200)"
 
 # LEG GT -- GolibTests, Debug and Release
