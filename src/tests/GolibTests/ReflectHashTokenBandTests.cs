@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 using static go.builtin;
 using reflect = go.reflect_package;
+using @unsafe = go.unsafe_package;
 
 namespace GolibTests;
 
@@ -65,6 +66,47 @@ public class ReflectHashTokenBandTests
         PanicException refusal = Assert.ThrowsException<PanicException>(() => p.Value);
 
         StringAssert.Contains(refusal.Message, "nil pointer dereference", $"token 0x{(ulong)(nuint)token:x}");
+    }
+
+    // A SLICE WINDOW'S TOKEN IS GO'S &s[low] ARITHMETIC: two windows of one backing differ by the element
+    // size per element (G's review, the displacement claim).
+    [TestMethod]
+    public void ASliceWindowsTokenStepsByTheElementSize()
+    {
+        slice<nint> s = make<slice<nint>>(4);
+        ulong whole = (ulong)(nuint)reflect.ValueOf(s).Pointer();
+        ulong fromOne = (ulong)(nuint)reflect.ValueOf(s[1..]).Pointer();
+
+        Assert.AreEqual(8UL, fromOne - whole, $"Pointer(s[1:]) - Pointer(s): 0x{fromOne:x} - 0x{whole:x}");
+    }
+
+    // unsafe.Pointer EQUALITY AGREES WITH ITS uintptr for a RESOLVED NON-BOX referent (G's review): a
+    // channel's pointer resolves to the boxed channel, and its equality token must be the same number
+    // uintptr(p) reads, or two live referents whose identity hashes collide compare equal while their
+    // uintptrs differ. A planted collision is not constructible, so this pins the SHAPE.
+    [TestMethod]
+    public void AResolvedNonBoxReferentKeysEqualityOnItsOwnToken()
+    {
+        System.Reflection.MethodInfo referentToken = typeof(@unsafe.Pointer).GetMethod("ReferentToken",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!;
+
+        channel<nint> c1 = new(1), c2 = new(1);
+        var v1 = reflect.ValueOf(c1);
+        var v2 = reflect.ValueOf(c2);
+        uintptr u1 = v1.Pointer(), u2 = v2.Pointer();
+        @unsafe.Pointer p1 = u1, p1Again = u1, p2 = u2;
+
+        object r1 = p1.Referent ?? throw new AssertFailedException("the channel's pointer did not resolve to its referent");
+        object r2 = p2.Referent ?? throw new AssertFailedException("the second channel's pointer did not resolve");
+
+        Assert.AreEqual((nuint)u1, (nuint)referentToken.Invoke(null, [r1])!, "ReferentToken must be the number uintptr(p) reads");
+        Assert.AreEqual((nuint)u2, (nuint)referentToken.Invoke(null, [r2])!, "ReferentToken must be the number uintptr(p) reads");
+        Assert.IsTrue(p1.Equals(p1Again), "one referent, one number: equal");
+        Assert.AreEqual(p1.GetHashCode(), p1Again.GetHashCode(), "equal pointers must hash alike");
+        Assert.IsFalse(p1.Equals(p2), "two referents, two numbers: unequal");
+
+        GC.KeepAlive(v1);
+        GC.KeepAlive(v2);
     }
 
     // UNIQUENESS (gojq's prerequisite, roadmap-post100: its allocator keys a Go map on Pointer() of a

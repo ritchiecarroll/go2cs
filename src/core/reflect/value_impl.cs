@@ -1190,6 +1190,10 @@ private static uintptr interfaceWordToken(object cur) {
 // the same identity root deepValueEqual's cycle detection keys on. A nil slice has no storage and
 // tokens 0, which is what the nil test one level up already answers for every other kind. A
 // displacement past 4 GiB wraps inside the 32-bit displacement field (ManagedPointerTokens.IdentityBand).
+// RESIDUAL, stated: a NAMED slice type (`type S []T`, converted to its own non-generic struct) is not a
+// slice<T>, so the element type is not read and the displacement steps by 1 per element where Go steps
+// by the element size. Identity and ordering still hold; only the byte distance between two windows of
+// one backing differs.
 private static uintptr sliceStorageToken(object boxed) {
     (object? data, nint low) = sliceData(boxed);
     if (data is null) {
