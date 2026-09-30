@@ -96,3 +96,43 @@ managed PDBs. The offsets resolve against Build ID `edc8e045...` with Canonical'
 (dotnet/runtime #130577, #134044), which name system libunwind 1.8.x. This box has 1.6.2, so either the
 version bound in those reports is too narrow, or the cause is another difference between the two builds.
 This probe does not separate those two readings.
+
+## Amendment 2026-09-30 (later): the mitigation for users, and what it costs
+
+**The question.** A converted Go program that a user runs on Ubuntu's packaged .NET uses default tiering. Can a
+setting remove the fault, and at what price? The owner ruled the answer OPT-IN (ledger, 2026-09-30).
+
+**The arms.** All four ran on Canonical 10.0.12 with the golib repro above and the same BAD rule (rc != 0, or no
+`depth 50` line):
+- D: the default.
+- M1: `DOTNET_TC_QuickJitForLoops=0` (methods with loops JIT straight to full optimization, so there is no OSR).
+- M2: the same setting through runtimeconfig, `System.Runtime.TieredCompilation.QuickJitForLoops=false`, which
+  `<TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>` writes. The arm is D's binaries
+  with only `runtimeconfig.json` changed.
+- M3: `DOTNET_TC_OnStackReplacement=0`, a control.
+
+Each arm ran 48 times per walk arm, interleaved.
+
+| Arm | walk BAD | no-walk BAD |
+|---|---:|---:|
+| D (positive control) | 34/48 (34 fatal) | 30/48 (5 fatal, 25 silent) |
+| M1 | 0/48 | 0/48 |
+| M2 | 0/48 | 0/48 |
+| M3 | 0/48 | 0/48 |
+
+The prediction was met: 0 BAD in 288 mitigated runs.
+
+**The cost of M2.** Measured on 4 cores with the same runtime. The programs are the performance suite's
+`PerfStartup` and `PerfSieve`, built Release from master `f819887fa3`. D and M2 differ only in runtimeconfig, and
+the arms were interleaved; every run had rc 0 and one checksum.
+
+| Program | Measure | D median (p10, p90) | M2 median (p10, p90) |
+|---|---|---|---|
+| PerfStartup, n=40 | wall | 561 ms (524, 617) | 653 ms (592, 686): +92 ms, about +16% |
+| PerfSieve, n=20 | in-program workload | 238 ms (215, 278) | 249 ms (226, 322): +4.7%, inside the spread |
+
+The startup cost is the mechanism at work: every method that contains a loop, the standard library's
+initialization included, is compiled fully optimized at its first call instead of at tier 0.
+
+**The flip trigger.** A converted Go program, not this synthetic probe, that reproduces the fault. Until one
+exists the setting stays an opt-in. Microsoft's build (0/72 above) needs no mitigation at all.
