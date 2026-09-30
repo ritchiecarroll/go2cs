@@ -479,3 +479,48 @@ func assertWellFormedXml(contents string) error {
 		}
 	}
 }
+
+// The on-stack-replacement opt-in (owner ruling 2026-09-30): Ubuntu's packaged .NET 10 can end a converted
+// program that recovers panics in a hot loop, fatally (0x80131506) or SILENTLY with exit code 0, and turning
+// off quick JIT for loops removes OSR at about 90 ms of startup. It ships COMMENTED OUT, only where it takes
+// effect: runtimeconfig applies to executables, so it sits in csproj-template.xml's non-Library group and
+// nowhere in the test-host template. A comment is invisible to the XML readers above, so this reads the text.
+const quickJitForLoopsOptIn = "<!-- <TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops> -->"
+
+func TestQuickJitForLoopsOptInShipsCommentedInTheExecutableGroupOnly(t *testing.T) {
+	template := strings.ReplaceAll(string(csprojTemplate), "\r\n", "\n")
+
+	if count := strings.Count(template, quickJitForLoopsOptIn); count != 1 {
+		t.Fatalf("csproj-template.xml carries the commented opt-in %d time(s); want exactly 1:\n  %s", count, quickJitForLoopsOptIn)
+	}
+
+	const executableGroup = "<PropertyGroup Condition=\"'$(OutputType)'!='Library'\">"
+	start := strings.Index(template, executableGroup)
+
+	if start < 0 {
+		t.Fatalf("csproj-template.xml has no %s group to hold the opt-in", executableGroup)
+	}
+
+	end := start + strings.Index(template[start:], "</PropertyGroup>")
+	at := strings.Index(template, quickJitForLoopsOptIn)
+
+	if at < start || at > end {
+		t.Errorf("the opt-in is outside the executable-only group: runtimeconfig has no effect on a library")
+	}
+
+	if !strings.Contains(template[start:end], "docs/KnownIssues.md") {
+		t.Errorf("the executable-only group's note does not link docs/KnownIssues.md, which names the fault, the cost and the flip trigger")
+	}
+
+	for _, outputType := range []string{"Exe", "Library"} {
+		properties := propertyGroupsOf(t, "csproj-template.xml", renderCsprojTemplate(outputType, "", ""))
+
+		if value := properties.value("TieredCompilationQuickJitForLoops"); value != "" {
+			t.Errorf("a rendered %s project SETS TieredCompilationQuickJitForLoops=%q; the ruling is opt-in, so it must stay commented", outputType, value)
+		}
+	}
+
+	if strings.Contains(string(testCsprojTemplate), "TieredCompilationQuickJitForLoops") {
+		t.Errorf("test-csproj-template.xml mentions TieredCompilationQuickJitForLoops; the test hosts are the fleet's instrument and carry no opt-in")
+	}
+}
