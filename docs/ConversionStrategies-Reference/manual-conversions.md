@@ -3703,11 +3703,12 @@ self-contained single-file: ~70 MB and a publish rather than a build, per packag
 **The bar, and why the class stays narrow.** A `host-limit` entry must pin a **structural** property
 of the current deployment shape — provable from how the artifact is built, not from how far an
 implementation has got — and never an unimplemented-but-fixable defect. The distinction is the same
-one that keeps `log` unbanked rather than disclosed: `log`'s `TestAll` wants a `.go:63` position, and
-a Go-source position map would satisfy it exactly, so it is a deferred capability and no disclosure.
+one that kept `log` unbanked rather than disclosed while it waited: `log`'s `TestAll` wants a `.go:63`
+position, and a Go-source position map satisfied it exactly, so it was a deferred capability and no
+disclosure (`log` has since banked on the position map).
 Nothing about an apphost's binding is deferred work of that kind; it is what the artifact *is*.
 
-**Why a disclosure rather than a capability gate**, given that `unsupportedRuntimeCapabilities` names
+**Why a disclosure rather than a capability gate**, when `unsupportedRuntimeCapabilities` then named
 this very capability for `os_test.TestRemoveAllWithExecutedProcess`. The gate arm was built and
 measured on `os/exec` before the ruling, and it fails on three counts recorded in
 [BOARD-next-validation-candidates](../phase4/BOARD-next-validation-candidates.md): a gate keys on the
@@ -3717,8 +3718,12 @@ the suite is what arms that census (`helper command unused: "printpath"`, host e
 validates at no count); and it hides the very rows whose future passing is the signal the limit has
 been lifted. A disclosure keeps every row running, visible and compared, so the class **retires
 itself**: build the single-file host and these 25 rows start passing, the disclosed count stops
-matching, and the sweep fails until the entries are removed. `os`'s gate entry predates the ruling
-and `os` is not yet on the roster; its disposition is decided when it banks.
+matching, and the sweep fails until the entries are removed. That is what happened on 2026-08-27,
+when the host began publishing single-file: `os/exec`'s rows passed and its entries retired.
+`os`'s gate entry predated the ruling and outlived the capability, withdrawing
+`TestRemoveAllWithExecutedProcess` from both runs on a row that had banked by then; it retired with
+the withdrawal gate change (see `TestNoEntryWithdrawsATestOnTheSingleFileHostCapability`), and the
+test now runs and reports a verdict like any other row.
 
 ## `deferred` and `structural` — the two labels every allocation-count disclosure resolves into
 
