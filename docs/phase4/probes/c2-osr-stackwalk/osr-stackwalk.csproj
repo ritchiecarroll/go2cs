@@ -6,6 +6,10 @@
     <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <!-- bare-walk/ is the control, a project of its own: keep its sources out of this one. -->
+    <Compile Remove="bare-walk/**" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../../../../src/core/golib/golib.csproj" />
   </ItemGroup>
 </Project>
