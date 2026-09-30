@@ -134,9 +134,9 @@ internal static void text(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slic
         }
         if (i < len(line) && (line[i] == (rune)'.' || line[i] == (rune)')')) {
             // Escape what would be the start of an ordered list.
-            @out.Write(line[..(int)(i)]);
+            @out.Write(line.slice(0, i));
             @out.WriteByte((rune)'\\');
-            line = line[(int)(i)..];
+            line = line.slice(i);
         }
         break;
     }}
@@ -198,14 +198,14 @@ internal static void text(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slic
     for (nint i = 0; i < len(s); i++) {
         switch (s[i]) {
         case (rune)'\n': {
-            @out.WriteString(s[(int)(start)..(int)(i)]);
+            @out.WriteString(s.slice(start, i));
             @out.WriteByte((rune)' ');
             start = i + 1;
             continue;
             break;
         }
         case (rune)'`' or (rune)'_' or (rune)'*' or (rune)'[' or (rune)'<' or (rune)'\\': {
-            @out.WriteString(s[(int)(start)..(int)(i)]);
+            @out.WriteString(s.slice(start, i));
             @out.WriteByte((rune)'\\');
             @out.WriteByte(s[i]);
             start = i + 1;
@@ -224,7 +224,7 @@ internal static void text(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slic
     // Markdown renderer, not edited by a person,
     // so it's fine to have escapes that are not strictly
     // necessary in some cases.
-    @out.WriteString(s[(int)(start)..]);
+    @out.WriteString(s.slice(start));
 }
 
 } // end comment_package

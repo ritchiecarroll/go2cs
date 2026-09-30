@@ -31,7 +31,7 @@ internal static bool parseable(this RIBType typ) {
 // Sys implements the Sys method of Message interface.
 [GoRecv] public static slice<ΔSys> Sys(this ref RouteMessage m) {
     return new ΔSys[]{new RouteMetricsжΔSys(Ꮡ(new RouteMetrics(
-        PathMTU: (nint)nativeEndian.Uint32(m.raw[(int)(m.extOff + 4)..(int)(m.extOff + 8)])
+        PathMTU: (nint)nativeEndian.Uint32(m.raw.slice(m.extOff + 4, m.extOff + 8))
     )))
     }.slice();
 }
@@ -51,7 +51,7 @@ internal static bool parseable(this RIBType typ) {
 [GoRecv] public static slice<ΔSys> Sys(this ref InterfaceMessage m) {
     return new ΔSys[]{new InterfaceMetricsжΔSys(Ꮡ(new InterfaceMetrics(
         Type: (nint)m.raw[m.extOff],
-        MTU: (nint)nativeEndian.Uint32(m.raw[(int)(m.extOff + 8)..(int)(m.extOff + 12)])
+        MTU: (nint)nativeEndian.Uint32(m.raw.slice(m.extOff + 8, m.extOff + 12))
     )))
     }.slice();
 }

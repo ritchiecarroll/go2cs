@@ -606,7 +606,7 @@ internal static void encode(this floatEncoder bits, ж<encodeState> Ꮡe, reflec
         nint n = len(b);
         if (n >= 4 && b[n - 4] == (rune)'e' && b[n - 3] == (rune)'-' && b[n - 2] == (rune)'0') {
             b[n - 2] = b[n - 1];
-            b = b[..(int)(n - 1)];
+            b = b.slice(0, n - 1);
         }
     }
     b = mayAppendQuote(b, opts.quoted);
@@ -1074,7 +1074,7 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
                     i++;
                     continue;
                 }
-                dst = append(dst, src[(int)(start)..(int)(i)].ꓸꓸꓸ);
+                dst = append(dst, src.slice(start, i).ꓸꓸꓸ);
                 switch (b) {
                 case (rune)'\\' or (rune)'"': {
                     dst = append(dst, (byte)((rune)'\\'), b);
@@ -1123,9 +1123,9 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
         if (n > utf8.UTFMax) {
             n = utf8.UTFMax;
         }
-        var (c, size) = utf8.DecodeRuneInString(src[(int)(i)..(int)(i + n)].ToGoString());
+        var (c, size) = utf8.DecodeRuneInString(src.slice(i, i + n).ToGoString());
         if (c == utf8.RuneError && size == 1) {
-            dst = append(dst, src[(int)(start)..(int)(i)].ꓸꓸꓸ);
+            dst = append(dst, src.slice(start, i).ꓸꓸꓸ);
             dst = append(dst, ((@string)@"\ufffd"u8).ꓸꓸꓸ);
             i += size;
             start = i;
@@ -1139,7 +1139,7 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
         // escape them, so we do so unconditionally.
         // See https://en.wikipedia.org/wiki/JSON#Safety.
         if (c == (rune)'\u2028' || c == (rune)'\u2029') {
-            dst = append(dst, src[(int)(start)..(int)(i)].ꓸꓸꓸ);
+            dst = append(dst, src.slice(start, i).ꓸꓸꓸ);
             dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'2'), (byte)((rune)'0'), (byte)((rune)'2'), hex[(rune)(c & 0xF)]);
             i += size;
             start = i;
@@ -1147,7 +1147,7 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
         }
         i += size;
     }
-    dst = append(dst, src[(int)(start)..].ꓸꓸꓸ);
+    dst = append(dst, src.slice(start).ꓸꓸꓸ);
     dst = append(dst, (byte)((rune)'"'));
     return dst;
 }
@@ -1377,7 +1377,7 @@ internal static structFields typeFields(reflectꓸType t) {
             @out = append(@out, fi);
             continue;
         }
-        var (dominant, ok) = dominantField(fields[(int)(i)..(int)(i + advance)]);
+        var (dominant, ok) = dominantField(fields.slice(i, i + advance));
         if (ok) {
             @out = append(@out, dominant);
         }

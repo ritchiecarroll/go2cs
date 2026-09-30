@@ -1,0 +1,190 @@
+// main.go - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
+
+// genpopulation generates a release's POPULATION OF RECORD -- every testable standard-library import
+// path of one Go release, under the corpus's own axis and tags -- the machine-read set the roster's
+// guard (check-roster-format.ps1), push-nuget's release census and a release hop's -Hop sweep all
+// measure against. It runs the derivation ladder the committed population-go1.24.13.txt states in its
+// own header, which until now was run by hand ("Regenerate and diff against this file rather than
+// editing it by hand"):
+//
+//  1. `go list std` over the named GOROOT -- vendored packages included, exactly as go prints them;
+//  2. keep a package when its TestGoFiles union XTestGoFiles, SURVIVING the axis and tags, is non-empty;
+//  3. keep a package when those surviving files declare `^func Test\w*\(` (the regex admits a bare
+//     `func Test(t *testing.T)`: internal/diff declares one and is a banked row).
+//
+// Membership is a property of GOROOT under the axis and tags and nothing else. The generator refuses a
+// GOROOT whose VERSION it cannot read, and it runs that GOROOT's OWN go binary with GOTOOLCHAIN=local,
+// so the list is the release named and never a toolchain switched to silently. Output is deterministic
+// (sorted import paths, no timestamps, BOM-less UTF-8, LF endings).
+//
+// Usage (S4, ruled 2026-09-29):
+//
+//	go run ./internal/genpopulation -goroot <GOROOT> [-goos windows -goarch amd64 -tags purego,math_big_pure_go] [-out FILE]
+package main
+
+import (
+	"bufio"
+	"bytes"
+	"flag"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"regexp"
+	"runtime"
+	"sort"
+	"strings"
+)
+
+var testFunc = regexp.MustCompile(`(?m)^func Test\w*\(`)
+
+func main() {
+	goroot := flag.String("goroot", "", "GOROOT of the release to enumerate (required)")
+	goos := flag.String("goos", "windows", "target GOOS (the corpus axis)")
+	goarch := flag.String("goarch", "amd64", "target GOARCH (the corpus axis)")
+	tags := flag.String("tags", "purego,math_big_pure_go", "build tags (the tags the corpus converts under)")
+	out := flag.String("out", "", "output file (default: stdout)")
+	flag.Parse()
+
+	if err := run(*goroot, *goos, *goarch, *tags, *out); err != nil {
+		fmt.Fprintln(os.Stderr, "genpopulation:", err)
+		os.Exit(1)
+	}
+}
+
+func run(goroot, goos, goarch, tags, out string) error {
+	if goroot == "" {
+		return fmt.Errorf("-goroot is required")
+	}
+
+	release, err := readRelease(goroot)
+	if err != nil {
+		return err
+	}
+
+	goBinary := filepath.Join(goroot, "bin", "go")
+	if runtime.GOOS == "windows" {
+		goBinary += ".exe"
+	}
+
+	if _, err := os.Stat(goBinary); err != nil {
+		return fmt.Errorf("the GOROOT's own go binary is missing (%s): %w", goBinary, err)
+	}
+
+	list := exec.Command(goBinary, "list", "-tags", tags,
+		"-f", "{{.ImportPath}}\t{{.Dir}}\t{{join .TestGoFiles \",\"}}\t{{join .XTestGoFiles \",\"}}", "std")
+	list.Env = append(os.Environ(), "GOROOT="+goroot, "GOTOOLCHAIN=local", "GOOS="+goos, "GOARCH="+goarch,
+		"CGO_ENABLED=0", "GOFLAGS=")
+
+	var stderr bytes.Buffer
+	list.Stderr = &stderr
+
+	listed, err := list.Output()
+	if err != nil {
+		return fmt.Errorf("go list std failed: %w: %s", err, strings.TrimSpace(stderr.String()))
+	}
+
+	var all, withTestFiles, withTests []string
+	var noTestFunc []string
+
+	scanner := bufio.NewScanner(bytes.NewReader(listed))
+	for scanner.Scan() {
+		fields := strings.Split(scanner.Text(), "\t")
+		if len(fields) != 4 {
+			return fmt.Errorf("unexpected go list line: %q", scanner.Text())
+		}
+
+		importPath, dir := fields[0], fields[1]
+		all = append(all, importPath)
+
+		var files []string
+		for _, list := range fields[2:] {
+			if list != "" {
+				files = append(files, strings.Split(list, ",")...)
+			}
+		}
+
+		if len(files) == 0 {
+			continue
+		}
+
+		withTestFiles = append(withTestFiles, importPath)
+
+		declares := false
+		for _, file := range files {
+			source, err := os.ReadFile(filepath.Join(dir, file))
+			if err != nil {
+				return fmt.Errorf("reading %s: %w", filepath.Join(dir, file), err)
+			}
+
+			if testFunc.Match(source) {
+				declares = true
+				break
+			}
+		}
+
+		if declares {
+			withTests = append(withTests, importPath)
+		} else {
+			noTestFunc = append(noTestFunc, importPath)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
+	if len(withTests) == 0 {
+		return fmt.Errorf("the population parsed to ZERO packages -- refusing to write an empty universe")
+	}
+
+	sort.Strings(withTests)
+	sort.Strings(noTestFunc)
+
+	var b strings.Builder
+	fmt.Fprintf(&b, "# THE POPULATION OF RECORD at %s -- N = %d testable packages, one import path per line.\n", release, len(withTests))
+	fmt.Fprintf(&b, "#\n# GENERATED by src/go2cs/internal/genpopulation; regenerate rather than edit.\n#\n")
+	fmt.Fprintf(&b, "# AXIS      %s/%s, CGO_ENABLED=0\n", goos, goarch)
+	fmt.Fprintf(&b, "# TAGS      -tags %s\n", tags)
+	fmt.Fprintf(&b, "# GO        %s (the GOROOT's own VERSION; its own go binary, GOTOOLCHAIN=local)\n#\n", release)
+	fmt.Fprintf(&b, "#   %d  `go list std`\n", len(all))
+	fmt.Fprintf(&b, "#   %d  minus %d packages with no test file surviving the axis and tags\n", len(withTestFiles), len(all)-len(withTestFiles))
+	fmt.Fprintf(&b, "#   %d  minus %d packages whose surviving test files declare no `^func Test\\w*\\(`:\n", len(withTests), len(noTestFunc))
+	for _, name := range noTestFunc {
+		fmt.Fprintf(&b, "#        %s\n", name)
+	}
+	b.WriteString("#\n")
+	for _, name := range withTests {
+		b.WriteString(name)
+		b.WriteByte('\n')
+	}
+
+	if out == "" {
+		_, err = os.Stdout.WriteString(b.String())
+		return err
+	}
+
+	return os.WriteFile(out, []byte(b.String()), 0o644)
+}
+
+// readRelease reads the release a GOROOT holds from its VERSION file's first line (Go 1.21 added a
+// `time` line beneath it), the same precedence the sweep's pin guard and the converter use.
+func readRelease(goroot string) (string, error) {
+	data, err := os.ReadFile(filepath.Join(goroot, "VERSION"))
+	if err != nil {
+		return "", fmt.Errorf("cannot read the GOROOT's VERSION (%s): %w", goroot, err)
+	}
+
+	release := strings.TrimSpace(strings.SplitN(string(data), "\n", 2)[0])
+	if !strings.HasPrefix(release, "go") {
+		return "", fmt.Errorf("the GOROOT's VERSION does not name a release: %q", release)
+	}
+
+	return release, nil
+}

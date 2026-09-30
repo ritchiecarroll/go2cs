@@ -84,11 +84,11 @@ public static ж<Writer> NewWriter(io.Writer w) {
             }
             // Copy verbatim everything before the special character.
             {
-                var (_, errΔ4) = w.w.WriteString(field[..(int)(i)]); if (errΔ4 != default!) {
+                var (_, errΔ4) = w.w.WriteString(field.slice(0, i)); if (errΔ4 != default!) {
                     return errΔ4;
                 }
             }
-            field = field[(int)(i)..];
+            field = field.slice(i);
             // Encode the special character.
             if (len(field) > 0) {
                 error errΔ5 = default!;

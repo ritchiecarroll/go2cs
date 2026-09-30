@@ -155,16 +155,16 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
         }
         if (z.buf[i] == 0) {
             // Digest covers the NUL terminator.
-            z.digest = crc32.Update(z.digest, crc32.IEEETable, z.buf[..(int)(i + 1)]);
+            z.digest = crc32.Update(z.digest, crc32.IEEETable, z.buf.slice(0, i + 1));
             // Strings are ISO 8859-1, Latin-1 (RFC 1952, section 2.3.1).
             if (needConv) {
                 var s = new slice<rune>(0, i);
-                foreach (var (_, v) in z.buf[..(int)(i)]) {
+                foreach (var (_, v) in z.buf.slice(0, i)) {
                     s = append(s, (rune)v);
                 }
                 return (((@string)s), default!);
             }
-            return (((@string)(z.buf[..(int)(i)])), default!);
+            return (((@string)(z.buf.slice(0, i))), default!);
         }
     }
 }
@@ -263,7 +263,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     }
     while (n == 0) {
         (n, z.err) = z.decompressor.Read(p);
-        z.digest = crc32.Update(z.digest, crc32.IEEETable, p[..(int)(n)]);
+        z.digest = crc32.Update(z.digest, crc32.IEEETable, p.slice(0, n));
         z.size += (uint32)n;
         if (!AreEqual(z.err, io.EOF)) {
             // In the normal case we return here.

@@ -45,7 +45,33 @@ func (v *Visitor) visitSendStmt(sendStmt *ast.SendStmt, format FormattingContext
 		channelOperation = "Send"
 	}
 
-	sendExpr := fmt.Sprintf("%s.%s(%s)", v.convExpr(sendStmt.Chan, nil), channelOperation, v.convSendValueExpr(sendStmt))
+	chanOperand := v.convExpr(sendStmt.Chan, nil)
+	chanHoistLen := 0
+
+	if hoistBuf != nil {
+		chanHoistLen = hoistBuf.Len()
+	}
+
+	sendValue := v.convSendValueExpr(sendStmt)
+
+	// Go evaluates the channel operand BEFORE the value, and the order it guarantees is the order of
+	// calls and receives. A value that spilled a pre-statement (`chanFor(ch) <- must(pair())` spreads as
+	// `var (ᴛ1, ᴛ2) = pair();`) would run it ahead of a channel operand still inline in the send, so an
+	// operand that itself calls or receives is pinned to its own temp first. A bare or field-chain
+	// channel carries no ordering obligation and stays inline (no churn) -- the select-send case
+	// (visitSelectStmt) pins uniformly because its operands are temps already.
+	if hoistBuf != nil && hoistBuf.Len() > chanHoistLen && tagHasSideEffects(sendStmt.Chan) {
+		hoisted := hoistBuf.String()
+		chanTemp := getGlobalTempVarName("chan")
+
+		hoistBuf.Reset()
+		hoistBuf.WriteString(hoisted[:chanHoistLen])
+		hoistBuf.WriteString(fmt.Sprintf("%s%svar %s = %s;", v.newline, v.indent(v.indentLevel), chanTemp, chanOperand))
+		hoistBuf.WriteString(hoisted[chanHoistLen:])
+		chanOperand = chanTemp
+	}
+
+	sendExpr := fmt.Sprintf("%s.%s(%s)", chanOperand, channelOperation, sendValue)
 
 	if hoistBuf != nil && hoistBuf.Len() > 0 {
 		// The hoisted decls carry their own leading newline + per-line indentation.

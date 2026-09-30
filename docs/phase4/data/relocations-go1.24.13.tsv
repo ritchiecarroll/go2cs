@@ -1,0 +1,19 @@
+# RELOCATIONS INTO go1.24.13 -- the rows whose tests moved into this release, one `source<TAB>target`
+# per line (a source that fanned out appears once per target). -Hop reads it for each row's Receives:
+# PROVENANCE, never an expectation. Copied verbatim from hop A's docs/phase4/hopA-inputs/relocations.tsv
+# (the shard-map instrument's input), which is the machine-read form of the relocation table in
+# CENSUS-h10-eligibility-go124.md section 3.
+source	target
+crypto/internal/edwards25519	crypto/internal/fips140/edwards25519
+crypto/internal/edwards25519	crypto/internal/fips140test
+crypto/internal/edwards25519/field	crypto/internal/fips140/edwards25519/field
+crypto/internal/bigmod	crypto/internal/fips140/bigmod
+crypto/internal/mlkem768	crypto/internal/fips140/mlkem
+crypto/internal/mlkem768	crypto/mlkem
+crypto/internal/nistec	crypto/internal/fips140/nistec
+crypto/internal/nistec	crypto/internal/fips140test
+crypto/internal/alias	crypto/internal/fips140test
+internal/concurrent	internal/sync
+internal/weak	weak
+runtime/internal/sys	internal/runtime/sys
+runtime/internal/math	internal/runtime/math

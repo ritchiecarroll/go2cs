@@ -161,7 +161,7 @@ public static Version Parse(@string x) {
     if (i == 0) {
         return new Version(nil);
     }
-    (v.Kind, x) = (x[..(int)(i)], x[(int)(i)..]);
+    (v.Kind, x) = (x.slice(0, i), x.slice(i));
     if (x == ""u8) {
         return v;
     }
@@ -183,7 +183,7 @@ internal static (@string n, @string rest, bool ok) cutInt(@string x) {
         // no digits or unnecessary leading zero
         return ("", "", false);
     }
-    return (x[..(int)(i)], x[(int)(i)..], true);
+    return (x.slice(0, i), x.slice(i), true);
 }
 
 // CmpInt returns cmp.Compare(x, y) interpreting x and y as decimal numbers.

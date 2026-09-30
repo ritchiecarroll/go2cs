@@ -33,8 +33,8 @@ dependencies and the fallback for everything.
 2026-08-29): a survey of the Go ecosystem's conversion candidates, designed to pick the registry's
 FIRST real operational conversions — three or four packages alongside the planned HashSet — once
 the validation campaign reaches 100% of the implementable set. Interim conversions live on the
-`rcarroll` org (as HashSet does) and yield to any official conversion an original code owner later
-publishes on their own org, per the canonicality rules in §2.
+publishing account (the owner's choice, as HashSet does) and yield to any official conversion an
+original code owner later publishes on their own org, per the canonicality rules in §2.
 
 > **AMENDED 2026-09-07 — the gate above is DEFERRED to the next corpus, not retargeted.**
 > **OWNER RULING, 2026-09-07:** the Go 1.23.12 validation record **closes at its anchor** rather than
@@ -55,6 +55,12 @@ publishes on their own org, per the canonicality rules in §2.
 > once the **Go 1.24 roster exists**, a hop re-deriving every row, denominator and disclosure set
 > from the new release's own sources (`GoCorpusMigration.md` H10). HashSet and the Target Atlas
 > survey are untouched; what waits is the first real operational conversions the gate guards.
+>
+> **AMENDED 2026-09-28 — the seed gate is WAIVED for seeds labelled as PROOFS.** **OWNER RULING,
+> 2026-09-28** (ledger 2026-09-28 03:38, item 2, on the post-100% roadmap): the gate above is waived
+> for nugetgo seeds that are clearly labelled as proofs once 223 implementable rows are banked, and
+> full publication follows 100% or the dated 1.24 freeze. The deferral above stands for everything
+> else: an unlabelled seed still waits for the Go 1.24 roster.
 
 ---
 
@@ -73,7 +79,7 @@ and URLs never fight the delimiter:
 
 ```
 # module-path<TAB>nuget-id<TAB>status<TAB>source-repo<TAB>registered<TAB>contact
-github.com/ritchiecarroll/hashset	go.github.ritchiecarroll.hashset	canonical	https://github.com/ritchiecarroll/hashset-cs	2026-08-21	ritchiecarroll
+github.com/ritchiecarroll/hashset	go.github.com.ritchiecarroll.hashset	canonical	https://github.com/ritchiecarroll/hashset-cs	2026-08-21	ritchiecarroll
 ```
 
 - **`module-path`** — the Go module path exactly as it appears in `go.mod`, including any
@@ -83,6 +89,9 @@ github.com/ritchiecarroll/hashset	go.github.ritchiecarroll.hashset	canonical	htt
   (mirroring the stdlib's `go.$(AssemblyName)` rule — see §5 for why the recommendation matters).
   The `go.*` prefix on NuGet.org should be ID-prefix-reserved by the project to prevent squatting
   ⟨OQ-3⟩.
+  **AMENDED 2026-09-30 (owner ruling B2, §8):** third-party conversions take `nugetgo.` + the dotted
+  module path; `go.<path>` is left free for canonical publishers. The recommendation above stands as
+  the record and now applies to canonical publishers only.
 - **`status`** — `canonical` or `community` (§2).
 - **`source-repo`** — the repo holding the CONVERSION (the C# side), for humans and for CI.
 - Remaining columns are provenance for humans; the converter reads only the first three.
@@ -152,6 +161,12 @@ Every PR runs, in order, cheapest first:
 5. **Auto-merge** — all green AND `status == canonical` → label + merge without human action.
    Anything else waits for a maintainer, with every check's evidence on the PR.
 
+> **AMENDED 2026-09-30 (owner ruling B6, §8) — the existence check for prerelease-only modules.**
+> Check 2 requires a non-prerelease version of the NuGet package. A module whose only Go versions are
+> prereleases or pseudo-versions has none by construction, so for such a module the check accepts a
+> prerelease package version that carries the PROOF text of B6 and the existence of the Go module
+> version at `proxy.golang.org`. Every other check is unchanged.
+
 ---
 
 ## 4. Converter integration (anchored to the censused seams)
@@ -200,6 +215,12 @@ match → warn loudly and fall back to local conversion — never a silent near-
 This is the converter's first HTTP machinery (censused: none exists today; the pprof listener is
 loopback-only) — it is small, HTTPS-only, size-capped, and OFF except under `-recurse=nuget` with
 mappings enabled.
+
+> **AMENDED 2026-09-30 (owner ruling B3, §8) — "exact match" needs a tie-break.** Rebuilds of one Go
+> module version differ only in the trailing revision, so several package versions can carry the
+> same self-description. Among the package versions whose self-description matches the required
+> module version, the converter selects the highest revision built for the running converter's
+> corpus. No such revision → the no-match path above, unchanged: warn loudly and convert locally.
 
 ### 4.4 The lock file
 
@@ -295,13 +316,63 @@ the .NET 10 hop decides the deployment shape it would emit references for. ⟨OQ
 3. **Reserve the `go.` NuGet ID prefix** — **IN MOTION.** The reservation request is submitted
    to NuGet.org's prefix-reservation program; they have acknowledged receipt, no response yet.
    Remains open until the program answers either way.
+   **AMENDED 2026-09-30 (owner ruling B5):** the pending request is narrowed to the standard
+   library's 30 root prefixes, with a separate private `nugetgo.` request. One email carries both,
+   after B1's publisher is settled, and the owner sends it.
 4. **Multi-package Go modules** — **RULED: deferred as recommended.** One nupkg with one root ID
    is the v1 posture; the real decision waits for the first real multi-package module.
+   **AMENDED 2026-09-29 — RULED (ledger 2026-09-29 16:38), no longer deferred.** D6 structure: one
+   assembly per Go package and one nupkg per module, root ID `go.<dotted module>` carrying N
+   assemblies, with no assembly merging, which satisfies the v1 posture above. *Amended
+   2026-09-30: the root ID `go.<dotted module>` is superseded for third-party packages by B2
+   (`nugetgo.<dotted path>`, §8's OWNER RULINGS) and kept for canonical publishers.*
+   Dependency paths are
+   version-free with a `go2cs.modules.lock`, one version per module per output root and a version
+   clash refused by name. Third-party proof pages sit beside the conversion, never in the stdlib
+   roster, and only main-module packages are validated. The design is R's
+   `docs/phase4/DESIGN-multi-package-modules.md`.
 5. **S3 timing** — **RULED: as recommended, AFTER the .NET 10 hop** (the hop decides the
    deployment shape S3's emitted references bind to). Note for readers: "S3" is §7's staged
    landing, stage 3 — the converter-integration stage (map fetch, resolution arm, lock file,
    provenance, CLI), the only stage that touches emission. Stage ladders are per-document:
    this S3 is unrelated to any other design doc's S-numbered ladder.
+
+### OWNER RULINGS 2026-09-30 — the NuGet identity decisions B1–B8
+
+**OWNER RULING, 2026-09-30** (ledger 2026-09-30 09:15): the NuGet identity decisions B1–B8 go as
+COORD recommended in the decision memo. Each is recorded here in a line or two; the amendments
+above (§1, §3, §4.3, OQ-3) point back to this block, and the earlier text stays as the record.
+
+- **B1 — publisher.** The existing account, the one that already owns `go.*`, publishes. This is
+  settled before any prefix request is sent.
+- **B2 — third-party IDs.** `nugetgo.` + the dotted module path, every path segment kept, with Go's
+  letter case in the display name. `go.<path>` is left free for canonical publishers. A
+  hash-shortened registry alternate is used when the natural ID fails nuget.org's ID rule, collides
+  case-insensitively or as `a/b.c` against `a.b/c`, or (under `go.`) would equal a stdlib ID. The
+  pack overrides `PackageId`.
+- **B3 — versions.** The Go version without the `v` and without `+incompatible`. Rebuilds are
+  `X.Y.Z.N` for a release and `L.0.N` for a prerelease or pseudo-version, never a fourth number on a
+  prerelease; revisions rise with the corpus. `L` is the Go prerelease or pseudo-version string used
+  as-is without the `v` (for example `1.0.0-rc.1`, or `0.0.0-20251001235044-fca9a0999f15`): its first
+  publish is `L` itself and its rebuilds are `L.0.1`, `L.0.2`. Before assigning an `L.0.N` rebuild,
+  the module's `@v/list` is checked for any version whose prerelease starts with `L.0`, and the
+  rebuild is refused or escalated if one exists, because a legal Go tag could equal it.
+  `/vN` and gopkg.in `.vN` stay in the ID. A version that
+  needs an uppercase prerelease label, overflows Int32, or runs past 64 characters is refused and
+  converted locally. A Go retraction maps to a NuGet deprecation. The tie-break for §4.3's exact
+  match is the highest revision built for the running converter's corpus.
+- **B4 — dependency ranges.** A package's stdlib dependency is the range from its build to the next
+  Go minor, e.g. `[1.24.13.3, 1.25)`; across a hop it takes a new revision. An edge between
+  third-party packages takes the first revision built for the same corpus.
+- **B5 — the `go.` prefix request.** Narrowed to the standard library's 30 root prefixes, plus a
+  private `nugetgo.` request, in one email after B1.
+- **B6 — metadata.** Upstream copyright and LICENSE verbatim. The description reads "PROOF:
+  unofficial go2cs C# conversion of <module> <ver>, built on the Go 1.24.13 standard library, not
+  affiliated with or endorsed by <upstream> or the Go project", with the Go 1.24 standard-library
+  security caveat. `RepositoryUrl` is a per-module conversion-source repo. Stable versions carry
+  PROOF in the text. §3's existence check is amended for prerelease-only modules.
+- **B7 — rehearsal.** Each new package shape is rehearsed on int.nugettest.org first.
+- **B8 — first wave.** uuid and jwt. gojq's scope is ruled before it is packed.
 
 ---
 

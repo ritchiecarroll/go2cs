@@ -154,11 +154,11 @@ internal static bool processURLOnto(@string s, bool norm, ж<strings.Builder> �
             break;
         }}
 
-        Ꮡb.WriteString(s[(int)(written)..(int)(i)]);
+        Ꮡb.WriteString(s.slice(written, i));
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "%%%02x"u8, c);
         written = i + 1;
     }
-    Ꮡb.WriteString(s[(int)(written)..]);
+    Ꮡb.WriteString(s.slice(written));
     return written != 0;
 }
 
@@ -222,7 +222,7 @@ internal static void filterSrcsetElement(@string s, nint left, nint right, ж<st
         }
     }
     {
-        @string url = s[(int)(start)..(int)(end)]; if (isSafeURL(url)) {
+        @string url = s.slice(start, end); if (isSafeURL(url)) {
             // If image metadata is only spaces or alnums then
             // we don't need to URL normalize it.
             var metadataOk = true;
@@ -233,9 +233,9 @@ internal static void filterSrcsetElement(@string s, nint left, nint right, ж<st
                 }
             }
             if (metadataOk) {
-                Ꮡb.WriteString(s[(int)(left)..(int)(start)]);
+                Ꮡb.WriteString(s.slice(left, start));
                 processURLOnto(url, true, Ꮡb);
-                Ꮡb.WriteString(s[(int)(end)..(int)(right)]);
+                Ꮡb.WriteString(s.slice(end, right));
                 return;
             }
         }

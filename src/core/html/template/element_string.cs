@@ -24,7 +24,7 @@ internal static @string String(this element i) {
     if (i >= ((element)(uint8)(len(_element_index) - 1))) {
         return "element("u8 + strconv.FormatInt((int64)(uint8)i, 10) + ")"u8;
     }
-    return _element_name[(int)(_element_index[i])..(int)(_element_index[i + 1])];
+    return _element_name.slice(_element_index[i], _element_index[i + 1]);
 }
 
 } // end template_package

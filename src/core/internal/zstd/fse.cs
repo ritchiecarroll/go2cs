@@ -138,7 +138,7 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
     }
     br.backup();
     {
-        var errΔ5 = r.buildFSE(off, norm[..(int)(maxSym + 1)], table, accuracyLog); if (errΔ5 != default!) {
+        var errΔ5 = r.buildFSE(off, norm.slice(0, maxSym + 1), table, accuracyLog); if (errΔ5 != default!) {
             return (0, 0, errΔ5);
         }
     }

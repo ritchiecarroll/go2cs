@@ -675,8 +675,10 @@
     <Project Path="tests/Behavioral/NamedSliceChildPkg/netlike/NamedSliceChildPkg.netlike.csproj" />
     <Project Path="tests/Behavioral/NamedSliceConversion/NamedSliceConversion.csproj" />
     <Project Path="tests/Behavioral/NamedSliceNilVsEmpty/NamedSliceNilVsEmpty.csproj" />
+    <Project Path="tests/Behavioral/NamedSliceOfArrayDims/NamedSliceOfArrayDims.csproj" />
     <Project Path="tests/Behavioral/NamedSlicePointerReinterpret/NamedSlicePointerReinterpret.csproj" />
     <Project Path="tests/Behavioral/NamedSlicePointerElements/NamedSlicePointerElements.csproj" />
+    <Project Path="tests/Behavioral/NamedSliceReflectDims/NamedSliceReflectDims.csproj" />
     <Project Path="tests/Behavioral/NamedStringConcat/NamedStringConcat.csproj" />
     <Project Path="tests/Behavioral/NamedStringConversion/NamedStringConversion.csproj" />
     <Project Path="tests/Behavioral/NamedStringConsts/NamedStringConsts.csproj" />
@@ -742,6 +744,7 @@
     <Project Path="tests/Behavioral/PackageVarFuncLitPointerParam/PackageVarFuncLitPointerParam.csproj" />
     <Project Path="tests/Behavioral/PackageVarFuncLitTypeLift/PackageVarFuncLitTypeLift.csproj" />
     <Project Path="tests/Behavioral/PackageVarInitOrder/PackageVarInitOrder.csproj" />
+    <Project Path="tests/Behavioral/PackageVarTupleInitOrder/PackageVarTupleInitOrder.csproj" />
     <Project Path="tests/Behavioral/PanicDeferCalleeFrame/PanicDeferCalleeFrame.csproj" />
     <Project Path="tests/Behavioral/PanicRecover/PanicRecover.csproj" />
     <Project Path="tests/Behavioral/PanicValueRendering/PanicValueRendering.csproj" />
@@ -752,6 +755,7 @@
     <Project Path="tests/Behavioral/PartialRedeclaration/PartialRedeclaration.csproj" />
     <Project Path="tests/Behavioral/PkgLevelFuncLitLocals/PkgLevelFuncLitLocals.csproj" />
     <Project Path="tests/Behavioral/PipeCloseUnblocksRead/PipeCloseUnblocksRead.csproj" />
+    <Project Path="tests/Behavioral/PlainSendOperandOrder/PlainSendOperandOrder.csproj" />
     <Project Path="tests/Behavioral/PointerArraySlice/PointerArraySlice.csproj" />
     <Project Path="tests/Behavioral/PointerEmbedValueChainPromotion/PointerEmbedValueChainPromotion.csproj" />
     <Project Path="tests/Behavioral/PointerElementAtUnsignedIndex/PointerElementAtUnsignedIndex.csproj" />
@@ -864,6 +868,7 @@
     <Project Path="tests/Behavioral/SelectRecvCommShadowRename/SelectRecvCommShadowRename.csproj" />
     <Project Path="tests/Behavioral/SelectSendDefault/SelectSendDefault.csproj" />
     <Project Path="tests/Behavioral/SelectSendRecvMix/SelectSendRecvMix.csproj" />
+    <Project Path="tests/Behavioral/SelectSendTupleSpread/SelectSendTupleSpread.csproj" />
     <Project Path="tests/Behavioral/SelectSingleFire/SelectSingleFire.csproj" />
     <Project Path="tests/Behavioral/SelectStatement/SelectStatement.csproj" />
     <Project Path="tests/Behavioral/SetFinalizerBridge/SetFinalizerBridge.csproj" />
@@ -887,6 +892,7 @@
     <Project Path="tests/Behavioral/Slice3IndexWideBound/Slice3IndexWideBound.csproj" />
     <Project Path="tests/Behavioral/SliceAliasing/SliceAliasing.csproj" />
     <Project Path="tests/Behavioral/SliceBoundsEscapeRoutes/SliceBoundsEscapeRoutes.csproj" />
+    <Project Path="tests/Behavioral/SliceBoundsRecover/SliceBoundsRecover.csproj" />
     <Project Path="tests/Behavioral/SliceElementFieldAddress/SliceElementFieldAddress.csproj" />
     <Project Path="tests/Behavioral/SliceFieldElementAddress/SliceFieldElementAddress.csproj" />
     <Project Path="tests/Behavioral/SliceNilVsEmpty/SliceNilVsEmpty.csproj" />

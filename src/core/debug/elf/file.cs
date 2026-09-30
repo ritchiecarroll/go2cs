@@ -430,27 +430,27 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         if (exprᴛ5 == ELFCLASS32) {
             Prog32 ph = default!;
             p.Value.ProgHeader = new ProgHeader(
-                Type: ((ProgType)(nint)bo.Uint32(phdata[(int)(off + /* unsafe.Offsetof(ph.Type) */ (uintptr)0)..])),
-                Flags: ((ProgFlag)bo.Uint32(phdata[(int)(off + /* unsafe.Offsetof(ph.Flags) */ (uintptr)24)..])),
-                Off: (uint64)bo.Uint32(phdata[(int)(off + /* unsafe.Offsetof(ph.Off) */ (uintptr)4)..]),
-                Vaddr: (uint64)bo.Uint32(phdata[(int)(off + /* unsafe.Offsetof(ph.Vaddr) */ (uintptr)8)..]),
-                Paddr: (uint64)bo.Uint32(phdata[(int)(off + /* unsafe.Offsetof(ph.Paddr) */ (uintptr)12)..]),
-                Filesz: (uint64)bo.Uint32(phdata[(int)(off + /* unsafe.Offsetof(ph.Filesz) */ (uintptr)16)..]),
-                Memsz: (uint64)bo.Uint32(phdata[(int)(off + /* unsafe.Offsetof(ph.Memsz) */ (uintptr)20)..]),
-                Align: (uint64)bo.Uint32(phdata[(int)(off + /* unsafe.Offsetof(ph.Align) */ (uintptr)28)..])
+                Type: ((ProgType)(nint)bo.Uint32(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Type) */ (uintptr)0)))),
+                Flags: ((ProgFlag)bo.Uint32(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Flags) */ (uintptr)24)))),
+                Off: (uint64)bo.Uint32(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Off) */ (uintptr)4))),
+                Vaddr: (uint64)bo.Uint32(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Vaddr) */ (uintptr)8))),
+                Paddr: (uint64)bo.Uint32(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Paddr) */ (uintptr)12))),
+                Filesz: (uint64)bo.Uint32(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Filesz) */ (uintptr)16))),
+                Memsz: (uint64)bo.Uint32(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Memsz) */ (uintptr)20))),
+                Align: (uint64)bo.Uint32(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Align) */ (uintptr)28)))
             );
         }
         else if (exprᴛ5 == ELFCLASS64) {
             Prog64 ph = default!;
             p.Value.ProgHeader = new ProgHeader(
-                Type: ((ProgType)(nint)bo.Uint32(phdata[(int)(off + /* unsafe.Offsetof(ph.Type) */ (uintptr)0)..])),
-                Flags: ((ProgFlag)bo.Uint32(phdata[(int)(off + /* unsafe.Offsetof(ph.Flags) */ (uintptr)4)..])),
-                Off: bo.Uint64(phdata[(int)(off + /* unsafe.Offsetof(ph.Off) */ (uintptr)8)..]),
-                Vaddr: bo.Uint64(phdata[(int)(off + /* unsafe.Offsetof(ph.Vaddr) */ (uintptr)16)..]),
-                Paddr: bo.Uint64(phdata[(int)(off + /* unsafe.Offsetof(ph.Paddr) */ (uintptr)24)..]),
-                Filesz: bo.Uint64(phdata[(int)(off + /* unsafe.Offsetof(ph.Filesz) */ (uintptr)32)..]),
-                Memsz: bo.Uint64(phdata[(int)(off + /* unsafe.Offsetof(ph.Memsz) */ (uintptr)40)..]),
-                Align: bo.Uint64(phdata[(int)(off + /* unsafe.Offsetof(ph.Align) */ (uintptr)48)..])
+                Type: ((ProgType)(nint)bo.Uint32(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Type) */ (uintptr)0)))),
+                Flags: ((ProgFlag)bo.Uint32(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Flags) */ (uintptr)4)))),
+                Off: bo.Uint64(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Off) */ (uintptr)8))),
+                Vaddr: bo.Uint64(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Vaddr) */ (uintptr)16))),
+                Paddr: bo.Uint64(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Paddr) */ (uintptr)24))),
+                Filesz: bo.Uint64(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Filesz) */ (uintptr)32))),
+                Memsz: bo.Uint64(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Memsz) */ (uintptr)40))),
+                Align: bo.Uint64(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Align) */ (uintptr)48)))
             );
         }
 
@@ -537,32 +537,32 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         var exprᴛ7 = (~f).Class;
         if (exprᴛ7 == ELFCLASS32) {
             Section32 sh = default!;
-            names = append(names, bo.Uint32(shdata[(int)(off + /* unsafe.Offsetof(sh.Name) */ (uintptr)0)..]));
+            names = append(names, bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Name) */ (uintptr)0))));
             s.Value.SectionHeader = new SectionHeader(
-                Type: ((SectionType)bo.Uint32(shdata[(int)(off + /* unsafe.Offsetof(sh.Type) */ (uintptr)4)..])),
-                Flags: ((SectionFlag)bo.Uint32(shdata[(int)(off + /* unsafe.Offsetof(sh.Flags) */ (uintptr)8)..])),
-                Addr: (uint64)bo.Uint32(shdata[(int)(off + /* unsafe.Offsetof(sh.Addr) */ (uintptr)12)..]),
-                Offset: (uint64)bo.Uint32(shdata[(int)(off + /* unsafe.Offsetof(sh.Off) */ (uintptr)16)..]),
-                FileSize: (uint64)bo.Uint32(shdata[(int)(off + /* unsafe.Offsetof(sh.Size) */ (uintptr)20)..]),
-                Link: bo.Uint32(shdata[(int)(off + /* unsafe.Offsetof(sh.Link) */ (uintptr)24)..]),
-                Info: bo.Uint32(shdata[(int)(off + /* unsafe.Offsetof(sh.Info) */ (uintptr)28)..]),
-                Addralign: (uint64)bo.Uint32(shdata[(int)(off + /* unsafe.Offsetof(sh.Addralign) */ (uintptr)32)..]),
-                Entsize: (uint64)bo.Uint32(shdata[(int)(off + /* unsafe.Offsetof(sh.Entsize) */ (uintptr)36)..])
+                Type: ((SectionType)bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Type) */ (uintptr)4)))),
+                Flags: ((SectionFlag)bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Flags) */ (uintptr)8)))),
+                Addr: (uint64)bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Addr) */ (uintptr)12))),
+                Offset: (uint64)bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Off) */ (uintptr)16))),
+                FileSize: (uint64)bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Size) */ (uintptr)20))),
+                Link: bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Link) */ (uintptr)24))),
+                Info: bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Info) */ (uintptr)28))),
+                Addralign: (uint64)bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Addralign) */ (uintptr)32))),
+                Entsize: (uint64)bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Entsize) */ (uintptr)36)))
             );
         }
         else if (exprᴛ7 == ELFCLASS64) {
             Section64 sh = default!;
-            names = append(names, bo.Uint32(shdata[(int)(off + /* unsafe.Offsetof(sh.Name) */ (uintptr)0)..]));
+            names = append(names, bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Name) */ (uintptr)0))));
             s.Value.SectionHeader = new SectionHeader(
-                Type: ((SectionType)bo.Uint32(shdata[(int)(off + /* unsafe.Offsetof(sh.Type) */ (uintptr)4)..])),
-                Flags: ((SectionFlag)(uint32)bo.Uint64(shdata[(int)(off + /* unsafe.Offsetof(sh.Flags) */ (uintptr)8)..])),
-                Offset: bo.Uint64(shdata[(int)(off + /* unsafe.Offsetof(sh.Off) */ (uintptr)24)..]),
-                FileSize: bo.Uint64(shdata[(int)(off + /* unsafe.Offsetof(sh.Size) */ (uintptr)32)..]),
-                Addr: bo.Uint64(shdata[(int)(off + /* unsafe.Offsetof(sh.Addr) */ (uintptr)16)..]),
-                Link: bo.Uint32(shdata[(int)(off + /* unsafe.Offsetof(sh.Link) */ (uintptr)40)..]),
-                Info: bo.Uint32(shdata[(int)(off + /* unsafe.Offsetof(sh.Info) */ (uintptr)44)..]),
-                Addralign: bo.Uint64(shdata[(int)(off + /* unsafe.Offsetof(sh.Addralign) */ (uintptr)48)..]),
-                Entsize: bo.Uint64(shdata[(int)(off + /* unsafe.Offsetof(sh.Entsize) */ (uintptr)56)..])
+                Type: ((SectionType)bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Type) */ (uintptr)4)))),
+                Flags: ((SectionFlag)(uint32)bo.Uint64(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Flags) */ (uintptr)8)))),
+                Offset: bo.Uint64(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Off) */ (uintptr)24))),
+                FileSize: bo.Uint64(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Size) */ (uintptr)32))),
+                Addr: bo.Uint64(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Addr) */ (uintptr)16))),
+                Link: bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Link) */ (uintptr)40))),
+                Info: bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Info) */ (uintptr)44))),
+                Addralign: bo.Uint64(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Addralign) */ (uintptr)48))),
+                Entsize: bo.Uint64(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Entsize) */ (uintptr)56)))
             );
         }
 
@@ -756,7 +756,7 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
     }
     for (nint end = start; end < len(section); end++) {
         if (section[end] == 0) {
-            return (((@string)(section[(int)(start)..(int)(end)])), true);
+            return (((@string)(section.slice(start, end))), true);
         }
     }
     return ("", false);
@@ -866,14 +866,14 @@ internal static readonly @string lengthOfRelocationˢ = "length of relocation se
                 continue;
             }
             var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
+            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
         }
         else if (exprᴛ1 == R_X86_64_32) {
             if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
+            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
 
     }
@@ -906,9 +906,9 @@ internal static readonly @string lengthOfRelocationˢ2 = "length of relocation s
             if (rel.Off + 4 >= (uint32)len(dst)) {
                 continue;
             }
-            var val = f.ByteOrder.Uint32(dst[(int)(rel.Off)..(int)(rel.Off + 4)]);
+            var val = f.ByteOrder.Uint32(dst.slice((nint)(rel.Off), (nint)(rel.Off + 4)));
             val += (uint32)(~sym).Value;
-            f.ByteOrder.PutUint32(dst[(int)(rel.Off)..(int)(rel.Off + 4)], val);
+            f.ByteOrder.PutUint32(dst.slice((nint)(rel.Off), (nint)(rel.Off + 4)), val);
         }
     }
     return default!;
@@ -938,9 +938,9 @@ internal static readonly @string lengthOfRelocationˢ2 = "length of relocation s
             if (rel.Off + 4 >= (uint32)len(dst)) {
                 continue;
             }
-            var val = f.ByteOrder.Uint32(dst[(int)(rel.Off)..(int)(rel.Off + 4)]);
+            var val = f.ByteOrder.Uint32(dst.slice((nint)(rel.Off), (nint)(rel.Off + 4)));
             val += (uint32)(~sym).Value;
-            f.ByteOrder.PutUint32(dst[(int)(rel.Off)..(int)(rel.Off + 4)], val);
+            f.ByteOrder.PutUint32(dst.slice((nint)(rel.Off), (nint)(rel.Off + 4)), val);
         }
 
     }
@@ -978,14 +978,14 @@ internal static readonly @string lengthOfRelocationˢ2 = "length of relocation s
                 continue;
             }
             var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
+            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
         }
         else if (exprᴛ1 == R_AARCH64_ABS32) {
             if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
+            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
 
     }
@@ -1023,7 +1023,7 @@ internal static readonly @string lengthOfRelocationˢ3 = "length of relocation s
                 continue;
             }
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
+            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
 
     }
@@ -1058,14 +1058,14 @@ internal static readonly @string lengthOfRelocationˢ3 = "length of relocation s
                 continue;
             }
             var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
+            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
         }
         else if (exprᴛ1 == R_PPC64_ADDR32) {
             if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
+            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
 
     }
@@ -1096,9 +1096,9 @@ internal static readonly @string lengthOfRelocationˢ3 = "length of relocation s
             if (rel.Off + 4 >= (uint32)len(dst)) {
                 continue;
             }
-            var val = f.ByteOrder.Uint32(dst[(int)(rel.Off)..(int)(rel.Off + 4)]);
+            var val = f.ByteOrder.Uint32(dst.slice((nint)(rel.Off), (nint)(rel.Off + 4)));
             val += (uint32)(~sym).Value;
-            f.ByteOrder.PutUint32(dst[(int)(rel.Off)..(int)(rel.Off + 4)], val);
+            f.ByteOrder.PutUint32(dst.slice((nint)(rel.Off), (nint)(rel.Off + 4)), val);
         }
 
     }
@@ -1140,14 +1140,14 @@ internal static readonly @string lengthOfRelocationˢ3 = "length of relocation s
                 continue;
             }
             var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
+            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
         }
         else if (exprᴛ1 == R_MIPS_32) {
             if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
+            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
 
     }
@@ -1184,14 +1184,14 @@ internal static readonly @string lengthOfRelocationˢ3 = "length of relocation s
                 continue;
             }
             var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
+            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
         }
         else if (exprᴛ1 == R_LARCH_32) {
             if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
+            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
 
     }
@@ -1226,14 +1226,14 @@ internal static readonly @string lengthOfRelocationˢ3 = "length of relocation s
                 continue;
             }
             var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
+            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
         }
         else if (exprᴛ1 == R_RISCV_32) {
             if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
+            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
 
     }
@@ -1268,14 +1268,14 @@ internal static readonly @string lengthOfRelocationˢ3 = "length of relocation s
                 continue;
             }
             var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
+            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
         }
         else if (exprᴛ1 == R_390_32) {
             if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
+            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
 
     }
@@ -1310,14 +1310,14 @@ internal static readonly @string lengthOfRelocationˢ3 = "length of relocation s
                 continue;
             }
             var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
+            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
         }
         else if (exprᴛ1 == R_SPARC_32 || exprᴛ1 == R_SPARC_UA32) {
             if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
+            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
 
     }
@@ -1576,15 +1576,15 @@ public static uint16 Index(this VersionIndex vi) {
             break;
         }
         ref var version = ref heap<uint16>(out var Ꮡversion);
-        version = f.ByteOrder.Uint16(d[(int)(i)..(int)(i + 2)]);
+        version = f.ByteOrder.Uint16(d.slice(i, i + 2));
         if (version != 1) {
             return new FormatErrorжerror(Ꮡ(new FormatError((int64)((~vd).Offset + (uint64)i), "unexpected dynamic version"u8, version)));
         }
-        var flags = ((DynamicVersionFlag)f.ByteOrder.Uint16(d[(int)(i + 2)..(int)(i + 4)]));
-        var ndx = f.ByteOrder.Uint16(d[(int)(i + 4)..(int)(i + 6)]);
-        var cnt = f.ByteOrder.Uint16(d[(int)(i + 6)..(int)(i + 8)]);
-        var aux = f.ByteOrder.Uint32(d[(int)(i + 12)..(int)(i + 16)]);
-        var next = f.ByteOrder.Uint32(d[(int)(i + 16)..(int)(i + 20)]);
+        var flags = ((DynamicVersionFlag)f.ByteOrder.Uint16(d.slice(i + 2, i + 4)));
+        var ndx = f.ByteOrder.Uint16(d.slice(i + 4, i + 6));
+        var cnt = f.ByteOrder.Uint16(d.slice(i + 6, i + 8));
+        var aux = f.ByteOrder.Uint32(d.slice(i + 12, i + 16));
+        var next = f.ByteOrder.Uint32(d.slice(i + 16, i + 20));
         if (cnt == 0) {
             return new FormatErrorжerror(Ꮡ(new FormatError((int64)((~vd).Offset + (uint64)i), "dynamic version has no name"u8, default!)));
         }
@@ -1596,8 +1596,8 @@ public static uint16 Index(this VersionIndex vi) {
             if (j + 8 > len(d)) {
                 break;
             }
-            var vname = f.ByteOrder.Uint32(d[(int)(j)..(int)(j + 4)]);
-            var vnext = f.ByteOrder.Uint32(d[(int)(j + 4)..(int)(j + 8)]);
+            var vname = f.ByteOrder.Uint32(d.slice(j, j + 4));
+            var vnext = f.ByteOrder.Uint32(d.slice(j + 4, j + 8));
             (depName, _) = getString(str, (nint)vname);
             if (c == 0){
                 name = depName;
@@ -1661,14 +1661,14 @@ internal static readonly @string dynamicVersionsMissingˢ = "DynamicVersions: mi
             break;
         }
         ref var vers = ref heap<uint16>(out var Ꮡvers);
-        vers = f.ByteOrder.Uint16(d[(int)(i)..(int)(i + 2)]);
+        vers = f.ByteOrder.Uint16(d.slice(i, i + 2));
         if (vers != 1) {
             return new FormatErrorжerror(Ꮡ(new FormatError((int64)((~vn).Offset + (uint64)i), "unexpected dynamic need version"u8, vers)));
         }
-        var cnt = f.ByteOrder.Uint16(d[(int)(i + 2)..(int)(i + 4)]);
-        var fileoff = f.ByteOrder.Uint32(d[(int)(i + 4)..(int)(i + 8)]);
-        var aux = f.ByteOrder.Uint32(d[(int)(i + 8)..(int)(i + 12)]);
-        var next = f.ByteOrder.Uint32(d[(int)(i + 12)..(int)(i + 16)]);
+        var cnt = f.ByteOrder.Uint16(d.slice(i + 2, i + 4));
+        var fileoff = f.ByteOrder.Uint32(d.slice(i + 4, i + 8));
+        var aux = f.ByteOrder.Uint32(d.slice(i + 8, i + 12));
+        var next = f.ByteOrder.Uint32(d.slice(i + 12, i + 16));
         var (@file, _) = getString(str, (nint)fileoff);
         slice<DynamicVersionDep> deps = default!;
         nint j = i + (nint)aux;
@@ -1676,10 +1676,10 @@ internal static readonly @string dynamicVersionsMissingˢ = "DynamicVersions: mi
             if (j + 16 > len(d)) {
                 break;
             }
-            var flags = ((DynamicVersionFlag)f.ByteOrder.Uint16(d[(int)(j + 4)..(int)(j + 6)]));
-            var index = f.ByteOrder.Uint16(d[(int)(j + 6)..(int)(j + 8)]);
-            var nameoff = f.ByteOrder.Uint32(d[(int)(j + 8)..(int)(j + 12)]);
-            var nextΔ1 = f.ByteOrder.Uint32(d[(int)(j + 12)..(int)(j + 16)]);
+            var flags = ((DynamicVersionFlag)f.ByteOrder.Uint16(d.slice(j + 4, j + 6)));
+            var index = f.ByteOrder.Uint16(d.slice(j + 6, j + 8));
+            var nameoff = f.ByteOrder.Uint32(d.slice(j + 8, j + 12));
+            var nextΔ1 = f.ByteOrder.Uint32(d.slice(j + 12, j + 16));
             var (depName, _) = getString(str, (nint)nameoff);
             deps = append(deps, new DynamicVersionDep(
                 Flags: flags,
@@ -1757,7 +1757,7 @@ internal static readonly @string dynamicVersionNeedsˢ = "DynamicVersionNeeds: m
     if (i >= len(f.gnuVersym)) {
         return (false, 0, "", "");
     }
-    var s = f.gnuVersym[(int)(i)..];
+    var s = f.gnuVersym.slice(i);
     if (len(s) < 2) {
         return (false, 0, "", "");
     }

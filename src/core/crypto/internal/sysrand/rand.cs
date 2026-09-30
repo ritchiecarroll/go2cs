@@ -91,7 +91,7 @@ internal static error urandomRead(slice<byte> b) {
         if (err != default!) {
             return err;
         }
-        b = b[(int)(n)..];
+        b = b.slice(n);
     }
     return default!;
 }

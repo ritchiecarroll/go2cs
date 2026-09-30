@@ -141,7 +141,7 @@ internal static (@string output, bool unordered, bool ok) exampleOutput(ж<ast.B
                     if (loc[2] != -1) {
                         unordered = true;
                     }
-                    text = text[(int)(loc[1])..];
+                    text = text.slice(loc[1]);
                     // Strip zero or more spaces followed by \n or a single space.
                     text = strings.TrimLeft(text, " "u8);
                     if (len(text) > 0 && text[0] == (rune)'\n') {
@@ -166,7 +166,7 @@ internal static bool isTest(@string name, @string prefix) {
         // "Test" is ok
         return true;
     }
-    var (rune, _) = utf8.DecodeRuneInString(name[(int)(len(prefix))..]);
+    var (rune, _) = utf8.DecodeRuneInString(name.slice(len(prefix)));
     return !unicode.IsLower(rune);
 }
 
@@ -633,8 +633,8 @@ internal static (ж<ast.BlockStmt>, slice<ж<ast.CommentGroup>>) stripOutputComm
         Rbrace: last.Pos()
     ));
     var newComments = new slice<ж<ast.CommentGroup>>(len(comments) - 1);
-    copy(newComments, comments[..(int)(i)]);
-    copy(newComments[(int)(i)..], comments[(int)(i + 1)..]);
+    copy(newComments, comments.slice(0, i));
+    copy(newComments.slice(i), comments.slice(i + 1));
     return (newBody, newComments);
 }
 
@@ -713,7 +713,7 @@ internal static void classifyExamples(ж<Package> Ꮡp, slice<ж<Example>> examp
         //
         // An association is made on the first successful match.
         // Examples with malformed names that match nothing are skipped.
-        for (nint i = len((~ex).Name); i >= 0; i = strings.LastIndexByte((~ex).Name[..(int)(i)], (rune)'_')) {
+        for (nint i = len((~ex).Name); i >= 0; i = strings.LastIndexByte((~ex).Name.slice(0, i), (rune)'_')) {
             var (prefix, suffix, ok) = splitExampleName((~ex).Name, i);
             if (!ok) {
                 continue;
@@ -748,7 +748,7 @@ internal static @string nameWithoutInst(@string name) {
         // Malformed name, should contain closing bracket too.
         return name;
     }
-    return name[0..(int)(start)] + name[(int)(end + 1)..];
+    return name.slice(0, start) + name.slice(end + 1);
 }
 
 // splitExampleName attempts to split example name s at index i,
@@ -767,7 +767,7 @@ internal static (@string prefix, @string suffix, bool ok) splitExampleName(@stri
     if (i == len(s) - 1) {
         return ("", "", false);
     }
-    (prefix, suffix) = (s[..(int)(i)], s[(int)(i + 1)..]);
+    (prefix, suffix) = (s.slice(0, i), s.slice(i + 1));
     return (prefix, suffix, isExampleSuffix(suffix));
 }
 

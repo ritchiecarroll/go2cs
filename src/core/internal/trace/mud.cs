@@ -170,11 +170,11 @@ internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) 
         nint j = 0;
         foreach (var (o, _) in newSorted) {
             if (i >= len(oldSorted)){
-                copy(newSorted[(int)(o)..], edges[(int)(j)..]);
+                copy(newSorted.slice(o), edges.slice(j));
                 break;
             } else 
             if (j >= len(edges)){
-                copy(newSorted[(int)(o)..], oldSorted[(int)(i)..]);
+                copy(newSorted.slice(o), oldSorted.slice(i));
                 break;
             } else 
             if (oldSorted[i].x < edges[j].x){

@@ -152,7 +152,7 @@ public static slice<byte> Decomposition(this ΔProperties p) {
     var i = p.index;
     var n = (byte)(decomps[i] & (byte)headerLenMask);
     i++;
-    return decomps[(int)(i)..(int)((uint16)(i + (uint16)n))];
+    return decomps.slice(i, (uint16)(i + (uint16)n));
 }
 
 // Size returns the length of UTF-8 encoding of the rune.
@@ -184,7 +184,7 @@ internal static void buildRecompMap() {
     recompMap = new map<uint32, rune>(len(recompMapPacked) / 8);
     array<byte> buf = new(8);
     for (nint i = 0; i < len(recompMapPacked); i += 8) {
-        copy(buf[..], recompMapPacked[(int)(i)..(int)(i + 8)]);
+        copy(buf[..], recompMapPacked.slice(i, i + 8));
         var key = binary.BigEndian.Uint32(buf[..4]);
         var val = binary.BigEndian.Uint32(buf[4..]);
         recompMap[key] = (rune)val;

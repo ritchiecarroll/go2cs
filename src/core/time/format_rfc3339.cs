@@ -70,7 +70,7 @@ internal static (slice<byte>, error) appendStrictRFC3339(this Time t, slice<byte
     }
     case {} when b[len(b) - 1] is not (rune)'Z': {
         var c = b[len(b) - len("Z07:00")];
-        if (((rune)'0' <= c && c <= (rune)'9') || num2(b[(int)(len(b) - len("07:00"))..]) >= 24) {
+        if (((rune)'0' <= c && c <= (rune)'9') || num2(b.slice(len(b) - len("07:00"))) >= 24) {
             // year must be exactly 4 digits wide
             return (b, errors.New(timezoneHourOutsideOfˢ));
         }
@@ -126,7 +126,7 @@ internal static (Time, bool) parseRFC3339<bytes>(bytes s, ж<ΔLocation> Ꮡloca
         for (; n < len(s) && isDigit(s, n); n++) {
         }
         (nsec, _, _) = parseNanoseconds(s, n);
-        s = s[(int)(n)..];
+        s = s.slice(n);
     }
     // Parse the time zone.
     var t = Date(year, ((ΔMonth)month), day, hour, min, sec, nsec, ΔUTC);
@@ -183,13 +183,13 @@ RFC3339, ((@string)b), "."u8, ","u8, ""u8))));
         }
         case {} when b[len(b) - 1] is not (rune)'Z': {
             switch (ᐧ) {
-            case {} when num2(b[(int)(len(b) - len("07:00"))..]) >= 24: {
+            case {} when num2(b.slice(len(b) - len("07:00"))) >= 24: {
                 return (new Time(nil), new ParseErrorжerror(Ꮡ(new ParseError( // timezone hour must be in range
-RFC3339, ((@string)b), "Z07:00"u8, ((@string)(b[(int)(len(b) - len("Z07:00"))..])), ": timezone hour out of range"u8))));
+RFC3339, ((@string)b), "Z07:00"u8, ((@string)(b.slice(len(b) - len("Z07:00")))), ": timezone hour out of range"u8))));
             }
-            case {} when num2(b[(int)(len(b) - len("00"))..]) >= 60: {
+            case {} when num2(b.slice(len(b) - len("00"))) >= 60: {
                 return (new Time(nil), new ParseErrorжerror(Ꮡ(new ParseError( // timezone minute must be in range
-RFC3339, ((@string)b), "Z07:00"u8, ((@string)(b[(int)(len(b) - len("Z07:00"))..])), ": timezone minute out of range"u8))));
+RFC3339, ((@string)b), "Z07:00"u8, ((@string)(b.slice(len(b) - len("Z07:00")))), ": timezone minute out of range"u8))));
             }}
 
             break;

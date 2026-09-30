@@ -189,7 +189,7 @@ internal static readonly @string errorSCodeDˢ = "ERROR: %s (code = %d)"u8;
             @string url = fmt.Sprintf((~check.conf)._ErrorURL, code);
             {
                 nint i = strings.Index(msg, "\n"u8); if (i >= 0){
-                    msg = msg[..(int)(i)] + url + msg[(int)(i)..];
+                    msg = msg.slice(0, i) + url + msg.slice(i);
                 } else {
                     msg += url;
                 }

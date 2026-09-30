@@ -65,23 +65,23 @@ internal static (nint, error) Write(this ж<macGeneric> Ꮡh, slice<byte> p) {
 
     nint nn = len(p);
     if (h.offset > 0) {
-        nint n = copy(h.buffer[(int)(h.offset)..], p);
+        nint n = copy(h.buffer.slice(h.offset), p);
         if (h.offset + n < TagSize) {
             h.offset += n;
             return (nn, default!);
         }
-        p = p[(int)(n)..];
+        p = p.slice(n);
         h.offset = 0;
         updateGeneric(ref nonnil(ref h).macState, h.buffer[..]);
     }
     {
         nint n = len(p) - (len(p) % (nint)TagSize); if (n > 0) {
-            updateGeneric(ref nonnil(ref h).macState, p[..(int)(n)]);
-            p = p[(int)(n)..];
+            updateGeneric(ref nonnil(ref h).macState, p.slice(0, n));
+            p = p.slice(n);
         }
     }
     if (len(p) > 0) {
-        h.offset += copy(h.buffer[(int)(h.offset)..], p);
+        h.offset += copy(h.buffer.slice(h.offset), p);
     }
     return (nn, default!);
 }
@@ -92,7 +92,7 @@ internal static (nint, error) Write(this ж<macGeneric> Ꮡh, slice<byte> p) {
 [GoRecv] internal static void Sum(this ref macGeneric h, [GoArrayDims(16)] ж<array<byte>> Ꮡout) {
     var state = h.macState.ΔClone();
     if (h.offset > 0) {
-        updateGeneric(ref state, h.buffer[..(int)(h.offset)]);
+        updateGeneric(ref state, h.buffer.slice(0, h.offset));
     }
     finalize(Ꮡout, ref state.h, ref state.s);
 }

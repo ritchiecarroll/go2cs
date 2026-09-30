@@ -103,7 +103,7 @@ internal static error Close(this errorReader r) {
         while (r.offset < newOffset) {
             var b = buf[..];
             if (newOffset - r.offset < (int64)len(buf)) {
-                b = buf[..(int)(newOffset - r.offset)];
+                b = buf.slice(0, (nint)(newOffset - r.offset));
             }
             {
                 var (_, err) = r.Read(b); if (err != default!) {

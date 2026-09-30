@@ -182,22 +182,22 @@ internal static (uint32, uint32, uint32, uint32) quarterRound(uint32 a, uint32 b
     if (len(dst) < len(src)) {
         throw panic("chacha20: output smaller than input");
     }
-    dst = dst[..(int)(len(src))];
+    dst = dst.slice(0, len(src));
     if (alias.InexactOverlap(dst, src)) {
         throw panic("chacha20: invalid buffer overlap");
     }
     // First, drain any remaining key stream from a previous XORKeyStream.
     if (s.len != 0) {
-        var keyStream = s.buf[(int)((nint)bufSize - s.len)..];
+        var keyStream = s.buf.slice((nint)bufSize - s.len);
         if (len(src) < len(keyStream)) {
-            keyStream = keyStream[..(int)(len(src))];
+            keyStream = keyStream.slice(0, len(src));
         }
         _ = src[len(keyStream) - 1]; // bounds check elimination hint
         foreach (var (i, b) in keyStream) {
             dst[i] = (byte)(src[i] ^ b);
         }
         s.len -= len(keyStream);
-        (dst, src) = (dst[(int)(len(keyStream))..], src[(int)(len(keyStream))..]);
+        (dst, src) = (dst.slice(len(keyStream)), src.slice(len(keyStream)));
     }
     if (len(src) == 0) {
         return;
@@ -217,16 +217,16 @@ internal static (uint32, uint32, uint32, uint32) quarterRound(uint32 a, uint32 b
     // time, so have bufSizes that are a multiple of blockSize.
     nint full = len(src) - len(src) % (nint)bufSize;
     if (full > 0) {
-        s.xorKeyStreamBlocks(dst[..(int)(full)], src[..(int)(full)]);
+        s.xorKeyStreamBlocks(dst.slice(0, full), src.slice(0, full));
     }
-    (dst, src) = (dst[(int)(full)..], src[(int)(full)..]);
+    (dst, src) = (dst.slice(full), src.slice(full));
     // If using a multi-block xorKeyStreamBlocks would overflow, use the generic
     // one that does one block at a time.
     const uint64 blocksPerBuf = /* bufSize / blockSize */ 1;
     if ((uint64)s.counter + blocksPerBuf > ((uint64)1 << (int)(32))) {
         s.buf = new byte[]{}.array(64);
         nint numBlocksΔ1 = (len(src) + (nint)blockSize - 1) / (nint)blockSize;
-        var buf = s.buf[(int)((nint)bufSize - numBlocksΔ1 * (nint)blockSize)..];
+        var buf = s.buf.slice((nint)bufSize - numBlocksΔ1 * (nint)blockSize);
         copy(buf, src);
         s.xorKeyStreamBlocksGeneric(buf, buf);
         s.len = len(buf) - copy(dst, buf);

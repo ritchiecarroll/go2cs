@@ -160,14 +160,14 @@ internal static @string htmlReplacer(@string s, slice<@string> replacementTable,
         // Cannot use 'for range s' because we need to preserve the width
         // of the runes in the input. If we see a decoding error, the input
         // width will not be utf8.Runelen(r) and we will overrun the buffer.
-        (r, w) = utf8.DecodeRuneInString(s[(int)(i)..]);
+        (r, w) = utf8.DecodeRuneInString(s.slice(i));
         if ((nint)r < len(replacementTable)){
             {
                 @string repl = replacementTable[r]; if (len(repl) != 0) {
                     if (written == 0) {
                         b.Grow(len(s));
                     }
-                    b.WriteString(s[(int)(written)..(int)(i)]);
+                    b.WriteString(s.slice(written, i));
                     b.WriteString(repl);
                     written = i + w;
                 }
@@ -181,14 +181,14 @@ internal static @string htmlReplacer(@string s, slice<@string> replacementTable,
             if (written == 0) {
                 b.Grow(len(s));
             }
-            fmt.Fprintf(new strings_BuilderжWriter(b), "%s&#x%x;"u8, s[(int)(written)..(int)(i)], r);
+            fmt.Fprintf(new strings_BuilderжWriter(b), "%s&#x%x;"u8, s.slice(written, i), r);
             written = i + w;
         }
     }
     if (written == 0) {
         return s;
     }
-    b.WriteString(s[(int)(written)..]);
+    b.WriteString(s.slice(written));
     return b.String();
 }
 
@@ -209,7 +209,7 @@ internal static @string stripTags(@string html) {
             if (c.element != elementNone && !isInTag(st)) {
                 st = stateRCDATA;
             }
-            var (d, nread) = transitionFunc[st](c, s[(int)(i)..]);
+            var (d, nread) = transitionFunc[st](c, s.slice(i));
             nint i1Δ1 = i + nread;
             if (c.state == stateText || c.state == stateRCDATA){
                 // Emit text up to the start of the tag or comment.
@@ -222,14 +222,14 @@ internal static @string stripTags(@string html) {
                         }
                     }
                 }
-                Ꮡb.Write(s[(int)(i)..(int)(j)]);
+                Ꮡb.Write(s.slice(i, j));
             } else {
                 allText = false;
             }
             (c, i) = (d, i1Δ1);
             continue;
         }
-        nint i1 = i + bytes.IndexAny(s[(int)(i)..], delimEnds[c.delim]);
+        nint i1 = i + bytes.IndexAny(s.slice(i), delimEnds[c.delim]);
         if (i1 < i) {
             break;
         }
@@ -243,7 +243,7 @@ internal static @string stripTags(@string html) {
         return html;
     } else 
     if (c.state == stateText || c.state == stateRCDATA) {
-        Ꮡb.Write(s[(int)(i)..]);
+        Ꮡb.Write(s.slice(i));
     }
     return b.String();
 }

@@ -188,8 +188,8 @@ public static ж<Encoding> RawURLEncoding = (~URLEncoding).WithPadding(NoPadding
 [GoRecv] public static slice<byte> AppendEncode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
     nint n = enc.EncodedLen(len(src));
     dst = slices.Grow<slice<byte>, byte>(dst, n);
-    enc.Encode(dst[(int)(len(dst))..][..(int)(n)], src);
-    return dst[..(int)(len(dst) + n)];
+    enc.Encode(dst.slice(len(dst)).slice(0, n), src);
+    return dst.slice(0, len(dst) + n);
 }
 
 // EncodeToString returns the base64 encoding of src.
@@ -223,7 +223,7 @@ public static ж<Encoding> RawURLEncoding = (~URLEncoding).WithPadding(NoPadding
             e.nbuf++;
         }
         n += i;
-        p = p[(int)(i)..];
+        p = p.slice(i);
         if (e.nbuf < 3) {
             return (n, err);
         }
@@ -242,14 +242,14 @@ public static ж<Encoding> RawURLEncoding = (~URLEncoding).WithPadding(NoPadding
             nn = len(p);
             nn -= nn % 3;
         }
-        e.enc.Encode(e.@out[..], p[..(int)(nn)]);
+        e.enc.Encode(e.@out[..], p.slice(0, nn));
         {
-            (_, e.err) = e.w.Write(e.@out[0..(int)(nn / 3 * 4)]); if (e.err != default!) {
+            (_, e.err) = e.w.Write(e.@out.slice(0, nn / 3 * 4)); if (e.err != default!) {
                 return (n, e.err);
             }
         }
         n += nn;
-        p = p[(int)(nn)..];
+        p = p.slice(nn);
     }
     // Trailing fringe.
     copy(e.buf[..], p);
@@ -263,8 +263,8 @@ public static ж<Encoding> RawURLEncoding = (~URLEncoding).WithPadding(NoPadding
 [GoRecv] internal static error Close(this ref encoder e) {
     // If there's anything left in the buffer, flush it out
     if (e.err == default! && e.nbuf > 0) {
-        e.enc.Encode(e.@out[..], e.buf[..(int)(e.nbuf)]);
-        (_, e.err) = e.w.Write(e.@out[..(int)(e.enc.EncodedLen(e.nbuf))]);
+        e.enc.Encode(e.@out[..], e.buf.slice(0, e.nbuf));
+        (_, e.err) = e.w.Write(e.@out.slice(0, e.enc.EncodedLen(e.nbuf)));
         e.nbuf = 0;
     }
     return e.err;
@@ -412,8 +412,8 @@ public static @string Error(this CorruptInputError e) {
     }
     n = decodedLen(n, NoPadding);
     dst = slices.Grow<slice<byte>, byte>(dst, n);
-    (n, var err) = enc.Decode(dst[(int)(len(dst))..][..(int)(n)], src);
-    return (dst[..(int)(len(dst) + n)], err);
+    (n, var err) = enc.Decode(dst.slice(len(dst)).slice(0, n), src);
+    return (dst.slice(0, len(dst) + n), err);
 }
 
 // DecodeString returns the bytes represented by the base64 string s.
@@ -422,7 +422,7 @@ public static @string Error(this CorruptInputError e) {
 [GoRecv] public static (slice<byte>, error) DecodeString(this ref Encoding enc, @string s) {
     var dbuf = new slice<byte>(enc.DecodedLen(len(s)));
     var (n, err) = enc.Decode(dbuf, slice<byte>(s));
-    return (dbuf[..(int)(n)], err);
+    return (dbuf.slice(0, n), err);
 }
 
 [GoType] partial struct decoder {
@@ -442,7 +442,7 @@ public static @string Error(this CorruptInputError e) {
     // Use leftover decoded output from last read.
     if (len(d.@out) > 0) {
         n = copy(p, d.@out);
-        d.@out = d.@out[(int)(n)..];
+        d.@out = d.@out.slice(n);
         return (n, default!);
     }
     if (d.err != default!) {
@@ -458,18 +458,18 @@ public static @string Error(this CorruptInputError e) {
         if (nn > len(d.buf)) {
             nn = len(d.buf);
         }
-        (nn, d.readErr) = d.r.Read(d.buf[(int)(d.nbuf)..(int)(nn)]);
+        (nn, d.readErr) = d.r.Read(d.buf.slice(d.nbuf, nn));
         d.nbuf += nn;
     }
     if (d.nbuf < 4) {
         if ((~d.enc).padChar == NoPadding && d.nbuf > 0) {
             // Decode final fragment, without padding.
             nint nwΔ1 = default!;
-            (nwΔ1, d.err) = d.enc.Decode(d.outbuf[..], d.buf[..(int)(d.nbuf)]);
+            (nwΔ1, d.err) = d.enc.Decode(d.outbuf[..], d.buf.slice(0, d.nbuf));
             d.nbuf = 0;
-            d.@out = d.outbuf[..(int)(nwΔ1)];
+            d.@out = d.outbuf.slice(0, nwΔ1);
             n = copy(p, d.@out);
-            d.@out = d.@out[(int)(n)..];
+            d.@out = d.@out.slice(n);
             if (n > 0 || len(p) == 0 && len(d.@out) > 0) {
                 return (n, default!);
             }
@@ -487,15 +487,15 @@ public static @string Error(this CorruptInputError e) {
     nint nr = d.nbuf / 4 * 4;
     nint nw = d.nbuf / 4 * 3;
     if (nw > len(p)){
-        (nw, d.err) = d.enc.Decode(d.outbuf[..], d.buf[..(int)(nr)]);
-        d.@out = d.outbuf[..(int)(nw)];
+        (nw, d.err) = d.enc.Decode(d.outbuf[..], d.buf.slice(0, nr));
+        d.@out = d.outbuf.slice(0, nw);
         n = copy(p, d.@out);
-        d.@out = d.@out[(int)(n)..];
+        d.@out = d.@out.slice(n);
     } else {
-        (n, d.err) = d.enc.Decode(p, d.buf[..(int)(nr)]);
+        (n, d.err) = d.enc.Decode(p, d.buf.slice(0, nr));
     }
     d.nbuf -= nr;
-    copy(d.buf[..(int)(d.nbuf)], d.buf[(int)(nr)..]);
+    copy(d.buf.slice(0, d.nbuf), d.buf.slice(nr));
     return (n, d.err);
 }
 
@@ -518,7 +518,7 @@ public static @string Error(this CorruptInputError e) {
     _ = enc.decodeMap;
     nint si = 0;
     while (strconv.IntSize >= 64 && len(src) - si >= 8 && len(dst) - n >= 8) {
-        var src2 = src[(int)(si)..(int)(si + 8)];
+        var src2 = src.slice(si, si + 8);
         {
             var (dn, ok) = assemble64(
                 enc.decodeMap[src2[0]],
@@ -529,12 +529,12 @@ public static @string Error(this CorruptInputError e) {
                 enc.decodeMap[src2[5]],
                 enc.decodeMap[src2[6]],
                 enc.decodeMap[src2[7]]); if (ok){
-                binary.BigEndian.PutUint64(dst[(int)(n)..], dn);
+                binary.BigEndian.PutUint64(dst.slice(n), dn);
                 n += 6;
                 si += 8;
             } else {
                 nint ninc = default!;
-                (si, ninc, err) = enc.decodeQuantum(dst[(int)(n)..], src, si);
+                (si, ninc, err) = enc.decodeQuantum(dst.slice(n), src, si);
                 n += ninc;
                 if (err != default!) {
                     return (n, err);
@@ -543,19 +543,19 @@ public static @string Error(this CorruptInputError e) {
         }
     }
     while (len(src) - si >= 4 && len(dst) - n >= 4) {
-        var src2 = src[(int)(si)..(int)(si + 4)];
+        var src2 = src.slice(si, si + 4);
         {
             var (dn, ok) = assemble32(
                 enc.decodeMap[src2[0]],
                 enc.decodeMap[src2[1]],
                 enc.decodeMap[src2[2]],
                 enc.decodeMap[src2[3]]); if (ok){
-                binary.BigEndian.PutUint32(dst[(int)(n)..], dn);
+                binary.BigEndian.PutUint32(dst.slice(n), dn);
                 n += 3;
                 si += 4;
             } else {
                 nint ninc = default!;
-                (si, ninc, err) = enc.decodeQuantum(dst[(int)(n)..], src, si);
+                (si, ninc, err) = enc.decodeQuantum(dst.slice(n), src, si);
                 n += ninc;
                 if (err != default!) {
                     return (n, err);
@@ -565,7 +565,7 @@ public static @string Error(this CorruptInputError e) {
     }
     while (si < len(src)) {
         nint ninc = default!;
-        (si, ninc, err) = enc.decodeQuantum(dst[(int)(n)..], src, si);
+        (si, ninc, err) = enc.decodeQuantum(dst.slice(n), src, si);
         n += ninc;
         if (err != default!) {
             return (n, err);
@@ -606,7 +606,7 @@ internal static (uint64 dn, bool ok) assemble64(byte n1, byte n2, byte n3, byte 
     var (n, err) = r.wrapped.Read(p);
     while (n > 0) {
         nint offset = 0;
-        foreach (var (i, b) in p[..(int)(n)]) {
+        foreach (var (i, b) in p.slice(0, n)) {
             if (b != (rune)'\r' && b != (rune)'\n') {
                 if (i != offset) {
                     p[offset] = b;

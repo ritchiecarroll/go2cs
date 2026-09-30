@@ -51,7 +51,7 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
 
 // popWriter pops the innermost writer.
 [GoRecv] internal static void popWriter(this ref Encoder enc) {
-    enc.w = enc.w[0..(int)(len(enc.w) - 1)];
+    enc.w = enc.w.slice(0, len(enc.w) - 1);
 }
 
 [GoRecv] internal static void setError(this ref Encoder enc, error err) {
@@ -83,9 +83,9 @@ internal static readonly @string gobEncoderMessageTooBigˢ = "gob: encoder: mess
     enc.countState.encodeUint((uint64)messageLen);
     // Copy the length to be a prefix of the message.
     nint offset = (nint)maxLength - (~enc.countState).b.Len();
-    copy(message[(int)(offset)..], (~enc.countState).b.Bytes());
+    copy(message.slice(offset), (~enc.countState).b.Bytes());
     // Write the data.
-    var (_, err) = w.Write(message[(int)(offset)..]);
+    var (_, err) = w.Write(message.slice(offset));
     // Drain the buffer and restore the space at the front for the count of the next message.
     b.Reset();
     b.Write(spaceForLength);

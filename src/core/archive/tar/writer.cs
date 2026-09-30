@@ -59,7 +59,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
         }
     }
     {
-        (_, tw.err) = tw.w.Write(zeroBlock[..(int)(tw.pad)]); if (tw.err != default!) {
+        (_, tw.err) = tw.w.Write(zeroBlock.slice(0, (nint)(tw.pad))); if (tw.err != default!) {
             return tw.err;
         }
     }
@@ -507,13 +507,13 @@ internal static (@string prefix, @string suffix, bool ok) splitUSTARPath(@string
     if (name[length - 1] == (rune)'/') {
         length--;
     }
-    nint i = strings.LastIndex(name[..(int)(length)], "/"u8);
+    nint i = strings.LastIndex(name.slice(0, length), "/"u8);
     nint nlen = len(name) - i - 1; // nlen is length of suffix
     nint plen = i; // plen is length of prefix
     if (i <= 0 || nlen > nameSize || nlen == 0 || plen > prefixSize) {
         return ("", "", false);
     }
-    return (name[..(int)(i)], name[(int)(i + 1)..], true);
+    return (name.slice(0, i), name.slice(i + 1), true);
 }
 
 // Write writes to the current file in the tar archive.
@@ -587,7 +587,7 @@ internal static (@string prefix, @string suffix, bool ok) splitUSTARPath(@string
 
     var overwrite = (int64)len(b) > fw.nb;
     if (overwrite) {
-        b = b[..(int)(fw.nb)];
+        b = b.slice(0, (nint)(fw.nb));
     }
     if (len(b) > 0) {
         (n, err) = fw.w.Write(b);
@@ -637,7 +637,7 @@ internal static int64 physicalRemaining(this regFileWriter fw) {
 
     var overwrite = (int64)len(b) > sw.logicalRemaining();
     if (overwrite) {
-        b = b[..(int)(sw.logicalRemaining())];
+        b = b.slice(0, (nint)(sw.logicalRemaining()));
     }
     var b0 = b;
     var endPos = sw.pos + (int64)len(b);
@@ -646,14 +646,14 @@ internal static int64 physicalRemaining(this regFileWriter fw) {
         var (dataStart, dataEnd) = (sw.sp[0].Offset, sw.sp[0].endOffset());
         if (sw.pos < dataStart){
             // In a hole fragment
-            var bf = b[..(int)(min((int64)len(b), dataStart - sw.pos))];
+            var bf = b.slice(0, (nint)(min((int64)len(b), dataStart - sw.pos)));
             (nf, err) = new zeroWriter(nil).Write(bf);
         } else {
             // In a data fragment
-            var bf = b[..(int)(min((int64)len(b), dataEnd - sw.pos))];
+            var bf = b.slice(0, (nint)(min((int64)len(b), dataEnd - sw.pos)));
             (nf, err) = sw.fw.Write(bf);
         }
-        b = b[(int)(nf)..];
+        b = b.slice(nf);
         sw.pos += (int64)nf;
         if (sw.pos >= dataEnd && len(sw.sp) > 1) {
             sw.sp = sw.sp[1..]; // Ensure last fragment always remains

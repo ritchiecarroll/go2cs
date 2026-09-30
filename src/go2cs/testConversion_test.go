@@ -2976,8 +2976,8 @@ func TestUnsupportedRuntimeCapabilityGate(t *testing.T) {
 }
 
 // A capability entry may name the TEST DECLARATION itself, for an impossibility that belongs to the
-// host rather than to anything the test calls (os's TestRemoveAllWithExecutedProcess, which assumes
-// the test binary is a relocatable single file). Nothing NAMES a test, so the caller-side arm of the
+// host rather than to anything the test calls (a test that assumes a host property the converted
+// binary lacks; the capability name below is synthetic). Nothing NAMES a test, so the caller-side arm of the
 // attribution can never record such a requirement — requiredFor gates a listed function on its own
 // account, and this is the control for that arm.
 func TestUnsupportedRuntimeCapabilityGatesTheDeclarationItself(t *testing.T) {
@@ -3004,6 +3004,24 @@ func TestUnsupportedRuntimeCapabilityGatesTheDeclarationItself(t *testing.T) {
 	}
 }
 
+// The test host is published as a relocatable single-file executable (publishTestHost), so the
+// deployment shape Go's statically linked test binary has EXISTS here, and a test that copies
+// os.Executable() into a temp directory and runs the copy is not host-bound. No entry may name this
+// capability: an entry that does withdraws a test the host can run, from both the Go and the C#
+// side, and hides the row whose verdict is the only signal that the premise holds.
+// os_test.TestRemoveAllWithExecutedProcess was the last such entry.
+func TestNoEntryWithdrawsATestOnTheSingleFileHostCapability(t *testing.T) {
+	for symbol, capability := range unsupportedRuntimeCapabilities {
+		if capability == "relocatable single-file test executable" {
+			t.Fatalf("entry %q withdraws a test on %q, a capability the published test host has", symbol, capability)
+		}
+	}
+
+	if _, present := unsupportedRuntimeCapabilities["os_test.TestRemoveAllWithExecutedProcess"]; present {
+		t.Fatal("os_test.TestRemoveAllWithExecutedProcess is withdrawn, but the host it needs is the single-file executable publishTestHost builds")
+	}
+}
+
 // A declaration-keyed entry must be keyed on the EXTERNAL TEST package's import path, which is the
 // package path with "_test" appended: os/exec's helper-copying tests live in `package exec_test`,
 // whose types.Package path is os/exec_test — not os/exec, and not exec_test. Getting it wrong is
@@ -3025,8 +3043,9 @@ func TestDeclarationKeyedCapabilityEntries(t *testing.T) {
 		capability string
 		internal   bool // the test file declares `package <pkg>`, not `package <pkg>_test`
 	}{
-		// os/os_windows_test.go: `package os_test` → external → os_test.<Name>.
-		"os_test.TestRemoveAllWithExecutedProcess": {capability: "relocatable single-file test executable", internal: false},
+		// os_test.TestRemoveAllWithExecutedProcess was pinned here (os/os_windows_test.go, `package os_test`,
+		// external) until its gate retired: the host publishes single-file. The external arm keeps a
+		// synthetic control below.
 		// runtime/pprof.TestFakeMapping (`package pprof`, internal) was pinned here until its gate retired
 		// on 2026-09-27 (M2b); the internal arm keeps a negative control below.
 		// testing/*_test.go: `package testing_test` -> external -> testing_test.<Name> (SUB-Q18's twelve, pinned at the train-24 union under this per-entry rule).
@@ -3101,9 +3120,16 @@ func TestDeclarationKeyedCapabilityEntries(t *testing.T) {
 		internal   bool
 	}{internal: true}
 
+	// Likewise the external arm: a synthetic EXTERNAL entry spelled bare is known, external and
+	// unsuffixed, which only the external arm refuses.
+	pinned["example.TestExternalControl"] = struct {
+		capability string
+		internal   bool
+	}{internal: false}
+
 	for _, misKeyed := range []string{
 		"example/internal_test.TestInternalControl",
-		"os.TestRemoveAllWithExecutedProcess",
+		"example.TestExternalControl",
 		"example_test.TestNobodyPinnedThis",
 	} {
 		if check(misKeyed) == nil {
@@ -3112,6 +3138,7 @@ func TestDeclarationKeyedCapabilityEntries(t *testing.T) {
 	}
 
 	delete(pinned, "example/internal_test.TestInternalControl")
+	delete(pinned, "example.TestExternalControl")
 }
 
 // A DECLARATION-keyed gate is not a declaration-sized omission: eligibleTerminalTestResults cuts a

@@ -63,7 +63,7 @@ internal static @string regionFilename(uint64 address) {
     if (r == 0) {
         return ""u8;
     }
-    return ((@string)(buf[..(int)(r)]));
+    return ((@string)(buf.slice(0, r)));
 }
 
 // mach_vm_region and proc_regionfilename are implemented by

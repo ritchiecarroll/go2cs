@@ -92,7 +92,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
     assert(binary.Read(new strings_ReaderжReader(r), binary.LittleEndian, pr.elemEnds[..]) == default!);
     var (pos, err) = r.Seek(0, io.SeekCurrent);
     assert(err == default!);
-    pr.elemData = input[(int)(pos)..];
+    pr.elemData = input.slice((nint)(pos));
     const nint fingerprintSize = 8;
     assert(len(pr.elemData) - fingerprintSize == (nint)pr.elemEnds[len(pr.elemEnds) - 1]);
     return pr.ΔClone();
@@ -115,7 +115,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 // Fingerprint returns the package fingerprint.
 [GoRecv] public static array<byte> Fingerprint(this ref PkgDecoder pr) {
     array<byte> fp = new(8);
-    copy(fp[..], pr.elemData[(int)(len(pr.elemData) - 8)..]);
+    copy(fp[..], pr.elemData.slice(len(pr.elemData) - 8));
     return fp.Clone();
 }
 
@@ -141,7 +141,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
         start = pr.elemEnds[absIdx - 1];
     }
     var end = pr.elemEnds[absIdx];
-    return pr.elemData[(int)(start)..(int)(end)];
+    return pr.elemData.slice((nint)(start), (nint)(end));
 }
 
 // StringIdx returns the string value for the given string index.
@@ -211,7 +211,7 @@ public static Decoder TempDecoderRaw(this ж<PkgDecoder> Ꮡpr, RelocKind k, Ind
     Ꮡr.Sync(SyncRelocs);
     nint l = Ꮡr.Len();
     if (cap(pr.scratchRelocEnt) >= l){
-        r.Relocs = pr.scratchRelocEnt[..(int)(l)];
+        r.Relocs = pr.scratchRelocEnt.slice(0, l);
         pr.scratchRelocEnt = default!;
     } else {
         r.Relocs = new slice<RelocEnt>(l);
@@ -338,7 +338,7 @@ internal static int64 rawVarint(this ж<Decoder> Ꮡr) {
     fmt.Printf("\nexpected %v, reading at:\n"u8, mWant);
     array<uintptr> readerPCs = new(32);               // TODO(mdempsky): Dynamically size?
     nint n = Δruntime.Callers(2, readerPCs[..]);
-    foreach (var (_, pc) in fmtFrames(readerPCs[..(int)(n)].ꓸꓸꓸ)) {
+    foreach (var (_, pc) in fmtFrames(readerPCs.slice(0, n).ꓸꓸꓸ)) {
         fmt.Printf("\t%s\n"u8, pc);
     }
     // We already printed a stack trace for the reader, so now we can

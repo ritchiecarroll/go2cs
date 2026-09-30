@@ -128,7 +128,7 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
         if (builtin.cap(m.scratch) < maxPerVal){
             m.scratch = append(new slice<byte>(0, maxPerVal), v.ꓸꓸꓸ);
         } else {
-            m.scratch = m.scratch[..(int)(len(v))];
+            m.scratch = m.scratch.slice(0, len(v));
             copy(m.scratch, v);
         }
         Ꮡm.mutateBytes(Ꮡm.of(mutator.Ꮡscratch));
@@ -142,7 +142,7 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
         if (builtin.cap(m.scratch) < maxPerVal){
             m.scratch = appendꓸꓸꓸ(new slice<byte>(0, maxPerVal), v);
         } else {
-            m.scratch = m.scratch[..(int)(len(v))];
+            m.scratch = m.scratch.slice(0, len(v));
             copy(m.scratch, v);
         }
         Ꮡm.mutateBytes(Ꮡm.of(mutator.Ꮡscratch));

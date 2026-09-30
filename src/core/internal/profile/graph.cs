@@ -206,7 +206,7 @@ public static ж<Edge> FindTo(this EdgeMap em, ж<Node> Ꮡn) {
     foreach (var (i, edge) in em) {
         if (edge == Ꮡe) {
             (em)[i] = (em)[len(em) - 1];
-            em = (em)[..(int)(len(em) - 1)];
+            em = (em).slice(0, len(em) - 1);
             return;
         }
     }

@@ -220,6 +220,65 @@ public class SliceBoundsR1aTests
         Assert.AreEqual((byte)'c', tag.slice(1, 3)[1], "StructTag[1:3][1]");
     }
 
+    // S-c R1-A commit 2, the 3-index sentinel (design §6): the optional-parameter `.slice(low = -1, high = -1,
+    // max = -1)` family read a RUNTIME -1 as "omitted", so `s[neg:2:5]` sliced silently as `s[0:2:5]`. Every
+    // receiver in the family now has explicit arities and no sentinel.
+    [TestMethod]
+    public void ThreeIndexHasNoSentinelOnAnyReceiver()
+    {
+        slice<int> s = Slice3Cap10();
+
+        AssertRuntimeError(() => _ = s.slice(-1, 2, 5), Prefix + "[-1::]", "s[-1:2:5]");
+        AssertRuntimeError(() => _ = s.slice(0, -1, 5), Prefix + "[:-1:]", "s[0:-1:5]");
+        AssertRuntimeError(() => _ = s.slice(0, 2, -1), Prefix + "[::-1]", "s[0:2:-1]");
+
+        array<int> a = new(6);
+
+        AssertRuntimeError(() => _ = a.slice(-1, 2, 5), Prefix + "[-1::]", "a[-1:2:5]");
+        AssertRuntimeError(() => _ = a.slice(0, 2, -1), Prefix + "[::-1]", "a[0:2:-1]");
+
+        AssertRuntimeError(() => _ = new int[6].slice(-1, 2, 5), Prefix + "[-1::]", "T[] [-1:2:5]");
+        AssertRuntimeError(() => { Span<int> span = new int[6]; _ = span.slice(0, -1, 5); }, Prefix + "[:-1:]", "Span [0:-1:5]");
+        AssertRuntimeError(() => _ = ((System.Collections.Generic.IEnumerable<int>)new int[6]).slice(0, 2, -1), Prefix + "[::-1]", "IEnumerable [0:2:-1]");
+
+        @string str = "abc";
+
+        AssertRuntimeError(() => _ = str.slice(-1, 2, 3), Prefix + "[-1::]", "string view [-1:2:3]");
+        AssertRuntimeError(() => _ = str.slice(0, 2, -1), Prefix + "[::-1]", "string view [0:2:-1]");
+    }
+
+    // The arities that replaced the optional parameters: the whole value, and a C# array's 1- and 2-index forms,
+    // which bound against its LENGTH as a Go array's do.
+    [TestMethod]
+    public void ExplicitAritiesKeepTheWholeValueAndTheLengthBound()
+    {
+        slice<int> s = Slice3Cap10();
+        Assert.AreEqual((nint)3, len(s.slice()), "len(s[:])");
+        Assert.AreEqual((nint)10, cap(s.slice()), "cap(s[:]) keeps the capacity");
+        Assert.IsTrue(default(slice<int>).slice() == nil, "nil[:] is nil");
+
+        int[] raw = new int[3];
+        Assert.AreEqual((nint)3, cap(raw.slice()), "cap(T[] [:])");
+        Assert.AreEqual((nint)2, cap(raw.slice(1)), "cap(T[] [1:])");
+        Assert.AreEqual((nint)1, len(raw.slice(1, 2)), "len(T[] [1:2])");
+        AssertRuntimeError(() => _ = raw.slice(0, 5), Prefix + "[:5] with length 3", "T[] [:5]");
+        AssertRuntimeError(() => _ = raw.slice(-1), Prefix + "[-1:]", "T[] [-1:]");
+
+        Span<int> nilSpan = default;
+        Assert.IsTrue(nilSpan.slice() == nil, "a nil variadic pack stays nil");
+
+        Span<int> span = new int[4];
+        Assert.AreEqual((nint)4, len(span.slice()), "len(Span [:])");
+        Assert.AreEqual((nint)3, len(span.slice(1)), "len(Span [1:])");
+
+        array<int> a = new(6);
+        Assert.AreEqual((nint)6, cap(a.slice()), "cap(a[:])");
+
+        @string str = "abc";
+        Assert.AreEqual(3, str.slice().Length, "len(string view [:])");
+        Assert.AreEqual(2, str.slice(1, 3, 3).Length, "len(string view [1:3:3])");
+    }
+
     [TestMethod]
     public void InRangeSlicingIsUnchanged()
     {

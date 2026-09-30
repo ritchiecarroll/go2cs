@@ -60,9 +60,9 @@ public static slice<byte> AppendUint(slice<byte> dst, uint64 i, nint @base) {
 // small returns the string for an i with 0 <= i < nSmalls.
 internal static @string small(nint i) {
     if (i < 10) {
-        return digits[(int)(i)..(int)(i + 1)];
+        return digits.slice(i, i + 1);
     }
-    return smallsString[(int)(i * 2)..(int)(i * 2 + 2)];
+    return smallsString.slice(i * 2, i * 2 + 2);
 }
 
 internal static UntypedInt nSmalls => 100;
@@ -173,10 +173,10 @@ internal static (slice<byte> d, @string s) formatBits(slice<byte> dst, uint64 u,
         a[i] = (rune)'-';
     }
     if (append_) {
-        d = appendꓸꓸꓸ(dst, a[(int)(i)..]);
+        d = appendꓸꓸꓸ(dst, a.slice(i));
         return (d, s);
     }
-    s = ((@string)(a[(int)(i)..]));
+    s = ((@string)(a.slice(i)));
     return (d, s);
 }
 

@@ -10,6 +10,7 @@
 // ReSharper disable StaticMemberInGenericType
 
 using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -18,6 +19,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Unicode;
 using System.Threading;
 using go.golib;
 using static System.Math;
@@ -2849,7 +2851,7 @@ public static partial class builtin
     /// </remarks>
     public static void print(params object[] args)
     {
-        Console.Error.Write(string.Concat(args.Select(printArg)));
+        emitPrint(args, separate: false);
     }
 
     /// <summary>
@@ -2863,7 +2865,136 @@ public static partial class builtin
     /// </remarks>
     public static void println(params object[] args)
     {
-        Console.Error.Write(string.Join(" ", args.Select(printArg)) + "\n");
+        emitPrint(args, separate: true);
+    }
+
+    // The runtime's printer: printlock, gwrite per chunk, printunlock.
+    internal interface IPrintSink
+    {
+        void Lock();
+
+        void Write(ReadOnlySpan<byte> bytes);
+
+        void Unlock();
+    }
+
+    /// <summary>
+    /// The runtime's printer, registered by the runtime package's module initializer (print fidelity,
+    /// ruling 2026-09-30 R1). As in Go, every package's print then runs through the runtime, so it
+    /// reaches the runtime's print backlog (recordForPanic) and a goroutine's writebuf capture. Null
+    /// until the runtime is loaded, and then print writes Console.Error as it always did.
+    /// </summary>
+    internal static IPrintSink? PrintSink;
+
+    // Go's printer formats each argument into a STACK buffer and allocates nothing (runtime/print.go),
+    // so a formatted argument is encoded through this bounded stack buffer, chunk by chunk.
+    private const int PrintChunkBytes = 512;
+
+    // The bytes gc's printer writes, under ONE lock as Go holds printlock across a print statement: an
+    // @string argument contributes its OWN bytes (invalid UTF-8 included, as Go writes them), anything
+    // else its formatted text. println separates with one space and ends with a bare \n.
+    private static void emitPrint(object[] args, bool separate)
+    {
+        if (Volatile.Read(ref PrintSink) is not { } sink)
+        {
+            Console.Error.Write(separate ? string.Join(" ", args.Select(printArg)) + "\n" : string.Concat(args.Select(printArg)));
+            return;
+        }
+
+        Span<byte> buffer = stackalloc byte[PrintChunkBytes];
+
+        sink.Lock();
+
+        try
+        {
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (separate && i > 0)
+                    sink.Write(" "u8);
+
+                if (args[i] is @string text)
+                    sink.Write(text.ToSpan());
+                else
+                    writePrintText(sink, printArg(args[i]).AsSpan(), buffer);
+            }
+
+            if (separate)
+                sink.Write("\n"u8);
+        }
+        finally
+        {
+            sink.Unlock();
+        }
+    }
+
+    // Encodes text as UTF-8 through the stack buffer. Utf8.FromUtf16 stops a too-small destination at a
+    // whole rune, so no rune splits across two writes.
+    private static void writePrintText(IPrintSink sink, ReadOnlySpan<char> text, Span<byte> buffer)
+    {
+        while (true)
+        {
+            OperationStatus status = Utf8.FromUtf16(text, buffer, out int read, out int written);
+
+            sink.Write(buffer[..written]);
+
+            if (status != OperationStatus.DestinationTooSmall)
+                return;
+
+            text = text[read..];
+        }
+    }
+
+    // The Console.Error writer last examined, whether it writes to the process's standard error, and
+    // the raw stream WriteStandardError writes Go's bytes to while it is current. The stream is opened
+    // per WRITER (Console.OpenStandardError duplicates descriptor 2 when opened), so a host that points
+    // descriptor 2 elsewhere and installs a new console writer gets a stream to the new target. A
+    // program that never replaces Console.Error opens it once. It is the console stream, which writes
+    // with write(2) and so shares the descriptor's file offset with Console.Error's own stream; a
+    // FileStream over descriptor 2 would write positionally and could overwrite interleaved output.
+    private sealed record StandardErrorState(System.IO.TextWriter Writer, System.IO.Stream? Raw);
+
+    private static StandardErrorState? s_standardError;
+
+    /// <summary>
+    /// Writes bytes where the runtime's writeErr writes them (print fidelity S2): RAW BYTES to the
+    /// process's standard error when Console.Error is the writer .NET made for it, and UTF-8 text to
+    /// Console.Error when a host replaced it (a test host's capture, Console.SetError).
+    /// </summary>
+    /// <remarks>
+    /// ORDER: Console.Error is flushed before a raw write, so a raw write never overtakes text a program
+    /// wrote through Console.Error that the writer still holds. The test for "the writer .NET made"
+    /// reads the synchronized wrapper's inner writer: a StreamWriter over the console's own stream.
+    /// Where that cannot be read (a trimmed build), the answer is "replaced", which is the text path:
+    /// safe, only not byte-exact for invalid UTF-8.
+    /// </remarks>
+    internal static void WriteStandardError(ReadOnlySpan<byte> bytes)
+    {
+        System.IO.TextWriter error = Console.Error;
+        StandardErrorState? state = Volatile.Read(ref s_standardError);
+
+        if (state is null || !ReferenceEquals(state.Writer, error))
+        {
+            state = new StandardErrorState(error, IsProcessStandardError(error) ? Console.OpenStandardError() : null);
+            Volatile.Write(ref s_standardError, state);
+        }
+
+        if (state.Raw is not { } raw)
+        {
+            error.Write(Encoding.UTF8.GetString(bytes));
+            return;
+        }
+
+        error.Flush();
+        raw.Write(bytes);
+        raw.Flush();
+    }
+
+    private static bool IsProcessStandardError(System.IO.TextWriter error)
+    {
+        object inner = error.GetType().GetField("_out", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(error) ?? error;
+
+        return inner is System.IO.StreamWriter { BaseStream: var stream } &&
+               stream.GetType().DeclaringType?.Name == "ConsolePal";
     }
 
     // Formats a single print/println argument the way gc's runtime printer does where the BCL

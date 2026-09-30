@@ -151,8 +151,8 @@ public static void MergeLine(this ж<ΔFile> Ꮡf, nint line) {
         // numbered <line+1>. The entry in lines corresponding to the line
         // numbered <line+1> is located at index <line>, since indices in lines
         // are 0-based and line numbers are 1-based.
-        copy(f.lines[(int)(line)..], f.lines[(int)(line + 1)..]);
-        f.lines = f.lines[..(int)(len(f.lines) - 1)];
+        copy(f.lines.slice(line), f.lines.slice(line + 1));
+        f.lines = f.lines.slice(0, len(f.lines) - 1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡf.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }

@@ -23,7 +23,7 @@ internal static @string String(this delim i) {
     if (i >= ((delim)(uint8)(len(_delim_index) - 1))) {
         return "delim("u8 + strconv.FormatInt((int64)(uint8)i, 10) + ")"u8;
     }
-    return _delim_name[(int)(_delim_index[i])..(int)(_delim_index[i + 1])];
+    return _delim_name.slice(_delim_index[i], _delim_index[i + 1]);
 }
 
 } // end template_package

@@ -1207,6 +1207,13 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 		typeParam := typeParams.At(i)
 		typeParamNames[i] = typeParam.Obj().Name()
 
+		// A type parameter named after a C# 15 reserved type-position keyword is Δ-renamed package-wide
+		// (csReservedTypeNames); its uses already spell through getSanitizedIdentifier, so the declaration
+		// must too. Scoped to that set so no other type parameter's spelling moves.
+		if csReservedTypeNames.Contains(typeParamNames[i]) {
+			typeParamNames[i] = getSanitizedIdentifier(typeParamNames[i])
+		}
+
 		// A single non-tilde pointer term (`[P *T]`) has a singleton type set — P is
 		// definitionally *T — so P is erased: dropped from the emitted `<...>` list and `where`
 		// clauses, rendering inline as `ж<T>` everywhere it appears (see the getAliasQualifiedTypeName arm and

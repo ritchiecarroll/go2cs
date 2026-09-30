@@ -68,14 +68,14 @@ public static bool ValidPath(@string name) {
         while (i < len(name) && name[i] != (rune)'/') {
             i++;
         }
-        @string elem = name[..(int)(i)];
+        @string elem = name.slice(0, i);
         if (elem == ""u8 || elem == "."u8 || elem == ".."u8) {
             return false;
         }
         if (i == len(name)) {
             return true; // reached clean ending
         }
-        name = name[(int)(i + 1)..];
+        name = name.slice(i + 1);
     }
 }
 
@@ -244,7 +244,7 @@ public static @string String(this FileMode m) {
         }
         w++;
     }
-    return ((@string)(buf[..(int)(w)]));
+    return ((@string)(buf.slice(0, w)));
 }
 
 // IsDir reports whether m describes a directory.

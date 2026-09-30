@@ -332,7 +332,7 @@ internal static slice<ΔValue> call(this ΔValue v, @string op, slice<ΔValue> @
         }
         var origIn = @in;
         @in = new slice<ΔValue>(n + 1, () => new(nil));
-        copy(@in[..(int)(n)], origIn);
+        copy(@in.slice(0, n), origIn);
         @in[n] = Δslice;
     }
     nint nin = len(@in);
@@ -1270,7 +1270,7 @@ internal static bool isZero(slice<byte> b) {
         if (b[len(b) - 1] != 0) {
             return false;
         }
-        b = b[..(int)(len(b) - 1)];
+        b = b.slice(0, len(b) - 1);
     }
     if (len(b) == 0) {
         return true;

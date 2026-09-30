@@ -487,7 +487,7 @@ internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metali
             var pkgId = Ꮡ(sd, i + (nint)coverage.PkgIdOffset).Load();
             var funcId = Ꮡ(sd, i + (nint)coverage.FuncIdOffset).Load();
             nint cst = i + (nint)coverage.FirstCtrOffset;
-            var counters = sd[(int)(cst)..(int)(cst + (nint)nCtrs)];
+            var counters = sd.slice(cst, cst + (nint)nCtrs);
             // Check to make sure that we have at least one live
             // counter. See the implementation note in ClearCoverageCounters
             // for a description of why this is needed.

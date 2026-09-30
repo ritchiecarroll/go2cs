@@ -33,11 +33,11 @@ public static void SortImports(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf) {
         foreach (var (j, s) in (~dΔ1).Specs) {
             if (j > i && lineAt(Ꮡfset, s.Pos()) > 1 + lineAt(Ꮡfset, (~dΔ1).Specs[j - 1].End())) {
                 // j begins a new run. End this one.
-                specs = appendꓸꓸꓸ(specs, sortSpecs(Ꮡfset, ref (Ꮡf).DerefOrNull(), (~dΔ1).Specs[(int)(i)..(int)(j)]));
+                specs = appendꓸꓸꓸ(specs, sortSpecs(Ꮡfset, ref (Ꮡf).DerefOrNull(), (~dΔ1).Specs.slice(i, j)));
                 i = j;
             }
         }
-        specs = appendꓸꓸꓸ(specs, sortSpecs(Ꮡfset, ref (Ꮡf).DerefOrNull(), (~dΔ1).Specs[(int)(i)..]));
+        specs = appendꓸꓸꓸ(specs, sortSpecs(Ꮡfset, ref (Ꮡf).DerefOrNull(), (~dΔ1).Specs.slice(i)));
         dΔ1.Value.Specs = specs;
         // Deduping can leave a blank line before the rparen; clean that up.
         if (len((~dΔ1).Specs) > 0) {
@@ -152,7 +152,7 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, sli
     }
     slice<ж<CommentGroup>> comments = default!;
     if (last >= 0) {
-        comments = f.Comments[(int)(first)..(int)(last + 1)];
+        comments = f.Comments.slice(first, last + 1);
     }
     // Assign each comment to the import spec on the same line.
     var importComments = new map<ж<ImportSpec>, slice<cgPos>>{};

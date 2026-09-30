@@ -482,7 +482,7 @@ internal static slice<byte> pkeDecrypt(ref decryptionKey dx, [GoArrayDims(1088)]
 
     var u = GoReflect.WithElemDims(new slice<ringElement>(k), 256);
     foreach (var (i, _) in u) {
-        var bΔ1 = Ꮡ(array<byte>.Alias(c[(int)((nint)encodingSize10 * i)..(int)((nint)encodingSize10 * (i + 1))], 320));
+        var bΔ1 = Ꮡ(array<byte>.Alias(c.slice((nint)encodingSize10 * i, (nint)encodingSize10 * (i + 1)), 320));
         u[i] = ringDecodeAndDecompress10(bΔ1);
     }
     var b = Ꮡ(array<byte>.Alias(c[(int)(encodingSize10 * k)..], 128));

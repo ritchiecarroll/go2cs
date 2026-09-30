@@ -131,7 +131,7 @@ internal static (byte, error) readByte(io.ByteReader r) {
         return;
     }
     b.i = 0;
-    b.err = readFull((~b.d).r, (~b.d).tmp[..(int)(b.j)]);
+    b.err = readFull((~b.d).r, (~b.d).tmp.slice(0, b.j));
     if (b.err != default!) {
         b.j = 0;
     }
@@ -161,7 +161,7 @@ internal static (byte, error) readByte(io.ByteReader r) {
             return (0, b.err);
         }
     }
-    nint n = copy(p, (~b.d).tmp[(int)(b.i)..(int)(b.j)]);
+    nint n = copy(p, (~b.d).tmp.slice(b.i, b.j));
     b.i += (uint8)n;
     return (n, default!);
 }
@@ -293,7 +293,7 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
 
 [GoRecv] internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte fields) {
     nint n = ((nint)1).Lsh((1 + (nuint)((byte)(fields & (byte)fColorTableBitsMask))));
-    var err = readFull(d.r, d.tmp[..(int)(3 * n)]);
+    var err = readFull(d.r, d.tmp.slice(0, 3 * n));
     if (err != default!) {
         return (default!, fmt.Errorf("gif: reading color table: %s"u8, err));
     }
@@ -336,14 +336,14 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
 
     if (size > 0) {
         {
-            var errΔ3 = readFull(d.r, d.tmp[..(int)(size)]); if (errΔ3 != default!) {
+            var errΔ3 = readFull(d.r, d.tmp.slice(0, size)); if (errΔ3 != default!) {
                 return fmt.Errorf("gif: reading extension: %v"u8, errΔ3);
             }
         }
     }
     // Application Extension with "NETSCAPE2.0" as string and 1 in data means
     // this extension defines a loop count.
-    if (extension == eApplication && ((sstring)(d.tmp[..(int)(size)])) == "NETSCAPE2.0"u8) {
+    if (extension == eApplication && ((sstring)(d.tmp.slice(0, size))) == "NETSCAPE2.0"u8) {
         var (n, errΔ4) = d.readBlock();
         if (errΔ4 != default!) {
             return fmt.Errorf("gif: reading extension: %v"u8, errΔ4);
@@ -556,7 +556,7 @@ internal static readonly @string gifFrameBoundsLargerThanˢ = "gif: frame bounds
         return (0, err);
     }
     {
-        var errΔ1 = readFull(d.r, d.tmp[..(int)(n)]); if (errΔ1 != default!) {
+        var errΔ1 = readFull(d.r, d.tmp.slice(0, n)); if (errΔ1 != default!) {
             return (0, errΔ1);
         }
     }
@@ -592,7 +592,7 @@ internal static void uninterlace(ж<image.Paletted> Ꮡm) {
     foreach (var (_, pass) in interlacing) {
         nint nOffset = pass.start * dx; // steps through the output as defined by pass.
         for (nint y = pass.start; y < dy; y += pass.skip) {
-            copy(nPix[(int)(nOffset)..(int)(nOffset + dx)], m.Pix[(int)(offset)..(int)(offset + dx)]);
+            copy(nPix.slice(nOffset, nOffset + dx), m.Pix.slice(offset, offset + dx));
             offset += dx;
             nOffset += dx * pass.skip;
         }

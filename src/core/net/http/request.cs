@@ -790,11 +790,11 @@ internal static @string removeZone(@string host) {
     if (i < 0) {
         return host;
     }
-    nint j = strings.LastIndex(host[..(int)(i)], "%"u8);
+    nint j = strings.LastIndex(host.slice(0, i), "%"u8);
     if (j < 0) {
         return host;
     }
-    return host[..(int)(j)] + host[(int)(i)..];
+    return host.slice(0, j) + host.slice(i);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1269,7 +1269,7 @@ internal static readonly @string httpRequestBodyTooLargeˢ = "http: request body
     // question of the whether we hit the limit or go past it.
     // 0 < len(p) < 2^63
     if ((int64)builtin.len(p) - 1 > l.n) {
-        p = p[..(int)(l.n + 1)];
+        p = p.slice(0, (nint)(l.n + 1));
     }
     (n, err) = l.r.Read(p);
     if ((int64)n <= l.n) {

@@ -77,7 +77,7 @@ public static nint Encode(slice<byte> dst, slice<byte> src) {
         } else {
             src = src[4..];
         }
-        dst = dst[(int)(m)..];
+        dst = dst.slice(m);
         n += m;
     }
     return n;
@@ -120,13 +120,13 @@ public static io.WriteCloser NewEncoder(io.Writer w) {
             e.nbuf++;
         }
         n += i;
-        p = p[(int)(i)..];
+        p = p.slice(i);
         if (e.nbuf < 4) {
             return (n, err);
         }
         nint nout = Encode(e.@out[0..], e.buf[0..]);
         {
-            (_, e.err) = e.w.Write(e.@out[0..(int)(nout)]); if (e.err != default!) {
+            (_, e.err) = e.w.Write(e.@out.slice(0, nout)); if (e.err != default!) {
                 return (n, e.err);
             }
         }
@@ -140,15 +140,15 @@ public static io.WriteCloser NewEncoder(io.Writer w) {
         }
         nn -= nn % 4;
         if (nn > 0) {
-            nint nout = Encode(e.@out[0..], p[0..(int)(nn)]);
+            nint nout = Encode(e.@out[0..], p.slice(0, nn));
             {
-                (_, e.err) = e.w.Write(e.@out[0..(int)(nout)]); if (e.err != default!) {
+                (_, e.err) = e.w.Write(e.@out.slice(0, nout)); if (e.err != default!) {
                     return (n, e.err);
                 }
             }
         }
         n += nn;
-        p = p[(int)(nn)..];
+        p = p.slice(nn);
     }
     // Trailing fringe.
     copy(e.buf[..], p);
@@ -162,9 +162,9 @@ public static io.WriteCloser NewEncoder(io.Writer w) {
 [GoRecv] internal static error Close(this ref encoder e) {
     // If there's anything left in the buffer, flush it out
     if (e.err == default! && e.nbuf > 0) {
-        nint nout = Encode(e.@out[0..], e.buf[0..(int)(e.nbuf)]);
+        nint nout = Encode(e.@out[0..], e.buf.slice(0, e.nbuf));
         e.nbuf = 0;
-        (_, e.err) = e.w.Write(e.@out[0..(int)(nout)]);
+        (_, e.err) = e.w.Write(e.@out.slice(0, nout));
     }
     return e.err;
 }
@@ -287,7 +287,7 @@ public static io.Reader NewDecoder(io.Reader r) {
         // Copy leftover output from last decode.
         if (len(d.@out) > 0) {
             n = copy(p, d.@out);
-            d.@out = d.@out[(int)(n)..];
+            d.@out = d.@out.slice(n);
             return (n, err);
         }
         // Decode leftover input from last read.
@@ -295,10 +295,10 @@ public static io.Reader NewDecoder(io.Reader r) {
         nint nsrc = default!;
         nint ndst = default!;
         if (d.nbuf > 0) {
-            (ndst, nsrc, d.err) = Decode(d.outbuf[0..], d.buf[0..(int)(d.nbuf)], d.readErr != default!);
+            (ndst, nsrc, d.err) = Decode(d.outbuf[0..], d.buf.slice(0, d.nbuf), d.readErr != default!);
             if (ndst > 0) {
-                d.@out = d.outbuf[0..(int)(ndst)];
-                d.nbuf = copy(d.buf[0..], d.buf[(int)(nsrc)..(int)(d.nbuf)]);
+                d.@out = d.outbuf.slice(0, ndst);
+                d.nbuf = copy(d.buf[0..], d.buf.slice(nsrc, d.nbuf));
                 continue; // copy out and return
             }
             if (ndst == 0 && d.err == default!) {
@@ -323,7 +323,7 @@ public static io.Reader NewDecoder(io.Reader r) {
             return (0, d.err);
         }
         // Read more data.
-        (nn, d.readErr) = d.r.Read(d.buf[(int)(d.nbuf)..]);
+        (nn, d.readErr) = d.r.Read(d.buf.slice(d.nbuf));
         d.nbuf += nn;
     }
 }

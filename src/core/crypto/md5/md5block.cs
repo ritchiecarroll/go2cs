@@ -16,8 +16,8 @@ internal static void blockGeneric(ref digest dig, slice<byte> p) {
     var (a, b, c, d) = (dig.s[0], dig.s[1], dig.s[2], dig.s[3]);
     for (nint i = 0; i <= len(p) - (nint)ΔBlockSize; i += ΔBlockSize) {
         // eliminate bounds checks on p
-        var q = p[(int)(i)..];
-        q = q.slice(-1, ΔBlockSize, ΔBlockSize);
+        var q = p.slice(i);
+        q = q.slice(0, ΔBlockSize, ΔBlockSize);
         // save current state
         var (aa, bb, cc, dd) = (a, b, c, d);
         // load input block

@@ -111,7 +111,7 @@ internal static error handshake(this ж<clientHandshakeStateTLS13> Ꮡhs) {
             echAcceptConfirmationˢ,
             confTranscript.Sum(default!),
             8);
-        if (subtle.ConstantTimeCompare(acceptConfirmation, (~hs.serverHello).random[(int)(len((~hs.serverHello).random) - 8)..]) == 1){
+        if (subtle.ConstantTimeCompare(acceptConfirmation, (~hs.serverHello).random.slice(len((~hs.serverHello).random) - 8)) == 1){
             hs.hello = hs.echContext.Value.innerHello;
             c.Value.serverName = c.Value.config.Value.ServerName;
             hs.transcript = hs.echContext.Value.innerTranscript;

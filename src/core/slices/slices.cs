@@ -336,14 +336,14 @@ public static S Replace<S, E>(S s, nint i, nint j, params Span<E> vʗp)
     // If either of those two destinations don't alias v, then we're good.
     nint y = len(v) - (j - i); // length of y portion
     if (!overlaps(new slice<E>(subslice<S, E>(r, i, j)), v)) {
-        copy(subslice<S, E>(r, i, j), v[(int)(y)..]);
-        copy(subslice<S, E>(r, len(s)), v[..(int)(y)]);
+        copy(subslice<S, E>(r, i, j), v.slice(y));
+        copy(subslice<S, E>(r, len(s)), v.slice(0, y));
         rotateRight(new slice<E>(subslice<S, E>(r, i)), y);
         return r;
     }
     if (!overlaps(new slice<E>(subslice<S, E>(r, len(s))), v)) {
-        copy(subslice<S, E>(r, len(s)), v[..(int)(y)]);
-        copy(subslice<S, E>(r, i, j), v[(int)(y)..]);
+        copy(subslice<S, E>(r, len(s)), v.slice(0, y));
+        copy(subslice<S, E>(r, i, j), v.slice(y));
         rotateRight(new slice<E>(subslice<S, E>(r, i)), y);
         return r;
     }
@@ -458,8 +458,8 @@ public static S Clip<S, E>(S s)
 // rotateLeft rotates s left by r spaces.
 // s_final[i] = s_orig[i+r], wrapping around.
 internal static void rotateLeft<E>(slice<E> s, nint r) {
-    Reverse<slice<E>, E>(s[..(int)(r)]);
-    Reverse<slice<E>, E>(s[(int)(r)..]);
+    Reverse<slice<E>, E>(s.slice(0, r));
+    Reverse<slice<E>, E>(s.slice(r));
     Reverse<slice<E>, E>(s);
 }
 

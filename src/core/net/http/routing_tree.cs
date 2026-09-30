@@ -237,7 +237,7 @@ internal static (@string seg, @string rest) firstSegment(@string path) {
     if (i < 0) {
         i = builtin.len(path);
     }
-    return (pathUnescape(path[..(int)(i)]), path[(int)(i)..]);
+    return (pathUnescape(path.slice(0, i)), path.slice(i));
 }
 
 // matchingMethods adds to methodSet all the methods that would result in a

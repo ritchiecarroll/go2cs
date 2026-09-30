@@ -159,8 +159,8 @@ internal static readonly @string overflowingCoordinateˢ = "overflowing coordina
     nint byteLen = ((~curve.@params).BitSize + 7) / 8;
     var buf = new slice<byte>(1 + 2 * byteLen);
     buf[0] = 4; // uncompressed point
-    x.FillBytes(buf[1..(int)(1 + byteLen)]);
-    y.FillBytes(buf[(int)(1 + byteLen)..(int)(1 + 2 * byteLen)]);
+    x.FillBytes(buf.slice(1, 1 + byteLen));
+    y.FillBytes(buf.slice(1 + byteLen, 1 + 2 * byteLen));
     return curve.newPoint().SetBytes(buf);
 }
 
@@ -177,8 +177,8 @@ internal static readonly @string overflowingCoordinateˢ = "overflowing coordina
         return (@new<bigꓸInt>(), @new<bigꓸInt>());
     }
     nint byteLen = ((~curve.@params).BitSize + 7) / 8;
-    x = @new<bigꓸInt>().SetBytes(@out[1..(int)(1 + byteLen)]);
-    y = @new<bigꓸInt>().SetBytes(@out[(int)(1 + byteLen)..]);
+    x = @new<bigꓸInt>().SetBytes(@out.slice(1, 1 + byteLen));
+    y = @new<bigꓸInt>().SetBytes(@out.slice(1 + byteLen));
     return (x, y);
 }
 
@@ -289,8 +289,8 @@ internal static readonly @string overflowingCoordinateˢ = "overflowing coordina
     // inversion to convert from Jacobian to affine coordinates, which we
     // already have.
     nint byteLen = ((~curve.@params).BitSize + 7) / 8;
-    x = @new<bigꓸInt>().SetBytes(data[1..(int)(1 + byteLen)]);
-    y = @new<bigꓸInt>().SetBytes(data[(int)(1 + byteLen)..]);
+    x = @new<bigꓸInt>().SetBytes(data.slice(1, 1 + byteLen));
+    y = @new<bigꓸInt>().SetBytes(data.slice(1 + byteLen));
     return (x, y);
 }
 

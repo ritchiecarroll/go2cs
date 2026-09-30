@@ -475,7 +475,7 @@ internal static readonly @string dnsˢ = "dns"u8;
         // Some source we don't know how to deal with.
         if (!hasDNSSourceChecked) {
             hasDNSSourceChecked = true;
-            foreach (var (_, v) in srcs[(int)(i + 1)..]) {
+            foreach (var (_, v) in srcs.slice(i + 1)) {
                 if (v.source == "dns"u8) {
                     hasDNSSource = true;
                     break;
@@ -545,8 +545,8 @@ internal static (@string dnsMode, nint debugLevel) goDebugNetDNS() {
     }
     {
         nint i = bytealg.IndexByteString(goDebug, (rune)'+'); if (i != -1) {
-            parsePart(goDebug[..(int)(i)]);
-            parsePart(goDebug[(int)(i + 1)..]);
+            parsePart(goDebug.slice(0, i));
+            parsePart(goDebug.slice(i + 1));
             return (dnsMode, debugLevel);
         }
     }

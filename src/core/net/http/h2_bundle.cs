@@ -1035,7 +1035,7 @@ internal static error http2errReadEmpty = errors.New("read from empty dataBuffer
     while (builtin.len(p) > 0 && b.size > 0) {
         var readFrom = b.bytesFromFirstChunk();
         nint n = copy(p, readFrom);
-        p = p[(int)(n)..];
+        p = p.slice(n);
         ntotal += n;
         b.r += n;
         b.size -= n;
@@ -1043,9 +1043,9 @@ internal static error http2errReadEmpty = errors.New("read from empty dataBuffer
         if (b.r == builtin.len(b.chunks[0])) {
             http2putDataBufferChunk(b.chunks[0]);
             nint end = builtin.len(b.chunks) - 1;
-            copy(b.chunks[..(int)(end)], b.chunks[1..]);
+            copy(b.chunks.slice(0, end), b.chunks[1..]);
             b.chunks[end] = default!;
-            b.chunks = b.chunks[..(int)(end)];
+            b.chunks = b.chunks.slice(0, end);
             b.r = 0;
         }
     }
@@ -1054,9 +1054,9 @@ internal static error http2errReadEmpty = errors.New("read from empty dataBuffer
 
 [GoRecv] internal static slice<byte> bytesFromFirstChunk(this ref http2dataBuffer b) {
     if (builtin.len(b.chunks) == 1) {
-        return b.chunks[0][(int)(b.r)..(int)(b.w)];
+        return b.chunks[0].slice(b.r, b.w);
     }
-    return b.chunks[0][(int)(b.r)..];
+    return b.chunks[0].slice(b.r);
 }
 
 // Len returns the number of bytes of the unread portion of the buffer.
@@ -1076,8 +1076,8 @@ internal static error http2errReadEmpty = errors.New("read from empty dataBuffer
             want = b.expected;
         }
         var chunk = b.lastChunkOrAlloc(want);
-        nint n = copy(chunk[(int)(b.w)..], p);
-        p = p[(int)(n)..];
+        nint n = copy(chunk.slice(b.w), p);
+        p = p.slice(n);
         b.w += n;
         b.size += n;
         b.expected -= (int64)n;
@@ -1772,7 +1772,7 @@ internal static ж<http2Framer> http2NewFramer(io.Writer w, io.Reader r) {
     var frʗ1 = fr;
     fr.Value.getReadBuf = (uint32 size) => {
         if (cap((~frʗ1).readBuf) >= (nint)size) {
-            return (~frʗ1).readBuf[..(int)(size)];
+            return (~frʗ1).readBuf.slice(0, (nint)(size));
         }
         frʗ1.Value.readBuf = new slice<byte>((nint)(size));
         return (~frʗ1).readBuf;
@@ -1973,7 +1973,7 @@ internal static (http2Frame, error) http2parseDataFrame(ж<http2frameCache> Ꮡf
         countError(frameDataPadTooBigˢ);
         return (default!, new http2connError(http2ErrCodeProtocol, "pad size larger than data payload"u8));
     }
-    f.Value.data = payload[..(int)(builtin.len(payload) - (nint)padSize)];
+    f.Value.data = payload.slice(0, builtin.len(payload) - (nint)padSize);
     return (new http2DataFrameжhttp2Frame(f), default!);
 }
 
@@ -2131,8 +2131,8 @@ internal static (http2Frame, error) http2parseSettingsFrame(ж<http2frameCache> 
 [GoRecv] internal static http2Setting Setting(this ref http2SettingsFrame f, nint i) {
     var buf = f.p;
     return new http2Setting(
-        ID: ((http2SettingID)binary.BigEndian.Uint16(buf[(int)(i * 6)..(int)(i * 6 + 2)])),
-        Val: binary.BigEndian.Uint32(buf[(int)(i * 6 + 2)..(int)(i * 6 + 6)])
+        ID: ((http2SettingID)binary.BigEndian.Uint16(buf.slice(i * 6, i * 6 + 2))),
+        Val: binary.BigEndian.Uint32(buf.slice(i * 6 + 2, i * 6 + 6))
     );
 }
 
@@ -2460,7 +2460,7 @@ internal static (http2Frame, error err) http2parseHeadersFrame(ж<http2frameCach
         countError(frameHeadersPadTooBigˢ);
         return (default!, http2streamError(fh.StreamID, http2ErrCodeProtocol));
     }
-    hf.Value.headerFragBuf = p[..(int)(builtin.len(p) - (nint)padLength)];
+    hf.Value.headerFragBuf = p.slice(0, builtin.len(p) - (nint)padLength);
     return (new http2HeadersFrameжhttp2Frame(hf), default!);
 }
 
@@ -2530,7 +2530,7 @@ internal static error WriteHeaders(this ж<http2Framer> Ꮡf, http2HeadersFrameP
         f.writeByte(p.Priority.Weight);
     }
     f.wbuf = appendꓸꓸꓸ(f.wbuf, p.BlockFragment);
-    f.wbuf = appendꓸꓸꓸ(f.wbuf, http2padZeros[..(int)(p.PadLength)]);
+    f.wbuf = appendꓸꓸꓸ(f.wbuf, http2padZeros.slice(0, p.PadLength));
     return Ꮡf.endWrite();
 }
 
@@ -2755,7 +2755,7 @@ internal static (http2Frame, error err) http2parsePushPromise(ж<http2frameCache
         countError(framePushpromisePadTooˢ);
         return (default!, ((http2ConnectionError)(uint32)http2ErrCodeProtocol));
     }
-    pp.Value.headerFragBuf = p[..(int)(builtin.len(p) - (nint)padLength)];
+    pp.Value.headerFragBuf = p.slice(0, builtin.len(p) - (nint)padLength);
     return (new http2PushPromiseFrameжhttp2Frame(pp), default!);
 }
 
@@ -2806,7 +2806,7 @@ internal static error WritePushPromise(this ж<http2Framer> Ꮡf, http2PushPromi
     }
     f.writeUint32(p.PromiseID);
     f.wbuf = appendꓸꓸꓸ(f.wbuf, p.BlockFragment);
-    f.wbuf = appendꓸꓸꓸ(f.wbuf, http2padZeros[..(int)(p.PadLength)]);
+    f.wbuf = appendꓸꓸꓸ(f.wbuf, http2padZeros.slice(0, p.PadLength));
     return Ꮡf.endWrite();
 }
 
@@ -2892,7 +2892,7 @@ internal static (slice<byte> remain, uint32 v, error err) http2readUint32(slice<
 [GoRecv] internal static slice<hpack.HeaderField> RegularFields(this ref http2MetaHeadersFrame mh) {
     foreach (var (i, hf) in mh.Fields) {
         if (!hf.IsPseudo()) {
-            return mh.Fields[(int)(i)..];
+            return mh.Fields.slice(i);
         }
     }
     return default!;
@@ -2903,7 +2903,7 @@ internal static (slice<byte> remain, uint32 v, error err) http2readUint32(slice<
 [GoRecv] internal static slice<hpack.HeaderField> PseudoFields(this ref http2MetaHeadersFrame mh) {
     foreach (var (i, hf) in mh.Fields) {
         if (!hf.IsPseudo()) {
-            return mh.Fields[..(int)(i)];
+            return mh.Fields.slice(0, i);
         }
     }
     return mh.Fields;
@@ -2928,7 +2928,7 @@ internal static (slice<byte> remain, uint32 v, error err) http2readUint32(slice<
         // Check for duplicates.
         // This would be a bad algorithm, but N is 5.
         // And this doesn't allocate.
-        foreach (var (_, hf2) in pf[..(int)(i)]) {
+        foreach (var (_, hf2) in pf.slice(0, i)) {
             if (hf.Name == hf2.Name) {
                 return ((http2duplicatePseudoHeaderError)hf.Name);
             }
@@ -3181,14 +3181,14 @@ internal static slice<byte> http2goroutineSpace = slice<byte>("goroutine "u8);
         var bp = Ꮡhttp2littleBuf.Get()._<ж<slice<byte>>>();
         defer(Ꮡhttp2littleBuf.Put, bp.OrTypedNil(), ref ᒐ);
         var b = bp.ValueSlot;
-        b = b[..(int)(runtime.Stack(b, false))];
+        b = b.slice(0, runtime.Stack(b, false));
         // Parse the 4707 out of "goroutine 4707 ["
         b = bytes.TrimPrefix(b, http2goroutineSpace);
         nint i = bytes.IndexByte(b, (rune)' ');
         if (i < 0) {
             throw panic(fmt.Sprintf("No space found in %q"u8, b));
         }
-        b = b[..(int)(i)];
+        b = b.slice(0, i);
         var (n, err) = http2parseUintBytes(b, 10, 64);
         if (err != default!) {
             throw panic(fmt.Sprintf("Failed to parse goroutine ID out of %q: %v"u8, b, err));
@@ -3697,7 +3697,7 @@ internal static (nint n, error err) http2writeWithByteTimeout(http2synctestGroup
             now = group.Now();
         }
         conn.SetWriteDeadline(now.Add(timeout));
-        var (nn, errΔ1) = conn.Write(p[(int)(n)..]);
+        var (nn, errΔ1) = conn.Write(p.slice(n));
         n += nn;
         if (n == builtin.len(p) || nn == 0 || !errors.Is(errΔ1, os.ErrDeadlineExceeded)) {
             // Either we finished the write, made no progress, or hit the deadline.
@@ -6795,7 +6795,7 @@ internal static void handlerDone(this ж<http2serverConn> Ꮡsc) {
         goǃ(Ꮡsc.runHandler, u.rw, u.req, u.handler);
         sc.unstartedHandlers[i] = new http2unstartedHandler(nil); // don't retain references
     }
-    sc.unstartedHandlers = sc.unstartedHandlers[(int)(i)..];
+    sc.unstartedHandlers = sc.unstartedHandlers.slice(i);
     if (builtin.len(sc.unstartedHandlers) == 0) {
         sc.unstartedHandlers = default!;
     }
@@ -6825,7 +6825,7 @@ internal static void runHandler(this ж<http2serverConn> Ꮡsc, ж<http2response
                 if (e != default! && !AreEqual(e, ErrAbortHandler)) {
                     const nint size = /* 64 << 10 */ 65536;
                     var buf = new slice<byte>(size);
-                    buf = buf[..(int)(runtime.Stack(buf, false))];
+                    buf = buf.slice(0, runtime.Stack(buf, false));
                     Ꮡsc.Value.logf("http2: panic serving %v: %v\n%s"u8, Ꮡsc.Value.conn.RemoteAddr(), e, buf);
                 }
                 return;
@@ -9892,9 +9892,9 @@ internal static void cleanupWriteRequest(this ж<http2clientStream> Ꮡcs, error
     while (builtin.len(hdrs) > 0 && cc.werr == default!) {
         var chunk = hdrs;
         if (builtin.len(chunk) > maxFrameSize) {
-            chunk = chunk[..(int)(maxFrameSize)];
+            chunk = chunk.slice(0, maxFrameSize);
         }
-        hdrs = hdrs[(int)(builtin.len(chunk))..];
+        hdrs = hdrs.slice(builtin.len(chunk));
         var endHeaders = builtin.len(hdrs) == 0;
         if (first){
             cc.fr.WriteHeaders(new http2HeadersFrameParam(
@@ -10039,7 +10039,7 @@ internal static error /*err*/ writeRequestBody(this ж<http2clientStream> Ꮡcs,
                 }}
 
             }
-            var remain = buf[..(int)(n)];
+            var remain = buf.slice(0, n);
             while (builtin.len(remain) > 0 && errΔ1 == default!) {
                 int32 allowed = default!;
                 (allowed, errΔ1) = Ꮡcs.awaitFlowControl(builtin.len(remain));
@@ -10047,8 +10047,8 @@ internal static error /*err*/ writeRequestBody(this ж<http2clientStream> Ꮡcs,
                     err = errΔ1; goto ᒐdone;
                 }
                 cc.of(http2ClientConn.Ꮡwmu).Lock();
-                var data = remain[..(int)(allowed)];
-                remain = remain[(int)(allowed)..];
+                var data = remain.slice(0, allowed);
+                remain = remain.slice(allowed);
                 sentEnd = sawEOF && builtin.len(remain) == 0 && !hasTrailers;
                 errΔ1 = (~cc).fr.WriteData(cs.ID, sentEnd, data);
                 if (errΔ1 == default!) {
@@ -10325,13 +10325,13 @@ internal static (slice<byte>, error) encodeHeaders(this ж<http2ClientConn> Ꮡc
                         if (p < 0) {
                             break;
                         }
-                        f(cookieˢ2, v[..(int)(p)]);
+                        f(cookieˢ2, v.slice(0, p));
                         p++;
                         // strip space after semicolon if any.
                         while (p + 1 <= builtin.len(v) && v[p] == (rune)' ') {
                             p++;
                         }
-                        v = v[(int)(p)..];
+                        v = v.slice(p);
                     }
                     if (builtin.len(v) > 0) {
                         f(cookieˢ2, v);
@@ -10875,7 +10875,7 @@ internal static readonly @string headerListTooLargeˢ = "header list too large"u
                 // Most headers aren't multi-valued.
                 // Set the capacity on strs[0] to 1, so any future append
                 // won't extend the slice into the other strings.
-                (vv, strs) = (strs.slice(-1, 1, 1), strs[1..]);
+                (vv, strs) = (strs.slice(0, 1, 1), strs[1..]);
                 vv[0] = hf.Value;
                 header[key] = vv;
             } else {
@@ -12140,7 +12140,7 @@ internal static error http2splitHeaderBlock(http2writeContext ctx, slice<byte> h
         if (builtin.len(frag) > maxFrameSize) {
             frag = frag[..(int)(maxFrameSize)];
         }
-        headerBlock = headerBlock[(int)(builtin.len(frag))..];
+        headerBlock = headerBlock.slice(builtin.len(frag));
         {
             var err = fn(ctx, frag, first, builtin.len(headerBlock) == 0); if (err != default!) {
                 return err;
@@ -12471,7 +12471,7 @@ public static (http2FrameWriteRequest, http2FrameWriteRequest, nint) Consume(thi
             stream: wr.stream,
             write: new http2writeDataжhttp2writeFramer(Ꮡ(new http2writeData(
                 streamID: (~wd).streamID,
-                p: (~wd).p[..(int)(allowed)], // Even if the original had endStream set, there
+                p: (~wd).p.slice(0, allowed), // Even if the original had endStream set, there
  // are bytes remaining because len(wd.p) > allowed,
  // so we know endStream is false.
 
@@ -12485,7 +12485,7 @@ public static (http2FrameWriteRequest, http2FrameWriteRequest, nint) Consume(thi
             stream: wr.stream,
             write: new http2writeDataжhttp2writeFramer(Ꮡ(new http2writeData(
                 streamID: (~wd).streamID,
-                p: (~wd).p[(int)(allowed)..],
+                p: (~wd).p.slice(allowed),
                 endStream: (~wd).endStream
             ))),
             done: wr.done
@@ -12551,7 +12551,7 @@ public static @string String(this http2FrameWriteRequest wr) {
     // TODO: less copy-happy queue.
     copy(q.s, q.s[1..]);
     q.s[builtin.len(q.s) - 1] = new http2FrameWriteRequest(nil);
-    q.s = q.s[..(int)(builtin.len(q.s) - 1)];
+    q.s = q.s.slice(0, builtin.len(q.s) - 1);
     return wr;
 }
 
@@ -12604,7 +12604,7 @@ public static @string String(this http2FrameWriteRequest wr) {
     nint x = ln - 1;
     var q = (p)[x];
     (p)[x] = default!;
-    p = (p)[..(int)(x)];
+    p = (p).slice(0, x);
     return q;
 }
 
@@ -13047,7 +13047,7 @@ internal static (http2FrameWriteRequest wr, bool ok) Pop(this ж<http2priorityWr
         ws.removeNode((list)[0]);
         var x = (list)[1..];
         copy(list, x);
-        list = (list)[..(int)(builtin.len(x))];
+        list = (list).slice(0, builtin.len(x));
     }
     list = append(list, Ꮡn);
 }

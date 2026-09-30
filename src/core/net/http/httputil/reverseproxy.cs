@@ -698,7 +698,7 @@ internal static error copyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWrit
             p.logf("httputil: ReverseProxy read error during body copy: %v"u8, rerr);
         }
         if (nr > 0) {
-            var (nw, werr) = dst.Write(buf[..(int)(nr)]);
+            var (nw, werr) = dst.Write(buf.slice(0, nr));
             if (nw > 0) {
                 written += (int64)nw;
             }

@@ -61,7 +61,7 @@ public static @string UTF16ToString(slice<uint16> s) {
     nint maxLen = 0;
     foreach (var (i, v) in s) {
         if (v == 0) {
-            s = s[0..(int)(i)];
+            s = s.slice(0, i);
             break;
         }
         switch (ᐧ) {
@@ -161,7 +161,7 @@ public static @string Error(this Errno e) {
     // trim terminating \r and \n
     for (; n > 0 && (b[n - 1] == (rune)'\n' || b[n - 1] == (rune)'\r'); n--) {
     }
-    return UTF16ToString(b[..(int)(n)]);
+    return UTF16ToString(b.slice(0, (nint)(n)));
 }
 
 internal static Errno _ERROR_NOT_ENOUGH_MEMORY => /* Errno(8) */ 8;
@@ -584,7 +584,7 @@ public static (@string wd, error err) Getwd() {
             return ("", e);
         }
         if ((nint)n <= len(b)) {
-            return (UTF16ToString(b[..(int)(n)]), default!);
+            return (UTF16ToString(b.slice(0, (nint)(n))), default!);
         }
         b = new slice<uint16>((nint)(n));
     }
@@ -652,7 +652,7 @@ public static (@string name, error err) ComputerName() {
     if (e != default!) {
         return ("", e);
     }
-    return (UTF16ToString(b[..(int)(n)]), default!);
+    return (UTF16ToString(b.slice(0, (nint)(n))), default!);
 }
 
 [GoType("dyn")] internal partial struct Ftruncate__FILE_END_OF_FILE_INFO {
@@ -1261,7 +1261,7 @@ internal static (slice<uint16>, error) fdpath(ΔHandle fd, slice<uint16> buf) {
     while (ᐧ) {
         var (n, err) = getFinalPathNameByHandle(fd, Ꮡ(buf, 0), (uint32)len(buf), (uint32)((uint32)FILE_NAME_NORMALIZED | (uint32)VOLUME_NAME_DOS));
         if (err == default!) {
-            buf = buf[..(int)(n)];
+            buf = buf.slice(0, (nint)(n));
             break;
         }
         if (!AreEqual(err, _ERROR_NOT_ENOUGH_MEMORY)) {
@@ -1383,7 +1383,7 @@ public static (nint n, error err) Readlink(@string path, slice<byte> buf) {
         if (exprᴛ1 == IO_REPARSE_TAG_SYMLINK) {
             var data = rdb.of(reparseDataBuffer.ᏑreparseBuffer).Reinterpret<byte, symbolicLinkReparseBuffer>();
             var p = array<uint16>.AliasPointer(data.at(symbolicLinkReparseBuffer.ᏑPathBuffer, 0), 65535);
-            s = UTF16ToString((~p)[(int)((~data).SubstituteNameOffset / 2)..(int)((uint16)((~data).SubstituteNameOffset + (~data).SubstituteNameLength) / 2)]);
+            s = UTF16ToString((~p).slice((~data).SubstituteNameOffset / 2, (uint16)((~data).SubstituteNameOffset + (~data).SubstituteNameLength) / 2));
             if ((uint32)((~data).Flags & (uint32)_SYMLINK_FLAG_RELATIVE) == 0) {
                 if (len(s) >= 4 && s[..4] == @"\??\"){
                     s = s[4..];
@@ -1406,7 +1406,7 @@ public static (nint n, error err) Readlink(@string path, slice<byte> buf) {
         else if (exprᴛ1 == _IO_REPARSE_TAG_MOUNT_POINT) {
             var data = rdb.of(reparseDataBuffer.ᏑreparseBuffer).Reinterpret<byte, mountPointReparseBuffer>();
             var p = array<uint16>.AliasPointer(data.at(mountPointReparseBuffer.ᏑPathBuffer, 0), 65535);
-            s = UTF16ToString((~p)[(int)((~data).SubstituteNameOffset / 2)..(int)((uint16)((~data).SubstituteNameOffset + (~data).SubstituteNameLength) / 2)]);
+            s = UTF16ToString((~p).slice((~data).SubstituteNameOffset / 2, (uint16)((~data).SubstituteNameOffset + (~data).SubstituteNameLength) / 2));
             if (len(s) >= 4 && s[..4] == @"\??\"){
                 // \??\C:\foo\bar
                 // do nothing

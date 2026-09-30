@@ -70,7 +70,7 @@ Pattern:
             // Look for match skipping i+1 bytes.
             // Cannot skip /.
             for (nint i = 0; i < len(name) && name[i] != Separator; i++) {
-                var (tΔ1, okΔ1, errΔ2) = matchChunk(chunk, name[(int)(i + 1)..]);
+                var (tΔ1, okΔ1, errΔ2) = matchChunk(chunk, name.slice(i + 1));
                 if (okΔ1) {
                     // if we're the last chunk, make sure we exhausted the name
                     if (len(pattern) == 0 && len(tΔ1) > 0) {
@@ -132,7 +132,7 @@ Scan:
 continue_Scan:;
     }
 break_Scan:;
-    return (star, pattern[0..(int)(i)], pattern[(int)(i)..]);
+    return (star, pattern.slice(0, i), pattern.slice(i));
 }
 
 // matchChunk checks whether chunk matches the beginning of s.
@@ -157,7 +157,7 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
             if (!failed) {
                 nint n = default!;
                 (r, n) = utf8.DecodeRuneInString(s);
-                s = s[(int)(n)..];
+                s = s.slice(n);
             }
             chunk = chunk[1..];
             var negated = false;
@@ -204,7 +204,7 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
                     failed = true;
                 }
                 var (_, n) = utf8.DecodeRuneInString(s);
-                s = s[(int)(n)..];
+                s = s.slice(n);
             }
             chunk = chunk[1..];
         }
@@ -255,7 +255,7 @@ internal static (rune r, @string nchunk, error err) getEsc(@string chunk) {
     if (r == utf8.RuneError && n == 1) {
         err = ErrBadPattern;
     }
-    nchunk = chunk[(int)(n)..];
+    nchunk = chunk.slice(n);
     if (len(nchunk) == 0) {
         err = ErrBadPattern;
     }
@@ -304,7 +304,7 @@ internal static (slice<@string> matches, error err) globWithLimit(@string patter
     } else {
         dir = cleanGlobPath(dir);
     }
-    if (!hasMeta(dir[(int)(volumeLen)..])) {
+    if (!hasMeta(dir.slice(volumeLen))) {
         return glob(dir, @file, default!);
     }
     // Prevent infinite recursion. See issue 15879.
@@ -335,7 +335,7 @@ internal static @string cleanGlobPath(@string path) {
         return path;
     }
     { /* default: */
-        return path[0..(int)(len(path) - 1)]; // chop off trailing separator
+        return path.slice(0, len(path) - 1); // chop off trailing separator
     }
 
 }
@@ -362,7 +362,7 @@ internal static (nint prefixLen, @string cleaned) cleanGlobPathWindows(@string p
             // C:
             vollen = len(path) - 1;
         }
-        return (vollen, path[0..(int)(len(path) - 1)]); // chop off trailing separator
+        return (vollen, path.slice(0, len(path) - 1)); // chop off trailing separator
     }}
 
 }

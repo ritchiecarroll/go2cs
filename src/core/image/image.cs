@@ -206,7 +206,7 @@ internal static nint pixelBufferLength(nint bytesPerPixel, Rectangle r, @string 
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new ΔRGBAжImage(Ꮡ(new ΔRGBA(
-        Pix: p.Pix[(int)(i)..],
+        Pix: p.Pix.slice(i),
         Stride: p.Stride,
         Rect: r
     )));
@@ -331,7 +331,7 @@ public static ж<ΔRGBA> NewRGBA(Rectangle r) {
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new RGBA64жImage(Ꮡ(new RGBA64(
-        Pix: p.Pix[(int)(i)..],
+        Pix: p.Pix.slice(i),
         Stride: p.Stride,
         Rect: r
     )));
@@ -466,7 +466,7 @@ public static ж<RGBA64> NewRGBA64(Rectangle r) {
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new NRGBAжImage(Ꮡ(new NRGBA(
-        Pix: p.Pix[(int)(i)..],
+        Pix: p.Pix.slice(i),
         Stride: p.Stride,
         Rect: r
     )));
@@ -618,7 +618,7 @@ public static ж<NRGBA> NewNRGBA(Rectangle r) {
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new NRGBA64жImage(Ꮡ(new NRGBA64(
-        Pix: p.Pix[(int)(i)..],
+        Pix: p.Pix.slice(i),
         Stride: p.Stride,
         Rect: r
     )));
@@ -734,7 +734,7 @@ public static ж<NRGBA64> NewNRGBA64(Rectangle r) {
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new AlphaжImage(Ꮡ(new Alpha(
-        Pix: p.Pix[(int)(i)..],
+        Pix: p.Pix.slice(i),
         Stride: p.Stride,
         Rect: r
     )));
@@ -853,7 +853,7 @@ public static ж<Alpha> NewAlpha(Rectangle r) {
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new Alpha16жImage(Ꮡ(new Alpha16(
-        Pix: p.Pix[(int)(i)..],
+        Pix: p.Pix.slice(i),
         Stride: p.Stride,
         Rect: r
     )));
@@ -971,7 +971,7 @@ public static ж<Alpha16> NewAlpha16(Rectangle r) {
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new GrayжImage(Ꮡ(new Gray(
-        Pix: p.Pix[(int)(i)..],
+        Pix: p.Pix.slice(i),
         Stride: p.Stride,
         Rect: r
     )));
@@ -1078,7 +1078,7 @@ public static ж<Gray> NewGray(Rectangle r) {
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new Gray16жImage(Ꮡ(new Gray16(
-        Pix: p.Pix[(int)(i)..],
+        Pix: p.Pix.slice(i),
         Stride: p.Stride,
         Rect: r
     )));
@@ -1194,7 +1194,7 @@ public static ж<Gray16> NewGray16(Rectangle r) {
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new CMYKжImage(Ꮡ(new CMYK(
-        Pix: p.Pix[(int)(i)..],
+        Pix: p.Pix.slice(i),
         Stride: p.Stride,
         Rect: r
     )));
@@ -1321,7 +1321,7 @@ public static ж<CMYK> NewCMYK(Rectangle r) {
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new PalettedжImage(Ꮡ(new Paletted(
-        Pix: p.Pix[(int)(i)..],
+        Pix: p.Pix.slice(i),
         Stride: p.Stride,
         Rect: p.Rect.Intersect(r),
         Palette: p.Palette
@@ -1334,7 +1334,7 @@ public static ж<CMYK> NewCMYK(Rectangle r) {
     nint i0 = 0;
     nint i1 = p.Rect.Dx();
     for (nint y = p.Rect.Min.Y; y < p.Rect.Max.Y; y++) {
-        foreach (var (_, c) in p.Pix[(int)(i0)..(int)(i1)]) {
+        foreach (var (_, c) in p.Pix.slice(i0, i1)) {
             present[c] = true;
         }
         i0 += p.Stride;

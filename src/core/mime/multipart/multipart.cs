@@ -130,9 +130,9 @@ public static ж<Reader> NewReader(io.Reader r, @string boundary) {
     return Ꮡ(new Reader(
         bufReader: bufio.NewReaderSize(new stickyErrorReaderжReader(Ꮡ(new stickyErrorReader(r: r))), peekBufferSize),
         nl: b[..2],
-        nlDashBoundary: b[..(int)(len(b) - 2)],
+        nlDashBoundary: b.slice(0, len(b) - 2),
         dashBoundaryDash: b[2..],
-        dashBoundary: b[2..(int)(len(b) - 2)]
+        dashBoundary: b.slice(2, len(b) - 2)
     ));
 }
 
@@ -233,7 +233,7 @@ internal static (nint, error) Read(this partReader pr, slice<byte> d) {
     if (n > (~p).n) {
         n = p.Value.n;
     }
-    (n, _) = br.Read(d[..(int)(n)]);
+    (n, _) = br.Read(d.slice(0, n));
     p.Value.total += (int64)n;
     p.Value.n -= n;
     if ((~p).n == 0) {
@@ -275,7 +275,7 @@ internal static (nint, error) scanUntilBoundary(slice<byte> buf, slice<byte> das
     // Search for "\n--boundary".
     {
         nint iΔ1 = bytes.Index(buf, nlDashBoundary); if (iΔ1 >= 0) {
-            var exprᴛ2 = matchAfterPrefix(buf[(int)(iΔ1)..], nlDashBoundary, readErr);
+            var exprᴛ2 = matchAfterPrefix(buf.slice(iΔ1), nlDashBoundary, readErr);
             if (exprᴛ2 == -1) {
                 return (iΔ1 + len(nlDashBoundary), default!);
             }
@@ -296,7 +296,7 @@ internal static (nint, error) scanUntilBoundary(slice<byte> buf, slice<byte> das
     // Also if the section from the final \n onward is not a prefix of the boundary,
     // it too must be part of the body.
     nint i = bytes.LastIndexByte(buf, nlDashBoundary[0]);
-    if (i >= 0 && bytes.HasPrefix(nlDashBoundary, buf[(int)(i)..])) {
+    if (i >= 0 && bytes.HasPrefix(nlDashBoundary, buf.slice(i))) {
         return (i, default!);
     }
     return (len(buf), readErr);
@@ -464,7 +464,7 @@ internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, i
     if (!bytes.HasPrefix(line, r.dashBoundaryDash)) {
         return false;
     }
-    var rest = line[(int)(len(r.dashBoundaryDash))..];
+    var rest = line.slice(len(r.dashBoundaryDash));
     rest = skipLWSPChar(rest);
     return len(rest) == 0 || bytes.Equal(rest, r.nl);
 }
@@ -479,7 +479,7 @@ internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, i
     if (!bytes.HasPrefix(line, r.dashBoundary)) {
         return false;
     }
-    var rest = line[(int)(len(r.dashBoundary))..];
+    var rest = line.slice(len(r.dashBoundary));
     rest = skipLWSPChar(rest);
     // On the first part, see our lines are ending in \n instead of \r\n
     // and switch into that mode if so. This is a violation of the spec,

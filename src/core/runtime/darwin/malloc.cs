@@ -638,7 +638,7 @@ mapped:
             // there may be concurrent readers. Since we
             // double the array each time, this can lead
             // to at most 2x waste.
-            h.allArenas = h.allArenas[..(int)(len(h.allArenas) + 1)];
+            h.allArenas = h.allArenas.slice(0, len(h.allArenas) + 1);
             h.allArenas[len(h.allArenas) - 1] = ri;
         }
         // Store atomically just in case an object from the

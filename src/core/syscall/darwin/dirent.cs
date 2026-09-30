@@ -18,9 +18,9 @@ internal static (uint64 u, bool ok) readInt(slice<byte> b, uintptr off, uintptr 
         return (0, false);
     }
     if (goarch.BigEndian) {
-        return (readIntBE(b[(int)(off)..], size), true);
+        return (readIntBE(b.slice((nint)(off)), size), true);
     }
-    return (readIntLE(b[(int)(off)..], size), true);
+    return (readIntLE(b.slice((nint)(off)), size), true);
 }
 
 internal static uint64 readIntBE(slice<byte> b, uintptr size) {
@@ -77,8 +77,8 @@ public static (nint consumed, nint count, slice<@string> newnames) ParseDirent(s
         if (!ok || reclen > (uint64)len(buf)) {
             return (origlen, count, names);
         }
-        var rec = buf[..(int)(reclen)];
-        buf = buf[(int)(reclen)..];
+        var rec = buf.slice(0, (nint)(reclen));
+        buf = buf.slice((nint)(reclen));
         (var ino, ok) = direntIno(rec);
         if (!ok) {
             break;
@@ -94,10 +94,10 @@ public static (nint consumed, nint count, slice<@string> newnames) ParseDirent(s
         if (!ok || namoff + namlen > (uint64)len(rec)) {
             break;
         }
-        var name = rec[(int)(namoff)..(int)(namoff + namlen)];
+        var name = rec.slice((nint)(namoff), (nint)(namoff + namlen));
         foreach (var (i, c) in name) {
             if (c == 0) {
-                name = name[..(int)(i)];
+                name = name.slice(0, i);
                 break;
             }
         }

@@ -124,7 +124,7 @@ internal static @string trimOWS(@string x) {
         x = x[1..];
     }
     while (len(x) > 0 && isOWS(x[len(x) - 1])) {
-        x = x[..(int)(len(x) - 1)];
+        x = x.slice(0, len(x) - 1);
     }
     return x;
 }
@@ -135,10 +135,10 @@ internal static @string trimOWS(@string x) {
 // case-insensitively.
 internal static bool headerValueContainsToken(@string v, @string token) {
     for (nint comma = strings.IndexByte(v, (rune)','); comma != -1; comma = strings.IndexByte(v, (rune)',')) {
-        if (tokenEqual(trimOWS(v[..(int)(comma)]), token)) {
+        if (tokenEqual(trimOWS(v.slice(0, comma)), token)) {
             return true;
         }
-        v = v[(int)(comma + 1)..];
+        v = v.slice(comma + 1);
     }
     return tokenEqual(trimOWS(v), token);
 }

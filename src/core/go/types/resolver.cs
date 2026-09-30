@@ -213,12 +213,12 @@ internal static ж<Package> importPackage(this ж<Checker> Ꮡcheck, positioner 
                 @string name = path;
                 {
                     nint i = len(name); if (i > 0 && name[i - 1] == (rune)'/') {
-                        name = name[..(int)(i - 1)];
+                        name = name.slice(0, i - 1);
                     }
                 }
                 {
                     nint i = strings.LastIndex(name, "/"u8); if (i >= 0) {
-                        name = name[(int)(i + 1)..];
+                        name = name.slice(i + 1);
                     }
                 }
                 imp = NewPackage(path, name);
@@ -784,7 +784,7 @@ internal static void errorUnusedPkg(this ж<Checker> Ꮡcheck, ж<PkgName> Ꮡob
     @string elem = path;
     {
         nint i = strings.LastIndex(elem, "/"u8); if (i >= 0) {
-            elem = elem[(int)(i + 1)..];
+            elem = elem.slice(i + 1);
         }
     }
     if (obj.name == ""u8 || obj.name == "."u8 || obj.name == elem){
@@ -801,7 +801,7 @@ internal static void errorUnusedPkg(this ж<Checker> Ꮡcheck, ж<PkgName> Ꮡob
 internal static @string dir(@string path) {
     {
         nint i = strings.LastIndexAny(path, @"/\"u8); if (i > 0) {
-            return path[..(int)(i)];
+            return path.slice(0, i);
         }
     }
     // i <= 0

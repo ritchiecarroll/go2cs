@@ -162,7 +162,7 @@ internal static (nint port, error err) cgoLookupServicePort(ж<_C_struct_addrinf
             (port, err) = (0, new DNSErrorжerror(Ꮡ(new DNSError(Err: err.Error(), Name: network + "/"u8 + service)))); goto ᒐdone;
         }
         // Lowercase the C service name.
-        foreach (var (i, b) in cservice[..(int)(len(service))]) {
+        foreach (var (i, b) in cservice.slice(0, len(service))) {
             cservice[i] = lowerASCII(b);
         }
         ref var res = ref heap<ж<_C_struct_addrinfo>>(out var Ꮡres);
@@ -355,7 +355,7 @@ internal static (slice<@string> names, error err) cgoLookupAddrPTR(@string addr,
     }
     {
         nint i = bytealg.IndexByte(b, 0); if (i != -1) {
-            b = b[..(int)(i)];
+            b = b.slice(0, i);
         }
     }
     return (new @string[]{absDomainName(((@string)b))}.slice(), default!);

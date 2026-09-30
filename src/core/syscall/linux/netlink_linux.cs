@@ -97,7 +97,7 @@ done:
             if (nr < NLMSG_HDRLEN) {
                 return (default!, EINVAL);
             }
-            rb = rb[..(int)(nr)];
+            rb = rb.slice(0, nr);
             tab = appendꓸꓸꓸ(tab, rb);
             (var msgs, errΔ3) = ParseNetlinkMessage(rb);
             if (errΔ3 != default!) {
@@ -138,9 +138,9 @@ public static (slice<NetlinkMessage>, error) ParseNetlinkMessage(slice<byte> b) 
         if (err != default!) {
             return (default!, err);
         }
-        var m = new NetlinkMessage(Header: h.Value, Data: dbuf[..(int)((nint)(~h).Len - (nint)NLMSG_HDRLEN)]);
+        var m = new NetlinkMessage(Header: h.Value, Data: dbuf.slice(0, (nint)(~h).Len - (nint)NLMSG_HDRLEN));
         msgs = append(msgs, m);
-        b = b[(int)(dlen)..];
+        b = b.slice(dlen);
     }
     return (msgs, default!);
 }
@@ -187,9 +187,9 @@ public static (slice<NetlinkRouteAttr>, error) ParseNetlinkRouteAttr(ж<NetlinkM
         if (err != default!) {
             return (default!, err);
         }
-        var ra = new NetlinkRouteAttr(Attr: a.Value, Value: vbuf[..(int)((nint)(~a).Len - (nint)SizeofRtAttr)]);
+        var ra = new NetlinkRouteAttr(Attr: a.Value, Value: vbuf.slice(0, (nint)(~a).Len - (nint)SizeofRtAttr));
         attrs = append(attrs, ra);
-        b = b[(int)(alen)..];
+        b = b.slice(alen);
     }
     return (attrs, default!);
 }

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
-    <LangVersion>latest</LangVersion>
+    <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 

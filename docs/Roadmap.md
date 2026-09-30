@@ -99,11 +99,12 @@ starts passing breaks the roster's disclosure arithmetic loudly and must be remo
 test host publishes as a self-contained, relocatable single-file executable, so Go tests that copy
 and relaunch their own binary pass.
 
-The remaining entry is `crypto/tls`'s `TestBogoSuite`, where BoringSSL's test runner starts the host
-once per case inside Go's own 10-minute test deadline. The interop itself passes, and the run is bound
-by throughput rather than start-up time, so no start-up work alone retires it. The entry retires when
-managed steady-state TLS throughput brings the run inside the runner's deadline, which is what the
-TLS work under [Performance](#performance) targets.
+Entries remain in `crypto/tls`, `os`, `os/exec` and `syscall`, and not every one retires through the
+deployment shape; the roster's class text names what each one needs. In `crypto/tls`'s
+`TestBogoSuite`, BoringSSL's test runner starts the host once per case inside Go's own 10-minute test
+deadline. The interop itself passes, and the run is bound by throughput rather than start-up time, so
+no start-up work alone retires it. The entry retires when managed steady-state TLS throughput brings
+the run inside the runner's deadline, which is what the TLS work under [Performance](#performance) targets.
 
 ## Platforms
 
@@ -258,7 +259,7 @@ and under Native AOT. The follow-ups run off the critical path:
 - **A re-baseline at the final Go 1.24 package release** (October 2026), which is also the before
   picture for the Go 1.25 hop and the .NET 11 measurement stage. It adds a TLS-handshake benchmark
   and profiles the crypto paths behind the handshake gap; TLS throughput is also what retires the
-  remaining [host-limit entry](#declared-host-limits-and-their-retirement-path).
+  `crypto/tls` [host-limit entry](#declared-host-limits-and-their-retirement-path).
 - **Allocations** (committed; design kickoff planned for Q1 2027): the retirement plan named by each
   deferred allocation-count disclosure on the roster. Go meets those assertions through compiler
   optimizations, chiefly escape analysis keeping values off the heap, that the converted code does

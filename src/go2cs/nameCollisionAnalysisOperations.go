@@ -61,9 +61,14 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 	// the name sets above.
 	funcDeclsByName := make(map[string][]packageFuncDecl)
 
+	// Names this package declares in a C# 15 reserved TYPE position (see csReservedTypeNames).
+	csReservedTypeNameDecls := make(map[string]bool)
+
 	// Collect all named element names and method names (top-level declarations only)
 	for _, file := range pkg.Syntax {
 		isTestFile := strings.HasSuffix(strings.ToLower(filepath.Base(pkg.Fset.Position(file.Pos()).Filename)), "_test.go")
+
+		collectCSReservedTypeNameDecls(file, csReservedTypeNameDecls)
 
 		for _, decl := range file.Decls {
 			switch node := decl.(type) {
@@ -165,6 +170,13 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 		if isType && emitterSpelledTypeNames[name] {
 			nameCollisions[name] = true
 		}
+	}
+
+	// A type, alias or type parameter named after a C# 15 reserved TYPE-position keyword (`closed`,
+	// `union`; preview `safe`) breaks as a type name and at member start, where C# 15 reads it as a
+	// keyword: Δ-rename it package-wide the same way (see csReservedTypeNames for the positions).
+	for name := range csReservedTypeNameDecls {
+		nameCollisions[name] = true
 	}
 
 	// A method/function name can also shadow an IMPORTED PACKAGE's using-alias inside the

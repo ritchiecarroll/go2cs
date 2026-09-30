@@ -40,11 +40,11 @@ internal static slice<uint16> encodeWTF16(@string s, slice<uint16> buf) {
     for (nint i = 0; i < len(s); ) {
         // Cannot use 'for range s' because it expects valid
         // UTF-8 runes.
-        var (r, size) = utf8.DecodeRuneInString(s[(int)(i)..]);
+        var (r, size) = utf8.DecodeRuneInString(s.slice(i));
         if (r == utf8.RuneError) {
             // Check if s[i:] contains a valid WTF-8 encoded surrogate.
             {
-                @string sc = s[(int)(i)..]; if (len(sc) >= 3 && sc[0] == 0xED && 0xA0 <= sc[1] && sc[1] <= 0xBF && 0x80 <= sc[2] && sc[2] <= 0xBF) {
+                @string sc = s.slice(i); if (len(sc) >= 3 && sc[0] == 0xED && 0xA0 <= sc[1] && sc[1] <= 0xBF && 0x80 <= sc[2] && sc[2] <= 0xBF) {
                     r = ((rune)((byte)(sc[0] & (byte)mask3)) << (int)(12)) + ((rune)((byte)(sc[1] & (byte)maskx)) << (int)(6)) + (rune)((byte)(sc[2] & (byte)maskx));
                     buf = append(buf, (uint16)r);
                     i += 3;

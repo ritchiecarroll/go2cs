@@ -124,7 +124,7 @@ internal static readonly @string attemptedToTraceStackOfAˢ = "attempted to trac
     if (nstk > 0 && gp.goid == 1) {
         nstk--; // skip runtime.main
     }
-    var id = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(gen % 2)).put(pcBuf[..(int)(nstk)]);
+    var id = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(gen % 2)).put(pcBuf.slice(0, nstk));
     return id;
 }
 
@@ -166,7 +166,7 @@ internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter 
     // N.B. This might allocate, but that's OK because we're not writing to the M's buffer,
     // but one we're about to create (with ensure).
     nint n = fpunwindExpand(stackBuf, Δstack);
-    var frames = makeTraceFrames(w.gen, stackBuf[..(int)(n)]);
+    var frames = makeTraceFrames(w.gen, stackBuf.slice(0, n));
     // The maximum number of bytes required to hold the encoded stack, given that
     // it contains N frames.
     nint maxBytes = 1 + (2 + 4 * len(frames)) * (nint)traceBytesPerNumber;
@@ -229,13 +229,13 @@ internal static traceFrame makeTraceFrame(uintptr gen, Frame f) {
     @string fn = f.Function;
     const nint maxLen = /* 1 << 10 */ 1024;
     if (len(fn) > maxLen) {
-        fn = fn[(int)(len(fn) - maxLen)..];
+        fn = fn.slice(len(fn) - maxLen);
     }
     frame.funcID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, fn);
     frame.line = (uint64)f.Line;
     @string @file = f.File;
     if (len(@file) > maxLen) {
-        @file = @file[(int)(len(@file) - maxLen)..];
+        @file = @file.slice(len(@file) - maxLen);
     }
     frame.fileID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, @file);
     return frame;

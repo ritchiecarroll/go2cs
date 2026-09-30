@@ -20,10 +20,10 @@ partial class slicewriter_package {
 
 [GoRecv] public static (nint n, error err) Write(this ref WriteSeeker sws, slice<byte> p) {
     nint amt = len(p);
-    var towrite = sws.payload[(int)(sws.off)..];
+    var towrite = sws.payload.slice((nint)(sws.off));
     if (len(towrite) < amt) {
         sws.payload = appendꓸꓸꓸ(sws.payload, makeꓸꓸꓸ<byte>(amt - len(towrite)));
-        towrite = sws.payload[(int)(sws.off)..];
+        towrite = sws.payload.slice((nint)(sws.off));
     }
     copy(towrite, p);
     sws.off += (int64)amt;
@@ -72,7 +72,7 @@ partial class slicewriter_package {
 
 [GoRecv] public static (nint n, error err) Read(this ref WriteSeeker sws, slice<byte> p) {
     nint amt = len(p);
-    var toread = sws.payload[(int)(sws.off)..];
+    var toread = sws.payload.slice((nint)(sws.off));
     if (len(toread) < amt) {
         amt = len(toread);
     }

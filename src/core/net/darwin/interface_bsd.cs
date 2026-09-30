@@ -49,12 +49,12 @@ internal static (slice<Interface>, error) interfaceTable(nint ifindex) {
             }
             n++;
             if (ifindex == (~mΔ1).Index) {
-                return (ift[..(int)(n)], default!);
+                return (ift.slice(0, n), default!);
             }
             break;
         }}
     }
-    return (ift[..(int)(n)], default!);
+    return (ift.slice(0, n), default!);
 }
 
 internal static Flags linkFlags(nint rawFlags) {

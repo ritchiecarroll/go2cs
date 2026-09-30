@@ -129,7 +129,7 @@ public static @string TrimString(@string s) {
         s = s[1..];
     }
     while (len(s) > 0 && isASCIISpace(s[len(s) - 1])) {
-        s = s[..(int)(len(s) - 1)];
+        s = s.slice(0, len(s) - 1);
     }
     return s;
 }
@@ -140,7 +140,7 @@ public static slice<byte> TrimBytes(slice<byte> b) {
         b = b[1..];
     }
     while (len(b) > 0 && isASCIISpace(b[len(b) - 1])) {
-        b = b[..(int)(len(b) - 1)];
+        b = b.slice(0, len(b) - 1);
     }
     return b;
 }

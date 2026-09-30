@@ -255,7 +255,7 @@ internal static (ж<url.URL>, error) parseProxy(@string proxy) {
                 continue;
             }
             if (phost[0] == (rune)'[' && phost[len(phost) - 1] == (rune)']') {
-                phost = phost[1..(int)(len(phost) - 1)];
+                phost = phost.slice(1, len(phost) - 1);
             }
         } else {
             phost = p;

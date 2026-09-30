@@ -317,7 +317,7 @@ internal static readonly @string unexpectedTokenˢ = "unexpected token !"u8;
             if (i < 0) {
                 i = len(p.text);
             }
-            p.text = p.text[(int)(i)..];
+            p.text = p.text.slice(i);
             continue;
         }
         else if (exprᴛ1 is (rune)'\n') { matchᴛ1 = true;
@@ -333,8 +333,8 @@ internal static readonly @string unexpectedTokenˢ = "unexpected token !"u8;
             if (i < 0) {
                 i = len(p.text);
             }
-            @string t = p.text[..(int)(i)];
-            p.text = p.text[(int)(i)..];
+            @string t = p.text.slice(0, i);
+            p.text = p.text.slice(i);
             p.lastWord = t;
             return t;
         }

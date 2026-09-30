@@ -9,6 +9,7 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using System.Runtime.CompilerServices;
 
 partial class runtime_package {
 
@@ -152,7 +153,7 @@ internal static void @lock(ж<mutex> Ꮡl) {
 
 // go2cs generated this placeholder — func lock2 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static void unlock(ж<mutex> Ꮡl) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void unlock(ж<mutex> Ꮡl) {
     unlockWithRank(Ꮡl);
 }
 

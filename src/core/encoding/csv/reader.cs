@@ -260,7 +260,7 @@ public static ж<Reader> NewReader(io.Reader r) {
         err = default!;
         // For backwards compatibility, drop trailing \r before EOF.
         if (line[readSize - 1] == (rune)'\r') {
-            line = line[..(int)(readSize - 1)];
+            line = line.slice(0, readSize - 1);
         }
     }
     r.numLine++;
@@ -269,7 +269,7 @@ public static ж<Reader> NewReader(io.Reader r) {
     {
         nint n = len(line); if (n >= 2 && line[n - 2] == (rune)'\r' && line[n - 1] == (rune)'\n') {
             line[n - 2] = (rune)'\n';
-            line = line[..(int)(n - 1)];
+            line = line.slice(0, n - 1);
         }
     }
     return (line, err);
@@ -329,7 +329,7 @@ parseField:
                 i = len(line);
                 pos.col -= lengthNL(line);
             }
-            line = line[(int)(i)..];
+            line = line.slice(i);
             pos.col += i;
         }
         if (len(line) == 0 || line[0] != (rune)'"'){
@@ -337,9 +337,9 @@ parseField:
             nint i = bytes.IndexRune(line, r.Comma);
             var field = line;
             if (i >= 0){
-                field = field[..(int)(i)];
+                field = field.slice(0, i);
             } else {
-                field = field[..(int)(len(field) - lengthNL(field))];
+                field = field.slice(0, len(field) - lengthNL(field));
             }
             // Check to make sure a quote does not appear in field.
             if (!r.LazyQuotes) {
@@ -356,7 +356,7 @@ parseField:
             r.fieldIndexes = append(r.fieldIndexes, len(r.recordBuffer));
             r.fieldPositions = append(r.fieldPositions, pos);
             if (i >= 0) {
-                line = line[(int)(i + commaLen)..];
+                line = line.slice(i + commaLen);
                 pos.col += i + commaLen;
                 goto continue_parseField;
             }
@@ -370,8 +370,8 @@ parseField:
                 nint i = bytes.IndexByte(line, (rune)'"');
                 if (i >= 0){
                     // Hit next quote.
-                    r.recordBuffer = appendꓸꓸꓸ(r.recordBuffer, line[..(int)(i)]);
-                    line = line[(int)(i + quoteLen)..];
+                    r.recordBuffer = appendꓸꓸꓸ(r.recordBuffer, line.slice(0, i));
+                    line = line.slice(i + quoteLen);
                     pos.col += i + quoteLen;
                     {
                         var rn = nextRune(line);
@@ -384,7 +384,7 @@ parseField:
                             break;
                         }
                         case {} when rn == r.Comma: {
-                            line = line[(int)(commaLen)..];
+                            line = line.slice(commaLen);
                             pos.col += commaLen;
                             r.fieldIndexes = append(r.fieldIndexes, // `",` sequence (end of field).
  len(r.recordBuffer));
@@ -453,10 +453,10 @@ break_parseField:;
     if (cap(dst) < len(r.fieldIndexes)) {
         dst = new slice<@string>(len(r.fieldIndexes));
     }
-    dst = dst[..(int)(len(r.fieldIndexes))];
+    dst = dst.slice(0, len(r.fieldIndexes));
     nint preIdx = default!;
     foreach (var (i, idx) in r.fieldIndexes) {
-        dst[i] = str[(int)(preIdx)..(int)(idx)];
+        dst[i] = str.slice(preIdx, idx);
         preIdx = idx;
     }
     // Check or update the expected fields per record.

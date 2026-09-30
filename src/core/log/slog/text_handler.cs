@@ -172,7 +172,7 @@ internal static bool needsQuoting(@string s) {
             i++;
             continue;
         }
-        var (r, size) = utf8.DecodeRuneInString(s[(int)(i)..]);
+        var (r, size) = utf8.DecodeRuneInString(s.slice(i));
         if (r == utf8.RuneError || unicode.IsSpace(r) || !unicode.IsPrint(r)) {
             return true;
         }

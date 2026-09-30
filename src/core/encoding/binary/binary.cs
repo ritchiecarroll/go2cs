@@ -352,7 +352,7 @@ public static (nint, error) Decode(slice<byte> buf, ByteOrder order, any data) {
     if (len(buf) < size) {
         return (0, errBufferTooSmall);
     }
-    var d = Ꮡ(new decoder(new coder(order: order, buf: buf[..(int)(size)])));
+    var d = Ꮡ(new decoder(new coder(order: order, buf: buf.slice(0, size))));
     d.value(v);
     return (size, default!);
 }
@@ -422,49 +422,49 @@ internal static bool decodeFast(slice<byte> bs, ByteOrder order, any data) {
     }
     case slice<int16> dataΔ1: {
         foreach (var (i, _) in dataΔ1) {
-            dataΔ1[i] = (int16)order.Uint16(bs[(int)(2 * i)..]);
+            dataΔ1[i] = (int16)order.Uint16(bs.slice(2 * i));
         }
         break;
     }
     case slice<uint16> dataΔ1: {
         foreach (var (i, _) in dataΔ1) {
-            dataΔ1[i] = order.Uint16(bs[(int)(2 * i)..]);
+            dataΔ1[i] = order.Uint16(bs.slice(2 * i));
         }
         break;
     }
     case slice<int32> dataΔ1: {
         foreach (var (i, _) in dataΔ1) {
-            dataΔ1[i] = (int32)order.Uint32(bs[(int)(4 * i)..]);
+            dataΔ1[i] = (int32)order.Uint32(bs.slice(4 * i));
         }
         break;
     }
     case slice<uint32> dataΔ1: {
         foreach (var (i, _) in dataΔ1) {
-            dataΔ1[i] = order.Uint32(bs[(int)(4 * i)..]);
+            dataΔ1[i] = order.Uint32(bs.slice(4 * i));
         }
         break;
     }
     case slice<int64> dataΔ1: {
         foreach (var (i, _) in dataΔ1) {
-            dataΔ1[i] = (int64)order.Uint64(bs[(int)(8 * i)..]);
+            dataΔ1[i] = (int64)order.Uint64(bs.slice(8 * i));
         }
         break;
     }
     case slice<uint64> dataΔ1: {
         foreach (var (i, _) in dataΔ1) {
-            dataΔ1[i] = order.Uint64(bs[(int)(8 * i)..]);
+            dataΔ1[i] = order.Uint64(bs.slice(8 * i));
         }
         break;
     }
     case slice<float32> dataΔ1: {
         foreach (var (i, _) in dataΔ1) {
-            dataΔ1[i] = math.Float32frombits(order.Uint32(bs[(int)(4 * i)..]));
+            dataΔ1[i] = math.Float32frombits(order.Uint32(bs.slice(4 * i)));
         }
         break;
     }
     case slice<float64> dataΔ1: {
         foreach (var (i, _) in dataΔ1) {
-            dataΔ1[i] = math.Float64frombits(order.Uint64(bs[(int)(8 * i)..]));
+            dataΔ1[i] = math.Float64frombits(order.Uint64(bs.slice(8 * i)));
         }
         break;
     }
@@ -626,7 +626,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
     }
     case slice<int16> v: {
         foreach (var (i, x) in v) {
-            order.PutUint16(bs[(int)(2 * i)..], (uint16)x);
+            order.PutUint16(bs.slice(2 * i), (uint16)x);
         }
         break;
     }
@@ -640,7 +640,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
     }
     case slice<uint16> v: {
         foreach (var (i, x) in v) {
-            order.PutUint16(bs[(int)(2 * i)..], x);
+            order.PutUint16(bs.slice(2 * i), x);
         }
         break;
     }
@@ -654,7 +654,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
     }
     case slice<int32> v: {
         foreach (var (i, x) in v) {
-            order.PutUint32(bs[(int)(4 * i)..], (uint32)x);
+            order.PutUint32(bs.slice(4 * i), (uint32)x);
         }
         break;
     }
@@ -668,7 +668,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
     }
     case slice<uint32> v: {
         foreach (var (i, x) in v) {
-            order.PutUint32(bs[(int)(4 * i)..], x);
+            order.PutUint32(bs.slice(4 * i), x);
         }
         break;
     }
@@ -682,7 +682,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
     }
     case slice<int64> v: {
         foreach (var (i, x) in v) {
-            order.PutUint64(bs[(int)(8 * i)..], (uint64)x);
+            order.PutUint64(bs.slice(8 * i), (uint64)x);
         }
         break;
     }
@@ -696,7 +696,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
     }
     case slice<uint64> v: {
         foreach (var (i, x) in v) {
-            order.PutUint64(bs[(int)(8 * i)..], x);
+            order.PutUint64(bs.slice(8 * i), x);
         }
         break;
     }
@@ -710,7 +710,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
     }
     case slice<float32> v: {
         foreach (var (i, x) in v) {
-            order.PutUint32(bs[(int)(4 * i)..], math.Float32bits(x));
+            order.PutUint32(bs.slice(4 * i), math.Float32bits(x));
         }
         break;
     }
@@ -724,7 +724,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
     }
     case slice<float64> v: {
         foreach (var (i, x) in v) {
-            order.PutUint64(bs[(int)(8 * i)..], math.Float64bits(x));
+            order.PutUint64(bs.slice(8 * i), math.Float64bits(x));
         }
         break;
     }}
@@ -973,35 +973,35 @@ internal static nint @sizeof(reflectꓸType t) {
 }
 
 [GoRecv] internal static uint16 uint16(this ref decoder d) {
-    var x = d.order.Uint16(d.buf[(int)(d.offset)..(int)(d.offset + 2)]);
+    var x = d.order.Uint16(d.buf.slice(d.offset, d.offset + 2));
     d.offset += 2;
     return x;
 }
 
 [GoRecv] internal static void uint16(this ref encoder e, uint16 x) {
-    e.order.PutUint16(e.buf[(int)(e.offset)..(int)(e.offset + 2)], x);
+    e.order.PutUint16(e.buf.slice(e.offset, e.offset + 2), x);
     e.offset += 2;
 }
 
 [GoRecv] internal static uint32 uint32(this ref decoder d) {
-    var x = d.order.Uint32(d.buf[(int)(d.offset)..(int)(d.offset + 4)]);
+    var x = d.order.Uint32(d.buf.slice(d.offset, d.offset + 4));
     d.offset += 4;
     return x;
 }
 
 [GoRecv] internal static void uint32(this ref encoder e, uint32 x) {
-    e.order.PutUint32(e.buf[(int)(e.offset)..(int)(e.offset + 4)], x);
+    e.order.PutUint32(e.buf.slice(e.offset, e.offset + 4), x);
     e.offset += 4;
 }
 
 [GoRecv] internal static uint64 uint64(this ref decoder d) {
-    var x = d.order.Uint64(d.buf[(int)(d.offset)..(int)(d.offset + 8)]);
+    var x = d.order.Uint64(d.buf.slice(d.offset, d.offset + 8));
     d.offset += 8;
     return x;
 }
 
 [GoRecv] internal static void uint64(this ref encoder e, uint64 x) {
-    e.order.PutUint64(e.buf[(int)(e.offset)..(int)(e.offset + 8)], x);
+    e.order.PutUint64(e.buf.slice(e.offset, e.offset + 8), x);
     e.offset += 8;
 }
 
@@ -1195,7 +1195,7 @@ internal static nint @sizeof(reflectꓸType t) {
 
 [GoRecv] internal static void skip(this ref encoder e, reflectꓸValue v) {
     nint n = dataSize(v);
-    clear(e.buf[(int)(e.offset)..(int)(e.offset + n)]);
+    clear(e.buf.slice(e.offset, e.offset + n));
     e.offset += n;
 }
 
@@ -1284,8 +1284,8 @@ internal static (nint, slice<byte>) intDataSize(any data) {
 // and a slice starting at the original length of buf (that is, buf2[len(buf):]).
 internal static (slice<byte> buf2, slice<byte> pos) ensure(slice<byte> buf, nint n) {
     nint l = len(buf);
-    buf = slices.Grow<slice<byte>, byte>(buf, n)[..(int)(l + n)];
-    return (buf, buf[(int)(l)..]);
+    buf = slices.Grow<slice<byte>, byte>(buf, n).slice(0, l + n);
+    return (buf, buf.slice(l));
 }
 
 } // end binary_package

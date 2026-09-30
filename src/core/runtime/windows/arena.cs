@@ -259,7 +259,7 @@ internal static readonly @string outOfMemoryˢ = "out of memory"u8;
         s = userArenaState.reuse[n].mspan;
         userArenaState.reuse[n].x = default!;
         userArenaState.reuse[n].mspan = default!;
-        userArenaState.reuse = userArenaState.reuse[..(int)(n)];
+        userArenaState.reuse = userArenaState.reuse.slice(0, n);
     }
     unlock(ᏑuserArenaState.of(userArenaStateᴛ1.Ꮡlock));
     if (s == nil) {

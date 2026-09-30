@@ -131,7 +131,7 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) dnsPacketRoundTrip
         // Ignore invalid responses as they may be malicious
         // forgery attempts. Instead continue waiting until
         // timeout. See golang.org/issue/13281.
-        (var h, err) = p.Start(b[..(int)(n)]);
+        (var h, err) = p.Start(b.slice(0, n));
         if (err != default!) {
             continue;
         }
@@ -161,12 +161,12 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) dnsStreamRoundTrip
     if (l > len(b)) {
         b = new slice<byte>(l);
     }
-    var (n, err) = Δio.ReadFull(new ConnᴠReader(c), b[..(int)(l)]);
+    var (n, err) = Δio.ReadFull(new ConnᴠReader(c), b.slice(0, l));
     if (err != default!) {
         return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), err);
     }
     dnsmessage.Parser p = default!;
-    (var h, err) = p.Start(b[..(int)(n)]);
+    (var h, err) = p.Start(b.slice(0, n));
     if (err != default!) {
         return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errCannotUnmarshalDNSMessage);
     }

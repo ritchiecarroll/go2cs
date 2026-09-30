@@ -44,7 +44,7 @@ public static slice<StructField> VisibleFields(ΔType t) {
         }
         j++;
     }
-    return (~w).fields[..(int)(j)];
+    return (~w).fields.slice(0, j);
 }
 
 [GoType] partial struct visibleFieldsWalker {
@@ -103,7 +103,7 @@ public static slice<StructField> VisibleFields(ΔType t) {
                 w.walk(f.Type);
             }
         }
-        w.index = w.index[..(int)(len(w.index) - 1)];
+        w.index = w.index.slice(0, len(w.index) - 1);
     }
     delete(w.visiting, t);
 }

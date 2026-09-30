@@ -32,8 +32,10 @@ using go;
 // and that last one is why the managed slot uses the value 1 for "held" on BOTH flavors: it is what
 // Go's own `locked` and `mutex_locked` are, so a converted `key = 0` still means unlocked and a
 // converted comparison against either constant still reads true.
-// NOT modeled (deliberately, documented): the waiter QUEUE (fairness/FIFO wakeup), lock
-// profiling (lockTimer/mLockProfile), and the m.locks/preempt bookkeeping — getg() is a Go
+// NOT modeled (deliberately, documented): the waiter QUEUE (fairness/FIFO wakeup), lockTimer's
+// TIME half (the per-M waitTime; the metric is charged directly below — lock profiling's mutex-
+// profile half IS modeled, see "runtime-internal lock contention in the MUTEX PROFILE"), and the
+// m.locks/preempt bookkeeping — getg() is a Go
 // compiler intrinsic with no managed realization yet (a [ThreadStatic] g/m model is the future
 // root that unlocks it); when getg lands, the bookkeeping lines return here. Known divergence, CLOSED as a
 // hang (Q54, 2026-09-05): Go's throw() is process-fatal while managed exceptions are catchable, so
@@ -90,6 +92,11 @@ private static readonly bool s_heldLocksReset = GoroutineThreadState.Register(st
         Array.Clear(held);
 
     t_heldCount = 0;
+    // Mirrors the M's mLockProfile, which the next goroutine mints afresh. A stated residual, not a
+    // defect: the managed M is per-goroutine, so cyclesLost still pending when a goroutine exits is
+    // dropped here, where Go's longer-lived M would store it at a later outermost unlock. That is lost-
+    // contention accounting only; the profiled stack itself stores synchronously at the outermost unlock.
+    t_runtimeLockProfilePending = false;
 });
 
 private static void pushHeld(ж<mutex> Ꮡl) {
@@ -175,6 +182,17 @@ public static void GoRuntimeLockProbeUnlock(int which) => unlock2(s_lockProbes[w
 public static void GoRuntimeLockProbeReset(int which) => Interlocked.Exchange(ref s_lockProbes[which].Value.key.Value, 0);
 public static int GoRuntimeLocksHeldByCurrentThread() => t_heldCount;
 
+// The probes through Go's own entry points, runtime.lock and runtime.unlock (-> unlockWithRank -> unlock2),
+// the frames a runtime-lock contention stack starts at; and runtime's GODEBUG runtimecontentionstacks,
+// set and restored (the previous value is returned).
+public static void GoRuntimeLockProbeLockGo(int which) => @lock(s_lockProbes[which]);
+public static void GoRuntimeLockProbeUnlockGo(int which) => unlock(s_lockProbes[which]);
+public static int GoSetRuntimeContentionStacks(int value) {
+    int previous = Ꮡdebug.of(debugᴛ1.ᏑruntimeContentionStacks).Load();
+    Ꮡdebug.of(debugᴛ1.ᏑruntimeContentionStacks).Store(value);
+    return previous;
+}
+
 // ---- contention: WHO IS WAITING, without a waiter chain (COORD ruling 2026-09-22) ----
 //
 // The managed model has no waiter queue, but it does have waiters: a lock2 on its slow path is a
@@ -192,7 +210,7 @@ public static int GoRuntimeLocksHeldByCurrentThread() => t_heldCount;
 // sched.totalRuntimeLockWaitTime (through mLockProfile, sampled 1 in gTrackingPeriod and scaled by
 // it); the managed lock charges every contended wait at its measured length, the same quantity
 // without the sampling. The mutex PROFILE half (mLockProfile's stack sample into the mutex bucket)
-// stays NOT MODELED, as this file's header says.
+// is modeled below lock2/unlock2 (census A3).
 // LAZY, not a static-readonly initializer: runtime_package is partial across many files, a field
 // initializer's order against another file's static init is unspecified, and lock2 is reached from
 // static initialization -- a contended lock2 there must not meet a null table.
@@ -233,6 +251,7 @@ internal static void lock2(ж<mutex> Ꮡl) {
 
     SpinWait spinner = default;
     int64 waitStart = nanotime();
+    int64 tickStart = beginRuntimeLockProfile();
 
     addLockWaiter(Ꮡl);
     try {
@@ -255,18 +274,118 @@ internal static void lock2(ж<mutex> Ꮡl) {
     if (waited > 0 && Ꮡsched is not null && !Ꮡsched.IsNilPointer) {
         Ꮡsched.of(schedt.ᏑtotalRuntimeLockWaitTime).Add(waited);
     }
+    if (tickStart != 0) {
+        endRuntimeLockProfile(Ꮡl, tickStart);
+    }
     pushHeld(Ꮡl);
 }
 
 // We might not be holding a p in this code.
+//
+// NoInlining: unlock2 is one of the frames recordRuntimeLockUnlock's fixed skip counts (as
+// unlockWithRank and unlock are, which the converter emits NoInlining for that reason), and under
+// Release TieredCompilation=0 the JIT otherwise folds it into unlockWithRank, the walk loses its
+// frame, and the mutex-profile stack starts one frame past runtime.unlock (measured, census A3).
+[MethodImpl(MethodImplOptions.NoInlining)]
 internal static void unlock2(ж<mutex> Ꮡl) {
     ref var l = ref Ꮡl.Value;
+
+    // The held depth BEFORE the release: Go's m.locks at the point its unlock2 calls recordUnlock
+    // (1 = the outermost runtime lock this thread holds). See recordRuntimeLockUnlock for why the
+    // managed held count stands in for m.locks.
+    int depth = t_heldCount;
 
     // No waiter chain to dequeue and nobody parked to wake — release the slot; a spinning lock2
     // observes it. The futex flavor's mutex_sleeping state has no managed counterpart for the same
     // reason: nothing ever sleeps on the slot.
     popHeld(Ꮡl);
     Interlocked.Exchange(ref l.key.Value, 0);
+
+    // Go's unlock2 calls recordUnlock after the release. The early-out is one thread-static read:
+    // an uncontended unlock, or any unlock while the mutex profile is off, goes no further.
+    if (t_runtimeLockProfilePending) {
+        recordRuntimeLockUnlock(Ꮡl, depth);
+    }
+}
+
+// ---- runtime-internal lock contention in the MUTEX PROFILE (census A3; G's design, i9's cut) ----
+//
+// Go's split (lock_spinbit.go lock2/unlock2, mprof.go lockTimer and mLockProfile): the WAITER charges
+// its contended acquire to its M's mLockProfile (lockTimer.end -> recordLock), and that SAME M's later
+// unlock of the lock captures the stack there, starting at runtime.unlock (recordUnlock ->
+// captureStack), and its outermost unlock stores it in the mutex bucket (store). One event per sampled
+// contended acquire; runtime's TestRuntimeLockMetricsAndProfile/runtime.lock/sample-1 counts exactly 200
+// at [runtime.unlock, its closure, (*contentionWorker).run].
+//
+// What is managed, and why:
+// - The lockTimer's TICK half only (the mutex profile's sample, 1 in mutexprofilerate): its TIME half
+//   feeds m.mLockProfile.waitTime, which the metric never reads here (totalMutexWaitTimeNanos drops
+//   the allm walk) -- the metric is charged above, every contended wait at its measured length.
+// - The held depth is t_heldCount, NOT m.locks: the managed lock2 does not return the m.locks
+//   bookkeeping (this file's header), and m.locks also rises on acquirem, so "m.locks == 1" would not
+//   mean "the outermost runtime lock". recordUnlock's store condition keys on the held depth instead.
+// - The stack is taken by the managed walk (callers), not Go's unwinder, into mLockProfile.stack,
+//   which the managed getg's per-goroutine M never initializes (no mProfStackInit): it is allocated
+//   LAZILY on the first capture, never on every M at mint.
+// - The early-out: t_runtimeLockProfilePending is set only when recordLock has something to carry to
+//   an unlock, so with the mutex profile off (rate 0) no lock2 samples and no unlock2 looks further.
+// The converted recordLock and store run as Go wrote them; recordUnlock and captureStack are the two
+// halves that read m.locks and the native unwinder, so their managed forms are below.
+
+[ThreadStatic] private static bool t_runtimeLockProfilePending;
+
+// lockTimer.begin's tick half: sample this contended acquire for the mutex profile, 1 in
+// mutexprofilerate. Returns the start tick, or 0 when not sampled (always 0 with the profile off).
+private static int64 beginRuntimeLockProfile() {
+    var rate = (int64)@internal.runtime.atomic_package.Load64(Ꮡmutexprofilerate);
+    if (rate > 0 && rem((int64)cheaprand(), rate) == 0) {
+        return cputicks();
+    }
+    return 0;
+}
+
+// lockTimer.end's tick half: charge the sampled wait to this M's mLockProfile (recordLock).
+private static void endRuntimeLockProfile(ж<mutex> Ꮡl, int64 tickStart) {
+    var gp = getg();
+    (~gp).m.of(m.ᏑmLockProfile).recordLock(cputicks() - tickStart, Ꮡl);
+    t_runtimeLockProfilePending = true;
+}
+
+// recordUnlock, with captureStack inlined into it so the walk's frame count is Go's: callers' skip 0 is
+// this frame (Go's recordUnlock), 1 unlock2, 2 unlockWithRank, and 3 runtime.unlock -- Go's `skip := 3`.
+// NoInlining keeps this frame counted; unlock2 is a skip-counted walker to the converter
+// (computeNoInliningClosure), so unlockWithRank and unlock are emitted NoInlining too.
+[MethodImpl(MethodImplOptions.NoInlining)]
+private static void recordRuntimeLockUnlock(ж<mutex> Ꮡl, int depth) {
+    var gp = getg();
+    ж<mLockProfile> Ꮡprof = (~gp).m.of(m.ᏑmLockProfile);
+    ref var prof = ref Ꮡprof.Value;
+
+    if ((uintptr)Ꮡl == prof.pending && debug.profstackdepth != 0) {
+        // captureStack (debug.profstackdepth == 0 records no stack, as Go returns early)
+        if (len(prof.stack) == 0) {
+            prof.stack = new slice<uintptr>(1 + (int)maxSkip + (int)debug.profstackdepth);
+        }
+        prof.pending = 0;
+        prof.haveStack = true;
+        prof.stack[0] = logicalStackSentinel;
+        if (Ꮡdebug.of(debugᴛ1.ᏑruntimeContentionStacks).Load() == 0) {
+            prof.stack[1] = @internal.abi_package.FuncPCABIInternal(_LostContendedRuntimeLock) + (uintptr)@internal.runtime.sys_package.PCQuantum;
+            prof.stack[2] = 0;
+        }
+        else {
+            nint nstk = 1 + callers(3, prof.stack[1..]);
+            if (nstk < len(prof.stack)) {
+                prof.stack[nstk] = 0;
+            }
+        }
+    }
+    if (depth == 1 && prof.haveStack) {
+        prof.store();
+    }
+    if (prof.pending == 0 && !prof.haveStack && prof.cycles == 0 && prof.cyclesLost == 0) {
+        t_runtimeLockProfilePending = false;
+    }
 }
 
 // go1.24's lock_spinbit.go splits the tail of unlock2 into this helper: it walks the sleeping-M stack

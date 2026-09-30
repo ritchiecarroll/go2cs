@@ -30,7 +30,7 @@ internal static void readServices() {
             // "http 80/tcp www www-http # World Wide Web HTTP"
             {
                 nint i = bytealg.IndexByteString(line, (rune)'#'); if (i >= 0) {
-                    line = line[..(int)(i)];
+                    line = line.slice(0, i);
                 }
             }
             var f = getFields(line);
@@ -42,7 +42,7 @@ internal static void readServices() {
             if (!okΔ1 || port <= 0 || j >= len(portnet) || portnet[j] != (rune)'/') {
                 continue;
             }
-            @string netw = portnet[(int)(j + 1)..]; // "tcp"
+            @string netw = portnet.slice(j + 1); // "tcp"
             var (m, ok1) = services[netw, ꟷ];
             if (!ok1) {
                 m = new map<@string, nint>();

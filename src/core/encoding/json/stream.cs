@@ -69,7 +69,7 @@ public static error Decode(this ж<Decoder> Ꮡdec, any v) {
     if (err != default!) {
         return err;
     }
-    Ꮡdec.of(Decoder.Ꮡd).init(dec.buf[(int)(dec.scanp)..(int)(dec.scanp + n)]);
+    Ꮡdec.of(Decoder.Ꮡd).init(dec.buf.slice(dec.scanp, dec.scanp + n));
     dec.scanp += n;
     // Don't save err from unmarshal into dec.err:
     // the connection is still usable since we read a complete JSON
@@ -83,7 +83,7 @@ public static error Decode(this ж<Decoder> Ꮡdec, any v) {
 // Buffered returns a reader of the data remaining in the Decoder's
 // buffer. The reader is valid until the next call to [Decoder.Decode].
 [GoRecv] public static io.Reader Buffered(this ref Decoder dec) {
-    return new bytes_ReaderжReader(bytes.NewReader(dec.buf[(int)(dec.scanp)..]));
+    return new bytes_ReaderжReader(bytes.NewReader(dec.buf.slice(dec.scanp)));
 }
 
 // readValue reads a JSON value into dec.buf.
@@ -153,8 +153,8 @@ break_Input:;
     // First slide down data already consumed.
     if (dec.scanp > 0) {
         dec.scanned += (int64)dec.scanp;
-        nint nΔ1 = copy(dec.buf, dec.buf[(int)(dec.scanp)..]);
-        dec.buf = dec.buf[..(int)(nΔ1)];
+        nint nΔ1 = copy(dec.buf, dec.buf.slice(dec.scanp));
+        dec.buf = dec.buf.slice(0, nΔ1);
         dec.scanp = 0;
     }
     // Grow buffer if not large enough.
@@ -165,8 +165,8 @@ break_Input:;
         dec.buf = newBuf;
     }
     // Read. Delay error for next iteration (after scan).
-    var (n, err) = dec.r.Read(dec.buf[(int)(len(dec.buf))..(int)(cap(dec.buf))]);
-    dec.buf = dec.buf[0..(int)(len(dec.buf) + n)];
+    var (n, err) = dec.r.Read(dec.buf.slice(len(dec.buf), cap(dec.buf)));
+    dec.buf = dec.buf.slice(0, len(dec.buf) + n);
     return err;
 }
 
@@ -394,7 +394,7 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             }
             dec.scanp++;
             dec.tokenState = dec.tokenStack[len(dec.tokenStack) - 1];
-            dec.tokenStack = dec.tokenStack[..(int)(len(dec.tokenStack) - 1)];
+            dec.tokenStack = dec.tokenStack.slice(0, len(dec.tokenStack) - 1);
             dec.tokenValueEnd();
             return (((Delim)(rune)']'), default!);
         }
@@ -413,7 +413,7 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             }
             dec.scanp++;
             dec.tokenState = dec.tokenStack[len(dec.tokenStack) - 1];
-            dec.tokenStack = dec.tokenStack[..(int)(len(dec.tokenStack) - 1)];
+            dec.tokenStack = dec.tokenStack.slice(0, len(dec.tokenStack) - 1);
             dec.tokenValueEnd();
             return (((Delim)(rune)'}'), default!);
         }

@@ -47,7 +47,7 @@ public static slice<byte> Expand<H>(Func<H> h, slice<byte> pseudorandomKey, @str
         buf = expander.Sum(buf[..0]);
         nint remain = keyLen - len(@out);
         remain = min(remain, len(buf));
-        @out = appendꓸꓸꓸ(@out, buf[..(int)(remain)]);
+        @out = appendꓸꓸꓸ(@out, buf.slice(0, remain));
     }
     return @out;
 }

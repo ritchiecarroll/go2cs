@@ -94,7 +94,7 @@ public static slice<uint16> Encode(slice<rune> s) {
     }
     // normal rune
     // needs surrogate sequence
-    return a[..(int)(n)];
+    return a.slice(0, n);
 }
 
 // AppendRune appends the UTF-16 encoding of the Unicode code point r

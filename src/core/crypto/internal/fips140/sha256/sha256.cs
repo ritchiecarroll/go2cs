@@ -72,7 +72,7 @@ internal const nint marshaledSize = /* len(magic256) + 8*4 + chunk + 8 */ 108;
     b = byteorder.BEAppendUint32(b, d.h[5]);
     b = byteorder.BEAppendUint32(b, d.h[6]);
     b = byteorder.BEAppendUint32(b, d.h[7]);
-    b = appendꓸꓸꓸ(b, d.x[..(int)(d.nx)]);
+    b = appendꓸꓸꓸ(b, d.x.slice(0, d.nx));
     b = appendꓸꓸꓸ(b, makeꓸꓸꓸ<byte>(len(d.x) - d.nx));
     b = byteorder.BEAppendUint64(b, d.len);
     return (b, default!);
@@ -98,7 +98,7 @@ private static readonly @string cryptoSha256InvalidHashˢ2 = "crypto/sha256: inv
     (b, d.h[5]) = consumeUint32(b);
     (b, d.h[6]) = consumeUint32(b);
     (b, d.h[7]) = consumeUint32(b);
-    b = b[(int)(copy(d.x[..], b))..];
+    b = b.slice(copy(d.x[..], b));
     (b, d.len) = consumeUint64(b);
     d.nx = (nint)(d.len % (uint64)chunk);
     return default!;
@@ -170,18 +170,18 @@ public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
     nn = len(p);
     d.len += (uint64)nn;
     if (d.nx > 0) {
-        nint n = copy(d.x[(int)(d.nx)..], p);
+        nint n = copy(d.x.slice(d.nx), p);
         d.nx += n;
         if (d.nx == chunk) {
             block(ref (Ꮡd).DerefOrNull(), d.x[..]);
             d.nx = 0;
         }
-        p = p[(int)(n)..];
+        p = p.slice(n);
     }
     if (len(p) >= chunk) {
         nint n = (nint)(len(p) & ~(nint)(chunk - 1));
-        block(ref (Ꮡd).DerefOrNull(), p[..(int)(n)]);
-        p = p[(int)(n)..];
+        block(ref (Ꮡd).DerefOrNull(), p.slice(0, n));
+        p = p.slice(n);
     }
     if (len(p) > 0) {
         d.nx = copy(d.x[..], p);
@@ -216,8 +216,8 @@ internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
     }
     // Length in bits.
     len <<= (int)(3);
-    var padlen = tmp[..(int)(t + 8)];
-    byteorder.BEPutUint64(padlen[(int)(t + 0)..], len);
+    var padlen = tmp.slice(0, (nint)(t + 8));
+    byteorder.BEPutUint64(padlen.slice((nint)(t + 0)), len);
     Ꮡd.Write(padlen);
     if (d.nx != 0) {
         throw panic("d.nx != 0");

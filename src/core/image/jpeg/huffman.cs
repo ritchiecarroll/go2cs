@@ -136,7 +136,7 @@ internal static readonly @string huffmanTableHasExcessiveˢ = "Huffman table has
             return ((FormatError)(@string)dhtHasWrongLengthˢ);
         }
         {
-            var err = d.readFull((~h).vals[..(int)((~h).nCodes)]); if (err != default!) {
+            var err = d.readFull((~h).vals.slice(0, (~h).nCodes)); if (err != default!) {
                 return err;
             }
         }

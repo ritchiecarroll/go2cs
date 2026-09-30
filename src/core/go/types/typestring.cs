@@ -582,13 +582,13 @@ internal static @string subscript(uint64 x) {
     nint i = len(buf);
     while (ᐧ) {
         i -= w;
-        utf8.EncodeRune(buf[(int)(i)..], (rune)'₀' + (rune)(x % 10)); // '₀' == U+2080
+        utf8.EncodeRune(buf.slice(i), (rune)'₀' + (rune)(x % 10)); // '₀' == U+2080
         x /= 10;
         if (x == 0) {
             break;
         }
     }
-    return ((@string)(buf[(int)(i)..]));
+    return ((@string)(buf.slice(i)));
 }
 
 } // end types_package

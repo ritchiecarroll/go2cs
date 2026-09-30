@@ -176,9 +176,11 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			// A PACKAGE-LEVEL var initializer (`var debug = template.Must(template.New("RPC
 			// debug").Parse(debugText))`, net/rpc debug.go) has no statement sink at all; the
 			// spill becomes a hidden once-evaluated static tuple FIELD flushed before the
-			// var's own field (mirroring visitPackageTupleVarSpec's holder emission).
+			// var's own field (mirroring visitPackageTupleVarSpec's holder emission). A RELOCATED
+			// var's initializer runs in its init method instead, so the spill stays a statement
+			// there (see globalDeclHoistStatements).
 			tupleHoist = v.globalDeclHoist
-			globalFieldHoist = true
+			globalFieldHoist = !v.globalDeclHoistStatements
 		}
 
 		if len(exprs) == 1 && callArgs == nil && !spreadArg && tupleHoist != nil {

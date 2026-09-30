@@ -196,7 +196,7 @@ nextCheck:
             continue;
         }
         else if (AreEqual(exprᴛ1, driver.ErrRemoveArgument)) {
-            nvargs = nvargs[..(int)(len(nvargs) - 1)];
+            nvargs = nvargs.slice(0, len(nvargs) - 1);
             continue;
         }
         else if (AreEqual(exprᴛ1, driver.ErrSkip)) {

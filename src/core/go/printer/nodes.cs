@@ -1175,7 +1175,7 @@ internal static ж<ast.BasicLit> normalizedNumber(ж<ast.BasicLit> Ꮡlit) {
  // remove leading 0's from integer (but not floating-point) imaginary literals
  // possibly a hexadecimal float
  (rune)'P'); if (i >= 0) {
-                x = x[..(int)(i)] + "p" + x[(int)(i + 1)..];
+                x = x.slice(0, i) + "p" + x.slice(i + 1);
             }
         }
     }
@@ -1185,7 +1185,7 @@ internal static ж<ast.BasicLit> normalizedNumber(ж<ast.BasicLit> Ꮡlit) {
         if (i == -1) {
             return Ꮡlit; // nothing to do
         }
-        x = x[..(int)(i)] + "p" + x[(int)(i + 1)..];
+        x = x.slice(0, i) + "p" + x.slice(i + 1);
     }
     else if (exprᴛ1 == "0O"u8) {
         x = "0o" + x[2..];
@@ -1203,7 +1203,7 @@ internal static ж<ast.BasicLit> normalizedNumber(ж<ast.BasicLit> Ꮡlit) {
         do {
             {
                 nint i = strings.LastIndexByte(x, (rune)'E'); if (i >= 0) {
-                    x = x[..(int)(i)] + "e" + x[(int)(i + 1)..];
+                    x = x.slice(0, i) + "e" + x.slice(i + 1);
                     break;
                 }
             }

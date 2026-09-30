@@ -79,7 +79,7 @@ public static void XORKeyStreamAt(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte
     if (len(dst) < len(src)) {
         throw panic("crypto/aes: len(dst) < len(src)");
     }
-    dst = dst[..(int)(len(src))];
+    dst = dst.slice(0, len(src));
     if (alias.InexactOverlap(dst, src)) {
         throw panic("crypto/aes: invalid buffer overlap");
     }
@@ -90,11 +90,11 @@ public static void XORKeyStreamAt(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte
             // We have a partial block at the beginning.
             ref var @in = ref heap(new array<byte>(16), out var Ꮡin);
             ref var @out = ref heap(new array<byte>(16), out var Ꮡout);
-            copy(@in[(int)(blockOffset)..], src);
+            copy(@in.slice((nint)(blockOffset)), src);
             ctrBlocks1(ref nonnil(ref c).b, Ꮡout, Ꮡin, ivlo, ivhi);
-            nint n = copy(dst, @out[(int)(blockOffset)..]);
-            src = src[(int)(n)..];
-            dst = dst[(int)(n)..];
+            nint n = copy(dst, @out.slice((nint)(blockOffset)));
+            src = src.slice(n);
+            dst = dst.slice(n);
             (ivlo, ivhi) = add128(ivlo, ivhi, 1);
         }
     }
@@ -140,10 +140,10 @@ public static void XORKeyStreamAt(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte
 internal static void ctrBlocks(ref Block b, slice<byte> dst, slice<byte> src, uint64 ivlo, uint64 ivhi) {
     var buf = new slice<byte>(len(src), 8 * ΔBlockSize);
     for (nint i = 0; i < len(buf); i += ΔBlockSize) {
-        byteorder.BEPutUint64(buf[(int)(i)..], ivhi);
-        byteorder.BEPutUint64(buf[(int)(i + 8)..], ivlo);
+        byteorder.BEPutUint64(buf.slice(i), ivhi);
+        byteorder.BEPutUint64(buf.slice(i + 8), ivlo);
         (ivlo, ivhi) = add128(ivlo, ivhi, 1);
-        encryptBlock(ref b, buf[(int)(i)..], buf[(int)(i)..]);
+        encryptBlock(ref b, buf.slice(i), buf.slice(i));
     }
     // XOR into buf first, in case src and dst overlap (see above).
     subtle.XORBytes(buf, src, buf);

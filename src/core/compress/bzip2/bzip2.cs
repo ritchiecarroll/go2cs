@@ -170,7 +170,7 @@ internal static (nint, error) read(this ж<reader> Ꮡbz2, slice<byte> buf) {
     while (ᐧ) {
         nint n = bz2.readFromBlock(buf);
         if (n > 0 || len(buf) == 0) {
-            bz2.blockCRC = updateCRC(bz2.blockCRC, buf[..(int)(n)]);
+            bz2.blockCRC = updateCRC(bz2.blockCRC, buf.slice(0, n));
             return (n, default!);
         }
         // End of block. Check CRC.
@@ -437,7 +437,7 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
     }
     // We have completed the entropy decoding. Now we can perform the
     // inverse BWT and setup the RLE buffer.
-    bz2.preRLE = bz2.tt[..(int)(bufIndex)];
+    bz2.preRLE = bz2.tt.slice(0, bufIndex);
     bz2.preRLEUsed = 0;
     bz2.tPos = inverseBWT(bz2.preRLE, origPtr, bz2.c[..]);
     bz2.lastByte = -1;

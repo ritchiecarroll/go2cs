@@ -159,7 +159,7 @@ internal static bool hasByte(@string s, byte b) {
 
     var pc = new slice<uintptr>(64);
     nint n = runtime.Callers(0, pc);
-    var frames = runtime.CallersFrames(pc[..(int)(n)]);
+    var frames = runtime.CallersFrames(pc.slice(0, n));
     while (ᐧ) {
         var (frame, more) = frames.Next();
         if (len(frame.File) > 0) {
@@ -186,7 +186,7 @@ internal static bool hasByte(@string s, byte b) {
             }
         }
     }
-    return @file[(int)(cut)..];
+    return @file.slice(cut);
 }
 
 [MethodImpl(MethodImplOptions.NoInlining)] internal static bool callerFileRooted() {
@@ -200,7 +200,7 @@ internal static bool hasByte(@string s, byte b) {
 [MethodImpl(MethodImplOptions.NoInlining)] internal static bool stackHasBackslash() {
     var buf = new slice<byte>(8192);
     nint n = runtime.Stack(buf, false);
-    return hasByte(((@string)(buf[..(int)(n)])), (rune)'\\');
+    return hasByte(((@string)(buf.slice(0, n))), (rune)'\\');
 }
 
 internal static bool hasSub(@string s, @string sub) {
@@ -222,7 +222,7 @@ internal static bool hasSub(@string s, @string sub) {
 [MethodImpl(MethodImplOptions.NoInlining)] internal static @string stackText() {
     var buf = new slice<byte>(8192);
     nint n = runtime.Stack(buf, false);
-    return ((@string)(buf[..(int)(n)]));
+    return ((@string)(buf.slice(0, n)));
 }
 
 [GoType("num:nint")] partial struct recvT;

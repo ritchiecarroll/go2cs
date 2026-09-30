@@ -27,7 +27,7 @@ internal static void minimizeBytes(slice<byte> v, Func<slice<byte>, bool> @try, 
                 if (shouldStop()) {
                     return;
                 }
-                var candidate = v[..(int)(len(v) - n)];
+                var candidate = v.slice(0, len(v) - n);
                 if (!@try(candidate)) {
                     break;
                 }
@@ -40,34 +40,34 @@ internal static void minimizeBytes(slice<byte> v, Func<slice<byte>, bool> @try, 
             if (shouldStop()) {
                 return;
             }
-            var candidate = tmp[..(int)(len(v) - 1)];
-            copy(candidate[..(int)(i)], v[..(int)(i)]);
-            copy(candidate[(int)(i)..], v[(int)(i + 1)..]);
+            var candidate = tmp.slice(0, len(v) - 1);
+            copy(candidate.slice(0, i), v.slice(0, i));
+            copy(candidate.slice(i), v.slice(i + 1));
             if (!@try(candidate)) {
                 continue;
             }
             // Update v to delete the value at index i.
-            copy(v[(int)(i)..], v[(int)(i + 1)..]);
-            v = v[..(int)(len(candidate))];
+            copy(v.slice(i), v.slice(i + 1));
+            v = v.slice(0, len(candidate));
             // v[i] is now different, so decrement i to redo this iteration
             // of the loop with the new value.
             i--;
         }
         // Then, try to remove each possible subset of bytes.
         for (nint i = 0; i < len(v) - 1; i++) {
-            copy(tmp, v[..(int)(i)]);
+            copy(tmp, v.slice(0, i));
             for (nint j = len(v); j > i + 1; j--) {
                 if (shouldStop()) {
                     return;
                 }
-                var candidate = tmp[..(int)(len(v) - j + i)];
-                copy(candidate[(int)(i)..], v[(int)(j)..]);
+                var candidate = tmp.slice(0, len(v) - j + i);
+                copy(candidate.slice(i), v.slice(j));
                 if (!@try(candidate)) {
                     continue;
                 }
                 // Update v and reset the loop with the new length.
-                copy(v[(int)(i)..], v[(int)(j)..]);
-                v = v[..(int)(len(candidate))];
+                copy(v.slice(i), v.slice(j));
+                v = v.slice(0, len(candidate));
                 j = len(v);
             }
         }

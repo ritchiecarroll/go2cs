@@ -178,7 +178,7 @@ internal static Ordering calculateOrdering(slice<level> levels, slice<rune> rune
         }
         if (curDir != prevDir) {
             if (i > 0) {
-                o.runes = append(o.runes, runes[(int)(prevI)..(int)(i)]);
+                o.runes = append(o.runes, runes.slice(prevI, i));
                 o.directions = append(o.directions, prevDir);
                 o.startpos = append(o.startpos, prevI);
             }
@@ -186,7 +186,7 @@ internal static Ordering calculateOrdering(slice<level> levels, slice<rune> rune
             prevDir = curDir;
         }
     }
-    o.runes = append(o.runes, runes[(int)(prevI)..]);
+    o.runes = append(o.runes, runes.slice(prevI));
     o.directions = append(o.directions, prevDir);
     o.startpos = append(o.startpos, prevI);
     return o;
@@ -218,13 +218,13 @@ public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
 // Line computes the visual ordering of runs for a single line starting and
 // ending at the given positions in the original text.
 [GoRecv] public static (Ordering, error) Line(this ref Paragraph p, nint start, nint end) {
-    var lineTypes = p.types[(int)(start)..(int)(end)];
-    var (para, err) = newParagraph(lineTypes, p.pairTypes[(int)(start)..(int)(end)], p.pairValues[(int)(start)..(int)(end)], (level)(-1));
+    var lineTypes = p.types.slice(start, end);
+    var (para, err) = newParagraph(lineTypes, p.pairTypes.slice(start, end), p.pairValues.slice(start, end), (level)(-1));
     if (err != default!) {
         return (new Ordering(nil), err);
     }
     var levels = para.getLevels(new nint[]{len(lineTypes)}.slice());
-    var o = calculateOrdering(levels, p.runes[(int)(start)..(int)(end)]);
+    var o = calculateOrdering(levels, p.runes.slice(start, end));
     return (o, default!);
 }
 
@@ -315,7 +315,7 @@ public static slice<byte> AppendReverse(slice<byte> @out, slice<byte> @in) {
     for ((nint i, nint j) = (0, len(inRunes) - 1); i < j; (i, j) = (i + 1, j - 1)) {
         (inRunes[i], inRunes[j]) = (inRunes[j], inRunes[i]);
     }
-    copy(ret[(int)(len(@out))..], ((@string)inRunes));
+    copy(ret.slice(len(@out)), ((@string)inRunes));
     return ret;
 }
 

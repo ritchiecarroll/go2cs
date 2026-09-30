@@ -67,7 +67,7 @@ internal static ж<stringFinder> makeStringFinder(@string pattern) {
     // pattern.
     nint lastPrefix = last;
     for (nint i = last; i >= 0; i--) {
-        if (HasPrefix(pattern, pattern[(int)(i + 1)..])) {
+        if (HasPrefix(pattern, pattern.slice(i + 1))) {
             lastPrefix = i + 1;
         }
         // lastPrefix is the shift, and (last-i) is len(suffix).
@@ -75,7 +75,7 @@ internal static ж<stringFinder> makeStringFinder(@string pattern) {
     }
     // Second pass: find repeats of pattern's suffix starting from the front.
     for (nint i = 0; i < last; i++) {
-        nint lenSuffix = longestCommonSuffix(pattern, pattern[1..(int)(i + 1)]);
+        nint lenSuffix = longestCommonSuffix(pattern, pattern.slice(1, i + 1));
         if (pattern[i - lenSuffix] != pattern[last - lenSuffix]) {
             // (last-i) is the shift, and lenSuffix is len(suffix).
             f.Value.goodSuffixSkip[last - lenSuffix] = lenSuffix + last - i;

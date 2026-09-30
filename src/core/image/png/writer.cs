@@ -198,9 +198,9 @@ internal static readonly @string tRNSˢ = "tRNS"u8;
         }
         e.tmp[3 * 256 + i] = c1.A;
     }
-    e.writeChunk(e.tmp[..(int)(3 * len(p))], plteˢ);
+    e.writeChunk(e.tmp.slice(0, 3 * len(p)), plteˢ);
     if (last != -1) {
-        e.writeChunk(e.tmp[(int)(3 * 256)..(int)(3 * 256 + 1 + last)], tRNSˢ);
+        e.writeChunk(e.tmp.slice(3 * 256, 3 * 256 + 1 + last), tRNSˢ);
     }
 }
 
@@ -369,7 +369,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
             if (cap(e.cr[i]) < sz){
                 e.cr[i] = new slice<uint8>(sz);
             } else {
-                e.cr[i] = e.cr[i][..(int)(sz)];
+                e.cr[i] = e.cr[i].slice(0, sz);
             }
             e.cr[i][0] = (uint8)i;
         }
@@ -377,7 +377,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
         if (cap(e.pr) < sz){
             e.pr = new slice<uint8>(sz);
         } else {
-            e.pr = e.pr[..(int)(sz)];
+            e.pr = e.pr.slice(0, sz);
             clear(e.pr);
         }
         var pr = e.pr;
@@ -392,7 +392,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
             if (exprᴛ2 == cbG8) {
                 if (gray != nil){
                     nint offset = (y - b.Min.Y) * (~gray).Stride;
-                    copy(cr[0][1..], (~gray).Pix[(int)(offset)..(int)(offset + b.Dx())]);
+                    copy(cr[0][1..], (~gray).Pix.slice(offset, offset + b.Dx()));
                 } else {
                     for (nint x = b.Min.X; x < b.Max.X; x++) {
                         var c = color.GrayModel.Convert(m.At(x, y))._<color.Gray>();
@@ -434,7 +434,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
             else if (exprᴛ2 == cbP8) {
                 if (paletted != nil){
                     nint offset = (y - b.Min.Y) * (~paletted).Stride;
-                    copy(cr[0][1..], (~paletted).Pix[(int)(offset)..(int)(offset + b.Dx())]);
+                    copy(cr[0][1..], (~paletted).Pix.slice(offset, offset + b.Dx()));
                 } else {
                     var pi = m._<image.PalettedImage>();
                     for (nint x = b.Min.X; x < b.Max.X; x++) {
@@ -469,11 +469,11 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
             else if (exprᴛ2 == cbTCA8) {
                 if (nrgba != nil){
                     nint offset = (y - b.Min.Y) * (~nrgba).Stride;
-                    copy(cr[0][1..], (~nrgba).Pix[(int)(offset)..(int)(offset + b.Dx() * 4)]);
+                    copy(cr[0][1..], (~nrgba).Pix.slice(offset, offset + b.Dx() * 4));
                 } else 
                 if (rgba != nil){
                     var dst = cr[0][1..];
-                    var src = (~rgba).Pix[(int)(rgba.PixOffset(b.Min.X, y))..(int)(rgba.PixOffset(b.Max.X, y))];
+                    var src = (~rgba).Pix.slice(rgba.PixOffset(b.Min.X, y), rgba.PixOffset(b.Max.X, y));
                     for (; len(src) >= 4; (dst, src) = (dst[4..], src[4..])) {
                         var d = Ꮡ(array<byte>.Alias(dst, 4));
                         var s = Ꮡ(array<byte>.Alias(src, 4));

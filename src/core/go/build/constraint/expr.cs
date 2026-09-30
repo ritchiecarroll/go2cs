@@ -193,7 +193,7 @@ internal static readonly @string goBuildˢ = "//go:build"u8;
 internal static (@string expr, bool ok) splitGoBuild(@string line) {
     // A single trailing newline is OK; otherwise multiple lines are not.
     if (len(line) > 0 && line[len(line) - 1] == (rune)'\n') {
-        line = line[..(int)(len(line) - 1)];
+        line = line.slice(0, len(line) - 1);
     }
     if (strings.Contains(line, "\n"u8)) {
         return ("", false);
@@ -370,7 +370,7 @@ internal static Expr atom(this ж<exprParser> Ꮡp) {
     case (rune)'(' or (rune)')' or (rune)'!': {
         p.pos = p.i;
         p.i++;
-        p.tok = p.s[(int)(p.pos)..(int)(p.i)];
+        p.tok = p.s.slice(p.pos, p.i);
         return;
     }
     case (rune)'&' or (rune)'|': {
@@ -379,24 +379,24 @@ internal static Expr atom(this ж<exprParser> Ꮡp) {
         }
         p.pos = p.i;
         p.i += 2;
-        p.tok = p.s[(int)(p.pos)..(int)(p.i)];
+        p.tok = p.s.slice(p.pos, p.i);
         return;
     }}
 
-    @string tag = p.s[(int)(p.i)..];
+    @string tag = p.s.slice(p.i);
     foreach (var (i, c) in tag) {
         if (!unicode.IsLetter(c) && !unicode.IsDigit(c) && c != (rune)'_' && c != (rune)'.') {
-            tag = tag[..(int)(i)];
+            tag = tag.slice(0, i);
             break;
         }
     }
     if (tag == ""u8) {
-        var (c, _) = utf8.DecodeRuneInString(p.s[(int)(p.i)..]);
+        var (c, _) = utf8.DecodeRuneInString(p.s.slice(p.i));
         throw panic(Ꮡ(new SyntaxError(Offset: p.i, Err: "invalid syntax at "u8 + ((@string)c))));
     }
     p.pos = p.i;
     p.i += len(tag);
-    p.tok = p.s[(int)(p.pos)..(int)(p.i)];
+    p.tok = p.s.slice(p.pos, p.i);
     p.isTag = true;
 }
 
@@ -415,7 +415,7 @@ internal static readonly @string buildˢ = "+build"u8;
 internal static (@string expr, bool ok) splitPlusBuild(@string line) {
     // A single trailing newline is OK; otherwise multiple lines are not.
     if (len(line) > 0 && line[len(line) - 1] == (rune)'\n') {
-        line = line[..(int)(len(line) - 1)];
+        line = line.slice(0, len(line) - 1);
     }
     if (strings.Contains(line, "\n"u8)) {
         return ("", false);

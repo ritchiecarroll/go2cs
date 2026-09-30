@@ -25,7 +25,7 @@ partial class cipher_package {
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }
-    if (alias.InexactOverlap(dst[..(int)(len(src))], src)) {
+    if (alias.InexactOverlap(dst.slice(0, len(src)), src)) {
         throw panic("crypto/cipher: invalid buffer overlap");
     }
     while (len(src) > 0) {
@@ -38,14 +38,14 @@ partial class cipher_package {
             // keystream on decryption. This will allow
             // larger batches for xor, and we should be
             // able to match CTR/OFB performance.
-            copy(x.next[(int)(x.outUsed)..], src);
+            copy(x.next.slice(x.outUsed), src);
         }
-        nint n = subtle.XORBytes(dst, src, x.@out[(int)(x.outUsed)..]);
+        nint n = subtle.XORBytes(dst, src, x.@out.slice(x.outUsed));
         if (!x.decrypt) {
-            copy(x.next[(int)(x.outUsed)..], dst);
+            copy(x.next.slice(x.outUsed), dst);
         }
-        dst = dst[(int)(n)..];
-        src = src[(int)(n)..];
+        dst = dst.slice(n);
+        src = src.slice(n);
         x.outUsed += n;
     }
 }

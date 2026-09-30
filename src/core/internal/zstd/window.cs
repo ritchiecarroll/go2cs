@@ -44,25 +44,25 @@ partial class zstd_package {
     }
     if (builtin.len(buf) >= w.size) {
         nint from = builtin.len(buf) - w.size;
-        w.data = appendꓸꓸꓸ(w.data[..0], buf[(int)(from)..]);
+        w.data = appendꓸꓸꓸ(w.data[..0], buf.slice(from));
         w.off = 0;
         return;
     }
     // Update off to point to the oldest remaining byte.
     nint free = w.size - builtin.len(w.data);
     if (free == 0){
-        nint n = copy(w.data[(int)(w.off)..], buf);
+        nint n = copy(w.data.slice(w.off), buf);
         if (n == builtin.len(buf)){
             w.off += n;
         } else {
-            w.off = copy(w.data, buf[(int)(n)..]);
+            w.off = copy(w.data, buf.slice(n));
         }
     } else {
         if (free >= builtin.len(buf)){
             w.data = appendꓸꓸꓸ(w.data, buf);
         } else {
-            w.data = appendꓸꓸꓸ(w.data, buf[..(int)(free)]);
-            w.off = copy(w.data, buf[(int)(free)..]);
+            w.data = appendꓸꓸꓸ(w.data, buf.slice(0, free));
+            w.off = copy(w.data, buf.slice(free));
         }
     }
 }
@@ -83,10 +83,10 @@ partial class zstd_package {
         wrap = !wrap;
     }
     if (wrap){
-        buf = appendꓸꓸꓸ(buf, w.data[(int)(from)..]);
-        return appendꓸꓸꓸ(buf, w.data[..(int)(to)]);
+        buf = appendꓸꓸꓸ(buf, w.data.slice((nint)(from)));
+        return appendꓸꓸꓸ(buf, w.data.slice(0, (nint)(to)));
     } else {
-        return appendꓸꓸꓸ(buf, w.data[(int)(from)..(int)(to)]);
+        return appendꓸꓸꓸ(buf, w.data.slice((nint)(from), (nint)(to)));
     }
 }
 

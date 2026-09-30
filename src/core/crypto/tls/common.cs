@@ -1751,7 +1751,7 @@ internal static bool anyValidVerifiedChain(slice<slice<ж<Δx509.Certificate>>> 
         // CertPool.Contains if/once that is available. See go.dev/issue/77376.
         if (runtime.GOOS == "windows"u8 || runtime.GOOS == "darwin"u8 || runtime.GOOS == "ios"u8){
             opts.Intermediates = Δx509.NewCertPool();
-            foreach (var (_, cert) in chain[1..(int)(max(1, len(chain) - 1))]) {
+            foreach (var (_, cert) in chain.slice(1, max(1, len(chain) - 1))) {
                 opts.Intermediates.AddCert(cert);
             }
             var leaf = chain[0];

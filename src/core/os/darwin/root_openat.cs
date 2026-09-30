@@ -209,7 +209,7 @@ internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, Func<sy
                     if (symlinks > rootMaxSymlinks) {
                         (ret, err) = (ret, syscall.ELOOP); goto ᒐdone;
                     }
-                    var (newparts, newSuffixSep, errΔ2) = splitPathInRoot(((@string)e), parts[..(int)(i)], parts[(int)(i + 1)..]);
+                    var (newparts, newSuffixSep, errΔ2) = splitPathInRoot(((@string)e), parts.slice(0, i), parts.slice(i + 1));
                     if (errΔ2 != default!) {
                         (ret, err) = (ret, errΔ2); goto ᒐdone;
                     }
@@ -222,7 +222,7 @@ internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, Func<sy
                         // directories.
                         suffixSep = newSuffixSep;
                     }
-                    if (len(newparts) < i || !slices.Equal<slice<@string>, @string>(parts[..(int)(i)], newparts[..(int)(i)])) {
+                    if (len(newparts) < i || !slices.Equal<slice<@string>, @string>(parts.slice(0, i), newparts.slice(0, i))) {
                         // Some component in the path which we have already traversed
                         // has changed. We need to restart parsing from the root.
                         i = 0;

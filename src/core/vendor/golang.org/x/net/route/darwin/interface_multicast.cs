@@ -19,10 +19,10 @@ partial class route_package {
         Type: (nint)b[3],
         Flags: (nint)nativeEndian.Uint32(b[8..12]),
         Index: (nint)nativeEndian.Uint16(b[12..14]),
-        raw: b[..(int)(l)]
+        raw: b.slice(0, l)
     ));
     error err = default!;
-    (m.Value.Addrs, err) = parseAddrs((nuint)nativeEndian.Uint32(b[4..8]), parseKernelInetAddr, b[(int)(w.bodyOff)..]);
+    (m.Value.Addrs, err) = parseAddrs((nuint)nativeEndian.Uint32(b[4..8]), parseKernelInetAddr, b.slice(w.bodyOff));
     if (err != default!) {
         return (default!, err);
     }

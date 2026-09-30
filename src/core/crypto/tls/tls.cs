@@ -178,7 +178,7 @@ internal static (ж<Conn>, error) dial(context.Context ctx, ж<net.Dialer> Ꮡne
         if (colonPos == -1) {
             colonPos = len(addr);
         }
-        @string hostname = addr[..(int)(colonPos)];
+        @string hostname = addr.slice(0, colonPos);
         if (Ꮡconfig == nil) {
             Ꮡconfig = defaultConfig(); config = ref Ꮡconfig.DerefOrNull();
         }

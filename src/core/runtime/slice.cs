@@ -406,7 +406,7 @@ internal static slice<byte> bytealg_MakeNoZero(nint len) {
         panicmakeslicelen();
     }
     var cap = roundupsize((uintptr)len, true);
-    return @unsafe.Slice((ж<byte>)(uintptr)(mallocgc((uintptr)cap, nil, false)), cap)[..(int)(len)];
+    return @unsafe.Slice((ж<byte>)(uintptr)(mallocgc((uintptr)cap, nil, false)), cap).slice(0, len);
 }
 
 } // end runtime_package

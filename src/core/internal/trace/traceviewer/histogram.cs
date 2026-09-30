@@ -31,7 +31,7 @@ internal static float64 logDiv = math.Log(math.Pow(10D, 1.0D / 5D));
     }
     if (len(h.Buckets) <= bucket) {
         h.Buckets = appendꓸꓸꓸ(h.Buckets, makeꓸꓸꓸ<nint>(bucket - len(h.Buckets) + 1));
-        h.Buckets = h.Buckets[..(int)(cap(h.Buckets))];
+        h.Buckets = h.Buckets.slice(0, cap(h.Buckets));
     }
     h.Buckets[bucket]++;
     if (bucket < h.MinBucket || h.MaxBucket == 0) {

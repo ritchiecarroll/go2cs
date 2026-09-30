@@ -164,8 +164,8 @@ public static (time.Time, error) ParseDate(@string date) {
     // zone length is always 5 chars unless obsolete (obs-zone)
     {
         nint ind = strings.IndexAny(p.s, "+-"u8); if (ind != -1 && builtin.len(p.s) >= ind + 5){
-            date = p.s[..(int)(ind + 5)];
-            p.s = p.s[(int)(ind + 5)..];
+            date = p.s.slice(0, ind + 5);
+            p.s = p.s.slice(ind + 5);
         } else {
             nint indΔ1 = strings.Index(p.s, "T"u8);
             if (indΔ1 == 0) {
@@ -181,8 +181,8 @@ public static (time.Time, error) ParseDate(@string date) {
             if (indΔ1 != -1 && builtin.len(p.s) >= indΔ1 + 5) {
                 // The last letter T of the obsolete time zone is checked when no standard time zone is found.
                 // If T is misplaced, the date to parse is garbage.
-                date = p.s[..(int)(indΔ1 + 1)];
-                p.s = p.s[(int)(indΔ1 + 1)..];
+                date = p.s.slice(0, indΔ1 + 1);
+                p.s = p.s.slice(indΔ1 + 1);
             }
         }
     }
@@ -285,7 +285,7 @@ internal static readonly @string utf8ˢ = "utf-8"u8;
         // treat the whole address as local-part.
         local = a.ΔAddress;
     } else {
-        (local, domain) = (a.ΔAddress[..(int)(at)], a.ΔAddress[(int)(at + 1)..]);
+        (local, domain) = (a.ΔAddress.slice(0, at), a.ΔAddress.slice(at + 1));
     }
     // Add quotes if needed
     var quoteLocal = false;
@@ -664,7 +664,7 @@ internal static readonly @string mailUnclosedQuotedStringˢ = "mail: unclosed qu
     var escaped = false;
 Loop:
     while (ᐧ) {
-        var (r, size) = utf8.DecodeRuneInString(p.s[(int)(i)..]);
+        var (r, size) = utf8.DecodeRuneInString(p.s.slice(i));
         switch (ᐧ) {
         case {} when size is 0: {
             return ("", errors.New(mailUnclosedQuotedStringˢ));
@@ -703,7 +703,7 @@ Loop:
 continue_Loop:;
     }
 break_Loop:;
-    p.s = p.s[(int)(i + 1)..];
+    p.s = p.s.slice(i + 1);
     return (((@string)qsb), default!);
 }
 
@@ -723,7 +723,7 @@ internal static readonly @string mailTrailingDotInAtomˢ = "mail: trailing dot i
     nint i = 0;
 Loop:
     while (ᐧ) {
-        var (r, size) = utf8.DecodeRuneInString(p.s[(int)(i)..]);
+        var (r, size) = utf8.DecodeRuneInString(p.s.slice(i));
         switch (ᐧ) {
         case {} when size == 1 && r == utf8.RuneError: {
             return ("", fmt.Errorf("mail: invalid utf-8 in address: %q"u8, p.s));
@@ -743,7 +743,7 @@ break_Loop:;
     if (i == 0) {
         return ("", errors.New(mailInvalidStringˢ));
     }
-    (atom, p.s) = (p.s[..(int)(i)], p.s[(int)(i)..]);
+    (atom, p.s) = (p.s.slice(0, i), p.s.slice(i));
     if (!permissive) {
         if (strings.HasPrefix(atom, "."u8)) {
             return ("", errors.New(mailLeadingDotInAtomˢ));
@@ -786,9 +786,9 @@ internal static readonly @string mailUnclosedDomainˢ = "mail: unclosed domain-l
             return ("", fmt.Errorf("mail: bad character in domain-literal: %q"u8, r));
         }
         dtextLen += size;
-        p.s = p.s[(int)(size)..];
+        p.s = p.s.slice(size);
     }
-    dtext = dtext[..(int)(dtextLen)];
+    dtext = dtext.slice(0, dtextLen);
     // Skip the trailing ]
     if (!p.consume((rune)']')) {
         return ("", errors.New(mailUnclosedDomainˢ));

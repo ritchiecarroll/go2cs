@@ -21,7 +21,7 @@ internal static (@string name, error err) hostname() {
         var b = new slice<uint16>((nint)(n));
         var errΔ1 = windows.GetComputerNameEx(format, Ꮡ(b, 0), Ꮡn);
         if (errΔ1 == default!) {
-            return (syscall.UTF16ToString(b[..(int)(n)]), default!);
+            return (syscall.UTF16ToString(b.slice(0, (nint)(n))), default!);
         }
         if (!AreEqual(errΔ1, syscall.ERROR_MORE_DATA)) {
             return ("", NewSyscallError(computerNameExˢ, errΔ1));

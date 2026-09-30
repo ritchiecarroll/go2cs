@@ -70,7 +70,7 @@ internal static readonly @string rleLiteralMissingˢ = "RLE literal missing"u8;
         if (off + regeneratedSize > builtin.len(data)) {
             return (0, default!, r.makeError(off, rawLiteralSizeTooLargeˢ));
         }
-        outbuf = appendꓸꓸꓸ(outbuf, data[(int)(off)..(int)(off + regeneratedSize)]);
+        outbuf = appendꓸꓸꓸ(outbuf, data.slice(off, off + regeneratedSize));
         off += regeneratedSize;
     } else {
         // RFC 3.1.1.3.1.3.
@@ -236,9 +236,9 @@ internal static (slice<byte>, error) readLiteralsFourStreams(this ж<Reader> Ꮡ
     if (regeneratedSize < regeneratedStreamSize * 3) {
         return (default!, r.makeError(off, regeneratedSizeTooSmallˢ));
     }
-    var streamSize1 = binary.LittleEndian.Uint16(data[(int)(off)..]);
-    var streamSize2 = binary.LittleEndian.Uint16(data[(int)(off + 2)..]);
-    var streamSize3 = binary.LittleEndian.Uint16(data[(int)(off + 4)..]);
+    var streamSize1 = binary.LittleEndian.Uint16(data.slice(off));
+    var streamSize2 = binary.LittleEndian.Uint16(data.slice(off + 2));
+    var streamSize3 = binary.LittleEndian.Uint16(data.slice(off + 4));
     off += 6;
     var tot = (uint64)streamSize1 + (uint64)streamSize2 + (uint64)streamSize3;
     if (tot > (uint64)totalStreamsSize - 6) {

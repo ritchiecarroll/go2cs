@@ -29,10 +29,10 @@ internal static (nint n, error err) Write(this ж<normWriter> Ꮡw, slice<byte> 
         if (m > chunk) {
             m = chunk;
         }
-        w.rb.src = inputBytes(data[..(int)(m)]);
+        w.rb.src = inputBytes(data.slice(0, m));
         w.rb.nsrc = m;
         w.buf = doAppend(Ꮡw.of(normWriter.Ꮡrb), w.buf, 0);
-        data = data[(int)(m)..];
+        data = data.slice(m);
         n += m;
         // Write out complete prefix, save remainder.
         // Note that lastBoundary looks back at most 31 runes.
@@ -42,12 +42,12 @@ internal static (nint n, error err) Write(this ж<normWriter> Ꮡw, slice<byte> 
         }
         if (i > 0) {
             {
-                (_, err) = w.w.Write(w.buf[..(int)(i)]); if (err != default!) {
+                (_, err) = w.w.Write(w.buf.slice(0, i)); if (err != default!) {
                     break;
                 }
             }
-            nint bn = copy(w.buf, w.buf[(int)(i)..]);
-            w.buf = w.buf[..(int)(bn)];
+            nint bn = copy(w.buf, w.buf.slice(i));
+            w.buf = w.buf.slice(0, bn);
         }
     }
     return (n, err);
@@ -90,7 +90,7 @@ internal static (nint, error) Read(this ж<normReader> Ꮡr, slice<byte> p) {
 
     while (ᐧ) {
         if (r.lastBoundary - r.bufStart > 0) {
-            nint nΔ1 = copy(p, r.outbuf[(int)(r.bufStart)..(int)(r.lastBoundary)]);
+            nint nΔ1 = copy(p, r.outbuf.slice(r.bufStart, r.lastBoundary));
             r.bufStart += nΔ1;
             if (r.lastBoundary - r.bufStart > 0) {
                 return (nΔ1, default!);
@@ -100,11 +100,11 @@ internal static (nint, error) Read(this ж<normReader> Ꮡr, slice<byte> p) {
         if (r.err != default!) {
             return (0, r.err);
         }
-        nint outn = copy(r.outbuf, r.outbuf[(int)(r.lastBoundary)..]);
-        r.outbuf = r.outbuf[0..(int)(outn)];
+        nint outn = copy(r.outbuf, r.outbuf.slice(r.lastBoundary));
+        r.outbuf = r.outbuf.slice(0, outn);
         r.bufStart = 0;
         var (n, err) = r.r.Read(r.inbuf);
-        r.rb.src = inputBytes(r.inbuf[0..(int)(n)]);
+        r.rb.src = inputBytes(r.inbuf.slice(0, n));
         (r.rb.nsrc, r.err) = (n, err);
         if (n > 0) {
             r.outbuf = doAppend(Ꮡr.of(normReader.Ꮡrb), r.outbuf, 0);

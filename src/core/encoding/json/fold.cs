@@ -31,7 +31,7 @@ internal static slice<byte> appendFoldedName(slice<byte> @out, slice<byte> @in) 
             }
         }
         // Handle multi-byte Unicode.
-        var (r, n) = utf8.DecodeRune(@in[(int)(i)..]);
+        var (r, n) = utf8.DecodeRune(@in.slice(i));
         @out = utf8.AppendRune(@out, foldRune(r));
         i += n;
     }

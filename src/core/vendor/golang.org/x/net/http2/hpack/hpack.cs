@@ -536,8 +536,8 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
         return (u, p, errNeedMore);
     }
     u.isHuff = isHuff;
-    u.b = p[..(int)(strLen)];
-    return (u, p[(int)(strLen)..], default!);
+    u.b = p.slice(0, (nint)(strLen));
+    return (u, p.slice((nint)(strLen)), default!);
 }
 
 [GoType] partial struct undecodedString {

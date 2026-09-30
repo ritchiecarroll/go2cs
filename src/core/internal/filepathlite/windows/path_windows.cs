@@ -68,8 +68,8 @@ internal static (@string, error) localize(@string path) {
             p = ""u8;
         } else {
             containsSlash = true;
-            element = p[..(int)(i)];
-            p = p[(int)(i + 1)..];
+            element = p.slice(0, i);
+            p = p.slice(i + 1);
         }
         if (isReservedName(element)) {
             return ("", errInvalidPath);
@@ -99,14 +99,14 @@ internal static bool isReservedName(@string name) {
     for (nint i = 0; i < len(@base); i++) {
         switch (@base[i]) {
         case (rune)':' or (rune)'.': {
-            @base = @base[..(int)(i)];
+            @base = @base.slice(0, i);
             break;
         }}
 
     }
     // Trailing spaces in the last path element are ignored.
     while (len(@base) > 0 && @base[len(@base) - 1] == (rune)' ') {
-        @base = @base[..(int)(len(@base) - 1)];
+        @base = @base.slice(0, len(@base) - 1);
     }
     if (!isReservedBaseName(@base)) {
         return false;
@@ -197,7 +197,7 @@ public static bool /*b*/ IsAbs(@string path) {
     if (IsPathSeparator(path[0]) && IsPathSeparator(path[1])) {
         return true;
     }
-    path = path[(int)(l)..];
+    path = path.slice(l);
     if (path == ""u8) {
         return false;
     }
@@ -304,7 +304,7 @@ internal static nint uncLen(@string path, nint prefixLen) {
 internal static (@string before, @string after, bool found) cutPath(@string path) {
     foreach (var (i, _) in path) {
         if (IsPathSeparator(path[i])) {
-            return (path[..(int)(i)], path[(int)(i + 1)..], true);
+            return (path.slice(0, i), path.slice(i + 1), true);
         }
     }
     return (path, "", false);

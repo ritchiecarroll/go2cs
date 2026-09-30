@@ -83,8 +83,8 @@ internal static (slice<byte>, error) pkcs1v15ConstructEM(ж<ΔPublicKey> Ꮡpub,
     for (nint i = 2; i < k - len(prefix) - len(hashed) - 1; i++) {
         em[i] = 0xff;
     }
-    copy(em[(int)(k - len(prefix) - len(hashed))..], prefix);
-    copy(em[(int)(k - len(hashed))..], hashed);
+    copy(em.slice(k - len(prefix) - len(hashed)), prefix);
+    copy(em.slice(k - len(hashed)), hashed);
     return (em, default!);
 }
 

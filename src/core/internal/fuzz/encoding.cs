@@ -319,7 +319,7 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
             if (n < 2) {
                 return (default!, fmt.Errorf("malformed character literal, missing single quotes"u8));
             }
-            var (code, _, _, errΔ3) = strconv.UnquoteChar(val[1..(int)(n - 1)], (rune)'\'');
+            var (code, _, _, errΔ3) = strconv.UnquoteChar(val.slice(1, n - 1), (rune)'\'');
             if (errΔ3 != default!) {
                 return (default!, errΔ3);
             }

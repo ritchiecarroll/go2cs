@@ -235,7 +235,7 @@ internal static (slice<@string>, @string suffixSep, error err) splitPathInRoot(@
             j++;
             continue;
         }
-        parts = append(parts, s[(int)(i)..(int)(j)]);
+        parts = append(parts, s.slice(i, j));
         // Advance to the next component, or end of the path.
         nint partEnd = j;
         while (j < len(s) && IsPathSeparator(s[j])) {
@@ -244,18 +244,18 @@ internal static (slice<@string>, @string suffixSep, error err) splitPathInRoot(@
         if (j == len(s)) {
             // If this is the last path component,
             // preserve any trailing path separators.
-            suffixSep = s[(int)(partEnd)..];
+            suffixSep = s.slice(partEnd);
             break;
         }
         if (parts[len(parts) - 1] == ".") {
             // Remove "." components, except at the end.
-            parts = parts[..(int)(len(parts) - 1)];
+            parts = parts.slice(0, len(parts) - 1);
         }
         i = j;
     }
     if (len(suffix) > 0 && len(parts) > 0 && parts[len(parts) - 1] == ".") {
         // Remove a trailing "." component if we're joining to a suffix.
-        parts = parts[..(int)(len(parts) - 1)];
+        parts = parts.slice(0, len(parts) - 1);
     }
     parts = appendꓸꓸꓸ(parts, suffix);
     return (parts, suffixSep, default!);

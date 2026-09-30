@@ -277,7 +277,7 @@ internal static slice<embeddedType> consolidateMultiples(slice<embeddedType> lis
             }
         }
     }
-    return list[..(int)(n)];
+    return list.slice(0, n);
 }
 
 internal static (nint, bool) lookupType(map<ΔType, nint> m, ΔType typ) {

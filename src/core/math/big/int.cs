@@ -598,7 +598,7 @@ public static ж<ΔInt> SetBytes(this ж<ΔInt> Ꮡz, slice<byte> buf) {
     // anything but the Int's sign and bit size through side-channels. Any
     // changes must be reviewed by a security expert.
     var buf = new slice<byte>(len(x.abs) * (nint)_S);
-    return buf[(int)(x.abs.bytes(buf))..];
+    return buf.slice(x.abs.bytes(buf));
 }
 
 // FillBytes sets buf to the absolute value of x, storing it as a zero-extended

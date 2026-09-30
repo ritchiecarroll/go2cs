@@ -60,14 +60,14 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
                 // {RFC 2231 section 7}
                 // attribute-char := <any (US-ASCII) CHAR except SPACE, CTLs, "*", "'", "%", or tspecials>
                 if (ch <= (rune)' ' || ch >= 0x7F || ch == (rune)'*' || ch == (rune)'\'' || ch == (rune)'%' || isTSpecial((rune)ch)) {
-                    Ꮡb.WriteString(value[(int)(offsetΔ1)..(int)(index)]);
+                    Ꮡb.WriteString(value.slice(offsetΔ1, index));
                     offsetΔ1 = index + 1;
                     Ꮡb.WriteByte((rune)'%');
                     Ꮡb.WriteByte(upperhex[(ch >> (int)(4))]);
                     Ꮡb.WriteByte(upperhex[(byte)(ch & 0x0F)]);
                 }
             }
-            Ꮡb.WriteString(value[(int)(offsetΔ1)..]);
+            Ꮡb.WriteString(value.slice(offsetΔ1));
             continue;
         }
         if (isToken(value)) {
@@ -79,12 +79,12 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
         for (nint index = 0; index < len(value); index++) {
             var character = value[index];
             if (character == (rune)'"' || character == (rune)'\\') {
-                Ꮡb.WriteString(value[(int)(offset)..(int)(index)]);
+                Ꮡb.WriteString(value.slice(offset, index));
                 offset = index;
                 Ꮡb.WriteByte((rune)'\\');
             }
         }
-        Ꮡb.WriteString(value[(int)(offset)..]);
+        Ꮡb.WriteString(value.slice(offset));
         Ꮡb.WriteByte((rune)'"');
     }
     return b.String();
@@ -151,7 +151,7 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
     // for parameters containing a '*' character.
     // Lazily initialized.
     map<@string, map<@string, @string>> continuation = default!;
-    v = v[(int)(len(@base))..];
+    v = v.slice(len(@base));
     while (len(v) > 0) {
         v = strings.TrimLeftFunc(v, Δunicode.IsSpace);
         if (len(v) == 0) {
@@ -280,7 +280,7 @@ internal static (@string token, @string rest) consumeToken(@string v) {
     if (notPos == 0) {
         return ("", v);
     }
-    return (v[0..(int)(notPos)], v[(int)(notPos)..]);
+    return (v.slice(0, notPos), v.slice(notPos));
 }
 
 // consumeValue consumes a "value" per RFC 2045, where a value is
@@ -303,7 +303,7 @@ internal static (@string value, @string rest) consumeValue(@string v) {
     for (nint i = 1; i < len(v); i++) {
         var r = v[i];
         if (r == (rune)'"') {
-            return (buffer.String(), v[(int)(i + 1)..]);
+            return (buffer.String(), v.slice(i + 1));
         }
         // When MSIE sends a full file path (in "intranet mode"), it does not
         // escape backslashes: "C:\dev\go\foo.txt", not "C:\\dev\\go\\foo.txt".
@@ -369,7 +369,7 @@ internal static (@string, error) percentHexUnescape(@string s) {
         }
         percents++;
         if (i + 2 >= len(s) || !ishex(s[i + 1]) || !ishex(s[i + 2])) {
-            s = s[(int)(i)..];
+            s = s.slice(i);
             if (len(s) > 3) {
                 s = s[0..3];
             }

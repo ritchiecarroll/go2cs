@@ -39,7 +39,7 @@ public static @string String(this Class i) {
     if (i < 0 || i >= ((Class)(len(_Class_index) - 1))) {
         return "Class("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
     }
-    return _Class_name[(int)(_Class_index[i])..(int)(_Class_index[i + 1])];
+    return _Class_name.slice(_Class_index[i], _Class_index[i + 1]);
 }
 
 } // end dwarf_package

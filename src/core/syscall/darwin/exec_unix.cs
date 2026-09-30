@@ -93,7 +93,7 @@ public static (slice<ж<byte>>, error) SlicePtrFromStrings(slice<@string> ss) {
     n = 0;
     foreach (var (i, s) in ss) {
         bb[i] = Ꮡ(b, n);
-        copy(b[(int)(n)..], s);
+        copy(b.slice(n), s);
         n += len(s) + 1;
     }
     return (bb, default!);

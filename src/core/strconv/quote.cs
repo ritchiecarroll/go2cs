@@ -34,7 +34,7 @@ internal static slice<byte> appendQuotedWith(slice<byte> buf, @string s, byte qu
         buf = nBuf;
     }
     buf = append(buf, quote);
-    for (nint width = 0; len(s) > 0; s = s[(int)(width)..]) {
+    for (nint width = 0; len(s) > 0; s = s.slice(width)) {
         var r = (rune)s[0];
         width = 1;
         if (r >= utf8.RuneSelf) {
@@ -231,7 +231,7 @@ public static slice<byte> AppendQuoteRuneToGraphic(slice<byte> dst, rune r) {
 public static bool CanBackquote(@string s) {
     while (len(s) > 0) {
         var (r, wid) = utf8.DecodeRuneInString(s);
-        s = s[(int)(wid)..];
+        s = s.slice(wid);
         if (wid > 1) {
             if (r == (rune)'\ufeff') {
                 return false; // BOMs are invisible and should not be quoted.
@@ -301,7 +301,7 @@ public static (rune value, bool multibyte, @string tail, error err) UnquoteChar(
         }
         case {} when cΔ1 >= utf8.RuneSelf: {
             var (r, size) = utf8.DecodeRuneInString(s);
-            return (r, true, s[(int)(size)..], default!);
+            return (r, true, s.slice(size), default!);
         }
         case {} when cΔ1 is not (rune)'\\': {
             return ((rune)s[0], false, s[1..], default!);
@@ -373,7 +373,7 @@ public static (rune value, bool multibyte, @string tail, error err) UnquoteChar(
             }
             v = (rune)((v << (int)(4)) | x);
         }
-        s = s[(int)(n)..];
+        s = s.slice(n);
         if (c == (rune)'x') {
             // single-byte string, possibly not UTF-8
             value = v;
@@ -473,11 +473,11 @@ internal static (@string @out, @string rem, error err) unquote(@string @in, bool
     case (rune)'`': {
         switch (ᐧ) {
         case {} when !unescape: {
-            @out = @in[..(int)(end)]; // include quotes
+            @out = @in.slice(0, end); // include quotes
             break;
         }
-        case {} when !contains(@in[..(int)(end)], (rune)'\r'): {
-            @out = @in[(int)(len("`"))..(int)(end - len("`"))]; // exclude quotes
+        case {} when !contains(@in.slice(0, end), (rune)'\r'): {
+            @out = @in.slice(len("`"), end - len("`")); // exclude quotes
             break;
         }
         default: {
@@ -491,34 +491,34 @@ internal static (@string @out, @string rem, error err) unquote(@string @in, bool
             break;
         }}
 
-        return (@out, @in[(int)(end)..], default!);
+        return (@out, @in.slice(end), default!);
     }
     case (rune)'"' or (rune)'\'': {
-        if (!contains(@in[..(int)(end)], // NOTE: Prior implementations did not verify that raw strings consist
+        if (!contains(@in.slice(0, end), // NOTE: Prior implementations did not verify that raw strings consist
  // of valid UTF-8 characters and we continue to not verify it as such.
  // The Go specification does not explicitly require valid UTF-8,
  // but only mention that it is implicitly valid for Go source code
  // (which must be valid UTF-8).
  // Handle quoted strings without any escape sequences.
- (rune)'\\') && !contains(@in[..(int)(end)], (rune)'\n')) {
+ (rune)'\\') && !contains(@in.slice(0, end), (rune)'\n')) {
             bool valid = default!;
             switch (quote) {
             case (rune)'"': {
-                valid = utf8.ValidString(@in[(int)(len(@""""))..(int)(end - len(@""""))]);
+                valid = utf8.ValidString(@in.slice(len(@""""), end - len(@"""")));
                 break;
             }
             case (rune)'\'': {
-                var (r, n) = utf8.DecodeRuneInString(@in[(int)(len("'"))..(int)(end - len("'"))]);
+                var (r, n) = utf8.DecodeRuneInString(@in.slice(len("'"), end - len("'")));
                 valid = len("'") + n + len("'") == end && (r != utf8.RuneError || n != 1);
                 break;
             }}
 
             if (valid) {
-                @out = @in[..(int)(end)];
+                @out = @in.slice(0, end);
                 if (unescape) {
-                    @out = @out[1..(int)(end - 1)]; // exclude quotes
+                    @out = @out.slice(1, end - 1); // exclude quotes
                 }
-                return (@out, @in[(int)(end)..], default!);
+                return (@out, @in.slice(end), default!);
             }
         }
         // Handle quoted strings with escape sequences.
@@ -557,7 +557,7 @@ internal static (@string @out, @string rem, error err) unquote(@string @in, bool
         if (unescape) {
             return (((@string)buf), @in, default!);
         }
-        return (in0[..(int)(len(in0) - len(@in))], @in, default!);
+        return (in0.slice(0, len(in0) - len(@in)), @in, default!);
     }
     default: {
         return ("", @in, ErrSyntax);

@@ -53,11 +53,11 @@ internal static slice<byte> commentEnd = slice<byte>("-->"u8);
 internal static (context, nint) tText(context c, slice<byte> s) {
     nint k = 0;
     while (ᐧ) {
-        nint i = k + bytes.IndexByte(s[(int)(k)..], (rune)'<');
+        nint i = k + bytes.IndexByte(s.slice(k), (rune)'<');
         if (i < k || i + 1 == len(s)){
             return (c, len(s));
         } else 
-        if (i + 4 <= len(s) && bytes.Equal(commentStart, s[(int)(i)..(int)(i + 4)])) {
+        if (i + 4 <= len(s) && bytes.Equal(commentStart, s.slice(i, i + 4))) {
             return (new context(state: stateHTMLCmt), i + 4);
         }
         i++;
@@ -109,10 +109,10 @@ internal static (context, nint) tTag(context c, slice<byte> s) {
     if (i == j) {
         return (new context(
             state: stateError,
-            err: errorf(ErrBadHTML, default!, 0, "expected space, attr name, or end of tag, but got %q"u8, s[(int)(i)..])
+            err: errorf(ErrBadHTML, default!, 0, "expected space, attr name, or end of tag, but got %q"u8, s.slice(i))
         ), len(s));
     }
-    @string attrName = strings.ToLower(((@string)(s[(int)(i)..(int)(j)])));
+    @string attrName = strings.ToLower(((@string)(s.slice(i, j))));
     if (c.element == elementScript && attrName == "type"u8){
         attr = attrScriptType;
     } else {
@@ -249,10 +249,10 @@ internal static nint indexTagEnd(slice<byte> s, slice<byte> tag) {
         if (i == -1) {
             return i;
         }
-        s = s[(int)(i + plen)..];
+        s = s.slice(i + plen);
         // Try to match the actual tag if there is still space for it
-        if (len(tag) <= len(s) && bytes.EqualFold(tag, s[..(int)(len(tag))])) {
-            s = s[(int)(len(tag))..];
+        if (len(tag) <= len(s) && bytes.EqualFold(tag, s.slice(0, len(tag)))) {
+            s = s.slice(len(tag));
             // Check the tag is followed by a proper separator
             if (len(s) > 0 && bytes.IndexByte(tagEndSeparators, s[0]) != -1) {
                 return res + i;
@@ -290,7 +290,7 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
         c.jsCtx = nextJSCtx(s, c.jsCtx);
         return (c, len(s));
     }
-    c.jsCtx = nextJSCtx(s[..(int)(i)], c.jsCtx);
+    c.jsCtx = nextJSCtx(s.slice(0, i), c.jsCtx);
     switch (s[i]) {
     case (rune)'"': {
         (c.state, c.jsCtx) = (stateJSDqStr, jsCtxRegexp);
@@ -325,7 +325,7 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
         default: {
             return (new context(
                 state: stateError,
-                err: errorf(ErrSlashAmbig, default!, 0, "'/' could start a division or regexp: %.32q"u8, s[(int)(i)..])
+                err: errorf(ErrSlashAmbig, default!, 0, "'/' could start a division or regexp: %.32q"u8, s.slice(i))
             ), len(s));
         }}
 
@@ -339,13 +339,13 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
  // anything following the opening or closing token, on the same line, is
  // ignored. As such we simply treat any line prefixed with "<!--" or "-->"
  // as if it were actually prefixed with "//" and move on.
- s[(int)(i)..(int)(i + 4)])) {
+ s.slice(i, i + 4))) {
             (c.state, i) = (stateJSHTMLOpenCmt, i + 3);
         }
         break;
     }
     case (rune)'-': {
-        if (i + 2 < len(s) && bytes.Equal(commentEnd, s[(int)(i)..(int)(i + 3)])) {
+        if (i + 2 < len(s) && bytes.Equal(commentEnd, s.slice(i, i + 3))) {
             (c.state, i) = (stateJSHTMLCloseCmt, i + 2);
         }
         break;
@@ -378,7 +378,7 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
             // fully fledged parsers will just fail anyway.
             return (c, i + 1);
         }
-        c.jsBraceDepth = c.jsBraceDepth[..(int)(len(c.jsBraceDepth) - 1)];
+        c.jsBraceDepth = c.jsBraceDepth.slice(0, len(c.jsBraceDepth) - 1);
         c.state = stateJSTmplLit;
         break;
     }
@@ -393,7 +393,7 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
 internal static (context, nint) tJSTmpl(context c, slice<byte> s) {
     nint k = default!;
     while (ᐧ) {
-        nint i = k + bytes.IndexAny(s[(int)(k)..], "`\\$"u8);
+        nint i = k + bytes.IndexAny(s.slice(k), "`\\$"u8);
         if (i < k) {
             break;
         }
@@ -442,7 +442,7 @@ internal static (context, nint) tJSDelimited(context c, slice<byte> s) {
     nint k = 0;
     var inCharset = false;
     while (ᐧ) {
-        nint i = k + bytes.IndexAny(s[(int)(k)..], specials);
+        nint i = k + bytes.IndexAny(s.slice(k), specials);
         if (i < k) {
             break;
         }
@@ -466,7 +466,7 @@ internal static (context, nint) tJSDelimited(context c, slice<byte> s) {
             break;
         }
         case (rune)'/': {
-            if (i > 0 && i + 7 <= len(s) && bytes.Equal(bytes.ToLower(s[(int)(i - 1)..(int)(i + 7)]), // If "</script" appears in a regex literal, the '/' should not
+            if (i > 0 && i + 7 <= len(s) && bytes.Equal(bytes.ToLower(s.slice(i - 1, i + 7)), // If "</script" appears in a regex literal, the '/' should not
  // close the regex literal, and it will later be escaped to
  // "\x3C/script" in escapeText.
  slice<byte>("</script"u8))){
@@ -587,16 +587,16 @@ internal static (context, nint) tCSS(context c, slice<byte> s) {
     // proves problematic for real code.
     nint k = 0;
     while (ᐧ) {
-        nint i = k + bytes.IndexAny(s[(int)(k)..], @"(""'/"u8);
+        nint i = k + bytes.IndexAny(s.slice(k), @"(""'/"u8);
         if (i < k) {
             return (c, len(s));
         }
         switch (s[i]) {
         case (rune)'(': {
-            var p = bytes.TrimRight(s[..(int)(i)], // Look for url to the left.
+            var p = bytes.TrimRight(s.slice(0, i), // Look for url to the left.
  "\t\n\f\r "u8);
             if (endsWithCSSKeyword(p, urlˢ)) {
-                nint j = len(s) - len(bytes.TrimLeft(s[(int)(i + 1)..], "\t\n\f\r "u8));
+                nint j = len(s) - len(bytes.TrimLeft(s.slice(i + 1), "\t\n\f\r "u8));
                 switch (ᐧ) {
                 case {} when j != len(s) && s[j] == (rune)'"': {
                     (c.state, j) = (stateCSSDqURL, j + 1);
@@ -664,9 +664,9 @@ internal static (context, nint) tCSSStr(context c, slice<byte> s) {
     // The below includes the wc (whitespace character) and nl.
     nint k = 0;
     while (ᐧ) {
-        nint i = k + bytes.IndexAny(s[(int)(k)..], endAndEsc);
+        nint i = k + bytes.IndexAny(s.slice(k), endAndEsc);
         if (i < k) {
-            var (cΔ1, nread) = tURL(c, decodeCSS(s[(int)(k)..]));
+            var (cΔ1, nread) = tURL(c, decodeCSS(s.slice(k)));
             return (cΔ1, k + nread);
         }
         if (s[i] == (rune)'\\'){
@@ -681,7 +681,7 @@ internal static (context, nint) tCSSStr(context c, slice<byte> s) {
             c.state = stateCSS;
             return (c, i + 1);
         }
-        (c, _) = tURL(c, decodeCSS(s[..(int)(i + 1)]));
+        (c, _) = tURL(c, decodeCSS(s.slice(0, i + 1)));
         k = i + 1;
     }
 }
@@ -705,7 +705,7 @@ internal static (nint, ж<ΔError>) eatAttrName(slice<byte> s, nint i) {
             return (-1, errorf(ErrBadHTML, // These result in a parse warning in HTML5 and are
  // indicative of serious problems if seen in an attr
  // name in a template.
- default!, 0, "%q in attribute name: %.32q"u8, s[(int)(j)..(int)(j + 1)], s));
+ default!, 0, "%q in attribute name: %.32q"u8, s.slice(j, j + 1), s));
         }
         default: {
             break;
@@ -752,7 +752,7 @@ internal static (nint, element) eatTagName(slice<byte> s, nint i) {
         }
         break;
     }
-    return (j, elementNameMap[strings.ToLower(((@string)(s[(int)(i)..(int)(j)])))]);
+    return (j, elementNameMap[strings.ToLower(((@string)(s.slice(i, j))))]);
 }
 
 // eatWhiteSpace returns the largest j such that s[i:j] is white space.

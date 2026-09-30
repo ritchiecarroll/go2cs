@@ -12,17 +12,7 @@ partial class runtime_package {
 
 [GoType("num:uint64")] partial struct Δhex;
 
-internal static slice<byte> /*ret*/ bytes(@string sʗp) {
-    ref var ret = ref heap<slice<byte>>(out var Ꮡret);
-
-    ref var s = ref heap(sʗp, out var Ꮡs);
-    var rp = Ꮡret.Reinterpret<slice<byte>, Δsliceᴛ>();
-    var sp = stringStructOf(Ꮡs);
-    rp.Value.Δarray = sp.Value.str;
-    rp.Value.len = sp.Value.len;
-    rp.Value.cap = sp.Value.len;
-    return ret;
-}
+// go2cs generated this placeholder — func bytes is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static array<byte> printBacklog = new(512);
 internal static nint printBacklogIndex;
@@ -39,7 +29,7 @@ internal static void recordForPanic(slice<byte> b) {
     if (Ꮡpanicking.Load() == 0) {
         // Not actively crashing: maintain circular buffer of print output.
         for (nint i = 0; i < len(b); ) {
-            nint n = copy(printBacklog[(int)(printBacklogIndex)..], b[(int)(i)..]);
+            nint n = copy(printBacklog.slice(printBacklogIndex), b.slice(i));
             i += n;
             printBacklogIndex += n;
             printBacklogIndex %= len(printBacklog);
@@ -93,8 +83,8 @@ internal static void gwrite(slice<byte> b) {
         writeErr(b);
         return;
     }
-    nint n = copy((~gp).writebuf[(int)(len((~gp).writebuf))..(int)(cap((~gp).writebuf))], b);
-    gp.Value.writebuf = (~gp).writebuf[..(int)(len((~gp).writebuf) + n)];
+    nint n = copy((~gp).writebuf.slice(len((~gp).writebuf), cap((~gp).writebuf)), b);
+    gp.Value.writebuf = (~gp).writebuf.slice(0, len((~gp).writebuf) + n);
 }
 
 internal static void printsp() {
@@ -205,7 +195,7 @@ internal static void printuint(uint64 v) {
         }
         v /= 10;
     }
-    gwrite(buf[(int)(i)..]);
+    gwrite(buf.slice(i));
 }
 
 internal static void printint(int64 v) {
@@ -236,7 +226,7 @@ internal static void printhex(uint64 v) {
     buf[i] = (rune)'x';
     i--;
     buf[i] = (rune)'0';
-    gwrite(buf[(int)(i)..]);
+    gwrite(buf.slice(i));
 }
 
 internal static void printpointer(@unsafe.Pointer Δp) {

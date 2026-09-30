@@ -153,7 +153,7 @@ public static (@string location, @string context) ErrorContext(this ж<Tree> Ꮡ
     if (tree == nil) {
         tree = Ꮡt;
     }
-    @string text = (~tree).text[..(int)(pos)];
+    @string text = (~tree).text.slice(0, pos);
     nint byteNum = strings.LastIndex(text, "\n"u8);
     if (byteNum == -1){
         byteNum = pos; // On first line.
@@ -1036,7 +1036,7 @@ internal static Node term(this ж<Tree> Ꮡt) {
 
 // popVars trims the variable list to the specified length
 [GoRecv] internal static void popVars(this ref Tree t, nint n) {
-    t.vars = t.vars[..(int)(n)];
+    t.vars = t.vars.slice(0, n);
 }
 
 // useVar returns a node for a variable reference. It errors if the

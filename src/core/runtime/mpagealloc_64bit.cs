@@ -144,7 +144,7 @@ internal static void sysGrow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr lim
         //
         // We must do this regardless of whether we map new memory.
         if (needIdxLimit > len(Δp.summary[l])) {
-            Δp.summary[l] = Δp.summary[l][..(int)(needIdxLimit)];
+            Δp.summary[l] = Δp.summary[l].slice(0, needIdxLimit);
         }
         // Compute the needed address range in the summary array for level l.
         var need = summaryRangeToSumAddrRange(l, needIdxBase, needIdxLimit);

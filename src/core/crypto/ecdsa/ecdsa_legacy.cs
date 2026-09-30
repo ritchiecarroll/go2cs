@@ -47,7 +47,7 @@ internal static ж<bigꓸInt> hashToInt(slice<byte> hash, elliptic.Curve c) {
     nint orderBits = (~c.Params()).N.BitLen();
     nint orderBytes = (orderBits + 7) / 8;
     if (len(hash) > orderBytes) {
-        hash = hash[..(int)(orderBytes)];
+        hash = hash.slice(0, orderBytes);
     }
     var ret = @new<bigꓸInt>().SetBytes(hash);
     nint excess = len(hash) * 8 - orderBits;

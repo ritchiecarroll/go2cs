@@ -49,7 +49,7 @@ internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off,
     if (off > (uint64)len(data)){
         data = default!;
     } else {
-        data = data[(int)(off)..];
+        data = data.slice((nint)(off));
     }
     ref var b = ref heap<buf>(out var Ꮡb);
     b = makeBuf(Ꮡd, new unknownFormat(nil), abbrevˢ, 0, data);
@@ -845,7 +845,7 @@ internal static readonly @string offsetOutOfRangeˢ = "offset out of range"u8;
     }
     var u = Ꮡ((~d).unit, i);
     r.unit = i;
-    r.b = makeBuf(r.d, new unitжdataFormat(u), infoˢ, off, (~u).data[(int)(uint32)(off - (~u).off)..]);
+    r.b = makeBuf(r.d, new unitжdataFormat(u), infoˢ, off, (~u).data.slice((nint)(uint32)(off - (~u).off)));
 }
 
 // maybeNextUnit advances to the next unit if this one is finished.
@@ -1124,7 +1124,7 @@ internal static (slice<array<uint64>>, error) dwarf2Ranges(this ж<Data> Ꮡd, �
     if (ranges < 0 || ranges > (int64)len(d.ranges)) {
         return (default!, fmt.Errorf("invalid range offset %d (max %d)"u8, ranges, len(d.ranges)));
     }
-    var buf = makeBuf(Ꮡd, new unitжdataFormat(Ꮡu), rangesˢ, ((Offset)(uint32)ranges), d.ranges[(int)(ranges)..]);
+    var buf = makeBuf(Ꮡd, new unitжdataFormat(Ꮡu), rangesˢ, ((Offset)(uint32)ranges), d.ranges.slice((nint)(ranges)));
     while (len(buf.data) > 0) {
         var low = buf.addr();
         var high = buf.addr();

@@ -273,7 +273,7 @@ internal static void writeEventsTo(this ж<ΔGeneration> Ꮡg, ж<raw.TextWriter
     foreach (var (kᴛ1, id) in g.stacks) {
         var stk = kᴛ1.ΔClone();
 
-        var stkΔ1 = stk.stk[..(int)(stk.len)];
+        var stkΔ1 = stk.stk.slice(0, stk.len);
         var args = new uint64[]{id}.slice();
         foreach (var (_, f) in stkΔ1) {
             args = append(args, f.PC, g.String(f.Func), g.String(f.File), f.Line);

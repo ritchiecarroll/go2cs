@@ -71,7 +71,7 @@ public static (slice<byte>, error) EncryptPKCS1v15(io.Reader random, ж<PublicKe
     // EM = 0x00 || 0x02 || PS || 0x00 || M
     var em = new slice<byte>(k);
     em[1] = 2;
-    var (ps, mm) = (em[2..(int)(len(em) - len(msg) - 1)], em[(int)(len(em) - len(msg))..]);
+    var (ps, mm) = (em.slice(2, len(em) - len(msg) - 1), em.slice(len(em) - len(msg)));
     var err = nonZeroRandomBytes(ps, random);
     if (err != default!) {
         return (default!, err);
@@ -127,7 +127,7 @@ public static (slice<byte>, error) DecryptPKCS1v15(io.Reader random, ж<PrivateK
     if (valid == 0) {
         return (default!, ErrDecryption);
     }
-    return (@out[(int)(index)..], default!);
+    return (@out.slice(index), default!);
 }
 
 // DecryptPKCS1v15SessionKey decrypts a session key using RSA and the padding
@@ -186,7 +186,7 @@ public static error DecryptPKCS1v15SessionKey(io.Reader random, ж<PrivateKey> �
         return ErrDecryption;
     }
     valid &= (nint)(subtle.ConstantTimeEq((int32)(len(em) - index), (int32)len(key)));
-    subtle.ConstantTimeCopy(valid, key, em[(int)(len(em) - len(key))..]);
+    subtle.ConstantTimeCopy(valid, key, em.slice(len(em) - len(key)));
     return default!;
 }
 
@@ -260,7 +260,7 @@ internal static error /*err*/ nonZeroRandomBytes(slice<byte> s, io.Reader random
     }
     for (nint i = 0; i < len(s); i++) {
         while (s[i] == 0) {
-            (_, err) = io.ReadFull(random, s[(int)(i)..(int)(i + 1)]);
+            (_, err) = io.ReadFull(random, s.slice(i, i + 1));
             if (err != default!) {
                 return err;
             }

@@ -53,7 +53,7 @@ public static (complex128, error) ParseComplex(@string s, nint bitSize) {
     @string orig = s;
     // Remove parentheses, if any.
     if (len(s) >= 2 && s[0] == (rune)'(' && s[len(s) - 1] == (rune)')') {
-        s = s[1..(int)(len(s) - 1)];
+        s = s.slice(1, len(s) - 1);
     }
     error pending = default!;     // pending range error, or nil
     // Read real part (possibly imaginary part if followed by 'i').
@@ -64,7 +64,7 @@ public static (complex128, error) ParseComplex(@string s, nint bitSize) {
             return (0D, err);
         }
     }
-    s = s[(int)(n)..];
+    s = s.slice(n);
     // If we have nothing left, we're done.
     if (len(s) == 0) {
         return (complex(re, 0D), pending);
@@ -101,7 +101,7 @@ public static (complex128, error) ParseComplex(@string s, nint bitSize) {
             return (0D, err);
         }
     }
-    s = s[(int)(n)..];
+    s = s.slice(n);
     if (s != "i"u8) {
         return (0D, new NumErrorжerror(syntaxError(fnParseComplex, orig)));
     }

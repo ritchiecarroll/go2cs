@@ -6,7 +6,7 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 internal static nint readInto(ж<uint16> Ꮡbuf, nint toread, slice<uint16> src) {
-    return copy((~array<uint16>.AliasPointer(Ꮡbuf, 10000)).slice(-1, toread, toread), src);
+    return copy((~array<uint16>.AliasPointer(Ꮡbuf, 10000)).slice(0, toread, toread), src);
 }
 
 internal static void bumpAll(ж<byte> Ꮡp) {

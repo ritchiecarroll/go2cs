@@ -466,17 +466,17 @@ internal static (@string idem, bool bidi, error err) validateRegistration(ж<Pro
         return (s, false, new labelErrorжerror(Ꮡ(new labelError(s, "V1"u8))));
     }
     for (nint i = 0; i < len(s); ) {
-        var (v, sz) = trie.lookupString(s[(int)(i)..]);
+        var (v, sz) = trie.lookupString(s.slice(i));
         if (sz == 0) {
             return (s, bidi, ((runeError)utf8.RuneError));
         }
-        bidi = bidi || ((info)v).isBidi(s[(int)(i)..]);
+        bidi = bidi || ((info)v).isBidi(s.slice(i));
         // Copy bytes not copied so far.
         var exprᴛ1 = p.simplify(((info)v).category());
         if (exprᴛ1 == valid || exprᴛ1 == deviation) {
         }
         else if (exprᴛ1 == disallowed || exprᴛ1 == mapped || exprᴛ1 == unknown || exprᴛ1 == ignored) {
-            var (r, _) = utf8.DecodeRuneInString(s[(int)(i)..]);
+            var (r, _) = utf8.DecodeRuneInString(s.slice(i));
             return (s, bidi, ((runeError)r));
         }
 
@@ -515,9 +515,9 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
     // is another 10% saving on BenchmarkProfile for the common case.
     info combinedInfoBits = default!;
     for (nint i = 0; i < len(s); ) {
-        var (v, sz) = trie.lookupString(s[(int)(i)..]);
+        var (v, sz) = trie.lookupString(s.slice(i));
         if (sz == 0) {
-            b = append(b, s[(int)(k)..(int)(i)].ꓸꓸꓸ);
+            b = append(b, s.slice(k, i).ꓸꓸꓸ);
             b = append(b, ((@string)"\ufffd"u8).ꓸꓸꓸ);
             k = len(s);
             if (err == default!) {
@@ -526,7 +526,7 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
             break;
         }
         combinedInfoBits |= (info)(((info)v));
-        bidi = bidi || ((info)v).isBidi(s[(int)(i)..]);
+        bidi = bidi || ((info)v).isBidi(s.slice(i));
         nint start = i;
         i += sz;
         // Copy bytes not copied so far.
@@ -536,21 +536,21 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
         }
         else if (exprᴛ1 == disallowed) {
             if (err == default!) {
-                var (r, _) = utf8.DecodeRuneInString(s[(int)(start)..]);
+                var (r, _) = utf8.DecodeRuneInString(s.slice(start));
                 err = ((runeError)r);
             }
             continue;
         }
         else if (exprᴛ1 == mapped || exprᴛ1 == deviation) {
-            b = append(b, s[(int)(k)..(int)(start)].ꓸꓸꓸ);
-            b = ((info)v).appendMapping(b, s[(int)(start)..(int)(i)]);
+            b = append(b, s.slice(k, start).ꓸꓸꓸ);
+            b = ((info)v).appendMapping(b, s.slice(start, i));
         }
         else if (exprᴛ1 == ignored) {
-            b = append(b, s[(int)(k)..(int)(start)].ꓸꓸꓸ);
+            b = append(b, s.slice(k, start).ꓸꓸꓸ);
         }
         else if (exprᴛ1 == unknown) {
             b = append(b, // drop the rune
- s[(int)(k)..(int)(start)].ꓸꓸꓸ);
+ s.slice(k, start).ꓸꓸꓸ);
             b = append(b, ((@string)"\ufffd"u8).ꓸꓸꓸ);
         }
 
@@ -562,7 +562,7 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
             s = norm.NFC.String(s);
         }
     } else {
-        b = append(b, s[(int)(k)..].ꓸꓸꓸ);
+        b = append(b, s.slice(k).ꓸꓸꓸ);
         if (norm.NFC.QuickSpan(b) != len(b)) {
             b = norm.NFC.Bytes(b);
         }
@@ -602,12 +602,12 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
     if (l.Δslice != default!) {
         return l.Δslice[l.i];
     }
-    nint p = strings.IndexByte(l.orig[(int)(l.curStart)..], (rune)'.');
+    nint p = strings.IndexByte(l.orig.slice(l.curStart), (rune)'.');
     l.curEnd = l.curStart + p;
     if (p == -1) {
         l.curEnd = len(l.orig);
     }
-    return l.orig[(int)(l.curStart)..(int)(l.curEnd)];
+    return l.orig.slice(l.curStart, l.curEnd);
 }
 
 // next sets the value to the next label. It skips the last label if it is empty.
@@ -673,7 +673,7 @@ internal static error validateFromPunycode(ж<Profile> Ꮡp, @string s) {
     // TODO: detect whether string may have to be normalized in the following
     // loop.
     for (nint i = 0; i < len(s); ) {
-        var (v, sz) = trie.lookupString(s[(int)(i)..]);
+        var (v, sz) = trie.lookupString(s.slice(i));
         if (sz == 0) {
             return ((runeError)utf8.RuneError);
         }
@@ -774,10 +774,10 @@ internal static slice<array<joinState>> joinStates = GoReflect.WithElemDims(new 
     var st = stateStart;
     for (nint i = 0; ᐧ ; ) {
         var jt = x.joinType();
-        if (s[(int)(i)..(int)(i + sz)] == zwj){
+        if (s.slice(i, i + sz) == zwj){
             jt = joinZWJ;
         } else 
-        if (s[(int)(i)..(int)(i + sz)] == zwnj) {
+        if (s.slice(i, i + sz) == zwnj) {
             jt = joinZWNJ;
         }
         st = joinStates[st][jt];
@@ -789,7 +789,7 @@ internal static slice<array<joinState>> joinStates = GoReflect.WithElemDims(new 
                 break;
             }
         }
-        (v, sz) = trie.lookupString(s[(int)(i)..]);
+        (v, sz) = trie.lookupString(s.slice(i));
         x = ((info)v);
     }
     if (st == stateFAIL || st == stateAfter) {

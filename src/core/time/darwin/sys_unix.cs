@@ -59,7 +59,7 @@ internal static error preadn(uintptr fd, slice<byte> buf, nint off) {
             }
             return err;
         }
-        buf = buf[(int)(m)..];
+        buf = buf.slice(m);
     }
     return default!;
 }

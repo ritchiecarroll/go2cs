@@ -170,7 +170,7 @@ internal static bool isExcludingLatin(ref RangeTable rangeTab, rune r) {
     // Compare as uint32 to correctly handle negative runes.
     {
         nint off = rangeTab.LatinOffset; if (len(r16) > off && (uint32)r <= (uint32)r16[len(r16) - 1].Hi) {
-            return is16(r16[(int)(off)..], (uint16)r);
+            return is16(r16.slice(off), (uint16)r);
         }
     }
     var r32 = rangeTab.R32;

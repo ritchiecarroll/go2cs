@@ -423,7 +423,7 @@ internal static (slice<byte>, error) readComments(io.Reader f) {
     r.peekByte(true);
     if ((~r).err == default! && !(~r).eof) {
         // Didn't reach EOF, so must have found a non-space byte. Remove it.
-        r.Value.buf = (~r).buf[..(int)(len((~r).buf) - 1)];
+        r.Value.buf = (~r).buf.slice(0, len((~r).buf) - 1);
     }
     return ((~r).buf, (~r).err);
 }
@@ -459,7 +459,7 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
     // If we stopped successfully before EOF, we read a byte that told us we were done.
     // Return all but that last byte, which would cause a syntax error if we let it through.
     if ((~r).err == default! && !(~r).eof) {
-        info.header = (~r).buf[..(int)(len((~r).buf) - 1)];
+        info.header = (~r).buf.slice(0, len((~r).buf) - 1);
     }
     // If we stopped for a syntax error, consume the whole file so that
     // we are sure we don't change the errors that go/parser returns.
@@ -581,8 +581,8 @@ internal static bool isValidImport(@string s) {
 internal static (slice<fileEmbed>, error) parseGoEmbed(@string args, tokenꓸPosition pos) {
     void trimBytes(nint n) {
         pos.Offset += n;
-        pos.Column += utf8.RuneCountInString(args[..(int)(n)]);
-        args = args[(int)(n)..];
+        pos.Column += utf8.RuneCountInString(args.slice(0, n));
+        args = args.slice(n);
     }
     var trimBytesʗ1 = trimBytes;
     void trimSpace() {
@@ -603,7 +603,7 @@ Switch:
                     break;
                 }
             }
-            path = args[..(int)(i)];
+            path = args.slice(0, i);
             trimBytes(i);
             break;
         }
@@ -624,9 +624,9 @@ Switch:
                     continue;
                 }
                 if (args[i] == (rune)'"') {
-                    var (q, err) = strconv.Unquote(args[..(int)(i + 1)]);
+                    var (q, err) = strconv.Unquote(args.slice(0, i + 1));
                     if (err != default!) {
-                        return (default!, fmt.Errorf("invalid quoted string in //go:embed: %s"u8, args[..(int)(i + 1)]));
+                        return (default!, fmt.Errorf("invalid quoted string in //go:embed: %s"u8, args.slice(0, i + 1)));
                     }
                     path = q;
                     trimBytes(i + 1);

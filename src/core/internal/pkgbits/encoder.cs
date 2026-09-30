@@ -193,7 +193,7 @@ public static Index Flush(this ж<Encoder> Ꮡw) {
 [GoRecv] internal static void rawUvarint(this ref Encoder w, uint64 x) {
     array<byte> buf = new(10); /* binary.MaxVarintLen64 */
     nint n = binary.PutUvarint(buf[..], x);
-    var (_, err) = w.Data.Write(buf[..(int)(n)]);
+    var (_, err) = w.Data.Write(buf.slice(0, n));
     w.checkErr(err);
 }
 
@@ -235,7 +235,7 @@ public static Index Flush(this ж<Encoder> Ꮡw) {
     if (!w.encodingRelocHeader && (~w.p).syncFrames > 0) {
         var pcs = new slice<uintptr>((~w.p).syncFrames);
         nint n = Δruntime.Callers(2, pcs);
-        frames = fmtFrames(pcs[..(int)(n)].ꓸꓸꓸ);
+        frames = fmtFrames(pcs.slice(0, n).ꓸꓸꓸ);
     }
     // TODO(mdempsky): Save space by writing out stack frames as a
     // linked list so we can share common stack frames.

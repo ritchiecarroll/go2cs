@@ -1216,10 +1216,16 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedSliceNilVsEmpty() => CheckTarget("NamedSliceNilVsEmpty");
 
     [TestMethod]
+    public void CheckNamedSliceOfArrayDims() => CheckTarget("NamedSliceOfArrayDims");
+
+    [TestMethod]
     public void CheckNamedSlicePointerElements() => CheckTarget("NamedSlicePointerElements");
 
     [TestMethod]
     public void CheckNamedSlicePointerReinterpret() => CheckTarget("NamedSlicePointerReinterpret");
+
+    [TestMethod]
+    public void CheckNamedSliceReflectDims() => CheckTarget("NamedSliceReflectDims");
 
     [TestMethod]
     public void CheckNamedStringConcat() => CheckTarget("NamedStringConcat");
@@ -1378,6 +1384,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPackageVarInitOrder() => CheckTarget("PackageVarInitOrder");
 
     [TestMethod]
+    public void CheckPackageVarTupleInitOrder() => CheckTarget("PackageVarTupleInitOrder");
+
+    [TestMethod]
     public void CheckPanicDeferCalleeFrame() => CheckTarget("PanicDeferCalleeFrame");
 
     [TestMethod]
@@ -1406,6 +1415,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPkgLevelFuncLitLocals() => CheckTarget("PkgLevelFuncLitLocals");
+
+    [TestMethod]
+    public void CheckPlainSendOperandOrder() => CheckTarget("PlainSendOperandOrder");
 
     [TestMethod]
     public void CheckPointerArrayRange() => CheckTarget("PointerArrayRange");
@@ -1741,6 +1753,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckSelectSendRecvMix() => CheckTarget("SelectSendRecvMix");
 
     [TestMethod]
+    public void CheckSelectSendTupleSpread() => CheckTarget("SelectSendTupleSpread");
+
+    [TestMethod]
     public void CheckSelectSingleFire() => CheckTarget("SelectSingleFire");
 
     [TestMethod]
@@ -1808,6 +1823,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSliceBoundsEscapeRoutes() => CheckTarget("SliceBoundsEscapeRoutes");
+
+    [TestMethod]
+    public void CheckSliceBoundsRecover() => CheckTarget("SliceBoundsRecover");
 
     [TestMethod]
     public void CheckSliceElementFieldAddress() => CheckTarget("SliceElementFieldAddress");

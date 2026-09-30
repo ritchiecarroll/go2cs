@@ -138,9 +138,9 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     var cas1 = array<scase>.AliasPointer(Ꮡcas0, 65536);
     var order1 = array<uint16>.AliasPointer(Ꮡorder0, 131072);
     nint ncases = nsends + nrecvs;
-    var scases = (~cas1).slice(-1, ncases, ncases);
-    var pollorder = (~order1).slice(-1, ncases, ncases);
-    var lockorder = (~order1)[(int)(ncases)..].slice(-1, ncases, ncases);
+    var scases = (~cas1).slice(0, ncases, ncases);
+    var pollorder = (~order1).slice(0, ncases, ncases);
+    var lockorder = (~order1).slice(ncases).slice(0, ncases, ncases);
     // NOTE: pollorder/lockorder's underlying array was not zero-initialized by compiler.
     // Even when raceenabled is true, there might be select
     // statements in packages compiled without -race (e.g.,
@@ -148,7 +148,7 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     slice<uintptr> pcs = default!;
     if (raceenabled && Ꮡpc0 != nil) {
         var pc1 = array<uintptr>.AliasPointer(Ꮡpc0, 65536);
-        pcs = (~pc1).slice(-1, ncases, ncases);
+        pcs = (~pc1).slice(0, ncases, ncases);
     }
     var pcsʗ1 = pcs;
     uintptr casePC(nint casiΔ1) {
@@ -193,8 +193,8 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
         pollorder[j] = (uint16)i;
         norder++;
     }
-    pollorder = pollorder[..(int)(norder)];
-    lockorder = lockorder[..(int)(norder)];
+    pollorder = pollorder.slice(0, norder);
+    lockorder = lockorder.slice(0, norder);
     var waitReason = waitReasonSelect;
     if ((~gp).syncGroup != nil && allSynctest) {
         // Every channel selected on is in a synctest bubble,
@@ -579,8 +579,8 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
     }
     // Compact sel and orig if necessary.
     if (nsends + nrecvs < len(cases)) {
-        copy(sel[(int)(nsends)..], sel[(int)(len(cases) - nrecvs)..]);
-        copy(orig[(int)(nsends)..], orig[(int)(len(cases) - nrecvs)..]);
+        copy(sel.slice(nsends), sel.slice(len(cases) - nrecvs));
+        copy(orig.slice(nsends), orig.slice(len(cases) - nrecvs));
     }
     var order = new slice<uint16>(2 * (nsends + nrecvs));
     ж<uintptr> pc0 = default!;

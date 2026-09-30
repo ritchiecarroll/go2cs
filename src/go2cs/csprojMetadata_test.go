@@ -24,7 +24,9 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -246,4 +248,82 @@ func elementCondition(groups propertyGroups, name string) (string, bool) {
 	}
 
 	return "", false
+}
+
+// The language version is pinned, and pinned in ONE place, exactly as the framework is. `latest` moves
+// with whichever SDK builds the tree: under a .NET 11 SDK it is C# 15, whose new contextual keywords
+// can break the emitted corpus the way C# 14's `field` broke the source generator (issue #34), and
+// nothing in the repository would have chosen that. 14 is the .NET 10 default. The value lives in
+// src/Directory.Build.props and each emitted project carries it only as a CONDITIONED fallback, for the
+// same trees the TargetFramework fallback serves (deploy-core staging, -recurse output roots), so the
+// next hop is one line there.
+const pinnedLangVersion = "14"
+
+func TestTemplatesPinTheLanguageVersionConditionally(t *testing.T) {
+	for _, name := range []string{"csproj-template.xml", "test-csproj-template.xml"} {
+		contents := renderCsprojTemplate("Library", "", "")
+
+		if name == "test-csproj-template.xml" {
+			contents = renderTestCsprojTemplate()
+		}
+
+		condition, ok := elementCondition(propertyGroupsOf(t, name, contents), "LangVersion")
+
+		if !ok {
+			t.Errorf("%s sets no <LangVersion> at all", name)
+			continue
+		}
+
+		if strings.ReplaceAll(condition, " ", "") != "'$(LangVersion)'==''" {
+			t.Errorf("%s guards <LangVersion> with %q, want '$(LangVersion)'=='' -- an unconditional value cannot be hoisted", name, condition)
+		}
+
+		if !strings.Contains(contents, `<LangVersion Condition="'$(LangVersion)'==''">`+pinnedLangVersion+`</LangVersion>`) {
+			t.Errorf("%s does not pin <LangVersion> to %s (`latest` follows the SDK, which is not a choice this repository made)", name, pinnedLangVersion)
+		}
+	}
+}
+
+func TestDirectoryBuildPropsCarriesTheLanguageVersionPin(t *testing.T) {
+	props, err := os.ReadFile(filepath.Join(repoRootFromPackageDir(t), "src", "Directory.Build.props"))
+
+	if err != nil {
+		t.Fatalf("cannot read src/Directory.Build.props: %v", err)
+	}
+
+	if !strings.Contains(string(props), `<LangVersion Condition="'$(LangVersion)'==''">`+pinnedLangVersion+`</LangVersion>`) {
+		t.Errorf("src/Directory.Build.props does not carry the conditioned <LangVersion>%s</LangVersion> the templates defer to", pinnedLangVersion)
+	}
+}
+
+// global.json pins the SDK band, and NOTHING else: a `test` key would change `dotnet test`'s runner
+// (docs/DotNetMigration.md step 4). The floor 10.0.100 with `latestFeature` admits every 10.0.x SDK on
+// the fleet (the 1xx and 4xx bands) and refuses an 11.x SDK and a 9.x one. The `latestMajor` family is
+// the trap: it is the only roll-forward that crosses a major, so it would admit 11.x.
+func TestGlobalJsonPinsTheSdkBand(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join(repoRootFromPackageDir(t), "global.json"))
+
+	if err != nil {
+		t.Fatalf("cannot read global.json: %v", err)
+	}
+
+	var doc map[string]any
+
+	if err := json.Unmarshal(raw, &doc); err != nil {
+		t.Fatalf("global.json is not valid JSON: %v", err)
+	}
+
+	if len(doc) != 1 {
+		t.Errorf("global.json holds %d top-level keys, want only \"sdk\" (a `test` key changes the test runner)", len(doc))
+	}
+
+	sdk, _ := doc["sdk"].(map[string]any)
+
+	if sdk == nil {
+		t.Fatalf("global.json has no \"sdk\" object")
+	}
+
+	if sdk["version"] != "10.0.100" || sdk["rollForward"] != "latestFeature" || sdk["allowPrerelease"] != false || len(sdk) != 3 {
+		t.Errorf("global.json sdk = %v, want version 10.0.100, rollForward latestFeature, allowPrerelease false and nothing else", sdk)
+	}
 }

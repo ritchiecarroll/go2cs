@@ -335,7 +335,7 @@ public static (context.Context ctx, Action stop) NotifyContext(context.Context p
     // We know that the type of c.Context is context.cancelCtx, and we know that the
     // String method of cancelCtx returns a string that ends with ".WithCancel".
     @string name = c.Context._<stringer>().String();
-    name = name[..(int)(len(name) - len(".WithCancel"))];
+    name = name.slice(0, len(name) - len(".WithCancel"));
     buf = append(buf, ((@string)("signal.NotifyContext("u8 + name)).ꓸꓸꓸ);
     if (len(c.signals) != 0) {
         buf = append(buf, ((@string)", ["u8).ꓸꓸꓸ);

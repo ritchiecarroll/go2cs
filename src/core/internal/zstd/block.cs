@@ -20,7 +20,7 @@ internal static error compressedBlock(this ж<Reader> Ꮡr, nint blockSize) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (builtin.len(r.compressedBuf) >= blockSize){
-        r.compressedBuf = r.compressedBuf[..(int)(blockSize)];
+        r.compressedBuf = r.compressedBuf.slice(0, blockSize);
     } else {
         // We know that blockSize <= 128K,
         // so this won't allocate an enormous amount.
@@ -210,16 +210,16 @@ internal static (nint, error) setSeqTable(this ж<Reader> Ꮡr, block data, nint
             // FSE_Compressed_Mode
             r.fseScratch = new slice<fseEntry>(((nint)1).Lsh((int64)((~info).maxBits)));
         }
-        r.fseScratch = r.fseScratch[..(int)(((nint)1).Lsh((int64)((~info).maxBits)))];
+        r.fseScratch = r.fseScratch.slice(0, ((nint)1).Lsh((int64)((~info).maxBits)));
         var (tableBits, roff, err) = Ꮡr.readFSE(data, off, (~info).maxSym, (~info).maxBits, r.fseScratch);
         if (err != default!) {
             return (0, err);
         }
-        r.fseScratch = r.fseScratch[..(int)(((nint)1).Lsh((int64)(tableBits)))];
+        r.fseScratch = r.fseScratch.slice(0, ((nint)1).Lsh((int64)(tableBits)));
         if (cap(r.seqTableBuffers[kind]) == 0) {
             r.seqTableBuffers[kind] = new slice<fseBaselineEntry>(((nint)1).Lsh((int64)((~info).maxBits)));
         }
-        r.seqTableBuffers[kind] = r.seqTableBuffers[kind][..(int)(((nint)1).Lsh((int64)(tableBits)))];
+        r.seqTableBuffers[kind] = r.seqTableBuffers[kind].slice(0, ((nint)1).Lsh((int64)(tableBits)));
         {
             var errΔ1 = (~info).toBaseline(Ꮡr, roff, r.fseScratch, r.seqTableBuffers[kind]); if (errΔ1 != default!) {
                 return (0, errΔ1);
@@ -356,8 +356,8 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
             return rbr.makeError(literalByteOverflowˢ);
         }
         if (literal > 0) {
-            r.buffer = appendꓸꓸꓸ(r.buffer, litbuf[..(int)(literal)]);
-            litbuf = litbuf[(int)(literal)..];
+            r.buffer = appendꓸꓸꓸ(r.buffer, litbuf.slice(0, (nint)(literal)));
+            litbuf = litbuf.slice((nint)(literal));
         }
         if (match > 0) {
             {
@@ -414,7 +414,7 @@ internal static readonly @string offsetPastWindowˢ = "offset past window"u8;
         if (copy > match) {
             copy = match;
         }
-        r.buffer = appendꓸꓸꓸ(r.buffer, r.buffer[(int)(bufferOffset)..(int)(bufferOffset + copy)]);
+        r.buffer = appendꓸꓸꓸ(r.buffer, r.buffer.slice((nint)(bufferOffset), (nint)(bufferOffset + copy)));
         match -= copy;
     }
     return default!;

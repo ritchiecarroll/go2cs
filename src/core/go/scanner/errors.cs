@@ -90,7 +90,7 @@ public static void RemoveMultiples(this ж<ErrorList> Ꮡp) {
             i++;
         }
     }
-    p = (p)[0..(int)(i)];
+    p = (p).slice(0, i);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
