@@ -3004,6 +3004,24 @@ func TestUnsupportedRuntimeCapabilityGatesTheDeclarationItself(t *testing.T) {
 	}
 }
 
+// The test host is published as a relocatable single-file executable (publishTestHost), so the
+// deployment shape Go's statically linked test binary has EXISTS here, and a test that copies
+// os.Executable() into a temp directory and runs the copy is not host-bound. No entry may name this
+// capability: an entry that does withdraws a test the host can run, from both the Go and the C#
+// side, and hides the row whose verdict is the only signal that the premise holds.
+// os_test.TestRemoveAllWithExecutedProcess was the last such entry.
+func TestNoEntryWithdrawsATestOnTheSingleFileHostCapability(t *testing.T) {
+	for symbol, capability := range unsupportedRuntimeCapabilities {
+		if capability == "relocatable single-file test executable" {
+			t.Fatalf("entry %q withdraws a test on %q, a capability the published test host has", symbol, capability)
+		}
+	}
+
+	if _, present := unsupportedRuntimeCapabilities["os_test.TestRemoveAllWithExecutedProcess"]; present {
+		t.Fatal("os_test.TestRemoveAllWithExecutedProcess is withdrawn, but the host it needs is the single-file executable publishTestHost builds")
+	}
+}
+
 // A declaration-keyed entry must be keyed on the EXTERNAL TEST package's import path, which is the
 // package path with "_test" appended: os/exec's helper-copying tests live in `package exec_test`,
 // whose types.Package path is os/exec_test — not os/exec, and not exec_test. Getting it wrong is
