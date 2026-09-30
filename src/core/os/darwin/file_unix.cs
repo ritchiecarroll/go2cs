@@ -239,7 +239,7 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
     return f;
 }
 
-internal static void sigpipe() {
+[global::System.Diagnostics.StackTraceHidden] internal static void sigpipe() {
     runtime.os_sigpipe();
 }
 
