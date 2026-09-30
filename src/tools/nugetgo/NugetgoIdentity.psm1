@@ -71,18 +71,28 @@ function Get-NugetgoPackageId {
         return [pscustomobject]@{ ModulePath = $ModulePath; Id = $natural; Display = $natural; Natural = $natural; Alternate = $false; Reason = $null }
     }
 
-    # The hash-shortened alternate (PROPOSED shape; B2 names the triggers, not the format): the natural ID's valid
-    # characters, truncated so that '.' + 8 hex digits of SHA-256(module path) fits in 100, the hash over the EXACT
-    # module path so a/b.c and a.b/c get different alternates.
+    # The hash-shortened alternate (COORD ruling within B2, 2026-09-30):
+    # - STEM: the natural ID with every character outside [A-Za-z0-9_.-] mapped to '-', runs of separators collapsed
+    #   to their first, leading and trailing separators trimmed;
+    # - HASH: the first 8 lowercase hex digits of SHA-256 over the EXACT module path as UTF-8 (case-sensitive, /vN
+    #   included), so a/b.c and a.b/c, or Foo/x and foo/x, take different alternates;
+    # - TRUNCATE: the stem is cut at a SEPARATOR BOUNDARY so stem + '.' + hash fits in 100, never leaving a dangling
+    #   separator. The module published first keeps the natural ID; the caller passes it in -ExistingIds.
     $hash = Get-NugetgoHash $ModulePath
-    $stem = [regex]::Replace($natural, '[^\w.-]', '_')
-    $stem = [regex]::Replace($stem, '[_.-]{2,}', '.').Trim('.', '-', '_')
+    $stem = [regex]::Replace($natural, '[^A-Za-z0-9_.-]', '-')
+    $stem = [regex]::Replace($stem, '([_.-])[_.-]+', '$1').Trim('.', '-', '_')
     $room = $script:IdMaxLength - ($script:HashDigits + 1)
-    if ($stem.Length -gt $room) { $stem = $stem.Substring(0, $room).TrimEnd('.', '-', '_') }
+    if ($stem.Length -gt $room) {
+        $cut = $stem.Substring(0, $room + 1)           # one past the room, so a separator AT the boundary counts
+        $at = $cut.LastIndexOfAny([char[]]'._-')
+        $stem = if ($at -gt 0) { $cut.Substring(0, $at) } else { $stem.Substring(0, $room) }
+        $stem = $stem.TrimEnd('.', '-', '_')
+    }
     $alternate = "$stem.$hash"
 
     if (-not (Test-NugetgoIdRule $alternate) -or $taken.ContainsKey($alternate.ToLowerInvariant())) {
-        return [pscustomobject]@{ ModulePath = $ModulePath; Id = $null; Display = $null; Natural = $natural; Alternate = $true; Reason = "$why, and the hash-shortened alternate '$alternate' is not usable either: refuse and escalate" }
+        $whyAlt = if ($taken.ContainsKey($alternate.ToLowerInvariant())) { "collides with '$($taken[$alternate.ToLowerInvariant()])'" } else { "breaks nuget.org's ID rule" }
+        return [pscustomobject]@{ ModulePath = $ModulePath; Id = $null; Display = $null; Natural = $natural; Alternate = $true; Reason = "$why, and the hash-shortened alternate '$alternate' ${whyAlt}: refused by name, the hash is never extended" }
     }
     return [pscustomobject]@{ ModulePath = $ModulePath; Id = $alternate; Display = $alternate; Natural = $natural; Alternate = $true; Reason = $why }
 }

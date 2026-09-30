@@ -20,24 +20,28 @@ $ids = @(
     @('github.com/golang-jwt/jwt/v5', @(), 'nugetgo.github.com.golang-jwt.jwt.v5', $false, $null),
     @('gopkg.in/yaml.v3', @(), 'nugetgo.gopkg.in.yaml.v3', $false, $null),
     @('github.com/BurntSushi/toml', @(), 'nugetgo.github.com.BurntSushi.toml', $false, $null),
-    @('example.com/a~b', @(), $null, $true, 'breaks nuget.org''s ID rule'),
-    @('github.com/a/b.c', @('nugetgo.github.com.a.b.c'), $null, $true, 'collides'),
-    @('github.com/a.b/c', @('NUGETGO.GITHUB.COM.A.B.C'), $null, $true, 'collides'),
-    @(('example.com/' + ('x' * 95)), @(), $null, $true, 'over nuget.org''s 100'),
+    # The alternates (COORD's ruling within B2). Every hash is the first 8 hex digits of SHA-256 over the exact module
+    # path, computed INDEPENDENTLY of the module under test (coreutils sha256sum), and pinned here as a literal.
+    @('example.com/a~b', @(), 'nugetgo.example.com.a-b.42086d51', $true, 'breaks nuget.org''s ID rule'),
+    @('github.com/a/b.c', @('nugetgo.github.com.a.b.c'), 'nugetgo.github.com.a.b.c.22485230', $true, 'collides'),
+    @('github.com/a.b/c', @('NUGETGO.GITHUB.COM.A.B.C'), 'nugetgo.github.com.a.b.c.14244b44', $true, 'collides'),
+    @('github.com/Foo/x', @('nugetgo.github.com.foo.x'), 'nugetgo.github.com.Foo.x.0b06ffe9', $true, 'collides'),
+    @('github.com/foo/x', @('nugetgo.github.com.Foo.x'), 'nugetgo.github.com.foo.x.27641fec', $true, 'collides'),
+    # over 100: the stem is cut at the separator boundary before the 95 x's, never mid-segment
+    @(('example.com/' + ('x' * 95)), @(), 'nugetgo.example.com.8a8ab77e', $true, 'over nuget.org''s 100'),
+    # the alternate collides too: refused by name, the hash never extended
+    @('github.com/a/b.c', @('nugetgo.github.com.a.b.c', 'nugetgo.github.com.a.b.c.22485230'), $null, $true, 'refused by name'),
     @('not a path', @(), $null, $false, 'not a Go module path')
 )
 foreach ($c in $ids) {
     $r = Get-NugetgoPackageId -ModulePath $c[0] -ExistingIds $c[1]
     $label = "$($c[0]) [existing: $($c[1] -join ',')]"
     if ($c[2]) {
-        Check $label ($r.Id -ceq $c[2] -and $r.Alternate -eq $c[3]) "got Id '$($r.Id)' Alternate $($r.Alternate)"
-    }
-    elseif ($c[3]) {
-        $shape = $r.Id -and $r.Id.Length -le 100 -and $r.Id -match '^\w+([_.-]\w+)*$' -and $r.Id -match '\.[0-9a-f]{8}$'
-        Check $label ($r.Alternate -and $shape -and $r.Reason -like "*$($c[4])*") "got Id '$($r.Id)' Alternate $($r.Alternate) Reason '$($r.Reason)'"
+        $reasonOk = if ($c[3]) { $r.Reason -like "*$($c[4])*" } else { $null -eq $r.Reason }
+        Check $label ($r.Id -ceq $c[2] -and $r.Alternate -eq $c[3] -and $reasonOk -and $r.Id.Length -le 100) "got Id '$($r.Id)' Alternate $($r.Alternate) Reason '$($r.Reason)'"
     }
     else {
-        Check $label ($null -eq $r.Id -and $r.Reason -like "*$($c[4])*") "got Id '$($r.Id)' Reason '$($r.Reason)'"
+        Check $label ($null -eq $r.Id -and $r.Alternate -eq $c[3] -and $r.Reason -like "*$($c[4])*") "got Id '$($r.Id)' Alternate $($r.Alternate) Reason '$($r.Reason)'"
     }
 }
 # a/b.c and a.b/c must not share an alternate (the hash is over the exact path)
