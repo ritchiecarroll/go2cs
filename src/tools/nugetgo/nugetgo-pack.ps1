@@ -10,7 +10,9 @@
     under lib/<tfm>/, and declares the UNION of the packages' public go.* PackageReferences at the same
     $(GoStdLibVersion). The pack passes GoStdLibVersion as B4's range, [<ClosureVersion>, <next Go minor>), so NuGet
     writes the range from the PackageReference route itself, with no rewrite of any edge. The lower bound is the
-    closure version packed against: a PARAMETER, never a literal.
+    closure version packed against: a PARAMETER, never a literal. NuGet NORMALIZES the range as it writes the nuspec
+    (the upper bound 1.25 reads 1.25.0): the same range, ACCEPTED as such (COORD, 2026-09-30: B4 rules the range, not
+    its bytes).
 
     Identity (B2, B3) comes from NugetgoIdentity.psm1. A rehearsal carries -RehearsalSuffix (e.g. local.1), so a
     rehearsal can never mint a real release version: NuGet caches by id+version immutably. A version with no suffix is
@@ -94,11 +96,13 @@ if (-not $LicenseFile) { $LicenseFile = Join-Path (& go env GOMODCACHE).Trim() (
 if (-not (Test-Path -LiteralPath $LicenseFile)) { Refuse "no upstream LICENSE at $LicenseFile" }
 $copyright = (@(Get-Content -LiteralPath $LicenseFile | Where-Object { $_ -cmatch '^\s*Copyright\b' } | ForEach-Object { $_.Trim() }) -join '; ')
 if (-not $copyright) { Refuse "the upstream LICENSE carries no Copyright line: $LicenseFile" }
-$goMinorLine = "Go $goMajor.$goMinor"
-$description = "PROOF: unofficial go2cs C# conversion of $ModulePath $GoVersion, built on the Go 1.24.13 standard library, " +
+# The description, exactly as ruled (COORD, within B6, 2026-09-30). The Go release is the closure's own (its first three
+# components), never a literal, so the text cannot outlive the corpus it describes. The same two sentences head
+# VALIDATION.md and are the release notes.
+$goRelease = ($ClosureVersion -split '[.-]')[0..2] -join '.'
+$description = "PROOF: unofficial go2cs C# conversion of $ModulePath $GoVersion, built on the Go $goRelease standard library, " +
     "not affiliated with or endorsed by $Upstream or the Go project. " +
-    "Security: it runs on go2cs's conversion of the $goMinorLine standard library, which takes Go's security fixes only as go2cs republishes it; " +
-    "review before production use."
+    "Security: that standard library carries no Go security fixes issued after Go $goRelease; review before any production use."
 
 # D7: a validated module ships its MODULE.md as VALIDATION.md, the per-package pages beside it. A module that cannot
 # validate yet packs ONLY as a rehearsal of its shape (-UnvalidatedReason), whose VALIDATION.md says so; such a
@@ -126,7 +130,9 @@ $packDir = Join-Path $Scratch "pack\$($id.Id)"
 if (Test-Path $packDir) { Remove-Item -Recurse -Force $packDir }
 New-Item -ItemType Directory -Force $packDir | Out-Null
 Copy-Item -LiteralPath $LicenseFile (Join-Path $packDir 'LICENSE')
-Copy-Item -LiteralPath $validationPage (Join-Path $packDir 'VALIDATION.md')
+# VALIDATION.md = the ruled two sentences as its header, then the proof page itself, unchanged below them.
+[System.IO.File]::WriteAllText((Join-Path $packDir 'VALIDATION.md'),
+    ("> $description`n`n" + [System.IO.File]::ReadAllText($validationPage)), (New-Object System.Text.UTF8Encoding($false)))
 $esc = { param($s) [System.Security.SecurityElement]::Escape($s) }
 $projRefs = ($libraries | ForEach-Object { "    <ProjectReference Include=`"$(& $esc $_.FullName)`" PrivateAssets=`"all`" />" }) -join "`n"
 $pkgRefs = ($goRefs | ForEach-Object { "    <PackageReference Include=`"$_`" Version=`"`$(GoStdLibVersion)`" />" }) -join "`n"
@@ -147,6 +153,7 @@ $csproj = @"
     <Version>$(& $esc $packageVersion)</Version>
     <Authors>$(& $esc $Authors)</Authors>
     <Description>$(& $esc $description)</Description>
+    <PackageReleaseNotes>$(& $esc $description)</PackageReleaseNotes>
     <Copyright>$(& $esc $copyright)</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>VALIDATION.md</PackageReadmeFile>
@@ -217,6 +224,9 @@ try {
     $nuspecEntry = $zip.Entries | Where-Object { $_.FullName -like '*.nuspec' } | Select-Object -First 1
     $reader = New-Object System.IO.StreamReader($nuspecEntry.Open())
     [xml]$nuspec = $reader.ReadToEnd(); $reader.Dispose()
+    $validationEntry = $zip.Entries | Where-Object { $_.FullName -eq 'VALIDATION.md' } | Select-Object -First 1
+    $reader = New-Object System.IO.StreamReader($validationEntry.Open())
+    $validationHead = $reader.ReadToEnd(); $reader.Dispose()
 }
 finally { $zip.Dispose() }
 $md = $nuspec.package.metadata
@@ -230,6 +240,8 @@ Write-Host "    copyright: $($md.copyright)"
 Write-Host "    description: $($md.description)"
 Write-Host "    pages: $((@($entries | Where-Object { $_ -like '*.md' })) -join ', ')"
 if ($md.id -ne $id.Id -or $md.version -ne $packageVersion) { throw "read-back identity $($md.id) $($md.version) is not $($id.Id) $packageVersion" }
+if ($md.description -cne $description -or $md.releaseNotes -cne $description) { throw 'the read-back description or release notes are not the ruled text' }
+if (-not $validationHead.StartsWith("> $description", [StringComparison]::Ordinal)) { throw 'the packed VALIDATION.md does not open with the ruled text' }
 if ($badDeps.Count) { throw "go.* dependencies not at the B4 range: $(($badDeps | ForEach-Object { "$($_.id) $($_.version)" }) -join ', ')" }
 if (@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count -ne $libraries.Count) { throw "lib/ carries $(@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count) assemblies for $($libraries.Count) packages" }
 Write-Host "==> packed $nupkg (global packages folder unchanged: $($gpfAfter.Count) go.*/nugetgo.* pairs)"
