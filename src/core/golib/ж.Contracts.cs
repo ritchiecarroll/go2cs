@@ -193,9 +193,10 @@ public interface INilPointer
     /// map-key ordering of <c>*T</c>/<c>unsafe.Pointer</c> keys). The default is per-instance
     /// identity; <see cref="ж{T}"/> supplies the canonical referent-based form (a generated
     /// named-pointer wrapper keeps the default — a recorded fidelity residual, no consumer
-    /// orders wrapped pointers).
+    /// orders wrapped pointers). The default is an identity token
+    /// (<see cref="ManagedPointerTokens.IdentityBand"/>): unique, and refused as an address.
     /// </summary>
-    nuint PointerOrderToken => (nuint)(uint)RuntimeHelpers.GetHashCode(this);
+    nuint PointerOrderToken => ManagedPointerTokens.IdentityToken(this);
 
     /// <summary>
     /// Gets the managed object whose LIFETIME is the Go allocation this pointer references — the

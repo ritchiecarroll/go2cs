@@ -205,3 +205,59 @@ forced nonzero (`h == 0 ? 1 : h`, the guard `interfaceWordToken` and `delegateMe
 Whether any address below 2^32 is mapped in a converted host on windows or linux; the band cut's GolibTests
 and -tests readings. All of these belong
 to whoever cuts it, on a box with the SDK.
+
+## AMENDMENT 2026-09-30 -- the cut (C1), as ruled: option 2, IDENTITY tokens
+
+**Ruling.** COORD ruled option 2 of C1's 2026-09-29 sizing, which folds the post-100% gojq prerequisite (unique
+identity tokens for map and slice backings, roadmap-post100) into this item. It REPLACES §3.1's
+`0xC000_0000_0000_0000 | hash`: a band over an identity hash is safe but not unique, and identity hashes collide
+(measured in a standalone .NET 10 probe on linux: 0 among 1k live arrays and dictionaries, 2 among 10k, 80 among
+100k, 7403 among 1M).
+
+**What was cut.** golib `ManagedPointerTokens.IdentityBand` and `IdentityToken(object)`: a monotonic id minted on
+the first ask (one `ConditionalWeakTable`), and the token
+`0xC000_0000_0000_0000 | id hi (bits 61..48) | id lo (bits 46..32) | 32-bit displacement`. All seven mints of §1
+and `CurrentToken`'s fallback use it. A slice is its storage's token plus `low * elemsize` (`GoReflect.TryGoSizeOf`,
+1 when not derivable). A channel is its core's token, through the same table rather than a field on the core, so
+`CurrentToken` and the channel agree by construction. `IsIdentityToken` is the one predicate the disjointness guards
+assert against.
+
+**The wrap, stated at the site.** The id is 29 bits: after 2^29 (5.4e8) objects have been asked, ids repeat.
+
+**G's amendment (a).** The band lies inside `GoSyntheticTextRange()` ([caller base, ulong.Max)). That is harmless:
+only the proto readers use that range, to map profile PCs, which never carry an identity token. Stated at
+`IdentityBand`.
+
+**G's amendment (b).** Bit-62 disjointness from ж tokens rests on the CLR identity hash staying below 2^29.
+GolibTests `PointerTokensKeepBit62ClearSoTheHashBandIsDisjoint` guards it every run (200k ж tokens and 200k shifted
+identity hashes: bit 62 never set, linux x64 CoreCLR). UNMEASURED under Native AOT.
+
+**§3.2's comment edits, and the guards re-pointed.** RuntimeCallerPCSpanTests' and SyntheticPCRegistryTests'
+"> uint.MaxValue" assertions now assert `!IsIdentityToken`. Floor item 13: under a planted over-wide
+`IsIdentityToken` (any bit-63 number), both went red and named their sites (caller PC 0x8000800000000000; the
+synthetic-PC arm); restored byte-identical.
+
+**COORD's question (G's pprof label lead).** Can a token for a live reference-bearing object fail to alias its
+current token under option 2? Option 2 changes only the NON-ж tokens of §1. A labelMap reached through
+`FromPinnedBox` carries its box's ж token (`AllocationBase(identity hash)`), which option 2 leaves as it was, so
+option 2 neither closes nor opens that class. The ж-token collision class (`Register` keeps the last writer, so an
+earlier box's token resolves to the later box) is option 3's sizing, queued next.
+
+**Readings (linux x64, Canonical's .NET 10.0.12 build; `-tests` at Release TC0, the configuration the OSR fault
+does not reach; GolibTests read by their totals lines).**
+- RED at `f819887fa3` (the red commit): the map `Pointer()` token `0x9852f3` names user memory (identity hashes vary
+  per run), and 39 of 100000 live map and slice backings shared a token. The bit-62 guard is green.
+- GREEN at the cut: ReflectHashTokenBandTests 5/5, and the token-related classes (caller spans, the synthetic-PC
+  registry, pointer-token layout, method wrappers, pinner, referents) 41/41. Full GolibTests: Release 1447 / 0 / 16
+  and Debug 1439 / 0 / 24 of 1463.
+- P2 and P3 SCORED, MET: `-tests` base (the red commit) against the cut, with one converter built from master and
+  run serially: reflect 418 verdicts, fmt 63, internal/fmtsort 3, encoding/json 532, and runtime's FuncForPC and
+  Callers rows 12. **0 verdicts moved**, and the disclosure sets are unchanged. Disclosed record TEXT differs only
+  where a test prints a token: TestValuePointerAndUnsafePointer/{channel,function,map,slice,string} (`got 0x11e919c`
+  becomes `got 0xc000008100000000`) and TestTracebackSystem/trap's sentinel. Every signature still matches.
+- NOT measured here: the behavioral suite and CNR (no golden prints a `%p` of a map, chan, func or slice, per §2),
+  windows, darwin, and Native AOT.
+- FOUND, not cut: `unsafe.Pointer`'s `ReferentToken` (unsafe.cs, `Equals`/`GetHashCode`) keys a NON-box referent
+  on `(uint)GetHashCode`, so two different such referents with colliding hashes compare equal. That is an equality
+  key, never an address, and outside §1's census scope (the unsafe package). Same uniqueness class; routed to the
+  option 3 sizing.

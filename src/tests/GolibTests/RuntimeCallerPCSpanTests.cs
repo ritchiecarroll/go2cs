@@ -66,8 +66,9 @@ public class RuntimeCallerPCSpanTests
         Assert.AreNotEqual(FuncForPC(second).Entry(), FuncForPC(first + 1).Entry(), "first + 1 must never land in the second site's span");
     }
 
-    // THE BAND'S NEIGHBOURS. A caller PC must never equal a value of another space: managed-pointer
-    // hashes (below 2^32), tagged pointer tokens (bit 63 set, bit 47 clear; ManagedPointerTokens),
+    // THE BAND'S NEIGHBOURS. A caller PC must never equal a value of another space: identity tokens
+    // (ManagedPointerTokens.IdentityBand, reflect's Pointer() of a map, slice, func or channel), tagged
+    // pointer tokens (bit 63 set, bit 47 clear; ManagedPointerTokens),
     // synthetic PCs (from 0xFFFF_8000_0000_0000; GoSyntheticPC), and user-mode addresses, which a
     // pinned data pointer or a marshal buffer can be. The band first started at 2^32, a valid x64
     // user-mode address (the i9's hardening note on 96ce90f997); 0x8000_0000_0000_0000 would be tagged.
@@ -100,11 +101,11 @@ public class RuntimeCallerPCSpanTests
     }
 
     [TestMethod]
-    public void TheCallerBandSitsBetweenHashesAndSyntheticPCs()
+    public void TheCallerBandIsDisjointFromIdentityTokensAndSyntheticPCs()
     {
         foreach (var value in BandSamples())
         {
-            Assert.IsTrue((ulong)value > uint.MaxValue, $"caller PC 0x{(ulong)value:X16} is inside the hash space");
+            Assert.IsFalse(ManagedPointerTokens.IsIdentityToken(value), $"caller PC 0x{(ulong)value:X16} is inside the identity band");
             Assert.IsTrue((ulong)value < 0xFFFF_8000_0000_0000UL, $"caller PC 0x{(ulong)value:X16} is inside the synthetic-PC space");
         }
     }

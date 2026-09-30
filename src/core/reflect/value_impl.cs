@@ -1177,22 +1177,30 @@ public static array<uintptr> InterfaceData(this ΔValue v) {
     return data;
 }
 
-// A stable, non-zero stand-in for an interface word. Object identity, the same fallback
-// reflectPointerToken ends on — but never 0, because a present word is the property the caller is
-// entitled to observe, and GetHashCode does not promise a non-zero result.
+// A stable, non-zero stand-in for an interface word: the word's IDENTITY TOKEN, the same fallback
+// reflectPointerToken ends on. Never 0 (a present word is the property the caller is entitled to
+// observe), unique among live objects, and refused as an address (ManagedPointerTokens.IdentityBand).
 private static uintptr interfaceWordToken(object cur) {
-    uint hash = (uint)System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(cur);
-    return ((uintptr)(nuint)(hash == 0 ? 1u : hash));
+    return ((uintptr)ManagedPointerTokens.IdentityToken(cur));
 }
 
-// A slice's Go data address is `&s[0]` — its BACKING STORE plus its window offset — so the token
-// combines the two, exactly as deepValueEqual's identityRoot does. A nil slice has no storage and
-// tokens 0, which is what the nil test one level up already answers for every other kind.
+// A slice's Go data address is `&s[low]` — its BACKING STORE plus its window offset — so the token is
+// the storage's identity token displaced by `low * elemsize`, as Go's address is: two windows of one
+// backing token equal at the same start and differ by the element size per element. The storage is
+// the same identity root deepValueEqual's cycle detection keys on. A nil slice has no storage and
+// tokens 0, which is what the nil test one level up already answers for every other kind. A
+// displacement past 4 GiB wraps inside the 32-bit displacement field (ManagedPointerTokens.IdentityBand).
 private static uintptr sliceStorageToken(object boxed) {
     (object? data, nint low) = sliceData(boxed);
-    return data is null
-        ? 0
-        : ((uintptr)(nuint)(uint)System.HashCode.Combine(System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(data), low));
+    if (data is null) {
+        return 0;
+    }
+    nuint elemSize = 1;
+    System.Type? elem = boxed.GetType().IsGenericType ? boxed.GetType().GetGenericArguments()[0] : null;
+    if (elem is not null && GoReflect.TryGoSizeOf(elem, null, out nuint size) && size > 0) {
+        elemSize = size;
+    }
+    return ((uintptr)(ManagedPointerTokens.IdentityToken(data) + (nuint)(uint)unchecked((nuint)low * elemSize)));
 }
 
 // delegateMethodToken orders a func value by the METHOD it invokes rather than by the delegate
@@ -1205,15 +1213,14 @@ private static uintptr sliceStorageToken(object boxed) {
 private static uintptr delegateMethodToken(Delegate d) {
     System.Reflection.MethodInfo? method = d.Method;
     if (method is null) {
-        return ((uintptr)(nuint)(uint)System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(d));
+        return ((uintptr)ManagedPointerTokens.IdentityToken(d));
     }
     // MethodHandle THROWS for a DynamicMethod (InvalidOperationException), and reflect's own
     // Method(i) builds its func values as dynamic methods -- which is the row's actual path, found
     // only by running it. So the identity comes from the MethodInfo OBJECT, which is defined for
     // every method kind; whether that object is stable across two Method(i) calls is the question
     // this measures.
-    uint hash = (uint)System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(method);
-    return ((uintptr)(nuint)(hash == 0 ? 1u : hash));
+    return ((uintptr)ManagedPointerTokens.IdentityToken(method));
 }
 
 private static uintptr reflectPointerToken(ΔValue v) {
@@ -1268,7 +1275,7 @@ private static uintptr reflectPointerToken(ΔValue v) {
     uintptr token = cur switch {
         INilPointer p => ((uintptr)p.PointerOrderToken),
         IChannel c => ((uintptr)c.PointerOrderToken),
-        IMap => ((uintptr)(nuint)(uint)System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(mapBacking(cur) ?? cur)),
+        IMap => ((uintptr)ManagedPointerTokens.IdentityToken(mapBacking(cur) ?? cur)),
         ISlice => sliceStorageToken(cur),
         // A FUNC value is a delegate, and a delegate is minted FRESH on every read of a method value
         // — `ValueOf(p).Method(1)` hands back a new closure each time — so the default arm below,
@@ -1283,7 +1290,11 @@ private static uintptr reflectPointerToken(ΔValue v) {
         // arms above make: a map tokens its backing, a channel its core, a pointer its order token —
         // each replaces the box in hand with the thing the box is a view of.
         Delegate d => delegateMethodToken(d),
-        _ => ((uintptr)(nuint)(uint)System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(cur))
+        // Every arm but a pointer's mints an IDENTITY TOKEN (ManagedPointerTokens.IdentityBand):
+        // unique among live objects, which gojq's allocator relies on (it keys a Go map on Pointer()),
+        // and refused as an address if converted back and dereferenced. Before, these were identity
+        // HASHES below 2^32, which collide and read as low user addresses.
+        _ => ((uintptr)ManagedPointerTokens.IdentityToken(cur))
     };
     // Go also permits the OTHER direction — converting the scalar back to a pointer and
     // dereferencing it (`(*bool)(v.FieldByName(name).Addr().UnsafePointer())`, go/types'

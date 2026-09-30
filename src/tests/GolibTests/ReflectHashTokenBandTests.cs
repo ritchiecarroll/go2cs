@@ -51,6 +51,22 @@ public class ReflectHashTokenBandTests
         AssertInBand("InterfaceData word", reflect.ValueOf(x).Elem().InterfaceData()[1]);
     }
 
+    // THE REFUSAL ITSELF (the census's P1, after only): an identity token converted back to a pointer
+    // and dereferenced is Go's nil-dereference panic, not a read of a low user address. Before the
+    // band this read was a fatal access violation on windows or a silent garbage read, so there is no
+    // in-process red form of this arm.
+    [TestMethod]
+    public void ADereferencedIdentityTokenPanicsAsANilDereference()
+    {
+        map<@string, nint> m = new() { ["a"] = 1 };
+        uintptr token = reflect.ValueOf(m).Pointer();
+        ж<long> p = (ж<long>)token;
+
+        PanicException refusal = Assert.ThrowsException<PanicException>(() => p.Value);
+
+        StringAssert.Contains(refusal.Message, "nil pointer dereference", $"token 0x{(ulong)(nuint)token:x}");
+    }
+
     // UNIQUENESS (gojq's prerequisite, roadmap-post100: its allocator keys a Go map on Pointer() of a
     // map or []any to decide whether it may mutate in place). Two LIVE backings must never share a
     // token; identity hashes collide (measured: 2 among 10k live objects, 80 among 100k).
