@@ -1,0 +1,37 @@
+TRAIN K sweep partition -- the note that goes with tK-i7-sweeps.txt (COORD reconciles; written 2026-09-30 beside tK-i9-shard.txt)
+
+ROSTER OF RECORD: docs/ValidatedTestPackages.md at f819887fa3, the table's Package column: 223 banked rows.
+
+THE i7 SET ASSUMED BY tK-i9-shard.txt (96 rows) = TRAIN J's tJ-i7-sweeps.txt (92 rows, os among them)
+  + runtime/debug (banked at TRAIN J's landing, so in neither J list)
+  + the reflect canaries not already on the i7 list: crypto/cipher, go/types, encoding/json
+The i9 shard is the complement: 223 - 96 = 127 rows (J's 130 minus crypto/cipher, go/types, encoding/json).
+
+THE CANARIES, derived at f819887fa3 by the validation-bank rule (never carried forward): banked rows whose Go source,
+production OR _test.go, imports reflect (parsed import declarations, go1.24.13 GOROOT), the five largest by the
+windows Tests column: crypto/cipher 27272, crypto/tls 4759, net/http 1387, go/types 574, encoding/json 532.
+Controls: encoding/json IN, cmp OUT, go/doc/comment OUT (go/internal/gccgoimporter also OUT). reflect itself is on the
+J i7 list already. os is NOT a canary at 1.24.13 (no reflect import in os or its tests). Next ranks, for the record:
+crypto/x509 518, net 476, encoding/xml 387. K's reflect-bridge seats: r-field-ptr-equality, c1-reflect-hash-band,
+r-named-slice-reflect-dims.
+
+THE i9's STANDING HARDWARE EXCLUSION (crypto/tls + the TLS-using net suite; the D4 census split ruled 2026-09-30 00:58):
+crypto/tls, net, net/http, net/http/httptest, net/http/httputil, net/http/cgi, net/http/fcgi, net/rpc, net/smtp, crypto/x509.
+All ten are already on TRAIN J's i7 list, so the exclusion removes NO row from the complement as defined above.
+If tK-i7-sweeps.txt drops any of the ten, it goes back to the i7, never to the i9.
+Rows left IN the i9 shard that mention net/http in their Go sources, checked and kept (no TLS; each swept on the i9 at
+TRAIN J and in the D4 census): expvar (its handler, tested through httptest.NewRecorder), compress/gzip (one example over
+httptest.NewServer, plain-HTTP loopback) and log/slog (an example builds a request, no server); internal/godebugs,
+go/internal/gcimporter and go/internal/gccgoimporter name it only as data.
+
+RECONCILE: tK-i7-sweeps.txt + tK-i9-shard.txt must equal the 223 roster rows exactly (no row in neither, none in both):
+  cat tK-i7-sweeps.txt tK-i9-shard.txt | LC_ALL=C sort | uniq -d          # must print nothing
+  cat tK-i7-sweeps.txt tK-i9-shard.txt | LC_ALL=C sort -u | wc -l          # must print 223
+If the battery author's i7 list differs from the 96 above, move the difference into or out of tK-i9-shard.txt (never a
+TLS/net row into it) and restate its sha256 in the i9 brief's GO message.
+AT COMMIT TIME (the list flapped on disk during review: a second writer seeded this folder from trainJ/ and briefly
+restored J's 130-row list): re-run the two reconcile commands above against the files being committed, then take the
+sha256 of the COMMITTED blob, never the working file:
+  git show HEAD:.claude/coord-scripts/trainK/tK-i9-shard.txt | sha256sum        # this value goes in the GO
+  git show HEAD:.claude/coord-scripts/trainK/tK-i9-shard.txt | grep -c .         # EXPECT_ROWS in the GO
+tK-i9-shard.sh refuses to start unless EXPECT_LIST_SHA and EXPECT_ROWS are given and both match.
