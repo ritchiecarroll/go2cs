@@ -1378,6 +1378,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPackageVarInitOrder() => CheckTarget("PackageVarInitOrder");
 
     [TestMethod]
+    public void CheckPackageVarTupleInitOrder() => CheckTarget("PackageVarTupleInitOrder");
+
+    [TestMethod]
     public void CheckPanicDeferCalleeFrame() => CheckTarget("PanicDeferCalleeFrame");
 
     [TestMethod]

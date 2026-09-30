@@ -742,6 +742,7 @@
     <Project Path="tests/Behavioral/PackageVarFuncLitPointerParam/PackageVarFuncLitPointerParam.csproj" />
     <Project Path="tests/Behavioral/PackageVarFuncLitTypeLift/PackageVarFuncLitTypeLift.csproj" />
     <Project Path="tests/Behavioral/PackageVarInitOrder/PackageVarInitOrder.csproj" />
+    <Project Path="tests/Behavioral/PackageVarTupleInitOrder/PackageVarTupleInitOrder.csproj" />
     <Project Path="tests/Behavioral/PanicDeferCalleeFrame/PanicDeferCalleeFrame.csproj" />
     <Project Path="tests/Behavioral/PanicRecover/PanicRecover.csproj" />
     <Project Path="tests/Behavioral/PanicValueRendering/PanicValueRendering.csproj" />

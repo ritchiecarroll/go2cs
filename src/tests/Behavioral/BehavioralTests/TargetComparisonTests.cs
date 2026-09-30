@@ -1381,6 +1381,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPackageVarInitOrder() => CheckTarget("PackageVarInitOrder");
 
     [TestMethod]
+    public void CheckPackageVarTupleInitOrder() => CheckTarget("PackageVarTupleInitOrder");
+
+    [TestMethod]
     public void CheckPanicDeferCalleeFrame() => CheckTarget("PanicDeferCalleeFrame");
 
     [TestMethod]
