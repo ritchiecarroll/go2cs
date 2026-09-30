@@ -426,6 +426,44 @@ partial class runtime_package
     // runtime's TestPeriodicGC writes. GolibTests is outside runtime's InternalsVisibleTo grant.
     public static ref int64 GoForceGCPeriod => ref forcegcperiod;
 
+    // TEST SEAMS (print fidelity): the runtime's print backlog, and a goroutine writebuf capture
+    // around a body -- the two places Go's print lands. GolibTests is outside runtime's
+    // InternalsVisibleTo grant.
+    public static byte[] GoPrintBacklog()
+    {
+        printlock();
+
+        try
+        {
+            byte[] copy = new byte[(int)len(printBacklog)];
+
+            for (int i = 0; i < copy.Length; i++)
+                copy[i] = printBacklog[i];
+
+            return copy;
+        }
+        finally
+        {
+            printunlock();
+        }
+    }
+
+    public static byte[] GoCaptureWritebuf(Action body)
+    {
+        var gp = getg();
+        gp.Value.writebuf = new slice<byte>(0, 4096);
+
+        try
+        {
+            body();
+            return (~gp).writebuf.ToSpan().ToArray();
+        }
+        finally
+        {
+            gp.Value.writebuf = default!;
+        }
+    }
+
     // GC runs a garbage collection and blocks the caller until the garbage collection is complete.
     public static void GC()
     {
