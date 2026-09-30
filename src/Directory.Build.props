@@ -28,6 +28,24 @@
   </PropertyGroup>
 
   <!--
+    The repository-wide LANGUAGE VERSION, the second line a .NET hop edits, hoisted the same way and
+    for the same reason as the framework above (each emitted project keeps only a CONDITIONED
+    fallback of the same value, for trees this file is not above).
+
+    Pinned, not `latest`: `latest` follows whichever SDK builds the tree, so an 11.x SDK would silently
+    move the whole corpus to C# 15 and its new contextual keywords (C# 14's `field` already broke the
+    source generator once, issue #34). 14 is the net10.0 default. Its companion is /global.json, which
+    pins the SDK band (10.0.100 floor, `latestFeature`) so an 11.x SDK is refused by name rather than
+    trusted. Never use a `latestMajor` roll-forward there: it is the only policy that crosses a major
+    and would admit 11.x. The source generator (src/gen/go2cs-gen, netstandard2.0) keeps its own
+    explicit, unconditional 14 in its csproj: a netstandard2.0 default is C# 7.3, so it must never be
+    left to a default or to this file being above it.
+  -->
+  <PropertyGroup>
+    <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
+  </PropertyGroup>
+
+  <!--
     A source generator that fails to LOAD or INITIALIZE is only a warning to the compiler: CS8034 (the
     analyzer assembly cannot be loaded), CS8032 (it cannot be instantiated), CS8784 (a generator failed to
     initialize), CS8785 (a generator threw). The build goes on WITHOUT the generator's output and exits 0, or
