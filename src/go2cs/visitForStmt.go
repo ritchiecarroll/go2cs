@@ -50,6 +50,26 @@ func (v *Visitor) finalizeLoopContinueTarget(entry *continueTargetEntry, marker 
 	}
 }
 
+// loopBodyLines re-indents a clause's spilled pre-statements (each carrying its own leading newline and
+// the clause's indentation) to the loop body's level, one statement per line.
+func (v *Visitor) loopBodyLines(hoisted string) string {
+	var lines strings.Builder
+	bodyIndent := v.indent(v.indentLevel + 1)
+
+	for _, line := range splitLines(hoisted) {
+		if line = strings.TrimSpace(line); len(line) > 0 {
+			lines.WriteString(v.newline + bodyIndent + line)
+		}
+	}
+
+	return lines.String()
+}
+
+// loopCondPrefix opens a loop body with a spilling condition: its pre-statements, then the test.
+func (v *Visitor) loopCondPrefix(hoisted string, cond string) string {
+	return fmt.Sprintf("%s%s%sif (!(%s)) break;", v.loopBodyLines(hoisted), v.newline, v.indent(v.indentLevel+1), cond)
+}
+
 func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) {
 	// A func literal passed as a call argument in the condition (`for (…; underIs(t, func(u){…}); …)`)
 	// emits its captured-variable snapshot declarations (`var tʗ1 = t;`) — statements, invalid inside
@@ -68,18 +88,38 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 	// every transfer to the post clause (end of body, unlabeled `continue`, `continue_<label>:`).
 	perIterVars := v.forClausePerIterVars(forStmt)
 
+	// A clause statement that SPILLS an evaluating pre-statement -- a multi-value spread
+	// (`keep(next())` becomes `var (ᴛ1, ᴛ2) = next();` then `keep(ᴛ1, ᴛ2)`) or a ref-lowered
+	// temp, both of which advance tupleTempIndex -- cannot stay in a C# for-clause, which has no
+	// statement slot. The INIT runs once, first, so its spill goes before the loop. The COND runs
+	// before EVERY pass, so a spilling condition leaves the header and opens the body as
+	// `<spill> if (!(<cond>)) break;` (a spill hoisted before the loop would be evaluated once --
+	// an infinite loop that compiles); `continue` then re-enters at the top and re-evaluates it.
+	// The POST runs after every pass, so a spilling post leaves the header and closes the body,
+	// after the end-of-body continue label and the per-iteration copy-backs, and every continue to
+	// the loop is routed through that label (continueTargetEntry.forcesLabel). A loop whose clauses
+	// spill nothing emits exactly as before.
+	var condPrefix, postLowered string
+	postSpilled := false
+
 	if forStmt.Init == nil && forStmt.Post == nil {
 		// Handle while-style for loops
 		hoistBuf := &strings.Builder{}
 		var cond string
+		condSpilled := false
 
 		if forStmt.Cond != nil {
 			v.hoistedDecls = hoistBuf
+			tempsBefore := v.tupleTempIndex
 			cond = v.convExpr(forStmt.Cond, nil)
 			v.hoistedDecls = savedHoist
+			condSpilled = v.tupleTempIndex != tempsBefore
 		}
 
-		if hoistBuf.Len() > 0 {
+		if condSpilled {
+			condPrefix = v.loopCondPrefix(hoistBuf.String(), cond)
+			v.outputBuilder.WriteString(v.newline)
+		} else if hoistBuf.Len() > 0 {
 			// The buffer carries its own leading newline+indent per decl and a trailing newline (the
 			// per-decl trailing indent is trimmed by convFuncLit); writeOutput supplies `while`'s indent.
 			v.outputBuilder.WriteString(hoistBuf.String())
@@ -89,7 +129,7 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 
 		v.writeOutput("while (")
 
-		if forStmt.Cond == nil {
+		if forStmt.Cond == nil || condSpilled {
 			v.outputBuilder.WriteString(TrueMarker)
 		} else {
 			v.outputBuilder.WriteString(cond)
@@ -156,6 +196,7 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 		}
 
 		contexts := []StmtContext{format}
+		initHoistBuf := &strings.Builder{}
 
 		if forStmt.Init != nil {
 			// Allowed statements in the init part of a for loop:
@@ -167,27 +208,38 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 			// tuple-deconstruction declaration (a for-init clause cannot hold `;`-separated decls).
 			initFormat := format
 			initFormat.forInit = true
+			v.hoistedDecls = initHoistBuf
 			v.visitStmt(forStmt.Init, []StmtContext{initFormat})
+			v.hoistedDecls = savedHoist
 		}
 
 		// Convert the condition AFTER the init (preserving capture-counter ordering). Any func-literal
 		// capture-snapshot decls are collected here and hoisted before the `for`, at the same marker
-		// position as the for-init heap allocations.
+		// position as the for-init heap allocations -- unless the condition SPILLS (see condPrefix).
 		condHoistBuf := &strings.Builder{}
 		var cond string
+		condSpilled := false
 
 		if forStmt.Cond != nil {
 			v.hoistedDecls = condHoistBuf
+			tempsBefore := v.tupleTempIndex
 			cond = v.convExpr(forStmt.Cond, nil)
 			v.hoistedDecls = savedHoist
+			condSpilled = v.tupleTempIndex != tempsBefore
 		}
 
-		// Replace the marker with the hoisted condition snapshot decls followed by any heap
-		// allocations for the for loop. The marker sits after a leading newline and before the
-		// `<indent>for (`, so each group is emitted as `<indent>content` lines ending in a newline.
+		// Replace the marker with the init clause's spill, the hoisted condition snapshot decls, and
+		// any heap allocations for the for loop. The marker sits after a leading newline and before
+		// the `<indent>for (`, so each group is emitted as `<indent>content` lines ending in a newline.
 		var markerReplacement strings.Builder
 
-		if condHoistBuf.Len() > 0 {
+		if initHoistBuf.Len() > 0 {
+			markerReplacement.WriteString(strings.TrimRight(strings.TrimPrefix(initHoistBuf.String(), v.newline), " "))
+		}
+
+		if condSpilled {
+			condPrefix = v.loopCondPrefix(condHoistBuf.String(), cond)
+		} else if condHoistBuf.Len() > 0 {
 			// Reformat the buffer's `\r\n<indent>decl;…\r\n<indent>` into `<indent>decl;…\r\n` lines:
 			// drop the leading newline (the marker already follows one) and the trailing indent.
 			markerReplacement.WriteString(strings.TrimRight(strings.TrimPrefix(condHoistBuf.String(), v.newline), " "))
@@ -203,7 +255,7 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 
 		v.outputBuilder.WriteString("; ")
 
-		if forStmt.Cond == nil {
+		if forStmt.Cond == nil || condSpilled {
 			v.outputBuilder.WriteString(TrueMarker)
 			v.outputBuilder.WriteRune(' ')
 		} else {
@@ -217,10 +269,24 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 			//   - assignment
 			//   - increment / decrement statement
 			//   - send statement (source code):
+			postHoistBuf := &strings.Builder{}
+			postStart := v.outputBuilder.Len()
+			v.hoistedDecls = postHoistBuf
 			v.inForPost = true
 			v.forPostReAlias = ""
 			v.visitStmt(forStmt.Post, contexts)
 			v.inForPost = false
+			v.hoistedDecls = savedHoist
+
+			// A post that spilled leaves the header: its rendering is cut back out of the output and
+			// closes the body instead (see condPrefix above).
+			if postHoistBuf.Len() > 0 {
+				emitted := v.outputBuilder.String()
+				postSpilled = true
+				postLowered = v.loopBodyLines(postHoistBuf.String()) + v.newline + v.indent(v.indentLevel+1) + emitted[postStart:] + ";"
+				v.outputBuilder.Reset()
+				v.outputBuilder.WriteString(emitted[:postStart])
+			}
 		}
 	}
 
@@ -277,6 +343,16 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 	for _, copyBack := range copyBacks {
 		blockContext.innerSuffix += v.newline + bodyIndent + copyBack
 	}
+
+	// A lowered post closes the body after the label and the copy-backs -- the position a header
+	// post occupies -- and every continue is routed there. A lowered condition opens the body, ahead
+	// of the per-iteration declarations (it reads the carriers, like the header condition did).
+	if postSpilled {
+		blockContext.innerSuffix += postLowered
+		continueTarget.forcesLabel = true
+	}
+
+	blockContext.innerPrefix = condPrefix + blockContext.innerPrefix
 
 	v.loopCopyBackStack = append(v.loopCopyBackStack, copyBacks)
 	v.continueTargetStack = append(v.continueTargetStack, continueTarget)
