@@ -323,7 +323,10 @@ the .NET 10 hop decides the deployment shape it would emit references for. ⟨OQ
    is the v1 posture; the real decision waits for the first real multi-package module.
    **AMENDED 2026-09-29 — RULED (ledger 2026-09-29 16:38), no longer deferred.** D6 structure: one
    assembly per Go package and one nupkg per module, root ID `go.<dotted module>` carrying N
-   assemblies, with no assembly merging, which satisfies the v1 posture above. Dependency paths are
+   assemblies, with no assembly merging, which satisfies the v1 posture above. *Amended
+   2026-09-30: the root ID `go.<dotted module>` is superseded for third-party packages by B2
+   (`nugetgo.<dotted path>`, §8's OWNER RULINGS) and kept for canonical publishers.*
+   Dependency paths are
    version-free with a `go2cs.modules.lock`, one version per module per output root and a version
    clash refused by name. Third-party proof pages sit beside the conversion, never in the stdlib
    roster, and only main-module packages are validated. The design is R's
@@ -349,7 +352,12 @@ above (§1, §3, §4.3, OQ-3) point back to this block, and the earlier text sta
   pack overrides `PackageId`.
 - **B3 — versions.** The Go version without the `v` and without `+incompatible`. Rebuilds are
   `X.Y.Z.N` for a release and `L.0.N` for a prerelease or pseudo-version, never a fourth number on a
-  prerelease; revisions rise with the corpus. `/vN` and gopkg.in `.vN` stay in the ID. A version that
+  prerelease; revisions rise with the corpus. `L` is the Go prerelease or pseudo-version string used
+  as-is without the `v` (for example `1.0.0-rc.1`, or `0.0.0-20251001235044-fca9a0999f15`): its first
+  publish is `L` itself and its rebuilds are `L.0.1`, `L.0.2`. Before assigning an `L.0.N` rebuild,
+  the module's `@v/list` is checked for any version whose prerelease starts with `L.0`, and the
+  rebuild is refused or escalated if one exists, because a legal Go tag could equal it.
+  `/vN` and gopkg.in `.vN` stay in the ID. A version that
   needs an uppercase prerelease label, overflows Int32, or runs past 64 characters is refused and
   converted locally. A Go retraction maps to a NuGet deprecation. The tie-break for §4.3's exact
   match is the highest revision built for the running converter's corpus.
