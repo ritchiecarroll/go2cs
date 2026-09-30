@@ -17,26 +17,99 @@ namespace GolibTests;
 /// <remarks>
 /// Red first: a stream with its frequency batch withheld is refused by the same invocation ("no frequency
 /// event found"), so the arm is shown able to fail before its green is believed. Inconclusive only where
-/// no Go toolchain resolves (GOROOT, then PATH); every fleet box has one.
+/// no Go toolchain resolves (GOROOT, then PATH) or the one that does is not the pinned release; the reason
+/// is named either way, and the arm never runs an ambient go of another release.
 /// </remarks>
 [TestClass]
 public class ExecutionTracerParserTests
 {
-    private static string? GoTool()
+    // The go the oracle runs: GOROOT's, else the first on PATH, and only if it IS the pinned release.
+    // The parser under test is internal/trace's, and a go of another release parses a different flag set
+    // (go1.22's -d is an int, so `-d=parsed` prints usage), so an ambient toolchain that differs is a
+    // wrong oracle and the arm must not run it. `Skip` names why no go was returned.
+    internal static (string? Go, string? Skip) ResolveOracle(string? goRoot, string? path, string? pinnedRelease, Func<string, string?> versionOf)
     {
         string exe = OperatingSystem.IsWindows() ? "go.exe" : "go";
+        string? found = null;
 
-        if (Environment.GetEnvironmentVariable("GOROOT") is { Length: > 0 } root && File.Exists(Path.Combine(root, "bin", exe)))
-            return Path.Combine(root, "bin", exe);
+        if (goRoot is { Length: > 0 } && File.Exists(Path.Combine(goRoot, "bin", exe)))
+            found = Path.Combine(goRoot, "bin", exe);
 
-        foreach (string dir in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(Path.PathSeparator))
+        foreach (string dir in found is null ? (path ?? "").Split(Path.PathSeparator) : [])
         {
             if (dir.Length > 0 && File.Exists(Path.Combine(dir, exe)))
-                return Path.Combine(dir, exe);
+            {
+                found = Path.Combine(dir, exe);
+                break;
+            }
+        }
+
+        if (found is null)
+            return (null, "no Go toolchain resolves (GOROOT, PATH): the oracle is unavailable here");
+
+        if (pinnedRelease is not { Length: > 0 })
+            return (null, $"the pinned Go release cannot be read from version.props, so the go at {found} cannot be verified as the oracle");
+
+        if (versionOf(found) is not { } version)
+            return (null, $"`go version` gave no answer for the go at {found}, so it cannot be verified as the pinned release go{pinnedRelease}");
+
+        // Go prints go1.25 for the x.y.0 release, not go1.25.0.
+        if (version != $"go{pinnedRelease}" && !(pinnedRelease.EndsWith(".0") && version == $"go{pinnedRelease[..^2]}"))
+        {
+            return (null, $"the go at {found} is {version}, but the oracle is the pinned toolchain's parser " +
+                $"(go{pinnedRelease}); set GOROOT to a go{pinnedRelease} toolchain to run this arm");
+        }
+
+        return (found, null);
+    }
+
+    // The corpus's pinned Go release: GoStdLibVersion in the nearest version.props above the test binary.
+    private static string? PinnedRelease()
+    {
+        for (DirectoryInfo? dir = new(AppContext.BaseDirectory); dir is not null; dir = dir.Parent)
+        {
+            string props = Path.Combine(dir.FullName, "version.props");
+
+            if (File.Exists(props) &&
+                System.Text.RegularExpressions.Regex.Match(File.ReadAllText(props), @"<GoStdLibVersion>\s*([^<\s]+)\s*</GoStdLibVersion>") is { Success: true } match)
+                return match.Groups[1].Value;
         }
 
         return null;
     }
+
+    // What `go version` reports for one go binary, with its own toolchain (GOTOOLCHAIN=local): "go1.24.13".
+    private static string? VersionOf(string go)
+    {
+        try
+        {
+            ProcessStartInfo start = new(go, ["version"])
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false
+            };
+
+            start.Environment["GOTOOLCHAIN"] = "local";
+
+            using Process process = Process.Start(start)!;
+            Task<string> stdout = process.StandardOutput.ReadToEndAsync();
+            process.StandardError.ReadToEndAsync();
+
+            if (!process.WaitForExit(30_000) || process.ExitCode != 0)
+                return null;
+
+            System.Text.RegularExpressions.Match match = System.Text.RegularExpressions.Regex.Match(stdout.Result, @"^go version (go\S+)");
+            return match.Success ? match.Groups[1].Value : null;
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            return null;
+        }
+    }
+
+    private static (string? Go, string? Skip) Oracle() =>
+        ResolveOracle(Environment.GetEnvironmentVariable("GOROOT"), Environment.GetEnvironmentVariable("PATH"), PinnedRelease(), VersionOf);
 
     // Runs the toolchain's parser on `trace`: (exit code, stdout, stderr).
     private static (int Code, string Out, string Err) Parse(string go, byte[] trace)
@@ -129,9 +202,11 @@ public class ExecutionTracerParserTests
     [TestMethod]
     public void GosOwnParserAcceptsAManagedProgramsTrace()
     {
-        if (GoTool() is not { } go)
+        (string? resolved, string? skip) = Oracle();
+
+        if (resolved is not { } go)
         {
-            Assert.Inconclusive("no Go toolchain resolves (GOROOT, PATH): the oracle is unavailable here");
+            Assert.Inconclusive(skip);
             return;
         }
 
