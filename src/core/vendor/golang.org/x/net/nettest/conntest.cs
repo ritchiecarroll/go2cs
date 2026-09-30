@@ -628,7 +628,7 @@ internal static void resyncConn(ж<testing.T> Ꮡt, net.Conn c) {
     var buf = new slice<byte>(1024);
     while (ᐧ) {
         var (n, err) = c.Read(buf);
-        if (n > 0 && bytes.IndexByte(buf[..(int)(n)], 0xff) == n - 1) {
+        if (n > 0 && bytes.IndexByte(buf.slice(0, n), 0xff) == n - 1) {
             break;
         }
         if (err != default!) {

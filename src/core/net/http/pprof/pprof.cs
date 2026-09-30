@@ -243,7 +243,7 @@ public static void Symbol(http.ResponseWriter w, ж<http.Request> Ꮡr) {
     while (ᐧ) {
         var (word, err) = b.ReadSlice((rune)'+');
         if (err == default!) {
-            word = word[0..(int)(len(word) - 1)]; // trim +
+            word = word.slice(0, len(word) - 1); // trim +
         }
         var (pc, _) = strconv.ParseUint(((@string)word), 0, 64);
         if (pc != 0) {

@@ -293,11 +293,11 @@ internal static readonly @string plteColorTypeMismatchˢ = "PLTE, color type mis
     if (length % 3 != 0 || np <= 0 || np > 256 || np > ((nint)1).Lsh((nuint)d.depth)) {
         return ((FormatError)(@string)badPlteLengthˢ);
     }
-    var (n, err) = io.ReadFull(d.r, d.tmp[..(int)(3 * np)]);
+    var (n, err) = io.ReadFull(d.r, d.tmp.slice(0, 3 * np));
     if (err != default!) {
         return err;
     }
-    d.crc.Write(d.tmp[..(int)(n)]);
+    d.crc.Write(d.tmp.slice(0, n));
     var exprᴛ1 = d.cb;
     if (exprᴛ1 == cbP1 || exprᴛ1 == cbP2 || exprᴛ1 == cbP4 || exprᴛ1 == cbP8) {
         d.palette = new color.Palette(256);
@@ -312,7 +312,7 @@ internal static readonly @string plteColorTypeMismatchˢ = "PLTE, color type mis
             // ImageMagick 6.5.7 returns an error.
             d.palette[i] = new colorꓸRGBA(0x00, 0x00, 0x00, 0xff);
         }
-        d.palette = d.palette[..(int)(np)];
+        d.palette = d.palette.slice(0, np);
     }
     else if (exprᴛ1 == cbTC8 || exprᴛ1 == cbTCA8 || exprᴛ1 == cbTC16 || exprᴛ1 == cbTCA16) {
     }
@@ -335,12 +335,12 @@ internal static readonly @string tRNSColorTypeMismatchˢ = "tRNS, color type mis
         if (length != 2) {
             return ((FormatError)(@string)badTRNSLengthˢ);
         }
-        var (n, err) = io.ReadFull(d.r, d.tmp[..(int)(length)]);
+        var (n, err) = io.ReadFull(d.r, d.tmp.slice(0, (nint)(length)));
         if (err != default!) {
             return err;
         }
-        d.crc.Write(d.tmp[..(int)(n)]);
-        copy(d.transparent[..], d.tmp[..(int)(length)]);
+        d.crc.Write(d.tmp.slice(0, n));
+        copy(d.transparent[..], d.tmp.slice(0, (nint)(length)));
         var exprᴛ2 = d.cb;
         if (exprᴛ2 == cbG1) {
             d.transparent[1] *= 0xff;
@@ -358,25 +358,25 @@ internal static readonly @string tRNSColorTypeMismatchˢ = "tRNS, color type mis
         if (length != 6) {
             return ((FormatError)(@string)badTRNSLengthˢ);
         }
-        var (n, err) = io.ReadFull(d.r, d.tmp[..(int)(length)]);
+        var (n, err) = io.ReadFull(d.r, d.tmp.slice(0, (nint)(length)));
         if (err != default!) {
             return err;
         }
-        d.crc.Write(d.tmp[..(int)(n)]);
-        copy(d.transparent[..], d.tmp[..(int)(length)]);
+        d.crc.Write(d.tmp.slice(0, n));
+        copy(d.transparent[..], d.tmp.slice(0, (nint)(length)));
         d.useTransparent = true;
     }
     else if (exprᴛ1 == cbP1 || exprᴛ1 == cbP2 || exprᴛ1 == cbP4 || exprᴛ1 == cbP8) {
         if (length > 256) {
             return ((FormatError)(@string)badTRNSLengthˢ);
         }
-        var (n, err) = io.ReadFull(d.r, d.tmp[..(int)(length)]);
+        var (n, err) = io.ReadFull(d.r, d.tmp.slice(0, (nint)(length)));
         if (err != default!) {
             return err;
         }
-        d.crc.Write(d.tmp[..(int)(n)]);
+        d.crc.Write(d.tmp.slice(0, n));
         if (len(d.palette) < n) {
-            d.palette = d.palette[..(int)(n)];
+            d.palette = d.palette.slice(0, n);
         }
         for (nint i = 0; i < n; i++) {
             var rgba = d.palette[i]._<colorꓸRGBA>();
@@ -431,8 +431,8 @@ internal static readonly @string idatChunkLengthOverflowˢ = "IDAT chunk length 
     if ((nint)d.idatLength < 0) {
         return (0, ((UnsupportedError)(@string)idatChunkLengthOverflowˢ));
     }
-    var (n, err) = d.r.Read(p[..(int)(min(len(p), (nint)d.idatLength))]);
-    d.crc.Write(p[..(int)(n)]);
+    var (n, err) = d.r.Read(p.slice(0, min(len(p), (nint)d.idatLength)));
+    d.crc.Write(p.slice(0, n));
     d.idatLength -= (uint32)n;
     return (n, err);
 }
@@ -736,7 +736,7 @@ internal static readonly @string badFilterTypeˢ = "bad filter type"u8;
                     nrgba.SetNRGBA(x, y, new color.NRGBA(ycol, ycol, ycol, acol));
                 }
             } else {
-                copy((~gray).Pix[(int)(pixOffset)..], cdat);
+                copy((~gray).Pix.slice(pixOffset), cdat);
                 pixOffset += gray.Value.Stride;
             }
         }
@@ -789,7 +789,7 @@ internal static readonly @string badFilterTypeˢ = "bad filter type"u8;
                 for (nint x2 = 0; x2 < 8 && x + x2 < width; x2++) {
                     var idx = (uint8)((b >> (int)(7)));
                     if (len((~paletted).Palette) <= (nint)idx) {
-                        paletted.Value.Palette = (~paletted).Palette[..(int)((nint)idx + 1)];
+                        paletted.Value.Palette = (~paletted).Palette.slice(0, (nint)idx + 1);
                     }
                     paletted.SetColorIndex(x + x2, y, idx);
                     b <<= (int)(1);
@@ -802,7 +802,7 @@ internal static readonly @string badFilterTypeˢ = "bad filter type"u8;
                 for (nint x2 = 0; x2 < 4 && x + x2 < width; x2++) {
                     var idx = (uint8)((b >> (int)(6)));
                     if (len((~paletted).Palette) <= (nint)idx) {
-                        paletted.Value.Palette = (~paletted).Palette[..(int)((nint)idx + 1)];
+                        paletted.Value.Palette = (~paletted).Palette.slice(0, (nint)idx + 1);
                     }
                     paletted.SetColorIndex(x + x2, y, idx);
                     b <<= (int)(2);
@@ -815,7 +815,7 @@ internal static readonly @string badFilterTypeˢ = "bad filter type"u8;
                 for (nint x2 = 0; x2 < 2 && x + x2 < width; x2++) {
                     var idx = (uint8)((b >> (int)(4)));
                     if (len((~paletted).Palette) <= (nint)idx) {
-                        paletted.Value.Palette = (~paletted).Palette[..(int)((nint)idx + 1)];
+                        paletted.Value.Palette = (~paletted).Palette.slice(0, (nint)idx + 1);
                     }
                     paletted.SetColorIndex(x + x2, y, idx);
                     b <<= (int)(4);
@@ -826,15 +826,15 @@ internal static readonly @string badFilterTypeˢ = "bad filter type"u8;
             if (len((~paletted).Palette) != 256) {
                 for (nint x = 0; x < width; x++) {
                     if (len((~paletted).Palette) <= (nint)cdat[x]) {
-                        paletted.Value.Palette = (~paletted).Palette[..(int)((nint)cdat[x] + 1)];
+                        paletted.Value.Palette = (~paletted).Palette.slice(0, (nint)cdat[x] + 1);
                     }
                 }
             }
-            copy((~paletted).Pix[(int)(pixOffset)..], cdat);
+            copy((~paletted).Pix.slice(pixOffset), cdat);
             pixOffset += paletted.Value.Stride;
         }
         else if (exprᴛ3 == cbTCA8) {
-            copy((~nrgba).Pix[(int)(pixOffset)..], cdat);
+            copy((~nrgba).Pix.slice(pixOffset), cdat);
             pixOffset += nrgba.Value.Stride;
         }
         else if (exprᴛ3 == cbG16) {
@@ -979,7 +979,7 @@ internal static readonly @string badFilterTypeˢ = "bad filter type"u8;
         nint dBase = (y * p.yFactor + p.yOffset - rect.Min.Y) * stride + (p.xOffset - rect.Min.X) * bytesPerPixel;
         for (nint x = bounds.Min.X; x < bounds.Max.X; x++) {
             nint dΔ1 = dBase + x * p.xFactor * bytesPerPixel;
-            copy(dstPix[(int)(dΔ1)..], srcPix[(int)(s)..(int)(s + bytesPerPixel)]);
+            copy(dstPix.slice(dΔ1), srcPix.slice(s, s + bytesPerPixel));
             s += bytesPerPixel;
         }
     }
@@ -1086,11 +1086,11 @@ internal static error parseChunk(this ж<decoder> Ꮡd, bool configOnly) {
     // Ignore this chunk (of a known length).
     array<byte> ignored = new(4096);
     while (length > 0) {
-        var (n, err) = io.ReadFull(d.r, ignored[..(int)(min(len(ignored), (nint)length))]);
+        var (n, err) = io.ReadFull(d.r, ignored.slice(0, min(len(ignored), (nint)length)));
         if (err != default!) {
             return err;
         }
-        d.crc.Write(ignored[..(int)(n)]);
+        d.crc.Write(ignored.slice(0, n));
         length -= (uint32)n;
     }
     return d.verifyChecksum();

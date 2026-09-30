@@ -37,7 +37,7 @@ partial struct timedEventArgs;
 [GoRecv] internal static slice<uint64> extra(this ref baseEvent e, version.Version v) {
     var exprᴛ1 = v;
     if (exprᴛ1 == version.Go122) {
-        return e.args[(int)(len(go122.Specs()[e.typ].Args) - 1)..];
+        return e.args.slice(len(go122.Specs()[e.typ].Args) - 1);
     }
 
     throw panic(fmt.Sprintf("unsupported version: go 1.%d"u8, v));

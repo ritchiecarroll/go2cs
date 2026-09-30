@@ -68,7 +68,7 @@ internal static (bool skip, echConfig ec, error err) parseECHConfig(slice<byte> 
     if (len(ec.raw) < (nint)ec.Length + 4) {
         return (false, new echConfig(nil), errMalformedECHConfig);
     }
-    ec.raw = ec.raw[..(int)((uint16)(ec.Length + 4))];
+    ec.raw = ec.raw.slice(0, (uint16)(ec.Length + 4));
     if (ec.Version != extensionEncryptedClientHello) {
         s.Skip((nint)ec.Length);
         return (true, new echConfig(nil), default!);
@@ -146,7 +146,7 @@ internal static (slice<echConfig>, error) parseECHConfigList(slice<byte> data) {
         if (err != default!) {
             return (default!, err);
         }
-        s = s[(int)((uint16)(configLen + 4))..];
+        s = s.slice((uint16)(configLen + 4));
         if (!skip) {
             configs = append(configs, ec);
         }

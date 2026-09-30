@@ -50,12 +50,12 @@ public static error TestFS(fs.FS fsys, params ꓸꓸꓸstring expectedʗp) {
     foreach (var (_, name) in expected) {
         {
             nint i = strings.Index(name, "/"u8); if (i >= 0) {
-                @string dir = name[..(int)(i)];
-                @string dirSlash = name[..(int)(i + 1)];
+                @string dir = name.slice(0, i);
+                @string dirSlash = name.slice(0, i + 1);
                 slice<@string> subExpected = default!;
                 foreach (var (_, nameΔ1) in expected) {
                     if (strings.HasPrefix(nameΔ1, dirSlash)) {
-                        subExpected = append(subExpected, nameΔ1[(int)(len(dirSlash))..]);
+                        subExpected = append(subExpected, nameΔ1.slice(len(dirSlash)));
                     }
                 }
                 var (sub, err) = fs.Sub(fsys, dir);
@@ -659,19 +659,19 @@ internal static void checkOpen(this ж<fsTester> Ꮡt, @string @file) {
     {
         nint i = strings.Index(@file, "/"u8); if (i >= 0) {
             bad = append(bad,
-                @file[..(int)(i)] + "//" + @file[(int)(i + 1)..],
-                @file[..(int)(i)] + "/./" + @file[(int)(i + 1)..],
-                @file[..(int)(i)] + @"\" + @file[(int)(i + 1)..],
-                @file[..(int)(i)] + "/../" + @file);
+                @file.slice(0, i) + "//" + @file.slice(i + 1),
+                @file.slice(0, i) + "/./" + @file.slice(i + 1),
+                @file.slice(0, i) + @"\" + @file.slice(i + 1),
+                @file.slice(0, i) + "/../" + @file);
         }
     }
     {
         nint i = strings.LastIndex(@file, "/"u8); if (i >= 0) {
             bad = append(bad,
-                @file[..(int)(i)] + "//" + @file[(int)(i + 1)..],
-                @file[..(int)(i)] + "/./" + @file[(int)(i + 1)..],
-                @file[..(int)(i)] + @"\" + @file[(int)(i + 1)..],
-                @file + "/../" + @file[(int)(i + 1)..]);
+                @file.slice(0, i) + "//" + @file.slice(i + 1),
+                @file.slice(0, i) + "/./" + @file.slice(i + 1),
+                @file.slice(0, i) + @"\" + @file.slice(i + 1),
+                @file + "/../" + @file.slice(i + 1));
         }
     }
     foreach (var (_, b) in bad) {

@@ -153,10 +153,10 @@ internal static @string String(this ж<stringVal> Ꮡx) {
         // only the first maxLen-3 runes; then add "...".
         nint i = 0;
         for (nint n = 0; n < (nint)(maxLen - 3); n++) {
-            var (_, size) = utf8.DecodeRuneInString(s[(int)(i)..]);
+            var (_, size) = utf8.DecodeRuneInString(s.slice(i));
             i += size;
         }
-        s = s[..(int)(i)] + "...";
+        s = s.slice(0, i) + "...";
     }
     return s;
 }
@@ -573,7 +573,7 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) {
         {
             nint n = len(lit); if (n > 0 && lit[n - 1] == (rune)'i') {
                 {
-                    var im = makeFloatFromLiteral(lit[..(int)(n - 1)]); if (im != default!) {
+                    var im = makeFloatFromLiteral(lit.slice(0, n - 1)); if (im != default!) {
                         return makeComplex(((int64Val)0), im);
                     }
                 }
@@ -584,7 +584,7 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) {
         {
             nint n = len(lit); if (n >= 2) {
                 {
-                    var (code, _, _, err) = strconv.UnquoteChar(lit[1..(int)(n - 1)], (rune)'\''); if (err == default!) {
+                    var (code, _, _, err) = strconv.UnquoteChar(lit.slice(1, n - 1), (rune)'\''); if (err == default!) {
                         return MakeInt64((int64)code);
                     }
                 }
@@ -925,7 +925,7 @@ public static slice<byte> Bytes(Value x) {
     while (i > 0 && bytes[i - 1] == 0) {
         i--;
     }
-    return bytes[..(int)(i)];
+    return bytes.slice(0, i);
 }
 
 // MakeFromBytes returns the [Int] value given the bytes of its little-endian
@@ -955,7 +955,7 @@ public static Value MakeFromBytes(slice<byte> bytes) {
     while (i > 0 && words[i - 1] == 0) {
         i--;
     }
-    return makeInt(newInt().SetBits(words[..(int)(i)]));
+    return makeInt(newInt().SetBits(words.slice(0, i)));
 }
 
 // Num returns the numerator of x; x must be [Int], [Float], or [Unknown].

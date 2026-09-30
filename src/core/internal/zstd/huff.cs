@@ -123,7 +123,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
     // RFC 4.2.1.3.
     array<uint32> weightMark = new(13);
     var weightMask = (uint32)0;
-    foreach (var (_, w) in weights[..(int)(count)]) {
+    foreach (var (_, w) in weights.slice(0, count)) {
         if (w > 12) {
             return (0, 0, r.makeError(off, huffmanWeightOverflowˢ));
         }
@@ -170,7 +170,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
         next += weightMark[i + 1].Lsh((int64)(i));
         weightMark[i + 1] = cur;
     }
-    foreach (var (i, w) in weights[..(int)(count)]) {
+    foreach (var (i, w) in weights.slice(0, count)) {
         if (w == 0) {
             continue;
         }

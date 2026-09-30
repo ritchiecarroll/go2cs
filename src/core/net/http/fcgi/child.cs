@@ -54,19 +54,19 @@ internal static ж<request> newRequest(uint16 reqId, uint8 flags) {
         if (n == 0) {
             return;
         }
-        text = text[(int)(n)..];
+        text = text.slice(n);
         (var valLen, n) = readSize(text);
         if (n == 0) {
             return;
         }
-        text = text[(int)(n)..];
+        text = text.slice(n);
         if ((nint)keyLen + (nint)valLen > len(text)) {
             return;
         }
         @string key = readString(text, keyLen);
-        text = text[(int)(keyLen)..];
+        text = text.slice((nint)(keyLen));
         @string val = readString(text, valLen);
-        text = text[(int)(valLen)..];
+        text = text.slice((nint)(valLen));
         r.@params[key] = val;
     }
 }

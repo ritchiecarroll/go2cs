@@ -55,7 +55,7 @@ internal static void gcMarkRootPrepare() {
     //
     // Snapshot allArenas as markArenas. This snapshot is safe because allArenas
     // is append-only.
-    mheap_.markArenas = mheap_.allArenas.slice(-1, len(mheap_.allArenas), len(mheap_.allArenas));
+    mheap_.markArenas = mheap_.allArenas.slice(0, len(mheap_.allArenas), len(mheap_.allArenas));
     work.nSpanRoots = len(mheap_.markArenas) * (nint)(pagesPerArena / pagesPerSpanRoot);
     // Scan stacks.
     //
@@ -319,7 +319,7 @@ internal static void markrootSpans(ж<gcWork> Ꮡgcw, nint shard) {
     var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
     nuint arenaPage = (nuint)((uintptr)shard * (uintptr)pagesPerSpanRoot % (uintptr)pagesPerArena);
     // Construct slice of bitmap which we'll iterate over.
-    var specialsbits = (~ha).pageSpecials[(int)(arenaPage / 8)..];
+    var specialsbits = (~ha).pageSpecials.slice((nint)(arenaPage / 8));
     specialsbits = specialsbits[..(int)(pagesPerSpanRoot / 8)];
     foreach (var (i, _) in specialsbits) {
         // Find set bits, which correspond to spans with specials.

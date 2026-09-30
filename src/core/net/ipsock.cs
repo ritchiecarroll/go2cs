@@ -220,21 +220,21 @@ public static (@string host, @string port, error err) SplitHostPort(@string host
             return addrErr(hostport, missingPort);
         }
 
-        host = hostport[1..(int)(end)];
+        host = hostport.slice(1, end);
         (j, k) = (1, end + 1); // there can't be a '[' resp. ']' before these positions
     } else {
-        host = hostport[..(int)(i)];
+        host = hostport.slice(0, i);
         if (bytealg.IndexByteString(host, (rune)':') >= 0) {
             return addrErr(hostport, tooManyColons);
         }
     }
-    if (bytealg.IndexByteString(hostport[(int)(j)..], (rune)'[') >= 0) {
+    if (bytealg.IndexByteString(hostport.slice(j), (rune)'[') >= 0) {
         return addrErr(hostport, unexpectedInAddressˢ);
     }
-    if (bytealg.IndexByteString(hostport[(int)(k)..], (rune)']') >= 0) {
+    if (bytealg.IndexByteString(hostport.slice(k), (rune)']') >= 0) {
         return addrErr(hostport, unexpectedInAddressˢ2);
     }
-    port = hostport[(int)(i + 1)..];
+    port = hostport.slice(i + 1);
     return (host, port, default!);
 }
 
@@ -246,7 +246,7 @@ internal static (@string host, @string zone) splitHostZone(@string s) {
     // last percent sign.
     {
         nint i = bytealg.LastIndexByteString(s, (rune)'%'); if (i > 0){
-            (host, zone) = (s[..(int)(i)], s[(int)(i + 1)..]);
+            (host, zone) = (s.slice(0, i), s.slice(i + 1));
         } else {
             host = s;
         }

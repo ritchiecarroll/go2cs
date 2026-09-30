@@ -63,8 +63,8 @@ public static (FS, error) Sub(FS fsys, @string dir) {
     if (name == f.dir) {
         return (".", true);
     }
-    if (len(name) >= len(f.dir) + 2 && name[len(f.dir)] == (rune)'/' && name[..(int)(len(f.dir))] == f.dir) {
-        return (name[(int)(len(f.dir) + 1)..], true);
+    if (len(name) >= len(f.dir) + 2 && name[len(f.dir)] == (rune)'/' && name.slice(0, len(f.dir)) == f.dir) {
+        return (name.slice(len(f.dir) + 1), true);
     }
     return ("", false);
 }

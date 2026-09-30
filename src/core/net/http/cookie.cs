@@ -638,7 +638,7 @@ internal static (@string value, bool quoted, bool ok) parseCookieValue(@string r
 
     // Strip the quotes, if present.
     if (allowDoubleQuote && builtin.len(raw) > 1 && raw[0] == (rune)'"' && raw[builtin.len(raw) - 1] == (rune)'"') {
-        raw = raw[1..(int)(builtin.len(raw) - 1)];
+        raw = raw.slice(1, builtin.len(raw) - 1);
         quoted = true;
     }
     for (nint i = 0; i < builtin.len(raw); i++) {

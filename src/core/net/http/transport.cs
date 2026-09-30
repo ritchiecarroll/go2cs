@@ -1271,7 +1271,7 @@ internal static bool /*delivered*/ queueForIdleConn(this ж<Transport> Ꮡt, ж<
                         // from the idle list, or if this persistConn is too old (it was
                         // idle too long), then ignore it and look for another. In both
                         // cases it's already in the process of being closed.
-                        list = list[..(int)(builtin.len(list) - 1)];
+                        list = list.slice(0, builtin.len(list) - 1);
                         continue;
                     }
                     deliveredΔ1 = Ꮡw.tryDeliver(pconn, default!, (~pconn).idleAt);
@@ -1283,7 +1283,7 @@ internal static bool /*delivered*/ queueForIdleConn(this ж<Transport> Ꮡt, ж<
                             // HTTP/1: only one client can use pconn.
                             // Remove it from the list.
                             t.idleLRU.remove(pconn);
-                            list = list[..(int)(builtin.len(list) - 1)];
+                            list = list.slice(0, builtin.len(list) - 1);
                         }
                     }
                     stop = true;
@@ -1358,8 +1358,8 @@ internal static bool removeIdleConn(this ж<Transport> Ꮡt, ж<persistConn> Ꮡ
             }
             // Slide down, keeping most recently-used
             // conns at the end.
-            copy(pconns[(int)(i)..], pconns[(int)(i + 1)..]);
-            t.idleConn[key] = pconns[..(int)(builtin.len(pconns) - 1)];
+            copy(pconns.slice(i), pconns.slice(i + 1));
+            t.idleConn[key] = pconns.slice(0, builtin.len(pconns) - 1);
             removed = true;
             break;
         }
@@ -1586,7 +1586,7 @@ internal static void cancel(this ж<wantConn> Ꮡw, ж<Transport> Ꮡt, error er
 // all iterates over all wantConns in the queue.
 // The caller must not modify the queue while iterating.
 [GoRecv] internal static void all(this ref wantConnQueue q, Action<ж<wantConn>> f) {
-    foreach (var (_, w) in q.head[(int)(q.headPos)..]) {
+    foreach (var (_, w) in q.head.slice(q.headPos)) {
         f(w);
     }
     foreach (var (_, w) in q.tail) {
@@ -2283,7 +2283,7 @@ internal static io.ReaderFrom _ᴛ12ʗ = new persistConnWriterжReaderFrom(((ж<
 [GoRecv] internal static @string tlsHost(this ref connectMethod cm) {
     @string h = cm.targetAddr;
     if (hasPort(h)) {
-        h = h[..(int)(strings.LastIndex(h, ":"u8))];
+        h = h.slice(0, strings.LastIndex(h, ":"u8));
     }
     return h;
 }
@@ -2363,7 +2363,7 @@ internal static @string String(this connectMethodKey k) {
         return (0, fmt.Errorf("read limit of %d bytes exhausted"u8, pc.maxHeaderResponseSize()));
     }
     if ((int64)builtin.len(p) > pc.readLimit) {
-        p = p[..(int)(pc.readLimit)];
+        p = p.slice(0, (nint)(pc.readLimit));
     }
     (n, err) = pc.conn.Read(p);
     if (AreEqual(err, io.EOF)) {
@@ -2884,7 +2884,7 @@ internal static (nint, error) Write(this readWriteCloserBody recvᴛ, slice<byte
     if (b.br != nil) {
         {
             nint nΔ1 = b.br.Buffered(); if (builtin.len(p) > nΔ1) {
-                p = p[..(int)(nΔ1)];
+                p = p.slice(0, nΔ1);
             }
         }
         (n, err) = b.br.Read(p);

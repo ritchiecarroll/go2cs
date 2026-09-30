@@ -87,7 +87,7 @@ internal static readonly @string excessiveDcComponentˢ = "excessive DC componen
         return ((FormatError)(@string)sosHasWrongLengthˢ);
     }
     {
-        var err = d.readFull(d.tmp[..(int)(n)]); if (err != default!) {
+        var err = d.readFull(d.tmp.slice(0, n)); if (err != default!) {
             return err;
         }
     }
@@ -100,7 +100,7 @@ internal static readonly @string excessiveDcComponentˢ = "excessive DC componen
     for (nint i = 0; i < nComp; i++) {
         var cs = d.tmp[1 + 2 * i]; // Component selector.
         nint compIndex = -1;
-        foreach (var (j, comp) in d.comp[..(int)(d.nComp)]) {
+        foreach (var (j, comp) in d.comp.slice(0, d.nComp)) {
             if (cs == comp.c) {
                 compIndex = j;
             }
@@ -524,23 +524,23 @@ internal static readonly @string tooManyComponentsˢ = "too many components"u8;
     var dst = slice<byte>(default!);
     nint stride = 0;
     if (d.nComp == 1){
-        (dst, stride) = ((~d.img1).Pix[(int)(8 * (by * (~d.img1).Stride + bx))..], d.img1.Value.Stride);
+        (dst, stride) = ((~d.img1).Pix.slice(8 * (by * (~d.img1).Stride + bx)), d.img1.Value.Stride);
     } else {
         switch (compIndex) {
         case 0: {
-            (dst, stride) = ((~d.img3).Y[(int)(8 * (by * (~d.img3).YStride + bx))..], d.img3.Value.YStride);
+            (dst, stride) = ((~d.img3).Y.slice(8 * (by * (~d.img3).YStride + bx)), d.img3.Value.YStride);
             break;
         }
         case 1: {
-            (dst, stride) = ((~d.img3).Cb[(int)(8 * (by * (~d.img3).CStride + bx))..], d.img3.Value.CStride);
+            (dst, stride) = ((~d.img3).Cb.slice(8 * (by * (~d.img3).CStride + bx)), d.img3.Value.CStride);
             break;
         }
         case 2: {
-            (dst, stride) = ((~d.img3).Cr[(int)(8 * (by * (~d.img3).CStride + bx))..], d.img3.Value.CStride);
+            (dst, stride) = ((~d.img3).Cr.slice(8 * (by * (~d.img3).CStride + bx)), d.img3.Value.CStride);
             break;
         }
         case 3: {
-            (dst, stride) = (d.blackPix[(int)(8 * (by * d.blackStride + bx))..], d.blackStride);
+            (dst, stride) = (d.blackPix.slice(8 * (by * d.blackStride + bx)), d.blackStride);
             break;
         }
         default: {
@@ -610,7 +610,7 @@ internal static readonly @string badRstMarkerˢ = "bad RST marker"u8;
             i = 1;
         }
         {
-            var err = d.readFull(d.tmp[(int)(i)..2]); if (err != default!) {
+            var err = d.readFull(d.tmp.slice(i, 2)); if (err != default!) {
                 return err;
             }
         }

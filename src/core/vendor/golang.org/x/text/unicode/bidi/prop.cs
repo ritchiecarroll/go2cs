@@ -76,7 +76,7 @@ internal static array<ΔClass> controlByteToClass = new array<ΔClass>(16){
 public static (Properties p, nint size) LookupRune(rune r) {
     array<byte> buf = new(4);
     nint n = utf8.EncodeRune(buf[..], r);
-    return Lookup(buf[..(int)(n)]);
+    return Lookup(buf.slice(0, n));
 }
 
 // TODO: these lookup methods are based on the generated trie code. The returned

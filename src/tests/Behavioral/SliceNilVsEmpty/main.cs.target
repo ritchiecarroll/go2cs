@@ -55,7 +55,7 @@ internal static void Main() {
     probe(cloneShapeˢ, cloneShape == default!, len(cloneShape), cap(cloneShape));
     var trim = x;
     while (len(trim) > 0) {
-        trim = trim[..(int)(len(trim) - 1)];
+        trim = trim.slice(0, len(trim) - 1);
     }
     probe(trimShapeˢ, trim == default!, len(trim), cap(trim));
     slice<@string> zs = default!;

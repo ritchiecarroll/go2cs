@@ -98,7 +98,7 @@ public static void TestStream(ж<testing.T> Ꮡt, Func<cipher.Stream> ms) {
             var srcʗ1 = src;
             tΔ7.Run(fmt.Sprintf("BuffLength=%d"u8, length), (ж<testing.T> tΔ8) => {
                 copy(beforeʗ1, srcʗ1);
-                ms().XORKeyStream(dstʗ1[..(int)(length)], srcʗ1[..(int)(length)]);
+                ms().XORKeyStream(dstʗ1.slice(0, length), srcʗ1.slice(0, length));
                 if (!bytes.Equal(srcʗ1, beforeʗ1)) {
                     tΔ8.Errorf("XORKeyStream modified src; got %s, want %s"u8, truncateHex(srcʗ1), truncateHex(beforeʗ1));
                 }
@@ -111,12 +111,12 @@ public static void TestStream(ж<testing.T> Ꮡt, Func<cipher.Stream> ms) {
         foreach (var (_, length) in bufLens) {
             // Record what output is when src and dst are different
             rng.Read(buff);
-            ms().XORKeyStream(expectedOutput[..(int)(length)], buff[..(int)(length)]);
+            ms().XORKeyStream(expectedOutput.slice(0, length), buff.slice(0, length));
             // Check that the same output is generated when src=dst alias to the same
             // memory
-            ms().XORKeyStream(buff[..(int)(length)], buff[..(int)(length)]);
-            if (!bytes.Equal(buff[..(int)(length)], expectedOutput[..(int)(length)])) {
-                tΔ9.Errorf("block cipher produced different output when dst = src; got %x, want %x"u8, buff[..(int)(length)], expectedOutput[..(int)(length)]);
+            ms().XORKeyStream(buff.slice(0, length), buff.slice(0, length));
+            if (!bytes.Equal(buff.slice(0, length), expectedOutput.slice(0, length))) {
+                tΔ9.Errorf("block cipher produced different output when dst = src; got %x, want %x"u8, buff.slice(0, length), expectedOutput.slice(0, length));
             }
         }
     });
@@ -134,10 +134,10 @@ public static void TestStream(ж<testing.T> Ꮡt, Func<cipher.Stream> ms) {
                 var ciphertextʗ2 = ciphertextʗ1;
                 var plaintextʗ2 = plaintextʗ1;
                 mustPanic(tΔ11, outputSmallerThanInputˢ, () => {
-                    ms().XORKeyStream(ciphertextʗ2[..(int)(length)], plaintextʗ2);
+                    ms().XORKeyStream(ciphertextʗ2.slice(0, length), plaintextʗ2);
                 });
-                if (!bytes.Equal(ciphertextʗ1[(int)(length)..], plaintextʗ1[(int)(length)..])) {
-                    tΔ11.Errorf("XORKeyStream did out of bounds write; got %s, want %s"u8, truncateHex(ciphertextʗ1[(int)(length)..]), truncateHex(plaintextʗ1[(int)(length)..]));
+                if (!bytes.Equal(ciphertextʗ1.slice(length), plaintextʗ1.slice(length))) {
+                    tΔ11.Errorf("XORKeyStream did out of bounds write; got %s, want %s"u8, truncateHex(ciphertextʗ1.slice(length)), truncateHex(plaintextʗ1.slice(length)));
                 }
             });
         }
@@ -154,21 +154,21 @@ public static void TestStream(ж<testing.T> Ꮡt, Func<cipher.Stream> ms) {
             tΔ12.Run(fmt.Sprintf("BuffLength=%d"u8, length), (ж<testing.T> tΔ13) => {
                 // Make src and dst slices point to same array with inexact overlap
                 ref var src = ref heap<slice<byte>>(out var Ꮡsrc);
-                Ꮡsrc.ValueSlot = buffʗ1[..(int)(length)];
+                Ꮡsrc.ValueSlot = buffʗ1.slice(0, length);
                 ref var dst = ref heap<slice<byte>>(out var Ꮡdst);
-                Ꮡdst.ValueSlot = buffʗ1[1..(int)(length + 1)];
+                Ꮡdst.ValueSlot = buffʗ1.slice(1, length + 1);
                 mustPanic(tΔ13, invalidBufferOverlapˢ, () => {
                     ms().XORKeyStream(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
                 });
                 // Only overlap on one byte
-                Ꮡsrc.ValueSlot = buffʗ1[..(int)(length)];
-                Ꮡdst.ValueSlot = buffʗ1[(int)(length - 1)..(int)(2 * length - 1)];
+                Ꮡsrc.ValueSlot = buffʗ1.slice(0, length);
+                Ꮡdst.ValueSlot = buffʗ1.slice(length - 1, 2 * length - 1);
                 mustPanic(tΔ13, invalidBufferOverlapˢ, () => {
                     ms().XORKeyStream(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
                 });
                 // src comes after dst with one byte overlap
-                Ꮡsrc.ValueSlot = buffʗ1[(int)(length - 1)..(int)(2 * length - 1)];
-                Ꮡdst.ValueSlot = buffʗ1[..(int)(length)];
+                Ꮡsrc.ValueSlot = buffʗ1.slice(length - 1, 2 * length - 1);
+                Ꮡdst.ValueSlot = buffʗ1.slice(0, length);
                 mustPanic(tΔ13, invalidBufferOverlapˢ, () => {
                     ms().XORKeyStream(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
                 });
@@ -192,10 +192,10 @@ public static void TestStream(ж<testing.T> Ꮡt, Func<cipher.Stream> ms) {
             var stream = ms();
             nint i = 0;
             while (i + step < len(plaintext)) {
-                stream.XORKeyStream(dst[(int)(i)..], plaintext[(int)(i)..(int)(i + step)]);
+                stream.XORKeyStream(dst.slice(i), plaintext.slice(i, i + step));
                 i += step;
             }
-            stream.XORKeyStream(dst[(int)(i)..], plaintext[(int)(i)..]);
+            stream.XORKeyStream(dst.slice(i), plaintext.slice(i));
             if (!bytes.Equal(dst, ciphertext)) {
                 tΔ14.Errorf(stepMsg + "successive XORKeyStream calls returned a different result than a single one; got %s, want %s"u8, truncateHex(dst), truncateHex(ciphertext));
             }
@@ -236,7 +236,7 @@ internal static @string truncateHex(slice<byte> b) {
     if (len(b) <= numVals) {
         return fmt.Sprintf("%x"u8, b);
     }
-    return fmt.Sprintf("%x..."u8, b[..(int)(numVals)]);
+    return fmt.Sprintf("%x..."u8, b.slice(0, numVals));
 }
 
 } // end cryptotest_package

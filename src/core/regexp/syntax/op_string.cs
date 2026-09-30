@@ -40,7 +40,7 @@ public static @string String(this Op i) {
     switch (ᐧ) {
     case {} when 1 <= i && i <= 19: {
         i -= 1;
-        return _Op_name_0[(int)(_Op_index_0[i])..(int)(_Op_index_0[i + 1])];
+        return _Op_name_0.slice(_Op_index_0[i], _Op_index_0[i + 1]);
     }
     case {} when i == 128: {
         return _Op_name_1;

@@ -41,9 +41,9 @@ partial class pprof_package {
         nint n2 = len(b.data);
         b.length(tag, n2 - n1);
         nint n3 = len(b.data);
-        copy(b.tmp[..], b.data[(int)(n2)..(int)(n3)]);
-        copy(b.data[(int)(n1 + (n3 - n2))..], b.data[(int)(n1)..(int)(n2)]);
-        copy(b.data[(int)(n1)..], b.tmp[..(int)(n3 - n2)]);
+        copy(b.tmp[..], b.data.slice(n2, n3));
+        copy(b.data.slice(n1 + (n3 - n2)), b.data.slice(n1, n2));
+        copy(b.data.slice(n1), b.tmp.slice(0, n3 - n2));
         return;
     }
     foreach (var (_, u) in x) {
@@ -80,9 +80,9 @@ partial class pprof_package {
         nint n2 = len(b.data);
         b.length(tag, n2 - n1);
         nint n3 = len(b.data);
-        copy(b.tmp[..], b.data[(int)(n2)..(int)(n3)]);
-        copy(b.data[(int)(n1 + (n3 - n2))..], b.data[(int)(n1)..(int)(n2)]);
-        copy(b.data[(int)(n1)..], b.tmp[..(int)(n3 - n2)]);
+        copy(b.tmp[..], b.data.slice(n2, n3));
+        copy(b.data.slice(n1 + (n3 - n2)), b.data.slice(n1, n2));
+        copy(b.data.slice(n1), b.tmp.slice(0, n3 - n2));
         return;
     }
     foreach (var (_, u) in x) {
@@ -135,9 +135,9 @@ partial class pprof_package {
     nint n2 = len(b.data);
     b.length(tag, n2 - n1);
     nint n3 = len(b.data);
-    copy(b.tmp[..], b.data[(int)(n2)..(int)(n3)]);
-    copy(b.data[(int)(n1 + (n3 - n2))..], b.data[(int)(n1)..(int)(n2)]);
-    copy(b.data[(int)(n1)..], b.tmp[..(int)(n3 - n2)]);
+    copy(b.tmp[..], b.data.slice(n2, n3));
+    copy(b.data.slice(n1 + (n3 - n2)), b.data.slice(n1, n2));
+    copy(b.data.slice(n1), b.tmp.slice(0, n3 - n2));
     b.nest--;
 }
 

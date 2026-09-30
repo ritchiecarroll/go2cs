@@ -33,10 +33,10 @@ internal static void sais_8_64(slice<byte> text, nint textMax, slice<int64> sa, 
     slice<int64> freq = default!;
     slice<int64> bucket = default!;
     if (builtin.len(tmp) >= 2 * textMax){
-        (freq, bucket) = (tmp[..(int)(textMax)], tmp[(int)(textMax)..(int)(2 * textMax)]);
+        (freq, bucket) = (tmp.slice(0, textMax), tmp.slice(textMax, 2 * textMax));
         freq[0] = -1; // mark as uninitialized
     } else {
-        (freq, bucket) = (default!, tmp[..(int)(textMax)]);
+        (freq, bucket) = (default!, tmp.slice(0, textMax));
     }
     // The SAIS algorithm.
     // Each of these calls makes one scan through sa.
@@ -62,7 +62,7 @@ internal static void sais_8_64(slice<byte> text, nint textMax, slice<int64> sa, 
             // (simpler) LMS-substring sort order.
             // Copy the original LMS-substring order into the
             // suffix array destination.
-            copy(sa, sa[(int)(builtin.len(sa) - numLMS)..]);
+            copy(sa, sa.slice(builtin.len(sa) - numLMS));
         }
         expand_8_64(text, freq, bucket, sa, numLMS);
     }
@@ -92,10 +92,10 @@ internal static void sais_32(slice<int32> text, nint textMax, slice<int32> sa, s
     slice<int32> freq = default!;
     slice<int32> bucket = default!;
     if (builtin.len(tmp) >= 2 * textMax){
-        (freq, bucket) = (tmp[..(int)(textMax)], tmp[(int)(textMax)..(int)(2 * textMax)]);
+        (freq, bucket) = (tmp.slice(0, textMax), tmp.slice(textMax, 2 * textMax));
         freq[0] = -1; // mark as uninitialized
     } else {
-        (freq, bucket) = (default!, tmp[..(int)(textMax)]);
+        (freq, bucket) = (default!, tmp.slice(0, textMax));
     }
     // The SAIS algorithm.
     // Each of these calls makes one scan through sa.
@@ -121,7 +121,7 @@ internal static void sais_32(slice<int32> text, nint textMax, slice<int32> sa, s
             // (simpler) LMS-substring sort order.
             // Copy the original LMS-substring order into the
             // suffix array destination.
-            copy(sa, sa[(int)(builtin.len(sa) - numLMS)..]);
+            copy(sa, sa.slice(builtin.len(sa) - numLMS));
         }
         expand_32(text, freq, bucket, sa, numLMS);
     }
@@ -151,10 +151,10 @@ internal static void sais_64(slice<int64> text, nint textMax, slice<int64> sa, s
     slice<int64> freq = default!;
     slice<int64> bucket = default!;
     if (builtin.len(tmp) >= 2 * textMax){
-        (freq, bucket) = (tmp[..(int)(textMax)], tmp[(int)(textMax)..(int)(2 * textMax)]);
+        (freq, bucket) = (tmp.slice(0, textMax), tmp.slice(textMax, 2 * textMax));
         freq[0] = -1; // mark as uninitialized
     } else {
-        (freq, bucket) = (default!, tmp[..(int)(textMax)]);
+        (freq, bucket) = (default!, tmp.slice(0, textMax));
     }
     // The SAIS algorithm.
     // Each of these calls makes one scan through sa.
@@ -180,7 +180,7 @@ internal static void sais_64(slice<int64> text, nint textMax, slice<int64> sa, s
             // (simpler) LMS-substring sort order.
             // Copy the original LMS-substring order into the
             // suffix array destination.
-            copy(sa, sa[(int)(builtin.len(sa) - numLMS)..]);
+            copy(sa, sa.slice(builtin.len(sa) - numLMS));
         }
         expand_64(text, freq, bucket, sa, numLMS);
     }
@@ -1010,7 +1010,7 @@ internal static nint assignID_8_64(slice<byte> text, slice<int64> sa, nint numLM
     nint id = 0;
     var lastLen = (int64)(-1); // impossible
     var lastPos = (int64)0;
-    foreach (var (_, j) in sa[(int)(builtin.len(sa) - numLMS)..]) {
+    foreach (var (_, j) in sa.slice(builtin.len(sa) - numLMS)) {
         // Is the LMS-substring at index j new, or is it the same as the last one we saw?
         var n = sa[(nint)(j / 2)];
         if (n != lastLen) {
@@ -1023,8 +1023,8 @@ internal static nint assignID_8_64(slice<byte> text, slice<int64> sa, nint numLM
         {
             // Compare actual texts.
             nint nΔ1 = (nint)n;
-            var @this = text[(int)(j)..][..(int)(nΔ1)];
-            var last = text[(int)(lastPos)..][..(int)(nΔ1)];
+            var @this = text.slice((nint)(j)).slice(0, nΔ1);
+            var last = text.slice((nint)(lastPos)).slice(0, nΔ1);
             for (nint i = 0; i < nΔ1; i++) {
                 if (@this[i] != last[i]) {
                     goto New;
@@ -1046,7 +1046,7 @@ internal static nint assignID_32(slice<int32> text, slice<int32> sa, nint numLMS
     nint id = 0;
     var lastLen = (int32)(-1); // impossible
     var lastPos = (int32)0;
-    foreach (var (_, j) in sa[(int)(builtin.len(sa) - numLMS)..]) {
+    foreach (var (_, j) in sa.slice(builtin.len(sa) - numLMS)) {
         // Is the LMS-substring at index j new, or is it the same as the last one we saw?
         var n = sa[j / 2];
         if (n != lastLen) {
@@ -1059,8 +1059,8 @@ internal static nint assignID_32(slice<int32> text, slice<int32> sa, nint numLMS
         {
             // Compare actual texts.
             nint nΔ1 = (nint)n;
-            var @this = text[(int)(j)..][..(int)(nΔ1)];
-            var last = text[(int)(lastPos)..][..(int)(nΔ1)];
+            var @this = text.slice(j).slice(0, nΔ1);
+            var last = text.slice(lastPos).slice(0, nΔ1);
             for (nint i = 0; i < nΔ1; i++) {
                 if (@this[i] != last[i]) {
                     goto New;
@@ -1082,7 +1082,7 @@ internal static nint assignID_64(slice<int64> text, slice<int64> sa, nint numLMS
     nint id = 0;
     var lastLen = (int64)(-1); // impossible
     var lastPos = (int64)0;
-    foreach (var (_, j) in sa[(int)(builtin.len(sa) - numLMS)..]) {
+    foreach (var (_, j) in sa.slice(builtin.len(sa) - numLMS)) {
         // Is the LMS-substring at index j new, or is it the same as the last one we saw?
         var n = sa[(nint)(j / 2)];
         if (n != lastLen) {
@@ -1095,8 +1095,8 @@ internal static nint assignID_64(slice<int64> text, slice<int64> sa, nint numLMS
         {
             // Compare actual texts.
             nint nΔ1 = (nint)n;
-            var @this = text[(int)(j)..][..(int)(nΔ1)];
-            var last = text[(int)(lastPos)..][..(int)(nΔ1)];
+            var @this = text.slice((nint)(j)).slice(0, nΔ1);
+            var last = text.slice((nint)(lastPos)).slice(0, nΔ1);
             for (nint i = 0; i < nΔ1; i++) {
                 if (@this[i] != last[i]) {
                     goto New;
@@ -1126,7 +1126,7 @@ internal static void map_64(slice<int64> sa, nint numLMS) {
 }
 
 internal static void recurse_64(slice<int64> sa, slice<int64> oldTmp, nint numLMS, nint maxID) {
-    var (dst, saTmp, text) = (sa[..(int)(numLMS)], sa[(int)(numLMS)..(int)(builtin.len(sa) - numLMS)], sa[(int)(builtin.len(sa) - numLMS)..]);
+    var (dst, saTmp, text) = (sa.slice(0, numLMS), sa.slice(numLMS, builtin.len(sa) - numLMS), sa.slice(builtin.len(sa) - numLMS));
     // Set up temporary space for recursive call.
     // We must pass sais_64 a tmp buffer with at least maxID entries.
     //
@@ -1186,7 +1186,7 @@ internal static void recurse_64(slice<int64> sa, slice<int64> oldTmp, nint numLM
 }
 
 internal static void unmap_8_64(slice<byte> text, slice<int64> sa, nint numLMS) {
-    var unmap = sa[(int)(builtin.len(sa) - numLMS)..];
+    var unmap = sa.slice(builtin.len(sa) - numLMS);
     nint j = builtin.len(unmap);
     // "LMS-substring iterator" (see placeLMS_8_64 above).
     var (c0, c1, isTypeS) = ((byte)0, (byte)0, false);
@@ -1203,14 +1203,14 @@ internal static void unmap_8_64(slice<byte> text, slice<int64> sa, nint numLMS) 
         }
     }
     // Apply inverse map to subproblem suffix array.
-    sa = sa[..(int)(numLMS)];
+    sa = sa.slice(0, numLMS);
     for (nint i = 0; i < builtin.len(sa); i++) {
         sa[i] = unmap[(nint)(sa[i])];
     }
 }
 
 internal static void unmap_32(slice<int32> text, slice<int32> sa, nint numLMS) {
-    var unmap = sa[(int)(builtin.len(sa) - numLMS)..];
+    var unmap = sa.slice(builtin.len(sa) - numLMS);
     nint j = builtin.len(unmap);
     // "LMS-substring iterator" (see placeLMS_32 above).
     var (c0, c1, isTypeS) = ((int32)0, (int32)0, false);
@@ -1227,14 +1227,14 @@ internal static void unmap_32(slice<int32> text, slice<int32> sa, nint numLMS) {
         }
     }
     // Apply inverse map to subproblem suffix array.
-    sa = sa[..(int)(numLMS)];
+    sa = sa.slice(0, numLMS);
     for (nint i = 0; i < builtin.len(sa); i++) {
         sa[i] = unmap[sa[i]];
     }
 }
 
 internal static void unmap_64(slice<int64> text, slice<int64> sa, nint numLMS) {
-    var unmap = sa[(int)(builtin.len(sa) - numLMS)..];
+    var unmap = sa.slice(builtin.len(sa) - numLMS);
     nint j = builtin.len(unmap);
     // "LMS-substring iterator" (see placeLMS_64 above).
     var (c0, c1, isTypeS) = ((int64)0, (int64)0, false);
@@ -1251,7 +1251,7 @@ internal static void unmap_64(slice<int64> text, slice<int64> sa, nint numLMS) {
         }
     }
     // Apply inverse map to subproblem suffix array.
-    sa = sa[..(int)(numLMS)];
+    sa = sa.slice(0, numLMS);
     for (nint i = 0; i < builtin.len(sa); i++) {
         sa[i] = unmap[(nint)(sa[i])];
     }

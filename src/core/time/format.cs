@@ -218,13 +218,13 @@ internal static (@string prefix, nint std, @string suffix) nextStdChunk(@string 
             nint c = (nint)layout[i];
             switch (c) {
             case (rune)'J': {
-                if (len(layout) >= i + 3 && layout[(int)(i)..(int)(i + 3)] == "Jan") {
+                if (len(layout) >= i + 3 && layout.slice(i, i + 3) == "Jan") {
                     // January, Jan
-                    if (len(layout) >= i + 7 && layout[(int)(i)..(int)(i + 7)] == "January") {
-                        return (layout[0..(int)(i)], stdLongMonth, layout[(int)(i + 7)..]);
+                    if (len(layout) >= i + 7 && layout.slice(i, i + 7) == "January") {
+                        return (layout.slice(0, i), stdLongMonth, layout.slice(i + 7));
                     }
-                    if (!startsWithLowerCase(layout[(int)(i + 3)..])) {
-                        return (layout[0..(int)(i)], stdMonth, layout[(int)(i + 3)..]);
+                    if (!startsWithLowerCase(layout.slice(i + 3))) {
+                        return (layout.slice(0, i), stdMonth, layout.slice(i + 3));
                     }
                 }
                 break;
@@ -232,16 +232,16 @@ internal static (@string prefix, nint std, @string suffix) nextStdChunk(@string 
             case (rune)'M': {
                 if (len(layout) >= i + 3) {
                     // Monday, Mon, MST
-                    if (layout[(int)(i)..(int)(i + 3)] == "Mon") {
-                        if (len(layout) >= i + 6 && layout[(int)(i)..(int)(i + 6)] == "Monday") {
-                            return (layout[0..(int)(i)], stdLongWeekDay, layout[(int)(i + 6)..]);
+                    if (layout.slice(i, i + 3) == "Mon") {
+                        if (len(layout) >= i + 6 && layout.slice(i, i + 6) == "Monday") {
+                            return (layout.slice(0, i), stdLongWeekDay, layout.slice(i + 6));
                         }
-                        if (!startsWithLowerCase(layout[(int)(i + 3)..])) {
-                            return (layout[0..(int)(i)], stdWeekDay, layout[(int)(i + 3)..]);
+                        if (!startsWithLowerCase(layout.slice(i + 3))) {
+                            return (layout.slice(0, i), stdWeekDay, layout.slice(i + 3));
                         }
                     }
-                    if (layout[(int)(i)..(int)(i + 3)] == "MST") {
-                        return (layout[0..(int)(i)], stdTZ, layout[(int)(i + 3)..]);
+                    if (layout.slice(i, i + 3) == "MST") {
+                        return (layout.slice(0, i), stdTZ, layout.slice(i + 3));
                     }
                 }
                 break;
@@ -249,99 +249,99 @@ internal static (@string prefix, nint std, @string suffix) nextStdChunk(@string 
             case (rune)'0': {
                 if (len(layout) >= i + 2 && (rune)'1' <= layout[i + 1] && layout[i + 1] <= (rune)'6') {
                     // 01, 02, 03, 04, 05, 06, 002
-                    return (layout[0..(int)(i)], std0x[(byte)(layout[i + 1] - (rune)'1')], layout[(int)(i + 2)..]);
+                    return (layout.slice(0, i), std0x[(byte)(layout[i + 1] - (rune)'1')], layout.slice(i + 2));
                 }
                 if (len(layout) >= i + 3 && layout[i + 1] == (rune)'0' && layout[i + 2] == (rune)'2') {
-                    return (layout[0..(int)(i)], stdZeroYearDay, layout[(int)(i + 3)..]);
+                    return (layout.slice(0, i), stdZeroYearDay, layout.slice(i + 3));
                 }
                 break;
             }
             case (rune)'1': {
                 if (len(layout) >= i + 2 && layout[i + 1] == (rune)'5') {
                     // 15, 1
-                    return (layout[0..(int)(i)], stdHour, layout[(int)(i + 2)..]);
+                    return (layout.slice(0, i), stdHour, layout.slice(i + 2));
                 }
-                return (layout[0..(int)(i)], stdNumMonth, layout[(int)(i + 1)..]);
+                return (layout.slice(0, i), stdNumMonth, layout.slice(i + 1));
             }
             case (rune)'2': {
-                if (len(layout) >= i + 4 && layout[(int)(i)..(int)(i + 4)] == "2006") {
+                if (len(layout) >= i + 4 && layout.slice(i, i + 4) == "2006") {
                     // 2006, 2
-                    return (layout[0..(int)(i)], stdLongYear, layout[(int)(i + 4)..]);
+                    return (layout.slice(0, i), stdLongYear, layout.slice(i + 4));
                 }
-                return (layout[0..(int)(i)], stdDay, layout[(int)(i + 1)..]);
+                return (layout.slice(0, i), stdDay, layout.slice(i + 1));
             }
             case (rune)'_': {
                 if (len(layout) >= i + 2 && layout[i + 1] == (rune)'2') {
                     // _2, _2006, __2
                     // _2006 is really a literal _, followed by stdLongYear
-                    if (len(layout) >= i + 5 && layout[(int)(i + 1)..(int)(i + 5)] == "2006") {
-                        return (layout[0..(int)(i + 1)], stdLongYear, layout[(int)(i + 5)..]);
+                    if (len(layout) >= i + 5 && layout.slice(i + 1, i + 5) == "2006") {
+                        return (layout.slice(0, i + 1), stdLongYear, layout.slice(i + 5));
                     }
-                    return (layout[0..(int)(i)], stdUnderDay, layout[(int)(i + 2)..]);
+                    return (layout.slice(0, i), stdUnderDay, layout.slice(i + 2));
                 }
                 if (len(layout) >= i + 3 && layout[i + 1] == (rune)'_' && layout[i + 2] == (rune)'2') {
-                    return (layout[0..(int)(i)], stdUnderYearDay, layout[(int)(i + 3)..]);
+                    return (layout.slice(0, i), stdUnderYearDay, layout.slice(i + 3));
                 }
                 break;
             }
             case (rune)'3': {
-                return (layout[0..(int)(i)], stdHour12, layout[(int)(i + 1)..]);
+                return (layout.slice(0, i), stdHour12, layout.slice(i + 1));
             }
             case (rune)'4': {
-                return (layout[0..(int)(i)], stdMinute, layout[(int)(i + 1)..]);
+                return (layout.slice(0, i), stdMinute, layout.slice(i + 1));
             }
             case (rune)'5': {
-                return (layout[0..(int)(i)], stdSecond, layout[(int)(i + 1)..]);
+                return (layout.slice(0, i), stdSecond, layout.slice(i + 1));
             }
             case (rune)'P': {
                 if (len(layout) >= i + 2 && layout[i + 1] == (rune)'M') {
                     // PM
-                    return (layout[0..(int)(i)], stdPM, layout[(int)(i + 2)..]);
+                    return (layout.slice(0, i), stdPM, layout.slice(i + 2));
                 }
                 break;
             }
             case (rune)'p': {
                 if (len(layout) >= i + 2 && layout[i + 1] == (rune)'m') {
                     // pm
-                    return (layout[0..(int)(i)], stdpm, layout[(int)(i + 2)..]);
+                    return (layout.slice(0, i), stdpm, layout.slice(i + 2));
                 }
                 break;
             }
             case (rune)'-': {
-                if (len(layout) >= i + 7 && layout[(int)(i)..(int)(i + 7)] == "-070000") {
+                if (len(layout) >= i + 7 && layout.slice(i, i + 7) == "-070000") {
                     // -070000, -07:00:00, -0700, -07:00, -07
-                    return (layout[0..(int)(i)], stdNumSecondsTz, layout[(int)(i + 7)..]);
+                    return (layout.slice(0, i), stdNumSecondsTz, layout.slice(i + 7));
                 }
-                if (len(layout) >= i + 9 && layout[(int)(i)..(int)(i + 9)] == "-07:00:00") {
-                    return (layout[0..(int)(i)], stdNumColonSecondsTZ, layout[(int)(i + 9)..]);
+                if (len(layout) >= i + 9 && layout.slice(i, i + 9) == "-07:00:00") {
+                    return (layout.slice(0, i), stdNumColonSecondsTZ, layout.slice(i + 9));
                 }
-                if (len(layout) >= i + 5 && layout[(int)(i)..(int)(i + 5)] == "-0700") {
-                    return (layout[0..(int)(i)], stdNumTZ, layout[(int)(i + 5)..]);
+                if (len(layout) >= i + 5 && layout.slice(i, i + 5) == "-0700") {
+                    return (layout.slice(0, i), stdNumTZ, layout.slice(i + 5));
                 }
-                if (len(layout) >= i + 6 && layout[(int)(i)..(int)(i + 6)] == "-07:00") {
-                    return (layout[0..(int)(i)], stdNumColonTZ, layout[(int)(i + 6)..]);
+                if (len(layout) >= i + 6 && layout.slice(i, i + 6) == "-07:00") {
+                    return (layout.slice(0, i), stdNumColonTZ, layout.slice(i + 6));
                 }
-                if (len(layout) >= i + 3 && layout[(int)(i)..(int)(i + 3)] == "-07") {
-                    return (layout[0..(int)(i)], stdNumShortTZ, layout[(int)(i + 3)..]);
+                if (len(layout) >= i + 3 && layout.slice(i, i + 3) == "-07") {
+                    return (layout.slice(0, i), stdNumShortTZ, layout.slice(i + 3));
                 }
                 break;
             }
             case (rune)'Z': {
-                if (len(layout) >= i + 7 && layout[(int)(i)..(int)(i + 7)] == "Z070000") {
+                if (len(layout) >= i + 7 && layout.slice(i, i + 7) == "Z070000") {
                     // Z070000, Z07:00:00, Z0700, Z07:00,
-                    return (layout[0..(int)(i)], stdISO8601SecondsTZ, layout[(int)(i + 7)..]);
+                    return (layout.slice(0, i), stdISO8601SecondsTZ, layout.slice(i + 7));
                 }
-                if (len(layout) >= i + 9 && layout[(int)(i)..(int)(i + 9)] == "Z07:00:00") {
-                    return (layout[0..(int)(i)], stdISO8601ColonSecondsTZ, layout[(int)(i + 9)..]);
+                if (len(layout) >= i + 9 && layout.slice(i, i + 9) == "Z07:00:00") {
+                    return (layout.slice(0, i), stdISO8601ColonSecondsTZ, layout.slice(i + 9));
                 }
-                if (len(layout) >= i + 5 && layout[(int)(i)..(int)(i + 5)] == "Z0700") {
-                    return (layout[0..(int)(i)], stdISO8601TZ, layout[(int)(i + 5)..]);
+                if (len(layout) >= i + 5 && layout.slice(i, i + 5) == "Z0700") {
+                    return (layout.slice(0, i), stdISO8601TZ, layout.slice(i + 5));
                 }
-                if (len(layout) >= i + 6 && layout[(int)(i)..(int)(i + 6)] == "Z07:00") {
-                    return (layout[0..(int)(i)], stdISO8601ColonTZ, layout[(int)(i + 6)..]);
+                if (len(layout) >= i + 6 && layout.slice(i, i + 6) == "Z07:00") {
+                    return (layout.slice(0, i), stdISO8601ColonTZ, layout.slice(i + 6));
                 }
-                if (len(layout) >= i + 3 && layout[(int)(i)..(int)(i + 3)] == "Z07") {
-                    return (layout[0..(int)(i)], stdISO8601ShortTZ, layout[(int)(i + 3)..]);
+                if (len(layout) >= i + 3 && layout.slice(i, i + 3) == "Z07") {
+                    return (layout.slice(0, i), stdISO8601ShortTZ, layout.slice(i + 3));
                 }
                 break;
             }
@@ -360,7 +360,7 @@ internal static (@string prefix, nint std, @string suffix) nextStdChunk(@string 
                             code = stdFracSecond9;
                         }
                         nint stdΔ2 = stdFracSecond(code, j - (i + 1), c);
-                        return (layout[0..(int)(i)], stdΔ2, layout[(int)(j)..]);
+                        return (layout.slice(0, i), stdΔ2, layout.slice(j));
                     }
                 }
                 break;
@@ -441,8 +441,8 @@ internal static bool match(@string s1, @string s2) {
 
 internal static (nint, @string, error) lookup(slice<@string> tab, @string val) {
     foreach (var (i, v) in tab) {
-        if (len(val) >= len(v) && match(val[..(int)(len(v))], v)) {
-            return (i, val[(int)(len(v))..], default!);
+        if (len(val) >= len(v) && match(val.slice(0, len(v)), v)) {
+            return (i, val.slice(len(v)), default!);
         }
     }
     return (-1, val, errBad);
@@ -481,7 +481,7 @@ internal static slice<byte> appendInt(slice<byte> b, nint x, nint width) {
     }
     // Ensure capacity.
     if (len(b) + n <= cap(b)){
-        b = b[..(int)(len(b) + n)];
+        b = b.slice(0, len(b) + n);
     } else {
         b = appendꓸꓸꓸ(b, makeꓸꓸꓸ<byte>(n));
     }
@@ -557,14 +557,14 @@ internal static slice<byte> appendNano(slice<byte> b, nint nanosec, nint std) {
     b = append(b, dot);
     b = appendInt(b, nanosec, 9);
     if (n < 9) {
-        b = b[..(int)(len(b) - 9 + n)];
+        b = b.slice(0, len(b) - 9 + n);
     }
     if (trim) {
         while (len(b) > 0 && b[len(b) - 1] == (rune)'0') {
-            b = b[..(int)(len(b) - 1)];
+            b = b.slice(0, len(b) - 1);
         }
         if (len(b) > 0 && b[len(b) - 1] == dot) {
-            b = b[..(int)(len(b) - 1)];
+            b = b.slice(0, len(b) - 1);
         }
     }
     return b;
@@ -948,7 +948,7 @@ internal static @string quote(@string s) {
             nint width = default!;
             if (c == runeError){
                 width = 1;
-                if (i + 2 < len(s) && s[(int)(i)..(int)(i + 3)] == ((@string)(rune)runeError)) {
+                if (i + 2 < len(s) && s.slice(i, i + 3) == ((@string)(rune)runeError)) {
                     width = 3;
                 }
             } else {
@@ -1017,7 +1017,7 @@ internal static (nint, @string, error) getnum3(@string s, bool @fixed) {
     if (i == 0 || @fixed && i != 3) {
         return (0, s, errBad);
     }
-    return (n, s[(int)(i)..], default!);
+    return (n, s.slice(i), default!);
 }
 
 internal static @string cutspace(@string s) {
@@ -1166,7 +1166,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
     while (ᐧ) {
         error err = default!;
         var (prefix, std, suffix) = nextStdChunk(layout);
-        @string stdstr = layout[(int)(len(prefix))..(int)(len(layout) - len(suffix))];
+        @string stdstr = layout.slice(len(prefix), len(layout) - len(suffix));
         (value, err) = skip(value, prefix);
         if (err != default!) {
             return (new Time(nil), new ParseErrorжerror(newParseError(alayout, avalue, prefix, value, ""u8)));
@@ -1292,7 +1292,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
                     for (; n < len(value) && isDigit(value, n); n++) {
                     }
                     (nsec, rangeErrString, err) = parseNanoseconds(value, n);
-                    value = value[(int)(n)..];
+                    value = value.slice(n);
                 }
             } while (false);
         }
@@ -1445,7 +1445,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
                     err = errBad;
                     break;
                 }
-                (zoneName, value) = (value[..(int)(n)], value[(int)(n)..]);
+                (zoneName, value) = (value.slice(0, n), value.slice(n));
             } while (false);
         }
         else if (exprᴛ1 == stdFracSecond0) {
@@ -1458,7 +1458,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
                     break;
                 }
                 (nsec, rangeErrString, err) = parseNanoseconds(value, ndigit);
-                value = value[(int)(ndigit)..];
+                value = value.slice(ndigit);
             } while (false);
         }
         else if (exprᴛ1 == stdFracSecond9) { matchᴛ1 = true;
@@ -1474,7 +1474,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
                     i++;
                 }
                 (nsec, rangeErrString, err) = parseNanoseconds(value, 1 + i);
-                value = value[(int)(1 + i)..];
+                value = value.slice(1 + i);
             } while (false);
         }
 
@@ -1698,7 +1698,7 @@ internal static (nint ns, @string rangeErrString, error err) parseNanoseconds<by
         nbytes = 10;
     }
     {
-        (ns, err) = atoi(value[1..(int)(nbytes)]); if (err != default!) {
+        (ns, err) = atoi(value.slice(1, nbytes)); if (err != default!) {
             return (ns, rangeErrString, err);
         }
     }
@@ -1740,7 +1740,7 @@ internal static (uint64 x, bytes rem, error err) leadingInt<bytes>(bytes s)
             return (0, rem, errLeadingInt);
         }
     }
-    return (x, s[(int)(i)..], default!);
+    return (x, s.slice(i), default!);
 }
 
 // leadingFraction consumes the leading [0-9]* from s.
@@ -1774,7 +1774,7 @@ internal static (uint64 x, float64 scale, @string rem) leadingFraction(@string s
         x = y;
         scale *= 10D;
     }
-    return (x, scale, s[(int)(i)..]);
+    return (x, scale, s.slice(i));
 }
 
 // U+00B5 = micro symbol
@@ -1854,8 +1854,8 @@ public static (Duration, error) ParseDuration(@string s) {
         if (i == 0) {
             return (0, errors.New("time: missing unit in duration "u8 + quote(orig)));
         }
-        @string u = s[..(int)(i)];
-        s = s[(int)(i)..];
+        @string u = s.slice(0, i);
+        s = s.slice(i);
         var (unit, ok) = unitMap[u, ꟷ];
         if (!ok) {
             return (0, errors.New("time: unknown unit "u8 + quote(u) + " in duration "u8 + quote(orig)));

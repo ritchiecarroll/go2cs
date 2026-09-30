@@ -71,8 +71,8 @@ partial class hmac_package {
         h.outer.Reset();
         h.outer.Write(h.opad);
     }
-    h.outer.Write(@in[(int)(origLen)..]);
-    return h.outer.Sum(@in[..(int)(origLen)]);
+    h.outer.Write(@in.slice(origLen));
+    return h.outer.Sum(@in.slice(0, origLen));
 }
 
 [GoRecv] public static (nint n, error err) Write(this ref HMAC h, slice<byte> p) {

@@ -60,8 +60,8 @@ internal static UntypedInt seekEnd => 2;
         d.error = true;
         return default!;
     }
-    var p = d.p[0..(int)(n)];
-    d.p = d.p[(int)(n)..];
+    var p = d.p.slice(0, n);
+    d.p = d.p.slice(n);
     return p;
 }
 
@@ -104,7 +104,7 @@ internal static UntypedInt seekEnd => 2;
 internal static @string byteString(slice<byte> p) {
     {
         nint i = bytealg.IndexByte(p, 0); if (i != -1) {
-            p = p[..(int)(i)];
+            p = p.slice(0, i);
         }
     }
     return ((@string)p);
@@ -230,7 +230,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     ref var extend = ref heap(new @string(), out var Ꮡextend);
     var rest = d.rest();
     if (len(rest) > 2 && rest[0] == (rune)'\n' && rest[len(rest) - 1] == (rune)'\n') {
-        extend = ((@string)(rest[1..(int)(len(rest) - 1)]));
+        extend = ((@string)(rest.slice(1, len(rest) - 1)));
     }
     // Now we can build up a useful data structure.
     // First the zone information.
@@ -266,7 +266,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
                 return (default!, errBadData);
             }
         }
-        zones[i].name = byteString(abbrev[(int)(b)..]);
+        zones[i].name = byteString(abbrev.slice(b));
         if (runtime.GOOS == "aix"u8 && len(name) > 8 && (name[..8] == "Etc/GMT+" || name[..8] == "Etc/GMT-")) {
             // There is a bug with AIX 7.2 TL 0 with files in Etc,
             // GMT+1 will return GMT-1 instead of GMT+1 or -01.
@@ -370,7 +370,7 @@ internal static nint findZone(slice<zone> zones, @string name, nint offset, bool
 // loadTzinfoFromDirOrZip returns the contents of the file with the given name
 // in dir. dir can either be an uncompressed zip file, or a directory.
 internal static (slice<byte>, error) loadTzinfoFromDirOrZip(@string dir, @string name) {
-    if (len(dir) > 4 && dir[(int)(len(dir) - 4)..] == ".zip") {
+    if (len(dir) > 4 && dir.slice(len(dir) - 4) == ".zip") {
         return loadTzinfoFromZip(dir, name);
     }
     if (dir != ""u8) {
@@ -466,8 +466,8 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
             nint xlen = get2(buf[30..]);
             nint fclen = get2(buf[32..]);
             nint offΔ1 = get4(buf[42..]);
-            var zname = buf[46..(int)(46 + namelen)];
-            buf = buf[(int)(46 + namelen + xlen + fclen)..];
+            var zname = buf.slice(46, 46 + namelen);
+            buf = buf.slice(46 + namelen + xlen + fclen);
             if (((sstring)zname) != name) {
                 continue;
             }
@@ -492,7 +492,7 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
             //
             buf = new slice<byte>(zheadersize + namelen);
             {
-                var errΔ3 = preadn(fd, buf, offΔ1); if (errΔ3 != default! || get4(buf) != zheader || get2(buf[8..]) != meth || get2(buf[26..]) != namelen || ((sstring)(buf[30..(int)(30 + namelen)])) != name) {
+                var errΔ3 = preadn(fd, buf, offΔ1); if (errΔ3 != default! || get4(buf) != zheader || get2(buf[8..]) != meth || get2(buf[26..]) != namelen || ((sstring)(buf.slice(30, 30 + namelen))) != name) {
                     return (default!, errors.New("corrupt zip file "u8 + zipfile));
                 }
             }
@@ -521,7 +521,7 @@ internal static Func<@string, @string, (slice<byte>, error)> loadTzinfoFromTzdat
 // timezone database directory, tzdata database file or an uncompressed
 // zip file, containing the contents of such a directory.
 internal static (slice<byte>, error) loadTzinfo(@string name, @string source) {
-    if (len(source) >= 6 && source[(int)(len(source) - 6)..] == "tzdata") {
+    if (len(source) >= 6 && source.slice(len(source) - 6) == "tzdata") {
         return loadTzinfoFromTzdata(source, name);
     }
     return loadTzinfoFromDirOrZip(source, name);
@@ -600,7 +600,7 @@ internal static (slice<byte>, error) readFile(@string name) {
         while (ᐧ) {
             (n, err) = read(f, buf[..]);
             if (n > 0) {
-                ret = appendꓸꓸꓸ(ret, buf[..(int)(n)]);
+                ret = appendꓸꓸꓸ(ret, buf.slice(0, n));
             }
             if (n == 0 || err != default!) {
                 break;

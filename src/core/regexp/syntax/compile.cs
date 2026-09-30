@@ -107,7 +107,7 @@ internal static slice<rune> anyRune = new rune[]{0, unicode.MaxRune}.slice();
         }
         frag f = default!;
         foreach (var (j, _) in re.Rune) {
-            var f1 = c.rune(re.Rune[(int)(j)..(int)(j + 1)], re.Flags);
+            var f1 = c.rune(re.Rune.slice(j, j + 1), re.Flags);
             if (j == 0){
                 f = f1;
             } else {

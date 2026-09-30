@@ -185,7 +185,7 @@ internal static (netꓸAddr, error ctxErr) connect(this ж<socksDialer> Ꮡd, co
         if (cap(b) < l){
             b = new slice<byte>(l);
         } else {
-            b = b[..(int)(l)];
+            b = b.slice(0, l);
         }
         {
             (_, ctxErr) = io.ReadFull(new net_ConnᴠReader(c), b); if (ctxErr != default!) {
@@ -195,7 +195,7 @@ internal static (netꓸAddr, error ctxErr) connect(this ж<socksDialer> Ꮡd, co
         if (a.IP != default!){
             copy(a.IP, b);
         } else {
-            a.Name = ((@string)(b[..(int)(builtin.len(b) - 2)]));
+            a.Name = ((@string)(b.slice(0, builtin.len(b) - 2)));
         }
         a.Port = (nint)(((nint)b[builtin.len(b) - 2] << (int)(8)) | (nint)b[builtin.len(b) - 1]);
         (_ᴛ1, ctxErr) = (new socksAddrжΔAddr(Ꮡa), default!);

@@ -280,7 +280,7 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
             return ("", "", errNotGoExe);
         }
         vers = readString(x, ptrSize, readPtr, readPtr(header[(int)(versPtrOffset)..]));
-        mod = readString(x, ptrSize, readPtr, readPtr(header[(int)(versPtrOffset + ptrSize)..]));
+        mod = readString(x, ptrSize, readPtr, readPtr(header.slice(versPtrOffset + ptrSize)));
     }
     if (vers == ""u8) {
         return ("", "", errNotGoExe);
@@ -288,7 +288,7 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
     if (len(mod) >= 33 && mod[len(mod) - 17] == (rune)'\n'){
         // Strip module framing: sentinel strings delimiting the module info.
         // These are cmd/go/internal/modload.infoStart and infoEnd.
-        mod = mod[16..(int)(len(mod) - 16)];
+        mod = mod.slice(16, len(mod) - 16);
     } else {
         mod = ""u8;
     }
@@ -349,7 +349,7 @@ internal static @string readString(exe x, nint ptrSize, Func<slice<byte>, uint64
         return ""u8;
     }
     var dataAddr = readPtr(hdr);
-    var dataLen = readPtr(hdr[(int)(ptrSize)..]);
+    var dataLen = readPtr(hdr.slice(ptrSize));
     (var data, err) = readData(x, dataAddr, dataLen);
     if (err != default! || (uint64)len(data) < dataLen) {
         return ""u8;
@@ -389,7 +389,7 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
         } else {
             // N.B. chunkSize can only decrease, and only on the
             // last chunk.
-            buf = buf[..(int)(chunkSize)];
+            buf = buf.slice(0, (nint)(chunkSize));
             clear(buf);
         }
         var (n, err) = readDataInto(x, start, buf);
@@ -400,7 +400,7 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
         if (err != default!) {
             return (0, err);
         }
-        var data = buf[..(int)(n)];
+        var data = buf.slice(0, n);
         while (len(data) > 0) {
             nint i = bytes.Index(data, buildInfoMagic);
             if (i < 0) {
@@ -419,7 +419,7 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
                     // but we didn't read it.
                     return (0, errNotGoExe);
                 }
-                data = data[(int)(next)..];
+                data = data.slice(next);
                 continue;
             }
             // Good match!

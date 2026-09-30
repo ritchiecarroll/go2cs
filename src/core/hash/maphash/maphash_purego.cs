@@ -79,8 +79,8 @@ internal static uint64 wyhash(slice<byte> key, uint64 seed, uint64 len) {
     }
     default: {
         var n = (((i >> (int)(3))) << (int)(2));
-        a = (uint64)((r4(p) << (int)(32)) | r4(p[(int)(n)..]));
-        b = (uint64)((r4(p[(int)(i - 4)..]) << (int)(32)) | r4(p[(int)(i - 4 - n)..]));
+        a = (uint64)((r4(p) << (int)(32)) | r4(p.slice((nint)(n))));
+        b = (uint64)((r4(p.slice((nint)(i - 4))) << (int)(32)) | r4(p.slice((nint)(i - 4 - n))));
         break;
     }}
 

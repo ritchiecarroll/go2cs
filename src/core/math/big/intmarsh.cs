@@ -27,7 +27,7 @@ public static (slice<byte>, error) GobEncode(this ж<ΔInt> Ꮡx) {
         b |= (byte)(1);
     }
     buf[i] = b;
-    return (buf[(int)(i)..], default!);
+    return (buf.slice(i), default!);
 }
 
 // GobDecode implements the [encoding/gob.GobDecoder] interface.

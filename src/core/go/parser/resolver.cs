@@ -61,7 +61,7 @@ internal static void resolveFile(ref ast.File @file, ж<tokenꓸFile> Ꮡhandle,
         }
     }
     @file.Scope = r.Value.pkgScope;
-    @file.Unresolved = (~r).unresolved[0..(int)(i)];
+    @file.Unresolved = (~r).unresolved.slice(0, i);
 }
 
 internal const nint maxScopeDepth = 1000;
@@ -140,7 +140,7 @@ internal static readonly @string closingScopeˢ = "closing scope"u8;
         }
     }
     // pop label scope
-    r.targetStack = r.targetStack[0..(int)(n)];
+    r.targetStack = r.targetStack.slice(0, n);
     r.labelScope = r.labelScope.Value.Outer;
 }
 

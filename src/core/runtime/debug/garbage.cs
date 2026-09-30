@@ -51,12 +51,12 @@ public static void ReadGCStats(ж<GCStats> Ꮡstats) {
     stats.NumGC = (int64)stats.Pause[n + 1];
     stats.PauseTotal = stats.Pause[n + 2];
     n /= 2; // buffer holds pauses and end times
-    stats.Pause = stats.Pause[..(int)(n)];
+    stats.Pause = stats.Pause.slice(0, n);
     if (cap(stats.PauseEnd) < maxPause) {
         stats.PauseEnd = new slice<time.Time>(0, maxPause);
     }
     stats.PauseEnd = stats.PauseEnd[..0];
-    foreach (var (_, ns) in stats.Pause[(int)(n)..(int)(n + n)]) {
+    foreach (var (_, ns) in stats.Pause.slice(n, n + n)) {
         stats.PauseEnd = append(stats.PauseEnd, time.Unix(0, (int64)ns));
     }
     if (len(stats.PauseQuantiles) > 0) {
@@ -65,7 +65,7 @@ public static void ReadGCStats(ж<GCStats> Ꮡstats) {
         } else {
             // There's room for a second copy of the data in stats.Pause.
             // See the allocation at the top of the function.
-            var sorted = stats.Pause[(int)(n)..(int)(n + n)];
+            var sorted = stats.Pause.slice(n, n + n);
             copy(sorted, stats.Pause);
             slices.Sort<slice<time.Duration>, time.Duration>(sorted);
             nint nq = len(stats.PauseQuantiles) - 1;

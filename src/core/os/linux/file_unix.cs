@@ -454,7 +454,7 @@ internal static (@string, error) readlink(@string name) {
             return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlink"u8, Path: name, Err: err))));
         }
         if (n < len) {
-            return (((@string)(b[0..(int)(n)])), default!);
+            return (((@string)(b.slice(0, n))), default!);
         }
     }
 }

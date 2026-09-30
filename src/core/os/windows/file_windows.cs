@@ -276,7 +276,7 @@ internal static @string tempDir() {
             // Otherwise remove terminating \.
             n--;
         }
-        return syscall.UTF16ToString(b[..(int)(n)]);
+        return syscall.UTF16ToString(b.slice(0, (nint)(n)));
     }
 }
 

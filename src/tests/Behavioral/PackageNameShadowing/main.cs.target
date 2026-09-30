@@ -36,7 +36,7 @@ internal static void Main() {
     var (d, secs, east) = foldedConstant();
     fmt.Println((@string)"4:"u8, d, secs, east);
     nint frac = 4;
-    fmt.Println((@string)"5:"u8, ((@string)"012345678"u8[..(int)(frac)]) + "000000000"u8[..(int)(9 - frac)]);
+    fmt.Println((@string)"5:"u8, ((@string)"012345678"u8.slice(0, frac)) + "000000000"u8.slice(0, 9 - frac));
     fmt.Println((@string)"6:"u8, dotImported());
 }
 

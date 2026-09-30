@@ -234,20 +234,20 @@ internal static (@string, error) unescape(@string s, encoding mode) {
         case (rune)'%': {
             n++;
             if (i + 2 >= len(s) || !ishex(s[i + 1]) || !ishex(s[i + 2])) {
-                s = s[(int)(i)..];
+                s = s.slice(i);
                 if (len(s) > 3) {
                     s = s[..3];
                 }
                 return ("", ((EscapeError)s));
             }
-            if (mode == encodeHost && unhex(s[i + 1]) < 8 && s[(int)(i)..(int)(i + 3)] != "%25") {
+            if (mode == encodeHost && unhex(s[i + 1]) < 8 && s.slice(i, i + 3) != "%25") {
                 // Per https://tools.ietf.org/html/rfc3986#page-21
                 // in the host component %-encoding can only be used
                 // for non-ASCII bytes.
                 // But https://tools.ietf.org/html/rfc6874#section-2
                 // introduces %25 being allowed to escape a percent sign
                 // in IPv6 scoped-address literals. Yay.
-                return ("", ((EscapeError)(s[(int)(i)..(int)(i + 3)])));
+                return ("", ((EscapeError)(s.slice(i, i + 3))));
             }
             if (mode == encodeZone) {
                 // RFC 6874 says basically "anything goes" for zone identifiers
@@ -258,8 +258,8 @@ internal static (@string, error) unescape(@string s, encoding mode) {
                 // to introduce bytes you couldn't just write directly.
                 // But Windows puts spaces here! Yay.
                 var v = (byte)((byte)(unhex(s[i + 1]) << (int)(4)) | unhex(s[i + 2]));
-                if (s[(int)(i)..(int)(i + 3)] != "%25" && v != (rune)' ' && shouldEscape(v, encodeHost)) {
-                    return ("", ((EscapeError)(s[(int)(i)..(int)(i + 3)])));
+                if (s.slice(i, i + 3) != "%25" && v != (rune)' ' && shouldEscape(v, encodeHost)) {
+                    return ("", ((EscapeError)(s.slice(i, i + 3))));
                 }
             }
             i += 3;
@@ -272,7 +272,7 @@ internal static (@string, error) unescape(@string s, encoding mode) {
         }
         default: {
             if ((mode == encodeHost || mode == encodeZone) && s[i] < 0x80 && shouldEscape(s[i], mode)) {
-                return ("", ((InvalidHostError)(s[(int)(i)..(int)(i + 1)])));
+                return ("", ((InvalidHostError)(s.slice(i, i + 1))));
             }
             i++;
             break;
@@ -340,7 +340,7 @@ internal static @string escape(@string s, encoding mode) {
     slice<byte> t = default!;
     nint @required = len(s) + 2 * hexCount;
     if (@required <= len(buf)){
-        t = buf[..(int)(@required)];
+        t = buf.slice(0, @required);
     } else {
         t = new slice<byte>(@required);
     }
@@ -510,7 +510,7 @@ internal static (@string scheme, @string path, error err) getScheme(@string rawU
             if (i == 0) {
                 return ("", "", errors.New(missingProtocolSchemeˢ));
             }
-            return (rawURL[..(int)(i)], rawURL[(int)(i + 1)..], default!);
+            return (rawURL.slice(0, i), rawURL.slice(i + 1), default!);
         }
         default: {
             return ("", rawURL, default!);
@@ -594,7 +594,7 @@ internal static (ж<URL>, error) parse(@string rawURL, bool viaRequest) {
     url.Value.Scheme = strings.ToLower((~url).Scheme);
     if (strings.HasSuffix(rest, "?"u8) && strings.Count(rest, "?"u8) == 1){
         url.Value.ForceQuery = true;
-        rest = rest[..(int)(len(rest) - 1)];
+        rest = rest.slice(0, len(rest) - 1);
     } else {
         (rest, url.Value.RawQuery, _) = strings.Cut(rest, "?"u8);
     }
@@ -625,7 +625,7 @@ internal static (ж<URL>, error) parse(@string rawURL, bool viaRequest) {
         (authority, rest) = (rest[2..], "");
         {
             nint i = strings.Index(authority, "/"u8); if (i >= 0) {
-                (authority, rest) = (authority[..(int)(i)], authority[(int)(i)..]);
+                (authority, rest) = (authority.slice(0, i), authority.slice(i));
             }
         }
         (url.Value.User, url.Value.Host, err) = parseAuthority(authority);
@@ -662,7 +662,7 @@ internal static (ж<Userinfo> user, @string host, error err) parseAuthority(@str
     if (i < 0){
         (host, err) = parseHost(authority);
     } else {
-        (host, err) = parseHost(authority[(int)(i + 1)..]);
+        (host, err) = parseHost(authority.slice(i + 1));
     }
     if (err != default!) {
         return (default!, "", err);
@@ -670,7 +670,7 @@ internal static (ж<Userinfo> user, @string host, error err) parseAuthority(@str
     if (i < 0) {
         return (default!, host, default!);
     }
-    @string userinfo = authority[..(int)(i)];
+    @string userinfo = authority.slice(0, i);
     if (!validUserinfo(userinfo)) {
         return (default!, "", errors.New(netUrlInvalidUserinfoˢ));
     }
@@ -713,7 +713,7 @@ internal static (@string, error) parseHost(@string host) {
             if (closeBracketIdx < 0) {
                 return ("", errors.New(missingInHostˢ));
             }
-            @string colonPort = host[(int)(closeBracketIdx + 1)..];
+            @string colonPort = host.slice(closeBracketIdx + 1);
             if (!validOptionalPort(colonPort)) {
                 return ("", fmt.Errorf("invalid port %q after host"u8, colonPort));
             }
@@ -721,7 +721,7 @@ internal static (@string, error) parseHost(@string host) {
             if (errΔ1 != default!) {
                 return ("", errΔ1);
             }
-            @string hostname = host[(int)(openBracketIdx + 1)..(int)(closeBracketIdx)];
+            @string hostname = host.slice(openBracketIdx + 1, closeBracketIdx);
             @string unescapedHostname = default!;
             // RFC 6874 defines that %25 (%-encoded percent) introduces
             // the zone identifier, and the zone identifier can use basically
@@ -731,11 +731,11 @@ internal static (@string, error) parseHost(@string host) {
             // like newlines.
             nint zoneIdx = strings.Index(hostname, "%25"u8);
             if (zoneIdx >= 0){
-                var (hostPart, errΔ2) = unescape(hostname[..(int)(zoneIdx)], encodeHost);
+                var (hostPart, errΔ2) = unescape(hostname.slice(0, zoneIdx), encodeHost);
                 if (errΔ2 != default!) {
                     return ("", errΔ2);
                 }
-                (var zonePart, errΔ2) = unescape(hostname[(int)(zoneIdx)..], encodeZone);
+                (var zonePart, errΔ2) = unescape(hostname.slice(zoneIdx), encodeZone);
                 if (errΔ2 != default!) {
                     return ("", errΔ2);
                 }
@@ -761,7 +761,7 @@ internal static (@string, error) parseHost(@string host) {
         } else 
         {
             nint i = strings.LastIndex(host, ":"u8); if (i != -1) {
-                @string colonPort = host[(int)(i)..];
+                @string colonPort = host.slice(i);
                 if (!validOptionalPort(colonPort)) {
                     return ("", fmt.Errorf("invalid port %q after host"u8, colonPort));
                 }
@@ -1181,7 +1181,7 @@ internal static @string resolvePath(@string @base, @string @ref) {
     } else 
     if (@ref[0] != (rune)'/'){
         nint i = strings.LastIndex(@base, "/"u8);
-        full = @base[..(int)(i + 1)] + @ref;
+        full = @base.slice(0, i + 1) + @ref;
     } else {
         full = @ref;
     }
@@ -1211,7 +1211,7 @@ internal static @string resolvePath(@string @base, @string @ref) {
             if (index == -1){
                 first = true;
             } else {
-                Ꮡdst.WriteString(str[..(int)(index)]);
+                Ꮡdst.WriteString(str.slice(0, index));
             }
         } else {
             if (!first) {
@@ -1351,11 +1351,11 @@ internal static (@string host, @string port) splitHostPort(@string hostPort) {
 
     host = hostPort;
     nint colon = strings.LastIndexByte(host, (rune)':');
-    if (colon != -1 && validOptionalPort(host[(int)(colon)..])) {
-        (host, port) = (host[..(int)(colon)], host[(int)(colon + 1)..]);
+    if (colon != -1 && validOptionalPort(host.slice(colon))) {
+        (host, port) = (host.slice(0, colon), host.slice(colon + 1));
     }
     if (strings.HasPrefix(host, "["u8) && strings.HasSuffix(host, "]"u8)) {
-        host = host[1..(int)(len(host) - 1)];
+        host = host.slice(1, len(host) - 1);
     }
     return (host, port);
 }

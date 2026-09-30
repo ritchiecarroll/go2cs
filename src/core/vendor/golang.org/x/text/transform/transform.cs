@@ -133,7 +133,7 @@ public static ж<Reader> NewReader(io.Reader r, Transformer t) {
     while (ᐧ) {
         // Copy out any transformed bytes and return the final error if we are done.
         if (r.dst0 != r.dst1){
-            n = copy(p, r.dst[(int)(r.dst0)..(int)(r.dst1)]);
+            n = copy(p, r.dst.slice(r.dst0, r.dst1));
             r.dst0 += n;
             if (r.dst0 == r.dst1 && r.transformComplete) {
                 return (n, r.err);
@@ -149,7 +149,7 @@ public static ж<Reader> NewReader(io.Reader r, Transformer t) {
         // before considering the error".
         if (r.src0 != r.src1 || r.err != default!) {
             r.dst0 = 0;
-            (r.dst1, n, err) = r.t.Transform(r.dst, r.src[(int)(r.src0)..(int)(r.src1)], AreEqual(r.err, io.EOF));
+            (r.dst1, n, err) = r.t.Transform(r.dst, r.src.slice(r.src0, r.src1), AreEqual(r.err, io.EOF));
             r.src0 += n;
             switch (ᐧ) {
             case {} when err == default!: {
@@ -186,9 +186,9 @@ public static ж<Reader> NewReader(io.Reader r, Transformer t) {
         // Move any untransformed source bytes to the start of the buffer
         // and read more bytes.
         if (r.src0 != 0) {
-            (r.src0, r.src1) = (0, copy(r.src, r.src[(int)(r.src0)..(int)(r.src1)]));
+            (r.src0, r.src1) = (0, copy(r.src, r.src.slice(r.src0, r.src1)));
         }
-        (n, r.err) = r.r.Read(r.src[(int)(r.src1)..]);
+        (n, r.err) = r.r.Read(r.src.slice(r.src1));
         r.src1 += n;
     }
 }
@@ -229,18 +229,18 @@ public static ж<Writer> NewWriter(io.Writer w, Transformer t) {
     if (w.n > 0) {
         // Append bytes from data to the last remainder.
         // TODO: limit the amount copied on first try.
-        n = copy(w.src[(int)(w.n)..], data);
+        n = copy(w.src.slice(w.n), data);
         w.n += n;
-        src = w.src[..(int)(w.n)];
+        src = w.src.slice(0, w.n);
     }
     while (ᐧ) {
         var (nDst, nSrc, errΔ1) = w.t.Transform(w.dst, src, false);
         {
-            var (_, werr) = w.w.Write(w.dst[..(int)(nDst)]); if (werr != default!) {
+            var (_, werr) = w.w.Write(w.dst.slice(0, nDst)); if (werr != default!) {
                 return (n, werr);
             }
         }
-        src = src[(int)(nSrc)..];
+        src = src.slice(nSrc);
         if (w.n == 0){
             n += nSrc;
         } else 
@@ -249,7 +249,7 @@ public static ж<Writer> NewWriter(io.Writer w, Transformer t) {
             // to data instead to reduce the copying.
             w.n = 0;
             n -= len(src);
-            src = data[(int)(n)..];
+            src = data.slice(n);
             if (n < len(data) && (errΔ1 == default! || AreEqual(errΔ1, ErrShortSrc))) {
                 continue;
             }
@@ -294,18 +294,18 @@ public static ж<Writer> NewWriter(io.Writer w, Transformer t) {
 
 // Close implements the io.Closer interface.
 [GoRecv] public static error Close(this ref Writer w) {
-    var src = w.src[..(int)(w.n)];
+    var src = w.src.slice(0, w.n);
     while (ᐧ) {
         var (nDst, nSrc, err) = w.t.Transform(w.dst, src, true);
         {
-            var (_, werr) = w.w.Write(w.dst[..(int)(nDst)]); if (werr != default!) {
+            var (_, werr) = w.w.Write(w.dst.slice(0, nDst)); if (werr != default!) {
                 return werr;
             }
         }
         if (!AreEqual(err, ErrShortDst)) {
             return err;
         }
-        src = src[(int)(nSrc)..];
+        src = src.slice(nSrc);
     }
 }
 
@@ -371,11 +371,11 @@ public static SpanningTransformer Nop = new nop(nil);
 }
 
 [GoRecv] internal static slice<byte> src(this ref link l) {
-    return l.b[(int)(l.p)..(int)(l.n)];
+    return l.b.slice(l.p, l.n);
 }
 
 [GoRecv] internal static slice<byte> dst(this ref link l) {
-    return l.b[(int)(l.n)..];
+    return l.b.slice(l.n);
 }
 
 // Chain returns a Transformer that applies t in sequence.
@@ -523,7 +523,7 @@ internal static (nint nDst, nint nSrc, error err) Transform(this removeF t, slic
     nint nSrc = default!;
     error err = default!;
 
-    for ((var r, nint sz) = ((rune)0, 0); len(src) > 0; src = src[(int)(sz)..]) {
+    for ((var r, nint sz) = ((rune)0, 0); len(src) > 0; src = src.slice(sz)) {
         {
             r = (rune)src[0]; if (r < utf8.RuneSelf){
                 sz = 1;
@@ -544,7 +544,7 @@ internal static (nint nDst, nint nSrc, error err) Transform(this removeF t, slic
                             err = ErrShortDst;
                             break;
                         }
-                        nDst += copy(dst[(int)(nDst)..], "\uFFFD"u8);
+                        nDst += copy(dst.slice(nDst), "\uFFFD"u8);
                     }
                     nSrc++;
                     continue;
@@ -556,7 +556,7 @@ internal static (nint nDst, nint nSrc, error err) Transform(this removeF t, slic
                 err = ErrShortDst;
                 break;
             }
-            nDst += copy(dst[(int)(nDst)..], src[..(int)(sz)]);
+            nDst += copy(dst.slice(nDst), src.slice(0, sz));
         }
         nSrc += sz;
     }
@@ -576,7 +576,7 @@ internal static slice<byte> grow(slice<byte> b, nint n) {
         m += (m >> (int)(1));
     }
     var buf = new slice<byte>(m);
-    copy(buf, b[..(int)(n)]);
+    copy(buf, b.slice(0, n));
     return buf;
 }
 
@@ -600,7 +600,7 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
     // Allocate only once. Note that both dst and src escape when passed to
     // Transform.
     var buf = new byte[]{}.array(256);
-    var dst = buf.slice(-1, initialBufSize, initialBufSize);
+    var dst = buf.slice(0, initialBufSize, initialBufSize);
     var src = buf[(int)(initialBufSize)..(int)(2 * initialBufSize)];
     // The input string s is transformed in multiple chunks (starting with a
     // chunk size of initialBufSize). nDst and nSrc are per-chunk (or
@@ -618,13 +618,13 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
     nint pPrefix = 0;
     while (ᐧ) {
         // Invariant: pDst == pPrefix && pSrc == pPrefix.
-        nint nΔ1 = copy(src, s[(int)(pSrc)..]);
-        (nDst, nSrc, err) = t.Transform(dst, src[..(int)(nΔ1)], pSrc + nΔ1 == len(s));
+        nint nΔ1 = copy(src, s.slice(pSrc));
+        (nDst, nSrc, err) = t.Transform(dst, src.slice(0, nΔ1), pSrc + nΔ1 == len(s));
         pDst += nDst;
         pSrc += nSrc;
         // TODO:  let transformers implement an optional Spanner interface, akin
         // to norm's QuickSpan. This would even allow us to avoid any allocation.
-        if (!bytes.Equal(dst[..(int)(nDst)], src[..(int)(nSrc)])) {
+        if (!bytes.Equal(dst.slice(0, nDst), src.slice(0, nSrc))) {
             break;
         }
         pPrefix = pSrc;
@@ -640,7 +640,7 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
         } else 
         if (err != default! || pPrefix == len(s)) {
             // Equal so far and !atEOF, so continue checking.
-            return (((@string)(s[..(int)(pPrefix)])), pPrefix, err);
+            return (((@string)(s.slice(0, pPrefix))), pPrefix, err);
         }
     }
     // Post-condition: pDst == pPrefix + nDst && pSrc == pPrefix + nSrc.
@@ -654,20 +654,20 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
         if (pDst > len(newDst)) {
             newDst = new slice<byte>(len(s) + nDst - nSrc);
         }
-        copy(newDst[(int)(pPrefix)..(int)(pDst)], dst[..(int)(nDst)]);
-        copy(newDst[..(int)(pPrefix)], s[..(int)(pPrefix)]);
+        copy(newDst.slice(pPrefix, pDst), dst.slice(0, nDst));
+        copy(newDst.slice(0, pPrefix), s.slice(0, pPrefix));
         dst = newDst;
     }
     // Prevent duplicate Transform calls with atEOF being true at the end of
     // the input. Also return if we have an unrecoverable error.
     if ((err == default! && pSrc == len(s)) || (err != default! && !AreEqual(err, ErrShortDst) && !AreEqual(err, ErrShortSrc))) {
-        return (((@string)(dst[..(int)(pDst)])), pSrc, err);
+        return (((@string)(dst.slice(0, pDst))), pSrc, err);
     }
     // Transform the remaining input, growing dst and src buffers as necessary.
     while (ᐧ) {
-        nint nΔ2 = copy(src, s[(int)(pSrc)..]);
+        nint nΔ2 = copy(src, s.slice(pSrc));
         var atEOF = pSrc + nΔ2 == len(s);
-        var (nDstΔ1, nSrcΔ1, errΔ2) = t.Transform(dst[(int)(pDst)..], src[..(int)(nΔ2)], atEOF);
+        var (nDstΔ1, nSrcΔ1, errΔ2) = t.Transform(dst.slice(pDst), src.slice(0, nΔ2), atEOF);
         pDst += nDstΔ1;
         pSrc += nSrcΔ1;
         // If we got ErrShortDst or ErrShortSrc, do not grow as long as we can
@@ -679,14 +679,14 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
         } else 
         if (AreEqual(errΔ2, ErrShortSrc)){
             if (atEOF) {
-                return (((@string)(dst[..(int)(pDst)])), pSrc, errΔ2);
+                return (((@string)(dst.slice(0, pDst))), pSrc, errΔ2);
             }
             if (nSrcΔ1 == 0) {
                 src = grow(src, 0);
             }
         } else 
         if (errΔ2 != default! || pSrc == len(s)) {
-            return (((@string)(dst[..(int)(pDst)])), pSrc, errΔ2);
+            return (((@string)(dst.slice(0, pDst))), pSrc, errΔ2);
         }
     }
 }
@@ -703,20 +703,20 @@ public static (slice<byte> result, nint n, error err) Append(Transformer t, slic
     if (len(dst) == cap(dst)) {
         nint nΔ1 = len(src) + len(dst); // It is okay for this to be 0.
         var b = new slice<byte>(nΔ1);
-        dst = b[..(int)(copy(b, dst))];
+        dst = b.slice(0, copy(b, dst));
     }
-    return doAppend(t, len(dst), dst[..(int)(cap(dst))], src);
+    return doAppend(t, len(dst), dst.slice(0, cap(dst)), src);
 }
 
 internal static (slice<byte> result, nint n, error err) doAppend(Transformer t, nint pDst, slice<byte> dst, slice<byte> src) {
     t.Reset();
     nint pSrc = 0;
     while (ᐧ) {
-        var (nDst, nSrc, errΔ1) = t.Transform(dst[(int)(pDst)..], src[(int)(pSrc)..], true);
+        var (nDst, nSrc, errΔ1) = t.Transform(dst.slice(pDst), src.slice(pSrc), true);
         pDst += nDst;
         pSrc += nSrc;
         if (!AreEqual(errΔ1, ErrShortDst)) {
-            return (dst[..(int)(pDst)], pSrc, errΔ1);
+            return (dst.slice(0, pDst), pSrc, errΔ1);
         }
         // Grow the destination buffer, but do not grow as long as we can make
         // progress. This may avoid excessive allocations.

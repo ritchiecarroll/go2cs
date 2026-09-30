@@ -69,7 +69,7 @@ internal static @string debugCallCheck(uintptr pc) {
         // coded sequences (e.g., defer handling) that it's
         // better to play it safe.
         {
-            @string pfx = runtimeˢ; if (len(name) > len(pfx) && name[..(int)(len(pfx))] == pfx) {
+            @string pfx = runtimeˢ; if (len(name) > len(pfx) && name.slice(0, len(pfx)) == pfx) {
                 ret = debugCallRuntime;
                 return;
             }

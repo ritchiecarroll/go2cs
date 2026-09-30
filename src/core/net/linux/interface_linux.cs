@@ -98,7 +98,7 @@ internal static ж<Interface> newLink(ref syscall.IfInfomsg ifim, slice<syscall.
             }
         }
         else if (exprᴛ1 == syscall.IFLA_IFNAME) {
-            ifi.Value.Name = ((@string)(a.Value[..(int)(len(a.Value) - 1)]));
+            ifi.Value.Name = ((@string)(a.Value.slice(0, len(a.Value) - 1)));
         }
         else if (exprᴛ1 == syscall.IFLA_MTU) {
             ifi.Value.MTU = (nint)(~Ꮡ(a.Value[..4], 0).Reinterpret<byte, uint32>());
@@ -256,7 +256,7 @@ internal static slice<ΔAddr> parseProcNetIGMP(@string path, ж<Interface> Ꮡif
                     // address in /proc/net/igmp in native
                     // endianness.
                     for (nint iΔ1 = 0; iΔ1 + 1 < len(f[0]); iΔ1 += 2) {
-                        (b[iΔ1 / 2], _) = xtoi2(f[0][(int)(iΔ1)..(int)(iΔ1 + 2)], 0);
+                        (b[iΔ1 / 2], _) = xtoi2(f[0].slice(iΔ1, iΔ1 + 2), 0);
                     }
                     var i = ~Ꮡ(b[..4], 0).Reinterpret<byte, uint32>();
                     var ifma = Ꮡ(new IPAddr(IP: IPv4((byte)((i >> (int)(24))), (byte)((i >> (int)(16))), (byte)((i >> (int)(8))), (byte)i)));
@@ -292,7 +292,7 @@ internal static slice<ΔAddr> parseProcNetIGMP6(@string path, ж<Interface> Ꮡi
             }
             if (Ꮡifi == nil || f[1] == ifi.Name) {
                 for (nint i = 0; i + 1 < len(f[2]); i += 2) {
-                    (b[i / 2], _) = xtoi2(f[2][(int)(i)..(int)(i + 2)], 0);
+                    (b[i / 2], _) = xtoi2(f[2].slice(i, i + 2), 0);
                 }
                 var ifma = Ꮡ(new IPAddr(IP: new IP(new byte[]{b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15]}.slice())));
                 ifmat = append(ifmat, (ΔAddr)(new IPAddrжΔAddr(ifma)));

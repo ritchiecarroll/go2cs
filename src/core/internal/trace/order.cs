@@ -1349,7 +1349,7 @@ internal static rangeType makeRangeType(@event.Type typ, stringID desc) {
             return fmt.Errorf("misuse of region in goroutine %v: region end %v when the inner-most active region start event is %v"u8, s.id, r, next);
         }
     }
-    s.regions = s.regions[..(int)(len(s.regions) - 1)];
+    s.regions = s.regions.slice(0, len(s.regions) - 1);
     return default!;
 }
 
@@ -1428,7 +1428,7 @@ internal static rangeType makeRangeType(@event.Type typ, stringID desc) {
     // Swap remove.
     var desc = s.inFlight[idx].desc;
     (s.inFlight[idx], s.inFlight[len(s.inFlight) - 1]) = (s.inFlight[len(s.inFlight) - 1], s.inFlight[idx]);
-    s.inFlight = s.inFlight[..(int)(len(s.inFlight) - 1)];
+    s.inFlight = s.inFlight.slice(0, len(s.inFlight) - 1);
     return (desc, default!);
 }
 
@@ -1503,9 +1503,9 @@ internal static @string dumpOrdering(ref ordering order) {
     // Create new buf and copy data over.
     var newBuf = new slice<T>(len(q.buf) * 2);
     nint pivot = q.start % len(q.buf);
-    var (first, last) = (q.buf[(int)(pivot)..], q.buf[..(int)(pivot)]);
-    copy(newBuf[..(int)(len(first))], first);
-    copy(newBuf[(int)(len(first))..], last);
+    var (first, last) = (q.buf.slice(pivot), q.buf.slice(0, pivot));
+    copy(newBuf.slice(0, len(first)), first);
+    copy(newBuf.slice(len(first)), last);
     // Update the queue state.
     q.start = 0;
     q.end = len(q.buf);

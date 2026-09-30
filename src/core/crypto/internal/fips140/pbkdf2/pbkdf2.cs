@@ -54,7 +54,7 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
         buf[3] = (byte)block;
         prf.Write(buf[..4]);
         dk = prf.Sum(dk);
-        var T = dk[(int)(len(dk) - hashLen)..];
+        var T = dk.slice(len(dk) - hashLen);
         copy(U, T);
         // U_n = PRF(password, U_(n-1))
         for (nint n = 2; n <= iter; n++) {
@@ -67,7 +67,7 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
             }
         }
     }
-    return (dk[..(int)(keyLength)], default!);
+    return (dk.slice(0, keyLength), default!);
 }
 
 internal static void setServiceIndicator(slice<byte> salt, nint keyLength) {

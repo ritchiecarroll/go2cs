@@ -62,7 +62,7 @@ internal static input inputString(@string str) {
 
 [GoRecv] internal static slice<byte> appendSlice(this ref input @in, slice<byte> buf, nint b, nint e) {
     if (@in.bytes != default!) {
-        return appendꓸꓸꓸ(buf, @in.bytes[(int)(b)..(int)(e)]);
+        return appendꓸꓸꓸ(buf, @in.bytes.slice(b, e));
     }
     for (nint i = b; i < e; i++) {
         buf = append(buf, @in.str[i]);
@@ -72,23 +72,23 @@ internal static input inputString(@string str) {
 
 [GoRecv] internal static nint copySlice(this ref input @in, slice<byte> buf, nint b, nint e) {
     if (@in.bytes == default!) {
-        return copy(buf, @in.str[(int)(b)..(int)(e)]);
+        return copy(buf, @in.str.slice(b, e));
     }
-    return copy(buf, @in.bytes[(int)(b)..(int)(e)]);
+    return copy(buf, @in.bytes.slice(b, e));
 }
 
 [GoRecv] internal static (uint16, nint) charinfoNFC(this ref input @in, nint p) {
     if (@in.bytes == default!) {
-        return nfcData.lookupString(@in.str[(int)(p)..]);
+        return nfcData.lookupString(@in.str.slice(p));
     }
-    return nfcData.lookup(@in.bytes[(int)(p)..]);
+    return nfcData.lookup(@in.bytes.slice(p));
 }
 
 [GoRecv] internal static (uint16, nint) charinfoNFKC(this ref input @in, nint p) {
     if (@in.bytes == default!) {
-        return nfkcData.lookupString(@in.str[(int)(p)..]);
+        return nfkcData.lookupString(@in.str.slice(p));
     }
-    return nfkcData.lookup(@in.bytes[(int)(p)..]);
+    return nfkcData.lookup(@in.bytes.slice(p));
 }
 
 [GoRecv] internal static rune /*r*/ hangul(this ref input @in, nint p) {
@@ -96,15 +96,15 @@ internal static input inputString(@string str) {
 
     nint size = default!;
     if (@in.bytes == default!){
-        if (!isHangulString(@in.str[(int)(p)..])) {
+        if (!isHangulString(@in.str.slice(p))) {
             return 0;
         }
-        (r, size) = utf8.DecodeRuneInString(@in.str[(int)(p)..]);
+        (r, size) = utf8.DecodeRuneInString(@in.str.slice(p));
     } else {
-        if (!isHangul(@in.bytes[(int)(p)..])) {
+        if (!isHangul(@in.bytes.slice(p))) {
             return 0;
         }
-        (r, size) = utf8.DecodeRune(@in.bytes[(int)(p)..]);
+        (r, size) = utf8.DecodeRune(@in.bytes.slice(p));
     }
     if (size != hangulUTF8Size) {
         return 0;

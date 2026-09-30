@@ -584,7 +584,7 @@ internal static ж<ΔisolatingRunSequence> isolatingRunSequence(this ж<paragrap
                 }
             }
             if (tΔ1 == EN) {
-                setTypes(s.types[(int)(runStart)..(int)(runEnd)], EN);
+                setTypes(s.types.slice(runStart, runEnd), EN);
             }
             // continue at end of sequence
             i = runEnd;
@@ -661,7 +661,7 @@ internal static ж<ΔisolatingRunSequence> isolatingRunSequence(this ж<paragrap
                 // the paragraph embedding level.
                 resolvedType = typeForLevel(s.level);
             }
-            setTypes(s.types[(int)(runStart)..(int)(runEnd)], resolvedType);
+            setTypes(s.types.slice(runStart, runEnd), resolvedType);
             i = runEnd;
         }
 
@@ -943,7 +943,7 @@ internal static slice<nint> computeMultilineReordering(slice<level> levels, slic
     nint start = 0;
     foreach (var (_, limit) in linebreaks) {
         var tempLevels = new slice<level>(limit - start);
-        copy(tempLevels, levels[(int)(start)..]);
+        copy(tempLevels, levels.slice(start));
         foreach (var (j, order) in computeReordering(tempLevels)) {
             result[start + j] = order + start;
         }
@@ -1027,7 +1027,7 @@ internal static error validateTypes(slice<ΔClass> types) {
     if (len(types) == 0) {
         return fmt.Errorf("types is null"u8);
     }
-    foreach (var (i, t) in types[..(int)(len(types) - 1)]) {
+    foreach (var (i, t) in types.slice(0, len(types) - 1)) {
         if (t == B) {
             return fmt.Errorf("B type before end of paragraph at index: %d"u8, i);
         }

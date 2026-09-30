@@ -453,9 +453,9 @@ internal static readonly @string recordWrappedAroundˢ = "record wrapped around"
     var pos = l.write;
     l.write += (uint64)len(x);
     while (len(x) > 0) {
-        nint n = copy(l.data.b[(int)(pos % (uint64)len(l.data.b))..], x);
+        nint n = copy(l.data.b.slice((nint)(pos % (uint64)len(l.data.b))), x);
         pos += (uint64)n;
-        x = x[(int)(n)..];
+        x = x.slice(n);
     }
 }
 
@@ -480,7 +480,7 @@ internal static readonly @string recordWrappedAroundˢ = "record wrapped around"
     }
     l.buf[i] = (byte)u;
     i++;
-    l.bytes(l.buf[..(int)(i)]);
+    l.bytes(l.buf.slice(0, i));
 }
 
 [GoType] partial struct debugLogReader {

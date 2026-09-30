@@ -46,14 +46,14 @@ public static (slice<byte>, error) ReadData(io.Reader r, uint64 n) {
         if (next > chunk) {
             next = chunk;
         }
-        var (_, err) = io.ReadFull(r, buf1[..(int)(next)]);
+        var (_, err) = io.ReadFull(r, buf1.slice(0, (nint)(next)));
         if (err != default!) {
             if (len(buf) > 0 && AreEqual(err, io.EOF)) {
                 err = io.ErrUnexpectedEOF;
             }
             return (default!, err);
         }
-        buf = appendꓸꓸꓸ(buf, buf1[..(int)(next)]);
+        buf = appendꓸꓸꓸ(buf, buf1.slice(0, (nint)(next)));
         n -= next;
     }
     return (buf, default!);
@@ -87,11 +87,11 @@ public static (slice<byte>, error) ReadDataAt(io.ReaderAt r, uint64 n, int64 off
         if (next > chunk) {
             next = chunk;
         }
-        var (_, err) = r.ReadAt(buf1[..(int)(next)], off);
+        var (_, err) = r.ReadAt(buf1.slice(0, (nint)(next)), off);
         if (err != default!) {
             return (default!, err);
         }
-        buf = appendꓸꓸꓸ(buf, buf1[..(int)(next)]);
+        buf = appendꓸꓸꓸ(buf, buf1.slice(0, (nint)(next)));
         n -= next;
         off += (int64)next;
     }

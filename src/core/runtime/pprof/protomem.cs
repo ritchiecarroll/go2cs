@@ -50,7 +50,7 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
                         }
                     }
                     // Found non-runtime. Show any runtime uses above it.
-                    stk = stk[(int)(i)..];
+                    stk = stk.slice(i);
                     break;
                 }
             }

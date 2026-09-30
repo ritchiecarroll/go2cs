@@ -38,27 +38,27 @@ partial class strconv_package {
         w++;
         buf[w] = (rune)'.';
         w++;
-        w += digitZero(buf[(int)(w)..(int)(w + -a.dp)]);
-        w += copy(buf[(int)(w)..], // zeros fill space between decimal point and digits
- a.d[0..(int)(a.nd)]);
+        w += digitZero(buf.slice(w, w + -a.dp));
+        w += copy(buf.slice(w), // zeros fill space between decimal point and digits
+ a.d.slice(0, a.nd));
         break;
     }
     case {} when a.dp < a.nd: {
-        w += copy(buf[(int)(w)..], // decimal point in middle of digits
- a.d[0..(int)(a.dp)]);
+        w += copy(buf.slice(w), // decimal point in middle of digits
+ a.d.slice(0, a.dp));
         buf[w] = (rune)'.';
         w++;
-        w += copy(buf[(int)(w)..], a.d[(int)(a.dp)..(int)(a.nd)]);
+        w += copy(buf.slice(w), a.d.slice(a.dp, a.nd));
         break;
     }
     default: {
-        w += copy(buf[(int)(w)..], // zeros fill space between digits and decimal point
- a.d[0..(int)(a.nd)]);
-        w += digitZero(buf[(int)(w)..(int)(w + a.dp - a.nd)]);
+        w += copy(buf.slice(w), // zeros fill space between digits and decimal point
+ a.d.slice(0, a.nd));
+        w += digitZero(buf.slice(w, w + a.dp - a.nd));
         break;
     }}
 
-    return ((@string)(buf[0..(int)(w)]));
+    return ((@string)(buf.slice(0, w)));
 }
 
 internal static nint digitZero(slice<byte> dst) {
@@ -327,7 +327,7 @@ internal static bool prefixIsLessThan(slice<byte> b, @string s) {
 // Binary shift left (* 2) by k bits.  k <= maxShift to avoid overflow.
 internal static void leftShift(ref @decimal a, nuint k) {
     nint delta = leftcheats[k].delta;
-    if (prefixIsLessThan(a.d[0..(int)(a.nd)], leftcheats[k].cutoff)) {
+    if (prefixIsLessThan(a.d.slice(0, a.nd), leftcheats[k].cutoff)) {
         delta--;
     }
     nint r = a.nd; // read index

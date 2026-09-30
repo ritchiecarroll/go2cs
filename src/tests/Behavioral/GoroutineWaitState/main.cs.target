@@ -25,7 +25,7 @@ internal static bool present(@string dump, @string state) {
 }
 
 [MethodImpl(MethodImplOptions.NoInlining)] internal static @string dump(slice<byte> buf) {
-    return ((@string)(buf[..(int)(runtime.Stack(buf, true))]));
+    return ((@string)(buf.slice(0, runtime.Stack(buf, true))));
 }
 
 internal static @string await(slice<byte> buf, slice<@string> want, bool sense) {

@@ -23,7 +23,7 @@ public static @string String(this Accuracy i) {
     if (i < 0 || i >= ((Accuracy)(int8)(len(_Accuracy_index) - 1))) {
         return "Accuracy("u8 + strconv.FormatInt((int64)(int8)(i + -1), 10) + ")"u8;
     }
-    return _Accuracy_name[(int)(_Accuracy_index[i])..(int)(_Accuracy_index[i + 1])];
+    return _Accuracy_name.slice(_Accuracy_index[i], _Accuracy_index[i + 1]);
 }
 
 } // end big_package

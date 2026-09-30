@@ -53,20 +53,20 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
                     list = append(list, new mapFileInfo(fname, f));
                 }
             } else {
-                need[fname[..(int)(i)]] = true;
+                need[fname.slice(0, i)] = true;
             }
         }
     } else {
-        elem = name[(int)(strings.LastIndex(name, "/"u8) + 1)..];
+        elem = name.slice(strings.LastIndex(name, "/"u8) + 1);
         @string prefix = name + "/"u8;
         foreach (var (fname, f) in fsys) {
             if (strings.HasPrefix(fname, prefix)) {
-                @string felem = fname[(int)(len(prefix))..];
+                @string felem = fname.slice(len(prefix));
                 nint i = strings.Index(felem, "/"u8);
                 if (i < 0){
                     list = append(list, new mapFileInfo(felem, f));
                 } else {
-                    need[fname[(int)(len(prefix))..(int)(len(prefix) + i)]] = true;
+                    need[fname.slice(len(prefix), len(prefix) + i)] = true;
                 }
             }
         }
@@ -192,7 +192,7 @@ internal static (fs.FileInfo, error) Stat(this ж<openMapFile> Ꮡf) {
     if (f.offset < 0) {
         return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: f.path, Err: fs.ErrInvalid))));
     }
-    nint n = copy(b, (~f.f).Data[(int)(f.offset)..]);
+    nint n = copy(b, (~f.f).Data.slice((nint)(f.offset)));
     f.offset += (int64)n;
     return (n, default!);
 }
@@ -223,7 +223,7 @@ internal static (fs.FileInfo, error) Stat(this ж<openMapFile> Ꮡf) {
     if (offset < 0 || offset > (int64)len((~f.f).Data)) {
         return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: f.path, Err: fs.ErrInvalid))));
     }
-    nint n = copy(b, (~f.f).Data[(int)(offset)..]);
+    nint n = copy(b, (~f.f).Data.slice((nint)(offset)));
     if (n < len(b)) {
         return (n, io.EOF);
     }

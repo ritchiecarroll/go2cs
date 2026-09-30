@@ -150,7 +150,7 @@ internal const nint marshaledSize = /* len(magic512) + 8*8 + chunk + 8 */ 204;
     b = byteorder.BEAppendUint64(b, d.h[5]);
     b = byteorder.BEAppendUint64(b, d.h[6]);
     b = byteorder.BEAppendUint64(b, d.h[7]);
-    b = appendꓸꓸꓸ(b, d.x[..(int)(d.nx)]);
+    b = appendꓸꓸꓸ(b, d.x.slice(0, d.nx));
     b = appendꓸꓸꓸ(b, makeꓸꓸꓸ<byte>(len(d.x) - d.nx));
     b = byteorder.BEAppendUint64(b, d.len);
     return (b, default!);
@@ -193,7 +193,7 @@ private static readonly @string cryptoSha512InvalidHashˢ2 = "crypto/sha512: inv
     (b, d.h[5]) = consumeUint64(b);
     (b, d.h[6]) = consumeUint64(b);
     (b, d.h[7]) = consumeUint64(b);
-    b = b[(int)(copy(d.x[..], b))..];
+    b = b.slice(copy(d.x[..], b));
     (b, d.len) = consumeUint64(b);
     d.nx = (nint)(d.len % (uint64)chunk);
     return default!;
@@ -247,18 +247,18 @@ public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
     nn = len(p);
     d.len += (uint64)nn;
     if (d.nx > 0) {
-        nint n = copy(d.x[(int)(d.nx)..], p);
+        nint n = copy(d.x.slice(d.nx), p);
         d.nx += n;
         if (d.nx == chunk) {
             block(ref (Ꮡd).DerefOrNull(), d.x[..]);
             d.nx = 0;
         }
-        p = p[(int)(n)..];
+        p = p.slice(n);
     }
     if (len(p) >= chunk) {
         nint n = (nint)(len(p) & ~(nint)(chunk - 1));
-        block(ref (Ꮡd).DerefOrNull(), p[..(int)(n)]);
-        p = p[(int)(n)..];
+        block(ref (Ꮡd).DerefOrNull(), p.slice(0, n));
+        p = p.slice(n);
     }
     if (len(p) > 0) {
         d.nx = copy(d.x[..], p);
@@ -272,7 +272,7 @@ public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
     var d0 = @new<Digest>();
     d0.Value = d.ΔClone();
     var hash = d0.checkSum();
-    return appendꓸꓸꓸ(@in, hash[..(int)(d.size)]);
+    return appendꓸꓸꓸ(@in, hash.slice(0, d.size));
 }
 
 internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
@@ -290,11 +290,11 @@ internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
     }
     // Length in bits.
     len <<= (int)(3);
-    var padlen = tmp[..(int)(t + 16)];
+    var padlen = tmp.slice(0, (nint)(t + 16));
     // Upper 64 bits are always zero, because len variable has type uint64,
     // and tmp is already zeroed at that index, so we can skip updating it.
     // byteorder.BEPutUint64(padlen[t+0:], 0)
-    byteorder.BEPutUint64(padlen[(int)(t + 8)..], len);
+    byteorder.BEPutUint64(padlen.slice((nint)(t + 8)), len);
     Ꮡd.Write(padlen);
     if (d.nx != 0) {
         throw panic("d.nx != 0");

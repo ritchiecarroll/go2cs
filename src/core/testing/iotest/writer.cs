@@ -30,7 +30,7 @@ public static io.Writer TruncateWriter(io.Writer w, int64 n) {
     if ((int64)n > t.n) {
         n = (nint)t.n;
     }
-    (n, err) = t.w.Write(p[0..(int)(n)]);
+    (n, err) = t.w.Write(p.slice(0, n));
     t.n -= (int64)n;
     if (err == default!) {
         n = len(p);

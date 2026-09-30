@@ -129,7 +129,7 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                         rng.Read(addData);
                         // Make plaintext and dst slices point to same array with inexact overlap.
                         ref var plaintext = ref heap<slice<byte>>(out var Ꮡplaintext);
-                        Ꮡplaintext.ValueSlot = buff[..(int)(ptLen)];
+                        Ꮡplaintext.ValueSlot = buff.slice(0, ptLen);
                         ref var dst = ref heap<slice<byte>>(out var Ꮡdst);
                         Ꮡdst.ValueSlot = buff[1..1]; // Shift dst to not start at start of plaintext.
                         var addDataʗ1 = addData;
@@ -139,8 +139,8 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                             sealMsg(tΔ9, aeadʗ10, Ꮡdst.ValueSlot, nonceʗ1, Ꮡplaintext.ValueSlot, addDataʗ1);
                         });
                         // Only overlap on one byte
-                        Ꮡplaintext.ValueSlot = buff[..(int)(ptLen)];
-                        Ꮡdst.ValueSlot = buff[(int)(ptLen - 1)..(int)(ptLen - 1)];
+                        Ꮡplaintext.ValueSlot = buff.slice(0, ptLen);
+                        Ꮡdst.ValueSlot = buff.slice(ptLen - 1, ptLen - 1);
                         var addDataʗ2 = addData;
                         var aeadʗ11 = aeadʗ9;
                         var nonceʗ2 = nonce;
@@ -164,7 +164,7 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                         var buff = new slice<byte>(ptLen + len(validCT));
                         // Make ciphertext and dst slices point to same array with inexact overlap.
                         ref var ciphertext = ref heap<slice<byte>>(out var Ꮡciphertext);
-                        Ꮡciphertext.ValueSlot = buff[..(int)(len(validCT))];
+                        Ꮡciphertext.ValueSlot = buff.slice(0, len(validCT));
                         copy(Ꮡciphertext.ValueSlot, validCT);
                         ref var dst = ref heap<slice<byte>>(out var Ꮡdst);
                         Ꮡdst.ValueSlot = buff[1..1]; // Shift dst to not start at start of ciphertext.
@@ -175,14 +175,14 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                             aeadʗ13.Open(Ꮡdst.ValueSlot, nonceʗ3, Ꮡciphertext.ValueSlot, addDataʗ3);
                         });
                         // Only overlap on one byte.
-                        Ꮡciphertext.ValueSlot = buff[..(int)(len(validCT))];
+                        Ꮡciphertext.ValueSlot = buff.slice(0, len(validCT));
                         copy(Ꮡciphertext.ValueSlot, validCT);
                         // Make sure it is the actual ciphertext being overlapped and not
                         // the hash digest which might be extracted/truncated in some
                         // implementations: Go one byte past the hash digest/tag and into
                         // the ciphertext.
                         nint beforeTag = len(validCT) - aeadʗ12.Overhead();
-                        Ꮡdst.ValueSlot = buff[(int)(beforeTag - 1)..(int)(beforeTag - 1)];
+                        Ꮡdst.ValueSlot = buff.slice(beforeTag - 1, beforeTag - 1);
                         var addDataʗ4 = addData;
                         var aeadʗ14 = aeadʗ12;
                         var nonceʗ4 = nonce;
@@ -217,11 +217,11 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                             rng.Read(addData);
                             var @out = sealMsg(tΔ13, aeadʗ17, prefix, nonce, plaintext, addData);
                             // Check that Seal didn't alter the prefix
-                            if (!bytes.Equal(@out[..(int)(len(prefix))], prefix)) {
-                                tΔ13.Errorf("Seal alters dst instead of appending; got %s, want %s"u8, truncateHex(@out[..(int)(len(prefix))]), truncateHex(prefix));
+                            if (!bytes.Equal(@out.slice(0, len(prefix)), prefix)) {
+                                tΔ13.Errorf("Seal alters dst instead of appending; got %s, want %s"u8, truncateHex(@out.slice(0, len(prefix))), truncateHex(prefix));
                             }
                             if (isDeterministic(aeadʗ17)) {
-                                var ciphertext = @out[(int)(len(prefix))..];
+                                var ciphertext = @out.slice(len(prefix));
                                 // Check that the appended ciphertext wasn't affected by the prefix
                                 {
                                     var expectedCT = sealMsg(tΔ13, aeadʗ17, default!, nonce, plaintext, addData); if (!bytes.Equal(ciphertext, expectedCT)) {
@@ -248,10 +248,10 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                             var ciphertext = sealMsg(tΔ14, aeadʗ18, default!, nonce, before, addData);
                             var @out = openWithoutError(tΔ14, aeadʗ18, prefix, nonce, ciphertext, addData);
                             // Check that Open didn't alter the prefix
-                            if (!bytes.Equal(@out[..(int)(len(prefix))], prefix)) {
-                                tΔ14.Errorf("Open alters dst instead of appending; got %s, want %s"u8, truncateHex(@out[..(int)(len(prefix))]), truncateHex(prefix));
+                            if (!bytes.Equal(@out.slice(0, len(prefix)), prefix)) {
+                                tΔ14.Errorf("Open alters dst instead of appending; got %s, want %s"u8, truncateHex(@out.slice(0, len(prefix))), truncateHex(prefix));
                             }
-                            var after = @out[(int)(len(prefix))..];
+                            var after = @out.slice(len(prefix));
                             // Check that the appended plaintext wasn't affected by the prefix
                             if (!bytes.Equal(after, before)) {
                                 tΔ14.Errorf("Open behavior affected by pre-existing data in dst; got %s, want %s"u8, truncateHex(after), truncateHex(before));

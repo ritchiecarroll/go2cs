@@ -151,7 +151,7 @@ internal static slice<uintptr> runtime_expandFinalInlineFrame(slice<uintptr> stk
     // elided.
     var calleeID = abi.FuncIDNormal;
     // Remove pc from stk; we'll re-add it below.
-    stk = stk[..(int)(len(stk) - 1)];
+    stk = stk.slice(0, len(stk) - 1);
     for (; uf.valid(); uf = u.next(uf)) {
         var funcID = u.srcFunc(uf).funcID;
         if (funcID == abi.FuncIDWrapper && elideWrapperCalling(calleeID)){
@@ -838,7 +838,7 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
         return (-1, 0);
     }
     var datap = f.datap;
-    var Δp = (~datap).pctab[(int)(off)..];
+    var Δp = (~datap).pctab.slice((nint)(off));
     var pc = f.entry();
     var prevpc = pc;
     var val = (int32)(-1);
@@ -888,7 +888,7 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
         return (-1, 0);
     }
     print((@string)"runtime: invalid pc-encoded table f="u8, funcname(f), (@string)" pc="u8, ((Δhex)(uint64)pc), (@string)" targetpc="u8, ((Δhex)(uint64)targetpc), (@string)" tab="u8, Δp, (@string)"\n"u8);
-    Δp = (~datap).pctab[(int)(off)..];
+    Δp = (~datap).pctab.slice((nint)(off));
     pc = f.entry();
     val = -1;
     while (ᐧ) {
@@ -923,7 +923,7 @@ internal static @string funcpkgpath(ΔfuncInfo f) {
             break;
         }
     }
-    return name[..(int)(i)];
+    return name.slice(0, i);
 }
 
 internal static @string funcfile(ΔfuncInfo f, int32 fileno) {
@@ -987,7 +987,7 @@ internal static int32 funcspdelta(ΔfuncInfo f, uintptr targetpc) {
 // funcMaxSPDelta returns the maximum spdelta at any point in f.
 internal static int32 funcMaxSPDelta(ΔfuncInfo f) {
     var datap = f.datap;
-    var Δp = (~datap).pctab[(int)(f.pcsp)..];
+    var Δp = (~datap).pctab.slice((nint)(f.pcsp));
     var pc = f.entry();
     var val = (int32)(-1);
     var most = (int32)0;
@@ -1062,13 +1062,13 @@ internal static (slice<byte> newp, bool ok) step(slice<byte> Δp, ref uintptr pc
         (n, uvdelta) = readvarint(Δp);
     }
     val += (int32)((uint32)(((uint32)0 - ((uint32)(uvdelta & 1))) ^ ((uvdelta >> (int)(1)))));
-    Δp = Δp[(int)(n)..];
+    Δp = Δp.slice((nint)(n));
     var pcdelta = (uint32)Δp[0];
     n = 1;
     if ((uint32)(pcdelta & 0x80) != 0) {
         (n, pcdelta) = readvarint(Δp);
     }
-    Δp = Δp[(int)(n)..];
+    Δp = Δp.slice((nint)(n));
     pc += (uintptr)(pcdelta * (uint32)sys.PCQuantum);
     return (Δp, true);
 }

@@ -887,6 +887,7 @@
     <Project Path="tests/Behavioral/Slice3IndexWideBound/Slice3IndexWideBound.csproj" />
     <Project Path="tests/Behavioral/SliceAliasing/SliceAliasing.csproj" />
     <Project Path="tests/Behavioral/SliceBoundsEscapeRoutes/SliceBoundsEscapeRoutes.csproj" />
+    <Project Path="tests/Behavioral/SliceBoundsRecover/SliceBoundsRecover.csproj" />
     <Project Path="tests/Behavioral/SliceElementFieldAddress/SliceElementFieldAddress.csproj" />
     <Project Path="tests/Behavioral/SliceFieldElementAddress/SliceFieldElementAddress.csproj" />
     <Project Path="tests/Behavioral/SliceNilVsEmpty/SliceNilVsEmpty.csproj" />

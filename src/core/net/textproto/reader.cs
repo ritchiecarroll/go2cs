@@ -113,7 +113,7 @@ internal static slice<byte> trim(slice<byte> s) {
     while (n > i && (s[n - 1] == (rune)' ' || s[n - 1] == (rune)'\t')) {
         n--;
     }
-    return s[(int)(i)..(int)(n)];
+    return s.slice(i, n);
 }
 
 // ReadContinuedLineBytes is like [Reader.ReadContinuedLine] but
@@ -603,7 +603,7 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
             // Most headers aren't multi-valued.
             // Set the capacity on strs[0] to 1, so any future append
             // won't extend the slice into the other strings.
-            (vv, strs) = (strs.slice(-1, 1, 1), strs[1..]);
+            (vv, strs) = (strs.slice(0, 1, 1), strs[1..]);
             vv[0] = value;
             m[key] = vv;
         } else {

@@ -325,16 +325,13 @@ public readonly struct @string :
         return new slice<byte>(m_value ?? [], m_offset, m_offset + m_length);
     }
 
+    // No bound is a sentinel (S-c R1-A): the callers pass every bound explicitly.
     internal ReadOnlySpan<byte> SliceBounds(nint low, nint high, nint max)
     {
-        nint start = low == -1 ? 0 : low;
-        nint end = high == -1 ? m_length : high;
-        nint bound = max == -1 ? m_length : max;
+        if (low < 0 || high < low || max < high || max > m_length)
+            throw RuntimeErrorPanic.LengthSliceBoundsOutOfRange(low, high, max, m_length);
 
-        if (start < 0 || end < start || bound < end || bound > m_length)
-            throw RuntimeErrorPanic.LengthSliceBoundsOutOfRange(start, end, bound, m_length);
-
-        return Bytes.Slice((int)start, (int)(end - start));
+        return Bytes.Slice((int)low, (int)(high - low));
     }
 
     public ReadOnlySpan<byte> ToSpan()

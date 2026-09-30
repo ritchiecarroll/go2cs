@@ -15,11 +15,11 @@ using go.@internal;
 partial class stringslite_package {
 
 public static bool HasPrefix(@string s, @string prefix) {
-    return len(s) >= len(prefix) && s[..(int)(len(prefix))] == prefix;
+    return len(s) >= len(prefix) && s.slice(0, len(prefix)) == prefix;
 }
 
 public static bool HasSuffix(@string s, @string suffix) {
-    return len(s) >= len(suffix) && s[(int)(len(s) - len(suffix))..] == suffix;
+    return len(s) >= len(suffix) && s.slice(len(s) - len(suffix)) == suffix;
 }
 
 public static nint IndexByte(@string s, byte c) {
@@ -58,20 +58,20 @@ public static nint Index(@string s, @string substr) {
             if (s[iΔ2] != c0Δ2) {
                 // IndexByte is faster than bytealg.IndexString, so use it as long as
                 // we're not getting lots of false positives.
-                nint o = IndexByte(s[(int)(iΔ2 + 1)..(int)(tΔ2)], c0Δ2);
+                nint o = IndexByte(s.slice(iΔ2 + 1, tΔ2), c0Δ2);
                 if (o < 0) {
                     return -1;
                 }
                 iΔ2 += o + 1;
             }
-            if (s[iΔ2 + 1] == c1Δ2 && s[(int)(iΔ2)..(int)(iΔ2 + n)] == substr) {
+            if (s[iΔ2 + 1] == c1Δ2 && s.slice(iΔ2, iΔ2 + n) == substr) {
                 return iΔ2;
             }
             failsΔ2++;
             iΔ2++;
             // Switch to bytealg.IndexString when IndexByte produces too many false positives.
             if (failsΔ2 > bytealg.Cutover(iΔ2)) {
-                nint r = bytealg.IndexString(s[(int)(iΔ2)..], substr);
+                nint r = bytealg.IndexString(s.slice(iΔ2), substr);
                 if (r >= 0) {
                     return r + iΔ2;
                 }
@@ -88,20 +88,20 @@ public static nint Index(@string s, @string substr) {
     nint fails = 0;
     while (i < t) {
         if (s[i] != c0) {
-            nint o = IndexByte(s[(int)(i + 1)..(int)(t)], c0);
+            nint o = IndexByte(s.slice(i + 1, t), c0);
             if (o < 0) {
                 return -1;
             }
             i += o + 1;
         }
-        if (s[i + 1] == c1 && s[(int)(i)..(int)(i + n)] == substr) {
+        if (s[i + 1] == c1 && s.slice(i, i + n) == substr) {
             return i;
         }
         i++;
         fails++;
         if (fails >= 4 + (i >> (int)(4)) && i < t) {
             // See comment in ../bytes/bytes.go.
-            nint j = bytealg.IndexRabinKarp(s[(int)(i)..], substr);
+            nint j = bytealg.IndexRabinKarp(s.slice(i), substr);
             if (j < 0) {
                 return -1;
             }
@@ -114,7 +114,7 @@ public static nint Index(@string s, @string substr) {
 public static (@string before, @string after, bool found) Cut(@string s, @string sep) {
     {
         nint i = Index(s, sep); if (i >= 0) {
-            return (s[..(int)(i)], s[(int)(i + len(sep))..], true);
+            return (s.slice(0, i), s.slice(i + len(sep)), true);
         }
     }
     return (s, "", false);
@@ -124,26 +124,26 @@ public static (@string after, bool found) CutPrefix(@string s, @string prefix) {
     if (!HasPrefix(s, prefix)) {
         return (s, false);
     }
-    return (s[(int)(len(prefix))..], true);
+    return (s.slice(len(prefix)), true);
 }
 
 public static (@string before, bool found) CutSuffix(@string s, @string suffix) {
     if (!HasSuffix(s, suffix)) {
         return (s, false);
     }
-    return (s[..(int)(len(s) - len(suffix))], true);
+    return (s.slice(0, len(s) - len(suffix)), true);
 }
 
 public static @string TrimPrefix(@string s, @string prefix) {
     if (HasPrefix(s, prefix)) {
-        return s[(int)(len(prefix))..];
+        return s.slice(len(prefix));
     }
     return s;
 }
 
 public static @string TrimSuffix(@string s, @string suffix) {
     if (HasSuffix(s, suffix)) {
-        return s[..(int)(len(s) - len(suffix))];
+        return s.slice(0, len(s) - len(suffix));
     }
     return s;
 }

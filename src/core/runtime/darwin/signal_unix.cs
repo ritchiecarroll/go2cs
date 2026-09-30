@@ -446,7 +446,7 @@ internal static void sigprofNonGo(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Point
             while (n < len(sigprofCallers) && sigprofCallers[n] != 0) {
                 n++;
             }
-            cpuprof.addNonGo(sigprofCallers[..(int)(n)]);
+            cpuprof.addNonGo(sigprofCallers.slice(0, n));
         }
     }
     atomic.Store(ᏑsigprofCallersUse, 0);

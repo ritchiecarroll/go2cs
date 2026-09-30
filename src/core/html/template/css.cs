@@ -22,7 +22,7 @@ internal static bool endsWithCSSKeyword(slice<byte> b, @string kw) {
         return false;
     }
     if (i != 0) {
-        var (r, _) = utf8.DecodeLastRune(b[..(int)(i)]);
+        var (r, _) = utf8.DecodeLastRune(b.slice(0, i));
         if (isCSSNmchar(r)) {
             // Too long.
             return false;
@@ -33,7 +33,7 @@ internal static bool endsWithCSSKeyword(slice<byte> b, @string kw) {
     // https://www.w3.org/TR/css3-syntax/#TOK-URI
     // This does not attempt to recognize encoded keywords. For example,
     // given "\75\72\6c" and "url" this return false.
-    return ((sstring)bytes.ToLower(b[(int)(i)..])) == kw;
+    return ((sstring)bytes.ToLower(b.slice(i))) == kw;
 }
 
 // isCSSNmchar reports whether rune is allowed anywhere in a CSS identifier.
@@ -64,7 +64,7 @@ internal static slice<byte> decodeCSS(slice<byte> s) {
         if (iΔ1 == -1) {
             iΔ1 = len(s);
         }
-        (b, s) = (appendꓸꓸꓸ(b, s[..(int)(iΔ1)]), s[(int)(iΔ1)..]);
+        (b, s) = (appendꓸꓸꓸ(b, s.slice(0, iΔ1)), s.slice(iΔ1));
         if (len(s) < 2) {
             break;
         }
@@ -77,19 +77,19 @@ internal static slice<byte> decodeCSS(slice<byte> s) {
             while (j < len(s) && j < 7 && isHex(s[j])) {
                 j++;
             }
-            var r = hexDecode(s[1..(int)(j)]);
+            var r = hexDecode(s.slice(1, j));
             if (r > unicode.MaxRune) {
                 (r, j) = (r / 16, j - 1);
             }
-            nint n = utf8.EncodeRune(b[(int)(len(b))..(int)(cap(b))], r);
+            nint n = utf8.EncodeRune(b.slice(len(b), cap(b)), r);
             // The optional space at the end allows a hex
             // sequence to be followed by a literal hex.
             // string(decodeCSS([]byte(`\A B`))) == "\nB"
-            (b, s) = (b[..(int)(len(b) + n)], skipCSSSpace(s[(int)(j)..]));
+            (b, s) = (b.slice(0, len(b) + n), skipCSSSpace(s.slice(j)));
         } else {
             // `\\` decodes to `\` and `\"` to `"`.
             var (_, n) = utf8.DecodeRune(s[1..]);
-            (b, s) = (appendꓸꓸꓸ(b, s[1..(int)(1 + n)]), s[(int)(1 + n)..]);
+            (b, s) = (appendꓸꓸꓸ(b, s.slice(1, 1 + n)), s.slice(1 + n));
         }
     }
     return b;
@@ -171,7 +171,7 @@ internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
     nint written = 0;
     for (nint i = 0; i < len(s); i += w) {
         // See comment in htmlEscaper.
-        (r, w) = utf8.DecodeRuneInString(s[(int)(i)..]);
+        (r, w) = utf8.DecodeRuneInString(s.slice(i));
         @string repl = default!;
         switch (ᐧ) {
         case {} when (nint)r < len(cssReplacementTable) && cssReplacementTable[r] != "": {
@@ -186,7 +186,7 @@ internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
         if (written == 0) {
             Ꮡb.Grow(len(s));
         }
-        Ꮡb.WriteString(s[(int)(written)..(int)(i)]);
+        Ꮡb.WriteString(s.slice(written, i));
         Ꮡb.WriteString(repl);
         written = i + w;
         if (repl != @"\\"u8 && (written == len(s) || isHex(s[written]) || isCSSSpace(s[written]))) {
@@ -196,7 +196,7 @@ internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
     if (written == 0) {
         return s;
     }
-    Ꮡb.WriteString(s[(int)(written)..]);
+    Ꮡb.WriteString(s.slice(written));
     return b.String();
 }
 

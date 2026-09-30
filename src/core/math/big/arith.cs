@@ -111,7 +111,7 @@ internal static Word /*c*/ addVWlarge(slice<Word> z, slice<Word> x, Word y) {
     // The comment near the top of this file discusses this for loop condition.
     for (nint i = 0; i < len(z) && i < len(x); i++) {
         if (c == 0) {
-            copy(z[(int)(i)..], x[(int)(i)..]);
+            copy(z.slice(i), x.slice(i));
             return c;
         }
         var (zi, cc) = bits.Add((nuint)x[i], (nuint)c, 0);
@@ -142,7 +142,7 @@ internal static Word /*c*/ subVWlarge(slice<Word> z, slice<Word> x, Word y) {
     // The comment near the top of this file discusses this for loop condition.
     for (nint i = 0; i < len(z) && i < len(x); i++) {
         if (c == 0) {
-            copy(z[(int)(i)..], x[(int)(i)..]);
+            copy(z.slice(i), x.slice(i));
             return c;
         }
         var (zi, cc) = bits.Sub((nuint)x[i], (nuint)c, 0);

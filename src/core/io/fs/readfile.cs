@@ -56,11 +56,11 @@ public static (slice<byte>, error) ReadFile(FS fsys, @string name) {
         var data = new slice<byte>(0, size + 1);
         while (ᐧ) {
             if (len(data) >= cap(data)) {
-                var d = append(data[..(int)(cap(data))], (byte)(0));
-                data = d[..(int)(len(data))];
+                var d = append(data.slice(0, cap(data)), (byte)(0));
+                data = d.slice(0, len(data));
             }
-            var (n, errΔ2) = @file.Read(data[(int)(len(data))..(int)(cap(data))]);
-            data = data[..(int)(len(data) + n)];
+            var (n, errΔ2) = @file.Read(data.slice(len(data), cap(data)));
+            data = data.slice(0, len(data) + n);
             if (errΔ2 != default!) {
                 if (AreEqual(errΔ2, io.EOF)) {
                     errΔ2 = default!;

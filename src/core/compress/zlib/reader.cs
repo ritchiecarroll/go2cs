@@ -91,7 +91,7 @@ public static (io.ReadCloser, error) NewReaderDict(io.Reader r, slice<byte> dict
     }
     nint n = default!;
     (n, z.err) = z.decompressor.Read(p);
-    z.digest.Write(p[0..(int)(n)]);
+    z.digest.Write(p.slice(0, n));
     if (!AreEqual(z.err, io.EOF)) {
         // In the normal case we return here.
         return (n, z.err);

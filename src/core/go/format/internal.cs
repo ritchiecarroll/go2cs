@@ -48,7 +48,7 @@ internal static (ж<ast.File> @file, Func<slice<byte>, nint, slice<byte>> source
         sourceAdj = (slice<byte> srcΔ1, nint indent) => {
             // Remove the package clause.
             // Gofmt has turned the ';' into a '\n'.
-            srcΔ1 = srcΔ1[(int)(indent + len("package p\n"))..];
+            srcΔ1 = srcΔ1.slice(indent + len("package p\n"));
             return bytes.TrimSpace(srcΔ1);
         };
         return (@file, sourceAdj, indentAdj, err);
@@ -76,9 +76,9 @@ internal static (ж<ast.File> @file, Func<slice<byte>, nint, slice<byte>> source
             // Remove the wrapping.
             // Gofmt has turned the "; " into a "\n\n".
             // There will be two non-blank lines with indent, hence 2*indent.
-            srcΔ2 = srcΔ2[(int)(2 * indent + len("package p\n\nfunc _() {"))..];
+            srcΔ2 = srcΔ2.slice(2 * indent + len("package p\n\nfunc _() {"));
             // Remove only the "}\n" suffix: remaining whitespaces will be trimmed anyway
-            srcΔ2 = srcΔ2[..(int)(len(srcΔ2) - len("}\n"))];
+            srcΔ2 = srcΔ2.slice(0, len(srcΔ2) - len("}\n"));
             return bytes.TrimSpace(srcΔ2);
         };
         // Gofmt has also indented the function body one level.
@@ -115,13 +115,13 @@ internal static (slice<byte>, error) format(ж<token.FileSet> Ꮡfset, ж<ast.Fi
         j++;
     }
     slice<byte> res = default!;
-    res = appendꓸꓸꓸ(res, src[..(int)(i)]);
+    res = appendꓸꓸꓸ(res, src.slice(0, i));
     // Determine and prepend indentation of first code line.
     // Spaces are ignored unless there are no tabs,
     // in which case spaces count as one tab.
     nint indent = 0;
     var hasSpace = false;
-    foreach (var (_, b) in src[(int)(i)..(int)(j)]) {
+    foreach (var (_, b) in src.slice(i, j)) {
         switch (b) {
         case (rune)' ': {
             hasSpace = true;
@@ -161,7 +161,7 @@ internal static (slice<byte>, error) format(ж<token.FileSet> Ꮡfset, ж<ast.Fi
     while (i > 0 && isSpace(src[i - 1])) {
         i--;
     }
-    return (appendꓸꓸꓸ(res, src[(int)(i)..]), default!);
+    return (appendꓸꓸꓸ(res, src.slice(i)), default!);
 }
 
 // isSpace reports whether the byte is a space character.

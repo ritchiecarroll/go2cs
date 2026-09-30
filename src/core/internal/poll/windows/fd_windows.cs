@@ -495,11 +495,11 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, e
             n = len(b);
         }
         ref var nw = ref heap(new uint32(), out var Ꮡnw);
-        var err = ReadConsole(fd.Sysfd, Ꮡ(fd.readuint16[..(int)(len(fd.readuint16) + 1)], len(fd.readuint16)), (uint32)n, Ꮡnw, nil);
+        var err = ReadConsole(fd.Sysfd, Ꮡ(fd.readuint16.slice(0, len(fd.readuint16) + 1), len(fd.readuint16)), (uint32)n, Ꮡnw, nil);
         if (err != default!) {
             return (0, err);
         }
-        var uint16s = fd.readuint16[..(int)(len(fd.readuint16) + (nint)nw)];
+        var uint16s = fd.readuint16.slice(0, len(fd.readuint16) + (nint)nw);
         fd.readuint16 = fd.readuint16[..0];
         var buf = fd.readbyte[..0];
         for (nint iΔ1 = 0; iΔ1 < len(uint16s); iΔ1++) {
@@ -528,7 +528,7 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, e
             break;
         }
     }
-    var src = fd.readbyte[(int)(fd.readbyteOffset)..];
+    var src = fd.readbyte.slice(fd.readbyteOffset);
     nint i = default!;
     for (i = 0; i < len(src) && i < len(b); i++) {
         var x = src[i];
@@ -768,7 +768,7 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> buf) {
             if (err != default!) {
                 return (ntotal, err);
             }
-            buf = buf[(int)(n)..];
+            buf = buf.slice(n);
         }
         return (ntotal, default!);
     }
@@ -788,7 +788,7 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> buf) {
     while (len(b) >= utf8.UTFMax || utf8.FullRune(b)) {
         var (r, l) = utf8.DecodeRune(b);
         runes = append(runes, r);
-        b = b[(int)(l)..];
+        b = b.slice(l);
     }
     if (len(b) > 0) {
         fd.lastbits = new slice<byte>(len(b));
@@ -803,8 +803,8 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> buf) {
         if (m > maxWrite) {
             m = maxWrite;
         }
-        var chunk = runes[..(int)(m)];
-        runes = runes[(int)(m)..];
+        var chunk = runes.slice(0, m);
+        runes = runes.slice(m);
         var uint16s = utf16.Encode(chunk);
         while (len(uint16s) > 0) {
             ref var written = ref heap(new uint32(), out var Ꮡwritten);
@@ -812,7 +812,7 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> buf) {
             if (err != default!) {
                 return (0, err);
             }
-            uint16s = uint16s[(int)(written)..];
+            uint16s = uint16s.slice((nint)(written));
         }
     }
     return (n, default!);
@@ -860,7 +860,7 @@ public static (nint, error) Pwrite(this ж<FD> Ꮡfd, slice<byte> buf, int64 off
             if (e != default!) {
                 return (ntotal, e);
             }
-            buf = buf[(int)(n)..];
+            buf = buf.slice((nint)(n));
             off += (int64)n;
         }
         return (ntotal, default!);
@@ -936,7 +936,7 @@ public static (nint, error) WriteTo(this ж<FD> Ꮡfd, slice<byte> buf, syscall�
             if (err != default!) {
                 return (ntotal, err);
             }
-            buf = buf[(int)(n)..];
+            buf = buf.slice(n);
         }
         return (ntotal, default!);
     }
@@ -977,7 +977,7 @@ public static (nint, error) WriteToInet4(this ж<FD> Ꮡfd, slice<byte> buf, ж<
             if (err != default!) {
                 return (ntotal, err);
             }
-            buf = buf[(int)(n)..];
+            buf = buf.slice(n);
         }
         return (ntotal, default!);
     }
@@ -1018,7 +1018,7 @@ public static (nint, error) WriteToInet6(this ж<FD> Ꮡfd, slice<byte> buf, ж<
             if (err != default!) {
                 return (ntotal, err);
             }
-            buf = buf[(int)(n)..];
+            buf = buf.slice(n);
         }
         return (ntotal, default!);
     }

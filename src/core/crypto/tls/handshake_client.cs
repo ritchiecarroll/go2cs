@@ -1369,18 +1369,18 @@ internal static ж<CertificateRequestInfo> certificateRequestInfoFromMsg(context
 internal static @string hostnameInSNI(@string name) {
     @string host = name;
     if (len(host) > 0 && host[0] == (rune)'[' && host[len(host) - 1] == (rune)']') {
-        host = host[1..(int)(len(host) - 1)];
+        host = host.slice(1, len(host) - 1);
     }
     {
         nint i = strings.LastIndex(host, "%"u8); if (i > 0) {
-            host = host[..(int)(i)];
+            host = host.slice(0, i);
         }
     }
     if (net.ParseIP(host) != default!) {
         return ""u8;
     }
     while (len(name) > 0 && name[len(name) - 1] == (rune)'.') {
-        name = name[..(int)(len(name) - 1)];
+        name = name.slice(0, len(name) - 1);
     }
     return name;
 }

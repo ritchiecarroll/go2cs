@@ -270,7 +270,7 @@ field:
         if (i < 0){
             (field, env) = (env, "");
         } else {
-            (field, env) = (env[..(int)(i)], env[(int)(i + 1)..]);
+            (field, env) = (env.slice(0, i), env.slice(i + 1));
         }
         if (len(field) < 4 || field[..4] != "cpu.") {
             continue;
@@ -280,8 +280,8 @@ field:
             print((@string)"GODEBUG sys/cpu: no value specified for \""u8, field, (@string)"\"\n"u8);
             continue;
         }
-        @string key = field[4..(int)(i)];
-        @string value = field[(int)(i + 1)..]; // e.g. "SSE2", "on"
+        @string key = field.slice(4, i);
+        @string value = field.slice(i + 1); // e.g. "SSE2", "on"
         bool enable = default!;
         var exprᴛ1 = value;
         if (exprᴛ1 == "on"u8) {

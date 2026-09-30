@@ -454,8 +454,8 @@ internal static void round(this ж<Float> Ꮡz, nuint sbit) {
     // cut off extra words
     var n = (z.prec + (uint32)(_W - 1)) / (uint32)_W; // mantissa length in words for desired precision
     if (m > n) {
-        copy(z.mant, z.mant[(int)(m - n)..]); // move n last words to front
-        z.mant = z.mant[..(int)(n)];
+        copy(z.mant, z.mant.slice((nint)(m - n))); // move n last words to front
+        z.mant = z.mant.slice(0, (nint)(n));
     }
     // determine number of trailing zero bits (ntz) and compute lsb mask of mantissa's least-significant word
     var ntz = n * (uint32)_W - z.prec; // 0 <= ntz < _W
@@ -1418,7 +1418,7 @@ internal static void uquo(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
         nint dΔ1 = n - len(x.mant) + len(y.mant); if (dΔ1 > 0) {
             // d extra words needed => add d "0 digits" to x
             xadj = new nat(len(x.mant) + dΔ1);
-            copy(xadj[(int)(dΔ1)..], x.mant);
+            copy(xadj.slice(dΔ1), x.mant);
         }
     }
     // TODO(gri): If we have too many digits (d < 0), we should be able

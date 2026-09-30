@@ -102,9 +102,9 @@ public static UntypedInt MaxSegmentSize => /* maxByteBufferSize */ 128;
 // and return that.
 [GoRecv] internal static slice<byte> returnSlice(this ref Iter i, nint a, nint b) {
     if (i.rb.src.bytes == default!) {
-        return i.buf[..(int)(copy(i.buf[..], i.rb.src.str[(int)(a)..(int)(b)]))];
+        return i.buf.slice(0, copy(i.buf[..], i.rb.src.str.slice(a, b)));
     }
-    return i.rb.src.bytes[(int)(a)..(int)(b)];
+    return i.rb.src.bytes.slice(a, b);
 }
 
 // Pos returns the byte position at which the next call to Next will commence processing.
@@ -140,12 +140,12 @@ internal static slice<byte> nextASCIIBytes(ж<Iter> Ꮡi) {
     if (p >= i.rb.nsrc) {
         nint p0 = i.p;
         i.setDone();
-        return i.rb.src.bytes[(int)(p0)..(int)(p)];
+        return i.rb.src.bytes.slice(p0, p);
     }
     if (i.rb.src.bytes[p] < utf8.RuneSelf) {
         nint p0 = i.p;
         i.p = p;
-        return i.rb.src.bytes[(int)(p0)..(int)(p)];
+        return i.rb.src.bytes.slice(p0, p);
     }
     i.info = i.rb.f.info(i.rb.src, i.p);
     i.next = i.rb.f.nextMain;
@@ -186,7 +186,7 @@ internal static slice<byte> nextHangul(ж<Iter> Ꮡi) {
         return i.next(Ꮡi);
     }
     i.p = next;
-    return i.buf[..(int)(decomposeHangul(i.buf[..], i.rb.src.hangul(p)))];
+    return i.buf.slice(0, decomposeHangul(i.buf[..], i.rb.src.hangul(p)));
 }
 
 internal static slice<byte> nextDone(ж<Iter> Ꮡi) {
@@ -206,8 +206,8 @@ internal static slice<byte> nextMulti(ж<Iter> Ꮡi) {
     while (j < len(d)) {
         var info = i.rb.f.info(new input(bytes: d), j);
         if (info.BoundaryBefore()) {
-            i.multiSeg = d[(int)(j)..];
-            return d[..(int)(j)];
+            i.multiSeg = d.slice(j);
+            return d.slice(0, j);
         }
         j += (nint)info.size;
     }
@@ -227,9 +227,9 @@ internal static slice<byte> nextMultiNorm(ж<Iter> Ꮡi) {
         var info = i.rb.f.info(new input(bytes: d), j);
         if (info.BoundaryBefore()) {
             i.rb.compose();
-            var seg = i.buf[..(int)(i.rb.flushCopy(i.buf[..]))];
+            var seg = i.buf.slice(0, i.rb.flushCopy(i.buf[..]));
             Ꮡi.of(Iter.Ꮡrb).insertUnsafe(new input(bytes: d), j, info);
-            i.multiSeg = d[(int)(j + (nint)info.size)..];
+            i.multiSeg = d.slice(j + (nint)info.size);
             return seg;
         }
         Ꮡi.of(Iter.Ꮡrb).insertUnsafe(new input(bytes: d), j, info);
@@ -271,11 +271,11 @@ internal static slice<byte> /*next*/ nextDecomposed(ж<Iter> Ꮡi) {
                     // Case 2: no leftover. Simply return d if followed by a ccc == 0 value.
                     nint p = outp + len(d);
                     if (outp > 0){
-                        i.rb.src.copySlice(i.buf[(int)(outCopyStart)..], inCopyStart, i.p);
+                        i.rb.src.copySlice(i.buf.slice(outCopyStart), inCopyStart, i.p);
                         // TODO: this condition should not be possible, but we leave it
                         // in for defensive purposes.
                         if (p > len(i.buf)) {
-                            return i.buf[..(int)(outp)];
+                            return i.buf.slice(0, outp);
                         }
                     } else 
                     if (i.info.multiSegment()) {
@@ -308,13 +308,13 @@ internal static slice<byte> /*next*/ nextDecomposed(ж<Iter> Ꮡi) {
                     }
                     if (fallthrough || !matchᴛ1 && exprᴛ1 == ssStarter) { matchᴛ1 = true;
                         if (outp > 0) {
-                            copy(i.buf[(int)(outp)..], d);
-                            return i.buf[..(int)(p)];
+                            copy(i.buf.slice(outp), d);
+                            return i.buf.slice(0, p);
                         }
                         return d;
                     }
 
-                    copy(i.buf[(int)(outp)..], d);
+                    copy(i.buf.slice(outp), d);
                     outp = p;
                     (inCopyStart, outCopyStart) = (i.p, outp);
                     if (i.info.ccc < prevCCΔ1) {
@@ -333,7 +333,7 @@ internal static slice<byte> /*next*/ nextDecomposed(ж<Iter> Ꮡi) {
                         } else 
                         if (i.rb.src.hangul(i.p) != 0) {
                             i.next = nextHangul;
-                            return i.buf[..(int)(outp)];
+                            return i.buf.slice(0, outp);
                         }
                     } else {
                         nint p = outp + sz;
@@ -369,14 +369,14 @@ internal static slice<byte> /*next*/ nextDecomposed(ж<Iter> Ꮡi) {
         return i.returnSlice(inCopyStart, i.p);
     } else 
     if (inCopyStart < i.p) {
-        i.rb.src.copySlice(i.buf[(int)(outCopyStart)..], inCopyStart, i.p);
+        i.rb.src.copySlice(i.buf.slice(outCopyStart), inCopyStart, i.p);
     }
-    return i.buf[..(int)(outp)];
+    return i.buf.slice(0, outp);
 doNorm:
-    i.rb.src.copySlice(i.buf[(int)(outCopyStart)..], // Insert what we have decomposed so far in the reorderBuffer.
+    i.rb.src.copySlice(i.buf.slice(outCopyStart), // Insert what we have decomposed so far in the reorderBuffer.
  // As we will only reorder, there will always be enough room.
  inCopyStart, i.p);
-    Ꮡi.of(Iter.Ꮡrb).insertDecomposed(i.buf[0..(int)(outp)]);
+    Ꮡi.of(Iter.Ꮡrb).insertDecomposed(i.buf.slice(0, outp));
     return doNormDecomposed(Ꮡi);
 }
 
@@ -403,7 +403,7 @@ internal static slice<byte> doNormDecomposed(ж<Iter> Ꮡi) {
         }
     }
     // new segment or too many combining characters: exit normalization
-    return i.buf[..(int)(i.rb.flushCopy(i.buf[..]))];
+    return i.buf.slice(0, i.rb.flushCopy(i.buf[..]));
 }
 
 internal static slice<byte> nextCGJDecompose(ж<Iter> Ꮡi) {
@@ -472,7 +472,7 @@ doNorm:
         var d = i.info.Decomposition();
         var info = i.rb.f.info(new input(bytes: d), 0);
         Ꮡi.of(Iter.Ꮡrb).insertUnsafe(new input(bytes: d), 0, info);
-        i.multiSeg = d[(int)((nint)info.size)..];
+        i.multiSeg = d.slice((nint)info.size);
         i.next = nextMultiNorm;
         return nextMultiNorm(Ꮡi);
     }
@@ -505,7 +505,7 @@ internal static slice<byte> doNormComposed(ж<Iter> Ꮡi) {
         Ꮡi.of(Iter.Ꮡrb).insertUnsafe(i.rb.src, i.p, i.info);
     }
     i.rb.compose();
-    var seg = i.buf[..(int)(i.rb.flushCopy(i.buf[..]))];
+    var seg = i.buf.slice(0, i.rb.flushCopy(i.buf[..]));
     return seg;
 }
 

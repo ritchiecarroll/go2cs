@@ -58,7 +58,7 @@ internal static unsafe void dwrite(@unsafe.Pointer data, uintptr len) {
         return;
     }
     if (nbuf + len <= bufSize) {
-        copy(buf[(int)(nbuf)..], new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(data), (int)(len))));
+        copy(buf.slice((nint)(nbuf)), new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(data), (int)(len))));
         nbuf += len;
         return;
     }
@@ -618,7 +618,7 @@ internal static void dumpmemprof_callback(ж<bucket> Ꮡb, uintptr nstk, ж<uint
             buf[n] = (rune)'0';
             n--;
             buf[n] = (rune)'(';
-            dumpslice(buf[(int)(n)..]);
+            dumpslice(buf.slice(n));
             dumpstr("?"u8);
             dumpint(0);
         } else {
@@ -724,7 +724,7 @@ internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
         tmpbuf = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(pΔ1), (int)(n)));
     }
     // Convert heap bitmap to pointer bitmap.
-    builtin.clear(tmpbuf[..(int)(nptr / 8 + 1)]);
+    builtin.clear(tmpbuf.slice(0, (nint)(nptr / 8 + 1)));
     var s = spanOf(Δp);
     var tp = s.typePointersOf(Δp, size);
     while (ᐧ) {

@@ -80,7 +80,7 @@ internal static void randinit() {
                 ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Refill();
             }
             nint n = copy(startupRand, buf);
-            startupRand = startupRand[(int)(n)..];
+            startupRand = startupRand.slice(n);
         }
         startupRand = default!;
     }
@@ -109,7 +109,7 @@ internal static void readTimeRandom(slice<byte> r) {
         for (nint i = 0; i < size; i++) {
             r[i] ^= (byte)((byte)(v.Rsh((int64)((8 * i)))));
         }
-        r = r[(int)(size)..];
+        r = r.slice(size);
         v = (uint64)((v >> (int)(32)) | (v << (int)(32)));
     }
 }

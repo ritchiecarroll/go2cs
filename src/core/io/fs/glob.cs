@@ -92,7 +92,7 @@ internal static @string cleanGlobPath(@string path) {
         return "."u8;
     }
     { /* default: */
-        return path[0..(int)(len(path) - 1)]; // chop off trailing separator
+        return path.slice(0, len(path) - 1); // chop off trailing separator
     }
 
 }

@@ -116,16 +116,16 @@ partial class printer_package {
         if (end < start) {
             continue;
         }
-        after = appendLines(after, p.output[(int)(start)..(int)(end)]);
+        after = appendLines(after, p.output.slice(start, end));
         start = end + len(p.lineAt(end));
     }
-    after = appendLines(after, p.output[(int)(start)..]);
+    after = appendLines(after, p.output.slice(start));
     {
         nint n = len(after); if (n >= 2 && isNL(after[n - 1]) && isNL(after[n - 2])) {
-            after = after[..(int)(n - 1)];
+            after = after.slice(0, n - 1);
         }
     }
-    p.output = p.output[..(int)(insert)];
+    p.output = p.output.slice(0, insert);
     p.output = appendꓸꓸꓸ(p.output, block);
     p.output = appendꓸꓸꓸ(p.output, after);
 }
@@ -152,7 +152,7 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
     if (pos < len(p.output)) {
         pos++;
     }
-    return p.output[(int)(start)..(int)(pos)];
+    return p.output.slice(start, pos);
 }
 
 [GoRecv] internal static @string commentTextAt(this ref printer p, nint start) {
@@ -163,7 +163,7 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
     while (pos < len(p.output) && p.output[pos] != tabwriter.Escape && !isNL(p.output[pos])) {
         pos++;
     }
-    return ((@string)(p.output[(int)(start)..(int)(pos)]));
+    return ((@string)(p.output.slice(start, pos)));
 }
 
 internal static bool isNL(byte b) {

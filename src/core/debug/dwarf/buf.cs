@@ -74,8 +74,8 @@ internal static readonly @string underflowˢ = "underflow"u8;
         b.error(underflowˢ);
         return default!;
     }
-    var data = b.data[0..(int)(n)];
-    b.data = b.data[(int)(n)..];
+    var data = b.data.slice(0, n);
+    b.data = b.data.slice(n);
     b.off += ((Offset)(uint32)n);
     return data;
 }
@@ -90,8 +90,8 @@ internal static readonly @string underflowˢ = "underflow"u8;
         b.error(underflowˢ);
         return ""u8;
     }
-    @string s = ((@string)(b.data[0..(int)(i)]));
-    b.data = b.data[(int)(i + 1)..];
+    @string s = ((@string)(b.data.slice(0, i)));
+    b.data = b.data.slice(i + 1);
     b.off += ((Offset)(uint32)(i + 1));
     return s;
 }
@@ -144,7 +144,7 @@ internal static readonly @string underflowˢ = "underflow"u8;
         bits += 7;
         if ((byte)(@byte & 0x80) == 0) {
             b.off += ((Offset)(uint32)(i + 1));
-            b.data = b.data[(int)(i + 1)..];
+            b.data = b.data.slice(i + 1);
             return (c, bits);
         }
     }

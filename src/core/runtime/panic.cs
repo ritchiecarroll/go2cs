@@ -580,7 +580,7 @@ internal static ж<_defer> newdefer() {
         nint n = len((~pp).deferpool); if (n > 0) {
             d = (~pp).deferpool[n - 1];
             pp.Value.deferpool[n - 1] = default!;
-            pp.Value.deferpool = (~pp).deferpool[..(int)(n - 1)];
+            pp.Value.deferpool = (~pp).deferpool.slice(0, n - 1);
         }
     }
     releasem(ref (mp).DerefOrNull());
@@ -617,7 +617,7 @@ internal static void popDefer(ref g gp) {
             nint n = len((~pp).deferpool);
             var dΔ1 = (~pp).deferpool[n - 1];
             pp.Value.deferpool[n - 1] = default!;
-            pp.Value.deferpool = (~pp).deferpool[..(int)(n - 1)];
+            pp.Value.deferpool = (~pp).deferpool.slice(0, n - 1);
             if (first == nil){
                 first = dΔ1;
             } else {

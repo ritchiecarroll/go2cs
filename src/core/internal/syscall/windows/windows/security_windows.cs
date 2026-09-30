@@ -154,7 +154,7 @@ public static (@string, error) GetUserName(uint32 format) {
         var b = new slice<uint16>((nint)(n));
         var e = syscall.GetUserNameEx(format, Ꮡ(b, 0), Ꮡn);
         if (e == default!) {
-            return (syscall.UTF16ToString(b[..(int)(n)]), default!);
+            return (syscall.UTF16ToString(b.slice(0, (nint)(n))), default!);
         }
         if (!AreEqual(e, syscall.ERROR_MORE_DATA)) {
             return ("", e);

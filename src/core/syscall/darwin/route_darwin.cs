@@ -13,19 +13,19 @@ internal static RoutingMessage toRoutingMessage(this ж<anyMessage> Ꮡany, slic
     var exprᴛ1 = any.Type;
     if (exprᴛ1 == RTM_ADD || exprᴛ1 == RTM_DELETE || exprᴛ1 == RTM_CHANGE || exprᴛ1 == RTM_GET || exprᴛ1 == RTM_LOSING || exprᴛ1 == RTM_REDIRECT || exprᴛ1 == RTM_MISS || exprᴛ1 == RTM_LOCK || exprᴛ1 == RTM_RESOLVE) {
         var p = Ꮡany.Reinterpret<anyMessage, RouteMessage>();
-        return new RouteMessageжRoutingMessage(Ꮡ(new RouteMessage(Header: (~p).Header.ΔClone(), Data: b[(int)(SizeofRtMsghdr)..(int)(any.Msglen)])));
+        return new RouteMessageжRoutingMessage(Ꮡ(new RouteMessage(Header: (~p).Header.ΔClone(), Data: b.slice(SizeofRtMsghdr, any.Msglen))));
     }
     if (exprᴛ1 == RTM_IFINFO) {
         var p = Ꮡany.Reinterpret<anyMessage, InterfaceMessage>();
-        return new InterfaceMessageжRoutingMessage(Ꮡ(new InterfaceMessage(Header: (~p).Header.ΔClone(), Data: b[(int)(SizeofIfMsghdr)..(int)(any.Msglen)])));
+        return new InterfaceMessageжRoutingMessage(Ꮡ(new InterfaceMessage(Header: (~p).Header.ΔClone(), Data: b.slice(SizeofIfMsghdr, any.Msglen))));
     }
     if (exprᴛ1 == RTM_NEWADDR || exprᴛ1 == RTM_DELADDR) {
         var p = Ꮡany.Reinterpret<anyMessage, InterfaceAddrMessage>();
-        return new InterfaceAddrMessageжRoutingMessage(Ꮡ(new InterfaceAddrMessage(Header: (~p).Header.ΔClone(), Data: b[(int)(SizeofIfaMsghdr)..(int)(any.Msglen)])));
+        return new InterfaceAddrMessageжRoutingMessage(Ꮡ(new InterfaceAddrMessage(Header: (~p).Header.ΔClone(), Data: b.slice(SizeofIfaMsghdr, any.Msglen))));
     }
     if (exprᴛ1 == RTM_NEWMADDR2 || exprᴛ1 == RTM_DELMADDR) {
         var p = Ꮡany.Reinterpret<anyMessage, InterfaceMulticastAddrMessage>();
-        return new InterfaceMulticastAddrMessageжRoutingMessage(Ꮡ(new InterfaceMulticastAddrMessage(Header: (~p).Header.ΔClone(), Data: b[(int)(SizeofIfmaMsghdr2)..(int)(any.Msglen)])));
+        return new InterfaceMulticastAddrMessageжRoutingMessage(Ꮡ(new InterfaceMulticastAddrMessage(Header: (~p).Header.ΔClone(), Data: b.slice(SizeofIfmaMsghdr2, any.Msglen))));
     }
 
     return default!;
@@ -55,7 +55,7 @@ internal static RoutingMessage toRoutingMessage(this ж<anyMessage> Ꮡany, slic
                 return (default!, err);
             }
             sas[i] = new SockaddrDatalinkжSockaddr(sa);
-            b = b[(int)(rsaAlignOf((nint)(~rsa).Len))..];
+            b = b.slice(rsaAlignOf((nint)(~rsa).Len));
         }
         else if (exprᴛ1 == AF_INET || exprᴛ1 == AF_INET6) {
             var (sa, err) = parseSockaddrInet(b, (~rsa).Family);
@@ -63,7 +63,7 @@ internal static RoutingMessage toRoutingMessage(this ж<anyMessage> Ꮡany, slic
                 return (default!, err);
             }
             sas[i] = sa;
-            b = b[(int)(rsaAlignOf((nint)(~rsa).Len))..];
+            b = b.slice(rsaAlignOf((nint)(~rsa).Len));
         }
         else { /* default: */
             var (sa, l, err) = parseLinkLayerAddr(b);
@@ -71,7 +71,7 @@ internal static RoutingMessage toRoutingMessage(this ж<anyMessage> Ꮡany, slic
                 return (default!, err);
             }
             sas[i] = new SockaddrDatalinkжSockaddr(sa);
-            b = b[(int)(l)..];
+            b = b.slice(l);
         }
 
     }

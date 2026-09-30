@@ -73,11 +73,11 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
     {
         nint sep = strings.Index(s, "/"u8); if (sep >= 0) {
             {
-                var (_, ok) = Ꮡz.of(big_package.ΔRat.Ꮡa).SetString(s[..(int)(sep)], 0); if (!ok) {
+                var (_, ok) = Ꮡz.of(big_package.ΔRat.Ꮡa).SetString(s.slice(0, sep), 0); if (!ok) {
                     return (default!, false);
                 }
             }
-            var rΔ1 = strings.NewReader(s[(int)(sep + 1)..]);
+            var rΔ1 = strings.NewReader(s.slice(sep + 1));
             error errΔ1 = default!;
             {
                 (z.b.abs, _, _, errΔ1) = z.b.abs.scan(new strings_ReaderжByteScanner(rΔ1), 0, false); if (errΔ1 != default!) {

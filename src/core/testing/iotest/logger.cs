@@ -19,9 +19,9 @@ partial class iotest_package {
 
     (n, err) = l.w.Write(p);
     if (err != default!){
-        log.Printf("%s %x: %v"u8, l.prefix, p[0..(int)(n)], err);
+        log.Printf("%s %x: %v"u8, l.prefix, p.slice(0, n), err);
     } else {
-        log.Printf("%s %x"u8, l.prefix, p[0..(int)(n)]);
+        log.Printf("%s %x"u8, l.prefix, p.slice(0, n));
     }
     return (n, err);
 }
@@ -44,9 +44,9 @@ public static io.Writer NewWriteLogger(@string prefix, io.Writer w) {
 
     (n, err) = l.r.Read(p);
     if (err != default!){
-        log.Printf("%s %x: %v"u8, l.prefix, p[0..(int)(n)], err);
+        log.Printf("%s %x: %v"u8, l.prefix, p.slice(0, n), err);
     } else {
-        log.Printf("%s %x"u8, l.prefix, p[0..(int)(n)]);
+        log.Printf("%s %x"u8, l.prefix, p.slice(0, n));
     }
     return (n, err);
 }

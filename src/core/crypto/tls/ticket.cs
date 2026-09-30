@@ -344,9 +344,9 @@ internal static readonly @string tlsInternalErrorSessionˢ = "tls: internal erro
     }
     var encrypted = new slice<byte>((nint)aes.BlockSize + len(state) + (nint)sha256.Size);
     var iv = encrypted[..(int)(aes.BlockSize)];
-    var ciphertext = encrypted[(int)(aes.BlockSize)..(int)(len(encrypted) - (nint)sha256.Size)];
-    var authenticated = encrypted[..(int)(len(encrypted) - (nint)sha256.Size)];
-    var macBytes = encrypted[(int)(len(encrypted) - (nint)sha256.Size)..];
+    var ciphertext = encrypted.slice(aes.BlockSize, len(encrypted) - (nint)sha256.Size);
+    var authenticated = encrypted.slice(0, len(encrypted) - (nint)sha256.Size);
+    var macBytes = encrypted.slice(len(encrypted) - (nint)sha256.Size);
     {
         var (_, errΔ1) = io.ReadFull(c.rand(), iv); if (errΔ1 != default!) {
             return (default!, errΔ1);
@@ -388,9 +388,9 @@ public static (ж<SessionState>, error) DecryptTicket(this ж<Config> Ꮡc, slic
         return default!;
     }
     var iv = encrypted[..(int)(aes.BlockSize)];
-    var ciphertext = encrypted[(int)(aes.BlockSize)..(int)(len(encrypted) - (nint)sha256.Size)];
-    var authenticated = encrypted[..(int)(len(encrypted) - (nint)sha256.Size)];
-    var macBytes = encrypted[(int)(len(encrypted) - (nint)sha256.Size)..];
+    var ciphertext = encrypted.slice(aes.BlockSize, len(encrypted) - (nint)sha256.Size);
+    var authenticated = encrypted.slice(0, len(encrypted) - (nint)sha256.Size);
+    var macBytes = encrypted.slice(len(encrypted) - (nint)sha256.Size);
     foreach (var (_, vᴛ1) in ticketKeys) {
         var key = vᴛ1.ΔClone();
 

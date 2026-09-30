@@ -101,7 +101,7 @@ internal static slice<byte> indent = slice<byte>(".  "u8);
     foreach (var (i, b) in data) {
         // invariant: data[0:n] has been written
         if (b == (rune)'\n'){
-            (m, err) = p.output.Write(data[(int)(n)..(int)(i + 1)]);
+            (m, err) = p.output.Write(data.slice(n, i + 1));
             n += m;
             if (err != default!) {
                 return (n, err);
@@ -123,7 +123,7 @@ internal static slice<byte> indent = slice<byte>(".  "u8);
         p.last = b;
     }
     if (len(data) > n) {
-        (m, err) = p.output.Write(data[(int)(n)..]);
+        (m, err) = p.output.Write(data.slice(n));
         n += m;
     }
     return (n, err);

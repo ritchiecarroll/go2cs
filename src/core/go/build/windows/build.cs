@@ -545,7 +545,7 @@ internal static @string nameExt(@string name) {
     if (i < 0) {
         return ""u8;
     }
-    return name[(int)(i)..];
+    return name.slice(i);
 }
 
 internal static ж<godebug.Setting> installgoroot = godebug.New("installgoroot"u8);
@@ -668,7 +668,7 @@ public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path
                             }
                         }
                     }
-                    foreach (var (_, earlyRoot) in all[..(int)(i)]) {
+                    foreach (var (_, earlyRoot) in all.slice(0, i)) {
                         {
                             @string dir = ctxt.joinPath(earlyRoot, srcˢ, sub); if (ctxt.isDir(dir)) {
                                 p.Value.ConflictDir = dir;
@@ -729,7 +729,7 @@ public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path
                     if (i < 0) {
                         break;
                     }
-                    sub = sub[..(int)(i)];
+                    sub = sub.slice(0, i);
                 }
                 return false;
             }
@@ -962,7 +962,7 @@ Found:
         var isXTest = false;
         if (isTest && strings.HasSuffix(pkg, testˢ) && (~p).Name != pkg) {
             isXTest = true;
-            pkg = pkg[..(int)(len(pkg) - len("_test"))];
+            pkg = pkg.slice(0, len(pkg) - len("_test"));
         }
         if ((~p).Name == ""u8){
             p.Value.Name = pkg;
@@ -1378,7 +1378,7 @@ internal static (@string s, nint line) findImportComment(slice<byte> data) {
     if (((sstring)word) != "import"u8) {
         return ("", 0);
     }
-    line = 1 + bytes.Count(data[..(int)(cap(data) - cap(arg))], newline);
+    line = 1 + bytes.Count(data.slice(0, cap(data) - cap(arg)), newline);
     return (strings.TrimSpace(((@string)arg)), line);
 }
 
@@ -1402,7 +1402,7 @@ internal static slice<byte> skipSpaceOrComment(slice<byte> data) {
                 if (i < 0) {
                     return default!;
                 }
-                data = data[(int)(i + 1)..];
+                data = data.slice(i + 1);
                 continue;
             }
             if (bytes.HasPrefix(data, slashStar)) {
@@ -1411,7 +1411,7 @@ internal static slice<byte> skipSpaceOrComment(slice<byte> data) {
                 if (i < 0) {
                     return default!;
                 }
-                data = data[(int)(i + 2)..];
+                data = data.slice(i + 2);
                 continue;
             }
             break;
@@ -1435,12 +1435,12 @@ internal static (slice<byte> word, slice<byte> rest) parseWord(slice<byte> data)
     while (ᐧ) {
         var (r, size) = utf8.DecodeRune(rest);
         if (unicode.IsLetter(r) || (rune)'0' <= r && r <= (rune)'9' || r == (rune)'_') {
-            rest = rest[(int)(size)..];
+            rest = rest.slice(size);
             continue;
         }
         break;
     }
-    word = data[..(int)(len(data) - len(rest))];
+    word = data.slice(0, len(data) - len(rest));
     if (len(word) == 0) {
         return (default!, default!);
     }
@@ -1509,7 +1509,7 @@ internal static (ж<fileInfo>, error) matchFile(this ж<Context> Ꮡctxt, @strin
     if (i < 0) {
         i = len(name);
     }
-    @string ext = name[(int)(i)..];
+    @string ext = name.slice(i);
     if (ext != ".go"u8 && fileListForExt(ᏑdummyPkg, ext) == nil) {
         // skip
         return (default!, default!);
@@ -1581,7 +1581,7 @@ internal static bool isGoBuildComment(slice<byte> line) {
         return false;
     }
     line = bytes.TrimSpace(line);
-    var rest = line[(int)(len(goBuildComment))..];
+    var rest = line.slice(len(goBuildComment));
     return len(rest) == 0 || len(bytes.TrimSpace(rest)) < len(rest);
 }
 
@@ -1636,9 +1636,9 @@ internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuild(this 
             var line = p;
             {
                 nint i = bytes.IndexByte(line, (rune)'\n'); if (i >= 0){
-                    (line, p) = (line[..(int)(i)], p[(int)(i + 1)..]);
+                    (line, p) = (line.slice(0, i), p.slice(i + 1));
                 } else {
-                    p = p[(int)(len(p))..];
+                    p = p.slice(len(p));
                 }
             }
             line = bytes.TrimSpace(line);
@@ -1685,9 +1685,9 @@ Lines:
         var line = p;
         {
             nint i = bytes.IndexByte(line, (rune)'\n'); if (i >= 0){
-                (line, p) = (line[..(int)(i)], p[(int)(i + 1)..]);
+                (line, p) = (line.slice(0, i), p.slice(i + 1));
             } else {
-                p = p[(int)(len(p))..];
+                p = p.slice(len(p));
             }
         }
         line = bytes.TrimSpace(line);
@@ -1723,7 +1723,7 @@ Comments:
                 {
                     nint i = bytes.Index(line, starSlash); if (i >= 0) {
                         inSlashStar = false;
-                        line = bytes.TrimSpace(line[(int)(i + len(starSlash))..]);
+                        line = bytes.TrimSpace(line.slice(i + len(starSlash)));
                         goto continue_Comments;
                     }
                 }
@@ -1734,7 +1734,7 @@ Comments:
             }
             if (bytes.HasPrefix(line, slashStar)) {
                 inSlashStar = true;
-                line = bytes.TrimSpace(line[(int)(len(slashStar))..]);
+                line = bytes.TrimSpace(line.slice(len(slashStar)));
                 goto continue_Comments;
             }
             // Found non-comment text.
@@ -1745,7 +1745,7 @@ break_Comments:;
 continue_Lines:;
     }
 break_Lines:;
-    return (content[..(int)(end)], goBuild, sawBinaryOnly, default!);
+    return (content.slice(0, end), goBuild, sawBinaryOnly, default!);
 }
 
 // saveCgo saves the information from the #cgo lines in the import "C" comment.
@@ -1783,7 +1783,7 @@ internal static error saveCgo(this ж<Context> Ꮡctxt, @string filename, ж<Pac
         if (len(f) < 1) {
             return fmt.Errorf("%s: invalid #cgo line: %s"u8, filename, orig);
         }
-        var cond = f[..(int)(len(f) - 1)];
+        var cond = f.slice(0, len(f) - 1);
         @string verb = f[len(f) - 1];
         if (len(cond) > 0) {
             var okΔ1 = false;
@@ -1977,7 +1977,7 @@ internal static (slice<@string> r, error err) splitQuoted(@string s) {
         case {} when unicode.IsSpace(rune): {
             if (quoted || i > 0) {
                 quoted = false;
-                args = append(args, ((@string)(arg[..(int)(i)])));
+                args = append(args, ((@string)(arg.slice(0, i))));
                 i = 0;
             }
             continue;
@@ -1988,7 +1988,7 @@ internal static (slice<@string> r, error err) splitQuoted(@string s) {
         i++;
     }
     if (quoted || i > 0) {
-        args = append(args, ((@string)(arg[..(int)(i)])));
+        args = append(args, ((@string)(arg.slice(0, i))));
     }
     if (quote != 0){
         err = errors.New(unclosedQuoteˢ);
@@ -2112,11 +2112,11 @@ internal static readonly @string goexperimentBoringcryptoˢ = "goexperiment.bori
     if (i < 0) {
         return true;
     }
-    name = name[(int)(i)..]; // ignore everything before first _
+    name = name.slice(i); // ignore everything before first _
     var l = strings.Split(name, "_"u8);
     {
         nint nΔ1 = len(l); if (nΔ1 > 0 && l[nΔ1 - 1] == "test") {
-            l = l[..(int)(nΔ1 - 1)];
+            l = l.slice(0, nΔ1 - 1);
         }
     }
     nint n = len(l);

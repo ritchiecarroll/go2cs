@@ -350,7 +350,7 @@ internal static UntypedInt runeSize => 4; // rune is int32
         re1.Value.Flags = flags;
         return true;
     }
-    p.stack = p.stack[..(int)(n - 1)];
+    p.stack = p.stack.slice(0, n - 1);
     p.reuse(re1);
     return false; // did not push r
 }
@@ -403,16 +403,16 @@ internal static rune minFoldRune(rune r) {
             // In Perl it is not allowed to stack repetition operators:
             // a** is a syntax error, not a doubled star, and a++ means
             // something else entirely, which we don't support!
-            return ("", new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidRepeatOp, lastRepeat[..(int)(len(lastRepeat) - len(after))]))));
+            return ("", new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidRepeatOp, lastRepeat.slice(0, len(lastRepeat) - len(after))))));
         }
     }
     nint n = len(p.stack);
     if (n == 0) {
-        return ("", new ΔErrorжerror(Ꮡ(new ΔError(ErrMissingRepeatArgument, before[..(int)(len(before) - len(after))]))));
+        return ("", new ΔErrorжerror(Ꮡ(new ΔError(ErrMissingRepeatArgument, before.slice(0, len(before) - len(after))))));
     }
     var sub = p.stack[n - 1];
     if ((~sub).Op >= opPseudo) {
-        return ("", new ΔErrorжerror(Ꮡ(new ΔError(ErrMissingRepeatArgument, before[..(int)(len(before) - len(after))]))));
+        return ("", new ΔErrorжerror(Ꮡ(new ΔError(ErrMissingRepeatArgument, before.slice(0, len(before) - len(after))))));
     }
     var re = p.newRegexp(op);
     re.Value.Min = min;
@@ -423,7 +423,7 @@ internal static rune minFoldRune(rune r) {
     p.stack[n - 1] = re;
     p.checkLimits(re);
     if (op == OpRepeat && (min >= 2 || max >= 2) && !repeatIsValid(ref (re).DerefOrNull(), 1000)) {
-        return ("", new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidRepeatSize, before[..(int)(len(before) - len(after))]))));
+        return ("", new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidRepeatSize, before.slice(0, len(before) - len(after))))));
     }
     return (after, default!);
 }
@@ -469,8 +469,8 @@ internal static bool repeatIsValid(ref Regexp re, nint n) {
     while (i > 0 && (~p.stack[i - 1]).Op < opPseudo) {
         i--;
     }
-    var subs = p.stack[(int)(i)..];
-    p.stack = p.stack[..(int)(i)];
+    var subs = p.stack.slice(i);
+    p.stack = p.stack.slice(0, i);
     // Empty concatenation is special case.
     if (len(subs) == 0) {
         return p.push(p.newRegexp(OpEmptyMatch));
@@ -486,8 +486,8 @@ internal static bool repeatIsValid(ref Regexp re, nint n) {
     while (i > 0 && (~p.stack[i - 1]).Op < opPseudo) {
         i--;
     }
-    var subs = p.stack[(int)(i)..];
-    p.stack = p.stack[..(int)(i)];
+    var subs = p.stack.slice(i);
+    p.stack = p.stack.slice(0, i);
     // Make sure top class is clean.
     // All the others already are (see swapVerticalBar).
     if (len(subs) > 0) {
@@ -599,7 +599,7 @@ internal static void cleanAlt(ж<Regexp> Ꮡre) {
                 if (same > 0) {
                     // Matches at least one rune in current range.
                     // Keep going around.
-                    str = str[..(int)(same)];
+                    str = str.slice(0, same);
                     continue;
                 }
             }
@@ -624,7 +624,7 @@ internal static void cleanAlt(ж<Regexp> Ꮡre) {
                 sub[j] = p.removeLeadingString(sub[j], len(str));
                 p.checkLimits(sub[j]);
             }
-            var suffix = p.collapse(sub[(int)(start)..(int)(i)], OpAlternate); // recurse
+            var suffix = p.collapse(sub.slice(start, i), OpAlternate); // recurse
             var re = p.newRegexp(OpConcat);
             re.Value.Sub = builtin.append((~re).Sub[..0], prefix, suffix);
             @out = builtin.append(@out, re);
@@ -678,7 +678,7 @@ internal static void cleanAlt(ж<Regexp> Ꮡre) {
                 sub[j] = p.removeLeadingRegexp(sub[j], reuse);
                 p.checkLimits(sub[j]);
             }
-            var suffix = p.collapse(sub[(int)(start)..(int)(i)], OpAlternate); // recurse
+            var suffix = p.collapse(sub.slice(start, i), OpAlternate); // recurse
             var re = p.newRegexp(OpConcat);
             re.Value.Sub = builtin.append((~re).Sub[..0], prefix, suffix);
             @out = builtin.append(@out, re);
@@ -787,7 +787,7 @@ internal static void cleanAlt(ж<Regexp> Ꮡre) {
             default: {
                 copy(re.Sub, // Impossible but handle.
  re.Sub[1..]);
-                re.Sub = re.Sub[..(int)(len(re.Sub) - 1)];
+                re.Sub = re.Sub.slice(0, len(re.Sub) - 1);
                 break;
             }}
 
@@ -795,7 +795,7 @@ internal static void cleanAlt(ж<Regexp> Ꮡre) {
         return Ꮡre;
     }
     if (re.Op == OpLiteral) {
-        re.Rune = re.Rune[..(int)(copy(re.Rune, re.Rune[(int)(n)..]))];
+        re.Rune = re.Rune.slice(0, copy(re.Rune, re.Rune.slice(n)));
         if (len(re.Rune) == 0) {
             re.Op = OpEmptyMatch;
         }
@@ -831,7 +831,7 @@ internal static void cleanAlt(ж<Regexp> Ꮡre) {
         if (reuse) {
             p.reuse(re.Sub[0]);
         }
-        re.Sub = re.Sub[..(int)(copy(re.Sub, re.Sub[1..]))];
+        re.Sub = re.Sub.slice(0, copy(re.Sub, re.Sub[1..]));
         switch (len(re.Sub)) {
         case 0: {
             re.Op = OpEmptyMatch;
@@ -1037,7 +1037,7 @@ BigSwitch:
                 }
                 if (min < 0 || min > 1000 || max > 1000 || max >= 0 && min > max) {
                     // Numbers were too big, or max is present and min > max.
-                    (_ᴛ1, err) = (default!, new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidRepeatSize, before[..(int)(len(before) - len(after))])))); goto ᒐdone;
+                    (_ᴛ1, err) = (default!, new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidRepeatSize, before.slice(0, len(before) - len(after)))))); goto ᒐdone;
                 }
                 {
                     (after, err) = p.repeat(op, min, max, before, after, lastRepeat); if (err != default!) {
@@ -1137,7 +1137,7 @@ ErrInvalidEscape, t[..2])))); goto ᒐdone;
         p.concat();
         if (p.swapVerticalBar()) {
             // pop vertical bar
-            p.stack = p.stack[..(int)(len(p.stack) - 1)];
+            p.stack = p.stack.slice(0, len(p.stack) - 1);
         }
         p.alternate();
         nint n = len(p.stack);
@@ -1242,8 +1242,8 @@ ErrInvalidEscape, t[..2])))); goto ᒐdone;
             return ("", new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidNamedCapture, s))));
         }
         ref var capture = ref heap<@string>(out var Ꮡcapture);
-        capture = t[..(int)(end + 1)]; // "(?P<name>" or "(?<name>"
-        @string name = t[(int)(exprStartPos)..(int)(end)]; // "name"
+        capture = t.slice(0, end + 1); // "(?P<name>" or "(?<name>"
+        @string name = t.slice(exprStartPos, end); // "name"
         {
             err = checkUTF8(name); if (err != default!) {
                 return ("", err);
@@ -1257,7 +1257,7 @@ ErrInvalidEscape, t[..2])))); goto ᒐdone;
         var re = p.op(opLeftParen);
         re.Value.Cap = p.numCap;
         re.Value.Name = name;
-        return (t[(int)(end + 1)..], default!);
+        return (t.slice(end + 1), default!);
     }
     // Non-capturing group. Might also twiddle Perl flags.
     rune c = default!;
@@ -1329,7 +1329,7 @@ Loop:
 continue_Loop:;
     }
 break_Loop:;
-    return ("", new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidPerlOp, s[..(int)(len(s) - len(t))]))));
+    return ("", new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidPerlOp, s.slice(0, len(s) - len(t))))));
 }
 
 // isValidCaptureName reports whether name
@@ -1369,7 +1369,7 @@ internal static bool isValidCaptureName(@string name) {
     rest = s;
     ok = true;
     // Have digits, compute value.
-    t = t[..(int)(len(t) - len(s))];
+    t = t.slice(0, len(t) - len(s));
     for (nint i = 0; i < len(t); i++) {
         // Avoid overflow.
         if (n >= 100000000) {
@@ -1476,7 +1476,7 @@ internal static void mergeCharClass(ref Regexp dst, ref Regexp src) {
         }
         mergeCharClass(ref (re3).DerefOrNull(), ref (re1).DerefOrNull());
         p.reuse(re1);
-        p.stack = p.stack[..(int)(n - 1)];
+        p.stack = p.stack.slice(0, n - 1);
         return true;
     }
     if (n >= 2) {
@@ -1501,7 +1501,7 @@ internal static void mergeCharClass(ref Regexp dst, ref Regexp src) {
     p.concat();
     if (p.swapVerticalBar()) {
         // pop vertical bar
-        p.stack = p.stack[..(int)(len(p.stack) - 1)];
+        p.stack = p.stack.slice(0, len(p.stack) - 1);
     }
     p.alternate();
     nint n = len(p.stack);
@@ -1510,7 +1510,7 @@ internal static void mergeCharClass(ref Regexp dst, ref Regexp src) {
     }
     var re1 = p.stack[n - 1];
     var re2 = p.stack[n - 2];
-    p.stack = p.stack[..(int)(n - 2)];
+    p.stack = p.stack.slice(0, n - 2);
     if ((~re2).Op != opLeftParen) {
         return new ΔErrorжerror(Ꮡ(new ΔError(ErrUnexpectedParen, p.wholeRegexp)));
     }
@@ -1662,7 +1662,7 @@ Switch:
     // but /[\b]/ means backspace. We don't support that.
     // If you want a backspace, embed a literal backspace
     // character or use \x08.
-    return (0, "", new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidEscape, s[..(int)(len(s) - len(t))]))));
+    return (0, "", new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidEscape, s.slice(0, len(s) - len(t))))));
 }
 
 // parseClassChar parses a character class character at the beginning of s
@@ -1721,8 +1721,8 @@ internal static (slice<rune> @out, @string rest, error err) parseNamedClass(this
     }
     i += 2;
     ref var name = ref heap<@string>(out var Ꮡname);
-    name = s[0..(int)(i + 2)];
-    s = s[(int)(i + 2)..];
+    name = s.slice(0, i + 2);
+    s = s.slice(i + 2);
     var g = posixGroup[name];
     if (g.sign == 0) {
         return (default!, "", new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidCharRange, name))));
@@ -1804,7 +1804,7 @@ internal static (slice<rune> @out, @string rest, error err) parseUnicodeClass(th
     @string name = default!;
     if (c != (rune)'{'){
         // Single-letter name.
-        seq = s[..(int)(len(s) - len(t))];
+        seq = s.slice(0, len(s) - len(t));
         name = seq[2..];
     } else {
         // Name is in braces.
@@ -1817,8 +1817,8 @@ internal static (slice<rune> @out, @string rest, error err) parseUnicodeClass(th
             }
             return (default!, "", new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidCharRange, s))));
         }
-        (seq, t) = (s[..(int)(end + 1)], s[(int)(end + 1)..]);
-        name = s[3..(int)(end)];
+        (seq, t) = (s.slice(0, end + 1), s.slice(end + 1));
+        name = s.slice(3, end);
         {
             err = checkUTF8(name); if (err != default!) {
                 return (@out, rest, err);
@@ -1884,7 +1884,7 @@ internal static (@string rest, error err) parseClass(this ж<parser> Ꮡp, @stri
         // Perl: - is okay anywhere.
         if (t != ""u8 && t[0] == (rune)'-' && (Flags)(p.flags & PerlX) == 0 && !first && (len(t) == 1 || t[1] != (rune)']')) {
             var (_, size) = utf8.DecodeRuneInString(t[1..]);
-            return ("", new ΔErrorжerror(Ꮡ(new ΔError(Code: ErrInvalidCharRange, Expr: t[..(int)(1 + size)]))));
+            return ("", new ΔErrorжerror(Ꮡ(new ΔError(Code: ErrInvalidCharRange, Expr: t.slice(0, 1 + size)))));
         }
         first = false;
         // Look for POSIX [:alnum:] etc.
@@ -1934,7 +1934,7 @@ internal static (@string rest, error err) parseClass(this ж<parser> Ꮡp, @stri
                 }
             }
             if (hi < lo) {
-                rng = rng[..(int)(len(rng) - len(t))];
+                rng = rng.slice(0, len(rng) - len(t));
                 return ("", new ΔErrorжerror(Ꮡ(new ΔError(Code: ErrInvalidCharRange, Expr: rng))));
             }
         }
@@ -1983,7 +1983,7 @@ internal static slice<rune> cleanClass(ж<slice<rune>> Ꮡrp) {
         r[w + 1] = hi;
         w += 2;
     }
-    return r[..(int)(w)];
+    return r.slice(0, w);
 }
 
 // inCharClass reports whether r is in the class.
@@ -2187,7 +2187,7 @@ internal static slice<rune> negateClass(slice<rune> r) {
         }
         nextLo = hi + 1;
     }
-    r = r[..(int)(w)];
+    r = r.slice(0, w);
     if (nextLo <= unicode.MaxRune) {
         // It's possible for the negation to have one more
         // range - this one - than the original class, so use append.
@@ -2228,7 +2228,7 @@ internal static error checkUTF8(@string s) {
         if (rune == utf8.RuneError && size == 1) {
             return new ΔErrorжerror(Ꮡ(new ΔError(Code: ErrInvalidUTF8, Expr: s)));
         }
-        s = s[(int)(size)..];
+        s = s.slice(size);
     }
     return default!;
 }
@@ -2240,7 +2240,7 @@ internal static (rune c, @string t, error err) nextRune(@string s) {
     if (c == utf8.RuneError && size == 1) {
         return (0, "", new ΔErrorжerror(Ꮡ(new ΔError(Code: ErrInvalidUTF8, Expr: s))));
     }
-    return (c, s[(int)(size)..], default!);
+    return (c, s.slice(size), default!);
 }
 
 internal static bool isalnum(rune c) {

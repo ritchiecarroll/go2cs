@@ -60,7 +60,7 @@ internal static nint initMaxExecDepth() {
 
 // pop pops the variable stack up to the mark.
 [GoRecv] internal static void pop(this ref state s, nint mark) {
-    s.vars = s.vars[0..(int)(mark)];
+    s.vars = s.vars.slice(0, mark);
 }
 
 // setVar overwrites the last declared variable with the given name.

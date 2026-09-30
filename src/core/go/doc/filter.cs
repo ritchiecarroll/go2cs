@@ -69,7 +69,7 @@ internal static slice<ж<Value>> filterValues(slice<ж<Value>> a, Func<@string, 
             w++;
         }
     }
-    return a[0..(int)(w)];
+    return a.slice(0, w);
 }
 
 internal static slice<ж<Func>> filterFuncs(slice<ж<Func>> a, Func<@string, bool> f) {
@@ -80,7 +80,7 @@ internal static slice<ж<Func>> filterFuncs(slice<ж<Func>> a, Func<@string, boo
             w++;
         }
     }
-    return a[0..(int)(w)];
+    return a.slice(0, w);
 }
 
 internal static slice<ж<Type>> filterTypes(slice<ж<Type>> a, Func<@string, bool> f) {
@@ -102,7 +102,7 @@ internal static slice<ж<Type>> filterTypes(slice<ж<Type>> a, Func<@string, boo
             w++;
         }
     }
-    return a[0..(int)(w)];
+    return a.slice(0, w);
 }
 
 // Filter eliminates documentation for names that don't pass through the filter f.

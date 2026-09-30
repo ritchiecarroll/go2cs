@@ -26,10 +26,10 @@ internal static @string dirname(@string path) {
     while (i >= len(vol) && !IsPathSeparator(path[i])) {
         i--;
     }
-    @string dir = path[(int)(len(vol))..(int)(i + 1)];
+    @string dir = path.slice(len(vol), i + 1);
     nint last = len(dir) - 1;
     if (last > 0 && IsPathSeparator(dir[last])) {
-        dir = dir[..(int)(last)];
+        dir = dir.slice(0, last);
     }
     if (dir == ""u8) {
         dir = "."u8;
@@ -136,7 +136,7 @@ internal static @string addExtendedPrefix(@string path) {
             return path;
         }
         if (n <= (uint32)(len(buf) - len(prefix))) {
-            buf = buf[..(int)(n + (uint32)len(prefix))];
+            buf = buf.slice(0, (nint)(n + (uint32)len(prefix)));
             break;
         }
     }

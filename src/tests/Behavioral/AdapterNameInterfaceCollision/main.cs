@@ -20,7 +20,7 @@ partial class main_package {
     if (s.pos >= len(s.data)) {
         return (0, Δio.EOF);
     }
-    nint n = copy(p, s.data[(int)(s.pos)..]);
+    nint n = copy(p, s.data.slice(s.pos));
     s.pos += n;
     return (n, default!);
 }
@@ -38,7 +38,7 @@ internal static @string viaForeign(Δio.Reader r) {
     if (err != default!) {
         return errˢ;
     }
-    return ((@string)(buf[..(int)(n)]));
+    return ((@string)(buf.slice(0, n)));
 }
 
 internal static @string viaLocal(Reader r) {
@@ -48,7 +48,7 @@ internal static @string viaLocal(Reader r) {
     if (err != default!) {
         return errˢ;
     }
-    return fmt.Sprintf("%d|%s|%d"u8, before, ((@string)(buf[..(int)(n)])), r.Remaining());
+    return fmt.Sprintf("%d|%s|%d"u8, before, ((@string)(buf.slice(0, n))), r.Remaining());
 }
 
 internal static void Main() {

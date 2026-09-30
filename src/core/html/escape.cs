@@ -64,7 +64,7 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
     // http://www.whatwg.org/specs/web-apps/current-work/multipage/tokenization.html#consume-a-character-reference
     // i starts at 1 because we already know that s[0] == '&'.
     nint i = 1;
-    var s = b[(int)(src)..];
+    var s = b.slice(src);
     if (len(s) <= 1) {
         b[dst] = b[src];
         return (dst + 1, src + 1);
@@ -122,7 +122,7 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
             // Replace invalid characters with the replacement character.
             x = (rune)'\uFFFD';
         }
-        return (dst + utf8.EncodeRune(b[(int)(dst)..], x), src + i);
+        return (dst + utf8.EncodeRune(b.slice(dst), x), src + i);
     }
     // Consume the maximum number of characters possible, with the
     // consumed characters matching one of the named references.
@@ -138,7 +138,7 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
         }
         break;
     }
-    var entityName = s[1..(int)(i)];
+    var entityName = s.slice(1, i);
     if (len(entityName) == 0){
     } else 
     if (attribute && entityName[len(entityName) - 1] != (rune)';' && len(s) > i && s[i] == (rune)'='){
@@ -147,12 +147,12 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
         var x = entity[tmpstring(entityName)]; if (x != 0){
             // No-op.
             // No-op.
-            return (dst + utf8.EncodeRune(b[(int)(dst)..], x), src + i);
+            return (dst + utf8.EncodeRune(b.slice(dst), x), src + i);
         } else 
         {
             var xΔ1 = entity2[tmpstring(entityName), () => new array<rune>(2)].Clone(); if (xΔ1[0] != 0){
-                nint dst1Δ1 = dst + utf8.EncodeRune(b[(int)(dst)..], xΔ1[0]);
-                return (dst1Δ1 + utf8.EncodeRune(b[(int)(dst1Δ1)..], xΔ1[1]), src + i);
+                nint dst1Δ1 = dst + utf8.EncodeRune(b.slice(dst), xΔ1[0]);
+                return (dst1Δ1 + utf8.EncodeRune(b.slice(dst1Δ1), xΔ1[1]), src + i);
             } else 
             if (!attribute) {
                 nint maxLen = len(entityName) - 1;
@@ -161,8 +161,8 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
                 }
                 for (nint j = maxLen; j > 1; j--) {
                     {
-                        var xΔ2 = entity[tmpstring(entityName[..(int)(j)])]; if (xΔ2 != 0) {
-                            return (dst + utf8.EncodeRune(b[(int)(dst)..], xΔ2), src + j + 1);
+                        var xΔ2 = entity[tmpstring(entityName.slice(0, j))]; if (xΔ2 != 0) {
+                            return (dst + utf8.EncodeRune(b.slice(dst), xΔ2), src + j + 1);
                         }
                     }
                 }
@@ -170,7 +170,7 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
         }
     }
     (dst1, src1) = (dst + i, src + i);
-    copy(b[(int)(dst)..(int)(dst1)], b[(int)(src)..(int)(src1)]);
+    copy(b.slice(dst, dst1), b.slice(src, src1));
     return (dst1, src1);
 }
 
@@ -204,22 +204,22 @@ public static @string UnescapeString(@string s) {
     var b = slice<byte>(s);
     var (entity, entity2) = entityMaps();
     var (dst, src) = unescapeEntity(b, i, i, entity, entity2);
-    while (len(s[(int)(src)..]) > 0) {
+    while (len(s.slice(src)) > 0) {
         if (s[src] == (rune)'&'){
             i = 0;
         } else {
-            i = strings.IndexByte(s[(int)(src)..], (rune)'&');
+            i = strings.IndexByte(s.slice(src), (rune)'&');
         }
         if (i < 0) {
-            dst += copy(b[(int)(dst)..], s[(int)(src)..]);
+            dst += copy(b.slice(dst), s.slice(src));
             break;
         }
         if (i > 0) {
-            copy(b[(int)(dst)..], s[(int)(src)..(int)(src + i)]);
+            copy(b.slice(dst), s.slice(src, src + i));
         }
         (dst, src) = unescapeEntity(b, dst + i, src + i, entity, entity2);
     }
-    return ((@string)(b[..(int)(dst)]));
+    return ((@string)(b.slice(0, dst)));
 }
 
 } // end html_package

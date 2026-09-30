@@ -40,7 +40,7 @@ public static io.Reader HalfReader(io.Reader r) {
 }
 
 [GoRecv] internal static (nint, error) Read(this ref halfReader r, slice<byte> p) {
-    return r.r.Read(p[0..(int)((len(p) + 1) / 2)]);
+    return r.r.Read(p.slice(0, (len(p) + 1) / 2));
 }
 
 // DataErrReader changes the way errors are handled by a Reader. Normally, a
@@ -67,14 +67,14 @@ public static io.Reader DataErrReader(io.Reader r) {
     while (ᐧ) {
         if (len(r.unread) == 0) {
             var (n1, err1) = r.r.Read(r.data);
-            r.unread = r.data[0..(int)(n1)];
+            r.unread = r.data.slice(0, n1);
             err = err1;
         }
         if (n > 0 || err != default!) {
             break;
         }
         n = copy(p, r.unread);
-        r.unread = r.unread[(int)(n)..];
+        r.unread = r.unread.slice(n);
     }
     return (n, err);
 }
@@ -129,7 +129,7 @@ public static io.Reader ErrReader(error err) {
     if (n > len(p)) {
         n = len(p);
     }
-    (n, var err) = r.r.Read(p[0..(int)(n)]);
+    (n, var err) = r.r.Read(p.slice(0, n));
     if (err != default! && !AreEqual(err, io.EOF)) {
         err = fmt.Errorf("Read(%d bytes at offset %d): %v"u8, n, r.off, err);
     }
@@ -205,8 +205,8 @@ public static error TestReader(io.Reader r, slice<byte> content) {
             if (errΔ7 != default!) {
                 return fmt.Errorf("ReadAll from offset %d: %v"u8, middle, errΔ7);
             }
-            if (!bytes.Equal(dataΔ1, content[(int)(middle)..])) {
-                return fmt.Errorf("ReadAll from offset %d = %q\n\twant %q"u8, middle, dataΔ1, content[(int)(middle)..]);
+            if (!bytes.Equal(dataΔ1, content.slice(middle))) {
+                return fmt.Errorf("ReadAll from offset %d = %q\n\twant %q"u8, middle, dataΔ1, content.slice(middle));
             }
             // Seek relative to end of file, but start elsewhere.
             {
@@ -224,8 +224,8 @@ public static error TestReader(io.Reader r, slice<byte> content) {
             if (errΔ7 != default!) {
                 return fmt.Errorf("ReadAll from offset %d: %v"u8, middle, errΔ7);
             }
-            if (!bytes.Equal(dataΔ1, content[(int)(middle)..])) {
-                return fmt.Errorf("ReadAll from offset %d = %q\n\twant %q"u8, middle, dataΔ1, content[(int)(middle)..]);
+            if (!bytes.Equal(dataΔ1, content.slice(middle))) {
+                return fmt.Errorf("ReadAll from offset %d = %q\n\twant %q"u8, middle, dataΔ1, content.slice(middle));
             }
             // Absolute seek & read forward.
             {
@@ -237,8 +237,8 @@ public static error TestReader(io.Reader r, slice<byte> content) {
             if (errΔ7 != default!) {
                 return fmt.Errorf("ReadAll from offset %d: %v"u8, middle / 2, errΔ7);
             }
-            if (!bytes.Equal(dataΔ1, content[(int)(middle / 2)..])) {
-                return fmt.Errorf("ReadAll from offset %d = %q\n\twant %q"u8, middle / 2, dataΔ1, content[(int)(middle / 2)..]);
+            if (!bytes.Equal(dataΔ1, content.slice(middle / 2))) {
+                return fmt.Errorf("ReadAll from offset %d = %q\n\twant %q"u8, middle / 2, dataΔ1, content.slice(middle / 2));
             }
         }
     }
@@ -262,7 +262,7 @@ public static error TestReader(io.Reader r, slice<byte> content) {
             foreach (var (i, _) in dataΔ2) {
                 dataΔ2[i] = 0xfe;
             }
-            (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2[..(int)(cap(dataΔ2))], 0);
+            (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2.slice(0, cap(dataΔ2)), 0);
             if (nΔ2 != len(dataΔ2) || !AreEqual(errΔ11, io.EOF)) {
                 return fmt.Errorf("ReadAt(%d, 0) = %v, %v, want %d, EOF"u8, cap(dataΔ2), nΔ2, errΔ11, len(dataΔ2));
             }
@@ -273,7 +273,7 @@ public static error TestReader(io.Reader r, slice<byte> content) {
                 dataΔ2[i] = 0xfe;
             }
             foreach (var (i, _) in dataΔ2) {
-                (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2[(int)(i)..(int)(i + 1)], (int64)i);
+                (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2.slice(i, i + 1), (int64)i);
                 if (nΔ2 != 1 || errΔ11 != default! && (i != len(dataΔ2) - 1 || !AreEqual(errΔ11, io.EOF))) {
                     @string want = nilˢ;
                     if (i == len(dataΔ2) - 1) {
@@ -282,7 +282,7 @@ public static error TestReader(io.Reader r, slice<byte> content) {
                     return fmt.Errorf("ReadAt(1, %d) = %v, %v, want 1, %s"u8, i, nΔ2, errΔ11, want);
                 }
                 if (dataΔ2[i] != content[i]) {
-                    return fmt.Errorf("ReadAt(1, %d) = %q want %q"u8, i, dataΔ2[(int)(i)..(int)(i + 1)], content[(int)(i)..(int)(i + 1)]);
+                    return fmt.Errorf("ReadAt(1, %d) = %q want %q"u8, i, dataΔ2.slice(i, i + 1), content.slice(i, i + 1));
                 }
             }
         }

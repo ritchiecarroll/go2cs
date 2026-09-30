@@ -542,7 +542,7 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
                 // Pop the top region from the stack since that's what must have ended.
                 nint n = len(regionStk);
                 sd = regionStk[n - 1];
-                regionStk = regionStk[..(int)(n - 1)];
+                regionStk = regionStk.slice(0, n - 1);
                 g.Value.activeRegions = regionStk;
             } else {
                 // N.B. No need to add the region to a task; the EventRegionBegin already handled it.

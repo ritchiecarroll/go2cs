@@ -153,7 +153,7 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
             // Report overlapping (non-disjoint) terms such as
             // a|a, a|~a, ~a|~a, and ~a|A (where under(A) == a).
             {
-                nint j = overlappingTerm(termsʗ1[..(int)(i)], t); if (j >= 0) {
+                nint j = overlappingTerm(termsʗ1.slice(0, i), t); if (j >= 0) {
                     Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "overlapping terms %s and %s"u8, t.OrTypedNil(), termsʗ1[j].OrTypedNil());
                 }
             }

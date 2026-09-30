@@ -421,7 +421,7 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string @file, nint 
         buf[i] = (byte)((rune)'0' + (byte)(u % 10));
         u /= 10;
     }
-    dst = appendꓸꓸꓸ(dst, buf[(int)(i)..]);
+    dst = appendꓸꓸꓸ(dst, buf.slice(i));
     return dst;
 }
 
@@ -449,10 +449,10 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string @file, nint 
     }
     var @base = stk[0];
     // normalize PCs
-    foreach (var (i, _) in stk[..(int)(n)]) {
+    foreach (var (i, _) in stk.slice(0, n)) {
         stk[i] -= @base;
     }
-    var h = Hash(stk[..(int)(n)]);
+    var h = Hash(stk.slice(0, n));
     if (Ꮡm.ShouldPrint(h)) {
         ж<dedup> d = default!;
         while (ᐧ) {
@@ -472,10 +472,10 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string @file, nint 
         } else {
             if (!d.seen(h)) {
                 // Restore PCs in stack for printing
-                foreach (var (i, _) in stk[..(int)(n)]) {
+                foreach (var (i, _) in stk.slice(0, n)) {
                     stk[i] += @base;
                 }
-                printStack(w, h, stk[1..(int)(n)]);
+                printStack(w, h, stk.slice(1, n));
             }
         }
     }
@@ -566,7 +566,7 @@ public static (@string @short, uint64 id, bool ok) CutMarker(@string line) {
         if (i >= len(line) - len(prefix)) {
             return (line, 0, false);
         }
-        if (line[i] == (rune)'[' && line[(int)(i)..(int)(i + len(prefix))] == prefix) {
+        if (line[i] == (rune)'[' && line.slice(i, i + len(prefix)) == prefix) {
             break;
         }
     }
@@ -579,7 +579,7 @@ public static (@string @short, uint64 id, bool ok) CutMarker(@string line) {
         return (line, 0, false);
     }
     // Parse id.
-    @string idstr = line[(int)(i + len(prefix))..(int)(j)];
+    @string idstr = line.slice(i + len(prefix), j);
     if (len(idstr) >= 3 && idstr[..2] == "0x"){
         // parse hex
         if (len(idstr) > 2 + 16) {
@@ -638,7 +638,7 @@ public static (@string @short, uint64 id, bool ok) CutMarker(@string line) {
     if (j < len(line) && line[j] == (rune)' ') {
         j++;
     }
-    @short = line[..(int)(i)] + line[(int)(j)..];
+    @short = line.slice(0, i) + line.slice(j);
     return (@short, id, true);
 }
 

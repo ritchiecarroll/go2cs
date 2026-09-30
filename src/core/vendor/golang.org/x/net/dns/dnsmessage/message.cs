@@ -1805,7 +1805,7 @@ public static error UnknownResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔU
     }
     b.section = sectionDone;
     // Space for the header was allocated in NewBuilder.
-    b.header.pack(b.msg[(int)(b.start)..(int)(b.start)]);
+    b.header.pack(b.msg.slice(b.start, b.start));
     return (b.msg, default!);
 }
 
@@ -1901,7 +1901,7 @@ public static error UnknownResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔU
         return errResTooLong;
     }
     // Fill in the length now that we know how long the content is.
-    packUint16(msg[(int)(lenOff)..(int)(lenOff)], (uint16)conLen);
+    packUint16(msg.slice(lenOff, lenOff), (uint16)conLen);
     h.Length = (uint16)conLen;
     return default!;
 }
@@ -2069,7 +2069,7 @@ internal static (@string, nint, error) unpackText(slice<byte> msg, nint off) {
     if (endOff > len(msg)) {
         return ("", off, errCalcLen);
     }
-    return (((@string)(msg[(int)(beginOff)..(int)(endOff)])), endOff, default!);
+    return (((@string)(msg.slice(beginOff, endOff))), endOff, default!);
 }
 
 // packBytes appends the wire format of field to msg.
@@ -2082,7 +2082,7 @@ internal static (nint, error) unpackBytes(slice<byte> msg, nint off, slice<byte>
     if (newOff > len(msg)) {
         return (off, errBaseLen);
     }
-    copy(field, msg[(int)(off)..(int)(newOff)]);
+    copy(field, msg.slice(off, newOff));
     return (newOff, default!);
 }
 
@@ -2120,12 +2120,12 @@ public static Name MustNewName(@string name) {
 public static @string String(this Name n) {
     n = n.ΔClone();
 
-    return ((@string)(n.Data[..(int)(n.Length)]));
+    return ((@string)(n.Data.slice(0, n.Length)));
 }
 
 // GoString implements fmt.GoStringer.GoString.
 [GoRecv] public static @string GoString(this ref Name n) {
-    return @"dnsmessage.MustNewName("""u8 + printString(n.Data[..(int)(n.Length)]) + @""")"u8;
+    return @"dnsmessage.MustNewName("""u8 + printString(n.Data.slice(0, n.Length)) + @""")"u8;
 }
 
 // pack appends the wire format of the Name to msg.
@@ -2175,7 +2175,7 @@ public static @string String(this Name n) {
         // bits set to 1 to indicate that it is a pointer.
         if ((i == 0 || n.Data[i - 1] == (rune)'.') && compression != default!) {
             {
-                var (ptr, ok) = compression[tmpstring(n.Data[(int)(i)..(int)(n.Length)]), ꟷ]; if (ok) {
+                var (ptr, ok) = compression[tmpstring(n.Data.slice(i, n.Length)), ꟷ]; if (ok) {
                     // Hit. Emit a pointer instead of the rest of
                     // the domain.
                     return (append(msg, (byte)((uint16)((ptr >> (int)(8)) | 0xC0)), (byte)ptr), default!);
@@ -2188,9 +2188,9 @@ public static @string String(this Name n) {
                 if (nameAsStr == ""u8) {
                     // allocate n.Data on the heap once, to avoid allocating it
                     // multiple times (for next labels).
-                    nameAsStr = ((@string)(n.Data[..(int)(n.Length)]));
+                    nameAsStr = ((@string)(n.Data.slice(0, n.Length)));
                 }
-                compression[nameAsStr[(int)(i)..]] = (uint16)newPtr;
+                compression[nameAsStr.slice(i)] = (uint16)newPtr;
             }
         }
     }
@@ -2227,14 +2227,14 @@ Loop:
             if (endOff > len(msg)) {
                 return (off, errCalcLen);
             }
-            foreach (var (_, v) in msg[(int)(currOff)..(int)(endOff)]) {
+            foreach (var (_, v) in msg.slice(currOff, endOff)) {
                 // Reject names containing dots.
                 // See issue golang/go#56246
                 if (v == (rune)'.') {
                     return (off, errInvalidName);
                 }
             }
-            name = appendꓸꓸꓸ(name, msg[(int)(currOff)..(int)(endOff)]);
+            name = appendꓸꓸꓸ(name, msg.slice(currOff, endOff));
             name = append(name, (byte)((rune)'.'));
             currOff = endOff;
             break;
@@ -2875,7 +2875,7 @@ internal static (ΔOPTResource, error) unpackOPTResource(slice<byte> msg, nint o
             return (new ΔOPTResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Data"u8, err))));
         }
         o.Data = new slice<byte>(l);
-        if (copy(o.Data, msg[(int)(off)..]) != (nint)l) {
+        if (copy(o.Data, msg.slice(off)) != (nint)l) {
             return (new ΔOPTResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Data"u8, errCalcLen))));
         }
         off += (nint)l;

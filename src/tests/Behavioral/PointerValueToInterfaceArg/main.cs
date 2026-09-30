@@ -19,7 +19,7 @@ internal static any poolGet() {
     {
         nint n = len(freeList); if (n > 0) {
             var x = freeList[n - 1];
-            freeList = freeList[..(int)(n - 1)];
+            freeList = freeList.slice(0, n - 1);
             return x;
         }
     }

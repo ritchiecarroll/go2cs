@@ -780,7 +780,7 @@ internal static (nint n, error err) Read(this ж<connReader> Ꮡcr, slice<byte> 
         return (0, default!);
     }
     if ((int64)builtin.len(p) > cr.remain) {
-        p = p[..(int)(cr.remain)];
+        p = p.slice(0, (nint)(cr.remain));
     }
     if (cr.hasByte) {
         p[0] = cr.byteBuf[0];
@@ -1019,8 +1019,8 @@ internal static slice<byte> appendTime(slice<byte> b, time.Time t) {
     t = t.UTC();
     var (yy, mm, dd) = t.Date();
     var (hh, mn, ss) = t.Clock();
-    @string day = days[(int)(nint)(3 * t.Weekday())..];
-    @string mon = months[(int)(nint)(3 * (mm - 1))..];
+    @string day = days.slice(3 * t.Weekday());
+    @string mon = months.slice(3 * (mm - 1));
     return append(b,
         day[0], day[1], day[2], (byte)((rune)','), (byte)((rune)' '),
         (byte)((rune)'0' + dd / 10), (byte)((rune)'0' + dd % 10), (byte)((rune)' '),
@@ -1210,7 +1210,7 @@ internal static readonly @string netHttpˢ = "net/http."u8;
 [MethodImpl(MethodImplOptions.NoInlining)] internal static runtime.Frame relevantCaller() {
     var pc = new slice<uintptr>(16);
     nint n = runtime.Callers(1, pc);
-    var frames = runtime.CallersFrames(pc[..(int)(n)]);
+    var frames = runtime.CallersFrames(pc.slice(0, n));
     runtime.Frame frame = new();
     while (ᐧ) {
         var (frameΔ1, more) = frames.Next();
@@ -2018,7 +2018,7 @@ internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
                 var err = recover(); if (err != default! && !AreEqual(err, ErrAbortHandler)) {
                     const nint size = /* 64 << 10 */ 65536;
                     var buf = new slice<byte>(size);
-                    buf = buf[..(int)(runtime.Stack(buf, false))];
+                    buf = buf.slice(0, runtime.Stack(buf, false));
                     Ꮡc.Value.server.logf("http: panic serving %v: %v\n%s"u8, Ꮡc.Value.remoteAddr, err, buf);
                 }
             }
@@ -2508,7 +2508,7 @@ public static void Redirect(ResponseWriter w, ж<Request> Ꮡr, @string url, nin
                 @string query = default!;
                 {
                     nint i = strings.Index(url, "?"u8); if (i != -1) {
-                        (url, query) = (url[..(int)(i)], url[(int)(i)..]);
+                        (url, query) = (url.slice(0, i), url.slice(i));
                     }
                 }
                 // clean up but preserve trailing slash

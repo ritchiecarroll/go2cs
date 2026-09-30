@@ -195,7 +195,7 @@ internal static (@string, error) readlinkat(nint fd, @string name) {
             n = 0;
         }
         if (n < len) {
-            return (((@string)(b[0..(int)(n)])), default!);
+            return (((@string)(b.slice(0, n))), default!);
         }
     }
 }

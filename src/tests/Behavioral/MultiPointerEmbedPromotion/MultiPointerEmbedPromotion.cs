@@ -17,7 +17,7 @@ internal static (nint, error) Read(this ж<reader> Ꮡr, slice<byte> p) {
     if (q.Value >= len(r.src)) {
         return (0, default!);
     }
-    nint n = copy(p, r.src[(int)(q.Value)..]);
+    nint n = copy(p, r.src.slice(q.Value));
     q.Value += n;
     return (n, default!);
 }
@@ -98,8 +98,8 @@ internal static void Main() {
     readWriteCloser rwc = new duplexжreadWriteCloser(d);
     var buf = new slice<byte>(5);
     var (n, err) = rwc.Read(buf);
-    fmt.Println(readˢ, n, ((@string)(buf[..(int)(n)])), err == default!);
-    (n, err) = rwc.Write(buf[..(int)(n)]);
+    fmt.Println(readˢ, n, ((@string)(buf.slice(0, n))), err == default!);
+    (n, err) = rwc.Write(buf.slice(0, n));
     fmt.Println(writeˢ, n, err == default!);
     fmt.Println(aliasedˢ, (~r).pos, w.String());
     fmt.Println(closeˢ, rwc.Close() == default!, (~r).pos, (~w).flush);
@@ -110,7 +110,7 @@ internal static void Main() {
     readStringWriter rsw = new foreignжreadStringWriter(f);
     var fbuf = new slice<byte>(3);
     (n, _) = rsw.Read(fbuf);
-    var (n2, _) = rsw.WriteString(((sstring)(fbuf[..(int)(n)])) + "def"u8);
+    var (n2, _) = rsw.WriteString(((sstring)(fbuf.slice(0, n))) + "def"u8);
     fmt.Println(foreignˢ, n, n2, (~f).Builder.String());
     readStringWriter frsw = f.Value;
     var (n3, _) = frsw.WriteString("gh"u8);

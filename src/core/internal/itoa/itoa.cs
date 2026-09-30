@@ -30,7 +30,7 @@ public static @string Uitoa(nuint val) {
     }
     // val < 10
     buf[i] = (byte)((rune)'0' + val);
-    return ((@string)(buf[(int)(i)..]));
+    return ((@string)(buf.slice(i)));
 }
 
 internal static readonly @string hex = "0123456789abcdef"u8;
@@ -55,7 +55,7 @@ public static @string Uitox(nuint val) {
     buf[i] = (rune)'x';
     i--;
     buf[i] = (rune)'0';
-    return ((@string)(buf[(int)(i)..]));
+    return ((@string)(buf.slice(i)));
 }
 
 } // end itoa_package

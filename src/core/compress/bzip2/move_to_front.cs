@@ -37,7 +37,7 @@ internal static byte /*b*/ Decode(this moveToFrontDecoder m, nint n) {
     // because it has high locality of reference inside of a
     // single cache line (most move-to-front operations have n < 64).
     b = m[n];
-    copy(m[1..], m[..(int)(n)]);
+    copy(m[1..], m.slice(0, n));
     m[0] = b;
     return b;
 }

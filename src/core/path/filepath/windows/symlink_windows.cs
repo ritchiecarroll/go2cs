@@ -39,7 +39,7 @@ internal static (@string, error) normBase(@string path) {
 // The given path should be 'Clean'-ed in advance.
 internal static bool baseIsDotDot(@string path) {
     nint i = strings.LastIndexByte(path, Separator);
-    return path[(int)(i + 1)..] == "..";
+    return path.slice(i + 1) == "..";
 }
 
 // toNorm returns the normalized path that is guaranteed to be unique.
@@ -58,7 +58,7 @@ internal static (@string, error) toNorm(@string path, Func<@string, (@string, er
         return (path, default!);
     }
     @string volume = normVolumeName(path);
-    path = path[(int)(len(volume))..];
+    path = path.slice(len(volume));
     // skip special cases
     if (path == ""u8 || path == "."u8 || path == @"\"u8) {
         return (volume + path, default!);
@@ -83,9 +83,9 @@ internal static (@string, error) toNorm(@string path, Func<@string, (@string, er
             normPath = @"\"u8 + normPath;
             break;
         }
-        path = path[..(int)(i)];
+        path = path.slice(0, i);
     }
-    normPath = normPath[..(int)(len(normPath) - 1)]; // remove trailing '\'
+    normPath = normPath.slice(0, len(normPath) - 1); // remove trailing '\'
     return (volume + normPath, default!);
 }
 

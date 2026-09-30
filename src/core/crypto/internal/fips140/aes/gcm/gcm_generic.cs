@@ -20,8 +20,8 @@ internal static void sealGeneric(slice<byte> @out, ж<GCM> Ꮡg, slice<byte> non
     gcmCounterCryptGeneric(Ꮡg.of(GCM.Ꮡcipher), tagMask[..], tagMask[..], Ꮡcounter);
     gcmCounterCryptGeneric(Ꮡg.of(GCM.Ꮡcipher), @out, plaintext, Ꮡcounter);
     array<byte> tag = new(16); /* gcmTagSize */
-    gcmAuthGeneric(tag[..], ᏑH, ᏑtagMask, @out[..(int)(len(plaintext))], additionalData);
-    copy(@out[(int)(len(plaintext))..], tag[..]);
+    gcmAuthGeneric(tag[..], ᏑH, ᏑtagMask, @out.slice(0, len(plaintext)), additionalData);
+    copy(@out.slice(len(plaintext)), tag[..]);
 }
 
 internal static error openGeneric(slice<byte> @out, ж<GCM> Ꮡg, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
@@ -33,11 +33,11 @@ internal static error openGeneric(slice<byte> @out, ж<GCM> Ꮡg, slice<byte> no
     aes.EncryptBlockInternal(Ꮡg.of(GCM.Ꮡcipher), H[..], H[..]);
     deriveCounterGeneric(ᏑH, Ꮡcounter, nonce);
     gcmCounterCryptGeneric(Ꮡg.of(GCM.Ꮡcipher), tagMask[..], tagMask[..], Ꮡcounter);
-    var tag = ciphertext[(int)(len(ciphertext) - g.tagSize)..];
-    ciphertext = ciphertext[..(int)(len(ciphertext) - g.tagSize)];
+    var tag = ciphertext.slice(len(ciphertext) - g.tagSize);
+    ciphertext = ciphertext.slice(0, len(ciphertext) - g.tagSize);
     array<byte> expectedTag = new(16); /* gcmTagSize */
     gcmAuthGeneric(expectedTag[..], ᏑH, ᏑtagMask, ciphertext, additionalData);
-    if (subtle.ConstantTimeCompare(expectedTag[..(int)(g.tagSize)], tag) != 1) {
+    if (subtle.ConstantTimeCompare(expectedTag.slice(0, g.tagSize), tag) != 1) {
         return errOpen;
     }
     gcmCounterCryptGeneric(Ꮡg.of(GCM.Ꮡcipher), @out, ciphertext, Ꮡcounter);

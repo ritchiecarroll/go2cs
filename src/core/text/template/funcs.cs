@@ -747,11 +747,11 @@ public static void HTMLEscape(io.Writer w, slice<byte> b) {
             break;
         }}
 
-        w.Write(b[(int)(last)..(int)(i)]);
+        w.Write(b.slice(last, i));
         w.Write(html);
         last = i + 1;
     }
-    w.Write(b[(int)(last)..]);
+    w.Write(b.slice(last));
 }
 
 // HTMLEscapeString returns the escaped HTML equivalent of the plain text data s.
@@ -793,7 +793,7 @@ public static void JSEscape(io.Writer w, slice<byte> b) {
             // fast path: nothing to do
             continue;
         }
-        w.Write(b[(int)(last)..(int)(i)]);
+        w.Write(b.slice(last, i));
         if (c < utf8.RuneSelf){
             // Quotes, slashes and angle brackets get quoted.
             // Control characters get written as \u00XX.
@@ -829,16 +829,16 @@ public static void JSEscape(io.Writer w, slice<byte> b) {
             default: {
                 w.Write(jsLowUni);
                 var (t, bΔ2) = ((byte)((c >> (int)(4))), (byte)(c & 0x0f));
-                w.Write(hex[(int)(t)..(int)((byte)(t + 1))]);
-                w.Write(hex[(int)(bΔ2)..(int)((byte)(bΔ2 + 1))]);
+                w.Write(hex.slice(t, (byte)(t + 1)));
+                w.Write(hex.slice(bΔ2, (byte)(bΔ2 + 1)));
                 break;
             }}
 
         } else {
             // Unicode rune.
-            var (r, size) = utf8.DecodeRune(b[(int)(i)..]);
+            var (r, size) = utf8.DecodeRune(b.slice(i));
             if (unicode.IsPrint(r)){
-                w.Write(b[(int)(i)..(int)(i + size)]);
+                w.Write(b.slice(i, i + size));
             } else {
                 fmt.Fprintf(w, "\\u%04X"u8, r);
             }
@@ -846,7 +846,7 @@ public static void JSEscape(io.Writer w, slice<byte> b) {
         }
         last = i + 1;
     }
-    w.Write(b[(int)(last)..]);
+    w.Write(b.slice(last));
 }
 
 // JSEscapeString returns the escaped JavaScript equivalent of the plain text data s.

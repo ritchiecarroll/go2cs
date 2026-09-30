@@ -179,8 +179,8 @@ public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) {
 [GoRecv] public static slice<byte> AppendEncode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
     nint n = enc.EncodedLen(len(src));
     dst = slices.Grow<slice<byte>, byte>(dst, n);
-    enc.Encode(dst[(int)(len(dst))..][..(int)(n)], src);
-    return dst[..(int)(len(dst) + n)];
+    enc.Encode(dst.slice(len(dst)).slice(0, n), src);
+    return dst.slice(0, len(dst) + n);
 }
 
 // EncodeToString returns the base32 encoding of src.
@@ -214,7 +214,7 @@ public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) {
             e.nbuf++;
         }
         n += i;
-        p = p[(int)(i)..];
+        p = p.slice(i);
         if (e.nbuf < 5) {
             return (n, err);
         }
@@ -233,14 +233,14 @@ public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) {
             nn = len(p);
             nn -= nn % 5;
         }
-        e.enc.Encode(e.@out[0..], p[0..(int)(nn)]);
+        e.enc.Encode(e.@out[0..], p.slice(0, nn));
         {
-            (_, e.err) = e.w.Write(e.@out[0..(int)(nn / 5 * 8)]); if (e.err != default!) {
+            (_, e.err) = e.w.Write(e.@out.slice(0, nn / 5 * 8)); if (e.err != default!) {
                 return (n, e.err);
             }
         }
         n += nn;
-        p = p[(int)(nn)..];
+        p = p.slice(nn);
     }
     // Trailing fringe.
     copy(e.buf[..], p);
@@ -254,10 +254,10 @@ public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) {
 [GoRecv] internal static error Close(this ref encoder e) {
     // If there's anything left in the buffer, flush it out
     if (e.err == default! && e.nbuf > 0) {
-        e.enc.Encode(e.@out[0..], e.buf[0..(int)(e.nbuf)]);
+        e.enc.Encode(e.@out[0..], e.buf.slice(0, e.nbuf));
         nint encodedLen = e.enc.EncodedLen(e.nbuf);
         e.nbuf = 0;
-        (_, e.err) = e.w.Write(e.@out[0..(int)(encodedLen)]);
+        (_, e.err) = e.w.Write(e.@out.slice(0, encodedLen));
     }
     return e.err;
 }
@@ -392,7 +392,7 @@ public static @string Error(this CorruptInputError e) {
 
     var buf = new slice<byte>(len(src));
     nint l = stripNewlines(buf, src);
-    (n, _, err) = enc.decode(dst, buf[..(int)(l)]);
+    (n, _, err) = enc.decode(dst, buf.slice(0, l));
     return (n, err);
 }
 
@@ -408,8 +408,8 @@ public static @string Error(this CorruptInputError e) {
     }
     n = decodedLen(n, NoPadding);
     dst = slices.Grow<slice<byte>, byte>(dst, n);
-    (n, var err) = enc.Decode(dst[(int)(len(dst))..][..(int)(n)], src);
-    return (dst[..(int)(len(dst) + n)], err);
+    (n, var err) = enc.Decode(dst.slice(len(dst)).slice(0, n), src);
+    return (dst.slice(0, len(dst) + n), err);
 }
 
 // DecodeString returns the bytes represented by the base32 string s.
@@ -418,8 +418,8 @@ public static @string Error(this CorruptInputError e) {
 [GoRecv] public static (slice<byte>, error) DecodeString(this ref Encoding enc, @string s) {
     var buf = slice<byte>(s);
     nint l = stripNewlines(buf, buf);
-    var (n, _, err) = enc.decode(buf, buf[..(int)(l)]);
-    return (buf[..(int)(n)], err);
+    var (n, _, err) = enc.decode(buf, buf.slice(0, l));
+    return (buf.slice(0, n), err);
 }
 
 [GoType] partial struct decoder {
@@ -439,7 +439,7 @@ internal static (nint n, error err) readEncodedData(io.Reader r, slice<byte> buf
 
     while (n < min && err == default!) {
         nint nn = default!;
-        (nn, err) = r.Read(buf[(int)(n)..]);
+        (nn, err) = r.Read(buf.slice(n));
         n += nn;
     }
     // data was read, less than min bytes could be read
@@ -462,7 +462,7 @@ internal static (nint n, error err) readEncodedData(io.Reader r, slice<byte> buf
     // Use leftover decoded output from last read.
     if (len(d.@out) > 0) {
         n = copy(p, d.@out);
-        d.@out = d.@out[(int)(n)..];
+        d.@out = d.@out.slice(n);
         if (len(d.@out) == 0) {
             return (n, d.err);
         }
@@ -489,7 +489,7 @@ internal static (nint n, error err) readEncodedData(io.Reader r, slice<byte> buf
         min = 8 - d.nbuf;
         expectsPadding = true;
     }
-    (nn, d.err) = readEncodedData(d.r, d.buf[(int)(d.nbuf)..(int)(nn)], min, expectsPadding);
+    (nn, d.err) = readEncodedData(d.r, d.buf.slice(d.nbuf, nn), min, expectsPadding);
     d.nbuf += nn;
     if (d.nbuf < min) {
         return (0, d.err);
@@ -506,12 +506,12 @@ internal static (nint n, error err) readEncodedData(io.Reader r, slice<byte> buf
     }
     nint nw = d.enc.DecodedLen(d.nbuf);
     if (nw > len(p)){
-        (nw, d.end, err) = d.enc.decode(d.outbuf[0..], d.buf[0..(int)(nr)]);
-        d.@out = d.outbuf[0..(int)(nw)];
+        (nw, d.end, err) = d.enc.decode(d.outbuf[0..], d.buf.slice(0, nr));
+        d.@out = d.outbuf.slice(0, nw);
         n = copy(p, d.@out);
-        d.@out = d.@out[(int)(n)..];
+        d.@out = d.@out.slice(n);
     } else {
-        (n, d.end, err) = d.enc.decode(p, d.buf[0..(int)(nr)]);
+        (n, d.end, err) = d.enc.decode(p, d.buf.slice(0, nr));
     }
     d.nbuf -= nr;
     for (nint i = 0; i < d.nbuf; i++) {
@@ -551,7 +551,7 @@ internal static nint stripNewlines(slice<byte> dst, slice<byte> src) {
 [GoRecv] internal static (nint, error) Read(this ref newlineFilteringReader r, slice<byte> p) {
     var (n, err) = r.wrapped.Read(p);
     while (n > 0) {
-        var s = p[0..(int)(n)];
+        var s = p.slice(0, n);
         nint offset = stripNewlines(s, s);
         if (err != default! || offset > 0) {
             return (offset, err);

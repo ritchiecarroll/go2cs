@@ -19,7 +19,7 @@ internal static void writeWithPadding(ж<poly1305.MAC> Ꮡp, slice<byte> b) {
         nint rem = len(b) % 16; if (rem != 0) {
             array<byte> buf = new(16);
             nint padLen = 16 - rem;
-            Ꮡp.Write(buf[..(int)(padLen)]);
+            Ꮡp.Write(buf.slice(0, padLen));
         }
     }
 }
@@ -32,7 +32,7 @@ internal static void writeUint64(ж<poly1305.MAC> Ꮡp, nint n) {
 
 [GoRecv] internal static slice<byte> sealGeneric(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     var (ret, @out) = sliceForAppend(dst, len(plaintext) + (nint)poly1305.TagSize);
-    var (ciphertext, tag) = (@out[..(int)(len(plaintext))], @out[(int)(len(plaintext))..]);
+    var (ciphertext, tag) = (@out.slice(0, len(plaintext)), @out.slice(len(plaintext)));
     if (alias.InexactOverlap(@out, plaintext)) {
         throw panic("chacha20poly1305: invalid buffer overlap");
     }
@@ -51,8 +51,8 @@ internal static void writeUint64(ж<poly1305.MAC> Ꮡp, nint n) {
 }
 
 [GoRecv] internal static (slice<byte>, error) openGeneric(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
-    var tag = ciphertext[(int)(len(ciphertext) - 16)..];
-    ciphertext = ciphertext[..(int)(len(ciphertext) - 16)];
+    var tag = ciphertext.slice(len(ciphertext) - 16);
+    ciphertext = ciphertext.slice(0, len(ciphertext) - 16);
     ref var polyKey = ref heap(new array<byte>(32), out var ᏑpolyKey);
     var (s, _) = chacha20.NewUnauthenticatedCipher(c.key[..], nonce);
     s.XORKeyStream(polyKey[..], polyKey[..]);

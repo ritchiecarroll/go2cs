@@ -171,7 +171,7 @@ public static (nint n, error err) ReadAt(this ж<File> Ꮡf, slice<byte> b, int6
             break;
         }
         n += m;
-        b = b[(int)(m)..];
+        b = b.slice(m);
         off += (int64)m;
     }
     return (n, err);
@@ -277,7 +277,7 @@ public static (nint n, error err) WriteAt(this ж<File> Ꮡf, slice<byte> b, int
             break;
         }
         n += m;
-        b = b[(int)(m)..];
+        b = b.slice(m);
         off += (int64)m;
     }
     return (n, err);
@@ -937,8 +937,8 @@ internal static (slice<byte>, error) readFileContents(ж<File> Ꮡf) {
     }
     var data = new slice<byte>(0, size);
     while (ᐧ) {
-        var (n, err) = Ꮡf.Read(data[(int)(len(data))..(int)(cap(data))]);
-        data = data[..(int)(len(data) + n)];
+        var (n, err) = Ꮡf.Read(data.slice(len(data), cap(data)));
+        data = data.slice(0, len(data) + n);
         if (err != default!) {
             if (AreEqual(err, Δio.EOF)) {
                 err = default!;
@@ -946,8 +946,8 @@ internal static (slice<byte>, error) readFileContents(ж<File> Ꮡf) {
             return (data, err);
         }
         if (len(data) >= cap(data)) {
-            var d = append(data[..(int)(cap(data))], (byte)(0));
-            data = d[..(int)(len(data))];
+            var d = append(data.slice(0, cap(data)), (byte)(0));
+            data = d.slice(0, len(data));
         }
     }
 }

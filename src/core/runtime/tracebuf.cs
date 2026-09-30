@@ -271,7 +271,7 @@ internal static traceWriter refill(this traceWriter w) {
 //go:nosplit
 [GoRecv] internal static void varint(this ref traceBuf buf, uint64 v) {
     nint pos = buf.pos;
-    var arr = buf.arr[(int)(pos)..(int)(pos + (nint)traceBytesPerNumber)];
+    var arr = buf.arr.slice(pos, pos + (nint)traceBytesPerNumber);
     foreach (var (i, _) in arr) {
         if (v < 0x80) {
             pos += i + 1;
@@ -305,7 +305,7 @@ internal static traceWriter refill(this traceWriter w) {
 //
 //go:nosplit
 [GoRecv] internal static void stringData(this ref traceBuf buf, @string s) {
-    buf.pos += copy(buf.arr[(int)(buf.pos)..], s);
+    buf.pos += copy(buf.arr.slice(buf.pos), s);
 }
 
 // nosplit because it's part of writing an event for an M, which must not

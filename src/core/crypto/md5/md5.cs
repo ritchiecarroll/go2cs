@@ -64,7 +64,7 @@ internal const nint marshaledSize = /* len(magic) + 4*4 + BlockSize + 8 */ 92;
     b = byteorder.BEAppendUint32(b, d.s[1]);
     b = byteorder.BEAppendUint32(b, d.s[2]);
     b = byteorder.BEAppendUint32(b, d.s[3]);
-    b = appendꓸꓸꓸ(b, d.x[..(int)(d.nx)]);
+    b = appendꓸꓸꓸ(b, d.x.slice(0, d.nx));
     b = appendꓸꓸꓸ(b, makeꓸꓸꓸ<byte>(len(d.x) - d.nx));
     b = byteorder.BEAppendUint64(b, d.len);
     return (b, default!);
@@ -86,7 +86,7 @@ internal static readonly @string cryptoMd5InvalidHashˢ2 = "crypto/md5: invalid 
     (b, d.s[1]) = consumeUint32(b);
     (b, d.s[2]) = consumeUint32(b);
     (b, d.s[3]) = consumeUint32(b);
-    b = b[(int)(copy(d.x[..], b))..];
+    b = b.slice(copy(d.x[..], b));
     (b, d.len) = consumeUint64(b);
     d.nx = (nint)(d.len % (uint64)ΔBlockSize);
     return default!;
@@ -135,7 +135,7 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
     nn = len(p);
     d.len += (uint64)nn;
     if (d.nx > 0) {
-        nint n = copy(d.x[(int)(d.nx)..], p);
+        nint n = copy(d.x.slice(d.nx), p);
         d.nx += n;
         if (d.nx == ΔBlockSize) {
             if (haveAsm){
@@ -145,16 +145,16 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
             }
             d.nx = 0;
         }
-        p = p[(int)(n)..];
+        p = p.slice(n);
     }
     if (len(p) >= ΔBlockSize) {
         nint n = (nint)(len(p) & ~(nint)(ΔBlockSize - 1));
         if (haveAsm){
-            block(ref (Ꮡd).DerefOrNull(), p[..(int)(n)]);
+            block(ref (Ꮡd).DerefOrNull(), p.slice(0, n));
         } else {
-            blockGeneric(ref (Ꮡd).DerefOrNull(), p[..(int)(n)]);
+            blockGeneric(ref (Ꮡd).DerefOrNull(), p.slice(0, n));
         }
-        p = p[(int)(n)..];
+        p = p.slice(n);
     }
     if (len(p) > 0) {
         d.nx = copy(d.x[..], p);
@@ -183,8 +183,8 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
     // 1 byte end marker :: 0-63 padding bytes :: 8 byte length
     var tmp = new byte[]{0x80}.array(72);
     var pad = (55 - d.len) % 64; // calculate number of padding bytes
-    byteorder.LEPutUint64(tmp[(int)(1 + pad)..], (d.len << (int)(3))); // append length in bits
-    Ꮡd.Write(tmp[..(int)(1 + pad + 8)]);
+    byteorder.LEPutUint64(tmp.slice((nint)(1 + pad)), (d.len << (int)(3))); // append length in bits
+    Ꮡd.Write(tmp.slice(0, (nint)(1 + pad + 8)));
     // The previous write ensures that a whole number of
     // blocks (i.e. a multiple of 64 bytes) have been hashed.
     if (d.nx != 0) {

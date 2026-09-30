@@ -81,7 +81,7 @@ internal static (@string, error) elfBuildID(@string @file) {
 
         for (nint i = 0; i < shnum; i++) {
             {
-                var (_, errΔ2) = f.ReadAt(buf[..(int)(shentsize)], shoff + (int64)i * shentsize); if (errΔ2 != default!) {
+                var (_, errΔ2) = f.ReadAt(buf.slice(0, (nint)(shentsize)), shoff + (int64)i * shentsize); if (errΔ2 != default!) {
                     return ("", errΔ2);
                 }
             }
@@ -123,11 +123,11 @@ internal static (@string, error) elfBuildID(@string @file) {
                     return ("", errBadELF);
                 }
                 {
-                    var (_, errΔ4) = f.ReadAt(buf[..(int)(descSize)], descOff); if (errΔ4 != default!) {
+                    var (_, errΔ4) = f.ReadAt(buf.slice(0, descSize), descOff); if (errΔ4 != default!) {
                         return ("", errΔ4);
                     }
                 }
-                return (fmt.Sprintf("%x"u8, buf[..(int)(descSize)]), default!);
+                return (fmt.Sprintf("%x"u8, buf.slice(0, descSize)), default!);
             }
         }
         return ("", errNoBuildID);

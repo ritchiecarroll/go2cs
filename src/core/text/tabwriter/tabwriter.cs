@@ -114,7 +114,7 @@ partial class tabwriter_package {
     // to re-use an existing []cell.
     {
         nint n = len(b.lines) + 1; if (n <= cap(b.lines)){
-            b.lines = b.lines[..(int)(n)];
+            b.lines = b.lines.slice(0, n);
             b.lines[n - 1] = b.lines[n - 1][..0];
         } else {
             b.lines = builtin.append(b.lines, (slice<cell>)(default!));
@@ -225,7 +225,7 @@ public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwi
     foreach (var (i, line) in b.lines) {
         print((@string)"("u8, i, (@string)") "u8);
         foreach (var (_, c) in line) {
-            print((@string)"["u8, ((@string)(b.buf[(int)(pos)..(int)(pos + c.size)])), (@string)"]"u8);
+            print((@string)"["u8, ((@string)(b.buf.slice(pos, pos + c.size))), (@string)"]"u8);
             pos += c.size;
         }
         print((@string)"\n"u8);
@@ -254,7 +254,7 @@ public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwi
         b.write0(src);
         n -= len(src);
     }
-    b.write0(src[0..(int)(n)]);
+    b.write0(src.slice(0, n));
 }
 
 internal static slice<byte> newline = new byte[]{(rune)'\n'}.slice();
@@ -304,7 +304,7 @@ internal static slice<byte> vbar = new byte[]{(rune)'|'}.slice();
                 useTabs = false;
                 if ((nuint)(b.flags & AlignRight) == 0){
                     // align left
-                    b.write0(b.buf[(int)(pos)..(int)(pos + c.size)]);
+                    b.write0(b.buf.slice(pos, pos + c.size));
                     pos += c.size;
                     if (j < len(b.widths)) {
                         b.writePadding(c.width, b.widths[j], false);
@@ -314,7 +314,7 @@ internal static slice<byte> vbar = new byte[]{(rune)'|'}.slice();
                     if (j < len(b.widths)) {
                         b.writePadding(c.width, b.widths[j], false);
                     }
-                    b.write0(b.buf[(int)(pos)..(int)(pos + c.size)]);
+                    b.write0(b.buf.slice(pos, pos + c.size));
                     pos += c.size;
                 }
             }
@@ -322,7 +322,7 @@ internal static slice<byte> vbar = new byte[]{(rune)'|'}.slice();
         if (i + 1 == len(b.lines)){
             // last buffered line - we don't have a newline, so just write
             // any outstanding buffered data
-            b.write0(b.buf[(int)(pos)..(int)(pos + b.cell.size)]);
+            b.write0(b.buf.slice(pos, pos + b.cell.size));
             pos += b.cell.size;
         } else {
             // not the last line - write newline
@@ -385,7 +385,7 @@ internal static slice<byte> vbar = new byte[]{(rune)'|'}.slice();
         // (we know the widths of this column and all columns to the left)
         b.widths = builtin.append(b.widths, width); // push width
         pos = b.format(pos, line0, @this);
-        b.widths = b.widths[0..(int)(len(b.widths) - 1)]; // pop width
+        b.widths = b.widths.slice(0, len(b.widths) - 1); // pop width
         line0 = @this;
     }
     // print unprinted lines until end
@@ -400,7 +400,7 @@ internal static slice<byte> vbar = new byte[]{(rune)'|'}.slice();
 
 // Update the cell width.
 [GoRecv] internal static void updateWidth(this ref Writer b) {
-    b.cell.width += utf8.RuneCount(b.buf[(int)(b.pos)..]);
+    b.cell.width += utf8.RuneCount(b.buf.slice(b.pos));
     b.pos = len(b.buf);
 }
 
@@ -556,7 +556,7 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
                 // outside escape
                 var exprᴛ1 = ch;
                 if (exprᴛ1 is (rune)'\t' or (rune)'\v' or (rune)'\n' or (rune)'\f') {
-                    b.append(buf[(int)(n)..(int)(i)]);
+                    b.append(buf.slice(n, i));
                     b.updateWidth();
                     n = i + 1; // ch consumed
                     nint ncells = b.terminateCell(ch == (rune)'\t');
@@ -579,7 +579,7 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
                     }
                 }
                 else if (exprᴛ1 == Escape) {
-                    b.append(buf[(int)(n)..(int)(i)]);
+                    b.append(buf.slice(n, i));
                     b.updateWidth();
                     n = i;
                     if ((nuint)(b.flags & StripEscape) != 0) {
@@ -592,7 +592,7 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
                     if ((nuint)(b.flags & FilterHTML) != 0) {
                         // possibly an html tag/entity
                         // begin of tag/entity
-                        b.append(buf[(int)(n)..(int)(i)]);
+                        b.append(buf.slice(n, i));
                         b.updateWidth();
                         n = i;
                         b.startEscape(ch);
@@ -607,14 +607,14 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
                     if (ch == Escape && (nuint)(b.flags & StripEscape) != 0) {
                         j = i; // strip Escape
                     }
-                    b.append(buf[(int)(n)..(int)(j)]);
+                    b.append(buf.slice(n, j));
                     n = i + 1; // ch consumed
                     b.endEscape();
                 }
             }
         }
         // append leftover text
-        b.append(buf[(int)(n)..]);
+        b.append(buf.slice(n));
         n = len(buf);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

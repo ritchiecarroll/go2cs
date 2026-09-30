@@ -113,7 +113,7 @@ internal static slice<ast.Stmt> trimTrailingEmptyStmts(slice<ast.Stmt> list) {
     for (nint i = len(list); i > 0; i--) {
         {
             var (_, ok) = list[i - 1]._<ж<ast.EmptyStmt>>(ᐧ); if (!ok) {
-                return list[..(int)(i)];
+                return list.slice(0, i);
             }
         }
     }

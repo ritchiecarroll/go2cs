@@ -57,7 +57,7 @@ internal static void unconnectedRoundTrip() {
             fmt.Println(ipv4ReadFromFailedˢ);
             return;
         }
-        fmt.Printf("ipv4: bytesMatch=%v\n"u8, ((sstring)(buf[..(int)(n)])) == ((sstring)payload));
+        fmt.Printf("ipv4: bytesMatch=%v\n"u8, ((sstring)(buf.slice(0, n))) == ((sstring)payload));
         fmt.Printf("ipv4: senderAddrMatchesClient=%v\n"u8, from.String() == client.LocalAddr().String());
         {
             (_, err) = server.WriteTo(slice<byte>("reply"u8), from); if (err != default!) {
@@ -72,7 +72,7 @@ internal static void unconnectedRoundTrip() {
             return;
         }
         fmt.Printf("ipv4: replyMatches=%v replyFromServer=%v\n"u8,
-            ((sstring)(buf[..(int)(rn)])) == "reply"u8, rfrom.String() == server.LocalAddr().String());
+            ((sstring)(buf.slice(0, rn))) == "reply"u8, rfrom.String() == server.LocalAddr().String());
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -154,7 +154,7 @@ internal static void connectedRoundTrip() {
             return;
         }
         fmt.Printf("connected: bytesMatch=%v senderMatchesLocal=%v\n"u8,
-            ((sstring)(buf[..(int)(n)])) == "connected-payload"u8, from.String() == conn.LocalAddr().String());
+            ((sstring)(buf.slice(0, n))) == "connected-payload"u8, from.String() == conn.LocalAddr().String());
         {
             (_, err) = server.WriteTo(slice<byte>("connected-reply"u8), from); if (err != default!) {
                 fmt.Println(connectedReplyFailedˢ);
@@ -163,7 +163,7 @@ internal static void connectedRoundTrip() {
         }
         conn.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
         var (rn, rerr) = conn.Read(buf);
-        fmt.Printf("connected: replyMatches=%v\n"u8, rerr == default! && ((sstring)(buf[..(int)(rn)])) == "connected-reply"u8);
+        fmt.Printf("connected: replyMatches=%v\n"u8, rerr == default! && ((sstring)(buf.slice(0, rn))) == "connected-reply"u8);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -208,7 +208,7 @@ internal static void ipv6RoundTrip() {
             return;
         }
         fmt.Printf("ipv6: bytesMatch=%v senderAddrMatchesClient=%v\n"u8,
-            ((sstring)(buf[..(int)(n)])) == "v6-payload"u8, from.String() == client.LocalAddr().String());
+            ((sstring)(buf.slice(0, n))) == "v6-payload"u8, from.String() == client.LocalAddr().String());
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

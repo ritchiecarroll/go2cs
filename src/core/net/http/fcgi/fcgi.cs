@@ -146,7 +146,7 @@ internal static error /*err*/ read(this ж<record> Ꮡrec, io.Reader r) {
     }
     nint n = (nint)rec.h.ContentLength + (nint)rec.h.PaddingLength;
     {
-        (_, err) = io.ReadFull(r, rec.buf[..(int)(n)]); if (err != default!) {
+        (_, err) = io.ReadFull(r, rec.buf.slice(0, n)); if (err != default!) {
             return err;
         }
     }
@@ -154,7 +154,7 @@ internal static error /*err*/ read(this ж<record> Ꮡrec, io.Reader r) {
 }
 
 [GoRecv] internal static slice<byte> content(this ref record r) {
-    return r.buf[..(int)(r.h.ContentLength)];
+    return r.buf.slice(0, r.h.ContentLength);
 }
 
 // writeRecord writes and sends a single record.
@@ -179,7 +179,7 @@ internal static error writeRecord(this ж<conn> Ꮡc, recType recType, uint16 re
             }
         }
         {
-            var (_, errΔ3) = c.buf.Write(pad[..(int)(c.h.PaddingLength)]); if (errΔ3 != default!) {
+            var (_, errΔ3) = c.buf.Write(pad.slice(0, c.h.PaddingLength)); if (errΔ3 != default!) {
                 return errΔ3;
             }
         }
@@ -202,9 +202,9 @@ internal static error writePairs(this ж<conn> Ꮡc, recType recType, uint16 req
     var b = new slice<byte>(8);
     foreach (var (k, v) in pairs) {
         nint n = encodeSize(b, (uint32)len(k));
-        n += encodeSize(b[(int)(n)..], (uint32)len(v));
+        n += encodeSize(b.slice(n), (uint32)len(v));
         {
-            var (_, err) = w.Value.Writer.Value.Write(b[..(int)(n)]); if (err != default!) {
+            var (_, err) = w.Value.Writer.Value.Write(b.slice(0, n)); if (err != default!) {
                 return err;
             }
         }
@@ -244,7 +244,7 @@ internal static @string readString(slice<byte> s, uint32 size) {
     if (size > (uint32)len(s)) {
         return ""u8;
     }
-    return ((@string)(s[..(int)(size)]));
+    return ((@string)(s.slice(0, (nint)(size))));
 }
 
 internal static nint encodeSize(slice<byte> b, uint32 size) {
@@ -296,12 +296,12 @@ internal static ж<bufWriter> newWriter(ж<conn> Ꮡc, recType recType, uint16 r
             n = maxWrite;
         }
         {
-            var err = w.c.writeRecord(w.recType, w.reqId, p[..(int)(n)]); if (err != default!) {
+            var err = w.c.writeRecord(w.recType, w.reqId, p.slice(0, n)); if (err != default!) {
                 return (nn, err);
             }
         }
         nn += n;
-        p = p[(int)(n)..];
+        p = p.slice(n);
     }
     return (nn, default!);
 }

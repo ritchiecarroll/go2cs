@@ -26,7 +26,7 @@ public static (@string, error) Getwd() {
     if (n < 1) {
         return ("", EINVAL);
     }
-    return (((@string)(buf[..(int)(n)])), default!);
+    return (((@string)(buf.slice(0, n))), default!);
 }
 
 /*
@@ -55,7 +55,7 @@ public static (slice<nint> gids, error err) Getgroups() {
         return (default!, err);
     }
     gids = new slice<nint>(n);
-    foreach (var (i, v) in a[0..(int)(n)]) {
+    foreach (var (i, v) in a.slice(0, n)) {
         gids[i] = (nint)(uint32)v;
     }
     return (gids, err);
@@ -343,7 +343,7 @@ public static (@string value, error err) Sysctl(@string name) {
     if (n > 0 && buf[n - 1] == (rune)'\x00') {
         n--;
     }
-    return (((@string)(buf[0..(int)(n)])), default!);
+    return (((@string)(buf.slice(0, (nint)(n)))), default!);
 }
 
 public static (uint32 value, error err) SysctlUint32(@string name) {

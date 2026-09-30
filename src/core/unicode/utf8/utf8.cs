@@ -287,7 +287,7 @@ public static (rune r, nint size) DecodeLastRune(slice<byte> p) {
     if (start < 0) {
         start = 0;
     }
-    (r, size) = DecodeRune(p[(int)(start)..(int)(end)]);
+    (r, size) = DecodeRune(p.slice(start, end));
     if (start + size != end) {
         return (RuneError, 1);
     }
@@ -330,7 +330,7 @@ public static (rune r, nint size) DecodeLastRuneInString(@string s) {
     if (start < 0) {
         start = 0;
     }
-    (r, size) = DecodeRuneInString(s[(int)(start)..(int)(end)]);
+    (r, size) = DecodeRuneInString(s.slice(start, end));
     if (start + size != end) {
         return (RuneError, 1);
     }
@@ -453,7 +453,7 @@ public static nint RuneCount(slice<byte> p) {
         {
             var c = p[n]; if (c >= RuneSelf) {
                 // non-ASCII slow path
-                return n + RuneCountInString(((@string)(p[(int)(n)..])));
+                return n + RuneCountInString(((@string)(p.slice(n))));
             }
         }
     }
@@ -482,7 +482,7 @@ public static bool Valid(slice<byte> p) {
     // This optimization avoids the need to recompute the capacity
     // when generating code for p[8:], bringing it to parity with
     // ValidString, which was 20% faster on long ASCII strings.
-    p = p.slice(-1, len(p), len(p));
+    p = p.slice(0, len(p), len(p));
     // Fast path. Check for and skip 8 bytes of ASCII characters per iteration.
     while (len(p) >= 8) {
         // Combining two 32 bit loads allows the same code to be used

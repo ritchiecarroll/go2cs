@@ -22,7 +22,7 @@ public static (nint n, error err) Read(this StreamReader r, slice<byte> dst) {
     error err = default!;
 
     (n, err) = r.R.Read(dst);
-    r.S.XORKeyStream(dst[..(int)(n)], dst[..(int)(n)]);
+    r.S.XORKeyStream(dst.slice(0, n), dst.slice(0, n));
     return (n, err);
 }
 

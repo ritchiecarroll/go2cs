@@ -80,7 +80,7 @@ public static slice<byte> Seal(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> ds
     if (len(nonce) != gcmStandardNonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }
-    var counter = byteorder.BEUint64(nonce[(int)(len(nonce) - 8)..]);
+    var counter = byteorder.BEUint64(nonce.slice(len(nonce) - 8));
     if (!g.ready) {
         // The first invocation sets the fixed name encoding and start counter.
         g.ready = true;
@@ -140,7 +140,7 @@ public static slice<byte> Seal(this ж<GCMForTLS12> Ꮡg, slice<byte> dst, slice
     if (len(nonce) != gcmStandardNonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }
-    var counter = byteorder.BEUint64(nonce[(int)(len(nonce) - 8)..]);
+    var counter = byteorder.BEUint64(nonce.slice(len(nonce) - 8));
     // Ensure the counter is monotonically increasing.
     if (counter == math.MaxUint64) {
         throw panic("crypto/cipher: counter wrapped");
@@ -189,7 +189,7 @@ public static slice<byte> Seal(this ж<GCMForTLS13> Ꮡg, slice<byte> dst, slice
     if (len(nonce) != gcmStandardNonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }
-    var counter = byteorder.BEUint64(nonce[(int)(len(nonce) - 8)..]);
+    var counter = byteorder.BEUint64(nonce.slice(len(nonce) - 8));
     if (!g.ready) {
         // In the first call, the counter is zero, so we learn the XOR mask.
         g.ready = true;
@@ -246,7 +246,7 @@ public static slice<byte> Seal(this ж<GCMForSSH> Ꮡg, slice<byte> dst, slice<b
     if (len(nonce) != gcmStandardNonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }
-    var counter = byteorder.BEUint64(nonce[(int)(len(nonce) - 8)..]);
+    var counter = byteorder.BEUint64(nonce.slice(len(nonce) - 8));
     if (!g.ready) {
         // In the first call we learn the start value.
         g.ready = true;

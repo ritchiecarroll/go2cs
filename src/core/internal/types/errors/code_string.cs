@@ -179,23 +179,23 @@ public static @string String(this Code i) {
     }
     case {} when 1 <= i && i <= 28: {
         i -= 1;
-        return _Code_name_1[(int)(_Code_index_1[i])..(int)(_Code_index_1[i + 1])];
+        return _Code_name_1.slice(_Code_index_1[i], _Code_index_1[i + 1]);
     }
     case {} when 30 <= i && i <= 79: {
         i -= 30;
-        return _Code_name_2[(int)(_Code_index_2[i])..(int)(_Code_index_2[i + 1])];
+        return _Code_name_2.slice(_Code_index_2[i], _Code_index_2[i + 1]);
     }
     case {} when 81 <= i && i <= 106: {
         i -= 81;
-        return _Code_name_3[(int)(_Code_index_3[i])..(int)(_Code_index_3[i + 1])];
+        return _Code_name_3.slice(_Code_index_3[i], _Code_index_3[i + 1]);
     }
     case {} when 108 <= i && i <= 146: {
         i -= 108;
-        return _Code_name_4[(int)(_Code_index_4[i])..(int)(_Code_index_4[i + 1])];
+        return _Code_name_4.slice(_Code_index_4[i], _Code_index_4[i + 1]);
     }
     case {} when 148 <= i && i <= 151: {
         i -= 148;
-        return _Code_name_5[(int)(_Code_index_5[i])..(int)(_Code_index_5[i + 1])];
+        return _Code_name_5.slice(_Code_index_5[i], _Code_index_5[i + 1]);
     }
     default: {
         return "Code("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;

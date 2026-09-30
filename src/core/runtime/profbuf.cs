@@ -381,9 +381,9 @@ Read:
             var dst = b.overflowBuf;
             dst[0] = (uint64)(2 + b.hdrsize + 1);
             dst[1] = time;
-            builtin.clear(dst[2..(int)(2 + b.hdrsize)]);
+            builtin.clear(dst.slice(2, (nint)(2 + b.hdrsize)));
             dst[2 + b.hdrsize] = (uint64)count;
-            return (dst[..(int)(2 + b.hdrsize + 1)], overflowTag[..1], false);
+            return (dst.slice(0, (nint)(2 + b.hdrsize + 1)), overflowTag[..1], false);
         }
         if (Ꮡb.of(profBuf.Ꮡeof).Load() > 0) {
             // No data, no overflow, EOF set: done.
@@ -411,9 +411,9 @@ Read:
         noteclear(Ꮡb.of(profBuf.Ꮡwait));
         goto Read;
     }
-    data = b.data[(int)(br.dataCount() % (uint32)len(b.data))..];
+    data = b.data.slice((nint)(br.dataCount() % (uint32)len(b.data)));
     if (len(data) > numData){
-        data = data[..(int)(numData)];
+        data = data.slice(0, numData);
     } else {
         numData -= len(data); // available in case of wraparound
     }
@@ -423,16 +423,16 @@ Read:
         skip = len(data);
         data = b.data;
         if (len(data) > numData) {
-            data = data[..(int)(numData)];
+            data = data.slice(0, numData);
         }
     }
     nint ntag = countSub(bw.tagCount(), br.tagCount());
     if (ntag == 0) {
         @throw(runtimeMalformedProfBufˢ);
     }
-    tags = b.tags[(int)(br.tagCount() % (uint32)len(b.tags))..];
+    tags = b.tags.slice((nint)(br.tagCount() % (uint32)len(b.tags)));
     if (len(tags) > ntag) {
-        tags = tags[..(int)(ntag)];
+        tags = tags.slice(0, ntag);
     }
     // Count out whole data records until either data or tags is done.
     // They are always in sync in the buffer, but due to an end-of-slice
@@ -461,7 +461,7 @@ Read:
         // atomics to read those queue indices.
         raceacquire(@unsafe.Pointer.FromBox(ᏑlabelSync));
     }
-    return (data[..(int)(di)], tags[..(int)(ti)], false);
+    return (data.slice(0, di), tags.slice(0, ti), false);
 }
 
 } // end runtime_package

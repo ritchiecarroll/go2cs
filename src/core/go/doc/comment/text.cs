@@ -169,7 +169,7 @@ internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @s
             @out.WriteString(p.prefix);
             @out.WriteString(indent);
         }
-        foreach (var (j, w) in words[(int)(seq[i])..(int)(seq[i + 1])]) {
+        foreach (var (j, w) in words.slice(seq[i], seq[i + 1])) {
             if (j > 0) {
                 @out.WriteString(" "u8);
             }
@@ -336,7 +336,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
             d = d[1..]; // “Retire”
         }
         while (len(d) > 1 && bridge(d[len(d) - 2], d[len(d) - 1], m)) {
-            d = d[..(int)(len(d) - 1)]; // “Fire”
+            d = d.slice(0, len(d) - 1); // “Fire”
         }
         if (cmp(g(m, len(words)), g(d[len(d) - 1], len(words))) < 0) {
             d = append(d, m); // “Hire”

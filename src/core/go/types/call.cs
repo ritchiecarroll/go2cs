@@ -672,12 +672,12 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
         }
         // update result signature: instantiate if needed
         if (n > 0) {
-            rsig = Ꮡcheck.instantiateSignature(call.Pos(), call.Fun, Ꮡsig, targs[..(int)(n)], xlist);
+            rsig = Ꮡcheck.instantiateSignature(call.Pos(), call.Fun, Ꮡsig, targs.slice(0, n), xlist);
             // If the callee's parameter list was adjusted we need to update (instantiate)
             // it separately. Otherwise we can simply use the result signature's parameter
             // list.
             if (adjusted){
-                sigParams = Ꮡcheck.subst(call.Pos(), new TupleжΔType(sigParams), makeSubstMap(tparams[..(int)(n)], targs[..(int)(n)]), nil, check.context())._<ж<Tuple>>();
+                sigParams = Ꮡcheck.subst(call.Pos(), new TupleжΔType(sigParams), makeSubstMap(tparams.slice(0, n), targs.slice(0, n)), nil, check.context())._<ж<Tuple>>();
             } else {
                 sigParams = rsig.Value.@params;
             }
@@ -689,7 +689,7 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
             var asig = (~arg).typ._<ж<ΔSignature>>();
             nint k = j + asig.TypeParams().Len();
             // targs[j:k] are the inferred type arguments for asig
-            arg.Value.typ = new ΔSignatureжΔType(Ꮡcheck.instantiateSignature(call.Pos(), (~arg).expr, asig, targs[(int)(j)..(int)(k)], default!)); // TODO(gri) provide xlist if possible (partial instantiations)
+            arg.Value.typ = new ΔSignatureжΔType(Ꮡcheck.instantiateSignature(call.Pos(), (~arg).expr, asig, targs.slice(j, k), default!)); // TODO(gri) provide xlist if possible (partial instantiations)
             check.record(arg); // record here because we didn't use the usual expr evaluators
             j = k;
         }

@@ -108,7 +108,7 @@ internal static abiStepKind abiStepFloatReg => 4; // copy to/from FP register
     } else {
         e = a.valueStart[i + 1];
     }
-    return a.steps[(int)(s)..(int)(e)];
+    return a.steps.slice(s, e);
 }
 
 // addArg extends the abiSeq with a new Go value of type t.

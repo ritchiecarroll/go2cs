@@ -11,8 +11,10 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/constant"
 	"go/token"
 	"go/types"
+	"math"
 	"strings"
 )
 
@@ -72,6 +74,12 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 		// does. A 3-index slice cannot occur on a string-including union (Go forbids it on strings),
 		// so only the range forms take this route.
 		if typeParamIsStringByteUnion(tp) && !sliceExpr.Slice3 {
+			// A bound the Range cannot carry exactly takes IByteSeq's own slice members instead, which
+			// return TSelf too (see sliceBoundsNeedMethod).
+			if call, ok := v.sliceMethodCall(ident, sliceExpr); ok {
+				return call
+			}
+
 			var inner string
 
 			switch {
@@ -179,6 +187,17 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 		return ident + "[..]"
 	}
 
+	// A 2-index expression with a bound the Range cannot carry exactly calls golib's slice method, which
+	// checks the full value with Go's codes (S-c R1-A):
+	//      s[i:j] => s.slice(i, j)      s[:n] => s.slice(0, n)      str[i:] => str.slice(i)
+	// The receiver is exactly the expression the Range would have indexed (`(~p)`, a named array's `.Value`,
+	// a deref-aliased parameter), so every receiver the Range reached has the method.
+	if !sliceExpr.Slice3 {
+		if call, ok := v.sliceMethodCall(ident, sliceExpr); ok {
+			return call
+		}
+	}
+
 	// sliceExpr[Low:] => sliceExpr[Low..]
 	if sliceExpr.Low != nil && sliceExpr.High == nil && !sliceExpr.Slice3 {
 		return ident + "[" + v.getRangeIndexer(sliceExpr.Low) + "..]"
@@ -194,12 +213,14 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 		return ident + "[" + v.getRangeIndexer(sliceExpr.Low) + ".." + v.getRangeIndexer(sliceExpr.High) + "]"
 	}
 
-	// sliceExpr[:High:Max] => sliceExpr.slice(-1, High, Max). The golib `.slice(nint low, nint high,
-	// nint max)` method takes nint, so a High/Max bound of a wide integer (uintptr/uint/…) is cast to
-	// nint (CS1503 otherwise — runtime/mprof `stk[:b.nstk:b.nstk]` with a uintptr b.nstk); see
-	// castWideIntegerToNint for why nint and not int.
+	// sliceExpr[:High:Max] => sliceExpr.slice(0, High, Max). Go's omitted low IS 0, and golib's 3-index
+	// `.slice(nint low, nint high, nint max)` has no sentinel (S-c R1-A): the -1 this emitted before read
+	// as "omitted" only because the method it called treated a RUNTIME -1 the same way, which let
+	// `s[neg:2:5]` slice silently. The method takes nint, so a High/Max bound of a wide integer
+	// (uintptr/uint/…) is cast to nint (CS1503 otherwise — runtime/mprof `stk[:b.nstk:b.nstk]` with a
+	// uintptr b.nstk); see castWideIntegerToNint for why nint and not int.
 	if sliceExpr.Low == nil && sliceExpr.High != nil && sliceExpr.Slice3 {
-		return ident + ".slice(-1, " + v.castWideIntegerToNint(sliceExpr.High) + ", " + v.castWideIntegerToNint(sliceExpr.Max) + ")"
+		return ident + ".slice(0, " + v.castWideIntegerToNint(sliceExpr.High) + ", " + v.castWideIntegerToNint(sliceExpr.Max) + ")"
 	}
 
 	// sliceExpr[Low:High:Max] => sliceExpr.slice(Low, High, Max)
@@ -266,6 +287,63 @@ func (v *Visitor) withSliceElemDims(exprResult string, t types.Type) string {
 	}
 
 	return fmt.Sprintf("GoReflect.WithElemDims(%s, %s)", exprResult, strings.Join(values, ", "))
+}
+
+// sliceBoundsNeedMethod reports whether a 2-index slice expression must call golib's slice method rather
+// than index with a C# Range (S-c R1-A, docs/phase4/DESIGN-slice-bounds-r1a.md §5). A Range narrows each
+// bound with (int) before golib sees it and cannot carry a negative one, so a non-constant bound, or a
+// constant that does not fit int32, reaches Go's check only through the method. A constant within int32
+// survives the (int) exactly (Go rejects a negative constant bound at compile time), so such a site keeps
+// its Range, byte for byte.
+func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool {
+	for _, bound := range []ast.Expr{sliceExpr.Low, sliceExpr.High} {
+		if bound == nil {
+			continue
+		}
+
+		if _, fits := v.int32ConstantBound(bound); !fits {
+			return true
+		}
+	}
+
+	return false
+}
+
+// int32ConstantBound answers a slice bound's constant value and whether it is a constant that fits int32.
+func (v *Visitor) int32ConstantBound(bound ast.Expr) (int64, bool) {
+	tv, ok := v.info.Types[bound]
+
+	if !ok || tv.Value == nil {
+		return 0, false
+	}
+
+	value, exact := constant.Int64Val(constant.ToInt(tv.Value))
+
+	return value, exact && value >= math.MinInt32 && value <= math.MaxInt32
+}
+
+// sliceMethodCall renders a 2-index slice expression as golib's sentinel-free slice method when
+// sliceBoundsNeedMethod says so: `x.slice(lo)` for `x[lo:]`, `x.slice(lo, hi)` for `x[lo:hi]`, and
+// `x.slice(0, hi)` for `x[:hi]`, since Go's omitted low IS 0. Each bound is nint at its full value
+// (castWideIntegerToNint; ruling U1 takes an unsigned bound through (nint), so one at or above 2^63 panics
+// with a negative number in its text). A constant bound past int32 already renders as nint
+// (`unchecked((nint)4294967301L)`), which the method takes as it is; the Range could not (CS0029).
+func (v *Visitor) sliceMethodCall(ident string, sliceExpr *ast.SliceExpr) (string, bool) {
+	if sliceExpr.Slice3 || (sliceExpr.Low == nil && sliceExpr.High == nil) || !v.sliceBoundsNeedMethod(sliceExpr) {
+		return "", false
+	}
+
+	low := "0"
+
+	if sliceExpr.Low != nil {
+		low = v.castWideIntegerToNint(sliceExpr.Low)
+	}
+
+	if sliceExpr.High == nil {
+		return fmt.Sprintf("%s.slice(%s)", ident, low), true
+	}
+
+	return fmt.Sprintf("%s.slice(%s, %s)", ident, low, v.castWideIntegerToNint(sliceExpr.High)), true
 }
 
 func (v *Visitor) getRangeIndexer(expr ast.Expr) string {

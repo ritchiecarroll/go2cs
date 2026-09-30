@@ -202,8 +202,8 @@ internal static ж<nssConf> parseNSSConf(ж<Δfile> Ꮡf) {
             conf.Value.err = errors.New(noColonOnLineˢ);
             return conf;
         }
-        @string db = trimSpace(line[..(int)(colon)]);
-        @string srcs = line[(int)(colon + 1)..];
+        @string db = trimSpace(line.slice(0, colon));
+        @string srcs = line.slice(colon + 1);
         while (ᐧ) {
             srcs = trimSpace(srcs);
             if (len(srcs) == 0) {
@@ -215,8 +215,8 @@ internal static ж<nssConf> parseNSSConf(ж<Δfile> Ꮡf) {
                 src = srcs;
                 srcs = ""u8; // done
             } else {
-                src = srcs[..(int)(sp)];
-                srcs = trimSpace(srcs[(int)(sp + 1)..]);
+                src = srcs.slice(0, sp);
+                srcs = trimSpace(srcs.slice(sp + 1));
             }
             slice<nssCriterion> criteria = default!;
             // See if there's a criteria block in brackets.
@@ -227,12 +227,12 @@ internal static ж<nssConf> parseNSSConf(ж<Δfile> Ꮡf) {
                     return conf;
                 }
                 error err = default!;
-                (criteria, err) = parseCriteria(srcs[1..(int)(bclose)]);
+                (criteria, err) = parseCriteria(srcs.slice(1, bclose));
                 if (err != default!) {
-                    conf.Value.err = errors.New("invalid criteria: " + srcs[1..(int)(bclose)]);
+                    conf.Value.err = errors.New("invalid criteria: " + srcs.slice(1, bclose));
                     return conf;
                 }
-                srcs = srcs[(int)(bclose + 1)..];
+                srcs = srcs.slice(bclose + 1);
             }
             if ((~conf).sources == default!) {
                 conf.Value.sources = new map<@string, slice<nssSource>>();
@@ -275,8 +275,8 @@ internal static (slice<nssCriterion> c, error err) parseCriteria(@string x) {
         }
         c = append(c, new nssCriterion(
             negate: not,
-            status: f[..(int)(eq)],
-            action: f[(int)(eq + 1)..]
+            status: f.slice(0, eq),
+            action: f.slice(eq + 1)
         ));
         return default!;
     });

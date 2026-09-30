@@ -163,7 +163,7 @@ internal static slice<byte> Seal(this gcmWithRandomNonce g, slice<byte> dst, sli
     //
     if (alias.AnyOverlap(@out, plaintext)) {
         copy(ciphertext, plaintext);
-        plaintext = ciphertext[..(int)(len(plaintext))];
+        plaintext = ciphertext.slice(0, len(plaintext));
     }
     gcm.SealWithRandomNonce(g.GCM, nonce, ciphertext, plaintext, additionalData);
     return ret;
@@ -190,8 +190,8 @@ internal static (slice<byte>, error) Open(this gcmWithRandomNonce g, slice<byte>
     if (alias.AnyOverlap(@out, ciphertext)){
         nonce = new slice<byte>(gcmStandardNonceSize);
         copy(nonce, ciphertext);
-        copy(@out[..(int)(len(ciphertext))], ciphertext[(int)(gcmStandardNonceSize)..]);
-        ciphertext = @out[..(int)(len(ciphertext) - (nint)gcmStandardNonceSize)];
+        copy(@out.slice(0, len(ciphertext)), ciphertext[(int)(gcmStandardNonceSize)..]);
+        ciphertext = @out.slice(0, len(ciphertext) - (nint)gcmStandardNonceSize);
     } else {
         nonce = ciphertext[..(int)(gcmStandardNonceSize)];
         ciphertext = ciphertext[(int)(gcmStandardNonceSize)..];
@@ -275,8 +275,8 @@ internal static (AEAD, error) newGCMFallback(Block cipher, nint nonceSize, nint 
     gcmCounterCryptGeneric(g.cipher, tagMask[..], tagMask[..], Ꮡcounter);
     gcmCounterCryptGeneric(g.cipher, @out, plaintext, Ꮡcounter);
     array<byte> tag = new(16); /* gcmTagSize */
-    gcmAuth(tag[..], ᏑH, ᏑtagMask, @out[..(int)(len(plaintext))], additionalData);
-    copy(@out[(int)(len(plaintext))..], tag[..]);
+    gcmAuth(tag[..], ᏑH, ᏑtagMask, @out.slice(0, len(plaintext)), additionalData);
+    copy(@out.slice(len(plaintext)), tag[..]);
     return ret;
 }
 
@@ -308,11 +308,11 @@ internal static error errOpen = errors.New("cipher: message authentication faile
     g.cipher.Encrypt(H[..], H[..]);
     deriveCounter(ᏑH, Ꮡcounter, nonce);
     gcmCounterCryptGeneric(g.cipher, tagMask[..], tagMask[..], Ꮡcounter);
-    var tag = ciphertext[(int)(len(ciphertext) - g.tagSize)..];
-    ciphertext = ciphertext[..(int)(len(ciphertext) - g.tagSize)];
+    var tag = ciphertext.slice(len(ciphertext) - g.tagSize);
+    ciphertext = ciphertext.slice(0, len(ciphertext) - g.tagSize);
     array<byte> expectedTag = new(16); /* gcmTagSize */
     gcmAuth(expectedTag[..], ᏑH, ᏑtagMask, ciphertext, additionalData);
-    if (subtle.ConstantTimeCompare(expectedTag[..(int)(g.tagSize)], tag) != 1) {
+    if (subtle.ConstantTimeCompare(expectedTag.slice(0, g.tagSize), tag) != 1) {
         // We sometimes decrypt and authenticate concurrently, so we overwrite
         // dst in the event of a tag mismatch. To be consistent across platforms
         // and to avoid releasing unauthenticated plaintext, we clear the buffer
@@ -383,13 +383,13 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
 
     {
         nint total = len(@in) + n; if (cap(@in) >= total){
-            head = @in[..(int)(total)];
+            head = @in.slice(0, total);
         } else {
             head = new slice<byte>(total);
             copy(head, @in);
         }
     }
-    tail = head[(int)(len(@in))..];
+    tail = head.slice(len(@in));
     return (head, tail);
 }
 

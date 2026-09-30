@@ -273,9 +273,9 @@ internal static void parsePclnTab(this ж<LineTable> Ꮡt) {
         // quantum and ptrSize are the same between 1.2, 1.16, and 1.18
         t.quantum = (uint32)t.Data[6];
         t.ptrsize = (uint32)t.Data[7];
-        uint64 offset(uint32 word) => Ꮡt.Value.uintptr(Ꮡt.Value.Data[(int)(8 + word * Ꮡt.Value.ptrsize)..]);
+        uint64 offset(uint32 word) => Ꮡt.Value.uintptr(Ꮡt.Value.Data.slice((nint)(8 + word * Ꮡt.Value.ptrsize)));
         var offsetʗ1 = offset;
-        slice<byte> data(uint32 word) => Ꮡt.Value.Data[(int)(offsetʗ1(word))..];
+        slice<byte> data(uint32 word) => Ꮡt.Value.Data.slice((nint)(offsetʗ1(word)));
         var exprᴛ1 = possibleVersion;
         if (exprᴛ1 == ver118 || exprᴛ1 == ver120) {
             t.nfunctab = (uint32)offset(0);
@@ -288,7 +288,7 @@ internal static void parsePclnTab(this ж<LineTable> Ꮡt) {
             t.funcdata = data(7);
             t.functab = data(7);
             nint functabsize = ((nint)t.nfunctab * 2 + 1) * t.functabFieldSize();
-            t.functab = t.functab[..(int)(functabsize)];
+            t.functab = t.functab.slice(0, functabsize);
         }
         else if (exprᴛ1 == ver116) {
             t.nfunctab = (uint32)offset(0);
@@ -300,20 +300,20 @@ internal static void parsePclnTab(this ж<LineTable> Ꮡt) {
             t.funcdata = data(6);
             t.functab = data(6);
             nint functabsize = ((nint)t.nfunctab * 2 + 1) * t.functabFieldSize();
-            t.functab = t.functab[..(int)(functabsize)];
+            t.functab = t.functab.slice(0, functabsize);
         }
         else if (exprᴛ1 == ver12) {
             t.nfunctab = (uint32)t.uintptr(t.Data[8..]);
             t.funcdata = t.Data;
             t.funcnametab = t.Data;
-            t.functab = t.Data[(int)(8 + t.ptrsize)..];
+            t.functab = t.Data.slice((nint)(8 + t.ptrsize));
             t.pctab = t.Data;
             nint functabsize = ((nint)t.nfunctab * 2 + 1) * t.functabFieldSize();
-            var fileoff = t.binary.Uint32(t.functab[(int)(functabsize)..]);
-            t.functab = t.functab[..(int)(functabsize)];
-            t.filetab = t.Data[(int)(fileoff)..];
+            var fileoff = t.binary.Uint32(t.functab.slice(functabsize));
+            t.functab = t.functab.slice(0, functabsize);
+            t.filetab = t.Data.slice((nint)(fileoff));
             t.nfiletab = t.binary.Uint32(t.filetab);
-            t.filetab = t.filetab[..(int)(t.nfiletab * 4)];
+            t.filetab = t.filetab.slice(0, (nint)(t.nfiletab * 4));
         }
         else { /* default: */
             throw panic("unreachable");
@@ -403,8 +403,8 @@ internal static ΔfuncData findFunc(this ж<LineTable> Ꮡt, uint64 pc) {
             return sΔ1;
         }
     }
-    nint i = bytes.IndexByte(t.funcnametab[(int)(off)..], 0);
-    @string s = ((@string)(t.funcnametab[(int)(off)..(int)(off + (uint32)i)]));
+    nint i = bytes.IndexByte(t.funcnametab.slice((nint)(off)), 0);
+    @string s = ((@string)(t.funcnametab.slice((nint)(off), (nint)(off + (uint32)i))));
     t.funcNames[off] = s;
     return s;
 }
@@ -416,8 +416,8 @@ internal static ΔfuncData findFunc(this ж<LineTable> Ꮡt, uint64 pc) {
             return sΔ1;
         }
     }
-    nint i = bytes.IndexByte(arr[(int)(off)..], 0);
-    @string s = ((@string)(arr[(int)(off)..(int)(off + (uint32)i)]));
+    nint i = bytes.IndexByte(arr.slice((nint)(off)), 0);
+    @string s = ((@string)(arr.slice((nint)(off), (nint)(off + (uint32)i))));
     t.strings[off] = s;
     return s;
 }
@@ -456,7 +456,7 @@ internal static nint Count(this ΔfuncTab f) {
 
 // pc returns the PC of the i'th func in f.
 internal static uint64 pc(this ΔfuncTab f, nint i) {
-    var u = f.@uint(f.functab[(int)(2 * i * f.sz)..]);
+    var u = f.@uint(f.functab.slice(2 * i * f.sz));
     if (f.version >= ver118) {
         u += f.textStart;
     }
@@ -465,7 +465,7 @@ internal static uint64 pc(this ΔfuncTab f, nint i) {
 
 // funcOff returns the funcdata offset of the i'th func in f.
 internal static uint64 funcOff(this ΔfuncTab f, nint i) {
-    return f.@uint(f.functab[(int)((2 * i + 1) * f.sz)..]);
+    return f.@uint(f.functab.slice((2 * i + 1) * f.sz));
 }
 
 // uint returns the uint stored at b.
@@ -486,7 +486,7 @@ internal static uint64 @uint(this ΔfuncTab f, slice<byte> b) {
 internal static ΔfuncData funcData(this ж<LineTable> Ꮡt, uint32 i) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    var data = t.funcdata[(int)(Ꮡt.funcTab().funcOff((nint)i))..];
+    var data = t.funcdata.slice((nint)(Ꮡt.funcTab().funcOff((nint)i)));
     return new ΔfuncData(t: Ꮡt, data: data);
 }
 
@@ -541,7 +541,7 @@ internal static uint32 field(this ΔfuncData f, uint32 n) {
         sz0 = 4;
     }
     var off = sz0 + (n - 1) * 4; // subsequent fields are 4 bytes each
-    var data = f.data[(int)(off)..];
+    var data = f.data.slice((nint)(off));
     return (~f.t).binary.Uint32(data);
 }
 
@@ -571,7 +571,7 @@ internal static uint32 field(this ΔfuncData f, uint32 n) {
 // and entry is the start PC for the corresponding function.
 [GoRecv] internal static int32 pcvalue(this ref LineTable t, uint32 off, uint64 entry, uint64 targetpc) {
     ref var p = ref heap<slice<byte>>(out var Ꮡp);
-    p = t.pctab[(int)(off)..];
+    p = t.pctab.slice((nint)(off));
     ref var val = ref heap<int32>(out var Ꮡval);
     val = (int32)(-1);
     ref var pc = ref heap<uint64>(out var Ꮡpc);
@@ -595,9 +595,9 @@ internal static uint32 field(this ΔfuncData f, uint32 n) {
         return 0;
     }
     ref var fp = ref heap<slice<byte>>(out var Ꮡfp);
-    fp = t.pctab[(int)(filetab)..];
+    fp = t.pctab.slice((nint)(filetab));
     ref var fl = ref heap<slice<byte>>(out var Ꮡfl);
-    fl = t.pctab[(int)(linetab)..];
+    fl = t.pctab.slice((nint)(linetab));
     ref var fileVal = ref heap<int32>(out var ᏑfileVal);
     fileVal = (int32)(-1);
     ref var filePC = ref heap<uint64>(out var ᏑfilePC);
@@ -610,7 +610,7 @@ internal static uint32 field(this ΔfuncData f, uint32 n) {
     while (t.step(Ꮡfp, ᏑfilePC, ᏑfileVal, filePC == entry)) {
         var fileIndex = fileVal;
         if (t.version == ver116 || t.version == ver118 || t.version == ver120) {
-            fileIndex = (int32)t.binary.Uint32(cutab[(int)(fileVal * 4)..]);
+            fileIndex = (int32)t.binary.Uint32(cutab.slice(fileVal * 4));
         }
         if (fileIndex == filenum && fileStartPC < filePC) {
             // fileIndex is in effect starting at fileStartPC up to
@@ -684,7 +684,7 @@ internal static @string /*file*/ go12PCToFile(this ж<LineTable> Ꮡt, uint64 pc
             if (fno <= 0) {
                 @file = ""u8; goto ᒐdone;
             }
-            @file = t.@string(t.binary.Uint32(t.filetab[(int)(4 * fno)..])); goto ᒐdone;
+            @file = t.@string(t.binary.Uint32(t.filetab.slice(4 * fno))); goto ᒐdone;
         }
         // Go ≥ 1.16
         if (fno < 0) {
@@ -693,7 +693,7 @@ internal static @string /*file*/ go12PCToFile(this ж<LineTable> Ꮡt, uint64 pc
         }
         var cuoff = f.cuOffset();
         {
-            var fnoff = t.binary.Uint32(t.cutab[(int)((cuoff + (uint32)fno) * 4)..]); if (fnoff != ~(uint32)0) {
+            var fnoff = t.binary.Uint32(t.cutab.slice((nint)((cuoff + (uint32)fno) * 4))); if (fnoff != ~(uint32)0) {
                 @file = t.stringFrom(t.filetab, fnoff); goto ᒐdone;
             }
         }
@@ -735,7 +735,7 @@ internal static uint64 /*pc*/ go12LineToPC(this ж<LineTable> Ꮡt, @string @fil
                     // skip functions without compilation unit (not real function, or linker generated)
                     continue;
                 }
-                cutab = t.cutab[(int)(f.cuOffset() * 4)..];
+                cutab = t.cutab.slice((nint)(f.cuOffset() * 4));
             }
             var pcΔ1 = t.findFileLine(entry, filetab, linetab, (int32)filenum, (int32)line, cutab);
             if (pcΔ1 != 0) {
@@ -764,7 +764,7 @@ internal static void initFileMap(this ж<LineTable> Ꮡt) {
         var m = new map<@string, uint32>();
         if (t.version == ver12){
             for (var i = (uint32)1; i < t.nfiletab; i++) {
-                @string s = t.@string(t.binary.Uint32(t.filetab[(int)(4 * i)..]));
+                @string s = t.@string(t.binary.Uint32(t.filetab.slice((nint)(4 * i))));
                 m[s] = i;
             }
         } else {

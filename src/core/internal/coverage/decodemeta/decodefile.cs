@@ -209,7 +209,7 @@ internal static error readFileHeader(this ж<CoverageMetaFileReader> Ꮡr) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=-= for pk %d, off=%d len=%d\n"u8, pkIdx, off, len);
     }
     if (r.fileView != default!) {
-        return (r.fileView[(int)(off)..(int)(off + len)], default!);
+        return (r.fileView.slice((nint)(off), (nint)(off + len)), default!);
     }
     var payload = payloadbuf[..0];
     if (cap(payload) < (nint)len) {

@@ -339,7 +339,7 @@ internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
         a.totalBytes -= nBytes;
         return new addrRange(newEnd, r.limit);
     }
-    a.ranges = a.ranges[..(int)(len(a.ranges) - 1)];
+    a.ranges = a.ranges.slice(0, len(a.ranges) - 1);
     a.totalBytes -= size;
     return r;
 }
@@ -355,7 +355,7 @@ internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
         return;
     }
     var removed = (uintptr)0;
-    foreach (var (_, r) in a.ranges[(int)(pivot)..]) {
+    foreach (var (_, r) in a.ranges.slice(pivot)) {
         removed += r.size();
     }
     {
@@ -370,7 +370,7 @@ internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
             }
         }
     }
-    a.ranges = a.ranges[..(int)(pivot)];
+    a.ranges = a.ranges.slice(0, pivot);
     a.totalBytes -= removed;
 }
 

@@ -1660,7 +1660,7 @@ internal static slice<byte> itoaDiv(slice<byte> buf, uint64 val, nint dec) {
         val /= 10;
     }
     buf[i] = (byte)(val + (rune)'0');
-    return buf[(int)(i)..];
+    return buf.slice(i);
 }
 
 // fmtNSAsMS nicely formats ns nanoseconds as milliseconds.

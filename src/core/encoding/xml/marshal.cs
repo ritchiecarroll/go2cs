@@ -295,7 +295,7 @@ internal static bool isValidDirective(Directive dir) {
         case {} when incomment: {
             if (c == (rune)'>') {
                 {
-                    nint n = 1 + i - len(endComment); if (n >= 0 && bytes.Equal(dir[(int)(n)..(int)(i + 1)], endComment)) {
+                    nint n = 1 + i - len(endComment); if (n >= 0 && bytes.Equal(dir.slice(n, i + 1), endComment)) {
                         incomment = false;
                     }
                 }
@@ -314,7 +314,7 @@ internal static bool isValidDirective(Directive dir) {
             break;
         }
         case {} when c is (rune)'<': {
-            if (i + len(begComment) < len(dir) && bytes.Equal(dir[(int)(i)..(int)(i + len(begComment))], // Just ignore anything within quotes
+            if (i + len(begComment) < len(dir) && bytes.Equal(dir.slice(i, i + len(begComment)), // Just ignore anything within quotes
  begComment)){
                 incomment = true;
             } else {
@@ -395,7 +395,7 @@ internal static @string createAttrPrefix(this ж<printer> Ꮡp, @string url) {
     @string prefix = strings.TrimRight(url, "/"u8);
     {
         nint i = strings.LastIndex(prefix, "/"u8); if (i >= 0) {
-            prefix = prefix[(int)(i + 1)..];
+            prefix = prefix.slice(i + 1);
         }
     }
     if (prefix == ""u8 || !isName(slice<byte>(prefix)) || strings.Contains(prefix, ":"u8)) {
@@ -443,7 +443,7 @@ internal static @string createAttrPrefix(this ж<printer> Ꮡp, @string url) {
 [GoRecv] internal static void popPrefix(this ref printer p) {
     while (len(p.prefixes) > 0) {
         @string prefix = p.prefixes[len(p.prefixes) - 1];
-        p.prefixes = p.prefixes[..(int)(len(p.prefixes) - 1)];
+        p.prefixes = p.prefixes.slice(0, len(p.prefixes) - 1);
         if (prefix == ""u8) {
             break;
         }
@@ -549,7 +549,7 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
         {
             nint i = strings.IndexByte(name, (rune)'['); if (i >= 0) {
                 // Truncate generic instantiation name. See issue 48318.
-                name = name[..(int)(i)];
+                name = name.slice(0, i);
             }
         }
         if (name == ""u8) {
@@ -733,7 +733,7 @@ internal static StartElement defaultStart(reflectꓸType typ, ж<fieldInfo> Ꮡf
     if (len(p.tags) > n) {
         return fmt.Errorf("xml: %s.MarshalXML wrote invalid XML: <%s> not closed"u8, receiverType(val), p.tags[len(p.tags) - 1].Local);
     }
-    p.tags = p.tags[..(int)(n - 1)];
+    p.tags = p.tags.slice(0, n - 1);
     return default!;
 }
 
@@ -811,7 +811,7 @@ internal static error writeStart(this ж<printer> Ꮡp, ж<StartElement> Ꮡstar
             return fmt.Errorf("xml: end tag </%s> in namespace %s does not match start tag <%s> in namespace %s"u8, name.Local, name.Space, top.Local, top.Space);
         }
     }
-    p.tags = p.tags[..(int)(len(p.tags) - 1)];
+    p.tags = p.tags.slice(0, len(p.tags) - 1);
     p.writeIndent(-1);
     p.WriteByte((rune)'<');
     p.WriteByte((rune)'/');
@@ -1062,7 +1062,7 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
             if (len((~finfo).parents) > len(s.stack)) {
                 if (vf.Kind() != reflect.ΔPointer && vf.Kind() != reflect.ΔInterface || !vf.IsNil()) {
                     {
-                        var err = s.push((~finfo).parents[(int)(len(s.stack))..]); if (err != default!) {
+                        var err = s.push((~finfo).parents.slice(len(s.stack))); if (err != default!) {
                             return err;
                         }
                     }
@@ -1198,7 +1198,7 @@ internal static readonly @string useOfClosedEncoderˢ = "use of closed Encoder"u
             }
         }
     }
-    s.stack = s.stack[..(int)(split)];
+    s.stack = s.stack.slice(0, split);
     return default!;
 }
 

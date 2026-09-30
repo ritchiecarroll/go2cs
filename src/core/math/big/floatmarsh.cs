@@ -50,7 +50,7 @@ public static (slice<byte>, error) GobEncode(this ж<Float> Ꮡx) {
     byteorder.BEPutUint32(buf[2..], x.prec);
     if (x.form == finite) {
         byteorder.BEPutUint32(buf[6..], (uint32)x.exp);
-        x.mant[(int)(len(x.mant) - n)..].bytes(buf[10..]); // cut off unused trailing words
+        x.mant.slice(len(x.mant) - n).bytes(buf[10..]); // cut off unused trailing words
     }
     return (buf, default!);
 }

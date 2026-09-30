@@ -69,8 +69,8 @@ break_Search:;
         m.freeStk = new slice<uintptr>(1024);
     }
     // Limit cap to prevent append from clobbering freeStk.
-    e.Value.stk = m.freeStk.slice(-1, len(stk), len(stk));
-    m.freeStk = m.freeStk[(int)(len(stk))..];
+    e.Value.stk = m.freeStk.slice(0, len(stk), len(stk));
+    m.freeStk = m.freeStk.slice(len(stk));
     foreach (var (j, _) in stk) {
         e.Value.stk[j] = (uintptr)stk[j];
     }

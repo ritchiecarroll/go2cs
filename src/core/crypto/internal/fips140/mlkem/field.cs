@@ -205,13 +205,13 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
 
     {
         nint total = len(@in) + n; if (cap(@in) >= total){
-            head = @in[..(int)(total)];
+            head = @in.slice(0, total);
         } else {
             head = new slice<byte>(total);
             copy(head, @in);
         }
     }
-    tail = head[(int)(len(@in))..];
+    tail = head.slice(len(@in));
     return (head, tail);
 }
 
@@ -491,7 +491,7 @@ internal static nttElement ntt(ringElement f) {
             var zeta = zetas[k];
             k++;
             // Bounds check elimination hint.
-            var (fΔ1, flen) = (f[(int)(start)..(int)(start + len)], f[(int)(start + len)..(int)(start + len + len)]);
+            var (fΔ1, flen) = (f.slice(start, start + len), f.slice(start + len, start + len + len));
             for (nint j = 0; j < len; j++) {
                 var t = fieldMul(zeta, flen[j]);
                 flen[j] = fieldSub(fΔ1[j], t);
@@ -514,7 +514,7 @@ internal static ringElement inverseNTT(nttElement f) {
             var zeta = zetas[k];
             k--;
             // Bounds check elimination hint.
-            var (fΔ1, flen) = (f[(int)(start)..(int)(start + len)], f[(int)(start + len)..(int)(start + len + len)]);
+            var (fΔ1, flen) = (f.slice(start, start + len), f.slice(start + len, start + len + len));
             for (nint j = 0; j < len; j++) {
                 var t = fΔ1[j];
                 fΔ1[j] = fieldAdd(t, flen[j]);
@@ -567,8 +567,8 @@ internal static nttElement sampleNTT(slice<byte> rho, byte ii, byte jj) {
             B.Read(buf[..]);
             off = 0;
         }
-        var d1 = (uint16)(byteorder.LEUint16(buf[(int)(off)..]) & 0b1111_1111_1111);
-        var d2 = (uint16)((byteorder.LEUint16(buf[(int)(off + 1)..]) >> (int)(4)));
+        var d1 = (uint16)(byteorder.LEUint16(buf.slice(off)) & 0b1111_1111_1111);
+        var d2 = (uint16)((byteorder.LEUint16(buf.slice(off + 1)) >> (int)(4)));
         off += 3;
         if (d1 < q) {
             a[j] = ((fieldElement)d1);

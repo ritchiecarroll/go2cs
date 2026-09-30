@@ -75,7 +75,7 @@ internal static slice<byte> itoa(slice<byte> buf, uint64 val) {
         val /= 10;
     }
     buf[i] = (byte)(val + (rune)'0');
-    return buf[(int)(i)..];
+    return buf.slice(i);
 }
 
 [GoType("@string")] partial struct errorString;
@@ -380,9 +380,9 @@ internal static void printindented(@string s) {
             break;
         }
         i += len("\n");
-        print(s[..(int)(i)]);
+        print(s.slice(0, i));
         print((@string)"\t"u8);
-        s = s[(int)(i)..];
+        s = s.slice(i);
     }
     print(s);
 }
@@ -401,20 +401,20 @@ internal static void panicwrap() {
     if (i < 0) {
         @throw("panicwrap: no ( in "u8 + name);
     }
-    @string pkg = name[..(int)(i - 1)];
-    if (i + 2 >= len(name) || name[(int)(i - 1)..(int)(i + 2)] != ".(*") {
+    @string pkg = name.slice(0, i - 1);
+    if (i + 2 >= len(name) || name.slice(i - 1, i + 2) != ".(*") {
         @throw("panicwrap: unexpected string after package name: "u8 + name);
     }
-    name = name[(int)(i + 2)..];
+    name = name.slice(i + 2);
     i = bytealg.IndexByteString(name, (rune)')');
     if (i < 0) {
         @throw("panicwrap: no ) in "u8 + name);
     }
-    if (i + 2 >= len(name) || name[(int)(i)..(int)(i + 2)] != ").") {
+    if (i + 2 >= len(name) || name.slice(i, i + 2) != ").") {
         @throw("panicwrap: unexpected string after type name: "u8 + name);
     }
-    @string typ = name[..(int)(i)];
-    @string meth = name[(int)(i + 2)..];
+    @string typ = name.slice(0, i);
+    @string meth = name.slice(i + 2);
     throw panic(((plainError)("value method "u8 + pkg + "."u8 + typ + "."u8 + meth + " called using nil *"u8 + typ + " pointer"u8)));
 }
 

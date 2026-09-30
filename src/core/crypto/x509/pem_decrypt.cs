@@ -94,7 +94,7 @@ internal static slice<byte> deriveKey(this rfc1423Algo c, slice<byte> password, 
         hash.Write(password);
         hash.Write(salt);
         digest = hash.Sum(digest[..0]);
-        copy(@out[(int)(i)..], digest);
+        copy(@out.slice(i), digest);
     }
     return @out;
 }
@@ -190,12 +190,12 @@ public static (slice<byte>, error) DecryptPEMBlock(ж<pem.Block> Ꮡb, slice<byt
     if (last == 0 || last > (~ciph).blockSize) {
         return (default!, IncorrectPasswordError);
     }
-    foreach (var (_, val) in data[(int)(dlen - last)..]) {
+    foreach (var (_, val) in data.slice(dlen - last)) {
         if ((nint)val != last) {
             return (default!, IncorrectPasswordError);
         }
     }
-    return (data[..(int)(dlen - last)], default!);
+    return (data.slice(0, dlen - last), default!);
 }
 
 // EncryptPEMBlock returns a PEM block of the specified type holding the

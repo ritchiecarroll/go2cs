@@ -85,9 +85,9 @@ internal static ж<ΔNat> expand(this ж<ΔNat> Ꮡx, nint n) {
         x.limbs = newLimbs;
         return Ꮡx;
     }
-    var extraLimbs = x.limbs[(int)(len(x.limbs))..(int)(n)];
+    var extraLimbs = x.limbs.slice(len(x.limbs), n);
     clear(extraLimbs);
-    x.limbs = x.limbs[..(int)(n)];
+    x.limbs = x.limbs.slice(0, n);
     return Ꮡx;
 }
 
@@ -100,7 +100,7 @@ internal static ж<ΔNat> reset(this ж<ΔNat> Ꮡx, nint n) {
         return Ꮡx;
     }
     clear(x.limbs);
-    x.limbs = x.limbs[..(int)(n)];
+    x.limbs = x.limbs.slice(0, n);
     return Ꮡx;
 }
 
@@ -131,7 +131,7 @@ internal static ж<ΔNat> trim(this ж<ΔNat> Ꮡx) {
         if (x.limbs[i] != 0) {
             break;
         }
-        x.limbs = x.limbs[..(int)(i)];
+        x.limbs = x.limbs.slice(0, i);
     }
     return Ꮡx;
 }
@@ -246,7 +246,7 @@ internal static nuint bigEndianUint(slice<byte> buf) {
     nint i = len(b);
     nint k = 0;
     while (k < len(x.limbs) && i >= _S) {
-        x.limbs[k] = bigEndianUint(b[(int)(i - (nint)_S)..(int)(i)]);
+        x.limbs[k] = bigEndianUint(b.slice(i - (nint)_S, i));
         i -= _S;
         k++;
     }
@@ -281,8 +281,8 @@ public static ж<ΔNat> SetUint(this ж<ΔNat> Ꮡx, nuint y) {
 
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
-    var xLimbs = x.limbs[..(int)(size)];
-    var yLimbs = y.limbs[..(int)(size)];
+    var xLimbs = x.limbs.slice(0, size);
+    var yLimbs = y.limbs.slice(0, size);
     choice equal = yes;
     for (nint i = 0; i < size; i++) {
         equal &= (choice)(ctEq(xLimbs[i], yLimbs[i]));
@@ -296,7 +296,7 @@ public static ж<ΔNat> SetUint(this ж<ΔNat> Ꮡx, nuint y) {
 [GoRecv] public static choice IsZero(this ref ΔNat x) {
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
-    var xLimbs = x.limbs[..(int)(size)];
+    var xLimbs = x.limbs.slice(0, size);
     choice zero = yes;
     for (nint i = 0; i < size; i++) {
         zero &= (choice)(ctEq(xLimbs[i], 0));
@@ -310,7 +310,7 @@ public static ж<ΔNat> SetUint(this ж<ΔNat> Ꮡx, nuint y) {
 [GoRecv] public static choice IsOne(this ref ΔNat x) {
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
-    var xLimbs = x.limbs[..(int)(size)];
+    var xLimbs = x.limbs.slice(0, size);
     if (len(xLimbs) == 0) {
         return no;
     }
@@ -368,8 +368,8 @@ public static ж<ΔNat> SetUint(this ж<ΔNat> Ꮡx, nuint y) {
 
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
-    var xLimbs = x.limbs[..(int)(size)];
-    var yLimbs = y.limbs[..(int)(size)];
+    var xLimbs = x.limbs.slice(0, size);
+    var yLimbs = y.limbs.slice(0, size);
     nuint c = default!;
     for (nint i = 0; i < size; i++) {
         (_, c) = bits.Sub(xLimbs[i], yLimbs[i], c);
@@ -390,8 +390,8 @@ internal static ж<ΔNat> assign(this ж<ΔNat> Ꮡx, choice on, ж<ΔNat> Ꮡy)
 
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
-    var xLimbs = x.limbs[..(int)(size)];
-    var yLimbs = y.limbs[..(int)(size)];
+    var xLimbs = x.limbs.slice(0, size);
+    var yLimbs = y.limbs.slice(0, size);
     nuint mask = ctMask(on);
     for (nint i = 0; i < size; i++) {
         xLimbs[i] ^= (nuint)((nuint)(mask & ((nuint)(xLimbs[i] ^ yLimbs[i]))));
@@ -410,8 +410,8 @@ internal static ж<ΔNat> assign(this ж<ΔNat> Ꮡx, choice on, ж<ΔNat> Ꮡy)
     ref var y = ref Ꮡy.DerefOrNull();
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
-    var xLimbs = x.limbs[..(int)(size)];
-    var yLimbs = y.limbs[..(int)(size)];
+    var xLimbs = x.limbs.slice(0, size);
+    var yLimbs = y.limbs.slice(0, size);
     for (nint i = 0; i < size; i++) {
         (xLimbs[i], c) = bits.Add(xLimbs[i], yLimbs[i], c);
     }
@@ -429,8 +429,8 @@ internal static ж<ΔNat> assign(this ж<ΔNat> Ꮡx, choice on, ж<ΔNat> Ꮡy)
     ref var y = ref Ꮡy.DerefOrNull();
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
-    var xLimbs = x.limbs[..(int)(size)];
-    var yLimbs = y.limbs[..(int)(size)];
+    var xLimbs = x.limbs.slice(0, size);
+    var yLimbs = y.limbs.slice(0, size);
     for (nint i = 0; i < size; i++) {
         (xLimbs[i], c) = bits.Sub(xLimbs[i], yLimbs[i], c);
     }
@@ -447,12 +447,12 @@ public static ж<ΔNat> ShiftRightVarTime(this ж<ΔNat> Ꮡx, nuint n) {
 
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
-    var xLimbs = x.limbs[..(int)(size)];
+    var xLimbs = x.limbs.slice(0, size);
     nint shift = (nint)(n % (nuint)_W);
     nint shiftLimbs = (nint)(n / (nuint)_W);
     slice<nuint> shiftedLimbs = default!;
     if (shiftLimbs < size) {
-        shiftedLimbs = xLimbs[(int)(shiftLimbs)..];
+        shiftedLimbs = xLimbs.slice(shiftLimbs);
     }
     foreach (var (i, _) in xLimbs) {
         if (i >= len(shiftedLimbs)) {
@@ -474,7 +474,7 @@ public static ж<ΔNat> ShiftRightVarTime(this ж<ΔNat> Ꮡx, nuint n) {
 [GoRecv] public static nint BitLenVarTime(this ref ΔNat x) {
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
-    var xLimbs = x.limbs[..(int)(size)];
+    var xLimbs = x.limbs.slice(0, size);
     for (nint i = size - 1; i >= 0; i--) {
         if (xLimbs[i] != 0) {
             return i * (nint)_W + bitLen(xLimbs[i]);
@@ -594,7 +594,7 @@ public static (ж<Modulus>, error) NewModulusProduct(slice<byte> a, slice<byte> 
     var y = NewNat().resetToBytes(b);
     var n = NewNat().reset(len((~x).limbs) + len((~y).limbs));
     foreach (var (i, _) in (~y).limbs) {
-        n.Value.limbs[i + len((~x).limbs)] = addMulVVW((~n).limbs[(int)(i)..(int)(i + len((~x).limbs))], (~x).limbs, (~y).limbs[i]);
+        n.Value.limbs[i + len((~x).limbs)] = addMulVVW((~n).limbs.slice(i, i + len((~x).limbs)), (~x).limbs, (~y).limbs[i]);
     }
     return newModulus(n.trim());
 }
@@ -646,9 +646,9 @@ internal static ж<ΔNat> shiftIn(this ж<ΔNat> Ꮡx, nuint y, ж<Modulus> Ꮡm
     var d = NewNat().resetFor(Ꮡm);
     // Eliminate bounds checks in the loop.
     nint size = len((~m.nat).limbs);
-    var xLimbs = x.limbs[..(int)(size)];
-    var dLimbs = (~d).limbs[..(int)(size)];
-    var mLimbs = (~m.nat).limbs[..(int)(size)];
+    var xLimbs = x.limbs.slice(0, size);
+    var dLimbs = (~d).limbs.slice(0, size);
+    var mLimbs = (~m.nat).limbs.slice(0, size);
     // Each iteration of this loop computes x = 2x + b mod m, where b is a bit
     // from y. Effectively, it left-shifts x and adds y one bit at a time,
     // reducing it every time.
@@ -840,9 +840,9 @@ internal static ж<ΔNat> montgomeryMul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡa, ж<
     ref var m = ref Ꮡm.DerefOrNull();
 
     nint n = len((~m.nat).limbs);
-    var mLimbs = (~m.nat).limbs[..(int)(n)];
-    var aLimbs = a.limbs[..(int)(n)];
-    var bLimbs = b.limbs[..(int)(n)];
+    var mLimbs = (~m.nat).limbs.slice(0, n);
+    var aLimbs = a.limbs.slice(0, n);
+    var bLimbs = b.limbs.slice(0, n);
     var exprᴛ1 = n;
     if (exprᴛ1 == 1024 / _W) {
 // Attempt to use a stack-allocated backing array.
@@ -930,7 +930,7 @@ internal static ж<ΔNat> montgomeryMul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡa, ж<
         if (cap(T) < n * 2) {
             T = new slice<nuint>(0, n * 2);
         }
-        T = T[..(int)(n * 2)];
+        T = T.slice(0, n * 2);
         // This loop implements Word-by-Word Montgomery Multiplication, as
         // described in Algorithm 4 (Fig. 3) of "Efficient Software
         // Implementations of Modular Exponentiation" by Shay Gueron
@@ -939,12 +939,12 @@ internal static ж<ΔNat> montgomeryMul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡa, ж<
         for (nint i = 0; i < n; i++) {
             _ = T[n + i];
             nuint d = bLimbs[i];
-            nuint c1 = addMulVVW(T[(int)(i)..(int)(n + i)], aLimbs, d);
+            nuint c1 = addMulVVW(T.slice(i, n + i), aLimbs, d);
             nuint Y = T[i] * m.m0inv;
-            nuint c2 = addMulVVW(T[(int)(i)..(int)(n + i)], mLimbs, Y);
+            nuint c2 = addMulVVW(T.slice(i, n + i), mLimbs, Y);
             (T[n + i], c) = bits.Add(c1, c2, c);
         }
-        copy((~Ꮡx.reset(n)).limbs, T[(int)(n)..]);
+        copy((~Ꮡx.reset(n)).limbs, T.slice(n));
         Ꮡx.maybeSubtractModulus(((choice)c), Ꮡm);
     }
 
@@ -992,8 +992,8 @@ public static ж<ΔNat> Mul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡ
         return Ꮡx.montgomeryMul(xR, Ꮡy, Ꮡm); // x = xR * y / R mod m
     }
     nint n = len((~m.nat).limbs);
-    var xLimbs = x.limbs[..(int)(n)];
-    var yLimbs = y.limbs[..(int)(n)];
+    var xLimbs = x.limbs.slice(0, n);
+    var yLimbs = y.limbs.slice(0, n);
     var exprᴛ1 = n;
     if (exprᴛ1 == 1024 / _W) {
 // Attempt to use a stack-allocated backing array.
@@ -1029,9 +1029,9 @@ public static ж<ΔNat> Mul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡ
         if (cap(T) < n * 2) {
             T = new slice<nuint>(0, n * 2);
         }
-        T = T[..(int)(n * 2)];
+        T = T.slice(0, n * 2);
         for (nint i = 0; i < n; i++) {
-            T[n + i] = addMulVVW(T[(int)(i)..(int)(n + i)], xLimbs, yLimbs[i]);
+            T[n + i] = addMulVVW(T.slice(i, n + i), xLimbs, yLimbs[i]);
         }
         return Ꮡx.Mod(Ꮡ(new ΔNat(limbs: T)), Ꮡm);
     }
@@ -1269,7 +1269,7 @@ internal static (ж<ΔNat> u, ж<ΔNat> A, error err) extendedGCD(ж<ΔNat> Ꮡa
 //go:norace
 internal static void rshift1(ref ΔNat a, nuint carry) {
     nint size = len(a.limbs);
-    var aLimbs = a.limbs[..(int)(size)];
+    var aLimbs = a.limbs.slice(0, size);
     foreach (var i in range(size)) {
         aLimbs[i] >>= (int)(1);
         if (i + 1 < size){

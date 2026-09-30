@@ -135,7 +135,7 @@ public static void SetCPUProfileRate(nint hz) {
     if (cpuprof.numExtra + 1 + len(stk) < len(cpuprof.extra)){
         nint i = cpuprof.numExtra;
         cpuprof.extra[i] = (uintptr)(1 + len(stk));
-        copy(cpuprof.extra[(int)(i + 1)..], stk);
+        copy(cpuprof.extra.slice(i + 1), stk);
         cpuprof.numExtra += 1 + len(stk);
     } else {
         cpuprof.lostExtra++;
@@ -152,7 +152,7 @@ public static void SetCPUProfileRate(nint hz) {
     // Copy accumulated non-Go profile events.
     var hdr = new uint64[]{1}.array();
     for (nint i = 0; i < Δp.numExtra; ) {
-        Δp.log.write(nil, 0, hdr[..], Δp.extra[(int)(i + 1)..(int)(i + (nint)Δp.extra[i])]);
+        Δp.log.write(nil, 0, hdr[..], Δp.extra.slice(i + 1, i + (nint)Δp.extra[i]));
         i += (nint)Δp.extra[i];
     }
     Δp.numExtra = 0;

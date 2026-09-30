@@ -528,7 +528,7 @@ internal static void readGCStats_m(ref slice<uint64> pauses) {
     // pause_ns[(numgc-1)%len(pause_ns)], and then backward
     // from there to go back farther in time. We deliver the times
     // most recent first (in p[0]).
-    Δp = Δp[..(int)(cap(Δp))];
+    Δp = Δp.slice(0, cap(Δp));
     for (var i = (uint32)0; i < n; i++) {
         var j = (memstats.numgc - 1 - i) % (uint32)len(memstats.pause_ns);
         Δp[i] = memstats.pause_ns[j];
@@ -538,7 +538,7 @@ internal static void readGCStats_m(ref slice<uint64> pauses) {
     Δp[n + n + 1] = (uint64)memstats.numgc;
     Δp[n + n + 2] = memstats.pause_total_ns;
     unlock(Ꮡmheap_.of(mheap.Ꮡlock));
-    pauses = Δp[..(int)(n + n + 3)];
+    pauses = Δp.slice(0, (nint)(n + n + 3));
 }
 
 // flushmcache flushes the mcache of allp[i].

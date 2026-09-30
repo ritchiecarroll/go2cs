@@ -74,9 +74,9 @@ internal static void encodeUint64s(ref buffer b, nint tag, slice<uint64> x) {
         nint n2 = len(b.data);
         encodeLength(ref b, tag, n2 - n1);
         nint n3 = len(b.data);
-        copy(b.tmp[..], b.data[(int)(n2)..(int)(n3)]);
-        copy(b.data[(int)(n1 + (n3 - n2))..], b.data[(int)(n1)..(int)(n2)]);
-        copy(b.data[(int)(n1)..], b.tmp[..(int)(n3 - n2)]);
+        copy(b.tmp[..], b.data.slice(n2, n3));
+        copy(b.data.slice(n1 + (n3 - n2)), b.data.slice(n1, n2));
+        copy(b.data.slice(n1), b.tmp.slice(0, n3 - n2));
         return;
     }
     foreach (var (_, u) in x) {
@@ -113,9 +113,9 @@ internal static void encodeInt64s(ref buffer b, nint tag, slice<int64> x) {
         nint n2 = len(b.data);
         encodeLength(ref b, tag, n2 - n1);
         nint n3 = len(b.data);
-        copy(b.tmp[..], b.data[(int)(n2)..(int)(n3)]);
-        copy(b.data[(int)(n1 + (n3 - n2))..], b.data[(int)(n1)..(int)(n2)]);
-        copy(b.data[(int)(n1)..], b.tmp[..(int)(n3 - n2)]);
+        copy(b.tmp[..], b.data.slice(n2, n3));
+        copy(b.data.slice(n1 + (n3 - n2)), b.data.slice(n1, n2));
+        copy(b.data.slice(n1), b.tmp.slice(0, n3 - n2));
         return;
     }
     foreach (var (_, u) in x) {
@@ -157,9 +157,9 @@ internal static void encodeMessage(ж<buffer> Ꮡb, nint tag, message m) {
     nint n2 = len(b.data);
     encodeLength(ref (Ꮡb).DerefOrNull(), tag, n2 - n1);
     nint n3 = len(b.data);
-    copy(b.tmp[..], b.data[(int)(n2)..(int)(n3)]);
-    copy(b.data[(int)(n1 + (n3 - n2))..], b.data[(int)(n1)..(int)(n2)]);
-    copy(b.data[(int)(n1)..], b.tmp[..(int)(n3 - n2)]);
+    copy(b.tmp[..], b.data.slice(n2, n3));
+    copy(b.data.slice(n1 + (n3 - n2)), b.data.slice(n1, n2));
+    copy(b.data.slice(n1), b.tmp.slice(0, n3 - n2));
 }
 
 internal static error /*err*/ unmarshal(slice<byte> data, message m) {
@@ -188,7 +188,7 @@ internal static (uint64, slice<byte>, error) decodeVarint(slice<byte> data) {
         }
         u |= (uint64)(((uint64)((byte)(data[i] & 0x7F))).Lsh((nuint)(7 * i)));
         if ((byte)(data[i] & 0x80) == 0) {
-            return (u, data[(int)(i + 1)..], default!);
+            return (u, data.slice(i + 1), default!);
         }
     }
 }
@@ -231,8 +231,8 @@ internal static (slice<byte>, error) decodeField(ref buffer b, slice<byte> data)
         if (n > (uint64)len(data)) {
             return (default!, errors.New(tooMuchDataˢ));
         }
-        b.data = data[..(int)(n)];
-        data = data[(int)(n)..];
+        b.data = data.slice(0, (nint)(n));
+        data = data.slice((nint)(n));
         break;
     }
     case 5: {

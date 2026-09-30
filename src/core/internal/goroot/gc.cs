@@ -136,7 +136,7 @@ internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
     if (i < 0) {
         i = len(path);
     }
-    if (strings.Contains(path[..(int)(i)], "."u8)) {
+    if (strings.Contains(path.slice(0, i), "."u8)) {
         return false;
     }
     if (path == "unsafe"u8) {

@@ -403,11 +403,11 @@ internal static ж<headerV7> v7(this ж<headerUSTAR> Ꮡh) {
 [GoType("[]byte")] partial struct sparseArray;
 
 internal static sparseElem entry(this sparseArray s, nint i) {
-    return ((sparseElem)(slice<byte>)(s[(int)(i * 24)..]));
+    return ((sparseElem)(slice<byte>)(s.slice(i * 24)));
 }
 
 internal static slice<byte> isExtended(this sparseArray s) {
-    return s[(int)(24 * s.maxEntries())..][..1];
+    return s.slice(24 * s.maxEntries())[..1];
 }
 
 internal static nint maxEntries(this sparseArray s) {

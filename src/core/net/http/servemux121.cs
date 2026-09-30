@@ -92,7 +92,7 @@ internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
     }
     // we now know that i points at where we want to insert
     es = append(es, new muxEntry(nil)); // try to grow the slice in place, any entry works.
-    copy(es[(int)(i + 1)..], es[(int)(i)..]); // Move shorter entries down
+    copy(es.slice(i + 1), es.slice(i)); // Move shorter entries down
     es[i] = e;
     return es;
 }

@@ -27,7 +27,7 @@ partial class debug_package {
     while (ᐧ) {
         nint n = runtime.Stack(buf, false);
         if (n < len(buf)) {
-            return buf[..(int)(n)];
+            return buf.slice(0, n);
         }
         buf = new slice<byte>(2 * len(buf));
     }

@@ -73,7 +73,7 @@ internal static void Main() {
         return (zero, false);
     }
     var v = p.items[len(p.items) - 1];
-    p.items = p.items[..(int)(len(p.items) - 1)];
+    p.items = p.items.slice(0, len(p.items) - 1);
     return (v, true);
 }
 

@@ -41,8 +41,8 @@ public static nint Encode(slice<byte> dst, slice<byte> src) {
 public static slice<byte> AppendEncode(slice<byte> dst, slice<byte> src) {
     nint n = EncodedLen(len(src));
     dst = slices.Grow<slice<byte>, byte>(dst, n);
-    Encode(dst[(int)(len(dst))..][..(int)(n)], src);
-    return dst[..(int)(len(dst) + n)];
+    Encode(dst.slice(len(dst)).slice(0, n), src);
+    return dst.slice(0, len(dst) + n);
 }
 
 // ErrLength reports an attempt to decode an odd-length input
@@ -103,8 +103,8 @@ public static (nint, error) Decode(slice<byte> dst, slice<byte> src) {
 public static (slice<byte>, error) AppendDecode(slice<byte> dst, slice<byte> src) {
     nint n = DecodedLen(len(src));
     dst = slices.Grow<slice<byte>, byte>(dst, n);
-    (n, var err) = Decode(dst[(int)(len(dst))..][..(int)(n)], src);
-    return (dst[..(int)(len(dst) + n)], err);
+    (n, var err) = Decode(dst.slice(len(dst)).slice(0, n), src);
+    return (dst.slice(0, len(dst) + n), err);
 }
 
 // EncodeToString returns the hexadecimal encoding of src.
@@ -123,7 +123,7 @@ public static @string EncodeToString(slice<byte> src) {
 public static (slice<byte>, error) DecodeString(@string s) {
     var dst = new slice<byte>(DecodedLen(len(s)));
     var (n, err) = Decode(dst, slice<byte>(s));
-    return (dst[..(int)(n)], err);
+    return (dst.slice(0, n), err);
 }
 
 // Dump returns a string that contains a hex dump of the given data. The format
@@ -166,10 +166,10 @@ public static io.Writer NewEncoder(io.Writer w) {
             chunkSize = len(p);
         }
         nint written = default!;
-        nint encoded = Encode(e.@out[..], p[..(int)(chunkSize)]);
-        (written, e.err) = e.w.Write(e.@out[..(int)(encoded)]);
+        nint encoded = Encode(e.@out[..], p.slice(0, chunkSize));
+        (written, e.err) = e.w.Write(e.@out.slice(0, encoded));
         n += written / 2;
-        p = p[(int)(chunkSize)..];
+        p = p.slice(chunkSize);
     }
     return (n, e.err);
 }
@@ -195,8 +195,8 @@ public static io.Reader NewDecoder(io.Reader r) {
         nint numCopy = default!;
         nint numRead = default!;
         numCopy = copy(d.arr[..], d.@in); // Copies either 0 or 1 bytes
-        (numRead, d.err) = d.r.Read(d.arr[(int)(numCopy)..]);
-        d.@in = d.arr[..(int)(numCopy + numRead)];
+        (numRead, d.err) = d.r.Read(d.arr.slice(numCopy));
+        d.@in = d.arr.slice(0, numCopy + numRead);
         if (AreEqual(d.err, io.EOF) && len(d.@in) % 2 != 0) {
             {
                 var a = reverseHexTable[d.@in[len(d.@in) - 1]]; if (a > 0x0f){
@@ -210,11 +210,11 @@ public static io.Reader NewDecoder(io.Reader r) {
     // Decode internal buffer into output buffer
     {
         nint numAvail = len(d.@in) / 2; if (len(p) > numAvail) {
-            p = p[..(int)(numAvail)];
+            p = p.slice(0, numAvail);
         }
     }
-    (var numDec, err) = Decode(p, d.@in[..(int)(len(p) * 2)]);
-    d.@in = d.@in[(int)(2 * numDec)..];
+    (var numDec, err) = Decode(p, d.@in.slice(0, len(p) * 2));
+    d.@in = d.@in.slice(2 * numDec);
     if (err != default!) {
         (d.@in, d.err) = (default!, err); // Decode error; discard input remainder
     }
@@ -276,7 +276,7 @@ internal static readonly @string encodingHexDumperClosedˢ = "encoding/hex: dump
                 return (n, err);
             }
         }
-        Encode(h.buf[..], data[(int)(i)..(int)(i + 1)]);
+        Encode(h.buf[..], data.slice(i, i + 1));
         h.buf[2] = (rune)' ';
         nint l = 3;
         if (h.used == 7){
@@ -291,7 +291,7 @@ internal static readonly @string encodingHexDumperClosedˢ = "encoding/hex: dump
             h.buf[4] = (rune)'|';
             l = 5;
         }
-        (_, err) = h.w.Write(h.buf[..(int)(l)]);
+        (_, err) = h.w.Write(h.buf.slice(0, l));
         if (err != default!) {
             return (n, err);
         }
@@ -337,7 +337,7 @@ internal static readonly @string encodingHexDumperClosedˢ = "encoding/hex: dump
         if (h.used == 15) {
             l = 5;
         }
-        (_, err) = h.w.Write(h.buf[..(int)(l)]);
+        (_, err) = h.w.Write(h.buf.slice(0, l));
         if (err != default!) {
             return err;
         }
@@ -345,7 +345,7 @@ internal static readonly @string encodingHexDumperClosedˢ = "encoding/hex: dump
     }
     h.rightChars[nBytes] = (rune)'|';
     h.rightChars[nBytes + 1] = (rune)'\n';
-    (_, err) = h.w.Write(h.rightChars[..(int)(nBytes + 2)]);
+    (_, err) = h.w.Write(h.rightChars.slice(0, nBytes + 2));
     return err;
 }
 

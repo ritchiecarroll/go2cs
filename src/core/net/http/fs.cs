@@ -42,7 +42,7 @@ internal static error mapOpenError(error originalErr, @string name, rune sep, Fu
         if (parts[i] == "") {
             continue;
         }
-        var (fi, err) = stat(strings.Join(parts[..(int)(i + 1)], ((@string)sep)));
+        var (fi, err) = stat(strings.Join(parts.slice(0, i + 1), ((@string)sep)));
         if (err != default!) {
             return originalErr;
         }
@@ -304,7 +304,7 @@ internal static void serveContent(ResponseWriter w, ref Request r, @string name,
                 // read a chunk to decide between utf-8 text and binary
                 array<byte> buf = new(512); /* sniffLen */
                 var (n, _) = io.ReadFull(content, buf[..]);
-                ctype = DetectContentType(buf[..(int)(n)]);
+                ctype = DetectContentType(buf.slice(0, n));
                 var (_, errΔ1) = content.Seek(0, io.SeekStart); // rewind to output whole file
                 if (errΔ1 != default!) {
                     serveError(w, seekerCanTSeekˢ, StatusInternalServerError);
@@ -473,7 +473,7 @@ internal static (@string etag, @string remain) scanETag(@string s) {
     if (strings.HasPrefix(s, "W/"u8)) {
         start = 2;
     }
-    if (builtin.len(s[(int)(start)..]) < 2 || s[start] != (rune)'"') {
+    if (builtin.len(s.slice(start)) < 2 || s[start] != (rune)'"') {
         return ("", "");
     }
     // ETag is either W/"text" or "text".
@@ -485,7 +485,7 @@ internal static (@string etag, @string remain) scanETag(@string s) {
             break;
         }
         case {} when c is (rune)'"': {
-            return (s[..(int)(i + 1)], s[(int)(i + 1)..]);
+            return (s.slice(0, i + 1), s.slice(i + 1));
         }
         default: {
             return ("", "");

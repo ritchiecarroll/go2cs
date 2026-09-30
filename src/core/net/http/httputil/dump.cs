@@ -197,7 +197,7 @@ public static (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡreq, bool 
         if (dummyBody) {
             {
                 nint i = bytes.Index(dump, slice<byte>("\r\n\r\n"u8)); if (i >= 0) {
-                    dump = dump[..(int)(i + 4)];
+                    dump = dump.slice(0, i + 4);
                 }
             }
         }

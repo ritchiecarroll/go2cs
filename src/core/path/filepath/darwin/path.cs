@@ -192,8 +192,8 @@ public static (@string, error) Rel(@string basepath, @string targpath) {
     if (sameWord(targ, @base)) {
         return (".", default!);
     }
-    @base = @base[(int)(len(baseVol))..];
-    targ = targ[(int)(len(targVol))..];
+    @base = @base.slice(len(baseVol));
+    targ = targ.slice(len(targVol));
     if (@base == "."u8){
         @base = ""u8;
     } else 
@@ -222,7 +222,7 @@ public static (@string, error) Rel(@string basepath, @string targpath) {
         while (ti < tl && targ[ti] != Separator) {
             ti++;
         }
-        if (!sameWord(targ[(int)(t0)..(int)(ti)], @base[(int)(b0)..(int)(bi)])) {
+        if (!sameWord(targ.slice(t0, ti), @base.slice(b0, bi))) {
             break;
         }
         if (bi < bl) {
@@ -234,12 +234,12 @@ public static (@string, error) Rel(@string basepath, @string targpath) {
         b0 = bi;
         t0 = ti;
     }
-    if (@base[(int)(b0)..(int)(bi)] == "..") {
+    if (@base.slice(b0, bi) == "..") {
         return ("", errors.New("Rel: can't make "u8 + targpath + " relative to "u8 + basepath));
     }
     if (b0 != bl) {
         // Base elements left. Must go up before going down.
-        nint seps = bytealg.CountString(@base[(int)(b0)..(int)(bl)], Separator);
+        nint seps = bytealg.CountString(@base.slice(b0, bl), Separator);
         nint size = 2 + seps * 3;
         if (tl != t0) {
             size += 1 + tl - t0;
@@ -248,16 +248,16 @@ public static (@string, error) Rel(@string basepath, @string targpath) {
         nint n = copy(buf, ".."u8);
         for (nint i = 0; i < seps; i++) {
             buf[n] = Separator;
-            copy(buf[(int)(n + 1)..], ".."u8);
+            copy(buf.slice(n + 1), ".."u8);
             n += 3;
         }
         if (t0 != tl) {
             buf[n] = Separator;
-            copy(buf[(int)(n + 1)..], targ[(int)(t0)..]);
+            copy(buf.slice(n + 1), targ.slice(t0));
         }
         return (((@string)buf), default!);
     }
-    return (targ[(int)(t0)..], default!);
+    return (targ.slice(t0), default!);
 }
 
 // SkipDir is used as a return value from [WalkFunc] to indicate that

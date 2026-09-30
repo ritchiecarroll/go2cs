@@ -11,7 +11,7 @@ internal static void growTo(ref stack s, nint v) {
 }
 
 internal static void shrink(ref stack s) {
-    s = (s)[..(int)(len(s) - 1)];
+    s = (s).slice(0, len(s) - 1);
 }
 
 internal static void push(this ж<stack> Ꮡs, nint v) {

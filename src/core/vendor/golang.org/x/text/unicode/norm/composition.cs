@@ -143,7 +143,7 @@ internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
     for (nint i = 0; i < rb.nrune; i++) {
         var start = rb.rune[i].pos;
         var end = (uint8)(start + rb.rune[i].size);
-        rb.@out = appendꓸꓸꓸ(rb.@out, rb.@byte[(int)(start)..(int)(end)]);
+        rb.@out = appendꓸꓸꓸ(rb.@out, rb.@byte.slice(start, end));
     }
     return true;
 }
@@ -153,7 +153,7 @@ internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
     for (nint i = 0; i < rb.nrune; i++) {
         var start = rb.rune[i].pos;
         var end = (uint8)(start + rb.rune[i].size);
-        @out = appendꓸꓸꓸ(@out, rb.@byte[(int)(start)..(int)(end)]);
+        @out = appendꓸꓸꓸ(@out, rb.@byte.slice(start, end));
     }
     rb.reset();
     return @out;
@@ -165,7 +165,7 @@ internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
     nint p = 0;
     for (nint i = 0; i < rb.nrune; i++) {
         var runep = rb.rune[i];
-        p += copy(buf[(int)(p)..], rb.@byte[(int)(runep.pos)..(int)((uint8)(runep.pos + runep.size))]);
+        p += copy(buf.slice(p), rb.@byte.slice(runep.pos, (uint8)(runep.pos + runep.size)));
     }
     rb.reset();
     return p;
@@ -255,7 +255,7 @@ internal static insertErr insertDecomposed(this ж<reorderBuffer> Ꮡrb, slice<b
         if (info.BoundaryBefore() && rb.nrune > 0 && !Ꮡrb.doFlush()) {
             return iShortDst;
         }
-        i += copy(rb.@byte[(int)(rb.nbyte)..], dcomp[(int)(i)..(int)(i + (nint)info.size)]);
+        i += copy(rb.@byte.slice(rb.nbyte), dcomp.slice(i, i + (nint)info.size));
         rb.insertOrdered(info);
     }
     return iSuccess;
@@ -264,7 +264,7 @@ internal static insertErr insertDecomposed(this ж<reorderBuffer> Ꮡrb, slice<b
 // insertSingle inserts an entry in the reorderBuffer for the rune at
 // position i. info is the runeInfo for the rune at position i.
 [GoRecv] internal static void insertSingle(this ref reorderBuffer rb, input src, nint i, ΔProperties info) {
-    src.copySlice(rb.@byte[(int)(rb.nbyte)..], i, i + (nint)info.size);
+    src.copySlice(rb.@byte.slice(rb.nbyte), i, i + (nint)info.size);
     rb.insertOrdered(info);
 }
 
@@ -276,7 +276,7 @@ internal static insertErr insertDecomposed(this ж<reorderBuffer> Ꮡrb, slice<b
 // appendRune inserts a rune at the end of the buffer. It is used for Hangul.
 [GoRecv] internal static void appendRune(this ref reorderBuffer rb, rune r) {
     var bn = rb.nbyte;
-    nint sz = utf8.EncodeRune(rb.@byte[(int)(bn)..], (rune)r);
+    nint sz = utf8.EncodeRune(rb.@byte.slice(bn), (rune)r);
     rb.nbyte += utf8.UTFMax;
     rb.rune[rb.nrune] = new ΔProperties(pos: bn, size: (uint8)sz);
     rb.nrune++;
@@ -285,14 +285,14 @@ internal static insertErr insertDecomposed(this ж<reorderBuffer> Ꮡrb, slice<b
 // assignRune sets a rune at position pos. It is used for Hangul and recomposition.
 [GoRecv] internal static void assignRune(this ref reorderBuffer rb, nint pos, rune r) {
     var bn = rb.rune[pos].pos;
-    nint sz = utf8.EncodeRune(rb.@byte[(int)(bn)..], (rune)r);
+    nint sz = utf8.EncodeRune(rb.@byte.slice(bn), (rune)r);
     rb.rune[pos] = new ΔProperties(pos: bn, size: (uint8)sz);
 }
 
 // runeAt returns the rune at position n. It is used for Hangul and recomposition.
 [GoRecv] internal static rune runeAt(this ref reorderBuffer rb, nint n) {
     var inf = rb.rune[n];
-    var (r, _) = utf8.DecodeRune(rb.@byte[(int)(inf.pos)..(int)((uint8)(inf.pos + inf.size))]);
+    var (r, _) = utf8.DecodeRune(rb.@byte.slice(inf.pos, (uint8)(inf.pos + inf.size)));
     return r;
 }
 
@@ -300,7 +300,7 @@ internal static insertErr insertDecomposed(this ж<reorderBuffer> Ꮡrb, slice<b
 // It is used for Hangul and recomposition.
 [GoRecv] internal static slice<byte> bytesAt(this ref reorderBuffer rb, nint n) {
     var inf = rb.rune[n];
-    return rb.@byte[(int)(inf.pos)..(int)((nint)inf.pos + (nint)inf.size)];
+    return rb.@byte.slice(inf.pos, (nint)inf.pos + (nint)inf.size);
 }
 
 // For Hangul we combine algorithmically, instead of using tables.

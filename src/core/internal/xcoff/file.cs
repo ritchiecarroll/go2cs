@@ -144,7 +144,7 @@ internal static @string cstring(slice<byte> b) {
     nint i = default!;
     for (i = 0; i < len(b) && b[i] != 0; i++) {
     }
-    return ((@string)(b[..(int)(i)]));
+    return ((@string)(b.slice(0, i)));
 }
 
 // getString extracts a string from an XCOFF string table.
@@ -152,7 +152,7 @@ internal static (@string, bool) getString(slice<byte> st, uint32 offset) {
     if (offset < 4 || (nint)offset >= len(st)) {
         return ("", false);
     }
-    return (cstring(st[(int)(offset)..]), true);
+    return (cstring(st.slice((nint)(offset))), true);
 }
 
 // NewFile creates a new File for accessing an XCOFF binary in an underlying reader.
@@ -511,7 +511,7 @@ internal static readonly @string unexpectedReadFromˢ = "unexpected read from se
     if (n == len(dat)) {
         err = default!;
     }
-    return (dat[..(int)(n)], err);
+    return (dat.slice(0, n), err);
 }
 
 // CSect reads and returns the contents of a csect.
@@ -609,16 +609,16 @@ internal static readonly @string unexpectedReadFromˢ = "unexpected read from se
     }
     nint offset = 0;
     // First import file ID is the default LIBPATH value
-    @string libpath = cstring(table[(int)(offset)..]);
+    @string libpath = cstring(table.slice(offset));
     f.LibraryPaths = strings.Split(libpath, ":"u8);
     offset += len(libpath) + 3; // 3 null bytes
     var all = new slice<@string>(0);
     for (nint i = 1; i < (nint)nimpid; i++) {
-        @string impidpath = cstring(table[(int)(offset)..]);
+        @string impidpath = cstring(table.slice(offset));
         offset += len(impidpath) + 1;
-        @string impidbase = cstring(table[(int)(offset)..]);
+        @string impidbase = cstring(table.slice(offset));
         offset += len(impidbase) + 1;
-        @string impidmem = cstring(table[(int)(offset)..]);
+        @string impidmem = cstring(table.slice(offset));
         offset += len(impidmem) + 1;
         @string path = default!;
         if (len(impidpath) > 0){

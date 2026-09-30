@@ -101,7 +101,7 @@ internal static @string stripTrailingWhitespace(@string s) {
     while (i > 0 && isWhitespace(s[i - 1])) {
         i--;
     }
-    return s[0..(int)(i)];
+    return s.slice(0, i);
 }
 
 // Text returns the text of the comment.
@@ -146,7 +146,7 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
             break;
         }
         case (rune)'*': {
-            c = c[2..(int)(len(c) - 2)];
+            c = c.slice(2, len(c) - 2);
             break;
         }}
 
@@ -167,7 +167,7 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
             n++;
         }
     }
-    lines = lines[0..(int)(n)];
+    lines = lines.slice(0, n);
     // Add final "" entry to get trailing newline from Join.
     if (n > 0 && lines[n - 1] != "") {
         lines = append(lines, ""u8);

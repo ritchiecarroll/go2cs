@@ -138,7 +138,7 @@ public static slice<byte> Marshal(ж<State> Ꮡs) {
     var used = (s.c / (uint32)ctrInc) * (uint32)chunk + s.i;
     byteorder.BEPutUint64(data[(int)(1 * 8)..], (uint64)used);
     foreach (var (i, seed) in s.seed.ΔRangeSnapshot()) {
-        byteorder.LEPutUint64(data[(int)((2 + i) * 8)..], seed);
+        byteorder.LEPutUint64(data.slice((2 + i) * 8), seed);
     }
     return data;
 }
@@ -165,7 +165,7 @@ public static error Unmarshal(ж<State> Ꮡs, slice<byte> data) {
         return new errUnmarshalChaCha8жerror(@new<errUnmarshalChaCha8>());
     }
     foreach (var (i, _) in s.seed) {
-        s.seed[i] = byteorder.LEUint64(data[(int)((2 + i) * 8)..]);
+        s.seed[i] = byteorder.LEUint64(data.slice((2 + i) * 8));
     }
     s.c = (uint32)ctrInc * ((uint32)used / (uint32)chunk);
     block(Ꮡs.of(State.Ꮡseed), Ꮡs.of(State.Ꮡbuf), s.c);

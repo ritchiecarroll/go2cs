@@ -50,7 +50,7 @@ internal static (slice<byte> line, slice<byte> rest, nint consumed) getLine(slic
             i--;
         }
     }
-    return (bytes.TrimRight(data[0..(int)(i)], " \t"u8), data[(int)(j)..], j);
+    return (bytes.TrimRight(data.slice(0, i), " \t"u8), data.slice(j), j);
 }
 
 // removeSpacesAndTabs returns a copy of its input with all spaces and tabs
@@ -73,7 +73,7 @@ internal static slice<byte> removeSpacesAndTabs(slice<byte> data) {
         result[n] = b;
         n++;
     }
-    return result[0..(int)(n)];
+    return result.slice(0, n);
 }
 
 internal static slice<byte> pemStart = slice<byte>("\n-----BEGIN "u8);
@@ -102,7 +102,7 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
         if (endTrailerIndex < 0 || endTrailerIndex > len(rest)) {
             return (default!, data);
         }
-        rest = rest[(int)(endTrailerIndex)..];
+        rest = rest.slice(endTrailerIndex);
         // Find the first END line, and then find the last BEGIN line before
         // the end line. This lets us skip any repeated BEGIN lines that don't
         // have a matching END.
@@ -111,11 +111,11 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
             return (default!, data);
         }
         endTrailerIndex = endIndex + len(pemEnd);
-        nint beginIndex = bytes.LastIndex(rest[..(int)(endIndex)], pemStart[1..]);
+        nint beginIndex = bytes.LastIndex(rest.slice(0, endIndex), pemStart[1..]);
         if (beginIndex < 0 || (beginIndex > 0 && rest[beginIndex - 1] != (rune)'\n')) {
             continue;
         }
-        rest = rest[(int)(beginIndex + len(pemStart) - 1)..];
+        rest = rest.slice(beginIndex + len(pemStart) - 1);
         endIndex -= beginIndex + len(pemStart) - 1;
         endTrailerIndex -= beginIndex + len(pemStart) - 1;
         slice<byte> typeLine = default!;
@@ -126,7 +126,7 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
         if (!bytes.HasSuffix(typeLine, pemEndOfLine)) {
             continue;
         }
-        typeLine = typeLine[0..(int)(len(typeLine) - len(pemEndOfLine))];
+        typeLine = typeLine.slice(0, len(typeLine) - len(pemEndOfLine));
         p = Ꮡ(new Block(
             Headers: new map<@string, @string>(),
             Type: ((@string)typeLine)
@@ -157,13 +157,13 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
         }
         // After the "-----" of the ending line, there should be the same type
         // and then a final five dashes.
-        var endTrailer = rest[(int)(endTrailerIndex)..];
+        var endTrailer = rest.slice(endTrailerIndex);
         nint endTrailerLen = len(typeLine) + len(pemEndOfLine);
         if (len(endTrailer) < endTrailerLen) {
             continue;
         }
-        var restOfEndLine = endTrailer[(int)(endTrailerLen)..];
-        endTrailer = endTrailer[..(int)(endTrailerLen)];
+        var restOfEndLine = endTrailer.slice(endTrailerLen);
+        endTrailer = endTrailer.slice(0, endTrailerLen);
         if (!bytes.HasPrefix(endTrailer, typeLine) || !bytes.HasSuffix(endTrailer, pemEndOfLine)) {
             continue;
         }
@@ -175,17 +175,17 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
         }
         p.Value.Bytes = new byte[]{}.slice();
         if (endIndex > 0) {
-            var base64Data = removeSpacesAndTabs(rest[..(int)(endIndex)]);
+            var base64Data = removeSpacesAndTabs(rest.slice(0, endIndex));
             p.Value.Bytes = new slice<byte>(base64.StdEncoding.DecodedLen(len(base64Data)));
             var (n, err) = base64.StdEncoding.Decode((~p).Bytes, base64Data);
             if (err != default!) {
                 continue;
             }
-            p.Value.Bytes = (~p).Bytes[..(int)(n)];
+            p.Value.Bytes = (~p).Bytes.slice(0, n);
         }
         // the -1 is because we might have only matched pemEnd without the
         // leading newline if the PEM block was empty.
-        (_, rest, _) = getLine(rest[(int)(endIndex + len(pemEnd) - 1)..]);
+        (_, rest, _) = getLine(rest.slice(endIndex + len(pemEnd) - 1));
         return (p, rest);
     }
 }
@@ -205,17 +205,17 @@ internal static slice<byte> nl = new byte[]{(rune)'\n'}.slice();
     error err = default!;
 
     if (l.used + len(b) < pemLineLength) {
-        copy(l.line[(int)(l.used)..], b);
+        copy(l.line.slice(l.used), b);
         l.used += len(b);
         return (len(b), default!);
     }
-    (n, err) = l.@out.Write(l.line[0..(int)(l.used)]);
+    (n, err) = l.@out.Write(l.line.slice(0, l.used));
     if (err != default!) {
         return (n, err);
     }
     nint excess = (nint)pemLineLength - l.used;
     l.used = 0;
-    (n, err) = l.@out.Write(b[0..(int)(excess)]);
+    (n, err) = l.@out.Write(b.slice(0, excess));
     if (err != default!) {
         return (n, err);
     }
@@ -223,14 +223,14 @@ internal static slice<byte> nl = new byte[]{(rune)'\n'}.slice();
     if (err != default!) {
         return (n, err);
     }
-    return l.Write(b[(int)(excess)..]);
+    return l.Write(b.slice(excess));
 }
 
 [GoRecv] internal static error /*err*/ Close(this ref lineBreaker l) {
     error err = default!;
 
     if (l.used > 0) {
-        (_, err) = l.@out.Write(l.line[0..(int)(l.used)]);
+        (_, err) = l.@out.Write(l.line.slice(0, l.used));
         if (err != default!) {
             return err;
         }
