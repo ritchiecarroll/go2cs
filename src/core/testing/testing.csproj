@@ -13,7 +13,7 @@
          values and nil-able references the converted corpus does, so it carries the same suppression
          policy as csproj-template.xml rather than a list of its own. -->
     <Nullable>annotations</Nullable>
-    <LangVersion>latest</LangVersion>
+    <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>CS0162;CS0164;CS0282;CS0660;CS0661;CS1717;CS1718;CS8618;CS8860;CS8974;CS8981;IDE0060;IDE1006;CA2255</NoWarn>
   </PropertyGroup>

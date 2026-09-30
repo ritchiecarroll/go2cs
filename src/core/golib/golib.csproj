@@ -34,7 +34,7 @@
          here on purpose — and the corpus must not inherit it. 1701/1702 were .NET Framework
          assembly-binding redirects that cannot fire on net10.0; 660/661 were bare numbers. -->
     <NoWarn>CS0660;CS0661;CS8500;CS8981;IDE1006;CA2255</NoWarn>
-    <LangVersion>latest</LangVersion>
+    <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OutDir)'==''">
