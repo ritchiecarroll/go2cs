@@ -1104,6 +1104,11 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 	if namedArrayComposite {
 		csElementType := convertToCSTypeName(v.getAliasQualifiedTypeName(elementType, false))
 
+		// A named slice of ARRAYS records its element dims on the INNER literal, the `slice<T>` the
+		// wrapper's constructor takes and shares (withSliceElemDims answers the named type unchanged).
+		// Empty for a named array and for any other element.
+		dimsOpen, dimsClose := sliceElemDimsWrap(types.Unalias(exprType).Underlying())
+
 		// An EMPTY composite of a named-over-array/slice (`tmpBuf{}` where `type tmpBuf [32]byte`
 		// — runtime string.go's `*buf = tmpBuf{}` — or `pm{}` over a named slice) is the type's
 		// ZERO VALUE. The generic named-composite `nil` filler below would land INSIDE the
@@ -1135,7 +1140,7 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 				return fmt.Sprintf("new %s(new %s[%d].array())", typeRender, csElementType, definedLen)
 			}
 
-			return fmt.Sprintf("new %s(new %s[]{}%s)", typeRender, csElementType, compositeSuffix)
+			return fmt.Sprintf("new %s(%snew %s[]{}%s%s)", typeRender, dimsOpen, csElementType, compositeSuffix, dimsClose)
 		}
 
 		if arrayTypeContext.maxLength > 0 {
@@ -1145,14 +1150,14 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 			// it with the indexer-capable golib `array<T>(length)` instead, mirroring the alias form
 			// (`new words(4){[2] = 30}`); the named ctor takes an `array<T>` just as the positional
 			// `.array()` path produces.
-			typeRender = fmt.Sprintf("%s(new array<%s>(%s)", typeRender, csElementType, arrayTypeContext.lengthArgs())
-			compositeSuffix += ")"
+			typeRender = fmt.Sprintf("%s(%snew array<%s>(%s)", typeRender, dimsOpen, csElementType, arrayTypeContext.lengthArgs())
+			compositeSuffix += dimsClose + ")"
 		} else {
 			// Wrap the underlying array/slice literal in the named type's constructor:
 			// `new d(new rune[]{...}.array())`. The element literal and its `.array()`/
 			// `.slice()` suffix render via the ArraySource path below; close the ctor here.
-			typeRender = fmt.Sprintf("%s(new %s[]", typeRender, csElementType)
-			compositeSuffix += ")"
+			typeRender = fmt.Sprintf("%s(%snew %s[]", typeRender, dimsOpen, csElementType)
+			compositeSuffix += dimsClose + ")"
 		}
 	}
 

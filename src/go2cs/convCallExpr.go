@@ -2740,8 +2740,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 							// downstream of fmt). Build the factory-filled backing as the underlying
 							// slice<E> — the same value the unnamed form produces — and hand it to the
 							// wrapper's `T(slice<E> value)` ctor, which the generator always emits.
+							// That inner slice<E> is also where the element dims are recorded
+							// (withSliceElemDims answers the named type itself unchanged).
 							if _, isNamed := typeParam.(*types.Named); isNamed {
-								remainingArgs = fmt.Sprintf("new %s(%s)", v.getCSharpTypeName(sliceType), remainingArgs)
+								remainingArgs = v.withSliceElemDims(fmt.Sprintf("new %s(%s)", v.getCSharpTypeName(sliceType), remainingArgs), sliceType)
 							}
 						}
 					}

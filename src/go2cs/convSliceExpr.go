@@ -252,11 +252,29 @@ func sliceElemArrayDims(t types.Type) []int64 {
 //
 // Only creation sites are wrapped: a reslice shares its source's backing and inherits the record for
 // free, so nothing needs to travel through slicing, ranging or assignment.
+//
+// A NAMED slice type (`type UUIDs []UUID`) is answered unchanged: its wrapper struct is not a
+// `slice<T>`, so wrapping it cannot bind (CS0411), and returning `slice<T>` would drop the name its
+// methods hang on. Its creation sites record against the inner `slice<T>` the wrapper's constructor
+// takes instead -- `new UUIDs(GoReflect.WithElemDims(new UUID[]{…}.slice(), 16))` -- which is the
+// backing the wrapper shares, and so the same record (see sliceElemDimsWrap).
 func (v *Visitor) withSliceElemDims(exprResult string, t types.Type) string {
+	if _, isNamed := types.Unalias(t).(*types.Named); isNamed {
+		return exprResult
+	}
+
+	prefix, suffix := sliceElemDimsWrap(t)
+	return prefix + exprResult + suffix
+}
+
+// sliceElemDimsWrap answers the text that opens and closes a GoReflect.WithElemDims wrapper around a
+// creation expression of slice type t, or two empty strings when t records nothing. The composite
+// literal renderer assembles its text in pieces and so needs the halves rather than a finished wrap.
+func sliceElemDimsWrap(t types.Type) (prefix string, suffix string) {
 	dims := sliceElemArrayDims(t)
 
 	if len(dims) == 0 {
-		return exprResult
+		return "", ""
 	}
 
 	values := make([]string, len(dims))
@@ -265,7 +283,7 @@ func (v *Visitor) withSliceElemDims(exprResult string, t types.Type) string {
 		values[i] = fmt.Sprintf("%d", dim)
 	}
 
-	return fmt.Sprintf("GoReflect.WithElemDims(%s, %s)", exprResult, strings.Join(values, ", "))
+	return "GoReflect.WithElemDims(", ", " + strings.Join(values, ", ") + ")"
 }
 
 func (v *Visitor) getRangeIndexer(expr ast.Expr) string {
