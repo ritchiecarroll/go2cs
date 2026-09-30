@@ -1,0 +1,79 @@
+<#
+.SYNOPSIS
+    Table-driven arms for NugetgoIdentity.psm1 (owner rulings B2 and B3). Every expectation is a LITERAL; a case
+    that should refuse names a fragment of its reason, so a refusal for the wrong cause fails too. Exit code =
+    the number of failed cases.
+#>
+$ErrorActionPreference = 'Stop'
+Import-Module (Join-Path $PSScriptRoot 'NugetgoIdentity.psm1') -Force
+$failed = 0
+$ran = 0
+function Check([string]$name, [bool]$ok, [string]$detail) {
+    $script:ran++
+    if ($ok) { Write-Host "  ok    $name" } else { $script:failed++; Write-Host "  FAIL  $name -- $detail" -ForegroundColor Red }
+}
+
+Write-Host 'B2 -- package IDs'
+$ids = @(
+    # module path, existing IDs, expected Id (literal) or $null, expected Alternate, reason fragment when refused/alternate
+    @('github.com/google/uuid', @(), 'nugetgo.github.com.google.uuid', $false, $null),
+    @('github.com/golang-jwt/jwt/v5', @(), 'nugetgo.github.com.golang-jwt.jwt.v5', $false, $null),
+    @('gopkg.in/yaml.v3', @(), 'nugetgo.gopkg.in.yaml.v3', $false, $null),
+    @('github.com/BurntSushi/toml', @(), 'nugetgo.github.com.BurntSushi.toml', $false, $null),
+    @('example.com/a~b', @(), $null, $true, 'breaks nuget.org''s ID rule'),
+    @('github.com/a/b.c', @('nugetgo.github.com.a.b.c'), $null, $true, 'collides'),
+    @('github.com/a.b/c', @('NUGETGO.GITHUB.COM.A.B.C'), $null, $true, 'collides'),
+    @(('example.com/' + ('x' * 95)), @(), $null, $true, 'over nuget.org''s 100'),
+    @('not a path', @(), $null, $false, 'not a Go module path')
+)
+foreach ($c in $ids) {
+    $r = Get-NugetgoPackageId -ModulePath $c[0] -ExistingIds $c[1]
+    $label = "$($c[0]) [existing: $($c[1] -join ',')]"
+    if ($c[2]) {
+        Check $label ($r.Id -ceq $c[2] -and $r.Alternate -eq $c[3]) "got Id '$($r.Id)' Alternate $($r.Alternate)"
+    }
+    elseif ($c[3]) {
+        $shape = $r.Id -and $r.Id.Length -le 100 -and $r.Id -match '^\w+([_.-]\w+)*$' -and $r.Id -match '\.[0-9a-f]{8}$'
+        Check $label ($r.Alternate -and $shape -and $r.Reason -like "*$($c[4])*") "got Id '$($r.Id)' Alternate $($r.Alternate) Reason '$($r.Reason)'"
+    }
+    else {
+        Check $label ($null -eq $r.Id -and $r.Reason -like "*$($c[4])*") "got Id '$($r.Id)' Reason '$($r.Reason)'"
+    }
+}
+# a/b.c and a.b/c must not share an alternate (the hash is over the exact path)
+$ab = Get-NugetgoPackageId -ModulePath 'github.com/a/b.c' -ExistingIds @('nugetgo.github.com.a.b.c')
+$ba = Get-NugetgoPackageId -ModulePath 'github.com/a.b/c' -ExistingIds @('nugetgo.github.com.a.b.c')
+Check 'a/b.c and a.b/c take DIFFERENT alternates' ($ab.Id -and $ba.Id -and $ab.Id -ne $ba.Id) "a/b.c '$($ab.Id)', a.b/c '$($ba.Id)'"
+
+Write-Host 'B3 -- package versions'
+$uuidList = @('v1.0.0', 'v1.6.0')
+$rcList = @('v1.0.0-rc.1', 'v1.0.0-rc.2')
+$rcClash = @('v1.0.0-rc.1', 'v1.0.0-rc.1.0.3')
+$vs = @(
+    # Go version, revision, @v/list, expected version (literal) or $null, refusal fragment
+    @('v1.6.0', 0, $null, '1.6.0', $null),
+    @('v1.6.300', 1, $uuidList, '1.6.300.1', $null),
+    @('v5.3.256', 2, $null, '5.3.256.2', $null),
+    @('v2.0.0+incompatible', 0, $null, '2.0.0', $null),
+    @('v1.0.0-rc.1', 0, $null, '1.0.0-rc.1', $null),
+    @('v1.0.0-rc.1', 1, $rcList, '1.0.0-rc.1.0.1', $null),
+    @('v1.0.0-rc.1', 2, $rcList, '1.0.0-rc.1.0.2', $null),
+    @('v0.0.0-20251001235044-fca9a0999f15', 0, $null, '0.0.0-20251001235044-fca9a0999f15', $null),
+    @('v0.0.0-20251001235044-fca9a0999f15', 1, @(), '0.0.0-20251001235044-fca9a0999f15.0.1', $null),
+    @('v1.0.0-rc.1', 1, $rcClash, $null, 'could equal'),
+    @('v1.0.0-rc.1', 1, $null, $null, 'needs the module''s @v/list'),
+    @('v1.0.0-RC.1', 0, $null, $null, 'uppercase'),
+    @('v2147483648.0.0', 0, $null, $null, 'overflows Int32'),
+    @(('v1.0.0-' + ('a' * 60)), 0, $null, $null, 'over 64'),
+    @('1.6.0', 0, $null, $null, 'not a Go module version'),
+    @('v1.6.0', -1, $null, $null, 'not -1')
+)
+foreach ($c in $vs) {
+    $r = Get-NugetgoVersion -GoVersion $c[0] -Revision $c[1] -VList $c[2]
+    $label = "$($c[0]) rev $($c[1])"
+    if ($c[3]) { Check $label (-not $r.Refused -and $r.Version -ceq $c[3]) "got '$($r.Version)' refused $($r.Refused) '$($r.Reason)'" }
+    else { Check $label ($r.Refused -and $null -eq $r.Version -and $r.Reason -like "*$($c[4])*") "got '$($r.Version)' refused $($r.Refused) '$($r.Reason)'" }
+}
+
+Write-Host "ran $ran, failed $failed"
+exit $failed
