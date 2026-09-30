@@ -33,8 +33,9 @@ internal static void deferredSend(channel<nint> ch) {
     try {
         var chʗ1 = ch;
         defer(() => {
+            var chanᴛ1 = chanFor(chʗ1);
             var (ᴛ1, ᴛ2) = pair();
-            chanFor(chʗ1).ᐸꟷ(must(ᴛ1, ᴛ2));
+            chanᴛ1.ᐸꟷ(must(ᴛ1, ᴛ2));
         }, ref ᒐ);
         log = append(log, "body"u8);
     }
@@ -50,21 +51,24 @@ private static readonly object bareˢ = (@string)"bare:"u8;
 
 internal static void Main() {
     var ch = new channel<nint>(8);
+    var chanᴛ2 = chanFor(ch);
     var (ᴛ3, ᴛ4) = pair();
-    chanFor(ch).ᐸꟷ(must(ᴛ3, ᴛ4));
+    chanᴛ2.ᐸꟷ(must(ᴛ3, ᴛ4));
     fmt.Println(callˢ, log, ᐸꟷ(ch));
     log = default!;
     var chans = new channel<nint>[]{default!, ch}.slice();
+    var chanᴛ3 = chans[idx()];
     var (ᴛ5, ᴛ6) = pair();
-    chans[idx()].ᐸꟷ(must(ᴛ5, ᴛ6));
+    chanᴛ3.ᐸꟷ(must(ᴛ5, ᴛ6));
     fmt.Println(indexˢ, log, ᐸꟷ(ch));
     log = default!;
     var done = new channel<bool>(0);
     var chʗ1 = ch;
     var doneʗ1 = done;
     goǃ(() => {
+        var chanᴛ4 = chanFor(chʗ1);
         var (ᴛ7, ᴛ8) = pair();
-        chanFor(chʗ1).ᐸꟷ(must(ᴛ7, ᴛ8));
+        chanᴛ4.ᐸꟷ(must(ᴛ7, ᴛ8));
         doneʗ1.ᐸꟷ(true);
     });
     ᐸꟷ(done);
