@@ -20,6 +20,8 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/parser"
+	"go/token"
 	"go/types"
 	"log"
 	"os"
@@ -272,6 +274,14 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			packageInputPath = pkg.Dir
 		}
 
+		// Refuse a selected cgo source BEFORE any project file is written: the package cannot be
+		// converted faithfully, and a refused conversion should leave the output tree untouched.
+		paired, skippedGenerated := syntaxSourceFiles(pkg)
+
+		if err := refuseSelectedCgoSources(pkg, paired); err != nil {
+			log.Fatalf("Refusing to convert: %s\n", err)
+		}
+
 		var projectName, projectFileName, projectFileContents string
 		projectName, packageNamespace = getProjectName(packageInputPath, options)
 		currentPackageGorootVendored = isGorootVendoredDir(packageInputPath, options.goRoot)
@@ -279,14 +289,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		if projectFileName, projectFileContents, err = prepareProjectFiles(projectName, packageNamespace, packageOutputPath); err != nil {
 			log.Fatalf("Failed to write project files for directory \"%s\": %s\n", packageOutputPath, err)
 		} else {
-			paired, skippedGenerated := syntaxSourceFiles(pkg)
-
-			// Only a cgo package produces these (never met on Windows, where no cgo files are
-			// selected for any stdlib package): the parsed set then carries toolchain-GENERATED
-			// intermediates whose mangled content has no C# conversion. Say so per file — this
-			// line is the only account of why the emitted package is missing its cgo half.
+			// A selected cgo source never reaches here (refused above, before any file is written), so
+			// what remains is a toolchain-GENERATED file that is not a cgo intermediate. Its content
+			// has no C# conversion; say so per file, since this line is the only account of why the
+			// emitted package lacks it.
 			for _, skippedPath := range skippedGenerated {
-				showWarning("Skipping generated file %q: not among package %s's plain Go sources (a cgo intermediate has no C# conversion); the package converts best-effort without it", skippedPath, pkg.PkgPath)
+				showWarning("Skipping generated file %q: not among package %s's plain Go sources (a toolchain-generated intermediate has no C# conversion); the package converts best-effort without it", skippedPath, pkg.PkgPath)
 			}
 
 			for _, pair := range paired {
@@ -725,7 +733,56 @@ func packageInfoPath(packageOutputPath string, isDir bool, options Options) stri
 	return filepath.Join(filepath.Dir(packageOutputPath), PackageInfoFileName)
 }
 
-// refuseSelectedCgoSources is the S3 refusal. RED stub: returns nil until the GREEN commit.
+// refuseSelectedCgoSources is S3, the loud half of the cgo skip. go/packages lists a cgo package's
+// `import "C"` source among GoFiles, but never parses it into Syntax: the compiled files carry cgo's
+// generated, content-hashed build-cache objects in its place, which syntaxSourceFiles reports as
+// skipped and which have no C# conversion. Skipping them with a warning yielded a package that
+// compiles and is missing code, so a selected cgo source is refused by name here instead (owner,
+// ruling 578 item 7).
+//
+// The decision reads what the loader SELECTED (GoFiles), never the package directory, which is why
+// the cases that must stay quiet do so structurally: a test-only file is not part of the package
+// build, a platform-deselected file (build tags, GOOS/GOARCH suffix) is in IgnoredFiles, and at
+// CGO_ENABLED=0 -- how the corpus is converted -- no file imports C into the build at all. A
+// selected file counts as cgo only if it has no paired syntax tree AND imports "C"; a file that
+// merely failed to parse is a different fault with its own reporting.
 func refuseSelectedCgoSources(pkg *packages.Package, paired []syntaxSourceFile) error {
-	return nil
+	parsed := make(map[string]bool, len(paired))
+
+	for _, pair := range paired {
+		parsed[filepath.Clean(pair.path)] = true
+	}
+
+	var sources []string
+
+	for _, path := range pkg.GoFiles {
+		if !parsed[filepath.Clean(path)] && importsC(path) {
+			sources = append(sources, filepath.Base(path))
+		}
+	}
+
+	if len(sources) == 0 {
+		return nil
+	}
+
+	return fmt.Errorf("package %s selects cgo source %s (import \"C\") for this build, and cgo has no C# conversion yet, so the converted package would silently lack that code; convert with CGO_ENABLED=0 (the corpus convention) or exclude the file from the build",
+		pkg.PkgPath, strings.Join(sources, ", "))
+}
+
+// importsC reports whether the Go source at path imports the pseudo-package "C". Unreadable or
+// unparseable files report false: they are not evidence of cgo.
+func importsC(path string) bool {
+	file, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.ImportsOnly)
+
+	if err != nil || file == nil {
+		return false
+	}
+
+	for _, spec := range file.Imports {
+		if spec.Path != nil && spec.Path.Value == `"C"` {
+			return true
+		}
+	}
+
+	return false
 }
