@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -42,6 +44,12 @@ public class LinuxDescriptorLimitTests
 
     [DllImport("libc", SetLastError = true)]
     private static extern int setrlimit(int resource, in RLimit rlim);
+
+    [DllImport("libc", SetLastError = true)]
+    private static extern int open(string path, int flags);
+
+    [DllImport("libc")]
+    private static extern int close(int fd);
 
     [DllImport("libc")]
     private static extern int pthread_create(out nint thread, nint attr, nint startRoutine, nint arg);
@@ -189,5 +197,40 @@ public class LinuxDescriptorLimitTests
         Assert.IsNull(thrown, $"the run must survive a test that lowered the limit, got {thrown?.GetType().Name}: {thrown?.Message}");
         Assert.IsTrue(secondRan, "the test after the lowering one must start and run");
         Assert.AreEqual((nint)0, exit, "both tests pass, so the run exits 0");
+    }
+
+    // RLIMIT_NOFILE bounds the descriptor NUMBER an open may return, not how many are open. A long-lived
+    // host (the full GolibTests run) has holes in its table, so a limit sized from the COUNT still leaves
+    // free numbers below it. Punch holes deliberately and the headroom arm must read what it reads on a
+    // table without them.
+    [TestMethod]
+    public void TheHeadroomArmIsNotFooledByHolesInTheDescriptorTable()
+    {
+        RequireLinux();
+
+        List<int> opened = [];
+
+        try
+        {
+            for (int i = 0; i < 64; i++)
+            {
+                int fd = open("/dev/null", 0);
+                Assert.IsTrue(fd >= 0, $"open(/dev/null) #{i}");
+                opened.Add(fd);
+            }
+
+            // Every other one: 32 holes, spread across the numbers the count-sized limit admits.
+            for (int i = 0; i < opened.Count; i += 2)
+                close(opened[i]);
+
+            opened = opened.Where((_, i) => i % 2 == 1).ToList();
+
+            AManagedThreadStartNeedsDescriptorsGosLimitDenies();
+        }
+        finally
+        {
+            foreach (int fd in opened)
+                close(fd);
+        }
     }
 }
