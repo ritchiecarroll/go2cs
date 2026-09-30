@@ -674,6 +674,7 @@
     <Project Path="tests/Behavioral/NamedSliceChildPkg/netlike/NamedSliceChildPkg.netlike.csproj" />
     <Project Path="tests/Behavioral/NamedSliceConversion/NamedSliceConversion.csproj" />
     <Project Path="tests/Behavioral/NamedSliceNilVsEmpty/NamedSliceNilVsEmpty.csproj" />
+    <Project Path="tests/Behavioral/NamedSliceOfArrayDims/NamedSliceOfArrayDims.csproj" />
     <Project Path="tests/Behavioral/NamedSlicePointerReinterpret/NamedSlicePointerReinterpret.csproj" />
     <Project Path="tests/Behavioral/NamedSlicePointerElements/NamedSlicePointerElements.csproj" />
     <Project Path="tests/Behavioral/NamedStringConcat/NamedStringConcat.csproj" />

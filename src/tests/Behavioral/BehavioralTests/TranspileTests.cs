@@ -1213,6 +1213,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedSliceNilVsEmpty() => CheckTarget("NamedSliceNilVsEmpty");
 
     [TestMethod]
+    public void CheckNamedSliceOfArrayDims() => CheckTarget("NamedSliceOfArrayDims");
+
+    [TestMethod]
     public void CheckNamedSlicePointerElements() => CheckTarget("NamedSlicePointerElements");
 
     [TestMethod]

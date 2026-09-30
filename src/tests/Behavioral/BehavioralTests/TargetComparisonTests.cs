@@ -1216,6 +1216,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedSliceNilVsEmpty() => CheckTarget("NamedSliceNilVsEmpty");
 
     [TestMethod]
+    public void CheckNamedSliceOfArrayDims() => CheckTarget("NamedSliceOfArrayDims");
+
+    [TestMethod]
     public void CheckNamedSlicePointerElements() => CheckTarget("NamedSlicePointerElements");
 
     [TestMethod]
