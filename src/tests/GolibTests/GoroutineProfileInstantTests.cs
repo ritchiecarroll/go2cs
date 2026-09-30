@@ -122,6 +122,57 @@ public class GoroutineProfileInstantTests
         }
     }
 
+    // The gate's SHARED side is shared: a go statement and a label set proceed while another thread
+    // holds it shared, so the gate serializes profiles against launches, never launches against each
+    // other. The holder is this thread and the launches run on another, because the gate refuses
+    // recursion (NoRecursion) by design.
+    [TestMethod]
+    public void SharedHoldersOfTheProfileGateNeverBlockEachOther()
+    {
+        var gate = (ReaderWriterLockSlim)typeof(Goroutine)
+            .GetField("s_profileGate", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null)!;
+
+        channel<int> park = new(0);
+        using var finished = new ManualResetEventSlim();
+        Exception? failure = null;
+
+        gate.EnterReadLock();
+
+        try
+        {
+            var other = new Thread(() =>
+            {
+                try
+                {
+                    using (Goroutine.Enter())
+                    {
+                        Goroutine.SetProfileLabels(new object());
+                        builtin.goǃ(ParkChild, park);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    failure = ex;
+                }
+                finally
+                {
+                    finished.Set();
+                }
+            });
+
+            other.Start();
+
+            Assert.IsTrue(finished.Wait(TimeSpan.FromSeconds(10)),
+                "a label set and a go statement blocked while another thread held the profile gate SHARED");
+            Assert.IsNull(failure, $"the other thread failed: {failure}");
+        }
+        finally
+        {
+            gate.ExitReadLock();
+            park.Close();
+        }
+    }
+
     // TestGoroutineProfileConcurrency/goroutine_launches, in miniature: a launcher that labels itself
     // i and starts child i, spinning longer each time; a churn chain that labels itself and hands off;
     // and snapshots taken meanwhile, each checked with the subtest's own rule -- the distinct launch
