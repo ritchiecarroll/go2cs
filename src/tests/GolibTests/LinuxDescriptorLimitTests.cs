@@ -38,6 +38,7 @@ public class LinuxDescriptorLimitTests
 
     private const int RLIMIT_NOFILE = 7;
     private const ulong GoMagicLimit = 43; // magicRlimitValue + 1, syscall_linux_test.go:734
+    private const int O_RDONLY = 0;
 
     [DllImport("libc", SetLastError = true)]
     private static extern int getrlimit(int resource, out RLimit rlim);
@@ -69,11 +70,34 @@ public class LinuxDescriptorLimitTests
         return limit;
     }
 
+    // How long a body may stay inside a lowered limit before the limit comes back without it. A thread
+    // start the limit denies throws OutOfMemoryException at once on Microsoft's build of the runtime but
+    // BLOCKS on Canonical's Ubuntu build until descriptors come back (it then throws the same exception),
+    // so without this the testhost waits inside NOFILE 43 forever. Kept short because the runtime cannot
+    // start a thread of its own in there either, and one it fails to start takes the testhost down: with
+    // the watchdog at 1 s, 3 of 8 runs of this class alone on Canonical's build crashed; at 100 ms, 0 of 8.
+    private static readonly TimeSpan LimitWatchdog = TimeSpan.FromMilliseconds(100);
+
     // Runs body with the SOFT limit at `soft` and ALWAYS puts the original back -- setrlimit opens no
-    // descriptor, so the restore cannot itself be denied by the limit it is undoing.
+    // descriptor, so the restore cannot itself be denied by the limit it is undoing. The finally covers a
+    // body that throws; the watchdog covers one that does not come back.
     private static T UnderSoftLimit<T>(ulong soft, Func<T> body)
     {
         RLimit original = Current();
+        using ManualResetEventSlim done = new();
+        bool fired = false;
+
+        // Started BEFORE the limit drops: a thread start inside it is exactly what may be denied.
+        Thread watchdog = new(() =>
+        {
+            if (!done.Wait(LimitWatchdog))
+            {
+                setrlimit(RLIMIT_NOFILE, original);
+                fired = true;
+            }
+        }) { IsBackground = true, Name = "NOFILE watchdog" };
+
+        watchdog.Start();
 
         try
         {
@@ -82,7 +106,42 @@ public class LinuxDescriptorLimitTests
         }
         finally
         {
+            done.Set();
+            watchdog.Join();
             setrlimit(RLIMIT_NOFILE, original);
+
+            if (fired)
+                Console.WriteLine($"the watchdog restored NOFILE after {LimitWatchdog.TotalSeconds} s: the body was still inside {soft}");
+        }
+    }
+
+    // RLIMIT_NOFILE bounds the NUMBER a new descriptor may take, not how many are open, and open() returns
+    // the lowest free number. A long-lived host has holes in its table, so a limit sized from the COUNT
+    // in /proc/self/fd still leaves free numbers below it. This fills every hole below the highest open
+    // descriptor with /dev/null for the duration of body, which it hands the lowest free number: with the
+    // limit at lowestFree + k, exactly k numbers are free.
+    private static T WithNoHolesBelowTheTop<T>(Func<int, T> body)
+    {
+        int highest = Directory.GetFileSystemEntries("/proc/self/fd").Max(entry => int.Parse(Path.GetFileName(entry)));
+        List<int> fillers = [];
+
+        try
+        {
+            int fd;
+
+            while ((fd = open("/dev/null", O_RDONLY)) >= 0 && fd <= highest)
+                fillers.Add(fd);
+
+            Assert.IsTrue(fd > highest, $"filling the holes below descriptor {highest}: open(/dev/null) failed");
+
+            // The first number past the top: it is the lowest free one once it is closed again.
+            close(fd);
+            return body(fd);
+        }
+        finally
+        {
+            foreach (int filler in fillers)
+                close(filler);
         }
     }
 
@@ -121,32 +180,32 @@ public class LinuxDescriptorLimitTests
     {
         RequireLinux();
 
-        int open = OpenDescriptors();
-        Assert.IsTrue((ulong)open > GoMagicLimit,
-            $"PREMISE: this host holds {open} descriptors, so Go's {GoMagicLimit} admits no new one; below that the arm proves nothing");
+        int held = OpenDescriptors();
+        Assert.IsTrue((ulong)held > GoMagicLimit,
+            $"PREMISE: this host holds {held} descriptors, so Go's {GoMagicLimit} admits no new one; below that the arm proves nothing");
 
-        (Exception? managed, int native) = UnderSoftLimit(GoMagicLimit, () => (TryManagedThreadStart(), TryNativeThread()));
+        // With the holes below the top filled, every number under 43 is taken, which is the premise's claim.
+        (Exception? managed, int native) = WithNoHolesBelowTheTop(_ =>
+            UnderSoftLimit(GoMagicLimit, () => (TryManagedThreadStart(), TryNativeThread())));
 
         Assert.IsInstanceOfType(managed, typeof(OutOfMemoryException),
             $"under NOFILE {GoMagicLimit} a managed Thread.Start must fail the way the syscall row's host did, got {managed?.GetType().Name ?? "success"}");
         Assert.AreEqual(0, native,
             "a NATIVE pthread_create under the same limit must succeed: the thread itself is admissible, so what is denied is a descriptor the runtime's thread start opens");
 
-        // The headroom a managed thread start needs: the smallest k with the soft limit at open + k that
-        // lets it through. Re-read the descriptor count per step, since a successful start can leave
-        // the process holding a different number than before.
+        // The headroom a managed thread start needs: the smallest k with exactly k free descriptor numbers
+        // under the limit that lets it through. The holes are refilled per step, since a successful start
+        // can leave the table different from before.
         int? needed = null;
 
         for (int k = 0; k <= 16 && needed is null; k++)
         {
-            int now = OpenDescriptors();
-
-            if (UnderSoftLimit((ulong)(now + k), TryManagedThreadStart) is null)
+            if (WithNoHolesBelowTheTop(lowestFree => UnderSoftLimit((ulong)(lowestFree + k), TryManagedThreadStart)) is null)
                 needed = k;
         }
 
         Assert.IsNotNull(needed, "no headroom up to 16 descriptors let a managed thread start through");
-        Console.WriteLine($"managed Thread.Start needs {needed} free descriptor(s) (host held {open} at the arm's start)");
+        Console.WriteLine($"managed Thread.Start needs {needed} free descriptor(s) (host held {held} at the arm's start)");
         Assert.IsTrue(needed >= 1, "a managed thread start that needs ZERO free descriptors could not have failed under Go's limit");
     }
 
@@ -214,7 +273,7 @@ public class LinuxDescriptorLimitTests
         {
             for (int i = 0; i < 64; i++)
             {
-                int fd = open("/dev/null", 0);
+                int fd = open("/dev/null", O_RDONLY);
                 Assert.IsTrue(fd >= 0, $"open(/dev/null) #{i}");
                 opened.Add(fd);
             }
