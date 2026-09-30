@@ -184,3 +184,49 @@ M1-only build still carries it). `-Go2csPath` is a master worktree; D1 to D3 cha
 | `v4` | `version=VERSION_4 variant=RFC4122 len=36 roundtrip=true` | MATCH |
 | `v6` | `version=VERSION_6 variant=RFC4122 len=36 roundtrip=true` | MATCH |
 | `v7` | `version=VERSION_7 variant=RFC4122 len=36 roundtrip=true` | MATCH |
+
+## Amendment 2026-09-30 -- the release-path reading (TRAIN J landed)
+
+**Tree:** `5739f103c2`, a local, never-pushed merge of this branch (through `22f375286c`) onto master `f819887fa3`,
+where TRAIN J landed. Master has no `-VersionSuffix`, and this branch's 10 files touch nothing master changed.
+**Converter:** the same untracked M1 + D3 + D1 + D2 build as the amendment above (md5 `fcfc292e…`).
+
+**Closure pack: 344 packages in each of two flavours, every version local.**
+- push-nuget's release pre-flight is CLEAN at the landed tip: 219 green badges verified against 237 proof pages,
+  223 roster rows, 228 `.tests.csproj`. The stale `runtime.debug` page that blocked the first attempt is resolved.
+- Two flavours: `win-x64` 344 packages and `linux-x64` 344 packages.
+  - 37 L3 packages (per-GOOS sources) were merged into RID-specific assets; `go.runtime` carries both
+    `runtimes/win-x64` and `runtimes/linux-x64`.
+  - 307 are platform-neutral and were copied verbatim. None differs materially between flavours.
+- The feed: 344 `.nupkg`, all `go.*`, every one `1.24.13.2-local.1` (`go.lib`, `go.gen`, `go.runtime` included).
+  Every `.nuspec` `<version>` reads `1.24.13.2-local.1`, and so do all 2,725 `go.*` dependency edges. None is at a
+  published version.
+- The user's global packages folder holds 85 `go.*` ids / 289 id-version pairs before and after the pack.
+
+**A defect in this branch's own push-nuget line, found and fixed (`22f375286c`).** The first pack passed the
+pre-flight and the main build, then stopped at `[linux-x64] Packing` with `MSB1001: Unknown switch`. MSBuild had
+received `-p:PackageVersion=…` one CHARACTER per argument.
+- Mechanism: `$packVersionArgs = if ($VersionSuffix) { @("-p:…") } else { @() }`. The `if`'s output unrolls the
+  one-element array to a bare string, and `@packVersionArgs` splats a string by character.
+- Isolated control (pwsh 7): the old form is a `String` and splats 35 arguments, exactly the failing command line.
+  The fixed form, `@(if ($VersionSuffix) { "-p:PackageVersion=$packVersion" })`, passes 1, and 0 without a suffix.
+- The release path is unaffected: without `-VersionSuffix` it always took the empty branch and passed nothing.
+
+**uuid pack:** `go.github.com.google.uuid` `1.6.0-local.1`, with 18 `go.*` dependencies at the closure version and
+the LICENSE packed.
+
+**Package-feed consume: 28 of 28 lines match `go run`, and the table is byte-identical to the project-reference
+table above.**
+- The consumer restores from the local folder feed alone (a `nuget.config` with `<clear/>`) into an isolated
+  `NUGET_PACKAGES`. That cache holds 107 `go.*` packages: 106 at `1.24.13.2-local.1` and uuid at `1.6.0-local.1`,
+  nothing at a published version. `project.assets.json` resolves every `go.*` entry at a local version.
+- Consumer exit 0, offline oracle exit 0.
+- The global packages folder: 85 ids / 289 pairs before and after; 0 new ids, 0 new pairs.
+
+**`-tests` at master, without D4: 2 order failures this run.** `TestRandomUUID` and `TestRandomUUID_Pooled` fail,
+Go pass / C# fail, as the alphabetical order predicts. `TestVersion6` passed on BOTH sides this time, in the same
+alphabetical order in which it failed `time reversed` in the amendment above (the second UUID's timestamp read older
+than the first's). Its failure therefore needs ORDER plus a run-to-run factor, most likely timing. The mechanism is
+not traced here. That sharpens the order reading rather than contradicting it. Nothing outside the known order set
+failed. With D1 to D4
+landed (TRAIN K), the reading to take at the landed tip is 54 of 54.
