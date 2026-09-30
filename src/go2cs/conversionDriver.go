@@ -724,3 +724,8 @@ func packageInfoPath(packageOutputPath string, isDir bool, options Options) stri
 
 	return filepath.Join(filepath.Dir(packageOutputPath), PackageInfoFileName)
 }
+
+// refuseSelectedCgoSources is the S3 refusal. RED stub: returns nil until the GREEN commit.
+func refuseSelectedCgoSources(pkg *packages.Package, paired []syntaxSourceFile) error {
+	return nil
+}
