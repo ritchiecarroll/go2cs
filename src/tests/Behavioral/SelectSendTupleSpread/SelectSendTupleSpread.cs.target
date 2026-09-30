@@ -31,17 +31,21 @@ private static readonly object orderˢ = (@string)"order:"u8;
 
 internal static void Main() {
     var ch = new channel<nint>(4);
-    var selᴛ1 = ch.ᐸꟷ(must(pair()), ꓸꓸꓸ);
-    switch (select(selᴛ1)) {
+    var selᴛ1 = ch;
+    var (ᴛ1, ᴛ2) = pair();
+    var selᴛ2 = selᴛ1.ᐸꟷ(must(ᴛ1, ᴛ2), ꓸꓸꓸ);
+    switch (select(selᴛ2)) {
     case 0: {
         fmt.Println(sentAloneˢ);
         break;
     }}
     var never = new channel<nint>(0);
-    var selᴛ2 = never;
-    var selᴛ3 = ch.ᐸꟷ(must(pair()), ꓸꓸꓸ);
-    switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ), selᴛ3)) {
-    case 0 when selᴛ2.ꟷᐳ(out var v): {
+    var selᴛ3 = never;
+    var selᴛ4 = ch;
+    var (ᴛ3, ᴛ4) = pair();
+    var selᴛ5 = selᴛ4.ᐸꟷ(must(ᴛ3, ᴛ4), ꓸꓸꓸ);
+    switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), selᴛ5)) {
+    case 0 when selᴛ3.ꟷᐳ(out var v): {
         fmt.Println(impossibleˢ, v);
         break;
     }
@@ -50,14 +54,16 @@ internal static void Main() {
         break;
     }}
     log = default!;
-    var selᴛ4 = chanFor(ch).ᐸꟷ(must(pair()), ꓸꓸꓸ);
-    switch (select(selᴛ4)) {
+    var selᴛ6 = chanFor(ch);
+    var (ᴛ5, ᴛ6) = pair();
+    var selᴛ7 = selᴛ6.ᐸꟷ(must(ᴛ5, ᴛ6), ꓸꓸꓸ);
+    switch (select(selᴛ7)) {
     case 0: {
         fmt.Println(orderˢ, log);
         break;
     }}
-    var (ᴛ1, ᴛ2) = pair();
-    ch.ᐸꟷ(must(ᴛ1, ᴛ2));
+    var (ᴛ7, ᴛ8) = pair();
+    ch.ᐸꟷ(must(ᴛ7, ᴛ8));
     fmt.Println(ᐸꟷ(ch), ᐸꟷ(ch), ᐸꟷ(ch), ᐸꟷ(ch));
 }
 
