@@ -870,14 +870,16 @@ function Save-OracleEvidence {
 # A failed row's WHOLE output, kept. The console shows its last three lines and nothing else keeps the rest,
 # so the next occurrence of a transient (the go2cs-gen output-missing class, whose diagnosis is in the build's
 # warnings and errors) would otherwise carry no evidence past the three lines. Written under the same
-# gitignored evidence root as the oracle records, per package and attempt; returns the file's path.
+# gitignored evidence root as the oracle records, per package and attempt; returns the file's path. A publish
+# binlog the converter kept (-PublishBinlog) is copied beside it as publish.binlog.
 function Save-RowOutput {
-    param([string] $Package, $Output, [string] $Attempt)
+    param([string] $Package, $Output, [string] $Attempt, [string] $OutDir)
 
     $dest = Join-Path $oracleEvidenceRoot ('{0}/run{1}' -f ($Package -replace '/', '.'), $Attempt)
     [void](New-Item -ItemType Directory -Force -Path $dest)
     $file = Join-Path $dest 'row-output.txt'
     [System.IO.File]::WriteAllLines($file, [string[]]@($Output | ForEach-Object { "$_" }))
+    if ($OutDir) { [void](Copy-KeptPublishBinlog -OutDir $OutDir -Destination $dest) }
 
     return $file
 }
@@ -1242,10 +1244,12 @@ foreach ($row in $rows) {
         $generatorCheck = Test-GeneratedTypeMissingFailure -OutputText (($out | ForEach-Object { "$_" }) -join "`n")
 
         if ($generatorCheck.GeneratedTypeMissing) {
-            $run1Output = Save-RowOutput -Package $pkg -Output $out -Attempt 1
+            $run1Output = Save-RowOutput -Package $pkg -Output $out -Attempt 1 -OutDir $outDir
             Write-Host ("  RERUN $label go2cs-gen output-missing class: the build failed on $($generatorCheck.Codes -join ', ') " +
                 "and nothing else -- re-running once [${rowSecs}s]") -ForegroundColor Magenta
             Write-Host "        run 1 full output preserved at $run1Output" -ForegroundColor DarkGray
+            $run1Binlog = Join-Path (Split-Path $run1Output) 'publish.binlog'
+            if (Test-Path -LiteralPath $run1Binlog) { Write-Host "        run 1 publish binlog preserved at $run1Binlog" -ForegroundColor DarkGray }
 
             $rowStarted = Get-Date
             $out = Invoke-SweepRow -Package $pkg -GoDir $goDir -OutDir $outDir -PkgTimeout $pkgTimeout -ExecArgs $execArgs
@@ -1436,8 +1440,10 @@ foreach ($row in $rows) {
             Write-Host ("        go2cs-gen output-missing class REPRODUCED on the re-run: a real build failure, not the transient " +
                 "(run 1 output: $($generatorMissed.Run1))") -ForegroundColor Yellow
         }
-        $failOutput = Save-RowOutput -Package $pkg -Output $out -Attempt 'final'
+        $failOutput = Save-RowOutput -Package $pkg -Output $out -Attempt 'final' -OutDir $outDir
         Write-Host "        full output: $failOutput" -ForegroundColor DarkGray
+        $failBinlog = Join-Path (Split-Path $failOutput) 'publish.binlog'
+        if (Test-Path -LiteralPath $failBinlog) { Write-Host "        publish binlog: $failBinlog" -ForegroundColor DarkGray }
     }
 }
 
