@@ -474,19 +474,47 @@ partial class runtime_package
     [ModuleInitializer]
     internal static void ᴛRegisterPrintSink()
     {
-        builtin.PrintSink = static b =>
-        {
-            printlock();
+        builtin.PrintSink = new RuntimePrintSink();
+    }
 
-            try
+    private sealed class RuntimePrintSink : builtin.IPrintSink
+    {
+        // gwrite takes a Go slice, and it only reads it (into the print backlog, a writebuf, and
+        // writeErr), so each chunk is copied into one reused per-thread buffer: handing bytes to the
+        // printer allocates nothing, as Go's gwrite does not.
+        [ThreadStatic]
+        private static byte[]? t_chunk;
+
+        public void Lock() => printlock();
+
+        public void Unlock() => printunlock();
+
+        public void Write(ReadOnlySpan<byte> bytes)
+        {
+            byte[] chunk = t_chunk ??= new byte[512];
+
+            while (bytes.Length > 0)
             {
-                gwrite(new slice<byte>(b));
+                int n = Math.Min(bytes.Length, chunk.Length);
+
+                // A cut inside a string's bytes backs off to a rune start (not a UTF-8 continuation
+                // byte), so a writer that decodes each write as text never sees half a rune.
+                if (n < bytes.Length)
+                {
+                    int cut = n;
+
+                    while (cut > 0 && (bytes[cut] & 0xC0) == 0x80)
+                        cut--;
+
+                    if (cut > 0)
+                        n = cut;
+                }
+
+                bytes[..n].CopyTo(chunk);
+                gwrite(new slice<byte>(chunk, 0, n));
+                bytes = bytes[n..];
             }
-            finally
-            {
-                printunlock();
-            }
-        };
+        }
     }
 
     // bytes(s) (print.go), S3: a COPY of the string's bytes. Go reinterprets the string header as a

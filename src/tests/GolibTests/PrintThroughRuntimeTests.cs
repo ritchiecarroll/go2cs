@@ -15,6 +15,13 @@ namespace GolibTests;
 [TestClass]
 public class PrintThroughRuntimeTests
 {
+    // The sink is registered by the runtime assembly's module initializer, which runs when that assembly
+    // is first touched. Run it here, so an arm that touches no runtime type before it prints (the stderr
+    // and rune arms) tests the runtime's printer whatever order the arms run in, never golib's fallback.
+    [ClassInitialize]
+    public static void LoadTheRuntimesPrinter(TestContext _) =>
+        System.Runtime.CompilerServices.RuntimeHelpers.RunModuleConstructor(typeof(Δruntime).Module.ModuleHandle);
+
     [TestMethod]
     public void PrintLandsInTheRuntimesPrintBacklog()
     {
@@ -31,6 +38,35 @@ public class PrintThroughRuntimeTests
         byte[] captured = Δruntime.GoCaptureWritebuf(() => builtin.println((@string)"captured", 7));
 
         Assert.AreEqual("captured 7\n", Encoding.Latin1.GetString(captured), "println did not reach the goroutine's writebuf capture");
+    }
+
+    // Print writes in bounded chunks (a 512-byte stack buffer for formatted text, a 512-byte reused buffer
+    // into gwrite), and a host that replaced Console.Error decodes each write as text. One ASCII byte
+    // before 2-byte runes puts a 512-byte cut INSIDE a rune, so a chunk that split it would print U+FFFD.
+    [TestMethod]
+    public void ALongPrintKeepsEveryRuneWhole()
+    {
+        string runes = "a" + new string('\u00E9', 400);
+        TextWriter savedWriter = Console.Error;
+        StringWriter capture = new();
+
+        try
+        {
+            Console.SetError(capture);
+            builtin.println((@string)runes, new RuneText(runes));
+        }
+        finally
+        {
+            Console.SetError(savedWriter);
+        }
+
+        Assert.AreEqual(runes + " " + runes + "\n", capture.ToString(), "a chunk boundary split a rune");
+    }
+
+    // A non-string argument, so its text takes the formatted path (UTF-16 encoded through the stack buffer).
+    private sealed record RuneText(string Text)
+    {
+        public override string ToString() => Text;
     }
 
     [DllImport("libc", SetLastError = true)]

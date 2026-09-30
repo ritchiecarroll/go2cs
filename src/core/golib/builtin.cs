@@ -10,6 +10,7 @@
 // ReSharper disable StaticMemberInGenericType
 
 using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -18,6 +19,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Unicode;
 using System.Threading;
 using go.golib;
 using static System.Math;
@@ -2849,7 +2851,7 @@ public static partial class builtin
     /// </remarks>
     public static void print(params object[] args)
     {
-        emitPrint(printBytes(args, separate: false));
+        emitPrint(args, separate: false);
     }
 
     /// <summary>
@@ -2863,48 +2865,83 @@ public static partial class builtin
     /// </remarks>
     public static void println(params object[] args)
     {
-        emitPrint(printBytes(args, separate: true));
+        emitPrint(args, separate: true);
+    }
+
+    // The runtime's printer: printlock, gwrite per chunk, printunlock.
+    internal interface IPrintSink
+    {
+        void Lock();
+
+        void Write(ReadOnlySpan<byte> bytes);
+
+        void Unlock();
     }
 
     /// <summary>
-    /// The runtime's printer, registered by the runtime package's module initializer (print
-    /// fidelity, ruling 2026-09-30 R1): <c>printlock(); gwrite(b); printunlock()</c>. As in Go, every
-    /// package's print then runs through the runtime, so it reaches the runtime's print backlog
-    /// (recordForPanic) and a goroutine's writebuf capture. Null until the runtime is loaded, and
-    /// then print writes Console.Error as it always did.
+    /// The runtime's printer, registered by the runtime package's module initializer (print fidelity,
+    /// ruling 2026-09-30 R1). As in Go, every package's print then runs through the runtime, so it
+    /// reaches the runtime's print backlog (recordForPanic) and a goroutine's writebuf capture. Null
+    /// until the runtime is loaded, and then print writes Console.Error as it always did.
     /// </summary>
-    internal static Action<byte[]>? PrintSink;
+    internal static IPrintSink? PrintSink;
 
-    // The bytes gc's printer writes: an @string argument contributes its OWN bytes (invalid UTF-8
-    // included, as Go writes them), anything else its formatted text. println separates with one space
-    // and ends with a bare \n.
-    private static byte[] printBytes(object[] args, bool separate)
+    // Go's printer formats each argument into a STACK buffer and allocates nothing (runtime/print.go),
+    // so a formatted argument is encoded through this bounded stack buffer, chunk by chunk.
+    private const int PrintChunkBytes = 512;
+
+    // The bytes gc's printer writes, under ONE lock as Go holds printlock across a print statement: an
+    // @string argument contributes its OWN bytes (invalid UTF-8 included, as Go writes them), anything
+    // else its formatted text. println separates with one space and ends with a bare \n.
+    private static void emitPrint(object[] args, bool separate)
     {
-        List<byte> bytes = new();
-
-        for (int i = 0; i < args.Length; i++)
+        if (Volatile.Read(ref PrintSink) is not { } sink)
         {
-            if (separate && i > 0)
-                bytes.Add((byte)' ');
-
-            if (args[i] is @string text)
-                bytes.AddRange(text.ToSpan());
-            else
-                bytes.AddRange(Encoding.UTF8.GetBytes(printArg(args[i]) ?? ""));
+            Console.Error.Write(separate ? string.Join(" ", args.Select(printArg)) + "\n" : string.Concat(args.Select(printArg)));
+            return;
         }
 
-        if (separate)
-            bytes.Add((byte)'\n');
+        Span<byte> buffer = stackalloc byte[PrintChunkBytes];
 
-        return [.. bytes];
+        sink.Lock();
+
+        try
+        {
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (separate && i > 0)
+                    sink.Write(" "u8);
+
+                if (args[i] is @string text)
+                    sink.Write(text.ToSpan());
+                else
+                    writePrintText(sink, printArg(args[i]).AsSpan(), buffer);
+            }
+
+            if (separate)
+                sink.Write("\n"u8);
+        }
+        finally
+        {
+            sink.Unlock();
+        }
     }
 
-    private static void emitPrint(byte[] bytes)
+    // Encodes text as UTF-8 through the stack buffer. Utf8.FromUtf16 stops a too-small destination at a
+    // whole rune, so no rune splits across two writes.
+    private static void writePrintText(IPrintSink sink, ReadOnlySpan<char> text, Span<byte> buffer)
     {
-        if (Volatile.Read(ref PrintSink) is { } sink)
-            sink(bytes);
-        else
-            Console.Error.Write(Encoding.UTF8.GetString(bytes));
+        while (true)
+        {
+            OperationStatus status = Utf8.FromUtf16(text, buffer, out int read, out int written);
+
+            sink.Write(buffer[..written]);
+
+            if (status != OperationStatus.DestinationTooSmall)
+                return;
+
+            text = text[read..];
+        }
     }
 
     // The Console.Error writer last examined, whether it writes to the process's standard error, and
