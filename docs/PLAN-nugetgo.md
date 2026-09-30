@@ -32,9 +32,9 @@ dependencies and the fallback for everything.
 **Seed targets — the [Target Atlas](https://go2cs.net/TargetAtlas.html)** (owner study,
 2026-08-29): a survey of the Go ecosystem's conversion candidates, designed to pick the registry's
 FIRST real operational conversions — three or four packages alongside the planned HashSet — once
-the validation campaign reaches 100% of the implementable set. Interim conversions live on
-the publishing account (the owner's choice, as HashSet does) and yield to any official conversion an original code owner later
-publishes on their own org, per the canonicality rules in §2.
+the validation campaign reaches 100% of the implementable set. Interim conversions live on the
+publishing account (the owner's choice, as HashSet does) and yield to any official conversion an
+original code owner later publishes on their own org, per the canonicality rules in §2.
 
 > **AMENDED 2026-09-07 — the gate above is DEFERRED to the next corpus, not retargeted.**
 > **OWNER RULING, 2026-09-07:** the Go 1.23.12 validation record **closes at its anchor** rather than
@@ -55,6 +55,12 @@ publishes on their own org, per the canonicality rules in §2.
 > once the **Go 1.24 roster exists**, a hop re-deriving every row, denominator and disclosure set
 > from the new release's own sources (`GoCorpusMigration.md` H10). HashSet and the Target Atlas
 > survey are untouched; what waits is the first real operational conversions the gate guards.
+>
+> **AMENDED 2026-09-28 — the seed gate is WAIVED for seeds labelled as PROOFS.** **OWNER RULING,
+> 2026-09-28** (ledger 2026-09-28 03:38, item 2, on the post-100% roadmap): the gate above is waived
+> for nugetgo seeds that are clearly labelled as proofs once 223 implementable rows are banked, and
+> full publication follows 100% or the dated 1.24 freeze. The deferral above stands for everything
+> else: an unlabelled seed still waits for the Go 1.24 roster.
 
 ---
 
@@ -73,7 +79,7 @@ and URLs never fight the delimiter:
 
 ```
 # module-path<TAB>nuget-id<TAB>status<TAB>source-repo<TAB>registered<TAB>contact
-github.com/ritchiecarroll/hashset	go.github.ritchiecarroll.hashset	canonical	https://github.com/ritchiecarroll/hashset-cs	2026-08-21	ritchiecarroll
+github.com/ritchiecarroll/hashset	go.github.com.ritchiecarroll.hashset	canonical	https://github.com/ritchiecarroll/hashset-cs	2026-08-21	ritchiecarroll
 ```
 
 - **`module-path`** — the Go module path exactly as it appears in `go.mod`, including any
@@ -297,6 +303,13 @@ the .NET 10 hop decides the deployment shape it would emit references for. ⟨OQ
    Remains open until the program answers either way.
 4. **Multi-package Go modules** — **RULED: deferred as recommended.** One nupkg with one root ID
    is the v1 posture; the real decision waits for the first real multi-package module.
+   **AMENDED 2026-09-29 — RULED (ledger 2026-09-29 16:38), no longer deferred.** D6 structure: one
+   assembly per Go package and one nupkg per module, root ID `go.<dotted module>` carrying N
+   assemblies, with no assembly merging, which satisfies the v1 posture above. Dependency paths are
+   version-free with a `go2cs.modules.lock`, one version per module per output root and a version
+   clash refused by name. Third-party proof pages sit beside the conversion, never in the stdlib
+   roster, and only main-module packages are validated. The design is R's
+   `docs/phase4/DESIGN-multi-package-modules.md`.
 5. **S3 timing** — **RULED: as recommended, AFTER the .NET 10 hop** (the hop decides the
    deployment shape S3's emitted references bind to). Note for readers: "S3" is §7's staged
    landing, stage 3 — the converter-integration stage (map fetch, resolution arm, lock file,
