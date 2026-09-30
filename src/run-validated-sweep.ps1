@@ -371,6 +371,11 @@ $hostConditionalDisclosed = @()   # rows absorbed by the host-conditional-disclo
 #                      oracle reds are a host to qualify, not a gate to pass.
 $oracleFlakedRows = @()
 $unstable = 0; $unstableRows = @()
+# The GO2CS-GEN OUTPUT-MISSING class (coordinator ruling 2026-09-30; the rule is
+# Test-GeneratedTypeMissingFailure in _roster.ps1): a row whose BUILD failed with nothing but CS0246 and the
+# generator-load codes is re-run ONCE. A green second run lands here and on its own verdict line, so it never
+# reads as a row that passed first time; a second failure is a real build failure and takes FAIL.
+$generatorMissedRows = @()
 # Where a failed row's evidence is PRESERVED before the re-run overwrites it (CLAUDE.md: a gate
 # preserves a failed row's comparison record BEFORE any restore or cleanup -- a union battery once
 # deleted the only evidence of which rows diverged). Under the repo's gitignored scratch root, so
@@ -850,6 +855,21 @@ function Save-OracleEvidence {
     return $dest
 }
 
+# A failed row's WHOLE output, kept. The console shows its last three lines and nothing else keeps the rest,
+# so the next occurrence of a transient (the go2cs-gen output-missing class, whose diagnosis is in the build's
+# warnings and errors) would otherwise carry no evidence past the three lines. Written under the same
+# gitignored evidence root as the oracle records, per package and attempt; returns the file's path.
+function Save-RowOutput {
+    param([string] $Package, $Output, [string] $Attempt)
+
+    $dest = Join-Path $oracleEvidenceRoot ('{0}/run{1}' -f ($Package -replace '/', '.'), $Attempt)
+    [void](New-Item -ItemType Directory -Force -Path $dest)
+    $file = Join-Path $dest 'row-output.txt'
+    [System.IO.File]::WriteAllLines($file, [string[]]@($Output | ForEach-Object { "$_" }))
+
+    return $file
+}
+
 # ONE invocation path, called by the first attempt and by the oracle re-run alike. It is a function
 # rather than two call sites for the reason the silent-duplication rule states: a re-run whose
 # command line has drifted from the run it is repeating is not a re-run, and two independently
@@ -1198,6 +1218,30 @@ foreach ($row in $rows) {
         }
     }
 
+    # ---- the GO2CS-GEN OUTPUT-MISSING RE-RUN ARM (coordinator ruling 2026-09-30) --------------------
+    # Reached only when the row produced no verdict and the oracle arm did not take it. A build whose every
+    # compiler error is CS0246 or a generator-load code is the class a source generator that went missing
+    # leaves behind; it passed on a re-run by name the one time it was seen (the i9's D5 reflect row).
+    # Run 1's whole output is kept BEFORE the re-run overwrites the moment, then the row runs once more.
+    $generatorMissed = $null
+
+    if (-not $verdict -and $oracleFlakedNames.Count -eq 0) {
+        $generatorCheck = Test-GeneratedTypeMissingFailure -OutputText (($out | ForEach-Object { "$_" }) -join "`n")
+
+        if ($generatorCheck.GeneratedTypeMissing) {
+            $run1Output = Save-RowOutput -Package $pkg -Output $out -Attempt 1
+            Write-Host ("  RERUN $label go2cs-gen output-missing class: the build failed on $($generatorCheck.Codes -join ', ') " +
+                "and nothing else -- re-running once [${rowSecs}s]") -ForegroundColor Magenta
+            Write-Host "        run 1 full output preserved at $run1Output" -ForegroundColor DarkGray
+
+            $rowStarted = Get-Date
+            $out = Invoke-SweepRow -Package $pkg -GoDir $goDir -OutDir $outDir -PkgTimeout $pkgTimeout -ExecArgs $execArgs
+            $rowSecs = [int]((Get-Date) - $rowStarted).TotalSeconds
+            $verdict = ($out | Select-String 'Validated (\d+) tests against go test' | Select-Object -First 1)
+            $generatorMissed = [PSCustomObject]@{ Codes = $generatorCheck.Codes; Run1 = $run1Output }
+        }
+    }
+
     if ($verdict) {
         $got = [int]$verdict.Matches[0].Groups[1].Value
         $gotDisclosed = Get-DisclosedCount -Output $out
@@ -1350,6 +1394,13 @@ foreach ($row in $rows) {
                 "Flaked: $($shown -join ', ')$moreNote") -ForegroundColor Magenta
             $oracleFlakedRows += "$pkg ($($oracleFlakedNames.Count) oracle-only case(s) on run 1, re-run classified '$class')"
         }
+
+        # The same rule for the generator class: a row that needed two runs says so on its own face.
+        if ($null -ne $generatorMissed) {
+            Write-Host ("        GENERATED TYPE MISSING ONCE -- run 1's build failed on $($generatorMissed.Codes -join ', ') only " +
+                "(the go2cs-gen output-missing class); run 2 is the verdict above. Run 1 output: $($generatorMissed.Run1)") -ForegroundColor Magenta
+            $generatorMissedRows += "$pkg (run 1 failed on $($generatorMissed.Codes -join ', '); re-run classified '$class')"
+        }
     }
     elseif ($oracleUnstable) {
         # BOTH runs oracle-only. Its own verdict word, counted apart from FAIL -- the converted side
@@ -1368,6 +1419,12 @@ foreach ($row in $rows) {
         # where a reader expected it to: a stale record, a deadline in the tail, or a converted-side
         # divergence each say something different about what this row just did.
         if ($oracleReason) { Write-Host "        oracle-only check: $oracleReason" -ForegroundColor DarkGray }
+        if ($null -ne $generatorMissed) {
+            Write-Host ("        go2cs-gen output-missing class REPRODUCED on the re-run: a real build failure, not the transient " +
+                "(run 1 output: $($generatorMissed.Run1))") -ForegroundColor Yellow
+        }
+        $failOutput = Save-RowOutput -Package $pkg -Output $out -Attempt 'final'
+        Write-Host "        full output: $failOutput" -ForegroundColor DarkGray
     }
 }
 
@@ -1379,6 +1436,7 @@ $summary = "sweep: $pass pass"
 if ($hostLimited.Count) { $summary += " ($($hostLimited.Count) host-limited)" }
 if ($hostConditionalDisclosed.Count) { $summary += " ($($hostConditionalDisclosed.Count) host-conditional disclosure fired)" }
 if ($oracleFlakedRows.Count) { $summary += " ($($oracleFlakedRows.Count) after an oracle re-run)" }
+if ($generatorMissedRows.Count) { $summary += " ($($generatorMissedRows.Count) after a go2cs-gen re-run)" }
 $summary += " / $fail fail"
 if ($unstable) { $summary += " / $unstable oracle-unstable" }
 if ($cvac) { $summary += " / $cvac comparison-validated-at-count" }
@@ -1588,6 +1646,13 @@ if ($oracleFlakedRows.Count) {
     Write-Host 'oracle flaked once -- run 1 diverged ONLY on the oracle side (Go=fail / C#=pass, no converted-side failure); run 2 is what the verdict describes:' -ForegroundColor Magenta
     $oracleFlakedRows | ForEach-Object { Write-Host "  $_" -ForegroundColor Magenta }
     Write-Host "  (run 1's comparison record and results file are preserved under $oracleEvidenceRoot)" -ForegroundColor DarkGray
+}
+
+if ($generatorMissedRows.Count) {
+    Write-Host ''
+    Write-Host 'go2cs-gen output missing once -- run 1 failed to BUILD on CS0246 and generator-load codes only; run 2 is what the verdict describes:' -ForegroundColor Magenta
+    $generatorMissedRows | ForEach-Object { Write-Host "  $_" -ForegroundColor Magenta }
+    Write-Host "  (each run 1's full output is preserved under $oracleEvidenceRoot)" -ForegroundColor DarkGray
 }
 
 if ($unstable) {

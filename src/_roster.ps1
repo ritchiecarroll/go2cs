@@ -2265,3 +2265,52 @@ function ConvertFrom-ComparisonRecord {
         testFilter = $testFilter
     }
 }
+
+# The go2cs-gen output-missing class (C2, coordinator ruling 2026-09-30). A source generator that failed to
+# load or initialize leaves the build to fail LATER, as CS0246 on the first generated type the code names --
+# the i9's D5 reflect row: three CS0246 in go/ast walk.cs (a generated adapter type and the inspector Visitor), green on
+# a re-run by name. src/Directory.Build.props now raises the load codes themselves to errors, so the class is
+# a failed build whose EVERY compiler error is CS0246 or one of those four. The sweep re-runs such a row ONCE
+# and names it on the verdict line either way: a green re-run is never silently green, and a class that
+# reproduces is a real build failure. The cost of a genuine CS0246 regression is that one extra run.
+$GeneratedTypeMissingCodes = @('CS0246', 'CS8032', 'CS8034', 'CS8784', 'CS8785')
+
+<#
+.SYNOPSIS
+    Decides whether a failed row's output is the go2cs-gen output-missing class: a build that failed, whose
+    every compiler ERROR is CS0246 or a generator-load code. Pure -- no I/O, no state.
+.OUTPUTS
+    GeneratedTypeMissing (bool), Codes (the distinct error codes seen), Reason (why not).
+#>
+function Test-GeneratedTypeMissingFailure {
+    param(
+        # The row's whole output as one string. DELIBERATELY UNTYPED, as Test-OracleOnlyFailure's tail is:
+        # a [string] parameter would coerce $null to '' and hide the "no output" refusal.
+        $OutputText
+    )
+
+    function New-GeneratedTypeResult([bool] $missing, [string[]] $codes, [string] $reason) {
+        return [PSCustomObject]@{ GeneratedTypeMissing = $missing; Codes = $codes; Reason = $reason }
+    }
+
+    if ([string]::IsNullOrEmpty($OutputText)) {
+        return New-GeneratedTypeResult $false @() 'the row returned no output to read'
+    }
+
+    # ERRORS only. A warning CS8034 is the unguarded shape (the build goes on); it is not a failed build.
+    $found = [regex]::Matches($OutputText, '\berror (CS\d{4})\b')
+
+    if ($found.Count -eq 0) {
+        return New-GeneratedTypeResult $false @() 'no compiler error in the output -- the row failed after its build, not in it'
+    }
+
+    $codes = @($found | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+    $outside = @($codes | Where-Object { $GeneratedTypeMissingCodes -notcontains $_ })
+
+    if ($outside.Count -gt 0) {
+        return New-GeneratedTypeResult $false $codes ("compiler error(s) outside the class: $($outside -join ', ') -- " +
+            'a real compile failure, not a generator that went missing')
+    }
+
+    return New-GeneratedTypeResult $true $codes ''
+}
