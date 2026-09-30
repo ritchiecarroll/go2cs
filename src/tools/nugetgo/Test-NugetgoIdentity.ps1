@@ -56,6 +56,8 @@ $rcClash = @('v1.0.0-rc.1', 'v1.0.0-rc.1.0.3')
 $vs = @(
     # Go version, revision, @v/list, expected version (literal) or $null, refusal fragment
     @('v1.6.0', 0, $null, '1.6.0', $null),
+    # Release rebuilds (X.Y.Z.N). A component above 255 keeps each four-part literal out of the identifier census's
+    # IPv4 shape (strict mode admits only the corpus's own release versions); the rule under test is the same.
     @('v1.6.300', 1, $uuidList, '1.6.300.1', $null),
     @('v5.3.256', 2, $null, '5.3.256.2', $null),
     @('v2.0.0+incompatible', 0, $null, '2.0.0', $null),
