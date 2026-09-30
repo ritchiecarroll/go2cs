@@ -6549,15 +6549,22 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 // documented form exactly; a trailing backslash escapes the closing quote and mangles the path into
 // phantom golib-not-found errors.
 func publishTestHost(outputPath, testProject string, options Options) error {
+	args := publishTestHostArgs(outputPath, testProject, options)
+	_, err := runCommandWithTimeout(options.testTimeout, outputPath, options, "dotnet", args...)
+	return err
+}
+
+// publishTestHostArgs is the `dotnet` argument list publishTestHost runs, split out so the command a
+// run builds is checkable without running it.
+func publishTestHostArgs(outputPath, testProject string, options Options) []string {
+	publishDir := filepath.Join(outputPath, "bin", "tests", "publish")
+
 	if options.testConfig == "Release" {
 		go2csPathArg := strings.TrimRight(filepath.ToSlash(options.go2csPath), "/") + "/"
-		_, err := runCommandWithTimeout(options.testTimeout, outputPath, options, "dotnet", "publish", testProject,
-			"-c", "Release", "-p:go2csPath="+go2csPathArg, "-o", filepath.Join(outputPath, "bin", "tests", "publish"))
-		return err
+		return []string{"publish", testProject, "-c", "Release", "-p:go2csPath=" + go2csPathArg, "-o", publishDir}
 	}
-	_, err := runCommandWithTimeout(options.testTimeout, outputPath, options, "dotnet", "publish", testProject,
-		"-c", "Debug", "-o", filepath.Join(outputPath, "bin", "tests", "publish"))
-	return err
+
+	return []string{"publish", testProject, "-c", "Debug", "-o", publishDir}
 }
 
 // testHostRunEnv is the extra environment a Release configuration asks the RUN half of the pair
