@@ -366,6 +366,7 @@
     <Project Path="tests/Behavioral/CrossPackageArrayZeroValue/bufpkg/CrossPackageArrayZeroValue.bufpkg.csproj" />
     <Project Path="tests/Behavioral/CrossPackagePointerReceiverVar/CrossPackagePointerReceiverVar.csproj" />
     <Project Path="tests/Behavioral/CrossPackagePointerReceiverVar/xpkgmulib/go.xpkgmu.csproj" />
+    <Project Path="tests/Behavioral/CrossPackagePromotedValueMethod/CrossPackagePromotedValueMethod.csproj" />
     <Project Path="tests/Behavioral/CrossPkgLiteralNestedField/CrossPkgLiteralNestedField.csproj" />
     <Project Path="tests/Behavioral/CrossPkgLiteralNestedField/addrlib/CrossPkgLiteralNestedField.addrlib.csproj" />
     <Project Path="tests/Behavioral/CrossPkgBox/CrossPkgBox.csproj" />
