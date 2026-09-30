@@ -4014,26 +4014,20 @@ var unsupportedRuntimeCapabilities = map[string]string{
 	// lands. The board entry stays OPEN.
 	"os_test.createSymbolicLink": "raw-metal struct overlay on managed bytes",
 
-	// The one entry that names a TEST rather than a symbol, because the impossibility is a property of
-	// the host: the test copies os.Executable() — ONE file — into a temp directory 100 times and runs
-	// each copy. os.Executable() is correct (it returns the apphost, os.tests.exe), but an apphost is a
-	// stub bound at build time to a managed assembly of the same base name that must sit beside it, so
-	// a single-file copy can never run: hostfxr answers 0x8000809a LibHostAppRootFindFailure, which is
-	// byte-for-byte the code the test reports. Go's test binary is statically linked, which is the only
-	// reason its premise holds there. Satisfying it means publishing every converted test host
-	// self-contained single-file — ~70 MB and a publish rather than a build, per package.
-	"os_test.TestRemoveAllWithExecutedProcess": "relocatable single-file test executable",
-
-	// os/exec's TestCommand and TestLookPathWindows want this SAME capability from the other
-	// direction — installExe (lp_windows_test.go) copies the running test executable into a
-	// t.TempDir() tree and runs the copy — and they are NOT listed here. They are DISCLOSED
-	// instead, under the host-limit class ruled 2026-08-15: src/core/os/exec's committed
-	// go2cs_test_disclosures.json pins 25 leaf rows on `exit status 0x8000809a`, their 2 parents
-	// ride the disclosed-parent aggregation, and os/exec banks at 74 matched + 27 disclosed. The
-	// class and the bar an entry must clear are in docs/ConversionStrategies-Reference.md,
-	// "host-limit — the third disclosed-divergence class". Gating them was measured FIRST and is
-	// worse on three counts — the two below, plus that a gate hides the very rows whose future
-	// passing is the only signal the limit has lifted
+	// No entry names a relocatable single-file test executable any more. publishTestHost has
+	// published the host as one since 2026-08-27, so a test that copies os.Executable() into a temp
+	// directory and runs the copy is not host-bound and runs on both sides.
+	// os_test.TestRemoveAllWithExecutedProcess was the last entry to name it, and
+	// TestNoEntryWithdrawsATestOnTheSingleFileHostCapability pins that none does. os/exec's
+	// TestCommand and TestLookPathWindows want the same thing — installExe (lp_windows_test.go)
+	// copies the running test executable into a t.TempDir() tree and runs the copy — and were never
+	// listed here: they were DISCLOSED under the host-limit class ruled 2026-08-15 (25 leaf rows on
+	// `exit status 0x8000809a`, os/exec banked at 74 matched + 27 disclosed), and that class entry
+	// retired when the host became single-file. The class and the bar an entry must clear are in
+	// docs/ConversionStrategies-Reference.md, "host-limit — the third disclosed-divergence class".
+	// The two hazards below were measured on os/exec and still describe what a declaration-keyed
+	// gate does to a package whose tests can run, and a gate hides the very rows whose future
+	// passing is the only signal a limit has lifted
 	// (docs/phase4/BOARD-next-validation-candidates.md, lane claude/os-exec-gate-bank):
 	//
 	//  1. A gate is DECLARATION-keyed and eligibleTerminalTestResults cuts a verdict row at its
@@ -4045,14 +4039,11 @@ var unsupportedRuntimeCapabilities = map[string]string{
 	//     suite and the census fires: `helper command unused: "printpath"`, exit 1, and the package
 	//     validates at no count at all.
 	//
-	// os_test.TestRemoveAllWithExecutedProcess never showed (2) only because os's TestMain is a bare
-	// Exit(m.Run()), and os is not yet on the roster — its disposition is decided when it banks.
 	// The underlying hazard is unfixed and QUEUED rather than closed: a gate is invisible to the
 	// running host, since nothing publishes the fact that a SUBSET ran where Go's own vocabulary for
 	// it is a non-empty test.run. So any suite asserting that the whole suite ran will mis-answer
-	// while a gate is active. Nothing is broken today (the only gated declarations live in os, whose
-	// TestMain asserts nothing), but CHECK FOR SUCH A TestMain before adding a declaration-keyed
-	// entry — and prefer a disclosure whenever the tests can still run.
+	// while a gate is active. CHECK FOR SUCH A TestMain before adding a declaration-keyed entry — and
+	// prefer a disclosure whenever the tests can still run.
 	//
 	// Checked for net/http: main_test.go's TestMain only runs goroutineLeaked() after m.Run() exits
 	// 0 — a post-hoc stack census with no dependency on which tests ran, unlike os/exec's helper
@@ -4082,8 +4073,7 @@ var unsupportedRuntimeCapabilities = map[string]string{
 	// (the other three: a by-value slice header's address-exposed caller temp, a two-result call's
 	// address-exposed temp, a frame-rooted large buffer) — new in KIND, same CLASS.
 	//
-	// Why a gate and not a disclosure, per the same fork os_test.TestRemoveAllWithExecutedProcess
-	// took: the disclosure manifest pins a FAILURE's captured signature, and this test doesn't fail —
+	// Why a gate and not a disclosure: the disclosure manifest pins a FAILURE's captured signature, and this test doesn't fail —
 	// it HANGS, forever, with no output to pin. DESIGN-object-lifetime-disclosure.md §3c named this
 	// exact gap against internal/weak's TestPointerFinalizer (structurally identical: a still-rooted
 	// object whose finalizer a test blocks on forever) and left it to ⟨OQ-L3⟩, unruled until this row
