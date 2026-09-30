@@ -244,6 +244,7 @@
     <None Include="$(MSBuildThisFileDirectory)processGroupUnix.go" />
     <None Include="$(MSBuildThisFileDirectory)processGroup_test.go" />
     <None Include="$(MSBuildThisFileDirectory)processGroupWindows.go" />
+    <None Include="$(MSBuildThisFileDirectory)publishBinlog_test.go" />
     <None Include="$(MSBuildThisFileDirectory)profiles\linux-arm.pubxml" />
     <None Include="$(MSBuildThisFileDirectory)profiles\linux-arm64.pubxml" />
     <None Include="$(MSBuildThisFileDirectory)profiles\linux-x64.pubxml" />

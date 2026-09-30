@@ -6548,16 +6548,73 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 // hand-invoked Release build elsewhere. Forward slashes and a trailing slash, matching that
 // documented form exactly; a trailing backslash escapes the closing quote and mangles the path into
 // phantom golib-not-found errors.
+//
+// With -test-publish-binlog the publish also writes an MSBuild binary log, from the FIRST attempt,
+// and keeps it only when the publish fails (see settlePublishBinlog).
 func publishTestHost(outputPath, testProject string, options Options) error {
+	binlog := preparePublishBinlog(outputPath, options)
+	_, err := runCommandWithTimeout(options.testTimeout, outputPath, options, "dotnet",
+		publishTestHostArgs(outputPath, testProject, options, binlog)...)
+	return settlePublishBinlog(binlog, err)
+}
+
+// publishTestHostArgs is publishTestHost's dotnet argument list, with `-bl:<binlog>` last when a binlog
+// path is given.
+func publishTestHostArgs(outputPath, testProject string, options Options, binlog string) []string {
+	var args []string
 	if options.testConfig == "Release" {
 		go2csPathArg := strings.TrimRight(filepath.ToSlash(options.go2csPath), "/") + "/"
-		_, err := runCommandWithTimeout(options.testTimeout, outputPath, options, "dotnet", "publish", testProject,
-			"-c", "Release", "-p:go2csPath="+go2csPathArg, "-o", filepath.Join(outputPath, "bin", "tests", "publish"))
+		args = []string{"publish", testProject,
+			"-c", "Release", "-p:go2csPath=" + go2csPathArg, "-o", filepath.Join(outputPath, "bin", "tests", "publish")}
+	} else {
+		args = []string{"publish", testProject,
+			"-c", "Debug", "-o", filepath.Join(outputPath, "bin", "tests", "publish")}
+	}
+	if binlog != "" {
+		args = append(args, "-bl:"+binlog)
+	}
+	return args
+}
+
+// publishBinlogPath is where the test host's publish writes its binary log: beside the publish
+// directory, never inside it, so the single-file bundle it feeds is unchanged.
+func publishBinlogPath(outputPath string) string {
+	return filepath.Join(outputPath, "bin", "tests", "publish.binlog")
+}
+
+// preparePublishBinlog answers the binlog path for this publish ("" without -test-publish-binlog) and
+// removes any log an earlier attempt kept, so a file found after a failure is always THIS publish's.
+//
+// Why a switch rather than a default: the log exists for the transient build failure that passes on a
+// re-run (the i9's D5 reflect row -- CS0246 on go2cs-gen types, and no generator diagnostic in the
+// returned output), where only a binlog names the /analyzer list csc received and the input that made
+// a project recompile. A re-run heals it, so the log must be on from the first attempt; and it costs
+// ~4 s on a warm reflect publish (12.0 s -> 16.2 s, +35%, ~7 MB), so the census and battery sweeps ask
+// for it (run-validated-sweep.ps1 -PublishBinlog) and an everyday -tests run does not.
+func preparePublishBinlog(outputPath string, options Options) string {
+	if !options.testPublishBinlog {
+		return ""
+	}
+	path := publishBinlogPath(outputPath)
+	_ = os.Remove(path)
+	_ = os.MkdirAll(filepath.Dir(path), 0o755)
+	return path
+}
+
+// settlePublishBinlog keeps the binlog only for a FAILED publish, and names it in the error so the
+// row's output says where the evidence is; a passing publish leaves no log behind.
+func settlePublishBinlog(binlog string, err error) error {
+	if binlog == "" {
 		return err
 	}
-	_, err := runCommandWithTimeout(options.testTimeout, outputPath, options, "dotnet", "publish", testProject,
-		"-c", "Debug", "-o", filepath.Join(outputPath, "bin", "tests", "publish"))
-	return err
+	if err == nil {
+		_ = os.Remove(binlog)
+		return nil
+	}
+	if _, statErr := os.Stat(binlog); statErr != nil {
+		return fmt.Errorf("%w\nbinary build log was asked for but not written: %s", err, binlog)
+	}
+	return fmt.Errorf("%w\nbinary build log kept for this failed publish: %s", err, binlog)
 }
 
 // testHostRunEnv is the extra environment a Release configuration asks the RUN half of the pair

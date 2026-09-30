@@ -53,6 +53,11 @@
 #                                                   #   Untiered by default; add -TestTiered to opt
 #                                                   #   back in, exactly like the pipeline's own
 #                                                   #   -test-config/-test-tiered it threads to
+#   ./run-validated-sweep.ps1 -PublishBinlog        # every row's test-host publish writes an MSBuild
+#                                                   #   binary log, KEPT only when the publish fails
+#                                                   #   (<outDir>/bin/tests/publish.binlog) -- for the
+#                                                   #   D-census and battery sweeps; ~35% of a warm
+#                                                   #   publish, so off by default
 [CmdletBinding()]
 param(
     [string] $Filter,
@@ -95,6 +100,13 @@ param(
     # is DOTNET_TieredCompilation=0, since a verdict that depends on JIT promotion timing is not
     # reproducible run to run (the same reasoning -test-config's own commit recorded).
     [switch] $TestTiered,
+    # Threads the converter's -test-publish-binlog to every row: the test host's dotnet publish writes
+    # <outDir>/bin/tests/publish.binlog from the FIRST attempt and keeps it only when the publish FAILS
+    # (a passing publish deletes it). For the census and battery sweeps chasing a build failure that
+    # passes on a re-run, where only the binlog names the /analyzer list csc received. It costs ~4 s on a
+    # warm reflect publish (12.0 s -> 16.2 s, +35%), so it is not the default. It changes no verdict and
+    # no config: it is added after the execution args on either path below.
+    [switch] $PublishBinlog,
     # Split the (already Filter/Exact/Applicable-filtered) row set into -ShardCount contiguous,
     # roster-order pieces and run only the -ShardIndex'th (1-based) -- owner ruling 2026-09-02, this
     # host's own known thermal limit: a ~2-hour continuous full-roster run is exactly the load that
@@ -1167,6 +1179,7 @@ foreach ($row in $rows) {
         # therefore invisible, for every default-path row.
         $execSuffix = if ($row.Execution) { " [$($row.Execution)]" } else { '' }
     }
+    if ($PublishBinlog) { $execArgs += '-test-publish-binlog' }
 
     $rowStarted = Get-Date
     $out = Invoke-SweepRow -Package $pkg -GoDir $goDir -OutDir $outDir -PkgTimeout $pkgTimeout -ExecArgs $execArgs
