@@ -92,7 +92,11 @@ private static readonly bool s_heldLocksReset = GoroutineThreadState.Register(st
         Array.Clear(held);
 
     t_heldCount = 0;
-    t_runtimeLockProfilePending = false;   // mirrors the M's mLockProfile, which the next goroutine mints afresh
+    // Mirrors the M's mLockProfile, which the next goroutine mints afresh. A stated residual, not a
+    // defect: the managed M is per-goroutine, so cyclesLost still pending when a goroutine exits is
+    // dropped here, where Go's longer-lived M would store it at a later outermost unlock. That is lost-
+    // contention accounting only; the profiled stack itself stores synchronously at the outermost unlock.
+    t_runtimeLockProfilePending = false;
 });
 
 private static void pushHeld(ж<mutex> Ꮡl) {
