@@ -188,6 +188,15 @@ public sealed class ElemRefBox<T> : ж<T>
     /// <inheritdoc/>
     // Canonical backing identity in the high bits with the ABSOLUTE element index below, so
     // same-storage element pointers order by index exactly like Go addresses.
+    //
+    // A STATED COST (option 3, accepted 2026-09-30). A T[] has no field to hold an id, so its id comes
+    // from the identity table (a ConditionalWeakTable). Measured against the identity-hash base
+    // (Microsoft .NET 10.0.12, linux, 500k slice<nint> x &s[1]): a first token read 499-524 ns vs 38-45,
+    // a repeat 152-171 ns vs 18-20, and allocation 504-509 vs 314-345 ns/element while the token-read
+    // arrays live. It is paid only where an element's TOKEN is read: a pinnable element converts to its
+    // real address instead. RETIREMENT PATH, if a sweep, perf leg or lane reads the cost: keep the
+    // identity hash for arrays and mint a table id only for a live COLLIDER, found at Register (about 1
+    // in 4622 live arrays), so a read pays one lookup in a nearly empty table.
     public override nuint PointerOrderToken
     {
         get
