@@ -197,6 +197,13 @@ internal static ж<bucket> stkbucket(bucketType typ, uintptr size, slice<uintptr
     return nb;
 }
 
+// NoInlining: a SKIP-COUNTED WALKER keeps its own frame. callers(skip) counts from its caller, which is
+// this frame, so mutexevent's skip + 1 lands on sync.(*Mutex).Unlock only while this frame exists. It is
+// small enough that Tier-1 inlined it into mutexevent/blockevent once a full run made it hot, and every
+// mutex and block event then started one frame past Unlock / Lock (SyncMutexProfileTests, TRAIN K union).
+// The converter marks the converted hops that call a walker (computeNoInliningClosure) but never a
+// hand-owned file; GolibTests SkipCountedWalkerFrameTests guards every hand-owned walker.
+[MethodImpl(MethodImplOptions.NoInlining)]
 internal static void saveblockevent(int64 cycles, int64 rate, nint skip, bucketType which) {
     if (debug.profstackdepth == 0) {
         // profstackdepth is set to 0 by the user, so no stack can be recorded (Go's own early return).
