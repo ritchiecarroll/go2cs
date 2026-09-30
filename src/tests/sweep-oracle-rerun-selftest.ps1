@@ -332,6 +332,28 @@ $result = Test-GeneratedTypeMissingFailure -OutputText $null
 Assert-Equal 'generated: no output refuses' $false $result.GeneratedTypeMissing
 Assert-ReasonNames 'generated: the no-output refusal says so' $result 'no output'
 
+# ---- a kept publish binlog rides with the row's saved output (Copy-KeptPublishBinlog) -------------------
+# The generator re-run arm runs the row again, and run 2's publish removes run 1's kept binlog before it
+# starts (-test-publish-binlog never lets a stale log read as the new attempt's). So when run 1's output is
+# saved, a binlog run 1 kept is copied beside it; without that, a row that heals on the re-run -- the one
+# case the log exists for -- would lose it.
+
+$binlogOutDir = Join-Path $fixtureRoot 'binlog-row'
+$binlogDest = Join-Path $fixtureRoot 'binlog-evidence/run1'
+[void](New-Item -ItemType Directory -Force -Path (Join-Path $binlogOutDir 'bin/tests'))
+[void](New-Item -ItemType Directory -Force -Path $binlogDest)
+
+$copied = Copy-KeptPublishBinlog -OutDir $binlogOutDir -Destination $binlogDest
+Assert-Equal 'binlog: none kept, nothing copied' '' "$copied"
+Assert-Equal 'binlog: none kept, nothing created' $false (Test-Path (Join-Path $binlogDest 'publish.binlog'))
+
+$keptBytes = [byte[]](1, 2, 3, 0, 255)
+[System.IO.File]::WriteAllBytes((Join-Path $binlogOutDir 'bin/tests/publish.binlog'), $keptBytes)
+$copied = Copy-KeptPublishBinlog -OutDir $binlogOutDir -Destination $binlogDest
+Assert-Equal 'binlog: a kept log is copied beside the output' (Join-Path $binlogDest 'publish.binlog') "$copied"
+Assert-Equal 'binlog: the copy is byte-identical' ($keptBytes -join ',') (([System.IO.File]::ReadAllBytes("$copied")) -join ',')
+Assert-Equal 'binlog: the kept log itself is left in place' $true (Test-Path (Join-Path $binlogOutDir 'bin/tests/publish.binlog'))
+
 # ---- verdict -----------------------------------------------------------------------------------------
 
 Remove-Item -LiteralPath $fixtureRoot -Recurse -Force -ErrorAction SilentlyContinue
