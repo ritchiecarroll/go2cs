@@ -6576,15 +6576,38 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 // documented form exactly; a trailing backslash escapes the closing quote and mangles the path into
 // phantom golib-not-found errors.
 func publishTestHost(outputPath, testProject string, options Options) error {
+	args := publishTestHostArgs(outputPath, testProject, options)
+	_, err := runCommandWithTimeout(options.testTimeout, outputPath, options, "dotnet", args...)
+	return err
+}
+
+// publishTestHostArgs is the `dotnet` argument list publishTestHost runs, split out so the command a
+// run builds is checkable without running it.
+//
+// The target's GOOS rides on the command (-p:GoTargetOS=), because the csproj defaults it to windows
+// and it selects the per-GOOS source folder and references the host compiles: a linux run must
+// compile the linux flavour whatever the caller's environment holds. goosOfTarget is the pipeline's
+// own source of truth for the platform a run is FOR (the same value that routes the sources and
+// scopes the disclosure manifest); a run with no target set leaves the csproj default alone.
+func publishTestHostArgs(outputPath, testProject string, options Options) []string {
+	publishDir := filepath.Join(outputPath, "bin", "tests", "publish")
+
+	var targetOS []string
+
+	if goos := goosOfTarget(options.targetPlatform); goos != "" {
+		targetOS = []string{"-p:GoTargetOS=" + goos}
+	}
+
 	if options.testConfig == "Release" {
 		go2csPathArg := strings.TrimRight(filepath.ToSlash(options.go2csPath), "/") + "/"
-		_, err := runCommandWithTimeout(options.testTimeout, outputPath, options, "dotnet", "publish", testProject,
-			"-c", "Release", "-p:go2csPath="+go2csPathArg, "-o", filepath.Join(outputPath, "bin", "tests", "publish"))
-		return err
+		args := []string{"publish", testProject, "-c", "Release", "-p:go2csPath=" + go2csPathArg}
+
+		return append(append(args, targetOS...), "-o", publishDir)
 	}
-	_, err := runCommandWithTimeout(options.testTimeout, outputPath, options, "dotnet", "publish", testProject,
-		"-c", "Debug", "-o", filepath.Join(outputPath, "bin", "tests", "publish"))
-	return err
+
+	args := []string{"publish", testProject, "-c", "Debug"}
+
+	return append(append(args, targetOS...), "-o", publishDir)
 }
 
 // testHostRunEnv is the extra environment a Release configuration asks the RUN half of the pair
