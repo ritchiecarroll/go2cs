@@ -196,7 +196,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     // growslice bound. A zero-size T never spans its storage and keeps Go's unbounded length.
     private static void RefuseNativeWindowBeyondSpan(nint length)
     {
-        if (length > Array.MaxLength && !GoZeroSizeFacts<T>.IsZeroSize)
+        if (GoSliceLimit.ExceedsManagedSpan<T>(length))
             throw RuntimeErrorPanic.NativeSliceBeyondManagedSpan(length);
     }
 

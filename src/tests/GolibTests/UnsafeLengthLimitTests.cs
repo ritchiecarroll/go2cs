@@ -137,4 +137,73 @@ public unsafe class UnsafeLengthLimitTests
             Marshal.FreeHGlobal(buffer);
         }
     }
+
+    // SpanLength checked only the UPPER bound before narrowing, so a length BELOW Int32.MinValue
+    // (-(2^32) + 5 as an int64) truncated to a small POSITIVE int and came back as a five-element
+    // slice: the same silent wrap in the other direction (TRAIN J review, 2026-09-29). Go's own answer to
+    // any negative length is "len is negative", decided on the full-width value before narrowing.
+    [TestMethod]
+    public void SliceRefusesANegativeLengthBelowInt32AsNegativeNotAShortSlice()
+    {
+        slice<byte> source = Source();
+        long length = -(1L << 32) + 5;
+
+        PanicException ex = Assert.ThrowsException<PanicException>(() => @unsafe.Slice(Ꮡ(source, 0), length), "a huge negative length must not wrap to a positive one");
+        StringAssert.Contains(ex.Message, "len is negative");
+    }
+
+    [TestMethod]
+    public void StringRefusesANegativeLengthBelowInt32AsNegativeNotAShortString()
+    {
+        slice<byte> source = Source();
+        long length = -(1L << 32) + 5;
+
+        PanicException ex = Assert.ThrowsException<PanicException>(() => @unsafe.String(Ꮡ(source, 0), length), "a huge negative length must not wrap to a positive one");
+        StringAssert.Contains(ex.Message, "len is negative");
+    }
+
+    // The offset of unsafe.Add already had the full-width negative check; this arm keeps it.
+    [TestMethod]
+    public void AddRefusesAnOffsetBelowInt32InsteadOfWrappingItPositive()
+    {
+        slice<byte> source = Source();
+        long offset = -(1L << 32) + 5;
+
+        PanicException ex = Assert.ThrowsException<PanicException>(() => @unsafe.Add(Ꮡ(source, 0), offset));
+        StringAssert.Contains(ex.Message, $"unsafe.Add: offset {offset} exceeds what this runtime can address through a typed element box");
+    }
+
+    // ONE maximum. golib's native-window door refuses a length past Array.MaxLength (the longest T[] the
+    // CLR can hold) and exempts a zero-size element, which never spans its storage. unsafe.Slice and
+    // unsafe.String used int.MaxValue for every element type, so a length in (Array.MaxLength, Int32.MaxValue]
+    // passed here and failed later, deep in the CLR, as an OutOfMemory or an IndexOutOfRange.
+    [TestMethod]
+    public void SliceRefusesALengthBetweenArrayMaxLengthAndInt32Max()
+    {
+        slice<byte> source = Source();
+        long length = (long)Array.MaxLength + 1;
+
+        Assert.IsTrue(length <= int.MaxValue, "the arm needs a length inside Int32");
+        AssertRefused(() => @unsafe.Slice(Ꮡ(source, 0), length), length, "unsafe.Slice");
+    }
+
+    [TestMethod]
+    public void StringRefusesALengthBetweenArrayMaxLengthAndInt32Max()
+    {
+        slice<byte> source = Source();
+        long length = (long)Array.MaxLength + 1;
+
+        AssertRefused(() => @unsafe.String(Ꮡ(source, 0), length), length, "unsafe.String");
+    }
+
+    [TestMethod]
+    public void AZeroSizeElementIsExemptFromTheArrayMaxLengthBound()
+    {
+        slice<EmptyStruct> source = new slice<EmptyStruct>(4);
+        long length = (long)Array.MaxLength + 1;
+
+        slice<EmptyStruct> result = @unsafe.Slice(Ꮡ(source, 0), length);
+
+        Assert.AreEqual((int)length, len(result));
+    }
 }
