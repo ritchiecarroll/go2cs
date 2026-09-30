@@ -93,9 +93,18 @@ public sealed class TestRunner
 
         for (int count = 0; count < m_options.Count; count++)
         {
+            // GO'S ORDER, not the names' (D4). cmd/go's loadTestFuncs (load/test.go) lists the package's
+            // internal _test files, then its external (package x_test) files, each list by file name (go/build
+            // reads the directory sorted by name), and a file's tests in declaration order. An order-dependent
+            // suite reads differently in any other order: google/uuid's TestRandPool leaves the package's random
+            // source exhausted, and Go runs it AFTER TestRandomUUID. The name stays as the last key, so a
+            // registration without a Go source position keeps the name order it always had.
             List<RegisteredTest> tests = m_registry.Tests
                 .Where(test => m_options.ShouldRun(test.Name))
-                .OrderBy(test => test.Name, StringComparer.Ordinal)
+                .OrderBy(test => IsExternalTest(test) ? 1 : 0)
+                .ThenBy(test => test.Source, StringComparer.Ordinal)
+                .ThenBy(test => test.Line)
+                .ThenBy(test => test.Name, StringComparer.Ordinal)
                 .ToList();
 
             if (m_options.ShuffleSeed is int seed)
@@ -279,6 +288,19 @@ public sealed class TestRunner
     internal void ReleaseParallelSlot() => m_parallelLimiter.Release();
 
     internal void Report(TestEvent testEvent) => m_reporter.Report(testEvent);
+
+    // Whether a registered test comes from the package's EXTERNAL (package x_test) files. The converter declares a
+    // package's internal tests in `<pkg>_internal_test_package` and its external ones in `<pkg>_test_package`, and a
+    // converted host registers each test by method group, so the declaring class says which list Go put it in. A
+    // host-side lambda (GolibTests) or any other class reads as internal, and its relative order is unchanged.
+    private static bool IsExternalTest(RegisteredTest test)
+    {
+        string? declaring = test.Action.Method.DeclaringType?.Name;
+
+        return declaring is not null &&
+               declaring.EndsWith("_test_package", StringComparison.Ordinal) &&
+               !declaring.EndsWith("_internal_test_package", StringComparison.Ordinal);
+    }
 
     private static void Shuffle<T>(IList<T> values, int seed)
     {
