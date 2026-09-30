@@ -580,6 +580,13 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"debugLogReader.printVal":     goosAny,
 		"printDebugLogImpl":           goosAny,
 		"printDebugLogPC":             goosAny,
+		// PRINT FIDELITY (ruling 2026-09-30, R1 with S1 and S3): every print reaches gwrite through
+		// golib's print sink (managed_impl.cs), so its two walls are hand-owned. writeErrData writes
+		// standard error through golib's managed writer on every target (it was write(2) -> on windows
+		// write1 -> asmcgocall, which has no body), and bytes(s) is a COPY (Go reinterprets the string
+		// header, which the managed model refuses).
+		"writeErrData": goosAny,
+		"bytes":        goosAny,
 		// syscall.AllThreadsSyscall's runtime half refuses by name BEFORE the world (Q6): there are
 		// no Ms to signal, so a stop that now succeeds would run the call on one thread and report
 		// success. linux-only: the function exists only in os_linux.go (linux/os_linux_impl.cs).

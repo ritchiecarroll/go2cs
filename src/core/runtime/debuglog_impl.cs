@@ -245,19 +245,12 @@ partial class runtime_package
         dlogWrite("]"u8);
     }
 
-    // The runtime's printstring hands a string to gwrite through bytes(s), a string-header
-    // reinterpret the managed model refuses (and printbool, printnl and printint's sign are printstring). The
-    // reader bodies here write a string's bytes to gwrite directly: a copy, which gwrite only reads.
-    private static void dlogWrite(@string s) => gwrite(s);
+    // The runtime's own printers, as Go's compiler lowers `print`. These were special cases while
+    // printstring's bytes(s) reinterpreted a string header the managed model refuses; bytes(s) is a
+    // hand-owned copy since the print-fidelity seat, so printstring and printint's sign work.
+    private static void dlogWrite(@string s) => printstring(s);
 
-    // printint, whose sign goes through printstring too.
-    private static void dlogInt(int64 v) {
-        if (v < 0) {
-            dlogWrite("-"u8);
-            v = -v;
-        }
-        printuint((uint64)v);
-    }
+    private static void dlogInt(int64 v) => printint(v);
 
     // debugLogReader.printVal prints one logged value. Go's `print` is the runtime's own printer
     // (printlock/printstring/printint..., through gwrite), which DumpDebugLog captures by setting the

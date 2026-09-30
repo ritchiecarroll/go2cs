@@ -82,6 +82,7 @@ public class ThreadStateCensusTests
         ("runtime/debug/stubs_impl.cs|t_panicOnFault", Disposition.Registered, "GoroutineThreadState.Register(static () => t_panicOnFault = false)", "debug.SetPanicOnFault, per goroutine in Go"),
         ("runtime/lock_managed_impl.cs|t_heldLocks", Disposition.Registered, "Array.Clear(held);", "the runtime locks this goroutine holds"),
         ("runtime/lock_managed_impl.cs|t_heldCount", Disposition.Registered, "t_heldCount = 0;", "the runtime locks this goroutine holds"),
+        ("runtime/managed_impl.cs|t_chunk", Disposition.KeptThreadResource, "private static byte[]? t_chunk;", "the print sink's reused chunk buffer: scratch whose contents never outlive one Write call, so it carries no goroutine state"),
         ("sync/runtime_impl.cs|t_procId", Disposition.Registered, "t_procId = 0;", "sync.Pool's shard id for this goroutine"),
         ("sync/runtime_impl.cs|t_procIdAssigned", Disposition.Registered, "t_procIdAssigned = false;", "sync.Pool's shard id for this goroutine"),
         ("testing/TestExecution.cs|s_current", Disposition.FlowsWithContext, "AsyncLocal<TestExecution?> s_current", "the test a goroutine belongs to, inherited from its creator"),

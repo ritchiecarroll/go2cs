@@ -239,21 +239,7 @@ internal static void writeErrStr(@string s) {
     writeErrData(@unsafe.StringData(s), (int32)len(s));
 }
 
-// writeErrData is the common parts of writeErr{,Str}.
-//
-//go:nosplit
-internal static void writeErrData(ж<byte> Ꮡdata, int32 n) {
-    write(2, @unsafe.Pointer.FromPinnedBox(Ꮡdata), n);
-    // If crashing, print a copy to the SetCrashOutput fd.
-    var gp = getg();
-    if (gp != nil && (~(~gp).m).dying > 0 || gp == nil && Ꮡpanicking.Load() > 0) {
-        {
-            var fd = ᏑcrashFD.Load(); if (fd != ~(uintptr)0) {
-                write(fd, @unsafe.Pointer.FromPinnedBox(Ꮡdata), n);
-            }
-        }
-    }
-}
+// go2cs generated this placeholder — func writeErrData is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // crashFD is an optional file descriptor to use for fatal panics, as
 // set by debug.SetCrashOutput (see #42888). If it is a valid fd (not
