@@ -1743,8 +1743,9 @@ foreach ($rid in $buildOrder) {
     # too, because it selects the conditioned <ProjectReference> groups the .nuspec is derived from.
     Write-Step "[$rid] Packing -> $flavorOut"
     # A local rehearsal overrides the PACKAGE version only (a global property, so every go.* dependency
-    # between the packages carries it too); a release passes nothing extra.
-    $packVersionArgs = if ($VersionSuffix) { @("-p:PackageVersion=$packVersion") } else { @() }
+    # between the packages carries it too); a release passes nothing extra. The @( ) must wrap the whole `if`:
+    # an `if` that yields a one-element array unrolls it to a bare string, and @ splats a string by character.
+    $packVersionArgs = @(if ($VersionSuffix) { "-p:PackageVersion=$packVersion" })
     & dotnet pack $slnx -c $Configuration -o $flavorOut -p:GoTargetOS=$goos -p:GeneratePackageOnBuild=false --no-build --nologo -v m @packVersionArgs
     if ($LASTEXITCODE -ne 0) { throw "[$rid] dotnet pack failed ($LASTEXITCODE)" }
 }
