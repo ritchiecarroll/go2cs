@@ -33,7 +33,7 @@ namespace GolibTests;
 ///     allocates nothing (a compiler stack temp, <c>runtime.zerobase</c>), so charging them would report a
 ///     malloc Go does not make. Each reason cites Go's source for the equivalent construct. The block began
 ///     as V-fix 11's 21 unclassified sites; the follow-on seat routed the real undercounts and the sites
-///     whose charge the scan could not see, and these five are what remained.
+///     whose charge the scan could not see, and five remained; print fidelity added print's staging bytes.
 ///   </description></item>
 ///   <item><description>
 ///     <see cref="Infrastructure"/>, the (c) block: allocations that are not Go-visible backings at all
@@ -55,6 +55,7 @@ public class NoUncountedBackingAllocationsTests
     private static readonly (string Site, string Reason)[] ByDesign =
     [
         ("GoReflect.TypeLayout.cs|s = new slice<T>(new T[0]);", "a zero-length backing: Go's mallocgc answers size 0 with &zerobase and no malloc (runtime/malloc.go); the fresh object exists only as the dims table's identity key"),
+        ("builtin.cs|bytes.AddRange(Encoding.UTF8.GetBytes(printArg(args[i]) ?? \"\"));", "print's staging bytes for a non-string argument: Go's print builtin formats each argument into a stack buffer and hands it to gwrite (runtime/print.go printint/printfloat, buf [..]byte), with no malloc"),
         ("builtin.cs|return (slice<T>)slice.Append(elems.Cast<object>().ToArray())!;", "the ISlice bridge's staging array: Go's append is a builtin that writes the elements in place, with no staging array"),
         ("channel.cs|ChanCore[] lockOrder = cores.ToArray();", "select scratch: Go's select statement keeps its lock/poll order in a compiler stack temp (cmd/compile/internal/walk/select.go, order TempAt)"),
         ("channel.cs|int[] pollOrder = new int[liveCount];", "select scratch: Go's select statement keeps its lock/poll order in a compiler stack temp (cmd/compile/internal/walk/select.go, order TempAt)"),

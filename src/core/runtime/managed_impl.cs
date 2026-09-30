@@ -464,6 +464,72 @@ partial class runtime_package
         }
     }
 
+    // ---- PRINT FIDELITY (ruling 2026-09-30: R1 with S1, S2 and S3) ----------------------------------
+    //
+    // Go's print and println are the RUNTIME's printer: gc lowers them to printlock, one printX per
+    // argument, and printunlock, and every byte goes through gwrite, which keeps the print backlog a
+    // crash dump carries (recordForPanic) and honours a goroutine's writebuf capture (DumpDebugLog,
+    // runtime.Stack's). A converted print binds golib's builtin.print instead, so golib now hands its
+    // formatted bytes to the sink registered here and the runtime's printer is again the one path.
+    [ModuleInitializer]
+    internal static void ᴛRegisterPrintSink()
+    {
+        builtin.PrintSink = static b =>
+        {
+            printlock();
+
+            try
+            {
+                gwrite(new slice<byte>(b));
+            }
+            finally
+            {
+                printunlock();
+            }
+        };
+    }
+
+    // bytes(s) (print.go), S3: a COPY of the string's bytes. Go reinterprets the string header as a
+    // slice header, which the managed model refuses; printstring, and through it printbool, printnl
+    // and printint's sign, reach it, and gwrite only reads what it is given.
+    internal static slice<byte> bytes(@string s) => new slice<byte>(s.ToSpan().ToArray());
+
+    // writeErrData (runtime.go, every GOOS), S1: standard error through golib's managed writer
+    // (builtin.WriteStandardError, S2's rule: raw bytes to the process's stderr, or text to a
+    // Console.Error a host replaced). It was write(2, ...), which on windows is write1 -> stdcall ->
+    // asmcgocall, a door with no body; the print path now reaches it, so it is managed everywhere.
+    // When crashing, Go also copies the bytes to debug.SetCrashOutput's descriptor; that copy goes
+    // through a non-owning SafeFileHandle, as the minimal heap dump writes (it closes nothing).
+    internal static void writeErrData(ж<byte> Ꮡdata, int32 n)
+    {
+        slice<byte> b = @unsafe.Slice(Ꮡdata, n);
+
+        builtin.WriteStandardError(b.ToSpan());
+
+        var gp = getg();
+
+        if (gp != nil && (~(~gp).m).dying > 0 || gp == nil && Ꮡpanicking.Load() > 0)
+        {
+            uintptr fd = ᏑcrashFD.Load();
+
+            if (fd != ~(uintptr)0)
+                writeCrashCopy(fd, b.ToSpan());
+        }
+    }
+
+    private static void writeCrashCopy(uintptr fd, ReadOnlySpan<byte> bytes)
+    {
+        try
+        {
+            using global::Microsoft.Win32.SafeHandles.SafeFileHandle handle = new((nint)(nuint)fd, ownsHandle: false);
+            using global::System.IO.FileStream stream = new(handle, global::System.IO.FileAccess.Write, bufferSize: 0);
+            stream.Write(bytes);
+        }
+        catch (Exception ex) when (ex is global::System.IO.IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException or ObjectDisposedException)
+        {
+        }
+    }
+
     // GC runs a garbage collection and blocks the caller until the garbage collection is complete.
     public static void GC()
     {
