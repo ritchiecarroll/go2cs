@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -93,9 +94,18 @@ public sealed class TestRunner
 
         for (int count = 0; count < m_options.Count; count++)
         {
+            // GO'S ORDER, not the names' (D4). cmd/go's loadTestFuncs (load/test.go) lists the package's
+            // internal _test files, then its external (package x_test) files, each list by file name (go/build
+            // reads the directory sorted by name), and a file's tests in declaration order. An order-dependent
+            // suite reads differently in any other order: google/uuid's TestRandPool leaves the package's random
+            // source exhausted, and Go runs it AFTER TestRandomUUID. The name stays as the last key, so a
+            // registration without a Go source position keeps the name order it always had.
             List<RegisteredTest> tests = m_registry.Tests
                 .Where(test => m_options.ShouldRun(test.Name))
-                .OrderBy(test => test.Name, StringComparer.Ordinal)
+                .OrderBy(test => IsExternalTest(test) ? 1 : 0)
+                .ThenBy(test => test.Source, StringComparer.Ordinal)
+                .ThenBy(test => test.Line)
+                .ThenBy(test => test.Name, StringComparer.Ordinal)
                 .ToList();
 
             if (m_options.ShuffleSeed is int seed)
@@ -279,6 +289,20 @@ public sealed class TestRunner
     internal void ReleaseParallelSlot() => m_parallelLimiter.Release();
 
     internal void Report(TestEvent testEvent) => m_reporter.Report(testEvent);
+
+    // Whether a registered test comes from the package's EXTERNAL (package x_test) files. Go's own definition is the
+    // package clause: an external test file's clause is `<name>_test`. The converter stamps every test class with
+    // its clause as [GoPackage("<clause>")], and a converted host registers each test by method group, so the
+    // declaring class's stamp says which list Go put the test in. The class NAME cannot: a package named `x_internal`
+    // declares its external tests in `x_internal_test_package`. A host-side lambda (GolibTests) or any unstamped
+    // class reads as internal, and its relative order is unchanged.
+    //
+    // Only Test functions are registered: examples and benchmarks are deferred by kind (Phase 4D) and fuzz targets
+    // are compile-only. When examples register, they need a kind key AHEAD of Source/Line, because testing.M runs
+    // every test, then every fuzz target's seeds, then every example.
+    private static bool IsExternalTest(RegisteredTest test) =>
+        test.Action.Method.DeclaringType?.GetCustomAttribute<GoPackageAttribute>()?.PackageName
+            .EndsWith("_test", StringComparison.Ordinal) ?? false;
 
     private static void Shuffle<T>(IList<T> values, int seed)
     {
