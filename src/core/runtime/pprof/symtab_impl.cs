@@ -63,10 +63,13 @@ partial class pprof_package
     //     u, uf := newInlineUnwinder(f.funcInfo, f.PC); return u.srcFunc(uf).name()
     // The inline half exists to give a generic function its unsubstituted symbol name. `funcInfo` is
     // never valid in this corpus — findfunc skips every module with an empty pclntable and the only
-    // moduledata is a permanent empty stub — so the FIRST branch is the one that fires, exactly as it
-    // does for runtime_expandFinalInlineFrame above. Returning f.Function is Go's answer here, not an
-    // approximation of it.
-    internal static partial @string runtime_FrameSymbolName(ж<runtime.Frame> f) => f.Value.Function;
+    // moduledata is a permanent empty stub — so neither branch can run as written. What the second
+    // branch ANSWERS is still reachable: the managed frame record carries the name before Go's
+    // funcNameForPrint decoration (runtime.GoFrameSymbolName), where Frame.Function is the print name
+    // since the traceback learned fn[...]. Reading Frame.Function let that "[...]" leak into every
+    // generic heap-profile location (TRAIN J, 603f51490d); the raw symbol would carry Go's GC-shape
+    // arguments, which the CLR cannot recover, so the undecorated name is the nearest answer.
+    internal static partial @string runtime_FrameSymbolName(ж<runtime.Frame> f) => runtime.GoFrameSymbolName(f.Value);
 
     // Go's body is `return f.startLine`, unconditionally. `Frame.startLine` is `internal` to the
     // runtime assembly, so this one cannot read it across the boundary, and it answers 0.
