@@ -166,6 +166,16 @@ func TestTestsRecurseConvertsAModuleAgainstItsTests(t *testing.T) {
 		testProjects = append(testProjects, projects[0])
 	}
 
+	// Nothing EXTRA was converted: the go command's synthesized test mains (`p.test`) are scaffolding,
+	// and a directory for one means phase A converted it -- and phase B then took it for a package.
+	// (Keyed on the exact paths a test main would take: the fixture's own domain directory
+	// `example.test` also ends in `.test`, so a suffix match would fire on it.)
+	for _, testMain := range []string{srcRoot + ".test", filepath.Join(srcRoot, "request.test")} {
+		if _, statErr := os.Stat(testMain); statErr == nil {
+			t.Errorf("a synthesized test main was converted: %s", testMain)
+		}
+	}
+
 	// Phase B ran over MAIN-MODULE packages only: the third-party dependency is converted (production
 	// imports it) but has no test project, although it has tests of its own.
 	depDir := filepath.Join(outRoot, "pkg", "example.test", "dep")

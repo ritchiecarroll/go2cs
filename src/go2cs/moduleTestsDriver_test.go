@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -78,6 +79,14 @@ func TestTestClosureDiscoveryAddsNoOrderEdges(t *testing.T) {
 
 	if !converter.graph.Contains(helper) {
 		t.Fatalf("the test-only helper %s did not join the convert-set", helper)
+	}
+
+	// The synthesized test MAINS (`p.test`: Name main, ID == PkgPath, sources in the build cache) are
+	// the go command's scaffolding, not packages of the module: none may join the convert-set.
+	for path := range converter.graph.packages {
+		if strings.HasSuffix(path, "/jwtlike.test") || strings.HasSuffix(path, "/request.test") {
+			t.Errorf("the synthesized test main %s joined the convert-set", path)
+		}
 	}
 
 	for from, testImport := range edges {
