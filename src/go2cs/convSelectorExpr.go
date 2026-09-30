@@ -72,8 +72,12 @@ func typeCollidingFieldName(name string) string {
 // fieldCollidesWithType reports whether a field selector's name equals the C# type name of the
 // struct it belongs to (`type Node struct{ Node *Node }` → field `Node` in struct `Node`).
 func (v *Visitor) fieldCollidesWithType(sel *ast.Ident, x ast.Expr) bool {
-	xType := v.info.TypeOf(x)
+	return fieldCollidesWithOwnerType(sel.Name, v.info.TypeOf(x))
+}
 
+// fieldCollidesWithOwnerType is fieldCollidesWithType's answer from the owning struct's TYPE, for a field reached
+// where no AST expression names its owner (a hop of an embed path; see crossPackagePromotionHop).
+func fieldCollidesWithOwnerType(fieldName string, xType types.Type) bool {
 	if xType == nil {
 		return false
 	}
@@ -98,7 +102,7 @@ func (v *Visitor) fieldCollidesWithType(sel *ast.Ident, x ast.Expr) bool {
 		return false
 	}
 
-	return getSanitizedIdentifier(sel.Name) == getSanitizedIdentifier(obj.Name())
+	return getSanitizedIdentifier(fieldName) == getSanitizedIdentifier(obj.Name())
 }
 
 // packageMethodNames caches, per package, the set of every method/func name declared in it. Used to
@@ -202,6 +206,128 @@ func (v *Visitor) structFieldBoxName(sel *ast.Ident, structExpr ast.Expr) string
 	}
 
 	return removeLeadingSanitizationMarker(name)
+}
+
+// crossPackageValuePromotion returns the embedded fields a selection walks when it promotes a concrete VALUE-receiver
+// method through an embed path in which some HOP crosses packages (the embedding type and the embedded type are declared
+// in different packages); nil otherwise. go2cs-gen promotes no method across packages -- a metadata embed promotes FIELDS
+// only (see the pointer-embed arm below) -- so such a method has no forwarder to bind, and the bare `x.M()` binds nothing
+// or an unrelated same-named extension (CS1929; golang-jwt's NumericDate, which embeds time.Time and calls Truncate and
+// Add). The explicit walk, `x.Time.M()`, is itself legal Go and equivalent. A path of same-package hops keeps its
+// generated forwarder, and a pointer-receiver or interface method keeps its own arm.
+func crossPackageValuePromotion(sel *types.Selection) []*types.Var {
+	if sel == nil || (sel.Kind() != types.MethodVal && sel.Kind() != types.MethodExpr) || len(sel.Index()) < 2 {
+		return nil
+	}
+
+	fn, ok := sel.Obj().(*types.Func)
+
+	if !ok || fn.Pkg() == nil {
+		return nil
+	}
+
+	sig, ok := fn.Type().(*types.Signature)
+
+	if !ok || sig.Recv() == nil || types.IsInterface(sig.Recv().Type()) {
+		return nil
+	}
+
+	if _, isPtrRecv := types.Unalias(sig.Recv().Type()).(*types.Pointer); isPtrRecv {
+		return nil
+	}
+
+	var path []*types.Var
+	crosses := false
+	owner := sel.Recv()
+
+	for _, idx := range sel.Index()[:len(sel.Index())-1] {
+		ownerNamed := promotionNamed(owner)
+		structType, ok := types.Unalias(promotionDeref(owner)).Underlying().(*types.Struct)
+
+		if !ok || ownerNamed == nil || idx >= structType.NumFields() {
+			return nil
+		}
+
+		field := structType.Field(idx)
+		fieldNamed := promotionNamed(field.Type())
+
+		if !field.Embedded() || fieldNamed == nil {
+			return nil
+		}
+
+		if ownerNamed.Obj().Pkg() != fieldNamed.Obj().Pkg() {
+			crosses = true
+		}
+
+		path = append(path, field)
+		owner = field.Type()
+	}
+
+	if !crosses {
+		return nil
+	}
+
+	return path
+}
+
+func promotionDeref(t types.Type) types.Type {
+	if ptr, ok := types.Unalias(t).(*types.Pointer); ok {
+		return ptr.Elem()
+	}
+
+	return t
+}
+
+func promotionNamed(t types.Type) *types.Named {
+	named, _ := types.Unalias(promotionDeref(t)).(*types.Named)
+	return named
+}
+
+// crossPackagePromotionHop renders the explicit walk of a crossPackageValuePromotion path from a rendered base whose Go
+// type is baseType: a base that renders as a raw ж box (a pointer the rendering has not already dereferenced) goes
+// through `.Value` first, each hop names its embed field as the struct declaration names it, and a POINTER embed is
+// dereferenced (`.Value`) so the next hop, or the value-receiver method, sees the pointee.
+func crossPackagePromotionHop(base string, baseIsBox bool, baseType types.Type, path []*types.Var) string {
+	expr := base
+
+	if baseIsBox {
+		expr += ".Value"
+	}
+
+	owner := baseType
+
+	for _, field := range path {
+		name := getCoreSanitizedIdentifier(field.Name())
+
+		if fieldCollidesWithOwnerType(field.Name(), owner) {
+			name = typeCollidingFieldName(name)
+		}
+
+		expr += "." + removeLeadingSanitizationMarker(name)
+
+		if _, isPtr := types.Unalias(field.Type()).(*types.Pointer); isPtr {
+			expr += ".Value"
+		}
+
+		owner = field.Type()
+	}
+
+	return expr
+}
+
+// crossPackagePromotedReceiver applies crossPackagePromotionHop to a selector's rendered receiver when the selector is a
+// crossPackageValuePromotion; the rendering is returned unchanged otherwise.
+func (v *Visitor) crossPackagePromotedReceiver(selectorExpr *ast.SelectorExpr, rendered string) string {
+	path := crossPackageValuePromotion(v.info.Selections[selectorExpr])
+
+	if path == nil {
+		return rendered
+	}
+
+	xType := v.info.TypeOf(selectorExpr.X)
+	_, xIsPtr := types.Unalias(xType).Underlying().(*types.Pointer)
+
+	return crossPackagePromotionHop(rendered, xIsPtr && !v.exprIsDerefAliasedPointer(selectorExpr.X), xType, path)
 }
 
 // structFieldReachable reports whether a field named `name` is reachable on the struct — either
@@ -850,6 +976,17 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		}
 	}
 
+	// A CALL of a VALUE-receiver method promoted through an embed hop that CROSSES packages walks the embed path
+	// explicitly — `s.Time.Truncate(d)`, `p.Value.Time.Add(d)`, `o.inner.Time.Truncate(d)` — because go2cs-gen promotes
+	// no method across packages and the bare call binds nothing (crossPackageValuePromotion). Every other selector,
+	// same-package paths included, is untouched.
+	if context.isCallExpr {
+		if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.MethodVal && crossPackageValuePromotion(sel) != nil {
+			return v.aliasResolvedSelector(selectorExpr, fmt.Sprintf("%s.%s",
+				v.crossPackagePromotedReceiver(selectorExpr, v.convExpr(selectorExpr.X, nil)), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+		}
+	}
+
 	// A Go METHOD EXPRESSION — `(*timers).run`, the unbound method as a func value whose first
 	// parameter is the receiver (runtime time.go's `abi.FuncPCABIInternal((*timers).run)`) —
 	// selects a method off a TYPE. Emitting the selector naively renders the type in value
@@ -889,6 +1026,37 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 					// wrapperRecv: a nil receiver faults IN the wrapper, as Go's does, raised as the
 					// wrapper's own panic (the emitter's marker runtime.Callers keeps the frame on).
 					return fmt.Sprintf("((%s)(%s(%s) => wrapperRecv(p0).%s(%s)))", delegateType, v.methodExpressionWrapperMark(sel, false), strings.Join(params, ", "), methodName, strings.Join(args, ", "))
+				}
+			}
+		}
+
+		// A VALUE-receiver method promoted through an embed hop that CROSSES packages (`Stamp.Add`, Stamp embedding
+		// time.Time) has no static form on the receiver type to cast: go2cs-gen promotes no method across packages.
+		// Forward through a lambda that walks the embed path explicitly (crossPackageValuePromotion), before the
+		// qualification below turns the method into a foreign static group: `((Func<Stamp, Duration, Time>)((p0, p1)
+		// => p0.Time.Add(p1)))`. A `(*Stamp).Add` receiver reads through the wrapper's nil fault, as the pointer-type
+		// arm below does.
+		if path := crossPackageValuePromotion(sel); path != nil {
+			if fn, ok := sel.Obj().(*types.Func); ok {
+				if sig, ok := fn.Type().(*types.Signature); ok {
+					params := []string{"p0"}
+					args := make([]string, 0, sig.Params().Len())
+
+					for i := 0; i < sig.Params().Len(); i++ {
+						name := fmt.Sprintf("p%d", i+1)
+						params = append(params, name)
+						args = append(args, name)
+					}
+
+					_, recvIsPtr := types.Unalias(sel.Recv()).(*types.Pointer)
+					recv, mark := "p0", ""
+
+					if recvIsPtr {
+						recv, mark = v.methodExpressionWrapperReceiver(sel), v.methodExpressionWrapperMark(sel, true)
+					}
+
+					return fmt.Sprintf("((%s)(%s(%s) => %s.%s(%s)))", delegateType, mark, strings.Join(params, ", "),
+						crossPackagePromotionHop(recv, recvIsPtr, sel.Recv(), path), methodName, strings.Join(args, ", "))
 				}
 			}
 		}
@@ -1243,12 +1411,12 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 					paramUses.WriteString(name)
 				}
 
-				return fmt.Sprintf("(%s) => %s.%s(%s)", paramDecls.String(), recvExpr,
+				return fmt.Sprintf("(%s) => %s.%s(%s)", paramDecls.String(), v.crossPackagePromotedReceiver(selectorExpr, recvExpr),
 					v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)), paramUses.String())
 			}
 		}
 
-		return fmt.Sprintf("() => %s.%s()", recvExpr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+		return fmt.Sprintf("() => %s.%s()", v.crossPackagePromotedReceiver(selectorExpr, recvExpr), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 	}
 
 	// A method VALUE over a POINTER-receiver method in a VALUE context — a call argument
@@ -1420,7 +1588,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 						recvRender = v.convExprInLambdaContext(selectorExpr.X)
 					}
 
-					return fmt.Sprintf("(%s) => %s.%s(%s)", paramDecls.String(), recvRender,
+					return fmt.Sprintf("(%s) => %s.%s(%s)", paramDecls.String(), v.crossPackagePromotedReceiver(selectorExpr, recvRender),
 						v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)), paramUses.String())
 				}
 			}
