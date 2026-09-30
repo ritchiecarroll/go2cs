@@ -1349,6 +1349,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPkgLevelFuncLitLocals() => CheckTarget("PkgLevelFuncLitLocals");
 
     [TestMethod]
+    public void CheckPlainSendOperandOrder() => CheckTarget("PlainSendOperandOrder");
+
+    [TestMethod]
     public void CheckPointerArrayRange() => CheckTarget("PointerArrayRange");
 
     [TestMethod]

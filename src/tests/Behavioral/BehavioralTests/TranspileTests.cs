@@ -1402,6 +1402,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPkgLevelFuncLitLocals() => CheckTarget("PkgLevelFuncLitLocals");
 
     [TestMethod]
+    public void CheckPlainSendOperandOrder() => CheckTarget("PlainSendOperandOrder");
+
+    [TestMethod]
     public void CheckPointerArrayRange() => CheckTarget("PointerArrayRange");
 
     [TestMethod]
