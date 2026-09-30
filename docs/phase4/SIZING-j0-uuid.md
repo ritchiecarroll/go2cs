@@ -127,3 +127,60 @@ tools\j0-uuid-rehearsal\j0-consume.ps1 -Feed <feed> -UuidVersion 1.6.0-local.1 -
 ```
 
 `<out>`, `<feed>` and `<scratch>` belong outside every checkout and outside `GOMODCACHE`.
+
+## Amendment 2026-09-30 -- the local-converter reading (R's D1, D2, D3 on refs)
+
+**Converter:** an UNTRACKED build of a local, never-pushed merge of M1 (`e0b6dcdf73`) with R's D3 (`5391840f47`),
+D1 (`5054c6af00`) and D2 (`aa8811022a`), all on master `a1f133c3a9`. The three merges were clean, and each fix's
+behavioral registration is present exactly once. The binary was proven by content: M1's `validationProofDestination`,
+D1's `sendRegistration` and D2's `sliceElemDimsWrap` are present, and the warning D3 deletes is absent (while the
+M1-only build still carries it). `-Go2csPath` is a master worktree; D1 to D3 change only the converter.
+
+**`-tests` validation: 51 of 54 verdicts agree.**
+- The test host compiles and runs. The record is keyed `github.com/google/uuid` (M1).
+- The three `Fuzz` targets are EXCLUDED BY NAME, "fuzz execution is deferred to Phase 4D", as the pre-read predicted.
+  The host has no seed-corpus path: `testing.F` is a compile-only surface.
+- The three misses, each Go pass / C# fail: `TestRandomUUID` (`panic: EOF`), `TestRandomUUID_Pooled` (`panic: EOF`),
+  `TestVersion6` (`time reversed`).
+- ALL THREE PASS ALONE: a `-test-filter` over just them validates 3 of 3.
+- The cause is test ORDER, **D4**. The host runs tests alphabetically, sorted in two places: `testConversion.go:850`
+  and `core/testing/TestRunner.cs:98`. Go runs them in source order.
+  - `TestRandPool` swaps the package's random source for a 16-byte `strings.Reader`, consumes it and never restores
+    it. In Go it runs after `TestRandomUUID`; alphabetically it runs first.
+  - `TestVersion6` is order-dependent too, but its predecessor is not pinned.
+- D4 is ruled to i9 as a runs-like-Go fix, with a census of every banked row before it seats (TRAIN K or L, never J).
+
+**Consumer by PROJECT REFERENCE: 28 of 28 lines byte-identical to `go run`, raw files equal.**
+- The package's static constructor survives, so D3 is proven end to end.
+- The package-feed consume repeats this table at TRAIN J's landed tip.
+
+| key | go run (and the converted package) | |
+|:--|:--|:--|
+| `namespace.dns` | `6ba7b810-9dad-11d1-80b4-00c04fd430c8 version=VERSION_1 variant=RFC4122` | MATCH |
+| `namespace.url` | `6ba7b811-9dad-11d1-80b4-00c04fd430c8 version=VERSION_1 variant=RFC4122` | MATCH |
+| `namespace.oid` | `6ba7b812-9dad-11d1-80b4-00c04fd430c8 version=VERSION_1 variant=RFC4122` | MATCH |
+| `namespace.x500` | `6ba7b814-9dad-11d1-80b4-00c04fd430c8 version=VERSION_1 variant=RFC4122` | MATCH |
+| `v3.dns.example.com` | `9073926b-929f-31c2-abc9-fad77ae3e8eb version=VERSION_3 variant=RFC4122` | MATCH |
+| `v3.url.go2cs` | `d5b40fdd-2f5e-3185-af7f-3d46b84096ec version=VERSION_3 variant=RFC4122` | MATCH |
+| `v5.dns.example.com` | `cfbff0d1-9375-5685-968c-48ce8b15ae17 version=VERSION_5 variant=RFC4122` | MATCH |
+| `v5.url.go2cs` | `e785bc3e-6679-50eb-b899-ac1fee1e4a11 version=VERSION_5 variant=RFC4122` | MATCH |
+| `v5.oid.empty` | `0a68eb57-c88a-5f34-9e9d-27f85e68af4f version=VERSION_5 variant=RFC4122` | MATCH |
+| `v5.x500.unicode` | `5a878cea-5a85-5abd-bf1d-988597e639a6 version=VERSION_5 variant=RFC4122` | MATCH |
+| `parse "f47ac10b-58cc-0372-8567-0e02b2c3d479"` | `f47ac10b-58cc-0372-8567-0e02b2c3d479 version=VERSION_0 variant=RFC4122` | MATCH |
+| `parse "urn:uuid:f47ac10b-58cc-4372-a567-0e02b2c3d479"` | `f47ac10b-58cc-4372-a567-0e02b2c3d479 version=VERSION_4 variant=RFC4122` | MATCH |
+| `parse "{f47ac10b-58cc-4372-a567-0e02b2c3d479}"` | `f47ac10b-58cc-4372-a567-0e02b2c3d479 version=VERSION_4 variant=RFC4122` | MATCH |
+| `parse "f47ac10b58cc4372a5670e02b2c3d479"` | `f47ac10b-58cc-4372-a567-0e02b2c3d479 version=VERSION_4 variant=RFC4122` | MATCH |
+| `parse "F47AC10B-58CC-4372-A567-0E02B2C3D479"` | `f47ac10b-58cc-4372-a567-0e02b2c3d479 version=VERSION_4 variant=RFC4122` | MATCH |
+| `parse "not-a-uuid"` | `error invalid UUID length: 10` | MATCH |
+| `parse "f47ac10b-58cc-4372-a567-0e02b2c3d47"` | `error invalid UUID length: 35` | MATCH |
+| `parse "f47ac10b-58cc-4372-a567+0e02b2c3d479"` | `error invalid UUID format` | MATCH |
+| `urn` | `urn:uuid:f47ac10b-58cc-4372-a567-0e02b2c3d479` | MATCH |
+| `marshaltext` | `f47ac10b-58cc-4372-a567-0e02b2c3d479` | MATCH |
+| `unmarshaltext` | `f47ac10b-58cc-4372-a567-0e02b2c3d479 err=<nil> equal=true` | MATCH |
+| `marshalbinary` | `f47ac10b58cc4372a5670e02b2c3d479` | MATCH |
+| `validate.good` | `<nil>` | MATCH |
+| `validate.bad` | `invalid UUID format` | MATCH |
+| `v1` | `version=VERSION_1 variant=RFC4122 len=36 roundtrip=true` | MATCH |
+| `v4` | `version=VERSION_4 variant=RFC4122 len=36 roundtrip=true` | MATCH |
+| `v6` | `version=VERSION_6 variant=RFC4122 len=36 roundtrip=true` | MATCH |
+| `v7` | `version=VERSION_7 variant=RFC4122 len=36 roundtrip=true` | MATCH |
