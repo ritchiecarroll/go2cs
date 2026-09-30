@@ -5,9 +5,11 @@ using go.testing_runtime;
 
 namespace GolibTests;
 
-// The two classes below stand in for a converted package's test classes. The converter names them exactly so:
-// `<pkg>_internal_test_package` holds the tests of the package's own _test files, `<pkg>_test_package` those of its
-// external (package <pkg>_test) files. The host reads that distinction from each registered test's declaring class.
+// The two classes below stand in for a converted package's test classes, named and stamped exactly as the converter
+// emits them: `<pkg>_internal_test_package` holds the tests of the package's own _test files and carries the
+// package's clause, [GoPackage("<pkg>")]; `<pkg>_test_package` holds those of its external files and carries
+// [GoPackage("<pkg>_test")]. The host reads which list a test is in from its declaring class's stamp.
+[GoPackage("ordering")]
 internal static class ordering_internal_test_package
 {
     public static void TestMInternal(ж<testing_package.T> t) => GoTestOrderTests.Ran("TestMInternal");
@@ -15,10 +17,29 @@ internal static class ordering_internal_test_package
     public static void TestAInternalLater(ж<testing_package.T> t) => GoTestOrderTests.Ran("TestAInternalLater");
 }
 
+[GoPackage("ordering_test")]
 internal static class ordering_test_package
 {
     public static void TestBExternal(ж<testing_package.T> t) => GoTestOrderTests.Ran("TestBExternal");
     public static void TestYExternal(ж<testing_package.T> t) => GoTestOrderTests.Ran("TestYExternal");
+}
+
+// A package whose own NAME ends in "_internal". The converter names its external class `ordering_internal_test_package`,
+// the same name the package above gives its INTERNAL class, so only the stamp says which list it is. (Nested here
+// because the two same-named classes live in different converted assemblies.)
+internal static class PackageNamedOrderingInternal
+{
+    [GoPackage("ordering_internal")]
+    internal static class ordering_internal_internal_test_package
+    {
+        public static void TestZInternal(ж<testing_package.T> t) => GoTestOrderTests.Ran("TestZInternal");
+    }
+
+    [GoPackage("ordering_internal_test")]
+    internal static class ordering_internal_test_package
+    {
+        public static void TestAExternal(ж<testing_package.T> t) => GoTestOrderTests.Ran("TestAExternal");
+    }
 }
 
 /// <summary>
@@ -81,6 +102,25 @@ public class GoTestOrderTests
             ran,
             "the host must run tests in Go's order (internal files, then external files, each by file name, " +
             $"then declaration order), not by name. Ran: {string.Join(", ", ran)}");
+    }
+
+    [TestMethod]
+    public void AnExternalTestIsKnownByItsPackageClauseNotItsClassName()
+    {
+        TestRegistry registry = new("ordering_internal", []);
+
+        registry.Add("TestAExternal", PackageNamedOrderingInternal.ordering_internal_test_package.TestAExternal, "a_x_test.go", 1);
+        registry.Add("TestZInternal", PackageNamedOrderingInternal.ordering_internal_internal_test_package.TestZInternal, "z_test.go", 1);
+
+        List<string> ran = RunInOrder(registry);
+
+        // The internal file z_test.go runs before the external a_x_test.go. Reading the class-name suffix instead
+        // takes both for internal and runs a_x_test.go first, by file name.
+        CollectionAssert.AreEqual(
+            new[] { "TestZInternal", "TestAExternal" },
+            ran,
+            "an external test is one whose [GoPackage] clause ends in \"_test\", whatever its class is named. " +
+            $"Ran: {string.Join(", ", ran)}");
     }
 
     [TestMethod]
