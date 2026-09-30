@@ -865,6 +865,7 @@
     <Project Path="tests/Behavioral/SelectRecvCommShadowRename/SelectRecvCommShadowRename.csproj" />
     <Project Path="tests/Behavioral/SelectSendDefault/SelectSendDefault.csproj" />
     <Project Path="tests/Behavioral/SelectSendRecvMix/SelectSendRecvMix.csproj" />
+    <Project Path="tests/Behavioral/SelectSendTupleSpread/SelectSendTupleSpread.csproj" />
     <Project Path="tests/Behavioral/SelectSingleFire/SelectSingleFire.csproj" />
     <Project Path="tests/Behavioral/SelectStatement/SelectStatement.csproj" />
     <Project Path="tests/Behavioral/SetFinalizerBridge/SetFinalizerBridge.csproj" />

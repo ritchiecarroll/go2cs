@@ -75,7 +75,25 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 	// separate value temp would have to re-render the element type to declare itself, and `var`
 	// inference is provably wrong there: `case bch <- 200:` on a `chan byte` becomes
 	// `var t = 200;` (an int) which no longer converts to byte at the call — CS1503.
+	//
+	// An operand can itself need a pre-statement — a value forwarding a multi-value call
+	// (`case ch <- must(pair()):` spreads as `var (ᴛ1, ᴛ2) = pair();`, then `must(ᴛ1, ᴛ2)`), a
+	// captured func literal's snapshot. The select is a statement, so each case's operands convert
+	// against a statement sink exactly as the plain send statement's do (visitSendStmt), and the
+	// sink is flushed immediately before that case's temp, keeping cross-case source order. When the
+	// VALUE spills, its pre-statement would run ahead of the channel operand still sitting in the
+	// registration call, so the channel operand is pinned to its own temp first.
 	caseTemps := make(map[int]string)
+
+	savedHoist := v.hoistedDecls
+
+	flushHoist := func(hoist *strings.Builder) {
+		// The decls carry their own leading newline + indentation; the temp below adds its own.
+		if hoist.Len() > 0 {
+			v.outputBuilder.WriteString(strings.TrimRight(hoist.String(), " \t\r\n"))
+			hoist.Reset()
+		}
+	}
 
 	for i, comClause := range comClauses {
 		if comClause.Comm == nil {
@@ -84,8 +102,24 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 
 		var hoisted string
 
+		hoistBuf := &strings.Builder{}
+		v.hoistedDecls = hoistBuf
+
 		if sendStmt, ok := comClause.Comm.(*ast.SendStmt); ok {
-			hoisted = v.sendRegistration(sendStmt)
+			chanOperand := v.convExpr(sendStmt.Chan, nil)
+			flushHoist(hoistBuf)
+
+			sendValue := v.convSendValueExpr(sendStmt)
+
+			if hoistBuf.Len() > 0 {
+				chanTemp := getGlobalTempVarName("sel")
+				v.outputBuilder.WriteString(v.newline)
+				v.writeOutput("var %s = %s;", chanTemp, chanOperand)
+				chanOperand = chanTemp
+				flushHoist(hoistBuf)
+			}
+
+			hoisted = v.sendRegistration(chanOperand, sendValue)
 		} else {
 			var chanExpr ast.Expr
 
@@ -106,6 +140,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 			}
 
 			hoisted = v.convExpr(chanExpr, nil)
+			flushHoist(hoistBuf)
 		}
 
 		tempName := getGlobalTempVarName("sel")
@@ -114,6 +149,8 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 		v.outputBuilder.WriteString(v.newline)
 		v.writeOutput("var %s = %s;", tempName, hoisted)
 	}
+
+	v.hoistedDecls = savedHoist
 
 	v.outputBuilder.WriteString(v.newline)
 
@@ -386,11 +423,12 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 // hoist it whole into a select-scoped temp: the call BUILDS a SelectOp descriptor and performs no
 // communication, its receiver-then-argument evaluation is exactly Go's channel-then-value source
 // order, and the value expression keeps its original argument position so every implicit conversion
-// convSendValueExpr relies on the `in T` parameter to apply survives untouched.
-func (v *Visitor) sendRegistration(sendStmt *ast.SendStmt) string {
+// convSendValueExpr relies on the `in T` parameter to apply survives untouched. The caller converts
+// both operands (channel first) so any pre-statement they spill is placed before the registration.
+func (v *Visitor) sendRegistration(chanOperand string, sendValue string) string {
 	var reg strings.Builder
 
-	reg.WriteString(v.convExpr(sendStmt.Chan, nil))
+	reg.WriteString(chanOperand)
 	reg.WriteRune('.')
 
 	if v.options.useChannelOperators {
@@ -400,7 +438,7 @@ func (v *Visitor) sendRegistration(sendStmt *ast.SendStmt) string {
 	}
 
 	reg.WriteRune('(')
-	reg.WriteString(v.convSendValueExpr(sendStmt))
+	reg.WriteString(sendValue)
 
 	if v.options.useChannelOperators {
 		reg.WriteString(", ")
