@@ -1,0 +1,23 @@
+# RELOCATIONS INTO go1.25.14 -- the rows whose tests moved into this release, one `source<TAB>target` per
+# line (a source that fanned out appears once per target). -Hop reads it for each row's Receives: PROVENANCE,
+# never an expectation. Every target is in population-go1.25.14.txt.
+#
+# DERIVED BY BODY (C2, 2026-09-30), not by name: every _test.go file and every test function body of the 10
+# ADDED and 3 REMOVED rows (population-go1.24.13.txt -> population-go1.25.14.txt) was matched against every
+# std _test.go of the other release (GOROOTs go1.24.13 and go1.25.14; cmd, vendor and testdata excluded).
+# An arc needs the test bodies to have LEFT the source and ARRIVED at the target:
+#   runtime/internal/wasitest -> internal/runtime/wasitest: all 3 files (tcpecho 0.98, nonblock 0.97, host 1.00).
+#   internal/trace/internal/oldtrace -> internal/trace/internal/tracev1: parser_test.go, 1.00, 3 of 3 tests.
+#   go/ast/internal/tests -> go/ast: its one test, TestSortImportsUpdatesFileImportsField, identical (1.00)
+#     in go/ast/import_test.go; the source directory is gone in go1.25.14. NOT a true removal.
+#   runtime -> internal/runtime/strconv: PARTIAL, the source row survives. TestAtoi (0.80) and TestAtoi32
+#     (0.75) left runtime/string_test.go (1 -> 0 each) for internal/runtime/strconv/atoi_test.go.
+# No origin at 0.50 or above, so NOT relocations: crypto/fips140, crypto/internal/fips140/subtle,
+# crypto/internal/fips140cache, internal/runtime/cgroup, internal/trace/tracev2, math/big/internal/asmgen,
+# testing/synctest (its tests are new; only the 7-line helper wantPanic matches internal/synctest, whose
+# own tests stay and grow 20 -> 41).
+source	target
+runtime/internal/wasitest	internal/runtime/wasitest
+internal/trace/internal/oldtrace	internal/trace/internal/tracev1
+go/ast/internal/tests	go/ast
+runtime	internal/runtime/strconv
