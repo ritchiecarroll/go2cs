@@ -237,7 +237,6 @@ var fleetClearedTokenFiles = map[string]string{
 	"docs/_config.yml":                               "published site configuration: the owner's public name",
 	"src/go2cs/winres/winres.json":                   "published copyright string: the owner's public name",
 	"src/go2cs/.vscode/settings.json":                "spell-check dictionary word: the owner's public given name",
-	"docs/PLAN-nugetgo.md":                           "a package-registry organisation name that is public on the registry",
 	"docs/phase4/SESSION-ROLL-2026-09-01-EVENING.md": "address-style norms using the owner's public given name",
 }
 
