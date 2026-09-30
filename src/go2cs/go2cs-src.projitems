@@ -214,7 +214,9 @@
     <None Include="$(MSBuildThisFileDirectory)moduleConverter_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleNamespaceAgreement_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleProofPages_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)moduleTestsDriver.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleTestsDriver_integration_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)moduleTestsDriver_test.go" />
     <None Include="$(MSBuildThisFileDirectory)modulesLock.go" />
     <None Include="$(MSBuildThisFileDirectory)modulesLock_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nameCollisionAnalysisOperations.go" />

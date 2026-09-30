@@ -52,6 +52,7 @@ type ModuleConverter struct {
 	convertedCsproj      map[string]string          // import path -> its generated .csproj path (successful conversions)
 	referencedThirdParty []string                   // -recurse=module: third-party import paths left OUT of the convert-set
 	lockedModules        map[string]moduleLockEntry // module-cache dependency modules in the convert-set (modulesLock.go)
+	includeTestClosure   bool                       // -tests -recurse: widen the convert-set by the module's test closure (moduleTestsDriver.go)
 }
 
 // NewModuleConverter creates a recursive end-user module converter.
@@ -101,6 +102,14 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 	//    are deliberately left OUT of the graph, so edges to them never constrain the conversion
 	//    order — they are pre-converted and only referenced.
 	m.partition(closure)
+
+	// 2. (-tests -recurse) The packages only the module's TESTS need -- a test helper, a test-only
+	//    dependency -- join the convert-set too, from a separate discovery load (moduleTestsDriver.go).
+	if m.includeTestClosure {
+		if err := m.addTestOnlyPackages(moduleDir, closure); err != nil {
+			return err
+		}
+	}
 
 	// 2a. One version per module per output root (modulesLock.go): a dependency the root already
 	//     holds at a DIFFERENT version is refused here, before a single package is overwritten.
@@ -288,6 +297,39 @@ func (m *ModuleConverter) classify(pkg *packages.Package) packageClass {
 	return classSkip
 }
 
+// addToConvertSet adds an app or third-party package to the graph -- reporting false for a third-party
+// package -recurse=module keeps referenced-only -- and records what the rest of the run keys on: the
+// main module's path (outputDirFor and reference emission route the app's packages to src\ and every
+// dependency to pkg\), and a module-cache dependency's selected version (modulesLock.go; a local
+// replace has no version to lock).
+func (m *ModuleConverter) addToConvertSet(pkg *packages.Package) bool {
+	if pkg.Module != nil && pkg.Module.Main {
+		m.graph.AddPackage(pkg.PkgPath, pkg.Dir)
+		m.options.mainModulePath = pkg.Module.Path
+		return true
+	}
+
+	// -recurse=module: keep the dependency OUT of the convert-set. Its references are still emitted
+	// (getRecurseDependencyInfo routes it to pkg\<import-path> from the import path alone, not from
+	// anything converted), so converting it later into the same output root resolves them — but
+	// nothing about it can fail this run.
+	if m.options.moduleOnly {
+		return false
+	}
+
+	m.graph.AddPackage(pkg.PkgPath, pkg.Dir)
+
+	if pkg.Module != nil && pkg.Module.Replace == nil && pkg.Module.Version != "" {
+		if m.lockedModules == nil {
+			m.lockedModules = make(map[string]moduleLockEntry)
+		}
+
+		m.lockedModules[pkg.Module.Path] = moduleLockEntry{path: pkg.Module.Path, version: pkg.Module.Version}
+	}
+
+	return true
+}
+
 // partition classifies every closure package and adds the convert-set to the graph, printing a
 // one-line census. The convert-set is the app + third-party packages, or — under -recurse=module —
 // the app's packages alone, with the third-party packages recorded as referenced-only.
@@ -297,35 +339,13 @@ func (m *ModuleConverter) partition(closure map[string]*packages.Package) {
 	for pkgPath, pkg := range closure {
 		switch m.classify(pkg) {
 		case classApp:
-			m.graph.AddPackage(pkgPath, pkg.Dir)
-			// Record the app's module path so outputDirFor / reference emission can route the app's
-			// own packages to src\ and every dependency to pkg\ (all app packages share this module).
-			if pkg.Module != nil {
-				m.options.mainModulePath = pkg.Module.Path
-			}
+			m.addToConvertSet(pkg)
 			appCount++
 		case classThirdParty:
 			thirdPartyCount++
 
-			// -recurse=module: keep the dependency OUT of the convert-set. Its references are still
-			// emitted (getRecurseDependencyInfo routes it to pkg\<import-path> from the import path
-			// alone, not from anything converted), so converting it later into the same output root
-			// resolves them — but nothing about it can fail this run.
-			if m.options.moduleOnly {
+			if !m.addToConvertSet(pkg) {
 				m.referencedThirdParty = append(m.referencedThirdParty, pkgPath)
-				continue
-			}
-
-			m.graph.AddPackage(pkgPath, pkg.Dir)
-
-			// A module-cache dependency (no `replace`) converted into the root is locked at the version
-			// the build selected (modulesLock.go); a local replace has no version to lock.
-			if pkg.Module.Replace == nil && pkg.Module.Version != "" {
-				if m.lockedModules == nil {
-					m.lockedModules = make(map[string]moduleLockEntry)
-				}
-
-				m.lockedModules[pkg.Module.Path] = moduleLockEntry{path: pkg.Module.Path, version: pkg.Module.Version}
 			}
 		case classStdLib:
 			stdlibCount++
