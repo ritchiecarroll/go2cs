@@ -1172,6 +1172,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedSlicePointerReinterpret() => CheckTarget("NamedSlicePointerReinterpret");
 
     [TestMethod]
+    public void CheckNamedSliceReflectDims() => CheckTarget("NamedSliceReflectDims");
+
+    [TestMethod]
     public void CheckNamedStringConcat() => CheckTarget("NamedStringConcat");
 
     [TestMethod]

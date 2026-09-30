@@ -720,7 +720,38 @@ public static partial class GoReflect
         if (box is ISliceBacking { Backing: { } backing } && s_sliceElemDims.TryGetValue(backing, out nint[]? recorded))
             return recorded;
 
+        // A NAMED slice type (`type UUIDs []UUID`) is a converted wrapper struct holding its slice<T> in
+        // one private `m_value` -- not itself an ISliceBacking, so the record the converter makes on the
+        // inner slice<T> it wraps and SHARES was unreachable through it: TypeOf(UUIDs{}).Elem().Len()
+        // read 0 where Go reads 16. Project through `m_value`, the defined-type-over-struct precedent in
+        // GoReflect.FieldAccess.cs. Only an EMPTY one needs it (observation below answers the rest) and
+        // only one whose element is an array can hold a record (the per-type cached field is null for
+        // any other), so the one box GetValue costs lands only on values that had no answer before.
+        if (box is ISlice { Length: 0 } && box is not ISliceBacking && namedSliceValueField(box.GetType()) is { } valueField &&
+            valueField.GetValue(box) is ISliceBacking { Backing: { } innerBacking } &&
+            s_sliceElemDims.TryGetValue(innerBacking, out nint[]? innerRecorded))
+            return innerRecorded;
+
         return box is ISlice { Length: > 0 } s ? elemArrayDims(((IArray)s)[0]) : null;
+    }
+
+    private static readonly ConcurrentDictionary<Type, FieldInfo?> s_namedSliceValueFields = new();
+
+    // The `m_value` of a named slice-of-ARRAY wrapper, or null for every other type: a single instance
+    // field of that name whose type is a slice<E> (the only ISliceBacking) with an array element.
+    private static FieldInfo? namedSliceValueField(Type type)
+    {
+        return s_namedSliceValueFields.GetOrAdd(type, static t =>
+        {
+            FieldInfo[] fields = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+            return fields is [{ Name: "m_value" } valueField] &&
+                   typeof(ISliceBacking).IsAssignableFrom(valueField.FieldType) &&
+                   valueField.FieldType.IsGenericType &&
+                   KindOf(valueField.FieldType.GetGenericArguments()[0]) == Array
+                ? valueField
+                : null;
+        });
     }
 
     public static nint[]? MapKeyArrayDims(object? value)

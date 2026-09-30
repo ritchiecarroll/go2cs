@@ -1225,6 +1225,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedSlicePointerReinterpret() => CheckTarget("NamedSlicePointerReinterpret");
 
     [TestMethod]
+    public void CheckNamedSliceReflectDims() => CheckTarget("NamedSliceReflectDims");
+
+    [TestMethod]
     public void CheckNamedStringConcat() => CheckTarget("NamedStringConcat");
 
     [TestMethod]
