@@ -754,6 +754,7 @@
     <Project Path="tests/Behavioral/PartialRedeclaration/PartialRedeclaration.csproj" />
     <Project Path="tests/Behavioral/PkgLevelFuncLitLocals/PkgLevelFuncLitLocals.csproj" />
     <Project Path="tests/Behavioral/PipeCloseUnblocksRead/PipeCloseUnblocksRead.csproj" />
+    <Project Path="tests/Behavioral/PlainSendOperandOrder/PlainSendOperandOrder.csproj" />
     <Project Path="tests/Behavioral/PointerArraySlice/PointerArraySlice.csproj" />
     <Project Path="tests/Behavioral/PointerEmbedValueChainPromotion/PointerEmbedValueChainPromotion.csproj" />
     <Project Path="tests/Behavioral/PointerElementAtUnsignedIndex/PointerElementAtUnsignedIndex.csproj" />

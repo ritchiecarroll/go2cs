@@ -1417,6 +1417,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPkgLevelFuncLitLocals() => CheckTarget("PkgLevelFuncLitLocals");
 
     [TestMethod]
+    public void CheckPlainSendOperandOrder() => CheckTarget("PlainSendOperandOrder");
+
+    [TestMethod]
     public void CheckPointerArrayRange() => CheckTarget("PointerArrayRange");
 
     [TestMethod]
