@@ -157,7 +157,22 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted
         // Pointer into a struct field: same source object and field accessor. The comparison uses
         // the field IDENTITY token — the original accessor delegate — never the stored ref
         // function (comparing per-call wrappers made every distinct `&x.field` box unequal).
-        return other is FieldRefBox<T> fr && SameSource(m_source, fr.m_source) && m_token.Equals(fr.m_token);
+        if (other is not FieldRefBox<T> fr || !SameSource(m_source, fr.m_source))
+            return false;
+
+        if (m_token.Equals(fr.m_token))
+            return true;
+
+        // The same field reached by the OTHER construction path: converted code's `&s.A` carries go2cs-gen's
+        // generated `ᏑA` accessor, reflect's `Field(i).Addr()` carries GoReflect's `goref_A`. Over the same
+        // source they are one Go pointer, so compare by the Go field NAME each token spells -- the key
+        // PointerOrderToken already resolves both spellings by, which is why their uintptrs always agreed
+        // while == answered false and a map keyed by one missed the other (box-equality census, 2026-09-29).
+        // "Same declaring type" holds by construction: both tokens are resolved against the one source's pointee.
+        // RESIDUAL: a PROMOTED field is not covered. Converted code nests a box per hop
+        // (`Ꮡs.of(ᏑEmbedded).of(ᏑF)`) while reflect builds one box over a two-hop path, so their SOURCES
+        // differ and this arm is never reached. That needs its own arm.
+        return FieldNameOf(m_token) is { } name && name == FieldNameOf(fr.m_token);
     }
 
     /// <inheritdoc/>
