@@ -100,9 +100,9 @@ internal static (input, nint) init(this ж<inputs> Ꮡi, io.RuneReader r, slice<
 
 [GoRecv] internal static void init(this ref machine m, nint ncap) {
     foreach (var (_, t) in m.pool) {
-        t.Value.cap = (~t).cap[..(int)(ncap)];
+        t.Value.cap = (~t).cap.slice(0, ncap);
     }
-    m.matchcap = m.matchcap[..(int)(ncap)];
+    m.matchcap = m.matchcap.slice(0, ncap);
 }
 
 // alloc allocates a new thread with the given instruction.
@@ -112,7 +112,7 @@ internal static (input, nint) init(this ж<inputs> Ꮡi, io.RuneReader r, slice<
     {
         nint n = len(m.pool); if (n > 0){
             t = m.pool[n - 1];
-            m.pool = m.pool[..(int)(n - 1)];
+            m.pool = m.pool.slice(0, n - 1);
         } else {
             t = @new<thread>();
             t.Value.cap = new slice<nint>(len(m.matchcap), cap(m.matchcap));
@@ -290,7 +290,7 @@ internal static bool match(this ж<machine> Ꮡm, input i, nint pos) {
             }
             if (!longest) {
                 // First-match mode: cut off all lower-priority threads.
-                foreach (var (_, dΔ2) in runq.dense[(int)(j + 1)..]) {
+                foreach (var (_, dΔ2) in runq.dense.slice(j + 1)) {
                     if (dΔ2.t != nil) {
                         m.pool = append(m.pool, dΔ2.t);
                     }
@@ -344,7 +344,7 @@ Again:
         }
     }
     nint j = len(q.dense);
-    q.dense = q.dense[..(int)(j + 1)];
+    q.dense = q.dense.slice(0, j + 1);
     var d = Ꮡ(q.dense, j);
     d.Value.t = default!;
     d.Value.pc = pc;
@@ -435,7 +435,7 @@ internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, s
     if (cap((~m).matchcap) < ncap){
         m.Value.matchcap = new slice<nint>(ncap);
     } else {
-        m.Value.matchcap = (~m).matchcap[..(int)(ncap)];
+        m.Value.matchcap = (~m).matchcap.slice(0, ncap);
     }
     var matched = false;
     foreach (var (iΔ1, _) in (~m).matchcap) {
@@ -560,7 +560,7 @@ internal static slice<nint> doExecute(this ж<Regexp> Ꮡre, io.RuneReader r, sl
 
     if (dstCap == default!) {
         // Make sure 'return dstCap' is non-nil.
-        dstCap = arrayNoInts.slice(-1, 0, 0);
+        dstCap = arrayNoInts.slice(0, 0, 0);
     }
     if (r == default! && len(b) + len(s) < re.minInputLen) {
         return default!;

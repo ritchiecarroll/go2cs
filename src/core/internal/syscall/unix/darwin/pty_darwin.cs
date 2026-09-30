@@ -47,7 +47,7 @@ public static (@string, error) Ptsname(nint fd) {
     }
     foreach (var (i, c) in buf) {
         if (c == 0) {
-            buf = buf[..(int)(i)];
+            buf = buf.slice(0, i);
             break;
         }
     }

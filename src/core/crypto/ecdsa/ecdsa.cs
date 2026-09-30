@@ -512,8 +512,8 @@ internal static (slice<byte>, error) pointFromAffine(elliptic.Curve curve, ж<bi
     nint byteLen = (bitSize + 7) / 8;
     var buf = new slice<byte>(1 + 2 * byteLen);
     buf[0] = 4; // uncompressed point
-    x.FillBytes(buf[1..(int)(1 + byteLen)]);
-    y.FillBytes(buf[(int)(1 + byteLen)..(int)(1 + 2 * byteLen)]);
+    x.FillBytes(buf.slice(1, 1 + byteLen));
+    y.FillBytes(buf.slice(1 + byteLen, 1 + 2 * byteLen));
     return (buf, default!);
 }
 
@@ -530,8 +530,8 @@ internal static (ж<bigꓸInt> x, ж<bigꓸInt> y, error err) pointToAffine(elli
         return (default!, default!, errors.New(ecdsaPublicKeyPointIsTheˢ));
     }
     nint byteLen = ((~curve.Params()).BitSize + 7) / 8;
-    x = @new<bigꓸInt>().SetBytes(p[1..(int)(1 + byteLen)]);
-    y = @new<bigꓸInt>().SetBytes(p[(int)(1 + byteLen)..]);
+    x = @new<bigꓸInt>().SetBytes(p.slice(1, 1 + byteLen));
+    y = @new<bigꓸInt>().SetBytes(p.slice(1 + byteLen));
     return (x, y, default!);
 }
 

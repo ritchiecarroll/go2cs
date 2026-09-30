@@ -173,7 +173,7 @@ public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@st
                 i++;
             }
         }
-        @file.Value.Unresolved = (~@file).Unresolved[0..(int)(i)];
+        @file.Value.Unresolved = (~@file).Unresolved.slice(0, i);
         pkgScope.Value.Outer = Ꮡuniverse; // reset universe scope
     }
     p.errors.Sort();

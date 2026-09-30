@@ -89,7 +89,7 @@ public static @string String(this SyncMarker i) {
     if (i < 0 || i >= ((SyncMarker)(len(_SyncMarker_index) - 1))) {
         return "SyncMarker("u8 + strconv.FormatInt((int64)(nint)(i + 1), 10) + ")"u8;
     }
-    return _SyncMarker_name[(int)(_SyncMarker_index[i])..(int)(_SyncMarker_index[i + 1])];
+    return _SyncMarker_name.slice(_SyncMarker_index[i], _SyncMarker_index[i + 1]);
 }
 
 } // end pkgbits_package

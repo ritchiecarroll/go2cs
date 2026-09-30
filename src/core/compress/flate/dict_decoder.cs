@@ -41,9 +41,9 @@ partial class flate_package {
     if (cap(dd.hist) < size) {
         dd.hist = new slice<byte>(size);
     }
-    dd.hist = dd.hist[..(int)(size)];
+    dd.hist = dd.hist.slice(0, size);
     if (len(dict) > len(dd.hist)) {
-        dict = dict[(int)(len(dict) - len(dd.hist))..];
+        dict = dict.slice(len(dict) - len(dd.hist));
     }
     dd.wrPos = copy(dd.hist, dict);
     if (dd.wrPos == len(dd.hist)) {
@@ -75,7 +75,7 @@ partial class flate_package {
 //
 // This invariant will be kept: len(s) <= availWrite()
 [GoRecv] internal static slice<byte> writeSlice(this ref dictDecoder dd) {
-    return dd.hist[(int)(dd.wrPos)..];
+    return dd.hist.slice(dd.wrPos);
 }
 
 // writeMark advances the writer pointer by cnt.
@@ -115,7 +115,7 @@ partial class flate_package {
     // the source prior to the copy is placed in the destination.
     if (srcPos < 0) {
         srcPos += len(dd.hist);
-        dstPos += copy(dd.hist[(int)(dstPos)..(int)(endPos)], dd.hist[(int)(srcPos)..]);
+        dstPos += copy(dd.hist.slice(dstPos, endPos), dd.hist.slice(srcPos));
         srcPos = 0;
     }
     // Copy possibly overlapping section before destination position.
@@ -133,7 +133,7 @@ partial class flate_package {
     //	dstPos = endPos
     //
     while (dstPos < endPos) {
-        dstPos += copy(dd.hist[(int)(dstPos)..(int)(endPos)], dd.hist[(int)(srcPos)..(int)(dstPos)]);
+        dstPos += copy(dd.hist.slice(dstPos, endPos), dd.hist.slice(srcPos, dstPos));
     }
     dd.wrPos = dstPos;
     return dstPos - dstBase;
@@ -155,7 +155,7 @@ partial class flate_package {
     nint srcPos = dstPos - dist;
     // Copy possibly overlapping section before destination position.
     while (dstPos < endPos) {
-        dstPos += copy(dd.hist[(int)(dstPos)..(int)(endPos)], dd.hist[(int)(srcPos)..(int)(dstPos)]);
+        dstPos += copy(dd.hist.slice(dstPos, endPos), dd.hist.slice(srcPos, dstPos));
     }
     dd.wrPos = dstPos;
     return dstPos - dstBase;
@@ -165,7 +165,7 @@ partial class flate_package {
 // emitted to the user. The data returned by readFlush must be fully consumed
 // before calling any other dictDecoder methods.
 [GoRecv] internal static slice<byte> readFlush(this ref dictDecoder dd) {
-    var toRead = dd.hist[(int)(dd.rdPos)..(int)(dd.wrPos)];
+    var toRead = dd.hist.slice(dd.rdPos, dd.wrPos);
     dd.rdPos = dd.wrPos;
     if (dd.wrPos == len(dd.hist)) {
         (dd.wrPos, dd.rdPos) = (0, 0);

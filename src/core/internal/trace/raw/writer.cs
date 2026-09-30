@@ -42,11 +42,11 @@ public static (ж<Writer>, error) NewWriter(io.Writer w, version.Version v) {
     w.buf = append(w.buf, (uint8)e.Ev);
     // Write out all arguments.
     var spec = w.specs[e.Ev];
-    foreach (var (_, arg) in e.Args[..(int)(len(spec.Args))]) {
+    foreach (var (_, arg) in e.Args.slice(0, len(spec.Args))) {
         w.buf = binary.AppendUvarint(w.buf, arg);
     }
     if (spec.IsStack) {
-        var frameArgs = e.Args[(int)(len(spec.Args))..];
+        var frameArgs = e.Args.slice(len(spec.Args));
         for (nint i = 0; i < len(frameArgs); i++) {
             w.buf = binary.AppendUvarint(w.buf, frameArgs[i]);
         }

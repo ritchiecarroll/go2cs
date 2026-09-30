@@ -57,7 +57,7 @@ internal static (ж<worker>, error) newWorker(ж<coordinator> Ꮡc, @string dir,
         dir: dir,
         binPath: binPath,
         args: args,
-        env: env.slice(-1, len(env), len(env)), // copy on append to ensure workers don't overwrite each other.
+        env: env.slice(0, len(env), len(env)), // copy on append to ensure workers don't overwrite each other.
 
         coordinator: Ꮡc,
         memMu: memMu
@@ -361,7 +361,7 @@ internal static error /*err*/ start(this ж<worker> Ꮡw) {
         w.termC = default!;
         var cmd = exec.Command(w.binPath, w.args.ꓸꓸꓸ);
         cmd.Value.Dir = w.dir;
-        cmd.Value.Env = w.env.slice(-1, len(w.env), len(w.env)); // copy on append to ensure workers don't overwrite each other.
+        cmd.Value.Env = w.env.slice(0, len(w.env), len(w.env)); // copy on append to ensure workers don't overwrite each other.
         // Create the "fuzz_in" and "fuzz_out" pipes so we can communicate with
         // the worker. We don't use stdin and stdout, since the test binary may
         // do something else with those.
@@ -970,7 +970,7 @@ internal static (bool success, error retErr) minimizeInput(this ж<workerServer>
         }}
 
         copy(bPtrʗ1.ValueSlot, candidate);
-        bPtrʗ1.ValueSlot = (bPtrʗ1.ValueSlot)[..(int)(len(candidate))];
+        bPtrʗ1.ValueSlot = (bPtrʗ1.ValueSlot).slice(0, len(candidate));
         Ꮡmem.Value.setValueLen(len(candidate));
         countʗ2.Value++;
         var (_, err) = Ꮡws.Value.fuzzFn(new CorpusEntry(Values: valsʗ1));

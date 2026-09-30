@@ -46,7 +46,7 @@ partial class bytes_package {
         return (0, io.EOF);
     }
     r.prevRune = -1;
-    n = copy(b, r.s[(int)(r.i)..]);
+    n = copy(b, r.s.slice((nint)(r.i)));
     r.i += (int64)n;
     return (n, err);
 }
@@ -66,7 +66,7 @@ internal static readonly @string bytesReaderReadAtˢ = "bytes.Reader.ReadAt: neg
     if (off >= (int64)len(r.s)) {
         return (0, io.EOF);
     }
-    n = copy(b, r.s[(int)(off)..]);
+    n = copy(b, r.s.slice((nint)(off)));
     if (n < len(b)) {
         err = io.EOF;
     }
@@ -114,7 +114,7 @@ internal static readonly @string bytesReaderUnreadByteAtˢ = "bytes.Reader.Unrea
             return ((rune)c, 1, default!);
         }
     }
-    (ch, size) = utf8.DecodeRune(r.s[(int)(r.i)..]);
+    (ch, size) = utf8.DecodeRune(r.s.slice((nint)(r.i)));
     r.i += (int64)size;
     return (ch, size, err);
 }
@@ -174,7 +174,7 @@ internal static readonly @string bytesReaderSeekNegativeˢ = "bytes.Reader.Seek:
     if (r.i >= (int64)len(r.s)) {
         return (0, default!);
     }
-    var b = r.s[(int)(r.i)..];
+    var b = r.s.slice((nint)(r.i));
     (var m, err) = w.Write(b);
     if (m > len(b)) {
         throw panic("bytes.Reader.WriteTo: invalid Write count");

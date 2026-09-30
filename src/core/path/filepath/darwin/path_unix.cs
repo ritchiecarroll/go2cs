@@ -31,7 +31,7 @@ internal static @string join(slice<@string> elem) {
     // If there's a bug here, fix the logic in ./path_plan9.go too.
     foreach (var (i, e) in elem) {
         if (e != ""u8) {
-            return Clean(strings.Join(elem[(int)(i)..], ((@string)(rune)Separator)));
+            return Clean(strings.Join(elem.slice(i), ((@string)(rune)Separator)));
         }
     }
     return ""u8;

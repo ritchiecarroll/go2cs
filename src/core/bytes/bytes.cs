@@ -49,10 +49,10 @@ internal static slice<slice<byte>> explode(slice<byte> s, nint n) {
         }
         (_, size) = utf8.DecodeRune(s);
         a[na] = s.slice(0, size, size);
-        s = s[(int)(size)..];
+        s = s.slice(size);
         na++;
     }
-    return a[0..(int)(na)];
+    return a.slice(0, na);
 }
 
 // Count counts the number of non-overlapping instances of sep in s.
@@ -72,7 +72,7 @@ public static nint Count(slice<byte> s, slice<byte> sep) {
             return n;
         }
         n++;
-        s = s[(int)(i + len(sep))..];
+        s = s.slice(i + len(sep));
     }
 }
 
@@ -151,7 +151,7 @@ public static nint IndexRune(slice<byte> s, rune r) {
     }
     case {} when r == utf8.RuneError: {
         for (nint i = 0; i < len(s); ) {
-            var (r1, n) = utf8.DecodeRune(s[(int)(i)..]);
+            var (r1, n) = utf8.DecodeRune(s.slice(i));
             if (r1 == utf8.RuneError) {
                 return i;
             }
@@ -173,7 +173,7 @@ public static nint IndexRune(slice<byte> s, rune r) {
         nint fails = 0;
         while (i < len(s)) {
             if (s[i] != b[last]) {
-                nint o = IndexByte(s[(int)(i + 1)..], b[last]);
+                nint o = IndexByte(s.slice(i + 1), b[last]);
                 if (o < 0) {
                     return -1;
                 }
@@ -199,7 +199,7 @@ fallback:
             // Switch to bytealg.Index, if available, or a brute force search when
             // IndexByte returns too many false positives.
             {
-                nint j = bytealg.Index(s[(int)(i - last)..], b[..(int)(n)]); if (j >= 0) {
+                nint j = bytealg.Index(s.slice(i - last), b.slice(0, n)); if (j >= 0) {
                     return i + j - last;
                 }
             }
@@ -283,7 +283,7 @@ public static nint IndexAny(slice<byte> s, @string chars) {
             width = 1;
             continue;
         }
-        (r, width) = utf8.DecodeRune(s[(int)(i)..]);
+        (r, width) = utf8.DecodeRune(s.slice(i));
         if (r != utf8.RuneError) {
             // r is 2 to 4 bytes
             if (len(chars) == width) {
@@ -353,7 +353,7 @@ public static nint LastIndexAny(slice<byte> s, @string chars) {
             cr = utf8.RuneError;
         }
         for (nint i = len(s); i > 0; ) {
-            var (r, size) = utf8.DecodeLastRune(s[..(int)(i)]);
+            var (r, size) = utf8.DecodeLastRune(s.slice(0, i));
             i -= size;
             if (r == cr) {
                 return i;
@@ -370,7 +370,7 @@ public static nint LastIndexAny(slice<byte> s, @string chars) {
             i--;
             continue;
         }
-        (r, var size) = utf8.DecodeLastRune(s[..(int)(i)]);
+        (r, var size) = utf8.DecodeLastRune(s.slice(0, i));
         i -= size;
         if (r != utf8.RuneError) {
             // r is 2 to 4 bytes
@@ -420,12 +420,12 @@ internal static slice<slice<byte>> genSplit(slice<byte> s, slice<byte> sep, nint
         if (m < 0) {
             break;
         }
-        a[i] = s.slice(-1, m + sepSave, m + sepSave);
-        s = s[(int)(m + len(sep))..];
+        a[i] = s.slice(0, m + sepSave, m + sepSave);
+        s = s.slice(m + len(sep));
         i++;
     }
     a[i] = s;
-    return a[..(int)(i + 1)];
+    return a.slice(0, i + 1);
 }
 
 // SplitN slices s into subslices separated by sep and returns a slice of
@@ -550,7 +550,7 @@ public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<rune, bool> f) {
         nint size = 1;
         var r = (rune)s[i];
         if (r >= utf8.RuneSelf) {
-            (r, size) = utf8.DecodeRune(s[(int)(i)..]);
+            (r, size) = utf8.DecodeRune(s.slice(i));
         }
         if (f(r)){
             if (start >= 0) {
@@ -599,23 +599,23 @@ public static slice<byte> Join(slice<slice<byte>> s, slice<byte> sep) {
         }
         n += len(v);
     }
-    var b = bytealg.MakeNoZero(n).slice(-1, n, n);
+    var b = bytealg.MakeNoZero(n).slice(0, n, n);
     nint bp = copy(b, s[0]);
     foreach (var (_, v) in s[1..]) {
-        bp += copy(b[(int)(bp)..], sep);
-        bp += copy(b[(int)(bp)..], v);
+        bp += copy(b.slice(bp), sep);
+        bp += copy(b.slice(bp), v);
     }
     return b;
 }
 
 // HasPrefix reports whether the byte slice s begins with prefix.
 public static bool HasPrefix(slice<byte> s, slice<byte> prefix) {
-    return len(s) >= len(prefix) && Equal(s[..(int)(len(prefix))], prefix);
+    return len(s) >= len(prefix) && Equal(s.slice(0, len(prefix)), prefix);
 }
 
 // HasSuffix reports whether the byte slice s ends with suffix.
 public static bool HasSuffix(slice<byte> s, slice<byte> suffix) {
-    return len(s) >= len(suffix) && Equal(s[(int)(len(s) - len(suffix))..], suffix);
+    return len(s) >= len(suffix) && Equal(s.slice(len(s) - len(suffix)), suffix);
 }
 
 // Map returns a copy of the byte slice s with all its characters modified
@@ -631,7 +631,7 @@ public static slice<byte> Map(Func<rune, rune> mapping, slice<byte> s) {
         nint wid = 1;
         var r = (rune)s[i];
         if (r >= utf8.RuneSelf) {
-            (r, wid) = utf8.DecodeRune(s[(int)(i)..]);
+            (r, wid) = utf8.DecodeRune(s.slice(i));
         }
         r = mapping(r);
         if (r >= 0) {
@@ -694,11 +694,11 @@ public static slice<byte> Repeat(slice<byte> b, nint count) {
             chunkMax = len(b);
         }
     }
-    var nb = bytealg.MakeNoZero(n).slice(-1, n, n);
+    var nb = bytealg.MakeNoZero(n).slice(0, n, n);
     nint bp = copy(nb, b);
     while (bp < n) {
         nint chunk = min(bp, chunkMax);
-        bp += copy(nb[(int)(bp)..], nb[..(int)(chunk)]);
+        bp += copy(nb.slice(bp), nb.slice(0, chunk));
     }
     return nb;
 }
@@ -721,7 +721,7 @@ public static slice<byte> ToUpper(slice<byte> s) {
             // Just return a copy.
             return appendꓸꓸꓸ(slice<byte>(""u8), s);
         }
-        var b = bytealg.MakeNoZero(len(s)).slice(-1, len(s), len(s));
+        var b = bytealg.MakeNoZero(len(s)).slice(0, len(s), len(s));
         for (nint i = 0; i < len(s); i++) {
             var c = s[i];
             if ((rune)'a' <= c && c <= (rune)'z') {
@@ -751,7 +751,7 @@ public static slice<byte> ToLower(slice<byte> s) {
         if (!hasUpper) {
             return appendꓸꓸꓸ(slice<byte>(""u8), s);
         }
-        var b = bytealg.MakeNoZero(len(s)).slice(-1, len(s), len(s));
+        var b = bytealg.MakeNoZero(len(s)).slice(0, len(s), len(s));
         for (nint i = 0; i < len(s); i++) {
             var c = s[i];
             if ((rune)'A' <= c && c <= (rune)'Z') {
@@ -803,7 +803,7 @@ public static slice<byte> ToValidUTF8(slice<byte> s, slice<byte> replacement) {
             b = append(b, c);
             continue;
         }
-        var (_, wid) = utf8.DecodeRune(s[(int)(i)..]);
+        var (_, wid) = utf8.DecodeRune(s.slice(i));
         if (wid == 1) {
             i++;
             if (!invalid) {
@@ -813,7 +813,7 @@ public static slice<byte> ToValidUTF8(slice<byte> s, slice<byte> replacement) {
             continue;
         }
         invalid = false;
-        b = appendꓸꓸꓸ(b, s[(int)(i)..(int)(i + wid)]);
+        b = appendꓸꓸꓸ(b, s.slice(i, i + wid));
         i += wid;
     }
     return b;
@@ -877,7 +877,7 @@ public static slice<byte> TrimLeftFunc(slice<byte> s, Func<rune, bool> f) {
     if (i == -1) {
         return default!;
     }
-    return s[(int)(i)..];
+    return s.slice(i);
 }
 
 // TrimRightFunc returns a subslice of s by slicing off all trailing
@@ -885,12 +885,12 @@ public static slice<byte> TrimLeftFunc(slice<byte> s, Func<rune, bool> f) {
 public static slice<byte> TrimRightFunc(slice<byte> s, Func<rune, bool> f) {
     nint i = lastIndexFunc(s, f, false);
     if (i >= 0 && s[i] >= utf8.RuneSelf){
-        var (_, wid) = utf8.DecodeRune(s[(int)(i)..]);
+        var (_, wid) = utf8.DecodeRune(s.slice(i));
         i += wid;
     } else {
         i++;
     }
-    return s[0..(int)(i)];
+    return s.slice(0, i);
 }
 
 // TrimFunc returns a subslice of s by slicing off all leading and trailing
@@ -903,7 +903,7 @@ public static slice<byte> TrimFunc(slice<byte> s, Func<rune, bool> f) {
 // If s doesn't start with prefix, s is returned unchanged.
 public static slice<byte> TrimPrefix(slice<byte> s, slice<byte> prefix) {
     if (HasPrefix(s, prefix)) {
-        return s[(int)(len(prefix))..];
+        return s.slice(len(prefix));
     }
     return s;
 }
@@ -912,7 +912,7 @@ public static slice<byte> TrimPrefix(slice<byte> s, slice<byte> prefix) {
 // If s doesn't end with suffix, s is returned unchanged.
 public static slice<byte> TrimSuffix(slice<byte> s, slice<byte> suffix) {
     if (HasSuffix(s, suffix)) {
-        return s[..(int)(len(s) - len(suffix))];
+        return s.slice(0, len(s) - len(suffix));
     }
     return s;
 }
@@ -940,7 +940,7 @@ internal static nint indexFunc(slice<byte> s, Func<rune, bool> f, bool truth) {
         nint wid = 1;
         var r = (rune)s[start];
         if (r >= utf8.RuneSelf) {
-            (r, wid) = utf8.DecodeRune(s[(int)(start)..]);
+            (r, wid) = utf8.DecodeRune(s.slice(start));
         }
         if (f(r) == truth) {
             return start;
@@ -958,7 +958,7 @@ internal static nint lastIndexFunc(slice<byte> s, Func<rune, bool> f, bool truth
         var r = (rune)s[i - 1];
         nint size = 1;
         if (r >= utf8.RuneSelf) {
-            (r, size) = utf8.DecodeLastRune(s[0..(int)(i)]);
+            (r, size) = utf8.DecodeLastRune(s.slice(0, i));
         }
         i -= size;
         if (f(r) == truth) {
@@ -1083,7 +1083,7 @@ internal static slice<byte> trimLeftUnicode(slice<byte> s, @string cutset) {
         if (!containsRune(cutset, r)) {
             break;
         }
-        s = s[(int)(n)..];
+        s = s.slice(n);
     }
     if (len(s) == 0) {
         // This is what we've historically done.
@@ -1112,7 +1112,7 @@ public static slice<byte> TrimRight(slice<byte> s, @string cutset) {
 
 internal static slice<byte> trimRightByte(slice<byte> s, byte c) {
     while (len(s) > 0 && s[len(s) - 1] == c) {
-        s = s[..(int)(len(s) - 1)];
+        s = s.slice(0, len(s) - 1);
     }
     return s;
 }
@@ -1124,7 +1124,7 @@ internal static slice<byte> trimRightASCII(slice<byte> s, ж<asciiSet> Ꮡas) {
         if (!@as.contains(s[len(s) - 1])) {
             break;
         }
-        s = s[..(int)(len(s) - 1)];
+        s = s.slice(0, len(s) - 1);
     }
     return s;
 }
@@ -1139,7 +1139,7 @@ internal static slice<byte> trimRightUnicode(slice<byte> s, @string cutset) {
         if (!containsRune(cutset, r)) {
             break;
         }
-        s = s[..(int)(len(s) - n)];
+        s = s.slice(0, len(s) - n);
     }
     return s;
 }
@@ -1154,7 +1154,7 @@ public static slice<byte> TrimSpace(slice<byte> s) {
         if (c >= utf8.RuneSelf) {
             // If we run into a non-ASCII byte, fall back to the
             // slower unicode-aware method on the remaining bytes
-            return TrimFunc(s[(int)(start)..], Δunicode.IsSpace);
+            return TrimFunc(s.slice(start), Δunicode.IsSpace);
         }
         if (asciiSpace[c] == 0) {
             break;
@@ -1165,7 +1165,7 @@ public static slice<byte> TrimSpace(slice<byte> s) {
     for (; stop > start; stop--) {
         var c = s[stop - 1];
         if (c >= utf8.RuneSelf) {
-            return TrimFunc(s[(int)(start)..(int)(stop)], Δunicode.IsSpace);
+            return TrimFunc(s.slice(start, stop), Δunicode.IsSpace);
         }
         if (asciiSpace[c] == 0) {
             break;
@@ -1179,7 +1179,7 @@ public static slice<byte> TrimSpace(slice<byte> s) {
         // returning nil instead of empty slice if all spaces.
         return default!;
     }
-    return s[(int)(start)..(int)(stop)];
+    return s.slice(start, stop);
 }
 
 // Runes interprets s as a sequence of UTF-8-encoded code points.
@@ -1191,7 +1191,7 @@ public static slice<rune> Runes(slice<byte> s) {
         var (r, l) = utf8.DecodeRune(s);
         t[i] = r;
         i++;
-        s = s[(int)(l)..];
+        s = s.slice(l);
     }
     return t;
 }
@@ -1223,18 +1223,18 @@ public static slice<byte> Replace(slice<byte> s, slice<byte> old, slice<byte> @n
         nint j = start;
         if (len(old) == 0){
             if (i > 0) {
-                var (_, wid) = utf8.DecodeRune(s[(int)(start)..]);
+                var (_, wid) = utf8.DecodeRune(s.slice(start));
                 j += wid;
             }
         } else {
-            j += Index(s[(int)(start)..], old);
+            j += Index(s.slice(start), old);
         }
-        w += copy(t[(int)(w)..], s[(int)(start)..(int)(j)]);
-        w += copy(t[(int)(w)..], @new);
+        w += copy(t.slice(w), s.slice(start, j));
+        w += copy(t.slice(w), @new);
         start = j + len(old);
     }
-    w += copy(t[(int)(w)..], s[(int)(start)..]);
-    return t[0..(int)(w)];
+    w += copy(t.slice(w), s.slice(start));
+    return t.slice(0, w);
 }
 
 // ReplaceAll returns a copy of the slice s with all
@@ -1275,8 +1275,8 @@ public static bool EqualFold(slice<byte> s, slice<byte> t) {
     // Check if we've exhausted both strings.
     return len(s) == len(t);
 hasUnicode:
-    s = s[(int)(i)..];
-    t = t[(int)(i)..];
+    s = s.slice(i);
+    t = t.slice(i);
     while (len(s) != 0 && len(t) != 0) {
         // Extract first rune from each.
         rune sr = default!;
@@ -1285,13 +1285,13 @@ hasUnicode:
             (sr, s) = ((rune)s[0], s[1..]);
         } else {
             var (rΔ1, size) = utf8.DecodeRune(s);
-            (sr, s) = (rΔ1, s[(int)(size)..]);
+            (sr, s) = (rΔ1, s.slice(size));
         }
         if (t[0] < utf8.RuneSelf){
             (tr, t) = ((rune)t[0], t[1..]);
         } else {
             var (rΔ2, size) = utf8.DecodeRune(t);
-            (tr, t) = (rΔ2, t[(int)(size)..]);
+            (tr, t) = (rΔ2, t.slice(size));
         }
         // If they match, keep going; if not, return false.
         // Easy case.
@@ -1358,20 +1358,20 @@ public static nint Index(slice<byte> s, slice<byte> sep) {
             if (s[iΔ2] != c0Δ2) {
                 // IndexByte is faster than bytealg.Index, so use it as long as
                 // we're not getting lots of false positives.
-                nint o = IndexByte(s[(int)(iΔ2 + 1)..(int)(tΔ2)], c0Δ2);
+                nint o = IndexByte(s.slice(iΔ2 + 1, tΔ2), c0Δ2);
                 if (o < 0) {
                     return -1;
                 }
                 iΔ2 += o + 1;
             }
-            if (s[iΔ2 + 1] == c1Δ2 && Equal(s[(int)(iΔ2)..(int)(iΔ2 + n)], sep)) {
+            if (s[iΔ2 + 1] == c1Δ2 && Equal(s.slice(iΔ2, iΔ2 + n), sep)) {
                 return iΔ2;
             }
             failsΔ2++;
             iΔ2++;
             // Switch to bytealg.Index when IndexByte produces too many false positives.
             if (failsΔ2 > bytealg.Cutover(iΔ2)) {
-                nint r = bytealg.Index(s[(int)(iΔ2)..], sep);
+                nint r = bytealg.Index(s.slice(iΔ2), sep);
                 if (r >= 0) {
                     return r + iΔ2;
                 }
@@ -1388,13 +1388,13 @@ public static nint Index(slice<byte> s, slice<byte> sep) {
     nint t = len(s) - n + 1;
     while (i < t) {
         if (s[i] != c0) {
-            nint o = IndexByte(s[(int)(i + 1)..(int)(t)], c0);
+            nint o = IndexByte(s.slice(i + 1, t), c0);
             if (o < 0) {
                 break;
             }
             i += o + 1;
         }
-        if (s[i + 1] == c1 && Equal(s[(int)(i)..(int)(i + n)], sep)) {
+        if (s[i + 1] == c1 && Equal(s.slice(i, i + n), sep)) {
             return i;
         }
         i++;
@@ -1408,7 +1408,7 @@ public static nint Index(slice<byte> s, slice<byte> sep) {
             // we should cutover at even larger average skips,
             // because Equal becomes that much more expensive.
             // This code does not take that effect into account.
-            nint j = bytealg.IndexRabinKarp(s[(int)(i)..], sep);
+            nint j = bytealg.IndexRabinKarp(s.slice(i), sep);
             if (j < 0) {
                 return -1;
             }
@@ -1427,7 +1427,7 @@ public static nint Index(slice<byte> s, slice<byte> sep) {
 public static (slice<byte> before, slice<byte> after, bool found) Cut(slice<byte> s, slice<byte> sep) {
     {
         nint i = Index(s, sep); if (i >= 0) {
-            return (s[..(int)(i)], s[(int)(i + len(sep))..], true);
+            return (s.slice(0, i), s.slice(i + len(sep)), true);
         }
     }
     return (s, default!, false);
@@ -1453,7 +1453,7 @@ public static (slice<byte> after, bool found) CutPrefix(slice<byte> s, slice<byt
     if (!HasPrefix(s, prefix)) {
         return (s, false);
     }
-    return (s[(int)(len(prefix))..], true);
+    return (s.slice(len(prefix)), true);
 }
 
 // CutSuffix returns s without the provided ending suffix byte slice
@@ -1466,7 +1466,7 @@ public static (slice<byte> before, bool found) CutSuffix(slice<byte> s, slice<by
     if (!HasSuffix(s, suffix)) {
         return (s, false);
     }
-    return (s[..(int)(len(s) - len(suffix))], true);
+    return (s.slice(0, len(s) - len(suffix)), true);
 }
 
 } // end bytes_package

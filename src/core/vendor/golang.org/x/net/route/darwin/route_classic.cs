@@ -32,7 +32,7 @@ partial class route_package {
     nativeEndian.PutUint16(b[4..6], (uint16)m.Index);
     nativeEndian.PutUint32(b[16..20], (uint32)m.ID);
     nativeEndian.PutUint32(b[20..24], (uint32)m.Seq);
-    var (attrs, err) = marshalAddrs(b[(int)((~w).bodyOff)..], m.Addrs);
+    var (attrs, err) = marshalAddrs(b.slice((~w).bodyOff), m.Addrs);
     if (err != default!) {
         return (default!, err);
     }
@@ -58,14 +58,14 @@ partial class route_package {
         ID: (uintptr)nativeEndian.Uint32(b[16..20]),
         Seq: (nint)nativeEndian.Uint32(b[20..24]),
         extOff: w.extOff,
-        raw: b[..(int)(l)]
+        raw: b.slice(0, l)
     ));
     var errno = ((syscall.Errno)(uintptr)nativeEndian.Uint32(b[28..32]));
     if (errno != 0) {
         m.Value.Err = errno;
     }
     error err = default!;
-    (m.Value.Addrs, err) = parseAddrs((nuint)nativeEndian.Uint32(b[12..16]), parseKernelInetAddr, b[(int)(w.bodyOff)..]);
+    (m.Value.Addrs, err) = parseAddrs((nuint)nativeEndian.Uint32(b[12..16]), parseKernelInetAddr, b.slice(w.bodyOff));
     if (err != default!) {
         return (default!, err);
     }

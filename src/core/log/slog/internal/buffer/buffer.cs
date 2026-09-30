@@ -63,7 +63,7 @@ public static void Free(this ж<Buffer> Ꮡb) {
 }
 
 [GoRecv] public static void SetLen(this ref Buffer b, nint n) {
-    b = (b)[..(int)(n)];
+    b = (b).slice(0, n);
 }
 
 } // end buffer_package

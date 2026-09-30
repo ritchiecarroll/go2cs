@@ -666,7 +666,7 @@ internal static readonly @string attributeNameWithoutInˢ = "attribute name with
             b0 = b;
         }
         var data = d.buf.Bytes();
-        data = data[0..(int)(len(data) - 2)]; // chop ?>
+        data = data.slice(0, len(data) - 2); // chop ?>
         if (targetΔ1 == "xml"u8) {
             @string content = ((@string)data);
             @string ver = procInst(versionˢ, content);
@@ -735,7 +735,7 @@ internal static readonly @string attributeNameWithoutInˢ = "attribute name with
                 (b0, b1) = (b1, b);
             }
             var data = d.buf.Bytes();
-            data = data[0..(int)(len(data) - 3)]; // chop -->
+            data = data.slice(0, len(data) - 3); // chop -->
             return (((Comment)data), default!);
         }
         case (rune)'[': {
@@ -1157,7 +1157,7 @@ Input:
                 if (b != (rune)';'){
                     d.ungetc(b);
                 } else {
-                    @string s = ((@string)(d.buf.Bytes()[(int)(start)..]));
+                    @string s = ((@string)(d.buf.Bytes().slice(start)));
                     d.buf.WriteByte((rune)';');
                     var (n, err) = strconv.ParseUint(s, @base, 64);
                     if (err == default! && n <= unicode.MaxRune) {
@@ -1180,7 +1180,7 @@ Input:
                 if (b != (rune)';'){
                     d.ungetc(b);
                 } else {
-                    var name = d.buf.Bytes()[(int)(before + 1)..];
+                    var name = d.buf.Bytes().slice(before + 1);
                     d.buf.WriteByte((rune)';');
                     if (isName(name)) {
                         @string s = ((@string)name);
@@ -1206,7 +1206,7 @@ Input:
                 (b0, b1) = (0, 0);
                 goto continue_Input;
             }
-            @string ent = ((@string)(d.buf.Bytes()[(int)(before)..]));
+            @string ent = ((@string)(d.buf.Bytes().slice(before)));
             if (ent[len(ent) - 1] != (rune)';') {
                 ent += " (no semicolon)"u8;
             }
@@ -1227,7 +1227,7 @@ continue_Input:;
     }
 break_Input:;
     var data = d.buf.Bytes();
-    data = data[0..(int)(len(data) - trunc)];
+    data = data.slice(0, len(data) - trunc);
     // Inspect each rune for being a disallowed character.
     var buf = data;
     while (len(buf) > 0) {
@@ -1236,7 +1236,7 @@ break_Input:;
             d.err = d.syntaxError(invalidUtf8ˢ);
             return default!;
         }
-        buf = buf[(int)(size)..];
+        buf = buf.slice(size);
         if (!isInCharacterRange(r)) {
             d.err = d.syntaxError(fmt.Sprintf("illegal character code %U"u8, r));
             return default!;
@@ -1341,7 +1341,7 @@ internal static bool isName(slice<byte> s) {
         return false;
     }
     while (n < len(s)) {
-        s = s[(int)(n)..];
+        s = s.slice(n);
         (c, n) = utf8.DecodeRune(s);
         if (c == utf8.RuneError && n == 1) {
             return false;
@@ -1365,7 +1365,7 @@ internal static bool isNameString(@string s) {
         return false;
     }
     while (n < len(s)) {
-        s = s[(int)(n)..];
+        s = s.slice(n);
         (c, n) = utf8.DecodeRuneInString(s);
         if (c == utf8.RuneError && n == 1) {
             return false;
@@ -2013,7 +2013,7 @@ internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline)
     slice<byte> esc = default!;
     nint last = 0;
     for (nint i = 0; i < len(s); ) {
-        var (r, width) = utf8.DecodeRune(s[(int)(i)..]);
+        var (r, width) = utf8.DecodeRune(s.slice(i));
         i += width;
         switch (r) {
         case (rune)'"': {
@@ -2061,7 +2061,7 @@ internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline)
         }}
 
         {
-            var (_, errΔ1) = w.Write(s[(int)(last)..(int)(i - width)]); if (errΔ1 != default!) {
+            var (_, errΔ1) = w.Write(s.slice(last, i - width)); if (errΔ1 != default!) {
                 return errΔ1;
             }
         }
@@ -2072,7 +2072,7 @@ internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline)
         }
         last = i;
     }
-    var (_, err) = w.Write(s[(int)(last)..]);
+    var (_, err) = w.Write(s.slice(last));
     return err;
 }
 
@@ -2082,7 +2082,7 @@ internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline)
     slice<byte> esc = default!;
     nint last = 0;
     for (nint i = 0; i < len(s); ) {
-        var (r, width) = utf8.DecodeRuneInString(s[(int)(i)..]);
+        var (r, width) = utf8.DecodeRuneInString(s.slice(i));
         i += width;
         switch (r) {
         case (rune)'"': {
@@ -2126,11 +2126,11 @@ internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline)
             break;
         }}
 
-        p.WriteString(s[(int)(last)..(int)(i - width)]);
+        p.WriteString(s.slice(last, i - width));
         p.Write(esc);
         last = i;
     }
-    p.WriteString(s[(int)(last)..]);
+    p.WriteString(s.slice(last));
 }
 
 // Escape is like [EscapeText] but omits the error return value.
@@ -2192,7 +2192,7 @@ internal static @string procInst(@string param, @string s) {
     nint i = 0;
     byte sep = default!;
     while (i < len(s)) {
-        @string sub = s[(int)(i)..];
+        @string sub = s.slice(i);
         nint k = strings.Index(sub, param);
         if (k < 0 || lenp + k >= len(sub)) {
             return ""u8;
@@ -2208,11 +2208,11 @@ internal static @string procInst(@string param, @string s) {
     if (sep == 0) {
         return ""u8;
     }
-    nint j = strings.IndexByte(s[(int)(i)..], sep);
+    nint j = strings.IndexByte(s.slice(i), sep);
     if (j < 0) {
         return ""u8;
     }
-    return s[(int)(i)..(int)(i + j)];
+    return s.slice(i, i + j);
 }
 
 } // end xml_package

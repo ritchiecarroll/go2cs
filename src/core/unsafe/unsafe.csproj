@@ -46,6 +46,9 @@
     <PublishTrimmed>True</PublishTrimmed>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <!-- Opt-in for Ubuntu's packaged .NET 10, where on-stack replacement can end a program early (0x80131506 or a silent
+         exit 0); costs about 90 ms of startup; becomes the default if a converted program reproduces it. https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md -->
+    <!-- <TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops> -->
   </PropertyGroup>
 
   <!-- NuGet packaging metadata for library projects; packing itself is explicit ('dotnet pack' via push-nuget.ps1), so plain builds emit no .nupkg -->

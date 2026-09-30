@@ -426,6 +426,138 @@ partial class runtime_package
     // runtime's TestPeriodicGC writes. GolibTests is outside runtime's InternalsVisibleTo grant.
     public static ref int64 GoForceGCPeriod => ref forcegcperiod;
 
+    // TEST SEAMS (print fidelity): the runtime's print backlog, and a goroutine writebuf capture
+    // around a body -- the two places Go's print lands. GolibTests is outside runtime's
+    // InternalsVisibleTo grant.
+    public static byte[] GoPrintBacklog()
+    {
+        printlock();
+
+        try
+        {
+            byte[] copy = new byte[(int)len(printBacklog)];
+
+            for (int i = 0; i < copy.Length; i++)
+                copy[i] = printBacklog[i];
+
+            return copy;
+        }
+        finally
+        {
+            printunlock();
+        }
+    }
+
+    public static byte[] GoCaptureWritebuf(Action body)
+    {
+        var gp = getg();
+        gp.Value.writebuf = new slice<byte>(0, 4096);
+
+        try
+        {
+            body();
+            return (~gp).writebuf.ToSpan().ToArray();
+        }
+        finally
+        {
+            gp.Value.writebuf = default!;
+        }
+    }
+
+    // ---- PRINT FIDELITY (ruling 2026-09-30: R1 with S1, S2 and S3) ----------------------------------
+    //
+    // Go's print and println are the RUNTIME's printer: gc lowers them to printlock, one printX per
+    // argument, and printunlock, and every byte goes through gwrite, which keeps the print backlog a
+    // crash dump carries (recordForPanic) and honours a goroutine's writebuf capture (DumpDebugLog,
+    // runtime.Stack's). A converted print binds golib's builtin.print instead, so golib now hands its
+    // formatted bytes to the sink registered here and the runtime's printer is again the one path.
+    [ModuleInitializer]
+    internal static void ᴛRegisterPrintSink()
+    {
+        builtin.PrintSink = new RuntimePrintSink();
+    }
+
+    private sealed class RuntimePrintSink : builtin.IPrintSink
+    {
+        // gwrite takes a Go slice, and it only reads it (into the print backlog, a writebuf, and
+        // writeErr), so each chunk is copied into one reused per-thread buffer: handing bytes to the
+        // printer allocates nothing, as Go's gwrite does not.
+        [ThreadStatic]
+        private static byte[]? t_chunk;
+
+        public void Lock() => printlock();
+
+        public void Unlock() => printunlock();
+
+        public void Write(ReadOnlySpan<byte> bytes)
+        {
+            byte[] chunk = t_chunk ??= new byte[512];
+
+            while (bytes.Length > 0)
+            {
+                int n = Math.Min(bytes.Length, chunk.Length);
+
+                // A cut inside a string's bytes backs off to a rune start (not a UTF-8 continuation
+                // byte), so a writer that decodes each write as text never sees half a rune.
+                if (n < bytes.Length)
+                {
+                    int cut = n;
+
+                    while (cut > 0 && (bytes[cut] & 0xC0) == 0x80)
+                        cut--;
+
+                    if (cut > 0)
+                        n = cut;
+                }
+
+                bytes[..n].CopyTo(chunk);
+                gwrite(new slice<byte>(chunk, 0, n));
+                bytes = bytes[n..];
+            }
+        }
+    }
+
+    // bytes(s) (print.go), S3: a COPY of the string's bytes. Go reinterprets the string header as a
+    // slice header, which the managed model refuses; printstring, and through it printbool, printnl
+    // and printint's sign, reach it, and gwrite only reads what it is given.
+    internal static slice<byte> bytes(@string s) => new slice<byte>(s.ToSpan().ToArray());
+
+    // writeErrData (runtime.go, every GOOS), S1: standard error through golib's managed writer
+    // (builtin.WriteStandardError, S2's rule: raw bytes to the process's stderr, or text to a
+    // Console.Error a host replaced). It was write(2, ...), which on windows is write1 -> stdcall ->
+    // asmcgocall, a door with no body; the print path now reaches it, so it is managed everywhere.
+    // When crashing, Go also copies the bytes to debug.SetCrashOutput's descriptor; that copy goes
+    // through a non-owning SafeFileHandle, as the minimal heap dump writes (it closes nothing).
+    internal static void writeErrData(ж<byte> Ꮡdata, int32 n)
+    {
+        slice<byte> b = @unsafe.Slice(Ꮡdata, n);
+
+        builtin.WriteStandardError(b.ToSpan());
+
+        var gp = getg();
+
+        if (gp != nil && (~(~gp).m).dying > 0 || gp == nil && Ꮡpanicking.Load() > 0)
+        {
+            uintptr fd = ᏑcrashFD.Load();
+
+            if (fd != ~(uintptr)0)
+                writeCrashCopy(fd, b.ToSpan());
+        }
+    }
+
+    private static void writeCrashCopy(uintptr fd, ReadOnlySpan<byte> bytes)
+    {
+        try
+        {
+            using global::Microsoft.Win32.SafeHandles.SafeFileHandle handle = new((nint)(nuint)fd, ownsHandle: false);
+            using global::System.IO.FileStream stream = new(handle, global::System.IO.FileAccess.Write, bufferSize: 0);
+            stream.Write(bytes);
+        }
+        catch (Exception ex) when (ex is global::System.IO.IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException or ObjectDisposedException)
+        {
+        }
+    }
+
     // GC runs a garbage collection and blocks the caller until the garbage collection is complete.
     public static void GC()
     {
@@ -1341,6 +1473,11 @@ partial class runtime_package
             appendGoFrames(trace, panicSite);
         }
 
+        // Go ends the calling goroutine's block, like every other, with the `go` statement that started
+        // it (traceback1's printcreatedby): the line a child reads to name its parent.
+        if (current is not null)
+            appendCreatedBy(trace, current);
+
         if (all)
         {
             // Every OTHER live goroutine, in goid order, as Go dumps them: one blank-line-separated
@@ -1374,14 +1511,20 @@ partial class runtime_package
         return trace.ToString();
     }
 
-    // Go's printcreatedby1 (runtime/traceback.go): `created by <func> in goroutine <parentGoid>` --
-    // the one line of a foreign goroutine's block this runtime CAN state truthfully, because the
-    // registry records the creator at launch (Goroutine.Creator). It is what a leak filter reads:
-    // net/http's interestingGoroutines drops blocks by `created by testing.RunTests`, `created by
-    // runtime.gc`, and an operator reading a dump learns which `go` statement left the goroutine
-    // behind. Go's position line beneath it is deliberately omitted: it would cost a file-info
-    // capture on every `go` statement, and nothing matches on it. Absent for the main goroutine
+    // Go's printcreatedby1 (runtime/traceback.go): `created by <func> in goroutine <parentGoid>`, then
+    // the `go` statement's position on a tab-indented line -- the one part of a foreign goroutine's
+    // block this runtime CAN state truthfully, because the registry records the creator at launch
+    // (Goroutine.Creator). The first line is what a leak filter reads: net/http's
+    // interestingGoroutines drops blocks by `created by testing.RunTests`, `created by runtime.gc`.
+    // The second is what runtime's parseTraceback requires under it. Absent for the main goroutine
     // and for a host-entered thread, exactly as Go prints none for goroutine 1.
+    //
+    // The position is resolved HERE, at print time, from the IL offset captured at the `go`
+    // statement (Goroutine.CreatorILOffset), through the same PDB reader and the same Go position
+    // map every frame line reads (goCreatorPosition). Where no position can be named (no portable
+    // PDB beside the assembly or embedded, as under native AOT) the line is Go's own spelling for an
+    // unknown PC, `?:0` (funcline1), rather than omitted: a created-by with no line beneath it is a
+    // malformed block to Go's parser.
     private static void appendCreatedBy(StringBuilder trace, Goroutine goroutine)
     {
         if (goroutine.Creator is not System.Reflection.MethodBase creator)
@@ -1392,7 +1535,33 @@ partial class runtime_package
         if (goroutine.ParentId != 0)
             trace.Append(" in goroutine ").Append(goroutine.ParentId);
 
-        trace.Append('\n');
+        (string file, int line) = goCreatorPosition(creator, goroutine.CreatorILOffset);
+
+        trace.Append("\n\t").Append(file).Append(':').Append(line).Append('\n');
+    }
+
+    // The `go` statement's position: the sequence point at or before the captured IL offset in the
+    // creator's portable PDB, mapped to Go by the frame lines' own lookup (goSourcePosition).
+    //
+    // PRECISION LIMIT, the one every frame line already has: in optimized JIT code a non-leaf frame's
+    // IL offset can read 0 where the JIT kept no mapping for the call site, and then the line named is
+    // the creator's FIRST statement rather than the `go` statement. StackTrace(true) reads the same
+    // offset and names the same line, so this adds no error of its own.
+    //
+    // A creator with no captured offset (one a host supplied: the test host's testing.(*T).Run, the
+    // finalizer's starter) names no `go` statement at all, so its position is the unknown one too,
+    // not the creator's first line.
+    private static (string file, int line) goCreatorPosition(System.Reflection.MethodBase creator, int ilOffset)
+    {
+        if (ilOffset < 0)
+            return ("?", 0);
+
+        (string? csFile, int csLine) = methodSourcePosition(creator, ilOffset);
+
+        if (csFile is null || csLine <= 0)
+            return ("?", 0);
+
+        return goSourcePosition(creator, csFile, csLine);
     }
 
     // Go's goroutineheader (runtime/traceback.go): `goroutine <goid> [<status>]:`, where the status
@@ -1547,12 +1716,18 @@ partial class runtime_package
     // goFuncLiteralSuffix), and derived from the compiler-generated name only as the fallback.
     // A frame that is not converted Go code (golib, the
     // BCL, the test host) keeps its .NET name — inventing a Go name for it would be a lie.
-    private static string goFrameName(System.Reflection.MethodBase method, StackFrame? frame)
+    private static string goFrameName(System.Reflection.MethodBase method, StackFrame? frame) => goFrameName(method, frame, out _);
+
+    // The PRINT name (Frame.Function, the traceback) and, in `symbol`, the SYMBOL name runtime/pprof
+    // symbolizes by (runtime_FrameSymbolName) -- one derivation, two spellings. They differ only where Go's
+    // funcNameForPrint decorates: a generic function prints as fn[...], while pprof reads the raw symbol,
+    // which in Go carries the GC-shape arguments and here, with no shapes to recover, is the undecorated name.
+    private static string goFrameName(System.Reflection.MethodBase method, StackFrame? frame, out string symbol)
     {
         Type? declaring = method.DeclaringType;
 
         if (declaring is null)
-            return method.Name;
+            return symbol = method.Name;
 
         string typeName = declaring.FullName ?? declaring.Name;
 
@@ -1561,7 +1736,7 @@ partial class runtime_package
         int packageSuffix = typeName.LastIndexOf("_package", StringComparison.Ordinal);
 
         if (!typeName.StartsWith("go.", StringComparison.Ordinal) || packageSuffix < 0)
-            return $"{typeName}.{method.Name}";
+            return symbol = $"{typeName}.{method.Name}";
 
         // "go.runtime.debug_package" -> "runtime/debug"
         string importPath = typeName[3..packageSuffix].Replace('.', '/');
@@ -1623,7 +1798,7 @@ partial class runtime_package
         // A method-expression WRAPPER (GoWrapperAttribute) is named as Go names its autogenerated
         // wrapper: the expression, in the package that declares the receiver type.
         if (method.GetCustomAttributes(typeof(GoWrapperAttribute), inherit: false) is [GoWrapperAttribute wrapper])
-            return $"{wrapper.PackagePath ?? importPath}.{wrapper.GoName}";
+            return symbol = $"{wrapper.PackagePath ?? importPath}.{wrapper.GoName}";
 
         string name = method.Name;
 
@@ -1672,8 +1847,10 @@ partial class runtime_package
 
         // Go's traceback names a METHOD frame with its receiver TYPE between the package and the
         // method, which the flat `<pkg>.<name>` form drops.
+        string printName;
+
         if (goReceiverName(method) is string receiver)
-            name = $"{receiver}.{name}";
+            printName = name = $"{receiver}.{name}";
         // A generic FUNCTION prints as `fn[...]` (funcNameForPrint). A method's C# type parameters are
         // its receiver type's, which the receiver's own `T[...]` already spells, and a function literal
         // keeps the name its enclosing function gave it.
@@ -1684,9 +1861,13 @@ partial class runtime_package
         // frame) and sync/atomic's LoadPointer and StorePointer. Every converted Go generic function (145)
         // emits as a C# generic method, and no converted non-generic one does.
         else if (method.IsGenericMethod && method.Name[0] != '<')
-            name = $"{name}[...]";
+            printName = $"{name}[...]";
+        else
+            printName = name;
 
-        return $"{importPath}.{name}";
+        symbol = $"{importPath}.{name}";
+
+        return $"{importPath}.{printName}";
     }
 
     // Spells a function-literal frame's recorded Go counter suffix (`1`, `2.1`), or null when the
@@ -1746,8 +1927,10 @@ partial class runtime_package
     private static readonly object s_pdbLock = new();
     private static readonly Dictionary<System.Reflection.Assembly, System.Reflection.Metadata.MetadataReaderProvider?> s_pdbs = new();
 
-    // A method's first non-hidden sequence point (document name, line), or (null, 0).
-    private static (string? file, int line) methodSourcePosition(System.Reflection.MethodBase method)
+    // A method's first non-hidden sequence point (document name, line), or (null, 0). Given an IL
+    // offset (not StackFrame.OFFSET_UNKNOWN), the last non-hidden sequence point at or before it
+    // instead -- the lookup StackTrace(true) makes for a live frame -- falling back to the first.
+    private static (string? file, int line) methodSourcePosition(System.Reflection.MethodBase method, int ilOffset = StackFrame.OFFSET_UNKNOWN)
     {
         System.Reflection.Assembly assembly = method.Module.Assembly;
         System.Reflection.Metadata.MetadataReaderProvider? provider;
@@ -1772,13 +1955,21 @@ partial class runtime_package
                 var definition = System.Reflection.Metadata.Ecma335.MetadataTokens.MethodDefinitionHandle(method.MetadataToken);
                 System.Reflection.Metadata.MethodDebugInformation information = pdb.GetMethodDebugInformation(definition.ToDebugInformationHandle());
 
+                System.Reflection.Metadata.SequencePoint? found = null;
+
                 foreach (System.Reflection.Metadata.SequencePoint point in information.GetSequencePoints())
                 {
                     if (point.IsHidden)
                         continue;
 
-                    return (pdb.GetString(pdb.GetDocument(point.Document).Name), point.StartLine);
+                    if (found is not null && (ilOffset < 0 || point.Offset > ilOffset))
+                        break;
+
+                    found = point;
                 }
+
+                if (found is System.Reflection.Metadata.SequencePoint at)
+                    return (pdb.GetString(pdb.GetDocument(at.Document).Name), at.StartLine);
             }
         }
         catch (Exception)
@@ -1934,10 +2125,14 @@ partial class runtime_package
     // goFramePosition spells one frame's source position: the Go one the conversion recorded, or the
     // converted C# one when it recorded none. The single funnel both consumers read, so a traceback
     // and a runtime.Caller on the same frame can never disagree about where it is.
-    private static (string file, int line) goFramePosition(System.Reflection.MethodBase method, StackFrame frame)
+    private static (string file, int line) goFramePosition(System.Reflection.MethodBase method, StackFrame frame) =>
+        goSourcePosition(method, frame.GetFileName(), frame.GetFileLineNumber());
+
+    // The mapping itself, from a C# position however it was read: a live frame's file info, or a PDB
+    // sequence point read at print time (goCreatorPosition).
+    private static (string file, int line) goSourcePosition(System.Reflection.MethodBase method, string? csFile, int csLine)
     {
-        string csPath = goSourcePath(frame.GetFileName());
-        int csLine = frame.GetFileLineNumber();
+        string csPath = goSourcePath(csFile);
 
         if (csPath.Length == 0)
             return (csPath, csLine);
@@ -2462,6 +2657,10 @@ partial class runtime_package
     private sealed class CallerFrameRecord
     {
         public string Function = string.Empty;
+
+        // The name runtime/pprof symbolizes the frame by (runtime_FrameSymbolName; see goFrameName's
+        // `symbol`). Null means the same as Function, which it is for every non-generic frame.
+        public string? SymbolName;
         public string File = string.Empty;
         public nint Line;
 
@@ -2483,8 +2682,8 @@ partial class runtime_package
     //
     // THE BAND IS NON-CANONICAL AND UNTAGGED. It starts at 0x8000_8000_0000_0000: bits 63 and 47 set,
     // bits 62..48 clear. That keeps it disjoint by construction from every other space a uintptr can
-    // hold in this corpus: managed-pointer hashes (below 2^32); tagged pointer tokens (bit 63 set, bit
-    // 47 CLEAR; ManagedPointerTokens.IsTaggedToken); synthetic PCs (from 0xFFFF_8000_0000_0000,
+    // hold in this corpus: tagged pointer tokens, the identity band among them (bit 63 set, bit 47
+    // CLEAR; ManagedPointerTokens.IsTaggedToken, IsIdentityToken); synthetic PCs (from 0xFFFF_8000_0000_0000,
     // GoSyntheticPC); and every x64 user-mode or kernel address, which has bits 63..47 all equal, so
     // a pinned data pointer or a marshal buffer can never name a call site. The band holds 2^35 spans
     // before a carry into bit 48 would clear bit 47 and make a tagged token; the record list is an
@@ -3011,9 +3210,12 @@ partial class runtime_package
             // (the same rule the FuncForPC record applies).
             (string file, int line) = method.IsDefined(typeof(GoWrapperAttribute), inherit: false) ? ("<autogenerated>", 1) : goFramePosition(method, frame);
 
+            string function = goFrameName(method, frame, out string symbol);
+
             CallerFrameRecord record = new()
             {
-                Function = goFrameName(method, frame),
+                Function = function,
+                SymbolName = symbol == function ? null : symbol,
                 File = file,
                 Line = line,
                 StartLine = goFunctionStartLine(method)
@@ -3052,6 +3254,14 @@ partial class runtime_package
 
         return pc;
     }
+
+    // runtime_FrameSymbolName's managed answer (runtime/pprof's symtab linkname reads it): the name pprof
+    // symbolizes a frame by. Go returns the RAW function symbol there, never funcNameForPrint's form.
+    // The frame's own record carries it (CallerFrameRecord.SymbolName), found by the frame's pc: Frames.Next
+    // reports the call pc one below the token, which is still inside the record's span. A frame no record
+    // answers for keeps its Function, as Go's own runtime_FrameSymbolName does for an invalid funcInfo.
+    public static @string GoFrameSymbolName(Frame f) =>
+        f.PC != 0 && callerFrameRecord(f.PC) is CallerFrameRecord { SymbolName: string symbol } ? symbol : f.Function;
 
     private static CallerFrameRecord? callerFrameRecord(uintptr token)
     {
@@ -3118,9 +3328,23 @@ partial class runtime_package
 
         (string file, int line) = method is System.Reflection.Emit.DynamicMethod ? (string.Empty, 0) : syntheticFramePosition(method);
 
+        string function;
+        string symbol;
+
+        if (isGoSourceFrame(method))
+        {
+            function = goFrameName(method, null, out symbol);
+        }
+        else
+        {
+            function = GoSyntheticPC.GoNameOf(method);
+            symbol = function;
+        }
+
         return new CallerFrameRecord
         {
-            Function = isGoSourceFrame(method) ? goFrameName(method, null) : GoSyntheticPC.GoNameOf(method),
+            Function = function,
+            SymbolName = symbol == function ? null : symbol,
             File = file,
             Line = line,
             StartLine = method is System.Reflection.Emit.DynamicMethod ? 0 : goFunctionStartLine(method)

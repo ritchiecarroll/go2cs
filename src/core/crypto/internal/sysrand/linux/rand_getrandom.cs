@@ -40,7 +40,7 @@ internal static error read(slice<byte> b) {
         if (size > maxSize) {
             size = maxSize;
         }
-        var (n, err) = unix.GetRandom(b[..(int)(size)], 0);
+        var (n, err) = unix.GetRandom(b.slice(0, size), 0);
         if (errors.Is(err, syscall.ENOSYS)) {
             // If getrandom(2) is not available, presumably on Linux versions
             // earlier than 3.17, fall back to reading from /dev/urandom.
@@ -55,7 +55,7 @@ internal static error read(slice<byte> b) {
         if (err != default!) {
             return err;
         }
-        b = b[(int)(n)..];
+        b = b.slice(n);
     }
     return default!;
 }

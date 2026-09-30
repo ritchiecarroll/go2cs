@@ -33,13 +33,13 @@ partial class net_package {
     nint i = 0;
     for (i = 0; i < len(data); i++) {
         if (data[i] == (rune)'\n') {
-            s = ((@string)(data[0..(int)(i)]));
+            s = ((@string)(data.slice(0, i)));
             ok = true;
             // move data
             i++;
             nint n = len(data) - i;
-            copy(data[0..], data[(int)(i)..]);
-            f.data = data[0..(int)(n)];
+            copy(data[0..], data.slice(i));
+            f.data = data.slice(0, n);
             return (s, ok);
         }
     }
@@ -63,9 +63,9 @@ partial class net_package {
     }
     if (len(f.data) < cap(f.data)) {
         nint ln = len(f.data);
-        var (n, err) = Δio.ReadFull(new os_FileжReader(f.ΔΔfile), f.data[(int)(ln)..(int)(cap(f.data))]);
+        var (n, err) = Δio.ReadFull(new os_FileжReader(f.ΔΔfile), f.data.slice(ln, cap(f.data)));
         if (n >= 0) {
-            f.data = f.data[0..(int)(ln + n)];
+            f.data = f.data.slice(0, ln + n);
         }
         if (AreEqual(err, Δio.EOF) || AreEqual(err, Δio.ErrUnexpectedEOF)) {
             f.atEOF = true;
@@ -122,17 +122,17 @@ internal static slice<@string> splitAtBytes(@string s, @string t) {
     for (nint i = 0; i < len(s); i++) {
         if (bytealg.IndexByteString(t, s[i]) >= 0) {
             if (last < i) {
-                a[n] = s[(int)(last)..(int)(i)];
+                a[n] = s.slice(last, i);
                 n++;
             }
             last = i + 1;
         }
     }
     if (last < len(s)) {
-        a[n] = s[(int)(last)..];
+        a[n] = s.slice(last);
         n++;
     }
-    return a[0..(int)(n)];
+    return a.slice(0, n);
 }
 
 internal static slice<@string> getFields(@string s) {
@@ -238,7 +238,7 @@ internal static @string trimSpace(@string x) {
         x = x[1..];
     }
     while (len(x) > 0 && isSpace(x[len(x) - 1])) {
-        x = x[..(int)(len(x) - 1)];
+        x = x.slice(0, len(x) - 1);
     }
     return x;
 }
@@ -253,7 +253,7 @@ internal static bool isSpace(byte b) {
 internal static @string removeComment(@string line) {
     {
         nint i = bytealg.IndexByteString(line, (rune)'#'); if (i != -1) {
-            return line[..(int)(i)];
+            return line.slice(0, i);
         }
     }
     return line;
@@ -269,7 +269,7 @@ internal static error foreachField(@string x, Func<@string, error> fn) {
             return fn(x);
         }
         {
-            @string field = trimSpace(x[..(int)(sp)]); if (len(field) > 0) {
+            @string field = trimSpace(x.slice(0, sp)); if (len(field) > 0) {
                 {
                     var err = fn(field); if (err != default!) {
                         return err;
@@ -277,7 +277,7 @@ internal static error foreachField(@string x, Func<@string, error> fn) {
                 }
             }
         }
-        x = trimSpace(x[(int)(sp + 1)..]);
+        x = trimSpace(x.slice(sp + 1));
     }
     return default!;
 }
@@ -285,7 +285,7 @@ internal static error foreachField(@string x, Func<@string, error> fn) {
 // stringsHasSuffixFold reports whether s ends in suffix,
 // ASCII-case-insensitively.
 internal static bool stringsHasSuffixFold(@string s, @string suffix) {
-    return len(s) >= len(suffix) && stringsEqualFold(s[(int)(len(s) - len(suffix))..], suffix);
+    return len(s) >= len(suffix) && stringsEqualFold(s.slice(len(s) - len(suffix)), suffix);
 }
 
 // stringsEqualFold is strings.EqualFold, ASCII only. It reports whether s and t

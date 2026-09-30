@@ -25,7 +25,7 @@ internal static (@string, @string) splitPath(@string path) {
     nint i = len(path) - 1;
     // Remove trailing slashes.
     for (; i > 0 && path[i] == (rune)'/'; i--) {
-        path = path[..(int)(i)];
+        path = path.slice(0, i);
     }
     // if no slashes in path, base is path
     @string basename = path;
@@ -35,9 +35,9 @@ internal static (@string, @string) splitPath(@string path) {
             if (i == 0){
                 dirname = path[..1];
             } else {
-                dirname = path[..(int)(i)];
+                dirname = path.slice(0, i);
             }
-            basename = path[(int)(i + 1)..];
+            basename = path.slice(i + 1);
             break;
         }
     }

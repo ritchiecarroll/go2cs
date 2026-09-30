@@ -86,7 +86,7 @@ internal static void init(this ж<@decimal> Ꮡx, nat m, nint shift) {
     while (n > 0 && s[n - 1] == (rune)'0') {
         n--;
     }
-    x.mant = appendꓸꓸꓸ(x.mant[..0], s[..(int)(n)]);
+    x.mant = appendꓸꓸꓸ(x.mant[..0], s.slice(0, n));
     // Do any (remaining) shift right in decimal representation.
     if (shift < 0) {
         while (shift < (nint)(-maxShift)) {
@@ -138,7 +138,7 @@ internal static void shr(ref @decimal x, nuint s) {
         w++;
         n = n * 10;
     }
-    x.mant = x.mant[..(int)(w)]; // the number may be shorter (e.g. 1024 >> 10)
+    x.mant = x.mant.slice(0, w); // the number may be shorter (e.g. 1024 >> 10)
     // append additional digits that didn't fit
     while (n > 0) {
         Word d = (n >> (int)(s));
@@ -164,9 +164,9 @@ internal static void shr(ref @decimal x, nuint s) {
     }
     case {} when x.exp < len(x.mant): {
         buf = new slice<byte>(0, 1 + len(x.mant));
-        buf = appendꓸꓸꓸ(buf, x.mant[..(int)(x.exp)]);
+        buf = appendꓸꓸꓸ(buf, x.mant.slice(0, x.exp));
         buf = append(buf, (byte)((rune)'.'));
-        buf = appendꓸꓸꓸ(buf, x.mant[(int)(x.exp)..]);
+        buf = appendꓸꓸꓸ(buf, x.mant.slice(x.exp));
         break;
     }
     default: {
@@ -233,7 +233,7 @@ internal static void round(this ж<@decimal> Ꮡx, nint n) {
     }
     // n > 0 && x.mant[n-1] < '9'
     x.mant[n - 1]++;
-    x.mant = x.mant[..(int)(n)];
+    x.mant = x.mant.slice(0, n);
 }
 
 // x already trimmed
@@ -243,7 +243,7 @@ internal static void roundDown(this ж<@decimal> Ꮡx, nint n) {
     if (n < 0 || n >= len(x.mant)) {
         return; // nothing to do
     }
-    x.mant = x.mant[..(int)(n)];
+    x.mant = x.mant.slice(0, n);
     trim(ref (Ꮡx).DerefOrNull());
 }
 
@@ -254,7 +254,7 @@ internal static void trim(ref @decimal x) {
     while (i > 0 && x.mant[i - 1] == (rune)'0') {
         i--;
     }
-    x.mant = x.mant[..(int)(i)];
+    x.mant = x.mant.slice(0, i);
     if (i == 0) {
         x.exp = 0;
     }

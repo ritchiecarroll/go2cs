@@ -149,7 +149,7 @@ internal static (ж<ecdsa.PrivateKey> key, error err) parseECPrivateKey(ж<asn1.
     // Some private keys remove all leading zeros, this is also invalid
     // according to [SEC1] but since OpenSSL used to do this, we ignore
     // this too.
-    copy(privateKey[(int)(builtin.len(privateKey) - builtin.len(privKey.PrivateKey))..], privKey.PrivateKey);
+    copy(privateKey.slice(builtin.len(privateKey) - builtin.len(privKey.PrivateKey)), privKey.PrivateKey);
     (priv.Value.X, priv.Value.Y) = curve.ScalarBaseMult(privateKey);
     return (priv, default!);
 }

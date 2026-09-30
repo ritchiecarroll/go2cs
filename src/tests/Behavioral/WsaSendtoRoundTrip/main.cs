@@ -79,7 +79,7 @@ internal static void roundTrip() {
             fmt.Println(roundtripReadfromFailedˢ);
             return;
         }
-        fmt.Println(roundtripBytesArrivedˢ, ((sstring)(buf[..(int)(n)])) == ((sstring)payload));
+        fmt.Println(roundtripBytesArrivedˢ, ((sstring)(buf.slice(0, n))) == ((sstring)payload));
         (var peer, ok) = from._<ж<Δnet.UDPAddr>>(ᐧ);
         if (!ok) {
             fmt.Println(roundtripPeerAddressIsˢ);

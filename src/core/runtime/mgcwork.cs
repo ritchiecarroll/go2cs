@@ -168,9 +168,9 @@ internal static UntypedInt workbufAlloc => /* 32 << 10 */ 32768;
             wbuf = w.wbuf1;
             flushed = true;
         }
-        nint n = copy((~wbuf).obj[(int)((~wbuf).nobj)..], obj);
+        nint n = copy((~wbuf).obj.slice((~wbuf).nobj), obj);
         wbuf.Value.nobj += n;
-        obj = obj[(int)(n)..];
+        obj = obj.slice(n);
     }
     if (flushed && gcphase == _GCmark) {
         ᏑgcController.enlistWorker();

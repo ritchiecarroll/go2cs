@@ -197,7 +197,7 @@ internal static readonly object unexpectedEofˢ = (@string)"unexpected EOF"u8;
         break;
     }
     default: {
-        pkgpath = strings.Join(parts[..(int)(len(parts) - 1)], // unqualified name
+        pkgpath = strings.Join(parts.slice(0, len(parts) - 1), // unqualified name
  // qualified name, which may contain periods
  "."u8);
         name = parts[len(parts) - 1];
@@ -1167,7 +1167,7 @@ internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) 
         @string allTypeData = sb.String();
         p.typeData = new @string[]{""u8}.slice(); // type 0, unused
         foreach (var (_, to) in typeOffsets) {
-            p.typeData = append(p.typeData, allTypeData[(int)(to.offset)..(int)(to.offset + to.length)]);
+            p.typeData = append(p.typeData, allTypeData.slice(to.offset, to.offset + to.length));
         }
         for (nint i = 1; i < exportedp1; i++) {
             Ꮡp.parseSavedType(Ꮡpkg, i, default!);

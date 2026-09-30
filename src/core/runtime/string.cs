@@ -58,7 +58,7 @@ internal static @string concatstrings(ж<tmpBuf> Ꮡbuf, slice<@string> a) {
     var (s, b) = rawstringtmp(Ꮡbuf, l);
     foreach (var (_, x) in a) {
         nint n = copy(b, x);
-        b = b[(int)(n)..];
+        b = b.slice(n);
     }
     return s;
 }
@@ -98,7 +98,7 @@ internal static slice<byte> concatbytes(slice<@string> a) {
     var b = rawbyteslice(l);
     nint offset = 0;
     foreach (var (_, x) in a) {
-        copy(b[(int)(offset)..], x);
+        copy(b.slice(offset), x);
         offset += len(x);
     }
     return b;
@@ -178,7 +178,7 @@ internal static (@string s, slice<byte> b) rawstringtmp(ж<tmpBuf> Ꮡbuf, nint 
 
     ref var buf = ref Ꮡbuf.DerefOrNull();
     if (Ꮡbuf != nil && l <= 32){
-        b = buf.Value[..(int)(l)];
+        b = buf.Value.slice(0, l);
         s = slicebytetostringtmp(Ꮡ(b, 0), len(b));
     } else {
         (s, b) = rawstring(l);
@@ -222,7 +222,7 @@ internal static slice<byte> stringtoslicebyte(ж<tmpBuf> Ꮡbuf, @string s) {
     slice<byte> b = default!;
     if (Ꮡbuf != nil && len(s) <= 32){
         buf = new tmpBuf(new byte[32].array());
-        b = buf.Value[..(int)(len(s))];
+        b = buf.Value.slice(0, len(s));
     } else {
         b = rawbyteslice(len(s));
     }
@@ -242,7 +242,7 @@ internal static slice<rune> stringtoslicerune([GoArrayDims(32)] ж<array<rune>> 
     slice<rune> a = default!;
     if (Ꮡbuf != nil && n <= 32){
         buf = new rune[]{}.array(32);
-        a = buf[..(int)(n)];
+        a = buf.slice(0, n);
     } else {
         a = rawruneslice(n);
     }
@@ -279,9 +279,9 @@ internal static @string slicerunetostring(ж<tmpBuf> Ꮡbuf, slice<rune> a) {
         if (size2 >= size1) {
             break;
         }
-        size2 += encoderune(b[(int)(size2)..], r);
+        size2 += encoderune(b.slice(size2), r);
     }
-    return s[..(int)(size2)];
+    return s.slice(0, size2);
 }
 
 [GoType] partial struct stringStruct {
@@ -314,7 +314,7 @@ internal static @string /*s*/ intstring([GoArrayDims(4)] ж<array<byte>> Ꮡbuf,
         v = runeError;
     }
     nint n = encoderune(b, (rune)v);
-    return s[..(int)(n)];
+    return s.slice(0, n);
 }
 
 // go2cs generated this placeholder — func rawstring is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -501,7 +501,7 @@ internal static (int64, bool) parseByteCount(@string s) {
     {
         var c = s[len(s) - 2]; if (c >= (rune)'0' && c <= (rune)'9'){
             // Trivial 'B' suffix.
-            var (nΔ2, okΔ2) = atoi64(s[..(int)(len(s) - 1)]);
+            var (nΔ2, okΔ2) = atoi64(s.slice(0, len(s) - 1));
             if (!okΔ2 || nΔ2 < 0) {
                 return (0, false);
             }
@@ -543,7 +543,7 @@ internal static (int64, bool) parseByteCount(@string s) {
     for (nint i = 0; i < power; i++) {
         m *= 1024;
     }
-    var (n, ok) = atoi64(s[..(int)(len(s) - 3)]);
+    var (n, ok) = atoi64(s.slice(0, len(s) - 3));
     if (!ok || n < 0) {
         return (0, false);
     }
@@ -640,10 +640,10 @@ internal static @string gostringw(ж<uint16> Ꮡstrw) {
         if (n2 >= n1) {
             break;
         }
-        n2 += encoderune(b[(int)(n2)..], (rune)str.Value[i]);
+        n2 += encoderune(b.slice(n2), (rune)str.Value[i]);
     }
     b[n2] = 0; // for luck
-    return s[..(int)(n2)];
+    return s.slice(0, n2);
 }
 
 } // end runtime_package

@@ -41,7 +41,7 @@ internal static error errRange = errors.New("gob: bad data: field numbers out of
 }
 
 [GoRecv] internal static (nint, error) Read(this ref decBuffer d, slice<byte> p) {
-    nint n = copy(p, d.data[(int)(d.offset)..]);
+    nint n = copy(p, d.data.slice(d.offset));
     if (n == 0 && len(p) != 0) {
         return (0, io.EOF);
     }
@@ -70,7 +70,7 @@ internal static error errRange = errors.New("gob: bad data: field numbers out of
 }
 
 [GoRecv] internal static slice<byte> Bytes(this ref decBuffer d) {
-    return d.data[(int)(d.offset)..];
+    return d.data.slice(d.offset);
 }
 
 // SetBytes sets the buffer to the bytes, discarding any existing data.
@@ -119,7 +119,7 @@ internal static (uint64 x, nint width, error err) decodeUintReader(io.Reader r, 
     error err = default!;
 
     width = 1;
-    (var n, err) = io.ReadFull(r, buf[0..(int)(width)]);
+    (var n, err) = io.ReadFull(r, buf.slice(0, width));
     if (n == 0) {
         return (x, width, err);
     }
@@ -132,7 +132,7 @@ internal static (uint64 x, nint width, error err) decodeUintReader(io.Reader r, 
         err = errBadUint;
         return (x, width, err);
     }
-    (width, err) = io.ReadFull(r, buf[0..(int)(n)]);
+    (width, err) = io.ReadFull(r, buf.slice(0, n));
     if (err != default!) {
         if (AreEqual(err, io.EOF)) {
             err = io.ErrUnexpectedEOF;
@@ -140,7 +140,7 @@ internal static (uint64 x, nint width, error err) decodeUintReader(io.Reader r, 
         return (x, width, err);
     }
     // Could check that the high byte is zero but it's not worth it.
-    foreach (var (_, bΔ1) in buf[0..(int)(width)]) {
+    foreach (var (_, bΔ1) in buf.slice(0, width)) {
         x = (uint64)((x << (int)(8)) | (uint64)bΔ1);
     }
     width++; // +1 for length byte
@@ -169,7 +169,7 @@ internal static (uint64 x, nint width, error err) decodeUintReader(io.Reader r, 
     }
     // Don't need to check error; it's safe to loop regardless.
     // Could check that the high byte is zero but it's not worth it.
-    foreach (var (_, bΔ1) in buf[0..(int)(n)]) {
+    foreach (var (_, bΔ1) in buf.slice(0, n)) {
         x = (uint64)((x << (int)(8)) | (uint64)bΔ1);
     }
     state.b.Drop(n);
@@ -473,7 +473,7 @@ internal static void decString(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, ref
     if (len(data) < n) {
         errorf("invalid string length %d: exceeds input size %d"u8, n, len(data));
     }
-    @string s = ((@string)(data[..(int)(n)]));
+    @string s = ((@string)(data.slice(0, n)));
     state.b.Drop(n);
     value.SetString(s);
 }
@@ -797,7 +797,7 @@ internal static void decodeInterface(this ж<Decoder> Ꮡdec, reflectꓸType ity
         errorf("invalid type name length %d: exceeds input size"u8, nr);
     }
     nint n = (nint)nr;
-    var name = state.b.Bytes()[..(int)(n)];
+    var name = state.b.Bytes().slice(0, n);
     state.b.Drop(n);
     // Allocate the destination interface value.
     if (len(name) == 0) {
@@ -879,7 +879,7 @@ internal static void ignoreInterface(this ж<Decoder> Ꮡdec, ж<decoderState> �
     if (len(b) < n) {
         errorf("GobDecoder: invalid data length %d: exceeds input size %d"u8, n, len(b));
     }
-    b = b[..(int)(n)];
+    b = b.slice(0, n);
     state.b.Drop(n);
     error err = default!;
     // We know it's one of these.

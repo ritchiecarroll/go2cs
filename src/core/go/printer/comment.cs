@@ -33,7 +33,7 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
             // reformatting it will only make the situation worse.
             return list;
         }
-        text = text[2..(int)(len(text) - 2)]; // cut /* and */
+        text = text.slice(2, len(text) - 2); // cut /* and */
     } else 
     if (strings.HasPrefix((~list[0]).Text, "//"u8)){
         kind = "//"u8;

@@ -21,7 +21,7 @@ public static iter.Seq<@string> Lines(@string s) {
             @string line = default!;
             {
                 nint i = IndexByte(s, (rune)'\n'); if (i >= 0){
-                    (line, s) = (s[..(int)(i + 1)], s[(int)(i + 1)..]);
+                    (line, s) = (s.slice(0, i + 1), s.slice(i + 1));
                 } else {
                     (line, s) = (s, "");
                 }
@@ -39,10 +39,10 @@ internal static iter.Seq<@string> explodeSeq(@string s) {
     return (Func<@string, bool> yield) => {
         while (len(s) > 0) {
             var (_, size) = utf8.DecodeRuneInString(s);
-            if (!yield(s[..(int)(size)])) {
+            if (!yield(s.slice(0, size))) {
                 return;
             }
-            s = s[(int)(size)..];
+            s = s.slice(size);
         }
     };
 }
@@ -59,11 +59,11 @@ internal static iter.Seq<@string> splitSeq(@string s, @string sep, nint sepSave)
             if (i < 0) {
                 break;
             }
-            @string frag = s[..(int)(i + sepSave)];
+            @string frag = s.slice(0, i + sepSave);
             if (!yield(frag)) {
                 return;
             }
-            s = s[(int)(i + len(sep))..];
+            s = s.slice(i + len(sep));
         }
         yield(s);
     };
@@ -97,12 +97,12 @@ public static iter.Seq<@string> FieldsSeq(@string s) {
             var r = (rune)s[i];
             var isSpace = asciiSpace[s[i]] != 0;
             if (r >= utf8.RuneSelf) {
-                (r, size) = utf8.DecodeRuneInString(s[(int)(i)..]);
+                (r, size) = utf8.DecodeRuneInString(s.slice(i));
                 isSpace = Δunicode.IsSpace(r);
             }
             if (isSpace){
                 if (start >= 0) {
-                    if (!yield(s[(int)(start)..(int)(i)])) {
+                    if (!yield(s.slice(start, i))) {
                         return;
                     }
                     start = -1;
@@ -114,7 +114,7 @@ public static iter.Seq<@string> FieldsSeq(@string s) {
             i += size;
         }
         if (start >= 0) {
-            yield(s[(int)(start)..]);
+            yield(s.slice(start));
         }
     };
 }
@@ -130,11 +130,11 @@ public static iter.Seq<@string> FieldsFuncSeq(@string s, Func<rune, bool> f) {
             nint size = 1;
             var r = (rune)s[i];
             if (r >= utf8.RuneSelf) {
-                (r, size) = utf8.DecodeRuneInString(s[(int)(i)..]);
+                (r, size) = utf8.DecodeRuneInString(s.slice(i));
             }
             if (f(r)){
                 if (start >= 0) {
-                    if (!yield(s[(int)(start)..(int)(i)])) {
+                    if (!yield(s.slice(start, i))) {
                         return;
                     }
                     start = -1;
@@ -146,7 +146,7 @@ public static iter.Seq<@string> FieldsFuncSeq(@string s, Func<rune, bool> f) {
             i += size;
         }
         if (start >= 0) {
-            yield(s[(int)(start)..]);
+            yield(s.slice(start));
         }
     };
 }

@@ -150,7 +150,7 @@ internal static void Main() {
     arm(arrayIndexˢ, () => fmt.Sprint(arrʗ1[(uint8)(u + u)]));
     arm(stringIndexˢ, () => fmt.Sprint(str[(uint8)(d + 10)]));
     var tblʗ2 = tbl;
-    arm(sliceBoundˢ, () => fmt.Sprint(len(tblʗ2[(int)((uint8)(u + u))..]), (@string)" "u8, len(tblʗ2[..(int)((uint8)(u + u))]), (@string)" "u8, str[(int)((uint8)(d + 10))..]));
+    arm(sliceBoundˢ, () => fmt.Sprint(len(tblʗ2.slice((uint8)(u + u))), (@string)" "u8, len(tblʗ2.slice(0, (uint8)(u + u))), (@string)" "u8, str.slice((uint8)(d + 10))));
     arm(shiftCountˢ, () => {
         var y = (uint32)1;
         y.LshAssign((uint64)((uint8)(d + 10)));

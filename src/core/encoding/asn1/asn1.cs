@@ -294,7 +294,7 @@ internal static (ObjectIdentifier s, error err) parseObjectIdentifier(slice<byte
         }
         s[i] = v;
     }
-    s = s[0..(int)(i)];
+    s = s.slice(0, i);
     return (s, err);
 }
 
@@ -509,7 +509,7 @@ internal static (@string, error) parseBMPString(slice<byte> bmpString) {
     // Strip terminator if present.
     {
         nint l = len(bmpString); if (l >= 2 && bmpString[l - 1] == 0 && bmpString[l - 2] == 0) {
-            bmpString = bmpString[..(int)(l - 2)];
+            bmpString = bmpString.slice(0, l - 2);
         }
     }
     var s = new slice<uint16>(0, len(bmpString) / 2);
@@ -727,7 +727,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
             }
             any result = default!;
             if (!tΔ1.isCompound && tΔ1.@class == ClassUniversal) {
-                var innerBytesΔ1 = bytes[(int)(offset)..(int)(offset + tΔ1.length)];
+                var innerBytesΔ1 = bytes.slice(offset, offset + tΔ1.length);
                 var exprᴛ1 = tΔ1.tag;
                 if (exprᴛ1 == TagBoolean) {
                     (result, err) = parseBool(innerBytesΔ1);
@@ -886,12 +886,12 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
         err = new SyntaxError("data truncated"u8);
         return (offset, err);
     }
-    var innerBytes = bytes[(int)(offset)..(int)(offset + t.length)];
+    var innerBytes = bytes.slice(offset, offset + t.length);
     offset += t.length;
     // We deal with the structures defined in this package first.
     switch (v.Addr().Interface().type()) {
     case ж<RawValue> vΔ1: {
-        vΔ1.Value = new RawValue(t.@class, t.tag, t.isCompound, innerBytes, bytes[(int)(initOffset)..(int)(offset)]);
+        vΔ1.Value = new RawValue(t.@class, t.tag, t.isCompound, innerBytes, bytes.slice(initOffset, offset));
         return (offset, err);
     }
     case ж<ObjectIdentifier> vΔ1: {
@@ -967,7 +967,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
                 }
             }
             if (structType.NumField() > 0 && AreEqual(structType.Field(0).Type, rawContentsType)) {
-                var bytesΔ2 = bytes[(int)(initOffset)..(int)(offset)];
+                var bytesΔ2 = bytes.slice(initOffset, offset);
                 val.Field(0).Set(reflect.ValueOf(((RawContent)bytesΔ2)));
             }
             nint innerOffset = 0;
@@ -1178,7 +1178,7 @@ public static (slice<byte> rest, error err) UnmarshalWithParams(slice<byte> b, a
     if (err != default!) {
         return (default!, err);
     }
-    return (b[(int)(offset)..], default!);
+    return (b.slice(offset), default!);
 }
 
 } // end asn1_package

@@ -93,8 +93,8 @@ internal static (slice<byte>, error) emsaPSSEncode(slice<byte> mHash, nint emBit
     }
     var em = new slice<byte>(emLen);
     nint psLen = emLen - sLen - hLen - 2;
-    var db = em[..(int)(psLen + 1 + sLen)];
-    var h = em[(int)(psLen + 1 + sLen)..(int)(emLen - 1)];
+    var db = em.slice(0, psLen + 1 + sLen);
+    var h = em.slice(psLen + 1 + sLen, emLen - 1);
     // 4.  Generate a random octet string salt of length sLen; if sLen = 0,
     //     then salt is the empty string.
     //
@@ -117,7 +117,7 @@ internal static (slice<byte>, error) emsaPSSEncode(slice<byte> mHash, nint emBit
     // 8.  Let DB = PS || 0x01 || salt; DB is an octet string of length
     //     emLen - hLen - 1.
     db[psLen] = 0x01;
-    copy(db[(int)(psLen + 1)..], salt);
+    copy(db.slice(psLen + 1), salt);
     // 9.  Let dbMask = MGF(H, emLen - hLen - 1).
     //
     // 10. Let maskedDB = DB \xor dbMask.
@@ -162,8 +162,8 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
     }
     // 5.  Let maskedDB be the leftmost emLen - hLen - 1 octets of EM, and
     //     let H be the next hLen octets.
-    var db = em[..(int)(emLen - hLen - 1)];
-    var h = em[(int)(emLen - hLen - 1)..(int)(emLen - 1)];
+    var db = em.slice(0, emLen - hLen - 1);
+    var h = em.slice(emLen - hLen - 1, emLen - 1);
     // 6.  If the leftmost 8 * emLen - emBits bits of the leftmost octet in
     //     maskedDB are not all equal to zero, output "inconsistent" and
     //     stop.
@@ -196,7 +196,7 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
     //     position is "position 1") does not have hexadecimal value 0x01,
     //     output "inconsistent" and stop.
     nint psLen = emLen - hLen - sLen - 2;
-    foreach (var (_, e) in db[..(int)(psLen)]) {
+    foreach (var (_, e) in db.slice(0, psLen)) {
         if (e != 0x00) {
             return ErrVerification;
         }
@@ -205,7 +205,7 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
         return ErrVerification;
     }
     // 11.  Let salt be the last sLen octets of DB.
-    var salt = db[(int)(len(db) - sLen)..];
+    var salt = db.slice(len(db) - sLen);
     // 12.  Let
     //          M' = (0x)00 00 00 00 00 00 00 00 || mHash || salt ;
     //     M' is an octet string of length 8 + hLen + sLen with eight
@@ -288,7 +288,7 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
         nint emLen = len(em);
         nint k = priv.pub.Size(); if (emLen < k) {
             var emNew = new slice<byte>(k);
-            copy(emNew[(int)(k - emLen)..], em);
+            copy(emNew.slice(k - emLen), em);
             em = emNew;
         }
     }
@@ -387,11 +387,11 @@ public static (slice<byte>, error) EncryptOAEP(fips140.Hash hash, fips140.Hash m
     hash.Write(label);
     var lHash = hash.Sum(default!);
     var em = new slice<byte>(k);
-    var seed = em[1..(int)(1 + hash.Size())];
-    var db = em[(int)(1 + hash.Size())..];
-    copy(db[0..(int)(hash.Size())], lHash);
+    var seed = em.slice(1, 1 + hash.Size());
+    var db = em.slice(1 + hash.Size());
+    copy(db.slice(0, hash.Size()), lHash);
     db[len(db) - len(msg) - 1] = 1;
-    copy(db[(int)(len(db) - len(msg))..], msg);
+    copy(db.slice(len(db) - len(msg)), msg);
     {
         var err = drbg.ReadWithReaderDeterministic(random, seed); if (err != default!) {
             return (default!, err);
@@ -421,11 +421,11 @@ public static (slice<byte>, error) DecryptOAEP(fips140.Hash hash, fips140.Hash m
     hash.Write(label);
     var lHash = hash.Sum(default!);
     nint firstByteIsZero = subtle.ConstantTimeByteEq(em[0], 0);
-    var seed = em[1..(int)(hash.Size() + 1)];
-    var db = em[(int)(hash.Size() + 1)..];
+    var seed = em.slice(1, hash.Size() + 1);
+    var db = em.slice(hash.Size() + 1);
     mgf1XOR(seed, mgfHash, db);
     mgf1XOR(db, mgfHash, seed);
-    var lHash2 = db[0..(int)(hash.Size())];
+    var lHash2 = db.slice(0, hash.Size());
     // We have to validate the plaintext in constant time in order to avoid
     // attacks like: J. Manger. A Chosen Ciphertext Attack on RSA Optimal
     // Asymmetric Encryption Padding (OAEP) as Standardized in PKCS #1
@@ -440,7 +440,7 @@ public static (slice<byte>, error) DecryptOAEP(fips140.Hash hash, fips140.Hash m
     nint index = default!;
     nint invalid = default!;
     lookingForIndex = 1;
-    var rest = db[(int)(hash.Size())..];
+    var rest = db.slice(hash.Size());
     for (nint i = 0; i < len(rest); i++) {
         nint equals0 = subtle.ConstantTimeByteEq(rest[i], 0);
         nint equals1 = subtle.ConstantTimeByteEq(rest[i], 1);
@@ -451,7 +451,7 @@ public static (slice<byte>, error) DecryptOAEP(fips140.Hash hash, fips140.Hash m
     if ((nint)((nint)((nint)(firstByteIsZero & lHash2Good) & ~invalid) & ~lookingForIndex) != 1) {
         return (default!, ErrDecryption);
     }
-    return (rest[(int)(index + 1)..], default!);
+    return (rest.slice(index + 1), default!);
 }
 
 } // end rsa_package

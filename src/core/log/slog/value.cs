@@ -614,7 +614,7 @@ internal static readonly @string noStackˢ = "(no stack)"u8;
     if (n == 0) {
         return noStackˢ;
     }
-    var frames = runtime.CallersFrames(pcs[..(int)(n)]);
+    var frames = runtime.CallersFrames(pcs.slice(0, n));
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     nint i = 0;
     while (ᐧ) {

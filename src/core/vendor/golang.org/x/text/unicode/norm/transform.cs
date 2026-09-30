@@ -30,13 +30,13 @@ public static (nint nDst, nint nSrc, error err) Transform(this Form f, slice<byt
         nint ns = len(dst); if (ns < len(b)) {
             err = go.vendor.golang.org.x.text.transform_package.ErrShortDst;
             eof = false;
-            b = b[..(int)(ns)];
+            b = b.slice(0, ns);
         }
     }
     var (i, ok) = formTable[f].quickSpan(inputBytes(b), 0, len(b), eof);
-    nint n = copy(dst, b[..(int)(i)]);
+    nint n = copy(dst, b.slice(0, i));
     if (!ok) {
-        (nDst, nSrc, err) = f.transform(dst[(int)(n)..], src[(int)(n)..], atEOF);
+        (nDst, nSrc, err) = f.transform(dst.slice(n), src.slice(n), atEOF);
         return (nDst + n, nSrc + n, err);
     }
     if (err == default! && n < len(src) && !atEOF) {
@@ -52,7 +52,7 @@ internal static bool flushTransform(ж<reorderBuffer> Ꮡrb) {
     if (len(rb.@out) < rb.nrune * (nint)utf8.UTFMax) {
         return false;
     }
-    rb.@out = rb.@out[(int)(rb.flushCopy(rb.@out))..];
+    rb.@out = rb.@out.slice(rb.flushCopy(rb.@out));
     return true;
 }
 
@@ -71,7 +71,7 @@ internal static (nint nDst, nint nSrc, error err) transform(this Form f, slice<b
     rb.init(f, src);
     while (ᐧ) {
         // Load segment into reorder buffer.
-        rb.setFlusher(dst[(int)(nDst)..], flushTransform);
+        rb.setFlusher(dst.slice(nDst), flushTransform);
         nint end = decomposeSegment(Ꮡrb, nSrc, atEOF);
         if (end < 0) {
             return (nDst, nSrc, errs[-end]);
@@ -89,7 +89,7 @@ internal static (nint nDst, nint nSrc, error err) transform(this Form f, slice<b
             }
         }
         (end, var ok) = rb.f.quickSpan(rb.src, nSrc, end, eof);
-        nint n = copy(dst[(int)(nDst)..], rb.src.bytes[(int)(nSrc)..(int)(end)]);
+        nint n = copy(dst.slice(nDst), rb.src.bytes.slice(nSrc, end));
         nSrc += n;
         nDst += n;
         if (ok) {

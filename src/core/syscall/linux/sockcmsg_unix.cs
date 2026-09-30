@@ -40,7 +40,7 @@ public static (slice<SocketControlMessage>, error) ParseSocketControlMessage(sli
     slice<SocketControlMessage> msgs = default!;
     nint i = 0;
     while (i + CmsgLen(0) <= len(b)) {
-        var (h, dbuf, err) = socketControlMessageHeaderAndData(b[(int)(i)..]);
+        var (h, dbuf, err) = socketControlMessageHeaderAndData(b.slice(i));
         if (err != default!) {
             return (default!, err);
         }
@@ -56,7 +56,7 @@ internal static (ж<Cmsghdr>, slice<byte>, error) socketControlMessageHeaderAndD
     if ((~h).Len < SizeofCmsghdr || (uint64)(~h).Len > (uint64)len(b)) {
         return (default!, default!, EINVAL);
     }
-    return (h, b[(int)(cmsgAlignOf(SizeofCmsghdr))..(int)((~h).Len)], default!);
+    return (h, b.slice(cmsgAlignOf(SizeofCmsghdr), (nint)((~h).Len)), default!);
 }
 
 // UnixRights encodes a set of open file descriptors into a socket

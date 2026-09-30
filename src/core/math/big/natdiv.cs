@@ -616,7 +616,7 @@ internal static (nat q, nat r) divLarge(this nat z, nat u, nat uIn, nat vIn) {
     var v = vp.ValueSlot;
     shlVU(v, vIn, shift);
     u = u.make(len(uIn) + 1);
-    u[len(uIn)] = shlVU(u[..(int)(len(uIn))], uIn, shift);
+    u[len(uIn)] = shlVU(u.slice(0, len(uIn)), uIn, shift);
     // The caller should not pass aliased z and u, since those are
     // the two different outputs, but correct just in case.
     if (alias(z, u)) {
@@ -681,7 +681,7 @@ internal static void divBasic(this nat q, nat u, nat v) {
             }
         }
         // Compute q̂·v.
-        qhatv[n] = mulAddVWW(qhatv[0..(int)(n)], v, qhat, 0);
+        qhatv[n] = mulAddVWW(qhatv.slice(0, n), v, qhat, 0);
         nint qhl = len(qhatv);
         if (j + qhl > len(u) && qhatv[n] == 0) {
             qhl--;
@@ -689,9 +689,9 @@ internal static void divBasic(this nat q, nat u, nat v) {
         // Subtract q̂·v from the current section of u.
         // If it underflows, q̂·v > u, which we fix up
         // by decrementing q̂ and adding v back.
-        Word c = subVV(u[(int)(j)..(int)(j + qhl)], u[(int)(j)..], qhatv);
+        Word c = subVV(u.slice(j, j + qhl), u.slice(j), qhatv);
         if (c != 0) {
-            Word cΔ1 = addVV(u[(int)(j)..(int)(j + n)], u[(int)(j)..], v);
+            Word cΔ1 = addVV(u.slice(j, j + n), u.slice(j), v);
             // If n == qhl, the carry from subVV and the carry from addVV
             // cancel out and don't affect u[j+n].
             if (n < qhl) {
@@ -805,11 +805,11 @@ internal static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ж<n
         // We drop B-1 to be left with 2B+1 and B+1.
         nint sΔ1 = (B - 1);
         // uu is the up-to-3B-digit section of u we are working on.
-        var uu = u[(int)(j - B)..];
+        var uu = u.slice(j - B);
         // Compute the 2-by-1 guess q̂, leaving r̂ in uu[s:B+n].
         var qhatΔ1 = temps[depth].ValueSlot;
         clear(qhatΔ1);
-        qhatΔ1.divRecursiveStep(uu[(int)(sΔ1)..(int)(B + n)], v[(int)(sΔ1)..], depth + 1, Ꮡtmp, temps);
+        qhatΔ1.divRecursiveStep(uu.slice(sΔ1, B + n), v.slice(sΔ1), depth + 1, Ꮡtmp, temps);
         qhatΔ1 = qhatΔ1.norm();
         // Extend to a 3-by-2 quotient and remainder.
         // Because divRecursiveStep overwrote the top part of uu with
@@ -824,25 +824,25 @@ internal static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ж<n
         // and in long division, because we know that q̂ is wrong by at most one.
         var qhatvΔ1 = tmp.make(3 * n);
         clear(qhatvΔ1);
-        qhatvΔ1 = qhatvΔ1.mul(qhatΔ1, v[..(int)(sΔ1)]);
+        qhatvΔ1 = qhatvΔ1.mul(qhatΔ1, v.slice(0, sΔ1));
         for (nint i = 0; i < 2; i++) {
             nint e = qhatvΔ1.cmp(uu.norm());
             if (e <= 0) {
                 break;
             }
             subVW(qhatΔ1, qhatΔ1, 1);
-            Word cΔ1 = subVV(qhatvΔ1[..(int)(sΔ1)], qhatvΔ1[..(int)(sΔ1)], v[..(int)(sΔ1)]);
+            Word cΔ1 = subVV(qhatvΔ1.slice(0, sΔ1), qhatvΔ1.slice(0, sΔ1), v.slice(0, sΔ1));
             if (len(qhatvΔ1) > sΔ1) {
-                subVW(qhatvΔ1[(int)(sΔ1)..], qhatvΔ1[(int)(sΔ1)..], cΔ1);
+                subVW(qhatvΔ1.slice(sΔ1), qhatvΔ1.slice(sΔ1), cΔ1);
             }
-            addAt(uu[(int)(sΔ1)..], v[(int)(sΔ1)..], 0);
+            addAt(uu.slice(sΔ1), v.slice(sΔ1), 0);
         }
         if (qhatvΔ1.cmp(uu.norm()) > 0) {
             throw panic("impossible");
         }
-        Word cΔ2 = subVV(uu[..(int)(len(qhatvΔ1))], uu[..(int)(len(qhatvΔ1))], qhatvΔ1);
+        Word cΔ2 = subVV(uu.slice(0, len(qhatvΔ1)), uu.slice(0, len(qhatvΔ1)), qhatvΔ1);
         if (cΔ2 > 0) {
-            subVW(uu[(int)(len(qhatvΔ1))..], uu[(int)(len(qhatvΔ1))..], cΔ2);
+            subVW(uu.slice(len(qhatvΔ1)), uu.slice(len(qhatvΔ1)), cΔ2);
         }
         addAt(z, qhatΔ1, j - B);
         j -= B;
@@ -853,30 +853,30 @@ internal static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ж<n
     nint s = B - 1;
     var qhat = temps[depth].ValueSlot;
     clear(qhat);
-    qhat.divRecursiveStep(u[(int)(s)..].norm(), v[(int)(s)..], depth + 1, Ꮡtmp, temps);
+    qhat.divRecursiveStep(u.slice(s).norm(), v.slice(s), depth + 1, Ꮡtmp, temps);
     qhat = qhat.norm();
     var qhatv = tmp.make(3 * n);
     clear(qhatv);
-    qhatv = qhatv.mul(qhat, v[..(int)(s)]);
+    qhatv = qhatv.mul(qhat, v.slice(0, s));
     // Set the correct remainder as before.
     for (nint i = 0; i < 2; i++) {
         {
             nint e = qhatv.cmp(u.norm()); if (e > 0) {
                 subVW(qhat, qhat, 1);
-                Word cΔ3 = subVV(qhatv[..(int)(s)], qhatv[..(int)(s)], v[..(int)(s)]);
+                Word cΔ3 = subVV(qhatv.slice(0, s), qhatv.slice(0, s), v.slice(0, s));
                 if (len(qhatv) > s) {
-                    subVW(qhatv[(int)(s)..], qhatv[(int)(s)..], cΔ3);
+                    subVW(qhatv.slice(s), qhatv.slice(s), cΔ3);
                 }
-                addAt(u[(int)(s)..], v[(int)(s)..], 0);
+                addAt(u.slice(s), v.slice(s), 0);
             }
         }
     }
     if (qhatv.cmp(u.norm()) > 0) {
         throw panic("impossible");
     }
-    Word c = subVV(u[..(int)(len(qhatv))], u[..(int)(len(qhatv))], qhatv);
+    Word c = subVV(u.slice(0, len(qhatv)), u.slice(0, len(qhatv)), qhatv);
     if (c > 0) {
-        c = subVW(u[(int)(len(qhatv))..], u[(int)(len(qhatv))..], c);
+        c = subVW(u.slice(len(qhatv)), u.slice(len(qhatv)), c);
     }
     if (c > 0) {
         throw panic("impossible");

@@ -65,7 +65,7 @@ internal static @string name(this Δrtype t) {
 
         i--;
     }
-    return s[(int)(i + 1)..];
+    return s.slice(i + 1);
 }
 
 // pkgpath returns the path of the package where t was defined, if

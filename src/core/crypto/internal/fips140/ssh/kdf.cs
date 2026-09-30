@@ -52,7 +52,7 @@ public static (slice<byte> ivKey, slice<byte> key, slice<byte> macKey) Keys<Hash
             }
             keyΔ1 = hʗ1.Sum(keyΔ1);
         }
-        return keyΔ1[..(int)(length)];
+        return keyΔ1.slice(0, length);
     }
     ivKey = generateKeyMaterial(d.ivTag, ivKeyLen);
     key = generateKeyMaterial(d.keyTag, keyLen);

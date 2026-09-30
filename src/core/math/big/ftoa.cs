@@ -173,7 +173,7 @@ public static slice<byte> Append(this ж<Float> Ꮡx, slice<byte> buf, byte fmt,
 
     // unknown format
     if (x.neg) {
-        buf = buf[..(int)(len(buf) - 1)]; // sign was added prematurely - remove it again
+        buf = buf.slice(0, len(buf) - 1); // sign was added prematurely - remove it again
     }
     return append(buf, (byte)((rune)'%'), fmt);
 }
@@ -265,7 +265,7 @@ internal static slice<byte> fmtE(slice<byte> buf, byte fmt, nint prec, @decimal 
         nint i = 1;
         nint m = min(len(d.mant), prec + 1);
         if (i < m) {
-            buf = appendꓸꓸꓸ(buf, d.mant[(int)(i)..(int)(m)]);
+            buf = appendꓸꓸꓸ(buf, d.mant.slice(i, m));
             i = m;
         }
         for (; i <= prec; i++) {
@@ -297,7 +297,7 @@ internal static slice<byte> fmtF(slice<byte> buf, nint prec, @decimal d) {
     // integer, padded with zeros as needed
     if (d.exp > 0){
         nint m = min(len(d.mant), d.exp);
-        buf = appendꓸꓸꓸ(buf, d.mant[..(int)(m)]);
+        buf = appendꓸꓸꓸ(buf, d.mant.slice(0, m));
         for (; m < d.exp; m++) {
             buf = append(buf, (byte)((rune)'0'));
         }
@@ -445,7 +445,7 @@ internal static slice<byte> fmtX(this ж<Float> Ꮡx, slice<byte> buf, nint prec
     while (i < len(m) && m[i] == 0) {
         i++;
     }
-    m = m[(int)(i)..];
+    m = m.slice(i);
     buf = append(buf, ((@string)"0x."u8).ꓸꓸꓸ);
     buf = appendꓸꓸꓸ(buf, bytes_package.TrimRight(m.utoa(16), "0"u8));
     buf = append(buf, (byte)((rune)'p'));

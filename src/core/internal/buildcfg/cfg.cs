@@ -141,7 +141,7 @@ internal static (@string rest, bool ok) skipNum(@string s) {
     while (i < len(s) && (rune)'0' <= s[i] && s[i] <= (rune)'9') {
         i++;
     }
-    return (s[(int)(i)..], i > 0);
+    return (s.slice(i), i > 0);
 }
 
 [GoType] partial struct GoarmFeatures {
@@ -183,11 +183,11 @@ internal static GoarmFeatures /*g*/ goarm() {
     if (strings.HasSuffix(v, softFloatOpt)) {
         g.SoftFloat = true;
         floatSpecified = true;
-        v = v[..(int)(len(v) - len(softFloatOpt))];
+        v = v.slice(0, len(v) - len(softFloatOpt));
     }
     if (strings.HasSuffix(v, hardFloatOpt)) {
         floatSpecified = true;
-        v = v[..(int)(len(v) - len(hardFloatOpt))];
+        v = v.slice(0, len(v) - len(hardFloatOpt));
     }
     var exprᴛ1 = v;
     if (exprᴛ1 == "5"u8) {
@@ -252,12 +252,12 @@ public static (Goarm64Features g, error e) ParseGoarm64(@string v) {
     while (ᐧ) {
         if (strings.HasSuffix(v, lseOpt)) {
             g.LSE = true;
-            v = v[..(int)(len(v) - len(lseOpt))];
+            v = v.slice(0, len(v) - len(lseOpt));
             continue;
         }
         if (strings.HasSuffix(v, cryptoOpt)) {
             g.Crypto = true;
-            v = v[..(int)(len(v) - len(cryptoOpt))];
+            v = v.slice(0, len(v) - len(cryptoOpt));
             continue;
         }
         break;
@@ -388,7 +388,7 @@ internal static nint goriscv64() {
     Error = fmt.Errorf("invalid GORISCV64: must be rva20u64, rva22u64"u8);
     @string v = DefaultGORISCV64[(int)(len("rva"))..];
     nint i = strings.IndexFunc(v, (rune r) => r < (rune)'0' || r > (rune)'9');
-    var (year, _) = strconv.Atoi(v[..(int)(i)]);
+    var (year, _) = strconv.Atoi(v.slice(0, i));
     return year;
 }
 

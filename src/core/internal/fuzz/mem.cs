@@ -103,7 +103,7 @@ internal static (ж<sharedMem> m, error err) sharedMemTempFile(nint size) {
 [GoRecv] internal static slice<byte> valueRef(this ref sharedMem m) {
     nint length = m.header().Value.valueLen;
     nint valueOffset = (nint)/* unsafe.Sizeof(sharedMemHeader{}) */ (uintptr)40;
-    return m.region[(int)(valueOffset)..(int)(valueOffset + length)];
+    return m.region.slice(valueOffset, valueOffset + length);
 }
 
 // valueCopy returns a copy of the value stored in shared memory.
@@ -121,7 +121,7 @@ internal static (ж<sharedMem> m, error err) sharedMemTempFile(nint size) {
         throw panic(fmt.Sprintf("value length %d larger than shared memory capacity %d"u8, len(b), builtin.cap(v)));
     }
     m.header().Value.valueLen = len(b);
-    copy(v[..(int)(builtin.cap(v))], b);
+    copy(v.slice(0, builtin.cap(v)), b);
 }
 
 // setValueLen sets the length of the shared memory buffer returned by valueRef

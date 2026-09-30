@@ -88,11 +88,11 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                 if (len(ps) > gomaxprocs) {
                     if ((UtilFlags)(flags & UtilPerProc) != 0) {
                         // End each P's series.
-                        foreach (var (_, p) in ps[(int)(gomaxprocs)..]) {
+                        foreach (var (_, p) in ps.slice(gomaxprocs)) {
                             @out[p.series] = addUtil(@out[p.series], new MutatorUtil((int64)(~ev).Time(), 0D));
                         }
                     }
-                    ps = ps[..(int)(gomaxprocs)];
+                    ps = ps.slice(0, gomaxprocs);
                 }
                 while (len(ps) < gomaxprocs) {
                     // Start new P's series.
@@ -452,7 +452,7 @@ internal static void Swap(this bandUtilHeap h, nint i, nint j) {
 
 [GoRecv] internal static any Pop(this ref bandUtilHeap h) {
     var x = (h)[len(h) - 1];
-    h = (h)[..(int)(len(h) - 1)];
+    h = (h).slice(0, len(h) - 1);
     return x;
 }
 
@@ -486,7 +486,7 @@ internal static void Swap(this utilHeap h, nint i, nint j) {
 
 [GoRecv] internal static any Pop(this ref utilHeap h) {
     var x = (h)[len(h) - 1];
-    h = (h)[..(int)(len(h) - 1)];
+    h = (h).slice(0, len(h) - 1);
     return x;
 }
 
@@ -913,7 +913,7 @@ keep:;
 // next returns the smallest time t' > time of a change in the
 // utilization function.
 [GoRecv] internal static int64 next(this ref integrator @in, int64 time) {
-    foreach (var (_, u) in (~@in.u).util[(int)(@in.pos)..]) {
+    foreach (var (_, u) in (~@in.u).util.slice(@in.pos)) {
         if (u.Time > time) {
             return u.Time;
         }

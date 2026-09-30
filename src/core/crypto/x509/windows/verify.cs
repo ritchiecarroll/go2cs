@@ -389,8 +389,8 @@ internal static (slice<@string> reverseLabels, bool ok) domainToReverseLabels(@s
                 reverseLabels = append(reverseLabels, domain);
                 domain = ""u8;
             } else {
-                reverseLabels = append(reverseLabels, domain[(int)(i + 1)..]);
-                domain = domain[..(int)(i)];
+                reverseLabels = append(reverseLabels, domain.slice(i + 1));
+                domain = domain.slice(0, i);
                 if (i == 0) {
                     // domain == ""
                     // domain is prefixed with an empty label, append an empty
@@ -521,8 +521,8 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
         return (false, default!);
     }
     if (excluded && wildcardDomain && builtin.len(domainLabels) > 1 && builtin.len(constraintLabels) > 1) {
-        domainLabels = domainLabels[..(int)(builtin.len(domainLabels) - 1)];
-        constraintLabels = constraintLabels[..(int)(builtin.len(constraintLabels) - 1)];
+        domainLabels = domainLabels.slice(0, builtin.len(domainLabels) - 1);
+        constraintLabels = constraintLabels.slice(0, builtin.len(constraintLabels) - 1);
     }
     foreach (var (i, constraintLabel) in constraintLabels) {
         if (!strings.EqualFold(constraintLabel, domainLabels[i])) {
@@ -1170,7 +1170,7 @@ public static error VerifyHostname(this ж<Certificate> Ꮡc, @string h) {
     // IP addresses may be written in [ ].
     @string candidateIP = h;
     if (builtin.len(h) >= 3 && h[0] == (rune)'[' && h[builtin.len(h) - 1] == (rune)']') {
-        candidateIP = h[1..(int)(builtin.len(h) - 1)];
+        candidateIP = h.slice(1, builtin.len(h) - 1);
     }
     {
         var ip = net.ParseIP(candidateIP); if (ip != default!) {

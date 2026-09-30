@@ -90,13 +90,13 @@ internal static bool shouldBacktrack(ref syntax.Prog prog) {
     if (cap(b.visited) < visitedSize){
         b.visited = new slice<uint32>(visitedSize, maxBacktrackVector / visitedBits);
     } else {
-        b.visited = b.visited[..(int)(visitedSize)];
+        b.visited = b.visited.slice(0, visitedSize);
         builtin.clear(b.visited); // set to 0
     }
     if (cap(b.cap) < ncap){
         b.cap = new slice<nint>(ncap);
     } else {
-        b.cap = b.cap[..(int)(ncap)];
+        b.cap = b.cap.slice(0, ncap);
     }
     foreach (var (i, _) in b.cap) {
         b.cap[i] = -1;
@@ -104,7 +104,7 @@ internal static bool shouldBacktrack(ref syntax.Prog prog) {
     if (cap(b.matchcap) < ncap){
         b.matchcap = new slice<nint>(ncap);
     } else {
-        b.matchcap = b.matchcap[..(int)(ncap)];
+        b.matchcap = b.matchcap.slice(0, ncap);
     }
     foreach (var (i, _) in b.matchcap) {
         b.matchcap[i] = -1;
@@ -147,7 +147,7 @@ internal static bool tryBacktrack(this ж<Regexp> Ꮡre, ж<bitState> Ꮡb, inpu
         var pcΔ1 = b.jobs[l].pc;
         nint posΔ1 = b.jobs[l].pos;
         var arg = b.jobs[l].arg;
-        b.jobs = b.jobs[..(int)(l)];
+        b.jobs = b.jobs.slice(0, l);
         // Optimization: rather than push and pop,
         // code that is going to Push and continue
         // the loop simply updates ip, p, and arg

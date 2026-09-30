@@ -141,7 +141,7 @@ internal static UntypedInt maxBitsLimit => 16;
         throw panic("flate: maxBits too large");
     }
     var n = (int32)len(list);
-    list = list[0..(int)(n + 1)];
+    list = list.slice(0, n + 1);
     list[n] = maxNode();
     // The tree can't have greater depth than n - 1, no matter what. This
     // saves a little bit of work in some small cases
@@ -201,7 +201,7 @@ internal static UntypedInt maxBitsLimit => 16;
             // more values in the level below
             l.Value.lastFreq = l.Value.nextPairFreq;
             // Take leaf counts from the lower level, except counts[level] remains the same.
-            copy(leafCounts[level][..(int)(level)], leafCounts[level - 1][..(int)(level)]);
+            copy(leafCounts[level].slice(0, level), leafCounts[level - 1].slice(0, level));
             levels[(~l).level - 1].needed = 2;
         }
         {
@@ -229,7 +229,7 @@ internal static UntypedInt maxBitsLimit => 16;
     if (leafCounts[maxBits][maxBits] != n) {
         throw panic("leafCounts[maxBits][maxBits] != n");
     }
-    var bitCount = h.bitCount[..(int)(maxBits + 1)];
+    var bitCount = h.bitCount.slice(0, maxBits + 1);
     nint bits = 1;
     var counts = ᏑleafCounts.at<array<int32>>((nint)(maxBits));
     for (var levelΔ2 = maxBits; levelΔ2 > 0; levelΔ2--) {
@@ -256,13 +256,13 @@ internal static void assignEncodingAndSize(this ж<huffmanEncoder> Ꮡh, slice<i
         // are encoded using "bits" bits, and get the values
         // code, code + 1, ....  The code values are
         // assigned in literal order (not frequency order).
-        var chunk = list[(int)(len(list) - (nint)bits)..];
+        var chunk = list.slice(len(list) - (nint)bits);
         Ꮡh.of(huffmanEncoder.Ꮡlns).sort(chunk);
         foreach (var (_, node) in chunk) {
             h.codes[node.literal] = new hcode(code: reverseBits(code, (uint8)n), len: (uint16)n);
             code++;
         }
-        list = list[0..(int)(len(list) - (nint)bits)];
+        list = list.slice(0, len(list) - (nint)bits);
     }
 }
 
@@ -279,7 +279,7 @@ internal static void generate(this ж<huffmanEncoder> Ꮡh, slice<int32> freq, i
         // The largest of these is maxNumLit, so we allocate for that case.
         h.freqcache = new slice<literalNode>(maxNumLit + 1);
     }
-    var list = h.freqcache[..(int)(len(freq) + 1)];
+    var list = h.freqcache.slice(0, len(freq) + 1);
     // Number of non-zero literals
     nint count = 0;
     // Set list to be the set of all non-zero literals and their frequencies
@@ -291,7 +291,7 @@ internal static void generate(this ж<huffmanEncoder> Ꮡh, slice<int32> freq, i
             h.codes[i].len = 0;
         }
     }
-    list = list[..(int)(count)];
+    list = list.slice(0, count);
     if (count <= 2) {
         // Handle the small cases here, because they are awkward for the general case code. With
         // two or fewer literals, everything has bit length 1.

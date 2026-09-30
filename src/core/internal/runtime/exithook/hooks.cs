@@ -77,7 +77,7 @@ public static void Run(nint code) {
         }, ref ᒐ);
         while (len(hooks) > 0) {
             var h = hooks[len(hooks) - 1];
-            hooks = hooks[..(int)(len(hooks) - 1)];
+            hooks = hooks.slice(0, len(hooks) - 1);
             if (code != 0 && !h.RunOnFailure) {
                 continue;
             }

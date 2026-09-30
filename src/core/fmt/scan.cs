@@ -87,7 +87,7 @@ public static (nint n, error err) Scanf(@string format, params ꓸꓸꓸany aʗp
     error err = default!;
 
     n = copy(b, r);
-    r = (r)[(int)(n)..];
+    r = (r).slice(n);
     if (n == 0) {
         err = Δio.EOF;
     }
@@ -404,7 +404,7 @@ internal static bool notSpace(rune r) {
         return (rr, size, err);
     }
     nint n = default!;
-    for (n = 1; !utf8.FullRune(r.buf[..(int)(n)]); n++) {
+    for (n = 1; !utf8.FullRune(r.buf.slice(0, n)); n++) {
         (r.buf[n], err) = r.readByte();
         if (err != default!) {
             if (AreEqual(err, Δio.EOF)) {
@@ -414,10 +414,10 @@ internal static bool notSpace(rune r) {
             return (rr, size, err);
         }
     }
-    (rr, size) = utf8.DecodeRune(r.buf[..(int)(n)]);
+    (rr, size) = utf8.DecodeRune(r.buf.slice(0, n));
     if (size < n) {
         // an error, save the bytes for the next read
-        copy(r.pendBuf[(int)(r.pending)..], r.buf[(int)(size)..(int)(n)]);
+        copy(r.pendBuf.slice(r.pending), r.buf.slice(size, n));
         r.pending += n - size;
     }
     // Flip the bits of the rune so it's available to UnreadRune.
@@ -893,7 +893,7 @@ internal static readonly @string badUnicodeFormatˢ = "bad unicode format "u8;
         nint p = indexRune(str, (rune)'p'); if (p >= 0 && !hasX(str)) {
             // Atof doesn't handle power-of-2 exponents,
             // but they're easy to evaluate.
-            var (fΔ1, errΔ1) = strconv.ParseFloat(str[..(int)(p)], n);
+            var (fΔ1, errΔ1) = strconv.ParseFloat(str.slice(0, p), n);
             if (errΔ1 != default!) {
                 // Put full string into error.
                 {
@@ -903,7 +903,7 @@ internal static readonly @string badUnicodeFormatˢ = "bad unicode format "u8;
                 }
                 s.error(errΔ1);
             }
-            (var m, errΔ1) = strconv.Atoi(str[(int)(p + 1)..]);
+            (var m, errΔ1) = strconv.Atoi(str.slice(p + 1));
             if (errΔ1 != default!) {
                 // Put full string into error.
                 {
@@ -1344,7 +1344,7 @@ internal static readonly @string missingVerbAtEndOfFormatˢ = "missing verb: % a
     nint i = default!;
 
     while (i < len(format)) {
-        var (fmtc, w) = utf8.DecodeRuneInString(format[(int)(i)..]);
+        var (fmtc, w) = utf8.DecodeRuneInString(format.slice(i));
         // Space processing.
         // In the rest of this comment "space" means spaces other than newline.
         // Newline in the format matches input of zero or more spaces and then newline or end-of-input.
@@ -1362,7 +1362,7 @@ internal static readonly @string missingVerbAtEndOfFormatˢ = "missing verb: % a
                     trailingSpace = true;
                 }
                 i += w;
-                (fmtc, w) = utf8.DecodeRuneInString(format[(int)(i)..]);
+                (fmtc, w) = utf8.DecodeRuneInString(format.slice(i));
             }
             for (nint j = 0; j < newlines; j++) {
                 var inputcΔ1 = s.getRune();
@@ -1401,7 +1401,7 @@ internal static readonly @string missingVerbAtEndOfFormatˢ = "missing verb: % a
                 s.errorString(missingVerbAtEndOfFormatˢ);
             }
             // %% acts like a real percent
-            var (nextc, _) = utf8.DecodeRuneInString(format[(int)(i + w)..]); // will not match % if string is empty
+            var (nextc, _) = utf8.DecodeRuneInString(format.slice(i + w)); // will not match % if string is empty
             if (nextc != (rune)'%') {
                 return i;
             }
@@ -1436,7 +1436,7 @@ internal static readonly @string tooManyOperandsˢ = "too many operands"u8;
         nint end = len(format) - 1;
         // We process one item per non-trivial format
         for (nint i = 0; i <= end; ) {
-            nint w = s.advance(format[(int)(i)..]);
+            nint w = s.advance(format.slice(i));
             if (w > 0) {
                 i += w;
                 continue;
@@ -1457,7 +1457,7 @@ internal static readonly @string tooManyOperandsˢ = "too many operands"u8;
             if (!widPresent) {
                 s.maxWid = hugeWid;
             }
-            (var c, w) = utf8.DecodeRuneInString(format[(int)(i)..]);
+            (var c, w) = utf8.DecodeRuneInString(format.slice(i));
             i += w;
             if (c != (rune)'c') {
                 s.SkipSpace();
@@ -1474,7 +1474,7 @@ internal static readonly @string tooManyOperandsˢ = "too many operands"u8;
             }
             if (numProcessed >= len(a)) {
                 // out of operands
-                s.errorString("too few operands for format '%" + format[(int)(i - w)..] + "'");
+                s.errorString("too few operands for format '%" + format.slice(i - w) + "'");
                 break;
             }
             var arg = a[numProcessed];

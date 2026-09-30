@@ -596,6 +596,31 @@ func isGo2CSRoot(dir string) bool {
 	return err == nil
 }
 
+// comparisonRecordPackage is the "package" key a comparison record carries: the package's FULL import
+// path, so two packages named alike in different directories never share a key -- a module's `request`
+// and another's, or even the standard library's own crypto/rand and math/rand, which the bare directory
+// name conflated (the multi-package module design, D2). A manifest that never reached the package keeps
+// the directory name.
+func comparisonRecordPackage(manifest testManifest, inputPath string) string {
+	if manifest.PackageImportPath != "" {
+		return manifest.PackageImportPath
+	}
+
+	return filepath.Base(inputPath)
+}
+
+// packageModulePath is the Go module a loaded package belongs to, or "" for a standard-library
+// package (go/packages gives those no Module). It fills testManifest.ModulePath (`omitempty`), so every
+// standard-library manifest stays byte-identical, and a third-party package's proof page is keyed by it
+// (validationProofDestination).
+func packageModulePath(pkg *packages.Package) string {
+	if pkg == nil || pkg.Module == nil {
+		return ""
+	}
+
+	return pkg.Module.Path
+}
+
 // findGo2CSRootAbove walks dir's ancestor chain (inclusive) and returns the first go2cs
 // project-reference root, or "" when none exists above dir.
 func findGo2CSRootAbove(dir string) string {
@@ -637,6 +662,7 @@ type testManifest struct {
 	SchemaVersion           int               `json:"schemaVersion"`
 	CapabilitiesVersion     int               `json:"capabilitiesVersion"`
 	PackageImportPath       string            `json:"packageImportPath"`
+	ModulePath              string            `json:"modulePath,omitempty"`
 	ProjectName             string            `json:"projectName"`
 	TestProject             string            `json:"testProject"`
 	GoVersion               string            `json:"goVersion"`
@@ -717,7 +743,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	}
 
 	cfg := &packages.Config{
-		Mode:       packages.LoadAllSyntax,
+		Mode:       packages.LoadAllSyntax | packages.NeedModule,
 		Dir:        inputPath,
 		Tests:      true,
 		BuildFlags: options.loaderBuildFlags(),
@@ -964,6 +990,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 		SchemaVersion:           1,
 		CapabilitiesVersion:     1,
 		PackageImportPath:       production.PkgPath,
+		ModulePath:              packageModulePath(production),
 		ProjectName:             projectName,
 		TestProject:             testProjectName,
 		GoVersion:               runtime.Version(),
@@ -3987,26 +4014,20 @@ var unsupportedRuntimeCapabilities = map[string]string{
 	// lands. The board entry stays OPEN.
 	"os_test.createSymbolicLink": "raw-metal struct overlay on managed bytes",
 
-	// The one entry that names a TEST rather than a symbol, because the impossibility is a property of
-	// the host: the test copies os.Executable() — ONE file — into a temp directory 100 times and runs
-	// each copy. os.Executable() is correct (it returns the apphost, os.tests.exe), but an apphost is a
-	// stub bound at build time to a managed assembly of the same base name that must sit beside it, so
-	// a single-file copy can never run: hostfxr answers 0x8000809a LibHostAppRootFindFailure, which is
-	// byte-for-byte the code the test reports. Go's test binary is statically linked, which is the only
-	// reason its premise holds there. Satisfying it means publishing every converted test host
-	// self-contained single-file — ~70 MB and a publish rather than a build, per package.
-	"os_test.TestRemoveAllWithExecutedProcess": "relocatable single-file test executable",
-
-	// os/exec's TestCommand and TestLookPathWindows want this SAME capability from the other
-	// direction — installExe (lp_windows_test.go) copies the running test executable into a
-	// t.TempDir() tree and runs the copy — and they are NOT listed here. They are DISCLOSED
-	// instead, under the host-limit class ruled 2026-08-15: src/core/os/exec's committed
-	// go2cs_test_disclosures.json pins 25 leaf rows on `exit status 0x8000809a`, their 2 parents
-	// ride the disclosed-parent aggregation, and os/exec banks at 74 matched + 27 disclosed. The
-	// class and the bar an entry must clear are in docs/ConversionStrategies-Reference.md,
-	// "host-limit — the third disclosed-divergence class". Gating them was measured FIRST and is
-	// worse on three counts — the two below, plus that a gate hides the very rows whose future
-	// passing is the only signal the limit has lifted
+	// No entry names a relocatable single-file test executable any more. publishTestHost has
+	// published the host as one since 2026-08-27, so a test that copies os.Executable() into a temp
+	// directory and runs the copy is not host-bound and runs on both sides.
+	// os_test.TestRemoveAllWithExecutedProcess was the last entry to name it, and
+	// TestNoEntryWithdrawsATestOnTheSingleFileHostCapability pins that none does. os/exec's
+	// TestCommand and TestLookPathWindows want the same thing — installExe (lp_windows_test.go)
+	// copies the running test executable into a t.TempDir() tree and runs the copy — and were never
+	// listed here: they were DISCLOSED under the host-limit class ruled 2026-08-15 (25 leaf rows on
+	// `exit status 0x8000809a`, os/exec banked at 74 matched + 27 disclosed), and that class entry
+	// retired when the host became single-file. The class and the bar an entry must clear are in
+	// docs/ConversionStrategies-Reference.md, "host-limit — the third disclosed-divergence class".
+	// The two hazards below were measured on os/exec and still describe what a declaration-keyed
+	// gate does to a package whose tests can run, and a gate hides the very rows whose future
+	// passing is the only signal a limit has lifted
 	// (docs/phase4/BOARD-next-validation-candidates.md, lane claude/os-exec-gate-bank):
 	//
 	//  1. A gate is DECLARATION-keyed and eligibleTerminalTestResults cuts a verdict row at its
@@ -4018,14 +4039,11 @@ var unsupportedRuntimeCapabilities = map[string]string{
 	//     suite and the census fires: `helper command unused: "printpath"`, exit 1, and the package
 	//     validates at no count at all.
 	//
-	// os_test.TestRemoveAllWithExecutedProcess never showed (2) only because os's TestMain is a bare
-	// Exit(m.Run()), and os is not yet on the roster — its disposition is decided when it banks.
 	// The underlying hazard is unfixed and QUEUED rather than closed: a gate is invisible to the
 	// running host, since nothing publishes the fact that a SUBSET ran where Go's own vocabulary for
 	// it is a non-empty test.run. So any suite asserting that the whole suite ran will mis-answer
-	// while a gate is active. Nothing is broken today (the only gated declarations live in os, whose
-	// TestMain asserts nothing), but CHECK FOR SUCH A TestMain before adding a declaration-keyed
-	// entry — and prefer a disclosure whenever the tests can still run.
+	// while a gate is active. CHECK FOR SUCH A TestMain before adding a declaration-keyed entry — and
+	// prefer a disclosure whenever the tests can still run.
 	//
 	// Checked for net/http: main_test.go's TestMain only runs goroutineLeaked() after m.Run() exits
 	// 0 — a post-hoc stack census with no dependency on which tests ran, unlike os/exec's helper
@@ -4055,8 +4073,7 @@ var unsupportedRuntimeCapabilities = map[string]string{
 	// (the other three: a by-value slice header's address-exposed caller temp, a two-result call's
 	// address-exposed temp, a frame-rooted large buffer) — new in KIND, same CLASS.
 	//
-	// Why a gate and not a disclosure, per the same fork os_test.TestRemoveAllWithExecutedProcess
-	// took: the disclosure manifest pins a FAILURE's captured signature, and this test doesn't fail —
+	// Why a gate and not a disclosure: the disclosure manifest pins a FAILURE's captured signature, and this test doesn't fail —
 	// it HANGS, forever, with no output to pin. DESIGN-object-lifetime-disclosure.md §3c named this
 	// exact gap against internal/weak's TestPointerFinalizer (structurally identical: a still-rooted
 	// object whose finalizer a test blocks on forever) and left it to ⟨OQ-L3⟩, unruled until this row
@@ -6351,7 +6368,7 @@ func testInputDigest(inputPath, outputPath string, options Options, revision str
 func writeNoTestsManifest(production *packages.Package, inputPath, outputPath string, target []string, options Options) error {
 	projectName, _ := getProjectName(inputPath, options)
 	manifest := testManifest{
-		SchemaVersion: 1, CapabilitiesVersion: 1, PackageImportPath: production.PkgPath,
+		SchemaVersion: 1, CapabilitiesVersion: 1, PackageImportPath: production.PkgPath, ModulePath: packageModulePath(production),
 		ProjectName: projectName, TestProject: projectFileBaseName(projectName) + ".tests.csproj", GoVersion: runtime.Version(),
 		TargetGOOS: target[0], TargetGOARCH: target[1], SourceRevision: gitRevision(inputPath),
 		ConverterRevision: converterRevision(), ProductionFiles: []string{}, TestSources: []testSource{},
@@ -6489,7 +6506,7 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 	// Individually blocked tests among runnable siblings are excluded-disclosed instead (F4).
 	if blocked := manifestCapabilityBlock(manifest); len(blocked) > 0 {
 		result := map[string]any{
-			"package": filepath.Base(inputPath), "status": "infrastructure-blocked", "matched": false,
+			"package": comparisonRecordPackage(manifest, inputPath), "status": "infrastructure-blocked", "matched": false,
 			"errors": []string{"unsupported testing capabilities: " + strings.Join(blocked, ", ")},
 		}
 		if err := writeComparisonRecord(outputPath, result, options.testFilter); err != nil {
@@ -6500,7 +6517,7 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 
 	if !manifestHasEligibleTests(manifest) {
 		if options.testAction == "all" || options.testAction == "compare" {
-			result := map[string]any{"package": filepath.Base(inputPath), "status": "not-applicable", "matched": true, "errors": []string{}}
+			result := map[string]any{"package": comparisonRecordPackage(manifest, inputPath), "status": "not-applicable", "matched": true, "errors": []string{}}
 			if err := writeComparisonRecord(outputPath, result, options.testFilter); err != nil {
 				return err
 			}
@@ -6553,27 +6570,47 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 // and keeps it only when the publish fails (see settlePublishBinlog).
 func publishTestHost(outputPath, testProject string, options Options) error {
 	binlog := preparePublishBinlog(outputPath, options)
-	_, err := runCommandWithTimeout(options.testTimeout, outputPath, options, "dotnet",
-		publishTestHostArgs(outputPath, testProject, options, binlog)...)
+	args := withPublishBinlog(publishTestHostArgs(outputPath, testProject, options), binlog)
+	_, err := runCommandWithTimeout(options.testTimeout, outputPath, options, "dotnet", args...)
 	return settlePublishBinlog(binlog, err)
 }
 
-// publishTestHostArgs is publishTestHost's dotnet argument list, with `-bl:<binlog>` last when a binlog
-// path is given.
-func publishTestHostArgs(outputPath, testProject string, options Options, binlog string) []string {
-	var args []string
+// publishTestHostArgs is the `dotnet` argument list publishTestHost runs, split out so the command a
+// run builds is checkable without running it.
+//
+// The target's GOOS rides on the command (-p:GoTargetOS=), because the csproj defaults it to windows
+// and it selects the per-GOOS source folder and references the host compiles: a linux run must
+// compile the linux flavour whatever the caller's environment holds. goosOfTarget is the pipeline's
+// own source of truth for the platform a run is FOR (the same value that routes the sources and
+// scopes the disclosure manifest); a run with no target set leaves the csproj default alone.
+func publishTestHostArgs(outputPath, testProject string, options Options) []string {
+	publishDir := filepath.Join(outputPath, "bin", "tests", "publish")
+
+	var targetOS []string
+
+	if goos := goosOfTarget(options.targetPlatform); goos != "" {
+		targetOS = []string{"-p:GoTargetOS=" + goos}
+	}
+
 	if options.testConfig == "Release" {
 		go2csPathArg := strings.TrimRight(filepath.ToSlash(options.go2csPath), "/") + "/"
-		args = []string{"publish", testProject,
-			"-c", "Release", "-p:go2csPath=" + go2csPathArg, "-o", filepath.Join(outputPath, "bin", "tests", "publish")}
-	} else {
-		args = []string{"publish", testProject,
-			"-c", "Debug", "-o", filepath.Join(outputPath, "bin", "tests", "publish")}
+		args := []string{"publish", testProject, "-c", "Release", "-p:go2csPath=" + go2csPathArg}
+
+		return append(append(args, targetOS...), "-o", publishDir)
 	}
-	if binlog != "" {
-		args = append(args, "-bl:"+binlog)
+
+	args := []string{"publish", testProject, "-c", "Debug"}
+
+	return append(append(args, targetOS...), "-o", publishDir)
+}
+
+// withPublishBinlog appends `-bl:<binlog>` to a publish argument list when a binlog path is given, and
+// returns the list unchanged otherwise.
+func withPublishBinlog(args []string, binlog string) []string {
+	if binlog == "" {
+		return args
 	}
-	return args
+	return append(args, "-bl:"+binlog)
 }
 
 // publishBinlogPath is where the test host's publish writes its binary log: beside the publish
@@ -9034,7 +9071,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	environment.OracleGoVersion = oracleVersion
 	environment.Terminal = terminal
 	result := testComparison{
-		Package: filepath.Base(inputPath), Status: status, Go: goResults, CSharp: csResults,
+		Package: comparisonRecordPackage(manifest, inputPath), Status: status, Go: goResults, CSharp: csResults,
 		Matched: true, Skipped: []string{}, Disclosed: []string{}, Excluded: excludedDeclarations(manifest), Errors: []string{},
 		Gated: gated, Withdrawn: []string{}, Environment: environment,
 	}

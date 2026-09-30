@@ -51,7 +51,7 @@ partial class gosym_package {
         // Malformed name, should contain closing bracket too.
         return s.Name;
     }
-    return s.Name[0..(int)(start)] + s.Name[(int)(end + 1)..];
+    return s.Name.slice(0, start) + s.Name.slice(end + 1);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -78,8 +78,8 @@ internal static readonly @string typeˢ2 = "type."u8;
         pathend = 0;
     }
     {
-        nint i = strings.Index(name[(int)(pathend)..], "."u8); if (i != -1) {
-            return name[..(int)(pathend + i)];
+        nint i = strings.Index(name.slice(pathend), "."u8); if (i != -1) {
+            return name.slice(0, pathend + i);
         }
     }
     return ""u8;
@@ -98,9 +98,9 @@ internal static readonly @string typeˢ2 = "type."u8;
     }
     // Find the first dot after pathend (or from the beginning, if there was
     // no slash in name).
-    nint l = strings.Index(name[(int)(pathend)..], "."u8);
+    nint l = strings.Index(name.slice(pathend), "."u8);
     // Find the last dot after pathend (or the beginning).
-    nint r = strings.LastIndex(name[(int)(pathend)..], "."u8);
+    nint r = strings.LastIndex(name.slice(pathend), "."u8);
     if (l == -1 || r == -1 || l == r) {
         // There is no receiver if we didn't find two distinct dots after pathend.
         return ""u8;
@@ -108,8 +108,8 @@ internal static readonly @string typeˢ2 = "type."u8;
     // Given there is a trailing '.' that is in name, find it now in s.Name.
     // pathend+l should apply to s.Name, because it should be the dot in the
     // package name.
-    r = strings.LastIndex(s.Name[(int)(pathend)..], "."u8);
-    return s.Name[(int)(pathend + l + 1)..(int)(pathend + r)];
+    r = strings.LastIndex(s.Name.slice(pathend), "."u8);
+    return s.Name.slice(pathend + l + 1, pathend + r);
 }
 
 // BaseName returns the symbol name without the package or receiver name.
@@ -127,7 +127,7 @@ internal static readonly @string typeˢ2 = "type."u8;
                     i = strings.LastIndex(s.Name, "."u8);
                 }
             }
-            return s.Name[(int)(i + 1)..];
+            return s.Name.slice(i + 1);
         }
     }
     return s.Name;
@@ -310,7 +310,7 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
         }
         switch (typ) {
         case (rune)'z' or (rune)'Z': {
-            p = p[(int)(i + nnul)..];
+            p = p.slice(i + nnul);
             for (i = 0; i + 2 <= len(p); i += 2) {
                 if (p[i] == 0 && p[i + 1] == 0) {
                     nnul = 2;
@@ -323,9 +323,9 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
         if (len(p) < i + nnul) {
             return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF"u8, default!)));
         }
-        s.name = p[0..(int)(i)];
+        s.name = p.slice(0, i);
         i += nnul;
-        p = p[(int)(i)..];
+        p = p.slice(i);
         if (!newTable) {
             if (len(p) < 4) {
                 return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF"u8, default!)));
@@ -365,7 +365,7 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
     var fnameʗ1 = fname;
     err = walksymtab(symtab, error (sym s) => {
         nint nΔ1 = len(Ꮡt.Value.Syms);
-        Ꮡt.Value.Syms = Ꮡt.Value.Syms[0..(int)(nΔ1 + 1)];
+        Ꮡt.Value.Syms = Ꮡt.Value.Syms.slice(0, nΔ1 + 1);
         var ts = Ꮡ(Ꮡt.Value.Syms, nΔ1);
         ts.Value.Type = s.typ;
         ts.Value.Value = s.value;
@@ -384,7 +384,7 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
                 b[w] = b[i];
                 w++;
             }
-            ts.Value.Name = ((@string)(s.name[0..(int)(w)]));
+            ts.Value.Name = ((@string)(s.name.slice(0, w)));
             break;
         }
         case (rune)'z' or (rune)'Z': {
@@ -393,7 +393,7 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
             }
             for (nint i = 0; i < len(s.name); i += 2) {
                 ref var eltIdx = ref heap<uint16>(out var ᏑeltIdx);
-                eltIdx = binary.BigEndian.Uint16(s.name[(int)(i)..(int)(i + 2)]);
+                eltIdx = binary.BigEndian.Uint16(s.name.slice(i, i + 2));
                 var (elt, ok) = fnameʗ1[eltIdx, ꟷ];
                 if (!ok) {
                     return new DecodingErrorжerror(Ꮡ(new DecodingError(-1, "bad filename code"u8, eltIdx)));
@@ -449,11 +449,11 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
             }
             if (obj != nil) {
                 // Finish the current object
-                obj.Value.Funcs = t.Funcs[(int)(lastf)..];
+                obj.Value.Funcs = t.Funcs.slice(lastf);
             }
             lastf = len(t.Funcs);
             nint nΔ9 = len(t.Objs);
-            t.Objs = t.Objs[0..(int)(nΔ9 + 1)];
+            t.Objs = t.Objs.slice(0, nΔ9 + 1);
             obj = Ꮡ(t.Objs, nΔ9);
 // Start new object
 
@@ -466,7 +466,7 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
                     }
                 }
             }
-            obj.Value.Paths = t.Syms[(int)(i)..(int)(endΔ1)];
+            obj.Value.Paths = t.Syms.slice(i, endΔ1);
             i = endΔ1 - 1; // loop will i++
             nint depth = 0;
             foreach (var (j, _) in (~obj).Paths) {
@@ -517,7 +517,7 @@ continue_countloop:;
             }
 break_countloop:;
             nint nΔ11 = len(t.Funcs);
-            t.Funcs = t.Funcs[0..(int)(nΔ11 + 1)];
+            t.Funcs = t.Funcs.slice(0, nΔ11 + 1);
             var fn = Ꮡ(t.Funcs, nΔ11);
             sym.Value.Func = fn;
             fn.Value.Params = new slice<ж<Sym>>(0, np);
@@ -544,13 +544,13 @@ break_countloop:;
                 }
                 case (rune)'p': {
                     nint nΔ13 = len((~fn).Params);
-                    fn.Value.Params = (~fn).Params[0..(int)(nΔ13 + 1)];
+                    fn.Value.Params = (~fn).Params.slice(0, nΔ13 + 1);
                     fn.Value.Params[nΔ13] = s;
                     break;
                 }
                 case (rune)'a': {
                     nint nΔ14 = len((~fn).Locals);
-                    fn.Value.Locals = (~fn).Locals[0..(int)(nΔ14 + 1)];
+                    fn.Value.Locals = (~fn).Locals.slice(0, nΔ14 + 1);
                     fn.Value.Locals[nΔ14] = s;
                     break;
                 }}
@@ -565,7 +565,7 @@ break_countloop:;
         t.Funcs = t.go12line.go12Funcs();
     }
     if (obj != nil) {
-        obj.Value.Funcs = t.Funcs[(int)(lastf)..];
+        obj.Value.Funcs = t.Funcs.slice(lastf);
     }
     return (Ꮡt, default!);
 }
@@ -579,14 +579,14 @@ break_countloop:;
         var fn = Ꮡ(funcs, m);
         switch (ᐧ) {
         case {} when pc < (~fn).Entry: {
-            funcs = funcs[0..(int)(m)];
+            funcs = funcs.slice(0, m);
             break;
         }
         case {} when (~fn).Entry <= pc && pc < (~fn).End: {
             return fn;
         }
         default: {
-            funcs = funcs[(int)(m + 1)..];
+            funcs = funcs.slice(m + 1);
             break;
         }}
 
@@ -768,7 +768,7 @@ break_pathloop:;
         nint incstart = default!;
         line += (nint)s.Value;
 pathloop:
-        foreach (var (_, sΔ1) in o.Paths[(int)(i)..]) {
+        foreach (var (_, sΔ1) in o.Paths.slice(i)) {
             nint val = (nint)sΔ1.Value;
             switch (ᐧ) {
             case {} when depth == 1 && val >= line: {

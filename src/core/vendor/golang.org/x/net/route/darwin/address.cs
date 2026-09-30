@@ -50,13 +50,13 @@ partial class route_package {
     var data = b[8..];
     if (nlen > 0) {
         b[5] = (byte)nlen;
-        copy(data[..(int)(nlen)], a.Name);
-        data = data[(int)(nlen)..];
+        copy(data.slice(0, nlen), a.Name);
+        data = data.slice(nlen);
     }
     if (alen > 0) {
         b[6] = (byte)alen;
-        copy(data[..(int)(alen)], a.Addr);
-        data = data[(int)(alen)..];
+        copy(data.slice(0, alen), a.Addr);
+        data = data.slice(alen);
     }
     return (ll, default!);
 }
@@ -111,12 +111,12 @@ internal static (nint, Addr, error) parseKernelLinkAddr(nint _, slice<byte> b) {
     ref var name = ref heap(new @string(), out var Ꮡname);
     slice<byte> addr = default!;
     if (nlen > 0) {
-        name = ((@string)(data[..(int)(nlen)]));
-        data = data[(int)(nlen)..];
+        name = ((@string)(data.slice(0, nlen)));
+        data = data.slice(nlen);
     }
     if (alen > 0) {
-        addr = data[..(int)(alen)];
-        data = data[(int)(alen)..];
+        addr = data.slice(0, alen);
+        data = data.slice(alen);
     }
     return (l, new LinkAddrжAddr(Ꮡ(new LinkAddr(Name: name, Addr: addr))), default!);
 }
@@ -190,7 +190,7 @@ internal static (Addr, error) parseInetAddr(nint af, slice<byte> b) {
         if (sockAddrLen < n) {
             n = sockAddrLen;
         }
-        copy((~a).IP[..], b[(int)(off4)..(int)(n)]);
+        copy((~a).IP[..], b.slice(off4, n));
         return (new Inet4AddrжAddr(a), default!);
     }
     if (exprᴛ1 == syscall.AF_INET6) {
@@ -206,7 +206,7 @@ internal static (Addr, error) parseInetAddr(nint af, slice<byte> b) {
         if (sockAddrLen == sizeofSockaddrInet6) {
             a.Value.ZoneID = (nint)nativeEndian.Uint32(b[24..28]);
         }
-        copy((~a).IP[..], b[(int)(off6)..(int)(n)]);
+        copy((~a).IP[..], b.slice(off6, n));
         if ((~a).IP[0] == 0xfe && (byte)((~a).IP[1] & 0xc0) == 0x80 || (~a).IP[0] == 0xff && ((byte)((~a).IP[1] & 0x0f) == 0x01 || (byte)((~a).IP[1] & 0x0f) == 0x02)) {
             // KAME based IPv6 protocol stack usually
             // embeds the interface index in the
@@ -275,9 +275,9 @@ internal static (nint, Addr, error) parseKernelInetAddr(nint af, slice<byte> b) 
     case {} when af == syscall.AF_INET6: {
         var a = Ꮡ(new Inet6Addr(nil));
         if (l - 1 < off6){
-            copy((~a).IP[..], b[1..(int)(l)]);
+            copy((~a).IP[..], b.slice(1, l));
         } else {
-            copy((~a).IP[..], b[(int)(l - (nint)off6)..(int)(l)]);
+            copy((~a).IP[..], b.slice(l - (nint)off6, l));
         }
         return ((nint)b[0], new Inet6AddrжAddr(a), default!);
     }
@@ -290,9 +290,9 @@ internal static (nint, Addr, error) parseKernelInetAddr(nint af, slice<byte> b) 
         var a = Ꮡ(new Inet4Addr(nil));
         if (l - 1 < off4){
             // an old fashion, AF_UNSPEC or unknown means AF_INET
-            copy((~a).IP[..], b[1..(int)(l)]);
+            copy((~a).IP[..], b.slice(1, l));
         } else {
-            copy((~a).IP[..], b[(int)(l - (nint)off4)..(int)(l)]);
+            copy((~a).IP[..], b.slice(l - (nint)off4, l));
         }
         return ((nint)b[0], new Inet4AddrжAddr(a), default!);
     }}
@@ -325,7 +325,7 @@ internal static (nint, Addr, error) parseKernelInetAddr(nint af, slice<byte> b) 
         return (0, errInvalidAddr);
     }
     b[1] = (byte)l;
-    copy(b[..(int)(l)], a.Raw);
+    copy(b.slice(0, l), a.Raw);
     return (ll, default!);
 }
 
@@ -333,7 +333,7 @@ internal static (Addr, error) parseDefaultAddr(slice<byte> b) {
     if (len(b) < 2 || len(b) < (nint)b[0]) {
         return (default!, errInvalidAddr);
     }
-    var a = Ꮡ(new DefaultAddr(af: (nint)b[1], Raw: b[..(int)(b[0])]));
+    var a = Ꮡ(new DefaultAddr(af: (nint)b[1], Raw: b.slice(0, b[0])));
     return (new DefaultAddrжAddr(a), default!);
 }
 
@@ -376,7 +376,7 @@ internal static (nuint, error) marshalAddrs(slice<byte> b, slice<Addr> @as) {
             if (err != default!) {
                 return (0, err);
             }
-            b = b[(int)(l)..];
+            b = b.slice(l);
             attrs |= (nuint)(((nuint)1).Lsh((nuint)i));
             break;
         }
@@ -385,7 +385,7 @@ internal static (nuint, error) marshalAddrs(slice<byte> b, slice<Addr> @as) {
             if (err != default!) {
                 return (0, err);
             }
-            b = b[(int)(l)..];
+            b = b.slice(l);
             attrs |= (nuint)(((nuint)1).Lsh((nuint)i));
             break;
         }
@@ -394,7 +394,7 @@ internal static (nuint, error) marshalAddrs(slice<byte> b, slice<Addr> @as) {
             if (err != default!) {
                 return (0, err);
             }
-            b = b[(int)(l)..];
+            b = b.slice(l);
             attrs |= (nuint)(((nuint)1).Lsh((nuint)i));
             break;
         }
@@ -403,7 +403,7 @@ internal static (nuint, error) marshalAddrs(slice<byte> b, slice<Addr> @as) {
             if (err != default!) {
                 return (0, err);
             }
-            b = b[(int)(l)..];
+            b = b.slice(l);
             attrs |= (nuint)(((nuint)1).Lsh((nuint)i));
             break;
         }}
@@ -430,7 +430,7 @@ internal static (slice<Addr>, error) parseAddrs(nuint attrs, Func<nint, slice<by
                 if (len(b) < l) {
                     return (default!, errMessageTooShort);
                 }
-                b = b[(int)(l)..];
+                b = b.slice(l);
             }
             else if (exprᴛ1 == syscall.AF_INET || exprᴛ1 == syscall.AF_INET6) {
                 if (b[0] > 0) {
@@ -447,7 +447,7 @@ internal static (slice<Addr>, error) parseAddrs(nuint attrs, Func<nint, slice<by
                 if (len(b) < l) {
                     return (default!, errMessageTooShort);
                 }
-                b = b[(int)(l)..];
+                b = b.slice(l);
             }
             else { /* default: */
                 var (l, a, err) = fn(af, b);
@@ -457,9 +457,9 @@ internal static (slice<Addr>, error) parseAddrs(nuint attrs, Func<nint, slice<by
                 @as[i] = a;
                 nint ll = roundup(l);
                 if (len(b) < ll){
-                    b = b[(int)(l)..];
+                    b = b.slice(l);
                 } else {
-                    b = b[(int)(ll)..];
+                    b = b.slice(ll);
                 }
             }
 
@@ -473,7 +473,7 @@ internal static (slice<Addr>, error) parseAddrs(nuint attrs, Func<nint, slice<by
             if (len(b) < l) {
                 return (default!, errMessageTooShort);
             }
-            b = b[(int)(l)..];
+            b = b.slice(l);
         }
     }
     // The only remaining bytes in b should be alignment.

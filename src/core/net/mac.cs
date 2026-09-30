@@ -54,7 +54,7 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
         for ((nint x, nint i) = (0, 0); i < n; i++) {
             bool ok = default!;
             {
-                (hw[i], ok) = xtoi2(s[(int)(x)..], s[2]); if (!ok) {
+                (hw[i], ok) = xtoi2(s.slice(x), s[2]); if (!ok) {
                     goto error;
                 }
             }
@@ -73,12 +73,12 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
         for ((nint x, nint i) = (0, 0); i < n; i += 2) {
             bool ok = default!;
             {
-                (hw[i], ok) = xtoi2(s[(int)(x)..(int)(x + 2)], 0); if (!ok) {
+                (hw[i], ok) = xtoi2(s.slice(x, x + 2), 0); if (!ok) {
                     goto error;
                 }
             }
             {
-                (hw[i + 1], ok) = xtoi2(s[(int)(x + 2)..], s[4]); if (!ok) {
+                (hw[i + 1], ok) = xtoi2(s.slice(x + 2), s[4]); if (!ok) {
                     goto error;
                 }
             }

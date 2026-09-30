@@ -317,7 +317,7 @@ internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
     array<int8> naf = new(256);
     array<uint64> digits = new(5);
     for (nint i = 0; i < 4; i++) {
-        digits[i] = byteorder.LEUint64(b[(int)(i * 8)..]);
+        digits[i] = byteorder.LEUint64(b.slice(i * 8));
     }
     var width = (uint64)(((uint64)1).Lsh(w));
     var windowMask = (uint64)(width - 1);

@@ -438,7 +438,7 @@ internal static void hashToNat<P>(ref Curve<P> c, ж<bigmodꓸNat> Ꮡe, slice<b
     // the left-most bits for P-521 we have to do a right shift.
     {
         nint size = c.N.Size(); if (len(hash) >= size) {
-            hash = hash[..(int)(size)];
+            hash = hash.slice(0, size);
             {
                 nint excess = len(hash) * 8 - c.N.BitLen(); if (excess > 0) {
                     hash = rightShift(hash, excess);

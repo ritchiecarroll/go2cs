@@ -368,7 +368,7 @@ public static nint Count(this ж<Profile> Ꮡp) {
         }
         var stk = new slice<uintptr>(32);
         nint n = runtime.Callers(skip + 1, stk[..]);
-        stk = stk[..(int)(n)];
+        stk = stk.slice(0, n);
         if (len(stk) == 0) {
             // The value for skip is too large, and there's no stack trace to record.
             stk = new uintptr[]{abi.FuncPCABIInternal(lostProfileEvent)}.slice();
@@ -504,7 +504,7 @@ internal static error printCountCycleProfile(io.Writer w, @string countName, @st
         // For count profiles, all stack addresses are
         // return PCs, which is what appendLocsForStack expects.
         nint n = expandInlinedFrames(expandedStack, r.Stack);
-        locs = b.appendLocsForStack(locs[..0], expandedStack[..(int)(n)]);
+        locs = b.appendLocsForStack(locs[..0], expandedStack.slice(0, n));
         b.pbSample(values, locs, default!);
     }
     b.build();
@@ -694,7 +694,7 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
         p = new slice<profilerecord.MemProfileRecord>(n + 50);
         (n, ok) = pprof_memProfileInternal(p, true);
         if (ok) {
-            p = p[0..(int)(n)];
+            p = p.slice(0, n);
             break;
         }
     }
@@ -823,7 +823,7 @@ internal static error writeGoroutine(io.Writer w, nint debug) {
     for (nint i = 0; ᐧ ; i++) {
         nint n = runtime.Stack(buf, true);
         if (n < len(buf)) {
-            buf = buf[..(int)(n)];
+            buf = buf.slice(0, n);
             break;
         }
         if (len(buf) >= (64 << (int)(20))) {
@@ -854,7 +854,7 @@ internal static error writeRuntimeProfile(io.Writer w, nint debug, @string name,
         labels = new slice<@unsafe.Pointer>(n + 10);
         (n, ok) = fetch(p, labels);
         if (ok) {
-            p = p[0..(int)(n)];
+            p = p.slice(0, n);
             break;
         }
     }
@@ -1023,7 +1023,7 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
         p = new slice<profilerecord.BlockProfileRecord>(n + 50);
         (n, ok) = runtimeProfile(p);
         if (ok) {
-            p = p[..(int)(n)];
+            p = p.slice(0, n);
             break;
         }
     }
@@ -1044,7 +1044,7 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
         var r = Ꮡ(p, i);
         fmt.Fprintf(w, "%v %v @"u8, (~r).Cycles, (~r).Count);
         nint nΔ1 = expandInlinedFrames(expandedStack, (~r).Stack);
-        var stack = expandedStack[..(int)(nΔ1)];
+        var stack = expandedStack.slice(0, nΔ1);
         foreach (var (_, pc) in stack) {
             fmt.Fprintf(w, " %#x"u8, pc);
         }

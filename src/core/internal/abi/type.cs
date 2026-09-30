@@ -168,7 +168,7 @@ public static ж<Type> TypeFor<T>() {
     if ((TFlag)(t.TFlag & TFlagGCMaskOnDemand) != 0) {
         throw panic("GcSlice can't handle on-demand gcdata types");
     }
-    return @unsafe.Slice(t.GCData, (nint)end)[(int)(begin)..];
+    return @unsafe.Slice(t.GCData, (nint)end).slice((nint)(begin));
 }
 
 // Method on non-interface type
@@ -623,12 +623,12 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     }
     var b = new slice<byte>(l);
     b[0] = bits;
-    copy(b[1..], nameLen[..(int)(nameLenLen)]);
-    copy(b[(int)(1 + nameLenLen)..], n);
+    copy(b[1..], nameLen.slice(0, nameLenLen));
+    copy(b.slice(1 + nameLenLen), n);
     if (len(tag) > 0) {
-        var tb = b[(int)(1 + nameLenLen + len(n))..];
-        copy(tb, tagLen[..(int)(tagLenLen)]);
-        copy(tb[(int)(tagLenLen)..], tag);
+        var tb = b.slice(1 + nameLenLen + len(n));
+        copy(tb, tagLen.slice(0, tagLenLen));
+        copy(tb.slice(tagLenLen), tag);
     }
     return new ΔName(Bytes: Ꮡ(b, 0));
 }

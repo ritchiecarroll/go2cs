@@ -681,7 +681,7 @@ internal static (ж<NumberNode>, error) newNumber(this ж<Tree> Ꮡt, Pos pos, @
 
     // Imaginary constants can only be complex unless they are zero.
     if (len(text) > 0 && text[len(text) - 1] == (rune)'i') {
-        var (f, errΔ5) = strconv.ParseFloat(text[..(int)(len(text) - 1)], 64);
+        var (f, errΔ5) = strconv.ParseFloat(text.slice(0, len(text) - 1), 64);
         if (errΔ5 == default!) {
             n.Value.IsComplex = true;
             n.Value.Complex128 = complex(0D, f);

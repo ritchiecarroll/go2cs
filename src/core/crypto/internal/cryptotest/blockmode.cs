@@ -88,7 +88,7 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
         foreach (var (_, length) in new nint[]{0, blockSize, blockSize * 2}.slice()) {
             rng.Read(src);
             copy(before, src);
-            bm(b, ivʗ3).CryptBlocks(dst[..(int)(length)], src[..(int)(length)]);
+            bm(b, ivʗ3).CryptBlocks(dst.slice(0, length), src.slice(0, length));
             if (!bytes.Equal(src, before)) {
                 tΔ3.Errorf("CryptBlocks modified src; got %x, want %x"u8, src, before);
             }
@@ -101,12 +101,12 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
         foreach (var (_, length) in new nint[]{0, blockSize, blockSize * 2}.slice()) {
             // Record what output is when src and dst are different
             rng.Read(buff);
-            bm(b, ivʗ4).CryptBlocks(expectedOutput[..(int)(length)], buff[..(int)(length)]);
+            bm(b, ivʗ4).CryptBlocks(expectedOutput.slice(0, length), buff.slice(0, length));
             // Check that the same output is generated when src=dst alias to the same
             // memory
-            bm(b, ivʗ4).CryptBlocks(buff[..(int)(length)], buff[..(int)(length)]);
-            if (!bytes.Equal(buff[..(int)(length)], expectedOutput[..(int)(length)])) {
-                tΔ4.Errorf("block cipher produced different output when dst = src; got %x, want %x"u8, buff[..(int)(length)], expectedOutput[..(int)(length)]);
+            bm(b, ivʗ4).CryptBlocks(buff.slice(0, length), buff.slice(0, length));
+            if (!bytes.Equal(buff.slice(0, length), expectedOutput.slice(0, length))) {
+                tΔ4.Errorf("block cipher produced different output when dst = src; got %x, want %x"u8, buff.slice(0, length), expectedOutput.slice(0, length));
             }
         }
     });
@@ -121,29 +121,29 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
         var buff = new slice<byte>(blockSize * 3);
         nint endOfPrefix = blockSize;
         nint startOfSuffix = blockSize * 2;
-        rng.Read(buff[..(int)(endOfPrefix)]);
-        rng.Read(buff[(int)(startOfSuffix)..]);
+        rng.Read(buff.slice(0, endOfPrefix));
+        rng.Read(buff.slice(startOfSuffix));
         ref var dst = ref heap<slice<byte>>(out var Ꮡdst);
-        Ꮡdst.ValueSlot = buff[(int)(endOfPrefix)..(int)(startOfSuffix)];
+        Ꮡdst.ValueSlot = buff.slice(endOfPrefix, startOfSuffix);
         // Record the prefix and suffix data to make sure they aren't written to
         var (initPrefix, initSuffix) = (new slice<byte>(blockSize), new slice<byte>(blockSize));
-        copy(initPrefix, buff[..(int)(endOfPrefix)]);
-        copy(initSuffix, buff[(int)(startOfSuffix)..]);
+        copy(initPrefix, buff.slice(0, endOfPrefix));
+        copy(initSuffix, buff.slice(startOfSuffix));
         // Write to dst (the middle of the buffer) and make sure it doesn't write
         // beyond the dst slice on a valid CryptBlocks call
         bm(b, ivʗ5).CryptBlocks(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
-        if (!bytes.Equal(buff[(int)(startOfSuffix)..], initSuffix)) {
-            tΔ5.Errorf("block cipher did out of bounds write after end of dst slice; got %x, want %x"u8, buff[(int)(startOfSuffix)..], initSuffix);
+        if (!bytes.Equal(buff.slice(startOfSuffix), initSuffix)) {
+            tΔ5.Errorf("block cipher did out of bounds write after end of dst slice; got %x, want %x"u8, buff.slice(startOfSuffix), initSuffix);
         }
-        if (!bytes.Equal(buff[..(int)(endOfPrefix)], initPrefix)) {
-            tΔ5.Errorf("block cipher did out of bounds write before beginning of dst slice; got %x, want %x"u8, buff[..(int)(endOfPrefix)], initPrefix);
+        if (!bytes.Equal(buff.slice(0, endOfPrefix), initPrefix)) {
+            tΔ5.Errorf("block cipher did out of bounds write before beginning of dst slice; got %x, want %x"u8, buff.slice(0, endOfPrefix), initPrefix);
         }
         // Check that dst isn't written to beyond len(src) even if there is room in
         // the slice
-        Ꮡdst.ValueSlot = buff[(int)(endOfPrefix)..]; // Extend dst to include suffix
+        Ꮡdst.ValueSlot = buff.slice(endOfPrefix); // Extend dst to include suffix
         bm(b, ivʗ5).CryptBlocks(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
-        if (!bytes.Equal(buff[(int)(startOfSuffix)..], initSuffix)) {
-            tΔ5.Errorf("CryptBlocks modified dst past len(src); got %x, want %x"u8, buff[(int)(startOfSuffix)..], initSuffix);
+        if (!bytes.Equal(buff.slice(startOfSuffix), initSuffix)) {
+            tΔ5.Errorf("CryptBlocks modified dst past len(src); got %x, want %x"u8, buff.slice(startOfSuffix), initSuffix);
         }
         // Issue 21104: Shouldn't write to anything outside of dst even if src is bigger
         Ꮡsrc.ValueSlot = new slice<byte>(blockSize * 3);
@@ -152,11 +152,11 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
         mustPanic(tΔ5, outputSmallerThanInputˢ, () => {
             bm(b, ivʗ6).CryptBlocks(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
         });
-        if (!bytes.Equal(buff[(int)(startOfSuffix)..], initSuffix)) {
-            tΔ5.Errorf("block cipher did out of bounds write after end of dst slice; got %x, want %x"u8, buff[(int)(startOfSuffix)..], initSuffix);
+        if (!bytes.Equal(buff.slice(startOfSuffix), initSuffix)) {
+            tΔ5.Errorf("block cipher did out of bounds write after end of dst slice; got %x, want %x"u8, buff.slice(startOfSuffix), initSuffix);
         }
-        if (!bytes.Equal(buff[..(int)(endOfPrefix)], initPrefix)) {
-            tΔ5.Errorf("block cipher did out of bounds write before beginning of dst slice; got %x, want %x"u8, buff[..(int)(endOfPrefix)], initPrefix);
+        if (!bytes.Equal(buff.slice(0, endOfPrefix), initPrefix)) {
+            tΔ5.Errorf("block cipher did out of bounds write before beginning of dst slice; got %x, want %x"u8, buff.slice(0, endOfPrefix), initPrefix);
         }
     });
     // Check that output of cipher isn't affected by adjacent data beyond input
@@ -172,11 +172,11 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
         var buff = new slice<byte>(blockSize * 3);
         nint endOfPrefix = blockSize;
         nint startOfSuffix = blockSize * 2;
-        copy(buff[(int)(endOfPrefix)..(int)(startOfSuffix)], src);
-        rng.Read(buff[..(int)(endOfPrefix)]);
-        rng.Read(buff[(int)(startOfSuffix)..]);
+        copy(buff.slice(endOfPrefix, startOfSuffix), src);
+        rng.Read(buff.slice(0, endOfPrefix));
+        rng.Read(buff.slice(startOfSuffix));
         var testDst = new slice<byte>(blockSize);
-        bm(b, ivʗ7).CryptBlocks(testDst, buff[(int)(endOfPrefix)..(int)(startOfSuffix)]);
+        bm(b, ivʗ7).CryptBlocks(testDst, buff.slice(endOfPrefix, startOfSuffix));
         if (!bytes.Equal(testDst, expectedDst)) {
             tΔ6.Errorf("CryptBlocks affected by data outside of src slice bounds; got %x, want %x"u8, testDst, expectedDst);
         }
@@ -188,23 +188,23 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
         rng.Read(buff);
         // Make src and dst slices point to same array with inexact overlap
         ref var src = ref heap<slice<byte>>(out var Ꮡsrc);
-        Ꮡsrc.ValueSlot = buff[..(int)(blockSize)];
+        Ꮡsrc.ValueSlot = buff.slice(0, blockSize);
         ref var dst = ref heap<slice<byte>>(out var Ꮡdst);
-        Ꮡdst.ValueSlot = buff[1..(int)(blockSize + 1)];
+        Ꮡdst.ValueSlot = buff.slice(1, blockSize + 1);
         var ivʗ9 = ivʗ8;
         mustPanic(tΔ7, invalidBufferOverlapˢ, () => {
             bm(b, ivʗ9).CryptBlocks(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
         });
         // Only overlap on one byte
-        Ꮡsrc.ValueSlot = buff[..(int)(blockSize)];
-        Ꮡdst.ValueSlot = buff[(int)(blockSize - 1)..(int)(2 * blockSize - 1)];
+        Ꮡsrc.ValueSlot = buff.slice(0, blockSize);
+        Ꮡdst.ValueSlot = buff.slice(blockSize - 1, 2 * blockSize - 1);
         var ivʗ10 = ivʗ8;
         mustPanic(tΔ7, invalidBufferOverlapˢ, () => {
             bm(b, ivʗ10).CryptBlocks(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
         });
         // src comes after dst with one byte overlap
-        Ꮡsrc.ValueSlot = buff[(int)(blockSize - 1)..(int)(2 * blockSize - 1)];
-        Ꮡdst.ValueSlot = buff[..(int)(blockSize)];
+        Ꮡsrc.ValueSlot = buff.slice(blockSize - 1, 2 * blockSize - 1);
+        Ꮡdst.ValueSlot = buff.slice(0, blockSize);
         var ivʗ11 = ivʗ8;
         mustPanic(tΔ7, invalidBufferOverlapˢ, () => {
             bm(b, ivʗ11).CryptBlocks(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
@@ -232,8 +232,8 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
         rng.Read(src);
         nint length = 2 * blockSize;
         var block = bm(b, ivʗ14);
-        block.CryptBlocks(serialDst, src[..(int)(length)]);
-        block.CryptBlocks(serialDst[(int)(length)..], src[(int)(length)..]);
+        block.CryptBlocks(serialDst, src.slice(0, length));
+        block.CryptBlocks(serialDst.slice(length), src.slice(length));
         bm(b, ivʗ14).CryptBlocks(compositeDst, src);
         if (!bytes.Equal(serialDst, compositeDst)) {
             tΔ9.Errorf("two successive CryptBlocks calls returned a different result than a single one; got %x, want %x"u8, serialDst, compositeDst);

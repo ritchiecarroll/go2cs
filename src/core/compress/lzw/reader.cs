@@ -113,7 +113,7 @@ public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> b) {
     while (ᐧ) {
         if (len(r.toRead) > 0) {
             nint n = copy(b, r.toRead);
-            r.toRead = r.toRead[(int)(n)..];
+            r.toRead = r.toRead.slice(n);
             return (n, default!);
         }
         if (r.err != default!) {
@@ -190,7 +190,7 @@ loop:
                 c = r.prefix[c];
             }
             r.output[i] = (uint8)c;
-            r.o += copy(r.output[(int)(r.o)..], r.output[(int)(i)..]);
+            r.o += copy(r.output.slice(r.o), r.output.slice(i));
             if (r.last != decoderInvalidCode) {
                 // Save what the hi code expands to.
                 r.suffix[r.hi] = (uint8)c;
@@ -227,7 +227,7 @@ continue_loop:;
     }
 break_loop:;
     // Flush pending output.
-    r.toRead = r.output[..(int)(r.o)];
+    r.toRead = r.output.slice(0, r.o);
     r.o = 0;
 }
 

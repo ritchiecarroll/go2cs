@@ -94,7 +94,7 @@ internal static readonly @string dotsᶜ = ". . . . . . . . . . . . . . . . . . 
         i -= n;
     }
     // i <= n
-    fmt.Print(dots[0..(int)(i)]);
+    fmt.Print(dots.slice(0, i));
     fmt.Println(a.ꓸꓸꓸ);
 }
 

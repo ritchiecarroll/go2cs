@@ -90,11 +90,11 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
         }
         // Emit the mismatched lines before start into this chunk.
         // (No effect on first sentinel iteration, when start = {0,0}.)
-        foreach (var (_, s) in x[(int)(done.x)..(int)(start.x)]) {
+        foreach (var (_, s) in x.slice(done.x, start.x)) {
             ctext = append(ctext, "-"u8 + s);
             count.x++;
         }
-        foreach (var (_, s) in y[(int)(done.y)..(int)(start.y)]) {
+        foreach (var (_, s) in y.slice(done.y, start.y)) {
             ctext = append(ctext, "+"u8 + s);
             count.y++;
         }
@@ -102,7 +102,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
         // the chunk includes all the common lines and continues.
         UntypedInt C = 3; // number of context lines
         if ((end.x < len(x) || end.y < len(y)) && (end.x - start.x < C || (len(ctext) > 0 && end.x - start.x < (nint)(2 * C)))) {
-            foreach (var (_, s) in x[(int)(start.x)..(int)(end.x)]) {
+            foreach (var (_, s) in x.slice(start.x, end.x)) {
                 ctext = append(ctext, " "u8 + s);
                 count.x++;
                 count.y++;
@@ -116,7 +116,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
             if (n > C) {
                 n = C;
             }
-            foreach (var (_, s) in x[(int)(start.x)..(int)(start.x + n)]) {
+            foreach (var (_, s) in x.slice(start.x, start.x + n)) {
                 ctext = append(ctext, " "u8 + s);
                 count.x++;
                 count.y++;
@@ -145,7 +145,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
         }
         // Otherwise start a new chunk.
         chunk = new pair(end.x - (nint)C, end.y - (nint)C);
-        foreach (var (_, s) in x[(int)(chunk.x)..(int)(end.x)]) {
+        foreach (var (_, s) in x.slice(chunk.x, end.x)) {
             ctext = append(ctext, " "u8 + s);
             count.x++;
             count.y++;
@@ -161,7 +161,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
 internal static slice<@string> lines(slice<byte> x) {
     var l = strings.SplitAfter(((@string)x), "\n"u8);
     if (l[len(l) - 1] == ""){
-        l = l[..(int)(len(l) - 1)];
+        l = l.slice(0, len(l) - 1);
     } else {
         // Treat last line as having a message about the missing newline attached,
         // using the same text as BSD/GNU diff (including the leading backslash).

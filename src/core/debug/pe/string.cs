@@ -20,7 +20,7 @@ internal static @string cstring(slice<byte> b) {
     if (i == -1) {
         i = len(b);
     }
-    return ((@string)(b[..(int)(i)]));
+    return ((@string)(b.slice(0, i)));
 }
 
 [GoType("[]byte")] partial struct StringTable;
@@ -64,7 +64,7 @@ public static (@string, error) String(this StringTable st, uint32 start) {
     if ((nint)start > len(st)) {
         return ("", fmt.Errorf("offset %d is beyond the end of string table"u8, start));
     }
-    return (cstring(st[(int)(start)..]), default!);
+    return (cstring(st.slice((nint)(start))), default!);
 }
 
 } // end pe_package

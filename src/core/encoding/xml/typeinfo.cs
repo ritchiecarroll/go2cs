@@ -215,7 +215,7 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
         if (((fieldFlags)((~finfo).flags & fElement)) == 0) {
             return (default!, fmt.Errorf("xml: %s chain not valid with %s flag"u8, tag, strings.Join(tokens[1..], ","u8)));
         }
-        finfo.Value.parents = parents[..(int)(len(parents) - 1)];
+        finfo.Value.parents = parents.slice(0, len(parents) - 1);
     }
     // If the field type has an XMLName field, the names must match
     // so that the behavior of both marshaling and unmarshaling
@@ -326,8 +326,8 @@ break_Loop:;
     // so drop the conflicting fields from tinfo and append the new one.
     for (nint c = len(conflicts) - 1; c >= 0; c--) {
         nint i = conflicts[c];
-        copy(tinfo.fields[(int)(i)..], tinfo.fields[(int)(i + 1)..]);
-        tinfo.fields = tinfo.fields[..(int)(len(tinfo.fields) - 1)];
+        copy(tinfo.fields.slice(i), tinfo.fields.slice(i + 1));
+        tinfo.fields = tinfo.fields.slice(0, len(tinfo.fields) - 1);
     }
     tinfo.fields = append(tinfo.fields, newf);
     return default!;

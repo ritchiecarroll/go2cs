@@ -121,7 +121,7 @@ internal static void itoa(ref slice<byte> buf, nint i, nint wid) {
     }
     // i < 10
     b[bp] = (byte)((rune)'0' + i);
-    buf = appendꓸꓸꓸ(buf, b[(int)(bp)..]);
+    buf = appendꓸꓸꓸ(buf, b.slice(bp));
 }
 
 // formatHeader writes log header to buf in following order:
@@ -165,7 +165,7 @@ internal static void formatHeader(ref slice<byte> buf, time.Time t, @string pref
             @string @short = @file;
             for (nint i = len(@file) - 1; i > 0; i--) {
                 if (@file[i] == (rune)'/') {
-                    @short = @file[(int)(i + 1)..];
+                    @short = @file.slice(i + 1);
                     break;
                 }
             }

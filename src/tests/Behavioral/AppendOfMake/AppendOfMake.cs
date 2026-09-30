@@ -11,7 +11,7 @@ internal static slice<nint> extend(slice<nint> s, nint n) {
 public static slice<nint> Grow(slice<nint> s, nint n) {
     {
         n -= cap(s) - len(s); if (n > 0) {
-            s = appendꓸꓸꓸ(s[..(int)(cap(s))], makeꓸꓸꓸ<nint>(n))[..(int)(len(s))];
+            s = appendꓸꓸꓸ(s.slice(0, cap(s)), makeꓸꓸꓸ<nint>(n)).slice(0, len(s));
         }
     }
     return s;

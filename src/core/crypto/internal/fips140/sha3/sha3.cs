@@ -114,9 +114,9 @@ internal static (nint n, error err) writeGeneric(this ж<Digest> Ꮡd, slice<byt
     }
     n = len(p);
     while (len(p) > 0) {
-        nint x = subtle.XORBytes(d.a[(int)(d.n)..(int)(d.rate)], d.a[(int)(d.n)..(int)(d.rate)], p);
+        nint x = subtle.XORBytes(d.a.slice(d.n, d.rate), d.a.slice(d.n, d.rate), p);
         d.n += x;
-        p = p[(int)(x)..];
+        p = p.slice(x);
         // If the sponge is full, apply the permutation.
         if (d.n == d.rate) {
             Ꮡd.permute();
@@ -142,9 +142,9 @@ internal static (nint n, error err) readGeneric(this ж<Digest> Ꮡd, slice<byte
         if (d.n == d.rate) {
             Ꮡd.permute();
         }
-        nint x = copy(@out, d.a[(int)(d.n)..(int)(d.rate)]);
+        nint x = copy(@out, d.a.slice(d.n, d.rate));
         d.n += x;
-        @out = @out[(int)(x)..];
+        @out = @out.slice(x);
     }
     return (n, err);
 }

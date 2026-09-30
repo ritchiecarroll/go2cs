@@ -154,9 +154,9 @@ internal static (Sockaddr, error) parseNetworkLayerAddr(slice<byte> b, byte fami
     case {} when family == AF_INET6: {
         var sa = Ꮡ(new SockaddrInet6(nil));
         if (l - 1 < offsetofInet6){
-            copy((~sa).Addr[..], b[1..(int)(l)]);
+            copy((~sa).Addr[..], b.slice(1, l));
         } else {
-            copy((~sa).Addr[..], b[(int)(l - offsetofInet6)..(int)(l)]);
+            copy((~sa).Addr[..], b.slice(l - offsetofInet6, l));
         }
         return (new SockaddrInet6жSockaddr(sa), default!);
     }
@@ -169,9 +169,9 @@ internal static (Sockaddr, error) parseNetworkLayerAddr(slice<byte> b, byte fami
         var sa = Ꮡ(new SockaddrInet4(nil));
         if (l - 1 < offsetofInet4){
             // an old fashion, AF_UNSPEC or unknown means AF_INET
-            copy((~sa).Addr[..], b[1..(int)(l)]);
+            copy((~sa).Addr[..], b.slice(1, l));
         } else {
-            copy((~sa).Addr[..], b[(int)(l - offsetofInet4)..(int)(l)]);
+            copy((~sa).Addr[..], b.slice(l - offsetofInet4, l));
         }
         return (new SockaddrInet4жSockaddr(sa), default!);
     }}
@@ -202,7 +202,7 @@ public static (slice<byte>, error) RouteRIB(nint facility, nint param) {
             return (default!, err);
         }
     }
-    return (tab[..(int)(n)], default!);
+    return (tab.slice(0, (nint)(n)), default!);
 }
 
 // RoutingMessage represents a routing message.
@@ -245,7 +245,7 @@ internal const nint anyMessageLen = /* int(unsafe.Sizeof(anyMessage{})) */ 4;
                 return (default!, err);
             }
             sas[i] = new SockaddrDatalinkжSockaddr(sa);
-            b = b[(int)(rsaAlignOf((nint)(~rsa).Len))..];
+            b = b.slice(rsaAlignOf((nint)(~rsa).Len));
         }
         else if (exprᴛ1 == AF_INET || exprᴛ1 == AF_INET6) {
             var (sa, err) = parseSockaddrInet(b, (~rsa).Family);
@@ -253,7 +253,7 @@ internal const nint anyMessageLen = /* int(unsafe.Sizeof(anyMessage{})) */ 4;
                 return (default!, err);
             }
             sas[i] = sa;
-            b = b[(int)(rsaAlignOf((nint)(~rsa).Len))..];
+            b = b.slice(rsaAlignOf((nint)(~rsa).Len));
             family = rsa.Value.Family;
         }
         else { /* default: */
@@ -262,7 +262,7 @@ internal const nint anyMessageLen = /* int(unsafe.Sizeof(anyMessage{})) */ 4;
                 return (default!, err);
             }
             sas[i] = sa;
-            b = b[(int)(rsaAlignOf((nint)b[0]))..];
+            b = b.slice(rsaAlignOf((nint)b[0]));
         }
 
     }
@@ -316,7 +316,7 @@ internal const nint anyMessageLen = /* int(unsafe.Sizeof(anyMessage{})) */ 4;
                 return (default!, err);
             }
             sas[i] = new SockaddrDatalinkжSockaddr(sa);
-            b = b[(int)(rsaAlignOf((nint)(~rsa).Len))..];
+            b = b.slice(rsaAlignOf((nint)(~rsa).Len));
         }
         else if (exprᴛ1 == AF_INET || exprᴛ1 == AF_INET6) {
             var (sa, err) = parseSockaddrInet(b, (~rsa).Family);
@@ -324,7 +324,7 @@ internal const nint anyMessageLen = /* int(unsafe.Sizeof(anyMessage{})) */ 4;
                 return (default!, err);
             }
             sas[i] = sa;
-            b = b[(int)(rsaAlignOf((nint)(~rsa).Len))..];
+            b = b.slice(rsaAlignOf((nint)(~rsa).Len));
             family = rsa.Value.Family;
         }
         else { /* default: */
@@ -333,7 +333,7 @@ internal const nint anyMessageLen = /* int(unsafe.Sizeof(anyMessage{})) */ 4;
                 return (default!, err);
             }
             sas[i] = sa;
-            b = b[(int)(rsaAlignOf((nint)b[0]))..];
+            b = b.slice(rsaAlignOf((nint)b[0]));
         }
 
     }
@@ -353,7 +353,7 @@ public static (slice<RoutingMessage> msgs, error err) ParseRoutingMessage(slice<
         nmsgs++;
         var any = Ꮡ(b, 0).Reinterpret<byte, anyMessage>();
         if ((~any).Version != RTM_VERSION) {
-            b = b[(int)((~any).Msglen)..];
+            b = b.slice((~any).Msglen);
             continue;
         }
         {
@@ -363,7 +363,7 @@ public static (slice<RoutingMessage> msgs, error err) ParseRoutingMessage(slice<
                 msgs = append(msgs, m);
             }
         }
-        b = b[(int)((~any).Msglen)..];
+        b = b.slice((~any).Msglen);
     }
     // We failed to parse any of the messages - version mismatch?
     if (nmsgs != len(msgs) + nskips) {

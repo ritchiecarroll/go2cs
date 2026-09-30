@@ -27,8 +27,8 @@ internal static (slice<@string>, error) listGroupsFromReader(ref User u, io.Read
     }
     var userCommas = slice<byte>("," + u.Username + ","); // ,john,
     var userFirst = userCommas[1..]; // john,
-    var userLast = userCommas[..(int)(len(userCommas) - 1)]; // ,john
-    var userOnly = userCommas[1..(int)(len(userCommas) - 1)]; // john
+    var userLast = userCommas.slice(0, len(userCommas) - 1); // ,john
+    var userOnly = userCommas.slice(1, len(userCommas) - 1); // john
     // Add primary Gid first.
     var groups = new @string[]{u.Gid}.slice();
     var rd = bufio.NewReader(r);
@@ -64,17 +64,17 @@ internal static (slice<@string>, error) listGroupsFromReader(ref User u, io.Read
             // No commas, or empty group list.
             continue;
         }
-        if (bytes.Count(line[..(int)(listIdx)], colon) != 2) {
+        if (bytes.Count(line.slice(0, listIdx), colon) != 2) {
             // Incorrect number of colons.
             continue;
         }
-        var list = line[(int)(listIdx + 1)..];
+        var list = line.slice(listIdx + 1);
         // Check the list for user without splitting or copying.
         if (!(bytes.Equal(list, userOnly) || bytes.HasPrefix(list, userFirst) || bytes.HasSuffix(list, userLast) || bytes.Contains(list, userCommas))) {
             continue;
         }
         // groupname:password:GID
-        var parts = bytes.Split(line[..(int)(listIdx)], colon);
+        var parts = bytes.Split(line.slice(0, listIdx), colon);
         if (len(parts) != 3 || len(parts[0]) == 0) {
             continue;
         }

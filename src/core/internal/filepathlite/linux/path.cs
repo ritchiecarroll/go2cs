@@ -46,7 +46,7 @@ internal static error errInvalidPath = errors.New("invalid path"u8);
             return;
         }
         b.buf = new slice<byte>(len(b.path));
-        copy(b.buf, b.path[..(int)(b.w)]);
+        copy(b.buf, b.path.slice(0, b.w));
     }
     b.buf[b.w] = c;
     b.w++;
@@ -61,16 +61,16 @@ internal static error errInvalidPath = errors.New("invalid path"u8);
 
 [GoRecv] internal static @string @string(this ref lazybuf b) {
     if (b.buf == default!) {
-        return b.volAndPath[..(int)(b.volLen + b.w)];
+        return b.volAndPath.slice(0, b.volLen + b.w);
     }
-    return b.volAndPath[..(int)(b.volLen)] + ((sstring)(b.buf[..(int)(b.w)]));
+    return b.volAndPath.slice(0, b.volLen) + ((sstring)(b.buf.slice(0, b.w)));
 }
 
 // Clean is filepath.Clean.
 public static @string Clean(@string path) {
     @string originalPath = path;
     nint volLen = volumeNameLen(path);
-    path = path[(int)(volLen)..];
+    path = path.slice(volLen);
     if (path == ""u8) {
         if (volLen > 1 && IsPathSeparator(originalPath[0]) && IsPathSeparator(originalPath[1])) {
             // should be UNC
@@ -222,14 +222,14 @@ public static (@string dir, @string @file) Split(@string path) {
     while (i >= len(vol) && !IsPathSeparator(path[i])) {
         i--;
     }
-    return (path[..(int)(i + 1)], path[(int)(i + 1)..]);
+    return (path.slice(0, i + 1), path.slice(i + 1));
 }
 
 // Ext is filepath.Ext.
 public static @string Ext(@string path) {
     for (nint i = len(path) - 1; i >= 0 && !IsPathSeparator(path[i]); i--) {
         if (path[i] == (rune)'.') {
-            return path[(int)(i)..];
+            return path.slice(i);
         }
     }
     return ""u8;
@@ -242,17 +242,17 @@ public static @string Base(@string path) {
     }
     // Strip trailing slashes.
     while (len(path) > 0 && IsPathSeparator(path[len(path) - 1])) {
-        path = path[0..(int)(len(path) - 1)];
+        path = path.slice(0, len(path) - 1);
     }
     // Throw away volume name
-    path = path[(int)(len(VolumeName(path)))..];
+    path = path.slice(len(VolumeName(path)));
     // Find the last element
     nint i = len(path) - 1;
     while (i >= 0 && !IsPathSeparator(path[i])) {
         i--;
     }
     if (i >= 0) {
-        path = path[(int)(i + 1)..];
+        path = path.slice(i + 1);
     }
     // If empty now, it had only slashes.
     if (path == ""u8) {
@@ -268,7 +268,7 @@ public static @string Dir(@string path) {
     while (i >= len(vol) && !IsPathSeparator(path[i])) {
         i--;
     }
-    @string dir = Clean(path[(int)(len(vol))..(int)(i + 1)]);
+    @string dir = Clean(path.slice(len(vol), i + 1));
     if (dir == "."u8 && len(vol) > 2) {
         // must be UNC
         return vol;
@@ -278,7 +278,7 @@ public static @string Dir(@string path) {
 
 // VolumeName is filepath.VolumeName.
 public static @string VolumeName(@string path) {
-    return FromSlash(path[..(int)(volumeNameLen(path))]);
+    return FromSlash(path.slice(0, volumeNameLen(path)));
 }
 
 // VolumeNameLen returns the length of the leading volume name on Windows.

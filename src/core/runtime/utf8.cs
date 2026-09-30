@@ -59,7 +59,7 @@ internal static (rune r, nint pos) decoderune(@string s, nint k) {
     if (k >= len(s)) {
         return (runeError, k + 1);
     }
-    s = s[(int)(k)..];
+    s = s.slice(k);
     switch (ᐧ) {
     case {} when t2 <= s[0] && s[0] < t3: {
         if (len(s) > 1 && (locb <= s[1] && s[1] <= hicb)) {

@@ -31,8 +31,8 @@ internal static slice<@string> explode(@string s, nint n) {
     var a = new slice<@string>(n);
     for (nint i = 0; i < n - 1; i++) {
         var (_, size) = utf8.DecodeRuneInString(s);
-        a[i] = s[..(int)(size)];
-        s = s[(int)(size)..];
+        a[i] = s.slice(0, size);
+        s = s.slice(size);
     }
     if (n > 0) {
         a[n - 1] = s;
@@ -57,7 +57,7 @@ public static nint Count(@string s, @string substr) {
             return n;
         }
         n++;
-        s = s[(int)(i + len(substr))..];
+        s = s.slice(i + len(substr));
     }
 }
 
@@ -108,14 +108,14 @@ public static nint LastIndex(@string s, @string substr) {
     for (nint i = len(s) - 1; i >= last; i--) {
         h = h * (uint32)bytealg.PrimeRK + (uint32)s[i];
     }
-    if (h == hashss && s[(int)(last)..] == substr) {
+    if (h == hashss && s.slice(last) == substr) {
         return last;
     }
     for (nint i = last - 1; i >= 0; i--) {
         h *= bytealg.PrimeRK;
         h += (uint32)s[i];
         h -= pow * (uint32)s[i + n];
-        if (h == hashss && s[(int)(i)..(int)(i + n)] == substr) {
+        if (h == hashss && s.slice(i, i + n) == substr) {
             return i;
         }
     }
@@ -158,7 +158,7 @@ public static nint IndexRune(@string s, rune r) {
             // The distribution of the last byte is more uniform compared to the
             // first byte which has a 78% chance of being [240, 243, 244].
             if (s[i] != rs[last]) {
-                nint o = IndexByte(s[(int)(i + 1)..], rs[last]);
+                nint o = IndexByte(s.slice(i + 1), rs[last]);
                 if (o < 0) {
                     return -1;
                 }
@@ -183,7 +183,7 @@ fallback:
         if (haveFastIndex){
             // see comment in ../bytes/bytes.go
             {
-                nint j = bytealg.IndexString(s[(int)(i - last)..], ((@string)r)); if (j >= 0) {
+                nint j = bytealg.IndexString(s.slice(i - last), ((@string)r)); if (j >= 0) {
                     return i + j - last;
                 }
             }
@@ -280,7 +280,7 @@ public static nint LastIndexAny(@string s, @string chars) {
             rc = utf8.RuneError;
         }
         for (nint i = len(s); i > 0; ) {
-            var (r, size) = utf8.DecodeLastRuneInString(s[..(int)(i)]);
+            var (r, size) = utf8.DecodeLastRuneInString(s.slice(0, i));
             i -= size;
             if (rc == r) {
                 return i;
@@ -289,7 +289,7 @@ public static nint LastIndexAny(@string s, @string chars) {
         return -1;
     }
     for (nint i = len(s); i > 0; ) {
-        var (r, size) = utf8.DecodeLastRuneInString(s[..(int)(i)]);
+        var (r, size) = utf8.DecodeLastRuneInString(s.slice(0, i));
         i -= size;
         if (IndexRune(chars, r) >= 0) {
             return i;
@@ -326,12 +326,12 @@ internal static slice<@string> genSplit(@string s, @string sep, nint sepSave, ni
         if (m < 0) {
             break;
         }
-        a[i] = s[..(int)(m + sepSave)];
-        s = s[(int)(m + len(sep))..];
+        a[i] = s.slice(0, m + sepSave);
+        s = s.slice(m + len(sep));
         i++;
     }
     a[i] = s;
-    return a[..(int)(i + 1)];
+    return a.slice(0, i + 1);
 }
 
 // SplitN slices s into substrings separated by sep and returns a slice of
@@ -432,7 +432,7 @@ public static slice<@string> Fields(@string s) {
             i++;
             continue;
         }
-        a[na] = s[(int)(fieldStart)..(int)(i)];
+        a[na] = s.slice(fieldStart, i);
         na++;
         i++;
         // Skip spaces in between fields.
@@ -443,7 +443,7 @@ public static slice<@string> Fields(@string s) {
     }
     if (fieldStart < len(s)) {
         // Last field might end at EOF.
-        a[na] = s[(int)(fieldStart)..];
+        a[na] = s.slice(fieldStart);
     }
     return a;
 }
@@ -490,7 +490,7 @@ public static slice<@string> FieldsFunc(@string s, Func<rune, bool> f) {
     // Create strings from recorded field indices.
     var a = new slice<@string>(len(spans));
     foreach (var (i, span) in spans) {
-        a[i] = s[(int)(span.start)..(int)(span.end)];
+        a[i] = s.slice(span.start, span.end);
     }
     return a;
 }
@@ -558,7 +558,7 @@ public static @string Map(Func<rune, rune> mapping, @string s) {
         }
         nint width = default!;
         if (c == utf8.RuneError){
-            (c, width) = utf8.DecodeRuneInString(s[(int)(i)..]);
+            (c, width) = utf8.DecodeRuneInString(s.slice(i));
             if (width != 1 && r == c) {
                 continue;
             }
@@ -566,11 +566,11 @@ public static @string Map(Func<rune, rune> mapping, @string s) {
             width = utf8.RuneLen(c);
         }
         Ꮡb.Grow(len(s) + (nint)utf8.UTFMax);
-        Ꮡb.WriteString(s[..(int)(i)]);
+        Ꮡb.WriteString(s.slice(0, i));
         if (r >= 0) {
             Ꮡb.WriteRune(r);
         }
-        s = s[(int)(i + width)..];
+        s = s.slice(i + width);
         break;
     }
     // Fast path for unchanged input
@@ -641,19 +641,19 @@ public static @string Repeat(@string s, nint count) {
     case (rune)' ' or (rune)'-' or (rune)'0' or (rune)'=' or (rune)'\t': {
         switch (ᐧ) {
         case {} when n <= len(repeatedSpaces) && HasPrefix(repeatedSpaces, s): {
-            return repeatedSpaces[..(int)(n)];
+            return repeatedSpaces.slice(0, n);
         }
         case {} when n <= len(repeatedDashes) && HasPrefix(repeatedDashes, s): {
-            return repeatedDashes[..(int)(n)];
+            return repeatedDashes.slice(0, n);
         }
         case {} when n <= len(repeatedZeroes) && HasPrefix(repeatedZeroes, s): {
-            return repeatedZeroes[..(int)(n)];
+            return repeatedZeroes.slice(0, n);
         }
         case {} when n <= len(repeatedEquals) && HasPrefix(repeatedEquals, s): {
-            return repeatedEquals[..(int)(n)];
+            return repeatedEquals.slice(0, n);
         }
         case {} when n <= len(repeatedTabs) && HasPrefix(repeatedTabs, s): {
-            return repeatedTabs[..(int)(n)];
+            return repeatedTabs.slice(0, n);
         }}
 
         break;
@@ -682,7 +682,7 @@ public static @string Repeat(@string s, nint count) {
     Ꮡb.WriteString(s);
     while (b.Len() < n) {
         nint chunk = min(n - b.Len(), b.Len(), chunkMax);
-        Ꮡb.WriteString(b.String()[..(int)(chunk)]);
+        Ꮡb.WriteString(b.String().slice(0, chunk));
     }
     return b.String();
 }
@@ -711,14 +711,14 @@ public static @string ToUpper(@string s) {
             if ((rune)'a' <= c && c <= (rune)'z') {
                 c -= (byte)((rune)'a' - (rune)'A');
                 if (pos < i) {
-                    Ꮡb.WriteString(s[(int)(pos)..(int)(i)]);
+                    Ꮡb.WriteString(s.slice(pos, i));
                 }
                 Ꮡb.WriteByte(c);
                 pos = i + 1;
             }
         }
         if (pos < len(s)) {
-            Ꮡb.WriteString(s[(int)(pos)..]);
+            Ꮡb.WriteString(s.slice(pos));
         }
         return b.String();
     }
@@ -749,14 +749,14 @@ public static @string ToLower(@string s) {
             if ((rune)'A' <= c && c <= (rune)'Z') {
                 c += (byte)((rune)'a' - (rune)'A');
                 if (pos < i) {
-                    Ꮡb.WriteString(s[(int)(pos)..(int)(i)]);
+                    Ꮡb.WriteString(s.slice(pos, i));
                 }
                 Ꮡb.WriteByte(c);
                 pos = i + 1;
             }
         }
         if (pos < len(s)) {
-            Ꮡb.WriteString(s[(int)(pos)..]);
+            Ꮡb.WriteString(s.slice(pos));
         }
         return b.String();
     }
@@ -798,11 +798,11 @@ public static @string ToValidUTF8(@string s, @string replacement) {
         if (c != utf8.RuneError) {
             continue;
         }
-        var (_, wid) = utf8.DecodeRuneInString(s[(int)(i)..]);
+        var (_, wid) = utf8.DecodeRuneInString(s.slice(i));
         if (wid == 1) {
             Ꮡb.Grow(len(s) + len(replacement));
-            Ꮡb.WriteString(s[..(int)(i)]);
-            s = s[(int)(i)..];
+            Ꮡb.WriteString(s.slice(0, i));
+            s = s.slice(i);
             break;
         }
     }
@@ -820,7 +820,7 @@ public static @string ToValidUTF8(@string s, @string replacement) {
             Ꮡb.WriteByte(c);
             continue;
         }
-        var (_, wid) = utf8.DecodeRuneInString(s[(int)(i)..]);
+        var (_, wid) = utf8.DecodeRuneInString(s.slice(i));
         if (wid == 1) {
             i++;
             if (!invalid) {
@@ -830,7 +830,7 @@ public static @string ToValidUTF8(@string s, @string replacement) {
             continue;
         }
         invalid = false;
-        Ꮡb.WriteString(s[(int)(i)..(int)(i + wid)]);
+        Ꮡb.WriteString(s.slice(i, i + wid));
         i += wid;
     }
     return b.String();
@@ -894,7 +894,7 @@ public static @string TrimLeftFunc(@string s, Func<rune, bool> f) {
     if (i == -1) {
         return ""u8;
     }
-    return s[(int)(i)..];
+    return s.slice(i);
 }
 
 // TrimRightFunc returns a slice of the string s with all trailing
@@ -902,12 +902,12 @@ public static @string TrimLeftFunc(@string s, Func<rune, bool> f) {
 public static @string TrimRightFunc(@string s, Func<rune, bool> f) {
     nint i = lastIndexFunc(s, f, false);
     if (i >= 0 && s[i] >= utf8.RuneSelf){
-        var (_, wid) = utf8.DecodeRuneInString(s[(int)(i)..]);
+        var (_, wid) = utf8.DecodeRuneInString(s.slice(i));
         i += wid;
     } else {
         i++;
     }
-    return s[0..(int)(i)];
+    return s.slice(0, i);
 }
 
 // TrimFunc returns a slice of the string s with all leading
@@ -945,7 +945,7 @@ internal static nint indexFunc(@string s, Func<rune, bool> f, bool truth) {
 // inverted.
 internal static nint lastIndexFunc(@string s, Func<rune, bool> f, bool truth) {
     for (nint i = len(s); i > 0; ) {
-        var (r, size) = utf8.DecodeLastRuneInString(s[0..(int)(i)]);
+        var (r, size) = utf8.DecodeLastRuneInString(s.slice(0, i));
         i -= size;
         if (f(r) == truth) {
             return i;
@@ -1043,7 +1043,7 @@ internal static @string trimLeftUnicode(@string s, @string cutset) {
         if (!ContainsRune(cutset, r)) {
             break;
         }
-        s = s[(int)(n)..];
+        s = s.slice(n);
     }
     return s;
 }
@@ -1070,7 +1070,7 @@ public static @string TrimRight(@string s, @string cutset) {
 
 internal static @string trimRightByte(@string s, byte c) {
     while (len(s) > 0 && s[len(s) - 1] == c) {
-        s = s[..(int)(len(s) - 1)];
+        s = s.slice(0, len(s) - 1);
     }
     return s;
 }
@@ -1082,7 +1082,7 @@ internal static @string trimRightASCII(@string s, ж<asciiSet> Ꮡas) {
         if (!@as.contains(s[len(s) - 1])) {
             break;
         }
-        s = s[..(int)(len(s) - 1)];
+        s = s.slice(0, len(s) - 1);
     }
     return s;
 }
@@ -1097,7 +1097,7 @@ internal static @string trimRightUnicode(@string s, @string cutset) {
         if (!ContainsRune(cutset, r)) {
             break;
         }
-        s = s[..(int)(len(s) - n)];
+        s = s.slice(0, len(s) - n);
     }
     return s;
 }
@@ -1112,7 +1112,7 @@ public static @string TrimSpace(@string s) {
         if (c >= utf8.RuneSelf) {
             // If we run into a non-ASCII byte, fall back to the
             // slower unicode-aware method on the remaining bytes
-            return TrimFunc(s[(int)(start)..], Δunicode.IsSpace);
+            return TrimFunc(s.slice(start), Δunicode.IsSpace);
         }
         if (asciiSpace[c] == 0) {
             break;
@@ -1124,7 +1124,7 @@ public static @string TrimSpace(@string s) {
         var c = s[stop - 1];
         if (c >= utf8.RuneSelf) {
             // start has been already trimmed above, should trim end only
-            return TrimRightFunc(s[(int)(start)..(int)(stop)], Δunicode.IsSpace);
+            return TrimRightFunc(s.slice(start, stop), Δunicode.IsSpace);
         }
         if (asciiSpace[c] == 0) {
             break;
@@ -1133,7 +1133,7 @@ public static @string TrimSpace(@string s) {
     // At this point s[start:stop] starts and ends with an ASCII
     // non-space bytes, so we're done. Non-ASCII cases have already
     // been handled above.
-    return s[(int)(start)..(int)(stop)];
+    return s.slice(start, stop);
 }
 
 // TrimPrefix returns s without the provided leading prefix string.
@@ -1175,17 +1175,17 @@ public static @string Replace(@string s, @string old, @string @new, nint n) {
         nint j = start;
         if (len(old) == 0){
             if (i > 0) {
-                var (_, wid) = utf8.DecodeRuneInString(s[(int)(start)..]);
+                var (_, wid) = utf8.DecodeRuneInString(s.slice(start));
                 j += wid;
             }
         } else {
-            j += Index(s[(int)(start)..], old);
+            j += Index(s.slice(start), old);
         }
-        Ꮡb.WriteString(s[(int)(start)..(int)(j)]);
+        Ꮡb.WriteString(s.slice(start, j));
         Ꮡb.WriteString(@new);
         start = j + len(old);
     }
-    Ꮡb.WriteString(s[(int)(start)..]);
+    Ꮡb.WriteString(s.slice(start));
     return b.String();
 }
 
@@ -1227,8 +1227,8 @@ public static bool EqualFold(@string s, @string t) {
     // Check if we've exhausted both strings.
     return len(s) == len(t);
 hasUnicode:
-    s = s[(int)(i)..];
-    t = t[(int)(i)..];
+    s = s.slice(i);
+    t = t.slice(i);
     foreach (var (_, rᴛ1) in s) {
         var sr = rᴛ1;
 
@@ -1242,7 +1242,7 @@ hasUnicode:
             (tr, t) = ((rune)t[0], t[1..]);
         } else {
             var (rΔ1, size) = utf8.DecodeRuneInString(t);
-            (tr, t) = (rΔ1, t[(int)(size)..]);
+            (tr, t) = (rΔ1, t.slice(size));
         }
         // If they match, keep going; if not, return false.
         // Easy case.

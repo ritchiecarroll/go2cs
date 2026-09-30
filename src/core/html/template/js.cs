@@ -107,7 +107,7 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
                 // can precede a regular expression.
                 j--;
             }
-            if (regexpPrecederKeywords[tmpstring(s[(int)(j)..])]) {
+            if (regexpPrecederKeywords[tmpstring(s.slice(j))]) {
                 return jsCtxRegexp;
             }
             break;
@@ -249,7 +249,7 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
     // Make sure that json.Marshal escapes codepoints U+2028 & U+2029
     // so it falls within the subset of JSON which is valid JS.
     for (nint i = 0; i < len(b); ) {
-        var (rune, n) = utf8.DecodeRune(b[(int)(i)..]);
+        var (rune, n) = utf8.DecodeRune(b.slice(i));
         @string repl = ""u8;
         if (rune == 0x2028){
             repl = u2028ˢ;
@@ -258,14 +258,14 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
             repl = u2029ˢ;
         }
         if (repl != ""u8) {
-            Ꮡbuf.Write(b[(int)(written)..(int)(i)]);
+            Ꮡbuf.Write(b.slice(written, i));
             Ꮡbuf.WriteString(repl);
             written = i + n;
         }
         i += n;
     }
     if (buf.Len() != 0) {
-        Ꮡbuf.Write(b[(int)(written)..]);
+        Ꮡbuf.Write(b.slice(written));
         if (pad) {
             Ꮡbuf.WriteByte((rune)' ');
         }
@@ -322,7 +322,7 @@ internal static @string replace(@string s, slice<@string> replacementTable) {
     nint written = 0;
     for (nint i = 0; i < len(s); i += w) {
         // See comment in htmlEscaper.
-        (r, w) = utf8.DecodeRuneInString(s[(int)(i)..]);
+        (r, w) = utf8.DecodeRuneInString(s.slice(i));
         @string repl = default!;
         switch (ᐧ) {
         case {} when (nint)r < len(lowUnicodeReplacementTable): {
@@ -349,14 +349,14 @@ internal static @string replace(@string s, slice<@string> replacementTable) {
         if (written == 0) {
             Ꮡb.Grow(len(s));
         }
-        Ꮡb.WriteString(s[(int)(written)..(int)(i)]);
+        Ꮡb.WriteString(s.slice(written, i));
         Ꮡb.WriteString(repl);
         written = i + w;
     }
     if (written == 0) {
         return s;
     }
-    Ꮡb.WriteString(s[(int)(written)..]);
+    Ꮡb.WriteString(s.slice(written));
     return b.String();
 }
 

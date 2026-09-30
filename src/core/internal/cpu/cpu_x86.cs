@@ -171,7 +171,7 @@ public static @string Name() {
     // Trim tail after and including the first null byte.
     foreach (var (i, c) in data) {
         if (c == (rune)'\x00') {
-            data = data[..(int)(i)];
+            data = data.slice(0, i);
             break;
         }
     }

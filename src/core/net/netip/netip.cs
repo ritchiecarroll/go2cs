@@ -173,7 +173,7 @@ internal static error parseIPv4Fields(@string @in, nint off, nint end, slice<uin
     nint val = default!;
     nint pos = default!;
     nint digLen = default!;  // number of digits in current octet
-    @string s = @in[(int)(off)..(int)(end)];
+    @string s = @in.slice(off, end);
     for (nint i = 0; i < len(s); i++) {
         if (s[i] >= (rune)'0' && s[i] <= (rune)'9'){
             if (digLen == 1 && val == 0) {
@@ -190,7 +190,7 @@ internal static error parseIPv4Fields(@string @in, nint off, nint end, slice<uin
             // 1.2.3.
             // 1..2.3
             if (i == 0 || i == len(s) - 1 || s[i - 1] == (rune)'.') {
-                return new parseAddrError(@in: @in, msg: "IPv4 field must have at least one digit"u8, at: s[(int)(i)..]);
+                return new parseAddrError(@in: @in, msg: "IPv4 field must have at least one digit"u8, at: s.slice(i));
             }
             // 1.2.3.4.5
             if (pos == 3) {
@@ -201,7 +201,7 @@ internal static error parseIPv4Fields(@string @in, nint off, nint end, slice<uin
             val = 0;
             digLen = 0;
         } else {
-            return new parseAddrError(@in: @in, msg: "unexpected character"u8, at: s[(int)(i)..]);
+            return new parseAddrError(@in: @in, msg: "unexpected character"u8, at: s.slice(i));
         }
     }
     if (pos < 3) {
@@ -233,7 +233,7 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
     @string zone = ""u8;
     nint i = bytealg.IndexByteString(s, (rune)'%');
     if (i != -1) {
-        (s, zone) = (s[..(int)(i)], s[(int)(i + 1)..]);
+        (s, zone) = (s.slice(0, i), s.slice(i + 1));
         if (zone == ""u8) {
             // Not allowed to have an empty zone if explicitly specified.
             return (new ΔAddr(nil), new parseAddrError(@in: @in, msg: "zone must be a non-empty string"u8));
@@ -297,7 +297,7 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
             if (len(zone) > 0) {
                 end -= len(zone) + 1;
             }
-            var err = parseIPv4Fields(@in, end - len(s), end, ip[(int)(i)..(int)(i + 4)]);
+            var err = parseIPv4Fields(@in, end - len(s), end, ip.slice(i, i + 4));
             if (err != default!) {
                 return (new ΔAddr(nil), err);
             }
@@ -310,7 +310,7 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
         ip[i + 1] = (byte)acc;
         i += 2;
         // Stop at end of string.
-        s = s[(int)(off)..];
+        s = s.slice(off);
         if (len(s) == 0) {
             break;
         }
@@ -349,7 +349,7 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
         for (nint j = i - 1; j >= ellipsis; j--) {
             ip[j + n] = ip[j];
         }
-        clear(ip[(int)(ellipsis)..(int)(ellipsis + n)]);
+        clear(ip.slice(ellipsis, ellipsis + n));
     } else 
     if (ellipsis >= 0) {
         // Ellipsis must represent at least one 0 group.
@@ -1154,7 +1154,7 @@ internal static (@string ip, @string port, bool v6, error err) splitAddrPort(@st
     if (i == -1) {
         return ("", "", false, errors.New(notAnIpPortˢ));
     }
-    (ip, port) = (s[..(int)(i)], s[(int)(i + 1)..]);
+    (ip, port) = (s.slice(0, i), s.slice(i + 1));
     if (len(ip) == 0) {
         return ("", "", false, errors.New(noIpˢ));
     }
@@ -1165,7 +1165,7 @@ internal static (@string ip, @string port, bool v6, error err) splitAddrPort(@st
         if (len(ip) < 2 || ip[len(ip) - 1] != (rune)']') {
             return ("", "", false, errors.New(missingˢ));
         }
-        ip = ip[1..(int)(len(ip) - 1)];
+        ip = ip.slice(1, len(ip) - 1);
         v6 = true;
     }
     return (ip, port, v6, default!);
@@ -1351,11 +1351,11 @@ public static (slice<byte>, error) MarshalBinary(this AddrPort p) {
         return errors.New(unexpectedSliceSizeˢ);
     }
     ΔAddr addr = default!;
-    var err = addr.UnmarshalBinary(b[..(int)(len(b) - 2)]);
+    var err = addr.UnmarshalBinary(b.slice(0, len(b) - 2));
     if (err != default!) {
         return err;
     }
-    p = AddrPortFrom(addr, byteorder.LEUint16(b[(int)(len(b) - 2)..]));
+    p = AddrPortFrom(addr, byteorder.LEUint16(b.slice(len(b) - 2)));
     return default!;
 }
 
@@ -1460,7 +1460,7 @@ public static (ΔPrefix, error) ParsePrefix(@string s) {
     if (i < 0) {
         return (new ΔPrefix(nil), new parsePrefixError(@in: s, msg: "no '/'"u8));
     }
-    var (ip, err) = ParseAddr(s[..(int)(i)]);
+    var (ip, err) = ParseAddr(s.slice(0, i));
     if (err != default!) {
         return (new ΔPrefix(nil), new parsePrefixError(@in: s, msg: err.Error()));
     }
@@ -1468,7 +1468,7 @@ public static (ΔPrefix, error) ParsePrefix(@string s) {
     if (ip.Is6() && ip.z != z6noz) {
         return (new ΔPrefix(nil), new parsePrefixError(@in: s, msg: "IPv6 zones cannot be present in a prefix"u8));
     }
-    @string bitsStr = s[(int)(i + 1)..];
+    @string bitsStr = s.slice(i + 1);
     // strconv.Atoi accepts a leading sign and leading zeroes, but we don't want that.
     if (len(bitsStr) > 1 && (bitsStr[0] < (rune)'1' || bitsStr[0] > (rune)'9')) {
         return (new ΔPrefix(nil), new parsePrefixError(@in: s, msg: "bad bits after slash: "u8 + strconv.Quote(bitsStr)));
@@ -1677,7 +1677,7 @@ public static (slice<byte>, error) MarshalBinary(this ΔPrefix p) {
         return errors.New(unexpectedSliceSizeˢ);
     }
     ΔAddr addr = default!;
-    var err = addr.UnmarshalBinary(b[..(int)(len(b) - 1)]);
+    var err = addr.UnmarshalBinary(b.slice(0, len(b) - 1));
     if (err != default!) {
         return err;
     }

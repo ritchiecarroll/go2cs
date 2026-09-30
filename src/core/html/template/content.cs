@@ -114,7 +114,7 @@ internal static (@string, contentType) stringify(params ꓸꓸꓸany argsʗp) {
         args[i] = indirectToStringerOrError(arg);
         i++;
     }
-    return (fmt.Sprint(args[..(int)(i)].ꓸꓸꓸ), contentTypePlain);
+    return (fmt.Sprint(args.slice(0, i).ꓸꓸꓸ), contentTypePlain);
 }
 
 } // end template_package

@@ -322,7 +322,7 @@ internal static void dumpProg(ж<strings.Builder> Ꮡb, ж<Prog> Ꮡp) {
         var i = Ꮡ(p.Inst, j);
         @string pc = strconv.Itoa(j);
         if (len(pc) < 3) {
-            Ꮡb.WriteString("   "u8[(int)(len(pc))..]);
+            Ꮡb.WriteString("   "u8.slice(len(pc)));
         }
         if (j == p.Start) {
             pc += "*"u8;

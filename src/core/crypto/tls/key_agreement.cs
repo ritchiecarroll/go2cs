@@ -263,7 +263,7 @@ internal static readonly @string tlsCertificateCannotBeˢ = "tls: certificate ca
     }
     skx.Value.key = new slice<byte>(len(serverECDHEParams) + sigAndHashLen + 2 + len(sig));
     copy((~skx).key, serverECDHEParams);
-    var k = (~skx).key[(int)(len(serverECDHEParams))..];
+    var k = (~skx).key.slice(len(serverECDHEParams));
     if (ka.version >= VersionTLS12) {
         k[0] = (byte)(uint16)((signatureAlgorithm >> (int)(8)));
         k[1] = (byte)(uint16)signatureAlgorithm;
@@ -314,9 +314,9 @@ internal static readonly @string tlsServerSelectedˢ4 = "tls: server selected un
     if (publicLen + 4 > len(skx.key)) {
         return errServerKeyExchange;
     }
-    var serverECDHEParams = skx.key[..(int)(4 + publicLen)];
+    var serverECDHEParams = skx.key.slice(0, 4 + publicLen);
     var publicKey = serverECDHEParams[4..];
-    var sig = skx.key[(int)(4 + publicLen)..];
+    var sig = skx.key.slice(4 + publicLen);
     if (len(sig) < 2) {
         return errServerKeyExchange;
     }

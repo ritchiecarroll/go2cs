@@ -21,15 +21,15 @@ internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@stri
     // Strip anything after a dash or plus.
     for (nint i = 0; i < len(rel); i++) {
         if (rel[i] == (rune)'-' || rel[i] == (rune)'+') {
-            rel = rel[..(int)(i)];
+            rel = rel.slice(0, i);
             break;
         }
     }
     (nint, bool) next() {
         for (nint i = 0; i < len(rel); i++) {
             if (rel[i] == (rune)'.') {
-                var (verΔ1, errΔ1) = strconv.Atoi(rel[..(int)(i)]);
-                rel = rel[(int)(i + 1)..];
+                var (verΔ1, errΔ1) = strconv.Atoi(rel.slice(0, i));
+                rel = rel.slice(i + 1);
                 return (verΔ1, errΔ1 == default!);
             }
         }

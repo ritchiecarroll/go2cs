@@ -176,7 +176,7 @@ public static (nint n, error err) WriteString(this ж<Replacer> Ꮡr, io.Writer 
             }
         }
         if (n == len(t.prefix)){
-            t.next.add(key[(int)(n)..], val, priority, Ꮡr);
+            t.next.add(key.slice(n), val, priority, Ꮡr);
         } else 
         if (n == 0){
             // First byte differs, start a new lookup table here. Looking up
@@ -201,12 +201,12 @@ public static (nint n, error err) WriteString(this ж<Replacer> Ꮡr, io.Writer 
         } else {
             // Insert new node after the common section of the prefix.
             var next = Ꮡ(new trieNode(
-                prefix: t.prefix[(int)(n)..],
+                prefix: t.prefix.slice(n),
                 next: t.next
             ));
-            t.prefix = t.prefix[..(int)(n)];
+            t.prefix = t.prefix.slice(0, n);
             t.next = next;
-            next.add(key[(int)(n)..], val, priority, Ꮡr);
+            next.add(key.slice(n), val, priority, Ꮡr);
         }
     } else 
     if (t.table != default!){
@@ -255,7 +255,7 @@ internal static (@string val, nint keylen, bool found) lookup(this ж<genericRep
         } else 
         if ((~node).prefix != ""u8 && HasPrefix(s, (~node).prefix)){
             n += len((~node).prefix);
-            s = s[(int)(len((~node).prefix))..];
+            s = s.slice(len((~node).prefix));
             node = node.Value.next;
         } else {
             break;
@@ -360,10 +360,10 @@ internal static (nint n, error err) WriteString(this ж<genericReplacer> Ꮡr, i
             }
         }
         // Ignore the empty match iff the previous loop found the empty match.
-        var (val, keylen, match) = Ꮡr.lookup(s[(int)(i)..], prevMatchEmpty);
+        var (val, keylen, match) = Ꮡr.lookup(s.slice(i), prevMatchEmpty);
         prevMatchEmpty = match && keylen == 0;
         if (match) {
-            (wn, err) = sw.WriteString(s[(int)(last)..(int)(i)]);
+            (wn, err) = sw.WriteString(s.slice(last, i));
             n += wn;
             if (err != default!) {
                 return (n, err);
@@ -380,7 +380,7 @@ internal static (nint n, error err) WriteString(this ж<genericReplacer> Ꮡr, i
         i++;
     }
     if (last != len(s)) {
-        (wn, err) = sw.WriteString(s[(int)(last)..]);
+        (wn, err) = sw.WriteString(s.slice(last));
         n += wn;
     }
     return (n, err);
@@ -403,20 +403,20 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
     nint i = 0;
     var matched = false;
     while (ᐧ) {
-        nint match = r.finder.next(s[(int)(i)..]);
+        nint match = r.finder.next(s.slice(i));
         if (match == -1) {
             break;
         }
         matched = true;
         Ꮡbuf.Grow(match + len(r.value));
-        Ꮡbuf.WriteString(s[(int)(i)..(int)(i + match)]);
+        Ꮡbuf.WriteString(s.slice(i, i + match));
         Ꮡbuf.WriteString(r.value);
         i += match + len((~r.finder).pattern);
     }
     if (!matched) {
         return s;
     }
-    Ꮡbuf.WriteString(s[(int)(i)..]);
+    Ꮡbuf.WriteString(s.slice(i));
     return buf.String();
 }
 
@@ -428,11 +428,11 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
     nint i = default!;
     nint wn = default!;
     while (ᐧ) {
-        nint match = r.finder.next(s[(int)(i)..]);
+        nint match = r.finder.next(s.slice(i));
         if (match == -1) {
             break;
         }
-        (wn, err) = sw.WriteString(s[(int)(i)..(int)(i + match)]);
+        (wn, err) = sw.WriteString(s.slice(i, i + match));
         n += wn;
         if (err != default!) {
             return (n, err);
@@ -444,7 +444,7 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
         }
         i += match + len((~r.finder).pattern);
     }
-    (wn, err) = sw.WriteString(s[(int)(i)..]);
+    (wn, err) = sw.WriteString(s.slice(i));
     n += wn;
     return (n, err);
 }
@@ -479,21 +479,21 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
             continue;
         }
         if (last != i) {
-            var (wn, errΔ1) = sw.WriteString(s[(int)(last)..(int)(i)]);
+            var (wn, errΔ1) = sw.WriteString(s.slice(last, i));
             n += wn;
             if (errΔ1 != default!) {
                 return (n, errΔ1);
             }
         }
         last = i + 1;
-        var (nw, errΔ2) = w.Write(r.Value[(int)(b)..(int)((nint)b + 1)]);
+        var (nw, errΔ2) = w.Write(r.Value.slice(b, (nint)b + 1));
         n += nw;
         if (errΔ2 != default!) {
             return (n, errΔ2);
         }
     }
     if (last != len(s)) {
-        var (nw, errΔ3) = sw.WriteString(s[(int)(last)..]);
+        var (nw, errΔ3) = sw.WriteString(s.slice(last));
         n += nw;
         if (errΔ3 != default!) {
             return (n, errΔ3);
@@ -555,7 +555,7 @@ internal static UntypedInt countCutOff => 8;
     for (nint i = 0; i < len(s); i++) {
         var b = s[i];
         if (r.replacements[b] != default!){
-            j += copy(buf[(int)(j)..], r.replacements[b]);
+            j += copy(buf.slice(j), r.replacements[b]);
         } else {
             buf[j] = b;
             j++;
@@ -576,7 +576,7 @@ internal static UntypedInt countCutOff => 8;
             continue;
         }
         if (last != i) {
-            var (nwΔ1, errΔ1) = sw.WriteString(s[(int)(last)..(int)(i)]);
+            var (nwΔ1, errΔ1) = sw.WriteString(s.slice(last, i));
             n += nwΔ1;
             if (errΔ1 != default!) {
                 return (n, errΔ1);
@@ -591,7 +591,7 @@ internal static UntypedInt countCutOff => 8;
     }
     if (last != len(s)) {
         nint nw = default!;
-        (nw, err) = sw.WriteString(s[(int)(last)..]);
+        (nw, err) = sw.WriteString(s.slice(last));
         n += nw;
     }
     return (n, err);

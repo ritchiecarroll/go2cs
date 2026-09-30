@@ -509,7 +509,7 @@ internal static bool asn1Unsigned(ref uint64 @out, slice<byte> n) {
         }
         components[i] = v;
     }
-    @out = components[..(int)(i)];
+    @out = components.slice(0, i);
     return true;
 }
 
@@ -844,7 +844,7 @@ public static bool PeekASN1Tag(this String s, asn1.Tag tag) {
         if (lenLen == 0 || lenLen > 4 || len(s) < (nint)((byte)(2 + lenLen))) {
             return false;
         }
-        var lenBytes = ((String)((s)[2..(int)((byte)(2 + lenLen))]));
+        var lenBytes = ((String)((s).slice(2, (byte)(2 + lenLen))));
         if (!lenBytes.readUnsigned(Ꮡlen32, (nint)lenLen)) {
             return false;
         }

@@ -3675,9 +3675,10 @@ the investigation *did* find (SetFinalizer keying on the pointer box; `Ꮡ`'s `i
 array) were fixed at their layers first; only what remained was disclosed.
 
 The class's bar and its standing measurements live with the roster's disclosure classes in
-[Validated Test Packages](../ValidatedTestPackages.md): the 2026-08-30 tier-0 A/B found the first point above
-disappears under a Release publish with `DOTNET_TieredCompilation=0`, so a row that needs that
-configuration says so on its own line, `execution: release-tc0` (`internal/weak` is the first). `sync`'s
+[Validated Test Packages](../ValidatedTestPackages.md), key figures visible and derivations in the
+provenance comments beside them. The 2026-08-30 tier-0 A/B found the first point above disappears under
+a Release publish with `DOTNET_TieredCompilation=0`, and that configuration has been the default since
+2026-09-02, so no row carries `execution: release-tc0` (`internal/weak` was the first to need it). `sync`'s
 three `TestOnceXGC` subtest pins, and how they count toward its Disclosed column, are recorded in
 [DATA-alloc-pins-rand-sync](../phase4/DATA-alloc-pins-rand-sync.md);
 [CENSUS-type-name-erasure](../phase4/CENSUS-type-name-erasure.md) §8 derives how `unique`'s GC rows move
@@ -3688,26 +3689,38 @@ between matched and `codegen-liveness` once its subtest names match Go's.
 `alloc-profile` and `codegen-liveness` both name something the managed runtime cannot **measure**.
 `host-limit` names something the converted test binary cannot **be** — a property of the deployment
 shape rather than of an assertion. Ruled 2026-08-15 and first pinned by `os/exec`, whose 25 leaf rows
-under `TestCommand` and `TestLookPathWindows` carry it (their 2 parents ride the disclosed-parent
+under `TestCommand` and `TestLookPathWindows` carried it (their 2 parents rode the disclosed-parent
 aggregation rule, carrying no failure text of their own).
 
-**The one capability named today: a relocatable single-file test executable.** Go's test binary is
-statically linked, so a test may copy it and run the copy — `os/exec`'s `installExe` does exactly
-that, and both of its `LookPath`/`Command` fixture tables are built on it. A converted test host is
-an **apphost**: a stub bound at build time to a managed assembly of the same base name that must sit
-beside it. Copy the one file and hostfxr answers `LibHostAppRootFindFailure` — `exit status
-0x8000809a`, *"The application to execute does not exist"* — which is byte for byte what the tests
-report, and is the pinned signature. Satisfying it means publishing every converted test host
-self-contained single-file: ~70 MB and a publish rather than a build, per package.
+**The founding capability, retired 2026-08-27: a relocatable single-file test executable.** Go's
+test binary is statically linked, so a test may copy it and run the copy — `os/exec`'s `installExe`
+does exactly that, and both of its `LookPath`/`Command` fixture tables are built on it. A converted
+test host was then an **apphost**: a stub bound at build time to a managed assembly of the same base
+name that must sit beside it. Copy the one file and hostfxr answered `LibHostAppRootFindFailure` —
+`exit status 0x8000809a`, *"The application to execute does not exist"* — which was byte for byte
+what the tests reported, and was the pinned signature. Satisfying it meant publishing every
+converted test host self-contained single-file (~70 MB and a publish rather than a build, per
+package). The `-tests` host has published that way since 2026-08-27, so the copy runs, the 27
+`os/exec` verdicts pass, and those entries were removed.
+
+**The live entries** name other properties of the shape, and not every one retires through a shape
+change. They are in `crypto/tls` (`TestBogoSuite`: BoringSSL's runner spawns the host once per case
+inside Go's own 10-minute test-binary wall, and the run is bound by throughput rather than
+start-up), `os` (`TestRemoveAllNoFcntl`, linux: a CLR-hosted child's own start-up `fcntl` calls
+exceed the test's budget), `os/exec` (`TestCredentialNoSetGroups`) and `syscall` (`TestExecPtrace`),
+where `posix_spawn` cannot express the credential or ptrace step, and `syscall` again
+(`TestPrlimitFileLimit`, linux: the managed runtime's open-descriptor floor, which no named change
+lowers). The roster's `host-limit` class lists each with its measurement and what retires it.
 
 **The bar, and why the class stays narrow.** A `host-limit` entry must pin a **structural** property
 of the current deployment shape — provable from how the artifact is built, not from how far an
 implementation has got — and never an unimplemented-but-fixable defect. The distinction is the same
-one that keeps `log` unbanked rather than disclosed: `log`'s `TestAll` wants a `.go:63` position, and
-a Go-source position map would satisfy it exactly, so it is a deferred capability and no disclosure.
+one that kept `log` unbanked rather than disclosed while it waited: `log`'s `TestAll` wants a `.go:63`
+position, and a Go-source position map satisfied it exactly, so it was a deferred capability and no
+disclosure (`log` has since banked on the position map).
 Nothing about an apphost's binding is deferred work of that kind; it is what the artifact *is*.
 
-**Why a disclosure rather than a capability gate**, given that `unsupportedRuntimeCapabilities` names
+**Why a disclosure rather than a capability gate**, when `unsupportedRuntimeCapabilities` then named
 this very capability for `os_test.TestRemoveAllWithExecutedProcess`. The gate arm was built and
 measured on `os/exec` before the ruling, and it fails on three counts recorded in
 [BOARD-next-validation-candidates](../phase4/BOARD-next-validation-candidates.md): a gate keys on the
@@ -3715,10 +3728,14 @@ DECLARATION, so it withdrew 40 verdict rows where only 27 were failing, destroyi
 passes; it is self-defeating against a `TestMain` that asserts the whole suite ran, because greening
 the suite is what arms that census (`helper command unused: "printpath"`, host exit 1, package
 validates at no count); and it hides the very rows whose future passing is the signal the limit has
-been lifted. A disclosure keeps every row running, visible and compared, so the class **retires
-itself**: build the single-file host and these 25 rows start passing, the disclosed count stops
-matching, and the sweep fails until the entries are removed. `os`'s gate entry predates the ruling
-and `os` is not yet on the roster; its disposition is decided when it banks.
+been lifted. A disclosure keeps every row running, visible and compared, so each entry **retires
+itself**: once the shape gains its property the rows start passing, the disclosed count stops
+matching, and the sweep fails until the entries are removed, which is how the founding entry left
+on 2026-08-27, when the host began publishing single-file and `os/exec`'s rows passed. `os`'s gate
+entry predated the ruling and outlived the capability, withdrawing `TestRemoveAllWithExecutedProcess`
+from both runs; it retired with the withdrawal gate change (see
+`TestNoEntryWithdrawsATestOnTheSingleFileHostCapability`), and the test now runs and reports a
+verdict like any other row.
 
 ## `deferred` and `structural` — the two labels every allocation-count disclosure resolves into
 

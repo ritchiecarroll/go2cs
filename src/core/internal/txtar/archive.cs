@@ -105,11 +105,11 @@ internal static (slice<byte> before, @string name, slice<byte> after) findFileMa
     nint i = default!;
     while (ᐧ) {
         {
-            (name, after) = isMarker(data[(int)(i)..]); if (name != ""u8) {
-                return (data[..(int)(i)], name, after);
+            (name, after) = isMarker(data.slice(i)); if (name != ""u8) {
+                return (data.slice(0, i), name, after);
             }
         }
-        nint j = bytes.Index(data[(int)(i)..], newlineMarker);
+        nint j = bytes.Index(data.slice(i), newlineMarker);
         if (j < 0) {
             return (fixNL(data), "", default!);
         }
@@ -128,13 +128,13 @@ internal static (@string name, slice<byte> after) isMarker(slice<byte> data) {
     }
     {
         nint i = bytes.IndexByte(data, (rune)'\n'); if (i >= 0) {
-            (data, after) = (data[..(int)(i)], data[(int)(i + 1)..]);
+            (data, after) = (data.slice(0, i), data.slice(i + 1));
         }
     }
     if (!(bytes.HasSuffix(data, markerEnd) && len(data) >= len(marker) + len(markerEnd))) {
         return ("", default!);
     }
-    return (strings.TrimSpace(((@string)(data[(int)(len(marker))..(int)(len(data) - len(markerEnd))]))), after);
+    return (strings.TrimSpace(((@string)(data.slice(len(marker), len(data) - len(markerEnd))))), after);
 }
 
 // If data is empty or ends in \n, fixNL returns data.

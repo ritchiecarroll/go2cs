@@ -120,7 +120,7 @@ internal static ж<encoderState> newEncoderState(this ж<Encoder> Ꮡenc, ж<enc
     binary.BigEndian.PutUint64(state.buf[1..], x);
     nint bc = (bits.LeadingZeros64(x) >> (int)(3)); // 8 - bytelen(x)
     state.buf[bc] = (uint8)(bc - (nint)uint64Size); // and then we subtract 8 to get -bytelen(x)
-    state.b.Write(state.buf[(int)(bc)..(int)(uint64Size + 1)]);
+    state.b.Write(state.buf.slice(bc, uint64Size + 1));
 }
 
 // encodeInt writes an encoded signed integer to state.w.

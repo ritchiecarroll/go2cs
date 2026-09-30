@@ -350,7 +350,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
 L:
     foreach (var (i, xΔ2) in ind[..(int)(len(ind) - 1)]) {
         if (xΔ2 > 0) {
-            foreach (var (j, y) in ind[(int)(i + 1)..]) {
+            foreach (var (j, y) in ind.slice(i + 1)) {
                 if (y >= 0 && y < xΔ2) {
                     // The value y corresponds to the expression e.Index[i+1+j].
                     // Because y >= 0, it must have been set from the expression

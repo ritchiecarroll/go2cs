@@ -101,11 +101,12 @@ public sealed class Goroutine
     // The panic observer, when a HOST installed one. Read once per escaping panic and never cleared.
     private static Action<PanicException>? s_panicObserver;
 
-    private Goroutine(long id, bool isMain, System.Reflection.MethodBase? creator, long parentId, System.Reflection.MethodBase? entry)
+    private Goroutine(long id, bool isMain, System.Reflection.MethodBase? creator, int creatorILOffset, long parentId, System.Reflection.MethodBase? entry)
     {
         Id = id;
         IsMain = isMain;
         Creator = creator;
+        CreatorILOffset = creatorILOffset;
         ParentId = parentId;
         Entry = entry;
         IsSystem = !isMain && IsSystemCreator(creator);
@@ -204,11 +205,15 @@ public sealed class Goroutine
     // The function that executed the `go` statement -- Go's gp.gopc, resolved to its function -- and
     // the goroutine it ran on (gp.parentGoid). Captured on the CREATING thread at Start, by an
     // identity-located walk past golib's own launcher frames, WITHOUT file info (a per-launch PDB
-    // read would price every `go` statement; the traceback consumers that matter -- net/http's
-    // goroutine-leak filter among them -- match the `created by <func>` text, never its position).
-    // Null for the main goroutine and for a thread a host entered directly: Go prints no creator
-    // for goroutine 1 either.
+    // read would price every `go` statement). Null for the main goroutine and for a thread a host
+    // entered directly: Go prints no creator for goroutine 1 either.
     internal System.Reflection.MethodBase? Creator { get; }
+
+    // The IL offset of the `go` statement within Creator, from the same walk (Go's gp.gopc itself,
+    // before it is resolved to a line): read from the frame the walk already holds, so it adds nothing
+    // to a `go` statement. The traceback resolves it to a file and line only when it prints
+    // (runtime's appendCreatedBy). StackFrame.OFFSET_UNKNOWN (-1) where the frame carries none.
+    internal int CreatorILOffset { get; }
 
     internal long ParentId { get; }
 
@@ -358,6 +363,21 @@ public sealed class Goroutine
     public static Scope Enter() => Enter(creator: null, parentId: 0, entry: null);
 
     /// <summary>
+    /// Marks the calling thread as a goroutine that <paramref name="creator"/> started from
+    /// <paramref name="parent"/>, for a host thread that stands in for a Go <c>go</c> statement the
+    /// host itself executes.
+    /// </summary>
+    /// <remarks>
+    /// The converted-test host runs each test on a thread it creates, where Go's
+    /// <c>testing.(*T).Run</c> executes <c>go tRunner(t, f)</c>: the traceback's
+    /// <c>created by</c> line names that creator and the parent's goroutine, as Go's does.
+    /// <paramref name="parent"/> is read on the CREATING thread (<see cref="Current"/> there) and
+    /// handed across. No IL offset is known for a creator given this way, so the position beneath
+    /// the line is the unknown one. Otherwise exactly <see cref="Enter()"/>.
+    /// </remarks>
+    public static Scope Enter(System.Reflection.MethodBase creator, Goroutine? parent) => Enter(creator, parent?.Id ?? 0, entry: null);
+
+    /// <summary>
     /// Marks the calling thread as running one of the RUNTIME's own goroutines — a system goroutine,
     /// in Go's terms — started by <paramref name="starter"/>.
     /// </summary>
@@ -375,13 +395,11 @@ public sealed class Goroutine
         if (t_current is not null)
             return default;
 
-        Goroutine goroutine = Register(isMain: false, creator, parentId, entry);
-
         // Go's `newg.labels = mp.curg.labels`, arriving through the ExecutionContext the creating
         // thread captured at Thread.Start. Seeding the mirror HERE rather than at the set site is
         // what makes an inherited label visible to a profile: the child never calls setProfLabel,
         // so nothing else would ever write its entry.
-        goroutine.m_profileLabels = s_profileLabels.Value;
+        Goroutine goroutine = Register(isMain: false, creator, parentId, entry, s_profileLabels.Value);
 
         return Adopt(goroutine);
     }
@@ -673,7 +691,20 @@ public sealed class Goroutine
         s_profileLabels.Value = labels;
 
         if (t_current is { } goroutine)
-            Volatile.Write(ref goroutine.m_profileLabels, labels);
+        {
+            // Shared, so a profile snapshot (exclusive) sees this set entirely before or entirely
+            // after its one instant (s_profileGate).
+            s_profileGate.EnterReadLock();
+
+            try
+            {
+                Volatile.Write(ref goroutine.m_profileLabels, labels);
+            }
+            finally
+            {
+                s_profileGate.ExitReadLock();
+            }
+        }
 
         ProfileLabelEvents.Record(labels);
     }
@@ -731,19 +762,68 @@ public sealed class Goroutine
     /// </remarks>
     public static GoroutineProfileEntry[] ProfileSnapshot()
     {
-        Goroutine[] live = Snapshot();
-        List<GoroutineProfileEntry> entries = new(live.Length);
+        // ONE instant across the set and the labels: exclusive against every registration and every
+        // label set (s_profileGate), so no `go` statement or label change can land between the copy
+        // and the reads however long this thread is preempted there.
+        s_profileGate.EnterWriteLock();
 
-        foreach (Goroutine goroutine in live)
+        try
         {
-            if (!goroutine.CountsAsUser)
-                continue;
+            Goroutine[] live = Snapshot();
 
-            entries.Add(new GoroutineProfileEntry(goroutine.Entry, Volatile.Read(ref goroutine.m_profileLabels)));
+            // The guard seam: between the copy of the set and the reads of the labels, the window a
+            // preempted profiling thread stalls in (GoroutineProfileInstantTests).
+            SnapshotSeamForGuard?.Invoke();
+
+            List<GoroutineProfileEntry> entries = new(live.Length);
+
+            foreach (Goroutine goroutine in live)
+            {
+                if (!goroutine.CountsAsUser)
+                    continue;
+
+                // The labels REFERENCE: the payload is immutable once set (Go's labelMap is), so the
+                // reference read here is the goroutine's labels at the instant.
+                entries.Add(new GoroutineProfileEntry(goroutine.Entry, Volatile.Read(ref goroutine.m_profileLabels)));
+            }
+
+            return [.. entries];
         }
-
-        return [.. entries];
+        finally
+        {
+            s_profileGate.ExitWriteLock();
+        }
     }
+
+    // THE PROFILE GATE -- Go's stop-the-world, scoped to exactly what a goroutine profile reads. Go takes
+    // its goroutine profile with the world stopped, and every goroutine that runs afterwards records
+    // itself first (tryRecordGoroutineProfile), so the set and the labels are one instant. Here nothing
+    // stops the other goroutines and each is a thread, so a profiling thread preempted between copying
+    // the set and reading the labels paired an old set with new labels: runtime/pprof's
+    // TestGoroutineProfileConcurrency/goroutine_launches flake.
+    //
+    //   SHARED: Register (the insertion into s_live together with the child's label seed) and
+    //     SetProfileLabels (the mirror write). Shared holders never block each other.
+    //   EXCLUSIVE: ProfileSnapshot, around the copy and the label reads -- one linearization point.
+    //     Exclusive holders exclude each other, so two profiles never interleave either.
+    //   OUTSIDE: exits. Unregister takes no gate: a goroutine gone before the exclusive acquire is gone
+    //     (Go too, after goexit), one alive at it is included, and its labels object stays readable
+    //     because the entry holds the reference.
+    //
+    // NO RECURSION, by construction and enforced: nothing inside a shared section reaches
+    // ProfileSnapshot (Register and the mirror write call nothing that profiles), and the exclusive
+    // section allocates and reads but never registers or sets labels. NoRecursion makes a violation
+    // throw LockRecursionException instead of deadlocking.
+    //
+    // COST: one uncontended shared acquire per go statement and per label set; measured with the cut.
+    private static readonly ReaderWriterLockSlim s_profileGate = new(LockRecursionPolicy.NoRecursion);
+
+    /// <summary>
+    /// The guard seam for <see cref="ProfileSnapshot"/>: invoked on the profiling thread after the set
+    /// is copied and before any label is read, so a test can place another goroutine's work exactly
+    /// where a preempted profiler would let it land. Null outside those tests.
+    /// </summary>
+    internal static Action? SnapshotSeamForGuard;
 
     /// <summary>
     /// Every live goroutine, ordered by the sequence in which they were created.
@@ -779,7 +859,8 @@ public sealed class Goroutine
         // Captured HERE, on the thread executing the `go` statement -- the new thread's first frame
         // is Run, which knows nothing about who asked for it. `body` IS the goroutine's start
         // function on this overload: nothing wrapped it, so its Method names the Go function.
-        StartWithCreator(body, CreatorFrame(), body.Method);
+        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorFrame();
+        StartWithCreator(body, creator, ilOffset, body.Method);
     }
 
     /// <summary>
@@ -795,16 +876,18 @@ public sealed class Goroutine
     /// </remarks>
     public static void Start(Action body, Delegate entry)
     {
-        StartWithCreator(body, CreatorFrame(), entry.Method);
+        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorFrame();
+        StartWithCreator(body, creator, ilOffset, entry.Method);
     }
 
     /// <summary>
     /// The guard seam for <see cref="Start"/>: the same launch with the creator SUPPLIED, so a test can
     /// register a goroutine as the runtime's own without a runtime function to execute the `go`.
     /// </summary>
-    internal static void StartForGuard(Action body, System.Reflection.MethodBase? creator) => StartWithCreator(body, creator, body.Method);
+    internal static void StartForGuard(Action body, System.Reflection.MethodBase? creator) =>
+        StartWithCreator(body, creator, System.Diagnostics.StackFrame.OFFSET_UNKNOWN, body.Method);
 
-    private static void StartWithCreator(Action body, System.Reflection.MethodBase? creator, System.Reflection.MethodBase? entry)
+    private static void StartWithCreator(Action body, System.Reflection.MethodBase? creator, int creatorILOffset, System.Reflection.MethodBase? entry)
     {
         long parentId = t_current?.Id ?? 0;
 
@@ -820,8 +903,7 @@ public sealed class Goroutine
         // out of NumGoroutine, runtime.Stack(all) and the goroutine profile until that thread was
         // scheduled -- which runtime/pprof's "goroutine launches" subtest reads as a missing child.
         // The labels are this thread's AsyncLocal, the value the child's flowed context would hold.
-        Goroutine goroutine = Register(isMain: false, creator, parentId, entry);
-        goroutine.m_profileLabels = s_profileLabels.Value;
+        Goroutine goroutine = Register(isMain: false, creator, parentId, entry, s_profileLabels.Value, creatorILOffset);
 
         // Go's newproc traces the create on the creating thread (ExecutionTracer, Q28).
         if (ExecutionTracer.Enabled)
@@ -910,15 +992,16 @@ public sealed class Goroutine
         if (t_current is not null)
             return;
 
-        t_current = s_main = Register(isMain: true, creator: null, parentId: 0, entry: null);
+        t_current = s_main = Register(isMain: true, creator: null, parentId: 0, entry: null, labels: null);
     }
 
     // The first frame above golib's own launch machinery -- the `goǃ` rungs live on `builtin`, Start
     // and this walk on Goroutine -- located by IDENTITY rather than by a skip count, so a rung the
     // JIT inlines (they are one-line bodies, exactly the shape it inlines eagerly) cannot shift the
-    // answer onto the wrong function. No file info: see Creator.
+    // answer onto the wrong function. No file info: see Creator. The frame's IL offset rides along
+    // (see CreatorILOffset).
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-    private static System.Reflection.MethodBase? CreatorFrame()
+    private static (System.Reflection.MethodBase? method, int ilOffset) CreatorFrame()
     {
         foreach (System.Diagnostics.StackFrame frame in new System.Diagnostics.StackTrace(fNeedFileInfo: false).GetFrames())
         {
@@ -932,17 +1015,35 @@ public sealed class Goroutine
             if (declaring == typeof(Goroutine) || declaring == typeof(builtin))
                 continue;
 
-            return method;
+            return (method, frame.GetILOffset());
         }
 
-        return null;
+        return (null, System.Diagnostics.StackFrame.OFFSET_UNKNOWN);
     }
 
-    private static Goroutine Register(bool isMain, System.Reflection.MethodBase? creator, long parentId, System.Reflection.MethodBase? entry)
+    // `labels` seeds the profile mirror INSIDE the gate's shared section, together with the insertion:
+    // a goroutine a profile can see is never one whose labels it cannot (see s_profileGate).
+    private static Goroutine Register(bool isMain, System.Reflection.MethodBase? creator, long parentId, System.Reflection.MethodBase? entry, object? labels,
+        int creatorILOffset = System.Diagnostics.StackFrame.OFFSET_UNKNOWN)
     {
-        Goroutine goroutine = new(Interlocked.Increment(ref s_nextId), isMain, creator, parentId, entry);
+        s_profileGate.EnterReadLock();
 
-        s_live[goroutine.Id] = goroutine;
+        Goroutine goroutine;
+
+        try
+        {
+            goroutine = new(Interlocked.Increment(ref s_nextId), isMain, creator, creatorILOffset, parentId, entry)
+            {
+                m_profileLabels = labels
+            };
+
+            s_live[goroutine.Id] = goroutine;
+        }
+        finally
+        {
+            s_profileGate.ExitReadLock();
+        }
+
         Interlocked.Increment(ref s_count);
 
         if (goroutine.IsSystem)

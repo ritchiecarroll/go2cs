@@ -79,7 +79,7 @@ internal static void readHosts() {
                 {
                     nint i = bytealg.IndexByteString(line, (rune)'#'); if (i >= 0) {
                         // Discard comments.
-                        line = line[0..(int)(i)];
+                        line = line.slice(0, i);
                     }
                 }
                 var f = getFields(line);

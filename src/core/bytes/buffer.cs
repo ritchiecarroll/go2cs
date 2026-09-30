@@ -51,7 +51,7 @@ internal static nint maxInt => /* int(^uint(0) >> 1) */ unchecked((nint)92233720
 // The slice aliases the buffer content at least until the next buffer modification,
 // so immediate changes to the slice will affect the result of future reads.
 [GoRecv] public static slice<byte> Bytes(this ref Buffer b) {
-    return b.buf[(int)(b.off)..];
+    return b.buf.slice(b.off);
 }
 
 // AvailableBuffer returns an empty buffer with b.Available() capacity.
@@ -59,7 +59,7 @@ internal static nint maxInt => /* int(^uint(0) >> 1) */ unchecked((nint)92233720
 // passed to an immediately succeeding [Buffer.Write] call.
 // The buffer is only valid until the next write operation on b.
 [GoRecv] public static slice<byte> AvailableBuffer(this ref Buffer b) {
-    return b.buf[(int)(len(b.buf))..];
+    return b.buf.slice(len(b.buf));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -76,7 +76,7 @@ public static @string String(this ж<Buffer> Ꮡb) {
         // Special case, useful in debugging.
         return nilˢ;
     }
-    return ((@string)(b.buf[(int)(b.off)..]));
+    return ((@string)(b.buf.slice(b.off)));
 }
 
 // empty reports whether the unread portion of the buffer is empty.
@@ -113,7 +113,7 @@ public static @string String(this ж<Buffer> Ꮡb) {
     if (n < 0 || n > b.Len()) {
         throw panic("bytes.Buffer: truncation out of range");
     }
-    b.buf = b.buf[..(int)(b.off + n)];
+    b.buf = b.buf.slice(0, b.off + n);
 }
 
 // Reset resets the buffer to be empty,
@@ -131,7 +131,7 @@ public static @string String(this ж<Buffer> Ꮡb) {
 [GoRecv] internal static (nint, bool) tryGrowByReslice(this ref Buffer b, nint n) {
     {
         nint l = len(b.buf); if (n <= cap(b.buf) - l) {
-            b.buf = b.buf[..(int)(l + n)];
+            b.buf = b.buf.slice(0, l + n);
             return (l, true);
         }
     }
@@ -163,17 +163,17 @@ public static @string String(this ж<Buffer> Ꮡb) {
         // slice. We only need m+n <= c to slide, but
         // we instead let capacity get twice as large so we
         // don't spend all our time copying.
-        copy(b.buf, b.buf[(int)(b.off)..]);
+        copy(b.buf, b.buf.slice(b.off));
     } else 
     if (c > maxInt - c - n){
         throw panic(ErrTooLarge);
     } else {
         // Add b.off to account for b.buf[:b.off] being sliced off the front.
-        b.buf = growSlice(b.buf[(int)(b.off)..], b.off + n);
+        b.buf = growSlice(b.buf.slice(b.off), b.off + n);
     }
     // Restore b.off and len(b.buf).
     b.off = 0;
-    b.buf = b.buf[..(int)(m + n)];
+    b.buf = b.buf.slice(0, m + n);
     return m;
 }
 
@@ -187,7 +187,7 @@ public static @string String(this ж<Buffer> Ꮡb) {
         throw panic("bytes.Buffer.Grow: negative count");
     }
     nint m = b.grow(n);
-    b.buf = b.buf[..(int)(m)];
+    b.buf = b.buf.slice(0, m);
 }
 
 // Write appends the contents of p to the buffer, growing the buffer as
@@ -199,7 +199,7 @@ public static @string String(this ж<Buffer> Ꮡb) {
     if (!ok) {
         m = b.grow(len(p));
     }
-    return (copy(b.buf[(int)(m)..], p), default!);
+    return (copy(b.buf.slice(m), p), default!);
 }
 
 // WriteString appends the contents of s to the buffer, growing the buffer as
@@ -211,7 +211,7 @@ public static @string String(this ж<Buffer> Ꮡb) {
     if (!ok) {
         m = b.grow(len(s));
     }
-    return (copy(b.buf[(int)(m)..], s), default!);
+    return (copy(b.buf.slice(m), s), default!);
 }
 
 // MinRead is the minimum slice size passed to a [Buffer.Read] call by
@@ -230,12 +230,12 @@ public static UntypedInt MinRead => 512;
     b.lastRead = opInvalid;
     while (ᐧ) {
         nint i = b.grow(MinRead);
-        b.buf = b.buf[..(int)(i)];
-        var (m, e) = r.Read(b.buf[(int)(i)..(int)(cap(b.buf))]);
+        b.buf = b.buf.slice(0, i);
+        var (m, e) = r.Read(b.buf.slice(i, cap(b.buf)));
         if (m < 0) {
             throw panic(errNegativeRead);
         }
-        b.buf = b.buf[..(int)(i + m)];
+        b.buf = b.buf.slice(0, i + m);
         n += (int64)m;
         if (AreEqual(e, io.EOF)) {
             return (n, default!); // e is EOF, so return nil explicitly
@@ -272,7 +272,7 @@ internal static slice<byte> growSlice(slice<byte> b, nint n) {
         }
         var b2 = appendꓸꓸꓸ(slice<byte>(default!), makeꓸꓸꓸ<byte>(c));
         nint i = copy(b2, b);
-        return b2[..(int)(i)];
+        return b2.slice(0, i);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }
@@ -288,7 +288,7 @@ internal static slice<byte> growSlice(slice<byte> b, nint n) {
     b.lastRead = opInvalid;
     {
         nint nBytes = b.Len(); if (nBytes > 0) {
-            var (m, e) = w.Write(b.buf[(int)(b.off)..]);
+            var (m, e) = w.Write(b.buf.slice(b.off));
             if (m > nBytes) {
                 throw panic("bytes.Buffer.WriteTo: invalid Write count");
             }
@@ -338,7 +338,7 @@ internal static slice<byte> growSlice(slice<byte> b, nint n) {
     if (!ok) {
         m = b.grow(utf8.UTFMax);
     }
-    b.buf = utf8.AppendRune(b.buf[..(int)(m)], r);
+    b.buf = utf8.AppendRune(b.buf.slice(0, m), r);
     return (len(b.buf) - m, default!);
 }
 
@@ -358,7 +358,7 @@ internal static slice<byte> growSlice(slice<byte> b, nint n) {
         }
         return (0, io.EOF);
     }
-    n = copy(p, b.buf[(int)(b.off)..]);
+    n = copy(p, b.buf.slice(b.off));
     b.off += n;
     if (n > 0) {
         b.lastRead = opRead;
@@ -376,7 +376,7 @@ internal static slice<byte> growSlice(slice<byte> b, nint n) {
     if (n > m) {
         n = m;
     }
-    var data = b.buf[(int)(b.off)..(int)(b.off + n)];
+    var data = b.buf.slice(b.off, b.off + n);
     b.off += n;
     if (n > 0) {
         b.lastRead = opRead;
@@ -417,7 +417,7 @@ internal static slice<byte> growSlice(slice<byte> b, nint n) {
         b.lastRead = opReadRune1;
         return ((rune)c, 1, default!);
     }
-    (r, var n) = utf8.DecodeRune(b.buf[(int)(b.off)..]);
+    (r, var n) = utf8.DecodeRune(b.buf.slice(b.off));
     b.off += n;
     b.lastRead = ((readOp)(int8)n);
     return (r, n, default!);
@@ -481,13 +481,13 @@ internal static error errUnreadByte = errors.New("bytes.Buffer: UnreadByte: prev
     slice<byte> line = default!;
     error err = default!;
 
-    nint i = IndexByte(b.buf[(int)(b.off)..], delim);
+    nint i = IndexByte(b.buf.slice(b.off), delim);
     nint end = b.off + i + 1;
     if (i < 0) {
         end = len(b.buf);
         err = io.EOF;
     }
-    line = b.buf[(int)(b.off)..(int)(end)];
+    line = b.buf.slice(b.off, end);
     b.off = end;
     b.lastRead = opRead;
     return (line, err);

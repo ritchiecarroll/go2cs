@@ -193,7 +193,7 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
     }
     for (nint end = start; end < len(section); end++) {
         if (section[end] == 0) {
-            return (((@string)(section[(int)(start)..(int)(end)])), true);
+            return (((@string)(section.slice(start, end))), true);
         }
     }
     return ("", false);
@@ -240,7 +240,7 @@ internal static readonly @string strˢ = "str"u8;
             return (default!, errΔ1);
         }
         if (0 < (~s).VirtualSize && (~s).VirtualSize < (~s).Size) {
-            b = b[..(int)((~s).VirtualSize)];
+            b = b.slice(0, (nint)((~s).VirtualSize));
         }
         if (len(b) >= 12 && ((sstring)(b[..4])) == "ZLIB"u8) {
             var dlen = binary.BigEndian.Uint64(b[4..12]);
@@ -377,7 +377,7 @@ internal static readonly @string strˢ = "str"u8;
         return (default!, err);
     }
     // seek to the virtual address specified in the import data directory
-    d = d[(int)(idd.VirtualAddress - (~ds).VirtualAddress)..];
+    d = d.slice((nint)(idd.VirtualAddress - (~ds).VirtualAddress));
     // start decoding the import directory
     slice<ImportDirectory> ida = default!;
     while (len(d) >= 20) {
@@ -407,7 +407,7 @@ internal static readonly @string strˢ = "str"u8;
         (dt.dll, _) = getString(names, (nint)(dt.Name - (~ds).VirtualAddress));
         (d, _) = ds.Data();
         // seek to OriginalFirstThunk
-        d = d[(int)(dt.OriginalFirstThunk - (~ds).VirtualAddress)..];
+        d = d.slice((nint)(dt.OriginalFirstThunk - (~ds).VirtualAddress));
         while (len(d) > 0) {
             if (pe64){
                 // 64bit

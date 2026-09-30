@@ -97,12 +97,12 @@ internal static bool getenvAgrees(slice<@string> env) {
         if (i < 0) {
             return false;
         }
-        @string name = e[..(int)(i + 1)];
+        @string name = e.slice(0, i + 1);
         if (strings.HasPrefix(name, "="u8)) {
             continue;
         }
         {
-            var (got, ok) = syscall.Getenv(name); if (!ok || got != e[(int)(i + 2)..]) {
+            var (got, ok) = syscall.Getenv(name); if (!ok || got != e.slice(i + 2)) {
                 return false;
             }
         }

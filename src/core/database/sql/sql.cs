@@ -1128,8 +1128,8 @@ public static void SetMaxIdleConns(this ж<DB> Ꮡdb, nint n) {
     nint idleCount = len(db.freeConn);
     nint maxIdle = db.maxIdleConnsLocked();
     if (idleCount > maxIdle) {
-        closing = db.freeConn[(int)(maxIdle)..];
-        db.freeConn = db.freeConn[..(int)(maxIdle)];
+        closing = db.freeConn.slice(maxIdle);
+        db.freeConn = db.freeConn.slice(0, maxIdle);
     }
     db.maxIdleClosed += (int64)len(closing);
     db.mu.Unlock();
@@ -1296,8 +1296,8 @@ internal static void connectionCleaner(this ж<DB> Ꮡdb, time.Duration d) {
             var c = db.freeConn[i];
             if ((~c).returnedAt.Before(idleSince)) {
                 i++;
-                closing = db.freeConn.slice(-1, i, i);
-                db.freeConn = db.freeConn[(int)(i)..];
+                closing = db.freeConn.slice(0, i, i);
+                db.freeConn = db.freeConn.slice(i);
                 idleClosing = (int64)len(closing);
                 db.maxIdleTimeClosed += idleClosing;
                 break;
@@ -1323,9 +1323,9 @@ internal static void connectionCleaner(this ж<DB> Ꮡdb, time.Duration d) {
                 nint last = len(db.freeConn) - 1;
                 // Use slow delete as order is required to ensure
                 // connections are reused least idle time first.
-                copy(db.freeConn[(int)(i)..], db.freeConn[(int)(i + 1)..]);
+                copy(db.freeConn.slice(i), db.freeConn.slice(i + 1));
                 db.freeConn[last] = default!;
-                db.freeConn = db.freeConn[..(int)(last)];
+                db.freeConn = db.freeConn.slice(0, last);
                 i--;
             } else 
             {
@@ -1501,7 +1501,7 @@ internal static (ж<driverConn>, error) conn(this ж<DB> Ꮡdb, context.Context 
         // Reuse the lowest idle time connection so we can close
         // connections which remain idle as soon as possible.
         var conn = db.freeConn[last];
-        db.freeConn = db.freeConn[..(int)(last)];
+        db.freeConn = db.freeConn.slice(0, last);
         conn.Value.inUse = true;
         if (conn.expired(lifetime)) {
             db.maxLifetimeClosed++;
@@ -2990,7 +2990,7 @@ internal static (Result, error) resultFromStatement(context.Context ctx, driver.
             s.css[i] = s.css[len(s.css) - 1];
             // Zero out the last element (for GC) before shrinking the slice.
             s.css[len(s.css) - 1] = new ΔconnStmt(nil);
-            s.css = s.css[..(int)(len(s.css) - 1)];
+            s.css = s.css.slice(0, len(s.css) - 1);
             i--;
         }
     }
@@ -3527,7 +3527,7 @@ internal static RawBytes setrawbuf(this ж<Rows> Ꮡrs, slice<byte> b) {
     }
     nint off = len(rs.raw);
     rs.raw = b;
-    return ((RawBytes)(rs.raw[(int)(off)..]));
+    return ((RawBytes)(rs.raw.slice(off)));
 }
 
 internal static error errRowsClosed = errors.New("sql: Rows are closed"u8);
@@ -3977,7 +3977,7 @@ internal static (int64, error) RowsAffected(this driverResult dr) {
 
 [MethodImpl(MethodImplOptions.NoInlining)] internal static @string stack() {
     array<byte> buf = new(2048); /* (2 << (int)(10)) */
-    return ((@string)(buf[..(int)(runtime.Stack(buf[..], false))]));
+    return ((@string)(buf.slice(0, runtime.Stack(buf[..], false))));
 }
 
 // withLock runs while holding lk.
@@ -4080,7 +4080,7 @@ internal static void withLock(sync.Locker lk, Action fn) {
     }
     // Zero out last element (for GC) before shrinking the slice.
     s.s[len(s.s) - 1] = new connRequestAndIndex(nil);
-    s.s = s.s[..(int)(len(s.s) - 1)];
+    s.s = s.s.slice(0, len(s.s) - 1);
 }
 
 // TakeRandom returns and removes a random element from s

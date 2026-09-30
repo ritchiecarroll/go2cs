@@ -165,6 +165,12 @@ internal sealed class TestReporter(string package, bool json, bool verbose)
     /// When Console.Out has been replaced (Console.SetOut, as an in-process host capture does), the line
     /// goes to that writer instead, in one call, because that is where the caller asked output to go.
     /// </para>
+    /// <para>
+    /// The line ends in a bare "\n" on every OS, as Go's test binary's lines do, never the writer's NewLine
+    /// ("\r\n" on windows). A Go test that re-executes its own binary reads this output back: runtime's
+    /// TestFinalizerRegisterABI requires strings.Contains(out, "PASS\n"), and a child that passed but printed
+    /// "PASS\r\n" failed it (D5). The comparer splits on "\n" and reads either ending.
+    /// </para>
     /// </remarks>
     internal static void WriteEventLine(string line)
     {
@@ -172,11 +178,11 @@ internal sealed class TestReporter(string package, bool json, bool verbose)
         {
             if (!(ProcessConsoleForGuard ?? ConsoleOutIsTheProcessConsole()))
             {
-                Console.Out.WriteLine(line);
+                Console.Out.Write(line + "\n");
                 return;
             }
 
-            byte[] bytes = Console.OutputEncoding.GetBytes(line + Console.Out.NewLine);
+            byte[] bytes = Console.OutputEncoding.GetBytes(line + "\n");
             Stream stdout = StdoutForGuard ?? s_stdout.Value;
 
             // Anything already written through Console.Out stays ahead of this line.

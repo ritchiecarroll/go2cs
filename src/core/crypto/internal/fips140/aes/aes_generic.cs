@@ -147,7 +147,7 @@ internal static void expandKeyGeneric(ж<blockExpanded> Ꮡc, slice<byte> key) {
     nint i = default!;
     nint nk = len(key) / 4;
     for (i = 0; i < nk; i++) {
-        c.enc[i] = byteorder.BEUint32(key[(int)(4 * i)..]);
+        c.enc[i] = byteorder.BEUint32(key.slice(4 * i));
     }
     for (; i < c.roundKeysSize(); i++) {
         var t = c.enc[i - 1];

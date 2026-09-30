@@ -292,8 +292,8 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
             return fmt.Errorf("mismatched profile records and tags"u8);
         }
         var count = data[2];
-        var stk = data[3..(int)(data[0])];
-        data = data[(int)(data[0])..];
+        var stk = data.slice(3, (nint)(data[0]));
+        data = data.slice((nint)(data[0]));
         @unsafe.Pointer tag = tags[0];
         tags = tags[1..];
         if (count == 0 && len(stk) == 1) {
@@ -416,7 +416,7 @@ internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuil
                 if (len(l.pcs) > len(stk)) {
                     throw panic(fmt.Sprintf("stack too short to match cached location; stk = %#x, l.pcs = %#x, original stk = %#x"u8, stk, l.pcs, origStk));
                 }
-                stk = stk[(int)(len(l.pcs))..];
+                stk = stk.slice(len(l.pcs));
                 continue;
             }
         }
@@ -449,7 +449,7 @@ internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuil
         {
             var (l, ok) = b.locs[addr, ꟷ]; if (ok){
                 locs = append(locs, l.id);
-                stk = stk[(int)(len(l.pcs))..]; // skip the matching pcs.
+                stk = stk.slice(len(l.pcs)); // skip the matching pcs.
             } else {
                 b.deck.tryAdd(addr, frames, symbolizeResult); // must succeed.
                 stk = stk[1..];
@@ -598,7 +598,7 @@ internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) {
             id: id,
             pcs: appendꓸꓸꓸ(new uintptr[]{}.slice(), b.deck.pcs),
             firstPCSymbolizeResult: b.deck.firstPCSymbolizeResult,
-            firstPCFrames: appendꓸꓸꓸ(new runtime.Frame[]{}.slice(), b.deck.frames[..(int)(b.deck.firstPCFrames)])
+            firstPCFrames: appendꓸꓸꓸ(new runtime.Frame[]{}.slice(), b.deck.frames.slice(0, b.deck.firstPCFrames))
         );
         msgOffset start = b.pb.startMessage();
         b.pb.uint64Opt(tagLocation_ID, id);
@@ -719,8 +719,8 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
         // Trim deleted file marker.
         @string deletedStr = deletedˢ;
         nint deletedLen = len(deletedStr);
-        if (len(@file) >= deletedLen && @file[(int)(len(@file) - deletedLen)..] == deletedStr) {
-            @file = @file[..(int)(len(@file) - deletedLen)];
+        if (len(@file) >= deletedLen && @file.slice(len(@file) - deletedLen) == deletedStr) {
+            @file = @file.slice(0, len(@file) - deletedLen);
         }
         if (len(inode) == 1 && inode[0] == (rune)'0' && @file == ""u8) {
             // Huge-page text mappings list the initial fragment of

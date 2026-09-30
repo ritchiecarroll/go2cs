@@ -25,7 +25,7 @@ internal static @string String(this attr i) {
     if (i >= ((attr)(uint8)(len(_attr_index) - 1))) {
         return "attr("u8 + strconv.FormatInt((int64)(uint8)i, 10) + ")"u8;
     }
-    return _attr_name[(int)(_attr_index[i])..(int)(_attr_index[i + 1])];
+    return _attr_name.slice(_attr_index[i], _attr_index[i + 1]);
 }
 
 } // end template_package

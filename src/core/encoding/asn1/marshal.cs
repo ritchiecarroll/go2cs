@@ -74,7 +74,7 @@ internal static nint Len(this multiEncoder m) {
 internal static void Encode(this multiEncoder m, slice<byte> dst) {
     nint off = default!;
     foreach (var (_, e) in m) {
-        e.Encode(dst[(int)(off)..]);
+        e.Encode(dst.slice(off));
         off += e.Len();
     }
 }
@@ -112,7 +112,7 @@ internal static void Encode(this setEncoder s, slice<byte> dst) {
     slices.SortFunc<slice<slice<byte>>, slice<byte>>(l, bytes.Compare);
     nint off = default!;
     foreach (var (_, b) in l) {
-        copy(dst[(int)(off)..], b);
+        copy(dst.slice(off), b);
         off += len(b);
     }
 }
@@ -131,7 +131,7 @@ internal static void Encode(this setEncoder s, slice<byte> dst) {
 
 [GoRecv] internal static void Encode(this ref taggedEncoder t, slice<byte> dst) {
     t.tag.Encode(dst);
-    t.body.Encode(dst[(int)(t.tag.Len())..]);
+    t.body.Encode(dst.slice(t.tag.Len()));
 }
 
 [GoType("num:int64")] partial struct int64Encoder;
@@ -434,7 +434,7 @@ internal static slice<byte> stripTagAndLength(slice<byte> @in) {
     if (err != default!) {
         return @in;
     }
-    return @in[(int)(offset)..];
+    return @in.slice(offset);
 }
 
 internal static (encoder e, error err) makeBody(reflectꓸValue value, fieldParameters @params) {

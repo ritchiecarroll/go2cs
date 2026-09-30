@@ -148,7 +148,7 @@ public static (ж<Jar>, error) New(ж<Options> Ꮡo) {
 
 // hasDotSuffix reports whether s ends in "."+suffix.
 internal static bool hasDotSuffix(@string s, @string suffix) {
-    return len(s) > len(suffix) && s[len(s) - len(suffix) - 1] == (rune)'.' && s[(int)(len(s) - len(suffix))..] == suffix;
+    return len(s) > len(suffix) && s[len(s) - len(suffix) - 1] == (rune)'.' && s.slice(len(s) - len(suffix)) == suffix;
 }
 
 // Cookies implements the Cookies method of the [http.CookieJar] interface.
@@ -371,8 +371,8 @@ internal static @string jarKey(@string host, PublicSuffixList psl) {
     // Only len(suffix) is used to determine the jar key from
     // here on, so it is okay if psl.PublicSuffix("www.buggy.psl")
     // returns "com" as the jar key is generated from host.
-    nint prevDot = strings.LastIndex(host[..(int)(i - 1)], "."u8);
-    return host[(int)(prevDot + 1)..];
+    nint prevDot = strings.LastIndex(host.slice(0, i - 1), "."u8);
+    return host.slice(prevDot + 1);
 }
 
 // isIP reports whether host is an IP address.
@@ -397,7 +397,7 @@ internal static @string defaultPath(@string path) {
     if (i == 0) {
         return "/"u8; // Path has the form "/abc".
     }
-    return path[..(int)(i)]; // Path is either of form "/abc/xyz" or "/abc/xyz/".
+    return path.slice(0, i); // Path is either of form "/abc/xyz" or "/abc/xyz/".
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

@@ -66,7 +66,7 @@ internal static (slice<_C_int> mib, error err) nametomib(@string name) {
             return (default!, err);
         }
     }
-    return (buf[0..(int)(n / siz)], default!);
+    return (buf.slice(0, (nint)(n / siz)), default!);
 }
 
 internal static (uint64, bool) direntIno(slice<byte> buf) {
@@ -333,7 +333,7 @@ public static (nint n, error err) Getdirentries(nint fd, slice<byte> buf, ж<uin
             }
             // Copy entry into return buffer.
             copy(buf, @unsafe.Slice(Ꮡentry.Reinterpret<Dirent, byte>(), reclen));
-            buf = buf[(int)(reclen)..];
+            buf = buf.slice(reclen);
             n += reclen;
             cnt++;
         }

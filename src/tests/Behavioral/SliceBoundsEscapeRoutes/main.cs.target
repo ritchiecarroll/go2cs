@@ -93,12 +93,12 @@ internal static void Main() {
     });
     arm(stringPastEndˢ, () => {
         @string s = abcˢ;
-        fmt.Println(s[1..(int)(past)]);
+        fmt.Println(s.slice(1, past));
     });
     nint low = 4;
     arm(stringLowPastEndˢ, () => {
         @string s = abcˢ;
-        fmt.Println(s[(int)(low)..]);
+        fmt.Println(s.slice(low));
     });
 }
 

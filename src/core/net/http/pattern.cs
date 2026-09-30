@@ -113,7 +113,7 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
         var found = false;
         {
             nint iΔ1 = strings.IndexAny(s, " \t"u8); if (iΔ1 >= 0) {
-                (method, rest, found) = (s[..(int)(iΔ1)], strings.TrimLeft(s[(int)(iΔ1 + 1)..], " \t"u8), true);
+                (method, rest, found) = (s.slice(0, iΔ1), strings.TrimLeft(s.slice(iΔ1 + 1), " \t"u8), true);
             }
         }
         if (!found) {
@@ -131,8 +131,8 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
         if (i < 0) {
             (_ᴛ1, err) = (default!, errors.New(hostPathMissingˢ)); goto ᒐdone;
         }
-        p.Value.host = rest[..(int)(i)];
-        rest = rest[(int)(i)..];
+        p.Value.host = rest.slice(0, i);
+        rest = rest.slice(i);
         {
             nint j = strings.IndexByte((~p).host, (rune)'{'); if (j >= 0) {
                 off += j;
@@ -161,7 +161,7 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
                 iΔ2 = builtin.len(rest);
             }
             @string seg = default!;
-            (seg, rest) = (rest[..(int)(iΔ2)], rest[(int)(iΔ2)..]);
+            (seg, rest) = (rest.slice(0, iΔ2), rest.slice(iΔ2));
             {
                 nint iΔ3 = strings.IndexByte(seg, (rune)'{'); if (iΔ3 < 0){
                     // Literal.
@@ -175,7 +175,7 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
                     if (seg[builtin.len(seg) - 1] != (rune)'}') {
                         (_ᴛ1, err) = (default!, errors.New(badWildcardSegmentMustˢ2)); goto ᒐdone;
                     }
-                    @string name = seg[1..(int)(builtin.len(seg) - 1)];
+                    @string name = seg.slice(1, builtin.len(seg) - 1);
                     if (name == "$"u8) {
                         if (builtin.len(rest) != 0) {
                             (_ᴛ1, err) = (default!, errors.New(notAtEndˢ)); goto ᒐdone;

@@ -22,7 +22,7 @@ public static (ж<BuildInfo> info, bool ok) ReadBuildInfo() {
     if (len(data) < 32) {
         return (default!, false);
     }
-    data = data[16..(int)(len(data) - 16)];
+    data = data.slice(16, len(data) - 16);
     var (bi, err) = ParseBuildInfo(data);
     if (err != default!) {
         return (default!, false);
@@ -283,7 +283,7 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
                         }
                     }
                     (key, _) = strconv.Unquote(rawKey);
-                    rawValue = kv[(int)(len(rawKey) + 1)..];
+                    rawValue = kv.slice(len(rawKey) + 1);
                     break;
                 }
                 default: {

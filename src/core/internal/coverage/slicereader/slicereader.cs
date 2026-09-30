@@ -31,7 +31,7 @@ public static ж<Reader> NewReader(slice<byte> b, bool @readonly) {
 
 [GoRecv] public static (nint, error) Read(this ref Reader r, slice<byte> b) {
     nint amt = len(b);
-    var toread = r.b[(int)(r.off)..];
+    var toread = r.b.slice((nint)(r.off));
     if (len(toread) < amt) {
         amt = len(toread);
     }
@@ -111,7 +111,7 @@ public static ж<Reader> NewReader(slice<byte> b, bool @readonly) {
 }
 
 [GoRecv] public static @string ReadString(this ref Reader r, int64 len) {
-    var b = r.b[(int)(r.off)..(int)(r.off + len)];
+    var b = r.b.slice((nint)(r.off), (nint)(r.off + len));
     r.off += len;
     if (r.@readonly) {
         return toString(b); // backed by RO memory, ok to make unsafe string

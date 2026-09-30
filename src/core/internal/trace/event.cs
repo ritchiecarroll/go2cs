@@ -652,7 +652,7 @@ public static ExperimentalEvent Experimental(this ΔEvent e) {
     return new ExperimentalEvent(
         Name: spec.Name,
         ArgNames: argNames,
-        Args: e.@base.args[..(int)(len(argNames))],
+        Args: e.@base.args.slice(0, len(argNames)),
         Data: (~e.table).expData[spec.Experiment]
     );
 }

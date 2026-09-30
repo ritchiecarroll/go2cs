@@ -703,7 +703,7 @@ private static readonly @string syscallsˢ = "Syscalls"u8;
     }
     nint last = len(stk) - 1;
     var frame = stk[last];
-    stk = stk[..(int)(last)];
+    stk = stk.slice(0, last);
     var (node, ok) = parent.children[(~frame).PC, ꟷ];
     if (!ok) {
         e.frameSeq++;

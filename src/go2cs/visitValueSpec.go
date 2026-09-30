@@ -663,17 +663,6 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						access := v.testDeclaredValueAccess(packageVarAccess(goIDName, v.getIdentType(ident)), ident.Pos(), v.getIdentType(ident))
 						typeLenDeviation = token.Pos(len(csTypeName)+(len(csIDName)-len(goIDName))) - token.Pos(len(access)+9)
 
-						// A multi-value inner call spread in the initializer (`var debug =
-						// template.Must(template.New(…).Parse(…))`, net/rpc debug.go) spills
-						// into a hidden static tuple field via v.globalDeclHoist; flush it
-						// BEFORE this var's field so the once-evaluated holder precedes its
-						// readers (C# static field initializers run in textual order).
-						globalHoist := &strings.Builder{}
-						savedGlobalHoist := v.globalDeclHoist
-						v.globalDeclHoist = globalHoist
-						valExpr := v.convInterfaceDeclValue(valueSpec.Values[i], ifaceDeclType, emptyIfaceDeclType, context)
-						v.globalDeclHoist = savedGlobalHoist
-
 						// A package var whose initializer's Go init-order dependencies C#'s
 						// static-field-initializer order cannot reproduce (cross-file / same-file
 						// forward reference / dependency on another relocated var — see
@@ -683,14 +672,24 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						// rendered expression keeps the file's own using aliases. An addressed global
 						// relocates too (its box is declared with the default value; the ctor
 						// assignment writes through the ref property into the same box), else a moved
-						// dependency of an addressed global would still read zero. The multi-value
-						// hoist form falls back inline with a warning (no stdlib occurrence).
+						// dependency of an addressed global would still read zero.
 						ordinal, moved := v.movedInitOrdinal(def)
 
-						if moved && globalHoist.Len() > 0 {
-							v.showWarning("package var '%s' needs init-order relocation but has a multi-value hoisted initializer - left inline (init order NOT guaranteed)", goIDName)
-							moved = false
-						}
+						// A multi-value inner call spread in the initializer (`var debug =
+						// template.Must(template.New(…).Parse(…))`, net/rpc debug.go) spills
+						// into a hidden static tuple field via v.globalDeclHoist; flush it
+						// BEFORE this var's field so the once-evaluated holder precedes its
+						// readers (C# static field initializers run in textual order). For a
+						// RELOCATED var the spill is a local statement of its init method
+						// instead, so the call waits for the same dependencies the var does.
+						globalHoist := &strings.Builder{}
+						savedGlobalHoist := v.globalDeclHoist
+						savedGlobalHoistStatements := v.globalDeclHoistStatements
+						v.globalDeclHoist = globalHoist
+						v.globalDeclHoistStatements = moved
+						valExpr := v.convInterfaceDeclValue(valueSpec.Values[i], ifaceDeclType, emptyIfaceDeclType, context)
+						v.globalDeclHoist = savedGlobalHoist
+						v.globalDeclHoistStatements = savedGlobalHoistStatements
 
 						// The initializer's line gets its own position marker. Without one, a frame the
 						// initializer creates (a call reading runtime.Caller) inherited the last marker
@@ -708,7 +707,26 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 							methodName := packageInitMethodName(csIDName)
 							v.outputBuilder.WriteString(v.newline)
 							v.writePositionSentinel(ident.Pos())
-							v.writeOutput("internal static void %s() { %s = %s; }", methodName, csIDName, valExpr)
+
+							if globalHoist.Len() > 0 {
+								// The spilled tuple locals precede the assignment that reads them:
+								// `var (ᴛ1, ᴛ2) = build(B);` then `A = must(ᴛ1, ᴛ2);`.
+								bodyIndent := v.indent(v.indentLevel + 1)
+								v.writeOutput("internal static void %s() {", methodName)
+								v.outputBuilder.WriteString(v.newline)
+
+								for _, line := range splitLines(globalHoist.String()) {
+									if line = strings.TrimSpace(line); len(line) > 0 {
+										v.outputBuilder.WriteString(bodyIndent + line + v.newline)
+									}
+								}
+
+								v.outputBuilder.WriteString(fmt.Sprintf("%s%s = %s;%s", bodyIndent, csIDName, valExpr, v.newline))
+								v.writeOutput("}")
+							} else {
+								v.writeOutput("internal static void %s() { %s = %s; }", methodName, csIDName, valExpr)
+							}
+
 							recordMovedInitMethod(ordinal, methodName)
 						} else {
 							v.writePositionSentinel(ident.Pos())

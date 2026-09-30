@@ -12,7 +12,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
+    <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>BehavioralRunner</AssemblyName>

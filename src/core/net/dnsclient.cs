@@ -216,11 +216,11 @@ internal static void sort(this byPriorityWeight addrs) {
     nint i = 0;
     for (nint j = 1; j < len(addrs); j++) {
         if ((~addrs[i]).Priority != (~addrs[j]).Priority) {
-            addrs[(int)(i)..(int)(j)].shuffleByWeight();
+            addrs.slice(i, j).shuffleByWeight();
             i = j;
         }
     }
-    addrs[(int)(i)..].shuffleByWeight();
+    addrs.slice(i).shuffleByWeight();
 }
 
 // An MX represents a single DNS MX record.

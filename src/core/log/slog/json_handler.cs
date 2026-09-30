@@ -180,7 +180,7 @@ internal static error appendJSONMarshal(ж<buffer.Buffer> Ꮡbuf, any v) {
         }
     }
     var bs = bb.Bytes();
-    buf.Write(bs[..(int)(len(bs) - 1)]); // remove final newline
+    buf.Write(bs.slice(0, len(bs) - 1)); // remove final newline
     return default!;
 }
 
@@ -210,7 +210,7 @@ internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) 
                     continue;
                 }
                 if (start < i) {
-                    str(s[(int)(start)..(int)(i)]);
+                    str(s.slice(start, i));
                 }
                 @char((rune)'\\');
                 switch (b) {
@@ -243,10 +243,10 @@ internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) 
                 continue;
             }
         }
-        var (c, size) = utf8.DecodeRuneInString(s[(int)(i)..]);
+        var (c, size) = utf8.DecodeRuneInString(s.slice(i));
         if (c == utf8.RuneError && size == 1) {
             if (start < i) {
-                str(s[(int)(start)..(int)(i)]);
+                str(s.slice(start, i));
             }
             str(ufffdˢ);
             i += size;
@@ -262,7 +262,7 @@ internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) 
         // See http://timelessrepo.com/json-isnt-a-javascript-subset for discussion.
         if (c == (rune)'\u2028' || c == (rune)'\u2029') {
             if (start < i) {
-                str(s[(int)(start)..(int)(i)]);
+                str(s.slice(start, i));
             }
             str(u202ˢ);
             @char(hex[(rune)(c & 0xF)]);
@@ -273,7 +273,7 @@ internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) 
         i += size;
     }
     if (start < len(s)) {
-        str(s[(int)(start)..]);
+        str(s.slice(start));
     }
     return buf;
 }

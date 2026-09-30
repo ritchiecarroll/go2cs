@@ -41,7 +41,7 @@ partial class profile_package {
                 // Matched the top entry: prune the whole location.
                 prune[(~loc).ID] = true;
             } else {
-                loc.Value.Line = (~loc).Line[(int)(i + 1)..];
+                loc.Value.Line = (~loc).Line.slice(i + 1);
             }
         }
     }
@@ -61,11 +61,11 @@ partial class profile_package {
                 continue;
             }
             if (prune[id]) {
-                sample.Value.Location = (~sample).Location[(int)(i + 1)..];
+                sample.Value.Location = (~sample).Location.slice(i + 1);
                 break;
             }
             if (pruneBeneath[id]) {
-                sample.Value.Location = (~sample).Location[(int)(i)..];
+                sample.Value.Location = (~sample).Location.slice(i);
                 break;
             }
         }

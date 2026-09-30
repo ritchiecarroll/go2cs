@@ -111,28 +111,28 @@ internal static void testCipher(ж<testing.T> Ꮡt, Action<slice<byte>, slice<by
         var buff = new slice<byte>(blockSize * 3);
         nint endOfPrefix = blockSize;
         nint startOfSuffix = blockSize * 2;
-        rng.Read(buff[..(int)(endOfPrefix)]);
-        rng.Read(buff[(int)(startOfSuffix)..]);
-        var dst = buff[(int)(endOfPrefix)..(int)(startOfSuffix)];
+        rng.Read(buff.slice(0, endOfPrefix));
+        rng.Read(buff.slice(startOfSuffix));
+        var dst = buff.slice(endOfPrefix, startOfSuffix);
         // Record the prefix and suffix data to make sure they aren't written to
         var (initPrefix, initSuffix) = (new slice<byte>(blockSize), new slice<byte>(blockSize));
-        copy(initPrefix, buff[..(int)(endOfPrefix)]);
-        copy(initSuffix, buff[(int)(startOfSuffix)..]);
+        copy(initPrefix, buff.slice(0, endOfPrefix));
+        copy(initSuffix, buff.slice(startOfSuffix));
         // Write to dst (the middle of the buffer) and make sure it doesn't write
         // beyond the dst slice
         cipher(dst, src);
-        if (!bytes.Equal(buff[(int)(startOfSuffix)..], initSuffix)) {
-            tΔ3.Errorf("block cipher did out of bounds write after end of dst slice; got %x, want %x"u8, buff[(int)(startOfSuffix)..], initSuffix);
+        if (!bytes.Equal(buff.slice(startOfSuffix), initSuffix)) {
+            tΔ3.Errorf("block cipher did out of bounds write after end of dst slice; got %x, want %x"u8, buff.slice(startOfSuffix), initSuffix);
         }
-        if (!bytes.Equal(buff[..(int)(endOfPrefix)], initPrefix)) {
-            tΔ3.Errorf("block cipher did out of bounds write before beginning of dst slice; got %x, want %x"u8, buff[..(int)(endOfPrefix)], initPrefix);
+        if (!bytes.Equal(buff.slice(0, endOfPrefix), initPrefix)) {
+            tΔ3.Errorf("block cipher did out of bounds write before beginning of dst slice; got %x, want %x"u8, buff.slice(0, endOfPrefix), initPrefix);
         }
         // Check that dst isn't written to beyond BlockSize even if there is room
         // in the slice
-        dst = buff[(int)(endOfPrefix)..]; // Extend dst to include suffix
+        dst = buff.slice(endOfPrefix); // Extend dst to include suffix
         cipher(dst, src);
-        if (!bytes.Equal(buff[(int)(startOfSuffix)..], initSuffix)) {
-            tΔ3.Errorf("block cipher modified dst past BlockSize bytes; got %x, want %x"u8, buff[(int)(startOfSuffix)..], initSuffix);
+        if (!bytes.Equal(buff.slice(startOfSuffix), initSuffix)) {
+            tΔ3.Errorf("block cipher modified dst past BlockSize bytes; got %x, want %x"u8, buff.slice(startOfSuffix), initSuffix);
         }
     });
     // Check that output of cipher isn't affected by adjacent data beyond input
@@ -148,19 +148,19 @@ internal static void testCipher(ж<testing.T> Ꮡt, Action<slice<byte>, slice<by
         var buff = new slice<byte>(blockSize * 3);
         nint endOfPrefix = blockSize;
         nint startOfSuffix = blockSize * 2;
-        copy(buff[(int)(endOfPrefix)..(int)(startOfSuffix)], src);
-        rng.Read(buff[..(int)(endOfPrefix)]);
-        rng.Read(buff[(int)(startOfSuffix)..]);
+        copy(buff.slice(endOfPrefix, startOfSuffix), src);
+        rng.Read(buff.slice(0, endOfPrefix));
+        rng.Read(buff.slice(startOfSuffix));
         var testDst = new slice<byte>(blockSize);
-        cipher(testDst, buff[(int)(endOfPrefix)..(int)(startOfSuffix)]);
+        cipher(testDst, buff.slice(endOfPrefix, startOfSuffix));
         if (!bytes.Equal(testDst, expectedDst)) {
             tΔ4.Errorf("block cipher affected by data outside of src slice bounds; got %x, want %x"u8, testDst, expectedDst);
         }
         // Check that src isn't read from beyond BlockSize even if the slice is
         // longer and contains data in the suffix
-        cipher(testDst, buff[(int)(endOfPrefix)..]); // Input long src
+        cipher(testDst, buff.slice(endOfPrefix)); // Input long src
         if (!bytes.Equal(testDst, expectedDst)) {
-            tΔ4.Errorf("block cipher affected by src data beyond BlockSize bytes; got %x, want %x"u8, buff[(int)(startOfSuffix)..], expectedDst);
+            tΔ4.Errorf("block cipher affected by src data beyond BlockSize bytes; got %x, want %x"u8, buff.slice(startOfSuffix), expectedDst);
         }
     });
     Ꮡt.Run(nonZeroDstˢ, (ж<testing.T> tΔ5) => {
@@ -174,7 +174,7 @@ internal static void testCipher(ж<testing.T> Ꮡt, Action<slice<byte>, slice<by
         var dst = new slice<byte>(blockSize * 2);
         rng.Read(dst);
         // Remember the random suffix which shouldn't be written to
-        expectedDst = appendꓸꓸꓸ(expectedDst, dst[(int)(blockSize)..]);
+        expectedDst = appendꓸꓸꓸ(expectedDst, dst.slice(blockSize));
         cipher(dst, src);
         if (!bytes.Equal(dst, expectedDst)) {
             tΔ5.Errorf("block cipher behavior differs when given non-zero dst; got %x, want %x"u8, dst, expectedDst);
@@ -186,21 +186,21 @@ internal static void testCipher(ж<testing.T> Ꮡt, Action<slice<byte>, slice<by
         rng.Read((buff));
         // Make src and dst slices point to same array with inexact overlap
         ref var src = ref heap<slice<byte>>(out var Ꮡsrc);
-        Ꮡsrc.ValueSlot = buff[..(int)(blockSize)];
+        Ꮡsrc.ValueSlot = buff.slice(0, blockSize);
         ref var dst = ref heap<slice<byte>>(out var Ꮡdst);
-        Ꮡdst.ValueSlot = buff[1..(int)(blockSize + 1)];
+        Ꮡdst.ValueSlot = buff.slice(1, blockSize + 1);
         mustPanic(tΔ6, invalidBufferOverlapˢ, () => {
             cipher(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
         });
         // Only overlap on one byte
-        Ꮡsrc.ValueSlot = buff[..(int)(blockSize)];
-        Ꮡdst.ValueSlot = buff[(int)(blockSize - 1)..(int)(2 * blockSize - 1)];
+        Ꮡsrc.ValueSlot = buff.slice(0, blockSize);
+        Ꮡdst.ValueSlot = buff.slice(blockSize - 1, 2 * blockSize - 1);
         mustPanic(tΔ6, invalidBufferOverlapˢ, () => {
             cipher(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
         });
         // src comes after dst with one byte overlap
-        Ꮡsrc.ValueSlot = buff[(int)(blockSize - 1)..(int)(2 * blockSize - 1)];
-        Ꮡdst.ValueSlot = buff[..(int)(blockSize)];
+        Ꮡsrc.ValueSlot = buff.slice(blockSize - 1, 2 * blockSize - 1);
+        Ꮡdst.ValueSlot = buff.slice(0, blockSize);
         mustPanic(tΔ6, invalidBufferOverlapˢ, () => {
             cipher(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
         });
@@ -212,7 +212,7 @@ internal static void testCipher(ж<testing.T> Ꮡt, Action<slice<byte>, slice<by
         // Returns slice of n bytes of an n+1 length array.  Lets us test that a
         // slice is still considered too short even if the underlying array it
         // points to is large enough
-        slice<byte> byteSlice(nint n) => new slice<byte>(n + 1)[0..(int)(n)];
+        slice<byte> byteSlice(nint n) => new slice<byte>(n + 1).slice(0, n);
         // Off by one byte
         var byteSliceʗ1 = byteSlice;
         mustPanic(tΔ7, inputNotFullBlockˢ, () => {

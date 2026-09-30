@@ -574,7 +574,7 @@ Loop:
         }
         case EndElement t: {
             if (saveXML.IsValid()) {
-                saveXMLData = d.saved.Bytes()[(int)(saveXMLIndex)..(int)(savedOffset)];
+                saveXMLData = d.saved.Bytes().slice(saveXMLIndex, savedOffset);
                 if (saveXMLIndex == 0) {
                     d.saved = default!;
                 }
@@ -756,7 +756,7 @@ Loop:
             recurse = true;
             // We can reuse the same slice as long as we
             // don't try to append to it.
-            parents = (~finfo).parents[..(int)(len(parents) + 1)];
+            parents = (~finfo).parents.slice(0, len(parents) + 1);
             break;
         }
 continue_Loop:;

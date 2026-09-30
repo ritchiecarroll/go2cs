@@ -396,7 +396,7 @@ internal static void ryuDigits(ref decimalSlice d, uint64 lower, uint64 central,
             n--;
             d.d[n] = (byte)(v2 + (rune)'0');
         }
-        d.d = d.d[(int)(n)..];
+        d.d = d.d.slice((nint)(n));
         d.nd = (nint)(9 - n);
         // emit low part
         ryuDigits32(ref d, llo, clo, ulo,

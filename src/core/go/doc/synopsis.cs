@@ -24,10 +24,10 @@ internal static @string firstSentence(@string s) {
             q = (rune)' ';
         }
         if (q == (rune)' ' && p == (rune)'.' && (!unicode.IsUpper(pp) || unicode.IsUpper(ppp))) {
-            return s[..(int)(i)];
+            return s.slice(0, i);
         }
         if (p == (rune)'。' || p == (rune)'．') {
-            return s[..(int)(i)];
+            return s.slice(0, i);
         }
         (ppp, pp, p) = (pp, p, q);
     }

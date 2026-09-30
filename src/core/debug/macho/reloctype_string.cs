@@ -25,7 +25,7 @@ public static @string String(this RelocTypeGeneric i) {
     if (i < 0 || i >= ((RelocTypeGeneric)(len(_RelocTypeGeneric_index) - 1))) {
         return "RelocTypeGeneric("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
     }
-    return _RelocTypeGeneric_name[(int)(_RelocTypeGeneric_index[i])..(int)(_RelocTypeGeneric_index[i + 1])];
+    return _RelocTypeGeneric_name.slice(_RelocTypeGeneric_index[i], _RelocTypeGeneric_index[i + 1]);
 }
 
 internal static void _ᴛ2() {
@@ -52,7 +52,7 @@ public static @string String(this RelocTypeX86_64 i) {
     if (i < 0 || i >= ((RelocTypeX86_64)(len(_RelocTypeX86_64_index) - 1))) {
         return "RelocTypeX86_64("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
     }
-    return _RelocTypeX86_64_name[(int)(_RelocTypeX86_64_index[i])..(int)(_RelocTypeX86_64_index[i + 1])];
+    return _RelocTypeX86_64_name.slice(_RelocTypeX86_64_index[i], _RelocTypeX86_64_index[i + 1]);
 }
 
 internal static void _ᴛ3() {
@@ -79,7 +79,7 @@ public static @string String(this RelocTypeARM i) {
     if (i < 0 || i >= ((RelocTypeARM)(len(_RelocTypeARM_index) - 1))) {
         return "RelocTypeARM("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
     }
-    return _RelocTypeARM_name[(int)(_RelocTypeARM_index[i])..(int)(_RelocTypeARM_index[i + 1])];
+    return _RelocTypeARM_name.slice(_RelocTypeARM_index[i], _RelocTypeARM_index[i + 1]);
 }
 
 internal static void _ᴛ4() {
@@ -107,7 +107,7 @@ public static @string String(this RelocTypeARM64 i) {
     if (i < 0 || i >= ((RelocTypeARM64)(len(_RelocTypeARM64_index) - 1))) {
         return "RelocTypeARM64("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
     }
-    return _RelocTypeARM64_name[(int)(_RelocTypeARM64_index[i])..(int)(_RelocTypeARM64_index[i + 1])];
+    return _RelocTypeARM64_name.slice(_RelocTypeARM64_index[i], _RelocTypeARM64_index[i + 1]);
 }
 
 } // end macho_package

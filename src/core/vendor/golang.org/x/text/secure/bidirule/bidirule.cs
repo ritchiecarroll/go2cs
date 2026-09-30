@@ -124,7 +124,7 @@ internal const uint16 exclusiveRTL = /* uint16(1<<bidi.EN | 1<<bidi.AN) */ 36;
 // LeftToRight.
 public static bidiꓸDirection Direction(slice<byte> b) {
     for (nint i = 0; i < len(b); ) {
-        var (e, sz) = bidi.Lookup(b[(int)(i)..]);
+        var (e, sz) = bidi.Lookup(b.slice(i));
         if (sz == 0) {
             i++;
         }
@@ -142,7 +142,7 @@ public static bidiꓸDirection Direction(slice<byte> b) {
 // LeftToRight.
 public static bidiꓸDirection DirectionString(@string s) {
     for (nint i = 0; i < len(s); ) {
-        var (e, sz) = bidi.LookupString(s[(int)(i)..]);
+        var (e, sz) = bidi.LookupString(s.slice(i));
         if (sz == 0) {
             i++;
             continue;
@@ -208,12 +208,12 @@ public static ж<Transformer> New() {
     error err = default!;
 
     if (len(dst) < len(src)) {
-        src = src[..(int)(len(dst))];
+        src = src.slice(0, len(dst));
         atEOF = false;
         err = transform.ErrShortDst;
     }
     var (n, err1) = t.Span(src, atEOF);
-    copy(dst, src[..(int)(n)]);
+    copy(dst, src.slice(0, n));
     if (err == default! || err1 != default! && !AreEqual(err1, transform.ErrShortSrc)) {
         err = err1;
     }
@@ -270,7 +270,7 @@ internal static array<bidi.Properties> asciiTable = new(128);
         if (s[n] < utf8.RuneSelf){
             (e, sz) = (asciiTable[s[n]], 1);
         } else {
-            (e, sz) = bidi.Lookup(s[(int)(n)..]);
+            (e, sz) = bidi.Lookup(s.slice(n));
             if (sz <= 1) {
                 if (sz == 1) {
                     // We always consider invalid UTF-8 to be invalid, even if
@@ -323,7 +323,7 @@ internal static array<bidi.Properties> asciiTable = new(128);
         if (s[n] < utf8.RuneSelf){
             (e, sz) = (asciiTable[s[n]], 1);
         } else {
-            (e, sz) = bidi.LookupString(s[(int)(n)..]);
+            (e, sz) = bidi.LookupString(s.slice(n));
             if (sz <= 1) {
                 if (sz == 1) {
                     return (n, false); // invalid UTF-8

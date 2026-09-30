@@ -150,10 +150,10 @@ internal static void updateBlocks(ref array<gcmFieldElement> productTable, ref g
 // multiple of gcmBlockSize bytes long then the remainder is zero padded.
 internal static void ghashUpdate(ref array<gcmFieldElement> productTable, ref gcmFieldElement y, slice<byte> data) {
     nint fullBlocks = (((len(data) >> (int)(4))) << (int)(4));
-    updateBlocks(ref productTable, ref y, data[..(int)(fullBlocks)]);
+    updateBlocks(ref productTable, ref y, data.slice(0, fullBlocks));
     if (len(data) != fullBlocks) {
         array<byte> partialBlock = new(16); /* gcmBlockSize */
-        copy(partialBlock[..], data[(int)(fullBlocks)..]);
+        copy(partialBlock[..], data.slice(fullBlocks));
         updateBlocks(ref productTable, ref y, partialBlock[..]);
     }
 }

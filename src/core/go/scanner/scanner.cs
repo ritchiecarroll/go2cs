@@ -72,7 +72,7 @@ internal static readonly @string illegalByteOrderMarkˢ = "illegal byte order ma
             break;
         }
         case {} when r >= utf8.RuneSelf: {
-            (r, w) = utf8.DecodeRune(s.src[(int)(s.rdOffset)..]);
+            (r, w) = utf8.DecodeRune(s.src.slice(s.rdOffset));
             if (r == utf8.RuneError && w == 1){
                 // not ASCII
                 s.error(s.offset, illegalUtf8Encodingˢ);
@@ -208,14 +208,14 @@ internal static readonly @string commentNotTerminatedˢ = "comment not terminate
     }
     s.error(offs, commentNotTerminatedˢ);
 exit:
-    var lit = s.src[(int)(offs)..(int)(s.offset)];
+    var lit = s.src.slice(offs, s.offset);
     // On Windows, a (//-comment) line may end in "\r\n".
     // Remove the final '\r' before analyzing the text for
     // line directives (matching the compiler). Remove any
     // other '\r' afterwards (matching the pre-existing be-
     // havior of the scanner).
     if (numCR > 0 && len(lit) >= 2 && lit[1] == (rune)'/' && lit[len(lit) - 1] == (rune)'\r') {
-        lit = lit[..(int)(len(lit) - 1)];
+        lit = lit.slice(0, len(lit) - 1);
         numCR--;
     }
     // interpret line directives
@@ -238,7 +238,7 @@ internal static slice<byte> prefix = slice<byte>("line "u8);
 [GoRecv] internal static void updateLineInfo(this ref Scanner s, nint next, nint offs, slice<byte> text) {
     // extract comment text
     if (text[1] == (rune)'*') {
-        text = text[..(int)(len(text) - 2)]; // lop off trailing "*/"
+        text = text.slice(0, len(text) - 2); // lop off trailing "*/"
     }
     text = text[7..]; // lop off leading "//line " or "/*line "
     offs += 7;
@@ -249,7 +249,7 @@ internal static slice<byte> prefix = slice<byte>("line "u8);
     // i > 0
     if (!ok) {
         // text has a suffix :xxx but xxx is not a number
-        s.error(offs + i, "invalid line number: "u8 + ((sstring)(text[(int)(i)..])));
+        s.error(offs + i, "invalid line number: "u8 + ((sstring)(text.slice(i))));
         return;
     }
     // Put a cap on the maximum size of line and column numbers.
@@ -258,27 +258,27 @@ internal static slice<byte> prefix = slice<byte>("line "u8);
     const nint maxLineCol = /* 1 << 30 */ 1073741824;
     nint line = default!;
     nint col = default!;
-    var (i2, n2, ok2) = trailingDigits(text[..(int)(i - 1)]);
+    var (i2, n2, ok2) = trailingDigits(text.slice(0, i - 1));
     if (ok2){
         //line filename:line:col
         (i, i2) = (i2, i);
         (line, col) = (n2, n);
         if (col == 0 || col > maxLineCol) {
-            s.error(offs + i2, "invalid column number: "u8 + ((sstring)(text[(int)(i2)..])));
+            s.error(offs + i2, "invalid column number: "u8 + ((sstring)(text.slice(i2))));
             return;
         }
-        text = text[..(int)(i2 - 1)]; // lop off ":col"
+        text = text.slice(0, i2 - 1); // lop off ":col"
     } else {
         //line filename:line
         line = n;
     }
     if (line == 0 || line > maxLineCol) {
-        s.error(offs + i, "invalid line number: "u8 + ((sstring)(text[(int)(i)..])));
+        s.error(offs + i, "invalid line number: "u8 + ((sstring)(text.slice(i))));
         return;
     }
     // If we have a column (//line filename:line:col form),
     // an empty filename means to use the previous filename.
-    @string filename = ((@string)(text[..(int)(i - 1)])); // lop off ":line", and trim white space
+    @string filename = ((@string)(text.slice(0, i - 1))); // lop off ":line", and trim white space
     if (filename == ""u8 && ok2){
         filename = s.@file.Position(s.@file.Pos(offs)).Filename;
     } else 
@@ -300,7 +300,7 @@ internal static (nint, nint, bool) trailingDigits(slice<byte> text) {
         return (0, 0, false); // no ":"
     }
     // i >= 0
-    var (n, err) = strconv.ParseUint(((@string)(text[(int)(i + 1)..])), 10, 0);
+    var (n, err) = strconv.ParseUint(((@string)(text.slice(i + 1))), 10, 0);
     return (i + 1, (nint)n, err == default!);
 }
 
@@ -326,7 +326,7 @@ internal static bool isDigit(rune ch) {
     //
     // In case we encounter a non-ASCII character, fall back on the slower path
     // of calling into s.next().
-    foreach (var (rdOffset, b) in s.src[(int)(s.rdOffset)..]) {
+    foreach (var (rdOffset, b) in s.src.slice(s.rdOffset)) {
         if ((rune)'a' <= b && b <= (rune)'z' || (rune)'A' <= b && b <= (rune)'Z' || b == (rune)'_' || (rune)'0' <= b && b <= (rune)'9') {
             // Avoid assigning a rune for the common case of an ascii character.
             continue;
@@ -357,7 +357,7 @@ internal static bool isDigit(rune ch) {
     s.rdOffset = len(s.src);
     s.ch = eof;
 exit:
-    return ((@string)(s.src[(int)(offs)..(int)(s.offset)]));
+    return ((@string)(s.src.slice(offs, s.offset)));
 }
 
 internal static nint digitVal(rune ch) {
@@ -508,7 +508,7 @@ internal static readonly @string mustSeparateSuccessiveˢ = "'_' must separate s
         tok = token.IMAG;
         s.next();
     }
-    @string lit = ((@string)(s.src[(int)(offs)..(int)(s.offset)]));
+    @string lit = ((@string)(s.src.slice(offs, s.offset)));
     if (tok == token.INT && invalid >= 0) {
         s.errorf(invalid, "invalid digit %q in %s"u8, lit[invalid - offs], litname(prefix));
     }
@@ -685,7 +685,7 @@ internal static readonly @string illegalRuneLiteralˢ = "illegal rune literal"u8
     if (valid && n != 1) {
         s.error(offs, illegalRuneLiteralˢ);
     }
-    return ((@string)(s.src[(int)(offs)..(int)(s.offset)]));
+    return ((@string)(s.src.slice(offs, s.offset)));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -708,7 +708,7 @@ internal static readonly @string stringLiteralNotˢ = "string literal not termin
             s.scanEscape((rune)'"');
         }
     }
-    return ((@string)(s.src[(int)(offs)..(int)(s.offset)]));
+    return ((@string)(s.src.slice(offs, s.offset)));
 }
 
 internal static slice<byte> stripCR(slice<byte> b, bool comment) {
@@ -725,7 +725,7 @@ internal static slice<byte> stripCR(slice<byte> b, bool comment) {
             i++;
         }
     }
-    return c[..(int)(i)];
+    return c.slice(0, i);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -749,7 +749,7 @@ internal static readonly @string rawStringLiteralNotˢ = "raw string literal not
             hasCR = true;
         }
     }
-    var lit = s.src[(int)(offs)..(int)(s.offset)];
+    var lit = s.src.slice(offs, s.offset);
     if (hasCR) {
         lit = stripCR(lit, false);
     }

@@ -201,16 +201,16 @@ internal static (@string token, @string rest) readToken(@string s) {
         return ("", "");
     }
     nint tkEnd = -1;
-    foreach (var (i, r) in s[(int)(tkStart)..]) {
+    foreach (var (i, r) in s.slice(tkStart)) {
         if (unicode.IsSpace(r) || r == (rune)'#') {
             tkEnd = i + tkStart;
             break;
         }
     }
     if (tkEnd < 0) {
-        return (s[(int)(tkStart)..], "");
+        return (s.slice(tkStart), "");
     }
-    return (s[(int)(tkStart)..(int)(tkEnd)], s[(int)(tkEnd)..]);
+    return (s.slice(tkStart, tkEnd), s.slice(tkEnd));
 }
 
 internal static (slice<byte>, error) readData(@string line) {

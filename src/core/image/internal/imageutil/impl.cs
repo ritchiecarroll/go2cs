@@ -37,7 +37,7 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
     var exprᴛ1 = src.SubsampleRatio;
     if (exprᴛ1 == image.YCbCrSubsampleRatio444) {
         for ((nint y, nint sy) = (y0, sp.Y); y != y1; (y, sy) = (y + 1, sy + 1)) {
-            var dpix = dst.Pix[(int)(y * dst.Stride)..];
+            var dpix = dst.Pix.slice(y * dst.Stride);
             nint yi = (sy - src.Rect.Min.Y) * src.YStride + (sp.X - src.Rect.Min.X);
             nint ci = (sy - src.Rect.Min.Y) * src.CStride + (sp.X - src.Rect.Min.X);
             for (nint x = x0; x != x1; (x, yi, ci) = (x + 4, yi + 1, ci + 1)) {
@@ -87,7 +87,7 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
     }
     else if (exprᴛ1 == image.YCbCrSubsampleRatio422) {
         for ((nint y, nint sy) = (y0, sp.Y); y != y1; (y, sy) = (y + 1, sy + 1)) {
-            var dpix = dst.Pix[(int)(y * dst.Stride)..];
+            var dpix = dst.Pix.slice(y * dst.Stride);
             nint yi = (sy - src.Rect.Min.Y) * src.YStride + (sp.X - src.Rect.Min.X);
             nint ciBase = (sy - src.Rect.Min.Y) * src.CStride - src.Rect.Min.X / 2;
             for ((nint x, nint sx) = (x0, sp.X); x != x1; (x, sx, yi) = (x + 4, sx + 1, yi + 1)) {
@@ -138,7 +138,7 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
     }
     else if (exprᴛ1 == image.YCbCrSubsampleRatio420) {
         for ((nint y, nint sy) = (y0, sp.Y); y != y1; (y, sy) = (y + 1, sy + 1)) {
-            var dpix = dst.Pix[(int)(y * dst.Stride)..];
+            var dpix = dst.Pix.slice(y * dst.Stride);
             nint yi = (sy - src.Rect.Min.Y) * src.YStride + (sp.X - src.Rect.Min.X);
             nint ciBase = (sy / 2 - src.Rect.Min.Y / 2) * src.CStride - src.Rect.Min.X / 2;
             for ((nint x, nint sx) = (x0, sp.X); x != x1; (x, sx, yi) = (x + 4, sx + 1, yi + 1)) {
@@ -189,7 +189,7 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
     }
     else if (exprᴛ1 == image.YCbCrSubsampleRatio440) {
         for ((nint y, nint sy) = (y0, sp.Y); y != y1; (y, sy) = (y + 1, sy + 1)) {
-            var dpix = dst.Pix[(int)(y * dst.Stride)..];
+            var dpix = dst.Pix.slice(y * dst.Stride);
             nint yi = (sy - src.Rect.Min.Y) * src.YStride + (sp.X - src.Rect.Min.X);
             nint ci = (sy / 2 - src.Rect.Min.Y / 2) * src.CStride + (sp.X - src.Rect.Min.X);
             for (nint x = x0; x != x1; (x, yi, ci) = (x + 4, yi + 1, ci + 1)) {

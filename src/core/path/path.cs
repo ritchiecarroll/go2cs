@@ -41,7 +41,7 @@ partial class path_package {
             return;
         }
         b.buf = new slice<byte>(len(b.s));
-        copy(b.buf, b.s[..(int)(b.w)]);
+        copy(b.buf, b.s.slice(0, b.w));
     }
     b.buf[b.w] = c;
     b.w++;
@@ -49,9 +49,9 @@ partial class path_package {
 
 [GoRecv] internal static @string @string(this ref lazybuf b) {
     if (b.buf == default!) {
-        return b.s[..(int)(b.w)];
+        return b.s.slice(0, b.w);
     }
-    return ((@string)(b.buf[..(int)(b.w)]));
+    return ((@string)(b.buf.slice(0, b.w)));
 }
 
 // Clean returns the shortest path name equivalent to path
@@ -156,7 +156,7 @@ public static @string Clean(@string path) {
 // The returned values have the property that path = dir+file.
 public static (@string dir, @string @file) Split(@string path) {
     nint i = bytealg.LastIndexByteString(path, (rune)'/');
-    return (path[..(int)(i + 1)], path[(int)(i + 1)..]);
+    return (path.slice(0, i + 1), path.slice(i + 1));
 }
 
 // Join joins any number of path elements into a single path,
@@ -193,7 +193,7 @@ public static @string Join(params ꓸꓸꓸstring elemʗp) {
 public static @string Ext(@string path) {
     for (nint i = len(path) - 1; i >= 0 && path[i] != (rune)'/'; i--) {
         if (path[i] == (rune)'.') {
-            return path[(int)(i)..];
+            return path.slice(i);
         }
     }
     return ""u8;
@@ -209,12 +209,12 @@ public static @string Base(@string path) {
     }
     // Strip trailing slashes.
     while (len(path) > 0 && path[len(path) - 1] == (rune)'/') {
-        path = path[0..(int)(len(path) - 1)];
+        path = path.slice(0, len(path) - 1);
     }
     // Find the last element
     {
         nint i = bytealg.LastIndexByteString(path, (rune)'/'); if (i >= 0) {
-            path = path[(int)(i + 1)..];
+            path = path.slice(i + 1);
         }
     }
     // If empty now, it had only slashes.

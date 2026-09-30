@@ -384,6 +384,212 @@ function Get-ExclusionLedgerSectionLines {
 
 <#
 .SYNOPSIS
+    Parses the H10 eligibility census's appendix skeleton into row objects, for -Hop runs.
+.DESCRIPTION
+    The hop's row population is NOT the banked roster. At a release hop the banked table holds the
+    rows banked at the OUTGOING release, while the eligible set at the INCOMING one is the census's
+    own appendix -- and the two populations genuinely differ. Measured at 2e6cf71e4 between
+    docs/ValidatedTestPackages.md (204 rows) and this skeleton (227): 194 names in common, 10 roster
+    rows absent from the skeleton, 33 skeleton rows absent from the roster.
+
+    ⚠ THE TEN ARE RELOCATIONS, NOT DISAPPEARANCES, and that is why this function carries Receives.
+    The skeleton's fifth column names, for ten of its rows, the 1.23.12 row whose tests moved into
+    it and the count that row banked (`internal/sync` receives `internal/concurrent (20)`; `weak`
+    receives `internal/weak (4)`; the six crypto/internal rows receive their pre-fips140 selves;
+    `internal/runtime/math` and `.../sys` receive the old `runtime/internal/*`). Those ten cells name
+    EXACTLY the ten roster rows absent from the skeleton, one for one, zero unmatched in either
+    direction -- so nothing was lost at this hop, and a mode that reported the ten as "gone" or the
+    ten arrivals as "new" would throw away the one fact that makes their counts reviewable.
+
+    ⚠ A Receives count is PROVENANCE AND NEVER AN EXPECTATION. The census rules this itself, above
+    its relocation table: "No count is carried: a relocated row re-banks from zero at 1.24, and the
+    verdict figure below records only what the 1.23.12 anchor held." So Expected stays $null here
+    for every row, relocated or not, and no caller may compare a measured count against Receives.
+
+    Verdicts and disclosed are blank for all 227 rows BY DESIGN -- the hop MEASURES them; they are
+    its output, not its input. (Recorded because the author of this function first reported the
+    Receives column blank as well, having characterised a 227-row table from the rows he sampled:
+    ten populated cells sit at indices 29-41, 138-142 and 227, and a sparse column is the one kind
+    of emptiness that sampling confirms.)
+.OUTPUTS
+    One PSCustomObject per row, carrying every property run-validated-sweep.ps1 reads off a roster
+    row so the sweep's row pipeline needs no second shape: Package, Expected ($null -- nothing is
+    banked at the incoming release), Disclosed ($null), Conditional (empty), ConditionalDisclosures
+    (empty), OS (empty), Execution ($null -- no row carries an annotation in the skeleton), plus
+    Index and Receives, which exist only on a hop row.
+#>
+function Get-HopSkeletonRows {
+    param([Parameter(Mandatory)][string] $Path)
+
+    if (-not (Test-Path $Path)) { throw "Cannot find the H10 eligibility census at $Path" }
+
+    # ReadAllLines for the same load-bearing reason Get-ValidatedRosterRows states: 5.1's Get-Content
+    # reads a BOM-less UTF-8 file as ANSI, and this file carries non-ASCII prose around the table.
+    $lines = [System.IO.File]::ReadAllLines($Path)
+
+    # FIVE fields exactly, and the count is what separates the appendix from the census's other
+    # tables: the admitted-list table above it opens with the same `| N | `pkg` |` shape and carries
+    # THREE, and the relocation table's rows open with a backticked name rather than an index. A
+    # looser pattern would silently sweep both in.
+    $pattern = '^\|\s*(\d+)\s*\|\s*`([^`]+)`\s*\|([^|]*)\|([^|]*)\|([^|]*)\|\s*$'
+
+    $rows = New-Object System.Collections.Generic.List[object]
+
+    foreach ($line in $lines) {
+        if ($line -notmatch $pattern) { continue }
+
+        $rowIndex    = [int]$Matches[1]
+        $rowPackage  = $Matches[2].Trim()
+        $rowVerdicts = $Matches[3].Trim()
+        $rowDisclosed = $Matches[4].Trim()
+        $rowReceives = $Matches[5].Trim()
+
+        if (-not $rowPackage) { throw "Hop skeleton row $rowIndex has an empty package name." }
+
+        # The skeleton's counts are its OUTPUT. A populated one means this file has already been
+        # banked into, and a hop run over it would compare against figures it is supposed to be
+        # deriving -- refused by name rather than silently honoured or silently ignored.
+        if ($rowVerdicts -or $rowDisclosed) {
+            throw ("Hop skeleton row $rowIndex ($rowPackage) already carries a count " +
+                "(verdicts '$rowVerdicts', disclosed '$rowDisclosed'). The skeleton is the hop's " +
+                'output, not its input: re-derive into a blank skeleton, or bank this one into the ' +
+                'roster and sweep against that instead.')
+        }
+
+        [void]$rows.Add([PSCustomObject]@{
+            Package     = $rowPackage
+            Expected    = $null
+            Disclosed   = $null
+            Conditional = @()
+            ConditionalDisclosures = @()
+            OS          = @{}
+            Execution   = $null
+            Index       = $rowIndex
+            Receives    = $rowReceives
+        })
+    }
+
+    $result = $rows.ToArray()
+
+    # Three assertions rather than a count against a constant, because a constant goes stale at the
+    # next hop and this population is meant to change: the table must be non-empty, its indices must
+    # run 1..N with no gap (a mis-parse drops or doubles rows, and either shows up here), and its
+    # names must be unique. Each names the offending row.
+    if ($result.Count -eq 0) {
+        throw ("$Path yielded no hop skeleton rows -- the 5-field appendix pattern matched nothing, " +
+            'so this is a parse failure and not an empty census.')
+    }
+
+    for ($i = 0; $i -lt $result.Count; $i++) {
+        if ($result[$i].Index -ne ($i + 1)) {
+            throw ("Hop skeleton indices are not contiguous: row at position $($i + 1) carries " +
+                "index $($result[$i].Index) ($($result[$i].Package)).")
+        }
+    }
+
+    $duplicates = @($result | Group-Object -Property Package | Where-Object { $_.Count -gt 1 })
+    if ($duplicates.Count -gt 0) {
+        throw ("Hop skeleton names are not unique: " + (($duplicates | ForEach-Object { $_.Name }) -join ', '))
+    }
+
+    return $result
+}
+
+<#
+.SYNOPSIS
+    The -Hop row population, from DATA: the incoming release's generated population of record, minus
+    the roster's exclusion ledger, each row carrying the relocations it receives.
+.DESCRIPTION
+    Replaces reading the census record's appendix (Get-HopSkeletonRows, kept as the parser of that dated
+    record): S4 ruled that -Hop reads machine-read DATA and never a CENSUS file (2026-09-29).
+      * POPULATION: src/go2cs/internal/genpopulation's output for the incoming release, read through
+        Get-PopulationRows (a SET; refuses an empty or repeating file).
+      * EXCLUSIONS: the roster's exclusion ledger (Get-ExclusionLedgerRows), subtracted by name. The ledger
+        is the outgoing release's; a hop re-verifies each reason (the census's section 2 practice), and a
+        row the incoming release no longer has simply subtracts nothing.
+      * RELOCATIONS (optional): a `source<TAB>target` table of the rows whose tests moved INTO this release
+        (hop A's hopA-inputs/relocations.tsv is the 1.24.13 one). Receives is PROVENANCE and NEVER AN
+        EXPECTATION: each target lists its sources, with the outgoing roster's banked count where it has
+        a row. A target outside the population is refused by name -- a relocation into nothing is a
+        stale table.
+    Measured at go1.24.13 against the census's 227-row appendix: the census's own inputs (no corpus tags,
+    its two 09-08 exclusions) reproduce it exactly; the ruled inputs give 225, the roster's implementable
+    denominator.
+.OUTPUTS
+    The row shape Get-HopSkeletonRows returns, so the sweep's row pipeline needs no second shape:
+    Package, Expected ($null), Disclosed ($null), Conditional, ConditionalDisclosures, OS, Execution
+    ($null), Index (1..N in population order) and Receives.
+#>
+function Get-HopPopulationRows {
+    param(
+        [Parameter(Mandatory)][string] $PopulationPath,
+        [Parameter(Mandatory)][string] $RosterPath,
+        [string] $RelocationsPath)
+
+    $population = @(Get-PopulationRows -Path $PopulationPath)
+    $excluded = @(Get-ExclusionLedgerRows -Path $RosterPath | ForEach-Object { $_.Package })
+    $banked = @{}
+
+    foreach ($row in (Get-ValidatedRosterRows -Path $RosterPath)) {
+        $banked[$row.Package] = $row.Expected
+    }
+
+    $receives = @{}
+
+    if ($RelocationsPath) {
+        if (-not (Test-Path $RelocationsPath)) { throw "Cannot find the relocation table at $RelocationsPath" }
+
+        $relocationLines = @([System.IO.File]::ReadAllLines($RelocationsPath) |
+            ForEach-Object { $_.Trim() } |
+            Where-Object { $_ -and -not $_.StartsWith('#') })
+
+        if ($relocationLines.Count -eq 0 -or $relocationLines[0] -ne "source`ttarget") {
+            throw "The relocation table at $RelocationsPath must open with the header 'source<TAB>target'"
+        }
+
+        foreach ($line in ($relocationLines | Select-Object -Skip 1)) {
+            $fields = $line -split "`t"
+
+            if ($fields.Count -ne 2 -or -not $fields[0] -or -not $fields[1]) {
+                throw "Relocation line is not 'source<TAB>target': '$line' ($RelocationsPath)"
+            }
+
+            if ($fields[1] -notin $population) {
+                throw "Relocation target '$($fields[1])' (from '$($fields[0])') is not in the population at $PopulationPath -- a relocation into nothing is a stale table"
+            }
+
+            $source = if ($banked.ContainsKey($fields[0])) { "$($fields[0]) ($($banked[$fields[0]]))" } else { $fields[0] }
+
+            if (-not $receives.ContainsKey($fields[1])) { $receives[$fields[1]] = New-Object System.Collections.Generic.List[string] }
+            [void]$receives[$fields[1]].Add($source)
+        }
+    }
+
+    $rows = New-Object System.Collections.Generic.List[object]
+
+    foreach ($package in ($population | Where-Object { $_ -notin $excluded })) {
+        [void]$rows.Add([PSCustomObject]@{
+            Package     = $package
+            Expected    = $null
+            Disclosed   = $null
+            Conditional = @()
+            ConditionalDisclosures = @()
+            OS          = @{}
+            Execution   = $null
+            Index       = $rows.Count + 1
+            Receives    = if ($receives.ContainsKey($package)) { $receives[$package] -join ', ' } else { '' }
+        })
+    }
+
+    if ($rows.Count -eq 0) {
+        throw "The hop population at $PopulationPath minus the exclusion ledger is EMPTY -- refusing to sweep nothing"
+    }
+
+    return $rows.ToArray()
+}
+
+<#
+.SYNOPSIS
     Parses the exclusion-ledger table ("Excluded packages") into row objects.
 .OUTPUTS
     One PSCustomObject per row: Package, Verdicts (the raw cell text -- a naive count where one

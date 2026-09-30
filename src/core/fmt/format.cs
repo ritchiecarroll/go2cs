@@ -77,11 +77,11 @@ internal const bool unsigned = false;
         padByte = (byte)(rune)'0';
     }
     // Fill padding with padByte.
-    var padding = buf[(int)(oldLen)..(int)(newLen)];
+    var padding = buf.slice(oldLen, newLen);
     foreach (var (i, _) in padding) {
         padding[i] = padByte;
     }
-    f.buf.ValueSlot = buf[..(int)(newLen)];
+    f.buf.ValueSlot = buf.slice(0, newLen);
 }
 
 // pad appends b to f.buf, padded on left (!f.minus) or right (f.minus).
@@ -155,7 +155,7 @@ internal static readonly @string falseˢ = "false"u8;
         i--;
         buf[i] = (rune)'\'';
         i -= utf8.RuneLen((rune)u);
-        utf8.EncodeRune(buf[(int)(i)..], (rune)u);
+        utf8.EncodeRune(buf.slice(i), (rune)u);
         i--;
         buf[i] = (rune)'\'';
         i--;
@@ -184,7 +184,7 @@ internal static readonly @string falseˢ = "false"u8;
     buf[i] = (rune)'U';
     var oldZero = f.zero;
     f.zero = false;
-    f.pad(buf[(int)(i)..]);
+    f.pad(buf.slice(i));
     f.zero = oldZero;
 }
 
@@ -328,7 +328,7 @@ internal static readonly @string falseˢ = "false"u8;
     // or the f.zero flag is ignored due to an explicitly set precision.
     var oldZero = f.zero;
     f.zero = false;
-    f.pad(buf[(int)(i)..]);
+    f.pad(buf.slice(i));
     f.zero = oldZero;
 }
 
@@ -339,7 +339,7 @@ internal static readonly @string falseˢ = "false"u8;
         foreach (var (i, _) in s) {
             n--;
             if (n < 0) {
-                return s[..(int)(i)];
+                return s.slice(0, i);
             }
         }
     }
@@ -353,11 +353,11 @@ internal static readonly @string falseˢ = "false"u8;
         for (nint i = 0; i < len(b); ) {
             n--;
             if (n < 0) {
-                return b[..(int)(i)];
+                return b.slice(0, i);
             }
             nint wid = 1;
             if (b[i] >= utf8.RuneSelf) {
-                (_, wid) = utf8.DecodeRune(b[(int)(i)..]);
+                (_, wid) = utf8.DecodeRune(b.slice(i));
             }
             i += wid;
         }
@@ -560,14 +560,14 @@ internal static readonly @string falseˢ = "false"u8;
                 hasDecimalPoint = true;
             }
             else if (exprᴛ1 is (rune)'p' or (rune)'P') { matchᴛ1 = true;
-                tail = appendꓸꓸꓸ(tail, num[(int)(i)..]);
-                num = num[..(int)(i)];
+                tail = appendꓸꓸꓸ(tail, num.slice(i));
+                num = num.slice(0, i);
             }
             else if (exprᴛ1 is (rune)'e' or (rune)'E') { matchᴛ1 = true;
                 do {
                     if (verb != (rune)'x' && verb != (rune)'X') {
-                        tail = appendꓸꓸꓸ(tail, num[(int)(i)..]);
-                        num = num[..(int)(i)];
+                        tail = appendꓸꓸꓸ(tail, num.slice(i));
+                        num = num.slice(0, i);
                         break;
                     }
                     fallthrough = true;

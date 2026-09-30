@@ -409,7 +409,7 @@ pidLoop:
                     // This P has no more events
                     proc.Value.done = true;
                     (availableProcs[i], availableProcs[len(availableProcs) - 1]) = (availableProcs[len(availableProcs) - 1], availableProcs[i]);
-                    availableProcs = availableProcs[..(int)(len(availableProcs) - 1)];
+                    availableProcs = availableProcs.slice(0, len(availableProcs) - 1);
                     // We swapped the element at i with another proc, so look at
                     // the index again
                     i--;
@@ -438,7 +438,7 @@ pidLoop:
             }
             proc.Value.events = (~proc).events[1..];
             (availableProcs[i], availableProcs[len(availableProcs) - 1]) = (availableProcs[len(availableProcs) - 1], availableProcs[i]);
-            availableProcs = availableProcs[..(int)(len(availableProcs) - 1)];
+            availableProcs = availableProcs.slice(0, len(availableProcs) - 1);
             Ꮡfrontier.Push(new orderEvent(ev.Value.ΔClone(), proc));
             // We swapped the element at i with another proc, so look at the
             // index again
@@ -607,7 +607,7 @@ internal static UntypedInt skipStrings => 2;
         // partial results.
         return (default!, io.ErrUnexpectedEOF);
     }
-    var buf = p.data[(int)(p.off)..(int)(p.off + n)];
+    var buf = p.data.slice(p.off, p.off + n);
     p.off += n;
     return (buf, default!);
 }
@@ -1321,7 +1321,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
                         return fmt.Errorf("misuse of region in goroutine %d: span end %q when the inner-most active span start event is %q"u8, (~ev).G, ev.OrTypedNil(), s.OrTypedNil());
                     }
                     if (n > 1){
-                        activeRegions[(~ev).G] = regions[..(int)(n - 1)];
+                        activeRegions[(~ev).G] = regions.slice(0, n - 1);
                     } else {
                         delete(activeRegions, (~ev).G);
                     }
@@ -1346,7 +1346,7 @@ internal static error errMalformedVarint = errors.New("malformatted base-128 var
 
 // readVal reads unsigned base-128 value from r.
 [GoRecv] internal static (uint64, error) readVal(this ref parser p) {
-    var (v, n) = binary.Uvarint(p.data[(int)(p.off)..]);
+    var (v, n) = binary.Uvarint(p.data.slice(p.off));
     if (n <= 0) {
         return (0, errMalformedVarint);
     }
@@ -1361,7 +1361,7 @@ internal static (uint64 v, slice<byte> rem, error err) readValFrom(slice<byte> b
     if (n <= 0) {
         return (0, default!, errMalformedVarint);
     }
-    return (v, buf[(int)(n)..], default!);
+    return (v, buf.slice(n), default!);
 }
 
 [GoRecv] public static @string String(this ref Event ev) {
@@ -1581,8 +1581,8 @@ public static ref array<EventDescriptionsᴛ1> EventDescriptions => ref ᏑEvent
     if ((uint64)len(@out) < size) {
         @out = new slice<uint64>(1024 * 128);
     }
-    p.stacksData = @out[(int)(size)..];
-    return @out.slice(-1, (nint)(size), (nint)(size));
+    p.stacksData = @out.slice((nint)(size));
+    return @out.slice(0, (nint)(size), (nint)(size));
 }
 
 [GoRecv] public static ΔSTWReason STWReason(this ref Trace tr, uint64 kindID) {

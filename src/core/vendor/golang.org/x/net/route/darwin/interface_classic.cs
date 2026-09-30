@@ -28,9 +28,9 @@ partial class route_package {
         Flags: (nint)nativeEndian.Uint32(b[8..12]),
         Index: (nint)nativeEndian.Uint16(b[12..14]),
         extOff: w.extOff,
-        raw: b[..(int)(l)]
+        raw: b.slice(0, l)
     ));
-    var (a, err) = parseLinkAddr(b[(int)(w.bodyOff)..]);
+    var (a, err) = parseLinkAddr(b.slice(w.bodyOff));
     if (err != default!) {
         return (default!, err);
     }
@@ -51,7 +51,7 @@ partial class route_package {
         Version: (nint)b[2],
         Type: (nint)b[3],
         Flags: (nint)nativeEndian.Uint32(b[8..12]),
-        raw: b[..(int)(l)]
+        raw: b.slice(0, l)
     ));
     if (runtime.GOOS == "netbsd"u8){
         m.Value.Index = (nint)nativeEndian.Uint16(b[16..18]);
@@ -59,7 +59,7 @@ partial class route_package {
         m.Value.Index = (nint)nativeEndian.Uint16(b[12..14]);
     }
     error err = default!;
-    (m.Value.Addrs, err) = parseAddrs((nuint)nativeEndian.Uint32(b[4..8]), parseKernelInetAddr, b[(int)(w.bodyOff)..]);
+    (m.Value.Addrs, err) = parseAddrs((nuint)nativeEndian.Uint32(b[4..8]), parseKernelInetAddr, b.slice(w.bodyOff));
     if (err != default!) {
         return (default!, err);
     }

@@ -611,7 +611,7 @@ internal static nint tracebackPCs(ж<unwinder> Ꮡu, nint skip, slice<uintptr> p
         // Add cgo frames (if we're done skipping over the requested number of
         // Go frames).
         if (skip == 0) {
-            n += copy(pcBuf[(int)(n)..], cgoBuf[..(int)(cgoN)]);
+            n += copy(pcBuf.slice(n), cgoBuf.slice(0, cgoN));
         }
     }
     return n;
@@ -721,7 +721,7 @@ internal static (@string, @string, @string) funcNamePiecesForPrint(@string name)
     if (j <= i) {
         return (name, "", "");
     }
-    return (name[..(int)(i)], "[...]", name[(int)(j + 1)..]);
+    return (name.slice(0, i), "[...]", name.slice(j + 1));
 }
 
 // funcNameForPrint returns the function name for printing to the user.
@@ -991,7 +991,7 @@ internal static (nint n, nint lastN) traceback2(ж<unwinder> Ꮡu, bool showRunt
                 ref var arg = ref heap(new cgoSymbolizerArg(), out var Ꮡarg);
                 var anySymbolized = false;
                 var stop = false;
-                foreach (var (_, pc) in cgoBuf[..(int)(cgoN)]) {
+                foreach (var (_, pc) in cgoBuf.slice(0, cgoN)) {
                     if (cgoSymbolizer == nil){
                         {
                             var (pr, stopΔ1) = commitFrame(); if (stopΔ1){
@@ -1118,11 +1118,11 @@ internal static bool isExportedRuntime(@string name) {
         i--;
     }
     if (i >= 0) {
-        rcvr = name[..(int)(i)];
-        name = name[(int)(i + 1)..];
+        rcvr = name.slice(0, i);
+        name = name.slice(i + 1);
         // Remove parentheses and star for pointer receivers.
         if (len(rcvr) >= 3 && rcvr[0] == (rune)'(' && rcvr[1] == (rune)'*' && rcvr[len(rcvr) - 1] == (rune)')') {
-            rcvr = rcvr[2..(int)(len(rcvr) - 1)];
+            rcvr = rcvr.slice(2, len(rcvr) - 1);
         }
     }
     // Exported functions and exported methods on exported types.

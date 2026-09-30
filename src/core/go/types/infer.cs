@@ -438,7 +438,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                     }
                 }
             }
-            dirty = dirty[..(int)(nΔ1)];
+            dirty = dirty.slice(0, nΔ1);
         }
         // Once nothing changes anymore, we may still have type parameters left;
         // e.g., a constraint with core type *P may match a type parameter Q but
@@ -531,7 +531,7 @@ internal static @string typeParamsString(slice<ж<TypeParam>> list) {
 
     // general case (n > 2)
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    foreach (var (i, tname) in list[..(int)(n - 1)]) {
+    foreach (var (i, tname) in list.slice(0, n - 1)) {
         if (i > 0) {
             Ꮡbuf.WriteString(", "u8);
         }

@@ -27,7 +27,7 @@ import (
 func TestPublishBinlogIsPassedOnlyWhenAsked(t *testing.T) {
 	out := t.TempDir()
 
-	off := publishTestHostArgs(out, "x.tests.csproj", Options{testConfig: "Release", go2csPath: "/src"}, "")
+	off := withPublishBinlog(publishTestHostArgs(out, "x.tests.csproj", Options{testConfig: "Release", go2csPath: "/src"}), "")
 	for _, arg := range off {
 		if strings.HasPrefix(arg, "-bl") {
 			t.Errorf("without -test-publish-binlog the publish still carries %q", arg)
@@ -35,12 +35,12 @@ func TestPublishBinlogIsPassedOnlyWhenAsked(t *testing.T) {
 	}
 
 	path := publishBinlogPath(out)
-	on := publishTestHostArgs(out, "x.tests.csproj", Options{testConfig: "Release", go2csPath: "/src"}, path)
+	on := withPublishBinlog(publishTestHostArgs(out, "x.tests.csproj", Options{testConfig: "Release", go2csPath: "/src"}), path)
 	if on[len(on)-1] != "-bl:"+path {
 		t.Errorf("with the binlog asked for, the publish's last argument is %q; want %q", on[len(on)-1], "-bl:"+path)
 	}
 
-	debug := publishTestHostArgs(out, "x.tests.csproj", Options{testConfig: "Debug"}, path)
+	debug := withPublishBinlog(publishTestHostArgs(out, "x.tests.csproj", Options{testConfig: "Debug"}), path)
 	if debug[len(debug)-1] != "-bl:"+path {
 		t.Errorf("the Debug publish does not carry the binlog either: %v", debug)
 	}

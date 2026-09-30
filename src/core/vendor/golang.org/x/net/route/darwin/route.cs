@@ -130,7 +130,7 @@ public static (slice<byte>, error) FetchRIB(nint af, RIBType typ, nint arg) {
                 return (default!, os.NewSyscallError(sysctlˢ, err));
             }
         }
-        return (b[..(int)(n)], default!);
+        return (b.slice(0, (nint)(n)), default!);
     }
 }
 

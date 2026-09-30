@@ -590,7 +590,7 @@ loop:
         {
             var (i, ok) = seen[n, ꟷ]; if (ok) {
                 // cycle
-                check.cycleError(path[(int)(i)..], firstInSrc(path[(int)(i)..]));
+                check.cycleError(path.slice(i), firstInSrc(path.slice(i)));
                 u = new BasicжΔType(Typ[Invalid]);
                 break;
             }

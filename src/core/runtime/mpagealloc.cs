@@ -475,7 +475,7 @@ internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) 
         summary[sc] = Δp.chunkOf(sc).of(pallocData.ᏑpallocBits).summarize();
         // Update the summaries for chunks in between, which are
         // either totally allocated or freed.
-        var whole = Δp.summary[len(Δp.summary) - 1][(int)(nuint)(sc + 1)..(int)(nuint)(ec)];
+        var whole = Δp.summary[len(Δp.summary) - 1].slice((nint)(nuint)(sc + 1), (nint)(nuint)(ec));
         if (alloc){
             builtin.clear(whole);
         } else {
@@ -509,7 +509,7 @@ internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) 
         var (lo, hi) = addrsToSummaryRange(l, @base, limit + 1);
         // Iterate over each block, updating the corresponding summary in the less-granular level.
         for (nint i = lo; i < hi; i++) {
-            var children = Δp.summary[l + 1][(int)(i.Lsh(logEntriesPerBlock))..(int)((i + 1).Lsh(logEntriesPerBlock))];
+            var children = Δp.summary[l + 1].slice(i.Lsh(logEntriesPerBlock), (i + 1).Lsh(logEntriesPerBlock));
             var sum = mergeSummaries(children, logMaxPages);
             var old = Δp.summary[l][i];
             if (old != sum) {
@@ -697,7 +697,7 @@ nextLevel:
         // starting index. This is a no-op for level 0.
         i.LshAssign(levelBits[l]);
         // Slice out the block of entries we care about.
-        var entries = Δp.summary[l][(int)(i)..(int)(i + entriesPerBlock)];
+        var entries = Δp.summary[l].slice(i, i + entriesPerBlock);
         // Determine j0, the first index we should start iterating from.
         // The searchAddr may help us eliminate iterations if we followed the
         // searchAddr on the previous level or we're on the root level, in which

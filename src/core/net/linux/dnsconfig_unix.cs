@@ -194,7 +194,7 @@ internal static slice<@string> dnsDefaultSearch() {
     }
     {
         nint i = bytealg.IndexByteString(hn, (rune)'.'); if (i >= 0 && i < len(hn) - 1) {
-            return new @string[]{ensureRooted(hn[(int)(i + 1)..])}.slice();
+            return new @string[]{ensureRooted(hn.slice(i + 1))}.slice();
         }
     }
     return default!;

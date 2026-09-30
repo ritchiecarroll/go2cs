@@ -366,11 +366,11 @@ internal static nint roundUp(nint a, nint b) {
             if (len(payload) < explicitNonceLen) {
                 return (default!, 0, alertBadRecordMAC);
             }
-            var nonce = payload[..(int)(explicitNonceLen)];
+            var nonce = payload.slice(0, explicitNonceLen);
             if (len(nonce) == 0) {
                 nonce = hc.seq[..];
             }
-            payload = payload[(int)(explicitNonceLen)..];
+            payload = payload.slice(explicitNonceLen);
             slice<byte> additionalData = default!;
             if (hc.version == VersionTLS13){
                 additionalData = record[..(int)(recordHeaderLen)];
@@ -394,8 +394,8 @@ internal static nint roundUp(nint a, nint b) {
                 return (default!, 0, alertBadRecordMAC);
             }
             if (explicitNonceLen > 0) {
-                c.SetIV(payload[..(int)(explicitNonceLen)]);
-                payload = payload[(int)(explicitNonceLen)..];
+                c.SetIV(payload.slice(0, explicitNonceLen));
+                payload = payload.slice(explicitNonceLen);
             }
             c.CryptBlocks(payload, payload);
             (paddingLen, paddingGood) = extractPadding(payload);
@@ -423,7 +423,7 @@ internal static nint roundUp(nint a, nint b) {
             for (nint i = len(plaintext) - 1; i >= 0; i--) {
                 if (plaintext[i] != 0) {
                     typ = ((recordType)plaintext[i]);
-                    plaintext = plaintext[..(int)(i)];
+                    plaintext = plaintext.slice(0, i);
                     break;
                 }
                 if (i == 0) {
@@ -443,8 +443,8 @@ internal static nint roundUp(nint a, nint b) {
         n = subtle.ConstantTimeSelect((nint)(((uint32)n >> (int)(31))), 0, n); // if n < 0 { n = 0 }
         record[3] = (byte)((n >> (int)(8)));
         record[4] = (byte)n;
-        var remoteMAC = payload[(int)(n)..(int)(n + macSize)];
-        var localMAC = tls10MAC(hc.mac, hc.scratchBuf[..0], hc.seq[..], record[..(int)(recordHeaderLen)], payload[..(int)(n)], payload[(int)(n + macSize)..]);
+        var remoteMAC = payload.slice(n, n + macSize);
+        var localMAC = tls10MAC(hc.mac, hc.scratchBuf[..0], hc.seq[..], record[..(int)(recordHeaderLen)], payload.slice(0, n), payload.slice(n + macSize));
         // This is equivalent to checking the MACs and paddingGood
         // separately, but in constant-time to prevent distinguishing
         // padding failures from MAC failures. Depending on what value
@@ -456,7 +456,7 @@ internal static nint roundUp(nint a, nint b) {
         if (macAndPaddingGood != 1) {
             return (default!, 0, alertBadRecordMAC);
         }
-        plaintext = payload[..(int)(n)];
+        plaintext = payload.slice(0, n);
     }
     hc.incSeq();
     return (plaintext, typ, default!);
@@ -471,13 +471,13 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
 
     {
         nint total = len(@in) + n; if (cap(@in) >= total){
-            head = @in[..(int)(total)];
+            head = @in.slice(0, total);
         } else {
             head = new slice<byte>(total);
             copy(head, @in);
         }
     }
-    tail = head[(int)(len(@in))..];
+    tail = head.slice(len(@in));
     return (head, tail);
 }
 
@@ -518,8 +518,8 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
     case {} Δc when Δc._<cipher.Stream>(out var c): {
         var mac = tls10MAC(hc.mac, hc.scratchBuf[..0], hc.seq[..], record[..(int)(recordHeaderLen)], payload, default!);
         (record, dst) = sliceForAppend(record, len(payload) + len(mac));
-        c.XORKeyStream(dst[..(int)(len(payload))], payload);
-        c.XORKeyStream(dst[(int)(len(payload))..], mac);
+        c.XORKeyStream(dst.slice(0, len(payload)), payload);
+        c.XORKeyStream(dst.slice(len(payload)), mac);
         break;
     }
     case {} Δc when Δc._<aead>(out var c): {
@@ -551,7 +551,7 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
         nint paddingLen = blockSize - rem(plaintextLen, blockSize);
         (record, dst) = sliceForAppend(record, plaintextLen + paddingLen);
         copy(dst, payload);
-        copy(dst[(int)(len(payload))..], mac);
+        copy(dst.slice(len(payload)), mac);
         for (nint i = plaintextLen; i < len(dst); i++) {
             dst[i] = (byte)(paddingLen - 1);
         }
@@ -1061,7 +1061,7 @@ internal static (nint, error) writeRecordLocked(this ж<Conn> Ꮡc, recordType t
             outBuf[3] = (byte)((m >> (int)(8)));
             outBuf[4] = (byte)m;
             error err = default!;
-            (outBuf, err) = c.@out.encrypt(outBuf, data[..(int)(m)], c.config.rand());
+            (outBuf, err) = c.@out.encrypt(outBuf, data.slice(0, m), c.config.rand());
             if (err != default!) {
                 return (n, err);
             }
@@ -1071,7 +1071,7 @@ internal static (nint, error) writeRecordLocked(this ж<Conn> Ꮡc, recordType t
                 }
             }
             n += m;
-            data = data[(int)(m)..];
+            data = data.slice(m);
         }
         if (typ == recordTypeChangeCipherSpec && c.vers != VersionTLS13) {
             {

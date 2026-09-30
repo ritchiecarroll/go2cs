@@ -347,7 +347,7 @@ public static (nint n, error err) ReadAtLeast(Reader r, slice<byte> buf, nint mi
     }
     while (n < min && err == default!) {
         nint nn = default!;
-        (nn, err) = r.Read(buf[(int)(n)..]);
+        (nn, err) = r.Read(buf.slice(n));
         n += nn;
     }
     if (n >= min){
@@ -456,7 +456,7 @@ internal static (int64 written, error err) copyBuffer(Writer dst, Reader src, sl
     while (ᐧ) {
         var (nr, er) = src.Read(buf);
         if (nr > 0) {
-            var (nw, ew) = dst.Write(buf[0..(int)(nr)]);
+            var (nw, ew) = dst.Write(buf.slice(0, nr));
             if (nw < 0 || nr < nw) {
                 nw = 0;
                 if (ew == default!) {
@@ -507,7 +507,7 @@ public static Reader LimitReader(Reader r, int64 n) {
         return (0, EOF);
     }
     if ((int64)len(p) > l.N) {
-        p = p[0..(int)(l.N)];
+        p = p.slice(0, (nint)(l.N));
     }
     (n, err) = l.R.Read(p);
     l.N -= (int64)n;
@@ -548,7 +548,7 @@ public static ж<SectionReader> NewSectionReader(ReaderAt r, int64 off, int64 n)
     }
     {
         var max = s.limit - s.off; if ((int64)len(p) > max) {
-            p = p[0..(int)(max)];
+            p = p.slice(0, (nint)(max));
         }
     }
     (n, err) = s.r.ReadAt(p, s.off);
@@ -592,7 +592,7 @@ internal static error errOffset = errors.New("Seek: invalid offset"u8);
     off += s.@base;
     {
         var max = s.limit - off; if ((int64)len(p) > max) {
-            p = p[0..(int)(max)];
+            p = p.slice(0, (nint)(max));
             (n, err) = s.r.ReadAt(p, off);
             if (err == default!) {
                 err = EOF;
@@ -686,7 +686,7 @@ public static Reader TeeReader(Reader r, Writer w) {
     (n, err) = t.r.Read(p);
     if (n > 0) {
         {
-            var (nΔ1, errΔ1) = t.w.Write(p[..(int)(n)]); if (errΔ1 != default!) {
+            var (nΔ1, errΔ1) = t.w.Write(p.slice(0, n)); if (errΔ1 != default!) {
                 return (nΔ1, errΔ1);
             }
         }
@@ -780,8 +780,8 @@ internal static (int64 n, error err) WriteTo(this nopCloserWriterTo c, Writer w)
 public static (slice<byte>, error) ReadAll(Reader r) {
     var b = new slice<byte>(0, 512);
     while (ᐧ) {
-        var (n, err) = r.Read(b[(int)(len(b))..(int)(cap(b))]);
-        b = b[..(int)(len(b) + n)];
+        var (n, err) = r.Read(b.slice(len(b), cap(b)));
+        b = b.slice(0, len(b) + n);
         if (err != default!) {
             if (AreEqual(err, EOF)) {
                 err = default!;
@@ -790,7 +790,7 @@ public static (slice<byte>, error) ReadAll(Reader r) {
         }
         if (len(b) == cap(b)) {
             // Add more capacity (let append pick how much).
-            b = append(b, (byte)(0))[..(int)(len(b))];
+            b = append(b, (byte)(0)).slice(0, len(b));
         }
     }
 }

@@ -48,7 +48,7 @@ internal static @string String(this state i) {
     if (i >= ((state)(uint8)(len(_state_index) - 1))) {
         return "state("u8 + strconv.FormatInt((int64)(uint8)i, 10) + ")"u8;
     }
-    return _state_name[(int)(_state_index[i])..(int)(_state_index[i + 1])];
+    return _state_name.slice(_state_index[i], _state_index[i + 1]);
 }
 
 } // end template_package

@@ -33,7 +33,7 @@ internal static void readProtocols() {
             // tcp    6   TCP    # transmission control protocol
             {
                 nint i = bytealg.IndexByteString(line, (rune)'#'); if (i >= 0) {
-                    line = line[0..(int)(i)];
+                    line = line.slice(0, i);
                 }
             }
             var f = getFields(line);

@@ -23,8 +23,8 @@ partial class calloc_package {
         }
         ca.pool = new slice<uint32>(siz);
     }
-    var rv = ca.pool[..(int)(n)];
-    ca.pool = ca.pool[(int)(n)..];
+    var rv = ca.pool.slice(0, n);
+    ca.pool = ca.pool.slice(n);
     return rv;
 }
 

@@ -430,7 +430,7 @@ internal static error value(this ж<decodeState> Ꮡd, reflectꓸValue v) {
         if (v.IsValid()) {
             // All bytes inside literal return scanContinue op code.
             {
-                var err = d.literalStore(d.data[(int)(start)..(int)(d.readIndex())], v, false); if (err != default!) {
+                var err = d.literalStore(d.data.slice(start, d.readIndex()), v, false); if (err != default!) {
                     return err;
                 }
             }
@@ -561,7 +561,7 @@ internal static error Δarray(this ж<decodeState> Ꮡd, reflectꓸValue v) {
     if (u != default!) {
         nint start = d.readIndex();
         Ꮡd.skip();
-        return u.UnmarshalJSON(d.data[(int)(start)..(int)(d.off)]);
+        return u.UnmarshalJSON(d.data.slice(start, d.off));
     }
     if (ut != default!) {
         d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "array"u8, Type: v.Type(), Offset: (int64)d.off))));
@@ -666,7 +666,7 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
     if (u != default!) {
         nint start = d.readIndex();
         Ꮡd.skip();
-        return u.UnmarshalJSON(d.data[(int)(start)..(int)(d.off)]);
+        return u.UnmarshalJSON(d.data.slice(start, d.off));
     }
     if (ut != default!) {
         d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "object"u8, Type: v.Type(), Offset: (int64)d.off))));
@@ -733,7 +733,7 @@ Value: "object"u8, Type: t, Offset: (int64)d.off))));
         // Read key.
         nint start = d.readIndex();
         Ꮡd.rescanLiteral();
-        var item = d.data[(int)(start)..(int)(d.readIndex())];
+        var item = d.data.slice(start, d.readIndex());
         var (key, ok) = unquoteBytes(item);
         if (!ok) {
             throw panic(phasePanicMsg);
@@ -893,7 +893,7 @@ Value: "object"u8, Type: t, Offset: (int64)d.off))));
             // Reset errorContext to its original state.
             // Keep the same underlying array for FieldStack, to reuse the
             // space and avoid unnecessary allocs.
-            d.errorContext.Value.FieldStack = (~d.errorContext).FieldStack[..(int)(len(origErrorContext.FieldStack))];
+            d.errorContext.Value.FieldStack = (~d.errorContext).FieldStack.slice(0, len(origErrorContext.FieldStack));
             d.errorContext.Value.Struct = origErrorContext.Struct;
         }
         if (d.opcode == scanEndObject) {
@@ -1045,7 +1045,7 @@ internal static readonly @string boolˢ = "bool"u8;
                         d.saveError(err);
                         break;
                     }
-                    v.SetBytes(b[..(int)(n)]);
+                    v.SetBytes(b.slice(0, n));
                 } while (false);
             }
             else if (exprᴛ3 == reflect.ΔString) {
@@ -1215,7 +1215,7 @@ internal static map<@string, any> objectInterface(this ж<decodeState> Ꮡd) {
         // Read string key.
         nint start = d.readIndex();
         Ꮡd.rescanLiteral();
-        var item = d.data[(int)(start)..(int)(d.readIndex())];
+        var item = d.data.slice(start, d.readIndex());
         var (key, ok) = unquote(item);
         if (!ok) {
             throw panic(phasePanicMsg);
@@ -1253,7 +1253,7 @@ internal static any literalInterface(this ж<decodeState> Ꮡd) {
     // All bytes inside literal return scanContinue op code.
     nint start = d.readIndex();
     Ꮡd.rescanLiteral();
-    var item = d.data[(int)(start)..(int)(d.readIndex())];
+    var item = d.data.slice(start, d.readIndex());
     {
         var c = item[0];
         switch (c) {
@@ -1347,7 +1347,7 @@ internal static (slice<byte> t, bool ok) unquoteBytes(slice<byte> s) {
     if (len(s) < 2 || s[0] != (rune)'"' || s[len(s) - 1] != (rune)'"') {
         return (t, ok);
     }
-    s = s[1..(int)(len(s) - 1)];
+    s = s.slice(1, len(s) - 1);
     // Check for unusual characters. If there are none,
     // then no unquoting is needed, so return a slice of the
     // original bytes.
@@ -1361,7 +1361,7 @@ internal static (slice<byte> t, bool ok) unquoteBytes(slice<byte> s) {
             r++;
             continue;
         }
-        var (rr, size) = utf8.DecodeRune(s[(int)(r)..]);
+        var (rr, size) = utf8.DecodeRune(s.slice(r));
         if (rr == utf8.RuneError && size == 1) {
             break;
         }
@@ -1371,14 +1371,14 @@ internal static (slice<byte> t, bool ok) unquoteBytes(slice<byte> s) {
         return (s, true);
     }
     var b = new slice<byte>(len(s) + (nint)(2 * utf8.UTFMax));
-    nint w = copy(b, s[0..(int)(r)]);
+    nint w = copy(b, s.slice(0, r));
     while (r < len(s)) {
         // Out of room? Can only happen if s is full of
         // malformed UTF-8 and we're replacing each
         // byte with RuneError.
         if (w >= len(b) - (nint)(2 * utf8.UTFMax)) {
             var nb = new slice<byte>((len(b) + (nint)utf8.UTFMax) * 2);
-            copy(nb, b[0..(int)(w)]);
+            copy(nb, b.slice(0, w));
             b = nb;
         }
         {
@@ -1431,25 +1431,25 @@ internal static (slice<byte> t, bool ok) unquoteBytes(slice<byte> s) {
                 }
                 case (rune)'u': {
                     r--;
-                    var rr = getu4(s[(int)(r)..]);
+                    var rr = getu4(s.slice(r));
                     if (rr < 0) {
                         return (t, ok);
                     }
                     r += 6;
                     if (utf16.IsSurrogate(rr)) {
-                        var rr1 = getu4(s[(int)(r)..]);
+                        var rr1 = getu4(s.slice(r));
                         {
                             var dec = utf16.DecodeRune(rr, rr1); if (dec != unicode.ReplacementChar) {
                                 // A valid pair; consume.
                                 r += 6;
-                                w += utf8.EncodeRune(b[(int)(w)..], dec);
+                                w += utf8.EncodeRune(b.slice(w), dec);
                                 break;
                             }
                         }
                         // Invalid surrogate; fall back to replacement rune.
                         rr = unicode.ReplacementChar;
                     }
-                    w += utf8.EncodeRune(b[(int)(w)..], rr);
+                    w += utf8.EncodeRune(b.slice(w), rr);
                     break;
                 }}
 
@@ -1465,9 +1465,9 @@ internal static (slice<byte> t, bool ok) unquoteBytes(slice<byte> s) {
                 break;
             }
             default: {
-                var (rr, size) = utf8.DecodeRune(s[(int)(r)..]);
+                var (rr, size) = utf8.DecodeRune(s.slice(r));
                 r += size;
-                w += utf8.EncodeRune(b[(int)(w)..], // Quote, control characters are invalid.
+                w += utf8.EncodeRune(b.slice(w), // Quote, control characters are invalid.
  // ASCII
  // Coerce to well-formed UTF-8.
  rr);
@@ -1476,7 +1476,7 @@ internal static (slice<byte> t, bool ok) unquoteBytes(slice<byte> s) {
         }
 
     }
-    return (b[0..(int)(w)], true);
+    return (b.slice(0, w), true);
 }
 
 } // end json_package

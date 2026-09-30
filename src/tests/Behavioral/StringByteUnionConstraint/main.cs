@@ -21,7 +21,7 @@ internal static bool prefixMatch<T>(T s, T sep)
     if (len(s) < n) {
         return false;
     }
-    return s[..(int)(n)].ToGoString() == sep.ToGoString();
+    return s.slice(0, n).ToGoString() == sep.ToGoString();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -113,8 +113,8 @@ internal static slice<byte> appendRun<Bytes>(slice<byte> dst, Bytes src)
 {
     dst = append(dst, (byte)((rune)'['));
     if (len(src) > 1) {
-        dst = append(dst, src[1..(int)(len(src) - 1)].ꓸꓸꓸ);
-        dst = append(dst, src[(int)(len(src) - 1)..].ꓸꓸꓸ);
+        dst = append(dst, src.slice(1, len(src) - 1).ꓸꓸꓸ);
+        dst = append(dst, src.slice(len(src) - 1).ꓸꓸꓸ);
     }
     dst = append(dst, (byte)((rune)']'));
     return dst;

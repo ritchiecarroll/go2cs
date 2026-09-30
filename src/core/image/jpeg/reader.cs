@@ -155,7 +155,7 @@ internal static array<nint> unzig = new nint[]{
         (d.bytes.i, d.bytes.j) = (2, 2);
     }
     // Fill in the rest of the buffer.
-    var (n, err) = d.r.Read(d.bytes.buf[(int)(d.bytes.j)..]);
+    var (n, err) = d.r.Read(d.bytes.buf.slice(d.bytes.j));
     d.bytes.j += n;
     if (n > 0) {
         return default!;
@@ -255,8 +255,8 @@ internal static FormatError errMissingFF00 = ((FormatError)(@string)"missing 0xf
         d.bytes.nUnreadable = 0;
     }
     while (ᐧ) {
-        nint n = copy(p, d.bytes.buf[(int)(d.bytes.i)..(int)(d.bytes.j)]);
-        p = p[(int)(n)..];
+        nint n = copy(p, d.bytes.buf.slice(d.bytes.i, d.bytes.j));
+        p = p.slice(n);
         d.bytes.i += n;
         if (len(p) == 0) {
             break;
@@ -330,7 +330,7 @@ internal static readonly @string lumaChromaSubsamplingˢ = "luma/chroma subsampl
     // YCbCr or RGB image.
     // YCbCrK or CMYK image.
     {
-        var err = d.readFull(d.tmp[..(int)(n)]); if (err != default!) {
+        var err = d.readFull(d.tmp.slice(0, n)); if (err != default!) {
             return err;
         }
     }

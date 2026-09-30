@@ -33,7 +33,7 @@ public static slice<byte> Bytes(this Form f, slice<byte> b) {
         return b;
     }
     var @out = new slice<byte>(n, len(b));
-    copy(@out, b[0..(int)(n)]);
+    copy(@out, b.slice(0, n));
     ref var rb = ref heap<reorderBuffer>(out var Ꮡrb);
     rb = new reorderBuffer(f: ft.Value, src: src, nsrc: len(b), @out: @out, flushF: appendFlush);
     return doAppendInner(Ꮡrb, n);
@@ -48,7 +48,7 @@ public static @string String(this Form f, @string s) {
         return s;
     }
     var @out = new slice<byte>(n, len(s));
-    copy(@out, s[0..(int)(n)]);
+    copy(@out, s.slice(0, n));
     ref var rb = ref heap<reorderBuffer>(out var Ꮡrb);
     rb = new reorderBuffer(f: ft.Value, src: src, nsrc: len(s), @out: @out, flushF: appendFlush);
     return ((@string)doAppendInner(Ꮡrb, n));
@@ -66,7 +66,7 @@ public static bool IsNormal(this Form f, slice<byte> b) {
     rb = new reorderBuffer(f: ft.Value, src: src, nsrc: len(b));
     rb.setFlusher(default!, cmpNormalBytes);
     while (bp < len(b)) {
-        rb.@out = b[(int)(bp)..];
+        rb.@out = b.slice(bp);
         {
             bp = decomposeSegment(Ꮡrb, bp, true); if (bp < 0) {
                 return false;
@@ -152,15 +152,15 @@ internal static bool patchTail(ж<reorderBuffer> Ꮡrb) {
         // Potentially allocating memory. However, this only
         // happens with ill-formed UTF-8.
         var x = new slice<byte>(0);
-        x = appendꓸꓸꓸ(x, rb.@out[(int)(len(rb.@out) - extra)..]);
-        rb.@out = rb.@out[..(int)(end)];
+        x = appendꓸꓸꓸ(x, rb.@out.slice(len(rb.@out) - extra));
+        rb.@out = rb.@out.slice(0, end);
         decomposeToLastBoundary(Ꮡrb);
         Ꮡrb.doFlush();
         rb.@out = appendꓸꓸꓸ(rb.@out, x);
         return false;
     }
-    var buf = rb.@out[(int)(p)..];
-    rb.@out = rb.@out[..(int)(p)];
+    var buf = rb.@out.slice(p);
+    rb.@out = rb.@out.slice(0, p);
     decomposeToLastBoundary(Ꮡrb);
     {
         ssState s = rb.ss.next(info); if (s == ssStarter){
@@ -499,7 +499,7 @@ internal static nint lastBoundary(ref formInfo fd, slice<byte> b) {
             return -1;
         }
         i = p;
-        (info, p) = lastRuneStart(ref fd, b[..(int)(i)]);
+        (info, p) = lastRuneStart(ref fd, b.slice(0, i));
         if (p == -1) {
             // incomplete UTF-8 encoding or non-starter bytes without a starter
             return i;
@@ -515,7 +515,7 @@ internal static nint lastBoundary(ref formInfo fd, slice<byte> b) {
     var ss = ((streamSafe)0);
     ssState v = ss.backwards(info);
     for (i = p; i >= 0 && v != ssStarter; i = p) {
-        (info, p) = lastRuneStart(ref fd, b[..(int)(i)]);
+        (info, p) = lastRuneStart(ref fd, b.slice(0, i));
         {
             v = ss.backwards(info); if (v == ssOverflow) {
                 break;
@@ -640,7 +640,7 @@ internal static void decomposeToLastBoundary(ж<reorderBuffer> Ꮡrb) {
         if (v == ssStarter || p < 0) {
             break;
         }
-        (info, i) = lastRuneStart(ref (fd).DerefOrNull(), rb.@out[..(int)(p)]);
+        (info, i) = lastRuneStart(ref (fd).DerefOrNull(), rb.@out.slice(0, p));
         if ((nint)info.size != p - i) {
             break;
         }
@@ -648,12 +648,12 @@ internal static void decomposeToLastBoundary(ж<reorderBuffer> Ꮡrb) {
     rb.ss = ss;
     // Copy bytes for insertion as we may need to overwrite rb.out.
     array<byte> buf = new(128); /* maxBufferSize * utf8.UTFMax */
-    var cp = buf[..(int)(copy(buf[..], rb.@out[(int)(p)..]))];
-    rb.@out = rb.@out[..(int)(p)];
+    var cp = buf.slice(0, copy(buf[..], rb.@out.slice(p)));
+    rb.@out = rb.@out.slice(0, p);
     for (padd--; padd >= 0; padd--) {
         info = add[padd];
         Ꮡrb.insertUnsafe(inputBytes(cp), 0, info);
-        cp = cp[(int)(info.size)..];
+        cp = cp.slice(info.size);
     }
 }
 

@@ -75,7 +75,7 @@ internal static void writeMsgAddrPortRoundTrip(@string network, @string host) {
                 break;
             }
             reads++;
-            if (((sstring)(buf[..(int)(rn)])) == ((sstring)payload)) {
+            if (((sstring)(buf.slice(0, rn))) == ((sstring)payload)) {
                 bytes++;
             }
             if (from.Port() == clientPort) {
@@ -131,7 +131,7 @@ internal static void writeMsgUDPRoundTrip(@string network, @string host) {
                 break;
             }
             reads++;
-            if (((sstring)(buf[..(int)(rn)])) == ((sstring)payload)) {
+            if (((sstring)(buf.slice(0, rn))) == ((sstring)payload)) {
                 bytes++;
             }
             if ((~from).Port == clientPort) {

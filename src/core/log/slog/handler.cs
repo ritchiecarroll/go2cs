@@ -373,7 +373,7 @@ internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
     }
     if ((~s.h).json) {
         // Close all open groups.
-        foreach ((_, _) in (~s.h).groups[..(int)(nOpenGroups)]) {
+        foreach ((_, _) in (~s.h).groups.slice(0, nOpenGroups)) {
             s.buf.WriteByte((rune)'}');
         }
         // Close the top-level object.
@@ -420,7 +420,7 @@ internal static handleState newHandleState(this ж<commonHandler> Ꮡh, ж<buffe
     );
     if (h.opts.ReplaceAttr != default!) {
         s.groups = ᏑgroupPool.Get()._<ж<slice<@string>>>();
-        s.groups.ValueSlot = builtin.appendꓸꓸꓸ(s.groups.ValueSlot, h.groups[..(int)(h.nOpenGroups)]);
+        s.groups.ValueSlot = builtin.appendꓸꓸꓸ(s.groups.ValueSlot, h.groups.slice(0, h.nOpenGroups));
     }
     return s;
 }
@@ -439,7 +439,7 @@ internal static handleState newHandleState(this ж<commonHandler> Ꮡh, ж<buffe
 }
 
 [GoRecv] internal static void openGroups(this ref handleState s) {
-    foreach (var (_, n) in (~s.h).groups[(int)((~s.h).nOpenGroups)..]) {
+    foreach (var (_, n) in (~s.h).groups.slice((~s.h).nOpenGroups)) {
         s.openGroup(n);
     }
 }
@@ -469,12 +469,12 @@ internal static UntypedInt keyComponentSep => /* '.' */ 46;
     if ((~s.h).json){
         s.buf.WriteByte((rune)'}');
     } else {
-        (s.prefix.ValueSlot) = (s.prefix.ValueSlot)[..(int)(len(s.prefix.ValueSlot) - len(name) - 1)];
+        (s.prefix.ValueSlot) = (s.prefix.ValueSlot).slice(0, len(s.prefix.ValueSlot) - len(name) - 1);
     }
     /* for keyComponentSep */
     s.sep = s.h.attrSep();
     if (s.groups != nil) {
-        s.groups.ValueSlot = (s.groups.ValueSlot)[..(int)(len(s.groups.ValueSlot) - 1)];
+        s.groups.ValueSlot = (s.groups.ValueSlot).slice(0, len(s.groups.ValueSlot) - 1);
     }
 }
 
@@ -652,7 +652,7 @@ internal static slice<byte> appendRFC3339Millis(slice<byte> b, time.Time t) {
     nint n = len(b);
     t = t.Truncate(time_package.Millisecond).Add(time_package.Millisecond / 10);
     b = t.AppendFormat(b, time_package.RFC3339Nano);
-    b = builtin.appendꓸꓸꓸ(b[..(int)(n + prefixLen)], b[(int)(n + prefixLen + 1)..]); // drop the 4th digit
+    b = builtin.appendꓸꓸꓸ(b.slice(0, n + prefixLen), b.slice(n + prefixLen + 1)); // drop the 4th digit
     return b;
 }
 

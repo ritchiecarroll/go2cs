@@ -120,7 +120,7 @@ internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
             switch (select(selᴛ5, ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
             case 0: {
                 nint nw = ᐸꟷ(p.rdCh);
-                b = b[(int)(nw)..];
+                b = b.slice(nw);
                 n += nw;
                 break;
             }

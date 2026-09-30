@@ -94,8 +94,8 @@ internal static LabelSet mergeLabelSets(LabelSet left, LabelSet right) {
 
     }
     // Append the remaining elements
-    result = appendꓸꓸꓸ(result, left.list[(int)(l)..]);
-    result = appendꓸꓸꓸ(result, right.list[(int)(r)..]);
+    result = appendꓸꓸꓸ(result, left.list.slice(l));
+    result = appendꓸꓸꓸ(result, right.list.slice(r));
     return new LabelSet(list: result);
 }
 

@@ -491,7 +491,7 @@ internal static @string commonPrefix(@string a, @string b) {
     while (i < len(a) && i < len(b) && a[i] == b[i] && (a[i] <= (rune)' ' || a[i] == (rune)'*')) {
         i++;
     }
-    return a[0..(int)(i)];
+    return a.slice(0, i);
 }
 
 // trimRight returns s with trailing whitespace removed.
@@ -530,7 +530,7 @@ internal static void stripCommonPrefix(slice<@string> lines) {
     @string prefix = ""u8;
     var prefixSet = false;
     if (len(lines) > 2) {
-        foreach (var (i, line) in lines[1..(int)(len(lines) - 1)]) {
+        foreach (var (i, line) in lines.slice(1, len(lines) - 1)) {
             if (isBlank(line)){
                 lines[1 + i] = ""u8; // range starts with lines[1]
             } else {
@@ -578,7 +578,7 @@ internal static void stripCommonPrefix(slice<@string> lines) {
                 if (i == len(prefix) && i > 0 && prefix[i - 1] == (rune)'\t') {
                     i--;
                 }
-                prefix = prefix[0..(int)(i)];
+                prefix = prefix.slice(0, i);
             } else {
                 // comment text on the first line
                 var suffix = new slice<byte>(len(first));
@@ -589,11 +589,11 @@ internal static void stripCommonPrefix(slice<@string> lines) {
                 }
                 if (n > 2 && suffix[2] == (rune)'\t'){
                     // assume the '\t' compensates for the /*
-                    suffix = suffix[2..(int)(n)];
+                    suffix = suffix.slice(2, n);
                 } else {
                     // otherwise assume two blanks
                     (suffix[0], suffix[1]) = ((rune)' ', (rune)' ');
-                    suffix = suffix[0..(int)(n)];
+                    suffix = suffix.slice(0, n);
                 }
                 // Shorten the computed common prefix by the length of
                 // suffix, if it is found as suffix of the prefix.
@@ -622,7 +622,7 @@ internal static void stripCommonPrefix(slice<@string> lines) {
     // Remove the common prefix from all but the first and empty lines.
     foreach (var (i, line) in lines) {
         if (i > 0 && line != ""u8) {
-            lines[i] = line[(int)(len(prefix))..];
+            lines[i] = line.slice(len(prefix));
         }
     }
 }
@@ -873,8 +873,8 @@ internal static readonly object negativeIndentationˢ = (@string)"negative inden
 
     }
     // shift remaining entries down
-    nint l = copy(p.wsbuf, p.wsbuf[(int)(n)..]);
-    p.wsbuf = p.wsbuf[..(int)(l)];
+    nint l = copy(p.wsbuf, p.wsbuf.slice(n));
+    p.wsbuf = p.wsbuf.slice(0, l);
 }
 
 // ----------------------------------------------------------------------------
@@ -974,7 +974,7 @@ internal static void print(this ж<printer> Ꮡp, params ꓸꓸꓸany argsʗp) {
                 p.writeWhitespace(i);
                 i = 0;
             }
-            p.wsbuf = p.wsbuf[0..(int)(i + 1)];
+            p.wsbuf = p.wsbuf.slice(0, i + 1);
             p.wsbuf[i] = x;
             if (x == newline || x == formfeed) {
                 // newlines affect the current state (p.impliedSemi)
@@ -1193,7 +1193,7 @@ internal static error printNode(this ж<printer> Ꮡp, any node) {
             j++;
         }
         if (i < j) {
-            p.comments = comments[(int)(i)..(int)(j)];
+            p.comments = comments.slice(i, j);
         }
     } else 
     {
@@ -1339,26 +1339,26 @@ internal static slice<byte> aNewline = slice<byte>("\n"u8);
         }
         else if (exprᴛ1 == inEscape) {
             if (b == tabwriter.Escape) {
-                (_, err) = p.output.Write(data[(int)(m)..(int)(nΔ1)]);
+                (_, err) = p.output.Write(data.slice(m, nΔ1));
                 p.resetSpace();
             }
         }
         else if (exprᴛ1 == inText) {
             var exprᴛ3 = b;
             if (exprᴛ3 is (rune)'\t' or (rune)' ') {
-                (_, err) = p.output.Write(data[(int)(m)..(int)(nΔ1)]);
+                (_, err) = p.output.Write(data.slice(m, nΔ1));
                 p.resetSpace();
                 p.space = append(p.space, b);
             }
             else if (exprᴛ3 is (rune)'\n' or (rune)'\f') {
-                (_, err) = p.output.Write(data[(int)(m)..(int)(nΔ1)]);
+                (_, err) = p.output.Write(data.slice(m, nΔ1));
                 p.resetSpace();
                 if (err == default!) {
                     (_, err) = p.output.Write(aNewline);
                 }
             }
             else if (exprᴛ3 == tabwriter.Escape) {
-                (_, err) = p.output.Write(data[(int)(m)..(int)(nΔ1)]);
+                (_, err) = p.output.Write(data.slice(m, nΔ1));
                 p.state = inEscape;
                 m = nΔ1 + 1; // +1: skip tabwriter.Escape
             }
@@ -1375,7 +1375,7 @@ internal static slice<byte> aNewline = slice<byte>("\n"u8);
     nΔ1 = len(data);
     var exprᴛ4 = p.state;
     if (exprᴛ4 == inEscape || exprᴛ4 == inText) {
-        (_, err) = p.output.Write(data[(int)(m)..(int)(nΔ1)]);
+        (_, err) = p.output.Write(data.slice(m, nΔ1));
         p.resetSpace();
     }
 

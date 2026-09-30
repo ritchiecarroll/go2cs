@@ -321,7 +321,7 @@ internal static bool isLess(slice<byte> a, slice<byte> b) {
     // Perform a subtraction with borrow.
     uint64 borrow = default!;
     for (nint i = 0; i < len(bufA); i += 8) {
-        var (limbA, limbB) = (byteorder.LEUint64(bufA[(int)(i)..]), byteorder.LEUint64(bufB[(int)(i)..]));
+        var (limbA, limbB) = (byteorder.LEUint64(bufA.slice(i)), byteorder.LEUint64(bufB.slice(i)));
         (_, borrow) = bits.Sub64(limbA, limbB, borrow);
     }
     // If there is a borrow at the end of the operation, then a < b.
