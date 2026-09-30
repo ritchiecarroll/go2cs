@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -289,18 +290,19 @@ public sealed class TestRunner
 
     internal void Report(TestEvent testEvent) => m_reporter.Report(testEvent);
 
-    // Whether a registered test comes from the package's EXTERNAL (package x_test) files. The converter declares a
-    // package's internal tests in `<pkg>_internal_test_package` and its external ones in `<pkg>_test_package`, and a
-    // converted host registers each test by method group, so the declaring class says which list Go put it in. A
-    // host-side lambda (GolibTests) or any other class reads as internal, and its relative order is unchanged.
-    private static bool IsExternalTest(RegisteredTest test)
-    {
-        string? declaring = test.Action.Method.DeclaringType?.Name;
-
-        return declaring is not null &&
-               declaring.EndsWith("_test_package", StringComparison.Ordinal) &&
-               !declaring.EndsWith("_internal_test_package", StringComparison.Ordinal);
-    }
+    // Whether a registered test comes from the package's EXTERNAL (package x_test) files. Go's own definition is the
+    // package clause: an external test file's clause is `<name>_test`. The converter stamps every test class with
+    // its clause as [GoPackage("<clause>")], and a converted host registers each test by method group, so the
+    // declaring class's stamp says which list Go put the test in. The class NAME cannot: a package named `x_internal`
+    // declares its external tests in `x_internal_test_package`. A host-side lambda (GolibTests) or any unstamped
+    // class reads as internal, and its relative order is unchanged.
+    //
+    // Only Test functions are registered: examples and benchmarks are deferred by kind (Phase 4D) and fuzz targets
+    // are compile-only. When examples register, they need a kind key AHEAD of Source/Line, because testing.M runs
+    // every test, then every fuzz target's seeds, then every example.
+    private static bool IsExternalTest(RegisteredTest test) =>
+        test.Action.Method.DeclaringType?.GetCustomAttribute<GoPackageAttribute>()?.PackageName
+            .EndsWith("_test", StringComparison.Ordinal) ?? false;
 
     private static void Shuffle<T>(IList<T> values, int seed)
     {
