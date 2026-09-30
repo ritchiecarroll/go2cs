@@ -301,6 +301,37 @@ $smallPath = Join-Path $fixtureRoot 'small-results.json'
 [System.IO.File]::WriteAllText($smallPath, $cleanTail)
 Assert-Equal 'tail: a file smaller than the window reads whole' $cleanTail (Get-ResultsTailText -Path $smallPath)
 
+# ---- the go2cs-gen output-missing class (Test-GeneratedTypeMissingFailure) ------------------------------
+# The sweep's second re-run arm. Its fixtures are the shapes a failed row's OUTPUT takes; the i9's D5 reflect
+# row is the positive case (three CS0246 on generated types, nothing else). Every refusal names why.
+
+$i9Shape = @(
+    "walk.cs(406,25): error CS0246: The type or namespace name 'FileNode' could not be found [go.ast.csproj]",
+    "walk.cs(422,20): error CS0246: The type or namespace name 'inspectorVisitor' could not be found [go.ast.csproj]",
+    "walk.cs(432,14): error CS0246: The type or namespace name 'inspectorVisitor' could not be found [go.ast.csproj]"
+) -join "`n"
+$result = Test-GeneratedTypeMissingFailure -OutputText $i9Shape
+Assert-Equal 'generated: the i9 D5 shape is the class' $true $result.GeneratedTypeMissing
+Assert-Equal 'generated: the i9 D5 shape names CS0246 once' 'CS0246' ($result.Codes -join ',')
+
+$result = Test-GeneratedTypeMissingFailure -OutputText "CSC : error CS8034: Unable to load Analyzer assembly go2cs-gen.dll"
+Assert-Equal 'generated: a guarded load failure (error CS8034) is the class' $true $result.GeneratedTypeMissing
+
+$result = Test-GeneratedTypeMissingFailure -OutputText ($i9Shape + "`nx.cs(1,1): error CS1503: Argument 1: cannot convert")
+Assert-Equal 'generated: a real compile error alongside refuses' $false $result.GeneratedTypeMissing
+Assert-ReasonNames 'generated: the refusal names the outside code' $result 'CS1503'
+
+$result = Test-GeneratedTypeMissingFailure -OutputText "CSC : warning CS8034: Unable to load Analyzer assembly go2cs-gen.dll"
+Assert-Equal 'generated: a WARNING is not a failed build' $false $result.GeneratedTypeMissing
+Assert-ReasonNames 'generated: the warning refusal says no compiler error' $result 'no compiler error'
+
+$result = Test-GeneratedTypeMissingFailure -OutputText "--- FAIL: TestSomething`nConverted test action failed: mismatch"
+Assert-Equal 'generated: a failure after the build refuses' $false $result.GeneratedTypeMissing
+
+$result = Test-GeneratedTypeMissingFailure -OutputText $null
+Assert-Equal 'generated: no output refuses' $false $result.GeneratedTypeMissing
+Assert-ReasonNames 'generated: the no-output refusal says so' $result 'no output'
+
 # ---- verdict -----------------------------------------------------------------------------------------
 
 Remove-Item -LiteralPath $fixtureRoot -Recurse -Force -ErrorAction SilentlyContinue
