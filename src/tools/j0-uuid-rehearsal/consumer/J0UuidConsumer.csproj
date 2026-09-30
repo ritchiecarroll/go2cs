@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The J0 consumer (docs/phase4/SIZING-j0-uuid.md). It references the converted google/uuid ONLY as a NuGet
+    package, restored by j0-consume.ps1 from a local folder feed through a nuget.config that clears every other
+    source, into an isolated NUGET_PACKAGES. J0UuidVersion names the rehearsal's package version (for example
+    1.6.0-local.1); the script passes it.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <J0UuidVersion Condition="'$(J0UuidVersion)' == ''">0.0.0-unset</J0UuidVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="go.github.com.google.uuid" Version="$(J0UuidVersion)" />
+  </ItemGroup>
+
+</Project>

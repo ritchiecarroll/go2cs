@@ -84,9 +84,22 @@
     must be on PATH; an origin that cannot be reached is reported by name and the tag comparison runs
     on the local tags.
 
+.PARAMETER VersionSuffix
+    A LOCAL REHEARSAL's prerelease label (e.g. local.1): every package is packed as
+    <GoStdLibVersion>.<GoBuildNumber>-<VersionSuffix>, and every go.* dependency between them carries that
+    same version. PACK-ONLY: refused with -Push, -BumpBuild and -VerifyOnly, so a suffixed package can never
+    reach a feed through this script, and version.props, the tags and docs\validation are never touched.
+    Only the PACKAGE version moves; assembly versions are unchanged. It exists for local-feed rehearsals
+    (the J0 pilot) whose packages must not share an id+version with a published release in a NuGet cache.
+
 .EXAMPLE
     .\push-nuget.ps1
     Pack every package to src\artifacts\nupkg (no push, no bump). Inspect the output, then push.
+
+.EXAMPLE
+    .\push-nuget.ps1 -VersionSuffix local.1 -OutDir D:\feeds\go2cs-local
+    A local rehearsal: pack every package as <version>-local.1 into a folder feed. Nothing is bumped,
+    tagged, frozen or pushed.
 
 .EXAMPLE
     .\push-nuget.ps1 -VerifyOnly
@@ -114,7 +127,8 @@ param(
     [switch]$SkipBuild,
     [switch]$BumpBuild,
     [switch]$Push,
-    [switch]$VerifyOnly
+    [switch]$VerifyOnly,
+    [string]$VersionSuffix
 )
 
 $ErrorActionPreference = 'Stop'
@@ -136,6 +150,19 @@ $repoRoot = Split-Path $src -Parent
 if ($VerifyOnly -and ($Push -or $BumpBuild)) {
     throw ("-VerifyOnly is mutually exclusive with -Push and -BumpBuild: it checks the tree and exits " +
            "before anything is bumped, tagged, frozen, packed or published.")
+}
+
+# A local rehearsal's label is PACK-ONLY by construction: a suffixed package must never be pushed, and a
+# run that bumps is a release. -VerifyOnly packs nothing, so a suffix there is a mistake worth naming.
+if ($VersionSuffix) {
+    if ($Push -or $PSBoundParameters.ContainsKey('BumpBuild') -or $VerifyOnly) {
+        throw ("-VersionSuffix is a local-rehearsal pack and is refused with -Push, -BumpBuild and -VerifyOnly: " +
+               "a suffixed package must never reach a feed through this script.")
+    }
+
+    if ($VersionSuffix -notmatch '^[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*$') {
+        throw "-VersionSuffix '$VersionSuffix' is not a NuGet prerelease label (dot-separated alphanumerics and hyphens)."
+    }
 }
 
 # --- PRE-FLIGHT VERIFICATION: EVERY CHECKABLE THING, BEFORE ANY IRREVERSIBLE ONE ------------------
@@ -879,6 +906,11 @@ if ($doBump) {
 if ($propsText -match '<GoStdLibVersion>([^<]+)</GoStdLibVersion>') { $baseVersion = $Matches[1] } else { $baseVersion = '?' }
 $fullVersion = "$baseVersion.$build"
 Write-Step "Package version: $fullVersion   (solution: go2cs-stdlib.slnx)"
+
+# The version the PACK writes. Unchanged unless a local rehearsal passed -VersionSuffix, which is refused on
+# every release path above, so on a release $packVersion IS $fullVersion and nothing below moves.
+$packVersion = if ($VersionSuffix) { "$fullVersion-$VersionSuffix" } else { $fullVersion }
+if ($VersionSuffix) { Write-Step "LOCAL REHEARSAL: packing as $packVersion (pack-only; nothing is bumped, tagged or pushed)" }
 
 # The version a BUMPING run would publish. Only meaningful when this run did not bump: $build is then
 # still the last-published number, so +1 names the next release. After a bump $build already IS that
@@ -1712,7 +1744,11 @@ foreach ($rid in $buildOrder) {
     # --no-build packs exactly what the pass above produced; the same -p:GoTargetOS is required here
     # too, because it selects the conditioned <ProjectReference> groups the .nuspec is derived from.
     Write-Step "[$rid] Packing -> $flavorOut"
-    & dotnet pack $slnx -c $Configuration -o $flavorOut -p:GoTargetOS=$goos -p:GeneratePackageOnBuild=false --no-build --nologo -v m
+    # A local rehearsal overrides the PACKAGE version only (a global property, so every go.* dependency
+    # between the packages carries it too); a release passes nothing extra. The @( ) must wrap the whole `if`:
+    # an `if` that yields a one-element array unrolls it to a bare string, and @ splats a string by character.
+    $packVersionArgs = @(if ($VersionSuffix) { "-p:PackageVersion=$packVersion" })
+    & dotnet pack $slnx -c $Configuration -o $flavorOut -p:GoTargetOS=$goos -p:GeneratePackageOnBuild=false --no-build --nologo -v m @packVersionArgs
     if ($LASTEXITCODE -ne 0) { throw "[$rid] dotnet pack failed ($LASTEXITCODE)" }
 }
 
