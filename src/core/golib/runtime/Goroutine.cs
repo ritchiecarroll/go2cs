@@ -732,6 +732,11 @@ public sealed class Goroutine
     public static GoroutineProfileEntry[] ProfileSnapshot()
     {
         Goroutine[] live = Snapshot();
+
+        // The guard seam: between the copy of the set and the reads of the labels, the window a
+        // preempted profiling thread stalls in (GoroutineProfileInstantTests).
+        SnapshotSeamForGuard?.Invoke();
+
         List<GoroutineProfileEntry> entries = new(live.Length);
 
         foreach (Goroutine goroutine in live)
@@ -744,6 +749,13 @@ public sealed class Goroutine
 
         return [.. entries];
     }
+
+    /// <summary>
+    /// The guard seam for <see cref="ProfileSnapshot"/>: invoked on the profiling thread after the set
+    /// is copied and before any label is read, so a test can place another goroutine's work exactly
+    /// where a preempted profiler would let it land. Null outside those tests.
+    /// </summary>
+    internal static Action? SnapshotSeamForGuard;
 
     /// <summary>
     /// Every live goroutine, ordered by the sequence in which they were created.
