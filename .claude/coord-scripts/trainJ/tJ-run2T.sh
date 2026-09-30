@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# TRAIN J RUN 2 on the i7 -- the re-gate after the post-run-1 seat (the i9's A11 windows fix, 019ed294d3, merged as
+# TRAIN J RUN 2, T LEGS ONLY (attempt 2) on the i7 -- the re-gate after the post-run-1 seat (the i9's A11 windows fix, 019ed294d3, merged as
 # d616cc686c). Launch from a PER-RUN COPY (floor 4): copy tJ-regate2.sh + tJ-seats.txt to a run folder and run the copy.
 # Scope, ruled in PRERES (POST-RUN-1 SEAT + RUN-1 LEG 5): the fix touches ONLY src/core/runtime/mfinal.cs and
 # GolibTests/CleanupDispatchTests.cs -- no converter, gen or emission change, so C/E/SY/2b/GN/TR/CNR/H7 stand from run 1.
@@ -31,7 +31,7 @@ h=$(git rev-parse --short=10 HEAD)
 while IFS='|' read -r b sha msg; do [ -z "$b" ] && continue; git merge-base --is-ancestor "$sha" HEAD || { stamp "ABORT: seat $b $sha not an ancestor"; exit 2; }; done < "$SD/tJ-seats.txt"
 git merge-base --is-ancestor 019ed294d3 HEAD || { stamp "ABORT: the A11 fix 019ed294d3 is not an ancestor"; exit 2; }
 [ "$(git status --porcelain | grep -vc '^??')" = 0 ] || { stamp "ABORT: tracked changes before run 2"; exit 2; }
-stamp "PRE run2 head=$h tree=$(git rev-parse --short=10 HEAD^{tree}) $(go version) dotnet=$(dotnet --version | tr -d '\r') free=$(freegb)G"
+stamp "PRE run2-T (the T legs only; GT/B/T0/S were read in attempt 1, SUMMARY 00:12-01:01) head=$h tree=$(git rev-parse --short=10 HEAD^{tree}) $(go version) dotnet=$(dotnet --version | tr -d '\r') free=$(freegb)G"
 
 leg(){ # name, logfile-suffix, command...
   local name=$1 suf=$2; shift 2
@@ -52,20 +52,6 @@ purge(){ # label
   [ "$left" = 0 ] && [ "$td" = 0 ] || { stamp "ABORT: purge incomplete or tracked deletions"; exit 3; }
 }
 
-# LEG GT -- GolibTests, Debug and Release (run 1: Arm6 red in both; the fix's own red arm is Arm10)
-for cfg in Debug Release; do
-  leg GT-$cfg golibtests-$cfg bash -c "dotnet build src/tests/GolibTests/GolibTests.csproj -c $cfg -p:UseSharedCompilation=false && dotnet test src/tests/GolibTests/GolibTests.csproj -c $cfg --no-build"
-  stamp "  GT-$cfg: $(grep -aE '(Passed|Failed)!' "$LOGDIR/golibtests-$cfg.log" | tail -n 1 | cut -c1-200) :: failed-names: $(grep -aE '^\s+Failed [A-Za-z]' "$LOGDIR/golibtests-$cfg.log" | sed 's/^ *Failed //' | cut -d' ' -f1 | tr '\n' ' ' | cut -c1-300)"
-done
-purge after-GT
-
-# LEG B7 -- run 1's six Output timeouts (a load window) plus the one behavioral project that uses finalizers, each ISOLATED
-for p in ClosureBareReturnNamedResults ClosureLocalNoHeapBox ClosureMixedReturnUnsigned ClosureReturnAnonStruct DeferFinallyLowering EmbeddedValuePointerMethod SetFinalizerBridge; do
-  leg "B:$p" "behav-$p" powershell -NoProfile -ExecutionPolicy Bypass -File src/tests/Behavioral/run-behavioral.ps1 --filter "$p"
-  stamp "  B:$p: $(grep -aE '^\s+(Transpile|Compile|Target|Output)\s+pass' "$LOGDIR/behav-$p.log" | tr -s ' ' | tr '\r\n' '  ' | cut -c1-300) :: $(grep -aE '^(PASS|FAIL)' "$LOGDIR/behav-$p.log" | tail -n 1 | cut -c1-120)"
-done
-purge after-behavioral
-
 export MSYS_NO_PATHCONV=1
 ( cd src/go2cs && go build -o bin/go2cs.exe . ) > "$LOGDIR/conv-build.log" 2>&1
 EXE="$W/src/go2cs/bin/go2cs.exe"
@@ -80,18 +66,7 @@ tleg(){ # pkg, timeout, suffix, extra args...
   for f in go2cs_test_comparison.json go2cs_test_results.json; do [ -f "src/core/$pkg/$f" ] && cp "src/core/$pkg/$f" "$LOGDIR/tests-$(echo "$pkg" | tr '/' '.')-$suf.$f"; done
 }
 
-# LEG T0 -- the CANARY: runtime's finalizer and cleanup rows by name (the i9's windows reading at the fix: 14 of 15 = Go,
-# TestFinalizerRegisterABI pre-existing). Read before the long legs; a hang here is the A11 defect still live.
-tleg runtime 30m fin -test-filter '^(TestCleanup.*|TestFinalizer.*)$'
 unset MSYS_NO_PATHCONV
-
-# LEG S -- the finalizer-sensitive banked rows (i7 and i9-shard rows alike), one at a time, exact match
-for pkg in sync unique internal/poll weak runtime/metrics internal/sync os reflect crypto/tls; do
-  n=$(echo "$pkg" | tr '/' '.')
-  leg "S:$pkg" "sweep-$n" powershell -NoProfile -ExecutionPolicy Bypass -File src/run-validated-sweep.ps1 -Filter "$pkg" -Exact
-  stamp "  S:$pkg: $(grep -aE "^\s*(PASS|FAIL|COUNT|DRIFT)" "$LOGDIR/sweep-$n.log" | tail -n 1 | cut -c1-200)"
-done
-purge after-sweep
 
 # LEG T -- runtime/debug (the row TRAIN J banks) and the FULL windows runtime row
 # REBUILD the converter first: purge after-sweep removes every src/**/bin, the converter's own included (run 2 attempt 1
