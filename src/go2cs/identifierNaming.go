@@ -70,6 +70,87 @@ var keywords = NewHashSet([]string{
 	// "goto", "if", "interface", "return", "select", "struct", "switch", "var"
 })
 
+// csReservedTypeNames are C# contextual keywords that change meaning ONLY where a Go identifier can reach
+// as a TYPE: a type/alias NAME, and the START of a member declaration (whose first token is the member's
+// type). Statements and expressions are unaffected, so unlike `keywords` above they are NOT '@'-escaped
+// everywhere -- that would put '@' on ~230 std fields, locals and selectors that never change meaning. A
+// package that DECLARES a type, alias or type parameter so named is instead Δ-renamed package-wide
+// (collectCSReservedTypeNameDecls feeds nameCollisions), the `Δfile` / emitterSpelledTypeNames precedent:
+// '@' cannot survive go2cs-gen, which spells type names from symbols. (Side seat S2, ruled 2026-09-29;
+// Roslyn main 644b6341ab and "Compiler Breaking Changes - DotNet 11".)
+//   - closed (C# 15, closed hierarchies): a type or alias named `closed` is CS9380; `closed f;` at member
+//     start parses `closed` as a modifier (CS1519).
+//   - union (C# 15, unions): `union F;` at member start parses as a union declaration (CS9370); a type
+//     named `union` itself only warns (CS8981), but its every member-start use breaks.
+//   - safe (PREVIEW only, unsafe evolution -- not LangVersion 15): a member modifier. Included
+//     pre-emptively, as ruled; the corpus declares no such type, so it costs nothing today.
+//
+// RESIDUAL, not covered: a Go PACKAGE so named used as a qualifier at member start (`closed.T f;`) --
+// no std or behavioral package is. And as with emitterSpelledTypeNames, a type declared only in a
+// `_test.go` file renames the test side's uses of a same-named production field (the B2 coherence class);
+// the corpus declares none. C# 15's `with(` collection-element rule needs nothing: a Go composite literal
+// is emitted as an array initializer, never a collection expression.
+var csReservedTypeNames = NewHashSet([]string{"closed", "union", "safe"})
+
+// collectCSReservedTypeNameDecls records every name in file that a C# 15 reserved TYPE-position keyword
+// (csReservedTypeNames) would break: a type declaration at any level, an alias, and a type parameter of a
+// type, a function or a method receiver.
+func collectCSReservedTypeNameDecls(file *ast.File, found map[string]bool) {
+	record := func(ident *ast.Ident) {
+		if ident != nil && csReservedTypeNames.Contains(ident.Name) {
+			found[ident.Name] = true
+		}
+	}
+
+	recordFields := func(list *ast.FieldList) {
+		if list == nil {
+			return
+		}
+
+		for _, field := range list.List {
+			for _, name := range field.Names {
+				record(name)
+			}
+		}
+	}
+
+	ast.Inspect(file, func(node ast.Node) bool {
+		switch n := node.(type) {
+		case *ast.TypeSpec:
+			record(n.Name)
+			recordFields(n.TypeParams)
+		case *ast.FuncType:
+			recordFields(n.TypeParams)
+		case *ast.FuncDecl:
+			// A generic method's receiver re-declares its type parameters: `func (l *list[closed]) m()`.
+			if n.Recv != nil {
+				for _, field := range n.Recv.List {
+					receiver := field.Type
+
+					if star, ok := receiver.(*ast.StarExpr); ok {
+						receiver = star.X
+					}
+
+					switch index := receiver.(type) {
+					case *ast.IndexExpr:
+						if ident, ok := index.Index.(*ast.Ident); ok {
+							record(ident)
+						}
+					case *ast.IndexListExpr:
+						for _, expr := range index.Indices {
+							if ident, ok := expr.(*ast.Ident); ok {
+								record(ident)
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return true
+	})
+}
+
 // The following names are reserved by go2cs or C#, if encountered in Go code, prefix with `Δ`:
 // Note that "_" is used for type assertion functions in go2cs converted C# code, but it is not
 // a valid method name in Go, so it is not included in the reserved list.
