@@ -3053,6 +3053,10 @@ partial class runtime_package
         return pc;
     }
 
+    // runtime_FrameSymbolName's managed answer (runtime/pprof's symtab linkname reads it): the name pprof
+    // symbolizes a frame by. Go returns the RAW function symbol there, never funcNameForPrint's form.
+    public static @string GoFrameSymbolName(Frame f) => f.Function;
+
     private static CallerFrameRecord? callerFrameRecord(uintptr token)
     {
         nuint value = token;
