@@ -558,13 +558,15 @@ func getLocalModulePackageInfo(importPath string, options Options) (PackageInfo,
 		}, true
 	}
 
-	// A read-only, versioned module-cache dependency ($GOPATH/pkg/mod/<module>@<version>/...): its
+	// A read-only, versioned module-cache dependency (GOMODCACHE/<module>@<version>/...): its
 	// converted output goes to a WRITABLE $(go2csPath)pkg\<import-path> location, referenced there via
 	// the $(go2csPath) property (like the stdlib $(go2csPath)core refs — NOT rewritten relative, so it
 	// resolves against the deploy root). The @version segment is stripped by deriving the path from the
 	// version-free IMPORT PATH rather than from meta.Dir. ModuleConverter writes the package's output
 	// to the matching $(go2csPath)pkg\<import-path> directory, so reference and output stay in agreement.
-	if isPathUnder(meta.Dir, filepath.Join(options.goPath, "pkg", "mod")) {
+	// The cache is goModCacheDir(), not $GOPATH/pkg/mod: GOMODCACHE may point anywhere, and a cache
+	// outside GOPATH was taken for a LOCAL module -- in-place output, a relative reference.
+	if isPathUnder(meta.Dir, goModCacheDir()) {
 		libProjectName, namespace := getProjectName(meta.Dir, options)
 		targetDir := "$(go2csPath)pkg/" + importPath
 		projectReference := emittedProjectReference(targetDir, projectFileBaseName(libProjectName)+".csproj")

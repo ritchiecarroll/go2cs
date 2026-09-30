@@ -48,9 +48,10 @@ type ModuleConverter struct {
 	options              Options
 	graph                *DependencyGraph
 	startTime            time.Time
-	convertedProjects    []string          // csproj paths of successfully converted app + third-party packages
-	convertedCsproj      map[string]string // import path -> its generated .csproj path (successful conversions)
-	referencedThirdParty []string          // -recurse=module: third-party import paths left OUT of the convert-set
+	convertedProjects    []string                   // csproj paths of successfully converted app + third-party packages
+	convertedCsproj      map[string]string          // import path -> its generated .csproj path (successful conversions)
+	referencedThirdParty []string                   // -recurse=module: third-party import paths left OUT of the convert-set
+	lockedModules        map[string]moduleLockEntry // module-cache dependency modules in the convert-set (modulesLock.go)
 }
 
 // NewModuleConverter creates a recursive end-user module converter.
@@ -80,6 +81,12 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 		m.options.mainModuleDir = moduleDir
 	}
 
+	// 0. Every dependency must already be in the module cache and verify against the module's own
+	//    go.sum: one refusal naming the missing module, not a load warning per importing package.
+	if err := goModDownloadPreflight(moduleDir); err != nil {
+		return err
+	}
+
 	// 1. Load the module and its full dependency closure. This load is used only to DISCOVER and
 	//    CLASSIFY the closure (import paths, source dirs, module identity) and to build the
 	//    dependency graph — each package is re-loaded with full syntax/types when it is converted,
@@ -94,6 +101,18 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 	//    are deliberately left OUT of the graph, so edges to them never constrain the conversion
 	//    order — they are pre-converted and only referenced.
 	m.partition(closure)
+
+	// 2a. One version per module per output root (modulesLock.go): a dependency the root already
+	//     holds at a DIFFERENT version is refused here, before a single package is overwritten.
+	lock, err := readModulesLock(m.recurseRoot())
+
+	if err != nil {
+		return err
+	}
+
+	if err := checkModulesLock(m.recurseRoot(), lock, m.lockedModules); err != nil {
+		return err
+	}
 
 	if len(m.graph.packages) == 0 {
 		if m.options.moduleOnly {
@@ -118,6 +137,23 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 
 	// 4. Convert the convert-set in dependency order.
 	m.convertAll()
+
+	// 4b. Record the dependency versions now in the root, with the main module's go.sum hash for each
+	//     and the converter that wrote them, merged over what the lock already held.
+	if len(m.lockedModules) > 0 {
+		hashes := goSumHashes(moduleDir)
+		revision := converterRevision()
+
+		for path, entry := range m.lockedModules {
+			entry.sum = hashes[path+" "+entry.version]
+			entry.converter = revision
+			lock[path] = entry
+		}
+
+		if err := writeModulesLock(m.recurseRoot(), lock); err != nil {
+			return fmt.Errorf("writing %s: %w", modulesLockPath(m.recurseRoot()), err)
+		}
+	}
 
 	// 4a. Under -recurse=module, report the dependency packages that were referenced but deliberately
 	//     left unconverted, so the unresolved references in the emitted projects are expected, listed
@@ -281,6 +317,16 @@ func (m *ModuleConverter) partition(closure map[string]*packages.Package) {
 			}
 
 			m.graph.AddPackage(pkgPath, pkg.Dir)
+
+			// A module-cache dependency (no `replace`) converted into the root is locked at the version
+			// the build selected (modulesLock.go); a local replace has no version to lock.
+			if pkg.Module.Replace == nil && pkg.Module.Version != "" {
+				if m.lockedModules == nil {
+					m.lockedModules = make(map[string]moduleLockEntry)
+				}
+
+				m.lockedModules[pkg.Module.Path] = moduleLockEntry{path: pkg.Module.Path, version: pkg.Module.Version}
+			}
 		case classStdLib:
 			stdlibCount++
 		case classSkip:
