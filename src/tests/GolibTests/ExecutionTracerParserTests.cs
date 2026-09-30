@@ -22,21 +22,30 @@ namespace GolibTests;
 [TestClass]
 public class ExecutionTracerParserTests
 {
-    private static string? GoTool()
+    // The go the oracle runs: GOROOT's, else the first on PATH. `Skip` names why none was returned.
+    // Today this checks only that a go EXISTS; nothing yet asks whether it is the pinned release.
+    internal static (string? Go, string? Skip) ResolveOracle(string? goRoot, string? path, string? pinnedRelease, Func<string, string?> versionOf)
     {
         string exe = OperatingSystem.IsWindows() ? "go.exe" : "go";
 
-        if (Environment.GetEnvironmentVariable("GOROOT") is { Length: > 0 } root && File.Exists(Path.Combine(root, "bin", exe)))
-            return Path.Combine(root, "bin", exe);
+        if (goRoot is { Length: > 0 } && File.Exists(Path.Combine(goRoot, "bin", exe)))
+            return (Path.Combine(goRoot, "bin", exe), null);
 
-        foreach (string dir in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(Path.PathSeparator))
+        foreach (string dir in (path ?? "").Split(Path.PathSeparator))
         {
             if (dir.Length > 0 && File.Exists(Path.Combine(dir, exe)))
-                return Path.Combine(dir, exe);
+                return (Path.Combine(dir, exe), null);
         }
 
-        return null;
+        return (null, "no Go toolchain resolves (GOROOT, PATH): the oracle is unavailable here");
     }
+
+    private static string? PinnedRelease() => null;
+
+    private static string? VersionOf(string go) => null;
+
+    private static (string? Go, string? Skip) Oracle() =>
+        ResolveOracle(Environment.GetEnvironmentVariable("GOROOT"), Environment.GetEnvironmentVariable("PATH"), PinnedRelease(), VersionOf);
 
     // Runs the toolchain's parser on `trace`: (exit code, stdout, stderr).
     private static (int Code, string Out, string Err) Parse(string go, byte[] trace)
@@ -129,9 +138,11 @@ public class ExecutionTracerParserTests
     [TestMethod]
     public void GosOwnParserAcceptsAManagedProgramsTrace()
     {
-        if (GoTool() is not { } go)
+        (string? resolved, string? skip) = Oracle();
+
+        if (resolved is not { } go)
         {
-            Assert.Inconclusive("no Go toolchain resolves (GOROOT, PATH): the oracle is unavailable here");
+            Assert.Inconclusive(skip);
             return;
         }
 
