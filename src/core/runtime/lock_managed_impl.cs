@@ -175,6 +175,17 @@ public static void GoRuntimeLockProbeUnlock(int which) => unlock2(s_lockProbes[w
 public static void GoRuntimeLockProbeReset(int which) => Interlocked.Exchange(ref s_lockProbes[which].Value.key.Value, 0);
 public static int GoRuntimeLocksHeldByCurrentThread() => t_heldCount;
 
+// The probes through Go's own entry points, runtime.lock and runtime.unlock (-> unlockWithRank -> unlock2),
+// the frames a runtime-lock contention stack starts at; and runtime's GODEBUG runtimecontentionstacks,
+// set and restored (the previous value is returned).
+public static void GoRuntimeLockProbeLockGo(int which) => @lock(s_lockProbes[which]);
+public static void GoRuntimeLockProbeUnlockGo(int which) => unlock(s_lockProbes[which]);
+public static int GoSetRuntimeContentionStacks(int value) {
+    int previous = Ꮡdebug.of(debugᴛ1.ᏑruntimeContentionStacks).Load();
+    Ꮡdebug.of(debugᴛ1.ᏑruntimeContentionStacks).Store(value);
+    return previous;
+}
+
 // ---- contention: WHO IS WAITING, without a waiter chain (COORD ruling 2026-09-22) ----
 //
 // The managed model has no waiter queue, but it does have waiters: a lock2 on its slow path is a
