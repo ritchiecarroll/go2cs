@@ -391,9 +391,19 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     // Comparing the objects said `unsafe.Pointer(&l.p) != unsafe.Pointer(&l.p)` where Go and the
     // numeric rule both say equal (the ManagedAtomicPointer behavioral guard, full-suite run of the
     // referent cut). Hashing by the same token keeps Equals and GetHashCode one fact.
+    //
+    // A NON-BOX referent (a channel, or an object reflect registered) keys on the SAME token the
+    // registry projects for it -- ManagedPointerTokens.CurrentToken's shape -- so that equality and
+    // uintptr agree, as Go requires: p1 == p2 exactly when uintptr(p1) == uintptr(p2). It keyed on the
+    // identity HASH before, which collides between live objects (G's review of the hash-token cut).
     private static nuint ReferentToken(object referent)
     {
-        return referent is INilPointer box ? box.PointerOrderToken : (nuint)(uint)RuntimeHelpers.GetHashCode(referent);
+        return referent switch
+        {
+            INilPointer box => box.PointerOrderToken,
+            IChannel channel => channel.PointerOrderToken,
+            _ => ManagedPointerTokens.IdentityToken(referent)
+        };
     }
 
     /// <summary>

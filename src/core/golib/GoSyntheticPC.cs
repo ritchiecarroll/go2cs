@@ -59,8 +59,9 @@ public static class GoSyntheticPC
     //
     // 64-BIT ONLY, AND THE 32-BIT ARM THROWS RATHER THAN NARROWING. An earlier draft used the top
     // 256 MiB (0xF000_0000) on a 32-bit runtime. That is WRONG and the census of the corpus's token
-    // spaces found it: ManagedPointerTokens mints `(nuint)(uint)RuntimeHelpers.GetHashCode(o)`
-    // (ж.Contracts.cs), an unconstrained 32-bit value that can and does exceed 0xF000_0000, so on a
+    // spaces found it: ManagedPointerTokens then minted `(nuint)(uint)RuntimeHelpers.GetHashCode(o)`
+    // (ж.Contracts.cs; identity tokens in 0xC000_0000_0000_0000 since the hash-token cut, which needs
+    // 64 bits too), an unconstrained 32-bit value that can and does exceed 0xF000_0000, so on a
     // 32-bit runtime the two spaces OVERLAP and a resolver consulting both would answer a pointer
     // token as a function. The corpus is 64-bit, so the collision is unreachable — which is exactly
     // why it is refused loudly at the mint instead of left latent for whoever first builds 32-bit.

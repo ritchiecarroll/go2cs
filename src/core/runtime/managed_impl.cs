@@ -2499,8 +2499,8 @@ partial class runtime_package
     //
     // THE BAND IS NON-CANONICAL AND UNTAGGED. It starts at 0x8000_8000_0000_0000: bits 63 and 47 set,
     // bits 62..48 clear. That keeps it disjoint by construction from every other space a uintptr can
-    // hold in this corpus: managed-pointer hashes (below 2^32); tagged pointer tokens (bit 63 set, bit
-    // 47 CLEAR; ManagedPointerTokens.IsTaggedToken); synthetic PCs (from 0xFFFF_8000_0000_0000,
+    // hold in this corpus: tagged pointer tokens, the identity band among them (bit 63 set, bit 47
+    // CLEAR; ManagedPointerTokens.IsTaggedToken, IsIdentityToken); synthetic PCs (from 0xFFFF_8000_0000_0000,
     // GoSyntheticPC); and every x64 user-mode or kernel address, which has bits 63..47 all equal, so
     // a pinned data pointer or a marshal buffer can never name a call site. The band holds 2^35 spans
     // before a carry into bit 48 would clear bit 47 and make a tagged token; the record list is an

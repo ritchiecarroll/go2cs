@@ -29,9 +29,10 @@ public interface IChannel : IEnumerable
     /// from <c>reflect.Value.Pointer()</c>. Equal channel values (struct copies sharing one
     /// core) must yield equal tokens across boxings; <see cref="channel{T}"/> answers with the
     /// shared core's identity (the default is per-boxing identity — a generated named-channel
-    /// wrapper keeps it, a recorded fidelity residual with no consumer).
+    /// wrapper keeps it, a recorded fidelity residual with no consumer). Both are identity tokens
+    /// (<see cref="ManagedPointerTokens.IdentityBand"/>): unique, and refused as an address.
     /// </summary>
-    nuint PointerOrderToken => (nuint)(uint)System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(this);
+    nuint PointerOrderToken => ManagedPointerTokens.IdentityToken(this);
 
     /// <summary>
     /// Gets the Go DIRECTION of the channel type this value was born with, or
@@ -1387,7 +1388,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     /// the same token (a nil channel reports 0) — the property that makes ordering channels by
     /// <c>reflect.Value.Pointer()</c> self-consistent, exactly like Go addresses.
     /// </summary>
-    public nuint PointerOrderToken => m_core is null ? 0 : (nuint)(uint)System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(m_core);
+    public nuint PointerOrderToken => m_core is null ? 0 : ManagedPointerTokens.IdentityToken(m_core);
 
     /// <summary>
     /// Gets a flag that determines if the channel is closed.

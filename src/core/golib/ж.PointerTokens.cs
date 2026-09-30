@@ -213,6 +213,70 @@ public static class ManagedPointerTokens
     internal const ulong TagMask = (1UL << 63) | (1UL << 47);
 
     /// <summary>
+    /// The band of IDENTITY tokens: the number <c>reflect.Value.Pointer()</c> answers for a map, a
+    /// slice, a func, a channel or any other object that is not a <c>ж&lt;T&gt;</c>, and that
+    /// <c>InterfaceData</c> answers for an interface word. Census CENSUS-reflect-hash-tokens-go1.24.13.md,
+    /// ruled as option 2 of its 2026-09-29 sizing.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A token is <c>IdentityBand | id | displacement</c>:
+    /// </para>
+    /// <code>
+    ///     bit 63 | bit 62 | 61..48 id hi | bit 47 | 46..32 id lo | 31..0 displacement
+    ///        1   |    1   |    14 bits   |    0   |    15 bits   |      32 bits
+    /// </code>
+    /// <list type="bullet">
+    /// <item>Bit 63 set and bit 47 clear: <see cref="NamesNoUserMemory"/> and <see cref="IsTaggedToken"/>
+    /// both hold, so a dereference refuses with the nil-dereference panic and memmove, memclr and
+    /// the syscall doors refuse by name. Before, these were identity HASHES below 2^32 -- low USER
+    /// addresses, where a dereference is a fatal access violation or a silent garbage read.</item>
+    /// <item>Bit 62 set: disjoint from ж tokens, whose bit 62 is identity-hash bit 29, never set by
+    /// the CLR's 26-bit hash (GolibTests guards it). Also disjoint from caller spans (bit 62 clear)
+    /// and from synthetic PCs (at and above 0xFFFF_8000_0000_0000, which is above this band).</item>
+    /// <item>The id is UNIQUE: minted once per object, in order, and never reused while the process
+    /// lives, so two live objects never share a token. Identity hashes collide (measured: 2 among 10k
+    /// live objects, 80 among 100k), and a program that keys a map on Pointer() -- gojq's allocator
+    /// does, to decide whether it may mutate in place -- would then mistake one object for another.
+    /// THE WRAP: the id is 29 bits, so after 2^29 (5.4e8) objects have been asked for a token the ids
+    /// repeat, and an object asked first could share a token with one asked 2^29 asks later.</item>
+    /// <item>The displacement is a within-object offset: a slice's <c>&amp;s[low]</c> is its storage's
+    /// token plus <c>low * elemsize</c>, as in Go.</item>
+    /// </list>
+    /// <para>
+    /// These tokens lie inside <c>GoSyntheticTextRange()</c> (runtime managed_impl.cs, [caller base,
+    /// ulong.Max)). That is harmless: only the proto readers use that range, to map profile PCs,
+    /// which never carry an identity token (G's review of the census, amendment (a)).
+    /// </para>
+    /// </remarks>
+    public const ulong IdentityBand = 0xC000_0000_0000_0000;
+
+    private static readonly ConditionalWeakTable<object, IdentityCell> s_identities = new();
+    private static long s_lastIdentity;
+
+    private sealed class IdentityCell(ulong id)
+    {
+        internal readonly ulong Id = id;
+    }
+
+    /// <summary>
+    /// Whether <paramref name="number"/> lies in the identity band: bits 63 and 62 set, bit 47 clear.
+    /// The one definition the disjointness guards over the other token spaces assert against.
+    /// </summary>
+    internal static bool IsIdentityToken(nuint number) => ((ulong)number & (IdentityBand | (1UL << 47))) == IdentityBand;
+
+    /// <summary>
+    /// <paramref name="value"/>'s identity token (see <see cref="IdentityBand"/>): the same number for
+    /// the same object for as long as it lives, and a different number from every other live object.
+    /// </summary>
+    public static nuint IdentityToken(object value)
+    {
+        ulong id = s_identities.GetValue(value, static _ => new IdentityCell((ulong)Interlocked.Increment(ref s_lastIdentity))).Id;
+
+        return unchecked((nuint)(IdentityBand | ((id >> 15 & 0x3FFF) << 48) | ((id & 0x7FFF) << 32)));
+    }
+
+    /// <summary>
     /// Whether <paramref name="address"/> lies where no user-mode memory can exist on any address
     /// space this corpus runs on: bit 63 set. A raw read or write there must never reach the hardware.
     /// </summary>
@@ -568,7 +632,7 @@ public static class ManagedPointerTokens
         {
             INilPointer p => p.PointerOrderToken,
             IChannel c => c.PointerOrderToken,
-            _ => (nuint)(uint)RuntimeHelpers.GetHashCode(box)
+            _ => IdentityToken(box)
         };
     }
 

@@ -157,11 +157,12 @@ namespace GolibTests
             Assert.IsTrue(pc >= unchecked((nuint)0xFFFF_8000_0000_0000UL),
                 "a token must sit in the non-user half of the address space");
 
-            // Disjoint from the corpus's other two token spaces BY CONSTRUCTION, which is what lets
-            // one resolver answer for all three: caller frames are `s_callerRecords.Count` (small
-            // integers) and managed pointers are 32-bit hashes. Both are below 2^32; a token is not.
-            Assert.IsTrue(pc > uint.MaxValue,
-                "a token must not collide with the caller-frame or managed-pointer token spaces");
+            // Disjoint from the corpus's other token spaces BY CONSTRUCTION, which is what lets one
+            // resolver answer for all of them: caller spans (RuntimeCallerPCSpanTests guards those) and
+            // identity tokens (ManagedPointerTokens.IdentityBand, whose bit 47 is clear where a
+            // synthetic PC's is set).
+            Assert.IsFalse(ManagedPointerTokens.IsIdentityToken(pc),
+                "a token must not collide with the identity-token space");
         }
 
         [TestMethod]
