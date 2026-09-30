@@ -32,8 +32,8 @@ dependencies and the fallback for everything.
 **Seed targets — the [Target Atlas](https://go2cs.net/TargetAtlas.html)** (owner study,
 2026-08-29): a survey of the Go ecosystem's conversion candidates, designed to pick the registry's
 FIRST real operational conversions — three or four packages alongside the planned HashSet — once
-the validation campaign reaches 100% of the implementable set. Interim conversions live on the
-`rcarroll` org (as HashSet does) and yield to any official conversion an original code owner later
+the validation campaign reaches 100% of the implementable set. Interim conversions live on
+the publishing account (the owner's choice, as HashSet does) and yield to any official conversion an original code owner later
 publishes on their own org, per the canonicality rules in §2.
 
 > **AMENDED 2026-09-07 — the gate above is DEFERRED to the next corpus, not retargeted.**

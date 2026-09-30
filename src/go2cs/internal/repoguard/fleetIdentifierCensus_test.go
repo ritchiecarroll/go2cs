@@ -1557,6 +1557,40 @@ func TestFleetIdentifierClearancesAreLive(t *testing.T) {
 	}
 }
 
+// A token clearance switches the denied-token pass OFF for a whole file, so it must not outlive the
+// token it was cut for. A cleared file that no longer carries a denied token is a standing blind
+// spot: the next reintroduction into it passes the tree guard in silence, which is how a denied
+// account handle stayed in docs/PLAN-nugetgo.md under a clearance written for a handle that was
+// believed public. TestFleetIdentifierClearancesAreLive checks that the file exists; this checks
+// that the clearance still has a reason to.
+//
+// It scans each cleared file under a path the clearance table does not know, with the structural
+// pass off, so the answer is exactly "does the denied-token pass find something here".
+func TestFleetClearedTokenFilesStillCarryADeniedToken(t *testing.T) {
+	root := repoRootFromPackageDir(t)
+	denied := fleetDeniedIndex(fleetDeniedTokens)
+	admit := fleetAdmitIndex(fleetPublicHandles)
+
+	for path := range fleetClearedTokenFiles {
+		content, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(path)))
+		if err != nil {
+			continue // TestFleetIdentifierClearancesAreLive reports a missing file
+		}
+
+		carries := false
+		for _, f := range scanFleetContent("clearance-liveness/"+path, content, denied, admit, true) {
+			if strings.HasPrefix(f.Kind, "denied-token") {
+				carries = true
+			}
+		}
+
+		if !carries {
+			t.Errorf("cleared file %s carries no denied token -- retire its fleetClearedTokenFiles entry, "+
+				"which otherwise leaves the denied-token pass off for the next reintroduction", path)
+		}
+	}
+}
+
 // TestFleetPublicHandleAdmitIsBounded is the control for the 2026-09-22 public-handle admit, and,
 // as with the nickname widening, the arms that matter are the REFUSALS. An admit-only control is
 // green on a set that admits everything.
