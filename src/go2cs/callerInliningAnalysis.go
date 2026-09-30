@@ -204,11 +204,16 @@ func hasNoinlineDirective(doc *ast.CommentGroup) bool {
 // `runtime/debug.PrintStack`, whose printed traceback starts at their caller's frame. runtime/debug's
 // TestStack is the measured frame-listing case: its one-line `(*T).ptrmethod` / `T.method` forwarders into
 // debug.Stack vanished from the traceback, and hand-marking both [MethodImpl(NoInlining)] brought both
-// frames back (G, 2026-09-28, linux). A test extends the set copy-on-write to stand a fixture package in.
+// frames back (G, 2026-09-28, linux). `runtime.unlock2` (hand-owned) walks too: its contended-unlock
+// record captures the mutex-profile stack with a fixed skip of 3 (recordUnlock's frame, unlock2,
+// unlockWithRank) so the stack starts at runtime.unlock, and under Release TieredCompilation=0 the JIT
+// inlined the thin unlockWithRank/unlock forwarders and the record lost runtime.unlock (census A3,
+// GolibTests RuntimeLockProfileTests). A test extends the set copy-on-write to stand a fixture package in.
 var skipCountedWalkers = map[string]bool{
 	"runtime.callers":          true,
 	"runtime.gcallers":         true,
 	"runtime.saveblockevent":   true,
+	"runtime.unlock2":          true,
 	"runtime.Stack":            true,
 	"runtime/debug.Stack":      true,
 	"runtime/debug.PrintStack": true,
