@@ -82,12 +82,17 @@ public enum PointerStorage
     Pinnable
 }
 
-public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess
+public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess, IAllocationIdentity
 {
     // The ONE storage fact every kind shares: whether this box IS the nil pointer. STRUCTURAL —
     // set only at construction, by the kind ctor contracts (see the class remarks); the
     // value-peeking refinement for a standard box lives in StandardBox.IsNull.
     private protected readonly bool m_isNull;
+
+    // Option 3b: a heap box's allocation id, minted on its first token read (StandardBox). It is declared
+    // HERE, beside m_isNull, because the CLR lays out a base class's fields as one pointer-aligned block:
+    // an int in the derived class costs a box 8 bytes, while here it fills m_isNull's padding for 0.
+    private protected int m_id;
 
     // A pin this box OWNS, kept alive for the box's lifetime and freed when the box is collected
     // (the PinnedBuffer finalizer releases the GCHandle). Serves every kind: a standard box's
@@ -511,9 +516,10 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// </remarks>
     public abstract nuint PointerOrderToken { get; }
 
-    // An allocation's token base: the identity hash lifted clear of the low 32 bits, so every
-    // base is 8-aligned and the whole low half is available to carry a within-allocation
-    // displacement -- and TAGGED non-canonical, so the value announces itself as a token.
+    // An allocation's token base: its UNIQUE allocation id (ManagedPointerTokens.NextIdentity: 29
+    // bits, never 0) lifted clear of the low 32 bits, so every base is 8-aligned and the whole low
+    // half is available to carry a within-allocation displacement -- and TAGGED non-canonical, so
+    // the value announces itself as a token.
     //
     // THE TAG (DESIGN-token-value-tag-refusal.md outcome B). x86-64 requires bits 63..47 of a
     // valid user-mode address to be ALL EQUAL. Forcing bit 63 = 1 and bit 47 = 0 makes every
@@ -522,23 +528,28 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // refuse one from the VALUE alone (see ManagedPointerTokens.IsTaggedToken, which reads back
     // exactly the two bits this sets -- they are declared there so mint and door cannot drift).
     //
-    //     bit 63 | 62..48 hash hi | bit 47 | 46..32 hash lo | 31..0 displacement
-    //        1   |    15 bits     |    0   |    15 bits     |      32 bits
+    //     bit 63 | bit 62 | 61..48 id hi | bit 47 | 46..32 id lo | 31..0 displacement
+    //        1   |    0   |    14 bits   |    0   |    15 bits   |      32 bits
     //
     // The displacement stays 32 bits, so ElemRefBox's absolute index, FieldRefBox's offset and
     // ManagedPointerTokens.IsTokenArithmetic's `& ~0xFFFFFFFF` are all untouched and the ordering
-    // contract is unchanged. What it costs is the hash, 32 -> 30 bits, and that cost was MEASURED
-    // rather than assumed: the CLR identity hash never sets bits 31..26 (OR of 10^6 hashes =
-    // 0x03FFFFFF on linux-x64 and windows-x64 alike, record C.1), so the two bits this drops were
-    // never carrying information. The collision count is unchanged on both hosts.
-    private protected static nuint AllocationBase(int identityHash)
-    {
-        ulong hash = (uint)identityHash;
+    // contract is unchanged.
+    //
+    // THE ID (option 3, ruling 2026-09-30). The base was the CLR identity hash, which is not unique: two
+    // LIVE objects share one (the first pair among live boxes came after 4622 of them), and because a
+    // reference-bearing box registers its token on every uintptr conversion and the registry keeps the
+    // last writer, `(*T)(uintptr)p` of the first box's number resolved to the second -- a silent wrong
+    // object. An id names one allocation. Bit 62 is clear by construction (the 14-bit hi mask), so a
+    // base never meets ManagedPointerTokens' identity band. Ids wrap after 2^29 mints: only an
+    // allocation that stays live across that many token reads can share its id.
+    private protected static nuint AllocationBase(ulong id) =>
+        unchecked((nuint)(ManagedPointerTokens.TagBit | ((id >> 15 & 0x3FFF) << 48) | ((id & 0x7FFF) << 32)));
 
-        return unchecked((nuint)(ManagedPointerTokens.TagBit |
-                                 ((hash >> 15 & 0x7FFF) << 48) |
-                                 ((hash & 0x7FFF) << 32)));
-    }
+    // The allocation this pointer's token names. A heap box is its own allocation (StandardBox keeps
+    // the id in m_id); element and field references name their storage's; any other kind asks the table.
+    internal virtual ulong AllocationId => ManagedPointerTokens.IdentityOf(this);
+
+    ulong IAllocationIdentity.AllocationId => AllocationId;
 
     /// <inheritdoc/>
     /// <remarks>

@@ -199,9 +199,11 @@ public sealed class ElemRefBox<T> : ж<T>
                 return addr;
 
             (object storage, nint element) = CanonicalPair();
-            return unchecked(AllocationBase(RuntimeHelpers.GetHashCode(storage)) + (nuint)(uint)element);
+            return unchecked(AllocationBase(ManagedPointerTokens.AllocationIdOf(storage)) + (nuint)(uint)element);
         }
     }
+
+    internal override ulong AllocationId => ManagedPointerTokens.AllocationIdOf(CanonicalPair().Item1);
 
     /// <inheritdoc/>
     public override bool Equals(ж<T>? other)

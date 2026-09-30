@@ -190,8 +190,8 @@ public static class ManagedPointerTokens
     /// token's own 4 GiB block, but not a token itself.
     /// </summary>
     /// <remarks>
-    /// A token is <c>AllocationBase(identityHash)</c> = <c>hash &lt;&lt; 32</c>: 4 GiB-aligned, low
-    /// half zero, one block per source identity. So `unsafe.Add(unsafe.Pointer(&amp;v), offset)` over a
+    /// A token is <c>AllocationBase(id)</c> = <c>id &lt;&lt; 32</c>: 4 GiB-aligned, low
+    /// half zero, one block per source allocation. So `unsafe.Add(unsafe.Pointer(&amp;v), offset)` over a
     /// box with no pinnable storage produces base+offset — still inside the block, no longer a key.
     /// Before this existed the inbound conversion answered a native box over that number and the
     /// write through it took the process down with an ACCESS VIOLATION, uncatchable; reflect's
@@ -271,10 +271,31 @@ public static class ManagedPointerTokens
     /// </summary>
     public static nuint IdentityToken(object value)
     {
-        ulong id = s_identities.GetValue(value, static _ => new IdentityCell((ulong)Interlocked.Increment(ref s_lastIdentity))).Id;
+        ulong id = IdentityOf(value);
 
         return unchecked((nuint)(IdentityBand | ((id >> 15 & 0x3FFF) << 48) | ((id & 0x7FFF) << 32)));
     }
+
+    // The next id of the ONE id space identity tokens and ж tokens share: 29 bits, never 0.
+    internal static ulong NextIdentity()
+    {
+        ulong id;
+
+        do
+            id = (ulong)Interlocked.Increment(ref s_lastIdentity) & 0x1FFF_FFFF;
+        while (id == 0);
+
+        return id;
+    }
+
+    // An object's id, minted on the first ask and held for its life by the identity table.
+    internal static ulong IdentityOf(object value) =>
+        s_identities.GetValue(value, static _ => new IdentityCell(NextIdentity())).Id;
+
+    // The id of the allocation a ж token's base names: a box's own (IAllocationIdentity), else the
+    // object's table id.
+    internal static ulong AllocationIdOf(object source) =>
+        source is IAllocationIdentity allocation ? allocation.AllocationId : IdentityOf(source);
 
     /// <summary>
     /// Whether <paramref name="address"/> lies where no user-mode memory can exist on any address
@@ -685,4 +706,10 @@ public static class ManagedPointerTokens
             Monitor.Exit(s_sweepLock);
         }
     }
+}
+
+// The allocation identity a ж token's base is minted from (option 3).
+internal interface IAllocationIdentity
+{
+    ulong AllocationId { get; }
 }

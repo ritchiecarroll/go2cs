@@ -181,6 +181,8 @@ internal sealed class HeaderSliceBox<T, TDst> : ж<TDst>
     /// <summary>The slice is the header variable seen through another type, so it orders and compares as that variable's box.</summary>
     public override nuint PointerOrderToken => m_source.PointerOrderToken;
 
+    internal override ulong AllocationId => m_source.AllocationId;
+
     public override bool Equals(ж<TDst>? other)
     {
         return other is HeaderSliceBox<T, TDst> view && ReferenceEquals(view.m_source, m_source);

@@ -135,7 +135,23 @@ public class StandardBox<T> : ж<T>
     // something an address does). Offset 0 within itself, which is also why `&s` and
     // `&s.firstField` token alike — as Go's addresses do.
     public override nuint PointerOrderToken =>
-        IsNilPointer ? 0 : NamesZeroBase ? GoZeroBase.Token : AllocationBase(RuntimeHelpers.GetHashCode(this));
+        IsNilPointer ? 0 : NamesZeroBase ? GoZeroBase.Token :
+        AllocationBase(AllocationId);
+
+    internal override ulong AllocationId
+    {
+        get
+        {
+            int id = System.Threading.Volatile.Read(ref m_id);
+
+            if (id != 0)
+                return (ulong)(uint)id;
+
+            int fresh = (int)ManagedPointerTokens.NextIdentity();
+            int prior = System.Threading.Interlocked.CompareExchange(ref m_id, fresh, 0);
+            return (ulong)(uint)(prior != 0 ? prior : fresh);
+        }
+    }
 
     /// <inheritdoc/>
     // A ZERO-SIZE heap allocation is Go's zerobase: mallocgc(0) answers &zerobase for every one of
