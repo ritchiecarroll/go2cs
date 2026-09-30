@@ -30,8 +30,8 @@
       "halves": [
         {
           "class": "runtime-capability",
-          "signature": "runtime/pprof.genericAllocFunc[go.shape.uint32] [1 128 0 0]",
-          "reason": "SHAPE-NAME half. Go names each generic instantiation's frame with its GC shape (genericAllocFunc[go.shape.uint32]); the CLR's StackFrame.GetMethod() returns the generic method DEFINITION (measured), so every instantiation's managed frame is genericAllocFunc and the test's want lines -- printed only while the names differ -- cannot match. Retires only if frame resolution can recover an instantiation's shape."
+          "signature": "runtime/pprof.genericAllocFunc [1 128 0 0]",
+          "reason": "SHAPE-NAME half. Go names each generic instantiation's frame with its GC shape (genericAllocFunc[go.shape.uint32]); the CLR's StackFrame.GetMethod() returns the generic method DEFINITION (measured), so every instantiation's managed frame is genericAllocFunc and the test's want lines -- printed only while the names differ -- cannot match. Retires only if frame resolution can recover an instantiation's shape. The signature is this half's own evidence line in the printed profile: the uint32 sample with Go's values [1 128 0 0] under the shape-less name, one of the test's newest samples near each record's top. It is never Go's `want =` text, which is each record's LAST line and is cut once the cumulative heap profile (Go's test order, D4) passes the 64K record cap (TestExecution.MaxRecordCharacters)."
         },
         {
           "class": "codegen-liveness",
