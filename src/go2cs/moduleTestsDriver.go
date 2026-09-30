@@ -88,15 +88,20 @@ func checkOutputRootOutsideModule(moduleDir string, outRoot string) error {
 }
 
 // addTestOnlyPackages widens the convert-set with the packages the module's TESTS need that its
-// production code does not. It is a separate Tests:true load used ONLY for discovery: a test variant
-// (`p [p.test]`, `p_test [p.test]`, the synthesized `p.test`) has an ID different from its PkgPath or a
-// ForTest, and is never deduped into the production walk -- `p [p.test]` shares p's PkgPath and would
-// otherwise stand in for production, turning test-only imports into conversion-ORDER edges. Only
-// ordinary (ID == PkgPath) packages reachable from the variants are added, with their production
-// imports.
+// production code does not. It is a separate Tests:true load used ONLY for discovery, and the go
+// command's test scaffolding in it never reaches the convert-set:
+//   - a test VARIANT (`p [p.test]`, `p_test [p.test]`) has an ID different from its PkgPath (and a
+//     ForTest, now that NeedForTest asks for it) and is never deduped into the production walk --
+//     `p [p.test]` shares p's PkgPath and would otherwise stand in for production, turning test-only
+//     imports into conversion-ORDER edges;
+//   - the synthesized test MAIN `p.test` has ID == PkgPath, so it needs its own test: Name main, a
+//     `.test` suffix, and the package it tests (`p`) in the same load. The last clause keeps a genuine
+//     package whose path happens to end in `.test` convertible.
+//
+// Only ordinary packages reachable from the variants are added, with their production imports.
 func (m *ModuleConverter) addTestOnlyPackages(moduleDir string, closure map[string]*packages.Package) error {
 	cfg := &packages.Config{
-		Mode:  packages.NeedName | packages.NeedFiles | packages.NeedImports | packages.NeedDeps | packages.NeedModule,
+		Mode:  packages.NeedName | packages.NeedFiles | packages.NeedImports | packages.NeedDeps | packages.NeedModule | packages.NeedForTest,
 		Dir:   moduleDir,
 		Tests: true,
 		Env:   os.Environ(),
@@ -106,6 +111,19 @@ func (m *ModuleConverter) addTestOnlyPackages(moduleDir string, closure map[stri
 
 	if err != nil {
 		return fmt.Errorf("loading the module's test closure: %w", err)
+	}
+
+	loaded := make(map[string]bool)
+
+	for _, root := range roots {
+		if root.ID == root.PkgPath {
+			loaded[root.PkgPath] = true
+		}
+	}
+
+	isTestMain := func(pkg *packages.Package) bool {
+		tested, isTestSuffix := strings.CutSuffix(pkg.PkgPath, ".test")
+		return pkg.Name == "main" && pkg.ID == pkg.PkgPath && isTestSuffix && loaded[tested]
 	}
 
 	seen := make(map[string]bool)
@@ -118,7 +136,7 @@ func (m *ModuleConverter) addTestOnlyPackages(moduleDir string, closure map[stri
 
 		seen[pkg.ID] = true
 
-		isVariant := pkg.ID != pkg.PkgPath || pkg.ForTest != ""
+		isVariant := pkg.ID != pkg.PkgPath || pkg.ForTest != "" || isTestMain(pkg)
 
 		if !isVariant && closure[pkg.PkgPath] == nil {
 			switch m.classify(pkg) {
