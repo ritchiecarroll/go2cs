@@ -550,6 +550,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckFloatKindConstArrayLength() => CheckTarget("FloatKindConstArrayLength");
 
     [TestMethod]
+    public void CheckForClauseSpill() => CheckTarget("ForClauseSpill");
+
+    [TestMethod]
     public void CheckForInitMixedTypes() => CheckTarget("ForInitMixedTypes");
 
     [TestMethod]
