@@ -1,0 +1,3 @@
+package dot
+
+func Grow() {}
