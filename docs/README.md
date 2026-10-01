@@ -11,8 +11,8 @@ Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?
 
 ## 📰 NEWS — The converted standard library moves to Go 1.24.13
 
-go2cs now converts Go 1.24.13's standard library, and **223 of the 230 testable standard-library
-packages (97.0%) pass their own Go 1.24.13 test suites in C#**, compared verdict for verdict against
+go2cs now converts Go 1.24.13's standard library, and **225 of the 230 testable standard-library
+packages (97.8%) pass their own Go 1.24.13 test suites in C#**, compared verdict for verdict against
 `go test -json`, with every difference disclosed. Each row of the
 [validated roster](ValidatedTestPackages.md) links a proof page that lists Go's verdict beside
 go2cs's, test by test. Converted programs can use Go 1.24's new APIs, such as `os.Root`,
