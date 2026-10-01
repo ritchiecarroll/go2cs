@@ -150,7 +150,7 @@ CUT (branch-only) · SEATED (in a train, not landed) · LANDED · DONE.
      that fired, with no shell stated.
      A7-A9, A13: read at origin/master a1f133c3a9 (run-h10-recon.ps1:841-843; check-h6-completeness.ps1:76;
      shardmap.py:94; check-roster-format.ps1:896; push-nuget.ps1:617-622 composes population-go$preflightGoPin.txt from
-     <GoStdLibVersion>). A11: push-nuget.ps1 at a1f133c3a9; ledger 2026-09-24 04:59 · STAMP · ffa5c1015a ("9 origin
+     `<GoStdLibVersion>`). A11: push-nuget.ps1 at a1f133c3a9; ledger 2026-09-24 04:59 · STAMP · ffa5c1015a ("9 origin
      tags, 0 missing locally"). A12: the converter's go.mod at master; module-cache .mod files under
      golang.org/x/tools and golang.org/x/mod, read 2026-09-29. A14: claude/coord-h10-readings ac9f8251ee
      (docs/phase4/h10-evidence/i7-readings/README.md "How the unit was extracted"; the README and TSV only, no script),
