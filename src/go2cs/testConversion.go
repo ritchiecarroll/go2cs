@@ -4560,9 +4560,18 @@ func writeTestProject(projectFile, projectName, namespace, importPath string, mo
 	refs := references.Keys()
 	sort.Strings(refs)
 	for _, reference := range refs {
+		// An ABSOLUTE reference (a local module, or a sibling routed by the -tests -recurse driver
+		// through the recurse resolver) is made relative to this project, exactly as the production
+		// writer does (writeProjectFile): a machine path must never land in emitted output.
+		if filepath.IsAbs(reference) {
+			if rel, relErr := filepath.Rel(filepath.Dir(projectFile), reference); relErr == nil {
+				reference = rel
+			}
+		}
+
 		// Forward slashes on every host, matching the production writer (see F5): a resolved
-		// dependency arrives already slashed from emittedProjectReference, but an ABSOLUTE
-		// reference (a local module) is OS-native.
+		// dependency arrives already slashed from emittedProjectReference, but a relativized one is
+		// OS-native.
 		referenceItems.WriteString(fmt.Sprintf("\r\n    <ProjectReference Include=\"%s\" />", escapeXMLAttributeValue(filepath.ToSlash(reference))))
 	}
 

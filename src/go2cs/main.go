@@ -551,11 +551,12 @@ Examples:
 	}
 
 	if options.convertTests {
-		// -tests and -recurse compose badly today (the recursive module walk has its own
-		// conversion driver and output routing); convert the module first, then its packages'
-		// tests individually. Revisit when a recursive test-conversion mode is designed.
-		if options.recurse {
-			log.Fatalln("-tests cannot be combined with -recurse: convert the module first, then convert its package tests individually")
+		// -tests with -recurse is the whole-module driver (moduleTestsDriver.go): it converts the
+		// module's closure once, then runs the per-package pipeline over each main-module package.
+		// It needs an output root of its own; -recurse=module / =nuget change what phase A emits, and
+		// neither has been validated under the driver.
+		if options.recurse && (options.moduleOnly || options.nugetRefs) {
+			log.Fatalln("-tests -recurse supports the plain -recurse form only (not =module or =nuget)")
 		}
 
 		switch options.testAction {
@@ -706,7 +707,39 @@ Examples:
 			return
 		}
 
-		if options.recurse {
+		if options.recurse && options.convertTests {
+			// The -tests -recurse driver: a whole end-user module validated against its own tests,
+			// into ONE output root, which must be given (a module run owns a whole layout).
+			if len(positionals) < 2 {
+				log.Fatalln("-tests -recurse needs an output root: go2cs -tests -recurse <moduleDir> <outRoot>")
+			}
+
+			outRoot, absErr := filepath.Abs(outputFilePath)
+
+			if absErr != nil {
+				log.Fatalf("Failed to get absolute output root %q: %v\n", outputFilePath, absErr)
+			}
+
+			resolveGo2CSPath(&options, "", false)
+
+			// The toolchain pin, as for every -tests run: the Go side of each comparison re-runs from
+			// this toolchain's sources, and the converted side compiles against the pinned corpus.
+			testsPinnedRelease, pinErr := corpusPinnedReleaseOrError(options.go2csPath)
+
+			if pinErr != nil {
+				log.Fatalf("-tests: %v\n", pinErr)
+			}
+
+			printToolchainProvenance(options)
+
+			if err := checkCorpusToolchainPin("-tests", convertingRelease(options.goRoot), testsPinnedRelease); err != nil {
+				log.Fatalf("%v\n", err)
+			}
+
+			if err := runModuleTests(inputFilePath, outRoot, options, testsPinnedRelease); err != nil {
+				log.Fatalf("-tests -recurse failed: %v\n", err)
+			}
+		} else if options.recurse {
 			// Recursive end-user conversion: convert the input module AND every third-party
 			// dependency package in its transitive closure, in dependency order, referencing the
 			// pre-converted standard library. The stdlib is not converted. A supplied second
