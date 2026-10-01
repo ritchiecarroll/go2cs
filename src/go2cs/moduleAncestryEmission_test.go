@@ -27,7 +27,7 @@ var machinePathPattern = regexp.MustCompile(`"(?:[A-Za-z]:[\\/]|/)`)
 func TestTestHostCarriesTheLogicalModulePathOnly(t *testing.T) {
 	module := t.TempDir()
 
-	if err := writeTestHost(module, "go", "example.test/keys/parse", nil, nil, []string{"parse_test.go"}, nil, nil, "example.test/keys"); err != nil {
+	if err := writeTestHost(module, "go", "example.test/keys/parse", nil, nil, []string{"parse_test.go"}, nil, nil, "example.test/keys", ""); err != nil {
 		t.Fatal(err)
 	}
 
@@ -43,7 +43,7 @@ func TestTestHostCarriesTheLogicalModulePathOnly(t *testing.T) {
 
 	stdlib := t.TempDir()
 
-	if err := writeTestHost(stdlib, "go", "cmp", nil, nil, []string{"cmp.go"}, nil, nil, ""); err != nil {
+	if err := writeTestHost(stdlib, "go", "cmp", nil, nil, []string{"cmp.go"}, nil, nil, "", ""); err != nil {
 		t.Fatal(err)
 	}
 

@@ -64,6 +64,11 @@ partial class runtime_package
         envs = snapshot;
         defaultGOROOT = Environment.GetEnvironmentVariable(GoDefaultGorootVariable) ?? "";
 
+        // cmd/go's -X=runtime.godebugDefault=...: the program's default GODEBUG, from its module's go line,
+        // its go.mod godebug block and its //go:debug directives, which the converter stamps on the entry
+        // assembly (GoDefaultGodebugAttribute). Before parsedebugvars, which parses it UNDER the environment.
+        godebugDefault = GoDefaultGodebugAttribute.EntryValue;
+
         // schedinit's NEXT step in Go is parsedebugvars, and it belongs here for the same reason envs
         // does: it reads the environment (gogetenv, so envs must be set first) and must precede any
         // Go code. Without it every dbgvar default stayed zero, and a GODEBUG or GOTRACEBACK present
