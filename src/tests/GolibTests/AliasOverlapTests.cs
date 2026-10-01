@@ -193,9 +193,9 @@ public class AliasOverlapTests
     public void TokenCollisionDoesNotReachThePredicate()
     {
         // The falsification of candidate mechanism (1), kept as a live assertion rather than as
-        // prose. Two DISTINCT arrays that share a CLR identity hash report the SAME
-        // PointerOrderToken span — golib lifts the 26-bit hash into the high 32 bits and carries the
-        // element index below it, so a collision makes two unrelated buffers indistinguishable to
+        // prose. Before option 3, two DISTINCT arrays that shared a CLR identity hash reported the SAME
+        // PointerOrderToken span — golib lifted the 26-bit hash into the high 32 bits and carried the
+        // element index below it, so a collision made two unrelated buffers indistinguishable to
         // any consumer that orders by token. AnyOverlap is not such a consumer: it compares pinned
         // addresses. If a future change ever routes it through the token, this goes red, which is
         // the point of keeping it.
@@ -235,10 +235,14 @@ public class AliasOverlapTests
         slice<byte> x = first.slice();
         slice<byte> y = second.slice();
 
-        // POSITIVE CONTROL: the collision has to be real before its consequence means anything.
+        // POSITIVE CONTROL: the pair has to be real before its consequence means anything.
         Assert.AreNotSame(first, second, "the colliding pair must be two DISTINCT arrays");
-        Assert.AreEqual(Ꮡ(x, 0).PointerOrderToken, Ꮡ(y, 0).PointerOrderToken,
-            "the pair was selected for a shared identity hash, so their element-0 order tokens must collide");
+
+        // The token half of the collision is GONE since option 3 (ruling 2026-09-30): a token base is the
+        // allocation's unique id, not its identity hash, and that shared token was the defect it fixed. So
+        // the pair that shares an identity hash must now get two tokens; the falsification below stands.
+        Assert.AreNotEqual(Ꮡ(x, 0).PointerOrderToken, Ꮡ(y, 0).PointerOrderToken,
+            "two live arrays sharing an identity hash must still get two order tokens (option 3)");
 
         // The falsification itself.
         Assert.IsFalse(alias.AnyOverlap(x, y),

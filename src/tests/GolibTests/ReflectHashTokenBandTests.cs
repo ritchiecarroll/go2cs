@@ -138,11 +138,10 @@ public class ReflectHashTokenBandTests
         Assert.AreEqual(0, collisions, $"{collisions} of {2 * N} live map and slice backings shared a Pointer() token with another live one");
     }
 
-    // AMENDMENT (b) of G's review: the band's DISJOINTNESS from ж tokens rests on the CLR's identity
-    // hash width. AllocationBase packs `hash >> 15` into bits 48 and up, so hash bit 29 lands on token
-    // bit 62, the band's own bit; a hash with any of bits 29..31 set would alias a ж token into the
-    // band. Measured on CoreCLR x64 as 26 bits wide (the AllocationBase comment); this is the guard that
-    // says so every run. UNMEASURED under Native AOT until a GolibTests AOT run reads it.
+    // AMENDMENT (b) of G's review: the band's DISJOINTNESS from ж tokens. It rested on the CLR's
+    // identity hash width (26 bits measured on CoreCLR x64) while AllocationBase packed the hash; since
+    // option 3 the base is a 29-bit allocation id under a 14-bit hi mask, so bit 62 is clear by
+    // construction. This guard reads real minted tokens, so it fails if the mint ever changes that.
     [TestMethod]
     public void PointerTokensKeepBit62ClearSoTheHashBandIsDisjoint()
     {
@@ -153,11 +152,10 @@ public class ReflectHashTokenBandTests
         {
             ж<nint> box = @new<nint>();
             seen |= (ulong)box.PointerOrderToken;
-            seen |= (ulong)(uint)RuntimeHelpers.GetHashCode(new object()) << 33;
         }
 
         Assert.AreEqual(0UL, seen & Bit62,
-            $"a pointer token (or an identity hash shifted to its token position) set bit 62: OR 0x{seen:x}. " +
+            $"a pointer token set bit 62: OR 0x{seen:x}. " +
             "The hash band 0xC000_0000_0000_0000 | h is no longer disjoint from ж tokens.");
     }
 }

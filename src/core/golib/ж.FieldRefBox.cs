@@ -79,7 +79,9 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted
     // down a nested chain.
     public override nuint PointerOrderToken =>
         m_pointerOrderToken != 0 ? m_pointerOrderToken :
-        m_pointerOrderToken = unchecked(AllocationBase(SourceIdentityHash(m_source)) + GoFieldDisplacement(m_source, m_token));
+        m_pointerOrderToken = unchecked(AllocationBase(ManagedPointerTokens.AllocationIdOf(m_source)) + GoFieldDisplacement(m_source, m_token));
+
+    internal override ulong AllocationId => ManagedPointerTokens.AllocationIdOf(m_source);
 
     // The token above, computed once per view. It is a pure function of this view's immutable source
     // identity and field, and a view is cached per (box, accessor), so a repeated conversion of the same
