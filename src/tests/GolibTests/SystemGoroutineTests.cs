@@ -52,6 +52,49 @@ public class SystemGoroutineTests
         Assert.IsFalse(Goroutine.IsSystemCreator(null), "no creator is a user goroutine, as runtime.main is in Go");
     }
 
+    // THE BASIS IS THE START FUNCTION, not the creator: Go's isSystemGoroutine reads gp.startpc. The
+    // creator is found by walking the launching thread's stack, and under a full-opt JIT (TC0) the
+    // runtime frame that executed the `go` can be elided -- inlined or tail-called away -- so the walk
+    // lands on a caller outside the runtime. Measured on the net/http row (2026-10-01): unique's
+    // map-cleanup goroutine (runtime.unique_runtime_registerUniqueMapCleanup, whose last statement is
+    // the `go`) read `created by sync.(*Once).doSlow` at TC0, classified USER, and TestMain's leak
+    // check counted it. Staged here as that shape: a runtime-package start function launched from
+    // this (non-runtime, never-inlined) frame. The entry is supplied as a delegate over a runtime
+    // function exactly as the `goǃ` arity rungs supply theirs.
+    [TestMethod]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public void ARuntimeStartFunctionIsSystemWhateverTheCreatorFrame()
+    {
+        channel<int> park = new(0);
+        HashSet<long> live = StragglerStaging.LiveIds();
+
+        Goroutine.Start(() => park.Receive(), (Action)runtime_package.Gosched);
+
+        Goroutine? started = null;
+
+        for (int i = 0; i < 400 && started is null; i++)
+        {
+            started = StragglerStaging.Minted(live).FirstOrDefault(g => g.Entry is not null && g.Entry.DeclaringType == typeof(runtime_package));
+
+            if (started is null)
+                System.Threading.Thread.Sleep(5);
+        }
+
+        try
+        {
+            Assert.IsNotNull(started, "the staged goroutine must be registered with its runtime start function");
+            Assert.IsFalse(Goroutine.IsSystemCreator(started.Creator), "control: the staged creator frame must be OUTSIDE the runtime, or this test stages nothing");
+            Assert.IsTrue(started.IsSystem, "a goroutine whose start function is in the runtime is a system goroutine, whatever frame the creator walk found");
+        }
+        finally
+        {
+            park.Close();
+
+            if (started is not null)
+                System.Threading.SpinWait.SpinUntil(() => Goroutine.FromId(started.Id) is null, 30000);
+        }
+    }
+
     // THE GUARD. A goroutine registered with a runtime creator is absent from Stack(all) and from
     // UserCount while the registry's own Count still sees it; a user goroutine parked the same way
     // renders, with its created-by line. Positive control (measured at the cut): the predicate
