@@ -4,7 +4,8 @@
     The J0 consumer (docs/phase4/SIZING-j0-uuid.md). It references the converted google/uuid ONLY as a NuGet
     package, restored by j0-consume.ps1 from a local folder feed through a nuget.config that clears every other
     source, into an isolated NUGET_PACKAGES. J0UuidVersion names the rehearsal's package version (for example
-    1.6.0-local.1); the script passes it.
+    1.6.0-local.1), and J0UuidPackageId its ID: J0's go.github.com.google.uuid by default, or the nugetgo.* ID
+    (owner ruling B2) that nugetgo-pack.ps1 packs. The script passes both.
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -13,10 +14,11 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <J0UuidVersion Condition="'$(J0UuidVersion)' == ''">0.0.0-unset</J0UuidVersion>
+    <J0UuidPackageId Condition="'$(J0UuidPackageId)' == ''">go.github.com.google.uuid</J0UuidPackageId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="go.github.com.google.uuid" Version="$(J0UuidVersion)" />
+    <PackageReference Include="$(J0UuidPackageId)" Version="$(J0UuidVersion)" />
   </ItemGroup>
 
 </Project>

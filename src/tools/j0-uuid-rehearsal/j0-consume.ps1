@@ -22,7 +22,8 @@
 param(
     [Parameter(Mandatory)][string]$Feed,
     [Parameter(Mandatory)][string]$UuidVersion,
-    [Parameter(Mandatory)][string]$Scratch
+    [Parameter(Mandatory)][string]$Scratch,
+    [string]$PackageId = 'go.github.com.google.uuid'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -33,7 +34,7 @@ function Get-GoPackageCensus {
     $folder = ($line -replace '^global-packages:\s*', '').Trim()
     $pairs = New-Object System.Collections.Generic.List[string]
     if (Test-Path $folder) {
-        foreach ($id in Get-ChildItem $folder -Directory -Filter 'go.*') {
+        foreach ($id in @(Get-ChildItem $folder -Directory -Filter 'go.*') + @(Get-ChildItem $folder -Directory -Filter 'nugetgo.*')) {
             foreach ($ver in Get-ChildItem $id.FullName -Directory) { $pairs.Add("$($id.Name)/$($ver.Name)") }
         }
     }
@@ -69,7 +70,7 @@ $savedPackages = $env:NUGET_PACKAGES
 $env:NUGET_PACKAGES = $isolated
 try {
     Write-Host "==> Restoring and running the consumer (isolated NUGET_PACKAGES $isolated; the only source is $feedFull)"
-    $csOut = & dotnet run --project (Join-Path $consumer 'J0UuidConsumer.csproj') -c Release "-p:J0UuidVersion=$UuidVersion" 2>&1
+    $csOut = & dotnet run --project (Join-Path $consumer 'J0UuidConsumer.csproj') -c Release "-p:J0UuidVersion=$UuidVersion" "-p:J0UuidPackageId=$PackageId" 2>&1
     $csRc = $LASTEXITCODE
 }
 finally {
