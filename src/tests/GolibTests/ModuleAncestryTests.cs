@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Security.Cryptography;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go.testing_runtime;
@@ -217,6 +218,74 @@ public class ModuleAncestryTests
         finally
         {
             Discard(runRoot);
+        }
+    }
+
+    // THE MODULE CACHE IS READ-ONLY: Go marks every file under GOMODCACHE so (0444; ReadOnly on
+    // windows), and FileInfo.CopyTo carries the attribute onto the copy. The harness then overwrites a
+    // module file it already staged -- CopyFixtures' File.Copy(source, target, true) -- and an
+    // overwrite onto a ReadOnly target throws. Measured on the TRAIN L union (2026-10-01):
+    // google/uuid@v1.6.0 from GOMODCACHE died in 18 s at `Access to the path '...\uuid\dce.go' is
+    // denied` before any test ran, and the failed run left its ReadOnly sandbox behind, since a
+    // recursive delete refuses a ReadOnly file too. Every working-copy fixture is writable, which is
+    // why no proof met it. Staged here as that shape: a ReadOnly module file, the REAL CopyFixtures
+    // overwriting it, and the sandbox deleted afterwards.
+    [TestMethod]
+    public void AReadOnlyModuleFileIsStagedWritableForTheFixtureOverwriteAndTheCleanup()
+    {
+        string module = NewModule();
+        string runRoot = NewDirectory("run");
+        string workingDirectory = WorkingDirectoryFor(runRoot, ModulePath + "/parse");
+        string fixtureDirectory = "g2cs-readonly-" + Guid.NewGuid().ToString("N");
+        string moduleFile = Path.Combine(module, "parse", fixtureDirectory, "dce.go");
+        string hostFixture = Path.Combine(AppContext.BaseDirectory, fixtureDirectory, "dce.go");
+        string staged = Path.Combine(workingDirectory, fixtureDirectory, "dce.go");
+
+        try
+        {
+            Write(moduleFile, "package parse // as the module cache holds it\n");
+            File.SetAttributes(moduleFile, File.GetAttributes(moduleFile) | FileAttributes.ReadOnly);
+            Write(hostFixture, "package parse // as the host's fixture staging holds it\n");
+
+            Assert.IsTrue(PackageAncestry.TryStageModule(module, ModulePath, ModulePath + "/parse", runRoot, workingDirectory));
+            Assert.IsTrue(File.Exists(staged), "control: the module copy must have placed the file the fixture overwrites");
+
+            MethodInfo copyFixtures = typeof(TestHost).GetMethod("CopyFixtures", BindingFlags.NonPublic | BindingFlags.Static)!;
+
+            try
+            {
+                copyFixtures.Invoke(null, [new List<string> { fixtureDirectory + "/dce.go" }, workingDirectory, runRoot]);
+            }
+            catch (TargetInvocationException ex)
+            {
+                Assert.Fail($"the fixture overwrite of a staged module file threw: {ex.InnerException}");
+            }
+
+            Assert.AreEqual("package parse // as the host's fixture staging holds it\n", File.ReadAllText(staged), "the fixture must replace the staged copy");
+            Assert.AreEqual("package parse // as the module cache holds it\n", File.ReadAllText(moduleFile), "the user's module file must be untouched");
+            Assert.AreNotEqual((FileAttributes)0, File.GetAttributes(moduleFile) & FileAttributes.ReadOnly, "the user's module file must keep its own ReadOnly");
+
+            PackageAncestry.Delete(runRoot);
+            Assert.IsFalse(Directory.Exists(runRoot), "the sandbox must not be left behind");
+        }
+        finally
+        {
+            if (File.Exists(moduleFile))
+                File.SetAttributes(moduleFile, File.GetAttributes(moduleFile) & ~FileAttributes.ReadOnly);
+
+            if (File.Exists(staged))
+                File.SetAttributes(staged, File.GetAttributes(staged) & ~FileAttributes.ReadOnly);
+
+            try
+            {
+                Directory.Delete(Path.GetDirectoryName(hostFixture)!, true);
+            }
+            catch (Exception)
+            {
+            }
+
+            Discard(runRoot);
+            Discard(module);
         }
     }
 }
