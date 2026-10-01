@@ -3,9 +3,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 
 // A Go-source fixture (namespace go, a *_package class) in the shape of internal/godebug's
-// TestBisectTestCase: consecutive statements, each a call whose result is compared with a u8 literal
-// and stored. AggressiveOptimization skips tier-0, so the method is jitted exactly as the Release
-// TieredCompilation=0 default jits it.
+// TestBisectTestCase: inside a loop, consecutive statements, each a call whose result is compared
+// with a u8 literal and stored. AggressiveOptimization skips tier-0, so the method is jitted with the
+// full-opt codegen of the Release TieredCompilation=0 default. The loop matters: the same statements
+// in straight-line code resolve correctly even unfixed (measured), and only inside the loop body does
+// the full-opt JIT keep no per-statement boundaries.
 namespace go
 {
     internal static class returnsiteline_package
@@ -25,11 +27,17 @@ namespace go
             nint hits = 0;
             for (nint i = 0; i < 2; i++)
             {
+                // The body's FIRST call is not asserted (index 5): its preceding mapping is the loop's
+                // own head, which the full-opt JIT lays out as the condition block AFTER the body in IL
+                // order, so no call follows it and the frame keeps the CLR's own line -- the stated
+                // layout limit of returnSiteILOffset, measured here with tiering enabled.
+                var z = probe(got, want, 5) == "1"u8;
                 var a = probe(got, want, 0) == "1"u8;
                 var b = probe(got, want, 1) == "1"u8;
                 var c = probe(got, want, 2) == "1"u8;
                 var d = probe(got, want, 3) == "1"u8;
                 var e = probe(got, want, 4) == "1"u8;
+                if (z) hits++;
                 if (a) hits++;
                 if (b) hits++;
                 if (c) hits++;
@@ -45,17 +53,17 @@ namespace GolibTests
     // A Go PC from runtime.Callers is a RETURN address, and Go resolves it at pc-1 -- the call
     // instruction -- so a frame's line is the line of the call it is suspended in. The CLR resolves a
     // non-leaf frame's return address to the IL offset of the last JIT mapping at or before it, and the
-    // full-opt JIT keeps no per-statement boundaries: measured 2026-10-01 on internal/godebug at TC0,
-    // every TestBisectTestCase frame read the PREVIOUS statement's call (IL 37, the compare call of
-    // statement N-1, for a frame suspended in statement N's Value call at IL 45), so the line was one
-    // early (have 145-147, want 146-148) while tier-0 read the right one.
+    // full-opt JIT keeps no per-statement boundaries in a loop body: measured 2026-10-01 on
+    // internal/godebug at TC0, every TestBisectTestCase frame read the PREVIOUS statement's call (IL 37,
+    // the compare call of statement N-1, for a frame suspended in statement N's Value call at IL 45), so
+    // the line was one early (have 145-147, want 146-148) while tier-0 read the right one.
     [TestClass]
     public class ReturnSiteLineTests
     {
         [TestMethod]
         public void ACallerFrameNamesTheLineOfTheCallItIsSuspendedIn()
         {
-            nint[] got = new nint[5], want = new nint[5];
+            nint[] got = new nint[6], want = new nint[6];
             _ = returnsiteline_package.shape(got, want);
 
             for (int i = 0; i < 5; i++)
