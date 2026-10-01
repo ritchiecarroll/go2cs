@@ -2520,3 +2520,19 @@ function Test-GeneratedTypeMissingFailure {
 
     return New-GeneratedTypeResult $true $codes ''
 }
+
+# A publish binlog the converter KEPT for a failed publish (-test-publish-binlog writes
+# <OutDir>/bin/tests/publish.binlog and deletes it again on success), copied into $Destination beside a
+# failed row's saved output. The sweep's re-run arm needs this: run 2's publish removes run 1's kept log
+# before it starts, so a row that heals on the re-run would otherwise lose the one log that explains it.
+# Returns the copy's path, or $null when no log was kept (the switch was off, or the publish passed).
+function Copy-KeptPublishBinlog {
+    param([string] $OutDir, [string] $Destination)
+
+    $kept = Join-Path $OutDir 'bin/tests/publish.binlog'
+    if (-not (Test-Path -LiteralPath $kept -PathType Leaf)) { return $null }
+
+    $copy = Join-Path $Destination 'publish.binlog'
+    Copy-Item -LiteralPath $kept -Destination $copy -Force
+    return $copy
+}
