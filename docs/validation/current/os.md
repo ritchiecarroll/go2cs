@@ -6,14 +6,14 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `os` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-01 · converter `8b5396a1a`*
 
-**1105 matched · 2 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**1106 matched · 2 disclosed** — Go 1.24.13, `windows/amd64`, converted package
 [`src/core/os`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/os).
 
 Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
 
-Both runtimes skip 24 of the matched tests identically.
+Both runtimes skip 25 of the matched tests identically.
 
 > ⚠ Eight tests fail AGREEING on both runtimes — `TestReadlink` with its six subtests (`symlink_dir_drive_absolute`, `symlink_dir_volume_absolute`, `symlink_dir_volume_relative`, `symlink_file_drive_absolute`, `symlink_file_volume_absolute`, `symlink_file_volume_relative`) and `TestOpenFileCreateExclDanglingSymlink` — because this host does not hold the Windows symbolic-link creation privilege (`SeCreateSymbolicLinkPrivilege`), so neither runtime can create the links the tests read back. The verdicts agree name for name and therefore count as matched, and the arithmetic closes: 685 = 645 pass + 32 skip + 8 agreeing-fail. But NEITHER side ran the thing under test, and that is the distinction this note exists to carry: an agreeing failure on an ABSENT CAPABILITY masks a question, where an agreeing failure on shared semantics answers one. **683 of 685 is what a host without that privilege can score.** On a host holding it those eight should pass on the Go side, the converted side's behaviour there is UNMEASURED, and this row's next bank states its privilege context rather than inheriting this one. PROVENANCE: first measured on G-LAPTOP. A SECOND HOST HAS NOW READ THIS ROW AND AGREES: the i7 read os cold as part of the reflect-importer canary set on 2026-09-07 (the row entered that set when it banked) and reported PASS 683 matched / 2 disclosed at Release with tiering off, identical name for name. The clause this note used to carry - that no second host had read it, because the validated sweep enumerates the roster and a first-time bank is outside it by construction - is therefore SUPERSEDED, by exactly the mechanism it predicted. WHAT IS NOT SUPERSEDED IS THE PRIVILEGE CAVEAT ABOVE: that host also lacks SeCreateSymbolicLinkPrivilege, so the same eight agreeing-fails appear there, 683 of 685 remains what a host without that privilege can score, and the converted side behaviour WITH the privilege is still UNMEASURED on any host. Two hosts agreeing on a number both obtained without the capability is a reproducibility result, not a capability one.
 
@@ -177,7 +177,7 @@ Both runtimes skip 24 of the matched tests identically.
 | `TestMkdirTempBadPattern/tempfile_test*foo\` | pass | pass |
 | `TestMkdirTempBadPattern/tempfile_test\*foo` | pass | pass |
 | `TestMkdirTempBadPattern/tempfile_test\foo` | pass | pass |
-| `TestNetworkSymbolicLink` | pass | pass |
+| `TestNetworkSymbolicLink` | skip | skip |
 | `TestNewFileInvalid` | pass | pass |
 | `TestNilFileMethods` | pass | pass |
 | `TestNilProcessStateString` | pass | pass |
@@ -707,6 +707,7 @@ Both runtimes skip 24 of the matched tests identically.
 | `TestRemoveAllLongPathRelative` | pass | pass |
 | `TestRemoveAllNoFcntl` | skip | skip |
 | `TestRemoveAllRace` | skip | skip |
+| `TestRemoveAllWithExecutedProcess` | pass | pass |
 | `TestRemoveAllWithMoreErrorThanReqSize` | pass | pass |
 | `TestRemoveReadOnlyDir` | pass | pass |
 | `TestRemoveReadOnlyFile` | pass | pass |
@@ -1191,7 +1192,6 @@ the capability it needs.
 - TestCmdArgs (test): requires unsupported testing capabilities: native output block with caller-side LocalFree
 - TestDirectoryJunction (test): requires unsupported testing capabilities: raw-metal struct overlay on managed bytes
 - TestDirectorySymbolicLink (test): requires unsupported testing capabilities: raw-metal struct overlay on managed bytes
-- TestRemoveAllWithExecutedProcess (test): requires unsupported testing capabilities: relocatable single-file test executable
 
 ## Gated by a host capability
 
@@ -1218,9 +1218,3 @@ page states exactly what the row leaves out.
 1 verdict row `go test` reports and this comparison does not claim:
 
 `TestDirectorySymbolicLink`
-
-### `TestRemoveAllWithExecutedProcess` — relocatable single-file test executable
-
-1 verdict row `go test` reports and this comparison does not claim:
-
-`TestRemoveAllWithExecutedProcess`
