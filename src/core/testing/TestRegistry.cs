@@ -81,7 +81,7 @@ public sealed record RegisteredTest(
 /// compiles; a regenerated one always passes it.
 /// </para>
 /// </remarks>
-public sealed class TestRegistry(string package, IReadOnlyList<string> fixtures, IReadOnlyList<string>? fixtureDirectories = null, IReadOnlyList<string>? fixtureLinks = null)
+public sealed class TestRegistry(string package, IReadOnlyList<string> fixtures, IReadOnlyList<string>? fixtureDirectories = null, IReadOnlyList<string>? fixtureLinks = null, string? modulePath = null)
 {
     private readonly List<RegisteredTest> m_tests = [];
 
@@ -106,6 +106,15 @@ public sealed class TestRegistry(string package, IReadOnlyList<string> fixtures,
     /// this list existed still compiles; a regenerated one always passes it.
     /// </remarks>
     public IReadOnlyList<string> FixtureLinks { get; } = fixtureLinks ?? [];
+
+    /// <summary>
+    /// The Go MODULE path of a package outside the standard library (empty for the standard library),
+    /// the LOGICAL half of <see cref="PackageAncestry.TryStageModule"/>'s input. The module's location
+    /// on disk is deliberately NOT here: it arrives at run time through
+    /// <see cref="PackageAncestry.ModuleRootEnvironmentVariable"/>, as GOROOT does, so a machine path
+    /// never lands in an emitted host. Defaulted so every standard-library host stays byte-identical.
+    /// </summary>
+    public string ModulePath { get; } = modulePath ?? "";
 
     public IReadOnlyList<RegisteredTest> Tests => m_tests;
 

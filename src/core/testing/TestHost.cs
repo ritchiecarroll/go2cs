@@ -235,6 +235,12 @@ public static class TestHost
                 // both sides; when there is none, staging is skipped and the sandbox is what it always was.
                 PackageAncestry.TryStage(Environment.GetEnvironmentVariable("GOROOT"), registry.Package, runRoot, workingDirectory);
 
+                // A package outside the standard library stages its MODULE instead: a real copy of the
+                // module tree, from the root the converter's run hands over in the environment.
+                bool moduleStaged = PackageAncestry.TryStageModule(
+                    Environment.GetEnvironmentVariable(PackageAncestry.ModuleRootEnvironmentVariable),
+                    registry.ModulePath, registry.Package, runRoot, workingDirectory);
+
                 CreateFixtureDirectories(registry.FixtureDirectories, workingDirectory, runRoot);
 
                 // AFTER the run-directory shape and BEFORE the copies. After, because a link at
@@ -243,7 +249,7 @@ public static class TestHost
                 // what must never be made writable — staging first is what puts the refusal in
                 // front of the write instead of behind it.
                 PackageAncestry.StageFixtureLinks(registry.FixtureLinks, Environment.GetEnvironmentVariable("GOROOT"),
-                    registry.Package, workingDirectory, runRoot);
+                    registry.Package, workingDirectory, runRoot, moduleStaged);
 
                 CopyFixtures(registry.Fixtures, workingDirectory, runRoot);
                 Environment.CurrentDirectory = workingDirectory;
