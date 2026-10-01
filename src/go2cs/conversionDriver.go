@@ -578,6 +578,23 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			log.Fatalf("Error while writing project file \"%s\": %s\n", projectFileName, err)
 		}
 
+		// A MAIN package converted under -recurse is a program of its module, so its assembly carries the
+		// module's DefaultGODEBUG (godebugDefault.go), stamped through the project file -- not package_info.cs,
+		// whose content a -tests run seeds into the test assembly beside the host's own stamp. Plain
+		// single-package conversions are unchanged (the M6 scope ruling); the value depends on the package's
+		// files alone, so both -tests -recurse phases write the same stamp.
+		if options.recurse && pkg.Name == "main" {
+			godebug, godebugErr := packageDefaultGODEBUG(pkg.Dir, pkg.GoFiles, options)
+
+			if godebugErr != nil {
+				return godebugErr
+			}
+
+			if err := stampDefaultGodebugProject(projectFileName, godebug); err != nil {
+				return err
+			}
+		}
+
 		// The cross-package lowering contract: compute the `ref`-primary records this package
 		// publishes (its selected exported primaries plus any registered hand-own declaration,
 		// which must be on disk) before the info file is written. A registered hand-own primary

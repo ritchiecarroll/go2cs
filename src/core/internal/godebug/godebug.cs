@@ -213,8 +213,17 @@ public static @string Value(this ж<Setting> Ꮡs) {
 // silently: `t.Setenv("GODEBUG", …)` — how Go's own suites exercise a setting, and the only way a
 // converted test can reach one — could not be observed once ANY setting had been read, which in a
 // test binary is almost always before the test that sets it runs.
+//
+// The initial key is a sentinel no environment value can equal: with "" as the key, a process with no
+// $GODEBUG would match it on the first lookup and return the EMPTY map -- skipping the program's
+// default layer below, the one case where the default is all there is.
 private static volatile Tuple<string, Dictionary<string, SettingValue>> s_settings =
-    new("", new Dictionary<string, SettingValue>(StringComparer.Ordinal));
+    new("\0unparsed", new Dictionary<string, SettingValue>(StringComparer.Ordinal));
+
+// The program's default GODEBUG (GoDefaultGodebugAttribute: cmd/go's runtime.godebugDefault, from the
+// module's go line and its //go:debug directives), parsed once. It never changes during a run.
+private static readonly Lazy<Dictionary<string, SettingValue>> s_defaults =
+    new(() => parseGodebugEnv(GoDefaultGodebugAttribute.EntryValue));
 
 private static Dictionary<string, SettingValue> settings() {
     string raw = Environment.GetEnvironmentVariable("GODEBUG") ?? "";
@@ -223,7 +232,14 @@ private static Dictionary<string, SettingValue> settings() {
     if (string.Equals(current.Item1, raw, StringComparison.Ordinal))
         return current.Item2;
 
-    Tuple<string, Dictionary<string, SettingValue>> parsed = new(raw, parseGodebugEnv(raw));
+    // $GODEBUG first, then the program's default for every name it does not set -- Go's
+    // `parse(did, env); parse(did, def)`, in which the environment always wins.
+    Dictionary<string, SettingValue> layered = parseGodebugEnv(raw);
+
+    foreach (KeyValuePair<string, SettingValue> fallback in s_defaults.Value)
+        layered.TryAdd(fallback.Key, fallback.Value);
+
+    Tuple<string, Dictionary<string, SettingValue>> parsed = new(raw, layered);
 
     // Last writer wins, and every writer parsed the same text it observed — so whichever snapshot
     // is published is self-consistent (the field is volatile, so the dictionary's contents are
