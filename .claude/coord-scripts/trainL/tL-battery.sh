@@ -159,7 +159,7 @@ SEATFULL=$(grep -E '^[A-Za-z0-9._-]+\|' "$SEATS" | cut -d'|' -f2 | while read -r
 # merge and before the fixup, when its second parent is on that seat's origin branch, descends from the seated sha and is
 # not it. Two are ruled: i9-nugetgo-pack (R2, the Windows PowerShell 5.1 parse fix) and c1-token-ids (C1's
 # field-of-element / field-of-field token fix, red 2c3589bd05 + fix ec0f0bdd6c).
-FOLLOW='i9-nugetgo-pack:1f99ee7e9f c1-token-ids:667d052869'
+FOLLOW='i9-nugetgo-pack:1f99ee7e9f c1-token-ids:667d052869 g-m4-readonly-staging:6a079a9675 c1-readme-tests-recurse:6a079a9675'   # the last two: R's chain (r-m6 tip) follow-ups, rerouted to G and C1 2026-10-01 (R in travel mode)
 mbad=0; mcontain=0; munsigned=0; nfix=0; FIXES=''
 for c in $(git rev-list --first-parent "$MASTER..HEAD^"); do
   [ "$(git rev-list --parents -n 1 "$c" | wc -w)" = 3 ] || { stamp "  PRE union: $(git rev-parse --short=10 "$c") is not a two-parent merge"; mbad=$((mbad + 1)); continue; }

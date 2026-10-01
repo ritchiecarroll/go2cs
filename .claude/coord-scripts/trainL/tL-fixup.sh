@@ -77,7 +77,7 @@ fpc=$(git rev-list --first-parent --count "$BASE..HEAD")
 # FOLLOW-UP SEAT MERGES (COORD 2026-10-01): after the 11 seat merges, up to TWO ruled follow-ups may ride, one each
 # for i9-nugetgo-pack (R2, the 5.1 parse fix) and c1-token-ids (C1's token fix): a merge whose second parent is on that
 # seat's origin branch, descends from the seated sha, is not it, and comes after the seat's own merge.
-FOLLOW='i9-nugetgo-pack:1f99ee7e9f c1-token-ids:667d052869'
+FOLLOW='i9-nugetgo-pack:1f99ee7e9f c1-token-ids:667d052869 g-m4-readonly-staging:6a079a9675 c1-readme-tests-recurse:6a079a9675'   # the last two: R's chain (r-m6 tip) follow-ups, rerouted to G and C1 2026-10-01 (R in travel mode)
 NGFIX=''; FIXES=''; nfix=0
 for c in $(git rev-list --first-parent "$BASE..HEAD"); do
   [ "$(git rev-list --parents -n 1 "$c" | wc -w)" = 3 ] || die "first-parent commit ${c:0:10} is not a two-parent merge (a fixup already present?)"
