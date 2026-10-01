@@ -56,7 +56,7 @@ private static readonly @string waitgroupˢ = "waitgroup"u8;
 private static readonly @string runningˢ = "running"u8;
 private static readonly @string chanSendˢ = "chan send"u8;
 
-internal static void Main() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
     var buf = new slice<byte>(dumpSize);
     ref var mu = ref heap(new Δsync.Mutex(), out var Ꮡmu);
     Ꮡmu.Lock();

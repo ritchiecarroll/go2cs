@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -49,7 +50,7 @@ private static readonly object indexˢ = (@string)"index:"u8;
 private static readonly object deferˢ = (@string)"defer:"u8;
 private static readonly object bareˢ = (@string)"bare:"u8;
 
-internal static void Main() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
     var ch = new channel<nint>(8);
     var chanᴛ2 = chanFor(ch);
     var (ᴛ3, ᴛ4) = pair();

@@ -4,6 +4,7 @@ using fmt = fmt_package;
 using Δio = io_package;
 using Δnet = net_package;
 using time = time_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -30,7 +31,7 @@ internal static uint32 checksum(slice<byte> b) {
     internal error err;
 }
 
-internal static void roundTrip(@string label, @string network, @string address) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void roundTrip(@string label, @string network, @string address) {
     GoFrame ᒐ = default;
     try {
         var (listener, err) = Δnet.Listen(network, address);
@@ -110,7 +111,7 @@ private static readonly object closeReadDialFailedˢ = (@string)"closeRead: dial
 private static readonly object closeReadAcceptFailedˢ = (@string)"closeRead: accept failed"u8;
 private static readonly object closeReadˢ = (@string)"closeRead: brokeBlockedRead=false (timed out)"u8;
 
-internal static void closeBreaksBlockedRead() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void closeBreaksBlockedRead() {
     GoFrame ᒐ = default;
     try {
         var (listener, err) = Δnet.Listen(tcpˢ, "127.0.0.1:0"u8);
@@ -175,7 +176,7 @@ private static readonly object closeWriteDialFailedˢ = (@string)"closeWrite: di
 private static readonly object closeWriteAcceptFailedˢ = (@string)"closeWrite: accept failed"u8;
 private static readonly object closeWriteˢ = (@string)"closeWrite: brokeBlockedWrite=false (timed out)"u8;
 
-internal static void closeBreaksBlockedWrite() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void closeBreaksBlockedWrite() {
     GoFrame ᒐ = default;
     try {
         var (listener, err) = Δnet.Listen(tcpˢ, "127.0.0.1:0"u8);

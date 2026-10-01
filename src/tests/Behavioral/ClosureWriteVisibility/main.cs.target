@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -111,7 +112,7 @@ internal static void probeE2() {
     finally { ᒐ.Run(); }
 }
 
-internal static void probeF1() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void probeF1() {
     ref var t = ref heap<Tally>(out var Ꮡt);
     t = new Tally(5, "s"u8);
     var done = new channel<nint>(0);
