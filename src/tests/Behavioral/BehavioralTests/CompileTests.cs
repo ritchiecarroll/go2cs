@@ -451,9 +451,6 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckDivideByZeroPanic() => CheckTarget("DivideByZeroPanic");
 
     [TestMethod]
-    public void CheckUnsafePointerParamAssign() => CheckTarget("UnsafePointerParamAssign");
-
-    [TestMethod]
     public void CheckDotImportRenamedPackage() => CheckTarget("DotImportRenamedPackage");
 
     [TestMethod]
@@ -593,6 +590,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckForeignValueImplementSuppression() => CheckTarget("ForeignValueImplementSuppression");
+
+    [TestMethod]
+    public void CheckForeverWaitWorkersMainReturns() => CheckTarget("ForeverWaitWorkersMainReturns");
 
     [TestMethod]
     public void CheckFormatTypeAdapters() => CheckTarget("FormatTypeAdapters");
@@ -979,6 +979,12 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckLookupServicePort() => CheckTarget("LookupServicePort");
 
     [TestMethod]
+    public void CheckMainSelectForeverAfterFunc() => CheckTarget("MainSelectForeverAfterFunc");
+
+    [TestMethod]
+    public void CheckMainSelectForeverWorkerExits() => CheckTarget("MainSelectForeverWorkerExits");
+
+    [TestMethod]
     public void CheckMakeLenNamedNumeric() => CheckTarget("MakeLenNamedNumeric");
 
     [TestMethod]
@@ -1061,9 +1067,6 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckMinIntDivideShadow() => CheckTarget("MinIntDivideShadow");
-
-    [TestMethod]
-    public void CheckNegativeShiftCount() => CheckTarget("NegativeShiftCount");
 
     [TestMethod]
     public void CheckMinMaxBuiltin() => CheckTarget("MinMaxBuiltin");
@@ -1280,6 +1283,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNativeIntWideConstElement() => CheckTarget("NativeIntWideConstElement");
+
+    [TestMethod]
+    public void CheckNegativeShiftCount() => CheckTarget("NegativeShiftCount");
 
     [TestMethod]
     public void CheckNestedAliasUser() => CheckTarget("NestedAliasUser");
@@ -2114,6 +2120,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnsafePointerKeywordParam() => CheckTarget("UnsafePointerKeywordParam");
+
+    [TestMethod]
+    public void CheckUnsafePointerParamAssign() => CheckTarget("UnsafePointerParamAssign");
 
     [TestMethod]
     public void CheckUnsafePointerParamPin() => CheckTarget("UnsafePointerParamPin");
