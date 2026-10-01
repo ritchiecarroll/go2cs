@@ -113,7 +113,7 @@ if ($UnvalidatedReason) {
     if ($ValidationDir) { Refuse '-UnvalidatedReason and -ValidationDir are exclusive' }
     $validationPage = Join-Path $Scratch 'UNVALIDATED.md'
     New-Item -ItemType Directory -Force $Scratch | Out-Null
-    [System.IO.File]::WriteAllText($validationPage, ("# ``$ModulePath`` — NOT VALIDATED`n`n" +
+    [System.IO.File]::WriteAllText($validationPage, ("# ``$ModulePath`` -- NOT VALIDATED`n`n" +
         "This package is a pack-shape rehearsal of the go2cs conversion of ``$ModulePath`` $GoVersion. Its Go tests have " +
         "not been converted and compared, so it carries no validation proof, and it is not published.`n`n$UnvalidatedReason`n"),
         (New-Object System.Text.UTF8Encoding($false)))
