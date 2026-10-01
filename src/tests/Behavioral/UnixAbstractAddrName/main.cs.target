@@ -4,6 +4,7 @@ using fmt = fmt_package;
 using Δnet = net_package;
 using os = os_package;
 using filepath = path.filepath_package;
+using System.Runtime.CompilerServices;
 using path;
 
 partial class main_package {
@@ -19,7 +20,7 @@ private static readonly object netˢ = (@string)"net       ="u8;
 private static readonly object nameLenˢ = (@string)"name len  ="u8;
 private static readonly object nameIsˢ = (@string)"name is @ ="u8;
 
-internal static void Main() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
     GoFrame ᒐ = default;
     try {
         var (dir, err) = os.MkdirTemp(""u8, abstractaddrˢ);

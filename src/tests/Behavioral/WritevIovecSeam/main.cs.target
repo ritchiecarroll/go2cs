@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using Δio = io_package;
 using Δnet = net_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -16,7 +17,7 @@ private static readonly object lenˢ = (@string)"len:"u8;
 private static readonly object bytesˢ = (@string)"bytes:"u8;
 private static readonly object eachIovecDeliveredItsOwnˢ = (@string)"each iovec delivered its own byte in order:"u8;
 
-internal static void Main() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
     GoFrame ᒐ = default;
     try {
         var (ln, err) = Δnet.Listen(tcpˢ, "127.0.0.1:0"u8);
