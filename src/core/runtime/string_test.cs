@@ -478,11 +478,11 @@ public static void TestString2Slice(ж<testing.T> Ꮡt) {
     // between len and cap. See issue 14232.
     @string s = fooˢ3;
     var b = (slice<byte>)(s);
-    if (!isZeroed(b[(int)(len(b))..(int)(cap(b))])) {
+    if (!isZeroed(b.slice(len(b), cap(b)))) {
         Ꮡt.Errorf("extra bytes not zeroed"u8);
     }
     var r = (slice<rune>)(s);
-    if (!isZeroedR(r[(int)(len(r))..(int)(cap(r))])) {
+    if (!isZeroedR(r.slice(len(r), cap(r)))) {
         Ꮡt.Errorf("extra runes not zeroed"u8);
     }
 }

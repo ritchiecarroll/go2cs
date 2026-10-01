@@ -196,7 +196,7 @@ public static void TestDebugLogWraparound(ж<testing.T> Ꮡt) {
         }
         var idx = lost.FindStringIndex(log);
         // Strip lost message.
-        log = dlogCanonicalize(log[(int)(idx[1])..]);
+        log = dlogCanonicalize(log.slice(idx[1]));
         // Check log.
         if (!strings.HasSuffix(want.String(), log)) {
             Ꮡt.Fatalf("wrong suffix:\n%s"u8, log);

@@ -385,7 +385,7 @@ public static void TestPinnerCgoCheckPtr2UnsafePtr(ж<testing.T> Ꮡt) {
         p = @unsafe.Pointer.FromPinnedBox(@new<obj>());
         var p2 = Ꮡ(new objWith<@unsafe.Pointer>(o: p));
         assertCgoCheckPanics(Ꮡt, p2.OrTypedNil());
-        pinner.Pin(p);
+        pinner.Pin(@unsafe.Pointer.OrTypedNil(p));
         runtime_internal_test_package.CgoCheckPointer(p2.OrTypedNil(), true);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -410,7 +410,7 @@ public static void TestPinnerCgoCheckPtr2UnknownPtr(ж<testing.T> Ꮡt) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }))();
-        pinner.Pin(p);
+        pinner.Pin(@unsafe.Pointer.OrTypedNil(p));
         runtime_internal_test_package.CgoCheckPointer(p2.OrTypedNil(), default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

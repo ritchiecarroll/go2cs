@@ -310,6 +310,7 @@ internal static class Go2CsTestHost
         registry.Add("TestRemoveAllLongPathRelative", os_test_package.TestRemoveAllLongPathRelative, "path_windows_test.go", 223);
         registry.Add("TestRemoveAllNoFcntl", os_test_package.TestRemoveAllNoFcntl, "removeall_test.go", 413);
         registry.Add("TestRemoveAllRace", os_test_package.TestRemoveAllRace, "os_test.go", 2791);
+        registry.Add("TestRemoveAllWithExecutedProcess", os_test_package.TestRemoveAllWithExecutedProcess, "exec_windows_test.go", 18);
         registry.Add("TestRemoveAllWithMoreErrorThanReqSize", os_test_package.TestRemoveAllWithMoreErrorThanReqSize, "removeall_test.go", 352);
         registry.Add("TestRemoveReadOnlyDir", os_test_package.TestRemoveReadOnlyDir, "removeall_test.go", 217);
         registry.Add("TestRemoveReadOnlyFile", os_test_package.TestRemoveReadOnlyFile, "os_test.go", 3858);

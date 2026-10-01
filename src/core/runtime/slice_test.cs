@@ -240,21 +240,21 @@ public static void BenchmarkExtendSlice(ж<testing.B> Ꮡb) {
     Ꮡb.Run(intSliceˢ, (ж<testing.B> bΔ1) => {
         var s = new slice<nint>(0, length);
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            s = appendꓸꓸꓸ(s.slice(-1, 0, length / 2), new slice<nint>(length));
+            s = appendꓸꓸꓸ(s.slice(0, 0, length / 2), makeꓸꓸꓸ<nint>(length));
         }
         SinkIntSlice = s;
     });
     Ꮡb.Run(pointerSliceˢ, (ж<testing.B> bΔ2) => {
         var s = new slice<ж<nint>>(0, length);
         for (nint i = 0; i < (~bΔ2).N; i++) {
-            s = appendꓸꓸꓸ(s.slice(-1, 0, length / 2), new slice<ж<nint>>(length));
+            s = appendꓸꓸꓸ(s.slice(0, 0, length / 2), makeꓸꓸꓸ<ж<nint>>(length));
         }
         SinkIntPointerSlice = s;
     });
     Ꮡb.Run(noGrowˢ, (ж<testing.B> bΔ3) => {
         var s = new slice<nint>(0, length);
         for (nint i = 0; i < (~bΔ3).N; i++) {
-            s = appendꓸꓸꓸ(s.slice(-1, 0, length), new slice<nint>(length));
+            s = appendꓸꓸꓸ(s.slice(0, 0, length), makeꓸꓸꓸ<nint>(length));
         }
         SinkIntSlice = s;
     });
@@ -356,7 +356,7 @@ public static void BenchmarkAppendSpecialCase(ж<testing.B> Ꮡb) {
         x = x[0..0];
         for (nint j = 0; j < N; j++) {
             if (len(x) < cap(x)){
-                x = x[..(int)(len(x) + 1)];
+                x = x.slice(0, len(x) + 1);
                 x[len(x) - 1] = j;
             } else {
                 x = append(x, j);
@@ -494,7 +494,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
                 sByte = new slice<byte>(0);
                 for (nint j = 0; j < C; j++) {
                     sByte = append(sByte, (byte)(0x77));
-                    sByte = sByte[..(int)(cap(sByte))];
+                    sByte = sByte.slice(0, cap(sByte));
                 }
             }
         });
@@ -503,7 +503,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
                 s1Ptr = new slice<uintptr>(0);
                 for (nint j = 0; j < C; j++) {
                     s1Ptr = append(s1Ptr, (uintptr)(0x77));
-                    s1Ptr = s1Ptr[..(int)(cap(s1Ptr))];
+                    s1Ptr = s1Ptr.slice(0, cap(s1Ptr));
                 }
             }
         });
@@ -512,7 +512,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
                 s2Ptr = GoReflect.WithElemDims(new slice<array<uintptr>>(0, () => new(2)), 2);
                 for (nint j = 0; j < C; j++) {
                     s2Ptr = append(s2Ptr, new uintptr[]{0x77, 0x88}.array());
-                    s2Ptr = GoReflect.WithElemDims(s2Ptr[..(int)(cap(s2Ptr))], 2);
+                    s2Ptr = GoReflect.WithElemDims(s2Ptr.slice(0, cap(s2Ptr)), 2);
                 }
             }
         });
@@ -521,7 +521,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
                 s3Ptr = GoReflect.WithElemDims(new slice<array<uintptr>>(0, () => new(3)), 3);
                 for (nint j = 0; j < C; j++) {
                     s3Ptr = append(s3Ptr, new uintptr[]{0x77, 0x88, 0x99}.array());
-                    s3Ptr = GoReflect.WithElemDims(s3Ptr[..(int)(cap(s3Ptr))], 3);
+                    s3Ptr = GoReflect.WithElemDims(s3Ptr.slice(0, cap(s3Ptr)), 3);
                 }
             }
         });
@@ -530,7 +530,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
                 s4Ptr = GoReflect.WithElemDims(new slice<array<uintptr>>(0, () => new(4)), 4);
                 for (nint j = 0; j < C; j++) {
                     s4Ptr = append(s4Ptr, new uintptr[]{0x77, 0x88, 0x99, 0xAA}.array());
-                    s4Ptr = GoReflect.WithElemDims(s4Ptr[..(int)(cap(s4Ptr))], 4);
+                    s4Ptr = GoReflect.WithElemDims(s4Ptr.slice(0, cap(s4Ptr)), 4);
                 }
             }
         });

@@ -20,11 +20,11 @@ public static void RunStealOrderTest() {
             var @checked = new slice<bool>(procs);
             for (nint Δp = 0; Δp < procs; Δp++) {
                 var x = @enum.position();
-                if (@checked[(nint)(x)]) {
+                if (@checked[x]) {
                     println((@string)"procs:"u8, procs, (@string)"inc:"u8, @enum.inc);
                     throw panic("duplicate during enumeration");
                 }
-                @checked[(nint)(x)] = true;
+                @checked[x] = true;
                 @enum.next();
             }
             if (!@enum.done()) {
@@ -42,11 +42,11 @@ public static void RunStealOrderTest() {
         for (nint i = 0; i < procs * len(ord.coprimes); i++) {
             var @enum = ord.start((uint32)i);
             var j = @enum.pos * (uint32)procs + @enum.inc;
-            if (@checked[(nint)(j)]) {
+            if (@checked[j]) {
                 println((@string)"procs:"u8, procs, (@string)"pos:"u8, @enum.pos, (@string)"inc:"u8, @enum.inc);
                 throw panic("duplicate pos+inc during enumeration");
             }
-            @checked[(nint)(j)] = true;
+            @checked[j] = true;
         }
     }
 }

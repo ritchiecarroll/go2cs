@@ -16,6 +16,7 @@ using Δsync = sync_package;
 using testing = testing_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using @internal;
+using System.Runtime.CompilerServices;
 using global::go.runtime;
 using static global::go.runtime_internal_test_package;
 using ꓸꓸꓸany = Span<any>;
@@ -104,7 +105,7 @@ public static void TestTracebackInlined(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-internal static ж<ttiResult> ttiLeaf() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<ttiResult> ttiLeaf() {
     // Get a printed stack trace.
     ref var printed = ref heap<@string>(out var Ꮡprinted);
     printed = ((@string)Δdebug.Stack());
@@ -112,20 +113,20 @@ internal static ж<ttiResult> ttiLeaf() {
 }
 
 //go:noinline
-internal static ж<ttiResult> ttiSimple1() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<ttiResult> ttiSimple1() {
     return ttiSimple2();
 }
 
-internal static ж<ttiResult> ttiSimple2() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<ttiResult> ttiSimple2() {
     return ttiSimple3();
 }
 
-internal static ж<ttiResult> ttiSimple3() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<ttiResult> ttiSimple3() {
     return ttiLeaf();
 }
 
 //go:noinline
-internal static ж<ttiResult> /*res*/ ttiSigpanic1() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<ttiResult> /*res*/ ttiSigpanic1() {
     ж<ttiResult> res = default!;
     GoFrame ᒐ = default;
     try {
@@ -159,21 +160,21 @@ internal static void ttiSigpanic3() {
 internal static bool alwaysTrue = true;
 
 //go:noinline
-internal static ж<ttiResult> ttiWrapper1() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<ttiResult> ttiWrapper1() {
     ref var w = ref heap(new ttiWrapper(), out var Ꮡw);
-    var m = ((Func<ж<ttiWrapper>, ж<ttiResult>>)((p0) => m1(p0.Value)));
+    var m = ((Func<ж<ttiWrapper>, ж<ttiResult>>)([GoWrapper("(*ttiWrapper).m1")] (p0) => m1(panicwrapRecv(p0, "value method runtime_test.ttiWrapper.m1 called using nil *ttiWrapper pointer").Value)));
     return m(Ꮡw);
 }
 
 [GoType] partial struct ttiWrapper {
 }
 
-internal static ж<ttiResult> m1(this ttiWrapper w) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<ttiResult> m1(this ttiWrapper w) {
     return ttiLeaf();
 }
 
 //go:noinline
-internal static ж<ttiResult> ttiExcluded1() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<ttiResult> ttiExcluded1() {
     return ttiExcluded2();
 }
 
@@ -184,11 +185,11 @@ internal static ж<ttiResult> ttiExcluded1() {
 //
 //go:linkname ttiExcluded2 runtime.ttiExcluded2
 //go:noinline
-internal static ж<ttiResult> ttiExcluded2() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<ttiResult> ttiExcluded2() {
     return ttiExcluded3();
 }
 
-internal static ж<ttiResult> ttiExcluded3() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<ttiResult> ttiExcluded3() {
     return ttiLeaf();
 }
 
@@ -253,8 +254,8 @@ public static void TestTracebackElision(ж<testing.T> Ꮡt) {
                 if (len((~tb).frames) > 0) {
                     off = (~tb).frames[0].Value.off;
                 }
-                tΔ1.Logf("traceback before error:\n%s"u8, stack[..(int)(off)]);
-                tΔ1.Logf("traceback after error:\n%s"u8, stack[(int)(off)..]);
+                tΔ1.Logf("traceback before error:\n%s"u8, stack.slice(0, off));
+                tΔ1.Logf("traceback after error:\n%s"u8, stack.slice(off));
             }
         });
     }
@@ -295,15 +296,15 @@ internal static void tteStack(nint n, channel/*<-*/<@string> stack) {
 
 }
 
-internal static @string tte0(nint n) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static @string tte0(nint n) {
     return tte4(n - 1);
 }
 
-internal static @string tte1(nint n) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static @string tte1(nint n) {
     return tte0(n - 1);
 }
 
-internal static @string tte2(nint n) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static @string tte2(nint n) {
     // tte2 opens n%5 == 2 frames. It's also the base case of the recursion,
     // since we can open no fewer than two frames to call debug.Stack().
     if (n < 2) {
@@ -315,11 +316,11 @@ internal static @string tte2(nint n) {
     return tte1(n - 1);
 }
 
-internal static @string tte3(nint n) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static @string tte3(nint n) {
     return tte2(n - 1);
 }
 
-internal static @string tte4(nint n) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static @string tte4(nint n) {
     return tte3(n - 1);
 }
 
@@ -365,21 +366,21 @@ public static void TestTracebackArgs(ж<testing.T> Ꮡt) {
     var tests = new TestTracebackArgs_tests[]{ // simple ints
 
         new(
-            () => testTracebackArgs1(1, 2, 3, 4, 5),
+            [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs1(1, 2, 3, 4, 5),
             "testTracebackArgs1(0x1, 0x2, 0x3, 0x4, 0x5)"u8
         ), // some aggregates
 
         new(
-            () => testTracebackArgs2(false, new TestTracebackArgs_b(1, 2, 3, new nint[]{4, 5}.array()), new nint[]{}.array(), new byte[]{6, 7, 8}.array()),
+            [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs2(false, new TestTracebackArgs_b(1, 2, 3, new nint[]{4, 5}.array()), new nint[]{}.array(), new byte[]{6, 7, 8}.array()),
             "testTracebackArgs2(0x0, {0x1, 0x2, 0x3, {0x4, 0x5}}, {}, {0x6, 0x7, 0x8})"u8
         ),
         new(
-            () => testTracebackArgs3(new byte[]{1, 2, 3}.array(), 4, 5, 6, new byte[]{7, 8, 9}.array()),
+            [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs3(new byte[]{1, 2, 3}.array(), 4, 5, 6, new byte[]{7, 8, 9}.array()),
             "testTracebackArgs3({0x1, 0x2, 0x3}, 0x4, 0x5, 0x6, {0x7, 0x8, 0x9})"u8
         ), // too deeply nested type
 
         new(
-            () => testTracebackArgs4(false, new array<array<array<array<array<array<array<array<array<nint>>>>>>>>>[]{}.array(1, () => new(1, () => new(1, () => new(1, () => new(1, () => new(1, () => new(1, () => new(1, () => new(1, () => new(1))))))))))),
+            [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs4(false, new array<array<array<array<array<array<array<array<array<nint>>>>>>>>>[]{}.array(1, () => new(1, () => new(1, () => new(1, () => new(1, () => new(1, () => new(1, () => new(1, () => new(1, () => new(1))))))))))),
             "testTracebackArgs4(0x0, {{{{{...}}}}})"u8
         ), // a lot of zero-sized type
 
@@ -393,52 +394,52 @@ public static void TestTracebackArgs(ж<testing.T> Ꮡt) {
  // no ... for 10 args
 
         new(
-            () => testTracebackArgs6a(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+            [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs6a(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
             "testTracebackArgs6a(0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa)"u8
         ), // has ... for 11 args
 
         new(
-            () => testTracebackArgs6b(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
+            [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs6b(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
             "testTracebackArgs6b(0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, ...)"u8
         ), // no ... for aggregates with 10 words
 
         new(
-            () => testTracebackArgs7a(new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.array()),
+            [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs7a(new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.array()),
             "testTracebackArgs7a({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa})"u8
         ), // has ... for aggregates with 11 words
 
         new(
-            () => testTracebackArgs7b(new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}.array()),
+            [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs7b(new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}.array()),
             "testTracebackArgs7b({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, ...})"u8
         ), // no ... for aggregates, but with more args
 
         new(
-            () => testTracebackArgs7c(new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.array(), 11),
+            [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs7c(new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.array(), 11),
             "testTracebackArgs7c({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa}, ...)"u8
         ), // has ... for aggregates and also for more args
 
         new(
-            () => testTracebackArgs7d(new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}.array(), 12),
+            [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs7d(new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}.array(), 12),
             "testTracebackArgs7d({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, ...}, ...)"u8
         ), // nested aggregates, no ...
 
         new(
-            () => testTracebackArgs8a(new testArgsType8a(1, 2, 3, 4, 5, 6, 7, 8, new nint[]{9, 10}.array())),
+            [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs8a(new testArgsType8a(1, 2, 3, 4, 5, 6, 7, 8, new nint[]{9, 10}.array())),
             "testTracebackArgs8a({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, {0x9, 0xa}})"u8
         ), // nested aggregates, ... in inner but not outer
 
         new(
-            () => testTracebackArgs8b(new testArgsType8b(1, 2, 3, 4, 5, 6, 7, 8, new nint[]{9, 10, 11}.array())),
+            [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs8b(new testArgsType8b(1, 2, 3, 4, 5, 6, 7, 8, new nint[]{9, 10, 11}.array())),
             "testTracebackArgs8b({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, {0x9, 0xa, ...}})"u8
         ), // nested aggregates, ... in outer but not inner
 
         new(
-            () => testTracebackArgs8c(new testArgsType8c(1, 2, 3, 4, 5, 6, 7, 8, new nint[]{9, 10}.array(), 11)),
+            [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs8c(new testArgsType8c(1, 2, 3, 4, 5, 6, 7, 8, new nint[]{9, 10}.array(), 11)),
             "testTracebackArgs8c({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, {0x9, 0xa}, ...})"u8
         ), // nested aggregates, ... in both inner and outer
 
         new(
-            () => testTracebackArgs8d(new testArgsType8d(1, 2, 3, 4, 5, 6, 7, 8, new nint[]{9, 10, 11}.array(), 12)),
+            [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs8d(new testArgsType8d(1, 2, 3, 4, 5, 6, 7, 8, new nint[]{9, 10, 11}.array(), 12)),
             "testTracebackArgs8d({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, {0x9, 0xa, ...}, ...})"u8
         ), // Register argument liveness.
  // 1, 3 are used and live, 2, 4 are dead (in register ABI).
@@ -500,7 +501,7 @@ public static void TestTracebackArgs(ж<testing.T> Ꮡt) {
     }.slice();
     foreach (var (_, test) in tests) {
         nint n = test.fn();
-        var got = testTracebackArgsBuf[..(int)(n)];
+        var got = testTracebackArgsBuf.slice(0, n);
         if (!bytes.Contains(got, slice<byte>(test.expect))) {
             Ꮡt.Errorf("traceback does not contain expected string: want %q, got\n%s"u8, test.expect, got);
         }
@@ -508,7 +509,7 @@ public static void TestTracebackArgs(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-internal static nint testTracebackArgs1(nint a, nint b, nint c, nint d, nint e) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs1(nint a, nint b, nint c, nint d, nint e) {
     nint n = Δruntime.Stack(testTracebackArgsBuf[..], false);
     if (a < 0) {
         // use in-reg args to keep them alive
@@ -518,7 +519,7 @@ internal static nint testTracebackArgs1(nint a, nint b, nint c, nint d, nint e) 
 }
 
 //go:noinline
-internal static nint testTracebackArgs2(bool a, TestTracebackArgs_b b, [GoArrayDims(0)] array<nint> _, [GoArrayDims(3)] array<byte> d) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs2(bool a, TestTracebackArgs_b b, [GoArrayDims(0)] array<nint> _, [GoArrayDims(3)] array<byte> d) {
     b = b.ΔClone();
     d = d.Clone();
 
@@ -532,7 +533,7 @@ internal static nint testTracebackArgs2(bool a, TestTracebackArgs_b b, [GoArrayD
 
 //go:noinline
 //go:registerparams
-internal static nint testTracebackArgs3([GoArrayDims(3)] array<byte> x, nint a, nint b, nint c, [GoArrayDims(3)] array<byte> y) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs3([GoArrayDims(3)] array<byte> x, nint a, nint b, nint c, [GoArrayDims(3)] array<byte> y) {
     x = x.Clone();
     y = y.Clone();
 
@@ -545,7 +546,7 @@ internal static nint testTracebackArgs3([GoArrayDims(3)] array<byte> x, nint a, 
 }
 
 //go:noinline
-internal static nint testTracebackArgs4(bool a, [GoArrayDims(1, 1, 1, 1, 1, 1, 1, 1, 1, 1)] array<array<array<array<array<array<array<array<array<array<nint>>>>>>>>>> x) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs4(bool a, [GoArrayDims(1, 1, 1, 1, 1, 1, 1, 1, 1, 1)] array<array<array<array<array<array<array<array<array<array<nint>>>>>>>>>> x) {
     x = x.Clone();
 
     nint n = Δruntime.Stack(testTracebackArgsBuf[..], false);
@@ -556,7 +557,7 @@ internal static nint testTracebackArgs4(bool a, [GoArrayDims(1, 1, 1, 1, 1, 1, 1
 }
 
 //go:noinline
-internal static nint testTracebackArgs5(bool a, TestTracebackArgs_x x, [GoArrayDims(0)] array<nint> _Δp2, [GoArrayDims(0)] array<nint> _Δp3, [GoArrayDims(0)] array<nint> _Δp4, [GoArrayDims(0)] array<nint> _Δp5, [GoArrayDims(0)] array<nint> _Δp6, [GoArrayDims(0)] array<nint> _Δp7, [GoArrayDims(0)] array<nint> _Δp8, [GoArrayDims(0)] array<nint> _Δp9, [GoArrayDims(0)] array<nint> _Δp10, [GoArrayDims(0)] array<nint> _Δp11, [GoArrayDims(0)] array<nint> _Δp12, [GoArrayDims(0)] array<nint> _Δp13) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs5(bool a, TestTracebackArgs_x x, [GoArrayDims(0)] array<nint> _Δp2, [GoArrayDims(0)] array<nint> _Δp3, [GoArrayDims(0)] array<nint> _Δp4, [GoArrayDims(0)] array<nint> _Δp5, [GoArrayDims(0)] array<nint> _Δp6, [GoArrayDims(0)] array<nint> _Δp7, [GoArrayDims(0)] array<nint> _Δp8, [GoArrayDims(0)] array<nint> _Δp9, [GoArrayDims(0)] array<nint> _Δp10, [GoArrayDims(0)] array<nint> _Δp11, [GoArrayDims(0)] array<nint> _Δp12, [GoArrayDims(0)] array<nint> _Δp13) {
     x = x.ΔClone();
 
     nint n = Δruntime.Stack(testTracebackArgsBuf[..], false);
@@ -567,7 +568,7 @@ internal static nint testTracebackArgs5(bool a, TestTracebackArgs_x x, [GoArrayD
 }
 
 //go:noinline
-internal static nint testTracebackArgs6a(nint a, nint b, nint c, nint d, nint e, nint f, nint g, nint h, nint i, nint j) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs6a(nint a, nint b, nint c, nint d, nint e, nint f, nint g, nint h, nint i, nint j) {
     nint n = Δruntime.Stack(testTracebackArgsBuf[..], false);
     if (a < 0) {
         // use in-reg args to keep them alive
@@ -577,7 +578,7 @@ internal static nint testTracebackArgs6a(nint a, nint b, nint c, nint d, nint e,
 }
 
 //go:noinline
-internal static nint testTracebackArgs6b(nint a, nint b, nint c, nint d, nint e, nint f, nint g, nint h, nint i, nint j, nint k) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs6b(nint a, nint b, nint c, nint d, nint e, nint f, nint g, nint h, nint i, nint j, nint k) {
     nint n = Δruntime.Stack(testTracebackArgsBuf[..], false);
     if (a < 0) {
         // use in-reg args to keep them alive
@@ -587,7 +588,7 @@ internal static nint testTracebackArgs6b(nint a, nint b, nint c, nint d, nint e,
 }
 
 //go:noinline
-internal static nint testTracebackArgs7a([GoArrayDims(10)] array<nint> a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs7a([GoArrayDims(10)] array<nint> a) {
     a = a.Clone();
 
     nint n = Δruntime.Stack(testTracebackArgsBuf[..], false);
@@ -599,7 +600,7 @@ internal static nint testTracebackArgs7a([GoArrayDims(10)] array<nint> a) {
 }
 
 //go:noinline
-internal static nint testTracebackArgs7b([GoArrayDims(11)] array<nint> a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs7b([GoArrayDims(11)] array<nint> a) {
     a = a.Clone();
 
     nint n = Δruntime.Stack(testTracebackArgsBuf[..], false);
@@ -611,7 +612,7 @@ internal static nint testTracebackArgs7b([GoArrayDims(11)] array<nint> a) {
 }
 
 //go:noinline
-internal static nint testTracebackArgs7c([GoArrayDims(10)] array<nint> a, nint b) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs7c([GoArrayDims(10)] array<nint> a, nint b) {
     a = a.Clone();
 
     nint n = Δruntime.Stack(testTracebackArgsBuf[..], false);
@@ -623,7 +624,7 @@ internal static nint testTracebackArgs7c([GoArrayDims(10)] array<nint> a, nint b
 }
 
 //go:noinline
-internal static nint testTracebackArgs7d([GoArrayDims(11)] array<nint> a, nint b) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs7d([GoArrayDims(11)] array<nint> a, nint b) {
     a = a.Clone();
 
     nint n = Δruntime.Stack(testTracebackArgsBuf[..], false);
@@ -657,7 +658,7 @@ internal static nint testTracebackArgs7d([GoArrayDims(11)] array<nint> a, nint b
 }
 
 //go:noinline
-internal static nint testTracebackArgs8a(testArgsType8a a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs8a(testArgsType8a a) {
     a = a.ΔClone();
 
     nint n = Δruntime.Stack(testTracebackArgsBuf[..], false);
@@ -669,7 +670,7 @@ internal static nint testTracebackArgs8a(testArgsType8a a) {
 }
 
 //go:noinline
-internal static nint testTracebackArgs8b(testArgsType8b a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs8b(testArgsType8b a) {
     a = a.ΔClone();
 
     nint n = Δruntime.Stack(testTracebackArgsBuf[..], false);
@@ -681,7 +682,7 @@ internal static nint testTracebackArgs8b(testArgsType8b a) {
 }
 
 //go:noinline
-internal static nint testTracebackArgs8c(testArgsType8c a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs8c(testArgsType8c a) {
     a = a.ΔClone();
 
     nint n = Δruntime.Stack(testTracebackArgsBuf[..], false);
@@ -693,7 +694,7 @@ internal static nint testTracebackArgs8c(testArgsType8c a) {
 }
 
 //go:noinline
-internal static nint testTracebackArgs8d(testArgsType8d a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs8d(testArgsType8d a) {
     a = a.ΔClone();
 
     nint n = Δruntime.Stack(testTracebackArgsBuf[..], false);
@@ -708,7 +709,7 @@ internal static nint testTracebackArgs8d(testArgsType8d a) {
 //
 //go:nosplit
 //go:noinline
-internal static nint testTracebackArgs9(int64 a, int32 b, int16 c, int8 d, [GoArrayDims(2)] array<nint> x, nint yʗp) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs9(int64 a, int32 b, int16 c, int8 d, [GoArrayDims(2)] array<nint> x, nint yʗp) {
     x = x.Clone();
 
     ref var y = ref heap(yʗp, out var Ꮡy);
@@ -727,7 +728,7 @@ internal static nint testTracebackArgs9(int64 a, int32 b, int16 c, int8 d, [GoAr
 //
 //go:nosplit
 //go:noinline
-internal static nint testTracebackArgs10(int32 a, int32 b, int32 c, int32 d, int32 e) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs10(int32 a, int32 b, int32 c, int32 d, int32 e) {
     // no use of any args
     return Δruntime.Stack(testTracebackArgsBuf[..], false);
 }
@@ -738,7 +739,7 @@ internal static nint testTracebackArgs10(int32 a, int32 b, int32 c, int32 d, int
 //go:norace
 //go:nosplit
 //go:noinline
-internal static nint testTracebackArgs11a(int32 a, int32 b, int32 c) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs11a(int32 a, int32 b, int32 c) {
     if (a < 0) {
         println(a, b, c); // spill in a conditional, may not execute
     }
@@ -754,7 +755,7 @@ internal static nint testTracebackArgs11a(int32 a, int32 b, int32 c) {
 //go:norace
 //go:nosplit
 //go:noinline
-internal static nint testTracebackArgs11b(int32 a, int32 b, int32 c, int32 d) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgs11b(int32 a, int32 b, int32 c, int32 d) {
     int32 x = default!;
     if (a < 0){
         builtin.print(); // spill b in a conditional
@@ -776,7 +777,7 @@ internal static nint testTracebackArgs11b(int32 a, int32 b, int32 c, int32 d) {
 //go:norace
 //go:nosplit
 //go:noinline
-internal static nint testTracebackArgsSlice(slice<nint> a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackArgsSlice(slice<nint> a) {
     nint n = Δruntime.Stack(testTracebackArgsBuf[..], false);
     return a[1] + n;
 }
@@ -787,7 +788,7 @@ internal static ref array<nint> testTracebackArgsSliceBackingStore => ref Ꮡtes
 // Poison the arg area with deterministic values.
 //
 //go:noinline
-internal static array<nint> poisonStack() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static array<nint> poisonStack() {
     return new nint[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}.array();
 }
 
@@ -795,7 +796,7 @@ public static void TestTracebackParentChildGoroutines(ж<testing.T> Ꮡt) {
     @string parent = fmt.Sprintf("goroutine %d"u8, runtime_internal_test_package.Goid());
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(1);
-    goǃ(() => {
+    goǃ([MethodImpl(MethodImplOptions.NoInlining)] () => {
         GoFrame ᒐ = default;
         try {
             defer(Ꮡwg.Done, ref ᒐ);
@@ -804,7 +805,7 @@ public static void TestTracebackParentChildGoroutines(ж<testing.T> Ꮡt) {
             // false to runtime.Stack). We expect to see the current
             // goroutine ID, and the parent goroutine ID in a message like
             // "created by ... in goroutine N".
-            @string stack = ((@string)(buf[..(int)(Δruntime.Stack(buf, false))]));
+            @string stack = ((@string)(buf.slice(0, Δruntime.Stack(buf, false))));
             @string child = fmt.Sprintf("goroutine %d"u8, runtime_internal_test_package.Goid());
             if (!strings.Contains(stack, parent) || !strings.Contains(stack, child)) {
                 Ꮡt.Errorf("did not see parent (%s) and child (%s) IDs in stack, got %s"u8, parent, child, stack);
@@ -848,7 +849,7 @@ internal static slice<ж<traceback>> parseTraceback(ж<testing.T> Ꮡt, @string 
     off = 0;
     nint lineNo = 0;
     void fatal(@string f, params ꓸꓸꓸany argsʗp) {
-        var args = argsʗp.slice();
+        var args = argsʗp.sslice();
         @string msg = fmt.Sprintf(f, args.ꓸꓸꓸ);
         Ꮡt.Fatalf("%s (line %d):\n%s"u8, msg, lineNo, tb);
     }
@@ -894,7 +895,7 @@ internal static slice<ж<traceback>> parseTraceback(ж<testing.T> Ꮡt, @string 
             break;
         }
         case {} when strings.HasSuffix(line, ")"u8): {
-            line = line[..(int)(len(line) - 1)]; // Trim trailing ")"
+            line = line.slice(0, len(line) - 1); // Trim trailing ")"
             var (funcName, args, found) = strings.Cut(line, "("u8);
             if (!found) {
                 fatal(missingˢ);
@@ -928,11 +929,11 @@ internal static ж<traceback> parseTraceback1(ж<testing.T> Ꮡt, @string tb) {
 }
 
 //go:noinline
-internal static nint testTracebackGenericFn<T>(slice<byte> buf) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackGenericFn<T>(slice<byte> buf) {
     return Δruntime.Stack(buf[..], false);
 }
 
-internal static nint testTracebackGenericFnInlined<T>(slice<byte> buf) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint testTracebackGenericFnInlined<T>(slice<byte> buf) {
     return Δruntime.Stack(buf[..], false);
 }
 
@@ -941,11 +942,11 @@ internal static nint testTracebackGenericFnInlined<T>(slice<byte> buf) {
 }
 
 //go:noinline
-internal static nint M<P>(this testTracebackGenericTyp<P> t, slice<byte> buf) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint M<P>(this testTracebackGenericTyp<P> t, slice<byte> buf) {
     return Δruntime.Stack(buf[..], false);
 }
 
-internal static nint Inlined<P>(this testTracebackGenericTyp<P> t, slice<byte> buf) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint Inlined<P>(this testTracebackGenericTyp<P> t, slice<byte> buf) {
     return Δruntime.Stack(buf[..], false);
 }
 
@@ -987,7 +988,7 @@ public static void TestTracebackGeneric(ж<testing.T> Ꮡt) {
     array<byte> buf = new(1000);
     foreach (var (_, test) in tests) {
         nint n = test.fn(buf[..]);
-        var got = buf[..(int)(n)];
+        var got = buf.slice(0, n);
         if (!bytes.Contains(got, slice<byte>(test.expect))) {
             Ꮡt.Errorf("traceback does not contain expected string: want %q, got\n%s"u8, test.expect, got);
         }

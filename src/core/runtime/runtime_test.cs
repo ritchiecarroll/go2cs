@@ -19,6 +19,7 @@ using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using System.Runtime.InteropServices;
 using global::go.math;
 using global::go.runtime;
 using static global::go.runtime_internal_test_package;
@@ -331,9 +332,9 @@ public static void TestEqString(ж<testing.T> Ꮡt) {
     internal array<byte> z = new(0);
 }
 
-[GoType("dyn")] internal partial struct TestTrailingZero_T2 {
-    internal int64 n;
-    internal EmptyStruct z;
+[GoType("dyn")] [StructLayout(LayoutKind.Explicit, Size = 16)] internal partial struct TestTrailingZero_T2 {
+    [FieldOffset(0)] internal int64 n;
+    [FieldOffset(8)] internal readonly EmptyStruct z;
 }
 
 [GoType("dyn")] internal partial struct TestTrailingZero_T3 {
@@ -342,11 +343,11 @@ public static void TestEqString(ж<testing.T> Ꮡt) {
 }
 
 // make sure padding can double for both zerosize and alignment
-[GoType("dyn")] internal partial struct TestTrailingZero_T4 {
-    internal int32 a;
-    internal int16 b;
-    internal int8 c;
-    internal EmptyStruct z;
+[GoType("dyn")] [StructLayout(LayoutKind.Explicit, Size = 8)] internal partial struct TestTrailingZero_T4 {
+    [FieldOffset(0)] internal int32 a;
+    [FieldOffset(4)] internal int16 b;
+    [FieldOffset(6)] internal int8 c;
+    [FieldOffset(7)] internal readonly EmptyStruct z;
 }
 
 // make sure we don't pad a zero-sized thing
@@ -605,8 +606,8 @@ public static void TestTimediv(ж<testing.T> Ꮡt) {
         Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
             // Double check that the inputs make sense using
             // standard 64-bit division.
-            var ret64 = tcʗ1.num / (int64)tcʗ1.div;
-            var rem64 = tcʗ1.num % (int64)tcʗ1.div;
+            var ret64 = quo(tcʗ1.num, (int64)tcʗ1.div);
+            var rem64 = builtin.rem(tcʗ1.num, (int64)tcʗ1.div);
             if (ret64 != (int64)(int32)ret64) {
                 // Simulate timediv overflow value.
                 ret64 = 2147483648L - 1;
@@ -773,7 +774,7 @@ public static void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
         h = h.Clone();
         nint sum = 0;
         foreach (var (i, v) in h.ΔRangeSnapshot()) {
-            var bound = ((uint64)(((uint64)1 << (int)(63)))).Rsh((uint64)(i));
+            var bound = ((uint64)(((uint64)1 << (int)(63)))).Rsh((int64)(i));
             sum += (nint)bound * v;
         }
         // Imagine that the longest streak / starvation events were instead half
@@ -782,7 +783,7 @@ public static void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
         // percentile target.
         nint part = 0;
         foreach (var (i, v) in h.ΔRangeSnapshot()) {
-            var bound = ((uint64)(((uint64)1 << (int)(63)))).Rsh((uint64)(i));
+            var bound = ((uint64)(((uint64)1 << (int)(63)))).Rsh((int64)(i));
             part += (nint)bound * v;
             // have we trimmed off enough at the head to dip below the percentile goal
             if ((float64)(sum - part) < (float64)sum * p) {

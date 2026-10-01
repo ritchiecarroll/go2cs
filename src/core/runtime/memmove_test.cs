@@ -42,7 +42,7 @@ public static void TestMemmove(ж<testing.T> Ꮡt) {
             // offset in src
             for (nint y = 0; y <= size - n; y++) {
                 // offset in dst
-                copy(dst[(int)(y)..(int)(y + n)], src[(int)(x)..(int)(x + n)]);
+                copy(dst.slice(y, y + n), src.slice(x, x + n));
                 for (nint i = 0; i < y; i++) {
                     if (dst[i] != (byte)((nint)(i & 127))) {
                         Ꮡt.Fatalf("prefix dst[%d] = %d"u8, i, dst[i]);
@@ -82,7 +82,7 @@ public static void TestMemmoveAlias(ж<testing.T> Ꮡt) {
             // src offset
             for (nint y = 0; y <= size - n; y++) {
                 // dst offset
-                copy(buf[(int)(y)..(int)(y + n)], buf[(int)(x)..(int)(x + n)]);
+                copy(buf.slice(y, y + n), buf.slice(x, x + n));
                 for (nint i = 0; i < y; i++) {
                     if (buf[i] != (byte)i) {
                         Ꮡt.Fatalf("prefix buf[%d] = %d"u8, i, buf[i]);
@@ -142,8 +142,8 @@ internal static void testSize(ж<testing.T> Ꮡt, nint size) {
             // offset in src
             for (nint y = 0; y <= size - n; y = y * 9 + 1) {
                 // offset in dst
-                copy(dst[(int)(y)..(int)(y + n)], src[(int)(x)..(int)(x + n)]);
-                copyref(@ref[(int)(y)..(int)(y + n)], src[(int)(x)..(int)(x + n)]);
+                copy(dst.slice(y, y + n), src.slice(x, x + n));
+                copyref(@ref.slice(y, y + n), src.slice(x, x + n));
                 nint p = cmpb(dst, @ref);
                 if (p >= 0) {
                     Ꮡt.Fatalf("Copy failed, copying from src[%d:%d] to dst[%d:%d].\nOffset %d is different, %v != %v"u8, x, x + n, y, y + n, p, dst[p], @ref[p]);
@@ -166,11 +166,11 @@ internal static void testOverlap(ж<testing.T> Ꮡt, nint size) {
                 // Reset input
                 copyref(test, src);
                 copyref(@ref, src);
-                copy(test[(int)(y)..(int)(y + n)], test[(int)(x)..(int)(x + n)]);
+                copy(test.slice(y, y + n), test.slice(x, x + n));
                 if (y <= x){
-                    copyref(@ref[(int)(y)..(int)(y + n)], @ref[(int)(x)..(int)(x + n)]);
+                    copyref(@ref.slice(y, y + n), @ref.slice(x, x + n));
                 } else {
-                    copybw(@ref[(int)(y)..(int)(y + n)], @ref[(int)(x)..(int)(x + n)]);
+                    copybw(@ref.slice(y, y + n), @ref.slice(x, x + n));
                 }
                 nint p = cmpb(test, @ref);
                 if (p >= 0) {
@@ -200,8 +200,8 @@ internal static void copybw(slice<byte> dst, slice<byte> src) {
 
 // Returns offset of difference
 internal static nint matchLen(slice<byte> a, slice<byte> b, nint max) {
-    a = a[..(int)(max)];
-    b = b[..(int)(max)];
+    a = a.slice(0, max);
+    b = b.slice(0, max);
     foreach (var (i, av) in a) {
         if (b[i] != av) {
             return i;
@@ -243,9 +243,9 @@ public static void TestMemmoveAtomicity(ж<testing.T> Ꮡt) {
                 // Use overlapping src and dst to force forward/backward copy.
                 array<ж<nint>> s = new(100);
                 ref var src = ref heap<slice<ж<nint>>>(out var Ꮡsrc);
-                Ꮡsrc.ValueSlot = s[(int)(nΔ1 - 1)..(int)(2 * nΔ1 - 1)];
+                Ꮡsrc.ValueSlot = s.slice(nΔ1 - 1, 2 * nΔ1 - 1);
                 ref var dst = ref heap<slice<ж<nint>>>(out var Ꮡdst);
-                Ꮡdst.ValueSlot = s[..(int)(nΔ1)];
+                Ꮡdst.ValueSlot = s.slice(0, nΔ1);
                 if (backward) {
                     (Ꮡsrc.ValueSlot, Ꮡdst.ValueSlot) = (Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
                 }
@@ -312,7 +312,7 @@ public static void BenchmarkMemmoveOverlap(ж<testing.B> Ꮡb) {
     benchmarkSizes(Ꮡb, bufSizesOverlap, (ж<testing.B> bΔ1, nint n) => {
         var x = new slice<byte>(n + 16);
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            copy(x[16..(int)(n + 16)], x[..(int)(n)]);
+            copy(x.slice(16, n + 16), x.slice(0, n));
         }
     });
 }
@@ -331,7 +331,7 @@ public static void BenchmarkMemmoveUnalignedDstOverlap(ж<testing.B> Ꮡb) {
     benchmarkSizes(Ꮡb, bufSizesOverlap, (ж<testing.B> bΔ1, nint n) => {
         var x = new slice<byte>(n + 16);
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            copy(x[16..(int)(n + 16)], x[1..(int)(n + 1)]);
+            copy(x.slice(16, n + 16), x.slice(1, n + 1));
         }
     });
 }
@@ -349,15 +349,15 @@ public static void BenchmarkMemmoveUnalignedSrc(ж<testing.B> Ꮡb) {
 public static void BenchmarkMemmoveUnalignedSrcDst(ж<testing.B> Ꮡb) {
     foreach (var (_, n) in new nint[]{16, 64, 256, 4096, 65536}.slice()) {
         var buf = new slice<byte>((n + 8) * 2);
-        var x = buf[..(int)(len(buf) / 2)];
-        var y = buf[(int)(len(buf) / 2)..];
+        var x = buf.slice(0, len(buf) / 2);
+        var y = buf.slice(len(buf) / 2);
         foreach (var (_, off) in new nint[]{0, 1, 4, 7}.slice()) {
             var xʗ1 = x;
             var yʗ1 = y;
             Ꮡb.Run(fmt.Sprint((@string)"f_"u8, n, off), (ж<testing.B> bΔ1) => {
                 bΔ1.SetBytes((int64)n);
                 for (nint i = 0; i < (~bΔ1).N; i++) {
-                    copy(xʗ1[(int)(off)..(int)(n + off)], yʗ1[(int)(off)..(int)(n + off)]);
+                    copy(xʗ1.slice(off, n + off), yʗ1.slice(off, n + off));
                 }
             });
             var xʗ2 = x;
@@ -365,7 +365,7 @@ public static void BenchmarkMemmoveUnalignedSrcDst(ж<testing.B> Ꮡb) {
             Ꮡb.Run(fmt.Sprint((@string)"b_"u8, n, off), (ж<testing.B> bΔ2) => {
                 bΔ2.SetBytes((int64)n);
                 for (nint i = 0; i < (~bΔ2).N; i++) {
-                    copy(yʗ2[(int)(off)..(int)(n + off)], xʗ2[(int)(off)..(int)(n + off)]);
+                    copy(yʗ2.slice(off, n + off), xʗ2.slice(off, n + off));
                 }
             });
         }
@@ -376,7 +376,7 @@ public static void BenchmarkMemmoveUnalignedSrcOverlap(ж<testing.B> Ꮡb) {
     benchmarkSizes(Ꮡb, bufSizesOverlap, (ж<testing.B> bΔ1, nint n) => {
         var x = new slice<byte>(n + 1);
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            copy(x[1..(int)(n + 1)], x[..(int)(n)]);
+            copy(x.slice(1, n + 1), x.slice(0, n));
         }
     });
 }
@@ -393,7 +393,7 @@ public static void TestMemclr(ж<testing.T> Ꮡt) {
     for (nint n = 0; n < size; n++) {
         for (nint x = 0; x <= size - n; x++) {
             // offset in mem
-            runtime_internal_test_package.MemclrBytes(mem[(int)(x)..(int)(x + n)]);
+            runtime_internal_test_package.MemclrBytes(mem.slice(x, x + n));
             for (nint i = 0; i < x; i++) {
                 if (mem[i] != 0xee) {
                     Ꮡt.Fatalf("overwrite prefix mem[%d] = %d"u8, i, mem[i]);
@@ -445,7 +445,7 @@ public static void BenchmarkMemclrUnaligned(ж<testing.B> Ꮡb) {
             Ꮡb.Run(fmt.Sprint(off, n), (ж<testing.B> bΔ1) => {
                 bΔ1.SetBytes((int64)n);
                 for (nint i = 0; i < (~bΔ1).N; i++) {
-                    runtime_internal_test_package.MemclrBytes(xʗ1[(int)(off)..]);
+                    runtime_internal_test_package.MemclrBytes(xʗ1.slice(off));
                 }
             });
         }
@@ -457,7 +457,7 @@ public static void BenchmarkMemclrUnaligned(ж<testing.B> Ꮡb) {
             Ꮡb.Run(fmt.Sprint(off, m, (@string)"M"u8), (ж<testing.B> bΔ2) => {
                 bΔ2.SetBytes((int64)((m << (int)(20))));
                 for (nint i = 0; i < (~bΔ2).N; i++) {
-                    runtime_internal_test_package.MemclrBytes(xʗ2[(int)(off)..]);
+                    runtime_internal_test_package.MemclrBytes(xʗ2.slice(off));
                 }
             });
         }
@@ -528,7 +528,7 @@ public static void BenchmarkMemclrRange(ж<testing.B> Ꮡb) {
             bΔ1.SetBytes((int64)total);
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 foreach (var (_, clrLen) in tʗ1.data) {
-                    runtime_internal_test_package.MemclrBytes(bufferʗ1[..(int)(clrLen)]);
+                    runtime_internal_test_package.MemclrBytes(bufferʗ1.slice(0, clrLen));
                 }
             }
         });
@@ -1021,7 +1021,7 @@ public static void BenchmarkIssue18740(ж<testing.B> Ꮡb) {
         Ꮡb.Run(bm.name, (ж<testing.B> bΔ1) => {
             for (nint j = 0; j < (~bΔ1).N; j++) {
                 for (nint i = 0; i < 4096; i += bmʗ1.nbyte) {
-                    copy(bufʗ1[..], gʗ1[(int)(i)..]);
+                    copy(bufʗ1[..], gʗ1.slice(i));
                     sink += bmʗ1.f(bufʗ1[..]);
                 }
             }

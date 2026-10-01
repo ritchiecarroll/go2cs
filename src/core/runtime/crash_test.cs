@@ -23,6 +23,7 @@ using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using System.Runtime.CompilerServices;
 using fs = global::go.io.fs_package;
 using global::go.os;
 using global::go.runtime;
@@ -94,7 +95,7 @@ internal static ref testprogᴛ1 testprog => ref Ꮡtestprog.Value;
 internal static readonly object quickˢ = (@string)"-quick"u8;
 
 internal static @string runTestProg(ж<testing.T> Ꮡt, @string binary, @string name, params ꓸꓸꓸstring envʗp) {
-    var env = envʗp.slice();
+    var env = envʗp.sslice();
 
     if (flagQuick.Value) {
         Ꮡt.Skip(quickˢ);
@@ -109,7 +110,7 @@ internal static @string runTestProg(ж<testing.T> Ꮡt, @string binary, @string 
 }
 
 internal static @string runBuiltTestProg(ж<testing.T> Ꮡt, @string exe, @string name, params ꓸꓸꓸstring envʗp) {
-    var env = envʗp.slice();
+    var env = envʗp.sslice();
 
     Ꮡt.Helper();
     if (flagQuick.Value) {
@@ -674,7 +675,7 @@ public static void TestPanicTraceback(ж<testing.T> Ꮡt) {
         if (idx == default!) {
             Ꮡt.Fatalf("expected %q function in traceback:\n%s"u8, fn, output);
         }
-        output = output[(int)(idx[1])..];
+        output = output.slice(idx[1]);
     }
 }
 
@@ -873,14 +874,14 @@ public static void TestConcurrentMapWritesIssue69447(ж<testing.T> Ꮡt) {
 public static void TestPanicInlined(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             var r = recover();
             if (r == default!) {
                 Ꮡt.Fatalf("recover failed"u8);
             }
             var buf = new slice<byte>(2048);
             nint n = Δruntime.Stack(buf, false);
-            buf = buf[..(int)(n)];
+            buf = buf.slice(0, n);
             if (!bytes.Contains(buf, slice<byte>("(*point).negate("u8))) {
                 Ꮡt.Fatalf("expecting stack trace to contain call to (*point).negate()"u8);
             }

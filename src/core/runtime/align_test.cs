@@ -64,7 +64,7 @@ public static void TestAtomicAlignment(ж<testing.T> Ꮡt) {
     }
     foreach (var (i, p) in runtime_internal_test_package.AtomicVariables) {
         if ((uintptr)p % 8 != 0) {
-            Ꮡt.Errorf("variable alignment of %s failed: address is %x"u8, varDesc[i], p);
+            Ꮡt.Errorf("variable alignment of %s failed: address is %x"u8, varDesc[i], @unsafe.Pointer.OrTypedNil(p));
         }
     }
     // The code above is the actual test. The code below attempts to check

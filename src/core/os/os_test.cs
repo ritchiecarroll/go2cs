@@ -723,7 +723,7 @@ internal static slice<@string> smallReaddirnames(ж<Δos.File> Ꮡfile, nint len
         names[count] = d[0];
         count++;
     }
-    return names[0..(int)(count)];
+    return names.slice(0, count);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1989,6 +1989,9 @@ public static void TestProgWideChdir(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dataᶜ = "hello, world\n"u8;
+
 [GoType("dyn")] internal partial struct TestSeek_test {
     internal int64 @in;
     internal nint whence;
@@ -1998,7 +2001,7 @@ public static void TestProgWideChdir(ж<Δtesting.T> Ꮡt) {
 public static void TestSeek(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
     var f = newFile(Ꮡt);
-    @string data = "hello, world\n"u8;
+    @string data = dataᶜ;
     Δio.WriteString(new Δos.FileжWriter(f), data);
 // Issue 21681, Windows 4G-1, etc:
     slice<TestSeek_test> tests = new TestSeek_test[]{
@@ -2216,7 +2219,7 @@ internal static @string runBinHostname(ж<Δtesting.T> Ꮡt) {
         @string output = b.String();
         {
             nint n = len(output); if (n > 0 && output[n - 1] == (rune)'\n') {
-                output = output[0..(int)(n - 1)];
+                output = output.slice(0, n - 1);
             }
         }
         if (output == ""u8) {
@@ -2283,10 +2286,13 @@ public static void TestHostname(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object worldˢ = (@string)"world"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dataᶜ1 = "hello, world\n"u8;
+
 public static void TestReadAt(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
     var f = newFile(Ꮡt);
-    @string data = "hello, world\n"u8;
+    @string data = dataᶜ1;
     Δio.WriteString(new Δos.FileжWriter(f), data);
     var b = new slice<byte>(5);
     var (n, err) = f.ReadAt(b, 7);
@@ -2301,6 +2307,9 @@ public static void TestReadAt(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string helloˢ = "hello"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dataᶜ2 = "hello, world\n"u8;
+
 // Verify that ReadAt doesn't affect seek offset.
 // In the Plan 9 kernel, there used to be a bug in the implementation of
 // the pread syscall, where the channel offset was erroneously updated after
@@ -2308,7 +2317,7 @@ internal static readonly @string helloˢ = "hello"u8;
 public static void TestReadAtOffset(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
     var f = newFile(Ꮡt);
-    @string data = "hello, world\n"u8;
+    @string data = dataᶜ2;
     Δio.WriteString(new Δos.FileжWriter(f), data);
     f.Seek(0, 0);
     var b = new slice<byte>(5);
@@ -2328,16 +2337,22 @@ public static void TestReadAtOffset(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dataᶜ3 = "hello, world\n"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantsubᶜ = "negative offset"u8;
+
 // Verify that ReadAt doesn't allow negative offset.
 public static void TestReadAtNegativeOffset(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
     var f = newFile(Ꮡt);
-    @string data = "hello, world\n"u8;
+    @string data = dataᶜ3;
     Δio.WriteString(new Δos.FileжWriter(f), data);
     f.Seek(0, 0);
     var b = new slice<byte>(5);
     var (n, err) = f.ReadAt(b, -10);
-    @string wantsub = "negative offset"u8;
+    @string wantsub = wantsubᶜ;
     if (!strings.Contains(fmt.Sprint(err), wantsub) || n != 0) {
         Ꮡt.Errorf("ReadAt(-10) = %v, %v; want 0, ...%q..."u8, n, err, wantsub);
     }
@@ -2346,10 +2361,13 @@ public static void TestReadAtNegativeOffset(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object helloWorldˢ = (@string)"hello, WORLD\n"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dataᶜ4 = "hello, world\n"u8;
+
 public static void TestWriteAt(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
     var f = newFile(Ꮡt);
-    @string data = "hello, world\n"u8;
+    @string data = dataᶜ4;
     Δio.WriteString(new Δos.FileжWriter(f), data);
     var (n, err) = f.WriteAt(slice<byte>("WORLD"u8), 7);
     if (err != default! || n != 5) {
@@ -2364,12 +2382,15 @@ public static void TestWriteAt(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantsubᶜ1 = "negative offset"u8;
+
 // Verify that WriteAt doesn't allow negative offset.
 public static void TestWriteAtNegativeOffset(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
     var f = newFile(Ꮡt);
     var (n, err) = f.WriteAt(slice<byte>("WORLD"u8), -10);
-    @string wantsub = "negative offset"u8;
+    @string wantsub = wantsubᶜ1;
     if (!strings.Contains(fmt.Sprint(err), wantsub) || n != 0) {
         Ꮡt.Errorf("WriteAt(-10) = %v, %v; want 0, ...%q..."u8, n, err, wantsub);
     }
@@ -2431,9 +2452,12 @@ internal static readonly @string newAppendˢ2 = "new&append"u8;
 internal static readonly @string oldˢ = "old"u8;
 internal static readonly object oldAppendˢ = (@string)"old&append"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string fᶜ = "append.txt"u8;
+
 public static void TestAppend(ж<Δtesting.T> Ꮡt) {
     testMaybeRooted(Ꮡt, (ж<Δtesting.T> tΔ1, ж<Δos.Root> r) => {
-        @string f = "append.txt"u8;
+        @string f = fᶜ;
         @string s = writeFile(tΔ1, r, f, (nint)((nint)(nint)(O_CREATE | O_TRUNC) | O_RDWR), newˢ);
         if (s != "new"u8) {
             tΔ1.Fatalf("writeFile: have %q want %q"u8, s, newˢ);
@@ -2473,6 +2497,9 @@ internal static readonly object skippingTestWhenRunningˢ = (@string)"skipping t
     internal fs.FileMode mode;
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string filenameᶜ = "f"u8;
+
 // TestFilePermissions tests setting Unix permission bits on file creation.
 public static void TestFilePermissions(ж<Δtesting.T> Ꮡt) {
     if (Getuid() == 0) {
@@ -2500,7 +2527,7 @@ public static void TestFilePermissions(ж<Δtesting.T> Ꮡt) {
 
             var testʗ2 = testʗ1;
             testMaybeRooted(tΔ1, (ж<Δtesting.T> tΔ2, ж<Δos.Root> r) => {
-                @string filename = "f"u8;
+                @string filename = filenameᶜ;
                 ж<Δos.File> f = default!;
                 error err = default!;
                 if (r == nil){
@@ -2554,10 +2581,13 @@ public static void TestFilePermissions(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string doesNotExistˢ = "does_not_exist"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string linkᶜ = "link"u8;
+
 public static void TestOpenFileCreateExclDanglingSymlink(ж<Δtesting.T> Ꮡt) {
     testenv.MustHaveSymlink(new os_test_package.testing_TжTB(Ꮡt));
     testMaybeRooted(Ꮡt, (ж<Δtesting.T> tΔ1, ж<Δos.Root> r) => {
-        @string link = "link"u8;
+        @string link = linkᶜ;
         {
             var errΔ1 = Symlink(doesNotExistˢ, link); if (errΔ1 != default!) {
                 tΔ1.Fatal(errΔ1);
@@ -2589,6 +2619,9 @@ public static void TestOpenFileCreateExclDanglingSymlink(ж<Δtesting.T> Ꮡt) {
     internal nint flag;
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string filenameᶜ1 = "f"u8;
+
 // TestFileRDWRFlags tests the O_RDONLY, O_WRONLY, and O_RDWR flags.
 public static void TestFileRDWRFlags(ж<Δtesting.T> Ꮡt) {
     foreach (var (_, vᴛ1) in new TestFileRDWRFlags_type[]{
@@ -2605,7 +2638,7 @@ public static void TestFileRDWRFlags(ж<Δtesting.T> Ꮡt) {
             testMaybeRooted(tΔ1, (ж<Δtesting.T> tΔ2, ж<Δos.Root> r) => {
                 GoFrame ᒐ = default;
                 try {
-                    @string filename = "f"u8;
+                    @string filename = filenameᶜ1;
                     var content = slice<byte>("content"u8);
                     {
                         var errΔ1 = WriteFile(filename, content, 438); if (errΔ1 != default!) {
@@ -2932,7 +2965,7 @@ public static void TestStatRelativeSymlink(ж<Δtesting.T> Ꮡt) {
         }
         if (Δruntime.GOOS == "windows"u8) {
             Remove(link);
-            err = Symlink(target[(int)(len(filepath.VolumeName(target)))..], link);
+            err = Symlink(target.slice(len(filepath.VolumeName(target))), link);
             if (err != default!) {
                 Ꮡt.Fatal(err);
             }
@@ -2976,7 +3009,7 @@ public static void TestLongPath(ж<Δtesting.T> Ꮡt) {
     }
     foreach (var (_, sz) in sizes) {
         Ꮡt.Run(fmt.Sprintf("length=%d"u8, sz), (ж<Δtesting.T> tΔ1) => {
-            @string sizedTempDir = tmpdir[..(int)(sz - 1)] + "x"; // Ensure it does not end with a slash.
+            @string sizedTempDir = tmpdir.slice(0, sz - 1) + "x"; // Ensure it does not end with a slash.
             // The various sized runs are for this call to trigger the boundary
             // condition.
             {
@@ -3744,6 +3777,9 @@ internal static readonly object fsOpenOfNonexistentFileˢ = (@string)"fs.Open of
 internal static readonly @string testdataDirfsˢ2 = @"testdata\dirfs"u8;
 internal static readonly @string nulˢ3 = @"NUL"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string nonesuchᶜ = "dir/nonesuch"u8;
+
 internal static void testDirFS(ж<Δtesting.T> Ꮡt, fs.FS fsys) {
     forceMFTUpdateOnWindows(Ꮡt, testdataDirfsˢ);
     {
@@ -3762,7 +3798,7 @@ internal static void testDirFS(ж<Δtesting.T> Ꮡt, fs.FS fsys) {
     }
     // Test that the error message does not contain a backslash,
     // and does not contain the DirFS argument.
-    @string nonesuch = "dir/nonesuch"u8;
+    @string nonesuch = nonesuchᶜ;
     var (_, err) = fsys.Open(nonesuch);
     if (err == default!){
         Ꮡt.Error(fsOpenOfNonexistentFileˢ);
@@ -3793,7 +3829,7 @@ public static void TestDirFSRootDir(ж<Δtesting.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    cwd = cwd[(int)(len(filepath.VolumeName(cwd)))..]; // trim volume prefix (C:) on Windows
+    cwd = cwd.slice(len(filepath.VolumeName(cwd))); // trim volume prefix (C:) on Windows
     cwd = filepath.ToSlash(cwd); // convert \ to /
     cwd = strings.TrimPrefix(cwd, "/"u8); // trim leading /
     // Test that Open can open a path starting at /.

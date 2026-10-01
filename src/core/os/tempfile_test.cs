@@ -61,6 +61,9 @@ public static void TestCreateTempPattern(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string sepᶜ1 = "\\";
+
 [GoType("dyn")] internal partial struct TestCreateTempBadPattern_tests {
     internal @string pattern;
     internal bool wantErr;
@@ -69,7 +72,7 @@ public static void TestCreateTempPattern(ж<Δtesting.T> Ꮡt) {
 public static void TestCreateTempBadPattern(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
     @string tmpDir = Ꮡt.TempDir();
-    @string sep = "\\";
+    @string sep = sepᶜ1;
     var tests = new TestCreateTempBadPattern_tests[]{
         new("ioutil*test"u8, false),
         new("tempfile_test*foo"u8, false),
@@ -189,6 +192,9 @@ public static void TestMkdirTempBadDir(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string sepᶜ2 = "\\";
+
 [GoType("dyn")] internal partial struct TestMkdirTempBadPattern_tests {
     internal @string pattern;
     internal bool wantErr;
@@ -197,7 +203,7 @@ public static void TestMkdirTempBadDir(ж<Δtesting.T> Ꮡt) {
 public static void TestMkdirTempBadPattern(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
     @string tmpDir = Ꮡt.TempDir();
-    @string sep = "\\";
+    @string sep = sepᶜ2;
     var tests = new TestMkdirTempBadPattern_tests[]{
         new("ioutil*test"u8, false),
         new("tempfile_test*foo"u8, false),

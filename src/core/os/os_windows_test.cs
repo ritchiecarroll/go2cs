@@ -188,7 +188,7 @@ internal static void testDirLinks(ж<Δtesting.T> Ꮡt, slice<dirLinkTest> tests
 
 [GoRecv] internal static (uint16 offset, uint16 length) addStringNoNUL(this ref reparseData rd, @string s) {
     var p = syscall.StringToUTF16(s);
-    p = p[..(int)(len(p) - 1)];
+    p = p.slice(0, len(p) - 1);
     return (rd.addUTF16s(p), (uint16)((uint16)len(p) * 2));
 }
 
@@ -251,7 +251,7 @@ internal static error createMountPoint(@string link, ж<reparseData> Ꮡtarget) 
     buf.Value.PrintNameOffset = target.printName.offset;
     buf.Value.PrintNameLength = target.printName.length;
     nint pbuflen = len(target.pathBuf);
-    copy((~array<uint16>.AliasPointer(buf.at(windows.MountPointReparseBuffer.ᏑPathBuffer, 0), 2048)).slice(-1, pbuflen, pbuflen), target.pathBuf);
+    copy((~array<uint16>.AliasPointer(buf.at(windows.MountPointReparseBuffer.ᏑPathBuffer, 0), 2048)).slice(0, pbuflen, pbuflen), target.pathBuf);
     ref var rdb = ref heap(new _REPARSE_DATA_BUFFER(), out var Ꮡrdb);
     rdb.header.ReparseTag = windows.IO_REPARSE_TAG_MOUNT_POINT;
     rdb.header.ReparseDataLength = buflen;
@@ -355,7 +355,7 @@ internal static error createSymbolicLink(@string link, ж<reparseData> Ꮡtarget
         buf.Value.Flags = windows.SYMLINK_FLAG_RELATIVE;
     }
     nint pbuflen = len(target.pathBuf);
-    copy((~array<uint16>.AliasPointer(buf.at(windows.SymbolicLinkReparseBuffer.ᏑPathBuffer, 0), 2048)).slice(-1, pbuflen, pbuflen), target.pathBuf);
+    copy((~array<uint16>.AliasPointer(buf.at(windows.SymbolicLinkReparseBuffer.ᏑPathBuffer, 0), 2048)).slice(0, pbuflen, pbuflen), target.pathBuf);
     ref var rdb = ref heap(new _REPARSE_DATA_BUFFER(), out var Ꮡrdb);
     rdb.header.ReparseTag = syscall.IO_REPARSE_TAG_SYMLINK;
     rdb.header.ReparseDataLength = buflen;
@@ -569,6 +569,12 @@ internal static readonly @string binMkdirˢ = "/bin/mkdir"u8;
 internal static readonly @string binLnˢ = "/bin/ln"u8;
 internal static readonly object skippingWslCreatedˢ = (@string)"skipping: WSL created reparse tag IO_REPARSE_TAG_SYMLINK instead of an IO_REPARSE_TAG_LX_SYMLINK"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string targetᶜ = "target"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string linkᶜ1 = "link"u8;
+
 public static void TestStatLxSymLink(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -578,8 +584,8 @@ public static void TestStatLxSymLink(ж<Δtesting.T> Ꮡt) {
         }
     }
     Ꮡt.Chdir(Ꮡt.TempDir());
-    @string target = "target"u8;
-    @string link = "link"u8;
+    @string target = targetᶜ;
+    @string link = linkᶜ1;
     var (_, err) = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), wslˢ, binMkdirˢ, target).Output();
     if (err != default!) {
         // This normally happens when WSL still doesn't have a distro installed to run on.
@@ -781,8 +787,8 @@ public static void TestReadStdin(ж<Δtesting.T> Ꮡt) {
                             if (n > consoleSize) {
                                 n = consoleSize;
                             }
-                            n = copy((~array<uint16>.AliasPointer(bufΔ1, 10000)).slice(-1, n, n), Ꮡs16.ValueSlot);
-                            Ꮡs16.ValueSlot = Ꮡs16.ValueSlot[(int)(n)..];
+                            n = copy((~array<uint16>.AliasPointer(bufΔ1, 10000)).slice(0, n, n), Ꮡs16.ValueSlot);
+                            Ꮡs16.ValueSlot = Ꮡs16.ValueSlot.slice(n);
                             read.Value = (uint32)n;
                             tΔ1.Logf("read %d -> %d"u8, toread, read.Value);
                             return default!;
@@ -792,7 +798,7 @@ public static void TestReadStdin(ж<Δtesting.T> Ꮡt) {
                         var chunk = new slice<byte>(readSize);
                         while (ᐧ) {
                             var (n, errΔ1) = testConsoleʗ1.Read(chunk);
-                            buf = appendꓸꓸꓸ(buf, chunk[..(int)(n)]);
+                            buf = appendꓸꓸꓸ(buf, chunk.slice(0, n));
                             if (AreEqual(errΔ1, Δio.EOF)){
                                 all = append(all, ((@string)buf));
                                 if (len(all) >= 5) {
@@ -826,9 +832,12 @@ public static void TestReadStdin(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingBecauseCPagefileˢ = (@string)@"skipping because c:\pagefile.sys is not found"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string pathᶜ = @"c:\pagefile.sys"u8;
+
 public static void TestStatPagefile(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
-    @string path = @"c:\pagefile.sys"u8;
+    @string path = pathᶜ;
     var (fi, err) = Δos.Stat(path);
     if (err == default!) {
         if (fi.Name() == ""u8) {
@@ -855,7 +864,7 @@ internal static (slice<@string>, error) syscallCommandLineToArgv(@string cmd) {
         }
         defer(syscall.LocalFree, ((syscallꓸHandle)(uintptr)argv), ref ᒐ);
         slice<@string> args = default!;
-        foreach (var (_, v) in (argv.Value)[..(int)(argc)]) {
+        foreach (var (_, v) in (argv.Value).slice(0, argc)) {
             args = append(args, syscall.UTF16ToString((v.Value)[..]));
         }
         return (args, default!);
@@ -886,15 +895,8 @@ internal static void compareCommandLineToArgvWithSyscall(ж<Δtesting.T> Ꮡt, @
 internal static readonly @string mainGoˢ = "main.go"u8;
 internal static readonly @string mainExeˢ = "main.exe"u8;
 
-public static void TestCmdArgs(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    if (Δtesting.Short()) {
-        Ꮡt.Skipf("in short mode; skipping test that builds a binary"u8);
-    }
-    Ꮡt.Parallel();
-    @string tmpdir = Ꮡt.TempDir();
-    @string prog = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string progᶜ = """
 
 package main
 
@@ -908,6 +910,16 @@ func main() {
 }
 
 """u8;
+
+public static void TestCmdArgs(ж<Δtesting.T> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    if (Δtesting.Short()) {
+        Ꮡt.Skipf("in short mode; skipping test that builds a binary"u8);
+    }
+    Ꮡt.Parallel();
+    @string tmpdir = Ꮡt.TempDir();
+    @string prog = progᶜ;
     @string src = filepath.Join(tmpdir, mainGoˢ);
     {
         var errΔ1 = Δos.WriteFile(src, slice<byte>(prog), 438); if (errΔ1 != default!) {
@@ -995,11 +1007,14 @@ func main() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string userFolderˢ = "UserFolder"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string onedrivekeyᶜ = @"SOFTWARE\Microsoft\OneDrive"u8;
+
 internal static (@string, error) findOneDriveDir() {
     GoFrame ᒐ = default;
     try {
         // as per https://stackoverflow.com/questions/42519624/how-to-determine-location-of-onedrive-on-windows-7-and-8-in-c
-        @string onedrivekey = @"SOFTWARE\Microsoft\OneDrive"u8;
+        @string onedrivekey = onedrivekeyᶜ;
         var (k, err) = registry.OpenKey(registry.CURRENT_USER, onedrivekey, registry.READ);
         if (err != default!) {
             return ("", fmt.Errorf("OpenKey(%q) failed: %v"u8, onedrivekey, err));
@@ -1333,7 +1348,7 @@ internal static @string replaceDriveWithVolumeID(ж<Δtesting.T> Ꮡt, @string p
         Ꮡt.Fatalf("%v: %v\n%s"u8, cmd.OrTypedNil(), err, @out);
     }
     @string vol = strings.Trim(((@string)@out), " \n\r"u8);
-    return filepath.Join(vol, path[(int)(len(filepath.VolumeName(path)))..]);
+    return filepath.Join(vol, path.slice(len(filepath.VolumeName(path))));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1572,11 +1587,14 @@ public static void TestAppExecLinkStat(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object fileNotListedˢ = (@string)"file not listed"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string sepᶜ = "\\";
+
 public static void TestIllformedUTF16FileName(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     @string dir = Ꮡt.TempDir();
-    @string sep = "\\";
+    @string sep = sepᶜ;
     if (!strings.HasSuffix(dir, sep)) {
         dir += sep;
     }

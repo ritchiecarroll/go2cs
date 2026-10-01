@@ -38,7 +38,7 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
     uint64 baseOverflow = default!;  // Track total overflow across iterations.
     for (nint i = 0; i < 2; i++) {
         Ꮡt.Logf("Iteration %d"u8, i + 1);
-        if (l.Capacity() != (uint64)(procs * runtime_internal_test_package.CapacityPerProc)) {
+        if (l.Capacity() != (uint64)(/* procs * CapacityPerProc */ 14000000000UL)) {
             Ꮡt.Fatalf("unexpected capacity: %d"u8, l.Capacity());
         }
         if (l.Fill() != 0) {
@@ -168,7 +168,7 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("limiter is not enabled after overfill but should be"u8);
         }
         {
-            var expect = (uint64)(runtime_internal_test_package.CapacityPerProc * procs / 2); if (l.Overflow() != expect + baseOverflow) {
+            var expect = (uint64)(/* CapacityPerProc * procs / 2 */ 7000000000UL); if (l.Overflow() != expect + baseOverflow) {
                 Ꮡt.Errorf("bucket overfilled should have overflow %d, found %d"u8, expect, l.Overflow());
             }
         }

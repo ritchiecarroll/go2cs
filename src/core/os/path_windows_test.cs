@@ -37,7 +37,7 @@ public static void TestAddExtendedPrefix(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Fatal(cannotGetCwdˢ);
     }
     @string drive = strings.ToLower(filepath.VolumeName(cwd));
-    cwd = strings.ToLower(cwd[(int)(len(drive) + 1)..]);
+    cwd = strings.ToLower(cwd.slice(len(drive) + 1));
     // Build a very long pathname. Paths in Go are supposed to be arbitrarily long,
     // so let's make a long path which is comfortably bigger than MAX_PATH on Windows
     // (256) and thus requires fixLongPath to be correctly interpreted in I/O syscalls.
@@ -143,10 +143,13 @@ public static void TestMkdirAllLongPath(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string prefixᶜ = @"\\?\"u8;
+
 public static void TestMkdirAllExtendedLength(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
     @string tmpDir = Ꮡt.TempDir();
-    @string prefix = @"\\?\"u8;
+    @string prefix = prefixᶜ;
     if (len(tmpDir) < 4 || tmpDir[..4] != prefix) {
         var (fullPath, err) = syscall.FullPath(tmpDir);
         if (err != default!) {
@@ -200,11 +203,14 @@ internal static void testMkdirAllAtRoot(ж<Δtesting.T> Ꮡt, @string root) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string prefixᶜ1 = @"\\?\"u8;
+
 public static void TestMkdirAllExtendedLengthAtRoot(ж<Δtesting.T> Ꮡt) {
     if (testenv.Builder() == ""u8) {
         Ꮡt.Skipf("skipping non-hermetic test outside of Go builders"u8);
     }
-    @string prefix = @"\\?\"u8;
+    @string prefix = prefixᶜ1;
     @string vol = filepath.VolumeName(Ꮡt.TempDir()) + @"\"u8;
     if (len(vol) < 4 || vol[..4] != prefix) {
         vol = prefix + vol;

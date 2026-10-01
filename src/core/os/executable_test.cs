@@ -22,8 +22,11 @@ partial class os_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object errorˢ = (@string)"ERROR: "u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string helperEnvVarᶜ = "OSTEST_OUTPUT_EXECPATH"u8;
+
 public static void TestExecutable(ж<Δtesting.T> Ꮡt) {
-    @string helperEnvVar = "OSTEST_OUTPUT_EXECPATH"u8;
+    @string helperEnvVar = helperEnvVarᶜ;
     if (Δos.Getenv(helperEnvVar) != ""u8) {
         // First chdir to another path.
         @string dirΔ1 = "/"u8;

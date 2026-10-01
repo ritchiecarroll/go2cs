@@ -178,7 +178,7 @@ internal static void benchmarkRWMutex(ж<testing.B> Ꮡb, nint localWork, nint w
         nint foo = 0;
         while (pb.Next()) {
             foo++;
-            if (foo % writeRatio == 0){
+            if (rem(foo, writeRatio) == 0){
                 Ꮡrwm.Lock();
                 Ꮡrwm.Unlock();
             } else {

@@ -77,25 +77,25 @@ internal static void child4() {
 }
 
 //go:noinline
-internal static void child5() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void child5() {
     // test trace through second of two call instructions
     child6bad();
     child6(); // appears in stack trace
 }
 
 //go:noinline
-internal static void child6bad() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void child6bad() {
 }
 
 //go:noinline
-internal static void child6() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void child6() {
     // test trace through first of two call instructions
     child7(); // appears in stack trace
     child7bad();
 }
 
 //go:noinline
-internal static void child7bad() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void child7bad() {
 }
 
 //go:noinline
@@ -103,8 +103,8 @@ internal static void child7bad() {
     // Write runtime.Caller's view of the stack to stderr, for debugging.
     array<uintptr> pcs = new(16);
     nint n = Δruntime.Callers(1, pcs[..]);
-    fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "Callers: %#x\n"u8, pcs[..(int)(n)]);
-    Δio.WriteString(new Δos.FileжWriter(Δos.Stderr), formatStack(pcs[..(int)(n)]));
+    fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "Callers: %#x\n"u8, pcs.slice(0, n));
+    Δio.WriteString(new Δos.FileжWriter(Δos.Stderr), formatStack(pcs.slice(0, n)));
     // Cause the crash report to be written to stdout.
     throw panic("oops");
 }
@@ -263,7 +263,7 @@ internal static (slice<uintptr>, error) parseStackPCs(@string crash) {
                 prev = c;
                 continue;
             }
-            return (line[..(int)(i)], default!);
+            return (line.slice(0, i), default!);
         }
         return ("", fmt.Errorf("no symbol for stack frame: %s"u8, line));
     }

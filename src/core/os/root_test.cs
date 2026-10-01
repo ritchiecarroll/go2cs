@@ -178,7 +178,7 @@ internal static void run(this ж<rootTest> Ꮡtest, ж<Δtesting.T> Ꮡt, Action
 // It returns true if the test is done due to encountering an expected error.
 // false if the test should continue.
 internal static bool errEndsTest(ж<Δtesting.T> Ꮡt, error err, bool wantError, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.slice();
+    var args = argsʗp.sslice();
 
     Ꮡt.Helper();
     if (wantError){
@@ -686,6 +686,9 @@ public static void TestRootOpenFileAsRoot(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string rootStatQˢ = "root.Stat(%q)"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string contentᶜ = "content"u8;
+
 public static void TestRootStat(ж<Δtesting.T> Ꮡt) {
     foreach (var (_, vᴛ1) in rootTestCases) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
@@ -693,7 +696,7 @@ public static void TestRootStat(ж<Δtesting.T> Ꮡt) {
 
         var testʗ1 = test;
         Ꮡtest.run(Ꮡt, (ж<Δtesting.T> tΔ1, @string target, ж<Δos.Root> root) => {
-            @string content = "content"u8;
+            @string content = contentᶜ;
             if (target != ""u8) {
                 {
                     var errΔ1 = Δos.WriteFile(target, slice<byte>(content), 438); if (errΔ1 != default!) {
@@ -720,6 +723,9 @@ public static void TestRootStat(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string contentᶜ1 = "content"u8;
+
 public static void TestRootLstat(ж<Δtesting.T> Ꮡt) {
     foreach (var (_, vᴛ1) in rootTestCases) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
@@ -727,7 +733,7 @@ public static void TestRootLstat(ж<Δtesting.T> Ꮡt) {
 
         var testʗ1 = test;
         Ꮡtest.run(Ꮡt, (ж<Δtesting.T> tΔ1, @string target, ж<Δos.Root> root) => {
-            @string content = "content"u8;
+            @string content = contentᶜ1;
             var wantError = testʗ1.wantError;
             if (testʗ1.ltarget != ""u8){
                 // Lstat will stat the final link, rather than following it.

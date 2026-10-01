@@ -145,8 +145,8 @@ public static void TestCDecl(ж<testing.T> Ꮡt) {
         (uintptr)Ꮡbuf.at<byte>(0),
         (uintptr)fmtp,
         1000, 2000, 3000);
-    if (((sstring)(buf[..(int)(a)])) != "1000 2000 3000"u8) {
-        Ꮡt.Error(cdeclUser32WsprintfAˢ, a, bufˢ, buf[..(int)(a)]);
+    if (((sstring)(buf.slice(0, (nint)(a)))) != "1000 2000 3000"u8) {
+        Ꮡt.Error(cdeclUser32WsprintfAˢ, a, bufˢ, buf.slice(0, (nint)(a)));
     }
 }
 
@@ -448,11 +448,11 @@ internal static slice<cbFunc> cbFuncs = new cbFunc[]{
     new((uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5, uintptr i6, uintptr i7) => i1 + i2 + i3 + i4 + i5 + i6 + i7),
     new((uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5, uintptr i6, uintptr i7, uintptr i8) => i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8),
     new((uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5, uintptr i6, uintptr i7, uintptr i8, uintptr i9) => i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9),
-    new((uint8 i1, uint8 i2, uint8 i3, uint8 i4, uint8 i5, uint8 i6, uint8 i7, uint8 i8, uint8 i9) => (uintptr)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9)),
-    new((uint16 i1, uint16 i2, uint16 i3, uint16 i4, uint16 i5, uint16 i6, uint16 i7, uint16 i8, uint16 i9) => (uintptr)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9)),
-    new((int8 i1, int8 i2, int8 i3, int8 i4, int8 i5, int8 i6, int8 i7, int8 i8, int8 i9) => (uintptr)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9)),
+    new((uint8 i1, uint8 i2, uint8 i3, uint8 i4, uint8 i5, uint8 i6, uint8 i7, uint8 i8, uint8 i9) => (uintptr)((uint8)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9))),
+    new((uint16 i1, uint16 i2, uint16 i3, uint16 i4, uint16 i5, uint16 i6, uint16 i7, uint16 i8, uint16 i9) => (uintptr)((uint16)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9))),
+    new((int8 i1, int8 i2, int8 i3, int8 i4, int8 i5, int8 i6, int8 i7, int8 i8, int8 i9) => (uintptr)((int8)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9))),
     new((int8 i1, int16 i2, int32 i3, uintptr i4, uintptr i5) => (uintptr)i1 + (uintptr)i2 + (uintptr)i3 + i4 + i5),
-    new((uint8Pair i1, uint8Pair i2, uint8Pair i3, uint8Pair i4, uint8Pair i5) => (uintptr)(i1.x + i1.y + i2.x + i2.y + i3.x + i3.y + i4.x + i4.y + i5.x + i5.y)),
+    new((uint8Pair i1, uint8Pair i2, uint8Pair i3, uint8Pair i4, uint8Pair i5) => (uintptr)((uint8)(i1.x + i1.y + i2.x + i2.y + i3.x + i3.y + i4.x + i4.y + i5.x + i5.y))),
     new((uint32 i1, uint32 i2, uint32 i3, uint32 i4, uint32 i5, uint32 i6, uint32 i7, uint32 i8, uint32 i9) => {
         Δruntime.GC();
         return (uintptr)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9);
@@ -506,17 +506,17 @@ internal static uintptr sum10(uintptr i1, uintptr i2, uintptr i3, uintptr i4, ui
 
 //go:registerparams
 internal static uintptr sum9uint8(uint8 i1, uint8 i2, uint8 i3, uint8 i4, uint8 i5, uint8 i6, uint8 i7, uint8 i8, uint8 i9) {
-    return (uintptr)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9);
+    return (uintptr)((uint8)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9));
 }
 
 //go:registerparams
 internal static uintptr sum9uint16(uint16 i1, uint16 i2, uint16 i3, uint16 i4, uint16 i5, uint16 i6, uint16 i7, uint16 i8, uint16 i9) {
-    return (uintptr)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9);
+    return (uintptr)((uint16)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9));
 }
 
 //go:registerparams
 internal static uintptr sum9int8(int8 i1, int8 i2, int8 i3, int8 i4, int8 i5, int8 i6, int8 i7, int8 i8, int8 i9) {
-    return (uintptr)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9);
+    return (uintptr)((int8)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9));
 }
 
 //go:registerparams
@@ -526,7 +526,7 @@ internal static uintptr sum5mix(int8 i1, int16 i2, int32 i3, uintptr i4, uintptr
 
 //go:registerparams
 internal static uintptr sum5andPair(uint8Pair i1, uint8Pair i2, uint8Pair i3, uint8Pair i4, uint8Pair i5) {
-    return (uintptr)(i1.x + i1.y + i2.x + i2.y + i3.x + i3.y + i4.x + i4.y + i5.x + i5.y);
+    return (uintptr)((uint8)(i1.x + i1.y + i2.x + i2.y + i3.x + i3.y + i4.x + i4.y + i5.x + i5.y));
 }
 
 // This test forces a GC. The idea is to have enough arguments
@@ -842,21 +842,8 @@ internal static readonly @string mydllDllˢ = "mydll.dll"u8;
 internal static readonly @string werrorˢ = "-Werror"u8;
 internal static readonly @string cfuncˢ = "cfunc"u8;
 
-// Use a new goroutine so that we get a small stack.
-[GoType("dyn")] internal partial struct TestReturnAfterStackGrowInCallback_result {
-    internal uintptr r;
-    internal syscall.Errno err;
-}
-
-public static void TestReturnAfterStackGrowInCallback(ж<testing.T> Ꮡt) {
-    GoFrame ᒐ = default;
-    try {
-        {
-            var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != default!) {
-                Ꮡt.Skip(skippingTestGccIsMissingˢ);
-            }
-        }
-        @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ = """
 
 #include <stdint.h>
 #include <windows.h>
@@ -871,6 +858,22 @@ uintptr_t cfunc(callback f, uintptr_t n) {
 }
 
 """u8;
+
+// Use a new goroutine so that we get a small stack.
+[GoType("dyn")] internal partial struct TestReturnAfterStackGrowInCallback_result {
+    internal uintptr r;
+    internal syscall.Errno err;
+}
+
+public static void TestReturnAfterStackGrowInCallback(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        {
+            var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != default!) {
+                Ꮡt.Skip(skippingTestGccIsMissingˢ);
+            }
+        }
+        @string src = srcᶜ;
         @string tmpdir = Ꮡt.TempDir();
         @string srcname = mydllCˢ;
         var err = Δos.WriteFile(filepath.Join(tmpdir, srcname), slice<byte>(src), 0);
@@ -977,18 +980,8 @@ public static void TestSyscallN(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestFloatArgs(ж<testing.T> Ꮡt) {
-    GoFrame ᒐ = default;
-    try {
-        {
-            var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != default!) {
-                Ꮡt.Skip(skippingTestGccIsMissingˢ);
-            }
-        }
-        if (Δruntime.GOARCH != "amd64"u8) {
-            Ꮡt.Skipf("skipping test: GOARCH=%s"u8, Δruntime.GOARCH);
-        }
-        @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ1 = """
 
 #include <stdint.h>
 #include <windows.h>
@@ -1001,6 +994,19 @@ uintptr_t cfunc(uintptr_t a, double b, float c, double d) {
 }
 
 """u8;
+
+public static void TestFloatArgs(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        {
+            var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != default!) {
+                Ꮡt.Skip(skippingTestGccIsMissingˢ);
+            }
+        }
+        if (Δruntime.GOARCH != "amd64"u8) {
+            Ꮡt.Skipf("skipping test: GOARCH=%s"u8, Δruntime.GOARCH);
+        }
+        @string src = srcᶜ1;
         @string tmpdir = Ꮡt.TempDir();
         @string srcname = mydllCˢ;
         var err = Δos.WriteFile(filepath.Join(tmpdir, srcname), slice<byte>(src), 0);
@@ -1036,18 +1042,8 @@ uintptr_t cfunc(uintptr_t a, double b, float c, double d) {
 internal static readonly @string cfuncFloatˢ = "cfuncFloat"u8;
 internal static readonly @string cfuncDoubleˢ = "cfuncDouble"u8;
 
-public static void TestFloatReturn(ж<testing.T> Ꮡt) {
-    GoFrame ᒐ = default;
-    try {
-        {
-            var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != default!) {
-                Ꮡt.Skip(skippingTestGccIsMissingˢ);
-            }
-        }
-        if (Δruntime.GOARCH != "amd64"u8) {
-            Ꮡt.Skipf("skipping test: GOARCH=%s"u8, Δruntime.GOARCH);
-        }
-        @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ2 = """
 
 #include <stdint.h>
 #include <windows.h>
@@ -1067,6 +1063,19 @@ double cfuncDouble(uintptr_t a, double b, float c, double d) {
 }
 
 """u8;
+
+public static void TestFloatReturn(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        {
+            var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != default!) {
+                Ꮡt.Skip(skippingTestGccIsMissingˢ);
+            }
+        }
+        if (Δruntime.GOARCH != "amd64"u8) {
+            Ꮡt.Skipf("skipping test: GOARCH=%s"u8, Δruntime.GOARCH);
+        }
+        @string src = srcᶜ2;
         @string tmpdir = Ꮡt.TempDir();
         @string srcname = mydllCˢ;
         var err = Δos.WriteFile(filepath.Join(tmpdir, srcname), slice<byte>(src), 0);
@@ -1291,15 +1300,8 @@ public static void TestNumCPU(ж<testing.T> Ꮡt) {
 internal static readonly @string nojackCˢ = "nojack.c"u8;
 internal static readonly @string nojackDllˢ = "nojack.dll"u8;
 
-// See Issue 14959
-public static void TestDLLPreloadMitigation(ж<testing.T> Ꮡt) {
-    {
-        var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != default!) {
-            Ꮡt.Skip(skippingTestGccIsMissingˢ);
-        }
-    }
-    @string tmpdir = Ꮡt.TempDir();
-    @string src = """
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ3 = """
 
 #include <stdint.h>
 #include <windows.h>
@@ -1310,6 +1312,16 @@ uintptr_t cfunc(void) {
 }
 
 """u8;
+
+// See Issue 14959
+public static void TestDLLPreloadMitigation(ж<testing.T> Ꮡt) {
+    {
+        var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != default!) {
+            Ꮡt.Skip(skippingTestGccIsMissingˢ);
+        }
+    }
+    @string tmpdir = Ꮡt.TempDir();
+    @string src = srcᶜ3;
     @string srcname = nojackCˢ;
     var err = Δos.WriteFile(filepath.Join(tmpdir, srcname), slice<byte>(src), 0);
     if (err != default!) {

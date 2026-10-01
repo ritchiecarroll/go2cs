@@ -126,7 +126,7 @@ public static void TestUserArena(ж<testing.T> Ꮡt) {
                 arena.New(Ꮡx);
                 {
                     @unsafe.Pointer v = @unsafe.Pointer.FromPinnedBox(x._<ж<EmptyStruct>>()); if (v != runtime_internal_test_package.ZeroBase) {
-                        tΔ2.Errorf("expected zero-sized type to be allocated as zerobase: got %x, want %x"u8, v, runtime_internal_test_package.ZeroBase);
+                        tΔ2.Errorf("expected zero-sized type to be allocated as zerobase: got %x, want %x"u8, @unsafe.Pointer.OrTypedNil(v), @unsafe.Pointer.OrTypedNil(runtime_internal_test_package.ZeroBase));
                     }
                 }
                 arena.Free();
@@ -137,7 +137,7 @@ public static void TestUserArena(ж<testing.T> Ꮡt) {
                 arena.Slice(Ꮡsl, 10);
                 {
                     @unsafe.Pointer v = @unsafe.Pointer.FromPinnedBox(Ꮡ(sl, 0)); if (v != runtime_internal_test_package.ZeroBase) {
-                        tΔ3.Errorf("expected zero-sized type to be allocated as zerobase: got %x, want %x"u8, v, runtime_internal_test_package.ZeroBase);
+                        tΔ3.Errorf("expected zero-sized type to be allocated as zerobase: got %x, want %x"u8, @unsafe.Pointer.OrTypedNil(v), @unsafe.Pointer.OrTypedNil(runtime_internal_test_package.ZeroBase));
                     }
                 }
                 arena.Free();

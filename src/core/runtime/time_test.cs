@@ -60,8 +60,8 @@ public static void TestFakeTime(ж<testing.T> Ꮡt) {
     slice<slice<fakeTimeFrame>> want = new slice<fakeTimeFrame>[]{new fakeTimeFrame[]{
         new(time0 + 1, "line 2\n"u8),
         new(time0 + 1, "line 3\n"u8),
-        new(time0 + 1000000000, "line 5\n"u8),
-        new(time0 + 1000000000, "2009-11-10T23:00:01Z"u8)}.slice(), new fakeTimeFrame[]{
+        new(/* time0 + 1e9 */ 1257894001000000000UL, "line 5\n"u8),
+        new(/* time0 + 1e9 */ 1257894001000000000UL, "2009-11-10T23:00:01Z"u8)}.slice(), new fakeTimeFrame[]{
         new(time0, "line 1\n"u8),
         new(time0 + 2, "line 4\n"u8)}.slice()
     }.slice();
@@ -79,13 +79,16 @@ public static void TestFakeTime(ж<testing.T> Ꮡt) {
 internal static readonly @string truncatedHeaderˢ = "truncated header"u8;
 internal static readonly @string badMagicˢ = "bad magic"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string magicᶜ = "\x00\x00PB"u8;
+
 internal static (slice<fakeTimeFrame>, error) parseFakeTime(slice<byte> x) {
     slice<fakeTimeFrame> frames = default!;
     while (len(x) != 0) {
         if (len(x) < 4 + 8 + 4) {
             return (default!, errors.New(truncatedHeaderˢ));
         }
-        @string magic = "\x00\x00PB"u8;
+        @string magic = magicᶜ;
         if (((sstring)(x[..(int)(len(magic))])) != magic) {
             return (default!, errors.New(badMagicˢ));
         }
@@ -94,8 +97,8 @@ internal static (slice<fakeTimeFrame>, error) parseFakeTime(slice<byte> x) {
         x = x[8..];
         var dlen = binary.BigEndian.Uint32(x);
         x = x[4..];
-        @string data = ((@string)(x[..(int)(dlen)]));
-        x = x[(int)(dlen)..];
+        @string data = ((@string)(x.slice(0, (nint)(dlen))));
+        x = x.slice((nint)(dlen));
         frames = append(frames, new fakeTimeFrame(time, data));
     }
     return (frames, default!);

@@ -148,7 +148,7 @@ internal static nint nerr;
 internal static readonly object tooManyErrorsˢ = (@string)"too many errors"u8;
 
 internal static void err(ж<testing.T> Ꮡt, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.slice();
+    var args = argsʗp.sslice();
 
     Ꮡt.Errorf(format, args.ꓸꓸꓸ);
     // cut errors off after a while.

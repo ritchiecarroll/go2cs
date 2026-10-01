@@ -109,6 +109,9 @@ public static void TestMkdirAllWithSymlink(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string goOsTestˢ = "/_go_os_test"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string dirᶜ = "/_go_os_test/dir"u8;
+
 public static void TestMkdirAllAtSlash(ж<Δtesting.T> Ꮡt) {
     var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "android"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "windows"u8) {
@@ -119,7 +122,7 @@ public static void TestMkdirAllAtSlash(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Skipf("skipping non-hermetic test outside of Go builders"u8);
     }
     RemoveAll(goOsTestˢ);
-    @string dir = "/_go_os_test/dir"u8;
+    @string dir = dirᶜ;
     var err = MkdirAll(dir, 511);
     if (err != default!) {
         var (pathErr, ok) = err._<ж<fs.PathError>>(ᐧ);

@@ -6,6 +6,7 @@ namespace go;
 using Δruntime = runtime_package;
 using slices = slices_package;
 using testing = testing_package;
+using System.Runtime.CompilerServices;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -61,7 +62,7 @@ public static void TestOpenAndNonOpenDefers(ж<testing.T> Ꮡt) {
 internal static readonly object expectedTestOpenPanicˢ = (@string)"expected testOpen panic"u8;
 
 //go:noinline
-internal static void testOpen(ж<testing.T> Ꮡt, nint arg) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testOpen(ж<testing.T> Ꮡt, nint arg) {
     GoFrame ᒐ = default;
     try {
         defer((nint n) => {
@@ -264,7 +265,7 @@ internal static nint globint2;
 internal static nint globint3;
 
 //go:noinline
-internal static int64 sideeffect(int64 n) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static int64 sideeffect(int64 n) {
     globint2++;
     return n;
 }
@@ -333,7 +334,7 @@ public static void TestNonSSAableArgs(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-internal static void doPanic() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void doPanic() {
     throw panic("Test panic");
 }
 
@@ -447,11 +448,11 @@ public static void TestIssue37688(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-[GoRecv] internal static void method1(this ref foo f) {
+[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static void method1(this ref foo f) {
 }
 
 //go:noinline
-[GoRecv] internal static void method2(this ref foo f) {
+[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static void method2(this ref foo f) {
 }
 
 internal static void g2() {

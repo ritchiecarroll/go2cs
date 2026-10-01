@@ -1241,7 +1241,7 @@ internal static void benchmarkChanSync(ж<testing.B> Ꮡb, nint work) {
     const nint CallsPerSched = 1000;
     nint procs = 2;
     ref var N = ref heap<int32>(out var ᏑN);
-    N = (int32)(b.N / CallsPerSched / procs * procs);
+    N = (int32)(quo(b.N / CallsPerSched, procs) * procs);
     var c = new channel<bool>(procs);
     var myc = new channel<nint>(0);
     for (nint p = 0; p < procs; p++) {
@@ -1545,7 +1545,7 @@ internal static nint workSink = 0;
 internal static void localWork(nint w) {
     nint foo = 0;
     for (nint i = 0; i < w; i++) {
-        foo /= (foo + 1);
+        foo = quo(foo, (foo + 1));
     }
     if (alwaysFalse) {
         workSink += foo;

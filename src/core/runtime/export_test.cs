@@ -18,6 +18,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using System.Runtime.CompilerServices;
 using static global::go.runtime_package;
 using ꓸꓸꓸAddrRange = Span<runtime_internal_test_package.AddrRange>;
 using ꓸꓸꓸunsafeꓸPointer = Span<unsafe_package.Pointer>;
@@ -575,32 +576,9 @@ public static (uint32 external, uint32 @internal) LockOSCounts() {
     return ((~(~gp).m).lockedExt, (~(~gp).m).lockedInt);
 }
 
-//go:noinline
-public static nint TracebackSystemstack(slice<uintptr> stk, nint i) {
-    if (i == 0) {
-        var (pc, sp) = (sys.GetCallerPC(), sys.GetCallerSP());
-        ref var u = ref heap(new global::go.runtime_package.unwinder(), out var Ꮡu);
-        Ꮡu.initAt(pc, sp, 0, getg(), unwindJumpStack); // Don't ignore errors, for testing
-        return tracebackPCs(Ꮡu, 0, stk);
-    }
-    nint n = 0;
-    var stkʗ1 = stk;
-    systemstack(() => {
-        n = TracebackSystemstack(stkʗ1, i - 1);
-    });
-    return n;
-}
+// go2cs generated this placeholder — func TracebackSystemstack is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-public static void KeepNArenaHints(nint n) {
-    var hint = mheap_.arenaHints;
-    for (nint i = 1; i < n; i++) {
-        hint = hint.Value.next;
-        if (hint == nil) {
-            return;
-        }
-    }
-    hint.Value.next = default!;
-}
+// go2cs generated this placeholder — func KeepNArenaHints is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // MapNextArenaHint reserves a page at the next arena growth hint,
 // preventing the arena from growing there, and returns the range of
@@ -653,28 +631,16 @@ public static ж<bool> CasGStatusAlwaysTrack;
 internal static void initᴛCasGStatusAlwaysTrack() { CasGStatusAlwaysTrack = ᏑcasgstatusAlwaysTrack; }
 
 //go:noinline
-public static byte PanicForTesting(slice<byte> b, nint i) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static byte PanicForTesting(slice<byte> b, nint i) {
     return unexportedPanicForTesting(b, i);
 }
 
 //go:noinline
-internal static byte unexportedPanicForTesting(slice<byte> b, nint i) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static byte unexportedPanicForTesting(slice<byte> b, nint i) {
     return b[i];
 }
 
-public static void G0StackOverflow() {
-    systemstack(() => {
-        var g0 = getg();
-        var sp = sys.GetCallerSP();
-        // The stack bounds for g0 stack is not always precise.
-        // Use an artificially small stack, to trigger a stack overflow
-        // without actually run out of the system stack (which may seg fault).
-        g0.Value.stack.lo = sp - 4096 - (uintptr)stackSystem;
-        g0.Value.stackguard0 = (~g0).stack.lo + (uintptr)stackGuard;
-        g0.Value.stackguard1 = g0.Value.stackguard0;
-        stackOverflow(nil);
-    });
-}
+// go2cs generated this placeholder — func G0StackOverflow is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static void stackOverflow(ж<byte> Ꮡx) {
     ref var buf = ref heap(new array<byte>(256), out var Ꮡbuf);
@@ -1292,7 +1258,7 @@ public static uintptr /*leaked*/ PageCachePagesLeaked() {
 
     var stw = stopTheWorld(stwForTestPageCachePagesLeaked);
     // Walk over destroyed Ps and look for unflushed caches.
-    var deadp = allp[(int)(len(allp))..(int)(cap(allp))];
+    var deadp = allp.slice(len(allp), cap(allp));
     foreach (var (_, Δp) in deadp) {
         // Since we're going past len(allp) we may see nil Ps.
         // Just ignore them.
@@ -1328,10 +1294,7 @@ internal static void initᴛSemacquire() { Semacquire = semacquire; }
 public static Action<ж<uint32>, bool, nint> Semrelease1;
 internal static void initᴛSemrelease1() { Semrelease1 = semrelease1; }
 
-public static uint32 SemNwait(ж<uint32> Ꮡaddr) {
-    var root = semtable.rootFor(Ꮡaddr);
-    return root.of(global::go.runtime_package.semaRoot.Ꮡnwait).Load();
-}
+// go2cs generated this placeholder — func SemNwait is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 public static UntypedInt SemTableSize => /* semTabSize */ 251;
 
@@ -1444,7 +1407,7 @@ public static Action GCTestMoveStackOnNextCall = gcTestMoveStackOnNextCall;
 // For GCTestIsReachable, it's important that we do this as a call so
 // escape analysis can see through it.
 public static uint64 /*mask*/ GCTestIsReachable(params ꓸꓸꓸunsafeꓸPointer ptrsʗp) {
-    var ptrs = ptrsʗp.slice();
+    var ptrs = ptrsʗp.sslice();
 
     return gcTestIsReachable(ptrs.ꓸꓸꓸ);
 }
@@ -1582,7 +1545,7 @@ public static Func<int64, int32, ж<int32>, int32> Timediv = timediv;
     internal partial ref global::go.runtime_package.piController piController { get; }
 }
 
-public static ж<PIController> NewPIController(float64 kp, float64 ti, float64 tt, float64 min, float64 max) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static ж<PIController> NewPIController(float64 kp, float64 ti, float64 tt, float64 min, float64 max) {
     return Ꮡ(new PIController(new piController(
         kp: kp,
         ti: ti,
@@ -1878,7 +1841,7 @@ public static uintptr UserArenaChunkBytes => /* userArenaChunkBytes */ 4194304;
     internal ж<global::go.runtime_package.userArena> arena;
 }
 
-public static ж<UserArena> NewUserArena() {
+[MethodImpl(MethodImplOptions.NoInlining)] public static ж<UserArena> NewUserArena() {
     return Ꮡ(new UserArena(newUserArena()));
 }
 

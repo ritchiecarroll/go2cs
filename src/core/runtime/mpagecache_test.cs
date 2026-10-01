@@ -201,7 +201,7 @@ public static void TestPageCacheFlush(ж<testing.T> Ꮡt) {
         nuint start = (nuint)0;
         nuint size = (nuint)0;
         for (nint i = 0; i < 64; i++) {
-            if ((uint64)(bits & (((uint64)1).Lsh((uint64)(i)))) != 0){
+            if ((uint64)(bits & (((uint64)1).Lsh((int64)(i)))) != 0){
                 if (size == 0) {
                     start = (nuint)i + @base;
                 }

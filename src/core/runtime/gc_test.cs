@@ -21,6 +21,7 @@ using time = time_package;
 using @unsafe = unsafe_package;
 using weak = weak_package;
 using @internal;
+using System.Runtime.CompilerServices;
 using global::go.math;
 using global::go.runtime;
 using global::go.sync;
@@ -151,7 +152,7 @@ public static void TestGcLastTime(ж<testing.T> Ꮡt) {
     if (t0 > last || last > t1) {
         Ꮡt.Fatalf("bad last GC time: got %v, want [%v, %v]"u8, last, t0, t1);
     }
-    var pause = (~ms).PauseNs[(nint)(((~ms).NumGC + 255) % 256)];
+    var pause = (~ms).PauseNs[((~ms).NumGC + 255) % 256];
     // Due to timer granularity, pause can actually be 0 on windows
     // or on virtualized environments.
     if (pause == 0){
@@ -268,7 +269,7 @@ public static void TestGCTestMoveStackOnNextCall(ж<testing.T> Ꮡt) {
 // growth check and move the stack.
 //
 //go:noinline
-internal static bool moveStackCheck(ж<testing.T> Ꮡt, ж<nint> Ꮡnew, uintptr old) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static bool moveStackCheck(ж<testing.T> Ꮡt, ж<nint> Ꮡnew, uintptr old) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // new should have been updated by the stack move;
@@ -300,7 +301,7 @@ public static void TestGCTestMoveStackRepeatedly(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-internal static void moveStack1(bool x) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void moveStack1(bool x) {
     // Make sure this function doesn't get auto-nosplit.
     if (x) {
         println((@string)"x"u8);
@@ -320,7 +321,7 @@ public static void TestGCTestIsReachable(ж<testing.T> Ꮡt) {
         all = append(all, p);
         if (i % 2 == 0) {
             half = append(half, p);
-            want |= (uint64)(((uint64)1).Lsh((uint64)(i)));
+            want |= (uint64)(((uint64)1).Lsh((int64)(i)));
         }
     }
     var got = runtime_internal_test_package.GCTestIsReachable(all.ꓸꓸꓸ);
@@ -484,7 +485,7 @@ internal static error testAssertVar(any x) {
 internal static bool a;
 
 //go:noinline
-internal static void testIfaceEqual(any x) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testIfaceEqual(any x) {
     if (AreEqual(x, (@string)("abc"))) {
         a = true;
     }
@@ -814,7 +815,7 @@ public static void BenchmarkBulkWriteBarrier(ж<testing.B> Ꮡb) {
         nint pos = default!;
         for (nint i = 0; i < Ꮡb.Value.N; i += blockSize) {
             // Rotate block.
-            var block = ptrsʗ1[(int)(pos)..(int)(pos + (nint)blockSize)];
+            var block = ptrsʗ1.slice(pos, pos + (nint)blockSize);
             var first = block[0];
             copy(block, block[1..]);
             block[blockSize - 1] = first;

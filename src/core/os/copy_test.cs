@@ -233,7 +233,7 @@ internal static error compareReaders(Δio.Reader a, Δio.Reader b) {
         if (errb != default! && !AreEqual(errb, Δio.EOF) && !AreEqual(errb, Δio.ErrUnexpectedEOF)) {
             return errb;
         }
-        if (!bytes.Equal(bufa[..(int)(na)], bufb[..(int)(nb)])) {
+        if (!bytes.Equal(bufa.slice(0, na), bufb.slice(0, nb))) {
             return errors.New(contentsMismatchˢ);
         }
         if (erra != default! && errb != default!) {

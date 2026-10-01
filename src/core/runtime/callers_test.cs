@@ -25,7 +25,7 @@ partial class runtime_test_package {
         throw panic("f3"); // line 24
     }
     var ret = new slice<uintptr>(20);
-    return ret[..(int)(Δruntime.Callers(0, ret))]; // line 27
+    return ret.slice(0, Δruntime.Callers(0, ret)); // line 27
 }
 
 [GoType("dyn")] internal partial struct testCallers_want {
@@ -111,7 +111,7 @@ internal static readonly object didNotPanicˢ = (@string)"did not panic"u8;
                 }
             }
             var pcs = new slice<uintptr>(20);
-            pcs = pcs[..(int)(Δruntime.Callers(0, pcs))];
+            pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
             testCallers(Ꮡt, pcs, true);
             testCallersEqual(Ꮡt, pcs, wantʗ1);
         }, ref ᒐ);
@@ -137,7 +137,7 @@ internal static readonly object didNotPanicˢ = (@string)"did not panic"u8;
                 var wantʗ2 = wantʗ1;
                 defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
                     var pcs = new slice<uintptr>(20);
-                    pcs = pcs[..(int)(Δruntime.Callers(0, pcs))];
+                    pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
                     if (recover() == default!) {
                         Ꮡt.Fatal(didNotPanicˢ);
                     }
@@ -169,7 +169,7 @@ internal static readonly object didNotRecoverFromPanicˢ = (@string)"did not rec
         var wantʗ1 = want;
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             var pcs = new slice<uintptr>(20);
-            pcs = pcs[..(int)(Δruntime.Callers(0, pcs))];
+            pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
             testCallersEqual(Ꮡt, pcs, wantʗ1);
         }, ref ᒐ);
         defer(() => {
@@ -201,7 +201,7 @@ internal static readonly object panic2ˢ = (@string)"panic2"u8;
             // panic2 was aborted/replaced by panic1, so when panic2 was
             // recovered, there is no remaining panic on the stack.
             var pcs = new slice<uintptr>(20);
-            pcs = pcs[..(int)(Δruntime.Callers(0, pcs))];
+            pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
             testCallersEqual(Ꮡt, pcs, wantʗ1);
         }, ref ᒐ);
         defer(() => {
@@ -235,7 +235,7 @@ internal static readonly object panic2ˢ = (@string)"panic2"u8;
         var wantʗ1 = want;
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             var pcs = new slice<uintptr>(20);
-            pcs = pcs[..(int)(Δruntime.Callers(0, pcs))];
+            pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
             testCallersEqual(Ꮡt, pcs, wantʗ1);
         }, ref ᒐ);
         ((Action)(() => {
@@ -289,7 +289,7 @@ internal static readonly object didNotSeeNilPointerPanicˢ = (@string)"did not s
                 }
             }
             var pcs = new slice<uintptr>(20);
-            pcs = pcs[..(int)(Δruntime.Callers(0, pcs))];
+            pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
             testCallersEqual(Ꮡt, pcs, wantʗ1);
         }, ref ᒐ);
         ж<nint> p = default!;
@@ -322,7 +322,7 @@ internal static readonly object didNotSeeDivideBySizerˢ = (@string)"did not see
                 }
             }
             var pcs = new slice<uintptr>(20);
-            pcs = pcs[..(int)(Δruntime.Callers(0, pcs))];
+            pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
             testCallersEqual(Ꮡt, pcs, wantʗ1);
         }, ref ᒐ);
         nint n = default!;
@@ -357,7 +357,7 @@ internal static readonly object nilDeferFuncPanickedAtˢ = (@string)"nil defer f
                 }
             }
             var pcs = new slice<uintptr>(20);
-            pcs = pcs[..(int)(Δruntime.Callers(0, pcs))];
+            pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
             testCallersEqual(Ꮡt, pcs, wantʗ1);
             if (state == 1) {
                 Ꮡt.Fatal(nilDeferFuncPanickedAtˢ);
@@ -390,7 +390,7 @@ internal static readonly object nilDeferFuncPanickedAtˢ = (@string)"nil defer f
                 }
             }
             var pcs = new slice<uintptr>(20);
-            pcs = pcs[..(int)(Δruntime.Callers(0, pcs))];
+            pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
             testCallersEqual(Ꮡt, pcs, wantʗ1);
             if (state == 1) {
                 Ꮡt.Fatal(nilDeferFuncPanickedAtˢ);

@@ -29,9 +29,9 @@ public static void TestTimeHistogram(ж<testing.T> Ꮡt) {
         }
     }
     for (nint i = runtime_internal_test_package.TimeHistMinBucketBits; i < runtime_internal_test_package.TimeHistMaxBucketBits; i++) {
-        var @base = ((int64)1).Lsh((uint64)((i - 1)));
+        var @base = ((int64)1).Lsh((int64)((i - 1)));
         for (nint j = 0; j < runtime_internal_test_package.TimeHistNumSubBuckets; j++) {
-            var v = ((int64)j).Lsh((uint64)((i - 1 - (nint)runtime_internal_test_package.TimeHistSubBucketBits)));
+            var v = ((int64)j).Lsh((int64)((i - 1 - (nint)runtime_internal_test_package.TimeHistSubBucketBits)));
             for (nint k = 0; k < (i + 1 - (nint)runtime_internal_test_package.TimeHistMinBucketBits) * (nint)runtime_internal_test_package.TimeHistNumSubBuckets + j; k++) {
                 // Record a number of times equal to the bucket index.
                 h.Record(@base + v);

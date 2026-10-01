@@ -495,11 +495,14 @@ internal static readonly @string subdirˢ = "subdir"u8;
 internal static readonly @string fcntlˢ = "fcntl"u8;
 internal static readonly @string testRunˢ3 = "-test.run=^TestRemoveAllNoFcntl$"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string envᶜ = "GO_TEST_REMOVE_ALL_NO_FCNTL"u8;
+
 public static void TestRemoveAllNoFcntl(ж<Δtesting.T> Ꮡt) {
     if (Δtesting.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
-    @string env = "GO_TEST_REMOVE_ALL_NO_FCNTL"u8;
+    @string env = envᶜ;
     {
         @string dir = Getenv(env); if (dir != ""u8) {
             {

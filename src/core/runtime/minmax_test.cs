@@ -102,7 +102,7 @@ internal static void testMinMax<T>(ж<testing.T> Ꮡt, params Span<T> valsʗp)
     var vals = valsʗp.slice();
 
     foreach (var (i, x) in vals) {
-        foreach (var (_, y) in vals[(int)(i + 1)..]) {
+        foreach (var (_, y) in vals.slice(i + 1)) {
             if (!(x < y)) {
                 Ꮡt.Fatalf("values out of order: !(%v < %v)"u8, x, y);
             }

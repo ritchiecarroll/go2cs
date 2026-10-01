@@ -266,7 +266,7 @@ public static void TestScavengedBitsCleared(ж<testing.T> Ꮡt) {
     {
         var (n, ok) = runtime_internal_test_package.CheckScavengedBitsCleared(mismatches[..]); if (!ok) {
             Ꮡt.Errorf("uncleared scavenged bits"u8);
-            foreach (var (_, m) in mismatches[..(int)(n)]) {
+            foreach (var (_, m) in mismatches.slice(0, n)) {
                 Ꮡt.Logf("\t@ address 0x%x"u8, m.Base);
                 Ꮡt.Logf("\t|  got: %064b"u8, m.Got);
                 Ꮡt.Logf("\t| want: %064b"u8, m.Want);

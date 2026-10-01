@@ -136,7 +136,7 @@ internal static void verifyGCInfo(ж<testing.T> Ꮡt, @string name, any p, slice
 
 internal static slice<byte> trimDead(slice<byte> mask) {
     while (len(mask) > 0 && mask[len(mask) - 1] == typeScalar) {
-        mask = mask[..(int)(len(mask) - 1)];
+        mask = mask.slice(0, len(mask) - 1);
     }
     return mask;
 }

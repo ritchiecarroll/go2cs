@@ -13,6 +13,7 @@ using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
+using System.Runtime.CompilerServices;
 using encoding;
 using global::go.math;
 using static global::go.runtime_internal_test_package;
@@ -318,7 +319,7 @@ internal static slice<nint> cyclicPermutation(nint n) {
     var inc = new slice<nint>(n);
     var pInv = new slice<nint>(n);
     for (nint i = 0; i < n; i++) {
-        inc[i] = (i + 1) % n;
+        inc[i] = rem((i + 1), n);
         pInv[p[i]] = i;
     }
     var res = new slice<nint>(n);
@@ -770,7 +771,7 @@ internal static slice<slice<T>> genIntSliceValues<T>(nint start, nint end)
 }
 
 internal static slice<T> genValues<T>(nint start, nint end) {
-    T t = default!;
+    T t = GoZero<T>();
     switch (((any)t).type()) {
     case int32: {
         return ((any)genIntValues<int32>(start, end))._<slice<T>>();
@@ -806,7 +807,7 @@ internal static slice<T> genValues<T>(nint start, nint end) {
 // Avoid inlining to force a heap allocation.
 //
 //go:noinline
-internal static ж<T> newSink<T>() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<T> newSink<T>() {
     return @new<T>();
 }
 
@@ -830,20 +831,20 @@ internal static nint iterCount(ж<testing.B> Ꮡb, nint n) {
     if (n == 0) {
         return b.N;
     }
-    return b.N / n;
+    return quo(b.N, n);
 }
 
 internal static void checkAllocSize<K, E>(ж<testing.B> Ꮡb, nint n) {
-    K k = default!;
+    K k = GoZero<K>();
     var size = (uint64)n * (uint64)@unsafe.Sizeof(k);
-    E e = default!;
+    E e = GoZero<E>();
     size += (uint64)n * (uint64)@unsafe.Sizeof(e);
     if (size >= ((uint64)1 << (int)(30))) {
         Ꮡb.Skipf("Total key+elem size %d exceeds 1GiB"u8, size);
     }
 }
 
-internal static void benchmarkMapIter<K, E>(ж<testing.B> Ꮡb, nint n) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkMapIter<K, E>(ж<testing.B> Ꮡb, nint n) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     checkAllocSize<K, E>(Ꮡb, n);
@@ -887,7 +888,7 @@ public static void BenchmarkMapIter(ж<testing.B> Ꮡb) {
     Ꮡb.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapIter<int32, ж<int32>>));
 }
 
-internal static void benchmarkMapIterLowLoad<K, E>(ж<testing.B> Ꮡb, nint n) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkMapIterLowLoad<K, E>(ж<testing.B> Ꮡb, nint n) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Only insert one entry regardless of map size.
@@ -925,7 +926,7 @@ public static void BenchmarkMapIterLowLoad(ж<testing.B> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object canTAccessEmptyMapˢ = (@string)"can't access empty map"u8;
 
-internal static void benchmarkMapAccessHit<K, E>(ж<testing.B> Ꮡb, nint n) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkMapAccessHit<K, E>(ж<testing.B> Ꮡb, nint n) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (n == 0) {
@@ -938,7 +939,7 @@ internal static void benchmarkMapAccessHit<K, E>(ж<testing.B> Ꮡb, nint n) {
     var sink = newSink<E>();
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        sink.ValueSlot = m[k[i % n]];
+        sink.ValueSlot = m[k[rem(i, n)]];
     }
 }
 
@@ -972,7 +973,7 @@ internal static void benchmarkMapAccessMiss<K, E>(ж<testing.B> Ꮡb, nint n) {
     b.ResetTimer();
     bool ok = default!;
     for (nint i = 0; i < b.N; i++) {
-        (_, ok) = m[w[i % n], ꟷ];
+        (_, ok) = m[w[rem(i, n)], ꟷ];
     }
     sinkOK = ok;
 }
@@ -1006,7 +1007,7 @@ internal static void benchmarkMapAssignExists<K, E>(ж<testing.B> Ꮡb, nint n) 
     var m = fillMap(k, e);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        m[k[i % n]] = e[i % n];
+        m[k[rem(i, n)]] = e[rem(i, n)];
     }
 }
 
@@ -1044,10 +1045,10 @@ internal static void benchmarkMapAssignFillNoHint<K, E>(ж<testing.B> Ꮡb, nint
     b.ResetTimer();
     map<K, E> m = default!;
     for (nint i = 0; i < b.N; i++) {
-        if (i % n == 0) {
+        if (rem(i, n) == 0) {
             m = new map<K, E>();
         }
-        m[k[i % n]] = e[i % n];
+        m[k[rem(i, n)]] = e[rem(i, n)];
     }
 }
 
@@ -1089,11 +1090,11 @@ internal static void benchmarkMapAssignGrowLatency<K, E>(ж<testing.B> Ꮡb, nin
     b.ResetTimer();
     map<K, E> m = default!;
     for (nint i = 0; i < b.N; i++) {
-        if (i % n == 0) {
+        if (rem(i, n) == 0) {
             m = new map<K, E>();
         }
         var start = runtime_internal_test_package.Nanotime();
-        m[k[i % n]] = e[i % n];
+        m[k[rem(i, n)]] = e[rem(i, n)];
         var end = runtime_internal_test_package.Nanotime();
         sample[i] = end - start;
     }
@@ -1138,10 +1139,10 @@ internal static void benchmarkMapAssignFillHint<K, E>(ж<testing.B> Ꮡb, nint n
     b.ResetTimer();
     map<K, E> m = default!;
     for (nint i = 0; i < b.N; i++) {
-        if (i % n == 0) {
+        if (rem(i, n) == 0) {
             m = new map<K, E>(n);
         }
-        m[k[i % n]] = e[i % n];
+        m[k[rem(i, n)]] = e[rem(i, n)];
     }
 }
 
@@ -1174,10 +1175,10 @@ internal static void benchmarkMapAssignFillClear<K, E>(ж<testing.B> Ꮡb, nint 
     var m = fillMap(k, e);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        if (i % n == 0) {
+        if (rem(i, n) == 0) {
             builtin.clear(m);
         }
-        m[k[i % n]] = e[i % n];
+        m[k[rem(i, n)]] = e[rem(i, n)];
     }
 }
 
@@ -1212,7 +1213,7 @@ internal static void benchmarkMapAssignAddition<K, E>(ж<testing.B> Ꮡb, nint n
     var m = fillMap(k, e);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        m[k[i % n]] += e[i % n];
+        m[k[rem(i, n)]] += e[rem(i, n)];
     }
 }
 
@@ -1241,7 +1242,7 @@ internal static void benchmarkMapAssignAppend<K>(ж<testing.B> Ꮡb, nint n) {
     var m = fillMap(k, e);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        m[k[i % n]] = append(m[k[i % n]], e[i % n][0]);
+        m[k[rem(i, n)]] = append(m[k[rem(i, n)]], e[rem(i, n)][0]);
     }
 }
 
@@ -1279,7 +1280,7 @@ internal static void benchmarkMapDelete<K, E>(ж<testing.B> Ꮡb, nint n) {
                 m[k[j]] = e[j];
             }
         }
-        delete(m, k[i % n]);
+        delete(m, k[rem(i, n)]);
     }
 }
 

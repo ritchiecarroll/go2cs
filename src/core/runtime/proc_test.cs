@@ -17,6 +17,7 @@ using syscall = syscall_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using System.Runtime.CompilerServices;
 using global::go.runtime;
 using global::go.sync;
 using static global::go.runtime_internal_test_package;
@@ -479,7 +480,7 @@ internal static readonly @string numGoroutineˢ = "NumGoroutine"u8;
 internal static readonly @string inGoroutineˢ = "in goroutine"u8;
 internal static readonly @string goroutineˢ = "goroutine "u8;
 
-public static void TestNumGoroutine(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestNumGoroutine(ж<testing.T> Ꮡt) {
     @string output = runTestProg(Ꮡt, testprogˢ, numGoroutineˢ);
     @string want = "1\n"u8;
     if (output != want) {
@@ -496,7 +497,7 @@ public static void TestNumGoroutine(ж<testing.T> Ꮡt) {
         // to keep it quiet is good.
         Δruntime.Gosched();
         nint n = Δruntime.NumGoroutine();
-        buf = buf[..(int)(Δruntime.Stack(buf, true))];
+        buf = buf.slice(0, Δruntime.Stack(buf, true));
         // To avoid double-counting "goroutine" in "goroutine $m [running]:"
         // and "created by $func in goroutine $n", remove the latter
         @string outputΔ1 = strings.ReplaceAll(((@string)buf), inGoroutineˢ, ""u8);
@@ -810,7 +811,7 @@ internal static void benchmarkCreateGoroutines(ж<testing.B> Ꮡb, nint procs) {
         goǃ(Ꮡf.ValueSlot, n - 1);
     };
     for (nint i = 0; i < procs; i++) {
-        goǃ(Ꮡf.ValueSlot, b.N / procs);
+        goǃ(Ꮡf.ValueSlot, quo(b.N, procs));
     }
     for (nint i = 0; i < procs; i++) {
         ᐸꟷ(c);

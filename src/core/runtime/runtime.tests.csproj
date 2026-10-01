@@ -119,8 +119,10 @@
     <Compile Include="ehooks_test.cs" />
     <Compile Include="env_test.cs" />
     <Compile Include="export_debuglog_test.cs" />
+    <Compile Include="export_impl_test.cs" />
     <Compile Include="export_map_swiss_test.cs" />
     <Compile Include="export_test.cs" />
+    <Compile Include="export_windows_impl_test.cs" />
     <Compile Include="export_windows_test.cs" />
     <Compile Include="fastlog2_test.cs" />
     <Compile Include="float_test.cs" />

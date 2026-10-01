@@ -16,6 +16,12 @@ partial class runtime_internal_test_package {
 internal static readonly object skippingTestWithInliningˢ = (@string)"skipping test with inlining optimizations disabled"u8;
 internal static readonly @string tiuˢ = "tiu"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantFileᶜ = "symtabinl_test.go"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string namePrefixᶜ = "runtime."u8;
+
 public static void XTestInlineUnwinder(TestingT t) {
     if (TestenvOptimizationOff()) {
         t.Skip(skippingTestWithInliningˢ);
@@ -55,13 +61,13 @@ public static void XTestInlineUnwinder(TestingT t) {
         }
         for (; uf.valid(); uf = u.next(uf)) {
             var (@file, line) = u.fileLine(uf);
-            @string wantFile = "symtabinl_test.go"u8;
+            @string wantFile = wantFileᶜ;
             if (!stringslite.HasSuffix(@file, wantFile)) {
                 t.Errorf("tiuTest+%#x: want file ...%s, got %s"u8, pc - pc1, wantFile, @file);
             }
             var sf = u.srcFunc(uf);
             @string name = sf.name();
-            @string namePrefix = "runtime."u8;
+            @string namePrefix = namePrefixᶜ;
             if (stringslite.HasPrefix(name, namePrefix)) {
                 name = name[(int)(len(namePrefix))..];
             }

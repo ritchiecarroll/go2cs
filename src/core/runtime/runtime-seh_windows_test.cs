@@ -11,6 +11,7 @@ using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.syscall;
+using System.Runtime.CompilerServices;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -93,18 +94,18 @@ internal static slice<uintptr> sehCallers() {
         n++;
         windows.RtlVirtualUnwind(0, @base, (~ctx).GetPC(), fn, (uintptr)ctx, nil, Ꮡframe, nil);
     }
-    return pcs[..(int)(n)];
+    return pcs.slice(0, n);
 }
 
 // SEH unwinding does not report inlined frames.
 //
 //go:noinline
-internal static slice<uintptr> sehf3(bool pan) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<uintptr> sehf3(bool pan) {
     return sehf4(pan);
 }
 
 //go:noinline
-internal static slice<uintptr> sehf4(bool pan) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<uintptr> sehf4(bool pan) {
     slice<uintptr> pcs = default!;
     if (pan) {
         throw panic("sehf4");

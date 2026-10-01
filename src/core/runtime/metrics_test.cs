@@ -25,6 +25,7 @@ using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
+using System.Runtime.CompilerServices;
 using global::go.runtime;
 using global::go.sync;
 using static global::go.runtime_internal_test_package;
@@ -601,8 +602,8 @@ public static void TestReadMetricsCumulative(ж<testing.T> Ꮡt) {
         samples[0][total].Name = descs[i].Name;
         total++;
     }
-    samples[0] = samples[0][..(int)(total)];
-    samples[1] = samples[1][..(int)(total)];
+    samples[0] = samples[0].slice(0, total);
+    samples[1] = samples[1].slice(0, total);
     copy(samples[1], samples[0]);
     // Start some noise in the background.
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -1070,7 +1071,7 @@ public static void TestSchedPauseMetrics(ж<testing.T> Ꮡt) {
             ),
             new(
                 name: "runtime.Stack"u8,
-                fn: (ж<testing.T> tΔ5) => {
+                fn: [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ5) => {
                     array<byte> b = new(64);
                     Δruntime.Stack(b[..], true);
                 }

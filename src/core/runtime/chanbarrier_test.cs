@@ -6,6 +6,7 @@ namespace go;
 using Δruntime = runtime_package;
 using Δsync = sync_package;
 using testing = testing_package;
+using System.Runtime.CompilerServices;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -96,7 +97,7 @@ internal static void testChanSendBarrier(bool useSelect) {
 }
 
 //go:noinline
-internal static slice<byte> makeByte() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<byte> makeByte() {
     return new slice<byte>((1 << (int)(10)));
 }
 

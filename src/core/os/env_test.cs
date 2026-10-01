@@ -130,8 +130,11 @@ public static void TestConsistentEnviron(ж<Δtesting.T> Ꮡt) {
 internal static readonly object setenvDidnTSetˢ = (@string)"Setenv didn't set TestUnsetenv"u8;
 internal static readonly object unsetenvDidnTClearˢ = (@string)"Unsetenv didn't clear TestUnsetenv"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testKeyᶜ = "GO_TEST_UNSETENV"u8;
+
 public static void TestUnsetenv(ж<Δtesting.T> Ꮡt) {
-    @string testKey = "GO_TEST_UNSETENV"u8;
+    @string testKey = testKeyᶜ;
     bool set() {
         @string prefix = testKey + "=";
         foreach (var (_, key) in Environ()) {
@@ -159,13 +162,19 @@ public static void TestUnsetenv(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testKeyᶜ1 = "GO_TEST_CLEARENV"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testValueᶜ = "1"u8;
+
 public static void TestClearenv(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        @string testKey = "GO_TEST_CLEARENV"u8;
-        @string testValue = "1"u8;
+        @string testKey = testKeyᶜ1;
+        @string testValue = testValueᶜ;
         // reset env
         defer((slice<@string> origEnv) => {
             foreach (var (_, pair) in origEnv) {
@@ -173,8 +182,8 @@ public static void TestClearenv(ж<Δtesting.T> Ꮡt) {
                 // https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133
                 nint i = strings.Index(pair[1..], "="u8) + 1;
                 {
-                    var err = Setenv(pair[..(int)(i)], pair[(int)(i + 1)..]); if (err != default!) {
-                        Ꮡt.Errorf("Setenv(%q, %q) failed during reset: %v"u8, pair[..(int)(i)], pair[(int)(i + 1)..], err);
+                    var err = Setenv(pair.slice(0, i), pair.slice(i + 1)); if (err != default!) {
+                        Ꮡt.Errorf("Setenv(%q, %q) failed during reset: %v"u8, pair.slice(0, i), pair.slice(i + 1), err);
                     }
                 }
             }
@@ -203,10 +212,13 @@ public static void TestClearenv(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string virusˢ = "virus"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string smallpoxᶜ = "SMALLPOX"u8;
+
 public static void TestLookupEnv(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string smallpox = "SMALLPOX"u8; // No one has smallpox.
+        @string smallpox = smallpoxᶜ; // No one has smallpox.
         var (value, ok) = LookupEnv(smallpox); // Should not exist.
         if (ok || value != ""u8) {
             Ꮡt.Fatalf("%s=%q"u8, smallpox, value);
@@ -244,8 +256,8 @@ public static void TestEnvironConsistency(ж<Δtesting.T> Ꮡt) {
         if (i < 0) {
             Ꮡt.Errorf("Environ entry missing '=': %q"u8, kv);
         }
-        @string k = kv[..(int)(i)];
-        @string v = kv[(int)(i + 1)..];
+        @string k = kv.slice(0, i);
+        @string v = kv.slice(i + 1);
         var (v2, ok) = LookupEnv(k);
         if (ok && v == v2){
             Ꮡt.Logf("LookupEnv(%q) = %q, %t"u8, k, v2, ok);

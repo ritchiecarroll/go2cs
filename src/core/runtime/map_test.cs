@@ -833,9 +833,12 @@ public static void TestIncrementAfterDeleteValueInt64(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string key2ᶜ = "x"u8;
+
 public static void TestIncrementAfterDeleteKeyStringValueInt(ж<testing.T> Ꮡt) {
     @string key1 = ""u8;
-    @string key2 = "x"u8;
+    @string key2 = key2ᶜ;
     var m = new map<@string, nint>();
     m[key1] = 99;
     delete(m, key1);
@@ -847,9 +850,12 @@ public static void TestIncrementAfterDeleteKeyStringValueInt(ж<testing.T> Ꮡt)
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string key2ᶜ1 = "x"u8;
+
 public static void TestIncrementAfterDeleteKeyValueString(ж<testing.T> Ꮡt) {
     @string key1 = ""u8;
-    @string key2 = "x"u8;
+    @string key2 = key2ᶜ1;
     var m = new map<@string, @string>();
     m[key1] = "99"u8;
     delete(m, key1);
@@ -861,12 +867,15 @@ public static void TestIncrementAfterDeleteKeyValueString(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string key2ᶜ2 = "x"u8;
+
 // TestIncrementAfterBulkClearKeyStringValueInt tests that map bulk
 // deletion (mapclear) still works as expected. Note that it was not
 // affected by Issue 25936.
 public static void TestIncrementAfterBulkClearKeyStringValueInt(ж<testing.T> Ꮡt) {
     @string key1 = ""u8;
-    @string key2 = "x"u8;
+    @string key2 = key2ᶜ2;
     var m = new map<@string, nint>();
     m[key1] = 99;
     foreach (var (k, _) in m) {
@@ -1121,7 +1130,7 @@ public static void TestEmptyMapWithInterfaceKey(ж<testing.T> Ꮡt) {
     });
     var meʗ20 = me;
     mustNotPanic(() => {
-        _ = meʗ20[up];
+        _ = meʗ20[@unsafe.Pointer.OrTypedNil(up)];
     });
     var chʗ1 = ch;
     var meʗ21 = me;
