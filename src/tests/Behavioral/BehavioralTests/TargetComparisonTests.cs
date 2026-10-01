@@ -553,6 +553,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckFloatKindConstArrayLength() => CheckTarget("FloatKindConstArrayLength");
 
     [TestMethod]
+    public void CheckForClauseSpill() => CheckTarget("ForClauseSpill");
+
+    [TestMethod]
     public void CheckForInitMixedTypes() => CheckTarget("ForInitMixedTypes");
 
     [TestMethod]

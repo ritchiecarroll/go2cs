@@ -65,9 +65,10 @@ func (v *Visitor) visitBranchStmt(branchStmt *ast.BranchStmt) {
 // loop's minted end-of-body label name; wrapper entries mark a `do { … } while (false)`
 // switch-break wrapper (visitSwitchStmtCore) — a C# iteration statement the Go source never had.
 type continueTargetEntry struct {
-	isWrapper bool   // a switch-break wrapper, not a Go loop
-	labelName string // loop entries: the minted `continueᴛN` end-of-body label
-	labelUsed bool   // loop entries: some wrapped continue targeted it — emit the label
+	isWrapper   bool   // a switch-break wrapper, not a Go loop
+	labelName   string // loop entries: the minted `continueᴛN` end-of-body label
+	labelUsed   bool   // loop entries: some wrapped continue targeted it — emit the label
+	forcesLabel bool   // loop entries: EVERY continue must reach the label (a lowered post clause follows it)
 }
 
 // wrappedContinueLoopLabel reports the label an unlabeled `continue` must `goto` when the
@@ -76,11 +77,22 @@ type continueTargetEntry struct {
 // so the loop's emitter writes it (visitForStmt / visitRangeStmt replace a marker in the loop
 // body's innerSuffix). Returns "" when the continue may be emitted bare: the top of the stack is
 // a real loop (or the stack is empty — a continue outside any loop does not compile in Go, so
-// emission cannot reach that state with a wrapper on top).
+// emission cannot reach that state with a wrapper on top). A loop whose post clause was lowered into
+// the end of its body (visitForStmt: a post that spills a pre-statement) has no header post for a bare
+// `continue` to run, so EVERY continue to it goes to the label, which the lowered post follows.
 func (v *Visitor) wrappedContinueLoopLabel() string {
 	count := len(v.continueTargetStack)
 
-	if count == 0 || !v.continueTargetStack[count-1].isWrapper {
+	if count == 0 {
+		return ""
+	}
+
+	if top := v.continueTargetStack[count-1]; !top.isWrapper {
+		if top.forcesLabel {
+			top.labelUsed = true
+			return top.labelName
+		}
+
 		return ""
 	}
 
