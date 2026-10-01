@@ -6,7 +6,7 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `os` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-10-01 · converter `8b5396a1a`*
+*Validated 2026-10-01 · converter `75648a022`*
 
 **1106 matched · 2 disclosed** — Go 1.24.13, `windows/amd64`, converted package
 [`src/core/os`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/os).
@@ -15,7 +15,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 
 Both runtimes skip 25 of the matched tests identically.
 
-> ⚠ Eight tests fail AGREEING on both runtimes — `TestReadlink` with its six subtests (`symlink_dir_drive_absolute`, `symlink_dir_volume_absolute`, `symlink_dir_volume_relative`, `symlink_file_drive_absolute`, `symlink_file_volume_absolute`, `symlink_file_volume_relative`) and `TestOpenFileCreateExclDanglingSymlink` — because this host does not hold the Windows symbolic-link creation privilege (`SeCreateSymbolicLinkPrivilege`), so neither runtime can create the links the tests read back. The verdicts agree name for name and therefore count as matched, and the arithmetic closes: 685 = 645 pass + 32 skip + 8 agreeing-fail. But NEITHER side ran the thing under test, and that is the distinction this note exists to carry: an agreeing failure on an ABSENT CAPABILITY masks a question, where an agreeing failure on shared semantics answers one. **683 of 685 is what a host without that privilege can score.** On a host holding it those eight should pass on the Go side, the converted side's behaviour there is UNMEASURED, and this row's next bank states its privilege context rather than inheriting this one. PROVENANCE: first measured on G-LAPTOP. A SECOND HOST HAS NOW READ THIS ROW AND AGREES: the i7 read os cold as part of the reflect-importer canary set on 2026-09-07 (the row entered that set when it banked) and reported PASS 683 matched / 2 disclosed at Release with tiering off, identical name for name. The clause this note used to carry - that no second host had read it, because the validated sweep enumerates the roster and a first-time bank is outside it by construction - is therefore SUPERSEDED, by exactly the mechanism it predicted. WHAT IS NOT SUPERSEDED IS THE PRIVILEGE CAVEAT ABOVE: that host also lacks SeCreateSymbolicLinkPrivilege, so the same eight agreeing-fails appear there, 683 of 685 remains what a host without that privilege can score, and the converted side behaviour WITH the privilege is still UNMEASURED on any host. Two hosts agreeing on a number both obtained without the capability is a reproducibility result, not a capability one.
+> ⚠ Ten verdict rows depend on creating symbolic links on Windows: `TestReadlink` with its six symlink subtests (`symlink_dir_drive_absolute`, `symlink_dir_volume_absolute`, `symlink_dir_volume_relative`, `symlink_file_drive_absolute`, `symlink_file_volume_absolute`, `symlink_file_volume_relative`), and `TestOpenFileCreateExclDanglingSymlink` with its `InRoot` and `NoRoot` subtests. They need unprivileged symbolic-link creation, which Windows grants under Developer Mode or to a holder of `SeCreateSymbolicLinkPrivilege`. On a host with it, all ten run and pass on both runtimes (measured 2026-10-01). On a host without it, all ten fail on both runtimes, agreeing name for name, so they count as matched without exercising the code under test; that is why a bank of this row states its host context.
 
 ## Verdicts
 
