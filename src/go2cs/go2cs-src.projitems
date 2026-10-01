@@ -36,6 +36,7 @@
     <None Include="$(MSBuildThisFileDirectory)buildConstraints_test.go" />
     <None Include="$(MSBuildThisFileDirectory)callerInliningAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)callerSkipWindowFrames_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)goCreatorFrame_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeNamedIntType_test.go" />
