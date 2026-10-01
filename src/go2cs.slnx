@@ -472,6 +472,7 @@
     <Project Path="tests/Behavioral/ForeignPointerImplementSuppression/tone/ForeignPointerImplementSuppression.tone.csproj" />
     <Project Path="tests/Behavioral/ForeignValueImplementSuppression/ForeignValueImplementSuppression.csproj" />
     <Project Path="tests/Behavioral/ForeignValueImplementSuppression/hue/ForeignValueImplementSuppression.hue.csproj" />
+    <Project Path="tests/Behavioral/ForeverWaitWorkersMainReturns/ForeverWaitWorkersMainReturns.csproj" />
     <Project Path="tests/Behavioral/FuncFieldUnexportedType/FuncFieldUnexportedType.csproj" />
     <Project Path="tests/Behavioral/FuncLitArgCapture/FuncLitArgCapture.csproj" />
     <Project Path="tests/Behavioral/FuncLitCaptureInCondition/FuncLitCaptureInCondition.csproj" />
@@ -599,6 +600,8 @@
     <Project Path="tests/Behavioral/LocalTypeSliceElement/LocalTypeSliceElement.csproj" />
     <Project Path="tests/Behavioral/LongPathRoundTrip/LongPathRoundTrip.csproj" />
     <Project Path="tests/Behavioral/LookupServicePort/LookupServicePort.csproj" />
+    <Project Path="tests/Behavioral/MainSelectForeverAfterFunc/MainSelectForeverAfterFunc.csproj" />
+    <Project Path="tests/Behavioral/MainSelectForeverWorkerExits/MainSelectForeverWorkerExits.csproj" />
     <Project Path="tests/Behavioral/MakeLenNamedNumeric/MakeLenNamedNumeric.csproj" />
     <Project Path="tests/Behavioral/MakeSlicePanicRange/MakeSlicePanicRange.csproj" />
     <Project Path="tests/Behavioral/MakeSliceUintptrLen/MakeSliceUintptrLen.csproj" />
