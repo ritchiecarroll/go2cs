@@ -101,7 +101,8 @@ public sealed class Goroutine
     // The panic observer, when a HOST installed one. Read once per escaping panic and never cleared.
     private static Action<PanicException>? s_panicObserver;
 
-    private Goroutine(long id, bool isMain, System.Reflection.MethodBase? creator, int creatorILOffset, long parentId, System.Reflection.MethodBase? entry)
+    private Goroutine(long id, bool isMain, System.Reflection.MethodBase? creator, int creatorILOffset, long parentId, System.Reflection.MethodBase? entry,
+        System.Reflection.MethodBase? systemBasis)
     {
         Id = id;
         IsMain = isMain;
@@ -109,7 +110,7 @@ public sealed class Goroutine
         CreatorILOffset = creatorILOffset;
         ParentId = parentId;
         Entry = entry;
-        IsSystem = !isMain && IsSystemCreator(creator);
+        IsSystem = !isMain && IsSystemCreator(systemBasis ?? entry ?? creator);
     }
 
     // Why this goroutine is parked, or WaitReason.Zero when it is not — Go's gp.waitreason, and the
@@ -235,19 +236,27 @@ public sealed class Goroutine
 
     // Go's isSystemGoroutine (runtime/traceback.go): a goroutine whose start function lives in the
     // runtime package -- less runtime.main, which has no creator here and is never system. Decided
-    // from the CREATOR's package rather than the entry closure's: the runtime starts its own
-    // goroutines from its own functions (the unique map-cleanup goroutine, mgc.go, is started
-    // inside the runtime precisely "so it's counted as a system goroutine"), so the two agree by
-    // construction for every `go` the runtime executes. What it decides: runtime.Stack(all) omits
+    // from the START FUNCTION (Entry), as Go decides from gp.startpc, and from the creator only where
+    // no start function was recorded (a host-entered thread). Until 2026-10-01 it read the CREATOR,
+    // on the reasoning that the runtime starts its own goroutines from its own functions, so the two
+    // "agree by construction". They agree only while the creator's FRAME survives: the creator is
+    // found by walking the launching stack, and a full-opt JIT (DOTNET_TieredCompilation=0) elides
+    // a frame whose last statement is the `go` -- measured on net/http at TC0, unique's map-cleanup
+    // goroutine (started inside the runtime precisely "so it's counted as a system goroutine",
+    // mgc.go) read `created by sync.(*Once).doSlow`, classified USER, and TestMain's leak check
+    // counted it; tiered runs those first calls unoptimized and read clean. Entry is captured from
+    // the launcher's delegate, where no frame can be elided. One stated divergence: Go wraps a `go`
+    // call WITH arguments in a closure of the CALLER's package (gowrap), so user code's
+    // `go runtime.F(x)` is a user goroutine in Go and a system one here. What it decides: runtime.Stack(all) omits
     // these unless GOTRACEBACK asks for them, and NumGoroutine does not count them -- both exactly
     // as Go, where a leak filter over a traceback never has to name the runtime's own goroutines.
     // The finalizer-goroutine nuance (runfinq counts as user while it runs a finalizer) is not
     // modelled: the finalizer runner is a plain thread here, not a registered goroutine.
     // Two edges, stated so the next reader does not "fix" them: the main goroutine and a thread a
     // host entered directly carry no creator and are USER goroutines (Go's runtime.main exclusion);
-    // and a hand-own that launches a goroutine from a golib type rather than from runtime_package
-    // reads as USER too -- correct by Go's rule, since Go would not have started it in the runtime
-    // either. Only a `go` executed by runtime's own converted or hand-owned functions is system.
+    // and a goroutine whose start function is a golib type rather than runtime_package reads as USER
+    // too -- correct by Go's rule, since Go would not have started it in the runtime either. Only a
+    // goroutine whose body BEGINS in runtime's own converted or hand-owned functions is system.
     internal bool IsSystem { get; }
 
     internal static bool IsSystemCreator(System.Reflection.MethodBase? creator)
@@ -884,10 +893,16 @@ public sealed class Goroutine
     /// The guard seam for <see cref="Start"/>: the same launch with the creator SUPPLIED, so a test can
     /// register a goroutine as the runtime's own without a runtime function to execute the `go`.
     /// </summary>
+    /// <remarks>
+    /// The supplied creator is also the CLASSIFICATION basis: the body stays the recorded start
+    /// function, because the profile guards identify their goroutines by it, and a test body is never
+    /// a runtime function -- so classifying by it would make every guard a user goroutine.
+    /// </remarks>
     internal static void StartForGuard(Action body, System.Reflection.MethodBase? creator) =>
-        StartWithCreator(body, creator, System.Diagnostics.StackFrame.OFFSET_UNKNOWN, body.Method);
+        StartWithCreator(body, creator, System.Diagnostics.StackFrame.OFFSET_UNKNOWN, body.Method, systemBasis: creator);
 
-    private static void StartWithCreator(Action body, System.Reflection.MethodBase? creator, int creatorILOffset, System.Reflection.MethodBase? entry)
+    private static void StartWithCreator(Action body, System.Reflection.MethodBase? creator, int creatorILOffset, System.Reflection.MethodBase? entry,
+        System.Reflection.MethodBase? systemBasis = null)
     {
         long parentId = t_current?.Id ?? 0;
 
@@ -903,7 +918,7 @@ public sealed class Goroutine
         // out of NumGoroutine, runtime.Stack(all) and the goroutine profile until that thread was
         // scheduled -- which runtime/pprof's "goroutine launches" subtest reads as a missing child.
         // The labels are this thread's AsyncLocal, the value the child's flowed context would hold.
-        Goroutine goroutine = Register(isMain: false, creator, parentId, entry, s_profileLabels.Value, creatorILOffset);
+        Goroutine goroutine = Register(isMain: false, creator, parentId, entry, s_profileLabels.Value, creatorILOffset, systemBasis);
 
         // Go's newproc traces the create on the creating thread (ExecutionTracer, Q28).
         if (ExecutionTracer.Enabled)
@@ -1024,7 +1039,7 @@ public sealed class Goroutine
     // `labels` seeds the profile mirror INSIDE the gate's shared section, together with the insertion:
     // a goroutine a profile can see is never one whose labels it cannot (see s_profileGate).
     private static Goroutine Register(bool isMain, System.Reflection.MethodBase? creator, long parentId, System.Reflection.MethodBase? entry, object? labels,
-        int creatorILOffset = System.Diagnostics.StackFrame.OFFSET_UNKNOWN)
+        int creatorILOffset = System.Diagnostics.StackFrame.OFFSET_UNKNOWN, System.Reflection.MethodBase? systemBasis = null)
     {
         s_profileGate.EnterReadLock();
 
@@ -1032,7 +1047,7 @@ public sealed class Goroutine
 
         try
         {
-            goroutine = new(Interlocked.Increment(ref s_nextId), isMain, creator, creatorILOffset, parentId, entry)
+            goroutine = new(Interlocked.Increment(ref s_nextId), isMain, creator, creatorILOffset, parentId, entry, systemBasis)
             {
                 m_profileLabels = labels
             };
