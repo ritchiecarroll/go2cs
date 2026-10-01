@@ -881,24 +881,41 @@ public sealed class Goroutine
             s_profileGate.ExitWriteLock();
         }
 
-        bool mainBlocked = false;
+        List<(WaitReason Reason, bool Readied, bool IsMain)> users = new(live.Length);
 
         foreach (Goroutine goroutine in live)
         {
-            if (!goroutine.CountsAsUser)
-                continue;
+            if (goroutine.CountsAsUser)
+                users.Add((goroutine.Reason, goroutine.IsReadied, ReferenceEquals(goroutine, s_main)));
+        }
 
-            // A forever wait is absorbing: once a goroutine is in one nothing ends it, so a reason read
-            // after the snapshot cannot go stale in the direction that matters.
-            if (goroutine.IsReadied || !IsForeverWait(goroutine.Reason))
+        return IsProvableDeadlock(users);
+    }
+
+    /// <summary>
+    /// The deadlock decision itself, over each user goroutine's (wait reason, readied, is main): every one
+    /// in a forever wait, and main among them.
+    /// </summary>
+    /// <remarks>
+    /// A forever wait is absorbing: once a goroutine is in one nothing ends it, so a reason read after the
+    /// snapshot cannot go stale in the direction that matters. Main must be among them: a host whose main
+    /// entry is not parked (the -tests host, a test framework) is never declared deadlocked, and Go exits
+    /// rather than reports once main returns. GolibTests ForeverWaitDeadlockDecisionTests pins the table,
+    /// including the named residual (an ordinary channel or sync wait anywhere means no report).
+    /// </remarks>
+    internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)
+    {
+        bool mainBlocked = false;
+
+        foreach ((WaitReason reason, bool readied, bool isMain) in users)
+        {
+            if (readied || !IsForeverWait(reason))
                 return false;
 
-            if (ReferenceEquals(goroutine, s_main))
+            if (isMain)
                 mainBlocked = true;
         }
 
-        // Main must be among them: a host whose main entry is not parked (the -tests host, a test
-        // framework) is never declared deadlocked, and Go exits rather than reports once main returns.
         return mainBlocked;
     }
 

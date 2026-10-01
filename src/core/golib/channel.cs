@@ -910,7 +910,7 @@ internal static class SelectRuntime
             // select{} or every case on a nil channel: blocks forever — the standing
             // nil-channel deadlock-grace path (matches plain send/receive on nil).
             if (!channel.Wait(CancellationToken.None, reason: WaitReason.SelectNoCases))
-                fatal(FatalError.DeadLock());
+                fatal(FatalError.DeadLock(), 2);
 
             return -1; // unreachable
         }
@@ -1508,7 +1508,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
             if (channel.Wait(CancellationToken.None, reason: WaitReason.ChanSendNilChan))
                 return;
 
-            fatal(FatalError.DeadLock());
+            fatal(FatalError.DeadLock(), 2);
             return;
         }
 
@@ -1644,7 +1644,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
             if (channel.Wait(CancellationToken.None, reason: WaitReason.ChanReceiveNilChan))
                 return default!;
 
-            fatal(FatalError.DeadLock());
+            fatal(FatalError.DeadLock(), 2);
             return default!;
         }
 
@@ -1679,7 +1679,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
             if (channel.Wait(CancellationToken.None, reason: WaitReason.ChanReceiveNilChan))
                 return (default!, false);
 
-            fatal(FatalError.DeadLock());
+            fatal(FatalError.DeadLock(), 2);
             return (default!, false);
         }
 
@@ -1846,7 +1846,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
             if (channel.Wait(CancellationToken.None, reason: WaitReason.ChanReceiveNilChan))
                 yield break;
 
-            fatal(FatalError.DeadLock());
+            fatal(FatalError.DeadLock(), 2);
             yield break;
         }
 
