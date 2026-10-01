@@ -36,7 +36,8 @@ import (
 // WHAT THIS GUARD IS, stated so it is not read as more: a RATCHET. It holds that the elision does not
 // come back. It does not prove RED 8 (a) cured anything -- that is (a)'s own A/B and i9's gate build.
 //
-// TWO FORMS, ONE GATED. The converter has a SECOND, legitimate erasure for pointer-core constraints
+// THREE FORMS, ONE GATED (the third, the methodless-union breadcrumb, is stated at methodlessUnionPattern;
+// it is REPORTED, never gated). The converter has a SECOND, legitimate erasure for pointer-core constraints
 // (`/* where P : *T (erased: P renders as ж<T>) */`), which moves the whole clause into a comment
 // rather than reducing it to `new()`. That form is REPORTED here and NOT gated: it is a deliberate
 // emission with its own precedent. Reporting it is what gives the guard's zero for that form a
@@ -72,6 +73,21 @@ var elidedConstraintPattern = regexp.MustCompile(`where\s+[A-Za-z_][A-Za-z0-9_]*
 // on one line.
 var erasedConstraintPattern = regexp.MustCompile(`/\*\s*where\s+[A-Za-z_][A-Za-z0-9_]*\s*:.*?\(erased:.*?\)\s*\*/`)
 
+// methodlessUnionPattern is the SECOND REPORTED form: a gated-form line whose breadcrumb is an inline
+// union of two or more type terms. Go forbids a multi-term union to contain an interface that
+// specifies methods, so no method set existed for `new()` to elide. That `new()` is the converter's
+// own pinned methodless-union answer (constraintProxyPointerUnion_test.go, the `valueKeyCurve`
+// control), not the RED 8 loss. A union of struct types has no C# constraint to render, where
+// `Point[P]` had one.
+// First corpus member, TRAIN K (2026-10-01): runtime/pprof's committed test source, at
+// testProfileRecordNullPadding[T runtime.StackRecord | runtime.MemProfileRecord | runtime.BlockProfileRecord].
+// The term grammar admits no braces, parentheses, semicolons or pointer stars. An inline interface
+// that carries methods, and a pointer term (whose methodless union emits no constraint at all, so it
+// can never reach `new()` legitimately), therefore stay in the gated column.
+var methodlessUnionPattern = regexp.MustCompile(`where\s+[A-Za-z_][A-Za-z0-9_]*\s*:\s*/\*\s*` + unionTerm + `(?:\s*\|\s*` + unionTerm + `)+\s*\*/\s*new\(\)`)
+
+const unionTerm = `~?[A-Za-z_][A-Za-z0-9_.]*(?:\[[A-Za-z0-9_., \[\]]*\])?`
+
 // declaredElidedConstraints is the declared set: "<path relative to src/core>:<line>". It SHRINKS as
 // seats land and it NEVER GROWS -- a new elided constraint is a converter defect, fixed at the
 // converter, never admitted here. Empty once RED 8 (a) is at the tip.
@@ -80,6 +96,7 @@ var declaredElidedConstraints = []string{}
 type elidedScan struct {
 	elided []string // "<path>:<line>" for the gated form
 	erased []string // "<path>:<line>" for the reported form
+	union  []string // "<path>:<line>" for the methodless-union breadcrumb (reported)
 	files  int
 }
 
@@ -107,7 +124,11 @@ func scanElidedConstraints(t *testing.T, root string, tracked []string) elidedSc
 
 		for i, line := range strings.Split(strings.ReplaceAll(string(body), "\r\n", "\n"), "\n") {
 			if elidedConstraintPattern.MatchString(line) {
-				scan.elided = append(scan.elided, fmt.Sprintf("%s:%d", rest, i+1))
+				if methodlessUnionPattern.MatchString(line) {
+					scan.union = append(scan.union, fmt.Sprintf("%s:%d", rest, i+1))
+				} else {
+					scan.elided = append(scan.elided, fmt.Sprintf("%s:%d", rest, i+1))
+				}
 			}
 
 			if erasedConstraintPattern.MatchString(line) {
@@ -118,6 +139,7 @@ func scanElidedConstraints(t *testing.T, root string, tracked []string) elidedSc
 
 	sort.Strings(scan.elided)
 	sort.Strings(scan.erased)
+	sort.Strings(scan.union)
 
 	return scan
 }
@@ -172,8 +194,10 @@ func TestNoElidedConstraintsInCommittedSources(t *testing.T) {
 		}
 	}
 
-	t.Logf("scanned %d .cs · declared %d · measured %d · pointer-core erasures reported (not gated) %d",
-		scan.files, len(declaredElidedConstraints), len(scan.elided), len(scan.erased))
+	t.Logf("scanned %d .cs · declared %d · measured %d · pointer-core erasures reported (not gated) %d · "+
+		"methodless-union breadcrumbs reported (not gated) %d: %s",
+		scan.files, len(declaredElidedConstraints), len(scan.elided), len(scan.erased), len(scan.union),
+		strings.Join(scan.union, ", "))
 }
 
 // TestElidedConstraintScannerFiresOnBothForms is the positive control, and it plants BOTH forms.
@@ -204,6 +228,14 @@ func TestElidedConstraintScannerFiresOnBothForms(t *testing.T) {
 	// prefix: a commented constraint followed by a REAL C# clause. It must NOT match.
 	write("src/core/planted/nearmiss.cs", "    where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>\n")
 	write("src/notcore/planted/elided.cs", "    where P : /* Point[P] */ new()\n")
+	// The methodless-union breadcrumb, in the corpus member's own spelling and with approximation terms:
+	// REPORTED, never gated.
+	write("src/core/planted/union.cs", "    where T : /* runtime.StackRecord | runtime.MemProfileRecord | runtime.BlockProfileRecord */ new()\n")
+	write("src/core/planted/tilde.cs", "    where T : /* ~int | ~string */ new()\n")
+	// Its two near-misses stay GATED: an inline interface that carries methods beside its union, and a
+	// pointer term. Without them the union arm would pass for a change that admits every `|`.
+	write("src/core/planted/unionmethods.cs", "    where T : /* interface{ ~int | ~string; String() string } */ new()\n")
+	write("src/core/planted/unionptr.cs", "    where T : /* *Node | Leaf */ new()\n")
 
 	tracked := []string{
 		"src/core/planted/elided.cs",
@@ -212,11 +244,15 @@ func TestElidedConstraintScannerFiresOnBothForms(t *testing.T) {
 		"src/core/planted/clean.cs",
 		"src/core/planted/nearmiss.cs",
 		"src/notcore/planted/elided.cs",
+		"src/core/planted/union.cs",
+		"src/core/planted/tilde.cs",
+		"src/core/planted/unionmethods.cs",
+		"src/core/planted/unionptr.cs",
 	}
 
 	scan := scanElidedConstraints(t, root, tracked)
 
-	wantElided := []string{"planted/elided.cs:2", "planted/qualified.cs:1"}
+	wantElided := []string{"planted/elided.cs:2", "planted/qualified.cs:1", "planted/unionmethods.cs:1", "planted/unionptr.cs:1"}
 
 	if strings.Join(scan.elided, ",") != strings.Join(wantElided, ",") {
 		t.Errorf("gated form: want %v, got %v", wantElided, scan.elided)
@@ -229,7 +265,13 @@ func TestElidedConstraintScannerFiresOnBothForms(t *testing.T) {
 			"which is why this plant exists", wantErased, scan.erased)
 	}
 
-	if scan.files != 5 {
-		t.Errorf("scanned %d files, want 5 (the src/core plants only; src/notcore is out of scope)", scan.files)
+	wantUnion := []string{"planted/tilde.cs:1", "planted/union.cs:1"}
+
+	if strings.Join(scan.union, ",") != strings.Join(wantUnion, ",") {
+		t.Errorf("methodless-union form: want %v, got %v", wantUnion, scan.union)
+	}
+
+	if scan.files != 9 {
+		t.Errorf("scanned %d files, want 9 (the src/core plants only; src/notcore is out of scope)", scan.files)
 	}
 }
