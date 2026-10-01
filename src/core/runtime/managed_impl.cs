@@ -1927,6 +1927,52 @@ partial class runtime_package
     private static readonly object s_pdbLock = new();
     private static readonly Dictionary<System.Reflection.Assembly, System.Reflection.Metadata.MetadataReaderProvider?> s_pdbs = new();
 
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, int[]?> s_sequencePointOffsets = new();
+
+    // The IL offsets at which a method's non-hidden sequence points (its statements) start, ascending,
+    // or null when its PDB cannot be read. Read once per method; see returnSiteILOffset.
+    private static int[]? sequencePointOffsets(System.Reflection.MethodBase method) =>
+        s_sequencePointOffsets.GetOrAdd(method, static m =>
+        {
+            System.Reflection.Assembly assembly = m.Module.Assembly;
+            System.Reflection.Metadata.MetadataReaderProvider? provider;
+
+            lock (s_pdbLock)
+            {
+                if (!s_pdbs.TryGetValue(assembly, out provider))
+                {
+                    provider = openPortablePdb(assembly);
+                    s_pdbs[assembly] = provider;
+                }
+            }
+
+            if (provider is null)
+                return null;
+
+            try
+            {
+                lock (s_pdbLock)
+                {
+                    System.Reflection.Metadata.MetadataReader pdb = provider.GetMetadataReader();
+                    var definition = System.Reflection.Metadata.Ecma335.MetadataTokens.MethodDefinitionHandle(m.MetadataToken);
+                    List<int> offsets = [];
+
+                    foreach (System.Reflection.Metadata.SequencePoint point in pdb.GetMethodDebugInformation(definition.ToDebugInformationHandle()).GetSequencePoints())
+                    {
+                        if (!point.IsHidden)
+                            offsets.Add(point.Offset);
+                    }
+
+                    offsets.Sort();
+                    return offsets.ToArray();
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        });
+
     // A method's first non-hidden sequence point (document name, line), or (null, 0). Given an IL
     // offset (not StackFrame.OFFSET_UNKNOWN), the last non-hidden sequence point at or before it
     // instead -- the lookup StackTrace(true) makes for a live frame -- falling back to the first.
@@ -3254,9 +3300,17 @@ partial class runtime_package
     // 2026-10-01 on internal/godebug's TestBisectTestCase (calls to Value at IL 21/45/69/93/117, each
     // statement's compare call at 37/61/85/109/133): TC0 frames read 11/37/61/85/109 -- the previous
     // statement's call, so every line was one early (TestCmdBisect: have 145-147, want 146-148) -- while
-    // tier-0 read 20/44/68/92/116, the instruction before each call. In both cases the call the frame is
-    // suspended in is the FIRST call-like instruction strictly after the reported offset, so that is the
-    // offset resolved. A miss that lands on another call of the same statement names the same line.
+    // tier-0 read 20/44/68/92/116, the instruction before each call.
+    //
+    // Which call, then, depends on what kind of mapping was found. A STATEMENT BOUNDARY (the offset is a
+    // sequence point's start) means the frame is inside that statement, so the suspended call is the first
+    // call-like instruction AT OR AFTER it -- including the boundary itself when the statement IS a call
+    // (`f()` as a statement, a package var initializer): measured in the layout A/B, resolving strictly
+    // after there moved runtime/pprof's TestMemoryProfiler frames and runtime's TestLineNumber one call
+    // LATE. Any other mapping is a previous CALL's record, so the suspended call is the first one STRICTLY
+    // after it. godebug's TC0 offsets read both kinds: 11 (a boundary, -> 21) and 37 (a call, -> 45); its
+    // tier-0 offset 20 is a boundary (-> 21). A miss that lands on another call of the same statement
+    // names the same line.
     //
     // Two limits, stated. (1) "Previous" is in NATIVE order, so where block layout departs from IL order
     // the next IL call may not be the suspended one; the gates measured the line-attribution rows at TC0
@@ -3268,11 +3322,13 @@ partial class runtime_package
             return -1;
 
         int[]? calls = callSiteOffsets(method);
+        int[]? statements = sequencePointOffsets(method);
 
-        if (calls is null)
+        if (calls is null || statements is null)
             return -1;
 
-        int index = Array.BinarySearch(calls, ilOffset + 1);
+        bool boundary = Array.BinarySearch(statements, ilOffset) >= 0;
+        int index = Array.BinarySearch(calls, boundary ? ilOffset : ilOffset + 1);
 
         if (index < 0)
             index = ~index;
