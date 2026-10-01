@@ -502,6 +502,25 @@ partial class time_package
     // interrupts an in-progress wait.
     private static readonly object s_timerLock = new();
     private static readonly PriorityQueue<(runtimeTimer timer, int64 gen), int64> s_timerHeap = new();
+
+    // golib's deadlock report asks whether a timer is still pending (Go: checkdead's timer scan), since
+    // an AfterFunc can still start a goroutine. Registered with the heap itself, so it exists whenever a
+    // timer can; a stale (stopped) entry still in the heap reads as pending, which only DELAYS a report.
+    private static readonly bool s_pendingTimerProbeRegistered = RegisterPendingTimerProbe();
+
+    private static bool RegisterPendingTimerProbe()
+    {
+        global::go.golib.Goroutine.RegisterPendingTimerProbe(static () =>
+        {
+            lock (s_timerLock)
+            {
+                return s_timerHeap.Count > 0;
+            }
+        });
+
+        return true;
+    }
+
     private static readonly AutoResetEvent s_timerWake = new(false);
     private static Thread? s_timerThread;
 

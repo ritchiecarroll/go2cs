@@ -825,6 +825,83 @@ public sealed class Goroutine
     /// </summary>
     internal static Action? SnapshotSeamForGuard;
 
+    // ---- Go's checkdead, at the shape the managed runtime can PROVE ----
+    //
+    // Go parks a goroutine blocked on a nil channel or in `select {}` FOREVER and reports "all goroutines
+    // are asleep - deadlock!" only when nothing can run again (runtime.checkdead: no running M, no
+    // pending timer). golib used to end the process 200 ms after the FIRST such block whatever else was
+    // alive, which killed Go's `go serve(); select {}` main idiom and every program that leaks a
+    // parked goroutine -- net/rpc's TestSendDeadlock trips it at host teardown (TRAIN K union).
+    //
+    // A managed goroutine can also be woken by things that are not goroutines: a timer callback, an I/O
+    // completion, a signal, a host thread. So "every goroutine is parked" is NOT provable here, and a
+    // detector built on it would kill a live program (a ticker worker parked on its channel beside a
+    // `select {}` main). What IS provable is the FOREVER wait: nothing can ever wake a nil-channel op or
+    // a `select {}`. The report is therefore Go's rule restricted to that shape: every user goroutine,
+    // MAIN included, sits in a forever wait, no new goroutine appeared during the check, and package
+    // time holds no pending timer (an AfterFunc can still start one -- checkdead waits for timers too).
+    // A deadlock that involves an ordinary channel or sync wait is not reported; it blocks, as it did
+    // before this rule existed for every shape but the nil-channel one.
+
+    private static Func<bool>? s_pendingTimerProbe;
+
+    /// <summary>
+    /// Registers package time's answer to "is any timer still pending?" (Go: checkdead's timer scan).
+    /// </summary>
+    public static void RegisterPendingTimerProbe(Func<bool> anyPending) => Volatile.Write(ref s_pendingTimerProbe, anyPending);
+
+    // Waits nothing can ever end: a nil-channel receive or send, and a select with no live case.
+    internal static bool IsForeverWait(WaitReason reason) =>
+        reason is WaitReason.ChanReceiveNilChan or WaitReason.ChanSendNilChan or WaitReason.SelectNoCases;
+
+    /// <summary>
+    /// Whether the process is provably deadlocked: every user goroutine, the main goroutine among them,
+    /// is parked in a forever wait, and no timer is pending.
+    /// </summary>
+    internal static bool AllGoroutinesForeverBlocked()
+    {
+        // The timer probe FIRST: a timer that fires after this read starts its goroutine through Register,
+        // which the exclusive section below either sees whole or excludes whole.
+        if (Volatile.Read(ref s_pendingTimerProbe) is { } anyPending && anyPending())
+            return false;
+
+        Goroutine[] live;
+
+        // Exclusive on the profile gate: Register mints the id and inserts the entry inside its SHARED
+        // section, so no goroutine is ever half-registered while this snapshot is taken. The caller is a
+        // parked goroutine holding no gate (NoRecursion would throw, not deadlock, if that changed).
+        s_profileGate.EnterWriteLock();
+
+        try
+        {
+            live = Snapshot();
+        }
+        finally
+        {
+            s_profileGate.ExitWriteLock();
+        }
+
+        bool mainBlocked = false;
+
+        foreach (Goroutine goroutine in live)
+        {
+            if (!goroutine.CountsAsUser)
+                continue;
+
+            // A forever wait is absorbing: once a goroutine is in one nothing ends it, so a reason read
+            // after the snapshot cannot go stale in the direction that matters.
+            if (goroutine.IsReadied || !IsForeverWait(goroutine.Reason))
+                return false;
+
+            if (ReferenceEquals(goroutine, s_main))
+                mainBlocked = true;
+        }
+
+        // Main must be among them: a host whose main entry is not parked (the -tests host, a test
+        // framework) is never declared deadlocked, and Go exits rather than reports once main returns.
+        return mainBlocked;
+    }
+
     /// <summary>
     /// Every live goroutine, ordered by the sequence in which they were created.
     /// </summary>

@@ -1932,9 +1932,10 @@ public static class channel
     public const int DeadLockDetectionTimeout = 200;
 
     /// <summary>
-    /// Sleeps for the deadlock-grace <paramref name="timeout"/> used by operations on a nil
-    /// channel, returning <c>true</c> only if <paramref name="token"/> was canceled first —
-    /// <c>false</c> means the timeout elapsed (the caller reports the deadlock).
+    /// Blocks an operation on a nil channel (or a <c>select</c> with no live case): FOREVER for an
+    /// uncancelable token, returning <c>false</c> only once the process is provably deadlocked (the
+    /// caller reports it); <c>true</c> only if a cancelable <paramref name="token"/> was canceled first.
+    /// <paramref name="timeout"/> is the period between deadlock checks.
     /// </summary>
     /// <remarks>
     /// <paramref name="reason"/> is the park accounting a traceback reads while the grace elapses.
@@ -1962,8 +1963,24 @@ public static class channel
 
         using (Goroutine.Park(reason))
         {
+            // A FOREVER wait parks forever, as Go's does, and reports the deadlock only when Go's
+            // checkdead would and the managed runtime can prove it: every user goroutine, main included,
+            // in a forever wait, and no timer pending (Goroutine.AllGoroutinesForeverBlocked). Checked
+            // every `timeout`, so a main goroutine blocked alone still reports after the first period.
+            // The thread is a background thread: when main returns, the process exits around it.
+            if (!token.CanBeCanceled && Goroutine.IsForeverWait(reason))
+            {
+                while (true)
+                {
+                    Thread.Sleep(timeout);
+
+                    if (Goroutine.AllGoroutinesForeverBlocked())
+                        return false;
+                }
+            }
+
             // Plain timed wait — every nil-channel op funnels here, so no per-call throwaway
-            // SemaphoreSlim. An uncancelable token (the in-tree callers all pass None) is a sleep.
+            // SemaphoreSlim. An uncancelable token with no forever reason is a sleep.
             if (!token.CanBeCanceled)
             {
                 Thread.Sleep(timeout);
