@@ -225,8 +225,34 @@ internal static class PackageAncestry
             }
             else if (!File.Exists(target))
             {
-                ((FileInfo)entry).CopyTo(target);
+                CopyWritable((FileInfo)entry, target);
             }
+        }
+    }
+
+    // A sandbox copy the run may write. Go makes every file under GOMODCACHE read-only (0444, ReadOnly
+    // on windows) -- and a GOTOOLCHAIN-downloaded GOROOT lives there too -- and CopyTo carries that onto
+    // the copy, so the harness's own fixture overwrite (CopyFixtures' File.Copy(…, true)) threw on the
+    // first file the module copy had already placed, and the recursive delete refused the sandbox
+    // afterwards. Measured 2026-10-01: google/uuid@v1.6.0 from GOMODCACHE died before any test ran,
+    // every verdict empty. Only the COPY is made writable; the user's file keeps its own mode.
+    private static void CopyWritable(FileInfo source, string target)
+    {
+        source.CopyTo(target);
+
+        if (OperatingSystem.IsWindows())
+        {
+            FileAttributes attributes = File.GetAttributes(target);
+
+            if ((attributes & FileAttributes.ReadOnly) != 0)
+                File.SetAttributes(target, attributes & ~FileAttributes.ReadOnly);
+        }
+        else
+        {
+            UnixFileMode mode = File.GetUnixFileMode(target);
+
+            if ((mode & UnixFileMode.UserWrite) == 0)
+                File.SetUnixFileMode(target, mode | UnixFileMode.UserWrite);
         }
     }
 
@@ -1251,7 +1277,7 @@ internal static class PackageAncestry
 
             try
             {
-                file.CopyTo(target);
+                CopyWritable(file, target);
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
