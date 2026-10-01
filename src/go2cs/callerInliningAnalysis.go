@@ -60,6 +60,11 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 	// that one frame, not its callers), and they never count as the package's Caller/Callers user the
 	// opaque-forwarder gate asks about.
 	var directed []types.Object
+	// launchers collects the declarations whose OWN body executes a `go` statement -- each is the
+	// creator golib names for that goroutine. They join after the fixed point, like directed, so a
+	// caller of one never joins (the creator is the frame executing the `go`, not its callers), and
+	// they never count as the Caller/Callers user the opaque-forwarder gate asks about.
+	var launchers []types.Object
 	// genericFuncs collects the GENERIC declarations: one that directly calls a seeded thin allocator
 	// joins the set once the allocators are decided (see callsSeededThinAllocator below).
 	type genericFunc struct {
@@ -95,6 +100,10 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 
 			if hasNoinlineDirective(fn.Doc) {
 				directed = append(directed, obj)
+			}
+
+			if executesGoStatement(fn.Body) {
+				launchers = append(launchers, obj)
 			}
 
 			if fn.Type.TypeParams != nil {
@@ -207,7 +216,49 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 		seed[obj] = true
 	}
 
+	// THE GO CREATOR: golib names a goroutine's creator (Go's gp.gopc, printed as `created by <func>`)
+	// by walking the launching thread's stack, so the function executing the `go` must keep its frame.
+	// Under the Release TieredCompilation=0 JIT it was elided two ways: inlined into its caller, or --
+	// for a `go` in tail position -- replaced by an opportunistic tail call into goǃ. Measured
+	// 2026-10-01: unique's map-cleanup goroutine read `created by sync.(*Once).doSlow` on net/http at
+	// TC0 (runtime.unique_runtime_registerUniqueMapCleanup, reached behind a delegate invoke, tail-called
+	// its trailing goǃ). A probe at TC0 showed [MethodImpl(NoInlining)] suppresses BOTH mechanisms, on a
+	// method and on a C# lambda or local function alike (correcting the earlier sizing claim that it
+	// could not reach a tail call). Func literals take the same rule in litNoInliningPrefix.
+	for _, obj := range launchers {
+		seed[obj] = true
+	}
+
 	return seed
+}
+
+// executesGoStatement reports whether body ITSELF executes a `go` statement -- one not inside a nested
+// func literal, which is its own frame and so its own creator. A literal that is the `go` statement's
+// callee (`go func() { ... }()`) is the goroutine's body, not a creator, and is not descended into.
+func executesGoStatement(body *ast.BlockStmt) bool {
+	if body == nil {
+		return false
+	}
+
+	found := false
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		switch n.(type) {
+		case *ast.FuncLit:
+			return false
+		case *ast.GoStmt:
+			found = true
+			return false
+		}
+
+		return true
+	})
+
+	return found
 }
 
 // hasNoinlineDirective reports whether a declaration's doc comment carries Go's `//go:noinline`. Go's
