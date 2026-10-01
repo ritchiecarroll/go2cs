@@ -308,6 +308,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckCrossPackagePointerReceiverVar() => CheckTarget("CrossPackagePointerReceiverVar");
 
     [TestMethod]
+    public void CheckCrossPackagePromotedValueMethod() => CheckTarget("CrossPackagePromotedValueMethod");
+
+    [TestMethod]
     public void CheckCrossPkgLiteralNestedField() => CheckTarget("CrossPkgLiteralNestedField");
 
     [TestMethod]
