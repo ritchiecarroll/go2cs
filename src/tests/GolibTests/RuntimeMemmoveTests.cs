@@ -165,8 +165,11 @@ public class RuntimeMemmoveTests
         Assert.IsTrue(ManagedPointerTokens.IsTaggedToken(p0.Value.Value), "&s[0] over []*int is an order token");
         Assert.AreSame(b0, p0.RetainedSource, "a token mint carries its box");
         Assert.IsNotNull(ManagedPointerTokens.Resolve(p0.Value.Value), "the token resolves through the registry");
-        Assert.AreEqual((nuint)1, p1.Value.Value - p0.Value.Value,
-            "same-array element tokens order by ELEMENT index (identity + ordering), not by a byte stride");
+        // Go BYTE offsets since 2026-10-01 (COORD ruling on c1-token-ids): the 2026-09-22 element-index unit
+        // put a field displacement and an element index in one space, so &s[0].f (offset 8) met &s[8].
+        // memmove counts elements from the referent and n / size, never from a token difference.
+        Assert.AreEqual((nuint)IntPtr.Size, p1.Value.Value - p0.Value.Value,
+            "same-array element tokens are one Go element (a pointer word) apart, as Go addresses are");
     }
 
     [TestMethod]

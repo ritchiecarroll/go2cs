@@ -37,7 +37,7 @@ namespace go;
 /// canonicalization that halved the token/hash workloads in the design's §2.2 measurement.
 /// </para>
 /// </remarks>
-public sealed class ElemRefBox<T> : ж<T>
+public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer
 {
     // The FAST arm: canonical backing + ABSOLUTE index, deref-equivalent by the indexer
     // definitions of the three arms that populate it. Null when the foreign arm is in effect.
@@ -186,8 +186,11 @@ public sealed class ElemRefBox<T> : ж<T>
     }
 
     /// <inheritdoc/>
-    // Canonical backing identity in the high bits with the ABSOLUTE element index below, so
-    // same-storage element pointers order by index exactly like Go addresses.
+    // Canonical backing identity in the high bits with the element's Go BYTE offset below (absolute
+    // index x Go element size), so same-storage element pointers order exactly like Go addresses and a
+    // field view through one (IInteriorPointer) adds its displacement in the same units: an unscaled
+    // index made &s[0].f (displacement 8) and &s[8] one number. The offset is kept to the low 32 bits,
+    // the allocation-offset space every token shares, as the index was.
     //
     // A STATED COST (option 3, accepted 2026-09-30). A T[] has no field to hold an id, so its id comes
     // from the identity table (a ConditionalWeakTable). Measured against the identity-hash base
@@ -208,9 +211,14 @@ public sealed class ElemRefBox<T> : ж<T>
                 return addr;
 
             (object storage, nint element) = CanonicalPair();
-            return unchecked(AllocationBase(ManagedPointerTokens.AllocationIdOf(storage)) + (nuint)(uint)element);
+            return unchecked(AllocationBase(ManagedPointerTokens.AllocationIdOf(storage)) + (nuint)(uint)((nuint)element * s_goStride));
         }
     }
+
+    // T's Go size, the step between elements' offsets. Underivable or zero (a zero-size element) steps by
+    // 1, which keeps distinct elements distinct, as the unscaled index did.
+    private static readonly nuint s_goStride =
+        GoReflect.TryGoSizeOf(typeof(T), null, out nuint size) && size != 0 ? size : 1;
 
     internal override ulong AllocationId => ManagedPointerTokens.AllocationIdOf(CanonicalPair().Item1);
 

@@ -37,7 +37,17 @@ internal interface INativeRooted
     bool IsNativeRooted { get; }
 }
 
-public sealed class FieldRefBox<T> : ж<T>, INativeRooted
+/// <summary>
+/// A pointer INTO an allocation, an element or field view, whose own token already carries its Go offset
+/// within that allocation. A field view taken through one builds on that token rather than on the
+/// allocation's base (option 3's base alone made &amp;s[0].f and &amp;s[1].f, and &amp;o.X.f and &amp;o.Y.f, one number).
+/// </summary>
+internal interface IInteriorPointer
+{
+    nuint PointerOrderToken { get; }
+}
+
+public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer
 {
     private readonly object m_source;
     private readonly FieldRefFunc<T> m_accessor;
@@ -79,7 +89,14 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted
     // down a nested chain.
     public override nuint PointerOrderToken =>
         m_pointerOrderToken != 0 ? m_pointerOrderToken :
-        m_pointerOrderToken = unchecked(AllocationBase(ManagedPointerTokens.AllocationIdOf(m_source)) + GoFieldDisplacement(m_source, m_token));
+        m_pointerOrderToken = unchecked(SourceBase(m_source) + GoFieldDisplacement(m_source, m_token));
+
+    // Where this field's displacement is counted from: an element or field view's own token, which
+    // already carries its Go offset within the allocation, else the allocation's base. Option 3 gave
+    // every view the allocation's base, so &s[0].f and &s[1].f, and &o.X.f and &o.Y.f, shared a number.
+    private static nuint SourceBase(object source) =>
+        source is IInteriorPointer interior && interior.PointerOrderToken is var token and not 0 ? token :
+        AllocationBase(ManagedPointerTokens.AllocationIdOf(source));
 
     internal override ulong AllocationId => ManagedPointerTokens.AllocationIdOf(m_source);
 
