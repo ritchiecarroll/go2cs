@@ -134,6 +134,103 @@ internal static class PackageAncestry
     }
 
     /// <summary>
+    /// The environment variable through which the converter's run hands a NON-standard-library package
+    /// its module's source root -- the on-disk half of <see cref="TryStageModule"/>'s input, read at run
+    /// time exactly as GOROOT is, so no machine path is ever emitted into a generated host.
+    /// </summary>
+    public const string ModuleRootEnvironmentVariable = "GO2CS_MODULE_ROOT";
+
+    /// <summary>
+    /// Stages a third-party package's MODULE ancestry: a real COPY of the module's source tree at
+    /// <c>runRoot/src/&lt;modulePath&gt;</c>, so the package sits at its relative path under its own
+    /// <c>go.mod</c> and a test reads <c>../test/key.pem</c>, <c>../go.mod</c> or its own non-Go files
+    /// as <c>go test</c> lets it.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>A COPY, never a link.</b> The GOROOT ancestry hard-links files and junctions directories,
+    /// which is sound for an installed toolchain and wrong for a USER's module: a converted test's own
+    /// write -- not the harness's -- would land in the real tree (rewriting a hard-linked go.mod, or a
+    /// file under a junctioned directory). A copy makes "the sandbox never writes into the user's module"
+    /// true by construction, for every writer, and needs no link privilege. It is also a real module
+    /// root, so <see cref="StageFixtureLinks"/> has nothing to add for a module-staged package.
+    /// </para>
+    /// <para>
+    /// The copy skips <c>.git</c>, a previous conversion's build output (<c>bin</c>/<c>obj</c>/<c>Generated</c>
+    /// holding no Go file), and the sandbox itself: a module whose tree CONTAINS this run's sandbox (its
+    /// output root inside the module) is copied whole except for that one directory, so the copy can
+    /// never recurse into its own destination. <c>vendor/</c> is copied.
+    /// </para>
+    /// </remarks>
+    /// <returns>true when the module was staged; false when it was skipped and the sandbox is unchanged.</returns>
+    public static bool TryStageModule(string? moduleRoot, string modulePath, string importPath, string runRoot, string workingDirectory)
+    {
+        if (string.IsNullOrWhiteSpace(moduleRoot) || string.IsNullOrEmpty(modulePath))
+            return false;
+
+        // The package must belong to the module the root claims, and the root must BE a module.
+        if (importPath != modulePath && !importPath.StartsWith(modulePath + "/", StringComparison.Ordinal))
+            return false;
+
+        if (!File.Exists(Path.Combine(moduleRoot, "go.mod")))
+            return false;
+
+        string[] moduleSegments = modulePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        string mirrorRoot = Path.Combine([runRoot, "src", .. moduleSegments]);
+
+        try
+        {
+            ReclaimAbandonedSandboxes(runRoot);
+            MarkOwner(runRoot);
+
+            CopyModuleTree(new DirectoryInfo(Path.GetFullPath(moduleRoot)), mirrorRoot, Path.GetFullPath(runRoot));
+            Directory.CreateDirectory(workingDirectory);
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
+        {
+            // A partially copied module is still a superset of the empty sandbox, so the run continues.
+            return false;
+        }
+    }
+
+    // Copies one level of the module tree, recursing into its directories, minus .git and the sandbox.
+    private static void CopyModuleTree(DirectoryInfo real, string mirror, string sandbox)
+    {
+        Directory.CreateDirectory(mirror);
+
+        foreach (FileSystemInfo entry in real.EnumerateFileSystemInfos())
+        {
+            string target = Path.Combine(mirror, entry.Name);
+
+            if (entry is DirectoryInfo directory)
+            {
+                string full = Path.GetFullPath(directory.FullName);
+
+                if (directory.Name == ".git" || full.Equals(sandbox, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                // A previous conversion's .NET build output (an in-place conversion leaves bin/, obj/ and
+                // Generated/ beside the Go sources) is not the module's. Skipped only when it holds no Go
+                // file of its own: a module may have a real Go package named `bin`. vendor/ is Go source
+                // and is copied like any other directory.
+                if (directory.Name is "bin" or "obj" or "Generated" && !System.Linq.Enumerable.Any(directory.EnumerateFiles("*.go")))
+                    continue;
+
+                // A link inside the user's module is not followed: its target is not the module's to copy.
+                if ((directory.Attributes & FileAttributes.ReparsePoint) != 0)
+                    continue;
+
+                CopyModuleTree(directory, target, sandbox);
+            }
+            else if (!File.Exists(target))
+            {
+                ((FileInfo)entry).CopyTo(target);
+            }
+        }
+    }
+
+    /// <summary>
     /// Guarantees every component of <paramref name="directory"/> below <paramref name="runRoot"/> is
     /// a real directory, replacing any link this view staged with an empty one.
     /// </summary>
@@ -228,9 +325,15 @@ internal static class PackageAncestry
     /// neither form survives, the run fails here rather than in a test.
     /// </para>
     /// </remarks>
-    public static void StageFixtureLinks(IReadOnlyList<string> links, string? goRoot, string importPath, string workingDirectory, string runRoot)
+    public static void StageFixtureLinks(IReadOnlyList<string> links, string? goRoot, string importPath, string workingDirectory, string runRoot, bool moduleStaged = false)
     {
         if (links.Count == 0)
+            return;
+
+        // A MODULE-staged package (TryStageModule) already sits in a real copy of its module, go.mod
+        // included, with these trees in place -- and a module's internal/ rule is satisfied by that
+        // module root, not by $GOROOT/src. There is nothing to link, and nothing in GOROOT to link to.
+        if (moduleStaged)
             return;
 
         if (string.IsNullOrWhiteSpace(goRoot))
