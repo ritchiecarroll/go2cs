@@ -1,0 +1,23 @@
+diff --git a/src/tests/Behavioral/CrossPackagePromotedValueMethod/main.cs b/src/tests/Behavioral/CrossPackagePromotedValueMethod/main.cs
+index 84fdf5b4f6..ce6914b260 100644
+--- a/src/tests/Behavioral/CrossPackagePromotedValueMethod/main.cs
++++ b/src/tests/Behavioral/CrossPackagePromotedValueMethod/main.cs
+@@ -41,3 +41,3 @@ internal static void Main() {
+-    fmt.Println(s.Truncate(time.ΔSecond).Format(time.RFC3339Nano));
+-    fmt.Println(p.Add(-time.ΔHour).Format(time.RFC3339));
+-    fmt.Println(s.Unix(), p.Nanosecond());
++    fmt.Println(s.Time.Truncate(time.ΔSecond).Format(time.RFC3339Nano));
++    fmt.Println(p.Value.Time.Add(-time.ΔHour).Format(time.RFC3339));
++    fmt.Println(s.Time.Unix(), p.Value.Time.Nanosecond());
+@@ -48 +48 @@ internal static void Main() {
+-    fmt.Println(ps.Truncate(time.ΔMinute).Format(time.RFC3339), pp.Year());
++    fmt.Println(ps.Time.Value.Truncate(time.ΔMinute).Format(time.RFC3339), pp.Value.Time.Value.Year());
+@@ -52 +52 @@ internal static void Main() {
+-    fmt.Println(o.Truncate(time.ΔHour).Format(time.RFC3339), po.Month());
++    fmt.Println(o.inner.Time.Truncate(time.ΔHour).Format(time.RFC3339), po.Value.inner.Time.Month());
+@@ -55 +55 @@ internal static void Main() {
+-    var f = (time.Duration p1) => sʗ1.Truncate(p1);
++    var f = (time.Duration p1) => sʗ1.Time.Truncate(p1);
+@@ -58 +58 @@ internal static void Main() {
+-    var g = ((Func<Stamp, time.Duration, time.Time>)(time.Add));
++    var g = ((Func<Stamp, time.Duration, time.Time>)((p0, p1) => p0.Time.Add(p1)));

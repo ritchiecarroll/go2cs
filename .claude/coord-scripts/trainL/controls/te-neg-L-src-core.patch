@@ -1,0 +1,560 @@
+diff --git a/src/core/golib/GoDefaultGodebugAttribute.cs b/src/core/golib/GoDefaultGodebugAttribute.cs
+new file mode 100644
+index 0000000000..d851690a8a
+--- /dev/null
++++ b/src/core/golib/GoDefaultGodebugAttribute.cs
+@@ -0,0 +1,41 @@
++// GoDefaultGodebugAttribute.cs - Gbtc
++// Copyright © 2026 The go2cs Authors. All rights reserved.
++//
++// Use of this source code is governed by an MIT-style license
++// that can be found in the LICENSE file.
++
++using System;
++using System.Reflection;
++
++namespace go;
++
++/// <summary>
++/// The program's default GODEBUG settings: the converter's reproduction of what <c>cmd/go</c> bakes into a
++/// Go binary as <c>runtime.godebugDefault</c> (<c>-X=runtime.godebugDefault=...</c>) from the main module's
++/// <c>go</c> line, its go.mod <c>godebug</c> block and the package's <c>//go:debug</c> directives.
++/// </summary>
++/// <remarks>
++/// <para>
++/// Applied to the ENTRY assembly -- a converted program or a converted test host -- and only when the
++/// default is non-empty, so every program whose module is at the corpus release emits nothing. Read once at
++/// start-up: the runtime copies it into <c>godebugDefault</c> before <c>parsedebugvars</c>, and
++/// <c>internal/godebug</c> layers it UNDER the GODEBUG environment variable, exactly as Go does.
++/// </para>
++/// <para>
++/// An attribute rather than an environment variable because, like Go's link-time value, it belongs to the
++/// binary: a test that starts a child process must not hand that child its own defaults.
++/// </para>
++/// </remarks>
++[AttributeUsage(AttributeTargets.Assembly)]
++public sealed class GoDefaultGodebugAttribute(string value) : Attribute
++{
++    /// <summary>The comma-separated <c>name=value</c> settings, sorted by name, as cmd/go writes them.</summary>
++    public string Value { get; } = value;
++
++    private static string? s_entryValue;
++
++    /// <summary>
++    /// The entry assembly's default GODEBUG, or "" when it declares none (or there is no entry assembly).
++    /// </summary>
++    public static string EntryValue => s_entryValue ??= Assembly.GetEntryAssembly()?.GetCustomAttribute<GoDefaultGodebugAttribute>()?.Value ?? "";
++}
+diff --git a/src/core/golib/channel.cs b/src/core/golib/channel.cs
+index 42cbce576d..3caa67c8e7 100644
+--- a/src/core/golib/channel.cs
++++ b/src/core/golib/channel.cs
+@@ -913 +913 @@ internal static class SelectRuntime
+-                fatal(FatalError.DeadLock());
++                fatal(FatalError.DeadLock(), 2);
+@@ -1511 +1511 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
+-            fatal(FatalError.DeadLock());
++            fatal(FatalError.DeadLock(), 2);
+@@ -1647 +1647 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
+-            fatal(FatalError.DeadLock());
++            fatal(FatalError.DeadLock(), 2);
+@@ -1682 +1682 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
+-            fatal(FatalError.DeadLock());
++            fatal(FatalError.DeadLock(), 2);
+@@ -1849 +1849 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
+-            fatal(FatalError.DeadLock());
++            fatal(FatalError.DeadLock(), 2);
+@@ -1935,3 +1935,4 @@ public static class channel
+-    /// Sleeps for the deadlock-grace <paramref name="timeout"/> used by operations on a nil
+-    /// channel, returning <c>true</c> only if <paramref name="token"/> was canceled first —
+-    /// <c>false</c> means the timeout elapsed (the caller reports the deadlock).
++    /// Blocks an operation on a nil channel (or a <c>select</c> with no live case): FOREVER for an
++    /// uncancelable token, returning <c>false</c> only once the process is provably deadlocked (the
++    /// caller reports it); <c>true</c> only if a cancelable <paramref name="token"/> was canceled first.
++    /// <paramref name="timeout"/> is the period between deadlock checks.
+@@ -1964,0 +1966,16 @@ public static class channel
++            // A FOREVER wait parks forever, as Go's does, and reports the deadlock only when Go's
++            // checkdead would and the managed runtime can prove it: every user goroutine, main included,
++            // in a forever wait, and no timer pending (Goroutine.AllGoroutinesForeverBlocked). Checked
++            // every `timeout`, so a main goroutine blocked alone still reports after the first period.
++            // The thread is a background thread: when main returns, the process exits around it.
++            if (!token.CanBeCanceled && Goroutine.IsForeverWait(reason))
++            {
++                while (true)
++                {
++                    Thread.Sleep(timeout);
++
++                    if (Goroutine.AllGoroutinesForeverBlocked())
++                        return false;
++                }
++            }
++
+@@ -1966 +1983 @@ public static class channel
+-            // SemaphoreSlim. An uncancelable token (the in-tree callers all pass None) is a sleep.
++            // SemaphoreSlim. An uncancelable token with no forever reason is a sleep.
+diff --git a/src/core/golib/runtime/Goroutine.cs b/src/core/golib/runtime/Goroutine.cs
+index 50e3fbfc64..c9f76f126f 100644
+--- a/src/core/golib/runtime/Goroutine.cs
++++ b/src/core/golib/runtime/Goroutine.cs
+@@ -827,0 +828,94 @@ public sealed class Goroutine
++    // ---- Go's checkdead, at the shape the managed runtime can PROVE ----
++    //
++    // Go parks a goroutine blocked on a nil channel or in `select {}` FOREVER and reports "all goroutines
++    // are asleep - deadlock!" only when nothing can run again (runtime.checkdead: no running M, no
++    // pending timer). golib used to end the process 200 ms after the FIRST such block whatever else was
++    // alive, which killed Go's `go serve(); select {}` main idiom and every program that leaks a
++    // parked goroutine -- net/rpc's TestSendDeadlock trips it at host teardown (TRAIN K union).
++    //
++    // A managed goroutine can also be woken by things that are not goroutines: a timer callback, an I/O
++    // completion, a signal, a host thread. So "every goroutine is parked" is NOT provable here, and a
++    // detector built on it would kill a live program (a ticker worker parked on its channel beside a
++    // `select {}` main). What IS provable is the FOREVER wait: nothing can ever wake a nil-channel op or
++    // a `select {}`. The report is therefore Go's rule restricted to that shape: every user goroutine,
++    // MAIN included, sits in a forever wait, no new goroutine appeared during the check, and package
++    // time holds no pending timer (an AfterFunc can still start one -- checkdead waits for timers too).
++    // A deadlock that involves an ordinary channel or sync wait is not reported; it blocks, as it did
++    // before this rule existed for every shape but the nil-channel one.
++
++    private static Func<bool>? s_pendingTimerProbe;
++
++    /// <summary>
++    /// Registers package time's answer to "is any timer still pending?" (Go: checkdead's timer scan).
++    /// </summary>
++    public static void RegisterPendingTimerProbe(Func<bool> anyPending) => Volatile.Write(ref s_pendingTimerProbe, anyPending);
++
++    // Waits nothing can ever end: a nil-channel receive or send, and a select with no live case.
++    internal static bool IsForeverWait(WaitReason reason) =>
++        reason is WaitReason.ChanReceiveNilChan or WaitReason.ChanSendNilChan or WaitReason.SelectNoCases;
++
++    /// <summary>
++    /// Whether the process is provably deadlocked: every user goroutine, the main goroutine among them,
++    /// is parked in a forever wait, and no timer is pending.
++    /// </summary>
++    internal static bool AllGoroutinesForeverBlocked()
++    {
++        // The timer probe FIRST: a timer that fires after this read starts its goroutine through Register,
++        // which the exclusive section below either sees whole or excludes whole.
++        if (Volatile.Read(ref s_pendingTimerProbe) is { } anyPending && anyPending())
++            return false;
++
++        Goroutine[] live;
++
++        // Exclusive on the profile gate: Register mints the id and inserts the entry inside its SHARED
++        // section, so no goroutine is ever half-registered while this snapshot is taken. The caller is a
++        // parked goroutine holding no gate (NoRecursion would throw, not deadlock, if that changed).
++        s_profileGate.EnterWriteLock();
++
++        try
++        {
++            live = Snapshot();
++        }
++        finally
++        {
++            s_profileGate.ExitWriteLock();
++        }
++
++        List<(WaitReason Reason, bool Readied, bool IsMain)> users = new(live.Length);
++
++        foreach (Goroutine goroutine in live)
++        {
++            if (goroutine.CountsAsUser)
++                users.Add((goroutine.Reason, goroutine.IsReadied, ReferenceEquals(goroutine, s_main)));
++        }
++
++        return IsProvableDeadlock(users);
++    }
++
++    /// <summary>
++    /// The deadlock decision itself, over each user goroutine's (wait reason, readied, is main): every one
++    /// in a forever wait, and main among them.
++    /// </summary>
++    /// <remarks>
++    /// A forever wait is absorbing: once a goroutine is in one nothing ends it, so a reason read after the
++    /// snapshot cannot go stale in the direction that matters. Main must be among them: a host whose main
++    /// entry is not parked (the -tests host, a test framework) is never declared deadlocked, and Go exits
++    /// rather than reports once main returns. GolibTests ForeverWaitDeadlockDecisionTests pins the table,
++    /// including the named residual (an ordinary channel or sync wait anywhere means no report).
++    /// </remarks>
++    internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)
++    {
++        bool mainBlocked = false;
++
++        foreach ((WaitReason reason, bool readied, bool isMain) in users)
++        {
++            if (readied || !IsForeverWait(reason))
++                return false;
++
++            if (isMain)
++                mainBlocked = true;
++        }
++
++        return mainBlocked;
++    }
++
+diff --git "a/src/core/golib/\320\266.ElemRefBox.cs" "b/src/core/golib/\320\266.ElemRefBox.cs"
+index 8a4f675c53..813f904017 100644
+--- "a/src/core/golib/\320\266.ElemRefBox.cs"
++++ "b/src/core/golib/\320\266.ElemRefBox.cs"
+@@ -190,0 +191,9 @@ public sealed class ElemRefBox<T> : ж<T>
++    //
++    // A STATED COST (option 3, accepted 2026-09-30). A T[] has no field to hold an id, so its id comes
++    // from the identity table (a ConditionalWeakTable). Measured against the identity-hash base
++    // (Microsoft .NET 10.0.12, linux, 500k slice<nint> x &s[1]): a first token read 499-524 ns vs 38-45,
++    // a repeat 152-171 ns vs 18-20, and allocation 504-509 vs 314-345 ns/element while the token-read
++    // arrays live. It is paid only where an element's TOKEN is read: a pinnable element converts to its
++    // real address instead. RETIREMENT PATH, if a sweep, perf leg or lane reads the cost: keep the
++    // identity hash for arrays and mint a table id only for a live COLLIDER, found at Register (about 1
++    // in 4622 live arrays), so a read pays one lookup in a nearly empty table.
+@@ -202 +211 @@ public sealed class ElemRefBox<T> : ж<T>
+-            return unchecked(AllocationBase(RuntimeHelpers.GetHashCode(storage)) + (nuint)(uint)element);
++            return unchecked(AllocationBase(ManagedPointerTokens.AllocationIdOf(storage)) + (nuint)(uint)element);
+@@ -205,0 +215,2 @@ public sealed class ElemRefBox<T> : ж<T>
++    internal override ulong AllocationId => ManagedPointerTokens.AllocationIdOf(CanonicalPair().Item1);
++
+diff --git "a/src/core/golib/\320\266.FieldRefBox.cs" "b/src/core/golib/\320\266.FieldRefBox.cs"
+index cfe468b8a6..83368f25bd 100644
+--- "a/src/core/golib/\320\266.FieldRefBox.cs"
++++ "b/src/core/golib/\320\266.FieldRefBox.cs"
+@@ -82 +82,3 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted
+-        m_pointerOrderToken = unchecked(AllocationBase(SourceIdentityHash(m_source)) + GoFieldDisplacement(m_source, m_token));
++        m_pointerOrderToken = unchecked(AllocationBase(ManagedPointerTokens.AllocationIdOf(m_source)) + GoFieldDisplacement(m_source, m_token));
++
++    internal override ulong AllocationId => ManagedPointerTokens.AllocationIdOf(m_source);
+diff --git "a/src/core/golib/\320\266.HeaderSliceBox.cs" "b/src/core/golib/\320\266.HeaderSliceBox.cs"
+index 3d6640b9f9..bb98e825e2 100644
+--- "a/src/core/golib/\320\266.HeaderSliceBox.cs"
++++ "b/src/core/golib/\320\266.HeaderSliceBox.cs"
+@@ -183,0 +184,2 @@ internal sealed class HeaderSliceBox<T, TDst> : ж<TDst>
++    internal override ulong AllocationId => m_source.AllocationId;
++
+diff --git "a/src/core/golib/\320\266.PointerTokens.cs" "b/src/core/golib/\320\266.PointerTokens.cs"
+index 1b260766e9..ccc4b0b84b 100644
+--- "a/src/core/golib/\320\266.PointerTokens.cs"
++++ "b/src/core/golib/\320\266.PointerTokens.cs"
+@@ -193,2 +193,2 @@ public static class ManagedPointerTokens
+-    /// A token is <c>AllocationBase(identityHash)</c> = <c>hash &lt;&lt; 32</c>: 4 GiB-aligned, low
+-    /// half zero, one block per source identity. So `unsafe.Add(unsafe.Pointer(&amp;v), offset)` over a
++    /// A token is <c>AllocationBase(id)</c> = <c>id &lt;&lt; 32</c>: 4 GiB-aligned, low
++    /// half zero, one block per source allocation. So `unsafe.Add(unsafe.Pointer(&amp;v), offset)` over a
+@@ -274 +274 @@ public static class ManagedPointerTokens
+-        ulong id = s_identities.GetValue(value, static _ => new IdentityCell((ulong)Interlocked.Increment(ref s_lastIdentity))).Id;
++        ulong id = IdentityOf(value);
+@@ -278,0 +279,21 @@ public static class ManagedPointerTokens
++    // The next id of the ONE id space identity tokens and ж tokens share: 29 bits, never 0.
++    internal static ulong NextIdentity()
++    {
++        ulong id;
++
++        do
++            id = (ulong)Interlocked.Increment(ref s_lastIdentity) & 0x1FFF_FFFF;
++        while (id == 0);
++
++        return id;
++    }
++
++    // An object's id, minted on the first ask and held for its life by the identity table.
++    internal static ulong IdentityOf(object value) =>
++        s_identities.GetValue(value, static _ => new IdentityCell(NextIdentity())).Id;
++
++    // The id of the allocation a ж token's base names: a box's own (IAllocationIdentity), else the
++    // object's table id.
++    internal static ulong AllocationIdOf(object source) =>
++        source is IAllocationIdentity allocation ? allocation.AllocationId : IdentityOf(source);
++
+@@ -688,0 +710,6 @@ public static class ManagedPointerTokens
++
++// The allocation identity a ж token's base is minted from (option 3).
++internal interface IAllocationIdentity
++{
++    ulong AllocationId { get; }
++}
+diff --git "a/src/core/golib/\320\266.SliceHeaderBox.cs" "b/src/core/golib/\320\266.SliceHeaderBox.cs"
+index e0bbb442ca..cc8591cedf 100644
+--- "a/src/core/golib/\320\266.SliceHeaderBox.cs"
++++ "b/src/core/golib/\320\266.SliceHeaderBox.cs"
+@@ -224,0 +225,2 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
++    internal override ulong AllocationId => m_source.AllocationId;
++
+diff --git "a/src/core/golib/\320\266.StandardBox.cs" "b/src/core/golib/\320\266.StandardBox.cs"
+index d2ac126b84..5127dbcc7f 100644
+--- "a/src/core/golib/\320\266.StandardBox.cs"
++++ "b/src/core/golib/\320\266.StandardBox.cs"
+@@ -138 +138,17 @@ public class StandardBox<T> : ж<T>
+-        IsNilPointer ? 0 : NamesZeroBase ? GoZeroBase.Token : AllocationBase(RuntimeHelpers.GetHashCode(this));
++        IsNilPointer ? 0 : NamesZeroBase ? GoZeroBase.Token :
++        AllocationBase(AllocationId);
++
++    internal override ulong AllocationId
++    {
++        get
++        {
++            int id = System.Threading.Volatile.Read(ref m_id);
++
++            if (id != 0)
++                return (ulong)(uint)id;
++
++            int fresh = (int)ManagedPointerTokens.NextIdentity();
++            int prior = System.Threading.Interlocked.CompareExchange(ref m_id, fresh, 0);
++            return (ulong)(uint)(prior != 0 ? prior : fresh);
++        }
++    }
+diff --git "a/src/core/golib/\320\266.cs" "b/src/core/golib/\320\266.cs"
+index 56e8563315..4f3b9dd573 100644
+--- "a/src/core/golib/\320\266.cs"
++++ "b/src/core/golib/\320\266.cs"
+@@ -85 +85 @@ public enum PointerStorage
+-public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess
++public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess, IAllocationIdentity
+@@ -91,0 +92,5 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
++    // Option 3b: a heap box's allocation id, minted on its first token read (StandardBox). It is declared
++    // HERE, beside m_isNull, because the CLR lays out a base class's fields as one pointer-aligned block:
++    // an int in the derived class costs a box 8 bytes, while here it fills m_isNull's padding for 0.
++    private protected int m_id;
++
+@@ -514,3 +519,4 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
+-    // An allocation's token base: the identity hash lifted clear of the low 32 bits, so every
+-    // base is 8-aligned and the whole low half is available to carry a within-allocation
+-    // displacement -- and TAGGED non-canonical, so the value announces itself as a token.
++    // An allocation's token base: its UNIQUE allocation id (ManagedPointerTokens.NextIdentity: 29
++    // bits, never 0) lifted clear of the low 32 bits, so every base is 8-aligned and the whole low
++    // half is available to carry a within-allocation displacement -- and TAGGED non-canonical, so
++    // the value announces itself as a token.
+@@ -525,2 +531,2 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
+-    //     bit 63 | 62..48 hash hi | bit 47 | 46..32 hash lo | 31..0 displacement
+-    //        1   |    15 bits     |    0   |    15 bits     |      32 bits
++    //     bit 63 | bit 62 | 61..48 id hi | bit 47 | 46..32 id lo | 31..0 displacement
++    //        1   |    0   |    14 bits   |    0   |    15 bits   |      32 bits
+@@ -530,12 +536,17 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
+-    // contract is unchanged. What it costs is the hash, 32 -> 30 bits, and that cost was MEASURED
+-    // rather than assumed: the CLR identity hash never sets bits 31..26 (OR of 10^6 hashes =
+-    // 0x03FFFFFF on linux-x64 and windows-x64 alike, record C.1), so the two bits this drops were
+-    // never carrying information. The collision count is unchanged on both hosts.
+-    private protected static nuint AllocationBase(int identityHash)
+-    {
+-        ulong hash = (uint)identityHash;
+-
+-        return unchecked((nuint)(ManagedPointerTokens.TagBit |
+-                                 ((hash >> 15 & 0x7FFF) << 48) |
+-                                 ((hash & 0x7FFF) << 32)));
+-    }
++    // contract is unchanged.
++    //
++    // THE ID (option 3, ruling 2026-09-30). The base was the CLR identity hash, which is not unique: two
++    // LIVE objects share one (the first pair among live boxes came after 4622 of them), and because a
++    // reference-bearing box registers its token on every uintptr conversion and the registry keeps the
++    // last writer, `(*T)(uintptr)p` of the first box's number resolved to the second -- a silent wrong
++    // object. An id names one allocation. Bit 62 is clear by construction (the 14-bit hi mask), so a
++    // base never meets ManagedPointerTokens' identity band. Ids wrap after 2^29 mints: only an
++    // allocation that stays live across that many token reads can share its id.
++    private protected static nuint AllocationBase(ulong id) =>
++        unchecked((nuint)(ManagedPointerTokens.TagBit | ((id >> 15 & 0x3FFF) << 48) | ((id & 0x7FFF) << 32)));
++
++    // The allocation this pointer's token names. A heap box is its own allocation (StandardBox keeps
++    // the id in m_id); element and field references name their storage's; any other kind asks the table.
++    internal virtual ulong AllocationId => ManagedPointerTokens.IdentityOf(this);
++
++    ulong IAllocationIdentity.AllocationId => AllocationId;
+diff --git a/src/core/internal/godebug/godebug.cs b/src/core/internal/godebug/godebug.cs
+index 0be14e79eb..8e89ccf42d 100644
+--- a/src/core/internal/godebug/godebug.cs
++++ b/src/core/internal/godebug/godebug.cs
+@@ -215,0 +216,4 @@ public static @string Value(this ж<Setting> Ꮡs) {
++//
++// The initial key is a sentinel no environment value can equal: with "" as the key, a process with no
++// $GODEBUG would match it on the first lookup and return the EMPTY map -- skipping the program's
++// default layer below, the one case where the default is all there is.
+@@ -217 +221,6 @@ private static volatile Tuple<string, Dictionary<string, SettingValue>> s_settin
+-    new("", new Dictionary<string, SettingValue>(StringComparer.Ordinal));
++    new("\0unparsed", new Dictionary<string, SettingValue>(StringComparer.Ordinal));
++
++// The program's default GODEBUG (GoDefaultGodebugAttribute: cmd/go's runtime.godebugDefault, from the
++// module's go line and its //go:debug directives), parsed once. It never changes during a run.
++private static readonly Lazy<Dictionary<string, SettingValue>> s_defaults =
++    new(() => parseGodebugEnv(GoDefaultGodebugAttribute.EntryValue));
+@@ -226 +235,8 @@ private static Dictionary<string, SettingValue> settings() {
+-    Tuple<string, Dictionary<string, SettingValue>> parsed = new(raw, parseGodebugEnv(raw));
++    // $GODEBUG first, then the program's default for every name it does not set -- Go's
++    // `parse(did, env); parse(did, def)`, in which the environment always wins.
++    Dictionary<string, SettingValue> layered = parseGodebugEnv(raw);
++
++    foreach (KeyValuePair<string, SettingValue> fallback in s_defaults.Value)
++        layered.TryAdd(fallback.Key, fallback.Value);
++
++    Tuple<string, Dictionary<string, SettingValue>> parsed = new(raw, layered);
+diff --git a/src/core/runtime/goenvs_impl.cs b/src/core/runtime/goenvs_impl.cs
+index 536c6e427c..84438ff52e 100644
+--- a/src/core/runtime/goenvs_impl.cs
++++ b/src/core/runtime/goenvs_impl.cs
+@@ -66,0 +67,5 @@ partial class runtime_package
++        // cmd/go's -X=runtime.godebugDefault=...: the program's default GODEBUG, from its module's go line,
++        // its go.mod godebug block and its //go:debug directives, which the converter stamps on the entry
++        // assembly (GoDefaultGodebugAttribute). Before parsedebugvars, which parses it UNDER the environment.
++        godebugDefault = GoDefaultGodebugAttribute.EntryValue;
++
+diff --git a/src/core/testing/PackageAncestry.cs b/src/core/testing/PackageAncestry.cs
+index 2145ab9aaa..5683a1e4f1 100644
+--- a/src/core/testing/PackageAncestry.cs
++++ b/src/core/testing/PackageAncestry.cs
+@@ -135,0 +136,97 @@ internal static class PackageAncestry
++    /// <summary>
++    /// The environment variable through which the converter's run hands a NON-standard-library package
++    /// its module's source root -- the on-disk half of <see cref="TryStageModule"/>'s input, read at run
++    /// time exactly as GOROOT is, so no machine path is ever emitted into a generated host.
++    /// </summary>
++    public const string ModuleRootEnvironmentVariable = "GO2CS_MODULE_ROOT";
++
++    /// <summary>
++    /// Stages a third-party package's MODULE ancestry: a real COPY of the module's source tree at
++    /// <c>runRoot/src/&lt;modulePath&gt;</c>, so the package sits at its relative path under its own
++    /// <c>go.mod</c> and a test reads <c>../test/key.pem</c>, <c>../go.mod</c> or its own non-Go files
++    /// as <c>go test</c> lets it.
++    /// </summary>
++    /// <remarks>
++    /// <para>
++    /// <b>A COPY, never a link.</b> The GOROOT ancestry hard-links files and junctions directories,
++    /// which is sound for an installed toolchain and wrong for a USER's module: a converted test's own
++    /// write -- not the harness's -- would land in the real tree (rewriting a hard-linked go.mod, or a
++    /// file under a junctioned directory). A copy makes "the sandbox never writes into the user's module"
++    /// true by construction, for every writer, and needs no link privilege. It is also a real module
++    /// root, so <see cref="StageFixtureLinks"/> has nothing to add for a module-staged package.
++    /// </para>
++    /// <para>
++    /// The copy skips <c>.git</c>, a previous conversion's build output (<c>bin</c>/<c>obj</c>/<c>Generated</c>
++    /// holding no Go file), and the sandbox itself: a module whose tree CONTAINS this run's sandbox (its
++    /// output root inside the module) is copied whole except for that one directory, so the copy can
++    /// never recurse into its own destination. <c>vendor/</c> is copied.
++    /// </para>
++    /// </remarks>
++    /// <returns>true when the module was staged; false when it was skipped and the sandbox is unchanged.</returns>
++    public static bool TryStageModule(string? moduleRoot, string modulePath, string importPath, string runRoot, string workingDirectory)
++    {
++        if (string.IsNullOrWhiteSpace(moduleRoot) || string.IsNullOrEmpty(modulePath))
++            return false;
++
++        // The package must belong to the module the root claims, and the root must BE a module.
++        if (importPath != modulePath && !importPath.StartsWith(modulePath + "/", StringComparison.Ordinal))
++            return false;
++
++        if (!File.Exists(Path.Combine(moduleRoot, "go.mod")))
++            return false;
++
++        string[] moduleSegments = modulePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
++        string mirrorRoot = Path.Combine([runRoot, "src", .. moduleSegments]);
++
++        try
++        {
++            ReclaimAbandonedSandboxes(runRoot);
++            MarkOwner(runRoot);
++
++            CopyModuleTree(new DirectoryInfo(Path.GetFullPath(moduleRoot)), mirrorRoot, Path.GetFullPath(runRoot));
++            Directory.CreateDirectory(workingDirectory);
++            return true;
++        }
++        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
++        {
++            // A partially copied module is still a superset of the empty sandbox, so the run continues.
++            return false;
++        }
++    }
++
++    // Copies one level of the module tree, recursing into its directories, minus .git and the sandbox.
++    private static void CopyModuleTree(DirectoryInfo real, string mirror, string sandbox)
++    {
++        Directory.CreateDirectory(mirror);
++
++        foreach (FileSystemInfo entry in real.EnumerateFileSystemInfos())
++        {
++            string target = Path.Combine(mirror, entry.Name);
++
++            if (entry is DirectoryInfo directory)
++            {
++                string full = Path.GetFullPath(directory.FullName);
++
++                if (directory.Name == ".git" || full.Equals(sandbox, StringComparison.OrdinalIgnoreCase))
++                    continue;
++
++                // A previous conversion's .NET build output (an in-place conversion leaves bin/, obj/ and
++                // Generated/ beside the Go sources) is not the module's. Skipped only when it holds no Go
++                // file of its own: a module may have a real Go package named `bin`. vendor/ is Go source
++                // and is copied like any other directory.
++                if (directory.Name is "bin" or "obj" or "Generated" && !System.Linq.Enumerable.Any(directory.EnumerateFiles("*.go")))
++                    continue;
++
++                // A link inside the user's module is not followed: its target is not the module's to copy.
++                if ((directory.Attributes & FileAttributes.ReparsePoint) != 0)
++                    continue;
++
++                CopyModuleTree(directory, target, sandbox);
++            }
++            else if (!File.Exists(target))
++            {
++                ((FileInfo)entry).CopyTo(target);
++            }
++        }
++    }
++
+@@ -231 +328 @@ internal static class PackageAncestry
+-    public static void StageFixtureLinks(IReadOnlyList<string> links, string? goRoot, string importPath, string workingDirectory, string runRoot)
++    public static void StageFixtureLinks(IReadOnlyList<string> links, string? goRoot, string importPath, string workingDirectory, string runRoot, bool moduleStaged = false)
+@@ -235,0 +333,6 @@ internal static class PackageAncestry
++        // A MODULE-staged package (TryStageModule) already sits in a real copy of its module, go.mod
++        // included, with these trees in place -- and a module's internal/ rule is satisfied by that
++        // module root, not by $GOROOT/src. There is nothing to link, and nothing in GOROOT to link to.
++        if (moduleStaged)
++            return;
++
+diff --git a/src/core/testing/TestHost.cs b/src/core/testing/TestHost.cs
+index d18c7829c0..7a1d8c54cf 100644
+--- a/src/core/testing/TestHost.cs
++++ b/src/core/testing/TestHost.cs
+@@ -237,0 +238,6 @@ public static class TestHost
++                // A package outside the standard library stages its MODULE instead: a real copy of the
++                // module tree, from the root the converter's run hands over in the environment.
++                bool moduleStaged = PackageAncestry.TryStageModule(
++                    Environment.GetEnvironmentVariable(PackageAncestry.ModuleRootEnvironmentVariable),
++                    registry.ModulePath, registry.Package, runRoot, workingDirectory);
++
+@@ -246 +252 @@ public static class TestHost
+-                    registry.Package, workingDirectory, runRoot);
++                    registry.Package, workingDirectory, runRoot, moduleStaged);
+diff --git a/src/core/testing/TestRegistry.cs b/src/core/testing/TestRegistry.cs
+index 6ee3722ac8..7a9ba1e1f7 100644
+--- a/src/core/testing/TestRegistry.cs
++++ b/src/core/testing/TestRegistry.cs
+@@ -84 +84 @@ public sealed record RegisteredTest(
+-public sealed class TestRegistry(string package, IReadOnlyList<string> fixtures, IReadOnlyList<string>? fixtureDirectories = null, IReadOnlyList<string>? fixtureLinks = null)
++public sealed class TestRegistry(string package, IReadOnlyList<string> fixtures, IReadOnlyList<string>? fixtureDirectories = null, IReadOnlyList<string>? fixtureLinks = null, string? modulePath = null)
+@@ -109,0 +110,9 @@ public sealed class TestRegistry(string package, IReadOnlyList<string> fixtures,
++    /// <summary>
++    /// The Go MODULE path of a package outside the standard library (empty for the standard library),
++    /// the LOGICAL half of <see cref="PackageAncestry.TryStageModule"/>'s input. The module's location
++    /// on disk is deliberately NOT here: it arrives at run time through
++    /// <see cref="PackageAncestry.ModuleRootEnvironmentVariable"/>, as GOROOT does, so a machine path
++    /// never lands in an emitted host. Defaulted so every standard-library host stays byte-identical.
++    /// </summary>
++    public string ModulePath { get; } = modulePath ?? "";
++
+diff --git a/src/core/time/time_impl.cs b/src/core/time/time_impl.cs
+index 84c1a64628..ffcacf06ad 100644
+--- a/src/core/time/time_impl.cs
++++ b/src/core/time/time_impl.cs
+@@ -504,0 +505,19 @@ partial class time_package
++
++    // golib's deadlock report asks whether a timer is still pending (Go: checkdead's timer scan), since
++    // an AfterFunc can still start a goroutine. Registered with the heap itself, so it exists whenever a
++    // timer can; a stale (stopped) entry still in the heap reads as pending, which only DELAYS a report.
++    private static readonly bool s_pendingTimerProbeRegistered = RegisterPendingTimerProbe();
++
++    private static bool RegisterPendingTimerProbe()
++    {
++        global::go.golib.Goroutine.RegisterPendingTimerProbe(static () =>
++        {
++            lock (s_timerLock)
++            {
++                return s_timerHeap.Count > 0;
++            }
++        });
++
++        return true;
++    }
++
