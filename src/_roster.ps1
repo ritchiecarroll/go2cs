@@ -118,7 +118,9 @@ $RosterOsNaPattern =
 # opts a row back OUT of it now that Release+TC0 is. Three rows carry it, each measured as a
 # one-axis A/B rather than inferred -- internal/godebug (TestCmdBisect), log/slog (TestCallDepth)
 # and net/http (TestRegisterErr) -- all three PC/line-attribution assertions that tiering's presence
-# is what supplies. 'release-tc0' is RETAINED though the flip makes it redundant: it still names
+# is what supplies. net/http dropped it 2026-10-01, once the converter kept a constant skip window's
+# frames out of inlining and golib classified goroutines by start function (two rows carry it now).
+# 'release-tc0' is RETAINED though the flip makes it redundant: it still names
 # exactly what it always named, and a row that opted in deliberately should keep saying so.
 $RosterExecutionValues = @('release-tc0', 'release-tiered')
 
