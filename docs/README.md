@@ -9,17 +9,17 @@ Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?
 
 ---
 
-## 📰 NEWS — The converted standard library moves to Go 1.24.13
+## 📰 NEWS — Every implementable standard-library package validates
 
-go2cs now converts Go 1.24.13's standard library, and **225 of the 230 testable standard-library
-packages (97.8%) pass their own Go 1.24.13 test suites in C#**, compared verdict for verdict against
-`go test -json`, with every difference disclosed. Each row of the
+**All 225 implementable packages of Go 1.24.13's standard library pass their own test suites in
+C#**: 225 of the 230 testable (97.8%), at 69,777 matching verdicts against `go test -json`, with 373
+divergences disclosed by exact failure signature. They include `runtime` itself, `reflect`,
+`net/http` and `crypto/tls`, and on Linux 223 of the 223 applicable rows validate. Each row of the
 [validated roster](ValidatedTestPackages.md) links a proof page that lists Go's verdict beside
-go2cs's, test by test. Converted programs can use Go 1.24's new APIs, such as `os.Root`,
-`weak.Pointer` and `crypto/mlkem`, and the converted library ships as **NuGet 1.24.13.2**,
-targeting .NET 10. `net/http` shipped in 1.24.13.2 before it validated; it validates on master since
-2026-09-25 (1,387 verdicts), and `reflect` validates since 2026-09-27. The
-[full announcement](NEWS.md#september-24-2026--the-converted-standard-library-moves-to-go-12413-and-218-packages-validate-against-it)
+go2cs's, test by test, and the five packages outside the 225 are
+[listed with their reasons](ValidatedTestPackages.md#excluded-packages). The converted library
+ships as **NuGet 1.24.13.3**, targeting .NET 10. The
+[full announcement](NEWS.md#october-1-2026--every-implementable-standard-library-package-validates)
 has the details.
 
 **➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**
@@ -457,12 +457,17 @@ execute Go's hand-written `.s` assembly, so the portable pure-Go variants of the
 functions are the faithful target (`-stdlib` and `-tests` apply the tag by default; see
 [Conversion Strategies](ConversionStrategies.md#the-standard-library-reproduces-go--tags-purego)).
 
-Compiling is not runtime parity. Making the library **operational** is the ongoing
-[Phase 4](RoadmapHistory.md#phase-4--convert-and-run-go-package-tests) work: each package's own `_test.go` suite
-is converted to C#, built against the converted standard library, run under a Go-semantics test host, and
-compared verdict-for-verdict against a clean `go test -json` baseline.
-[Validated Test Packages](ValidatedTestPackages.md) tracks the set — reproducible via
-[Try it yourself](#try-it-yourself--validate-a-converted-test-suite).
+Compiling is not runtime parity, so the library is also validated **operationally**
+([Phase 4](RoadmapHistory.md#phase-4--convert-and-run-go-package-tests)). Each package's own `_test.go`
+suite is converted to C#, built against the converted standard library, and run under a Go-semantics
+test host. Its results are compared verdict for verdict against a clean `go test -json` baseline, and
+every difference is disclosed by exact failure signature; a test withdrawn is withdrawn from both
+sides, by name. At Go 1.24.13 every implementable package validates: 225 of 225, and 225 of the 230
+testable. The five outside the implementable set are each listed with the reason they cannot be
+validated. [Validated Test Packages](ValidatedTestPackages.md) tracks the set, and the results are
+reproducible via [Try it yourself](#try-it-yourself--validate-a-converted-test-suite).
+<!-- 225 of 225 and 225 of 230 read 2026-10-01 at master c2591d5b95 from the Phase 4 progress header of
+     docs/ValidatedTestPackages.md; a Go release hop re-derives both. -->
 
 ### Try it yourself — validate a converted test suite
 
@@ -554,6 +559,7 @@ High level timeline of the project's major turning points.
 | 2026-09-24 | [**The converted standard library moves to Go 1.24.13**](NEWS.md#september-24-2026--the-converted-standard-library-moves-to-go-12413-and-218-packages-validate-against-it) | `509828948` · `nuget-1.24.13.1` | **218/230** packages, 56,974 matching verdicts, 283 disclosed — **218/224 = 97.3%** against the implementable set; every row re-derived from Go 1.24.13's own test sources; `net/http` not validated at Go 1.24.13, its 17 divergences all under Go 1.24's new `internal/synctest`; published as NuGet 1.24.13.1 (51 new package IDs, 14 ended). |
 | 2026-09-24 | NuGet 1.24.13.2 published | `4c53b02a0` · `nuget-1.24.13.2` | Platform-varying packages ship `win-x64` and `linux-x64` flavors that a consumer both compiles and runs against, so the real-world walkthrough builds and runs on `linux/amd64`; 232 proof pages frozen for the release, at **218/230** packages and 56,975 matching verdicts. |
 | 2026-09-25 | [`net/http` validates again, at Go 1.24.13](ValidatedTestPackages.md) | `db1bd885a` | **219/230** packages, 58,364 matching verdicts, 280 disclosed; `net/http` returns to the roster at 1,387 verdicts, release-tiered as at Go 1.23.12. |
+| 2026-10-01 | [**Every implementable standard-library package validates**](NEWS.md#october-1-2026--every-implementable-standard-library-package-validates) | `133ca704e` · `nuget-1.24.13.3` | **225/230** packages, 69,777 matching verdicts, 373 disclosed — **225/225 = 100.0%** against the implementable set; `runtime` (10,819 matching, 71 disclosed) and `runtime/pprof` (145 matching, 7 disclosed) are the last to validate; Linux 223 of 223 applicable rows; published as NuGet 1.24.13.3. |
 
 ## C# to Go?
 

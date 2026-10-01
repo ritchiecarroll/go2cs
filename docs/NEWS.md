@@ -8,6 +8,83 @@ their full text.
 
 ---
 
+## October 1, 2026 — Every implementable standard-library package validates
+
+**Every implementable package in Go 1.24.13's standard library now validates its own test suite in
+C#.** That is **225 of 225**, and **225 of the 230** testable packages, **97.8%**, at **69,777
+matching verdicts** against `go test -json`, with **373** divergences disclosed by exact failure
+signature. On Linux, all 223 applicable rows validate at their own Linux counts, at 69,617 matching
+verdicts with 392 disclosed. The other two, `internal/syscall/windows` and
+`internal/syscall/windows/registry`, are Windows-exclusive and have nothing to compile there.
+
+The last two rows banked today. **`runtime` validates at 10,819 matching verdicts, with 71
+disclosed** (10,810 and 73 on Linux). This is the Go runtime's own suite, run against the managed
+runtime that replaces Go's. It covers the scheduler and preemption, channels and `select`, finalizers
+and cleanups, and `defer`, `panic` and `recover` in every ordering, with Go-spelled tracebacks and
+crash reports read back from child processes. It also covers maps, stack growth and Windows
+callbacks. One test, `TestMapIterDeleteReplace`, contributes 10,001 of those verdicts through its
+subtests, and the roster row says so. Of the 71 disclosures, 33 name something the managed runtime
+cannot truthfully describe: Go's SEH unwinder, its inline tree, GC bitmaps, the tiny allocator's
+layout. Another 24 are deferred. They are allocation counts, plus one live-heap metric that the
+managed host has no Go mark phase to produce, and each carries a measured reading and the plan that
+retires it. When the Go 1.23.12 record closed on September 7, this suite could be read only as far as
+index 104, where a crash killed the test host. Now every verdict is read and accounted for.
+
+**`runtime/pprof` validates at 145 matching verdicts, with 7 disclosed** (147 and 7 on Linux). It
+covers CPU, heap, goroutine, block and mutex profiles taken in the managed runtime, labels raced
+across goroutines, and the profile builder's proto encoding. Six of its tests wait for another
+goroutine's interior frames in `runtime.Stack`. Because the CLR cannot walk a foreign thread's stack,
+those six are withdrawn from both sides by name.
+
+The September 24 announcement stood at 218 of 230. Since then, every one of the six implementable
+packages it named as not yet validated has validated. `net/http` validated again on September 25, at
+all 1,387 verdicts, once Go 1.24's `internal/synctest` was supported. `internal/synctest` itself banked
+at 28 of 28 on September 27, the same day as `reflect`, now at 396 matching with 22 disclosed.
+`net/http/pprof` banked at 15 of 15 on September 28, and `runtime` and `runtime/pprof` complete the six
+today. A seventh row joined by arithmetic rather than by ruling. On September 28, `runtime/trace` left
+the exclusion ledger: go2cs's managed execution tracer writes a trace that Go's own parser accepts,
+both of its verdicts matched, and the implementable set grew from 224 to 225. The same day
+`runtime/debug` left the roster, when its disclosure for `TestStack` was found to match by substring
+and absorb assertion lines it should not have. It returned on September 30, at 8 matching with 1
+disclosed, and `TestStack` is now a plain pass.
+
+The figure needs to be read exactly. **A row is all-or-nothing.** A package joins only when every
+eligible `Test` verdict matches Go's or is disclosed, so a package matching every verdict but one
+scores zero. A disclosure names a specific Go assertion that the converted suite provably cannot
+satisfy, and it is pinned by exact failure signature in a committed manifest, so any other failure is a
+hard mismatch. Disclosures are never a tolerance, and nothing is skipped quietly; the few tests
+withdrawn are withdrawn from both sides, by name. Validation counts `Test` functions. Runnable
+examples, fuzz seed corpora and benchmarks are the next validation slice. Within that scope, this is
+the goal Phase 4 was given. The 100% counts finished packages, judged by Go's own tests, and the 373
+disclosures are where the record says what a managed runtime cannot do, or does not do yet. Every
+one of the 225 rows links a proof page that lists Go's verdict beside go2cs's, test by test.
+
+Five testable packages sit outside the implementable set. Every one of them is an internal package
+that no Go program outside the standard library can import, and each is listed with its class,
+mechanism and evidence. `runtime/internal/wasitest` is a WASI test package that runs no test on
+`windows/amd64`, because its only selecting test skips unless the target is `wasip1/wasm` (E1).
+`internal/unsafeheader` builds live slices and strings by writing raw header fields, a memory model
+a managed runtime deliberately does not have, so a pass would be fabrication rather than implementation
+(E3). The other three run cleanly but validate nothing about the port (E4). `net/internal/cgotest`'s
+only test has an empty body, `internal/copyright` scans the GOROOT both sides share for copyright
+notices, and `crypto/internal/fips140deps` shells out to `go list` to check the Go tree's import
+policy. An exclusion rejoins the denominator the day its evidence changes, as `runtime/trace`'s did.
+
+Go's own tests first passed in C# on [July 17](#july-17-2026--gos-own-tests-now-pass-in-c), with
+`unicode/utf8`'s fourteen verdicts. Seventy-six days later, the last implementable package validated.
+
+The converted standard library ships as **NuGet 1.24.13.3**, targeting .NET 10. It is the first
+release published with every implementable package validated. Every proof page is frozen at
+`validation/1.24.13.3` for the badges the packed READMEs link, and the exact shipped tree is
+browsable at the `nuget-1.24.13.3` tag.
+
+With the standard library validated, the work turns to real Go code brought to .NET. Whole modules
+will be converted together and validated against their own test suites, so that a module is judged by
+its own tests the way the standard library is. Alongside that comes nugetgo.net, a registry for
+converted Go modules.
+
+*Roster commit `133ca704e` · tag `nuget-1.24.13.3`*
+
 ## September 24, 2026 — The converted standard library moves to Go 1.24.13, and 218 packages validate against it
 
 **go2cs now converts Go 1.24.13's standard library**, and the validated roster crossed the hop
