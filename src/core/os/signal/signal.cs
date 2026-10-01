@@ -7,6 +7,7 @@ using context = context_package;
 using os = os_package;
 using slices = slices_package;
 using sync = sync_package;
+using System.Runtime.CompilerServices;
 using ꓸꓸꓸosꓸSignal = Span<osꓸSignal>;
 
 partial class signal_package {
@@ -149,7 +150,7 @@ public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSig
                     enableSignal(n);
                     // The runtime requires that we enable a
                     // signal before starting the watcher.
-                    ᏑwatchSignalLoopOnce.Do(() => {
+                    ᏑwatchSignalLoopOnce.Do([MethodImpl(MethodImplOptions.NoInlining)] () => {
                         if (watchSignalLoop != default!) {
                             goǃ(watchSignalLoop);
                         }
@@ -284,7 +285,7 @@ internal static void process(osꓸSignal sig) {
 // The stop function releases resources associated with it, so code should
 // call stop as soon as the operations running in this Context complete and
 // signals no longer need to be diverted to the context.
-public static (context.Context ctx, Action stop) NotifyContext(context.Context parent, params ꓸꓸꓸosꓸSignal signalsʗp) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static (context.Context ctx, Action stop) NotifyContext(context.Context parent, params ꓸꓸꓸosꓸSignal signalsʗp) {
     context.Context ctx = default!;
     var signals = signalsʗp.slice();
 

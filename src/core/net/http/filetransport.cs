@@ -6,6 +6,7 @@ namespace go.net;
 using fmt = fmt_package;
 using io = io_package;
 using fs = go.io.fs_package;
+using System.Runtime.CompilerServices;
 using go.io;
 
 partial class http_package {
@@ -50,7 +51,7 @@ public static RoundTripper NewFileTransportFS(fs.FS fsys) {
     return NewFileTransport(FS(fsys));
 }
 
-internal static (ж<Response> resp, error err) RoundTrip(this fileTransport t, ж<Request> Ꮡreq) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<Response> resp, error err) RoundTrip(this fileTransport t, ж<Request> Ꮡreq) {
     // We start ServeHTTP in a goroutine, which may take a long
     // time if the file is large. The newPopulateResponseWriter
     // call returns a channel which either ServeHTTP or finish()

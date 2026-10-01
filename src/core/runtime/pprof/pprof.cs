@@ -899,7 +899,7 @@ internal static ref cpuᴛ1 cpu => ref Ꮡcpu.Value;
 // not to the one used by Go. To make it work, call [os/signal.Notify]
 // for [syscall.SIGPROF], but note that doing so may break any profiling
 // being done by the main program.
-public static error StartCPUProfile(io.Writer w) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static error StartCPUProfile(io.Writer w) {
     GoFrame ᒐ = default;
     try {
         // The runtime routines allow a variable profiling rate,

@@ -128,6 +128,7 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using System.Runtime.CompilerServices;
 
 partial class runtime_package {
 
@@ -184,7 +185,7 @@ internal static void gcinit() {
 // just before we're about to start letting user code run.
 // It kicks off the background sweeper goroutine, the background
 // scavenger goroutine, and enables GC.
-internal static void gcenable() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void gcenable() {
     // Kick off sweeping and scavenging.
     var c = new channel<nint>(2);
     goǃ(bgsweep, c);
@@ -1119,7 +1120,7 @@ internal static void gcMarkTermination(worldStop stw) {
 // goroutines will not run until the mark phase, but they must be started while
 // the work is not stopped and from a regular G stack. The caller must hold
 // worldsema.
-internal static void gcBgMarkStartWorkers() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void gcBgMarkStartWorkers() {
     // Background marking is performed by per-P G's. Ensure that each P has
     // a background GC G.
     //
@@ -1581,7 +1582,7 @@ internal static void boring_registerCache(@unsafe.Pointer Δp) {
 }
 
 //go:linkname unique_runtime_registerUniqueMapCleanup unique.runtime_registerUniqueMapCleanup
-public static void unique_runtime_registerUniqueMapCleanup(Action f) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void unique_runtime_registerUniqueMapCleanup(Action f) {
     // Create the channel on the system stack so it doesn't inherit the current G's
     // synctest bubble (if any).
     systemstack(() => {

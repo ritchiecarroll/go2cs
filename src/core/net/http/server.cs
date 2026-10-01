@@ -634,7 +634,7 @@ internal static void unlock(this ж<connReader> Ꮡcr) {
     cr.mu.Unlock();
 }
 
-internal static void startBackgroundRead(this ж<connReader> Ꮡcr) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void startBackgroundRead(this ж<connReader> Ꮡcr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3283,7 +3283,7 @@ internal static time.Duration shutdownPollIntervalMax => /* 500 * time.Milliseco
 //
 // Once Shutdown has been called on a server, it may not be reused;
 // future calls to methods such as Serve will return ErrServerClosed.
-public static error Shutdown(this ж<Server> Ꮡs, context.Context ctx) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static error Shutdown(this ж<Server> Ꮡs, context.Context ctx) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -3533,7 +3533,7 @@ public static error ErrServerClosed = errors.New("http: Server closed"u8);
 //
 // Serve always returns a non-nil error and closes l.
 // After [Server.Shutdown] or [Server.Close], the returned error is [ErrServerClosed].
-public static error Serve(this ж<Server> Ꮡs, net.Listener lʗp) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static error Serve(this ж<Server> Ꮡs, net.Listener lʗp) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -3998,7 +3998,7 @@ internal static readonly @string htmlHeadTitleTimeoutˢ = "<html><head><title>Ti
     return htmlHeadTitleTimeoutˢ;
 }
 
-internal static void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWriter w, ж<Request> Ꮡr) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWriter w, ж<Request> Ꮡr) {
     GoFrame ᒐ = default;
     try {
         ref var h = ref Ꮡh.DerefOrNull();

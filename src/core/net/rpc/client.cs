@@ -11,6 +11,7 @@ using log = log_package;
 using net = net_package;
 using Δhttp = global::go.net.http_package;
 using sync = sync_package;
+using System.Runtime.CompilerServices;
 using encoding;
 using global::go.net;
 
@@ -221,7 +222,7 @@ public static ж<Client> NewClient(io.ReadWriteCloser conn) {
 
 // NewClientWithCodec is like [NewClient] but uses the specified
 // codec to encode requests and decode responses.
-public static ж<Client> NewClientWithCodec(ClientCodec codec) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static ж<Client> NewClientWithCodec(ClientCodec codec) {
     var client = Ꮡ(new Client(
         codec: codec,
         pending: new map<uint64, ж<ΔCall>>()

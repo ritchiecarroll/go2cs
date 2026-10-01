@@ -16,6 +16,7 @@ using os = os_package;
 using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
+using System.Runtime.CompilerServices;
 using crypto;
 using go.net;
 using go.net.http.@internal;
@@ -292,7 +293,7 @@ internal static void logCloseHangDebugInfo(this ж<Server> Ꮡs) {
 }
 
 // CloseClientConnections closes any open HTTP connections to the test Server.
-public static void CloseClientConnections(this ж<Server> Ꮡs) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void CloseClientConnections(this ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -345,7 +346,7 @@ public static void CloseClientConnections(this ж<Server> Ꮡs) {
     return s.client;
 }
 
-internal static void goServe(this ж<Server> Ꮡs) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void goServe(this ж<Server> Ꮡs) {
     Ꮡs.of(Server.Ꮡwg).Add(1);
     goǃ(() => {
         GoFrame ᒐ = default;

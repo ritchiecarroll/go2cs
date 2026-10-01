@@ -112,6 +112,7 @@ using io = io_package;
 using runtime = runtime_package;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
+using System.Runtime.CompilerServices;
 using go.sync;
 
 partial class trace_package {
@@ -119,7 +120,7 @@ partial class trace_package {
 // Start enables tracing for the current program.
 // While tracing, the trace will be buffered and written to w.
 // Start returns an error if tracing is already enabled.
-public static error Start(io.Writer w) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static error Start(io.Writer w) {
     GoFrame ᒐ = default;
     try {
         Ꮡtracing.of(tracingᴛ1.ᏑMutex).Lock();

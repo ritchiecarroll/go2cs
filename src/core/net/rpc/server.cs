@@ -137,6 +137,7 @@ using Δhttp = global::go.net.http_package;
 using reflect = reflect_package;
 using strings = strings_package;
 using sync = sync_package;
+using System.Runtime.CompilerServices;
 using encoding;
 using global::go.go;
 using global::go.net;
@@ -485,7 +486,7 @@ internal static readonly object rpcˢ = (@string)"rpc:"u8;
 
 // ServeCodec is like [ServeConn] but uses the specified codec to
 // decode requests and encode responses.
-public static void ServeCodec(this ж<Server> Ꮡserver, ServerCodec codec) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void ServeCodec(this ж<Server> Ꮡserver, ServerCodec codec) {
     var sending = @new<sync.Mutex>();
     var wg = @new<sync.WaitGroup>();
     while (ᐧ) {
@@ -683,7 +684,7 @@ internal static readonly object rpcServeAcceptˢ = (@string)"rpc.Serve: accept:"
 // for each incoming connection. Accept blocks until the listener
 // returns a non-nil error. The caller typically invokes Accept in a
 // go statement.
-public static void Accept(this ж<Server> Ꮡserver, net.Listener lis) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void Accept(this ж<Server> Ꮡserver, net.Listener lis) {
     while (ᐧ) {
         var (conn, err) = lis.Accept();
         if (err != default!) {

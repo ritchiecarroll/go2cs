@@ -6,6 +6,7 @@ namespace go;
 using godebug = @internal.godebug_package;
 using @unsafe = unsafe_package;
 using @internal;
+using System.Runtime.CompilerServices;
 
 partial class time_package {
 
@@ -191,7 +192,7 @@ public static ж<Timer> AfterFunc(Duration d, Action f) {
     return newTimer(when(d), 0, goFunc, (f).OrTypedNilFunc(), nil);
 }
 
-internal static void goFunc(any arg, uintptr seq, int64 delta) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void goFunc(any arg, uintptr seq, int64 delta) {
     goǃ(arg._<Action>());
 }
 

@@ -21,6 +21,7 @@ using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
 using httpguts = vendor.golang.org.x.net.http.httpguts_package;
+using System.Runtime.CompilerServices;
 using go.@internal;
 using go.net;
 using go.net.http;
@@ -212,7 +213,7 @@ internal static bool shouldSendChunkedRequestBody(this ж<transferWriter> Ꮡt) 
 //
 // In other words, this delay will not normally affect anybody, and there
 // are workarounds if it does.
-internal static void probeRequestBody(this ж<transferWriter> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void probeRequestBody(this ж<transferWriter> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.ByteReadCh = new channel<readResult>(1);

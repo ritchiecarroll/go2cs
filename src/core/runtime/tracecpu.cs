@@ -6,6 +6,7 @@ namespace go;
 
 using @internal.runtime;
 using @unsafe = unsafe_package;
+using System.Runtime.CompilerServices;
 using atomic = @internal.runtime.atomic_package;
 
 partial class runtime_package {
@@ -42,7 +43,7 @@ internal static readonly @string traceStartReadCPUCalledˢ = "traceStartReadCPU 
 // data into an active trace.
 //
 // traceAdvanceSema must be held.
-internal static void traceStartReadCPU() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void traceStartReadCPU() {
     if (!traceEnabled()) {
         @throw(traceStartReadCPUCalledˢ);
     }

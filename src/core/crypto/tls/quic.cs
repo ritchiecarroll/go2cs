@@ -6,6 +6,7 @@ namespace go.crypto;
 using context = context_package;
 using errors = errors_package;
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 using go.sync;
 using net = net_package;
 
@@ -158,7 +159,7 @@ internal static readonly @string tlsConfigMinVersionMustˢ = "tls: Config MinVer
 // It may produce connection events, which may be read with [QUICConn.NextEvent].
 //
 // Start must be called at most once.
-public static error Start(this ж<QUICConn> Ꮡq, context.Context ctx) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static error Start(this ж<QUICConn> Ꮡq, context.Context ctx) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     if ((~(~q.conn).quic).started) {
