@@ -1,8 +1,8 @@
 # TRAIN M -- a method promoted through another package's embed, in the RUNTIME method set
 
-**Status:** DESIGN RECORD **v3**, no code in this file. It revises v2 (`6fc6c2b26d`) under COORD's second CONDITIONS
-ruling (G's re-read and COORD's three-lens review), for G and COORD to re-read before any cut. The census tools this
-record cites are committed beside it, in `src/tools/crosspkg-census` (M6).
+**Status:** DESIGN RECORD **v3.1**: v3 (`4deec86a26`, ACCEPTED WITH CONDITIONS) plus the AMENDMENT below, for G and
+COORD to spot-read by its diff before the CROSS-PACKAGE seat is cut (TRAIN M, after L). There is no code in this file.
+The census tools it cites are committed beside it, in `src/tools/crosspkg-census` (M6).
 **Lane:** i9
 **Date:** 2026-09-30
 **Tree read:** `master` @ `f819887fa3`; every file:line is at that tree. Two files moved on TRAIN K's union
@@ -11,6 +11,40 @@ record cites are committed beside it, in `src/tools/crosspkg-census` (M6).
 **Sequencing:** M cuts on L's LANDED master. The red `CrossPackagePromotedValueMethod` lives on L's `8213221317`.
 **Companion seat:** `claude/i9-crosspkg-value-promotion` (TRAIN L) is the converter's CALL-SITE half of the same defect
 class. This document is the METHOD-SET half.
+
+## What v3.1 amends (the conditions of the v3 ruling)
+
+Every figure below is from the committed tools, run PINNED (go1.24.13; `toolchain@` absent from the output), or from
+the scratch prototype (§5).
+
+1. **The §5.6 crash class is a SEPARATE seat, not this one (§6.6 rewritten).** v3's 490 / 498 / 494 counts every row
+   Go SEES, not the by-ref, non-`[GoRecv]` forwarders the generator EMITS (`os.fileWithoutWriteTo`: 4 emitted vs 38
+   counted). It is one class with two halves: SameP (pointer hop) and SameV (value hop, the 1013-1017 over-claim
+   rows). The seat's first deliverable is the census of what is emitted.
+2. **Refinement (b) is the cut's rule; its premise is now stated (§2.2b).** Measuring it found a defect, now fixed:
+   FIELDS must count separately from the method surface. Otherwise (b) mints `reflect.ptrType.Elem` and
+   `sliceType.Elem` through internal/abi's PRE-EXISTING field-shadowed forwarder. The fixed (b) adds exactly
+   `net/http_test.cleanupT.Chdir/Setenv` over literal (i').
+   - **Gate 6 is re-predicted: 706 / 703 / 703.** The row-for-row join is exact in both modes: literal 704 / 701 / 701,
+     and (b) 706 / 703 / 703, with 0 rows on either side on every target.
+   - The plant `bfield` (fields merged into the surface) makes `OuterFS` inherit the shadowed `Tok`.
+3. **The M2 name is defined (§2.2).**
+   - `{pkg}` is the EMITTED package-class stem, so `http` and `http_test` differ.
+   - `{Struct}` is the EMITTED type name, lifted locals included, so it MAY contain `ᴛ` (`sizeTestsᴛ1`).
+   - Uniqueness rests on package stems NEVER containing `ᴛ`, which makes the first `ᴛ` the stem boundary. Census:
+     **0** std `.go` files contain `ᴛ`, and the behavioral corpus has **0** package or type declarations with it (27
+     files use it, all in comments).
+4. **Completeness:**
+   - S1, S3, S4 and S5 are real-generator arms. S1/S3/S4 are NAMED DIVERGENCES exactly as the ruling predicted (§6.3);
+     S5 is Go-equal.
+   - Also Go-equal: a depth >= 1 FIELD inside a metadata subtree (`OuterFD`), the field-shadow propagation arm
+     (`OuterFS`), and the hand-owned arm (`struct{ *testing.T }`, value `Error` true).
+   - The transit figure is given (§6.4). m3 is widened (`xtransit`: **0**).
+   - The shared collector is answered (§2.2), and so is the GolibTests guard's scope with its plant (§7.5).
+   - Every plant names its line or site (§5.2).
+   - The join is committed (`scripts/reconcile.sh`; a CROSS-CHECK, since the two tools share `treeOccurrences`).
+   - m4's twin count is an actual census (**0**). v2's depth-flattening obligations are RETIRED (§3). m7 and m8 are
+     quoted (§3).
 
 ## What v3 changes
 
@@ -71,7 +105,8 @@ real generator, run against Go's own output (§5).
 > The scratch prototype of exactly that is **IDENTICAL TO GO**, byte for byte, on 14 shapes and every probe in §5.
 > Every floor-13 plant flips something named.
 >
-> Footprint, re-derived from the committed tools: **+704 / +701 / +701** forwarded rows (windows / linux / darwin), 0
+> Footprint, re-derived from the committed tools: **+706 / +703 / +703** forwarded rows under refinement (b) (v3.1;
+> literal (i') gives 704 / 701 / 701) (windows / linux / darwin), 0
 > same-package forwarder changes, and 0 over-claims added. The converter's marker changes 54 production interface
 > embeds in 35 std files, 136-140 test embeds in 57-59 files, and 24 embeds in 15 behavioral modules.
 
@@ -142,6 +177,12 @@ real generator, run against Go's own output (§5).
 ### 2.2 Generator
 
 - **Placement (M2).**
+  - **v3.1, the name's definitions (ruled).** `{pkg}` is the EMITTED package-class stem, what precedes `_package`, so
+    an internal-test `http` and an external-test `http_test` differ (the dumpConn CS0101 case). `{Struct}` is the
+    EMITTED type name, lifted locals included (internal/abi's `u`; a lifted `sizeTestsᴛ1`), so it may contain `ᴛ`.
+    Uniqueness rests on package stems NEVER containing `ᴛ`, which makes the first `ᴛ` the stem boundary. Census: 0 std
+    `.go` files contain `ᴛ`; the behavioral corpus has 0 package or type declarations with it (its 27 uses are all in
+    comments about emitted C#).
   - Cross-package forwarders go into `public static class {pkg}ᴛ{Struct}ᴛxpkg` under the package namespace. `{Struct}`
     is the name without generic arity or `@`; receivers are qualified `global::{ns}.{pkg}_package.{Struct}`.
   - The class is PUBLIC, because the harvest skips inaccessible methods (`:1193`). Each forwarder takes the struct's
@@ -174,10 +215,34 @@ real generator, run against Go's own output (§5).
       saw those).
     Without (b), `Within{ProtoB.Mid2}` inherited ProtoB's PRE-EXISTING Go-incorrect `Mid2.Tok` as a new cross addition.
     The prototype showed exactly that before (b).
+    - **v3.1, PREMISE (ruled).** (b) is regression-free RELATIVE TO the foreign generator's surface names being
+      Go-correct IN NAME within the embed. Literal (i') could not claim more, because foreign INTERNAL methods are never
+      imported.
+    - **v3.1, FIELDS count separately (a defect found by measuring (b), now fixed in the prototype and in `cmd/sim -b`).**
+      A field is its own occurrence and never joins the method surface. Go forbids a field and a method of one name at
+      one level, so a surface method beside a same-named field can only be a forwarder of a SHADOWED method: internal/abi
+      `PtrType.Elem`, the §6.1 pre-existing over-claim, which violates the premise. With the two merged, (b) minted
+      `reflect.ptrType.Elem` and `sliceType.Elem`, which Go drops. Separated, they count 2.
+      - The arms that prove (b) does not propagate the Seven-type or the field-shadow surface are `Within` (Seven-type)
+        and `OuterFS` (`PS{inner3; Tok int}`, whose master forwarder `PS.Tok` is field-shadowed). Both are Go-equal.
+      - The plant `bfield` (fields merged back) makes `OuterFS` inherit `Tok`.
+      - The cut carries both as GenTests arms.
+    - **v3.1, re-prove trigger.** If §6.2's same-package counter ever changes from DROP to MINT, (b) must be re-proved:
+      its package-class mirror assumes master DROPS a same-depth same-package ambiguity.
   - **(c) The literal and refined rules differ in one std case.** At the Go level the census counts every declaration,
     so `testing.T`'s `Chdir`/`Setenv` shadowing its embedded `common`'s are 2 occurrences. That is `k = 2`
-    (`net/http_test.cleanupT`). Under (b) a package-class name that mirrors SAME-package providers below counts 1, so
-    the prototype would mint those 2, which is Go-correct. The gate measures which.
+    (`net/http_test.cleanupT`). Under (b) a package-class name that mirrors SAME-package providers below counts 1, so it
+    mints those 2, which is Go-correct.
+    - **v3.1:** (b) is the cut's rule, so the forwarded count is **706 / 703 / 703**, not 704 / 701 / 701.
+      `cmd/sim -b` adds exactly those 2 rows over the literal run, and the row join is exact in both modes (§4).
+  - **v3.1, ONE collector?** No. The uniqueness walk (`BuildTreeNameCounts`) is separate from the collector
+    (`collectPromotedMethods`) and the counter (`countPromotedMethods`). Their disagreement cannot over-claim, unlike
+    the rejected (i):
+    - the counter never sees a cross name, so master's same-package answer is untouched;
+    - a cross name mints only if the collector offered it AND the walk counts it exactly once;
+    - the walk's view contains the collector's (it visits every embed the collector visits, plus fields and interface
+      providers);
+    - so any disagreement can only REFUSE a name: master's MISS.
   - (i') subsumes R3 (interface providers), R4 (field shadow) and v2's section-5.3 twin. It is a harvest-side filter:
     ~20-40 lines in the cut, about 150 in the prototype with its walkers. No golib change.
 - **R5 and B2.**
@@ -229,12 +294,31 @@ real generator, run against Go's own output (§5).
 - **m3.** The adapter's single-value-embed static hop (`ImplementGenerator.cs:1423`) calls the embed's PACKAGE class
   and cannot reach a `ᴛxpkg` forwarder. Its population is the rows reaching a method THROUGH an embed's own cross
   forwarder: `multicross` = **0** (std x3, behavioral).
+  - **v3.1, widened (ruled).** `multicross` counted only inside the non-public-return branch, while the cut mints
+    exactly the PUBLIC-shape intermediates into `ᴛxpkg`. The census's new `xtransit` counts every exported row whose
+    path crosses packages at two or more hops, whatever the return shape: **0** on all three targets. ProtoC is the
+    positive control, at 16.
 - **m4, frame names.** `GoSyntheticPC` derives a frame's package from a `<pkg>_package` class (`:185-191`). The probe
   calls a `runtime.Caller(1)` method directly, through an assert on `Direct`, and through one on the transitive
   `Outer`. It reports the calling closure exactly as Go does: no `ᴛxpkg` frame surfaces. The only difference is the
   pre-existing `main.Main` vs `main.main` naming, which the forwarder-free direct call shows too.
 - **m4, twins.** A (struct, method) pair holding both a `ᴛpromoted` twin and a `ᴛxpkg` forwarder is **0 by
   construction**: an interface provider counts under (i'), so a name it provides is never unique beside a cross one.
+  - **v3.1, as an actual census (`twin`):** **0** on all three targets.
+  - The arm cannot fire in Go's own semantics, and that is stated rather than planted. A direct interface embed
+    providing a crossing row's name either TIES the cross method at depth 1 (ambiguous, so no row) or BEATS a deeper
+    one (so not a crossing row).
+- **v3.1, depth flattening RETIRED.** Under (i') the item-5 shape no longer regresses. v2's depth-flattening
+  obligations are retired: the converter `showWarning`, the release-hop census predicate, and the GenTests divergence
+  pin.
+- **v3.1, m7 (quoted: "State that section 4's instance was measured in the package-class layout").** v2's §4
+  real-generator instance ran the R1-only prototype with the forwarders in the PACKAGE class. Every v3 / v3.1 reading
+  (§5) is the sibling-class layout.
+- **v3.1, m8 (quoted: "The item-5 census predicate becomes (i')'s collision set, split Go-correct vs Go-incorrect").**
+  - Go-INCORRECT refusals: the `collide` rows Go promotes but literal (i') refuses. There are 2 per target
+    (`cleanupT.Chdir/Setenv`), which refinement (b) mints, so 0 under the cut's rule.
+  - Go-CORRECT refusals: names Go itself drops by ambiguity or shadowing. Those never become census rows; they are the
+    drop rows and the Go-equal arms of §5.
 
 ---
 
@@ -253,12 +337,17 @@ real generator, run against Go's own output (§5).
 | − M4 guard skips | 0 | 0 |
 | **= 706 / 703 before (i')** | | |
 | − k, (i') collisions at the Go level (`collide`) | 2 | 2 |
-| **= forwarded** | **704** | **701** |
+| **= forwarded under literal (i')** | **704** | **701** |
+| **v3.1: = forwarded under refinement (b), the cut's rule (k minted, Go-correctly)** | **706** | **703** |
 
-- **Independent re-derivation.** `cmd/sim` models the generator with v3's rules: master's counter over same-package
-  occurrences only, cross names minted by (i'), C4's invisible same-package forwarders, and `[GoRecv]` methods at any
-  depth. Its `added` is **704 / 701 / 701**. The added SET equals the census's expected set row for row (704 = 704,
-  nothing on either side).
+- **The re-derivation (a CROSS-CHECK: the two tools share `treeOccurrences` and go/types).** `cmd/sim` models the
+  generator with v3's rules: master's counter over same-package occurrences only, cross names minted by (i'), C4's
+  invisible same-package forwarders, and `[GoRecv]` methods at any depth. `cmd/sim -b` adds refinement (b).
+  - The committed join `scripts/reconcile.sh` labels both sides (package, type, declaration file:line, method).
+  - Literal mode against `sim`: **704 / 701 / 701 = census**. (b) mode against `sim -b`: **706 / 703 / 703 = census**.
+    Every target has 0 rows on either side.
+  - Both readings are pinned. An unpinned run read a cached go1.24.0 std and shifted two types' lines by 13; the README
+    now requires the pin assertion.
 - `removed` is **0** on all targets and behavioral. Behavioral `k` = 0 in all 6 crossing modules.
 - **Over-claims** (all PRE-EXISTING same-package, none added by the cut): 21 per target under the any-depth `[GoRecv]`
   model, 10 under v2's depth-1 model. All are internal/abi field shadows (the local type `u` among them) plus
@@ -305,6 +394,19 @@ go2cs-gen loaded across rebuilds; that was caught by a marker the new generator 
 | `BufP{*bytes.Buffer}` | B1 over std `[GoRecv]` methods (23 / 23) | = Go |
 | `HideC{bytes.Buffer; io.WriterTo}` | R3 via the marker (`WriteTo` dropped: 0 / 22) | = Go |
 | `Where` via direct call, via assert on `Direct`, via assert on `Outer` | m4 frame names | = Go (`main.Main` naming aside) |
+| **v3.1** `OuterS5{ProtoB.Mid3; localTok}` | S5: Inner's `Tok` at depth 3 vs `deepTok.Tok` at depth 2; set AND dispatch (N 5) | = Go |
+| **v3.1** `OuterFD{ProtoB.MidF}` | a FIELD at depth >= 1 inside a metadata subtree (`MidF{Inner; HasTok{Tok int}}`) | = Go |
+| **v3.1** `OuterFS{ProtoB.PS}` | (b) does not propagate a field-shadowed same-package forwarder (`PS{inner3; Tok int}`) | = Go |
+| **v3.1** `TT{*testing.T}` | hand-owned `this ref T` methods across packages (cleanupT's shape); 23 / 23, value `Error` true | = Go |
+
+**v3.1, the named divergences** (S1 / S3 / S4, exactly as the ruling predicted; §6.3):
+- `OuterS1{ProtoA.Foreign; localM}`: Go 0 / 0, C# 1 [M] / 1 [M]. Master's `localM.M` over-claim stays.
+- `OuterS4{ProtoB.MidM; localDeep}`: Go 0 / 0, C# 1 [M] / 1 [M]. The over-claim stays.
+- `OuterS3{ProtoA.Foreign; localDeep}`: membership equal (1 [M]), but DISPATCH through an interface is Go `foreign`
+  vs C# `deep`. Wrong dispatch; a direct call stays right through the converter's explicit hop.
+
+A VALUE embed `struct{ testing.T }` fails the struct template's constructor/`==` emission (CS1729, CS0019, in
+`TT.g.cs`). That is pre-existing at master, not a cut effect, so the arm uses `*testing.T`.
 
 ### 5.2 Floor-13 plants (each rule OFF in turn, everything else on; the baseline is 0 diff lines)
 
@@ -315,9 +417,15 @@ go2cs-gen loaded across rebuilds; that was caught by a marker the new generator 
 | B1 | `report(PtrDirect)` DIES at the same site |
 | the marker | `HideC ptr 23` vs Go's 22: `WriteTo` is minted |
 | M4 (guard scoped) | `Stamp` / `PtrStamp` lose `After`, `Date`, `Unix`, `UnixMicro`, `UnixMilli` (38 / 42 vs 43 / 47) |
+| **v3.1** C4-transitive (the cross forwarder takes the NAME-heuristic scope) | `Outer value 5 [Name Pair String Tok Where]` -> `1 [Tok]` (and `Five` the same): ProtoB's `Mid` forwarders go internal and vanish one assembly on |
+| **v3.1** C14 (the generic test by STRING, `Contains("<")`) | every pointer-embed shape loses its cross forwarders: `PtrDirect 6 / 6` -> `0 / 0`; `Broken 4 [Lock Read TryLock Unlock]` -> `1 [Read]` (also PtrStamp, BufP, TT) |
+| **v3.1** R4 (fields not counted in the (i') walk) | `Shadow value 4` -> `5 [... Tok ...]`: the field-shadowed `Tok` is minted; `OuterFD` and `OuterFS` move too |
+| **v3.1** (b)'s field separation (`bfield`: fields merged into the surface) | `OuterFS 0 / 0` -> `1 [Tok] / 1 [Tok]`: the field-shadowed same-package forwarder propagates |
 
-The remaining plants are GenTests arms of the cut itself: the C14 string test, a broken parity arm, and R4 keyed on the
-field-shadow arm. R4 cannot be switched off apart from (i'), which subsumes it.
+**v3.1:** the baseline (every rule on) differs from Go only by the 8 lines of the named S1/S4 divergences. Each plant
+is measured against that baseline. The broken-PARITY plant is a GenTests arm of the cut: its diagnostic is the parity
+test's `Assert.AreEqual` failing on the generated text, at the arm's own line. The MSBuild-only prototype has no
+CompilationReference route.
 
 ### 5.3 The §5.6 same-package class, at run time (ProtoB's own forwarders, unchanged by the cut)
 
@@ -340,15 +448,42 @@ field-shadow arm. R4 cannot be switched off apart from (i'), which subsumes it.
    rows per target, depending on the pointer-method emission form. Behavioral: IotaEnum 2, StdLibInternalAbi 7.
 2. **The pre-existing same-package depth-blind METHOD counter.** Fields were made depth-aware (`:290-321`); methods
    never were (`:697`, `:879-883`). It is its own follow-up.
-3. **(i') collisions where Go's winner is a METADATA method** keep master's MISS: `k` = 2 per target at the Go level
-   (`net/http_test.cleanupT.Chdir/Setenv`), 0 in behavioral. Under refinement (b) the prototype rule may mint them,
-   Go-correctly.
+3. **(i') collisions where Go picks a METADATA method or calls the name ambiguous** keep master's answer.
+   - At the Go level `k` = 2 per target (`net/http_test.cleanupT.Chdir/Setenv`), which refinement (b) mints
+     Go-correctly, so 0 under the cut's rule. 0 in behavioral.
+   - **v3.1, the residual's three shapes, measured on the real generator (each pinned by a GenTests arm asserting the
+     generated text keeps master's forwarder, plus a recorded known-divergence behavioral line):**
+     - **S1, a same-depth collision** `Outer{ProtoA.Foreign; local}` (both `M` at depth 1). Go: ambiguous, so absent.
+       C#: master's `local.M` OVER-CLAIM stays (1 [M] / 1 [M]).
+     - **S3, the foreign method shallower** `Outer{ProtoA.Foreign; local{deep}}`. Go: `Foreign.M`. C#: membership
+       right, DISPATCH wrong (`deep`) through an interface or reflect.
+     - **S4, equal depth 2** `Outer{ProtoB.Mid{Foreign}; local{deep}}`. Go: ambiguous, so absent. C#: over-claim stays.
+     - S5 (a local shallower than a deep foreign forwarder) is Go-equal (§5.1), not a residual.
 4. **C4, through a pre-existing same-package INTERNAL forwarder:** 67 exported rows per target (reflect's abi wrappers,
    and net/http_test's `testMockTCPConn` and `cleanupT`). The fix is the name-heuristic scope, which is same-package
    churn. Accepted.
+   - **v3.1, the TRANSIT figure.** `transit` counts **132** exported rows per target: rows reached THROUGH a foreign
+     type's own forwarder. **65** are forwarded, because that forwarder is public. **67** are this C4 residual.
+     `multicross` / `xtransit` is **0**: no transit row passes through a forwarder the cut itself mints.
 5. **Generic metadata embeds:** 11 rows (`unique.uniqueMap`), and the generic-enclosing box-shim gap.
-6. **The same-package by-ref class (B1 §5.6): a CRASH residual unless COORD folds it into M.**
-   - Census (`cmd/r5` `same-ptrhop`): **490 / 498 / 494 rows in 37 / 38 / 38 std types**. Among them:
+6. **The same-package by-ref class (B1 §5.6): v3.1, RULED A SEPARATE SEAT (the CRASH-CLASS seat), not this one.**
+   - **Its design, as ruled:**
+     - golib-side COPY-binding: `AdapterBinder.cs:203-204` and `CompileBoundFactory` (`GoReflect.MethodSets.cs:507-526`)
+       bind a by-ref receiver WITHOUT `[GoRecv]` through a copy of the receiver. That is Go's value-method semantics,
+       with no generator churn and no per-call copy on static paths.
+     - In the SAME seat and ATOMIC with it: same-package `[GoRecv]` stamping of the value-hop pointer-method forwarders
+       (SameV). It is an attribute only, and the diff is attribute lines predicted from a base build's `Generated/`.
+     - A CLASSIFICATION census first: every by-ref, non-`[GoRecv]` extension receiver across the corpus (converted,
+       hand-owned such as `testing.cs:231`, and generated forwarders from a base `Generated/`), each classified as a Go
+       VALUE or POINTER method. The pointer ones are stamped.
+     - A GolibTests reflection guard pinned to a REVIEWED ALLOWLIST.
+     - G's recoverable-panic hardening: `TryAsPanic` adopts only Panic/DivideByZero/NullReference (`:490-520`).
+     - The ruled before/after: the SameP value assert flips MISS -> HIT, NumMethod is unchanged, and the reflect walks
+       stop dying.
+   - **v3.1 correction:** the figures below count every row GO SEES, not the forwarders the generator EMITS
+     (`os.fileWithoutWriteTo`: 4 emitted vs 38 counted; `bufio.ReadWriter` agrees at 25). The seat's first
+     deliverable is the emitted census.
+   - Census (`cmd/r5` `same-ptrhop`, Go-seen): **490 / 498 / 494 rows in 37 / 38 / 38 std types**. Among them:
      - `os.fileWithoutWriteTo`/`fileWithoutReadFrom` (38 each);
      - `net.lookupCustomResolver` (38);
      - `runtime.sweepLocked` (35);
@@ -358,9 +493,8 @@ field-shadow arm. R4 cannot be switched off apart from (i'), which subsumes it.
      answers a wrong MISS.
    - **Reachability from banked rows: 0 by construction for the crash** (a banked row passes at master, where these
      forwarders exist; a reached crash kills the row). The silent MISS cannot be ruled out that way.
-   - The B1 remedy (by value through a pointer hop) is safe for callers: a by-value receiver serves lvalues and
-     rvalues, and the mutation goes through the pointer. Applied same-package, it would change those generated files.
-     **COORD rules whether it joins M.**
+   - The generator by-value route is WITHDRAWN for same-package work (G). It is the fallback only if the golib route
+     fails somewhere, and then with a measured go/types A/B, because it copies the outer struct per static call.
 7. **Unexported cross-package methods** (R1): unobservable, per `UnexportedMethodPackageMatches` (`GoMethodSets.cs:239-255`).
 8. **CompilationReference transitive promotion (M7).** The syntax arm's exact-text receiver match never sees a
    qualified `ᴛxpkg` receiver. Pinned by GenTests; MSBuild (metadata) is unaffected.
@@ -402,6 +536,11 @@ field-shadow arm. R4 cannot be switched off apart from (i'), which subsumes it.
 5. **The per-row `[GoRecv]` gate.** Each of the 360 `cmd/r5` cross rows (value-hop, pointer-receiver) is emitted
    `[GoRecv] this ref`, and each of the 387 / 384 / 384 `cross-ptrhop` rows is emitted by value. A GolibTests guard
    asserts that no by-ref, non-`[GoRecv]` method reaches `GetGoMethodSetEntries` for a cross forwarder.
+   - **v3.1, the guard's SCOPE.** It is CROSS-only here: its predicate is "a method of a `ᴛxpkg` class". The
+     same-package class EXISTS today (§6.6), so a corpus-wide guard would fail at master. The CRASH-CLASS seat widens it
+     into the allowlist guard.
+   - **The plant proving it fails:** the predicate (a `ᴛxpkg` forwarder that is `this ref` with no `[GoRecv]`), read
+     over the prototype's `Generated/`, counts **0** at the baseline, **45** with R5 off and **53** with B1 off.
 6. **The generated-source diff is the footprint.**
    - Base and cut run in SEPARATE fresh worktrees, every `Generated/` purged first.
    - Generated output is captured PER PROJECT (`-p:CompilerGeneratedFilesOutputPath=Generated-<proj>`; `io.csproj:106`
@@ -410,8 +549,8 @@ field-shadow arm. R4 cannot be switched off apart from (i'), which subsumes it.
    - Production and test predictions are separate. The tests.csproj of every package holding a census `_test` type is
      built (io, encoding/json, net/http, net/http/cgi, math/big, go/types, runtime, sync, image/draw, net/rpc/jsonrpc;
      crypto/tls on its lane).
-   - The diff is census'd BOTH ways against `cmd/sim`'s added set: **704** on windows; the linux reconciliation 701;
-     darwin stated unmeasured.
+   - The diff is census'd BOTH ways against `cmd/sim -b`'s added set (v3.1, re-predicted under refinement (b)):
+     **706** on windows; the linux reconciliation 703; darwin stated unmeasured.
    - **A mismatch is a STOP, not a reconciliation.** Same-package changes: 0.
    - Planted control: drop one predicted forwarder; the both-ways census names it; restore byte-identical.
 7. **Behavioral:**
@@ -426,7 +565,9 @@ field-shadow arm. R4 cannot be switched off apart from (i'), which subsumes it.
    - (i') off: CS0121;
    - M4 off;
    - the C14 string test;
-   - a broken parity arm.
+   - a broken parity arm;
+   - v3.1: C4-transitive (the name-heuristic scope), R4 (fields not counted) and (b)'s field separation, each keyed
+     on the §5.2 line it flips.
 9. **Full validated sweep on windows plus a linux leg.** crypto/tls and net go to their lane. Must-not-move rows:
    reflect, internal/reflectlite, encoding/json, encoding/xml, fmt, archive/tar, io, net, os. Plus GolibTests x2 with
    GOROOT pinned, and `go test ./...`.
@@ -435,8 +576,11 @@ field-shadow arm. R4 cannot be switched off apart from (i'), which subsumes it.
 
 ## 8. For G and COORD to read
 
-- **§6.6, the same-package by-ref crash class:** fold the by-value emission into M (it changes same-package generated
-  files: 490 rows in 37 types), or keep it a named crash residual with its guard.
-- **(i') refinement (b)'s package-class mirror:** it mints `cleanupT.Chdir/Setenv` Go-correctly where the literal rule
-  refuses (`k` 2 vs 0). Which rule is the cut's?
-- **The name** `{pkg}ᴛ{Struct}ᴛxpkg`, as specified in M2.
+v3's three open points are RULED (v3.1):
+- §6.6 is a SEPARATE CRASH-CLASS seat, designed as in §6.6. It is sized after this record, with its emitted
+  classification census as the first deliverable.
+- Refinement (b) is the cut's rule, with its premise, field separation and re-prove trigger (§2.2b). Gate 6 reads
+  706 / 703.
+- The name `{pkg}ᴛ{Struct}ᴛxpkg` is SOUND, with its definitions (§2.2).
+
+For the spot-read: this record's v3.1 diff only. The cross-package seat is then ready to cut (TRAIN M, after L).

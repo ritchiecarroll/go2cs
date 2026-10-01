@@ -143,7 +143,7 @@ func main() {
 
 	seen := map[string]bool{} // a type declared in production files appears in the package AND its test variant
 	var rows, ifrows, droprows []string
-	types_, methods, exported, shims, clashes, generic, sigunexp, transit, internalfwd, multicross, collide := 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	types_, methods, exported, shims, clashes, generic, sigunexp, transit, internalfwd, multicross, collide, xtransit, twin := 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	byIface := map[string]int{}
 	for _, p := range pkgs {
 		if p.TypesInfo == nil {
@@ -259,6 +259,31 @@ func main() {
 							multicross++
 						}
 					}
+					// m3 (widened): ANY row reached through an embed's own CROSS-package forwarder, public shape or not --
+					// the cut mints those intermediates into ᴛxpkg, which the adapter's single-value-embed static hop
+					// (ImplementGenerator.cs:1423, the embed's PACKAGE class) cannot reach.
+					if crossings(sel) >= 2 {
+						flags = append(flags, "xtransit")
+						if fn.Exported() {
+							xtransit++
+						}
+					}
+				}
+				// m4 twin: a DIRECT interface embed of T providing the same name (its ᴛpromoted twin) beside a crossing
+				// row. (i') counts interface providers, so such a name is never unique: predicted 0.
+				for fi := 0; fi < nt.Underlying().(*types.Struct).NumFields(); fi++ {
+					ff := nt.Underlying().(*types.Struct).Field(fi)
+					if !ff.Embedded() || !types.IsInterface(ff.Type()) {
+						continue
+					}
+					if it, ok := ff.Type().Underlying().(*types.Interface); ok {
+						for mi := 0; mi < it.NumMethods(); mi++ {
+							if it.Method(mi).Name() == fn.Name() {
+								flags = append(flags, "twin")
+								twin++
+							}
+						}
+					}
 				}
 				if isGeneric {
 					flags = append(flags, "genencl")
@@ -273,8 +298,10 @@ func main() {
 					}
 				}
 				methods++
-				mine = append(mine, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s.%s\t%s-recv\tset=%s\tpath=%s[%s]\t%s", tn.Pkg().Path(), kind, scope, tn.Name(), rel,
-					fn.Pkg().Path(), fn.Name(), rk, set, path, hk, strings.Join(flags, ",")))
+				// The trailing decl= column is the row LABEL shared with cmd/sim (package, type, declaration file:line,
+				// method), so the two can be joined row for row (scripts/reconcile.sh).
+				mine = append(mine, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s.%s\t%s-recv\tset=%s\tpath=%s[%s]\t%s\tdecl=%s:%d", tn.Pkg().Path(), kind, scope, tn.Name(), rel,
+					fn.Pkg().Path(), fn.Name(), rk, set, path, hk, strings.Join(flags, ","), filepath.Base(pos.Filename), pos.Line))
 			}
 			// DROP rows (question 3): an exported method of a crossing embed's own method set that Go does NOT promote into
 			// *T. A harvest of the embed's emitted extension methods would see it anyway, so the generator must drop it
@@ -390,8 +417,8 @@ func main() {
 		ik = append(ik, fmt.Sprintf("%s=%d", k, v))
 	}
 	sort.Strings(ik)
-	fmt.Printf("\npackages loaded %d (load errors %d); interfaces resolved %d; types %d (generic %d); methods %d (exported %d, shim %d, clash %d, sigunexp %d, transit %d, internalfwd %d, multicross %d, collide %d); drop rows %d; interface rows %d: %s\n",
-		len(pkgs), loadErrors, len(ifaces), types_, generic, methods, exported, shims, clashes, sigunexp, transit, internalfwd, multicross, collide, len(droprows), len(ifrows), strings.Join(ik, " "))
+	fmt.Printf("\npackages loaded %d (load errors %d); interfaces resolved %d; types %d (generic %d); methods %d (exported %d, shim %d, clash %d, sigunexp %d, transit %d, internalfwd %d, multicross %d, collide %d, xtransit %d, twin %d); drop rows %d; interface rows %d: %s\n",
+		len(pkgs), loadErrors, len(ifaces), types_, generic, methods, exported, shims, clashes, sigunexp, transit, internalfwd, multicross, collide, xtransit, twin, len(droprows), len(ifrows), strings.Join(ik, " "))
 }
 
 // sigNamesForeignUnexported reports whether any parameter or result type mentions a named type that is unexported

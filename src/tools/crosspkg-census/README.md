@@ -31,6 +31,13 @@ under `GOOS=linux` when the summary shows load errors (a linux-only module).
 | `r5` | pointer-receiver promotions: through VALUE-only hops (the value-set over-claim R5 fixes cross-package; `same` is the residual), and through a POINTER hop (`same-ptrhop` / `cross-ptrhop`: B1's by-ref forwarders) |
 | `ifaceembed` | every embedded INTERFACE field (the converter footprint of the `[GoEmbedded]` marker), and how many are COMPOSITE |
 
+- **Pin first.** Assert `head -1 $GOROOT/VERSION` reads `go1.24.13` and `go env GOROOT` echoes it. An UNPINNED run
+  (no `GOROOT`, default `GOTOOLCHAIN`) silently loads a cached toolchain's std, whose line numbers differ. This was
+  measured: a 13-line shift that broke the row join. A pinned output contains no `toolchain@` path; check that it has 0.
+- **The join.** `scripts/reconcile.sh <census output> <sim output> [b]` is the row-for-row join behind the record's
+  forwarded-row figure. It exits 0 iff the sets are equal. `cmd/census` and `cmd/sim` share `treeOccurrences` and
+  go/types, so this is a CROSS-CHECK, not an independent derivation. `sim -b` runs refinement (b), the rule the cut
+  uses: 706 / 703 / 703 at f819887fa3. Without `-b` it runs literal (i'): 704 / 701 / 701.
 - **Controls.** `testdata/plant` and `testdata/simplant` are planted modules. Every arm has a shape there that must
   fire: crossing, field shadow, same-depth ambiguity, function / var / builtin / dot-import / bridge clash, C3
   `Leak() hidden`, C4 `Deep`, the generic enclosing struct `Gen`, and `Col` (collide).

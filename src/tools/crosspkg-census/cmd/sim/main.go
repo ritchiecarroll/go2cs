@@ -202,7 +202,7 @@ func emitted(n *types.Named, m mode) map[string]bool {
 		// (methods at any depth, interface providers, fields at any depth) -- R3 and R4 fold into this.
 		crossMinted[k] = map[string]bool{}
 		for name := range crossSeen {
-			if own[name] || out[name] || treeOccurrences(n, name) != 1 {
+			if own[name] || out[name] || occurrences(n, name) != 1 {
 				continue
 			}
 			out[name] = true
@@ -215,6 +215,7 @@ func emitted(n *types.Named, m mode) map[string]bool {
 
 func main() {
 	root := flag.String("root", "", "directory to load from (default: current)")
+	flag.BoolVar(&refineB, "b", false, "apply refinement (b): inside a METADATA embed, a surface name counts 1 plus the cross-package providers below it")
 	builtinFile := flag.String("builtin", "", "file of go.builtin member names (the global using static), one per line")
 	flag.Parse()
 	cfg := &packages.Config{Mode: packages.NeedName | packages.NeedFiles | packages.NeedSyntax | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedDeps | packages.NeedImports, Tests: true, Dir: *root}
@@ -453,4 +454,134 @@ func treeOccurrences(t *types.Named, name string) int {
 	}
 	walk(t, map[*types.Named]bool{})
 	return n
+}
+
+// refineB selects the (i') rule: false = the literal Go-level count (treeOccurrences); true = refinement (b).
+var refineB bool
+
+func occurrences(t *types.Named, name string) int {
+	if refineB {
+		return treeOccurrencesB(t, name)
+	}
+	return treeOccurrences(t, name)
+}
+
+// treeOccurrencesB is (i') under refinement (b), the rule the prototype runs. SOURCE embeds (t's own package) are
+// walked like treeOccurrences. A METADATA embed E (another package) contributes through metadataCountB: its surface
+// (Go's method set of *E plus its fields -- the PREMISE: the foreign generator's surface names are Go-correct in name)
+// counts 1 plus the providers CROSS-package below it (master's counter in E's compile never saw those); a name off
+// the surface counts what lies below.
+func treeOccurrencesB(t *types.Named, name string) int {
+	n := 0
+	var walk func(s types.Type, visiting map[*types.Named]bool)
+	walk = func(s types.Type, visiting map[*types.Named]bool) {
+		owner := named(s)
+		base, _ := deref(s)
+		st, ok := types.Unalias(base).Underlying().(*types.Struct)
+		if !ok || owner == nil || visiting[owner] {
+			return
+		}
+		visiting[owner] = true
+		defer delete(visiting, owner)
+		for i := 0; i < st.NumFields(); i++ {
+			f := st.Field(i)
+			if f.Name() == name {
+				n++
+			}
+			if !f.Embedded() {
+				continue
+			}
+			e := named(f.Type())
+			if e == nil {
+				continue
+			}
+			if it, ok := e.Underlying().(*types.Interface); ok {
+				for j := 0; j < it.NumMethods(); j++ {
+					if it.Method(j).Name() == name {
+						n++
+					}
+				}
+				continue
+			}
+			if e.Obj().Pkg() != t.Obj().Pkg() {
+				n += metadataCountB(e, name, map[*types.Named]bool{})
+				continue
+			}
+			for j := 0; j < e.NumMethods(); j++ {
+				if e.Method(j).Name() == name {
+					n++
+				}
+			}
+			walk(f.Type(), visiting)
+		}
+	}
+	walk(t, map[*types.Named]bool{})
+	return n
+}
+
+func metadataCountB(e *types.Named, name string, seen map[*types.Named]bool) int {
+	if seen[e] {
+		return 0
+	}
+	seen[e] = true
+	st, ok := e.Underlying().(*types.Struct)
+	if !ok {
+		return 0
+	}
+	// The surface is what the GENERATOR sees on e: its declared methods plus the forwarders its own compile emitted
+	// (cmd/sim's model of that compile, cut mode: package-class forwarders are master's, ᴛxpkg ones the cut's).
+	// FIELDS are separate occurrences: Go forbids a field and a method of one name at one level, so a surface METHOD
+	// beside a same-named field can only be a forwarder of a shadowed method (internal/abi PtrType.Elem, §6.1) --
+	// merging the two into one surface name would mint reflect's ptrType.Elem, which Go drops.
+	declaredHere, _ := declared(e)
+	emittedHere := emitted(e, cut)
+	inSibling := crossMinted[key{e, cut}][name]
+	onSurface := declaredHere[name] || emittedHere[name]
+	fieldsHere := 0
+	cross, same := 0, 0
+	for i := 0; i < st.NumFields(); i++ {
+		f := st.Field(i)
+		if f.Name() == name {
+			fieldsHere++
+		}
+		if !f.Embedded() {
+			continue
+		}
+		g := named(f.Type())
+		if g == nil {
+			continue
+		}
+		c := 0
+		if it, ok := g.Underlying().(*types.Interface); ok {
+			for j := 0; j < it.NumMethods(); j++ {
+				if it.Method(j).Name() == name {
+					c++
+				}
+			}
+			cross += c // an interface provider is never mirrored by a package-class forwarder
+			continue
+		}
+		c = metadataCountB(g, name, copySeen(seen))
+		if g.Obj().Pkg() != e.Obj().Pkg() {
+			cross += c
+		} else {
+			same += c
+		}
+	}
+	switch {
+	case inSibling:
+		return 1 + fieldsHere // a ᴛxpkg forwarder was proven unique where it was minted
+	case onSurface:
+		return 1 + cross + fieldsHere // a package-class name mirrors SAME-package providers only
+	default:
+		return cross + same + fieldsHere
+	}
+}
+
+func copySeen(m map[*types.Named]bool) map[*types.Named]bool {
+	c := make(map[*types.Named]bool, len(m))
+	for k, v := range m {
+		c[k] = v
+	}
+	return c
 }
