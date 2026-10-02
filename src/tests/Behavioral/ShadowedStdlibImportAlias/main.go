@@ -4,7 +4,7 @@ import (
 	stderrors "errors"
 	"fmt"
 
-	"go2cs/ShadowedStdlibImportAlias/errors"
+	"ShadowedStdlibImportAlias/errors"
 )
 
 func main() {

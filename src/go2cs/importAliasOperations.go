@@ -170,6 +170,21 @@ func computeImportAliasRenames(files []FileEntry, pkg *types.Package, packageNS 
 		}
 	}
 
+	// The package's OWN class is a member of its own namespace in every compilation, so it shadows
+	// a same-named import target exactly as a closure class does: github.com/pkg/errors (namespace
+	// go.github.com.pkg) emitted `using stderrors = errors_package;` for the standard library's
+	// errors, which bound to ITSELF (Is called Is). Only the class half: the package's namespace
+	// chain is its own namespace and adding it would only re-qualify what already binds.
+	if pkg != nil {
+		ownPath := pkg.Path()
+
+		if isGorootPackage {
+			ownPath = resolveGorootVendoredPath(ownPath)
+		}
+
+		packageQualifiedNamespaces[RootNamespace+"."+convertImportPathToNamespace(ownPath, PackageSuffix)] = true
+	}
+
 	collides := func(qualifier string) bool {
 		return packageChildNamespaces[packageNS+"."+getSanitizedImport(qualifier)]
 	}

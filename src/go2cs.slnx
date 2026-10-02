@@ -883,6 +883,8 @@
     <Project Path="tests/Behavioral/SelectSingleFire/SelectSingleFire.csproj" />
     <Project Path="tests/Behavioral/SelectStatement/SelectStatement.csproj" />
     <Project Path="tests/Behavioral/SetFinalizerBridge/SetFinalizerBridge.csproj" />
+    <Project Path="tests/Behavioral/ShadowedStdlibImportAlias/ShadowedStdlibImportAlias.csproj" />
+    <Project Path="tests/Behavioral/ShadowedStdlibImportAlias/errors/ShadowedStdlibImportAlias.errors.csproj" />
     <Project Path="tests/Behavioral/SparseArrayIfaceElem/SparseArrayIfaceElem.csproj" />
     <Project Path="tests/Behavioral/SparseArrayNamedIntKey/SparseArrayNamedIntKey.csproj" />
     <Project Path="tests/Behavioral/ShadowedCompoundAssign/ShadowedCompoundAssign.csproj" />

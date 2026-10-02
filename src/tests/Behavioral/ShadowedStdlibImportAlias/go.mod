@@ -1,3 +1,3 @@
-module go2cs/ShadowedStdlibImportAlias
+module ShadowedStdlibImportAlias
 
 go 1.24
