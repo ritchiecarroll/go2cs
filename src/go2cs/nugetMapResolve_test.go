@@ -183,7 +183,7 @@ func TestNuGetMapDecisionsAreSortedByModule(t *testing.T) {
 // converted locally, and why (no matching package, or a closure demotion naming its blocker).
 func TestNuGetMapReportNamesWhatWasAppliedAndWhy(t *testing.T) {
 	decisions := []nugetMapDecision{
-		{module: modA.path, version: "v1.0.0", mapped: true, nugetID: "id.a", status: "canonical", layer: "registry", applied: true, packageVersion: "1.0.0.1"},
+		{module: modA.path, version: "v1.300.0", mapped: true, nugetID: "id.a", status: "canonical", layer: "registry", applied: true, packageVersion: "1.300.0.1"},
 		{module: modB.path, version: "v2.1.0", mapped: true, nugetID: "id.b", status: "community", layer: "mine.txt", note: "demoted: its package requires github.com/c/c, which this run converts locally"},
 		{module: "github.com/c/c", version: "v0.1.0", note: "no mapping in any source"},
 	}
@@ -191,7 +191,7 @@ func TestNuGetMapReportNamesWhatWasAppliedAndWhy(t *testing.T) {
 	report := formatNuGetMapReport(decisions, []string{"go2cs.nuget.lock disagrees for X"})
 
 	for _, want := range []string{
-		"id.a", "canonical", "registry", "PackageReference id.a [1.0.0.1]",
+		"id.a", "canonical", "registry", "PackageReference id.a [1.300.0.1]",
 		"id.b", "community", "mine.txt", "TRUST", "converted locally", "demoted", "requires github.com/c/c",
 		"github.com/c/c", "no mapping in any source",
 		"WARNING", "go2cs.nuget.lock disagrees for X",

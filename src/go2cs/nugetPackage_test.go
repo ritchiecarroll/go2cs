@@ -94,11 +94,11 @@ func TestNuGetPackageCandidatesFollowB3(t *testing.T) {
 		published []string
 		want      []string
 	}{
-		{"v1.6.0", []string{"1.6.0", "1.6.0.2", "1.6.1", "1.6.0-local.1", "1.6.0.1", "1.6.0.x", "1.6.0.1.1"}, []string{"1.6.0.2", "1.6.0.1", "1.6.0"}},
-		{"v2.0.0+incompatible", []string{"2.0.0.1", "2.0.0"}, []string{"2.0.0.1", "2.0.0"}},
+		{"v1.600.300", []string{"1.600.300", "1.600.300.2", "1.600.301", "1.600.300-local.1", "1.600.300.1", "1.600.300.x", "1.600.300.1.1"}, []string{"1.600.300.2", "1.600.300.1", "1.600.300"}},
+		{"v2.300.0+incompatible", []string{"2.300.0.1", "2.300.0"}, []string{"2.300.0.1", "2.300.0"}},
 		{"v1.0.0-rc.1", []string{"1.0.0-rc.1", "1.0.0-rc.1.0.1", "1.0.0-rc.1.1", "1.0.0"}, []string{"1.0.0-rc.1.0.1", "1.0.0-rc.1"}},
 		{"v0.0.0-20251001235044-fca9a0999f15", []string{"0.0.0-20251001235044-fca9a0999f15.0.2", "0.0.0-20251001235044-fca9a0999f15"}, []string{"0.0.0-20251001235044-fca9a0999f15.0.2", "0.0.0-20251001235044-fca9a0999f15"}},
-		{"v1.6.0", []string{"1.6.1"}, nil},
+		{"v1.600.300", []string{"1.600.301"}, nil},
 	}
 
 	for _, c := range cases {
@@ -120,25 +120,26 @@ func TestNuGetPackageCandidatesFollowB3(t *testing.T) {
 func TestNuGetPackageSelectsTheHighestRevisionBuiltForThisCorpus(t *testing.T) {
 	f := newNuGetMapFixture(t)
 	release := corpusRelease()
-	rev1 := buildNupkg(t, map[string]string{sourcemeta.EntryPath: selfDescription(t, modShape.path, modShape.version, release, nil)})
+	mod := thirdPartyModule{path: modShape.path, version: "v1.300.0"}
+	rev1 := buildNupkg(t, map[string]string{sourcemeta.EntryPath: selfDescription(t, mod.path, mod.version, release, nil)})
 	f.publish("nugetgo.example.test.shape", map[string][]byte{
-		"1.0.0":   buildNupkg(t, map[string]string{sourcemeta.EntryPath: selfDescription(t, modShape.path, modShape.version, release, nil)}),
-		"1.0.0.1": rev1,
-		"1.0.0.2": buildNupkg(t, map[string]string{sourcemeta.EntryPath: selfDescription(t, modShape.path, modShape.version, "1.24.13.99", nil)}),
+		"1.300.0":   buildNupkg(t, map[string]string{sourcemeta.EntryPath: selfDescription(t, mod.path, mod.version, release, nil)}),
+		"1.300.0.1": rev1,
+		"1.300.0.2": buildNupkg(t, map[string]string{sourcemeta.EntryPath: selfDescription(t, mod.path, mod.version, "1.24.13.99", nil)}),
 	})
 
-	choice, notes, err := selectNuGetPackage("nugetgo.example.test.shape", modShape, nugetLockEntry{}, false, false)
+	choice, notes, err := selectNuGetPackage("nugetgo.example.test.shape", mod, nugetLockEntry{}, false, false)
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if choice.packageVersion != "1.0.0.1" || choice.contentHash != nupkgHash(rev1) || choice.description.Module != modShape.path {
-		t.Errorf("choice %+v; want 1.0.0.1 with its SHA-512", choice)
+	if choice.packageVersion != "1.300.0.1" || choice.contentHash != nupkgHash(rev1) || choice.description.Module != mod.path {
+		t.Errorf("choice %+v; want 1.300.0.1 with its SHA-512", choice)
 	}
 
-	if joined := strings.Join(notes, "\n"); !strings.Contains(joined, "1.0.0.2") || !strings.Contains(joined, "1.24.13.99") || !strings.Contains(joined, release) {
-		t.Errorf("notes %q do not say why 1.0.0.2 was passed over (its release and this converter's)", notes)
+	if joined := strings.Join(notes, "\n"); !strings.Contains(joined, "1.300.0.2") || !strings.Contains(joined, "1.24.13.99") || !strings.Contains(joined, release) {
+		t.Errorf("notes %q do not say why 1.300.0.2 was passed over (its release and this converter's)", notes)
 	}
 }
 
