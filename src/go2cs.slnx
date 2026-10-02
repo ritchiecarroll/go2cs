@@ -543,6 +543,7 @@
     <Project Path="tests/Behavioral/HexByteStringLiteral/HexByteStringLiteral.csproj" />
     <Project Path="tests/Behavioral/IfStatements/IfStatements.csproj" />
     <Project Path="tests/Behavioral/IfaceChainPointerAssert/IfaceChainPointerAssert.csproj" />
+    <Project Path="tests/Behavioral/IfaceEmbedReflectAnonymous/IfaceEmbedReflectAnonymous.csproj" />
     <Project Path="tests/Behavioral/IfaceToIfaceNarrow/IfaceToIfaceNarrow.csproj" />
     <Project Path="tests/Behavioral/IncDecPointerField/IncDecPointerField.csproj" />
     <Project Path="tests/Behavioral/IndexedElementDirectBoxMethod/IndexedElementDirectBoxMethod.csproj" />
@@ -1036,6 +1037,9 @@
     <Project Path="tests/Behavioral/WrittenCaptureParam/WrittenCaptureParam.csproj" />
     <Project Path="tests/Behavioral/WsaProtocolInfo/WsaProtocolInfo.csproj" />
     <Project Path="tests/Behavioral/WsaSendtoRoundTrip/WsaSendtoRoundTrip.csproj" />
+    <Project Path="tests/Behavioral/XpkgPromotedInnerLib/XpkgPromotedInnerLib.csproj" />
+    <Project Path="tests/Behavioral/XpkgPromotedMethodSet/XpkgPromotedMethodSet.csproj" />
+    <Project Path="tests/Behavioral/XpkgPromotedMidLib/XpkgPromotedMidLib.csproj" />
     <Project Path="tests/Behavioral/ZeroSizeFieldLayout/ZeroSizeFieldLayout.csproj" />
     <Project Path="tests/Behavioral/ZeroValueArrayField/ZeroValueArrayField.csproj" />
     <Project Path="tests/Behavioral/ZeroValueArrayNamedResult/ZeroValueArrayNamedResult.csproj" />

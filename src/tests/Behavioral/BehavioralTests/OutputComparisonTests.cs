@@ -770,6 +770,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckIfaceChainPointerAssert() => CheckTarget("IfaceChainPointerAssert");
 
     [TestMethod]
+    public void CheckIfaceEmbedReflectAnonymous() => CheckTarget("IfaceEmbedReflectAnonymous");
+
+    [TestMethod]
     public void CheckIfaceFieldEmbedAdapter() => CheckTarget("IfaceFieldEmbedAdapter");
 
     [TestMethod]
@@ -2178,6 +2181,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckWsaSendtoRoundTrip() => CheckTarget("WsaSendtoRoundTrip");
+
+    [TestMethod]
+    public void CheckXpkgPromotedMethodSet() => CheckTarget("XpkgPromotedMethodSet");
 
     [TestMethod]
     public void CheckZeroSizeFieldLayout() => CheckTarget("ZeroSizeFieldLayout");

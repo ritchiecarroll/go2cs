@@ -811,6 +811,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckIfaceChainPointerAssert() => CheckTarget("IfaceChainPointerAssert");
 
     [TestMethod]
+    public void CheckIfaceEmbedReflectAnonymous() => CheckTarget("IfaceEmbedReflectAnonymous");
+
+    [TestMethod]
     public void CheckIfaceFieldEmbedAdapter() => CheckTarget("IfaceFieldEmbedAdapter");
 
     [TestMethod]
@@ -2255,6 +2258,15 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckWsaSendtoRoundTrip() => CheckTarget("WsaSendtoRoundTrip");
+
+    [TestMethod]
+    public void CheckXpkgPromotedInnerLib() => CheckTarget("XpkgPromotedInnerLib");
+
+    [TestMethod]
+    public void CheckXpkgPromotedMethodSet() => CheckTarget("XpkgPromotedMethodSet");
+
+    [TestMethod]
+    public void CheckXpkgPromotedMidLib() => CheckTarget("XpkgPromotedMidLib");
 
     [TestMethod]
     public void CheckZeroSizeFieldLayout() => CheckTarget("ZeroSizeFieldLayout");
