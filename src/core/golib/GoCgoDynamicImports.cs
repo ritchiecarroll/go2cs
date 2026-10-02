@@ -51,6 +51,34 @@ public static class GoCgoDynamicImports
     private static readonly ConcurrentDictionary<nint, string> s_symbols = new();
 
     /// <summary>
+    /// The libSystem imports Go's linker binds as <c>&lt;name&gt;$INODE64</c> on macOS/amd64
+    /// (cmd/link/internal/ld/macho.go, "Some 64-bit functions have a $INODE64 ... suffix").
+    /// </summary>
+    /// <remarks>
+    /// The bare x86_64 symbols are the LEGACY 32-bit-inode ABI, whose <c>struct dirent</c> and
+    /// <c>struct statfs</c> are not the layouts Go's syscall types describe. Binding the bare readdir_r
+    /// read four empty, directory-typed names per directory on osx-x64 and sent filepath.WalkDir into an
+    /// unbounded self-recursion (run 36976772120, 2026-10-02). arm64 has only the one layout. repoguard's
+    /// TestGolibInode64RenamesMatchGoLinker keeps this list equal to the one in GOROOT's macho.go.
+    /// </remarks>
+    public static readonly string[] Inode64RenamedSymbols = ["fdopendir", "readdir_r", "getfsstat"];
+
+    private const string LibSystem = "/usr/lib/libSystem.B.dylib";
+
+    /// <summary>
+    /// The name Go's linker would bind <paramref name="symbol"/> to: <c>&lt;symbol&gt;$INODE64</c> for a
+    /// listed libSystem import on macOS x86_64, the symbol itself everywhere else.
+    /// </summary>
+    public static string LinkerSymbolName(string symbol, string library, bool isMacOS, Architecture architecture) =>
+        isMacOS && architecture == Architecture.X64 && library == LibSystem && Array.IndexOf(Inode64RenamedSymbols, symbol) >= 0 ?
+            symbol + "$INODE64" :
+            symbol;
+
+    /// <summary><see cref="LinkerSymbolName(string, string, bool, Architecture)"/> for this process.</summary>
+    public static string LinkerSymbolName(string symbol, string library) =>
+        LinkerSymbolName(symbol, library, OperatingSystem.IsMacOS(), RuntimeInformation.ProcessArchitecture);
+
+    /// <summary>
     /// Attempts to resolve <paramref name="method"/> as a cgo-imported trampoline.
     /// </summary>
     /// <param name="method">The delegate target's method, i.e. the trampoline stub.</param>
@@ -116,6 +144,9 @@ public static class GoCgoDynamicImports
 
             return loaded;
         });
+
+        // Bind the name Go's linker would: on macOS x86_64 a few libSystem imports are $INODE64.
+        symbol = LinkerSymbolName(symbol, library);
 
         if (!NativeLibrary.TryGetExport(handle, symbol, out nint address) || address == 0)
         {
