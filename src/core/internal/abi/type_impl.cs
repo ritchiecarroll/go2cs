@@ -838,7 +838,11 @@ private static ж<ΔArrayType> synthesizeArrayType(ж<Type> Ꮡt) {
 // make this a conjunction containing the absence test, and a reader could then reasonably carry
 // the absence half forward as the operative one. Callers establish the absence; this answers only
 // "does this descriptor name a Go kind at all".
-public static bool IsFrameLayoutDescriptor(this ж<Type> Ꮡt) {
+//
+// A plain static FUNCTION, not an extension method: Go has no such method, and an extension method
+// on ж<Type> is read as one — it sat in *abi.Type's run-time method set, and was promoted from
+// there into every type that embeds abi.Type across a package (reflect's and runtime's rtype).
+public static bool IsFrameLayoutDescriptor(ж<Type> Ꮡt) {
     return Ꮡt != nil && Ꮡt.Value.Kind() == Invalid;
 }
 
