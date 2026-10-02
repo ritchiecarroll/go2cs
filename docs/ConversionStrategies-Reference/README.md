@@ -269,6 +269,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A test project's references cover UNROOTED alias targets (single- AND multi-segment)](struct-types.md#a-test-projects-references-cover-unrooted-alias-targets-single--and-multi-segment)
   - [Generic embedded fields](struct-types.md#generic-embedded-fields)
   - [A func literal in an `any` slot states its Go result type explicitly](struct-types.md#a-func-literal-in-an-any-slot-states-its-go-result-type-explicitly)
+  - [A `:=`-bound func literal states its declared result type when its body cannot supply it](struct-types.md#a--bound-func-literal-states-its-declared-result-type-when-its-body-cannot-supply-it)
   - [Lifted function-local types: anonymous structs dedupe, named types carry [GoLocalName]](struct-types.md#lifted-function-local-types-anonymous-structs-dedupe-named-types-carry-golocalname)
   - [A lift inside a PACKAGE-LEVEL func literal flushes at package scope, seeded by the declaration](struct-types.md#a-lift-inside-a-package-level-func-literal-flushes-at-package-scope-seeded-by-the-declaration)
   - [A methodless named func type renders as its base delegate](struct-types.md#a-methodless-named-func-type-renders-as-its-base-delegate)

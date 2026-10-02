@@ -369,70 +369,54 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 		// the structural-inheritance emission (see getStructuralInterfaceBases).
 		forwarded := false
 
-		if len(returnStmt.Results) == 1 && resultParams != nil && resultParams.Len() > 1 {
-			if tuple, ok := v.getType(returnStmt.Results[0], false).(*types.Tuple); ok && tuple.Len() == resultParams.Len() {
-				needsConversion := false
+		if len(returnStmt.Results) == 1 {
+			if tuple, needsConversion := v.forwardedReturnNeedsConversion(returnStmt.Results[0], resultParams); needsConversion {
+				lambdaContext.deferredDecls = &strings.Builder{}
+				callExpr := v.convExpr(returnStmt.Results[0], []ExprContext{basicLitContext, lambdaContext})
+
+				if lambdaContext.deferredDecls.Len() > 0 {
+					deferredDecls.WriteString(lambdaContext.deferredDecls.String())
+				}
+
+				tempNames := make([]string, tuple.Len())
 
 				for i := range tuple.Len() {
+					tempNames[i] = fmt.Sprintf("%s%d", TempVarMarker, i+1)
+				}
+
+				deferredDecls.WriteString(v.newline)
+				deferredDecls.WriteString(v.indent(v.indentLevel))
+				deferredDecls.WriteString(fmt.Sprintf("var (%s) = %s;", strings.Join(tempNames, ", "), callExpr))
+				deferredDecls.WriteString(v.newline)
+
+				result.WriteRune('(')
+
+				for i := range tuple.Len() {
+					if i > 0 {
+						result.WriteString(", ")
+					}
+
 					declared := resultParams.At(i).Type()
 					actual := tuple.At(i).Type()
 
-					if declaredIsIface, _ := isInterface(declared); declaredIsIface && !types.Identical(declared, actual) {
-						if _, actualIsIface := actual.Underlying().(*types.Interface); !actualIsIface {
-							needsConversion = true
-							break
-						}
-					}
-				}
-
-				if needsConversion {
-					lambdaContext.deferredDecls = &strings.Builder{}
-					callExpr := v.convExpr(returnStmt.Results[0], []ExprContext{basicLitContext, lambdaContext})
-
-					if lambdaContext.deferredDecls.Len() > 0 {
-						deferredDecls.WriteString(lambdaContext.deferredDecls.String())
-					}
-
-					tempNames := make([]string, tuple.Len())
-
-					for i := range tuple.Len() {
-						tempNames[i] = fmt.Sprintf("%s%d", TempVarMarker, i+1)
-					}
-
-					deferredDecls.WriteString(v.newline)
-					deferredDecls.WriteString(v.indent(v.indentLevel))
-					deferredDecls.WriteString(fmt.Sprintf("var (%s) = %s;", strings.Join(tempNames, ", "), callExpr))
-					deferredDecls.WriteString(v.newline)
-
-					result.WriteRune('(')
-
-					for i := range tuple.Len() {
-						if i > 0 {
-							result.WriteString(", ")
-						}
-
-						declared := resultParams.At(i).Type()
-						actual := tuple.At(i).Type()
-
-						if declaredIsIface, declaredIfaceEmpty := isInterface(declared); declaredIsIface && !types.Identical(declared, actual) {
-							if declaredIfaceEmpty {
-								// The EMPTY interface takes the boundary treatment directly, NOT
-								// the adapter route: `any` has no adapter to hold a pointer box, so
-								// convertToInterfaceType finds no arm and falls through to its
-								// pointer-DEREF prefix — boxing a COPY of the pointee where Go's
-								// interface holds the pointer. See typedNilInterfaceBoxing.go.
-								result.WriteString(v.applyTypedNilPointerBoxToType(actual, tempNames[i]))
-							} else {
-								result.WriteString(v.convertToInterfaceType(declared, actual, tempNames[i]))
-							}
+					if declaredIsIface, declaredIfaceEmpty := isInterface(declared); declaredIsIface && !types.Identical(declared, actual) {
+						if declaredIfaceEmpty {
+							// The EMPTY interface takes the boundary treatment directly, NOT
+							// the adapter route: `any` has no adapter to hold a pointer box, so
+							// convertToInterfaceType finds no arm and falls through to its
+							// pointer-DEREF prefix — boxing a COPY of the pointee where Go's
+							// interface holds the pointer. See typedNilInterfaceBoxing.go.
+							result.WriteString(v.applyTypedNilPointerBoxToType(actual, tempNames[i]))
 						} else {
-							result.WriteString(tempNames[i])
+							result.WriteString(v.convertToInterfaceType(declared, actual, tempNames[i]))
 						}
+					} else {
+						result.WriteString(tempNames[i])
 					}
-
-					result.WriteRune(')')
-					forwarded = true
 				}
+
+				result.WriteRune(')')
+				forwarded = true
 			}
 		}
 
@@ -783,4 +767,35 @@ func (v *Visitor) crossBaseConstCastFor(targetType types.Type, expr ast.Expr) st
 	}
 
 	return "(" + v.getCSharpTypeName(named) + ")(" + v.getCSharpTypeName(rhsNamed) + ")"
+}
+
+// forwardedReturnNeedsConversion reports whether `result`, the ONE expression of a return statement, is a
+// multi-value call forwarded as the whole result list whose elements must be converted to the declared
+// results: a declared interface result the call returns as a concrete, non-interface type. Such a return
+// is deconstructed into temps and each element converted (see visitReturnStmt), and a function literal
+// with such an arm cannot take its delegate type from its body (see convFuncLit). The call's tuple is
+// returned with the answer.
+func (v *Visitor) forwardedReturnNeedsConversion(result ast.Expr, resultParams *types.Tuple) (*types.Tuple, bool) {
+	if resultParams == nil || resultParams.Len() < 2 {
+		return nil, false
+	}
+
+	tuple, ok := v.getType(result, false).(*types.Tuple)
+
+	if !ok || tuple.Len() != resultParams.Len() {
+		return nil, false
+	}
+
+	for i := range tuple.Len() {
+		declared := resultParams.At(i).Type()
+		actual := tuple.At(i).Type()
+
+		if declaredIsIface, _ := isInterface(declared); declaredIsIface && !types.Identical(declared, actual) {
+			if _, actualIsIface := actual.Underlying().(*types.Interface); !actualIsIface {
+				return tuple, true
+			}
+		}
+	}
+
+	return tuple, false
 }
