@@ -656,7 +656,7 @@ public static void TestEncodeCroppedSubImages(ж<testing.T> Ꮡt) {
 }
 
 [GoType] internal partial struct offsetImage {
-    public image_package.Image Image;
+    [GoEmbedded] public image_package.Image Image;
     public image.Rectangle Rect;
 }
 

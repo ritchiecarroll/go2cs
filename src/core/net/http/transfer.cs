@@ -1238,8 +1238,8 @@ internal static reflectꓸType nopCloserType = reflect.TypeOf(io.NopCloser(defau
 
 
     [GoType("dyn")] partial struct rᴛ1 {
-        public io_package.Reader Reader;
-        public io_package.WriterTo WriterTo;
+        [GoEmbedded] public io_package.Reader Reader;
+        [GoEmbedded] public io_package.WriterTo WriterTo;
     }
 internal static reflectꓸType nopCloserWriterToType = reflect.TypeOf(io.NopCloser(new rᴛ1()));
 

@@ -573,7 +573,7 @@ internal static slice<ScanfMultiTest> multiTests = new ScanfMultiTest[]{
 }
 
 [GoType("dyn")] internal partial struct readers_type {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 internal static slice<readersᴛ1> readers = new readersᴛ1[]{
     new("StringReader"u8, (@string s) => new fmt_test_package.strings_ReaderжReader(strings.NewReader(s))),
@@ -1104,7 +1104,7 @@ public static void TestMultiLine(ж<Δtesting.T> Ꮡt) {
 }
 
 [GoType("dyn")] internal partial struct TestLineByLineFscanf_r {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 // TestLineByLineFscanf tests that Fscanf does not read past newline. Issue
@@ -1290,7 +1290,7 @@ public static void BenchmarkScanRecursiveInt(ж<Δtesting.B> Ꮡb) {
 }
 
 [GoType("dyn")] internal partial struct BenchmarkScanRecursiveIntReaderWrapper_buf {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 public static void BenchmarkScanRecursiveIntReaderWrapper(ж<Δtesting.B> Ꮡb) {

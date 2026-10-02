@@ -35,7 +35,7 @@ internal static @string WithName(this baseHandler b, @string name) {
 }
 
 [GoType] partial struct wrapper {
-    public ΔHandler Handler;
+    [GoEmbedded] public ΔHandler Handler;
     internal @string prefix;
 }
 

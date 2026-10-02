@@ -42,7 +42,7 @@ public static void TestCustomContextGoroutines(ж<testing.T> Ꮡt) {
 // This lets us test code paths that differ based on the underlying type of the
 // Context.
 [GoType] partial struct otherContext {
-    public context_package.Context Context;
+    [GoEmbedded] public context_package.Context Context;
 }
 
 internal static time.Duration shortDuration => /* 1 * time.Millisecond */ 1000000; // a reasonable duration to block in a test
@@ -1120,7 +1120,7 @@ public static void TestWithoutCancel(ж<testing.T> Ꮡt) {
 }
 
 [GoType] partial struct customDoneContext {
-    public context_package.Context Context;
+    [GoEmbedded] public context_package.Context Context;
     internal channel<EmptyStruct> donec;
 }
 

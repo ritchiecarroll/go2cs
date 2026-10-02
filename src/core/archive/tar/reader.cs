@@ -751,7 +751,7 @@ internal static (sparseDatas, error) readGNUSparseMap0x1(map<@string, @string> p
 }
 
 [GoType("dyn")] internal partial struct WriteTo_src {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 internal static (int64, error) WriteTo(this ж<regFileReader> Ꮡfr, io.Writer w) {

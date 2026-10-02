@@ -27,7 +27,7 @@ internal static @string Greet(this hello h) {
 
 [GoType] partial struct mixed {
     internal partial ref ж<counter> counter { get; }
-    internal greeter greeter;
+    [GoEmbedded] internal greeter greeter;
 }
 
 [GoType] partial interface greetBumper {
@@ -36,7 +36,7 @@ internal static @string Greet(this hello h) {
 }
 
 [GoType] partial struct holder {
-    internal greeter greeter;
+    [GoEmbedded] internal greeter greeter;
     internal @string tag;
 }
 

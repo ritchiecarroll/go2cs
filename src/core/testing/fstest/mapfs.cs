@@ -97,7 +97,7 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
 // is redundant and unnecessary, but having the methods may make
 // MapFS exercise more code paths when used in tests.)
 [GoType] partial struct fsOnly {
-    public go.io.fs_package.FS FS;
+    [GoEmbedded] public go.io.fs_package.FS FS;
 }
 
 public static (slice<byte>, error) ReadFile(this MapFS fsys, @string name) {

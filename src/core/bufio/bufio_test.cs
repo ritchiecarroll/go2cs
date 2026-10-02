@@ -1977,12 +1977,12 @@ public static void TestWriterSize(ж<Δtesting.T> Ꮡt) {
 
 // An onlyReader only implements io.Reader, no matter what other methods the underlying implementation may have.
 [GoType] partial struct onlyReader {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 // An onlyWriter only implements io.Writer, no matter what other methods the underlying implementation may have.
 [GoType] partial struct onlyWriter {
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 [GoType("[]Func<slice<byte>, (nint n, error err)>")] partial struct scriptedReader;

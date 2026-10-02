@@ -594,8 +594,8 @@ internal static readonly @string dialˢ = "dial"u8;
 }
 
 [GoType("dyn")] internal partial struct dialParallel_dialResult {
-    public Conn Conn;
-    internal error error;
+    [GoEmbedded] public Conn Conn;
+    [GoEmbedded] internal error error;
     internal bool primary;
     internal bool done;
 }

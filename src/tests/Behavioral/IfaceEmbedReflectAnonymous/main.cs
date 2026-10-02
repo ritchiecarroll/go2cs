@@ -29,11 +29,11 @@ public static @string String(this S _) {
 }
 
 [GoType] partial struct w {
-    internal error error;
+    [GoEmbedded] internal error error;
 }
 
 [GoType] partial struct Pub {
-    public fmt_package.Stringer Stringer;
+    [GoEmbedded] public fmt_package.Stringer Stringer;
 }
 
 [GoType] partial struct Named {
@@ -42,18 +42,18 @@ public static @string String(this S _) {
 
 [GoType] partial struct Tagged {
     [GoTag(@"json:""key""")]
-    public fmt_package.Stringer Stringer;
+    [GoEmbedded] public fmt_package.Stringer Stringer;
     public nint N;
 }
 
 [GoType] partial struct Omitted {
     [GoTag(@"json:""-""")]
-    public fmt_package.Stringer Stringer;
+    [GoEmbedded] public fmt_package.Stringer Stringer;
     public nint N;
 }
 
 [GoType] partial struct X {
-    internal error error;
+    [GoEmbedded] internal error error;
     public nint N;
 }
 

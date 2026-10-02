@@ -607,7 +607,7 @@ internal static (@string prefix, @string suffix, bool ok) splitUSTARPath(@string
 }
 
 [GoType("dyn")] internal partial struct ReadFrom_dst {
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 internal static (int64, error) ReadFrom(this ж<regFileWriter> Ꮡfw, io.Reader r) {

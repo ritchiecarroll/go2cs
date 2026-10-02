@@ -285,7 +285,7 @@ public static void TestDynamicRecordSizingWithTLSv13(ж<testing.T> Ꮡt) {
 // hairpinConn is a net.Conn that makes a “hairpin” call when closed, back into
 // the tls.Conn which is calling it.
 [GoType] internal partial struct hairpinConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
     internal ж<global::go.crypto.tls_package.Conn> tlsConn;
 }
 

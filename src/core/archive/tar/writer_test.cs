@@ -1165,7 +1165,7 @@ public static void TestWriteLongHeader(ж<testing.T> Ꮡt) {
 // testNonEmptyWriter wraps an io.Writer and ensures that
 // Write is never called with an empty buffer.
 [GoType] internal partial struct testNonEmptyWriter {
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

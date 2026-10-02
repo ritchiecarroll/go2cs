@@ -4907,13 +4907,13 @@ internal static readonly @string callˢ = "Call"u8;
 }
 
 [GoType("dyn")] internal partial struct TestCallPanic_T2 {
-    public TestCallPanic_T1 T1;
-    internal TestCallPanic_t0 t0;
+    [GoEmbedded] public TestCallPanic_T1 T1;
+    [GoEmbedded] internal TestCallPanic_t0 t0;
 }
 
 [GoType("dyn")] internal partial struct TestCallPanic_T {
-    internal TestCallPanic_t0 t0; // 0
-    public TestCallPanic_T1 T1; // 1
+    [GoEmbedded] internal TestCallPanic_t0 t0; // 0
+    [GoEmbedded] public TestCallPanic_T1 T1; // 1
     public TestCallPanic_t0 NamedT0; // 2
     public TestCallPanic_T1 NamedT1; // 3
     public TestCallPanic_T2 NamedT2; // 4

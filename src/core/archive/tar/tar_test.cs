@@ -27,7 +27,7 @@ using static go.archive.tar_package;
 partial class tar_internal_test_package {
 
 [GoType] internal partial struct testError {
-    internal error error;
+    [GoEmbedded] internal error error;
 }
 
 [GoType("[]any")] internal partial struct fileOps; // []T where T is (string | int64)

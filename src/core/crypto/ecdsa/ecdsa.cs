@@ -47,7 +47,7 @@ partial class ecdsa_package {
 
 // PublicKey represents an ECDSA public key.
 [GoType] partial struct PublicKey {
-    public go.crypto.elliptic_package.Curve Curve;
+    [GoEmbedded] public go.crypto.elliptic_package.Curve Curve;
     public ж<bigꓸInt> X, Y;
 }
 

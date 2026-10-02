@@ -761,7 +761,7 @@ internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usi
 // that the error came from a Read call on the Request.Body.
 // This error type should not escape the net/http package to users.
 [GoType] partial struct requestBodyReadError {
-    internal error error;
+    [GoEmbedded] internal error error;
 }
 
 internal static (@string, error) idnaASCII(@string v) {

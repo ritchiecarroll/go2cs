@@ -15,7 +15,7 @@ partial class cipher_test_package {
 // This is no longer the case, but for now test that the mechanism is
 // still working until we explicitly decide to remove it.
 [GoType] partial struct block {
-    public go.crypto.cipher_package.Block Block;
+    [GoEmbedded] public go.crypto.cipher_package.Block Block;
 }
 
 internal static nint BlockSize(this block _) {
@@ -23,7 +23,7 @@ internal static nint BlockSize(this block _) {
 }
 
 [GoType] partial struct specialCTR {
-    public go.crypto.cipher_package.Stream Stream;
+    [GoEmbedded] public go.crypto.cipher_package.Stream Stream;
 }
 
 internal static cipher.Stream ΔNewCTR(this block _, slice<byte> iv) {
@@ -41,7 +41,7 @@ public static void TestCTRAble(ж<testing.T> Ꮡt) {
 }
 
 [GoType] partial struct specialCBC {
-    public go.crypto.cipher_package.BlockMode BlockMode;
+    [GoEmbedded] public go.crypto.cipher_package.BlockMode BlockMode;
 }
 
 internal static cipher.BlockMode ΔNewCBCEncrypter(this block _, slice<byte> iv) {
@@ -69,7 +69,7 @@ public static void TestCBCAble(ж<testing.T> Ꮡt) {
 }
 
 [GoType] partial struct specialGCM {
-    public go.crypto.cipher_package.AEAD AEAD;
+    [GoEmbedded] public go.crypto.cipher_package.AEAD AEAD;
 }
 
 internal static (cipher.AEAD, error) ΔNewGCM(this block _, nint nonceSize, nint tagSize) {

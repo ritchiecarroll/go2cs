@@ -46,8 +46,8 @@ internal static (io.ReadCloser r1, io.ReadCloser r2, error err) drainBody(io.Rea
 
 // dumpConn is a net.Conn which writes to Writer and reads from Reader
 [GoType] partial struct dumpConn {
-    public io_package.Writer Writer;
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 [GoRecv] internal static error Close(this ref dumpConn c) {

@@ -301,7 +301,7 @@ public static (slice<netipꓸAddr>, error) LookupNetIP(this ж<Resolver> Ꮡr, c
 // onlyValuesCtx is a context that uses an underlying context
 // for value lookup if the underlying context hasn't yet expired.
 [GoType] partial struct onlyValuesCtx {
-    public context_package.Context Context;
+    [GoEmbedded] public context_package.Context Context;
     internal context.Context lookupValues;
 }
 

@@ -697,7 +697,7 @@ internal static readonly @string zipFileClosedTwiceˢ = "zip: file closed twice"
 }
 
 [GoType] partial struct nopCloser {
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 internal static error Close(this nopCloser w) {

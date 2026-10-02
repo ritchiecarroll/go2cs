@@ -26,7 +26,7 @@ public static @string Name(this Tag g) {
 }
 
 [GoType] partial struct Box {
-    public HasName HasName;
+    [GoEmbedded] public HasName HasName;
     internal nint id;
 }
 

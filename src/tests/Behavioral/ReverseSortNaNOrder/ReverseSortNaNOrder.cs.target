@@ -30,7 +30,7 @@ internal static bool fisNaN(float64 f) {
 }
 
 [GoType] partial struct reverse {
-    public Interface Interface;
+    [GoEmbedded] public Interface Interface;
 }
 
 internal static bool Less(this reverse r, nint i, nint j) {

@@ -49,7 +49,7 @@ internal static readonly @string fooˢ = "foo"u8;
 }
 
 [GoType("dyn")] internal partial struct TestNewRequestWithContext_typeᴛ1 {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 public static void TestNewRequestWithContext(ж<testing.T> Ꮡt) {

@@ -145,7 +145,7 @@ internal static (slice<ж<global::go.net_package.TCPListener>> lns, error err) n
 
 [GoType] internal partial struct localServer {
     internal Δsync.RWMutex lnmu;
-    public global::go.net_package.Listener Listener;
+    [GoEmbedded] public global::go.net_package.Listener Listener;
     internal channel<bool> done; // signal that indicates server stopped
     internal slice<global::go.net_package.Conn> cl; // accepted connection list
 }
@@ -199,7 +199,7 @@ internal static ж<localServer> newLocalServer(testing.TB t, @string network) {
 
 [GoType] internal partial struct streamListener {
     internal @string network, address;
-    public global::go.net_package.Listener Listener;
+    [GoEmbedded] public global::go.net_package.Listener Listener;
     internal channel<bool> done; // signal that indicates server stopped
 }
 
@@ -482,7 +482,7 @@ internal static (slice<ж<global::go.net_package.UDPConn>> cs, error err) newDua
 
 [GoType] internal partial struct localPacketServer {
     internal Δsync.RWMutex pcmu;
-    public global::go.net_package.PacketConn PacketConn;
+    [GoEmbedded] public global::go.net_package.PacketConn PacketConn;
     internal channel<bool> done; // signal that indicates server stopped
 }
 
@@ -521,7 +521,7 @@ internal static ж<localPacketServer> newLocalPacketServer(testing.TB t, @string
 }
 
 [GoType] internal partial struct packetListener {
-    public global::go.net_package.PacketConn PacketConn;
+    [GoEmbedded] public global::go.net_package.PacketConn PacketConn;
 }
 
 [GoRecv] internal static ж<localPacketServer> newLocalServer(this ref packetListener pl) {

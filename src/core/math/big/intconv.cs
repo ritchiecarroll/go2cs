@@ -265,7 +265,7 @@ internal static (bool neg, error err) scanSign(io.ByteScanner r) {
 // byteReader is a local wrapper around fmt.ScanState;
 // it implements the ByteReader interface.
 [GoType] partial struct byteReader {
-    public fmt_package.ScanState ScanState;
+    [GoEmbedded] public fmt_package.ScanState ScanState;
 }
 
 internal static (byte, error) ReadByte(this byteReader r) {

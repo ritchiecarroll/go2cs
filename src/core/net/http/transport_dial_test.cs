@@ -98,7 +98,7 @@ public static void TestTransportPoolConnConnectionBecomesAvailableDuringDial(ж<
     internal ж<testing.T> t;
     internal nint connID;       // distinguished Dials in logs
     internal channel<error> ready; // sent on to complete the Dial
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
 }
 
 internal static ж<transportDialTester> newTransportDialTester(ж<testing.T> Ꮡt, testMode mode) {

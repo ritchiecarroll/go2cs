@@ -67,7 +67,7 @@ internal static (fs.File, error) Open(this shuffledFS fsys, @string name) {
 }
 
 [GoType] internal partial struct shuffledFile {
-    public go.io.fs_package.File File;
+    [GoEmbedded] public go.io.fs_package.File File;
 }
 
 [GoRecv] internal static (slice<fs.DirEntry>, error) ReadDir(this ref shuffledFile f, nint n) {

@@ -994,7 +994,7 @@ internal static void testStreamingGet(ж<testing.T> Ꮡt, testMode mode) {
 }
 
 [GoType] partial struct writeCountingConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
     internal ж<nint> count;
 }
 

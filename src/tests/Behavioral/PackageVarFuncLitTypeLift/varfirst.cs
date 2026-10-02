@@ -4,7 +4,7 @@ partial class main_package {
 
 
 [GoType("dyn")] internal partial struct varFirst_type {
-    public Greeter Greeter;
+    [GoEmbedded] public Greeter Greeter;
 }
 internal static Greeter varFirst = ((Func<@string, Greeter>)(s => {
     return new varFirst_type(new namedGreeter(s));

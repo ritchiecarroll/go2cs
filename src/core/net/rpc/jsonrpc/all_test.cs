@@ -337,9 +337,9 @@ public static void TestMalformedOutput(ж<testing.T> Ꮡt) {
 internal static readonly @string methodArithAddId123ˢ = @"{""method"": ""Arith.Add"", ""id"": ""123"", ""params"": []}"u8;
 
 [GoType("dyn")] internal partial struct TestServerErrorHasNullResult_conn {
-    public io_package.Reader Reader;
-    public io_package.Writer Writer;
-    public io_package.Closer Closer;
+    [GoEmbedded] public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Closer Closer;
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)

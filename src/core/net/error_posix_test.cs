@@ -12,7 +12,7 @@ using static go.net_package;
 partial class net_internal_test_package {
 
 [GoType("dyn")] internal partial struct TestSpuriousENOTAVAIL_type {
-    internal error error;
+    [GoEmbedded] internal error error;
     internal bool ok;
 }
 

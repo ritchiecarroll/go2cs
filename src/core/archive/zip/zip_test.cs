@@ -302,7 +302,7 @@ public static void TestRLEBuffer(ж<testing.T> Ꮡt) {
 
 // fakeHash32 is a dummy Hash32 that always returns 0.
 [GoType] internal partial struct fakeHash32 {
-    public hash_package.Hash32 Hash32;
+    [GoEmbedded] public hash_package.Hash32 Hash32;
 }
 
 internal static (nint, error) Write(this fakeHash32 _, slice<byte> p) {

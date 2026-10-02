@@ -150,7 +150,7 @@ internal static bool Is(this fakeError _, error err) {
 }
 
 [GoType("dyn")] internal partial struct fill_dst {
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 internal static (int64, error) fill(this ж<tally> Ꮡt, Δio.Reader r) {

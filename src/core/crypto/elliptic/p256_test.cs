@@ -72,7 +72,7 @@ public static void TestP256Mult(ж<testing.T> Ꮡt) {
 }
 
 [GoType] internal partial struct synthCombinedMult {
-    public global::go.crypto.elliptic_package.Curve Curve;
+    [GoEmbedded] public global::go.crypto.elliptic_package.Curve Curve;
 }
 
 internal static (ж<bigꓸInt> x, ж<bigꓸInt> y) CombinedMult(this synthCombinedMult s, ж<bigꓸInt> ᏑbigX, ж<bigꓸInt> ᏑbigY, slice<byte> baseScalar, slice<byte> scalar) {

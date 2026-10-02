@@ -538,7 +538,7 @@ internal static ж<Δhttp.Response> mostlyCopy(ж<Δhttp.Response> Ꮡr) {
 }
 
 [GoType] partial struct slurpResult {
-    public io_package.ReadCloser ReadCloser;
+    [GoEmbedded] public io_package.ReadCloser ReadCloser;
     internal slice<byte> body;
     internal error err;
 }
@@ -866,7 +866,7 @@ public static void TestH12_RequestContentLength_Known_Zero(ж<testing.T> Ꮡt) {
 internal static readonly @string stuffˢ = "Stuff"u8;
 
 [GoType("dyn")] internal partial struct TestH12_RequestContentLength_Unknown_type {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 public static void TestH12_RequestContentLength_Unknown(ж<testing.T> Ꮡt) {
@@ -1858,7 +1858,7 @@ internal static void testCloseIdleConnections(ж<testing.T> Ꮡt, testMode mode)
 }
 
 [GoType] partial struct noteCloseConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
     internal Action closeFunc;
 }
 

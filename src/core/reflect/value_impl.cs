@@ -828,9 +828,16 @@ public static ΔValue Elem(this ΔValue v) {
         // Go refuses (reflect's own TestCallPanic reaches this by the single .Elem() that separates
         // its second badCall from its first). The pointer arm below has always carried the bits;
         // this arm simply never did.
+        //
+        // The bits go through ro(), as Go's do: ANY read-only bit on the parent becomes
+        // flagStickyRO, never flagEmbedRO. Copying the parent's bits verbatim carried flagEmbedRO
+        // across — the bit an unexported EMBEDDED interface field has — and a field of the unpacked
+        // value then read as reached through an unexported embed: CanInterface() answered true
+        // for `reflect.ValueOf(w{E{}}).Field(0).Elem().Field(0)` over `type w struct{ error }`,
+        // where Go answers false.
         ΔValue elem = makeReflectValue(v.live);
         if (elem.flag != 0) {
-            elem.flag |= (flag)(v.flag & flagRO);
+            elem.flag |= v.flag.ro();
         }
         return elem;
     }

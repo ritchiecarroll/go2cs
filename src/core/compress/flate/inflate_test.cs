@@ -96,7 +96,7 @@ public static void TestResetDict(ж<testing.T> Ꮡt) {
 internal static readonly @string bufferIsReusedˢ = "BufferIsReused"u8;
 
 [GoType("dyn")] internal partial struct TestReaderReusesReaderBuffer_encodedNotByteReader {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 public static void TestReaderReusesReaderBuffer(ж<testing.T> Ꮡt) {

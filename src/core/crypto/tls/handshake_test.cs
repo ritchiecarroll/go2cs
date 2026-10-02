@@ -109,7 +109,7 @@ internal static error checkOpenSSLVersion() {
 // WriteTo can be used to produce output that can be later be loaded with
 // ParseTestData.
 [GoType] internal partial struct recordingConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
     public partial ref sync_package.Mutex Mutex { get; }
     internal slice<slice<byte>> flows;
     internal bool reading;

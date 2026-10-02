@@ -131,8 +131,8 @@ internal static error SetWriteDeadline(this noopConn _, time.Time t) {
 }
 
 [GoType] partial struct rwTestConn {
-    public io_package.Reader Reader;
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Writer Writer;
     internal partial ref noopConn noopConn { get; }
     internal Func<error> closeFunc;  // called if non-nil
     internal channel<bool> closec; // else, if non-nil, send value to it on close
@@ -1404,7 +1404,7 @@ internal static void testOnlyWriteTimeout(ж<testing.T> Ꮡt, testMode mode) {
 
 // trackLastConnListener tracks the last net.Conn that was accepted.
 [GoType] partial struct trackLastConnListener {
-    public net_package.Listener Listener;
+    [GoEmbedded] public net_package.Listener Listener;
     internal ж<sync.RWMutex> mu;
     internal ж<net.Conn> last; // destination
 }
@@ -1736,7 +1736,7 @@ internal static void testSetsRemoteAddr(ж<testing.T> Ꮡt, testMode mode) {
 }
 
 [GoType] partial struct blockingRemoteAddrListener {
-    public net_package.Listener Listener;
+    [GoEmbedded] public net_package.Listener Listener;
     internal channel/*<-*/<net.Conn> conns = channel/*<-*/<net.Conn>.SendOnly;
 }
 
@@ -1762,7 +1762,7 @@ internal static error Close(this blockingRemoteAddrListener recvᴛ) => recvᴛ.
 }
 
 [GoType] partial struct blockingRemoteAddrConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
     internal channel<netꓸAddr> addrs;
 }
 
@@ -1887,7 +1887,7 @@ public static void TestHeadResponses(ж<testing.T> Ꮡt) {
 }
 
 [GoType("dyn")] internal partial struct testHeadResponses_src {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 internal static void testHeadResponses(ж<testing.T> Ꮡt, testMode mode) {
@@ -2406,8 +2406,8 @@ internal static readonly @string readbodyTrueˢ = "readbody=true"u8;
 internal static readonly @string transferEncodingChunkedˢ = "Transfer-Encoding: chunked"u8;
 
 [GoType("dyn")] internal partial struct testServerExpect_type {
-    public io_package.Writer Writer;
-    public io_package.Closer Closer;
+    [GoEmbedded] public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Closer Closer;
 }
 
 internal static void testServerExpect(ж<testing.T> Ꮡt, testMode mode) {
@@ -3030,7 +3030,7 @@ public static void TestRequestBodyTimeoutClosesConnection(ж<testing.T> Ꮡt) {
 
 // cancelableTimeoutContext overwrites the error message to DeadlineExceeded
 [GoType] partial struct cancelableTimeoutContext {
-    public context_package.Context Context;
+    [GoEmbedded] public context_package.Context Context;
 }
 
 internal static error Err(this cancelableTimeoutContext c) {
@@ -7701,7 +7701,7 @@ public static void TestServerListenNotComparableListener(ж<testing.T> Ꮡt) {
 
 // countCloseListener is a Listener wrapper that counts the number of Close calls.
 [GoType] partial struct countCloseListener {
-    public net_package.Listener Listener;
+    [GoEmbedded] public net_package.Listener Listener;
     internal int32 closes; // atomic
 }
 

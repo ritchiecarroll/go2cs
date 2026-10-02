@@ -85,7 +85,7 @@ public static nint Name = 0;
 }
 
 [GoType] partial struct Broken {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
     internal partial ref ж<brokenState> brokenState { get; }
 }
 
@@ -131,7 +131,7 @@ internal static inner.Token Tok(this deepTok _) {
 
 [GoType] partial struct HideC {
     public partial ref bytes_package.Buffer Buffer { get; }
-    public io_package.WriterTo WriterTo;
+    [GoEmbedded] public io_package.WriterTo WriterTo;
 }
 
 internal static @string methods(reflectꓸType t) {

@@ -82,7 +82,7 @@ internal static Δhttp.HandlerFunc hostPortHandler = new Δhttp.HandlerFunc((Δh
 
 // testCloseConn is a net.Conn tracked by a testConnSet.
 [GoType] partial struct testCloseConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
     internal ж<testConnSet> set;
 }
 
@@ -2421,7 +2421,7 @@ internal static void testTransportPersistConnLeakShortBody(ж<testing.T> Ꮡt, t
 
 // A countedConn is a net.Conn that decrements an atomic counter when finalized.
 [GoType] partial struct countedConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
 }
 
 // A countingDialer dials connections and counts the number that remain reachable.
@@ -2526,7 +2526,7 @@ internal static void testTransportPersistConnLeakNeverIdle(ж<testing.T> Ꮡt, t
 }
 
 [GoType] partial struct countedContext {
-    public context_package.Context Context;
+    [GoEmbedded] public context_package.Context Context;
 }
 
 [GoType] partial struct contextCounter {
@@ -4600,7 +4600,7 @@ internal delegate error closerFunc();
 }
 
 [GoType] partial struct writerFuncConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
     internal Func<slice<byte>, (nint n, error err)> write;
 }
 
@@ -4812,8 +4812,8 @@ public static void TestTransportClosesBodyOnError(ж<testing.T> Ꮡt) {
 internal static readonly @string fakeErrorˢ = "fake error"u8;
 
 [GoType("dyn")] internal partial struct testTransportClosesBodyOnError_body {
-    public io_package.Reader Reader;
-    public io_package.Closer Closer;
+    [GoEmbedded] public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Closer Closer;
 }
 
 internal static void testTransportClosesBodyOnError(ж<testing.T> Ꮡt, testMode mode) {
@@ -5457,7 +5457,7 @@ internal static void testConnClosedBeforeRequestIsWritten(ж<testing.T> Ꮡt, te
 // and then proxies to w.
 // It proxies Read calls to a reader it receives from rch.
 [GoType] partial struct logWritesConn {
-    public net_package.Conn Conn; // nil. crash on use.
+    [GoEmbedded] public net_package.Conn Conn; // nil. crash on use.
     internal io.Writer w;
     internal /*<-*/channel<io.Reader> rch = /*<-*/channel<io.Reader>.RecvOnly;
     internal io.Reader r; // nil until received by rch
@@ -5630,7 +5630,7 @@ internal static void testTransportFlushesRequestHeader(ж<testing.T> Ꮡt, testM
 }
 
 [GoType] partial struct wgReadCloser {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
     internal ж<sync.WaitGroup> wg;
     internal bool closed;
 }
@@ -6838,7 +6838,7 @@ internal static void testIdleConnH2Crash(ж<testing.T> Ꮡt, testMode mode) {
 }
 
 [GoType] partial struct funcConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
     internal Func<slice<byte>, (nint, error)> read;
     internal Func<slice<byte>, (nint, error)> write;
 }
@@ -7129,7 +7129,7 @@ internal static net.Listener newLocalListener(ж<testing.T> Ꮡt) {
 
 [GoType] partial struct countCloseReader {
     internal ж<nint> n;
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 internal static error Close(this countCloseReader cr) {
@@ -7280,7 +7280,7 @@ internal delegate (nint, error) funcWriter(slice<byte> _Δp0);
 }
 
 [GoType] partial struct doneContext {
-    public context_package.Context Context;
+    [GoEmbedded] public context_package.Context Context;
     internal error err;
 }
 
@@ -8172,7 +8172,7 @@ internal static void testTransportClosesBodyOnInvalidRequests(ж<testing.T> Ꮡt
 // breakableConn is a net.Conn wrapper with a Write method
 // that will fail when its brokenState is true.
 [GoType] partial struct breakableConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
     internal partial ref ж<brokenState> brokenState { get; }
 }
 
@@ -8477,8 +8477,8 @@ internal static void testTransportRejectsSignInContentLength(ж<testing.T> Ꮡt,
 
 // dumpConn is a net.Conn which writes to Writer and reads from Reader
 [GoType] partial struct dumpConn {
-    public io_package.Writer Writer;
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 [GoRecv] internal static error Close(this ref dumpConn c) {

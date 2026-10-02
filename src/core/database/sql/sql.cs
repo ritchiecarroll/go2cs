@@ -796,7 +796,7 @@ internal static error finalClose(this ж<driverConn> Ꮡdc) {
 // *driverConn from which it came, so the driverConn's lock can be
 // held during calls.
 [GoType] partial struct driverStmt {
-    public sync_package.Locker Locker; // the *driverConn
+    [GoEmbedded] public sync_package.Locker Locker; // the *driverConn
     internal driver.Stmt si;
     internal bool closed;
     internal error closeErr; // return value of previous Close call
@@ -3947,7 +3947,7 @@ public static error Scan(this ж<Row> Ꮡr, params ꓸꓸꓸany destʗp) {
 }
 
 [GoType] partial struct driverResult {
-    public sync_package.Locker Locker; // the *driverConn
+    [GoEmbedded] public sync_package.Locker Locker; // the *driverConn
     internal driver.Result resi;
 }
 

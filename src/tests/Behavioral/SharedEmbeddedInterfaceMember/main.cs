@@ -19,7 +19,7 @@ partial class main_package {
 }
 
 [GoType] partial struct myFile {
-    public Closer Closer;
+    [GoEmbedded] public Closer Closer;
     internal @string data;
 }
 

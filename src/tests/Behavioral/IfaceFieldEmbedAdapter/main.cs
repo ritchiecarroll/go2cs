@@ -35,8 +35,8 @@ partial class main_package {
 }
 
 [GoType] partial struct duplex {
-    internal source source;
-    internal sink sink;
+    [GoEmbedded] internal source source;
+    [GoEmbedded] internal sink sink;
 }
 
 [GoRecv] internal static @string Status(this ref duplex d) {

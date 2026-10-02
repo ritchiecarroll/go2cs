@@ -527,7 +527,7 @@ internal static void disableWriteContinue(this ж<response> Ꮡw) {
 // writerOnly hides an io.Writer value's optional ReadFrom method
 // from io.Copy.
 [GoType] partial struct writerOnly {
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 // ReadFrom is here to optimize copying from an [*os.File] regular file
@@ -2252,7 +2252,7 @@ internal static void ServeHTTP(this unencryptedHTTP2Request h, ResponseWriter rw
 // unencryptedNetConnInTLSConn is used to pass an unencrypted net.Conn to
 // functions that only accept a *tls.Conn.
 [GoType] partial struct unencryptedNetConnInTLSConn {
-    public net_package.Conn Conn; // panic on all net.Conn methods
+    [GoEmbedded] public net_package.Conn Conn; // panic on all net.Conn methods
     internal net.Conn conn;
 }
 
@@ -4170,7 +4170,7 @@ internal static void WriteHeader(this ж<timeoutWriter> Ꮡtw, nint code) {
 // onceCloseListener wraps a net.Listener, protecting it from
 // multiple Close calls.
 [GoType] partial struct onceCloseListener {
-    public net_package.Listener Listener;
+    [GoEmbedded] public net_package.Listener Listener;
     internal sync.Once once;
     internal error closeErr;
 }
@@ -4249,7 +4249,7 @@ internal static void ServeHTTP(this initALPNRequest h, ResponseWriter rw, ж<Req
 // loggingConn is used for debugging.
 [GoType] partial struct loggingConn {
     internal @string name;
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
 }
 
 // Go method set entry for the promoted 'Conn.LocalAddr()' - provided ONLY by the embedded

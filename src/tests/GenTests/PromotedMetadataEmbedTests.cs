@@ -249,7 +249,7 @@ public class PromotedMetadataEmbedTests
     }
 
     [TestMethod]
-    public void CrossPackageEmbedStaysPublicFieldsOnlyAndMintsNoForwarders()
+    public void CrossPackageEmbedPromotesExportedMembersOnlyAndMintsIntoTheSiblingClass()
     {
         string generated = GeneratedFor(RunTypeGeneratorOverFriendShape(), "serverProbe");
 
@@ -260,11 +260,17 @@ public class PromotedMetadataEmbedTests
         Assert.IsFalse(generated.Contains("secret"),
             "an unexported field must NOT promote across Go packages — the friend grant is not a Go visibility rule");
 
-        // Method promotion across packages is converter territory (the explicit-hop emission);
-        // the generator minting forwarders there would change every cross-package embed corpus-wide.
-        Assert.IsFalse(generated.Contains("ServePublic"),
-            "a public cross-package method must NOT gain a generated forwarder — the converter's explicit hop owns that call");
+        // An exported method promotes too, and the run-time method set is read off emitted
+        // extension methods, so it needs a forwarder: minted into the SIBLING class, never into
+        // the package class, and by value because the embed is a pointer. (CrossPackagePromotedForwarderTests
+        // holds the rules.)
+        int sibling = generated.IndexOf("public static class net_testᴛserverProbeᴛxpkg", System.StringComparison.Ordinal);
+        Assert.IsTrue(sibling >= 0, "the cross-package forwarders live in the sibling class");
+        StringAssert.Contains(generated[sibling..], "static void ServePublic(this global::go.net_test_package.serverProbe target) => target.Server.Value.ServePublic();",
+            "an exported cross-package method gains a forwarder in the sibling class");
+        Assert.IsFalse(generated[..sibling].Contains("ServePublic"),
+            "the package class must not gain a cross-package forwarder");
         Assert.IsFalse(generated.Contains("serveInternal"),
-            "an unexported cross-package method is not promoted in Go at all");
+            "an unexported cross-package method is not observable across Go packages and gains no forwarder, friend grant or not");
     }
 }

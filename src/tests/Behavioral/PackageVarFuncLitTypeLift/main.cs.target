@@ -23,7 +23,7 @@ internal static @string Greet(this namedGreeter g) {
 }
 
 [GoType("dyn")] internal partial struct makers_type {
-    public Greeter Greeter;
+    [GoEmbedded] public Greeter Greeter;
 }
 internal static slice<makersᴛ1> makers = new makersᴛ1[]{
     new("direct"u8, (@string s) => new namedGreeter(s)),

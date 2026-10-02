@@ -344,7 +344,7 @@ internal static readonly @string fooˢ = "foo"u8;
 internal static readonly object noBytesWrittenAfterFlushˢ = (@string)"No bytes written after Flush"u8;
 
 [GoType("dyn")] internal partial struct TestWriterFlush_w {
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 public static void TestWriterFlush(ж<testing.T> Ꮡt) {

@@ -188,7 +188,7 @@ internal static readonly @string expectedᶜ = "text/html; charset=utf-8"u8;
 
 // Use io.Copy from a plain Reader.
 [GoType("dyn")] internal partial struct testContentTypeWithVariousSources_readerOnly {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 internal static void testContentTypeWithVariousSources(ж<testing.T> Ꮡt, testMode mode) {

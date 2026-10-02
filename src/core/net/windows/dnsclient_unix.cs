@@ -667,7 +667,7 @@ internal static (slice<IPAddr> addrs, error err) goLookupIP(this ж<Resolver> �
 [GoType("dyn")] internal partial struct goLookupIPCNAMEOrder_result {
     internal dnsmessage.Parser p;
     internal @string server;
-    internal error error;
+    [GoEmbedded] internal error error;
 }
 
 internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookupIPCNAMEOrder(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string name, ΔhostLookupOrder order, ж<dnsConfig> Ꮡconf) {

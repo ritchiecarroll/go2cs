@@ -27,7 +27,7 @@ internal static @string Error(this valueErr v) {
 
 [GoType("dyn")] internal partial struct main_ptrCases {
     internal @string want;
-    internal error error;
+    [GoEmbedded] internal error error;
 }
 
 internal static void Main() {

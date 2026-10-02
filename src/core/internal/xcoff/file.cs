@@ -32,7 +32,7 @@ partial class xcoff_package {
 [GoType] partial struct ΔSection {
     public partial ref SectionHeader SectionHeader { get; }
     public slice<Reloc> Relocs;
-    public io_package.ReaderAt ReaderAt;
+    [GoEmbedded] public io_package.ReaderAt ReaderAt;
     internal ж<io.SectionReader> sr;
 }
 

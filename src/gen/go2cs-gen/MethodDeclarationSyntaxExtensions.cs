@@ -96,6 +96,17 @@ public record MethodInfo
     // does not compile. Defaults true so a MethodInfo built without semantic info keeps prior behavior.
     public bool IsSignatureRenderable { get; init; } = true;
 
+    // True when the method carries [GoRecv]: a Go POINTER-receiver method, whatever its emitted
+    // receiver looks like. Read from the attribute itself (syntax and metadata alike) rather than
+    // inferred from the receiver's ref kind, because a generated forwarder of a pointer-receiver
+    // method is `[GoRecv] this ref T` in one assembly and is harvested from METADATA in the next.
+    public bool IsGoRecv { get; init; }
+
+    // Set on a PROMOTED method harvested through an embed of ANOTHER Go package at some hop of its
+    // path. Its forwarder goes to the struct's sibling `{pkg}ᴛ{Struct}ᴛxpkg` class, never into the
+    // package class, and is minted only when its name is unique across the struct's whole tree.
+    public bool IsCrossPackage { get; init; }
+
     // The name a FORWARDING call must spell on the receiver, when that differs from the interface
     // member's own name. The member being IMPLEMENTED always carries the interface's name — an
     // explicit implementation of `Stringer.String` is spelled `String` and may never be renamed —
@@ -364,6 +375,8 @@ public static class MethodSyntaxExtensions
             IsSignatureRenderable = signatureRenderable,
             GenericTypes = string.Join(", ", typeParameters),
             TypeConstraints = typeConstraints,
+            IsGoRecv = methodDeclaration.AttributeLists.SelectMany(list => list.Attributes)
+                .Any(attribute => attribute.Name.ToString() is "GoRecv" or "GoRecvAttribute" or "go.GoRecv" or "global::go.GoRecv"),
 
             Parameters = methodDeclaration.ParameterList.Parameters.Select(param =>
             {
@@ -528,7 +541,8 @@ public static class MethodSyntaxExtensions
             Parameters = parameters,
             GenericTypes = genericTypes,
             TypeConstraints = typeConstraints,
-            IsRefRecv = methodSymbol.ReturnsByRef
+            IsRefRecv = methodSymbol.ReturnsByRef,
+            IsGoRecv = methodSymbol.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "GoRecvAttribute")
         };
     }
 }
