@@ -798,7 +798,57 @@ jobs:
               $finished = $proc.WaitForExit([int]$env:GO2CS_RUN_TIMEOUT * 1000)
 
               if (-not $finished) {
+                  # Kill the TREE, never just the apphost, and never by name (CLAUDE.md floor 5). A program
+                  # that spawns itself (StdoutCloseEofBarrier execs os.Args[0]) leaves its child alive past
+                  # a parent-only kill: on arm64 that orphan outlived every later row of the job (run
+                  # 36953433720, "Terminate orphan process: pid (6761) (StdoutCloseEofB)" at job end).
+                  # Every member is STOPPED as it is found, so none can spawn while the tree is read, and
+                  # nothing is killed until the whole tree is collected by PARENT PID -- a process whose
+                  # parent has died re-parents to launchd or init and no longer answers pgrep -P.
+                  $tree = [System.Collections.Generic.List[string]]::new()
+
+                  if ($IsWindows) {
+                      & taskkill /PID $proc.Id /T /F 2>&1 | Out-Null
+                  }
+                  else {
+                      & kill -STOP $proc.Id 2>$null
+                      $frontier = @($proc.Id)
+                      $descendants = @()
+
+                      while ($frontier.Count -gt 0) {
+                          $next = @()
+
+                          foreach ($parentPid in $frontier) {
+                              $next += @(& pgrep -P $parentPid 2>$null | ForEach-Object { [int]$_ })
+                          }
+
+                          foreach ($child in $next) {
+                              & kill -STOP $child 2>$null
+                              $tree.Add("$child ($((Get-Process -Id $child -ErrorAction SilentlyContinue).ProcessName))")
+                          }
+
+                          $descendants += $next
+                          $frontier = $next
+                      }
+
+                      foreach ($child in $descendants) { & kill -9 $child 2>$null }
+                  }
+
                   Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+                  Start-Sleep -Seconds 2
+
+                  if ($tree.Count -gt 0) {
+                      Write-Host "==> ${p}: the timeout kill took the apphost and $($tree.Count) descendant(s): $($tree -join ', ')"
+                  }
+
+                  foreach ($id in @($proc.Id) + @($tree | ForEach-Object { [int]($_ -split ' ')[0] })) {
+                      $alive = Get-Process -Id $id -ErrorAction SilentlyContinue
+
+                      if ($alive) {
+                          Write-Host "::warning::${p}: pid $id ($($alive.ProcessName)) SURVIVED the timeout kill"
+                      }
+                  }
+
                   $code = 'TIMEOUT'
               }
               else {
