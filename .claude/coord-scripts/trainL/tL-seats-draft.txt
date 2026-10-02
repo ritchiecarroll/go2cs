@@ -119,3 +119,9 @@ TRAIN N +seat: claude/r-module-license 2d46145bdd (ACCEPTED). C2's claude/c2-nug
  forms (-UpstreamPublishes + org cross-check), the three go.-ID refusals, the template (B) = no prefixed PackageId for a non-stdlib library
  (55 behavioral library csprojs regenerate), the J0 uuid defaults. N SCRIPT ITEM: the NGF-j0 leg's EXPECT (default=go...uuid) changes when that seat is seated.
 R dispatched (measure-first, no cut): github.com/pkg/errors v0.9.1 with -tests -recurse at 8f46a9adae.
+
+== 2026-10-02 17:54 ==
+PUSHED: nugetgo main 90cc7d7409 (lint: no go.); hashset main 5415b0cf1d (pre-tag; module CI green 1.21+race and stable, run 37073540512). TAG v1.0.0 waits ONLY for P1's "gate (a) GREEN at 5415b0cf1d".
+G publish-keep RULED: template TrimMode=partial (yields to a project's own), WITH corpus regeneration (+2 lines x ~1,133 csprojs, 0 .cs = stop condition); FIRST in N.
+ C2's ID-pattern seat bases on G's tip (both edit csproj-template.xml) as well as stacking on R's 2d46145bdd -- tell C2 the tip when G pushes.
+N SCRIPT ITEMS: + check-published-output.ps1 leg (windows, ~4 min, failed publish = NOT MEASURED; control = the two reds at 4c558191ef); NGF-j0 EXPECT change (C2 seat).
