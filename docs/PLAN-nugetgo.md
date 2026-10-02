@@ -187,6 +187,14 @@ story: the user's file wins for the modules it names, the registry answers the r
 apply only under `-recurse=nuget`; other modes ignore them (`-recurse` local conversion is
 unchanged, and `-recurse=module`'s reference-without-convert path is unchanged).
 
+> **AMENDED 2026-10-02 (COORD rulings on the S3a sizing).** Three refinements of the surface above.
+> (1) **Refused, not ignored:** a `-nuget-map*` flag without `-recurse=nuget` is refused by name, since a flag
+> that silently does nothing is a misconfiguration. (2) **`-nuget-map-only`** is the owner's "use my source
+> only" switch: it drops the registry fallback and is refused without a `-nuget-map` source; `-nuget-map off`
+> still disables mapping entirely. (3) **Dormant until S3b:** stage S3a resolves, locks and reports mappings
+> only when a `-nuget-map` source is named; with none, a run is byte-identical to the run before S3a and makes
+> no request. S3b makes the registry the default together with the substitution.
+
 ### 4.2 Resolution — a new arm beside `IsStdLib`
 
 Today `writeProjectFile` (projectFileWriter.go) mints `PackageReference`s only for

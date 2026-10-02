@@ -9,6 +9,7 @@
 package main
 
 import (
+	"errors"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -143,8 +144,11 @@ func TestNuGetMapRefusesARedirectAwayFromHTTPS(t *testing.T) {
 
 	_, _, err := loadNuGetMapSource(f.url("/redirect-to-http"), false)
 
-	if err == nil || !strings.Contains(err.Error(), "https") {
-		t.Errorf("a redirect to http:// was followed (err %v)", err)
+	// errors.Is, not a substring: without the redirect policy the client follows the redirect, the TLS
+	// fixture answers the plain request 400, and that error ALSO names an https URL (the source's), so a
+	// text match passed with the policy removed (measured 2026-10-02).
+	if !errors.Is(err, errNuGetMapInsecureRedirect) {
+		t.Errorf("a redirect to http:// was not refused by the redirect policy (err %v)", err)
 	}
 
 	if f.count("/registry") != 0 {

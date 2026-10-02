@@ -53,6 +53,12 @@ type ModuleConverter struct {
 	referencedThirdParty []string                   // -recurse=module: third-party import paths left OUT of the convert-set
 	lockedModules        map[string]moduleLockEntry // module-cache dependency modules in the convert-set (modulesLock.go)
 	includeTestClosure   bool                       // -tests -recurse: widen the convert-set by the module's test closure (moduleTestsDriver.go)
+
+	// -nuget-map (nugetMap.go): every third-party module of the closure, converted or only referenced; the
+	// resolver's answer per module; and the source and lock warnings printed with its report.
+	thirdPartyModules map[string]thirdPartyModule
+	nugetDecisions    []nugetMapDecision
+	nugetWarnings     []string
 }
 
 // NewModuleConverter creates a recursive end-user module converter.
@@ -109,6 +115,19 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 		if err := m.addTestOnlyPackages(moduleDir, closure); err != nil {
 			return err
 		}
+	}
+
+	// 2b. -recurse=nuget with a -nuget-map source (nugetMap.go): decide which third-party modules a
+	//     mapping answers and lock the answer. Stage S3a resolves and records only -- every module is still
+	//     converted below; S3b turns a mapped module into a PackageReference here, before conversion.
+	if m.options.nugetRefs {
+		decisions, warnings, err := runNuGetMapResolution(m.sortedThirdPartyModules(), m.options.nugetMap, m.recurseRoot())
+
+		if err != nil {
+			return err
+		}
+
+		m.nugetDecisions, m.nugetWarnings = decisions, warnings
 	}
 
 	// 2a. One version per module per output root (modulesLock.go): a dependency the root already
@@ -168,6 +187,12 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 	//     left unconverted, so the unresolved references in the emitted projects are expected, listed
 	//     and actionable rather than a surprise at build time.
 	m.reportUnconvertedDependencies()
+
+	// 4c. -nuget-map: the provenance report -- which layer answered each module, and that S3a has not
+	//     applied any of it yet.
+	if len(m.nugetDecisions) > 0 || len(m.nugetWarnings) > 0 {
+		fmt.Print(formatNuGetMapReport(m.nugetDecisions, m.nugetWarnings))
+	}
 
 	// 5. Emit a per-project .slnx next to each converted .csproj, over that project + its transitive
 	//    converted dependencies + golib + the analyzer, tied to the pre-converted stdlib (referenced via
@@ -343,6 +368,7 @@ func (m *ModuleConverter) partition(closure map[string]*packages.Package) {
 			appCount++
 		case classThirdParty:
 			thirdPartyCount++
+			m.recordThirdPartyModule(pkg)
 
 			if !m.addToConvertSet(pkg) {
 				m.referencedThirdParty = append(m.referencedThirdParty, pkgPath)
@@ -362,6 +388,32 @@ func (m *ModuleConverter) partition(closure map[string]*packages.Package) {
 
 	fmt.Printf("Closure: %d packages discovered — converting %d app + %d third-party, referencing %d stdlib (%d skipped)\n",
 		len(closure), appCount, thirdPartyCount, stdlibCount, skipCount)
+}
+
+// recordThirdPartyModule notes a third-party package's module -- its path, the selected version, and
+// whether a replace directive supplies it -- for the -nuget-map resolver, which decides per MODULE.
+func (m *ModuleConverter) recordThirdPartyModule(pkg *packages.Package) {
+	if pkg.Module == nil {
+		return
+	}
+
+	if m.thirdPartyModules == nil {
+		m.thirdPartyModules = make(map[string]thirdPartyModule)
+	}
+
+	m.thirdPartyModules[pkg.Module.Path] = thirdPartyModule{path: pkg.Module.Path, version: pkg.Module.Version, replaced: pkg.Module.Replace != nil}
+}
+
+// sortedThirdPartyModules returns the recorded third-party modules in module-path order.
+func (m *ModuleConverter) sortedThirdPartyModules() []thirdPartyModule {
+	modules := make([]thirdPartyModule, 0, len(m.thirdPartyModules))
+
+	for _, mod := range m.thirdPartyModules {
+		modules = append(modules, mod)
+	}
+
+	sort.Slice(modules, func(i, j int) bool { return modules[i].path < modules[j].path })
+	return modules
 }
 
 // reportUnconvertedDependencies lists the third-party packages -recurse=module referenced without

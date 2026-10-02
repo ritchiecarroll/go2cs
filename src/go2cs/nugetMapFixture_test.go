@@ -87,7 +87,6 @@ func newNuGetMapFixture(t *testing.T) *nugetMapFixture {
 
 	client := f.server.Client()
 	client.Transport = guardTransport{host: host, inner: client.Transport}
-	client.CheckRedirect = nugetMapHTTPClient.CheckRedirect
 	nugetMapHTTPClient = client
 	nugetMapCacheRoot = func() (string, error) { return f.cacheDir, nil }
 	nugetMapRegistryURL = f.url("/registry")
