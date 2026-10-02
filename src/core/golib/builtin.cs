@@ -65,8 +65,9 @@ public static partial class builtin
         // FIRST, before anything can touch System.Console: close the .NET runtime's startup
         // duplicates of the standard descriptors so that Go code closing fd 0/1/2 releases the
         // underlying pipe the way it does in a Go binary. The ordering is part of that fix's
-        // safety contract - see builtin.LinuxStdDescriptors.cs.
+        // safety contract - see builtin.LinuxStdDescriptors.cs (darwin: builtin.DarwinStdDescriptors.cs).
         InitializeLinuxStdDescriptorHygiene();
+        InitializeDarwinStdDescriptorHygiene();
 
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         Console.OutputEncoding = Console.InputEncoding = Encoding.UTF8;
