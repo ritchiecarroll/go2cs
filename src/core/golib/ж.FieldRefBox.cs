@@ -217,12 +217,39 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer
     // RawSockaddrInet4 keeps Port at CLR offset 0 where libc wrote it at 2. The offset is the struct's Go
     // layout (GoReflect.GoFieldOffsets, the same pass the order token's displacement reads); a layout that
     // cannot be known answers 0, so the caller keeps its own route and nothing is viewed at a guess.
+    //
+    // The order matters for cost: the native-root test comes FIRST, so a managed root -- every root the door
+    // declines, runtime's cheaprand among them -- pays one interface test and nothing else. A native root
+    // pays one memoized lookup per call (GoFieldOffsetOf), never the name read and slice that resolve it.
     nuint INativeRooted.NativeGoFieldAddress =>
         m_source is INativeRooted { NativeRootAddress: var root and not 0 } &&
-        PointeeTypeOf(m_source) is { } structType && FieldNameOf(m_token) is { } fieldName &&
-        s_goFieldDisplacements.GetOrAdd((structType, fieldName), static key => ResolveGoFieldOffset(key.Item1, key.Item2)) is var offset and >= 0
+        GoFieldOffsetOf(m_source, m_token) is var offset and >= 0
             ? root + (nuint)offset
             : 0;
+
+    // A field's Go offset per accessor, memoized beside the displacement above and on the same terms: an
+    // entry records the source type it was resolved for, so it is exact on a match and re-resolved on a
+    // mismatch. Resolving reads the field's name off the delegate and slices it, which allocates; the door
+    // asks on every call. -1 is "no Go layout", and it is cached too.
+    private static nint GoFieldOffsetOf(object source, Delegate fieldId)
+    {
+        Type sourceType = source.GetType();
+
+        if (s_goOffsetsByAccessor.TryGetValue(fieldId, out GoOffset? cached) && ReferenceEquals(cached.SourceType, sourceType))
+            return cached.Value;
+
+        nint offset = PointeeTypeOf(source) is { } structType && FieldNameOf(fieldId) is { } fieldName
+            ? s_goFieldDisplacements.GetOrAdd((structType, fieldName), static key => ResolveGoFieldOffset(key.Item1, key.Item2))
+            : -1;
+
+        s_goOffsetsByAccessor.AddOrUpdate(fieldId, new GoOffset(sourceType, offset));
+
+        return offset;
+    }
+
+    private sealed record GoOffset(Type SourceType, nint Value);
+
+    private static readonly ConditionalWeakTable<Delegate, GoOffset> s_goOffsetsByAccessor = new();
 
     /// <inheritdoc/>
     // A field reference's storage is its container's, recursively: `Ꮡo.of(Ꮡin).of(Ꮡv)` hangs off
