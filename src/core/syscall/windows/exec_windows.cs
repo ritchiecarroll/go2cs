@@ -195,14 +195,11 @@ public static void CloseOnExec(ΔHandle fd) {
 }
 
 public static error /*err*/ SetNonblock(ΔHandle fd, bool nonblocking) {
-    error err = default!;
-
     return default!;
 }
 
 // FullPath retrieves the full path of the specified file.
 public static (@string path, error err) FullPath(@string name) {
-    @string path = default!;
     error err = default!;
 
     (var p, err) = UTF16PtrFromString(name);
@@ -227,7 +224,6 @@ internal static bool isSlash(uint8 c) {
 }
 
 internal static (@string name, error err) normalizeDir(@string dir) {
-    @string name = default!;
     error err = default!;
 
     (var ndir, err) = FullPath(dir);
@@ -249,9 +245,6 @@ internal static nint volToUpper(nint ch) {
 }
 
 internal static (@string name, error err) joinExeDirAndFName(@string dir, @string p) {
-    @string name = default!;
-    error err = default!;
-
     if (len(p) == 0) {
         return ("", EINVAL);
     }
@@ -682,8 +675,6 @@ private static void freeAll(params IntPtr[] pointers) {
 }
 
 public static error /*err*/ Exec(@string argv0, slice<@string> argv, slice<@string> envv) {
-    error err = default!;
-
     return EWINDOWS;
 }
 

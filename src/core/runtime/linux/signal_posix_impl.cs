@@ -68,6 +68,8 @@ using go;
 // (a child inheriting SIG_DFL for an Ignore'd CLR-owned signal) is stated at sigignore's else branch.
 [module: GoManualConversion]
 
+#pragma warning disable CA1416 // PosixSignal.SIGCHLD/SIGCONT/SIGWINCH are unsupported on windows; this file compiles only into the linux flavour
+
 namespace go;
 
 using System;
