@@ -125,3 +125,9 @@ PUSHED: nugetgo main 90cc7d7409 (lint: no go.); hashset main 5415b0cf1d (pre-tag
 G publish-keep RULED: template TrimMode=partial (yields to a project's own), WITH corpus regeneration (+2 lines x ~1,133 csprojs, 0 .cs = stop condition); FIRST in N.
  C2's ID-pattern seat bases on G's tip (both edit csproj-template.xml) as well as stacking on R's 2d46145bdd -- tell C2 the tip when G pushes.
 N SCRIPT ITEMS: + check-published-output.ps1 leg (windows, ~4 min, failed publish = NOT MEASURED; control = the two reds at 4c558191ef); NGF-j0 EXPECT change (C2 seat).
+
+== 2026-10-02 18:07 ==
+HASHSET v1.0.0 TAGGED 17:57 (5d490727a5 -> 5415b0cf1d). P1 pushes claude/p1-hashset-module next.
+M readings at 8f46a9adae IN: i9 132/132; P1 linux (3 known movers); C1 darwin (LookupServicePort only). PENDING: i7 battery, P2 linux.
+R pkg/errors: (a) self-binding alias = R seat claude/r-shadowed-import-alias stacked on repro d7b4b538c6 (sizing first); B1 disclose; B2 .cctor->init = G (golib frame naming, after publish-keep + slog); (c) driver seat claude/r-module-driver-gomod-less after (a).
+i9 forwarders: shapes A/B fixed in ImplementGenerator (a9cc98c1e3 on 8f46a9adae; red 3c4fd81aae), C covered by the seat; gates2 running + a go2cs.slnx Debug build added. N ROW ORDER: i9 forwarders, THEN claude/r-jwt-promoted-iface-repros ee52639557 (guards green on landing; R's jwt/v5 re-run = acceptance).
