@@ -569,7 +569,7 @@ internal static (ж<http2ClientConn>, error) getClientConn(this ж<http2clientCo
 }
 
 // requires p.mu is held.
-internal static ж<http2dialCall> getStartDialLocked(this ж<http2clientConnPool> Ꮡp, context.Context ctx, @string addr) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<http2dialCall> getStartDialLocked(this ж<http2clientConnPool> Ꮡp, context.Context ctx, @string addr) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     {
@@ -609,7 +609,7 @@ internal static ж<http2dialCall> getStartDialLocked(this ж<http2clientConnPool
 // This code decides which ones live or die.
 // The return value used is whether c was used.
 // c is never closed.
-internal static (bool used, error err) addConnIfNeeded(this ж<http2clientConnPool> Ꮡp, @string key, ж<http2Transport> Ꮡt, net.Conn c) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (bool used, error err) addConnIfNeeded(this ж<http2clientConnPool> Ꮡp, @string key, ж<http2Transport> Ꮡt, net.Conn c) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.mu.Lock();
@@ -4355,7 +4355,7 @@ internal static error http2ConfigureServer(ж<Server> Ꮡs, ж<http2Server> Ꮡc
     //
     // A connection passed in this method has already had the HTTP/2 preface read from it.
     var protoHandlerʗ2 = protoHandler;
-    s.TLSNextProto[http2nextProtoUnencryptedHTTP2] = (ж<Server> hs, ж<tls.Conn> c, ΔHandler h) => {
+    s.TLSNextProto[http2nextProtoUnencryptedHTTP2] = [MethodImpl(MethodImplOptions.NoInlining)] (ж<Server> hs, ж<tls.Conn> c, ΔHandler h) => {
         var (nc, err) = http2unencryptedNetConnFromTLSConn(c);
         if (err != default!) {
             {
@@ -5002,7 +5002,7 @@ internal static void notePanic(this ж<http2serverConn> Ꮡsc) {
     finally { ᒐ.Run(); }
 }
 
-internal static void serve(this ж<http2serverConn> Ꮡsc, http2http2Config conf) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void serve(this ж<http2serverConn> Ꮡsc, http2http2Config conf) {
     GoFrame ᒐ = default;
     try {
         ref var sc = ref Ꮡsc.DerefOrNull();
@@ -5261,7 +5261,7 @@ internal static error http2errPrefaceTimeout = errors.New("timeout waiting for c
 // readPreface reads the ClientPreface greeting from the peer or
 // returns errPrefaceTimeout on timeout, or an error if the greeting
 // is invalid.
-internal static error readPreface(this ж<http2serverConn> Ꮡsc) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static error readPreface(this ж<http2serverConn> Ꮡsc) {
     GoFrame ᒐ = default;
     try {
         ref var sc = ref Ꮡsc.DerefOrNull();
@@ -5472,7 +5472,7 @@ internal static void writeFrame(this ж<http2serverConn> Ꮡsc, http2FrameWriteR
 // startFrameWrite starts a goroutine to write wr (in a separate
 // goroutine since that might block on the network), and updates the
 // serve goroutine's state about the world, updated from info in wr.
-internal static void startFrameWrite(this ж<http2serverConn> Ꮡsc, http2FrameWriteRequest wr) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void startFrameWrite(this ж<http2serverConn> Ꮡsc, http2FrameWriteRequest wr) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -6427,7 +6427,7 @@ internal static error processHeaders(this ж<http2serverConn> Ꮡsc, ж<http2Met
     return Ꮡsc.scheduleHandler(id, rw, req, new Action<ResponseWriter, ж<Request>>(handler));
 }
 
-internal static void upgradeRequest(this ж<http2serverConn> Ꮡsc, ж<Request> Ꮡreq) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void upgradeRequest(this ж<http2serverConn> Ꮡsc, ж<Request> Ꮡreq) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var req = ref Ꮡreq.DerefOrNull();
 
@@ -6752,7 +6752,7 @@ internal static readonly @string tooManyEarlyResetsˢ = "too_many_early_resets"u
 
 // scheduleHandler starts a handler goroutine,
 // or schedules one to start as soon as an existing handler finishes.
-internal static error scheduleHandler(this ж<http2serverConn> Ꮡsc, uint32 streamID, ж<http2responseWriter> Ꮡrw, ж<Request> Ꮡreq, Action<ResponseWriter, ж<Request>> handler) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static error scheduleHandler(this ж<http2serverConn> Ꮡsc, uint32 streamID, ж<http2responseWriter> Ꮡrw, ж<Request> Ꮡreq, Action<ResponseWriter, ж<Request>> handler) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -6774,7 +6774,7 @@ internal static error scheduleHandler(this ж<http2serverConn> Ꮡsc, uint32 str
     return default!;
 }
 
-internal static void handlerDone(this ж<http2serverConn> Ꮡsc) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void handlerDone(this ж<http2serverConn> Ꮡsc) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -7369,7 +7369,7 @@ internal static readonly @string http2TrailerPrefix = "Trailer:"u8;
     return err;
 }
 
-[GoRecv] internal static /*<-*/channel<bool> CloseNotify(this ref http2responseWriter w) {
+[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static /*<-*/channel<bool> CloseNotify(this ref http2responseWriter w) {
     var rws = w.rws;
     if (rws == nil) {
         throw panic("CloseNotify called after Handler finished");
@@ -7672,7 +7672,7 @@ internal static void startPush(this ж<http2serverConn> Ꮡsc, ж<http2startPush
     // PUSH_PROMISE frames must be sent in increasing order by stream ID, so
     // we allocate an ID for the promised stream lazily, when the PUSH_PROMISE
     // is written. Once the ID is allocated, we start the request handler.
-    var allocatePromisedID = (uint32, error) () => {
+    var allocatePromisedID = [MethodImpl(MethodImplOptions.NoInlining)] (uint32, error) () => {
         Ꮡsc.Value.serveG.check();
         // Check this again, just in case. Technically, we might have received
         // an updated SETTINGS by the time we got around to writing this frame.
@@ -8093,7 +8093,7 @@ internal static (ж<http2Transport>, error) http2configureTransports(ж<Transpor
     }
     var connPoolʗ1 = connPool;
     var t2ʗ1 = t2;
-    RoundTripper upgradeFn(@string scheme, @string authority, net.Conn c) {
+    [MethodImpl(MethodImplOptions.NoInlining)] RoundTripper upgradeFn(@string scheme, @string authority, net.Conn c) {
         @string addr = http2authorityAddr(scheme, authority);
         {
             var (used, err) = connPoolʗ1.addConnIfNeeded(addr, t2ʗ1, c); if (err != default!){
@@ -8120,7 +8120,7 @@ internal static (ж<http2Transport>, error) http2configureTransports(ж<Transpor
     t1.TLSNextProto[http2NextProtoTLS] = (@string authority, ж<tls.Conn> c) => upgradeFnʗ1(httpsˢ, authority, new tls.ConnжConn(c));
     // The "unencrypted_http2" TLSNextProto key is used to pass off non-TLS HTTP/2 conns.
     var upgradeFnʗ2 = upgradeFn;
-    t1.TLSNextProto[http2nextProtoUnencryptedHTTP2] = RoundTripper (@string authority, ж<tls.Conn> c) => {
+    t1.TLSNextProto[http2nextProtoUnencryptedHTTP2] = [MethodImpl(MethodImplOptions.NoInlining)] RoundTripper (@string authority, ж<tls.Conn> c) => {
         var (nc, err) = http2unencryptedNetConnFromTLSConn(c);
         if (err != default!) {
             goǃ(() => c.Close());
@@ -8332,7 +8332,7 @@ internal static void abortRequestBodyWrite(this ж<http2clientStream> Ꮡcs) {
     finally { ᒐ.Run(); }
 }
 
-internal static void closeReqBodyLocked(this ж<http2clientStream> Ꮡcs) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void closeReqBodyLocked(this ж<http2clientStream> Ꮡcs) {
     ref var cs = ref Ꮡcs.DerefOrNull();
 
     if (cs.reqBodyClosed != default!) {
@@ -8674,7 +8674,7 @@ internal static (ж<http2ClientConn>, error) NewClientConn(this ж<http2Transpor
     return Ꮡt.newClientConn(c, t.disableKeepAlives());
 }
 
-internal static (ж<http2ClientConn>, error) newClientConn(this ж<http2Transport> Ꮡt, net.Conn c, bool singleUse) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<http2ClientConn>, error) newClientConn(this ж<http2Transport> Ꮡt, net.Conn c, bool singleUse) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var conf = http2configFromTransport(ref (Ꮡt).DerefOrNull());
@@ -9103,7 +9103,7 @@ internal static Action http2shutdownEnterWaitStateHook = () => {
 };
 
 // Shutdown gracefully closes the client connection, waiting for running streams to complete.
-public static error Shutdown(this ж<http2ClientConn> Ꮡcc, context.Context ctx) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static error Shutdown(this ж<http2ClientConn> Ꮡcc, context.Context ctx) {
     ref var cc = ref Ꮡcc.DerefOrNull();
 
     {
@@ -9336,7 +9336,7 @@ public static (ж<Response>, error) RoundTrip(this ж<http2ClientConn> Ꮡcc, ж
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string acceptEncodingˢ = "Accept-Encoding"u8;
 
-internal static (ж<Response>, error) roundTrip(this ж<http2ClientConn> Ꮡcc, ж<Request> Ꮡreq, Action<ж<http2clientStream>> streamf) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<Response>, error) roundTrip(this ж<http2ClientConn> Ꮡcc, ж<Request> Ꮡreq, Action<ж<http2clientStream>> streamf) {
     ref var cc = ref Ꮡcc.DerefOrNull();
     ref var req = ref Ꮡreq.DerefOrNull();
 
@@ -11509,7 +11509,7 @@ internal static error processResetStream(this ж<http2clientConnReadLoop> Ꮡrl,
 }
 
 // Ping sends a PING frame to the server and waits for the ack.
-public static error Ping(this ж<http2ClientConn> Ꮡcc, context.Context ctx) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static error Ping(this ж<http2ClientConn> Ꮡcc, context.Context ctx) {
     ref var cc = ref Ꮡcc.DerefOrNull();
 
     var c = new channel<EmptyStruct>(0);

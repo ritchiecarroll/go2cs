@@ -10,6 +10,7 @@ package main
 
 import (
 	"go/ast"
+	"go/constant"
 	"go/token"
 	"go/types"
 	"strings"
@@ -59,6 +60,11 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 	// that one frame, not its callers), and they never count as the package's Caller/Callers user the
 	// opaque-forwarder gate asks about.
 	var directed []types.Object
+	// launchers collects the declarations whose OWN body executes a `go` statement -- each is the
+	// creator golib names for that goroutine. They join after the fixed point, like directed, so a
+	// caller of one never joins (the creator is the frame executing the `go`, not its callers), and
+	// they never count as the Caller/Callers user the opaque-forwarder gate asks about.
+	var launchers []types.Object
 	// genericFuncs collects the GENERIC declarations: one that directly calls a seeded thin allocator
 	// joins the set once the allocators are decided (see callsSeededThinAllocator below).
 	type genericFunc struct {
@@ -66,6 +72,16 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 		body *ast.BlockStmt
 	}
 	var genericFuncs []genericFunc
+	// callers[g] = the package-scope declarations whose OWN body calls g (a closure's calls are its own
+	// frame), and windows = the constant-skip runtime.Caller/Callers sites with the deepest caller depth
+	// each one SKIPS -- see runtimeCallerSkipWindow. Recorded for every declaration, seeds included,
+	// since a skipped frame can sit anywhere in the call graph.
+	callers := map[types.Object]map[types.Object]bool{}
+	type skipWindow struct {
+		obj   types.Object
+		depth int64
+	}
+	var windows []skipWindow
 
 	for _, entry := range files {
 		if entry.file == nil {
@@ -86,8 +102,18 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 				directed = append(directed, obj)
 			}
 
+			if executesGoStatement(fn.Body) {
+				launchers = append(launchers, obj)
+			}
+
 			if fn.Type.TypeParams != nil {
 				genericFuncs = append(genericFuncs, genericFunc{obj: obj, body: fn.Body})
+			}
+
+			recordSamePackageCallees(info, pkg, obj, fn.Body, callers)
+
+			if depth, ok := runtimeCallerSkipWindow(info, fn.Body); ok {
+				windows = append(windows, skipWindow{obj: obj, depth: depth})
 			}
 
 			if callsSkipCountedRuntimeCaller(info, fn.Body) || callsSkipCountedWalker(info, fn.Body) {
@@ -108,6 +134,21 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 			if isThinAllocator(info, fn.Body) {
 				thinAllocators = append(thinAllocators, thinAllocator{obj: obj, inTest: inTest})
 			}
+		}
+	}
+
+	// The SKIP WINDOW: every in-package caller at a depth a constant-skip runtime.Caller/Callers SKIPS keeps
+	// its frame, whatever its shape -- the thin-forwarder fixed point below only reaches one-statement
+	// bodies. net/http's ServeMux is the measured case: registerErr's runtime.Caller(3) skips register (an
+	// if with a panic) and Handle (an if/else), the Release TieredCompilation=0 JIT inlined one of them, and
+	// TestRegisterErr's "registered at" landed on testing.tRunner (10/10 at TC0, 0/10 tiered). Only SKIPPED
+	// depths: the reported frame and everything above it are the caller's code, and marking the first
+	// reported frame too measured +167 std functions the JIT never inlines (a std census put the window
+	// itself at +7 per target: net/http's 5 and internal/reflectlite's flag.mustBeExported/mustBeAssignable).
+	// Seeded before the fixed point, so a thin forwarder to a window frame chains as usual.
+	for _, window := range windows {
+		for _, caller := range callersWithinDepth(window.obj, window.depth, callers) {
+			seed[caller] = true
 		}
 	}
 
@@ -175,7 +216,49 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 		seed[obj] = true
 	}
 
+	// THE GO CREATOR: golib names a goroutine's creator (Go's gp.gopc, printed as `created by <func>`)
+	// by walking the launching thread's stack, so the function executing the `go` must keep its frame.
+	// Under the Release TieredCompilation=0 JIT it was elided two ways: inlined into its caller, or --
+	// for a `go` in tail position -- replaced by an opportunistic tail call into goǃ. Measured
+	// 2026-10-01: unique's map-cleanup goroutine read `created by sync.(*Once).doSlow` on net/http at
+	// TC0 (runtime.unique_runtime_registerUniqueMapCleanup, reached behind a delegate invoke, tail-called
+	// its trailing goǃ). A probe at TC0 showed [MethodImpl(NoInlining)] suppresses BOTH mechanisms, on a
+	// method and on a C# lambda or local function alike (correcting the earlier sizing claim that it
+	// could not reach a tail call). Func literals take the same rule in litNoInliningPrefix.
+	for _, obj := range launchers {
+		seed[obj] = true
+	}
+
 	return seed
+}
+
+// executesGoStatement reports whether body ITSELF executes a `go` statement -- one not inside a nested
+// func literal, which is its own frame and so its own creator. A literal that is the `go` statement's
+// callee (`go func() { ... }()`) is the goroutine's body, not a creator, and is not descended into.
+func executesGoStatement(body *ast.BlockStmt) bool {
+	if body == nil {
+		return false
+	}
+
+	found := false
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		switch n.(type) {
+		case *ast.FuncLit:
+			return false
+		case *ast.GoStmt:
+			found = true
+			return false
+		}
+
+		return true
+	})
+
+	return found
 }
 
 // hasNoinlineDirective reports whether a declaration's doc comment carries Go's `//go:noinline`. Go's
@@ -607,4 +690,153 @@ func thinForwarderTarget(info *types.Info, pkg *types.Package, body *ast.BlockSt
 		return nil
 	}
 	return target
+}
+
+// runtimeCallerSkipWindow reports the deepest CALLER depth that body's constant-skip runtime.Caller /
+// runtime.Callers calls skip, with body's own function at depth 0. Go's skip semantics: Caller(k) skips
+// depths 0..k-1 and reports depth k; Callers(k) counts itself as frame 0, so it skips depths 0..k-2 and
+// records from depth k-1. ok is false when no call has a constant skip that reaches past body's own frame
+// (that frame is the direct caller, which the seed already keeps). A non-constant skip cannot be sized and
+// is ignored here; its direct caller is still seeded by callsSkipCountedRuntimeCaller. Stops at a nested
+// *ast.FuncLit: a closure is a frame of its own.
+func runtimeCallerSkipWindow(info *types.Info, body *ast.BlockStmt) (int64, bool) {
+	if body == nil || info == nil {
+		return 0, false
+	}
+
+	var deepest int64
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if _, isLit := n.(*ast.FuncLit); isLit {
+			return false
+		}
+
+		call, ok := n.(*ast.CallExpr)
+
+		if !ok || len(call.Args) == 0 {
+			return true
+		}
+
+		sel, ok := call.Fun.(*ast.SelectorExpr)
+
+		if !ok {
+			return true
+		}
+
+		used, ok := info.Uses[sel.Sel].(*types.Func)
+
+		if !ok || used.Pkg() == nil || used.Pkg().Path() != "runtime" {
+			return true
+		}
+
+		var unskipped int64 // Caller(k) skips k frames counting F; Callers(k) skips k-1 of them
+
+		switch used.Name() {
+		case "Caller":
+			unskipped = 1
+		case "Callers":
+			unskipped = 2
+		default:
+			return true
+		}
+
+		value := info.Types[call.Args[0]].Value
+
+		if value == nil {
+			return true
+		}
+
+		if skip, exact := constant.Int64Val(value); exact && skip-unskipped > deepest {
+			deepest = skip - unskipped
+		}
+
+		return true
+	})
+
+	return deepest, deepest > 0
+}
+
+// recordSamePackageCallees adds caller to callers[g] for every same-package function g that body calls
+// directly (an identifier, a selector, or an explicit instantiation), keyed by g's origin so a generic
+// callee's instances fold into its declaration. A call through an interface or a function value names no
+// declaration and adds nothing. Stops at a nested *ast.FuncLit: a closure's calls are its own frame's.
+func recordSamePackageCallees(info *types.Info, pkg *types.Package, caller types.Object, body *ast.BlockStmt, callers map[types.Object]map[types.Object]bool) {
+	if body == nil || info == nil {
+		return
+	}
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if _, isLit := n.(*ast.FuncLit); isLit {
+			return false
+		}
+
+		call, ok := n.(*ast.CallExpr)
+
+		if !ok {
+			return true
+		}
+
+		fun := ast.Unparen(call.Fun)
+
+		switch index := fun.(type) {
+		case *ast.IndexExpr:
+			fun = index.X
+		case *ast.IndexListExpr:
+			fun = index.X
+		}
+
+		var ident *ast.Ident
+
+		switch f := fun.(type) {
+		case *ast.Ident:
+			ident = f
+		case *ast.SelectorExpr:
+			ident = f.Sel
+		default:
+			return true
+		}
+
+		callee, ok := info.Uses[ident].(*types.Func)
+
+		if !ok || callee.Pkg() != pkg {
+			return true
+		}
+
+		target := callee.Origin()
+
+		if callers[target] == nil {
+			callers[target] = map[types.Object]bool{}
+		}
+
+		callers[target][caller] = true
+
+		return true
+	})
+}
+
+// callersWithinDepth returns every declaration that reaches fn through at most depth same-package calls
+// (fn itself excluded), breadth-first over callers.
+func callersWithinDepth(fn types.Object, depth int64, callers map[types.Object]map[types.Object]bool) []types.Object {
+	var reached []types.Object
+
+	seen := map[types.Object]bool{fn: true}
+	frontier := []types.Object{fn}
+
+	for level := int64(0); level < depth && len(frontier) > 0; level++ {
+		var next []types.Object
+
+		for _, g := range frontier {
+			for caller := range callers[g] {
+				if !seen[caller] {
+					seen[caller] = true
+					reached = append(reached, caller)
+					next = append(next, caller)
+				}
+			}
+		}
+
+		frontier = next
+	}
+
+	return reached
 }

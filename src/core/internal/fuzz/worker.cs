@@ -16,6 +16,7 @@ using reflect = reflect_package;
 using Δruntime = runtime_package;
 using sync = global::go.sync_package;
 using time = time_package;
+using System.Runtime.CompilerServices;
 using crypto;
 using encoding;
 using global::go;
@@ -347,7 +348,7 @@ internal static error startAndPing(this ж<worker> Ꮡw, context.Context ctx) {
 //
 // When the process terminates, w.waitErr is set to the error (if any), and
 // w.termC is closed.
-internal static error /*err*/ start(this ж<worker> Ꮡw) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static error /*err*/ start(this ж<worker> Ꮡw) {
     error err = default!;
     GoFrame ᒐ = default;
     try {
@@ -420,7 +421,7 @@ internal static error /*err*/ start(this ж<worker> Ꮡw) {
 //
 // stop must be called at least once after start returns successfully, even if
 // the worker process terminates unexpectedly.
-internal static error stop(this ж<worker> Ꮡw) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static error stop(this ж<worker> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.termC == default!) {
@@ -1309,7 +1310,7 @@ internal static error ping(this ж<workerClient> Ꮡwc, context.Context ctx) {
     internal io.Reader r;
 }
 
-internal static (nint, error) Read(this ж<contextReader> Ꮡcr, slice<byte> b) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, error) Read(this ж<contextReader> Ꮡcr, slice<byte> b) {
     ref var cr = ref Ꮡcr.DerefOrNull();
 
     {

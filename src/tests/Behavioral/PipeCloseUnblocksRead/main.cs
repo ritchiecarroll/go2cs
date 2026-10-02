@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using os = os_package;
 using time = time_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -12,7 +13,7 @@ private static readonly @string readReturnedNoErrorˢ = "read returned no error"
 private static readonly object readUnblockedˢ = (@string)"read unblocked:"u8;
 private static readonly object readDidNotUnblockˢ = (@string)"read did NOT unblock"u8;
 
-internal static void Main() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
     var (r, w, err) = os.Pipe();
     if (err != default!) {
         fmt.Println(pipeErrorˢ, err);

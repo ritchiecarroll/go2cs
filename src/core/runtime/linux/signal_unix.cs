@@ -10,6 +10,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using System.Runtime.CompilerServices;
 
 partial class runtime_package {
 
@@ -941,7 +942,7 @@ internal static void crash() {
 
 // ensureSigM starts one global, sleeping thread to make sure at least one thread
 // is available to catch signals enabled for os/signal.
-internal static void ensureSigM() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void ensureSigM() {
     if (maskUpdatedChan != default!) {
         return;
     }

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {
@@ -218,7 +219,7 @@ internal static void deferControlSingleValueCall() {
 private static readonly object goSpreadEnterˢ = (@string)"goSpread: enter"u8;
 private static readonly object goSpreadDoneˢ = (@string)"goSpread: done"u8;
 
-internal static void goSpread() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void goSpread() {
     fmt.Println(goSpreadEnterˢ);
     goǃ(ᴛ1 => goShow(ᴛ1.Item1, ᴛ1.Item2), two());
     ᐸꟷ(done);
@@ -229,7 +230,7 @@ internal static void goSpread() {
 private static readonly object goCaptureSpreadEnterˢ = (@string)"goCaptureSpread: enter"u8;
 private static readonly object goCaptureSpreadDoneˢ = (@string)"goCaptureSpread: done"u8;
 
-internal static void goCaptureSpread() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void goCaptureSpread() {
     fmt.Println(goCaptureSpreadEnterˢ);
     goǃ(ᴛ1 => goShow(ᴛ1.Item1, ᴛ1.Item2), pair());
     ᐸꟷ(done);

@@ -20,6 +20,7 @@ using filepath = path.filepath_package;
 using strings = strings_package;
 using sync = sync_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+using System.Runtime.CompilerServices;
 using global::go.go;
 using global::go.os;
 using path;
@@ -174,7 +175,7 @@ public static (ж<types.Package>, error) ImportFrom(this ж<Importer> Ꮡp, @str
     finally { ᒐ.Run(); }
 }
 
-internal static (slice<ж<ast.File>>, error) parseFiles(this ж<Importer> Ꮡp, @string dir, slice<@string> filenames) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (slice<ж<ast.File>>, error) parseFiles(this ж<Importer> Ꮡp, @string dir, slice<@string> filenames) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // use build.Context's OpenFile if there is one

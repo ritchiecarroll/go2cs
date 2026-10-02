@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -16,7 +17,7 @@ private static readonly object replyˢ = (@string)"reply:"u8;
 private static readonly object afterRendezvousLenˢ = (@string)"after rendezvous: len:"u8;
 private static readonly object pongˢ = (@string)"pong:"u8;
 
-internal static void Main() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
     var ch = new channel<nint>(0);
     fmt.Println(capˢ, cap(ch), lenˢ, len(ch));
     var selᴛ1 = ch.ᐸꟷ(1, ꓸꓸꓸ);

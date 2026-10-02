@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -24,11 +25,11 @@ partial class main_package {
     internal ж<counter> tally;
 }
 
-internal static void start(this ж<engine> Ꮡe, nint delta) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void start(this ж<engine> Ꮡe, nint delta) {
     goǃ(ᴛ1 => Ꮡe.Value.tally.bump(ᴛ1), delta);
 }
 
-internal static void ping(this ж<engine> Ꮡe) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void ping(this ж<engine> Ꮡe) {
     goǃ(() => Ꮡe.Value.tally.report());
 }
 
@@ -51,7 +52,7 @@ private static readonly object pingedˢ = (@string)"pinged:"u8;
 private static readonly object valueRecvGoˢ = (@string)"value-recv go:"u8;
 private static readonly object valueRecvNullaryGoˢ = (@string)"value-recv nullary go:"u8;
 
-internal static void Main() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
     var e = Ꮡ(new engine(tally: Ꮡ(new counter(done: new channel<bool>(1)))));
     e.start(5);
     ᐸꟷ((~(~e).tally).done);

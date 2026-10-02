@@ -20,6 +20,7 @@ using sort = sort_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using time = time_package;
+using System.Runtime.CompilerServices;
 using go.@internal;
 using go.io;
 using go.mime;
@@ -285,7 +286,7 @@ internal static readonly @string contentLengthˢ = "Content-Length"u8;
 // if modtime.IsZero(), modtime is unknown.
 // content must be seeked to the beginning of the file.
 // The sizeFunc is called at most once. Its error, if any, is sent in the HTTP response.
-internal static void serveContent(ResponseWriter w, ref Request r, @string name, time.Time modtime, Func<(int64, error)> sizeFunc, io.ReadSeeker content) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void serveContent(ResponseWriter w, ref Request r, @string name, time.Time modtime, Func<(int64, error)> sizeFunc, io.ReadSeeker content) {
     GoFrame ᒐ = default;
     try {
         setLastModified(w, modtime);

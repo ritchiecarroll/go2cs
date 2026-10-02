@@ -654,7 +654,7 @@ internal static readonly @string execCommandWithANonNilˢ = "exec: command with 
 //
 // After a successful call to Start the [Cmd.Wait] method must be called in
 // order to release associated system resources.
-public static error Start(this ж<Cmd> Ꮡc) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static error Start(this ж<Cmd> Ꮡc) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();

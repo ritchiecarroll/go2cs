@@ -62,6 +62,7 @@ using Δsync = sync_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
 using @internal;
+using System.Runtime.CompilerServices;
 using go.sync;
 
 partial class context_package {
@@ -376,7 +377,7 @@ internal static void cancel(this ж<afterFuncCtx> Ꮡa, bool removeFromParent, e
     if (removeFromParent) {
         removeChild(a.Context, new afterFuncCtxжcanceler(Ꮡa));
     }
-    Ꮡa.of(afterFuncCtx.Ꮡonce).Do(() => {
+    Ꮡa.of(afterFuncCtx.Ꮡonce).Do([MethodImpl(MethodImplOptions.NoInlining)] () => {
         goǃ(Ꮡa.Value.f);
     });
 }
@@ -510,7 +511,7 @@ internal static error Err(this ж<cancelCtx> Ꮡc) {
 
 // propagateCancel arranges for child to be canceled when parent is.
 // It sets the parent context of cancelCtx.
-internal static void propagateCancel(this ж<cancelCtx> Ꮡc, Context parent, canceler child) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void propagateCancel(this ж<cancelCtx> Ꮡc, Context parent, canceler child) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     c.Context = parent;

@@ -1,10 +1,11 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-internal static void Main() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
     channel<nint> c = new channel<nint>(100);
     for (nint i = 0; i < 10; i++) {
         var cʗ1 = c;

@@ -5,6 +5,7 @@ using os = os_package;
 using Δruntime = runtime_package;
 using strings = strings_package;
 using syscall = syscall_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -38,7 +39,7 @@ private static readonly object theParkedThreadFollowedˢ = (@string)"the parked 
 private static readonly object restoreFailedˢ = (@string)"restore failed:"u8;
 private static readonly object restoredMainˢ = (@string)"restored main:"u8;
 
-internal static void Main() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
     if (Δruntime.GOOS != "linux"u8) {
         fmt.Println(notLinuxNothingToObserveˢ);
         return;

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -15,7 +16,7 @@ internal static channel<nint> fresh() {
 
 internal static nint afterCalls;
 
-internal static channel<nint> after() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static channel<nint> after() {
     afterCalls++;
     var ch = new channel<nint>(0);
     var chʗ1 = ch;

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -62,7 +63,7 @@ internal static void Main() {
     var done = new channel<bool>(0);
     var baseʗ3 = @base;
     var doneʗ1 = done;
-    ((Action)(() => {
+    ((Action)([MethodImpl(MethodImplOptions.NoInlining)] () => {
         var doneʗ2 = doneʗ1;
         goǃ((Tally t) => {
             report(goroutineˢ, t, 7);

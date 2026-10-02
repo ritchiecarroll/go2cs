@@ -5,13 +5,14 @@ using fmt = fmt_package;
 using Δnet = net_package;
 using os = os_package;
 using time = time_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string tcpˢ = "tcp"u8;
 
-internal static (Δnet.Conn client, Δnet.Conn server, Action cleanup, bool ok) pair() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (Δnet.Conn client, Δnet.Conn server, Action cleanup, bool ok) pair() {
     Δnet.Conn client = default!;
     Δnet.Conn server = default!;
 
@@ -59,7 +60,7 @@ internal static bool isTimeout(error err) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object lifecycleSetupFailedˢ = (@string)"lifecycle: setup failed"u8;
 
-internal static void deadlineLifecycle() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void deadlineLifecycle() {
     GoFrame ᒐ = default;
     try {
         var (client, server, cleanup, ok) = pair();
@@ -119,7 +120,7 @@ internal static void pastDeadline() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object replaceSetupFailedˢ = (@string)"replace: setup failed"u8;
 
-internal static void replacedWhileBlocked() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void replacedWhileBlocked() {
     GoFrame ᒐ = default;
     try {
         var (client, server, cleanup, ok) = pair();
@@ -149,7 +150,7 @@ internal static void replacedWhileBlocked() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object modesSetupFailedˢ = (@string)"modes: setup failed"u8;
 
-internal static void modeIndependence() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void modeIndependence() {
     GoFrame ᒐ = default;
     try {
         var (client, server, cleanup, ok) = pair();
@@ -212,7 +213,7 @@ internal static void closeBeatsTimeout() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object raceSetupFailedˢ = (@string)"race: setup failed"u8;
 
-internal static void deadlineVersusData() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void deadlineVersusData() {
     GoFrame ᒐ = default;
     try {
         var (client, server, cleanup, ok) = pair();

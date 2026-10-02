@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -35,7 +36,7 @@ internal static Handler makeHandler(slice<@string> g) {
     });
 }
 
-internal static void Main() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
     var a = new @string[]{"a="u8}.slice();
     var aʗ1 = a;
     goǃ(serve, new HandlerᴠIface(new Handler((nint i) => {

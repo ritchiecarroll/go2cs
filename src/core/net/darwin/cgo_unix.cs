@@ -17,6 +17,7 @@ using syscall = syscall_package;
 using @unsafe = unsafe_package;
 using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
 using @internal;
+using System.Runtime.CompilerServices;
 using net;
 using vendor.golang.org.x.net.dns;
 
@@ -54,7 +55,7 @@ internal static void isAddrinfoErrno(this addrinfoErrno eai) {
 // cancellation (cgo, syscalls). blocking func may still be running after this function finishes.
 // For the duration of the execution of the blocking function, the thread is 'acquired' using [acquireThread],
 // blocking might not be executed when the context gets canceled early.
-internal static (T, error) doBlockingWithCtx<T>(context.Context ctx, @string lookupName, Func<(T, error)> blocking) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (T, error) doBlockingWithCtx<T>(context.Context ctx, @string lookupName, Func<(T, error)> blocking) {
     GoFrame ᒐ = default;
     try {
         {

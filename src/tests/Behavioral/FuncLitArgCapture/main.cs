@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -39,7 +40,7 @@ internal static nint nestedStructCapture() {
     var @out = new channel<nint>(1);
     var outʗ1 = @out;
     var pʗ1 = p;
-    void outer() {
+    [MethodImpl(MethodImplOptions.NoInlining)] void outer() {
         var outʗ2 = outʗ1;
         var pʗ2 = pʗ1;
         goǃ(() => {
@@ -50,7 +51,7 @@ internal static nint nestedStructCapture() {
     return ᐸꟷ(@out);
 }
 
-internal static nint selfRefCapture() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint selfRefCapture() {
     var done = new channel<nint>(1);
     var doneʗ1 = done;
     void worker(Action cb) {
@@ -80,7 +81,7 @@ internal static void deferArgCapture(ж<box> Ꮡout) {
 internal static nint nestedArgLiteralCapture() {
     var total = new channel<nint>(1);
     var totalʗ1 = total;
-    run(() => {
+    run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         var items = new nint[]{1, 2, 3}.slice();
         var done = new channel<nint>(len(items));
         foreach (var (i, _) in items) {

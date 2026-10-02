@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `net/http` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-25 · converter `e75e3b479`*
+*Validated 2026-10-01 · converter `824704e60`*
 
 **1387 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
 [`src/core/net/http`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net/http).
 
-Measured at `Release` (tiered JIT on), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
 
 Both runtimes skip 22 of the matched tests identically.
 

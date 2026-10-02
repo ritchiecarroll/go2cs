@@ -23,6 +23,7 @@ using atomic = go.sync.atomic_package;
 using time = time_package;
 using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
 using @internal;
+using System.Runtime.CompilerServices;
 using fs = go.io.fs_package;
 using go.io;
 using go.sync;
@@ -729,7 +730,7 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
         };
     } else {
         var laneʗ1 = lane;
-        queryFn = (@string fqdn, dnsmessage.Type qtype) => {
+        queryFn = [MethodImpl(MethodImplOptions.NoInlining)] (@string fqdn, dnsmessage.Type qtype) => {
             ᏑdnsWaitGroup.Add(1);
             var laneʗ2 = laneʗ1;
             goǃ((dnsmessage.Type qtypeΔ1) => {

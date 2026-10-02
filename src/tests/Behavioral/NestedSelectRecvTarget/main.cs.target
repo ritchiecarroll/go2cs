@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -29,7 +30,7 @@ internal static nint idxDefault(nint i) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object innerBlockingRecvˢ = (@string)"  inner blocking recv:"u8;
 
-internal static nint idxBlocking(nint i) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint idxBlocking(nint i) {
     var ready = new channel<nint>(0);
     var readyʗ1 = ready;
     goǃ(() => {

@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using time = time_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -67,7 +68,7 @@ internal static void freeBuffered() {
 private static readonly object unbufferedWithReceiverˢ = (@string)"unbuffered with receiver: sent ="u8;
 private static readonly object receivedˢ = (@string)"received ="u8;
 
-internal static void unbufferedWithReceiver() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void unbufferedWithReceiver() {
     var ch = new channel<nint>(0);
     var got = new channel<nint>(1);
     var chʗ1 = ch;
@@ -225,7 +226,7 @@ internal static void exactlyOneSend() {
 private static readonly object blockingSendSentˢ = (@string)"blocking send: sent"u8;
 private static readonly object blockingSendReceivedˢ = (@string)"blocking send: received"u8;
 
-internal static void blockingSendStillBlocks() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockingSendStillBlocks() {
     var ch = new channel<nint>(0);
     var got = new channel<nint>(1);
     var chʗ1 = ch;

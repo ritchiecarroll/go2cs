@@ -936,7 +936,7 @@ internal static driver.Driver Driver(this dsnConnector t) {
 // and maintains its own pool of idle connections. Thus, the OpenDB
 // function should be called just once. It is rarely necessary to
 // close a [DB].
-public static ж<DB> OpenDB(driver.Connector c) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static ж<DB> OpenDB(driver.Connector c) {
     var (ctx, cancel) = context.WithCancel(context.Background());
     var db = Ꮡ(new DB(
         connector: c,
@@ -1224,7 +1224,7 @@ public static void SetConnMaxIdleTime(this ж<DB> Ꮡdb, time.Duration d) {
 }
 
 // startCleanerLocked starts connectionCleaner if needed.
-internal static void startCleanerLocked(this ж<DB> Ꮡdb) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void startCleanerLocked(this ж<DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     if ((db.maxLifetime > 0 || db.maxIdleTime > 0) && db.numOpen > 0 && db.cleanerCh == default!) {
@@ -2116,7 +2116,7 @@ internal static (ж<Tx> tx, error err) begin(this ж<DB> Ꮡdb, context.Context 
 }
 
 // beginDC starts a transaction. The provided dc must be valid and ready to use.
-internal static (ж<Tx> tx, error err) beginDC(this ж<DB> Ꮡdb, context.Context ctxʗp, ж<driverConn> Ꮡdc, Action<error> release, ж<TxOptions> Ꮡopts) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<Tx> tx, error err) beginDC(this ж<DB> Ꮡdb, context.Context ctxʗp, ж<driverConn> Ꮡdc, Action<error> release, ж<TxOptions> Ꮡopts) {
     ж<Tx> tx = default!;
     error err = default!;
 
@@ -3302,7 +3302,7 @@ internal static error finalClose(this ж<ΔStmt> Ꮡs) {
 // If true, it will not close the Rows automatically from the context.
 internal static bool bypassRowsAwaitDone = false;
 
-internal static void initContextClose(this ж<Rows> Ꮡrs, context.Context ctx, context.Context txctx) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void initContextClose(this ж<Rows> Ꮡrs, context.Context ctx, context.Context txctx) {
     ref var rs = ref Ꮡrs.DerefOrNull();
 
     if (ctx.Done() == default! && (txctx == default! || txctx.Done() == default!)) {

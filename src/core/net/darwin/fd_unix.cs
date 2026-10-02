@@ -10,6 +10,7 @@ using os = os_package;
 using runtime = runtime_package;
 using syscall = syscall_package;
 using @internal;
+using System.Runtime.CompilerServices;
 using time = time_package;
 
 partial class net_package {
@@ -57,7 +58,7 @@ internal static error init(this ж<netFD> Ꮡfd) {
 internal static readonly @string connectˢ = "connect"u8;
 internal static readonly @string getsockoptˢ = "getsockopt"u8;
 
-internal static (syscall.Sockaddr rsa, error ret) connect(this ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (syscall.Sockaddr rsa, error ret) connect(this ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
     syscall.Sockaddr rsa = default!;
     error ret = default!;
     GoFrame ᒐ = default;

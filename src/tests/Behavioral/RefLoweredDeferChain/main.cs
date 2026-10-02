@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -32,7 +33,7 @@ internal static nint /*seen*/ deferChain<T>(ref Root r, T mark) {
     return seen;
 }
 
-internal static nint goChain(ref Root r) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint goChain(ref Root r) {
     goǃ(r.root.release);
     return ᐸꟷ((~r.root).done);
 }
