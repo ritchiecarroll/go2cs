@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `log/slog` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-28 · converter `2b8b1fb75`*
+*Validated 2026-10-02 · converter `8f46a9ada`*
 
 **199 matched · 17 disclosed** — Go 1.24.13, `windows/amd64`, converted package
 [`src/core/log/slog`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/log/slog).
 
-Measured at `Release` (tiered JIT on), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
 
 ## Verdicts
 
