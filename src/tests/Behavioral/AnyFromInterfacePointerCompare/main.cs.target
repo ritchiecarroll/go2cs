@@ -27,15 +27,15 @@ internal static void Main() {
     var p = Ꮡ(new node(id: 1));
     var q = Ꮡ(new node(id: 2));
     any direct = p.OrTypedNil();
-    fmt.Println(directPˢ, direct == p);
-    fmt.Println(directPˢ2, direct != p);
-    fmt.Println(directQˢ, direct == q);
+    fmt.Println(directPˢ, AreEqual(direct, p));
+    fmt.Println(directPˢ2, !AreEqual(direct, p));
+    fmt.Println(directQˢ, AreEqual(direct, q));
     error err = new nodeжerror(p);
     any widened = err;
-    fmt.Println(widenedPˢ, widened == p);
-    fmt.Println(widenedPˢ2, widened != p);
-    fmt.Println(pWidenedˢ, p == widened);
-    fmt.Println(widenedQˢ, widened == q);
+    fmt.Println(widenedPˢ, AreEqual(widened, p));
+    fmt.Println(widenedPˢ2, !AreEqual(widened, p));
+    fmt.Println(pWidenedˢ, AreEqual(p, widened));
+    fmt.Println(widenedQˢ, AreEqual(widened, q));
     fmt.Println(lookupˢ, lookup(err, p));
     fmt.Println(lookupOtherˢ, lookup(err, q));
 }
@@ -45,7 +45,7 @@ private static readonly @string foundˢ = "found"u8;
 private static readonly @string missingˢ = "missing"u8;
 
 internal static @string lookup(any key, ж<node> Ꮡwant) {
-    if (key == Ꮡwant) {
+    if (AreEqual(key, Ꮡwant)) {
         return foundˢ;
     }
     return missingˢ;

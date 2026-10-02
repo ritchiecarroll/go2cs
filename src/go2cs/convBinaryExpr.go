@@ -1686,10 +1686,13 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 		// is a generated IжAdapter wrapping the receiver box, and AreEqual unwraps adapters to
 		// compare box identity. The old deref form (`iface == ~p`) boxed a COPY of the pointed-to
 		// value — wrong identity semantics, and CS0019 once the adapter replaced the partial-struct
-		// comparison operators (InterfaceImplementation's `zoo[0] == f`).
+		// comparison operators (InterfaceImplementation's `zoo[0] == f`). An EMPTY interface takes the
+		// same route: a pointer that reached the `any` through a non-empty interface is held as that
+		// adapter, so C#'s reference `==` (CS0252) compared the adapter with the box and answered false
+		// where Go answers true (context's `key == &cancelCtxKey`; AnyFromInterfacePointerCompare).
 		if binaryOp == "==" || binaryOp == "!=" {
-			lhsIsInterface, isEmpty := isInterface(lhsType)
-			rhsIsInterface, rhsIsEmpty := isInterface(rhsType)
+			lhsIsInterface, _ := isInterface(lhsType)
+			rhsIsInterface, _ := isInterface(rhsType)
 
 			// A CONCRETE comparable value against a non-empty interface (`err ==
 			// ERROR_ENVVAR_NOT_FOUND`, error vs the Errno named numeric; syscall CS0019 x12)
@@ -1711,7 +1714,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				return !iface
 			}
 
-			if (lhsIsInterface && !isEmpty && rhsIsPointer) || (rhsIsInterface && !rhsIsEmpty && lhsIsPointer) || (lhsIsInterface && rhsIsInterface) ||
+			if (lhsIsInterface && rhsIsPointer) || (rhsIsInterface && lhsIsPointer) || (lhsIsInterface && rhsIsInterface) ||
 				(lhsIsInterface && concreteOperand(rhsType)) || (rhsIsInterface && concreteOperand(lhsType)) {
 				// The CONCRETE operand of an interface `==`/`!=` compares by BOX: AreEqual reflects on
 				// the boxed values' runtime types (an early `leftType != right.GetType()` bail), so an
