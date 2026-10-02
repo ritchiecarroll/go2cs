@@ -6619,8 +6619,13 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 func publishTestHost(outputPath, testProject string, options Options) error {
 	binlog := preparePublishBinlog(outputPath, options)
 	args := withPublishBinlog(publishTestHostArgs(outputPath, testProject, options), binlog)
-	_, err := runCommandWithTimeout(options.testTimeout, outputPath, options, "dotnet", args...)
+	_, err := runCommandWithTimeout(testPublishTimeout(options), outputPath, options, "dotnet", args...)
 	return settlePublishBinlog(binlog, err)
+}
+
+// testPublishTimeout is the budget publishTestHost gives `dotnet publish`.
+func testPublishTimeout(options Options) time.Duration {
+	return options.testTimeout
 }
 
 // publishTestHostArgs is the `dotnet` argument list publishTestHost runs, split out so the command a
