@@ -262,6 +262,12 @@ func main() {
 	testAllowHandOwnCmd := commandLine.Bool("test-allow-handown", false, "Convert a package the -stdlib queue deliberately skips (testing, unsafe, builtin, cmd/...) as a -tests target anyway. Refused by default: `testing` IS the hand-owned Phase-4 test host, and the pipeline's natural output path is the very directory the host lives in, so a mistyped command overwrites it (measured 2026-09-03 -- the run replaced src/core/testing/testing.cs with Go's converted testing.go). Pass this ONLY with a BARE scratch output root, for a deliberate measurement whose emission is thrown away; it is not a route to banking such a package, which would still hit the F15b 'ONE testing package, period' collision. Consulted AFTER the hand-own host path since 2026-09-20, so what this flag does depends on what is AT the output root: on a BARE root it keeps the full production census measured 2026-09-03 (no csproj there, so the host path cannot open), while at a hand-owned counterpart's own directory -- or at a root SEEDED from src/core, which carries that counterpart's csproj and markers and so is NOT bare -- the host path wins instead, the run converts TESTS ONLY, and no production file is emitted over a hand-own")
 	var recurseVal recurseMode
 	commandLine.Var(&recurseVal, "recurse", "Recursively convert an end-user module and its third-party dependencies (references the pre-converted standard library); use -recurse=module to convert only the module's own packages, leaving the third-party closure referenced but unconverted, and -recurse=nuget to reference the published go2cs NuGet packages (go.<pkg>/go.lib/go.gen) instead of local project references (values combine: -recurse=module,nuget)")
+	var nugetMapVals, nugetMapExcludeVals stringListFlag
+	commandLine.Var(&nugetMapVals, "nuget-map", "With -recurse=nuget: a Go-module -> NuGet-package mapping source, a local file or an https:// URL in nugetgo.net's schema v1; REPEATABLE, and the listed order is the precedence (the first source naming a module answers it). The nugetgo.net registry (https://nugetgo.net/v1/mappings.txt) answers every module the listed sources do not name, unless -nuget-map-only. 'off' disables mapping entirely. Resolved, locked (go2cs.nuget.lock) and reported, but not yet applied: every module is still converted locally until stage S3b. With no -nuget-map flag a run does no mapping at all")
+	nugetMapOnlyCmd := commandLine.Bool("nuget-map-only", false, "With -nuget-map: use only the listed sources, dropping the nugetgo.net fallback, so a module they do not name stays local and the registry is never fetched")
+	commandLine.Var(&nugetMapExcludeVals, "nuget-map-exclude", "With -nuget-map: a module path that is never mapped, whatever a source says; repeatable")
+	nugetMapRefreshCmd := commandLine.Bool("nuget-map-refresh", false, "With -nuget-map: fetch every URL source unconditionally (bypassing the cache) and re-resolve every module, adopting what the sources now say instead of what go2cs.nuget.lock pinned")
+	nugetMapCanonicalOnlyCmd := commandLine.Bool("nuget-map-canonical-only", false, "With -nuget-map: apply canonical mappings only (the module owner's own conversion); a community mapping is treated as unmapped")
 	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform(s) for conversion, format: os/arch; comma-separated for a list (windows/amd64,linux/amd64,darwin/amd64), which with -stdlib emits the multi-platform (layout L3) corpus — one GOOS per target")
 	platformCensusCmd := commandLine.String("platform-census", "", "With -stdlib and two or more -platforms targets: convert once per target into an isolated seeded staging root under this directory, classify the emissions (shared/variant/partial/exclusive) and write platform-manifest.json there. Emits NO corpus output")
 	refCensusCmd := commandLine.String("ref-census", "", "With -stdlib: run the ж-box A1 ref-lowering classification census (analysis only, never emits) over the standard library — once per -platforms target — and write the JSON report to this path. See docs/phase4/DESIGN-zh-box-reduction.md §9 stage A1")
@@ -355,6 +361,11 @@ Examples:
   go2cs -recurse=module module_dir        # Convert only the module's own packages (deps referenced, not converted)
   go2cs -recurse=nuget module_dir         # Same, but reference the go2cs stdlib from NuGet (go.*, no deploy-core)
   go2cs -recurse=module,nuget module_dir  # Values combine: module-only scope with NuGet references
+  go2cs -recurse=nuget -nuget-map mine.txt module_dir
+                                          # Resolve NuGet mappings: mine.txt answers the modules it names,
+                                          # nugetgo.net the rest; locked in go2cs.nuget.lock and reported
+  go2cs -recurse=nuget -nuget-map mine.txt -nuget-map-only module_dir
+                                          # Use mine.txt only; nugetgo.net is never fetched
   go2cs -stdlib -allow-stale-converter    # Proceed on a DELIBERATELY pinned binary (an A/B against a preserved go2cs);
                                           # without it, -stdlib and -tests refuse to run a binary older than their sources
   go2cs -stdlib -comments -tags purego    # Explicit form of the default: the portable Go crypto over the assembly ones
@@ -447,6 +458,25 @@ Examples:
 		os.Setenv("GOROOT", *goRootCmd)
 	}
 
+	// The -nuget-map family (nugetMap.go). Every one of these flags is refused BY NAME without
+	// -recurse=nuget, where it would do nothing at all (COORD ruling 2026-10-02).
+	nugetMapOpts, err := newNuGetMapOptions(nugetMapVals, nugetMapExcludeVals, *nugetMapOnlyCmd, *nugetMapRefreshCmd, *nugetMapCanonicalOnlyCmd)
+
+	if err != nil {
+		log.Fatalf("%v\n", err)
+	}
+
+	var nugetMapGiven []string
+	commandLine.Visit(func(f *flag.Flag) {
+		if strings.HasPrefix(f.Name, "nuget-map") {
+			nugetMapGiven = append(nugetMapGiven, "-"+f.Name)
+		}
+	})
+
+	if err := validateNuGetMapFlags(nugetMapGiven, nugetMapOpts, recurseVal.enabled && recurseVal.nuget); err != nil {
+		log.Fatalf("%v\n", err)
+	}
+
 	// -recurse=nuget references a PUBLISHED corpus, which exists for exactly one Go release. Converting
 	// a different release's standard library against it yields a project that cannot restore, and the
 	// user meets that as NU1101s naming packages they never imported. Refuse while the diagnosis is
@@ -510,6 +540,7 @@ Examples:
 		recurse:             recurseVal.enabled,
 		moduleOnly:          recurseVal.moduleOnly,
 		nugetRefs:           recurseVal.nuget,
+		nugetMap:            nugetMapOpts,
 		targetPlatform:      targetPlatforms[0],
 		targetPlatforms:     targetPlatforms,
 		platformCensusDir:   platformCensusDir,
