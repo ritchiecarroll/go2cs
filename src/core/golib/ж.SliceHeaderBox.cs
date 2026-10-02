@@ -112,8 +112,7 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
             return;
 
         Type element = source.GetGenericArguments()[0];
-        FieldInfo[] fields = header
-            .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        FieldInfo[] fields = GoFieldMetadata.InstanceFields(header)
             .OrderBy(field => field.MetadataToken)
             .ToArray();
 

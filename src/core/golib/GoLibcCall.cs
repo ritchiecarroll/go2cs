@@ -242,7 +242,7 @@ public static unsafe class GoLibcCall
         if (!slot.TryLoadThrough(out object? value) || value is null)
             throw new InvalidOperationException($"go2cs: libcCall({symbol}): the argument box is nil");
 
-        FieldInfo[] fields = argsType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        FieldInfo[] fields = GoFieldMetadata.InstanceFields(argsType);
         Array.Sort(fields, static (x, y) => x.MetadataToken.CompareTo(y.MetadataToken));
 
         Span<nuint> args = stackalloc nuint[MaxArgs];
