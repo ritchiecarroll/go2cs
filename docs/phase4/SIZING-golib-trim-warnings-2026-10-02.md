@@ -199,3 +199,40 @@ with whole-line comments filtered; the generic-declaration chain counts are a he
 are lower bounds. Statements about what the trimmer or Native AOT keeps are from knowledge of the
 runtime, not from a publish, and are marked where they carry a conclusion.
 
+
+## Amendment, 2026-10-02 — two claims above did not survive a build
+
+The sentences above stand as written; this block corrects them. Steps 1 and 2 of the cut order were
+built on `claude/g-trim-annotations` (golib Release, `--no-incremental`, the same tree before and
+after), and the build read two of this record's claims differently.
+
+1. **`ZeroFacts<T>` is not a true annotation.** Claimed: `builtin.cs`'s IL2090 on `ZeroFacts<T>` is
+   class (i), cleared by `PublicParameterlessConstructor` on `T` of `ZeroFacts<T>` and
+   `ZeroIsDefault<T>`. Read by the build: the annotation clears that record and raises a new IL2091
+   in `array<T>` at its `ZeroIsDefault` call, because `array<T>`'s own `T` cannot satisfy it. A
+   relocation, net 0. It clears only together with `array<T>.GoZeroLike`'s suppression (step 4), or
+   by routing `ZeroFacts<T>` through `GoZeroFactory<T>`. The routing was not taken: `ZeroFacts<T>`
+   caches its answer once per closed type, and a factory registered by a module initializer could be
+   read before that initializer has run, which would cache the wrong answer for the life of the
+   process.
+2. **Naming the generic definition by `typeof` clears 1 of the 3 records, not 3.** Claimed: three
+   IL2055 records in `GoReflect.TypeLayout.cs` may clear with no attribute. Read by the build: the
+   two-to-seven-arity `ValueTuple` call clears; the eight-arity call keeps its record, because
+   `TRest`'s `struct` constraint is itself a constructor requirement; the variadic-family site
+   indexes an array of definitions and was not attempted.
+
+3. **The *Totals* table miscounted class (i).** Its own rows name four class (i) records
+   (`builtin.cs` `ZeroFacts<T>` and `TryTypeAssert<T>`, and the two in
+   `builtin.TypeParamConversions.cs`), not five; the suppressions were therefore 72, not 71.
+
+**Corrected totals, by what the build cleared.**
+
+| how | records | which |
+|---|---|---|
+| a true annotation | 3 | `ConvertToType`, `ConvertToUInt64`, `TryTypeAssert<T>` |
+| a removal at the cause, no attribute | 6 | `FieldTypes`' parameter annotation (4), `NilType<T>` deleted as dead (1), the `ValueTuple` definitions named by `typeof` (1) |
+
+Steps 1 and 2 clear **9 records and 69 remain**, at 61 source positions. Of the 69, one takes a
+requires-attribute (`TryTypeAssert(object, Type, out object)`; the other class (ii) record was
+`NilType<T>`) and 68 are suppressions, now including `ZeroFacts<T>` and the two IL2055 records that
+stay.
