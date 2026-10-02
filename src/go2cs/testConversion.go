@@ -37,6 +37,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/ritchiecarroll/hashset"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -481,7 +482,7 @@ func recordsRequireProductionAnchor(productionClassName, productionPackageName s
 		names = append(names, proxy[0], proxy[1])
 	}
 
-	for _, conversions := range []map[string]HashSet[string]{implicitConversions, invertedImplicitConversions, indirectImplicitConversions} {
+	for _, conversions := range []map[string]hashset.HashSet[string]{implicitConversions, invertedImplicitConversions, indirectImplicitConversions} {
 		for sourceType, targetTypes := range conversions {
 			names = append(names, sourceType)
 			names = append(names, targetTypes.Keys()...)
@@ -530,7 +531,7 @@ func recordsRequireProductionMutation(productionClassName, productionPackageName
 			strings.Contains(name, shadowAliasPrefix)
 	}
 
-	for _, conversions := range []map[string]HashSet[string]{implicitConversions, invertedImplicitConversions, indirectImplicitConversions} {
+	for _, conversions := range []map[string]hashset.HashSet[string]{implicitConversions, invertedImplicitConversions, indirectImplicitConversions} {
 		for sourceType, targetTypes := range conversions {
 			for targetType := range targetTypes {
 				if pointerBoxRecordEitherOrientation(sourceType, targetType) {
@@ -790,7 +791,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	compileExcluded := selectCompileExcludedTestFiles(internal, external)
 
 	projectName, projectNamespace := getProjectName(inputPath, options)
-	supported := NewHashSet(supportedTestCapabilities())
+	supported := hashset.NewHashSet(supportedTestCapabilities())
 	testInfoPath := filepath.Join(outputPath, testPackageInfoFileName)
 
 	model := selectTestProjectModel(internal, external)
@@ -1005,7 +1006,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	capabilities := supportedTestCapabilities()
 	required := requiredCapabilities.Keys()
 	sort.Strings(required)
-	unsupported := NewHashSet(required)
+	unsupported := hashset.NewHashSet(required)
 	unsupported.ExceptWith(capabilities)
 	unsupportedList := unsupported.Keys()
 	sort.Strings(unsupportedList)
@@ -1050,9 +1051,9 @@ type testVariantConversionResult struct {
 	declarations         []testDeclaration
 	testMain             *testDeclaration
 	outputFiles          []string
-	allImports           HashSet[string]
-	requiredCapabilities HashSet[string]
-	includedSources      HashSet[string]
+	allImports           hashset.HashSet[string]
+	requiredCapabilities hashset.HashSet[string]
+	includedSources      hashset.HashSet[string]
 }
 
 // convertTestVariants converts the package's test variants under the given test-project model:
@@ -1060,15 +1061,15 @@ type testVariantConversionResult struct {
 // collected metadata into the model's anchor file(s). A reference model returns
 // errProductionAnchoredRecords when records require a closed production-type mutation; the caller
 // then re-runs the pass under testProjectRecompile (the go/packages load remains shared).
-func convertTestVariants(model testProjectModel, production, internal, external *packages.Package, compileExcluded map[string]bool, inputPath, outputPath, projectNamespace string, supported HashSet[string], options Options) (testVariantConversionResult, error) {
+func convertTestVariants(model testProjectModel, production, internal, external *packages.Package, compileExcluded map[string]bool, inputPath, outputPath, projectNamespace string, supported hashset.HashSet[string], options Options) (testVariantConversionResult, error) {
 	internalUnitListed := false
 
 	result := testVariantConversionResult{
 		declarations:         make([]testDeclaration, 0),
 		outputFiles:          make([]string, 0),
-		allImports:           HashSet[string]{},
-		requiredCapabilities: HashSet[string]{},
-		includedSources:      HashSet[string]{},
+		allImports:           hashset.HashSet[string]{},
+		requiredCapabilities: hashset.HashSet[string]{},
+		includedSources:      hashset.HashSet[string]{},
 	}
 
 	// Collected across BOTH variants (result.outputFiles carries csproj <Compile> names, not
@@ -1107,7 +1108,7 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 
 	// The bridge's declared-name set drives the white-box record split: a BARE record name in
 	// this set is a bridge-declared type whose generated partial must merge inside the bridge.
-	whiteboxBridgeTypeNames = HashSet[string]{}
+	whiteboxBridgeTypeNames = hashset.HashSet[string]{}
 	if model == testProjectWhiteboxReference {
 		whiteboxBridgeTypeNames = collectWhiteboxBridgeTypeNames(internal)
 	}
@@ -1146,7 +1147,7 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 	testTypeRenames = make(map[types.Object]bool)
 	whiteboxInternalTestObjects = collectWhiteboxInternalTestObjects(internal)
 
-	whiteboxBridgeDeclaredNames = HashSet[string]{}
+	whiteboxBridgeDeclaredNames = hashset.HashSet[string]{}
 	if model == testProjectWhiteboxReference {
 		whiteboxBridgeDeclaredNames = collectWhiteboxBridgeDeclaredNames(internal)
 	}
@@ -1539,14 +1540,14 @@ func metadataClassPrefix(namespace, goPackageName string) string {
 // one of these names cannot bind (CS0104) — see testAmbiguousLocalTypeNames. The Go name and its
 // core-sanitized C# spelling are both recorded: membership is tested against an EMITTED name, and
 // an entry that can never be emitted is inert. Empty unless BOTH variants exist.
-func ambiguousVariantTypeNames(internal, external *packages.Package) HashSet[string] {
-	ambiguous := HashSet[string]{}
+func ambiguousVariantTypeNames(internal, external *packages.Package) hashset.HashSet[string] {
+	ambiguous := hashset.HashSet[string]{}
 
 	if internal == nil || external == nil || internal.Types == nil || external.Types == nil {
 		return ambiguous
 	}
 
-	externalTypeNames := HashSet[string]{}
+	externalTypeNames := hashset.HashSet[string]{}
 
 	for _, name := range external.Types.Scope().Names() {
 		if _, ok := external.Types.Scope().Lookup(name).(*types.TypeName); ok {
@@ -1607,7 +1608,7 @@ func referenceModelTestPackageInfoSeed(projectNamespace, testClassName, goPackag
 	b.WriteString("using go;\r\n")
 
 	staticClasses := []string{testClassName}
-	seenStatic := HashSet[string]{}
+	seenStatic := hashset.HashSet[string]{}
 	for _, className := range staticClasses {
 		if className == "" || seenStatic.Contains(className) {
 			continue
@@ -1741,7 +1742,7 @@ func collectSiblingTestClosure(inputPath string, options Options) {
 		return
 	}
 
-	closure := HashSet[string]{}
+	closure := hashset.HashSet[string]{}
 
 	var walk func(pkg *packages.Package)
 
@@ -2200,7 +2201,7 @@ func markCompileExcludedDeclaration(declaration *testDeclaration, inputPath stri
 //
 // The returned map is the excluded set: a key per excluded file, its value the bridged names that
 // excluded an EXTERNAL file (nil for the internal variant's own files).
-func markHandOwnHostExcludedTestFiles(internal, external *packages.Package, excluded map[string]bool, hostDeclared HashSet[string]) map[string][]string {
+func markHandOwnHostExcludedTestFiles(internal, external *packages.Package, excluded map[string]bool, hostDeclared hashset.HashSet[string]) map[string][]string {
 	added := map[string][]string{}
 
 	if internal == nil {
@@ -2351,8 +2352,8 @@ func markHandOwnHostExcludedTestFiles(internal, external *packages.Package, excl
 // `public static void Run(…)`, `public partial struct T {`. Read as TEXT, deliberately: the host is
 // C#, go/types never sees it, and the only question asked of it is "is this exported name
 // declared". An unreadable directory answers the empty set, which exempts nothing.
-func handOwnHostDeclaredNames(outputPath string) HashSet[string] {
-	names := NewHashSet[string](nil)
+func handOwnHostDeclaredNames(outputPath string) hashset.HashSet[string] {
+	names := hashset.NewHashSet[string](nil)
 
 	files, err := filepath.Glob(filepath.Join(outputPath, "*.cs"))
 	if err != nil {
@@ -2713,7 +2714,7 @@ func followPublishedAliasChain(targets map[string]string, name string) (string, 
 		return "", "", false
 	}
 
-	visited := NewHashSet([]string{name})
+	visited := hashset.NewHashSet([]string{name})
 
 	for {
 		next, chained := targets[target]
@@ -2744,7 +2745,7 @@ func followPublishedAliasChain(targets map[string]string, name string) (string, 
 // and every direct unit-test call.
 type productionSeed struct {
 	// liftedTypeNames — the anonymous-struct/interface lifts already nested in the class.
-	liftedTypeNames HashSet[string]
+	liftedTypeNames hashset.HashSet[string]
 
 	// dynamicTypeNames — production's packageDynamicTypeNames (signature -> lifted name) for a
 	// purely-anonymous struct/interface with no Go-level alias declaration. See
@@ -2773,7 +2774,7 @@ type productionSeed struct {
 	// rule rather than the exception: nearly every test file re-imports something its production
 	// half already forced. The PRODUCTION half owns the hook whenever its file is in the
 	// compilation, because that file is the one this run cannot rewrite.
-	importForces HashSet[string]
+	importForces hashset.HashSet[string]
 
 	// initFuncs — how many Go `func init()` declarations the class already carries. Go allows any
 	// number per package and C# needs a distinct name for each, so the first takes `init` and the
@@ -2792,7 +2793,7 @@ type productionSeed struct {
 // Files convert SEQUENTIALLY in pkg.Syntax order for byte-reproducible output, mirroring
 // processConversion (the per-file visitors share package-level state claimed at visit time; the
 // branch's concurrent goroutines reproduced exactly the nondeterminism master removed).
-func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPath, projectNamespace string, seed productionSeed, options Options) ([]string, HashSet[string], error) {
+func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPath, projectNamespace string, seed productionSeed, options Options) ([]string, hashset.HashSet[string], error) {
 	resetPackageState(pkg)
 	packageNamespace = projectNamespace
 	currentPackageGorootVendored = isGorootVendoredDir(pkg.Dir, options.goRoot)
@@ -2909,7 +2910,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	}
 
 	if len(selected) == 0 {
-		return nil, HashSet[string]{}, nil
+		return nil, hashset.HashSet[string]{}, nil
 	}
 
 	// A `_test.go` in the variant's syntax that the caller did NOT select for emission is a
@@ -3123,7 +3124,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// the emission PATHS up (compileNames are csproj-relative) for the caller's single pass.
 	testAdapterResolveNames = append(testAdapterResolveNames, resolveNames...)
 
-	return compileNames, NewHashSet(projectImports.Keys()), nil
+	return compileNames, hashset.NewHashSet(projectImports.Keys()), nil
 }
 
 // appendExternalTestPackageClass appends the external test package's [GoPackage] partial class
@@ -3187,24 +3188,24 @@ func appendExternalTestPackageClass(testInfoPath, packageNamespace, productionPa
 // TWO passes with different anchors (B4/B5) — the writer reads the live globals, so each pass
 // installs its partition.
 type conversionRecordSet struct {
-	interfaceImplements map[string]HashSet[string]
-	promotedImplements  map[string]HashSet[string]
+	interfaceImplements map[string]hashset.HashSet[string]
+	promotedImplements  map[string]hashset.HashSet[string]
 	proxies             map[string][2]string
-	implicitConvs       map[string]HashSet[string]
-	invertedConvs       map[string]HashSet[string]
-	indirectConvs       map[string]HashSet[string]
+	implicitConvs       map[string]hashset.HashSet[string]
+	invertedConvs       map[string]hashset.HashSet[string]
+	indirectConvs       map[string]hashset.HashSet[string]
 	numericConvs        map[string]map[string]string
 	indirectNumerics    map[string]map[string]string
 }
 
 func newConversionRecordSet() conversionRecordSet {
 	return conversionRecordSet{
-		interfaceImplements: make(map[string]HashSet[string]),
-		promotedImplements:  make(map[string]HashSet[string]),
+		interfaceImplements: make(map[string]hashset.HashSet[string]),
+		promotedImplements:  make(map[string]hashset.HashSet[string]),
 		proxies:             make(map[string][2]string),
-		implicitConvs:       make(map[string]HashSet[string]),
-		invertedConvs:       make(map[string]HashSet[string]),
-		indirectConvs:       make(map[string]HashSet[string]),
+		implicitConvs:       make(map[string]hashset.HashSet[string]),
+		invertedConvs:       make(map[string]hashset.HashSet[string]),
+		indirectConvs:       make(map[string]hashset.HashSet[string]),
 		numericConvs:        make(map[string]map[string]string),
 		indirectNumerics:    make(map[string]map[string]string),
 	}
@@ -3332,7 +3333,7 @@ func splitExternalVariantRecords(productionClassName string, handOwnHost bool) (
 	testAnchored = newConversionRecordSet()
 	productionAnchored = newConversionRecordSet()
 
-	splitImplements := func(source map[string]HashSet[string], test, production map[string]HashSet[string]) {
+	splitImplements := func(source map[string]hashset.HashSet[string], test, production map[string]hashset.HashSet[string]) {
 		for ifaceName, implementations := range source {
 			for implementation := range implementations {
 				target := production
@@ -3344,7 +3345,7 @@ func splitExternalVariantRecords(productionClassName string, handOwnHost bool) (
 				if existing, ok := target[ifaceName]; ok {
 					existing.Add(implementation)
 				} else {
-					target[ifaceName] = NewHashSet([]string{implementation})
+					target[ifaceName] = hashset.NewHashSet([]string{implementation})
 				}
 			}
 		}
@@ -3361,7 +3362,7 @@ func splitExternalVariantRecords(productionClassName string, handOwnHost bool) (
 		}
 	}
 
-	splitConversions := func(source map[string]HashSet[string], test, production map[string]HashSet[string]) {
+	splitConversions := func(source map[string]hashset.HashSet[string], test, production map[string]hashset.HashSet[string]) {
 		for sourceType, targetTypes := range source {
 			for targetType := range targetTypes {
 				target := production
@@ -3373,7 +3374,7 @@ func splitExternalVariantRecords(productionClassName string, handOwnHost bool) (
 				if existing, ok := target[sourceType]; ok {
 					existing.Add(targetType)
 				} else {
-					target[sourceType] = NewHashSet([]string{targetType})
+					target[sourceType] = hashset.NewHashSet([]string{targetType})
 				}
 			}
 		}
@@ -3485,7 +3486,7 @@ func internalTestPackageInfoSeed(projectNamespace, productionClassName, bridgeCl
 // unqualified, CS0246 with no test host and all 106 verdicts empty. (Write-time qualification
 // cannot repair it: qualifyAmbiguousTestTypeRefs roots an ambiguous bare name at the file it is
 // ALREADY being written into, so a mis-anchored record is merely qualified to the wrong variant.)
-func splitWhiteboxVariantRecords(bridgeTypeNames HashSet[string], bridgeVariant bool) (bridgeAnchored, testAnchored conversionRecordSet) {
+func splitWhiteboxVariantRecords(bridgeTypeNames hashset.HashSet[string], bridgeVariant bool) (bridgeAnchored, testAnchored conversionRecordSet) {
 	bridgeAnchored = newConversionRecordSet()
 	testAnchored = newConversionRecordSet()
 
@@ -3501,7 +3502,7 @@ func splitWhiteboxVariantRecords(bridgeTypeNames HashSet[string], bridgeVariant 
 		return !strings.Contains(name, ".") && bridgeTypeNames.Contains(strings.TrimPrefix(name, ShadowVarMarker))
 	}
 
-	splitImplements := func(source map[string]HashSet[string], bridge, test map[string]HashSet[string]) {
+	splitImplements := func(source map[string]hashset.HashSet[string], bridge, test map[string]hashset.HashSet[string]) {
 		for ifaceName, implementations := range source {
 			for implementation := range implementations {
 				target := test
@@ -3517,7 +3518,7 @@ func splitWhiteboxVariantRecords(bridgeTypeNames HashSet[string], bridgeVariant 
 				if existing, ok := target[ifaceName]; ok {
 					existing.Add(implementation)
 				} else {
-					target[ifaceName] = NewHashSet([]string{implementation})
+					target[ifaceName] = hashset.NewHashSet([]string{implementation})
 				}
 			}
 		}
@@ -3534,7 +3535,7 @@ func splitWhiteboxVariantRecords(bridgeTypeNames HashSet[string], bridgeVariant 
 		}
 	}
 
-	splitConversions := func(source map[string]HashSet[string], bridge, test map[string]HashSet[string]) {
+	splitConversions := func(source map[string]hashset.HashSet[string], bridge, test map[string]hashset.HashSet[string]) {
 		for sourceType, targetTypes := range source {
 			for targetType := range targetTypes {
 				target := test
@@ -3546,7 +3547,7 @@ func splitWhiteboxVariantRecords(bridgeTypeNames HashSet[string], bridgeVariant 
 				if existing, ok := target[sourceType]; ok {
 					existing.Add(targetType)
 				} else {
-					target[sourceType] = NewHashSet([]string{targetType})
+					target[sourceType] = hashset.NewHashSet([]string{targetType})
 				}
 			}
 		}
@@ -3589,7 +3590,7 @@ func splitWhiteboxVariantRecords(bridgeTypeNames HashSet[string], bridgeVariant 
 // Returns the unit's file name when it was written, or "" when this variant contributed no
 // bridge-anchored records. bridgeVariant states which variant collected the live records — the
 // bridge's declared-name set only resolves ITS own bare spellings (splitWhiteboxVariantRecords).
-func writeWhiteboxVariantMetadata(testInfoPath, outputPath, productionClassName, bridgeClassName, goPackageName, internalAnchor, testAnchor string, bridgeTypeNames HashSet[string], bridgeVariant bool) (string, error) {
+func writeWhiteboxVariantMetadata(testInfoPath, outputPath, productionClassName, bridgeClassName, goPackageName, internalAnchor, testAnchor string, bridgeTypeNames hashset.HashSet[string], bridgeVariant bool) (string, error) {
 	bridgeAnchored, testAnchored := splitWhiteboxVariantRecords(bridgeTypeNames, bridgeVariant)
 
 	// Both anchored writes below are reference-model files: their anchor class IS the local
@@ -3625,7 +3626,7 @@ func writeWhiteboxVariantMetadata(testInfoPath, outputPath, productionClassName,
 		savedAccess := packageEmittedTypeAccess
 		importedTypeAliases = map[string]string{}
 		exportedTypeAliases = map[string]string{}
-		packageEmittedTypeAccess = HashSet[string]{}
+		packageEmittedTypeAccess = hashset.HashSet[string]{}
 
 		bridgeAnchored.install()
 		metadataAnchorClassPrefix = internalAnchor
@@ -3730,7 +3731,7 @@ func writeExternalVariantMetadata(testInfoPath, outputPath, productionPackageNam
 	// accessibility entries were written to the test-anchored unit above and must NOT reach this
 	// file's production-class section; clearing the set leaves the merge to preserve exactly the
 	// production + internal-variant entries already there.
-	packageEmittedTypeAccess = HashSet[string]{}
+	packageEmittedTypeAccess = hashset.HashSet[string]{}
 
 	productionAnchored.install()
 
@@ -3749,7 +3750,7 @@ func writeExternalVariantMetadata(testInfoPath, outputPath, productionPackageNam
 // explicit status — nothing is silently absent. Capability gating is PER TEST (F4): a test whose
 // transitive call closure requires capabilities outside the supported list blocks itself
 // (status "unsupported" + reason), not its package.
-func discoverTestDeclarations(pkg *packages.Package, entries []FileEntry, inputPath string, capabilities testCapabilityAnalysis, supported HashSet[string]) ([]testDeclaration, *testDeclaration) {
+func discoverTestDeclarations(pkg *packages.Package, entries []FileEntry, inputPath string, capabilities testCapabilityAnalysis, supported hashset.HashSet[string]) ([]testDeclaration, *testDeclaration) {
 	selected := make(map[*ast.File]string, len(entries))
 	for _, entry := range entries {
 		selected[entry.file] = entry.filePath
@@ -3832,8 +3833,8 @@ func discoverTestDeclarations(pkg *packages.Package, entries []FileEntry, inputP
 
 // applyCapabilityGate downgrades an included declaration to disclosed-unsupported when its
 // transitive capability requirements exceed the supported list.
-func applyCapabilityGate(entry *testDeclaration, requirements HashSet[string], supported HashSet[string]) {
-	unsupported := NewHashSet(requirements.Keys())
+func applyCapabilityGate(entry *testDeclaration, requirements hashset.HashSet[string], supported hashset.HashSet[string]) {
+	unsupported := hashset.NewHashSet(requirements.Keys())
 	unsupported.ExceptWith(supported.Keys())
 
 	if unsupported.IsEmpty() {
@@ -4211,7 +4212,7 @@ func unsupportedRuntimeCapability(fn *types.Func) (string, bool) {
 // test that stores it; cross-package helpers (e.g. internal/testenv) are outside the graph and
 // gate through their own package's conversion instead.
 type testCapabilityAnalysis struct {
-	direct   map[*types.Func]HashSet[string]
+	direct   map[*types.Func]hashset.HashSet[string]
 	referees map[*types.Func]map[*types.Func]bool
 }
 
@@ -4222,7 +4223,7 @@ type testCapabilityAnalysis struct {
 // of sailing through.
 func analyzeTestingCapabilities(pkg *packages.Package) testCapabilityAnalysis {
 	analysis := testCapabilityAnalysis{
-		direct:   make(map[*types.Func]HashSet[string]),
+		direct:   make(map[*types.Func]hashset.HashSet[string]),
 		referees: make(map[*types.Func]map[*types.Func]bool),
 	}
 
@@ -4238,7 +4239,7 @@ func analyzeTestingCapabilities(pkg *packages.Package) testCapabilityAnalysis {
 				continue
 			}
 
-			direct := HashSet[string]{}
+			direct := hashset.HashSet[string]{}
 			referees := make(map[*types.Func]bool)
 
 			if fn.Body != nil {
@@ -4296,8 +4297,8 @@ func analyzeTestingCapabilities(pkg *packages.Package) testCapabilityAnalysis {
 
 // requiredFor returns the transitive testing.* capability requirements of fn — its own direct
 // usage plus that of every same-package function reachable through the reference graph.
-func (a testCapabilityAnalysis) requiredFor(fn *types.Func) HashSet[string] {
-	required := HashSet[string]{}
+func (a testCapabilityAnalysis) requiredFor(fn *types.Func) hashset.HashSet[string] {
+	required := hashset.HashSet[string]{}
 	visited := make(map[*types.Func]bool)
 
 	var walk func(current *types.Func)
@@ -4452,7 +4453,7 @@ var testProjectFixedReferences = []string{
 }
 
 func writeTestProject(projectFile, projectName, namespace, importPath string, model testProjectModel, productionFiles, testFiles, fixtures, dependencies []string, options Options) error {
-	references := HashSet[string]{}
+	references := hashset.HashSet[string]{}
 
 	for _, fixed := range testProjectFixedReferences {
 		// A fixed reference that IS the package under test duplicates the production reference
@@ -4685,7 +4686,7 @@ func testProjectAliasScanFiles(model testProjectModel, outputPath, testInfoPath 
 }
 
 func aliasReferenceImports(infoFiles []string, productionPkgPath string, directDependencies []string) []string {
-	direct := NewHashSet(directDependencies)
+	direct := hashset.NewHashSet(directDependencies)
 	tokens := make(map[string][]string)
 	bareTokens := make(map[string][]string)
 
@@ -4713,7 +4714,7 @@ func aliasReferenceImports(infoFiles []string, productionPkgPath string, directD
 		}
 	}
 
-	found := HashSet[string]{}
+	found := hashset.HashSet[string]{}
 
 	for _, infoFile := range infoFiles {
 		data, err := os.ReadFile(infoFile)
@@ -5055,8 +5056,8 @@ func referenceScanTargets(line string) []string {
 // new and needs no separate visit: an interface implements its base's bases too, so those candidates
 // are found directly. Output is a sorted set, so the map-ordered walk stays deterministic.
 func declarationClosureImports(roots []*packages.Package, compileExcluded map[string]bool, referenced []string, recordedBases map[string][]string, foreignBases func(importPath string) map[string][]string) []string {
-	found := HashSet[string]{}
-	seen := NewHashSet(referenced)
+	found := hashset.HashSet[string]{}
+	seen := hashset.NewHashSet(referenced)
 	visited := map[*types.Named]bool{}
 
 	var queue []*types.Named
@@ -5112,7 +5113,7 @@ func declarationClosureImports(roots []*packages.Package, compileExcluded map[st
 	// `<pkg>_test`, which resolves to no importable package at all — a `bytes_test` struct literal
 	// whose field type is declared beside it would fail the conversion outright ("package
 	// bytes_test is not in std"), by design (F14b: a dependency that cannot resolve is loud).
-	rootPaths := HashSet[string]{}
+	rootPaths := hashset.HashSet[string]{}
 
 	for _, root := range roots {
 		if root != nil {
@@ -6191,7 +6192,7 @@ func parentRelativeFixturePaths(inputPath string) ([]string, error) {
 		return nil, err
 	}
 
-	seen := HashSet[string]{}
+	seen := hashset.HashSet[string]{}
 	paths := make([]string, 0)
 
 	for _, testSource := range testSources {
@@ -6329,7 +6330,7 @@ func copyTestFixtures(inputPath, outputPath string) (copied []string, linkStaged
 	return copied, linkStaged, nil
 }
 
-func classifyTestSources(inputPath string, included HashSet[string], compileExcluded map[string]bool, handOwnHostExcluded map[string][]string, external *packages.Package) ([]testSource, error) {
+func classifyTestSources(inputPath string, included hashset.HashSet[string], compileExcluded map[string]bool, handOwnHostExcluded map[string][]string, external *packages.Package) ([]testSource, error) {
 	matches, err := filepath.Glob(filepath.Join(inputPath, "*_test.go"))
 	if err != nil {
 		return nil, err
@@ -7011,7 +7012,7 @@ func manifestCapabilityBlock(manifest testManifest) []string {
 		}
 	}
 
-	blockedCapabilities := HashSet[string]{}
+	blockedCapabilities := hashset.HashSet[string]{}
 	hasIncludedTest := false
 	hasBlockedTest := false
 
@@ -8664,7 +8665,7 @@ func matchTerminalStatusesWithRecords(names []string, goResults, csResults map[s
 	// 3,243 mismatches that say nothing about the converted code. The C# side is pinned by
 	// signature in BOTH shapes, so the root admission never widens on the half that can be
 	// strict.
-	disclosureRoots := HashSet[string]{}
+	disclosureRoots := hashset.HashSet[string]{}
 	for name, disclosure := range disclosures {
 		// The compiler-property class roots on its ONE shape, Go pass / C# skip with the pinned
 		// signature in the C# side's own skip output: the test skipped at its own self-check before
@@ -8701,8 +8702,8 @@ func matchTerminalStatusesWithRecords(names []string, goResults, csResults map[s
 		}
 	}
 
-	mismatchNames := HashSet[string]{}
-	disclosedNames := HashSet[string]{}
+	mismatchNames := hashset.HashSet[string]{}
+	disclosedNames := hashset.HashSet[string]{}
 
 	for _, name := range ordered {
 		goStatus, goOK := goResults[name]
@@ -8853,7 +8854,7 @@ func matchTerminalStatusesWithRecords(names []string, goResults, csResults map[s
 
 // underDisclosureRoot reports whether name is a strict descendant of a signature-matched
 // disclosure root (see the withdrawal rule in matchTerminalStatuses).
-func underDisclosureRoot(name string, roots HashSet[string]) bool {
+func underDisclosureRoot(name string, roots hashset.HashSet[string]) bool {
 	for {
 		idx := strings.LastIndex(name, "/")
 
@@ -8893,7 +8894,7 @@ func flavorExcludedTestDeclarations(inputPath string, options Options, declared 
 		return nil
 	}
 
-	seen := HashSet[string]{}
+	seen := hashset.HashSet[string]{}
 	for _, decl := range declared {
 		seen.Add(decl.Name)
 	}
@@ -8998,7 +8999,7 @@ func hasSingleTestingParam(fn *ast.FuncDecl, typeName string) bool {
 // seed-corpus runs land here too); subtest names roll up to their top-level parent. Any gap fails
 // the comparison — a package cannot validate past a test the manifest never accounted for.
 func manifestCensusGaps(goResults map[string]string, manifest testManifest) []string {
-	declared := HashSet[string]{}
+	declared := hashset.HashSet[string]{}
 	for _, test := range manifest.Tests {
 		declared.Add(test.Name)
 	}
@@ -9006,7 +9007,7 @@ func manifestCensusGaps(goResults map[string]string, manifest testManifest) []st
 		declared.Add(manifest.TestMain.Name)
 	}
 
-	gaps := HashSet[string]{}
+	gaps := hashset.HashSet[string]{}
 	for name := range goResults {
 		topLevelName, _, _ := strings.Cut(name, "/")
 		if !declared.Contains(topLevelName) {
@@ -9229,7 +9230,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	pairAddressVariantNames(goResults, csResults, csOutputs, csRecords)
 
 	names := make([]string, 0, len(goResults)+len(csResults))
-	seen := HashSet[string]{}
+	seen := hashset.HashSet[string]{}
 	for name := range goResults {
 		if seen.Add(name) {
 			names = append(names, name)
@@ -9478,7 +9479,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 			"re-run WITHOUT -test-filter to bank a row.\n", options.testFilter, manifest.PackageImportPath)
 	}
 	if len(disclosed) > 0 {
-		classes := HashSet[string]{}
+		classes := hashset.HashSet[string]{}
 		for _, name := range disclosed {
 			// A disclosed ancestor rolled up from its children has no entry, and adds its empty class as
 			// it always has; a two-half entry adds each half's.
@@ -9713,7 +9714,7 @@ func capabilityGatedDeclarations(goResults map[string]string, manifest testManif
 }
 
 func eligibleTerminalTestResults(results map[string]string, manifest testManifest) map[string]string {
-	eligible := HashSet[string]{}
+	eligible := hashset.HashSet[string]{}
 	for _, test := range manifest.Tests {
 		if test.Kind == "test" && test.Status == "included" {
 			eligible.Add(test.Name)

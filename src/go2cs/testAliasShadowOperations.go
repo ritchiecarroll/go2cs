@@ -20,6 +20,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // siblingTestSignals carries what a PRODUCTION conversion must know about the package's build-
@@ -70,9 +72,9 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 		return siblingTestSignals{}
 	}
 
-	names := HashSet[string]{}
-	addressed := HashSet[string]{}
-	publicized := HashSet[string]{}
+	names := hashset.HashSet[string]{}
+	addressed := hashset.HashSet[string]{}
+	publicized := hashset.HashSet[string]{}
 	hasInternal := false
 
 	for _, entry := range entries {
@@ -129,7 +131,7 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 // production package-scope name therefore denotes exactly that object, with no shadowing to
 // disambiguate. A qualified `pkg.T` is skipped: another package's type is never this package's to
 // publicize.
-func collectSiblingPublicizedTypeNames(file *ast.File, names HashSet[string]) {
+func collectSiblingPublicizedTypeNames(file *ast.File, names hashset.HashSet[string]) {
 	for _, decl := range file.Decls {
 		switch decl := decl.(type) {
 		case *ast.GenDecl:
@@ -220,7 +222,7 @@ func siblingReceiverIsExported(recv *ast.FieldList) bool {
 
 // addSiblingSignatureTypeNames walks a signature's parameters and results, which is the
 // CS0050/CS0051 domain.
-func addSiblingSignatureTypeNames(sig *ast.FuncType, names HashSet[string]) {
+func addSiblingSignatureTypeNames(sig *ast.FuncType, names hashset.HashSet[string]) {
 	if sig == nil {
 		return
 	}
@@ -242,7 +244,7 @@ func addSiblingSignatureTypeNames(sig *ast.FuncType, names HashSet[string]) {
 // The peeling mirrors collectUnexportedNamedTypes: pointer, slice/array, map, channel, ellipsis and
 // through a func type's own signature, so a `[]func(hidden)` field reaches `hidden` exactly as the
 // production walk does.
-func addSiblingUnexportedTypeNames(expr ast.Expr, names HashSet[string]) {
+func addSiblingUnexportedTypeNames(expr ast.Expr, names hashset.HashSet[string]) {
 	switch expr := expr.(type) {
 	case *ast.Ident:
 		if !expr.IsExported() {
@@ -282,8 +284,8 @@ func addSiblingUnexportedTypeNames(expr ast.Expr, names HashSet[string]) {
 // enclosing top-level declaration — receiver, parameters, results, `:=`, `var`/`const`/`type`, range
 // and type-switch bindings, at any nesting depth — are excluded, which errs toward recording nothing
 // rather than boxing a global a test never addressed.
-func collectSiblingAddressedNames(file *ast.File, into HashSet[string]) {
-	declared := HashSet[string]{}
+func collectSiblingAddressedNames(file *ast.File, into hashset.HashSet[string]) {
+	declared := hashset.HashSet[string]{}
 
 	for _, decl := range file.Decls {
 		switch typed := decl.(type) {
@@ -348,8 +350,8 @@ func collectSiblingAddressedNames(file *ast.File, into HashSet[string]) {
 // siblingBoundNames returns every identifier bound by a declaration or statement anywhere inside the
 // given node — the conservative "this is a local, not a package-level var" filter of
 // collectSiblingAddressedNames.
-func siblingBoundNames(node ast.Node) HashSet[string] {
-	bound := HashSet[string]{}
+func siblingBoundNames(node ast.Node) hashset.HashSet[string] {
+	bound := hashset.HashSet[string]{}
 
 	addField := func(fields *ast.FieldList) {
 		if fields == nil {
@@ -412,7 +414,7 @@ func (v *Visitor) testAliasShadowName(stmt ast.Stmt) string {
 		return ""
 	}
 
-	names := HashSet[string]{}
+	names := hashset.HashSet[string]{}
 
 	ast.Inspect(stmt, func(node ast.Node) bool {
 		if node == nil {
@@ -494,8 +496,8 @@ func collectWhiteboxInternalTestObjects(pkg *packages.Package) map[types.Object]
 // bridge variant's bare record spellings against (see whiteboxBridgeTypeNames). Function-local
 // types are absent by construction: they reach the bridge under a LIFTED package-level name the
 // go/types defs cannot know, and are unioned in from the live claim set as the bridge converts.
-func collectWhiteboxBridgeTypeNames(pkg *packages.Package) HashSet[string] {
-	names := HashSet[string]{}
+func collectWhiteboxBridgeTypeNames(pkg *packages.Package) hashset.HashSet[string] {
+	names := hashset.HashSet[string]{}
 
 	if pkg == nil || pkg.TypesInfo == nil || pkg.Fset == nil {
 		return names
@@ -522,8 +524,8 @@ func collectWhiteboxBridgeTypeNames(pkg *packages.Package) HashSet[string] {
 // package-level object an internal `_test.go` contributes, plus its METHODS — those emit as static
 // extension members of the same class and hide a same-named production member just as a function
 // does. See whiteboxBridgeDeclaredNames.
-func collectWhiteboxBridgeDeclaredNames(pkg *packages.Package) HashSet[string] {
-	names := HashSet[string]{}
+func collectWhiteboxBridgeDeclaredNames(pkg *packages.Package) hashset.HashSet[string] {
+	names := hashset.HashSet[string]{}
 
 	if pkg == nil || pkg.TypesInfo == nil || pkg.Fset == nil {
 		return names

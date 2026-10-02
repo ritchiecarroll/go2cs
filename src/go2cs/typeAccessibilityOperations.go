@@ -16,6 +16,8 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // packageEmittedTypeAccess holds one condensed, single-line C# partial declaration per `[GoType]`
@@ -39,7 +41,7 @@ import (
 // The RENDERED LINE is the identity, exactly like the other package_info.cs sections, so the
 // writer's merge path (the -tests seeded files) unions the two sides without re-deriving anything.
 // Reset per package/variant by resetPackageState; written under packageLock.
-var packageEmittedTypeAccess HashSet[string]
+var packageEmittedTypeAccess hashset.HashSet[string]
 
 // TypeAccessibilitySection names the package_info.cs marker section that carries the condensed
 // accessibility-pinning partial declarations (see packageEmittedTypeAccess).

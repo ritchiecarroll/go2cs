@@ -49,6 +49,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // Veto reasons — callee-side (§3.2). Every veto carries one of these tags so the census can
@@ -278,7 +280,7 @@ func performRefLoweringAnalysis(files []FileEntry, pkg *types.Package, info *typ
 // against the resolved lowered set. handles is the package's one-arg //go:linkname handle set
 // (linknameHandles in the drivers; a local scan in the census driver). fset is optional — with
 // one, call-arg records carry file:line detail (the census driver passes it).
-func analyzeRefLowering(fset *token.FileSet, syntax []*ast.File, pkg *types.Package, info *types.Info, handles HashSet[string], manualFiles map[*ast.File]bool) *refLoweringPackageResult {
+func analyzeRefLowering(fset *token.FileSet, syntax []*ast.File, pkg *types.Package, info *types.Info, handles hashset.HashSet[string], manualFiles map[*ast.File]bool) *refLoweringPackageResult {
 	analysis := &refLoweringAnalysis{
 		pkg:     pkg,
 		info:    info,
@@ -357,7 +359,7 @@ func analyzeRefLowering(fset *token.FileSet, syntax []*ast.File, pkg *types.Pack
 type refLoweringAnalysis struct {
 	pkg     *types.Package
 	info    *types.Info
-	handles HashSet[string]
+	handles hashset.HashSet[string]
 	result  *refLoweringPackageResult
 
 	// fset is optional — the census driver provides it for line-accurate shape records; the

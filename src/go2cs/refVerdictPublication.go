@@ -49,6 +49,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/ritchiecarroll/hashset"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -85,7 +86,7 @@ var packageRefPrimaryRecords []string
 // refPrimaryRecordKey — the existence proof that the foreign assembly declares a `ref` primary for
 // the method. Populated by loadPackageImplementLines; nothing consumes it at C0 (see the file
 // comment). Reset with its siblings.
-var importedRefPrimaries HashSet[string]
+var importedRefPrimaries hashset.HashSet[string]
 
 // refPrimaryHandOwns is the curated registry of primaries that HAND-OWNED files declare, keyed
 // "<pkgPath>.<Type>.<method>" (the refLoweringHandOwnCallers shape): a hand-own does not dual-emit,
@@ -338,7 +339,7 @@ func collectPublishedRefVerdicts(pkg *packages.Package, packageOutputPath string
 		return nil
 	}
 
-	lines := HashSet[string]{}
+	lines := hashset.HashSet[string]{}
 
 	for _, pair := range publishableRefPrimaries(pkg.Types) {
 		lines.Add(formatRefPrimaryRecord(pair[0], pair[1]))
@@ -397,7 +398,7 @@ func applyRefVerdictSection(packageInfoLines []string, records []string, mergeEx
 // An empty set leaves no trace, which is what keeps a conversion with nothing to publish
 // byte-identical to a file written before the section existed.
 func applyRecordSection(packageInfoLines []string, records []string, mergeExisting bool, spec recordSection) []string {
-	merged := HashSet[string]{}
+	merged := hashset.HashSet[string]{}
 
 	for _, record := range records {
 		merged.Add(record)

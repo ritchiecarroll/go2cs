@@ -40,6 +40,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ritchiecarroll/hashset"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -198,7 +199,7 @@ func TestNoHandOwnDuplicatesAnImportInitHook(t *testing.T) {
 
 		packagesScanned++
 
-		minted := HashSet[string]{}
+		minted := hashset.HashSet[string]{}
 
 		for _, m := range hookName.FindAllStringSubmatch(string(infoBytes), -1) {
 			minted.Add(m[1])

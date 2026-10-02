@@ -15,6 +15,8 @@ import (
 	"go/types"
 	"slices"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 const InterfaceTypeAttributeMarker = ">>MARKER:INTERFACE_TYPE_ATTRS<<"
@@ -232,7 +234,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 	var structuralBases []string
 	var canonicalStructuralBases []string
-	structuralCovered := HashSet[string]{}
+	structuralCovered := hashset.HashSet[string]{}
 
 	// Structural (non-embedded) satisfaction of an imported interface is emitted as C#
 	// interface inheritance: Go converts fs.File to io.Reader implicitly because the method
@@ -261,8 +263,8 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	result := &strings.Builder{}
 	inheritedInterfaces := []string{}
 	canonicalInheritedInterfaces := []string{}
-	typeConstraints := HashSet[ConstraintType]{}
-	var operatorSets HashSet[OperatorSet]
+	typeConstraints := hashset.HashSet[ConstraintType]{}
+	var operatorSets hashset.HashSet[OperatorSet]
 	outerIndent := v.indent(v.indentLevel)
 
 	// A GENERIC interface — one whose own Go type parameter is USED in its member signatures
@@ -515,7 +517,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		trackedInheritances = append(trackedInheritances, canonicalStructuralBases...)
 
 		packageLock.Lock()
-		interfaceInheritances[interfaceTypeName] = NewHashSet(trackedInheritances)
+		interfaceInheritances[interfaceTypeName] = hashset.NewHashSet(trackedInheritances)
 		packageLock.Unlock()
 	} else {
 		inheritedResult += " "
@@ -548,7 +550,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 // skipped (the embed emission handles those, and a second differently-rendered base of the
 // same type would be a duplicate-interface error). Returns the rendered base type names and
 // the covered method names.
-func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, identType types.Type) ([]string, []string, HashSet[string]) {
+func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, identType types.Type) ([]string, []string, hashset.HashSet[string]) {
 	named, ok := identType.(*types.Named)
 
 	if !ok {
@@ -673,7 +675,7 @@ func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, 
 	// by TWO OR MORE bases (interfaces that share a method without subsuming each other) is
 	// RE-DECLARED instead: the redeclaration hides both inherited slots, so a call through
 	// this interface stays unambiguous (CS0121) — Go needs only one method to satisfy all.
-	covered := HashSet[string]{}
+	covered := hashset.HashSet[string]{}
 
 	for name, count := range coveredCounts {
 		if count == 1 {

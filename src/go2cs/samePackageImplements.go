@@ -43,6 +43,8 @@ import (
 	"go/types"
 	"path/filepath"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // recordSamePackageImplements records the GoImplement pairs a package SATISFIES but never WITNESSES:
@@ -98,7 +100,7 @@ func recordSamePackageImplements(fset *token.FileSet, packageTypes *types.Packag
 		return
 	}
 
-	convertedPaths := HashSet[string]{}
+	convertedPaths := hashset.HashSet[string]{}
 
 	for _, entry := range convertedFiles {
 		if entry.filePath != "" {
