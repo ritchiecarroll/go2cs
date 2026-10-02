@@ -267,6 +267,20 @@ publisher nothing. Packaging is per-MODULE (one nupkg per Go module, multi-packa
 their packages' assemblies together or as separate IDs sharing the metadata — v1: one module, one
 nupkg, one root package ID; multi-package modules are ⟨OQ-4⟩).
 
+> **AMENDED 2026-10-02 (COORD rulings on the S2/S3b sizing) -- the v1 self-description.** The file is
+> `go2cs/source-metadata.txt` at a nupkg **PackagePath**, not "packed as content": a contentFiles entry would be
+> copied into every consuming project. Format v1: the line `#go2cs-source-metadata v1`; then `module <path>`,
+> `module-version <Go version, with its v>`, `go2cs-release <the corpus release it was built against, e.g. 1.24.13.3>`;
+> one `require <module> <version> <nuget-id>` per third-party module the assemblies depend on (also a nuspec edge,
+> B4); one `package <import path> <assembly>` per packed Go package; then each package's metadata in
+> stdlib-metadata.txt's own `##<dotted package>[@<goos>]` sections. UTF-8 without a BOM, LF endings. One Go package
+> (`src/go2cs/internal/sourcemeta`) owns the writer and the strict parser, and `nugetgo-pack.ps1` writes it through
+> `internal/gensourcemeta` and verifies the packed copy with the same parser. A consumer matches a package only when
+> module and module-version match exactly AND go2cs-release equals its own corpus release (the strict default, so each
+> stdlib release needs the third-party wave rebuilt before a new converter maps it); a package without the file, or
+> with a malformed one, is converted locally with a warning naming what is malformed. No wave-1 package is published
+> yet, so wave 1 carries the file from its first version.
+
 ---
 
 ## 6. The proof of concept — HashSet, both directions
