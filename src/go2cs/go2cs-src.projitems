@@ -232,6 +232,17 @@
     <None Include="$(MSBuildThisFileDirectory)nestedArgScaling_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nestedMapPointerValue_test.go" />
     <None Include="$(MSBuildThisFileDirectory)noinlineDirective_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetLock.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetLock_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetMap.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetMapFetch.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetMapFetch_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetMapFixture_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetMapFlags_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetMapParse_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetMapRecurse_integration_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetMapResolve_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetMapRun_test.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleTestArgs_test.go" />
     <None Include="$(MSBuildThisFileDirectory)orphanDisclosureCheck_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageClassNaming_test.go" />

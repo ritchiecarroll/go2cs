@@ -40,6 +40,7 @@ type Options struct {
 	packageImportPath   string   // -recurse: import path of the ONE package being converted right now; set per package by convertAll, not from the command line
 	moduleOnly          bool     // -recurse=module: convert the input module's OWN packages only; the third-party closure is referenced (into pkg\) but not converted
 	nugetRefs           bool     // -recurse=nuget: reference the published go2cs NuGet packages (go.<pkg>/go.lib/go.gen) instead of local $(go2csPath) project references
+	nugetMap            nugetMapOptions // -nuget-map*: the -recurse=nuget mapping sources (nugetMap.go); resolved, locked and reported, not yet applied (stage S3b)
 	targetPlatform      string   // the ONE os/arch a conversion emits for; every pass reads this
 	targetPlatforms     []string // -platforms: the full requested list (len 1 for every ordinary run); targetPlatform is its first entry
 	platformCensusDir   string   // -platform-census: staging + manifest directory for a multi-target emission census (no corpus output)
@@ -188,6 +189,13 @@ func (r *recurseMode) Set(value string) error {
 
 	return nil
 }
+
+// stringListFlag is a repeatable string flag.
+type stringListFlag []string
+
+func (s *stringListFlag) String() string { return "" }
+
+func (s *stringListFlag) Set(value string) error { return nil }
 
 // parseArgsInterspersed parses fs while allowing flags to appear AFTER positional arguments. Go's
 // flag package stops at the first non-flag token, so an invocation like
