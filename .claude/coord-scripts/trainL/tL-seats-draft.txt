@@ -108,3 +108,14 @@ C2 seat claude/c2-nugetgo-id-pattern (second, after the generic map/chan shells)
 (two forms, two refusals); vanity path + switch = refused, a named gap; go.-ID refusals in converter tooling HELD for the owner's
 lint choice (sites: nugetMap.go:152, sourcemeta.go:364, NugetgoSelfDescription.psm1:51-55); csproj-template.xml:67 default
 PackageId SIZED first. R seat claude/r-module-license: (c) warning text + the pack's license-name gap.
+
+== 2026-10-02 17:07 owner rulings + seats ==
+OWNER: hashset four choices ACCEPTED as recommended (names kept; map[T]struct{}; go 1.21 + clear(); copyright line unchanged).
+OWNER: registry lint ENFORCES "no go." ONLY (refuse a go.-prefixed nuget-id, any case, any status; nugetgo. NOT required). Prefix reservation deferred.
+WORKFLOW wf_86514cdf-c6c (task wl12xlt1m): both cuts left UNCOMMITTED for COORD: repos/hashset (pre-tag commit) and repos/nugetgo (lint).
+ scratch: coord-scratch/hashset-pretag/final.diff, coord-scratch/nugetgo-lint/final.diff. COORD commits signed + pushes each.
+TAG ORDER (hashset v1.0.0): push pre-tag commit -> the module's CI green at it -> P1 re-points its replace + re-runs gate (a) -> COORD tags signed -> P1 go get v1.0.0, pushes claude/p1-hashset-module.
+TRAIN N +seat: claude/r-module-license 2d46145bdd (ACCEPTED). C2's claude/c2-nugetgo-id-pattern STACKS ON it; now carries: PLAN amendment, affiliation
+ forms (-UpstreamPublishes + org cross-check), the three go.-ID refusals, the template (B) = no prefixed PackageId for a non-stdlib library
+ (55 behavioral library csprojs regenerate), the J0 uuid defaults. N SCRIPT ITEM: the NGF-j0 leg's EXPECT (default=go...uuid) changes when that seat is seated.
+R dispatched (measure-first, no cut): github.com/pkg/errors v0.9.1 with -tests -recurse at 8f46a9adae.
