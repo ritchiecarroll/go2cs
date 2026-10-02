@@ -731,6 +731,11 @@ jobs:
 
       - name: Behavioral stderr — run named projects directly and keep the WHOLE stderr
         if: needs.plan.outputs.stage == 'behavioral-stderr'
+        # A STEP limit under the job's: a wedged timeout arm once held both mac runners to the job's
+        # 1h30m (run 36957913093), and one runner lost communication. Forty minutes covers five
+        # projects at run_timeout 300 with their builds (the slowest measured: osx-arm64, 28 min);
+        # the artifact upload below still runs (if: always()).
+        timeout-minutes: 40
         shell: pwsh
         env:
           STDERR_PROJECTS: ${{ needs.plan.outputs.filter }}
