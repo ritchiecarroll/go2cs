@@ -77,8 +77,8 @@ public static class GoMemProfile
     // resolves a constant Type.GetType name against the assemblies it was given, so the answer is the
     // static closure there, and GetReferencedAssemblies throws PlatformNotSupportedException. The name is a
     // constant AT THE CALL: the compiler does not follow it through a parameter. The entry assembly is asked
-    // second, for a program that compiles runtime/pprof in rather than referencing its assembly:
-    // runtime/pprof's own test binary compiles the package's files into runtime.pprof.tests.
+    // second, for a program that compiles runtime/pprof's sources into its own assembly rather than
+    // referencing runtime.pprof. runtime/pprof's own test binary is not one: it references the assembly.
     private static Type? findPprofPackage() =>
         Type.GetType("go.runtime.pprof_package, runtime.pprof", throwOnError: false) ??
         System.Reflection.Assembly.GetEntryAssembly()?.GetType("go.runtime.pprof_package", throwOnError: false);
