@@ -422,6 +422,8 @@
     <None Include="$(MSBuildThisFileDirectory)tokenDoorCensusGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)toolchainGoRootFix_test.go" />
     <None Include="$(MSBuildThisFileDirectory)warningClearEmission_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)warningEntries.go" />
+    <None Include="$(MSBuildThisFileDirectory)warningEntries_test.go" />
     <None Include="$(MSBuildThisFileDirectory)writeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)wsaSendtoNoCallers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)writtenUnderlyingOperations.go" />

@@ -492,6 +492,14 @@ type Visitor struct {
 	deadUnsafePointerBoxes  map[*ast.CallExpr]bool        // `unsafe.Pointer(x)` conversions whose wrapper object an enclosing `uintptr(…)` reads straight back — emitted without it (see markDeadUnsafePointerBox)
 	identNames              map[*ast.Ident]string         // Local identifiers to adjusted names map
 	isReassigned            map[*ast.Ident]bool           // Local identifiers to reassignment status map
+
+	// The per-file warning entry facts (warningEntries.go): the locals the emission referenced by
+	// name, the locals it declared with a constant initializer, and the package variables it
+	// declared with no initializer.
+	renderedLocals            map[types.Object]bool
+	constantInitializedLocals []types.Object
+	unassignedFieldCandidates []unassignedFieldCandidate
+
 	// narrowArithmeticCasts maps a non-constant narrow-integer arithmetic expression to the C# type
 	// its own emission is cast back to, because its consumer is not wrap-invariant (see
 	// markNarrowArithmeticContexts). convBinaryExpr and convUnaryExpr consult it.
