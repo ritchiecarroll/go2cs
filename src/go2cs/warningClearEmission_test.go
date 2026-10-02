@@ -96,3 +96,29 @@ func main() {
 		}
 	}
 }
+
+// TestEmptySelectEmitsBareCall pins CS1522 (net/http/httptest's `select {}`). A select with no clauses
+// blocks forever; it lowered to `switch (select()) {` with an empty block, which C# warns about and
+// which closed on a brace at column zero. The statement is the call itself.
+func TestEmptySelectEmitsBareCall(t *testing.T) {
+	mainCs := convertWarningFixture(t, "esel", `package main
+
+func serve(flag bool) {
+	if flag {
+		select {}
+	}
+}
+
+func main() {
+	serve(false)
+}
+`)
+
+	if !strings.Contains(mainCs, "        select();") {
+		t.Errorf("select {} must emit a bare, indented `select();`: %s", mainCs)
+	}
+
+	if strings.Contains(mainCs, "switch (select())") {
+		t.Errorf("select {} emitted an empty switch block: %s", mainCs)
+	}
+}
