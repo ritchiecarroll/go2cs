@@ -2197,6 +2197,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckVariadicBoxReceiver() => CheckTarget("VariadicBoxReceiver");
 
     [TestMethod]
+    public void CheckVariadicClosureShadowParam() => CheckTarget("VariadicClosureShadowParam");
+
+    [TestMethod]
     public void CheckVariadicClosureSpread() => CheckTarget("VariadicClosureSpread");
 
     [TestMethod]

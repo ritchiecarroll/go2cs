@@ -1023,6 +1023,7 @@
     <Project Path="tests/Behavioral/VariadicPointerParam/VariadicPointerParam.csproj" />
     <Project Path="tests/Behavioral/VariadicSlotInterfaces/VariadicSlotInterfaces.csproj" />
     <Project Path="tests/Behavioral/VariableCapture/VariableCapture.csproj" />
+    <Project Path="tests/Behavioral/VariadicClosureShadowParam/VariadicClosureShadowParam.csproj" />
     <Project Path="tests/Behavioral/VersionedImport/VersionedImport.csproj" />
     <Project Path="tests/Behavioral/VersionedImport/vlib/vlib.v2.csproj" />
     <Project Path="tests/Behavioral/WindowsNewCallback/WindowsNewCallback.csproj" />
