@@ -48,6 +48,19 @@ internal static class GoFieldMetadata
     {
         FieldInfo[] fields = type == WithheldForTest ? [] : type.GetFields(InstanceFieldFlags);
 
+        if (fields.Length == 0 && type.IsValueType && !type.IsPrimitive && !type.IsEnum && !type.ContainsGenericParameters)
+        {
+            int size = RuntimeHelpers.SizeOf(type.TypeHandle);
+
+            if (size > 1)
+            {
+                throw new InvalidOperationException(
+                    $"go2cs: {type.FullName} occupies {size} bytes and reports no instance fields — its field metadata was removed, " +
+                    "most likely by trimming. golib derives a Go struct's size, layout and call arguments from its fields: " +
+                    "publish with golib and the converted assemblies kept whole (TrimMode=partial, or a trimmer root for each).");
+            }
+        }
+
         return fields;
     }
 }
