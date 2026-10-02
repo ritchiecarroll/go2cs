@@ -5252,6 +5252,27 @@ func declarationClosureImports(roots []*packages.Package, compileExcluded map[st
 			implementEdge(named)
 		}
 
+		// The OVERLOAD-CANDIDATE edge. A Go method converts to an EXTENSION method on its package
+		// class, so `c.Lookup(path, vers)` makes the compiler weigh every same-named method of that
+		// package as a candidate, and ranking one requires binding its parameter types. x/mod's
+		// sumdb test calls Client.Lookup(path, vers string) beside TestServer.Lookup(ctx, m
+		// module.Version); `module` is in no test import, and the compile died
+		// `CS0012 … 'module_package.Version'`. Only candidates of the call's own arity are weighed
+		// that way: a same-named method of another arity compiles clean (measured), so it adds
+		// nothing here.
+		for _, method := range seeds.methodCalls {
+			for _, candidate := range overloadCandidates(method) {
+				parameters := candidate.Type().(*types.Signature).Params()
+
+				for i := range parameters.Len() {
+					for _, mentioned := range namedTypesIn(parameters.At(i).Type()) {
+						reach(mentioned)
+						enqueue(mentioned)
+					}
+				}
+			}
+		}
+
 		// The implemented-interface edge ALSO fires where a member is bound on a value WITHOUT a
 		// selector: `len(list)`, `range list`, `list[i]`. Each lowers to a member on the value's
 		// type — golib's generic `len`, the emitted enumeration, the indexer — so resolving it makes
@@ -5306,6 +5327,65 @@ func declarationClosureImports(roots []*packages.Package, compileExcluded map[st
 
 	result := found.Keys()
 	sort.Strings(result)
+
+	return result
+}
+
+// overloadCandidates returns the OTHER methods a call of method competes with in C#: every method of
+// the same name and arity declared on a non-interface named type of method's own package, since all of
+// them convert to extension methods of the one package class. A variadic method is a candidate at any
+// arity it can accept. `testing` contributes none, for closureWalkable's reason.
+func overloadCandidates(method *types.Func) []*types.Func {
+	signature, ok := method.Type().(*types.Signature)
+
+	if !ok || method.Pkg() == nil || method.Pkg().Path() == "testing" {
+		return nil
+	}
+
+	arity := signature.Params().Len()
+	accepts := func(candidate *types.Signature) bool {
+		count := candidate.Params().Len()
+
+		if candidate.Variadic() && arity >= count-1 {
+			return true
+		}
+
+		if signature.Variadic() && count >= arity-1 {
+			return true
+		}
+
+		return count == arity
+	}
+
+	var result []*types.Func
+
+	scope := method.Pkg().Scope()
+
+	for _, name := range scope.Names() {
+		typeName, isTypeName := scope.Lookup(name).(*types.TypeName)
+
+		if !isTypeName || typeName.IsAlias() {
+			continue
+		}
+
+		named, isNamed := typeName.Type().(*types.Named)
+
+		if !isNamed || types.IsInterface(named) {
+			continue
+		}
+
+		for i := range named.NumMethods() {
+			candidate := named.Method(i)
+
+			if candidate.Origin() == method.Origin() || candidate.Name() != method.Name() {
+				continue
+			}
+
+			if candidateSignature, ok := candidate.Type().(*types.Signature); ok && accepts(candidateSignature) {
+				result = append(result, candidate)
+			}
+		}
+	}
 
 	return result
 }
@@ -5392,6 +5472,9 @@ type typeSeeds struct {
 	constructed      []*types.Named
 	constructedEmpty []*types.Named
 	memberBases      []*types.Named
+	// methodCalls carries the concrete methods a compiled test source CALLS through a selector; the
+	// overload-candidate edge reads their same-named siblings (see declarationClosureImports).
+	methodCalls []*types.Func
 	// memberBound carries the types a compiled test source binds a member on through a form that
 	// spells no selector — a builtin call, a range, an index/slice. It feeds ONLY the
 	// implemented-interface edge (see declarationClosureImports): the demand is on the type's
@@ -5457,6 +5540,14 @@ func referencedTypeSeeds(pkg *packages.Package, compileExcluded map[string]bool)
 				// the import that spells it already carries the reference.
 				if isTestFile {
 					seeds.memberBases = append(seeds.memberBases, namedTypesIn(pkg.TypesInfo.Types[typed.X].Type)...)
+
+					// A call through an INTERFACE value binds the interface's member, not an
+					// extension method, so only a concrete receiver seeds the overload edge.
+					if selection := pkg.TypesInfo.Selections[typed]; selection != nil && selection.Kind() == types.MethodVal && !types.IsInterface(selection.Recv()) {
+						if method, isFunc := selection.Obj().(*types.Func); isFunc {
+							seeds.methodCalls = append(seeds.methodCalls, method)
+						}
+					}
 				}
 			case *ast.RangeStmt:
 				// `range list` enumerates the value, which binds a member on its type.
