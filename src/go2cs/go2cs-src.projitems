@@ -35,7 +35,10 @@
     <None Include="$(MSBuildThisFileDirectory)bestEffortTranspile_test.go" />
     <None Include="$(MSBuildThisFileDirectory)blockEventFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)buildConstraints_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)byRefReceiverGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)callerInliningAnalysis.go" />
+    <None Include="$(MSBuildThisFileDirectory)callerSkipWindowFrames_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)goCreatorFrame_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\corpusRelease_test.go" />
@@ -131,10 +134,12 @@
     <None Include="$(MSBuildThisFileDirectory)emptyStructConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)escapeAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)escapedArrayElementAddress_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)eventFraming_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo_test.go" />
     <None Include="$(MSBuildThisFileDirectory)filterZeroMatch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)finalizerDoorGuard_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)fixtureWritesTracked_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fleetPatchIdCensusGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions_test.go" />
@@ -186,9 +191,11 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsTableCodePipe_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\certContextReachGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\coreReferencesResolve_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\darwinLinknamePulls_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\elidedConstraints_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\fixturesCurrent_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\fleetIdentifierCensus_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\golibInode64Renames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\generatorLoadGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeBoundaryBoxDeref_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeCallGateDarwin_test.go" />
@@ -204,6 +211,7 @@
     <None Include="$(MSBuildThisFileDirectory)lineEndingSeams_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameCycleGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameForward_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)linknameForwardDarwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameForwardRegistry_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)linknamePush_test.go" />
@@ -282,6 +290,7 @@
     <None Include="$(MSBuildThisFileDirectory)processGroup_test.go" />
     <None Include="$(MSBuildThisFileDirectory)processGroupWindows.go" />
     <None Include="$(MSBuildThisFileDirectory)publishBinlog_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)publishTimeout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)profiles\linux-arm.pubxml" />
     <None Include="$(MSBuildThisFileDirectory)profiles\linux-arm64.pubxml" />
     <None Include="$(MSBuildThisFileDirectory)profiles\linux-x64.pubxml" />

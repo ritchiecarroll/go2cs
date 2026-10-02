@@ -51,6 +51,8 @@ using go.golib;
 
 [module: go.GoManualConversion]
 
+#pragma warning disable CS8826 // the converted partial names the blank Go parameter `_`; this hand-owned body keeps its readable name
+
 namespace go;
 
 partial class iter_package

@@ -5252,6 +5252,27 @@ func declarationClosureImports(roots []*packages.Package, compileExcluded map[st
 			implementEdge(named)
 		}
 
+		// The OVERLOAD-CANDIDATE edge. A Go method converts to an EXTENSION method on its package
+		// class, so `c.Lookup(path, vers)` makes the compiler weigh every same-named method of that
+		// package as a candidate, and ranking one requires binding its parameter types. x/mod's
+		// sumdb test calls Client.Lookup(path, vers string) beside TestServer.Lookup(ctx, m
+		// module.Version); `module` is in no test import, and the compile died
+		// `CS0012 … 'module_package.Version'`. Only candidates of the call's own arity are weighed
+		// that way: a same-named method of another arity compiles clean (measured), so it adds
+		// nothing here.
+		for _, method := range seeds.methodCalls {
+			for _, candidate := range overloadCandidates(method) {
+				parameters := candidate.Type().(*types.Signature).Params()
+
+				for i := range parameters.Len() {
+					for _, mentioned := range namedTypesIn(parameters.At(i).Type()) {
+						reach(mentioned)
+						enqueue(mentioned)
+					}
+				}
+			}
+		}
+
 		// The implemented-interface edge ALSO fires where a member is bound on a value WITHOUT a
 		// selector: `len(list)`, `range list`, `list[i]`. Each lowers to a member on the value's
 		// type — golib's generic `len`, the emitted enumeration, the indexer — so resolving it makes
@@ -5306,6 +5327,65 @@ func declarationClosureImports(roots []*packages.Package, compileExcluded map[st
 
 	result := found.Keys()
 	sort.Strings(result)
+
+	return result
+}
+
+// overloadCandidates returns the OTHER methods a call of method competes with in C#: every method of
+// the same name and arity declared on a non-interface named type of method's own package, since all of
+// them convert to extension methods of the one package class. A variadic method is a candidate at any
+// arity it can accept. `testing` contributes none, for closureWalkable's reason.
+func overloadCandidates(method *types.Func) []*types.Func {
+	signature, ok := method.Type().(*types.Signature)
+
+	if !ok || method.Pkg() == nil || method.Pkg().Path() == "testing" {
+		return nil
+	}
+
+	arity := signature.Params().Len()
+	accepts := func(candidate *types.Signature) bool {
+		count := candidate.Params().Len()
+
+		if candidate.Variadic() && arity >= count-1 {
+			return true
+		}
+
+		if signature.Variadic() && count >= arity-1 {
+			return true
+		}
+
+		return count == arity
+	}
+
+	var result []*types.Func
+
+	scope := method.Pkg().Scope()
+
+	for _, name := range scope.Names() {
+		typeName, isTypeName := scope.Lookup(name).(*types.TypeName)
+
+		if !isTypeName || typeName.IsAlias() {
+			continue
+		}
+
+		named, isNamed := typeName.Type().(*types.Named)
+
+		if !isNamed || types.IsInterface(named) {
+			continue
+		}
+
+		for i := range named.NumMethods() {
+			candidate := named.Method(i)
+
+			if candidate.Origin() == method.Origin() || candidate.Name() != method.Name() {
+				continue
+			}
+
+			if candidateSignature, ok := candidate.Type().(*types.Signature); ok && accepts(candidateSignature) {
+				result = append(result, candidate)
+			}
+		}
+	}
 
 	return result
 }
@@ -5392,6 +5472,9 @@ type typeSeeds struct {
 	constructed      []*types.Named
 	constructedEmpty []*types.Named
 	memberBases      []*types.Named
+	// methodCalls carries the concrete methods a compiled test source CALLS through a selector; the
+	// overload-candidate edge reads their same-named siblings (see declarationClosureImports).
+	methodCalls []*types.Func
 	// memberBound carries the types a compiled test source binds a member on through a form that
 	// spells no selector — a builtin call, a range, an index/slice. It feeds ONLY the
 	// implemented-interface edge (see declarationClosureImports): the demand is on the type's
@@ -5457,6 +5540,14 @@ func referencedTypeSeeds(pkg *packages.Package, compileExcluded map[string]bool)
 				// the import that spells it already carries the reference.
 				if isTestFile {
 					seeds.memberBases = append(seeds.memberBases, namedTypesIn(pkg.TypesInfo.Types[typed.X].Type)...)
+
+					// A call through an INTERFACE value binds the interface's member, not an
+					// extension method, so only a concrete receiver seeds the overload edge.
+					if selection := pkg.TypesInfo.Selections[typed]; selection != nil && selection.Kind() == types.MethodVal && !types.IsInterface(selection.Recv()) {
+						if method, isFunc := selection.Obj().(*types.Func); isFunc {
+							seeds.methodCalls = append(seeds.methodCalls, method)
+						}
+					}
 				}
 			case *ast.RangeStmt:
 				// `range list` enumerates the value, which binds a member on its type.
@@ -6619,8 +6710,22 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 func publishTestHost(outputPath, testProject string, options Options) error {
 	binlog := preparePublishBinlog(outputPath, options)
 	args := withPublishBinlog(publishTestHostArgs(outputPath, testProject, options), binlog)
-	_, err := runCommandWithTimeout(options.testTimeout, outputPath, options, "dotnet", args...)
+	_, err := runCommandWithTimeout(testPublishTimeout(options), outputPath, options, "dotnet", args...)
 	return settlePublishBinlog(binlog, err)
+}
+
+// testPublishTimeoutFloor is the least time publishTestHost gives `dotnet publish`. -test-timeout is
+// the PACKAGE deadline (2m by default), and the first publish on a fresh tree builds the test
+// project's whole standard-library closure, which takes far longer: under the bare deadline every
+// package of a first module run read "dotnet timed out after 2m0s". A warm publish is incremental,
+// so the floor only costs time when a publish is genuinely hung.
+const testPublishTimeoutFloor = 30 * time.Minute
+
+// testPublishTimeout is the budget publishTestHost gives `dotnet publish`: -test-timeout, but never
+// less than testPublishTimeoutFloor. The deadlines handed to the go and converted test runs are
+// unaffected.
+func testPublishTimeout(options Options) time.Duration {
+	return max(options.testTimeout, testPublishTimeoutFloor)
 }
 
 // publishTestHostArgs is the `dotnet` argument list publishTestHost runs, split out so the command a
@@ -8454,7 +8559,7 @@ type testRecords struct {
 // name, for the disclosure record-count pin (see recordPinFailure).
 func terminalTestRecords(output string) map[string]testRecords {
 	result := make(map[string]testRecords)
-	for _, line := range strings.Split(output, "\n") {
+	for _, line := range testStreamLines(output) {
 		var event normalizedTestEvent
 		if json.Unmarshal([]byte(line), &event) != nil || event.Test == "" {
 			continue
@@ -9396,9 +9501,36 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	return nil
 }
 
+// testFramingMarker is Go's ^V. Under -test.v=test2json every framing line of a test binary starts with
+// it (testing.go: chattyFlag.prefix), and the converted host's --json event lines carry it for the same
+// reason (TestReporter.FramingMarker).
+const testFramingMarker = '\x16'
+
+// testStreamLines splits one side's captured output into lines by cmd/test2json's rule (test2json.go:
+// indexEOL): a line ends at "\n" OR just before a ^V that does not begin a line, and a line's leading ^V
+// is stripped. So an event that lands on the end of a test's unterminated os.Stdout output still reads
+// as its own line, and the partial output stays partial (H2: x/mod/sumdb/tlog's
+// TestCertificateTransparency lost its pass event to exactly that, 2026-10-02). go test's own -json
+// stream carries no marker, so its lines are the plain "\n" split.
+func testStreamLines(output string) []string {
+	var lines []string
+	for _, line := range strings.Split(output, "\n") {
+		for len(line) > 1 {
+			cut := strings.IndexByte(line[1:], testFramingMarker)
+			if cut < 0 {
+				break
+			}
+			lines = append(lines, strings.TrimPrefix(line[:cut+1], string(testFramingMarker)))
+			line = line[cut+1:]
+		}
+		lines = append(lines, strings.TrimPrefix(line, string(testFramingMarker)))
+	}
+	return lines
+}
+
 func terminalTestResults(output string) map[string]string {
 	result := make(map[string]string)
-	for _, line := range strings.Split(output, "\n") {
+	for _, line := range testStreamLines(output) {
 		var event normalizedTestEvent
 		if json.Unmarshal([]byte(line), &event) != nil || event.Test == "" {
 			continue
@@ -9416,7 +9548,7 @@ func terminalTestResults(output string) map[string]string {
 // test name, for disclosure signature matching against the C# side's failure messages.
 func terminalTestOutputs(output string) map[string]string {
 	result := make(map[string]string)
-	for _, line := range strings.Split(output, "\n") {
+	for _, line := range testStreamLines(output) {
 		var event normalizedTestEvent
 		if json.Unmarshal([]byte(line), &event) != nil || event.Test == "" {
 			continue
@@ -9455,7 +9587,7 @@ func isTestEventLine(line string) bool {
 // empty-looking tail — a bound that measures whitespace is a bound that hides the reading.
 func diagnosticOutputTail(output string) *stderrTail {
 	var diagnostics []string
-	for _, line := range strings.Split(output, "\n") {
+	for _, line := range testStreamLines(output) {
 		line = strings.TrimRight(line, "\r")
 		if strings.TrimSpace(line) == "" || isTestEventLine(line) {
 			continue

@@ -38,6 +38,9 @@ public static (uintptr, @string, error) OpenDir(this ж<FD> Ꮡfd) {
 // Implemented in syscall/syscall_darwin.go.
 //
 //go:linkname fdopendir syscall.fdopendir
-internal static partial (uintptr dir, error err) fdopendir(nint fd);
+[global::System.Diagnostics.StackTraceHidden] internal static (uintptr dir, error err) fdopendir(nint fd) {
+    var (ᴛ1, ᴛ2) = Δsyscall.fdopendir(fd);
+    return ((uintptr)(uintptr)ᴛ1, ᴛ2);
+}
 
 } // end poll_package

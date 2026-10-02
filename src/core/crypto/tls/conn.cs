@@ -18,6 +18,7 @@ using net = net_package;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
+using System.Runtime.CompilerServices;
 using go.@internal;
 using go.crypto;
 using go.sync;
@@ -1651,7 +1652,7 @@ public static error HandshakeContext(this ж<Conn> Ꮡc, context.Context ctx) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsInternalErrorˢ4 = "tls: internal error: handshake should have had a result"u8;
 
-internal static error /*ret*/ handshakeContext(this ж<Conn> Ꮡc, context.Context ctx) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static error /*ret*/ handshakeContext(this ж<Conn> Ꮡc, context.Context ctx) {
     error ret = default!;
     GoFrame ᒐ = default;
     try {

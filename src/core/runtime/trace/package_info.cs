@@ -52,7 +52,7 @@ using static go.runtime.trace_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("runtime/trace/annotation.go", "annotation.cs", "ABFMABYCgpKCggACLAASAoCCpAAHFLLalKaqsoKosqaCAAYgABcggoKCogACFAAIAoKUkoIACBKWsoKUrLIAAhDmpqY=")]
-[assembly: go.GoPositionMap("runtime/trace/trace.go", "trace.cs", "AHbyAdKChICCpIKCgoKUpoLawoKChKI=", "128-136:1")]
+[assembly: go.GoPositionMap("runtime/trace/trace.go", "trace.cs", "AHfyAdKChICCpIKCgoKUpoLawoKChKI=", "128-136:1")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;

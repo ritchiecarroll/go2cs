@@ -2337,6 +2337,51 @@ func TestDeclarationClosureImportsSurfacesMemberAccessEdges(t *testing.T) {
 	}
 }
 
+// The OVERLOAD-CANDIDATE edge (x/mod's sumdb): a Go method converts to an EXTENSION method on its
+// package class, so a call `c.Lookup(path, vers)` makes the compiler weigh EVERY same-named method of
+// that package as a candidate, and ranking one whose parameter names a type from a package the test
+// never imports needs that package's assembly. sumdb's test calls Client.Lookup(path, vers string)
+// beside TestServer.Lookup(ctx, m module.Version), and the test compile died
+// `CS0012 … 'module_package.Version'` with no host linking. The negative is the one P1 measured: a
+// same-named method of a DIFFERENT arity is not weighed that way and compiles clean.
+func TestDeclarationClosureImportsSurfacesOverloadCandidateEdges(t *testing.T) {
+	dir := t.TempDir()
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod":       "module example/ovl\n\ngo 1.23\n",
+		"a/a.go":       "package a\ntype Version struct{ Path string }\n",
+		"main.go":      "package ovl\nimport \"example/ovl/a\"\ntype Client struct{}\nfunc (c *Client) Lookup(path, vers string) string { return path + vers }\ntype Server struct{}\nfunc (s *Server) Lookup(path string, m a.Version) int { return len(path) + len(m.Path) }\n",
+		"main_test.go": "package ovl\nimport \"testing\"\nfunc TestLookup(t *testing.T) { _ = new(Client).Lookup(\"p\", \"v\") }\n",
+	})
+
+	production := loadProductionForDir(t, dir)
+	internal, external := loadTestVariantsForDir(t, dir)
+
+	got := declarationClosureImports([]*packages.Package{production, internal, external}, nil,
+		[]string{production.PkgPath, "testing"}, nil, nil)
+
+	if len(got) != 1 || got[0] != "example/ovl/a" {
+		t.Fatalf("a same-arity, same-named method naming a.Version is an overload candidate of the call and must surface example/ovl/a; got %v", got)
+	}
+
+	// NEGATIVE (arity). Server.Lookup takes ONE parameter here, so it is not a candidate for a
+	// two-argument call.
+	arityDir := t.TempDir()
+	writeModuleFiles(t, arityDir, map[string]string{
+		"go.mod":       "module example/ovlarity\n\ngo 1.23\n",
+		"a/a.go":       "package a\ntype Version struct{ Path string }\n",
+		"main.go":      "package ovlarity\nimport \"example/ovlarity/a\"\ntype Client struct{}\nfunc (c *Client) Lookup(path, vers string) string { return path + vers }\ntype Server struct{}\nfunc (s *Server) Lookup(m a.Version) int { return len(m.Path) }\n",
+		"main_test.go": "package ovlarity\nimport \"testing\"\nfunc TestLookup(t *testing.T) { _ = new(Client).Lookup(\"p\", \"v\") }\n",
+	})
+
+	arityProduction := loadProductionForDir(t, arityDir)
+	arityInternal, arityExternal := loadTestVariantsForDir(t, arityDir)
+
+	if got := declarationClosureImports([]*packages.Package{arityProduction, arityInternal, arityExternal}, nil,
+		[]string{arityProduction.PkgPath, "testing"}, nil, nil); len(got) != 0 {
+		t.Fatalf("a same-named method of a different arity is not a candidate; got %v", got)
+	}
+}
+
 // The ZERO-VALUE DECLARATION form of the constructor edge (log): `var l Logger` writes no composite
 // literal anywhere, yet the converter renders Go's zero value as a CONSTRUCTOR CALL, so overload
 // resolution must still materialize the accessible fieldwise constructor's parameter types. log's

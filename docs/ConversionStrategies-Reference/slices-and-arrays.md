@@ -1356,6 +1356,32 @@ converts correctly.
 reached through a composite LITERAL; this one guards the zero value, which is where every one of the
 standard library's needy named arrays is actually built.)
 
+## A NAMED array compared with the unnamed array it is written over casts the unnamed side
+
+Go lets a value of a named array type be compared with a value of the unnamed array type it is
+declared over, because the unnamed operand is assignable to the named type. In C# the wrapper
+(`type Hash [4]byte` lowers to a go2cs-gen struct over `array<byte>`) converts IMPLICITLY in both
+directions, so `Hash == Hash` and `array<byte> == array<byte>` both apply and the comparison is
+ambiguous (CS0034, x/mod's sumdb/tlog `h != sha256.Sum256(nil)`). The emission casts the unnamed
+operand to the named type, which is the comparison Go makes, in either operand order and for `==`
+and `!=` alike:
+
+```go
+var h Hash                       // type Hash [4]byte
+if h != sum(nil) { … }           // func sum([]byte) [4]byte
+```
+
+```csharp
+if (h != ((Hash)(sum(default!)))) { … }
+```
+
+Only a type written DIRECTLY over an unnamed array takes the cast (`writtenRHSIsUnnamedArray`): a
+type written over another named array converts to that type instead, and an unknown declaration
+keeps the bare emission. Not covered: a public wrapper over a non-public element type, whose
+conversion operators the generator omits (see `OmitUnderlyingConversionOperators`), so neither the
+bare comparison nor the cast compiles there; no instance is known. Guarded by the
+`NamedArrayVsUnnamedCompare` behavioral test.
+
 ## `make([]E, n)` constructs its ELEMENTS by the same rule
 
 `slice<T>`'s length constructor fills its backing with `default(T)` exactly as `array<T>`'s does, so

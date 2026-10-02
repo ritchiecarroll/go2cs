@@ -190,6 +190,8 @@ public static class AdapterBinder
         byPtr = null;
         byVal = null;
 
+        MethodInfo? copyBound = null;
+
         // The *X method set — value AND pointer receivers. A VALUE-sourced shell narrows this to the
         // by-value half by simply never using byPtr (see BuildObjectShellFactory and the generated
         // delegate shell's dispatch), which is exactly Go's rule.
@@ -201,13 +203,27 @@ public static class AdapterBinder
             Type receiver = candidate.GetParameters()[0].ParameterType;
 
             if (receiver.IsByRef)
+            {
+                // `this ref X` WITHOUT [GoRecv] is a VALUE-set method whose receiver is bound through
+                // a copy (GoTypeExtensions.IsCopyBoundReceiver): the probe counts it for a value
+                // source, so the shell must bind it, or the two disagree and an assertion Go ACCEPTS
+                // misses — bufio.ReadWriter held by value, asserted to io.Reader. The [GoRecv] form
+                // stays skipped: it is a pointer-receiver method, bound through its ж<X> twin.
+                if (GoTypeExtensions.IsCopyBoundReceiver(candidate, out _))
+                    copyBound ??= candidate;
+
                 continue;
+            }
 
             if (receiver.IsGenericType && receiver.GetGenericTypeDefinition() == typeof(ж<>))
                 byPtr ??= candidate;
             else if (candidate.GetCustomAttribute<GoRecvAttribute>() is null)
                 byVal ??= candidate;
         }
+
+        // A true by-value method wins; Go has one method per name, so both existing would be the
+        // converter's own doing and the by-value form is the one every binder already carries.
+        byVal ??= copyBound;
     }
 
     // Resolves the shell spec for an interface, or null when it carries none (an empty, generic,

@@ -9,9 +9,13 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/build"
+	"go/parser"
 	"go/token"
+	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
@@ -200,4 +204,226 @@ func pkgHasLinknameHandle(t *testing.T, goRoot string, pkgPath string, symbol st
 	}
 
 	return false
+}
+
+// TestLinknameForwardTargetsExposeNoUnexportedTypes refuses a row whose target's signature names an
+// UNEXPORTED named type of the target package. packageFuncAccess emits a forward target `public`, and a
+// public C# method whose parameter or result type is `internal` is CS0051 -- in the TARGET package's
+// own compilation, for a row TestLinknameForwardTargetsMatchGoSource passes (body and handle both
+// present). Go's linker allows such a pull because it links symbols, not declarations; C# accessibility
+// does not. Measured 2026-10-02 (S7): a syscall.sysctl row, whose `mib []_C_int` names syscall's
+// unexported `type _C_int int32`, broke the darwin syscall build with exactly that error. Such a pull
+// needs a hand companion in the PULLING package instead (S7b: vendor/golang.org/x/net/route).
+//
+// Every declaration WITH A BODY in a file one of the corpus's targets builds (windows, linux, darwin;
+// amd64; cgo off) is checked, because each is one the converter emits; a bodyless one (assembly,
+// another GOOS's stub) emits no signature to widen, and a file no corpus target builds (wasip1's
+// `openat(..., pathLen size, ...)`) is never converted at all. A definition row is checked at its
+// definition, which is the func the converter widens. Each offending type is reported once per row.
+func TestLinknameForwardTargetsExposeNoUnexportedTypes(t *testing.T) {
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	if goRoot == "" {
+		t.Skip("GOROOT not resolvable; nothing to verify the registry against")
+	}
+
+	walked := 0
+
+	for target := range linknameForwardTargets {
+		widened := target
+
+		if definition, isDefined := linknameForwardDefinitions[target]; isDefined {
+			widened = definition
+		}
+
+		pkgPath, symbol, ok := splitLastDot(widened)
+
+		if !ok {
+			continue
+		}
+
+		files := corpusTargetFiles(t, goRoot, pkgPath)
+		typeNames := packageTypeNames(files)
+		reported := map[signatureTypeUse]bool{}
+
+		for _, file := range files {
+			for _, d := range file.Decls {
+				decl, isFunc := d.(*ast.FuncDecl)
+
+				if !isFunc || decl.Recv != nil || decl.Name.Name != symbol || decl.Body == nil {
+					continue
+				}
+
+				for _, use := range unexportedSignatureTypes(decl, typeNames) {
+					if reported[use] {
+						continue
+					}
+
+					reported[use] = true
+					t.Errorf("forward row %q: %s's signature names %s's UNEXPORTED type %s in %s, so the widened `public` target is CS0051 "+
+						"(inconsistent accessibility) in %s's own build. Remove the row and give the pull a hand companion in the "+
+						"pulling package (the S7b shape), which can stay `internal` on both sides of the seam",
+						target, symbol, pkgPath, use.typeName, use.where, pkgPath)
+				}
+			}
+		}
+
+		walked++
+	}
+
+	if walked == 0 {
+		t.Fatal("no forward row walked: the arm is vacuous")
+	}
+
+	t.Logf("walked %d forward rows", walked)
+}
+
+// corpusTargetFiles parses the non-test files of pkgPath that at least one corpus target builds: the
+// -stdlib platforms windows/amd64, linux/amd64 and darwin/amd64, with cgo off (the corpus's pinned state).
+func corpusTargetFiles(t *testing.T, goRoot string, pkgPath string) []*ast.File {
+	t.Helper()
+
+	dir := filepath.Join(goRoot, "src", filepath.FromSlash(pkgPath))
+	entries, err := os.ReadDir(dir)
+
+	if err != nil {
+		t.Errorf("reading %s: %v", dir, err)
+		return nil
+	}
+
+	fileSet := token.NewFileSet()
+	var files []*ast.File
+
+	for _, entry := range entries {
+		name := entry.Name()
+
+		if !strings.HasSuffix(name, ".go") || strings.HasSuffix(name, "_test.go") {
+			continue
+		}
+
+		built := false
+
+		for _, goos := range []string{"windows", "linux", "darwin"} {
+			ctx := build.Default
+			ctx.GOROOT, ctx.GOOS, ctx.GOARCH, ctx.CgoEnabled = goRoot, goos, "amd64", false
+
+			if match, err := ctx.MatchFile(dir, name); err == nil && match {
+				built = true
+				break
+			}
+		}
+
+		if !built {
+			continue
+		}
+
+		if file, err := parser.ParseFile(fileSet, filepath.Join(dir, name), nil, 0); err == nil {
+			files = append(files, file)
+		}
+	}
+
+	return files
+}
+
+// TestUnexportedSignatureTypesFires is the arm's positive control, on synthetic source: an unexported
+// package type in a parameter, nested in a slice, and in a result is reported with its position, while
+// a builtin, an exported type, a qualified type and a type parameter are not.
+func TestUnexportedSignatureTypesFires(t *testing.T) {
+	source := `package p
+type _C_int int32
+type Exported int
+type hidden struct{}
+func f[T any](mib []_C_int, n int, e Exported, q other.Thing, v T) (h *hidden, err error) { return nil, nil }
+`
+	file, err := parser.ParseFile(token.NewFileSet(), "p.go", source, 0)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var decl *ast.FuncDecl
+
+	for _, d := range file.Decls {
+		if funcDecl, isFunc := d.(*ast.FuncDecl); isFunc {
+			decl = funcDecl
+		}
+	}
+
+	var got []string
+
+	for _, use := range unexportedSignatureTypes(decl, packageTypeNames([]*ast.File{file})) {
+		got = append(got, use.typeName+" in "+use.where)
+	}
+
+	if want := "_C_int in parameter mib, hidden in result h"; strings.Join(got, ", ") != want {
+		t.Fatalf("unexportedSignatureTypes = %q, want %q", strings.Join(got, ", "), want)
+	}
+}
+
+// packageTypeNames returns every package-level type name declared in files.
+func packageTypeNames(files []*ast.File) map[string]bool {
+	names := map[string]bool{}
+
+	for _, file := range files {
+		for _, decl := range file.Decls {
+			genDecl, isGen := decl.(*ast.GenDecl)
+
+			if !isGen || genDecl.Tok != token.TYPE {
+				continue
+			}
+
+			for _, spec := range genDecl.Specs {
+				names[spec.(*ast.TypeSpec).Name.Name] = true
+			}
+		}
+	}
+
+	return names
+}
+
+type signatureTypeUse struct {
+	typeName string
+	where    string // "parameter <name>" or "result <name>"
+}
+
+// unexportedSignatureTypes reports each unexported package type named anywhere in decl's parameter or
+// result types. A qualified type (pkg.T) belongs to another package and is skipped whole.
+func unexportedSignatureTypes(decl *ast.FuncDecl, typeNames map[string]bool) []signatureTypeUse {
+	var uses []signatureTypeUse
+
+	scan := func(fields *ast.FieldList, kind string) {
+		if fields == nil {
+			return
+		}
+
+		for i, field := range fields.List {
+			where := fmt.Sprintf("%s #%d", kind, i+1)
+
+			if len(field.Names) > 0 {
+				where = kind + " " + field.Names[0].Name
+			}
+
+			ast.Inspect(field.Type, func(node ast.Node) bool {
+				switch n := node.(type) {
+				case *ast.SelectorExpr:
+					return false
+				case *ast.Ident:
+					if !token.IsExported(n.Name) && typeNames[n.Name] {
+						uses = append(uses, signatureTypeUse{typeName: n.Name, where: where})
+					}
+				}
+
+				return true
+			})
+		}
+	}
+
+	scan(decl.Type.Params, "parameter")
+	scan(decl.Type.Results, "result")
+
+	return uses
 }

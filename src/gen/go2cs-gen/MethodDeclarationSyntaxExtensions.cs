@@ -62,6 +62,14 @@ public record MethodInfo
     // exported promoted method by the plain `t.M(…)` call.
     public bool IsValueEmbedBoxRecv { get; init; }
 
+    // Set on a PROMOTED method when the embed path from the enclosing struct down to the type that
+    // declares it crosses a POINTER embed at any depth. It is Go's method-set rule in one bit: a
+    // pointer-receiver method reached through a pointer hop belongs to the enclosing type's VALUE
+    // method set (the embedded pointer is what it mutates through), and reached through value hops
+    // only it belongs to the POINTER set alone. The forwarder emission reads it to decide whether a
+    // `this ref` forwarder carries [GoRecv]; it is a property of the PATH, never of a method name.
+    public bool PathHasPointer { get; init; }
+
     // Set for a cross-assembly UNEXPORTED interface method — Go's package-sealing markers such as
     // ast.Expr's `exprNode()`, ast.Stmt's `stmtNode()`, ast.Decl's `declNode()`, or
     // text/template/parse.Node's `tree()`/`writeTo()`. Its C# implementation is an INTERNAL extension

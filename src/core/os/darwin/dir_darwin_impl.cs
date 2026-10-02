@@ -48,9 +48,10 @@ using go;
 //
 // The libc entry points are taken directly rather than through the generated trampolines, for
 // the reason above: the trampolines' arguments are precisely the two unrepresentable shapes.
-// `DllImport("libc")` resolves against libSystem.B.dylib on darwin (its libc is the same image),
-// matching the `//go:cgo_import_dynamic … "/usr/lib/libSystem.B.dylib"` the generated file
-// carries. Only `readdir_r` and the size constant are needed: the DIR* itself still comes from
+// readdir_r is resolved in libSystem.B.dylib by golib's import resolver, the library the
+// `//go:cgo_import_dynamic` the generated file carries names, and under the same $INODE64 rule
+// Go's linker applies (see readdir_r_native below). Only `readdir_r` and the size constant are
+// needed: the DIR* itself still comes from
 // internal/poll's OpenDir (Go's own source for it) and is still closed by the package's
 // converted `dirInfo.close` → `closedir`, so this file owns exactly one step of the protocol.
 //
@@ -87,8 +88,24 @@ private const int direntSize = direntNameOff + direntNameMax;
 // libc's readdir_r(3). The `entry` and `result` arguments are UNMANAGED addresses — that is the
 // whole point of this file (see the header): libc writes the entry record and publishes the
 // result pointer through them, and neither can be a managed object.
-[DllImport("libc", EntryPoint = "readdir_r", SetLastError = false)]
-private static extern int readdir_r_native(nint dir, nint entry, nint result);
+//
+// It is bound through golib's import resolver, not a DllImport of "readdir_r": on macOS x86_64 the
+// bare readdir_r is the LEGACY 32-bit-inode ABI, whose struct dirent is not the layout decoded
+// above, and Go's linker binds readdir_r$INODE64 there instead. That rule lives ONCE, in
+// GoCgoDynamicImports.LinkerSymbolName (S10, 2026-10-02); a bare DllImport read four empty,
+// directory-typed names per directory on osx-x64 (run 36976772120). The resolved function is the
+// same one the converted DIR* came from (the forwarded fdopendir resolves through the same rule).
+[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+private delegate int readdir_r_fn(nint dir, nint entry, nint result);
+
+private static readdir_r_fn? s_readdir_r;
+
+private static int readdir_r_native(nint dir, nint entry, nint result) {
+    s_readdir_r ??= Marshal.GetDelegateForFunctionPointer<readdir_r_fn>(
+        GoCgoDynamicImports.Resolve("readdir_r", "/usr/lib/libSystem.B.dylib"));
+
+    return s_readdir_r(dir, entry, result);
+}
 
 // readdir is Go's dir_darwin.go (*File).readdir, protocol-for-protocol, over an unmanaged entry
 // buffer. The dirInfo/OpenDir handshake, the size/n convention, the EINTR retry, the zero-inode

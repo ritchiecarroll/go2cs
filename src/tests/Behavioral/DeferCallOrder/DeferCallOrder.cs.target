@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 using ꓸꓸꓸnint = Span<nint>;
 
 partial class main_package {
@@ -29,7 +30,7 @@ private static readonly object heldˢ = (@string)"| held:"u8;
 private static readonly object notifyˢ = (@string)"notify:"u8;
 private static readonly object mainFunctionˢ = (@string)"Main function"u8;
 
-internal static void Main() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
     GoFrame ᒐ = default;
     try {
         defer(ᴛ1 => fmt.Println(ᴛ1), firstˢ, ref ᒐ);
@@ -91,7 +92,7 @@ private static readonly object semaReleasedˢ = (@string)"sema released"u8;
 private static readonly object sentFirstˢ = (@string)"sent-first:"u8;
 private static readonly object watchingHeldˢ = (@string)"watching, held:"u8;
 
-internal static void watchAndSend(ж<sema> Ꮡs) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void watchAndSend(ж<sema> Ꮡs) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();

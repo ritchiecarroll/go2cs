@@ -11,6 +11,7 @@ using netip = net.netip_package;
 using Δsync = sync_package;
 using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
 using @internal;
+using System.Runtime.CompilerServices;
 using net;
 using time = time_package;
 using vendor.golang.org.x.net.dns;
@@ -340,7 +341,7 @@ internal static context.Context withUnexpiredValuesPreserved(context.Context loo
 
 // lookupIPAddr looks up host using the local resolver and particular network.
 // It returns a slice of that host's IPv4 and IPv6 addresses.
-internal static (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
     // Make sure that no matter what we do later, host=="" is rejected.
     if (host == ""u8) {
         return (default!, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), host, ""u8)));

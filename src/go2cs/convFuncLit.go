@@ -39,6 +39,30 @@ func numericBasicLit(expr ast.Expr) (*ast.BasicLit, bool) {
 	return lit, true
 }
 
+// funcLitHasOwnReturn reports whether the literal's body holds a return statement of its OWN; the returns
+// of a nested literal belong to that literal.
+func funcLitHasOwnReturn(funcLit *ast.FuncLit) bool {
+	found := false
+
+	ast.Inspect(funcLit.Body, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		switch n.(type) {
+		case *ast.FuncLit:
+			return false
+		case *ast.ReturnStmt:
+			found = true
+			return false
+		}
+
+		return true
+	})
+
+	return found
+}
+
 // funcLitReturnArmTypes scans a function literal's OWN single-value return arms (a nested
 // literal's returns belong to it), reporting the distinct arm types, whether any such arm exists
 // at all, and whether EVERY one of them is the untyped nil.
@@ -837,10 +861,20 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 				sliceType = "sslice"
 			}
 
+			// The NAMES come from the signature the literal DECLARES (getSignature, the same source
+			// convFuncType emitted the parameter list from), not from the raw types.Var: a parameter
+			// that shadows an enclosing local is renamed there (`args`→`argsΔ1`, declared as
+			// `params … argsΔ1ʗp`) and the body reads the renamed local, so a prologue built from the
+			// raw name declared `var args = argsʗp.slice();` against neither (CS0103, x/mod's
+			// modfile: `errorf := func(format string, args ...any)` inside a method with an `args`
+			// parameter). The raw param still keys ssliceEligible and supplies the element type.
+			declared := v.getSignature(funcLit.Type).Params()
+			named := declared.At(declared.Len() - 1)
+
 			if v.options.preferVarDecl {
-				prologue = fmt.Sprintf("%s%svar %s = %s.%s();", v.newline, v.indent(bodyIndent), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)
+				prologue = fmt.Sprintf("%s%svar %s = %s.%s();", v.newline, v.indent(bodyIndent), getSanitizedIdentifier(named.Name()), getVariadicParamName(named), sliceMethod)
 			} else {
-				prologue = fmt.Sprintf("%s%s%s<%s> %s = %s.%s();", v.newline, v.indent(bodyIndent), sliceType, v.getCSharpTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)
+				prologue = fmt.Sprintf("%s%s%s<%s> %s = %s.%s();", v.newline, v.indent(bodyIndent), sliceType, v.getCSharpTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(named.Name()), getVariadicParamName(named), sliceMethod)
 			}
 
 			body = "{" + prologue + strings.TrimPrefix(trimmedBody, "{")
@@ -1019,6 +1053,13 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			// the declared Go result tuple explicitly is the same remedy the single-result arm
 			// and the generic-inference arm above already apply, through the same helper.
 			returnTypePrefix = v.generateResultSignature(litSig) + " "
+		} else if results := litSig.Results(); context.isAssignment && results != nil && results.Len() > 0 && !funcLitHasOwnReturn(funcLit) {
+			// A literal WITH results but WITHOUT a return statement can only end in a terminating
+			// statement (`fn := func() (interface{}, error) { panic("x") }`, x/sync singleflight's
+			// TestPanicDo). Its C# body returns nothing, so natural inference types the delegate as
+			// an Action, which the declared func type it is later passed as rejects (CS1503). State
+			// the declared result type: no arm exists that could have inferred it.
+			returnTypePrefix = v.generateResultSignature(litSig) + " "
 		} else if results := litSig.Results(); results != nil && results.Len() == 1 {
 			if context.untypedInterfaceTarget {
 				// A literal converted into a real `any` parameter slot is NATURAL-typed by C# —
@@ -1193,9 +1234,24 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			posHasIntLiteral := make([]bool, results.Len())
 			posHasNintExpr := make([]bool, results.Len())
 
+			// A return that FORWARDS one multi-value call whose elements convert to declared
+			// interface results (`return os.Open(name)` against `(io.ReadCloser, error)`, x/mod's
+			// sumdb/dirhash) is emitted as a tuple of converted temps, whose natural type is the
+			// ADAPTER class (`(os_FileжReadCloser, error)`), not the declared interface: the delegate
+			// is then rejected where the declared func type is expected (CS1503). Such an arm always
+			// needs the declared result type stated.
+			hasConvertedForward := false
+
 			ast.Inspect(funcLit.Body, func(n ast.Node) bool {
 				if _, isLit := n.(*ast.FuncLit); isLit && n != funcLit.Body {
 					return false // a nested literal's returns belong to it
+				}
+
+				if ret, ok := n.(*ast.ReturnStmt); ok && len(ret.Results) == 1 {
+					if _, needsConversion := v.forwardedReturnNeedsConversion(ret.Results[0], results); needsConversion {
+						hasReturn = true
+						hasConvertedForward = true
+					}
 				}
 
 				if ret, ok := n.(*ast.ReturnStmt); ok && len(ret.Results) == results.Len() {
@@ -1268,7 +1324,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 				}
 			}
 
-			if hasReturn && (!hasFullyTypedArm || mixedIntConflict) {
+			if hasReturn && (!hasFullyTypedArm || mixedIntConflict || hasConvertedForward) {
 				returnTypePrefix = v.generateResultSignature(litSig) + " "
 			}
 		}

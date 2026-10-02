@@ -7,6 +7,7 @@
 namespace go.@internal;
 
 using sync = go.sync_package;
+using System.Runtime.CompilerServices;
 using go;
 
 partial class singleflight_package {
@@ -70,7 +71,7 @@ public static (any v, error err, bool shared) Do(this ж<Group> Ꮡg, @string ke
 
 // DoChan is like Do but returns a channel that will receive the
 // results when they are ready.
-public static /*<-*/channel<Result> DoChan(this ж<Group> Ꮡg, @string key, Func<(any, error)> fn) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static /*<-*/channel<Result> DoChan(this ж<Group> Ꮡg, @string key, Func<(any, error)> fn) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     var ch = new channel<Result>(1);

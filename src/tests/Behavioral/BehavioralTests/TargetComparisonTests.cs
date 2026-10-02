@@ -40,6 +40,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAliasStructComposite() => CheckTarget("AliasStructComposite");
 
     [TestMethod]
+    public void CheckAliasStructToInterface() => CheckTarget("AliasStructToInterface");
+
+    [TestMethod]
+    public void CheckAliasStructToInterfaceLib() => CheckTarget("AliasStructToInterfaceLib");
+
+    [TestMethod]
     public void CheckAndNotAssignNarrow() => CheckTarget("AndNotAssignNarrow");
 
     [TestMethod]
@@ -631,6 +637,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckFuncLiteralCallerNames() => CheckTarget("FuncLiteralCallerNames");
 
     [TestMethod]
+    public void CheckFuncLiteralDeclaredResultIface() => CheckTarget("FuncLiteralDeclaredResultIface");
+
+    [TestMethod]
     public void CheckFuncTypeNilConversion() => CheckTarget("FuncTypeNilConversion");
 
     [TestMethod]
@@ -1108,6 +1117,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedArrayPointerConversion() => CheckTarget("NamedArrayPointerConversion");
 
     [TestMethod]
+    public void CheckNamedArrayVsUnnamedCompare() => CheckTarget("NamedArrayVsUnnamedCompare");
+
+    [TestMethod]
     public void CheckNamedArrayWrapper() => CheckTarget("NamedArrayWrapper");
 
     [TestMethod]
@@ -1405,6 +1417,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPanicDeferCalleeFrame() => CheckTarget("PanicDeferCalleeFrame");
 
     [TestMethod]
+    public void CheckPanicOnlyFuncLiteralVar() => CheckTarget("PanicOnlyFuncLiteralVar");
+
+    [TestMethod]
     public void CheckPanicRecover() => CheckTarget("PanicRecover");
 
     [TestMethod]
@@ -1547,6 +1562,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPromotedFieldPointerDeref() => CheckTarget("PromotedFieldPointerDeref");
+
+    [TestMethod]
+    public void CheckPromotedPtrMethodValueSet() => CheckTarget("PromotedPtrMethodValueSet");
 
     [TestMethod]
     public void CheckPromotedValueEmbedExprRecv() => CheckTarget("PromotedValueEmbedExprRecv");
@@ -2198,6 +2216,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckVariadicBoxReceiver() => CheckTarget("VariadicBoxReceiver");
+
+    [TestMethod]
+    public void CheckVariadicClosureShadowParam() => CheckTarget("VariadicClosureShadowParam");
 
     [TestMethod]
     public void CheckVariadicClosureSpread() => CheckTarget("VariadicClosureSpread");

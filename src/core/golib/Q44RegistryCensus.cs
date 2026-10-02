@@ -245,7 +245,7 @@ internal static class Q44RegistryCensus
     // per-process file instead. Reported in the BLOCK rather than on stderr, because stderr belongs
     // to the program under test and every child inherits the census -- the reason arm 2 removed all
     // routine stderr writes in the first place. The file is the census's own channel.
-    private static string s_rewrittenFrom;
+    private static string? s_rewrittenFrom;
 
     /// <summary>
     /// The path the arm-time START block was written to, or null if no start block was written.
@@ -262,7 +262,7 @@ internal static class Q44RegistryCensus
     /// blind direction together, and it is the same principle as the start block itself: an
     /// instrument says what it did instead of leaving a reader to infer it.
     /// </remarks>
-    internal static string StartBlockPath { get; private set; }
+    internal static string? StartBlockPath { get; private set; }
 
     /// <summary>
     /// The census path, PER PROCESS BY CONSTRUCTION.
@@ -297,7 +297,7 @@ internal static class Q44RegistryCensus
         if (named.Contains("{pid}", StringComparison.Ordinal))
             return named.Replace("{pid}", pid);
 
-        string dir = System.IO.Path.GetDirectoryName(named);
+        string? dir = System.IO.Path.GetDirectoryName(named);
         string stem = System.IO.Path.GetFileNameWithoutExtension(named);
         string ext = System.IO.Path.GetExtension(named);
         string perProcess = $"{stem}-{pid}{ext}";

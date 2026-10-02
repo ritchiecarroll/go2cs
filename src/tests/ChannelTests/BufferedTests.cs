@@ -31,11 +31,16 @@ namespace ChannelTests
             Assert.IsTrue(sut.IsUnbuffered);
         }
 
+        // Go's make(chan T, n) with a negative n panics "makechan: size out of range" — a
+        // runtime.Error that recover() sees — and the constructor raises exactly that. It raised
+        // the CLR's ArgumentOutOfRangeException until Go's runtime panics were given their Go
+        // values, and this test still expected the CLR exception.
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void Ctor_ChanSizeNegative_ShouldThrow()
         {
-            var sut = new channel<int>(-1);
+            PanicException panic = Assert.ThrowsException<PanicException>(() => new channel<int>(-1));
+
+            Assert.AreEqual("makechan: size out of range", panic.Message);
         }
 
         [TestMethod]

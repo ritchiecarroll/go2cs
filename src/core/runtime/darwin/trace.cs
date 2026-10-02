@@ -20,6 +20,7 @@ namespace go;
 using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using System.Runtime.CompilerServices;
 
 partial class runtime_package {
 
@@ -717,7 +718,7 @@ internal static ref traceAdvancerState traceAdvancer => ref ᏑtraceAdvancer.Val
 }
 
 // start starts a new traceAdvancer.
-internal static void start(this ж<traceAdvancerState> Ꮡs) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void start(this ж<traceAdvancerState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Start a goroutine to periodically advance the trace generation.

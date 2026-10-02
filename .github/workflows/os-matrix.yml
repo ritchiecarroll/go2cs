@@ -69,6 +69,11 @@ on:
         options:
           - 9.0.x
           - 10.0.x
+      run_timeout:
+        description: 'Per-program RUN budget in seconds for the behavioral stages (GO2CS_RUN_TIMEOUT), 1-1800. Blank takes 120, the budget every stage used before this input existed. Raise it to tell a slow program on the 3-core macos-15 runner from a real hang: a NOT MEASURED (timeout) row says only that the budget expired. A large value on behavioral-full can exceed that stage''s job budget.'
+        type: string
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -109,6 +114,7 @@ jobs:
       stage: ${{ steps.derive.outputs.stage }}
       filter: ${{ steps.derive.outputs.filter }}
       dotnet: ${{ steps.derive.outputs.dotnet }}
+      run-timeout: ${{ steps.derive.outputs.run-timeout }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -121,6 +127,7 @@ jobs:
           INPUT_STAGE: ${{ inputs.stage }}
           INPUT_FILTER: ${{ inputs.filter }}
           INPUT_DOTNET: ${{ inputs.dotnet }}
+          INPUT_RUN_TIMEOUT: ${{ inputs.run_timeout }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           $ErrorActionPreference = 'Stop'
@@ -145,6 +152,16 @@ jobs:
           if (-not $stage)  { $stage = 'census' }
           if (-not $dotnet) { $dotnet = '10.0.x' }
           if ($null -eq $filter) { $filter = '' }
+
+          # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
+          # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
+          # plan by name rather than reaching the runner as a string it would misread.
+          $runTimeout = if ($env:EVENT_NAME -eq 'schedule') { '' } else { "$env:INPUT_RUN_TIMEOUT".Trim() }
+          if (-not $runTimeout) { $runTimeout = '120' }
+          if ($runTimeout -notmatch '^[0-9]+$' -or [int]$runTimeout -lt 1 -or [int]$runTimeout -gt 1800) {
+              throw "run_timeout must be a whole number of seconds from 1 to 1800; got '$runTimeout'."
+          }
+          Write-Host "behavioral run budget: $runTimeout s per program"
 
           $env:INPUT_GOOS = $goos
           $env:INPUT_STAGE = $stage
@@ -239,6 +256,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "stage=$stage" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "filter=$filter" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dotnet=$dotnet" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "run-timeout=$runTimeout" -Encoding utf8
 
   # ---------------------------------------------------------------------------------------------
   # run — one leg per (goos, runner, rid).
@@ -520,7 +538,7 @@ jobs:
           GO2CS_BUILD_TIMEOUT: '5400'
           GO2CS_BUILD_ONE_TIMEOUT: '1800'
           GO2CS_TRANSPILE_TIMEOUT: '300'
-          GO2CS_RUN_TIMEOUT: '120'
+          GO2CS_RUN_TIMEOUT: ${{ needs.plan.outputs.run-timeout }}
           SLICES: '4'
         run: |
           $ErrorActionPreference = 'Continue'
@@ -638,7 +656,7 @@ jobs:
           GO2CS_BUILD_TIMEOUT: '5400'
           GO2CS_BUILD_ONE_TIMEOUT: '1800'
           GO2CS_TRANSPILE_TIMEOUT: '300'
-          GO2CS_RUN_TIMEOUT: '120'
+          GO2CS_RUN_TIMEOUT: ${{ needs.plan.outputs.run-timeout }}
         run: |
           $ErrorActionPreference = 'Continue'
 
@@ -713,13 +731,18 @@ jobs:
 
       - name: Behavioral stderr — run named projects directly and keep the WHOLE stderr
         if: needs.plan.outputs.stage == 'behavioral-stderr'
+        # A STEP limit under the job's: a wedged timeout arm once held both mac runners to the job's
+        # 1h30m (run 36957913093), and one runner lost communication. Forty minutes covers five
+        # projects at run_timeout 300 with their builds (the slowest measured: osx-arm64, 28 min);
+        # the artifact upload below still runs (if: always()).
+        timeout-minutes: 40
         shell: pwsh
         env:
           STDERR_PROJECTS: ${{ needs.plan.outputs.filter }}
           GO2CS_BUILD_TIMEOUT: '5400'
           GO2CS_BUILD_ONE_TIMEOUT: '1800'
           GO2CS_TRANSPILE_TIMEOUT: '300'
-          GO2CS_RUN_TIMEOUT: '120'
+          GO2CS_RUN_TIMEOUT: ${{ needs.plan.outputs.run-timeout }}
         run: |
           $ErrorActionPreference = 'Continue'
 
@@ -780,7 +803,71 @@ jobs:
               $finished = $proc.WaitForExit([int]$env:GO2CS_RUN_TIMEOUT * 1000)
 
               if (-not $finished) {
+                  # Kill the TREE, never just the apphost, and never by name (CLAUDE.md floor 5). A program
+                  # that spawns itself (StdoutCloseEofBarrier execs os.Args[0]) leaves its child alive past
+                  # a parent-only kill: on arm64 that orphan outlived every later row of the job (run
+                  # 36953433720, "Terminate orphan process: pid (6761) (StdoutCloseEofB)" at job end).
+                  # The tree is collected by PARENT PID while the apphost is still alive (an orphan
+                  # re-parents to launchd or init and no longer answers pgrep -P), then every descendant
+                  # is killed, then the apphost.
+                  #
+                  # NOTHING IS STOPPED. The first version SIGSTOPped each member before reading the next
+                  # level, and on BOTH mac legs the step then hung inside the walk with no further output
+                  # until the job's limit: osx-x64 ran out its 1h30m with both StdoutCloseEofB processes
+                  # still alive at cleanup, and osx-arm64's runner lost communication (run 36957913093).
+                  # Every call here is a one-shot native command over a RUNNING process.
+                  $tree = [System.Collections.Generic.List[string]]::new()
+
+                  if ($IsWindows) {
+                      & taskkill /PID $proc.Id /T /F 2>&1 | Out-Null
+                  }
+                  else {
+                      $frontier = @($proc.Id)
+                      $descendants = @()
+
+                      while ($frontier.Count -gt 0) {
+                          $next = @()
+
+                          foreach ($parentPid in $frontier) {
+                              $next += @(& pgrep -P $parentPid 2>$null | Where-Object { "$_" -match '^\s*\d+\s*$' } | ForEach-Object { [int]"$_".Trim() })
+                          }
+
+                          # Only real, new pids: never 0 or 1, never one already collected.
+                          $next = @($next | Where-Object { $_ -gt 1 -and $_ -ne $proc.Id -and $descendants -notcontains $_ })
+                          $descendants += $next
+                          $frontier = $next
+                      }
+
+                      foreach ($child in $descendants) {
+                          $tree.Add("$child ($(@(& ps -o comm= -p $child 2>$null) -join ''))")
+                      }
+
+                      foreach ($child in $descendants) { & kill -9 $child 2>$null }
+                  }
+
                   Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+                  Start-Sleep -Seconds 2
+
+                  if ($tree.Count -gt 0) {
+                      Write-Host "==> ${p}: the timeout kill took the apphost and $($tree.Count) descendant(s): $($tree -join ', ')"
+                  }
+
+                  # A survivor is a pid that still exists and is not a zombie awaiting its reaper.
+                  foreach ($id in @($proc.Id) + @($tree | ForEach-Object { [int]($_ -split ' ')[0] })) {
+                      if ($IsWindows) {
+                          $alive = Get-Process -Id $id -ErrorAction SilentlyContinue
+                          $survivor = if ($alive) { "$($alive.ProcessName)" } else { '' }
+                      }
+                      else {
+                          $stat = "$(@(& ps -o stat= -p $id 2>$null) -join '')".Trim()
+                          $survivor = if ($stat -and $stat -notmatch '^Z') { "$(@(& ps -o comm= -p $id 2>$null) -join '') [$stat]" } else { '' }
+                      }
+
+                      if ($survivor) {
+                          Write-Host "::warning::${p}: pid $id ($survivor) SURVIVED the timeout kill"
+                      }
+                  }
+
                   $code = 'TIMEOUT'
               }
               else {
@@ -999,6 +1086,16 @@ jobs:
           # sweep itself classifies them; this records the raw state alongside for the reader.
           & git -C $PWD status --porcelain -- src/core |
               Set-Content -LiteralPath (Join-Path $art "sweep-$goos-$rid-git-status.txt") -Encoding utf8
+
+          # The CONTENT of those rewrites, not just their names: a non-windows leg's -tests emission
+          # differs from the committed (windows) record, and the runner's tree is gone when the job
+          # ends. The diff lets a lane read per-GOOS emission drift without a runner of that OS
+          # (COORD ruling 2026-10-02, after the first darwin row drifted 15+1 lines unread).
+          # WriteAllLines always creates the file, so a clean tree uploads an empty diff rather than none.
+          $trackedDiff = Join-Path $art "sweep-$goos-$rid-tracked.diff"
+          $diffLines = [string[]]@(& git -C $PWD -c core.quotePath=false diff --no-ext-diff --no-color -- src/core)
+          [System.IO.File]::WriteAllLines($trackedDiff, $diffLines)
+          Write-Host "==> tracked-rewrite diff: $((Get-Item -LiteralPath $trackedDiff).Length) bytes -> $(Split-Path -Leaf $trackedDiff)"
 
           $summary = @(
               "## Validated sweep shard -- GOOS=$goos ($rid)"

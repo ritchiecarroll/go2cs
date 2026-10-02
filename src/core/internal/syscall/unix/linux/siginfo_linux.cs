@@ -67,7 +67,7 @@ public static partial class unix_package
 
     // WaitStatus converts SiginfoChild, as filled in by the waitid syscall, to syscall.WaitStatus
     // — the converted body verbatim over the mirror's fields.
-    public static syscall_package.WaitStatus WaitStatus(this ref SiginfoChild s)
+    [GoRecv] public static syscall_package.WaitStatus WaitStatus(this ref SiginfoChild s)
     {
         uint ws = 0;
 

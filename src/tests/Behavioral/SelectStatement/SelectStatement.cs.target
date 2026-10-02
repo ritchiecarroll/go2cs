@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -75,7 +76,7 @@ internal static void filter(/*<-*/channel<nint> src, channel/*<-*/<nint> dst, ni
     }
 }
 
-internal static void sieve() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void sieve() {
     var ch = new channel<nint>(0);
     goǃ(generate, ch.WithDirection(GoChanDir.Send));
     while (ᐧ) {
@@ -105,7 +106,7 @@ private static readonly object unexpectedˢ = (@string)"unexpected: "u8;
 private static readonly @string helloˢ = "hello"u8;
 private static readonly object racedˢ = (@string)"raced:"u8;
 
-internal static void Main() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
     var ch = new channel<nint>(2);
     ch.ᐸꟷ(1);
     ch.ᐸꟷ(2);

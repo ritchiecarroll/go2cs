@@ -64,6 +64,8 @@ using Thread = System.Threading.Thread;
 // readers see it as well as the suffix-based ones.
 [module: go.GoManualConversion]
 
+#pragma warning disable CS8826 // the converted partial names the blank Go parameter `_`; this hand-owned body keeps its readable name
+
 namespace go.@internal;
 
 partial class sync_package

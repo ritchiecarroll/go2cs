@@ -182,7 +182,7 @@ partial class runtime_package
         // was never thrown at all. A panic no frame ever caught — a panic() in a function with no
         // defer, which is what runtime/debug_test.TestMain does — has no snapshot, and there the
         // exception that actually travelled still carries the throw site.
-        StackTrace stack = panic.PanicTrace ?? new StackTrace(thrown, fNeedFileInfo: true);
+        StackTrace stack = panic.PanicTrace ?? new StackTrace(thrown, fNeedFileInfo: false);
         StringBuilder trace = new();
 
         trace.Append("goroutine 1 [running]:\n");
@@ -1612,7 +1612,7 @@ partial class runtime_package
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static IEnumerable<StackFrame> callerFrames(RuntimeMethodHandle anchor)
     {
-        StackFrame[] frames = new StackTrace(skipFrames: 0, fNeedFileInfo: true).GetFrames();
+        StackFrame[] frames = new StackTrace(skipFrames: 0, fNeedFileInfo: false).GetFrames();
         int boundary = -1;
 
         for (int i = 0; i < frames.Length; i++)
@@ -1722,7 +1722,12 @@ partial class runtime_package
     // symbolizes by (runtime_FrameSymbolName) -- one derivation, two spellings. They differ only where Go's
     // funcNameForPrint decorates: a generic function prints as fn[...], while pprof reads the raw symbol,
     // which in Go carries the GC-shape arguments and here, with no shapes to recover, is the undecorated name.
-    private static string goFrameName(System.Reflection.MethodBase method, StackFrame? frame, out string symbol)
+    private static string goFrameName(System.Reflection.MethodBase method, StackFrame? frame, out string symbol) =>
+        goFrameName(method, frame?.GetILOffset() ?? StackFrame.OFFSET_UNKNOWN, out symbol);
+
+    // The same, for a frame known only by its IL offset (a captured pc resolving lazily; see
+    // CallerFrameRecord). OFFSET_UNKNOWN names a method with no instruction at all.
+    private static string goFrameName(System.Reflection.MethodBase method, int ilOffset, out string symbol)
     {
         Type? declaring = method.DeclaringType;
 
@@ -1830,7 +1835,7 @@ partial class runtime_package
             if (close > 1)
             {
                 string outer = name[1..close];
-                string? recorded = frame is null ? goFuncLiteralSuffix(method) : goFuncLiteralSuffix(method, frame);
+                string? recorded = ilOffset < 0 ? goFuncLiteralSuffix(method) : goFuncLiteralSuffix(method, ilOffset);
 
                 if (recorded is not null)
                 {
@@ -1881,19 +1886,23 @@ partial class runtime_package
     // one Go line, nor a frame in an OUTER literal sitting on the very line a nested literal
     // starts — the innermost span wins the tie, which favors the far more common frame (a body
     // line of the nested literal) over the rarer one (the outer literal mid-call on that line).
-    private static string? goFuncLiteralSuffix(System.Reflection.MethodBase method, StackFrame frame)
+    //
+    // The frame's C# line is read at its IL OFFSET through this file's own PDB reader (the one reader:
+    // methodSourcePosition), never from a StackFrame's file info, so no capture has to ask the CLR to
+    // symbolize.
+    private static string? goFuncLiteralSuffix(System.Reflection.MethodBase method, int ilOffset)
     {
-        string csPath = goSourcePath(frame.GetFileName());
+        (string? csFile, int csLine) = methodSourcePosition(method, ilOffset);
 
-        if (csPath.Length == 0)
+        if (csFile is null || csLine <= 0)
             return null;
 
-        GoPositionMapRecord? record = goPositionMapRecord(method, csPath);
+        GoPositionMapRecord? record = goPositionMapRecord(method, goSourcePath(csFile));
 
         if (record is null)
             return null;
 
-        int goLine = record.GoLineFor(frame.GetFileLineNumber());
+        int goLine = record.GoLineFor(csLine);
 
         if (goLine <= 0)
             return null;
@@ -1927,22 +1936,75 @@ partial class runtime_package
     private static readonly object s_pdbLock = new();
     private static readonly Dictionary<System.Reflection.Assembly, System.Reflection.Metadata.MetadataReaderProvider?> s_pdbs = new();
 
+    // THE ONE DOOR to a symbol file, and the instrument on it: every assembly whose PDB this runtime has
+    // tried to open, by simple name, in order. Reading a position is the ONLY reason to pass through --
+    // a capture (runtime.Callers, a panic's site trace) never does -- and GolibTests' LazyCallersTests
+    // reads this list to assert exactly that, deterministically, where a timing could not.
+    private static readonly List<string> s_symbolFileOpens = new();
+
+    private static System.Reflection.Metadata.MetadataReaderProvider? symbolReader(System.Reflection.Assembly assembly)
+    {
+        lock (s_pdbLock)
+        {
+            if (!s_pdbs.TryGetValue(assembly, out System.Reflection.Metadata.MetadataReaderProvider? provider))
+            {
+                provider = openPortablePdb(assembly);
+                s_pdbs[assembly] = provider;
+                s_symbolFileOpens.Add(assembly.GetName().Name ?? string.Empty);
+            }
+
+            return provider;
+        }
+    }
+
+    private static string[] symbolFileOpens()
+    {
+        lock (s_pdbLock)
+            return s_symbolFileOpens.ToArray();
+    }
+
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, int[]?> s_sequencePointOffsets = new();
+
+    // The IL offsets at which a method's non-hidden sequence points (its statements) start, ascending,
+    // or null when its PDB cannot be read. Read once per method; see returnSiteILOffset.
+    private static int[]? sequencePointOffsets(System.Reflection.MethodBase method) =>
+        s_sequencePointOffsets.GetOrAdd(method, static m =>
+        {
+            System.Reflection.Metadata.MetadataReaderProvider? provider = symbolReader(m.Module.Assembly);
+
+            if (provider is null)
+                return null;
+
+            try
+            {
+                lock (s_pdbLock)
+                {
+                    System.Reflection.Metadata.MetadataReader pdb = provider.GetMetadataReader();
+                    var definition = System.Reflection.Metadata.Ecma335.MetadataTokens.MethodDefinitionHandle(m.MetadataToken);
+                    List<int> offsets = [];
+
+                    foreach (System.Reflection.Metadata.SequencePoint point in pdb.GetMethodDebugInformation(definition.ToDebugInformationHandle()).GetSequencePoints())
+                    {
+                        if (!point.IsHidden)
+                            offsets.Add(point.Offset);
+                    }
+
+                    offsets.Sort();
+                    return offsets.ToArray();
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        });
+
     // A method's first non-hidden sequence point (document name, line), or (null, 0). Given an IL
     // offset (not StackFrame.OFFSET_UNKNOWN), the last non-hidden sequence point at or before it
     // instead -- the lookup StackTrace(true) makes for a live frame -- falling back to the first.
     private static (string? file, int line) methodSourcePosition(System.Reflection.MethodBase method, int ilOffset = StackFrame.OFFSET_UNKNOWN)
     {
-        System.Reflection.Assembly assembly = method.Module.Assembly;
-        System.Reflection.Metadata.MetadataReaderProvider? provider;
-
-        lock (s_pdbLock)
-        {
-            if (!s_pdbs.TryGetValue(assembly, out provider))
-            {
-                provider = openPortablePdb(assembly);
-                s_pdbs[assembly] = provider;
-            }
-        }
+        System.Reflection.Metadata.MetadataReaderProvider? provider = symbolReader(method.Module.Assembly);
 
         if (provider is null)
             return (null, 0);
@@ -2125,8 +2187,22 @@ partial class runtime_package
     // goFramePosition spells one frame's source position: the Go one the conversion recorded, or the
     // converted C# one when it recorded none. The single funnel both consumers read, so a traceback
     // and a runtime.Caller on the same frame can never disagree about where it is.
+    //
+    // THE ONE READER. The C# position is read at the frame's IL offset through methodSourcePosition --
+    // this file's portable-PDB reader -- and never from the StackFrame's own file info, so no stack
+    // capture here asks the CLR to symbolize (every `new StackTrace` in this file and in golib passes
+    // fNeedFileInfo: false). The CLR resolves file info for EVERY frame at capture, opening each
+    // assembly's PDB, which made runtime.Callers a symbolization where Go's is a pc capture; see
+    // CallerFrameRecord. The lookup is the CLR's own (the last non-hidden sequence point at or before
+    // the offset); a frame with no IL offset has no position, as it had none there.
     private static (string file, int line) goFramePosition(System.Reflection.MethodBase method, StackFrame frame) =>
-        goSourcePosition(method, frame.GetFileName(), frame.GetFileLineNumber());
+        goILPosition(method, frame.GetILOffset());
+
+    private static (string file, int line) goILPosition(System.Reflection.MethodBase method, int ilOffset)
+    {
+        (string? csFile, int csLine) = ilOffset >= 0 ? methodSourcePosition(method, ilOffset) : (null, 0);
+        return goSourcePosition(method, csFile, csLine);
+    }
 
     // The mapping itself, from a C# position however it was read: a live frame's file info, or a PDB
     // sequence point read at print time (goCreatorPosition).
@@ -2651,9 +2727,23 @@ partial class runtime_package
 
     // ------- The traceback surface: Callers / callers (Caller's funnel) / Frames.Next -------
 
-    // One converted-Go call site observed on the managed stack, resolved at intern time so a
-    // later Frames walk needs no live StackFrame. Tokens are process-lifetime, like Go's program
-    // counters, so a pc slice recorded by Callers stays resolvable by any later CallersFrames.
+    // One converted-Go call site observed on the managed stack. Tokens are process-lifetime, like Go's
+    // program counters, so a pc slice recorded by Callers stays resolvable by any later CallersFrames.
+    //
+    // CAPTURE IS NOT SYMBOLIZATION. Go's runtime.Callers records program counters and nothing else; the
+    // function name, file and line are found later, by CallersFrames or FuncForPC, for the pcs somebody
+    // actually asks about. Until 2026-10-02 this record was filled at CAPTURE, from a StackTrace built
+    // with file info, which makes the CLR open the PDB of every assembly on the stack -- for every frame,
+    // the skipped ones included. log/slog calls runtime.Callers on every record whether or not a handler
+    // ever prints a source, so a program that only logged paid a symbol read per assembly: measured on a
+    // busy disk as up to 3.5 s of waiting inside log/slog's tests (TestSetDefault's 1 s deadline missed 1
+    // run in 3), and here as 39-57 ms for a first Callers against 7 ms, and ~25,000 ns per call against
+    // ~13,800.
+    //
+    // So a record made from a live frame carries only what capture saw -- the method, the REPORTED IL
+    // offset and whether the frame is a return address -- and Resolve fills the rest on the first READ of
+    // the token (callerFrameRecord), through this file's own PDB reader. A record whose Method is null
+    // was built already resolved (a root frame, a synthetic pc).
     private sealed class CallerFrameRecord
     {
         public string Function = string.Empty;
@@ -2667,10 +2757,66 @@ partial class runtime_package
         // The Go line of the function's `func` keyword (Go's _func.startLine / Frame.startLine), 0 where
         // no source position is known. See goFunctionStartLine.
         public nint StartLine;
+
+        public System.Reflection.MethodBase? Method;
+        public int ILOffset;
+        public bool ReturnAddress;
+        private int m_resolved;
+
+        // Idempotent and safe from any thread: the fields are written once, under the record's own lock,
+        // and m_resolved is published last.
+        public void Resolve()
+        {
+            if (Method is null || Volatile.Read(ref m_resolved) != 0)
+                return;
+
+            lock (this)
+            {
+                if (m_resolved != 0)
+                    return;
+
+                // A method-expression wrapper is Go's AUTOGENERATED function, positioned as Go positions
+                // it (the same rule the FuncForPC record applies).
+                if (Method.IsDefined(typeof(GoWrapperAttribute), inherit: false))
+                {
+                    File = "<autogenerated>";
+                    Line = 1;
+                }
+                else
+                {
+                    // The LINE is the call's (Go's pc-1): see returnSiteILOffset. The NAME below is read
+                    // at the REPORTED offset, as it always was -- a literal is named by the frame's own
+                    // line, never by the method's first sequence point.
+                    int callSite = ReturnAddress ? returnSiteILOffset(Method, ILOffset) : -1;
+                    (string file, int line) = goILPosition(Method, callSite >= 0 ? callSite : ILOffset);
+                    File = file;
+                    Line = line;
+                }
+
+                string function = goFrameName(Method, ILOffset, out string symbol);
+                Function = function;
+                SymbolName = symbol == function ? null : symbol;
+                StartLine = goFunctionStartLine(Method);
+                Volatile.Write(ref m_resolved, 1);
+            }
+        }
     }
+
+    // A captured pc's IDENTITY: the module, the method, the IL offset the CLR reported for the frame, and
+    // whether the frame is a return address. A struct, so interning a frame formats no string -- the key
+    // was once "{module GUID}:{token}:{offset}", built per frame per call. It deliberately holds the
+    // REPORTED offset, not the resolved call site: resolving needs the PDB, and capture must not read it.
+    //
+    // The caveat that follows, stated: two reported offsets that resolve to ONE call site are two pcs.
+    // The CLR reports one offset per site for a given compilation of the method, so under the Release
+    // TieredCompilation=0 default a site has one pc for the life of the process (pinned by GolibTests'
+    // LazyCallersTests.ACallSiteHasOnePcAcrossCalls); only a tiering promotion, which recompiles the
+    // method, can give the same site a second one.
+    private readonly record struct CallSiteKey(System.Reflection.Module Module, int MethodToken, int ILOffset, bool ReturnAddress);
 
     private static readonly object s_callerTableLock = new();
     private static readonly Dictionary<string, nuint> s_callerTokens = new();
+    private static readonly Dictionary<CallSiteKey, nuint> s_callSiteTokens = new();
     private static readonly List<CallerFrameRecord> s_callerRecords = new();
 
     // EVERY CALL SITE OWNS A SPAN, AND ITS TOKEN SITS IN THE MIDDLE. Go's consumers do arithmetic on a
@@ -2746,7 +2892,7 @@ partial class runtime_package
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static nint captureCallers(nint skip, slice<uintptr> pc)
     {
-        StackTrace stack = new(skipFrames: 0, fNeedFileInfo: true);
+        StackTrace stack = new(skipFrames: 0, fNeedFileInfo: false);
         StackFrame[] frames = stack.GetFrames();
         nint remainingSkip = skip;
         nint count = 0;
@@ -3003,13 +3149,13 @@ partial class runtime_package
                 site.RemoveAt(site.Count - 1);
 
                 foreach (StackFrame siteFrame in site)
-                    spliced.Add(internCallerFrame(siteFrame.GetMethod()!, siteFrame));
+                    spliced.Add(internCallerFrame(siteFrame.GetMethod()!, siteFrame, returnAddress: !isFaultingFrame(siteFrame, raw)));
 
                 return spliced;
             }
 
             foreach (StackFrame siteFrame in site)
-                spliced.Add(internCallerFrame(siteFrame.GetMethod()!, siteFrame));
+                spliced.Add(internCallerFrame(siteFrame.GetMethod()!, siteFrame, returnAddress: !isFaultingFrame(siteFrame, raw)));
         }
 
         return spliced;
@@ -3145,7 +3291,19 @@ partial class runtime_package
     // Everything outside a package class — golib, the BCL, the test-host runtime — is not Go
     // code and never counts. keepWrapper admits a method-expression wrapper, which only splicePanic
     // asks for: the one place Go keeps a wrapper frame is directly beneath the panic machinery.
-    private static bool isGoSourceFrame(System.Reflection.MethodBase method, bool keepWrapper = false)
+    //
+    // The answer is a property of the METHOD, so it is computed once per method: every capture asks it
+    // of every frame on the stack, and the test below is four reflection lookups (measured: it was most
+    // of what a runtime.Callers cost once capture stopped symbolizing).
+    private static bool isGoSourceFrame(System.Reflection.MethodBase method, bool keepWrapper = false) =>
+        (keepWrapper ? s_goSourceFramesKeepingWrappers : s_goSourceFrames).GetOrAdd(method, keepWrapper
+            ? static m => classifyGoSourceFrame(m, keepWrapper: true)
+            : static m => classifyGoSourceFrame(m, keepWrapper: false));
+
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, bool> s_goSourceFrames = new();
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, bool> s_goSourceFramesKeepingWrappers = new();
+
+    private static bool classifyGoSourceFrame(System.Reflection.MethodBase method, bool keepWrapper)
     {
         Type? declaring = method.DeclaringType;
 
@@ -3193,39 +3351,167 @@ partial class runtime_package
         return topLevel.Name.EndsWith("_package", StringComparison.Ordinal);
     }
 
-    // Interns one observed call site to its process-lifetime token. Keyed by (module version id,
-    // method metadata token, IL offset) — the managed spelling of "a PC": stable for the process
-    // lifetime, distinct per call site, equal on every recurrence, so pc-equality comparisons
-    // behave as they do in Go. Token 0 stays invalid, matching Go's zero-pc sentinel.
-    private static uintptr internCallerFrame(System.Reflection.MethodBase method, StackFrame frame)
+    // Interns one observed call site to its process-lifetime token -- the managed spelling of "a PC":
+    // stable for the process lifetime, distinct per call site, equal on every recurrence, so pc-equality
+    // comparisons behave as they do in Go. Token 0 stays invalid, matching Go's zero-pc sentinel. The
+    // key is CallSiteKey, and NOTHING here symbolizes: the record is filled when its token is first read
+    // (CallerFrameRecord.Resolve).
+    //
+    // `returnAddress` says the frame is suspended in a CALL -- true of every frame a live walk sees and
+    // of every frame of a panic site but its innermost, the faulting instruction. Go resolves such a
+    // PC at pc-1, the call instruction, so its line is the line of the call; see returnSiteILOffset for
+    // why the CLR's own answer is not that line under the full-opt JIT. The key carries the mode, so one
+    // IL offset seen both ways is two sites.
+    private static uintptr internCallerFrame(System.Reflection.MethodBase method, StackFrame frame, bool returnAddress = true)
     {
-        string key = $"{method.Module.ModuleVersionId}:{method.MetadataToken}:{frame.GetILOffset()}";
+        int ilOffset = frame.GetILOffset();
+        CallSiteKey key = new(method.Module, method.MetadataToken, ilOffset, returnAddress);
 
         lock (s_callerTableLock)
         {
-            if (s_callerTokens.TryGetValue(key, out nuint token))
+            if (s_callSiteTokens.TryGetValue(key, out nuint token))
                 return token;
 
-            // A method-expression wrapper is Go's AUTOGENERATED function, positioned as Go positions it
-            // (the same rule the FuncForPC record applies).
-            (string file, int line) = method.IsDefined(typeof(GoWrapperAttribute), inherit: false) ? ("<autogenerated>", 1) : goFramePosition(method, frame);
-
-            string function = goFrameName(method, frame, out string symbol);
-
-            CallerFrameRecord record = new()
-            {
-                Function = function,
-                SymbolName = symbol == function ? null : symbol,
-                File = file,
-                Line = line,
-                StartLine = goFunctionStartLine(method)
-            };
-
-            s_callerRecords.Add(record);
+            s_callerRecords.Add(new CallerFrameRecord { Method = method, ILOffset = ilOffset, ReturnAddress = returnAddress });
             // The middle of the new site's span; never 0, so Go's zero-pc sentinel stays invalid.
             token = callerSpanStart(s_callerRecords.Count - 1) + ((nuint)1 << (CallerSpanShift - 1));
-            s_callerTokens[key] = token;
+            s_callSiteTokens[key] = token;
             return token;
+        }
+    }
+
+    // Whether a panic site's frame is the exception's TOP frame -- the faulting instruction (a throw, a
+    // null dereference), whose offset is exact and is not a return address. Every other site frame,
+    // including a Go frame beneath a filtered golib helper that raised the panic, is suspended in a call.
+    private static bool isFaultingFrame(StackFrame siteFrame, StackFrame[] raw) =>
+        raw.Length > 0 && ReferenceEquals(siteFrame, raw[0]);
+
+    // RETURN-SITE RESOLUTION. A non-leaf frame is suspended in a call; Go names the line of that call
+    // (pc-1). The CLR resolves the frame's return address to the IL offset of the LAST JIT mapping at or
+    // before it, and the full-opt JIT -- the Release TieredCompilation=0 default -- keeps no per-statement
+    // boundaries, so the last mapping before a call is routinely the PREVIOUS call's. Measured
+    // 2026-10-01 on internal/godebug's TestBisectTestCase (calls to Value at IL 21/45/69/93/117, each
+    // statement's compare call at 37/61/85/109/133): TC0 frames read 11/37/61/85/109 -- the previous
+    // statement's call, so every line was one early (TestCmdBisect: have 145-147, want 146-148) -- while
+    // tier-0 read 20/44/68/92/116, the instruction before each call.
+    //
+    // Which call, then, depends on what kind of mapping was found. A STATEMENT BOUNDARY (the offset is a
+    // sequence point's start) means the frame is inside that statement, so the suspended call is the first
+    // call-like instruction AT OR AFTER it -- including the boundary itself when the statement IS a call
+    // (`f()` as a statement, a package var initializer): measured in the layout A/B, resolving strictly
+    // after there moved runtime/pprof's TestMemoryProfiler frames and runtime's TestLineNumber one call
+    // LATE. Any other mapping is a previous CALL's record, so the suspended call is the first one STRICTLY
+    // after it. godebug's TC0 offsets read both kinds: 11 (a boundary, -> 21) and 37 (a call, -> 45); its
+    // tier-0 offset 20 is a boundary (-> 21). A miss that lands on another call of the same statement
+    // names the same line.
+    //
+    // Two limits, stated. (1) "Previous" is in NATIVE order, so where block layout departs from IL order
+    // the next IL call may not be the suspended one; the gates measured the line-attribution rows at TC0
+    // with and without this. (2) Under NativeAOT a method has no IL body to read (GetMethodBody returns
+    // null or throws), and the frame keeps the CLR's own line, today's answer.
+    private static int returnSiteILOffset(System.Reflection.MethodBase method, int ilOffset)
+    {
+        if (ilOffset < 0)
+            return -1;
+
+        int[]? calls = callSiteOffsets(method);
+        int[]? statements = sequencePointOffsets(method);
+
+        if (calls is null || statements is null)
+            return -1;
+
+        bool boundary = Array.BinarySearch(statements, ilOffset) >= 0;
+        int index = Array.BinarySearch(calls, boundary ? ilOffset : ilOffset + 1);
+
+        if (index < 0)
+            index = ~index;
+
+        return index < calls.Length ? calls[index] : -1;
+    }
+
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, int[]?> s_callSiteOffsets = new();
+
+    // The IL offsets of a method's call-like instructions (call, callvirt, newobj, calli), ascending, or
+    // null when the method has no readable IL body (NativeAOT, a dynamic method). Decoded once per method.
+    private static int[]? callSiteOffsets(System.Reflection.MethodBase method) =>
+        s_callSiteOffsets.GetOrAdd(method, static m =>
+        {
+            byte[]? il;
+
+            try
+            {
+                il = m.GetMethodBody()?.GetILAsByteArray();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+            if (il is null)
+                return null;
+
+            List<int> calls = [];
+            int i = 0;
+
+            while (i < il.Length)
+            {
+                int start = i;
+                System.Reflection.Emit.OpCode op;
+
+                if (il[i] == 0xFE && i + 1 < il.Length)
+                {
+                    if (!ILOpCodeTable.TwoByte.TryGetValue(il[i + 1], out op))
+                        return null;
+                    i += 2;
+                }
+                else if (!ILOpCodeTable.OneByte.TryGetValue(il[i], out op))
+                {
+                    return null;
+                }
+                else
+                {
+                    i += 1;
+                }
+
+                if (op.FlowControl == System.Reflection.Emit.FlowControl.Call || op == System.Reflection.Emit.OpCodes.Newobj)
+                    calls.Add(start);
+
+                i += op.OperandType switch
+                {
+                    System.Reflection.Emit.OperandType.InlineNone => 0,
+                    System.Reflection.Emit.OperandType.ShortInlineBrTarget or System.Reflection.Emit.OperandType.ShortInlineI or System.Reflection.Emit.OperandType.ShortInlineVar => 1,
+                    System.Reflection.Emit.OperandType.InlineVar => 2,
+                    System.Reflection.Emit.OperandType.InlineI8 or System.Reflection.Emit.OperandType.InlineR => 8,
+                    System.Reflection.Emit.OperandType.InlineSwitch when i + 4 <= il.Length => 4 + 4 * BitConverter.ToInt32(il, i),
+                    _ => 4
+                };
+            }
+
+            return calls.ToArray();
+        });
+
+    // The ECMA-335 opcode table, keyed by encoding, built from System.Reflection.Emit.OpCodes on first
+    // use. A holder class rather than a static constructor on the package class, whose type
+    // initialization this must not change.
+    private static class ILOpCodeTable
+    {
+        internal static readonly Dictionary<byte, System.Reflection.Emit.OpCode> OneByte = new();
+        internal static readonly Dictionary<byte, System.Reflection.Emit.OpCode> TwoByte = new();
+
+        static ILOpCodeTable()
+        {
+            foreach (System.Reflection.FieldInfo field in typeof(System.Reflection.Emit.OpCodes).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static))
+            {
+                if (field.GetValue(null) is not System.Reflection.Emit.OpCode op)
+                    continue;
+
+                ushort value = unchecked((ushort)op.Value);
+
+                if (op.Size == 1)
+                    OneByte[(byte)value] = op;
+                else
+                    TwoByte[(byte)(value & 0xFF)] = op;
+            }
         }
     }
 
@@ -3267,10 +3553,20 @@ partial class runtime_package
     {
         nuint value = token;
 
+        CallerFrameRecord? found = null;
+
         lock (s_callerTableLock)
         {
             if (callerSpanIndex(value) is int index)
-                return s_callerRecords[index];
+                found = s_callerRecords[index];
+        }
+
+        // The READ of a token is where it symbolizes (CallerFrameRecord), outside the table lock: the
+        // resolution reads a PDB and must not hold up a concurrent capture.
+        if (found is not null)
+        {
+            found.Resolve();
+            return found;
         }
 
         // SECOND SOURCE, ONE RENDERER. A pc outside the caller table is not necessarily foreign: it

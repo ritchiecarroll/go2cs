@@ -65,8 +65,9 @@ public static partial class builtin
         // FIRST, before anything can touch System.Console: close the .NET runtime's startup
         // duplicates of the standard descriptors so that Go code closing fd 0/1/2 releases the
         // underlying pipe the way it does in a Go binary. The ordering is part of that fix's
-        // safety contract - see builtin.LinuxStdDescriptors.cs.
+        // safety contract - see builtin.LinuxStdDescriptors.cs (darwin: builtin.DarwinStdDescriptors.cs).
         InitializeLinuxStdDescriptorHygiene();
+        InitializeDarwinStdDescriptorHygiene();
 
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         Console.OutputEncoding = Console.InputEncoding = Encoding.UTF8;
@@ -278,7 +279,7 @@ public static partial class builtin
     /// Returns a new <see cref="PanicException"/> with the specified <paramref name="state"/>.
     /// </summary>
     /// <param name="state">State of panic exception.</param>
-    public static PanicException panic(object state)
+    public static PanicException panic(object? state)
     {
         // Go's `panic` takes an `any`, so the value's DYNAMIC TYPE is observable: a recovering
         // comparison (`if p != "x"`), a type assertion (`err.(string)`), and a `case string:` arm

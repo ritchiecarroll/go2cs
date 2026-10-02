@@ -243,7 +243,7 @@ public static error /*err*/ Kill(nint pid, ΔSignal signum) {
     execveDarwin = execve;
 }
 
-internal static (uintptr dir, error err) fdopendir(nint fd) {
+public static (uintptr dir, error err) fdopendir(nint fd) {
     uintptr dir = default!;
     error err = default!;
 

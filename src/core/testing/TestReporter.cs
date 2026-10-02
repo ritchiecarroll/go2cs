@@ -100,7 +100,7 @@ internal sealed class TestReporter(string package, bool json, bool verbose)
 
             if (json)
             {
-                WriteEventLine(JsonSerializer.Serialize(testEvent, JsonOptions));
+                WriteEventLine(FramedJson(testEvent));
                 return;
             }
 
@@ -117,6 +117,27 @@ internal sealed class TestReporter(string package, bool json, bool verbose)
                 : $"{testEvent.Action.ToUpperInvariant(),-20} {testEvent.Test}{output}");
         }
     }
+
+    /// <summary>
+    /// Go's framing marker, ^V. Under <c>-test.v=test2json</c> (what <c>go test -json</c> runs a test binary
+    /// with) every framing line starts with it (testing.go: <c>chattyFlag.prefix</c>), and cmd/test2json ends
+    /// a line at "\n" OR just before a ^V that does not begin one (test2json.go: <c>indexEOL</c>), then strips
+    /// the leading ^V.
+    /// </summary>
+    /// <remarks>
+    /// The host's --json mode is that binary and test2json in one process, so its JSON event lines carry the
+    /// marker and the comparer reads them with indexEOL's rule. That is what keeps an event whole when a test
+    /// wrote to os.Stdout without ending its line: the partial output stays partial, as it does in Go's
+    /// stream, and the event still starts a line for the reader. x/mod/sumdb/tlog's
+    /// TestCertificateTransparency (an HTTP body via os.Stdout.Write under -v) lost its pass event to exactly
+    /// that before (H2, measured 2026-10-02, linux). The human-readable mode carries no marker, as Go's plain
+    /// -test.v does not.
+    /// </remarks>
+    internal const char FramingMarker = '\u0016';
+
+    /// <summary>One event as its framed JSON line: <see cref="FramingMarker"/>, then the object.</summary>
+    internal static string FramedJson(TestEvent testEvent) =>
+        FramingMarker + JsonSerializer.Serialize(testEvent, JsonOptions);
 
     // Serializes every event line this process writes, across reporters and the host's own
     // infrastructure-error line.

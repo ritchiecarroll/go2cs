@@ -70,7 +70,7 @@ using static go.net.http.fcgi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/fcgi/child.go", "child.cs", "ACVKgsqCqJKCgoKCgpSCgoKUgoKUgoKCggANHKLugqaCgpSClAAIBoKClIKClIKClIIAAxDCgpSCgoCCpIKCpoKClKaCggAIFILuwoKCgoKAgqSAggAICpS4uMSygpSWlKaWgoCCpIKClIKCqKKClIKkgoKCpqSUlKaUgoKmpIKCpqSSgoKUlJSkgoKCzKKCgoKmprKCgpSClIKCgoKmgoIABxKChIK4goKmAAQU8oKCgoKUlIKUgoKClIIABxLygtq0mqSC3JS2")]
+[assembly: go.GoPositionMap("net/http/fcgi/child.go", "child.cs", "ACZKgsqCqJKCgoKCgpSCgoKUgoKUgoKCggANHKLugqaCgpSClAAIBoKClIKClIKClIIAAxDCgpSCgoCCpIKCpoKClKaCggAIFILuwoKCgoKAgqSAggAICpS4uMSygpSWlKaWgoCCpIKClIKCqKKClIKkgoKCpqSUlKaUgoKmpIKCpqSSgoKUlJSkgoKCzKKCgoKmprKCgpSClIKCgoKmgoIABxKChIK4goKmAAQU8oKCgoKUlIKUgoKClIIABxLygtq0mqSC3JS2")]
 [assembly: go.GoPositionMap("net/http/fcgi/fcgi.go", "fcgi.cs", "AEeeAYKClIKC7oKCgoKCAA0egqjigoKCgpQADRCygIKkgpSCgIKkpoKo4oKCgoKAgqSAgqSAgqSC1oKCgoKmgoKCgoKCgIKkgIKkgIK2gqaCgpSSgoKUgoKUpoKClKaCgoKClIIACRSCgIKCpKaCgoIAChaCgoKCgpSAgqSClKaU")]
 // </GoSourcePositionMaps>
 

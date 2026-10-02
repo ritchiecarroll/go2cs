@@ -76,7 +76,7 @@ using static go.os_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("os/dir.go", "dir.cs", "ABdQABECgpSCuJQAAiQAEgKClIK4lAACIgAKAoKUgpSUAAcY8oKClJSChgAFLgAUAqKCloKClJKCzIKWgoKUkoKClIKCloCCgqQ=", "126-128:1;153-193:1")]
-[assembly: go.GoPositionMap("os/dir_darwin.go", "dir_darwin.cs", "ABImgoKUggAExAGClKSkpKSkpKSsxg==")]
+[assembly: go.GoPositionMap("os/dir_darwin.go", "dir_darwin.cs", "ABImgoKUggAExAGClKSkpKSkpKSs5g==")]
 [assembly: go.GoPositionMap("os/eloop_other.go", "eloop_other.cs", "AAsekpSklIKm")]
 [assembly: go.GoPositionMap("os/env.go", "env.cs", "AAwgopSCgoKClIKC7JSUgqaClKyyqqKUpKiSrLKUgpaSgoKUpqSmkpSssoKCAAIQ0oLaooKClKiSqJKqog==")]
 [assembly: go.GoPositionMap("os/error.go", "error.cs", "ABImlJKSkpSSloAAAhLwAAwegKSAppKCrLKClAACEuIAAhLiAAIS4gACFgAIAoKmuIKCpoKokpSkpJQ=")]

@@ -42,6 +42,7 @@
 // lifetime (the parent → view → parent cycle collects together).
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
@@ -156,7 +157,7 @@ public abstract partial class ж<T>
         return publishView(fieldRefFunc, new FieldRefBox<TElem>(this, FieldRefWrappers<TElem>.For(fieldRefFunc), fieldRefFunc));
     }
 
-    private bool tryFindView<TElem>(Delegate token, out ж<TElem>? view)
+    private bool tryFindView<TElem>(Delegate token, [NotNullWhen(true)] out ж<TElem>? view)
     {
         // the lazy flip: the first field view asked of any ж<T> marks T a consumer for every box
         // minted afterwards

@@ -418,7 +418,7 @@ internal class StructTypeTemplate : TemplateBase
                     // (fileWithoutReadFrom → *File → *file) because that accessor may itself be
                     // this shape. Value embeds keep the plain `ref` form: their promoted fields
                     // live in the enclosing allocation, so the existing rooting is already right.
-                    string pointerEmbedInnerType = PointerEmbedInnerType(promotedStructType, promotedMemberName);
+                    string? pointerEmbedInnerType = PointerEmbedInnerType(promotedStructType, promotedMemberName);
 
                     // A depth-1 readonly zero-size member answers the shared slot, as the ref property above.
                     string promotedRefTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName)
@@ -772,10 +772,13 @@ internal class StructTypeTemplate : TemplateBase
             bool directEmbedIsUnexportedValue = directEmbedIsValue &&
                 GetScope(GetSimpleName(promotedStructType, dropCollisionPrefix: true)) != "public";
 
-            collectPromotedMethods(promotedStructType, []);
+            collectPromotedMethods(promotedStructType, [], IsPointerHop(promotedStructType));
 
             // PATH-scoped for the same reason as countPromotedMethods above (increment E2c).
-            void collectPromotedMethods(string typeName, HashSet<string> seenTypes)
+            // pathHasPointer is carried down the same path and stamped on every method harvested
+            // along it (MethodInfo.PathHasPointer): whether a POINTER embed lies between the
+            // enclosing struct and the type declaring the method.
+            void collectPromotedMethods(string typeName, HashSet<string> seenTypes, bool pathHasPointer)
             {
                 // Go forbids embedding cycles, but guard anyway.
                 if (!seenTypes.Add(typeName))
@@ -797,7 +800,7 @@ internal class StructTypeTemplate : TemplateBase
                     foreach (MethodInfo m in metadataValueMethods)
                     {
                         if (promotedMethodNames.Add(m.Name))
-                            promotedStructMethods.Add(m);
+                            promotedStructMethods.Add(m with { PathHasPointer = pathHasPointer });
                     }
 
                     bool metadataValueEmbedBoxRecv = typeName == promotedStructType && directEmbedIsValue;
@@ -807,7 +810,7 @@ internal class StructTypeTemplate : TemplateBase
                         foreach (MethodInfo m in metadataBoxMethods)
                         {
                             if (promotedMethodNames.Add(m.Name))
-                                promotedStructMethods.Add(m with { IsBoxRecv = true, IsValueEmbedBoxRecv = metadataValueEmbedBoxRecv });
+                                promotedStructMethods.Add(m with { IsBoxRecv = true, IsValueEmbedBoxRecv = metadataValueEmbedBoxRecv, PathHasPointer = pathHasPointer });
                         }
                     }
 
@@ -817,7 +820,7 @@ internal class StructTypeTemplate : TemplateBase
                 foreach (MethodInfo m in decl.GetExtensionMethods(comp!) ?? [])
                 {
                     if (promotedMethodNames.Add(m.Name))
-                        promotedStructMethods.Add(m);
+                        promotedStructMethods.Add(m with { PathHasPointer = pathHasPointer });
                 }
 
                 // A POINTER embed's BOX-receiver primaries (`this ж<T>`) promote unchanged — the hop
@@ -844,7 +847,7 @@ internal class StructTypeTemplate : TemplateBase
                     foreach (MethodInfo m in decl.GetBoxReceiverExtensionMethods(comp!))
                     {
                         if (promotedMethodNames.Add(m.Name))
-                            promotedStructMethods.Add(m with { IsBoxRecv = true, IsValueEmbedBoxRecv = valueEmbedBoxRecv });
+                            promotedStructMethods.Add(m with { IsBoxRecv = true, IsValueEmbedBoxRecv = valueEmbedBoxRecv, PathHasPointer = pathHasPointer });
                     }
                 }
 
@@ -858,7 +861,7 @@ internal class StructTypeTemplate : TemplateBase
                 foreach ((string memberType, _, _, bool isEmbedded, _) in decl.GetStructMembers(comp!, true))
                 {
                     if (isEmbedded)
-                        collectPromotedMethods(memberType, [.. seenTypes]);
+                        collectPromotedMethods(memberType, [.. seenTypes], pathHasPointer || IsPointerHop(memberType));
                 }
             }
 
@@ -1027,7 +1030,18 @@ internal class StructTypeTemplate : TemplateBase
                 if (method.IsBoxRecv && embedAccess.EndsWith(".Value", StringComparison.Ordinal))
                     embedAccess = embedAccess[..^".Value".Length];
 
-                result.Append($"\r\n    {methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{StructName} target");
+                // Go's method-set rule for the `this ref` forwarder of a promoted POINTER-receiver
+                // method. Through VALUE embeds only, the method is in the enclosing type's pointer set
+                // alone, so the forwarder says so with [GoRecv] — exactly what its source carries —
+                // and the run-time method set (GetGoMethodSetCandidates) leaves it out of the value
+                // set. Unmarked, it read as a VALUE-receiver method: reflect counted a method Go does
+                // not have and an interface assertion Go rejects succeeded. Through a POINTER embed
+                // the method IS in the value set, so that forwarder stays unmarked and golib binds
+                // it through a copy of the receiver (TypeExtensions.IsCopyBoundReceiver). The pointer
+                // forwarder below is the form every pointer-set consumer binds, in both cases.
+                string goRecv = method.IsRefRecv && !method.PathHasPointer ? "[global::go.GoRecv] " : "";
+
+                result.Append($"\r\n    {goRecv}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{StructName} target");
 
                 if (method.Parameters.Length > 1)
                 {
@@ -1072,8 +1086,15 @@ internal class StructTypeTemplate : TemplateBase
     // converter strips them), so StripGenericTypeArguments keeps a generic embed's simple name
     // comparable against the `.Value` suffix this test is really asking about.
     private static string EmbedHop(string promotedStructType, string memberName) =>
-        StripGenericTypeArguments(GetSimpleName(promotedStructType, dropCollisionPrefix: true))
-            .EndsWith(".Value", StringComparison.Ordinal) ? $"{memberName}.Value" : memberName;
+        IsPointerHop(promotedStructType) ? $"{memberName}.Value" : memberName;
+
+    // Whether an embed is a POINTER embed, read off its declared type: the box form's simple name
+    // carries the `.Value` deref. The ONE statement of that test — EmbedHop renders the hop from it
+    // and the promoted-method collection folds it down the embed path (MethodInfo.PathHasPointer) —
+    // so the hop a forwarder spells and the method set it is placed in cannot disagree.
+    private static bool IsPointerHop(string embedTypeName) =>
+        StripGenericTypeArguments(GetSimpleName(embedTypeName, dropCollisionPrefix: true))
+            .EndsWith(".Value", StringComparison.Ordinal);
 
     private string? m_enclosingGoPackage;
     private bool m_enclosingGoPackageResolved;

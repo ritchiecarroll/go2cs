@@ -269,6 +269,8 @@
     <Project Path="tests/Behavioral/AnonIfaceMethodSetWidening/AnonIfaceMethodSetWidening.csproj" />
     <Project Path="tests/Behavioral/AnonStructAssertLiftDedupe/AnonStructAssertLiftDedupe.csproj" />
     <Project Path="tests/Behavioral/AdapterNameInterfaceCollision/AdapterNameInterfaceCollision.csproj" />
+    <Project Path="tests/Behavioral/AliasStructToInterface/AliasStructToInterface.csproj" />
+    <Project Path="tests/Behavioral/AliasStructToInterfaceLib/AliasStructToInterfaceLib.csproj" />
     <Project Path="tests/Behavioral/AnonIfaceThroughPointerAdapter/AnonIfaceThroughPointerAdapter.csproj" />
     <Project Path="tests/Behavioral/AnonInterfaceCrossFile/AnonInterfaceCrossFile.csproj" />
     <Project Path="tests/Behavioral/AnonInterfaceSignatureAssert/AnonInterfaceSignatureAssert.csproj" />
@@ -479,6 +481,7 @@
     <Project Path="tests/Behavioral/FuncLitArgCapture/FuncLitArgCapture.csproj" />
     <Project Path="tests/Behavioral/FuncLitCaptureInCondition/FuncLitCaptureInCondition.csproj" />
     <Project Path="tests/Behavioral/FuncLiteralCallerNames/FuncLiteralCallerNames.csproj" />
+    <Project Path="tests/Behavioral/FuncLiteralDeclaredResultIface/FuncLiteralDeclaredResultIface.csproj" />
     <Project Path="tests/Behavioral/FuncLitNumericTupleReturn/FuncLitNumericTupleReturn.csproj" />
     <Project Path="tests/Behavioral/FuncLitStringConcatReturn/FuncLitStringConcatReturn.csproj" />
     <Project Path="tests/Behavioral/FuncLitUntypedConstReturn/FuncLitUntypedConstReturn.csproj" />
@@ -670,6 +673,7 @@
     <Project Path="tests/Behavioral/NamedMapCrossPkgKey/NamedMapCrossPkgKey.csproj" />
     <Project Path="tests/Behavioral/NamedMapMakeNonNil/NamedMapMakeNonNil.csproj" />
     <Project Path="tests/Behavioral/NamedArrayPointerConversion/NamedArrayPointerConversion.csproj" />
+    <Project Path="tests/Behavioral/NamedArrayVsUnnamedCompare/NamedArrayVsUnnamedCompare.csproj" />
     <Project Path="tests/Behavioral/NamedArrayZeroValue/NamedArrayZeroValue.csproj" />
     <Project Path="tests/Behavioral/NamedPointerReinterpret/NamedPointerReinterpret.csproj" />
     <Project Path="tests/Behavioral/NamedResultAddressEscape/NamedResultAddressEscape.csproj" />
@@ -751,6 +755,7 @@
     <Project Path="tests/Behavioral/PackageVarInitOrder/PackageVarInitOrder.csproj" />
     <Project Path="tests/Behavioral/PackageVarTupleInitOrder/PackageVarTupleInitOrder.csproj" />
     <Project Path="tests/Behavioral/PanicDeferCalleeFrame/PanicDeferCalleeFrame.csproj" />
+    <Project Path="tests/Behavioral/PanicOnlyFuncLiteralVar/PanicOnlyFuncLiteralVar.csproj" />
     <Project Path="tests/Behavioral/PanicRecover/PanicRecover.csproj" />
     <Project Path="tests/Behavioral/PanicValueRendering/PanicValueRendering.csproj" />
     <Project Path="tests/Behavioral/ParallelAssignmentHazard/ParallelAssignmentHazard.csproj" />
@@ -799,6 +804,7 @@
     <Project Path="tests/Behavioral/PromotedEmbedZeroValueField/PromotedEmbedZeroValueField.csproj" />
     <Project Path="tests/Behavioral/PromotedFieldNameIsType/PromotedFieldNameIsType.csproj" />
     <Project Path="tests/Behavioral/PromotedFieldPointerDeref/PromotedFieldPointerDeref.csproj" />
+    <Project Path="tests/Behavioral/PromotedPtrMethodValueSet/PromotedPtrMethodValueSet.csproj" />
     <Project Path="tests/Behavioral/PromotedValueEmbedExprRecv/PromotedValueEmbedExprRecv.csproj" />
     <Project Path="tests/Behavioral/PromotedValueEmbedLib/PromotedValueEmbedLib.csproj" />
     <Project Path="tests/Behavioral/PromotedValueEmbedUser/PromotedValueEmbedUser.csproj" />
@@ -1023,6 +1029,7 @@
     <Project Path="tests/Behavioral/VariadicPointerParam/VariadicPointerParam.csproj" />
     <Project Path="tests/Behavioral/VariadicSlotInterfaces/VariadicSlotInterfaces.csproj" />
     <Project Path="tests/Behavioral/VariableCapture/VariableCapture.csproj" />
+    <Project Path="tests/Behavioral/VariadicClosureShadowParam/VariadicClosureShadowParam.csproj" />
     <Project Path="tests/Behavioral/VersionedImport/VersionedImport.csproj" />
     <Project Path="tests/Behavioral/VersionedImport/vlib/vlib.v2.csproj" />
     <Project Path="tests/Behavioral/WindowsNewCallback/WindowsNewCallback.csproj" />

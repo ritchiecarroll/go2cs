@@ -80,7 +80,7 @@ internal abstract class TemplateBase
         
         {{Usings}}
 
-        #nullable enable
+        #nullable enable annotations
         
         namespace {{PackageNamespace}};
 

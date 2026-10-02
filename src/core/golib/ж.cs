@@ -7,6 +7,7 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using go.golib;
@@ -172,7 +173,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
     // Real managed element storage behind this pointer, when it exists and deref-equivalence
     // holds (see ElemRefBox).
-    internal virtual bool TryGetElementStorage(out T[]? backing, out nint index)
+    internal virtual bool TryGetElementStorage([NotNullWhen(true)] out T[]? backing, out nint index)
     {
         backing = null;
         index = 0;

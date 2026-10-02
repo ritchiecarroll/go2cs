@@ -606,6 +606,40 @@ the generic-inference arm already used:
 ["pred"u8] = (any, error) (params ꓸꓸꓸany aʗp) => { … }
 ```
 
+## A `:=`-bound func literal states its declared result type when its body cannot supply it
+A function literal bound with `:=` emits as `var f = (…) => …`, so C# takes the delegate type from
+the body's return arms. Two body shapes cannot supply the declared Go result list, and the literal
+is then rejected where it is passed as its declared func type (CS1503):
+
+- **No return statement at all.** A literal with results whose body only panics (x/sync
+  singleflight's `TestPanicDo`) has nothing to infer from, so C# infers `Action`.
+- **A forwarded multi-value call that converts.** `return os.Open(name)` against a declared
+  `(io.ReadCloser, error)` is emitted as a tuple of converted temps, whose natural type is the
+  adapter class `(os_FileжReadCloser, error)` (x/mod's sumdb/dirhash).
+
+Both state the declared result type, through the same explicit-return-type mechanism as the arms
+above:
+```go
+fn := func() (interface{}, error) { panic("boom") }
+open := func(name string) (io.ReadCloser, error) { return os.Open(name) }
+```
+```csharp
+var fn = (any, error) () => {
+    throw panic("boom");
+};
+var open = (Δio.ReadCloser, error) (@string name) => {
+    var (ᴛ1, ᴛ2) = os.Open(name);
+    return (new os_FileжReadCloser(ᴛ1), ᴛ2);
+};
+```
+The forwarded-call test is the predicate `visitReturnStmt` uses to decide the element-wise
+conversion (`forwardedReturnNeedsConversion`), so the type is stated exactly when the return emits
+adapter wrapping. A SINGLE-result literal returning one concrete adapter (`return
+new slog.JSONHandlerжΔHandler(…)` against `slog.Handler`) is left unprefixed: delegate covariance
+converts `Func<…, Adapter>` to `Func<…, Handler>`, and testing/slogtest's banked suite compiles that
+shape. Guarded by the `PanicOnlyFuncLiteralVar` and `FuncLiteralDeclaredResultIface` behavioral
+tests.
+
 ## Lifted function-local types: anonymous structs dedupe, named types carry [GoLocalName]
 C# forbids type declarations in method bodies, so the converter lifts function-local types to
 package scope under a function-prefixed name. Two Go type-identity rules ride the lift:

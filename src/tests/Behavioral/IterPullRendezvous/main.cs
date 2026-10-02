@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using iter = iter_package;
 using runtime = runtime_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -44,7 +45,7 @@ internal static void @catch(@string label, Action f) {
     finally { ᒐ.Run(); }
 }
 
-internal static bool goexits(Action f) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static bool goexits(Action f) {
     var done = new channel<bool>(0);
     var doneʗ1 = done;
     goǃ(() => {

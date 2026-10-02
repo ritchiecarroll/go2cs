@@ -13,6 +13,7 @@ using http = go.net.http_package;
 using url = go.net.url_package;
 using strings = strings_package;
 using time = time_package;
+using System.Runtime.CompilerServices;
 using go.net;
 
 partial class httputil_package {
@@ -101,7 +102,7 @@ internal static readonly @string http11204NoContentˢ = "HTTP/1.1 204 No Content
 // DumpRequestOut is like [DumpRequest] but for outgoing client requests. It
 // includes any headers that the standard [http.Transport] adds, such as
 // User-Agent.
-public static (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡreq, bool body) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡreq, bool body) {
     GoFrame ᒐ = default;
     try {
         ref var req = ref Ꮡreq.DerefOrNull();

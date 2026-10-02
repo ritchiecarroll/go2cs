@@ -12,6 +12,7 @@ using runtime = runtime_package;
 using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
+using System.Runtime.CompilerServices;
 using encoding;
 using math;
 
@@ -111,7 +112,7 @@ internal static void timeoutWrapper(ж<testing.T> Ꮡt, Func<(net.Conn, net.Conn
 private static readonly object transmittedDataDiffersˢ = (@string)"transmitted data differs"u8;
 
 // testBasicIO tests that the data sent on c1 is properly received on c2.
-internal static void testBasicIO(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testBasicIO(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     var want = new slice<byte>((1 << (int)(20)));
     rand.New(rand.NewSource(0)).Read(want);
     var dataCh = new channel<slice<byte>>(0);
@@ -153,7 +154,7 @@ internal static void testBasicIO(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
 
 // testPingPong tests that the two endpoints can synchronously send data to
 // each other in a typical request-response pattern.
-internal static void testPingPong(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testPingPong(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     GoFrame ᒐ = default;
     try {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -216,7 +217,7 @@ internal static void testPingPong(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) 
 
 // testRacyRead tests that it is safe to mutate the input Read buffer
 // immediately after cancelation has occurred.
-internal static void testRacyRead(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testRacyRead(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     GoFrame ᒐ = default;
     try {
         goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new rand_RandжReader(rand.New(rand.NewSource(0))));
@@ -251,7 +252,7 @@ internal static void testRacyRead(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) 
 
 // testRacyWrite tests that it is safe to mutate the input Write buffer
 // immediately after cancelation has occurred.
-internal static void testRacyWrite(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testRacyWrite(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     GoFrame ᒐ = default;
     try {
         goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), io.Discard, new net_ConnᴠReader(c2));
@@ -285,7 +286,7 @@ internal static void testRacyWrite(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2)
 }
 
 // testReadTimeout tests that Read timeouts do not affect Write.
-internal static void testReadTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testReadTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), io.Discard, new net_ConnᴠReader(c2));
     c1.SetReadDeadline(aLongTimeAgo);
     var (_, err) = c1.Read(new slice<byte>(1024));
@@ -298,7 +299,7 @@ internal static void testReadTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c
 }
 
 // testWriteTimeout tests that Write timeouts do not affect Read.
-internal static void testWriteTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testWriteTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new rand_RandжReader(rand.New(rand.NewSource(0))));
     c1.SetWriteDeadline(aLongTimeAgo);
     var (_, err) = c1.Write(new slice<byte>(1024));
@@ -312,7 +313,7 @@ internal static void testWriteTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn 
 
 // testPastTimeout tests that a deadline set in the past immediately times out
 // Read and Write requests.
-internal static void testPastTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testPastTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new net_ConnᴠReader(c2));
     testRoundtrip(Ꮡt, c1);
     c1.SetDeadline(aLongTimeAgo);
@@ -335,7 +336,7 @@ private static readonly object writeTimedOutBeforeˢ = (@string)"Write timed out
 
 // testPresentTimeout tests that a past deadline set while there are pending
 // Read and Write operations immediately times out those operations.
-internal static void testPresentTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testPresentTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     GoFrame ᒐ = default;
     try {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -396,7 +397,7 @@ internal static void testPresentTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Con
 
 // testFutureTimeout tests that a future deadline will eventually time out
 // Read and Write operations.
-internal static void testFutureTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testFutureTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(2);
     c1.SetDeadline(time.Now().Add(100 * time.Millisecond));
@@ -431,7 +432,7 @@ internal static void testFutureTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn
 
 // testCloseTimeout tests that calling Close immediately times out pending
 // Read and Write operations.
-internal static void testCloseTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testCloseTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     GoFrame ᒐ = default;
     try {
         goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new net_ConnᴠReader(c2));
@@ -486,7 +487,7 @@ private static readonly object skippingOnPlan9SeeHttpsˢ = (@string)"skipping on
 
 // testConcurrentMethods tests that the methods of net.Conn can safely
 // be called concurrently.
-internal static void testConcurrentMethods(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testConcurrentMethods(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     if (runtime.GOOS == "plan9"u8) {
         Ꮡt.Skip(skippingOnPlan9SeeHttpsˢ);
     }
@@ -616,7 +617,7 @@ internal static void testRoundtrip(ж<testing.T> Ꮡt, net.Conn c) {
 // resyncConn resynchronizes the connection into a sane state.
 // It assumes that everything written into c is echoed back to itself.
 // It assumes that 0xff is not currently on the wire or in the read buffer.
-internal static void resyncConn(ж<testing.T> Ꮡt, net.Conn c) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void resyncConn(ж<testing.T> Ꮡt, net.Conn c) {
     Ꮡt.Helper();
     c.SetDeadline(neverTimeout);
     var errCh = new channel<error>(0);

@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using time = time_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -101,7 +102,7 @@ internal static void Main() {
         var (v, ok) = ᐸꟷ(ch, ꟷ);
         fmt.Println(closedChannelˢ, len(v.vals), v.vals[3], ok);
     });
-    arm(parkedReceiveˢ, () => {
+    arm(parkedReceiveˢ, [MethodImpl(MethodImplOptions.NoInlining)] () => {
         var ch = new channel<counts>(0);
         var chʗ1 = ch;
         goǃ(() => {
@@ -111,7 +112,7 @@ internal static void Main() {
         var (v, ok) = ᐸꟷ(ch, ꟷ);
         fmt.Println(parkedReceiveˢ, len(v.vals), v.vals[3], ok);
     });
-    arm(parkedBareReceiveˢ, () => {
+    arm(parkedBareReceiveˢ, [MethodImpl(MethodImplOptions.NoInlining)] () => {
         var ch = new channel<counts>(0);
         var chʗ2 = ch;
         goǃ(() => {

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -14,7 +15,7 @@ internal static uint32 compute(uint32 p) {
     return r;
 }
 
-internal static void Main() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
     goǃ(ᴛ1 => compute(ᴛ1), (uint32)(poly));
     var stored = ᐸꟷ(done);
     fmt.Printf("%#x\n"u8, stored);

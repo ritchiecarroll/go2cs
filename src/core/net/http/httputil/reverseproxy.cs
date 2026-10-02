@@ -20,6 +20,7 @@ using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
 using httpguts = vendor.golang.org.x.net.http.httpguts_package;
+using System.Runtime.CompilerServices;
 using bufio = bufio_package;
 using go.net;
 using go.net.http;
@@ -356,7 +357,7 @@ internal static readonly @string forwardedˢ = "Forwarded"u8;
 internal static readonly @string userAgentˢ = "User-Agent"u8;
 internal static readonly @string trailerˢ = "Trailer"u8;
 
-public static void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -809,7 +810,7 @@ internal static @string upgradeType(httpꓸHeader h) {
     return h.Get(upgradeˢ);
 }
 
-internal static void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡres) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡres) {
     GoFrame ᒐ = default;
     try {
         ref var req = ref Ꮡreq.DerefOrNull();

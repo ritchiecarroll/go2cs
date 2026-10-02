@@ -228,14 +228,14 @@ public static partial class testing_package
     {
     }
 
-    public static void Error(this ref T t, params ꓸꓸꓸany args)
+    [GoRecv] public static void Error(this ref T t, params ꓸꓸꓸany args)
     {
         TestExecution execution = t.RequiredExecution;
         execution.Log(Sprint(args));
         execution.Fail();
     }
 
-    public static void Errorf(this ref T t, @string format, params ꓸꓸꓸany args)
+    [GoRecv] public static void Errorf(this ref T t, @string format, params ꓸꓸꓸany args)
     {
         TestExecution execution = t.RequiredExecution;
         execution.Log(Sprintf(format, args));
@@ -286,24 +286,24 @@ public static partial class testing_package
 
     [GoRecv] public static bool Failed(this ref T t) => t.RequiredExecution.Failed;
 
-    public static void Fatal(this ref T t, params ꓸꓸꓸany args)
+    [GoRecv] public static void Fatal(this ref T t, params ꓸꓸꓸany args)
     {
         TestExecution execution = t.RequiredExecution;
         execution.Log(Sprint(args));
         execution.FailNow();
     }
 
-    public static void Fatalf(this ref T t, @string format, params ꓸꓸꓸany args)
+    [GoRecv] public static void Fatalf(this ref T t, @string format, params ꓸꓸꓸany args)
     {
         TestExecution execution = t.RequiredExecution;
         execution.Log(Sprintf(format, args));
         execution.FailNow();
     }
 
-    public static void Log(this ref T t, params ꓸꓸꓸany args) =>
+    [GoRecv] public static void Log(this ref T t, params ꓸꓸꓸany args) =>
         t.RequiredExecution.Log(Sprint(args));
 
-    public static void Logf(this ref T t, @string format, params ꓸꓸꓸany args) =>
+    [GoRecv] public static void Logf(this ref T t, @string format, params ꓸꓸꓸany args) =>
         t.RequiredExecution.Log(Sprintf(format, args));
 
     [GoRecv] public static void Helper(this ref T t) => t.RequiredExecution.Helper();
@@ -316,14 +316,14 @@ public static partial class testing_package
     [GoRecv] public static bool Run(this ref T t, @string name, Action<ж<T>> test) =>
         t.RequiredExecution.Run(name.ToString(), test);
 
-    public static void Skip(this ref T t, params ꓸꓸꓸany args)
+    [GoRecv] public static void Skip(this ref T t, params ꓸꓸꓸany args)
     {
         TestExecution execution = t.RequiredExecution;
         execution.Log(Sprint(args));
         execution.SkipNow();
     }
 
-    public static void Skipf(this ref T t, @string format, params ꓸꓸꓸany args)
+    [GoRecv] public static void Skipf(this ref T t, @string format, params ꓸꓸꓸany args)
     {
         TestExecution execution = t.RequiredExecution;
         execution.Log(Sprintf(format, args));
@@ -388,6 +388,11 @@ public static partial class testing_package
         // tier (TestFlagBridge.BeginInProcessRun): Go's test binary exits in the parse, before any test.
         if (TestFlagBridge.Parse() is { } status)
             return status;
+
+        // Go's next decision after the parse, in Go's position: -test.list lists and returns 0 without
+        // running a test (`if *matchList != "" { listTests(...); m.exitCode = 0; return }`).
+        if (runner.Listing)
+            return runner.ListTests();
 
         return runner.RunAll();
     }
@@ -524,21 +529,21 @@ public static partial class testing_package
     // Params-taking B members need the same explicit ж<B> overloads as T's above (params
     // collections are ref-like Spans the RecvGenerator does not synthesize overloads for).
     // Failure reporting is a no-op: benchmark bodies never execute, so there is no run to fail.
-    public static void Error(this ref B b, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Error(this ref B b, params ꓸꓸꓸany args) { }
 
-    public static void Errorf(this ref B b, @string format, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Errorf(this ref B b, @string format, params ꓸꓸꓸany args) { }
 
-    public static void Fatal(this ref B b, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Fatal(this ref B b, params ꓸꓸꓸany args) { }
 
-    public static void Fatalf(this ref B b, @string format, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Fatalf(this ref B b, @string format, params ꓸꓸꓸany args) { }
 
-    public static void Log(this ref B b, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Log(this ref B b, params ꓸꓸꓸany args) { }
 
-    public static void Logf(this ref B b, @string format, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Logf(this ref B b, @string format, params ꓸꓸꓸany args) { }
 
-    public static void Skip(this ref B b, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Skip(this ref B b, params ꓸꓸꓸany args) { }
 
-    public static void Skipf(this ref B b, @string format, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Skipf(this ref B b, @string format, params ꓸꓸꓸany args) { }
 
     public static void Error(this ж<B> b, params ꓸꓸꓸany args) => Error(ref b.Value, args);
 
@@ -595,23 +600,23 @@ public static partial class testing_package
 
     // Params-taking F members need the same explicit ж<F> overloads as T's and B's above (params
     // collections are ref-like Spans the RecvGenerator does not synthesize overloads for).
-    public static void Add(this ref F f, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Add(this ref F f, params ꓸꓸꓸany args) { }
 
-    public static void Error(this ref F f, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Error(this ref F f, params ꓸꓸꓸany args) { }
 
-    public static void Errorf(this ref F f, @string format, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Errorf(this ref F f, @string format, params ꓸꓸꓸany args) { }
 
-    public static void Fatal(this ref F f, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Fatal(this ref F f, params ꓸꓸꓸany args) { }
 
-    public static void Fatalf(this ref F f, @string format, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Fatalf(this ref F f, @string format, params ꓸꓸꓸany args) { }
 
-    public static void Log(this ref F f, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Log(this ref F f, params ꓸꓸꓸany args) { }
 
-    public static void Logf(this ref F f, @string format, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Logf(this ref F f, @string format, params ꓸꓸꓸany args) { }
 
-    public static void Skip(this ref F f, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Skip(this ref F f, params ꓸꓸꓸany args) { }
 
-    public static void Skipf(this ref F f, @string format, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Skipf(this ref F f, @string format, params ꓸꓸꓸany args) { }
 
     public static void Add(this ж<F> f, params ꓸꓸꓸany args) => Add(ref f.Value, args);
 

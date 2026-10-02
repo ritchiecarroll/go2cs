@@ -1734,6 +1734,17 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 
 				return fmt.Sprintf("!AreEqual(%s, %s)", leftOperand, rightOperand)
 			}
+
+			// A NAMED array against the UNNAMED array it is written over (`h != sha256.Sum256(nil)` with
+			// `type Hash [32]byte`, x/mod's sumdb/tlog): Go converts the unnamed side to the named type.
+			// In C# both `Hash == Hash` and `array<byte> == array<byte>` apply, because the wrapper
+			// converts implicitly both ways, so the comparison is ambiguous (CS0034). Cast the unnamed
+			// side to the named type, which is the comparison Go makes.
+			if named, ok := v.namedArrayOverUnnamed(lhsType, rhsType); ok {
+				rightOperand = fmt.Sprintf("((%s)(%s))", convertToCSTypeName(v.getAliasQualifiedTypeName(named, false)), rightOperand)
+			} else if named, ok := v.namedArrayOverUnnamed(rhsType, lhsType); ok {
+				leftOperand = fmt.Sprintf("((%s)(%s))", convertToCSTypeName(v.getAliasQualifiedTypeName(named, false)), leftOperand)
+			}
 		} else if binaryOp == "<<" || binaryOp == ">>" {
 			// Go zeroes (or, for a signed right shift, sign-extends) a shift whose count reaches or
 			// exceeds the operand's width, but C#'s native shift MASKS the count (`n & 63`/`n & 31`,
@@ -2187,4 +2198,30 @@ func (v *Visitor) constExprOperandExceeds(expr ast.Expr, limit uint64) bool {
 	})
 
 	return found
+}
+
+// namedArrayOverUnnamed reports the defined type when namedType is declared directly over an unnamed
+// array type (`type Hash [4]byte`) and other is that unnamed array type. Only such a wrapper converts
+// implicitly to and from array<E>; a type written over another NAMED array converts to that type
+// instead, and an unknown declaration (writtenRHSIsUnnamedArray misses) keeps the existing emission.
+func (v *Visitor) namedArrayOverUnnamed(namedType, other types.Type) (*types.Named, bool) {
+	named, ok := types.Unalias(namedType).(*types.Named)
+
+	if !ok {
+		return nil, false
+	}
+
+	array, ok := named.Underlying().(*types.Array)
+
+	if !ok {
+		return nil, false
+	}
+
+	otherArray, ok := types.Unalias(other).(*types.Array)
+
+	if !ok || !types.Identical(array, otherArray) || !writtenRHSIsUnnamedArray(named) {
+		return nil, false
+	}
+
+	return named, true
 }

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -35,7 +36,7 @@ private static readonly object emitˢ = (@string)"emit:"u8;
 private static readonly object litvalˢ = (@string)"litval:"u8;
 private static readonly object litmultiˢ = (@string)"litmulti:"u8;
 
-internal static void Main() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
     var @out = new channel<nint>(0);
     goǃ((ᴛ1, ᴛ2, ᴛ3) => sum(ᴛ1, ᴛ2, ᴛ3), @out, 3, 4);
     fmt.Println(sumˢ, ᐸꟷ(@out));

@@ -141,8 +141,8 @@ internal sealed class HeaderSliceBox<T, TDst> : ж<TDst>
     // ---- the instance ----
 
     private readonly ж<T> m_source;
-    private TDst m_value;               // the slice handed out through Value (a ref into this field)
-    private TDst m_handedOut;           // what that slice was when it was handed out
+    private TDst m_value = default!;   // the slice handed out through Value (a ref into this field)
+    private TDst m_handedOut = default!; // what that slice was when it was handed out
     private bool m_materialized;
 
     private HeaderSliceBox(ж<T> source)

@@ -46,6 +46,8 @@ using FatalReport = go.golib.FatalReport;
 // readers see it as well as the suffix-based ones.
 [module: go.GoManualConversion]
 
+#pragma warning disable CS8826 // the converted partial names the blank Go parameter `_`; this hand-owned body keeps its readable name
+
 namespace go.crypto;
 
 partial class rand_package
