@@ -96,6 +96,22 @@ public static class PointerExtensions
     }
 
     /// <summary>
+    /// The element <paramref name="index"/> of the array this pointer references — Go's <c>p[i]</c> on a
+    /// <c>*[N]T</c>, emitted for a local bound by the native field-view door
+    /// (<see cref="builtin.NativeFieldArrayPointer{T}"/>).
+    /// </summary>
+    /// <remarks>
+    /// THE STUB of the red commit: it reads through <c>Value</c>, exactly as <c>p.Value[i]</c> does.
+    /// </remarks>
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, int index) => ref pointer.Value[index];
+
+    /// <inheritdoc cref="ElementRef{T}(ж{array{T}}, int)"/>
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, nint index) => ref pointer.Value[index];
+
+    /// <inheritdoc cref="ElementRef{T}(ж{array{T}}, int)"/>
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, ulong index) => ref pointer.Value[index];
+
+    /// <summary>
     /// Reinterprets a pointer as a pointer to <typeparamref name="TDst"/> — Go's
     /// <c>(*TDst)(unsafe.Pointer(p))</c>.
     /// </summary>

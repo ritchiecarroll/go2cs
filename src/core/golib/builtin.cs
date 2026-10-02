@@ -2693,6 +2693,24 @@ public static partial class builtin
     }
 
     /// <summary>
+    /// Creates a pointer to an ARRAY that views a FIELD of a struct living in NATIVE memory -- Go's
+    /// <c>(*[N]T)(unsafe.Pointer(&amp;p.f))</c> where <c>f</c>'s type is not <c>T</c> -- or answers
+    /// <c>null</c> when the field's root does not name native memory.
+    /// </summary>
+    /// <typeparam name="T">Element type of the pointed-at array.</typeparam>
+    /// <param name="field">The field reference the conversion takes the address of, <c>p.of(S.Ꮡf)</c>.</param>
+    /// <param name="length">Element count, the <c>N</c> of the Go type.</param>
+    /// <returns>A pointer to array over the field's native bytes, or <c>null</c> for a root that is not native.</returns>
+    /// <remarks>
+    /// THE STUB of the red commit (docs/phase4/DESIGN-native-array-view.md, the LookupServicePort door):
+    /// it answers <c>null</c> for every field, so the emission falls back to the raw-address route.
+    /// </remarks>
+    public static ж<array<T>>? NativeFieldArrayPointer<T>(INilPointer? field, nint length)
+    {
+        return null;
+    }
+
+    /// <summary>
     /// Creates a new heap allocated instance of the zero value for type <typeparamref name="T"/>.
     /// </summary>
     /// <param name="pointer">Out reference to pointer to heap allocated zero value.</param>
