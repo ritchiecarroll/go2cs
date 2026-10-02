@@ -63,8 +63,9 @@ namespace go;
 //   of fd 2 would hold a STDERR pipe open past a Go-side os.Stderr.Close() - the same shape, one
 //   stream over. No measured test needs stderr-close EOF propagation today; if a row ever does,
 //   the durable move is routing println's bytes at fd 2 directly on Unix rather than suppressing
-//   Console. Darwin is untouched (no /proc; its own arc measures first), and Windows is untouched
-//   (handle semantics differ and the banked os/exec row already proves pipe teardown there).
+//   Console. Darwin has its own arm (no /proc there; aliases are found by fstat identity - see
+//   builtin.DarwinStdDescriptors.cs), and Windows is untouched (handle semantics differ and the
+//   banked os/exec row already proves pipe teardown there).
 // ---------------------------------------------------------------------------------------------
 public static partial class builtin
 {

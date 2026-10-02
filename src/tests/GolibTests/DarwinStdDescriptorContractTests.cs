@@ -73,7 +73,7 @@ public class DarwinStdDescriptorContractTests
             Assert.IsTrue(builtin.TryDescriptorIdentity(unrelated[0], out var pipeIdentity), "fstat(pipe) failed");
             Assert.AreNotEqual(stdout, pipeIdentity, "a fresh pipe must not share stdout's identity");
 
-            int[] selected = builtin.FindStartupStdAliasesByIdentity();
+            var selected = builtin.FindStartupStdAliasesByIdentity();
 
             CollectionAssert.Contains(selected, cloexecDup, "the FD_CLOEXEC alias of fd 1 must be selected");
             CollectionAssert.DoesNotContain(selected, plainDup, "an alias WITHOUT FD_CLOEXEC is an inherited descriptor and must survive");
