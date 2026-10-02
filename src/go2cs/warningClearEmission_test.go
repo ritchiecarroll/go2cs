@@ -15,6 +15,7 @@ package main
 import (
 	"go/build"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -134,5 +135,47 @@ func main() {
 	// (CS0161 otherwise).
 	if want := "    select();\n    return default!;"; !strings.Contains(strings.ReplaceAll(mainCs, "\r\n", "\n"), want) {
 		t.Errorf("select {} ending a value-returning function must keep its trailing return (%q): %s", want, mainCs)
+	}
+}
+
+// TestFallthroughMatchFlagIsRead pins CS0219 (encoding/json's decodeState.array). A switch with a
+// fallthrough declares a running match flag that a case reached by fallthrough, or a TRAILING
+// default, reads. When the only fallthrough target is a non-trailing default, that default reads the
+// precomputed any-match flag instead, and the running flag was declared and set but never read.
+func TestFallthroughMatchFlagIsRead(t *testing.T) {
+	mainCs := convertWarningFixture(t, "fmfr", `package main
+
+func kind(k int, nilOK bool) string {
+	switch k {
+	case 1:
+		if nilOK {
+			return "nil"
+		}
+		fallthrough
+	default:
+		return "other"
+	case 2, 3:
+		break
+	}
+
+	return "list"
+}
+
+func main() {
+	println(kind(1, false), kind(2, false), kind(7, false))
+}
+`)
+
+	declared := regexp.MustCompile(`var (match\S+) = false;`).FindAllStringSubmatch(mainCs, -1)
+
+	for _, decl := range declared {
+		if !strings.Contains(mainCs, "!"+decl[1]) {
+			t.Errorf("match flag %s is declared but never read: %s", decl[1], mainCs)
+		}
+	}
+
+	// The non-trailing default still guards on the precomputed any-match flag.
+	if !strings.Contains(mainCs, "/* default: */") {
+		t.Errorf("expected the guarded default arm: %s", mainCs)
 	}
 }
