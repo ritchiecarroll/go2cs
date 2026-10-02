@@ -1018,6 +1018,16 @@ jobs:
           & git -C $PWD status --porcelain -- src/core |
               Set-Content -LiteralPath (Join-Path $art "sweep-$goos-$rid-git-status.txt") -Encoding utf8
 
+          # The CONTENT of those rewrites, not just their names: a non-windows leg's -tests emission
+          # differs from the committed (windows) record, and the runner's tree is gone when the job
+          # ends. The diff lets a lane read per-GOOS emission drift without a runner of that OS
+          # (COORD ruling 2026-10-02, after the first darwin row drifted 15+1 lines unread).
+          # WriteAllLines always creates the file, so a clean tree uploads an empty diff rather than none.
+          $trackedDiff = Join-Path $art "sweep-$goos-$rid-tracked.diff"
+          $diffLines = [string[]]@(& git -C $PWD -c core.quotePath=false diff --no-ext-diff --no-color -- src/core)
+          [System.IO.File]::WriteAllLines($trackedDiff, $diffLines)
+          Write-Host "==> tracked-rewrite diff: $((Get-Item -LiteralPath $trackedDiff).Length) bytes -> $(Split-Path -Leaf $trackedDiff)"
+
           $summary = @(
               "## Validated sweep shard -- GOOS=$goos ($rid)"
               ''
