@@ -195,6 +195,7 @@ func TestParseNamesWhatIsMalformed(t *testing.T) {
 	}{
 		{"no magic", strings.TrimPrefix(head, Magic+"\n") + section, "line 1"},
 		{"a later schema", strings.Replace(head, " v1", " v2", 1) + section, "v2"},
+		{"a byte-order mark", "\xEF\xBB\xBF" + head + section, "byte-order mark"},
 		{"a carriage return", strings.Replace(head, "module example.com/mod\n", "module example.com/mod\r\n", 1) + section, "carriage return"},
 		{"a second module line", head + "module example.com/other\n" + section, "a second module"},
 		{"an unknown key", head + "colour blue\n" + section, "unknown"},

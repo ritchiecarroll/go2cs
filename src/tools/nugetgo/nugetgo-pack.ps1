@@ -22,6 +22,15 @@
     per-module conversion-source repo. D7: the module's MODULE.md ships as VALIDATION.md, with every per-package
     proof page beside it.
 
+    Self-description (docs/PLAN-nugetgo.md section 5, stage S2, format v1 as COORD ruled it on 2026-10-02): the
+    package carries go2cs/source-metadata.txt -- the module path and version, the go2cs corpus release it was built
+    against (-ClosureVersion), one `package` line per packed Go package, one `require` line per third-party module
+    the packed packages reference, and each package's package_info.cs metadata -- so a consuming converter can map
+    it without a converted tree on disk. The Go side writes it (src/go2cs/internal/gensourcemeta, the same package
+    that parses it), and the read-back runs that parser on the copy taken back OUT of the nupkg. A third-party
+    module the packed packages reference becomes a NuGet dependency on the package -ThirdPartyPackage names (owner
+    ruling B4: the first revision built for the same corpus); one the caller does not name is refused by name.
+
     The restore is isolated: a nuget.config with <clear/> and only -Feed as a source, and a private NUGET_PACKAGES.
     The user's global packages folder is censused for nugetgo.* and go.* before and after, and the run fails if it
     grew. Nothing is pushed anywhere, and nothing is signed: signing is the release's last step.
@@ -45,13 +54,15 @@ param(
     [string]$RehearsalSuffix,
     [switch]$Release,
     [string[]]$ExistingIds = @(),
+    [string[]]$ThirdPartyPackage = @(),
     [string[]]$VList,
     [string]$Authors = 'go2cs conversion',
-    [string]$Gpf = $(if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { Join-Path $env:USERPROFILE '.nuget\packages' })
+    [string]$Gpf = $(if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { Join-Path ([Environment]::GetFolderPath('UserProfile')) '.nuget/packages' })
 )
 
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'NugetgoIdentity.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'NugetgoSelfDescription.psm1') -Force
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 
 function Refuse([string]$why) { throw "REFUSED: $why" }
@@ -75,7 +86,7 @@ $goMajor = [int]$Matches['maj']; $goMinor = [int]$Matches['min']   # captured no
 $stdlibRange = "[$ClosureVersion, $goMajor.$($goMinor + 1))"
 
 # ---- the module's library packages ---------------------------------------------------------------------------------
-$moduleSrc = Join-Path $RecurseRoot ('src\' + $ModulePath.Replace('/', '\'))
+$moduleSrc = Join-Path (Join-Path $RecurseRoot 'src') $ModulePath
 if (-not (Test-Path $moduleSrc)) { Refuse "no converted module at $moduleSrc (a -recurse=nuget output root is expected)" }
 $projects = @(Get-ChildItem -Path $moduleSrc -Recurse -Filter '*.csproj' | Where-Object { $_.Name -notlike '*.tests.csproj' } | Sort-Object FullName)
 $libraries = New-Object System.Collections.Generic.List[object]
@@ -91,8 +102,12 @@ foreach ($p in $projects) {
 }
 if ($libraries.Count -eq 0) { Refuse "no library package under $moduleSrc" }
 
+# ---- S2: what the self-description lists ------------------------------------------------------------------------------
+$packed = @(Get-NugetgoPackedPackages -RecurseRoot $RecurseRoot -Libraries $libraries.ToArray())
+$requires = @(Get-NugetgoThirdPartyRequires -RecurseRoot $RecurseRoot -Libraries $libraries.ToArray() -ThirdPartyPackage $ThirdPartyPackage)
+
 # ---- B6 metadata -----------------------------------------------------------------------------------------------------
-if (-not $LicenseFile) { $LicenseFile = Join-Path (& go env GOMODCACHE).Trim() ("$ModulePath@$GoVersion" -replace '/', '\' ) | Join-Path -ChildPath 'LICENSE' }
+if (-not $LicenseFile) { $LicenseFile = Join-Path (Join-Path (& go env GOMODCACHE).Trim() "$ModulePath@$GoVersion") 'LICENSE' }
 if (-not (Test-Path -LiteralPath $LicenseFile)) { Refuse "no upstream LICENSE at $LicenseFile" }
 $copyright = (@(Get-Content -LiteralPath $LicenseFile | Where-Object { $_ -cmatch '^\s*Copyright\b' } | ForEach-Object { $_.Trim() }) -join '; ')
 if (-not $copyright) { Refuse "the upstream LICENSE carries no Copyright line: $LicenseFile" }
@@ -126,7 +141,7 @@ else {
 }
 
 # ---- the generated module pack project --------------------------------------------------------------------------------
-$packDir = Join-Path $Scratch "pack\$($id.Id)"
+$packDir = Join-Path (Join-Path $Scratch 'pack') $id.Id
 if (Test-Path $packDir) { Remove-Item -Recurse -Force $packDir }
 New-Item -ItemType Directory -Force $packDir | Out-Null
 Copy-Item -LiteralPath $LicenseFile (Join-Path $packDir 'LICENSE')
@@ -134,10 +149,23 @@ Copy-Item -LiteralPath $LicenseFile (Join-Path $packDir 'LICENSE')
 [System.IO.File]::WriteAllText((Join-Path $packDir 'VALIDATION.md'),
     ("> $description`n`n" + [System.IO.File]::ReadAllText($validationPage)), (New-Object System.Text.UTF8Encoding($false)))
 $esc = { param($s) [System.Security.SecurityElement]::Escape($s) }
+
+# S2: go2cs/source-metadata.txt, written by the converter's own Go package so its consumer is known to read it.
+$converterDir = Join-Path (Split-Path (Split-Path $PSScriptRoot)) 'go2cs'
+$selfDescription = Join-Path (Join-Path $packDir 'go2cs') 'source-metadata.txt'
+New-Item -ItemType Directory -Force (Split-Path $selfDescription) | Out-Null
+$genArgs = @('run', './internal/gensourcemeta', '-src', (Join-Path $RecurseRoot 'src'), '-module', $ModulePath, '-module-version', $GoVersion,
+    '-go2cs-release', $ClosureVersion, '-out', $selfDescription)
+foreach ($p in $packed) { $genArgs += @('-package', "$($p.ImportPath)=$($p.Assembly)") }
+foreach ($r in $requires) { $genArgs += @('-require', "$($r.Module)@$($r.Version)=$($r.NuGetId)") }
+Push-Location $converterDir
+try { & go @genArgs; if ($LASTEXITCODE -ne 0) { Refuse "gensourcemeta could not write the self-description ($LASTEXITCODE)" } }
+finally { Pop-Location }
 $projRefs = ($libraries | ForEach-Object { "    <ProjectReference Include=`"$(& $esc $_.FullName)`" PrivateAssets=`"all`" />" }) -join "`n"
-$pkgRefs = ($goRefs | ForEach-Object { "    <PackageReference Include=`"$_`" Version=`"`$(GoStdLibVersion)`" />" }) -join "`n"
+$pkgRefs = ((@($goRefs | ForEach-Object { "    <PackageReference Include=`"$_`" Version=`"`$(GoStdLibVersion)`" />" }) +
+    @($requires | ForEach-Object { "    <PackageReference Include=`"$(& $esc $_.NuGetId)`" Version=`"$(& $esc $_.PackageVersion)`" />" })) -join "`n")
 $pageItems = ($pages | ForEach-Object {
-    $rel = $_.FullName.Substring($ValidationDir.TrimEnd('\').Length + 1)
+    $rel = $_.FullName.Substring($ValidationDir.TrimEnd('\', '/').Length + 1)
     "    <None Include=`"$(& $esc $_.FullName)`" Pack=`"true`" PackagePath=`"$(& $esc ([System.IO.Path]::GetDirectoryName($rel)))`" />"
 }) -join "`n"
 $csproj = @"
@@ -171,6 +199,7 @@ $pkgRefs
   <ItemGroup>
     <None Include="LICENSE" Pack="true" PackagePath="" />
     <None Include="VALIDATION.md" Pack="true" PackagePath="" />
+    <None Include="go2cs/source-metadata.txt" Pack="true" PackagePath="go2cs" />
 $pageItems
   </ItemGroup>
   <!-- Each package project's own assembly, as its project reference resolved it, under lib/<tfm>/. -->
@@ -227,6 +256,9 @@ try {
     $validationEntry = $zip.Entries | Where-Object { $_.FullName -eq 'VALIDATION.md' } | Select-Object -First 1
     $reader = New-Object System.IO.StreamReader($validationEntry.Open())
     $validationHead = $reader.ReadToEnd(); $reader.Dispose()
+    $selfEntry = $zip.Entries | Where-Object { $_.FullName -eq 'go2cs/source-metadata.txt' } | Select-Object -First 1
+    $packedSelfDescription = Join-Path $Scratch 'read-back-source-metadata.txt'
+    if ($selfEntry) { [System.IO.Compression.ZipFileExtensions]::ExtractToFile($selfEntry, $packedSelfDescription, $true) }
 }
 finally { $zip.Dispose() }
 $md = $nuspec.package.metadata
@@ -244,4 +276,18 @@ if ($md.description -cne $description -or $md.releaseNotes -cne $description) { 
 if (-not $validationHead.StartsWith("> $description", [StringComparison]::Ordinal)) { throw 'the packed VALIDATION.md does not open with the ruled text' }
 if ($badDeps.Count) { throw "go.* dependencies not at the B4 range: $(($badDeps | ForEach-Object { "$($_.id) $($_.version)" }) -join ', ')" }
 if (@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count -ne $libraries.Count) { throw "lib/ carries $(@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count) assemblies for $($libraries.Count) packages" }
+# S2: the self-description is in the package, byte for byte what was written, and the CONVERTER'S OWN parser reads it.
+if (-not $selfEntry) { throw 'the package carries no go2cs/source-metadata.txt' }
+if ([System.IO.File]::ReadAllText($packedSelfDescription) -cne [System.IO.File]::ReadAllText($selfDescription)) { throw 'the packed go2cs/source-metadata.txt differs from the one written' }
+Push-Location $converterDir
+try { $verified = (& go run ./internal/gensourcemeta -verify $packedSelfDescription 2>&1 | Out-String).Trim(); $verifyCode = $LASTEXITCODE }
+finally { Pop-Location }
+$expectedSummary = "$ModulePath $GoVersion (go2cs-release $ClosureVersion): $($libraries.Count) package(s), $($requires.Count) require(s)"
+Write-Host "    self-description: $verified"
+if ($verifyCode -ne 0 -or -not $verified.StartsWith($expectedSummary, [StringComparison]::Ordinal)) { throw "the packed self-description does not read back as '$expectedSummary': $verified" }
+foreach ($r in $requires) {
+    if (@($deps | Where-Object { $_.id -ceq $r.NuGetId -and ([string]$_.version).StartsWith($r.PackageVersion, [StringComparison]::Ordinal) }).Count -ne 1) {
+        throw "the third-party dependency $($r.NuGetId) $($r.PackageVersion) (for $($r.Module)) is not in the nuspec"
+    }
+}
 Write-Host "==> packed $nupkg (global packages folder unchanged: $($gpfAfter.Count) go.*/nugetgo.* pairs)"
