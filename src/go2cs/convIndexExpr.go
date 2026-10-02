@@ -341,6 +341,12 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		return fmt.Sprintf("%s%s[%s, %s]", baseExpr, ptrDeref, index, shapedZero)
 	}
 
+	// A local bound by the native field-view door reads through ElementRef: a native array pointer has
+	// no array<T> for Value to return (see nativeFieldArrayView.go).
+	if ptrDeref == ".Value" && v.isNativeFieldArrayViewLocal(indexExpr.X) {
+		return fmt.Sprintf("%s.ElementRef(%s)", baseExpr, index)
+	}
+
 	return fmt.Sprintf("%s%s[%s]", baseExpr, ptrDeref, index)
 }
 

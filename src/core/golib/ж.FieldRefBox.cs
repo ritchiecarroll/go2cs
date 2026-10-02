@@ -35,6 +35,15 @@ namespace go;
 internal interface INativeRooted
 {
     bool IsNativeRooted { get; }
+
+    /// <summary>The native base address when this box IS a native root (a <see cref="NativeBox{T}"/>), else 0.</summary>
+    nuint NativeRootAddress => 0;
+
+    /// <summary>
+    /// A field reference's address at its GO offset when it sits ONE field hop off a native root, else 0
+    /// -- the address the native field-view door views (<see cref="builtin.NativeFieldArrayPointer{T}"/>).
+    /// </summary>
+    nuint NativeGoFieldAddress => 0;
 }
 
 /// <summary>
@@ -202,6 +211,18 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer
 
     /// <inheritdoc/>
     bool INativeRooted.IsNativeRooted => m_source is INativeRooted { IsNativeRooted: true };
+
+    // The field at its GO offset off a NATIVE root, one hop -- never NativeSlotAddress, which is the CLR
+    // slot: a struct carrying a managed reference is laid out automatically, and darwin's converted
+    // RawSockaddrInet4 keeps Port at CLR offset 0 where libc wrote it at 2. The offset is the struct's Go
+    // layout (GoReflect.GoFieldOffsets, the same pass the order token's displacement reads); a layout that
+    // cannot be known answers 0, so the caller keeps its own route and nothing is viewed at a guess.
+    nuint INativeRooted.NativeGoFieldAddress =>
+        m_source is INativeRooted { NativeRootAddress: var root and not 0 } &&
+        PointeeTypeOf(m_source) is { } structType && FieldNameOf(m_token) is { } fieldName &&
+        s_goFieldDisplacements.GetOrAdd((structType, fieldName), static key => ResolveGoFieldOffset(key.Item1, key.Item2)) is var offset and >= 0
+            ? root + (nuint)offset
+            : 0;
 
     /// <inheritdoc/>
     // A field reference's storage is its container's, recursively: `Ꮡo.of(Ꮡin).of(Ꮡv)` hangs off

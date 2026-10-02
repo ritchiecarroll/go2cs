@@ -1288,6 +1288,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNarrowShiftVarCount() => CheckTarget("NarrowShiftVarCount");
 
     [TestMethod]
+    public void CheckNativeFieldPortAlias() => CheckTarget("NativeFieldPortAlias");
+
+    [TestMethod]
     public void CheckNativeIntConstMask() => CheckTarget("NativeIntConstMask");
 
     [TestMethod]

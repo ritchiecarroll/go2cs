@@ -241,6 +241,7 @@
     <None Include="$(MSBuildThisFileDirectory)namedResultLiveness_test.go" />
     <None Include="$(MSBuildThisFileDirectory)narrowArithmeticOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)nativeBackedArrayPointerStore_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nativeFieldArrayView.go" />
     <None Include="$(MSBuildThisFileDirectory)nativeFieldArrayView_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nativeIntConstWidth_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nestedArgScaling_test.go" />

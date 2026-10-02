@@ -1288,6 +1288,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNarrowShiftVarCount() => CheckTarget("NarrowShiftVarCount");
 
     [TestMethod]
+    public void CheckNativeFieldPortAlias() => CheckTarget("NativeFieldPortAlias");
+
+    [TestMethod]
     public void CheckNativeIntConstMask() => CheckTarget("NativeIntConstMask");
 
     [TestMethod]

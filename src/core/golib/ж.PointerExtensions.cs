@@ -101,15 +101,22 @@ public static class PointerExtensions
     /// (<see cref="builtin.NativeFieldArrayPointer{T}"/>).
     /// </summary>
     /// <remarks>
-    /// THE STUB of the red commit: it reads through <c>Value</c>, exactly as <c>p.Value[i]</c> does.
+    /// A native array pointer has no <c>array&lt;T&gt;</c> for <c>Value</c> to return -- it refuses by
+    /// design -- so this indexes it in place, bounded by the length it was minted with. Every other box
+    /// reads through <c>Value</c>, exactly as <c>p.Value[i]</c> does, with the same overloads and so the
+    /// same bounds checks and panics. One type test per read; no element box (runtime's cheaprand is on
+    /// the emitted population).
     /// </remarks>
-    public static ref T ElementRef<T>(this ж<array<T>> pointer, int index) => ref pointer.Value[index];
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, int index) =>
+        ref pointer is NativeArrayBox<T> native ? ref native.ElementRef(index) : ref pointer.Value[index];
 
     /// <inheritdoc cref="ElementRef{T}(ж{array{T}}, int)"/>
-    public static ref T ElementRef<T>(this ж<array<T>> pointer, nint index) => ref pointer.Value[index];
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, nint index) =>
+        ref pointer is NativeArrayBox<T> native ? ref native.ElementRef(index) : ref pointer.Value[index];
 
     /// <inheritdoc cref="ElementRef{T}(ж{array{T}}, int)"/>
-    public static ref T ElementRef<T>(this ж<array<T>> pointer, ulong index) => ref pointer.Value[index];
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, ulong index) =>
+        ref pointer is NativeArrayBox<T> native ? ref native.ElementRef(index) : ref pointer.Value[index];
 
     /// <summary>
     /// Reinterprets a pointer as a pointer to <typeparamref name="TDst"/> — Go's

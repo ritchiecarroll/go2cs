@@ -135,6 +135,8 @@ public sealed class NativeBox<T> : ж<T>, INativeRooted
     // The root of every native chain: a field reference over this box asks here (INativeRooted).
     bool INativeRooted.IsNativeRooted => true;
 
+    nuint INativeRooted.NativeRootAddress => NativeAddress;
+
     /// <inheritdoc/>
     // A native alias is not managed storage at all: its address is m_nativeAddr and both
     // operators return it long before they consult this, so no reachable path reads the answer.
