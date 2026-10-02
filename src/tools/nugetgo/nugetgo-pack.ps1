@@ -18,9 +18,9 @@
     rehearsal can never mint a real release version: NuGet caches by id+version immutably. A version with no suffix is
     packed only under -Release.
 
-    Metadata (B6): upstream's Copyright lines and LICENSE verbatim, the PROOF description, RepositoryUrl = the
-    per-module conversion-source repo. D7: the module's MODULE.md ships as VALIDATION.md, with every per-package
-    proof page beside it.
+    Metadata (B6): upstream's Copyright lines and license file verbatim, under its own name (NugetgoLicense.psm1),
+    the PROOF description, RepositoryUrl = the per-module conversion-source repo. D7: the module's MODULE.md ships as
+    VALIDATION.md, with every per-package proof page beside it.
 
     Self-description (docs/PLAN-nugetgo.md section 5, stage S2, format v1 as COORD ruled it on 2026-10-02): the
     package carries go2cs/source-metadata.txt -- the module path and version, the go2cs corpus release it was built
@@ -63,6 +63,7 @@ param(
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'NugetgoIdentity.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoSelfDescription.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'NugetgoLicense.psm1') -Force
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 
 function Refuse([string]$why) { throw "REFUSED: $why" }
@@ -107,10 +108,16 @@ $packed = @(Get-NugetgoPackedPackages -RecurseRoot $RecurseRoot -Libraries $libr
 $requires = @(Get-NugetgoThirdPartyRequires -RecurseRoot $RecurseRoot -Libraries $libraries.ToArray() -ThirdPartyPackage $ThirdPartyPackage)
 
 # ---- B6 metadata -----------------------------------------------------------------------------------------------------
-if (-not $LicenseFile) { $LicenseFile = Join-Path (Join-Path (& go env GOMODCACHE).Trim() "$ModulePath@$GoVersion") 'LICENSE' }
-if (-not (Test-Path -LiteralPath $LicenseFile)) { Refuse "no upstream LICENSE at $LicenseFile" }
+# The upstream license file under its own name: the converter's moduleLicenseNames, in its order (NugetgoLicense.psm1).
+if (-not $LicenseFile) {
+    $found = Find-NugetgoModuleLicense -ModuleDir (Join-Path (& go env GOMODCACHE).Trim() "$ModulePath@$GoVersion")
+    if (-not $found.Name) { Refuse "no upstream license file: $($found.Reason)" }
+    $LicenseFile = $found.Path
+}
+if (-not (Test-Path -LiteralPath $LicenseFile -PathType Leaf)) { Refuse "no upstream license file at $LicenseFile" }
+$licenseName = Split-Path -Leaf $LicenseFile
 $copyright = (@(Get-Content -LiteralPath $LicenseFile | Where-Object { $_ -cmatch '^\s*Copyright\b' } | ForEach-Object { $_.Trim() }) -join '; ')
-if (-not $copyright) { Refuse "the upstream LICENSE carries no Copyright line: $LicenseFile" }
+if (-not $copyright) { Refuse "the upstream license file carries no Copyright line: $LicenseFile" }
 # The description, exactly as ruled (COORD, within B6, 2026-09-30). The Go release is the closure's own (its first three
 # components), never a literal, so the text cannot outlive the corpus it describes. The same two sentences head
 # VALIDATION.md and are the release notes.
@@ -144,7 +151,7 @@ else {
 $packDir = Join-Path (Join-Path $Scratch 'pack') $id.Id
 if (Test-Path $packDir) { Remove-Item -Recurse -Force $packDir }
 New-Item -ItemType Directory -Force $packDir | Out-Null
-Copy-Item -LiteralPath $LicenseFile (Join-Path $packDir 'LICENSE')
+Copy-Item -LiteralPath $LicenseFile (Join-Path $packDir $licenseName)
 # VALIDATION.md = the ruled two sentences as its header, then the proof page itself, unchanged below them.
 [System.IO.File]::WriteAllText((Join-Path $packDir 'VALIDATION.md'),
     ("> $description`n`n" + [System.IO.File]::ReadAllText($validationPage)), (New-Object System.Text.UTF8Encoding($false)))
@@ -183,7 +190,7 @@ $csproj = @"
     <Description>$(& $esc $description)</Description>
     <PackageReleaseNotes>$(& $esc $description)</PackageReleaseNotes>
     <Copyright>$(& $esc $copyright)</Copyright>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageLicenseFile>$(& $esc $licenseName)</PackageLicenseFile>
     <PackageReadmeFile>VALIDATION.md</PackageReadmeFile>
     <RepositoryUrl>$(& $esc $RepositoryUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -197,7 +204,7 @@ $projRefs
 $pkgRefs
   </ItemGroup>
   <ItemGroup>
-    <None Include="LICENSE" Pack="true" PackagePath="" />
+    <None Include="$(& $esc $licenseName)" Pack="true" PackagePath="" />
     <None Include="VALIDATION.md" Pack="true" PackagePath="" />
     <None Include="go2cs/source-metadata.txt" Pack="true" PackagePath="go2cs" />
 $pageItems

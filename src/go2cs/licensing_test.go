@@ -312,6 +312,63 @@ func TestLicensingThirdPartyModuleLicense(t *testing.T) {
 	}
 }
 
+// The application's own module stays unspecified (it is the user's to license), but its warning says
+// what is true: a license file at the module root is named and said NOT to be packed for the
+// application's own module; a module root without one keeps the general text. Nothing else moves.
+func TestLicensingMainModuleLicenseWarning(t *testing.T) {
+	root := t.TempDir()
+	template := []byte("<Project><PropertyGroup><!-- GO2CS:PACKAGE-LICENSE --></PropertyGroup></Project>")
+	convert := func(app string, project string) (string, string) {
+		t.Helper()
+		if err := os.MkdirAll(filepath.Dir(project), 0755); err != nil {
+			t.Fatal(err)
+		}
+		var got []byte
+		stderr := captureConverterStderr(t, func() {
+			var err error
+			if got, err = licenseConvertedProjectFor(template, project, filepath.Join(app, "lib"), Options{mainModuleDir: app}); err != nil {
+				t.Fatal(err)
+			}
+		})
+		return string(got), stderr
+	}
+	localForm := `<PackageLicenseFile Condition="Exists('$(MSBuildProjectDirectory)/LICENSE')">LICENSE</PackageLicenseFile>`
+
+	licensed := filepath.Join(root, "licensed")
+	writeModuleFile(t, filepath.Join(licensed, "go.mod"), "module example.com/licensed\n")
+	writeModuleFile(t, filepath.Join(licensed, "License.md"), "App terms\n")
+	writeModuleFile(t, filepath.Join(licensed, "lib", "lib.go"), "package lib\n")
+	got, stderr := convert(licensed, filepath.Join(root, "out", "src", "example.com", "licensed", "lib", "example.com.licensed.lib.csproj"))
+	if !strings.Contains(got, localForm) || strings.Contains(got, "License.md") {
+		t.Fatalf("the application module's metadata moved:\n%s", got)
+	}
+	if !strings.Contains(stderr, "Package license is unspecified for ") ||
+		!strings.Contains(stderr, "the module root's License.md is not packed for the application's own module") ||
+		strings.Count(stderr, "WARNING:") != 1 {
+		t.Fatalf("warning does not name the module root's license file:\n%s", stderr)
+	}
+	if _, err := os.Stat(filepath.Join(root, "out", "src", "example.com", "licensed", "License.md")); !os.IsNotExist(err) {
+		t.Fatal("the application module's own license was copied")
+	}
+
+	// Once per module: a second package of the same module adds no line.
+	if _, again := convert(licensed, filepath.Join(root, "out", "src", "example.com", "licensed", "lib2", "example.com.licensed.lib2.csproj")); again != "" {
+		t.Fatalf("warned twice for one module:\n%s", again)
+	}
+
+	bare := filepath.Join(root, "bare")
+	writeModuleFile(t, filepath.Join(bare, "go.mod"), "module example.com/bare\n")
+	writeModuleFile(t, filepath.Join(bare, "lib", "lib.go"), "package lib\n")
+	got, stderr = convert(bare, filepath.Join(root, "out", "src", "example.com", "bare", "lib", "example.com.bare.lib.csproj"))
+	if !strings.Contains(got, localForm) {
+		t.Fatalf("the application module's metadata moved:\n%s", got)
+	}
+	if !strings.Contains(stderr, "add a LICENSE beside the project or pass -license with an SPDX expression before packing.") ||
+		strings.Contains(stderr, "module root's") || strings.Count(stderr, "WARNING:") != 1 {
+		t.Fatalf("a module root with no license file must keep the general warning:\n%s", stderr)
+	}
+}
+
 func TestLicensingConverterHeaders(t *testing.T) {
 	err := filepath.WalkDir(".", func(path string, entry os.DirEntry, err error) error {
 		if err != nil {
