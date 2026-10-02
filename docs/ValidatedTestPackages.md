@@ -82,6 +82,13 @@ the denominator honest.
      "**The two left to validate:** `runtime` and `runtime/pprof` (see
      [The 230 at the H10 close](#the-230-at-the-h10-close-go12413-2026-09-23))." -->
 
+<!-- Provenance, TRAIN L 2026-10-02: the Linux `runtime` annotation, 10810 + 73, now stands at TRAIN K's final
+     head as well as at the union the block above names. P2's second full linux row at 8b5396a1a6 (Release,
+     tiering off, Microsoft .NET 10.0.12, go1.24.13) validates 10810 + 73 (17 skipped identically on both
+     sides, 297 disclosed-unsupported declarations excluded; 10,883 verdicts on each side), with no C# verdict
+     moving against the union row; TestTracebackSystem/panic failed inside its disclosure on that run. TRAIN L
+     carries the checkdead seat the block above names. No count in the table or the header changes. -->
+
 ## Reading the table
 
 - **Tests** counts a row's matching verdicts, **Disclosed** its disclosed ones; both columns are
