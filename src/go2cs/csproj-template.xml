@@ -64,7 +64,7 @@
   <!-- NuGet packaging metadata for library projects; packing itself is explicit ('dotnet pack' via push-nuget.ps1), so plain builds emit no .nupkg -->
   <PropertyGroup Condition="'$(OutputType)'=='Library'">
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <PackageId>go.$(AssemblyName)</PackageId>
+    >>MARKER:PACKAGE_ID<<
     <!-- GO2CS:PACKAGE-LICENSE -->
     <PackageDescription>$(Description) -- C# project converted from Go source</PackageDescription>
     <PackageProjectUrl>https://github.com/ritchiecarroll/go2cs</PackageProjectUrl>

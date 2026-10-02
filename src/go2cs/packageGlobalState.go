@@ -57,6 +57,12 @@ const DynamicCastArgMarker = ">>MARKER:DYNAMIC_CAST_ARG<<"
 // with nothing, collapsing the line to the blank line the template has always had there.
 const ValidationPackMarker = ">>MARKER:VALIDATION_PACK<<"
 
+// PackageIdMarker occupies the PackageId line of csproj-template.xml. A standard-library project, and any Exe project
+// (the line sits in a Library-only group), gets `<PackageId>go.$(AssemblyName)</PackageId>`, byte-identical to the
+// template's line before the marker. A converted MODULE's library carries no prefixed ID: nugetgo-pack.ps1 mints a
+// module's one NuGet ID, the nugetgo. form, for the whole module (owner ruling, 2026-10-02).
+const PackageIdMarker = ">>MARKER:PACKAGE_ID<<"
+
 // Define package level variables
 var packageName string
 

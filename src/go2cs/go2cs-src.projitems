@@ -260,6 +260,7 @@
     <None Include="$(MSBuildThisFileDirectory)packageClassNaming_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageLevelAnonStructLift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageGlobalState.go" />
+    <None Include="$(MSBuildThisFileDirectory)packageIdLine_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageImportPathStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageInfoWriter.go" />
     <None Include="$(MSBuildThisFileDirectory)packageInitFacts.go" />

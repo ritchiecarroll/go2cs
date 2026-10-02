@@ -15,6 +15,8 @@ import (
 	"sort"
 	"strings"
 
+	"go2cs/internal/sourcemeta"
+
 	"golang.org/x/mod/module"
 )
 
@@ -151,6 +153,10 @@ func parseNuGetMap(name string, data []byte) (nugetMapSource, error) {
 
 		if row.nugetID == "" || strings.ContainsAny(row.nugetID, " \t") || len(row.nugetID) > 100 {
 			return nugetMapSource{}, fmt.Errorf("%s:%d: invalid nuget-id %q (non-empty, no whitespace, at most 100 characters)", name, lineNumber, row.nugetID)
+		}
+
+		if err := sourcemeta.CheckModuleNuGetID(row.nugetID); err != nil {
+			return nugetMapSource{}, fmt.Errorf("%s:%d: %v", name, lineNumber, err)
 		}
 
 		if !slices.Contains(nugetMapStatuses, row.status) {

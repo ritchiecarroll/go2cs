@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
-    The NuGet identity of a go2cs third-party conversion: package ID (owner ruling B2) and package version
-    (owner ruling B3), docs/PLAN-nugetgo.md section 8, "OWNER RULINGS 2026-09-30".
+    The NuGet identity of a go2cs third-party conversion: package ID (owner ruling B2), package version (owner ruling
+    B3) and description (B6), docs/PLAN-nugetgo.md section 8, "OWNER RULINGS 2026-09-30" and its 2026-10-02 amendment.
 
 .DESCRIPTION
     Get-NugetgoPackageId   module path -> 'nugetgo.' + the dotted module path, every segment kept, validated against
@@ -11,8 +11,10 @@
                            without +incompatible; a rebuild is X.Y.Z.N for a release and L.0.N for a prerelease or
                            pseudo-version; the refusals (an uppercase prerelease label, an Int32 overflow, more than
                            64 characters) and the @v/list guard before any L.0.N rebuild.
+    Get-NugetgoDescription the package description: the third-party PROOF sentence (B6) or the author's form, decided
+                           by -UpstreamPublishes cross-checked against the module's and -RepositoryUrl's host/org.
 
-    Both return an object, never a bare string, so a refusal carries its reason instead of an empty value a caller
+    All three return an object, never a bare string, so a refusal carries its reason instead of an empty value a caller
     could pack by mistake.
 #>
 Set-StrictMode -Version 3.0
@@ -143,4 +145,57 @@ function Get-NugetgoVersion {
     return [pscustomobject]@{ GoVersion = $GoVersion; Revision = $Revision; Version = $version; Refused = $false; Reason = $null }
 }
 
-Export-ModuleMember -Function Get-NugetgoPackageId, Get-NugetgoVersion
+# The hosts whose module paths read host/ORG/repo, so the ORG is the account that owns the repository -- the shape
+# PLAN-nugetgo section 2's canonical rule reads. A path on any other host (gopkg.in, a vanity domain) names no org the
+# pack can compare; resolving its go-import record would, and is not built (the registry's canonical rule has the same gap).
+$script:OrgHosts = @('github.com', 'gitlab.com', 'bitbucket.org')
+
+function Get-NugetgoHostOrg([string]$Path) {
+    $parts = @($Path.Trim('/') -split '/')
+    if ($parts.Count -lt 2 -or $script:OrgHosts -notcontains $parts[0].ToLowerInvariant() -or -not $parts[1]) { return $null }
+    return "$($parts[0].ToLowerInvariant())/$($parts[1].ToLowerInvariant())"
+}
+
+function Get-NugetgoDescription {
+    <#
+    .SYNOPSIS
+        The package description: the third-party PROOF sentence (B6), or the AUTHOR's form when the module's own
+        author publishes (owner ruling, 2026-10-02). The fact that decides it is -UpstreamPublishes, CROSS-CHECKED against
+        the module path's host/org and -RepositoryUrl's, the URL the registry's canonical rule reads: the switch with the
+        same org gives the author's form; neither gives the third-party form; the switch with another org, the same org
+        without the switch, or the switch on a path whose host/org the pack cannot compare, is REFUSED by name.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$ModulePath,
+        [Parameter(Mandatory)][string]$GoVersion,
+        [Parameter(Mandatory)][string]$GoRelease,
+        [Parameter(Mandatory)][string]$Upstream,
+        [Parameter(Mandatory)][string]$RepositoryUrl,
+        [switch]$UpstreamPublishes
+    )
+    $refuse = { param($why) [pscustomobject]@{ Description = $null; Author = $false; Refused = $true; Reason = $why } }
+    $moduleOrg = Get-NugetgoHostOrg $ModulePath
+    $repositoryOrg = if ($RepositoryUrl -match '^https://(?<rest>.+)$') { Get-NugetgoHostOrg $Matches['rest'] } else { $null }
+    $security = "Security: that standard library carries no Go security fixes issued after Go $GoRelease; review before any production use."
+
+    if ($UpstreamPublishes) {
+        if (-not $moduleOrg) {
+            return & $refuse "-UpstreamPublishes: the pack cannot corroborate authorship for $ModulePath -- its path is not <host>/<org>/... on $($script:OrgHosts -join ', '), so there is no org to compare -RepositoryUrl against (resolving the path's go-import record would; not built)"
+        }
+        if ($repositoryOrg -ne $moduleOrg) {
+            return & $refuse "-UpstreamPublishes: -RepositoryUrl $RepositoryUrl is not under $moduleOrg, the module's own org; the author's conversion-source repository lives there (the registry's canonical rule reads the same URL)"
+        }
+        return [pscustomobject]@{ Author = $true; Refused = $false; Reason = $null
+            Description = "PROOF: go2cs C# conversion of $ModulePath $GoVersion, published by its author, built on the Go $GoRelease standard library, " +
+                "not affiliated with or endorsed by the Go project. $security" }
+    }
+    if ($moduleOrg -and $repositoryOrg -eq $moduleOrg) {
+        return & $refuse "-RepositoryUrl $RepositoryUrl is under $moduleOrg, the module's own org, which is the author's form: pass -UpstreamPublishes, or publish from a repository outside that org"
+    }
+    return [pscustomobject]@{ Author = $false; Refused = $false; Reason = $null
+        Description = "PROOF: unofficial go2cs C# conversion of $ModulePath $GoVersion, built on the Go $GoRelease standard library, " +
+            "not affiliated with or endorsed by $Upstream or the Go project. $security" }
+}
+
+Export-ModuleMember -Function Get-NugetgoPackageId, Get-NugetgoVersion, Get-NugetgoDescription

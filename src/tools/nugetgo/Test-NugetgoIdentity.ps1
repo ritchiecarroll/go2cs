@@ -81,6 +81,31 @@ foreach ($c in $vs) {
     else { Check $label ($r.Refused -and $null -eq $r.Version -and $r.Reason -like "*$($c[4])*") "got '$($r.Version)' refused $($r.Refused) '$($r.Reason)'" }
 }
 
+Write-Host 'B6 -- the description: the third-party form or the author''s (owner ruling 2026-10-02)'
+$sec = 'Security: that standard library carries no Go security fixes issued after Go 1.24.13; review before any production use.'
+$third = "PROOF: unofficial go2cs C# conversion of github.com/acme/widget v1.2.3, built on the Go 1.24.13 standard library, not affiliated with or endorsed by Acme or the Go project. $sec"
+$author = "PROOF: go2cs C# conversion of github.com/acme/widget v1.2.3, published by its author, built on the Go 1.24.13 standard library, not affiliated with or endorsed by the Go project. $sec"
+$ds = @(
+    # module path, repository URL, -UpstreamPublishes, expected description (literal) or $null, reason fragment when refused
+    @('github.com/acme/widget', 'https://github.com/someone/widget-cs', $false, $third, $null),
+    @('github.com/acme/widget', 'https://github.com/acme/widget-cs', $true, $author, $null),
+    @('github.com/acme/widget', 'https://github.com/someone/widget-cs', $true, $null, 'is not under github.com/acme'),
+    @('github.com/acme/widget', 'https://github.com/acme/widget-cs', $false, $null, 'pass -UpstreamPublishes'),
+    @('gopkg.in/acme/widget.v1', 'https://github.com/acme/widget-cs', $true, $null, 'cannot corroborate authorship for gopkg.in/acme/widget.v1'),
+    @('example.com/widget', 'https://example.com/widget-cs', $true, $null, 'cannot corroborate authorship'),
+    # host and org compare case-insensitively, as the hosts themselves do
+    @('github.com/Acme/widget', 'https://GitHub.com/acme/widget-cs', $true, $author.Replace('github.com/acme/widget', 'github.com/Acme/widget'), $null)
+)
+foreach ($c in $ds) {
+    $module = $c[0]; $label = "$module from $($c[1])$(if ($c[2]) { ' -UpstreamPublishes' })"
+    $r = Get-NugetgoDescription -ModulePath $module -GoVersion 'v1.2.3' -GoRelease '1.24.13' -Upstream 'Acme' -RepositoryUrl $c[1] -UpstreamPublishes:$c[2]
+    if ($c[3]) { Check $label (-not $r.Refused -and $r.Description -ceq $c[3] -and $r.Author -eq $c[2]) "got refused $($r.Refused) '$($r.Reason)' '$($r.Description)'" }
+    else { Check $label ($r.Refused -and $null -eq $r.Description -and $r.Reason -like "*$($c[4])*") "got refused $($r.Refused) '$($r.Reason)' '$($r.Description)'" }
+}
+$pack = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'nugetgo-pack.ps1'))
+Check 'nugetgo-pack.ps1 takes its description from Get-NugetgoDescription, under -UpstreamPublishes' ($pack.Contains('Get-NugetgoDescription -ModulePath') -and
+    $pack.Contains('-UpstreamPublishes:$UpstreamPublishes') -and $pack.Contains('[switch]$UpstreamPublishes') -and -not $pack.Contains('$description = "PROOF')) 'the pack script still spells the description itself'
+
 Write-Host 'B6 -- the module license file'
 Import-Module (Join-Path $PSScriptRoot 'NugetgoLicense.psm1') -Force
 # ONE list: the converter's moduleLicenseNames (src/go2cs/licensing.go) and this module's copy, same names, same order.

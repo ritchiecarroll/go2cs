@@ -351,6 +351,20 @@ func validate(d Description) error {
 	return nil
 }
 
+// CheckModuleNuGetID refuses a converted MODULE's NuGet ID that takes the "go." prefix, in any letter case (NuGet IDs
+// are case-insensitive): "go." is the converted Go standard library, and a module's ID is the "nugetgo." form (owner
+// ruling, 2026-10-02). It mirrors the registry's lint exactly (nugetgo cmd/sitegen/parse.go at 90cc7d7409): the PREFIX
+// only, the dot included, so "golang.x", "gopher.x", "go-x.y" and the bare "go" pass; it requires nothing else; and a
+// caller runs it AFTER its own length and validity checks, so a malformed ID is refused for that alone. A
+// standard-library reference is never a module ID, so it never reaches this check.
+func CheckModuleNuGetID(id string) error {
+	if strings.HasPrefix(strings.ToLower(id), "go.") {
+		return fmt.Errorf(`nuget-id "%s" uses the "go." prefix, which is the converted Go standard library; the ID of a converted module starts with "nugetgo."`, id)
+	}
+
+	return nil
+}
+
 // validateRequire checks one require line's three fields.
 func validateRequire(r Require) error {
 	if err := module.CheckPath(r.Module); err != nil {
@@ -363,6 +377,10 @@ func validateRequire(r Require) error {
 
 	if !nugetIDPattern.MatchString(r.NuGetID) || len(r.NuGetID) > nugetIDMaxLength {
 		return fmt.Errorf("require %s: invalid nuget-id %q (the registry's rule: %s, at most %d characters)", r.Module, r.NuGetID, nugetIDPattern, nugetIDMaxLength)
+	}
+
+	if err := CheckModuleNuGetID(r.NuGetID); err != nil {
+		return fmt.Errorf("require %s: %v", r.Module, err)
 	}
 
 	return nil
