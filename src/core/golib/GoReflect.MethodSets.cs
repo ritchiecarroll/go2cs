@@ -298,12 +298,11 @@ public static partial class GoReflect
         {
             return s_methodFuncs.GetOrAdd(entry.Method, m =>
             {
-                ParameterInfo[] ps = m.GetParameters();
-                ParameterExpression[] args = new ParameterExpression[ps.Length];
-                args[0] = Expression.Parameter(receiverType, "recv");
-
-                for (int i = 1; i < ps.Length; i++)
-                    args[i] = Expression.Parameter(ps[i].ParameterType, ps[i].Name);
+                ParameterExpression[] args =
+                [
+                    Expression.Parameter(receiverType, "recv"),
+                    .. m.GetParameters().Skip(1).Select(static p => Expression.Parameter(p.ParameterType, p.Name))
+                ];
 
                 return Expression.Lambda(funcType, Expression.Call(m, args), args).Compile();
             });
