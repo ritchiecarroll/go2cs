@@ -179,3 +179,45 @@ func main() {
 		t.Errorf("expected the guarded default arm: %s", mainCs)
 	}
 }
+
+// TestConstantShiftBesideCastConstKeepsWidth pins CS0675 (runtime's `1<<tracebackShift |
+// tracebackAll`). go/types leaves the operands of a CONSTANT expression untyped, so the shift renders
+// as a C# `int` while the named constant beside it is cast to the result type, and C# sign-extends
+// the `int` to OR it with the unsigned operand. The shift takes the same cast. Only that shape: a
+// constant shift beside a literal (`16 | 1<<24`, internal/zstd) draws no warning, and a native-int
+// result already casts its computed operands in a block of its own.
+func TestConstantShiftBesideCastConstKeepsWidth(t *testing.T) {
+	mainCs := convertWarningFixture(t, "csbc", `package main
+
+const (
+	tracebackCrash = 1 << iota
+	tracebackAll
+	tracebackShift = iota
+)
+
+func level(n int) uint32 {
+	var t uint32
+
+	switch n {
+	case 1:
+		t = 1<<tracebackShift | tracebackAll
+	case 2:
+		t = 16 | 1<<24
+	}
+
+	return t
+}
+
+func main() {
+	println(level(1), level(2))
+}
+`)
+
+	if want := "(uint32)(1 << (int)(tracebackShift)) | (uint32)tracebackAll"; !strings.Contains(mainCs, want) {
+		t.Errorf("constant shift beside a cast constant must take the result type (%q): %s", want, mainCs)
+	}
+
+	if strings.Contains(mainCs, "16 | (uint32)") {
+		t.Errorf("constant shift beside a literal must stay as it was: %s", mainCs)
+	}
+}
