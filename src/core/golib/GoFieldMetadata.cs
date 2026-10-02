@@ -27,6 +27,12 @@ namespace go;
 /// more and reports none has lost its metadata, and that is refused here by name rather than
 /// answered.
 /// </para>
+/// <para>
+/// This is a tripwire, not the protection. The trimmer never removes an instance field from a value
+/// type it keeps (measured 2026-10-02 across golib, reflect, runtime and fmt published in full trim
+/// mode), so today's linker does not produce this case; what keeps a published program correct is the
+/// project template's <c>TrimMode=partial</c>, which keeps golib and every converted assembly whole.
+/// </para>
 /// </remarks>
 internal static class GoFieldMetadata
 {
