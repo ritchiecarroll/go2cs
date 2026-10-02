@@ -284,6 +284,46 @@ public static partial class TypeExtensions
     }
 
     /// <summary>
+    /// Determines whether <paramref name="method"/> takes its receiver <c>this ref X</c> WITHOUT
+    /// <see cref="GoRecvAttribute"/> — a method of <c>X</c>'s VALUE method set whose emitted receiver
+    /// is by reference, which every run-time binder must therefore call on a COPY.
+    /// </summary>
+    /// <param name="method">Receiver-first static method from a Go method set.</param>
+    /// <param name="receiverType">
+    /// The receiver type Go sees: the by-ref's element type when the method is copy-bound; the
+    /// declared parameter type, unchanged, otherwise.
+    /// </param>
+    /// <returns><c>true</c> when the receiver must be bound through a copy; otherwise, <c>false</c>.</returns>
+    /// <remarks>
+    /// The shape is the generated forwarder of a POINTER-receiver method promoted through an embedded
+    /// POINTER: Go puts that method in the outer type's value set (the embedded pointer is what the
+    /// method mutates through), while the forwarder mirrors its source's <c>this ref</c>. A by-ref
+    /// receiver fits no delegate and no <c>Func&lt;&gt;</c> type argument, so reflect's method table,
+    /// method values and the interface shells all refused it. Copying is exactly Go's semantics for a
+    /// value receiver, and nothing is lost by it: the forwarder reaches its target through the
+    /// embedded pointer, which the copy shares. A <c>[GoRecv]</c> by-ref receiver is NOT this shape
+    /// — it is a pointer-set method, bound through its <c>ж&lt;X&gt;</c> twin and never through a copy.
+    /// </remarks>
+    internal static bool IsCopyBoundReceiver(MethodInfo method, out Type receiverType)
+    {
+        ParameterInfo[] parameters = method.GetParameters();
+
+        if (parameters.Length == 0)
+        {
+            receiverType = typeof(void);
+            return false;
+        }
+
+        receiverType = parameters[0].ParameterType;
+
+        if (!receiverType.IsByRef || method.GetCustomAttribute<GoRecvAttribute>() is not null)
+            return false;
+
+        receiverType = receiverType.GetElementType()!;
+        return true;
+    }
+
+    /// <summary>
     /// Collects the extension methods whose receiver belongs to the Go METHOD SET of element type
     /// <paramref name="valueElement"/>, viewed as a pointer (<c>*X</c>) or as a value (<c>X</c>).
     /// </summary>
@@ -316,8 +356,10 @@ public static partial class TypeExtensions
                 // A pointer receiver appears in TWO emitted shapes: the RecvGenerator's ж<X> overload
                 // (receiverIsPointer above) and the original [GoRecv] `this ref X` extension — the
                 // byref strip on the line above erases the latter's pointer-ness, so ask the marker
-                // attribute directly (a `this ref` receiver without [GoRecv] does not exist in
-                // emitted code; value receivers are always by-value `this X`).
+                // attribute directly. A `this ref X` receiver WITHOUT [GoRecv] is the third shape, and
+                // it IS a value-set method: the forwarder of a pointer-receiver method promoted through
+                // an embedded POINTER (bufio.ReadWriter's ReadString, through *Reader). It stays in the
+                // set here and is bound through a COPY of the receiver (see IsCopyBoundReceiver).
                 if (!valueIsPointer && (receiverIsPointer || method.GetCustomAttribute<GoRecvAttribute>() is not null))
                     continue;
 
