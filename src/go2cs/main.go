@@ -263,7 +263,7 @@ func main() {
 	var recurseVal recurseMode
 	commandLine.Var(&recurseVal, "recurse", "Recursively convert an end-user module and its third-party dependencies (references the pre-converted standard library); use -recurse=module to convert only the module's own packages, leaving the third-party closure referenced but unconverted, and -recurse=nuget to reference the published go2cs NuGet packages (go.<pkg>/go.lib/go.gen) instead of local project references (values combine: -recurse=module,nuget)")
 	var nugetMapVals, nugetMapExcludeVals stringListFlag
-	commandLine.Var(&nugetMapVals, "nuget-map", "With -recurse=nuget: a Go-module -> NuGet-package mapping source, a local file or an https:// URL in nugetgo.net's schema v1; REPEATABLE, and the listed order is the precedence (the first source naming a module answers it). The nugetgo.net registry (https://nugetgo.net/v1/mappings.txt) answers every module the listed sources do not name, unless -nuget-map-only. 'off' disables mapping entirely. Resolved, locked (go2cs.nuget.lock) and reported, but not yet applied: every module is still converted locally until stage S3b. With no -nuget-map flag a run does no mapping at all")
+	commandLine.Var(&nugetMapVals, "nuget-map", "With -recurse=nuget (where mapping is ON by default): a Go-module -> NuGet-package mapping source, a local file or an https:// URL in nugetgo.net's schema v1; REPEATABLE, and the listed order is the precedence (the first source naming a module answers it). The nugetgo.net registry (https://nugetgo.net/v1/mappings.txt) answers every module the listed sources do not name, unless -nuget-map-only. A mapped module is referenced as its published package (one exact-pinned PackageReference, locked in go2cs.nuget.lock) when a version built for this go2cs release describes it exactly; otherwise it converts locally and the report says why. 'off' disables mapping entirely")
 	nugetMapOnlyCmd := commandLine.Bool("nuget-map-only", false, "With -nuget-map: use only the listed sources, dropping the nugetgo.net fallback, so a module they do not name stays local and the registry is never fetched")
 	commandLine.Var(&nugetMapExcludeVals, "nuget-map-exclude", "With -nuget-map: a module path that is never mapped, whatever a source says; repeatable")
 	nugetMapRefreshCmd := commandLine.Bool("nuget-map-refresh", false, "With -nuget-map: fetch every URL source unconditionally (bypassing the cache) and re-resolve every module, adopting what the sources now say instead of what go2cs.nuget.lock pinned")
@@ -362,8 +362,10 @@ Examples:
   go2cs -recurse=nuget module_dir         # Same, but reference the go2cs stdlib from NuGet (go.*, no deploy-core)
   go2cs -recurse=module,nuget module_dir  # Values combine: module-only scope with NuGet references
   go2cs -recurse=nuget -nuget-map mine.txt module_dir
-                                          # Resolve NuGet mappings: mine.txt answers the modules it names,
-                                          # nugetgo.net the rest; locked in go2cs.nuget.lock and reported
+                                          # Map third-party modules to published packages: mine.txt answers
+                                          # the modules it names, nugetgo.net the rest (the default without it)
+  go2cs -recurse=nuget -nuget-map off module_dir
+                                          # Convert every third-party module locally; no mapping request
   go2cs -recurse=nuget -nuget-map mine.txt -nuget-map-only module_dir
                                           # Use mine.txt only; nugetgo.net is never fetched
   go2cs -stdlib -allow-stale-converter    # Proceed on a DELIBERATELY pinned binary (an A/B against a preserved go2cs);

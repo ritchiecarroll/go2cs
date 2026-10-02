@@ -209,6 +209,18 @@ covers all packages within the module, each becoming a `PackageReference` to the
 only if the published package is per-module (§5 requires per-module packaging, matching how Go
 modules version).
 
+> **AMENDED 2026-10-02 (COORD rulings on the S3b sizing) -- the substitution as built.** (1) **On by default:** under
+> `-recurse=nuget` the registry is consulted with no flag; `-nuget-map off` is the opt-out (S3a shipped it dormant, and the
+> default flipped together with the substitution). (2) **Exact pin, one per module:** a substituted module is ONE
+> `PackageReference Version="[x]"`, whatever number of its packages are imported; `go2cs.nuget.lock` pins the version and the
+> SHA-512 of the nupkg, and a later run reuses that version (cache or NuGet's global packages folder) and refuses bytes that
+> no longer match. (3) **Closure consistency:** a package requires its own third-party modules through NuGet, so a module is
+> substituted only while every module its package requires is either absent from the run's closure or substituted by the
+> same package at the same version; otherwise it is DEMOTED to local conversion, as a fixed point, and the provenance table
+> names the blocking module. (4) The corpus release a package must match is the converter's embedded `corpus-release.txt`,
+> the last PUBLISHED release (releasestamp.PublishedStamp); the release-procedure lines that regenerate it at each record are
+> held for the owner (COORD, 2026-10-02), and repoguard's TestCorpusReleaseMatchesThePublishedStamp catches a stale one.
+
 ### 4.3 Metadata and version selection — the self-describing package
 
 The converter needs each mapped package's exported aliases and `GoImplement` records at

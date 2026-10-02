@@ -419,6 +419,10 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 	// converted packages (main-module + third-party, IsStdLib=false) stay local ProjectReferences.
 	var packageIds []string
 
+	// A substituted third-party module (nugetSubstitution.go): ONE PackageReference per module, whatever
+	// number of its packages this project imports, exact-pinned to the version go2cs.nuget.lock records.
+	substitutedPackages := map[string]string{}
+
 	for _, info := range packageInfoMap {
 		reference := info.ProjectReference
 
@@ -429,6 +433,11 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 		// Load imported type aliases for the current package, if not already loaded — needed regardless of
 		// whether this import is emitted as a ProjectReference or a NuGet PackageReference.
 		loadImportedTypeAliases(info, options)
+
+		if emitNuGet && info.NuGetSubstitution != nil {
+			substitutedPackages[info.NuGetSubstitution.nugetID] = info.NuGetSubstitution.packageVersion
+			continue
+		}
 
 		if emitNuGet && info.IsStdLib {
 			// PackageId is `go.` + the referenced project's AssemblyName. That AssemblyName is the .csproj
@@ -469,6 +478,19 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 	// intact and emits a .csproj MSBuild refuses to parse.
 	for _, packageID := range packageIds {
 		projectReferences.WriteString(fmt.Sprintf("\r\n    <PackageReference Include=\"%s\" Version=\"$(GoStdLibVersion)\" />", escapeXMLAttributeValue(packageID)))
+	}
+
+	substitutedIDs := make([]string, 0, len(substitutedPackages))
+
+	for packageID := range substitutedPackages {
+		substitutedIDs = append(substitutedIDs, packageID)
+	}
+
+	sort.Strings(substitutedIDs)
+
+	for _, packageID := range substitutedIDs {
+		projectReferences.WriteString(fmt.Sprintf("\r\n    <PackageReference Include=\"%s\" Version=\"[%s]\" />",
+			escapeXMLAttributeValue(packageID), escapeXMLAttributeValue(substitutedPackages[packageID])))
 	}
 
 	// The EMITTED spelling of each reference — escaped once, here, so the marker substitution below

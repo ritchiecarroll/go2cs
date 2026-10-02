@@ -37,13 +37,19 @@ type PackageInfo struct {
 	// record describes src/core, which under this mode is exactly what is referenced.
 	// It is deliberately NOT set for a $(go2csPath) source deployment, whose staged tree may be
 	// the baseline core stub instead.
-	PublishedStdLib  bool
-	PackageName      string
-	RootPackageName  string
-	SourceDir        string
-	TargetDir        string
-	ProjectReference string
-	Err              error
+	PublishedStdLib bool
+	// NuGetSubstitution marks a third-party import whose module this -recurse=nuget run references as a
+	// PUBLISHED package (nugetSubstitution.go): the project reference becomes an exact-pinned
+	// PackageReference, and the metadata a package_info.cs would carry comes from the package's
+	// self-description, for ImportPath.
+	NuGetSubstitution *nugetSubstitution
+	ImportPath        string
+	PackageName       string
+	RootPackageName   string
+	SourceDir         string
+	TargetDir         string
+	ProjectReference  string
+	Err               error
 }
 
 func getProjectName(importPath string, options Options) (string, string) {
@@ -643,14 +649,25 @@ func getRecurseDependencyInfo(importPath string, options Options) (PackageInfo, 
 	targetDir := filepath.Join(outputRoot, root, filepath.FromSlash(importPath))
 	projectReference := filepath.Join(targetDir, projectFileBaseName(libProjectName)+".csproj")
 
-	return PackageInfo{
+	info := PackageInfo{
 		IsStdLib:         false,
+		ImportPath:       importPath,
 		PackageName:      packageQualifiedName(namespace, meta.Name),
 		RootPackageName:  meta.Name,
 		SourceDir:        meta.Dir,
 		TargetDir:        targetDir,
 		ProjectReference: projectReference,
-	}, true
+	}
+
+	// A module this run references as a published package (-recurse=nuget, nugetSubstitution.go) has no
+	// converted output in the root: its reference is the package, and writeProjectFile emits it as one.
+	if substitution := nugetSubstitutionFor(importPath); substitution != nil && options.nugetRefs && root == "pkg" {
+		info.NuGetSubstitution = substitution
+		info.TargetDir = ""
+		info.ProjectReference = "nuget:" + substitution.nugetID
+	}
+
+	return info, true
 }
 
 // packageQualifiedName returns the dotted name N for which go.<N>_package is the imported package's
@@ -863,6 +880,35 @@ func isCSharpBuiltinTypeName(name string) bool {
 }
 
 func loadImportedTypeAliases(info PackageInfo, options Options) {
+	// A substituted third-party package (-recurse=nuget, nugetSubstitution.go) is a published assembly with
+	// no converted source in this root; its package_info.cs records travel in the package's self-description
+	// (go2cs/source-metadata.txt), so read them there -- exactly as a published stdlib package's come from
+	// the converter's embedded record below.
+	if info.NuGetSubstitution != nil {
+		key := "nuget:" + info.NuGetSubstitution.nugetID + ":" + info.ImportPath
+
+		packageLock.Lock()
+
+		if _, ok := parsedPackageInfoFiles[key]; ok {
+			packageLock.Unlock()
+			return
+		}
+
+		parsedPackageInfoFiles.Add(key)
+		packageLock.Unlock()
+
+		if lines, ok := info.NuGetSubstitution.metadataLines(info.ImportPath, goosOfTarget(options.targetPlatform)); ok {
+			if results, parseErr := parseExportedTypeAliasLines(lines); parseErr == nil {
+				applyExportedTypeAliases(results, info, false)
+				loadPackageImplementLines(lines, info.RootPackageName)
+				return
+			}
+		}
+
+		applyExportedTypeAliases(foreignDerivedTypeAliases(importedPackageSources[filepath.Clean(info.SourceDir)]), info, true)
+		return
+	}
+
 	// Layout L3 routes a package's platform-varying artifacts into per-GOOS folders, and
 	// `package_info.cs` is one of them (design §4.3) — so ask for the copy that describes the
 	// platform THIS conversion is emitting for. Flat wins when the dependency's metadata is shared,
