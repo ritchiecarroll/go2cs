@@ -387,6 +387,25 @@ func TestPublishPropertiesAreScopedOffLibrariesButAllowUnsafeBlocksIsNot(t *test
 		t.Errorf("<PublishTrimmed> is in a PropertyGroup with Condition %q; it must be scoped off Library projects", condition)
 	}
 
+	// A converted program's publish trims the FRAMEWORK only: golib, the converted packages and the
+	// program itself reach members by reflection the linker cannot see, and a full trim removed them
+	// (InterfaceAssertionMapKey and ReflectFieldMetadata printed wrong output published, 2026-10-02;
+	// tests/Behavioral/check-published-output.ps1 is the standing gate). The value sits beside
+	// PublishTrimmed, and only where the caller has not chosen one.
+	trimCondition, found := properties.conditionOf("TrimMode")
+
+	if !found {
+		t.Fatal("the rendered project sets no <TrimMode>: a publish would trim every assembly")
+	}
+
+	if trimCondition != condition {
+		t.Errorf("<TrimMode> is in a PropertyGroup with Condition %q, not PublishTrimmed's %q", trimCondition, condition)
+	}
+
+	if rendered := renderCsprojTemplate("Exe", "", ""); !strings.Contains(rendered, `<TrimMode Condition="'$(TrimMode)'==''">partial</TrimMode>`) {
+		t.Error("<TrimMode> must be partial, and must yield to a TrimMode the caller sets")
+	}
+
 	condition, found = properties.conditionOf("AllowUnsafeBlocks")
 
 	if !found {
