@@ -9,6 +9,17 @@
 # each target OS in its fourth column. CopyBoundReceiverAllowlistTests fails on a by-ref receiver without [GoRecv]
 # that is not listed.
 #
+# Population, measured on the generated sources of go2cs-stdlib.slnx: 693 by-ref forwarders on windows, 492 in a
+# pointer set ([GoRecv]) and 201 in a value set (listed); 493 + 197 on linux; 493 + 201 on darwin.
+#
+# Two corrections to the figures this seat was first sized with:
+#   1. The first census read 624 forwarders (459 pointer-set, 165 value-set). Its scan pattern stopped at the first
+#      parenthesis after `static`, so a forwarder whose return type is a tuple was never counted: 69 rows missed,
+#      33 pointer-set and 36 value-set. The whole-tree generated diff exposed it (492 changed lines for 459 rows).
+#   2. A second population was not in that census at all: StrGenerator's @string forwarder of a [GoRecv] sstring
+#      twin re-declared `this ref T` without [GoRecv]. 13 forwarders, all in fmt; they now repeat the mark and
+#      none is listed here.
+#
 # package<TAB>struct<TAB>method<TAB>target OSes
 archive.zip	fileWriter	ModTime	windows,linux,darwin
 archive.zip	fileWriter	Mode	windows,linux,darwin
