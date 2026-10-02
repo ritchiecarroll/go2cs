@@ -433,8 +433,9 @@ finally { $ErrorActionPreference = $savedEAP }
 #    dirs are excluded: their sources are HAND-WRITTEN, not converter output, so an edit to either is
 #    a deliberate harness change and reporting it as converter drift is pure noise. (BehavioralRunner
 #    was missing from this filter until 2026-08-02, so editing the runner made CNR accuse itself of a
-#    regression.)
-$changed = & git -C $repoRoot status --short -- "src/tests/Behavioral/*.cs" "src/tests/Behavioral/*.csproj" |
+#    regression.) The per-file warning entries (`.editorconfig`, src/go2cs/warningEntries.go) are
+#    converter output too, written beside the project file on every transpile.
+$changed = & git -C $repoRoot status --short -- "src/tests/Behavioral/*.cs" "src/tests/Behavioral/*.csproj" "src/tests/Behavioral/*.editorconfig" |
     Where-Object { $_ -notmatch "Behavioral(Tests|Runner)/" }
 
 # ---------------------------------------------------------------------------------------------
@@ -563,8 +564,12 @@ if ($Revert -and $changed) {
     # Same two exclusions as the report above, and for a sharper reason: without them this checkout
     # DESTROYS uncommitted hand-edits to the harness sources themselves (they are .cs/.csproj under
     # tests\Behavioral, so the bare pathspec swept them up).
-    Write-Host "==> -Revert: restoring changed .cs/.csproj to HEAD" -ForegroundColor Cyan
-    & git -C $repoRoot checkout -- "src/tests/Behavioral/*.cs" "src/tests/Behavioral/*.csproj" `
+    Write-Host "==> -Revert: restoring changed .cs/.csproj/.editorconfig to HEAD" -ForegroundColor Cyan
+    # The entry-file pathspec joins only when some entry file is tracked: a pathspec that matches no
+    # tracked file makes `git checkout` refuse the WHOLE command, which would restore nothing.
+    $revertSpecs = @("src/tests/Behavioral/*.cs", "src/tests/Behavioral/*.csproj")
+    if (& git -C $repoRoot ls-files -- "src/tests/Behavioral/*.editorconfig") { $revertSpecs += "src/tests/Behavioral/*.editorconfig" }
+    & git -C $repoRoot checkout -- @revertSpecs `
         ":(exclude)src/tests/Behavioral/BehavioralTests/*" `
         ":(exclude)src/tests/Behavioral/BehavioralRunner/*"
 }
