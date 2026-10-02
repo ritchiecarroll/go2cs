@@ -139,6 +139,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [An array or slice literal may MIX positional and keyed elements](slices-and-arrays.md#an-array-or-slice-literal-may-mix-positional-and-keyed-elements)
   - [A fixed-size array constructs its ELEMENTS when `default(T)` is not usable storage](slices-and-arrays.md#a-fixed-size-array-constructs-its-elements-when-defaultt-is-not-usable-storage)
   - [A NAMED array's ZERO VALUE constructs its elements through the wrapper's lazy backing](slices-and-arrays.md#a-named-arrays-zero-value-constructs-its-elements-through-the-wrappers-lazy-backing)
+  - [A NAMED array compared with the unnamed array it is written over casts the unnamed side](slices-and-arrays.md#a-named-array-compared-with-the-unnamed-array-it-is-written-over-casts-the-unnamed-side)
   - [`make([]E, n)` constructs its ELEMENTS by the same rule](slices-and-arrays.md#makee-n-constructs-its-elements-by-the-same-rule)
   - [`clear` rebuilds each element through golib's `GoZero` — the RUN-TIME half of zero-value construction](slices-and-arrays.md#clear-rebuilds-each-element-through-golibs-gozero--the-run-time-half-of-zero-value-construction)
   - [A map READ of a shape-carrying element supplies the zero from the CALL SITE](slices-and-arrays.md#a-map-read-of-a-shape-carrying-element-supplies-the-zero-from-the-call-site)

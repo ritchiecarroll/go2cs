@@ -1111,6 +1111,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedArrayPointerConversion() => CheckTarget("NamedArrayPointerConversion");
 
     [TestMethod]
+    public void CheckNamedArrayVsUnnamedCompare() => CheckTarget("NamedArrayVsUnnamedCompare");
+
+    [TestMethod]
     public void CheckNamedArrayWrapper() => CheckTarget("NamedArrayWrapper");
 
     [TestMethod]

@@ -23,4 +23,9 @@ func main() {
 	}
 
 	fmt.Println("equal")
+
+	// Both operand orders, with == as well as !=.
+	g := Hash(sum([]byte{1, 2, 3, 4}))
+	fmt.Println(g == sum([]byte{1, 2, 3, 4}), sum([]byte{1, 2, 3, 4}) == g)
+	fmt.Println(g != sum(nil), sum(nil) != g, sum(nil) == h)
 }
