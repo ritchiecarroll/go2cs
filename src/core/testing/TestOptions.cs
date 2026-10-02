@@ -74,6 +74,13 @@ internal sealed class TestOptions
     public string ShuffleValue { get; private set; } = "off";
 
     /// <summary>
+    /// The raw <c>-test.list</c> pattern, or empty when the flag is absent. Non-empty means LIST and exit:
+    /// Go's M.Run prints the matching names and returns 0 without running a test (see
+    /// <see cref="TestRunner.ListTests"/>). Kept raw for the reason -run is: TestFlagBridge republishes it.
+    /// </summary>
+    public string ListPattern { get; private set; } = "";
+
+    /// <summary>
     /// The first flag name this host does not define, undashed, or <c>null</c> when the parse met
     /// none. Its verdict is deferred rather than decided here — see <see cref="Parse"/>.
     /// </summary>
@@ -196,6 +203,13 @@ internal sealed class TestOptions
                     options.RunPattern = value;
                     options.Filters = value.Split('/').Select(part =>
                         new Regex(part, RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1.0D))).ToArray();
+                    break;
+                case "test.list":
+                    // Go's test binary defines only the qualified name; `go test -list` is cmd/go's spelling,
+                    // translated before the binary sees it. Compiled where it is used, so an invalid pattern
+                    // gets Go's message and status rather than this parse's.
+                    value ??= NextValue(args, ref index, name);
+                    options.ListPattern = value;
                     break;
                 case "skip":
                 case "test.skip":
