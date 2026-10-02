@@ -54,10 +54,8 @@ public enum GoLibcErrnoRule
 /// return register (<c>r2</c>, <c>DX</c>) is reported as 0 — no darwin syscall wrapper in the corpus
 /// reads it (censused over <c>zsyscall_darwin_amd64.cs</c>: 0 readers); floating-point arguments are
 /// refused (one lifted struct carries one, <c>crypto_x509_syscall_args</c>, and it sits behind a
-/// class-C entry); and a variadic callee on Apple silicon, whose variadic tail travels on the stack
-/// rather than in registers, is called with the fixed-register convention this signature family
-/// implies — correct on amd64, where the corpus's darwin flavour lives, and recorded beside the
-/// amd64-only debt for arm64.
+/// class-C entry). A variadic callee on Apple silicon, whose variadic tail travels on the stack rather
+/// than in registers, IS modelled since S9 (2026-10-02): see <see cref="VariadicStackSlot"/>.
 /// </para>
 /// </remarks>
 public static unsafe class GoLibcCall
@@ -97,7 +95,11 @@ public static unsafe class GoLibcCall
         if (args.Length > MaxArgs)
             throw new ArgumentException($"go2cs: libc call with {args.Length} arguments; the keystone family tops out at {MaxArgs}", nameof(args));
 
-        nuint r = args.Length switch
+        // Apple silicon reads a variadic argument from the stack; Go's runtime stores it there as well as in
+        // its register, per entry (VariadicStackSlot). Everywhere else the plain register call below.
+        int variadicSlot = VariadicStackSlot(args.Length, rule, s_darwinArm64);
+
+        nuint r = variadicSlot >= 0 ? CallWithVariadicStackSlot(fn, args, args[variadicSlot]) : args.Length switch
         {
             0 => ((delegate* unmanaged[Cdecl]<nuint>)fn)(),
             1 => ((delegate* unmanaged[Cdecl]<nuint, nuint>)fn)(args[0]),
@@ -121,6 +123,61 @@ public static unsafe class GoLibcCall
 
         errno = failed ? ReadErrno(errnoReader) : 0;
         return r;
+    }
+
+    // Apple silicon only: x86-64 passes a variadic callee's arguments in registers, so nothing moves there,
+    // and linux is untouched.
+    private static readonly bool s_darwinArm64 = OperatingSystem.IsMacOS() && RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
+
+    /// <summary>
+    /// The index of the argument Go's darwin/arm64 runtime ALSO stores at <c>[sp]</c> for a libc call of
+    /// <paramref name="arity"/> arguments under <paramref name="rule"/>, or -1 for none.
+    /// </summary>
+    /// <remarks>
+    /// Apple silicon passes a variadic callee's variadic arguments on the stack, and open, fcntl, ioctl
+    /// and openat are variadic in libSystem. Go's runtime entries store one argument there, read off
+    /// runtime/sys_darwin_arm64.s: <c>runtime·syscall</c> stores a3 ("open, fcntl, and ioctl ... put the 3rd
+    /// arg on the stack as well"); <c>runtime·syscall6</c> and <c>runtime·syscall9</c> store a4 ("openat,
+    /// for which the 4th arg must be on the stack"); <c>syscallX</c>, <c>syscall6X</c> and
+    /// <c>syscallPtr</c> store nothing. The converted keystones (syscall/darwin/syscall_darwin_impl.cs)
+    /// reach this dispatch with exactly those arities and errno rules, so (arity, rule) names the entry.
+    /// The runtime's own libcCall trampolines arrive here too: its open and fcntl trampolines are
+    /// 3-argument Int32MinusOne calls that store a3 (sys_darwin_arm64.s open_trampoline,
+    /// fcntl_trampoline), and any other trampoline of a matching shape gets an extra stack argument a
+    /// non-variadic callee never reads. Without this, a mode read from stack garbage made a file
+    /// os.WriteFile created with 0o644 reopen as "permission denied" on osx-arm64 (run 36976772120).
+    /// </remarks>
+    internal static int VariadicStackSlot(int arity, GoLibcErrnoRule rule, bool darwinArm64)
+    {
+        if (!darwinArm64 || rule != GoLibcErrnoRule.Int32MinusOne)
+            return -1;
+
+        return arity switch
+        {
+            3 => 2,       // runtime·syscall: a3
+            6 or 9 => 3,  // runtime·syscall6 / runtime·syscall9: a4
+            _ => -1,
+        };
+    }
+
+    /// <summary>
+    /// Calls <paramref name="fn"/> with its arguments in the eight register slots and
+    /// <paramref name="stackValue"/> as a ninth argument, which AAPCS64 places at <c>[sp]</c>: where a
+    /// darwin/arm64 variadic callee's va_arg reads its first variadic argument. A callee that is not
+    /// variadic reads only its own registers. A ninth real argument would also travel at <c>[sp]</c>, so for a
+    /// 9-argument call the slot holds a4 and a9 is not passed, exactly as Go's runtime·syscall9 does (its
+    /// one darwin caller, getnameinfo, has seven).
+    /// </summary>
+    internal static nuint CallWithVariadicStackSlot(nint fn, ReadOnlySpan<nuint> args, nuint stackValue)
+    {
+        Span<nuint> r = stackalloc nuint[8];
+        r.Clear();
+
+        for (int i = 0; i < args.Length && i < r.Length; i++)
+            r[i] = args[i];
+
+        return ((delegate* unmanaged[Cdecl]<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(
+            r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], stackValue);
     }
 
     /// <summary>
