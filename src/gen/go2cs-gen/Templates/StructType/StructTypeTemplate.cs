@@ -418,7 +418,7 @@ internal class StructTypeTemplate : TemplateBase
                     // (fileWithoutReadFrom → *File → *file) because that accessor may itself be
                     // this shape. Value embeds keep the plain `ref` form: their promoted fields
                     // live in the enclosing allocation, so the existing rooting is already right.
-                    string pointerEmbedInnerType = PointerEmbedInnerType(promotedStructType, promotedMemberName);
+                    string? pointerEmbedInnerType = PointerEmbedInnerType(promotedStructType, promotedMemberName);
 
                     // A depth-1 readonly zero-size member answers the shared slot, as the ref property above.
                     string promotedRefTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName)
