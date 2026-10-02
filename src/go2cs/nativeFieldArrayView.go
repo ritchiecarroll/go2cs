@@ -25,18 +25,21 @@ import (
 // automatically and that offset is not Go's (measured: Port at CLR offset 0, Go offset 2), which turns
 // a view-only fix into a silent wrong port.
 //
-// So the conversion emits golib's door ahead of the raw route, handing it the field reference itself —
-// the same `Ꮡp.of(S.Ꮡf)` the raw route pins:
+// So the conversion emits the unsafe package's helper over the field reference, naming the field ONCE as
+// the Go line does:
 //
-//	(NativeFieldArrayPointer<T>(Ꮡp.of(S.Ꮡf), N) ?? <the raw route>)
+//	@unsafe.ArrayPointer<T>.Of(Ꮡp.of(S.Ꮡf), N)
 //
-// golib resolves f's GO offset from the struct's Go layout at run time. It is NOT folded here: a Go offset
-// is a property of the target, and a literal makes one source file emit three ways — runtime's
-// m.cheaprand sits at 1648, 1688 and 1752 across linux, windows and darwin, which split the shared
-// runtime/rand.cs into three per-flavour copies when this door first folded it. The door answers only for
-// a native root; a managed or nil root answers null and keeps today's route byte for byte. And because a native array pointer has no array<T> for Value to return, a local bound
-// by the door and never re-pointed reads `p[i]` through ElementRef, which indexes a native array in
-// place and falls back to `ref p.Value[i]` for every other box.
+// It carries both routes. A native root takes golib's door, which resolves f's GO offset from the struct's
+// Go layout at run time; every other root takes the raw-address route this conversion emitted before, byte
+// for byte. The offset is NOT folded here: a Go offset is a property of the target, and a literal makes
+// one source file emit three ways — runtime's m.cheaprand sits at 1648, 1688 and 1752 across linux,
+// windows and darwin, which split the shared runtime/rand.cs into three per-flavour copies when this door
+// first folded it. The helper lives in the unsafe package because golib cannot name Pointer.FromPinnedBox,
+// the raw route's retaining pin; an earlier form spelled both routes at the call site and so named the
+// field twice. And because a native array pointer has no array<T> for Value to return, a local bound by
+// the door and never re-pointed reads `p[i]` through ElementRef, which indexes a native array in place and
+// falls back to `ref p.Value[i]` for every other box.
 //
 // SCOPE, kept to the one site class the census found (12 sites across 5 converted files): ONE field
 // hop off a pointer-typed identifier, a numeric element type, and a different element type than the
@@ -98,12 +101,12 @@ func (v *Visitor) nativeFieldArrayViewOf(callExpr *ast.CallExpr, arg ast.Expr) (
 	return nativeFieldArrayView{field: unary, elem: targetArr.Elem(), length: targetArr.Len()}, true
 }
 
-// nativeFieldArrayViewEmission renders the door ahead of the raw route it falls back to.
-func (v *Visitor) nativeFieldArrayViewEmission(view nativeFieldArrayView, rawRoute string) string {
+// nativeFieldArrayViewEmission renders the unsafe package's helper, which carries the door and the raw
+// route it falls back to.
+func (v *Visitor) nativeFieldArrayViewEmission(view nativeFieldArrayView) string {
 	elemName := convertToCSTypeName(v.getAliasQualifiedTypeName(view.elem, false))
 
-	return fmt.Sprintf("(NativeFieldArrayPointer<%s>(%s, %s) ?? %s)",
-		elemName, v.convExpr(view.field, nil), csNintLiteral(view.length), rawRoute)
+	return fmt.Sprintf("@unsafe.ArrayPointer<%s>.Of(%s, %s)", elemName, v.convExpr(view.field, nil), csNintLiteral(view.length))
 }
 
 // isNativeFieldArrayViewLocal reports whether an index base is a local bound by the door and never

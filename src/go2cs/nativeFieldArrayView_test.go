@@ -7,10 +7,11 @@
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // Guards the NATIVE FIELD-VIEW emission (docs/phase4/DESIGN-native-array-view.md, the LookupServicePort
-// door): Go's `(*[N]T)(unsafe.Pointer(&p.f))`, where f's type is not T, emits golib's door over the field
-// reference ahead of today's raw route, and a local bound by it and never re-pointed reads `p[i]` through
-// ElementRef rather than through Value. The door resolves f's Go offset at run time, so the emission
-// carries no offset literal and reads the same on every target.
+// door): Go's `(*[N]T)(unsafe.Pointer(&p.f))`, where f's type is not T, emits the unsafe package's
+// helper over the field reference, `@unsafe.ArrayPointer<T>.Of(Ꮡp.of(S.Ꮡf), N)`, naming the field ONCE,
+// and a local bound by it and never re-pointed reads `p[i]` through ElementRef rather than through
+// Value. golib resolves f's Go offset at run time, so the emission carries no offset literal and reads
+// the same on every target.
 //
 // The corpus instance is net's darwin cgoLookupServicePort (Go net/cgo_unix.go:154/158), whose `sa` is
 // libc memory: the raw route views the port at the field's CLR offset, which is not Go's for a struct
@@ -178,9 +179,9 @@ func TestNativeFieldArrayViewEmitsTheDoorAndElementRef(t *testing.T) {
 		function, door, local string
 		reads                 []string
 	}{
-		{"portOf", "NativeFieldArrayPointer<byte>(", "p", []string{"p.ElementRef(0)", "p.ElementRef(1)"}},
-		{"setPort", "NativeFieldArrayPointer<byte>(", "p", []string{"p.ElementRef(0) =", "p.ElementRef(1) ="}},
-		{"words", "NativeFieldArrayPointer<uint32>(", "t", []string{"t.ElementRef(0)", "t.ElementRef(1)"}},
+		{"portOf", "@unsafe.ArrayPointer<byte>.Of(", "p", []string{"p.ElementRef(0)", "p.ElementRef(1)"}},
+		{"setPort", "@unsafe.ArrayPointer<byte>.Of(", "p", []string{"p.ElementRef(0) =", "p.ElementRef(1) ="}},
+		{"words", "@unsafe.ArrayPointer<uint32>.Of(", "t", []string{"t.ElementRef(0)", "t.ElementRef(1)"}},
 	} {
 		body := emittedFunctionBody(t, mainCs, arm.function)
 
@@ -188,8 +189,8 @@ func TestNativeFieldArrayViewEmitsTheDoorAndElementRef(t *testing.T) {
 			t.Errorf("%s: expected the native field-view door %q, got:\n%s", arm.function, arm.door, body)
 		}
 
-		if !strings.Contains(body, ") ?? (ж<array<") {
-			t.Errorf("%s: the door must fall back to today's raw route for a root that is not native, got:\n%s", arm.function, body)
+		if strings.Contains(body, "(uintptr)(") {
+			t.Errorf("%s: the raw route lives inside the helper; the call site must not spell it, got:\n%s", arm.function, body)
 		}
 
 		for _, read := range arm.reads {
@@ -203,14 +204,14 @@ func TestNativeFieldArrayViewEmitsTheDoorAndElementRef(t *testing.T) {
 		}
 	}
 
-	// The door is handed the FIELD REFERENCE and N — never an offset literal, which is a property of the
-	// target and would make one source file emit differently per flavour.
-	if body := emittedFunctionBody(t, mainCs, "portOf"); !strings.Contains(body, "NativeFieldArrayPointer<byte>(Ꮡsa.of(sockaddr.ᏑPort), 2) ??") {
-		t.Errorf("portOf: expected the door over Ꮡsa.of(sockaddr.ᏑPort) with N 2, got:\n%s", body)
+	// The helper is handed the FIELD REFERENCE, once, and N — never an offset literal, which is a property
+	// of the target and would make one source file emit differently per flavour.
+	if body := emittedFunctionBody(t, mainCs, "portOf"); !strings.Contains(body, "@unsafe.ArrayPointer<byte>.Of(Ꮡsa.of(sockaddr.ᏑPort), 2);") || strings.Count(body, "Ꮡsa.of(sockaddr.ᏑPort)") != 1 {
+		t.Errorf("portOf: expected the helper over Ꮡsa.of(sockaddr.ᏑPort), named once, with N 2, got:\n%s", body)
 	}
 
-	if body := emittedFunctionBody(t, mainCs, "words"); !strings.Contains(body, "NativeFieldArrayPointer<uint32>(Ꮡh.of(holder.Ꮡcheap), 2) ??") {
-		t.Errorf("words: expected the door over Ꮡh.of(holder.Ꮡcheap) with N 2, got:\n%s", body)
+	if body := emittedFunctionBody(t, mainCs, "words"); !strings.Contains(body, "@unsafe.ArrayPointer<uint32>.Of(Ꮡh.of(holder.Ꮡcheap), 2);") || strings.Count(body, "Ꮡh.of(holder.Ꮡcheap)") != 1 {
+		t.Errorf("words: expected the helper over Ꮡh.of(holder.Ꮡcheap), named once, with N 2, got:\n%s", body)
 	}
 
 	// CONTROL 1 — the re-pointed local keeps Value: after `q = other` it may name a managed array.
@@ -219,12 +220,12 @@ func TestNativeFieldArrayViewEmitsTheDoorAndElementRef(t *testing.T) {
 	}
 
 	// CONTROL 2 — a same-element view keeps AliasPointer and takes no door.
-	if body := emittedFunctionBody(t, mainCs, "sameElem"); !strings.Contains(body, "array<byte>.AliasPointer(") || strings.Contains(body, "NativeFieldArrayPointer") {
+	if body := emittedFunctionBody(t, mainCs, "sameElem"); !strings.Contains(body, "array<byte>.AliasPointer(") || strings.Contains(body, "@unsafe.ArrayPointer<") {
 		t.Errorf("sameElem: a same-element view must keep array<T>.AliasPointer, got:\n%s", body)
 	}
 
 	// CONTROL 3 — a two-hop selector keeps today's raw route.
-	if body := emittedFunctionBody(t, mainCs, "nested"); strings.Contains(body, "NativeFieldArrayPointer") || !strings.Contains(body, "(ж<array<byte>>)(uintptr)(") {
+	if body := emittedFunctionBody(t, mainCs, "nested"); strings.Contains(body, "@unsafe.ArrayPointer<") || !strings.Contains(body, "(ж<array<byte>>)(uintptr)(") {
 		t.Errorf("nested: a two-hop selector must keep today's raw route, got:\n%s", body)
 	}
 }

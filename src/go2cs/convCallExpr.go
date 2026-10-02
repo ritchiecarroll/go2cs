@@ -3359,15 +3359,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			return emission
 		}
 
-		// And for the native field-view door, which goes AHEAD of that prefix: the raw route it falls
-		// back to is rendered exactly as below would render it — the pointer-cast paren, then the
-		// argument (see nativeFieldArrayView.go).
+		// And for the native field-view door, whose helper carries that prefix's route as its fallback
+		// (see nativeFieldArrayView.go).
 		if view, ok := v.nativeFieldArrayViewOf(callExpr, callExpr.Args[0]); ok {
-			castContext := lambdaContext
-			castContext.isPointerCast = true
-			rawRoute := fmt.Sprintf("%s(%s)", v.convExpr(callExpr.Fun, []ExprContext{castContext}), v.convExpr(callExpr.Args[0], nil))
-
-			return v.nativeFieldArrayViewEmission(view, rawRoute)
+			return v.nativeFieldArrayViewEmission(view)
 		}
 
 		argTypeName := v.getExpressionTypeName(callExpr.Args[0], true)

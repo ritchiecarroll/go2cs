@@ -23,11 +23,11 @@ internal static void Main() {
         defer(syscall.Munmap, page, ref ᒐ);
         var sa = Ꮡ(page, 0).Reinterpret<byte, syscall.RawSockaddrInet4>();
         nint port = 8080;
-        var p = (NativeFieldArrayPointer<byte>(sa.of(syscall.RawSockaddrInet4.ᏑPort), 2) ?? (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(sa.of(syscall.RawSockaddrInet4.ᏑPort))));
+        var p = @unsafe.ArrayPointer<byte>.Of(sa.of(syscall.RawSockaddrInet4.ᏑPort), 2);
         p.ElementRef(0) = (byte)((port >> (int)(8)));
         p.ElementRef(1) = (byte)port;
         fmt.Println(bytesAtGoOffsets2And3ˢ, page[2], page[3]);
-        var q = (NativeFieldArrayPointer<byte>(sa.of(syscall.RawSockaddrInet4.ᏑPort), 2) ?? (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(sa.of(syscall.RawSockaddrInet4.ᏑPort))));
+        var q = @unsafe.ArrayPointer<byte>.Of(sa.of(syscall.RawSockaddrInet4.ᏑPort), 2);
         fmt.Println(portReadThroughTheAliasˢ, (nint)(((nint)q.ElementRef(0) << (int)(8)) | (nint)q.ElementRef(1)));
         fmt.Println(bytesAt014ˢ, page[0], page[1], page[4]);
     }

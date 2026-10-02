@@ -2703,11 +2703,11 @@ public static partial class builtin
     /// <returns>A pointer to array over the field's native bytes, or <c>null</c> for a root that is not native.</returns>
     /// <remarks>
     /// <para>
-    /// The converter emits it AHEAD of the raw-address route, which it falls back to
-    /// (docs/phase4/DESIGN-native-array-view.md, the LookupServicePort door):
+    /// The converter emits the unsafe package's helper, which calls this door and falls back to the raw-address
+    /// route when it answers null (docs/phase4/DESIGN-native-array-view.md, the LookupServicePort door):
     /// </para>
     /// <code language="cs">
-    ///     (NativeFieldArrayPointer&lt;byte&gt;(Ꮡsa.of(RawSockaddrInet4.ᏑPort), 2) ?? (ж&lt;array&lt;byte&gt;&gt;)(uintptr)(…))
+    ///     @unsafe.ArrayPointer&lt;byte&gt;.Of(Ꮡsa.of(RawSockaddrInet4.ᏑPort), 2)
     /// </code>
     /// <para>
     /// The raw route fails twice over a native root. It builds an array view that native memory cannot back,

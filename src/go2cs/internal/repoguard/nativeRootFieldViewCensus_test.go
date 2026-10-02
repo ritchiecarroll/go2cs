@@ -41,12 +41,15 @@ import (
 //	        native-boundary guard uses (nativeBoundaryBoxDeref_test.go); a name it cannot resolve is
 //	        counted UNRESOLVED, never benign.
 //	EXCLUDED  comments, and hand-own companion files counted separately (their machinery is usually
-//	        the remedy). A line that also carries the native field-view door (NativeFieldArrayPointer)
+//	        the remedy). A line that also carries the native field-view door (@unsafe.ArrayPointer<T>.Of)
 //	        is counted once, BEHIND THE DOOR: the door views the field at its Go offset for a native
 //	        root, and only a managed root reaches the CLR-slot view the raw route takes.
 //
 // The POSITIVE CONTROL is the site this reading was cut beside: net/darwin/cgo_unix.cs's port alias,
 // both arms (RawSockaddrInet4 and RawSockaddrInet6), must be counted.
+
+// nativeFieldViewDoor is how the converter spells the door at a call site (nativeFieldArrayView.go).
+const nativeFieldViewDoor = "@unsafe.ArrayPointer<"
 
 var reinterpretMintPattern = regexp.MustCompile(`^\s*(?:var\s+)?([A-Za-z_\p{L}][A-Za-z0-9_\p{L}]*)\s*=\s*.*\.Reinterpret<(.+)>\(\)\s*;`)
 var uintptrMintPattern = regexp.MustCompile(`^\s*(?:var\s+)?([A-Za-z_\p{L}][A-Za-z0-9_\p{L}]*)\s*=\s*\(ж<([^>]+)>\)\s*\(uintptr\)`)
@@ -142,7 +145,7 @@ func scanNativeRootFieldViews(t *testing.T, root string, tracked []string) field
 				census.referenceFree++
 			case handOwn:
 				census.handOwn++
-			case strings.Contains(line, "NativeFieldArrayPointer<"):
+			case strings.Contains(line, nativeFieldViewDoor):
 				census.behindDoor[rel]++
 			default:
 				census.sites[rel]++
@@ -171,7 +174,7 @@ func scanNativeRootFieldViews(t *testing.T, root string, tracked []string) field
 
 			// A line carrying the door names the same field view twice -- the door's argument and the
 			// raw route it falls back to -- so it is ONE site, counted once.
-			door := strings.Contains(line, "NativeFieldArrayPointer<")
+			door := strings.Contains(line, nativeFieldViewDoor)
 
 			for _, view := range fieldViewPattern.FindAllStringSubmatch(line, -1) {
 				if pointee, ok := minted[view[2]]; ok {

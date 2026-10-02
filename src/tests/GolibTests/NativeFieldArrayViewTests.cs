@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 using syscall = go.syscall_package;
+using @unsafe = go.unsafe_package;
 
 namespace GolibTests;
 
@@ -189,6 +190,49 @@ public class NativeFieldArrayViewTests
 
         Assert.AreEqual(2, (int)GoOffsetOfPort(), "Port is at Go offset 2 in every flavour's RawSockaddrInet4");
         Console.WriteLine($"this flavour's RawSockaddrInet4: Port at CLR offset {clrOffset}, Go offset 2");
+    }
+
+    /// <summary>
+    /// The helper the converter EMITS, <c>@unsafe.ArrayPointer&lt;T&gt;.Of(field, N)</c>, which names the field
+    /// once: a native root reaches the door, and every other root gets exactly what the raw route gives.
+    /// </summary>
+    [TestMethod]
+    public void TheEmittedHelperTakesTheDoorForANativeRootAndTheRawRouteOtherwise()
+    {
+        nint block = NativeSockaddrForHttp();
+
+        try
+        {
+            ж<DarwinRawSockaddrInet4> sa = (ж<DarwinRawSockaddrInet4>)(uintptr)(nuint)block;
+            ж<array<byte>> p = @unsafe.ArrayPointer<byte>.Of(sa.of(ᏑPort), 2);
+
+            Assert.AreEqual((nuint)block + DarwinGoOffsetOfPort, p.NativeAddress, "a native root must take the door, at the Go offset");
+            Assert.AreEqual(80, p.ElementRef(0) << 8 | p.ElementRef(1), "and read the port libc wrote");
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(block);
+        }
+
+        // A managed root: the helper and the raw route must agree, box for box or panic for panic.
+        ж<syscall.RawSockaddrInet4> managed = new StandardBox<syscall.RawSockaddrInet4>(default);
+
+        Assert.AreEqual(
+            Outcome(() => (ж<array<byte>>)(uintptr)@unsafe.Pointer.FromPinnedBox(managed.of(syscall.RawSockaddrInet4.ᏑPort))),
+            Outcome(() => @unsafe.ArrayPointer<byte>.Of(managed.of(syscall.RawSockaddrInet4.ᏑPort), 2)),
+            "a managed root must take today's raw route through the helper, unchanged");
+    }
+
+    private static string Outcome(Func<ж<array<byte>>> route)
+    {
+        try
+        {
+            return "box " + route().GetType().Name;
+        }
+        catch (Exception exception)
+        {
+            return "threw " + exception.GetType().Name + ": " + exception.Message;
+        }
     }
 
     /// <summary>
