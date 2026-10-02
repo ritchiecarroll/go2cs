@@ -1546,6 +1546,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPromotedFieldPointerDeref() => CheckTarget("PromotedFieldPointerDeref");
 
     [TestMethod]
+    public void CheckPromotedPtrMethodValueSet() => CheckTarget("PromotedPtrMethodValueSet");
+
+    [TestMethod]
     public void CheckPromotedValueEmbedExprRecv() => CheckTarget("PromotedValueEmbedExprRecv");
 
     [TestMethod]
