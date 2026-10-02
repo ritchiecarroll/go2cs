@@ -124,6 +124,7 @@
     <None Include="$(MSBuildThisFileDirectory)emptyStructConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)escapeAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)escapedArrayElementAddress_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)eventFraming_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo_test.go" />
     <None Include="$(MSBuildThisFileDirectory)filterZeroMatch_test.go" />
