@@ -85,6 +85,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAnyBoxedUntypedConst() => CheckTarget("AnyBoxedUntypedConst");
 
     [TestMethod]
+    public void CheckAnyFromInterfacePointerCompare() => CheckTarget("AnyFromInterfacePointerCompare");
+
+    [TestMethod]
     public void CheckAnyKeyMap() => CheckTarget("AnyKeyMap");
 
     [TestMethod]

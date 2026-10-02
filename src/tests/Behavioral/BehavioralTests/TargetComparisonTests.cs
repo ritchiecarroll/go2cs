@@ -88,6 +88,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAnyBoxedUntypedConst() => CheckTarget("AnyBoxedUntypedConst");
 
     [TestMethod]
+    public void CheckAnyFromInterfacePointerCompare() => CheckTarget("AnyFromInterfacePointerCompare");
+
+    [TestMethod]
     public void CheckAnyKeyMap() => CheckTarget("AnyKeyMap");
 
     [TestMethod]
