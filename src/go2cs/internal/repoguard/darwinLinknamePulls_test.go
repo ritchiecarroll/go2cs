@@ -68,14 +68,8 @@ var declaredDormantDarwinPulls = map[string]string{
 // printed every run, a row without an owner seat fails, and a row whose pull has since been filled fails
 // until the owning seat's acceptance removes it.
 var declaredOpenDarwinPulls = map[string]openDarwinPull{
-	// S7 (2026-10-02) could not forward it: its target `sysctl(mib []_C_int, ...)` names syscall's
-	// unexported `type _C_int int32`, so the widened public target is CS0051 in syscall's own build
-	// (src/go2cs TestLinknameForwardTargetsExposeNoUnexportedTypes refuses the row).
-	"vendor/golang.org/x/net/route.sysctl": {
-		owner:  "S7b",
-		caller: "IpAdapterAddresses (net.Interfaces -> route.FetchRIB -> sysctl)",
-		fix:    "a hand companion in route's darwin folder over libc sysctl(3), mib copied into a native int32 block",
-	},
+	// Empty since S7b (2026-10-02): its one row, vendor/golang.org/x/net/route.sysctl (owner S7b, reached by
+	// IpAdapterAddresses), was removed when route/darwin/syscall_impl.cs filled it over libc sysctl(3).
 }
 
 // openDarwinPull is one declared-open row: the seat that owns the fix, the live caller it kills, and the fix.

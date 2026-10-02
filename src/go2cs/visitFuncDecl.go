@@ -2254,8 +2254,8 @@ var linknameForwardTargets = map[string]bool{
 	// target `sysctl(mib []_C_int, ...)` names syscall's unexported `type _C_int int32`, so widening it
 	// public is CS0051 in syscall's own build (measured with the row present, 2026-10-02), and route's
 	// []int32 would not convert to it either. TestLinknameForwardTargetsExposeNoUnexportedTypes refuses
-	// that shape; route.sysctl gets a hand companion in its own package instead (S7b), and repoguard's
-	// TestDarwinLinknamePullsAreFilledOrDeclared carries it as an OPEN pull until then.
+	// that shape; route.sysctl has a hand companion in its own package instead (S7b,
+	// vendor/golang.org/x/net/route/darwin/syscall_impl.cs, over libc sysctl(3)).
 	"syscall.fdopendir": true,
 	"syscall.closedir":  true,
 	"syscall.unlinkat":  true,
