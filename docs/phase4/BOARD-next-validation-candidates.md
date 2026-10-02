@@ -26051,4 +26051,33 @@ reached through `unsafe.Pointer`. This line records its membership. It does not 
 
 — COORD
 
+## 2026-10-02 — G: the copying slice view (`(*[N]T)(ptr)[:n]` over a reinterpret or a raw pointer) — two rows, neither reachable today
+
+The converter lowers a pointer-to-array cast that is then sliced, where the element type differs
+from the source's or the source is a raw pointer, to `new slice<T>(new ReadOnlySpan<T>((T*)…, n))`
+(`convSliceExpr.go`, the `isPointerCast` branch). golib's `slice(ReadOnlySpan<T>)` constructor
+copies, so the result is a detached snapshot. That is exact for a site that only reads. A census at
+the TRAIN M union `e2008427b1` found 14 emissions of the branch in `src/core`: 11 read, 3 write
+through the view. A same-element-type cast does not take this branch (it takes
+`array<T>.AliasPointer`, a real window).
+
+**How this was read.** Writers and readers by reading each site. Reachability by caller grep over
+`src/core`, test sources included, not by an executed trace. Linux and darwin from the committed
+`linux/` and `darwin/` folders of a windows checkout, not from a fresh three-target emission.
+
+| Row | Site | What is wrong | Predicate (when it fires) |
+|---|---|---|---|
+| 1 | `runtime/iface.cs`, `itabInit`'s `methods` | Go's `methods[k] = ifn` stores each method entry into the itab's own `Fun` words through the view. The emitted `methods` is a copy, so the stores never reach `m.Fun`: every `Fun[k]`, k ≥ 1, stays zero. The same line also reads `ni` managed `unsafe.Pointer` structs out of one-word `uintptr` storage, and is the corpus's one remaining CS8500. | Anything calls `getitab`. Its callers are `assertE2I`, `assertE2I2`, `typeAssert`, `interfaceSwitch` and the two `ifaceE2I` linknames, the Go compiler's inserted entry points; no converted code calls them, and reflect's and reflectlite's `ifaceE2I` are hand-owned and do not. |
+| 2 | `runtime/heapdump.cs`, `makeheapobjbv`'s `tmpbuf` | The bitmap's writes and reads both land in the copy, so they agree. The `sysFree` beside it frees the address of the managed copy's first element, not the `sysAlloc`'d block: the block leaks and managed memory is handed to the allocator's free. | The full heap walk is wired. Today `runtime/debug.WriteHeapDump` is hand-owned and writes the minimal dump, so `writeheapdump_m` and `dumpobj` have no caller. |
+
+The third writer, `runtime/mbitmap.cs` `progToPointerMask`, is self-consistent in the copy (the
+`persistentalloc`'d block is simply unused) and owes no row; it is reached only from `modulesinit`.
+
+Ruled by COORD the same day: no red-first seat and no aliasing door for a managed element over
+`uintptr` words until a row's predicate fires. Accepted as a follow-up seat: the branch prints a
+conversion-time note naming file and line when the slice it produces is assigned through in the same
+function, with no emission change.
+
+— G
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
