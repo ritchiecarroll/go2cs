@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-15%2F15_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.2/net.http.pprof.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/net/http/pprof@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/net/http/pprof) [![Source](https://img.shields.io/badge/Source-@1.24.13.2-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.2/src/core/net/http/pprof)
+[![Tests](https://img.shields.io/badge/Tests-15%2F15_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.3/net.http.pprof.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/net/http/pprof@go1.24.13)\
+[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/net/http/pprof) [![Source](https://img.shields.io/badge/Source-@1.24.13.3-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.3/src/core/net/http/pprof)
 
 Package pprof serves via its HTTP server runtime profiling data in the format expected by the pprof visualization tool.
 

@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-16%2F16_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.2/crypto.internal.fips140.edwards25519.field.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/crypto/internal/fips140/edwards25519/field@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/crypto/internal/fips140/edwards25519/field) [![Source](https://img.shields.io/badge/Source-@1.24.13.2-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.2/src/core/crypto/internal/fips140/edwards25519/field)
+[![Tests](https://img.shields.io/badge/Tests-16%2F16_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.3/crypto.internal.fips140.edwards25519.field.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/crypto/internal/fips140/edwards25519/field@go1.24.13)\
+[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/crypto/internal/fips140/edwards25519/field) [![Source](https://img.shields.io/badge/Source-@1.24.13.3-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.3/src/core/crypto/internal/fips140/edwards25519/field)
 
 Package field implements fast arithmetic modulo 2^255-19.
 

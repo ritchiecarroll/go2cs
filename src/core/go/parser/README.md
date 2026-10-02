@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-176%2F176_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.2/go.parser.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/go/parser@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/go/parser) [![Source](https://img.shields.io/badge/Source-@1.24.13.2-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.2/src/core/go/parser)
+[![Tests](https://img.shields.io/badge/Tests-176%2F176_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.3/go.parser.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/go/parser@go1.24.13)\
+[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/go/parser) [![Source](https://img.shields.io/badge/Source-@1.24.13.3-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.3/src/core/go/parser)
 
 Package parser implements a parser for Go source files. Input may be provided in a variety of forms (see the various Parse\* functions); the output is an abstract syntax tree (AST) representing the Go source. The parser is invoked through one of the Parse\* functions.
 

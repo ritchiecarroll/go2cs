@@ -3,7 +3,7 @@
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
 [![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@v0.32.1--0.20250304185419--76f9bf3279ef-00ADD8?logo=go)](https://pkg.go.dev/golang.org/x/net@v0.32.1-0.20250304185419-76f9bf3279ef/idna)\
-[![Source](https://img.shields.io/badge/Source-@v0.32.1--0.20250304185419--76f9bf3279ef-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/vendor/golang.org/x/net/idna) [![Source](https://img.shields.io/badge/Source-@1.24.13.2-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.2/src/core/vendor/golang.org/x/net/idna)
+[![Source](https://img.shields.io/badge/Source-@v0.32.1--0.20250304185419--76f9bf3279ef-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/vendor/golang.org/x/net/idna) [![Source](https://img.shields.io/badge/Source-@1.24.13.3-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.3/src/core/vendor/golang.org/x/net/idna)
 
 Package idna implements IDNA2008 using the compatibility processing defined by UTS (Unicode Technical Standard) #46, which defines a standard to deal with the transition from IDNA2003.
 
