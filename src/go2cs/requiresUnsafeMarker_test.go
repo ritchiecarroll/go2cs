@@ -60,6 +60,7 @@ func renderedAllowUnsafeBlocks(t *testing.T, packageDir string) string {
 	// renderCsprojTemplate helper hardcodes "false" there, which would make this guard vacuous.)
 	contents := fmt.Sprintf(string(csprojTemplate), "Library", "go", "TestProject", UnsafeMarker, "")
 	contents = strings.ReplaceAll(contents, ValidationPackMarker, "")
+	contents = strings.ReplaceAll(contents, PackageIdMarker, packageIdLine("", "Library", Options{convertStdLib: true}))
 
 	if !strings.Contains(contents, UnsafeMarker) {
 		t.Fatal("test setup: the rendered template carries no unsafe marker to substitute")

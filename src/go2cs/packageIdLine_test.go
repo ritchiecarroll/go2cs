@@ -15,6 +15,7 @@
 package main
 
 import (
+	"fmt"
 	"go/build"
 	"os"
 	"path/filepath"
@@ -135,5 +136,20 @@ func TestAConvertedModuleLibraryCarriesNoPrefixedPackageId(t *testing.T) {
 
 	if !strings.Contains(app, stdLibPackageIdLine) {
 		t.Errorf("the module's Exe keeps the template's line %q:\n%s", stdLibPackageIdLine, app)
+	}
+}
+
+// The converted module library's form reaches disk too, so it is validated as XML the way the stdlib form is.
+func TestCsprojTemplateForAModuleLibraryEmitsWellFormedXml(t *testing.T) {
+	contents := fmt.Sprintf(string(csprojTemplate), "Library", "go", "TestProject", "false", "")
+	contents = strings.ReplaceAll(contents, ValidationPackMarker, "")
+	contents = strings.ReplaceAll(contents, PackageIdMarker, packageIdLine(filepath.Join(t.TempDir(), "lib.csproj"), "Library", Options{go2csPath: t.TempDir()}))
+
+	if strings.Contains(contents, ">>MARKER:") || strings.Contains(contents, "<PackageId>") {
+		t.Fatalf("a module library's project must carry no marker and no PackageId:\n%s", contents)
+	}
+
+	if err := assertWellFormedXml(contents); err != nil {
+		t.Fatalf("a module library's project is not well-formed XML: %v", err)
 	}
 }
