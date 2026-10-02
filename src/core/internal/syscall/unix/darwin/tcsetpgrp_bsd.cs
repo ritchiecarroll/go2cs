@@ -10,7 +10,9 @@ using @unsafe = unsafe_package;
 partial class unix_package {
 
 //go:linkname ioctlPtr syscall.ioctlPtr
-internal static partial error /*err*/ ioctlPtr(nint fd, nuint req, @unsafe.Pointer arg);
+[global::System.Diagnostics.StackTraceHidden] internal static error /*err*/ ioctlPtr(nint fd, nuint req, @unsafe.Pointer arg) {
+    return syscall.ioctlPtr(fd, req, arg);
+}
 
 // Note that pgid should really be pid_t, however _C_int (aka int32) is
 // generally equivalent.

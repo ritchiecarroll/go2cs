@@ -56,7 +56,9 @@ internal static FileMode dtToType(uint8 typ) {
 // Implemented in syscall/syscall_darwin.go.
 
 //go:linkname closedir syscall.closedir
-internal static partial error /*err*/ closedir(uintptr dir);
+[global::System.Diagnostics.StackTraceHidden] internal static error /*err*/ closedir(uintptr dir) {
+    return syscall.closedir((uintptr)dir);
+}
 
 //go:linkname readdir_r syscall.readdir_r
 internal static partial syscall.Errno /*res*/ readdir_r(uintptr dir, ж<syscall.Dirent> entry, ж<ж<syscall.Dirent>> result);

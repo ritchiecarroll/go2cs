@@ -180,6 +180,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsTableCodePipe_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\certContextReachGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\coreReferencesResolve_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\darwinLinknamePulls_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\elidedConstraints_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\fixturesCurrent_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\fleetIdentifierCensus_test.go" />
@@ -196,6 +197,7 @@
     <None Include="$(MSBuildThisFileDirectory)lineEndingSeams_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameCycleGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameForward_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)linknameForwardDarwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameForwardRegistry_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)linknamePush_test.go" />

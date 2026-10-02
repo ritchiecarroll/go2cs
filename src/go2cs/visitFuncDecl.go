@@ -2236,6 +2236,35 @@ var linknameForwardTargets = map[string]bool{
 	"runtime.fastrand":   true,
 	"runtime.fastrandn":  true,
 	"runtime.fastrand64": true,
+	// darwin's syscall pulls, seven bodyless declarations in darwin-built files of three packages:
+	// internal/poll (fd_opendir_darwin.go `//go:linkname fdopendir syscall.fdopendir`, fd_writev_libc.go
+	// writev), internal/syscall/unix (at_libc2.go unlinkat/openat/fstatat, tcsetpgrp_bsd.go ioctlPtr) and
+	// os (dir_darwin.go closedir). syscall authorizes each with the matching one-arg handle
+	// (linkname_darwin.go: closedir, fdopendir, unlinkat, openat, fstatat; linkname_bsd.go: ioctlPtr;
+	// linkname_libc.go: writev). Like runtime.fcntl the
+	// implementations are ORDINARY CONVERTED Go -- each is a generated libc wrapper over syscall's
+	// trampoline funnel, the same path syscall's own callers take -- so each forwarder is an ordinary
+	// cross-assembly call. Only darwin moves: no linux or windows file carries any of the seven handles,
+	// so packageFuncAccess widens nothing there.
+	//
+	// What the stubs were costing, measured by the 1.24.13 darwin re-baseline (run 36947612442,
+	// 2026-10-02): poll's fdopendir (LongPathRoundTrip, and StatLayoutTruth on x64) and unix's unlinkat
+	// (StatLayoutTruth on arm64). The other five are the same shape one call away. No new project
+	// reference: each pulling package already references syscall.
+	//
+	// NOT HERE, and why: route's sysctl, the same class's third live death (IpAdapterAddresses). Its
+	// target `sysctl(mib []_C_int, ...)` names syscall's unexported `type _C_int int32`, so widening it
+	// public is CS0051 in syscall's own build (measured with the row present, 2026-10-02), and route's
+	// []int32 would not convert to it either. TestLinknameForwardTargetsExposeNoUnexportedTypes refuses
+	// that shape; route.sysctl gets a hand companion in its own package instead (S7b), and repoguard's
+	// TestDarwinLinknamePullsAreFilledOrDeclared carries it as an OPEN pull until then.
+	"syscall.fdopendir": true,
+	"syscall.closedir":  true,
+	"syscall.unlinkat":  true,
+	"syscall.openat":    true,
+	"syscall.fstatat":   true,
+	"syscall.ioctlPtr":  true,
+	"syscall.writev":    true,
 }
 
 // linknameForwardDefinitions names the DEFINITION of a linknameForwardTargets row whose symbol is not
