@@ -30,7 +30,7 @@ that is no longer true, and has not been since 2026-09-03:
 | the sizing is stale on its own base | `88f01638c` is an ancestor of `a02ac3df3`, the commit the sizing measured on 2026-09-13. The sizing still says `FuncPCABI0` "returns 0" and the ten keystones are throwing stubs |
 | darwin runs | FINDING §7–§8: 618/632 (arm64) and 619/633 (x64) behavioral programs Go-identical at Output, 2026-09-03 |
 | the latest full reading | BOARD, *THE TRAIN-25 DARWIN CENSUS* (2026-09-05, `db9e95841`, Go 1.23.12): measurable 670 arm64 / 671 x64, the same twelve failing on each leg, every door named |
-| what has never been measured | darwin increments 7–12 (sockaddr twin, `forkExec` over `posix_spawn`, ptrout and gostring, `Getaddrinfo`), the libc funnel's order-token marshal (2026-09-27), and the whole 1.23 → 1.24 hop |
+| what had never been measured (until §2.1) | darwin increments 7–12 (sockaddr twin, `forkExec` over `posix_spawn`, ptrout and gostring, `Getaddrinfo`), the libc funnel's order-token marshal (2026-09-27), and the whole 1.23 → 1.24 hop |
 | what still runs daily | the darwin **compile** census, green on both legs through 2026-10-01 (`f819887fa3`, a 1.24.13 tree) |
 
 `docs/CIMatrix.md:222` still quotes the pre-keystone *"failed all twenty"* reading as the darwin
@@ -121,9 +121,31 @@ the run. The prediction was posted to COORD before the trigger (mailbox `ce8eabc
   x/sys/cpu's `syscall_syscall6`; x64 Compile below 100 %; more than three `FuncPCABI0 … no program
   counter` deaths outside `SignalPrimitives`.
 
-**The reading** is posted per door, by name, against that prediction when both legs finish. It is
-recorded in a dated block on the BOARD and as an amendment to FINDING-darwin, and it SETS §3's seat
-order. The pinned ref is deleted once the reading is recorded.
+### 2.1 THE READING (2026-10-02, both legs complete)
+
+Recorded in full as the BOARD block *THE 1.24.13 DARWIN RE-BASELINE* (2026-10-02). In summary:
+
+| leg | measurable | Output compared / pass / **fail** | not measured (120 s budget) |
+|:--|--:|:--|:--|
+| osx-arm64 | 722 | 690 / 686 / **4** | 4 (`NetDeadlineMatrix`, `PipeCloseUnblocksRead`, `StdoutCloseEofBarrier`, `TcpLoopbackRoundTrip`) |
+| osx-x64 | 723 | 694 / 690 / **4** | 1 (`StdoutCloseEofBarrier`) |
+
+**The same four names fail on both legs**, against train 25's twelve:
+
+- **class L, three projects:** `IpAdapterAddresses` (`sysctl`), `LongPathRoundTrip` (`fdopendir`), and
+  `StatLayoutTruth` (`fdopendir` on x64, `unlinkat` on arm64). Each is a darwin `//go:linkname` PULL to a
+  body that exists in `syscall`, with no forward in the corpus.
+- **class N, one project:** `LookupServicePort`, a native-array-view refusal.
+
+`SignalPrimitives`, `LinuxSpawnBasics`, all five loopback programs on x64, and the new
+`SyscallKeystonePulls` pass. The four Go 1.24 deltas caused zero deaths, and no falsifier fired.
+
+The prediction scored 9 hits, 2 falsified and 1 missed, each row named in the BOARD block. The largest
+miss: **`SignalPrimitives` passes.** The Q52 os/signal bridge (`554620235`, `sigenable` over .NET
+`PosixSignalRegistration`) landed after train 25, and this plan's first version proposed it as a future
+design (S4, now retired).
+
+The pinned ref is deleted once this reading is recorded.
 
 ---
 
@@ -150,7 +172,11 @@ runtime.sigtramp`). The class is decidable from the committed tree, and today no
 - **No Mac needed.** It also turns the next "no program counter" death from a runner surprise into a
   diff in review.
 
-**S2 — a GOARCH axis for platform-exclusive behavioral projects.** FINDING-darwin §8 item 4.
+**S2 — a GOARCH axis for platform-exclusive behavioral projects.** ⚠ **Re-read against §2.1: largely
+DONE.** The arm64 leg now skips `StdLibInternalAbi [amd64]` by name before Transpile, and the runner
+already classifies a best-effort conversion as NOT MEASURED. What remains, if anything, is a
+red-first test pinning both behaviors, a small seat at most. Original text, kept for the record:
+FINDING-darwin §8 item 4.
 `StdLibInternalAbi` is native to an ARCHITECTURE (its `*_amd64.go` files), `[GoPlatformExclusive("<goos>")]`
 cannot say so, and on the arm64 leg the runner's Transpile phase reported `ok` over a best-effort
 conversion that only Compile caught. The seat has two parts:
@@ -173,7 +199,10 @@ loopback five and `StatLayoutTruth` cross. Red first, for each missing twin that
 case on linux that drives the SAME layout mechanism (a reference-bearing record handed to the libc
 dispatcher by address). The dispatcher is platform-neutral, so the layout bug reproduces off darwin.
 
-**S4 — the `sigtramp` door, as a DESIGN seat, shared with linux.** Train 25 ruled this "sized for
+**S4 — RETIRED by §2.1.** The design this seat proposed already exists: the Q52 os/signal bridge
+(`554620235`, 2026-09-05; increment 9 `d185e28b8` made Go's Ignore the kernel disposition) routes
+`sigenable` over .NET `PosixSignalRegistration`, and `SignalPrimitives` passes on both legs. Kept below
+as written, because it was proposed in error and the record should show it. Train 25 ruled this "sized for
 COORD, not cut here". Every darwin increment so far gave a libc call a managed body, while a signal
 trampoline runs the other way: the kernel calls into the process on any thread. And the CLR keeps its
 own handler chain (SIGSEGV and SIGBUS become managed exceptions; `PosixSignalRegistration` handles
@@ -201,6 +230,52 @@ runner. Candidates as of train 25, to be re-read against §2: `IpAdapterAddresse
 `unlinkat` on arm64, an architecture split that is itself a finding), the loopback five (exit 134), the
 `runtime_BeforeFork` pair if it did not move, and `LookupServicePort`. Each seat names its door and
 its predicted move before its own acceptance dispatch, as every darwin increment so far has.
+
+**S7 — NEW from §2.1: the darwin linkname-pull class.** The darwin flavor at `172d437e66` carries 24
+bodyless declarations with a `//go:linkname` pull. A companion `*_impl.cs` fills 14, the way
+`internal/syscall/unix/darwin/net_darwin_impl.cs` fills the `Sendto*`/`Recv*` family. **10 are
+unfilled:**
+
+| member → target | state |
+|:--|:--|
+| `vendor/golang.org/x/net/route.sysctl → syscall.sysctl` | **LIVE**, `IpAdapterAddresses` dies here |
+| `internal/poll.fdopendir → syscall.fdopendir` | **LIVE**, `LongPathRoundTrip` (both legs) and `StatLayoutTruth` (x64) |
+| `internal/syscall/unix.unlinkat → syscall.unlinkat` | **LIVE**, `StatLayoutTruth` (arm64) |
+| `internal/syscall/unix.fstatat`, `openat` → `syscall.*` | latent, on the `os.RemoveAll` and `os.Root` paths, next behind `unlinkat` |
+| `os.closedir → syscall.closedir` | latent, the twin of `fdopendir` |
+| `internal/poll.writev`, `internal/syscall/unix.ioctlPtr` → `syscall.*` | latent |
+| `runtime.main_main → main.main` | dormant: the managed entry point is not reached this way |
+| `vendor/golang.org/x/sys/cpu.syscall_syscall6 → syscall.syscall6` | dormant under `purego` (§1) |
+
+- **The seat:** companion bodies forwarding the eight live and latent members to their `syscall`
+  bodies, following the darwin precedent rather than linux's registry rows. Plus a repoguard census arm
+  listing every bodyless darwin linkname pull with its disposition (filled, or declared dormant with a
+  reason). A new unfilled pull fails by name.
+- **Red first, on linux:** the census arm reads 10 unfilled before the bodies and 2 (the declared
+  dormant pair) after. The forwarding itself compiles in the darwin flavor, so the converter suite and
+  the daily census gate it.
+- **Acceptance on the runner:** a `behavioral-stderr` dispatch on the three LIVE projects, with the
+  prediction posted first: each moves off class L, to a pass or to a newly named door, on both legs.
+
+**S8 — NEW from §2.1: a run-budget input for the behavioral stages.** Five not-measured results (four
+on arm64, one on both legs) sit at the fixed 120 s run budget (`GO2CS_RUN_TIMEOUT` is hard-coded in the
+workflow's env). Nothing can tell slowness on the 3-core arm64 runner from a hang until a run can wait
+longer. The seat adds an optional `run_timeout` input to `os-matrix.yml`, defaulting to today's 120.
+Red first: a dispatch with the input set reaches the step's env, read back from the job log.
+
+### 3.1 The proposed cut order, each with its predicted door movement
+
+| order | seat | predicted movement on the runner |
+|--:|:--|:--|
+| 1 | **S7**, the linkname pulls | `IpAdapterAddresses`, `LongPathRoundTrip` and `StatLayoutTruth` leave class L on both legs. At least two pass outright; any that do not name a new door in the `os` RemoveAll path |
+| 2 | **S8**, the run-budget input | none by itself. It makes the five NOT MEASURED results readable |
+| 3 | **S6a**, `behavioral-stderr` on `LookupServicePort`, `StdoutCloseEofBarrier`, `NetDeadlineMatrix`, `TcpLoopbackRoundTrip`, `PipeCloseUnblocksRead` (budget raised by S8) | the stacks, from which S6b seats are cut. My expectation: the arm64-only three pass with a longer budget, and `StdoutCloseEofBarrier` is a real hang on both legs |
+| 4 | **S1**, the record-less `FuncPCABI0` census | none (a static guard). It pins the class that produced train 25's `sigtramp` death |
+| 5 | **S5**, documentation currency | none |
+| — | **S2, S3** | S2 is largely done (§2.1); S3 is subsumed by §2.1, since all five loopback programs pass on x64 and no remaining failure is in the struct-seam class |
+
+**In parallel, no seat needed:** the first darwin ROW dispatch (§5), `sweep-shard` with
+`filter=unicode/utf8` on both legs. Nothing in §3 blocks it, and its reading starts the row ledger.
 
 ---
 
@@ -295,9 +370,8 @@ Hosted-runner minutes, not lane time, are the constraint, and the batch size is 
 
 ## 6. Honest limits
 
-- **Nothing in this plan has been run on a Mac by this lane except the §2 dispatch**, whose reading is
-  pending at the time of writing. Every per-door statement in §3 S6 is a train-25 (Go 1.23.12)
-  reading and is re-read before use.
+- **Nothing in this plan has been run on a Mac by this lane except the §2 dispatch**, read in §2.1.
+  Every door named in §3 is now a 1.24.13 reading, but each S6 seat still owes a stack before it is cut.
 - **The unbounded part is unbounded.** Linux needed four iterations found only by running; darwin's
   remaining twelve doors may hide more behind them. §2 narrows where the loop starts and nothing
   sizes where it ends.

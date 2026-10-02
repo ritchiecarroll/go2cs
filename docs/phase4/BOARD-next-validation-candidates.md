@@ -26051,4 +26051,72 @@ reached through `unsafe.Pointer`. This line records its membership. It does not 
 
 — COORD
 
+## 2026-10-02 · THE 1.24.13 DARWIN RE-BASELINE — 722 / 723 measurable, FOUR failing on each leg (the same four names), three of them ONE class: a darwin linkname pull with no forward (lane C1)
+
+Pinned ref `claude/c1-darwin-baseline` = `172d437e66` (head SHA read back from the run), behavioral-full run
+[36947612442](https://github.com/ritchiecarroll/go2cs/actions/runs/36947612442), arm64 45 min (00:46–01:32Z), x64 60 min
+(00:46–01:46Z), Go 1.24.13 pinned, `GoTargetOS: darwin`. Prediction posted first (mailbox `ce8eabce7`). The last full darwin
+reading before this was train 25 (2026-09-05, `db9e95841`, Go 1.23.12); six darwin increments and the 1.23 → 1.24 hop have
+landed since.
+
+| leg | measurable | skipped (platform-exclusive) | Output compared / pass / fail | not measured (120 s run budget) |
+|:--|--:|--:|:--|:--|
+| osx-arm64 (`macos-15`) | **722** (181 + 181 + 180 + 180) | 17 | 690 / 686 / **4** | 4: `NetDeadlineMatrix`, `PipeCloseUnblocksRead`, `StdoutCloseEofBarrier`, `TcpLoopbackRoundTrip` |
+| osx-x64 (`macos-15-intel`) | **723** (181 + 181 + 181 + 180) | 16 | 694 / 690 / **4** | 1: `StdoutCloseEofBarrier` |
+
+Transpile, Compile and Target are 100 % on both legs, and partition is asserted OK on both. arm64's 17th skip is
+`StdLibInternalAbi [amd64]`: the GOARCH axis already exists in the runner, so FINDING-darwin §8 item 4's GOARCH gap is
+CLOSED.
+
+**The four failing, identical names on both legs, each door quoted:**
+
+| project | arm64 | x64 | class |
+|:--|:--|:--|:--|
+| `IpAdapterAddresses` | `NotImplementedException: sysctl: no implementation reached this compilation (… a linkname whose push did not arrive)` | same | **L** |
+| `LongPathRoundTrip` | `… fdopendir: no implementation reached this compilation …` | same | **L** |
+| `StatLayoutTruth` | `… unlinkat: no implementation reached this compilation …` | `… fdopendir: …` | **L** (the arch split stands as at trains 22–25) |
+| `LookupServicePort` | `panic: runtime error: cannot view native memory as array<Byte>: the address has no managed element storage behind it` (DESIGN-native-array-view) | same | **N** |
+
+**Class L, rooted from the tree:** each symbol is a darwin `//go:linkname` PULL whose target body exists in `syscall`, and the
+corpus has no forward. The pulls are `vendor/golang.org/x/net/route.sysctl → syscall.sysctl`,
+`internal/poll.fdopendir → syscall.fdopendir` and `internal/syscall/unix.unlinkat → syscall.unlinkat`. The darwin flavor
+carries **24** bodyless declarations with a linkname pull. A companion fills 14 of them (`net_darwin_impl.cs`, `dir_darwin_impl.cs`,
+…). **10 are unfilled:**
+- the three above;
+- five latent, on `os.RemoveAll` / `os.Root` / `net.Buffers` paths: `fstatat`, `openat`, `ioctlPtr`, `writev`, `closedir`;
+- two dormant: `runtime.main_main`, and x/sys/cpu's `syscall_syscall6`, which purego keeps unreachable.
+
+**Scored against the prediction, row by row:**
+
+| predicted | measured | score |
+|:--|:--|:--|
+| measurable ≈ 723 x64 / 722 arm64 | 723 / 722 | HIT, exact |
+| `SignalPrimitives` STAYS RED (sigtramp) | **passes both legs** | **FALSIFIED**: the Q52 signal bridge (`554620235`, sigenable over .NET `PosixSignalRegistration`) landed AFTER train 25; I classified the post-train-25 commits and missed it |
+| `IpAdapterAddresses` stays red | red, `sysctl` (now spelled as a missing linkname push) | HIT |
+| `LongPathRoundTrip` stays red | red, door MOVED: stdout mismatch → `fdopendir` | HIT on red; the door moved |
+| `StatLayoutTruth` 50/50 | unchanged doors, `fdopendir` x64 / `unlinkat` arm64 | the "stays" side |
+| `runtime_BeforeFork` pair MOVES | `LinuxSpawnBasics` passes both; `StdoutCloseEofBarrier` → a run-budget timeout on both | HIT, both moved |
+| `LookupServicePort` MOVES | moved past `syscall_syscall6`, to the native-array-view refusal | HIT |
+| loopback five: ≥ 2 move, ≥ 1 stays red | x64 5 of 5 pass; arm64 3 pass + 2 NOT MEASURED | HIT on move; FALSIFIED on "≥ 1 red" |
+| `PipeCloseUnblocksRead`: arm64 not measured, x64 passes | exactly | HIT |
+| `SyscallKeystonePulls` 60 % pass | passes both | HIT |
+| the 1.24 deltas cause zero deaths | zero | HIT |
+| failing x64 6–14, arm64 7–15 | 4 and 4 (plus 1 / 4 not measured) | BELOW both bands, better than predicted |
+| ≥ 700 compared-passing per leg | 690 / 686 | MISSED: I did not subtract the 28 library-style Output skips |
+
+**Falsifiers: none fired.** No death in the pure class; no death names `arc4random_buf`, `mkdirat`, `readlinkat` or x/sys/cpu's
+`syscall_syscall6`; x64 Compile is 100 %; no `FuncPCABI0 … no program counter` death anywhere.
+
+**Both-legs agreement (COORD's banking rule, applied to programs as a preview):** the failing SET agrees: the same four names.
+One door differs by architecture (`StatLayoutTruth`), and the not-measured set differs (arm64 4, x64 1). The arm64 timeouts are
+on a 3-core runner at a 120 s budget; whether they are slowness or hangs is UNMEASURED until a `behavioral-stderr` run with a
+larger budget.
+
+**What it means for the plan:**
+- S4 (sigtramp) is RETIRED: the bridge exists, and `SignalPrimitives` passes.
+- A new seat, S7, is the darwin linkname-pull class, which closes three of four failing doors and five latent ones.
+- `LookupServicePort` (class N) and the timeouts need stacks before any seat.
+
+-- C1
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
