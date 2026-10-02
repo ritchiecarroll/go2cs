@@ -8559,7 +8559,7 @@ type testRecords struct {
 // name, for the disclosure record-count pin (see recordPinFailure).
 func terminalTestRecords(output string) map[string]testRecords {
 	result := make(map[string]testRecords)
-	for _, line := range strings.Split(output, "\n") {
+	for _, line := range testStreamLines(output) {
 		var event normalizedTestEvent
 		if json.Unmarshal([]byte(line), &event) != nil || event.Test == "" {
 			continue
@@ -9501,9 +9501,36 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	return nil
 }
 
+// testFramingMarker is Go's ^V. Under -test.v=test2json every framing line of a test binary starts with
+// it (testing.go: chattyFlag.prefix), and the converted host's --json event lines carry it for the same
+// reason (TestReporter.FramingMarker).
+const testFramingMarker = '\x16'
+
+// testStreamLines splits one side's captured output into lines by cmd/test2json's rule (test2json.go:
+// indexEOL): a line ends at "\n" OR just before a ^V that does not begin a line, and a line's leading ^V
+// is stripped. So an event that lands on the end of a test's unterminated os.Stdout output still reads
+// as its own line, and the partial output stays partial (H2: x/mod/sumdb/tlog's
+// TestCertificateTransparency lost its pass event to exactly that, 2026-10-02). go test's own -json
+// stream carries no marker, so its lines are the plain "\n" split.
+func testStreamLines(output string) []string {
+	var lines []string
+	for _, line := range strings.Split(output, "\n") {
+		for len(line) > 1 {
+			cut := strings.IndexByte(line[1:], testFramingMarker)
+			if cut < 0 {
+				break
+			}
+			lines = append(lines, strings.TrimPrefix(line[:cut+1], string(testFramingMarker)))
+			line = line[cut+1:]
+		}
+		lines = append(lines, strings.TrimPrefix(line, string(testFramingMarker)))
+	}
+	return lines
+}
+
 func terminalTestResults(output string) map[string]string {
 	result := make(map[string]string)
-	for _, line := range strings.Split(output, "\n") {
+	for _, line := range testStreamLines(output) {
 		var event normalizedTestEvent
 		if json.Unmarshal([]byte(line), &event) != nil || event.Test == "" {
 			continue
@@ -9521,7 +9548,7 @@ func terminalTestResults(output string) map[string]string {
 // test name, for disclosure signature matching against the C# side's failure messages.
 func terminalTestOutputs(output string) map[string]string {
 	result := make(map[string]string)
-	for _, line := range strings.Split(output, "\n") {
+	for _, line := range testStreamLines(output) {
 		var event normalizedTestEvent
 		if json.Unmarshal([]byte(line), &event) != nil || event.Test == "" {
 			continue
@@ -9560,7 +9587,7 @@ func isTestEventLine(line string) bool {
 // empty-looking tail — a bound that measures whitespace is a bound that hides the reading.
 func diagnosticOutputTail(output string) *stderrTail {
 	var diagnostics []string
-	for _, line := range strings.Split(output, "\n") {
+	for _, line := range testStreamLines(output) {
 		line = strings.TrimRight(line, "\r")
 		if strings.TrimSpace(line) == "" || isTestEventLine(line) {
 			continue
