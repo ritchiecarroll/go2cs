@@ -133,6 +133,7 @@ docs/phase4/hopA-inputs/*.tsv text eol=lf
 # nothing beyond the files this commit edits.
 #
 # ORDER: above the -text blocks, for the reason the pins above state.
+src/go2cs/corpus-release.txt text eol=lf
 src/go2cs/stdlib-metadata.txt text eol=lf
 
 # go2cs behavioral TargetComparison tests compare transpiled C# to .cs.target
