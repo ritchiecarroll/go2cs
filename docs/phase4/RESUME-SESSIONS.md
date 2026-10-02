@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-10-01 17:05 RELEASE DAY (master 172d437e66 = the 1.24.13.3 release tip, pre-stage green, freeze on; TRAIN L battery green, lands after the release; see the 1e.0 bullets). Earlier: 2026-10-01 02:40 TRAIN K LANDED (master 75648a022b, 225/225). Earlier: 2026-09-30 03:15 TRAIN J LANDED (master f819887fa3, 223/225). Earlier: 2026-09-28 19:10 TRANSITION (owner order 18:40): section **1e** is START HERE for R, C1, C2, P1 and P2, who run the MAILBOX-ONLY protocol (1e.1) with the models in 1e.2; G, the i9 and COORD continue from 1d.00 and the ledger. Earlier: 2026-09-27 17:09 FLEET SHUT DOWN (owner order; credits reset 2026-09-28 16:00 Central; the remaining credit is held for emergencies). FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
+> **Status of this revision:** 2026-10-02 02:30 go.* 1.24.13.3 PUBLISHED (the record and the tag are on origin: master 5f3a16943f, tag nuget-1.24.13.3; the freeze is lifted; TRAIN L lands next; R has a NEW session prompt in 1e.5). Earlier: 2026-10-01 17:05 RELEASE DAY (master 172d437e66 = the 1.24.13.3 release tip, pre-stage green, freeze on; TRAIN L battery green, lands after the release; see the 1e.0 bullets). Earlier: 2026-10-01 02:40 TRAIN K LANDED (master 75648a022b, 225/225). Earlier: 2026-09-30 03:15 TRAIN J LANDED (master f819887fa3, 223/225). Earlier: 2026-09-28 19:10 TRANSITION (owner order 18:40): section **1e** is START HERE for R, C1, C2, P1 and P2, who run the MAILBOX-ONLY protocol (1e.1) with the models in 1e.2; G, the i9 and COORD continue from 1d.00 and the ledger. Earlier: 2026-09-27 17:09 FLEET SHUT DOWN (owner order; credits reset 2026-09-28 16:00 Central; the remaining credit is held for emergencies). FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -35,6 +35,7 @@
 - **2026-10-01 02:33: TRAIN K LANDED.** master f819887fa3 -> 75648a022b (a fast-forward of the gated union 8b5396a1a6 plus the bank a8c6f53be1, G's os page 979673826c, roster 133ca704eb, repoguard 8ea43004fc, the pprof note 8289d30c99 and its regenerated page 75648a022b; ledger 1d56fbfd30). **225/225: every implementable package validates** (runtime 10819 + 71, linux 10810 + 73; runtime/pprof 145 + 7, linux 147 + 7; os re-banks 1106 + 2). **Base for every cut: master 75648a022b.** Before tonight's 1.24.13.3 release (the owner's PIN, shipped from K's master): G's host-neutral os note and page (claude/g-os-note). TRAIN L (12 candidates; pre-map 10 of 10 clean on K's banked head) assembles on 75648a022b and lands AFTER the release; draft `.claude/coord-scripts/trainL/tL-seats-draft.txt`, pre-map `trainL/tL-conflict-map.sh`. TRAIN K's scripts: `.claude/coord-scripts/trainK/`.
   - *Correction (2026-10-01 17:05):* TRAIN L held ELEVEN candidates, not twelve (ledger 02:46 erratum).
 - **2026-10-01 17:05: RELEASE DAY STATE.** master `75648a022b` -> `c2591d5b95` (G's host-neutral os note) -> `172d437e66` (the owner-approved 225/225 milestone: README NEWS block + Milestones row + Status, NEWS.md entry). **`172d437e66` is THE TIP of tonight's 1.24.13.3 release** (the owner's PIN; pre-stage P1-P7a green, runbook in COORD's scratch; freeze on, no master landing until the record commit and tag are on origin; the i7 quiet from O2). **TRAIN L**: union `claude/coord-trainL-union` `02a0b44467` = 11 seats + follow-ups (i9 nugetgo 5.1 fix, C1 token-collision fix, G's module-cache ReadOnly fix rerouted from R, C1's README -tests/-recurse row) + fixup; battery GREEN (i7 + i9 132/132 + P1/P2 linux), post-merge re-reads green, the i9's full uuid NGE from GOMODCACHE green; L's roster commit = runtime linux provenance only (log/slog KEEPS release-tiered, a TC0 first-call-latency timing reason). **L lands AFTER the release**: merge master (incl. the release record) into the union, roster commit, guards, land. **TRAIN M** (G's branch, tip `2acbc7144f`): Extension A, goroutine Entry-classification (net/http leak), net/http drops release-tiered, NoInlining on go-executing functions (true "created by"), internal/godebug PC->line (v2 A/B running). R in travel mode today (owner order); R's items rerouted to G and C1. The owner SENT the NuGet prefix reply (29 go.X. + go.uuid + nugetgo.; user account ritchiecarroll); awaiting NuGet.
+- **2026-10-02 02:03: go.* 1.24.13.3 PUBLISHED.** The owner built, signed and pushed 344 packages from `172d437e66` (nuget.org lists 344 / 344; the ID set equals 1.24.13.2's). The record is on origin: master `172d437e66` -> `5732917a95` (the release record: version.props, 342 README retargets, the frozen snapshot docs/validation/1.24.13.3 = 239 proof pages + the roster) -> `5f3a16943f` (the index row); tag `nuget-1.24.13.3` at `172d437e66`. **The freeze is lifted.** TRAIN L (union `02a0b44467`) lands next: merge master, roster commit, guards. **Base for every new cut: the L union `02a0b44467` until L lands, then master** (a cut on the union stays an ancestor). TRAIN M candidates so far: G's branch (tip `0af55d033e`), the i9's crash-class seat `7a8d02f6fe` and ChannelTests seat `73a7a15425`, C1's darwin seats (S7 `546eddf07e`, S6b-1 `35fb6b2bf8`, the run-timeout ref), C1's fixture-tracking seat, P1's templates and repros (`4b31ce1fc1`), P2's real-module fix batch (F4 `aa994a1a1c`, F5 `75d4d8d8a4`, F3 `d3358d81a9`, F7 `a216033728`, F1+F6 `1f2a73a3c2`, F8 `5556ef86cb`), C2's S3a (-nuget-map; cutting). Running notes: `.claude/coord-scripts/trainL/tL-seats-draft.txt` on this branch. Queued: the std-lib warning cleanup (`.claude/coord-scripts/coord-queue-stdlib-warnings.md`).
 
 ### 1e.1 THE MAILBOX-ONLY PROTOCOL (R, C1, C2, P1, P2)
 
@@ -105,6 +106,8 @@ First action: set up the mailbox clone (1e.1 step 1), read your inbox, then post
 ### 1e.4 STATE BLOCKS
 
 #### R
+
+*Superseded 2026-10-02 by section 1e.5 (R's new session). Kept as the 2026-09-28 record.*
 
 ```
 LANE: R   MODEL: Opus 5.5/high   HOST: R-LAPTOP (+ its WSL Ubuntu-22.04 linux arm)
@@ -206,6 +209,47 @@ TOOLS: GOROOT go1.24.13 (GOTOOLCHAIN=local, or GOTOOLCHAIN=go1.24.13 in a fresh 
 ```
 
 ---
+
+### 1e.5 R -- NEW SESSION 2026-10-02 (owner request: the previous R prompt no longer starts a working session). It SUPERSEDES R's row in 1e.3 and R's block in 1e.4.
+
+Paste this on R-LAPTOP, with the model set to Opus 5.5 and the effort to high:
+
+```
+RESUME 2026-10-02 (a NEW session; the previous R session is retired). You are lane R of the go2cs fleet, on R-LAPTOP
+(plus its WSL linux arm). You are in travel mode: short spurts, one deliverable per spurt.
+Model and effort: Opus 5.5, high (name them in your ACK).
+Read, from origin, reading every tip by ls-remote:
+ - CLAUDE.md;
+ - on branch claude/coord-handover, docs/phase4/RESUME-SESSIONS.md: section 0a (the shared preamble: security,
+   refs, pins, the floor -- its comms rules 1, 7 and 9 are REPLACED for you by 1e.1), section 1e.1 (the
+   MAILBOX-ONLY protocol), the NEWEST bullet of section 1e.0 (the base for your cuts), and section 1e.5: your
+   STATE BLOCK of 2026-10-02 with its READ-FIRST items. Ignore every older R block in that file.
+Comms are the mailbox ONLY (1e.1): read with fleet-read.sh, post with fleet-msg.sh, and wait with fleet-watch.sh in
+the background. The tools are not yours to change: report a defect to COORD in one line and keep working.
+First action: set up a FRESH mailbox clone in a new directory (1e.1 step 1; do not reuse the previous session's
+clone or its NEXT-SINCE), read your inbox, then post your ACK to COORD (1e.1 step 8) with your worktrees and
+anything unpushed. If a build clone left by the previous session misbehaves, do not repair it: clone fresh into a
+new directory and say so in the ACK. Then start your NEXT.
+```
+
+R's STATE BLOCK, COORD-written from origin and the inbox on 2026-10-02 (R replaces it with its own at the next save):
+
+```
+LANE: R   MODEL: Opus 5.5/high   HOST: R-LAPTOP (+ its WSL Ubuntu-22.04 linux arm)   MODE: travel, short spurts, one deliverable per spurt
+BRANCH: claude/r-m2-module-lock-onK 27f2199b30b0545238f6f97abcb0b7e7b8153a9c on-origin yes in TRAIN L union -- M2, go2cs.modules.lock
+BRANCH: claude/r-m3-tests-recurse c5e934c4646e56c807193a758fc93d35dd6d8123 on-origin yes in TRAIN L union -- M3, the `go2cs -tests -recurse <moduleDir> <outRoot>` driver
+BRANCH: claude/r-m4-module-ancestry e9009f2945b2648adf43446ea8b512035d0d49c3 on-origin yes in TRAIN L union -- M4, module ancestry staging for -tests
+BRANCH: claude/r-m6-default-godebug 6a079a9675e5d3619fe97b0f173c4193f40af78b on-origin yes in TRAIN L union -- M6, DefaultGODEBUG for -tests hosts and -recurse mains
+BRANCH: claude/r-d6-for-clause-spill 33fb0565f6c5a8c28d35b6aab1d3972a1e9cab14 on-origin yes in TRAIN L union -- D6, the for-clause spill
+BRANCH: claude/r-cb-panic-evidence 906ad5eef17b6b8451cba5f5443ad5f0f1701efc on-origin yes record only -- the callback-panic evidence; never seated
+NOTE: everything else of yours is LANDED on master (TRAINs G-K): panic frames, defer cost, pkgpath, godebug-at-start, W1, A16/A17, the D1-D3 seats, func cookie, field-ptr equality, zerosize view, M1 proof pages, S2 CS15 escape, the hop population generator, named-slice reflect dims. Design and evidence refs (gopark-synctest, recover, panic-frames designs; tls-bogo, p2-sweep evidence; s4-synctest-pulls, superseded) are records and stay as they are.
+NOTE: on 2026-10-01 (owner order, travel) your open items were REROUTED and are DONE by others, inside the L union: the M4 module-cache ReadOnly staging defect -> G (claude/g-m4-readonly-staging; proven on windows from GOMODCACHE by the i9 and on non-root linux by P1); the README -tests/-recurse row -> C1. The SyncMutexProfile Release pair you disclosed is rooted by G's bbbb3ff022 (landed with K). Nothing is owed from the previous session.
+LOCAL-ONLY: unknown to COORD -- state your worktrees and anything unpushed in your ACK. If a clone from the previous session misbehaves, do NOT repair it: clone fresh into a new directory and say so.
+NEXT: (1) A REAL-MODULE READING ON WINDOWS, the first third-party module of the nugetgo first wave: github.com/golang-jwt/jwt/v5 from the module cache, `go2cs -tests -recurse <moduleDir> <outRoot>` with an explicit `-test-timeout 30m` (the publish floor F4 is a TRAIN M seat, not yet on master), on the base named in 1e.0's newest bullet. ONE post: per package, validated count or the failing tests by name, each failure given a class; the module's DefaultGODEBUG as the host stamped it; wall time. Known classes you do NOT re-report (already seats in TRAIN M): F1+F6 func-literal result type, F3 pointer-to-alias adapter, F5 variadic closure rename, F7 named-vs-unnamed array compare, F8 overload-candidate references, H1 (the host ignores -test.list), H2 (a JSON event not line-started), and the TC0 timing class. A NEW class gets a minimal repro project as P1 did. (2) OPTIONAL, only if cheap: the GolibTests arm M4 lacks (ModuleAncestryTests reads .git/bin/sandbox recursion but not vendor/ inclusion or the in-module link skip): a test-only seat for TRAIN M on its own new ref. (3) Then say you are idle; COORD routes the next item to your inbox.
+READ-FIRST: your inbox (the 2026-10-01 11:21Z stand-down and what follows it); the ledger heads from 2026-10-01 on; P1's FINDING record for the first real-module runs (x/sync, x/mod; on claude/p1-m-repros) for the reporting shape; docs/README.md's -tests / -recurse rows; .claude/rules/converter.md.
+BLOCKED-ON: none. The module download is covered by the owner's standing approval for official Go module downloads (proxy.golang.org, sum-verified); a permission prompt in YOUR session still needs the owner's click there -- send COORD one OWNER-HAND line if it waits.
+TOOLS: GOROOT go1.24.13 WITH GOTOOLCHAIN=local (R-LAPTOP's ambient GOTOOLCHAIN is go1.23.1 and switches silently without the pin; an unpinned A/B once read a false red on both arms); DOTNET_ROOT .NET SDK 10.0.400; python 3.11; linux arm: WSL Ubuntu-22.04 with go1.24.13 and dotnet10, driven by script files only. Always pass the output directory as the second positional.
+```
 
 ## 1d. SAVE-STATE 2026-09-27 (weekly usage at 91%): START HERE. COORD's new-session prompt and every lane's state. It supersedes 1b and 1c for CURRENT STATE; sections 0a, 1a, 1b and 1c stay the reference for standing rules and history.
 
@@ -2835,6 +2879,7 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 
 ## 7. Revision log
 
+- 2026-10-02 02:30 (box) -- go.* 1.24.13.3 PUBLISHED and recorded (master 5f3a16943f, tag nuget-1.24.13.3); the 1e.0 bullet names the base for new cuts and the TRAIN M candidates; section 1e.5 = R's NEW session prompt and COORD-written STATE BLOCK (owner request: the 2026-09-28 prompt pointed a new session at a stale block).
 - 2026-09-21 18:03 (box) -- section 1a amended per the owner: C1 and C2 become STANDBY lanes after their current queue (Go-side seats, sizings, designs, docs, instrument arms; never a .NET leg or a row); new HARDWARE lanes (owner-provisioned, Remote Control, full gates) take the verification-heavy work and self-gate their refs; the plan is re-emitted with shardmap.py when the worker set changes.
 - 2026-09-21 17:35 (box) -- THE NEW COORD SESSION PROMPT as section 1a (the weekly limit hit 2026-09-20 ~15:35 mid-rehearsal: the rehearsal sub-agent died at row 1, its worktree reh left in place); the two briefs saved under docs/phase4/briefs/ (paths scrubbed; the previous commit ecc985499 wrote them EMPTY by a heredoc fault -- this one carries them); rule 4 notes the v2 position cursor. State at the cutoff: version tip 0adf2e4318, master 0b0be89fd7, batch 3 = ten refs, the lane queues as the ledger lists them.
 - 2026-09-20 14:56 (box) -- STAMP: VERSION TIP claude/version-go1.24.13 = 0adf2e4318 (APPLY BATCH 2: four signed merges on 6d814e2d38 -- the collision-key follow-up 8b1a284122, the host junction ref 91f1bd5872, R's mlkem seat d6c7ebd78b and its white-box fix 7e7eb990c1; gen 0 / GenTests 57 / GolibTests 788 / suite ok / repoguard uncached / CNR 729 / stdlib 344-0 / mlkem VALIDATED 8 with 0 divergences, cfile 15, trace 92, sync at its known divergence state / census clean). THE REHEARSAL LAUNCHED on it (i7 sub-agent: the i7's W=4 slice 1 + fips140test non-banking; the box contended by the duplicate battery instance). R re-tips the maphash ref on it (batch 3's ref 5), then the escapeForHash converter rule; G cuts TruncHash; C1 B.Elapsed; C2 the sha3 key -- all on 0adf2e4318. BATCH 3 (seven refs) follows the rehearsal.
