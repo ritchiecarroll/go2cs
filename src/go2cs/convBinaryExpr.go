@@ -1888,6 +1888,24 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				if v.isUntypedNamedConstRef(binaryExpr.Y) {
 					rightOperand = fmt.Sprintf("(%s)%s", operandCast, rightOperand)
 				}
+
+				// go/types leaves the operands of a CONSTANT expression untyped, so an untyped-constant
+				// SHIFT beside the operand just cast renders as a C# `int`, which C# sign-extends to OR
+				// it with the unsigned one (CS0675, runtime's `1<<tracebackShift | tracebackAll`). Give
+				// the shift the same cast. Only beside a cast named constant: casting every untyped
+				// shift operand moved 14 corpus files (internal/zstd's `16 | 1<<24` tables, bidirule,
+				// go/types, gccgoimporter) that draw no warning. A native-int result is skipped: the
+				// block below already casts its computed operands, and a second cast doubled it.
+				castPrefix := "(" + operandCast + ")"
+				nativeResult := binaryTypeName == "nuint" || binaryTypeName == "nint" || binaryTypeName == "uintptr"
+
+				if !nativeResult && v.isUntypedNamedConstRef(binaryExpr.Y) && v.isUntypedConstShift(binaryExpr.X) && !strings.HasPrefix(leftOperand, castPrefix) {
+					leftOperand = castPrefix + leftOperand
+				}
+
+				if !nativeResult && v.isUntypedNamedConstRef(binaryExpr.X) && v.isUntypedConstShift(binaryExpr.Y) && !strings.HasPrefix(rightOperand, castPrefix) {
+					rightOperand = castPrefix + rightOperand
+				}
 			}
 
 			// The right operand of `&^` is complemented (the operator was rendered `& ~`), and C#
@@ -2227,4 +2245,23 @@ func (v *Visitor) namedArrayOverUnnamed(namedType, other types.Type) (*types.Nam
 	}
 
 	return named, true
+}
+
+// isUntypedConstShift reports whether expr is a shift whose recorded type is an untyped integer
+// constant: an operand of a constant expression, which go/types never re-types to its context.
+func (v *Visitor) isUntypedConstShift(expr ast.Expr) bool {
+	shift, ok := unparenthesize(expr).(*ast.BinaryExpr)
+
+	if !ok || (shift.Op != token.SHL && shift.Op != token.SHR) {
+		return false
+	}
+
+	tv, ok := v.info.Types[shift]
+
+	if !ok || tv.Value == nil || tv.Type == nil {
+		return false
+	}
+
+	basic, ok := tv.Type.(*types.Basic)
+	return ok && basic.Info()&types.IsUntyped != 0 && basic.Info()&types.IsInteger != 0
 }
