@@ -213,6 +213,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         if (array is null)
         {
             this = default;
+            m_array = null!;    // the nil slice is the one state where m_array is null (see IsNil)
             return;
         }
 
@@ -386,6 +387,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
                 throw RuntimeErrorPanic.SliceBoundsOutOfRange(low, high == -1 ? 0 : high, 0);
 
             this = default;
+            m_array = null!;    // the nil slice is the one state where m_array is null (see IsNil)
             return;
         }
 
@@ -417,6 +419,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
                 throw RuntimeErrorPanic.SliceBoundsOutOfRange(low, high, max, 0);
 
             this = default;
+            m_array = null!;    // the nil slice is the one state where m_array is null (see IsNil)
             return;
         }
 

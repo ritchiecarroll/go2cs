@@ -279,7 +279,7 @@ public static partial class builtin
     /// Returns a new <see cref="PanicException"/> with the specified <paramref name="state"/>.
     /// </summary>
     /// <param name="state">State of panic exception.</param>
-    public static PanicException panic(object state)
+    public static PanicException panic(object? state)
     {
         // Go's `panic` takes an `any`, so the value's DYNAMIC TYPE is observable: a recovering
         // comparison (`if p != "x"`), a type assertion (`err.(string)`), and a `case string:` arm

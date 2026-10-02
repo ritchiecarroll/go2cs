@@ -716,7 +716,7 @@ public static class Common
     // type's own publicization above. Typed over the shared MemberDeclarationSyntax base (not just
     // BaseTypeDeclarationSyntax) so both TypeGenerator's type declarations and RecvGenerator's method
     // declarations read the SAME ground truth instead of each re-deriving their own.
-    public static string GetExplicitAccessModifier(MemberDeclarationSyntax typeDeclaration)
+    public static string? GetExplicitAccessModifier(MemberDeclarationSyntax typeDeclaration)
     {
         foreach (SyntaxToken modifier in typeDeclaration.Modifiers)
         {

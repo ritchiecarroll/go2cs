@@ -33,6 +33,8 @@ using WaitReason = go.golib.WaitReason;
 // file that carries this marker, so a -stdlib reconvert preserves it (see containsManualConversionMarker).
 [module: go.GoManualConversion]
 
+#pragma warning disable CS8826 // the converted partial names the blank Go parameter `_`; this hand-owned body keeps its readable name
+
 namespace go;
 
 partial class sync_package {

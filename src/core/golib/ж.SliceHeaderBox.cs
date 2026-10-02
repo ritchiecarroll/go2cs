@@ -183,8 +183,8 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
     // ---- the instance ----
 
     private readonly ж<T> m_source;
-    private TDst m_value;               // the header handed out through Value (a ref into this field)
-    private TDst m_handedOut;           // what that header held when it was handed out
+    private TDst m_value = default!;   // the header handed out through Value (a ref into this field)
+    private TDst m_handedOut = default!; // what that header held when it was handed out
     private bool m_materialized;
     private object? m_pointer;          // the cached pointer object, minted for (m_pointerBacking, m_pointerLow, cap == 0)
     private object? m_pointerBacking;
@@ -239,11 +239,11 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
         if (m_materialized && !EqualityComparer<TDst>.Default.Equals(m_value, m_handedOut))
             throw new PanicException($"slice header written through a reinterpretation: a {typeof(TDst).Name} built over a {typeof(T).Name} was assigned through the header and the managed slice cannot be rebuilt from Go's (array, len, cap) words — the write landed on a detached copy (the runtime's field-by-field writers, addrRanges.init/add/cloneInto, are hand-owned at the write for exactly this reason; its whole-header writers sit behind sysAlloc/mheap.init)");
 
-        (object? backing, nint low, nint len, nint cap) = s_describe!((IArray)(object)m_source.Value);
+        (object? backing, nint low, nint len, nint cap) = s_describe!((IArray)(object)m_source.Value!);
 
         if (m_pointer is null || !ReferenceEquals(backing, m_pointerBacking) || low != m_pointerLow || (cap == 0) != m_pointerZeroCapacity)
         {
-            object? elementZero = backing is null ? null : s_elementZero!((IArray)(object)m_source.Value);
+            object? elementZero = backing is null ? null : s_elementZero!((IArray)(object)m_source.Value!);
             m_pointer = s_fromBox!.Invoke(null, [elementZero]);
             m_pointerBacking = backing;
             m_pointerLow = low;

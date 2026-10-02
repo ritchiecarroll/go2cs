@@ -954,7 +954,7 @@ public static partial class GoReflect
                 {
                     Complex c => new complex64((float)c.Real, (float)c.Imaginary),
                     complex64 c64 => c64,
-                    _ => null
+                    _ => (object?)null
                 };
             case Float32:
                 return tryWideFloat(src, out double f32) ? (float)f32 : null;

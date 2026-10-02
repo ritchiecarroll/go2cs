@@ -109,6 +109,8 @@ using NativeMemory = System.Runtime.InteropServices.NativeMemory;
 // than inherited -- see zsyscall_windows_impl.cs.
 [module: go.GoRequiresUnsafe]
 
+#pragma warning disable CA1416 // ThreadPoolBoundHandle and NativeOverlapped are windows-only; this file compiles only into the windows flavour
+
 namespace go;
 
 partial class syscall_package

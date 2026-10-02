@@ -61,7 +61,7 @@ internal class InheritedTypeTemplate : TemplateBase
     // WrappedTypeIsPublic, which is exactly the corpus-wide CS0558 an earlier, unscoped attempt at
     // this fix measured (see TypeGenerator.cs's isTestFileDeclaration comment for the other half of
     // that same regression).
-    private string MemberScope => Scope.StartsWith("public") && WrappedTypeIsPublic ? "public" : "internal";
+    private string MemberScope => Scope!.StartsWith("public") && WrappedTypeIsPublic ? "public" : "internal";
 
     // For a defined type whose underlying is a STRUCT (`type winlibcall libcall`), the underlying
     // struct's fields are accessible on the named type in Go (`w.fn`). C# has no such access on the
@@ -138,7 +138,7 @@ internal class InheritedTypeTemplate : TemplateBase
     private string InterfaceImplementation => TypeClass switch
     {
         "Slice" => ISliceTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName),
-        "Map" => IMapTypeTemplate.Generate(ObjectName, TargetTypeName, TargetValueTypeName),
+        "Map" => IMapTypeTemplate.Generate(ObjectName, TargetTypeName, TargetValueTypeName!),
         "Channel" => IChannelTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName),
         "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName, TargetTypeSize),
         "Numeric" => NumericTypeTemplate.Generate(TypeName, TargetTypeName),
@@ -321,7 +321,7 @@ internal class InheritedTypeTemplate : TemplateBase
     // underlying, never an implicit one. The constructor and `.Value` (now correctly internal in
     // this same case) remain the explicit path for every consumer, all of which are sibling files
     // in the one test assembly under the whitebox-reference model.
-    private bool OmitUnderlyingConversionOperators => Scope.StartsWith("public") && !WrappedTypeIsPublic;
+    private bool OmitUnderlyingConversionOperators => Scope!.StartsWith("public") && !WrappedTypeIsPublic;
 
     private string UnderlyingConversionOperators => TypeName is "any" or "object" || OmitUnderlyingConversionOperators ? "" :
         $$"""

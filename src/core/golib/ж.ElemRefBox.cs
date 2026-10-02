@@ -7,6 +7,7 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using go.golib;
 
@@ -317,7 +318,7 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer
         m_backing is not null ? (new array<T>(m_backing), (int)m_index) : null;
 
     /// <inheritdoc/>
-    internal override bool TryGetElementStorage(out T[]? backing, out nint index)
+    internal override bool TryGetElementStorage([NotNullWhen(true)] out T[]? backing, out nint index)
     {
         if (m_backing is not null)
         {
