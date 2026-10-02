@@ -481,6 +481,7 @@
     <Project Path="tests/Behavioral/FuncLitArgCapture/FuncLitArgCapture.csproj" />
     <Project Path="tests/Behavioral/FuncLitCaptureInCondition/FuncLitCaptureInCondition.csproj" />
     <Project Path="tests/Behavioral/FuncLiteralCallerNames/FuncLiteralCallerNames.csproj" />
+    <Project Path="tests/Behavioral/FuncLiteralDeclaredResultIface/FuncLiteralDeclaredResultIface.csproj" />
     <Project Path="tests/Behavioral/FuncLitNumericTupleReturn/FuncLitNumericTupleReturn.csproj" />
     <Project Path="tests/Behavioral/FuncLitStringConcatReturn/FuncLitStringConcatReturn.csproj" />
     <Project Path="tests/Behavioral/FuncLitUntypedConstReturn/FuncLitUntypedConstReturn.csproj" />
@@ -754,6 +755,7 @@
     <Project Path="tests/Behavioral/PackageVarInitOrder/PackageVarInitOrder.csproj" />
     <Project Path="tests/Behavioral/PackageVarTupleInitOrder/PackageVarTupleInitOrder.csproj" />
     <Project Path="tests/Behavioral/PanicDeferCalleeFrame/PanicDeferCalleeFrame.csproj" />
+    <Project Path="tests/Behavioral/PanicOnlyFuncLiteralVar/PanicOnlyFuncLiteralVar.csproj" />
     <Project Path="tests/Behavioral/PanicRecover/PanicRecover.csproj" />
     <Project Path="tests/Behavioral/PanicValueRendering/PanicValueRendering.csproj" />
     <Project Path="tests/Behavioral/ParallelAssignmentHazard/ParallelAssignmentHazard.csproj" />

@@ -637,6 +637,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckFuncLiteralCallerNames() => CheckTarget("FuncLiteralCallerNames");
 
     [TestMethod]
+    public void CheckFuncLiteralDeclaredResultIface() => CheckTarget("FuncLiteralDeclaredResultIface");
+
+    [TestMethod]
     public void CheckFuncTypeNilConversion() => CheckTarget("FuncTypeNilConversion");
 
     [TestMethod]
@@ -1412,6 +1415,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPanicDeferCalleeFrame() => CheckTarget("PanicDeferCalleeFrame");
+
+    [TestMethod]
+    public void CheckPanicOnlyFuncLiteralVar() => CheckTarget("PanicOnlyFuncLiteralVar");
 
     [TestMethod]
     public void CheckPanicRecover() => CheckTarget("PanicRecover");
