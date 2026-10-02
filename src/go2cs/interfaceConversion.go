@@ -120,6 +120,17 @@ func (v *Visitor) convertToProjectedInterfaceType(interfaceType types.Type, chec
 	return v.convertToInterfaceTypeSlot(interfaceType, checkType, targetType, exprResult)
 }
 
+// unaliasPointerElem returns *T for a pointer to an alias of T, and t unchanged otherwise.
+func unaliasPointerElem(t types.Type) types.Type {
+	if ptr, ok := t.(*types.Pointer); ok {
+		if _, isAlias := ptr.Elem().(*types.Alias); isAlias {
+			return types.NewPointer(types.Unalias(ptr.Elem()))
+		}
+	}
+
+	return t
+}
+
 // convertToInterfaceTypeSlot is convertToInterfaceType's body; see that function for the
 // type-parameter split it sits behind.
 func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType types.Type, targetType types.Type, exprResult string) string {
@@ -140,6 +151,13 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 	// package-level `type E = ast.Expr` just as much — mismatched the same way. It stayed invisible
 	// only because the pre-lift local alias happened to be spelled exactly like its target.
 	interfaceType, checkType, targetType = types.Unalias(interfaceType), types.Unalias(checkType), types.Unalias(targetType)
+
+	// Unalias is SHALLOW: a POINTER to an alias is not itself an alias, so `&syncmap.Map{}` (with
+	// `type Map = sync.Map` in x/sync's syncmap) kept its element spelled through the alias. The
+	// record then fell through to that spelling (`GoImplement<…syncmap.Map, mapInterface>`) while
+	// the cast site named the generator's `sync_Mapж…` class (CS0246). Reach through the pointer
+	// too; a pointer whose element is not an alias is left exactly as it was.
+	checkType, targetType = unaliasPointerElem(checkType), unaliasPointerElem(targetType)
 
 	// Track interface types that need to an implementation mapping
 	// to properly handle duck typed Go interface implementations

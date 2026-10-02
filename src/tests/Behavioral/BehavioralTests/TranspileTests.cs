@@ -37,6 +37,12 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAliasStructComposite() => CheckTarget("AliasStructComposite");
 
     [TestMethod]
+    public void CheckAliasStructToInterface() => CheckTarget("AliasStructToInterface");
+
+    [TestMethod]
+    public void CheckAliasStructToInterfaceLib() => CheckTarget("AliasStructToInterfaceLib");
+
+    [TestMethod]
     public void CheckAndNotAssignNarrow() => CheckTarget("AndNotAssignNarrow");
 
     [TestMethod]
