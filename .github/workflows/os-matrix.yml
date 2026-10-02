@@ -69,6 +69,11 @@ on:
         options:
           - 9.0.x
           - 10.0.x
+      run_timeout:
+        description: 'Per-program RUN budget in seconds for the behavioral stages (GO2CS_RUN_TIMEOUT), 1-1800. Blank takes 120, the budget every stage used before this input existed. Raise it to tell a slow program on the 3-core macos-15 runner from a real hang: a NOT MEASURED (timeout) row says only that the budget expired. A large value on behavioral-full can exceed that stage''s job budget.'
+        type: string
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -109,6 +114,7 @@ jobs:
       stage: ${{ steps.derive.outputs.stage }}
       filter: ${{ steps.derive.outputs.filter }}
       dotnet: ${{ steps.derive.outputs.dotnet }}
+      run-timeout: ${{ steps.derive.outputs.run-timeout }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -121,6 +127,7 @@ jobs:
           INPUT_STAGE: ${{ inputs.stage }}
           INPUT_FILTER: ${{ inputs.filter }}
           INPUT_DOTNET: ${{ inputs.dotnet }}
+          INPUT_RUN_TIMEOUT: ${{ inputs.run_timeout }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           $ErrorActionPreference = 'Stop'
@@ -145,6 +152,16 @@ jobs:
           if (-not $stage)  { $stage = 'census' }
           if (-not $dotnet) { $dotnet = '10.0.x' }
           if ($null -eq $filter) { $filter = '' }
+
+          # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
+          # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
+          # plan by name rather than reaching the runner as a string it would misread.
+          $runTimeout = if ($env:EVENT_NAME -eq 'schedule') { '' } else { "$env:INPUT_RUN_TIMEOUT".Trim() }
+          if (-not $runTimeout) { $runTimeout = '120' }
+          if ($runTimeout -notmatch '^[0-9]+$' -or [int]$runTimeout -lt 1 -or [int]$runTimeout -gt 1800) {
+              throw "run_timeout must be a whole number of seconds from 1 to 1800; got '$runTimeout'."
+          }
+          Write-Host "behavioral run budget: $runTimeout s per program"
 
           $env:INPUT_GOOS = $goos
           $env:INPUT_STAGE = $stage
@@ -239,6 +256,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "stage=$stage" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "filter=$filter" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dotnet=$dotnet" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "run-timeout=$runTimeout" -Encoding utf8
 
   # ---------------------------------------------------------------------------------------------
   # run — one leg per (goos, runner, rid).
@@ -520,7 +538,7 @@ jobs:
           GO2CS_BUILD_TIMEOUT: '5400'
           GO2CS_BUILD_ONE_TIMEOUT: '1800'
           GO2CS_TRANSPILE_TIMEOUT: '300'
-          GO2CS_RUN_TIMEOUT: '120'
+          GO2CS_RUN_TIMEOUT: ${{ needs.plan.outputs.run-timeout }}
           SLICES: '4'
         run: |
           $ErrorActionPreference = 'Continue'
@@ -638,7 +656,7 @@ jobs:
           GO2CS_BUILD_TIMEOUT: '5400'
           GO2CS_BUILD_ONE_TIMEOUT: '1800'
           GO2CS_TRANSPILE_TIMEOUT: '300'
-          GO2CS_RUN_TIMEOUT: '120'
+          GO2CS_RUN_TIMEOUT: ${{ needs.plan.outputs.run-timeout }}
         run: |
           $ErrorActionPreference = 'Continue'
 
@@ -719,7 +737,7 @@ jobs:
           GO2CS_BUILD_TIMEOUT: '5400'
           GO2CS_BUILD_ONE_TIMEOUT: '1800'
           GO2CS_TRANSPILE_TIMEOUT: '300'
-          GO2CS_RUN_TIMEOUT: '120'
+          GO2CS_RUN_TIMEOUT: ${{ needs.plan.outputs.run-timeout }}
         run: |
           $ErrorActionPreference = 'Continue'
 
