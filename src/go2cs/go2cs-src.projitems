@@ -193,6 +193,7 @@
     <None Include="$(MSBuildThisFileDirectory)lineEndingSeams_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameCycleGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameForward_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)linknameForwardDarwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameForwardRegistry_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)linknamePush_test.go" />
