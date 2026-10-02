@@ -71,7 +71,8 @@ public class ConsoleEventLineAtomicityTests
 
         foreach (string line in text.Split('\n'))
         {
-            string trimmed = line.TrimEnd('\r');
+            // A JSON event line opens with Go's framing marker, which the comparer strips (H2, EventLineFramingTests).
+            string trimmed = line.TrimEnd('\r').TrimStart(TestReporter.FramingMarker);
 
             if (!trimmed.Contains("TestLong", StringComparison.Ordinal))
                 continue;
