@@ -359,7 +359,7 @@ public class PanicException(object? state, Exception? innerException = null) :
         if (SiteTrace is not null)
             return;
 
-        SiteTrace = new StackTrace(thrown, fNeedFileInfo: true);
+        SiteTrace = new StackTrace(thrown, fNeedFileInfo: false);
         PanicTrace ??= SiteTrace;
     }
 
