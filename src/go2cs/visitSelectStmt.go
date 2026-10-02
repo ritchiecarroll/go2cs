@@ -35,6 +35,23 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 		}
 	}
 
+	// `select {}` blocks forever. Emit the call as a statement: an empty `switch (select()) {}`
+	// block is CS1522 (net/http/httptest's serve flag).
+	if len(comClauses) == 0 && !hasDefault {
+		v.outputBuilder.WriteString(v.newline)
+		v.writeOutput("select();")
+
+		// It is a terminating statement C# cannot see past, so a value-returning function ending in
+		// it takes the same unreachable trailing return the switch form gets below (CS0161 without
+		// it: net/rpc's `func (WriteFailCodec) ReadResponseHeader(*Response) error { select {} }`).
+		if !v.namedReturnDeferMode && v.currentReturnSignature != nil && v.currentReturnSignature.Results().Len() > 0 {
+			v.outputBuilder.WriteString(v.newline)
+			v.writeOutput("return default!;")
+		}
+
+		return
+	}
+
 	// Ensure default clause is the last clause
 	if hasDefault {
 		comClauses = append(comClauses, defaultClause)

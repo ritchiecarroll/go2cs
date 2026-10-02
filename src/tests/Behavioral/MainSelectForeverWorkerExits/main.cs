@@ -16,8 +16,7 @@ private static readonly object theWorkerServedWhileMainˢ = (@string)"the worker
         fmt.Println(theWorkerServedWhileMainˢ);
         os.Exit(0);
     });
-    switch (select()) {
-}
+    select();
 }
 
 } // end main_package

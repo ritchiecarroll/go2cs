@@ -142,8 +142,7 @@ public static void Start(this ж<Server> Ꮡs) {
     Ꮡs.goServe();
     if (serveFlag != ""u8) {
         fmt.Fprintln(new os.FileжWriter(os.Stderr), httptestServingOnˢ, s.URL);
-        switch (select()) {
-}
+        select();
     }
 }
 

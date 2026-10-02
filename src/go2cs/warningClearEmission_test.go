@@ -109,8 +109,16 @@ func serve(flag bool) {
 	}
 }
 
+func block() error {
+	select {}
+}
+
 func main() {
 	serve(false)
+
+	if false {
+		_ = block()
+	}
 }
 `)
 
@@ -120,5 +128,11 @@ func main() {
 
 	if strings.Contains(mainCs, "switch (select())") {
 		t.Errorf("select {} emitted an empty switch block: %s", mainCs)
+	}
+
+	// A value-returning function ending in `select {}` still needs the unreachable trailing return
+	// (CS0161 otherwise).
+	if want := "    select();\n    return default!;"; !strings.Contains(strings.ReplaceAll(mainCs, "\r\n", "\n"), want) {
+		t.Errorf("select {} ending a value-returning function must keep its trailing return (%q): %s", want, mainCs)
 	}
 }
