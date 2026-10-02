@@ -204,8 +204,13 @@ public static partial class GoReflect
         // precisely the declared receiver. A pointer-receiver method already declares ж<X> and is
         // untouched; an interface method carries no receiver parameter to substitute, which is also
         // Go's rule (interfaceType.Method prepends nothing).
+        //
+        // The receiver compared is the one GO sees: a copy-bound `this ref X` method (see
+        // IsCopyBoundReceiver) is a value-receiver method of X, so its by-ref is read through.
+        golib.TypeExtensions.IsCopyBoundReceiver(method, out Type receiverType);
+
         if (t is not null && parameters.Length > 0 &&
-            KindOf(t) == Pointer && ElementType(t) == parameters[0].ParameterType)
+            KindOf(t) == Pointer && ElementType(t) == receiverType)
         {
             return s_pointerReceiverFuncTypes.GetOrAdd((t, method), static key =>
             {
@@ -215,8 +220,18 @@ public static partial class GoReflect
             });
         }
 
-        return s_methodFuncTypes.GetOrAdd(method, static m => MakeDelegateType(
-            [.. m.GetParameters().Select(static p => p.ParameterType)], m.ReturnType));
+        // A copy-bound receiver presents its VALUE type as argument 0 — Go's func(X, …) — where the
+        // declared `ref X` has no delegate form at all (the reflect walk over a value whose only
+        // shape for a promoted pointer-receiver method is the by-ref forwarder died here).
+        return s_methodFuncTypes.GetOrAdd(method, static m =>
+        {
+            Type[] ins = [.. m.GetParameters().Select(static p => p.ParameterType)];
+
+            if (golib.TypeExtensions.IsCopyBoundReceiver(m, out Type valueReceiver))
+                ins[0] = valueReceiver;
+
+            return MakeDelegateType(ins, m.ReturnType);
+        });
     }
 
     /// <summary>
@@ -242,8 +257,16 @@ public static partial class GoReflect
         // the signature. Compile a thin adapter that dereferences the box and calls through — the
         // same expression-compiled route the bound factories use, and keyed by receiver AND method
         // for the same reason the type cache is.
+        //
+        // A copy-bound `this ref X` method (IsCopyBoundReceiver) is read through to its value
+        // receiver here too, and takes the same adapter with nothing to dereference: argument 0 is
+        // the lambda's own by-value parameter, so the by-ref call lands on a COPY — Go's value
+        // receiver. An expression tree passes a non-addressable argument to a by-ref parameter
+        // through a temporary, which is that same copy for the dereferenced arm.
+        bool copyBound = golib.TypeExtensions.IsCopyBoundReceiver(entry.Method, out Type receiverType);
+
         if (t is not null && parameters.Length > 0 &&
-            KindOf(t) == Pointer && ElementType(t) == parameters[0].ParameterType)
+            KindOf(t) == Pointer && ElementType(t) == receiverType)
         {
             return s_pointerReceiverFuncs.GetOrAdd((t, entry.Method), key =>
             {
@@ -262,12 +285,27 @@ public static partial class GoReflect
                 // need to know which one it was handed.
                 call[0] = Expression.Convert(
                     Expression.Call(read, Expression.Convert(args[0], typeof(object))),
-                    ps[0].ParameterType);
+                    receiverType);
 
                 for (int i = 1; i < ps.Length; i++)
                     call[i] = args[i];
 
                 return Expression.Lambda(funcType, Expression.Call(key.Method, call), args).Compile();
+            });
+        }
+
+        if (copyBound)
+        {
+            return s_methodFuncs.GetOrAdd(entry.Method, m =>
+            {
+                ParameterInfo[] ps = m.GetParameters();
+                ParameterExpression[] args = new ParameterExpression[ps.Length];
+                args[0] = Expression.Parameter(receiverType, "recv");
+
+                for (int i = 1; i < ps.Length; i++)
+                    args[i] = Expression.Parameter(ps[i].ParameterType, ps[i].Name);
+
+                return Expression.Lambda(funcType, Expression.Call(m, args), args).Compile();
             });
         }
 
@@ -346,7 +384,8 @@ public static partial class GoReflect
             entry = MethodAt(staticType, index);
         }
 
-        Type receiverType = entry.Method.GetParameters()[0].ParameterType;
+        // The receiver GO sees: a copy-bound `this ref X` method is a value-receiver method of X.
+        golib.TypeExtensions.IsCopyBoundReceiver(entry.Method, out Type receiverType);
 
         // A value-receiver method reached through *X receives a COPY of the pointee (Go's rule).
         // Fix W: the box test walks the base chain, so a per-kind subclass instance still takes
@@ -507,11 +546,19 @@ public static partial class GoReflect
     private static Func<object?, Delegate> CompileBoundFactory(MethodInfo method)
     {
         ParameterInfo[] parameters = method.GetParameters();
-        Type receiverType = parameters[0].ParameterType;
 
+        // A copy-bound `this ref X` receiver (IsCopyBoundReceiver) binds as the value receiver it is
+        // in Go: the converted receiver below is not addressable, so the expression tree hands the
+        // by-ref parameter a TEMPORARY — a fresh copy per call, which is Go's value-receiver rule.
+        golib.TypeExtensions.IsCopyBoundReceiver(method, out Type receiverType);
+
+        // What is left by-ref is a [GoRecv] POINTER-receiver method with no ж<T> twin beside it. It
+        // has no value to copy from, so it is refused — as a Go PANIC, the form recover() sees. It
+        // was a NotImplementedException, which no Go frame adopts (RuntimeErrorPanic.TryAsPanic), so
+        // a deferred recover() watched it go by and the process died on a managed exception instead.
         if (receiverType.IsByRef)
         {
-            throw new NotImplementedException(
+            throw builtin.panic(
                 $"reflect: method value for '{method.DeclaringType?.Name}.{method.Name}' — the only emitted shape " +
                 "takes its receiver by reference, which a delegate cannot carry (the generated ж<T> overload is absent)");
         }

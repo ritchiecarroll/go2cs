@@ -80,9 +80,22 @@ internal class StrTemplate : TemplateBase
 
     private string ReturnType => Method.ReturnsVoid ? "void" : Method.ReturnType.ToDisplayString(s_typeFormat);
 
+    // The body member's [GoRecv], which the forwarder repeats. It re-declares the same `this ref T`
+    // receiver, and a by-ref receiver WITHOUT [GoRecv] is read at run time as a VALUE-set method
+    // bound through a copy (golib's TypeExtensions.IsCopyBoundReceiver) — so the forwarder of a
+    // pointer-receiver method has to say what it is, exactly as its body member does. RecvGenerator
+    // never sees it (a generator sees no generator output), so the mark mints no ж overload.
+    private string GoRecvMark => Method.GetAttributes().Any(attribute => attribute.AttributeClass is
+    {
+        Name: "GoRecvAttribute",
+        ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true }
+    })
+        ? ", global::go.GoRecv"
+        : "";
+
     private string ForwarderAttributes => NoInlining
-        ? $"[{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining), global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]"
-        : $"[{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]";
+        ? $"[{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining), global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1){GoRecvMark}]"
+        : $"[{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1){GoRecvMark}]";
 
     // A delegate TYPE ARGUMENT: a tuple loses its element names, which delegate identity ignores, so
     // the field's type reads as the converter's rendering of the same Go func type at every value site.

@@ -95,6 +95,13 @@ public class RecvGenerator : ISourceGenerator
                 if (method.Parameters.Length == 0 || !method.IsRefRecv)
                     continue;
 
+                // A HAND-WRITTEN twin already stands where this overload would go — the hand-owned
+                // testing.T/B/F logging methods, whose `params` tail needs a twin written by hand —
+                // so emitting one here is a duplicate member (CS0111). [GoRecv] on such a method
+                // states only what it is, a pointer-receiver method, for the run-time method set.
+                if (HasDeclaredPointerTwin(semanticModel, methodSyntax))
+                    continue;
+
                 // A null symbol (no semantic info for this declaration) falls back to the name rule,
                 // which is exactly the behaviour this read replaces — never a widening by default.
                 string receiverSimpleName = GetSimpleName(method.Parameters[0].type);
@@ -120,6 +127,38 @@ public class RecvGenerator : ISourceGenerator
                 context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{method.Parameters[0].type}.g.cs")), generatedSource);
             }
         }
+    }
+
+    // Whether the method's own class DECLARES its pointer twin: a same-named method whose receiver is
+    // `ж<T>` over this method's `ref T` receiver and whose remaining parameters match. Only a twin
+    // written in source can be seen here — a generator never sees generator output — so converted
+    // code, which declares none, is unaffected.
+    private static bool HasDeclaredPointerTwin(SemanticModel semanticModel, MethodDeclarationSyntax methodSyntax)
+    {
+        if (semanticModel.GetDeclaredSymbol(methodSyntax) is not IMethodSymbol { Parameters.Length: > 0, ContainingType: not null } method)
+            return false;
+
+        ITypeSymbol receiver = method.Parameters[0].Type;
+
+        foreach (ISymbol member in method.ContainingType.GetMembers(method.Name))
+        {
+            if (member is not IMethodSymbol sibling || sibling.Parameters.Length != method.Parameters.Length)
+                continue;
+
+            if (sibling.Parameters[0].Type is not INamedTypeSymbol { Name: PointerPrefix, TypeArguments.Length: 1 } box ||
+                !SymbolEqualityComparer.Default.Equals(box.TypeArguments[0], receiver))
+                continue;
+
+            bool sameTail = true;
+
+            for (int i = 1; i < method.Parameters.Length && sameTail; i++)
+                sameTail = SymbolEqualityComparer.Default.Equals(sibling.Parameters[i].Type, method.Parameters[i].Type);
+
+            if (sameTail)
+                return true;
+        }
+
+        return false;
     }
 
     private static string? GetOverloadResolutionPriority(MethodDeclarationSyntax methodSyntax)

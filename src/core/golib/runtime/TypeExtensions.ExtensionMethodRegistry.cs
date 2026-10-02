@@ -358,6 +358,19 @@ public static partial class TypeExtensions
 
         try
         {
+            // A copy-bound `this ref X` method (IsCopyBoundReceiver) asked for as a BY-VALUE delegate
+            // — the generated interface shell's `…ByVal(X target, …)`. No delegate can be created
+            // over the by-ref method itself, so a thin lambda takes the receiver by value and calls
+            // through: the by-ref parameter gets the lambda's own parameter, which is the copy.
+            if (IsCopyBoundReceiver(methodInfo, out Type valueReceiver) && !methodInfo.IsGenericMethod &&
+                delegateType.GetMethod(nameof(Action.Invoke))?.GetParameters() is { Length: > 0 } invokeParameters &&
+                invokeParameters[0].ParameterType == valueReceiver)
+            {
+                ParameterExpression[] arguments = [.. invokeParameters.Select(static (p, i) => Expression.Parameter(p.ParameterType, p.Name ?? $"arg{i}"))];
+
+                return Expression.Lambda(delegateType, Expression.Call(methodInfo, arguments), arguments).Compile();
+            }
+
             if (!delegateType.IsGenericType || !methodInfo.IsGenericMethod)
                 return Delegate.CreateDelegate(delegateType, methodInfo);
 
