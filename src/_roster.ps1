@@ -122,8 +122,9 @@ $RosterOsNaPattern =
 # frames out of inlining and golib classified goroutines by start function (two rows carry it now).
 # internal/godebug dropped it 2026-10-02, once the runtime resolved a caller frame at the call it is
 # suspended in (Go's pc-1). ONE row carries it now, log/slog, for a different reason: TestSetDefault's
-# 1 s deadline against first-call full-opt JIT latency on a slow box -- a timing dependence, which is
-# exactly what the annotation guards, not a line-attribution one.
+# 1 s deadline against symbol-file reads at the first source-line resolution on a busy disk (measured
+# 2026-10-02: the wait is I/O, not JIT, and ReadyToRun does not remove it; runtime.Callers symbolizes at
+# capture) -- a timing dependence, which is exactly what the annotation guards, not a line-attribution one.
 # 'release-tc0' is RETAINED though the flip makes it redundant: it still names
 # exactly what it always named, and a row that opted in deliberately should keep saying so.
 $RosterExecutionValues = @('release-tc0', 'release-tiered')

@@ -8,6 +8,7 @@ using goarch = go.@internal.goarch_package;
 using unsafeheader = go.@internal.unsafeheader_package;
 using Δruntime = runtime_package;
 using @unsafe = unsafe_package;
+using System.Runtime.CompilerServices;
 using go.@internal;
 
 partial class reflectlite_package {
@@ -166,7 +167,7 @@ internal static any packEface(Value v) {
 
 // mustBeExported panics if f records that the value was obtained using
 // an unexported field.
-internal static void mustBeExported(this flag f) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void mustBeExported(this flag f) {
     if (f == 0) {
         throw panic(Ꮡ(new ValueError(methodName(), 0)));
     }
@@ -178,7 +179,7 @@ internal static void mustBeExported(this flag f) {
 // mustBeAssignable panics if f records that the value is not assignable,
 // which is to say that either it was obtained using an unexported field
 // or it is not addressable.
-internal static void mustBeAssignable(this flag f) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void mustBeAssignable(this flag f) {
     if (f == 0) {
         throw panic(Ꮡ(new ValueError(methodName(), abi.Invalid)));
     }

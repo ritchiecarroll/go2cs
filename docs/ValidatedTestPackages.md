@@ -525,8 +525,15 @@ The classes in full:
   local live, and the tier-0 A/B (2026-08-30) showed that part disappears under a Release publish
   with `DOTNET_TieredCompilation=0`. That configuration has been the default since 2026-09-02, so
   the class holds what remains under it and no row carries `execution: release-tc0` (`internal/weak`
-  was the first to need it, at 4/4). Three rows opt back out: their PC or line-attribution asserts
-  need tiering, so they carry `execution: release-tiered`.
+  was the first to need it, at 4/4). One row opts back out, `log/slog`: with tiering off, the
+  one-second deadline in its `TestSetDefault` is exposed to a timing dependence in how the runtime
+  resolves caller frames, so it carries `execution: release-tiered`.
+  <!-- Provenance, TRAIN M 2026-10-02: until this date the sentence read "Three rows opt back out: their
+       PC or line-attribution asserts need tiering, so they carry `execution: release-tiered`." net/http
+       and internal/godebug dropped the annotation in TRAIN M (the constant skip window, goroutine
+       classification by start function, and the caller frame resolved at its own call). log/slog's
+       dependence was measured on the coordinator box as symbol-file reads at the first source-line
+       resolution on a busy disk (runtime.Callers symbolizes at capture), not first-call JIT latency. -->
   <!-- Provenance, roster restructure 2026-09-30: the flip and the per-row annotations are recorded
        in src/_roster.ps1 (the per-row EXECUTION annotation comment: release-tiered joined 2026-09-02
        with the Release + tiering-off default, for internal/godebug TestCmdBisect, log/slog

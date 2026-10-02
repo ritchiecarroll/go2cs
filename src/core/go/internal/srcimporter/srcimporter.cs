@@ -181,7 +181,7 @@ public static (ж<types.Package>, error) ImportFrom(this ж<Importer> Ꮡp, @str
     // use build.Context's OpenFile if there is one
     var open = p.ctxt.Value.OpenFile;
     if (open == default!) {
-        open = (@string name) => {
+        open = (io.ReadCloser, error) (@string name) => {
             var (ᴛ1, ᴛ2) = os.Open(name);
             return (new os_FileжReadCloser(ᴛ1), ᴛ2);
         };

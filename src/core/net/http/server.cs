@@ -2970,7 +2970,7 @@ public static void ServeHTTP(this ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Requ
 // Handle registers the handler for the given pattern.
 // If the given pattern conflicts, with one that is already registered, Handle
 // panics.
-public static void Handle(this ж<ServeMux> Ꮡmux, @string pattern, ΔHandler handler) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void Handle(this ж<ServeMux> Ꮡmux, @string pattern, ΔHandler handler) {
     if (use121){
         Ꮡmux.of(ServeMux.Ꮡmux121).handle(pattern, handler);
     } else {
@@ -2981,7 +2981,7 @@ public static void Handle(this ж<ServeMux> Ꮡmux, @string pattern, ΔHandler h
 // HandleFunc registers the handler function for the given pattern.
 // If the given pattern conflicts, with one that is already registered, HandleFunc
 // panics.
-public static void HandleFunc(this ж<ServeMux> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void HandleFunc(this ж<ServeMux> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
     if (use121){
         Ꮡmux.of(ServeMux.Ꮡmux121).handleFunc(pattern, handler);
     } else {
@@ -2991,7 +2991,7 @@ public static void HandleFunc(this ж<ServeMux> Ꮡmux, @string pattern, Action<
 
 // Handle registers the handler for the given pattern in [DefaultServeMux].
 // The documentation for [ServeMux] explains how patterns are matched.
-public static void Handle(@string pattern, ΔHandler handler) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void Handle(@string pattern, ΔHandler handler) {
     if (use121){
         DefaultServeMux.of(ServeMux.Ꮡmux121).handle(pattern, handler);
     } else {
@@ -3001,7 +3001,7 @@ public static void Handle(@string pattern, ΔHandler handler) {
 
 // HandleFunc registers the handler function for the given pattern in [DefaultServeMux].
 // The documentation for [ServeMux] explains how patterns are matched.
-public static void HandleFunc(@string pattern, Action<ResponseWriter, ж<Request>> handler) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void HandleFunc(@string pattern, Action<ResponseWriter, ж<Request>> handler) {
     if (use121){
         DefaultServeMux.of(ServeMux.Ꮡmux121).handleFunc(pattern, handler);
     } else {
@@ -3009,7 +3009,7 @@ public static void HandleFunc(@string pattern, Action<ResponseWriter, ж<Request
     }
 }
 
-internal static void register(this ж<ServeMux> Ꮡmux, @string pattern, ΔHandler handler) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void register(this ж<ServeMux> Ꮡmux, @string pattern, ΔHandler handler) {
     {
         var err = Ꮡmux.registerErr(pattern, handler); if (err != default!) {
             throw panic(err);
