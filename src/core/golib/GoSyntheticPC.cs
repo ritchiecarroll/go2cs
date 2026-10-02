@@ -53,8 +53,6 @@ public static class GoSyntheticPC
     // the function's own span; small enough that the 64-bit space holds 2^35 of them.
     private const int StrideShift = 12;
 
-    private static readonly nuint s_stride = (nuint)1 << StrideShift;
-
     // The canonical high half — unmapped in user mode on x86-64 (kernel half) and arm64 (TTBR1).
     //
     // 64-BIT ONLY, AND THE 32-BIT ARM THROWS RATHER THAN NARROWING. An earlier draft used the top

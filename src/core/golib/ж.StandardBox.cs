@@ -39,7 +39,7 @@ public class StandardBox<T> : ж<T>
 {
     // A managed T lives here (reference-containing layouts cannot be pinned, and no syscall can
     // meaningfully take their address, so no slot exists for them).
-    private T m_val;
+    private T m_val = default!;
 
     // PINNABLE storage for an unmanaged T — the ONE authority for the value when it exists (never
     // a mirror of m_val). See the storage doctrine in the class remarks.
