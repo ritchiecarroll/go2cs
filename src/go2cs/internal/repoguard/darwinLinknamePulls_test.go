@@ -32,9 +32,10 @@ import (
 // sysctl, internal/poll's fdopendir and internal/syscall/unix's unlinkat -- and the darwin flavor at
 // 172d437e66 held 24 such pulls, 14 filled by a companion and 10 with nothing behind them.
 //
-// So this census holds the class: every UNFILLED darwin linkname pull must be declared dormant below,
-// with the reason it is never reached. A new unfilled pull fails by name; a declared one that has
-// since been filled is logged for sweeping. It reads the TRACKED tree (git ls-files) and the files on
+// So this census holds the class: every UNFILLED darwin linkname pull must be declared, either DORMANT
+// (with the reason it is never reached) or OPEN (a live death with the seat that owns its fix). A new
+// unfilled pull fails by name; a dormant one since filled is logged for sweeping, and an open one since
+// filled fails until its seat removes the row. It reads the TRACKED tree (git ls-files) and the files on
 // disk, like nativeCallGateDarwin_test.go.
 //
 // POSITIVE CONTROL: TestDarwinLinknamePullScannerFires drives the same scanner over a synthetic
@@ -59,6 +60,48 @@ var declaredDormantDarwinPulls = map[string]string{
 	// in the conversion. The pull's only caller is gone, so a forward would route nowhere live -- and to
 	// the very struct-passing seam the companion exists to avoid.
 	"os.readdir_r": "its only caller, readdir, is hand-owned in dir_darwin_impl.cs and calls libc directly",
+}
+
+// declaredOpenDarwinPulls maps "<package>.<name>" to an unfilled pull that IS reached -- a known live
+// death with a named seat that owns its fix. It is not the dormant map, which states a pull is never
+// reached; a live pull declared there would be a lie the census then repeats every run. Each row is
+// printed every run, a row without an owner seat fails, and a row whose pull has since been filled fails
+// until the owning seat's acceptance removes it.
+var declaredOpenDarwinPulls = map[string]openDarwinPull{
+	// S7 (2026-10-02) could not forward it: its target `sysctl(mib []_C_int, ...)` names syscall's
+	// unexported `type _C_int int32`, so the widened public target is CS0051 in syscall's own build
+	// (src/go2cs TestLinknameForwardTargetsExposeNoUnexportedTypes refuses the row).
+	"vendor/golang.org/x/net/route.sysctl": {
+		owner:  "S7b",
+		caller: "IpAdapterAddresses (net.Interfaces -> route.FetchRIB -> sysctl)",
+		fix:    "a hand companion in route's darwin folder over libc sysctl(3), mib copied into a native int32 block",
+	},
+}
+
+// openDarwinPull is one declared-open row: the seat that owns the fix, the live caller it kills, and the fix.
+type openDarwinPull struct {
+	owner  string
+	caller string
+	fix    string
+}
+
+// openDarwinPullProblems reports each declared-open row that names no owner seat or no live caller.
+func openDarwinPullProblems(open map[string]openDarwinPull) []string {
+	var problems []string
+
+	for key, row := range open {
+		if strings.TrimSpace(row.owner) == "" {
+			problems = append(problems, key+": no owner seat -- an open pull nobody owns is a dormant declaration in disguise")
+		}
+
+		if strings.TrimSpace(row.caller) == "" {
+			problems = append(problems, key+": no live caller -- if nothing reaches it, it belongs in declaredDormantDarwinPulls with that reason")
+		}
+	}
+
+	sort.Strings(problems)
+
+	return problems
 }
 
 // darwinPull is one bodyless darwin declaration carrying a //go:linkname pull.
@@ -223,15 +266,30 @@ func TestDarwinLinknamePullsAreFilledOrDeclared(t *testing.T) {
 		t.Fatalf("VACUOUS: %d darwin linkname pulls found; the scan is measuring nothing", len(all))
 	}
 
-	t.Logf("darwin linkname pulls %d · filled %d · unfilled %d · declared dormant %d",
-		len(all), len(all)-len(unfilled), len(unfilled), len(declaredDormantDarwinPulls))
+	t.Logf("darwin linkname pulls %d · filled %d · unfilled %d · declared dormant %d · declared open %d",
+		len(all), len(all)-len(unfilled), len(unfilled), len(declaredDormantDarwinPulls), len(declaredOpenDarwinPulls))
+
+	for _, problem := range openDarwinPullProblems(declaredOpenDarwinPulls) {
+		t.Errorf("declaredOpenDarwinPulls: %s", problem)
+	}
 
 	measured := map[string]bool{}
 
 	for _, pull := range unfilled {
 		measured[pull.key] = true
+		_, dormant := declaredDormantDarwinPulls[pull.key]
+		open, isOpen := declaredOpenDarwinPulls[pull.key]
 
-		if _, dormant := declaredDormantDarwinPulls[pull.key]; !dormant {
+		if dormant && isOpen {
+			t.Errorf("%s is declared BOTH dormant and open: it is either reached or it is not", pull.key)
+		}
+
+		if isOpen {
+			t.Logf("OPEN (live, owned by %s): %s -> %s, reached by %s; fix: %s", open.owner, pull.key, pull.target, open.caller, open.fix)
+			continue
+		}
+
+		if !dormant {
 			t.Errorf("UNFILLED DARWIN LINKNAME PULL: %s -> %s (%s)\n"+
 				"nothing supplies its body, so it throws at first use. Give it one: a linknameForwardTargets row when the "+
 				"target is ordinary converted Go authorized by a one-arg handle in its package, or a companion "+
@@ -244,6 +302,30 @@ func TestDarwinLinknamePullsAreFilledOrDeclared(t *testing.T) {
 		if !measured[key] {
 			t.Logf("DECLARED DORMANT BUT NO LONGER UNFILLED, SWEEP IT: %s", key)
 		}
+	}
+
+	for key, open := range declaredOpenDarwinPulls {
+		if !measured[key] {
+			t.Errorf("DECLARED OPEN BUT NO LONGER UNFILLED: %s -- something now fills it, so %s's acceptance removes this row", key, open.owner)
+		}
+	}
+}
+
+// TestOpenDarwinPullProblemsFires is the owner guard's positive control: a row with no owner seat and a
+// row with no live caller are each refused, and a complete row is not.
+func TestOpenDarwinPullProblemsFires(t *testing.T) {
+	problems := openDarwinPullProblems(map[string]openDarwinPull{
+		"pkg.noOwner":  {caller: "Some program"},
+		"pkg.noCaller": {owner: "S9"},
+		"pkg.complete": {owner: "S9", caller: "Some program", fix: "a companion"},
+	})
+
+	if len(problems) != 2 || !strings.HasPrefix(problems[0], "pkg.noCaller: no live caller") || !strings.HasPrefix(problems[1], "pkg.noOwner: no owner seat") {
+		t.Fatalf("openDarwinPullProblems = %q; want exactly the noCaller and noOwner refusals", problems)
+	}
+
+	if len(openDarwinPullProblems(declaredOpenDarwinPulls)) != 0 {
+		t.Fatalf("the real declaredOpenDarwinPulls has problems: %q", openDarwinPullProblems(declaredOpenDarwinPulls))
 	}
 }
 

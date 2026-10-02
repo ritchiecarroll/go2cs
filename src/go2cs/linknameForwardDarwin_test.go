@@ -19,12 +19,14 @@ import (
 	"testing"
 )
 
-// TestDarwinSyscallPullsForward guards the eight darwin //go:linkname pulls of syscall that had nothing
+// TestDarwinSyscallPullsForward guards the seven darwin //go:linkname pulls of syscall that had nothing
 // behind them until S7 (2026-10-02). Each is a bodyless declaration in a darwin-built file whose
 // directive names an ORDINARY CONVERTED Go function in syscall that syscall authorizes with a one-arg
 // handle (linkname_darwin.go, linkname_bsd.go, linkname_libc.go). Without a linknameForwardTargets row
 // the converter emitted each as a bodyless partial that PartialStubGenerator filled with a throw, and the
-// 1.24.13 darwin re-baseline (run 36947612442) lost three projects on both mac legs to three of them.
+// 1.24.13 darwin re-baseline (run 36947612442) lost two projects on both mac legs to two of them. The
+// class's eighth pull, route's sysctl, cannot be a row (its target names an unexported type; see the
+// registry's comment) and is S7b's hand companion.
 //
 // The test reads each pull from GOROOT, from the exact file Go declares it in, and drives the converter's
 // own recognizer (funcLinknameForward) over that declaration: the pull must resolve to a forwarder calling
@@ -50,7 +52,6 @@ func TestDarwinSyscallPullsForward(t *testing.T) {
 		{"internal/syscall/unix/at_libc2.go", "fstatat", "syscall.fstatat"},
 		{"internal/syscall/unix/tcsetpgrp_bsd.go", "ioctlPtr", "syscall.ioctlPtr"},
 		{"os/dir_darwin.go", "closedir", "syscall.closedir"},
-		{"vendor/golang.org/x/net/route/syscall.go", "sysctl", "syscall.sysctl"},
 	}
 
 	for _, pull := range pulls {

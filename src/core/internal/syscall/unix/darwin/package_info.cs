@@ -60,7 +60,7 @@ using static go.@internal.syscall.unix_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/syscall/unix/arc4random_darwin.go", "arc4random_darwin.cs", "AAwcpqSClA==")]
 [assembly: go.GoPositionMap("internal/syscall/unix/at_darwin.go", "at_darwin.cs", "AA0emJKCgpSCgpSU7oKUppiSgoKUuIKU")]
-[assembly: go.GoPositionMap("internal/syscall/unix/at_libc2.go", "at_libc2.cs", "AAscgqaCpoKopqY=")]
+[assembly: go.GoPositionMap("internal/syscall/unix/at_libc2.go", "at_libc2.cs", "AAscgqaCpoKoxtY=")]
 [assembly: go.GoPositionMap("internal/syscall/unix/eaccess.go", "eaccess.cs", "AAscgtyU")]
 [assembly: go.GoPositionMap("internal/syscall/unix/faccessat_darwin.go", "faccessat_darwin.cs", "AAwamJKCgpSCgpQ=")]
 [assembly: go.GoPositionMap("internal/syscall/unix/fcntl_unix.go", "fcntl_unix.cs", "AAsi9IKCgpQ=")]
@@ -69,7 +69,7 @@ using static go.@internal.syscall.unix_package;
 [assembly: go.GoPositionMap("internal/syscall/unix/net_darwin.go", "net_darwin.cs", "ACRYAAYkAAQSpIIACRSCgpSopIKmqKSCqKampqbupIKmgpSopILMpILugpQ=")]
 [assembly: go.GoPositionMap("internal/syscall/unix/nonblocking_unix.go", "nonblocking_unix.cs", "AAoWgoKClKaC")]
 [assembly: go.GoPositionMap("internal/syscall/unix/pty_darwin.go", "pty_darwin.cs", "AAwapIKCgpSopIKCgpSopIKCyoKUgoKCpqikgoKClA==")]
-[assembly: go.GoPositionMap("internal/syscall/unix/tcsetpgrp_bsd.go", "tcsetpgrp_bsd.cs", "AAseqsI=")]
+[assembly: go.GoPositionMap("internal/syscall/unix/tcsetpgrp_bsd.go", "tcsetpgrp_bsd.cs", "AAseysI=")]
 [assembly: go.GoPositionMap("internal/syscall/unix/user_darwin.go", "user_darwin.cs", "AAwcpIKmgpQAGToABB4ABB4ABB4ABB6kgpSClA==")]
 // </GoSourcePositionMaps>
 
