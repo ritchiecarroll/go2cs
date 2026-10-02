@@ -837,10 +837,20 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 				sliceType = "sslice"
 			}
 
+			// The NAMES come from the signature the literal DECLARES (getSignature, the same source
+			// convFuncType emitted the parameter list from), not from the raw types.Var: a parameter
+			// that shadows an enclosing local is renamed there (`args`→`argsΔ1`, declared as
+			// `params … argsΔ1ʗp`) and the body reads the renamed local, so a prologue built from the
+			// raw name declared `var args = argsʗp.slice();` against neither (CS0103, x/mod's
+			// modfile: `errorf := func(format string, args ...any)` inside a method with an `args`
+			// parameter). The raw param still keys ssliceEligible and supplies the element type.
+			declared := v.getSignature(funcLit.Type).Params()
+			named := declared.At(declared.Len() - 1)
+
 			if v.options.preferVarDecl {
-				prologue = fmt.Sprintf("%s%svar %s = %s.%s();", v.newline, v.indent(bodyIndent), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)
+				prologue = fmt.Sprintf("%s%svar %s = %s.%s();", v.newline, v.indent(bodyIndent), getSanitizedIdentifier(named.Name()), getVariadicParamName(named), sliceMethod)
 			} else {
-				prologue = fmt.Sprintf("%s%s%s<%s> %s = %s.%s();", v.newline, v.indent(bodyIndent), sliceType, v.getCSharpTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)
+				prologue = fmt.Sprintf("%s%s%s<%s> %s = %s.%s();", v.newline, v.indent(bodyIndent), sliceType, v.getCSharpTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(named.Name()), getVariadicParamName(named), sliceMethod)
 			}
 
 			body = "{" + prologue + strings.TrimPrefix(trimmedBody, "{")
