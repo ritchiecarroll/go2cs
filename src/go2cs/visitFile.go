@@ -27,6 +27,34 @@ const UsingsMarker = ">>MARKER:USINGS<<"
 // ALL of a package's import hooks precede ALL of its own `init` functions, deterministically —
 // where this marker could only order a hook ahead of the inits of its own file.
 
+// systemNamespaceTypes is, for each .NET namespace the converter imports on demand, exactly the
+// types the emission that demands it names: `[MethodImpl(MethodImplOptions.NoInlining)]`
+// (noInliningPrefix) and `[StructLayout(LayoutKind.Explicit, …)]` / `[FieldOffset(n)]`
+// (zeroSizeFieldLayout). A new emission that names another type of either namespace adds it here.
+var systemNamespaceTypes = map[string][]string{
+	"System.Runtime.CompilerServices": {"MethodImplAttribute", "MethodImplOptions"},
+	"System.Runtime.InteropServices":  {"FieldOffsetAttribute", "LayoutKind", "StructLayoutAttribute"},
+}
+
+// importsStaticMembers reports whether this file resolves bare Go names through a `using static`:
+// its own Go dot-import, the production or bridge class a test file imports, or the `global using
+// static` every converted test project carries for the package under test.
+func (v *Visitor) importsStaticMembers(requiredUsings []string) bool {
+	if v.options.testClassNameOverride != "" {
+		return true
+	}
+
+	for _, requiredUsing := range requiredUsings {
+		if strings.HasPrefix(requiredUsing, "static ") {
+			return true
+		}
+	}
+
+	imports := v.packageImports.String()
+
+	return strings.HasPrefix(imports, "using static ") || strings.Contains(imports, "\nusing static ")
+}
+
 func (v *Visitor) Visit(node ast.Node) ast.Visitor {
 	if node != nil {
 		if commentGroup, ok := node.(*ast.CommentGroup); ok {
@@ -195,7 +223,22 @@ func (v *Visitor) visitFile(file *ast.File) {
 	requiredUsings := v.requiredUsings.Keys()
 	sort.Strings(requiredUsings)
 
+	importsStaticMembers := v.importsStaticMembers(requiredUsings)
+
 	for _, requiredUsing := range requiredUsings {
+		// A file that reaches Go names BARE through a `using static` cannot also import a whole .NET
+		// namespace: the two imports sit at one level, so a Go name the namespace happens to declare
+		// as a type is CS0229 (go/types' `Unsafe` against System.Runtime.CompilerServices.Unsafe).
+		// An alias directive outranks both, so such a file binds exactly the types its emission
+		// names and the emitted attribute text is unchanged.
+		if typeNames, ok := systemNamespaceTypes[requiredUsing]; ok && importsStaticMembers {
+			for _, typeName := range typeNames {
+				v.packageImports.WriteString(fmt.Sprintf("using %s = global::%s.%s;%s", typeName, requiredUsing, typeName, v.newline))
+			}
+
+			continue
+		}
+
 		v.packageImports.WriteString(fmt.Sprintf("using %s;%s", requiredUsing, v.newline))
 	}
 

@@ -157,4 +157,14 @@ func TestAFileWithAUsingStaticImportsNoDotNetNamespace(t *testing.T) {
 			t.Errorf("main.cs holds no using static and must not move to aliases: %s", alias)
 		}
 	}
+
+	// Every type name the alias table can bind is one the emission really names -- a table entry
+	// nothing emits would be an unused alias in every such file.
+	for namespace, typeNames := range systemNamespaceTypes {
+		for _, typeName := range typeNames {
+			if used := strings.TrimSuffix(typeName, "Attribute"); !strings.Contains(dotted, "["+used+"(") && !strings.Contains(dotted, used+".") {
+				t.Errorf("%s.%s is aliased but nothing in the fixture's emission names it", namespace, typeName)
+			}
+		}
+	}
 }
