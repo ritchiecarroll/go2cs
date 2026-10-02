@@ -393,7 +393,18 @@ gt(){ # cfg, tag, extra dotnet-test args...   (K verbatim)
   # verify round 2: 0 failed is the expectation of every GolibTests run in the brief; no result line is not a pass
   gtfl=$(grep -aE '^\s+Failed [A-Za-z]' "$L" | sed 's/^ *Failed //' | cut -d' ' -f1 | tr '\n' ' ')
   [ -z "$gtfl" ] || mover "GT-$cfg-$tag failed: $(echo "$gtfl" | cut -c1-300)"
-  grep -aE '(Passed|Failed)!' "$L" | tail -n 1 | tr -s ' ' | grep -qE 'Failed: 0,' || mover "GT-$cfg-$tag: no 'Failed: 0' result line ($(grep -aE '(Passed|Failed)!' "$L" | tail -n 1 | tr -s ' ' | cut -c1-120))"
+  # 2026-10-02 (P1 and P2, TRAIN M run 1): the linux console logger prints "Test Run Successful." / "Total tests: N" /
+  # "Passed: N" and NO "Failed:" line when nothing fails, so the 'Failed: 0,' grep of the MSBuild summary format raised
+  # a MOVER on three clean runs (the same defect was noted at TRAIN K). A result line is EITHER format; no result line
+  # in either format, or a failed count above 0, stays a MOVER.
+  gtres=$(grep -aE '(Passed|Failed)!' "$L" | tail -n 1 | tr -s ' ')
+  if [ -n "$gtres" ]; then
+    echo "$gtres" | grep -qE 'Failed: 0,' || mover "GT-$cfg-$tag: the result line does not read 'Failed: 0' ($(echo "$gtres" | cut -c1-120))"
+  elif grep -aqE '^Test Run Successful\.' "$L" && grep -aqE '^Total tests: [0-9]+' "$L" && ! grep -aqE '^[[:space:]]+Failed: [1-9]' "$L"; then
+    stamp "      result (vstest console format): $(grep -aE '^(Total tests|[[:space:]]+(Passed|Skipped|Failed)): ' "$L" | tr -s ' ' | tr '\r\n' '  ' | cut -c1-120)"
+  else
+    mover "GT-$cfg-$tag: no passing result line in either console format ($(grep -aE 'Test Run (Successful|Failed)|Total tests|^[[:space:]]+Failed: ' "$L" | tail -n 3 | tr -s ' ' | tr '\r\n' '  ' | cut -c1-120))"
+  fi
   crashbanner "$L" && stamp "      HANG/ABORT/CRASH text present in the log: read it"
 }
 crashbanner(){ # log -> rc 0 when the host's abort/crash/hang banner is present   (TEMPLATE FIX 3)
