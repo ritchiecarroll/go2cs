@@ -1105,6 +1105,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedArrayPointerConversion() => CheckTarget("NamedArrayPointerConversion");
 
     [TestMethod]
+    public void CheckNamedArrayVsUnnamedCompare() => CheckTarget("NamedArrayVsUnnamedCompare");
+
+    [TestMethod]
     public void CheckNamedArrayWrapper() => CheckTarget("NamedArrayWrapper");
 
     [TestMethod]

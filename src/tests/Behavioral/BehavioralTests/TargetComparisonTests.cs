@@ -1108,6 +1108,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedArrayPointerConversion() => CheckTarget("NamedArrayPointerConversion");
 
     [TestMethod]
+    public void CheckNamedArrayVsUnnamedCompare() => CheckTarget("NamedArrayVsUnnamedCompare");
+
+    [TestMethod]
     public void CheckNamedArrayWrapper() => CheckTarget("NamedArrayWrapper");
 
     [TestMethod]
