@@ -1376,34 +1376,23 @@ public static partial class GoReflect
     // ValueTuple the converter already returns from a multi-result func.
     private static Type makeGoResultType(Type[] outs)
     {
-        switch (outs.Length)
+        // Each definition is named by `typeof` AT its MakeGenericType call: the trim analyzer can
+        // then see that no ValueTuple type parameter carries a member requirement, which it cannot
+        // when the definition arrives through a helper's return value (IL2055).
+        return outs.Length switch
         {
-            case 0:
-                return typeof(void);
-            case 1:
-                return outs[0];
-        }
+            0 => typeof(void),
+            1 => outs[0],
+            2 => typeof(ValueTuple<,>).MakeGenericType(outs),
+            3 => typeof(ValueTuple<,,>).MakeGenericType(outs),
+            4 => typeof(ValueTuple<,,,>).MakeGenericType(outs),
+            5 => typeof(ValueTuple<,,,,>).MakeGenericType(outs),
+            6 => typeof(ValueTuple<,,,,,>).MakeGenericType(outs),
+            7 => typeof(ValueTuple<,,,,,,>).MakeGenericType(outs),
 
-        if (outs.Length <= 7)
-            return valueTupleDefinition(outs.Length).MakeGenericType(outs);
-
-        // Past seven the eighth argument is TRest and holds the remainder — the chain
-        // FlattenValueTuple walks, built here in the same shape.
-        return valueTupleDefinition(8).MakeGenericType([.. outs[..7], makeGoResultType(outs[7..])]);
-    }
-
-    private static Type valueTupleDefinition(int arity)
-    {
-        return arity switch
-        {
-            2 => typeof(ValueTuple<,>),
-            3 => typeof(ValueTuple<,,>),
-            4 => typeof(ValueTuple<,,,>),
-            5 => typeof(ValueTuple<,,,,>),
-            6 => typeof(ValueTuple<,,,,,>),
-            7 => typeof(ValueTuple<,,,,,,>),
-            8 => typeof(ValueTuple<,,,,,,,>),
-            _ => throw new ArgumentOutOfRangeException(nameof(arity))
+            // Past seven the eighth argument is TRest and holds the remainder — the chain
+            // FlattenValueTuple walks, built here in the same shape.
+            _ => typeof(ValueTuple<,,,,,,,>).MakeGenericType([.. outs[..7], makeGoResultType(outs[7..])])
         };
     }
 

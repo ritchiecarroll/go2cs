@@ -53,8 +53,11 @@ public static partial class builtin
     // sign-extend, unsigned kinds zero-extend - exactly Go integer conversion semantics.
     public static T ConvertToType<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.NonPublicConstructors |
         DynamicallyAccessedMemberTypes.PublicProperties |
-        DynamicallyAccessedMemberTypes.PublicFields
+        DynamicallyAccessedMemberTypes.NonPublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(ulong value) where T : new()
     {
         if (typeof(T) == typeof(nint)) return (T)(object)unchecked((nint)value);
@@ -74,14 +77,20 @@ public static partial class builtin
 
     public static T ConvertToType<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.NonPublicConstructors |
         DynamicallyAccessedMemberTypes.PublicProperties |
-        DynamicallyAccessedMemberTypes.PublicFields
+        DynamicallyAccessedMemberTypes.NonPublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(long value) where T : new() => ConvertToType<T>(unchecked((ulong)value));
 
     public static ulong ConvertToUInt64<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.NonPublicConstructors |
         DynamicallyAccessedMemberTypes.PublicProperties |
-        DynamicallyAccessedMemberTypes.PublicFields
+        DynamicallyAccessedMemberTypes.NonPublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(T value) where T : new()
     {
         if (typeof(T) == typeof(nint)) return unchecked((ulong)(nint)(object)value!);
