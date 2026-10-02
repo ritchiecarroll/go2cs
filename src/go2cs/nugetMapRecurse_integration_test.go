@@ -72,23 +72,30 @@ func TestRecurseNuGetMapHook(t *testing.T) {
 		}
 	}
 
-	dormantRoot := filepath.Join(root, "out-dormant")
-	convert(dormantRoot, nugetMapOptions{})
+	offRoot := filepath.Join(root, "out-off")
+	convert(offRoot, nugetMapOptions{off: true})
 
 	if n := f.count("/registry"); n != 0 {
-		t.Errorf("a -recurse=nuget run with no -nuget-map flag requested the registry %d times; want 0 (dormant until S3b)", n)
+		t.Errorf("a -recurse=nuget run with -nuget-map off requested the registry %d times; want 0", n)
 	}
 
-	if _, err := os.Stat(nugetLockPath(dormantRoot)); !os.IsNotExist(err) {
-		t.Errorf("a -recurse=nuget run with no -nuget-map flag wrote %s", nugetLockFileName)
+	if _, err := os.Stat(nugetLockPath(offRoot)); !os.IsNotExist(err) {
+		t.Errorf("a -recurse=nuget run with -nuget-map off wrote %s", nugetLockFileName)
+	}
+
+	defaultRoot := filepath.Join(root, "out-default")
+	convert(defaultRoot, nugetMapOptions{})
+
+	if n := f.count("/registry"); n != 1 {
+		t.Errorf("a -recurse=nuget run with no -nuget-map flag requested the registry %d times; want 1 (on by default since S3b)", n)
 	}
 
 	mappedRoot := filepath.Join(root, "out-mapped")
 	mine := writeMapFile(t, "mine.txt", "# no rows of my own\n")
 	convert(mappedRoot, nugetMapOptions{sources: []string{mine}})
 
-	if n := f.count("/registry"); n != 1 {
-		t.Errorf("with a -nuget-map source the registry was requested %d times; want 1", n)
+	if n := f.count("/registry"); n != 2 {
+		t.Errorf("with a -nuget-map source the registry was requested %d times in total; want 2 (one per run)", n)
 	}
 
 	lock, err := readNuGetLock(mappedRoot)

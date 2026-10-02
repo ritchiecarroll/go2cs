@@ -186,6 +186,11 @@ type nugetMapDecision struct {
 	layer    string
 	fromLock bool
 	note     string
+
+	// S3b: whether the mapping was APPLIED (the module is referenced as its published package rather than
+	// converted), and the exact package version it is pinned to.
+	applied        bool
+	packageVersion string
 }
 
 // resolveNuGetMappings decides every module, in module-path order, against the sources and the lock:

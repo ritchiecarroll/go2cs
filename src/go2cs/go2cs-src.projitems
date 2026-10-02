@@ -39,6 +39,11 @@
     <None Include="$(MSBuildThisFileDirectory)embedDirective.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\corpusRelease_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetPackage.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetPackage_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetSubstitute_integration_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetSubstitution.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetSubstitution_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeNamedIntType_test.go" />
     <None Include="$(MSBuildThisFileDirectory)solutionProjectPaths_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syscallKeepAliveAnalysis.go" />
