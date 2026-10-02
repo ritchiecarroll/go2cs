@@ -23,6 +23,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 func convertUsingStaticFixture(t *testing.T) (dotted, dottedLater, plain string) {
@@ -249,8 +251,8 @@ func TestEveryFileOfAReferenceModelTestProjectBindsByAlias(t *testing.T) {
 		testMethodRenames = nil
 		testTypeRenames = nil
 		whiteboxInternalTestObjects = nil
-		whiteboxBridgeDeclaredNames = HashSet[string]{}
-		whiteboxBridgeTypeNames = HashSet[string]{}
+		whiteboxBridgeDeclaredNames = hashset.HashSet[string]{}
+		whiteboxBridgeTypeNames = hashset.HashSet[string]{}
 	})
 
 	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, testVariantOptions(base, testProjectWhiteboxReference, false, bridgeName)); err != nil {

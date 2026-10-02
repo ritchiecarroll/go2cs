@@ -29,6 +29,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // TestPackageLevelAnonStructDedup pins that two package-level vars written over one anonymous
@@ -392,27 +394,27 @@ func TestPointerBoxRecordDoesNotForceRecompile(t *testing.T) {
 	for _, testCase := range []struct {
 		name           string
 		source, target string
-		into           func(map[string]HashSet[string])
+		into           func(map[string]hashset.HashSet[string])
 		want           bool
 	}{
-		{"implicit box on target", cert, certBox, func(m map[string]HashSet[string]) { implicitConversions = m }, false},
-		{"implicit box on source", certBox, cert, func(m map[string]HashSet[string]) { implicitConversions = m }, false},
-		{"inverted box on target", cert, certBox, func(m map[string]HashSet[string]) { invertedImplicitConversions = m }, false},
-		{"inverted box on source", certBox, cert, func(m map[string]HashSet[string]) { invertedImplicitConversions = m }, false},
-		{"indirect box on target", cert, certBox, func(m map[string]HashSet[string]) { indirectImplicitConversions = m }, false},
+		{"implicit box on target", cert, certBox, func(m map[string]hashset.HashSet[string]) { implicitConversions = m }, false},
+		{"implicit box on source", certBox, cert, func(m map[string]hashset.HashSet[string]) { implicitConversions = m }, false},
+		{"inverted box on target", cert, certBox, func(m map[string]hashset.HashSet[string]) { invertedImplicitConversions = m }, false},
+		{"inverted box on source", certBox, cert, func(m map[string]hashset.HashSet[string]) { invertedImplicitConversions = m }, false},
+		{"indirect box on target", cert, certBox, func(m map[string]hashset.HashSet[string]) { indirectImplicitConversions = m }, false},
 
 		// The control: a production x production STRUCTURAL pair is not the boxing route, the
 		// generator really would host an operator on a closed type, and the fallback must fire.
-		{"structural production pair still falls back", cert, opts, func(m map[string]HashSet[string]) { implicitConversions = m }, true},
+		{"structural production pair still falls back", cert, opts, func(m map[string]hashset.HashSet[string]) { implicitConversions = m }, true},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
-			implicitConversions = make(map[string]HashSet[string])
-			invertedImplicitConversions = make(map[string]HashSet[string])
-			indirectImplicitConversions = make(map[string]HashSet[string])
+			implicitConversions = make(map[string]hashset.HashSet[string])
+			invertedImplicitConversions = make(map[string]hashset.HashSet[string])
+			indirectImplicitConversions = make(map[string]hashset.HashSet[string])
 			numericConversions = make(map[string]map[string]string)
 			indirectNumericConversions = make(map[string]map[string]string)
 
-			seeded := map[string]HashSet[string]{testCase.source: NewHashSet([]string{testCase.target})}
+			seeded := map[string]hashset.HashSet[string]{testCase.source: hashset.NewHashSet([]string{testCase.target})}
 			testCase.into(seeded)
 
 			if got := recordsRequireProductionMutation(productionClass, productionPackage); got != testCase.want {

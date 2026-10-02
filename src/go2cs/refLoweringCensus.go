@@ -54,6 +54,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ritchiecarroll/hashset"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -509,8 +510,8 @@ func censusOneTarget(options Options, target string, packageFilter []string) (*r
 
 // censusLinknameHandles is collectLinknameHandles without the package-global side effect: the
 // census scans its own per-package handle set so a census run can never perturb conversion state.
-func censusLinknameHandles(files []*ast.File) HashSet[string] {
-	handles := NewHashSet([]string{})
+func censusLinknameHandles(files []*ast.File) hashset.HashSet[string] {
+	handles := hashset.NewHashSet([]string{})
 
 	for _, file := range files {
 		for _, group := range file.Comments {

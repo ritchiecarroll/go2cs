@@ -30,6 +30,8 @@ import (
 	"go/ast"
 	"go/types"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 func (v *Visitor) convertExprToInterfaceType(interfaceExpr ast.Expr, targetExpr ast.Expr, exprResult string) string {
@@ -210,7 +212,7 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 						existing.Add(embed)
 					}
 				} else {
-					interfaceInheritances[interfaceTypeName] = NewHashSet(embeds)
+					interfaceInheritances[interfaceTypeName] = hashset.NewHashSet(embeds)
 				}
 
 				packageLock.Unlock()
@@ -527,7 +529,7 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 		if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {
 			implementations.Add(targetTypeName)
 		} else {
-			interfaceImplementations[interfaceTypeName] = NewHashSet([]string{targetTypeName})
+			interfaceImplementations[interfaceTypeName] = hashset.NewHashSet([]string{targetTypeName})
 		}
 
 		// An interface-sourced pair generates a distinct `<src>ᴠ<iface>` adapter class the
@@ -554,7 +556,7 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 		if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {
 			implementations.Add(recordName)
 		} else {
-			interfaceImplementations[interfaceTypeName] = NewHashSet([]string{recordName})
+			interfaceImplementations[interfaceTypeName] = hashset.NewHashSet([]string{recordName})
 		}
 
 		// A foreign-struct VALUE pair generates a distinct `<pkg>_<src>ᴠ<iface>` adapter class
@@ -632,7 +634,7 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 							if interfaceParamTypeName == targetParamTypeName {
 								continue
 							}
-							var conversions HashSet[string]
+							var conversions hashset.HashSet[string]
 							var exists bool
 
 							packageLock.Lock()
@@ -642,7 +644,7 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 							if conversions, exists = invertedImplicitConversions[interfaceParamTypeName]; exists {
 								conversions.Add(targetParamTypeName)
 							} else {
-								conversions = NewHashSet([]string{targetParamTypeName})
+								conversions = hashset.NewHashSet([]string{targetParamTypeName})
 								invertedImplicitConversions[interfaceParamTypeName] = conversions
 							}
 
@@ -799,7 +801,7 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 					if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {
 						implementations.Add(recordName)
 					} else {
-						interfaceImplementations[interfaceTypeName] = NewHashSet([]string{recordName})
+						interfaceImplementations[interfaceTypeName] = hashset.NewHashSet([]string{recordName})
 					}
 
 					packageLock.Unlock()

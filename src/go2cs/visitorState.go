@@ -24,6 +24,8 @@ import (
 	"go/token"
 	"go/types"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 type FileEntry struct {
@@ -137,7 +139,7 @@ type Visitor struct {
 	outputBuilder      *strings.Builder
 	standAloneComments map[token.Pos]string
 	sortedCommentPos   []token.Pos
-	processedComments  HashSet[token.Pos]
+	processedComments  hashset.HashSet[token.Pos]
 	newline            string
 	indentLevel        int
 	options            Options
@@ -163,7 +165,7 @@ type Visitor struct {
 	// of not restarting at 0 per function — free, since the name is synthesized and never read back.
 	syscallKeepAliveCounter int
 
-	liftedTypeNames HashSet[string]
+	liftedTypeNames hashset.HashSet[string]
 	liftedTypeMap   map[types.Type]string
 	subStructTypes  map[types.Type][]types.Type
 
@@ -214,9 +216,9 @@ type Visitor struct {
 	// ImportSpec variables
 	currentImportPath     string
 	packageImports        *strings.Builder
-	importQueue           HashSet[string]
-	requiredUsings        HashSet[string]
-	methodNamespaceUsings HashSet[string] // see collectMethodNamespaceUsings
+	importQueue           hashset.HashSet[string]
+	requiredUsings        hashset.HashSet[string]
+	methodNamespaceUsings hashset.HashSet[string] // see collectMethodNamespaceUsings
 	typeAliasDeclarations *strings.Builder
 	// emittedClassName is the `partial class <name>` this FILE's declarations are emitted into —
 	// `<pkg>_package`, or the per-variant override under -tests (visitFile computes it; this is the
@@ -233,13 +235,13 @@ type Visitor struct {
 	// name — and then the reference fails to resolve (CS0246). referencedForeignPackages collects the
 	// import paths whose types getAliasQualifiedTypeName emits; canonicalAliasImported records the paths whose
 	// canonical alias a file import already emitted. visitFile supplies the alias for the difference.
-	referencedForeignPackages HashSet[string]
-	canonicalAliasImported    HashSet[string]
+	referencedForeignPackages hashset.HashSet[string]
+	canonicalAliasImported    hashset.HashSet[string]
 	// importAliasesEmitted holds the C# alias NAMES a file's real imports already bound (`asn1`,
 	// `encoding_asn1`, `time`). visitFile's synthesized canonical-alias `using` is skipped when its
 	// alias collides with one of these — a same-named subpackage plus an aliased parent import both
 	// resolving to alias `asn1` (cryptobyte's `encoding/asn1` + `.../cryptobyte/asn1`, CS1537).
-	importAliasesEmitted HashSet[string]
+	importAliasesEmitted hashset.HashSet[string]
 
 	// importAliasTargets maps each C# alias name a file's imports bound to the TARGET that using
 	// resolves to (`@unsafe` → `unsafe_package`, `ast` → `go.ast_package`). C# resolves a using-alias
@@ -326,7 +328,7 @@ type Visitor struct {
 	// closes, so the extension surface is complete before go2cs-gen composes the pointer-form
 	// adapter the arm's GoImplement record asks for.
 	promotedInterfaceForwarders []promotedInterfaceForwarder
-	paramNames                  HashSet[string]
+	paramNames                  hashset.HashSet[string]
 	paramObjects                map[types.Object]bool
 	// currentRefReturnPrimary marks the function being visited as a B′-S0 arm-(a) ref-return
 	// primary (packageRefReturnPrimaryMethods): its declared return is `ref T` and its bare
@@ -369,7 +371,7 @@ type Visitor struct {
 	// and nil otherwise. A literal's signature is generated from SYNTHESIZED vars (see
 	// getSignature) that can never match the identEscapesHeap entries paramNeedsHeapBox keys
 	// on, so the box decision travels by name here.
-	funcLitHeapBoxParamNames HashSet[string]
+	funcLitHeapBoxParamNames hashset.HashSet[string]
 	// funcLitProxyParamTypes maps a function literal parameter's Go name to the CONSTRAINT-PROXY
 	// C# type it must be DECLARED as — for a literal passed to a generic call whose type argument
 	// resolved to a proxy (see constraintProxyLitParamTypes). Set transiently by convFuncLit around
@@ -516,7 +518,7 @@ type Visitor struct {
 	// func literals. A bare type name spelled by the EMITTER (the `Type.Ꮡfield` box accessor) binds
 	// to such a variable rather than to the type wherever one exists, so boxAccessorType qualifies
 	// against this set. Repopulated per function by performVariableAnalysis.
-	funcScopeVarNames HashSet[string]
+	funcScopeVarNames hashset.HashSet[string]
 	scopeStack        []map[string]*types.Var // Stack of local variable scopes
 	lambdaCapture     *LambdaCapture          // Lambda capture tracking
 }

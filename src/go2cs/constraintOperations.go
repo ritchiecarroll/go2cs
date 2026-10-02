@@ -15,6 +15,8 @@ import (
 	"go/types"
 	"sort"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // In the case of generic constraints, restrictions in C# work somewhat differently than in Go. In C# a constraint
@@ -129,21 +131,21 @@ var operators = map[OperatorSet][]string{
 
 // sumOperatorTypes are types that can be used with the sum operator, i.e.,
 // `+`, which includes all numeric types plus strings.
-var sumOperatorTypes = NewHashSet([]ConstraintType{
+var sumOperatorTypes = hashset.NewHashSet([]ConstraintType{
 	Int, Int8, Int16, Int32, Int64, Uint, Uint8, Uint16, Uint32, Uint64,
 	Float32, Float64, Complex64, Complex128, String,
 })
 
 // arithmeticOperatorTypes are types that can be used with arithmetic operators,
 // i.e.: `-`, `*`, `/`, which includes all numeric types.
-var arithmeticOperatorTypes = NewHashSet([]ConstraintType{
+var arithmeticOperatorTypes = hashset.NewHashSet([]ConstraintType{
 	Int, Int8, Int16, Int32, Int64, Uint, Uint8, Uint16, Uint32, Uint64,
 	Float32, Float64, Complex64, Complex128,
 })
 
 // integerOperatorTypes are types that can be used with integer arithmetic
 // operators, i.e.: `%`, `&`, `|`, `^`, `&^`, `<<`, `>>`
-var integerOperatorTypes = NewHashSet([]ConstraintType{
+var integerOperatorTypes = hashset.NewHashSet([]ConstraintType{
 	Int, Int8, Int16, Int32, Int64, Uint, Uint8, Uint16, Uint32, Uint64,
 })
 
@@ -173,14 +175,14 @@ var integerOperatorTypes = NewHashSet([]ConstraintType{
 // array types took no such branch. Go's own comparability is unaffected: the checker validated
 // every instantiation before conversion, and emitted equality on a type parameter routes through
 // AreEqual, exactly as the built-in `comparable` arm already documents.
-var comparableOperatorTypes = NewHashSet([]ConstraintType{
+var comparableOperatorTypes = hashset.NewHashSet([]ConstraintType{
 	Bool, Int, Int8, Int16, Int32, Int64, Uint, Uint8, Uint16, Uint32, Uint64,
 	Float32, Float64, Complex64, Complex128, String,
 })
 
 // orderedOperatorTypes are types that can be ordered, i.e., those that support
 // the `<`, `<=`, `>`, `>=` operators. This is a subset of the comparable types.
-var orderedOperatorTypes = NewHashSet([]ConstraintType{
+var orderedOperatorTypes = hashset.NewHashSet([]ConstraintType{
 	Int, Int8, Int16, Int32, Int64, Uint, Uint8, Uint16, Uint32, Uint64,
 	Float32, Float64, String,
 })
@@ -188,8 +190,8 @@ var orderedOperatorTypes = NewHashSet([]ConstraintType{
 // getOperatorSet takes a set of constraint types and returns the set of
 // operators that can be applied to those types. This is used to determine
 // which operators can be used in generic functions and methods.
-func getOperatorSet(constraintTypes HashSet[ConstraintType]) HashSet[OperatorSet] {
-	operatorSet := HashSet[OperatorSet]{}
+func getOperatorSet(constraintTypes hashset.HashSet[ConstraintType]) hashset.HashSet[OperatorSet] {
+	operatorSet := hashset.HashSet[OperatorSet]{}
 
 	// An empty constraint type set (e.g. a slice or map constraint) supports no
 	// lifted operators. Without this guard the empty set would count as a subset
@@ -223,7 +225,7 @@ func getOperatorSet(constraintTypes HashSet[ConstraintType]) HashSet[OperatorSet
 
 // getOperatorSetAsString takes a set of operator sets and returns a string
 // representation of the operators in those sets.
-func getOperatorSetAsString(operatorSets HashSet[OperatorSet]) string {
+func getOperatorSetAsString(operatorSets hashset.HashSet[OperatorSet]) string {
 	operatorSetKeys := operatorSets.Keys()
 
 	sort.Slice(operatorSetKeys, func(i, j int) bool {
@@ -245,7 +247,7 @@ func getOperatorSetAsString(operatorSets HashSet[OperatorSet]) string {
 
 // getOperatorSetAttributes takes a set of operator sets and returns a string
 // representation of the attribute targets of those sets.
-func getOperatorSetAttributes(operatorSets HashSet[OperatorSet]) string {
+func getOperatorSetAttributes(operatorSets hashset.HashSet[OperatorSet]) string {
 	operatorSetKeys := operatorSets.Keys()
 
 	sort.Slice(operatorSetKeys, func(i, j int) bool {
@@ -450,7 +452,7 @@ func (v *Visitor) typeIsTypeConstraint(typ types.Type) (bool, int) {
 }
 
 // getConstraintTypeSetFromExpr collects all underlying type constraints
-func (v *Visitor) getConstraintTypeSetFromExpr(expr ast.Expr) HashSet[ConstraintType] {
+func (v *Visitor) getConstraintTypeSetFromExpr(expr ast.Expr) hashset.HashSet[ConstraintType] {
 	var results []types.Type
 
 	// Helper to process expressions recursively
@@ -598,7 +600,7 @@ func (v *Visitor) getConstraintsFromType(typ types.Type) []types.Type {
 	return constraints
 }
 
-func (v *Visitor) getConstraintTypeSetFromType(typ types.Type) HashSet[ConstraintType] {
+func (v *Visitor) getConstraintTypeSetFromType(typ types.Type) hashset.HashSet[ConstraintType] {
 	return getConstraintTypeSet(v.getConstraintsFromType(typ))
 }
 
@@ -622,9 +624,9 @@ func (v *Visitor) constraintTypeSetIsInexpressible(constraint types.Type) bool {
 	return getOperatorSet(typeSet).IsEmpty()
 }
 
-func getConstraintTypeSet(constraintTypes []types.Type) HashSet[ConstraintType] {
+func getConstraintTypeSet(constraintTypes []types.Type) hashset.HashSet[ConstraintType] {
 	// Convert the type results to a HashSet of ConstraintType
-	constraintTypeSet := HashSet[ConstraintType]{}
+	constraintTypeSet := hashset.HashSet[ConstraintType]{}
 
 	for _, typ := range constraintTypes {
 		switch t := typ.(type) {

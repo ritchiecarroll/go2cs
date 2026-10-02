@@ -18,6 +18,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // packageQualifiedNameRegex matches a dotted qualified identifier. Segments may contain Unicode
@@ -44,7 +46,7 @@ var rootQualifyScanRegex = regexp.MustCompile(`(?:global::)?@?[\p{L}_][\p{L}\p{N
 // they resolve unambiguously to the local type. Only names in this curated set are touched, so
 // attributes whose type names never collide with System (every behavioral-test case) emit
 // byte-identically (no golden churn).
-var systemCollidingTypeNames = NewHashSet([]string{
+var systemCollidingTypeNames = hashset.NewHashSet([]string{
 	"Action", "Activator", "Array", "Attribute", "Boolean", "Buffer", "Byte", "Char", "Comparison",
 	"Console", "Convert", "DateTime", "Decimal", "Delegate", "Double", "Enum", "Environment", "Exception",
 	"Func", "Guid", "Half", "Index", "Int128", "Lazy", "Math", "Memory", "Nullable", "Object", "Predicate",
@@ -224,7 +226,7 @@ func qualifySystemCollidingLocalTypeRefs(name string, packagePrefix string) stri
 //
 // A reference that already contains a dot is left alone: it has said where it comes from, and
 // re-qualifying it would produce a name that resolves nowhere.
-func qualifyBareTypeReferences(name string, ambiguousNames HashSet[string], qualifier string) string {
+func qualifyBareTypeReferences(name string, ambiguousNames hashset.HashSet[string], qualifier string) string {
 	return packageQualifiedNameRegex.ReplaceAllStringFunc(name, func(match string) string {
 		if strings.Contains(match, ".") {
 			return match
@@ -376,7 +378,7 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 // of one (`import _ "unsafe"`, required by every `//go:linkname` file — 67 files of the converted
 // standard library) exists to satisfy the Go compiler, never to run an `init`, so forcing its
 // converted assembly's module constructor would be a guaranteed no-op. See writeImportInit.
-var noInitPseudoPackages = NewHashSet([]string{"unsafe", "builtin", "C"})
+var noInitPseudoPackages = hashset.NewHashSet([]string{"unsafe", "builtin", "C"})
 
 // writeImportInit records the module-initializer hook that forces an IMPORTED package's `init`
 // functions to run before the importing package's own.
@@ -835,7 +837,7 @@ func (v *Visitor) qualifyPackageReference(ns string) string {
 		return ns
 	}
 
-	for _, usings := range []HashSet[string]{v.requiredUsings, v.methodNamespaceUsings} {
+	for _, usings := range []hashset.HashSet[string]{v.requiredUsings, v.methodNamespaceUsings} {
 		for using := range usings {
 			if namespace, ok := resolveUsingNamespace(using); ok && packageQualifiedNamespaces[namespace+"."+firstSeg] {
 				return rootQualified(ns)
@@ -882,7 +884,7 @@ func resolveUsingNamespace(using string) (string, bool) {
 // Go file, so their usings are all in place before any other declaration). A superset is harmless:
 // qualifyPackageReference only spells a reference in full on a hit, which is always correct.
 func (v *Visitor) collectMethodNamespaceUsings(file *ast.File) {
-	v.methodNamespaceUsings = HashSet[string]{}
+	v.methodNamespaceUsings = hashset.HashSet[string]{}
 
 	ast.Inspect(file, func(node ast.Node) bool {
 		if selectorExpr, ok := node.(*ast.SelectorExpr); ok {

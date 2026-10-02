@@ -18,6 +18,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // golang.org/x/sys/unix reaches libc on darwin in two halves (darwin-xsys-libc, 2026-10-03). The README
@@ -143,7 +145,7 @@ func TestXSysDarwinLibcPullsForwardToTwins(t *testing.T) {
 		currentPackagePath = pkgPath
 
 		for local, twin := range xsysDarwinTwins {
-			v := &Visitor{importQueue: HashSet[string]{}, importPathAliases: map[string]string{"syscall": "syscall"}}
+			v := &Visitor{importQueue: hashset.HashSet[string]{}, importPathAliases: map[string]string{"syscall": "syscall"}}
 			alias, targetFunc, ok := v.funcLinknameForward(decls[local])
 
 			if !ok {
@@ -161,7 +163,7 @@ func TestXSysDarwinLibcPullsForwardToTwins(t *testing.T) {
 	currentPackagePath = "internal/syscall/unix"
 
 	for local := range xsysDarwinTwins {
-		v := &Visitor{importQueue: HashSet[string]{}, importPathAliases: map[string]string{"syscall": "syscall"}}
+		v := &Visitor{importQueue: hashset.HashSet[string]{}, importPathAliases: map[string]string{"syscall": "syscall"}}
 
 		if _, _, ok := v.funcLinknameForward(decls[local]); ok {
 			t.Errorf("internal/syscall/unix: %s forwards, which would duplicate net_darwin_impl.cs's hand-owned body", local)

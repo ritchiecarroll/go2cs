@@ -16,6 +16,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // The defect this locks in (H7 RED 8, C2 sizing 0d6cd77a2, COORD 7bc9d58d4): Go 1.24 moved crypto/elliptic's
@@ -394,8 +396,8 @@ func loadCrossPackageProxyFixture(t *testing.T) (owner *Visitor, consumer *Visit
 	// referencedForeignPackages and importQueue as the package state initializes them (packageStateOperations.go): naming a FOREIGN
 	// interface's qualifier registers that package for the file's using alias, and importQueue holds the import paths the CURRENT
 	// file declares (visitImportSpec adds each), which is what decides whether that alias is in scope. Each test states its file's imports.
-	owner = &Visitor{info: ownerPkg.TypesInfo, pkg: ownerPkg.Types, newline: "\n", referencedForeignPackages: HashSet[string]{}, importQueue: HashSet[string]{}}
-	consumer = &Visitor{info: consumerPkg.TypesInfo, pkg: consumerPkg.Types, newline: "\n", referencedForeignPackages: HashSet[string]{}, importQueue: HashSet[string]{}}
+	owner = &Visitor{info: ownerPkg.TypesInfo, pkg: ownerPkg.Types, newline: "\n", referencedForeignPackages: hashset.HashSet[string]{}, importQueue: hashset.HashSet[string]{}}
+	consumer = &Visitor{info: consumerPkg.TypesInfo, pkg: consumerPkg.Types, newline: "\n", referencedForeignPackages: hashset.HashSet[string]{}, importQueue: hashset.HashSet[string]{}}
 
 	return owner, consumer, collect(ownerPkg.Syntax), collect(consumerPkg.Syntax)
 }

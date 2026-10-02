@@ -15,6 +15,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // Guards for the `go.go` root-shadow qualification and the record/reference canonicalization the
@@ -322,7 +324,7 @@ func TestPackageReferenceShadowedByFileUsingIsRootQualified(t *testing.T) {
 	}
 
 	visitor := func(required []string, method []string) *Visitor {
-		return &Visitor{requiredUsings: NewHashSet(required), methodNamespaceUsings: NewHashSet(method)}
+		return &Visitor{requiredUsings: hashset.NewHashSet(required), methodNamespaceUsings: hashset.NewHashSet(method)}
 	}
 
 	cases := []struct {
