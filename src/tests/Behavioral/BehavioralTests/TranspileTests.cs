@@ -658,6 +658,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGenericCompositeType() => CheckTarget("GenericCompositeType");
 
     [TestMethod]
+    public void CheckGenericDefinedMapChan() => CheckTarget("GenericDefinedMapChan");
+
+    [TestMethod]
     public void CheckGenericEmbedPromotion() => CheckTarget("GenericEmbedPromotion");
 
     [TestMethod]

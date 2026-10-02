@@ -491,6 +491,7 @@
     <Project Path="tests/Behavioral/GenericAtomicPointerField/GenericAtomicPointerField.csproj" />
     <Project Path="tests/Behavioral/GenericCompositeLiterals/GenericCompositeLiterals.csproj" />
     <Project Path="tests/Behavioral/GenericCompositeType/GenericCompositeType.csproj" />
+    <Project Path="tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.csproj" />
     <Project Path="tests/Behavioral/GenericEmbedPromotion/GenericEmbedPromotion.csproj" />
     <Project Path="tests/Behavioral/GenericFuncCall/GenericFuncCall.csproj" />
     <Project Path="tests/Behavioral/GenericFuncDecl/GenericFuncDecl.csproj" />

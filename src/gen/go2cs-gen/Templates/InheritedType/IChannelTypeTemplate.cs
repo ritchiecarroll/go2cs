@@ -10,7 +10,8 @@ namespace go2cs.Templates.InheritedType;
 
 internal static class IChannelTypeTemplate
 {
-    public static string Generate(string structName, string typeName, string targetTypeName) =>
+    // constructorName is structName without a generic type's parameters (a C# constructor never carries them).
+    public static string Generate(string structName, string constructorName, string typeName, string targetTypeName) =>
         $$"""
 
                 public nint Capacity => m_value.Capacity;
@@ -71,6 +72,6 @@ internal static class IChannelTypeTemplate
 
                 public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}(p1);
 
-                public {{structName}}(nint size) => m_value = new {{typeName}}(size);
+                public {{constructorName}}(nint size) => m_value = new {{typeName}}(size);
         """;
 }

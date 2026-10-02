@@ -10,7 +10,8 @@ namespace go2cs.Templates.InheritedType;
 
 internal static class IMapTypeTemplate
 {
-    public static string Generate(string structName, string keyTypeName, string valueTypeName) =>
+    // constructorName is structName without a generic type's parameters (a C# constructor never carries them).
+    public static string Generate(string structName, string constructorName, string keyTypeName, string valueTypeName) =>
         $$"""
         
                 public nint Length => ((IMap)m_value).Length;
@@ -21,7 +22,7 @@ internal static class IMapTypeTemplate
                 public static {{structName}} Make(nint p1, nint p2) => new {{structName}}(map<{{keyTypeName}}, {{valueTypeName}}>.Make(p1, p2));
 
                 /// <summary>Capacity form — `make(NamedMap, n)` emits `new NamedMap(n)` (socktest's Sockets).</summary>
-                public {{structName}}(nint size) => m_value = new map<{{keyTypeName}}, {{valueTypeName}}>(size);
+                public {{constructorName}}(nint size) => m_value = new map<{{keyTypeName}}, {{valueTypeName}}>(size);
 
                 public int Count => m_value.Count;
                 

@@ -626,6 +626,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGenericCompositeType() => CheckTarget("GenericCompositeType");
 
     [TestMethod]
+    public void CheckGenericDefinedMapChan() => CheckTarget("GenericDefinedMapChan");
+
+    [TestMethod]
     public void CheckGenericEmbedPromotion() => CheckTarget("GenericEmbedPromotion");
 
     [TestMethod]
