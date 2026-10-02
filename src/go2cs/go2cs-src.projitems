@@ -336,6 +336,7 @@
     <None Include="$(MSBuildThisFileDirectory)untypedConstOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedInterfaceFuncLit_test.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedPackageConversion_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)usingStaticNamespaceAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)validationProofPages.go" />
     <None Include="$(MSBuildThisFileDirectory)validationProofPages_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valueCloneFieldSpelling_test.go" />
