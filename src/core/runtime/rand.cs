@@ -251,11 +251,11 @@ internal static uint32 cheaprand() {
     // Xorshift paper: https://www.jstatsoft.org/article/view/v008i14/xorshift.pdf
     // This generator passes the SmallCrush suite, part of TestU01 framework:
     // http://simul.iro.umontreal.ca/testu01/tu01.html
-    var t = (ж<array<uint32>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(mp.of(m.Ꮡcheaprand)));
-    var (s1, s0) = (t.Value[0], t.Value[1]);
+    var t = (NativeFieldArrayPointer<uint32>(mp.of(m.Ꮡcheaprand), 2) ?? (ж<array<uint32>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(mp.of(m.Ꮡcheaprand))));
+    var (s1, s0) = (t.ElementRef(0), t.ElementRef(1));
     s1 ^= (uint32)((s1 << (int)(17)));
     s1 = (uint32)((uint32)((uint32)(s1 ^ s0) ^ (s1 >> (int)(7))) ^ (s0 >> (int)(16)));
-    (t.Value[0], t.Value[1]) = (s0, s1);
+    (t.ElementRef(0), t.ElementRef(1)) = (s0, s1);
     return s0 + s1;
 }
 

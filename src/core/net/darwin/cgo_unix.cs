@@ -191,13 +191,13 @@ internal static (nint port, error err) cgoLookupServicePort(ж<_C_struct_addrinf
             var exprᴛ2 = _C_ai_family(r).Value;
             if (exprᴛ2 == _C_AF_INET) {
                 var sa = _C_ai_addr(r).ValueSlot.Reinterpret<_C_struct_sockaddr, syscall.RawSockaddrInet4>();
-                var p = (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(sa.of(syscall.RawSockaddrInet4.ᏑPort)));
-                (port, err) = ((nint)(((nint)p.Value[0] << (int)(8)) | (nint)p.Value[1]), default!); goto ᒐdone;
+                var p = (NativeFieldArrayPointer<byte>(sa.of(syscall.RawSockaddrInet4.ᏑPort), 2) ?? (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(sa.of(syscall.RawSockaddrInet4.ᏑPort))));
+                (port, err) = ((nint)(((nint)p.ElementRef(0) << (int)(8)) | (nint)p.ElementRef(1)), default!); goto ᒐdone;
             }
             if (exprᴛ2 == _C_AF_INET6) {
                 var sa = _C_ai_addr(r).ValueSlot.Reinterpret<_C_struct_sockaddr, syscall.RawSockaddrInet6>();
-                var p = (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(sa.of(syscall.RawSockaddrInet6.ᏑPort)));
-                (port, err) = ((nint)(((nint)p.Value[0] << (int)(8)) | (nint)p.Value[1]), default!); goto ᒐdone;
+                var p = (NativeFieldArrayPointer<byte>(sa.of(syscall.RawSockaddrInet6.ᏑPort), 2) ?? (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(sa.of(syscall.RawSockaddrInet6.ᏑPort))));
+                (port, err) = ((nint)(((nint)p.ElementRef(0) << (int)(8)) | (nint)p.ElementRef(1)), default!); goto ᒐdone;
             }
 
         }
