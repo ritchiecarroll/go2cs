@@ -25,6 +25,8 @@ import (
 	"go/ast"
 	"go/types"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 func isDynamicStruct(t types.Type) bool {
@@ -94,13 +96,13 @@ func (v *Visitor) checkForDynamicStructs(argType types.Type, targetType types.Ty
 				// Track implicit conversions
 				packageLock.Lock()
 
-				var conversions HashSet[string]
+				var conversions hashset.HashSet[string]
 				var exists bool
 
 				if conversions, exists = implicitConversions[argTypeName]; exists {
 					conversions.Add(targetTypeName)
 				} else {
-					conversions = NewHashSet([]string{targetTypeName})
+					conversions = hashset.NewHashSet([]string{targetTypeName})
 					implicitConversions[argTypeName] = conversions
 				}
 

@@ -12,6 +12,8 @@ import (
 	"go/ast"
 	"sort"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // CgoDynamicImportsSection is the package_info.cs marker section holding this package's
@@ -242,7 +244,7 @@ func cgoDynamicImportLine(record cgoDynamicImportRecord) string {
 // import-init sections have, and for the same reason: a single-file or -tests seeding write sees
 // only part of the package.
 func cgoDynamicImportSectionLines(existing []string, mergeExisting bool) []string {
-	records := HashSet[string]{}
+	records := hashset.HashSet[string]{}
 
 	for _, record := range cgoDynamicImports {
 		records.Add(cgoDynamicImportLine(record))

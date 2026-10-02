@@ -24,6 +24,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ritchiecarroll/hashset"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -1071,7 +1072,7 @@ func TestRecordsRequireProductionAnchorGatesReferenceModel(t *testing.T) {
 
 	// A bare (test-package-local) implementer and an adapter-class-marked foreign pair both
 	// generate in the test class — no fallback.
-	interfaceImplementations["io_package.Writer"] = NewHashSet([]string{"errWriter"})
+	interfaceImplementations["io_package.Writer"] = hashset.NewHashSet([]string{"errWriter"})
 	adapterClassImplementations.Add("io_package.Writer|strings_package.Builder")
 	interfaceImplementations["io_package.Writer"].Add("strings_package.Builder")
 
@@ -1102,7 +1103,7 @@ func TestRecordsRequireProductionAnchorGatesReferenceModel(t *testing.T) {
 	// possible across an assembly boundary, so the host flag must NOT rescue it.
 	resetPackageState(&packages.Package{})
 	packageNamespace = "go"
-	interfaceImplementations["io_package.Writer"] = NewHashSet([]string{"value_package.Buffer"})
+	interfaceImplementations["io_package.Writer"] = hashset.NewHashSet([]string{"value_package.Buffer"})
 
 	if !recordsRequireProductionAnchor("value_package", "value", true) {
 		t.Fatal("a production-qualified VALUE implementer must require the production anchor even under a hand-owned host")
@@ -1112,7 +1113,7 @@ func TestRecordsRequireProductionAnchorGatesReferenceModel(t *testing.T) {
 	// production qualifier from the partition predicates — conservatively production-anchored.
 	resetPackageState(&packages.Package{})
 	packageNamespace = "go"
-	implicitConversions["value"+TypeAliasDot+"Kind"] = NewHashSet([]string{"@string"})
+	implicitConversions["value"+TypeAliasDot+"Kind"] = hashset.NewHashSet([]string{"@string"})
 
 	if !recordsRequireProductionAnchor("value_package", "value", false) {
 		t.Fatal("a ꓸ-alias-form production type reference must require the production anchor")
@@ -1125,14 +1126,14 @@ func TestRecordsRequireProductionMutationGatesWhiteboxModel(t *testing.T) {
 	resetPackageState(&packages.Package{})
 	packageNamespace = "go"
 
-	interfaceImplementations["io_package.Writer"] = NewHashSet([]string{PointerPrefix + "<value_package.Buffer>"})
+	interfaceImplementations["io_package.Writer"] = hashset.NewHashSet([]string{PointerPrefix + "<value_package.Buffer>"})
 	indirectSource := ShadowVarMarker + "value.Source"
-	indirectImplicitConversions[indirectSource] = NewHashSet([]string{PointerPrefix + "<" + indirectSource + ">"})
+	indirectImplicitConversions[indirectSource] = hashset.NewHashSet([]string{PointerPrefix + "<" + indirectSource + ">"})
 	if recordsRequireProductionMutation("value_package", "value") {
 		t.Fatal("production adapters and the shared T-to-pointer-box route are relocatable")
 	}
 
-	implicitConversions["value_package.Source"] = NewHashSet([]string{"LocalTarget"})
+	implicitConversions["value_package.Source"] = hashset.NewHashSet([]string{"LocalTarget"})
 	if !recordsRequireProductionMutation("value_package", "value") {
 		t.Fatal("a structural conversion involving a closed production type must fall back")
 	}
@@ -1238,7 +1239,7 @@ func TestNominalProductionConstraintForcesRecompile(t *testing.T) {
 		t.Helper()
 
 		packageLock.Lock()
-		nominalProductionConstraints = HashSet[string]{}
+		nominalProductionConstraints = hashset.HashSet[string]{}
 		packageLock.Unlock()
 
 		ident := calls[callKey]
@@ -1586,9 +1587,9 @@ func TestSplitWhiteboxVariantRecordsPartitionsByBridgeDeclaredNames(t *testing.T
 	resetPackageState(&packages.Package{})
 	packageNamespace = "go"
 
-	bridgeNames := NewHashSet([]string{"errReader"})
+	bridgeNames := hashset.NewHashSet([]string{"errReader"})
 
-	interfaceImplementations["io_package.Reader"] = NewHashSet([]string{"errReader", "externalHelper", PointerPrefix + "<scanner_package.Scanner>"})
+	interfaceImplementations["io_package.Reader"] = hashset.NewHashSet([]string{"errReader", "externalHelper", PointerPrefix + "<scanner_package.Scanner>"})
 
 	bridgeAnchored, testAnchored := splitWhiteboxVariantRecords(bridgeNames, true)
 
@@ -1652,7 +1653,7 @@ func TestSplitWhiteboxVariantRecordsResolvesBareNamesInTheRecordingVariant(t *te
 	// the bridge anchor cannot bind it.
 	resetPackageState(&packages.Package{})
 	packageNamespace = "go"
-	interfaceImplementations["Pythagoras"] = NewHashSet([]string{"Point"})
+	interfaceImplementations["Pythagoras"] = hashset.NewHashSet([]string{"Point"})
 
 	bridgeAnchored, testAnchored := splitWhiteboxVariantRecords(bridgeNames, false)
 
@@ -1667,7 +1668,7 @@ func TestSplitWhiteboxVariantRecordsResolvesBareNamesInTheRecordingVariant(t *te
 	// merge with the internal declaration.
 	resetPackageState(&packages.Package{})
 	packageNamespace = "go"
-	interfaceImplementations["Squarer"] = NewHashSet([]string{"Point"})
+	interfaceImplementations["Squarer"] = hashset.NewHashSet([]string{"Point"})
 
 	bridgeAnchored, testAnchored = splitWhiteboxVariantRecords(bridgeNames, true)
 
@@ -1723,7 +1724,7 @@ func TestWhiteboxBridgeUnitIsWrittenWithoutBridgeRecords(t *testing.T) {
 
 	// Nothing recorded at all — the record-less bridge registry reproduces.
 	unitName, err := writeWhiteboxVariantMetadata(testInfoPath, dir, "value_package", "value_internal_test_package",
-		"value", "go.value_internal_test_package", "go.value_test_package", HashSet[string]{}, true)
+		"value", "go.value_internal_test_package", "go.value_test_package", hashset.HashSet[string]{}, true)
 	if err != nil {
 		t.Fatalf("writeWhiteboxVariantMetadata: %v", err)
 	}
@@ -2896,7 +2897,7 @@ func TestUnsupportedTestingCapabilityIsDiscovered(t *testing.T) {
 	_, internal := loadTestVariantForDir(t, dir)
 
 	analysis := analyzeTestingCapabilities(internal)
-	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, NewHashSet(supportedTestCapabilities()))
+	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, hashset.NewHashSet(supportedTestCapabilities()))
 
 	if len(declarations) != 1 || declarations[0].Name != "TestBlocked" {
 		t.Fatalf("declarations = %#v, want just TestBlocked", declarations)
@@ -2905,17 +2906,17 @@ func TestUnsupportedTestingCapabilityIsDiscovered(t *testing.T) {
 	if declaration.Status != "unsupported" || !strings.Contains(declaration.Reason, "B.ReportAllocs") {
 		t.Fatalf("TestBlocked should be capability-blocked naming B.ReportAllocs, got status %q reason %q", declaration.Status, declaration.Reason)
 	}
-	if !NewHashSet(declaration.RequiredCapabilities).Contains("B.ReportAllocs") {
+	if !hashset.NewHashSet(declaration.RequiredCapabilities).Contains("B.ReportAllocs") {
 		t.Fatalf("required capabilities %v do not contain B.ReportAllocs", declaration.RequiredCapabilities)
 	}
-	if NewHashSet(supportedTestCapabilities()).Contains("B.ReportAllocs") {
+	if hashset.NewHashSet(supportedTestCapabilities()).Contains("B.ReportAllocs") {
 		t.Fatal("B.ReportAllocs unexpectedly appears in the runtime capability list")
 	}
 
 	// The exemplar moved (this test used to use T.Deadline, which is now supported), so pin the
 	// direction of that change too: T.Deadline must BE supported, or context's six cancellation
 	// tests silently drop out of the run set again.
-	if !NewHashSet(supportedTestCapabilities()).Contains("T.Deadline") {
+	if !hashset.NewHashSet(supportedTestCapabilities()).Contains("T.Deadline") {
 		t.Fatal("T.Deadline must be a supported capability — core/testing implements it")
 	}
 }
@@ -2943,7 +2944,7 @@ func TestTestingTBCapabilitiesAreSupported(t *testing.T) {
 	_, internal := loadTestVariantForDir(t, dir)
 
 	analysis := analyzeTestingCapabilities(internal)
-	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, NewHashSet(supportedTestCapabilities()))
+	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, hashset.NewHashSet(supportedTestCapabilities()))
 
 	if len(declarations) != 1 || declarations[0].Name != "TestViaTB" {
 		t.Fatalf("declarations = %#v, want just TestViaTB", declarations)
@@ -2951,7 +2952,7 @@ func TestTestingTBCapabilitiesAreSupported(t *testing.T) {
 
 	// Attribution: the requirement is recorded against the TB receiver the helper declares, and
 	// reaches the test transitively — the shape that gated os/exec.
-	required := NewHashSet(declarations[0].RequiredCapabilities)
+	required := hashset.NewHashSet(declarations[0].RequiredCapabilities)
 	for _, capability := range []string{"TB.Helper", "TB.Fatal"} {
 		if !required.Contains(capability) {
 			t.Fatalf("required capabilities %v do not contain %q — a testing.TB receiver must attribute to TB.*", declarations[0].RequiredCapabilities, capability)
@@ -2969,7 +2970,7 @@ func TestTestingTBCapabilitiesAreSupported(t *testing.T) {
 	// And the whole surface stays listed: Go 1.23's testing.TB, whose every member core/testing
 	// implements on T and the generated ж-adapter forwards. A member dropped here silently excludes
 	// every test in the corpus that reaches a helper calling it.
-	supported := NewHashSet(supportedTestCapabilities())
+	supported := hashset.NewHashSet(supportedTestCapabilities())
 	for _, member := range []string{
 		"Cleanup", "Error", "Errorf", "Fail", "FailNow", "Failed", "Fatal", "Fatalf", "Helper",
 		"Log", "Logf", "Name", "Setenv", "Skip", "SkipNow", "Skipf", "Skipped", "TempDir",
@@ -3035,7 +3036,7 @@ func TestUnsupportedRuntimeCapabilityGatesTheDeclarationItself(t *testing.T) {
 	defer delete(unsupportedRuntimeCapabilities, "example_test.TestHostBound")
 
 	analysis := testCapabilityAnalysis{
-		direct:   map[*types.Func]HashSet[string]{subject: {}, bystander: {}},
+		direct:   map[*types.Func]hashset.HashSet[string]{subject: {}, bystander: {}},
 		referees: map[*types.Func]map[*types.Func]bool{subject: {}, bystander: {}},
 	}
 
@@ -3258,7 +3259,7 @@ func TestAllocsPerRunCapabilityIsSupported(t *testing.T) {
 	_, internal := loadTestVariantForDir(t, dir)
 
 	analysis := analyzeTestingCapabilities(internal)
-	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, NewHashSet(supportedTestCapabilities()))
+	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, hashset.NewHashSet(supportedTestCapabilities()))
 
 	if len(declarations) != 1 || declarations[0].Name != "TestNoAllocs" {
 		t.Fatalf("declarations = %#v, want just TestNoAllocs", declarations)
@@ -3267,7 +3268,7 @@ func TestAllocsPerRunCapabilityIsSupported(t *testing.T) {
 	if declaration.Status != "included" {
 		t.Fatalf("TestNoAllocs should be included (testing.AllocsPerRun is supported), got status %q reason %q", declaration.Status, declaration.Reason)
 	}
-	if !NewHashSet(declaration.RequiredCapabilities).Contains("testing.AllocsPerRun") {
+	if !hashset.NewHashSet(declaration.RequiredCapabilities).Contains("testing.AllocsPerRun") {
 		t.Fatalf("required capabilities %v do not contain testing.AllocsPerRun", declaration.RequiredCapabilities)
 	}
 }
@@ -3295,7 +3296,7 @@ func TestCoverModeCapabilityIsSupported(t *testing.T) {
 	_, internal := loadTestVariantForDir(t, dir)
 
 	analysis := analyzeTestingCapabilities(internal)
-	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, NewHashSet(supportedTestCapabilities()))
+	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, hashset.NewHashSet(supportedTestCapabilities()))
 
 	if len(declarations) != 1 || declarations[0].Name != "TestCoverageOffPath" {
 		t.Fatalf("declarations = %#v, want just TestCoverageOffPath", declarations)
@@ -3304,7 +3305,7 @@ func TestCoverModeCapabilityIsSupported(t *testing.T) {
 	if declaration.Status != "included" {
 		t.Fatalf("TestCoverageOffPath should be included (testing.CoverMode is supported), got status %q reason %q", declaration.Status, declaration.Reason)
 	}
-	if !NewHashSet(declaration.RequiredCapabilities).Contains("testing.CoverMode") {
+	if !hashset.NewHashSet(declaration.RequiredCapabilities).Contains("testing.CoverMode") {
 		t.Fatalf("required capabilities %v do not contain testing.CoverMode", declaration.RequiredCapabilities)
 	}
 }
@@ -3340,7 +3341,7 @@ func TestBenchmarkCapabilityIsSupported(t *testing.T) {
 	_, internal := loadTestVariantForDir(t, dir)
 
 	analysis := analyzeTestingCapabilities(internal)
-	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, NewHashSet(supportedTestCapabilities()))
+	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, hashset.NewHashSet(supportedTestCapabilities()))
 
 	if len(declarations) != 1 || declarations[0].Name != "TestCalibrateLike" {
 		t.Fatalf("declarations = %#v, want just TestCalibrateLike", declarations)
@@ -3349,7 +3350,7 @@ func TestBenchmarkCapabilityIsSupported(t *testing.T) {
 	if declaration.Status != "included" {
 		t.Fatalf("TestCalibrateLike should be included (testing.Benchmark/B.N/BenchmarkResult.NsPerOp are supported), got status %q reason %q", declaration.Status, declaration.Reason)
 	}
-	required := NewHashSet(declaration.RequiredCapabilities)
+	required := hashset.NewHashSet(declaration.RequiredCapabilities)
 	for _, capability := range []string{"testing.Benchmark", "B.N", "BenchmarkResult.NsPerOp"} {
 		if !required.Contains(capability) {
 			t.Fatalf("required capabilities %v do not contain %q", declaration.RequiredCapabilities, capability)
@@ -3381,7 +3382,7 @@ func TestPerTestCapabilityAttributionBlocksOnlyOffendingTest(t *testing.T) {
 	_, internal := loadTestVariantForDir(t, dir)
 
 	analysis := analyzeTestingCapabilities(internal)
-	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, NewHashSet(supportedTestCapabilities()))
+	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, hashset.NewHashSet(supportedTestCapabilities()))
 
 	byName := map[string]testDeclaration{}
 	for _, declaration := range declarations {
@@ -3420,7 +3421,7 @@ func TestExampleDeclarationsAreDiscoveredAndDisclosed(t *testing.T) {
 	_, internal := loadTestVariantForDir(t, dir)
 
 	analysis := analyzeTestingCapabilities(internal)
-	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, NewHashSet(supportedTestCapabilities()))
+	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, hashset.NewHashSet(supportedTestCapabilities()))
 
 	byName := map[string]testDeclaration{}
 	for _, declaration := range declarations {
@@ -3558,7 +3559,7 @@ func TestMergedStaleGoImplementSpellingCollapses(t *testing.T) {
 	previous := testLocalTypePrefixes
 	t.Cleanup(func() { testLocalTypePrefixes = previous })
 	testLocalTypePrefixes = []string{"go.container.heap_package"}
-	interfaceImplementations["container.heap_package.Interface"] = NewHashSet([]string{PointerPrefix + "<IntHeap>"})
+	interfaceImplementations["container.heap_package.Interface"] = hashset.NewHashSet([]string{PointerPrefix + "<IntHeap>"})
 
 	writePackageInfoFile(fileName, true)
 
@@ -3659,7 +3660,7 @@ func TestWriteExternalVariantMetadataSplitsAnchors(t *testing.T) {
 	resetPackageState(&packages.Package{})
 	packageName = "value_test"
 	packageNamespace = "go"
-	interfaceImplementations["value_package.Interface"] = NewHashSet([]string{
+	interfaceImplementations["value_package.Interface"] = hashset.NewHashSet([]string{
 		"localSorter",            // bare ⇒ test anchor
 		"value_package.IntSlice", // production-qualified ⇒ production anchor
 	})
@@ -3723,7 +3724,7 @@ func TestWriteExternalVariantMetadataSplitsAnchors(t *testing.T) {
 	resetPackageState(&packages.Package{})
 	packageName = "value_test"
 	packageNamespace = "go"
-	interfaceImplementations["value_package.Interface"] = NewHashSet([]string{"value_package.IntSlice"})
+	interfaceImplementations["value_package.Interface"] = hashset.NewHashSet([]string{"value_package.IntSlice"})
 
 	unitName, err = writeExternalVariantMetadata(secondInfoPath, unitOnlyDir, "value", metadataClassPrefix("go", "value"), metadataClassPrefix("go", "value_test"), false)
 	if err != nil {
@@ -4084,7 +4085,7 @@ func TestTestVariantPinsProductionLiftedTypeNames(t *testing.T) {
 	// Seeded with the production conversion's claims (what convertTestVariants hands the INTERNAL
 	// variant): the very same lift must move off the pinned name.
 	seeded := t.TempDir()
-	seed := NewHashSet([]string{baseName})
+	seed := hashset.NewHashSet([]string{baseName})
 
 	if _, _, err := convertTestVariant(internal, testFileEntries(internal), seeded, "go", productionSeed{liftedTypeNames: seed}, options); err != nil {
 		t.Fatal(err)
@@ -4152,7 +4153,7 @@ func TestTestVariantPinsProductionBlankImportForces(t *testing.T) {
 	}
 
 	seeded := t.TempDir()
-	seed := productionSeed{importForces: NewHashSet([]string{"crypto/sha256"})}
+	seed := productionSeed{importForces: hashset.NewHashSet([]string{"crypto/sha256"})}
 
 	if _, _, err := convertTestVariant(internal, testFileEntries(internal), seeded, "go", seed, options); err != nil {
 		t.Fatal(err)
@@ -5144,8 +5145,8 @@ func TestTestVariantBridgeFollowsRenamedPackageVar(t *testing.T) {
 		testMethodRenames = nil
 		testTypeRenames = nil
 		whiteboxInternalTestObjects = nil
-		whiteboxBridgeDeclaredNames = HashSet[string]{}
-		whiteboxBridgeTypeNames = HashSet[string]{}
+		whiteboxBridgeDeclaredNames = hashset.HashSet[string]{}
+		whiteboxBridgeTypeNames = hashset.HashSet[string]{}
 	})
 
 	internalOptions := testVariantOptions(base, testProjectWhiteboxReference, false, bridgeName)
@@ -5579,7 +5580,7 @@ func TestHandOwnHostBridgedNameTheHostDeclaresIsNotGone(t *testing.T) {
 	}
 
 	// CONTROL: nothing declared by the host -- the pre-exemption behaviour, both files out.
-	control := excludedNames(markHandOwnHostExcludedTestFiles(internal, external, map[string]bool{}, NewHashSet[string](nil)))
+	control := excludedNames(markHandOwnHostExcludedTestFiles(internal, external, map[string]bool{}, hashset.NewHashSet[string](nil)))
 	if _, ok := control["declared_test.go"]; !ok {
 		t.Fatalf("control: with no host declaration, declared_test.go must be excluded, got %v", control)
 	}

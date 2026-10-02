@@ -25,6 +25,8 @@ import (
 	"go/ast"
 	"go/types"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 func (v *Visitor) typeExists(name string) bool {
@@ -158,7 +160,7 @@ func (v *Visitor) claimLiftedTypeName(name string) {
 	packageLock.Lock()
 
 	if packageLiftedTypeNames == nil {
-		packageLiftedTypeNames = HashSet[string]{}
+		packageLiftedTypeNames = hashset.HashSet[string]{}
 	}
 
 	packageLiftedTypeNames.Add(name)

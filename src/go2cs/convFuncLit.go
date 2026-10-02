@@ -14,6 +14,8 @@ import (
 	"go/token"
 	"go/types"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // numericBasicLit returns the (optionally sign-prefixed) INT or FLOAT basic literal behind
@@ -333,7 +335,7 @@ func (v *Visitor) objectOnlyCalled(obj types.Object, root ast.Node) bool {
 		return false
 	}
 
-	callees := HashSet[*ast.Ident]{}
+	callees := hashset.HashSet[*ast.Ident]{}
 
 	ast.Inspect(root, func(node ast.Node) bool {
 		if callExpr, ok := node.(*ast.CallExpr); ok {
@@ -614,10 +616,10 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	// paramNeedsHeapBox): the signature takes the incoming value under the `ʗp` name and the
 	// prologue injected below re-declares the Go name as the boxed ref alias.
 	boxedParamIdents := v.funcLitHeapBoxParamIdents(funcLit)
-	var boxedParamNames HashSet[string]
+	var boxedParamNames hashset.HashSet[string]
 
 	if len(boxedParamIdents) > 0 {
-		boxedParamNames = HashSet[string]{}
+		boxedParamNames = hashset.HashSet[string]{}
 
 		for _, ident := range boxedParamIdents {
 			boxedParamNames.Add(v.getIdentName(ident))

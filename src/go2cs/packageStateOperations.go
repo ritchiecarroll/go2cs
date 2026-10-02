@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ritchiecarroll/hashset"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -41,8 +42,8 @@ import (
 func resetPackageState(pkg *packages.Package) {
 	packageName = ""
 	packageNamespace = ""
-	projectImports = NewHashSet([]string{})
-	linknameHandles = NewHashSet([]string{})
+	projectImports = hashset.NewHashSet([]string{})
+	linknameHandles = hashset.NewHashSet([]string{})
 	cgoDynamicImports = nil
 	currentPackagePath = pkg.PkgPath
 	currentPackageGorootVendored = false
@@ -50,33 +51,33 @@ func resetPackageState(pkg *packages.Package) {
 	importedTypeAliases = make(map[string]string)
 	importedTypeAliasSourceDirs = make(map[string]string)
 	packageInlineFuncTypeNames = make(map[string]bool)
-	importedPointerImplements = HashSet[string]{}
-	importedValueImplements = HashSet[string]{}
-	importedRefPrimaries = HashSet[string]{}
+	importedPointerImplements = hashset.HashSet[string]{}
+	importedValueImplements = hashset.HashSet[string]{}
+	importedRefPrimaries = hashset.HashSet[string]{}
 	packageRefPrimaryRecords = nil
-	importedSStringTwins = HashSet[string]{}
+	importedSStringTwins = hashset.HashSet[string]{}
 	packageSStringTwinRecords = nil
-	constImportedTypeAliases = NewHashSet([]string{})
-	derivedTypeAliases = NewHashSet([]string{})
-	usedDerivedTypeAliases = NewHashSet([]string{})
-	qualifiedImportedTypeAliases = NewHashSet([]string{})
-	parsedPackageInfoFiles = NewHashSet([]string{})
-	interfaceImplementations = make(map[string]HashSet[string])
-	promotedInterfaceImplementations = make(map[string]HashSet[string])
+	constImportedTypeAliases = hashset.NewHashSet([]string{})
+	derivedTypeAliases = hashset.NewHashSet([]string{})
+	usedDerivedTypeAliases = hashset.NewHashSet([]string{})
+	qualifiedImportedTypeAliases = hashset.NewHashSet([]string{})
+	parsedPackageInfoFiles = hashset.NewHashSet([]string{})
+	interfaceImplementations = make(map[string]hashset.HashSet[string])
+	promotedInterfaceImplementations = make(map[string]hashset.HashSet[string])
 	constraintProxies = make(map[string][2]string)
-	nominalProductionConstraints = HashSet[string]{}
-	interfaceInheritances = make(map[string]HashSet[string])
-	adapterClassImplementations = HashSet[string]{}
-	implicitConversions = make(map[string]HashSet[string])
-	invertedImplicitConversions = make(map[string]HashSet[string])
-	indirectImplicitConversions = make(map[string]HashSet[string])
+	nominalProductionConstraints = hashset.HashSet[string]{}
+	interfaceInheritances = make(map[string]hashset.HashSet[string])
+	adapterClassImplementations = hashset.HashSet[string]{}
+	implicitConversions = make(map[string]hashset.HashSet[string])
+	invertedImplicitConversions = make(map[string]hashset.HashSet[string])
+	indirectImplicitConversions = make(map[string]hashset.HashSet[string])
 	conversionPackageUsings = make(map[string]string)
 	numericConversions = make(map[string]map[string]string)
 	indirectNumericConversions = make(map[string]map[string]string)
 	nameCollisions = make(map[string]bool)
 	globalTempVarCount = make(map[string]int)
 	packageDynamicTypeNames = make(map[string]string)
-	packageLiftedTypeNames = HashSet[string]{}
+	packageLiftedTypeNames = hashset.HashSet[string]{}
 	productionLiftedTypeNames = nil
 	productionAliasLiftedTypes = nil
 	productionDynamicTypeNames = nil
@@ -100,14 +101,14 @@ func resetPackageState(pkg *packages.Package) {
 	testLocalTypePrefixes = nil
 	packagePublicizedTypes = make(map[types.Object]bool)
 	packagePublicizedLiftedTypes = make(map[types.Type]bool)
-	packageEmittedTypeAccess = HashSet[string]{}
+	packageEmittedTypeAccess = hashset.HashSet[string]{}
 	packageCaptureModeMethods = make(map[*types.Func]bool)
 	packageCaptureModeBoxIdents = make(map[types.Object]bool)
 	packageDirectBoxReceiverMethods = make(map[*types.Func]bool)
 	packageRefReturnPrimaryMethods = make(map[*types.Func]bool)
 	initFuncCounter = 0
 	usesUnsafeCode = false
-	packageImportForces = HashSet[string]{}
+	packageImportForces = hashset.HashSet[string]{}
 	packageImportInits = map[string]string{}
 	packageRefLoweringResult = nil
 
@@ -186,22 +187,22 @@ func newFileVisitor(fset *token.FileSet, packageTypes *types.Package, info *type
 		info:                      info,
 		needsNoInlining:           needsNoInlining,
 		outputBuilder:             &strings.Builder{},
-		liftedTypeNames:           HashSet[string]{},
+		liftedTypeNames:           hashset.HashSet[string]{},
 		liftedTypeMap:             map[types.Type]string{},
 		liftedAnonStructNames:     map[string]string{},
 		subStructTypes:            map[types.Type][]types.Type{},
 		packageImports:            &strings.Builder{},
-		requiredUsings:            HashSet[string]{},
-		importQueue:               HashSet[string]{},
-		referencedForeignPackages: HashSet[string]{},
-		canonicalAliasImported:    HashSet[string]{},
-		importAliasesEmitted:      HashSet[string]{},
+		requiredUsings:            hashset.HashSet[string]{},
+		importQueue:               hashset.HashSet[string]{},
+		referencedForeignPackages: hashset.HashSet[string]{},
+		canonicalAliasImported:    hashset.HashSet[string]{},
+		importAliasesEmitted:      hashset.HashSet[string]{},
 		importAliasTargets:        map[string]string{},
 		importPathAliases:         map[string]string{},
 		typeAliasDeclarations:     &strings.Builder{},
 		standAloneComments:        map[token.Pos]string{},
 		sortedCommentPos:          []token.Pos{},
-		processedComments:         HashSet[token.Pos]{},
+		processedComments:         hashset.HashSet[token.Pos]{},
 		newline:                   "\r\n",
 		options:                   options,
 		globalIdentNames:          globalIdentNames,

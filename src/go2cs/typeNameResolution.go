@@ -47,6 +47,8 @@ import (
 	"go/ast"
 	"go/types"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // genericAliasTarget answers the TARGET of a Go 1.24 generic type alias (`type A[T any] = Box[T]`),
@@ -807,7 +809,7 @@ func (v *Visitor) usingAliasTypeQualifier(t types.Type) string {
 // (recursively) by t — through pointers, arrays/slices, maps, channels and generic type arguments.
 // Used by getScopeCheckedTypeName to decide whether the file-local package aliases for those packages
 // are all in scope.
-func (v *Visitor) collectCrossPackagePaths(t types.Type, paths HashSet[string]) {
+func (v *Visitor) collectCrossPackagePaths(t types.Type, paths hashset.HashSet[string]) {
 	switch tt := t.(type) {
 	case *types.Pointer:
 		v.collectCrossPackagePaths(tt.Elem(), paths)
@@ -858,7 +860,7 @@ func (v *Visitor) getScopeCheckedTypeName(t types.Type) string {
 		return aliased
 	}
 
-	paths := HashSet[string]{}
+	paths := hashset.HashSet[string]{}
 	v.collectCrossPackagePaths(t, paths)
 
 	for _, path := range paths.Keys() {

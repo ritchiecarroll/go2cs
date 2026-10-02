@@ -17,6 +17,8 @@ import (
 	"math"
 	"sort"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // rhsPointerCopyContext returns an IdentContext that forces the pointer (box) form when the
@@ -1131,7 +1133,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		!anyTypeIsString && !anyTypeIsUnsafePointer && v.lhsReusedInLaterRhs(lhsExprs, rhsExprs)
 
 	if tupleResult || lhsLen == reassignedCount || parallelHazard || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt && !anyTypeIsUnsafePointer {
-		leftExprs := HashSet[string]{}
+		leftExprs := hashset.HashSet[string]{}
 
 		// Go's partial redeclaration `a, b := f()` reuses any already-declared LHS variable and
 		// declares only the new ones. A single blanket `var` prefix would re-declare the reused

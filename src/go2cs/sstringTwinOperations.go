@@ -39,6 +39,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/ritchiecarroll/hashset"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -404,7 +405,7 @@ var sstringTwinRecordPattern = regexp.MustCompile(`^\[assembly: GoSStringTwin\("
 // ones read from imported packages, keyed by sstringTwinRecordKey. Reset with the other package state.
 var packageSStringTwinRecords []string
 
-var importedSStringTwins HashSet[string]
+var importedSStringTwins hashset.HashSet[string]
 
 func sstringTwinRecordKey(declaringPackageName string, functionName string) string {
 	return declaringPackageName + "|" + functionName

@@ -14,6 +14,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ritchiecarroll/hashset"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -93,8 +94,8 @@ func TestImplementRecordDedupesAcrossRenamedImportSpelling(t *testing.T) {
 	exportedTypeAliases["DirEntry"] = "go.io.fs_package.DirEntry"
 
 	// The SAME pair, registered under both spellings the two cast sites produce.
-	interfaceImplementations["DirEntry"] = NewHashSet([]string{PointerPrefix + "<unixDirent>"})
-	interfaceImplementations[ShadowVarMarker+"io.fs_package.DirEntry"] = NewHashSet([]string{PointerPrefix + "<unixDirent>"})
+	interfaceImplementations["DirEntry"] = hashset.NewHashSet([]string{PointerPrefix + "<unixDirent>"})
+	interfaceImplementations[ShadowVarMarker+"io.fs_package.DirEntry"] = hashset.NewHashSet([]string{PointerPrefix + "<unixDirent>"})
 
 	writePackageInfoFile(fileName, false)
 
@@ -131,7 +132,7 @@ func TestImplementRecordKeepsQualifiedRecordWhenNoAliasRecordExists(t *testing.T
 	packageNamespace = "go"
 
 	exportedTypeAliases["DirEntry"] = "go.io.fs_package.DirEntry"
-	interfaceImplementations[ShadowVarMarker+"io.fs_package.DirEntry"] = NewHashSet([]string{"dirEntry"})
+	interfaceImplementations[ShadowVarMarker+"io.fs_package.DirEntry"] = hashset.NewHashSet([]string{"dirEntry"})
 
 	writePackageInfoFile(fileName, false)
 
@@ -163,8 +164,8 @@ func TestImplementRecordKeepsDistinctImplementationsOfOneInterface(t *testing.T)
 	packageNamespace = "go"
 
 	exportedTypeAliases["DirEntry"] = "go.io.fs_package.DirEntry"
-	interfaceImplementations["DirEntry"] = NewHashSet([]string{PointerPrefix + "<unixDirent>"})
-	interfaceImplementations[ShadowVarMarker+"io.fs_package.DirEntry"] = NewHashSet([]string{PointerPrefix + "<unixDirent>", PointerPrefix + "<otherDirent>"})
+	interfaceImplementations["DirEntry"] = hashset.NewHashSet([]string{PointerPrefix + "<unixDirent>"})
+	interfaceImplementations[ShadowVarMarker+"io.fs_package.DirEntry"] = hashset.NewHashSet([]string{PointerPrefix + "<unixDirent>", PointerPrefix + "<otherDirent>"})
 
 	writePackageInfoFile(fileName, false)
 

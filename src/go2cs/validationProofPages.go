@@ -37,6 +37,8 @@ import (
 	"time"
 
 	"go2cs/internal/releasestamp"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 const (
@@ -131,7 +133,7 @@ func escapeProofCell(value string) string {
 // is a mismatch and never validates), but the union is what makes the renderer honest if that ever
 // changes.
 func proofVerdictNames(comparison testComparison) []string {
-	seen := HashSet[string]{}
+	seen := hashset.HashSet[string]{}
 	names := make([]string, 0, len(comparison.Go)+len(comparison.CSharp))
 
 	for name := range comparison.Go {
@@ -294,7 +296,7 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 	page.WriteString("| Test | `go test` | go2cs |\n")
 	page.WriteString("|:--|:--:|:--:|\n")
 
-	disclosedNames := HashSet[string]{}
+	disclosedNames := hashset.HashSet[string]{}
 	for _, name := range disclosed {
 		disclosedNames.Add(name)
 	}

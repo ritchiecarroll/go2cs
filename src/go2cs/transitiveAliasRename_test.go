@@ -11,6 +11,8 @@ package main
 import (
 	"go/types"
 	"testing"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // RED 9. A package reached only TRANSITIVELY — never imported by the package being converted — is still
@@ -159,7 +161,7 @@ func TestTypeReachedCollidingPackageRendersRenamedQualifier(t *testing.T) {
 	setShadowState(t, packageNS, nil)
 	computeImportAliasRenames(nil, production.Types, packageNS, "", "", false)
 
-	visitor := &Visitor{info: production.TypesInfo, pkg: production.Types, newline: "\n", referencedForeignPackages: HashSet[string]{}, importQueue: HashSet[string]{}}
+	visitor := &Visitor{info: production.TypesInfo, pkg: production.Types, newline: "\n", referencedForeignPackages: hashset.HashSet[string]{}, importQueue: hashset.HashSet[string]{}}
 	scope := production.Types.Scope()
 
 	made := scope.Lookup("made")

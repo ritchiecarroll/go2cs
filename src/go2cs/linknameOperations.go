@@ -15,6 +15,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ritchiecarroll/hashset"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -25,7 +26,7 @@ import (
 // generally, it does not name a specific puller), so the faithful C# emission is `public` — a
 // puller in a SEPARATE assembly can then reach the symbol through its forwarding property. Reset per
 // package alongside projectImports; populated by collectLinknameHandles.
-var linknameHandles HashSet[string]
+var linknameHandles hashset.HashSet[string]
 
 // conversionGraph is the CONVERT-SET dependency graph, built by the -stdlib and -recurse drivers and
 // nil for a single-package or -tests conversion. Set once the graph is built; read by
@@ -58,7 +59,7 @@ var currentPackagePath string
 // leave its import list incomplete) — distinct from an answer of "imports nothing", and the
 // difference is the whole point: see the fail-closed arm in linknamePullWouldCycle.
 type linknameCycleAnswer struct {
-	closure  HashSet[string]
+	closure  hashset.HashSet[string]
 	resolved bool
 }
 
@@ -114,7 +115,7 @@ func linknamePullWouldCycle(targetPath string, options Options) bool {
 
 // linknameTargetImportClosure returns the pull target's transitive import closure, loading it at most
 // once per target per platform.
-func linknameTargetImportClosure(targetPath string, options Options) (HashSet[string], bool) {
+func linknameTargetImportClosure(targetPath string, options Options) (hashset.HashSet[string], bool) {
 	key := targetPath + "|" + options.targetPlatform
 
 	if cached, found := linknameTargetClosures[key]; found {
@@ -175,7 +176,7 @@ func loadLinknameTargetImportClosure(targetPath string, options Options) linknam
 			return linknameCycleAnswer{}
 		}
 
-		closure := HashSet[string]{}
+		closure := hashset.HashSet[string]{}
 
 		var walk func(pkg *packages.Package)
 

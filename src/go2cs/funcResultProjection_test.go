@@ -13,6 +13,8 @@ import (
 	"go/types"
 	"strings"
 	"testing"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // The defect this locks in (H7 red 3, COORD 17e1ba0d2): crypto/internal/fips140/hmac's cast.go, new at
@@ -421,8 +423,8 @@ func TestProjectedGenericConstraintRecordsItsAdapter(t *testing.T) {
 		interfaceImplementations, adapterClassImplementations = previousImplementations, previousAdapterClasses
 	})
 
-	interfaceImplementations = make(map[string]HashSet[string])
-	adapterClassImplementations = HashSet[string]{}
+	interfaceImplementations = make(map[string]hashset.HashSet[string])
+	adapterClassImplementations = hashset.HashSet[string]{}
 
 	wrapped := visitor.convertToProjectedInterfaceType(constraint, checkConstraint, ptr, "src")
 	if !strings.HasPrefix(wrapped, "new ") {
@@ -457,7 +459,7 @@ func TestProjectedGenericConstraintRecordsItsAdapter(t *testing.T) {
 	// `keyedNamed[named]`. If this ever starts returning an adapter, the two-instantiation split has
 	// stopped being load-bearing and this test's green above means something else.
 	beforeUnsplit := interfaceImplementations
-	interfaceImplementations = make(map[string]HashSet[string])
+	interfaceImplementations = make(map[string]hashset.HashSet[string])
 
 	if unsplit := visitor.convertToInterfaceType(constraint, ptr, "src"); strings.HasPrefix(unsplit, "new ") {
 		t.Fatalf("the UNSPLIT conversion returned %q — Go has no return covariance, so asking types.Implements of the projected form must still decline", unsplit)
