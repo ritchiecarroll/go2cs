@@ -389,6 +389,11 @@ public static partial class testing_package
         if (TestFlagBridge.Parse() is { } status)
             return status;
 
+        // Go's next decision after the parse, in Go's position: -test.list lists and returns 0 without
+        // running a test (`if *matchList != "" { listTests(...); m.exitCode = 0; return }`).
+        if (runner.Listing)
+            return runner.ListTests();
+
         return runner.RunAll();
     }
 

@@ -73,9 +73,15 @@ public sealed class TestRunner
 
     public bool HasRun { get; private set; }
 
-    public nint ExitCode => m_failures == 0 && m_infrastructureFailures == 0 ? 0 : 1;
+    public nint ExitCode => m_listStatus ?? (m_failures == 0 && m_infrastructureFailures == 0 ? 0 : 1);
+
+    // Set only by ListTests: a listing run's status is the listing's, never a test verdict's.
+    private int? m_listStatus;
 
     internal string Package => m_registry.Package;
+
+    // -test.list was given: M.Run lists instead of running.
+    internal bool Listing => m_options.ListPattern.Length > 0;
 
     internal string WorkingDirectory { get; }
 
@@ -100,13 +106,7 @@ public sealed class TestRunner
             // suite reads differently in any other order: google/uuid's TestRandPool leaves the package's random
             // source exhausted, and Go runs it AFTER TestRandomUUID. The name stays as the last key, so a
             // registration without a Go source position keeps the name order it always had.
-            List<RegisteredTest> tests = m_registry.Tests
-                .Where(test => m_options.ShouldRun(test.Name))
-                .OrderBy(test => IsExternalTest(test) ? 1 : 0)
-                .ThenBy(test => test.Source, StringComparer.Ordinal)
-                .ThenBy(test => test.Line)
-                .ThenBy(test => test.Name, StringComparer.Ordinal)
-                .ToList();
+            List<RegisteredTest> tests = InGoOrder(m_registry.Tests.Where(test => m_options.ShouldRun(test.Name))).ToList();
 
             if (m_options.ShuffleSeed is int seed)
                 Shuffle(tests, unchecked(seed + count));
@@ -140,6 +140,57 @@ public sealed class TestRunner
         m_reporter.ReportPackage(ExitCode == 0 ? "pass" : "fail", packageTimer.Elapsed.TotalSeconds);
         return ExitCode;
     }
+
+    /// <summary>
+    /// <c>-test.list</c>: prints each registered test whose name matches the pattern, one per line, and
+    /// runs nothing -- Go's M.Run hands the same pattern to listTests and returns 0 before a test starts.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The pattern is matched unanchored against the WHOLE name, as Go's <c>matchString</c> does (it is
+    /// not -run's <c>/</c>-split), and in the order the run would use, which is Go's m.tests order.
+    /// An invalid pattern is Go's message and status 1. Go exits there; the status is returned instead,
+    /// so the in-process tier survives it and a real binary exits with the same code.
+    /// </para>
+    /// <para>
+    /// Go also lists benchmarks, fuzz targets and examples. The registry carries none of them (Phase 4D
+    /// registers tests only), so a listing here names tests only. A pattern that matches nothing, which
+    /// is x/sync/singleflight's control case (<c>-test.list=^$</c>), prints nothing on both sides.
+    /// </para>
+    /// </remarks>
+    public nint ListTests()
+    {
+        HasRun = true;
+
+        Regex pattern;
+
+        try
+        {
+            pattern = new Regex(m_options.ListPattern, RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1.0D));
+        }
+        catch (ArgumentException ex)
+        {
+            Console.Error.Write($"testing: invalid regexp in -test.list (\"{m_options.ListPattern}\"): {ex.Message}\n");
+            m_listStatus = 1;
+            return 1;
+        }
+
+        foreach (RegisteredTest test in InGoOrder(m_registry.Tests))
+        {
+            if (pattern.IsMatch(test.Name))
+                TestReporter.WriteEventLine(test.Name);
+        }
+
+        m_listStatus = 0;
+        return 0;
+    }
+
+    // GO'S ORDER, not the names' (D4). See RunAll, the reason this order exists; ListTests takes the same one.
+    private static IEnumerable<RegisteredTest> InGoOrder(IEnumerable<RegisteredTest> tests) => tests
+        .OrderBy(test => IsExternalTest(test) ? 1 : 0)
+        .ThenBy(test => test.Source, StringComparer.Ordinal)
+        .ThenBy(test => test.Line)
+        .ThenBy(test => test.Name, StringComparer.Ordinal);
 
     internal bool RunChild(TestExecution parent, string requestedName, Action<ж<testing_package.T>> action)
     {

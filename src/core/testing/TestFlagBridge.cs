@@ -196,7 +196,7 @@ internal static class TestFlagBridge
         registrar.Uint("test.count", (nuint)options.Count, "run tests and benchmarks `n` times");
         registrar.String("test.coverprofile", "", "write a coverage profile to `file`");
         registrar.String("test.gocoverdir", "", "write coverage intermediate files to this directory");
-        registrar.String("test.list", "", "list tests, examples, and benchmarks matching `regexp` then exit");
+        registrar.String("test.list", options.ListPattern, "list tests, examples, and benchmarks matching `regexp` then exit");
         registrar.String("test.run", options.RunPattern, "run only tests and examples matching `regexp`");
         registrar.String("test.skip", options.SkipPattern, "do not list or run tests matching `regexp`");
         registrar.String("test.memprofile", "", "write an allocation profile to `file`");
