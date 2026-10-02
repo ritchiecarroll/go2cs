@@ -6619,8 +6619,22 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 func publishTestHost(outputPath, testProject string, options Options) error {
 	binlog := preparePublishBinlog(outputPath, options)
 	args := withPublishBinlog(publishTestHostArgs(outputPath, testProject, options), binlog)
-	_, err := runCommandWithTimeout(options.testTimeout, outputPath, options, "dotnet", args...)
+	_, err := runCommandWithTimeout(testPublishTimeout(options), outputPath, options, "dotnet", args...)
 	return settlePublishBinlog(binlog, err)
+}
+
+// testPublishTimeoutFloor is the least time publishTestHost gives `dotnet publish`. -test-timeout is
+// the PACKAGE deadline (2m by default), and the first publish on a fresh tree builds the test
+// project's whole standard-library closure, which takes far longer: under the bare deadline every
+// package of a first module run read "dotnet timed out after 2m0s". A warm publish is incremental,
+// so the floor only costs time when a publish is genuinely hung.
+const testPublishTimeoutFloor = 30 * time.Minute
+
+// testPublishTimeout is the budget publishTestHost gives `dotnet publish`: -test-timeout, but never
+// less than testPublishTimeoutFloor. The deadlines handed to the go and converted test runs are
+// unaffected.
+func testPublishTimeout(options Options) time.Duration {
+	return max(options.testTimeout, testPublishTimeoutFloor)
 }
 
 // publishTestHostArgs is the `dotnet` argument list publishTestHost runs, split out so the command a
