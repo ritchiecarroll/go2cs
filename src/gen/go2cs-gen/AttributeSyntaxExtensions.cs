@@ -24,8 +24,18 @@ public static class AttributeSyntaxExtensions
 
     public static (ITypeSymbol? typeArg1, ITypeSymbol? typeArg2) Get2GenericTypeArguments(this AttributeSyntax attributeSyntax, GeneratorSyntaxContext context)
     {
-        // Check if the attribute type is generic
-        if (attributeSyntax.Name is not GenericNameSyntax genericName)
+        // Check if the attribute type is generic. A namespace-qualified spelling (`go.GoImplement<…>`,
+        // `global::go.GoImplement<…>`) is the same attribute — the finder matches its SYMBOL — so its
+        // generic name is read from the qualified name's right-hand side.
+        GenericNameSyntax? genericName = attributeSyntax.Name switch
+        {
+            GenericNameSyntax name => name,
+            QualifiedNameSyntax { Right: GenericNameSyntax right } => right,
+            AliasQualifiedNameSyntax { Name: GenericNameSyntax aliased } => aliased,
+            _ => null
+        };
+
+        if (genericName is null)
             return (null, null);
 
         // Get the type arguments

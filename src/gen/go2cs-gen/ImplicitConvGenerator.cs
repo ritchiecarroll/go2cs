@@ -62,16 +62,29 @@ public class ImplicitConvGenerator : ISourceGenerator
             SemanticModel semanticModel = context.Compilation.GetSemanticModel(syntaxTree);
 
             string packageNamespace = GetNamespace(namespaceSyntax) ?? Namespace;
-            string packageClassName = GetFirstClassName(compilationUnit) ?? throw new MissingMemberException($"No package class found in same file as [assembly: {AttributeName}]");
+            // A record this generator cannot use costs its own conversion only, never the whole
+            // generator's output (a throw contributed nothing). A WARNING: a missing conversion
+            // operator cannot pass silently, it fails to compile at the conversion it was for.
+            string? packageClassName = GetFirstClassName(compilationUnit);
+
+            if (packageClassName is null)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.MalformedRecord, attributeSyntax.GetLocation(), attributeSyntax.ToString(), "its file declares no package class to hold the conversion"));
+                continue;
+            }
+
             string packageName = packageClassName.EndsWith(PackageSuffix) ? packageClassName[..^PackageSuffix.Length] : packageClassName;
 
             string[] usingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel);
 
             // Extract generic type arguments from "GoImplicitConv"
             (ITypeSymbol? sourceType, ITypeSymbol? targetType) = attributeSyntax.Get2GenericTypeArguments(syntaxContext);
-            
+
             if (sourceType is null || targetType is null)
-                throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, must specify two generic type arguments.");
+            {
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.MalformedRecord, attributeSyntax.GetLocation(), attributeSyntax.ToString(), "it must name two resolvable type arguments"));
+                continue;
+            }
 
             if (sourceType.TypeKind != TypeKind.Struct)
                 // Source is not a struct (e.g. a defined type over a non-struct underlying). This one
