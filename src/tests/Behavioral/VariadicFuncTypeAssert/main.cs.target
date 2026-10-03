@@ -50,13 +50,13 @@ internal static void Main() {
             fmt.Println(noMatchForStringˢ);
         }
     }
-    any plain = (@string s) => s + "!"u8;
+    any plain = @string (@string s) => s + "!"u8;
     {
         var (fnΔ2, ok) = plain._<Func<@string, @string>>(ᐧ); if (ok) {
             fmt.Println(fnΔ2("ok"u8));
         }
     }
-    any direct = ((Funcꓸꓸꓸ<any, @string>)((params ꓸꓸꓸany argsʗp) => {
+    any direct = ((Funcꓸꓸꓸ<any, @string>)(@string (params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();
         return fmt.Sprint(args.ꓸꓸꓸ);
     }));
@@ -91,7 +91,7 @@ internal static void Main() {
             fmt.Println(elementNoMatchˢ);
         }
     }
-    any directPlain = (@string s) => s + "?"u8;
+    any directPlain = @string (@string s) => s + "?"u8;
     {
         var (f, ok) = directPlain._<Func<@string, @string>>(ᐧ); if (ok){
             fmt.Println(directPlainˢ, f("z"u8));

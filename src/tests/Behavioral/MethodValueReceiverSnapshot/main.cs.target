@@ -75,7 +75,7 @@ internal static void Main() {
         var bʗ1 = b;
     var boxed = new any[]{
         () => bʗ1.label(),
-        () => Ꮡb.Value.Inlined
+        bool () => Ꮡb.Value.Inlined
     }.slice();
     b.Name = "B"u8;
     fmt.Println(boxedˢ, boxed[0]._<Func<@string>>()(), boxed[1]._<Func<bool>>()());
