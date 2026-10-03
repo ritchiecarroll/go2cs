@@ -1135,6 +1135,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
 
     [TestMethod]
+    public void CheckNamedCompositeGenericArg() => CheckTarget("NamedCompositeGenericArg");
+
+    [TestMethod]
     public void CheckNamedConstConversionPrecedence() => CheckTarget("NamedConstConversionPrecedence");
 
     [TestMethod]

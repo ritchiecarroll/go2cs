@@ -561,6 +561,25 @@ Three further shapes in the same family were fixed with it, all first measured a
 
 Every one of the four is an ADDITION to the existing trigger set rather than a replacement, and each is gated on a property that is arithmetic rather than heuristic (is this argument a function reference; did this position receive an argument; is the written list shorter than the resolved one). That is what keeps the footprint at exactly the shapes that were failing: **CNR at 645 behavioral packages moves only the guard project itself, and a seeded reconvert of the whole converted standard library re-emits 4,173 artifacts byte for byte** (0 changed, 0 new; marker gate 0 violations across 78 marked files) — `slices` and `maps` included, whose own production code leans hardest on the inference this arc is about. Guarded by the `MethodGroupGenericArg` extension, which fails on the pre-change converter with exactly the `slices` error set — CS0411 ×4 (instantiated method-group argument, empty variadic, bare-ident generic value ×2) plus CS0305 ×1 (partial instantiation) — and passes after.
 
+### A NAMED composite argument at an UNNAMED composite parameter
+
+`keys[V any](m map[int]V)` called `keys(names)` with `type Names map[int]string`: Go infers `V` through the named
+type's underlying type. The named type emits as a wrapper struct (`partial struct Names`) that reaches
+`map<nint, V>` only by a user-defined implicit conversion, and C# type inference never looks through a user-defined
+conversion, so the bare call is CS0411 (the hashset module's test, 2026-10-03). `callPassesNamedCompositeToCompositeParam`
+adds the shape to the trigger set: an argument whose type is a NAMED map, slice, channel or array, at a parameter
+whose declared type is an UNNAMED map, slice, channel or array mentioning a type parameter. The call then spells
+the resolved arguments, `keys<@string>(names)`, `total<float64>(scores)`, `drain<nint>(feed)`, `first<nint>(grid)`,
+and the conversion applies once the parameter type is closed.
+
+Three neighbours keep their bare form. An unnamed argument (`keys(map[int]string{...})`) already has the
+parameter's shape. A named argument at a bare type-parameter position (`ident[T any](v T)`) infers the wrapper
+itself. A named FUNC type emits as a delegate that the parameter's delegate type infers from, measured compiling
+before the fix. The type-aware census of the shape read 0 sites in the converted standard library (production on
+three targets, tests on two) and 0 across the behavioral corpus, so the footprint is the guard alone. Guarded by
+`namedCompositeGenericArg_test.go` and the `NamedCompositeGenericArg` behavioral test, which fails on the pre-change
+converter with CS0411 x4, one per composite kind.
+
 ## The `comparable` constraint
 
 Go's built-in `comparable` admits every `==`-able Go type — numerics, strings, pointers, channels, and comparable structs/arrays/interfaces. No C# constraint can express that set: golib's old `comparable<T>` CRTP interface was implemented by *nothing* (every real instantiation failed — `maps.Keys[M ~map[K]V, K comparable]` could not be used at all), and lifting `IEqualityOperators` would reject structs, which Go admits. A `comparable` type parameter therefore emits **no C# constraint at all** — no `where` clause — relying on the two facts that make it sound: Go's checker already validated every instantiation, and emitted equality on type parameters routes through `AreEqual`, never operator `==`.
