@@ -368,7 +368,11 @@ public static partial class GoReflect
             if (name.Length > 0 && char.IsLower(name[0]))
                 return UnexportedMethodRefusal(interfaceEntry, "reflect: Call of unexported method");
 
-            Type dynamicType = GoDynamicTypeOf(bindTarget);
+            // The dynamic TYPE is read off the receiver as the interface holds it, not off
+            // bindTarget: a nil-wrapped named func unwraps to a null bind target (its Go value IS
+            // nil), and only its adapter still carries the type. GoDynamicTypeOf answers that
+            // shell from the adapter's declared wrapped type; handed the null it dereferenced it.
+            Type dynamicType = GoDynamicTypeOf(receiver!);
             int dynamicIndex = GoMethodIndex(dynamicType, name);
 
             // Past both of Go's refusals, a miss has no Go meaning left — it is a genuine lookup
