@@ -50,7 +50,7 @@ using static go.@internal.coverage.cformat_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/cformat/format.go", "format.cs", "AFSoAYIABRTCgpSCgoKCgoKUrLKClIKCgoKClIKCgoKCuJSuwoKCgoCCyICCpICCpICCpICCpAADFOKClIKCgqaAgqSCgoKClIKClIKCgoKApsissoKCgqiCgoCUxoCCtpaCkoKCgpSClIKCgoKmgoCCpICCyIKAgrgABhQACwKClIKClJSCkoKWgoKClIKC3oKCgoKCkpKCgoKU1oKAlLaCgoKCgpSCgpSUgILIgoKCpoCCtoCUpA==", "143-164:1;221-233:1;281-286:1;313-318:2;319-334:3")]
+[assembly: go.GoPositionMap("internal/coverage/cformat/format.go", "format.cs", "AFSoAYIABRTCgpSCgoKCgoKUrLKClIKCgoKClIKCgoKCuJSuwoKCgoCCyICCpICCpICCpICCpAADFOKClIKCgqaAgqSCgoKClIKClIKCgoKApsissoKCgqiCgoCUtIKAgraWgpKCgoKUgpSCgoKCpoKAgqSAgsiCgIK4AAYUAAsCgpSCgpSUgpKCloKCgpSCgt6CgoKCgpKSgoKClNaCgJS2goKCgoKUgoKUlICCyIKCgqaAgraAlKQ=", "143-164:1;221-233:1;281-286:1;313-318:2;319-334:3")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
