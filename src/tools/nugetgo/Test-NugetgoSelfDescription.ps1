@@ -60,7 +60,8 @@ try {
     Check 'a go.-prefixed -ThirdPartyPackage id is refused, in any letter case' ("$why" -like '*nuget-id "Go.Example.Com.Dep" uses the "go." prefix, which is the converted Go standard library; the ID of a converted module starts with "nugetgo."*') "got '$why'"
     foreach ($id in @('gopher.example.com.dep', 'Example.go.Dep', 'go-x.dep', 'go')) {
         $why = $null
-        $accepted = try { @(Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($rootLib) -ThirdPartyPackage @("example.com/dep=$id@1.0.0")) } catch { $why = $_.Exception.Message; @() }
+        # @( ) around the try: its output unrolls a one-element array to the bare object, which has no .Count in Windows PowerShell 5.1.
+        $accepted = @(try { @(Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($rootLib) -ThirdPartyPackage @("example.com/dep=$id@1.0.0")) } catch { $why = $_.Exception.Message; @() })
         Check "-ThirdPartyPackage id '$id' does not take the go. prefix: accepted" ($accepted.Count -eq 1 -and $accepted[0].NuGetId -ceq $id) "got $($accepted.Count) require(s), refusal '$why'"
     }
     $why = Refusal { Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($rootLib) -ThirdPartyPackage @('example.com/dep=go.example.com.dep') }
