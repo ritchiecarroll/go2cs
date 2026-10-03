@@ -229,6 +229,8 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			for _, loadError := range pkg.Errors {
 				reportDiagnostic(loadError.Pos, loadErrorCode(loadError.Kind), loadError.Msg)
 			}
+
+			recordUntypedOperands(pkg)
 		}
 	}
 
