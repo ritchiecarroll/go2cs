@@ -429,7 +429,11 @@ func TestRecurseNuGetPinsTheCompileRidToTheTarget(t *testing.T) {
 	cases := map[string]string{
 		"linux/amd64":   "linux-x64",
 		"windows/amd64": "win-x64",
-		"darwin/amd64":  "",
+		// Both Mac RIDs ship the same darwin build; the pin names the one matching the target's arch.
+		"darwin/amd64": "osx-x64",
+		"darwin/arm64": "osx-arm64",
+		// A GOOS no go.* flavor ships for: no pin, so the compile surface stays the reference flavor.
+		"freebsd/amd64": "",
 	}
 
 	for target, rid := range cases {
