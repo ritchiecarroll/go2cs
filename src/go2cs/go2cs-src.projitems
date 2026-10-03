@@ -144,6 +144,7 @@
     <None Include="$(MSBuildThisFileDirectory)go.mod" />
     <None Include="$(MSBuildThisFileDirectory)go.sum" />
     <None Include="$(MSBuildThisFileDirectory)goFrameOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)goStmtReceiverBoxMethodGroup_test.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault_test.go" />
     <None Include="$(MSBuildThisFileDirectory)h5MemberBillGuard_test.go" />
@@ -264,6 +265,7 @@
     <None Include="$(MSBuildThisFileDirectory)packageInfoWriter.go" />
     <None Include="$(MSBuildThisFileDirectory)packageInitFacts.go" />
     <None Include="$(MSBuildThisFileDirectory)packageStateOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)parenFuncLitGoDeferCallee_test.go" />
     <None Include="$(MSBuildThisFileDirectory)perUnitAliasRenames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformEmit.go" />
     <None Include="$(MSBuildThisFileDirectory)platformHandOwn.go" />
