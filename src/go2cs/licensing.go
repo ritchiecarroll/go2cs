@@ -214,7 +214,7 @@ func licenseConvertedProjectFor(contents []byte, projectFile string, sourceDir s
 				props = "<PackageLicenseFile>" + xmlLicenseText(name) + "</PackageLicenseFile>"
 				fmt.Fprintf(&items, "    <None Include=\"%s\" Pack=\"true\" PackagePath=\"\" Condition=\"!%s\" />\n", xmlLicenseText(relative), localLicenseExists)
 			} else {
-				warnUnspecifiedLicense(projectFile, sourceDir)
+				warnUnspecifiedLicense(projectFile, sourceDir, options)
 			}
 		}
 	}
@@ -370,15 +370,25 @@ func licenseSamePath(a string, b string) bool {
 // library packages gets one line on stderr, not forty.
 var unspecifiedLicenseWarned sync.Map
 
-func warnUnspecifiedLicense(projectFile string, sourceDir string) {
+func warnUnspecifiedLicense(projectFile string, sourceDir string, options Options) {
 	key := filepath.Dir(projectFile)
+	root := licenseModuleRoot(sourceDir)
 
-	if root := licenseModuleRoot(sourceDir); root != "" {
+	if root != "" {
 		key = root
 	}
 
 	if _, seen := unspecifiedLicenseWarned.LoadOrStore(key, true); seen {
 		return
+	}
+
+	// The application's own module is the user's to license, so its license file is never copied
+	// (thirdPartyModuleLicense); when its root has one, the warning names it instead of implying none.
+	if root != "" && options.mainModuleDir != "" && licenseSamePath(root, options.mainModuleDir) {
+		if name := licenseModuleFile(root); name != "" {
+			showWarning("Package license is unspecified for %s (reported once per module); the module root's %s is not packed for the application's own module unless it is placed beside the project, or pass -license with an SPDX expression before packing.", projectFile, name)
+			return
+		}
 	}
 
 	showWarning("Package license is unspecified for %s (reported once per module); add a LICENSE beside the project or pass -license with an SPDX expression before packing.", projectFile)

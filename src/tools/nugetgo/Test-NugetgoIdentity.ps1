@@ -81,5 +81,43 @@ foreach ($c in $vs) {
     else { Check $label ($r.Refused -and $null -eq $r.Version -and $r.Reason -like "*$($c[4])*") "got '$($r.Version)' refused $($r.Refused) '$($r.Reason)'" }
 }
 
+Write-Host 'B6 -- the module license file'
+Import-Module (Join-Path $PSScriptRoot 'NugetgoLicense.psm1') -Force
+# ONE list: the converter's moduleLicenseNames (src/go2cs/licensing.go) and this module's copy, same names, same order.
+$licensingGo = Join-Path (Split-Path (Split-Path $PSScriptRoot)) 'go2cs/licensing.go'
+$goBlock = [regex]::Match([System.IO.File]::ReadAllText($licensingGo), '(?s)var moduleLicenseNames = \[\]string\{(.*?)\}')
+$goNames = @([regex]::Matches($goBlock.Groups[1].Value, '"([^"]+)"') | ForEach-Object { $_.Groups[1].Value })
+$psNames = @(Get-NugetgoLicenseNames)
+Check 'license names: the pack module''s list IS licensing.go''s moduleLicenseNames, in order' ($goBlock.Success -and $goNames.Count -gt 0 -and
+    $goNames.Count -eq $psNames.Count -and -not @(for ($i = 0; $i -lt $goNames.Count; $i++) { if ($goNames[$i] -cne $psNames[$i]) { $i } }).Count) "licensing.go [$($goNames -join ', ')] vs pack [$($psNames -join ', ')]"
+
+$licenseRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('nugetgo-license-' + [guid]::NewGuid().ToString('N'))
+try {
+    $mdOnly = New-Item -ItemType Directory -Force (Join-Path $licenseRoot 'md-only')
+    Set-Content -LiteralPath (Join-Path $mdOnly 'LICENSE.md') -Value 'Upstream terms'
+    Set-Content -LiteralPath (Join-Path $mdOnly 'go.mod') -Value 'module example.com/mdonly'
+    $r = Find-NugetgoModuleLicense -ModuleDir $mdOnly
+    Check 'a module shipping LICENSE.md only: accepted under its own name' ($r.Name -ceq 'LICENSE.md' -and $r.Path -eq (Join-Path $mdOnly 'LICENSE.md') -and $null -eq $r.Reason) "got Name '$($r.Name)' Reason '$($r.Reason)'"
+
+    $both = New-Item -ItemType Directory -Force (Join-Path $licenseRoot 'both')
+    Set-Content -LiteralPath (Join-Path $both 'COPYING') -Value 'Upstream terms'
+    Set-Content -LiteralPath (Join-Path $both 'License.txt') -Value 'Upstream terms'
+    $r = Find-NugetgoModuleLicense -ModuleDir $both
+    Check 'preference order, spelled as the directory spells it: License.txt before COPYING' ($r.Name -ceq 'License.txt') "got Name '$($r.Name)'"
+
+    $none = New-Item -ItemType Directory -Force (Join-Path $licenseRoot 'none')
+    Set-Content -LiteralPath (Join-Path $none 'go.mod') -Value 'module example.com/none'
+    New-Item -ItemType Directory -Force (Join-Path $none 'LICENSE') | Out-Null   # a DIRECTORY named LICENSE is not a license file
+    $r = Find-NugetgoModuleLicense -ModuleDir $none
+    Check 'a module shipping no license file: refused by name' ($null -eq $r.Name -and $r.Reason -like "*no license file in $none*" -and $r.Reason -like '*COPYING.txt*') "got Name '$($r.Name)' Reason '$($r.Reason)'"
+}
+finally { Remove-Item -Recurse -Force -LiteralPath $licenseRoot -ErrorAction SilentlyContinue }
+
+# The pack script takes its license from the shared lookup and packs it under the upstream file's own name.
+$pack = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'nugetgo-pack.ps1'))
+Check 'nugetgo-pack.ps1 resolves the module license through Find-NugetgoModuleLicense' ($pack.Contains('Find-NugetgoModuleLicense -ModuleDir') -and -not $pack.Contains("'LICENSE') }")) 'the pack script still hard-codes LICENSE'
+Check 'nugetgo-pack.ps1 packs the license under its own name' ($pack.Contains('<PackageLicenseFile>$(& $esc $licenseName)</PackageLicenseFile>') -and
+    $pack.Contains('<None Include="$(& $esc $licenseName)" Pack="true" PackagePath="" />') -and -not $pack.Contains('<None Include="LICENSE" Pack="true"')) 'the pack project still names LICENSE literally'
+
 Write-Host "ran $ran, failed $failed"
 exit $failed
