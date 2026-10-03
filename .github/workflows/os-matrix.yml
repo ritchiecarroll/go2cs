@@ -46,7 +46,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that feed on this flavor''s legs)'
         type: choice
         required: true
         default: census
@@ -56,6 +56,7 @@ on:
           - behavioral-full
           - behavioral-stderr
           - sweep-shard
+          - release-smoke
       filter:
         description: 'Shard filter — package substring for sweep-shard, project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr.'
         type: string
@@ -225,6 +226,10 @@ jobs:
                                          # the headroom the table's own doctrine asks for.
               'sweep-shard'      = 210   # one -tests convert/build/run/compare cycle per matched
                                          # row; the sweep's own per-package floors reach 120m.
+              'release-smoke'    = 90    # the LEG only (the pack job has its own budget): converter
+                                         # go build + four small restore/build/run arms against the
+                                         # feed, each restoring into a fresh cache. PROVISIONAL
+                                         # until the first run.
           }
 
           $entries = foreach ($t in $targets) {
@@ -259,10 +264,94 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "run-timeout=$runTimeout" -Encoding utf8
 
   # ---------------------------------------------------------------------------------------------
+  # pack — release-smoke only: the release's own pack, as a rehearsal, on a hosted Windows runner.
+  # ---------------------------------------------------------------------------------------------
+  # push-nuget.ps1 -VersionSuffix is PACK-ONLY by construction: it bumps nothing, tags nothing, writes
+  # nothing under docs/validation and pushes nothing (its own parameter contract). It builds and packs
+  # one flavor per GoTargetOS and merges them, which is the only RELEASE-configuration build of the
+  # darwin flavor anywhere (the census above compiles Debug). The merged feed is what the legs consume.
+  # Windows PowerShell, as on the release machine: release-nuget.ps1 drives this script through
+  # `powershell`, and the script declares 5.1.
+  pack:
+    needs: plan
+    if: needs.plan.outputs.stage == 'release-smoke'
+    runs-on: windows-latest
+    # PROVISIONAL: three Release build+pack passes of the whole stdlib solution on a 4-core runner
+    # (the i7 measures ~17 min per pass); never yet run on a hosted runner.
+    timeout-minutes: 240
+    steps:
+      - name: Checkout (full history and tags -- the pre-flight reads release tags and snapshots)
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go (pinned to the corpus release)
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ needs.plan.outputs.go-version }}
+          check-latest: false
+          cache-dependency-path: src/go2cs/go.sum
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ needs.plan.outputs.dotnet }}
+
+      - name: Pack every go.* package (rehearsal)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Continue'
+          New-Item -ItemType Directory -Force -Path 'artifacts' | Out-Null
+          $feed = Join-Path $PWD 'feed'
+          $log = Join-Path $PWD 'artifacts/pack.log'
+          $suffix = "ci.${{ github.run_id }}"
+
+          $sw = [System.Diagnostics.Stopwatch]::StartNew()
+          & powershell -NoProfile -ExecutionPolicy Bypass -File src/push-nuget.ps1 -VersionSuffix $suffix -OutDir $feed *>&1 |
+              Tee-Object -FilePath $log
+          $packExit = $LASTEXITCODE
+          $sw.Stop()
+
+          $count = @(Get-ChildItem $feed -Filter *.nupkg -File -ErrorAction SilentlyContinue).Count
+          $summary = @(
+              '## Release-smoke pack (windows-latest)'
+              ''
+              "push-nuget.ps1 -VersionSuffix $suffix -- exit ``$packExit`` after $([int]$sw.Elapsed.TotalMinutes) min; $count merged package(s)"
+              ''
+              '```'
+          ) + @(Get-Content -LiteralPath $log | Select-String -Pattern '==> (Layout L3|Flavor comparison|  of |Merged|Shipped shape|Packed|\[)' | ForEach-Object { $_.Line }) + @('```')
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title 'release-smoke pack' -Lines $summary
+
+          if ($packExit -eq 0 -and $count -eq 0) { Write-Host '::error::the pack reported success and produced no package'; exit 1 }
+          exit $packExit
+
+      - name: Upload the feed
+        uses: actions/upload-artifact@v6
+        with:
+          name: release-smoke-feed
+          # The merged packages only; the per-flavor _flavors/ packs are inspection copies.
+          path: feed/*.nupkg
+          retention-days: 3
+          if-no-files-found: error
+
+      - name: Upload the pack log
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: release-smoke-pack-log
+          path: artifacts/
+          retention-days: 7
+          if-no-files-found: warn
+
+  # ---------------------------------------------------------------------------------------------
   # run — one leg per (goos, runner, rid).
   # ---------------------------------------------------------------------------------------------
   run:
-    needs: plan
+    needs: [plan, pack]
+    # pack runs for release-smoke only; every other stage sees it SKIPPED and must still run. A failed
+    # pack leaves the smoke legs nothing to consume, so they do not start.
+    if: ${{ !cancelled() && needs.plan.result == 'success' && (needs.pack.result == 'success' || needs.pack.result == 'skipped') }}
     name: ${{ needs.plan.outputs.stage }} (${{ matrix.goos }} / ${{ matrix.rid }})
     runs-on: ${{ matrix.runner }}
     timeout-minutes: ${{ matrix.timeout }}
@@ -1123,6 +1212,59 @@ jobs:
           & ./.github/annotate-summary.ps1 -Title "sweep $goos/$rid" -Lines $summary
 
           exit $sweepExit
+
+      # -------------------------------------------------------------------------------------
+      # release-smoke — consume the pack job's feed the way a user does, on this leg's host.
+      # -------------------------------------------------------------------------------------
+      - name: Release smoke — download the feed
+        if: needs.plan.outputs.stage == 'release-smoke'
+        uses: actions/download-artifact@v5
+        with:
+          name: release-smoke-feed
+          path: feed
+
+      - name: Release smoke — rid compile asset, sample, behavioral, walkthrough (measured)
+        if: needs.plan.outputs.stage == 'release-smoke'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          $goos = $env:GOOS_TARGET
+          $rid = $env:RID
+          $art = Join-Path $PWD 'artifacts'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+
+          # The consumer projects are NOT corpus projects; the leg-wide GoTargetOS binding must not
+          # reach their builds as a global property.
+          Remove-Item Env:GoTargetOS -ErrorAction SilentlyContinue
+
+          # The converter, built from this tree (the tree the feed was packed from).
+          $exeName = if ($IsWindows) { 'go2cs.exe' } else { 'go2cs' }
+          Push-Location 'src/go2cs'
+          try { & go build -o "bin/$exeName" . ; $goExit = $LASTEXITCODE } finally { Pop-Location }
+          if ($goExit -ne 0) { Write-Host "::error::converter go build failed with exit $goExit"; exit $goExit }
+
+          $work = Join-Path $art "release-smoke-$goos-$rid"
+          $log = Join-Path $art "release-smoke-$goos-$rid.log"
+          & ./src/tests/PackageTests/release-smoke.ps1 -Feed (Join-Path $PWD 'feed') -Converter (Join-Path $PWD "src/go2cs/bin/$exeName") -WorkRoot $work *>&1 |
+              Tee-Object -FilePath $log
+          $smokeExit = $LASTEXITCODE
+
+          $summary = @(
+              "## Release smoke -- GOOS=$goos ($rid)"
+              ''
+              "exit ``$smokeExit`` (A, B and C gate; D is measured only)"
+              ''
+              '```'
+          ) + @(Get-Content -LiteralPath $log | Where-Object { $_ -match '^(release smoke:|PASS|FAIL|MEASURED)' }) + @('```')
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "release-smoke $goos/$rid" -Lines $summary
+
+          # The per-arm caches are large and say nothing the logs do not.
+          Get-ChildItem $work -Recurse -Directory -Filter 'nuget-cache' -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+          Get-ChildItem $work -Recurse -Directory -Filter '.artifacts' -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+
+          exit $smokeExit
 
       # -------------------------------------------------------------------------------------
       # Artifacts — always, because a failed leg is the reading this workflow exists to produce.

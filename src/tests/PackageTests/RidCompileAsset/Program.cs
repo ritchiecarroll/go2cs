@@ -20,11 +20,15 @@ internal static class Program
 #elif GO_FLAVOUR_WINDOWS
         object surface = new go.syscall_package.DLLError();
         const string expected = "win";
+#elif GO_FLAVOUR_DARWIN
+        // Kqueue's event record: darwin's flavour defines it and neither windows' nor linux's does.
+        object surface = new go.syscall_package.Kevent_t();
+        const string expected = "osx";
 #else
         Console.WriteLine("RID-COMPILE-ASSET: no go.syscall flavour ships for this platform; nothing to check");
         return 0;
 #endif
-#if GO_FLAVOUR_LINUX || GO_FLAVOUR_WINDOWS
+#if GO_FLAVOUR_LINUX || GO_FLAVOUR_WINDOWS || GO_FLAVOUR_DARWIN
         // Reaching this line means the type was also found at RUN time: the assembly that loaded is
         // the same flavour the compiler bound against (a wrong-flavour load throws TypeLoadException
         // above). Where it loaded from differs by build shape (runtimes/<rid>/ for a portable build,

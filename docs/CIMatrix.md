@@ -69,7 +69,7 @@ gh workflow run os-matrix.yml -f goos=linux  -f stage=sweep-shard -f filter=comp
 | Input | Values | Meaning |
 |:--|:--|:--|
 | `goos` | `windows` · `linux` · `darwin` | The corpus flavor to bind. Each maps to a runner + RID pair; **`darwin` fans out to BOTH mac runners** (arm64 and x64) in one dispatch. |
-| `stage` | `census` · `behavioral-smoke` · `sweep-shard` | What to run. One stage per dispatch. |
+| `stage` | `census` · `behavioral-smoke` · `sweep-shard` · `release-smoke` | What to run. One stage per dispatch. |
 | `filter` | free text, optional | The shard. A package substring for `sweep-shard`, a project-name substring for `behavioral-smoke`. Blank takes the stage's documented default. |
 
 There is no `all` value: one dispatch per flavor keeps each leg's artifacts, budget and verdict
@@ -129,6 +129,24 @@ artifact under `rows/`, alongside the full log and a post-sweep `git status` of 
 
 Keep shards small. The sweep's own per-package deadline floors reach into the hours, and the job
 budget is a ceiling, not an allowance.
+
+### `release-smoke` — consume a rehearsal feed the way a user does
+
+The release's own pack, rehearsed, then consumed on the chosen flavor's legs. A `pack` job on
+`windows-latest` runs `push-nuget.ps1 -VersionSuffix ci.<run id>` under Windows PowerShell — pack-only by
+the script's own contract (no bump, no tag, nothing under `docs/validation`, no push) — and uploads the
+merged packages as the `release-smoke-feed` artifact. It is the only Release-configuration build of the
+darwin flavor anywhere. Each leg then runs `src/tests/PackageTests/release-smoke.ps1` against that feed,
+every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
+
+- **A** the RID-selected compile asset gate (`RidCompileAsset`): rid-less, `-r`, publish, and its control;
+- **B** a small generated stdlib program converted with `-recurse=nuget`, its stdout compared with `go run`
+  (it prints `runtime.GOOS`, so a wrong-flavor load is a visible mismatch);
+- **C** `Behavioral/StatLayoutTruth`, converted and compared the same way;
+- **D** the README walkthrough (`fatih/color`), compared the same way — **measured, never gating**.
+
+The leg is green when A, B and C pass. Dispatch it with `goos=darwin` before a release that ships macOS
+assets; `windows` and `linux` work the same way. The pack job's budget is its own (240 min, provisional).
 
 ## Results flow
 
@@ -197,6 +215,7 @@ disclosure count is half of what makes a row honest.
 | `census` | 150 min | 225 min | The full stdlib solution build `--no-incremental` on the fleet's slowest anchored box, plus a **cold** NuGet restore of every project. |
 | `behavioral-smoke` | 90 min | 135 min | Converter `go build` plus a filtered four-phase run whose shared core closure is built from nothing. |
 | `sweep-shard` | 210 min | 315 min | One convert/build/run/compare cycle per matched row; the sweep's own per-package floors are the reason this is the largest. |
+| `release-smoke` | 90 min | 135 min | The leg only: converter `go build` plus four small restore/build/run arms. The `pack` job (windows, 240 min) is separate. Provisional. |
 
 The macOS multiplier is 1.5x because `macos-15` (arm64) is a 3-core runner and every phase here is
 parallel-MSBuild bound. GitHub's hard ceiling for a hosted job is 360 minutes and every value stays
