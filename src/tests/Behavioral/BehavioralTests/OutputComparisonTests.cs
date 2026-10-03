@@ -1004,6 +1004,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMethodSelector() => CheckTarget("MethodSelector");
 
     [TestMethod]
+    public void CheckMethodValueFuncNames() => CheckTarget("MethodValueFuncNames");
+
+    [TestMethod]
     public void CheckMethodValuePointeeCopy() => CheckTarget("MethodValuePointeeCopy");
 
     [TestMethod]
