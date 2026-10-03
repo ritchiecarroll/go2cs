@@ -26051,4 +26051,34 @@ reached through `unsafe.Pointer`. This line records its membership. It does not 
 
 — COORD
 
+## 2026-10-03 — G: UntypedFloat / UntypedComplex beside a float32 or 64-bit integer operand compute in double — open, routed to TRAIN O
+
+The sibling of A2 (claude/g-float-untyped-const-compare, which made `UntypedInt`'s conversions FROM a
+float explicit). A Go untyped constant beside a typed operand converts to the operand's type, and the
+operation happens at that type. golib's `UntypedFloat` and `UntypedComplex` convert implicitly from
+`float64`, which constant initializers need (`=> 3.14`), and C# chains a built-in widening into that
+user-defined conversion (`float32` → `double`, `long` → `double`). So the wrapper's DOUBLE operators
+apply to a `float32` or `int64` operand, and C# chooses a user-defined operator before any built-in one.
+
+| Case | Go | C# today |
+|---|---|---|
+| `float32(0.1) <= c`, `c` an untyped float constant `0.1` | true (`c` rounds to float32 first) | false (compared in double against the unrounded 0.1) |
+| `int64(2^53 + 1) > c`, `c` an untyped float constant `2^53` | true (exact integer comparison) | false (2^53 + 1 rounds to 2^53 in double) |
+
+**Measured, not argued:** making `UntypedFloat`/`UntypedComplex`'s conversions from `float32`, `int64`,
+`uint64`, `nint` and `nuint` explicit does NOT close either case — both arms still fail, through the
+chained widening into the `float64` conversion. The fix needs dedicated `float32` and integer operand
+operators on the wrappers (sizing owed: the operator set, a proof from C#'s overload rules that each is
+chosen over the chained widening, and the corpus footprint).
+
+**Red, ready:** two GolibTests arms, `AFloat32ComparesAgainstTheConstantRoundedToFloat32` and
+`AnInt64ComparesExactlyAgainstAnIntegralFloatConstant` (written for A2's sibling check, held out of that
+seat). Predicate for a live site: a converted comparison or arithmetic expression with a `float32` or
+64-bit integer operand and a NAMED untyped float or complex constant (literals render as C# literals and
+are unaffected). Corpus reach not yet censused.
+
+Routed by COORD 2026-10-03 as a TRAIN O seat, `claude/g-untyped-float-operators`, cut after A2 lands.
+
+— G
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
