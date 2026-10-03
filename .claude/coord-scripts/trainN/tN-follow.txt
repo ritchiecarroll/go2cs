@@ -1,0 +1,22 @@
+# TRAIN N ruled FOLLOW-UP merges (DERIVED 2026-10-03 from trainM/tM-follow.txt). ONE list, read by tN-fixup.sh and tN-battery.sh (at TRAIN L the same list was written
+# twice, once in each script, and extended twice by hand).
+# ONE list PER RUN FOLDER (verify round 2): both scripts read the copy beside them. Edit THIS file in hnd BEFORE any run
+# copy is taken, or run the fixup and the battery from the SAME run folder (they do not collide: tN-fixup-logs/ against
+# tN-logs/ and mod-logs/). Each script stamps the hash of the entries it read ('lists=rows:<h>/follow:<h>' on its PRE
+# line; e3b0c44298fc is the EMPTY list): the fixup's FIXUP DONE line and the battery's PRE line must show the same pair.
+# One entry per line:   <ref>:<seat sha>
+#   <ref>        the branch the follow-up commit is on, read as refs/remotes/origin/claude/<ref>. FETCH it into the tN
+#                worktree BEFORE launching either script: neither script fetches.
+#   <seat sha>   the SEATED sha the follow-up descends from (a row of tN-seats-draft.txt).
+# A follow-up is ONE extra signed --no-ff merge on the union, after its seat's own merge and before the fixup, whose
+# second parent is on <ref>, descends from <seat sha> and is not it. Anything else on the first-parent line is refused.
+# A merge-revert is never the remedy for a seat (TRAIN L ruling: re-merge hazard); a follow-up on top is.
+# The follow-up lives on its OWN branch, cut on the seated sha; never push onto a seated ref (a seated branch takes no
+# commits, and tN-assemble.sh refuses a seat whose origin tip is no longer its seated sha unless TIP_MOVED_OK names it).
+# EMPTY at TRAIN N's 27-row draft list (01:59 on 2026-10-03, cutoff 10:00 Central). Hazard H4 FIRES there: row
+# r-jwt-promoted-iface-repros (ee52639557) adds three behavioral directories with Go sources and no C#
+# (PromotedIfaceFromLibEmbed, PromotedIfaceFromLibEmbedLib, PromotedIfaceTestEmbed). COORD rules the route
+# (tN-README.md MS2): if it is a follow-up merge on a branch of its own, its entry goes HERE before the fixup, in the
+# form below. (TRAIN M resolved its H4 inside the seat: e002a552a8.) The FORM of an entry, commented out (an invented
+# ref: nothing to merge):
+# some-seat-followup:0123456789
