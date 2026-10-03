@@ -174,6 +174,78 @@ public class ModuleAncestryTests
         }
     }
 
+    // A directory link the test can create without privilege: a symbolic link where the OS grants
+    // one, a junction on Windows where it does not (mklink /J needs no symlink privilege).
+    private static void CreateDirectoryLink(string link, string target)
+    {
+        try
+        {
+            Directory.CreateSymbolicLink(link, target);
+            return;
+        }
+        catch (Exception ex) when (OperatingSystem.IsWindows() && ex is IOException or UnauthorizedAccessException)
+        {
+        }
+
+        using System.Diagnostics.Process mklink = System.Diagnostics.Process.Start(
+            new System.Diagnostics.ProcessStartInfo("cmd.exe", ["/c", "mklink", "/J", link, target]) { RedirectStandardOutput = true })!;
+        mklink.WaitForExit();
+        Assert.AreEqual(0, mklink.ExitCode, $"mklink /J '{link}' -> '{target}'");
+    }
+
+    [TestMethod]
+    public void ALinkInsideTheModuleIsNotFollowed()
+    {
+        string module = NewModule();
+        string outside = NewDirectory("outside");
+        Write(Path.Combine(outside, "elsewhere.txt"), "not the module's\n");
+        string link = Path.Combine(module, "parse", "linked");
+        CreateDirectoryLink(link, outside);
+        string runRoot = NewDirectory("run");
+        string workingDirectory = WorkingDirectoryFor(runRoot, ModulePath + "/parse");
+
+        try
+        {
+            Assert.AreNotEqual((FileAttributes)0, File.GetAttributes(link) & FileAttributes.ReparsePoint, "the plant must be a link");
+            Assert.IsTrue(PackageAncestry.TryStageModule(module, ModulePath, ModulePath + "/parse", runRoot, workingDirectory));
+
+            Assert.IsTrue(File.Exists(Path.Combine(workingDirectory, "notes.txt")), "the link's own package is still copied");
+            Assert.IsFalse(Directory.Exists(Path.Combine(workingDirectory, "linked")),
+                "a link inside the module was followed: its target is not the module's to copy");
+        }
+        finally
+        {
+            Directory.Delete(link);
+            Discard(runRoot);
+            Discard(outside);
+            Discard(module);
+        }
+    }
+
+    [TestMethod]
+    public void TheModulesVendorTreeIsCopied()
+    {
+        string module = NewModule();
+        Write(Path.Combine(module, "vendor", "modules.txt"), "# example.dep/x v1.0.0\n");
+        Write(Path.Combine(module, "vendor", "example.dep", "x", "x.go"), "package x\n");
+        string runRoot = NewDirectory("run");
+        string workingDirectory = WorkingDirectoryFor(runRoot, ModulePath + "/parse");
+
+        try
+        {
+            Assert.IsTrue(PackageAncestry.TryStageModule(module, ModulePath, ModulePath + "/parse", runRoot, workingDirectory));
+
+            string mirrorRoot = WorkingDirectoryFor(runRoot, ModulePath);
+            Assert.IsTrue(File.Exists(Path.Combine(mirrorRoot, "vendor", "modules.txt")), "vendor/modules.txt is Go source and is copied");
+            Assert.IsTrue(File.Exists(Path.Combine(mirrorRoot, "vendor", "example.dep", "x", "x.go")), "a vendored package is copied");
+        }
+        finally
+        {
+            Discard(runRoot);
+            Discard(module);
+        }
+    }
+
     [TestMethod]
     public void StagingDeclinesWhatIsNotAModulePackage()
     {
