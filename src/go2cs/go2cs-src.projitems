@@ -235,6 +235,7 @@
     <None Include="$(MSBuildThisFileDirectory)moduleTestsDriver_test.go" />
     <None Include="$(MSBuildThisFileDirectory)modulesLock.go" />
     <None Include="$(MSBuildThisFileDirectory)modulesLock_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)multiValueFuncDefine_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nameCollisionAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)namedResultLiveness.go" />
     <None Include="$(MSBuildThisFileDirectory)namedResultLiveness_test.go" />
