@@ -490,7 +490,15 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		}
 	}
 
-	v.recordTypeAccessibility("interface", getSanitizedIdentifier(interfaceTypeName), declaredTypeParams, access, localNameAttr)
+	// In the internal white-box test bridge (testInlineTypeAccess) no metadata file receives the record:
+	// recordTypeAccessibility hands its attributes back to be written on the declaration itself, which is
+	// where the struct side already writes its stamp. Discarding them left a function-local interface in an
+	// internal _test.go file with no [GoLocalName], so go2cs-gen could not find the struct field embedding it
+	// and forwarded to `recvᴛ.<Func>_<name>.F()` (CS0120/CS1061, BurntSushi/toml's encode test). Outside
+	// that mode the record is written to package_info.cs and nothing comes back.
+	if inlineAttrs := v.recordTypeAccessibility("interface", getSanitizedIdentifier(interfaceTypeName), declaredTypeParams, access, localNameAttr); inlineAttrs != "" {
+		postAttrs = strings.TrimSuffix(postAttrs, access) + inlineAttrs + access
+	}
 
 	if len(inheritedInterfaces) > 0 {
 		inheritedResult += " :" + v.newline

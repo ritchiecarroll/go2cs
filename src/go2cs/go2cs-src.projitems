@@ -39,6 +39,7 @@
     <None Include="$(MSBuildThisFileDirectory)callerInliningAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)callerSkipWindowFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goCreatorFrame_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)elidedAnyCompositeElems_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\corpusRelease_test.go" />
@@ -179,6 +180,7 @@
     <None Include="$(MSBuildThisFileDirectory)importSegmentShadow_test.go" />
     <None Include="$(MSBuildThisFileDirectory)initOrderOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)initOrderTupleSpec_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internalTestLocalInterfaceStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)interfaceConversion.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gencorpusrelease\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\genpopulation\main.go" />

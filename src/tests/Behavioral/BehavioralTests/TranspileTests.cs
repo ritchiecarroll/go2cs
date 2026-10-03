@@ -475,6 +475,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckElementAddressUnsignedIndex() => CheckTarget("ElementAddressUnsignedIndex");
 
     [TestMethod]
+    public void CheckElidedAnyCompositeElems() => CheckTarget("ElidedAnyCompositeElems");
+
+    [TestMethod]
     public void CheckElidedNestedPtrComposite() => CheckTarget("ElidedNestedPtrComposite");
 
     [TestMethod]

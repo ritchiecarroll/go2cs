@@ -200,7 +200,7 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 				if compositeLitIsKeyed(compositeLit.Elts) {
 					return addrOf(fmt.Sprintf("new golib.SparseArray<%s>{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(inferred, compositeLit.Elts))))
 				}
-				return addrOf(fmt.Sprintf("new %s[]{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withValueCloneArgs(compositeLit.Elts, v.elidedPointerElemContext(u.Elem(), compositeLit.Elts)))))
+				return addrOf(fmt.Sprintf("new %s[]{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withValueCloneArgs(compositeLit.Elts, v.elidedElemContext(u.Elem(), compositeLit.Elts)))))
 			case *types.Array:
 				csElem := convertToCSTypeName(v.getAliasQualifiedTypeName(u.Elem(), false))
 				// An ELIDED array literal is still `[N]T` long, so its projection carries the
@@ -233,7 +233,7 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 				if compositeLitIsKeyed(compositeLit.Elts) {
 					return addrOf(fmt.Sprintf("new golib.SparseArray<%s>{%s}.array(%s)", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(inferred, compositeLit.Elts)), arrayLengthArgs(strconv.FormatInt(u.Len(), 10), v.arrayElemFactory(u.Elem()))))
 				}
-				return addrOf(fmt.Sprintf("new %s[]{%s}.array(%s)", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withValueCloneArgs(compositeLit.Elts, v.elidedPointerElemContext(u.Elem(), compositeLit.Elts))), elidedArrayArgs))
+				return addrOf(fmt.Sprintf("new %s[]{%s}.array(%s)", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withValueCloneArgs(compositeLit.Elts, v.elidedElemContext(u.Elem(), compositeLit.Elts))), elidedArrayArgs))
 			case *types.Pointer:
 				// An untyped composite whose inferred type is `*Struct` — the `[]*T{ {…} }` shorthand
 				// for `&T{…}` (e.g. runtime's `dbgvars = []*dbgVar{ {name, &debug.x}, … }`). Emit the
@@ -758,53 +758,7 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 		// plumbing convExprList honors. KeyValueExpr elements (maps, sparse arrays) are not
 		// BasicLits and route through convKeyValueExpr instead.
 		if isEmptyInterfaceTarget(elementType) {
-			for i, elt := range compositeLit.Elts {
-				if isStringBasicLit(elt) {
-					callContext.u8StringArgOK[i] = true
-					callContext.useGoStringArg[i] = true
-				} else if castType := v.untypedConstBoxCast(elt); castType != "" {
-					if callContext.castArgToType == nil {
-						callContext.castArgToType = make(map[int]string)
-					}
-
-					callContext.castArgToType[i] = castType
-				} else if castType := v.variadicFuncBoxCastType(v.getType(elt, false)); castType != "" {
-					// A VARIADIC func element boxes as C#'s SYNTHESIZED anonymous delegate
-					// unless it is cast to its Go func type — the third member of this same
-					// carry-your-Go-type family, applied through the same plumbing (see
-					// typedNilInterfaceBoxing.go). `[]any{escaper}` read back as
-					// `slots[0].(func(...any) string)` cannot match without it.
-					if callContext.castArgToType == nil {
-						callContext.castArgToType = make(map[int]string)
-					}
-
-					callContext.castArgToType[i] = castType
-				}
-
-				// A POINTER element crosses into interface space as its BOX, carrying its Go
-				// type — the same boundary the call-argument arm applies (see
-				// typedNilInterfaceBoxing.go); both halves are consumed in convExprList.
-				if _, eltIsPtr := v.getType(elt, false).(*types.Pointer); eltIsPtr {
-					callContext.argTypeIsPtr[i] = true
-					callContext.anyBoxedPtrArgs[i] = true
-				}
-
-				// The FUNC sibling of the arm above, and the one slot of this family that was
-				// measurably WRONG rather than merely unreached: `[]any{nilFunc}` emitted a bare
-				// null, so the element compared equal to nil where Go — whose interface holds
-				// (func-type, nil) — says it does not. Measured `true false` against Go's
-				// `false false`, with the map-VALUE slot beside it already correct.
-				if eltType := v.getType(elt, false); eltType != nil {
-					if _, eltIsFunc := eltType.Underlying().(*types.Signature); eltIsFunc {
-						callContext.anyBoxedFuncArgs[i] = true
-					}
-
-					// And the unsafe.Pointer sibling: `[]any{nilUnsafePointer}`.
-					if isExactUnsafePointer(eltType) {
-						callContext.markAnyBoxedUnsafePointerArg(i)
-					}
-				}
-			}
+			v.markEmptyInterfaceElems(compositeLit.Elts, callContext)
 		}
 	}
 
@@ -1334,6 +1288,31 @@ func (v *Visitor) normalizeMixedKeyedComposite(compositeLit *ast.CompositeLit) {
 	}
 }
 
+// elidedElemContext is the element context of an ELIDED (type-inferred) slice or array literal. An
+// EMPTY-interface element type takes the typed path's boxing (markEmptyInterfaceElems): the inner
+// `{"a", "b"}` of a `[][2]any{...}` otherwise renders its strings as `u8` spans, which have no
+// conversion to `object` (CS0029, BurntSushi/toml's encode test), and its untyped constants box as C#
+// `int` where Go boxes `int`. A pointer element type keeps elidedPointerElemContext. Nil when nothing is
+// marked, so every other elided literal keeps its exact nil-context rendering.
+func (v *Visitor) elidedElemContext(elem types.Type, elts []ast.Expr) *CallExprContext {
+	if !isEmptyInterfaceTarget(elem) {
+		return v.elidedPointerElemContext(elem, elts)
+	}
+
+	context := DefaultCallExprContext()
+
+	// Preserve the nil-context default, u8StringOK true per element (see elidedPointerElemContext).
+	for i := range elts {
+		context.u8StringArgOK[i] = true
+	}
+
+	if !v.markEmptyInterfaceElems(elts, context) {
+		return nil
+	}
+
+	return context
+}
+
 // elidedPointerElemContext renders a bare pointer-typed IDENT element of an ELIDED (type-inferred)
 // slice/array literal as its box (`Ꮡc`, the pointer value) instead of a deref-aliased value alias —
 // the untyped-elided twin of the TYPED pointer-element path (argTypeIsPtr, see convCompositeLit
@@ -1477,4 +1456,68 @@ func (v *Visitor) markAnyFieldLits(structType *types.Struct, elts []ast.Expr, co
 			}
 		}
 	}
+}
+
+// markEmptyInterfaceElems marks the elements of a slice or array literal whose element type is an EMPTY
+// interface so each one boxes at its Go type (see the typed call site in convCompositeLit for every arm):
+// a string literal through @string, an untyped constant through its default type, a pointer, func or
+// unsafe.Pointer element as its box. It reports whether any element was marked.
+func (v *Visitor) markEmptyInterfaceElems(elts []ast.Expr, context *CallExprContext) bool {
+	marked := false
+
+	for i, elt := range elts {
+		if isStringBasicLit(elt) {
+			context.u8StringArgOK[i] = true
+			context.useGoStringArg[i] = true
+			marked = true
+		} else if castType := v.untypedConstBoxCast(elt); castType != "" {
+			if context.castArgToType == nil {
+				context.castArgToType = make(map[int]string)
+			}
+
+			context.castArgToType[i] = castType
+			marked = true
+		} else if castType := v.variadicFuncBoxCastType(v.getType(elt, false)); castType != "" {
+			// A VARIADIC func element boxes as C#'s SYNTHESIZED anonymous delegate
+			// unless it is cast to its Go func type — the third member of this same
+			// carry-your-Go-type family, applied through the same plumbing (see
+			// typedNilInterfaceBoxing.go). `[]any{escaper}` read back as
+			// `slots[0].(func(...any) string)` cannot match without it.
+			if context.castArgToType == nil {
+				context.castArgToType = make(map[int]string)
+			}
+
+			context.castArgToType[i] = castType
+			marked = true
+		}
+
+		// A POINTER element crosses into interface space as its BOX, carrying its Go
+		// type — the same boundary the call-argument arm applies (see
+		// typedNilInterfaceBoxing.go); both halves are consumed in convExprList.
+		if _, eltIsPtr := v.getType(elt, false).(*types.Pointer); eltIsPtr {
+			context.argTypeIsPtr[i] = true
+			context.anyBoxedPtrArgs[i] = true
+			marked = true
+		}
+
+		// The FUNC sibling of the arm above, and the one slot of this family that was
+		// measurably WRONG rather than merely unreached: `[]any{nilFunc}` emitted a bare
+		// null, so the element compared equal to nil where Go — whose interface holds
+		// (func-type, nil) — says it does not. Measured `true false` against Go's
+		// `false false`, with the map-VALUE slot beside it already correct.
+		if eltType := v.getType(elt, false); eltType != nil {
+			if _, eltIsFunc := eltType.Underlying().(*types.Signature); eltIsFunc {
+				context.anyBoxedFuncArgs[i] = true
+				marked = true
+			}
+
+			// And the unsafe.Pointer sibling: `[]any{nilUnsafePointer}`.
+			if isExactUnsafePointer(eltType) {
+				context.markAnyBoxedUnsafePointerArg(i)
+				marked = true
+			}
+		}
+	}
+
+	return marked
 }

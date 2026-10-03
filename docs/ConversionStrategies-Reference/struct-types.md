@@ -695,6 +695,21 @@ Guarded by the `LiftedLocalTypes` behavioral test (single lifted declaration for
 anonymous occurrences + `[GoLocalName]` pinned in the golden); operationally by
 encoding/binary's banked suite.
 
+In the INTERNAL white-box test bridge (the `_test.go` files of the package under test) no metadata file receives
+the accessibility records: `recordTypeAccessibility` hands the attributes back and the declaration carries them
+inline. The struct lift always wrote its stamp there. The interface lift discarded the returned attributes, so a
+function-local interface in an internal test file had no `[GoLocalName]` at all, and go2cs-gen, which finds the
+struct field embedding an interface by that stamp, forwarded a promoted method to `recvᴛ.<Func>_<name>.F()`
+(CS0120/CS1061, BurntSushi/toml's `TestEncodeAnonymousNoStructField`). The interface declaration now places them
+the same way:
+
+```csharp
+[GoType("dyn")] [GoLocalName("Inner")] internal partial interface TestLocalEmbeddedInterface_Inner {
+```
+
+Outside the bridge nothing comes back and the record stays in `package_info.cs`, so production emission and the
+external test variant are unchanged. Guarded by `internalTestLocalInterfaceStamp_test.go`.
+
 ## A lift inside a PACKAGE-LEVEL func literal flushes at package scope, seeded by the declaration
 A func literal's body is function scope, and `convFuncLit` sets `inFunction` for it accordingly —
 but that flag does **not** say there is an enclosing function DECLARATION. `currentFuncName` and
