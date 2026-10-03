@@ -437,6 +437,8 @@ $editableSites = @(
         Find = 'versioned `{OLD}\.<build>`'
         Replace = 'versioned `{NEW}.<build>`'
         Expect = 1
+        Retired = 'the docs-refresh seat (Background.md rewrite)'
+        RetiredNote = 'the owner-approved Background rewrite no longer names the package version family; nothing on the page moves at a hop'
         Note = 'the published package version family a consumer sees on nuget.org'
     }
     @{
@@ -444,6 +446,8 @@ $editableSites = @(
         Find = 'packages whose Go {OLD} sources actually define'
         Replace = 'packages whose Go {NEW} sources actually define'
         Expect = 1
+        Retired = 'the docs-refresh seat (Background.md rewrite)'
+        RetiredNote = 'the owner-approved Background rewrite states the validation result without a release or a denominator definition; the roster carries both'
         Note = "the completion-goal denominator's definition"
     }
     @{
