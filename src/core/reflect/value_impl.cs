@@ -328,6 +328,12 @@ public static bool IsNil(this ΔValue v) {
     if (cur is IжAdapter { Box: not null } pointerAdapter) {
         cur = pointerAdapter.Box;
     }
+    // A value-sourced adapter wrapping a NIL delegate (a named func type held in an interface)
+    // is a non-null SHELL around a null wrapped value, as reflectPointerToken unwraps it too —
+    // asked about the shell, a nil Greeter read as non-nil.
+    if (cur is IValueAdapter valueAdapter) {
+        cur = valueAdapter.Value;
+    }
     return isNilGoValue(cur);
 }
 
