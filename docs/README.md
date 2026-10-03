@@ -335,15 +335,10 @@ internal static void Main() {
 
 > **NOTE — platforms:** _all four steps run on **Windows** (`windows/amd64`) and **Linux** (`linux/amd64`).
 > The conversion records the platform it targets, and the go2cs packages compile and run against that
-> platform's flavor: `win-x64` for a Windows conversion, `linux-x64` for a Linux one. Windows needs go2cs
-> packages **1.24.13.1 or later**, the release matching the converter's Go 1.24.13 toolchain. Linux needs
-> packages **1.24.13.2 or later** AND a converter built from a checkout that includes the 1.24.13.2
-> changes. The output matches `go run`, including `fatih/color`'s colors in an interactive console on
-> Windows. In an interactive terminal on Linux the colors do not show yet, because the terminal query
-> cannot yet hand its struct to the kernel, so the output stays plain there. Other platforms and
-> architectures are tracked in the Roadmap's
-> [Platforms section](Roadmap.md#platforms), with the
-> operational detail in [PLAN-linux-operation.md](PLAN-linux-operation.md)._
+> platform's flavor: `win-x64` for a Windows conversion, `linux-x64` for a Linux one. Use the current go2cs
+> packages, with a converter built from a checkout at or after the commit that published them. The output
+> matches `go run`, including `fatih/color`'s colors in an interactive terminal, on both platforms. Other
+> platforms and architectures are tracked in the Roadmap's [Platforms section](Roadmap.md#platforms)._
 
 **3 — C#: build the generated solution.** The app's per-project `.slnx` builds the app and its whole
 converted dependency tree, restoring the go2cs packages on the way; opening it in Visual Studio makes the

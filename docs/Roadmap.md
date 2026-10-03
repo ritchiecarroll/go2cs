@@ -113,8 +113,7 @@ the run inside the runner's deadline, which is what the TLS work under [Performa
 platform-shared files sit flat, and a package whose Go source varies by platform keeps one folder per
 target OS ([design](phase4/DESIGN-multiplatform-corpus.md)). Each platform-varying package ships a
 `win-x64` and a `linux-x64` flavor, and roster rows record their Linux verdict counts beside the
-Windows record. A few operational items remain on Linux, such as the terminal query `fatih/color`
-makes before it shows colors in an interactive Linux terminal; they are tracked in
+Windows record. Remaining Linux operational items are tracked in
 [`PLAN-linux-operation.md`](PLAN-linux-operation.md) and the multi-target design.
 
 **macOS.** The standard library compiles for macOS (Darwin), checked daily in CI on macOS arm64 and
