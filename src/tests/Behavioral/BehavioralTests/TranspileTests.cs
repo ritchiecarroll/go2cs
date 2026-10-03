@@ -1072,6 +1072,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMethodSelector() => CheckTarget("MethodSelector");
 
     [TestMethod]
+    public void CheckMethodValueFuncNames() => CheckTarget("MethodValueFuncNames");
+
+    [TestMethod]
     public void CheckMethodValuePointeeCopy() => CheckTarget("MethodValuePointeeCopy");
 
     [TestMethod]

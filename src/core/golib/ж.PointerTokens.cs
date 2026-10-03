@@ -132,6 +132,35 @@ public static class ManagedPointerTokens
     public static System.Reflection.MethodBase? ResolveDelegateMethod(nuint token) =>
         token != 0 && s_delegateMethods.TryGetValue(token, out System.Reflection.MethodBase? method) ? method : null;
 
+    // A Go METHOD VALUE (`t.M`, the receiver bound) and the METHOD EXPRESSION (`T.M`) invoke one C#
+    // method, but Go gives them two functions: every method value of T.M runs through ONE `-fm`
+    // wrapper (main.T.M-fm), whose pc differs from T.M's own. So a bound delegate tokens by a per-METHOD
+    // key object rather than by the MethodInfo itself -- still one token per method however many
+    // receivers bind it, which is the collapse Go performs, and a different token from the expression.
+    //
+    // In this host a method value is a delegate whose receiver is its TARGET: a static extension
+    // method closed over its first argument (a Go method with its receiver bound), or an instance
+    // method on a Go type (a generated interface implementation, i.e. a method value taken through an
+    // interface). Neither is a function literal (a compiler-generated method, named `<...>`), whose
+    // target is its closure, nor a reflect Value.Method(i) func (a DynamicMethod, with no declaring
+    // type), which keeps the per-method token reflect's TestMethodValue asserts.
+    private static readonly ConcurrentDictionary<System.Reflection.MethodInfo, object> s_methodValueKeys = new();
+    private static readonly ConcurrentDictionary<nuint, byte> s_methodValueTokens = new();
+
+    /// <summary>True when <paramref name="d"/> is a Go method value: a method with its receiver bound.</summary>
+    public static bool IsMethodValue(Delegate d) =>
+        d.Target is not null &&
+        d.Method is { DeclaringType: not null } method &&
+        method.Name.Length > 0 && method.Name[0] != '<';
+
+    /// <summary>The identity a method value of <paramref name="method"/> tokens by: one object per method.</summary>
+    public static object MethodValueKey(System.Reflection.MethodInfo method) =>
+        s_methodValueKeys.GetOrAdd(method, static _ => new object());
+
+    /// <summary>True when <paramref name="token"/> was minted for a Go method value (its name takes `-fm`).</summary>
+    public static bool IsMethodValueToken(nuint token) =>
+        token != 0 && s_methodValueTokens.ContainsKey(token);
+
     // The overwhelmingly common case is a program that never asks reflect for a pointer's scalar
     // form at all, and it must not pay even a hash: an empty table answers from this one load.
     // Volatile because the writer is a different thread than the reader in the general case.
@@ -434,7 +463,12 @@ public static class ManagedPointerTokens
         // name after every delegate sharing it has been collected. Written before the weak store is
         // observable to a reader, so a token that resolves at all resolves completely.
         if (box is Delegate del && del.Method is not null)
+        {
             s_delegateMethods[token] = del.Method;
+
+            if (IsMethodValue(del))
+                s_methodValueTokens.TryAdd(token, 0);
+        }
 
         // Only a genuinely new entry counts; the idempotent early return must stay before it.
         int count = Interlocked.Increment(ref s_count);
