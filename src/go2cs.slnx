@@ -448,6 +448,7 @@
     <Project Path="tests/Behavioral/FirstClassFunctions/FirstClassFunctions.csproj" />
     <Project Path="tests/Behavioral/FloatFormatExponent/FloatFormatExponent.csproj" />
     <Project Path="tests/Behavioral/FixedArrayBufferPointer/FixedArrayBufferPointer.csproj" />
+    <Project Path="tests/Behavioral/FloatCompareUntypedMaxUint64/FloatCompareUntypedMaxUint64.csproj" />
     <Project Path="tests/Behavioral/FloatConstIntContext/FloatConstIntContext.csproj" />
     <Project Path="tests/Behavioral/FloatFormatting/FloatFormatting.csproj" />
     <Project Path="tests/Behavioral/FloatKindConstArrayLength/FloatKindConstArrayLength.csproj" />
@@ -621,6 +622,7 @@
     <Project Path="tests/Behavioral/MapPointerElementLiteral/MapPointerElementLiteral.csproj" />
     <Project Path="tests/Behavioral/MapStringBytesLookup/MapStringBytesLookup.csproj" />
     <Project Path="tests/Behavioral/MathFloatBits/MathFloatBits.csproj" />
+    <Project Path="tests/Behavioral/MathHugeArgReduction/MathHugeArgReduction.csproj" />
     <Project Path="tests/Behavioral/MethodGroupGenericArg/MethodGroupGenericArg.csproj" />
     <Project Path="tests/Behavioral/MethodOnBoxedGlobalIndex/MethodOnBoxedGlobalIndex.csproj" />
     <Project Path="tests/Behavioral/MapSamePackageTypes/MapSamePackageTypes.csproj" />

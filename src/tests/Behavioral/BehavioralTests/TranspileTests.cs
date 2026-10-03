@@ -544,6 +544,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckFixedArrayBufferPointer() => CheckTarget("FixedArrayBufferPointer");
 
     [TestMethod]
+    public void CheckFloatCompareUntypedMaxUint64() => CheckTarget("FloatCompareUntypedMaxUint64");
+
+    [TestMethod]
     public void CheckFloatConstIntContext() => CheckTarget("FloatConstIntContext");
 
     [TestMethod]
@@ -1037,6 +1040,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckMathFloatBits() => CheckTarget("MathFloatBits");
+
+    [TestMethod]
+    public void CheckMathHugeArgReduction() => CheckTarget("MathHugeArgReduction");
 
     [TestMethod]
     public void CheckMethodExprDotImport() => CheckTarget("MethodExprDotImport");
@@ -1574,6 +1580,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPtrKeyMapReceiverLookup() => CheckTarget("PtrKeyMapReceiverLookup");
+
+    [TestMethod]
+    public void CheckPtrToAnonStructPtr() => CheckTarget("PtrToAnonStructPtr");
 
     [TestMethod]
     public void CheckPublicizedFieldType() => CheckTarget("PublicizedFieldType");
