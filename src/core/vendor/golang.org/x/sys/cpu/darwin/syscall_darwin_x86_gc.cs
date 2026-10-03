@@ -55,7 +55,7 @@ internal static error sysctl(slice<_C_int> mib, ж<byte> Ꮡold, ж<uintptr> Ꮡ
     return default!;
 }
 
-internal static uintptr libc_sysctl_trampoline_addr;
+internal static uintptr libc_sysctl_trampoline_addr = (uintptr)global::go.GoCgoDynamicImports.ResolveOrZero("sysctl", "/usr/lib/libSystem.B.dylib");
 
 // adapted from internal/cpu/cpu_arm64_darwin.go
 internal static bool darwinSysctlEnabled(slice<byte> name) {
@@ -72,7 +72,7 @@ internal static bool darwinSysctlEnabled(slice<byte> name) {
 }
 
 //go:cgo_import_dynamic libc_sysctl sysctl "/usr/lib/libSystem.B.dylib"
-internal static uintptr libc_sysctlbyname_trampoline_addr;
+internal static uintptr libc_sysctlbyname_trampoline_addr = (uintptr)global::go.GoCgoDynamicImports.ResolveOrZero("sysctlbyname", "/usr/lib/libSystem.B.dylib");
 
 // adapted from runtime/sys_darwin.go in the pattern of sysctl() above, as defined in x/sys/unix
 internal static error sysctlbyname(ж<byte> Ꮡname, ж<byte> Ꮡold, ж<uintptr> Ꮡoldlen, ж<byte> Ꮡnew, uintptr newlen) {
@@ -94,7 +94,10 @@ internal static error sysctlbyname(ж<byte> Ꮡname, ж<byte> Ꮡold, ж<uintptr
 //go:cgo_import_dynamic libc_sysctlbyname sysctlbyname "/usr/lib/libSystem.B.dylib"
 
 // Implemented in the runtime package (runtime/sys_darwin.go)
-internal static partial (uintptr r1, uintptr r2, Errno err) syscall_syscall6(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6);
+[global::System.Diagnostics.StackTraceHidden] internal static (uintptr r1, uintptr r2, Errno err) syscall_syscall6(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
+    var (ᴛ1, ᴛ2, ᴛ3) = syscall.Syscall6((uintptr)fn, (uintptr)a1, (uintptr)a2, (uintptr)a3, (uintptr)a4, (uintptr)a5, (uintptr)a6);
+    return ((uintptr)(uintptr)ᴛ1, (uintptr)(uintptr)ᴛ2, (Errno)(uintptr)ᴛ3);
+}
 
 //go:linkname syscall_syscall6 syscall.syscall6
 
