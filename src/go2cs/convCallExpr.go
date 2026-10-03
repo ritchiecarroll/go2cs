@@ -3359,6 +3359,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			return emission
 		}
 
+		// And for the native field-view door, whose helper carries that prefix's route as its fallback
+		// (see nativeFieldArrayView.go).
+		if view, ok := v.nativeFieldArrayViewOf(callExpr, callExpr.Args[0]); ok {
+			return v.nativeFieldArrayViewEmission(view)
+		}
+
 		argTypeName := v.getExpressionTypeName(callExpr.Args[0], true)
 
 		if argTypeName == "unsafe.Pointer" {

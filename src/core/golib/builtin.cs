@@ -2693,6 +2693,50 @@ public static partial class builtin
     }
 
     /// <summary>
+    /// Creates a pointer to an ARRAY that views a FIELD of a struct living in NATIVE memory -- Go's
+    /// <c>(*[N]T)(unsafe.Pointer(&amp;p.f))</c> where <c>f</c>'s type is not <c>T</c> -- or answers
+    /// <c>null</c> when the field's root does not name native memory.
+    /// </summary>
+    /// <typeparam name="T">Element type of the pointed-at array.</typeparam>
+    /// <param name="field">The field reference the conversion takes the address of, <c>p.of(S.Ꮡf)</c>.</param>
+    /// <param name="length">Element count, the <c>N</c> of the Go type.</param>
+    /// <returns>A pointer to array over the field's native bytes, or <c>null</c> for a root that is not native.</returns>
+    /// <remarks>
+    /// <para>
+    /// The converter emits the unsafe package's helper, which calls this door and falls back to the raw-address
+    /// route when it answers null (docs/phase4/DESIGN-native-array-view.md, the LookupServicePort door):
+    /// </para>
+    /// <code language="cs">
+    ///     @unsafe.ArrayPointer&lt;byte&gt;.Of(Ꮡsa.of(RawSockaddrInet4.ᏑPort), 2)
+    /// </code>
+    /// <para>
+    /// The raw route fails twice over a native root. It builds an array view that native memory cannot back,
+    /// which the floor refuses by name; and the address it would view is the field's CLR SLOT -- the native
+    /// base plus the field's CLR offset. A converted struct carrying an <c>array&lt;&gt;</c> field holds
+    /// managed references, so the CLR lays it out automatically and that offset is not Go's: darwin's
+    /// <c>RawSockaddrInet4</c> keeps Port at CLR offset 0 where libc wrote it at 2. The view here is taken at
+    /// the field's GO offset, from the struct's Go layout, over the existing native array door, so no managed
+    /// struct is laid over the native bytes at all.
+    /// </para>
+    /// <para>
+    /// The offset is resolved HERE, at run time, rather than folded into the emission: a Go offset is a
+    /// property of the target, and a literal would make one source file emit three ways (runtime's
+    /// <c>m.cheaprand</c> sits at three different offsets across windows, linux and darwin).
+    /// </para>
+    /// <para>
+    /// A managed or nil root, or a Go layout that cannot be known, answers <c>null</c>: the emission then
+    /// takes today's route unchanged.
+    /// </para>
+    /// </remarks>
+    public static ж<array<T>>? NativeFieldArrayPointer<T>(INilPointer? field, nint length)
+    {
+        if (field is not INativeRooted { NativeGoFieldAddress: var address and not 0 })
+            return null;
+
+        return NativeArrayPointer<T>(address, length);
+    }
+
+    /// <summary>
     /// Creates a new heap allocated instance of the zero value for type <typeparamref name="T"/>.
     /// </summary>
     /// <param name="pointer">Out reference to pointer to heap allocated zero value.</param>

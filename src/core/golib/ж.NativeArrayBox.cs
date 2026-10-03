@@ -7,6 +7,7 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using System.Runtime.CompilerServices;
 using go.golib;
 
 namespace go;
@@ -137,6 +138,31 @@ internal sealed class NativeArrayBox<T> : ж<array<T>>
 
     /// <summary>The element count this box was minted with.</summary>
     internal nint Length => m_length;
+
+    /// <summary>
+    /// The element at <paramref name="index"/>, in place in the native block -- the read
+    /// <see cref="PointerExtensions.ElementRef{T}(ж{array{T}}, nint)"/> takes for Go's <c>p[i]</c>, where
+    /// <see cref="Value"/> refuses. Bounded by the minted length and panicking with Go's message, as
+    /// <c>array&lt;T&gt;</c>'s own indexer does. Only a reference-free <typeparamref name="T"/> reaches this
+    /// kind (<see cref="builtin.NativeArrayPointer{T}"/> routes the rest to <see cref="ShadowArrayBox{T}"/>).
+    /// </summary>
+    internal unsafe ref T ElementRef(nint index)
+    {
+        if (index < 0 || index >= m_length)
+            throw RuntimeErrorPanic.IndexOutOfRange(index, m_length);
+
+        return ref Unsafe.AsRef<T>((void*)(m_nativeAddr + (nuint)index * (nuint)Unsafe.SizeOf<T>()));
+    }
+
+    /// <inheritdoc cref="ElementRef(nint)"/>
+    // An UNSIGNED index is checked before any narrowing, as array<T>'s ulong indexer does.
+    internal ref T ElementRef(ulong index)
+    {
+        if (index >= (ulong)m_length)
+            throw RuntimeErrorPanic.IndexOutOfRange(index, m_length);
+
+        return ref ElementRef((nint)index);
+    }
 
     /// <inheritdoc/>
     // Two boxes over one address are the same Go pointer, as for every native-backed kind.

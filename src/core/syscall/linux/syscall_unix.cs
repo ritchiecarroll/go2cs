@@ -332,8 +332,8 @@ internal static (nint n, error err) recvfromInet4(nint fd, slice<byte> p, nint f
         }
     }
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet4>();
-    var port = (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(pp.of(RawSockaddrInet4.ᏑPort)));
-    from.Port = ((nint)port.Value[0] << (int)(8)) + (nint)port.Value[1];
+    var port = @unsafe.ArrayPointer<byte>.Of(pp.of(RawSockaddrInet4.ᏑPort), 2);
+    from.Port = ((nint)port.ElementRef(0) << (int)(8)) + (nint)port.ElementRef(1);
     from.Addr = pp.Value.Addr.Clone();
     return (n, err);
 }
@@ -351,8 +351,8 @@ internal static (nint n, error err) recvfromInet6(nint fd, slice<byte> p, nint f
         }
     }
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet6>();
-    var port = (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(pp.of(RawSockaddrInet6.ᏑPort)));
-    from.Port = ((nint)port.Value[0] << (int)(8)) + (nint)port.Value[1];
+    var port = @unsafe.ArrayPointer<byte>.Of(pp.of(RawSockaddrInet6.ᏑPort), 2);
+    from.Port = ((nint)port.ElementRef(0) << (int)(8)) + (nint)port.ElementRef(1);
     from.ZoneId = pp.Value.Scope_id;
     from.Addr = pp.Value.Addr.Clone();
     return (n, err);
@@ -370,8 +370,8 @@ internal static (nint n, nint oobn, nint recvflags, error err) recvmsgInet4(nint
         return (n, oobn, recvflags, err);
     }
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet4>();
-    var port = (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(pp.of(RawSockaddrInet4.ᏑPort)));
-    from.Port = ((nint)port.Value[0] << (int)(8)) + (nint)port.Value[1];
+    var port = @unsafe.ArrayPointer<byte>.Of(pp.of(RawSockaddrInet4.ᏑPort), 2);
+    from.Port = ((nint)port.ElementRef(0) << (int)(8)) + (nint)port.ElementRef(1);
     from.Addr = pp.Value.Addr.Clone();
     return (n, oobn, recvflags, err);
 }
@@ -388,8 +388,8 @@ internal static (nint n, nint oobn, nint recvflags, error err) recvmsgInet6(nint
         return (n, oobn, recvflags, err);
     }
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet6>();
-    var port = (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(pp.of(RawSockaddrInet6.ᏑPort)));
-    from.Port = ((nint)port.Value[0] << (int)(8)) + (nint)port.Value[1];
+    var port = @unsafe.ArrayPointer<byte>.Of(pp.of(RawSockaddrInet6.ᏑPort), 2);
+    from.Port = ((nint)port.ElementRef(0) << (int)(8)) + (nint)port.ElementRef(1);
     from.ZoneId = pp.Value.Scope_id;
     from.Addr = pp.Value.Addr.Clone();
     return (n, oobn, recvflags, err);

@@ -1202,4 +1202,21 @@ public static ж<byte> StringData(@string str) {
     return Ꮡ(str.UnsafeBackingWindow(), 0);
 }
 
+// Go's `(*[N]T)(unsafe.Pointer(&p.f))` where f's type is not T: the converter emits it as
+// `@unsafe.ArrayPointer<T>.Of(Ꮡp.of(S.Ꮡf), N)`, naming the field ONCE, as the Go line does
+// (docs/phase4/DESIGN-native-array-view.md, the LookupServicePort door).
+//
+// It carries both routes. A field one hop off a NATIVE root takes golib's native field-view door, which
+// views the field at its GO offset (builtin.NativeFieldArrayPointer); every other root -- managed,
+// pinned-managed, nil, or a struct whose Go layout cannot be known -- takes the raw-address route the
+// converter emitted before, unchanged. The route lives here rather than in golib because golib sits
+// below this package and cannot name Pointer.FromPinnedBox, the retaining pin the raw route needs.
+//
+// T rides on the CLASS and TField on the method so the call site names only T: C# infers TField from
+// the field argument, and an extension member cannot take T alone (CS1061 under C# 14).
+public static class ArrayPointer<T> {
+    public static ж<array<T>> Of<TField>(ж<TField> field, nint length) =>
+        builtin.NativeFieldArrayPointer<T>(field, length) ?? (ж<array<T>>)(uintptr)Pointer.FromPinnedBox(field);
+}
+
 } // end unsafe_package

@@ -96,6 +96,29 @@ public static class PointerExtensions
     }
 
     /// <summary>
+    /// The element <paramref name="index"/> of the array this pointer references — Go's <c>p[i]</c> on a
+    /// <c>*[N]T</c>, emitted for a local bound by the native field-view door
+    /// (<see cref="builtin.NativeFieldArrayPointer{T}"/>).
+    /// </summary>
+    /// <remarks>
+    /// A native array pointer has no <c>array&lt;T&gt;</c> for <c>Value</c> to return -- it refuses by
+    /// design -- so this indexes it in place, bounded by the length it was minted with. Every other box
+    /// reads through <c>Value</c>, exactly as <c>p.Value[i]</c> does, with the same overloads and so the
+    /// same bounds checks and panics. One type test per read; no element box (runtime's cheaprand is on
+    /// the emitted population).
+    /// </remarks>
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, int index) =>
+        ref pointer is NativeArrayBox<T> native ? ref native.ElementRef(index) : ref pointer.Value[index];
+
+    /// <inheritdoc cref="ElementRef{T}(ж{array{T}}, int)"/>
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, nint index) =>
+        ref pointer is NativeArrayBox<T> native ? ref native.ElementRef(index) : ref pointer.Value[index];
+
+    /// <inheritdoc cref="ElementRef{T}(ж{array{T}}, int)"/>
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, ulong index) =>
+        ref pointer is NativeArrayBox<T> native ? ref native.ElementRef(index) : ref pointer.Value[index];
+
+    /// <summary>
     /// Reinterprets a pointer as a pointer to <typeparamref name="TDst"/> — Go's
     /// <c>(*TDst)(unsafe.Pointer(p))</c>.
     /// </summary>

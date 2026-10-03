@@ -350,6 +350,9 @@ type Visitor struct {
 	// (see identAddressTaken); lazily initialized, keyed by the *types.Object so entries
 	// from prior functions are simply never consulted again.
 	identAddressTakenCache map[types.Object]bool
+	// nativeFieldViewLocalCache memoizes isNativeFieldArrayViewLocal per local (nativeFieldArrayView.go);
+	// lazily initialized and never cleared, on the same per-object reasoning as the cache above.
+	nativeFieldViewLocalCache map[types.Object]bool
 	// captureAnalysisDecl is the declaration whose body performVariableAnalysis is currently
 	// walking — the real FuncDecl, or visitValueSpec's SYNTHETIC wrapper for a package-level
 	// func-literal initializer. The shared-capture routing's write scan (varShareFacts) reads
