@@ -15,7 +15,7 @@ import (
 
 func mustSource(t *testing.T, name, body string) nugetMapSource {
 	t.Helper()
-	src, err := parseNuGetMap(name, []byte(body))
+	src, _, err := parseNuGetMap(name, []byte(body))
 
 	if err != nil {
 		t.Fatal(err)

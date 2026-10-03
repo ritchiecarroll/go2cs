@@ -22,7 +22,7 @@ func TestNuGetMapParsesSchemaV1(t *testing.T) {
 		strings.TrimSuffix(mapRow("github.com/ritchiecarroll/hashset", "nugetgo.github.com.ritchiecarroll.hashset", "canonical"), "\n") + "\r\n" +
 		mapRow("example.com/gone/v2", "nugetgo.example.com.gone.v2", "withdrawn")
 
-	src, err := parseNuGetMap("m.txt", []byte(body))
+	src, _, err := parseNuGetMap("m.txt", []byte(body))
 
 	if err != nil {
 		t.Fatal(err)
@@ -62,15 +62,10 @@ func TestNuGetMapRefusesAMalformedSourceByFileAndLine(t *testing.T) {
 		{"empty id", mapRow("github.com/c/d", "", "community"), "nuget-id"},
 		{"id with a space", mapRow("github.com/c/d", "nugetgo github", "community"), "nuget-id"},
 		{"padded field", mapRow(" github.com/c/d", "nugetgo.github.com.c.d", "community"), "module"},
-		// The registry's one ID rule (owner ruling, 2026-10-02): "go." is the converted standard library, in any
-		// letter case and under any status.
-		{"go. prefix", mapRow("github.com/c/d", "go.github.com.c.d", "canonical"), `uses the "go." prefix`},
-		{"GO. prefix in another case", mapRow("github.com/c/d", "Go.Github.com.c.d", "community"), `uses the "go." prefix`},
-		{"go. prefix on a withdrawn row", mapRow("github.com/c/d", "go.github.com.c.d", "withdrawn"), `uses the "go." prefix`},
 	}
 
 	for _, c := range cases {
-		_, err := parseNuGetMap("bad.txt", []byte(good+c.row))
+		_, _, err := parseNuGetMap("bad.txt", []byte(good+c.row))
 
 		if err == nil {
 			t.Errorf("%s: the source was accepted", c.name)
@@ -83,8 +78,9 @@ func TestNuGetMapRefusesAMalformedSourceByFileAndLine(t *testing.T) {
 	}
 
 	// A malformed go. ID is refused for its malformation ALONE, as the registry's lint refuses it: the prefix rule
-	// runs after the validity checks, so one row yields one nuget-id problem.
-	_, err := parseNuGetMap("bad.txt", []byte(good+mapRow("github.com/c/d", "go.github com", "community")))
+	// runs after the validity checks, so one row yields one nuget-id problem (and a well-formed go. row is skipped,
+	// not refused: TestNuGetMapSkipsARowTheIDPatternRefusesWithAWarning).
+	_, _, err := parseNuGetMap("bad.txt", []byte(good+mapRow("github.com/c/d", "go.github com", "community")))
 
 	if err == nil || !strings.Contains(err.Error(), "non-empty, no whitespace") || strings.Contains(err.Error(), `uses the "go." prefix`) {
 		t.Errorf("a malformed go. ID must be refused for its malformation alone: %v", err)
@@ -96,7 +92,7 @@ func TestNuGetMapRefusesADuplicateModule(t *testing.T) {
 		mapRow("github.com/c/d", "nugetgo.github.com.c.d", "community") +
 		mapRow("github.com/a/b", "nugetgo.github.com.a.b.other", "canonical")
 
-	_, err := parseNuGetMap("dup.txt", []byte(body))
+	_, _, err := parseNuGetMap("dup.txt", []byte(body))
 
 	if err == nil || !strings.Contains(err.Error(), "dup.txt:3") || !strings.Contains(err.Error(), "line 1") {
 		t.Errorf("a duplicate module row was accepted, or the refusal does not name both lines: %v", err)
@@ -108,7 +104,7 @@ func TestNuGetMapKeysOnTheFullModulePath(t *testing.T) {
 	body := mapRow("github.com/golang-jwt/jwt/v4", "nugetgo.github.com.golang-jwt.jwt.v4", "community") +
 		mapRow("github.com/golang-jwt/jwt/v5", "nugetgo.github.com.golang-jwt.jwt.v5", "community")
 
-	src, err := parseNuGetMap("v.txt", []byte(body))
+	src, _, err := parseNuGetMap("v.txt", []byte(body))
 
 	if err != nil {
 		t.Fatalf("two major versions of one module were refused as duplicates: %v", err)
@@ -129,7 +125,7 @@ func TestNuGetMapAcceptsAnyIDThatDoesNotTakeTheGoPrefix(t *testing.T) {
 		mapRow("github.com/i/j", "go", "community") +
 		mapRow("github.com/k/l", "Example.HashSet", "canonical")
 
-	src, err := parseNuGetMap("ok.txt", []byte(body))
+	src, _, err := parseNuGetMap("ok.txt", []byte(body))
 
 	if err != nil {
 		t.Fatalf("a source with no go.-prefixed ID was refused: %v", err)
