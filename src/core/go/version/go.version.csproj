@@ -55,8 +55,10 @@
        on a library it buys nothing but IL#### trim warnings the app publish recomputes over the whole
        closure anyway. AllowUnsafeBlocks is a compile setting and stays unconditional. -->
   <PropertyGroup Condition="'$(OutputType)'!='Library'">
-    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRun Condition="'$(PublishSingleFile)'!='true'">true</PublishReadyToRun>
     <PublishTrimmed>True</PublishTrimmed>
+    <!-- Trim the framework only: a full trim removes members golib and the converted code reach by reflection. -->
+    <TrimMode Condition="'$(TrimMode)'==''">partial</TrimMode>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <!-- Opt-in for Ubuntu's packaged .NET 10, where on-stack replacement can end a program early (0x80131506 or a silent
