@@ -188,6 +188,77 @@ func TestSeedProductionInterfaceAliasesFollowsPublishedChain(t *testing.T) {
 	resetPackageState(&packages.Package{})
 }
 
+// TestSeedProductionInterfaceAliasesIncludesInlineEmptyInterface pins the THIRD right-hand side
+// visitTypeSpec emits as a `global using`: an INLINE EMPTY interface, `type Hook interface{}`
+// (mapstructure's DecodeHookFunc). interfaceAliasRHS admits it beside the named forms, so the
+// production compilation declares `global using Hook = object;` and no class member -- but the
+// seeding read its own copy of the predicate, which admitted only an identifier or selector RHS. The
+// internal test variant then qualified the type through the production class (CS0426, mapstructure's
+// `var f DecodeHookFunc = WeaklyTypedHook`). A method-bearing inline interface stays the control: it
+// IS a class member.
+func TestSeedProductionInterfaceAliasesIncludesInlineEmptyInterface(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: loads a module fixture through go/packages")
+	}
+
+	dir := t.TempDir()
+
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod": "module example/inlineempty\n\ngo 1.23\n",
+		"hook.go": "package inlineempty\n\n" +
+			"type Hook interface{}\n\n" +
+			"type Reader interface{ Read() int }\n",
+		"hook_test.go": "package inlineempty\n\n" +
+			"func helper(h Hook, r Reader) bool { return h == nil && r == nil }\n",
+	})
+
+	infoPath := filepath.Join(dir, "package_info.cs")
+	info := "// <ExportedTypeAliases>\r\n" +
+		"[assembly: GoTypeAlias(\"Hook\", \"object\")]\r\n" +
+		// Published for the control too, so the control tests the predicate, not the publication.
+		"[assembly: GoTypeAlias(\"Reader\", \"go.example.inlineempty_package.Reader\")]\r\n" +
+		"// </ExportedTypeAliases>\r\n"
+
+	if err := os.WriteFile(infoPath, []byte(info), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	internal, _ := loadTestVariantsForDir(t, dir)
+
+	if internal == nil {
+		t.Fatal("fixture must load the internal test variant")
+	}
+
+	if got, want := strings.Join(definedOverInterfaceTypeNames(internal), ","), "Hook"; got != want {
+		t.Fatalf("definedOverInterfaceTypeNames must admit an inline EMPTY interface and only it\n got: %s\nwant: %s", got, want)
+	}
+
+	resetPackageState(&packages.Package{})
+	packageNamespace = "go"
+
+	seedProductionInterfaceAliases(internal, infoPath, Options{testProductionPath: "example/inlineempty"})
+
+	hookObj := internal.Types.Scope().Lookup("Hook")
+
+	if hookObj == nil {
+		t.Fatal("fixture is inert: Hook must be in package scope")
+	}
+
+	if got := productionAliasLiftedTypes[hookObj.Type()]; got != "Hook" {
+		t.Errorf("an inline empty interface type must resolve to its alias name, got %q", got)
+	}
+
+	if got := importedTypeAliases["Hook"]; got != "object" {
+		t.Errorf("its alias must be re-emitted into the test compilation, got %q", got)
+	}
+
+	if got, seeded := productionAliasLiftedTypes[internal.Types.Scope().Lookup("Reader").Type()]; seeded {
+		t.Errorf("a method-bearing inline interface is a class member and must not be seeded, got %q", got)
+	}
+
+	resetPackageState(&packages.Package{})
+}
+
 // TestFunctionLocalAnonStructAdoptsPackageLift pins that a function-local lift of an anonymous
 // struct the PACKAGE has already lifted reuses that name instead of minting a second C# type.
 //
