@@ -132,8 +132,12 @@
     fixtures and end-user modules keep their historical bytes). Guarded by
     `TestValidationPackBlockSurvivesTestsRewriteOfCorePackage`; the end-to-end proof is the next
     sweep's aftermath, which should no longer contain the `0 8` csproj family at all.
-11. **`tests/PackageTests/ConvertedTestHarness` does not build — the end-to-end `-tests` fixture is
-    dead** (found r37-time-os-fin, 2026-08-02; PRE-EXISTING, A/B'd on `fa87dd349` with a
+11. ~~**`tests/PackageTests/ConvertedTestHarness` does not build — the end-to-end `-tests` fixture is
+    dead**~~ — **BUILDS AND VALIDATES, measured 2026-10-03** at `8f46a9adae` on linux (Microsoft .NET
+    10.0.12): the README's own command, `go2cs -tests -test-action all` over the fixture, exits 0 with
+    "Validated 12 tests against go test (0 skipped identically on both sides, 0 disclosed-unsupported
+    declarations excluded)". The run leaves an untracked `validation/` folder the fixture's
+    `.gitignore` does not cover. Original text, for the record: (found r37-time-os-fin, 2026-08-02; PRE-EXISTING, A/B'd on `fa87dd349` with a
     master-converter binary and reproduced from a clean slate). Its production `value.cs` emits
     `namespace go;` + `convertedtestharness_package`, while the external variant's `external_test.cs`
     qualifies the self-import as `go2cs.convertedtestharness_package` — the module prefix of
@@ -180,9 +184,10 @@
     exists. Original text, for the record: *"~30 stale scratch/probe/recon directories from r26–r34
     (`ab*`, `fmtcheck*`, `r3x-*` leftovers, `scratch*`, `splitmain`, …) plus the landed chip
     worktrees. Delete after confirming each is branch-landed."*
-14. **ConversionStrategies-Reference.md ~line 10734** — two unrelated topics mashed onto one line
-    (reflectlite mini-bridge paragraph runs into the AllocsPerRun discussion); chip-reported,
-    cosmetic.
+14. **`ConversionStrategies-Reference/manual-conversions.md` ~line 286** — two unrelated topics mashed
+    onto one line (reflectlite mini-bridge paragraph runs into the AllocsPerRun discussion);
+    chip-reported, cosmetic. (Pointer re-aimed 2026-10-03: the single-page reference it named is now
+    the anchor-redirect page, and the paragraph lives in the split page above.)
 15. ~~**`reflect.Value.Len()` reports 0 for EVERY channel.**~~ — **DONE 2026-08-20 (`22940de2f`, the
     channel-direction-cargo + `Value.Recv`/`Send` arc); struck 2026-09-02 on re-verified evidence.**
     The arm is at `src/core/reflect/value_impl.cs:354` — `IChannel c => c.Length,` — exactly the
