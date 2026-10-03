@@ -1078,6 +1078,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMethodSelector() => CheckTarget("MethodSelector");
 
     [TestMethod]
+    public void CheckMethodValueFmRecord() => CheckTarget("MethodValueFmRecord");
+
+    [TestMethod]
     public void CheckMethodValueFuncNames() => CheckTarget("MethodValueFuncNames");
 
     [TestMethod]
