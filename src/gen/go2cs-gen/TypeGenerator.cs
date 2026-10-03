@@ -123,6 +123,7 @@ public class TypeGenerator : ISourceGenerator
                             ChanDirInitializerMembers = structDeclaration.GetChanDirInitializerMembers(),
                             ReadOnlyZeroSizeMembers = structDeclaration.GetReadOnlyExplicitLayoutMembers(),
                             HasEqualityOperators = hasEqualityOperators,
+                            HandWrittenEquality = DeclaresOwnEquality(semanticModel.GetDeclaredSymbol(structDeclaration) as INamedTypeSymbol),
                             // A generic struct that failed the whole-struct constraint gate still
                             // gets a real memberwise Equals: each member whose type supports ==
                             // independent of the unconstrained type parameters compares with ==,
@@ -635,6 +636,23 @@ public class TypeGenerator : ISourceGenerator
         }
 
         return [];
+    }
+
+    // A hand-owned partial of a [GoType] struct that declares its OWN `Equals(T)` takes over the
+    // struct's equality: the generated memberwise `Equals(T)` and `GetHashCode` step aside (the
+    // operators and `Equals(object)` still route through it). The memberwise form sees only the
+    // fields of the converted declaration, so it cannot compare state a hand-own keeps beside them
+    // -- reflect.Value's datum lives in its [GoReflectCompanion] fields, which left every two Values
+    // of one type equal. Opt-in by declaration, so no other struct's equality can move: declaring
+    // `Equals(T)` beside the generated one was a duplicate-member error until now.
+    private static bool DeclaresOwnEquality(INamedTypeSymbol? structSymbol)
+    {
+        if (structSymbol is null)
+            return false;
+
+        return structSymbol.GetMembers("Equals").OfType<IMethodSymbol>().Any(method =>
+            !method.IsImplicitlyDeclared && method.Parameters.Length == 1 &&
+            SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, structSymbol));
     }
 
     private static string[] GetValueCloneFields(BaseTypeDeclarationSyntax targetSyntax, SemanticModel semanticModel)

@@ -23,6 +23,9 @@ internal class StructTypeTemplate : TemplateBase
     public required string FullyQualifiedStructType;
     public required List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct, bool isPublic)> StructMembers;
     public required bool HasEqualityOperators;
+    // True when a hand-owned partial declares the struct's own `Equals(T)` (and GetHashCode with it):
+    // the generated memberwise pair is then omitted (see TypeGenerator.DeclaresOwnEquality).
+    public bool HandWrittenEquality;
     // Non-null exactly when HasEqualityOperators is false: the members whose type cannot use ==
     // (see GetEqualityFallbackMembers). May be empty — a generic struct with no type-parameter-
     // dependent members compares every member with == despite failing the whole-struct gate.
@@ -118,13 +121,9 @@ internal class StructTypeTemplate : TemplateBase
                 {{Constructors}}
                 {{ValueCloneImplementation}}{{GoZeroRegistration}}
                 // Handle comparisons between struct '{{NonGenericStructName}}' instances
-                public bool Equals({{StructName}} other) =>
-                    {{CompareFields}};
-                
+                {{EqualsMember}}
                 public override bool Equals(object? obj) => obj is {{StructName}} other && Equals(other);
-                
-                public override int GetHashCode() => {{HashCode}};
-                
+                {{HashCodeMember}}
                 public static bool operator ==({{StructName}} left, {{StructName}} right) => left.Equals(right);
                 
                 public static bool operator !=({{StructName}} left, {{StructName}} right) => !(left == right);
@@ -154,6 +153,19 @@ internal class StructTypeTemplate : TemplateBase
     // receive, a failed comma-ok assertion), where `default` is wrong only for a needy T. A GENERIC
     // struct cannot host a module initializer and has no closed type to register, so it keeps
     // `default`: the residual option B states (pinned by GolibTests' GoZeroResidualTests).
+    // The memberwise `Equals(T)` and `GetHashCode`, omitted when a hand-owned partial declares the
+    // struct's own equality (HandWrittenEquality). Each carries the blank line that follows it in the
+    // template, so the generated form is byte-identical to the unconditional one it replaced.
+    private string EqualsMember =>
+        HandWrittenEquality
+            ? $"// Equals({NonGenericStructName}) and GetHashCode are hand-written in a hand-owned partial\r\n{TypeElemIndent}"
+            : $"public bool Equals({StructName} other) =>\r\n{TypeElemIndent}    {CompareFields};\r\n{TypeElemIndent}";
+
+    private string HashCodeMember =>
+        HandWrittenEquality
+            ? string.Empty
+            : $"\r\n{TypeElemIndent}public override int GetHashCode() => {HashCode};\r\n{TypeElemIndent}";
+
     private string GoZeroRegistration =>
         StructName.Contains('<') || !IsNeedy
             ? string.Empty
