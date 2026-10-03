@@ -93,7 +93,12 @@ public static partial class TypeExtensions
     private static readonly ConcurrentDictionary<Type, ImmutableHashSet<string>> s_typeExtensionMethodNames = [];
     private static int s_registeredAssemblyLoadEvent;
 
-    private static (MethodInfo, Type)[] GetExtensionMethods()
+    // TEST SEAM, GolibTests only (InternalsVisibleTo): called once per assembly the scan reaches, so a
+    // test can hold a scan in flight. Null in every program -- no behaviour and no allocation when
+    // unset. Never wire product code to it.
+    internal static Action<Assembly>? ScanProbeForTest;
+
+    internal static (MethodInfo, Type)[] GetExtensionMethods()
     {
         if (Interlocked.CompareExchange(ref s_extensionMethods, null, null) is not null)
             return s_extensionMethods!;
@@ -111,7 +116,10 @@ public static partial class TypeExtensions
             List<(MethodInfo, Type)> extensionMethods = [];
 
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                ScanProbeForTest?.Invoke(assembly);
                 LoadAssemblyExtensionMethods(assembly, extensionMethods);
+            }
 
             s_extensionMethods = extensionMethods.ToArray();
         }
@@ -119,7 +127,7 @@ public static partial class TypeExtensions
         return s_extensionMethods;
     }
 
-    private static void ClearTypeCaches(object? sender, EventArgs e)
+    internal static void ClearTypeCaches(object? sender, EventArgs e)
     {
         // Since not all assemblies may be loaded when initial type caches
         // are created, we need to clear caches when any new assemblies are
