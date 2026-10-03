@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- E8 spike, C#-consumer shape: a C# app referencing a local Go module. The Go module is converted
+       before NuGet builds its restore graph, so the generated projects exist when restore walks the
+       ProjectReference below. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GoModuleDir>$([MSBuild]::NormalizeDirectory($(MSBuildThisFileDirectory)../../samples/shared))</GoModuleDir>
+    <GoOutDir>$([MSBuild]::NormalizeDirectory($(MSBuildThisFileDirectory)obj/go2cs/$(Configuration)))</GoOutDir>
+    <GoStamp>$(GoOutDir)go2cs.stamp</GoStamp>
+  </PropertyGroup>
+  <ItemGroup>
+    <GoSource Include="$(GoModuleDir)**/*.go;$(GoModuleDir)go.mod" />
+    <Watch Include="@(GoSource)" />
+    <UpToDateCheckInput Include="@(GoSource)" />
+    <ProjectReference Include="$(GoOutDir)src/example.com/shared/example.com.shared.csproj" />
+  </ItemGroup>
+
+  <Target Name="GoConvert" BeforeTargets="_LoadRestoreGraphEntryPoints;BeforeBuild"
+          Condition="'$(DesignTimeBuild)' != 'true'" Inputs="@(GoSource)" Outputs="$(GoStamp)">
+    <Message Importance="high" Text="go2cs: converting $(GoModuleDir) -> $(GoOutDir)" />
+    <Exec Command="go2cs -recurse=nuget . &quot;$(GoOutDir.TrimEnd('/'))&quot;" WorkingDirectory="$(GoModuleDir)"
+          StandardOutputImportance="low" />
+    <Touch Files="$(GoStamp)" AlwaysCreate="true" />
+  </Target>
+</Project>

@@ -1,0 +1,8 @@
+<Project>
+  <!-- E9 option (b) prototype: compile the transient #line copies in place of the committed .cs files. -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == '$(GoLineProject)' and '$(GoLineDir)' != ''">
+    <_GoLineCopy Include="$(GoLineDir)*.cs" />
+    <Compile Remove="@(_GoLineCopy->'$(MSBuildProjectDirectory)/%(Filename)%(Extension)')" />
+    <Compile Include="@(_GoLineCopy)" />
+  </ItemGroup>
+</Project>

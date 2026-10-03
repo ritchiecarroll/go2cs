@@ -440,3 +440,29 @@ The swap that compiles the (b) copies in place of the committed files, used for 
 ```
 
 passed as `-p:CustomAfterMicrosoftCommonTargets=<file> -p:GoLineProject=<project name> -p:GoLineDir=<folder of copies>/`.
+
+## Amendment 2026-10-03 (after COORD's rulings of 23:08Z)
+
+The sections above stand as measured. These rulings supersede the parts of them they name.
+
+1. **E9 is ruled (b), hidden mode, with comment-only records moved.** It is COORD's ruling and gets the owner's
+   confirmation at the decision gate. The converter `#line` flag (Q2) is moot; (c) waits until stepping into the
+   published go.* packages is asked for.
+2. **The inputs are committed** under [`spike-ide-mode/`](spike-ide-mode/README.md): 27 files plus a README naming
+   which experiment uses which.
+3. **The `else if` position-map record** (converter item 2) is accepted as a TRAIN P seat for lane C2.
+4. **Startup hooks in Debug** (converter item 1) is deferred to Phase 3: the build package sets
+   `StartupHookSupport` for Debug, so the emitted csproj template does not change before the gate.
+5. **`main.Main` against `main.main`** (E7, converter item 4) is already fixed by a TRAIN O seat; it is re-checked
+   after TRAIN O lands.
+6. **The collapsed literal whose body is on its own Go line** (E6b, E7, converter item 3) is not fixed. It is
+   diagnostic-only, and the owner's rule of 2026-09-28 forbids changing visible emission for it. It is a residual.
+
+### Residuals
+
+- A function literal collapsed to one C# line, with its body on a later Go line, has no sequence point on the body's
+  line: a breakpoint there cannot bind, and `runtime.Caller` reports the literal's first line (E7: 18 against Go's 19).
+- Go `case` clauses cannot bind in any option: a C# `case` label has no IL of its own (124 lines in `strconv`).
+- 18 statement lines missed by every build, and 4 missed by (b) only, in `strconv` are not root-caused (E9).
+- E2 has not run: netcoredbg needs github.com, and that owner hand is open. If it is not granted, E2 joins the desktop
+  checklist.
