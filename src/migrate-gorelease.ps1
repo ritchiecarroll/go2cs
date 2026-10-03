@@ -345,8 +345,9 @@ $editableSites = @(
     # release ever returns to CLAUDE.md as present-tense prose, that line is reported unanchored
     # instead of being silently unmanaged. The retirement is itself asserted: the anchor must match
     # ZERO times, and a nonzero count is a failure telling the operator to un-retire the site.
-    # The present-tense corpus release is stated in docs/README.md, docs/ValidatedTestPackages.md,
-    # docs/Background.md and docs/ConversionStrategies.md, each anchored below; nothing is unstated.
+    # The present-tense corpus release is stated in docs/README.md and docs/ValidatedTestPackages.md,
+    # each anchored below; nothing is unstated. The docs-refresh seat retired the Background.md,
+    # ConversionStrategies.md and Roadmap.md sites: those pages no longer spell the release.
     @{
         File = 'CLAUDE.md'; Class = 'DOC-STATEMENT'
         Find = '; Go {OLD}\) auto-converted'
@@ -459,6 +460,8 @@ $editableSites = @(
         Find = '> Go {OLD}\) wherever possible'
         Replace = '> Go {NEW}) wherever possible'
         Expect = 1
+        Retired = 'the docs-refresh seat (ConversionStrategies snippet provenance)'
+        RetiredNote = 'snippets are not re-taken at every hop, so the summary no longer names a release; each code block keeps its exact provenance in its HTML comment'
         Note = 'the release the strategy summary draws its real converted snippets from'
     }
 )

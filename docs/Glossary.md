@@ -9,7 +9,7 @@
 > [`ConversionStrategies-Reference/`](ConversionStrategies-Reference/README.md) (full detail); this file covers
 > the **process** vocabulary — plus a short [**.NET and tooling terms**](#net-and-tooling-terms) section at
 > the end for the general .NET/toolchain acronyms the conversion docs assume (BCL, Roslyn, CRTP, …).
-> Companion docs: [`CLAUDE.md`](../CLAUDE.md) (authoritative workflow),
+> Companion docs: [`Architecture.md`](Architecture.md), the agent rules under `.claude/rules/`, and
 > [`Baseline-vs-FullConversion.md`](../src/archived/Baseline-vs-FullConversion.md).
 
 ## Gates (the checks a change must pass before it lands)

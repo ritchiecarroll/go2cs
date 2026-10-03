@@ -2,9 +2,8 @@
 
 ## Status
 
-Proposed design for Roadmap Phase 4. This document defines the test infrastructure that should be
-implemented after the full standard-library conversion compiles and before Roadmap Phase 5 converts
-the remaining assembly-backed declarations to working C# implementations.
+The design behind the converted-test pipeline. Phases 4A to 4C are implemented as the `-tests`
+pipeline; Phase 4D is planned ([Roadmap](Roadmap.md#phase-4d-examples-fuzz-seed-corpora-and-benchmarks)).
 
 ## 1. Purpose
 
