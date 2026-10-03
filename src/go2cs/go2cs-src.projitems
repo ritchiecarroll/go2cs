@@ -94,6 +94,7 @@
     <None Include="$(MSBuildThisFileDirectory)convTypeAssertExpr.go" />
     <None Include="$(MSBuildThisFileDirectory)corpusNilPointerGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)convUnaryExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)copyingSliceViewNote.go" />
     <None Include="$(MSBuildThisFileDirectory)copyingSliceViewNote_test.go" />
     <None Include="$(MSBuildThisFileDirectory)corpusReferenceClosure_test.go" />
     <None Include="$(MSBuildThisFileDirectory)crossAssemblyLiftDedup_test.go" />

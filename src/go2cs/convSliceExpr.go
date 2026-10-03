@@ -144,6 +144,9 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 			length = fmt.Sprintf("%s - %s", length, low)
 		}
 
+		// The span constructor COPIES: say so when this function writes through the result.
+		v.noteCopyingSliceViewWrite(sliceExpr)
+
 		return fmt.Sprintf("new slice<%s>(new ReadOnlySpan<%s>((%s*)%s, %s))", ptrType, ptrType, csPtrType, base, length)
 	}
 
