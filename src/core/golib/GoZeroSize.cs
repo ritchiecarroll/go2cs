@@ -83,7 +83,7 @@ internal static class GoZeroSizeFacts
 
         // A generic type parameter reaching here would be an open type — it cannot, since T is
         // always closed at the point a static generic field initializes.
-        foreach (FieldInfo field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+        foreach (FieldInfo field in GoFieldMetadata.InstanceFields(type))
         {
             if (!Classify(field.FieldType))
                 return false;
