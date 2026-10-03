@@ -1,0 +1,33 @@
+# TRAIN N draft (base: TRAIN M's landed master 8f46a9adae). Accepted candidates in PROPOSED MERGE ORDER (COORD re-derives order + PRERES at assembly). CUTOFF 10:00 Central 2026-10-03.
+# row = ref|seated sha|notes. The row order is the merge order; a stacked seat carries a higher row number than its base. Tips read by ls-remote 2026-10-03 02:10.
+coord-hop-lessons|aec4f4b20a|COORD: docs/GoCorpusMigration.md section 7.7 (hop lessons 40-85; 65 held REFUTED, 86 held) + the B33 edit to .claude/rules/harness-gates.md (allowed= .claude/rules/harness-gates.md)
+coord-slog-firstlaunch-record|b3e6969582|COORD: docs/phase4/briefs/slog-firstlaunch-union-2026-10-02.md (one docs record)
+g-readme-tests-config|e7513a59b7|G: README sentences on -tests configuration
+c2-native-array-view|c27cf4198a|C2: native array view (LookupServicePort on darwin: "cannot view native memory as array<Byte>"); mac acceptance PASS both legs
+c2-s3b-nuget-map|f18e4cf124|C2 S3b: the nuget-map consumer half
+r-m4-link-vendor-arm|9affd2b268|R: ModuleAncestryTests link/vendor arm
+g-named-pointer-inbound|5698c0a95f|G: named pointer inbound
+g-trim-sizing|4d7748a380|G: golib trim sizing steps 1-2 (78 -> 69 IL warning records)
+g-trim-annotations|4526442d52|G: golib trim annotations
+g-trim-loud-guards|fc4bd9cd60|G: trim step 3 -- GoFieldMetadata refuses by name a value type with storage and no instance fields (a tripwire); on e2008427b1; GOLIB seat
+g-publish-keep|3ced87fd40|G: DEFECT -- a published converted app misbehaved under full trim: template TrimMode=partial; ReadyToRun only when not single-file (single-file + R2R + partial hung 5/10); the 9 converter profiles R2R=false; 1,131 csproj +lines (0 .cs); check-published-output.ps1 = a NEW standing battery leg with a single-file hang arm
+r-module-license|2d46145bdd|R: the module-license warning names the root license file; nugetgo-pack accepts the converter's license names (NugetgoLicense.psm1, pinned to licensing.go)
+c2-nugetgo-id-pattern|a7873ee6c2|C2: nugetgo. prefix for every non-stdlib conversion (owner ruling): PLAN amendment, -UpstreamPublishes affiliation forms, three go.-ID refusals mirroring registry 90cc7d7409, template PackageId (B) for non-stdlib libraries (55 behavioral library csproj), J0 uuid defaults; stack-on r-module-license; merges with g-publish-keep with 0 conflicts (57 files changed both sides)
+g-slog-roster-tc0|582de36d1b|G: log/slog drops release-tiered (0 execution rows); proof page; comment fixes
+g-using-static-alias-guards|b9e2d5ffa1|G: the using-static alias trigger is the reference-model project; behavioral UsingStaticNamespaceAlias
+r-shadowed-import-alias|f33bd4eba9|R: a production-file import alias no longer binds to the package itself (pkg/errors hang); contains the repro d7b4b538c6; behavioral ShadowedStdlibImportAlias
+r-module-driver-gomod-less|537abad2a2|R: a go.mod-less module takes the module cache's .mod as an overlay; the oracle names a vet failure; the preflight keeps GOFLAGS; a go.mod with no go line stamps DefaultGODEBUG at go 1.16
+c2-generic-map-chan|1e2e91894c|C2: generic defined map/chan keep their type parameters; generator slice/map/chan constructor names; behavioral GenericDefinedMapChan; GEN seat
+c2-multi-func-define|1c182b5ca2|C2: a parallel := of function values declares each target alone (CS8130); behavioral MultiValueFuncLiteralDefine
+c2-named-composite-infer|9f9a305ffd|C2: a named composite at a generic composite parameter spells its type arguments (CS0411); behavioral NamedCompositeGenericArg
+p1-hashset-module|a7a7a197dd|P1: go2cs requires github.com/ritchiecarroll/hashset v1.0.0 (deletes src/go2cs/HashSet.go); supersedes claude/p1-hashset-module-wip
+i9-crosspkg-promoted-forwarders|a9cc98c1e3|i9: methods promoted through another package's embed are forwarded (sibling class); [GoEmbedded] on interface embeds; foreign value embed's class from its symbol; 4 behavioral modules; GOLIB+GEN seat (owes go2cs.slnx)
+r-jwt-promoted-iface-repros|ee52639557|R: PromotedIfaceFromLibEmbed + PromotedIfaceTestEmbed repros (green only with the i9's seat); stack-on i9-crosspkg-promoted-forwarders
+i9-gomethodvalue-nilfunc|9d39fa54d8|i9: a nil named func in an interface -- reflect method values and IsNil (P1's finding); behavioral NilFuncIfaceMethodValue; GOLIB seat
+g-slice-view-note|7adb0ad306|G: a write through a copying slice view is noted at conversion time (emission unchanged; the census's three writers noted)
+g-cctor-init-frame|0ce7e3dc9c|G: package initialization frames named init / init.funcN / init.N; behavioral InitFrameNames; GOLIB (runtime managed_impl.cs) seat
+p2-n-cleanup|6235912709|P2: the owner-ruled cleanup -- h5 hop scaffolding + 3 superseded census instruments (guards + projitems lines), strays (GetPackageDeps + exe, launch.json, src/go2cs.png, two .bat, build.cmd, two .go.test, mod-init-all.ps1), GenericTests, two dead converter helpers, os-matrix 9.0.x, doc pointers, the 34 MB archived PNG (G7); LAST: it deletes files other seats may touch
+# PENDING (seat only if pushed AND accepted by the cutoff): r-test-host-init-order (launch-from-source); r-ptrptr-anon-struct-lift (A1, stack-on r-atlas-batch-repros d834821da0); g-float-untyped-const-compare (A2, stack-on d834821da0); c2-toml-test-host; p1-linux-only-goldens; p2 converter-warning-clears.
+# N BATTERY ADDITIONS (vs M): the publish gate (check-published-output.ps1, ~5 min, windows; failed publish = NOT MEASURED; single-file hang arm); NGF-j0 EXPECT both nugetgo.github.com.google.uuid; EXEC_RULED empty (0 execution rows); comparison-classifier go test; the linux driver compares the six linux-only behavioral projects + the UF carve-out for linux-only test sources; emitcheck knows .editorconfig; the checklist compares the signing KEY (941694536F21BAFF), not %G?=G.
+# N ASSEMBLY HAZARDS: behavioral-project inserts in src/go2cs.slnx + src/tests/Behavioral/BehavioralTests/{Compile,OutputComparison,TargetComparison,Transpile}Tests.cs from r-shadowed-import-alias, g-using-static-alias-guards, c2-generic-map-chan, c2-multi-func-define, c2-named-composite-infer, i9-crosspkg (4), i9-gomethodvalue-nilfunc, g-cctor-init-frame: keep every side's insert; go2cs-src.projitems: many adds + p2-n-cleanup's deletions (merge-hazards: adjacent-insert rule, assert the line-count invariant).
+# AFTER N's union: COORD's M13 refresh of committed -tests sources from a WINDOWS re-emission (a fixup or the bank step); re-read hashset 37/37 on the union.
