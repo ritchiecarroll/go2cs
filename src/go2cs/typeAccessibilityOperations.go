@@ -603,6 +603,62 @@ var packagePublicizedTypes map[types.Object]bool
 // visiting; consulted at the lift's emission (visitStructType → isPublicizedLiftedType).
 var packagePublicizedLiftedTypes map[types.Type]bool
 
+// collectPackageLevelLiteralStructFieldTypes publicizes the unexported named types held by the
+// EXPORTED fields of an anonymous struct that is built as a VALUE in a package-level var initializer
+// — yaml.v3's `var unmarshalTests = []struct{ data string; value interface{} }{ …, &struct{ A int; C
+// inlineB }{…} }` (decode_test.go). collectPublicizedTypes walks TYPES, and such a struct is
+// reachable through no declared type (it hides behind `interface{}`), so nothing looked at its
+// fields. Its lift takes the placeholder name `Δtype`, which reads public (generatedTypeScope), and
+// a public lift's exported field over an internal type is CS0052, with CS0050/CS0051 on the members
+// go2cs-gen builds from it. This is the rule collectPublicizedLiftedType applies to a publicized
+// lift's fields, applied to the lifts that are public by name.
+//
+// Function bodies and func-literal bodies are skipped: a lift made there is pinned internal
+// (localTypeAccess) and may hold internal types. Must run BEFORE collectPublicizedTypes, whose
+// cascade then carries the publicized types' exported method signatures.
+func collectPackageLevelLiteralStructFieldTypes(files []FileEntry, pkg *types.Package, info *types.Info) {
+	if packagePublicizedTypes == nil {
+		packagePublicizedTypes = map[types.Object]bool{}
+	}
+
+	for _, fileEntry := range files {
+		for _, decl := range fileEntry.file.Decls {
+			genDecl, ok := decl.(*ast.GenDecl)
+
+			if !ok || genDecl.Tok != token.VAR {
+				continue
+			}
+
+			for _, spec := range genDecl.Specs {
+				valueSpec, ok := spec.(*ast.ValueSpec)
+
+				if !ok {
+					continue
+				}
+
+				for _, value := range valueSpec.Values {
+					ast.Inspect(value, func(node ast.Node) bool {
+						switch node := node.(type) {
+						case *ast.FuncLit:
+							return false
+						case *ast.CompositeLit:
+							if st, ok := types.Unalias(info.TypeOf(node)).(*types.Struct); ok {
+								for i := range st.NumFields() {
+									if field := st.Field(i); field.Exported() {
+										collectUnexportedNamedTypes(field.Type(), pkg)
+									}
+								}
+							}
+						}
+
+						return true
+					})
+				}
+			}
+		}
+	}
+}
+
 // collectPublicizedTypes records every unexported named type that is referenced by an exported
 // field of any package-level struct (directly, or through a pointer/slice/array/map/channel
 // element). Scanning the exported fields of every struct in one pass is sufficient: a publicized

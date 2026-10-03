@@ -893,6 +893,31 @@ the publicize.)
 
 **A publicized wrapper reaches through an UNNAMED composite RHS to its element type.** A defined type whose `[GoType]` wrapper is emitted `public` (exported, or unexported-but-publicized) exposes its written RHS through the wrapper's `Value`/ctor/indexer/operators, so an unexported RHS type must be publicized too. This holds not just for a NAMED RHS (`type EncoderBuffer encoder`) but for an UNNAMED composite RHS whose ELEMENT is an unexported named type: `type ringElement [256]fieldElement` exposes `fieldElement` through the array-wrapper's indexer/`Value`/`ToSpan`, so `fieldElement` must be publicized (crypto/internal/mlkem768, CS0050/CS0051/CS0053/CS0054/CS0056/CS0057). `collectPublicizedWrapperRHS` therefore feeds the RHS unconditionally to the pointer/slice/array/map/chan-peeling walk (`collectUnexportedNamedTypes`) rather than gating on a named RHS. The walk has no `*types.Struct` case, so a struct RHS stays a no-op — an exported field of an unexported struct-field type is the CS0052 domain and is intentionally left internal. (Guarded by the `NamedArrayWrapper` extension — an exported `Grid [3]unit` over an unexported `unit`, output vs Go.)
 
+**A package-level literal struct reached only as a VALUE publicizes its exported fields' types.** The
+walks above read TYPES, so an anonymous struct built inside a package-level var initializer and held only
+behind an interface is reachable through none of them — yaml.v3's decode_test.go:
+
+```go
+var unmarshalTests = []struct{ data string; value interface{} }{
+	{"a: 1\nb: 2\nc: 3\n", &struct {
+		A int
+		C inlineB `yaml:",inline"`
+	}{1, inlineB{2, inlineC{3}}}},
+}
+```
+
+The struct lifts under the placeholder name `Δtype`, which is public (`generatedTypeScope`: an anonymous
+lift carries no export status, and a lifted interface must stay public as a public interface's base,
+CS0061), so its exported field `C` held the internal `inlineB` — CS0052, with CS0050/CS0051 on the
+members go2cs-gen builds from it. `collectPackageLevelLiteralStructFieldTypes` walks every package-level
+var initializer's composite literals before the type walks run, and publicizes the unexported named types
+of each anonymous struct's EXPORTED fields: the rule `collectPublicizedLiftedType` already applies to a
+publicized lift's fields, applied to the lifts that are public by name. Func-literal bodies are skipped
+(their lifts are pinned `internal`), and an unexported field keeps an internal type. A type declared in
+PRODUCTION code and reached this way only from a `_test.go` literal is not covered: the `-tests` variant
+does not regenerate production output. (Guarded by `packageLevelLiteralLiftAccess_test.go`; an AST census
+finds no such field in GOROOT production code, so the standard library does not move.)
+
 ## A test-file exported helper over an unexported PRODUCTION type is emitted `internal` (the MIRROR)
 The publicization passes above run over a single `*types.Package` and raise a production type's
 accessibility to match the exported production surface that exposes it. A `_test.go`-declared helper

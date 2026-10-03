@@ -352,6 +352,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				collectTypeSpecRHS(pkg)
 				collectHoistedLiterals(files, packageTypes, info, goosOfTarget(options.targetPlatform), nil, true)
 				collectMovedInitVars(fset, packageTypes, info, pkg.Syntax)
+				collectPackageLevelLiteralStructFieldTypes(files, packageTypes, info)
 				collectPublicizedTypes(packageTypes)
 
 				// ж-box A1: the ref-lowering classification runs in the hand-owned-sibling driver
@@ -462,6 +463,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 		// Find unexported types used as exported struct fields so they can be emitted as public
 		// (an exported field's type must be at least as accessible — CS0051/CS0052).
+		collectPackageLevelLiteralStructFieldTypes(files, packageTypes, info)
 		collectPublicizedTypes(packageTypes)
 
 		// Find this package's definition-side one-arg //go:linkname handles (Go 1.23's opt-in that
