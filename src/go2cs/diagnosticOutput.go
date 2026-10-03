@@ -26,6 +26,8 @@ import (
 	"go/types"
 	"os"
 	"strings"
+
+	"golang.org/x/tools/go/packages"
 )
 
 func (v *Visitor) addRequiredUsing(usingName string) {
@@ -97,4 +99,22 @@ func showWarning(format string, a ...interface{}) {
 func (v *Visitor) showWarning(format string, a ...interface{}) {
 	message := fmt.Sprintf(format, a...)
 	showWarning("%s in \"%s\"", message, getShortFileName(v.file))
+}
+
+// Canonical diagnostic codes: GO2CS1xxx is a package that did not load cleanly, as go/packages
+// classifies the error; GO2CS2xxx is an input the converter refuses.
+const (
+	diagnosticLoadError  = "GO2CS1000"
+	diagnosticListError  = "GO2CS1001"
+	diagnosticParseError = "GO2CS1002"
+	diagnosticTypeError  = "GO2CS1003"
+	diagnosticCgoRefused = "GO2CS2001"
+)
+
+func canonicalDiagnostic(position, code, text string) string {
+	return ""
+}
+
+func loadErrorCode(kind packages.ErrorKind) string {
+	return ""
 }
