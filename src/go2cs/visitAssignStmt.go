@@ -952,6 +952,8 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	// normally trigger the lift — so without this the box type emits a raw, un-compilable
 	// `struct{…}` (e.g. runtime/mpagealloc's `firstFree := struct{…}{…}` whose address is taken).
 	// Mirrors convCompositeLit's lift; the liftedTypeExists guard makes the later one a no-op.
+	// The literal may sit under `&` (`data := &struct{…}{}` with `&data` taken -- mapstructure's
+	// TestNextSquashMapstructure): the box type is then `ж<struct{…}>` and needs the same lift.
 	if assignStmt.Tok == token.DEFINE {
 		for i, lhs := range lhsExprs {
 			if i >= rhsLen {
@@ -974,7 +976,13 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				continue
 			}
 
-			if compositeLit, ok := rhsExprs[i].(*ast.CompositeLit); ok {
+			rhs := ast.Unparen(rhsExprs[i])
+
+			if addressOf, ok := rhs.(*ast.UnaryExpr); ok && addressOf.Op == token.AND {
+				rhs = ast.Unparen(addressOf.X)
+			}
+
+			if compositeLit, ok := rhs.(*ast.CompositeLit); ok {
 				if structType, exprType := v.extractStructType(compositeLit.Type); structType != nil && !v.liftedTypeExists(structType) {
 					var indentOffset int
 

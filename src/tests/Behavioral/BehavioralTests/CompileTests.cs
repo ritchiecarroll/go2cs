@@ -1576,6 +1576,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPtrKeyMapReceiverLookup() => CheckTarget("PtrKeyMapReceiverLookup");
 
     [TestMethod]
+    public void CheckPtrToAnonStructPtr() => CheckTarget("PtrToAnonStructPtr");
+
+    [TestMethod]
     public void CheckPublicizedFieldType() => CheckTarget("PublicizedFieldType");
 
     [TestMethod]

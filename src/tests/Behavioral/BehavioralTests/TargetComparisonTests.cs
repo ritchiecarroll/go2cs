@@ -1579,6 +1579,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPtrKeyMapReceiverLookup() => CheckTarget("PtrKeyMapReceiverLookup");
 
     [TestMethod]
+    public void CheckPtrToAnonStructPtr() => CheckTarget("PtrToAnonStructPtr");
+
+    [TestMethod]
     public void CheckPublicizedFieldType() => CheckTarget("PublicizedFieldType");
 
     [TestMethod]

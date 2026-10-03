@@ -126,6 +126,7 @@
     <None Include="$(MSBuildThisFileDirectory)embeddedTemplates.go" />
     <None Include="$(MSBuildThisFileDirectory)emptyStructConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)escapeAnalysisOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)escapingAnonStructPointerLift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)escapedArrayElementAddress_test.go" />
     <None Include="$(MSBuildThisFileDirectory)eventFraming_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo.go" />

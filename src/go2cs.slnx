@@ -809,6 +809,7 @@
     <Project Path="tests/Behavioral/PromotedValueEmbedLib/PromotedValueEmbedLib.csproj" />
     <Project Path="tests/Behavioral/PromotedValueEmbedUser/PromotedValueEmbedUser.csproj" />
     <Project Path="tests/Behavioral/PtrKeyMapReceiverLookup/PtrKeyMapReceiverLookup.csproj" />
+    <Project Path="tests/Behavioral/PtrToAnonStructPtr/PtrToAnonStructPtr.csproj" />
     <Project Path="tests/Behavioral/PublicizedFieldType/PublicizedFieldType.csproj" />
     <Project Path="tests/Behavioral/PublicizedFuncTypeParam/PublicizedFuncTypeParam.csproj" />
     <Project Path="tests/Behavioral/RangeShadowSelectorMethod/RangeShadowSelectorMethod.csproj" />
