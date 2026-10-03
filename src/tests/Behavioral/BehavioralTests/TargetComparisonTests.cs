@@ -1687,6 +1687,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckReflectMethodTableWalk() => CheckTarget("ReflectMethodTableWalk");
 
     [TestMethod]
+    public void CheckReflectNilMapKey() => CheckTarget("ReflectNilMapKey");
+
+    [TestMethod]
     public void CheckReflectStringWindow() => CheckTarget("ReflectStringWindow");
 
     [TestMethod]
