@@ -497,6 +497,10 @@ type Visitor struct {
 	// markNarrowArithmeticContexts). convBinaryExpr and convUnaryExpr consult it.
 	narrowArithmeticCasts map[ast.Expr]string
 
+	// emptyInterfaceFuncLits marks the func literals whose Go destination is an empty interface, at
+	// any position (see markEmptyInterfaceFuncLits). convFuncLit then states the declared result type.
+	emptyInterfaceFuncLits map[*ast.FuncLit]bool
+
 	// untypedConstContexts maps an UNTYPED constant subexpression to the resolved type of its
 	// enclosing typed constant expression — the context go/types drops when it leaves constant
 	// operands untyped (see markUntypedConstContexts). convBasicLit consults it for the F/D

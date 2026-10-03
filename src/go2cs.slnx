@@ -480,6 +480,7 @@
     <Project Path="tests/Behavioral/FuncFieldUnexportedType/FuncFieldUnexportedType.csproj" />
     <Project Path="tests/Behavioral/FuncLitArgCapture/FuncLitArgCapture.csproj" />
     <Project Path="tests/Behavioral/FuncLitCaptureInCondition/FuncLitCaptureInCondition.csproj" />
+    <Project Path="tests/Behavioral/FuncLitEmptyInterfaceTarget/FuncLitEmptyInterfaceTarget.csproj" />
     <Project Path="tests/Behavioral/FuncLiteralCallerNames/FuncLiteralCallerNames.csproj" />
     <Project Path="tests/Behavioral/FuncLiteralDeclaredResultIface/FuncLiteralDeclaredResultIface.csproj" />
     <Project Path="tests/Behavioral/FuncLitNumericTupleReturn/FuncLitNumericTupleReturn.csproj" />

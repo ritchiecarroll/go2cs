@@ -76,6 +76,10 @@ func (v *Visitor) visitFile(file *ast.File) {
 	// markNarrowArithmeticContexts)
 	v.markNarrowArithmeticContexts(file)
 
+	// Mark the func literals whose destination is an empty interface, at every position (see
+	// markEmptyInterfaceFuncLits)
+	v.markEmptyInterfaceFuncLits(file)
+
 	if v.options.includeComments {
 		// Create standalone comments map
 		for _, commentGroup := range file.Comments {
