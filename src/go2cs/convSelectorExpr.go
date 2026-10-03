@@ -898,13 +898,6 @@ func aliasSourceMatchesPackage(rendered string, pkg *types.Package) bool {
 	return filepath.Clean(dir.Dir) == sourceDir
 }
 
-// selectorBaseIsPackage reports whether the selector qualifies a PACKAGE (`time.Second`) rather
-// than a value/type expression. Parentheses are peeled; anything that is not a bare identifier
-// bound to a *types.PkgName is not a package qualifier.
-func (v *Visitor) selectorBaseIsPackage(selectorExpr *ast.SelectorExpr) bool {
-	return v.selectorBasePackageObj(selectorExpr) != nil
-}
-
 // selectorBasePackageObj extracts the *types.PkgName the selector's base identifier is bound to,
 // peeling parens first, or nil if the base is not a bare package-qualifying identifier.
 func (v *Visitor) selectorBasePackageObj(selectorExpr *ast.SelectorExpr) *types.PkgName {

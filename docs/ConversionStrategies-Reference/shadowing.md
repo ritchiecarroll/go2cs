@@ -648,7 +648,7 @@ time.ΔHour()      // the const rename applied to the METHOD name
 ```
 
 The resolver is now gated on the selector's base actually **denoting a package**, asked through
-`go/types` (`selectorBaseIsPackage`, consulted by `aliasResolvedSelector`), so a shadowing binding is
+`go/types` (`selectorBasePackageObj`, consulted by `aliasResolvedSelector`), so a shadowing binding is
 excluded by construction rather than by name. A non-package base could never resolve through the alias
 maps anyway — they are keyed `<package>.<member>` — so the gate states the property once instead of
 per emission site. This cleared 33 errors across five codes (CS7036, CS1061, CS1955, CS8130, CS1501) in
