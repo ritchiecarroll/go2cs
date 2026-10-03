@@ -106,6 +106,7 @@
     <None Include="$(MSBuildThisFileDirectory)descriptorCompanionCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferFinallyLowering.go" />
     <None Include="$(MSBuildThisFileDirectory)deferValueReceiverSnapshot_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)deferLambdaReceiverCopy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferredMarkerOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)deferredMarkers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferredSyscallFunnel_test.go" />
