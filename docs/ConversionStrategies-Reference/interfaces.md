@@ -1068,6 +1068,20 @@ unexported interface publicized through an exported function, whose method both 
 `type = struct{…}` alias, output-compared vs Go; it fails to compile with CS0050/CS0051 without the lift
 publicize.)
 
+The walker records lifted anonymous INTERFACES as well as structs, but only the struct emitter consulted the set,
+so an exported func taking an anonymous interface emitted its lift `internal` beside the `public` method: go-cmp's
+`func Reporter(r interface{ PushStep(PathStep); Report(Result); PopStep() }) Option` was CS0051 in production.
+`visitInterfaceType` now consults `isPublicizedLiftedType` too, ahead of the function-local `internal` default:
+
+```csharp
+[GoType("dyn")] public partial interface Report_r {
+```
+
+An unexported func's anonymous interface keeps `internal`. The census of the shape (a non-empty anonymous
+interface reached by the walker) read 0 in the converted standard library on three targets and 0 across 757
+behavioral modules. (Guarded by `anonInterfaceParamPublic_test.go` and the `AnonInterfaceParamPublic` behavioral
+test, which fails to compile with CS0051 on the pre-change converter.)
+
 ## Publicized unexported types make their exported methods public
 An unexported Go type reachable through an exported surface (an exported var — `var BigEndian
 bigEndian` — an exported field, or an exported function's signature) is emitted `public`

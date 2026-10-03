@@ -58,6 +58,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAnonInterfaceCrossFile() => CheckTarget("AnonInterfaceCrossFile");
 
     [TestMethod]
+    public void CheckAnonInterfaceParamPublic() => CheckTarget("AnonInterfaceParamPublic");
+
+    [TestMethod]
     public void CheckAnonInterfaceSignatureAssert() => CheckTarget("AnonInterfaceSignatureAssert");
 
     [TestMethod]

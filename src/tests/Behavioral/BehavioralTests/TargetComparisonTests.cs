@@ -61,6 +61,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAnonInterfaceCrossFile() => CheckTarget("AnonInterfaceCrossFile");
 
     [TestMethod]
+    public void CheckAnonInterfaceParamPublic() => CheckTarget("AnonInterfaceParamPublic");
+
+    [TestMethod]
     public void CheckAnonInterfaceSignatureAssert() => CheckTarget("AnonInterfaceSignatureAssert");
 
     [TestMethod]
