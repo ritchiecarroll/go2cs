@@ -40,6 +40,8 @@ func main() {
 	show("after typed-nil key:", m)
 	fmt.Println("m[(*T)(nil)]:", m[(*T)(nil)])
 	fmt.Println("m[nil] still:", m[nil])
+	fmt.Println("MapIndex((*T)(nil)):", v.MapIndex(pk))
+	fmt.Println("MapIndex(nil) still:", v.MapIndex(reflect.Zero(keyType)))
 
 	// Overwrite and delete the nil key.
 	v.SetMapIndex(reflect.Zero(keyType), reflect.ValueOf("again"))

@@ -32,6 +32,8 @@ private static readonly object typedNilKeyˢ = (@string)"typed-nil-key"u8;
 private static readonly @string afterTypedNilKeyˢ = "after typed-nil key:"u8;
 private static readonly object mTNilˢ = (@string)"m[(*T)(nil)]:"u8;
 private static readonly object mNilStillˢ = (@string)"m[nil] still:"u8;
+private static readonly object mapIndexTNilˢ = (@string)"MapIndex((*T)(nil)):"u8;
+private static readonly object mapIndexNilStillˢ = (@string)"MapIndex(nil) still:"u8;
 private static readonly object againˢ = (@string)"again"u8;
 private static readonly object mNilAfterOverwriteˢ = (@string)"m[nil] after overwrite:"u8;
 private static readonly @string afterDeleteNilKeyˢ = "after delete nil key:"u8;
@@ -54,6 +56,8 @@ internal static void Main() {
     show(afterTypedNilKeyˢ, m);
     fmt.Println(mTNilˢ, m[((ж<T>)nil)]);
     fmt.Println(mNilStillˢ, m[default!]);
+    fmt.Println(mapIndexTNilˢ, v.MapIndex(pk));
+    fmt.Println(mapIndexNilStillˢ, v.MapIndex(reflect.Zero(keyType)));
     v.SetMapIndex(reflect.Zero(keyType), reflect.ValueOf(againˢ));
     fmt.Println(mNilAfterOverwriteˢ, m[default!]);
     v.SetMapIndex(reflect.Zero(keyType), new reflectꓸValue(nil));
