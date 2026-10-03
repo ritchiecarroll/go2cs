@@ -273,6 +273,58 @@ func TestRunning(t *testing.T) {
 	}
 }
 
+// TestWarningEntriesNamedResultReadOnlyThroughAFold pins the named-result form of the CS0219 fact:
+// syscall's darwin nametomib names its result `mib` and reads it only as an unsafe.Sizeof operand,
+// which folds, so the declaration `slice<_C_int> mib = default!;` is never read. A naked return
+// reads every named result, so a result that one reaches holds no fact.
+func TestWarningEntriesNamedResultReadOnlyThroughAFold(t *testing.T) {
+	root := t.TempDir()
+
+	dir := convertWarningEntriesFixture(t, root, "wnr", map[string]string{
+		"main.go": `package main
+
+func main() {
+	m, _ := nametomib()
+	println(len(m), nakedSized(), assigned())
+}
+`,
+		// CS0219: `mib` is only an unsafe.Sizeof operand, which folds.
+		"named.go": `package main
+
+import "unsafe"
+
+func nametomib() (mib []int32, err error) {
+	siz := unsafe.Sizeof(mib[0])
+	buf := make([]int32, 8)
+	return buf[:8/siz], nil
+}
+`,
+		// Controls: a naked return reads `n`; `r` is assigned and returned by name.
+		"controls.go": `package main
+
+import "unsafe"
+
+func nakedSized() (n int8) {
+	if unsafe.Sizeof(n) == 1 {
+		return
+	}
+	return 2
+}
+
+func assigned() (r int) {
+	r = 3
+	return r
+}
+`,
+	})
+
+	entries, _ := readWarningEntriesFixture(t, dir)
+
+	if got, want := warningEntryCodes(entries), "named.cs:CS0219"; got != want {
+		t.Fatalf("entries = %q, want %q", got, want)
+	}
+}
+
 // TestWarningEntriesLeaveAnUnmarkedFileAlone pins ruling 6: a package's own .editorconfig is never
 // touched, whatever the conversion derives.
 func TestWarningEntriesLeaveAnUnmarkedFileAlone(t *testing.T) {
