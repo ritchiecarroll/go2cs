@@ -6,7 +6,9 @@ maps, channels and goroutines appear to a C# caller.
 
 The examples use two converted modules, [`github.com/ritchiecarroll/hashset`](https://github.com/ritchiecarroll/hashset)
 (a generic set built on a Go map) and [`github.com/google/uuid`](https://github.com/google/uuid). Every snippet
-compiles and runs.
+comes from a small console app,
+[`src/tests/CSharpConsumer`](https://github.com/ritchiecarroll/go2cs/tree/master/src/tests/CSharpConsumer), which
+converts both modules, builds against them, and checks that each example still behaves as shown here.
 
 ## Getting a converted package
 

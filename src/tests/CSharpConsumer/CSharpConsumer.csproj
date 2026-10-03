@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- A plain C# console app that calls converted Go: the code behind docs/ConsumingGoFromCSharp.md.
+       It references the converted github.com/ritchiecarroll/hashset and github.com/google/uuid, which
+       run-csharp-consumer.ps1 converts into a work root outside the repository and passes in as
+       ConsumerConvertedRoot. It is not in go2cs.slnx: without that conversion it has nothing to build. -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <Target Name="RequireConvertedRoot" BeforeTargets="ResolveProjectReferences;CollectPackageReferences">
+    <Error Condition="'$(ConsumerConvertedRoot)' == ''" Text="ConsumerConvertedRoot is not set: build this project through run-csharp-consumer.ps1, which converts the modules it references." />
+  </Target>
+
+  <ItemGroup Condition="'$(ConsumerConvertedRoot)' != ''">
+    <ProjectReference Include="$(ConsumerConvertedRoot)/hashset/src/github.com/ritchiecarroll/hashset/github.com.ritchiecarroll.hashset.csproj" />
+    <ProjectReference Include="$(ConsumerConvertedRoot)/uuid/src/github.com/google/uuid/github.com.google.uuid.csproj" />
+  </ItemGroup>
+
+</Project>
