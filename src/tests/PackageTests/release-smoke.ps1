@@ -18,11 +18,13 @@
                             tree), converted and compared the same way: the syscall struct layouts differ
                             per GOOS, so it fails if a wrong flavor loads.
       D  WALKTHROUGH        the README walkthrough (fatih/color v1.18.0 -> go-isatty -> golang.org/x/sys)
-                            converted and compared the same way. A MEASUREMENT, NOT A GATE: it is reported
-                            and never moves the exit code, because the README states where it is supported
-                            and this arm is what measures a platform before the README may name it.
+                            converted and compared the same way. It GATES only with -GateWalkthrough, which
+                            the caller passes on the platforms the README says it works on; elsewhere it is
+                            a MEASUREMENT that never moves the exit code, because this arm is what measures
+                            a platform before the README may name it.
 
-    Exit 0 when A, B and C pass; 1 otherwise. Every arm's evidence lands under -WorkRoot.
+    Exit 0 when A, B and C pass (and D, with -GateWalkthrough); 1 otherwise. Every arm's evidence lands
+    under -WorkRoot.
 
 .PARAMETER Feed
     Folder holding the merged .nupkg files under test.
@@ -35,12 +37,16 @@
 
 .PARAMETER Version
     The go.* package version to restore. Default: read off the feed's go.lib package.
+
+.PARAMETER GateWalkthrough
+    Make arm D gate. Pass it where the README states the walkthrough works (windows, linux).
 #>
 param(
     [Parameter(Mandatory)] [string] $Feed,
     [Parameter(Mandatory)] [string] $Converter,
     [Parameter(Mandatory)] [string] $WorkRoot,
-    [string] $Version
+    [string] $Version,
+    [switch] $GateWalkthrough
 )
 
 $ErrorActionPreference = 'Stop'
@@ -264,8 +270,9 @@ finally { Pop-Location }
 $walkVerdict = if ($setup -ne 0) { "FAIL (D-walkthrough): the Go side did not set up (exit $setup)" } else { Invoke-ConvertArm 'D-walkthrough' $walk }
 
 # ---- verdicts ------------------------------------------------------------------------------------
+if ($GateWalkthrough) { $verdicts += $walkVerdict }
 $verdicts | ForEach-Object { Write-Host $_ }
-Write-Host "MEASURED, NOT GATING: $walkVerdict"
+if (-not $GateWalkthrough) { Write-Host "MEASURED, NOT GATING: $walkVerdict" }
 
 if ($verdicts | Where-Object { $_ -like 'FAIL*' }) { exit 1 }
 exit 0

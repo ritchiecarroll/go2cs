@@ -136,17 +136,21 @@ The release's own pack, rehearsed, then consumed on the chosen flavor's legs. A 
 `windows-latest` runs `push-nuget.ps1 -VersionSuffix ci.<run id>` under Windows PowerShell — pack-only by
 the script's own contract (no bump, no tag, nothing under `docs/validation`, no push) — and uploads the
 merged packages as the `release-smoke-feed` artifact. It is the only Release-configuration build of the
-darwin flavor anywhere. Each leg then runs `src/tests/PackageTests/release-smoke.ps1` against that feed,
+darwin flavor anywhere. The stage fans out to ALL FOUR shipped RIDs (win-x64, linux-x64, osx-arm64, osx-x64) from that
+one pack, whatever `goos` says. Each leg then runs `src/tests/PackageTests/release-smoke.ps1` against the feed,
 every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
 
 - **A** the RID-selected compile asset gate (`RidCompileAsset`): rid-less, `-r`, publish, and its control;
 - **B** a small generated stdlib program converted with `-recurse=nuget`, its stdout compared with `go run`
   (it prints `runtime.GOOS`, so a wrong-flavor load is a visible mismatch);
 - **C** `Behavioral/StatLayoutTruth`, converted and compared the same way;
-- **D** the README walkthrough (`fatih/color`), compared the same way — **measured, never gating**.
+- **D** the README walkthrough (`fatih/color`), compared the same way — it **gates on windows and linux**, where
+  the README says it works, and is **measured only on darwin**, where the README does not claim it yet.
 
-The leg is green when A, B and C pass. Dispatch it with `goos=darwin` before a release that ships macOS
-assets; `windows` and `linux` work the same way. The pack job's budget is its own (240 min, provisional).
+A leg is green when A, B and C pass, and D too off darwin. Dispatch it at the tree that ships, before every release:
+it is what proves the packages carry what that tree's converter emits on every OS (C2's 2026-10-03 finding: N's
+converter emits `unsafe.ArrayPointer`, which the published 1.24.13.3 lacks). The pack job's budget is its own
+(240 min; measured 38-53 min).
 
 ## Results flow
 

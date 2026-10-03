@@ -66,5 +66,6 @@ feed (a `push-nuget.ps1 -VersionSuffix` rehearsal's merged output), each restori
 with `go.*` mapped to the feed alone: (A) `RidCompileAsset` above; (B) a generated stdlib program
 converted with `go2cs -recurse=nuget`, built, run, and its stdout compared byte for byte with `go run`;
 (C) `Behavioral/StatLayoutTruth`, the same way; (D) the README walkthrough (`fatih/color`), the same
-way, MEASURED and never gating. It exits 0 when A, B and C pass. The `release-smoke` stage of
-`.github/workflows/os-matrix.yml` packs the feed on Windows and runs this on the chosen flavor's legs.
+way, gating only with `-GateWalkthrough` (passed on windows and linux, where the README says it works) and
+MEASURED elsewhere. It exits 0 when the gating arms pass. The `release-smoke` stage of
+`.github/workflows/os-matrix.yml` packs the feed on Windows and runs this on all four shipped RIDs.
