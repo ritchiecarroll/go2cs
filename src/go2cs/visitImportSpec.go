@@ -263,7 +263,9 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 	v.currentImportPath = strings.Trim(importSpec.Path.Value, "\"")
 
 	if !v.options.parseCgoTargets && v.currentImportPath == "C" {
-		log.Fatalf("cgo target parsing is not supported: file \"%s\"", v.fset.Position(importSpec.Pos()).Filename)
+		position := v.fset.Position(importSpec.Pos())
+		reportDiagnostic(position.String(), diagnosticCgoRefused, `cgo target parsing is not supported (import "C")`)
+		log.Fatalf("cgo target parsing is not supported: file \"%s\"", position.Filename)
 	}
 
 	// Resolve a GOROOT-vendored import to its on-disk path (see resolveGorootVendoredPath) so
