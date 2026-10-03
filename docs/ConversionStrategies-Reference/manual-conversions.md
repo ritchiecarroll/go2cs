@@ -3648,6 +3648,34 @@ away from the emitted C# the census workflow reads; and a per-statement emission
 reads-like-Go goal. The side-car alternative pays neither of those but adds a file and a csproj item
 per package.
 
+### Package initialization's frames are `init`, `init.funcN` and `init.N`
+
+Go names the frames of package initialization by role, not by the C# member that carries them, and
+`goFrameName` (the one site every reader goes through: the traceback and its `created by` line,
+`runtime.Callers` / `CallersFrames` / `FuncForPC().Name()`, a func value's name) maps them:
+
+| Go source | Emitted as | Frame name (Go 1.24.13) |
+|---|---|---|
+| a package-level var initializer | the package class's static constructor (`.cctor`) | `pkg.init` |
+| a func literal inside one | a lambda in that static constructor | `pkg.init.func1`, `pkg.init.func2`, … |
+| the package's `init` functions | `[GoInit]` methods `init`, `initΔ1`, `initΔ2`, … | `pkg.init.0`, `pkg.init.1`, `pkg.init.2`, … |
+| a func literal inside an `init` function | a lambda in that method | `pkg.init.2.func1` |
+
+Go numbers `init` functions in the order its compiler sees them — files in filename order, then
+declaration order — and the converter's `Δ` counter follows that same order (measured on a three-file
+probe), so `initΔK` → `init.K` is exact. Only a module-initializer method is renamed: a Go method or
+helper spelled `init` keeps its name, and the converter's import hooks (`initᴛᴛimport…`) never match.
+
+**Limit, stated rather than guarded.** A literal in a var initializer has no recorded counter (it is
+outside every function declaration), so its `N` is Roslyn's 0-based lambda ordinal within the static
+constructor, plus one. That is exact when a package's var initializers sit in one file; where they span
+files, the order Roslyn merges them into the one static constructor and Go's package-wide counter may
+differ.
+
+**Guards.** `InitFrameNameTests` (GolibTests) pins each shape against hand-written stand-ins, with a
+plain method named `init` as the control; the `InitFrameNames` behavioral project compares a three-file
+program's frame names with `go run`.
+
 ## `codegen-liveness` — a frame holds what Go has already dropped
 
 A second disclosed-divergence class alongside `alloc-profile`, first pinned by `sync` (packages

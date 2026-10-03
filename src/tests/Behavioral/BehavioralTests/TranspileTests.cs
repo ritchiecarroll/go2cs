@@ -847,6 +847,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckInferredForeignTypeNoImport() => CheckTarget("InferredForeignTypeNoImport");
 
     [TestMethod]
+    public void CheckInitFrameNames() => CheckTarget("InitFrameNames");
+
+    [TestMethod]
     public void CheckInitOrderTupleSpecs() => CheckTarget("InitOrderTupleSpecs");
 
     [TestMethod]

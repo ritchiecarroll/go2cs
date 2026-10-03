@@ -847,6 +847,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckInferredForeignTypeNoImport() => CheckTarget("InferredForeignTypeNoImport");
 
     [TestMethod]
+    public void CheckInitFrameNames() => CheckTarget("InitFrameNames");
+
+    [TestMethod]
     public void CheckInitOrderTupleSpecs() => CheckTarget("InitOrderTupleSpecs");
 
     [TestMethod]

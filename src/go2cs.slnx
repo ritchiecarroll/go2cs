@@ -555,6 +555,7 @@
     <Project Path="tests/Behavioral/IndexChainAddressBox/IndexChainAddressBox.csproj" />
     <Project Path="tests/Behavioral/IndexExprCaseLabel/IndexExprCaseLabel.csproj" />
     <Project Path="tests/Behavioral/InferredForeignTypeNoImport/InferredForeignTypeNoImport.csproj" />
+    <Project Path="tests/Behavioral/InitFrameNames/InitFrameNames.csproj" />
     <Project Path="tests/Behavioral/InitOrderTupleSpecs/InitOrderTupleSpecs.csproj" />
     <Project Path="tests/Behavioral/InterfaceAssertionMapKey/InterfaceAssertionMapKey.csproj" />
     <Project Path="tests/Behavioral/InterfaceCasting/InterfaceCasting.csproj" />

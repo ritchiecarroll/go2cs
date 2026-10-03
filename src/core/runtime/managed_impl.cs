@@ -1826,8 +1826,13 @@ partial class runtime_package
         // Go's func1/func2, and a nested literal cannot be represented at all), so the derived
         // ordinal below is kept ONLY as the fallback for frames no conversion recorded — an
         // older artifact, a hand-written lambda, a frame with no PDB, or a literal outside a
-        // function declaration (package-level initializers keep Go's package-global `glob..`
-        // counter, which is a compile-schedule fact no per-file record can carry).
+        // function declaration.
+        //
+        // A literal in a package-level var initializer is one of those: it is a lambda in the
+        // package class's static constructor, which Go names `init.funcN` with a 1-based counter.
+        // Its N is Roslyn's 0-based ordinal + 1, exact for a package whose var initializers sit in one
+        // file. Where they span files, Roslyn's order within the merged static constructor and Go's
+        // package-wide counter may differ -- stated, not guarded.
         if (name.Length > 0 && name[0] == '<')
         {
             int close = name.IndexOf('>');
@@ -1836,18 +1841,27 @@ partial class runtime_package
             {
                 string outer = name[1..close];
                 string? recorded = ilOffset < 0 ? goFuncLiteralSuffix(method) : goFuncLiteralSuffix(method, ilOffset);
+                string goOuter = goInitFrameName(goEnclosingMethod(method, outer), outer);
 
                 if (recorded is not null)
                 {
-                    name = $"{outer}.func{recorded}";
+                    name = $"{goOuter}.func{recorded}";
                 }
                 else
                 {
                     int lastUnderscore = name.LastIndexOf('_');
                     string ordinal = lastUnderscore >= 0 && lastUnderscore + 1 < name.Length ? name[(lastUnderscore + 1)..] : "1";
-                    name = $"{outer}.func{ordinal}";
+
+                    if (outer == ".cctor" && int.TryParse(ordinal, out int zeroBased))
+                        ordinal = (zeroBased + 1).ToString();
+
+                    name = $"{goOuter}.func{ordinal}";
                 }
             }
+        }
+        else
+        {
+            name = goInitFrameName(method, name);
         }
 
         // Go's traceback names a METHOD frame with its receiver TYPE between the package and the
@@ -1873,6 +1887,52 @@ partial class runtime_package
         symbol = $"{importPath}.{name}";
 
         return $"{importPath}.{printName}";
+    }
+
+    // Package initialization, named as Go names it. A package-level var initializer runs in the
+    // package class's static constructor, which Go names `init`. The package's init functions are
+    // emitted as [GoInit] (module-initializer) methods `init`, `initΔ1`, `initΔ2`, ..., numbered in the
+    // order Go's compiler sees them -- files in filename order, then declaration order -- and Go names
+    // them `init.0`, `init.1`, `init.2`, ... (measured, Go 1.24.13, a three-file probe: the
+    // InitFrameNames behavioral guard). Only a module-initializer method is renamed, so a Go METHOD
+    // named `init` keeps its name, and the converter's import hooks (`initᴛᴛimport…`) never match.
+    private static string goInitFrameName(System.Reflection.MethodBase? method, string name)
+    {
+        if (name == ".cctor")
+            return "init";
+
+        if (method is null || !method.IsDefined(typeof(ModuleInitializerAttribute), inherit: false))
+            return name;
+
+        if (name == "init")
+            return "init.0";
+
+        const string renamedInit = "initΔ";
+
+        if (name.StartsWith(renamedInit, StringComparison.Ordinal) && name.Length > renamedInit.Length && !name.AsSpan(renamedInit.Length).ContainsAnyExceptInRange('0', '9'))
+            return "init." + name[renamedInit.Length..];
+
+        return name;
+    }
+
+    // The method a compiler-generated literal is declared in: a lambda lives on a closure class
+    // (`<>c`, `<>c__DisplayClassN_M`) nested in the package class, a local function on the package
+    // class itself; either way the enclosing method is the package class's static method of that name.
+    // An init function takes no parameters, so a parameterless lookup is the only one that matters.
+    private static System.Reflection.MethodBase? goEnclosingMethod(System.Reflection.MethodBase literal, string outer)
+    {
+        if (outer == ".cctor")
+            return null;
+
+        for (Type? type = literal.DeclaringType; type is not null; type = type.DeclaringType)
+        {
+            if (type.Name.StartsWith('<'))
+                continue;
+
+            return type.GetMethod(outer, System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic, Type.EmptyTypes);
+        }
+
+        return null;
     }
 
     // Spells a function-literal frame's recorded Go counter suffix (`1`, `2.1`), or null when the
