@@ -1,0 +1,122 @@
+{
+  "verdict": "go2cs can very likely be the base of an automatic Go-to-.NET transpile-and-debug loop using stock .NET debuggers through #line, but it should not become a Go-first IDE flagship, because Go already runs natively, Go source cannot call .NET, Go editing is first-class only in VS Code, and the group with a real need is .NET teams that consume shared Go code from C#.",
+  "recommendation": "Approve the golib debugger views on their own, run a gated thin slice (spike, source-mapped build mode, hand-wired VS Code loop), and build MSBuild integration for C# projects that reference Go modules only if the E1 latency numbers and the owner's hands-on verdict pass; keep the VS Code extension a later showcase and .NET interop from Go out of v1.",
+  "thin_slice": "Phase 0 spike (E1-E9, with E2 as the stop gate and E9 choosing where the #line text comes from) plus Phase 2 source-mapped build mode with the incremental .cs write fix plus Phase 2.5 hand-wired VS Code recipe, about 3.5-6.5 lane-weeks, ending at a decision gate on E1 numbers and the owner pressing F5 on Go.",
+  "phases": [
+    {
+      "name": "Phase 0: Feasibility spike",
+      "scope": "Hand-inserted #line on converted samples, no converter change. E1 latency with a written prediction (warm edit-to-breakpoint <=5 s hello-world, <=15 s 10-package module; drop F5-on-Go above 2x); E2 breakpoint binding in vsdbg and netcoredbg (stop gate); E3/E4 Visual Studio and Rider gutters; E5 Hot Reload; E6/E6b stepping density and the #line-vs-position-map line model; E7 runtime.Caller positions and function-literal names; E8 build shape, fast up-to-date check and no conversion on project load; E9 choose converter flag vs MSBuild build-time pass vs PDB rewrite. Cloud-lane preflight: disk, nuget.org, .NET 10 SDK.",
+      "effort_lane_weeks": "1-1.5",
+      "depends_on": "Nothing; a box with no battery running",
+      "exit_test": "Every experiment answered green or red with numbers (E1) and screenshots (E2-E4); E2 red in both debuggers stops the plan; E1 above twice the prediction drops the F5-on-Go positioning."
+    },
+    {
+      "name": "Phase 1: golib debugger views (standalone, not counted in the IDE cost)",
+      "scope": "DebuggerTypeProxy/DebuggerDisplay for slice, array, map, @string, ж<T>, channel<T>; a channel ToString; step-over attributes on generator output in the user's assembly; goroutine thread names set at thread creation. Homes go.lib and go.gen. Works in vsdbg and Rider; netcoredbg supports neither attribute.",
+      "effort_lane_weeks": "1-2",
+      "depends_on": "A golib/go.gen window outside any battery; ships with the next package release",
+      "exit_test": "Proxy unit tests; manual checklist in Visual Studio, VS Code and Rider; Step Into on defer f() and go f() lands in f; F11 on an interface call skips the shell; behavioral suite unchanged."
+    },
+    {
+      "name": "Phase 2: Source-mapped build mode",
+      "scope": "Route converted .cs writes through needToWriteFile (corpus-neutral converter fix); a #line writer per the E9 choice with re-anchor/hidden rules, scaffolding under #line default + hidden, a closing-brace decision, checksums; an identity position-map record per Go file so closure names survive; a per-construct audit matrix; a scripted stepping oracle over netcoredbg DAP; whole-corpus invariants (strip-directives identity, Roslyn directive count), each failed once on purpose.",
+      "effort_lane_weeks": "2-4 (+1-2 for column spans, 2b)",
+      "depends_on": "Phase 0 with E2 green and E9 chosen; owner Q2 ruling only if E9 picks the converter flag",
+      "exit_test": "Every Go statement line takes a breakpoint and steps once in the oracle, multi-line statements included; default-mode corpus diff empty; deliberate errors on statement and continuation lines land on the right .go line and a scaffolding error stays on the .cs."
+    },
+    {
+      "name": "Phase 2.5: Hand-wired loop",
+      "scope": "A documented VS Code recipe (tasks.json running go2cs then dotnet build with $msCompile; a coreclr launch.json resolved via dotnet msbuild -getProperty:TargetPath) or a tiny go2cs run wrapper, which is also Phase 3's fallback.",
+      "effort_lane_weeks": "0.5-1",
+      "depends_on": "Phase 2",
+      "exit_test": "The owner presses F5 on a sample, stops at a .go breakpoint, steps, reads a value, and writes a hands-on verdict that, with the E1 numbers, gates Phase 3."
+    },
+    {
+      "name": "Phase 3: Build integration (C# consumer first)",
+      "scope": "<GoModuleReference> for C# projects plus a 'Consuming converted Go from C#' guide; a secondary dotnet new go2cs-app template; design-time-build guard, UpToDateCheckInput/Built and Watch items; content-hash stamp; locks per output root and cache, per-config roots, verbatim GOROOT, GOTOOLCHAIN=local; exact version tuple pin with a new go2cs -version; bundled RID-specific converter binaries; a Compare-with-go-run target; companion folder only with a stability statement and hash warnings; a headless netcoredbg DAP gate on Windows, Linux and macOS CI.",
+      "effort_lane_weeks": "4-8",
+      "depends_on": "The Phase 2.5 decision gate; the uuid pilot's package (local feed is enough); ideally the nugetgo transitive-dependency case",
+      "exit_test": "A C# app calls an exported Go function and a .go edit plus rebuild changes the result; F5 in Visual Studio after a .go edit shows the change; project load converts nothing; no-change rebuild skips conversion; Go errors and refusals land on .go lines; F11 from C# lands in .go; headless gate green on three OSes and failed once on purpose."
+    },
+    {
+      "name": "Phase 4: VS Code extension",
+      "scope": "A go2cs debug type resolving to coreclr (vsdbg in Microsoft VS Code), program resolution via TargetPath or a launch manifest, task provider, $go2cs matcher, code lens, Show C# panel, untrusted workspaces unsupported; breakpoints contribution only as a fallback. Optional 4b: Open VSX build with netcoredbg (raw golib values; no Intel-macOS or Windows-on-ARM builds), SharpDbg to evaluate.",
+      "effort_lane_weeks": "2-3 (+1-2 for 4b)",
+      "depends_on": "Phase 3 exit test",
+      "exit_test": "Clean machine with only the Go and C# extensions: install, open sample, F5, stop at a .go breakpoint, step, read a slice under vsdbg; extension tests cover configuration, program resolution and tasks."
+    },
+    {
+      "name": "Keep-alive",
+      "scope": "Keep Phases 2.5-4 working across go2cs package releases, Go hops, weekly VS Code releases and three OSes, using the headless gate.",
+      "effort_lane_weeks": "0.25-0.5 per release (about 2-4 per year) plus one owner signing hand per release",
+      "depends_on": "First shipped build package or extension",
+      "exit_test": "Headless gate green on every release and every hop."
+    },
+    {
+      "name": "Phase 5: Optional extras",
+      "scope": "Visual Studio VSIX or Rider plugin for .go breakpoints (if E3/E4 red), Hot Reload, SourceLink into Go's stdlib, Run test on .NET via -tests; Go-syntax Watch expressions not recommended.",
+      "effort_lane_weeks": "0.5-4 each",
+      "depends_on": "Evidence of demand per item",
+      "exit_test": "Per item."
+    },
+    {
+      "name": "Phase X: .NET API interop from Go source",
+      "scope": "Binding generator emitting Go stubs from .NET reference assemblies, mapping rules, converter rewrite, subclassing and attributes; shares design with the cgo bridge's first phases.",
+      "effort_lane_weeks": "10-20+ for a first subset; open-ended",
+      "depends_on": "Evidence from outside the fleet and a DESIGN doc, no earlier than the cgo bridge's first phases; out of v1",
+      "exit_test": "Defined by its DESIGN doc."
+    }
+  ],
+  "licensing": [
+    {"component": "vsdbg (Microsoft .NET debugger)", "license": "Proprietary; Microsoft VS Code, Visual Studio and Visual Studio for Mac only; no redistribution", "constraint": "Hand a coreclr launch configuration to the C# extension in Microsoft VS Code only; never bundle or download it; it will not run in forks."},
+    {"component": "C# extension (ms-dotnettools.csharp)", "license": "Source MIT; Marketplace binary (including vsdbg) under Microsoft terms limited to Microsoft IDEs; not on Open VSX", "constraint": "Depend on it in the Marketplace build only."},
+    {"component": "C# Dev Kit", "license": "Visual Studio licence terms (free for personal, academic, OSS and teams up to 5)", "constraint": "Do not require it; target the coreclr debug type."},
+    {"component": "netcoredbg", "license": "MIT", "constraint": "May be bundled with its notice for forks; no DebuggerDisplay/DebuggerTypeProxy support; release builds only for Linux x64/arm64, macOS arm64, Windows x64."},
+    {"component": "SharpDbg", "license": "MIT", "constraint": "Fork-path alternative to evaluate; supports DebuggerDisplay and DebuggerTypeProxy."},
+    {"component": "VS Code API, Code-OSS, .NET SDK, Roslyn, MSBuild", "license": "MIT", "constraint": "Build on them normally; Marketplace and Open VSX publishing is free."},
+    {"component": "Go toolchain, gopls, VS Code Go extension", "license": "BSD-3-Clause (Go, gopls); MIT (Go extension)", "constraint": "Coexist; nothing redistributed."},
+    {"component": "Visual Studio, Rider", "license": "Licensed to the user", "constraint": "User's concern; the MSBuild route needs no plug-in in either."},
+    {"component": "Go name and logo", "license": "go.dev brand guidelines", "constraint": "Plain-text nominative use only; no stylized mark or implied endorsement."},
+    {"component": "go2cs converter (including any #line mode and bundled binaries)", "license": "AGPL-3.0-only + Converter Output Exception", "constraint": "Invoking it as a separate process from MIT tooling is aggregation; bundling binaries in a NuGet package, dotnet tool or VSIX conveys them, so ship the licence text and a source link at the matching tag; commercial licence answers AGPL-banning enterprises; a public hosted service on a modified converter triggers AGPL section 13."},
+    {"component": "New build package, template and VS Code extension", "license": "MIT", "constraint": "Owner is sole AUTHORS holder, so MIT is open to him; 'go2cs' name and logo stay reserved."},
+    {"component": "Generated C#", "license": "Not a covered work under the Output Exception; scaffolding MIT", "constraint": "#line and checksum lines are scaffolding; user code stays clear."},
+    {"component": "golib debugger views; go.* stdlib", "license": "MIT (golib, go.gen); BSD-3-Clause (go.* stdlib)", "constraint": "Unchanged licences."}
+  ],
+  "placement": "Nothing about IDEs, tooling or debugging is on the Roadmap or in any PLAN; the only record is the banked, unscheduled BOARD idea. Phase 0 and the standalone Phase 1 fit any small window (a cloud lane after preflight, plus 2-3 owner hours; the next golib/go.gen package window). The small .cs write fix rides any converter window outside a battery freeze. Phases 2 and 2.5 follow the spike: if E9 picks a build-time pass they touch no converter source and can run on a cloud lane during hop season, otherwise they wait until after the Go 1.25 hop and respect freezes. Phase 3 need not wait for the Roadmap's Q1 2027 nugetgo row, because the converter side of nugetgo already exists; it waits on the decision gate, the uuid pilot's package and ideally the transitive-dependency case, shares the nugetgo-publishing lane, and displaces 4-8 lane-weeks of module-pilot or macOS work in a packed Q4-Q1. Phase 4 is cloud-lane-only after Phase 3. Public preview comes no earlier than the Go 1.26 hop, needs 1.27 to stay supported, and commits the project to a hop every Go release, so it should be an explicit input to the Q4 2026 hop-cadence decision; interop waits for the cgo bridge's first phases and evidence.",
+  "open_questions": [
+    {"question": "Q1 Ambition: a gated experiment or a flagship Go-first IDE product?", "recommendation": "The gated experiment; if it passes, the product is build integration for C# projects consuming Go, with the VS Code extension as a showcase."},
+    {"question": "Q2 Accept an opt-in #line emission mode in the converter, never default, never committed?", "recommendation": "Needed only if E9 picks the converter flag; under a build-time pass or PDB rewrite it is moot. If needed, yes with the byte-identity test, the two invariants and a repoguard."},
+    {"question": "Q3 .NET interop from Go source in v1?", "recommendation": "Out; v1 documents C# calling converted Go; companion folder only with a stability statement; a DESIGN doc only on evidence, shared with the cgo bridge."},
+    {"question": "Q4 Converter delivery: go install or bundled binaries?", "recommendation": "Bundle prebuilt RID-specific binaries from day one with AGPL text and a source link, plus a new go2cs -version; go install is impossible today (module path 'go2cs', four-part tags) without a fetchable module path and a semver tag scheme."},
+    {"question": "Q5 Package identity, publisher, repo home and licence?", "recommendation": "Same publishing identity as the nugetgo decisions; main repo under an MIT folder; MIT for the extension and build package."},
+    {"question": "Q6 Visibility and adoption measurement?", "recommendation": "Roadmap line when Phase 3 is queued; launch through NuGet and dotnet new with a 90-day download threshold set in advance; public preview only on a supported Go release, macOS marked preview."},
+    {"question": "Q7 Is an IDE public preview an input to the Q4 2026 hop-cadence decision?", "recommendation": "Yes; no public preview without committing to a hop every Go release."},
+    {"question": "Q8 Approve the golib debugger views independently?", "recommendation": "Yes, at the next golib/go.gen window; they serve every go.* consumer in vsdbg and Rider and change no emission."}
+  ],
+  "risks": [
+    {"risk": "Breakpoints do not bind or step on wrong lines because #line numbers following lines differently from the position map's predecessor model", "mitigation": "E2 stop gate, E6/E6b line-model checks, the re-anchor/hidden writer rules, a per-construct audit and a scripted stepping oracle."},
+    {"risk": "The loop is too slow to feel interactive (go/packages load, every reconverted .cs rewritten, ~279 ms .NET startup)", "mitigation": "E1 with a written prediction and a 2x drop rule, the needToWriteFile fix for converted .cs, changed-package conversion."},
+    {"risk": "The converter runs unattended on users' machines and hits the repo's safety-floor failure modes (racing conversions, design-time builds, forward-slash GOROOT, silent toolchain downloads)", "mitigation": "Design-time-build guard, locks per output root and cache, per-config roots, verbatim GOROOT, GOTOOLCHAIN=local, explicit output dir, Workspace Trust."},
+    {"risk": "Run-time divergence (converter gap, throwing stub, unreported ordinary deadlock) reads as the user's own Go being wrong, worsened by source-mapped debugging", "mitigation": "A Compare-with-go-run target, a supported-surface link on every error banner, a bug-report path."},
+    {"risk": "Go-release treadmill: public F5-on-Go claims stay honest only with a hop every six months (GopherJS stalled at Go 1.21)", "mitigation": "Make the preview an input to the Q4 2026 hop-cadence decision; refuse newer go lines with a clear message."},
+    {"risk": "Silent breakage across releases and editors for a one-owner project", "mitigation": "A headless netcoredbg DAP gate on Windows, Linux and macOS CI for every release and hop, plus a budgeted keep-alive of about 2-4 lane-weeks a year."},
+    {"risk": "Non-reproducible builds from the floating 1.24.13.* package version and converter skew", "mitigation": "Exact version tuple pin per build-package version, converter hash in the stamp, refusal on mismatch."},
+    {"risk": "Fork users (Cursor, VSCodium, Windsurf) get raw golib values and missing platforms under netcoredbg", "mitigation": "Scope readable values to vsdbg and Rider; add channel ToString; evaluate SharpDbg; name the platform gaps."},
+    {"risk": "Companion C# files drift from converted-code internals and from their Go files", "mitigation": "Explicit stability statement, Go-file hash warnings, prefer a function-level replacement design over whole-file replacement."},
+    {"risk": "Nobody finds or adopts it, and adoption cannot be measured", "mitigation": "Launch via NuGet and dotnet new, with a 90-day download threshold set before announcing; extension installs as a secondary signal."},
+    {"risk": "AGPL bans in enterprises", "mitigation": "MIT tooling, the Output Exception for generated code, and the existing commercial licence."}
+  ],
+  "users": [
+    {"group": ".NET teams keeping Go as the source of truth for shared code and calling it from C#", "fit": "strong", "why": "C# can already call converted Go; build integration via GoModuleReference keeps the twin in sync on every Go edit, in any MSBuild IDE and CI."},
+    {"group": "go.* NuGet consumers debugging C# that holds golib values", "fit": "strong", "why": "The standalone golib debugger views make slices, maps, strings, pointers and channels readable in vsdbg and Rider, independent of IDE mode."},
+    {"group": "go2cs users converting or publishing modules (nugetgo, Target Atlas)", "fit": "partial", "why": "Go-line stepping helps debug conversions, but it is a small group and the generated .cs cannot take breakpoints in source-mapped mode."},
+    {"group": "Learners comparing Go with C#", "fit": "partial", "why": "The Show C# panel is a cheap showcase, not a core need."},
+    {"group": "The go2cs fleet", "fit": "weak", "why": "Agent lanes root-cause from emitted .cs, goldens and test output; debugger views change no test output and source-mapped mode hides the .cs."},
+    {"group": "Go developers wanting Go on .NET for its own sake", "fit": "weak", "why": "Go already runs natively and usually faster (most JIT workloads 1.4x-6.8x Go's time, 279 ms vs 23 ms startup)."},
+    {"group": "GoLand users (28% of Go developers)", "fit": "weak", "why": "GoLand has no .NET build or debugger, so they are unserved."},
+    {"group": "Visual Studio or Rider users who want to edit Go there", "fit": "weak", "why": "No first-party Go editing in either; they are served only in the C#-consumer scenario."},
+    {"group": "Anyone needing .NET APIs from Go (WinForms/WPF/MAUI, Unity, Godot, plugin hosts)", "fit": "weak", "why": "Blocked by .NET interop from Go source, which is out of v1 and a multi-month design question."},
+    {"group": "macOS Go developers (60% of survey respondents)", "fit": "weak", "why": "The macOS run layer has no date; platform-varying packages load the Windows flavour until it lands."},
+    {"group": "Developers on current Go releases", "fit": "weak", "why": "The corpus is on out-of-support Go 1.24, and current modules need a newer Go until the hops land."}
+  ]
+}
