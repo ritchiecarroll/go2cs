@@ -68,6 +68,8 @@ param(
     ),
     [string] $SingleFileProject = 'InterfaceAssertionMapKey',
     [int] $SingleFileRuns = 10,
+    [string] $OneCpuProject = 'InterfaceAssertionMapKey',
+    [int] $OneCpuRuns = 20,
     [int] $RunTimeoutSeconds = 60,
     [switch] $KeepOutput,
     [string[]] $PublishArgs = @()
@@ -86,13 +88,29 @@ function Read-Lines([string] $text) {
     return @(($text -replace "`r", '').TrimEnd("`n") -split "`n")
 }
 
-# Runs a program with a time limit: its stdout, its exit code, and whether it had to be killed.
-function Invoke-Limited([string] $exe, [int] $seconds) {
-    $info = [System.Diagnostics.ProcessStartInfo]::new($exe)
+# Runs a program with a time limit: its stdout, its exit code, and whether it had to be killed. With
+# -OneCpu the program runs on a single CPU: on windows it inherits this process's affinity, set to CPU 0
+# just for the start; elsewhere it starts under `taskset -c 0`.
+function Invoke-Limited([string] $exe, [int] $seconds, [switch] $OneCpu) {
+    $info = if ($OneCpu -and -not $IsWindowsHost) { [System.Diagnostics.ProcessStartInfo]::new('taskset', "-c 0 `"$exe`"") } else { [System.Diagnostics.ProcessStartInfo]::new($exe) }
     $info.RedirectStandardOutput = $true
     $info.RedirectStandardError = $true
     $info.UseShellExecute = $false
-    $process = [System.Diagnostics.Process]::Start($info)
+    $self = [System.Diagnostics.Process]::GetCurrentProcess()
+    $savedAffinity = $self.ProcessorAffinity
+
+    if ($OneCpu -and $IsWindowsHost) {
+        $self.ProcessorAffinity = [IntPtr]1
+    }
+
+    try {
+        $process = [System.Diagnostics.Process]::Start($info)
+    }
+    finally {
+        if ($OneCpu -and $IsWindowsHost) {
+            $self.ProcessorAffinity = $savedAffinity
+        }
+    }
     $stdout = $process.StandardOutput.ReadToEndAsync()
     $null = $process.StandardError.ReadToEndAsync()
 
@@ -147,7 +165,7 @@ function Get-GoOutput([string] $projectDir) {
 
 $failures = [System.Collections.Generic.List[string]]::new()
 $measured = 0
-$expected = $Projects.Count + $(if ($SingleFileProject) { 1 } else { 0 })
+$expected = $Projects.Count + $(if ($SingleFileProject) { 1 } else { 0 }) + $(if ($OneCpuProject) { 1 } else { 0 })
 
 Write-Host "published-output gate: $($Projects.Count) project(s) + single-file arm '$SingleFileProject', runtime $rid, go2csPath $go2csPath, run limit ${RunTimeoutSeconds}s"
 
@@ -201,6 +219,68 @@ foreach ($name in $Projects) {
     if (-not $same) {
         $detail = if ($firstDiff) { $firstDiff } else { "exit code go $($go.ExitCode) published $($run.ExitCode)" }
         $failures.Add("$name DIFFERS once published: $detail")
+    }
+}
+
+# THE ONE-CPU ARM. golib's extension-method scan and its AssemblyLoad handler once took one lock in
+# opposite order with the runtime's type-load lock; a plain ReadyToRun publish pinned to one CPU hung in 20
+# of 23 runs (rooted 2026-10-03), while several CPUs almost never showed it. So one project is published
+# plainly (ReadyToRun, partial trim, not single-file) and run -OneCpuRuns times on a single CPU; a run past
+# the limit FAILS the leg as HUNG.
+if ($OneCpuProject) {
+    $name = $OneCpuProject
+    $projectDir = Join-Path $BehavioralRoot $name
+    $project = Join-Path $projectDir "$name.csproj"
+
+    if (-not (Test-Path $project)) {
+        $failures.Add("$name (one CPU) NOT MEASURED: no project at $project")
+    }
+    else {
+        $go = Get-GoOutput $projectDir
+        Clear-PublishState $projectDir
+        $out = Join-Path $workRoot "$name-one-cpu"
+        $watch = [System.Diagnostics.Stopwatch]::StartNew()
+        $publishLog = (& dotnet publish $project -c Release -r $rid "-p:go2csPath=$go2csPath" @PublishArgs -o $out 2>&1 | Out-String)
+        $publishExit = $LASTEXITCODE
+        $watch.Stop()
+        $exe = Join-Path $out "$name$ExeSuffix"
+
+        if ($publishExit -ne 0 -or -not (Test-Path $exe)) {
+            $firstError = (Read-Lines $publishLog | Where-Object { $_ -match ': error ' } | Select-Object -First 1)
+            $failures.Add("$name (one CPU) NOT MEASURED: dotnet publish exited $publishExit ($firstError)")
+        }
+        else {
+            $measured++
+            $hung = 0
+            $differing = $null
+
+            for ($i = 1; $i -le $OneCpuRuns; $i++) {
+                $run = Invoke-Limited $exe $RunTimeoutSeconds -OneCpu
+
+                if ($run.Hung) {
+                    $hung++
+                    continue
+                }
+
+                $firstDiff = Compare-Output $go.Output $run.Output
+
+                if (($null -ne $firstDiff -or $go.ExitCode -ne $run.ExitCode) -and $null -eq $differing) {
+                    $differing = "run ${i}: " + $(if ($firstDiff) { $firstDiff } else { "exit code go $($go.ExitCode) published $($run.ExitCode)" })
+                }
+            }
+
+            $size = [math]::Round(((Get-ChildItem $out -Recurse -File | Measure-Object Length -Sum).Sum) / 1MB, 1)
+            $verdict = if ($hung -gt 0) { 'HUNG' } elseif ($differing) { 'DIFFERS' } else { 'same as go' }
+            Write-Host ('  {0,-28} {1,-11} publish {2,5:N0}s  {3,6:N1} MB  one CPU, {4} runs, {5} hung' -f $name, $verdict, $watch.Elapsed.TotalSeconds, $size, $OneCpuRuns, $hung)
+
+            if ($hung -gt 0) {
+                $failures.Add("$name (one CPU) HUNG: $hung of $OneCpuRuns runs did not exit within ${RunTimeoutSeconds}s")
+            }
+
+            if ($differing) {
+                $failures.Add("$name (one CPU) DIFFERS once published: $differing")
+            }
+        }
     }
 }
 
