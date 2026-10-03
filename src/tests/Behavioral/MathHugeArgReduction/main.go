@@ -1,9 +1,10 @@
 // Guards math's trigonometric argument reduction for huge arguments. Sin, Cos, Sincos and Tan reduce
-// an argument at or above reduceThreshold (1<<29) with Payne-Hanek (trigReduce), through the test
-// `x >= reduceThreshold` -- a float64 compared with an untyped integer constant. go2cs emitted that
-// comparison against golib's UntypedInt, which converted x with a truncating int64 cast, so for
-// |x| >= 2^63 the test read false, the reduction was skipped, and the results were wrong. Output-
-// compared with go run.
+// an argument at or above reduceThreshold (1<<29) with Payne-Hanek (trigReduce), behind the test
+// `x >= reduceThreshold` -- a float64 compared with an untyped integer constant, the shape of the
+// float-vs-UntypedInt defect (UntypedIntFloatOperandTests). That defect does NOT reach these sites:
+// the truncating conversion saturates for |x| >= 2^63 and the threshold is a small integer, so the
+// truncated comparison agrees with Go (measured: this project passed before the fix). It is kept as a
+// standing guard that the reduction runs for 2^63, 2^64 and 1e300. Output-compared with go run.
 package main
 
 import (
