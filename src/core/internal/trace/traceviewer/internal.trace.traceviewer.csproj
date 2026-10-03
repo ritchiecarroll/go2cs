@@ -57,7 +57,7 @@
        on a library it buys nothing but IL#### trim warnings the app publish recomputes over the whole
        closure anyway. AllowUnsafeBlocks is a compile setting and stays unconditional. -->
   <PropertyGroup Condition="'$(OutputType)'!='Library'">
-    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRun Condition="'$(PublishSingleFile)'!='true'">true</PublishReadyToRun>
     <PublishTrimmed>True</PublishTrimmed>
     <!-- Trim the framework only: a full trim removes members golib and the converted code reach by reflection. -->
     <TrimMode Condition="'$(TrimMode)'==''">partial</TrimMode>
