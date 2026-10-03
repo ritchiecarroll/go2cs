@@ -491,6 +491,14 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 							} else {
 								v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, initializer)
 							}
+						} else if initializer, ok := v.cgoTrampolineAddrInitializer(goIDName, v.getIdentType(ident), ident.Pos()); ok {
+							// golang.org/x/sys's darwin libc address: its assembly is the only thing that sets
+							// it, so it resolves the dynamic symbol it stands for (cgoDynamicImports.go).
+							if v.isAddressedGlobal(ident) {
+								v.writeAddressedGlobalDecl(access, csTypeName, csIDName, initializer, false)
+							} else {
+								v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, initializer)
+							}
 						} else if v.isAddressedGlobal(ident) {
 							// Box an N-sized array, not the empty default, so writes through the
 							// pointer (and indexing) hit real storage.

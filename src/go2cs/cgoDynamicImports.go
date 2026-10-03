@@ -9,7 +9,11 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
+	"go/token"
+	"go/types"
+	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -47,6 +51,12 @@ type cgoDynamicImportRecord struct {
 // name. Populated by the package-wide pre-pass collectCgoDynamicImports, then read-only while the
 // package's files convert; reset per package by resetPackageState, like linknameHandles.
 var cgoDynamicImports map[string]cgoDynamicImportRecord
+
+// cgoDynamicImportPragmas holds every pragma of THIS package that parseCgoImportDynamic accepts, bound or
+// not, keyed by its local name. A trampoline ADDRESS variable (golang.org/x/sys's darwin shape, see
+// cgoTrampolineAddrInitializer) binds to its pragma through the assembly, not through a declaration, so it
+// reads the pragmas themselves. Reset per package with cgoDynamicImports.
+var cgoDynamicImportPragmas map[string]cgoDynamicImportRecord
 
 // parseCgoImportDynamic reads one `//go:cgo_import_dynamic <local> <symbol> "<library>"` comment,
 // returning its three fields when the pragma names a library go2cs can resolve at run time.
@@ -157,6 +167,8 @@ func collectCgoDynamicImports(files []*ast.File) {
 			}
 		}
 	}
+
+	cgoDynamicImportPragmas = pragmas
 
 	if len(pragmas) == 0 {
 		return
@@ -345,4 +357,52 @@ func applyCgoDynamicImports(packageInfoLines []string, packageInfoFileName strin
 	updated = append(updated, packageInfoLines[namespaceIndex:]...)
 
 	return updated
+}
+
+// cgoTrampolineAddrSuffix is the suffix golang.org/x/sys's darwin address variables carry.
+const cgoTrampolineAddrSuffix = "_trampoline_addr"
+
+// cgoTrampolineAddrInitializer returns the initializer for a package-level `var <name>_trampoline_addr
+// uintptr` that the package's own assembly fills with a trampoline's address (parseAsmTrampolineAddrs),
+// when the local name that trampoline jumps to has a `//go:cgo_import_dynamic` pragma in this package:
+// an expression resolving that dynamic symbol's real address, the value class B gives a standard-library
+// trampoline. golang.org/x/sys declares 154 of them per darwin arch, and each libc call passes one to
+// syscall_syscall; left a bare field each was 0, and the call refused its null function pointer.
+//
+// ResolveOrZero, not Resolve: these initializers run in the package's static initializer, and a symbol
+// absent from the running macOS must cost the one call that needs it (GoLibcCall refuses a zero address
+// by name), not every use of the package.
+func (v *Visitor) cgoTrampolineAddrInitializer(name string, varType types.Type, pos token.Pos) (string, bool) {
+	if !strings.HasSuffix(name, cgoTrampolineAddrSuffix) || len(cgoDynamicImportPragmas) == 0 || v.fset == nil {
+		return "", false
+	}
+
+	if basic, ok := types.Unalias(varType).(*types.Basic); !ok || basic.Kind() != types.Uintptr {
+		return "", false
+	}
+
+	sourceDir := filepath.Dir(v.fset.Position(pos).Filename)
+
+	if sourceDir == "" || sourceDir == "." {
+		return "", false
+	}
+
+	local, bound := asmTrampolineAddrIndex(sourceDir, v.options.targetPlatform, v.options.buildTags)[name]
+
+	if !bound {
+		return "", false
+	}
+
+	record, named := cgoDynamicImportPragmas[local]
+
+	if !named {
+		return "", false
+	}
+
+	return fmt.Sprintf("(uintptr)global::go.GoCgoDynamicImports.ResolveOrZero(%s, %s)", csStringLiteral(record.symbol), csStringLiteral(record.library)), true
+}
+
+// csStringLiteral renders s as a regular C# string literal.
+func csStringLiteral(s string) string {
+	return `"` + strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(s) + `"`
 }

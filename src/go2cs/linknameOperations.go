@@ -27,6 +27,11 @@ import (
 // package alongside projectImports; populated by collectLinknameHandles.
 var linknameHandles HashSet[string]
 
+// linknamePullDirectives maps THIS package's two-arg `//go:linkname <local> <pkgpath>.<remote>` directives by
+// local name, wherever in the package's files they sit. Populated by collectLinknameHandles, reset per
+// package by resetPackageState.
+var linknamePullDirectives map[string]string
+
 // conversionGraph is the CONVERT-SET dependency graph, built by the -stdlib and -recurse drivers and
 // nil for a single-package or -tests conversion. Set once the graph is built; read by
 // linknamePullWouldCycle. currentPackagePath is the import path of the package currently being
@@ -212,6 +217,16 @@ func collectLinknameHandles(files []*ast.File) {
 				// One-arg handle: exactly the directive + the authorized symbol name.
 				if len(fields) == 2 && fields[0] == "//go:linkname" {
 					linknameHandles.Add(fields[1])
+				}
+
+				// A two-arg pull, recorded by local name for the readers that cannot rely on the
+				// directive sitting in its declaration's doc comment (xsysDarwinLibcTwinForward).
+				if len(fields) == 3 && fields[0] == "//go:linkname" {
+					if linknamePullDirectives == nil {
+						linknamePullDirectives = map[string]string{}
+					}
+
+					linknamePullDirectives[fields[1]] = fields[2]
 				}
 			}
 		}

@@ -2286,6 +2286,45 @@ var linknameForwardDefinitions = map[string]string{
 	"runtime.fastrand64": "runtime.legacy_fastrand64",
 }
 
+// xsysDarwinLibcTwins maps each pull golang.org/x/sys makes of syscall's darwin libc family to the PUBLIC
+// syscall function that is the same call (darwin-xsys-libc, 2026-10-03). x/sys reaches libc on darwin through
+// seven bodyless declarations (syscall_darwin_libSystem.go: `//go:linkname syscall_syscall syscall.syscall`
+// and six siblings), and Go authorizes them on the PUSHING side: runtime/sys_darwin.go defines each body
+// under "golang.org/x/sys linknames syscall_syscall". Without a forward they were throwing stubs, and the
+// README walkthrough's app died in fatih/color's type initializer on both mac legs (unix.ioctlPtr ->
+// syscall_syscall; release-smoke 37136808066).
+//
+// The targets themselves stay internal: they are hand-owned partials in the darwin flavor
+// (syscall_darwin_impl.cs), and C# requires a partial's two halves to agree on accessibility, so widening
+// them would move the corpus. Each has a public twin there that issues the SAME libc call under the SAME
+// failure rule -- Syscall/Syscall6/Syscall9/RawSyscall/RawSyscall6 (low 32 bits == -1), and the two doors
+// darwin increment 10 (a) opened for the rules with no exported twin, GoSyscall6X (all 64 bits) and
+// GoSyscallPtr (NULL) -- and every pull's signature is identical to its twin's (x/sys's Errno is
+// `type Errno = syscall.Errno`). The forward is scoped to x/sys's package paths because
+// internal/syscall/unix declares five of the same pulls and answers them with its own hand-owned
+// net_darwin_impl.cs, which a forwarder would duplicate.
+var xsysDarwinLibcTwins = map[string]string{
+	"syscall.syscall":     "syscall.Syscall",
+	"syscall.syscall6":    "syscall.Syscall6",
+	"syscall.syscall9":    "syscall.Syscall9",
+	"syscall.rawSyscall":  "syscall.RawSyscall",
+	"syscall.rawSyscall6": "syscall.RawSyscall6",
+	"syscall.syscall6X":   "syscall.GoSyscall6X",
+	"syscall.syscallPtr":  "syscall.GoSyscallPtr",
+}
+
+// isXSysPackagePath reports whether pkgPath is golang.org/x/sys or one of its packages, as a module or as
+// the standard library's vendored copy.
+func isXSysPackagePath(pkgPath string) bool {
+	for _, root := range []string{"golang.org/x/sys", "vendor/golang.org/x/sys"} {
+		if pkgPath == root || strings.HasPrefix(pkgPath, root+"/") {
+			return true
+		}
+	}
+
+	return false
+}
+
 // linknameForwardDefinitionSources is the reverse index of linknameForwardDefinitions: the set of
 // definitions ("<pkgPath>.<funcName>") a forwarder calls, so packageFuncAccess can emit each public.
 // The definition's own two-arg directive is Go's authorization for the pull, in the place a one-arg
@@ -2319,8 +2358,12 @@ var linknameForwardBuiltins = map[string]string{
 // the `using <name> = <name>_package;` alias the importing file emits) and the target function name,
 // so the converter can emit a forwarder call to it instead of a throwing stub.
 func (v *Visitor) funcLinknameForward(funcDecl *ast.FuncDecl) (alias string, targetFunc string, ok bool) {
-	if funcDecl.Doc == nil || funcDecl.Name == nil {
+	if funcDecl.Name == nil {
 		return "", "", false
+	}
+
+	if funcDecl.Doc == nil {
+		return v.xsysDarwinLibcTwinForward(funcDecl.Name.Name)
 	}
 
 	for _, comment := range funcDecl.Doc.List {
@@ -2341,6 +2384,14 @@ func (v *Visitor) funcLinknameForward(funcDecl *ast.FuncDecl) (alias string, tar
 			return "", builtin, true
 		}
 
+		// golang.org/x/sys's darwin libc pulls forward to syscall's PUBLIC twin of each target (see
+		// xsysDarwinLibcTwins). Only x/sys and its vendored copy: they are the pullers Go authorizes.
+		if twin, isTwin := xsysDarwinLibcTwins[target]; isTwin && isXSysPackagePath(currentPackagePath) {
+			dot := strings.LastIndex(twin, ".")
+
+			return v.linknameTargetAlias(twin[:dot]), twin[dot+1:], true
+		}
+
 		if !linknameForwardTargets[target] {
 			return "", "", false
 		}
@@ -2356,7 +2407,28 @@ func (v *Visitor) funcLinknameForward(funcDecl *ast.FuncDecl) (alias string, tar
 		return v.linknameTargetAlias(target[:dot]), getSanitizedFunctionName(target[dot+1:]), true
 	}
 
-	return "", "", false
+	return v.xsysDarwinLibcTwinForward(funcDecl.Name.Name)
+}
+
+// xsysDarwinLibcTwinForward finds a twin-forwarded x/sys pull whose directive is NOT in the declaration's
+// doc comment. Go reads a //go:linkname anywhere in the file, and x/sys writes these seven in a block of
+// their own after the declarations (syscall_darwin_libSystem.go; the vendored x/sys/cpu likewise), so the
+// doc-comment reading above never sees them. The file-wide search is confined to xsysDarwinLibcTwins in
+// x/sys's own package paths, so no other declaration's emission can move through it.
+func (v *Visitor) xsysDarwinLibcTwinForward(name string) (alias string, targetFunc string, ok bool) {
+	if !isXSysPackagePath(currentPackagePath) {
+		return "", "", false
+	}
+
+	twin, isTwin := xsysDarwinLibcTwins[linknamePullDirectives[name]]
+
+	if !isTwin {
+		return "", "", false
+	}
+
+	dot := strings.LastIndex(twin, ".")
+
+	return v.linknameTargetAlias(twin[:dot]), twin[dot+1:], true
 }
 
 // linknameTargetAlias returns the qualifier a linkname forwarder must spell to reach pkgPath's
