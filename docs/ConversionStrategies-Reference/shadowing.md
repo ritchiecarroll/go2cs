@@ -693,6 +693,40 @@ path uses (`dotImportedRenamedMember`), and emits the renamed member **bare**: a
 `using static <pkg>_package`, which exposes it under exactly that name. Only `const:`-marked entries are
 honored — a type entry resolves to a `pkgꓸName` global-using alias, which is the type layer's business.
 
+## A file that reaches Go names through `using static` binds .NET types by alias, never by namespace
+
+Two emissions need a .NET namespace on demand: a frame kept for `runtime.Callers` or a goroutine's
+creator is marked `[MethodImpl(MethodImplOptions.NoInlining)]` (`System.Runtime.CompilerServices`), and a
+struct with a zero-size field is laid out at Go's offsets with `[StructLayout]` / `[FieldOffset]`
+(`System.Runtime.InteropServices`). Where a file reaches Go names bare through a `using static`, the
+namespace is **not** imported; the file gets one alias directive per type the emission names instead:
+
+```csharp
+using static global::go.go.types_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+```
+
+The attribute text the reader sees does not change. A file with no `using static` keeps the plain
+`using System.Runtime.CompilerServices;`.
+
+**Why.** A `using static` member and a namespace-imported type sit at one level of C# name lookup, so a Go
+name the namespace also declares is ambiguous (CS0229): go/types' `stdlib_test.go` reaches go/types'
+`Unsafe` through its dot-import, and broke the day `TestStdlib` took the attribute. An alias directive
+outranks both, so it can never collide with a Go name.
+
+**Which files.** Two triggers. A file with its own Go dot-import. And every file compiled into a test
+project whose production is a referenced assembly: that project seeds a `global using static` of the
+production class (and of the white-box bridge) at compilation-unit level, OUTSIDE the file's
+file-scoped namespace — where a namespace import inside the file would not collide with a Go name, it
+would silently **win**, binding the .NET type. That case has no compile error to catch it, which is why
+the trigger is the project, not the file.
+
+**Guards.** `usingStaticNamespaceAlias_test.go` pins each trigger (a dot-import first and behind an
+ordinary import, a white-box and a plain reference-model test project). The behavioral project
+`UsingStaticNamespaceAlias` compiles and runs both alias sets beside bare `Unsafe`, `Closure` and
+`Marshal`.
+
 ---
 
 [← Multi-Assignment and Evaluation Order](multi-assignment.md) · [Index](README.md) · [Multi-Result Values and Comma-Ok Forms →](multi-result-and-comma-ok.md)
