@@ -39,6 +39,7 @@
     <None Include="$(MSBuildThisFileDirectory)byRefReceiverGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)callerInliningAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)callerSkipWindowFrames_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)canonicalDiagnostics_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goCreatorFrame_test.go" />
     <None Include="$(MSBuildThisFileDirectory)elidedAnyCompositeElems_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective.go" />
@@ -415,6 +416,8 @@
     <None Include="$(MSBuildThisFileDirectory)variableAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)variadicGlobalAliasElement_test.go" />
     <None Include="$(MSBuildThisFileDirectory)variadicPackView_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)versionReport.go" />
+    <None Include="$(MSBuildThisFileDirectory)versionReport_test.go" />
     <None Include="$(MSBuildThisFileDirectory)visitArrayType.go" />
     <None Include="$(MSBuildThisFileDirectory)visitAssignStmt.go" />
     <None Include="$(MSBuildThisFileDirectory)visitBlockStmt.go" />
