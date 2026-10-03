@@ -18,6 +18,7 @@
     <None Include="$(MSBuildThisFileDirectory)allocInliningFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)corpusRelease.go" />
     <None Include="$(MSBuildThisFileDirectory)genericAllocCallerFrames_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)anonInterfaceParamPublic_test.go" />
     <None Include="$(MSBuildThisFileDirectory)anonStructPublicization_test.go" />
     <None Include="$(MSBuildThisFileDirectory)anonStructTypeArgLift.go" />
     <None Include="$(MSBuildThisFileDirectory)anonStructTypeArgLift_test.go" />
@@ -114,6 +115,7 @@
     <None Include="$(MSBuildThisFileDirectory)descriptorCompanion.go" />
     <None Include="$(MSBuildThisFileDirectory)descriptorCompanionCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferFinallyLowering.go" />
+    <None Include="$(MSBuildThisFileDirectory)deferValueReceiverSnapshot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferredMarkerOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)deferredMarkers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferredSyscallFunnel_test.go" />

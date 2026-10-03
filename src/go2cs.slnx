@@ -253,6 +253,7 @@
   <Folder Name="/tests/" />
   <Folder Name="/tests/behavioral/">
     <Project Path="tests/Behavioral/AnonInterfaceConversion/AnonInterfaceConversion.csproj" />
+    <Project Path="tests/Behavioral/AnonInterfaceParamPublic/AnonInterfaceParamPublic.csproj" />
     <Project Path="tests/Behavioral/AtomicValueTypedNilFunc/AtomicValueTypedNilFunc.csproj" />
     <Project Path="tests/Behavioral/BehavioralRunner/BehavioralRunner.csproj" />
     <Project Path="tests/Behavioral/BehavioralTests/BehavioralTests.csproj" />
@@ -399,6 +400,7 @@
     <Project Path="tests/Behavioral/DeferSimple/DeferSimple.csproj" />
     <Project Path="tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.csproj" />
     <Project Path="tests/Behavioral/DeferValueFieldPtrReceiver/DeferValueFieldPtrReceiver.csproj" />
+    <Project Path="tests/Behavioral/DeferValueReceiverSnapshot/DeferValueReceiverSnapshot.csproj" />
     <Project Path="tests/Behavioral/DeferVariadicCallee/DeferVariadicCallee.csproj" />
     <Project Path="tests/Behavioral/DefinedComplexConst/DefinedComplexConst.csproj" />
     <Project Path="tests/Behavioral/DefinedElemStringConversion/DefinedElemStringConversion.csproj" />

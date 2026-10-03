@@ -40,6 +40,15 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	access := v.pendingTypeAccess
 	v.pendingTypeAccess = ""
 
+	// A lifted ANONYMOUS interface in an exported signature — go-cmp's `func Reporter(r interface{…})
+	// Option` — is recorded by the publicize pre-pass (collectSignatureTypes interns the anonymous
+	// type, since a lift has no *types.Object) and must emit `public`, exactly as the struct twin does
+	// (liftedIsPublicized in visitStructType). Unconsulted, the lift fell to the function-local
+	// `internal` below and was less accessible than the public method taking it (CS0051).
+	if access == "" && lifted && (isPublicizedLiftedType(identType) || isPublicizedLiftedType(v.info.TypeOf(interfaceType))) {
+		access = "public "
+	}
+
 	// A FUNCTION-LOCAL interface (declared, or lifted anonymously, inside a function body) has no Go
 	// exportedness to read a modifier out of — see the struct twin in visitStructType and the rule in
 	// localTypeAccess. Pin it internal so it agrees with the sibling types the same function declares.
