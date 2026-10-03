@@ -120,6 +120,22 @@ func TestInstallGoModOverlayForAModuleWithoutGoMod(t *testing.T) {
 	}
 }
 
+// The dependency preflight keeps the run's GOFLAGS (and so the go.mod overlay): it used to replace
+// GOFLAGS with -mod=readonly, `go mod download` then saw no module, and pkg/errors v0.9.1 was refused
+// before converting anything ("go: no modules specified"). Runs the real go command.
+func TestGoModDownloadPreflightKeepsTheGoModOverlay(t *testing.T) {
+	_, moduleDir := moduleCacheFixture(t)
+	t.Setenv("GOFLAGS", "")
+
+	if _, err := installGoModOverlay(moduleDir, t.TempDir()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := goModDownloadPreflight(moduleDir); err != nil {
+		t.Fatalf("the preflight must see the module through the overlay: %v", err)
+	}
+}
+
 func quoteJSON(s string) string {
 	out := []byte{'"'}
 

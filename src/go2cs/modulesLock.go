@@ -169,11 +169,13 @@ func goSumHashes(moduleDir string) map[string]string {
 // goModDownloadPreflight runs `go mod download` in the module before anything is loaded, read-only
 // against the module's own go.mod and go.sum (-mod=readonly), so a dependency missing from the cache
 // or failing verification is ONE refusal naming it, instead of a load warning per package that
-// imports it.
+// imports it. -mod=readonly is ADDED to the run's GOFLAGS, never substituted for it: the run's own
+// flags include the go.mod overlay of a module that ships none (installGoModOverlay), and replacing
+// GOFLAGS dropped it, so `go mod download` saw no module ("no modules specified").
 func goModDownloadPreflight(moduleDir string) error {
 	cmd := exec.Command("go", "mod", "download")
 	cmd.Dir = moduleDir
-	cmd.Env = append(os.Environ(), "GOFLAGS=-mod=readonly")
+	cmd.Env = append(os.Environ(), "GOFLAGS="+strings.TrimSpace(os.Getenv("GOFLAGS")+" -mod=readonly"))
 
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("go mod download preflight failed in %s -- a dependency is missing from the module cache "+
