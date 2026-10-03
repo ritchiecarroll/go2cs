@@ -73,14 +73,6 @@ func (v *Visitor) identIsUniverseBuiltin(ident *ast.Ident) bool {
 	return isBuiltin
 }
 
-// callFunIsUniverseBuiltin reports whether a call's callee is an unshadowed universe built-in —
-// identIsUniverseBuiltin for a call whose callee has not already been narrowed to an identifier.
-func (v *Visitor) callFunIsUniverseBuiltin(callExpr *ast.CallExpr) bool {
-	ident, ok := callExpr.Fun.(*ast.Ident)
-
-	return ok && v.identIsUniverseBuiltin(ident)
-}
-
 // callFunIsUniversePrint reports whether a call is to the universe built-in `print` or `println`,
 // whose variadic parameter the argument classifier treats as `interface{}`.
 //
