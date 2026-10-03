@@ -3086,7 +3086,8 @@ public static partial class builtin
     public static T _<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |
-        DynamicallyAccessedMemberTypes.PublicFields
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(this object target)
     {
         if (TryTypeAssert(target, out T value))
@@ -3113,7 +3114,8 @@ public static partial class builtin
     private static bool TryTypeAssert<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |
-        DynamicallyAccessedMemberTypes.PublicFields
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(object? target, out T value)
     {
         // One IGoAdapter probe gates BOTH adapter tiers — this unwrap loop and the IжAdapter match
@@ -3470,7 +3472,8 @@ public static partial class builtin
     public static (T?, bool) _<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |
-        DynamicallyAccessedMemberTypes.PublicFields
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(this object target, bool _)
     {
         return TryTypeAssert(target, out T? value) ? (value, true) : (GoZero<T>(), false);
@@ -3486,7 +3489,8 @@ public static partial class builtin
     public static bool _<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |
-        DynamicallyAccessedMemberTypes.PublicFields
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(this object target, out T? value)
     {
         if (TryTypeAssert(target, out value))

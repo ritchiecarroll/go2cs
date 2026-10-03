@@ -416,7 +416,7 @@ public static class PointerExtensions
 
         [UnconditionalSuppressMessage("Trimming", "IL2070",
             Justification = "Reinterpreted Go struct surrogates are referenced by the converted code that reinterprets them.")]
-        private static Type[] FieldTypes([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicFields)] Type type)
+        private static Type[] FieldTypes(Type type)
         {
             if (!type.IsValueType || type.IsPrimitive || type.IsEnum)
                 return [];

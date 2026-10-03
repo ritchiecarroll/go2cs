@@ -220,7 +220,8 @@ public static class errorExtensions
     public static T _<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |
-        DynamicallyAccessedMemberTypes.PublicFields
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(this error target)
     {
         // The `error<T>` carrier is golib's own error box — built by AdapterBinder from the
@@ -248,7 +249,8 @@ public static class errorExtensions
     public static bool _<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |
-        DynamicallyAccessedMemberTypes.PublicFields
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(this error target, out T result)
     {
         try
