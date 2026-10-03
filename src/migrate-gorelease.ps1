@@ -432,6 +432,8 @@ $editableSites = @(
         Find = '`go build` \(Go {OLD}\)'
         Replace = '`go build` (Go {NEW})'
         Expect = 1
+        Retired = 'the docs-refresh seat (Roadmap converter-loop sentence)'
+        RetiredNote = 'the docs refresh points the converter loop at the release src/go2cs/go.mod names instead of spelling it; nothing on the page moves at a hop'
         Note = 'the converter-improvement loop names the toolchain it is run with'
     }
     @{
