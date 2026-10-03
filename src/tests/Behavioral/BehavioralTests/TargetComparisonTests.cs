@@ -1831,6 +1831,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckShadowedPointerParam() => CheckTarget("ShadowedPointerParam");
 
     [TestMethod]
+    public void CheckShadowedStdlibImportAlias() => CheckTarget("ShadowedStdlibImportAlias");
+
+    [TestMethod]
     public void CheckShadowedVarMethodCallLHS() => CheckTarget("ShadowedVarMethodCallLHS");
 
     [TestMethod]

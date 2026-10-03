@@ -1828,6 +1828,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckShadowedPointerParam() => CheckTarget("ShadowedPointerParam");
 
     [TestMethod]
+    public void CheckShadowedStdlibImportAlias() => CheckTarget("ShadowedStdlibImportAlias");
+
+    [TestMethod]
     public void CheckShadowedVarMethodCallLHS() => CheckTarget("ShadowedVarMethodCallLHS");
 
     [TestMethod]

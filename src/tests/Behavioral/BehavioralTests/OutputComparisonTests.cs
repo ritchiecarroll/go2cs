@@ -1760,6 +1760,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckShadowedPointerParam() => CheckTarget("ShadowedPointerParam");
 
     [TestMethod]
+    public void CheckShadowedStdlibImportAlias() => CheckTarget("ShadowedStdlibImportAlias");
+
+    [TestMethod]
     public void CheckShadowedVarMethodCallLHS() => CheckTarget("ShadowedVarMethodCallLHS");
 
     [TestMethod]
