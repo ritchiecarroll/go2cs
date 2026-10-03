@@ -169,3 +169,4 @@ N SCRIPT ITEMS: + comparison-classifier go test leg (cheap; nothing runs it).
  ACCEPTED: g-cctor-init-frame 0ce7e3dc9c. LAPSE: R/C2 idled ~4 h on unread posts (COORD stopped reading the mailbox during bridge traffic).
 01:52 TRAIN M LANDED: master 8f46a9adae (ledger c7f79f4264). Bank step no-op (i9: neither page rewritten; i7 sweep reproduced both). NEXT: TRAIN N assembly; COORD i7 items (hang root, full BoGo, M13 refresh on N union).
 01:59 TRAIN N: draft table fda440a18b (27 seats; cutoff 10:00 Central); FLEET posted (157c5b8e9). WORKFLOWS: i7 hang root + full BoGo control (wgrdik4qu); TRAIN N script derive (wbwjnfcsd, edits trainN/ only, uncommitted).
+02:34 ACCEPTED for N (add to tN-seats-draft AFTER the derive workflow ends, before p2-n-cleanup): c2-toml-test-host 15838bfff5 (classes 5+6; class 5 also fixed a silent x.(int) false on [][2]any). A2 RULED to G: golib (B) explicit float->UntypedInt (math Sin/Cos/Tan |x|>=2^63 defect).
