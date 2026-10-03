@@ -875,6 +875,16 @@ try {
               "Run ``go generate .`` from src\go2cs, commit the regenerated asset, then re-run this script. " +
               "Publishing now would ship packages the converter's -recurse=nuget mode describes incorrectly."
     }
+
+    # go2cs/corpus-release.txt names the last PUBLISHED release (release-nuget.ps1 Phase 4 regenerates it);
+    # a constant the previous release left stale fails here, before the bump.
+    Write-Step "Verifying corpus-release.txt names the published release"
+    & go test -count=1 -run TestCorpusReleaseMatchesThePublishedStamp ./internal/repoguard | Out-Host
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "STALE CORPUS-RELEASE CONSTANT: go2cs\corpus-release.txt does not name the last published release. " +
+              "Run ``go run ./internal/gencorpusrelease`` from src\go2cs, commit the regenerated file, then re-run this script."
+    }
 }
 finally {
     Pop-Location

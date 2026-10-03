@@ -67,25 +67,29 @@ func TestNuGetMapOnlyNeverFetchesTheRegistry(t *testing.T) {
 	}
 }
 
-// The DORMANT default, pinned at the registry: no -nuget-map flag reads no source, fetches nothing and
-// writes no lock. S3b flips the default, and this test is its deliberate red.
-func TestNuGetMapDormantDefaultFetchesNothing(t *testing.T) {
+// The DEFAULT, pinned at the registry (S3b's flip of S3a's dormant pin): no -nuget-map flag consults the
+// registry once, maps what it answers, and writes the lock.
+func TestNuGetMapDefaultConsultsTheRegistry(t *testing.T) {
 	f := newNuGetMapFixture(t)
 	f.set("/registry", mapRow(modA.path, "reg.a", "canonical"))
 	outRoot := t.TempDir()
 
-	decisions, warnings, err := runNuGetMapResolution([]thirdPartyModule{modA}, nugetMapOptions{}, outRoot)
+	decisions, _, err := runNuGetMapResolution([]thirdPartyModule{modA}, nugetMapOptions{}, outRoot)
 
-	if err != nil || len(decisions) != 0 || len(warnings) != 0 {
-		t.Errorf("the dormant default resolved: decisions %+v, warnings %q, err %v", decisions, warnings, err)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	if n := f.count("/registry"); n != 0 {
-		t.Errorf("the registry was requested %d times with no -nuget-map flag; want 0", n)
+	if a := decisionFor(t, decisions, modA.path); !a.mapped || a.nugetID != "reg.a" || a.layer != nugetMapRegistryURL {
+		t.Errorf("A: %+v; want reg.a from the registry by default", a)
 	}
 
-	if _, err := os.Stat(nugetLockPath(outRoot)); !os.IsNotExist(err) {
-		t.Errorf("the dormant default wrote %s", nugetLockFileName)
+	if n := f.count("/registry"); n != 1 {
+		t.Errorf("the registry was requested %d times with no -nuget-map flag; want 1", n)
+	}
+
+	if _, err := os.Stat(nugetLockPath(outRoot)); err != nil {
+		t.Errorf("the default wrote no %s: %v", nugetLockFileName, err)
 	}
 }
 

@@ -178,27 +178,31 @@ func TestNuGetMapDecisionsAreSortedByModule(t *testing.T) {
 	}
 }
 
-// The provenance report (docs/PLAN-nugetgo.md 4.5): a community mapping reads as a trust decision, and
-// in S3a every mapped row says it was resolved but NOT applied, so no run reads as a substitution.
-func TestNuGetMapReportMarksTrustAndTheS3aState(t *testing.T) {
+// The provenance report (docs/PLAN-nugetgo.md 4.5): a community mapping reads as a trust decision; a row
+// S3b APPLIED names the exact-pinned PackageReference it became; a mapped row S3b could not apply says it
+// converted locally, and why (no matching package, or a closure demotion naming its blocker).
+func TestNuGetMapReportNamesWhatWasAppliedAndWhy(t *testing.T) {
 	decisions := []nugetMapDecision{
-		{module: modA.path, version: "v1.0.0", mapped: true, nugetID: "id.a", status: "canonical", layer: "registry"},
-		{module: modB.path, version: "v2.1.0", mapped: true, nugetID: "id.b", status: "community", layer: "mine.txt"},
+		{module: modA.path, version: "v1.300.0", mapped: true, nugetID: "id.a", status: "canonical", layer: "registry", applied: true, packageVersion: "1.300.0.1"},
+		{module: modB.path, version: "v2.1.0", mapped: true, nugetID: "id.b", status: "community", layer: "mine.txt", note: "demoted: its package requires github.com/c/c, which this run converts locally"},
 		{module: "github.com/c/c", version: "v0.1.0", note: "no mapping in any source"},
 	}
 
 	report := formatNuGetMapReport(decisions, []string{"go2cs.nuget.lock disagrees for X"})
 
 	for _, want := range []string{
-		"id.a", "canonical", "registry",
-		"id.b", "community", "mine.txt", "TRUST",
+		"id.a", "canonical", "registry", "PackageReference id.a [1.300.0.1]",
+		"id.b", "community", "mine.txt", "TRUST", "converted locally", "demoted", "requires github.com/c/c",
 		"github.com/c/c", "no mapping in any source",
-		"resolved, not yet applied (S3b): converted locally",
 		"WARNING", "go2cs.nuget.lock disagrees for X",
 	} {
 		if !strings.Contains(report, want) {
 			t.Errorf("report lacks %q:\n%s", want, report)
 		}
+	}
+
+	if strings.Contains(report, "not yet applied") {
+		t.Errorf("the report still carries S3a's not-yet-applied column:\n%s", report)
 	}
 
 	if strings.Count(report, "TRUST") != 1 {

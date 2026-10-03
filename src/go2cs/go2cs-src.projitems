@@ -16,6 +16,7 @@
     <None Include="$(MSBuildThisFileDirectory)addressTakenPredicates_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasReferenceImports_test.go" />
     <None Include="$(MSBuildThisFileDirectory)allocInliningFrames_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)corpusRelease.go" />
     <None Include="$(MSBuildThisFileDirectory)genericAllocCallerFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)anonStructPublicization_test.go" />
     <None Include="$(MSBuildThisFileDirectory)anonStructTypeArgLift.go" />
@@ -40,6 +41,12 @@
     <None Include="$(MSBuildThisFileDirectory)goCreatorFrame_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\corpusRelease_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetPackage.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetPackage_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetSubstitute_integration_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetSubstitution.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetSubstitution_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeNamedIntType_test.go" />
     <None Include="$(MSBuildThisFileDirectory)solutionProjectPaths_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syscallKeepAliveAnalysis.go" />
@@ -168,6 +175,7 @@
     <None Include="$(MSBuildThisFileDirectory)initOrderOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)initOrderTupleSpec_test.go" />
     <None Include="$(MSBuildThisFileDirectory)interfaceConversion.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\gencorpusrelease\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\genpopulation\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gensourcemeta\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gensourcemeta\main_test.go" />
@@ -433,6 +441,7 @@
     <None Include="$(MSBuildThisFileDirectory)zeroSizeFieldStore_test.go" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)corpus-release.txt" />
     <Content Include="$(MSBuildThisFileDirectory)csproj-template.xml" />
     <Content Include="$(MSBuildThisFileDirectory)go2cs.ico" />
     <Content Include="$(MSBuildThisFileDirectory)go2cs.png" />

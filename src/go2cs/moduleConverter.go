@@ -56,9 +56,10 @@ type ModuleConverter struct {
 
 	// -nuget-map (nugetMap.go): every third-party module of the closure, converted or only referenced; the
 	// resolver's answer per module; and the source and lock warnings printed with its report.
-	thirdPartyModules map[string]thirdPartyModule
-	nugetDecisions    []nugetMapDecision
-	nugetWarnings     []string
+	thirdPartyModules  map[string]thirdPartyModule
+	thirdPartyPackages map[string]string // import path -> module path, for every third-party package of the closure
+	nugetDecisions     []nugetMapDecision
+	nugetWarnings      []string
 }
 
 // NewModuleConverter creates a recursive end-user module converter.
@@ -118,8 +119,12 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 	}
 
 	// 2b. -recurse=nuget with a -nuget-map source (nugetMap.go): decide which third-party modules a
-	//     mapping answers and lock the answer. Stage S3a resolves and records only -- every module is still
-	//     converted below; S3b turns a mapped module into a PackageReference here, before conversion.
+	//     mapping answers and lock the answer; then SUBSTITUTE every mapped module whose published package
+	//     qualifies (nugetSubstitution.go): its packages leave the convert-set before a single edge is built,
+	//     so they are never converted, never in go2cs.modules.lock and never in a .slnx, and every import of
+	//     one becomes an exact-pinned PackageReference.
+	nugetSubstitutions = nil
+
 	if m.options.nugetRefs {
 		decisions, warnings, err := runNuGetMapResolution(m.sortedThirdPartyModules(), m.options.nugetMap, m.recurseRoot())
 
@@ -127,7 +132,15 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 			return err
 		}
 
-		m.nugetDecisions, m.nugetWarnings = decisions, warnings
+		substitutions, substitutionWarnings, err := substituteNuGetMappings(decisions, m.thirdPartyModules, m.recurseRoot(), m.options.nugetMap.refresh)
+
+		if err != nil {
+			return err
+		}
+
+		m.nugetDecisions, m.nugetWarnings = decisions, append(warnings, substitutionWarnings...)
+		m.divertNuGetSubstitutions(substitutions)
+		nugetSubstitutions = substitutions
 	}
 
 	// 2a. One version per module per output root (modulesLock.go): a dependency the root already
@@ -402,6 +415,41 @@ func (m *ModuleConverter) recordThirdPartyModule(pkg *packages.Package) {
 	}
 
 	m.thirdPartyModules[pkg.Module.Path] = thirdPartyModule{path: pkg.Module.Path, version: pkg.Module.Version, replaced: pkg.Module.Replace != nil}
+
+	if m.thirdPartyPackages == nil {
+		m.thirdPartyPackages = make(map[string]string)
+	}
+
+	m.thirdPartyPackages[pkg.PkgPath] = pkg.Module.Path
+}
+
+// divertNuGetSubstitutions takes every package of a substituted module out of this run: out of the
+// convert-set, out of the dependency versions go2cs.modules.lock records, and out of the -recurse=module
+// "referenced but not converted" list, since a PackageReference now resolves it.
+func (m *ModuleConverter) divertNuGetSubstitutions(substitutions map[string]*nugetSubstitution) {
+	if len(substitutions) == 0 {
+		return
+	}
+
+	for pkgPath, modulePath := range m.thirdPartyPackages {
+		if _, substituted := substitutions[modulePath]; substituted {
+			m.graph.RemovePackage(pkgPath)
+		}
+	}
+
+	for modulePath := range substitutions {
+		delete(m.lockedModules, modulePath)
+	}
+
+	kept := m.referencedThirdParty[:0]
+
+	for _, pkgPath := range m.referencedThirdParty {
+		if _, substituted := substitutions[m.thirdPartyPackages[pkgPath]]; !substituted {
+			kept = append(kept, pkgPath)
+		}
+	}
+
+	m.referencedThirdParty = kept
 }
 
 // sortedThirdPartyModules returns the recorded third-party modules in module-path order.

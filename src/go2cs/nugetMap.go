@@ -18,19 +18,19 @@ import (
 	"golang.org/x/mod/module"
 )
 
-// The -nuget-map resolver (docs/PLAN-nugetgo.md section 4, stage S3a).
+// The -nuget-map resolver (docs/PLAN-nugetgo.md section 4; stages S3a and S3b).
 //
 // nugetgo.net maps Go module paths to published NuGet packages holding their go2cs conversions. Under
 // -recurse=nuget this file decides, per third-party module, whether a mapping answers it: it reads the
 // mapping sources (the user's -nuget-map files and URLs in listed order, then the registry unless
 // -nuget-map-only), applies the exclusions and the lock (nugetLock.go), records the result in
-// go2cs.nuget.lock and prints the provenance report. It does NOT substitute anything yet: turning a
-// mapped module into a PackageReference is stage S3b, so every module is still converted locally and
-// the report says so on every mapped row.
+// go2cs.nuget.lock and prints the provenance report. A mapped module is then SUBSTITUTED when a published
+// version of its package qualifies (nugetPackage.go) and its dependency closure stays consistent
+// (nugetSubstitution.go): it is referenced as that package instead of being converted.
 //
-// DORMANT BY DEFAULT until S3b (COORD ruling 2026-10-02): a -recurse=nuget run that names no -nuget-map
-// source resolves nothing, fetches nothing and writes no lock, so it is byte-identical to the run before
-// this file existed. S3b flips active() together with the substitution.
+// ON BY DEFAULT since S3b (COORD ruling 2026-10-02): a -recurse=nuget run consults the registry with no
+// -nuget-map flag at all; -nuget-map off is the one way to opt out. S3a shipped the resolver dormant, so
+// the default and the substitution switched on together.
 
 // nugetMapOptions is the -nuget-map flag family, as parsed.
 type nugetMapOptions struct {
@@ -42,10 +42,9 @@ type nugetMapOptions struct {
 	canonicalOnly bool     // -nuget-map-canonical-only: a community mapping is treated as unmapped
 }
 
-// active reports whether this run resolves mappings at all: only when a source is named (the dormant
-// default above).
+// active reports whether this run resolves mappings at all: always, unless -nuget-map off.
 func (o nugetMapOptions) active() bool {
-	return !o.off && len(o.sources) > 0
+	return !o.off
 }
 
 // newNuGetMapOptions builds the options from the raw flag values. `off` is a value of -nuget-map, not a
@@ -186,6 +185,11 @@ type nugetMapDecision struct {
 	layer    string
 	fromLock bool
 	note     string
+
+	// S3b: whether the mapping was APPLIED (the module is referenced as its published package rather than
+	// converted), and the exact package version it is pinned to.
+	applied        bool
+	packageVersion string
 }
 
 // resolveNuGetMappings decides every module, in module-path order, against the sources and the lock:
@@ -336,20 +340,21 @@ func runNuGetMapResolution(modules []thirdPartyModule, o nugetMapOptions, outRoo
 	return decisions, warnings, nil
 }
 
-// nugetMapNotApplied is the S3a column on every mapped row: the mapping is resolved and locked, but the
-// substitution is stage S3b, so the module is still converted locally. S3b removes it.
-const nugetMapNotApplied = "resolved, not yet applied (S3b): converted locally"
-
 // formatNuGetMapReport renders the provenance report (docs/PLAN-nugetgo.md 4.5): every warning first,
-// then one line per module. A canonical mapping reads as routine; a community mapping is marked TRUST,
+// then one line per module. A mapping that was APPLIED names the exact-pinned PackageReference it became; a
+// mapping that was not says the module converted locally, and why. A community mapping is marked TRUST,
 // because using it is a trust decision the user is making.
 func formatNuGetMapReport(decisions []nugetMapDecision, warnings []string) string {
 	var report strings.Builder
-	mapped := 0
+	mapped, applied := 0, 0
 
 	for _, decision := range decisions {
 		if decision.mapped {
 			mapped++
+		}
+
+		if decision.applied {
+			applied++
 		}
 	}
 
@@ -357,7 +362,7 @@ func formatNuGetMapReport(decisions []nugetMapDecision, warnings []string) strin
 		fmt.Fprintf(&report, "WARNING (-nuget-map): %s\n", warning)
 	}
 
-	fmt.Fprintf(&report, "\nNuGet mappings (-nuget-map): %d third-party module(s), %d mapped\n", len(decisions), mapped)
+	fmt.Fprintf(&report, "\nNuGet mappings (-nuget-map): %d third-party module(s), %d mapped, %d referenced as packages\n", len(decisions), mapped, applied)
 
 	for _, decision := range decisions {
 		subject := decision.module
@@ -383,13 +388,15 @@ func formatNuGetMapReport(decisions []nugetMapDecision, warnings []string) strin
 			layer += ", from " + nugetLockFileName
 		}
 
-		note := ""
+		outcome := ""
 
-		if decision.note != "" {
-			note = "  (" + decision.note + ")"
+		if decision.applied {
+			outcome = fmt.Sprintf("PackageReference %s [%s]", decision.nugetID, decision.packageVersion)
+		} else {
+			outcome = "converted locally: " + decision.note
 		}
 
-		fmt.Fprintf(&report, "  %s  ->  %s  %s  [%s]%s  %s%s\n", subject, decision.nugetID, decision.status, layer, trust, nugetMapNotApplied, note)
+		fmt.Fprintf(&report, "  %s  ->  %s  %s  [%s]%s  %s\n", subject, decision.nugetID, decision.status, layer, trust, outcome)
 	}
 
 	return report.String()

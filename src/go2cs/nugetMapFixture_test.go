@@ -31,6 +31,7 @@ func init() {
 	nugetMapCacheRoot = func() (string, error) {
 		return "", errors.New("test did not inject a -nuget-map cache directory")
 	}
+	nugetGlobalPackagesRoot = func() string { return "" }
 }
 
 // refusingTransport fails every request, naming the URL.
@@ -83,17 +84,18 @@ func newNuGetMapFixture(t *testing.T) *nugetMapFixture {
 	f.server = httptest.NewTLSServer(http.HandlerFunc(f.serve))
 
 	host := strings.TrimPrefix(f.server.URL, "https://")
-	savedClient, savedRoot, savedRegistry := nugetMapHTTPClient, nugetMapCacheRoot, nugetMapRegistryURL
+	savedClient, savedRoot, savedRegistry, savedFlat := nugetMapHTTPClient, nugetMapCacheRoot, nugetMapRegistryURL, nugetFlatContainerURL
 
 	client := f.server.Client()
 	client.Transport = guardTransport{host: host, inner: client.Transport}
 	nugetMapHTTPClient = client
 	nugetMapCacheRoot = func() (string, error) { return f.cacheDir, nil }
 	nugetMapRegistryURL = f.url("/registry")
+	nugetFlatContainerURL = f.url("/flat")
 
 	t.Cleanup(func() {
 		f.server.Close()
-		nugetMapHTTPClient, nugetMapCacheRoot, nugetMapRegistryURL = savedClient, savedRoot, savedRegistry
+		nugetMapHTTPClient, nugetMapCacheRoot, nugetMapRegistryURL, nugetFlatContainerURL = savedClient, savedRoot, savedRegistry, savedFlat
 	})
 
 	return f

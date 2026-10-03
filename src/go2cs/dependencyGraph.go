@@ -60,6 +60,12 @@ func (g *DependencyGraph) AddPackage(path, dir string) {
 	}
 }
 
+// RemovePackage drops a node from the convert-set before any edge is built: a -recurse=nuget substitution
+// (nugetSubstitution.go) references the package's module as a published NuGet package instead.
+func (g *DependencyGraph) RemovePackage(path string) {
+	delete(g.packages, path)
+}
+
 // Contains reports whether an import path is a node in the convert-set.
 func (g *DependencyGraph) Contains(path string) bool {
 	_, exists := g.packages[path]

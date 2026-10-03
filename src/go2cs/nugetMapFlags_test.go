@@ -53,12 +53,12 @@ func TestNuGetMapOffIsItsOwnValue(t *testing.T) {
 	}
 }
 
-// The DORMANT default (COORD ruling 2026-10-02): until S3b lands the substitution, a -recurse=nuget run
-// with no -nuget-map source is today's run -- no resolution, no fetch, no lock. S3b flips this, and this
-// test is meant to go red when it does.
-func TestNuGetMapIsDormantWithoutASource(t *testing.T) {
-	if (nugetMapOptions{}).active() {
-		t.Errorf("no -nuget-map flag resolves mappings; S3a's default is dormant")
+// THE FLIP (S3b, COORD ruling 2026-10-02): under -recurse=nuget the registry is consulted by DEFAULT, with
+// no -nuget-map flag at all; -nuget-map off is the one way to opt out. S3a pinned the opposite (dormant
+// until S3b), and this is that pin, inverted in the same change that applies the substitution.
+func TestNuGetMapIsOnByDefault(t *testing.T) {
+	if !(nugetMapOptions{}).active() {
+		t.Errorf("no -nuget-map flag does not resolve mappings; S3b's default is on")
 	}
 
 	if (nugetMapOptions{off: true}).active() {

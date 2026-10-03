@@ -248,10 +248,17 @@ if ($LASTEXITCODE -ne 0) {
 # every published README's C# Source badge links it -- until it reaches GitHub those links 404.
 
 Write-Phase 'Phase 4: record the release'
+
+# The converter's corpus-release constant (src/go2cs/corpus-release.txt) names the last PUBLISHED release,
+# which is now $ver; it is regenerated here, after the irreversible push, and joins the record commit.
+Push-Location (Join-Path $PSScriptRoot 'go2cs')
+try { & go run ./internal/gencorpusrelease } finally { Pop-Location }
+if ($LASTEXITCODE -ne 0) { Die "Phase 4: regenerating src/go2cs/corpus-release.txt FAILED. $ver IS published; run 'go run ./internal/gencorpusrelease' in src/go2cs before committing the record." }
+
 Write-Host '  Commit the version, the frozen proof and the retargeted badges TOGETHER, then push'
 Write-Host '  the commit and the tag Phase 1 already minted:'
 Write-Host ''
-Write-Host "    git add src/version.props docs/validation/$ver src/core" -ForegroundColor DarkGray
+Write-Host "    git add src/version.props docs/validation/$ver src/core src/go2cs/corpus-release.txt" -ForegroundColor DarkGray
 Write-Host "    git commit -S -m `"release: go2cs converted stdlib $ver`"" -ForegroundColor DarkGray
 Write-Host "    git push && git push origin nuget-$ver" -ForegroundColor DarkGray
 Write-Host ''

@@ -528,6 +528,7 @@ $pathClasses = @(
                                                           Class = 'MUST-NOT-CHANGE'; Note = 'whole-file [module: GoManualConversion] hand-own: transcribes Go source by FILE AND LINE at a named release, and cites both releases where they differ' }
     @{ Match = '^src/core/.+/go2cs_test_disclosures\.json$'
                                                           Class = 'MUST-NOT-CHANGE'; Note = "a disclosure's reason is a measured reading naming the release it was taken on; H10 re-judges every row from the new release's own sources, never by substitution" }
+    @{ Match = '^src/go2cs/corpus-release\.txt$';         Class = 'MUST-NOT-CHANGE'; Note = 'the last PUBLISHED release (releasestamp.PublishedStamp); release-nuget.ps1 Phase 4 regenerates it at the publish, never at the pin -- a hop leaves it naming the old release until the new base first publishes' }
     @{ Match = '^src/go2cs/.+_test\.go$';                 Class = 'MUST-NOT-CHANGE'; Note = 'hermetic fixture: the release is an INPUT to the function under test, not a pin' }
     @{ Match = '^src/go2cs/.+\.go$';                      Class = 'MUST-NOT-CHANGE'; Note = 'illustrative comment; the code itself derives the release at runtime' }
 
