@@ -3387,6 +3387,12 @@ FROM THE CLOSE SEAT ITSELF.** The seat stopped three times and each stop was rul
    line's final release tag; `release/go1.<new>` is minted only at the next cutover.
 2. **The owner's gate** is the README walkthrough on linux AND windows, from packages repacked at the tree that
    ships (it caught a windows-only compile surface); GolibTests is gated at Debug AND Release.
+   **A release that ships macOS assets adds the mac half, CI-only** *(added 2026-10-03, the 1.24.13.4 macOS
+   seat)*: the darwin `census` green AT the tree that ships (the daily schedule lags master by up to a day,
+   so dispatch one when the tip landed after it), and a `release-smoke` dispatch with `goos=darwin` at that
+   tree — its windows pack is the only Release-configuration darwin build, and both Mac legs must pass arms
+   A–C before the PIN. Arm D (the walkthrough on a Mac) is a measurement: until it reads green, the README
+   and the release notes do not say the walkthrough works on macOS.
 3. **The publish** is the owner's act at the release machine's own console, from a checkout with empty porcelain
    (an agent's credential checks are refused by the permission classifier). **No GPG signing on the release
    machine during NuGet Phase 2, or `disable-scdaemon` in gpg-agent.conf when no GPG key lives on a card** (the

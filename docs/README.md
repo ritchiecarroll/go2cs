@@ -339,7 +339,10 @@ internal static void Main() {
 > packages **1.24.13.2 or later** AND a converter built from a checkout that includes the 1.24.13.2
 > changes. The output matches `go run`, including `fatih/color`'s colors in an interactive console on
 > Windows. In an interactive terminal on Linux the colors do not show yet, because the terminal query
-> cannot yet hand its struct to the kernel, so the output stays plain there. Other platforms and
+> cannot yet hand its struct to the kernel, so the output stays plain there. **macOS:** starting with
+> 1.24.13.4, the platform-varying go2cs packages also carry macOS flavors (`osx-arm64` and `osx-x64`, one
+> darwin build), but this walkthrough has not yet been verified on macOS, and macOS is not yet expected
+> to be fully operational. Other platforms and
 > architectures are tracked in the Roadmap's
 > [Platforms section](Roadmap.md#platforms), with the
 > operational detail in [PLAN-linux-operation.md](PLAN-linux-operation.md)._
