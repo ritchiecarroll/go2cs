@@ -2098,6 +2098,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckUdpWriteMsgAddrPort() => CheckTarget("UdpWriteMsgAddrPort");
 
     [TestMethod]
+    public void CheckUint8SliceLiteralConversion() => CheckTarget("Uint8SliceLiteralConversion");
+
+    [TestMethod]
     public void CheckUintptrUnsafePointerIdiom() => CheckTarget("UintptrUnsafePointerIdiom");
 
     [TestMethod]

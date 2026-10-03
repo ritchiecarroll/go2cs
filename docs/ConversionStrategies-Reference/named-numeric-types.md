@@ -249,6 +249,17 @@ the lambda body is CS1503.)
 
 **A `[]byte("literal")` over a plain-text string literal** feeds the zero-allocation `u8` ROM span straight into the slice — `[]byte("hi")` → `slice<byte>("hi"u8)` — via golib's `slice<T>(ReadOnlySpan<T>)` factory (which copies the span into the slice's backing array), rather than routing the literal through a heap `@string` first (the older `slice<byte>((@string)"hi")` allocated an `@string` and then converted it to `byte[]`). Both the general `[]byte`/`[]rune` conversion path and the `u8` literal keep their existing forms elsewhere; only the specific plain-`[]byte`-literal case is retargeted, gated to exactly what `convBasicLit` renders as a `u8` span: a `[]rune` literal keeps `@string` (it needs `@string`'s rune decoding, not raw UTF-8 bytes); a high-`\xHH`-byte `[]byte` literal keeps the byte-array-backed `@string` (its bytes do not round-trip through `u8`); a NAMED byte-slice type (`type htmlSig []byte`) keeps its wrapper cast; and a string *variable* is already an `@string`. Not ambiguous with the array `slice<T>(T[])` builtin — a `u8` literal is a `ReadOnlySpan<byte>` (an exact match for the new overload), while an `@string` converts to `byte[]` but not to a span. (Guarded by the `StringLiteralSliceConversion` extension — plain-text, raw-backtick, and high-`\xHH`-byte `[]byte` literals plus `[]rune` and string-variable controls, output-compared vs Go; and confirmed across ~144 stdlib sites by the full reconvert.)
 
+**The element-decoding rules key on the TYPE, not the spelling.** `byte` and `rune` are aliases of
+`uint8` and `int32`, so `[]uint8("foo")` is the same conversion as `[]byte("foo")`. Keyed on the
+spelling `[]byte`/`[]rune`, it missed every arm and emitted `slice<uint8>("foo")`, a System.String
+with no conversion to the slice (CS1503, R's mapstructure reading). An unnamed slice target whose
+element is the basic `uint8` or `int32` now takes the same routes in every position, and keeps the
+source's spelling: `[]uint8("foo")` → `slice<uint8>("foo"u8)`, `[]int32("héllo")` →
+`slice<int32>((@string)"héllo")`, `[]uint8("a" + "b")` → `slice<uint8>((@string)("a"u8 + "b"u8))`.
+A defined element (`type Uint8 byte`) and an alias target (`type B = []byte`) keep their own routes.
+(Guarded by `uint8SliceLiteralConversion_test.go` and the `Uint8SliceLiteralConversion` behavioral
+test, output-compared vs Go.)
+
 Typed arguments and already-explicitly-converted elements (`uint16(r)`) are left as-is.
 
 Relatedly, when the shifted (left) operand of a shift is an untyped constant — `1 << k` — Go gives the whole shift the type it assumes from context (e.g. `uintptr` when compared with a `uintptr`), but the bare C# literal makes the result `int`, which then cannot compare or combine with the typed operand (CS0034). The shift result is cast to its resolved type:
