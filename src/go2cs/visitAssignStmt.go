@@ -15,6 +15,7 @@ import (
 	"go/token"
 	"go/types"
 	"math"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -1130,7 +1131,15 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	parallelHazard := rhsLen == lhsLen && lhsLen > 1 && reassignedCount > 0 && declaredCount > 0 &&
 		!anyTypeIsString && !anyTypeIsUnsafePointer && v.lhsReusedInLaterRhs(lhsExprs, rhsExprs)
 
-	if tupleResult || lhsLen == reassignedCount || parallelHazard || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt && !anyTypeIsUnsafePointer {
+	// An all-new parallel define whose right-hand side holds a FUNCTION VALUE -- a func literal, a method group, a
+	// method value or a generic func instantiation -- cannot take the tuple form either: those render as a C#
+	// lambda or method group, which has no type inside a tuple literal, so `var (a, b) = (x, y);` is CS8130 (the
+	// hashset test's `inA, inB := func..., func...`). It takes the split form the int and string exclusions take,
+	// one declaration per target, where C# types each lambda on its own. All-new targets cannot be read by a later
+	// right-hand side in Go, so the split loses no simultaneity.
+	anyRhsIsFunctionValue := lhsLen > 1 && rhsLen == lhsLen && slices.ContainsFunc(rhsExprs, v.rhsIsFunctionValue)
+
+	if tupleResult || lhsLen == reassignedCount || parallelHazard || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt && !anyTypeIsUnsafePointer && !anyRhsIsFunctionValue {
 		leftExprs := HashSet[string]{}
 
 		// Go's partial redeclaration `a, b := f()` reuses any already-declared LHS variable and
@@ -2188,6 +2197,32 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	}
 
 	v.outputBuilder.WriteString(result.String())
+}
+
+// rhsIsFunctionValue reports whether rhs renders as a C# lambda or method group, which has no type of its own
+// inside a tuple literal: a func literal, a method group (a declared func, unqualified or package-qualified), a
+// method value or method expression, or an instantiation of a generic func (`identity[string]`).
+func (v *Visitor) rhsIsFunctionValue(rhs ast.Expr) bool {
+	switch expr := ast.Unparen(rhs).(type) {
+	case *ast.FuncLit:
+		return true
+	case *ast.Ident:
+		_, isFunc := v.info.Uses[expr].(*types.Func)
+		return isFunc
+	case *ast.SelectorExpr:
+		if selection, ok := v.info.Selections[expr]; ok {
+			return selection.Kind() == types.MethodVal || selection.Kind() == types.MethodExpr
+		}
+
+		_, isFunc := v.info.Uses[expr.Sel].(*types.Func)
+		return isFunc
+	case *ast.IndexExpr:
+		return v.rhsIsFunctionValue(expr.X)
+	case *ast.IndexListExpr:
+		return v.rhsIsFunctionValue(expr.X)
+	}
+
+	return false
 }
 
 // lhsReusedInLaterRhs reports whether a WRITTEN left-hand identifier of a parallel assignment appears in

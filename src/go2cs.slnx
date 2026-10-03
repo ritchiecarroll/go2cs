@@ -641,6 +641,7 @@
     <Project Path="tests/Behavioral/MixedUntypedConstArithmetic/MixedUntypedConstArithmetic.csproj" />
     <Project Path="tests/Behavioral/MultiFileInitOrder/MultiFileInitOrder.csproj" />
     <Project Path="tests/Behavioral/MultiPointerEmbedPromotion/MultiPointerEmbedPromotion.csproj" />
+    <Project Path="tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.csproj" />
     <Project Path="tests/Behavioral/MultiValueReturnOrder/MultiValueReturnOrder.csproj" />
     <Project Path="tests/Behavioral/NamedAnySliceType/NamedAnySliceType.csproj" />
     <Project Path="tests/Behavioral/NamedArrayAnonElement/NamedArrayAnonElement.csproj" />

@@ -71,6 +71,34 @@ var (ᴛ1, ᴛ2) = Ꮡsd.dialTCP(ctx, laΔ1, raΔ1);
 
 The arm fires only for a statement-position deconstruction (one call RHS, several LHS) where some non-empty-interface target's tuple component is a non-identical, non-interface type; all other deconstructions keep the direct form. (Guarded by the `InterfaceCasting` extension `makeCounter` — a `(*Counter, error)` call deconstructed into an `Incrementer` — runtime-verified against Go.)
 
+## A parallel `:=` of FUNCTION VALUES declares each target on its own
+
+An all-new parallel define normally takes the tuple form, `var (a, b) = (x, y);`, but not when a right-hand side is a
+function value — a func literal, a method group, a method value, a method expression or a generic func instantiation.
+Those render as a C# lambda or method group, and a lambda has no type inside a tuple literal, so the tuple form is
+CS8130 even when the lambda states its return type. Such a define takes the split form the int and string exclusions
+already take, one declaration per target, where C# types each lambda on its own:
+
+```go
+small, even := func(v int) bool { return v < n }, func(v int) bool { return v%2 == 0 }
+d, t := double, triple
+```
+
+```csharp
+var small = (nint v) => v < n;
+var even = (nint v) => v % 2 == 0;
+var d = @double;
+var t = triple;
+```
+
+The split loses nothing: an all-new target is not in scope on the right-hand side in Go, so no later right-hand
+expression can read an earlier target, and the right-hand sides still evaluate left to right. A tuple-returning call
+(`f, one := pair()`) and a parallel define of ordinary values keep the tuple. No standard-library or behavioral site had
+this shape (a type-aware census over Go 1.24.13's std, its tests, and the behavioral corpus read 0); the hashset
+module's tests were the first. (Guarded by `MultiValueFuncLiteralDefine` — func literals, method groups, method
+values through a pointer receiver, a func literal beside a pointer, and generic instantiations, output vs Go — and by
+`multiValueFuncDefine_test.go`.)
+
 ## A multi-value RETURN reads its plain operands AFTER its calls
 
 The read-after-write hazard above has a **return-statement** sibling, and it arrives from the opposite direction: there Go's ordering is fixed and C#'s sequential emission breaks it; here Go's ordering is *free* and C#'s tuple literal fixes it the other way.

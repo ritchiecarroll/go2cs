@@ -1093,6 +1093,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMultiPointerEmbedPromotion() => CheckTarget("MultiPointerEmbedPromotion");
 
     [TestMethod]
+    public void CheckMultiValueFuncLiteralDefine() => CheckTarget("MultiValueFuncLiteralDefine");
+
+    [TestMethod]
     public void CheckMultiValueReturnOrder() => CheckTarget("MultiValueReturnOrder");
 
     [TestMethod]
