@@ -1351,6 +1351,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNilChannelSelectDefault() => CheckTarget("NilChannelSelectDefault");
 
     [TestMethod]
+    public void CheckNilFuncIfaceMethodValue() => CheckTarget("NilFuncIfaceMethodValue");
+
+    [TestMethod]
     public void CheckNilMapKey() => CheckTarget("NilMapKey");
 
     [TestMethod]

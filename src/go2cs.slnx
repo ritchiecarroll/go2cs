@@ -734,6 +734,7 @@
     <Project Path="tests/Behavioral/NilAdapterOpsClosure/NilAdapterOpsClosure.csproj" />
     <Project Path="tests/Behavioral/NilChannelInSelect/NilChannelInSelect.csproj" />
     <Project Path="tests/Behavioral/NilChannelSelectDefault/NilChannelSelectDefault.csproj" />
+    <Project Path="tests/Behavioral/NilFuncIfaceMethodValue/NilFuncIfaceMethodValue.csproj" />
     <Project Path="tests/Behavioral/NilMapKey/NilMapKey.csproj" />
     <Project Path="tests/Behavioral/NilMapOperations/NilMapOperations.csproj" />
     <Project Path="tests/Behavioral/NilPointerPanic/NilPointerPanic.csproj" />
