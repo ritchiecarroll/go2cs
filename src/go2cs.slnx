@@ -1025,6 +1025,7 @@
     <Project Path="tests/Behavioral/VariadicFuncFields/VariadicFuncFields.csproj" />
     <Project Path="tests/Behavioral/VariadicFuncTypeAssert/VariadicFuncTypeAssert.csproj" />
     <Project Path="tests/Behavioral/VariadicFuncValues/VariadicFuncValues.csproj" />
+    <Project Path="tests/Behavioral/VariadicNamedEmptyIface/VariadicNamedEmptyIface.csproj" />
     <Project Path="tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.csproj" />
     <Project Path="tests/Behavioral/VariadicPointerParam/VariadicPointerParam.csproj" />
     <Project Path="tests/Behavioral/VariadicSlotInterfaces/VariadicSlotInterfaces.csproj" />

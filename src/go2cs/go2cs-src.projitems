@@ -377,6 +377,7 @@
     <None Include="$(MSBuildThisFileDirectory)valuePunOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)valuePun_test.go" />
     <None Include="$(MSBuildThisFileDirectory)variableAnalysisOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)variadicGlobalAliasElement_test.go" />
     <None Include="$(MSBuildThisFileDirectory)variadicPackView_test.go" />
     <None Include="$(MSBuildThisFileDirectory)visitArrayType.go" />
     <None Include="$(MSBuildThisFileDirectory)visitAssignStmt.go" />
