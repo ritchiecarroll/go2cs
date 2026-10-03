@@ -635,6 +635,7 @@
     <Project Path="tests/Behavioral/MethodExprDotImport/mep/MethodExprDotImport.mep.csproj" />
     <Project Path="tests/Behavioral/MethodExpression/MethodExpression.csproj" />
     <Project Path="tests/Behavioral/MethodSelector/MethodSelector.csproj" />
+    <Project Path="tests/Behavioral/MethodValueFmRecord/MethodValueFmRecord.csproj" />
     <Project Path="tests/Behavioral/MethodValueFuncNames/MethodValueFuncNames.csproj" />
     <Project Path="tests/Behavioral/MethodValuePointeeCopy/MethodValuePointeeCopy.csproj" />
     <Project Path="tests/Behavioral/MethodValueReassignCapture/MethodValueReassignCapture.csproj" />

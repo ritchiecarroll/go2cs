@@ -513,6 +513,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// of the file's GoPositionMap record) — from the AST, before any conversion of the body, so
 	// the counter is a source-order fact (see positionMapOperations.go).
 	v.collectFuncLitNames(funcDecl)
+	v.collectMethodValueNames(funcDecl)
 
 	// Tier C: the hoisted string-literal fields this function OWNS (its body holds their first
 	// package-wide use) lead the prefix, so they land immediately above the doc comment — ahead of
