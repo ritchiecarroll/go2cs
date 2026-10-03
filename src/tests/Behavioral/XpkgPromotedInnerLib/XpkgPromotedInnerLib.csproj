@@ -48,8 +48,10 @@
        on a library it buys nothing but IL#### trim warnings the app publish recomputes over the whole
        closure anyway. AllowUnsafeBlocks is a compile setting and stays unconditional. -->
   <PropertyGroup Condition="'$(OutputType)'!='Library'">
-    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRun Condition="'$(PublishSingleFile)'!='true'">true</PublishReadyToRun>
     <PublishTrimmed>True</PublishTrimmed>
+    <!-- Trim the framework only: a full trim removes members golib and the converted code reach by reflection. -->
+    <TrimMode Condition="'$(TrimMode)'==''">partial</TrimMode>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <!-- Opt-in for Ubuntu's packaged .NET 10, where on-stack replacement can end a program early (0x80131506 or a silent
@@ -64,7 +66,7 @@
   <!-- NuGet packaging metadata for library projects; packing itself is explicit ('dotnet pack' via push-nuget.ps1), so plain builds emit no .nupkg -->
   <PropertyGroup Condition="'$(OutputType)'=='Library'">
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <PackageId>go.$(AssemblyName)</PackageId>
+    <!-- No PackageId: nugetgo-pack.ps1 mints a converted module's one NuGet ID, nugetgo.<dotted module path> -->
     <PackageLicenseFile Condition="Exists('$(MSBuildProjectDirectory)/LICENSE')">LICENSE</PackageLicenseFile>
     <PackageDescription>$(Description) -- C# project converted from Go source</PackageDescription>
     <PackageProjectUrl>https://github.com/ritchiecarroll/go2cs</PackageProjectUrl>
