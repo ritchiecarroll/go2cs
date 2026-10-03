@@ -168,3 +168,4 @@ N SCRIPT ITEMS: + comparison-classifier go test leg (cheap; nothing runs it).
  ROUTED: R = pkg/errors frame re-run @ G cctor tip, r-test-host-init-order seat, A1 (**struct lift; repro d834821da0). G = A2 float vs imported untyped const (g-float-untyped-const-compare on d834821da0). C2 = c2-toml-test-host (classes 5+6) then go-cmp, yaml.v3; toml class 8 DISCLOSE.
  ACCEPTED: g-cctor-init-frame 0ce7e3dc9c. LAPSE: R/C2 idled ~4 h on unread posts (COORD stopped reading the mailbox during bridge traffic).
 01:52 TRAIN M LANDED: master 8f46a9adae (ledger c7f79f4264). Bank step no-op (i9: neither page rewritten; i7 sweep reproduced both). NEXT: TRAIN N assembly; COORD i7 items (hang root, full BoGo, M13 refresh on N union).
+01:59 TRAIN N: draft table fda440a18b (27 seats; cutoff 10:00 Central); FLEET posted (157c5b8e9). WORKFLOWS: i7 hang root + full BoGo control (wgrdik4qu); TRAIN N script derive (wbwjnfcsd, edits trainN/ only, uncommitted).
