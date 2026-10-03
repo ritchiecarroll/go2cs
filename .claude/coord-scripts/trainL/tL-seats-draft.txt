@@ -135,3 +135,12 @@ i9 forwarders: shapes A/B fixed in ImplementGenerator (a9cc98c1e3 on 8f46a9adae;
  N SCRIPT ITEMS: retire linux-legs.sh:278-280 TC0 leg; EXEC_RULED empty; doctrine batch: measurement-discipline SKILL.md :40/:99 cite the retired pin. publish-keep: 337 core csprojs +2/-0, 0 .cs (G naming 342->337).
 18:28 G slog seat NEW TIP 582de36d1b (ff of 2d46eba8f0 by one comment-only commit; G pushed before announcing on an existing ref = floor-9 slip, self-reported, nothing replaced). G CORRECTION: its 18:25 'linux 337' was not measured yet (windows only); my owner status repeated it -- corrected to the owner.
 18:49 G trim step 3 ACCEPTED: claude/g-trim-loud-guards fc4bd9cd60 (on e2008427b1; golib GoFieldMetadata tripwire + GolibTests; no fixup-2 overlap). publish-keep measured: stdlib 337/335/336 csproj (win/linux/darwin) +2/-0, 0 .cs, union 340; behavioral 785 + 6 linux-only (WSL) pending; push after CNR + go test + gate.
+
+== 2026-10-02 19:27 TRAIN N candidate seats (accepted, remote-read) ==
+r-module-license 2d46145bdd | g-publish-keep f0397cf250 | c2-nugetgo-id-pattern a7873ee6c2 (on R; merges clean with G: 57 both-changed, 0 conflicts) |
+g-slog-roster-tc0 582de36d1b | g-trim-loud-guards fc4bd9cd60 (on e2008427b1) | r-shadowed-import-alias f33bd4eba9 (repro inside) |
+c2-generic-map-chan 1e2e91894c | p1-hashset-module a7a7a197dd (supersedes -wip 1611596a29: delete the -wip ref after N lands) |
++ earlier list: c2-native-array-view c27cf4198a; c2-s3b-nuget-map f18e4cf124; r-m4-link-vendor-arm 9affd2b268; g-named-pointer-inbound 5698c0a95f;
+  g-readme-tests-config e7513a59b7; g-trim-sizing 4d7748a380; g-trim-annotations 4526442d52; coord-hop-lessons aec4f4b20a; coord-slog-firstlaunch-record b3e6969582.
+PENDING: i9 crosspkg-promoted-forwarders (gates2) -> then r-jwt-promoted-iface-repros ee52639557; g alias-guards; p1-linux-only-goldens; c2 CS8130 then CS0411;
+  r-module-driver-gomod-less; cleanup seat (h5 scaffolding + scout results, OWNER YES 19:30); p2 converter-warning-clears.
