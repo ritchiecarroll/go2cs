@@ -9,8 +9,8 @@
 // Guards a deferred VALUE-receiver method call (go-cmp's `defer s.curPtrs.Pop(px, py)`, COORD 2026-10-03): the
 // method is a C# extension over a value type, from which no delegate can be created (CS1113), so golib's defer
 // cannot take its method group. The receiver becomes the thunk's first eager argument instead, so it is copied
-// at the defer statement as Go copies it. The controls hold a result-returning nullary callee and a variadic
-// callee in the lambda form they already took.
+// at the defer statement as Go copies it. A result-returning nullary callee and a variadic callee, which took the
+// lambda form, take the same snapshot over a field receiver (deferLambdaReceiverCopy_test.go).
 
 package main
 
@@ -103,13 +103,14 @@ func main() {
 		}
 	}
 
-	// CONTROLS: a result-returning nullary callee and a variadic callee keep the lambda form they already took.
+	// A result-returning nullary callee and a variadic callee over a FIELD receiver take the same snapshot since the
+	// lambda-form seat (deferLambdaReceiverCopy_test.go guards that rule; this asserts the two rules agree).
 	for _, want := range []string{
-		`defer(() => Ꮡs.Value.cur.Close(), ref ᒐ);`,
-		`=> Ꮡs.Value.cur.Log(`,
+		`defer(ᴛ0 => ᴛ0.Close(), Ꮡs.Value.cur, ref ᒐ);`,
+		`defer((ᴛ0, ᴛ1) => ᴛ0.Log(ᴛ1), Ꮡs.Value.cur, k, ref ᒐ);`,
 	} {
 		if !strings.Contains(mainCs, want) {
-			t.Errorf("control: want %q unchanged:\n%s", want, mainCs)
+			t.Errorf("want %q:\n%s", want, mainCs)
 		}
 	}
 }

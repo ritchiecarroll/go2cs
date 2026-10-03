@@ -403,6 +403,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDeferLambdaParam() => CheckTarget("DeferLambdaParam");
 
     [TestMethod]
+    public void CheckDeferLambdaReceiverCopy() => CheckTarget("DeferLambdaReceiverCopy");
+
+    [TestMethod]
     public void CheckDeferLoopCapture() => CheckTarget("DeferLoopCapture");
 
     [TestMethod]

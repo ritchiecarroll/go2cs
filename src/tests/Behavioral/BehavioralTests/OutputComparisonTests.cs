@@ -377,6 +377,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDeferLambdaParam() => CheckTarget("DeferLambdaParam");
 
     [TestMethod]
+    public void CheckDeferLambdaReceiverCopy() => CheckTarget("DeferLambdaReceiverCopy");
+
+    [TestMethod]
     public void CheckDeferLoopCapture() => CheckTarget("DeferLoopCapture");
 
     [TestMethod]
