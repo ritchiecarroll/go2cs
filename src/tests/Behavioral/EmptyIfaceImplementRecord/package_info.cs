@@ -38,7 +38,6 @@ using static go.main_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<main_xs, EmptyInterface>(Promoted = true)]
 [assembly: GoImplement<name, fmt_package.Stringer>]
 // </InterfaceImplementations>
 

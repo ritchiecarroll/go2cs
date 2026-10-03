@@ -733,7 +733,15 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				// pointer-form records carry their own realizability gates. Type-parameter-carrying
 				// structs keep the old unconditional behavior — types.Implements is undefined over
 				// uninstantiated generics, the same exclusion convertToInterfaceType makes.
-				if typeContainsTypeParams(declaredStructType) || types.Implements(declaredStructType, ifaceType) {
+				//
+				// An EMPTY interface (a named `interface{}`, or `any`) records nothing in either form:
+				// every type implements it, its C# side is `object`, and there is nothing to adapt — the
+				// conversion paths refuse it for the same reason (interfaceConversion.go's
+				// `!iface.Empty()`). Recorded, it reached ImplementGenerator as `GoImplement<S, object>`
+				// (go-cmp's cmpopts). The embedded field itself is emitted as before.
+				if ifaceType.Empty() {
+					// no record
+				} else if typeContainsTypeParams(declaredStructType) || types.Implements(declaredStructType, ifaceType) {
 					packageLock.Lock()
 
 					if promotions, exists := promotedInterfaceImplementations[csFullTypeName]; exists {

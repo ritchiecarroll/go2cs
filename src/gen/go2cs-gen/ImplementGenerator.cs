@@ -29,6 +29,18 @@ public class ImplementGenerator : ISourceGenerator
     private const string AttributeName = "GoImplement";
     private const string FullAttributeName = $"{Namespace}.{AttributeName}Attribute<TStruct, TInterface>";
 
+    // RS2008 asks for analyzer release-tracking files; go2cs-gen is a source generator that ships
+    // with the converter and keeps none.
+#pragma warning disable RS2008
+    private static readonly DiagnosticDescriptor s_malformedRecord = new(
+        id: "GO2CS0002",
+        title: "Malformed GoImplement record",
+        messageFormat: "Skipped {0}: {1}; no implementation is generated for it",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
+#pragma warning restore RS2008
+
     // Renders a namespace for a `using` directive: no `global::`, keyword segments escaped
     // (`go.crypto.@internal`, not the invalid `go.crypto.internal`).
     private static readonly SymbolDisplayFormat s_namespaceUsingFormat = new(
@@ -233,11 +245,22 @@ public class ImplementGenerator : ISourceGenerator
             // Extract generic type arguments from "GoImplementAttribute"
             (ITypeSymbol? structType, ITypeSymbol? interfaceType) = attributeSyntax.Get2GenericTypeArguments(syntaxContext);
             
+            // A malformed record costs exactly its own adapter. Thrown, it made the generator
+            // contribute NOTHING, and every other adapter in the compilation went with it (go-cmp's
+            // cmpopts: a record for a named empty interface, `GoImplement<S, object>`, CS8785, then
+            // an unrelated CS0426 for an adapter never generated). The pre-passes above already
+            // skip such a record.
             if (structType is null || interfaceType is null)
-                throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, must specify two generic type arguments.");
+            {
+                context.ReportDiagnostic(Diagnostic.Create(s_malformedRecord, attributeSyntax.GetLocation(), attributeSyntax.ToString(), "it must name two resolvable type arguments"));
+                continue;
+            }
 
             if (interfaceType.TypeKind != TypeKind.Interface)
-                throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, second generic type argument must be an interface.");
+            {
+                context.ReportDiagnostic(Diagnostic.Create(s_malformedRecord, attributeSyntax.GetLocation(), attributeSyntax.ToString(), $"its second type argument, '{interfaceType.ToDisplayString()}', is not an interface"));
+                continue;
+            }
 
             string structName = structType.GetFullTypeName();
             string interfaceName = GlobalQualify(interfaceType.GetFullTypeName(true));
