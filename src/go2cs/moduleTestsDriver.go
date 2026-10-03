@@ -36,7 +36,12 @@ import (
 
 // moduleGoDirective returns the module's `go` directive ("" when go.mod has none).
 func moduleGoDirective(moduleDir string) (string, error) {
-	path := filepath.Join(moduleDir, "go.mod")
+	path, ok := goModFile(moduleDir)
+
+	if !ok {
+		path = filepath.Join(moduleDir, "go.mod")
+	}
+
 	data, err := os.ReadFile(path)
 
 	if err != nil {
@@ -182,6 +187,12 @@ func (m *ModuleConverter) mainModulePackagesWithTests() []*Package {
 // the -tests settings (action, config, timeout) and a resolved go2csPath.
 func runModuleTests(moduleDir string, outRoot string, options Options, corpusRelease string) error {
 	if err := checkOutputRootOutsideModule(moduleDir, outRoot); err != nil {
+		return err
+	}
+
+	// A module-cache release with no go.mod: the go commands of this run read the cache's synthesized
+	// one, as goModFile already does in-process (and say so).
+	if _, err := installGoModOverlay(moduleDir, outRoot); err != nil {
 		return err
 	}
 

@@ -6835,19 +6835,28 @@ func testHostEnv(inputPath string, options Options) []string {
 // module tree so a test reads ../test/key.pem or ../go.mod as `go test` lets it. Through the
 // environment, never the emitted host, so no machine path lands in emitted output. A standard-library
 // package gets nothing -- it sits under $GOROOT/src/go.mod (`module std`), which the GOROOT ancestry
-// already mirrors -- and so does a directory with no go.mod above it.
+// already mirrors -- and so does a directory with no go.mod above it. A module-cache release that ships
+// no go.mod also hands over the go.mod `go` reads for it (goModFile), as GO2CS_MODULE_GOMOD
+// (PackageAncestry.ModuleGoModEnvironmentVariable), so the staged copy carries the go.mod the Go side sees.
 func testHostModuleEnv(inputPath string, options Options) []string {
 	if stdLibImportPathOf(inputPath, options.goRoot) != "" {
 		return nil
 	}
 
 	root := moduleRootDir(inputPath)
+	goMod, ok := goModFile(root)
 
-	if _, err := os.Stat(filepath.Join(root, "go.mod")); err != nil {
+	if !ok {
 		return nil
 	}
 
-	return []string{"GO2CS_MODULE_ROOT=" + root}
+	env := []string{"GO2CS_MODULE_ROOT=" + root}
+
+	if goMod != filepath.Join(root, "go.mod") {
+		env = append(env, "GO2CS_MODULE_GOMOD="+goMod)
+	}
+
+	return env
 }
 
 // testEnvironmentRecord is the configuration-provenance twin of TestHost.cs's own `environment`
@@ -9130,6 +9139,26 @@ func oracleTestArgs(options Options, hostFatalSkip string) []string {
 	return args
 }
 
+// oracleBuildFailure names why the Go side of a comparison did not BUILD: the first line the build
+// printed (a vet or compiler diagnostic), skipping the `# <package>` headers. "" when the oracle's
+// stream carries no build line. Without it a reading says only "[build failed]" beside a column of
+// Go="" verdicts, which reads exactly like a converter problem.
+func oracleBuildFailure(goOutput string) string {
+	for _, line := range strings.Split(goOutput, "\n") {
+		var event struct{ Action, Output string }
+
+		if json.Unmarshal([]byte(strings.TrimSpace(line)), &event) != nil || event.Action != "build-output" {
+			continue
+		}
+
+		if text := strings.TrimSpace(event.Output); text != "" && !strings.HasPrefix(text, "#") {
+			return text
+		}
+	}
+
+	return ""
+}
+
 func compareGoAndConvertedTests(inputPath, outputPath, testProject string, options Options) error {
 	// -test-timeout is the PACKAGE deadline, handed to BOTH sides so they agree: `go test -timeout`
 	// and the converted host's own `--timeout`. Without it each side silently used its OWN 10-minute
@@ -9454,6 +9483,10 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 		return err
 	}
 	if !result.Matched {
+		if line := oracleBuildFailure(goOutput); line != "" {
+			return fmt.Errorf("Go/C# test comparison failed: the Go side did not build (%s); %s", line, strings.Join(result.Errors, "; "))
+		}
+
 		return fmt.Errorf("Go/C# test comparison failed: %s", strings.Join(result.Errors, "; "))
 	}
 	// The differential that just proved the package is the proof: publish it as a committed page

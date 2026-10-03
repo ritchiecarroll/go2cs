@@ -107,10 +107,18 @@ type godebugSetting struct {
 	value string
 }
 
+// goModDefaultGoVersion is the language version cmd/go gives a go.mod with no `go` line.
+const goModDefaultGoVersion = "1.16"
+
 // moduleGodebug reads a module's `go` line and its go.mod `godebug` block. STRICT modfile.Parse: ParseLax
 // DROPS godebug directives, so the lax parser would silently lose exactly the overrides read here.
 func moduleGodebug(moduleDir string) (string, []godebugSetting, error) {
-	path := filepath.Join(moduleDir, "go.mod")
+	path, ok := goModFile(moduleDir)
+
+	if !ok {
+		path = filepath.Join(moduleDir, "go.mod")
+	}
+
 	data, err := os.ReadFile(path)
 
 	if err != nil {
@@ -123,7 +131,11 @@ func moduleGodebug(moduleDir string) (string, []godebugSetting, error) {
 		return "", nil, err
 	}
 
-	goLine := ""
+	// A go.mod with no `go` line is a go 1.16 module to cmd/go (gover.DefaultGoModVersion) -- every
+	// module-cache release that predates modules reads this way (github.com/pkg/errors v0.9.1: `go list`
+	// reports GoVersion 1.16 and a DefaultGODEBUG carrying panicnil=1). Without the default the module
+	// read as the corpus release and its program was stamped with nothing.
+	goLine := goModDefaultGoVersion
 
 	if parsed.Go != nil {
 		goLine = parsed.Go.Version
@@ -246,7 +258,7 @@ func packageDefaultGODEBUG(packageDir string, files []string, options Options) (
 
 	moduleDir := moduleRootDir(packageDir)
 
-	if _, err := os.Stat(filepath.Join(moduleDir, "go.mod")); err != nil {
+	if _, ok := goModFile(moduleDir); !ok {
 		return "", nil
 	}
 

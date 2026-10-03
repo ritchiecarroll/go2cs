@@ -300,7 +300,7 @@ func moduleRootDir(dir string) string {
 	}
 
 	for current := filepath.Clean(dir); ; {
-		if _, err := os.Stat(filepath.Join(current, "go.mod")); err == nil {
+		if _, ok := goModFile(current); ok {
 			return current
 		}
 

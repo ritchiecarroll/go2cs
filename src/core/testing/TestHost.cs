@@ -239,7 +239,8 @@ public static class TestHost
                 // module tree, from the root the converter's run hands over in the environment.
                 bool moduleStaged = PackageAncestry.TryStageModule(
                     Environment.GetEnvironmentVariable(PackageAncestry.ModuleRootEnvironmentVariable),
-                    registry.ModulePath, registry.Package, runRoot, workingDirectory);
+                    registry.ModulePath, registry.Package, runRoot, workingDirectory,
+                    Environment.GetEnvironmentVariable(PackageAncestry.ModuleGoModEnvironmentVariable));
 
                 CreateFixtureDirectories(registry.FixtureDirectories, workingDirectory, runRoot);
 

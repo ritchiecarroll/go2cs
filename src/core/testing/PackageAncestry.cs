@@ -141,6 +141,15 @@ internal static class PackageAncestry
     public const string ModuleRootEnvironmentVariable = "GO2CS_MODULE_ROOT";
 
     /// <summary>
+    /// The environment variable through which the converter's run hands over the go.mod of a module
+    /// that ships NONE (a module-cache release that predates modules): the file <c>go</c> itself reads
+    /// for it, cache/download/&lt;path&gt;/@v/&lt;version&gt;.mod. <see cref="TryStageModule"/> stages it
+    /// as the copy's go.mod, so the sandbox carries the go.mod the Go side sees. Unset for every module
+    /// with its own go.mod.
+    /// </summary>
+    public const string ModuleGoModEnvironmentVariable = "GO2CS_MODULE_GOMOD";
+
+    /// <summary>
     /// Stages a third-party package's MODULE ancestry: a real COPY of the module's source tree at
     /// <c>runRoot/src/&lt;modulePath&gt;</c>, so the package sits at its relative path under its own
     /// <c>go.mod</c> and a test reads <c>../test/key.pem</c>, <c>../go.mod</c> or its own non-Go files
@@ -162,17 +171,22 @@ internal static class PackageAncestry
     /// never recurse into its own destination. <c>vendor/</c> is copied.
     /// </para>
     /// </remarks>
+    /// <param name="goMod">The module's go.mod when it ships none (<see cref="ModuleGoModEnvironmentVariable"/>);
+    /// ignored when the module root holds its own.</param>
     /// <returns>true when the module was staged; false when it was skipped and the sandbox is unchanged.</returns>
-    public static bool TryStageModule(string? moduleRoot, string modulePath, string importPath, string runRoot, string workingDirectory)
+    public static bool TryStageModule(string? moduleRoot, string modulePath, string importPath, string runRoot, string workingDirectory, string? goMod = null)
     {
         if (string.IsNullOrWhiteSpace(moduleRoot) || string.IsNullOrEmpty(modulePath))
             return false;
 
-        // The package must belong to the module the root claims, and the root must BE a module.
+        // The package must belong to the module the root claims, and the root must BE a module: its own
+        // go.mod, or the one go reads for a module that ships none.
         if (importPath != modulePath && !importPath.StartsWith(modulePath + "/", StringComparison.Ordinal))
             return false;
 
-        if (!File.Exists(Path.Combine(moduleRoot, "go.mod")))
+        bool ownGoMod = File.Exists(Path.Combine(moduleRoot, "go.mod"));
+
+        if (!ownGoMod && (string.IsNullOrWhiteSpace(goMod) || !File.Exists(goMod)))
             return false;
 
         string[] moduleSegments = modulePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
@@ -184,6 +198,10 @@ internal static class PackageAncestry
             MarkOwner(runRoot);
 
             CopyModuleTree(new DirectoryInfo(Path.GetFullPath(moduleRoot)), mirrorRoot, Path.GetFullPath(runRoot));
+
+            if (!ownGoMod)
+                CopyWritable(new FileInfo(goMod!), Path.Combine(mirrorRoot, "go.mod"));
+
             Directory.CreateDirectory(workingDirectory);
             return true;
         }

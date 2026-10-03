@@ -321,7 +321,7 @@ func licenseModuleRoot(dir string) string {
 	dir = filepath.Clean(dir)
 
 	for {
-		if info, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil && !info.IsDir() {
+		if _, ok := goModFile(dir); ok {
 			return dir
 		}
 

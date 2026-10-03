@@ -81,9 +81,9 @@ func getProjectName(importPath string, options Options) (string, string) {
 		importPath, _ = pathReplace(filepath.Clean(importPath), filepath.Join(options.goRoot, "src"), "")
 	} else {
 		// Check if current folder has go.mod or main.go
-		if _, err := os.Stat(filepath.Join(importPath, "go.mod")); err == nil {
+		if goMod, ok := goModFile(importPath); ok {
 			// If we have a go.mod, try to read the module name from it
-			if moduleName := readModuleFromGoMod(filepath.Join(importPath, "go.mod")); moduleName != "" {
+			if moduleName := readModuleFromGoMod(goMod); moduleName != "" {
 				// Append remaining path segments if importPath has subdirectories
 				relPath := ""
 				if filepath.Base(importPath) != importPath {
@@ -152,9 +152,9 @@ func getProjectName(importPath string, options Options) (string, string) {
 
 					currentPath = parentDir
 
-					if _, err := os.Stat(filepath.Join(currentPath, "go.mod")); err == nil {
+					if goMod, ok := goModFile(currentPath); ok {
 						// Found go.mod, use module name and append relative path
-						if moduleName := readModuleFromGoMod(filepath.Join(currentPath, "go.mod")); moduleName != "" {
+						if moduleName := readModuleFromGoMod(goMod); moduleName != "" {
 							// Get relative path from module root to import path
 							relPath := getRelativePath(importPath, currentPath)
 							if relPath != "" {

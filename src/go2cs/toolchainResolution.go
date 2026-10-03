@@ -75,7 +75,12 @@ func moduleToolchainRequest(moduleRoot string) string {
 		return ""
 	}
 
-	goModPath := filepath.Join(moduleRoot, "go.mod")
+	goModPath, ok := goModFile(moduleRoot)
+
+	if !ok {
+		return ""
+	}
+
 	contents, err := os.ReadFile(goModPath)
 
 	if err != nil {
