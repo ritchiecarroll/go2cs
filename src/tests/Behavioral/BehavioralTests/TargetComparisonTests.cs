@@ -505,6 +505,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckEmbeddedValuePointerMethod() => CheckTarget("EmbeddedValuePointerMethod");
 
     [TestMethod]
+    public void CheckEmptyIfaceImplementRecord() => CheckTarget("EmptyIfaceImplementRecord");
+
+    [TestMethod]
     public void CheckEmptyStructMapSet() => CheckTarget("EmptyStructMapSet");
 
     [TestMethod]

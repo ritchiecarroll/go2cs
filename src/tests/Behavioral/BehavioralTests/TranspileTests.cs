@@ -502,6 +502,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckEmbeddedValuePointerMethod() => CheckTarget("EmbeddedValuePointerMethod");
 
     [TestMethod]
+    public void CheckEmptyIfaceImplementRecord() => CheckTarget("EmptyIfaceImplementRecord");
+
+    [TestMethod]
     public void CheckEmptyStructMapSet() => CheckTarget("EmptyStructMapSet");
 
     [TestMethod]
