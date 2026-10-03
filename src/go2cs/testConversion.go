@@ -6676,7 +6676,7 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 		if err := publishTestHost(outputPath, testProject, options); err != nil {
 			return err
 		}
-		output, err := runCommandWithTimeoutEnv(testChildTimeout(options), outputPath, options, testHostEnv(inputPath, options), publishedTestHostPath(outputPath, testProject),
+		output, err := runCommandWithTimeoutEnv(testChildTimeout(options), testHostLaunchDir(inputPath, outputPath), options, testHostEnv(inputPath, options), publishedTestHostPath(outputPath, testProject),
 			convertedHostArgs(options)...)
 		fmt.Print(output)
 		return err
@@ -6965,6 +6965,26 @@ func convertedHostArgs(options Options) []string {
 		args = append(args, "--run", options.testFilter)
 	}
 	return args
+}
+
+// testHostLaunchDir is the working directory the converted test host STARTS in: the package's Go
+// source directory, as `go test` starts a test binary. It matters only to code that runs at LOAD: a
+// converted package's init() and package variables run as module initializers when the host
+// assembly loads, before TestHost stages its sandbox and changes into it, so a test package whose
+// init reads a relative path (jwt/v5's hmac_example_test.go: os.ReadFile("test/hmacTestKey")) must
+// find it where Go finds it. Every test still runs in the staged sandbox (TestHost chdirs before the
+// first test). The starting directory is otherwise unused for inputs -- --result/--junit are
+// absolute, fixture sources come from AppContext.BaseDirectory, and the host restores it at exit --
+// so the output directory it replaces carried nothing. A missing source directory (an action on
+// existing artifacts whose input moved) keeps the output directory rather than fail the launch.
+func testHostLaunchDir(inputPath, outputPath string) string {
+	if dir, err := filepath.Abs(inputPath); err == nil {
+		if info, err := os.Stat(dir); err == nil && info.IsDir() {
+			return dir
+		}
+	}
+
+	return outputPath
 }
 
 // publishedTestHostPath is the single-file executable publishTestHost produces: the test project's
@@ -9223,7 +9243,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	}
 	csArgs = append(csArgs,
 		"--result", filepath.Join(outputPath, "go2cs_test_results.json"), "--junit", filepath.Join(outputPath, "go2cs_test_results.xml"))
-	csOutput, csErr := runCommandWithTimeoutEnv(testChildTimeout(options), outputPath, options, testHostEnv(inputPath, options), publishedTestHostPath(outputPath, testProject), csArgs...)
+	csOutput, csErr := runCommandWithTimeoutEnv(testChildTimeout(options), testHostLaunchDir(inputPath, outputPath), options, testHostEnv(inputPath, options), publishedTestHostPath(outputPath, testProject), csArgs...)
 
 	// The RAW command errors, snapshotted here because the two forgiveness arms far below nil them
 	// out — and the record's diagnostic tail (comparisonStderrTails) is attached on exactly the
