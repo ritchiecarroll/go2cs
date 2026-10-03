@@ -1481,7 +1481,9 @@ public static ΔValue MapIndex(this ΔValue v, ΔValue key) {
     // TryMarshalAssignable now enforces Go's assignability at its own arms when the caller asks
     // for it (GoTypeRelation.Assignable, below), and the branch immediately following throws the
     // identical text -- so the rule lives in one place and this caller keeps its own message.
-    if (!GoReflect.TryMarshalAssignable(key.live, keyType, out object? k, GoReflect.GoTypeRelation.Assignable)) {
+    // The key is marshalled as SetMapIndex stores it (storedDatum): a typed-nil *T key into an
+    // interface-keyed map is (type=*T, value=nil), and its raw datum looked up the NIL interface key.
+    if (!GoReflect.TryMarshalAssignable(storedDatum(key, v.Type().Key().Kind()), keyType, out object? k, GoReflect.GoTypeRelation.Assignable)) {
         // Go's own text, from assignTo: "value of type", not "key of type".
         throw panic("reflect.Value.MapIndex: value of type " + GoReflect.GoTypeName(key.live?.GetType()) +
                     " is not assignable to type " + GoReflect.GoTypeName(keyType));
@@ -1781,10 +1783,20 @@ public static void SetMapIndex(this ΔValue v, ΔValue key, ΔValue elem) {
     // AFTER the nil-map panic below -- so without this, a wrong-typed key on a NIL map would report
     // "assignment to entry in nil map" where Go reports the assignability failure. The arm answers
     // the question; it cannot express when the caller must ask it. Same trap MapIndex documents.
-    if (isBothNamedMismatch(GoReflect.GoDynamicTypeOf(key.live!), keyType)) {
+    //
+    // The key's type is read off its datum when it has one, and off the Value's own type when it
+    // does not: a NIL interface key (`reflect.Zero(keyType)`, yaml.v3's gocheck) and a typed-nil
+    // pointer key both carry a null datum, and GoDynamicTypeOf(null) dereferenced it.
+    System.Type? keyDynamicType = key.live is not null ? GoReflect.GoDynamicTypeOf(key.live) : key.typ_ == nil ? null : key.typ_.Value.sysType;
+    if (keyDynamicType is not null && isBothNamedMismatch(keyDynamicType, keyType)) {
         throw panic("reflect.Value.SetMapIndex: key of type " + GoReflect.GoTypeName(key.live?.GetType()) +
                     " is not assignable to type " + GoReflect.GoTypeName(keyType));
     }
+
+    // The key is stored as storedDatum stores an element: into an INTERFACE key slot it takes the
+    // interface packing, so a typed-nil *T key keeps (type=*T, value=nil) as Go does, where the raw
+    // datum landed as the nil interface key.
+    ΔKind keyKind = v.Type().Key().Kind();
 
     // Go puts TWO operations behind this one signature: a ZERO elem Value DELETES the key, anything
     // else assigns it. reflect has no Value.DeleteMapIndex, so this is the only way it can delete.
@@ -1795,7 +1807,7 @@ public static void SetMapIndex(this ΔValue v, ΔValue key, ΔValue elem) {
     // Guarding both arms together made the DELETE inherit the ASSIGN path's panic (reflect's own
     // TestNilMap), while the assignment beside it was already right, down to Go's exact text.
     if (elem.flag == 0) {
-        if (!GoReflect.TryMarshalAssignable(key.live, keyType, out object? dk, GoReflect.GoTypeRelation.Assignable)) {
+        if (!GoReflect.TryMarshalAssignable(storedDatum(key, keyKind), keyType, out object? dk, GoReflect.GoTypeRelation.Assignable)) {
             throw panic("reflect.Value.SetMapIndex: key of type " + GoReflect.GoTypeName(key.live?.GetType()) +
                         " is not assignable to type " + GoReflect.GoTypeName(keyType));
         }
@@ -1812,7 +1824,7 @@ public static void SetMapIndex(this ΔValue v, ΔValue key, ΔValue elem) {
     if (nilMap) {
         throw global::go.golib.RuntimeErrorPanic.PlainError("assignment to entry in nil map");
     }
-    if (!GoReflect.TryMarshalAssignable(key.live, keyType, out object? k, GoReflect.GoTypeRelation.Assignable)) {
+    if (!GoReflect.TryMarshalAssignable(storedDatum(key, keyKind), keyType, out object? k, GoReflect.GoTypeRelation.Assignable)) {
         throw panic("reflect.Value.SetMapIndex: key of type " + GoReflect.GoTypeName(key.live?.GetType()) +
                     " is not assignable to type " + GoReflect.GoTypeName(keyType));
     }
