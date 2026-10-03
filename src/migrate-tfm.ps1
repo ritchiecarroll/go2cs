@@ -152,7 +152,6 @@ $handOwnedCsproj = @(
     @{ Path = 'src\tests\Behavioral\BehavioralTests\BehavioralTests.csproj'; Why = 'LOAD-BEARING: the MSTest harness, same derivation exposure' },
     @{ Path = 'src\tests\ChannelTests\ChannelTests.csproj'; Why = 'hand-written test project' },
     @{ Path = 'src\tests\GenTests\GenTests.csproj'; Why = 'hand-written test project' },
-    @{ Path = 'src\tests\GenericTests\GenericTests.csproj'; Why = 'hand-written test project' },
     @{ Path = 'src\tests\GolibTests\GolibTests.csproj'; Why = 'hand-written test project (a Stage gate instrument)' },
     @{ Path = 'src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj'; Why = 'LOAD-BEARING: the perf harness, same bin-tail derivation as its Behavioral siblings -- and it hides in the Perf* tree, so a census excluding tests\Performance as generated misses it' },
     @{ Path = 'src\utilities\UpdateTestTargets\UpdateTestTargets.csproj'; Why = 'hand-written utility: regenerates goldens' }

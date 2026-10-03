@@ -28,8 +28,8 @@ public class Sha3ReinterpretVectorTests
     // test-conversion defects. So known-answer vectors it is, and they belong beside the golib
     // pointer tests because what they really prove is that the aliasing view WRITES THROUGH: a
     // snapshot instead of an alias yields a wrong digest, loudly, on the very first vector.
-    // (`GenericTests` referencing `core/sort` is the precedent for an MSTest tier binding a
-    // converted package.)
+    // (GolibTests' own reference to `core/sort`, in GolibTests.csproj, is the precedent for an
+    // MSTest tier binding a converted package.)
     //
     // ⚠ NEUTERED-FIX CONTROL — restoring the auto-converted `xor.cs` does not merely fail these
     // tests, it KILLS the test host with an AccessViolationException inside `slice<byte>`'s
