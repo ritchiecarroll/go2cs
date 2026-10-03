@@ -83,6 +83,22 @@ function Write-FeedConfig([string]$Dir) {
 "@ | Set-Content -LiteralPath (Join-Path $Dir 'nuget.config') -Encoding utf8
 }
 
+# The first lines of a failing step's stderr, echoed to the console and folded into the verdict. A leg's
+# artifacts are served from blob storage that a restricted-egress reader cannot reach; the console log and
+# the annotation summary come back from the API itself, so the evidence has to be there too.
+function Get-StderrHead([string]$Path, [int]$Lines = 12) {
+    $head = @(Get-Content -LiteralPath $Path -ErrorAction SilentlyContinue | Where-Object { $_.Trim() } | Select-Object -First $Lines)
+    $head | ForEach-Object { Write-Host "    stderr| $_" }
+    if ($head.Count) { return " -- first stderr line: $($head[0].Trim())" }
+    return ' -- stderr was empty'
+}
+
+function Get-FirstError([string]$Log) {
+    $first = Get-Content -LiteralPath $Log -ErrorAction SilentlyContinue | Where-Object { $_ -match '(?i)\berror\b' } | Select-Object -First 1
+    if ($first) { Write-Host "    error| $first"; return " -- first error: $($first.Trim())" }
+    return ''
+}
+
 function Invoke-Logged([string]$Log, [scriptblock]$Command) {
     $ErrorActionPreference = 'Continue'
     & $Command *>&1 | ForEach-Object { "$_" } | Set-Content -LiteralPath $Log -Encoding utf8
@@ -109,7 +125,7 @@ function Invoke-ConvertArm([string]$Name, [string]$ModuleDir) {
         if ($LASTEXITCODE -ne 0) { return "FAIL ($Name): go run exited $LASTEXITCODE (the Go baseline itself)" }
 
         $code = Invoke-Logged (Join-Path $arm 'convert.log') { & $Converter -recurse=nuget . csharp }
-        if ($code -ne 0) { return "FAIL ($Name): go2cs -recurse=nuget exited $code" }
+        if ($code -ne 0) { return "FAIL ($Name): go2cs -recurse=nuget exited $code$(Get-FirstError (Join-Path $arm 'convert.log'))" }
     }
     finally { Pop-Location }
 
@@ -129,7 +145,7 @@ function Invoke-ConvertArm([string]$Name, [string]$ModuleDir) {
     $env:NUGET_PACKAGES = $cache
     try {
         $code = Invoke-Logged (Join-Path $arm 'build.log') { & dotnet build $slnx[0].FullName -c Debug "-p:GoStdLibVersion=$Version" --nologo }
-        if ($code -ne 0) { return "FAIL ($Name): dotnet build exited $code (see build.log)" }
+        if ($code -ne 0) { return "FAIL ($Name): dotnet build exited $code$(Get-FirstError (Join-Path $arm 'build.log'))" }
 
         # Provenance: the restored go.os is THIS version, which only the feed carries, and it holds the twin
         # the conversion compiles against.
@@ -141,13 +157,19 @@ function Invoke-ConvertArm([string]$Name, [string]$ModuleDir) {
         & dotnet run --project $proj[0].FullName -c Debug --no-build "-p:GoStdLibVersion=$Version" 1> $csOut 2> (Join-Path $arm 'cs.stderr.txt')
         $runCode = $LASTEXITCODE
         $ErrorActionPreference = 'Stop'
-        if ($runCode -ne 0) { return "FAIL ($Name): the converted program exited $runCode (see cs.stderr.txt)" }
+        if ($runCode -ne 0) { return "FAIL ($Name): the converted program exited $runCode$(Get-StderrHead (Join-Path $arm 'cs.stderr.txt'))" }
     }
     finally { $env:NUGET_PACKAGES = $null }
 
     $want = ([System.IO.File]::ReadAllText($goOut)) -replace "`r`n", "`n"
     $got = ([System.IO.File]::ReadAllText($csOut)) -replace "`r`n", "`n"
-    if ($want -ne $got) { return "FAIL ($Name): stdout differs from go run (go.stdout.txt vs cs.stdout.txt)" }
+    if ($want -ne $got) {
+        $wantLines = @($want -split "`n"); $gotLines = @($got -split "`n")
+        $i = 0; while ($i -lt [Math]::Min($wantLines.Count, $gotLines.Count) -and $wantLines[$i] -eq $gotLines[$i]) { $i++ }
+        $w = if ($i -lt $wantLines.Count) { $wantLines[$i] } else { '<end>' }
+        $g = if ($i -lt $gotLines.Count) { $gotLines[$i] } else { '<end>' }
+        return "FAIL ($Name): stdout differs from go run at line $($i + 1): go '$w' vs C# '$g'$(Get-StderrHead (Join-Path $arm 'cs.stderr.txt'))"
+    }
     if (-not $want.Trim()) { return "FAIL ($Name): go run printed nothing, so the comparison proves nothing" }
 
     return "PASS ($Name): stdout identical to go run ($(@($want.TrimEnd("`n") -split "`n").Count) line(s)); go.* $Version from the feed, compiled against runtimes/$compileRid/"
