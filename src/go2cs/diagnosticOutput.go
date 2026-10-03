@@ -25,6 +25,7 @@ import (
 	"go/printer"
 	"go/types"
 	"os"
+	"regexp"
 	"strings"
 
 	"golang.org/x/tools/go/packages"
@@ -101,8 +102,16 @@ func (v *Visitor) showWarning(format string, a ...interface{}) {
 	showWarning("%s in \"%s\"", message, getShortFileName(v.file))
 }
 
-// Canonical diagnostic codes: GO2CS1xxx is a package that did not load cleanly, as go/packages
-// classifies the error; GO2CS2xxx is an input the converter refuses.
+// Canonical diagnostics: the converter's failures on its INPUT -- a package that did not load cleanly,
+// a source it refuses -- are also printed on stderr in MSBuild's canonical form,
+//
+//	file(line,col): error GO2CSnnnn: text
+//
+// so CI logs and editor problem matchers pick them up. Each site keeps the human-readable summary line
+// it printed before: the behavioral runner and check-no-regression key on that wording.
+//
+// GO2CS1xxx is a package that did not load cleanly, coded by how go/packages classifies the error;
+// GO2CS2xxx is an input the converter refuses.
 const (
 	diagnosticLoadError  = "GO2CS1000"
 	diagnosticListError  = "GO2CS1001"
@@ -111,10 +120,51 @@ const (
 	diagnosticCgoRefused = "GO2CS2001"
 )
 
+// diagnosticPositionPattern splits "file:line[:col]". The file part is matched lazily up to the LAST
+// line/column pair the anchor allows, so a Windows drive letter ("C:\src\te.go:3:16") stays in it.
+var diagnosticPositionPattern = regexp.MustCompile(`^(.+?):(\d+)(?::(\d+))?$`)
+
+var diagnosticLineBreaks = regexp.MustCompile(`\s*[\r\n]+\s*`)
+
+// canonicalDiagnostic formats one error. position is go/packages' or token.Position's spelling,
+// "file:line:col", "file:line" or "file"; empty or "-" names no file, and the origin is then the tool.
+// A multi-line text is joined onto one line, since a matcher reads one line per diagnostic.
 func canonicalDiagnostic(position, code, text string) string {
-	return ""
+	origin := "go2cs"
+
+	if position != "" && position != "-" {
+		origin = position
+
+		if match := diagnosticPositionPattern.FindStringSubmatch(position); match != nil {
+			origin = match[1] + "(" + match[2]
+
+			if match[3] != "" {
+				origin += "," + match[3]
+			}
+
+			origin += ")"
+		}
+	}
+
+	return fmt.Sprintf("%s: error %s: %s", origin, code, diagnosticLineBreaks.ReplaceAllString(strings.TrimSpace(text), " "))
 }
 
+// reportDiagnostic prints one canonical diagnostic on stderr, without the log package's timestamp,
+// which would put text before the origin a matcher anchors on.
+func reportDiagnostic(position, code, text string) {
+	os.Stderr.WriteString(canonicalDiagnostic(position, code, text) + "\n")
+}
+
+// loadErrorCode is the GO2CS1xxx code for a go/packages error kind.
 func loadErrorCode(kind packages.ErrorKind) string {
-	return ""
+	switch kind {
+	case packages.ListError:
+		return diagnosticListError
+	case packages.ParseError:
+		return diagnosticParseError
+	case packages.TypeError:
+		return diagnosticTypeError
+	default:
+		return diagnosticLoadError
+	}
 }

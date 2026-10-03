@@ -18,6 +18,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -225,6 +226,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	for _, pkg := range pkgs {
 		if len(pkg.Errors) > 0 {
 			log.Printf("WARNING: %s did not fully type-check; converting best-effort — code depending on the following is emitted untyped: %v", pkg.PkgPath, pkg.Errors)
+
+			for _, loadError := range pkg.Errors {
+				reportDiagnostic(loadError.Pos, loadErrorCode(loadError.Kind), loadError.Msg)
+			}
 		}
 	}
 
@@ -280,6 +285,14 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		paired, skippedGenerated := syntaxSourceFiles(pkg)
 
 		if err := refuseSelectedCgoSources(pkg, paired); err != nil {
+			var refusal *cgoSourceRefusal
+
+			if errors.As(err, &refusal) {
+				for _, position := range refusal.imports {
+					reportDiagnostic(position.String(), diagnosticCgoRefused, fmt.Sprintf("package %s selects this cgo source (import \"C\") for this build, and cgo has no C# conversion yet; convert with CGO_ENABLED=0 or exclude the file from the build", pkg.PkgPath))
+				}
+			}
+
 			log.Fatalf("Refusing to convert: %s\n", err)
 		}
 
@@ -799,36 +812,56 @@ func refuseSelectedCgoSources(pkg *packages.Package, paired []syntaxSourceFile) 
 		parsed[filepath.Clean(pair.path)] = true
 	}
 
-	var sources []string
+	refusal := &cgoSourceRefusal{pkgPath: pkg.PkgPath}
 
 	for _, path := range pkg.GoFiles {
-		if !parsed[filepath.Clean(path)] && importsC(path) {
-			sources = append(sources, filepath.Base(path))
+		if !parsed[filepath.Clean(path)] {
+			if position, ok := importCPosition(path); ok {
+				refusal.imports = append(refusal.imports, position)
+			}
 		}
 	}
 
-	if len(sources) == 0 {
+	if len(refusal.imports) == 0 {
 		return nil
 	}
 
-	return fmt.Errorf("package %s selects cgo source %s (import \"C\") for this build, and cgo has no C# conversion yet, so the converted package would silently lack that code; convert with CGO_ENABLED=0 (the corpus convention) or exclude the file from the build",
-		pkg.PkgPath, strings.Join(sources, ", "))
+	return refusal
 }
 
-// importsC reports whether the Go source at path imports the pseudo-package "C". Unreadable or
-// unparseable files report false: they are not evidence of cgo.
-func importsC(path string) bool {
-	file, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.ImportsOnly)
+// cgoSourceRefusal is refuseSelectedCgoSources' error: the package, and the `import "C"` of each
+// selected cgo source, which the driver reports as a canonical diagnostic before refusing.
+type cgoSourceRefusal struct {
+	pkgPath string
+	imports []token.Position
+}
+
+func (refusal *cgoSourceRefusal) Error() string {
+	sources := make([]string, len(refusal.imports))
+
+	for i, position := range refusal.imports {
+		sources[i] = filepath.Base(position.Filename)
+	}
+
+	return fmt.Sprintf("package %s selects cgo source %s (import \"C\") for this build, and cgo has no C# conversion yet, so the converted package would silently lack that code; convert with CGO_ENABLED=0 (the corpus convention) or exclude the file from the build",
+		refusal.pkgPath, strings.Join(sources, ", "))
+}
+
+// importCPosition reports where the Go source at path imports the pseudo-package "C", if it does.
+// Unreadable or unparseable files report false: they are not evidence of cgo.
+func importCPosition(path string) (token.Position, bool) {
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, path, nil, parser.ImportsOnly)
 
 	if err != nil || file == nil {
-		return false
+		return token.Position{}, false
 	}
 
 	for _, spec := range file.Imports {
 		if spec.Path != nil && spec.Path.Value == `"C"` {
-			return true
+			return fset.Position(spec.Pos()), true
 		}
 	}
 
-	return false
+	return token.Position{}, false
 }
