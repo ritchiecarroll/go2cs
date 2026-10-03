@@ -110,7 +110,12 @@ type godebugSetting struct {
 // moduleGodebug reads a module's `go` line and its go.mod `godebug` block. STRICT modfile.Parse: ParseLax
 // DROPS godebug directives, so the lax parser would silently lose exactly the overrides read here.
 func moduleGodebug(moduleDir string) (string, []godebugSetting, error) {
-	path := filepath.Join(moduleDir, "go.mod")
+	path, ok := goModFile(moduleDir)
+
+	if !ok {
+		path = filepath.Join(moduleDir, "go.mod")
+	}
+
 	data, err := os.ReadFile(path)
 
 	if err != nil {
@@ -246,7 +251,7 @@ func packageDefaultGODEBUG(packageDir string, files []string, options Options) (
 
 	moduleDir := moduleRootDir(packageDir)
 
-	if _, err := os.Stat(filepath.Join(moduleDir, "go.mod")); err != nil {
+	if _, ok := goModFile(moduleDir); !ok {
 		return "", nil
 	}
 

@@ -146,6 +146,8 @@
     <None Include="$(MSBuildThisFileDirectory)goFrameOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)goModFile.go" />
+    <None Include="$(MSBuildThisFileDirectory)goModFile_test.go" />
     <None Include="$(MSBuildThisFileDirectory)h5MemberBillGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)h5RederivePatchGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)handOwnAddress_test.go" />

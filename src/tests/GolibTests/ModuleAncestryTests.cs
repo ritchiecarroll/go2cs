@@ -288,4 +288,38 @@ public class ModuleAncestryTests
             Discard(module);
         }
     }
+
+    // A module-cache release that ships NO go.mod (a module that predates modules): the converter's run
+    // hands over the go.mod `go` reads for it, and the copy carries that go.mod at the module root, so
+    // the sandbox is the module the Go side sees. Without it the root is not a module and nothing stages.
+    [TestMethod]
+    public void AModuleWithoutGoModIsStagedWithTheGoModGoReads()
+    {
+        string module = NewModule();
+        File.Delete(Path.Combine(module, "go.mod"));
+        string synthesized = Path.Combine(NewDirectory("cache"), "v0.9.1.mod");
+        Write(synthesized, $"module {ModulePath}\n");
+        string runRoot = NewDirectory("run");
+        string workingDirectory = WorkingDirectoryFor(runRoot, ModulePath + "/parse");
+
+        try
+        {
+            Assert.IsFalse(PackageAncestry.TryStageModule(module, ModulePath, ModulePath + "/parse", runRoot, workingDirectory),
+                "a root with no go.mod and none handed over is not a module");
+
+            Assert.IsTrue(PackageAncestry.TryStageModule(module, ModulePath, ModulePath + "/parse", runRoot, workingDirectory, synthesized),
+                "the go.mod go reads makes the root a module");
+
+            string mirrorRoot = WorkingDirectoryFor(runRoot, ModulePath);
+            Assert.AreEqual($"module {ModulePath}\n", File.ReadAllText(Path.Combine(mirrorRoot, "go.mod")), "the copy carries the go.mod go reads");
+            Assert.IsTrue(File.Exists(Path.Combine(workingDirectory, "notes.txt")), "the module is copied as before");
+            Assert.IsFalse(File.Exists(Path.Combine(module, "go.mod")), "nothing is written into the module");
+        }
+        finally
+        {
+            Discard(runRoot);
+            Discard(Path.GetDirectoryName(synthesized)!);
+            Discard(module);
+        }
+    }
 }
