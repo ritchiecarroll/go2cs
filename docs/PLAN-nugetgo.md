@@ -225,8 +225,10 @@ modules version).
 > substituted only while every module its package requires is either absent from the run's closure or substituted by the
 > same package at the same version; otherwise it is DEMOTED to local conversion, as a fixed point, and the provenance table
 > names the blocking module. (4) The corpus release a package must match is the converter's embedded `corpus-release.txt`,
-> the last PUBLISHED release (releasestamp.PublishedStamp); the release-procedure lines that regenerate it at each record are
-> held for the owner (COORD, 2026-10-02), and repoguard's TestCorpusReleaseMatchesThePublishedStamp catches a stale one.
+> the last PUBLISHED release (releasestamp.PublishedStamp); the release-procedure lines that regenerate it at each record
+> were owner-approved (GoCorpusMigration H11) and built by S3b -- `release-nuget.ps1`, `push-nuget.ps1` and
+> `migrate-gorelease.ps1` write it -- and repoguard's TestCorpusReleaseMatchesThePublishedStamp catches a stale one. (Noted
+> 2026-10-03: until then this clause read "held for the owner (COORD, 2026-10-02)", which S3b's own commit had overtaken.)
 
 ### 4.3 Metadata and version selection — the self-describing package
 
