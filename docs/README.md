@@ -38,6 +38,7 @@ easily, and a .NET developer can use Go code directly within the .NET ecosystem.
 * Compile in Visual Studio: [Go Standard Library Solution](https://github.com/ritchiecarroll/go2cs/blob/master/src/go2cs-stdlib.slnx)
 * Run converted Go test validation: [Try it yourself](#try-it-yourself--validate-a-converted-test-suite)
 * Track which stdlib test suites pass in C#: [Validated Test Packages](ValidatedTestPackages.md)
+* Find converted Go modules as NuGet packages: [nugetgo.net](https://nugetgo.net)
 * Running converted programs on Ubuntu's packaged .NET: [Known issues](KnownIssues.md)
 * View example converted test: [`utf8_test.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/unicode/utf8/utf8_test.cs)
 * See current project [status](#status) and [milestones](#milestones)
@@ -200,17 +201,17 @@ go2cs -tests -recurse -test-action all module_dir out_root      # validate a who
 | Option | Description |
 |:--|:--|
 | `-stdlib` | Convert the Go standard library (optionally followed by specific package names). |
-| `-recurse` | Recursively convert a downloaded module **and its third-party dependencies** in dependency order, referencing (not reconverting) the pre-converted standard library through `$(go2csPath)`. An optional second positional output root isolates the generated `src\` app and `pkg\` dependency trees; references inside that graph are relative. A package that fails to load or convert is reported and skipped, and the run continues with the rest. See [Converting a real-world module](#converting-a-real-world-module). |
-| `-recurse=module` | Same recursion, narrower **scope**: convert the input module's own packages (every package under its `go.mod`, in dependency order) and **stop there** — each third-party package is still referenced into the `pkg\` tree, but none of them is converted, so a dependency closure that go2cs cannot yet convert can no longer hold up the module's own code. The referenced-but-unconverted packages are listed at the end of the run; converting them into the same output root later resolves those references. See [Converting a real-world module](#converting-a-real-world-module). |
-| `-recurse=nuget` | Same, but the standard library, the `golib` runtime and the analyzer come from NuGet — [`go.<pkg>`](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) + [`go.lib`](https://www.nuget.org/packages/go.lib) + [`go.gen`](https://www.nuget.org/packages/go.gen) — so nothing is staged locally. The app's own packages stay project references; a third-party module the [nugetgo.net](https://nugetgo.net) registry maps is referenced as its published package when one qualifies, and converted locally otherwise (see `-nuget-map`). A reference style and a scope are independent, so the values combine: `-recurse=module,nuget`. **The published packages exist for one Go release** — the release go2cs itself is built with — so the module being converted has to resolve to that release; go2cs checks before writing anything and refuses, naming both versions, rather than emitting a project whose restore fails on whichever packages that release added or moved. |
-| `-nuget-map <source>` | With `-recurse=nuget`, mapping is **on by default**: the [nugetgo.net](https://nugetgo.net) registry maps third-party Go modules to published NuGet packages of their go2cs conversions. `-nuget-map` adds a mapping source -- a local file path or an `https://` URL in nugetgo.net's schema v1 -- **repeatable, and the listed order is the precedence**: the first source naming a module answers it, and the registry answers every module your sources do **not** name, so a short override file is enough (`-nuget-map mine.txt`: `mine.txt` wins for its modules, nugetgo.net answers the rest). A mapped module is **referenced, not converted** -- one `PackageReference` per module, exact-pinned (`Version="[x]"`) -- when a published version's self-description (`go2cs/source-metadata.txt`) names that module at exactly the version your build selects AND was built for this go2cs release; the highest such revision wins. **Strict by design:** each go2cs release needs a module's package rebuilt before a new go2cs maps it. Anything else converts locally and the end-of-run table says why: no qualifying version, a package without a self-description, or a package that requires a module this run converts locally (closure consistency, which demotes everything that depends on it too). A module supplied by a `replace` directive is never mapped. The module, package version and SHA-512 are pinned in `go2cs.nuget.lock` in the output root: a later run reuses the pin (offline, from the cache or NuGet's global packages folder), **warns** if a source now disagrees, and refuses a package whose bytes no longer match. `-nuget-map off` disables mapping entirely and makes no request. Every `-nuget-map*` flag is refused without `-recurse=nuget`. Not yet exercised end to end: a mapped module whose package itself depends on another third-party package (no such package is published yet). |
+| `-recurse` | Convert a downloaded module **and its third-party dependencies** in dependency order, referencing (not reconverting) the pre-converted standard library. An optional second positional sets the output root for the generated `src\` (app) and `pkg\` (dependency) trees. A package that fails to convert is reported and skipped. See [Converting a real-world module](#converting-a-real-world-module). |
+| `-recurse=module` | Same, but convert only the module's own packages: third-party packages are referenced into `pkg\` but not converted, and are listed at the end of the run. See [converting the module only](#optional-convert-the-module-only-and-deal-with-its-dependencies-later). |
+| `-recurse=nuget` | Same, but the standard library, the `golib` runtime and the analyzer come from NuGet ([`go.<pkg>`](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll), [`go.lib`](https://www.nuget.org/packages/go.lib), [`go.gen`](https://www.nuget.org/packages/go.gen)), so nothing is staged locally. Third-party modules that the [nugetgo.net](https://nugetgo.net) registry maps are referenced as published packages when a qualifying version exists, and converted locally otherwise (see [Mapping modules to NuGet packages](#mapping-modules-to-nuget-packages)). Scope and reference style combine: `-recurse=module,nuget`. The published packages match the Go release go2cs is built with; go2cs checks the module against that release first, and refuses a mismatch, naming both versions. |
+| `-nuget-map <source>` | With `-recurse=nuget`: add a mapping source, a local file or an `https://` URL. Repeatable; the first source that names a module wins, and nugetgo.net answers the rest. `-nuget-map off` turns mapping off. See [Mapping modules to NuGet packages](#mapping-modules-to-nuget-packages). |
 | `-nuget-map-only` | With `-nuget-map`: use **only** the listed sources — the nugetgo.net fallback is dropped, so a module your sources do not name stays local, and nugetgo.net is never fetched. |
 | `-nuget-map-exclude <module-path>` | With `-nuget-map`: never map this module, whatever a source says. Repeatable. |
 | `-nuget-map-refresh` | With `-nuget-map`: fetch every URL source unconditionally (bypassing the local cache) and re-resolve, adopting what the sources say now instead of what `go2cs.nuget.lock` pinned. |
 | `-nuget-map-canonical-only` | With `-nuget-map`: apply only **canonical** mappings (the module owner's own conversion); a community mapping is treated as unmapped. |
-| `-tests` | Also convert the package's eligible `_test.go` suite and emit a runnable C# test-host project (default off). Forces `-comments` on and self-locates `$(go2csPath)` by walking up from the output directory, so the two-argument form works from a bare clone with no flags or environment setup. See [Try it yourself](#try-it-yourself--validate-a-converted-test-suite). Combined with `-recurse`, it validates a whole module: `go2cs -tests -recurse module_dir out_root` first converts the module, its third-party dependencies and the packages only its tests import, as plain `-recurse` does, then runs the `-tests` pipeline (with the chosen `-test-action`) for each of the module's own packages that has test files, into `out_root/src/<import path>`, beside that package's converted project. The output root is required and must be outside the module's source tree; only plain `-recurse` combines with `-tests` (not `=module` or `=nuget`); and a module whose `go.mod` declares a `go` version newer than the converted standard library is refused. |
+| `-tests` | Also convert the package's `_test.go` suite and emit a runnable C# test-host project (default off). Forces `-comments` on and works from a bare clone with no flags or environment setup. With plain `-recurse` it validates a whole module against its own tests: `go2cs -tests -recurse module_dir out_root`, with the output root outside the module's source tree; a module that needs a newer Go than the converted standard library is refused. See [Try it yourself](#try-it-yourself--validate-a-converted-test-suite). |
 | `-test-action <action>` | With `-tests`: one of `convert` (default), `build`, `run`, `compare`, or `all`. `convert` and `all` convert the package and its tests; `build` / `run` / `compare` act on the **existing** converted artifacts — validated against the test manifest's recorded input digest — without reconverting. `compare` (and `all`) runs both `go test -json -count=1` and the converted C# test host and diffs the terminal results by test name. |
-| `-test-timeout <duration>` | Package deadline for a converted-test action, in Go duration syntax (default `2m`). For `run`/`compare` it is handed to **both** sides — `go test -timeout` and the converted host's own `-timeout` — so they agree. The converted test host's `dotnet publish` gets at least `30m` whatever the value, because the first publish on a fresh tree builds the test project's whole standard-library closure. A suite that legitimately runs long needs a value above both defaults: `hash/maphash` takes ~15 minutes in C# where Go's takes 7.6 seconds, so it is validated with `-test-timeout 30m`. |
+| `-test-timeout <duration>` | Package deadline for a converted-test action, in Go duration syntax (default `2m`); `run` and `compare` give it to both `go test` and the converted host. The host's `dotnet publish` always gets at least `30m`, because the first publish on a fresh tree builds the whole standard-library closure. A suite that runs long in C# needs a larger value: `hash/maphash` is validated with `-test-timeout 30m`. |
 | `-go2cspath <dir>` | Runtime/stdlib root (env `GO2CSPATH`; default `~/go2cs`) used by generated `$(go2csPath)…` references, and the output root for `-stdlib`. For a single-package/file conversion, C# output goes to optional `[output_dir]` (in place by default). |
 | `-goroot` / `-gopath` | Override the detected Go root / path. |
 | `-platforms <os/arch>` | Target platform for build-tagged files (defaults to the host). A comma-separated **list** (`windows/amd64,linux/amd64,darwin/amd64`) is accepted and today requires `-platform-census`: a conversion still emits for exactly one target, so a list without the census flag is rejected rather than silently converting the first. |
@@ -223,7 +224,7 @@ go2cs -tests -recurse -test-action all module_dir out_root      # validate a who
 | `-csproj <file>` | Generate project files from a custom `.csproj` template instead of the embedded one. |
 | `-tree` | Print each file's Go parse tree (`go/ast`) to stdout during conversion — a diagnostic aid. |
 | `-debug` | Disable the converter's per-file panic recovery, so a conversion failure crashes with a full stack trace instead of being reported as a warning. |
-| ~~`-cgo`~~ | ~~Also convert cgo-targeted files.~~ Not yet functional — but planned, not abandoned: the ratified [cgo interop plan](PLAN-cgo-interop.md) lays out the `import "C"` ladder (P/Invoke-backed, staged after the current validation campaign), and this flag comes alive with it. |
+| ~~`-cgo`~~ | ~~Also convert cgo-targeted files.~~ Not yet functional, but planned: the [cgo interop plan](PLAN-cgo-interop.md) lays out a P/Invoke-backed bridge for `import "C"`, and this flag comes alive with it. |
 
 All converted C# code references a hand-written runtime library (`golib`, published as the [`go.lib`](https://www.nuget.org/packages/go.lib)
 NuGet package) plus a set of Roslyn source generators that supply Go semantics at compile time (published as
@@ -240,8 +241,8 @@ be staged on the machine beforehand. (Prefer the standard library as local C# so
 [building against a local standard library](#optional-build-against-a-local-standard-library) below.)
 
 Wondering which real-world Go packages make good conversions? The
-**[go2cs Target Atlas](https://go2cs.net/TargetAtlas.html)** surveys the Go ecosystem's best
-candidates — the study behind the first operational package conversions now being planned.
+**[go2cs Target Atlas](https://go2cs.net/TargetAtlas.html)** ranks the most-depended-on Go modules and
+grades how hard each one is to convert.
 
 Here is the full round-trip for a small CLI that uses [`github.com/fatih/color`](https://github.com/fatih/color),
 which itself pulls in `github.com/mattn/go-colorable`, `github.com/mattn/go-isatty`, and `golang.org/x/sys` —
@@ -271,14 +272,14 @@ func main() {
 }
 ```
 
-Next, pin the app to a **Go 1.24-compatible** dependency set and confirm it builds as Go.
+Next, pin the app's dependencies to releases that go2cs's Go version can read, and confirm it builds as Go.
 
-> **NOTE:** _go2cs is built with **Go 1.24.13**, so its type-checker only reads modules whose `go` directive — and their dependencies' — is **≤ 1.24.13**. `fatih/color` v1.19+ and recent `golang.org/x/sys` releases require a newer Go than 1.24, which would fail step 2 with_ `package requires newer Go version`_; pin as shown._
+> **NOTE:** _go2cs's type-checker reads only modules whose `go` directive (and their dependencies') is no newer than the Go release go2cs is built with (see [Requirements](#requirements)). Newer `fatih/color` and `golang.org/x/sys` releases need a newer Go, which would fail step 2 with_ `package requires newer Go version`_; pin as shown._
 >
 > _The `GOTOOLCHAIN=local` below is what makes that error appear at all. Left unset, Go **silently downloads and re-execs** whichever newer toolchain a `go`/`toolchain` directive asks for, so the build succeeds against a standard library go2cs has no published packages for. go2cs detects the switch and says so, but pinning the toolchain keeps the whole round-trip on one Go release, which is what you want._
 
-First pin the toolchain, so Go uses the Go 1.24.13 you have instead of fetching the newer one a dependency asks
-for — the one command whose syntax is shell-specific:
+First pin the toolchain, so Go uses the release you have instead of fetching the newer one a dependency asks
+for. This is the one command whose syntax is shell-specific:
 
 ```powershell
 $env:GOTOOLCHAIN = 'local'   # PowerShell
@@ -292,7 +293,7 @@ Then, in either shell:
 
 ```shell
 go get github.com/fatih/color@v1.18.0   # a Go 1.24-compatible release (v1.19+ requires Go 1.25)
-go mod tidy                             # download color + its (Go 1.24-compatible) dependencies
+go mod tidy                             # download color + its dependencies
 go build ./...                          # baseline: confirm it compiles as Go first
 ```
 
@@ -370,7 +371,7 @@ _Expected output:_
 
 ![colorapp-output](images/colorapp-output.png)
 
-> **NOTE:** this `fatih/color` example **compiles clean** — app plus all four dependency projects — **and runs**. Bigger programs are a deeper milestone: the referenced standard library compiles in full, and making it **operational** package by package is the [Phase-4](RoadmapHistory.md#phase-4--convert-and-run-go-package-tests) work that [Validated Test Packages](ValidatedTestPackages.md) tracks.
+> **NOTE:** this `fatih/color` example **compiles clean** — app plus all four dependency projects — **and runs**. The standard library it references is validated package by package against Go's own tests; see [Validated Test Packages](ValidatedTestPackages.md).
 
 #### Optional: convert the module only, and deal with its dependencies later
 
@@ -436,6 +437,26 @@ root as the `$(go2csPath)` default in the output root's generated `Directory.Bui
 solution builds from anywhere with no extra configuration — override with a `go2csPath` environment variable
 or a `-p:go2csPath` build global if the runtime root later moves.
 
+#### Mapping modules to NuGet packages
+
+With `-recurse=nuget`, go2cs asks the [nugetgo.net](https://nugetgo.net) registry whether someone has already
+converted and published each third-party module. A mapped module is **referenced, not converted**: one
+exact-pinned `PackageReference` per module. A mapping applies only when a published version describes itself (in
+`go2cs/source-metadata.txt`) as that module, at exactly the version your build selects, and was built for this
+go2cs release; the highest such revision wins. Anything else converts locally, and the end-of-run table says why.
+A module supplied by a `replace` directive is never mapped. A mapped package that itself depends on another
+third-party package is not yet tested end to end.
+
+The choices are pinned, with each package's SHA-512, in `go2cs.nuget.lock` in the output root. A later run reuses
+the pin offline, warns if a source now disagrees, and refuses a package whose bytes no longer match.
+
+- `-nuget-map <source>` adds your own mapping source: a local file or an `https://` URL in the registry's format.
+  It is repeatable, and the first source that names a module answers for it. nugetgo.net answers every module your
+  sources do not name, so a short override file is enough.
+- `-nuget-map off` turns mapping off and makes no request.
+- `-nuget-map-only`, `-nuget-map-exclude`, `-nuget-map-refresh` and `-nuget-map-canonical-only` are listed under
+  [Common options](#common-options). Every `-nuget-map*` flag needs `-recurse=nuget`.
+
 ## Project layout
 
 | Path | Contents |
@@ -449,17 +470,17 @@ or a `-p:go2csPath` build global if the runtime root later moves.
 | `src/tests/Behavioral/` | Per-feature Go↔C# equivalence tests (transpile, compile, run-and-compare). |
 | `src/tests/Performance/` | Go vs transpiled C# runtime benchmarks (JIT and Native AOT) — see the [performance comparison](Performance.md) for current numbers. |
 
-Contributors: see [`CLAUDE.md`](../CLAUDE.md) for an architecture overview and
-[`Architecture.md`](Architecture.md), [`ConversionStrategies.md`](ConversionStrategies.md), and
-[`Roadmap.md`](Roadmap.md) for details. There's lots of low hanging fruit to be had here, jump in if you'd like to help...
+Contributors: start with [`CONTRIBUTING.md`](https://github.com/ritchiecarroll/go2cs/blob/master/CONTRIBUTING.md),
+then see [`Architecture.md`](Architecture.md), [`ConversionStrategies.md`](ConversionStrategies.md) and
+[`Roadmap.md`](Roadmap.md) for details. There's plenty of low-hanging fruit here; jump in if you'd like to help.
 
 ## Status
 
-The converter builds idiomatic C# for the full range of Go language features, gated by nearly 700
-Go-vs-C# behavioral regression projects (2026-09-26) — each transpiled, compiled, byte-compared against a
-committed golden and, where it is a runnable program, executed with its stdout compared against the Go
-original's. The entire Go standard library (342 packages, Go 1.24.13) compiles cleanly as .NET assemblies.
-<!-- "nearly 700" counted 2026-09-26 at master db1bd885a2: 697 directories under src/tests/Behavioral
+The converter builds idiomatic C# for the full range of Go language features, guarded by hundreds of
+Go-vs-C# behavioral test projects. Each one is transpiled, compiled and compared against a committed golden,
+and each runnable one is executed with its output compared against Go's. The entire Go standard library
+compiles cleanly as .NET assemblies.
+<!-- "hundreds" (697 at the 2026-09-26 count) counted at master db1bd885a2: 697 directories under src/tests/Behavioral
      carry a committed .cs.target golden; the two harness directories (BehavioralRunner, BehavioralTests)
      carry none and are not counted. -->
 
@@ -468,17 +489,20 @@ execute Go's hand-written `.s` assembly, so the portable pure-Go variants of the
 functions are the faithful target (`-stdlib` and `-tests` apply the tag by default; see
 [Conversion Strategies](ConversionStrategies.md#the-standard-library-reproduces-go--tags-purego)).
 
-Compiling is not runtime parity, so the library is also validated **operationally**
-([Phase 4](RoadmapHistory.md#phase-4--convert-and-run-go-package-tests)). Each package's own `_test.go`
-suite is converted to C#, built against the converted standard library, and run under a Go-semantics
-test host. Its results are compared verdict for verdict against a clean `go test -json` baseline, and
-every difference is disclosed by exact failure signature; a test withdrawn is withdrawn from both
-sides, by name. At Go 1.24.13 every implementable package validates: 225 of 225, and 225 of the 230
-testable. The five outside the implementable set are each listed with the reason they cannot be
-validated. [Validated Test Packages](ValidatedTestPackages.md) tracks the set, and the results are
-reproducible via [Try it yourself](#try-it-yourself--validate-a-converted-test-suite).
-<!-- 225 of 225 and 225 of 230 read 2026-10-01 at master c2591d5b95 from the Phase 4 progress header of
-     docs/ValidatedTestPackages.md; a Go release hop re-derives both. -->
+Compiling is not the same as running correctly, so the library is also validated **operationally**. Each
+package's own `_test.go` suite is converted to C#, built against the converted standard library, and run
+under a Go-semantics test host. Its results are compared verdict for verdict against a clean `go test -json`
+run, and every difference is disclosed by exact failure signature; a test withdrawn is withdrawn from both
+sides, by name. Every implementable package validates this way, on Windows and on Linux where it applies,
+and the few packages outside that set are each listed with the reason they cannot be validated.
+[Validated Test Packages](ValidatedTestPackages.md) carries the current counts, and the results are
+reproducible via [Try it yourself](#try-it-yourself--validate-a-converted-test-suite). Real third-party Go
+modules convert too, and `go2cs -tests -recurse` validates a module against its own test suites the same way;
+macOS support is in progress. go2cs moves to newer Go and .NET releases one at a time, and each move
+re-validates every package against that release's own tests; see the [Roadmap](Roadmap.md).
+<!-- The prose no longer quotes the counts. They were 225 of 225 and 225 of 230 on 2026-10-01 at master
+     c2591d5b95, read from the Phase 4 progress header of docs/ValidatedTestPackages.md, which carries
+     the current figures. -->
 
 ### Try it yourself — validate a converted test suite
 
@@ -539,46 +563,29 @@ strictly.
 
 _Everyone asks:_ how fast is the transpiled C# compared to the original Go — including startup time,
 memory, and Native AOT builds? See the [performance comparison](Performance.md) — **`TL;DR`**: _usually
-slower than native Go, [but not always](Background.md#why-convert-go-to-c)_: maps and the optimized
+slower than native Go, [but not always](Background.md#how-fast-is-converted-code)_: maps and the optimized
 [stack string](ConversionStrategies.md#strings-string-and-sstring) path run at **parity with Go or
-faster in both C# variants** (measured against go1.23.1 on 2026-08-25; a rerun on the current Go 1.24.13
-pin is queued). Most compute-shaped code — channels included — sits within a small multiple of Go, with runtime structural-interface satisfaction the honest outlier. Save for
-the [ref struct](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/ref-struct)
-based stack string and [stack slice](ConversionStrategies.md#slices-and-arrays) work already landed, broad
-optimization is targeted for _after_ Phase 4 — the parity rows show the ceiling, not the finish line.
-
-Newer Go and .NET releases follow the same way: each hop re-derives every roster row from that release's own test sources — see the [Roadmap](Roadmap.md).
+faster in both C# variants**. Most compute-shaped code — channels included — sits within a small multiple
+of Go, with runtime structural-interface satisfaction the honest outlier. Some optimization is already in,
+such as the [ref struct](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/ref-struct)
+based stack strings and [stack slices](ConversionStrategies.md#slices-and-arrays); broader optimization is
+planned (see the [Roadmap](Roadmap.md#performance)), and the parity rows show the ceiling, not the finish line.
 
 ## Milestones
 
-High level timeline of the project's major turning points.
+High level timeline of the project's major turning points; the tags carry the details.
 
 | Date | Milestone | Commit / Tag | Notes |
 |:--|:--|:--|:--|
-| 2018-05-21 | Project inception | `929d1457f` | A C#/.NET converter built on an ANTLR4 Go grammar with T4 templates. |
-| 2020-07-09 | Runtime library + hand-converted stub | `9792eeea2` | The `golib` Go-semantics runtime and a curated hand-finished stdlib stub. |
-| 2022-03-13 | [`v0.1.2` release](NEWS.md#march-13-2022--v012-release) | [`v0.1.2`](https://github.com/ritchiecarroll/go2cs/releases/tag/v0.1.2) | Tagged release of the mature ANTLR4-era converter. |
-| 2025-01-12 | [Rewrite as "go2cs2" — Go-based converter](NEWS.md#january-12-2025--the-converter-is-rewritten-in-go-go2cs-version-2) | `87465f5f5` | Converter re-implemented in Go on `go/ast` + `go/types`; Roslyn source generators supply ancillary Go semantics. |
-| 2025-05-05 | [First full standard-library auto-conversion](NEWS.md#may-5-2025--first-full-standard-library-auto-conversion) | `6ca1c45b7` · [`full-conversion-2025-05`](https://github.com/ritchiecarroll/go2cs/releases/tag/full-conversion-2025-05) (`cc14584c7`) | Every Go file got a C# file — the transpiler did not crash; it did not mean the emitted C# compiled. |
-| 2026-06-25 | Baseline ↔ full-conversion separation | `3c8b3a848` | A compiling curated baseline and the WIP full conversion split apart, restoring a green build and the converter-improvement loop. |
-| 2026-06-26 | First full-conversion package promoted | `05a53e8c0` | `sync/atomic` migrated into the baseline (`atomic.Pointer[T]` backed by a managed slot). |
-| 2026-06-27 | [`math` package compiles clean](NEWS.md#june-27-2026--the-math-package-compiles-clean) | [`math-green-2026-06-27`](https://github.com/ritchiecarroll/go2cs/releases/tag/math-green-2026-06-27) (`914d4bd72`) | Nine packages greened via 19 behaviorally-tested converter fixes, including widely-imported `math`. |
-| 2026-07-10 | [**First clean full-standard-library compile**](NEWS.md#july-10-2026--the-entire-go-standard-library-compiles-in-net) | `51ba5d9cf` · [`stdlib-green-2026-07-10`](https://github.com/ritchiecarroll/go2cs/releases/tag/stdlib-green-2026-07-10) | All **302** packages (Go 1.23.1) compile with zero errors — `runtime`, `reflect`, `net/http`, `go/types`, `crypto/tls` included ([details](StdLibCompileMilestone.md)). |
-| 2026-07-14 | [Standard library on NuGet + NuGet-referencing conversion](NEWS.md#july-14-2026--the-converted-go-standard-library-is-on-nuget) | `2363af0e6` · `dd821a556` · [`nuget-stdlib-2026-07-14`](https://github.com/ritchiecarroll/go2cs/releases/tag/nuget-stdlib-2026-07-14) | `go.<pkg>` / `go.lib` / `go.gen` published to nuget.org; `-recurse=nuget` emits matching `<PackageReference>` entries, so a converted app needs no local go2cs checkout. |
-| 2026-07-17 | [**First Go standard-library test suite passing in C#**](NEWS.md#july-17-2026--gos-own-tests-now-pass-in-c) | `337a928df` · [`utf8-tests-green-2026-07-17`](https://github.com/ritchiecarroll/go2cs/releases/tag/utf8-tests-green-2026-07-17) | `unicode/utf8` validates **14/14 against `go test -json`** under the hand-owned `go.testing` host; the differential pipeline goes live end to end. |
-| 2026-07-18 | [**Phase-4 test suites expand — disclosed-divergence mechanism**](NEWS.md#july-18-2026--bytes-and-strings-tests-pass-with-disclosed-divergence) | `40f39d2be` · [`bytes-strings-tests-green-2026-07-18`](https://github.com/ritchiecarroll/go2cs/releases/tag/bytes-strings-tests-green-2026-07-18) · [`sort`](https://github.com/ritchiecarroll/go2cs/releases/tag/sort-tests-green-2026-07-18) · [`utf16`](https://github.com/ritchiecarroll/go2cs/releases/tag/utf16-tests-green-2026-07-18) | `bytes` (81), `strings` (68), `sort` (63) and `unicode/utf16` (8) validate, introducing the committed per-package disclosure manifest matched by exact failure signature. |
-| 2026-07-26 | [**More than a quarter of the standard library's test suites pass in C#**](NEWS.md#july-26-2026--more-than-a-quarter-of-the-standard-librarys-test-suites-pass-in-c) | `44fcc4f04` | The validated set moves past leaf packages into `sync`, `regexp`/`regexp/syntax`, `strconv`, `bufio`, `compress/gzip`, the `crypto/sha*` family and the reflection-driven `errors` / `encoding/binary` / `go/token`. |
-| 2026-08-01 | One tree — the converted standard library comes home to `src/core` | `2e8066da6` | Baseline and full conversion consolidate into a single tree with one `$(go2csPath)core/<pkg>` path scheme; no reference rewriting anywhere. |
-| 2026-08-08 | [**Over half the stdlib's test suites validate in C#**](NEWS.md#august-8-2026--over-half-the-standard-library-validates-defers-reach-zero-allocation) | [`stdlib-half-validated-2026-08-08`](https://github.com/ritchiecarroll/go2cs/releases/tag/stdlib-half-validated-2026-08-08) | **110/215** packages, 13,628 matching verdicts; zero-allocation `defer` frames; Docs+Tests badge trust chain in every package. |
-| 2026-08-08 | [**Go programs run on Linux**](NEWS.md#august-8-2026--go-programs-run-on-linux) | [`linux-first-run-2026-08-08`](https://github.com/ritchiecarroll/go2cs/releases/tag/linux-first-run-2026-08-08) | `hello, 世界`, an `os`/`time` program, and the real-world walkthrough (`fatih/color`, true ANSI colour) all byte-identical to `go run`; one L3 tree compiles windows+linux+darwin; one nupkg per package; one measured `libc syscall(2)` keystone. |
-| 2026-08-22 | [**Over 75% of the standard library's test suites pass in C#**](NEWS.md#august-22-2026--over-75-of-the-standard-librarys-test-suites-pass-in-c) | [`stdlib-tests-75pct-2026-08-22`](https://github.com/ritchiecarroll/go2cs/releases/tag/stdlib-tests-75pct-2026-08-22) | **162/215** packages, 18,569 matching verdicts, 85 disclosed; converted frames report Go file:line positions; Go 1.23.1's terminal validation marker, with `release/go1.23` cut. |
-| 2026-08-25 | [**Both runtime pins move: .NET 10 + Go 1.23.12**](NEWS.md#august-25-2026--both-runtime-pins-move-net-10-go-12312--and-the-whole-roster-re-proves-itself) | `925e48067` · `a2e079259` | 955 project files to `net10.0` with zero emission drift, three OS flavors green; the full roster re-derives from 1.23.12's own test sources — **162/162, 18,598** matching verdicts (+29, exactly the four re-derived rows). |
-| 2026-08-29 | [**Over 90% of the standard library's test suites pass in C#**](NEWS.md#august-29-2026--over-90-of-the-standard-librarys-test-suites-pass-in-c) | `773afa2c2` · `d2da277f5` · `nuget-1.23.12.2` | **189/215** packages, 26,043 matching verdicts, 148 disclosed — **189/208 = 90.9%** against the implementable set; `net` aboard at 472 verdicts, `reflect` executing for the first time; 189 proof pages frozen for the 1.23.12.2 release. |
-| 2026-09-07 | [**Go 1.23.12's record closes at its anchor; the corpus hops to Go 1.24**](NEWS.md#september-7-2026--the-go-12312-record-closes-at-its-anchor-the-corpus-hops-to-go-124) | `95daed007` | **204/215** packages, 28,459 matching verdicts, 167 disclosed — **204/209 = 97.6%** against the implementable set, frozen as the Go 1.23.12 anchor; the five rows still unbanked re-validate under Go 1.24.13, where a hop re-derives every row from scratch. |
-| 2026-09-24 | [**The converted standard library moves to Go 1.24.13**](NEWS.md#september-24-2026--the-converted-standard-library-moves-to-go-12413-and-218-packages-validate-against-it) | `509828948` · `nuget-1.24.13.1` | **218/230** packages, 56,974 matching verdicts, 283 disclosed — **218/224 = 97.3%** against the implementable set; every row re-derived from Go 1.24.13's own test sources; `net/http` not validated at Go 1.24.13, its 17 divergences all under Go 1.24's new `internal/synctest`; published as NuGet 1.24.13.1 (51 new package IDs, 14 ended). |
-| 2026-09-24 | NuGet 1.24.13.2 published | `4c53b02a0` · `nuget-1.24.13.2` | Platform-varying packages ship `win-x64` and `linux-x64` flavors that a consumer both compiles and runs against, so the real-world walkthrough builds and runs on `linux/amd64`; 232 proof pages frozen for the release, at **218/230** packages and 56,975 matching verdicts. |
-| 2026-09-25 | [`net/http` validates again, at Go 1.24.13](ValidatedTestPackages.md) | `db1bd885a` | **219/230** packages, 58,364 matching verdicts, 280 disclosed; `net/http` returns to the roster at 1,387 verdicts, release-tiered as at Go 1.23.12. |
-| 2026-10-01 | [**Every implementable standard-library package validates**](NEWS.md#october-1-2026--every-implementable-standard-library-package-validates) | `133ca704e` · `nuget-1.24.13.3` | **225/230** packages, 69,777 matching verdicts, 373 disclosed — **225/225 = 100.0%** against the implementable set; `runtime` (10,819 matching, 71 disclosed) and `runtime/pprof` (145 matching, 7 disclosed) are the last to validate; Linux 223 of 223 applicable rows; published as NuGet 1.24.13.3. |
+| 2018-05-21 | Project inception | `929d1457f` | A C#/.NET converter built on an ANTLR4 Go grammar. |
+| 2022-03-13 | [`v0.1.2` release](NEWS.md#march-13-2022--v012-release) | [`v0.1.2`](https://github.com/ritchiecarroll/go2cs/releases/tag/v0.1.2) | The mature ANTLR4-era converter, tagged. |
+| 2025-01-12 | [The converter is rewritten in Go](NEWS.md#january-12-2025--the-converter-is-rewritten-in-go-go2cs-version-2) | `87465f5f5` | Rebuilt on `go/ast` + `go/types`, with the `golib` runtime library and Roslyn source generators supplying Go's semantics. |
+| 2025-05-05 | [First full standard-library auto-conversion](NEWS.md#may-5-2025--first-full-standard-library-auto-conversion) | `6ca1c45b7` · [`full-conversion-2025-05`](https://github.com/ritchiecarroll/go2cs/releases/tag/full-conversion-2025-05) (`cc14584c7`) | Every Go file gets a C# file; compiling comes later. |
+| 2026-07-10 | [**First clean full-standard-library compile**](NEWS.md#july-10-2026--the-entire-go-standard-library-compiles-in-net) | `51ba5d9cf` · [`stdlib-green-2026-07-10`](https://github.com/ritchiecarroll/go2cs/releases/tag/stdlib-green-2026-07-10) | Every package compiles with zero errors, `runtime`, `reflect` and `net/http` included ([details](StdLibCompileMilestone.md)). |
+| 2026-07-14 | [Standard library on NuGet](NEWS.md#july-14-2026--the-converted-go-standard-library-is-on-nuget) | `2363af0e6` · `dd821a556` · [`nuget-stdlib-2026-07-14`](https://github.com/ritchiecarroll/go2cs/releases/tag/nuget-stdlib-2026-07-14) | A converted app references the standard library from nuget.org, with no local go2cs checkout. |
+| 2026-07-17 | [**First Go test suite passing in C#**](NEWS.md#july-17-2026--gos-own-tests-now-pass-in-c) | `337a928df` · [`utf8-tests-green-2026-07-17`](https://github.com/ritchiecarroll/go2cs/releases/tag/utf8-tests-green-2026-07-17) | `unicode/utf8` matches `go test`, test for test. |
+| 2026-08-08 | [**Go programs run on Linux**](NEWS.md#august-8-2026--go-programs-run-on-linux) | [`linux-first-run-2026-08-08`](https://github.com/ritchiecarroll/go2cs/releases/tag/linux-first-run-2026-08-08) | Converted programs, the `fatih/color` walkthrough included, match `go run` on Linux. |
+| 2026-10-01 | [**Every implementable standard-library package validates**](NEWS.md#october-1-2026--every-implementable-standard-library-package-validates) | `133ca704e` · `nuget-1.24.13.3` | Every implementable package passes its own Go tests in C#, `runtime` included, on Windows and Linux. |
 
 ## C# to Go?
 
@@ -610,7 +617,7 @@ a modified converter to others over a network, does.
 maintainer and will stay free for its users. A company that wants to ship the
 converter inside a proprietary product, offer it as a service without publishing its
 changes, or take on the project's long-term development is welcome to talk: a
-commercial license, sponsorship of the remaining validation work, or an outright
+commercial license, sponsorship of ongoing work, or an outright
 acquisition that keeps the tool free for the community are all on the table. The
 contact address is in [AUTHORS](https://github.com/ritchiecarroll/go2cs/blob/master/AUTHORS).
 Contributions to the converter carry a Developer Certificate of Origin sign-off and a

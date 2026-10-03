@@ -382,6 +382,8 @@ $editableSites = @(
         Find = 'packages, Go {OLD}\) compiles cleanly'
         Replace = 'packages, Go {NEW}) compiles cleanly'
         Expect = 1
+        Retired = 'the docs-refresh seat (README Status rewrite)'
+        RetiredNote = 'the docs refresh states the compile claim without a count or release; nothing moves at a hop'
         Note = 'present-tense compile claim (the package COUNT is re-measured separately; only the release moves here)'
     }
     @{
@@ -482,9 +484,9 @@ $historyAnchors = @(
     @{ File = 'docs/README.md'; Find = 'requires go2cs packages \*\*{OLD}\.5 or later\*\*'
        Note = 'the release Linux support FIRST shipped in' }
     @{ File = 'docs/README.md'; Find = 'All \*\*302\*\* packages \(Go {OLD}\) compile with zero errors'
-       Note = 'milestone table row, tag-anchored' }
+       Retired = 'the docs-refresh seat (README Milestones trim)'; Note = 'milestone table row, tag-anchored -- the trim to the turning points restates the row without the count or release; the tag carries the detail' }
     @{ File = 'docs/README.md'; Find = "Go {OLD}'s terminal validation marker"
-       Note = 'milestone table row, tag-anchored' }
+       Retired = 'the docs-refresh seat (README Milestones trim)'; Note = 'milestone table row, tag-anchored -- removed by the trim to the turning points; NEWS.md and the tag keep it' }
     # RETIRED 2026-09-29, all three: the roadmap rewrite moved the completed phases, these three
     # sentences among them, VERBATIM out of docs/Roadmap.md into docs/RoadmapHistory.md, which the
     # sweep below classifies MUST-NOT-CHANGE. Like the CLAUDE.md rows above they are spelled at Go
