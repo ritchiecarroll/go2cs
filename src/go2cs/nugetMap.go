@@ -127,8 +127,15 @@ var nugetMapStatuses = []string{"canonical", "community", "withdrawn"}
 // WHOLE SOURCE, naming it with file:line -- the registry's CI guarantees well-formed rows, so a bad one
 // signals corruption, and skipping it would silently change what the source answers. These rules mirror
 // PLAN section 1; the registry repo's own lint is cross-checked against them at S3b.
-func parseNuGetMap(name string, data []byte) (nugetMapSource, error) {
+//
+// A well-formed row whose ID the ID PATTERN refuses (sourcemeta.CheckModuleNuGetID: the reserved "go."
+// prefix) is the exception: it is SKIPPED, and a warning names it by file:line. The pattern is a POLICY,
+// which a newer converter can apply more strictly than an older registry row was linted against, so one
+// such row must never refuse the source -- under -recurse=nuget the registry is read by default, and a
+// refused source fails every user's conversion (COORD 2026-10-03).
+func parseNuGetMap(name string, data []byte) (nugetMapSource, []string, error) {
 	src := nugetMapSource{name: name, rows: make(map[string]nugetMapRow)}
+	var warnings []string
 
 	for index, line := range strings.Split(string(data), "\n") {
 		lineNumber := index + 1
@@ -141,35 +148,37 @@ func parseNuGetMap(name string, data []byte) (nugetMapSource, error) {
 		fields := strings.Split(line, "\t")
 
 		if len(fields) != nugetMapFieldCount {
-			return nugetMapSource{}, fmt.Errorf("%s:%d: want 6 TAB-separated fields (module-path, nuget-id, status, source-repo, registered, contact), got %d", name, lineNumber, len(fields))
+			return nugetMapSource{}, nil, fmt.Errorf("%s:%d: want 6 TAB-separated fields (module-path, nuget-id, status, source-repo, registered, contact), got %d", name, lineNumber, len(fields))
 		}
 
 		row := nugetMapRow{module: fields[0], nugetID: fields[1], status: fields[2], sourceRepo: fields[3], registered: fields[4], contact: fields[5], line: lineNumber}
 
 		if err := module.CheckPath(row.module); err != nil {
-			return nugetMapSource{}, fmt.Errorf("%s:%d: invalid module path %q: %v", name, lineNumber, row.module, err)
+			return nugetMapSource{}, nil, fmt.Errorf("%s:%d: invalid module path %q: %v", name, lineNumber, row.module, err)
 		}
 
 		if row.nugetID == "" || strings.ContainsAny(row.nugetID, " \t") || len(row.nugetID) > 100 {
-			return nugetMapSource{}, fmt.Errorf("%s:%d: invalid nuget-id %q (non-empty, no whitespace, at most 100 characters)", name, lineNumber, row.nugetID)
-		}
-
-		if err := sourcemeta.CheckModuleNuGetID(row.nugetID); err != nil {
-			return nugetMapSource{}, fmt.Errorf("%s:%d: %v", name, lineNumber, err)
+			return nugetMapSource{}, nil, fmt.Errorf("%s:%d: invalid nuget-id %q (non-empty, no whitespace, at most 100 characters)", name, lineNumber, row.nugetID)
 		}
 
 		if !slices.Contains(nugetMapStatuses, row.status) {
-			return nugetMapSource{}, fmt.Errorf("%s:%d: invalid status %q (want canonical, community or withdrawn)", name, lineNumber, row.status)
+			return nugetMapSource{}, nil, fmt.Errorf("%s:%d: invalid status %q (want canonical, community or withdrawn)", name, lineNumber, row.status)
 		}
 
 		if first, duplicate := src.rows[row.module]; duplicate {
-			return nugetMapSource{}, fmt.Errorf("%s:%d: a second row for module %s (first at line %d); a source maps each module path once", name, lineNumber, row.module, first.line)
+			return nugetMapSource{}, nil, fmt.Errorf("%s:%d: a second row for module %s (first at line %d); a source maps each module path once", name, lineNumber, row.module, first.line)
+		}
+
+		// After every format check, so a malformed ID is refused for its malformation alone.
+		if err := sourcemeta.CheckModuleNuGetID(row.nugetID); err != nil {
+			warnings = append(warnings, fmt.Sprintf("%s:%d: %v; the row is skipped and %s stays unmapped by this source", name, lineNumber, err, row.module))
+			continue
 		}
 
 		src.rows[row.module] = row
 	}
 
-	return src, nil
+	return src, warnings, nil
 }
 
 // thirdPartyModule is one third-party module of the closure being converted, as packages.Load reports
@@ -231,7 +240,18 @@ func resolveNuGetMappings(modules []thirdPartyModule, sources []nugetMapSource, 
 
 		row, answeredBy, found := firstNuGetMapRow(sources, mod.path)
 
-		if locked, isLocked := lock[mod.path]; isLocked && !o.refresh {
+		locked, isLocked := lock[mod.path]
+
+		// The lock is the fourth reader of a mapping's ID: a pin the ID pattern refuses (written before the
+		// rule, or edited by hand) is dropped with a warning, and the module re-resolves from the sources.
+		if isLocked && !o.refresh {
+			if err := sourcemeta.CheckModuleNuGetID(locked.nugetID); err != nil {
+				warnings = append(warnings, fmt.Sprintf("%s: %s pins %v; the pin is dropped and the module re-resolves from the sources", mod.path, nugetLockFileName, err))
+				isLocked = false
+			}
+		}
+
+		if isLocked && !o.refresh {
 			decision.mapped, decision.nugetID, decision.status, decision.layer, decision.fromLock = true, locked.nugetID, locked.status, locked.layer, true
 
 			if locked.version != mod.version {
