@@ -734,6 +734,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGoShiftSemantics() => CheckTarget("GoShiftSemantics");
 
     [TestMethod]
+    public void CheckGoStmtReceiverBoxGroup() => CheckTarget("GoStmtReceiverBoxGroup");
+
+    [TestMethod]
     public void CheckGoStmtReceiverLambda() => CheckTarget("GoStmtReceiverLambda");
 
     [TestMethod]

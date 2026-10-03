@@ -195,6 +195,7 @@ func selectRefReturnPrimaries(pkg *packages.Package) {
 			bodyHasPointerMethodValueOnReceiver(candidate.body, candidate.recvName, candidate.info) ||
 			bodyCapturesReceiverInValueMethodValue(candidate.body, candidate.recvName, candidate.info) ||
 			bodyHasGoStmtLambdaCapturingReceiver(candidate.body, candidate.recvName, signature.Recv(), candidate.info) ||
+			bodyHasGoStmtBoxMethodGroupOnReceiver(candidate.body, candidate.recvName, signature.Recv(), candidate.info) ||
 			bodyPassesReceiverAsPointerArg(candidate.body, candidate.recvName, candidate.info) ||
 			bodyWrappedInDeferContext(candidate.body, candidate.recvName, candidate.info) {
 			continue
@@ -510,7 +511,7 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 
 		recvObj := recvObjectOf(funcDecl, info)
 
-		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName, recvObj, info) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyReassignsReceiver(funcDecl.Body, recvName, signature.Recv(), info) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasPointerMethodValueOnReceiver(funcDecl.Body, recvName, info) || bodyCapturesReceiverInValueMethodValue(funcDecl.Body, recvName, info) || bodyHasGoStmtLambdaCapturingReceiver(funcDecl.Body, recvName, signature.Recv(), info) || bodyPassesReceiverAsPointerArg(funcDecl.Body, recvName, info) || bodyWrappedInDeferContext(funcDecl.Body, recvName, info) {
+		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName, recvObj, info) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyReassignsReceiver(funcDecl.Body, recvName, signature.Recv(), info) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasPointerMethodValueOnReceiver(funcDecl.Body, recvName, info) || bodyCapturesReceiverInValueMethodValue(funcDecl.Body, recvName, info) || bodyHasGoStmtLambdaCapturingReceiver(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasGoStmtBoxMethodGroupOnReceiver(funcDecl.Body, recvName, signature.Recv(), info) || bodyPassesReceiverAsPointerArg(funcDecl.Body, recvName, info) || bodyWrappedInDeferContext(funcDecl.Body, recvName, info) {
 			// Key by the generic origin so instantiated call sites (Set[int]) match.
 			origin := funcObj.Origin()
 			packageCaptureModeMethods[origin] = true
@@ -1027,6 +1028,70 @@ func bodyHasGoStmtLambdaCapturingReceiver(body *ast.BlockStmt, recvName string, 
 		})
 
 		return !found
+	})
+
+	return found
+}
+
+// bodyHasGoStmtBoxMethodGroupOnReceiver reports whether the body contains a `go` statement in
+// METHOD-GROUP form whose callee is a POINTER-receiver method on the method's own receiver, or on a
+// VALUE field chain rooted at it — `go t.loop()`, `go t.loopArg(9)` inside `func (t *tracker)`
+// (gopkg.in/yaml.v3's tests). visitGoStmt binds such a callee as a box-bound group
+// (pointerReceiverBoxMethodGroup: `goǃ(Ꮡt.loop)`), which needs the receiver box in scope; without
+// a promotion the receiver is the `ref T` alias, and `goǃ(t.loop)` binds the [GoRecv] ref extension
+// (CS1113/CS1503). The method VALUE twin is bodyHasPointerMethodValueOnReceiver, the lambda forms
+// are bodyHasGoStmtLambdaCapturingReceiver's, and a `defer` needs no equivalent (any function-level
+// defer promotes via bodyWrappedInDeferContext).
+func bodyHasGoStmtBoxMethodGroupOnReceiver(body *ast.BlockStmt, recvName string, recv *types.Var, info *types.Info) bool {
+	found := false
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		if found {
+			return false
+		}
+
+		goStmt, ok := node.(*ast.GoStmt)
+
+		if !ok {
+			return true
+		}
+
+		sel, ok := goStmt.Call.Fun.(*ast.SelectorExpr)
+
+		if !ok {
+			return true
+		}
+
+		selection, ok := info.Selections[sel]
+
+		if !ok || selection.Kind() != types.MethodVal {
+			return true
+		}
+
+		sig, ok := selection.Obj().Type().(*types.Signature)
+
+		if !ok || sig.Recv() == nil {
+			return true
+		}
+
+		if _, isPtr := sig.Recv().Type().(*types.Pointer); !isPtr {
+			return true
+		}
+
+		// Mirror visitGoStmt's box-group decision: a void, non-variadic callee called at its own
+		// arity. Every other shape takes a lambda form (bodyHasGoStmtLambdaCapturingReceiver).
+		if sig.Results().Len() > 0 || sig.Variadic() || len(goStmt.Call.Args) != sig.Params().Len() {
+			return true
+		}
+
+		if ident, ok := sel.X.(*ast.Ident); ok {
+			found = ident.Name == recvName && (recv == nil || info.ObjectOf(ident) == recv)
+			return true
+		}
+
+		found = selectorRootsAtReceiverValueFieldChain(sel.X, recvName, info)
+
+		return true
 	})
 
 	return found

@@ -535,6 +535,7 @@
     <Project Path="tests/Behavioral/GoroutineParkStorm/GoroutineParkStorm.csproj" />
     <Project Path="tests/Behavioral/GoroutineWaitState/GoroutineWaitState.csproj" />
     <Project Path="tests/Behavioral/GoShiftSemantics/GoShiftSemantics.csproj" />
+    <Project Path="tests/Behavioral/GoStmtReceiverBoxGroup/GoStmtReceiverBoxGroup.csproj" />
     <Project Path="tests/Behavioral/GoStmtReceiverLambda/GoStmtReceiverLambda.csproj" />
     <Project Path="tests/Behavioral/GoStmtValueReturn/GoStmtValueReturn.csproj" />
     <Project Path="tests/Behavioral/GoSyntaxIfaceFieldPointer/GoSyntaxIfaceFieldPointer.csproj" />
