@@ -1429,6 +1429,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckParallelAssignmentHazard() => CheckTarget("ParallelAssignmentHazard");
 
     [TestMethod]
+    public void CheckParenFuncLitGoDefer() => CheckTarget("ParenFuncLitGoDefer");
+
+    [TestMethod]
     public void CheckParenIifeNilFuncConv() => CheckTarget("ParenIifeNilFuncConv");
 
     [TestMethod]

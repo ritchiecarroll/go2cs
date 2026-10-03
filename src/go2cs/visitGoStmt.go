@@ -35,8 +35,12 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 
 	var renderLambdaParams bool
 
-	// If we have a function literal, only prepare captures there, not on the GoStmt
-	if funcLit, ok := goStmt.Call.Fun.(*ast.FuncLit); ok {
+	// If we have a function literal, only prepare captures there, not on the GoStmt. A PARENTHESIZED
+	// literal (`go (func() { … })()`, gopkg.in/check.v1's forkCall) is the same callee: taken as a
+	// non-literal it prepared the statement's captures AND let the literal hoist its own, which then
+	// had no statement to precede and was written inside the call (`goǃ((⏎var cʗ2 = cʗ1;⏎() => …`,
+	// CS1002/CS1003/CS1026/CS1513).
+	if funcLit, ok := ast.Unparen(goStmt.Call.Fun).(*ast.FuncLit); ok {
 		if captures, exists := v.lambdaCapture.stmtCaptures[goStmt]; exists {
 			v.lambdaCapture.stmtCaptures[funcLit] = captures
 
@@ -65,7 +69,7 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 	namedFuncType := false
 	variadicCallee := false
 
-	if _, isFuncLit := goStmt.Call.Fun.(*ast.FuncLit); !isFuncLit {
+	if _, isFuncLit := ast.Unparen(goStmt.Call.Fun).(*ast.FuncLit); !isFuncLit {
 		if funType := v.getType(goStmt.Call.Fun, false); funType != nil {
 			if sig, ok := funType.(*types.Signature); ok {
 				if sig.Results() != nil && sig.Results().Len() > 0 {

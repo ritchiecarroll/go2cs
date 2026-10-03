@@ -1426,6 +1426,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckParallelAssignmentHazard() => CheckTarget("ParallelAssignmentHazard");
 
     [TestMethod]
+    public void CheckParenFuncLitGoDefer() => CheckTarget("ParenFuncLitGoDefer");
+
+    [TestMethod]
     public void CheckParenIifeNilFuncConv() => CheckTarget("ParenIifeNilFuncConv");
 
     [TestMethod]

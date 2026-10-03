@@ -961,7 +961,7 @@ func bodyHasGoStmtLambdaCapturingReceiver(body *ast.BlockStmt, recvName string, 
 			return true
 		}
 
-		if _, isFuncLit := goStmt.Call.Fun.(*ast.FuncLit); isFuncLit {
+		if _, isFuncLit := ast.Unparen(goStmt.Call.Fun).(*ast.FuncLit); isFuncLit {
 			return true
 		}
 

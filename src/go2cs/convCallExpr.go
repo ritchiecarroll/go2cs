@@ -3409,6 +3409,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					callee = ast.Unparen(paren.X)
 				}
 			}
+
+			// A parenthesized FUNC-LITERAL callee (`go (func() { … })()`, gopkg.in/check.v1's
+			// forkCall) is the same callee as the bare literal. convParenExpr renders its operand
+			// without this LambdaContext, so the literal lost the statement's deferredDecls sink
+			// and wrote its capture copies inside the call (`goǃ((⏎var cʗ2 = cʗ1;⏎() => …`).
+			if funcLit, isLit := ast.Unparen(paren.X).(*ast.FuncLit); isLit {
+				callee = funcLit
+			}
 		}
 
 		funcName = v.convExpr(callee, []ExprContext{lambdaContext, calleeIdentContext})

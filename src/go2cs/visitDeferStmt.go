@@ -57,8 +57,9 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 
 	var renderLambdaParams bool
 
-	// If we have a function literal, only prepare captures there, not on the DeferStmt
-	if funcLit, ok := deferStmt.Call.Fun.(*ast.FuncLit); ok {
+	// If we have a function literal, only prepare captures there, not on the DeferStmt. A
+	// PARENTHESIZED literal is the same callee (see the twin in visitGoStmt).
+	if funcLit, ok := ast.Unparen(deferStmt.Call.Fun).(*ast.FuncLit); ok {
 		if captures, exists := v.lambdaCapture.stmtCaptures[deferStmt]; exists {
 			v.lambdaCapture.stmtCaptures[funcLit] = captures
 

@@ -2341,17 +2341,18 @@ type captureShareFacts struct {
 // Only inside a literal's body do Go's shared-variable closure semantics apply. The other capture
 // contexts — a method-value receiver (`f := t.Add`) and a go/defer statement's non-literal callee
 // expression — evaluate the receiver/callee AT STATEMENT TIME, so their value snapshot IS the
-// correct Go semantics and must stay.
+// correct Go semantics and must stay. A PARENTHESIZED literal callee (`go (func() { … })()`) is the
+// same closure body.
 func (v *Visitor) closureBodyCaptureLit() *ast.FuncLit {
 	switch node := v.lambdaCapture.currentLambda.(type) {
 	case *ast.FuncLit:
 		return node
 	case *ast.GoStmt:
-		if lit, ok := node.Call.Fun.(*ast.FuncLit); ok {
+		if lit, ok := ast.Unparen(node.Call.Fun).(*ast.FuncLit); ok {
 			return lit
 		}
 	case *ast.DeferStmt:
-		if lit, ok := node.Call.Fun.(*ast.FuncLit); ok {
+		if lit, ok := ast.Unparen(node.Call.Fun).(*ast.FuncLit); ok {
 			return lit
 		}
 	}
