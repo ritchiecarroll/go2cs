@@ -64,7 +64,7 @@ public static ж<Conn> Client(net.Conn conn, ж<Config> Ꮡconfig) {
 
 // A listener implements a network listener (net.Listener) for TLS connections.
 [GoType] partial struct listener {
-    public net_package.Listener Listener;
+    [GoEmbedded] public net_package.Listener Listener;
     internal ж<Config> config;
 }
 

@@ -61,7 +61,7 @@ partial class plan9obj_package {
     // If a client wants Read and Seek it must use
     // Open() to avoid fighting over the seek offset
     // with other clients.
-    public io_package.ReaderAt ReaderAt;
+    [GoEmbedded] public io_package.ReaderAt ReaderAt;
     internal ж<io.SectionReader> sr;
 }
 

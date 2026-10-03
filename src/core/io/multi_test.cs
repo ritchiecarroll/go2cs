@@ -101,8 +101,8 @@ public static void TestMultiReaderAsWriterTo(ж<testing.T> Ꮡt) {
 }
 
 [GoType("dyn")] internal partial struct TestMultiWriter_sink {
-    public io_package.Writer Writer;
-    public fmt_package.Stringer Stringer;
+    [GoEmbedded] public io_package.Writer Writer;
+    [GoEmbedded] public fmt_package.Stringer Stringer;
 }
 
 public static void TestMultiWriter(ж<testing.T> Ꮡt) {
@@ -117,7 +117,7 @@ public static void TestMultiWriter_String(ж<testing.T> Ꮡt) {
 
 [GoType("dyn")] internal partial struct TestMultiWriter_WriteStringSingleAlloc_simpleWriter {
 // hide bytes.Buffer's WriteString
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 // Test that a multiWriter.WriteString calls results in at most 1 allocation,

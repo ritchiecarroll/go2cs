@@ -298,11 +298,11 @@ public static void TestReaderDoubleUnreadRune(ж<testing.T> Ꮡt) {
 }
 
 [GoType("dyn")] internal partial struct TestReaderCopyNothing_justReader {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 [GoType("dyn")] internal partial struct TestReaderCopyNothing_justWriter {
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 // verify that copying from an empty reader always has the same results,

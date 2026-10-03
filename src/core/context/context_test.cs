@@ -293,11 +293,11 @@ public static void XTestCancelRemoves(testingT t) {
 }
 
 [GoType] internal partial struct myCtx {
-    public global::go.context_package.Context Context;
+    [GoEmbedded] public global::go.context_package.Context Context;
 }
 
 [GoType] internal partial struct myDoneCtx {
-    public global::go.context_package.Context Context;
+    [GoEmbedded] public global::go.context_package.Context Context;
 }
 
 // Go method set entry for the promoted 'Context.Deadline()' - provided ONLY by the embedded

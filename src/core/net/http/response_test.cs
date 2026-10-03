@@ -554,8 +554,8 @@ internal static slice<readResponseCloseInMiddleTestsᴛ1> readResponseCloseInMid
 }.slice();
 
 [GoType] internal partial struct readerAndCloser {
-    public io_package.Reader Reader;
-    public io_package.Closer Closer;
+    [GoEmbedded] public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Closer Closer;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

@@ -832,7 +832,14 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					}
 				}
 
-				v.writeString(target, "%s %s %s;", getAccess(goTypeName), csEmitTypeName, embedName)
+				// An embedded INTERFACE is emitted as a plain field named after its type, which nothing in
+				// the emitted C# tells apart from a NAMED field of that type. The [GoEmbedded] stamp is the
+				// difference: the reflection projection reports the field Anonymous, as Go does, and
+				// go2cs-gen reads the interface's methods as PROVIDERS when it decides whether a name
+				// promoted through another package's embed is unique in this struct's tree — an unmarked
+				// io_test `Buffer{bytes.Buffer; ReaderFrom; WriterTo}` would otherwise be given the
+				// embedded Buffer's ReadFrom and WriteTo, which Go drops as ambiguous.
+				v.writeString(target, "[GoEmbedded] %s %s %s;", getAccess(goTypeName), csEmitTypeName, embedName)
 			} else {
 				var handled bool
 

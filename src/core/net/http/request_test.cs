@@ -778,7 +778,7 @@ internal static readonly @string httpLocalhostˢ = "http://localhost/"u8;
 }
 
 [GoType("dyn")] internal partial struct TestNewRequestContentLength_type {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 public static void TestNewRequestContentLength(ж<testing.T> Ꮡt) {
@@ -1058,7 +1058,7 @@ public static void TestStarRequest(ж<testing.T> Ꮡt) {
 }
 
 [GoType] partial struct responseWriterJustWriter {
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 internal static httpꓸHeader Header(this responseWriterJustWriter _) {

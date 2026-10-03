@@ -233,7 +233,7 @@ public static void TestPathErrorUnwrap(ж<Δtesting.T> Ꮡt) {
 }
 
 [GoType] partial struct myErrorIs {
-    internal error error;
+    [GoEmbedded] internal error error;
 }
 
 internal static bool Is(this myErrorIs e, error target) {

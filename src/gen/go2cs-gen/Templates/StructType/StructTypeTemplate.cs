@@ -715,12 +715,16 @@ internal class StructTypeTemplate : TemplateBase
                     // below will forward (see GetMetadataPromotedMethods).
                     (List<MethodInfo> metadataValueMethods, List<MethodInfo> metadataBoxMethods) = GetMetadataPromotedMethods(typeName);
 
-                    foreach (MethodInfo m in metadataValueMethods)
+                    // A name reached through a CROSS-package path is not counted here: it is minted
+                    // only when unique across the whole tree (TreeNameCounts), and a name that is not
+                    // minted must not count either, or it would annihilate a same-package promotion
+                    // this counter has always answered. The counter reads same-package methods only.
+                    foreach (MethodInfo m in metadataValueMethods.Where(m => !m.IsCrossPackage))
                         embedMethodOccurrences.Add((m.Name, depth));
 
                     if (pointerEmbedTypeNames.Contains(embedKey(typeName)) || (typeName == promotedStructType && directEmbedIsValue))
                     {
-                        foreach (MethodInfo m in metadataBoxMethods)
+                        foreach (MethodInfo m in metadataBoxMethods.Where(m => !m.IsCrossPackage))
                             embedMethodOccurrences.Add((m.Name, depth));
                     }
 
@@ -772,6 +776,12 @@ internal class StructTypeTemplate : TemplateBase
             bool directEmbedIsUnexportedValue = directEmbedIsValue &&
                 GetScope(GetSimpleName(promotedStructType, dropCollisionPrefix: true)) != "public";
 
+            // Methods reached through a CROSS-package path, collected apart from the same-package ones
+            // so they never occupy a same-package name slot: the package class's forwarders stay
+            // exactly what they were. EmitCrossPackage mints these into the sibling class.
+            List<MethodInfo> crossMethods = [];
+            HashSet<string> crossMethodNames = new(StringComparer.Ordinal);
+
             collectPromotedMethods(promotedStructType, [], IsPointerHop(promotedStructType));
 
             // PATH-scoped for the same reason as countPromotedMethods above (increment E2c).
@@ -788,6 +798,31 @@ internal class StructTypeTemplate : TemplateBase
 
                 if (decl is null)
                 {
+                    // A METADATA embed's harvest splits: its cross-package methods go to crossMethods,
+                    // each with the path's pointer state; its same-package ones take the arm below.
+                    // A box primary promotes when a pointer lies on the path (the hop is a ж<T>), or
+                    // through a DIRECT value embed by the box-field descent shim.
+                    (List<MethodInfo> allValueMethods, List<MethodInfo> allBoxMethods) = GetMetadataPromotedMethods(typeName);
+                    bool crossValueEmbedBoxRecv = typeName == promotedStructType && directEmbedIsValue;
+
+                    foreach (MethodInfo m in allValueMethods.Where(m => m.IsCrossPackage))
+                    {
+                        if (crossMethodNames.Add(m.Name))
+                            crossMethods.Add(m with { PathHasPointer = pathHasPointer });
+                    }
+
+                    if (pathHasPointer || crossValueEmbedBoxRecv)
+                    {
+                        foreach (MethodInfo m in allBoxMethods.Where(m => m.IsCrossPackage))
+                        {
+                            if (crossMethodNames.Add(m.Name))
+                                crossMethods.Add(m with { IsBoxRecv = true, IsValueEmbedBoxRecv = !pathHasPointer && crossValueEmbedBoxRecv, PathHasPointer = pathHasPointer });
+                        }
+                    }
+                }
+
+                if (decl is null)
+                {
                     // METADATA embed — the `-tests` reference model's same-Go-package shape (net's
                     // resolvConfTest over *resolverConfig, whose init/tryAcquireSema/releaseSema
                     // live in the referenced production assembly). Harvest its promoted methods
@@ -797,7 +832,7 @@ internal class StructTypeTemplate : TemplateBase
                     // converter's explicit-hop call emission.
                     (List<MethodInfo> metadataValueMethods, List<MethodInfo> metadataBoxMethods) = GetMetadataPromotedMethods(typeName);
 
-                    foreach (MethodInfo m in metadataValueMethods)
+                    foreach (MethodInfo m in metadataValueMethods.Where(m => !m.IsCrossPackage))
                     {
                         if (promotedMethodNames.Add(m.Name))
                             promotedStructMethods.Add(m with { PathHasPointer = pathHasPointer });
@@ -807,7 +842,7 @@ internal class StructTypeTemplate : TemplateBase
 
                     if (pointerEmbedTypeNames.Contains(embedKey(typeName)) || metadataValueEmbedBoxRecv)
                     {
-                        foreach (MethodInfo m in metadataBoxMethods)
+                        foreach (MethodInfo m in metadataBoxMethods.Where(m => !m.IsCrossPackage))
                         {
                             if (promotedMethodNames.Add(m.Name))
                                 promotedStructMethods.Add(m with { IsBoxRecv = true, IsValueEmbedBoxRecv = metadataValueEmbedBoxRecv, PathHasPointer = pathHasPointer });
@@ -864,6 +899,10 @@ internal class StructTypeTemplate : TemplateBase
                         collectPromotedMethods(memberType, [.. seenTypes], pathHasPointer || IsPointerHop(memberType));
                 }
             }
+
+            // The cross-package forwarders, into the sibling class.
+            foreach (MethodInfo method in crossMethods)
+                EmitCrossPackage(method, promotedStructType, promotedMemberName, structMethodNames);
 
             foreach (MethodInfo method in promotedStructMethods)
             {
@@ -1174,8 +1213,14 @@ internal class StructTypeTemplate : TemplateBase
 
         string? embedGoPackage = GetGoPackageName(packageClass);
 
-        if (embedGoPackage is null || embedGoPackage != EnclosingGoPackageName)
+        if (embedGoPackage is null)
             return (valueMethods, boxMethods);
+
+        // An embed of ANOTHER Go package contributes too: Go promotes its exported methods, and
+        // the run-time method set is read from emitted extension methods, so an unminted promotion
+        // is a method the type does not have (`struct{ time.Time }` had none of Time's methods).
+        // Its methods are marked IsCrossPackage, which routes their forwarders to the sibling class.
+        bool crossPackage = embedGoPackage != EnclosingGoPackageName;
 
         // Names that must stay resolvable as BARE calls inside the embedding struct's own class.
         // Go lets a package-level FUNCTION and a METHOD share a name (they live in different
@@ -1188,9 +1233,15 @@ internal class StructTypeTemplate : TemplateBase
         // promoted-method call always has the explicit hop through the embed — so the function
         // wins and the colliding forwarder is skipped. (Residual, unmeasured: a Go call of such a
         // colliding method THROUGH the embedding struct would need the converter's explicit hop.)
+        //
+        // SAME-package only. The collision is with a function of the class the forwarder is minted
+        // INTO, and a cross-package forwarder goes to the sibling class, which holds no functions;
+        // the EMBED's package functions are another class's. Applied across packages the guard
+        // would drop real methods for nothing — time's `Unix`, `After`, `Date`, `UnixMicro` and
+        // `UnixMilli` are package functions and `Time` methods alike.
         HashSet<string> packageFunctionNames = new(StringComparer.Ordinal);
 
-        foreach (IMethodSymbol packageFunction in packageClass.GetMembers().OfType<IMethodSymbol>())
+        foreach (IMethodSymbol packageFunction in crossPackage ? [] : packageClass.GetMembers().OfType<IMethodSymbol>())
         {
             if (packageFunction.IsStatic && !packageFunction.IsExtensionMethod &&
                 packageFunction.MethodKind == MethodKind.Ordinary &&
@@ -1200,7 +1251,18 @@ internal class StructTypeTemplate : TemplateBase
             }
         }
 
-        foreach (IMethodSymbol method in packageClass.GetMembers().OfType<IMethodSymbol>())
+        // The embed's OWN cross-package forwarders live in its public sibling class
+        // `{pkg}ᴛ{Struct}ᴛxpkg`, beside its package class in the embed's own assembly. A method
+        // found there is a cross-package promotion whatever the embed's own package is, which is
+        // how a promotion crosses two packages: Outer{B.Mid{A.Inner}} harvests A's methods from
+        // B's sibling class for Mid.
+        INamedTypeSymbol? siblingClass = packageClass.ContainingNamespace
+            .GetTypeMembers(XpkgClassName(packageClass.Name, embedType.Name)).FirstOrDefault();
+
+        IEnumerable<(IMethodSymbol method, bool fromSibling)> candidateMethods = packageClass.GetMembers().OfType<IMethodSymbol>().Select(m => (m, false))
+            .Concat(siblingClass?.GetMembers().OfType<IMethodSymbol>().Select(m => (m, true)) ?? []);
+
+        foreach ((IMethodSymbol method, bool fromSibling) in candidateMethods)
         {
             if (packageFunctionNames.Contains(method.Name))
                 continue;
@@ -1212,6 +1274,16 @@ internal class StructTypeTemplate : TemplateBase
                 continue;
 
             if (!Context.Compilation.IsSymbolAccessibleWithin(method, Context.Compilation.Assembly))
+                continue;
+
+            bool isCross = crossPackage || fromSibling;
+
+            // A cross-package promotion carries EXPORTED Go names only, public in C#. Go promotes
+            // an unexported method across packages too, but nothing outside its own package can
+            // name it, and an interface carrying one is satisfiable only from that package
+            // (UnexportedMethodPackageMatches), so it is unobservable here. The Go name is read
+            // with the Δ marker and an `@` escape stripped.
+            if (isCross && (method.DeclaredAccessibility != Accessibility.Public || !IsGoExportedName(method.Name)))
                 continue;
 
             IParameterSymbol receiver = method.Parameters[0];
@@ -1281,7 +1353,7 @@ internal class StructTypeTemplate : TemplateBase
                 info.Parameters[i] = (type, name);
             }
 
-            (isBoxReceiver ? boxMethods : valueMethods).Add(info);
+            (isBoxReceiver ? boxMethods : valueMethods).Add(info with { IsCrossPackage = isCross });
         }
 
         // ONE Go method, TWO metadata members: a `[GoRecv]` value-receiver method (`this ref T`) is
@@ -1306,6 +1378,358 @@ internal class StructTypeTemplate : TemplateBase
     // three sites independently.
     private static string ArgumentName((string type, string name) parameter) =>
         MethodInfo.ParameterIdentifier(parameter.name);
+
+    // ---------------------------------------------------------------------------------------------
+    // Methods promoted through ANOTHER package's embed.
+    //
+    // Go promotes an embedded struct's exported methods whatever package declares it, and go2cs
+    // reads a run-time method set off emitted extension methods, so each such promotion needs a
+    // forwarder. They are minted into a SIBLING class, `{pkg}ᴛ{Struct}ᴛxpkg`, never into the
+    // package class: there a forwarder named like a package-level var or function is CS0102, and
+    // every same-package forwarder stays byte for byte what it was. The run-time registry reads
+    // every static class's extension methods, so the sibling's are found like any others.
+    // ---------------------------------------------------------------------------------------------
+
+    // The Go name of an emitted member: the Δ collision marker and an `@` keyword escape stripped.
+    private static string GoName(string emitted)
+    {
+        string name = emitted.StartsWith("@", StringComparison.Ordinal) ? emitted[1..] : emitted;
+        return name.StartsWith(ShadowVarMarker, StringComparison.Ordinal) ? name[ShadowVarMarker.Length..] : name;
+    }
+
+    private static bool IsGoExportedName(string emitted) => GoName(emitted) is { Length: > 0 } n && char.IsUpper(n[0]);
+
+    // The name of the sibling class holding a struct's cross-package forwarders, from the EMITTED
+    // package-class stem (what precedes `_package`, so an internal-test `http` and an
+    // external-test `http_test` differ) and the EMITTED struct name, lifted locals included
+    // (`sizeTestsᴛ1`). The struct name may hold `ᴛ`; a package stem never does, so the first `ᴛ`
+    // is the stem boundary and two structs cannot share a name.
+    private static string XpkgClassName(string packageClassName, string structName)
+    {
+        string pkg = packageClassName.EndsWith("_package", StringComparison.Ordinal) ? packageClassName[..^"_package".Length] : packageClassName;
+        return $"{pkg}{TempVarMarker}{structName.TrimStart('@')}{TempVarMarker}xpkg";
+    }
+
+    // The premise XpkgClassName's uniqueness rests on, checked where it could fail: a package stem
+    // holding `ᴛ` makes the stem boundary ambiguous (stem `aᴛb` + struct `c` and stem `a` + struct
+    // `bᴛc` name one class), and the collision would otherwise surface as a bare CS0101 on a
+    // generated class with nothing pointing here. No Go package in the corpus has such a stem.
+    // RS2008 asks for analyzer release-tracking files; go2cs-gen is a source generator that ships
+    // with the converter and keeps none, and this is its one diagnostic.
+#pragma warning disable RS2008
+    private static readonly DiagnosticDescriptor s_xpkgStemMarker = new(
+        id: "GO2CS0001",
+        title: "Package class stem contains the lifted-name marker",
+        messageFormat: "Package class stem '{0}' contains '" + TempVarMarker + "': the cross-package forwarder class '{1}' may collide with another struct's (CS0101)",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
+#pragma warning restore RS2008
+
+    private readonly StringBuilder m_xpkg = new();
+
+    private Dictionary<string, int>? m_treeNameCounts;
+
+    // G's uniqueness rule (i'): how many times each Go name occurs across the enclosing struct's WHOLE tree --
+    // every method at any depth (syntax, and metadata including the embed's sibling-class forwarders), every
+    // interface-embed provider ([GoEmbedded] interface fields, AllInterfaces), and every FIELD at any depth.
+    private Dictionary<string, int> TreeNameCounts => m_treeNameCounts ??= BuildTreeNameCounts();
+
+    private Dictionary<string, int> BuildTreeNameCounts()
+    {
+        Dictionary<string, int> counts = new(StringComparer.Ordinal);
+        (StructDeclarationSyntax? root, Compilation? rootComp) = Context.GetStructDeclaration(FullyQualifiedStructType);
+
+        if (root is null || rootComp is null)
+            return counts;
+
+        walkSource(root, rootComp, true, []);
+        return counts;
+
+        void add(string emitted)
+        {
+            string name = GoName(emitted);
+            counts[name] = counts.TryGetValue(name, out int count) ? count + 1 : 1;
+        }
+
+        void addInterface(ITypeSymbol type)
+        {
+            if (type is not INamedTypeSymbol { TypeKind: TypeKind.Interface } iface)
+                return;
+
+            HashSet<string> names = new(StringComparer.Ordinal);
+
+            foreach (INamedTypeSymbol each in iface.AllInterfaces.Prepend(iface))
+            {
+                foreach (IMethodSymbol member in each.GetMembers().OfType<IMethodSymbol>().Where(m => !m.IsStatic))
+                    names.Add(GoName(member.Name));
+            }
+
+            foreach (string name in names)
+                add(name);
+        }
+
+        static bool isGoEmbedded(ISymbol symbol) => symbol.GetAttributes().Any(a => a.AttributeClass?.Name == "GoEmbeddedAttribute");
+
+        void walkSource(StructDeclarationSyntax decl, Compilation comp, bool isRoot, HashSet<string> seen)
+        {
+            if (!isRoot)
+            {
+                HashSet<string> own = new(StringComparer.Ordinal);
+
+                foreach (MethodInfo m in decl.GetExtensionMethods(comp) ?? [])
+                    own.Add(GoName(m.Name));
+
+                foreach (MethodInfo m in decl.GetBoxReceiverExtensionMethods(comp))
+                    own.Add(GoName(m.Name));
+
+                foreach (string name in own)
+                    add(name);
+            }
+
+            SemanticModel model = comp.GetSemanticModel(decl.SyntaxTree);
+
+            foreach (FieldDeclarationSyntax field in decl.Members.OfType<FieldDeclarationSyntax>())
+            {
+                foreach (VariableDeclaratorSyntax variable in field.Declaration.Variables)
+                {
+                    // A FIELD is an occurrence of its name: Go lets a shallower field shadow a
+                    // deeper promoted method, so a name a field carries is not a unique method.
+                    add(variable.Identifier.Text);
+
+                    if (model.GetDeclaredSymbol(variable) is IFieldSymbol fieldSymbol && isGoEmbedded(fieldSymbol))
+                        addInterface(fieldSymbol.Type);
+                }
+            }
+
+            foreach ((string memberType, string memberName, _, bool isEmbedded, _) in decl.GetStructMembers(comp, true))
+            {
+                add(memberName);
+
+                if (isEmbedded)
+                    walk(memberType, seen);
+            }
+        }
+
+        void walk(string typeName, HashSet<string> seen)
+        {
+            if (!seen.Add(typeName))
+                return;
+
+            (StructDeclarationSyntax? decl, Compilation? comp) = Context.GetStructDeclaration(typeName);
+
+            if (decl is not null && comp is not null)
+            {
+                walkSource(decl, comp, false, [.. seen]);
+                return;
+            }
+
+            INamedTypeSymbol? embed = Context.FindUnderlyingStructSymbol(typeName);
+
+            if (embed is null)
+                return;
+
+            foreach (KeyValuePair<string, int> entry in metadataCounts(embed, new(SymbolEqualityComparer.Default)))
+                counts[entry.Key] = counts.TryGetValue(entry.Key, out int count) ? count + entry.Value : entry.Value;
+        }
+
+        // A METADATA embed's contribution, through its WHOLE subtree (its own embeds, accessible or not: an
+        // unexported embed's exported methods promote in Go). Its surface (methods with its receiver, including its
+        // own forwarders, which cannot be told from declared methods) mirrors its subtree: a surface name that its
+        // subtree provides at most once is ONE provider (a forwarder, or a declaration that shadows); a surface name
+        // its subtree provides twice or more is NOT unique (a buggy inherited forwarder or a shadowing declaration:
+        // either way the conservative answer is master's MISS).
+        Dictionary<string, int> metadataCounts(INamedTypeSymbol embed, HashSet<INamedTypeSymbol> seen)
+        {
+            Dictionary<string, int> result = new(StringComparer.Ordinal);
+
+            if (!seen.Add(embed) || embed.ContainingType is not INamedTypeSymbol packageClass)
+                return result;
+
+            INamedTypeSymbol? sibling = packageClass.ContainingNamespace.GetTypeMembers(XpkgClassName(packageClass.Name, embed.Name)).FirstOrDefault();
+            string? embedPackage = GetGoPackageName(packageClass);
+
+            // The surface splits by WHERE it lives. A sibling-class (ᴛxpkg) name is a cross-package forwarder the
+            // embed's own compile already proved unique: ONE provider. A package-class name comes from a SAME-package
+            // provider (declared, or forwarded from one this compilation may not even see: a foreign assembly's
+            // internal methods are never imported); it mirrors same-package providers below, but NOT cross-package
+            // ones or interface providers, which master's counter never saw.
+            HashSet<string> siblingSurface = new(StringComparer.Ordinal);
+            HashSet<string> surface = new(StringComparer.Ordinal);
+            Dictionary<string, int> subCross = new(StringComparer.Ordinal);
+            Dictionary<string, int> subSame = new(StringComparer.Ordinal);
+            Dictionary<string, int> fieldsHere = new(StringComparer.Ordinal);
+
+            static void addTo(Dictionary<string, int> into, string name, int n) => into[name] = into.TryGetValue(name, out int c) ? c + n : n;
+
+            foreach ((IMethodSymbol method, bool inSibling) in packageClass.GetMembers().OfType<IMethodSymbol>().Select(m => (m, false))
+                         .Concat(sibling?.GetMembers().OfType<IMethodSymbol>().Select(m => (m, true)) ?? []))
+            {
+                if (!method.IsExtensionMethod || method.Parameters.Length == 0)
+                    continue;
+
+                ITypeSymbol receiver = method.Parameters[0].Type;
+
+                if (receiver is INamedTypeSymbol { Name: PointerPrefix, TypeArguments.Length: 1 } box)
+                    receiver = box.TypeArguments[0];
+
+                if (SymbolEqualityComparer.Default.Equals(receiver.OriginalDefinition, embed.OriginalDefinition))
+                    (inSibling ? siblingSurface : surface).Add(GoName(method.Name));
+            }
+
+            foreach (ISymbol member in embed.GetMembers())
+            {
+                if (member.IsStatic || member.IsImplicitlyDeclared)
+                    continue;
+
+                if (member is IFieldSymbol field)
+                {
+                    // The INLINE embed field (`ʗ<Embed>`) is the one embed marker metadata always carries -- an
+                    // unexported embed (Mid2's `loc2`) has no accessor property at all -- so recurse through it.
+                    if (field.Name.StartsWith("ʗ", StringComparison.Ordinal))
+                    {
+                        addTo(fieldsHere, GoName(field.Name[1..]), 1);
+
+                        ITypeSymbol inline = field.Type;
+
+                        if (inline is INamedTypeSymbol { Name: PointerPrefix, TypeArguments.Length: 1 } inlineBox)
+                            inline = inlineBox.TypeArguments[0];
+
+                        if (inline is INamedTypeSymbol { TypeKind: TypeKind.Struct } inlineNested)
+                        {
+                            bool crossBelow = GetGoPackageName(inlineNested.ContainingType) != embedPackage;
+
+                            foreach (KeyValuePair<string, int> entry in metadataCounts(inlineNested, new(seen, SymbolEqualityComparer.Default)))
+                                addTo(crossBelow ? subCross : subSame, entry.Key, entry.Value);
+                        }
+
+                        continue;
+                    }
+
+                    addTo(fieldsHere, GoName(field.Name), 1);
+
+                    if (isGoEmbedded(field) && field.Type is INamedTypeSymbol { TypeKind: TypeKind.Interface } iface)
+                    {
+                        foreach (string name in iface.AllInterfaces.Prepend(iface).SelectMany(i => i.GetMembers().OfType<IMethodSymbol>())
+                                     .Where(m => !m.IsStatic).Select(m => GoName(m.Name)).Distinct(StringComparer.Ordinal))
+                            addTo(subCross, name, 1);
+                    }
+                }
+
+
+                // An accessor PROPERTY (the embed's own, or a promoted field's) is not counted: the
+                // inline `ʗ` field above, or the level that declares the field, already counts it.
+            }
+
+            // FIELDS count separately from the method surface: Go forbids a field and a method of one name at one
+            // level, so a surface method beside a same-named field is a forwarder of a SHADOWED method (internal/abi
+            // PtrType.Elem, a pre-existing same-package over-claim) and must not read as one provider.
+            foreach (string name in siblingSurface.Concat(surface).Concat(subCross.Keys).Concat(subSame.Keys).Concat(fieldsHere.Keys).Distinct(StringComparer.Ordinal))
+            {
+                int cross = subCross.TryGetValue(name, out int c1) ? c1 : 0;
+                int same = subSame.TryGetValue(name, out int c2) ? c2 : 0;
+                int fields = fieldsHere.TryGetValue(name, out int c3) ? c3 : 0;
+
+                result[name] = fields + (siblingSurface.Contains(name) ? 1 : surface.Contains(name) ? 1 + cross : cross + same);
+            }
+
+            return result;
+        }
+    }
+
+    // Mints one method promoted through another package's embed into the sibling class: the value
+    // form and its pointer twin, or the pointer shim alone for a box primary through a direct
+    // value embed. Mints nothing when a rule below declines.
+    private void EmitCrossPackage(MethodInfo method, string promotedStructType, string promotedMemberName, HashSet<string> structMethodNames)
+    {
+        // A GENERIC enclosing struct, or a generic embed, is not served: the forwarder would need
+        // the struct's own type parameters and their constraints re-declared on it. The embed is
+        // asked through its SYMBOL — the pointer box `ж<T>` is unwrapped there, so `*time.Time`
+        // is not mistaken for a generic embed, which a test on the type's spelling does.
+        if (StructName.Contains('<') || Context.FindUnderlyingStructSymbol(promotedStructType) is { TypeArguments.Length: > 0 })
+            return;
+
+        // A method the struct declares itself shadows every promotion of that name (Go's rule).
+        if (structMethodNames.Contains(method.Name))
+            return;
+
+        // Uniqueness across the struct's WHOLE tree: every method at any depth, every interface
+        // embed's methods, every field. Go promotes the shallowest occurrence of a name and drops
+        // it when two occur at that depth; a name that occurs once is promoted, unambiguously,
+        // whatever the depths are. A name that occurs twice or more is left exactly as it was —
+        // not minted, and not counted against the same-package promotions either.
+        if (!TreeNameCounts.TryGetValue(GoName(method.Name), out int occurrences) || occurrences != 1)
+            return;
+
+        // The forwarder is as visible as the struct, and it is skipped when its signature names
+        // a type that is not public: asked of the SYMBOLS, not of the names' casing, because a
+        // forwarder narrowed to `internal` on a lowercase-named public type is invisible one
+        // assembly on, and a promotion that crosses two packages would vanish there.
+        if (!method.ReturnTypeIsPublic || !method.ParametersArePublic)
+            return;
+
+        // The first forwarder this struct mints is where its sibling class comes into being.
+        if (m_xpkg.Length == 0 && PackageName.Contains(TempVarMarker))
+            Context.ReportDiagnostic(Diagnostic.Create(s_xpkgStemMarker, Location.None, PackageName, XpkgClassName($"{PackageName}_package", NonGenericStructName)));
+
+        string scope = Scope ?? "public";
+        string qualified = $"global::{PackageNamespace}.{PackageName}_package.{StructName}";
+        string typedParams = string.Join(", ", method.Parameters.Skip(1).Select(param => $"{param.type} {param.name}"));
+        string args = string.Join(", ", method.Parameters.Skip(1).Select(ArgumentName));
+        string sep = method.Parameters.Length > 1 ? ", " : "";
+        string ret = method.ReturnType == "void" ? "" : "return ";
+
+        if (method.IsValueEmbedBoxRecv)
+        {
+            // A box primary through a DIRECT value embed: the pointer-set shim alone, descending
+            // through the embed's box-field accessor exactly as the same-package path emits it.
+            string embedBox = GetUnsanitizedIdentifier(promotedMemberName);
+            m_xpkg.Append($"\r\n    {scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}target{sep}{typedParams}) => {AddressPrefix}target.of({qualified}.{AddressPrefix}{embedBox}).{method.Name}({args});");
+            return;
+        }
+
+        string embedAccess = EmbedHop(promotedStructType, promotedMemberName);
+
+        if (method.IsBoxRecv && embedAccess.EndsWith(".Value", StringComparison.Ordinal))
+            embedAccess = embedAccess[..^".Value".Length];
+
+        // Go's method-set rule for a POINTER-receiver method, by the embed path (PathHasPointer):
+        //   - a pointer hop on the path puts it in the struct's VALUE set. The value form takes
+        //     its receiver BY VALUE: the call goes through the embedded pointer, which a copy of
+        //     the struct shares, and a by-value receiver binds as a delegate and in an interface
+        //     shell with no help;
+        //   - value hops only leave it in the POINTER set alone. The value form mirrors its
+        //     source's `this ref` and says so with [GoRecv], which keeps it out of the value set.
+        // A value-receiver method is forwarded by value either way.
+        bool pointerReceiver = !method.IsBoxRecv && (method.IsRefRecv || method.IsGoRecv);
+        bool pointerSetOnly = pointerReceiver && !method.PathHasPointer;
+        string recvMod = pointerSetOnly ? "ref " : "";
+        string goRecv = pointerSetOnly ? "[global::go.GoRecv] " : "";
+
+        m_xpkg.Append($"\r\n    {goRecv}{scope} static {method.ReturnType} {method.Name}(this {recvMod}{qualified} target{sep}{typedParams}) => target.{embedAccess}.{method.Name}({args});");
+        m_xpkg.Append($"\r\n    {scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}target{sep}{typedParams})");
+        m_xpkg.Append($"\r\n    {{\r\n        ref var target = ref {AddressPrefix}target.Value;\r\n        {ret}target.{embedAccess}.{method.Name}({args});\r\n    }}");
+    }
+
+    public override string TemplateFooter
+    {
+        get
+        {
+            string footer = base.TemplateFooter;
+
+            if (m_xpkg.Length == 0)
+                return footer;
+
+            return footer + $$"""
+
+                [{{GeneratedCodeAttribute}}]
+                public static class {{XpkgClassName($"{PackageName}_package", NonGenericStructName)}}
+                {{{m_xpkg}}
+                }
+
+                """;
+        }
+    }
 
     // The POINTED-TO type of a pointer embed, or null when the re-rooted form cannot be emitted for
     // it. It is what a promoted field-reference accessor must re-root at: the embed's declared type

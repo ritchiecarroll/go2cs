@@ -95,7 +95,7 @@ partial class elf_package {
     // ReaderAt may be nil if the section is not easily available
     // in a random-access form. For example, a compressed section
     // may have a nil ReaderAt.
-    public io_package.ReaderAt ReaderAt;
+    [GoEmbedded] public io_package.ReaderAt ReaderAt;
     internal ж<io.SectionReader> sr;
     internal CompressionType compressionType;
     internal int64 compressionOffset;
@@ -201,7 +201,7 @@ public static io.ReadSeeker Open(this ж<ΔSection> Ꮡs) {
     // If a client wants Read and Seek it must use
     // Open() to avoid fighting over the seek offset
     // with other clients.
-    public io_package.ReaderAt ReaderAt;
+    [GoEmbedded] public io_package.ReaderAt ReaderAt;
     internal ж<io.SectionReader> sr;
 }
 

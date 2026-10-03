@@ -41,7 +41,7 @@ public static io.Reader Reader;
 }
 
 [GoType] partial struct reader {
-    public go.crypto.@internal.fips140.drbg_package.DefaultReader DefaultReader;
+    [GoEmbedded] public go.crypto.@internal.fips140.drbg_package.DefaultReader DefaultReader;
 }
 
 [GoRecv] internal static (nint n, error err) Read(this ref reader r, slice<byte> b) {

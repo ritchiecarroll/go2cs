@@ -8,7 +8,7 @@ using EmbeddedInterfaceWitness;
 partial class main_package {
 
 [GoType] partial struct wrapper {
-    public EmbeddedInterfaceWitness.iolike_package.Reader Reader;
+    [GoEmbedded] public EmbeddedInterfaceWitness.iolike_package.Reader Reader;
     internal @string prefix;
 }
 
@@ -82,7 +82,7 @@ private static readonly object localAssertˢ = (@string)"local assert:"u8;
 private static readonly object localAssertNoˢ = (@string)"local assert: no"u8;
 
 [GoType("dyn")] internal partial struct LocalPromotion_inner {
-    public EmbeddedInterfaceWitness.iolike_package.Reader Reader;
+    [GoEmbedded] public EmbeddedInterfaceWitness.iolike_package.Reader Reader;
 }
 
 public static void LocalPromotion() {
@@ -100,7 +100,7 @@ public static void LocalPromotion() {
 
 [GoType] partial struct conflicted {
     public partial ref EmbeddedInterfaceWitness.iolike_package.Base Base { get; }
-    public EmbeddedInterfaceWitness.iolike_package.Reader Reader;
+    [GoEmbedded] public EmbeddedInterfaceWitness.iolike_package.Reader Reader;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -129,7 +129,7 @@ internal static void checkConflicted() {
 }
 
 [GoType] partial struct pointerOnly {
-    public EmbeddedInterfaceWitness.iolike_package.ReadWriter ReadWriter;
+    [GoEmbedded] public EmbeddedInterfaceWitness.iolike_package.ReadWriter ReadWriter;
     internal partial ref pointerBase pointerBase { get; }
 }
 

@@ -592,7 +592,7 @@ internal static Func<error, bool> isEADDRINUSE = (error err) => false;
 [GoType("dyn")] [GoLocalName("test")] internal partial struct TestDialerLocalAddr_test {
     internal @string network, raddr;
     internal global::go.net_package.ΔAddr laddr;
-    internal error error;
+    [GoEmbedded] internal error error;
 }
 
 public static void TestDialerLocalAddr(ж<testing.T> Ꮡt) {
@@ -1273,7 +1273,7 @@ internal static void mustHaveExternalNetwork(ж<testing.T> Ꮡt) {
 }
 
 [GoType] internal partial struct contextWithNonZeroDeadline {
-    public context_package.Context Context;
+    [GoEmbedded] public context_package.Context Context;
 }
 
 internal static (time.Time, bool) Deadline(this contextWithNonZeroDeadline _) {

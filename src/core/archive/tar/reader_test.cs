@@ -795,15 +795,15 @@ public static void TestUninitializedRead(ж<testing.T> Ꮡt) {
 }
 
 [GoType] internal partial struct reader {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 [GoType] internal partial struct readSeeker {
-    public io_package.ReadSeeker ReadSeeker;
+    [GoEmbedded] public io_package.ReadSeeker ReadSeeker;
 }
 
 [GoType] internal partial struct readBadSeeker {
-    public io_package.ReadSeeker ReadSeeker;
+    [GoEmbedded] public io_package.ReadSeeker ReadSeeker;
 }
 
 // Go method set entry for the promoted 'ReadSeeker.Read()' - provided ONLY by the embedded
@@ -1440,7 +1440,7 @@ public static void TestReadGNUSparsePAXHeaders(ж<testing.T> Ꮡt) {
 // testNonEmptyReader wraps an io.Reader and ensures that
 // Read is never called with an empty buffer.
 [GoType] internal partial struct testNonEmptyReader {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

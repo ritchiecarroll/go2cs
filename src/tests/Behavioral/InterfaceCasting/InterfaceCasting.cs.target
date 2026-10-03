@@ -89,7 +89,7 @@ internal static (ж<Counter>, error) makeCounter() {
 }
 
 [GoType] partial struct reversed {
-    public Animal Animal;
+    [GoEmbedded] public Animal Animal;
 }
 
 public static Animal Reversed(Animal a) {
@@ -247,7 +247,7 @@ internal static void replaceAnimal(ref Animal a) {
 }
 
 [GoType] partial struct wrapSink {
-    public Animal Animal;
+    [GoEmbedded] public Animal Animal;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

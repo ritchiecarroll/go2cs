@@ -20,7 +20,7 @@ internal static @string label(this gold _) {
 
 
 [GoType("dyn")] partial struct reservedᴛ1 {
-    internal badge badge;
+    [GoEmbedded] internal badge badge;
 }
 internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
 

@@ -10,7 +10,7 @@ partial class elf_package {
 
 // errorReader returns error from all operations.
 [GoType] partial struct errorReader {
-    internal error error;
+    [GoEmbedded] internal error error;
 }
 
 internal static (nint n, error err) Read(this errorReader r, slice<byte> p) {

@@ -42,7 +42,7 @@ internal static readonly @string multipartˢ = "multipart-"u8;
 
 // os.File.ReadFrom will allocate its own copy buffer if we let io.Copy use it.
 [GoType("dyn")] internal partial struct readForm_writerOnly {
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMemory) {
@@ -317,7 +317,7 @@ internal static int64 /*size*/ mimeHeaderSize(textproto.MIMEHeader h) {
 // helper types to turn a []byte into a File
 [GoType] partial struct sectionReadCloser {
     public partial ref ж<io_package.SectionReader> SectionReader { get; }
-    public io_package.Closer Closer;
+    [GoEmbedded] public io_package.Closer Closer;
 }
 
 internal static error Close(this sectionReadCloser rc) {

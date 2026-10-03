@@ -63,7 +63,7 @@ internal static readonly object gotUnexpectedErrorAfterˢ = (@string)"Got unexpe
 internal static readonly object got0LengthWriteExpected0ˢ = (@string)"Got 0 length write, expected > 0"u8;
 
 [GoType("dyn")] internal partial struct TestWriteError_src {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 // Test if errors from the underlying writer is passed upwards.

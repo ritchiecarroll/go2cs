@@ -186,7 +186,7 @@ public static void TestMarshalEmptyIP(ж<testing.T> Ꮡt) {
     internal global::go.net_package.IP @in;     // see RFC 791 and RFC 4291
     internal @string str; // see RFC 791, RFC 4291 and RFC 5952
     internal slice<byte> byt;
-    internal error error;
+    [GoEmbedded] internal error error;
 }
 internal static slice<ж<ipStringTestsᴛ1>> ipStringTests;
 internal static void initᴛipStringTests() { ipStringTests = new ж<ipStringTestsᴛ1>[]{

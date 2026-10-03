@@ -339,11 +339,11 @@ public static void TestWriteAfterWriterClose(ж<testing.T> Ꮡt) {
 }
 
 [GoType("dyn")] internal partial struct TestPipeCloseError_testError1 {
-    internal error error;
+    [GoEmbedded] internal error error;
 }
 
 [GoType("dyn")] internal partial struct TestPipeCloseError_testError2 {
-    internal error error;
+    [GoEmbedded] internal error error;
 }
 
 public static void TestPipeCloseError(ж<testing.T> Ꮡt) {

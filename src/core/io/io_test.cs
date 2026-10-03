@@ -21,8 +21,8 @@ partial class io_test_package {
 // A version of bytes.Buffer without ReadFrom and WriteTo
 [GoType] partial struct Buffer {
     public partial ref bytes_package.Buffer ΔBuffer { get; }
-    public io_package.ReaderFrom ReaderFrom; // conflicts with and hides bytes.Buffer's ReaderFrom.
-    public io_package.WriterTo WriterTo;   // conflicts with and hides bytes.Buffer's WriterTo.
+    [GoEmbedded] public io_package.ReaderFrom ReaderFrom; // conflicts with and hides bytes.Buffer's ReaderFrom.
+    [GoEmbedded] public io_package.WriterTo WriterTo;   // conflicts with and hides bytes.Buffer's WriterTo.
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -531,8 +531,8 @@ public static void TestCopyLargeWriter(ж<testing.T> Ꮡt) {
 }
 
 [GoType("dyn")] internal partial struct TestNopCloserWriterToForwarding_typeᴛ1 {
-    public io_package.Reader Reader;
-    public io_package.WriterTo WriterTo;
+    [GoEmbedded] public io_package.Reader Reader;
+    [GoEmbedded] public io_package.WriterTo WriterTo;
 }
 
 public static void TestNopCloserWriterToForwarding(ж<testing.T> Ꮡt) {

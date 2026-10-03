@@ -386,7 +386,7 @@ internal static void cancel(this ж<afterFuncCtx> Ꮡa, bool removeFromParent, e
 // an AfterFunc has been registered with the parent.
 // It holds the stop function used to unregister the AfterFunc.
 [GoType] partial struct stopCtx {
-    public Context Context;
+    [GoEmbedded] public Context Context;
     internal Func<bool> stop;
 }
 
@@ -456,7 +456,7 @@ internal static channel<EmptyStruct> closedchan = new channel<EmptyStruct>(0);
 // A cancelCtx can be canceled. When canceled, it also cancels any children
 // that implement canceler.
 [GoType] partial struct cancelCtx {
-    public Context Context;
+    [GoEmbedded] public Context Context;
     internal Δsync.Mutex mu;            // protects following fields
     internal atomic.Value done;          // of chan struct{}, created lazily, closed by first cancel call
     internal map<canceler, EmptyStruct> children; // set to nil by the first cancel call
@@ -808,7 +808,7 @@ public static Context WithValue(Context parent, any key, any val) {
 // A valueCtx carries a key-value pair. It implements Value for that key and
 // delegates all other calls to the embedded Context.
 [GoType] partial struct valueCtx {
-    public Context Context;
+    [GoEmbedded] public Context Context;
     internal any key, val;
 }
 

@@ -415,7 +415,8 @@ public static partial class GoReflect
             GoChanDir fieldDir = KindOf(field.FieldType) == Chan ? FieldChanDir(t, field) : GoChanDir.Unstamped;
             ChanCargo? fieldCargo = KindOf(field.FieldType) == Chan ? FieldChanCargo(t, field) : null;
             // A plain field the converter stamped [GoEmbedded] is a Go EMBEDDED field of a predeclared
-            // type (`struct{ int }`): nothing to promote, so no `partial ref` shape to key on (E2b).
+            // type (`struct{ int }`) or of an interface type (`struct{ io.Reader }`): neither has the
+            // `partial ref` shape to key on, so the stamp is what makes the field Anonymous (E2b).
             result.Add(new GoFieldInfo(projected, field.FieldType, dims, [.. prefixPath, field], [.. prefixHops, false], goTagOf(field), embedded: field.IsDefined(typeof(GoEmbeddedAttribute), false), chanDir: fieldDir, keyDims: FieldMapKeyDims(field), descriptorSelf: FieldDescriptorType(field), chanCargo: fieldCargo));
         }
 

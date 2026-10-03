@@ -229,8 +229,8 @@ internal static void fixPragmaCacheControl(ΔHeader header) {
 internal static readonly @string contentLength0ˢ = "Content-Length: 0\r\n"u8;
 
 [GoType("dyn")] internal partial struct Write_r1 {
-    public io_package.Reader Reader;
-    public io_package.Closer Closer;
+    [GoEmbedded] public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Closer Closer;
 }
 
 // Write writes r to w in the HTTP/1.x server response format,

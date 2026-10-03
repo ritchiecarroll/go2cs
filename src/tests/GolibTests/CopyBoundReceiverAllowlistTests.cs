@@ -97,6 +97,56 @@ public class CopyBoundReceiverAllowlistTests
         Console.WriteLine($"package classes read: {packages}; allowlisted copy-bound receivers seen: {seen.Count} of {allowlist.Count}");
     }
 
+    // A method promoted through ANOTHER package's embed is forwarded from a sibling class,
+    // `{pkg}ᴛ{Struct}ᴛxpkg`, and the generator settles its method set where it mints it: a
+    // pointer-receiver method through value hops is `[GoRecv] this ref` (pointer set only), and one
+    // through a pointer hop is by value. So NO sibling-class forwarder is a by-ref receiver without
+    // [GoRecv] — the allowlist has no rows for these classes, and none may be added.
+    [TestMethod]
+    public void NoCrossPackageForwarderIsACopyBoundReceiver()
+    {
+        List<string> unmarked = [];
+        int classes = 0, forwarders = 0, pointerSetOnly = 0;
+
+        foreach (Assembly assembly in LoadReferencedClosure())
+        {
+            foreach (Type siblingClass in SafeTypes(assembly))
+            {
+                if (!siblingClass.IsAbstract || !siblingClass.IsSealed || siblingClass.IsNested ||
+                    !siblingClass.Name.EndsWith("ᴛxpkg", StringComparison.Ordinal))
+                    continue;
+
+                classes++;
+
+                foreach (MethodInfo method in siblingClass.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+                {
+                    if (!method.IsDefined(typeof(ExtensionAttribute), false))
+                        continue;
+
+                    forwarders++;
+
+                    if (!method.GetParameters()[0].ParameterType.IsByRef)
+                        continue;
+
+                    if (method.IsDefined(typeof(GoRecvAttribute), false))
+                        pointerSetOnly++;
+                    else
+                        unmarked.Add($"{siblingClass.FullName}.{method.Name}");
+                }
+            }
+        }
+
+        Assert.AreEqual(0, unmarked.Count,
+            "cross-package forwarder(s) with a by-ref receiver and no [GoRecv] — golib would bind each as a VALUE-set method through a copy: " +
+            string.Join(", ", unmarked.Take(20)));
+
+        // Not vacuous: the loaded closure holds sibling classes, with forwarders of both kinds.
+        Assert.IsTrue(classes >= 1 && forwarders > pointerSetOnly && pointerSetOnly >= 1,
+            $"the guard read {classes} sibling classes, {forwarders} forwarders, {pointerSetOnly} of them [GoRecv] by-ref: too few to be the corpus");
+
+        Console.WriteLine($"sibling classes read: {classes}; forwarders: {forwarders}; [GoRecv] by-ref: {pointerSetOnly}");
+    }
+
     private static HashSet<string> ReadAllowlist()
     {
         for (DirectoryInfo? dir = new(AppContext.BaseDirectory); dir is not null; dir = dir.Parent)

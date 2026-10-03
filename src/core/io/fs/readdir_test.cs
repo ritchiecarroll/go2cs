@@ -16,7 +16,7 @@ using go.testing;
 partial class fs_test_package {
 
 [GoType] partial struct readDirOnly {
-    public go.io.fs_package.ReadDirFS ReadDirFS;
+    [GoEmbedded] public go.io.fs_package.ReadDirFS ReadDirFS;
 }
 
 internal static (fs.File, error) Open(this readDirOnly _, @string name) {
@@ -118,7 +118,7 @@ internal static @string errorPath(error err) {
 private static readonly @string nonExistentˢ = "non-existent"u8;
 
 [GoType("dyn")] internal partial struct TestReadDirPath_fsys {
-    public go.io.fs_package.FS FS;
+    [GoEmbedded] public go.io.fs_package.FS FS;
 }
 
 public static void TestReadDirPath(ж<testing.T> Ꮡt) {

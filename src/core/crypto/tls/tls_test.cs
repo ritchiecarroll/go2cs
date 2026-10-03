@@ -1232,7 +1232,7 @@ public static void TestCloneNilConfig(ж<testing.T> Ꮡt) {
 // changeImplConn is a net.Conn which can change its Write and Close
 // methods.
 [GoType] internal partial struct changeImplConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
     internal Func<slice<byte>, (nint, error)> writeFunc;
     internal Func<error> closeFunc;
 }
@@ -1360,7 +1360,7 @@ public static void BenchmarkThroughput(ж<testing.B> Ꮡb) {
 }
 
 [GoType] internal partial struct slowConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
     internal nint bps;
 }
 
@@ -2078,7 +2078,7 @@ internal static bool http2isBadCipher(uint16 cipher) {
 }
 
 [GoType] internal partial struct brokenSigner {
-    public crypto_package.Signer Signer;
+    [GoEmbedded] public crypto_package.Signer Signer;
 }
 
 internal static (slice<byte> signature, error err) Sign(this brokenSigner s, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) {

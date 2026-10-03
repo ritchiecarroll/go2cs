@@ -16,7 +16,7 @@ partial class main_package {
 
 [GoType] partial struct MyCustomError {
     public @string Message;
-    public Abser Abser;
+    [GoEmbedded] public Abser Abser;
     public partial ref ж<MyError> MyError { get; }
 }
 

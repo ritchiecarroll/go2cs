@@ -8,7 +8,7 @@ partial class main_package {
 [GoType("dyn")] partial struct ptrElemsᴛ1 {
     internal nint @in;
     internal @string str;
-    internal error error;
+    [GoEmbedded] internal error error;
 }
 internal static slice<ж<ptrElemsᴛ1>> ptrElems = new ж<ptrElemsᴛ1>[]{
     Ꮡ(new ptrElemsᴛ1(1, "one"u8, default!)),

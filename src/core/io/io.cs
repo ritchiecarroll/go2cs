@@ -754,7 +754,7 @@ public static ReadCloser NopCloser(Reader r) {
 }
 
 [GoType] partial struct nopCloser {
-    public Reader Reader;
+    [GoEmbedded] public Reader Reader;
 }
 
 internal static error Close(this nopCloser _) {
@@ -762,7 +762,7 @@ internal static error Close(this nopCloser _) {
 }
 
 [GoType] partial struct nopCloserWriterTo {
-    public Reader Reader;
+    [GoEmbedded] public Reader Reader;
 }
 
 internal static error Close(this nopCloserWriterTo _) {

@@ -2268,7 +2268,7 @@ internal static void testVerifyPeerCertificate(ж<testing.T> Ꮡt, uint16 versio
 // brokenConn wraps a net.Conn and causes all Writes after a certain number to
 // fail with brokenConnErr.
 [GoType] internal partial struct brokenConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
     // breakAfter is the number of successful writes that will be allowed
     // before all subsequent writes fail.
     internal nint breakAfter;
@@ -2342,7 +2342,7 @@ public static void TestFailedWrite(ж<testing.T> Ꮡt) {
 
 // writeCountingConn wraps a net.Conn and counts the number of Write calls.
 [GoType] internal partial struct writeCountingConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
     // numWrites is the number of writes that have been done.
     internal nint numWrites;
 }
@@ -3072,7 +3072,7 @@ internal static void testTLS13OnlyClientHelloCipherSuite(ж<testing.T> Ꮡt, sli
 
 // discardConn wraps a net.Conn but discards all writes, but reports that they happened.
 [GoType] internal partial struct discardConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
 }
 
 // Go method set entry for the promoted 'Conn.Close()' - provided ONLY by the embedded

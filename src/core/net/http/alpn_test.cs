@@ -149,7 +149,7 @@ internal static void handleTLSProtocol09(ж<Δhttp.Server> Ꮡsrv, ж<tls.Conn> 
 }
 
 [GoType] partial struct http09Writer {
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Writer Writer;
     internal httpꓸHeader h;
 }
 

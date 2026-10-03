@@ -255,7 +255,7 @@ internal static void testTLSServerClientTransportType(ж<testing.T> Ꮡt, Func<h
 }
 
 [GoType] internal partial struct onlyCloseListener {
-    public net_package.Listener Listener;
+    [GoEmbedded] public net_package.Listener Listener;
 }
 
 internal static error Close(this onlyCloseListener _) {

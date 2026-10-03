@@ -83,7 +83,7 @@ internal static nuint nextPowerOfTwo(nint length) {
 [GoType] partial struct reverse {
     // This embedded Interface permits Reverse to use the methods of
     // another Interface implementation.
-    public Interface Interface;
+    [GoEmbedded] public Interface Interface;
 }
 
 // Less returns the opposite of the embedded implementation's Less method.

@@ -69,7 +69,7 @@ public static void TestCVE202230630(ж<testing.T> Ꮡt) {
 }
 
 [GoType] partial struct globOnly {
-    public go.io.fs_package.GlobFS GlobFS;
+    [GoEmbedded] public go.io.fs_package.GlobFS GlobFS;
 }
 
 internal static (fs.File, error) Open(this globOnly _, @string name) {

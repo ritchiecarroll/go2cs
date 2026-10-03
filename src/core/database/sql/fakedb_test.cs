@@ -180,7 +180,7 @@ internal static void incrStat(this ж<fakeConn> Ꮡc, ж<nint> Ꮡv) {
 }
 
 [GoType] internal partial struct fakeStmt {
-    internal memToucher memToucher;
+    [GoEmbedded] internal memToucher memToucher;
     internal ж<fakeConn> c;
     internal @string q; // just for debugging
     internal @string cmd;
@@ -204,7 +204,7 @@ internal static driver.Driver fdriver = new sql_internal_test_package.fakeDriver
 }
 
 [GoType] public partial struct Dummy {
-    public go.database.sql.driver_package.Driver Driver;
+    [GoEmbedded] public go.database.sql.driver_package.Driver Driver;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

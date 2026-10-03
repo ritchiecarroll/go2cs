@@ -780,7 +780,7 @@ internal static void awaitLegacyCancel(context.Context ctx, Action<error> cancel
 internal static error errCannotRewind = errors.New("net/http: cannot rewind body after connection loss"u8);
 
 [GoType] partial struct readTrackingBody {
-    public io_package.ReadCloser ReadCloser;
+    [GoEmbedded] public io_package.ReadCloser ReadCloser;
     internal bool didRead;
     internal bool didClose;
 }
@@ -2867,7 +2867,7 @@ internal static io.ReadWriteCloser newReadWriteCloserBody(ж<bufio.Reader> Ꮡbr
 [GoType] partial struct readWriteCloserBody {
     internal incomparable _;
     internal ж<bufio.Reader> br; // used until empty
-    public io_package.ReadWriteCloser ReadWriteCloser;
+    [GoEmbedded] public io_package.ReadWriteCloser ReadWriteCloser;
 }
 
 // Go method set entry for the promoted 'ReadWriteCloser.Close()' - provided ONLY by the embedded
@@ -2899,7 +2899,7 @@ internal static (nint, error) Write(this readWriteCloserBody recvᴛ, slice<byte
 
 // nothingWrittenError wraps a write errors which ended up writing zero bytes.
 [GoType] partial struct nothingWrittenError {
-    internal error error;
+    [GoEmbedded] internal error error;
 }
 
 internal static error Unwrap(this nothingWrittenError nwe) {

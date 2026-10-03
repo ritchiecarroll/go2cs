@@ -680,7 +680,7 @@ public static void TestReverseProxyFlushInterval(ж<testing.T> Ꮡt) {
 }
 
 [GoType] internal partial struct mockFlusher {
-    public go.net.http_package.ResponseWriter ResponseWriter;
+    [GoEmbedded] public go.net.http_package.ResponseWriter ResponseWriter;
     internal bool flushed;
 }
 
@@ -689,7 +689,7 @@ public static void TestReverseProxyFlushInterval(ж<testing.T> Ꮡt) {
 }
 
 [GoType] internal partial struct wrappedRW {
-    public go.net.http_package.ResponseWriter ResponseWriter;
+    [GoEmbedded] public go.net.http_package.ResponseWriter ResponseWriter;
 }
 
 [GoRecv] internal static http.ResponseWriter Unwrap(this ref wrappedRW w) {

@@ -127,8 +127,8 @@ internal static readonly @string fakeHostˢ = "fake.host"u8;
 internal static readonly @string authFooauthQuitˢ = "AUTH FOOAUTH\r\n*\r\nQUIT\r\n"u8;
 
 [GoType("dyn")] internal partial struct TestClientAuthTrimSpace_fake {
-    public io_package.Reader Reader;
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 // Issue 17794: don't send a trailing space on AUTH command when there's no password.
@@ -175,7 +175,7 @@ internal static (slice<byte> toServer, error err) Next(this toServerEmptyAuth _,
 }
 
 [GoType] internal partial struct faker {
-    public io_package.ReadWriter ReadWriter;
+    [GoEmbedded] public io_package.ReadWriter ReadWriter;
 }
 
 internal static error Close(this faker f) {

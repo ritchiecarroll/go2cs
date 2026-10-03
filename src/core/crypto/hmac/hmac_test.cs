@@ -605,7 +605,7 @@ public static void TestNonUniqueHash(ж<testing.T> Ꮡt) {
 
 // justHash implements just the hash.Hash methods and nothing else
 [GoType] internal partial struct justHash {
-    public hash_package.Hash Hash;
+    [GoEmbedded] public hash_package.Hash Hash;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

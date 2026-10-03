@@ -74,7 +74,7 @@ internal static slice<streamTestsᴛ1> streamTests = new streamTestsᴛ1[]{
 }.slice();
 
 [GoType] internal partial struct nilCloser {
-    public io_package.ReadWriter ReadWriter;
+    [GoEmbedded] public io_package.ReadWriter ReadWriter;
 }
 
 [GoRecv] internal static error Close(this ref nilCloser c) {
@@ -238,7 +238,7 @@ internal static void initᴛcleanUpTests() { cleanUpTests = new cleanUpTestsᴛ1
 }.slice(); }
 
 [GoType] internal partial struct nopWriteCloser {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 internal static (nint, error) Write(this nopWriteCloser _, slice<byte> buf) {
@@ -281,8 +281,8 @@ public static void TestChildServeCleansUp(ж<testing.T> Ꮡt) {
 }
 
 [GoType] internal partial struct rwNopCloser {
-    public io_package.Reader Reader;
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 internal static error Close(this rwNopCloser _) {
@@ -438,7 +438,7 @@ public static void TestResponseWriterSniffsContentType(ж<testing.T> Ꮡt) {
 }
 
 [GoType] internal partial struct signalingNopWriteCloser {
-    public io_package.ReadCloser ReadCloser;
+    [GoEmbedded] public io_package.ReadCloser ReadCloser;
     internal channel<bool> closed;
 }
 

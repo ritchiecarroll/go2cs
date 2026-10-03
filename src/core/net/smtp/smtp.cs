@@ -361,7 +361,7 @@ public static error Rcpt(this ж<Client> Ꮡc, @string to) {
 
 [GoType] partial struct dataCloser {
     internal ж<Client> c;
-    public io_package.WriteCloser WriteCloser;
+    [GoEmbedded] public io_package.WriteCloser WriteCloser;
 }
 
 // Go method set entry for the promoted 'WriteCloser.Write()' - provided ONLY by the embedded

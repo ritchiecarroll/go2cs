@@ -1419,9 +1419,12 @@ public class ImplementGenerator : ISourceGenerator
                 // A FOREIGN value embed's extensions live in another namespace segment
                 // (netip_package sits in go.net; the source file only ALIASES it, which does
                 // not import extensions) - call the package-class static directly:
-                // `global::go.net.netip_package.String(this.AddrPort)`.
+                // `global::go.net.netip_package.String(this.AddrPort)`. The class is read off the
+                // embed's SYMBOL: the spelled type name is already `global::go.…` in an internal test
+                // and `go.<module ns>.…` in an external one, and prefixing either again names nothing
+                // (`global::go.global::go.…` CS7000, `global::go.go.…` CS0234: golang-jwt's tests).
                 ValueEmbedHopStaticClass = embedHop is null && (structDecl?.GetEmbeddedValueHopNames() is [var svh]) && svh.TypeName.Contains('.')
-                    ? "global::go." + svh.TypeName.Substring(0, svh.TypeName.LastIndexOf('.'))
+                    ? ResolveValueEmbedPackageClass(structType, svh.Name) ?? "global::go." + svh.TypeName.Substring(0, svh.TypeName.LastIndexOf('.'))
                     : null,
                 UsingStatements = usingStatements
             }
@@ -1827,6 +1830,19 @@ public class ImplementGenerator : ISourceGenerator
 
         return declared ? localName : null;
     }
+
+    /// <summary>
+    /// The fully qualified package class (<c>global::go.….X_package</c>) declaring the type of the
+    /// struct's VALUE embed <paramref name="embedName"/>, or <c>null</c> when the embed member does
+    /// not resolve to a type nested in a class.
+    /// </summary>
+    private static string? ResolveValueEmbedPackageClass(ITypeSymbol structType, string embedName) =>
+        structType.GetMembers(embedName)
+            .Select(member => member switch { IPropertySymbol property => property.Type, IFieldSymbol field => field.Type, _ => null })
+            .OfType<INamedTypeSymbol>()
+            .FirstOrDefault()?.ContainingType is INamedTypeSymbol packageClass
+            ? packageClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+            : null;
 
     /// <summary>
     /// Reads a lifted type's ORIGINAL Go name from its <c>[GoLocalName]</c> stamp, or <c>null</c>

@@ -1018,7 +1018,7 @@ internal static @string String(this ж<fakeFileInfo> Ꮡf) {
 }
 
 [GoType] partial struct fakeFile {
-    public io_package.ReadSeeker ReadSeeker;
+    [GoEmbedded] public io_package.ReadSeeker ReadSeeker;
     internal ж<fakeFileInfo> fi;
     internal @string path; // as opened
     internal nint entpos;
@@ -1509,7 +1509,7 @@ internal static (Δhttp.File, error) Open(this issue12991FS _Δp0, @string _Δp1
 }
 
 [GoType] partial struct issue12991File {
-    public global::go.net.http_package.File File;
+    [GoEmbedded] public global::go.net.http_package.File File;
 }
 
 internal static (fs.FileInfo, error) Stat(this issue12991File _) {
@@ -1820,7 +1820,7 @@ internal static (Δhttp.File, error) Open(this fileServerCleanPathDir d, @string
 }
 
 [GoType] partial struct panicOnSeek {
-    public io_package.ReadSeeker ReadSeeker;
+    [GoEmbedded] public io_package.ReadSeeker ReadSeeker;
 }
 
 [GoType("dyn")] internal partial struct TestScanETag_tests {
@@ -2083,7 +2083,7 @@ public static void TestServeFileZippingResponseWriter(ж<testing.T> Ꮡt) {
 }
 
 [GoType] partial struct gzipResponseWriter {
-    public global::go.net.http_package.ResponseWriter ResponseWriter;
+    [GoEmbedded] public global::go.net.http_package.ResponseWriter ResponseWriter;
     internal ж<gzip.Writer> w;
 }
 

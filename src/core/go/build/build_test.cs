@@ -362,7 +362,7 @@ public static void TestGoodOSArchFile(ж<testing.T> Ꮡt) {
 }
 
 [GoType] internal partial struct readNopCloser {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 internal static error Close(this readNopCloser r) {

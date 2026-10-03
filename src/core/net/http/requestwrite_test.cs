@@ -647,7 +647,7 @@ public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
 }
 
 [GoType] internal partial struct closeChecker {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
     internal bool closed;
 }
 
@@ -707,8 +707,8 @@ internal delegate (nint, error) writerFunc(slice<byte> _);
 internal static readonly @string fakeWriteFailureˢ = "fake write failure"u8;
 
 [GoType("dyn")] internal partial struct TestRequestWriteError_w {
-    public io_package.ByteWriter ByteWriter; // to avoid being wrapped by a bufio.Writer
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.ByteWriter ByteWriter; // to avoid being wrapped by a bufio.Writer
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 // TestRequestWriteError tests the Write err != nil checks in (*Request).write.
@@ -834,8 +834,8 @@ internal static (slice<byte>, error) dumpRequestOut(ж<global::go.net.http_packa
 
 // dumpConn is a net.Conn that writes to Writer and reads from Reader.
 [GoType] internal partial struct dumpConn {
-    public io_package.Writer Writer;
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 [GoRecv] internal static error Close(this ref dumpConn c) {

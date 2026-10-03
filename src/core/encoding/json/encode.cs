@@ -306,7 +306,7 @@ internal static ж<encodeState> newEncodeState() {
 // Panics with errors are wrapped in jsonError so that the top-level recover
 // can distinguish intentional panics from this package.
 [GoType] partial struct jsonError {
-    internal error error;
+    [GoEmbedded] internal error error;
 }
 
 internal static error /*err*/ marshal(this ж<encodeState> Ꮡe, any v, encOpts opts) {

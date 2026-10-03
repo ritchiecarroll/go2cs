@@ -516,7 +516,7 @@ internal static ж<types.Const> parseConst(this ж<parser> Ꮡp, ж<types.Packag
 // error). Used for self-verification only - not required for correctness.
 
 [GoType("dyn")] partial struct reservedᴛ1 {
-    public global::go.go.types_package.ΔType Type;
+    [GoEmbedded] public global::go.go.types_package.ΔType Type;
 }
 internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
 

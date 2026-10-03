@@ -130,11 +130,11 @@ public static void TestDecodeStringErr(ж<testing.T> Ꮡt) {
 }
 
 [GoType("dyn")] internal partial struct TestEncoderDecoder_r {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 [GoType("dyn")] internal partial struct TestEncoderDecoder_w {
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 public static void TestEncoderDecoder(ж<testing.T> Ꮡt) {

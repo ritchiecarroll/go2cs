@@ -31,7 +31,7 @@ internal static ж<nint> ᏑsysValue = new StandardBox<nint>(default(nint));
 internal static ref nint sysValue => ref ᏑsysValue.Value;
 
 [GoType] partial struct readFileOnly {
-    public go.io.fs_package.ReadFileFS ReadFileFS;
+    [GoEmbedded] public go.io.fs_package.ReadFileFS ReadFileFS;
 }
 
 internal static (fs.File, error) Open(this readFileOnly _, @string name) {
@@ -39,7 +39,7 @@ internal static (fs.File, error) Open(this readFileOnly _, @string name) {
 }
 
 [GoType] partial struct openOnly {
-    public go.io.fs_package.FS FS;
+    [GoEmbedded] public go.io.fs_package.FS FS;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

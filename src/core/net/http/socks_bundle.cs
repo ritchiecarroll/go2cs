@@ -345,7 +345,7 @@ internal static @string String(this ж<socksAddr> Ꮡa) {
 
 // A Conn represents a forward proxy connection.
 [GoType] partial struct socksConn {
-    public net_package.Conn Conn;
+    [GoEmbedded] public net_package.Conn Conn;
     internal netꓸAddr boundAddr;
 }
 

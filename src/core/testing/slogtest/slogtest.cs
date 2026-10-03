@@ -368,7 +368,7 @@ internal static Func<map<@string, any>, @string> inGroup(@string name, Func<map<
 }
 
 [GoType] partial struct wrapper {
-    public log.slog_package.ΔHandler Handler;
+    [GoEmbedded] public log.slog_package.ΔHandler Handler;
     internal Action<ж<slog.Record>> mod;
 }
 

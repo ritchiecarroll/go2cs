@@ -645,11 +645,11 @@ internal static void testRoundtrip(ж<testing.T> Ꮡt, net.Conn c) {
 }
 
 [GoType("dyn")] internal partial struct chunkedCopy_dst {
-    public io_package.Writer Writer;
+    [GoEmbedded] public io_package.Writer Writer;
 }
 
 [GoType("dyn")] internal partial struct chunkedCopy_src {
-    public io_package.Reader Reader;
+    [GoEmbedded] public io_package.Reader Reader;
 }
 
 // chunkedCopy copies from r to w in fixed-width chunks to avoid

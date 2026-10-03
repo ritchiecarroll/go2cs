@@ -316,7 +316,7 @@ internal static void process(osꓸSignal sig) {
 }
 
 [GoType] partial struct signalCtx {
-    public context_package.Context Context;
+    [GoEmbedded] public context_package.Context Context;
     internal Action cancel;
     internal slice<osꓸSignal> signals;
     internal channel<osꓸSignal> ch;
