@@ -125,6 +125,8 @@ $RosterOsNaPattern =
 # 1 s deadline against symbol-file reads at the first source-line resolution on a busy disk (measured
 # 2026-10-02: the wait is I/O, not JIT, and ReadyToRun does not remove it; runtime.Callers symbolizes at
 # capture) -- a timing dependence, which is exactly what the annotation guards, not a line-attribution one.
+# log/slog dropped it 2026-10-02, once runtime.Callers captured a call site and resolved its source
+# position on first read: the symbol-file read left TestSetDefault's path. NO row carries it now.
 # 'release-tc0' is RETAINED though the flip makes it redundant: it still names
 # exactly what it always named, and a row that opted in deliberately should keep saying so.
 $RosterExecutionValues = @('release-tc0', 'release-tiered')

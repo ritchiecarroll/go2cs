@@ -33,10 +33,12 @@ namespace GolibTests;
 // 5,037 bytes of code for 328 bytes of IL -- Stack inlined, as on the row, where the same method
 // reached 8,389 bytes), and its control -- the count-based skip restored -- is RED: the calling
 // goroutine survives its own filter, the row's exact failure. Under DOTNET_TieredCompilation=0
-// nothing is promoted and both old and new code render the caller first, which is why the row's
-// `release-tiered` annotation is where this class surfaces and the configuration of record never
-// showed it. SUB-Q24's one-call measurement stands beside this one: Stack is not inlined at call 1,
-// at either tier, on windows/amd64 -- refuted at one call, confirmed at thirty.
+// nothing is promoted and both old and new code render the caller first, which is why this class
+// surfaces only where tiering is on, and the configuration of record (tiering off) never shows it.
+// SUB-Q24's one-call measurement stands beside this one: Stack is not inlined at call 1, at either
+// tier, on windows/amd64 -- refuted at one call, confirmed at thirty.
+// (2026-10-02: until this date the sentence read "which is why the row's `release-tiered` annotation
+//  is where this class surfaces"; net/http dropped that annotation 2026-10-01 and no row carries one.)
 [TestClass]
 public class StackFirstFrameWarmTests
 {

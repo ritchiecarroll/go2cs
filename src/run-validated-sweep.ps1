@@ -387,10 +387,13 @@ if ($ShardCount -gt 1) {
 # became load-bearing when the default flipped to Release on 2026-09-02. The predicate used to read
 # `($TestConfig -ne 'Debug') -or $TestTiered`, which was correct only while the default was Debug:
 # carried forward past the flip it makes EVERY default run an override, and an override SUPERSEDES
-# per-row `execution:` annotations -- so the three measured opt-out rows (internal/godebug,
-# log/slog, net/http, all `release-tiered`) would silently run at TC0 and fail, and no bank would be
-# eligible because every run would print the A/B warning. The bug would have looked like three
-# regressions rather than one predicate.
+# per-row `execution:` annotations -- so every annotated row would silently run at the sweep's
+# configuration instead of its own, and no bank would be eligible because every run would print the
+# A/B warning. The bug would look like one regression per annotated row rather than one predicate.
+# No row carries an annotation today; the predicate stands for any row that takes one.
+# (2026-10-02: until this date the sentence named the three measured opt-out rows of the time --
+#  "internal/godebug, log/slog, net/http, all `release-tiered`" -- which "would silently run at TC0
+#  and fail". All three ran at the default by this date, log/slog last.)
 #
 # Keying on specification keeps both meanings intact and fails SAFE in the one ambiguous case: an
 # explicit `-TestConfig Release` (same as the default) counts as an override, so it forces
