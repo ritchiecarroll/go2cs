@@ -274,6 +274,7 @@
     <None Include="$(MSBuildThisFileDirectory)nugetMapFlags_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetMapParse_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetMapRecurse_integration_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetMapRefusedRows_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetMapResolve_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetMapRun_test.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleBuildFailure_test.go" />
