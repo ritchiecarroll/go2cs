@@ -1564,6 +1564,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPromotedFieldPointerDeref() => CheckTarget("PromotedFieldPointerDeref");
 
     [TestMethod]
+    public void CheckPromotedMethodExpr() => CheckTarget("PromotedMethodExpr");
+
+    [TestMethod]
     public void CheckPromotedPtrMethodValueSet() => CheckTarget("PromotedPtrMethodValueSet");
 
     [TestMethod]
