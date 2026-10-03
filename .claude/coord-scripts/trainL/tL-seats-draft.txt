@@ -144,3 +144,10 @@ c2-generic-map-chan 1e2e91894c | p1-hashset-module a7a7a197dd (supersedes -wip 1
   g-readme-tests-config e7513a59b7; g-trim-sizing 4d7748a380; g-trim-annotations 4526442d52; coord-hop-lessons aec4f4b20a; coord-slog-firstlaunch-record b3e6969582.
 PENDING: i9 crosspkg-promoted-forwarders (gates2) -> then r-jwt-promoted-iface-repros ee52639557; g alias-guards; p1-linux-only-goldens; c2 CS8130 then CS0411;
   r-module-driver-gomod-less; cleanup seat (h5 scaffolding + scout results, OWNER YES 19:30); p2 converter-warning-clears.
+
+== 2026-10-02 20:11 ==
+ALL M LANE READINGS IN (i9, P1, P2, C1). M lands after the i7 battery (at H7 legs; CNR + behavioral green).
+P2 seats queued: claude/p2-tests-emission-regen (35 runtime/pprof test sources stale vs fixup-2) FIRST, then claude/p2-n-cleanup (scout, six commits), then converter-warning-clears.
+CLEANUP SCOUT: n-cleanup-scout-REPORT.md + n-cleanup-scout-CRITIC.md beside this file. Q9 (34 MB archived PNG) = OWNER question.
+DOCTRINE BATCH items: merge-hazards SKILL.md:78-90 (seat census now inside the assembler; the script is dropped); corpus.md:398-402 robocopy claim untrue (ReplaceInFiles.exe); a fixup that changes emission must regenerate committed -tests sources (fixup-2's gap).
+N SCRIPT ITEMS: + comparison-classifier go test leg (cheap; nothing runs it).
