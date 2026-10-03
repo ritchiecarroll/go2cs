@@ -2203,6 +2203,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckUntypedNestedSliceComposite() => CheckTarget("UntypedNestedSliceComposite");
 
     [TestMethod]
+    public void CheckUsingStaticNamespaceAlias() => CheckTarget("UsingStaticNamespaceAlias");
+
+    [TestMethod]
     public void CheckValueAdapterDynamicType() => CheckTarget("ValueAdapterDynamicType");
 
     [TestMethod]

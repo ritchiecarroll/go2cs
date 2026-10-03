@@ -2126,6 +2126,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckUntypedNestedSliceComposite() => CheckTarget("UntypedNestedSliceComposite");
 
     [TestMethod]
+    public void CheckUsingStaticNamespaceAlias() => CheckTarget("UsingStaticNamespaceAlias");
+
+    [TestMethod]
     public void CheckValueAdapterDynamicType() => CheckTarget("ValueAdapterDynamicType");
 
     [TestMethod]

@@ -37,17 +37,17 @@ var systemNamespaceTypes = map[string][]string{
 }
 
 // importsStaticMembers reports whether this file resolves bare Go names through a `using static`:
-// its own Go dot-import, the production or bridge class a test file imports, or the `global using
-// static` every converted test project carries for the package under test.
-func (v *Visitor) importsStaticMembers(requiredUsings []string) bool {
-	if v.options.testClassNameOverride != "" {
+// its own Go dot-import, or the test project it is compiled into. A test project whose production
+// is a referenced assembly (testProductionName set: the reference and white-box reference models)
+// seeds a `global using static` of the production class, and of the white-box bridge, for every
+// file in it. A global using sits OUTSIDE a file's file-scoped namespace, so for those files a
+// namespace import would not collide with a Go name, it would silently win -- every file in such a
+// project takes the aliases. The file-level `using static` lines a test file writes (visitFile's
+// production and bridge imports, testClassNameOverride's internal white-box file) arise only in such
+// a project, so they need no check of their own.
+func (v *Visitor) importsStaticMembers() bool {
+	if v.options.testProductionName != "" {
 		return true
-	}
-
-	for _, requiredUsing := range requiredUsings {
-		if strings.HasPrefix(requiredUsing, "static ") {
-			return true
-		}
 	}
 
 	imports := v.packageImports.String()
@@ -223,7 +223,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 	requiredUsings := v.requiredUsings.Keys()
 	sort.Strings(requiredUsings)
 
-	importsStaticMembers := v.importsStaticMembers(requiredUsings)
+	importsStaticMembers := v.importsStaticMembers()
 
 	for _, requiredUsing := range requiredUsings {
 		// A file that reaches Go names BARE through a `using static` cannot also import a whole .NET
