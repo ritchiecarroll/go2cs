@@ -1016,6 +1016,8 @@
     <Project Path="tests/Behavioral/UntypedIntFloatContexts/UntypedIntFloatContexts.csproj" />
     <Project Path="tests/Behavioral/UntypedIntFloatLiteralFold/UntypedIntFloatLiteralFold.csproj" />
     <Project Path="tests/Behavioral/UntypedIntWideShift/UntypedIntWideShift.csproj" />
+    <Project Path="tests/Behavioral/UsingStaticNamespaceAlias/UsingStaticNamespaceAlias.csproj" />
+    <Project Path="tests/Behavioral/UsingStaticNamespaceAlias/aliaslib/UsingStaticNamespaceAlias.aliaslib.csproj" />
     <Project Path="tests/Behavioral/ValueAdapterDynamicType/ValueAdapterDynamicType.csproj" />
     <Project Path="tests/Behavioral/ValueAdapterDynamicType/colorlike/ValueAdapterDynamicType.colorlike.csproj" />
     <Project Path="tests/Behavioral/ValuePunBits/ValuePunBits.csproj" />

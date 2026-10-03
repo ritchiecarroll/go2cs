@@ -2200,6 +2200,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckUntypedNestedSliceComposite() => CheckTarget("UntypedNestedSliceComposite");
 
     [TestMethod]
+    public void CheckUsingStaticNamespaceAlias() => CheckTarget("UsingStaticNamespaceAlias");
+
+    [TestMethod]
     public void CheckValueAdapterDynamicType() => CheckTarget("ValueAdapterDynamicType");
 
     [TestMethod]
