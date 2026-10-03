@@ -228,3 +228,78 @@ Four emoji (😄 🧾 🎉 🌹), all in body text, each on a beat that earns it
 The current .NET 10 table shows AOT *lower* on all fourteen rows, and the page's own History section says that penalty
 "inverted, and did so universally". REFRESH-PLAN now carries the fix as P9 (in `src/tests/Performance/README.md`, then
 re-mirrored). The current Background page repeated that stale claim; the draft drops it.
+
+## REVISION 3 (owner rulings 2026-10-03)
+
+**The owner's rulings (binding).** These supersede "Things I was unsure about" items 1, 3, 4 and 5 above, and the
+Revision 2 idiom and opening choices.
+
+1. The ANTLR-to-Go reason is right; it stays.
+2. The idiom is "everything is not peaches and cream 🍑", word for word (the roses line is gone).
+3. His two original lines are back, in his words: the "super slow ... comparable .NET applications" line in the TL;DR,
+   and "*code in Go, run in .NET* -- something until now unheard of".
+4. The drawbacks end at the Known issues link.
+5. The opening blockquote is dropped, and nothing reads "itch" or "scratch". The page opens on a short first-person
+   paragraph instead.
+
+His sixth item (cut down the README Milestones) is about the README, not this page, so it is not applied here.
+
+**What changed in this pass:** the TL;DR setup is now "Go is usually faster.", so his line is the payoff, not an echo. The
+paragraph after the drawbacks ends on the link. "Conversion isn't a one-way door" and the 🎉 are cut. The modules bullet
+now describes what go2cs can do, not a result. Native AOT's build cost is disclosed. A fifth drawback ("Not every Go
+module converts cleanly yet") is added. A `---` rule sets off the sign-off. The rest are wording fixes. The page now has
+50 lines, 1,202 words and three emoji (😄 🧾 🍑).
+
+**Checks re-run on the draft:** line 1 is `# Background`; both required headings are verbatim, with no emoji in any
+heading; there is no blockquote; a word-bounded search for `\b(itch|scratch)` finds nothing (a plain substring search
+still hits the account handle inside the URLs, which is expected); the owner's name, hosts, TypeScript, years, `go1.`,
+`ANTLR4` and Liquid are all absent; every link text sits on one line; and all four protected phrases are present once.
+Every relative link target and anchor exists at 59ee0d21bf (`git show` only). The anchors are README :93, :232, :483 and
+:552, ValidatedTestPackages :1025 and Roadmap :109.
+
+**Findings, reviewer A** (12):
+
+- A1 should-fix, TL;DR repeats itself: **APPLIED** as suggested. The backtick-in-bold `TL;DR` part is **DECLINED**,
+  because it is the owner's own device (ace1ea3527, 2020).
+- A2 should-fix, a sentence after the Known issues link: **APPLIED**. "Nothing here is graded on a curve." is deleted
+  (ruling 4; a401b35cf2 era, not one of his rulings).
+- A3 should-fix, "one-way door" is ambiguous: **APPLIED** (cut). It now reads as C#-to-Go, which README's "C# to Go?"
+  section says is not offered.
+- A4 nit, the README walkthrough is pointed to twice: **APPLIED**. The link moves onto "walks through one", and the
+  sentence says "the converted app's output matches `go run`" (README :340).
+- A5 nit, "with one command" said twice: **APPLIED** ("reproduce that yourself ... from a fresh clone").
+- A6 nit, "It took two tries" is ambiguous, and ANTLR4 carries a version: **APPLIED** ("The converter took two tries";
+  "the first was"; "an ANTLR grammar"). The reason itself is untouched (ruling 1).
+- A7 nit, "instead of argue about": **APPLIED** ("rather than argue about").
+- A8 nit, stack-string jargon and "honest outlier": **APPLIED** ("the big outlier"; "maps, and the string comparisons the
+  converter can optimize"). Performance.md :12 and its StringView row (:26) back it.
+- A9 nit, "yet" three times: **APPLIED**.
+- A10 nit, four emoji: **APPLIED** (🎉 dropped; 🍑 kept per ruling 2).
+- A11 nit, the sign-off sits under the performance heading: **APPLIED** with a `---` rule. README :10 and
+  ConversionStrategies already use thematic breaks, and no repoguard test objects.
+- A12 nit, the itch check note: **NO PAGE CHANGE**, confirmed by the word-bounded check above.
+
+**Findings, reviewer B** (9):
+
+- B1 should-fix, the modules bullet reads as a result: **APPLIED**. It now says "`go2cs -tests -recurse` judges a whole
+  module the way the standard library is judged: by its own test suites" (README :195 and the `-tests` options row). I dropped
+  the reviewer's "one command" wording so that "one command" isn't repeated (A5).
+- B2 should-fix, a sentence after the Known issues link: **APPLIED** (deleted, same as A2). I chose the delete option
+  over moving the line to the front, as the plainest reading of "Stop at known issues link".
+- B3 should-fix, Native AOT's costs are not mentioned: **APPLIED** at the performance paragraph, with no figures: "which
+  closes most of that gap, but takes a long time and a lot of memory to build and makes a much bigger executable".
+  Performance.md :146-149 (startup: AOT is several times faster than the JIT, and a gap to Go remains) and :214-229 (hours
+  per build, peak memory in the mid-teens of GB, images of hundreds of MB) back it. Line 13 is unchanged; ruling 3 governs
+  its tail.
+- B4 should-fix, the migrate-gorelease sites: **DECLINED as a page edit** (outside this file). Companion edits 1 and 2
+  above already carry it. The sites are unchanged at 59ee0d21bf (:435-448, comment :348-349), so the census still goes
+  red at the current pin unless the seat retires both rows.
+- B5 nit, nugetgo.net is presented as launched: **DECLINED for now**. The launch question is not among today's rulings,
+  and README at 59ee0d21bf (mapping on by default) supports the sentence while Roadmap :158-174 does not. Companion edit 4
+  stands: the sentence lands only with RM4 and the owner's launch word, and is dropped otherwise.
+- B6 nit, no drawback for real-world modules: **APPLIED** as a new bullet before macOS. README :376-378 backs it ("A
+  dependency closure is not always convertible today", and `-recurse=module`).
+- B7 nit, the grammar fix: **APPLIED** (same as A7).
+- B8 nit, README :542 lands on the wrong section: **DECLINED as a page edit**. Companion edit 3 / R15 already carries
+  it, and the `## Why convert Go to C#?` heading stays verbatim.
+- B9 nit, the itch check note: **NO PAGE CHANGE** (same as A12).
