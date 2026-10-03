@@ -62,12 +62,11 @@ on:
         required: false
         default: ''
       dotnet:
-        description: 'SDK channel for setup-dotnet. 10.0.x (the default) is the corpus TFM''s own runtime. 9.0.x is the release-line CONTROL, kept for as long as 1.23.1.x anchors ship: selecting it against a net10.0 reference fails with NETSDK1045 BY DESIGN -- that is operator error, not a corpus regression.'
+        description: 'SDK channel for setup-dotnet. 10.0.x is the corpus TFM''s own runtime and the only channel master builds with; a 1.23.1.x anchor ships from its own tag''s workflow, which pins its SDK.'
         type: choice
         required: false
         default: 10.0.x
         options:
-          - 9.0.x
           - 10.0.x
       run_timeout:
         description: 'Per-program RUN budget in seconds for the behavioral stages (GO2CS_RUN_TIMEOUT), 1-1800. Blank takes 120, the budget every stage used before this input existed. Raise it to tell a slow program on the 3-core macos-15 runner from a real hang: a NOT MEASURED (timeout) row says only that the budget expired. A large value on behavioral-full can exceed that stage''s job budget.'
@@ -297,11 +296,9 @@ jobs:
       - name: Set up .NET SDK
         uses: actions/setup-dotnet@v5
         with:
-          # Channel comes from the `dotnet` input; the default is 10.0.x, the corpus TFM's own
-          # runtime since the Stage-2 hop. Selecting 9.0.x against a net10.0 reference FAILS with
-          # NETSDK1045 -- an SDK cannot target a framework newer than itself. That is the
-          # release-line control behaving correctly on a 1.23.1.x anchor build, not a corpus break;
-          # read it as operator error and re-dispatch with 10.0.x.
+          # Channel comes from the `dotnet` input: 10.0.x, the corpus TFM's own runtime since the
+          # Stage-2 hop. An SDK cannot target a framework newer than itself, so an older channel
+          # could only fail here with NETSDK1045; the 1.23.1.x anchors build from their own tag.
           dotnet-version: ${{ needs.plan.outputs.dotnet }}
 
       - name: Environment report

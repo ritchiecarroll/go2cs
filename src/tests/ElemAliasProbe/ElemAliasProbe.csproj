@@ -2,7 +2,7 @@
 
   <!--
     Isolation probe for the golib element-aliasing lost-update defect rooted 2026-08-30
-    (see element-aliasing-investigation.md at the repository root).
+    (see docs/phase4/INVESTIGATION-element-aliasing.md).
 
     Deliberately NOT registered in either .slnx and enumerated by NO gate: it is a diagnostic
     instrument, not a corpus member. It references the BUILT golib / sync.atomic assemblies rather
