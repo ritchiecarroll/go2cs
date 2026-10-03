@@ -405,6 +405,7 @@
     <None Include="$(MSBuildThisFileDirectory)untypedConstAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedConstOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedInterfaceFuncLit_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)untypedOperands.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedPackageConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedRegionShapes_test.go" />
     <None Include="$(MSBuildThisFileDirectory)usingStaticNamespaceAlias_test.go" />
