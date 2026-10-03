@@ -18,13 +18,14 @@ package main
 
 import (
 	"go/build"
+	"go/types"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
 )
 
-func convertUsingStaticFixture(t *testing.T) (dotted, plain string) {
+func convertUsingStaticFixture(t *testing.T) (dotted, dottedLater, plain string) {
 	t.Helper()
 
 	root := t.TempDir()
@@ -58,6 +59,21 @@ func launch(done chan string) {
 }
 
 func total(c counter) int { return Marshal(int(c.v)) }
+`)
+
+	// POSITIVE, the dot-import BEHIND an ordinary import: the shape of both real sites (go/types'
+	// stdlib_test.go and its errors.go), where the import block's first using is an alias, not the
+	// using static. dotted.go above keeps the dot-import first, so both spellings are held.
+	writeModuleFile(t, filepath.Join(appDir, "dottedlater.go"), `package main
+
+import (
+	"strings"
+	. "example.com/usingstatic/lib"
+)
+
+func launchUpper(done chan string) {
+	go func() { done <- strings.ToUpper(Unsafe) }()
+}
 `)
 
 	// CONTROL -- the same two demands in a file with no using static.
@@ -101,11 +117,11 @@ func main() {
 
 	out := filepath.Join(options.go2csPath, "src", "example.com", "usingstatic")
 
-	return readGenerated(t, filepath.Join(out, "dotted.cs")), readGenerated(t, filepath.Join(out, "main.cs"))
+	return readGenerated(t, filepath.Join(out, "dotted.cs")), readGenerated(t, filepath.Join(out, "dottedlater.cs")), readGenerated(t, filepath.Join(out, "main.cs"))
 }
 
 func TestAFileWithAUsingStaticImportsNoDotNetNamespace(t *testing.T) {
-	dotted, plain := convertUsingStaticFixture(t)
+	dotted, dottedLater, plain := convertUsingStaticFixture(t)
 
 	const (
 		compilerServices = "using System.Runtime.CompilerServices;"
@@ -158,6 +174,15 @@ func TestAFileWithAUsingStaticImportsNoDotNetNamespace(t *testing.T) {
 		}
 	}
 
+	// The dot-import behind an ordinary import: its using static is not the block's first line.
+	if !strings.Contains(dottedLater, noInlining) || strings.HasPrefix(strings.TrimSpace(dottedLater[strings.Index(dottedLater, "using "):]), "using static ") {
+		t.Fatalf("control: dottedlater.cs must emit %s and open its usings with something other than the using static:\n%s", noInlining, dottedLater)
+	}
+
+	if strings.Contains(dottedLater, compilerServices) || !strings.Contains(dottedLater, "using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;") {
+		t.Errorf("dottedlater.cs holds a using static behind an ordinary import and must take the aliases, not the namespace:\n%s", dottedLater)
+	}
+
 	// Every type name the alias table can bind is one the emission really names -- a table entry
 	// nothing emits would be an unused alias in every such file.
 	for namespace, typeNames := range systemNamespaceTypes {
@@ -166,5 +191,156 @@ func TestAFileWithAUsingStaticImportsNoDotNetNamespace(t *testing.T) {
 				t.Errorf("%s.%s is aliased but nothing in the fixture's emission names it", namespace, typeName)
 			}
 		}
+	}
+}
+
+// The test-project trigger. A converted test project whose production is a REFERENCED assembly
+// carries `global using static <production class>` (and the white-box bridge) in its seeded
+// metadata, project-wide. That directive sits at compilation-unit level, OUTSIDE a file's
+// file-scoped namespace, so a namespace using INSIDE the namespace does not collide with it: it
+// silently WINS, and a bare Go name the namespace also declares binds the .NET type (measured on
+// the union: an external reference-model test file bound System.Runtime.CompilerServices.Unsafe,
+// not the Go member). So every file of such a test project takes the aliases, the internal file
+// (which also holds its own file-level using static) and the external one (which holds none).
+func TestEveryFileOfAReferenceModelTestProjectBindsByAlias(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: loads a module fixture through go/packages")
+	}
+
+	dir := t.TempDir()
+
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod":    "module example/aliasvariant\n\ngo 1.23\n",
+		"lib.go":    "package aliasvariant\n\nvar Unsafe = \"unsafe\"\n\nfunc Name() string { return Unsafe }\n",
+		"inner_test.go": "package aliasvariant\n\n" +
+			"func innerProbe(done chan string) {\n\tgo func() { done <- Unsafe }()\n}\n",
+		"outer_test.go": "package aliasvariant_test\n\nimport \"example/aliasvariant\"\n\n" +
+			"func outerProbe(done chan string) {\n\tgo func() { done <- aliasvariant.Name() }()\n}\n",
+	})
+
+	internal, external := loadBothTestVariantsForDir(t, dir)
+
+	if internal == nil || external == nil {
+		t.Fatal("both test variants must load")
+	}
+
+	outputPath := t.TempDir()
+	bridgeName := getSanitizedImport("aliasvariant_internal_test" + PackageSuffix)
+
+	// The white-box reference model's own option set, as convertTestVariants builds it.
+	base := Options{
+		indentSpaces:           4,
+		preferVarDecl:          true,
+		useChannelOperators:    true,
+		testProductionPath:     "example/aliasvariant",
+		testProductionName:     "aliasvariant",
+		testMetadataAnchorName: bridgeName,
+		testWhiteboxReference:  true,
+		testInternalBridgeName: bridgeName,
+	}
+
+	testMethodRenames = make(map[types.Object]bool)
+	testTypeRenames = make(map[types.Object]bool)
+	whiteboxInternalTestObjects = collectWhiteboxInternalTestObjects(internal)
+	whiteboxBridgeDeclaredNames = collectWhiteboxBridgeDeclaredNames(internal)
+	whiteboxBridgeTypeNames = collectWhiteboxBridgeTypeNames(internal)
+
+	t.Cleanup(func() {
+		testMethodRenames = nil
+		testTypeRenames = nil
+		whiteboxInternalTestObjects = nil
+		whiteboxBridgeDeclaredNames = HashSet[string]{}
+		whiteboxBridgeTypeNames = HashSet[string]{}
+	})
+
+	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, testVariantOptions(base, testProjectWhiteboxReference, false, bridgeName)); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, _, err := convertTestVariant(external, testFileEntries(external), outputPath, "go", productionSeed{}, testVariantOptions(base, testProjectWhiteboxReference, true, bridgeName)); err != nil {
+		t.Fatal(err)
+	}
+
+	const (
+		compilerServices = "using System.Runtime.CompilerServices;"
+		noInlining       = "[MethodImpl(MethodImplOptions.NoInlining)]"
+		optionsAlias     = "using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;"
+	)
+
+	for _, name := range []string{"inner_test.cs", "outer_test.cs"} {
+		cs := readConvertedTestFile(t, outputPath, name)
+
+		// Control: each file executes a go, so its frame is kept and the namespace is demanded.
+		if !strings.Contains(cs, noInlining) {
+			t.Fatalf("control: %s must emit %s, or this test proves nothing:\n%s", name, noInlining, cs)
+		}
+
+		if strings.Contains(cs, compilerServices) || !strings.Contains(cs, optionsAlias) {
+			t.Errorf("%s is compiled into a test project that imports its production class project-wide, and must take the aliases, not the namespace:\n%s", name, cs)
+		}
+	}
+}
+
+// The plain REFERENCE model (no internal test file, so no bridge and no file-level using static at
+// all): the external file's only using static is the seeded `global using static`, so only the
+// project-level trigger can reach it. This is the shape COORD's probe measured binding the .NET
+// Unsafe on the union.
+func TestAnExternalOnlyTestFileBindsByAlias(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: loads a module fixture through go/packages")
+	}
+
+	dir := t.TempDir()
+
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod": "module example/aliasexternal\n\ngo 1.23\n",
+		"lib.go": "package aliasexternal\n\nvar Unsafe = \"unsafe\"\n\nfunc Name() string { return Unsafe }\n",
+		"outer_test.go": "package aliasexternal_test\n\nimport \"example/aliasexternal\"\n\n" +
+			"func outerProbe(done chan string) {\n\tgo func() { done <- aliasexternal.Name() }()\n}\n",
+	})
+
+	_, external := loadBothTestVariantsForDir(t, dir)
+
+	if external == nil {
+		t.Fatal("the external test variant must load")
+	}
+
+	outputPath := t.TempDir()
+
+	// The reference model's option set, as processTestConversion builds it for a package whose
+	// tests are all external: production referenced, no white-box bridge.
+	base := Options{
+		indentSpaces:           4,
+		preferVarDecl:          true,
+		useChannelOperators:    true,
+		testProductionPath:     "example/aliasexternal",
+		testProductionName:     "aliasexternal",
+		testMetadataAnchorName: getSanitizedImport("aliasexternal_test" + PackageSuffix),
+	}
+
+	testMethodRenames = make(map[types.Object]bool)
+	testTypeRenames = make(map[types.Object]bool)
+
+	t.Cleanup(func() {
+		testMethodRenames = nil
+		testTypeRenames = nil
+	})
+
+	if _, _, err := convertTestVariant(external, testFileEntries(external), outputPath, "go", productionSeed{}, testVariantOptions(base, testProjectReference, true, "")); err != nil {
+		t.Fatal(err)
+	}
+
+	cs := readConvertedTestFile(t, outputPath, "outer_test.cs")
+
+	if !strings.Contains(cs, "[MethodImpl(MethodImplOptions.NoInlining)]") {
+		t.Fatalf("control: outer_test.cs executes a go and must keep its frame, or this test proves nothing:\n%s", cs)
+	}
+
+	if strings.Contains(cs, "using static ") {
+		t.Fatalf("control: outer_test.cs must hold no file-level using static, so only the project-level trigger can reach it:\n%s", cs)
+	}
+
+	if strings.Contains(cs, "using System.Runtime.CompilerServices;") || !strings.Contains(cs, "using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;") {
+		t.Errorf("outer_test.cs is compiled under its project's global using static of the production class, and must take the aliases, not the namespace:\n%s", cs)
 	}
 }
