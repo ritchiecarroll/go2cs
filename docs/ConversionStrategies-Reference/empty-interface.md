@@ -334,6 +334,26 @@ genuine boxed-constant-mismatch site is touched. (Guarded by the
 against an int literal, negative-literal and literal-on-the-left forms, output-compared vs Go; the
 pre-fix converter emits the bare literal and mis-reports every comparison unequal.)
 
+## An ELIDED inner literal of `any` elements boxes them as the typed literal does
+
+The two rules above apply to every element of a slice or array literal whose element type is an empty
+interface, including an inner literal whose type is ELIDED: the `{1, 2}` and `{"a", "b"}` of a
+`[][2]any{{1, 2}, {"a", "b"}}`. An elided inner literal goes through a smaller renderer than the typed one, and that
+renderer used to hand its elements a context with neither rule, so a string literal stayed a `u8` span, which has no
+conversion to `object` (CS0029, BurntSushi/toml's encode test), and an untyped constant boxed as C# `int`, so a later
+`x.(int)` read false where Go reads true. `elidedElemContext` now gives such a literal the typed path's element
+marking (`markEmptyInterfaceElems`, shared by both renderers), so the two spellings of one Go type emit alike:
+
+```csharp
+var a = GoReflect.WithElemDims(new array<any>[]{new any[]{(nint)(1), (nint)(2)}.array(), new any[]{(@string)"a"u8, (@string)"b"u8}.array()}.slice(), 2);
+```
+
+A pointer, func or `unsafe.Pointer` element takes its box the same way. An elided literal of any other element type,
+and an elided literal with nothing to mark, keep their exact rendering. The type-aware census of the shape read 0
+sites in the converted standard library (production on three targets, tests on two) and 0 across 757 behavioral
+modules. Guarded by `elidedAnyCompositeElems_test.go` and the `ElidedAnyCompositeElems` behavioral test, which fails
+on the pre-change converter with CS0029 x4.
+
 ## Comparing two interfaces of one UNCOMPARABLE dynamic type panics, as Go does
 
 Go decides an interface `==` in three steps, and only the third can panic:

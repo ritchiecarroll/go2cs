@@ -422,6 +422,7 @@
     <Project Path="tests/Behavioral/DynamicInterfaceKeywordMethod/DynamicInterfaceKeywordMethod.csproj" />
     <Project Path="tests/Behavioral/DynIfaceParamNameCollision/DynIfaceParamNameCollision.csproj" />
     <Project Path="tests/Behavioral/ElementAddressUnsignedIndex/ElementAddressUnsignedIndex.csproj" />
+    <Project Path="tests/Behavioral/ElidedAnyCompositeElems/ElidedAnyCompositeElems.csproj" />
     <Project Path="tests/Behavioral/ElidedNestedPtrComposite/ElidedNestedPtrComposite.csproj" />
     <Project Path="tests/Behavioral/ElidedPtrElemIfaceAssign/ElidedPtrElemIfaceAssign.csproj" />
     <Project Path="tests/Behavioral/ElidedStructInterfaceField/ElidedStructInterfaceField.csproj" />
