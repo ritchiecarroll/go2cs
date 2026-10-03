@@ -1138,6 +1138,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
 
     [TestMethod]
+    public void CheckNamedCompositeGenericArg() => CheckTarget("NamedCompositeGenericArg");
+
+    [TestMethod]
     public void CheckNamedConstConversionPrecedence() => CheckTarget("NamedConstConversionPrecedence");
 
     [TestMethod]

@@ -3161,7 +3161,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						v.calleeTypeParamUnsuppliedByCall(callExpr, funIdent) ||
 						v.calleeReadsDescriptorName(funIdent) ||
 						v.callNeedsConstraintProxy(funIdent, instance.TypeArgs) ||
-						v.calleeTypeParamMixesUntypedAndTypedArgs(callExpr, funIdent)) {
+						v.calleeTypeParamMixesUntypedAndTypedArgs(callExpr, funIdent) ||
+						v.callPassesNamedCompositeToCompositeParam(callExpr, funIdent)) {
 					// Erased (pointer-core) callee positions leave the emitted list — `clone[P *T,
 					// T any]` emits `clone<ΔSignature>(…)` (see renderedTypeArgs); a list that
 					// erases to empty stays bare.
@@ -6151,6 +6152,68 @@ func (v *Visitor) calleeTypeParamMixesUntypedAndTypedArgs(callExpr *ast.CallExpr
 		if sawUntyped && sawTyped {
 			return true
 		}
+	}
+
+	return false
+}
+
+// callPassesNamedCompositeToCompositeParam reports whether the call hands an argument of a NAMED map, slice,
+// channel or array type to a parameter whose declared type is an UNNAMED composite mentioning a type parameter
+// (`keys[V any](m map[int]V)` called `keys(names)` with `type Names map[int]string`). Go infers V through the
+// named type's underlying type. The named type emits as a wrapper struct that reaches `map<nint, V>` only by a
+// user-defined implicit conversion, and C# type inference never looks through one (CS0411, the hashset test).
+//
+// A named FUNC type is left alone: it emits as a delegate the parameter's delegate type infers from. A named
+// argument at a bare type-parameter position (`ident[T any](v T)`) infers the wrapper itself and is left
+// alone too, since the parameter is not a composite.
+func (v *Visitor) callPassesNamedCompositeToCompositeParam(callExpr *ast.CallExpr, funIdent *ast.Ident) bool {
+	funcObj, ok := v.info.ObjectOf(funIdent).(*types.Func)
+
+	if !ok {
+		return false
+	}
+
+	sig, ok := funcObj.Type().(*types.Signature)
+
+	if !ok || sig.TypeParams() == nil || sig.TypeParams().Len() == 0 {
+		return false
+	}
+
+	params := sig.Params()
+
+	for j, arg := range callExpr.Args {
+		paramIndex := min(j, params.Len()-1)
+
+		if paramIndex < 0 {
+			break
+		}
+
+		paramType := types.Unalias(params.At(paramIndex).Type())
+
+		// Every variadic argument binds the final parameter's ELEMENT type; a forwarded slice binds the slice.
+		if sig.Variadic() && paramIndex == params.Len()-1 && callExpr.Ellipsis == token.NoPos {
+			if slice, isSlice := paramType.(*types.Slice); isSlice {
+				paramType = types.Unalias(slice.Elem())
+			}
+		}
+
+		if !isUnnamedValueComposite(paramType) || !typeContainsTypeParams(paramType) {
+			continue
+		}
+
+		if named, isNamed := types.Unalias(v.info.TypeOf(arg)).(*types.Named); isNamed && isUnnamedValueComposite(named.Underlying()) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// isUnnamedValueComposite reports whether t is a map, slice, channel or array type literal.
+func isUnnamedValueComposite(t types.Type) bool {
+	switch t.(type) {
+	case *types.Map, *types.Slice, *types.Chan, *types.Array:
+		return true
 	}
 
 	return false

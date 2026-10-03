@@ -1138,6 +1138,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
 
     [TestMethod]
+    public void CheckNamedCompositeGenericArg() => CheckTarget("NamedCompositeGenericArg");
+
+    [TestMethod]
     public void CheckNamedConstConversionPrecedence() => CheckTarget("NamedConstConversionPrecedence");
 
     [TestMethod]

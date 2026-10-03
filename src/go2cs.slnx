@@ -652,6 +652,7 @@
     <Project Path="tests/Behavioral/NamedBooleanLogic/NamedBooleanLogic.csproj" />
     <Project Path="tests/Behavioral/NamedChannelType/NamedChannelType.csproj" />
     <Project Path="tests/Behavioral/NamedByteSliceFromStringLit/NamedByteSliceFromStringLit.csproj" />
+    <Project Path="tests/Behavioral/NamedCompositeGenericArg/NamedCompositeGenericArg.csproj" />
     <Project Path="tests/Behavioral/NamedConstConversionPrecedence/NamedConstConversionPrecedence.csproj" />
     <Project Path="tests/Behavioral/NamedConstFloatFold/NamedConstFloatFold.csproj" />
     <Project Path="tests/Behavioral/NamedEmptyInterface/NamedEmptyInterface.csproj" />
