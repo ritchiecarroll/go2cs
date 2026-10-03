@@ -418,6 +418,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDeferValueFieldPtrReceiver() => CheckTarget("DeferValueFieldPtrReceiver");
 
     [TestMethod]
+    public void CheckDeferValueReceiverSnapshot() => CheckTarget("DeferValueReceiverSnapshot");
+
+    [TestMethod]
     public void CheckDeferVariadicCallee() => CheckTarget("DeferVariadicCallee");
 
     [TestMethod]

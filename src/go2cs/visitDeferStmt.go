@@ -14,6 +14,7 @@ import (
 	"go/token"
 	"go/types"
 	"strings"
+	"unicode"
 )
 
 func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
@@ -111,6 +112,28 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 		}
 	}
 
+	// A VALUE-receiver method callee has no C# method group to pass: every Go named type emits a C#
+	// struct and the method an extension on it, and C# cannot create a delegate from an extension
+	// method over a value-type receiver (CS1113 — go-cmp's `defer s.curPtrs.Pop(px, py)`). Where the
+	// method group was the form (no lambda already forced above), the receiver becomes the thunk's
+	// FIRST eager argument instead — `defer((ᴛ0, ᴛ1) => ᴛ0.Pop(ᴛ1), Ꮡs.Value.curPtrs, k, ref ᒐ)` —
+	// so it is copied when the defer statement runs, which is Go's rule for a method value's receiver.
+	// A lambda over the receiver expression would read it at unwind instead (`s.cur = …` after the
+	// defer would leak in). An INTERFACE receiver keeps its method group (a real C# instance method),
+	// a POINTER receiver keeps the box-group machinery below, and a site that already takes the lambda
+	// form for another reason is left exactly as it was.
+	recvSnapshot := false
+
+	if recvSig := v.deferCalleeValueReceiverMethod(deferStmt.Call); recvSig != nil && !recvSig.Variadic() {
+		// Arity N: only where the method group was the form. Arity 0: only the void callee the method
+		// group trim served; a result-returning nullary callee already takes `() => …` and keeps it.
+		recvSnapshot = paramCount > 0 && !renderLambdaParams || paramCount == 0 && recvSig.Results().Len() == 0
+	}
+
+	if recvSnapshot && paramCount > 0 {
+		renderLambdaParams = true
+	}
+
 	// A MULTI-VALUE call as the SOLE argument (`defer f(g())`) always takes the temp-parameter
 	// form: the eager argument is the whole tuple and the thunk spreads its components at unwind
 	// (`ᴛ1 => f(ᴛ1.Item1, ᴛ1.Item2)`; see convExprList). The arity test above already forces it for
@@ -150,6 +173,28 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 	wroteDecls := false
 
 	callExpr := strings.TrimSpace(v.convCallExpr(deferStmt.Call, lambdaContext))
+
+	// The receiver snapshot (see recvSnapshot): under the temp-parameter form the call renders as
+	// `<receiver>.<method>(ᴛ1, …)`, so the receiver is exactly the text before the method name once that
+	// known argument list is stripped — `Ꮡs.Value.cur` for a field, `Ꮡp.Value` for a pointer the value
+	// method dereferences (Go copies `*p` at the defer statement too). The call is re-pointed at the
+	// thunk's `ᴛ0` parameter. A rendering that does not split that way keeps the plain lambda.
+	recvArg := ""
+
+	if recvSnapshot {
+		temps := make([]string, paramCount)
+
+		for i := range temps {
+			temps[i] = fmt.Sprintf("%s%d", TempVarMarker, i+1)
+		}
+
+		if head, ok := strings.CutSuffix(callExpr, "("+strings.Join(temps, ", ")+")"); ok {
+			if dot := strings.LastIndex(head, "."); dot > 0 && isPlainIdentifier(head[dot+1:]) {
+				recvArg = head[:dot]
+				callExpr = fmt.Sprintf("%s%d%s", TempVarMarker, 0, callExpr[dot:])
+			}
+		}
+	}
 
 	if lambdaContext.deferredDecls != nil && lambdaContext.deferredDecls.Len() > 0 {
 		result.WriteString(lambdaContext.deferredDecls.String())
@@ -236,7 +281,11 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 		// and let the lambda arm below wrap it.
 		variadicLit := v.variadicFuncLitCallee(deferStmt.Call) != nil
 
-		if boxGroup != "" {
+		if recvArg != "" {
+			callExpr = fmt.Sprintf("%s%d => %s, %s", TempVarMarker, 0, callExpr, recvArg)
+		} else if recvSnapshot {
+			callExpr = "() => " + callExpr
+		} else if boxGroup != "" {
 			callExpr = boxGroup
 		} else if !hasResults && !namedFuncType && !variadicLit && !variadicCallee && strings.HasSuffix(callExpr, "()") {
 			callExpr = strings.TrimSuffix(callExpr, "()")
@@ -250,19 +299,26 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 		result.WriteString("defer(")
 
 		if renderLambdaParams {
-			if paramCount > 1 {
+			// A receiver snapshot leads the thunk's parameters as `ᴛ0` (and its eager arguments below).
+			firstParam := 1
+
+			if recvArg != "" {
+				firstParam = 0
+			}
+
+			if paramCount+1-firstParam > 1 {
 				result.WriteRune('(')
 			}
 
-			for i := range paramCount {
-				if i > 0 {
+			for i := firstParam; i <= paramCount; i++ {
+				if i > firstParam {
 					result.WriteString(", ")
 				}
 
-				result.WriteString(fmt.Sprintf("%s%d", TempVarMarker, i+1))
+				result.WriteString(fmt.Sprintf("%s%d", TempVarMarker, i))
 			}
 
-			if paramCount > 1 {
+			if paramCount+1-firstParam > 1 {
 				result.WriteRune(')')
 			}
 
@@ -277,6 +333,12 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 
 		result.WriteString(callExpr)
 		result.WriteString(", ")
+
+		if recvArg != "" {
+			result.WriteString(recvArg)
+			result.WriteString(", ")
+		}
+
 		result.WriteString(strings.Join(lambdaContext.callArgs, ", "))
 		result.WriteString(deferTarget)
 	}
@@ -426,4 +488,60 @@ func (v *Visitor) pointerReceiverBoxMethodGroup(fun ast.Expr) string {
 	}
 
 	return addr + methodSel
+}
+
+// deferCalleeValueReceiverMethod returns the signature of a deferred call's callee when it is a method VALUE
+// with a VALUE receiver of a non-interface type, reached on a value: the method emits as a C# extension over
+// a value type, which no delegate can be created from (CS1113), so the call cannot hand golib's defer a method
+// group, and the receiver is the value Go copies at the defer statement. Nil for every other callee.
+func (v *Visitor) deferCalleeValueReceiverMethod(call *ast.CallExpr) *types.Signature {
+	selectorExpr, ok := ast.Unparen(call.Fun).(*ast.SelectorExpr)
+
+	if !ok {
+		return nil
+	}
+
+	funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func)
+
+	if !ok {
+		return nil
+	}
+
+	sig, ok := funcObj.Type().(*types.Signature)
+
+	if !ok || sig.Recv() == nil {
+		return nil
+	}
+
+	_, isPtrRecv := sig.Recv().Type().(*types.Pointer)
+
+	if isPtrRecv || types.IsInterface(sig.Recv().Type()) {
+		return nil
+	}
+
+	// A method VALUE only: a method EXPRESSION (`T.M(x)`) has a type before the dot, not a receiver, and
+	// keeps its existing emission. An implicitly dereferenced pointer (`p.M()` with `p *T`) qualifies:
+	// its receiver text is the dereference, which the snapshot copies.
+	if selection, ok := v.info.Selections[selectorExpr]; !ok || selection.Kind() != types.MethodVal {
+		return nil
+	}
+
+	return sig
+}
+
+// isPlainIdentifier reports whether s is a single C# identifier (no member access, call or cast).
+func isPlainIdentifier(s string) bool {
+	if s == "" {
+		return false
+	}
+
+	for i, r := range s {
+		if r == '@' && i == 0 || isIdentifierRune(r) && !(i == 0 && unicode.IsDigit(r)) {
+			continue
+		}
+
+		return false
+	}
+
+	return true
 }
