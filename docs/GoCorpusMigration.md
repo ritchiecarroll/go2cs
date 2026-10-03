@@ -164,13 +164,39 @@ A per-box record, taken and read before H0:
 - **Host.** DNS on public IPv4 resolvers per adapter (IPv6 unbound where there is no v6 path), qualified by Go's own
   `go test -count=1 -timeout 40m net` (`TestLookupCNAME` is the tolerated drift); WSL `localhost` resolving `::1`;
   unelevated symlinks (Developer Mode) and `LongPathsEnabled=1`; pwsh 7 and the pinned .NET SDK reachable by every
-  launcher; a many-core Windows host for crypto/tls's standard BoGo wall (only `GOFLAGS` reaches BoGo's nested
-  `go test`, so a raised wall is an owner ruling); any cloud quota requested now.
+  launcher; a many-core Windows host, local or cloud, for crypto/tls's standard BoGo wall, qualified by measurement:
+  Go's own `TestBogoSuite` green twice under `-count=1`, then one converted reading inside the standard 600 s wall
+  (only `GOFLAGS` reaches BoGo's nested `go test`, so a raised wall is an owner ruling); a temporary host built from a
+  kit committed on `claude/coord-handover` and named by its fleet nickname; any cloud quota an OWNER-HAND filed now.
+  net's qualification is re-run twice immediately before net's H10 row, on the box that reads it (a router's DNS relay
+  turns NXDOMAIN into SERVFAIL whatever its upstream, and nslookup asks only the first server), and what answers only
+  over IPv6 is listed before IPv6 is unbound. The record names the filesystem that holds the repository, TEMP and
+  GOROOT. GOROOT stays on NTFS, and a box whose worktree is on ReFS does not read os or testing. Linux arms run
+  Microsoft's .NET build, with its libcoreclr hash recorded.
+  *(Edited in place 2026-10-01, §7 lessons 40, 42 and 44-46: the BoGo host is sized by measurement and a temporary
+  host is built from a kit; net's re-qualification, the filesystem record and the .NET build were added. Each was
+  first met mid-campaign.)*
 - **Instruments.** Every instrument a later stage depends on is landed on master and red-proved BEFORE that stage —
   the H10 recon wrapper as one blob, the sweep's `-Hop` mode (under PowerShell 5.1 and pwsh 7), the H6 completeness
-  gate, the H11 existence-plus-monotonicity check reading local AND origin tags.
+  gate, the H11 existence-plus-monotonicity check reading local AND origin tags. Each derives its per-release input
+  from `src/version.props` (or GOROOT's `VERSION`) and refuses by name when that release's file is missing,
+  red-proved with `version.props` bumped in a scratch worktree (`docs/phase4/NOTES-next-hop.md`, "NOTES" from here
+  on, A7-A10). The sweep's `-Hop` rows carry each row's execution pin (NOTES A3; open at 172d437e66, where
+  `src/_roster.ps1:578` sets `Execution = $null`). Plain `go test ./... -count=1` in `src/go2cs`, TestContextBudget
+  included, is green at master.
+  *(Edited in place 2026-10-01, §7 lessons 43, 49 and 68: hard-coded instruments silently read the old release,
+  `-Hop` builds its rows without their execution pins, and an over-budget instruction file kept every sub-agent from
+  spawning.)*
 - **Fleet.** Addressed comms from day one (ledger, per-lane inboxes, one message per event), one OWNER-HAND line per
-  owner action, and resume prompts written on the rule that nothing local survives a restart.
+  owner action, and resume prompts written on the rule that nothing local survives a restart. Messages take the
+  WHAT / EVIDENCE / ASK-or-NEXT shape. Every battery brief and per-run script is committed on
+  `claude/coord-handover` before launch. `RESUME-SESSIONS.md` and its verifier exist.
+  *(Edited in place 2026-10-01, §7 lessons 78, 82 and 85: briefs derived before launch caught their defects there,
+  and a COORD lost to the weekly limit resumed from the branch.)*
+- **Seats.** Every seat the ledger accepted since the previous anchor is an ancestor of origin/master, or carries a
+  disposition by name (land / re-cut / drop). The census repeats before each train draft and before the close STAMP.
+  *(Edited in place 2026-10-01, §7 lesson 41: this bullet was added. TRAIN 49 never landed, and its items were
+  missing until they were re-cut.)*
 
 ### H0 — Baseline capture ⟲
 
@@ -183,12 +209,22 @@ directory), the behavioral suite's failing set **by name** (H9's base), and each
 *(Edited in place 2026-09-26, §7 lesson 6: the last three were added; H8 and H9 had to produce the first two
 mid-hop.)*
 
+Before H2's pin bump, each UNBANKED row's reading is committed as matched / disclosed / undisclosed (the denominator is
+their sum), naming each undisclosed test and its disposition. A disclosure disputed at that reading is marked CONTESTED.
+*(Edited in place 2026-10-01, §7 lesson 48: reflect circulated as 326 of 385 against a record reading 388.)*
+
 ⚠ **Generate the `.cs.auto` baseline fresh, from a seeded old-release regen — never from the committed
 siblings.** The overlay rule excludes `*.cs.auto` in order to protect the hand-owned `.cs` beside it,
 so the tracked siblings are **frozen on their own schedule** and a materially stale baseline poisons
 the differential. This is a ruled decision, not a preference.
 
 ### H1 — Toolchain provisioning **GATE**
+
+**Default order** (a COORD proposal, NOTES §5 Q13, unruled at 172d437e66; TRAIN K seated it this way): any side seat
+that moves a toolchain-adjacent pin (the .NET SDK `global.json`, the emitted `LangVersion`, a C# keyword escape) lands
+and regenerates before the outgoing corpus's final release, never inside the hop.
+*(Edited in place 2026-10-01, §7 lesson 47: inside a hop, H5 would measure the csproj files such a pin moves instead
+of inheriting them. Once Q13 is ruled, cite the ruling here or move the rule into §2's orderings.)*
 
 1. Install the target release **side-by-side**; confirm the target actually **executes** — run
    `<target-root>/bin/go version` and require its OUTPUT to name the exact target. **Reading
@@ -376,8 +412,15 @@ matters as much as the others: experiment-gated packages stay out until they gra
 package set (ruled), and naming them explicitly is what stops a later reader re-diagnosing a
 "missing package".
 
-Deliverable: a census document under `docs/phase4/`, in the shape of the existing census docs. **A
-patch-level migration should produce an empty census; a non-empty one is a finding.**
+Deliverable: a census document under `docs/phase4/`, in the shape of the existing census docs, plus the incoming
+release's DATA files, `docs/phase4/data/population-go<rel>.txt`
+(`go run ./internal/genpopulation -goroot <incoming GOROOT>`, agreeing by name with an independent enumeration; a
+pre-staged pair is regenerated byte-identical) and `relocations-go<rel>.tsv`. **A patch-level migration should produce
+an empty census; a non-empty one is a finding.** The census lists every `//go:embed` directive, every
+linker-synthesized `//go:linkname` target and every new syntax form, each paired with a behavioral probe. No inherited
+population rule is reused until it has been run against the banked set.
+*(Edited in place 2026-10-01, §7 lessons 52-54: three instruments refuse without the population file, an inherited
+rule would have dropped three banked rows, and each construct was first found at H10 or later.)*
 
 **Every count here and after states its axes**: the population (convertible, or raw `go list std`), the tags
 (`purego,math_big_pure_go`), `CGO_ENABLED=0`, `ReleaseTags` pinned per side, the toolchain driven by its own GOROOT,
@@ -395,7 +438,7 @@ test, update the conversion-strategy reference (and the summary only if the head
 and prove `check-no-regression` clean **on the outgoing corpus** where the change is meant to be
 neutral.
 
-**Two recurring work items belong here by ruling rather than being discovered as audit findings:**
+**Three recurring work items belong here by ruling rather than being discovered as audit findings:**
 
 - **The hand-owned test host.** `src/core/testing` is skip-listed and never converted, so it follows
   **nothing** automatically while upstream keeps adding to `testing`'s API. It is a named work item of
@@ -403,6 +446,9 @@ neutral.
 - **The `go.mod` readers.** New `go.mod` verbs are silently dropped by lax parsing, so any new
   directive in the target release owes a re-check of the converter's `go.mod` handling rather than an
   assumption of safety.
+- **Throwing linkname bodies, per non-Windows GOOS.** Every linkname body that throws `NotImplementedException` is
+  answered with Go's own unsupported result, and is re-censused at H6.
+  *(Added 2026-10-01, §7 lesson 50: this list came from a ruling, and the third item comes from a measured miss.)*
 
 **Gate:** CNR byte-identical over the full behavioral corpus, zero `NOT MEASURED`. Budget from
 CLAUDE.md's `check-no-regression.ps1` row, from the top of its range.
@@ -597,6 +643,10 @@ skip a step of it, so the non-negotiables are restated rather than referenced:
 - **Wrap the converter call so its stderr warnings do not abort the wrapper** — a terminating
   error-action policy turns a native stderr line into a fatal, which is how the overlapping-run
   corruption happened in the first place.
+- **Keep each target's converter stderr and diff its warning counts by kind against the outgoing pin's reconvert.** A
+  new kind is sized as a predicted H7 red.
+  *(Edited in place 2026-10-01, §7 lesson 56: this bullet was added. One warning fired at all 29 sites of an H7 red
+  class while every A/B sent stderr to `/dev/null`.)*
 - **The marker gate is PATH-PRECISE, line-anchored, whole-file, and re-measured** ⟲. Per marked path,
   the staging root must not hold a freshly-**emitted** plain `.cs` — either a `.cs.auto` sits beside
   it, or nothing was emitted there. Counts intentionally differ from the census, in both directions,
@@ -628,10 +678,12 @@ skip a step of it, so the non-negotiables are restated rather than referenced:
   an orphaned hand-own relocates with its principal (`git mv` plus its namespace and class lines).
 *(Edited in place 2026-09-26, §7 lessons 16-17: the two bullets above.)*
 
-**Gate:** H5c applied (a dry run, then `-Apply` with zero UNRESOLVED and full flavour agreement), then the overlay
+**Gate:** H5c applied (a dry run, then `-Apply` with zero UNRESOLVED and zero UNEXPLAINED-DESELECTION
+(`reconvert-deletions.ps1`'s exit 0) and full flavour agreement), then the overlay
 completes with the marker gate at zero violations and **every diff classified** (§4).
 *(Edited in place 2026-09-26, §7 fix A4: the gate named no deletion step, though the H5c amendments of 2026-09-07 and
 09-13 make it one.)*
+*(Edited in place 2026-10-01, §7 lesson 58: the instrument's exit 0 needs both zeros.)*
 
 #### Amendment 2026-09-07 — the DELETION PASS is a required step, and it has an instrument
 
@@ -701,7 +753,17 @@ rather than the target is what keeps a **removed** package a candidate — `inte
 | `KEEP-SELECTED` | Go still selects the principal at the target for this flavour | no — the dominant class, and the pass's own negative control |
 | `DELETE-ABSENT` | the principal, or its whole package, is gone at the target (H3 removals) | yes |
 | `DELETE-DESELECTED` | the principal still exists on disk but Go does not select it for this flavour — a build-tag or GOEXPERIMENT flip | yes |
-| `UNRESOLVED` | no Go principal is derivable **inside a package the converter emits** — generated metadata (`package_info.cs`, `package_init.cs`) and anything else whose stem maps to no `.go` name | **never** |
+| `UNEXPLAINED-DESELECTION` | a `DELETE-DESELECTED` candidate that neither release selects under the converter's tag set while its principal is present at the target | **never** — and the run exits non-zero, with or without `-Apply` |
+| `UNRESOLVED` | no Go principal is derivable **inside a package that survives at the target**, and the file is not generated metadata — a stem that maps to no `.go` name | **never** |
+| `KEEP-METADATA` | generated metadata in a package that survives at the target | **never** — listed by name, and not blocking |
+
+*(Rows added and the `UNRESOLVED` row narrowed 2026-10-01, §7 lesson 58: they come from the instrument's amendments,
+`src/reconvert-deletions.ps1:120-135`. Generated metadata was `UNRESOLVED` until `KEEP-METADATA` took it, so the
+`crypto/ecdh/package_init.cs` example below predates that class.)*
+<!-- The draft added the two rows only. The UNRESOLVED row was narrowed at the apply (2026-10-02, e2008427b1): it read
+     "inside a package the converter emits — generated metadata (package_info.cs, package_init.cs) and anything else
+     whose stem maps to no .go name", which the new KEEP-METADATA row contradicted
+     (src/reconvert-deletions.ps1:128-135). -->
 
 **`UNRESOLVED` stops the step for a human.** Those rows are always listed, and the class is not
 hypothetical and not automatable from a file name: the rehearsal's 25 contains exactly one,
@@ -1017,6 +1079,12 @@ L3) and the stage-root `find` are NOT MEASURED on real roots.
      windows): NOT-A-CONVERSION-TARGET 130, PROTECTED 138, UNRESOLVED 42. The runbook sentence: a02ac3df3:docs/GoCorpusMigration.md:494-497.
      REHEARSAL-h5-go124.md §11's 2026-09-07 disposition (15 delete / 28 keep) predates this ruling and does not govern. -->
 
+*(Superseded 2026-10-01, §7 lesson 58: the delete is `reconvert-deletions.ps1 -Apply`, with its eight classes and
+`-BuildTags`/`-TagLine`. The interim script below is kept as history. Its backup and its flavour-agreement check
+still precede the delete, and each flavour's `-Apply` is gated on rc 0: this step's closing sentence and H5's Gate.)*
+<!-- The draft's note ended at "kept as history."; the last sentence was added at the apply (2026-10-02), because the
+     note alone dropped three guards that this step's closing sentence, item (f) and the H5 Gate keep. -->
+
 **5. The delete — the executable interim, until the instrument amendment is seated.** `-Apply` refuses while
 ANY `UNRESOLVED` row stands, and current metadata is always `UNRESOLVED`, so `-Apply` cannot complete on a
 three-target root. COORD `5123a14a2` accepted the instrument amendment "-Apply admits an UNRESOLVED row the run
@@ -1131,7 +1199,8 @@ UNCLASSIFIED. `d-hop` (H4a → H5) is the upstream delta: every row through §4,
      checkout's line endings are not the converter's, hence the stripped CRs on the master side only. -->
 
 **2. The overlay** — after the H5c amendment's steps 5 and 6, and after the H8 census (the H8 amendment reads a
-clean `<tree>`) — `.cs`, `.csproj` and `README.md`, never `*.cs.auto`, a straight copy:
+clean `<tree>`) — `.cs`, `.csproj` and `README.md`, never `*.cs.auto`, a straight copy, plus every emitted
+`<EmbeddedResource Include>` payload, pinned `-text` and proven by a re-checkout:
 ```bash
 ( cd '<stage>/h5/src' && find core \( -name '*.cs' -o -name '*.csproj' -o -name README.md \) \
     -not -path '*/bin/*' -not -path '*/obj/*' -not -path '*/Generated/*' ) > '<stage>/logs/overlay-set.txt'
@@ -1139,6 +1208,15 @@ clean `<tree>`) — `.cs`, `.csproj` and `README.md`, never `*.cs.auto`, a strai
 git -C '<tree>' status --porcelain > '<stage>/logs/overlay-status.txt'
 grep -c '^ D' '<stage>/logs/overlay-status.txt'   # 0: a copy deletes nothing (floor 8); grep -c exits 1 on a zero count
 ```
+The `find` above does not match the payloads: they are appended to `overlay-set.txt` before the `tar`, derived from
+the emission. A refused payload goes through repoguard's csproj-keyed admit only. After the copy, no README has lost a
+badge line, and every merged L3 csproj round-trips (close lessons 2, 4-6).
+*(Edited in place 2026-10-01, §7 lesson 51: the payload clause and this paragraph were added. The close met these
+first, and only by derivation; H5 meets them first.)*
+<!-- The first sentence of this paragraph is not in the draft: it was added at the apply (2026-10-02), because the code
+     block above copies .cs, .csproj and README.md only, and close lesson 2 (H10's close amendment) widens the overlay
+     "by every file an emitted csproj names in <EmbeddedResource Include>, derived from the emission". -->
+
 Then the marker census re-measured in `<tree>`, T0 phantoms restored per §4, and staging by explicit path —
 never `git add -A` (floor 8). `<tree>` is a worktree ON the version branch COORD names (checked out at `<H2>`, not
 detached, before the overlay); commits are signed; announce, then push (floor 9).
@@ -1153,6 +1231,11 @@ LC_ALL=C comm -23 '<stage>/logs/tracked.txt' '<stage>/logs/staged.txt' > '<stage
 Its want: exactly the step-5 delete set (prefixed `core/`), plus whatever the ruling removes. **`go2cs-stdlib.slnx`**
 is adopted from `<stage>/h5/src` verbatim, and only after that ruling: the generator lists every `.csproj` on disk,
 so while the residue stands it lists the residue.
+
+Exception: a flat file the emitter moved to per-GOOS folders is `git rm`'d by name once all three targets carry their
+copy (close lesson 3).
+*(Edited in place 2026-10-01, §7 lesson 51: an exception to this step's STOP. The close met it first, and only by
+derivation.)*
 <!-- The overlay rule is this section's bullet above ("Overlay .cs, .csproj and README.md, excluding *.cs.auto"); a straight copy:
      corpus-reconvert SKILL.md:111. The slnx: src/go2cs/solutionGenerator.go:39-44 (adopted verbatim) and :140-175 (every .csproj on disk);
      never line-filtered: 826045a74:docs/phase4/h5-removals.txt:14-17 (28 MSB4025, zero assemblies). Version branch: this document §3.5
@@ -1319,6 +1402,10 @@ behavioral divergence, an added branch shows up as nothing.
 > marker list and asserting that every absent entry has a closed row. Banked, not cut during a
 > migration — the list's baseline moves at every hop and a guard whose baseline moves needs the hop to
 > be over before it can be written honestly.
+> The 1.24.13 hop is over, so the guard is owed before the next hop's H6. It is absent at 172d437e66, and its
+> baseline is that hop's `logs/handowns-outgoing.txt`.
+> *(Edited in place 2026-10-01, §7 lesson 60: missing the comm step let sha3's fabricated `array<T>` class return
+> while H6 passed.)*
 
 **The instrument** is `.cs.auto` — the converter's answer to *"what would the automatic conversion of
 this file be, today, from this Go tree?"*
@@ -2289,7 +2376,11 @@ Per banked package:
    design** (measured 2026-08-25: the wrapper reds every hop row in seconds — count mismatch, plus
    the re-emitted test sources reading as unclassified drift). The re-emitted sources are the
    **bank-in-waiting** for this step's own re-bank — leave them in the tree, restore only the
-   standing production-flip classes at the end. A wrapper `-Hop` mode is open instrument debt.
+   standing production-flip classes at the end. `run-validated-sweep.ps1 -Hop` runs the steady-state pass over
+   `docs/phase4/data/population-go<release>.txt` and refuses by name without it. Until NOTES A3 lands it does NOT
+   apply execution pins, so a pinned row is read outside `-Hop`. The recon leg stays the recon wrapper's.
+   *(Edited in place 2026-10-01, §7 lesson 68: this read "A wrapper `-Hop` mode is open instrument debt". `-Hop`
+   landed with TRAIN K, and its rows still carry no execution pin.)*
 2. **Re-derive the verdict count.** The denominator moves — tests are added and removed.
 3. **Re-derive the disclosure manifest.** Disclosures are pinned by **exact failure signature**, so a
    renamed or reworded test invalidates its pin and the manifest is **re-signed, never edited** (§4,
@@ -2301,9 +2392,21 @@ Per banked package:
    no plan). A hop re-signs every manifest anyway, so this is the step where a row's legacy label
    retires — full definitions in
    [`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md).
+   - (a) A reading-run TSV from the landed, red-proved unit extractor (NOTES A14), then the relabel, then rulings,
+     then page banking; labels are classed against the plan bar at the first classing.
+   - (b) Every structural label is read against its design records.
+   - (c) Unit-claiming classes are checked against measured units, and reading-vs-run MOVE rows are listed.
+   - (d) Every failure line each signature matches is listed on both OSes; over-absorbing pins are narrowed and
+     orphans retired.
+     *(Edited in place 2026-10-01, §7 lessons 63 and 69-71: the four sub-steps were added. The relabel took 122
+     entries in 24 manifests, six structural pins were reversed, and one pin absorbed five assertions and unbanked
+     its row.)*
 4. Regenerate the proof page and let the README validation badge recompose from it.
 5. **Re-check the per-package deadline floors** in the sweep's long-timeout table — a migration can
-   change a suite's cost.
+   change a suite's cost — re-keyed to the release's relocations and checked against the recon walls (raise when a
+   wall passes 0.75 of its floor, never lower), with `src/run-h10-recon.ps1 -SelfTest` passing before pass 1 under
+   every launcher's shell (§7 lesson 61 has the command).
+   *(Edited in place 2026-10-01, §7 lesson 61: the wrapper's floor and pin defects were found only at pass 3.)*
 
 **Order and launch.** H10 runs: (1) a census of the relocated rows' successors, and a conversion-only `-tests`
 pre-stage of them; (2) the recon leg, in a throwaway linked worktree detached at the tip — `-tests -test-action all`
@@ -2312,9 +2415,11 @@ per row, the tree's own wrapper by blob, derived floors (never the 2-minute defa
 .NET pins where its pwsh needs them, asserts pwsh starts under that environment before row 1, greps a `DRIVER_EXIT=`
 marker rather than trusting `$LASTEXITCODE`, and excludes the harness's own pwsh hosts from its sibling wait. A linux
 READING (`GoTargetOS=linux`, CGO 0, privilege stated) runs alongside the recon leg; the linux BANK stays a separate
-leg. *(Edited in place 2026-09-26, §7 lessons 28-30: seat-before-recon made the generator refuse, launch traps cost a
+leg. It reads and annotates EVERY linux-eligible banked row.
+*(Edited in place 2026-09-26, §7 lessons 28-30: seat-before-recon made the generator refuse, launch traps cost a
 40-minute false wait and a
 parsed-nothing exit 0, and the late linux leg found a linux-only partial on 25 of its 30 FAIL rows.)*
+*(Edited in place 2026-10-01, §7 lesson 64: 30 eligible rows were read and never annotated.)*
 
 > **Pre-staging a flagged row — the technique, and it is cheap.** A row the census or the upstream
 > survey flags as risky can be answered *before* the campaign reaches it: run the NEW release's test
@@ -2374,7 +2479,9 @@ lands. Then the plan is emitted from that TSV and the driver runs the campaign's
 every not-yet-banked row are outside it, and **this leg is the authority on membership**. The two
 words are not interchangeable in this block — the sentence below about the map generator says "the
 roster file" and is CORRECT, because that is the file the generator enumerates from. The difference
-between the two sets is the whole reason the sweep cannot run this leg.
+between the two sets is why this leg stays the recon wrapper's: `-Hop` runs the steady-state pass over the
+population file, never this leg, unless that is re-ruled.
+*(Edited in place 2026-10-01, NOTES-next-hop §6: `-Hop` landed with TRAIN K, b46af2049e.)*
 
 #### The 1.24.13 hop's recon leg, as it actually ran — the readings, cited rather than re-derived
 
@@ -2442,11 +2549,15 @@ and in no unscheduled bucket, and **on the pass-1 map they never run at 1.24.13 
 
 **The procedure this amends, for every hop after this one: a population is an ENUMERATION checked by
 two INDEPENDENT routes, never a count a generator derives from its own inputs.** The enumeration is
-a committed file (`docs/phase4/hopA-inputs/recon-lists/population-go1.24.13.txt`); the roster guard
+a committed file (`docs/phase4/data/population-go<release>.txt`, an H3 deliverable; `shardmap.py:94` reads the
+hopA-inputs copy until NOTES A9 lands); the roster guard
 asserts the header's `N` and every banked and excluded row's membership against it, and `shardmap.py`
 now refuses when `dispatched + unscheduled` does not close on it, naming every member on each side.
 The exclusion ledger takes the same rule the population does: an exclusion is subtractable only from
 a set that contains it, which is what struck four E1 rows from the roster's table on the same date.
+*(Edited in place 2026-10-01, §7 lesson 52: the path read
+`docs/phase4/hopA-inputs/recon-lists/population-go1.24.13.txt`; the roster guard, the sweep's `-Hop` and push-nuget's
+preflight read the `docs/phase4/data/` file and refuse without it.)*
 
 ⚠ **AMENDED 2026-09-22 (the two live members COSTED, coordinator ruling; ledger 16:31 · 3469154a95;
 evidence ledger 11:36 · 553cdcbae3). The closing check above now closes.** The basis
@@ -2873,7 +2984,11 @@ go2cs -tests -test-action all -test-config Release -test-timeout <floor> \
 or re-signs disclosures, then banks or routes; `CONVERT` and `BUILD` bank nothing and owe a sizing;
 `TIMEOUT` re-dispatches at a raised budget; `NOVERDICT` is recorded by cause. ⚠ **A long wall is not a
 TIMEOUT** — only the results-file tail says a deadline fired (floor 14) — and ⚠ **NOVERDICT banks no
-count**: it reads `NOMATCH`, never 0, with the cause written beside the row.
+count**: it reads `NOMATCH`, never 0, with the cause written beside the row. At the end of pass 1, run the page
+census and the population identity (enumerated two ways), and re-dispatch every NOVERDICT or hand-stopped row at a
+raised budget.
+*(Edited in place 2026-10-01, §7 lesson 62: two rows were in no shard plan and 14 banked rows had never been
+measured, which cost a whole pass 3.)*
 
 **HOW A ROW BANKS.** Each worker cuts **one lane ref per shard** off the version tip, carrying that
 shard's artifacts **only** — never `docs/validation/index.md`, never the roster header. The coordinator
@@ -2881,7 +2996,12 @@ merges the refs as **incremental trains, one leg at a time**, re-asserting the c
 that a red row names its own shard. ⚠ **The roster's figures are DERIVED and never hand-set**:
 `src/check-roster-format.ps1` recomputes the header from the table — validated count against row count,
 verdicts against the Tests column, disclosed against the Disclosed column, the percentage following
-from those — so a worker edits rows and the coordinator takes the header from the guard.
+from those — so a worker edits rows and the coordinator takes the header from the guard. **The shard checklist, on
+every ref:** test artifacts only, from a named list; rewritten production `.cs` restored; rowless PASS artifacts
+carried; staged GOROOT fixtures committed; Tests = MATCHED; any host capability the count depends on recorded and
+registered as host-conditional; every cited SHA pushed and read back by `ls-remote`.
+*(Edited in place 2026-10-01, §7 lessons 66, 67 and 72: 6 to 61 production files were restored per shard, a page
+cited a commit that was never on origin, and os banked at a count only a privileged host reads.)*
 
 ⚠ **AMENDED 2026-09-22 (what the Tests cell holds, coordinator correction; ledger 15:42 · 3469154a95).
 The Tests cell is the page's MATCHED count, never matched + disclosed.** Disclosed verdicts have their
@@ -3130,7 +3250,9 @@ leads:** where a brief and this block disagree, the brief stops and quotes both.
      orange by hand is re-greened when both badge arms agree. At this hop that is
      `crypto/internal/fips140deps`, an exclusion row that keeps a `tests.csproj` AND a current page.
      Restore it after the overlay as a named class. Do not leave it for T5.
-9. **Post-regen gates**, each from a per-run copy, serially:
+9. **Post-regen gates**, each from a per-run copy, serially. Rehearsed at the campaign-tip fold, not first met here.
+   *(Edited in place 2026-10-01, §7 lesson 75: the close seat stopped three times, for about 4 h, on R-B13 through
+   R-B16.)*
    - the converter suite;
    - CNR, with CHANGED empty, or classified by §4 with zero T5;
    - the stdlib on all three flavours by H7 as amended;
@@ -3149,6 +3271,14 @@ leads:** where a brief and this block disagree, the brief stops and quotes both.
     - every row's FIRST proof page is at the new release (a planted old first page is named);
     - every numeric linux annotation equals a new-release linux reading, so the residual set is EMPTY
       (a planted wrong annotation is named);
+    - the linux-annotated set equals the eligible set by name;
+    - every cited SHA resolves on origin;
+    - no accepted seat is unlanded without a named disposition;
+    - tracked `testdata` equals the pinned GOROOT (repoguard's `TestTrackedFixturesMatchPinnedGoRoot`, landed with
+      TRAIN L at fbaa3d1218; §7 lesson 76 has the by-hand command);
+      *(Edited in place 2026-10-01, §7 lessons 41, 64, 66 and 76: the four checks above.)*
+      <!-- The fixture clause was re-read at the apply (2026-10-02, e2008427b1). The draft read "TRAIN L's guard once
+      fbaa3d1218 lands, until then lesson 76's command"; TRAIN L landed at master aa0a07d5fd. -->
     - shardmap closes;
     - the release census closes as named identities (below);
     - the deadline floors hold against their largest walls;
@@ -3285,7 +3415,9 @@ FROM THE CLOSE SEAT ITSELF.** The seat stopped three times and each stop was rul
 
 - The published version is the pinned Go release plus the build counter, already set at H2.
 - **Verify EXISTENCE-PLUS-MONOTONICITY with a scripted comparison before the first publish**, never
-  believe it. A non-monotonic sequence on a public feed is not correctable.
+  believe it. A non-monotonic sequence on a public feed is not correctable. Whether an unreadable origin may degrade
+  to a local-tags comparison is ruled at Readiness and written here (NOTES A11, §5 Q15; `src/push-nuget.ps1` warns and
+  compares local tags only). *(Edited in place 2026-10-01, NOTES-next-hop Q15.)*
   > **AMENDED 2026-09-20.** This rung read "verify version monotonicity" until today, and that is
   > TRUE AND INSUFFICIENT: **a counter carried across a base bump is perfectly monotonic.** `0f97dcc8db`
   > is the proof — 1.23.12.3 → 1.24.13.3 increases, and 1.24.13.3 was never published. Monotonicity
@@ -3424,7 +3556,9 @@ large rows repeatedly.
 streaming, spawned child toolchains), and suites with enormous verdict counts can be quick. **The
 honest proxy is the previous full sweep's per-row wall time** — which means **per-row log retention on
 the preceding consolidation sweep is a prerequisite of the next migration's shard map**, and is
-unrecoverable afterward. Make it an obligation of that sweep, not of this step.
+unrecoverable afterward. Make it an obligation of that sweep, not of this step. The sweep's per-row TSV is committed
+as a dated (OS, SHA, machine) section of `docs/phase4/DATA-sweep-row-walltimes.md`; the sweep writes it under a
+git-ignored scratchpad (NOTES A4). *(Edited in place 2026-10-01, NOTES-next-hop A4.)*
 
 **Smallest-first is the established ordering, and its reason is banking**: partial results bank as the
 campaign goes, and the coordinator merges incrementally rather than waiting for the whole run. Its one
@@ -3787,9 +3921,11 @@ frame schedules it **once per ladder** plus coordinator discretion, not once per
 | master folded into the release branch | at H7a and again at the campaign tip (§2 H7a) — each sized, predicted, and scored; H6's retired-hand-own step re-run after H7a as the closing check. *(Edited in place 2026-09-26, §7 fix A6.)* |
 | `go2cs.slnx` | **yes** after any golib/runtime API change; it is the only gate compiling the non-generated members. In any non-Debug configuration pin `-p:go2csPath=<repo>/src/`, or every behavioral project resolves the machine deploy root instead of the tree (R-B16, H10's close amendment) |
 | full behavioral suite (four phases) | **yes**, at H9 and at the parity gate |
+| GolibTests build under `GoTargetOS=linux` | **yes**, every battery *(Edited in place 2026-10-01, §7 lesson 55: this row was added; the project had not built under linux for eight days and nothing noticed.)* |
 | seeded full reconvert | **once** per phase — H4a's bundle and H5 — plus H10's close regen whenever a converter fix landed after H5, plus any proving regen the release rules; count each. Never twice into one staging root. *(Edited in place 2026-09-26, §7 fix A13: the 1.24.13 hop ran a third at the close and a fourth before the release.)* |
 | multi-target emission + platform census | **yes**, at H8 |
 | full validated-roster sweep | **once**, at the parity gate: coordinator-owned, backgrounded, on the fastest available machine, **never parked by a lane** — a lane's process tree is reaped at its turn boundary, and sweeps have been lost to exactly that. Recovery is `roster − logged`, re-run inline, with the verdict arithmetic checked to close *(§7 lesson 37: a survival canary before row 1; `clean-bin -Root` explicit and `src/gen` purged separately; disk preflight at the row boundaries.)* |
+| `release-nuget.ps1 -VerifyOnly` | **yes**, at every train landing during the hop *(Edited in place 2026-10-01, §7 lesson 77: this row was added; push-nuget's release pre-flight was red at master from TRAIN G until 2026-09-29.)* |
 | release-ritual dry run | **yes**, at H12 |
 
 Budget every one from CLAUDE.md's measured budget table, **from the top of each range**, and
@@ -3814,6 +3950,10 @@ healthy run look hung — and, in the other direction, what lets a hung one look
 > **Fixes A1-A13.** Thirteen places where the step text still said what a later dated block had corrected (the
 > fourth ordering, H7a's "one merge", H9's "all four phases green", H10's row-count equality and its "226", among
 > them) were corrected in place. Each carries a one-line dated note naming its fix, so the old text stays readable.
+>
+> **Addendum 2026-10-01 (§7.7).** Lessons 40 onward cover 2026-09-26 to the 225/225 close (TRAIN K, 75648a022b) and
+> sharpen §7 items whose step text the next hop still needs. Their step edits carry "(Edited in place 2026-10-01,
+> §7 lesson N: …)".
 <!-- Owner order: ledger 2026-09-23 14:52 · OWNER ORDER · c9e15c73a0 (seed list claude/coord-handover
      docs/phase4/briefs/lessons-learned-seed.md). The owner excluded the i9's hardware issues as temporal. Derived by
      C1 on 2026-09-26: seven read-only agents over the ledger (09-20..09-25), the mailbox archives (09-07..09-20), the
@@ -4028,6 +4168,378 @@ healthy run look hung — and, in the other direction, what lets a hung one look
     b6746ab185; 05:48 · RULING · 6ab65f3409; 04:59 · STAMP · ffa5c1015a; 15:57 · STAMP · e06494c6f8; 11:27 · STAMP ·
     53f52233fc; 14:10 · ANNOUNCE · 4c53b02a0a; 16:17 · STAMP · 9a5f63041b; 06:44 · FINDING · 38529c765a (CS0426
     'Rlimit' on linux; seats 501b7e4c27, 43c8d5aac7, 26042b3a92); seed items 13, 14, 16, 17. -->
+
+### 7.7 Addendum — 2026-10-01: the close seat to 225/225
+
+<!-- Derived read-only on 2026-10-01 at master 172d437e66 and owner-approved on 2026-10-02. Applied on 2026-10-02 on
+     TRAIN M's union e2008427b1, where every cited path, line, flag and name was re-read. The text is the approved
+     draft's except where that re-read found the tree different. Each such change is recorded in the comment beside
+     its lesson, or, for step text, here:
+     - lessons 40, 41, 43, 61 and 68: a flag, the ledger's line form, a pathspec, a command's mandatory parameters and
+       the pinned-row list; and the line cites in lessons 61 and 72;
+     - the Readiness Host bullet (TestBogoSuite twice under -count=1); H3's deliverable (genpopulation's -goroot);
+       H5c's class table (the UNRESOLVED row) and its step-5 note; the H5 overlay amendment's step 2 (the payloads
+       are not in the find); H10 step 1 (the population file's name); H10 step 5 (a pointer to lesson 61); close
+       step 11 (the fixture guard landed with TRAIN L).
+     Placement adaptations that change no meaning are not listed: the first use of "NOTES" spelled out, the handover
+     branch named in full, and list and table formatting.
+     Lesson 65 is held for a COORD ruling and lesson 86 for the skills seat. Both numbers stay reserved. -->
+
+#### Before H0
+
+40. **Qualify crypto/tls's BoGo host by measurement at Readiness, not at its row.** Use a many-core Windows host, local or
+    cloud. Go's own `go test -count=1 -run '^TestBogoSuite$' crypto/tls` is green on it twice, and then one converted
+    `-tests` reading of `TestBogoSuite` finishes inside the standard 600 s wall. Any cloud quota is filed as an OWNER-HAND
+    the day Readiness opens. The raised-wall bank (`GOFLAGS=-timeout=40m` on both sides, in the row prose; the sweep's
+    environment execution pin is an owed instrument seat) is the owner-ruled fallback, not the plan. Why: the host, a
+    resize and Go's own loopback flake held H10's close for about 15 h. **Step text:** Readiness.
+    <!-- ledger 2026-09-22 21:55 · FINDING · 7462befde0 (C# TestBogoSuite 1,788.4 s against Go's 30.4 s on R-LAPTOP,
+    16 logical processors: no standard-wall run there); 2026-09-23 00:20 · RULING · c0f11384e4 (a temporary host, set up
+    at 8 vCPU and resized to 48 before the row); 10:10 · OWNER RULING · fc6269b0bf; 11:08 · FINDING · 6cd0bfb554 (a
+    48-vCPU host met the 600 s wall in 213.1 s; nine Go=fail / C#=pass leaves came from Go's own shim); 11:59 · OWNER
+    RULING · fad839a224 and 12:36 · 3ec2c9ff39 (the raised-wall bank; only GOFLAGS reaches BoGo's nested go test).
+    Extends §7 lesson 1. Draft lessons 41 and 43 merged.
+    Corrected at the apply, 2026-10-02. The draft's command had no -count=1: in package-list mode a second passing
+    run replays the cache (go1.24.13 src/crypto/tls/bogo_shim_test.go:411-415 keeps the test cacheable), and "twice"
+    exists because the temporary host's Go oracle flaked differently on each run (11:08 6cd0bfb554). The draft also
+    read "in the row prose and an execution pin": the roster has no such pin ($RosterExecutionValues in
+    src/_roster.ps1 is release-tc0 and release-tiered), and 11:59 fad839a224 rules a standing environment execution
+    pin for the sweep a post-hop instrument seat. -->
+41. **Census the accepted-but-unlanded seats before H0, before each train draft and before the close STAMP.** Enumerate
+    the ledger's `· ACCEPT ·` and `· SEAT ·` lines since the previous anchor, and its `COORD:` lines that say ACCEPTED or
+    seated (the ledger's form since 2026-09-30). After a fetch, run
+    `git merge-base --is-ancestor <sha> origin/master` for each one. Give every non-ancestor a disposition by name: land,
+    re-cut or drop. Why: TRAIN 49 never landed, and its items were missing until they were re-cut.
+    **Step text:** Readiness; H10 close step 11.
+    <!-- ledger 2026-09-26 10:07 · FINDING · 3ffd1d8a8d (TRAIN 49 never landed: its converter guard, hand-own census fix,
+    sweep -Hop mode, H5c slnx-orphan fix and runbook shard amendment, the last three marked "before the next hop", were
+    missing until re-cut); 2026-09-27 15:18 e9c57f833e; 2026-09-29 12:51 · SEAT · b46af2049e (the -Hop landing seat,
+    re-cut).
+    Corrected at the apply, 2026-10-02. The draft named the kind-field form only. The ledger stopped writing a kind
+    field on 2026-09-30: that day and 2026-10-01 carry no ACCEPT or SEAT kind line, and their acceptances (TRAIN K
+    onward) read "YYYY-MM-DD HH:MM COORD: ... ACCEPTED ...". The kind-field pattern alone reads every one of them as
+    absent, which is a clean census over stranded seats. -->
+42. **On the box that will read net, re-qualify DNS twice immediately before net's H10 row. Before unbinding IPv6, list
+    what answers only over IPv6.** Why: a targeted pass no longer held two hours later, once IPv6 DNS went back to automatic.
+    **Step text:** Readiness.
+    <!-- A router's DNS relay turns NXDOMAIN into SERVFAIL whatever its upstream, and nslookup asks only the first server.
+    A targeted pass at 00:35 no longer held at 02:17, once IPv6 DNS went to automatic and the router's link-local resolver
+    came back into the list. Unbinding IPv6 also disconnected the box's mapped drives. (ledger 2026-09-22 22:55
+    8b03ac8132; 2026-09-23 00:35 96a8b8d17c; 02:17 ac9f8251ee; 10:10 and 10:24 fc6269b0bf; 2026-09-24 00:33 836004dd20,
+    the per-box wording: public IPv4 resolvers per adapter, IPv6 unbound.) Extends §7 lesson 1. -->
+43. **Every instrument derives its per-release input from `src/version.props` (or GOROOT's `VERSION`) and refuses by
+    name when that release's file is missing. Red-prove each with `version.props` bumped in a scratch worktree.** At
+    Readiness, run
+    `git grep -n -E '<outgoing release spellings>' -- 'src/*.ps1' 'src/*.sh' 'docs/phase4/**/*.py' '.claude/coord-scripts'`;
+    for a hop out of 1.24.13 the pattern is `'go1\.24\.13|go124'`. Every hit is either a derivation or a named record.
+    Why: hard-coded instruments silently read the old release. **Step text:** Readiness.
+    <!-- ledger 2026-09-29 14:01 aa4ec663c5 and 16:11 422af93f53 (the roster guard and push-nuget's preflight were found
+    hard-coded and fixed). This hop's open instances: NOTES-next-hop.md §2 A7-A10 (src/run-h10-recon.ps1:841-843,
+    src/check-h6-completeness.ps1:76, docs/phase4/hopA-inputs/shardmap.py:94) and §5 Q14 (one naming convention).
+    Widened at the apply, 2026-10-02. The draft's pathspec was 'src/*.ps1' 'docs/phase4/**/*.py', which leaves out the
+    shell instruments and the committed fleet templates. They hard-code the release too (the linux driver template
+    refuses by name on any other): .claude/coord-scripts/templates/linux-legs.sh, templates/linux-brief.md and
+    src/apply-h5-c1-1-rederives.sh carry 13 of the 36 hits at e2008427b1. -->
+44. **Build any temporary host from a kit committed on coord-handover:** a setup script, a brief with the bank gate and
+    an evidence-only fallback branch, and a resume prompt. Name the host by its fleet nickname at creation. Keep its own
+    identifiers only in the census's local never-push token file. Re-run the kit's validation (identity, push auth, token
+    file, census plants) after every resize, and delete the host after its row. Why: the kit's derivation caught 28
+    defects, and the VM's computer name tripped the census. **Step text:** Readiness.
+    <!-- ledger 2026-09-23 00:20 c0f11384e4 (the kit: setup script, brief, resume prompt; 28 defects repaired); 10:45
+    fc6269b0bf (the whole validation re-run after the resize); 11:08 6cd0bfb554. -->
+45. **Each sweep box's host record names the filesystem that holds the repository, TEMP and GOROOT. GOROOT stays on
+    NTFS. A box whose worktree is on ReFS does not read os or testing; those rows go to an all-NTFS box.** Why: on ReFS,
+    os diverges on the converted side (`TestFileReadDir/.`, Go=pass / C#=fail), so does testing (`TestChdir/relative`,
+    Go=skip / C#=pass), and a ReFS GOROOT deadlocked runtime's `TestTracebackSystem/panic` child. **Step text:** Readiness.
+    <!-- ledger 2026-09-28 10:10 ec23ad9f6b (the cross-volume root cause: ReFS lacks object IDs); 2026-09-30 04:20 (the
+    one-filesystem A/B: both divergences retire with GOROOT on the worktree's volume); 04:55 (the ReFS-GOROOT adoption
+    reversed: trains keep GOROOT on NTFS; with it there runtime matches its pin);
+    coord-handover .claude/coord-scripts/trainK/tK-seats-draft.txt:50 (os and testing moved to an NTFS box for TRAIN K). -->
+46. **Linux lanes run Microsoft's .NET build, and the host record carries its libcoreclr hash.** Why: under OSR, a
+    distro-packaged .NET 10 faulted with 0x80131506, or exited 0 with truncated output. **Step text:** Readiness.
+    <!-- ledger 2026-09-29 07:49 7bf4ac26cd; 2026-09-30 04:38; 08:34. -->
+47. **Toolchain-adjacent pins land and regenerate before the outgoing corpus's final release, never inside the hop.**
+    These pins are the .NET SDK `global.json`, the emitted `LangVersion` and C# keyword escapes. This is the default order
+    until COORD rules NOTES-next-hop.md §5 Q13. Why: inside a hop, H5 would measure about 1,364 moved csproj instead of
+    inheriting them. **Step text:** H1.
+    <!-- 53eef3cda8; d87e4f883c; TRAIN K 4016a2269c; NOTES-next-hop.md E1, E2. Q13 is a COORD proposal, unruled at
+    172d437e66 (NOTES-next-hop.md:520); TRAIN K seated S1 and S2 this way. -->
+48. **At H0, before H2's pin bump, commit each UNBANKED row's reading as matched / disclosed / undisclosed.** The
+    denominator is their sum. Name each undisclosed test and its disposition, and mark CONTESTED any disclosure disputed
+    at that reading. Why: reflect circulated as 326 of 385 against a record reading 388, and unique's "4 of 19" was
+    19/1/0 of 20. **Step text:** H0.
+    <!-- BOARD:24286-24327. -->
+49. **Before H0, plain `go test ./... -count=1` in `src/go2cs` is green at master, TestContextBudget included.** Why:
+    before 56ff452a50 (2026-09-12, mid-hop), the instructions alone kept every sub-agent from spawning in the repo.
+    **Step text:** Readiness.
+    <!-- 56ff452a50; 3076e2074b; 48eaa32d98. -->
+
+#### H3 – H9
+
+50. **At H4, and again at H6, census every linkname body that throws `NotImplementedException`, per non-Windows GOOS.
+    Answer each one with Go's own unsupported result.** Why: `internal/syscall/unix.vgetrandom` killed 25 of the linux
+    leg's 30 FAIL rows through crypto/rand, and the cure was Go's `(-1, false)`. **Step text:** H4.
+    <!-- ledger 2026-09-23 06:18 5da426433b; 08:51 971d919113 (seat bdec3ae4d8); NOTES-next-hop.md §3.9 ("read the
+    non-Windows legs early"). Extends §7 lesson 30. -->
+51. **Run close lessons 2-6 (H10's close amendment) at H5's overlay and after every seeded regen, not first at the close.
+    Run close lesson 1 (a costed recon-basis row) at every demotion.** Why: the close met all six only by derivation, and
+    H5 meets them first. **Step text:** H5 overlay amendment, steps 2-3.
+    <!-- Close lessons 1-6, in H10's close amendment (172d437e66:docs/GoCorpusMigration.md:3187-3248):
+    (1) a costed recon-basis row for a demoted row;
+    (2) production //go:embed payloads copied with -text pins;
+    (3) emitter-moved flat files git rm'd;
+    (4) the staging seeder, which carried only docs/validation/current, stripped both badges from 337 READMEs (R-B13,
+    781c1c3c31);
+    (5) repoguard's csproj-keyed payload admit (R-B14, de436207c9, merged as f0ada4471e);
+    (6) the merge renderer dropped log/syslog's post-block group (R-B15, ae813db069).
+    Ledger 2026-09-22 16:36 c3cb3b310; 2026-09-23 13:36 3ec2c9ff39 (the close brief's derivation repaired 36 defects
+    and found 1-3 before the close ran); 18:11 922994cec3; 18:39 1a328f3ee8; 22:30 fa18863b94. Draft lessons 58, 59 and
+    82 merged; §7 lesson 35 holds the adversarial derivation itself. -->
+52. **At H3, commit `docs/phase4/data/population-go<rel>.txt` and `relocations-go<rel>.tsv`.** Generate the population
+    with `go run ./internal/genpopulation -goroot <incoming GOROOT>` in `src/go2cs`. It must agree by name with an
+    independent enumeration (a GOROOT filesystem walk against `go list`). If a pair was pre-staged before the hop,
+    regenerate it with the H1 toolchain and require byte-identity. Why: the roster guard, the sweep's `-Hop` and
+    push-nuget's preflight refuse without the population, and shardmap must be re-pointed at it (NOTES A9).
+    **Step text:** H3; H10's 2026-09-22 amendment.
+    <!-- src/check-roster-format.ps1:896-909; src/run-validated-sweep.ps1:251-264 (-Hop refuses a missing population and
+    only states a missing relocations table); docs/phase4/hopA-inputs/shardmap.py:94 (hard-codes the hop-A file);
+    ledger 2026-09-30 04:05 5b011e7cbf (the go1.25.14 population, pre-staged); 04:12 4304774785. -->
+53. **Before reusing an inherited population rule, run it against the current banked set, and drop any rule that
+    subtracts a banked row.** Why: membership is a property of GOROOT under the corpus tags, never of `src/core`. The
+    1.23.12 rule "a production .csproj exists" would have dropped three banked test-only rows. **Step text:** H3.
+    <!-- ValidatedTestPackages.md:1350-1359, :1376. -->
+54. **At H3/H4, census the new release's constructs and pair each one with a behavioral probe.** These are `//go:embed`
+    directives (production and test, named and blank `embed` imports), `//go:linkname` targets the Go linker synthesizes,
+    and new syntax such as generic type aliases. Why: each was first found at H10 or later, and a blank-import embed
+    regression reddened a batch. **Step text:** H3.
+    <!-- ledger 2026-09-22 00:43 769fc17fb; 05:57 (battery tip, local only); 2026-09-24 01:50 478e78429b; 2026-09-26
+    04:19 db1bd885a2 (go:fipsinfo, generic aliases). -->
+55. **Build GolibTests under `GoTargetOS=linux` in every battery.** Why: it had not built under linux since 2026-09-15,
+    and nothing noticed for eight days. **Step text:** §6.
+    <!-- ledger 2026-09-23 08:51 971d919113 (b293973e9f). Extends §7 lesson 30. -->
+56. **Keep each target's converter stderr from H5's seeded reconvert, and diff its warning counts by kind against the
+    outgoing pin's. Size a new kind as a predicted H7 red.** Why: a "not erased; emission may not compile" warning fired at
+    all 29 sites of one H7 red class on every conversion since the hop, while every A/B sent stderr to /dev/null.
+    **Step text:** H5.
+    <!-- BOARD:25412-25418 (RED 8); claude/mailbox 3d15626145. -->
+57. **Print each class's census, taken at both pins, per class and never as one total. When a hand-own closed a class
+    through a Go fork idiom, re-census that class in every package that carries its own copy of the fork.** Why: a total
+    read "unchanged" while 3 sites changed class. Three native-boundary members also arrived at 1.24 in
+    internal/syscall/windows. Two sat in its own copy of a fork that syscall/windows had already closed, and the third
+    (NtCreateFile) ended the test host on row 48.
+    <!-- BOARD:25272-25341 (RED 5), :25592-25597; 9a7789127a. -->
+58. **Run H5c's delete as `reconvert-deletions.ps1 -Apply`, with its eight classes and `-BuildTags`/`-TagLine`. Its exit
+    0 needs zero UNRESOLVED and zero UNEXPLAINED-DESELECTION.** Why: the stage text still prescribed the 2026-09-13
+    interim script and a six-class table, both older than the instrument's amendments.
+    **Step text:** H5 Gate; H5c step 5 and its class table.
+    <!-- src/reconvert-deletions.ps1:120-135 (the two newer classes), :240-246 (exit codes), :1259 (class order), :297
+    (-BuildTags); 172d437e66:docs/GoCorpusMigration.md:631, :695-704, :1020; c8ee9bb6a7; b291530e95. -->
+59. **From H2 to H5, run repoguard and the registry guards that read Go source with GOROOT at the CORPUS pin. Answer
+    "does this package exist" from `git ls-files`/`git ls-tree` at the ref, never from `os.Stat`.** Why: a newer GOROOT
+    reported a false linkname regression, and removed directories read as absent, empty or populated depending on the box.
+    <!-- BOARD:25674-25692. -->
+60. **Cut the retired-hand-own guard (H6's durable form) after each hop closes and before the next hop's H6, baselined
+    on that hop's `logs/handowns-outgoing.txt`.** Why: missing the comm step let sha3's fabricated `array<T>` class return
+    while H6 passed, and repoguard has no such guard at 172d437e66. **Step text:** H6.
+    <!-- 172d437e66:docs/GoCorpusMigration.md:1256-1262, :1288, :1318-1321; NOTES-next-hop.md A15 (owed: the
+    entry itself is not in NOTES yet; a separate seat adds it). -->
+
+#### H10
+
+61. **Before pass 1, run
+    `src/run-h10-recon.ps1 -SelfTest -Tree <worktree> -NameList x -GoRoot x -Out x -ExpectTip x -Scratch x`
+    under every shell a launcher uses. Its row-invocation contract must pass: the deadline is the longer of the derived
+    floor and the asked `-TestTimeout`, and every row carries its roster execution pin.** Re-key `$longTimeouts`
+    (run-validated-sweep.ps1:1203) to the release's relocations, and check it against the recon walls: raise a floor when
+    its wall passes 0.75 of it, never lower one. Why: the floor and pin defects were found only at pass 3, after rows read
+    without their pin had been reported as converter defects. **Step text:** H10 step 5.
+    <!-- Fixed at c8c77eadff (the wrapper takes max(asked, floor) and the roster pin, with the 1.24.13 floor re-check),
+    branch tip d095fe8108. The self-test's contract cases are at run-h10-recon.ps1:616-810. Ledger 2026-09-22 14:52
+    (RULING); 16:17 and 16:31 3469154a95; 18:02 d095fe8108 (the floor re-key was H10 step 5's routine re-check). Extends
+    §7 lesson 2.
+    Corrected at the apply, 2026-10-02. The draft gave the bare `-SelfTest`. The script's six other parameters are
+    Mandatory (run-h10-recon.ps1:89-111), so that form fails at parameter binding before any self-test code runs. Under
+    -SelfTest only -Tree is read (:238-242, :634-650: a per-run copy takes the sweep's and the roster's rules from the
+    tree), so it names the worktree and the other five take any value. Read at e2008427b1 under pwsh 7: rc 0 and
+    "SELF-TEST PASSED". $longTimeouts is at run-validated-sweep.ps1:1203 at e2008427b1 (:1189 at 172d437e66). -->
+62. **At the END of pass 1, run three checks.** The first is a page census: every row's first proof link is at the new
+    release. The second is the population identity, enumerated two ways: dispatched + unscheduled = population. The third
+    re-dispatches every NOVERDICT or hand-stopped row at a raised budget. Why: two rows were in no shard plan and 14
+    banked rows had never been measured, which cost a whole pass 3. **Step text:** H10, THE WORDS.
+    <!-- ledger 2026-09-22 11:27 f545b18d4d; 14:45 d5414aa151; 16:03 c660a17d8c; docs/phase4/hopA-inputs/shardmap.py:974-980. -->
+63. **Land and red-prove the allocation-unit extractor before H10 (NOTES A14). Class every alloc label against the plan
+    bar (`docs/ConversionStrategies-Reference/manual-conversions.md:3740-3748`) at the FIRST classing.** Why: the hop
+    retired the bare `alloc-profile` label, and the host records only the first nonzero `AllocsPerRun` unit. The relabel
+    took 122 entries in 24 manifests, 27 rows read and 28 pages re-banked, and six early structural pins had to be
+    reversed. **Step text:** H10 step 3.
+    <!-- Ledger 2026-09-22 00:43 769fc17fb; 11:24 eeed65f66d; 16:39 c8e6ca9034 (the bare label retired); 2026-09-23 02:17
+    ac9f8251ee (the 27-row reading run, extractor proven first); 03:37 718060141d; 07:12 74bae27672; BOARD:25854-25883
+    (the six pins reversed). Extends §7 lesson 31. -->
+64. **Take the linux leg as a READING in parallel with the windows recon. It reads and annotates every linux-eligible
+    banked row, and a closing check asserts, by name, that the annotated set equals the eligible set.** Why: re-banking
+    only the rows already annotated left 30 eligible rows read and never annotated. **Step text:** H10, Order and launch;
+    close step 11.
+    <!-- ledger 2026-09-23 06:18 5da426433b; 2026-09-26 06:01 and 06:34 3ffd1d8a8d. Extends §7 lesson 30. -->
+
+<!-- Lesson 65 of the owner-approved draft is HELD for a COORD ruling and is not in this seat (2026-10-02). Its number
+     stays reserved, so 66 onward keep the draft's numbering. The draft read: "Pass GoTargetOS=linux to every linux
+     runner, the behavioral one included. Each runner refuses a non-windows host without it, and the uid is recorded
+     beside every linux reading." At e2008427b1 no runner refuses: the refusal ruled at ledger 2026-09-22 03:45
+     c6fdbe73c (a) was never cut. The converter passes -p:GoTargetOS itself for a -tests row
+     (src/go2cs/testConversion.go), src/_paths.ps1 pins the variable from the host for the ps1 instruments, and the
+     linux driver template unsets it, aborts if it is exported, and passes it per command to the behavioral runner and
+     GolibTests only (.claude/coord-scripts/templates/linux-legs.sh). -->
+
+66. **A measurement commit is on origin before anything cites it.** The leg report shows `git ls-remote origin <ref>`
+    returning the cited SHA, and the raw results JSON is kept until COORD has read it. At the close, a planted check
+    confirms that every SHA a proof page, roster cell or bank commit cites resolves on origin
+    (`git branch -r --contains <sha>` is non-empty after a fetch), and that one planted unpushed SHA is named. Why:
+    crypto/tls's page cites a converter commit, 4c5b0a3b7, that was never on origin. **Step text:** H10, HOW A ROW
+    BANKS; close step 11.
+    <!-- coord-handover docs/phase4/briefs/h10-close-obligations.md:94 (c14); ledger 2026-09-22 22:11 8179b65f16 (the raw
+    JSON behind the 1,788 s BoGo reading purged by a git clean); 2026-09-23 14:39 faaa8fe999; 14:58 47e088d3d7;
+    172d437e66:docs/GoCorpusMigration.md:3148-3159. The instance is still live at e2008427b1:
+    docs/validation/current/crypto.tls.md:9 (and the 1.24.13.1, 1.24.13.2 and 1.24.13.3 snapshots) cite converter
+    4c5b0a3b7. Extends §7 lesson 33. Draft lessons 72 and 84 merged. -->
+67. **Gate every shard ref on one checklist.** It stages test artifacts only, from a named list. It restores any
+    production `.cs` a `-tests` run rewrote. It carries a rowless PASS package's artifacts and page, and it commits the
+    GOROOT fixtures the run staged. Tests is set to the page's MATCHED count. Why: 6 to 61 production files were restored
+    per shard, three rowless PASS rows were re-run, the header overstated matching by 120, and go/printer's fixtures kept
+    their go1.23.12 bytes. **Step text:** H10, HOW A ROW BANKS.
+    <!-- ledger 2026-09-22 04:01 7227138c2; 04:05 06ac80d68; 04:43 06f37e478; 06:33 4099c204b; 06:38 4099c204b; 15:42
+    3469154a95; 2026-09-30 15:16; 895a2e612b. -->
+68. **Until NOTES A3 lands, read every pinned row outside `run-validated-sweep.ps1 -Hop`. Land A3 before the next hop's
+    H10, firing-controlled on log/slog, with a relocated row taking its predecessor's pin.** Why:
+    `Get-HopPopulationRows` still builds every row with `Execution = $null`, the class c8c77eadff fixed in the recon
+    wrapper. **Step text:** Readiness, Instruments; H10 step 1 and its launch amendment.
+    <!-- src/_roster.ps1:578 at 172d437e66 (:585 at e2008427b1); 172d437e66:docs/GoCorpusMigration.md:2292, :2377;
+    NOTES-next-hop.md A3 and §6.
+    Corrected at the apply, 2026-10-02. The draft, derived at 172d437e66, read "firing-controlled on internal/godebug,
+    log/slog or net/http". net/http dropped its release-tiered pin on 2026-10-01 and internal/godebug on 2026-10-02, so
+    log/slog is the one row that carries a pin at e2008427b1 (src/_roster.ps1:121-124, ValidatedTestPackages.md:527-530),
+    and a firing control on either of the other two would be vacuous. -->
+69. **Before the relabel accepts a "structural" label, read the signed-off design records for it and for every alloc
+    ruling made before the bar. If a design stage removes the cost, the label is "deferred".** Why: COORD reversed six
+    structural pins, and the owner-confirmed 2026-08-10 crypto/rsa ratification fell to its own emission.
+    **Step text:** H10 step 3.
+    <!-- BOARD:25854-25916. -->
+70. **In the same reading run, check each unit-claiming disclosure class against every entry's measured unit, and list
+    every deferred entry whose run moved past a stated ratio as an unattributed MOVE row. Keep doing this until the
+    sweep-side reading-vs-run comparator lands.** Why: 7 of 10 alloc-count-semantics entries read a count, and P256 (8,528 →
+    16,149), crypto/rsa and database/sql moved with no gate comparing reading to run. **Step text:** H10 step 3.
+    <!-- ValidatedTestPackages.md:508-513; BOARD:25963-26037 (REC-F (v), BOARD:25987). -->
+71. **At re-sign, list on both OSes every failure line that each carried disclosure signature matches. Narrow any pin
+    that absorbs more than its own rows, retire orphan pins, and keep new pins' evidence lines away from record tails.**
+    Why: runtime/debug's `TestStack` pin absorbed five assertions and unbanked the row at TRAIN G. **Step text:** H10 step 3.
+    <!-- ValidatedTestPackages.md:1290-1302; ledger 2026-09-28 03:19 7ae74437c2; 06:55 3d56a90fbe; coord-handover
+    trainK/tK-seats-draft.txt:53 (a test-order seat truncated runtime/pprof's record past its pinned line). -->
+72. **Record any host capability a row's count depends on (symlink privilege, the junction fallback, root), and
+    register the row as a host-conditional verdict under ValidatedTestPackages.md's rule (:123) before it banks.** Why: os
+    banked at 1103 and then 1105 on a different host, and read COUNT on every unprivileged sweep.
+    **Step text:** H10, HOW A ROW BANKS.
+    <!-- ledger 2026-09-26 08:45 3ffd1d8a8d; 10:33; 11:05 d4c9dd8305 (internal/trace failed four leaves on junction-
+    fallback hosts). The rule is at ValidatedTestPackages.md:123 at e2008427b1 (:116 at 172d437e66). -->
+73. **Drop a row's execution pin only on TC0 greens from every box that banks or sweeps it.** Why: log/slog's drop was
+    ruled on two boxes, then failed `TestPanics` and `TestSetDefault` at TC0 on the i7 battery box and was reversed.
+    <!-- coord-handover trainL/tL-seats-draft.txt 16:17, 17:03; ledger 2026-10-01 16:18; 17:03. -->
+74. **Dispatch every E4 and E2 exclusion row as a non-banking READING row, and record its matched count.** Why: shardmap
+    treats exclusions as not dispatched, yet runtime/trace left E4 at TRAIN G and moved the denominator from 224 to 225
+    mid-campaign.
+    <!-- docs/phase4/hopA-inputs/shardmap.py:977-978; ValidatedTestPackages.md:1051-1074, :1111-1114. -->
+
+#### Close – H12
+
+75. **At the campaign-tip fold (§7 lesson 25's second fold), rehearse the close's two-seeded, three-target `-stdlib`
+    regen and its post-regen gates from per-run copies:**
+    - `go test ./... -count=1`, repoguard included;
+    - `dotnet build src/go2cs.slnx -c Release -p:go2csPath=<repo>/src/` (the close's B9(f));
+    - the README-badge check and the csproj diff.
+
+    Why: the close seat stopped three times, for about 4 h, on R-B13 through R-B16, and an unpinned Release solution
+    build reads the deploy root even in-solution. **Step text:** H10 close step 9.
+    <!-- ledger 2026-09-23 18:11 922994cec3; 18:39 1a328f3ee8; 21:43 1a328f3ee8 and claude/mailbox 00133ee238 (R-B16: the
+    unpinned build read 15,240 errors); .claude/rules/harness-gates.md:24 as amended at 13e9b039ea; close lesson 7
+    (172d437e66:docs/GoCorpusMigration.md:3249-3253) and §6's go2cs.slnx row. -->
+76. **Run the fixture-currency check at the close and in every battery: tracked `src/core/**/testdata/**` equals the
+    pinned GOROOT's bytes.** Until TRAIN L's guard (fbaa3d1218) lands, run it by hand with `GOROOT` set to the pinned
+    release. It prints nothing when every fixture is current:
+    `git ls-tree -r HEAD -- src/core | grep -F /testdata/ | while read -r _ _ h p; do [ "$(git hash-object --no-filters "$GOROOT/src/${p#src/core/}" 2>/dev/null)" = "$h" ] || echo "STALE $p"; done`.
+    Why: go/printer's `generics.input`/`.golden` kept their go1.23.12 bytes through the whole hop. **Step text:** H10 close
+    step 11.
+    <!-- 895a2e612b; fbaa3d1218, src/go2cs/internal/repoguard/fixturesCurrent_test.go (red at exactly those 2 of 1,276
+    fixtures; testdata trees are -text, so blob hashes compare verbatim); ledger 2026-09-30 15:16; 2026-10-01 15:16;
+    NOTES-next-hop.md A16 (owed: the entry itself is not in NOTES yet; a separate seat adds it, and it records a
+    LANDED guard). The lesson's text is the draft's, derived at 172d437e66. TRAIN L has landed since (master
+    aa0a07d5fd, 2026-10-02): the guard is repoguard's TestTrackedFixturesMatchPinnedGoRoot, in the tree at e2008427b1.
+    It reads the committed tree (git ls-tree -r HEAD), so it runs with -count=1 after the bank commit. Close step 11
+    names it. -->
+77. **During the hop, gate every train landing on `release-nuget.ps1 -VerifyOnly`.** Why: runtime/debug was unbanked at
+    TRAIN G but its page was left in place. push-nuget's release pre-flight was then red at master from TRAIN G until the
+    i9's closure pack found it on 2026-09-29. **Step text:** §6.
+    <!-- ledger 2026-09-24 00:10 677e3715fb; 02:10 bccf8d977b; 2026-09-29 18:28. -->
+
+#### Fleet
+
+78. **Before launch, commit each battery, batch, shard-leg, close and temporary-host brief, with its per-run script copy,
+    on `claude/coord-handover`, derived by a read-only workflow with adversarial checkers.** Why: checkers caught 36, 38,
+    39, 28 and 25 defects before launches, and a COORD lost to the weekly limit resumed from the branch.
+    **Step text:** Readiness, Fleet.
+    <!-- ledger 2026-09-21 17:36 54bbb29f5 (the weekly-limit resume); 2026-09-23 00:20 c0f11384e4; 13:36 3ec2c9ff39;
+    23:41 fa18863b94 (38); 2026-09-24 02:02 f223c19182; 2026-09-30 13:33. Extends §7 lesson 35. -->
+79. **Every seat, docs seats included, runs plain `go test ./... -count=1` in `src/go2cs` at its own tip before
+    admission, and the union rehearsal runs it again.** Why: union-only reds recurred at nearly every train, twice in a row
+    from a docs seat failing repoguard's kramdown guard.
+    <!-- ledger 2026-09-22 08:18 ae2f25198; 2026-09-25 00:08 ff67c57420; 2026-09-29 12:43 d51a62eaad; 2026-09-30 14:02;
+    coord-handover trainK/tK-seats-draft.txt:51. Extends §7 lesson 15. -->
+80. **At each status, read every lane's last post and unread count.** A lane is declared OFFLINE in one ledger line, with
+    one OWNER-HAND, when it has no post for about 6 h while holding unread COORD messages, has a failed delivery, or is
+    missing from ListAgents. Its open items are rerouted by name in one ledger RULING, and a returning lane reads its whole
+    inbox before its NEXT. Why: four lanes silent for 15-18 h stalled a TRAIN J landing gate, and a reroute met it 12
+    minutes later.
+    <!-- ledger 2026-09-30 00:26; 00:38; 16:09; 2026-10-01 19:16; reroutes 2026-09-27 17:27 05d7067bea; 2026-09-30 04:03
+    f819887fa3; 2026-10-01 06:22. Draft lessons 92 and 95 merged. -->
+81. **From H0, only COORD changes the comms tools (the inbox scripts and the ledger append), and each status line
+    reports protocol work as a share of output.** Why: on 2026-09-20, 59% of fleet output was measured as protocol work.
+    <!-- coord-handover RESUME-SESSIONS.md:789, :59-61 at 91e969cedb; ledger 2026-09-20 13:15 77a03bd82;
+    2026-09-28 19:28 bad6fcf862 (the owner order taking the tools out of the lanes' hands). Extends §7 lesson 3. -->
+82. **Send one message per deliverable, at most 40 lines, as WHAT (1 line), EVIDENCE (up to 10 lines; anything longer
+    is a file on the lane's ref) and ASK or NEXT (1 line). COORD does not echo, and silence after a ruling means
+    proceed.** **Step text:** Readiness, Fleet.
+    <!-- coord-handover RESUME-SESSIONS.md:50-53, :796-814 at 91e969cedb. -->
+83. **Poll origin by `ls-remote`, never by fetching into the clone COORD pulls from. Before re-dispatching a lane that
+    ListAgents shows as "idle", read its last message.** Why: a racing fetch handed a lane a corrupt loose object, and G's
+    "idle" was its own background battery.
+    <!-- ledger 2026-09-22 04:21 6dbe347c0; 14:52 (RULING). -->
+84. **Each lane's resume ACK states its wake mode, either a message event or a background inbox watcher, and COORD
+    verifies one round trip.** No session carries a watcher or loop id as state. Why: cloud sessions wake only on message
+    events, and a cloud lane's evidence sat unread for 25 minutes.
+    <!-- coord-handover RESUME-SESSIONS.md:771-776, :822-824 at 91e969cedb; ledger 2026-09-28 19:28 bad6fcf862. -->
+85. **`docs/phase4/RESUME-SESSIONS.md` and its verifier exist before H0 and are refreshed at every landing or ruling
+    STAMP (the `save-state` skill).** **Step text:** Readiness, Fleet.
+    <!-- 271300cea0; ledger 2026-09-24 05:02 a59b194e16; 2026-09-27 14:29 934d5f2409; 2026-09-28 19:28 bad6fcf862. -->
+
+<!-- Lesson 86 of the owner-approved draft is HELD for the skills seat and is not in this seat (2026-10-02). It points
+     at the `train-assembly` skill for the hop's train and battery mechanics (conflict maps by real trial merges, union
+     template-currency checks, launch-check tables, isolation re-runs, complement-shard bisection and frozen unions),
+     and the skill does not hold them at e2008427b1. The draft's placement note lands 86 with or after the seat that
+     adds them (draft lessons 97 and 102-110, routed as §7's intro routes instrument discipline). -->
+
+<!-- SEED COVERAGE (owner order 2026-09-23; ledger 2026-09-23 14:52 · OWNER ORDER · c9e15c73a0), each verified against the cited source:
+  1 hosts before the hop: DNS (relay NXDOMAIN->SERVFAIL, per-box public IPv4, IPv6 unbound) .......... 42 (+ the Readiness Host bullet)
+    many-core Windows host, local or cloud, for crypto/tls's 600 s wall; cloud quota early ............... 40, 44
+  2 new linkname partials surface first on non-Windows legs (vgetrandom); read linux early ............. 50, 55, 64 (+ 65, held for a COORD ruling)
+  3 reading run -> relabel -> rulings for alloc labels; host records only the first AllocsPerRun unit .. 63, 69, 70
+  4 wrapper defects (floor lowered an asked timeout; execution pins not applied), c8c77eadff / d095fe8108 61 (+ 68 the open -Hop twin, 43 release derivation)
+  5 push measurement commits (a page cited unpushed 4c5b0a3b7) .......................................... 66
+  6 close derivation catches (costed basis row; //go:embed + -text; emitter-moved flat files git rm'd) .. 51 (+ close lessons 1-3), 76
+  7 one message per event ................................................................................ 80, 81, 82
+  8 sub-agent batteries with briefs on coord-handover .................................................... 78 (+ 86, held for the skills seat)
+  9 go2cs.slnx Release gate carries -p:go2csPath (B9(f), R-B16, mailbox 00133ee238) ..................... 75; the rule's opening
+    line is owed (the draft's edit B33 to .claude/rules/harness-gates.md:24, not in this seat); its body already carries the non-Debug clause (13e9b039ea)
+ 10 repoguard payload admit for //go:embed outside testdata (R-B14, de436207c9 / f0ada4471e) .............. 51, 75
+ 11 -stdlib staging seeder carries docs/validation (R-B13, 781c1c3c31) .................................... 51, 75
+ 12 csproj merge renderer keeps post-block groups (R-B15, ae813db069) ..................................... 51, 75
+ Excluded by the owner: one host's temporal hardware issues. Lesson 40 is host-generic. -->
 
 ---
 
