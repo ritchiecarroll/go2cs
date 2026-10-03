@@ -88,44 +88,79 @@ namespace go.golib;
 public static partial class TypeExtensions
 {
     private static (MethodInfo, Type)[]? s_extensionMethods;
-    private static readonly Lock s_loadLock = new();
     private static readonly ConcurrentDictionary<Type, MethodInfo[]> s_typeExtensionMethods = [];
     private static readonly ConcurrentDictionary<Type, ImmutableHashSet<string>> s_typeExtensionMethodNames = [];
     private static int s_registeredAssemblyLoadEvent;
 
-    private static (MethodInfo, Type)[] GetExtensionMethods()
+    // TEST SEAM, GolibTests only (InternalsVisibleTo): called once per assembly the scan reaches, so a
+    // test can hold a scan in flight. Null in every program -- no behaviour and no allocation when
+    // unset. Never wire product code to it.
+    internal static Action<Assembly>? ScanProbeForTest;
+
+    // Bumped by every assembly load (ClearTypeCaches). A scan keeps only a result whose generation did not
+    // move while it ran.
+    private static int s_extensionMethodsGeneration;
+
+    // A load storm must not spin the scan forever: after this many generations moved under it, the latest
+    // complete scan is returned UNCACHED, and the next caller scans again.
+    private const int MaxScanAttempts = 4;
+
+    // NO LOCK, on either side -- and that is the rule this file keeps. The runtime raises AssemblyLoad
+    // SYNCHRONOUSLY while holding its own type-load lock, and a scan's Assembly.GetTypes() can wait on
+    // that same lock. When the scan held a golib lock across GetTypes() and ClearTypeCaches (the
+    // AssemblyLoad handler) took it, the two threads deadlocked: rooted 2026-10-03 from six hung
+    // published programs (a ReadyToRun publish pinned to one CPU hung in 20 of 23 runs). So the handler
+    // only bumps a generation and nulls the cache; the scan runs outside any lock, publishes with
+    // CompareExchange, and retracts its OWN result (never a newer scan's) if a load moved the generation
+    // meanwhile. Two concurrent scans may both run; that duplicates work and is harmless.
+    //
+    // THE RULE FOR EVERY HANDLER: a golib AssemblyLoad / TypeResolve / AssemblyResolve handler must NEVER
+    // wait on a lock that any code can hold across a type load.
+    internal static (MethodInfo, Type)[] GetExtensionMethods()
     {
-        if (Interlocked.CompareExchange(ref s_extensionMethods, null, null) is not null)
-            return s_extensionMethods!;
+        if (Volatile.Read(ref s_extensionMethods) is { } cached)
+            return cached;
 
         // Register assembly load event only once, used to clear extension method caches
         if (Interlocked.CompareExchange(ref s_registeredAssemblyLoadEvent, 1, 0) == 0)
             AppDomain.CurrentDomain.AssemblyLoad += ClearTypeCaches;
 
-        lock (s_loadLock)
-        {
-            // Check if another thread already loaded the extension methods
-            if (Volatile.Read(ref s_extensionMethods) is not null)
-                return s_extensionMethods!;
+        (MethodInfo, Type)[] scanned = [];
 
+        for (int attempt = 0; attempt < MaxScanAttempts; attempt++)
+        {
+            int generation = Volatile.Read(ref s_extensionMethodsGeneration);
             List<(MethodInfo, Type)> extensionMethods = [];
 
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                ScanProbeForTest?.Invoke(assembly);
                 LoadAssemblyExtensionMethods(assembly, extensionMethods);
+            }
 
-            s_extensionMethods = extensionMethods.ToArray();
+            scanned = extensionMethods.ToArray();
+
+            // Publish only into an empty slot: a concurrent scan that already published is as fresh as this one.
+            (MethodInfo, Type)[] published = Interlocked.CompareExchange(ref s_extensionMethods, scanned, null) ?? scanned;
+
+            if (Volatile.Read(ref s_extensionMethodsGeneration) == generation)
+                return published;
+
+            // An assembly loaded while this scan ran: retract this scan's result (only if it is still the
+            // one published) and scan again.
+            Interlocked.CompareExchange(ref s_extensionMethods, null, scanned);
         }
 
-        return s_extensionMethods;
+        return scanned;
     }
 
-    private static void ClearTypeCaches(object? sender, EventArgs e)
+    internal static void ClearTypeCaches(object? sender, EventArgs e)
     {
-        // Since not all assemblies may be loaded when initial type caches
-        // are created, we need to clear caches when any new assemblies are
-        // loaded so that caches can be recreated
-        lock (s_loadLock)
-            Volatile.Write(ref s_extensionMethods, null);
+        // Since not all assemblies may be loaded when initial type caches are created, a load clears the
+        // caches so they are recreated. Called by the runtime while it holds its type-load lock, so it
+        // takes NO lock of golib's (see GetExtensionMethods).
+        Interlocked.Increment(ref s_extensionMethodsGeneration);
+        Volatile.Write(ref s_extensionMethods, null);
 
         s_typeExtensionMethods.Clear();
         s_typeExtensionMethodNames.Clear();
