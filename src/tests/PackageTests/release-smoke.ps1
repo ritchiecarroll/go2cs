@@ -39,7 +39,7 @@
     The go.* package version to restore. Default: read off the feed's go.lib package.
 
 .PARAMETER GateWalkthrough
-    Make arm D gate. Pass it where the README states the walkthrough works (windows, linux).
+    Make arm D gate. The release-smoke stage passes it on every leg; without it D is a measurement.
 #>
 param(
     [Parameter(Mandatory)] [string] $Feed,

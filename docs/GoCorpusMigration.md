@@ -3531,11 +3531,10 @@ FROM THE CLOSE SEAT ITSELF.** The seat stopped three times and each stop was rul
    **And the CI half, every release** *(added 2026-10-03: the 1.24.13.4 macOS seat, widened the same day to every
    OS)*: a `release-smoke` dispatch at the tree that ships — one windows pack feeding all four shipped RIDs, the
    only check that the packages carry what that tree's converter emits on every OS (C2: N's converter emits
-   `unsafe.ArrayPointer`, absent from the published 1.24.13.3). Every leg must pass arms A–C, and win-x64 and
-   linux-x64 arm D as well, before the PIN. On a release that ships macOS assets, the darwin `census` must also be green
-   AT that tree (the daily schedule lags master by up to a day; dispatch one when the tip landed after it). Arm D
-   on a Mac is a measurement: until it reads green, the README and the release notes do not say the walkthrough
-   works on macOS.
+   `unsafe.ArrayPointer`, absent from the published 1.24.13.3). Every leg must pass all four arms, A–D, before the
+   PIN; darwin's D (the README walkthrough on a Mac) gates since darwin-xsys-libc (TRAIN O). On a release that ships
+   macOS assets, the darwin `census` must also be green AT that tree (the daily schedule lags master by up to a day;
+   dispatch one when the tip landed after it).
 3. **The publish** is the owner's act at the release machine's own console, from a checkout with empty porcelain
    (an agent's credential checks are refused by the permission classifier). **No GPG signing on the release
    machine during NuGet Phase 2, or `disable-scdaemon` in gpg-agent.conf when no GPG key lives on a card** (the

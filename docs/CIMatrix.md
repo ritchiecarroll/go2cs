@@ -144,10 +144,10 @@ every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
 - **B** a small generated stdlib program converted with `-recurse=nuget`, its stdout compared with `go run`
   (it prints `runtime.GOOS`, so a wrong-flavor load is a visible mismatch);
 - **C** `Behavioral/StatLayoutTruth`, converted and compared the same way;
-- **D** the README walkthrough (`fatih/color`), compared the same way — it **gates on windows and linux**, where
-  the README says it works, and is **measured only on darwin**, where the README does not claim it yet.
+- **D** the README walkthrough (`fatih/color`), compared the same way — it **gates on every leg**. darwin joined
+  windows and linux once darwin-xsys-libc (TRAIN O) made `x/sys/unix` reach libc on a Mac.
 
-A leg is green when A, B and C pass, and D too off darwin. Dispatch it at the tree that ships, before every release:
+A leg is green when all four arms pass. Dispatch it at the tree that ships, before every release:
 it is what proves the packages carry what that tree's converter emits on every OS (C2's 2026-10-03 finding: N's
 converter emits `unsafe.ArrayPointer`, which the published 1.24.13.3 lacks). The pack job's budget is its own
 (240 min; measured 38-53 min).

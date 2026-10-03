@@ -1256,9 +1256,10 @@ jobs:
 
           $work = Join-Path $art "release-smoke-$goos-$rid"
           $log = Join-Path $art "release-smoke-$goos-$rid.log"
-          # The README walkthrough GATES where the README says it works (windows, linux) and is MEASURED on
-          # darwin, where the README does not claim it yet (the darwin-xsys-libc door).
-          $gateWalkthrough = $goos -ne 'darwin'
+          # The README walkthrough GATES on every leg. darwin joined windows and linux once darwin-xsys-libc
+          # (TRAIN O) made x/sys/unix reach libc on a Mac: release-smoke 37155599211 ran it byte-identical to
+          # `go run` on both chips. A tree without that seat fails darwin's D, by design.
+          $gateWalkthrough = $true
           & ./src/tests/PackageTests/release-smoke.ps1 -Feed (Join-Path $PWD 'feed') -Converter (Join-Path $PWD "src/go2cs/bin/$exeName") -WorkRoot $work -GateWalkthrough:$gateWalkthrough *>&1 |
               Tee-Object -FilePath $log
           $smokeExit = $LASTEXITCODE
