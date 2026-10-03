@@ -49,6 +49,11 @@ func TestModuleCacheGoModIsTheModulesGoMod(t *testing.T) {
 		t.Fatalf("the sub-package's module root: want %s, got %s", moduleDir, got)
 	}
 
+	// ...and with no go line it is a go 1.16 module, as cmd/go reads it, for its DefaultGODEBUG.
+	if goLine, _, err := moduleGodebug(moduleDir); err != nil || goLine != "1.16" {
+		t.Fatalf("a go.mod with no go line is go 1.16 to cmd/go: want (\"1.16\", nil), got (%q, %v)", goLine, err)
+	}
+
 	// Never anything else: a package BELOW the module root is not a root, a go.mod-less directory
 	// outside the cache has no go.mod to take, and a release that ships its own go.mod keeps it.
 	if path, ok := goModFile(filepath.Join(moduleDir, "sub")); ok {

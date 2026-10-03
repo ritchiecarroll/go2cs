@@ -69,6 +69,8 @@ func TestDefaultGODEBUGMatchesTheToolchain(t *testing.T) {
 		{name: "go120", goMod: "module example.test/gd\n\ngo 1.20\n"},
 		{name: "go123", goMod: "module example.test/gd\n\ngo 1.23\n"},
 		{name: "go124", goMod: "module example.test/gd\n\ngo 1.24\n", empty: true},
+		// No go line: cmd/go reads the module as go 1.16 (a module-cache release that predates modules).
+		{name: "nogoline", goMod: "module example.test/gd\n"},
 		{name: "block", goMod: "module example.test/gd\n\ngo 1.23\n\ngodebug (\n\tdefault=go1.21\n\tpanicnil=0\n)\n"},
 		{name: "directive", goMod: "module example.test/gd\n\ngo 1.24\n",
 			mainGo: "//go:debug panicnil=1\n//go:debug randseednop=0\n\npackage main\n\nfunc main() {}\n"},
