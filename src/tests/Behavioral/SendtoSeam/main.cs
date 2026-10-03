@@ -55,7 +55,7 @@ internal static void Main() {
         var buf = new slice<byte>(64);
         (var n, var from, err) = syscall.Recvfrom(receiver, buf, 0);
         fatal(recvfromAddressedˢ, err);
-        fmt.Println(addressedPayloadˢ, ((@string)(buf[..(int)(n)])));
+        fmt.Println(addressedPayloadˢ, ((@string)(buf.slice(0, n))));
         var first = from._<ж<syscall.SockaddrInet4>>();
         fmt.Println(addressedSenderIsIn1278ˢ, (~first).Addr[0] == 127);
         fmt.Println(addressedSenderHasAPortˢ, (~first).Port != 0);
@@ -63,7 +63,7 @@ internal static void Main() {
         fatal(sendtoNilToˢ, syscall.Sendto(sender, slice<byte>("connected"u8), 0, default!));
         (n, from, err) = syscall.Recvfrom(receiver, buf, 0);
         fatal(recvfromNilToˢ, err);
-        fmt.Println(nilToPayloadˢ, ((@string)(buf[..(int)(n)])));
+        fmt.Println(nilToPayloadˢ, ((@string)(buf.slice(0, n))));
         var second = from._<ж<syscall.SockaddrInet4>>();
         fmt.Println(nilToSenderEqualsˢ,
             (~second).Addr == (~first).Addr && (~second).Port == (~first).Port);

@@ -2,7 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using os = os_package;
-using Δruntime = runtime_package;
+using runtime = runtime_package;
 using strings = strings_package;
 using syscall = syscall_package;
 using System.Runtime.CompilerServices;
@@ -40,7 +40,7 @@ private static readonly object restoreFailedˢ = (@string)"restore failed:"u8;
 private static readonly object restoredMainˢ = (@string)"restored main:"u8;
 
 [MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
-    if (Δruntime.GOOS != "linux"u8) {
+    if (runtime.GOOS != "linux"u8) {
         fmt.Println(notLinuxNothingToObserveˢ);
         return;
     }
@@ -57,8 +57,8 @@ private static readonly object restoredMainˢ = (@string)"restored main:"u8;
     goǃ(() => {
         GoFrame ᒐ = default;
         try {
-            Δruntime.LockOSThread();
-            defer(Δruntime.UnlockOSThread, ref ᒐ);
+            runtime.LockOSThread();
+            defer(runtime.UnlockOSThread, ref ᒐ);
             nint tid = syscall.Gettid();
             tidChʗ1.ᐸꟷ(tid);
             ᐸꟷ(releaseʗ1);
