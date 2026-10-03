@@ -49,7 +49,7 @@ private static readonly @string whyˢ = "why"u8;
 private static readonly object asValueˢ = (@string)"as value:"u8;
 
 internal static void Main() {
-    var write = ((Func<ж<myType>, slice<byte>, (nint, error)>)(bytes.Write));
+    var write = ((Func<ж<myType>, slice<byte>, (nint, error)>)([GoWrapper("(*myType).Write")] (p0, p1) => wrapperRecv(p0).of(myType.ᏑBuffer).Write(p1)));
     ref var m = ref heap(new myType(), out var Ꮡm);
     var (n, err) = write(Ꮡm, slice<byte>("expr"u8));
     fmt.Println(myTypeWriteˢ, n, err, Ꮡm.of(myType.ᏑBuffer).String());
@@ -85,7 +85,7 @@ internal static void Main() {
         ref var t = ref heap(new myType(), out var Ꮡt);
         var (k, _) = f(Ꮡt, slice<byte>("xyz"u8));
         return k + Ꮡt.of(myType.ᏑBuffer).Len();
-    }))(((Func<ж<myType>, slice<byte>, (nint, error)>)(bytes.Write))))));
+    }))(((Func<ж<myType>, slice<byte>, (nint, error)>)([GoWrapper("(*myType).Write")] (p0, p1) => wrapperRecv(p0).of(myType.ᏑBuffer).Write(p1)))))));
 }
 
 } // end main_package
