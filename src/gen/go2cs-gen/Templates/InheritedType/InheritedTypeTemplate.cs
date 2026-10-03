@@ -137,9 +137,9 @@ internal class InheritedTypeTemplate : TemplateBase
 
     private string InterfaceImplementation => TypeClass switch
     {
-        "Slice" => ISliceTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName),
-        "Map" => IMapTypeTemplate.Generate(ObjectName, TargetTypeName, TargetValueTypeName!),
-        "Channel" => IChannelTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName),
+        "Slice" => ISliceTypeTemplate.Generate(ObjectName, ConstructorName, TypeName, TargetTypeName),
+        "Map" => IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!),
+        "Channel" => IChannelTypeTemplate.Generate(ObjectName, ConstructorName, TypeName, TargetTypeName),
         "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName, TargetTypeSize),
         "Numeric" => NumericTypeTemplate.Generate(TypeName, TargetTypeName),
         "Pointer" => PointerTypeTemplate.Generate(ObjectName, TargetTypeName),

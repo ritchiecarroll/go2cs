@@ -401,6 +401,34 @@ no public surface is lost. (Guarded by `NamedChannelType` — the closeWaiter tr
 `type intQueue chan int` exercising make/send/len/cap/receive/comma-ok/close/range/select, output
 vs Go.)
 
+## A GENERIC defined map, channel or slice keeps its type parameters
+
+A generic defined map or channel type declares its type parameters, and their constraints, on the
+forward declaration AND on the accessibility line, exactly as a generic defined array or slice
+already did. `type Set[T comparable] map[T]void` (the hashset module's exported shape) emits:
+
+```csharp
+[GoType("map[T, @void]")] partial struct Set<T>;
+
+[GoRecv] public static void Reset<T>(this ref Set<T> s) {
+    s = new Set<T>(0);
+}
+```
+
+with `public partial struct Set<T> {}` in `package_info.cs`. Before this, both lines dropped the
+parameter list: the declaration became a NON-generic `partial struct Set` over an unbound `T`, so
+every member go2cs-gen generated for it was CS0246, every use (`Set<nint>`) was CS0308, and the
+accessibility line declared a second, empty public type. The generator side had the twin defect: the
+Slice, Map and Channel templates spelled their capacity/length constructor with the type's full name
+(`public Set<T>(nint size)`), which does not parse; they now take the base template's
+`ConstructorName`, so a non-generic shell's constructor is byte-identical. Neither Go 1.24.13's
+standard library nor the behavioral corpus declares a generic defined map or channel type, which is
+why nothing exercised either half until a third-party module did. (Guarded by
+`GenericDefinedMapChan` — a generic map over an unexported named empty struct and over `struct{}`,
+a two-parameter map, a channel and a slice, each with value and pointer receivers and two
+instantiations from `main`, output vs Go — plus `genericDefinedMapChan_test.go` on the declarations
+and `GenericInheritedShellConstructorTests` on the generated constructors.)
+
 ## A function-LOCAL named type declaration hoists to member level (slice/map/channel/array/pointer)
 
 C# forbids a type declaration inside a method body, so a `type X []T` / `type X map[K]V` /

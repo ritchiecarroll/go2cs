@@ -53,7 +53,12 @@ func (v *Visitor) visitMapType(mapType *ast.MapType, identType types.Type, name 
 		target.WriteString(v.newline)
 	}
 
-	v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), "", access, "")
-	v.writeStringLn(target, "%s[GoType(\"map[%s, %s]\")] %spartial struct %s;", v.localNameAttrFor(identType), rootGoTypeDescriptor(keyType), rootGoTypeDescriptor(valueType), access, getSanitizedIdentifier(name))
+	// A generic defined map (`type Set[T comparable] map[T]void`) declares its type parameters and their
+	// constraints, as the array and slice shells do: without them the shell is a non-generic struct over an
+	// unbound T. A non-generic map renders "" for both, so its emission is unchanged.
+	typeParams, constraints := v.getGenericDefinition(identType)
+
+	v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), typeParams, access, "")
+	v.writeStringLn(target, "%s[GoType(\"map[%s, %s]\")] %spartial struct %s%s%s;", v.localNameAttrFor(identType), rootGoTypeDescriptor(keyType), rootGoTypeDescriptor(valueType), access, getSanitizedIdentifier(name), typeParams, constraints)
 	finish()
 }

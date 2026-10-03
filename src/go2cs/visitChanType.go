@@ -49,7 +49,11 @@ func (v *Visitor) visitChanType(chanType *ast.ChanType, identType types.Type, na
 		target.WriteString(v.newline)
 	}
 
-	v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), "", access, "")
+	// A generic defined channel (`type Pipe[T any] chan T`) declares its type parameters and their
+	// constraints, as the map, array and slice shells do. A non-generic channel renders "" for both.
+	typeParams, constraints := v.getGenericDefinition(identType)
+
+	v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), typeParams, access, "")
 	// A DIRECTIONAL defined channel type carries its direction chain on the wrapper as TYPE-level descriptor
 	// cargo (increment E3 follow-up 7e-b): the marker stays `chan T` -- go2cs-gen dispatches the Channel
 	// template on that prefix -- and `[GoChanDir(...)]` beside it is what reflect's descriptor reads back,
@@ -68,7 +72,7 @@ func (v *Visitor) visitChanType(chanType *ast.ChanType, identType types.Type, na
 		dirAttr = "[GoChanDir(" + strings.Join(members, ", ") + ")] "
 	}
 
-	v.writeStringLn(target, "%s[GoType(\"chan %s\")] %s%spartial struct %s;", v.localNameAttrFor(identType), rootGoTypeDescriptor(elemType), dirAttr, access, getSanitizedIdentifier(name))
+	v.writeStringLn(target, "%s[GoType(\"chan %s\")] %s%spartial struct %s%s%s;", v.localNameAttrFor(identType), rootGoTypeDescriptor(elemType), dirAttr, access, getSanitizedIdentifier(name), typeParams, constraints)
 	finish()
 }
 

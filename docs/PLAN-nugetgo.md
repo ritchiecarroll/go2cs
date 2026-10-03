@@ -299,6 +299,12 @@ nupkg, one root package ID; multi-package modules are ⟨OQ-4⟩).
 > stdlib release needs the third-party wave rebuilt before a new converter maps it); a package without the file, or
 > with a malformed one, is converted locally with a warning naming what is malformed. No wave-1 package is published
 > yet, so wave 1 carries the file from its first version.
+>
+> **AMENDED 2026-10-02 (COORD, from the hashset end-to-end probe) -- a generic type needs no new record kind.** The
+> first generic module packed (`github.com/ritchiecarroll/hashset`, `HashSet[T comparable]`) carries a 440-byte
+> self-description with ZERO records: no alias rename and no `GoImplement`. The consumer spells
+> `hashset.HashSet<@string>` from `go/types`, so the v1 format needs nothing new for a generic type. Untested ground:
+> a generic type that implements an interface, whose `GoImplement` record would name an OPEN generic type.
 
 ---
 

@@ -10,7 +10,8 @@ namespace go2cs.Templates.InheritedType;
 
 internal static class ISliceTypeTemplate
 {
-    public static string Generate(string structName, string typeName, string targetTypeName) =>
+    // constructorName is structName without a generic type's parameters (a C# constructor never carries them).
+    public static string Generate(string structName, string constructorName, string typeName, string targetTypeName) =>
         $$"""
         
                 public {{targetTypeName}}[] Source => m_value;
@@ -105,6 +106,6 @@ internal static class ISliceTypeTemplate
                 
                 public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}(p1, p2);
         
-                public {{structName}}(nint length, nint capacity = -1, nint low = 0) => m_value = new {{typeName}}(length, capacity, low);
+                public {{constructorName}}(nint length, nint capacity = -1, nint low = 0) => m_value = new {{typeName}}(length, capacity, low);
         """;
 }
