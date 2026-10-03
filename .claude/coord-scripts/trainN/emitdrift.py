@@ -14,9 +14,15 @@ import os, sys
 # them) and, when <out-siblings> is given, reported there as their own class: a written sibling whose CR-stripped bytes
 # differ from the seed's. TRAIN J onward: every train's fixup refreshes that class from the union arm (ruling 857afcb47e;
 # before it, the check excluded siblings entirely and they went stale one converter seat at a time).
+# FIXUP STOP 2026-10-03 (COORD): an optional EIGHTH argument <out-copy-dir> receives a CR-stripped copy of every drifting
+# non-sibling file that exists in the seed, at its relative path, so tN-emitcheck.sh can compare the base arm's drift
+# with the union arm's on a file both arms drift on (STANDING per-target drift: at N's fixup, log/syslog's csproj, whose
+# InternalsVisibleTo block is emitted only on the targets where the package has same-package tests, read as
+# union-attributable because two seats edited other lines of it). Without it nothing is copied.
 root, seed, sentinel, outw, outd = sys.argv[1:6]
 outs = sys.argv[6] if len(sys.argv) > 6 else None
 oute = sys.argv[7] if len(sys.argv) > 7 else None
+outc = sys.argv[8] if len(sys.argv) > 8 else None
 edconf = []
 t0 = os.stat(sentinel).st_mtime
 written, drift, siblings = [], [], []
@@ -41,6 +47,10 @@ for dp, dn, fn in os.walk(base):
         b = open(q, 'rb').read().replace(b'\r', b'')
         if a != b:
             (siblings if sibling else drift).append(rel)
+            if outc and not sibling:
+                c = os.path.join(outc, *rel.split('/'))
+                os.makedirs(os.path.dirname(c), exist_ok=True)
+                open(c, 'wb').write(a)
 written.sort(); drift.sort(); siblings.sort()
 open(outw, 'w', encoding='utf-8', newline='\n').write(''.join(x + '\n' for x in written))
 open(outd, 'w', encoding='utf-8', newline='\n').write(''.join(x + '\n' for x in drift))

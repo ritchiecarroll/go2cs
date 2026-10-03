@@ -110,7 +110,7 @@ EVD="${LOGDIR:-$SD/tN-logs}/$TAG"
 archive_and_clean(){
   local rc=$? f n=0
   mkdir -p "$EVD"
-  for f in "$T"/drift-* "$T"/siblings-* "$T"/written-* "$T"/attr-* "$T"/dm-* "$T"/du-* "$T"/sm-* "$T"/su-* "$T"/sa-* "$T"/emit-* "$T"/markers-* "$T"/editorconfig-*; do
+  for f in "$T"/drift-* "$T"/siblings-* "$T"/written-* "$T"/attr-* "$T"/dm-* "$T"/du-* "$T"/sm-* "$T"/su-* "$T"/sa-* "$T"/emit-* "$T"/markers-* "$T"/editorconfig-* "$T"/sd-*; do
     [ -f "$f" ] && cp "$f" "$EVD/" && n=$((n + 1))
   done
   rm -rf "$T"/M-windows "$T"/M-linux "$T"/M-darwin "$T"/seed-M "$T"/seed-U "$T"/src-M "$T"/src-U
@@ -145,7 +145,7 @@ for arm in M U; do for os in windows linux darwin; do
   # critic 1 #15: the native exe gets a Windows path explicitly (no reliance on MSYS's automatic path conversion, which
   # MSYS_NO_PATHCONV=1 in the caller's environment would silently switch off).
   "$T/go2cs-$arm.exe" -stdlib -comments -platforms "$os/amd64" -go2cspath "$(cygpath -w "$R/src")" > "$T/emit-$arm-$os.log" 2>&1; rc=$?
-  python "$(cygpath -w "$SD")/emitdrift.py" "$(cygpath -w "$R")" "$(cygpath -w "$T/seed-$arm")" "$(cygpath -w "$T/sentinel-$arm-$os")" "$(cygpath -w "$T/written-$arm-$os.txt")" "$(cygpath -w "$T/drift-$arm-$os.txt")" "$(cygpath -w "$T/siblings-$arm-$os.txt")" "$(cygpath -w "$T/editorconfig-$arm-$os.txt")" > /dev/null || { echo "ABORT drift $arm $os"; exit 3; }
+  python "$(cygpath -w "$SD")/emitdrift.py" "$(cygpath -w "$R")" "$(cygpath -w "$T/seed-$arm")" "$(cygpath -w "$T/sentinel-$arm-$os")" "$(cygpath -w "$T/written-$arm-$os.txt")" "$(cygpath -w "$T/drift-$arm-$os.txt")" "$(cygpath -w "$T/siblings-$arm-$os.txt")" "$(cygpath -w "$T/editorconfig-$arm-$os.txt")" "$(cygpath -w "$T/dcopy-$arm-$os")" > /dev/null || { echo "ABORT drift $arm $os"; exit 3; }
   refuse=$(grep -ac 'Refusing to convert' "$T/emit-$arm-$os.log")
   # Verify round 1 (floor 1's signature): a raced or interrupted conversion exits 0 and leaves ONE written file holding
   # an unresolved deferred marker (the converter's two prefixes: dynamicTypeOperations.go:25, adapterNameCollisions.go:41;
@@ -162,18 +162,50 @@ pbad=$(for arm in M U; do for os in windows linux darwin; do grep -qxF "$PLANT_S
 echo "PLANT CONTROL: $([ "$pbad" = 0 ] && echo "OK (both plants read as drift in all six conversions)" || echo "FAILED ($pbad of 12 plant readings missing) -- the drift instrument is not measuring; every count below is VOID")"
 echo "EMIT RC/REFUSAL: $([ "$emitbad" = 0 ] && echo "OK (6 conversions rc=0, 0 S3 refusals, 0 unresolved markers)" || echo "FAILED on $emitbad conversion(s) (rc, an S3 refusal or an unresolved deferred marker: markers-<arm>-<os>.txt)")"
 echo "--- UNION-ATTRIBUTABLE (per target; plants subtracted)"
-attrtot=0
+# FIXUP STOP 2026-10-03 (COORD): a file BOTH arms drift on, whose committed bytes a seat changed, was attributed to the
+# union outright. At N's fixup that listed log/syslog's csproj on linux and darwin: two seats edited its ReadyToRun and
+# TrimMode lines (reproduced byte for byte by the windows emission), while the drift itself is the InternalsVisibleTo
+# block the converter emits only where the package has same-package tests, the SAME drift at the base. Such a file is now
+# STANDING drift when the base arm's drift hunks (committed -> emitted, positions dropped) equal the union arm's: listed in
+# sd-<os>.txt, counted, not attributable. A missing copy, or any difference in the hunks, keeps it attributable.
+drifthunks(){ # <committed sha> <path> <emitted copy> -- the -U0 hunk bodies, @@ positions and file headers dropped
+  [ -f "$3" ] || { echo "MISSING-COPY"; return; }
+  diff -U0 <(git show "$1:$2" 2>/dev/null | tr -d '\r') "$3" | sed -e '1,2d' -e '/^@@/d'
+}
+samedrift(){ # <M sha> <U sha> <path> <M copy> <U copy> -- rc 0 only when both drifts exist and are the same hunks
+  local a b; a=$(drifthunks "$1" "$3" "$4"); b=$(drifthunks "$2" "$3" "$5")
+  [ -n "$a" ] && [ "$a" != MISSING-COPY ] && [ "$a" = "$b" ]
+}
+# Control (floor 13), every launch: three hermetic cases through samedrift itself, on a throwaway repository.
+sdc="$T/sdcontrol"; rm -rf "$sdc"; mkdir -p "$sdc"
+sm=$(cd "$sdc" && git init -q . && git config user.email c@c && git config user.name c && git config commit.gpgsign false \
+     && printf 'a\nb\n' > f && git add f && git commit -qm m && git rev-parse HEAD) \
+  && su=$(cd "$sdc" && printf 'a2\nb\n' > f && git commit -qam u && git rev-parse HEAD) \
+  || { echo "ABORT standing-drift control could not build its repository"; exit 3; }
+printf 'a\nX\nb\n' > "$sdc/eM"; printf 'a2\nX\nb\n' > "$sdc/eU"; printf 'a2\nY\nb\n' > "$sdc/eU2"
+sdv=$(cd "$sdc" && { samedrift "$sm" "$su" f eM eU && echo same || echo diff; samedrift "$sm" "$su" f eM eU2 && echo same || echo diff; samedrift "$sm" "$su" f eM nonexistent && echo same || echo diff; } | tr '\n' ' ')
+rm -rf "$sdc"
+[ "$sdv" = "same diff diff " ] || { echo "ABORT standing-drift CONTROL did not read 'same diff diff' (read: '$sdv'): the classifier is not measuring"; exit 3; }
+echo "STANDING-DRIFT CONTROL: OK (equal hunks -> standing; a changed hunk -> attributable; a missing copy -> attributable)"
+attrtot=0; sdtot=0
 for os in windows linux darwin; do
   cut -d' ' -f1 "$T/drift-M-$os.txt" | grep -vxF "$PLANT_CS" | LC_ALL=C sort -u > "$T/dm-$os"; cut -d' ' -f1 "$T/drift-U-$os.txt" | grep -vxF "$PLANT_CS" | LC_ALL=C sort -u > "$T/du-$os"
-  LC_ALL=C comm -13 "$T/dm-$os" "$T/du-$os" > "$T/attr-$os.txt"
+  LC_ALL=C comm -13 "$T/dm-$os" "$T/du-$os" > "$T/attr-$os.txt"; : > "$T/sd-$os.txt"
   LC_ALL=C comm -12 "$T/dm-$os" "$T/du-$os" | while IFS= read -r f; do
     a=$(git show "$M:$f" 2>/dev/null | md5sum | cut -c1-12); b=$(git show "$U:$f" 2>/dev/null | md5sum | cut -c1-12)
-    [ "$a" = "$b" ] || echo "$f (drifts in both; a seat touched it)" >> "$T/attr-$os.txt"
+    [ "$a" = "$b" ] && continue
+    if samedrift "$M" "$U" "$f" "$T/dcopy-M-$os/$f" "$T/dcopy-U-$os/$f"; then
+      echo "$f (standing drift: a seat touched it; the base arm's drift hunks equal the union arm's)" >> "$T/sd-$os.txt"
+    else
+      echo "$f (drifts in both; a seat touched it; the drift hunks differ)" >> "$T/attr-$os.txt"
+    fi
   done
-  n=$(wc -l < "$T/attr-$os.txt"); attrtot=$((attrtot + n))
-  echo "$os: master-drift=$(wc -l < "$T/dm-$os") union-drift=$(wc -l < "$T/du-$os") union-attributable=$n csproj-in-union-drift=$(grep -c '\.csproj$' "$T/du-$os")"
+  n=$(wc -l < "$T/attr-$os.txt"); attrtot=$((attrtot + n)); ns=$(wc -l < "$T/sd-$os.txt"); sdtot=$((sdtot + ns))
+  echo "$os: master-drift=$(wc -l < "$T/dm-$os") union-drift=$(wc -l < "$T/du-$os") union-attributable=$n standing-seat-touched=$ns csproj-in-union-drift=$(grep -c '\.csproj$' "$T/du-$os")"
   sed 's/^/    /' "$T/attr-$os.txt" | head -n 60
+  sed 's/^/    STANDING /' "$T/sd-$os.txt" | head -n 20
 done
+echo "STANDING-DRIFT (seat-touched, drift unchanged) TOTAL: $sdtot"
 echo "UNION-ATTRIBUTABLE TOTAL: $attrtot"
 echo "--- NAMED"
 k9=$(cat "$T/attr-windows.txt" "$T/attr-linux.txt" "$T/attr-darwin.txt" | grep -c 'src/core/runtime/[a-z]*/package_info\.cs')
