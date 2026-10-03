@@ -105,7 +105,7 @@ internal class StructTypeTemplate : TemplateBase
 
     public override string TemplateBody =>
         $$"""
-            [{{GeneratedCodeAttribute}}]
+            [{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
             {{Scope}} partial struct {{StructName}}{{ValueCloneBaseList}}
             {
                 // Promoted Struct Fields
@@ -1722,7 +1722,7 @@ internal class StructTypeTemplate : TemplateBase
 
             return footer + $$"""
 
-                [{{GeneratedCodeAttribute}}]
+                [{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
                 public static class {{XpkgClassName($"{PackageName}_package", NonGenericStructName)}}
                 {{{m_xpkg}}
                 }

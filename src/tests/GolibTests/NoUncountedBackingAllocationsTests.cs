@@ -62,8 +62,14 @@ public class NoUncountedBackingAllocationsTests
     ];
 
     // (c) INFRASTRUCTURE: not a Go-visible backing; the reason names what the array is.
+    // The four debugger-view sites (DebuggerTypeProxy) run only when a debugger expands a value, never on
+    // a path the program executes, so they are not program memory a Go allocation count could see.
     private static readonly (string Site, string Reason)[] Infrastructure =
     [
+        ("array.cs|public T[] Items => value.ToSpan().ToArray();", "debugger view: the array's elements, built only when a debugger expands one"),
+        ("map.cs|m_items = items.ToArray();", "debugger view: at most 1,000 of a map's pairs, built only when a debugger expands one"),
+        ("slice.cs|public T[] Items => value.ToSpan().ToArray();", "debugger view: the len window's elements, built only when a debugger expands a slice"),
+        ("string.cs|public byte[] Bytes => value.ToSpan().ToArray();", "debugger view: a string's bytes, built only when a debugger expands one"),
         ("AdapterBinder.cs|MethodInvoker[] invokers = new MethodInvoker[methodNames.Length];", "adapter binder plumbing: per-binding invoker tables and the reflection-invoke argument array of its fallback path"),
         ("AdapterBinder.cs|bool[] dereference = new bool[methodNames.Length];", "adapter binder plumbing: per-binding invoker tables and the reflection-invoke argument array of its fallback path"),
         ("AdapterBinder.cs|object?[] arguments = new object?[args.Length + 1];", "adapter binder plumbing: per-binding invoker tables and the reflection-invoke argument array of its fallback path"),

@@ -136,8 +136,77 @@ public interface IMap<TKey, TValue> : IMap, IDictionary<TKey, TValue> where TKey
     }
 }
 
+[System.Diagnostics.DebuggerDisplay("len = {Count}")]
+[System.Diagnostics.DebuggerTypeProxy(typeof(map<,>.DebugView))]
 public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<TKey, TValue>> where TKey : notnull
 {
+    // The debugger's view (DebuggerTypeProxy): the map's key/value pairs, the nil-key entry first. It
+    // reads the store DIRECTLY rather than through Go's range contract (enumerateStore), so expanding a
+    // huge map costs SHOWN entries, not the whole map; More counts the rest. A Go map takes no lock, so
+    // the view takes none, and a write that lands while the debugger reads (another thread left
+    // running) ends the read early: the view shows what it read instead of throwing into the debugger.
+    internal sealed class DebugView(map<TKey, TValue> value)
+    {
+        private const int Shown = 1000;
+
+        private KeyValuePair<TKey, TValue>[]? m_items;
+        private int m_more;
+
+        public int Count => value.Count;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        public KeyValuePair<TKey, TValue>[] Items
+        {
+            get
+            {
+                read();
+                return m_items!;
+            }
+        }
+
+        public int More
+        {
+            get
+            {
+                read();
+                return m_more;
+            }
+        }
+
+        private void read()
+        {
+            if (m_items is not null)
+                return;
+
+            NilKeyDictionary? store = value.m_map;
+            List<KeyValuePair<TKey, TValue>> items = new(Math.Min(value.Count, Shown));
+
+            if (store is not null)
+            {
+                if (store.HasNilKey)
+                    items.Add(new KeyValuePair<TKey, TValue>(default!, store.NilKeyValue));
+
+                try
+                {
+                    foreach (KeyValuePair<TKey, TValue> pair in store)
+                    {
+                        if (items.Count == Shown)
+                            break;
+
+                        items.Add(pair);
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+                    // Written while the debugger read it.
+                }
+            }
+
+            m_items = items.ToArray();
+            m_more = Math.Max(0, value.Count - m_items.Length);
+        }
+    }
+
     /// <summary>
     /// The backing store — a <see cref="Dictionary{TKey, TValue}"/> that additionally carries Go's
     /// NIL-KEY slot. Go's map accepts a nil key whenever the key type can be nil (<c>map[any]V</c>,

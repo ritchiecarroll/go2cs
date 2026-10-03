@@ -55,6 +55,7 @@ internal class ValueAdapterImplTemplate : TemplateBase
              /// Value-sourced '{{GetSimpleName(InterfaceName)}}' implementation adapter for the foreign
              /// '{{StructName}}' — wraps a COPY, exactly as Go's interface holds a value.
              /// </summary>
+             [{{NonUserCodeAttribute}}]
              {{AdapterScope}} sealed class {{AdapterName}} : {{InterfaceName}}, IValueAdapter
              {
                  private readonly {{StructName}} m_value;

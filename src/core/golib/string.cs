@@ -27,7 +27,9 @@ namespace go;
 /// <summary>
 /// Represents a structure with heap allocated data that behaves like a Go string.
 /// </summary>
-public readonly struct @string : 
+[System.Diagnostics.DebuggerDisplay("{ToString()}")]
+[System.Diagnostics.DebuggerTypeProxy(typeof(@string.DebugView))]
+public readonly struct @string :
     IConvertible, 
     IEquatable<@string>, 
     IComparable<@string>, 
@@ -40,6 +42,14 @@ public readonly struct @string :
     IAdditionOperators<@string, @string, @string>,
     IByteSeq<@string, byte>
 {
+    // The debugger's view (DebuggerTypeProxy): the text, and the bytes a Go string IS on expand.
+    internal sealed class DebugView(@string value)
+    {
+        public string Text => value.ToString();
+
+        public byte[] Bytes => value.ToSpan().ToArray();
+    }
+
     // A Go string header is a POINTER PLUS LENGTH into shared immutable storage, which is what makes
     // `s[i:j]` an O(1) WINDOW rather than a copy. Modeling @string as a bare byte[] made that slice
     // O(n)-with-an-allocation, so the most ordinary Go idiom there is —

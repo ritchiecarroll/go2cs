@@ -35,6 +35,7 @@ internal class InterfaceAdapterImplTemplate : TemplateBase
              /// <summary>
              /// Interface-sourced '{{GetSimpleName(InterfaceName)}}' implementation adapter for '{{SourceInterfaceName}}'.
              /// </summary>
+             [{{NonUserCodeAttribute}}]
              {{AdapterScope}} sealed class {{AdapterName}} : {{InterfaceName}}, IInterfaceAdapter
              {
                  private readonly {{SourceInterfaceName}} m_value;

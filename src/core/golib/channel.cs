@@ -1195,8 +1195,21 @@ internal static class SelectRuntime
 /// Represents a concurrency primitive that operates like a Go channel.
 /// </summary>
 /// <typeparam name="T">Target type for channel.</typeparam>
+[System.Diagnostics.DebuggerDisplay("len = {Length}, cap = {Capacity}, closed = {IsClosed}")]
+[System.Diagnostics.DebuggerTypeProxy(typeof(channel<>.DebugView))]
 public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>, ISelectableChannel
 {
+    // The debugger's view (DebuggerTypeProxy): Go's len and cap of the buffer, and whether it is closed.
+    // Read without the channel's lock: a debugger's read must never wait on a goroutine it has stopped.
+    internal sealed class DebugView(channel<T> value)
+    {
+        public nint Length => value.Length;
+
+        public nint Capacity => value.Capacity;
+
+        public bool Closed => value.IsClosed;
+    }
+
     // The entire channel state lives in the heap core so struct copies share one channel (Go
     // channel values are references) and the zero value (all-null) is the NIL channel.
     private readonly ChanCore<T>? m_core;
@@ -1887,6 +1900,14 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     public override int GetHashCode()
     {
         return m_core is null ? 0 : System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(m_core);
+    }
+
+    // What Go's %v prints for a channel: its address, the same token reflect's Pointer() answers for it
+    // (so fmt and anything formatting through ToString agree), and <nil> for the nil channel. The
+    // debugger shows len, cap and closed instead (DebuggerDisplay).
+    public override string ToString()
+    {
+        return m_core is null ? "<nil>" : $"0x{PointerOrderToken:x}";
     }
 
     public static bool operator !=(channel<T> left, channel<T> right)

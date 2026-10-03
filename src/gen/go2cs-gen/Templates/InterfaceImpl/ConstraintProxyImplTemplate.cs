@@ -37,6 +37,7 @@ internal class ConstraintProxyImplTemplate : TemplateBase
              /// constraint interface by wrapping the box 'ж&lt;{{ElementName}}&gt;' and implementing the
              /// interface over ITSELF, so it can serve as a constrained generic type argument.
              /// </summary>
+             [global::System.Diagnostics.DebuggerNonUserCode]
              {{AdapterScope}} sealed class {{ProxyName}} : {{InterfaceRef}}, IжAdapter
              {
                  private readonly ж<{{ElementName}}> m_box;

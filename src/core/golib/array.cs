@@ -44,8 +44,17 @@ public interface IArray<T> : IArray, IEnumerable<(nint, T)>
 }
 
 [Serializable]
+[System.Diagnostics.DebuggerDisplay("len = {Length}")]
+[System.Diagnostics.DebuggerTypeProxy(typeof(array<>.DebugView))]
 public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquatable<IArray>, IGoZeroShaped
 {
+    // The debugger's view (DebuggerTypeProxy): the array's elements. Built only when a debugger expands one.
+    internal sealed class DebugView(array<T> value)
+    {
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        public T[] Items => value.ToSpan().ToArray();
+    }
+
     internal readonly T[] m_array;
 
     // The WINDOW this array occupies inside m_array. Every ordinary construction spans the whole
