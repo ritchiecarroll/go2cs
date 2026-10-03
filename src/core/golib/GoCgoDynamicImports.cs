@@ -159,6 +159,31 @@ public static class GoCgoDynamicImports
     }
 
     /// <summary>
+    /// <see cref="Resolve(string, string)"/>, answering zero where it would throw.
+    /// </summary>
+    /// <remarks>
+    /// It initializes golang.org/x/sys's darwin address variables (<c>libc_ioctl_trampoline_addr</c> and 153
+    /// siblings per arch), which the converter emits as static field initializers: a symbol the running OS
+    /// does not export must cost the one call that passes it — <see cref="GoLibcCall"/> refuses a zero
+    /// address by name — rather than the package's whole type initializer. A missing symbol on a resolver
+    /// whose caller needs an answer now stays a throw (<see cref="Resolve(string, string)"/>).
+    /// </remarks>
+    /// <param name="symbol">The dynamic symbol, e.g. <c>ioctl</c>.</param>
+    /// <param name="library">The library the pragma names, e.g. <c>/usr/lib/libSystem.B.dylib</c>.</param>
+    /// <returns>The exported function's address, or zero when the library or the symbol cannot be resolved.</returns>
+    public static nint ResolveOrZero(string symbol, string library)
+    {
+        try
+        {
+            return Resolve(symbol, library);
+        }
+        catch (EntryPointNotFoundException)
+        {
+            return 0;
+        }
+    }
+
+    /// <summary>
     /// Names the symbol a previously resolved address belongs to, or <c>null</c> when this process
     /// never resolved it — for the dispatch bottom's refusal messages, never for control flow.
     /// </summary>

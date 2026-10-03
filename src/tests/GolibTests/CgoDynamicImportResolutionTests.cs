@@ -154,4 +154,44 @@ public class CgoDynamicImportResolutionTests
         Assert.AreNotEqual(0, GoCgoDynamicImports.Resolve(symbol, library),
             $"{library} does not export {symbol} on this host — the guard's own premise has moved");
     }
+
+    // ResolveOrZero backs golang.org/x/sys's darwin address variables (`libc_<sym>_trampoline_addr`), which
+    // the converter initializes in the package's static initializer: 154 of them per arch. A symbol the
+    // running OS lacks must cost the one call that needs it (GoLibcCall refuses a zero address by name),
+    // never the whole package's type initializer.
+    [TestMethod]
+    public void ResolveOrZeroAgreesWithResolveOnAnExportedSymbol()
+    {
+        (string symbol, string library) = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? ("GetTickCount64", "kernel32.dll")
+            : RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+                ? ("getpid", "/usr/lib/libSystem.B.dylib")
+                : ("getpid", "libc.so.6");
+
+        nint resolved = GoCgoDynamicImports.Resolve(symbol, library);
+
+        Assert.AreNotEqual(0, resolved, $"{library} does not export {symbol} on this host");
+        Assert.AreEqual(resolved, GoCgoDynamicImports.ResolveOrZero(symbol, library),
+            "ResolveOrZero must return exactly Resolve's address when the symbol resolves");
+    }
+
+    [TestMethod]
+    public void ResolveOrZeroIsZeroForAMissingSymbol()
+    {
+        string library = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "kernel32.dll"
+            : RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "/usr/lib/libSystem.B.dylib"
+            : "libc.so.6";
+
+        Assert.AreEqual((nint)0, GoCgoDynamicImports.ResolveOrZero("go2cs_no_such_symbol_exists", library),
+            "a missing symbol must read as zero rather than throw out of a static initializer");
+    }
+
+    [TestMethod]
+    public void ResolveOrZeroIsZeroForAnUnloadableLibrary()
+    {
+        // The darwin library path on a host that is not darwin is exactly this case: a converted x/sys
+        // package for darwin whose assembly is loaded elsewhere must still initialize.
+        Assert.AreEqual((nint)0, GoCgoDynamicImports.ResolveOrZero("anything", "go2cs-no-such-library.so"),
+            "a library that will not load must read as zero rather than throw out of a static initializer");
+    }
 }
