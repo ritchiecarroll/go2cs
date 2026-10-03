@@ -151,10 +151,14 @@ git -C /h/go2cs-tmp-coord/tN log -1 --format='%H %G? %GK %s' | cut -c1-140
 #  (item N8: on this box %G? reads U for every COORD commit -- a good signature, local ownertrust unset, read on all 26
 #   M union commits and on master, tL-seats-draft.txt:91 -- so the IDENTITY is the key: %GK must be 941694536F21BAFF,
 #   and %G? may read G or U, never B, E, N, R, X or Y)
-git -C /h/go2cs-tmp-coord/tN log --format='%G? %GK' 8f46a9adae..HEAD | sort | uniq -c   # EXPECT every line '<G|U> 941694536F21BAFF'
+git -C /h/go2cs-tmp-coord/tN log --first-parent --format='%G? %GK' 8f46a9adae..HEAD | sort | uniq -c   # EXPECT ONE line '<n+1> <G|U> 941694536F21BAFF'
+#  (CORRECTED 2026-10-03 at N: without --first-parent the range takes the SEATS' own commits, which lanes leave unsigned
+#   or ssh-signed: N read '70 N / 50 U ...' plus allowedSignersFile errors. COORD signs the merges and the fixup, so the
+#   first-parent line is the claim; N read '31 U 941694536F21BAFF'. Run it as its OWN command, before the push below:
+#   at N it was composed into the push's command, so its verdict could not have stopped the push.)
 git -C /h/go2cs-tmp-coord/tN status --porcelain | grep -vc '^??'              # EXPECT 0
 UNION=$(git -C /h/go2cs-tmp-coord/tN rev-parse HEAD)                          # the GO's UNION and FIXUP (one sha)
-git -C /h/go2cs-tmp-coord/tN push origin claude/coord-trainN-union            # announce, then push; never replaced afterwards
+git -C /h/go2cs-tmp-coord/tN push origin claude/coord-trainN-union            # a NEW ref: push, read back, then announce with the read-back (mailbox skill); an existing ref: announce, then push; never replaced afterwards
 git -C /h/go2cs-tmp-coord/hnd show HEAD:.claude/coord-scripts/trainN/tN-i9-shard.txt | sha256sum | cut -d' ' -f1   # EXPECT 057c78c1f9ad47f181fe2ef8fdb62519252cc486b48ea7b3541d8f550d9cdf3d (M's and L's bytes)
 git -C /h/go2cs-tmp-coord/hnd show HEAD:.claude/coord-scripts/trainN/tN-i9-shard.txt | grep -c .                   # EXPECT 132
 git -C /h/go2cs-tmp-coord/hnd rev-parse --short=10 HEAD                       # the briefs' <HND> value
