@@ -933,15 +933,22 @@ func (m *ModuleConverter) writeRecurseBuildFile(path string, lines []string) {
 }
 
 // compileRuntimeIdentifierForTarget maps a conversion target (`os/arch`) to the RID whose go.* compile
-// asset matches the metadata the conversion read: the flavors push-nuget.ps1 ships (win-x64, linux-x64),
-// keyed by GOOS because the record is. Any other GOOS has no shipped twin and returns "", leaving the
-// property unset.
+// asset matches the metadata the conversion read: the flavors push-nuget.ps1 ships (win-x64, linux-x64,
+// osx-x64, osx-arm64), keyed by GOOS because the record is. darwin ships the SAME build under both Mac
+// RIDs, so either would compile identically; the target's arch picks the one that names it. Any other
+// GOOS has no shipped twin and returns "", leaving the property unset.
 func compileRuntimeIdentifierForTarget(targetPlatform string) string {
 	switch goosOfTarget(targetPlatform) {
 	case "windows":
 		return "win-x64"
 	case "linux":
 		return "linux-x64"
+	case "darwin":
+		if _, arch, _ := strings.Cut(targetPlatform, "/"); arch == "arm64" {
+			return "osx-arm64"
+		}
+
+		return "osx-x64"
 	default:
 		return ""
 	}
