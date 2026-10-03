@@ -406,6 +406,25 @@ func TestPublishPropertiesAreScopedOffLibrariesButAllowUnsafeBlocksIsNot(t *test
 		t.Error("<TrimMode> must be partial, and must yield to a TrimMode the caller sets")
 	}
 
+	// A self-contained single-file program with ReadyToRun and partial trimming hung at start in 5 to 10
+	// of 10 runs (2026-10-02); ReadyToRun stays on for every other publish. The command-line single-file
+	// path is a global property this condition sees; the converter's own profiles turn it off themselves.
+	if rendered := renderCsprojTemplate("Exe", "", ""); !strings.Contains(rendered, `<PublishReadyToRun Condition="'$(PublishSingleFile)'!='true'">true</PublishReadyToRun>`) {
+		t.Error("<PublishReadyToRun> must be on only when the publish is not single-file")
+	}
+
+	for _, name := range []string{"linux-x64", "osx-arm64", "win-x64"} {
+		profile, err := publishProfiles.ReadFile("profiles/" + name + ".pubxml")
+
+		if err != nil {
+			t.Fatalf("the converter's %s publish profile is not embedded: %v", name, err)
+		}
+
+		if text := string(profile); strings.Contains(text, "<PublishSingleFile>true</PublishSingleFile>") && !strings.Contains(text, "<PublishReadyToRun>false</PublishReadyToRun>") {
+			t.Errorf("the converter's %s profile publishes single-file with ReadyToRun on, the configuration that hangs", name)
+		}
+	}
+
 	condition, found = properties.conditionOf("AllowUnsafeBlocks")
 
 	if !found {
