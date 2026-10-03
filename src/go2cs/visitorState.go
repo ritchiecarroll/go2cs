@@ -387,9 +387,13 @@ type Visitor struct {
 	// (see finalizePositionMap). Pure AST facts, recorded at declaration-visit time so no emission
 	// reordering, collapse, or double conversion of an expression can perturb the counter.
 	funcLitEntries []funcLitEntry
-	varNames       map[*types.Var]string
-	hasDefer       bool
-	hasRecover     bool
+	// methodValueEntries collects this FILE's value-receiver method values -- the Go line and the
+	// `pkg.Recv.Method` Go names the `-fm` wrapper by -- appended per function declaration beside the
+	// literal names (collectMethodValueNames) and emitted as the record's methodValues argument.
+	methodValueEntries []methodValueEntry
+	varNames           map[*types.Var]string
+	hasDefer           bool
+	hasRecover         bool
 	// pendingTypeAccess carries an explicit C# access modifier ("public ") for the type
 	// declaration currently being emitted — set by visitTypeSpec for an unexported type that
 	// must be publicized (used as an exported struct field; see packagePublicizedTypes), and
