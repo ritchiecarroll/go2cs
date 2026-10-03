@@ -92,4 +92,57 @@ public class NamedPointerTokenCarrierTests
             Marshal.FreeHGlobal(memory);
         }
     }
+
+    // ---- the INBOUND conversions: an address converted INTO the named pointer ----
+    //
+    // The template read `*(T*)value` into a fresh managed box, so the result was a COPY of the
+    // pointee at some other address: the address it was made from was gone, and a token was
+    // dereferenced as if it were memory. Both now defer to ж<T>'s own operator, which aliases.
+
+    [TestMethod]
+    public void AnInboundNativeAddressAliasesTheAddress()
+    {
+        nint memory = Marshal.AllocHGlobal(16);
+
+        try
+        {
+            syscall_package.Pointer native = (uintptr)(nuint)memory;
+
+            Assert.AreEqual((nuint)memory, ((uintptr)native).Value,
+                "Go: uintptr(unsafe.Pointer(Pointer(unsafe.Pointer(p)))) == p -- a copy answers the copy's address");
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(memory);
+        }
+    }
+
+    [TestMethod]
+    public unsafe void AnInboundVoidPointerAliasesTheAddress()
+    {
+        nint memory = Marshal.AllocHGlobal(16);
+
+        try
+        {
+            syscall_package.Pointer native = (void*)memory;
+
+            Assert.AreEqual((nuint)memory, (nuint)(void*)native, "the void* conversion is the same inbound door as uintptr");
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(memory);
+        }
+    }
+
+    [TestMethod]
+    public void AnInboundTokenIsCarriedUnread()
+    {
+        // The carrier TokenCarrier builds by hand, built through the wrapper's own operator.
+        var (_, token, box) = TokenCarrier();
+
+        syscall_package.Pointer carrier = (uintptr)token;
+
+        Assert.AreEqual(token, ((uintptr)carrier).Value, "a token converted in must come back out as the same token");
+        Assert.AreSame(box, (ж<syscall_package.RawSockaddrInet4>)(uintptr)carrier);
+    }
 }
