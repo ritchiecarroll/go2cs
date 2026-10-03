@@ -395,7 +395,7 @@ public class TypeGenerator : ISourceGenerator
                             ReadOnlyValue = !mutableValue,
                             TypeName = typeName,
                             TargetTypeName = typeName,
-                            TypeClass = typeDefinition,
+                            TypeClass = NamedUnderlyingTypeClass(typeDefinition),
                             ForwardedStructMembers = forwardedMembers,
                             UnderlyingArrayElementType = underlyingArrayElem,
                             ValueClone = valueCloneFields.Length > 0,
@@ -686,6 +686,17 @@ public class TypeGenerator : ISourceGenerator
             yield return declaration;
         }
     }
+
+    // The InheritedTypeTemplate's KIND arms key on these TypeClass values, which the kind arms above set
+    // themselves. The named-underlying arm passes the underlying's NAME instead, and that name is
+    // load-bearing (`type MyBool bool` reaches the "bool" ToString arm), so it passes through, except
+    // where a user type merely SHARES a kind's name: mapstructure's tests declare `type MapCopy Map`
+    // over a struct named Map, which took the Map template (IDictionary over a struct). Such a name
+    // is re-keyed so no kind arm matches it, leaving the plain named-wrapper template it belongs to.
+    private static readonly HashSet<string> TemplateKindTypeClasses = ["Array", "Slice", "Map", "Channel", "Pointer", "Numeric"];
+
+    private static string NamedUnderlyingTypeClass(string underlyingName) =>
+        TemplateKindTypeClasses.Contains(underlyingName) ? $"named {underlyingName}" : underlyingName;
 
     private static (string keyTypeName, string valueTypeName) SplitMapTypes(string typeDefinition)
     {
