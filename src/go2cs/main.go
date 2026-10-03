@@ -247,6 +247,7 @@ func main() {
 	commandLine := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
 	commandLine.SetOutput(io.Discard)
 
+	versionCmd := commandLine.Bool("version", false, "Print the converter's release tuple (go2cs release, converter revision, go.* package version, Go toolchains, VCS revision) as key=value lines and exit")
 	goRootCmd := commandLine.String("goroot", goRoot, "Path to Go root directory")
 	goPathCmd := commandLine.String("gopath", goPath, "Path to Go path directory")
 	go2csPathCmd := commandLine.String("go2cspath", go2csPath, "Path to C# converted code")
@@ -289,6 +290,12 @@ func main() {
 
 	var positionals []string
 	positionals, err = parseArgsInterspersed(commandLine, os.Args[1:])
+
+	// -version answers before any other option is validated: it needs no input and converts nothing.
+	if err == nil && *versionCmd {
+		fmt.Print(versionReport())
+		os.Exit(0)
+	}
 
 	// Pin go/build's resolver to the converter's robustly-resolved GOROOT/GOPATH. build.Default is
 	// initialized at package-init from the start-up environment, which can be empty or stale in a
