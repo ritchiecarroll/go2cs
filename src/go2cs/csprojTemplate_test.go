@@ -64,7 +64,11 @@ func renderCsprojTemplate(outputType string, reference string, validationPack st
 		reference,
 	)
 
-	return strings.ReplaceAll(contents, ValidationPackMarker, validationPack)
+	contents = strings.ReplaceAll(contents, ValidationPackMarker, validationPack)
+
+	// The PackageId line as a STANDARD-LIBRARY project renders it, the template's line before the marker; a converted
+	// module library's form is validated by TestCsprojTemplateForAModuleLibraryEmitsWellFormedXml.
+	return strings.ReplaceAll(contents, PackageIdMarker, packageIdLine("", outputType, Options{convertStdLib: true}))
 }
 
 func TestCsprojTemplateEmitsWellFormedXml(t *testing.T) {

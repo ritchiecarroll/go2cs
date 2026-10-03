@@ -23,7 +23,7 @@ param(
     [Parameter(Mandatory)][string]$Feed,
     [Parameter(Mandatory)][string]$UuidVersion,
     [Parameter(Mandatory)][string]$Scratch,
-    [string]$PackageId = 'go.github.com.google.uuid'
+    [string]$PackageId = 'nugetgo.github.com.google.uuid'
 )
 
 $ErrorActionPreference = 'Stop'

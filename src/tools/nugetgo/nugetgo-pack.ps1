@@ -50,6 +50,9 @@ param(
     [Parameter(Mandatory)][string]$Scratch,
     [Parameter(Mandatory)][string]$RepositoryUrl,
     [Parameter(Mandatory)][string]$Upstream,
+    # The module's own author publishes: the description takes the author's form, and -RepositoryUrl must sit under the
+    # module path's own host/org (Get-NugetgoDescription, owner ruling 2026-10-02).
+    [switch]$UpstreamPublishes,
     [string]$LicenseFile,
     [string]$RehearsalSuffix,
     [switch]$Release,
@@ -122,9 +125,10 @@ if (-not $copyright) { Refuse "the upstream license file carries no Copyright li
 # components), never a literal, so the text cannot outlive the corpus it describes. The same two sentences head
 # VALIDATION.md and are the release notes.
 $goRelease = ($ClosureVersion -split '[.-]')[0..2] -join '.'
-$description = "PROOF: unofficial go2cs C# conversion of $ModulePath $GoVersion, built on the Go $goRelease standard library, " +
-    "not affiliated with or endorsed by $Upstream or the Go project. " +
-    "Security: that standard library carries no Go security fixes issued after Go $goRelease; review before any production use."
+$described = Get-NugetgoDescription -ModulePath $ModulePath -GoVersion $GoVersion -GoRelease $goRelease -Upstream $Upstream `
+    -RepositoryUrl $RepositoryUrl -UpstreamPublishes:$UpstreamPublishes
+if ($described.Refused) { Refuse "package description: $($described.Reason)" }
+$description = $described.Description
 
 # D7: a validated module ships its MODULE.md as VALIDATION.md, the per-package pages beside it. A module that cannot
 # validate yet packs ONLY as a rehearsal of its shape (-UnvalidatedReason), whose VALIDATION.md says so; such a

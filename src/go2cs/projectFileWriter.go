@@ -211,7 +211,7 @@ func insertFriendAssemblyAccess(projectFileContents string) string {
 // an end-user module keeps its historical .csproj bytes while every regeneration of a corpus
 // package keeps its proof sheet.
 func validationPackBlock(projectFileName string, options Options) string {
-	if !options.convertStdLib && !rewriteOfCorePackage(projectFileName, options) {
+	if !isStdLibProjectEmission(projectFileName, options) {
 		return ""
 	}
 
@@ -225,6 +225,24 @@ func validationPackBlock(projectFileName string, options Options) string {
 		"  <ItemGroup Condition=\"'$(OutputType)'=='Library' AND Exists('$(GoValidationProofFile)')\">\r\n" +
 		"    <None Include=\"$(GoValidationProofFile)\" Pack=\"true\" PackagePath=\"VALIDATION.md\" Visible=\"false\" />\r\n" +
 		"  </ItemGroup>\r\n"
+}
+
+// isStdLibProjectEmission reports whether this .csproj is a converted STANDARD-LIBRARY package's: a -stdlib run, or a
+// re-emission of a production project under <go2csPath>/core (rewriteOfCorePackage). The validation pack block and the
+// go.-prefixed PackageId both key on it, so the two cannot disagree about one project.
+func isStdLibProjectEmission(projectFileName string, options Options) bool {
+	return options.convertStdLib || rewriteOfCorePackage(projectFileName, options)
+}
+
+// packageIdLine is what replaces PackageIdMarker: the standard library's `go.` PackageId for a stdlib project or
+// an Exe (whose Library-only group never applies), and for a converted module's library a comment naming the one
+// place its ID is minted.
+func packageIdLine(projectFileName string, outputType string, options Options) string {
+	if outputType != "Library" || isStdLibProjectEmission(projectFileName, options) {
+		return "<PackageId>go.$(AssemblyName)</PackageId>"
+	}
+
+	return "<!-- No PackageId: nugetgo-pack.ps1 mints a converted module's one NuGet ID, nugetgo.<dotted module path> -->"
 }
 
 // rewriteOfCorePackage reports whether this conversion is re-emitting the production .csproj of a
@@ -396,6 +414,10 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 	// point at, so every other conversion collapses the marker's line back to the blank line the
 	// template has always had there and emits the .csproj it always did.
 	newContents = []byte(strings.ReplaceAll(string(newContents), ValidationPackMarker, validationPackBlock(projectFileName, options)))
+
+	// The PackageId line: the standard library's go.<AssemblyName>, or, for a converted module's library, none --
+	// nugetgo-pack.ps1 is the one place a module's NuGet ID is minted (see PackageIdMarker).
+	newContents = []byte(strings.ReplaceAll(string(newContents), PackageIdMarker, packageIdLine(projectFileName, outputType, options)))
 
 	// Extract project references from imports
 	packageInfoMap := getImportPackageInfo(projectImports.Keys(), options)

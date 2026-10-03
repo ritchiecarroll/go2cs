@@ -52,6 +52,12 @@ function Get-NugetgoThirdPartyRequires {
         if ($entry -notmatch '^(?<module>[^=@\s]+)=(?<id>[^=@\s]+)@(?<version>[^=@\s]+)$') {
             throw "REFUSED: -ThirdPartyPackage '$entry': want <module>=<nuget-id>@<package-version>"
         }
+        # "go." is the converted Go standard library, in any letter case (owner ruling, 2026-10-02): the registry's lint
+        # exactly (nugetgo cmd/sitegen/parse.go at 90cc7d7409) -- the prefix only, the dot included, after the shape
+        # check above -- in the same words as the converter's -nuget-map lint and sourcemeta.CheckModuleNuGetID.
+        if ($Matches['id'].ToLowerInvariant().StartsWith('go.', [StringComparison]::Ordinal)) {
+            throw "REFUSED: -ThirdPartyPackage '$entry': nuget-id `"$($Matches['id'])`" uses the `"go.`" prefix, which is the converted Go standard library; the ID of a converted module starts with `"nugetgo.`""
+        }
         $named[$Matches['module']] = [pscustomobject]@{ NuGetId = $Matches['id']; PackageVersion = $Matches['version'] }
     }
 

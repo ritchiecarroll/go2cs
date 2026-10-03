@@ -82,6 +82,10 @@ and URLs never fight the delimiter:
 github.com/ritchiecarroll/hashset	go.github.com.ritchiecarroll.hashset	canonical	https://github.com/ritchiecarroll/hashset-cs	2026-08-21	ritchiecarroll
 ```
 
+> **AMENDED 2026-10-02 (owner ruling, COORD session):** the example row's ID is
+> `nugetgo.github.com.ritchiecarroll.hashset`. A converted Go module takes the `nugetgo.` form whoever publishes it,
+> the module's own author included (the B2 amendment in section 8); the row above stays as the record.
+
 - **`module-path`** — the Go module path exactly as it appears in `go.mod`, including any
   `/vN` major-version suffix. One row per major version.
 - **`nuget-id`** — the published NuGet package ID. Free-form (the registry is the authority, not a
@@ -92,6 +96,9 @@ github.com/ritchiecarroll/hashset	go.github.com.ritchiecarroll.hashset	canonical
   **AMENDED 2026-09-30 (owner ruling B2, §8):** third-party conversions take `nugetgo.` + the dotted
   module path; `go.<path>` is left free for canonical publishers. The recommendation above stands as
   the record and now applies to canonical publishers only.
+  **AMENDED 2026-10-02 (owner ruling):** the canonical-publisher exception is retired. Every converted Go module's ID
+  is `nugetgo.` + the dotted module path, whoever publishes it; `go.` is the converted Go standard library only.
+  Canonical stays a verified registry STATUS and grants no prefix.
 - **`status`** — `canonical` or `community` (§2).
 - **`source-repo`** — the repo holding the CONVERSION (the C# side), for humans and for CI.
 - Remaining columns are provenance for humans; the converter reads only the first three.
@@ -360,6 +367,8 @@ the .NET 10 hop decides the deployment shape it would emit references for. ⟨OQ
    assemblies, with no assembly merging, which satisfies the v1 posture above. *Amended
    2026-09-30: the root ID `go.<dotted module>` is superseded for third-party packages by B2
    (`nugetgo.<dotted path>`, §8's OWNER RULINGS) and kept for canonical publishers.*
+   *Amended 2026-10-02: the canonical-publisher exception is retired; the root ID is `nugetgo.<dotted module>`
+   whoever publishes.*
    Dependency paths are
    version-free with a `go2cs.modules.lock`, one version per module per output root and a version
    clash refused by name. Third-party proof pages sit beside the conversion, never in the stdlib
@@ -384,6 +393,15 @@ above (§1, §3, §4.3, OQ-3) point back to this block, and the earlier text sta
   hash-shortened registry alternate is used when the natural ID fails nuget.org's ID rule, collides
   case-insensitively or as `a/b.c` against `a.b/c`, or (under `go.`) would equal a stdlib ID. The
   pack overrides `PackageId`.
+  **AMENDED 2026-10-02 (owner ruling, COORD session) -- one pattern.** `nugetgo.<dotted module path>` is the ID of
+  every non-standard-library conversion, the module's own author included; `go.<path>` is no longer left to anyone,
+  and `go.` is the converted Go standard library only. The registry's lint refuses a `go.`-prefixed nuget-id (any
+  letter case, any status) and requires nothing else; the pattern itself is stated in its docs. go2cs refuses the same
+  IDs at its three readers of a module's ID, in one wording -- the `-nuget-map` lint (`nugetMap.go`), the
+  self-description's `require` rule (`sourcemeta.CheckModuleNuGetID`) and `nugetgo-pack.ps1 -ThirdPartyPackage`
+  (`NugetgoSelfDescription.psm1`) -- and the pack's own ID cannot be `go.`: `Get-NugetgoPackageId` always prefixes
+  `nugetgo.` (`NugetgoIdentity.psm1`). A converted module's library project no longer writes a `go.`-prefixed
+  `PackageId`: `nugetgo-pack.ps1` is the one place a module's ID is minted.
 - **B3 — versions.** The Go version without the `v` and without `+incompatible`. Rebuilds are
   `X.Y.Z.N` for a release and `L.0.N` for a prerelease or pseudo-version, never a fourth number on a
   prerelease; revisions rise with the corpus. `L` is the Go prerelease or pseudo-version string used
@@ -405,6 +423,17 @@ above (§1, §3, §4.3, OQ-3) point back to this block, and the earlier text sta
   affiliated with or endorsed by <upstream> or the Go project", with the Go 1.24 standard-library
   security caveat. `RepositoryUrl` is a per-module conversion-source repo. Stable versions carry
   PROOF in the text. §3's existence check is amended for prerelease-only modules.
+  **AMENDED 2026-10-02 (owner ruling, COORD session) -- when the upstream publishes.** A package must not say it is
+  "not affiliated with or endorsed by" its upstream when the publisher IS the upstream. The fact that decides the form
+  is the pack's `-UpstreamPublishes` switch, CROSS-CHECKED against the module path's host/org and `-RepositoryUrl`'s
+  (the URL section 2's canonical rule reads, so the pack and the registry cannot disagree about one package): the
+  switch with the same org gives the author's form -- "PROOF: go2cs C# conversion of <module> <ver>, published by its
+  author, built on the Go <release> standard library, not affiliated with or endorsed by the Go project.", with the
+  same security sentence and without "unofficial"; neither gives the third-party form above, unchanged; the switch
+  with another org, or the same org without the switch, is refused by name (`Get-NugetgoDescription`).
+  **A named gap:** a module path with no comparable host/org (gopkg.in, a vanity domain) takes only the third-party
+  form; with the switch it is REFUSED, because the pack cannot corroborate authorship for that path shape. Resolving
+  the path's `go-import` record would close it, and is not built. Section 2's canonical rule has the same gap.
 - **B7 — rehearsal.** Each new package shape is rehearsed on int.nugettest.org first.
 - **B8 — first wave.** uuid and jwt. gojq's scope is ruled before it is packed.
 

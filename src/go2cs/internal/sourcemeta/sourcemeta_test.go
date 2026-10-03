@@ -201,6 +201,9 @@ func TestParseNamesWhatIsMalformed(t *testing.T) {
 		{"an unknown key", head + "colour blue\n" + section, "unknown"},
 		{"a short require", head + "require example.com/dep v1.0.0\n" + section, "require"},
 		{"an invalid require id", head + "require example.com/dep v1.0.0 bad id!\n" + section, "require"},
+		{"a go.-prefixed require id", head + "require example.com/dep v1.0.0 go.example.com.dep\n" + section, `uses the "go." prefix`},
+		// A malformed go. ID is refused for its malformation alone: the prefix rule runs after the validity check.
+		{"a malformed go.-prefixed require id", head + "require example.com/dep v1.0.0 go..dep\n" + section, "the registry's rule"},
 		{"no go2cs-release", strings.Replace(head, "go2cs-release 1.24.13.3\n", "", 1) + section, "go2cs-release"},
 		{"an invalid module-version", strings.Replace(head, "v1.0.0", "1.0.0", 1) + section, "module-version"},
 		{"a package without a section", head + "package example.com/mod/sub example.com.mod.sub\n" + section, "example.com.mod.sub"},
@@ -220,6 +223,10 @@ func TestParseNamesWhatIsMalformed(t *testing.T) {
 		if !strings.Contains(err.Error(), c.want) {
 			t.Errorf("%s: the refusal does not name %q: %v", c.name, c.want, err)
 		}
+
+		if c.name == "a malformed go.-prefixed require id" && strings.Contains(err.Error(), `uses the "go." prefix`) {
+			t.Errorf("%s: a malformed ID must yield ONE nuget-id problem, its malformation: %v", c.name, err)
+		}
 	}
 }
 
@@ -236,6 +243,7 @@ func TestGenerateRefusesWhatParseWouldRefuse(t *testing.T) {
 		{"no package", func(d *Description) { d.Packages = nil }, "package"},
 		{"duplicate package", func(d *Description) { d.Packages = append(d.Packages, d.Packages[0]) }, "example.com/mod"},
 		{"invalid require id", func(d *Description) { d.Requires[0].NuGetID = "a..b" }, "nuget-id"},
+		{"go.-prefixed require id", func(d *Description) { d.Requires[0].NuGetID = "GO.Example.Dep" }, `uses the "go." prefix`},
 		{"missing section", func(d *Description) { delete(d.Sections, "example.com.mod") }, "example.com.mod"},
 	}
 
@@ -245,6 +253,31 @@ func TestGenerateRefusesWhatParseWouldRefuse(t *testing.T) {
 
 		if _, err := Generate(d); err == nil || !strings.Contains(err.Error(), m.want) {
 			t.Errorf("%s: Generate did not refuse naming %q (err %v)", m.name, m.want, err)
+		}
+	}
+}
+
+// CheckModuleNuGetID refuses the standard library's "go." prefix in any letter case and nothing else (owner ruling,
+// 2026-10-02): the registry's lint and every go2cs reader of a module's NuGet ID apply this one rule.
+func TestCheckModuleNuGetIDRefusesOnlyTheGoPrefix(t *testing.T) {
+	for _, id := range []string{"go.github.com.google.uuid", "GO.github.com.google.uuid", "Go.Uuid", "go.x"} {
+		err := CheckModuleNuGetID(id)
+
+		if err == nil {
+			t.Errorf("%q: accepted", id)
+			continue
+		}
+
+		want := `nuget-id "` + id + `" uses the "go." prefix, which is the converted Go standard library; the ID of a converted module starts with "nugetgo."`
+
+		if err.Error() != want {
+			t.Errorf("%q: the refusal reads %q, want %q", id, err.Error(), want)
+		}
+	}
+
+	for _, id := range []string{"nugetgo.github.com.google.uuid", "golang.x", "gopher.x", "go-x.y", "gox", "go", "Acme.Go.x", "Example.HashSet"} {
+		if err := CheckModuleNuGetID(id); err != nil {
+			t.Errorf("%q: refused: %v", id, err)
 		}
 	}
 }

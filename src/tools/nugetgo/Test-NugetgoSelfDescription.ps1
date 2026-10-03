@@ -56,6 +56,15 @@ try {
     Check 'an unnamed dependency module is refused BY NAME' ($why -like '*example.com/dep*-ThirdPartyPackage*') "got '$why'"
     $why = Refusal { Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($rootLib) -ThirdPartyPackage @('example.com/dep=nugetgo.example.com.dep') }
     Check 'a -ThirdPartyPackage without a package version is refused' ($why -like '*-ThirdPartyPackage*<module>=<nuget-id>@<package-version>*') "got '$why'"
+    $why = Refusal { Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($rootLib) -ThirdPartyPackage @('example.com/dep=Go.Example.Com.Dep@1.0.0') }
+    Check 'a go.-prefixed -ThirdPartyPackage id is refused, in any letter case' ("$why" -like '*nuget-id "Go.Example.Com.Dep" uses the "go." prefix, which is the converted Go standard library; the ID of a converted module starts with "nugetgo."*') "got '$why'"
+    foreach ($id in @('gopher.example.com.dep', 'Example.go.Dep', 'go-x.dep', 'go')) {
+        $why = $null
+        $accepted = try { @(Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($rootLib) -ThirdPartyPackage @("example.com/dep=$id@1.0.0")) } catch { $why = $_.Exception.Message; @() }
+        Check "-ThirdPartyPackage id '$id' does not take the go. prefix: accepted" ($accepted.Count -eq 1 -and $accepted[0].NuGetId -ceq $id) "got $($accepted.Count) require(s), refusal '$why'"
+    }
+    $why = Refusal { Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($rootLib) -ThirdPartyPackage @('example.com/dep=go.example.com.dep') }
+    Check 'a malformed go.-prefixed -ThirdPartyPackage is refused for its shape alone' ("$why" -like '*want <module>=<nuget-id>@<package-version>*' -and "$why" -notlike '*uses the "go." prefix*') "got '$why'"
     $why = Refusal { Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($plainLib) -ThirdPartyPackage @('example.com/unused=nugetgo.example.com.unused@1.0.0') }
     Check 'a -ThirdPartyPackage no packed package references is refused' ($why -like '*example.com/unused*no packed package*') "got '$why'"
     $orphan = Write-Fixture 'src/example.com/mod/orphan/example.com.mod.orphan.csproj' (Project 'example.com.mod.orphan' @('../../../../pkg/example.com/stranger/example.com.stranger.csproj'))
