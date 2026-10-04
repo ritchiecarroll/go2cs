@@ -40,6 +40,42 @@
 - **2026-10-03 01:50: TRAIN M LANDED.** master `aa0a07d5fd` -> `8f46a9adae` (a fast-forward: 25 signed seat merges + `fixup` e2008427b1 + `fixup-2` 8f46a9adae; ledger c7f79f4264; announced to inbox/FLEET before the push). Gates: the i7 battery run 3 EXIT 0 (CNR 785; 93 sweep rows at banked counts; runtime 10819 + 71; runtime/pprof 145 + 7); landing precheck 0/0; roster guard both editions; the i9 132/132; P1/P2 linux known movers only; C1 darwin LookupServicePort only. Bank step a no-op. M13: committed -tests sources stand stale against the converter (TE-T files=43 hunks=207); COORD refreshes them once on TRAIN N's union from a windows re-emission. **Base for every cut: master `8f46a9adae`.** TRAIN N: the accepted seats are in `.claude/coord-scripts/trainL/tL-seats-draft.txt` (lines from 2026-10-02 19:26 on). Real-module readings so far: hashset v1.0.0 37/37, pkg/errors 44 agree, godotenv 43/43, gorilla/mux 320/320 (on local merges of N seats). COORD's own i7 items after M: root the single-file publish hang, a full-BoGo control run for the i9's TLS shim crash, the M13 refresh on N's union.
 - **2026-10-03 23:01: TRAIN N LANDED.** master `8f46a9adae` -> `54f7f4439d` (a fast-forward: 30 signed seat merges + `fixup` 59ee0d21bf + `fixup-2` 1a7f24d1c6 (the PS 5.1 test fix) + the MS13 refresh 54f7f4439d of 564 committed -tests sources; ledger f04f467cba; posted to inbox/FLEET). **Base for every cut until O lands: master `54f7f4439d`; TRAIN P cuts base on O's pushed union `eb88ab9492`.**
 
+## 1g. COORD STATE 2026-10-04 15:30 (START HERE; it supersedes 1f.1 steps 4-5 and all of 1f.2)
+
+Written 15:30 on the i7's clock. Everything below is on origin.
+
+- **Owner rulings today.** (1) Release go.\* 1.24.13.4 WAITS for TRAIN P: P carries the fix for a self-recursion in the
+  published `go.sort` (`IntSlice` / `Float64Slice` / `StringSlice` `.Sort()` overflow the stack under a tiered JIT and
+  loop forever under Release with tiered compilation off). (2) The C# consumer usings ship in this release; breaking
+  changes to shipped packages are acceptable until the project is announced loudly.
+- **master** = `54f7f4439d` (TRAIN N). **TRAIN O**: union `eb88ab9492`, battery `bat2` running since 06:37 (deadline
+  20:37), no findings at 15:12, all four lane readings in. Land O by 1f.1 steps 1 to 3.
+- **TRAIN P is the release train.** Drafts are on this branch under `.claude/coord-scripts/trainP/`:
+  `tP-seats-draft.txt` (23 rows, rows-sha256 `a9b5da13f551`), `tP-README.md` (section 7 holds the open questions),
+  `COORD-LAUNCH-CHECKLIST.md`, `tP-premap.md`, the scripts. BASE is a required variable: O's landed master. A pairwise
+  3-way of every row over `eb88ab9492` reads clean. One slot is open: COORD's BOARD docs row, cut on BASE (the corrected
+  observability line is in the notes, 11:35).
+- **After O lands, in order:**
+  1. re-read every P row at BASE (`tP-premap-all.sh`; the sibling-package row's committed test files are the exposure
+     to O's test-source refresh);
+  2. cut the BOARD docs row; freeze the table; map; assemble (signed `--no-ff`); fixup (`CSPROJ_TEMPLATE=accept`); the
+     first-parent signature check as its own command; push the union (a new ref: push, read back, announce);
+  3. GOs: the i9's shard, P1 and P2's linux legs, C1's release-smoke on all four RIDs with D gating plus the darwin
+     behavioral FULL and a docs-site build; G re-reads x/sync, pflag and cobra at the union; P1 re-reads the six
+     first-wave modules there (go-humanize's namespace moves under the sibling-package rule);
+  4. the battery from a fresh folder (decide `DEADLINE` and `E_BISECT_SEATS` at launch: tP-README Q9);
+  5. land by the checklist's section 6, and run `src/tests/CSharpConsumer/run-csharp-consumer.ps1` at the union;
+  6. release 1.24.13.4: the rehearsal feed, `test-consumer-usings.ps1` against it, the owner's PIN, the macOS line of
+     1f.1 step 4 verbatim.
+- **Row 23 (reflect `NewAt`, golib + reflect):** if the battery reds on it, revert its merge on top
+  (`git revert -m 1`, a `fixup-N: TRAIN P` commit); the release does not wait for it.
+- **Ruled for the train after P** (notes, 13:51 and after): CS0122 option A, the local-type constructor fix, the test
+  host's argv in Go's shape; the i9's and P2's follow-ups.
+- **R**: STANDBY (available in spurts on notice); its inbox holds the return note. **Owner hands**: the release PIN;
+  the desktop checklist, later; the stray refs named in 1f.3 and tP-README Q19.
+
+PASTE PROMPT: 1f.4's, reading "section 1g" for "section 1f".
+
 ## 1f. COORD STATE 2026-10-04 (a save-state refresh; START HERE to land TRAIN O and cut the release)
 
 Written 2026-10-04 07:40 local (the i7's clock). Everything below is on origin; nothing depends on a local memory file.
