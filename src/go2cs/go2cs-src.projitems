@@ -448,6 +448,7 @@
     <None Include="$(MSBuildThisFileDirectory)toolchainGoRootFix_test.go" />
     <None Include="$(MSBuildThisFileDirectory)writeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)wsaSendtoNoCallers_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)xsysDarwinLibc_test.go" />
     <None Include="$(MSBuildThisFileDirectory)writtenUnderlyingOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)zeroSizeFieldLayout.go" />
     <None Include="$(MSBuildThisFileDirectory)zeroSizeFieldStore_test.go" />

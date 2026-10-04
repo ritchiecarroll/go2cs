@@ -159,6 +159,10 @@ type asmPointerBridge struct {
 var (
 	asmTrampolineIndexes     = map[string]map[string]asmIndexEntry{}
 	asmTrampolineIndexesLock sync.Mutex
+
+	// asmTrampolineAddrIndexes caches parseAsmTrampolineAddrs over the same selected files, under the same
+	// key and lock: variable name -> the dynamic symbol's local name.
+	asmTrampolineAddrIndexes = map[string]map[string]string{}
 )
 
 // asmIndexEntry is one forwardable block: its target as `<import path>.<func>` (an empty import path for
@@ -435,13 +439,54 @@ func asmTrampolineIndex(sourceDir string, targetPlatform string, buildTags []str
 	index := map[string]asmIndexEntry{}
 	asmTrampolineIndexes[key] = index
 
-	entries, err := os.ReadDir(sourceDir)
+	for _, content := range selectedAsmSources(sourceDir, targetPlatform, buildTags) {
+		for name, target := range parseAsmTrampolines(content) {
+			index[name] = asmIndexEntry{target: target}
+		}
 
-	if err != nil {
+		for name, target := range parseAsmRawSyscallNoError(content) {
+			index[name] = asmIndexEntry{target: target, noError: true}
+		}
+	}
+
+	return index
+}
+
+// asmTrampolineAddrIndex is parseAsmTrampolineAddrs over the package directory's assembly files that the
+// target platform builds, once per (directory, platform, tags).
+func asmTrampolineAddrIndex(sourceDir string, targetPlatform string, buildTags []string) map[string]string {
+	key := sourceDir + "|" + targetPlatform + "|" + strings.Join(buildTags, ",")
+
+	asmTrampolineIndexesLock.Lock()
+	defer asmTrampolineIndexesLock.Unlock()
+
+	if index, ok := asmTrampolineAddrIndexes[key]; ok {
 		return index
 	}
 
+	index := map[string]string{}
+	asmTrampolineAddrIndexes[key] = index
+
+	for _, content := range selectedAsmSources(sourceDir, targetPlatform, buildTags) {
+		for variable, local := range parseAsmTrampolineAddrs(content) {
+			index[variable] = local
+		}
+	}
+
+	return index
+}
+
+// selectedAsmSources returns the contents of the package directory's assembly files that the target
+// platform builds.
+func selectedAsmSources(sourceDir string, targetPlatform string, buildTags []string) []string {
+	entries, err := os.ReadDir(sourceDir)
+
+	if err != nil {
+		return nil
+	}
+
 	context := asmBuildContext(sourceDir, targetPlatform, buildTags)
+	var sources []string
 
 	for _, entry := range entries {
 		if entry.IsDir() || !strings.EqualFold(filepath.Ext(entry.Name()), ".s") {
@@ -461,16 +506,10 @@ func asmTrampolineIndex(sourceDir string, targetPlatform string, buildTags []str
 			continue
 		}
 
-		for name, target := range parseAsmTrampolines(string(content)) {
-			index[name] = asmIndexEntry{target: target}
-		}
-
-		for name, target := range parseAsmRawSyscallNoError(string(content)) {
-			index[name] = asmIndexEntry{target: target, noError: true}
-		}
+		sources = append(sources, string(content))
 	}
 
-	return index
+	return sources
 }
 
 // stripAsmComments removes `//` and `/* */` comments in ONE left-to-right pass, so whichever opens
@@ -613,6 +652,85 @@ func parseAsmRawSyscallNoError(source string) map[string]string {
 	for _, block := range asmBlocks(source) {
 		if target, matched := asmRawSyscallNoErrorBlocks[strings.Join(block.instructions, "\n")]; matched {
 			result[block.name] = target
+		}
+	}
+
+	return result
+}
+
+var (
+	asmLocalTextRE = regexp.MustCompile(`^TEXT\s+([A-Za-z_][A-Za-z0-9_]*)<>\(SB\)`)
+	asmLocalJumpRE = regexp.MustCompile(`^(?:JMP|B)\s+([A-Za-z_][A-Za-z0-9_]*)\(SB\)$`)
+	asmAddrDataRE  = regexp.MustCompile(`^DATA\s+·([A-Za-z_][A-Za-z0-9_]*)\(SB\)/8,\s*\$([A-Za-z_][A-Za-z0-9_]*)<>\(SB\)$`)
+)
+
+// parseAsmTrampolineAddrs returns every package variable that assembly source fills with the address of a
+// file-local trampoline whose ONLY instruction is a jump to a dynamic symbol, as the variable's name mapped
+// to that symbol's local name -- the shape golang.org/x/sys uses on darwin for each libc call:
+//
+//	TEXT libc_ioctl_trampoline<>(SB),NOSPLIT,$0-0
+//		JMP	libc_ioctl(SB)
+//	GLOBL	·libc_ioctl_trampoline_addr(SB), RODATA, $8
+//	DATA	·libc_ioctl_trampoline_addr(SB)/8, $libc_ioctl_trampoline<>(SB)
+//
+// The jump is the whole trampoline, so the variable's value is, in effect, the symbol's address: what
+// class B resolves a standard-library trampoline to (cgoDynamicImports.go). Which symbol and library the
+// local names is the package's `//go:cgo_import_dynamic` pragma's to say; this reads the assembly alone.
+func parseAsmTrampolineAddrs(source string) map[string]string {
+	jumps := map[string]string{}
+	data := map[string]string{}
+
+	var name string
+	var instructions []string
+
+	flush := func() {
+		if name != "" && len(instructions) == 1 {
+			if match := asmLocalJumpRE.FindStringSubmatch(instructions[0]); match != nil {
+				jumps[name] = match[1]
+			}
+		}
+
+		name, instructions = "", nil
+	}
+
+	for _, line := range strings.Split(stripAsmComments(source), "\n") {
+		line = strings.TrimSpace(line)
+
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		if match := asmLocalTextRE.FindStringSubmatch(line); match != nil {
+			flush()
+			name = match[1]
+			continue
+		}
+
+		if match := asmAddrDataRE.FindStringSubmatch(strings.Join(strings.Fields(line), " ")); match != nil {
+			flush()
+			data[match[1]] = match[2]
+			continue
+		}
+
+		if strings.HasPrefix(line, "TEXT") || strings.HasPrefix(line, "DATA") || strings.HasPrefix(line, "GLOBL") {
+			flush()
+			continue
+		}
+
+		if name == "" || asmLabel.MatchString(line) {
+			continue
+		}
+
+		instructions = append(instructions, strings.Join(strings.Fields(line), " "))
+	}
+
+	flush()
+
+	result := map[string]string{}
+
+	for variable, trampoline := range data {
+		if local, ok := jumps[trampoline]; ok {
+			result[variable] = local
 		}
 	}
 
