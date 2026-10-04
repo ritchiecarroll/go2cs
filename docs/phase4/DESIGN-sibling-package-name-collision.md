@@ -85,3 +85,52 @@ Option 1, with the `/vN` and `name.vN` exemptions and the case-only question rul
 package's Go identity (its full path) in the C# namespace, changes nothing a Go reader sees at a use site, and its
 population is small and fully listed above. A cut would size the importer footprint with the two-seeded emission on
 three targets and CNR, and refresh the package-conversion.md table either way.
+
+## RULED 2026-10-04 — option 1, cut in seat `claude/c2-sibling-package-name`
+
+> Amendment, dated. Everything above is the note as written for the ruling and is unchanged.
+
+**Ruling (coordinator, 2026-10-04):** option 1 — when a package's name differs from the last segment of its import path,
+the namespace keeps the whole import path and the class stays `<name>_package`. Option 2 declined (a compound class name
+would have to be taught to every path that parses `*_package`); option 3 stays rejected (no registry, no directory
+scan). Exempt and unmoved: a `/vN` tail, a `name.vN` tail, a case-only difference (Go's module rules forbid two paths
+in one module that differ only by case). The cut also leaves `package main` unmoved and decides an external test package
+by the package it tests (`foo_test` → `foo`); a hyphenated directory is not exempt (`github.com/mattn/go-isatty` →
+`go.github.com.mattn.go_isatty.isatty_package`).
+
+**What the cut found that the note did not say:**
+
+- A persisted `package_info.cs` is copied through verbatim outside its marker sections, so its own `namespace` line and
+  the template's `using static <namespace>.<class>;` line would have kept the old namespace. `convergePackageNamespace`
+  moves both; a converged file is byte-identical to a fresh one.
+- The alias-collision rename (`computeImportAliasRenames`) reads a child-namespace map built from each closure path's
+  parent segments. A package that keeps its directory declares one level deeper, so the map records `<parent>.<tail>`
+  for it too; otherwise `import foo1 ".../teststructs/foo1"` from a package declared in `<parent>.teststructs` emits an
+  unrenamed `using foo1 = …` (CS0576). No std file moved for this.
+- The rename follows the namespace in the other direction as well: `crypto/internal/fips140test` sat directly in
+  `go.crypto.@internal`, whose child namespace `fips140` forced `using Δfips140 = …`. In
+  `go.crypto.@internal.fips140test` it does not collide (the converter emits the alias inside the namespace
+  declaration, where it binds before any enclosing namespace's member), so the plain `fips140` returns: 51 lines in 5
+  test files. Measured with a two-arm C# probe: alias inside a namespace whose PARENT has child `fips140`, rc 0; inside
+  the namespace that HAS child `fips140`, CS0576.
+
+**Footprint, measured** (prediction `3e08661784f4a39e`, posted before either emission; base master `54f7f4439d`):
+
+| Arm | Predicted | Measured |
+|---|---|---|
+| `-stdlib`, three targets | 6 files, 8/8, flat | 6 files, 8/8, flat — met |
+| `-tests` `fips140deps` | 4 files, 8/8 | met |
+| `-tests` `wasitest` | 5 files, 6/6 | met (plus `nonblock_test.cs`, linux-only, not committed) |
+| `-tests` `fips140test` | 15 files, 16/16 | 16/16 met, plus the 51-line `Δfips140` → `fips140` rename (falsifier fired, scored above) |
+
+| Behavioral (CNR) | `SiblingPackageNames` only | missed: two committed tests also move (below) |
+
+Committed in-seat: 30 corpus files, 89/89. darwin's `crypto/x509/internal/macos` and `math/rand/v2` unmoved. The two moved
+production projects build clean on linux, and the `fips140deps` and `fips140test` test assemblies compile (their only
+build errors are MSB3030 copies of `.go` sources the repository tree does not carry).
+
+**Behavioral, which the census above did not cover:** a module-ROOT library is a package whose name can differ from its
+directory too. `CrossPkgSameNameAlias` (`package atomic`) moves to `go.CrossPkgSameNameAlias`, its guarded shape
+intact. `AliasNamespaceShadow/sortlocal` (`package sort`) moves to `go.AliasNamespaceShadow.sortlocal`, so its class no
+longer shadows `inner`'s alias for the standard library's `sort`: the test still passes, but it no longer produces the
+shape it was written to guard. CNR at the seat tip then equals CNR at the base (one pre-existing mover, byte-identical).
