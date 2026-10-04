@@ -42,6 +42,39 @@ partial struct ΔValue {
 
     // The LIVE value this Value represents (read-through for an addressable Value).
     internal object? live => addrBox is null ? boxed : GoReflect.ReadPointerSlot(addrBox);
+
+    // Go compares two Values as structs: typ_, ptr and flag. Its ptr is the datum's ADDRESS -- an
+    // addressable Value's slot, a pointer-shaped value itself (pointer, map, chan, func,
+    // unsafe.Pointer), or else a fresh allocation per ValueOf / MapKeys copy -- so two Values of one
+    // type over different data never compare equal, and a copy of a Value always does. The managed
+    // ptr is default! for every value-derived Value; the datum lives in the companions, so equality
+    // compares their identity the way Go compares the address. The generated memberwise pair saw
+    // only typ_, ptr and flag, so every two Values of one type and flag were equal and hashed alike
+    // (mapstructure's map[reflect.Value]struct{} of a map's keys held ONE key). It steps aside for
+    // this declaration (TypeGenerator.DeclaresOwnEquality).
+    //
+    // Stated limitation: Go converts an integer below 256 to an interface through its static
+    // staticuint64s table, so reflect.ValueOf(5) == reflect.ValueOf(5) is true in Go; two managed
+    // boxings are two identities, so it is false here. No measured consumer.
+    public bool Equals(ΔValue other) =>
+        typ_ == other.typ_ && ptr == other.ptr && flag == other.flag &&
+        ReferenceEquals(addrBox, other.addrBox) &&
+        (addrBox is not null || (PointerShapedDatum ? Equals(boxed, other.boxed) : ReferenceEquals(boxed, other.boxed)));
+
+    public override int GetHashCode() => global::go.golib.HashCode.Combine(
+        typ_,
+        ptr,
+        flag,
+        System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(addrBox),
+        addrBox is not null ? 0 : PointerShapedDatum ? boxed?.GetHashCode() ?? 0 : System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(boxed));
+
+    // A pointer-shaped kind held directly (not through a slot): its Go ptr IS the value, so two
+    // Values of the same pointer, map, chan or func are equal -- compared by the value's own Go
+    // identity (ж<T> by reference, map<K,V> and channel<T> by their backing, a delegate by target
+    // and method), never by the box that carries it.
+    private bool PointerShapedDatum =>
+        (flag & flagIndir) == 0 && flag.kind() is var k &&
+        (k == Ptr || k == Map || k == Chan || k == Func || k == ΔUnsafePointer);
 }
 
 // makeReflectValue builds a Value carrying a boxed managed value, typed by its GO DYNAMIC type.

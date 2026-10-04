@@ -1759,6 +1759,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckReflectUnexportedFieldFlags() => CheckTarget("ReflectUnexportedFieldFlags");
 
     [TestMethod]
+    public void CheckReflectValueMapKeyIdentity() => CheckTarget("ReflectValueMapKeyIdentity");
+
+    [TestMethod]
     public void CheckReflectValueSingles() => CheckTarget("ReflectValueSingles");
 
     [TestMethod]
