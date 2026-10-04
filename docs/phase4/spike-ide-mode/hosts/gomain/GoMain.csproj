@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.Build.NoTargets/3.7.56">
+  <!-- E8 spike: one project that converts a Go module, restores and builds the generated
+       projects, and runs the Go main package under `dotnet run` / `dotnet watch`. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <UseAppHost>false</UseAppHost>
+    <GoModuleDir>$([MSBuild]::NormalizeDirectory($(MSBuildThisFileDirectory)../../samples/multi))</GoModuleDir>
+    <GoOutDir>$([MSBuild]::NormalizeDirectory($(MSBuildThisFileDirectory)obj/go2cs/$(Configuration)))</GoOutDir>
+    <GoMainProject>$(GoOutDir)src/example.com/multi/example.com.multi.csproj</GoMainProject>
+    <GoStamp>$(GoOutDir)go2cs.stamp</GoStamp>
+    <GoMainPathFile>$(GoOutDir)go2cs.main.path</GoMainPathFile>
+  </PropertyGroup>
+  <!-- `dotnet run` reads RunCommand after the build; the build records the generated main assembly. -->
+  <PropertyGroup Condition="Exists('$(GoMainPathFile)')">
+    <RunCommand>dotnet</RunCommand>
+    <RunArguments>exec &quot;$([System.IO.File]::ReadAllText('$(GoMainPathFile)').Trim())&quot;</RunArguments>
+    <RunWorkingDirectory>$(GoModuleDir)</RunWorkingDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <GoSource Include="$(GoModuleDir)**/*.go;$(GoModuleDir)go.mod" />
+    <Watch Include="@(GoSource)" />
+    <UpToDateCheckInput Include="@(GoSource)" />
+  </ItemGroup>
+
+  <Target Name="GoConvert" BeforeTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'"
+          Inputs="@(GoSource)" Outputs="$(GoStamp)">
+    <Message Importance="high" Text="go2cs: converting $(GoModuleDir) -> $(GoOutDir)" />
+    <Exec Command="go2cs -recurse=nuget . &quot;$(GoOutDir.TrimEnd('/'))&quot;" WorkingDirectory="$(GoModuleDir)"
+          StandardOutputImportance="low" />
+    <Touch Files="$(GoStamp)" AlwaysCreate="true" />
+  </Target>
+
+  <!-- The converter skips writing a byte-identical csproj, so restore only when a generated project
+       file (and therefore possibly a reference) changed since the last restore. -->
+  <Target Name="GoCollectProjects">
+    <ItemGroup>
+      <GoGeneratedProject Include="$(GoOutDir)src/**/*.csproj;$(GoOutDir)Directory.Build.*" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="GoRestore" AfterTargets="GoConvert" Condition="'$(DesignTimeBuild)' != 'true'"
+          Inputs="@(GoGeneratedProject)" Outputs="$(GoOutDir)go2cs.restore.stamp"
+          DependsOnTargets="GoCollectProjects">
+    <MSBuild Projects="$(GoMainProject)" Targets="Restore"
+             Properties="Configuration=$(Configuration);GoRestoreSession=$([System.Guid]::NewGuid())" />
+    <Touch Files="$(GoOutDir)go2cs.restore.stamp" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="GoBuild" AfterTargets="GoRestore" Condition="'$(DesignTimeBuild)' != 'true'">
+    <MSBuild Projects="$(GoMainProject)" Targets="Build" Properties="Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="GoMainTarget" />
+    </MSBuild>
+    <WriteLinesToFile File="$(GoMainPathFile)" Lines="@(GoMainTarget)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+
+</Project>

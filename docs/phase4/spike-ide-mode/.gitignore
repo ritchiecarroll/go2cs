@@ -1,0 +1,2 @@
+# Written by desktop/prepare.ps1 beside each sample; machine-specific paths, never committed.
+samples/*/.vscode/
