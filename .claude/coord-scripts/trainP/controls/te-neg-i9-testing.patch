@@ -1,0 +1,79 @@
+diff --git a/src/core/testing/testing.cs b/src/core/testing/testing.cs
+index bd67096823..4f12ca8f2a 100644
+--- a/src/core/testing/testing.cs
++++ b/src/core/testing/testing.cs
+@@ -231 +231 @@ public static partial class testing_package
+-    public static void Error(this ref T t, params ꓸꓸꓸany args)
++    [GoRecv] public static void Error(this ref T t, params ꓸꓸꓸany args)
+@@ -238 +238 @@ public static partial class testing_package
+-    public static void Errorf(this ref T t, @string format, params ꓸꓸꓸany args)
++    [GoRecv] public static void Errorf(this ref T t, @string format, params ꓸꓸꓸany args)
+@@ -289 +289 @@ public static partial class testing_package
+-    public static void Fatal(this ref T t, params ꓸꓸꓸany args)
++    [GoRecv] public static void Fatal(this ref T t, params ꓸꓸꓸany args)
+@@ -296 +296 @@ public static partial class testing_package
+-    public static void Fatalf(this ref T t, @string format, params ꓸꓸꓸany args)
++    [GoRecv] public static void Fatalf(this ref T t, @string format, params ꓸꓸꓸany args)
+@@ -303 +303 @@ public static partial class testing_package
+-    public static void Log(this ref T t, params ꓸꓸꓸany args) =>
++    [GoRecv] public static void Log(this ref T t, params ꓸꓸꓸany args) =>
+@@ -306 +306 @@ public static partial class testing_package
+-    public static void Logf(this ref T t, @string format, params ꓸꓸꓸany args) =>
++    [GoRecv] public static void Logf(this ref T t, @string format, params ꓸꓸꓸany args) =>
+@@ -319 +319 @@ public static partial class testing_package
+-    public static void Skip(this ref T t, params ꓸꓸꓸany args)
++    [GoRecv] public static void Skip(this ref T t, params ꓸꓸꓸany args)
+@@ -326 +326 @@ public static partial class testing_package
+-    public static void Skipf(this ref T t, @string format, params ꓸꓸꓸany args)
++    [GoRecv] public static void Skipf(this ref T t, @string format, params ꓸꓸꓸany args)
+@@ -527 +527 @@ public static partial class testing_package
+-    public static void Error(this ref B b, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Error(this ref B b, params ꓸꓸꓸany args) { }
+@@ -529 +529 @@ public static partial class testing_package
+-    public static void Errorf(this ref B b, @string format, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Errorf(this ref B b, @string format, params ꓸꓸꓸany args) { }
+@@ -531 +531 @@ public static partial class testing_package
+-    public static void Fatal(this ref B b, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Fatal(this ref B b, params ꓸꓸꓸany args) { }
+@@ -533 +533 @@ public static partial class testing_package
+-    public static void Fatalf(this ref B b, @string format, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Fatalf(this ref B b, @string format, params ꓸꓸꓸany args) { }
+@@ -535 +535 @@ public static partial class testing_package
+-    public static void Log(this ref B b, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Log(this ref B b, params ꓸꓸꓸany args) { }
+@@ -537 +537 @@ public static partial class testing_package
+-    public static void Logf(this ref B b, @string format, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Logf(this ref B b, @string format, params ꓸꓸꓸany args) { }
+@@ -539 +539 @@ public static partial class testing_package
+-    public static void Skip(this ref B b, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Skip(this ref B b, params ꓸꓸꓸany args) { }
+@@ -541 +541 @@ public static partial class testing_package
+-    public static void Skipf(this ref B b, @string format, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Skipf(this ref B b, @string format, params ꓸꓸꓸany args) { }
+@@ -598 +598 @@ public static partial class testing_package
+-    public static void Add(this ref F f, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Add(this ref F f, params ꓸꓸꓸany args) { }
+@@ -600 +600 @@ public static partial class testing_package
+-    public static void Error(this ref F f, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Error(this ref F f, params ꓸꓸꓸany args) { }
+@@ -602 +602 @@ public static partial class testing_package
+-    public static void Errorf(this ref F f, @string format, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Errorf(this ref F f, @string format, params ꓸꓸꓸany args) { }
+@@ -604 +604 @@ public static partial class testing_package
+-    public static void Fatal(this ref F f, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Fatal(this ref F f, params ꓸꓸꓸany args) { }
+@@ -606 +606 @@ public static partial class testing_package
+-    public static void Fatalf(this ref F f, @string format, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Fatalf(this ref F f, @string format, params ꓸꓸꓸany args) { }
+@@ -608 +608 @@ public static partial class testing_package
+-    public static void Log(this ref F f, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Log(this ref F f, params ꓸꓸꓸany args) { }
+@@ -610 +610 @@ public static partial class testing_package
+-    public static void Logf(this ref F f, @string format, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Logf(this ref F f, @string format, params ꓸꓸꓸany args) { }
+@@ -612 +612 @@ public static partial class testing_package
+-    public static void Skip(this ref F f, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Skip(this ref F f, params ꓸꓸꓸany args) { }
+@@ -614 +614 @@ public static partial class testing_package
+-    public static void Skipf(this ref F f, @string format, params ꓸꓸꓸany args) { }
++    [GoRecv] public static void Skipf(this ref F f, @string format, params ꓸꓸꓸany args) { }
