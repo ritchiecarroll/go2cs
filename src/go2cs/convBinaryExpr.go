@@ -308,6 +308,53 @@ func (v *Visitor) isUntypedNamedConstRef(expr ast.Expr) bool {
 	return false
 }
 
+// lossyUntypedFloatComparand reports whether constOperand is a BARE named untyped FLOAT or COMPLEX
+// constant compared with an operand of a type a double cannot hold exactly: float32 and complex64
+// (Go rounds the constant to the narrower width first) and the 64-bit and native integers (Go compares
+// the constant's exact integer value). Go converts the constant to the operand's type and compares at
+// that type; the emitted UntypedFloat/UntypedComplex wrapper instead converts implicitly from the
+// operand through C#'s chained built-in widening, so its DOUBLE operator runs -- float32(0.1) <= 0.1
+// reads false, int64(2^53+1) > 2^53 reads false. An untyped INTEGER constant is not in scope: its
+// BigInteger-backed form is cast at the reference itself (bigIntegerConstMaterialization), and casting
+// here again would double that cast.
+func (v *Visitor) lossyUntypedFloatComparand(constOperand ast.Expr, otherType types.Type) bool {
+	if !v.isUntypedNamedConstRef(constOperand) || otherType == nil {
+		return false
+	}
+
+	var sel *ast.Ident
+
+	switch e := constOperand.(type) {
+	case *ast.Ident:
+		sel = e
+	case *ast.SelectorExpr:
+		sel = e.Sel
+	}
+
+	constObj, ok := v.info.ObjectOf(sel).(*types.Const)
+
+	if !ok {
+		return false
+	}
+
+	if basic, ok := constObj.Type().(*types.Basic); !ok || (basic.Kind() != types.UntypedFloat && basic.Kind() != types.UntypedComplex) {
+		return false
+	}
+
+	other, ok := otherType.Underlying().(*types.Basic)
+
+	if !ok || other.Info()&types.IsUntyped != 0 {
+		return false
+	}
+
+	switch other.Kind() {
+	case types.Float32, types.Complex64, types.Int, types.Int64, types.Uint, types.Uint64, types.Uintptr:
+		return true
+	}
+
+	return false
+}
+
 // isUntypedNamedIntegerConstRef is the integer-kind subset of isUntypedNamedConstRef.
 func (v *Visitor) isUntypedNamedIntegerConstRef(expr ast.Expr) bool {
 	if !v.isUntypedNamedConstRef(expr) {
@@ -2046,8 +2093,11 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			castLeft = untypedConstOperand(binaryExpr.X)
 			castRight = !castLeft && untypedConstOperand(binaryExpr.Y)
 		case token.EQL, token.NEQ, token.LSS, token.LEQ, token.GTR, token.GEQ:
-			castLeft = computedUntypedConstOperand(binaryExpr.X)
-			castRight = !castLeft && computedUntypedConstOperand(binaryExpr.Y)
+			// A BARE named const also takes the cast when it is an untyped float or complex beside an
+			// operand a double cannot hold exactly (lossyUntypedFloatComparand): the comparison then
+			// runs at the operand's type, as Go's does.
+			castLeft = computedUntypedConstOperand(binaryExpr.X) || v.lossyUntypedFloatComparand(binaryExpr.X, rhsType)
+			castRight = !castLeft && (computedUntypedConstOperand(binaryExpr.Y) || v.lossyUntypedFloatComparand(binaryExpr.Y, lhsType))
 		}
 
 		// An operand whose own emission is ALREADY exactly this cast — the widened-const narrowing

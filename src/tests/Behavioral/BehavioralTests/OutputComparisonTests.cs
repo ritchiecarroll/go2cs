@@ -2114,6 +2114,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckUntypedFloatDefault() => CheckTarget("UntypedFloatDefault");
 
     [TestMethod]
+    public void CheckUntypedFloatTypedCompare() => CheckTarget("UntypedFloatTypedCompare");
+
+    [TestMethod]
     public void CheckUntypedIntFloatContexts() => CheckTarget("UntypedIntFloatContexts");
 
     [TestMethod]
