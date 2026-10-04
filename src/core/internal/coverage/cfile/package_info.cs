@@ -63,7 +63,7 @@ using static go.@internal.coverage.cfile_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/coverage/cfile/apis.go", "apis.cs", "ABEikoKUqJKClIKUgqiSgpSokoKUgqaCgpSCloK4qJKCgpSCADl4goKUgoKmgoKmpg==")]
-[assembly: go.GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACNKAESgAbKClIKCgoKmgoKWgoKCloCCgoLagoKUgoKUpoKCgpSsxN6Clt6EgoKCooKClJSCgoK6goKigIKkgoKClIKCuoKWgoKChKqigoKUgpaE3oCCuIKAgrassoKUgIKCgtykgpSWgqiCAAYQgIKkgqiAgqSAgsqAgqaokoCCpAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCloKAgraCgIK2rNKAgqSAgsqAgqasstaihIKigpSmgoSCgoKUloKCgpSCgqiCgoKCuoKCgoKmlIKWgoKCpgAHEoKCgqSAgpSCAAgQloKAgriUgqYABxDSgoKClIKCqsKCgIKkAAIQ0qaCgoSClIKCgoKigoKUlIKC", "455-461:1")]
+[assembly: go.GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACNKAESgAbKClIKCgoKmgoKWgoKCloCCgoLagoKUgoKUpoKCgpSsxN6Clt6EgoKCooKClJSCgoK6goKigIKkgoKClIKCuoKWgoKChKqigoKUgpaE3oCCuIKAgrassoKUgIKCgtykgpSWgqiCAAYQgIKkgqiAgqSAgsqAgqaokoCCpAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCloKAgraCgIK2rNKAgqSAgsqAgqasstaihIKigpSmgoSCgoKUloKCgpSCgqiCgoKCuoKCgoKmlIKWgoKCpgAHEoKCgpKCgIKUggAIEJaCgIK4lIKmAAcQ0oKCgpSCgqrCgoCCpAACENKmgoKEgpSCgoKCooKClJSCgg==", "455-461:1")]
 [assembly: go.GoPositionMap("internal/coverage/cfile/hooks.go", "hooks.cs", "AAo4ABYIgoKU")]
 [assembly: go.GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB484pKCqILKgIKkgIIABxCCgpiSgoKCgoKUkoKCzAAIEoKCgoKUgIK4goCCgILagIK4goCCpIKAgrgADBbkgoKUkpSCgoKUgoKUgoCCuJaygoKUkoKCgpSCgoKClIKogoCUgILGgoKU2IKAgsqCgoKCgoKUgoKCgoKAgraCgoKmgpSCgpS4AAkOhqKCgpSAggAHEIKCgIKkgoKAgrYAAhLigpSWgoKCgoKUgqaChIKUgoKCpqaClA==", "69-74:1;138-140:1;159-193:2")]
 // </GoSourcePositionMaps>

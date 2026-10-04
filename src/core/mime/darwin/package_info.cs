@@ -61,7 +61,7 @@ using static go.mime_package;
 [assembly: go.GoPositionMap("mime/grammar.go", "grammar.cs", "AAkaoqrGqqKClA==")]
 [assembly: go.GoPositionMap("mime/mediatype.go", "mediatype.cs", "ABIq0oKAgoKUlIKUgoKmgoKCgoKUhIKUlISChIKCpoiChIKCpoKWgoKWgoKCgoKCgqaClAAIBoKCgpSClIKUgoKUgpTcAAQYAA4CgoSCgpaKtIKCgoKUgoKmppaCgIKClIKAgoLGgJSkgpqigoKAgoCCpKaCgoKCgIKCgqSCgoKUgoKAgraCpoKopoKCgsqCgpSUlIKClKaCrsKCgpSClAACEAAIAoKUgqiCgoKCAAsYgoKClIKUpqbCgoKWgoKCgoKWgoKUgoKCgpSCppSCgoKClIKCgoKUlJSCloKCgpSCgrSCgsamgpSkpKSmgpSkpKQ=")]
 [assembly: go.GoPositionMap("mime/type.go", "type.cs", "ABc0soKChIKUgpaCgoKCgpSCgIKktKQAGC6CgIKUggAELgATApaAgqyygoKCgpSCgpSClKaCgq7CgoKWgoKClIKCrLKClILmooKClIKClISChIKCgoCCpIKCpoI=")]
-[assembly: go.GoPositionMap("mime/type_unix.go", "type_unix.cs", "AA0egsrc7qKCgpSUgpSCgqSWggAJFJSAuKaUgIKk1qKCgpSUgoKCgpSCgoKUpoCCxKSCgoCCyoK4goKC")]
+[assembly: go.GoPositionMap("mime/type_unix.go", "type_unix.cs", "AA0egsrc7qKCgpSUgpSCgpKCloIACRSUgLimlICCpNaigoKUlIKCgoKUgoKClKaAgsSkgoKAgsqCuIKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

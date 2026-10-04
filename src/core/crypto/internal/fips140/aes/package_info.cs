@@ -52,7 +52,7 @@ using static go.crypto.@internal.fips140.aes_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/aes.go", "aes.cs", "AC1mksqCrMSuwrakpqKUpKSkpoCklIKClIKUgpSmlIKClIKUgpSssg==")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/aes_generic.go", "aes_generic.cs", "AClUkoKEgoKCgpaCgoKWgrKCgoKCgoKogoKChIKCgoSCgoKCqJKChIKCgoKWgoKCloKygoKCgoKCqIKCgoSCgoKEgoKCgqiSrpCowoaSgoKUgoKCpJTMgoKCgoKClA==")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/aes/aes_generic.go", "aes_generic.cs", "AClUkoKEgoKCgpaCgoKWgrKCgoKCgoKogoKChIKCgoSCgoKCqJKChIKCgoKWgoKCloKygoKCgoKCqIKCgoSCgoKEgoKCgqiSrpCowoaSgoKUgoKCkoKUzIKCgoKCgpQ=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/aes_noasm.go", "aes_noasm.cs", "AAwagoKmgqaCpg==")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/cast.go", "cast.cs", "AA0cgoK4uLi4goKUgoKClIKClA==", "15-46:1")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/cbc.go", "cbc.cs", "ABIo0qaApKKClIKUgpSCgpSmgoKUpqKClIKWgoKoAAcU0qaApKKClIKUgpSCgpSmgoKUptiCgpaChIKEgqaWgoI=")]

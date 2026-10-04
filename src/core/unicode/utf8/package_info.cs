@@ -57,7 +57,7 @@ using static go.unicode.utf8_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("unicode/utf8/utf8.go", "utf8.cs", "AE2OAQAaOgAHFKKCgpSCgqaCgqSUqJKCgpSCgqaCgqSUAAIWAAgCgoKUgoK4gpSCgoKUgoKUkpSCgpSClIKClAACFgAIAoKClIKCuIKUgoKClIKClJKUgoKUgpSCgpQAAhYACwKCgpSCgoLKgoKUgoKmgpSCgpQAAhYACwKCgpSCgoLKgoKUgoKmgpSCgpSqopSkpKSkpKSsxIKClKaUgKSCgoKkgoKCgqSCgoKCgqSCgoKC3sSClKaUgKSkpKTcooKCgoCUtqiygpSssKbIlsqCgpSUlIKCgoKClIKClIKClIKAgsSCxILElKikyoKClJSUgoKCgoKUgoKUgoKUgoCCxILEgsSUqqKUpKQ=")]
+[assembly: go.GoPositionMap("unicode/utf8/utf8.go", "utf8.cs", "AE2OAQAaOgAHFKKCgpSCgqaCgpKClKiSgoKUgoKmgoKSgpQAAhYACAKCgpSCgriClIKCgpSCgpSSlIKClIKUgoKUAAIWAAgCgoKUgoK4gpSCgoKUgoKUkpSCgpSClIKClAACFgALAoKClIKCgsqCgpSCgqaClIKClAACFgALAoKClIKCgsqCgpSCgqaClIKClKqilKSkpKSkpKzEgoKUppSApIKCgqSCgoKCpIKCgoKCpIKCgoLexIKUppSApKSkpNyigoKCgJS2qLKClKywpsiWyoKClJSUgoKCgoKUgoKUgoKUgoCCkpKAgpKSgILElKikyoKClJSUgoKCgoKUgoKUgoKUgoCCkpKAgpKSgILElKqilKSk")]
 // </GoSourcePositionMaps>
 
 namespace go.unicode;

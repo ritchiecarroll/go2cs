@@ -78,8 +78,8 @@ using static go.debug.macho_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/macho/fat.go", "fat.cs", "AClSmrKCqIKCqKKCgoKUppaSgoKUhIK6hLiCgpSCgoKCgpSEgoKCqIKAgqSWgpSCqJaqooKClIKCgpSCpoKCgoKU")]
-[assembly: go.GoPositionMap("debug/macho/file.go", "file.cs", "ADRqgAAfQpKokAApVpKokAA0aIKCgpSCqJKCgpSCgoKUgqyygoKClKqigoiigIKkgoKUgqSCpLiAgriSgpSCgpSCgpSCgpSClIKClIKCgoKagoKAgqSCgpSCgqaCgoCCpIKClIKCgoKCpoKCgIKkgoKUgoKUlIKClIKClIKmgoKAgqSCpMi4goKUgoCCpIKCgoKCpoKCgIKkgoKCgoKCgoKCgoKCgoKCgoCCpIKCgoKCgoKCgoKAgtqCgoCCpIKCgoKCgoKCgoKCgoKCgoKAgqSCgoKCgoKCgoKCgIIABc8CAALYAoKClIKUgqamooKCgpSCgoKCgoCCtoKAgqSCgoKClIKmgoKUAAcQgoKCAAcQooKChIKCgpSEhIKChIKAgqaSgoKCgoKUlIKCgoKCpIKCgoKCpNymgoKClKiSgoCCtqqigoKmAAsIkoKCgpS0tMgACBKCgqaUgoKCloKCgoKClICCpICCpJScsoKCgpSAgqSCgpSWgoKogoKClICUpoKCloKUlIKorLKCloKCgoKUrLKCgoCCtg==", "612-640:1;641-663:2")]
+[assembly: go.GoPositionMap("debug/macho/fat.go", "fat.cs", "AClSmrKCqIKCkoaigoKClKaWkoKClISCuoS4goKUgoKCgoKUhIKCgqiCgIKkloKUgqiWqqKCgpSCgoKUgqaCgoKClA==")]
+[assembly: go.GoPositionMap("debug/macho/file.go", "file.cs", "ADRqgAAfQpKokAApVpKokAA0aIKCgpSCqJKCgpSCgoKUgqyygoKClKqigoiigIKkgoKUgqSCpLiAgriSgpSCgpSCgpSCgpSClIKClIKCgoKagoKAgqSCgpSCgqaCgoCCpIKClIKCgoKCpoKCgIKkgoKUgoKUlIKClIKClIKmgoKAgqSCkoK2griCgpSCgIKkgoKCgoKmgoKAgqSCgoKCgoKCgoKCgoKCgoKCgIKkgoKCgoKCgoKCgoCC2oKCgIKkgoKCgoKCgoKCgoKCgoKCgoCCpIKCgoKCgoKCgoKAggAFzwIAAtgCgoKUgpSCpqaigoKClIKCgoKCgIK2goCCpIKCgoKUgqaCgpQABxCCgoIABxCigoKEgoKClISEgoKEgoCCppKCgoKCgpSUgoKCgoKkgoKCgoKk3KaCgoKUqJKCgIK2qqKCgqYACwiSgoKClLS0yAAIEoKCppSCgoKWgoKCgoKUgIKkgIKklJyygoKClICCpIKClJaCgqiCgoKUgJSmgoKWgpSUgqissoKWgoKCgpSssoKCgIK2", "612-640:1;641-663:2")]
 [assembly: go.GoPositionMap("debug/macho/macho.go", "macho.cs", "ACli7oCigAANIAAIEoCigAAOIgAIEoCigADSAboDgoKCgpSm")]
 [assembly: go.GoPositionMap("debug/macho/reloctype.go", "reloctype.cs", "ABEogAAPIoAADyKAABAkgA==")]
 [assembly: go.GoPositionMap("debug/macho/reloctype_string.go", "reloctype_string.cs", "/oaigoKCgoLKlIKClKSGooKCgoKCgoKCgsqUgoKUpIaigoKCgoKCgoKCypSCgpSkhqKCgoKCgoKCgoKCypSCgpQ=")]
