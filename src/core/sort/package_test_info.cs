@@ -46,7 +46,7 @@ using static global::go.sort_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("sort/example_keys_test.go", "example_keys_test.cs", "ABg2ksgACBSSqJKokqYADBCkhoaGqoKEgoSChII=", "66-68:1;69-71:2;72-74:3;75-77:4")]
-[assembly: go.GoPositionMap("sort/example_multi_test.go", "example_multi_test.cs", "ABo4soKqwsySqJIAAhLihJKCgpa2/KYAEh7EhoaGmoKWgoSChIKEgg==", "95-97:1;98-100:2;101-103:3;104-106:4")]
+[assembly: go.GoPositionMap("sort/example_multi_test.go", "example_multi_test.cs", "ABo4soKqwsySqJIAAhLihJKCgpa2/KYAEh7EhoaGgqiCloKEgoSChII=", "95-97:1;98-100:2;101-103:3;104-106:4")]
 [assembly: go.GoPositionMap("sort/example_wrapper_test.go", "example_wrapper_test.cs", "AA0cgAAJEoCigAAIDIAACAyA5IIABxKCgoSCggACJgAPAoI=")]
 [assembly: go.GoPositionMap("sort/search_test.go", "search_test.cs", "AA4cgroACAQAGDyCgoKCAAsKgoKCgpaWhAAjYLKSmIKCAAUQooKUpqaCgoKmgpKCgICSgpSCpoLMkvQACBqCgoLKgoKCgoKC5oKClIKUgoK4ooK+soKSgoLe2oKSgoSUlISCgpSClII=", "15-17:1;122-131:1;123-125:1.1;156-156:1;229-229:1;248-251:1")]
 [assembly: go.GoPositionMap("sort/sort_slices_benchmark_test.go", "sort_slices_benchmark_test.cs", "ABIosoKCgpSmgoKClKaCgoKUpoKCgpSCyqKCgoKCuKKCgoKCuKKCgoKCuKKCgoKCvKKCgoKCgoKClJSmooKCgoK4ooKCgoK4ooKEgriigoSCAAwagKKAooCkgoKCgpSmgoKCgpaChIKCyqKCgoKCuKKCgoKCgg==", "175-175:1;194-194:1")]

@@ -1194,7 +1194,7 @@ public static void TestTaggedRawValue(ж<testing.T> Ꮡt) {
     UntypedInt tag = 5;
     var tests = new TestTaggedRawValue_tests[]{
         new(false, new byte[]{0x30, 3, TagInteger, 1, 1}.slice()),
-        new(true, new byte[]{0x30, 3, (byte)(((ClassContextSpecific << (int)(6))) | (byte)tag), 1, 1}.slice()),
+        new(true, new byte[]{0x30, 3, (byte)((byte)((ClassContextSpecific << (int)(6))) | (byte)tag), 1, 1}.slice()),
         new(true, new byte[]{0x30, 3, (byte)((UntypedInt)(((ClassContextSpecific << (int)(6))) | tag) | (byte)isCompound), 1, 1}.slice()),
         new(false, new byte[]{0x30, 3, (byte)((UntypedInt)(((ClassApplication << (int)(6))) | tag) | (byte)isCompound), 1, 1}.slice()),
         new(false, new byte[]{0x30, 3, (byte)((UntypedInt)(((ClassPrivate << (int)(6))) | tag) | (byte)isCompound), 1, 1}.slice())

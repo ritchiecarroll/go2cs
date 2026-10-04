@@ -87,7 +87,7 @@ partial class runtime_test_package {
         new((ж<nint> x) => x.Reinterpret<nint, Tint>().OrTypedNil(), (Tinter v) => {
             finalizeʗ5(v._<ж<Tint>>().Reinterpret<Tint, nint>());
         }),
-        new((ж<nint> x) => x.OrTypedNil(), (any v) => {
+        new((ж<nint> x) => x.OrTypedNil(), array<int64> (any v) => {
             builtin.print();
             finalizeʗ6(v._<ж<nint>>());
             return new int64[]{}.array(4);

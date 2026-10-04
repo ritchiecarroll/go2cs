@@ -4198,7 +4198,7 @@ public static void TestAllocations(ж<Δtesting.T> Ꮡt) {
     noAlloc(Ꮡt, 100, (nint j) => {
         any i = default!;
         reflectꓸValue v = new(nil);
-        i = (nint jΔ1) => jΔ1;
+        i = nint (nint jΔ1) => jΔ1;
         v = ValueOf(i);
         if (v.Interface()._<Func<nint, nint>>()(j) != j) {
             throw panic("wrong result");

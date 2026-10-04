@@ -108,7 +108,9 @@ public static void Example_sortMultiKeys() {
     var user = (ж<Change> c1, ж<Change> c2) => (~c1).user < (~c2).user;
     var language = (ж<Change> c1, ж<Change> c2) => (~c1).language < (~c2).language;
     var increasingLines = (ж<Change> c1, ж<Change> c2) => (~c1).lines < (~c2).lines;
-    var decreasingLines = (ж<Change> c1, ж<Change> c2) => (~c1).lines > (~c2).lines; // Note: > orders downwards.;
+    var decreasingLines = (ж<Change> c1, ж<Change> c2) => {
+        return (~c1).lines > (~c2).lines; // Note: > orders downwards.
+    };
     // Simple use: Sort by user.
     OrderedBy(new Func<ж<Change>, ж<Change>, bool>(user)).ΔSort(changes);
     fmt.Println(byUserˢ, changes);

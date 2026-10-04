@@ -222,7 +222,7 @@ public static void BenchmarkCodeMarshalError(ж<testing.B> Ꮡb) {
     b.SetBytes((int64)len(codeJSON));
 }
 
-[GoType("dyn")] internal partial struct benchMarshalBytes_type {
+[GoType("dyn")] internal partial struct benchMarshalBytes_v {
     public slice<byte> Bytes;
 }
 
@@ -230,7 +230,7 @@ internal static Action<ж<testing.B>> benchMarshalBytes(nint n) {
     var sample = slice<byte>("hello world"u8);
     // Use a struct pointer, to avoid an allocation when passing it as an
     // interface parameter to Marshal.
-    var v = Ꮡ(new benchMarshalBytes_type(
+    var v = Ꮡ(new benchMarshalBytes_v(
         bytes.Repeat(sample, (n / len(sample)) + 1).slice(0, n)
     ));
     var vʗ1 = v;
@@ -245,7 +245,7 @@ internal static Action<ж<testing.B>> benchMarshalBytes(nint n) {
     };
 }
 
-[GoType("dyn")] internal partial struct benchMarshalBytesError_type {
+[GoType("dyn")] internal partial struct benchMarshalBytesError_v {
     public slice<byte> Bytes;
 }
 
@@ -259,7 +259,7 @@ internal static Action<ж<testing.B>> benchMarshalBytesError(nint n) {
     var sample = slice<byte>("hello world"u8);
     // Use a struct pointer, to avoid an allocation when passing it as an
     // interface parameter to Marshal.
-    var v = Ꮡ(new benchMarshalBytesError_type(
+    var v = Ꮡ(new benchMarshalBytesError_v(
         bytes.Repeat(sample, (n / len(sample)) + 1).slice(0, n)
     ));
     ref var dummy = ref heap<benchMarshalBytesError_Dummy>(out var Ꮡdummy);

@@ -1051,7 +1051,7 @@ public static void TestAllocations(ж<testing.T> Ꮡt) {
     noAlloc(Ꮡt, 100, (nint j) => {
         any i = default!;
         reflectlite.Value v = new(nil);
-        i = (nint jΔ1) => jΔ1;
+        i = nint (nint jΔ1) => jΔ1;
         v = ValueOf(i);
         if (reflectlite_internal_test_package.ToInterface(v)._<Func<nint, nint>>()(j) != j) {
             throw panic("wrong result");

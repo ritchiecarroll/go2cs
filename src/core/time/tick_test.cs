@@ -337,7 +337,7 @@ public static void TestTimerGC(ж<Δtesting.T> Ꮡt) {
             Δruntime.GC();
             Δruntime.ReadMemStats(Ꮡstats);
             var before = (int64)(stats.Mallocs - stats.Frees);
-            for (nint j = 0; j < N; j++) {
+            for (nint j = 0; j < (nint)N; j++) {
                 f();
             }
             Δruntime.GC();
@@ -347,7 +347,7 @@ public static void TestTimerGC(ж<Δtesting.T> Ꮡt) {
             var after = (int64)(stats.Mallocs - stats.Frees);
             // Allow some slack, but inuse >= N means at least 1 allocation per iteration.
             var inuse = after - before;
-            if (inuse >= N) {
+            if (inuse >= (int64)N) {
                 tΔ2.Errorf("%s did not get GC'ed: %d allocations"u8, what, inuse);
                 Sleep(1 * ΔSecond);
                 Δruntime.ReadMemStats(Ꮡstats);

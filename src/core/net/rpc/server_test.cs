@@ -649,14 +649,12 @@ public static error WriteRequest(this WriteFailCodec _Δp0, ж<global::go.net.rp
 }
 
 public static error ReadResponseHeader(this WriteFailCodec _Δp0, ж<global::go.net.rpc_package.Response> _Δp1) {
-    switch (select()) {
-}
+    select();
     return default!;
 }
 
 public static error ReadResponseBody(this WriteFailCodec _Δp0, any _Δp1) {
-    switch (select()) {
-}
+    select();
     return default!;
 }
 

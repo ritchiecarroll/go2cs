@@ -280,7 +280,7 @@ public static void TestWrongTypeDecoder(ж<testing.T> Ꮡt) {
 // Types not supported at top level by the Encoder.
 internal static slice<any> unsupportedValues = new any[]{
     new channel<nint>(0),
-    (nint a) => true
+    bool (nint a) => true
 }.slice();
 
 public static void TestUnsupported(ж<testing.T> Ꮡt) {

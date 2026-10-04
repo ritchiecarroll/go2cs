@@ -1438,7 +1438,7 @@ public static void TestInsertGrowthRate(ж<testing.T> Ꮡt) {
     nint maxCap = cap(b);
     nint nGrow = 0;
     UntypedFloat N = 1e6;
-    for (nint i = 0; i < N; i++) {
+    for (nint i = 0; i < (nint)N; i++) {
         b = Insert(b, len(b) - 1, (byte)(0));
         if (cap(b) > maxCap) {
             maxCap = cap(b);
@@ -1456,7 +1456,7 @@ public static void TestReplaceGrowthRate(ж<testing.T> Ꮡt) {
     nint maxCap = cap(b);
     nint nGrow = 0;
     UntypedFloat N = 1e6;
-    for (nint i = 0; i < N; i++) {
+    for (nint i = 0; i < (nint)N; i++) {
         b = Replace(b, len(b) - 2, len(b) - 1, (byte)(0), (byte)(0));
         if (cap(b) > maxCap) {
             maxCap = cap(b);

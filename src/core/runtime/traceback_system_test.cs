@@ -42,8 +42,7 @@ internal static readonly @string systemˢ = "system"u8;
         // This call is typically inlined.
         child1();
     });
-    switch (select()) {
-}
+    select();
 }
 
 // This is the entrypoint of the child process used by
@@ -57,8 +56,7 @@ internal static readonly @string systemˢ = "system"u8;
         // This call is typically inlined.
         trap1();
     });
-    switch (select()) {
-}
+    select();
 }
 
 internal static void child1() {

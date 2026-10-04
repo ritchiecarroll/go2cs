@@ -363,8 +363,7 @@ public static void TestDeadlockRoot(ж<testing.T> Ꮡt) {
     try {
         defer(wantPanic, Ꮡt, deadlockAllGoroutinesInˢ, ref ᒐ);
         synctest.Run(() => {
-            switch (select()) {
-}
+            select();
         });
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -377,8 +376,7 @@ public static void TestDeadlockChild(ж<testing.T> Ꮡt) {
         defer(wantPanic, Ꮡt, deadlockAllGoroutinesInˢ, ref ᒐ);
         synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
             goǃ(() => {
-                switch (select()) {
-}
+                select();
             });
         });
     }

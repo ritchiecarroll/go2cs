@@ -212,7 +212,7 @@ internal static readonly @string stringOptionˢ = "stringOption"u8;
     public nint Invalid;
 }
 
-[GoType("dyn")] internal partial struct TestEncoderSetEscapeHTML_type {
+[GoType("dyn")] internal partial struct TestEncoderSetEscapeHTML_marshalerStruct {
     public strMarshaler NonPtr;
     public strPtrMarshaler Ptr;
 }
@@ -236,7 +236,7 @@ public static void TestEncoderSetEscapeHTML(ж<testing.T> Ꮡt) {
     // This case is particularly interesting, as we force the encoder to
     // take the address of the Ptr field to use its MarshalJSON method. This
     // is why the '&' is important.
-    var marshalerStruct = Ꮡ(new TestEncoderSetEscapeHTML_type(@"""<str>"""u8, @"""<str>"""u8));
+    var marshalerStruct = Ꮡ(new TestEncoderSetEscapeHTML_marshalerStruct(@"""<str>"""u8, @"""<str>"""u8));
     // https://golang.org/issue/34154
     var stringOption = new TestEncoderSetEscapeHTML_stringOption(@"<html>foobar</html>"u8);
     var tests = new TestEncoderSetEscapeHTML_tests[]{

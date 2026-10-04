@@ -442,20 +442,20 @@ internal static void testOne(this cbFunc f, ж<testing.T> Ꮡt, ж<syscall.DLL> 
 
 // Non-uintptr parameters.
 internal static slice<cbFunc> cbFuncs = new cbFunc[]{
-    new((uintptr i1, uintptr i2) => i1 + i2),
-    new((uintptr i1, uintptr i2, uintptr i3) => i1 + i2 + i3),
-    new((uintptr i1, uintptr i2, uintptr i3, uintptr i4) => i1 + i2 + i3 + i4),
-    new((uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5) => i1 + i2 + i3 + i4 + i5),
-    new((uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5, uintptr i6) => i1 + i2 + i3 + i4 + i5 + i6),
-    new((uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5, uintptr i6, uintptr i7) => i1 + i2 + i3 + i4 + i5 + i6 + i7),
-    new((uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5, uintptr i6, uintptr i7, uintptr i8) => i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8),
-    new((uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5, uintptr i6, uintptr i7, uintptr i8, uintptr i9) => i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9),
-    new((uint8 i1, uint8 i2, uint8 i3, uint8 i4, uint8 i5, uint8 i6, uint8 i7, uint8 i8, uint8 i9) => (uintptr)((uint8)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9))),
-    new((uint16 i1, uint16 i2, uint16 i3, uint16 i4, uint16 i5, uint16 i6, uint16 i7, uint16 i8, uint16 i9) => (uintptr)((uint16)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9))),
-    new((int8 i1, int8 i2, int8 i3, int8 i4, int8 i5, int8 i6, int8 i7, int8 i8, int8 i9) => (uintptr)((int8)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9))),
-    new((int8 i1, int16 i2, int32 i3, uintptr i4, uintptr i5) => (uintptr)i1 + (uintptr)i2 + (uintptr)i3 + i4 + i5),
-    new((uint8Pair i1, uint8Pair i2, uint8Pair i3, uint8Pair i4, uint8Pair i5) => (uintptr)((uint8)(i1.x + i1.y + i2.x + i2.y + i3.x + i3.y + i4.x + i4.y + i5.x + i5.y))),
-    new((uint32 i1, uint32 i2, uint32 i3, uint32 i4, uint32 i5, uint32 i6, uint32 i7, uint32 i8, uint32 i9) => {
+    new(uintptr (uintptr i1, uintptr i2) => i1 + i2),
+    new(uintptr (uintptr i1, uintptr i2, uintptr i3) => i1 + i2 + i3),
+    new(uintptr (uintptr i1, uintptr i2, uintptr i3, uintptr i4) => i1 + i2 + i3 + i4),
+    new(uintptr (uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5) => i1 + i2 + i3 + i4 + i5),
+    new(uintptr (uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5, uintptr i6) => i1 + i2 + i3 + i4 + i5 + i6),
+    new(uintptr (uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5, uintptr i6, uintptr i7) => i1 + i2 + i3 + i4 + i5 + i6 + i7),
+    new(uintptr (uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5, uintptr i6, uintptr i7, uintptr i8) => i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8),
+    new(uintptr (uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5, uintptr i6, uintptr i7, uintptr i8, uintptr i9) => i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9),
+    new(uintptr (uint8 i1, uint8 i2, uint8 i3, uint8 i4, uint8 i5, uint8 i6, uint8 i7, uint8 i8, uint8 i9) => (uintptr)((uint8)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9))),
+    new(uintptr (uint16 i1, uint16 i2, uint16 i3, uint16 i4, uint16 i5, uint16 i6, uint16 i7, uint16 i8, uint16 i9) => (uintptr)((uint16)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9))),
+    new(uintptr (int8 i1, int8 i2, int8 i3, int8 i4, int8 i5, int8 i6, int8 i7, int8 i8, int8 i9) => (uintptr)((int8)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9))),
+    new(uintptr (int8 i1, int16 i2, int32 i3, uintptr i4, uintptr i5) => (uintptr)i1 + (uintptr)i2 + (uintptr)i3 + i4 + i5),
+    new(uintptr (uint8Pair i1, uint8Pair i2, uint8Pair i3, uint8Pair i4, uint8Pair i5) => (uintptr)((uint8)(i1.x + i1.y + i2.x + i2.y + i3.x + i3.y + i4.x + i4.y + i5.x + i5.y))),
+    new(uintptr (uint32 i1, uint32 i2, uint32 i3, uint32 i4, uint32 i5, uint32 i6, uint32 i7, uint32 i8, uint32 i9) => {
         Δruntime.GC();
         return (uintptr)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9);
     })
