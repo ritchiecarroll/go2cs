@@ -1,7 +1,7 @@
 # Conversion Strategies
 <!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
-> **How `go2cs` turns each Go construct into C#, one short section per topic, with the Go and the C# it
+> **How `go2cs` turns each Go construct into C#, one section per topic, with the Go and the C# it
 > becomes side by side.** This page is for a Go developer reading converted code, or anyone evaluating
 > go2cs. Each section ends with a link into the [reference](ConversionStrategies-Reference/README.md),
 > which holds every emitted form, edge case and guard test, for maintainers. Each section stands on its
@@ -12,8 +12,8 @@ developer can read it and follow it. Two things make that possible: a hand-writt
 [golib](#the-golib-runtime-library), and a set of Roslyn [source generators](#source-generators) that add
 the members C# cannot spell directly.
 
-> The C# snippets below are drawn from the actual converted standard library (`src/core/`,
-> Go 1.24.13) wherever possible, paired with their original Go source; the rest come from the behavioral
+> The C# snippets below are drawn from the actual converted standard library (`src/core/`)
+> wherever possible, paired with their original Go source; the rest come from the behavioral
 > tests. Each code block carries an HTML comment naming the file and line it was copied from. The glyphs
 > you will see, such as `ж`, `Ꮡ` and `Δ`, are listed in
 > [Reading Converted Code](#reading-converted-code-names-and-glyphs).
@@ -1653,13 +1653,13 @@ that imports `fmt` gets these lines in its `.csproj`:
 
 **`$(GoStdLibVersion)` follows the Go release doing the conversion.** go2cs writes a
 `Directory.Build.props` beside the converted projects that sets it with a floating NuGet revision. For
-example, Go 1.24.13 gives `1.24.13.*`, and restore takes the newest published `1.24.13.x` package. Set
+example, Go 1.N.P gives `1.N.P.*`, and restore takes the newest published `1.N.P.x` package. Set
 the property yourself, for example with `-p:GoStdLibVersion=…`, to pin one exact version. <!-- default + override: src/go2cs/moduleConverter.go:661-665; version = the converting toolchain's GOVERSION (src/go2cs/readme.go:93-101); test: src/go2cs/moduleConverter_integration_test.go:294-306 -->
 
-**`-recurse=nuget` refuses a mismatched Go release.** The published packages match one Go release, such
-as 1.24. When the converting Go toolchain is a different release, the conversion stops with an error,
-because its standard library would not match the packages and the project could not restore. Only the
-major and minor numbers are compared, so a different patch number, such as 1.24.5, is accepted. <!-- src/go2cs/toolchainResolution.go:227-245 (version.Lang comparison: 1.23.1 vs 1.23.5 is accepted) -->
+**`-recurse=nuget` refuses a mismatched Go release.** The published packages match one Go release, by
+major and minor version. When the converting Go toolchain is a different release, the conversion stops
+with an error, because its standard library would not match the packages and the project could not
+restore. Only the major and minor numbers are compared, so a different patch number is accepted. <!-- src/go2cs/toolchainResolution.go:227-245 (version.Lang comparison: 1.23.1 vs 1.23.5 is accepted) -->
 
 **Full detail:** [Reference → Compiled Library versus Source Code](ConversionStrategies-Reference/compiled-library-vs-source.md#compiled-library-versus-source-code) — why source availability shapes Go's escape analysis, and how the converter chooses between NuGet and source references.
 

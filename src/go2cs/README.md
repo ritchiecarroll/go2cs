@@ -26,9 +26,8 @@ go2cs [options] <input_dir> [output_dir]
 ```
 
 See [`main.go`](main.go) for the authoritative flag set (`-stdlib`, `-recurse`, `-tests`,
-`-platforms`, `-go2cspath`, …) and the repository's
-[`CLAUDE.md`](../../CLAUDE.md) / [`docs/Architecture.md`](../../docs/Architecture.md) for how
-each mode is used in practice.
+`-platforms`, `-go2cspath`, …), the [README's usage section](../../docs/README.md#usage) for how
+each mode is used, and [`docs/Architecture.md`](../../docs/Architecture.md) for a map of the code.
 
 ## Layout
 
@@ -38,12 +37,15 @@ each mode is used in practice.
 - `conv*.go` — expression and type conversion (calls, slices, pointers, composite literals, …).
 - Analysis passes — escape analysis, variable shadowing, name collisions, generic constraints,
   imports (`*Operations.go`).
-- `testConversion*.go` — the Phase-4 `-tests` pipeline: converts a package's `_test.go` suite,
-  builds the runnable test host, and differentially compares results against `go test -json`.
+- `moduleConverter.go` — the `-recurse` module driver; `nuget*.go` — mapping third-party modules to
+  published NuGet packages (`-recurse=nuget`).
+- `testConversion.go` — the `-tests` pipeline: converts a package's `_test.go` suite, builds the
+  runnable test host, and compares results against `go test -json`; `moduleTestsDriver.go` runs it
+  across a whole module (`-tests -recurse`).
 
 The conversion strategy — how each Go construct maps to C# and why — is documented in
 [`docs/ConversionStrategies.md`](../../docs/ConversionStrategies.md) (summary) and
-[`docs/ConversionStrategies-Reference.md`](../../docs/ConversionStrategies-Reference.md)
+[`docs/ConversionStrategies-Reference/`](../../docs/ConversionStrategies-Reference/README.md)
 (exhaustive reference).
 
 ## Licensing and source provenance

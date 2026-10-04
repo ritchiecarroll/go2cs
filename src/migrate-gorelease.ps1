@@ -345,8 +345,9 @@ $editableSites = @(
     # release ever returns to CLAUDE.md as present-tense prose, that line is reported unanchored
     # instead of being silently unmanaged. The retirement is itself asserted: the anchor must match
     # ZERO times, and a nonzero count is a failure telling the operator to un-retire the site.
-    # The present-tense corpus release is stated in docs/README.md, docs/ValidatedTestPackages.md,
-    # docs/Background.md and docs/ConversionStrategies.md, each anchored below; nothing is unstated.
+    # The present-tense corpus release is stated in docs/README.md and docs/ValidatedTestPackages.md,
+    # each anchored below; nothing is unstated. The docs-refresh seat retired the Background.md,
+    # ConversionStrategies.md and Roadmap.md sites: those pages no longer spell the release.
     @{
         File = 'CLAUDE.md'; Class = 'DOC-STATEMENT'
         Find = '; Go {OLD}\) auto-converted'
@@ -382,6 +383,8 @@ $editableSites = @(
         Find = 'packages, Go {OLD}\) compiles cleanly'
         Replace = 'packages, Go {NEW}) compiles cleanly'
         Expect = 1
+        Retired = 'the docs-refresh seat (README Status rewrite)'
+        RetiredNote = 'the docs refresh states the compile claim without a count or release; nothing moves at a hop'
         Note = 'present-tense compile claim (the package COUNT is re-measured separately; only the release moves here)'
     }
     @{
@@ -430,6 +433,8 @@ $editableSites = @(
         Find = '`go build` \(Go {OLD}\)'
         Replace = '`go build` (Go {NEW})'
         Expect = 1
+        Retired = 'the docs-refresh seat (Roadmap converter-loop sentence)'
+        RetiredNote = 'the docs refresh points the converter loop at the release src/go2cs/go.mod names instead of spelling it; nothing on the page moves at a hop'
         Note = 'the converter-improvement loop names the toolchain it is run with'
     }
     @{
@@ -437,6 +442,8 @@ $editableSites = @(
         Find = 'versioned `{OLD}\.<build>`'
         Replace = 'versioned `{NEW}.<build>`'
         Expect = 1
+        Retired = 'the docs-refresh seat (Background.md rewrite)'
+        RetiredNote = 'the owner-approved Background rewrite no longer names the package version family; nothing on the page moves at a hop'
         Note = 'the published package version family a consumer sees on nuget.org'
     }
     @{
@@ -444,6 +451,8 @@ $editableSites = @(
         Find = 'packages whose Go {OLD} sources actually define'
         Replace = 'packages whose Go {NEW} sources actually define'
         Expect = 1
+        Retired = 'the docs-refresh seat (Background.md rewrite)'
+        RetiredNote = 'the owner-approved Background rewrite states the validation result without a release or a denominator definition; the roster carries both'
         Note = "the completion-goal denominator's definition"
     }
     @{
@@ -451,6 +460,8 @@ $editableSites = @(
         Find = '> Go {OLD}\) wherever possible'
         Replace = '> Go {NEW}) wherever possible'
         Expect = 1
+        Retired = 'the docs-refresh seat (ConversionStrategies snippet provenance)'
+        RetiredNote = 'snippets are not re-taken at every hop, so the summary no longer names a release; each code block keeps its exact provenance in its HTML comment'
         Note = 'the release the strategy summary draws its real converted snippets from'
     }
 )
@@ -478,9 +489,9 @@ $historyAnchors = @(
     @{ File = 'docs/README.md'; Find = 'requires go2cs packages \*\*{OLD}\.5 or later\*\*'
        Note = 'the release Linux support FIRST shipped in' }
     @{ File = 'docs/README.md'; Find = 'All \*\*302\*\* packages \(Go {OLD}\) compile with zero errors'
-       Note = 'milestone table row, tag-anchored' }
+       Retired = 'the docs-refresh seat (README Milestones trim)'; Note = 'milestone table row, tag-anchored -- the trim to the turning points restates the row without the count or release; the tag carries the detail' }
     @{ File = 'docs/README.md'; Find = "Go {OLD}'s terminal validation marker"
-       Note = 'milestone table row, tag-anchored' }
+       Retired = 'the docs-refresh seat (README Milestones trim)'; Note = 'milestone table row, tag-anchored -- removed by the trim to the turning points; NEWS.md and the tag keep it' }
     # RETIRED 2026-09-29, all three: the roadmap rewrite moved the completed phases, these three
     # sentences among them, VERBATIM out of docs/Roadmap.md into docs/RoadmapHistory.md, which the
     # sweep below classifies MUST-NOT-CHANGE. Like the CLAUDE.md rows above they are spelled at Go

@@ -9,7 +9,9 @@
      single-file test-host proposal is not carried: the test host publishes as a self-contained
      single-file executable and the os/exec host-limit verdicts pass (ValidatedTestPackages.md,
      host-limit class). The converter-loop sentence under "How progress is tracked" is an editable
-     site of src/migrate-gorelease.ps1 (Expect = 1): keep exactly one copy of it on this page. -->
+     site of src/migrate-gorelease.ps1 (Expect = 1): keep exactly one copy of it on this page.
+     Amended 2026-10-03: the converter-loop sentence no longer names a release; its migrate-gorelease
+     site is retired. -->
 
 <!-- Amended 2026-09-29 after three verification passes. Sources: the post-100% roadmap brief of
      2026-09-28 (sections 3-6, its owner-ruling block and appendix A's timing table) and the
@@ -39,9 +41,10 @@ library, and the runtime and converter work still ahead. It states what is plann
 phases, with the git commits and tags that anchor them, are in [Roadmap history](RoadmapHistory.md).
 Dates are month or quarter targets.
 
-**Where things stand.** The converted standard library is on Go 1.24 and is validated package by
-package against Go's own tests on Windows and Linux;
-[Validated Test Packages](ValidatedTestPackages.md), the validation roster, carries its current state.
+**Where things stand.** Every implementable package of the converted standard library validates
+against Go's own tests on Windows and Linux, and `go2cs -tests -recurse` validates real third-party
+modules against their own tests the same way.
+[Validated Test Packages](ValidatedTestPackages.md), the validation roster, carries the current state.
 
 ## How the project moves: release hops
 
@@ -74,13 +77,11 @@ How often later hops run is decided in Q4 2026, ahead of the Go 1.27 hop.
 **The published target stays `net10.0`.** .NET 10 is a long-term-support release, supported until
 November 2028, and converted packages stay on it until `net12.0`, the next long-term-support release.
 
-**Two protective changes land before .NET 11 ships in November 2026:**
-
-- **An SDK and C# language-version pin**: a repository `global.json`, and a fixed `LangVersion` in
-  the project template the converter emits, in place of `latest`. Without the pin, any machine or CI
-  image whose default SDK becomes 11.x compiles converted code as C# 15 without anyone choosing that.
-- **Escaping identifiers that C# 15 gives new meaning**, such as `closed`, `union` and `safe` when
-  they name a type: the converter escapes a Go identifier that collides with one.
+**The SDK and the C# language version are pinned.** A repository `global.json` pins the .NET SDK,
+and every project, including the template the converter emits, fixes `LangVersion` instead of
+following `latest`, so a machine whose default SDK moves to a newer .NET does not silently compile
+converted code under a newer C#. The converter also escapes Go identifiers that newer C# gives new
+meaning, such as `closed`, `union` and `safe` when they name a type.
 
 **A .NET 11 measurement stage follows the Go 1.25 hop** (November 2026) and never overlaps a Go hop.
 It compares JIT and allocation behavior on .NET 11 over identical code, and reviews the deployment
@@ -112,8 +113,7 @@ the run inside the runner's deadline, which is what the TLS work under [Performa
 platform-shared files sit flat, and a package whose Go source varies by platform keeps one folder per
 target OS ([design](phase4/DESIGN-multiplatform-corpus.md)). Each platform-varying package ships a
 `win-x64` and a `linux-x64` flavor, and roster rows record their Linux verdict counts beside the
-Windows record. A few operational items remain on Linux, such as the terminal query `fatih/color`
-makes before it shows colors in an interactive Linux terminal; they are tracked in
+Windows record. Remaining Linux operational items are tracked in
 [`PLAN-linux-operation.md`](PLAN-linux-operation.md) and the multi-target design.
 
 **macOS.** The standard library compiles for macOS (Darwin), checked daily in CI on macOS arm64 and
@@ -129,27 +129,19 @@ trip, without interactive debugging, so this work carries no committed date.
 
 ## Real-world Go modules
 
-Third-party modules are the next proving ground after the standard library. Each module is converted,
+Third-party modules are the proving ground after the standard library. Each module is converted,
 validated against its own Go test suite exactly as a standard-library package is, and given a proof
-page that lives outside the standard-library roster. The first candidates, in order:
+page beside the conversion rather than on the standard-library roster. `go2cs -tests -recurse` runs a
+module's tests across all of its packages, and a validated module packs as one NuGet package.
+
+The [`google/uuid`](https://github.com/google/uuid) pilot is one package with no dependencies; it brings
+Go's v1, v3, v5 and v6 UUIDs to .NET, where `System.Guid` generates v4 and v7. The next candidates, in
+order:
 
 | Module | Why it comes here | When |
 |:--|:--|:--|
-| [`google/uuid`](https://github.com/google/uuid) v1.6.0 | The pilot: one package with no dependencies, which proves the whole third-party pipeline (validate against its tests, pack, and consume from a local feed on `win-x64` and `linux-x64`). It generates Go-identical v1, v3, v5 and v6 UUIDs, where `System.Guid` generates v4 and v7. | October 2026 (target) |
 | [`itchyny/gojq`](https://github.com/itchyny/gojq) v0.12.19, with its dependency [`itchyny/timefmt-go`](https://github.com/itchyny/timefmt-go) v0.1.8 | The first conversion with a dependency. It gives .NET an in-process, fully managed jq, with no native binary per platform. | Q4 2026 |
 | [`golang-jwt/jwt`](https://github.com/golang-jwt/jwt) v5.3.1 | The first module whose tests span several of its own packages (the root package, `request`, and the `test` helper package). It exercises the converted crypto stack (`crypto/rsa`, `crypto/ecdsa`, `crypto/ed25519`, `crypto/x509`, `crypto/hmac`, `encoding/pem`) in real code, and gives .NET services token handling identical to a Go issuer's. | Q4 2026 |
-
-**What these need first.** Each module waits on converter or runtime work it is the first to exercise:
-
-- **Third-party proof pages** written beside the conversion rather than into this repository's roster.
-- **Before gojq:** unique identity tokens for map and slice backings, so that `reflect`'s pointer
-  identity for them cannot collide. gojq's copy-on-write allocator relies on that identity, and a
-  collision could let it modify its caller's input.
-- **A layout for a dependency taken from the module cache**, as `timefmt-go` is under gojq.
-- **Before jwt:** staging test fixtures that live outside `testdata` (jwt's `test/*.pem`); a
-  `DefaultGODEBUG` layer, so a module's declared `go` line selects Go's GODEBUG defaults for it; and
-  one flow that runs a module's tests across all of its packages (`-tests` combined with `-recurse`).
-- **A packaging decision for a module with several packages**, made by the time gojq is reached.
 
 gojq's full command-line conformance suite is a later second stage, once its command-line package's
 own dependencies convert. Further modules follow; the
@@ -158,18 +150,20 @@ own dependencies convert. Further modules follow; the
 ## NuGet packages of converted modules
 
 With `-recurse=nuget`, a converted program references the standard library, the runtime and the
-source generators as published NuGet packages. The plan extends that substitution to third-party
-modules: a community registry maps Go module paths to published NuGet packages of their conversions,
-so a dependency someone has already converted and published becomes a package restore instead of a
-local transpile. The design is [`PLAN-nugetgo.md`](PLAN-nugetgo.md).
+source generators as published NuGet packages, and the same substitution reaches third-party modules:
+the [nugetgo.net](https://nugetgo.net) community registry maps Go module paths to published NuGet
+packages of their conversions, so a dependency someone has already converted becomes a package restore
+instead of a local transpile. The converter side is built and on by default (see the README's
+[Mapping modules to NuGet packages](README.md#mapping-modules-to-nuget-packages)). The design is
+[`PLAN-nugetgo.md`](PLAN-nugetgo.md).
 
-- **Proof packages rehearse to a local feed first**, starting with the `google/uuid` pilot. A
-  rehearsal publishes nothing to nuget.org.
-- **Public publication follows decisions on the publishing identity**: the publishing account, the
-  package-ID form, the version scheme and a package-prefix reservation. These are still open.
-- **Converter integration and the registry launch** (fetching the map, resolution, a lock file,
-  printing every mapping the converter applies, CI on the registry) are planned for Q1 2027, after
-  those decisions.
+- **Package IDs:** a converted module publishes as `nugetgo.<dotted module path>`; the `go.` prefix is
+  the converted standard library's alone.
+- **Proof packages rehearse first**, to a local feed and NuGet's test gallery, before anything reaches
+  nuget.org.
+- **The registry launches with the next release's announcement.** `hashset` leads the first published
+  wave, and `google/uuid` and `golang-jwt/jwt` follow. NuGet's reservation of the package-ID prefixes is
+  pending with NuGet.
 - **Packages built from an unsupported Go release are labelled as proofs**, and are rebuilt once the
   converted standard library is on a supported release.
 
@@ -257,8 +251,9 @@ The published [performance comparison](Performance.md) measures converted C# aga
 and under Native AOT. The follow-ups run off the critical path:
 
 - **A re-baseline at the final Go 1.24 package release** (October 2026), which is also the before
-  picture for the Go 1.25 hop and the .NET 11 measurement stage. It adds a TLS-handshake benchmark
-  and profiles the crypto paths behind the handshake gap; TLS throughput is also what retires the
+  picture for the Go 1.25 hop and the .NET 11 measurement stage. It brings the TLS-handshake
+  benchmark, already in the suite, into the published table, and profiles the crypto paths behind the
+  handshake gap; TLS throughput is also what retires the
   `crypto/tls` [host-limit entry](#declared-host-limits-and-their-retirement-path).
 - **Allocations** (committed; design kickoff planned for Q1 2027): the retirement plan named by each
   deferred allocation-count disclosure on the roster. Go meets those assertions through compiler
@@ -322,11 +317,10 @@ the rest are tracked in `src/go2cs/ToDo.md`:
 
 | When | Planned |
 |:--|:--|
-| October 2026 | A final Go 1.24 package release, then the Go 1.25 hop. The performance re-baseline at that release. Starting as capacity frees: cgo's loud failure on `import "C"`, the `google/uuid` pilot to a local feed, and the macOS run layer, in parallel. |
-| Before .NET 11 ships (November 2026) | The .NET SDK and C# language-version pin, and the C# keyword escape. |
+| October 2026 | A final Go 1.24 package release, then the Go 1.25 hop. The performance re-baseline at that release. Starting as capacity frees: cgo's loud failure on `import "C"` and the macOS run layer, in parallel. |
 | November 2026 | .NET 11 ships. The .NET 11 measurement stage, after the Go 1.25 hop. |
 | Q4 2026 | Go 1.26 hop. `timefmt-go` and `gojq`, then `jwt`, as their prerequisites land. The generic-methods design for Go 1.27. The decision on how often later hops run. |
-| Q1 2027 | Go 1.27 hop, by about February. NuGet registry: converter integration and launch, after the publishing-identity decisions. The cgo bridge's first phases (C library only; Linux, then Windows, then macOS). The Phase 4D design kickoff. The allocation work's design kickoff. |
+| Q1 2027 | Go 1.27 hop, by about February. The cgo bridge's first phases (C library only; Linux, then Windows, then macOS). The Phase 4D design kickoff. The allocation work's design kickoff. |
 | Unscheduled | Completing the macOS run layer, which proceeds in parallel. Interface-conversion performance work. The remaining stack-string increments. Phase 5 close-out. Open converter items. |
 
 ## How progress is tracked
@@ -339,6 +333,7 @@ the rest are tracked in `src/go2cs/ToDo.md`:
 | Performance | The [performance comparison](Performance.md). |
 | Releases | [News](NEWS.md). |
 
-Every converter change runs the same loop: edit `src/go2cs/*.go` → `go build` (Go 1.24.13) →
+Every converter change runs the same loop: edit `src/go2cs/*.go` → `go build` (with the Go release
+`src/go2cs/go.mod` names) →
 re-transpile → `dotnet build`, and a whole-corpus reconvert shows no unintended drift before the change
 lands.

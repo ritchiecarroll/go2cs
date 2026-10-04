@@ -68,8 +68,8 @@ body if you like; do not list it as an author.
 
 ## 3. What a change owes before it is proposed
 
-The repository's engineering discipline is in [CLAUDE.md](CLAUDE.md) and
-[docs/Architecture.md](docs/Architecture.md): a converter change comes with a
+[docs/Architecture.md](docs/Architecture.md) maps the code, and [CLAUDE.md](CLAUDE.md)
+carries the same discipline in the form AI coding agents read. A converter change comes with a
 behavioral test that fails without it, a clean `check-no-regression.ps1` run or an
 explained set of golden updates, and a passing converter test suite
 (`go test ./...` from `src/go2cs`). A change to `src/gen` or `src/core/golib` also

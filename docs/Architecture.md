@@ -1,7 +1,7 @@
 # go2cs Architecture
 
-Companion to [`/CLAUDE.md`](../CLAUDE.md). Detailed map of the converter pipeline, the `visit*`/`conv*`
-file taxonomy, the analysis passes, the Roslyn source generators, and the runtime type map.
+A map of the converter pipeline, the `visit*`/`conv*` file taxonomy, the analysis passes, the Roslyn
+source generators, and the runtime type map. For how to use the converter, see the [README](README.md#usage).
 
 ## Pipeline overview
 
@@ -16,7 +16,9 @@ The converter (`src/go2cs/`, Go) leans on Go's own front-end (`go/ast`, `go/type
 walks the typed AST emitting C#. Because types are fully resolved, conversion decisions (overload
 selection, implicit conversions, constant folding, unsigned detection) are semantic, not syntactic.
 
-- **Entry point:** `main.go` — flag parsing, GOROOT/GOPATH resolution, single-file/dir vs `-stdlib` mode.
+- **Entry point:** `main.go` — flag parsing, GOROOT/GOPATH resolution, and dispatch: a single file or
+  package (`conversionDriver.go`), the standard library (`-stdlib`), a module (`-recurse`), or a
+  package's tests (`-tests`).
 - **Symbol constants:** `symbols.go` — the cross-language naming/marker constants (`RootNamespace`,
   `PackageSuffix`, `PointerPrefix` `ж`, `AddressPrefix` `Ꮡ`, …). Generated — together with its C# twin
   `src/core/go2cs/Symbols.cs` (class `go2cs.Symbols`, shared into golib and the `go2cs-gen` analyzer via
@@ -27,6 +29,14 @@ selection, implicit conversions, constant folding, unsigned detection) are seman
   topologically sorted queue (`sortedQueue`), and converts in dependency order (optionally filtered to a
   package list). Conversion is sequential — it relies on package-level converter state, so a converted
   importer must observe its dependency's finished `package_info.cs`. The topo order is reusable for bottom-up builds.
+- **Module driver:** `moduleConverter.go` — `-recurse`: converts a downloaded module plus every
+  third-party package in its import closure, in dependency order, while referencing the pre-converted
+  standard library. `nuget*.go` maps third-party modules to published NuGet packages under
+  `-recurse=nuget` (`nugetMap.go`, `nugetSubstitution.go`, `nugetLock.go`).
+- **Test pipeline:** `testConversion.go` — `-tests`: converts a package's `_test.go` suite, emits a
+  runnable test host, and compares its verdicts with `go test -json`. `moduleTestsDriver.go` runs it
+  for every package of a module (`-tests -recurse`), and `validationProofPages.go` writes the proof
+  pages.
 - **Output:** `writeOperations.go` emits `.cs` files and generates each package's `.csproj` from a template,
   substituting markers (project references derived from detected imports, `unsafe` usage flag, etc.).
 
@@ -68,6 +78,8 @@ Supporting: `Stack.go`, `HashSet.go` (generic data structures), `directiveOperat
 ## Analysis passes
 
 - `escapeAnalysisOperations.go` — stack-vs-heap escape detection, informs allocation strategy (`ж<T>` boxing).
+- `refLoweringAnalysisOperations.go` / `refLoweringEmissionOperations.go` — decide which pointer
+  parameters can be C# `ref` parameters instead of `ж<T>` heap boxes, and emit them.
 - `variableAnalysisOperations.go` — lexical scope + shadowing; generates save/restore (`i__prev1` …) so
   Go's shadowing semantics survive in C#.
 - `nameCollisionAnalysisOperations.go` — resolves C#-keyword / cross-symbol name collisions.
@@ -85,6 +97,8 @@ Compile-time emission so converted C# stays visually close to Go. Referenced as 
 | `RecvGenerator` | `[GoRecv]` on methods | Value/pointer receiver overloads handling `ptr<T>`/`ж<T>` deref. |
 | `ImplicitConvGenerator` | `[GoImplicitConv]` | Implicit conversion operators between Go type aliases. |
 | `TypeGenerator` | `[GoType]` | Wrapper types + field promotion for struct embedding. |
+| `PartialStubGenerator` | a bodyless `partial` method with no implementing part | A throwing stub, so a Go function with no Go body (assembly or cgo) compiles until a hand-owned companion supplies it. |
+| `StrGenerator` | `[GoStr]` on a method | The `@string` forwarder (and, for a package-level function, its value delegate) for an `sstring` twin. |
 
 ## Runtime type map (`src/core/golib/`)
 
@@ -94,7 +108,7 @@ Compile-time emission so converted C# stays visually close to Go. Referenced as 
 | array | `array<T>` — `array.cs` |
 | map | `map<K,V>` (Dictionary + lock) — `map.cs` |
 | channel | `channel<T>` (queue + wait handles) — `channel.cs` |
-| string | `@string` (UTF-8 backed); experimental ref-struct `sstring` — `string.cs` |
+| string | `@string` (UTF-8 backed) — `string.cs`; `sstring`, a zero-copy stack view for a non-escaping `string([]byte)` — `sstring.cs` |
 | `interface{}` / `any` | `object` |
 | builtins (`append`,`len`,`cap`,`make`,`copy`,`panic`,`recover`,`close`,`delete`,`...` spread) | `builtin.cs` (the large one) |
 | `nil` | `NilType` + `null` for heap refs |

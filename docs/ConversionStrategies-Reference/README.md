@@ -3,19 +3,16 @@
 > **📖 This is the exhaustive technical reference.** For a shorter, example-driven overview of how
 > each Go construct maps to C#, start with **[`ConversionStrategies.md`](../ConversionStrategies.md)** —
 > every section there links back here for the full detail. Read this document when you need the
-> *why*: the exact emitted form, the edge cases, the Phase-3 fixes, the behavioral-test guards, and
+> *why*: the exact emitted form, the edge cases, the converter fixes, the behavioral-test guards, and
 > the C#-vs-Go semantic reasoning behind a decision. It is the authoritative record; the summary is
 > the front door.
 
-> **Updated 2026-06-27 for the "go2cs2" generation of the converter.** This is a living
-> document; as more use cases are converted these strategies are refined. The current converter
-> is written in **Go** (using the official `go/ast` + `go/types` toolchain, under `src/go2cs/`)
-> and emits C# that leans on two things the visible code does not show in full: a hand-written
-> runtime library, **`golib`** (`src/core/golib/`), and a set of **[Roslyn](../Glossary.md#roslyn) source generators**
-> (`src/gen/go2cs-gen/`) that synthesize the Go semantics which cannot be written directly in C#.
-> Notes that previously referenced the retired ANTLR4/C# converter or the old `gocore` library
-> have been updated to reflect this. See also: [`Architecture.md`](../Architecture.md),
-> [`Glossary.md`](../Glossary.md), [`Roadmap.md`](../Roadmap.md), and [`CLAUDE.md`](../../CLAUDE.md).
+> **A living document**, refined as more code is converted. The converter is written in **Go** (using the
+> official `go/ast` + `go/types` toolchain, under `src/go2cs/`) and emits C# that leans on two things the visible
+> code does not show in full: a hand-written runtime library, **`golib`** (`src/core/golib/`), and a set of
+> **[Roslyn](../Glossary.md#roslyn) source generators** (`src/gen/go2cs-gen/`) that synthesize the Go semantics
+> which cannot be written directly in C#. See also: [`Architecture.md`](../Architecture.md),
+> [`Glossary.md`](../Glossary.md) and [`Roadmap.md`](../Roadmap.md).
 
 The guiding goal: the generated C# should be both *behaviorally* and *visually* similar to the
 original Go, so that a Go developer can read the output and follow it. The runtime library and
@@ -25,7 +22,7 @@ the generators exist to keep the visible converted code close to the Go original
 > ground the summary covers) and is then followed by `###` subsections documenting specific
 > conversion decisions, edge cases, and fixes — most keyed to the [behavioral test](../Glossary.md#guard) that guards them.
 > When updating the converter, add the deep detail here and the reader-facing example to the
-> summary (see [`../CLAUDE.md`](../../CLAUDE.md), "Record the conversion decision").
+> summary.
 
 ## Contents
 

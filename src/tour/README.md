@@ -13,7 +13,7 @@ The interface is deliberately parallel:
 - Conversion runs with comments on, so a lesson's own commentary crosses over
   with the code it explains: a Go end-of-line comment stays an end-of-line
   comment, on the statement it annotates
-  ([Comments](../../docs/ConversionStrategies-Reference.md#comments)).
+  ([Comments](../../docs/ConversionStrategies-Reference/comments.md#where-a-comment-is-attached-and-where-it-is-not)).
 - The **Runtime** selector chooses NuGet packages, a deployed stdlib, or live
   checkout source without changing the Go lesson.
 - **Transpile**, **Build**, and **.NET Run** keep their output separate.
@@ -35,7 +35,7 @@ The interface is deliberately parallel:
 
 ## Requirements
 
-- Go 1.24.13 (the release `src/go2cs/go.mod` pins)
+- Go, at the release `src/go2cs/go.mod` names
 - .NET SDK 10.0 or later
 - A local clone of this `go2cs` repository
 - Network access on the first start to install the official offline Tour and restore the go2cs NuGet
@@ -114,10 +114,8 @@ only when it is newer than every file under `src/go2cs` and still identifies
 itself when run, so a converter left by an older checkout is rebuilt rather than
 driven by a newer pipeline.
 
-That build gets ten minutes, which is a guard against a hung `go build` rather
-than an expectation about pace: it was two minutes until 2026-08-10, and a cold
-build measured 1m58.8s on an i7-5820K under WSL2 with the repository on a
-`/mnt` DrvFs mount — inside the cap by about a second. Raise or lower it with
+That build gets ten minutes, as a guard against a hung `go build`, not because
+it is expected to take that long. Raise or lower it with
 `-tool-timeout` or `GO2CS_TOOL_TIMEOUT` (a duration such as `15m`, or a whole
 number of seconds). A build that runs out of time is reported as the **Build
 go2cs** stage, not as a failed transpile: the converter never ran, so nothing
