@@ -390,7 +390,7 @@ public static class TestHost
 
             if (!run.Wait(options.Timeout))
             {
-                reporter.ReportPackage("timeout", options.Timeout.TotalSeconds, $"package timeout after {options.Timeout}");
+                reporter.ReportPackage("timeout", options.Timeout.TotalSeconds, PackageTimeoutMessage(options.Timeout, reporter.Events));
                 WriteResults(options.ResultFile, registry.Package, options, reporter.Events);
                 WriteJUnit(options.JUnitFile, registry.Package, reporter.Events);
                 return 1;
@@ -1350,6 +1350,34 @@ public static class TestHost
     /// Resets the per-run results latch for a guard that drives the flush without a Run of its own.
     /// </summary>
     internal static void ResetResultsLatchForGuard() => s_resultsWritten = false;
+
+    /// <summary>
+    /// The package-timeout event's text: the deadline, then the tests still running at it, as Go's test binary lists
+    /// them ("running tests:") after its own "test timed out" panic.
+    /// </summary>
+    /// <remarks>
+    /// A suite that holds the host until the deadline -- a converted self-call the JIT turned into a loop, a goroutine
+    /// nobody unblocks -- otherwise leaves the reader to guess which test held it. A test is running when it has a run
+    /// event and no terminal one; they are named in the order they started. The prefix is unchanged: the comparison
+    /// classifier quotes the event by it.
+    /// </remarks>
+    private static string PackageTimeoutMessage(TimeSpan timeout, IReadOnlyList<TestEvent> events)
+    {
+        HashSet<string> finished = events
+            .Where(testEvent => testEvent.Test.Length > 0 && testEvent.Action is "pass" or "fail" or "skip" or "timeout" or "infrastructure-error")
+            .Select(testEvent => testEvent.Test)
+            .ToHashSet(StringComparer.Ordinal);
+
+        List<string> running = events
+            .Where(testEvent => testEvent.Test.Length > 0 && testEvent.Action == "run" && !finished.Contains(testEvent.Test))
+            .Select(testEvent => testEvent.Test)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        return running.Count == 0
+            ? $"package timeout after {timeout}"
+            : $"package timeout after {timeout}; running tests: {string.Join(", ", running)}";
+    }
 
     private static void WriteResults(string? path, string package, TestOptions options, IReadOnlyList<TestEvent> events)
     {

@@ -9471,6 +9471,17 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 			}
 		}
 		result.Errors = append(result.Errors, "converted tests: "+csErr.Error())
+
+		// A host that crashed, or held a test until its own package deadline, gives the test(s) it was running a
+		// C# fail verdict instead of none (crashVerdict.go). Here, inside the arm both forgiveness arms above left
+		// standing, so it can only touch a record that is already failing.
+		applyHostCrash(&result, rawCSErr, csOutput, func(verdicts map[string]string) map[string]string {
+			if manifestErr == nil {
+				return eligibleTerminalTestResults(verdicts, manifest)
+			}
+
+			return verdicts
+		})
 	}
 
 	// ZERO-MATCH GUARD. A `-test-filter` run that matches NOTHING produced no verdicts at all, and
