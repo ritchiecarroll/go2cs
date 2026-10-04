@@ -225,11 +225,32 @@ go2cs -tests -recurse -test-action all module_dir out_root      # validate a who
 | `-csproj <file>` | Generate project files from a custom `.csproj` template instead of the embedded one. |
 | `-tree` | Print each file's Go parse tree (`go/ast`) to stdout during conversion — a diagnostic aid. |
 | `-debug` | Disable the converter's per-file panic recovery, so a conversion failure crashes with a full stack trace instead of being reported as a warning. |
+| `-version` | Print the converter's release tuple and exit 0, converting nothing. One `key=value` line per key, always in this order, every key present (`unknown` when a value cannot be resolved), so a bug report or a build script can paste or parse it: `go2cs.release` (the go2cs corpus release this binary belongs to, e.g. `1.24.13.3`), `go2cs.converter` (this binary's identity, `exe-` plus the first 16 hex digits of its SHA-256 — the value test manifests record), `go.packages` (the `go.*` NuGet version `-recurse=nuget` defaults `$(GoStdLibVersion)` to, e.g. `1.24.13.*`), `go.toolchain` (the active Go toolchain, `go env GOVERSION`), `go.build` (the Go toolchain that built this binary), `vcs.revision` and `vcs.modified` (the commit a binary built from a clone was built from, and whether its tree had local changes; Go 1.24 does not stamp a binary built from a `git worktree` checkout, so that reads `unknown`). New keys are only ever appended. |
 | ~~`-cgo`~~ | ~~Also convert cgo-targeted files.~~ Not yet functional, but planned: the [cgo interop plan](PLAN-cgo-interop.md) lays out a P/Invoke-backed bridge for `import "C"`, and this flag comes alive with it. |
 
 All converted C# code references a hand-written runtime library (`golib`, published as the [`go.lib`](https://www.nuget.org/packages/go.lib)
 NuGet package) plus a set of Roslyn source generators that supply Go semantics at compile time (published as
 [`go.gen`](https://www.nuget.org/packages/go.gen)). A `-recurse=nuget` conversion wires both up for you.
+
+### Diagnostics
+
+A failure in the Go input itself is printed on stderr in MSBuild's canonical error format, one line per error, so CI logs
+and editor problem matchers (for example VS Code's `$msCompile`) pick it up:
+
+```
+/src/app/main.go(3,16): error GO2CS1003: cannot use 1 (untyped int constant) as string value in variable declaration
+```
+
+| Code | Meaning |
+|:--|:--|
+| `GO2CS1000` | The package did not load cleanly (an error `go/packages` does not classify). The package still converts best-effort. |
+| `GO2CS1001` | The package did not load cleanly: a `go list` error, such as a missing module or no Go files for this build. |
+| `GO2CS1002` | The package did not load cleanly: a Go parse error. The package still converts best-effort. |
+| `GO2CS1003` | The package did not fully type-check. It still converts best-effort, but code that depends on the failing expression is emitted untyped and will not compile. |
+| `GO2CS2001` | Refused: a cgo source (`import "C"`) is selected for this build, and cgo has no C# conversion yet. The run exits non-zero. Convert with `CGO_ENABLED=0` or exclude the file. |
+
+A diagnostic with no source position names `go2cs` as its origin. The `WARNING:` / `Refusing to convert:` summary line
+printed before these lines is unchanged.
 
 ### Converting a real-world module
 
