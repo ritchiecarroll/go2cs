@@ -62,7 +62,7 @@ using static go.crypto.x509.@internal.macOS_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/x509/internal/macos/corefoundation.go", "corefoundation.cs", "ABY+4oKCgqqigoKUgoKokoKCAAgUkoKigqSasoK0gqSYsqSClKTskoKkgpSkmJKCpJiSgqSYkoKkmJKCpJiSgqSYkqSYkpKkmJKkmJKCpJiSgqSYkqTIkoKClKSWqrKCgpQ=")]
-[assembly: go.GoPositionMap("crypto/x509/internal/macos/security.go", "security.cs", "ADWIAYIACRaSkpKSlLyypIKklKS8sqSCpJSkmJKCpIKUpJiygoKmgpTUmLKCgoKUkoKU1JiSgoKUpJiSgqKClKSYspLkgpSkmJKCooKCgoKCgpSkmJKCpJiSgoKUpMiSgoKUgoKk")]
+[assembly: go.GoPositionMap("crypto/x509/internal/macos/security.go", "security.cs", "ADWIAYIACRaSkpKSlLyypIKSgpSkvLKkgpKClKSYkoKkgpSkmLKCgqaClNSYsoKCgpSSgpTUmJKCgpSkmJKCooKUpJiykuSClKSYkoKigoKCgoKClKSYkoKkmJKCgpSkyJKCgpSCgqQ=")]
 // </GoSourcePositionMaps>
 
 // Dynamically imported C entry points are recorded here, one `GoCgoImportDynamic` attribute

@@ -51,7 +51,7 @@ using static go.vendor.golang.org.x.crypto.chacha20_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20/chacha_generic.go", "chacha_generic.cs", "ADB6AAEWAAwIguaigpS4goKCpJaCAAkUygANILKCgoKCgoKCgoKCgoIAAhYADAqCgt6ClIIAAxwACgKClIKUgoKogoKClIKClIKUgsyCgqTOgoKUiKKCgoKCgoKCuoKCgoK4goIAARwAIBSCgoKCupSWgoKClpSCgoKWgoKCuoKCgoKCgoKCgoKCgoKCgoSEvuiC5oKClIKWgoKCgoKCgoKCgoKChJSCgoKWgoKCloKCgoKCgoKCgg==")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20/chacha_generic.go", "chacha_generic.cs", "ADB6AAEWAAwIguaigpS4goKCkoKWggAJFMoADSCygoKCgoKCgoKCgoKCAAIWAAwKgoLegpSCAAMcAAoCgpSClIKCqIKCgpSCgpSClILMgoKSgs6CgpSIooKCgoKCgoK6goKCgriCggABHAAgFIKCgoK6lJaCgoKWlIKCgpaCgoK6goKCgoKCgoKCgoKCgoKChIS+6ILmgoKUgpaCgoKCgoKCgoKCgoKElIKCgpaCgoKWgoKCgoKCgoKC")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20/chacha_noasm.go", "chacha_noasm.cs", "AAoWgg==")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20/xor.go", "xor.cs", "ABAkopLcgoKCgoKCgoKUgoKCgg==")]
 // </GoSourcePositionMaps>

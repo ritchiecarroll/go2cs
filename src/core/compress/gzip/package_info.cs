@@ -54,7 +54,7 @@ using static go.compress.gzip_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("compress/gzip/gunzip.go", "gunzip.cs", "AB5AhJaWkoKUAChg8oKAgqSssriAgpSkggACJgAQAq7CgoKCgpSCgpSClJSWgoKClJTO0oAABxCkgpSCgKa2goSCgIKkgoKAgqSCloKCgIKkloKAgqSWgoCCpIKCqIKClJSosoKWgoKCgpSogIKCpIKCgoKUloKUhICCuKyw")]
-[assembly: go.GoPositionMap("compress/gzip/gzip.go", "gzip.cs", "ACxiAAgCggACEuKClIKCpoKCgpQAChzC2JKClIKCgpSC2tSCgoKUgqaCgoKUlJSCpoKCqqKClJSCgoKClIKUgpSmlIKklIKCgpSCgoKmgoKCpoKCgqaCpoKCggACFgAIAoKUgpSCgoKmgqyygpSClIKCgoKmgoKUgoKC")]
+[assembly: go.GoPositionMap("compress/gzip/gzip.go", "gzip.cs", "ACxiAAgCggACEuKClIKCpoKCgpQAChzC2JKClIKCgpSC2tSCgoKUgqaCgoKUlJSCpoKCqqKClJSCgoKClIKUgpSmlIKSgpSCgoKUgoKCpoKCgqaCgoKmgqaCgoIAAhYACAKClIKUgoKCpoKssoKUgpSCgoKCpoKClIKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;
