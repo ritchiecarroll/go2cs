@@ -79,6 +79,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAnonStructCrossFile() => CheckTarget("AnonStructCrossFile");
 
     [TestMethod]
+    public void CheckAnonStructNamedConversion() => CheckTarget("AnonStructNamedConversion");
+
+    [TestMethod]
     public void CheckAnonymousInterfaces() => CheckTarget("AnonymousInterfaces");
 
     [TestMethod]

@@ -3854,16 +3854,20 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 				// implicit operators, so a recorded GoImplicitConv<BitString, bitStringEncoder>
 				// (or its reverse) is a DUPLICATE user-defined conversion (CS0557, encoding/asn1).
 				// packageTypeSpecRHS marks a defined type's written RHS (the wrapper relationship).
+				// Only a NAMED written RHS is a wrapper: `type local struct{ A int }` declares the
+				// struct itself, with no operator to or from an anonymous struct of the same shape,
+				// whose lift is a distinct C# type (`local(s)` over `var s struct{ A int }` was
+				// CS0030 with the record skipped here; go-cmp's teststructs).
 				wrapperConversion := false
 
 				if named, ok := funcType.(*types.Named); ok {
-					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && types.Identical(rhs, argType) {
+					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && !isUnnamedStruct(rhs) && types.Identical(rhs, argType) {
 						wrapperConversion = true
 					}
 				}
 
 				if named, ok := argType.(*types.Named); ok {
-					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && types.Identical(rhs, funcType) {
+					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && !isUnnamedStruct(rhs) && types.Identical(rhs, funcType) {
 						wrapperConversion = true
 					}
 				}
@@ -3884,7 +3888,8 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 				// involving a primitive is what C#'s own numeric conversions already express.
 				if targetTypeName != argTypeName && !wrapperConversion && !typeContainsTypeParams(argType) && !typeContainsTypeParams(funcType) &&
 					!typeIsPrimitiveAlias(argType) && !typeIsPrimitiveAlias(funcType) &&
-					v.conversionRecordHasLocalOperand(funcType, argType, pointerBoxConversionRecord(argTypeName, targetTypeName)) {
+					(v.conversionRecordHasLocalOperand(funcType, argType, pointerBoxConversionRecord(argTypeName, targetTypeName)) ||
+						v.liftedStructConversionOperand(funcType, argType)) {
 					// The recorded conversion type names use cross-package import aliases (e.g.
 					// `abi.Type`); register them so package_info.cs can emit a resolving `global using`.
 					v.recordConversionPackageUsing(argType)
@@ -4047,6 +4052,57 @@ func (v *Visitor) conversionRecordHasLocalOperand(funcType, argType types.Type, 
 	// The pointer-BOXING route hosts nothing, so the phantom this predicate exists to prevent
 	// cannot arise and a whitebox-production operand still counts. See pointerBoxConversionRecord.
 	return pointerBoxRecord && (v.whiteboxProductionDeclaration(funcType) || v.whiteboxProductionDeclaration(argType))
+}
+
+// liftedStructConversionOperand reports whether a struct conversion pair with no operand DECLARED
+// here still has a local host: an ANONYMOUS struct operand has no declaring Go package, but its lift
+// is a C# type THIS package declares, and the generator hosts the operator there.
+// `structs.AssignB(struct{ A int }{3})` has a foreign target and a local source (go-cmp's
+// teststructs, CS0030 when the record was declined).
+//
+// The pair must be a Go struct CONVERSION — the two underlying structs identical apart from tags.
+// The argument-recording loop at the end of convCallExpr compares EVERY argument with the callee's
+// first parameter, so `f(t, struct{}{})` presents `struct{}` against `testing.T`; without this test
+// that pair would record an operator between two unrelated types (hash/maphash's tests, net/rpc's
+// `sync.Mutex` parameter).
+func (v *Visitor) liftedStructConversionOperand(funcType, argType types.Type) bool {
+	if !types.IdenticalIgnoreTags(funcType.Underlying(), argType.Underlying()) {
+		return false
+	}
+
+	return v.typeLiftedInConvertedPackage(funcType) || v.typeLiftedInConvertedPackage(argType)
+}
+
+// typeLiftedInConvertedPackage reports whether an unnamed type was lifted to a C# declaration by
+// THIS package's conversion: the name the file resolved it to was minted by this file or by another
+// file of the package. A `-tests` reuse of PRODUCTION's lift answers false, because that declaration
+// lives in the production assembly, where no operator can be added from here.
+func (v *Visitor) typeLiftedInConvertedPackage(t types.Type) bool {
+	if t == nil || !isUnnamedStruct(t) {
+		return false
+	}
+
+	name, ok := v.liftedTypeMap[t]
+
+	if !ok {
+		return false
+	}
+
+	if v.liftedTypeNames.Contains(name) {
+		return true
+	}
+
+	packageLock.Lock()
+	defer packageLock.Unlock()
+
+	return packageLiftedTypeNames.Contains(name)
+}
+
+// isUnnamedStruct reports whether a type is a struct type literal (`struct{ A int }`), not a named
+// or aliased type over one.
+func isUnnamedStruct(t types.Type) bool {
+	_, ok := t.(*types.Struct)
+	return ok
 }
 
 // pointerBoxConversionRecord reports whether a recorded conversion pair is the shared Go

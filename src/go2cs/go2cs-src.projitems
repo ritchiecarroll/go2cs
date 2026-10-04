@@ -19,6 +19,7 @@
     <None Include="$(MSBuildThisFileDirectory)corpusRelease.go" />
     <None Include="$(MSBuildThisFileDirectory)genericAllocCallerFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)anonInterfaceParamPublic_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)anonStructNamedConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)anonStructPublicization_test.go" />
     <None Include="$(MSBuildThisFileDirectory)anonStructTypeArgLift.go" />
     <None Include="$(MSBuildThisFileDirectory)anonStructTypeArgLift_test.go" />

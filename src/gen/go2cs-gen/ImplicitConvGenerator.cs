@@ -107,10 +107,24 @@ public class ImplicitConvGenerator : ISourceGenerator
             string? valueType = arguments.FirstOrDefault(arg => arg.name.Equals("ValueType")).value?.Trim();
 
             List<(string typeName, string memberName)> structMembers;
+            bool foreignStructTarget = false;
 
             if (string.IsNullOrWhiteSpace(valueType))
             {
                 StructDeclarationSyntax? structDeclaration = GetStructDeclaration(syntaxContext, targetTypeName);
+
+                // A struct target declared in a REFERENCED assembly has no declaration in syntax. Go
+                // converts between struct types only when their fields are identical in name, type and
+                // order, so a LOCAL source's declaration enumerates the same members, in the order the
+                // target's constructor takes them: `structs.AssignB(struct{ A int }{3})`, whose lifted
+                // source is local (go-cmp's teststructs, CS0030 when this record was skipped).
+                if (structDeclaration is null && !inverted && targetType.TypeKind == TypeKind.Struct &&
+                    !SymbolEqualityComparer.Default.Equals(targetType.ContainingAssembly, context.Compilation.Assembly) &&
+                    SymbolEqualityComparer.Default.Equals(sourceType.ContainingAssembly, context.Compilation.Assembly))
+                {
+                    structDeclaration = GetStructDeclaration(syntaxContext, sourceTypeName);
+                    foreignStructTarget = structDeclaration is not null;
+                }
 
                 if (structDeclaration is null)
                     // The target type has no local struct declaration to enumerate members from — e.g. a
@@ -146,6 +160,11 @@ public class ImplicitConvGenerator : ISourceGenerator
             // converter's through-underlying inline cast; and if the default host (the source type) is
             // itself foreign, relocate the operator into the LOCAL type so it can be declared at all.
             string? hostTypeNameOverride = null, lhTypeNameOverride = null, rhTypeNameOverride = null, convExprOverride = null;
+
+            // A foreign struct target is returned and constructed by its QUALIFIED name: its simple
+            // name resolves only inside its own package class, not in this one (CS0246).
+            if (foreignStructTarget)
+                lhTypeNameOverride = targetType.ToDisplayString(s_qualifiedFormat);
 
             if (!string.IsNullOrWhiteSpace(valueType))
             {
