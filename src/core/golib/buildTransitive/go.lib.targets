@@ -71,4 +71,20 @@
     <Message Importance="low"
              Text="go.lib: compiling against the $(GoCompileRuntimeIdentifier) flavour of @(_GoRidCompileSwap->Count()) go.* package(s): @(_GoRidCompileSwap->'%(NuGetPackageId)', ', ')" />
   </Target>
+
+  <!--
+    THE CONSUMER USINGS. A C# project that calls converted Go names golib's types and Go's built-ins on
+    nearly every line: `@string`, `slice<T>`, `ж<T>`, `channel<T>` live in namespace `go`, and `nil`,
+    `len` and `goǃ` are static members of `go.builtin`. Every go.* and nugetgo.* package depends on
+    go.lib, so this file reaches every such consumer, and these two global usings save each one from
+    writing them (docs/ConsumingGoFromCSharp.md). A converted project that takes go.lib as a package
+    receives them too; its csproj template already declares `go.builtin`, and the SDK keeps one global
+    using per name (measured: identical Using items, Static casing included, emit once with no warning).
+    A project reference to golib never imports buildTransitive, so the corpus is untouched.
+    Set GoConsumerUsings=false to turn them off.
+  -->
+  <ItemGroup Condition="'$(GoConsumerUsings)' != 'false'">
+    <Using Include="go" />
+    <Using Include="go.builtin" Static="true" />
+  </ItemGroup>
 </Project>

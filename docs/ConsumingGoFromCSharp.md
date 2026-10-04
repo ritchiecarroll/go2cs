@@ -40,7 +40,9 @@ using errors = go.errors_package;
 ```
 
 `go` is the namespace of golib, the runtime library that carries Go's semantics. `go.builtin` holds Go's built-in
-functions and `nil`.
+functions and `nil`. When the converted code comes from NuGet packages, those two arrive with the packages as global
+usings, so you write only the package namespaces; set the MSBuild property `GoConsumerUsings` to `false` to turn
+them off. A local conversion that you reference as projects does not bring them, so add them yourself, as here.
 
 A Go name that would clash with another name in the same C# class gets a `Δ` prefix: uuid's `Version` type is
 `uuid_package.ΔVersion`, because the package class also holds the `Version` method.
