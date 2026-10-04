@@ -171,11 +171,18 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 		// the GoImplement assembly attribute and the adapter class name; internal/trace's
 		// `readBatch(r interface{io.Reader; io.ByteReader})` cast cross-file from
 		// generation.go, CS1730 cascade). Prefer this file's lift, then the shared package
-		// registry, then a deferred marker resolved after the file-visit barrier — the same
-		// three-step resolution dynamicStructTypeName performs for anonymous structs.
+		// registry, then the PRODUCTION conversion's published lifts, then a deferred marker
+		// resolved after the file-visit barrier — the same resolution deferredDynamicTypeName
+		// performs. The production step is what a `-tests` cast needs: cmp's internal test passes
+		// *defaultReporter to Reporter's lifted parameter interface (Reporter_r), which production
+		// lifted and the test compilation never re-lifts. Left a marker, the pair's record was
+		// dropped and the adapter named on the production class, which never generates it
+		// (CS0426 defaultReporterжReporter_r); resolved, the cast takes the named-interface path.
 		if name, ok := v.liftedTypeMap[interfaceType]; ok {
 			interfaceTypeName = name
 		} else if name := lookupDynamicTypeName(interfaceType.String()); name != "" {
+			interfaceTypeName = name
+		} else if name := lookupProductionDynamicTypeName(interfaceType.String()); name != "" {
 			interfaceTypeName = name
 		} else {
 			interfaceTypeName = dynamicTypeMarker(interfaceType.String())
