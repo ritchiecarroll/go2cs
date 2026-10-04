@@ -17,6 +17,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // TestDarwinSyscallPullsForward guards the seven darwin //go:linkname pulls of syscall that had nothing
@@ -76,7 +78,7 @@ func TestDarwinSyscallPullsForward(t *testing.T) {
 			continue
 		}
 
-		v := &Visitor{importQueue: HashSet[string]{}, importPathAliases: map[string]string{"syscall": "syscall"}}
+		v := &Visitor{importQueue: hashset.HashSet[string]{}, importPathAliases: map[string]string{"syscall": "syscall"}}
 		alias, targetFunc, ok := v.funcLinknameForward(decl)
 
 		if !ok {

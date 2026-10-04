@@ -37,6 +37,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ritchiecarroll/hashset"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -136,7 +137,7 @@ func convertTestOnlyFixture(t *testing.T, inputPath string) map[string]string {
 
 	if _, err = convertTestVariants(testProjectWhiteboxReference, production, internal, external,
 		selectCompileExcludedTestFiles(internal, external), inputPath, outputPath, "go",
-		NewHashSet(supportedTestCapabilities()), options); err != nil {
+		hashset.NewHashSet(supportedTestCapabilities()), options); err != nil {
 		t.Fatalf("convertTestVariants: %v", err)
 	}
 
@@ -595,7 +596,7 @@ func convertMixedSuiteFixture(t *testing.T, inputPath string) map[string]string 
 
 	if _, err = convertTestVariants(testProjectWhiteboxReference, production, internal, external,
 		selectCompileExcludedTestFiles(internal, external), inputPath, outputPath, "go",
-		NewHashSet(supportedTestCapabilities()), options); err != nil {
+		hashset.NewHashSet(supportedTestCapabilities()), options); err != nil {
 		t.Fatalf("convertTestVariants: %v", err)
 	}
 

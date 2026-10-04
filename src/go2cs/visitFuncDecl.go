@@ -15,6 +15,8 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 const FunctionPrefixMarker = ">>MARKER:FUNC_%s_PREFIX<<"
@@ -613,7 +615,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	// Collect parameter names from the function declaration
 	if v.paramNames == nil {
-		v.paramNames = HashSet[string]{}
+		v.paramNames = hashset.HashSet[string]{}
 	} else {
 		v.paramNames.Clear()
 	}

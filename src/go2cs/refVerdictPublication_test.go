@@ -30,6 +30,8 @@ import (
 	"testing"
 
 	"go2cs/internal/stdlibmeta"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // refVerdictFixtureSource is a package with exactly one publishable primary: Inc is exported, on an
@@ -342,7 +344,7 @@ func TestPublishedRefVerdictsMatchEmitted(t *testing.T) {
 		record := formatRefPrimaryRecord("Counter", "Inc")
 
 		previous := importedRefPrimaries
-		importedRefPrimaries = HashSet[string]{}
+		importedRefPrimaries = hashset.HashSet[string]{}
 
 		defer func() { importedRefPrimaries = previous }()
 

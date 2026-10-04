@@ -29,6 +29,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/ritchiecarroll/hashset"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -746,8 +747,8 @@ func syntaxSourceFiles(pkg *packages.Package) (paired []syntaxSourceFile, skippe
 // The aliased record wins and the qualified duplicate is skipped — this set drives that skip in
 // writePackageInfoFile's emission loop, and its adapter-name collision prune consults the same set
 // so a duplicate that will be skipped never owns an adapter name. Callers hold packageLock.
-func aliasCoveredImplementationKeys() HashSet[string] {
-	covered := HashSet[string]{}
+func aliasCoveredImplementationKeys() hashset.HashSet[string] {
+	covered := hashset.HashSet[string]{}
 
 	for alias, typeName := range exportedTypeAliases {
 		if implementations, ok := interfaceImplementations[alias]; ok {

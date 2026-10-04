@@ -15,6 +15,8 @@ import (
 	"go/types"
 	"sort"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 type TrackerType string
@@ -339,7 +341,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	// for the WHOLE block, so the earlier package reference binds to the not-yet-declared local
 	// (internal/zstd fse's `bits := tableBits - highBit` after `bits.LeadingZeros16`, CS0841).
 	// declareVar shadow-renames such locals.
-	usedPackageNames := HashSet[string]{}
+	usedPackageNames := hashset.HashSet[string]{}
 
 	// PACKAGE-LEVEL vars referenced in THIS function. A local sharing such a name is fine in
 	// Go — a reference before the local's declaration point (including the local's OWN
@@ -347,7 +349,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	// the package var — but C#'s whole-block scoping binds the earlier reference to the
 	// not-yet-declared local (CS0841/CS8130). declareVar shadow-renames such locals; the
 	// package var keeps the simple name.
-	usedPackageVarNames := HashSet[string]{}
+	usedPackageVarNames := hashset.HashSet[string]{}
 
 	// Every variable DECLARED anywhere in this function — receiver, parameters, results and locals
 	// at every nesting depth (func literals included). The emitter spells bare package-level TYPE
@@ -357,7 +359,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	// variable need not be anywhere near the reference — poly1305's `func (h *MAC) Sum(b []byte)`
 	// declares `var mac [TagSize]byte` and the promoted-embed hop for `h.mac.Sum(&mac)` spells
 	// `mac.ᏑmacGeneric`, which binds to that `array<byte>` local (CS1061).
-	v.funcScopeVarNames = HashSet[string]{}
+	v.funcScopeVarNames = hashset.HashSet[string]{}
 
 	ast.Inspect(funcDecl, func(n ast.Node) bool {
 		if ident, ok := n.(*ast.Ident); ok {

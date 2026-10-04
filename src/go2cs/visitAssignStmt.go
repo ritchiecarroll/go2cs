@@ -18,6 +18,8 @@ import (
 	"slices"
 	"sort"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // rhsPointerCopyContext returns an IdentContext that forces the pointer (box) form when the
@@ -1148,7 +1150,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	anyRhsIsFunctionValue := lhsLen > 1 && rhsLen == lhsLen && slices.ContainsFunc(rhsExprs, v.rhsIsFunctionValue)
 
 	if tupleResult || lhsLen == reassignedCount || parallelHazard || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt && !anyTypeIsUnsafePointer && !anyRhsIsFunctionValue {
-		leftExprs := HashSet[string]{}
+		leftExprs := hashset.HashSet[string]{}
 
 		// Go's partial redeclaration `a, b := f()` reuses any already-declared LHS variable and
 		// declares only the new ones. A single blanket `var` prefix would re-declare the reused

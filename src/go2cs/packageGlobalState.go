@@ -27,6 +27,7 @@ import (
 	"go/types"
 	"sync"
 
+	"github.com/ritchiecarroll/hashset"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -68,7 +69,7 @@ var packageName string
 
 var packageNamespace string
 
-var projectImports HashSet[string]
+var projectImports hashset.HashSet[string]
 
 var exportedTypeAliases map[string]string
 
@@ -96,13 +97,13 @@ var packageInlineFuncTypeNames map[string]bool
 // existence proof that the foreign assembly generated the public TжIface adapter class
 // (io/fs's PathErrorжerror), so a cross-package pointer-to-interface conversion can
 // reference it (os's `err = &PathError{...}`, CS0029 x38).
-var importedPointerImplements HashSet[string]
+var importedPointerImplements hashset.HashSet[string]
 
 // importedValueImplements records VALUE-form `[assembly: GoImplement<T, Iface>]` lines (plain or
 // Promoted) parsed from IMPORTED packages' package_info files, keyed "pkgName|T|ifaceSimple" -
 // the existence proof that the foreign assembly itself implements the interface on the value
 // type, so a both-foreign value cast here converts implicitly and skips the local adapter.
-var importedValueImplements HashSet[string]
+var importedValueImplements hashset.HashSet[string]
 
 // importPackageDirs maps a REACHABLE imported package's import path (the transitive closure, not
 // just direct imports) to its on-disk source directory and Go package name, captured from the
@@ -147,7 +148,7 @@ var importedPackages map[string]*packages.Package
 // package is as often the current one as an imported one. Reset alongside importedPackages.
 var currentPackageSource *packages.Package
 
-var constImportedTypeAliases HashSet[string]
+var constImportedTypeAliases hashset.HashSet[string]
 
 // derivedTypeAliases marks the importedTypeAliases keys that were DERIVED from a dependency's own
 // declarations (foreignNameCollisions.go) rather than parsed from its emitted package_info.cs, and
@@ -160,9 +161,9 @@ var constImportedTypeAliases HashSet[string]
 // test that imports time). Gating on use keeps the derived metadata's blast radius to the code that
 // actually references the renamed member — where the rename is required for the reference to bind
 // at all. Reset per package.
-var derivedTypeAliases HashSet[string]
+var derivedTypeAliases hashset.HashSet[string]
 
-var usedDerivedTypeAliases HashSet[string]
+var usedDerivedTypeAliases hashset.HashSet[string]
 
 // seededGlobalTypeAliases maps a `global using` alias NAME — the RENDERED form, with TypeAliasDot
 // for every `.` — to the target the PRODUCTION package_info.cs binds it to, for the one model that
@@ -197,13 +198,13 @@ var seededGlobalTypeAliases map[string]string
 // `global using` of its own (packageInfoWriter). The qualified spelling needs no declaration to
 // resolve, so production's binding survives untouched and the test-side reference still names the
 // right type. Reset per package.
-var qualifiedImportedTypeAliases HashSet[string]
+var qualifiedImportedTypeAliases hashset.HashSet[string]
 
-var parsedPackageInfoFiles HashSet[string]
+var parsedPackageInfoFiles hashset.HashSet[string]
 
-var interfaceImplementations map[string]HashSet[string]
+var interfaceImplementations map[string]hashset.HashSet[string]
 
-var promotedInterfaceImplementations map[string]HashSet[string]
+var promotedInterfaceImplementations map[string]hashset.HashSet[string]
 
 // constraintProxies collects the SELF-REFERENTIAL constraint proxies this package needs — a
 // generic type instantiated with a pointer type whose type parameter carries a self-referential
@@ -223,9 +224,9 @@ var constraintProxies map[string][2]string
 // model therefore has exactly this exception: an adapter serves interface BOXING, never a nominal
 // constraint. Entries are `typeArg|interface` for diagnostics; the model-selection gate reads only
 // whether the set is non-empty. See recordNominalProductionConstraint.
-var nominalProductionConstraints HashSet[string]
+var nominalProductionConstraints hashset.HashSet[string]
 
-var interfaceInheritances map[string]HashSet[string]
+var interfaceInheritances map[string]hashset.HashSet[string]
 
 // adapterClassImplementations marks recorded "iface|impl" GoImplement pairs whose implementation
 // is a DISTINCT value-form adapter CLASS (`<src>ᴠ<iface>` — an interface-sourced conversion or a
@@ -235,13 +236,13 @@ var interfaceInheritances map[string]HashSet[string]
 // pointer-form exemption there): pruning GoImplement<net.Conn, io.Writer> under
 // GoImplement<net.Conn, io.ReadWriteCloser> leaves every `new net_ConnᴠWriter(…)` use site
 // referencing a class the generator never emits (net/http, CS0246 ×17). Guarded by packageLock.
-var adapterClassImplementations HashSet[string]
+var adapterClassImplementations hashset.HashSet[string]
 
-var implicitConversions map[string]HashSet[string]
+var implicitConversions map[string]hashset.HashSet[string]
 
-var invertedImplicitConversions map[string]HashSet[string]
+var invertedImplicitConversions map[string]hashset.HashSet[string]
 
-var indirectImplicitConversions map[string]HashSet[string]
+var indirectImplicitConversions map[string]hashset.HashSet[string]
 
 // conversionPackageUsings maps a cross-package import alias (e.g. "abi") to its C# namespace (e.g.
 // "@internal.abi_package") for every package referenced by a recorded implicit conversion. The
@@ -403,7 +404,7 @@ var usesUnsafeCode bool
 // constructor likewise runs once per assembly — so a package blank-imported from several files
 // needs exactly ONE hook, and it belongs to the first file that names it. Reset per package/variant
 // by resetPackageState; written under packageLock.
-var packageImportForces HashSet[string]
+var packageImportForces hashset.HashSet[string]
 
 // packageImportInits holds each force hook's FORCING TARGET — the C# package class the emitted
 // `typeof(...)` names, already `global::`-qualified where the leading segment would be occluded —
@@ -457,7 +458,7 @@ var packageDynamicTypeNames map[string]string
 // A `[module: GoManualConversion]` file does NOT claim here — its emission is redirected to a
 // non-compiled `.cs.auto` review sibling, so a claim would push a REAL file's type name to a higher
 // ordinal for a declaration that is never compiled. Those visitors keep the per-file set alone.
-var packageLiftedTypeNames HashSet[string]
+var packageLiftedTypeNames hashset.HashSet[string]
 
 // productionLiftedTypeNames pins the lifted type names the PRODUCTION conversion of this package
 // already claimed, for the `-tests` INTERNAL variant only: that variant emits its `_test.go` files
@@ -467,7 +468,7 @@ var packageLiftedTypeNames HashSet[string]
 // for a production conversion and for the EXTERNAL variant, whose `<pkg>_test_package` class is a
 // separate scope that may reuse the names freely. Installed by convertTestVariant from the seed its
 // caller captured before the first variant's resetPackageState.
-var productionLiftedTypeNames HashSet[string]
+var productionLiftedTypeNames hashset.HashSet[string]
 
 // productionAliasLiftedTypes maps an anonymous struct/interface TYPE to the package-scope ALIAS
 // name the PRODUCTION conversion lifted it under (`type CorpusEntry = struct{…}` → "CorpusEntry").
@@ -549,7 +550,7 @@ var internalTestDynamicTypeNames map[string]string
 // to one `-tests` conversion (computed in convertTestVariants from the two loaded variants, before
 // either is converted) and, like testMethodRenames, deliberately NOT cleared by resetPackageState;
 // nil for every other conversion, so no other emission changes.
-var testAmbiguousLocalTypeNames HashSet[string]
+var testAmbiguousLocalTypeNames hashset.HashSet[string]
 
 // whiteboxInternalTestObjects is the object-identity set contributed by the internal `_test.go`
 // half of the one go/packages load. External-variant selector and type rendering consult it when
@@ -562,7 +563,7 @@ var whiteboxInternalTestObjects map[types.Object]bool
 // the anchor class its record will actually land in (whiteboxBridgeDeclaredType); the LIFTED half
 // of the set is only claimed as the bridge converts, so that predicate folds in the live lift
 // claims while the bridge is the variant under conversion.
-var whiteboxBridgeTypeNames HashSet[string]
+var whiteboxBridgeTypeNames hashset.HashSet[string]
 
 // whiteboxBridgeDeclaredNames holds the GO names the white-box bridge class itself declares — its
 // internal `_test.go` package-level funcs/vars/consts/types plus its methods, which emit as static
@@ -575,7 +576,7 @@ var whiteboxBridgeTypeNames HashSet[string]
 // remedy packageBuiltinShadows applies to a shadowed `using static go.builtin`. Raw Go names,
 // because both sides pass through the same sanitizers; session-scoped like testMethodRenames and
 // nil for every other conversion.
-var whiteboxBridgeDeclaredNames HashSet[string]
+var whiteboxBridgeDeclaredNames hashset.HashSet[string]
 
 // metadataAnchorLocalTypes reports whether the anchored metadata file being written treats its
 // anchor class as the LOCAL type scope — true for the reference test models (the production class

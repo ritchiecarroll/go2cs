@@ -13,6 +13,8 @@ import (
 	"go/types"
 	"strings"
 	"testing"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // RED 10. A NESTED map assignment `m[k1][k2] = v` emits `m[k1].Set(k2, v)` (a C# indexer setter on the
@@ -103,7 +105,7 @@ func loadNestedMapFixture(t *testing.T) (*Visitor, map[string]*ast.AssignStmt, m
 func withFixtureParams(t *testing.T, visitor *Visitor, production *ast.FuncDecl) {
 	t.Helper()
 
-	visitor.paramNames = HashSet[string]{}
+	visitor.paramNames = hashset.HashSet[string]{}
 	visitor.paramObjects = map[types.Object]bool{}
 
 	for _, field := range production.Type.Params.List {

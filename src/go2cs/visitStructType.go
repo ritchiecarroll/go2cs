@@ -14,6 +14,8 @@ import (
 	"go/token"
 	"go/types"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 const StructPrefixMarker = ">>MARKER:STRUCT_%s_PREFIX<<"
@@ -747,7 +749,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					if promotions, exists := promotedInterfaceImplementations[csFullTypeName]; exists {
 						promotions.Add(structTypeName)
 					} else {
-						promotedInterfaceImplementations[csFullTypeName] = NewHashSet([]string{structTypeName})
+						promotedInterfaceImplementations[csFullTypeName] = hashset.NewHashSet([]string{structTypeName})
 					}
 
 					packageLock.Unlock()
@@ -781,7 +783,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					if implementations, exists := interfaceImplementations[csFullTypeName]; exists {
 						implementations.Add(pointerRecordName)
 					} else {
-						interfaceImplementations[csFullTypeName] = NewHashSet([]string{pointerRecordName})
+						interfaceImplementations[csFullTypeName] = hashset.NewHashSet([]string{pointerRecordName})
 					}
 
 					packageLock.Unlock()

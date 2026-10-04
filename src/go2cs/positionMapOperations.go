@@ -18,6 +18,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // The POSITION MAP is how a converted program answers `runtime.Caller` — and every traceback built
@@ -365,7 +367,7 @@ func positionMapSectionLines(infoFileName string, existing []string, mergeExisti
 	packageLock.Unlock()
 
 	if mergeExisting {
-		recorded := HashSet[string]{}
+		recorded := hashset.HashSet[string]{}
 
 		for _, record := range records {
 			recorded.Add(positionMapRecordKey(record))

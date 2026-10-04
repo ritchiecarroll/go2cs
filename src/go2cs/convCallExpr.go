@@ -18,6 +18,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // csharpKeywordCastTypes are the C# keyword primitive type names for which `(T)-value` is
@@ -25,7 +27,7 @@ import (
 // (int64=long, uint64=ulong, rune=int, …) or a `[GoType]` NAMED type (level, Class) — for those,
 // `(T)-1` parses as `T MINUS 1` (CS0075 "to cast a negative value … enclose in parentheses" /
 // CS0119 "T is a type, not valid in the given context"), so the operand must be parenthesized.
-var csharpKeywordCastTypes = NewHashSet([]string{
+var csharpKeywordCastTypes = hashset.NewHashSet([]string{
 	"int", "uint", "long", "ulong", "short", "ushort", "byte", "sbyte",
 	"nint", "nuint", "float", "double", "decimal", "bool", "char",
 })
@@ -3854,7 +3856,7 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 					// If both funcType and argType are distinct structs, track implicit conversions
 					packageLock.Lock()
 
-					var targetConversionsMap map[string]HashSet[string]
+					var targetConversionsMap map[string]hashset.HashSet[string]
 
 					if targetTypeIsPointer {
 						targetConversionsMap = indirectImplicitConversions
@@ -3862,13 +3864,13 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 						targetConversionsMap = implicitConversions
 					}
 
-					var conversions HashSet[string]
+					var conversions hashset.HashSet[string]
 					var exists bool
 
 					if conversions, exists = targetConversionsMap[argTypeName]; exists {
 						conversions.Add(targetTypeName)
 					} else {
-						conversions = NewHashSet([]string{targetTypeName})
+						conversions = hashset.NewHashSet([]string{targetTypeName})
 						targetConversionsMap[argTypeName] = conversions
 					}
 
@@ -5672,7 +5674,7 @@ func (v *Visitor) addImplicitSubStructConversions(sourceType types.Type, targetT
 			// Recursively add implicit conversions for sub-structs
 			v.addImplicitSubStructConversions(subStructType, targetTypeName, indirect)
 
-			var targetConversionsMap map[string]HashSet[string]
+			var targetConversionsMap map[string]hashset.HashSet[string]
 
 			if indirect {
 				targetConversionsMap = indirectImplicitConversions
@@ -5680,7 +5682,7 @@ func (v *Visitor) addImplicitSubStructConversions(sourceType types.Type, targetT
 				targetConversionsMap = implicitConversions
 			}
 
-			var conversions HashSet[string]
+			var conversions hashset.HashSet[string]
 			var exists bool
 
 			packageLock.Lock()
@@ -5688,7 +5690,7 @@ func (v *Visitor) addImplicitSubStructConversions(sourceType types.Type, targetT
 			if conversions, exists = targetConversionsMap[subStructTypeName]; exists {
 				conversions.Add(targetTypeName)
 			} else {
-				conversions = NewHashSet([]string{targetTypeName})
+				conversions = hashset.NewHashSet([]string{targetTypeName})
 				targetConversionsMap[subStructTypeName] = conversions
 			}
 

@@ -13,6 +13,8 @@ import (
 	"go/token"
 	"go/types"
 	"testing"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // TestLinknameVarAliasRegistryMatchesGoSource checks every linknameVarAliasTargets row against the
@@ -141,7 +143,7 @@ func TestLinknameVarAliasPublicizesTheStorageSide(t *testing.T) {
 	savedPath := currentPackagePath
 	savedHandles := linknameHandles
 
-	linknameHandles = HashSet[string]{}
+	linknameHandles = hashset.HashSet[string]{}
 
 	t.Cleanup(func() {
 		currentPackagePath = savedPath

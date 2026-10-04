@@ -30,9 +30,11 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
-var keywords = NewHashSet([]string{
+var keywords = hashset.NewHashSet([]string{
 	// The following are all valid C# keywords and types, when encountered in Go code they should be
 	// escaped with an `@` prefix which allows them to be used as identifiers in C#:
 	"abstract", "as", "base", "catch", "char", "checked", "class", "const", "decimal", "delegate", "do", "double",
@@ -90,7 +92,7 @@ var keywords = NewHashSet([]string{
 // `_test.go` file renames the test side's uses of a same-named production field (the B2 coherence class);
 // the corpus declares none. C# 15's `with(` collection-element rule needs nothing: a Go composite literal
 // is emitted as an array initializer, never a collection expression.
-var csReservedTypeNames = NewHashSet([]string{"closed", "union", "safe"})
+var csReservedTypeNames = hashset.NewHashSet([]string{"closed", "union", "safe"})
 
 // collectCSReservedTypeNameDecls records every name in file that a C# 15 reserved TYPE-position keyword
 // (csReservedTypeNames) would break: a type declaration at any level, an alias, and a type parameter of a
@@ -165,7 +167,7 @@ func collectCSReservedTypeNameDecls(file *ast.File, found map[string]bool) {
 // re-fed delegate compositions corrupt `Func<..., nint, nint>` to `Δnint`), so a user TYPE
 // named one of those is instead renamed package-scoped via performNameCollisionAnalysis
 // (emitterSpelledTypeNames). Guarded by tests/Behavioral/ReservedNameShadows.
-var reserved = NewHashSet([]string{
+var reserved = hashset.NewHashSet([]string{
 	"AreEqual", "array", "builtin", "channel", "EmptyStruct", "Equals", "Finalize", "GetGoTypeName",
 	"GetHashCode", "GetType", "GoFrame", "GoFuncRoot", "GoImplement", "GoImplementAttribute", "GoImplicitConv",
 	"GoImplicitConvAttribute", "GoPackage", "GoPackageAttribute", "GoRecv", "GoRecvAttribute",

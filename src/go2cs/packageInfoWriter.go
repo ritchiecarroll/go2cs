@@ -29,6 +29,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // legacyInterfaceImplementationsFirstLine identifies the first line of the <InterfaceImplementations>
@@ -265,7 +267,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 
 	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
 		// Read existing type aliases from package info file
-		lines := HashSet[string]{}
+		lines := hashset.HashSet[string]{}
 
 		// If processing a single file, instead of all package files, merge type aliases
 		if mergeExisting {
@@ -338,7 +340,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 
 	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
 		// Read existing type aliases from package info file
-		lines := HashSet[string]{}
+		lines := hashset.HashSet[string]{}
 
 		// If processing a single file, instead of all package files, merge type aliases
 		if mergeExisting {
@@ -439,7 +441,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 
 	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
 		// Read existing interface lines from package info file
-		lines := HashSet[string]{}
+		lines := hashset.HashSet[string]{}
 
 		// If processing a single file, instead of all package files, merge interface implementations
 		if mergeExisting {
@@ -486,7 +488,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 						// on map iteration order. Only the COMMON implementations are dropped, and
 						// only from the LOWER (inherited) interface — C# interface inheritance
 						// already covers them via the derived implementation.
-						commonImplementations := NewHashSet(baseImplementations.Keys())
+						commonImplementations := hashset.NewHashSet(baseImplementations.Keys())
 						commonImplementations.IntersectWithSet(inheritedImplementations)
 
 						for _, implementation := range commonImplementations.Keys() {
@@ -675,7 +677,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 
 	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
 		// Read existing interface lines from package info file
-		lines := HashSet[string]{}
+		lines := hashset.HashSet[string]{}
 
 		// If processing a single file, instead of all package files, merge implicit conversions
 		if mergeExisting {
@@ -833,7 +835,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	}
 
 	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
-		lines := HashSet[string]{}
+		lines := hashset.HashSet[string]{}
 
 		// Merge the existing declarations for a single-file conversion, and for the -tests files
 		// seeded from the production package_info.cs (whose production entries must survive each

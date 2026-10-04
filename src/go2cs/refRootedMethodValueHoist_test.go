@@ -13,6 +13,8 @@ import (
 	"go/types"
 	"strings"
 	"testing"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // RED 11. A concrete VALUE-receiver method VALUE in a call ARGUMENT mints a wrapping lambda
@@ -121,7 +123,7 @@ func loadRefRootedFixture(t *testing.T) (*Visitor, map[string]*ast.CallExpr, map
 func withRefRootedFixtureParams(t *testing.T, visitor *Visitor, funcDecl *ast.FuncDecl) {
 	t.Helper()
 
-	visitor.paramNames = HashSet[string]{}
+	visitor.paramNames = hashset.HashSet[string]{}
 	visitor.paramObjects = map[types.Object]bool{}
 
 	for _, field := range funcDecl.Type.Params.List {
