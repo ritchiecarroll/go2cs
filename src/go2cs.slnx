@@ -437,6 +437,7 @@
     <Project Path="tests/Behavioral/EmbeddedTypeNameCollision/EmbeddedTypeNameCollision.csproj" />
     <Project Path="tests/Behavioral/EmbeddedTypeNameCollision/inner/EmbeddedTypeNameCollision.inner.csproj" />
     <Project Path="tests/Behavioral/EmbeddedValuePointerMethod/EmbeddedValuePointerMethod.csproj" />
+    <Project Path="tests/Behavioral/EmptyIfaceImplementRecord/EmptyIfaceImplementRecord.csproj" />
     <Project Path="tests/Behavioral/EmptyStructMapSet/EmptyStructMapSet.csproj" />
     <Project Path="tests/Behavioral/EnvironBlockWalk/EnvironBlockWalk.csproj" />
     <Project Path="tests/Behavioral/ErrorfFormatting/ErrorfFormatting.csproj" />
