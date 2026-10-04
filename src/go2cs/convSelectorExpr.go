@@ -315,6 +315,106 @@ func crossPackagePromotionHop(base string, baseIsBox bool, baseType types.Type, 
 	return expr
 }
 
+// crossPackagePointerPromotion is crossPackageValuePromotion's POINTER-receiver counterpart, for method EXPRESSIONS only:
+// the embedded fields a method expression walks when it selects a pointer-receiver method promoted through a path in
+// which some hop crosses packages; nil otherwise. A call of such a method already walks the embed explicitly, and its
+// method VALUE binds the generated forwarder; the expression had neither and named the declaring package's group
+// (`bytes.Write` for `(*myType).Write`, myType embedding bytes.Buffer: CS0123, go-cmp).
+func crossPackagePointerPromotion(sel *types.Selection) []*types.Var {
+	if sel == nil || sel.Kind() != types.MethodExpr || len(sel.Index()) < 2 {
+		return nil
+	}
+
+	fn, ok := sel.Obj().(*types.Func)
+
+	if !ok || fn.Pkg() == nil {
+		return nil
+	}
+
+	sig, ok := fn.Type().(*types.Signature)
+
+	if !ok || sig.Recv() == nil || types.IsInterface(sig.Recv().Type()) {
+		return nil
+	}
+
+	if _, isPtrRecv := types.Unalias(sig.Recv().Type()).(*types.Pointer); !isPtrRecv {
+		return nil
+	}
+
+	var path []*types.Var
+	crosses := false
+	owner := sel.Recv()
+
+	for _, idx := range sel.Index()[:len(sel.Index())-1] {
+		ownerNamed := promotionNamed(owner)
+		structType, ok := types.Unalias(promotionDeref(owner)).Underlying().(*types.Struct)
+
+		if !ok || ownerNamed == nil || idx >= structType.NumFields() {
+			return nil
+		}
+
+		field := structType.Field(idx)
+		fieldNamed := promotionNamed(field.Type())
+
+		if !field.Embedded() || fieldNamed == nil {
+			return nil
+		}
+
+		if ownerNamed.Obj().Pkg() != fieldNamed.Obj().Pkg() {
+			crosses = true
+		}
+
+		path = append(path, field)
+		owner = field.Type()
+	}
+
+	if !crosses {
+		return nil
+	}
+
+	return path
+}
+
+// crossPackagePointerPromotionHop renders the walk of a crossPackagePointerPromotion path to the BOX of the method's
+// receiver type, which is where a pointer-receiver method's ж<T> form binds. A base that is a box (`(*T).M`) stays a
+// box: a value hop is the field's `.of(<Owner>.Ꮡ<field>)` view, a pointer hop the field itself (`.Value.<field>`). A
+// value base (`T.M`, legal only when a pointer embed puts the method in T's value set) walks by value up to its first
+// pointer hop, whose field already is the box. Returns "" when the walk never reaches a box.
+func (v *Visitor) crossPackagePointerPromotionHop(base string, baseIsBox bool, baseType types.Type, path []*types.Var) string {
+	expr, isBox := base, baseIsBox
+	owner := promotionDeref(baseType)
+
+	for _, field := range path {
+		name := getCoreSanitizedIdentifier(field.Name())
+
+		if fieldCollidesWithOwnerType(field.Name(), owner) {
+			name = typeCollidingFieldName(name)
+		}
+
+		name = removeLeadingSanitizationMarker(name)
+		_, isPtr := types.Unalias(field.Type()).(*types.Pointer)
+
+		switch {
+		case isBox && !isPtr:
+			ownerTypeName := convertToCSTypeName(v.getAliasQualifiedTypeName(owner, false))
+			expr = fmt.Sprintf("%s.of(%s.%s%s)", expr, v.boxAccessorType(ownerTypeName, "", owner), AddressPrefix, name)
+		case isBox && isPtr:
+			expr += ".Value." + name
+		default:
+			expr += "." + name
+			isBox = isPtr
+		}
+
+		owner = promotionDeref(field.Type())
+	}
+
+	if !isBox {
+		return ""
+	}
+
+	return expr
+}
+
 // crossPackagePromotedReceiver applies crossPackagePromotionHop to a selector's rendered receiver when the selector is a
 // crossPackageValuePromotion; the rendering is returned unchanged otherwise.
 func (v *Visitor) crossPackagePromotedReceiver(selectorExpr *ast.SelectorExpr, rendered string) string {
@@ -1050,6 +1150,40 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 
 					return fmt.Sprintf("((%s)(%s(%s) => %s.%s(%s)))", delegateType, mark, strings.Join(params, ", "),
 						crossPackagePromotionHop(recv, recvIsPtr, sel.Recv(), path), methodName, strings.Join(args, ", "))
+				}
+			}
+		}
+
+		// The POINTER-receiver counterpart (crossPackagePointerPromotion): `(*myType).Write`, myType embedding
+		// bytes.Buffer, forwards through a lambda that walks the path to the receiver BOX the method's ж<T> form binds
+		// on: `((Func<ж<myType>, slice<byte>, (nint, error)>)((p0, p1) => wrapperRecv(p0).of(myType.ᏑBuffer).Write(p1)))`.
+		// Without it the qualification below named the declaring package's group, which has no overload for the
+		// embedding type (CS0123).
+		if path := crossPackagePointerPromotion(sel); path != nil {
+			if fn, ok := sel.Obj().(*types.Func); ok {
+				if sig, ok := fn.Type().(*types.Signature); ok {
+					params := []string{"p0"}
+					args := make([]string, 0, sig.Params().Len())
+
+					for i := 0; i < sig.Params().Len(); i++ {
+						name := fmt.Sprintf("p%d", i+1)
+						params = append(params, name)
+						args = append(args, name)
+					}
+
+					_, recvIsPtr := types.Unalias(sel.Recv()).(*types.Pointer)
+					recv := "p0"
+
+					if recvIsPtr {
+						recv = v.methodExpressionWrapperReceiver(sel)
+					}
+
+					if hop := v.crossPackagePointerPromotionHop(recv, recvIsPtr, sel.Recv(), path); hop != "" {
+						v.addMethodPackageNamespaceUsing(fn.Pkg())
+
+						return fmt.Sprintf("((%s)(%s(%s) => %s.%s(%s)))", delegateType, v.methodExpressionWrapperMark(sel, recvIsPtr),
+							strings.Join(params, ", "), hop, methodName, strings.Join(args, ", "))
+					}
 				}
 			}
 		}

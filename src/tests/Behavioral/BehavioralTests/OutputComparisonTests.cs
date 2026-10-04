@@ -1556,6 +1556,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPromotedFieldPointerDeref() => CheckTarget("PromotedFieldPointerDeref");
 
     [TestMethod]
+    public void CheckPromotedMethodExpr() => CheckTarget("PromotedMethodExpr");
+
+    [TestMethod]
     public void CheckPromotedPtrMethodValueSet() => CheckTarget("PromotedPtrMethodValueSet");
 
     [TestMethod]
