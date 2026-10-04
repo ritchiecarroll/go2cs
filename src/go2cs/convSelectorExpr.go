@@ -942,6 +942,13 @@ func (v *Visitor) aliasResolvedSelector(selectorExpr *ast.SelectorExpr, rendered
 	// the package class (CS0426). A published type alias is looked up under the declared name
 	// instead, and renders as its `global using` name (`PALibꓸB2`), as the canonical import does.
 	// Only a non-const type alias is redirected: every other member keeps the file-alias spelling.
+	// Two same-named imports both publish this alias name (see ambiguousImportedTypeAliases), so no
+	// `global using` declares it: render the alias's TARGET, which go/types resolved to the right
+	// package (`afoo.Alias{N: 2}` constructs `afoo.Inner`).
+	if obj, ok := v.info.Uses[selectorExpr.Sel].(*types.TypeName); ok && obj.IsAlias() && obj.Pkg() != nil && obj.Pkg() != v.pkg && importedTypeAliasIsAmbiguous(obj) {
+		return v.getCSharpTypeName(obj.Type())
+	}
+
 	if declared := pkgName.Imported().Name(); pkgName.Name() != declared {
 		if member, ok := strings.CutPrefix(rendered, pkgName.Name()+"."); ok {
 			key := getSanitizedIdentifier(declared) + "." + member
@@ -996,6 +1003,43 @@ func aliasSourceMatchesPackage(rendered string, pkg *types.Package) bool {
 	}
 
 	return filepath.Clean(dir.Dir) == sourceDir
+}
+
+// importedTypeAliasIsAmbiguous reports whether a foreign type alias's imported-type-alias key is one
+// that two same-named dependencies published with different targets (see ambiguousImportedTypeAliases).
+func importedTypeAliasIsAmbiguous(aliasObj *types.TypeName) bool {
+	key := getSanitizedIdentifier(aliasObj.Pkg().Name()) + "." + getCoreSanitizedIdentifier(aliasObj.Name())
+
+	packageLock.Lock()
+	defer packageLock.Unlock()
+
+	return ambiguousImportedTypeAliases.Contains(key)
+}
+
+// ambiguousImportedTypeAliasTarget returns the fully-qualified target that pkg ITSELF published under
+// an ambiguous key (see ambiguousImportedTypeAliases), read by pkg's source directory; false for every
+// other key, and for a package whose directory is unknown.
+func ambiguousImportedTypeAliasTarget(key string, pkg *types.Package) (string, bool) {
+	if pkg == nil {
+		return "", false
+	}
+
+	dir, ok := importPackageDirs[pkg.Path()]
+
+	if !ok || dir.Dir == "" {
+		return "", false
+	}
+
+	packageLock.Lock()
+	defer packageLock.Unlock()
+
+	if !ambiguousImportedTypeAliases.Contains(key) {
+		return "", false
+	}
+
+	target, ok := importedTypeAliasTargetsByDir[filepath.Clean(dir.Dir)+"\x00"+key]
+
+	return target, ok
 }
 
 // selectorBasePackageObj extracts the *types.PkgName the selector's base identifier is bound to,

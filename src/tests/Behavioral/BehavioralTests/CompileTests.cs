@@ -1825,6 +1825,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckSStringTwinPilot() => CheckTarget("SStringTwinPilot");
 
     [TestMethod]
+    public void CheckSameNameImportAlias() => CheckTarget("SameNameImportAlias");
+
+    [TestMethod]
     public void CheckSamePackageImplementNoWitness() => CheckTarget("SamePackageImplementNoWitness");
 
     [TestMethod]

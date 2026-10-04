@@ -188,6 +188,10 @@ func (v *Visitor) visitFile(file *ast.File) {
 	// the file already imports canonically, so a normal import emits its alias exactly once (no
 	// duplicate, no churn); a non-canonical alias (`using t = time_package;`) coexists with the added
 	// canonical one (`using time = time_package;`) without conflict.
+	type suppliedUsing struct{ importPath, namespace string }
+
+	supplied := map[string][]suppliedUsing{}
+
 	for _, importPath := range v.referencedForeignPackages.Keys() {
 		// referencedForeignPackages is keyed by pkg.Path() (unprefixed for GOROOT-vendored
 		// packages), while canonicalAliasImported records the RESOLVED on-disk path — check
@@ -220,7 +224,39 @@ func (v *Visitor) visitFile(file *ast.File) {
 			continue
 		}
 
-		v.addRequiredUsing(fmt.Sprintf("%s = %s", alias, namespace))
+		// One package can arrive under two path spellings (vendored and resolved); it is still one
+		// namespace, supplied once, exactly as the set below always deduplicated it.
+		duplicate := false
+
+		for _, candidate := range supplied[alias] {
+			duplicate = duplicate || candidate.namespace == namespace
+		}
+
+		if !duplicate {
+			supplied[alias] = append(supplied[alias], suppliedUsing{importPath, namespace})
+		}
+	}
+
+	// Two DIFFERENT packages can need the same canonical alias: a/foo and b/foo, both `package foo`,
+	// imported as `afoo` and `bfoo`. One `using foo` cannot name both (CS1537). A package this file
+	// imports under an EXPLICIT alias renders its types through that alias (importPathAliases), so it
+	// yields the canonical one; whatever remains is supplied only when it is a single package.
+	for alias, candidates := range supplied {
+		if len(candidates) > 1 {
+			var kept []suppliedUsing
+
+			for _, candidate := range candidates {
+				if v.importPathAliases[candidate.importPath] == "" {
+					kept = append(kept, candidate)
+				}
+			}
+
+			candidates = kept
+		}
+
+		if len(candidates) == 1 {
+			v.addRequiredUsing(fmt.Sprintf("%s = %s", alias, candidates[0].namespace))
+		}
 	}
 
 	// Ensure using ortder is consistent

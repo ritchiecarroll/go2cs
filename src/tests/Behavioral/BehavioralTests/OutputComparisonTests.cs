@@ -1763,6 +1763,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSStringTwinPilot() => CheckTarget("SStringTwinPilot");
 
     [TestMethod]
+    public void CheckSameNameImportAlias() => CheckTarget("SameNameImportAlias");
+
+    [TestMethod]
     public void CheckSamePackageImplementNoWitness() => CheckTarget("SamePackageImplementNoWitness");
 
     [TestMethod]

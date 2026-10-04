@@ -373,6 +373,9 @@
     <Project Path="tests/Behavioral/CrossPackagePromotedValueMethod/CrossPackagePromotedValueMethod.csproj" />
     <Project Path="tests/Behavioral/CrossPkgLiteralNestedField/CrossPkgLiteralNestedField.csproj" />
     <Project Path="tests/Behavioral/CrossPkgLiteralNestedField/addrlib/CrossPkgLiteralNestedField.addrlib.csproj" />
+    <Project Path="tests/Behavioral/SameNameImportAlias/SameNameImportAlias.csproj" />
+    <Project Path="tests/Behavioral/SameNameImportAlias/a/foo/SameNameImportAlias.a.foo.csproj" />
+    <Project Path="tests/Behavioral/SameNameImportAlias/b/foo/SameNameImportAlias.b.foo.csproj" />
     <Project Path="tests/Behavioral/CrossPkgBox/CrossPkgBox.csproj" />
     <Project Path="tests/Behavioral/CrossPkgFuncLib/CrossPkgFuncLib.csproj" />
     <Project Path="tests/Behavioral/CrossPkgLib/CrossPkgLib.csproj" />

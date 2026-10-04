@@ -26,8 +26,10 @@ func TestSameNamedImportsKeepTheirOwnTypeAliases(t *testing.T) {
 	appDir := filepath.Join(root, "app")
 
 	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/samename\n\ngo 1.23\n")
-	writeModuleFile(t, filepath.Join(appDir, "a", "foo", "foo.go"), "package foo\n\ntype Inner struct{ N int }\n\ntype Alias = Inner\n")
-	writeModuleFile(t, filepath.Join(appDir, "b", "foo", "foo.go"), "package foo\n\ntype Other struct{ S string }\n\ntype Alias = Other\n")
+	// Kind collides with S's method of the same name, so each package Δ-renames it and publishes
+	// `Kind` as an exported alias of its own ΔKind: the same ambiguity through a NAMED type.
+	writeModuleFile(t, filepath.Join(appDir, "a", "foo", "foo.go"), "package foo\n\ntype Inner struct{ N int }\n\ntype Alias = Inner\n\ntype Kind int\n\ntype S struct{}\n\nfunc (S) Kind() Kind { return 1 }\n")
+	writeModuleFile(t, filepath.Join(appDir, "b", "foo", "foo.go"), "package foo\n\ntype Other struct{ S string }\n\ntype Alias = Other\n\ntype Kind string\n\ntype S struct{}\n\nfunc (S) Kind() Kind { return \"b\" }\n")
 	writeModuleFile(t, filepath.Join(appDir, "main.go"), `package main
 
 import (
@@ -40,7 +42,9 @@ import (
 func main() {
 	var x afoo.Alias = afoo.Inner{N: 1}
 	var y bfoo.Alias = bfoo.Other{S: "s"}
-	fmt.Println(x.N, y.S)
+	z := afoo.Alias{N: 2}
+	var ka afoo.Kind = afoo.S{}.Kind()
+	fmt.Println(x.N, y.S, z.N, ka)
 }
 `)
 
@@ -73,15 +77,23 @@ func main() {
 	packageInfo := readGenerated(t, filepath.Join(outDir, "package_info.cs"))
 
 	for _, want := range []string{
-		"go.example.com.samename.a.foo_package.Inner x", // a/foo's Alias
-		"go.example.com.samename.b.foo_package.Other y", // b/foo's Alias
+		"afoo.Inner x",         // a/foo's Alias, rendered through its target
+		"bfoo.Other y",         // b/foo's Alias
+		"new afoo.Inner(N: 2)", // a composite literal written through the alias
+		"go.example.com.samename.a.foo_package.ΔKind ka", // a/foo's own renamed Kind
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("missing %q in:\n%s", want, mainCs)
 		}
 	}
 
-	if strings.Contains(packageInfo, "fooꓸAlias") {
+	// Both imports are renamed, so each package's types render through its own alias; supplying the
+	// canonical `using foo = …` for each would declare one alias name twice (CS1537).
+	if count := strings.Count(mainCs, "using foo = "); count > 1 {
+		t.Errorf("%d canonical `using foo` directives, one alias name for two packages, in:\n%s", count, mainCs)
+	}
+
+	if strings.Contains(packageInfo, "fooꓸAlias") || strings.Contains(packageInfo, "fooꓸKind") {
 		t.Errorf("the shared alias name is declared, though it has two meanings, in:\n%s", packageInfo)
 	}
 }

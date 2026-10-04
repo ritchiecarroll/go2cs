@@ -1056,8 +1056,21 @@ func applyExportedTypeAliases(results [][2]string, info PackageInfo, derived boo
 		}
 
 		packageLock.Lock()
+
+		sourceDir := filepath.Clean(info.SourceDir)
+
+		// A second same-named dependency publishing this key with a DIFFERENT target makes the
+		// key ambiguous: see ambiguousImportedTypeAliases. A CONST key declares no alias and
+		// renders through its import qualifier, so it is left as it was.
+		if previous, exists := importedTypeAliases[alias]; exists && previous != typeName &&
+			importedTypeAliasSourceDirs[alias] != sourceDir && !constImportedTypeAliases.Contains(alias) {
+			ambiguousImportedTypeAliases.Add(alias)
+			qualifiedImportedTypeAliases.Add(alias)
+		}
+
 		importedTypeAliases[alias] = typeName
-		importedTypeAliasSourceDirs[alias] = filepath.Clean(info.SourceDir)
+		importedTypeAliasSourceDirs[alias] = sourceDir
+		importedTypeAliasTargetsByDir[sourceDir+"\x00"+alias] = typeName
 
 		if derived {
 			derivedTypeAliases.Add(alias)
