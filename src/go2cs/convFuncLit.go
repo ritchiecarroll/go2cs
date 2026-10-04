@@ -971,18 +971,26 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		}
 
 		if returnIndex != -1 {
-			body = collapsible[returnIndex+7:]
-
 			// Remove the BLOCK's closing brace — always the last non-whitespace rune of the
 			// visited block; the statement's `;` always separates it from the expression. The
 			// old TrimSuffix+LastIndex pair cut at the last `}` ANYWHERE, truncating a return
 			// expression containing its own `}` — `return []Value{ValueOf(yield(in[0]))}`
 			// emitted `new ΔValue[]{ValueOf(yield(@in[0]))` with `}.slice()` chopped
 			// (reflect/iter.go MakeFunc literals, CS1513 x2).
-			body = strings.TrimSpace(body)
-			body = strings.TrimSuffix(body, "}")
-			body = strings.TrimSpace(body)
-			body = strings.TrimSuffix(body, ";")
+			expr := strings.TrimSpace(collapsible[returnIndex+7:])
+			expr = strings.TrimSpace(strings.TrimSuffix(expr, "}"))
+
+			// Only the return statement's own `;` may end the block. A COMMENT after it — the
+			// return's trailing `// Never true` under -comments (go-cmp's cmp/options.go), or a
+			// comment line before the `}` — has no place in an expression body: collapsed, it
+			// commented out the rest of the enclosing call (`wrap((reflectꓸType t) =>
+			// t.AssignableTo(errorIfaceʗ1); // Never true, "x"u8));`, CS1026). Keep the block
+			// body, as a comment ahead of the return already does (the prefix test above).
+			if strings.HasSuffix(expr, ";") {
+				body = strings.TrimSuffix(expr, ";")
+			} else {
+				body = strings.TrimSpace(body)
+			}
 		}
 	} else {
 		body = strings.TrimSpace(body)

@@ -101,6 +101,23 @@ Because the comment is now claimed by the statement it belongs to, it can no lon
 the closing brace: `} // after the if/else` and `} // after the switch` land on the brace, and a
 block's final statement keeps its comment inside the block.
 
+**A single-return func literal whose return carries the comment keeps its block body.** Such a literal
+normally collapses to an expression-bodied lambda (`(nint n) => n == limit`), but a collapsed body
+has no line of its own: it sits inside the enclosing expression, so a trailing `//` comment would
+comment out the rest of it (`wrap((nint n) => n < limit; // below the limit, "x"u8);`, CS1026 —
+go-cmp's `return t.AssignableTo(errorIface) // Never true`). `convFuncLit` collapses only when the
+return statement's own `;` ends the block; otherwise the block stays, and the comment ends its own
+line inside it:
+
+```csharp
+var f = wrap((nint n) => {
+    return n < limit; // below the limit
+}, "x"u8);
+```
+
+(Guarded by `collapsedLambdaTrailingComment_test.go`, with a comment-free literal that still collapses
+as the control.)
+
 ## What is still deferred
 
 Three shapes remain genuinely leading and keep the standalone path — the comment stays where it
