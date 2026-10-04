@@ -752,6 +752,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGoShiftSemantics() => CheckTarget("GoShiftSemantics");
 
     [TestMethod]
+    public void CheckGoStmtReceiverBoxGroup() => CheckTarget("GoStmtReceiverBoxGroup");
+
+    [TestMethod]
     public void CheckGoStmtReceiverLambda() => CheckTarget("GoStmtReceiverLambda");
 
     [TestMethod]
@@ -1413,6 +1416,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckParallelAssignmentHazard() => CheckTarget("ParallelAssignmentHazard");
+
+    [TestMethod]
+    public void CheckParenFuncLitGoDefer() => CheckTarget("ParenFuncLitGoDefer");
 
     [TestMethod]
     public void CheckParenIifeNilFuncConv() => CheckTarget("ParenIifeNilFuncConv");

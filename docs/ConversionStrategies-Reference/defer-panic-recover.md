@@ -737,6 +737,28 @@ captures keeps its existing pre-call `generateCaptureDeclarations()` emission. (
 call capturing a local pointer, whose deferred write lands through the shared pointer box, output-compared
 vs Go.)
 
+## A PARENTHESIZED func-literal callee is the bare literal
+`go (func() { … })()` (gopkg.in/check.v1's `forkCall`) and `defer (func() { … })()` name the same callee
+as their unparenthesized forms, and emit the same C#. Three places used to test the callee for a func
+literal without looking through the parentheses: `visitGoStmt`/`visitDeferStmt` prepared the statement's
+captures as for an ordinary callee, the capture analysis did not treat the literal's body as a closure
+body, and `convCallExpr` rendered the callee through `convParenExpr`, which drops the hoist sink. The
+literal's capture copies were then written inside the call (`goǃ((` `var doneʗ2 = doneʗ1;` `() => …`,
+CS1002/CS1003/CS1026/CS1513, with `doneʗ1` never declared). All three now unwrap the parentheses, so
+the copy is a statement before the call and the deferred literal reads its variables by reference:
+
+```csharp
+var doneʗ1 = done;
+goǃ(() => {
+    fmt.Println((@string)"go"u8, c);
+    doneʗ1.ᐸꟷ(true);
+});
+```
+
+(Guarded by `parenFuncLitGoDeferCallee_test.go` and the `ParenFuncLitGoDefer` behavioral test, which
+runs the `forkCall` shape and a deferred literal that observes a later reassignment, output-compared vs
+Go.)
+
 ## Defer/go EAGER arguments follow the enclosing closure's capture renames
 Go evaluates a deferred (or spawned) call's function value and arguments **at statement time, in the
 enclosing scope**. The defer/go emission enters its own lambda-conversion state (its callee snapshots
