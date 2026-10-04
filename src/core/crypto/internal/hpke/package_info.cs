@@ -57,7 +57,7 @@ using static go.crypto.@internal.hpke_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/hpke/hpke.go", "hpke.cs", "ACI6ooKCgoKCtqKCgoKCgoIAFiAABhKCgoKUAAsQooKmwoKClJSClIKClISChKaygoKUgoKUhAAUMoKCgpQADxYACh4ADQqChIKClISCgpaCgoKEhJKSlIKClgAJFIKCgpSCgpaCgpamgoKClIKCloKClqaCgoKUpqaClKaCgoKmgoKClIKmgoKCgoKC1oKCgpSmgoKClO6CgqaCpoKCgoI=")]
+[assembly: go.GoPositionMap("crypto/internal/hpke/hpke.go", "hpke.cs", "ACI6ooKCgoKCtqKCgoKCgoIAFiAABhKCgoKUAAsQooKmwoKClJSClIKClISChKaygoKUgoKUhAAUMoKCgpQADxYACh4ADQqChIKClISCgpaCgoKEhJKSlIKClgAJFIKCgpSCgpaCgpamgoKClIKCloKClqaCgoKUpqaClKaCgoKmgoKClIKmgoKCgoKC1oKCgpSmgoKClO6CgqaCpoKCgoI=", "", "35=crypto.Hash.New;45=crypto.Hash.New")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;
