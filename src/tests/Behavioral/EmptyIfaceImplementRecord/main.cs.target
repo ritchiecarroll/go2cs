@@ -26,7 +26,7 @@ internal static nint args(params ꓸꓸꓸany xsʗp) {
 
 [GoType("dyn")] internal partial struct main_xs {
     [GoDescriptorType(Self = typeof(EmptyInterfaceᴅ))]
-    public EmptyInterface EmptyInterface;
+    [GoEmbedded] public EmptyInterface EmptyInterface;
 }
 
 internal static void Main() {

@@ -302,7 +302,7 @@ internal static void monitorSuspendResume() {
     }
     ref var fn = ref heap<any>(out var Ꮡfn);
 
-    fn = (uintptr context, uint32 changeType, uintptr setting) => {
+    fn = uintptr (uintptr context, uint32 changeType, uintptr setting) => {
         for (var mp = (ж<m>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallm))); mp != nil; mp = mp.Value.alllink) {
             if ((~mp).resumesema != 0) {
                 stdcall1(_SetEvent, (~mp).resumesema);

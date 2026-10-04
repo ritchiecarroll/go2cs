@@ -62,7 +62,7 @@ internal static void Main() {
         new Func<reflectꓸType, reflectꓸType, any, (any, error)>((reflectꓸType f, reflectꓸType t, any data) => (fmt.Sprintf("%s->%s:%v"u8, f, t, data), default!)),
         new Func<reflectꓸKind, reflectꓸKind, any, (any, error)>((reflectꓸKind f, reflectꓸKind t, any data) => (fmt.Sprintf("%s->%s:%v"u8, f, t, data), default!)),
         new Func<reflectꓸValue, reflectꓸValue, (any, error)>((reflectꓸValue f, reflectꓸValue t) => (f.Int() * 2, default!)),
-        (nint x) => x + 1,
+        nint (nint x) => x + 1,
         (nint)(42)
     }.slice();
     foreach (var (_, h) in hooks) {
