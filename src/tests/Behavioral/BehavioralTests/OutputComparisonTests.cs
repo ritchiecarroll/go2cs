@@ -602,6 +602,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckFuncLitCaptureInCondition() => CheckTarget("FuncLitCaptureInCondition");
 
     [TestMethod]
+    public void CheckFuncLitEmptyInterfaceTarget() => CheckTarget("FuncLitEmptyInterfaceTarget");
+
+    [TestMethod]
     public void CheckFuncLitNumericTupleReturn() => CheckTarget("FuncLitNumericTupleReturn");
 
     [TestMethod]

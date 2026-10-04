@@ -39,6 +39,65 @@ func numericBasicLit(expr ast.Expr) (*ast.BasicLit, bool) {
 	return lit, true
 }
 
+// markEmptyInterfaceFuncLits records every func literal in the file whose Go destination is an EMPTY
+// interface, named or not, at any position Go allows: a return, a declared variable, an assignment, an
+// argument, a conversion, a composite element (keyed or not), a struct field, a channel send.
+//
+// Such a literal has no delegate target in C#, so C# derives its delegate type from the body. That is
+// the reason CallExprContext.emptyInterfaceArgs marks the `any` argument slot and convKeyValueExpr the
+// keyed value slot, but the other positions reached convFuncLit unmarked. mapstructure's decode_hooks.go
+// returns `func(f, t reflect.Value) (interface{}, error) {…}` through a DecodeHookFunc result: every
+// arm's tuple holds a `default!`, no arm has a natural type, and the bare lambda is CS8917 (then
+// CS1662/CS8716 per arm) -- 40 of the package's 43 build errors. A single untyped-constant result is
+// the silent half: `return func() int64 { return 1 }` compiled as a Func<int>, so the dynamic type Go
+// asserts back to (func() int64) never matched. The destination is read through the same parent walk
+// the narrow-arithmetic pass uses, so convFuncLit sees one predicate at every position.
+func (v *Visitor) markEmptyInterfaceFuncLits(file *ast.File) {
+	var stack []ast.Node
+
+	ast.Inspect(file, func(n ast.Node) bool {
+		if n == nil {
+			stack = stack[:len(stack)-1]
+			return true
+		}
+
+		if funcLit, ok := n.(*ast.FuncLit); ok && isEmptyInterfaceTarget(v.funcLitDestinationType(funcLit, stack)) {
+			if v.emptyInterfaceFuncLits == nil {
+				v.emptyInterfaceFuncLits = map[*ast.FuncLit]bool{}
+			}
+
+			v.emptyInterfaceFuncLits[funcLit] = true
+		}
+
+		stack = append(stack, n)
+		return true
+	})
+}
+
+// funcLitDestinationType is narrowDestinationType plus the one destination a func literal reaches that
+// arithmetic cannot use as a typed sink: the operand of a CONVERSION, `interface{}(func() {…})`.
+func (v *Visitor) funcLitDestinationType(funcLit *ast.FuncLit, stack []ast.Node) types.Type {
+	i := len(stack) - 1
+
+	for i >= 0 {
+		if _, isParen := stack[i].(*ast.ParenExpr); !isParen {
+			break
+		}
+
+		i--
+	}
+
+	if i >= 0 {
+		if call, ok := stack[i].(*ast.CallExpr); ok && len(call.Args) == 1 {
+			if tv, ok := v.info.Types[call.Fun]; ok && tv.IsType() {
+				return tv.Type
+			}
+		}
+	}
+
+	return v.narrowDestinationType(funcLit, stack)
+}
+
 // funcLitHasOwnReturn reports whether the literal's body holds a return statement of its OWN; the returns
 // of a nested literal belong to that literal.
 func funcLitHasOwnReturn(funcLit *ast.FuncLit) bool {
@@ -1030,6 +1089,10 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		// converts implicitly through the golib operators.
 		returnTypePrefix := ""
 
+		// An empty-interface destination at ANY position, not only the argument and keyed-value slots
+		// that thread the context flag (see markEmptyInterfaceFuncLits).
+		untypedInterfaceTarget := context.untypedInterfaceTarget || v.emptyInterfaceFuncLits[funcLit]
+
 		if results := litSig.Results(); context.genericResultInferenceTarget && results != nil && results.Len() > 0 {
 			// The callee is generic and infers a type argument FROM this literal's return type
 			// (see CallExprContext.genericResultInferredFuncArgs). C# derives that from the arms'
@@ -1043,7 +1106,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			} else {
 				returnTypePrefix = v.generateResultSignature(litSig) + " "
 			}
-		} else if results := litSig.Results(); context.untypedInterfaceTarget && results != nil && results.Len() > 1 {
+		} else if results := litSig.Results(); untypedInterfaceTarget && results != nil && results.Len() > 1 {
 			// The MULTI-result twin of the `any`-slot rule below, which was scoped to single
 			// results for want of a demonstrated consumer. html/template's escape_test supplies
 			// one: `FuncMap{"pred": func(a ...any) (any, error) {…}}` renders its arms as C#
@@ -1061,7 +1124,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			// the declared result type: no arm exists that could have inferred it.
 			returnTypePrefix = v.generateResultSignature(litSig) + " "
 		} else if results := litSig.Results(); results != nil && results.Len() == 1 {
-			if context.untypedInterfaceTarget {
+			if untypedInterfaceTarget {
 				// A literal converted into a real `any` parameter slot is NATURAL-typed by C# —
 				// there is no delegate target, so the inferred return type comes from the arms'
 				// literal types (`return 0` → C# int = Go int32) rather than the DECLARED Go
