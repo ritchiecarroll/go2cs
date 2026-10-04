@@ -958,6 +958,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckLinuxSpawnBasics() => CheckTarget("LinuxSpawnBasics");
 
     [TestMethod]
+    public void CheckLiteralFloatConstFold() => CheckTarget("LiteralFloatConstFold");
+
+    [TestMethod]
     public void CheckLocalFunctionEmission() => CheckTarget("LocalFunctionEmission");
 
     [TestMethod]

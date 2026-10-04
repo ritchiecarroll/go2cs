@@ -105,8 +105,10 @@ func (v *Visitor) containsUntypedNamedIntegerConstRef(expr ast.Expr) bool {
 //   - a bare named-const REFERENCE (`Ln10`, an ident/selector) — it already renders as a
 //     single-rounded golib `UntypedFloat` wrapper cast, so folding it would only churn a readable
 //     reference into a magic number.
-//   - an int-valued or complex constant, and a pure-literal float const (`1.5 * 2.0`, no named ref)
-//     — the latter computes exactly in C# double, so its readable operator form is kept.
+//   - an int-valued or complex constant, and a pure-literal float const (`1.5 * 2.0`, no named ref).
+//     C# evaluates the latter one operation at a time, which matches Go only when no step rounds
+//     differently: `1.5 * 2.0` does and keeps its operator form, `1 - .999` does not and is folded
+//     by foldedInexactLiteralFloatConst (literalFloatConstFold.go).
 //
 // `targetCSType` is the resolved float C# type name ("float64"/"float32"); any other value is "".
 func (v *Visitor) foldedNamedFloatConstLiteral(operand ast.Expr, targetCSType string) string {
@@ -1377,6 +1379,12 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 				}
 			}
 		}
+	}
+
+	// A literal-only float constant whose step-by-step C# value would differ from Go's single
+	// rounding folds to Go's value (`1 - .999`); one that already agrees keeps its operator form.
+	if lit := v.foldedInexactLiteralFloatConst(binaryExpr); lit != "" {
+		return lit
 	}
 
 	// A COMPLEX constant operator expression folds to its exact value, because C# cannot reproduce
