@@ -128,7 +128,7 @@ internal static void lockSlow(this ж<Mutex> Ꮡm) {
                 waitStartTime = runtime_nanotime();
             }
             runtime_SemacquireMutex(Ꮡm.of(Mutex.Ꮡsema), queueLifo, 2);
-            starving = starving || runtime_nanotime() - waitStartTime > starvationThresholdNs;
+            starving = starving || runtime_nanotime() - waitStartTime > (int64)starvationThresholdNs;
             old = m.state;
             if ((int32)(old & (int32)mutexStarving) != 0) {
                 // If this goroutine was woken and mutex is in starvation mode,

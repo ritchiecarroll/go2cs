@@ -150,7 +150,7 @@ internal static UntypedFloat gcCPULimiterUpdatePeriod => 10e6; // 10ms
 // needUpdate returns true if the limiter's maximum update period has been
 // exceeded, and so would benefit from an update.
 internal static bool needUpdate(this ж<gcCPULimiterState> Ꮡl, int64 now) {
-    return now - Ꮡl.of(gcCPULimiterState.ᏑlastUpdate).Load() > gcCPULimiterUpdatePeriod;
+    return now - Ꮡl.of(gcCPULimiterState.ᏑlastUpdate).Load() > (int64)gcCPULimiterUpdatePeriod;
 }
 
 // addAssistTime notifies the limiter of additional assist time. It will be
