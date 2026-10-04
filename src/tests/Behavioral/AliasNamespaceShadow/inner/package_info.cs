@@ -49,7 +49,7 @@ using static go.AliasNamespaceShadow.inner_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("inner.go", "inner.cs", "AAckgoKCqoI=")]
+[assembly: go.GoPositionMap("inner.go", "inner.cs", "AAgkgoKCqoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.AliasNamespaceShadow;
@@ -73,6 +73,6 @@ public static partial class inner_package
     // item of the project guarantees.
 
     // <ImportInitializers>
-    [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(sort_package));
+    [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(go.sort_package));
     // </ImportInitializers>
 }

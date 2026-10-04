@@ -13,7 +13,7 @@
 // </ImportedTypeAliases>
 
 using go;
-using static go.AliasNamespaceShadow.sortlocal.sort_package;
+using static go.AliasNamespaceShadow.sort_package;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,12 +49,12 @@ using static go.AliasNamespaceShadow.sortlocal.sort_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("sortlocal.go", "sortlocal.cs", "AAcUgg==")]
+[assembly: go.GoPositionMap("sort.go", "sort.cs", "AAcUgg==")]
 // </GoSourcePositionMaps>
 
-namespace go.AliasNamespaceShadow.sortlocal;
+namespace go.AliasNamespaceShadow;
 
-[GoPackage("sort", ImportPath = "AliasNamespaceShadow/sortlocal")]
+[GoPackage("sort")]
 public static partial class sort_package
 {
     // C# nested types declared with no access modifier are always private, and the
