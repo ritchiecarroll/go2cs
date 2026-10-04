@@ -443,6 +443,8 @@
     <Project Path="tests/Behavioral/EnvironBlockWalk/EnvironBlockWalk.csproj" />
     <Project Path="tests/Behavioral/ErrorfFormatting/ErrorfFormatting.csproj" />
     <Project Path="tests/Behavioral/EscapedLoopVarSiblingIndex/EscapedLoopVarSiblingIndex.csproj" />
+    <Project Path="tests/Behavioral/ExportedAliasUnexportedTarget/ExportedAliasUnexportedTarget.csproj" />
+    <Project Path="tests/Behavioral/ExportedAliasUnexportedTarget/aliaslib/ExportedAliasUnexportedTarget.aliaslib.csproj" />
     <Project Path="tests/Behavioral/ExprSwitch/ExprSwitch.csproj" />
     <Project Path="tests/Behavioral/FieldChainBoxReceiver/FieldChainBoxReceiver.csproj" />
     <Project Path="tests/Behavioral/FieldDimsCargo/FieldDimsCargo.csproj" />

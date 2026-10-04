@@ -51,7 +51,7 @@ func collectFixturePublicized(t *testing.T, source string) map[string]bool {
 	packagePublicizedTypes = nil
 	packagePublicizedLiftedTypes = nil
 
-	collectPublicizedTypes(production.Types)
+	collectPublicizedTypes(production.Types, production.Fset)
 
 	return publicizedTypeNames()
 }

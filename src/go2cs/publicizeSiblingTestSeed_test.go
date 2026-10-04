@@ -47,7 +47,7 @@ func seedFixture(t *testing.T, files map[string]string) []string {
 
 	t.Cleanup(func() { siblingTestPublicizedTypeNames = nil })
 
-	collectPublicizedTypes(production.Types)
+	collectPublicizedTypes(production.Types, production.Fset)
 
 	names := []string{}
 
