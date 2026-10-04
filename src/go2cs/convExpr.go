@@ -42,6 +42,10 @@ type CallExprContext struct {
 	useGoStringArg map[int]bool
 	argTypeIsPtr   map[int]bool
 	interfaceTypes map[int]types.Type
+	// sameNameCaptureCasts carries, for an argument slot whose bare emission C# would bind to a same-named
+	// METHOD's extension rather than to the package FUNCTION being called, the C# interface type to cast it
+	// to (sameNameMethodCapture). Empty for every other call.
+	sameNameCaptureCasts map[int]string
 	// nilArrayTypes carries a pointer-to-ARRAY parameter's type to the argument slot, so a bare
 	// `nil` argument keeps the array length `array<E>` erases (arrayDimsNilCargo.go). Sibling of
 	// interfaceTypes and populated in the same params walk; empty for every other call.

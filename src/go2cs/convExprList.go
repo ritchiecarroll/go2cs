@@ -261,6 +261,13 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			}
 
 			resultExpr = v.convertToInterfaceType(interfaceType, v.getType(expr, false), clonedElement(v.convExpr(expr, contexts)))
+
+			// A bare argument whose type declares a same-named method would bind the call to that method's
+			// extension (sameNameMethodCapture); an adapter (`new …`) is already a different type and binds
+			// the function.
+			if cast, ok := callContext.sameNameCaptureCasts[i]; ok && !strings.HasPrefix(resultExpr, "new ") {
+				resultExpr = fmt.Sprintf("(%s)(%s)", cast, resultExpr)
+			}
 		} else {
 			resultExpr = clonedElement(v.convExpr(expr, contexts))
 		}

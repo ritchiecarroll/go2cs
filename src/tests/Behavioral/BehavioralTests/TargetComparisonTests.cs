@@ -1966,6 +1966,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckSortArrayType() => CheckTarget("SortArrayType");
 
     [TestMethod]
+    public void CheckSortMethodSelfCapture() => CheckTarget("SortMethodSelfCapture");
+
+    [TestMethod]
     public void CheckSparseArrayIfaceElem() => CheckTarget("SparseArrayIfaceElem");
 
     [TestMethod]
