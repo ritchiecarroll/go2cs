@@ -163,7 +163,11 @@ function Invoke-ConvertArm([string]$Name, [string]$ModuleDir) {
         & dotnet run --project $proj[0].FullName -c Debug --no-build "-p:GoStdLibVersion=$Version" 1> $csOut 2> (Join-Path $arm 'cs.stderr.txt')
         $runCode = $LASTEXITCODE
         $ErrorActionPreference = 'Stop'
-        if ($runCode -ne 0) { return "FAIL ($Name): the converted program exited $runCode$(Get-StderrHead (Join-Path $arm 'cs.stderr.txt'))" }
+        if ($runCode -ne 0) {
+            # .NET prints "Stack overflow." before it aborts; say so in the verdict, so the crash never reads as a hang or a bare exit code.
+            $overflow = if (Select-String -LiteralPath (Join-Path $arm 'cs.stderr.txt') -Pattern '^\s*Stack overflow' -Quiet -ErrorAction SilentlyContinue) { ' (a STACK OVERFLOW)' } else { '' }
+            return "FAIL ($Name): the converted program exited $runCode$overflow$(Get-StderrHead (Join-Path $arm 'cs.stderr.txt'))"
+        }
     }
     finally { $env:NUGET_PACKAGES = $null }
 
@@ -235,6 +239,18 @@ func main() {
 
 	data, err := os.ReadFile(filepath.Join(dir, "a.txt"))
 	fmt.Println("ReadFile =", string(data), err)
+
+	// The sort forms whose converted bodies once called themselves (each xSlice.Sort() is `{ Sort(x) }`
+	// in Go, which C# bound back to the method itself): every method form, and the bare call form.
+	ints := sort.IntSlice{3, 1, 2}
+	ints.Sort()
+	floats := sort.Float64Slice{2.5, -1, 0.5}
+	floats.Sort()
+	strs := sort.StringSlice{"c", "a", "b"}
+	strs.Sort()
+	bare := []string{"z", "x", "y"}
+	sort.Sort(sort.StringSlice(bare))
+	fmt.Println("Sort =", ints, floats, strs, bare)
 }
 '@ | Set-Content -LiteralPath (Join-Path $sample 'main.go') -Encoding utf8
 $verdicts += Invoke-ConvertArm 'B-sample' $sample
