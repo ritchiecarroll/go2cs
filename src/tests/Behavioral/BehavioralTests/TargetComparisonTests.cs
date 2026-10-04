@@ -793,6 +793,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
 
     [TestMethod]
+    public void CheckGoHostModuleShadow() => CheckTarget("GoHostModuleShadow");
+
+    [TestMethod]
     public void CheckGoNamespaceShadow() => CheckTarget("GoNamespaceShadow");
 
     [TestMethod]
