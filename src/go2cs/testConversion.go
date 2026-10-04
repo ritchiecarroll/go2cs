@@ -1524,6 +1524,10 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 		resolveAdapterNameMarkers(testAdapterResolveNames)
 	}
 
+	// Both marker passes have run on the test sources: give an unchanged one its previous time back
+	// (incrementalWrites.go).
+	restoreUnchangedMarkedSources(testAdapterResolveNames)
+
 	return result, nil
 }
 

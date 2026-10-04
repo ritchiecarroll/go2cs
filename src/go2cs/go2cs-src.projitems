@@ -178,6 +178,7 @@
     <None Include="$(MSBuildThisFileDirectory)importInitSection.go" />
     <None Include="$(MSBuildThisFileDirectory)importOperations_test.go" />
     <None Include="$(MSBuildThisFileDirectory)importSegmentShadow_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)incrementalWrites.go" />
     <None Include="$(MSBuildThisFileDirectory)incrementalWrites_test.go" />
     <None Include="$(MSBuildThisFileDirectory)initOrderOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)initOrderTupleSpec_test.go" />

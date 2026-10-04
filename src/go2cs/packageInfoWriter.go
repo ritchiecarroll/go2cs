@@ -895,21 +895,15 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 		}
 	}
 
-	// Write updated package info file
-	packageInfoFile, err := os.Create(packageInfoFileName)
-
-	if err != nil {
-		log.Fatalf("Failed to create package info file \"%s\": %s\n", packageInfoFileName, err)
-	}
-
-	defer packageInfoFile.Close()
+	// Write updated package info file, unless it is unchanged (incrementalWrites.go)
+	var contents strings.Builder
 
 	for _, line := range packageInfoLines {
-		_, err = packageInfoFile.WriteString(line + "\r\n")
+		contents.WriteString(line + "\r\n")
+	}
 
-		if err != nil {
-			log.Fatalf("Failed to write to package info file \"%s\": %s\n", packageInfoFileName, err)
-		}
+	if _, err := writeSourceIfChanged(packageInfoFileName, []byte(contents.String())); err != nil {
+		log.Fatalf("Failed to write package info file \"%s\": %s\n", packageInfoFileName, err)
 	}
 }
 
