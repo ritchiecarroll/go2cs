@@ -3220,6 +3220,27 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	}
 
 	funcTypeName := v.getAliasQualifiedTypeName(funcType, true)
+
+	// The element-decoding rules below key on what the target slice IS, not how it is spelled: an
+	// unnamed slice of the basic `uint8` (`byte`) or `int32` (`rune`). Go's `byte` and `rune` are
+	// aliases, so `[]uint8("foo")` is the same conversion as `[]byte("foo")`; keyed on the spelling,
+	// it missed every arm and emitted `slice<uint8>("foo")`, a System.String with no conversion to
+	// the slice (CS1503 — R's mapstructure reading, B5). A DEFINED element (`type Uint8 byte`) is not
+	// a Basic and keeps the stringSliceConversions route. The emitted element keeps the source's
+	// spelling (`slice<uint8>("foo"u8)`), so a `[]byte` conversion renders exactly as before. Only a
+	// target SPELLED as a slice qualifies — an alias (`type B = []byte`) keeps the route it had.
+	stringDecodeTarget, stringDecodeElem := "", ""
+
+	if slice, ok := types.Unalias(funcType).(*types.Slice); ok && strings.HasPrefix(funcTypeName, "[]") {
+		if basic, ok := types.Unalias(slice.Elem()).(*types.Basic); ok {
+			switch basic.Kind() {
+			case types.Uint8:
+				stringDecodeTarget, stringDecodeElem = "[]byte", strings.TrimPrefix(funcTypeName, "[]")
+			case types.Int32:
+				stringDecodeTarget, stringDecodeElem = "[]rune", strings.TrimPrefix(funcTypeName, "[]")
+			}
+		}
+	}
 	// ---- Phase 6: conversions whose SOURCE is a string or slice ----
 	//
 	// []byte(s), []rune(s) and their literal forms. These need golib's @string in the middle
@@ -3231,7 +3252,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// (CS1503/CS1929). A string *variable* is already `@string`, so this only matters for literals;
 	// the cast fires only on STRING basic-literal args (see convBasicLit). The flag name predates
 	// the `[]byte` case.
-	callExprContext.sourceIsRuneArray = funcTypeName == "[]rune" || funcTypeName == "[]byte"
+	callExprContext.sourceIsRuneArray = stringDecodeTarget != ""
 
 	// A `[]byte(s)` conversion of a `string | []byte` union-constrained value (time
 	// format_rfc3339's parseUint ranges `[]byte(s)`): the usual route binds golib's
@@ -3243,7 +3264,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// source copies). A constructor cannot do this — C# has no generic constructor, so
 	// `new slice<byte>(seq)` can only accept the interface, which boxes; and a static factory
 	// cannot be named, because `using static go.builtin` shadows `slice` with a method (CS0119).
-	if funcTypeName == "[]byte" && len(callExpr.Args) == 1 {
+	if stringDecodeTarget == "[]byte" && len(callExpr.Args) == 1 {
 		if tp, ok := types.Unalias(v.getType(callExpr.Args[0], false)).(*types.TypeParam); ok && typeParamIsStringByteUnion(tp) {
 			return fmt.Sprintf("%s.ToSlice()", v.convExpr(callExpr.Args[0], nil))
 		}
@@ -3257,12 +3278,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// renders as a `u8` span: a high-`\xHH`-byte literal stays the byte-array-backed `@string` (its bytes
 	// do not round-trip through `u8`), and a `[]rune` conversion needs `@string`'s rune decoding, so only
 	// `[]byte` qualifies. A string VARIABLE is already an `@string` and keeps the general path.
-	if funcTypeName == "[]byte" && len(callExpr.Args) == 1 {
+	if stringDecodeTarget == "[]byte" && len(callExpr.Args) == 1 {
 		if basicLit, ok := callExpr.Args[0].(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
 			if strings.HasPrefix(basicLit.Value, "`") || !stringLiteralNeedsByteArray(basicLit.Value) {
 				u8Context := DefaultBasicLitContext()
 				u8Context.u8StringOK = true
-				return fmt.Sprintf("slice<byte>(%s)", v.convExpr(basicLit, []ExprContext{u8Context}))
+				return fmt.Sprintf("slice<%s>(%s)", stringDecodeElem, v.convExpr(basicLit, []ExprContext{u8Context}))
 			}
 		}
 	}
@@ -3280,15 +3301,9 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// Gated to a `+` chain whose every leaf is a PLAINLY-rendered string literal, which is exactly
 	// the shape that produces a bare C# string — see isConstantStringConcat for what that excludes
 	// and why each exclusion already carries an @string of its own.
-	if funcTypeName == "[]byte" || funcTypeName == "[]rune" {
+	if stringDecodeTarget != "" {
 		if len(callExpr.Args) == 1 && v.isConstantStringConcat(callExpr.Args[0]) {
-			elementName := "byte"
-
-			if funcTypeName == "[]rune" {
-				elementName = "rune"
-			}
-
-			return fmt.Sprintf("slice<%s>((@string)(%s))", elementName, v.convExpr(callExpr.Args[0], nil))
+			return fmt.Sprintf("slice<%s>((@string)(%s))", stringDecodeElem, v.convExpr(callExpr.Args[0], nil))
 		}
 	}
 

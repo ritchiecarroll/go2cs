@@ -2069,6 +2069,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckUdpWriteMsgAddrPort() => CheckTarget("UdpWriteMsgAddrPort");
 
     [TestMethod]
+    public void CheckUint8SliceLiteralConversion() => CheckTarget("Uint8SliceLiteralConversion");
+
+    [TestMethod]
     public void CheckUintptrUnsafePointerIdiom() => CheckTarget("UintptrUnsafePointerIdiom");
 
     [TestMethod]

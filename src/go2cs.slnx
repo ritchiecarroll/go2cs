@@ -998,6 +998,7 @@
     <Project Path="tests/Behavioral/TypedPointerCastDeref/TypedPointerCastDeref.csproj" />
     <Project Path="tests/Behavioral/UdpLoopbackRoundTrip/UdpLoopbackRoundTrip.csproj" />
     <Project Path="tests/Behavioral/UdpWriteMsgAddrPort/UdpWriteMsgAddrPort.csproj" />
+    <Project Path="tests/Behavioral/Uint8SliceLiteralConversion/Uint8SliceLiteralConversion.csproj" />
     <Project Path="tests/Behavioral/UintptrUnsafePointerIdiom/UintptrUnsafePointerIdiom.csproj" />
     <Project Path="tests/Behavioral/UnarySignStack/UnarySignStack.csproj" />
     <Project Path="tests/Behavioral/UncomparableEquality/UncomparableEquality.csproj" />
