@@ -8,15 +8,18 @@
 #
 #   A  MISSING: build the whole standard library with the entries in place. Any CS0219, CS0649 or
 #      CS0675 in a converted source file (src/core, not Generated/) is a warning with no entry: FAIL.
-#   B  STALE: move every marked entry file aside and build the packages that held one. Every entry
-#      must warn on at least one of the flavours its comment line names that this run builds (a
-#      flat file's entry may be inert on the others); an entry for a file under `<goos>/` must warn
-#      on THAT flavour. Otherwise FAIL. An entry none of whose flavours this run builds is reported
-#      UNMEASURED, not passed. The entry files are put back byte for byte, and the tree is checked
-#      for deletions.
+#      The solution holds no test project, so A does not measure the `_test.cs` sections: a test
+#      file's MISSING entry is not caught here.
+#   B  STALE: move every marked entry file aside and build the projects that compile its entries:
+#      the package's production project, and its `*.tests.csproj` for a `_test.cs` section (a
+#      `-tests` conversion writes those). Every entry must warn on at least one of the flavours its
+#      comment line names that this run builds (a flat file's entry may be inert on the others); an
+#      entry for a file under `<goos>/` must warn on THAT flavour. Otherwise FAIL. An entry none of
+#      whose flavours this run builds is reported UNMEASURED, not passed. The entry files are put
+#      back byte for byte, and the tree is checked for deletions.
 #
 # It is a TRAIN and PRE-RELEASE gate, not a per-lane one: it costs one standard-library build and
-# one entry-package build per flavour. The Go unit tests per fact run under `go test ./...`.
+# one build per entry project per flavour. The Go unit tests per fact run under `go test ./...`.
 #
 # POSITIVE CONTROL (a gate that has never failed proves nothing): `--control` plants a file with an
 # unread `int zz = 1;` in a package that holds no entry. A must then fail and NAME that file; the run
@@ -152,18 +155,32 @@ if [ "$RUN_B" = 1 ] && [ "${#MARKED[@]}" -gt 0 ]; then
     mv "$f" "$ASIDE/$rel"
   done
 
+  # holds PKG KIND -> does PKG hold an entry for a file the KIND project compiles? A `_test.cs`
+  # section's file is compiled only by the package's test project, every other file only by its
+  # production project.
+  holds() {
+    awk -F'|' -v p="$1" -v t="$2" '$1 == p && (($2 ~ /_test\.cs$/) == (t == "tests")) { found = 1 } END { exit !found }' "$ENTRIES"
+  }
+
   : > "$LOGS/b-warnings.txt"
   for flavour in "${FLAVOUR_LIST[@]}"; do
     for f in "${MARKED[@]}"; do
       dir="$(dirname "$f")"
       pkg="${dir#"$CORE"/}"
-      proj="$(find "$dir" -maxdepth 1 -name '*.csproj' -not -name '*.tests.csproj' | head -n 1)"
-      [ -n "$proj" ] || { echo "  FAIL: no project file beside core/$pkg/.editorconfig"; fail=1; continue; }
-      log="$LOGS/b-$flavour-$(printf '%s' "$pkg" | tr '/' '_').log"
-      dotnet build "$proj" -c Release -p:GoTargetOS="$flavour" --no-incremental -clp:NoSummary > "$log" 2>&1
-      rc=$?
-      echo "B [$flavour] core/$pkg rc=$rc"
-      warnings "$log" | sed "s/^/$flavour|/" >> "$LOGS/b-warnings.txt"
+      for kind in production tests; do
+        holds "$pkg" "$kind" || continue
+        if [ "$kind" = tests ]; then
+          proj="$(find "$dir" -maxdepth 1 -name '*.tests.csproj' | head -n 1)"; suffix=" (tests)"; tag="-tests"
+        else
+          proj="$(find "$dir" -maxdepth 1 -name '*.csproj' -not -name '*.tests.csproj' | head -n 1)"; suffix=""; tag=""
+        fi
+        [ -n "$proj" ] || { echo "  FAIL: no $kind project file beside core/$pkg/.editorconfig"; fail=1; continue; }
+        log="$LOGS/b-$flavour-$(printf '%s' "$pkg" | tr '/' '_')$tag.log"
+        dotnet build "$proj" -c Release -p:GoTargetOS="$flavour" --no-incremental -clp:NoSummary > "$log" 2>&1
+        rc=$?
+        echo "B [$flavour] core/$pkg$suffix rc=$rc"
+        warnings "$log" | sed "s/^/$flavour|/" >> "$LOGS/b-warnings.txt"
+      done
     done
   done
 
