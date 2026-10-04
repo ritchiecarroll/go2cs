@@ -328,6 +328,10 @@ func runCensusTarget(options Options, seedRoot, censusDir, target string, packag
 	targetOptions.targetPlatform = target
 	targetOptions.targetPlatforms = []string{target}
 	targetOptions.go2csPath = outputRoot
+	// The census tells "emitted by this run" from "seeded" by modification time against the sentinel stamped
+	// just above (snapshotConvertedRoot), and h8-comparand.sh reads the staged root the same way. An unchanged
+	// source the converter skipped would keep the sentinel and read as seeded, so a census writes every source.
+	targetOptions.alwaysWriteSources = true
 
 	converter := NewStdLibConverter(targetOptions)
 

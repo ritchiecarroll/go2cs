@@ -136,3 +136,74 @@ func TestUnchangedReconversionLeavesEverySourceUntouched(t *testing.T) {
 		t.Errorf("an unchanged re-conversion rewrote %d of %d .cs files (their timestamps moved, so MSBuild recompiles): %v", len(moved), len(sources), moved)
 	}
 }
+
+// The platform census tells "emitted by this run" from "seeded" by modification time against a sentinel it stamps
+// (platformCensus.go snapshotConvertedRoot; h8-comparand.sh reads its root the same way), so a census conversion must
+// still rewrite every source: the guard against incremental writes reaching it.
+func TestCensusConversionStillRewritesEverySource(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: loads the fixture package via go/packages")
+	}
+
+	pkgDir, outDir, options := incrementalFixture(t)
+	options.alwaysWriteSources = true
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("first conversion: %v", err)
+	}
+
+	sources := stampEmittedSources(t, outDir)
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("second conversion: %v", err)
+	}
+
+	if moved := rewrittenSources(t, sources); len(moved) != len(sources) {
+		t.Errorf("a census conversion must rewrite every source; %d of %d moved: %v", len(moved), len(sources), moved)
+	}
+}
+
+// A source still holding DEFERRED MARKERS when it is written (a pointer-to-interface cast names its adapter class
+// through a «ADAPTER:…» marker, resolved once the package's implementation records are final) is rewritten by the
+// marker pass, so the byte compare alone cannot keep its timestamp; the resolved file is compared with what it held
+// before, and an unchanged one gets its time back.
+func TestUnchangedReconversionKeepsMarkerBearingSourcesUntouched(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: loads the fixture package via go/packages")
+	}
+
+	pkgDir, outDir, options := incrementalFixture(t)
+
+	writeModuleFile(t, filepath.Join(pkgDir, "c.go"), `package incr
+
+import "fmt"
+
+type Named struct{ name string }
+
+func (n *Named) String() string { return n.name }
+
+func Describe() string {
+	var s fmt.Stringer = &Named{"n"}
+	return s.String()
+}
+`)
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("first conversion: %v", err)
+	}
+
+	sources := stampEmittedSources(t, outDir)
+	restoredBefore := markedSourcesRestored.Load()
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("second conversion: %v", err)
+	}
+
+	if markedSourcesRestored.Load() == restoredBefore {
+		t.Fatalf("the fixture's second conversion restored no marker-bearing source: it no longer exercises the marker path")
+	}
+
+	if moved := rewrittenSources(t, sources); len(moved) > 0 {
+		t.Errorf("an unchanged re-conversion rewrote %d of %d .cs files: %v", len(moved), len(sources), moved)
+	}
+}

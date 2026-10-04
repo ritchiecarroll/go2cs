@@ -15,7 +15,6 @@ import (
 	"go/token"
 	"go/types"
 	"math"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -489,7 +488,8 @@ func writePackageInitFile(outputDir, packageNamespace, packageName string, withT
 
 	sb.WriteString(fmt.Sprintf("} // end %s\r\n", packageClassName))
 
-	return os.WriteFile(filepath.Join(outputDir, PackageInitFileName), []byte(sb.String()), 0644)
+	_, err := writeSourceIfChanged(filepath.Join(outputDir, PackageInitFileName), []byte(sb.String()))
+	return err
 }
 
 // writeOrderedInitCalls appends the relocated init-method calls in InitOrder ordinal order.
@@ -546,5 +546,6 @@ func writeTestVariantInitFile(outputDir, fileName, packageNamespace, packageClas
 	sb.WriteString("    }\r\n")
 	sb.WriteString(fmt.Sprintf("} // end %s\r\n", packageClassName))
 
-	return os.WriteFile(filepath.Join(outputDir, fileName), []byte(sb.String()), 0644)
+	_, err := writeSourceIfChanged(filepath.Join(outputDir, fileName), []byte(sb.String()))
+	return err
 }

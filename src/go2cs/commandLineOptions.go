@@ -43,6 +43,7 @@ type Options struct {
 	targetPlatform      string   // the ONE os/arch a conversion emits for; every pass reads this
 	targetPlatforms     []string // -platforms: the full requested list (len 1 for every ordinary run); targetPlatform is its first entry
 	platformCensusDir   string   // -platform-census: staging + manifest directory for a multi-target emission census (no corpus output)
+	alwaysWriteSources  bool     // set ONLY by runCensusTarget: write every converted .cs even when unchanged (writeSourceIfChanged)
 	platformStageDir    string   // -platform-stage: where a multi-target EMISSION stages its per-target conversions; a temporary directory this run owns and removes when empty
 	refCensusPath       string   // -ref-census: JSON output path for the ж-box A1 ref-lowering census (analysis only, no corpus output)
 	dualRecv            bool     // -dual-recv: B′ S0 — eligible pointer-receiver methods emit the `[GoRecv] this ref T` PRIMARY (R3 arms; the ж twin is minted by RecvGenerator). Flag-gated and corpus-inert: default off, scratch-root regens only until S2's own rebank ride
