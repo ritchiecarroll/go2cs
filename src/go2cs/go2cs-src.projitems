@@ -357,6 +357,7 @@
     <None Include="$(MSBuildThisFileDirectory)sanitization_test.go" />
     <None Include="$(MSBuildThisFileDirectory)shadowedImportAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)siblingAddressedGlobals_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)siblingPackageNamespace_test.go" />
     <None Include="$(MSBuildThisFileDirectory)signedDivisionOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)sliceBoundsMethodEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)solutionGenerator.go" />
