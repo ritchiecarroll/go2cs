@@ -134,3 +134,8 @@ directory too. `CrossPkgSameNameAlias` (`package atomic`) moves to `go.CrossPkgS
 intact. `AliasNamespaceShadow/sortlocal` (`package sort`) moves to `go.AliasNamespaceShadow.sortlocal`, so its class no
 longer shadows `inner`'s alias for the standard library's `sort`: the test still passes, but it no longer produces the
 shape it was written to guard. CNR at the seat tip then equals CNR at the base (one pre-existing mover, byte-identical).
+
+> **Amended 2026-10-04 (later the same day):** `AliasNamespaceShadow` is restored in-seat, as ruled. Its `sortlocal/`
+> directory is now `sort/` (name == directory, so it stays in `go.AliasNamespaceShadow`) and the shadowing is produced
+> again; with `rootQualifyIfAmbiguous`'s class half removed the test fails Compile with CS0117 (`'sort_package' does not
+> contain a definition for 'Ints'`), and it passes with it restored byte-identical.
