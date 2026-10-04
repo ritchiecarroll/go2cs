@@ -80,6 +80,10 @@ func (v *Visitor) visitIfStmt(ifStmt *ast.IfStmt) {
 		switch elseStmt := ifStmt.Else.(type) {
 		case *ast.IfStmt:
 			v.outputBuilder.WriteRune(' ')
+			// An else-if is reached here, never through visitStmt, so it would carry no position
+			// record: its `if (cond)` line, emitted after the newline below, would answer the
+			// previous statement's Go line. The sentinel ends this line, so it marks the next one.
+			v.writePositionSentinel(elseStmt.Pos())
 			v.visitIfStmt(elseStmt)
 		case *ast.BlockStmt:
 			v.visitBlockStmt(elseStmt, context)
