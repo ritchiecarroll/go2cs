@@ -13,7 +13,7 @@
 // </ImportedTypeAliases>
 
 using go;
-using static go.AliasNamespaceShadow.sort_package;
+using static go.AliasNamespaceShadow.sortlocal.sort_package;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -52,7 +52,7 @@ using static go.AliasNamespaceShadow.sort_package;
 [assembly: go.GoPositionMap("sortlocal.go", "sortlocal.cs", "AAcUgg==")]
 // </GoSourcePositionMaps>
 
-namespace go.AliasNamespaceShadow;
+namespace go.AliasNamespaceShadow.sortlocal;
 
 [GoPackage("sort", ImportPath = "AliasNamespaceShadow/sortlocal")]
 public static partial class sort_package

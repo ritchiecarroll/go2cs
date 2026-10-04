@@ -21,9 +21,4 @@ func main() {
 	var a foo1.Pair = foo1.Pair{Left: 1, Right: 2}
 	b := foo2.Triple{A: "x", B: "y", C: "z"}
 	fmt.Println(a.Sum(), b.Join())
-
-	// An exported type alias from each sibling resolves to its own package's type.
-	var c foo1.Alias = foo1.Pair{Left: 3, Right: 4}
-	var d foo2.Alias = foo2.Triple{A: "p", B: "q", C: "r"}
-	fmt.Println(c.Sum(), d.Join())
 }

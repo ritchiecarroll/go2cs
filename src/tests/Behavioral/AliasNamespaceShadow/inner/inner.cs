@@ -1,8 +1,7 @@
 namespace go.AliasNamespaceShadow;
 
-using sort = go.sort_package;
-using local = go.AliasNamespaceShadow.sort_package;
-using go;
+using sort = sort_package;
+using local = go.AliasNamespaceShadow.sortlocal.sort_package;
 
 partial class inner_package {
 

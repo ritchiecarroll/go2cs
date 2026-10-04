@@ -1,6 +1,6 @@
 global using Int32 = go.sync.atomic_package.Int32;
 
-namespace go;
+namespace go.CrossPkgSameNameAlias;
 
 using atomic = sync.atomic_package;
 using sync;
