@@ -18,6 +18,9 @@
 //     marker passes after the package is visited, so its text at write time never equals the previous run's resolved
 //     file. Its previous bytes and time are remembered, and once the passes have run, a source whose resolved bytes
 //     equal its previous ones gets its previous time back: the run did not change it.
+//   - The -tests METADATA ANCHORS (package_test_info.cs, package_info_internal_test.cs) are re-seeded on every run and
+//     then merged into, so the merge's byte compare reads the seed. They are remembered the same way before the
+//     re-seed (rememberSource) and restored once the conversion's writes are done.
 
 package main
 
@@ -58,6 +61,25 @@ func rememberIfMarked(fileName string, content []byte) {
 		return
 	}
 
+	storeSourceState(fileName)
+}
+
+// rememberSource records the current state of fileName before a writer replaces it with a seed it then merges into.
+// The FIRST state recorded wins: the recompile-model fallback re-runs the -tests conversion over the same files, and
+// the abandoned attempt's seed must not become the comparand.
+func rememberSource(fileName string) {
+	if alwaysWriteSources.Load() {
+		return
+	}
+
+	if _, recorded := markedSources.Load(fileName); recorded {
+		return
+	}
+
+	storeSourceState(fileName)
+}
+
+func storeSourceState(fileName string) {
 	info, err := os.Stat(fileName)
 
 	if err != nil {
@@ -96,6 +118,6 @@ func restoreUnchangedMarkedSources(outputFileNames []string) {
 	}
 }
 
-// markedSourcesRestored counts the marker-bearing sources given their previous time back in this process (a
-// statistic, and what lets a test tell the marker path ran from a fixture that happened to emit no marker).
+// markedSourcesRestored counts the remembered sources given their previous time back in this process (a statistic, and
+// what lets a test tell the marker path ran from a fixture that happened to emit no marker).
 var markedSourcesRestored atomic.Int64
