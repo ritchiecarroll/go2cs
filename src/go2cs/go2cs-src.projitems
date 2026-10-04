@@ -109,6 +109,8 @@
     <None Include="$(MSBuildThisFileDirectory)copyingSliceViewNote.go" />
     <None Include="$(MSBuildThisFileDirectory)copyingSliceViewNote_test.go" />
     <None Include="$(MSBuildThisFileDirectory)corpusReferenceClosure_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)crashVerdict.go" />
+    <None Include="$(MSBuildThisFileDirectory)crashVerdict_test.go" />
     <None Include="$(MSBuildThisFileDirectory)crossAssemblyLiftDedup_test.go" />
     <None Include="$(MSBuildThisFileDirectory)csReservedTypeNames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)csprojMetadata_test.go" />
