@@ -6,7 +6,7 @@
 // to the FIPS module. Since modules are frozen upon validation and supported
 // for a number of future versions, APIs exposed by crypto/internal/fips140deps/...
 // must not be changed until the modules that use them are no longer supported.
-namespace go.crypto.@internal;
+namespace go.crypto.@internal.fips140deps;
 
 partial class fipsdeps_package {
 

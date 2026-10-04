@@ -264,7 +264,7 @@
     <Project Path="tests/Behavioral/AliasImportLib/AliasImportLib.csproj" />
     <Project Path="tests/Behavioral/AliasNamespaceShadow/AliasNamespaceShadow.csproj" />
     <Project Path="tests/Behavioral/AliasNamespaceShadow/inner/AliasNamespaceShadow.inner.csproj" />
-    <Project Path="tests/Behavioral/AliasNamespaceShadow/sortlocal/AliasNamespaceShadow.sortlocal.csproj" />
+    <Project Path="tests/Behavioral/AliasNamespaceShadow/sort/AliasNamespaceShadow.sort.csproj" />
     <Project Path="tests/Behavioral/AliasStructComposite/AliasStructComposite.csproj" />
     <Project Path="tests/Behavioral/AndNotAssignNarrow/AndNotAssignNarrow.csproj" />
     <Project Path="tests/Behavioral/AnonIfaceMethodSetWidening/AnonIfaceMethodSetWidening.csproj" />
@@ -923,6 +923,9 @@
     <Project Path="tests/Behavioral/ShiftNegativeWideConst/ShiftNegativeWideConst.csproj" />
     <Project Path="tests/Behavioral/ShiftPrecedenceUnsigned/ShiftPrecedenceUnsigned.csproj" />
     <Project Path="tests/Behavioral/ShellForwardArity/ShellForwardArity.csproj" />
+    <Project Path="tests/Behavioral/SiblingPackageNames/SiblingPackageNames.csproj" />
+    <Project Path="tests/Behavioral/SiblingPackageNames/teststructs/foo1/SiblingPackageNames.teststructs.foo1.csproj" />
+    <Project Path="tests/Behavioral/SiblingPackageNames/teststructs/foo2/SiblingPackageNames.teststructs.foo2.csproj" />
     <Project Path="tests/Behavioral/SiblingTestAddressedGlobal/SiblingTestAddressedGlobal.csproj" />
     <Project Path="tests/Behavioral/SignalPrimitives/SignalPrimitives.csproj" />
     <Project Path="tests/Behavioral/Slice3IndexWideBound/Slice3IndexWideBound.csproj" />

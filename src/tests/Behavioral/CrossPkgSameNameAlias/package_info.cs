@@ -13,7 +13,7 @@
 // </ImportedTypeAliases>
 
 using go;
-using static go.atomic_package;
+using static go.CrossPkgSameNameAlias.atomic_package;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -53,7 +53,7 @@ using static go.atomic_package;
 [assembly: go.GoPositionMap("alias.go", "alias.cs", "AAkmgA==")]
 // </GoSourcePositionMaps>
 
-namespace go;
+namespace go.CrossPkgSameNameAlias;
 
 [GoPackage("atomic", ImportPath = "go2cs/CrossPkgSameNameAlias")]
 public static partial class atomic_package

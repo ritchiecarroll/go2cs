@@ -13,7 +13,7 @@
 // </ImportedTypeAliases>
 
 using go;
-using static go.crypto.@internal.fipsdeps_package;
+using static go.crypto.@internal.fips140deps.fipsdeps_package;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -51,7 +51,7 @@ using static go.crypto.@internal.fipsdeps_package;
 // <GoSourcePositionMaps>
 // </GoSourcePositionMaps>
 
-namespace go.crypto.@internal;
+namespace go.crypto.@internal.fips140deps;
 
 [GoPackage("fipsdeps", ImportPath = "crypto/internal/fips140deps")]
 public static partial class fipsdeps_package

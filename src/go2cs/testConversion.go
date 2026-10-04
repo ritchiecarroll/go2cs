@@ -791,6 +791,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	compileExcluded := selectCompileExcludedTestFiles(internal, external)
 
 	projectName, projectNamespace := getProjectName(inputPath, options)
+	projectNamespace = namespaceWithDirectorySegment(projectNamespace, production.PkgPath, production.Name)
 	supported := hashset.NewHashSet(supportedTestCapabilities())
 	testInfoPath := filepath.Join(outputPath, testPackageInfoFileName)
 

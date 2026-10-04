@@ -34,7 +34,7 @@ global using tls13ꓸMasterSecret = go.crypto.@internal.fips140.tls13_package.Δ
 // </ImportedTypeAliases>
 
 using go;
-using static global::go.crypto.@internal.fipstest_internal_test_package;
+using static global::go.crypto.@internal.fips140test.fipstest_internal_test_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b78205b5d627974653b2079205b5d627974653b20616e794f7665726c617020626f6f6c3b20696e65786163744f7665726c617020626f6f6c7d", "aliasingTestsᴛ1")]
@@ -82,7 +82,7 @@ using static global::go.crypto.@internal.fipstest_internal_test_package;
 [assembly: go.GoPositionMap("crypto/internal/fips140test/xaes_test.go", "xaes_test.cs", "ABgmgoKUgoCCgoKCgoKCgIK2yIKCgoSChIKCgoKChIKClIIAAxbigoKCgoKmgoKCgoKCpoKCgoKCgoCCpICCpKaCgoKCgIKkgIKkyIKChIKCgoKCgoKCgoKCgoSCgoKUgpaUgII=", "24-34:1")]
 // </GoSourcePositionMaps>
 
-namespace go.crypto.@internal;
+namespace go.crypto.@internal.fips140test;
 
 [GoPackage("fipstest", ImportPath = "crypto/internal/fips140test")]
 public static partial class fipstest_internal_test_package

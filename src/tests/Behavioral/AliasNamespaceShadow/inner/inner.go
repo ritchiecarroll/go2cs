@@ -11,7 +11,7 @@ package inner
 import (
 	"sort"
 
-	local "AliasNamespaceShadow/sortlocal"
+	local "AliasNamespaceShadow/sort"
 )
 
 // SortThree uses a member only the STDLIB sort has, so a mis-bound alias cannot compile.

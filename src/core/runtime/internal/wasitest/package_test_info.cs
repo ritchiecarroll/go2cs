@@ -21,7 +21,7 @@ global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
-using static global::go.runtime.@internal.wasi_test_package;
+using static global::go.runtime.@internal.wasitest.wasi_test_package;
 
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
@@ -45,7 +45,7 @@ using static global::go.runtime.@internal.wasi_test_package;
 [assembly: go.GoPositionMap("runtime/internal/wasitest/tcpecho_test.go", "tcpecho_test.cs", "ABwkooIAChiClIKCgoKCgoKUloSElKSkpoKChICCgqSUgoKCgoKUlJSCgIKkgoKClIKCgg==")]
 // </GoSourcePositionMaps>
 
-namespace go.runtime.@internal;
+namespace go.runtime.@internal.wasitest;
 
 [GoPackage("wasi_test")]
 public static partial class wasi_test_package

@@ -1,7 +1,7 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go.crypto.@internal;
+namespace go.crypto.@internal.fips140deps;
 
 using testenv = go.@internal.testenv_package;
 using strings = strings_package;
@@ -9,7 +9,7 @@ using testing = testing_package;
 using exec = os.exec_package;
 using go.@internal;
 using os;
-using static go.crypto.@internal.fipsdeps_package;
+using static go.crypto.@internal.fips140deps.fipsdeps_package;
 
 partial class fipsdeps_internal_test_package {
 

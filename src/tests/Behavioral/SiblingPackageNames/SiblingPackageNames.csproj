@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
-    <RootNamespace>go.AliasNamespaceShadow</RootNamespace>
-    <AssemblyName>AliasNamespaceShadow.sortlocal</AssemblyName>
+    <RootNamespace>go</RootNamespace>
+    <AssemblyName>SiblingPackageNames</AssemblyName>
     <Product>go2cs</Product>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>
@@ -66,7 +66,7 @@
   <!-- NuGet packaging metadata for library projects; packing itself is explicit ('dotnet pack' via push-nuget.ps1), so plain builds emit no .nupkg -->
   <PropertyGroup Condition="'$(OutputType)'=='Library'">
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <!-- No PackageId: nugetgo-pack.ps1 mints a converted module's one NuGet ID, nugetgo.<dotted module path> -->
+    <PackageId>go.$(AssemblyName)</PackageId>
     <PackageLicenseFile Condition="Exists('$(MSBuildProjectDirectory)/LICENSE')">LICENSE</PackageLicenseFile>
     <PackageDescription>$(Description) -- C# project converted from Go source</PackageDescription>
     <PackageProjectUrl>https://github.com/ritchiecarroll/go2cs</PackageProjectUrl>
@@ -152,6 +152,9 @@
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
+    <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
+    <ProjectReference Include="teststructs/foo1/SiblingPackageNames.teststructs.foo1.csproj" />
+    <ProjectReference Include="teststructs/foo2/SiblingPackageNames.teststructs.foo2.csproj" />
   </ItemGroup>
 
 </Project>

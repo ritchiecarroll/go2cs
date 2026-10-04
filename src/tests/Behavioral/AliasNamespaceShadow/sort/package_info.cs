@@ -49,12 +49,12 @@ using static go.AliasNamespaceShadow.sort_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("sortlocal.go", "sortlocal.cs", "AAcUgg==")]
+[assembly: go.GoPositionMap("sort.go", "sort.cs", "AAcUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.AliasNamespaceShadow;
 
-[GoPackage("sort", ImportPath = "AliasNamespaceShadow/sortlocal")]
+[GoPackage("sort")]
 public static partial class sort_package
 {
     // C# nested types declared with no access modifier are always private, and the

@@ -1915,6 +1915,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckShiftPrecedenceUnsigned() => CheckTarget("ShiftPrecedenceUnsigned");
 
     [TestMethod]
+    public void CheckSiblingPackageNames() => CheckTarget("SiblingPackageNames");
+
+    [TestMethod]
     public void CheckSiblingTestAddressedGlobal() => CheckTarget("SiblingTestAddressedGlobal");
 
     [TestMethod]
