@@ -571,9 +571,8 @@ internal static error Δarray(this ж<decodeState> Ꮡd, reflectꓸValue v) {
     v = pv;
     // Check type of target.
     var exprᴛ1 = v.Kind();
-    var matchᴛ1 = false;
     var matchᴛ2 = exprᴛ1 == reflect.ΔInterface || (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice);
-    if (exprᴛ1 == reflect.ΔInterface) { matchᴛ1 = true;
+    if (exprᴛ1 == reflect.ΔInterface) {
         if (v.NumMethod() == 0) {
             // Decoding into nil interface? Switch to non-reflect code.
             var ai = Ꮡd.arrayInterface();
@@ -588,7 +587,7 @@ Value: "array"u8, Type: v.Type(), Offset: (int64)d.off))));
         Ꮡd.skip();
         return default!;
     }
-    if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice) { matchᴛ1 = true;
+    if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice) {
         do {
             break;
         } while (false);

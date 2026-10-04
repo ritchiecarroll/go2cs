@@ -282,6 +282,7 @@
     <Project Path="tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.csproj" />
     <Project Path="tests/Behavioral/AnonymousStructs/AnonymousStructs.csproj" />
     <Project Path="tests/Behavioral/AnyBoxedUntypedConst/AnyBoxedUntypedConst.csproj" />
+    <Project Path="tests/Behavioral/AnyFromInterfacePointerCompare/AnyFromInterfacePointerCompare.csproj" />
     <Project Path="tests/Behavioral/AnyKeyMap/AnyKeyMap.csproj" />
     <Project Path="tests/Behavioral/AnyStringLitAssign/AnyStringLitAssign.csproj" />
     <Project Path="tests/Behavioral/AnyStringLitChanSend/AnyStringLitChanSend.csproj" />

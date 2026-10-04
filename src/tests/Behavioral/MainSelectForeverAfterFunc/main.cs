@@ -14,8 +14,7 @@ internal static void Main() {
         fmt.Println(theTimerFiredWhileMainˢ);
         os.Exit(0);
     });
-    switch (select()) {
-}
+    select();
 }
 
 } // end main_package

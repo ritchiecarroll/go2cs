@@ -135,7 +135,7 @@ internal static (any, bool) popHead(this ж<poolDequeue> Ꮡd) {
         }
     }
     var val = ~slot.Reinterpret<eface, any>();
-    if (val == ((dequeueNil)nil)) {
+    if (AreEqual(val, ((dequeueNil)nil))) {
         val = default!;
     }
     // Zero the slot. Unlike popTail, this isn't racing with
@@ -170,7 +170,7 @@ internal static (any, bool) popTail(this ж<poolDequeue> Ꮡd) {
     }
     // We now own slot.
     var val = ~slot.Reinterpret<eface, any>();
-    if (val == ((dequeueNil)nil)) {
+    if (AreEqual(val, ((dequeueNil)nil))) {
         val = default!;
     }
     // Tell pushHead that we're done with this slot. Zeroing the

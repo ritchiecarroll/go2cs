@@ -304,6 +304,16 @@ func mergePlatformEmissions(rootPath string, targets []string, emissions []*plat
 
 	written += companionWritten
 
+	// The per-file warning entries: each target derived its own facts into its staging root, and the
+	// corpus file is their composition, anchored where the plans above put each file.
+	entriesWritten, err := mergeWarningEntries(coreDir, targets, emissions, plans)
+
+	if err != nil {
+		return err
+	}
+
+	written += entriesWritten
+
 	// The hand-owned files come last, because their routing READS the layout the two steps above just
 	// finished writing: a companion belongs in the platform set of its principal, and the principal's
 	// placement is only knowable once it has landed (platformHandOwn.go).
@@ -591,7 +601,9 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 
 	for _, emission := range emissions {
 		for rawPath, state := range emission.artifacts {
-			if state.emitted && filepath.Ext(rawPath) != ".cs" && artifactPackage(rawPath) != "." {
+			// The warning entries are composed from every target by mergeWarningEntries, never
+			// copied from one.
+			if state.emitted && filepath.Ext(rawPath) != ".cs" && artifactPackage(rawPath) != "." && path.Base(rawPath) != warningEntriesFileName {
 				names[rawPath] = true
 			}
 		}
