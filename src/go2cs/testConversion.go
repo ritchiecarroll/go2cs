@@ -2638,14 +2638,16 @@ func seedProductionInterfaceAliases(pkg *packages.Package, productionInfoPath st
 }
 
 // definedOverInterfaceTypeNames returns the package-level type names the PRODUCTION files declare as
-// a defined type over a NAMED interface — visitTypeSpec's definedOverInterface predicate, read from
-// the same syntax that pass reads it from.
+// a defined type that visitTypeSpec emits as a `global using` alias — interfaceAliasRHS, the one
+// predicate the declaration, its descriptor carrier and an importer's alias all ask, read from the
+// same syntax that pass reads it from: a NAMED interface RHS (`type X any`, `type X io.Reader`) or an
+// inline EMPTY one (`type X interface{}`).
 //
-// The predicate needs the AST and cannot be recovered from go/types: `type X any` and
-// `type X interface{}` are the same *types.Named over the same empty *types.Interface, yet the first
-// emits a `global using` and the second emits a C# interface that IS a class member. Only the
-// right-hand SYNTAX separates them, and convertTestVariant's package carries every production file's
-// syntax because the whole variant feeds the package-wide analyses.
+// The predicate needs the AST and cannot be recovered from go/types: an inline interface WITH methods
+// and a named one are both a *types.Named over an interface, yet only the named form is an alias; the
+// inline definition emits a C# interface that IS a class member. Only the right-hand SYNTAX separates
+// them, and convertTestVariant's package carries every production file's syntax because the whole
+// variant feeds the package-wide analyses.
 //
 // `_test.go` declarations are excluded: a test file's own alias emits its `global using` into THIS
 // compilation and needs no seeding.
@@ -2676,19 +2678,16 @@ func definedOverInterfaceTypeNames(pkg *packages.Package) []string {
 					continue
 				}
 
-				switch typeSpec.Type.(type) {
-				case *ast.Ident, *ast.SelectorExpr:
-				default:
-					continue
-				}
-
 				obj, isTypeName := scope.Lookup(typeSpec.Name.Name).(*types.TypeName)
 
 				if !isTypeName || obj.Type() == nil {
 					continue
 				}
 
-				if _, isInterface := obj.Type().Underlying().(*types.Interface); isInterface {
+				// The ONE predicate visitTypeSpec emits the `global using` by (interfaceAliasRHS): a
+				// named interface RHS or an inline EMPTY one. A private copy that admitted only the named
+				// forms left `type DecodeHookFunc interface{}` unseeded (mapstructure, CS0426).
+				if interfaceAliasRHS(typeSpec.Type, obj.Type().Underlying()) {
 					names = append(names, typeSpec.Name.Name)
 				}
 			}
