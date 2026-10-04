@@ -79,7 +79,7 @@ internal static void Main() {
         fatal(recvmsgˢ, err);
         fmt.Println(payloadByteReceivedˢ, rn == 1 && payload[0] == (rune)'x');
         fmt.Println(controlBytesReceivedˢ, oobn == len(oob));
-        (var scms, err) = syscall.ParseSocketControlMessage(oob[..(int)(oobn)]);
+        (var scms, err) = syscall.ParseSocketControlMessage(oob.slice(0, oobn));
         fatal(parseControlˢ, err);
         fmt.Println(controlMessagesˢ, len(scms));
         (var fds, err) = syscall.ParseUnixRights(Ꮡ(scms, 0));
@@ -89,7 +89,7 @@ internal static void Main() {
         (rn, err) = syscall.Read(fds[0], got);
         fatal(readReceivedFdˢ, err);
         syscall.Close(fds[0]);
-        fmt.Println(receivedDescriptorReadsˢ, rn == len(secret) && ((sstring)(got[..(int)(rn)])) == secret);
+        fmt.Println(receivedDescriptorReadsˢ, rn == len(secret) && ((sstring)(got.slice(0, rn))) == secret);
         array<nint> pipe2Fds = new(2);
         fatal(pipe2Phase2ˢ, syscall.Pipe2(pipe2Fds[..], 0));
         nint pipe2Read = pipe2Fds[0];
@@ -113,7 +113,7 @@ internal static void Main() {
         var oob2 = new slice<byte>(syscall.CmsgSpace(4));
         (_, var oobn2, _, _, err) = syscall.Recvmsg(receiver2, payload2, oob2, 0);
         fatal(recvmsgPhase2ˢ, err);
-        (var scms2, err) = syscall.ParseSocketControlMessage(oob2[..(int)(oobn2)]);
+        (var scms2, err) = syscall.ParseSocketControlMessage(oob2.slice(0, oobn2));
         fatal(parseControlPhase2ˢ, err);
         (var fds2, err) = syscall.ParseUnixRights(Ꮡ(scms2, 0));
         fatal(parseRightsPhase2ˢ, err);
@@ -121,7 +121,7 @@ internal static void Main() {
         (var rn2, err) = syscall.Read(fds2[0], got2);
         fatal(readReceivedFdPhase2ˢ, err);
         syscall.Close(fds2[0]);
-        fmt.Println(controlOnlyDescriptorˢ, rn2 == len(secret) && ((sstring)(got2[..(int)(rn2)])) == secret);
+        fmt.Println(controlOnlyDescriptorˢ, rn2 == len(secret) && ((sstring)(got2.slice(0, rn2))) == secret);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
