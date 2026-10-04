@@ -47,7 +47,7 @@ private static readonly @string nilrefˢ = "nilref"u8;
 private static readonly @string otherˢ = "other"u8;
 
 internal static @string classify(any v) {
-    if (v == ((intRef)nil)) {
+    if (AreEqual(v, ((intRef)nil))) {
         return nilrefˢ;
     }
     return otherˢ;

@@ -4722,7 +4722,9 @@ partial class runtime_package
 
     private sealed class RawBoxData
     {
+        #pragma warning disable CS0649 // Never assigned: Unsafe.As reinterprets a boxed value through this class, so Data names the box's first payload byte.
         public byte Data;
+        #pragma warning restore CS0649
     }
 
     private static uintptr interfaceValueHash(object? v, uintptr h)

@@ -485,6 +485,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		preloadImportedTypeAliases(files, options)
 
 		var outputFileNames []string
+		var warningFacts []fileWarningFacts
 
 		// Convert files SEQUENTIALLY, in the deterministic pkg.Syntax (sorted filename) order. Files
 		// were previously converted in concurrent goroutines, but the per-file visitors share package-
@@ -554,6 +555,15 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				packageLock.Lock()
 				projectImports.UnionWithSet(visitor.importQueue)
 				outputFileNames = append(outputFileNames, outputFileName)
+
+				// A hand-owned file's warnings are its own (a pragma in the file); the facts are
+				// for the files this conversion writes.
+				if !fileEntry.manualConversion {
+					if relPath, ok := warningEntryRelPath(warningEntriesDir(packageOutputPath, outputFileName, isDir), outputFileName); ok {
+						warningFacts = append(warningFacts, visitor.collectFileWarningFacts(relPath, fileEntry.file))
+					}
+				}
+
 				packageLock.Unlock()
 			}(fileEntry)
 		}
@@ -612,6 +622,22 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// which pairs survive to own an adapter class. Must follow writePackageInfoFile, unlike
 		// the dynamic-type barrier above, which only needs the file-visit registry.
 		resolveAdapterNameMarkers(outputFileNames)
+
+		// The per-file warning entries beside the project file (warningEntries.go). The CS0649
+		// fact needs the writes of every file this target selected, so it resolves here.
+		if len(outputFileNames) > 0 {
+			astFiles := make([]*ast.File, 0, len(files))
+
+			for _, fileEntry := range files {
+				astFiles = append(astFiles, fileEntry.file)
+			}
+
+			facts := resolveWarningFacts(warningFacts, collectPackageVarWrites(astFiles, info), hasSiblingInternalTestFiles)
+
+			if err := updateWarningEntries(warningEntriesDir(packageOutputPath, outputFileNames[0], isDir), goosOfTarget(options.targetPlatform), false, facts); err != nil {
+				showWarning("%s", err)
+			}
+		}
 
 		// Emit the ordered package-var initialization file (no-op unless any initializer was
 		// relocated for init-order correctness). Package (directory) conversions only. Under

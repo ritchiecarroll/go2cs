@@ -471,7 +471,7 @@ internal static (time.Time, bool) Deadline(this cancelCtx recvᴛ) => recvᴛ.Co
 internal static any Value(this ж<cancelCtx> Ꮡc, any key) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    if (key == ᏑcancelCtxKey) {
+    if (AreEqual(key, ᏑcancelCtxKey)) {
         return Ꮡc;
     }
     return value(c.Context, key);
@@ -866,14 +866,14 @@ internal static any value(Context c, any key) {
             break;
         }
         case ж<cancelCtx> ctx: {
-            if (key == ᏑcancelCtxKey) {
+            if (AreEqual(key, ᏑcancelCtxKey)) {
                 return c;
             }
             c = ctx.Value.Context;
             break;
         }
         case withoutCancelCtx ctx: {
-            if (key == ᏑcancelCtxKey) {
+            if (AreEqual(key, ᏑcancelCtxKey)) {
                 // This implements Cause(ctx) == nil
                 // when ctx is created using WithoutCancel.
                 return default!;
@@ -882,7 +882,7 @@ internal static any value(Context c, any key) {
             break;
         }
         case ж<timerCtx> ctx: {
-            if (key == ᏑcancelCtxKey) {
+            if (AreEqual(key, ᏑcancelCtxKey)) {
                 return ctx.of(timerCtx.ᏑcancelCtx);
             }
             c = ctx.Value.Context;

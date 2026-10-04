@@ -1,0 +1,7 @@
+# go2cs: per-file warning entries, written by every conversion of this package -- do not edit
+# Each section turns off one C# warning in one converted file, for a reason the converter
+# derived from the Go source; the comment above it names the GOOS flavours that hold it.
+
+[/UnsafeOperations.cs]
+# CS0219: darwin linux windows
+dotnet_diagnostic.CS0219.severity = none

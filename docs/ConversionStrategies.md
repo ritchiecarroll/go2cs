@@ -1024,6 +1024,32 @@ copy first. The `Exists` conditions let one project file serve both layouts:
     <Compile Include="$(GoTargetOS)/*.cs" Exclude="$(GoTargetOS)/package_info.cs" />
 ```
 
+**Three C# warnings that Go's own semantics draw are turned off per file, by an `.editorconfig` beside the
+project.** Go folds `unsafe.Sizeof(x)` and a constant expression over a local const at compile time, and
+the converter writes the folded value with the Go text in a comment, so a local whose every use folded is
+declared and never read in C# (CS0219). A package variable with no initializer that no file of the package
+writes, or a blank `var _ T`, is a field never assigned (CS0649); C# reports that on an internal field only
+in a project that grants no `InternalsVisibleTo`, so a package with in-package tests holds none. And
+`uint64(nsec) | x` with a signed `nsec` sign-extends in Go exactly as the C# cast does (CS0675). Changing
+the emission to silence these would make it say something other than the Go, so the conversion derives
+each fact from the Go source and writes one section per file that holds it, anchored with a leading slash
+and naming the per-OS folder where the file lives in one. A section switches the warning off for that one file and nowhere else, which also
+hides a genuine new instance in that file; that is the cost, and why the entries are per file rather than
+a project-wide `NoWarn`. The entries follow the code: a conversion that no longer finds a fact drops its
+section, and deletes the file when none is left. The file is the converter's only when its first line is
+the go2cs marker; a package's own `.editorconfig` is never touched (the conversion prints a warning naming
+the entries it would have written).
+
+```ini
+# go2cs: per-file warning entries, written by every conversion of this package -- do not edit
+# Each section turns off one C# warning in one converted file, for a reason the converter
+# derived from the Go source; the comment above it names the GOOS flavours that hold it.
+
+[/linux/runtime1.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+```
+
 **Full detail:** [Reference → Package Conversion](ConversionStrategies-Reference/package-conversion.md#package-conversion) — project names and paths, cross-package references and NuGet use, exported type aliases, the import-initialization rules including blank imports and test projects, build-constraint file selection, the per-OS layout including hand-written files, and the generated solution files.
 
 ---

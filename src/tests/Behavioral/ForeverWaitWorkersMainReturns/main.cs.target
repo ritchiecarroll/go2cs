@@ -12,8 +12,7 @@ private static readonly object mainReturnedWithThreeˢ = (@string)"main returned
 [MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
     channel<nint> nilc = default!;
     goǃ(() => {
-        switch (select()) {
-}
+        select();
     });
     var nilcʗ1 = nilc;
     goǃ(() => {

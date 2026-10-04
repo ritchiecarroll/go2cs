@@ -1076,6 +1076,7 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 	// makes the record set final.
 	testAdapterResolveNames = nil
 	emittedAdapterPairAnchors = nil
+	testWarningFacts = map[string][]string{}
 
 	// The //go:embed registry is reset HERE, per PACKAGE — never in resetPackageState, which runs
 	// per VARIANT. Both halves' targets must be in hand when the ONE tests csproj is written, and
@@ -1522,6 +1523,12 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 		// re-derive it.
 		captureAdapterPairsFromInfoFile(testInfoPath)
 		resolveAdapterNameMarkers(testAdapterResolveNames)
+	}
+
+	// The `_test.cs` sections of the package's warning entries (warningEntries.go), from both
+	// variants' facts; the production sections stay the production conversion's.
+	if err := updateWarningEntries(outputPath, goosOfTarget(options.targetPlatform), true, testWarningFacts); err != nil {
+		showWarning("%s", err)
 	}
 
 	return result, nil
@@ -3029,6 +3036,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 
 	var compileNames []string // emitted test .cs basenames — the csproj's compile items
 	var resolveNames []string // every emission (incl. .cs.auto review siblings) for marker resolution
+	var warningFacts []fileWarningFacts
 
 	convert := func(entry FileEntry) (err error) {
 		if !options.debugMode {
@@ -3069,6 +3077,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		projectImports.UnionWithSet(visitor.importQueue)
 		compileNames = append(compileNames, filepath.Base(outputName))
 		resolveNames = append(resolveNames, outputName)
+		warningFacts = append(warningFacts, visitor.collectFileWarningFacts(filepath.Base(outputName), entry.file))
 		return nil
 	}
 
@@ -3117,6 +3126,10 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	}
 
 	resolveDynamicTypeMarkers(resolveNames)
+
+	for relPath, codes := range resolveWarningFacts(warningFacts, collectPackageVarWrites(pkg.Syntax, pkg.TypesInfo), true) {
+		testWarningFacts[relPath] = codes
+	}
 
 	// Adapter names cannot resolve here: this variant's GoImplement records are not merged into
 	// package_test_info.cs until the caller writes it, and a name depends on the FINAL set. Hand

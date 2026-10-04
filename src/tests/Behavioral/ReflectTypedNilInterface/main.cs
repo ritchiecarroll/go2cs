@@ -129,7 +129,7 @@ internal static void Main() {
     var rn = reflect.New(reflect.TypeOf(((ж<Blob>)nil))).Elem();
     report(newBlobElemˢ, rn);
     var iface = rs.Index(0).Interface();
-    fmt.Printf("roundtrip: ==(*Blob)(nil) %v, ==nil %v\n"u8, iface == ((ж<Blob>)nil), iface == default!);
+    fmt.Printf("roundtrip: ==(*Blob)(nil) %v, ==nil %v\n"u8, AreEqual(iface, ((ж<Blob>)nil)), iface == default!);
     fmt.Printf("elem-of-typed-nil valid=%v\n"u8, rs.Index(0).Elem().IsValid());
     ж<Blob> np = default!;
     var si = new main_si(I: np.OrTypedNil());
