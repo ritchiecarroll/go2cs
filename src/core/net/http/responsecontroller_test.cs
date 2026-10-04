@@ -11,6 +11,8 @@ using os = os_package;
 using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using bufio = bufio_package;
 using global::go.net;
 using net = net_package;
@@ -53,8 +55,8 @@ internal static void testResponseControllerFlush(ж<testing.T> Ꮡt, testMode mo
         var buf = new slice<byte>(16);
         (var n, err) = (~res).Body.Read(buf);
         builtin.close(continuec);
-        if (err != default! || ((sstring)(buf[..(int)(n)])) != "one"u8) {
-            Ꮡt.Fatalf("Body.Read = %q, %v, want %q, nil"u8, ((@string)(buf[..(int)(n)])), err, oneˢ);
+        if (err != default! || ((sstring)(buf.slice(0, n))) != "one"u8) {
+            Ꮡt.Fatalf("Body.Read = %q, %v, want %q, nil"u8, ((@string)(buf.slice(0, n))), err, oneˢ);
         }
         (var got, err) = io.ReadAll((~res).Body);
         if (err != default! || ((sstring)got) != "two"u8) {
@@ -220,7 +222,7 @@ public static void TestResponseControllerSetPastReadDeadline(ж<testing.T> Ꮡt)
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string textFooˢ = "text/foo"u8;
 
-internal static void testResponseControllerSetPastReadDeadline(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testResponseControllerSetPastReadDeadline(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         var readc = new channel<EmptyStruct>(0);
@@ -234,7 +236,7 @@ internal static void testResponseControllerSetPastReadDeadline(ж<testing.T> Ꮡ
                 var ctl = NewResponseController(w);
                 var b = new slice<byte>(3);
                 var (n, errΔ1) = io.ReadFull((~r).Body, b);
-                b = b[..(int)(n)];
+                b = b.slice(0, n);
                 if (errΔ1 != default! || ((sstring)b) != "one"u8) {
                     Ꮡt.Errorf("before setting read deadline: Read = %v, %q, want nil, %q"u8, errΔ1, ((@string)b), oneˢ);
                     return;

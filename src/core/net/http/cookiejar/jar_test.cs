@@ -49,7 +49,7 @@ internal static @string PublicSuffix(this testPSL _, @string d) {
     if (d == "www2.buggy.psl"u8) {
         return comˢ;
     }
-    return d[(int)(strings.LastIndex(d, "."u8) + 1)..];
+    return d.slice(strings.LastIndex(d, "."u8) + 1);
 }
 
 // newTestJar creates an empty Jar with testPSL as the public suffix list.

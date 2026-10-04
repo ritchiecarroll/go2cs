@@ -149,7 +149,7 @@ internal static void empty(ж<testing.T> Ꮡt, @string testname, ж<bytes.Buffer
         if (err != default!) {
             Ꮡt.Errorf(testname + " (empty 2): err should always be nil, found err == %s"u8, err);
         }
-        s = s[(int)(n)..];
+        s = s.slice(n);
         check(Ꮡt, testname + " (empty 3)"u8, Ꮡbuf, s);
     }
     check(Ꮡt, testname + " (empty 4)"u8, Ꮡbuf, ""u8);
@@ -254,7 +254,7 @@ internal static readonly @string testLargeStringReads3ˢ = "TestLargeStringReads
 public static void TestLargeStringReads(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     for (nint i = 3; i < 30; i += 3) {
-        @string s = fillString(Ꮡt, testLargeReads1ˢ, Ꮡbuf, ""u8, 5, testString[..(int)(len(testString) / i)]);
+        @string s = fillString(Ꮡt, testLargeReads1ˢ, Ꮡbuf, ""u8, 5, testString.slice(0, len(testString) / i));
         empty(Ꮡt, testLargeReads2ˢ, Ꮡbuf, s, new slice<byte>(len(testString)));
     }
     check(Ꮡt, testLargeStringReads3ˢ, Ꮡbuf, ""u8);
@@ -266,7 +266,7 @@ internal static readonly @string testLargeByteReads3ˢ = "TestLargeByteReads (3)
 public static void TestLargeByteReads(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     for (nint i = 3; i < 30; i += 3) {
-        @string s = fillBytes(Ꮡt, testLargeReads1ˢ, Ꮡbuf, ""u8, 5, testBytes[..(int)(len(testBytes) / i)]);
+        @string s = fillBytes(Ꮡt, testLargeReads1ˢ, Ꮡbuf, ""u8, 5, testBytes.slice(0, len(testBytes) / i));
         empty(Ꮡt, testLargeReads2ˢ, Ꮡbuf, s, new slice<byte>(len(testString)));
     }
     check(Ꮡt, testLargeByteReads3ˢ, Ꮡbuf, ""u8);
@@ -282,14 +282,14 @@ public static void TestMixedReadsAndWrites(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 50; i++) {
         nint wlen = rand.Intn(len(testString));
         if (i % 2 == 0){
-            s = fillString(Ꮡt, testMixedReadsAndWrites1ˢ, Ꮡbuf, s, 1, testString[0..(int)(wlen)]);
+            s = fillString(Ꮡt, testMixedReadsAndWrites1ˢ, Ꮡbuf, s, 1, testString.slice(0, wlen));
         } else {
-            s = fillBytes(Ꮡt, testMixedReadsAndWrites1ˢ, Ꮡbuf, s, 1, testBytes[0..(int)(wlen)]);
+            s = fillBytes(Ꮡt, testMixedReadsAndWrites1ˢ, Ꮡbuf, s, 1, testBytes.slice(0, wlen));
         }
         nint rlen = rand.Intn(len(testString));
         var fub = new slice<byte>(rlen);
         var (n, _) = buf.Read(fub);
-        s = s[(int)(n)..];
+        s = s.slice(n);
     }
     empty(Ꮡt, testMixedReadsAndWrites2ˢ, Ꮡbuf, s, new slice<byte>(buf.Len()));
 }
@@ -325,7 +325,7 @@ internal static readonly @string testReadFrom2ˢ = "TestReadFrom (2)"u8;
 public static void TestReadFrom(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     for (nint i = 3; i < 30; i += 3) {
-        @string s = fillBytes(Ꮡt, testReadFrom1ˢ, Ꮡbuf, ""u8, 5, testBytes[..(int)(len(testBytes) / i)]);
+        @string s = fillBytes(Ꮡt, testReadFrom1ˢ, Ꮡbuf, ""u8, 5, testBytes.slice(0, len(testBytes) / i));
         ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
         b.ReadFrom(new bytes_test_package.bytes_BufferжReader(Ꮡbuf));
         empty(Ꮡt, testReadFrom2ˢ, Ꮡb, s, new slice<byte>(len(testString)));
@@ -416,7 +416,7 @@ internal static readonly @string testWriteTo2ˢ = "TestWriteTo (2)"u8;
 public static void TestWriteTo(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     for (nint i = 3; i < 30; i += 3) {
-        @string s = fillBytes(Ꮡt, testWriteTo1ˢ, Ꮡbuf, ""u8, 5, testBytes[..(int)(len(testBytes) / i)]);
+        @string s = fillBytes(Ꮡt, testWriteTo1ˢ, Ꮡbuf, ""u8, 5, testBytes.slice(0, len(testBytes) / i));
         ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
         buf.WriteTo(new bytes_test_package.bytes_BufferжWriter(Ꮡb));
         empty(Ꮡt, testWriteTo2ˢ, Ꮡb, s, new slice<byte>(len(testString)));
@@ -461,7 +461,7 @@ public static void TestRuneIO(ж<testing.T> Ꮡt) {
     bytes.Buffer buf = default!;
     nint n = 0;
     for (var r = (rune)0; r < NRune; r++) {
-        nint size = utf8.EncodeRune(b[(int)(n)..], r);
+        nint size = utf8.EncodeRune(b.slice(n), r);
         var (nbytes, err) = buf.WriteRune(r);
         if (err != default!) {
             Ꮡt.Fatalf("WriteRune(%U) error: %s"u8, r, err);
@@ -471,7 +471,7 @@ public static void TestRuneIO(ж<testing.T> Ꮡt) {
         }
         n += size;
     }
-    b = b[0..(int)(n)];
+    b = b.slice(0, n);
     // Check the resulting bytes
     if (!Equal(buf.Bytes(), b)) {
         Ꮡt.Fatalf("incorrect result from WriteRune: %q not %q"u8, buf.Bytes(), b);
@@ -539,8 +539,8 @@ public static void TestNext(ж<testing.T> Ꮡt) {
                 // Check that if we start with a buffer
                 // of length j at offset i and ask for
                 // Next(k), we get the right bytes.
-                var buf = NewBuffer(b[0..(int)(j)]);
-                var (n, _) = buf.Read(tmp[0..(int)(i)]);
+                var buf = NewBuffer(b.slice(0, j));
+                var (n, _) = buf.Read(tmp.slice(0, i));
                 if (n != i) {
                     Ꮡt.Fatalf("Read %d returned %d"u8, i, n);
                 }
@@ -657,10 +657,10 @@ public static void TestGrow(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("allocation occurred during write"u8);
             }
             // Check that buffer has correct data.
-            if (!Equal(buf.Bytes()[0..(int)(startLen - readBytes)], xBytes[(int)(readBytes)..])) {
+            if (!Equal(buf.Bytes().slice(0, startLen - readBytes), xBytes.slice(readBytes))) {
                 Ꮡt.Errorf("bad initial data at %d %d"u8, startLen, growLen);
             }
-            if (!Equal(buf.Bytes()[(int)(startLen - readBytes)..(int)(startLen - readBytes + growLen)], yBytes)) {
+            if (!Equal(buf.Bytes().slice(startLen - readBytes, startLen - readBytes + growLen), yBytes)) {
                 Ꮡt.Errorf("bad written data at %d %d"u8, startLen, growLen);
             }
         }
@@ -864,7 +864,7 @@ public static void BenchmarkBufferAppendNoCopy(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         bb.Reset();
         var bΔ1 = bb.AvailableBuffer();
-        bΔ1 = bΔ1[..(int)(cap(bΔ1))]; // use max capacity to simulate a large append operation
+        bΔ1 = bΔ1.slice(0, cap(bΔ1)); // use max capacity to simulate a large append operation
         bb.Write(bΔ1); // should be nearly infinitely fast
     }
 }

@@ -6,6 +6,8 @@ namespace go;
 using fmt = fmt_package;
 using Δmath = math_package;
 using Δtime = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.time_internal_test_package;
 
 partial class time_test_package {
@@ -231,7 +233,7 @@ internal static readonly object doneˢ = (@string)"Done!"u8;
 internal static readonly object currentTimeˢ = (@string)"Current time: "u8;
 
 // Output: Go launched at 2009-11-10 15:00:00 -0800 PST
-public static void ExampleNewTicker() {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleNewTicker() {
     GoFrame ᒐ = default;
     try {
         var ticker = Δtime.NewTicker(Δtime.ΔSecond);

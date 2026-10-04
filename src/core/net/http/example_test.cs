@@ -10,6 +10,8 @@ using log = log_package;
 using Δhttp = global::go.net.http_package;
 using os = os_package;
 using signal = global::go.os.signal_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using bufio = bufio_package;
 using global::go.net;
 using global::go.os;
@@ -155,7 +157,7 @@ public static void ExampleResponseWriter_trailers() {
     });
 }
 
-public static void ExampleServer_Shutdown() {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleServer_Shutdown() {
     ref var srv = ref heap(new Δhttp.Server(), out var Ꮡsrv);
     var idleConnsClosed = new channel<EmptyStruct>(0);
     var idleConnsClosedʗ1 = idleConnsClosed;

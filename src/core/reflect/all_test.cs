@@ -35,7 +35,8 @@ using Δtesting = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using global::go.go;
 using global::go.math;
@@ -1059,7 +1060,7 @@ public static void TestGrow(ж<Δtesting.T> Ꮡt) {
         slice<byte> b = default!;
         var vΔ2 = ValueOf(@new<slice<byte>>()).Elem();
         for (nint i = 0; i < 10; i++) {
-            b = appendꓸꓸꓸ(b[..(int)(cap(b))], makeꓸꓸꓸ<byte>(1));
+            b = appendꓸꓸꓸ(b.slice(0, cap(b)), makeꓸꓸꓸ<byte>(1));
             vΔ2.SetLen(vΔ2.Cap());
             vΔ2.Grow(1);
             if (vΔ2.Cap() != cap(b)) {
@@ -1072,7 +1073,7 @@ public static void TestGrow(ж<Δtesting.T> Ꮡt) {
             var vΔ3 = ValueOf(@new<slice<byte>>()).Elem();
             vΔ3.Grow(61);
             var b = vΔ3.Bytes();
-            b = b[..(int)(cap(b))];
+            b = b.slice(0, cap(b));
             foreach (var (iΔ1, c) in b) {
                 if (c != 0) {
                     tΔ3.Fatalf("Value.Bytes[%d] = 0x%02x, want 0x00"u8, iΔ1, c);
@@ -2008,7 +2009,7 @@ public static void TestInternalIsZero(ж<Δtesting.T> Ꮡt) {
     var b = new slice<byte>(512);
     for (nint a = 0; a < 8; a++) {
         for (nint i = 1; i <= 512 - a; i++) {
-            reflect_internal_test_package.InternalIsZero(b[(int)(a)..(int)(a + i)]);
+            reflect_internal_test_package.InternalIsZero(b.slice(a, a + i));
         }
     }
 }
@@ -2276,7 +2277,7 @@ public static void TestChan(ж<Δtesting.T> Ꮡt) {
 internal static ж<bool> allselect = flag.Bool("allselect"u8, false, "exhaustive select test"u8);
 
 public static void TestSelect(ж<Δtesting.T> Ꮡt) {
-    ᏑselectWatch.of(selectWatchᴛ1.Ꮡonce).Do(() => {
+    ᏑselectWatch.of(selectWatchᴛ1.Ꮡonce).Do([MethodImpl(MethodImplOptions.NoInlining)] () => {
         goǃ(selectWatcher);
     });
     exhaustive x = default!;
@@ -7649,7 +7650,7 @@ public static void TestChanOfDir(ж<Δtesting.T> Ꮡt) {
 
 [GoLocalName("T")] [GoType("ж<uintptr>")] internal partial class TestChanOfGC_T;
 
-public static void TestChanOfGC(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestChanOfGC(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var done = new channel<bool>(1);
@@ -8093,7 +8094,7 @@ public static void TestAllocsInterfaceSmall(ж<Δtesting.T> Ꮡt) {
         var c = Ꮡ(x.last, i);
         if ((~c).n + 1 < (~c).max) {
             c.Value.n++;
-            x.last = x.last[..(int)(i + 1)];
+            x.last = x.last.slice(0, i + 1);
             return true;
         }
     }
@@ -8746,7 +8747,7 @@ public static void TestFuncLayout(ж<Δtesting.T> Ꮡt) {
 // trimBitmap removes trailing 0 elements from b and returns the result.
 internal static slice<byte> trimBitmap(slice<byte> b) {
     while (len(b) > 0 && b[len(b) - 1] == 0) {
-        b = b[..(int)(len(b) - 1)];
+        b = b.slice(0, len(b) - 1);
     }
     return b;
 }
@@ -8784,7 +8785,7 @@ internal static slice<byte> trimBitmap(slice<byte> b) {
     if (bytes.Equal(heapBits, bits)) {
         return;
     }
-    if (len(heapBits) > len(bits) && bytes.Equal(heapBits[..(int)(len(bits))], bits)) {
+    if (len(heapBits) > len(bits) && bytes.Equal(heapBits.slice(0, len(bits)), bits)) {
         // Just the prefix matching is OK.
         return;
     }
@@ -9193,7 +9194,7 @@ public static void TestTypeStrings(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-public static void TestOffsetLock(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOffsetLock(ж<Δtesting.T> Ꮡt) {
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < 4; i++) {
         nint iΔ1 = i;
@@ -10409,7 +10410,7 @@ public static void TestValue_EqualNonComparable(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-public static void TestInitFuncTypes(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestInitFuncTypes(ж<Δtesting.T> Ꮡt) {
     nint n = 100;
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(n);

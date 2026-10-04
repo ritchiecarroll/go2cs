@@ -7,12 +7,13 @@ using Δruntime = runtime_package;
 using strings = strings_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-public static void TestCaller(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCaller(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         nint procs = Δruntime.GOMAXPROCS(-1);

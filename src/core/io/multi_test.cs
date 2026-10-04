@@ -12,7 +12,8 @@ using Δruntime = runtime_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
 using hash = hash_package;
 using static go.io_internal_test_package;
@@ -38,12 +39,12 @@ public static void TestMultiReader(ж<testing.T> Ꮡt) {
     }
     void expectRead(nint size, @string expected, error eerr) {
         nread++;
-        var (n, gerr) = Ꮡmr.ValueSlot.Read(Ꮡbuf.ValueSlot[0..(int)(size)]);
+        var (n, gerr) = Ꮡmr.ValueSlot.Read(Ꮡbuf.ValueSlot.slice(0, size));
         if (n != len(expected)) {
             Ꮡt.Errorf("#%d, expected %d bytes; got %d"u8,
                 nread, len(expected), n);
         }
-        @string got = ((@string)(Ꮡbuf.ValueSlot[0..(int)(n)]));
+        @string got = ((@string)(Ꮡbuf.ValueSlot.slice(0, n)));
         if (got != expected) {
             Ꮡt.Errorf("#%d, expected %q; got %q"u8,
                 nread, expected, got);
@@ -52,7 +53,7 @@ public static void TestMultiReader(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("#%d, expected error %v; got %v"u8,
                 nread, eerr, gerr);
         }
-        Ꮡbuf.ValueSlot = Ꮡbuf.ValueSlot[(int)(n)..];
+        Ꮡbuf.ValueSlot = Ꮡbuf.ValueSlot.slice(n);
     }
     var expectReadʗ1 = expectRead;
     withFooBar(() => {
@@ -203,13 +204,13 @@ internal delegate (nint, error) writerFunc(slice<byte> p);
 
     var pc = new slice<uintptr>(1000); // 1000 should fit the full stack
     nint n = Δruntime.Callers(0, pc);
-    nint myDepth = callDepth(pc[..(int)(n)]);
+    nint myDepth = callDepth(pc.slice(0, n));
     nint writeDepth = default!; // will contain the depth from which writerFunc.Writer was called
 
     var pcʗ1 = pc;
     Δio.Writer w = MultiWriter(new io_test_package.writerFuncᴠWriter(new writerFunc([MethodImpl(MethodImplOptions.NoInlining)] (slice<byte> p) => {
         nint nΔ1 = Δruntime.Callers(1, pcʗ1);
-        writeDepth += callDepth(pcʗ1[..(int)(nΔ1)]);
+        writeDepth += callDepth(pcʗ1.slice(0, nΔ1));
         return (0, default!);
     })));
     var mw = w;
@@ -296,13 +297,13 @@ internal static readonly @string irrelevantˢ = "irrelevant"u8;
 
     var pc = new slice<uintptr>(1000); // 1000 should fit the full stack
     nint n = Δruntime.Callers(0, pc);
-    nint myDepth = callDepth(pc[..(int)(n)]);
+    nint myDepth = callDepth(pc.slice(0, n));
     nint readDepth = default!; // will contain the depth from which fakeReader.Read was called
 
     var pcʗ1 = pc;
     Δio.Reader r = MultiReader(new io_test_package.readerFuncᴠReader(new readerFunc([MethodImpl(MethodImplOptions.NoInlining)] (slice<byte> p) => {
         nint nΔ1 = Δruntime.Callers(1, pcʗ1);
-        readDepth = callDepth(pcʗ1[..(int)(nΔ1)]);
+        readDepth = callDepth(pcʗ1.slice(0, nΔ1));
         return (0, errors.New(irrelevantˢ));
     })));
     // chain a bunch of multiReaders
@@ -380,7 +381,7 @@ public static void TestMultiReaderFreesExhaustedReaders(ж<testing.T> Ꮡt) {
     var buf = new slice<byte>(4);
     {
         var (n, err) = ReadFull(mr, buf); if (err != default! || ((sstring)buf) != "foob"u8) {
-            Ꮡt.Fatalf(@"ReadFull = %d (%q), %v; want 3, ""foo"", nil"u8, n, buf[..(int)(n)], err);
+            Ꮡt.Fatalf(@"ReadFull = %d (%q), %v; want 3, ""foo"", nil"u8, n, buf.slice(0, n), err);
         }
     }
     Δruntime.GC();
@@ -396,7 +397,7 @@ public static void TestMultiReaderFreesExhaustedReaders(ж<testing.T> Ꮡt) {
     }}
     {
         var (n, err) = ReadFull(mr, buf[..2]); if (err != default! || ((sstring)(buf[..2])) != "ar"u8) {
-            Ꮡt.Fatalf(@"ReadFull = %d (%q), %v; want 2, ""ar"", nil"u8, n, buf[..(int)(n)], err);
+            Ꮡt.Fatalf(@"ReadFull = %d (%q), %v; want 2, ""ar"", nil"u8, n, buf.slice(0, n), err);
         }
     }
 }
@@ -411,7 +412,7 @@ public static void TestInterleavedMultiReader(ж<testing.T> Ꮡt) {
     // Consume r1 (and clear it for GC to handle) and consume part of r2.
     var (n, err) = ReadFull(mr2, buf);
     {
-        @string got = ((@string)(buf[..(int)(n)])); if (got != "1234"u8 || err != default!) {
+        @string got = ((@string)(buf.slice(0, n))); if (got != "1234"u8 || err != default!) {
             Ꮡt.Errorf(@"ReadFull(mr2) = (%q, %v), want (""1234"", nil)"u8, got, err);
         }
     }
@@ -419,7 +420,7 @@ public static void TestInterleavedMultiReader(ж<testing.T> Ꮡt) {
     // This should not panic even though mr2 cleared r1.
     (n, err) = ReadFull(mr1, buf);
     {
-        @string got = ((@string)(buf[..(int)(n)])); if (got != "5678"u8 || err != default!) {
+        @string got = ((@string)(buf.slice(0, n))); if (got != "5678"u8 || err != default!) {
             Ꮡt.Errorf(@"ReadFull(mr1) = (%q, %v), want (""5678"", nil)"u8, got, err);
         }
     }

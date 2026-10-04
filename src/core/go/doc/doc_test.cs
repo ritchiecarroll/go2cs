@@ -58,7 +58,7 @@ internal static @string synopsisFmt(@string s) {
         s = s[0..(int)(n)];
         {
             nint i = strings.LastIndexAny(s, "\t\n "u8); if (i >= 0) {
-                s = s[0..(int)(i)];
+                s = s.slice(0, i);
             }
         }
         s = strings.TrimSpace(s) + " ..."u8;
@@ -70,7 +70,7 @@ internal static @string indentFmt(@string indent, @string s) {
     @string end = ""u8;
     if (strings.HasSuffix(s, "\n"u8)) {
         end = "\n"u8;
-        s = s[..(int)(len(s) - 1)];
+        s = s.slice(0, len(s) - 1);
     }
     return indent + strings.ReplaceAll(s, "\n"u8, "\n"u8 + indent) + end;
 }

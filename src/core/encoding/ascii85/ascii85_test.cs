@@ -57,7 +57,7 @@ internal static @string strip85(@string s) {
             w++;
         }
     }
-    return ((@string)(t[0..(int)(w)]));
+    return ((@string)(t.slice(0, w)));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -67,7 +67,7 @@ public static void TestEncode(ж<testing.T> Ꮡt) {
     foreach (var (_, p) in pairs) {
         var buf = new slice<byte>(MaxEncodedLen(len(p.decoded)));
         nint n = Encode(buf, slice<byte>(p.decoded));
-        buf = buf[0..(int)(n)];
+        buf = buf.slice(0, n);
         testEqual(Ꮡt, encodeQQWantQˢ, p.decoded, strip85(((@string)buf)), strip85(p.encoded));
     }
 }
@@ -98,9 +98,9 @@ public static void TestEncoderBuffering(ж<testing.T> Ꮡt) {
             if (end > len(input)) {
                 end = len(input);
             }
-            var (n, errΔ1) = encoder.Write(input[(int)(pos)..(int)(end)]);
-            testEqual(Ꮡt, writeQGaveErrorVWantVˢ, input[(int)(pos)..(int)(end)], errΔ1, ((error)default!));
-            testEqual(Ꮡt, writeQGaveLengthVWantVˢ, input[(int)(pos)..(int)(end)], n, end - pos);
+            var (n, errΔ1) = encoder.Write(input.slice(pos, end));
+            testEqual(Ꮡt, writeQGaveErrorVWantVˢ, input.slice(pos, end), errΔ1, ((error)default!));
+            testEqual(Ꮡt, writeQGaveLengthVWantVˢ, input.slice(pos, end), n, end - pos);
         }
         var err = encoder.Close();
         testEqual(Ꮡt, closeGaveErrorVWantVˢ, err, ((error)default!));
@@ -121,7 +121,7 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
         testEqual(Ꮡt, decodeQErrorVWantVˢ, p.encoded, err, ((error)default!));
         testEqual(Ꮡt, decodeQNsrcVWantVˢ, p.encoded, nsrc, len(p.encoded));
         testEqual(Ꮡt, decodeQNdstVWantVˢ, p.encoded, ndst, len(p.decoded));
-        testEqual(Ꮡt, decodeQQWantQˢ, p.encoded, ((@string)(dbuf[0..(int)(ndst)])), p.decoded);
+        testEqual(Ꮡt, decodeQQWantQˢ, p.encoded, ((@string)(dbuf.slice(0, ndst))), p.decoded);
     }
 }
 
@@ -157,13 +157,13 @@ public static void TestDecoderBuffering(ж<testing.T> Ꮡt) {
         nint n = default!;
         error err = default!;
         for (total = 0; total < len(bigtest.decoded) && err == default!; ) {
-            (n, err) = decoder.Read(buf[(int)(total)..(int)(total + bs)]);
+            (n, err) = decoder.Read(buf.slice(total, total + bs));
             total += n;
         }
         if (err != default! && !AreEqual(err, io.EOF)) {
             Ꮡt.Errorf("Read from %q at pos %d = %d, unexpected error %v"u8, bigtest.encoded, total, n, err);
         }
-        testEqual(Ꮡt, decodingDOfQQWantQˢ, bs, bigtest.encoded, ((@string)(buf[0..(int)(total)])), bigtest.decoded);
+        testEqual(Ꮡt, decodingDOfQQWantQˢ, bs, bigtest.encoded, ((@string)(buf.slice(0, total))), bigtest.decoded);
     }
 }
 

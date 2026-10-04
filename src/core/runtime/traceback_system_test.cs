@@ -18,7 +18,8 @@ using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
 using @internal;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using exec = global::go.os.exec_package;
 using global::go.os;
 using global::go.runtime;
@@ -32,7 +33,7 @@ internal static readonly @string systemˢ = "system"u8;
 
 // This is the entrypoint of the child process used by
 // TestTracebackSystem/panic. It prints a crash report to stdout.
-internal static void crashViaPanic() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void crashViaPanic() {
     // Ensure that we get pc=0x%x values in the traceback.
     Δdebug.SetTraceback(systemˢ);
     writeSentinel(new Δos.FileжWriter(Δos.Stdout));
@@ -47,7 +48,7 @@ internal static void crashViaPanic() {
 
 // This is the entrypoint of the child process used by
 // TestTracebackSystem/trap. It prints a crash report to stdout.
-internal static void crashViaTrap() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void crashViaTrap() {
     // Ensure that we get pc=0x%x values in the traceback.
     Δdebug.SetTraceback(systemˢ);
     writeSentinel(new Δos.FileжWriter(Δos.Stdout));

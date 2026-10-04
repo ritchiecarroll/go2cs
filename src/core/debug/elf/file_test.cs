@@ -1167,7 +1167,7 @@ public static void TestCompressedSection(ж<testing.T> Ꮡt) {
         if (end > (int64)len(buf)) {
             end = (int64)len(buf);
         }
-        var (n, errΔ3) = io.ReadFull(sf, buf[(int)(pos)..(int)(end)]);
+        var (n, errΔ3) = io.ReadFull(sf, buf.slice((nint)(pos), (nint)(end)));
         if (errΔ3 != default!) {
             Ꮡt.Fatal(errΔ3);
         }
@@ -1556,7 +1556,7 @@ public static void TestIssue59208(ж<testing.T> Ꮡt) {
     }
     var dn = new slice<byte>(len(data));
     var zoffset = (~sec).Offset + (uint64)(~sec).compressionOffset;
-    copy(dn, data[..(int)(zoffset)]);
+    copy(dn, data.slice(0, (nint)(zoffset)));
     (var ozd, err) = sec.Data();
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -1567,8 +1567,8 @@ public static void TestIssue59208(ж<testing.T> Ꮡt) {
     copy(ozd, new byte[]{1, 0, 0, 0}.slice());
     wr.Write(ozd);
     wr.Close();
-    copy(dn[(int)(zoffset)..], buf.Bytes());
-    copy(dn[(int)((~sec).Offset + (~sec).FileSize)..], data[(int)((~sec).Offset + (~sec).FileSize)..]);
+    copy(dn.slice((nint)(zoffset)), buf.Bytes());
+    copy(dn.slice((nint)((~sec).Offset + (~sec).FileSize)), data.slice((nint)((~sec).Offset + (~sec).FileSize)));
     (var nf, err) = NewFile(new elf_internal_test_package.bytes_ReaderжReaderAt(bytes.NewReader(dn)));
     if (err != default!) {
         Ꮡt.Error(err);

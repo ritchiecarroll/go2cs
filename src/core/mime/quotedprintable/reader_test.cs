@@ -14,6 +14,8 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using os;
 using static go.mime.quotedprintable_package;
 
@@ -107,7 +109,7 @@ internal static void everySequence(@string @base, @string alpha, nint length, Ac
         return;
     }
     for (nint i = 0; i < len(alpha); i++) {
-        everySequence(@base + alpha[(int)(i)..(int)(i + 1)], alpha, length, fn);
+        everySequence(@base + alpha.slice(i, i + 1), alpha, length, fn);
     }
 }
 
@@ -148,7 +150,7 @@ public static void TestExhaustive(ж<testing.T> Ꮡt) {
         n = 4;
     }
     var resʗ1 = res;
-    everySequence(""u8, "0A \r\n="u8, n, (@string s) => {
+    everySequence(""u8, "0A \r\n="u8, n, [MethodImpl(MethodImplOptions.NoInlining)] (@string s) => {
         if (strings.HasSuffix(s, "="u8) || strings.Contains(s, "=="u8)) {
             return;
         }

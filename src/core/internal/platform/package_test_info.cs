@@ -41,7 +41,7 @@ using static global::go.@internal.platform_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/platform/zosarch_test.go", "zosarch_test.cs", "ACsuwrqWhIKCgIKklo6AgqaCkoKCloKCgoKCgIKkloKCloKClJSWgII=")]
+[assembly: go.GoPositionMap("internal/platform/zosarch_test.go", "zosarch_test.cs", "ABcmABMIwrqWhIKCgIKklo6AgqaCkoKCloKCgoKCgIKkloKCloKClJSWgII=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

@@ -30,7 +30,7 @@ using static go.go.token_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/token/position_test.go", "position_test.cs", "AA8egoKUgpSClIL4goKUgoKCABQmgoKCgpSUpqKCgoKClIKCgriCgoKCpqaCgoKUgqiCgpSClIKogoKCpoKClKiAgqSClIKUloKUlIKClPiCgoKUgoKmgoKCgoK4goKCgqaUgoKCgpSClILMkoKClICCyIKCgoKClIKCgs6igoKUgoKCgoKCooKUpqqigqyigpSWsoKClJaCAA0GggAKFIKCgpaCgoKCgoKCmKKCloKCgqiCgoKUgoKClIKClIIACQiCgoKChIKCgoIACgqCgoKCgoKChJKAgraSgoCAkoKogoKCgpaCgoKWgoKCAAsGgpoARJQBspKCgoKUgty0goKCuoKCgpaAgqSAgqSAgriAgqSAgriCgIKkgoCCqJKCgoCCpoKAgg==", "182-188:1;234-239:1;254-259:1;261-267:2;356-360:1;361-367:2;363-363:2.1;469-478:1;485-489:1")]
+[assembly: global::go.GoPositionMap("go/token/position_test.go", "position_test.cs", "ABEegoKUgpSClIL4goKUgoKCAAkGAAoggoKCgpSUpqKCgoKClIKCgriCgoKCpqaCgoKUgqiCgpSClIKogoKCpoKClKiAgqSClIKUloKUlIKClPiCgoKUgoKmgoKCgoK4goKCgqaUgoKCgpSClILMkoKClICCyIKCgoKClIKCgs6igoKUgoKCgoKCooKUpqqigqyigpSWsoKClJaCAA0GggAKFIKCgpaCgoKCgoKCmKKCloKCgqiCgoKUgoKClIKClIIACQiCgoKChIKCgoIACgqCgoKCgoKChJKAgraSgoCAkoKogoKCgpaCgoKWgoKCAAsGgpoARJQBspKCgoKUgty0goKCuoKCgpaAgqSAgqSAgriAgqSAgriCgIKkgoCCqJKCgoCCpoKAgtY=", "182-188:1;234-239:1;254-259:1;261-267:2;356-360:1;361-367:2;363-363:2.1;469-478:1;485-489:1")]
 [assembly: global::go.GoPositionMap("go/token/serialize_test.go", "serialize_test.cs", "AA8g8pSogoKChIKWgpaCgoKUgpSClIKCgqaCgoLM1oKChoCCgqSChoCCgqSAgsiCgpSCgpSCgoKCgqY=", "67-69:1;75-77:2")]
 [assembly: global::go.GoPositionMap("go/token/token_test.go", "token_test.cs", "ABASogAKILKSgII=", "27-31:1")]
 // </GoSourcePositionMaps>

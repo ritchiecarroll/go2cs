@@ -92,7 +92,7 @@ internal static readonly @string pastWriteLimitˢ = "past write limit"u8;
     error err = default!;
 
     if (len(p) > w.n) {
-        p = p[..(int)(w.n)];
+        p = p.slice(0, w.n);
     }
     if (len(p) > 0) {
         (n, err) = w.w.Write(p);

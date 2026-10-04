@@ -44,7 +44,7 @@ using static global::go.net.http.cookiejar_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/cookiejar/dummy_publicsuffix_test.go", "dummy_publicsuffix_test.cs", "AA8agtaC")]
+[assembly: go.GoPositionMap("net/http/cookiejar/dummy_publicsuffix_test.go", "dummy_publicsuffix_test.cs", "AA8agtaCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

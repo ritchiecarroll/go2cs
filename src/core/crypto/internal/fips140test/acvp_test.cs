@@ -310,10 +310,10 @@ internal static command cmdHashMct(Δfips140.Hash h) {
                 h.Reset();
                 h.Write(buf);
                 digest = h.Sum(digest[..0]);
-                copy(buf, buf[(int)(hSize)..]);
-                copy(buf[(int)(2 * hSize)..], digest);
+                copy(buf, buf.slice(hSize));
+                copy(buf.slice(2 * hSize), digest);
             }
-            return (new slice<byte>[]{buf[(int)(hSize * 2)..]}.slice(), default!);
+            return (new slice<byte>[]{buf.slice(hSize * 2)}.slice(), default!);
         }
     );
 }

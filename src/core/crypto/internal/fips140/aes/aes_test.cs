@@ -55,7 +55,7 @@ public static void TestMul(ж<testing.T> Ꮡt) {
             for (nuint k = (nuint)0; k < 8; k++) {
                 for (nuint l = (nuint)0; l < 8; l++) {
                     if ((uint32)(i & (((uint32)1).Lsh(k))) != 0 && (uint32)(j & (((uint32)1).Lsh(l))) != 0) {
-                        s ^= (byte)(powx[(nint)(k + l)]);
+                        s ^= (byte)(powx[k + l]);
                     }
                 }
             }

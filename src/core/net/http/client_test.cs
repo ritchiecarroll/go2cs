@@ -26,7 +26,8 @@ using sync = sync_package;
 using atomic = global::go.sync.atomic_package;
 using testing = testing_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
 using encoding;
 using global::go.@internal;
@@ -56,7 +57,7 @@ internal static (slice<byte> b, error err) pedanticReadAll(io.Reader r) {
         if (n == 0 && errΔ1 == default!) {
             return (default!, fmt.Errorf("Read: n=0 with err=nil"u8));
         }
-        b = appendꓸꓸꓸ(b, buf[..(int)(n)]);
+        b = appendꓸꓸꓸ(b, buf.slice(0, n));
         if (AreEqual(errΔ1, io.EOF)) {
             var (nΔ1, errΔ2) = r.Read(buf);
             if (nΔ1 != 0 || !AreEqual(errΔ2, io.EOF)) {
@@ -600,13 +601,13 @@ internal static (@string asuffix, @string bsuffix, nint commonLines) removeCommo
         if (nl < 0) {
             return (a, b, commonLines);
         }
-        @string line = a[..(int)(nl + 1)];
+        @string line = a.slice(0, nl + 1);
         if (!strings.HasPrefix(b, line)) {
             return (a, b, commonLines);
         }
         commonLines++;
-        a = a[(int)(len(line))..];
-        b = b[(int)(len(line))..];
+        a = a.slice(len(line));
+        b = b.slice(len(line));
     }
 }
 
@@ -974,14 +975,14 @@ internal static void testStreamingGet(ж<testing.T> Ꮡt, testMode mode) {
     array<byte> buf = new(10);
     foreach (var (_, str) in new @string[]{"i"u8, "am"u8, "also"u8, "known"u8, "as"u8, "comet"u8}.slice()) {
         say.ᐸꟷ(str);
-        var (n, errΔ1) = io.ReadFull((~res).Body, buf[..(int)(len(str))]);
+        var (n, errΔ1) = io.ReadFull((~res).Body, buf.slice(0, len(str)));
         if (errΔ1 != default!) {
             Ꮡt.Fatalf("ReadFull on %q: %v"u8, str, errΔ1);
         }
         if (n != len(str)) {
             Ꮡt.Fatalf("Receiving %q, only read %d bytes"u8, str, n);
         }
-        @string got = ((@string)(buf[0..(int)(n)]));
+        @string got = ((@string)(buf.slice(0, n)));
         if (got != str) {
             Ꮡt.Fatalf("Expected %q, got %q"u8, str, got);
         }
@@ -2671,7 +2672,7 @@ internal static void testClientCallsCloseOnlyOnce(ж<testing.T> Ꮡt, testMode m
         return (0, io.EOF);
     }
     if (b.n < len(p)) { matchᴛ1 = true;
-        p = p[..(int)(b.n)];
+        p = p.slice(0, b.n);
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1) { /* default: */
@@ -2704,7 +2705,7 @@ public static void TestProbeZeroLengthBody(ж<testing.T> Ꮡt) {
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string contentᶜ = "body"u8;
 
-internal static void testProbeZeroLengthBody(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testProbeZeroLengthBody(ж<testing.T> Ꮡt, testMode mode) {
     var reqc = new channel<EmptyStruct>(0);
     var reqcʗ1 = reqc;
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {

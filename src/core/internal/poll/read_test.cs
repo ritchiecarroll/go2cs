@@ -8,6 +8,8 @@ using Δruntime = runtime_package;
 using sync = go.sync_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go;
 using static go.@internal.poll_internal_test_package;
 
@@ -17,7 +19,7 @@ partial class poll_test_package {
 internal static readonly @string specialFileˢ = "SpecialFile"u8;
 
 public static void TestRead(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(specialFileˢ, (ж<testing.T> tΔ1) => {
+    Ꮡt.Run(specialFileˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         foreach (var (_, p) in specialFiles()) {
             for (nint i = 0; i < 4; i++) {

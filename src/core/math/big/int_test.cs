@@ -166,7 +166,7 @@ internal static slice<byte> mulBytes(slice<byte> x, slice<byte> y) {
     while (i < len(z) && z[i] == 0) {
         i++;
     }
-    return z[(int)(i)..];
+    return z.slice(i);
 }
 
 internal static bool checkMul(slice<byte> a, slice<byte> b) {
@@ -368,7 +368,7 @@ internal static global::go.math.big_package.nat Δnorm(global::go.math.big_packa
     while (i > 0 && x[i - 1] == 0) {
         i--;
     }
-    return x[..(int)(i)];
+    return x.slice(0, i);
 }
 
 public static void TestBits(ж<testing.T> Ꮡt) {
@@ -1760,7 +1760,7 @@ public static void TestModSqrt(ж<testing.T> Ꮡt) {
             if (!testModSqrt(Ꮡt, Ꮡelt, Ꮡmod, Ꮡsq, Ꮡsqrt)) {
                 Ꮡt.Errorf("#%d: failed (sqrt(%d,%d) = %s)"u8, x, Ꮡelt, Ꮡmod, Ꮡsqrt);
             }
-            isSquare[(nint)(sq.Uint64())] = true;
+            isSquare[sq.Uint64()] = true;
         }
         // test all non-squares
         for (nint x = 1; x < n; x++) {

@@ -9,6 +9,8 @@ using static strings_package;
 using testing = testing_package;
 using utf8 = go.unicode.utf8_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.unicode;
 using static go.strings_internal_test_package;
 using strings = strings_package;
@@ -282,7 +284,7 @@ public static void TestBuilderAllocs(ж<testing.T> Ꮡt) {
     internal bool wantPanic;
 }
 
-public static void TestBuilderCopyPanic(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBuilderCopyPanic(ж<testing.T> Ꮡt) {
     var tests = new TestBuilderCopyPanic_tests[]{
         new(
             name: "String"u8,

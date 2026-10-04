@@ -19,6 +19,8 @@ using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.os;
 using global::go.sync;
 using static global::go.runtime_internal_test_package;
@@ -451,7 +453,7 @@ public static void BenchmarkGoroutineForRange(ж<testing.B> Ꮡb) {
     benchHelper(Ꮡb, n.Value, read);
 }
 
-internal static void benchHelper(ж<testing.B> Ꮡb, nint n, Action<channel<EmptyStruct>> read) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchHelper(ж<testing.B> Ꮡb, nint n, Action<channel<EmptyStruct>> read) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = new slice<channel<EmptyStruct>>(n);
@@ -479,7 +481,7 @@ internal static void benchHelper(ж<testing.B> Ꮡb, nint n, Action<channel<Empt
     time.Sleep(10 * time.Millisecond);
 }
 
-public static void BenchmarkGoroutineIdle(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkGoroutineIdle(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var quit = new channel<EmptyStruct>(0);

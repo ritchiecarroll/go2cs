@@ -372,8 +372,8 @@ internal static void testShiftFunc(ж<testing.T> Ꮡt, Func<slice<global::go.mat
     // work on copy of a.d to preserve the original data.
     var b = new slice<global::go.math.big_package.Word>(len(a.d));
     copy(b, a.d);
-    var z = b[(int)(a.zp)..(int)(a.zp + a.l)];
-    var x = b[(int)(a.xp)..(int)(a.xp + a.l)];
+    var z = b.slice((nint)(a.zp), (nint)(a.zp + a.l));
+    var x = b.slice((nint)(a.xp), (nint)(a.xp + a.l));
     global::go.math.big_package.Word c = f(z, x, a.s);
     foreach (var (i, zi) in z) {
         if (zi != a.r[i]) {

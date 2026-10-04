@@ -453,7 +453,7 @@ internal static void testRawToken(ж<testing.T> Ꮡt, ж<global::go.encoding.xml
             break;
         }
         default: {
-            @string text = raw[(int)(start)..(int)(end)];
+            @string text = raw.slice((nint)(start), (nint)(end));
             if (strings.ContainsAny(text, "<>"u8) && (!strings.HasPrefix(text, "<"u8) || !strings.HasSuffix(text, ">"u8))) {
                 Ꮡt.Errorf("token %d: misaligned raw token %#q for %T"u8, i, text, have);
             }

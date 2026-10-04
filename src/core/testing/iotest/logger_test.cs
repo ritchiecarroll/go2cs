@@ -136,7 +136,7 @@ public static void TestReadLogger(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("Unexpectedly failed to read: %v"u8, err);
         }
         {
-            var (g, w) = (p[..(int)(n)], data); if (!bytes.Equal(g, w)) {
+            var (g, w) = (p.slice(0, n), data); if (!bytes.Equal(g, w)) {
                 Ꮡt.Errorf("ReadLogger mismatch\n\tgot:  %q\n\twant: %q"u8, g, w);
             }
         }
@@ -181,7 +181,7 @@ public static void TestReadLogger_errorOnRead(ж<testing.T> Ꮡt) {
         if (err == default!) {
             Ꮡt.Fatalf("Unexpectedly succeeded to read: %v"u8, err);
         }
-        @string wantLogWithHex = fmt.Sprintf("lr: read %x: io failure\n"u8, p[..(int)(n)]);
+        @string wantLogWithHex = fmt.Sprintf("lr: read %x: io failure\n"u8, p.slice(0, n));
         {
             @string g = lOut.String();
             @string w = wantLogWithHex; if (g != w) {

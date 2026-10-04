@@ -40,7 +40,7 @@ using static go.image_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("image/geom_test.go", "geom_test.cs", "AAsYtIKClIKCgoK4lgAOIIKCgoKC3oKCgoCCpICCpICCtoKCgoKCgpSUggAHEoKCgoCCpICCpJSUgoKCgoKCgg==", "14-27:1")]
-[assembly: go.GoPositionMap("image/image_test.go", "image_test.cs", "ABYogoKCABUugoKCgoKUgoKUgoKClIKClIKCgpSCgpSCgpSCgoKmgoKCAAgItLKCgqaC1piioqKioqKioqKioqamgoK4gpSCloKCggAGEIKCgoK4gtyCnIKCgoKCppyCgoKCggAUCpSCgqiCAAEgggABILaCgoK2toKC/qK4goKClIKChKjKgrKSgoKCgtyCkrKigoKCgtyigoSCuKKCgoSCuKKChIK4ooKChIK4ooKEgriigoKEgriigoSCuKKCgoSCuKKChIK4ooKChIK4ooKEgriigoKEgriigoSCuKKCgoSCuKKChIK4ooKChII=", "94-102:1;95-99:1.1;108-108:2;109-109:3;110-110:4;111-111:5;112-112:6;113-113:7;114-114:8;115-115:9;116-116:10;117-117:11;118-118:12;119-119:13;197-201:1;283-290:1;297-304:1")]
+[assembly: go.GoPositionMap("image/image_test.go", "image_test.cs", "ABYogoKCAAgGAAwogoKCgoKUgoKUgoKClIKClIKCgpSCgpSCgpSCgoKmgoKCAAgItLKCgqaC1piioqKioqKioqKioqamgoK4gpSCloKCggAGEIKCgoK4gtyCnIKCgoKCppyCgoKCggAUCpSCgqiCAAEgggABILaCgoK2toKC/qK4goKClIKChKjKgrKSgoKCgtyCkrKigoKCgtyigoSCuKKCgoSCuKKChIK4ooKChIK4ooKEgriigoKEgriigoSCuKKCgoSCuKKChIK4ooKChIK4ooKEgriigoKEgriigoSCuKKCgoSCuKKChIK4ooKChII=", "94-102:1;95-99:1.1;108-108:2;109-109:3;110-110:4;111-111:5;112-112:6;113-113:7;114-114:8;115-115:9;116-116:10;117-117:11;118-118:12;119-119:13;197-201:1;283-290:1;297-304:1")]
 [assembly: go.GoPositionMap("image/ycbcr_test.go", "ycbcr_test.cs", "AAwYggAVLAAHENyCgoKmgsqUgpaClLqCgoKCgoK6goKCgoKWgoKCgoKUAAkUgoKCyoKCgqaCgoKC")]
 // </GoSourcePositionMaps>
 

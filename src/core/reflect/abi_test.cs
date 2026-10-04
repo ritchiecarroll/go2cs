@@ -12,7 +12,11 @@ using Δruntime = runtime_package;
 using Δtesting = testing_package;
 using quick = global::go.testing.quick_package;
 using @internal;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
+using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
+using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
 using global::go.math;
 using global::go.testing;
 using static global::go.reflect_internal_test_package;
@@ -234,7 +238,7 @@ public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> Ꮡt) {
             if (len(args) == 0) {
                 return new reflectꓸValue[]{}.slice();
             }
-            return args[..(int)(len(args) - 1)]; // The last Value is an empty magic value.
+            return args.slice(0, len(args) - 1); // The last Value is an empty magic value.
         };
         foreach (var (_, callFn) in abiMakeFuncTestCases) {
             var fnTyp = Δreflect.TypeOf(callFn).In(0);
@@ -343,96 +347,96 @@ internal static slice<any> abiCallTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-internal static void passNone() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void passNone() {
 }
 
 //go:registerparams
 //go:noinline
-internal static nint passInt(nint a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint passInt(nint a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static int8 passInt8(int8 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static int8 passInt8(int8 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static int16 passInt16(int16 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static int16 passInt16(int16 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static int32 passInt32(int32 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static int32 passInt32(int32 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static int64 passInt64(int64 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static int64 passInt64(int64 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static nuint passUint(nuint a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nuint passUint(nuint a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static uint8 passUint8(uint8 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static uint8 passUint8(uint8 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static uint16 passUint16(uint16 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static uint16 passUint16(uint16 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static uint32 passUint32(uint32 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static uint32 passUint32(uint32 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static uint64 passUint64(uint64 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static uint64 passUint64(uint64 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static float32 passFloat32(float32 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static float32 passFloat32(float32 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static float64 passFloat64(float64 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static float64 passFloat64(float64 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static complex64 passComplex64(complex64 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static complex64 passComplex64(complex64 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static complex128 passComplex128(complex128 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static complex128 passComplex128(complex128 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static array<uint32> passArray1([GoArrayDims(1)] array<uint32> a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static array<uint32> passArray1([GoArrayDims(1)] array<uint32> a) {
     a = a.Clone();
 
     return a.Clone();
@@ -440,7 +444,7 @@ internal static array<uint32> passArray1([GoArrayDims(1)] array<uint32> a) {
 
 //go:registerparams
 //go:noinline
-internal static array<uintptr> passArray([GoArrayDims(2)] array<uintptr> a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static array<uintptr> passArray([GoArrayDims(2)] array<uintptr> a) {
     a = a.Clone();
 
     return a.Clone();
@@ -448,7 +452,7 @@ internal static array<uintptr> passArray([GoArrayDims(2)] array<uintptr> a) {
 
 //go:registerparams
 //go:noinline
-internal static (nint, array<uint32>, float64) passArray1Mix(nint a, [GoArrayDims(1)] array<uint32> b, float64 c) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, array<uint32>, float64) passArray1Mix(nint a, [GoArrayDims(1)] array<uint32> b, float64 c) {
     b = b.Clone();
 
     return (a, b.Clone(), c);
@@ -456,43 +460,43 @@ internal static (nint, array<uint32>, float64) passArray1Mix(nint a, [GoArrayDim
 
 //go:registerparams
 //go:noinline
-internal static @string passString(@string a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static @string passString(@string a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static slice<byte> passSlice(slice<byte> a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<byte> passSlice(slice<byte> a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static ж<byte> passPointer(ж<byte> Ꮡa) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<byte> passPointer(ж<byte> Ꮡa) {
     return Ꮡa;
 }
 
 //go:registerparams
 //go:noinline
-internal static (nint, nint, nint, nint, nint, nint, nint, nint, nint, nint) passManyInt(nint a, nint b, nint c, nint d, nint e, nint f, nint g, nint h, nint i, nint j) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, nint, nint, nint, nint, nint, nint, nint, nint, nint) passManyInt(nint a, nint b, nint c, nint d, nint e, nint f, nint g, nint h, nint i, nint j) {
     return (a, b, c, d, e, f, g, h, i, j);
 }
 
 //go:registerparams
 //go:noinline
-internal static (float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64) passManyFloat64(float64 a, float64 b, float64 c, float64 d, float64 e, float64 f, float64 g, float64 h, float64 i, float64 j, float64 l, float64 m, float64 n, float64 o, float64 p, float64 q, float64 r, float64 s, float64 t) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64) passManyFloat64(float64 a, float64 b, float64 c, float64 d, float64 e, float64 f, float64 g, float64 h, float64 i, float64 j, float64 l, float64 m, float64 n, float64 o, float64 p, float64 q, float64 r, float64 s, float64 t) {
     return (a, b, c, d, e, f, g, h, i, j, l, m, n, o, p, q, r, s, t);
 }
 
 //go:registerparams
 //go:noinline
-internal static Struct1 passStruct1(Struct1 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct1 passStruct1(Struct1 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static Struct2 passStruct2(Struct2 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct2 passStruct2(Struct2 a) {
     a = a.ΔClone();
 
     return a.ΔClone();
@@ -500,7 +504,7 @@ internal static Struct2 passStruct2(Struct2 a) {
 
 //go:registerparams
 //go:noinline
-internal static Struct3 passStruct3(Struct3 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct3 passStruct3(Struct3 a) {
     a = a.ΔClone();
 
     return a.ΔClone();
@@ -508,67 +512,67 @@ internal static Struct3 passStruct3(Struct3 a) {
 
 //go:registerparams
 //go:noinline
-internal static Struct4 passStruct4(Struct4 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct4 passStruct4(Struct4 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static Struct5 passStruct5(Struct5 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct5 passStruct5(Struct5 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static Struct6 passStruct6(Struct6 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct6 passStruct6(Struct6 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static Struct7 passStruct7(Struct7 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct7 passStruct7(Struct7 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static Struct8 passStruct8(Struct8 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct8 passStruct8(Struct8 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static Struct9 passStruct9(Struct9 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct9 passStruct9(Struct9 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static Struct10 passStruct10(Struct10 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct10 passStruct10(Struct10 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static Struct11 passStruct11(Struct11 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct11 passStruct11(Struct11 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static Struct12 passStruct12(Struct12 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct12 passStruct12(Struct12 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static Struct13 passStruct13(Struct13 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct13 passStruct13(Struct13 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-internal static Struct14 passStruct14(Struct14 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct14 passStruct14(Struct14 a) {
     a = a.ΔClone();
 
     return a.ΔClone();
@@ -576,7 +580,7 @@ internal static Struct14 passStruct14(Struct14 a) {
 
 //go:registerparams
 //go:noinline
-internal static Struct15 passStruct15(Struct15 a) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct15 passStruct15(Struct15 a) {
     a = a.ΔClone();
 
     return a.ΔClone();
@@ -584,13 +588,13 @@ internal static Struct15 passStruct15(Struct15 a) {
 
 //go:registerparams
 //go:noinline
-internal static (Struct1 x, Struct1 y) pass2Struct1(Struct1 a, Struct1 b) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (Struct1 x, Struct1 y) pass2Struct1(Struct1 a, Struct1 b) {
     return (a, b);
 }
 
 //go:registerparams
 //go:noinline
-internal static (nint, EmptyStruct, float64) passEmptyStruct(nint a, EmptyStruct b, float64 c) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, EmptyStruct, float64) passEmptyStruct(nint a, EmptyStruct b, float64 c) {
     return (a, b, c);
 }
 
@@ -599,7 +603,7 @@ internal static (nint, EmptyStruct, float64) passEmptyStruct(nint a, EmptyStruct
 //
 //go:registerparams
 //go:noinline
-internal static (Struct10, byte, nuint) passStruct10AndSmall(Struct10 a, byte b, nuint c) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (Struct10, byte, nuint) passStruct10AndSmall(Struct10 a, byte b, nuint c) {
     return (a, b, c);
 }
 
@@ -988,10 +992,10 @@ internal static slice<any> abiMakeFuncTestCases = new any[]{
 }
 
 // Struct13 tests an empty field.
-[GoType] partial struct Struct13 {
-    public nint A;
-    public EmptyStruct X;
-    public nint B;
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Struct13 {
+    [FieldOffset(0)] public nint A;
+    [FieldOffset(8)] public readonly EmptyStruct X;
+    [FieldOffset(8)] public nint B;
 }
 
 // Struct14 tests a non-zero-sized (and otherwise register-assignable)

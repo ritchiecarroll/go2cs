@@ -36,7 +36,7 @@ using static global::go.@internal.coverage.test_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/test/counter_test.go", "counter_test.cs", "ABgsgoKAgramggAJDqK6goKCppbKhISWgoKCgqiCgpSCgoCCpICCpIaSgpKAgriClICCpIKCgoKUgoKUgoCCpKSCgoKmgoCCpAALCqKCgoKClpaCgoKCgoKCgoKCgoKClISElIKClIKAgraAgsiAgqiSgpKAgriClICCpIKClIKWgoCClKaCgIKkyIKCgoCCpKSCgoI=", "45-52:1;91-95:2;187-191:1")]
+[assembly: go.GoPositionMap("internal/coverage/test/counter_test.go", "counter_test.cs", "ABgsgoKAgramggAJDqK6goKCppbKhISWgoKCgqiCgpSCgoCCpICCpIaSgpKAgriClICCpIKCgoKUgoKUgoCCpKSCgoKmgoCCpNbUooKCgoKWloKCgoKCgoKCgoKCgoKUhISUgoKUgoCCtoCCyICCqJKCkoCCuIKUgIKkgoKUgpaCgIKUpoKAgqTIgoKCgIKkpIKCgtg=", "45-52:1;91-95:2;187-191:1")]
 [assembly: go.GoPositionMap("internal/coverage/test/roundtrip_test.go", "roundtrip_test.cs", "ABYmgoKCgpTmxoKCgoKClIKCgoKClIKClIKClIKClIKCAAgIlIKCgoKClAAHEIKClgAIEoKCqIKWgoKClIKCloKClIKCloKCgoCCpIKCyoKCgoKCgriUypTWgoKCgpaCgpSCgqaCgoKU1qKWgoKCpoKCgoKCgpSAgsqChIKClpSCgpSCgIKkgIK4goKUgoKUgoKClIKCgpaCgoKCgoKUgoKCpoKCgIK2goK4uKiCgoKCgpSCgoKCgoIABxCCqIKWgoKClIKClIKCgIKkgoI=")]
 // </GoSourcePositionMaps>
 

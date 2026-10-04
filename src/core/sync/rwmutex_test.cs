@@ -9,6 +9,8 @@ using Δruntime = runtime_package;
 using static sync_package;
 using atomic = go.sync.atomic_package;
 using Δtesting = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 using static go.sync_internal_test_package;
 using Δsync = sync_package;
@@ -25,7 +27,7 @@ internal static void parallelReader(ж<Δsync.RWMutex> Ꮡm, channel<bool> clock
     cdone.ᐸꟷ(true);
 }
 
-internal static void doTestParallelReaders(nint numReaders, nint gomaxprocs) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void doTestParallelReaders(nint numReaders, nint gomaxprocs) {
     Δruntime.GOMAXPROCS(gomaxprocs);
     ref var m = ref heap(new Δsync.RWMutex(), out var Ꮡm);
     var clocked = new channel<bool>(0);
@@ -91,7 +93,7 @@ internal static void writer(ж<Δsync.RWMutex> Ꮡrwm, nint num_iterations, ж<i
     cdone.ᐸꟷ(true);
 }
 
-public static void HammerRWMutex(nint gomaxprocs, nint numReaders, nint num_iterations) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void HammerRWMutex(nint gomaxprocs, nint numReaders, nint num_iterations) {
     Δruntime.GOMAXPROCS(gomaxprocs);
     // Number of active readers + 10000 * number of active writers.
     ref var activity = ref heap(new int32(), out var Ꮡactivity);
@@ -163,7 +165,7 @@ public static void TestRWMutex(ж<Δtesting.T> Ꮡt) {
 internal static readonly object rLockerDidnTReadLockItˢ = (@string)"RLocker() didn't read-lock it"u8;
 internal static readonly object rLockerDidnTRespectTheˢ = (@string)"RLocker() didn't respect the write lock"u8;
 
-public static void TestRLocker(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRLocker(ж<Δtesting.T> Ꮡt) {
     ref var wl = ref heap(new Δsync.RWMutex(), out var Ꮡwl);
     Δsync.Locker rl = default!;
     var wlocked = new channel<bool>(1);
@@ -234,7 +236,7 @@ internal static void benchmarkRWMutex(ж<Δtesting.B> Ꮡb, nint localWork, nint
         nint foo = 0;
         while (pb.Next()) {
             foo++;
-            if (foo % writeRatio == 0){
+            if (rem(foo, writeRatio) == 0){
                 Ꮡrwm.Lock();
                 Ꮡrwm.Unlock();
             } else {

@@ -12,6 +12,8 @@ using strings = strings_package;
 using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using context = context_package;
 using math;
 using static go.context_internal_test_package;
@@ -438,7 +440,7 @@ public static void TestAllocs(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestSimultaneousCancels(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSimultaneousCancels(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (root, cancel) = WithCancel(Background());
@@ -482,7 +484,7 @@ public static void TestSimultaneousCancels(ж<testing.T> Ꮡt) {
             case 1 when selᴛ17.ꟷᐳ(out _): {
                 var buf = new slice<byte>((10 << (int)(10)));
                 nint n = Δruntime.Stack(buf, true);
-                Ꮡt.Fatalf("timed out after %v waiting for <-ctx.Done(); stacks:\n%s"u8, d, buf[..(int)(n)]);
+                Ꮡt.Fatalf("timed out after %v waiting for <-ctx.Done(); stacks:\n%s"u8, d, buf.slice(0, n));
                 break;
             }}
         }
@@ -502,7 +504,7 @@ public static void TestSimultaneousCancels(ж<testing.T> Ꮡt) {
         case 1 when selᴛ19.ꟷᐳ(out _): {
             var buf = new slice<byte>((10 << (int)(10)));
             nint n = Δruntime.Stack(buf, true);
-            Ꮡt.Fatalf("timed out after %v waiting for cancel functions; stacks:\n%s"u8, d, buf[..(int)(n)]);
+            Ꮡt.Fatalf("timed out after %v waiting for cancel functions; stacks:\n%s"u8, d, buf.slice(0, n));
             break;
         }}
     }
@@ -510,7 +512,7 @@ public static void TestSimultaneousCancels(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestInterlockedCancels(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestInterlockedCancels(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (parent, cancelParent) = WithCancel(Background());
@@ -535,7 +537,7 @@ public static void TestInterlockedCancels(ж<testing.T> Ꮡt) {
         case 1 when selᴛ21.ꟷᐳ(out _): {
             var buf = new slice<byte>((10 << (int)(10)));
             nint n = Δruntime.Stack(buf, true);
-            Ꮡt.Fatalf("timed out after %v waiting for child.Done(); stacks:\n%s"u8, d, buf[..(int)(n)]);
+            Ꮡt.Fatalf("timed out after %v waiting for child.Done(); stacks:\n%s"u8, d, buf.slice(0, n));
             break;
         }}
     }
@@ -693,7 +695,7 @@ public static void TestWithCancelCanceledParent(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestWithCancelSimultaneouslyCanceledParent(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWithCancelSimultaneouslyCanceledParent(ж<testing.T> Ꮡt) {
     // Cancel the parent goroutine concurrently with creating a child.
     for (nint i = 0; i < 100; i++) {
         var (parent, pcancel) = WithCancelCause(Background());
@@ -1069,7 +1071,7 @@ public static void TestCause(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testCauseRaceˢ = "TestCauseRace"u8;
 
-public static void TestCauseRace(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCauseRace(ж<testing.T> Ꮡt) {
     var cause = errors.New(testCauseRaceˢ);
     var (ctx, cancel) = WithCancelCause(Background());
     var cancelʗ1 = cancel;

@@ -6,6 +6,8 @@ namespace go.sync;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 
 partial class atomic_test_package {
@@ -20,7 +22,7 @@ internal static channel<nint> requests() {
 
 // The following example shows how to use Value for periodic program config updates
 // and propagation of the changes to worker goroutines.
-public static void ExampleValue_config() {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleValue_config() {
     ref var config = ref heap(new atomic.Value(), out var Ꮡconfig);                    // holds current server configuration
     // Create initial config value and store into config.
     Ꮡconfig.Store(loadConfig());

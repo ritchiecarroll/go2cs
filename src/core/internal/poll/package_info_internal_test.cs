@@ -30,8 +30,8 @@ using static go.@internal.poll_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/poll/export_posix_test.go", "export_posix_test.cs", "AA0agg==")]
-[assembly: go.GoPositionMap("internal/poll/export_test.go", "export_test.cs", "ABIigqaCpoKmgqaC")]
-[assembly: go.GoPositionMap("internal/poll/export_windows_test.go", "export_windows_test.cs", "AA8egg==")]
+[assembly: go.GoPositionMap("internal/poll/export_test.go", "export_test.cs", "AAwW3IKmgqaCpoKmgg==")]
+[assembly: go.GoPositionMap("internal/poll/export_windows_test.go", "export_windows_test.cs", "AA0YloI=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

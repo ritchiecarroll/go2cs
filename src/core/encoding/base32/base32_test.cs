@@ -10,6 +10,8 @@ using math = math_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.encoding.base32_package;
 using ꓸꓸꓸany = Span<any>;
 
@@ -94,9 +96,9 @@ public static void TestEncoderBuffering(ж<testing.T> Ꮡt) {
             if (end > len(input)) {
                 end = len(input);
             }
-            var (n, errΔ1) = encoder.Write(input[(int)(pos)..(int)(end)]);
-            testEqual(Ꮡt, writeQGaveErrorVWantVˢ, input[(int)(pos)..(int)(end)], errΔ1, ((error)default!));
-            testEqual(Ꮡt, writeQGaveLengthVWantVˢ, input[(int)(pos)..(int)(end)], n, end - pos);
+            var (n, errΔ1) = encoder.Write(input.slice(pos, end));
+            testEqual(Ꮡt, writeQGaveErrorVWantVˢ, input.slice(pos, end), errΔ1, ((error)default!));
+            testEqual(Ꮡt, writeQGaveLengthVWantVˢ, input.slice(pos, end), n, end - pos);
         }
         var err = encoder.Close();
         testEqual(Ꮡt, closeGaveErrorVWantVˢ, err, ((error)default!));
@@ -118,7 +120,7 @@ public static void TestDecoderBufferingWithPadding(ж<testing.T> Ꮡt) {
             if (err != default! && !AreEqual(err, io.EOF)) {
                 Ꮡt.Errorf("Read from %q at pos %d = %d, unexpected error %v"u8, s.encoded, len(s.decoded), n, err);
             }
-            testEqual(Ꮡt, decodingDOfQQWantQˢ, bs, s.encoded, ((@string)(buf[..(int)(n)])), s.decoded);
+            testEqual(Ꮡt, decodingDOfQQWantQˢ, bs, s.encoded, ((@string)(buf.slice(0, n))), s.decoded);
         }
     }
 }
@@ -135,7 +137,7 @@ public static void TestDecoderBufferingWithoutPadding(ж<testing.T> Ꮡt) {
             if (err != default! && !AreEqual(err, io.EOF)) {
                 Ꮡt.Errorf("Read from %q at pos %d = %d, unexpected error %v"u8, encoded, len(s.decoded), n, err);
             }
-            testEqual(Ꮡt, decodingDOfQQWantQˢ, bs, encoded, ((@string)(buf[..(int)(n)])), s.decoded);
+            testEqual(Ꮡt, decodingDOfQQWantQˢ, bs, encoded, ((@string)(buf.slice(0, n))), s.decoded);
         }
     }
 }
@@ -160,14 +162,14 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
         if (len(p.encoded) > 0) {
             testEqual(Ꮡt, decodeQEndVWantVˢ, p.encoded, end, (p.encoded[len(p.encoded) - 1] == (rune)'='));
         }
-        testEqual(Ꮡt, decodeQQWantQˢ, p.encoded, ((@string)(dbuf[0..(int)(count)])), p.decoded);
+        testEqual(Ꮡt, decodeQQWantQˢ, p.encoded, ((@string)(dbuf.slice(0, count))), p.decoded);
         (dbuf, err) = StdEncoding.DecodeString(p.encoded);
         testEqual(Ꮡt, decodeStringQErrorVWantVˢ, p.encoded, err, ((error)default!));
         testEqual(Ꮡt, decodeStringQQWantQˢ, p.encoded, ((@string)dbuf), p.decoded);
         (var dst, err) = StdEncoding.AppendDecode(slice<byte>("lead"u8), slice<byte>(p.encoded));
         testEqual(Ꮡt, appendDecodeQErrorVWantVˢ, p.encoded, err, ((error)default!));
         testEqual(Ꮡt, appendDecodeLeadQQWantQˢ, p.encoded, ((@string)dst), "lead" + p.decoded);
-        (var dst2, err) = StdEncoding.AppendDecode(dst.slice(-1, 0, len(p.decoded)), slice<byte>(p.encoded));
+        (var dst2, err) = StdEncoding.AppendDecode(dst.slice(0, 0, len(p.decoded)), slice<byte>(p.encoded));
         testEqual(Ꮡt, appendDecodeQErrorVWantVˢ, p.encoded, err, ((error)default!));
         testEqual(Ꮡt, appendDecodeQQWantQˢ, p.encoded, ((@string)dst2), p.decoded);
         if (len(dst) > 0 && len(dst2) > 0 && Ꮡ(dst, 0) != Ꮡ(dst2, 0)) {
@@ -191,7 +193,7 @@ public static void TestDecoder(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(readFailedˢ, err);
         }
         testEqual(Ꮡt, readFromQLengthVWantVˢ, p.encoded, count, len(p.decoded));
-        testEqual(Ꮡt, decodingOfQQWantQˢ, p.encoded, ((@string)(dbuf[0..(int)(count)])), p.decoded);
+        testEqual(Ꮡt, decodingOfQQWantQˢ, p.encoded, ((@string)(dbuf.slice(0, count))), p.decoded);
         if (!AreEqual(err, io.EOF)) {
             (_, err) = decoder.Read(dbuf);
         }
@@ -221,10 +223,10 @@ public static void TestDecoder(ж<testing.T> Ꮡt) {
     if (len(b.data) < lim) {
         lim = len(b.data);
     }
-    foreach (var (i, _) in p[..(int)(lim)]) {
+    foreach (var (i, _) in p.slice(0, lim)) {
         p[i] = b.data[i];
     }
-    b.data = b.data[(int)(lim)..];
+    b.data = b.data.slice(lim);
     var err = io.EOF;
     if (b.called < len(b.errs)) {
         err = b.errs[b.called];
@@ -317,7 +319,7 @@ public static void TestIssue20044(ж<testing.T> Ꮡt) {
             nint n = default!;
             (n, err) = decoder.Read(dbuf);
             if (n > 0) {
-                res = appendꓸꓸꓸ(res, dbuf[..(int)(n)]);
+                res = appendꓸꓸꓸ(res, dbuf.slice(0, n));
             }
         }
         testEqual(Ꮡt, decodingOfQQWantQˢ, ((@string)input), ((@string)res), tc.res);
@@ -383,13 +385,13 @@ public static void TestDecoderBuffering(ж<testing.T> Ꮡt) {
         nint n = default!;
         error err = default!;
         for (total = 0; total < len(bigtest.decoded) && err == default!; ) {
-            (n, err) = decoder.Read(buf[(int)(total)..(int)(total + bs)]);
+            (n, err) = decoder.Read(buf.slice(total, total + bs));
             total += n;
         }
         if (err != default! && !AreEqual(err, io.EOF)) {
             Ꮡt.Errorf("Read from %q at pos %d = %d, unexpected error %v"u8, bigtest.encoded, total, n, err);
         }
-        testEqual(Ꮡt, decodingDOfQQWantQˢ2, bs, bigtest.encoded, ((@string)(buf[0..(int)(total)])), bigtest.decoded);
+        testEqual(Ꮡt, decodingDOfQQWantQˢ2, bs, bigtest.encoded, ((@string)(buf.slice(0, total))), bigtest.decoded);
     }
 }
 
@@ -674,7 +676,7 @@ public static void TestDecodeWithWrongPadding(ж<testing.T> Ꮡt) {
     internal error expected;
 }
 
-public static void TestBufferedDecodingSameError(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBufferedDecodingSameError(ж<testing.T> Ꮡt) {
     var testcases = new TestBufferedDecodingSameError_testcases[]{ // NBSWY3DPO5XXE3DE == helloworld
  // Test with "ZZ" as extra input
 
@@ -749,7 +751,7 @@ public static void TestBufferedDecodingSameError(ж<testing.T> Ꮡt) {
     internal @string expectedError;
 }
 
-public static void TestBufferedDecodingPadding(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBufferedDecodingPadding(ж<testing.T> Ꮡt) {
     var testcases = new TestBufferedDecodingPadding_testcases[]{
         new(new @string[]{
             "I4======"u8,
@@ -950,7 +952,7 @@ public static void TestDecodeSmallBuffer(ж<testing.T> Ꮡt) {
                 while (ᐧ) {
                     var buf = new slice<byte>(bufferSize);
                     var (n, err) = decoder.Read(buf);
-                    allRead = appendꓸꓸꓸ(allRead, buf[0..(int)(n)]);
+                    allRead = appendꓸꓸꓸ(allRead, buf.slice(0, n));
                     if (AreEqual(err, io.EOF)) {
                         break;
                     }

@@ -46,7 +46,7 @@ public static void TestReadLine(ж<testing.T> Ꮡt) {
             var (bline, berr) = br.ReadString((rune)'\n');
             {
                 nint n = len(bline); if (n > 0) {
-                    bline = bline[0..(int)(n - 1)];
+                    bline = bline.slice(0, n - 1);
                 }
             }
             var (line, ok) = Δfile.readLine();

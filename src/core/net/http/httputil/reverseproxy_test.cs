@@ -25,6 +25,8 @@ using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.net;
 using go.net.http;
 using go.net.http.@internal;
@@ -803,7 +805,7 @@ internal static readonly object serverClientDoReturnedˢ = (@string)"Server.Clie
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string backendResponseᶜ4 = "I am the backend"u8;
 
-public static void TestReverseProxyCancellation(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestReverseProxyCancellation(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         @string backendResponse = backendResponseᶜ4;
@@ -1107,7 +1109,7 @@ public static void TestReverseProxy_Post(ж<testing.T> Ꮡt) {
 
 public delegate (ж<http.Response>, error) RoundTripperFunc(ж<http.Request> _Δp0);
 
-public static (ж<http.Response>, error) RoundTrip(this RoundTripperFunc fn, ж<http.Request> Ꮡreq) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static (ж<http.Response>, error) RoundTrip(this RoundTripperFunc fn, ж<http.Request> Ꮡreq) {
     return fn(Ꮡreq);
 }
 
@@ -1513,7 +1515,7 @@ public static void TestClonesRequestHeaders(ж<testing.T> Ꮡt) {
 
 internal delegate (ж<http.Response>, error) roundTripperFunc(ж<http.Request> req);
 
-internal static (ж<http.Response>, error) RoundTrip(this roundTripperFunc fn, ж<http.Request> Ꮡreq) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<http.Response>, error) RoundTrip(this roundTripperFunc fn, ж<http.Request> Ꮡreq) {
     return fn(Ꮡreq);
 }
 
@@ -1613,7 +1615,7 @@ public static void TestReverseProxy_PanicBodyError(ж<testing.T> Ꮡt) {
 }
 
 // Issue #46866: panic without closing incoming request body causes a panic
-public static void TestReverseProxy_PanicClosesIncomingBody(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestReverseProxy_PanicClosesIncomingBody(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
@@ -1951,7 +1953,7 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> Ꮡt) {
         };
         var rproxyʗ1 = rproxy;
         var triggerCancelChʗ2 = triggerCancelCh;
-        var handler = new http.HandlerFunc((http.ResponseWriter rw, ж<http.Request> reqΔ1) => {
+        var handler = new http.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (http.ResponseWriter rw, ж<http.Request> reqΔ1) => {
             rw.Header().Set(xHeaderˢ, xValueˢ);
             var (ctx, cancel) = context.WithCancel(reqΔ1.Context());
             var cancelʗ1 = cancel;

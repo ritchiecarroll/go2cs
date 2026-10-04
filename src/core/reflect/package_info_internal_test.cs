@@ -136,7 +136,7 @@ using static go.reflect_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("reflect/export_swiss_test.go", "export_swiss_test.cs", "AAoSgoI=")]
-[assembly: global::go.GoPositionMap("reflect/export_test.go", "export_test.cs", "AA4ekoKokgAFFAAOAoKCgpSmgoKWgqiCgpSUgoKogoKCgoKmpoKCgoKCgoKmAAoSAAgQgoSCgpSCgoKUAAkcgu6CpsKCgoKCgoKC", "51-56:1")]
+[assembly: global::go.GoPositionMap("reflect/export_test.go", "export_test.cs", "AA4ekoKokraeAA4CgoKClKaCgpaCqIKClJSCgqiCgoKCgqamgoKCgoKCgqam/OyUgoSCgpSCgoKUAAkcgu6CpsKCgoKCgoKCppSU", "51-56:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

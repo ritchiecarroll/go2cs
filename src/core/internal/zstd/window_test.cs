@@ -53,7 +53,7 @@ internal static void testWindow(ж<testing.T> Ꮡt, nint size, slice<byte> a, sl
     tail = appendꓸꓸꓸ(tail, b);
     tail = appendꓸꓸꓸ(tail, c);
     if (builtin.len(tail) > size) {
-        tail = tail[(int)(builtin.len(tail) - size)..];
+        tail = tail.slice(builtin.len(tail) - size);
     }
     if (w.len() != (uint32)builtin.len(tail)) {
         Ꮡt.Errorf("wrong data length: got: %d, want: %d"u8, w.len(), builtin.len(tail));
@@ -63,7 +63,7 @@ internal static void testWindow(ж<testing.T> Ꮡt, nint size, slice<byte> a, sl
     for (from = 0; from <= (uint32)builtin.len(tail); from++) {
         for (to = from; to <= (uint32)builtin.len(tail); to++) {
             var got = w.appendTo(default!, from, to);
-            var want = tail[(int)(from)..(int)(to)];
+            var want = tail.slice((nint)(from), (nint)(to));
             if (!bytes.Equal(got, want)) {
                 Ꮡt.Errorf("wrong data at [%d:%d]: got %q, want %q"u8, from, to, got, want);
             }

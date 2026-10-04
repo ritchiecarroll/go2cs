@@ -23,6 +23,8 @@ using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
 using static global::go.go.types_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = io.fs_package;
 using global::go.@internal;
 using global::go.go;
@@ -50,7 +52,7 @@ internal static readonly object skippingInShortModeˢ = (@string)"skipping in sh
 internal static readonly @string srcˢ = "src"u8;
 internal static readonly object packagesTypecheckedInˢ = (@string)"packages typechecked in"u8;
 
-public static void TestStdlib(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStdlib(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (testing.Short()) {
@@ -199,7 +201,7 @@ internal static @string firstComment(@string filename) {
         var (n, _) = f.Read(src[..]);
         @string first = default!;
         scanner.Scanner s = default!;
-        s.Init(fset.AddFile(""u8, fset.Base(), n), src[..(int)(n)], default!, /* ignore errors */
+        s.Init(fset.AddFile(""u8, fset.Base(), n), src.slice(0, n), default!, /* ignore errors */
  scanner.ScanComments);
         while (ᐧ) {
             var (_, tok, lit) = s.Scan();
@@ -207,7 +209,7 @@ internal static @string firstComment(@string filename) {
             if (exprᴛ1 == token.COMMENT) {
                 if (lit[1] == (rune)'*') {
                     // remove trailing */ of multi-line comment
-                    lit = lit[..(int)(len(lit) - 2)];
+                    lit = lit.slice(0, len(lit) - 2);
                 }
                 @string contents = strings.TrimSpace(lit[2..]);
                 if (strings.HasPrefix(contents, goBuildˢ)) {

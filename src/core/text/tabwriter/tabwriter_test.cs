@@ -29,7 +29,7 @@ partial class tabwriter_test_package {
     nint n = len(b.a);
     nint m = len(buf);
     if (n + m <= cap(b.a)){
-        b.a = b.a[0..(int)(n + m)];
+        b.a = b.a.slice(0, n + m);
         for (nint i = 0; i < m; i++) {
             b.a[n + i] = buf[i];
         }
@@ -80,14 +80,14 @@ internal static void check(ж<testing.T> Ꮡt, @string testname, nint minwidth, 
     title = testname + " (written byte-by-byte)"u8;
     b.clear();
     for (nint i = 0; i < len(src); i++) {
-        write(Ꮡt, title, Ꮡw, src[(int)(i)..(int)(i + 1)]);
+        write(Ꮡt, title, Ꮡw, src.slice(i, i + 1));
     }
     verify(Ꮡt, title, Ꮡw, Ꮡb, src, expected);
     // write using Fibonacci slice sizes
     title = testname + " (written in fibonacci slices)"u8;
     b.clear();
     for ((nint i, nint d) = (0, 0); i < len(src); ) {
-        write(Ꮡt, title, Ꮡw, src[(int)(i)..(int)(i + d)]);
+        write(Ꮡt, title, Ꮡw, src.slice(i, i + d));
         (i, d) = (i + d, d + 1);
         if (i + d > len(src)) {
             d = len(src) - i;
@@ -556,7 +556,7 @@ public static void BenchmarkPyramid(ж<testing.B> Ꮡb) {
                 var w = NewWriter(io.Discard, 4, 4, 1, (rune)' ', 0); // no particular reason for these settings
                 // Write increasing prefixes of that line.
                 for (nint j = 0; j < x; j++) {
-                    w.Write(lineʗ1[..(int)(j * 2)]);
+                    w.Write(lineʗ1.slice(0, j * 2));
                     w.Write(new byte[]{(rune)'\n'}.slice());
                 }
                 w.Flush();

@@ -10,6 +10,8 @@ using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using parse = text.template.parse_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.html.template_package;
 using template = text.template_package;
 using text;
@@ -309,7 +311,7 @@ internal static readonly @string inputᶜ = @"<title>{{block ""a"" .}}a{{end}}</
 internal static readonly @string overlayᶜ = @"{{define ""b""}}A{{end}}"u8;
 
 // https://golang.org/issue/16101
-public static void TestTemplateCloneExecuteRace(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTemplateCloneExecuteRace(ж<testing.T> Ꮡt) {
     @string input = inputᶜ;
     @string overlay = overlayᶜ;
     var (ᴛ47, ᴛ48) = New(outerˢ).Parse(input);

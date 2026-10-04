@@ -19,6 +19,8 @@ using runtime = runtime_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto = crypto_package;
 using ecdh = go.crypto.ecdh_package;
 using encoding;
@@ -228,7 +230,7 @@ public static void TestFIPSServerCurves(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static (error clientErr, error serverErr) fipsHandshake(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> ᏑclientConfig, ж<global::go.crypto.tls_package.Config> ᏑserverConfig) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (error clientErr, error serverErr) fipsHandshake(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> ᏑclientConfig, ж<global::go.crypto.tls_package.Config> ᏑserverConfig) {
     error clientErr = default!;
     error serverErr = default!;
 
@@ -319,7 +321,7 @@ public static void TestFIPSClientHello(ж<testing.T> Ꮡt) {
     runWithFIPSEnabled(Ꮡt, testFIPSClientHello);
 }
 
-internal static void testFIPSClientHello(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testFIPSClientHello(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // Test that no matter what we put in the client config,
@@ -603,8 +605,8 @@ internal static ж<fipsCertificate> fipsCert(ж<testing.T> Ꮡt, @string name, a
     parentOrg = ""u8;
     {
         nint i = strings.Index(org, "_"u8); if (i >= 0) {
-            org = org[..(int)(i)];
-            parentOrg = name[(int)(i + 1)..];
+            org = org.slice(0, i);
+            parentOrg = name.slice(i + 1);
         }
     }
     var tmpl = Ꮡ(new Δx509.Certificate(

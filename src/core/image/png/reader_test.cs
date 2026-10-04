@@ -13,6 +13,8 @@ using os = os_package;
 using reflect = reflect_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.image;
 using static go.image.png_package;
 
@@ -413,7 +415,7 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string rgbˢ = "# rgb = ("u8;
 
-public static void TestReader(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestReader(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var names = filenames;
@@ -474,7 +476,7 @@ public static void TestReader(ж<testing.T> Ꮡt) {
                 if (strings.Contains(ss, rgbˢ) && !strings.HasSuffix(ss, ")"u8)) {
                     {
                         nint i = strings.LastIndex(ss, ") "u8); if (i >= 0) {
-                            ss = ss[..(int)(i + 1)];
+                            ss = ss.slice(0, i + 1);
                         }
                     }
                 }
@@ -792,8 +794,8 @@ public static void TestGray8Transparent(ж<testing.T> Ꮡt) {
             {
                 var (r, _, _, a) = m.At(x, y).RGBA(); if (a != 0){
                     got = append(got,
-                        hex[(int)((uint32)(0x0f & ((r >> (int)(12)))))],
-                        hex[(int)((uint32)(0x0f & ((r >> (int)(8)))))],
+                        hex[(uint32)(0x0f & ((r >> (int)(12))))],
+                        hex[(uint32)(0x0f & ((r >> (int)(8))))],
                         (byte)((rune)' '));
                 } else {
                     got = append(got,

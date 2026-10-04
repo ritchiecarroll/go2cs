@@ -502,7 +502,7 @@ internal static bool linear(slice<Δunicode.Range16> ranges, uint16 r) {
             return false;
         }
         if (r <= (~range_).Hi) {
-            return (uint16)((r - (~range_).Lo) % (~range_).Stride) == 0;
+            return (uint16)((uint16)(r - (~range_).Lo) % (~range_).Stride) == 0;
         }
     }
     return false;
@@ -516,7 +516,7 @@ internal static bool binary(slice<Δunicode.Range16> ranges, uint16 r) {
         nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
         var range_ = Ꮡ(ranges, m);
         if ((~range_).Lo <= r && r <= (~range_).Hi) {
-            return (uint16)((r - (~range_).Lo) % (~range_).Stride) == 0;
+            return (uint16)((uint16)(r - (~range_).Lo) % (~range_).Stride) == 0;
         }
         if (r < (~range_).Lo){
             hi = m;

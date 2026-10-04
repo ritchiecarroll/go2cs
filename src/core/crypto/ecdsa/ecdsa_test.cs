@@ -245,12 +245,12 @@ internal static void testVectors(ж<testing.T> Ꮡt) {
         if (!strings.HasSuffix(line, "\r\n"u8)) {
             Ꮡt.Fatalf("bad line ending (expected \\r\\n) on line %d"u8, lineNo);
         }
-        line = line[..(int)(len(line) - 2)];
+        line = line.slice(0, len(line) - 2);
         if (len(line) == 0 || line[0] == (rune)'#') {
             continue;
         }
         if (line[0] == (rune)'[') {
-            line = line[1..(int)(len(line) - 1)];
+            line = line.slice(1, len(line) - 1);
             var (curve, hashΔ1, _) = strings.Cut(line, ","u8);
             var exprᴛ1 = curve;
             if (exprᴛ1 == "P-224"u8) {

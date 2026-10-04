@@ -33,7 +33,7 @@ using static global::go.unicode.utf16_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("unicode/utf16/utf16_test.go", "utf16_test.cs", "AA8gkoKUggAICIIACRqAggASJIKCgoLKgoKCgpSCyqKCgoKCgoKClIKUlIKClIKUgoKCuIIAESSChLKSgoKmgsqCgoKCABIggoKCggAjMIKCgoLKtIKCuLSCgriilIKWgoKCyqKCgriigoK4ooKCgoKUuKKCgoKClLiigoI=", "131-136:1")]
+[assembly: go.GoPositionMap("unicode/utf16/utf16_test.go", "utf16_test.cs", "AA8gkoKUggAICIIACRqAggAKFAAHEIKCgoLKgoKCgpSCyqKCgoKCgoKClIKUlIKClIKUgoKCuIIACRQABxCChLKSgoKmgsqCgoKCAAoKAAcWgoKCggAVCgANJoKCgoLKtIKCuLSCgriilIKWgoKCyqKCgriigoK4ooKCgoKUuKKCgoKClLiigoI=", "131-136:1")]
 // </GoSourcePositionMaps>
 
 namespace go.unicode;

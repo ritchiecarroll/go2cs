@@ -109,9 +109,9 @@ public static void TestYCbCrSlicesDontOverlap(ж<testing.T> Ꮡt) {
     var m = NewYCbCr(Rect(0, 0, 8, 8), YCbCrSubsampleRatio420);
     var names = new @string[]{"Y"u8, "Cb"u8, "Cr"u8}.slice();
     var slices = new slice<byte>[]{
-        (~m).Y[..(int)(cap((~m).Y))],
-        (~m).Cb[..(int)(cap((~m).Cb))],
-        (~m).Cr[..(int)(cap((~m).Cr))]
+        (~m).Y.slice(0, cap((~m).Y)),
+        (~m).Cb.slice(0, cap((~m).Cb)),
+        (~m).Cr.slice(0, cap((~m).Cr))
     }.slice();
     foreach (var (i, Δslice) in slices) {
         var want = (uint8)(10 + i);

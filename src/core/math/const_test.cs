@@ -17,12 +17,12 @@ public static void TestMaxUint(ж<testing.T> Ꮡt) {
     }
     {
         var v = (uint8)MaxUint8; if ((uint8)(v + 1) != 0) {
-            Ꮡt.Errorf("MaxUint8 should wrap around to zero: %d"u8, v + 1);
+            Ꮡt.Errorf("MaxUint8 should wrap around to zero: %d"u8, (uint8)(v + 1));
         }
     }
     {
         var v = (uint16)MaxUint16; if ((uint16)(v + 1) != 0) {
-            Ꮡt.Errorf("MaxUint16 should wrap around to zero: %d"u8, v + 1);
+            Ꮡt.Errorf("MaxUint16 should wrap around to zero: %d"u8, (uint16)(v + 1));
         }
     }
     {
@@ -45,12 +45,12 @@ public static void TestMaxInt(ж<testing.T> Ꮡt) {
     }
     {
         var v = (int8)MaxInt8; if ((int8)(v + 1) != MinInt8) {
-            Ꮡt.Errorf("MaxInt8 should wrap around to MinInt8: %d"u8, v + 1);
+            Ꮡt.Errorf("MaxInt8 should wrap around to MinInt8: %d"u8, (int8)(v + 1));
         }
     }
     {
         var v = (int16)MaxInt16; if ((int16)(v + 1) != MinInt16) {
-            Ꮡt.Errorf("MaxInt16 should wrap around to MinInt16: %d"u8, v + 1);
+            Ꮡt.Errorf("MaxInt16 should wrap around to MinInt16: %d"u8, (int16)(v + 1));
         }
     }
     {

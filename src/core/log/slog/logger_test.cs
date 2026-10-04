@@ -20,7 +20,8 @@ using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.@internal;
 using path;
 using static go.log.slog_package;
@@ -457,7 +458,7 @@ public static void TestSetAttrs(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestSetDefault(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSetDefault(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // Verify that setting the default to itself does not result in deadlock.
@@ -655,7 +656,7 @@ internal static void checkLogOutput(ж<testing.T> Ꮡt, @string got, @string wan
 // clean prepares log output for comparison.
 internal static @string clean(@string s) {
     if (len(s) > 0 && s[len(s) - 1] == (rune)'\n') {
-        s = s[..(int)(len(s) - 1)];
+        s = s.slice(0, len(s) - 1);
     }
     return strings.ReplaceAll(s, "\n"u8, "~"u8);
 }
@@ -766,7 +767,7 @@ internal static global::go.log.slog_package.ΔHandler WithGroup(this discardTest
 internal static slice<T> concat<T>(slice<T> s1, slice<T> s2) {
     var s = new slice<T>(len(s1) + len(s2));
     copy(s, s1);
-    copy(s[(int)(len(s1))..], s2);
+    copy(s.slice(len(s1)), s2);
     return s;
 }
 

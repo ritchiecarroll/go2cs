@@ -22,6 +22,8 @@ using parser = global::go.go.parser_package;
 using token = global::go.go.token_package;
 using types = global::go.go.types_package;
 using static global::go.go.@internal.gcimporter_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = io.fs_package;
 using global::go.@internal;
 using global::go.go;
@@ -316,7 +318,7 @@ public static void TestVersionHandling(ж<testing.T> Ꮡt) {
             if (strings.Contains(name, corruptedˢ)) {
                 continue; // don't process a leftover corrupted file
             }
-            @string pkgpath = "./" + name[..(int)(len(name) - 2)];
+            @string pkgpath = "./" + name.slice(0, len(name) - 2);
             if (testing.Verbose()) {
                 Ꮡt.Logf("importing %s"u8, name);
             }
@@ -363,7 +365,7 @@ public static void TestVersionHandling(ж<testing.T> Ꮡt) {
             nint i = bytes.Index(data, slice<byte>("\n$$B\n"u8)) + 5;
             // Export data can contain "\n$$\n" in string constants, however,
             // searching for the next end of section marker "\n$$\n" is good enough for tests.
-            nint j = bytes.Index(data[(int)(i)..], slice<byte>("\n$$\n"u8)) + i;
+            nint j = bytes.Index(data.slice(i), slice<byte>("\n$$\n"u8)) + i;
             if (i < 0 || j < 0 || i > j) {
                 Ꮡt.Fatalf("export data section not found (i = %d, j = %d)"u8, i, j);
             }
@@ -870,7 +872,7 @@ type S struct {
 
 """u8;
 
-public static void TestIssue69912(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestIssue69912(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
     // This package only handles gc export data.
     if (runtime.Compiler != "gc") {

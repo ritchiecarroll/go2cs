@@ -41,7 +41,7 @@ using static global::go.go.format_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/format/benchmark_test.go", "benchmark_test.cs", "ABZGABACgoKClIKCgpSUABAYgoKCgoKChIKCgoKokoKCgoKCgoI=", "76-87:1")]
+[assembly: global::go.GoPositionMap("go/format/benchmark_test.go", "benchmark_test.cs", "ABQmAAEgABACgoKClIKCgpSUAAkGAAYSgoKCgoKChIKCgoKokoKCgoKCgoI=", "76-87:1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

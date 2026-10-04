@@ -191,7 +191,7 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
         if (i < 0) {
             tΔ4.Fatal(goBuildinfNotFoundˢ);
         }
-        var verLen = data[(int)(i + 32)..];
+        var verLen = data.slice(i + 32);
         binary.PutUvarint(verLen, ((uint64)16 << (int)(40))); // 16TB ought to be enough for anyone.
         {
             var errΔ1 = os.WriteFile(name, data, 438); if (errΔ1 != default!) {
@@ -447,7 +447,7 @@ public static void TestIssue54968(ж<testing.T> Ꮡt) {
         var buildInfoMagicʗ1 = buildInfoMagic;
         var dataʗ1 = data;
         Ꮡt.Run(fmt.Sprintf("start_at_%d"u8, i), (ж<testing.T> tΔ1) => {
-            var d = dataʗ1[..(int)(start)];
+            var d = dataʗ1.slice(0, start);
             // Construct intentionally-misaligned buildInfoMagic.
             d = appendꓸꓸꓸ(d, bytes.Repeat(new byte[]{0}.slice(), i));
             d = appendꓸꓸꓸ(d, buildInfoMagicʗ1);

@@ -18,7 +18,8 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_package;
 using ꓸꓸꓸAddrRange = Span<runtime_internal_test_package.AddrRange>;
 using ꓸꓸꓸunsafeꓸPointer = Span<unsafe_package.Pointer>;
@@ -226,7 +227,7 @@ public static void RunSchedLocalQueueStealTest() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string queueIsEmptyˢ = "queue is empty"u8;
 
-public static void RunSchedLocalQueueEmptyTest(nint iters) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void RunSchedLocalQueueEmptyTest(nint iters) {
     // Test that runq is not spuriously reported as empty.
     // Runq emptiness affects scheduling decisions and spurious emptiness
     // can lead to underutilization (both runnable Gs and idle Ps coexist
@@ -647,7 +648,7 @@ internal static void stackOverflow(ж<byte> Ꮡx) {
     stackOverflow(Ꮡbuf.at<byte>(0));
 }
 
-public static void RunGetgThreadSwitchTest() {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void RunGetgThreadSwitchTest() {
     // Test that getg works correctly with thread switch.
     // With gccgo, if we generate getg inlined, the backend
     // may cache the address of the TLS variable, which
@@ -1631,7 +1632,7 @@ public static UntypedInt ScavengePercent => /* scavengePercent */ 1;
     internal /*<-*/channel<EmptyStruct> done = /*<-*/channel<EmptyStruct>.RecvOnly;
 }
 
-public static void Start(this ж<Scavenger> Ꮡs) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void Start(this ж<Scavenger> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.Sleep == default! || s.Scavenge == default! || s.ShouldStop == default! || s.GoMaxProcs == default!) {

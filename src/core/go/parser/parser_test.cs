@@ -806,7 +806,7 @@ internal static (@string pre, @string mid, @string post) split(@string x) {
     if (start < 0 || end < 0) {
         return (x, "", "");
     }
-    return (x[..(int)(start)], x[(int)(start + len("«"))..(int)(end)], x[(int)(end + len("»"))..]);
+    return (x.slice(0, start), x.slice(start + len("«"), end), x.slice(end + len("»")));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -825,7 +825,7 @@ public static void TestParseDepthLimit(ж<testing.T> Ꮡt) {
             Ꮡt.Run(tt.name + "/"u8 + size, (ж<testing.T> tΔ1) => {
                 nint n = maxNestLev + 1;
                 if (ttʗ1.parseMultiplier > 0) {
-                    n /= ttʗ1.parseMultiplier;
+                    n = quo(n, ttʗ1.parseMultiplier);
                 }
                 if (size == "small"u8) {
                     // Decrease the number of statements by 10, in order to check
@@ -876,7 +876,7 @@ public static void TestScopeDepthLimit(ж<testing.T> Ꮡt) {
             Ꮡt.Run(tt.name + "/"u8 + size, (ж<testing.T> tΔ1) => {
                 nint n = maxScopeDepth + 1;
                 if (ttʗ1.scopeMultiplier > 0) {
-                    n /= ttʗ1.scopeMultiplier;
+                    n = quo(n, ttʗ1.scopeMultiplier);
                 }
                 if (size == "small"u8) {
                     // Decrease the number of statements by 10, in order to check

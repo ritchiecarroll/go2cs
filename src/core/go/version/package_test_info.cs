@@ -34,7 +34,7 @@ using static global::go.go.version_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/version/version_test.go", "version_test.cs", "AA4YgAAlRIAADxiAACBAgoKCgILagoKCgII=")]
+[assembly: global::go.GoPositionMap("go/version/version_test.go", "version_test.cs", "AA4YgKQAIkCApAAMFICkAB08goKCgILagoKCgII=")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

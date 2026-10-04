@@ -72,7 +72,7 @@ public static void TestRawConnReadWrite(ж<testing.T> Ꮡt) {
                         return;
                     }
                     {
-                        var (_, errΔ2) = cΔ1.Write(bΔ1[..(int)(nΔ1)]); if (errΔ2 != default!) {
+                        var (_, errΔ2) = cΔ1.Write(bΔ1.slice(0, nΔ1)); if (errΔ2 != default!) {
                             tΔ1.Error(errΔ2);
                             return;
                         }
@@ -110,8 +110,8 @@ public static void TestRawConnReadWrite(ж<testing.T> Ꮡt) {
             if (err != default!) {
                 tΔ1.Fatal(err);
             }
-            if (bytes.Compare(b[..(int)(n)], data) != 0) {
-                tΔ1.Fatalf("got %q; want %q"u8, b[..(int)(n)], data);
+            if (bytes.Compare(b.slice(0, n), data) != 0) {
+                tΔ1.Fatalf("got %q; want %q"u8, b.slice(0, n), data);
             }
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

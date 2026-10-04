@@ -43,7 +43,8 @@ using testing = testing_package;
 using iotest = global::go.testing.iotest_package;
 using time = time_package;
 using httpguts = vendor.golang.org.x.net.http.httpguts_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using compress;
 using crypto;
 using encoding;
@@ -587,7 +588,7 @@ internal static readonly @string res1ˢ = "res1"u8;
 internal static readonly @string res2ˢ = "res2"u8;
 internal static readonly @string res3ˢ = "res3"u8;
 
-internal static void testTransportMaxPerHostIdleConns(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportMaxPerHostIdleConns(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         var stop = new channel<EmptyStruct>(0); // stop marks the exit of main Test goroutine
@@ -722,7 +723,7 @@ internal static readonly @string req1ˢ2 = "req1"u8;
 internal static readonly @string req2ˢ2 = "req2"u8;
 internal static readonly object req2DialStartedWhileReq1ˢ = (@string)"req2 dial started while req1 dial in progress"u8;
 
-internal static void testTransportMaxConnsPerHostIncludeDialInProgress(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportMaxConnsPerHostIncludeDialInProgress(ж<testing.T> Ꮡt, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         var (_, err) = w.Write(slice<byte>("foo"u8));
         if (err != default!) {
@@ -798,7 +799,7 @@ public static void TestTransportMaxConnsPerHost(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testTransportMaxConnsPerHost(Δp0, Δp1), new testMode[]{http1Mode, https1Mode, http2Mode}.slice());
 }
 
-internal static void testTransportMaxConnsPerHost(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportMaxConnsPerHost(ж<testing.T> Ꮡt, testMode mode) {
     http_internal_test_package.CondSkipHTTP2(new http_test_package.testing_TжTB(Ꮡt));
     var h = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         var (_, err) = w.Write(slice<byte>("foo"u8));
@@ -1090,7 +1091,7 @@ public static void TestStressSurpriseServerCloses(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingTestInShortModeˢ = (@string)"skipping test in short mode"u8;
 
-internal static void testStressSurpriseServerCloses(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testStressSurpriseServerCloses(ж<testing.T> Ꮡt, testMode mode) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (testing.Short()) {
@@ -1464,7 +1465,7 @@ internal static readonly @string transport100ContinueTestBody = "request body"u8
 
 // newTransport100ContinueTest creates a Transport and sends an Expect: 100-continue
 // request on it.
-internal static ж<transport100ContinueTest> newTransport100ContinueTest(ж<testing.T> Ꮡt, time.Duration timeout) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<transport100ContinueTest> newTransport100ContinueTest(ж<testing.T> Ꮡt, time.Duration timeout) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(Ꮡt);
@@ -1633,7 +1634,7 @@ internal static void testSOCKS5Proxy(ж<testing.T> Ꮡt, testMode mode) {
         defer(ᴛ1 => builtin.close(ᴛ1), ch, ref ᒐ);
         var chʗ1 = ch;
         var lʗ2 = l;
-        void proxy(ж<testing.T> tΔ1) {
+        [MethodImpl(MethodImplOptions.NoInlining)] void proxy(ж<testing.T> tΔ1) {
             GoFrame ᒐ = default;
             try {
                 var (s, errΔ1) = lʗ2.Accept();
@@ -1690,16 +1691,16 @@ internal static void testSOCKS5Proxy(ж<testing.T> Ꮡt, testMode mode) {
                 }}
 
                 {
-                    var (_, errΔ5) = io.ReadFull(new http_test_package.net_ConnᴠReader(s), buf[4..(int)(ipLen + 6)]); if (errΔ5 != default!) {
+                    var (_, errΔ5) = io.ReadFull(new http_test_package.net_ConnᴠReader(s), buf.slice(4, ipLen + 6)); if (errΔ5 != default!) {
                         tΔ1.Errorf("socks5 proxy address read: %v"u8, errΔ5);
                         return;
                     }
                 }
-                var ip = ((net.IP)(buf[4..(int)(ipLen + 4)]));
-                var port = binary.BigEndian.Uint16(buf[(int)(ipLen + 4)..(int)(ipLen + 6)]);
+                var ip = ((net.IP)(buf.slice(4, ipLen + 4)));
+                var port = binary.BigEndian.Uint16(buf.slice(ipLen + 4, ipLen + 6));
                 copy(buf[..3], new byte[]{5, 0, 0}.slice());
                 {
-                    var (_, errΔ6) = s.Write(buf[..(int)(ipLen + 6)]); if (errΔ6 != default!) {
+                    var (_, errΔ6) = s.Write(buf.slice(0, ipLen + 6)); if (errΔ6 != default!) {
                         tΔ1.Errorf("socks5 proxy connect write: %v"u8, errΔ6);
                         return;
                     }
@@ -1733,7 +1734,7 @@ internal static void testSOCKS5Proxy(ж<testing.T> Ꮡt, testMode mode) {
             var hʗ1 = h;
             var proxyʗ1 = proxy;
             var puʗ1 = pu;
-            Ꮡt.Run(fmt.Sprintf("useTLS=%v"u8, useTLS), (ж<testing.T> tΔ2) => {
+            Ꮡt.Run(fmt.Sprintf("useTLS=%v"u8, useTLS), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
                 var ts = newClientServerTest(new http_test_package.testing_TжTB(tΔ2), mode, new http_test_package.http_HandlerFuncᴠΔHandler(hʗ1)).Value.ts;
                 var proxyʗ2 = proxyʗ1;
                 goǃ(proxyʗ2, tΔ2);
@@ -1791,7 +1792,7 @@ public static void TestTransportProxy(ж<testing.T> Ꮡt) {
                 });
                 var proxyCh = new channel<ж<Δhttp.Request>>(1);
                 var proxyChʗ1 = proxyCh;
-                var h2 = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+                var h2 = new Δhttp.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
                     proxyChʗ1.ᐸꟷ(r);
                     // Implement an entire CONNECT proxy
                     if ((~r).Method == "CONNECT"u8) {
@@ -1920,7 +1921,7 @@ public static void TestOnProxyConnectResponse(ж<testing.T> Ꮡt) {
         var h1 = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         });
         var tcaseʗ1 = tcase;
-        var h2 = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var h2 = new Δhttp.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             // Implement an entire CONNECT proxy
             if ((~r).Method == "CONNECT"u8) {
                 if (tcaseʗ1.proxyStatusCode != StatusOK) {
@@ -2031,12 +2032,12 @@ internal static readonly @string httpsGolangFakeTldˢ = "https://golang.fake.tld
 
 // Issue 28012: verify that the Transport closes its TCP connection to http proxies
 // when they're slow to reply to HTTPS CONNECT responses.
-public static void TestTransportProxyHTTPSConnectLeak(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTransportProxyHTTPSConnectLeak(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var cancelc = new channel<EmptyStruct>(0);
         var cancelcʗ1 = cancelc;
-        http_internal_test_package.SetTestHookProxyConnectTimeout(Ꮡt, (context.Context ctxʗp, time.Duration timeout) => {
+        http_internal_test_package.SetTestHookProxyConnectTimeout(Ꮡt, [MethodImpl(MethodImplOptions.NoInlining)] (context.Context ctxʗp, time.Duration timeout) => {
             ref var ctx = ref heap(ctxʗp, out var Ꮡctx);
             (ctx, var cancel) = context_package.WithCancel(ctx);
             var cancelʗ1 = cancel;
@@ -2306,7 +2307,7 @@ public static void TestTransportPersistConnLeak(ж<testing.T> Ꮡt) {
 internal static readonly object flakyInHttp2ˢ = (@string)"flaky in HTTP/2"u8;
 internal static readonly object tooManyNewGoroutinesˢ = (@string)"too many new goroutines"u8;
 
-internal static void testTransportPersistConnLeak(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportPersistConnLeak(ж<testing.T> Ꮡt, testMode mode) {
     if (mode == http2Mode) {
         Ꮡt.Skip(flakyInHttp2ˢ);
     }
@@ -2604,7 +2605,7 @@ internal static void testTransportPersistConnContextLeakMaxConnsPerHost(ж<testi
     var cʗ1 = c;
     var ctxʗ1 = ctx;
     var tsʗ1 = ts;
-    void doPosts(ж<contextCounter> cc) {
+    [MethodImpl(MethodImplOptions.NoInlining)] void doPosts(ж<contextCounter> cc) {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         for (nint n = 64; n > 0; n--) {
             Ꮡwg.Add(1);
@@ -2656,7 +2657,7 @@ public static void TestTransportIdleConnCrash(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testTransportIdleConnCrash(Δp0, Δp1));
 }
 
-internal static void testTransportIdleConnCrash(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportIdleConnCrash(ж<testing.T> Ꮡt, testMode mode) {
     ref var tr = ref heap<ж<Δhttp.Transport>>(out var Ꮡtr);
     var unblockCh = new channel<bool>(1);
     var unblockChʗ1 = unblockCh;
@@ -2812,7 +2813,7 @@ public static void TestTransportConcurrency(ж<testing.T> Ꮡt) {
 internal static readonly @string echoˢ = "echo"u8;
 internal static readonly @string connectionResetByPeerˢ = ": connection reset by peer"u8;
 
-internal static void testTransportConcurrency(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportConcurrency(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         // Not parallel: uses global test hooks.
@@ -3234,7 +3235,7 @@ internal static void testTransportCancelRequest(ж<testing.T> Ꮡt, cancelTest t
         var body = new slice<byte>(len(msg));
         var (n, _) = io.ReadFull((~res).Body, body);
         if (n != len(body) || !bytes.Equal(body, slice<byte>(msg))) {
-            Ꮡt.Errorf("Body = %q; want %q"u8, body[..(int)(n)], msg);
+            Ꮡt.Errorf("Body = %q; want %q"u8, body.slice(0, n), msg);
         }
         test.cancel(tr, req);
         (var tail, err) = io.ReadAll((~res).Body);
@@ -3261,7 +3262,7 @@ internal static void testTransportCancelRequest(ж<testing.T> Ꮡt, cancelTest t
     finally { ᒐ.Run(); }
 }
 
-internal static void testTransportCancelRequestInDo(ж<testing.T> Ꮡt, cancelTest test, io.Reader body) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportCancelRequestInDo(ж<testing.T> Ꮡt, cancelTest test, io.Reader body) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
@@ -3315,13 +3316,13 @@ internal static void testTransportCancelRequestInDo(ж<testing.T> Ꮡt, cancelTe
 }
 
 public static void TestTransportCancelRequestInDo(ж<testing.T> Ꮡt) {
-    runCancelTest(Ꮡt, (ж<testing.T> tΔ1, cancelTest test) => {
+    runCancelTest(Ꮡt, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1, cancelTest test) => {
         testTransportCancelRequestInDo(tΔ1, test, default!);
     });
 }
 
 public static void TestTransportCancelRequestWithBodyInDo(ж<testing.T> Ꮡt) {
-    runCancelTest(Ꮡt, (ж<testing.T> tΔ1, cancelTest test) => {
+    runCancelTest(Ꮡt, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1, cancelTest test) => {
         testTransportCancelRequestInDo(tΔ1, test, new http_test_package.bytes_BufferжReader(bytes.NewBuffer(new byte[]{0}.slice())));
     });
 }
@@ -3343,7 +3344,7 @@ Get error = true
 
 """u8;
 
-internal static void testTransportCancelRequestInDial(ж<testing.T> Ꮡt, cancelTest test) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportCancelRequestInDial(ж<testing.T> Ꮡt, cancelTest test) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -3449,7 +3450,7 @@ internal static void testTransportCancelRequestWithBody(ж<testing.T> Ꮡt, canc
         var body = new slice<byte>(len(msg));
         var (n, _) = io.ReadFull((~res).Body, body);
         if (n != len(body) || !bytes.Equal(body, slice<byte>(msg))) {
-            Ꮡt.Errorf("Body = %q; want %q"u8, body[..(int)(n)], msg);
+            Ꮡt.Errorf("Body = %q; want %q"u8, body.slice(0, n), msg);
         }
         test.cancel(tr, req);
         (var tail, err) = io.ReadAll((~res).Body);
@@ -3519,7 +3520,7 @@ public static void TestTransportCancelRequestBeforeResponseHeaders(ж<testing.T>
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string roundTripˢ = "RoundTrip"u8;
 
-internal static void testTransportCancelRequestBeforeResponseHeaders(ж<testing.T> Ꮡt, cancelTest test) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportCancelRequestBeforeResponseHeaders(ж<testing.T> Ꮡt, cancelTest test) {
     GoFrame ᒐ = default;
     try {
         defer(afterTest, new http_test_package.testing_TжTB(Ꮡt), ref ᒐ);
@@ -3719,7 +3720,7 @@ internal static readonly @string barIpportˢ = "bar-ipport"u8;
 internal static readonly @string manuallyClosedˢ = "manually closed"u8;
 internal static readonly object noAddrOnFooRequestˢ = (@string)"No addr on /foo request"u8;
 
-internal static void testTransportSocketLateBinding(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportSocketLateBinding(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -3887,7 +3888,7 @@ Content-Length: %d
         }
             var send100Responseʗ1 = send100Response;
         var tr = Ꮡ(new Transport(
-            Dial: (@string n, @string addr) => {
+            Dial: [MethodImpl(MethodImplOptions.NoInlining)] (@string n, @string addr) => {
                 var (sr, sw) = io.Pipe(); // server read/write
                 var (cr, cw) = io.Pipe(); // client read/write
                     var cwʗ1 = cw;
@@ -4326,7 +4327,7 @@ internal static readonly @string httpsDummyTldˢ = "https://dummy.tld/"u8;
 internal static readonly object expectedErrorˢ = (@string)"expected error"u8;
 internal static readonly @string handshakeTimeoutˢ = "handshake timeout"u8;
 
-public static void TestTransportTLSHandshakeTimeout(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTransportTLSHandshakeTimeout(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         defer(afterTest, new http_test_package.testing_TжTB(Ꮡt), ref ᒐ);
@@ -4508,7 +4509,7 @@ internal static void testTransportNoReuseAfterEarlyResponse(ж<testing.T> Ꮡt, 
             closeConnʗ1();
             Ꮡcopying.Wait();
         }, ref ᒐ);
-        var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             if ((~r).Method == "GET"u8) {
                 io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), barˢ);
                 return;
@@ -5134,7 +5135,7 @@ public static void TestTransportIdleConnRacesRequest(ж<testing.T> Ꮡt) {
 internal static readonly object removeSkipWhen70515Isˢ = (@string)"remove skip when #70515 is fixed"u8;
 internal static readonly object expectedRequestToFailButˢ = (@string)"expected request to fail, but it succeeded"u8;
 
-internal static void testTransportIdleConnRacesRequest(testing.TB t, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportIdleConnRacesRequest(testing.TB t, testMode mode) {
     if (mode == http2UnencryptedMode) {
         t.Skip(removeSkipWhen70515Isˢ);
     }
@@ -5518,7 +5519,7 @@ internal static readonly @string httpLocalhost8080ˢ = "http://localhost:8080"u8
 internal static readonly @string http11204NoContentˢ = "HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n"u8;
 
 // Issue 6574
-public static void TestTransportFlushesBodyChunks(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTransportFlushesBodyChunks(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         defer(afterTest, new http_test_package.testing_TжTB(Ꮡt), ref ᒐ);
@@ -5595,7 +5596,7 @@ public static void TestTransportFlushesRequestHeader(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testTransportFlushesRequestHeader(Δp0, Δp1));
 }
 
-internal static void testTransportFlushesRequestHeader(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportFlushesRequestHeader(ж<testing.T> Ꮡt, testMode mode) {
     var gotReq = new channel<EmptyStruct>(0);
     var gotReqʗ1 = gotReq;
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
@@ -5839,7 +5840,7 @@ internal static readonly @string httpsFakeTldˢ = "https://fake.tld/"u8;
 internal static readonly object fooRoundTripperShouldNotˢ = (@string)"foo RoundTripper should not be called"u8;
 
 // Issue 13839
-public static void TestNoCrashReturningTransportAltConn(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestNoCrashReturningTransportAltConn(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -7181,7 +7182,7 @@ internal static readonly @string wantᶜ3 = "unknown status code"u8;
 
 // Ensure that a missing status doesn't make the server panic
 // See Issue https://golang.org/issues/21701
-public static void TestMissingStatusNoPanic(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMissingStatusNoPanic(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     @string want = wantᶜ3;
     var ln = newLocalListener(Ꮡt);
@@ -8309,7 +8310,7 @@ public static void TestTransportDecrementConnWhenIdleConnRemoved(ж<testing.T> �
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testTransportDecrementConnWhenIdleConnRemoved(Δp0, Δp1), new testMode[]{http2Mode}.slice());
 }
 
-internal static void testTransportDecrementConnWhenIdleConnRemoved(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportDecrementConnWhenIdleConnRemoved(ж<testing.T> Ꮡt, testMode mode) {
     http_internal_test_package.CondSkipHTTP2(new http_test_package.testing_TжTB(Ꮡt));
     var h = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         var (_, err) = w.Write(slice<byte>("foo"u8));
@@ -8527,7 +8528,7 @@ internal static readonly @string delegateClosedˢ = "delegate closed"u8;
     return r.r.Read(p);
 }
 
-internal static void testTransportRace(ж<Δhttp.Request> Ꮡreq) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportRace(ж<Δhttp.Request> Ꮡreq) {
     GoFrame ᒐ = default;
     try {
         ref var req = ref Ꮡreq.DerefOrNull();
@@ -8623,7 +8624,7 @@ public static void TestCancelRequestWhenSharingConnection(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testCancelRequestWhenSharingConnection(Δp0, Δp1), new testMode[]{http1Mode}.slice());
 }
 
-internal static void testCancelRequestWhenSharingConnection(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testCancelRequestWhenSharingConnection(ж<testing.T> Ꮡt, testMode mode) {
     var reqc = new channel<channel<EmptyStruct>>(2);
     var reqcʗ1 = reqc;
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
@@ -8731,8 +8732,8 @@ public static void TestHandlerAbortRacesBodyRead(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testHandlerAbortRacesBodyRead(Δp0, Δp1));
 }
 
-internal static void testHandlerAbortRacesBodyRead(ж<testing.T> Ꮡt, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter rw, ж<Δhttp.Request> req) => {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testHandlerAbortRacesBodyRead(ж<testing.T> Ꮡt, testMode mode) {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (Δhttp.ResponseWriter rw, ж<Δhttp.Request> req) => {
         goǃ((ᴛ1, ᴛ2) => io.Copy(ᴛ1, ᴛ2), io.Discard, (~req).Body);
         throw panic(ErrAbortHandler);
     }))).Value.ts;
@@ -8837,7 +8838,7 @@ internal static void testProxyAuthHeader(ж<testing.T> Ꮡt, testMode mode) {
 internal static readonly @string http11200ContentLength3ˢ = "HTTP/1.1 200\r\nContent-Length: 3\r\n\r\nfoo"u8;
 
 // Issue 61708
-public static void TestTransportReqCancelerCleanupOnRequestBodyWriteError(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTransportReqCancelerCleanupOnRequestBodyWriteError(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(Ꮡt);
@@ -9171,7 +9172,7 @@ public static void TestTransportServerProtocols(ж<testing.T> Ꮡt) {
         var certʗ1 = cert;
         var certpoolʗ1 = certpool;
         var testʗ1 = test;
-        Ꮡt.Run(test.name, (ж<testing.T> tΔ3) => {
+        Ꮡt.Run(test.name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ3) => {
             // We don't use httptest here because it makes its own decisions
             // about how to enable/disable HTTP/2.
             var srv = Ꮡ(new Server(
@@ -9246,7 +9247,7 @@ public static void TestIssue61474(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object testIsTooLargeˢ = (@string)"test is too large"u8;
 
-internal static void testIssue61474(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testIssue61474(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

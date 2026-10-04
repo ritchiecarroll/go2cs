@@ -14,6 +14,8 @@ using Δruntime = runtime_package;
 using Δsync = sync_package;
 using Δtesting = testing_package;
 using nettest = vendor.golang.org.x.net.nettest_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using math.rand;
 using static go.os_internal_test_package;
 using time = time_package;
@@ -27,7 +29,7 @@ internal static readonly @string tcpˢ = "tcp"u8;
 // Exercise sendfile/splice fast paths with a moderately large file.
 //
 // https://go.dev/issue/70000
-public static void TestLargeCopyViaNetwork(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestLargeCopyViaNetwork(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         UntypedInt size = /* 10 * 1024 * 1024 */ 10485760;
@@ -267,7 +269,7 @@ internal static ж<randReader> newRandReader() {
     return (len(p), default!);
 }
 
-internal static (Δnet.Conn client, Δnet.Conn server) createSocketPair(ж<Δtesting.T> Ꮡt, @string proto) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (Δnet.Conn client, Δnet.Conn server) createSocketPair(ж<Δtesting.T> Ꮡt, @string proto) {
     Δnet.Conn client = default!;
     Δnet.Conn server = default!;
 

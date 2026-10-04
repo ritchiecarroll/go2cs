@@ -15,7 +15,8 @@ using testing = testing_package;
 using time = time_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
 using @internal;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.sync;
 using static global::go.runtime_internal_test_package;
 using Δio = io_package;
@@ -25,7 +26,7 @@ partial class runtime_test_package {
 
 // TestStackMem measures per-thread stack segment cache behavior.
 // The test consumed up to 500MB in the past.
-public static void TestStackMem(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStackMem(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -90,7 +91,7 @@ public static void TestStackMem(ж<testing.T> Ꮡt) {
 internal static readonly object firstGrowStackTookˢ = (@string)"first growStack took"u8;
 
 // Test stack growing in different contexts.
-public static void TestStackGrowth(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStackGrowth(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -219,7 +220,7 @@ internal static void growStackIter(ж<nint> Ꮡp, nint n) {
     }
 }
 
-public static void TestStackGrowthCallback(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStackGrowthCallback(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     // test stack growth at chan op
@@ -260,7 +261,7 @@ public static void TestStackGrowthCallback(ж<testing.T> Ꮡt) {
         GoFrame ᒐ = default;
         try {
             defer(Ꮡwg.Done, ref ᒐ);
-            growStackWithCallback(() => {
+            growStackWithCallback([MethodImpl(MethodImplOptions.NoInlining)] () => {
                 var done = new channel<bool>(0);
                 var doneʗ1 = done;
                 goǃ(() => {
@@ -322,7 +323,7 @@ partial struct bigBuf;
 // the bottom of the stack. The goal is to find a stack depth less than 4kB from
 // the end of the stack. Each trial runs in a different goroutine so that an earlier
 // stack growth does not invalidate a later attempt.
-public static void TestDeferPtrsGoexit(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDeferPtrsGoexit(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 100; i++) {
         var c = new channel<nint>(1);
         goǃ(testDeferPtrsGoexit, c, i);
@@ -359,7 +360,7 @@ internal static void setBig(ж<nint> Ꮡp, nint x, bigBuf b) {
 // TestDeferPtrsPanic is like TestDeferPtrsGoexit, but it's using panic instead
 // of Goexit to run the Defers. Those two are different execution paths
 // in the runtime.
-public static void TestDeferPtrsPanic(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDeferPtrsPanic(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 100; i++) {
         var c = new channel<nint>(1);
         goǃ(testDeferPtrsGoexit, c, i);
@@ -544,7 +545,7 @@ internal static void growing(channel<nint> c, channel<EmptyStruct> done) {
     done.ᐸꟷ(new EmptyStruct());
 }
 
-public static void TestStackCache(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStackCache(ж<testing.T> Ꮡt) {
     // Allocate a bunch of goroutines and grow their stacks.
     // Repeat a few times to test the stack cache.
     const nint R = 4;
@@ -616,7 +617,7 @@ public static void TestStackPanic(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void BenchmarkStackCopyPtr(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkStackCopyPtr(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var c = new channel<bool>(0);
@@ -642,7 +643,7 @@ internal static void countp(ж<nint> Ꮡn) {
     countp(Ꮡn);
 }
 
-public static void BenchmarkStackCopy(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkStackCopy(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var c = new channel<bool>(0);
@@ -663,7 +664,7 @@ internal static nint count(nint n) {
     return 1 + count(n - 1);
 }
 
-public static void BenchmarkStackCopyNoCache(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkStackCopyNoCache(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var c = new channel<bool>(0);
@@ -791,7 +792,7 @@ public static void Sum(int64 n, ж<stkobjT> Ꮡp) {
     p.x += s.x;
 }
 
-public static void BenchmarkStackCopyWithStkobj(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkStackCopyWithStkobj(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var c = new channel<bool>(0);
@@ -806,7 +807,7 @@ public static void BenchmarkStackCopyWithStkobj(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkIssue18138(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkIssue18138(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Channel with N "can run a goroutine" tokens
@@ -1154,7 +1155,7 @@ public static void TestDeferLiveness(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestDeferHeapAndStack(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDeferHeapAndStack(ж<testing.T> Ꮡt) {
     nint P = 4; // processors
     nint N = 10000; //iterations
     nint D = 200; // stack depth

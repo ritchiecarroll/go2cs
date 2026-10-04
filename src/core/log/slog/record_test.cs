@@ -35,7 +35,7 @@ public static void TestRecordAttrs(ж<testing.T> Ꮡt) {
             Ꮡgot.ValueSlot = builtin.append(Ꮡgot.ValueSlot, a);
             return len(Ꮡgot.ValueSlot) < stop;
         });
-        var want = @as[..(int)(stop)];
+        var want = @as.slice(0, stop);
         if (!attrsEqual(got, want)) {
             Ꮡt.Errorf("got %v, want %v"u8, got, want);
         }
@@ -68,7 +68,7 @@ public static void TestRecordSource(ж<testing.T> Ꮡt) {
         var got = r.source();
         {
             nint i = strings.LastIndexByte((~got).File, (rune)'/'); if (i >= 0) {
-                got.Value.File = (~got).File[(int)(i + 1)..];
+                got.Value.File = (~got).File.slice(i + 1);
             }
         }
         if ((~got).Function != test.wantFunction || (~got).File != test.wantFile || ((~got).Line > 0) != test.wantLinePositive) {

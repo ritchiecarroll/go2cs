@@ -209,7 +209,7 @@ internal static void testContentTypeWithVariousSources(ж<testing.T> Ꮡt, testM
             // Write the input one byte at a time.
             var buf = slice<byte>(input);
             foreach (var (i, _) in buf) {
-                var (n, err) = w.Write(buf[(int)(i)..(int)(i + 1)]);
+                var (n, err) = w.Write(buf.slice(i, i + 1));
                 if (n != 1 || err != default!) {
                     Ꮡt.Errorf("w.Write(%q) = %v, %v want 1, nil"u8, input, n, err);
                 }

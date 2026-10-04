@@ -7,6 +7,8 @@ using fmt = fmt_package;
 using static iter_package;
 using Δruntime = runtime_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using iter = iter_package;
 
 partial class iter_test_package {
@@ -559,7 +561,7 @@ internal static iter.Seq2<nint, nint> goexitCleanupSeq2() {
     };
 }
 
-internal static bool goexits(ж<testing.T> Ꮡt, Action f) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static bool goexits(ж<testing.T> Ꮡt, Action f) {
     Ꮡt.Helper();
     var exit = new channel<bool>(0);
     var exitʗ1 = exit;

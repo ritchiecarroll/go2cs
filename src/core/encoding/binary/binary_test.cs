@@ -659,12 +659,12 @@ public static void TestReadTruncated(ж<testing.T> Ꮡt) {
         }
 
         {
-            var err = go.encoding.binary_package.Read(new binary_test_package.strings_ReaderжReader(strings.NewReader(data[..(int)(i)])), LittleEndian, Ꮡb1); if (!AreEqual(err, errWant)) {
+            var err = go.encoding.binary_package.Read(new binary_test_package.strings_ReaderжReader(strings.NewReader(data.slice(0, i))), LittleEndian, Ꮡb1); if (!AreEqual(err, errWant)) {
                 Ꮡt.Errorf("Read(%d) with slice: got %v, want %v"u8, i, err, errWant);
             }
         }
         {
-            var err = go.encoding.binary_package.Read(new binary_test_package.strings_ReaderжReader(strings.NewReader(data[..(int)(i)])), LittleEndian, Ꮡb2); if (!AreEqual(err, errWant)) {
+            var err = go.encoding.binary_package.Read(new binary_test_package.strings_ReaderжReader(strings.NewReader(data.slice(0, i))), LittleEndian, Ꮡb2); if (!AreEqual(err, errWant)) {
                 Ꮡt.Errorf("Read(%d) with struct: got %v, want %v"u8, i, err, errWant);
             }
         }
@@ -703,7 +703,7 @@ internal static bool /*panicked*/ testPutUint64SmallSliceLengthPanics() {
     return panicked;
 }
 
-[GoType("dyn")] internal partial interface TestByteOrder_byteOrder :
+[GoType("dyn")] [GoLocalName("byteOrder")] internal partial interface TestByteOrder_byteOrder :
     ByteOrder,
     AppendByteOrder
 {
@@ -912,7 +912,7 @@ public static void TestSizeAllocs(ж<testing.T> Ꮡt) {
 
 [GoRecv] internal static (nint, error) Read(this ref byteSliceReader br, slice<byte> p) {
     nint n = copy(p, br.remain);
-    br.remain = br.remain[(int)(n)..];
+    br.remain = br.remain.slice(n);
     return (n, default!);
 }
 

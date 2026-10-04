@@ -45,8 +45,8 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
 public static void TestSynopsis(ж<testing.T> Ꮡt) {
     foreach (var (_, e) in tests) {
         @string fs = firstSentence(e.txt);
-        if (fs != e.txt[..(int)(e.fsl)]) {
-            Ꮡt.Errorf("firstSentence(%q) = %q, want %q"u8, e.txt, fs, e.txt[..(int)(e.fsl)]);
+        if (fs != e.txt.slice(0, e.fsl)) {
+            Ꮡt.Errorf("firstSentence(%q) = %q, want %q"u8, e.txt, fs, e.txt.slice(0, e.fsl));
         }
         @string syn = Synopsis(e.txt);
         if (syn != e.syn) {

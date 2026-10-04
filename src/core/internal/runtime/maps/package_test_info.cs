@@ -47,7 +47,7 @@ using static global::go.@internal.runtime.maps_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/maps/fuzz_test.go", "fuzz_test.cs", "AC1agoKAgqSmpoKChJKCgIKmpoIAChiCgoKogoKCuLQADyIAOniCgoKWgoKylIKEgpSClIKCtoKkgqg=", "175-211:1")]
+[assembly: go.GoPositionMap("internal/runtime/maps/fuzz_test.go", "fuzz_test.cs", "ACVGAAcUgoKAgqSmpoKChJKCgIKmpoIAChiCgoKogoKCuLQADyIAOniCgoKWgoKylIKEgpSClIKCtoKkgqg=", "175-211:1")]
 [assembly: go.GoPositionMap("internal/runtime/maps/map_swiss_test.go", "map_swiss_test.cs", "ABcugoKUABwQqABe0gGShIKCloKCloKWgoKWgoKoorKiooLKorKiooLKorKiooLKorKiooI=", "144-170:1;172-181:2;174-179:2.1;175-178:2.1.1;182-191:3;184-189:3.1;185-188:3.1.1;192-201:4;194-199:4.1;195-198:4.1.1;202-211:5;204-209:5.1;205-208:5.1.1")]
 [assembly: go.GoPositionMap("internal/runtime/maps/map_test.go", "map_test.cs", "ABIggoKCuIKEkpSCgoKEgqiCloKEgoKCgoKUgoLMkoSSlIKCgoSCqIKWgoSCgoKCgpSCgsqChJKUgoKChIKogoSCgpaCloKEgoKCgoLKgoSSlIKCgoSCqISCloKEgoKCgoL+ooSSkpSCgpaCgoKWgpaCgoKSgpaCgoKUgroACxSEkpSCgoQABxKClIKCzKiChISChKaWgriChJKUgoKChIKohIKCgoKSgpaCgpaCloKEgoKCgoKClILMkoSSlIKCgoSCqIKCkoKCgoKSgpaCgoSCqIKUqIKWgoSCgoSCgpaCgoKUgsyyhJKUgoKChIKogoKSgoKCgpKCloKChIKogqiSlIKCgoSCugAFEIKEgoKEgoKWgoKClILKgoSSlIKCgoSCqIKCgoKCkoKWgoKClICCpJaCkpSCgoKEggAKFtSApoAACQaCABk+goKClILMkoSSlISCloKClIKCloKCgoKC6IKIkpKEgoKChIKogpaCgoSCgoKCgpSCgsyShJKUhIKWgoKUgoKWhIKC", "552-552:1;555-555:2")]
 // </GoSourcePositionMaps>

@@ -46,7 +46,7 @@ internal static map<nint, slice<comment>> /*res*/ commentMap(slice<byte> src, ж
         }
         if (exprᴛ1 == token.COMMENT) { matchᴛ1 = true;
             if (lit[1] == (rune)'*') {
-                lit = lit[..(int)(len(lit) - 2)]; // strip trailing */
+                lit = lit.slice(0, len(lit) - 2); // strip trailing */
             }
             lit = lit[2..]; // strip leading // or /*
             if (Ꮡrx.MatchString(lit)) {

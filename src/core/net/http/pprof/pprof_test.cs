@@ -19,6 +19,8 @@ using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using exec = go.os.exec_package;
 using go.@internal;
@@ -170,7 +172,7 @@ internal static void mutexHog2(ж<sync.Mutex> Ꮡmu1, ж<sync.Mutex> Ꮡmu2, tim
 
 // mutexHog starts multiple goroutines that runs the given hogger function for the specified duration.
 // The hogger function will be given two mutexes to lock & unlock.
-internal static void mutexHog(time.Duration duration, Action<ж<sync.Mutex>, ж<sync.Mutex>, time.Time, time.Duration> hogger) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void mutexHog(time.Duration duration, Action<ж<sync.Mutex>, ж<sync.Mutex>, time.Time, time.Duration> hogger) {
     ref var start = ref heap<time.Time>(out var Ꮡstart);
     start = time.Now();
     var mu1 = @new<sync.Mutex>();
@@ -200,7 +202,7 @@ internal static readonly @string debugPprofMutexˢ = "/debug/pprof/mutex"u8;
 internal static readonly @string mutexHog1ˢ = "mutexHog1"u8;
 internal static readonly @string mutexHog2ˢ = "mutexHog2"u8;
 
-public static void TestDeltaProfile(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDeltaProfile(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (strings.HasPrefix(runtime.GOARCH, armˢ)) {

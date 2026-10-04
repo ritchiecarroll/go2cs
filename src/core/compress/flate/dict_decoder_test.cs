@@ -70,7 +70,7 @@ public static void TestDictDecoder(ж<testing.T> Ꮡt) {
     Action<@string> writeString = (@string strΔ1) => {
         while (len(strΔ1) > 0) {
             nint cnt = copy(Ꮡdd.Value.writeSlice(), strΔ1);
-            strΔ1 = strΔ1[(int)(cnt)..];
+            strΔ1 = strΔ1.slice(cnt);
             Ꮡdd.Value.writeMark(cnt);
             if (Ꮡdd.Value.availWrite() == 0) {
                 Ꮡgot.Value.Write(Ꮡdd.Value.readFlush());
@@ -82,11 +82,11 @@ public static void TestDictDecoder(ж<testing.T> Ꮡt) {
     @string str = poem;
     foreach (var (_, @ref) in poemRefs) {
         if (@ref.dist == 0){
-            writeString(str[..(int)(@ref.length)]);
+            writeString(str.slice(0, @ref.length));
         } else {
             writeCopy(@ref.dist, @ref.length);
         }
-        str = str[(int)(@ref.length)..];
+        str = str.slice(@ref.length);
     }
     want.WriteString(poem);
     writeCopy(dd.histSize(), 33);
@@ -104,7 +104,7 @@ public static void TestDictDecoder(ж<testing.T> Ꮡt) {
     writeCopy(len(poem), 7 * len(poem));
     want.WriteString(strings.Repeat(strings.ToUpper(poem), 8));
     writeCopy(dd.histSize(), 10);
-    want.Write(want.Bytes()[(int)(want.Len() - dd.histSize())..][..10]);
+    want.Write(want.Bytes().slice(want.Len() - dd.histSize())[..10]);
     got.Write(dd.readFlush());
     if (Ꮡgot.String() != Ꮡwant.String()) {
         Ꮡt.Errorf("final string mismatch:\ngot  %q\nwant %q"u8, Ꮡgot.String(), Ꮡwant.String());

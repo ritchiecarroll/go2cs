@@ -12,6 +12,8 @@ using os = os_package;
 using runtime = runtime_package;
 using testing = testing_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.compress.lzw_package;
 
 partial class lzw_internal_test_package {
@@ -24,7 +26,7 @@ internal static slice<@string> filenames = new @string[]{
 
 // testFile tests that compressing and then decompressing the given file with
 // the given options yields equivalent bytes to the original file.
-internal static void testFile(ж<testing.T> Ꮡt, @string fn, global::go.compress.lzw_package.Order order, nint litWidth) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testFile(ж<testing.T> Ꮡt, @string fn, global::go.compress.lzw_package.Order order, nint litWidth) {
     GoFrame ᒐ = default;
     try {
         // Read the file, as golden output.
@@ -63,7 +65,7 @@ internal static void testFile(ж<testing.T> Ꮡt, @string fn, global::go.compres
                         Ꮡt.Errorf("%s (order=%d litWidth=%d): %v"u8, fn, order, litWidth, err0Δ1);
                         return;
                     }
-                    var (_, err1Δ1) = lzww.Write(b[..(int)(n)]);
+                    var (_, err1Δ1) = lzww.Write(b.slice(0, n));
                     if (err1Δ1 != default!) {
                         Ꮡt.Errorf("%s (order=%d litWidth=%d): %v"u8, fn, order, litWidth, err1Δ1);
                         return;
@@ -236,9 +238,9 @@ public static void BenchmarkEncoder(ж<testing.B> Ꮡb) {
         var buf1 = new slice<byte>(n);
         for (nint i = 0; i < n; i += len(buf0)) {
             if (len(buf0) > n - i) {
-                buf0 = buf0[..(int)(n - i)];
+                buf0 = buf0.slice(0, n - i);
             }
-            copy(buf1[(int)(i)..], buf0);
+            copy(buf1.slice(i), buf0);
         }
         buf0 = default!;
         runtime.GC();

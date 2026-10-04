@@ -205,8 +205,8 @@ public static void TestEvalPos(ж<testing.T> Ꮡt) {
         foreach (var (_, group) in (~@file).Comments) {
             foreach (var (_, comment) in (~group).List) {
                 @string s = comment.Value.Text;
-                if (len(s) >= 4 && s[..2] == "/*" && s[(int)(len(s) - 2)..] == "*/") {
-                    var (str, typ) = split(s[2..(int)(len(s) - 2)], ", "u8);
+                if (len(s) >= 4 && s[..2] == "/*" && s.slice(len(s) - 2) == "*/") {
+                    var (str, typ) = split(s.slice(2, len(s) - 2), ", "u8);
                     (str, var val) = split(str, "=>"u8);
                     testEval(Ꮡt, fset, pkg, comment.Pos(), str, default!, typ, val);
                 }
@@ -320,7 +320,7 @@ public static void TestCheckExpr(ж<testing.T> Ꮡt) {
             @string s = comment.Value.Text;
             if (len(s) >= 4 && strings.HasPrefix(s, "/*"u8) && strings.HasSuffix(s, "*/"u8)) {
                 tokenꓸPos pos = comment.Pos();
-                var (expr, wantObj) = split(s[2..(int)(len(s) - 2)], "=>"u8);
+                var (expr, wantObj) = split(s.slice(2, len(s) - 2), "=>"u8);
                 var (obj, errΔ3) = checkExpr(pos, expr);
                 if (errΔ3 != default!) {
                     Ꮡt.Errorf("%s: %s"u8, fset.Position(pos), errΔ3);

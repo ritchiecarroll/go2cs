@@ -12,6 +12,8 @@ using rpc = global::go.net.rpc_package;
 using reflect = reflect_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using global::go.net;
 using static global::go.net.rpc.jsonrpc_package;
@@ -63,7 +65,7 @@ internal static readonly @string divideByZeroˢ = "divide by zero"u8;
     if (args.B == 0) {
         return errors.New(divideByZeroˢ);
     }
-    reply.C = args.A / args.B;
+    reply.C = quo(args.A, args.B);
     return default!;
 }
 
@@ -100,7 +102,7 @@ public static error Array(this BuiltinTypes _, nint i, [GoArrayDims(1)] ж<array
     rpc.Register(new BuiltinTypes(nil));
 }
 
-public static void TestServerNoParams(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServerNoParams(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (cli, srv) = net.Pipe();
@@ -123,7 +125,7 @@ public static void TestServerNoParams(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestServerEmptyMessage(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServerEmptyMessage(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (cli, srv) = net.Pipe();
@@ -146,7 +148,7 @@ public static void TestServerEmptyMessage(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestServer(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServer(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (cli, srv) = net.Pipe();
@@ -184,7 +186,7 @@ internal static readonly @string arithDivˢ = "Arith.Div"u8;
 internal static readonly object divExpectedErrorˢ = (@string)"Div: expected error"u8;
 internal static readonly object divExpectedDivideByZeroˢ = (@string)"Div: expected divide by zero error; got"u8;
 
-public static void TestClient(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestClient(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // Assume server is okay (TestServer is above).
@@ -254,7 +256,7 @@ internal static readonly @string builtinTypesMapˢ = "BuiltinTypes.Map"u8;
 internal static readonly @string builtinTypesSliceˢ = "BuiltinTypes.Slice"u8;
 internal static readonly @string builtinTypesArrayˢ = "BuiltinTypes.Array"u8;
 
-public static void TestBuiltinTypes(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBuiltinTypes(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (cli, srv) = net.Pipe();
@@ -302,7 +304,7 @@ public static void TestBuiltinTypes(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestMalformedInput(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMalformedInput(ж<testing.T> Ꮡt) {
     var (cli, srv) = net.Pipe();
     var cliʗ1 = cli;
     goǃ(ᴛ1 => cliʗ1.Write(ᴛ1), slice<byte>(@"{id:1}"u8)); // invalid json
@@ -312,7 +314,7 @@ public static void TestMalformedInput(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedErrorˢ = (@string)"expected error"u8;
 
-public static void TestMalformedOutput(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMalformedOutput(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (cli, srv) = net.Pipe();
@@ -384,7 +386,7 @@ public static void TestServerErrorHasNullResult(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unexpectedErrorˢ = "unexpected error!"u8;
 
-public static void TestUnexpectedError(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestUnexpectedError(ж<testing.T> Ꮡt) {
     var (cli, srv) = myPipe();
     var cliʗ1 = cli;
     goǃ(ᴛ1 => (~cliʗ1).PipeWriter.CloseWithError(ᴛ1), errors.New(unexpectedErrorˢ)); // reader will get this error

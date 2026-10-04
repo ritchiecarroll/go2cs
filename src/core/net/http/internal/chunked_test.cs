@@ -10,6 +10,8 @@ using io = io_package;
 using strings = strings_package;
 using testing = testing_package;
 using iotest = go.testing.iotest_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.testing;
 using static go.net.http.internal_package;
 
@@ -78,7 +80,7 @@ public static void TestChunkReadMultiple(ж<testing.T> Ꮡt) {
         if (n != 6 || !AreEqual(err, io.EOF)) {
             Ꮡt.Errorf("Read = %d, %v; want 6, EOF"u8, n, err);
         }
-        buf = buf[..(int)(n)];
+        buf = buf.slice(0, n);
         if (((sstring)buf) != "foobar"u8) {
             Ꮡt.Errorf("Read = %q; want %q"u8, buf, foobarˢ);
         }
@@ -103,7 +105,7 @@ public static void TestChunkReadMultiple(ж<testing.T> Ꮡt) {
         if (n != len(fillBufChunk) || err != default!) {
             Ꮡt.Errorf("Read = %d, %v; want %d, nil"u8, n, err, len(fillBufChunk));
         }
-        buf = buf[..(int)(n)];
+        buf = buf.slice(0, n);
         if (((sstring)buf) != fillBufChunk) {
             Ꮡt.Errorf("Read = %q; want %q"u8, buf, fillBufChunk);
         }
@@ -224,7 +226,7 @@ internal static readonly @string malformedˢ = "malformed"u8;
 
 // Issue 17355: ChunkedReader shouldn't block waiting for more data
 // if it can return something.
-public static void TestChunkReadPartial(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestChunkReadPartial(ж<testing.T> Ꮡt) {
     var (pr, pw) = io.Pipe();
     var pwʗ1 = pw;
     goǃ(() => {
@@ -238,7 +240,7 @@ public static void TestChunkReadPartial(ж<testing.T> Ꮡt) {
     }
     @string want = "1234567"u8;
     if (n != 7 || ((sstring)readBuf) != want) {
-        Ꮡt.Fatalf("Read: %v %q; want %d, %q"u8, n, readBuf[..(int)(n)], len(want), want);
+        Ꮡt.Fatalf("Read: %v %q; want %d, %q"u8, n, readBuf.slice(0, n), len(want), want);
     }
     var pwʗ2 = pw;
     goǃ(() => {
@@ -259,7 +261,7 @@ internal static readonly @string validᶜ = "4\r\nabcd\r\n5\r\nabc\r\n\r\n0\r\n"
 public static void TestIncompleteChunk(ж<testing.T> Ꮡt) {
     @string valid = validᶜ;
     for (nint i = 0; i < len(valid); i++) {
-        @string incomplete = valid[..(int)(i)];
+        @string incomplete = valid.slice(0, i);
         var rΔ1 = NewChunkedReader(new internal_internal_test_package.strings_ReaderжReader(strings.NewReader(incomplete)));
         {
             var (_, err) = io.ReadAll(rΔ1); if (!AreEqual(err, io.ErrUnexpectedEOF)) {
@@ -379,7 +381,7 @@ public static void TestChunkInvalidInputs(ж<testing.T> Ꮡt) {
         r.i++;
     }
     n = copy(p, r.b);
-    r.b = r.b[(int)(n)..];
+    r.b = r.b.slice(n);
     if (len(r.b) > 0) {
         return (n, default!);
     }

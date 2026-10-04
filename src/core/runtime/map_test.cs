@@ -17,6 +17,8 @@ using Δsync = sync_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using exec = global::go.os.exec_package;
 using global::go.os;
 using static global::go.runtime_internal_test_package;
@@ -328,7 +330,7 @@ public static void TestIterGrowWithGC(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static void testConcurrentReadsAfterGrowth(ж<testing.T> Ꮡt, bool useReflect) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testConcurrentReadsAfterGrowth(ж<testing.T> Ꮡt, bool useReflect) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();

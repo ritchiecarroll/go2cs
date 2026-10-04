@@ -5,6 +5,8 @@ namespace go;
 
 using static sync_package;
 using Δtesting = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.sync_internal_test_package;
 using Δsync = sync_package;
 
@@ -31,7 +33,7 @@ internal static void run(ж<Δtesting.T> Ꮡt, ж<Δsync.Once> Ꮡonce, ж<one> 
     c.ᐸꟷ(true);
 }
 
-public static void TestOnce(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOnce(ж<Δtesting.T> Ꮡt) {
     var o = @new<one>();
     var once = @new<Δsync.Once>();
     var c = new channel<bool>(0);

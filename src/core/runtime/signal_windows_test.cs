@@ -14,6 +14,8 @@ using strings = strings_package;
 using syscall = syscall_package;
 using testing = testing_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.os;
 using path;
 using static global::go.runtime_internal_test_package;
@@ -254,7 +256,7 @@ internal static readonly @string testdataTestwinlibsignalˢ2 = "testdata/testwin
 
 // TestLibraryCtrlHandler tests that Go DLL allows calling program to handle console control events.
 // See https://golang.org/issues/35965.
-public static void TestLibraryCtrlHandler(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestLibraryCtrlHandler(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (flagQuick.Value) {

@@ -17,7 +17,8 @@ using syscall = syscall_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.runtime;
 using global::go.sync;
 using static global::go.runtime_internal_test_package;
@@ -26,7 +27,7 @@ partial class runtime_test_package {
 
 internal static channel<bool> stop = new channel<bool>(1);
 
-internal static void perpetuumMobile() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void perpetuumMobile() {
     var selᴛ80 = stop;
     switch (trySelect(ᐸꟷ(selᴛ80, ꓸꓸꓸ))) {
     case 0 when selᴛ80.ꟷᐳ(out _): {
@@ -42,7 +43,7 @@ internal static void perpetuumMobile() {
 internal static readonly object noPreemptionOnWasmYetˢ = (@string)"no preemption on wasm yet"u8;
 internal static readonly object skippingDuringShortTestˢ = (@string)"skipping during short test"u8;
 
-public static void TestStopTheWorldDeadlock(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStopTheWorldDeadlock(ж<testing.T> Ꮡt) {
     if (Δruntime.GOARCH == "wasm"u8) {
         Ꮡt.Skip(noPreemptionOnWasmYetˢ);
     }
@@ -80,7 +81,7 @@ public static void TestYieldLockedProgress(ж<testing.T> Ꮡt) {
     testYieldProgress(true);
 }
 
-internal static void testYieldProgress(bool locked) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testYieldProgress(bool locked) {
     var c = new channel<bool>(0);
     var cack = new channel<bool>(0);
     var cʗ1 = c;
@@ -107,7 +108,7 @@ internal static void testYieldProgress(bool locked) {
     ᐸꟷ(cack);
 }
 
-public static void TestYieldLocked(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestYieldLocked(ж<testing.T> Ꮡt) {
     const nint N = 10;
     var c = new channel<bool>(0);
     var cʗ1 = c;
@@ -126,7 +127,7 @@ public static void TestYieldLocked(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingOnUniprocessorˢ = (@string)"skipping on uniprocessor"u8;
 
-public static void TestGoroutineParallelism(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestGoroutineParallelism(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -190,7 +191,7 @@ public static void TestGoroutineParallelism2(ж<testing.T> Ꮡt) {
 internal static readonly @string localhost0ˢ = "localhost:0"u8;
 internal static readonly @string tcpˢ = "tcp"u8;
 
-internal static void testGoroutineParallelism2(ж<testing.T> Ꮡt, bool load, bool netpoll) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testGoroutineParallelism2(ж<testing.T> Ꮡt, bool load, bool netpoll) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -255,7 +256,7 @@ internal static void testGoroutineParallelism2(ж<testing.T> Ꮡt, bool load, bo
             // Spawn P goroutines in a nested fashion just to differ from TestGoroutineParallelism.
             for (nint p = 0; p < P / 2; p++) {
                 var doneʗ2 = done;
-                goǃ((nint pΔ1) => {
+                goǃ([MethodImpl(MethodImplOptions.NoInlining)] (nint pΔ1) => {
                     for (nint p2 = 0; p2 < 2; p2++) {
                         var doneʗ3 = doneʗ2;
                         goǃ((nint p2Δ1) => {
@@ -279,7 +280,7 @@ internal static void testGoroutineParallelism2(ж<testing.T> Ꮡt, bool load, bo
     finally { ᒐ.Run(); }
 }
 
-public static void TestBlockLocked(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBlockLocked(ж<testing.T> Ꮡt) {
     const nint N = 10;
     var c = new channel<bool>(0);
     var cʗ1 = c;
@@ -295,7 +296,7 @@ public static void TestBlockLocked(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestTimerFairness(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTimerFairness(ж<testing.T> Ꮡt) {
     if (Δruntime.GOARCH == "wasm"u8) {
         Ꮡt.Skip(noPreemptionOnWasmYetˢ);
     }
@@ -333,7 +334,7 @@ public static void TestTimerFairness(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestTimerFairness2(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTimerFairness2(ж<testing.T> Ꮡt) {
     if (Δruntime.GOARCH == "wasm"u8) {
         Ꮡt.Skip(noPreemptionOnWasmYetˢ);
     }
@@ -379,7 +380,7 @@ internal static Func<nint> preempt = () => {
     return sum;
 };
 
-public static void TestPreemption(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPreemption(ж<testing.T> Ꮡt) {
     if (Δruntime.GOARCH == "wasm"u8) {
         Ꮡt.Skip(noPreemptionOnWasmYetˢ);
     }
@@ -406,7 +407,7 @@ public static void TestPreemption(ж<testing.T> Ꮡt) {
     ᐸꟷ(c);
 }
 
-public static void TestPreemptionGC(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPreemptionGC(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.GOARCH == "wasm"u8) {
@@ -515,7 +516,7 @@ internal static readonly @string goroutineˢ = "goroutine "u8;
 internal static readonly object skippingInShortModeˢ2 = (@string)"skipping in -short mode"u8;
 internal static readonly object skippingInRaceModeˢ = (@string)"skipping in -race mode"u8;
 
-public static void TestPingPongHog(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPingPongHog(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -588,7 +589,7 @@ public static void TestPingPongHog(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void BenchmarkPingPongHog(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkPingPongHog(ж<testing.B> Ꮡb) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -664,7 +665,7 @@ internal static void stackGrowthRecursive(nint i) {
     }
 }
 
-public static void TestPreemptSplitBig(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPreemptSplitBig(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
@@ -797,13 +798,13 @@ public static void BenchmarkCreateGoroutinesParallel(ж<testing.B> Ꮡb) {
     benchmarkCreateGoroutines(Ꮡb, Δruntime.GOMAXPROCS(-1));
 }
 
-internal static void benchmarkCreateGoroutines(ж<testing.B> Ꮡb, nint procs) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkCreateGoroutines(ж<testing.B> Ꮡb, nint procs) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var c = new channel<bool>(0);
     ref var f = ref heap<Action<nint>>(out var Ꮡf);
     var cʗ1 = c;
-    f = (nint n) => {
+    f = [MethodImpl(MethodImplOptions.NoInlining)] (nint n) => {
         if (n == 0) {
             cʗ1.ᐸꟷ(true);
             return;
@@ -818,7 +819,7 @@ internal static void benchmarkCreateGoroutines(ж<testing.B> Ꮡb, nint procs) {
     }
 }
 
-public static void BenchmarkCreateGoroutinesCapture(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkCreateGoroutinesCapture(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
@@ -841,7 +842,7 @@ public static void BenchmarkCreateGoroutinesCapture(ж<testing.B> Ꮡb) {
 
 // warmupScheduler ensures the scheduler has at least targetThreadCount threads
 // in its thread pool.
-internal static void warmupScheduler(nint targetThreadCount) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void warmupScheduler(nint targetThreadCount) {
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     ref var count = ref heap(new int32(), out var Ꮡcount);
     for (nint i = 0; i < targetThreadCount; i++) {
@@ -871,7 +872,7 @@ internal static void doWork(time.Duration dur) {
 // Compared to BenchmarkCreateGoroutines, this causes different behavior in the
 // scheduler because Ms are much more likely to need to steal work from the
 // main P rather than having work in the local run queue.
-public static void BenchmarkCreateGoroutinesSingle(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkCreateGoroutinesSingle(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Since we are interested in stealing behavior, warm the scheduler to
@@ -921,7 +922,7 @@ internal static void benchmarkWakeupParallel(ж<testing.B> Ꮡb, Action<time.Dur
         50 * time.Microsecond,
         100 * time.Microsecond
     }.slice()) {
-        Ꮡb.Run(delay.String(), (ж<testing.B> bΔ1) => {
+        Ꮡb.Run(delay.String(), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
             if ((~bΔ1).N == 0) {
                 return;
             }
@@ -1050,7 +1051,7 @@ internal static Matrix makeMatrix(nint n) {
     return m;
 }
 
-internal static void matmult(channel/*<-*/<EmptyStruct> done, Matrix A, Matrix B, Matrix C, nint i0, nint i1, nint j0, nint j1, nint k0, nint k1, nint threshold) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void matmult(channel/*<-*/<EmptyStruct> done, Matrix A, Matrix B, Matrix C, nint i0, nint i1, nint j0, nint j1, nint k0, nint k1, nint threshold) {
     nint di = i1 - i0;
     nint dj = j1 - j0;
     nint dk = k1 - k0;
@@ -1098,7 +1099,7 @@ public static void TestStealOrder(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object noThreadsOnWasmYetˢ = (@string)"no threads on wasm yet"u8;
 
-public static void TestLockOSThreadNesting(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestLockOSThreadNesting(ж<testing.T> Ꮡt) {
     if (Δruntime.GOARCH == "wasm"u8) {
         Ꮡt.Skip(noThreadsOnWasmYetˢ);
     }
@@ -1194,7 +1195,7 @@ internal static void fakeSyscall(time.Duration duration) {
 }
 
 // Check that a goroutine will be preempted if it is calling short system calls.
-internal static void testPreemptionAfterSyscall(ж<testing.T> Ꮡt, time.Duration syscallDuration) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testPreemptionAfterSyscall(ж<testing.T> Ꮡt, time.Duration syscallDuration) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.GOARCH == "wasm"u8) {
@@ -1247,7 +1248,7 @@ public static void TestPreemptionAfterSyscall(ж<testing.T> Ꮡt) {
     }
     foreach (var (_, i) in new time.Duration[]{10, 100, 1000}.slice()) {
         var d = i * time.Microsecond;
-        Ꮡt.Run(fmt.Sprint(d), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(fmt.Sprint(d), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             testPreemptionAfterSyscall(tΔ1, d);
         });
     }
@@ -1261,7 +1262,7 @@ public static void TestGetgThreadSwitch(ж<testing.T> Ꮡt) {
 // This test is not particularly safe since the call to netpoll
 // will pick up any stray files that are ready, but it should work
 // OK as long it is not run in parallel.
-public static void TestNetpollBreak(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestNetpollBreak(ж<testing.T> Ꮡt) {
     if (Δruntime.GOMAXPROCS(0) == 1) {
         Ꮡt.Skip(skippingGomaxprocs1ˢ);
     }

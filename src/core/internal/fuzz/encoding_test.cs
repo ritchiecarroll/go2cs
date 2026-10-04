@@ -323,7 +323,7 @@ public static void BenchmarkMarshalCorpusFile(ж<testing.B> Ꮡb) {
         Ꮡb.Run(strconv.Itoa(szΔ1), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 bΔ1.SetBytes((int64)szΔ1);
-                marshalCorpusFile(bufʗ1[..(int)(szΔ1)]);
+                marshalCorpusFile(bufʗ1.slice(0, szΔ1));
             }
         });
     }
@@ -339,7 +339,7 @@ public static void BenchmarkUnmarshalCorpusFile(ж<testing.B> Ꮡb) {
     }
     for (nint sz = 1; sz <= len(buf); sz <<= (int)(1)) {
         nint szΔ1 = sz;
-        var data = marshalCorpusFile(buf[..(int)(szΔ1)]);
+        var data = marshalCorpusFile(buf.slice(0, szΔ1));
         var dataʗ1 = data;
         Ꮡb.Run(strconv.Itoa(szΔ1), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {

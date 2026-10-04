@@ -122,7 +122,7 @@ internal static error parseFlags(slice<byte> src, ж<flag.FlagSet> Ꮡflags) {
     }
     src = src[(int)(len(prefix))..];
     {
-        nint i = bytes.Index(src, slice<byte>("-"u8)); if (i < 0 || len(bytes.TrimSpace(src[..(int)(i)])) != 0) {
+        nint i = bytes.Index(src, slice<byte>("-"u8)); if (i < 0 || len(bytes.TrimSpace(src.slice(0, i))) != 0) {
             return default!; // comment doesn't start with a "-"
         }
     }
@@ -131,7 +131,7 @@ internal static error parseFlags(slice<byte> src, ж<flag.FlagSet> Ꮡflags) {
     if (end < 0 || end > maxLen) {
         return fmt.Errorf("flags comment line too long"u8);
     }
-    return Ꮡflags.Parse(strings.Fields(((@string)(src[..(int)(end)]))));
+    return Ꮡflags.Parse(strings.Fields(((@string)(src.slice(0, end)))));
 }
 
 // testFiles type-checks the package consisting of the given files, and
@@ -334,8 +334,8 @@ internal static void testFilesImpl(ж<testing.T> Ꮡt, slice<@string> filenames,
             {
                 nint n = len(errList) - 1; if (n > 0){
                     // not the last entry - slide entries down (don't reorder)
-                    copy(errList[(int)(index)..], errList[(int)(index + 1)..]);
-                    filemap[line] = errList[..(int)(n)];
+                    copy(errList.slice(index), errList.slice(index + 1));
+                    filemap[line] = errList.slice(0, n);
                 } else {
                     // last entry - remove errList from filemap
                     delete(filemap, line);

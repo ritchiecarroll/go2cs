@@ -29,7 +29,8 @@ using time = time_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using @internal;
 using @internal.syscall;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using exec = go.os.exec_package;
 using go.math;
 using go.os;
@@ -114,7 +115,7 @@ public static void TestCPUProfileMultithreaded(ж<testing.T> Ꮡt) {
     try {
         defer(runtime.GOMAXPROCS, runtime.GOMAXPROCS(2), ref ᒐ);
         var matches = matchAndAvoidStacks(new Func<@string, uintptr, slice<ж<profile.Location>>, map<@string, slice<@string>>, bool>(stackContains), new @string[]{"runtime/pprof.cpuHog1"u8, "runtime/pprof.cpuHog2"u8}.slice(), avoidFunctions());
-        testCPUProfile(Ꮡt, matches, (time.Duration dur) => {
+        testCPUProfile(Ꮡt, matches, [MethodImpl(MethodImplOptions.NoInlining)] (time.Duration dur) => {
             var c = new channel<nint>(0);
             var cʗ1 = c;
             goǃ(() => {
@@ -248,7 +249,7 @@ public static void TestCPUProfileMultithreadMagnitude(ж<testing.T> Ꮡt) {
                 var tcʗ2 = tcʗ1;
                 testCPUProfile(tΔ1, new Func<ж<testing.T>, ж<profile.Profile>, bool>(acceptProfile), (time.Duration dur) => {
                     var tcʗ3 = tcʗ2;
-                    (userTime, systemTime) = diffCPUTime(tΔ1, () => {
+                    (userTime, systemTime) = diffCPUTime(tΔ1, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
                         ref var once = ref heap(new sync.Once(), out var Ꮡonce);
                         for (nint i = 0; i < tcʗ3.workers; i++) {
@@ -664,7 +665,7 @@ internal static Func<ж<testing.T>, ж<profile.Profile>, bool> matchAndAvoidStac
 
 // Fork can hang if preempted with signals frequently enough (see issue 5517).
 // Ensure that we do not do this.
-public static void TestCPUProfileWithFork(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCPUProfileWithFork(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -825,7 +826,7 @@ internal static bool stackContainsAll(@string spec, uintptr count, slice<ж<prof
 
 public static void TestMorestack(ж<testing.T> Ꮡt) {
     var matches = matchAndAvoidStacks(new Func<@string, uintptr, slice<ж<profile.Location>>, map<@string, slice<@string>>, bool>(stackContainsAll), new @string[]{"runtime.newstack,runtime/pprof.growstack"u8}.slice(), avoidFunctions());
-    testCPUProfile(Ꮡt, matches, (time.Duration duration) => {
+    testCPUProfile(Ꮡt, matches, [MethodImpl(MethodImplOptions.NoInlining)] (time.Duration duration) => {
         var tΔ1 = time.After(duration);
         var c = new channel<bool>(0);
         while (ᐧ) {
@@ -1151,7 +1152,7 @@ internal static readonly @string allˢ = "all"u8;
 internal static readonly @string chanReceiveˢ = "chan receive"u8;
 internal static readonly @string blockChanRecvˢ = "blockChanRecv"u8;
 
-internal static void blockChanRecv(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockChanRecv(ж<testing.T> Ꮡt) {
     var c = new channel<bool>(0);
     var cʗ1 = c;
     goǃ(() => {
@@ -1165,7 +1166,7 @@ internal static void blockChanRecv(ж<testing.T> Ꮡt) {
 internal static readonly @string chanSendˢ = "chan send"u8;
 internal static readonly @string blockChanSendˢ = "blockChanSend"u8;
 
-internal static void blockChanSend(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockChanSend(ж<testing.T> Ꮡt) {
     var c = new channel<bool>(0);
     var cʗ1 = c;
     goǃ(() => {
@@ -1178,7 +1179,7 @@ internal static void blockChanSend(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string blockChanCloseˢ = "blockChanClose"u8;
 
-internal static void blockChanClose(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockChanClose(ж<testing.T> Ꮡt) {
     var c = new channel<bool>(0);
     var cʗ1 = c;
     goǃ(() => {
@@ -1192,7 +1193,7 @@ internal static void blockChanClose(ж<testing.T> Ꮡt) {
 internal static readonly @string selectˢ = "select"u8;
 internal static readonly @string blockSelectRecvAsyncˢ = "blockSelectRecvAsync"u8;
 
-internal static void blockSelectRecvAsync(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockSelectRecvAsync(ж<testing.T> Ꮡt) {
     const nint numTries = 3;
     var c = new channel<bool>(1);
     var c2 = new channel<bool>(1);
@@ -1219,7 +1220,7 @@ internal static void blockSelectRecvAsync(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string blockSelectSendSyncˢ = "blockSelectSendSync"u8;
 
-internal static void blockSelectSendSync(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockSelectSendSync(ж<testing.T> Ꮡt) {
     var c = new channel<bool>(0);
     var c2 = new channel<bool>(0);
     var cʗ1 = c;
@@ -1242,7 +1243,7 @@ internal static void blockSelectSendSync(ж<testing.T> Ꮡt) {
 internal static readonly @string syncMutexLockˢ = "sync.Mutex.Lock"u8;
 internal static readonly @string blockMutexˢ = "blockMutex"u8;
 
-internal static void blockMutex(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockMutex(ж<testing.T> Ꮡt) {
     ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);
     Ꮡmu.Lock();
     goǃ(() => {
@@ -1256,7 +1257,7 @@ internal static void blockMutex(ж<testing.T> Ꮡt) {
     Ꮡmu.Lock();
 }
 
-internal static void blockMutexN(ж<testing.T> Ꮡt, nint n, time.Duration d) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockMutexN(ж<testing.T> Ꮡt, nint n, time.Duration d) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);
     Ꮡmu.Lock();
@@ -1289,7 +1290,7 @@ internal static void blockMutexN(ж<testing.T> Ꮡt, nint n, time.Duration d) {
 internal static readonly @string syncCondWaitˢ = "sync.Cond.Wait"u8;
 internal static readonly @string blockCondˢ = "blockCond"u8;
 
-internal static void blockCond(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockCond(ж<testing.T> Ꮡt) {
     ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);
     var c = sync.NewCond(new sync.MutexжLocker(Ꮡmu));
     Ꮡmu.Lock();
@@ -1595,7 +1596,7 @@ internal static readonly @string selfValueˢ = "self-value"u8;
 internal static readonly @string fingLabelˢ = "fing-label"u8;
 internal static readonly @string fingValueˢ = "fing-value"u8;
 
-public static void TestGoroutineCounts(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestGoroutineCounts(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // Setting GOMAXPROCS to 1 ensures we can force all goroutines to the
@@ -1626,7 +1627,7 @@ public static void TestGoroutineCounts(ж<testing.T> Ꮡt) {
         // ... and again, with labels this time (just with fewer iterations to keep
         // sorting deterministic).
         var cʗ1 = c;
-        Do(ctx, Labels(labelˢ, valueˢ), (context.Context _) => {
+        Do(ctx, Labels(labelˢ, valueˢ), [MethodImpl(MethodImplOptions.NoInlining)] (context.Context _) => {
             for (nint i = 0; i < 89; i++) {
                 switch (ᐧ) {
                 case {} when i % 10 is 0: {
@@ -1825,7 +1826,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
                 var cancelʗ2 = cancel;
                 var goroutineProfʗ2 = goroutineProfʗ1;
                 var profilerCallsʗ2 = profilerCallsʗ1;
-                Do(Ꮡctx.ValueSlot, Labels("i"u8, fmt.Sprint(i)), (context.Context _) => {
+                Do(Ꮡctx.ValueSlot, Labels("i"u8, fmt.Sprint(i)), [MethodImpl(MethodImplOptions.NoInlining)] (context.Context _) => {
                     var cancelʗ3 = cancelʗ2;
                     var goroutineProfʗ3 = goroutineProfʗ2;
                     var profilerCallsʗ3 = profilerCallsʗ2;
@@ -1908,7 +1909,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
     });
     // Check that new goroutines only show up in order.
     var goroutineProfʗ6 = goroutineProf;
-    var testLaunches = (ж<testing.T> tΔ4) => {
+    var testLaunches = [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ4) => {
         GoFrame ᒐ = default;
         try {
             ref var done = ref heap(new sync.WaitGroup(), out var Ꮡdone);
@@ -1927,7 +1928,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
             Ꮡready.Add(1);
             Ꮡdone.Add(1);
             var chʗ1 = ch;
-            goǃ(() => {
+            goǃ([MethodImpl(MethodImplOptions.NoInlining)] () => {
                 GoFrame ᒐ = default;
                 try {
                     defer(Ꮡdone.Done, ref ᒐ);
@@ -1963,7 +1964,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
             // we can test directly, but does help to shake out data races.
             Ꮡready.Add(1);
             ref var churn = ref heap<Action<nint>>(out var Ꮡchurn);
-            Ꮡchurn.ValueSlot = (nint i) => {
+            Ꮡchurn.ValueSlot = [MethodImpl(MethodImplOptions.NoInlining)] (nint i) => {
                 SetGoroutineLabels(WithLabels(Ꮡctx.ValueSlot, Labels(tΔ4.Name() + "-churn-i"u8, fmt.Sprint(i))));
                 if (i == 0){
                     Ꮡready.Done();
@@ -2025,7 +2026,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
 }
 
 // Regression test for #69998.
-public static void TestGoroutineProfileCoro(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestGoroutineProfileCoro(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     testenv.MustHaveParallelism(new pprof_internal_test_package.testing_TжTB(Ꮡt));
@@ -2122,7 +2123,7 @@ internal static readonly @string churnIˢ = "churn-i"u8;
 internal static readonly @string concurrentLaunchesOpˢ = "concurrent_launches/op"u8;
 
 public static void BenchmarkGoroutine(ж<testing.B> Ꮡb) {
-    Action<ж<testing.B>> withIdle(nint n, Action<ж<testing.B>> fn) => (ж<testing.B> bΔ1) => {
+    Action<ж<testing.B>> withIdle(nint n, Action<ж<testing.B>> fn) => [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
             GoFrame ᒐ = default;
             try {
                 var c = new channel<nint>(0);
@@ -2153,7 +2154,7 @@ public static void BenchmarkGoroutine(ж<testing.B> Ꮡb) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         };
-    Action<ж<testing.B>> withChurn(Action<ж<testing.B>> fn) => (ж<testing.B> bΔ2) => {
+    Action<ж<testing.B>> withChurn(Action<ж<testing.B>> fn) => [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ2) => {
             GoFrame ᒐ = default;
             try {
                 ref var ctx = ref heap<context.Context>(out var Ꮡctx);
@@ -2165,7 +2166,7 @@ public static void BenchmarkGoroutine(ж<testing.B> Ꮡb) {
                 Ꮡready.Add(1);
                 ref var count = ref heap(new int64(), out var Ꮡcount);
                 ref var churn = ref heap<Action<nint>>(out var Ꮡchurn);
-                Ꮡchurn.ValueSlot = (nint i) => {
+                Ꮡchurn.ValueSlot = [MethodImpl(MethodImplOptions.NoInlining)] (nint i) => {
                     SetGoroutineLabels(WithLabels(Ꮡctx.ValueSlot, Labels(churnIˢ, fmt.Sprint(i))));
                     atomic.AddInt64(Ꮡcount, 1);
                     if (i == 0) {
@@ -2271,7 +2272,7 @@ public static void TestLabelRace(ж<testing.T> Ꮡt) {
     // between setting labels and consuming them from the
     // profile.
     var matches = matchAndAvoidStacks(new Func<@string, uintptr, slice<ж<profile.Location>>, map<@string, slice<@string>>, bool>(stackContainsLabeled), new @string[]{"runtime/pprof.cpuHogger;key=value"u8}.slice(), default!);
-    testCPUProfile(Ꮡt, matches, (time.Duration dur) => {
+    testCPUProfile(Ꮡt, matches, [MethodImpl(MethodImplOptions.NoInlining)] (time.Duration dur) => {
         var start = time.Now();
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         while (time.Since(start) < dur) {
@@ -2300,7 +2301,7 @@ public static void TestGoroutineProfileLabelRace(ж<testing.T> Ꮡt) {
     // Test the race detector annotations for synchronization
     // between setting labels and consuming them from the
     // goroutine profile. See issue #50292.
-    Ꮡt.Run(resetˢ, (ж<testing.T> tΔ1) => {
+    Ꮡt.Run(resetˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
         GoFrame ᒐ = default;
         try {
             ref var ctx = ref heap<context.Context>(out var Ꮡctx);
@@ -2328,7 +2329,7 @@ public static void TestGoroutineProfileLabelRace(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
-    Ꮡt.Run(churnˢ, (ж<testing.T> tΔ2) => {
+    Ꮡt.Run(churnˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         GoFrame ᒐ = default;
         try {
             ref var ctx = ref heap<context.Context>(out var Ꮡctx);
@@ -2339,7 +2340,7 @@ public static void TestGoroutineProfileLabelRace(ж<testing.T> Ꮡt) {
             ref var ready = ref heap(new sync.WaitGroup(), out var Ꮡready);
             Ꮡready.Add(1);
             ref var churn = ref heap<Action<nint>>(out var Ꮡchurn);
-            Ꮡchurn.ValueSlot = (nint i) => {
+            Ꮡchurn.ValueSlot = [MethodImpl(MethodImplOptions.NoInlining)] (nint i) => {
                 SetGoroutineLabels(WithLabels(Ꮡctx.ValueSlot, Labels(churnIˢ, fmt.Sprint(i))));
                 if (i == 0) {
                     Ꮡready.Done();
@@ -2378,7 +2379,7 @@ public static void TestLabelSystemstack(ж<testing.T> Ꮡt) {
     debug.SetGCPercent(gogc);
     var matches = matchAndAvoidStacks(new Func<@string, uintptr, slice<ж<profile.Location>>, map<@string, slice<@string>>, bool>(stackContainsLabeled), new @string[]{"runtime.systemstack;key=value"u8}.slice(), avoidFunctions());
     var p = testCPUProfile(Ꮡt, matches, (time.Duration dur) => {
-        Do(context.Background(), Labels(keyˢ, valueˢ), (context.Context ctx) => {
+        Do(context.Background(), Labels(keyˢ, valueˢ), [MethodImpl(MethodImplOptions.NoInlining)] (context.Context ctx) => {
             parallelLabelHog(ctx, dur, gogc);
         });
     });
@@ -2479,7 +2480,7 @@ internal static void labelHog(channel<EmptyStruct> stop, nint gogc) {
 }
 
 // parallelLabelHog runs GOMAXPROCS goroutines running labelHog.
-internal static void parallelLabelHog(context.Context ctx, time.Duration dur, nint gogc) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void parallelLabelHog(context.Context ctx, time.Duration dur, nint gogc) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     var stop = new channel<EmptyStruct>(0);
     for (nint i = 0; i < runtime.GOMAXPROCS(0); i++) {
@@ -2505,7 +2506,7 @@ internal static readonly @string profatomicˢ = "profatomic"u8;
 
 // Check that there is no deadlock when the program receives SIGPROF while in
 // 64bit atomics' critical section. Used to happen on mips{,le}. See #20146.
-public static void TestAtomicLoadStore64(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAtomicLoadStore64(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = os.CreateTemp(""u8, profatomicˢ);
@@ -2890,7 +2891,7 @@ internal static readonly @string runtimePprofˢ = "runtime/pprof.produceProfileE
     internal slice<@string> prefix;
 }
 
-public static void TestProfilerStackDepth(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestProfilerStackDepth(ж<testing.T> Ꮡt) {
     Ꮡt.Cleanup(disableSampling());
     UntypedInt depth = 128;
     goǃ(produceProfileEvents, Ꮡt, (nint)(depth));
@@ -2988,7 +2989,7 @@ internal static readonly @string blockChanDeepˢ = "blockChanDeep"u8;
 
 // blockChanDeep produces a block profile event at stack depth n, including the
 // caller.
-internal static void blockChanDeep(ж<testing.T> Ꮡt, nint n) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockChanDeep(ж<testing.T> Ꮡt, nint n) {
     if (n > 1) {
         blockChanDeep(Ꮡt, n - 1);
         return;
@@ -3007,7 +3008,7 @@ internal static readonly @string blockMutexDeepˢ = "blockMutexDeep"u8;
 
 // blockMutexDeep produces a block profile event at stack depth n, including the
 // caller.
-internal static void blockMutexDeep(ж<testing.T> Ꮡt, nint n) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockMutexDeep(ж<testing.T> Ꮡt, nint n) {
     if (n > 1) {
         blockMutexDeep(Ꮡt, n - 1);
         return;
@@ -3090,7 +3091,7 @@ internal static void produceProfileEvents(ж<testing.T> Ꮡt, nint depth) {
     return stacks;
 }
 
-public static void TestMutexBlockFullAggregation(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMutexBlockFullAggregation(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // This regression test is adapted from
@@ -3196,7 +3197,7 @@ internal static readonly object didNotSeeExpectedStackˢ = (@string)"did not see
     public @string SubStack;
 }
 
-public static void TestBlockMutexProfileInlineExpansion(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBlockMutexProfileInlineExpansion(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         runtime.SetBlockProfileRate(1);

@@ -69,7 +69,7 @@ public static void TestHashPrefixes(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
-        want = want[..(int)(len(want) - h.Size())];
+        want = want.slice(0, len(want) - h.Size());
         var got = hashPrefixes[h.String()];
         if (!bytes.Equal(got, want)) {
             Ꮡt.Errorf("%s: got %x, want %x"u8, h, got, want);

@@ -15,6 +15,8 @@ using debug = go.runtime.debug_package;
 using sync = sync_package;
 using testing = testing_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.math;
 using go.runtime;
 using static go.compress.flate_package;
@@ -92,14 +94,14 @@ public static void TestBulkHash4(ж<testing.T> Ꮡt) {
         }
         y = appendꓸꓸꓸ(y, y);
         for (nint j = 4; j < len(y); j++) {
-            var yΔ1 = y[..(int)(j)];
+            var yΔ1 = y.slice(0, j);
             var dst = new slice<uint32>(len(yΔ1) - (nint)minMatchLength + 1);
             foreach (var (i, _) in dst) {
                 dst[i] = (uint32)(i + 100);
             }
             bulkHash4(yΔ1, dst);
             foreach (var (i, got) in dst) {
-                var want = hash4(yΔ1[(int)(i)..]);
+                var want = hash4(yΔ1.slice(i));
                 if (got != want && got == (uint32)i + 100){
                     Ꮡt.Errorf("Len:%d Index:%d, want 0x%08x but not modified"u8, len(yΔ1), i, want);
                 } else 
@@ -184,7 +186,7 @@ public static void TestWriterClose(ж<testing.T> Ꮡt) {
         n -= (nint)(cur - r.l);
         cur = r.l;
     }
-    foreach (var (i, _) in b[0..(int)(n)]) {
+    foreach (var (i, _) in b.slice(0, n)) {
         if (r.cur + (int64)i >= r.l - ((int64)1 << (int)(16))){
             b[i] = 1;
         } else {
@@ -304,7 +306,7 @@ internal static void testSync(ж<testing.T> Ꮡt, nint level, slice<byte> input,
         }
         Ꮡt.Logf("#%d: write %d-%d"u8, i, lo, hi);
         {
-            var (_, errΔ1) = w.Write(input[(int)(lo)..(int)(hi)]); if (errΔ1 != default!) {
+            var (_, errΔ1) = w.Write(input.slice(lo, hi)); if (errΔ1 != default!) {
                 Ꮡt.Errorf("testSync: write: %v"u8, errΔ1);
                 return;
             }
@@ -331,8 +333,8 @@ internal static void testSync(ж<testing.T> Ꮡt, nint level, slice<byte> input,
             Ꮡt.Errorf("testSync/%d (%d, %d, %s): read %d: %d, %v (%d left)"u8, i, level, len(input), name, hi - lo, m, errΔ4, buf.of(syncBuffer.Ꮡbuf).Len());
             return;
         }
-        if (!bytes.Equal(input[(int)(lo)..(int)(hi)], outΔ1[..(int)(hi - lo)])) {
-            Ꮡt.Errorf("testSync/%d: read wrong bytes: %x vs %x"u8, i, input[(int)(lo)..(int)(hi)], outΔ1[..(int)(hi - lo)]);
+        if (!bytes.Equal(input.slice(lo, hi), outΔ1.slice(0, hi - lo))) {
+            Ꮡt.Errorf("testSync/%d: read wrong bytes: %x vs %x"u8, i, input.slice(lo, hi), outΔ1.slice(0, hi - lo));
             return;
         }
         // This test originally checked that after reading
@@ -351,7 +353,7 @@ internal static void testSync(ж<testing.T> Ꮡt, nint level, slice<byte> input,
     var @out = new slice<byte>(10);
     {
         var (n, errΔ5) = r.Read(@out); if (n > 0 || !AreEqual(errΔ5, io.EOF)) {
-            Ꮡt.Errorf("testSync (%d, %d, %s): final Read: %d, %v (hex: %x)"u8, level, len(input), name, n, errΔ5, @out[0..(int)(n)]);
+            Ꮡt.Errorf("testSync (%d, %d, %s): final Read: %d, %v (hex: %x)"u8, level, len(input), name, n, errΔ5, @out.slice(0, n));
         }
     }
     if (buf.of(syncBuffer.Ꮡbuf).Len() != 0) {
@@ -653,7 +655,7 @@ internal static void testResetOutput(ж<testing.T> Ꮡt, nint level, slice<byte>
     }
     if (!bytes.Equal(out1, out2)) {
         nint mm = 0;
-        foreach (var (i, b) in out1[..(int)(len(out2))]) {
+        foreach (var (i, b) in out1.slice(0, len(out2))) {
             if (b != out2[i]) {
                 Ꮡt.Errorf("mismatch index %d: %#02x, expected %#02x"u8, i, out2[i], b);
             }
@@ -714,9 +716,9 @@ outer:
                     continue;
                 }
                 foreach (var (_, n) in tc) {
-                    want = appendꓸꓸꓸ(want, abcabc[..(int)(n)]);
+                    want = appendꓸꓸꓸ(want, abcabc.slice(0, n));
                     {
-                        var (_, errΔ1) = w.Write(abcabc[..(int)(n)]); if (errΔ1 != default!) {
+                        var (_, errΔ1) = w.Write(abcabc.slice(0, n)); if (errΔ1 != default!) {
                             Ꮡt.Errorf("i=%d, firstN=%d, flush=%t: Write: %v"u8, i, firstN, flush, errΔ1);
                             goto continue_outer;
                         }
@@ -1023,9 +1025,9 @@ public static void TestBestSpeedMaxMatchOffset(ж<testing.T> Ꮡt) {
                 var src = new slice<byte>(offset + len(abc) + extra);
                 copy(src, abc);
                 if (!matchBefore) {
-                    copy(src[(int)(offset - len(xyz))..], xyz);
+                    copy(src.slice(offset - len(xyz)), xyz);
                 }
-                copy(src[(int)(offset)..], abc);
+                copy(src.slice(offset), abc);
                 var buf = @new<bytes.Buffer>();
                 var (w, err) = NewWriter(new flate_test_package.bytes_BufferжWriter(buf), BestSpeed);
                 if (err != default!) {
@@ -1107,7 +1109,7 @@ public static void TestBestSpeedShiftOffsets(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestMaxStackSize(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMaxStackSize(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // This test must not run in parallel with other tests as debug.SetMaxStack

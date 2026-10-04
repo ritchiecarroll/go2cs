@@ -119,7 +119,7 @@ internal static void testBadLengths<E, D>(ж<testing.T> Ꮡt, Func<(D, error)> g
     var (_, c) = ek.Encapsulate();
     for (nint i = 0; i < len(dkBytes) - 1; i++) {
         {
-            var (_, errΔ1) = newDecapsulationKey(dkBytes[..(int)(i)]); if (errΔ1 == default!) {
+            var (_, errΔ1) = newDecapsulationKey(dkBytes.slice(0, i)); if (errΔ1 == default!) {
                 Ꮡt.Errorf("expected error for dk length %d"u8, i);
             }
         }
@@ -135,7 +135,7 @@ internal static void testBadLengths<E, D>(ж<testing.T> Ꮡt, Func<(D, error)> g
     }
     for (nint i = 0; i < len(ekBytes) - 1; i++) {
         {
-            var (_, errΔ3) = newEncapsulationKey(ekBytes[..(int)(i)]); if (errΔ3 == default!) {
+            var (_, errΔ3) = newEncapsulationKey(ekBytes.slice(0, i)); if (errΔ3 == default!) {
                 Ꮡt.Errorf("expected error for ek length %d"u8, i);
             }
         }
@@ -151,7 +151,7 @@ internal static void testBadLengths<E, D>(ж<testing.T> Ꮡt, Func<(D, error)> g
     }
     for (nint i = 0; i < len(c) - 1; i++) {
         {
-            var (_, errΔ5) = dk.Decapsulate(c[..(int)(i)]); if (errΔ5 == default!) {
+            var (_, errΔ5) = dk.Decapsulate(c.slice(0, i)); if (errΔ5 == default!) {
                 Ꮡt.Errorf("expected error for c length %d"u8, i);
             }
         }

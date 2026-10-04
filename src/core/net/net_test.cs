@@ -11,6 +11,8 @@ using Δos = os_package;
 using Δruntime = runtime_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using net.@internal;
 using static go.net_package;
 
@@ -355,7 +357,7 @@ public static void TestPacketConnClose(ж<testing.T> Ꮡt) {
 }
 
 // See golang.org/issue/6163, golang.org/issue/6987.
-public static void TestAcceptIgnoreAbortedConnRequest(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAcceptIgnoreAbortedConnRequest(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
@@ -432,7 +434,7 @@ public static void TestZeroByteRead(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     foreach (var (_, network) in new @string[]{"tcp"u8, "unix"u8, "unixpacket"u8}.slice()) {
         @string networkΔ1 = network;
-        Ꮡt.Run(networkΔ1, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(networkΔ1, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 if (!testableNetwork(networkΔ1)) {
@@ -506,7 +508,7 @@ public static void TestZeroByteRead(ж<testing.T> Ꮡt) {
 // withTCPConnPair sets up a TCP connection between two peers, then
 // runs peer1 and peer2 concurrently. withTCPConnPair returns when
 // both have completed.
-internal static void withTCPConnPair(ж<testing.T> Ꮡt, Func<ж<global::go.net_package.TCPConn>, error> peer1, Func<ж<global::go.net_package.TCPConn>, error> peer2) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void withTCPConnPair(ж<testing.T> Ꮡt, Func<ж<global::go.net_package.TCPConn>, error> peer1, Func<ж<global::go.net_package.TCPConn>, error> peer2) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Helper();
@@ -560,13 +562,13 @@ internal static readonly @string timeoutWaitingForReadToˢ = "timeout waiting fo
 public static void TestReadTimeoutUnblocksRead(ж<testing.T> Ꮡt) {
     var serverDone = new channel<EmptyStruct>(0);
     var serverDoneʗ1 = serverDone;
-    var server = (ж<global::go.net_package.TCPConn> cs) => {
+    var server = [MethodImpl(MethodImplOptions.NoInlining)] (ж<global::go.net_package.TCPConn> cs) => {
         GoFrame ᒐ = default;
         try {
             defer(ᴛ1 => builtin.close(ᴛ1), serverDoneʗ1, ref ᒐ);
             var errc = new channel<error>(1);
             var errcʗ1 = errc;
-            goǃ(() => {
+            goǃ([MethodImpl(MethodImplOptions.NoInlining)] () => {
                 GoFrame ᒐ = default;
                 try {
                     defer(ᴛ1 => builtin.close(ᴛ1), errcʗ1, ref ᒐ);
@@ -595,7 +597,7 @@ public static void TestReadTimeoutUnblocksRead(ж<testing.T> Ꮡt) {
             }
             case 1 when selᴛ10.ꟷᐳ(out _): {
                 var buf = new slice<byte>((2 << (int)(20)));
-                buf = buf[..(int)(Δruntime.Stack(buf, true))];
+                buf = buf.slice(0, Δruntime.Stack(buf, true));
                 println((@string)"Stacks at timeout:\n"u8, ((@string)buf));
                 return errors.New(timeoutWaitingForReadToˢ);
             }}
@@ -638,7 +640,7 @@ internal static readonly object readSucceededˢ = (@string)"Read succeeded unexp
 internal static readonly object readUnexpectedlyReturnedˢ = (@string)"Read unexpectedly returned io.EOF after socket was abruptly closed"u8;
 
 // Issue 24808: verify that ECONNRESET is not temporary for read.
-public static void TestNotTemporaryRead(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestNotTemporaryRead(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();

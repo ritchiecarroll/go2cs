@@ -242,7 +242,7 @@ internal static readonly @string dataᶜ = ((@string)(new byte[]{0x00, 0x0c, 0x0
 public static void TestTruncatedStreams(ж<testing.T> Ꮡt) {
     @string data = dataᶜ;
     for (nint i = 0; i < len(data) - 1; i++) {
-        var r = NewReader(new flate_test_package.strings_ReaderжReader(strings.NewReader(data[..(int)(i)])));
+        var r = NewReader(new flate_test_package.strings_ReaderжReader(strings.NewReader(data.slice(0, i))));
         var (_, err) = io.Copy(io.Discard, r);
         if (!AreEqual(err, io.ErrUnexpectedEOF)) {
             Ꮡt.Errorf("io.Copy(%d) on truncated stream: got %v, want %v"u8, i, err, io.ErrUnexpectedEOF);
@@ -286,7 +286,7 @@ public static void TestReaderEarlyEOF(ж<testing.T> Ꮡt) {
             var earlyEOF = true; // Do we expect early io.EOF?
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             var (w, _) = NewWriter(new flate_test_package.bytes_BufferжWriter(Ꮡbuf), 5);
-            w.Write(data[..(int)(sz)]);
+            w.Write(data.slice(0, sz));
             if (flush) {
                 // If a Flush occurs after all the actual data, the flushing
                 // semantics dictate that we will observe a (0, io.EOF) since

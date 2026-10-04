@@ -560,7 +560,7 @@ internal static void checkTime(Δtime.Time time, ж<ParseTest> Ꮡtest, ж<Δtes
         Ꮡt.Errorf("%s: bad second: %d not %d"u8, test.name, time.Second(), (nint)(57));
     }
     // Nanoseconds must be checked against the precision of the input.
-    var (nanosec, err) = strconv.ParseUint(((@string)"012345678"u8[..(int)(test.fracDigits)]) + "000000000"u8[..(int)(9 - test.fracDigits)], 10, 0);
+    var (nanosec, err) = strconv.ParseUint(((@string)"012345678"u8.slice(0, test.fracDigits)) + "000000000"u8.slice(0, 9 - test.fracDigits), 10, 0);
     if (err != default!) {
         throw panic(err);
     }
@@ -1186,7 +1186,7 @@ public static void FuzzParseRFC3339(ж<Δtesting.F> Ꮡf) {
                     t.Skipf("ParseAny(%q) incorrectly allows comma as sub-second separator"u8, s);
                     break;
                 }
-                case {} when !strings.HasSuffix(s, "Z"u8) && len(s) > 4 && (num2(s[(int)(len(s) - 5)..]) >= 24 || num2(s[(int)(len(s) - 2)..]) >= 60): {
+                case {} when !strings.HasSuffix(s, "Z"u8) && len(s) > 4 && (num2(s.slice(len(s) - 5)) >= 24 || num2(s.slice(len(s) - 2)) >= 60): {
                     t.Skipf("ParseAny(%q) incorrectly allows out-of-range zone offset"u8, s);
                     break;
                 }}

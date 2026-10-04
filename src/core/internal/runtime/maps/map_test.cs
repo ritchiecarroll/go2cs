@@ -585,7 +585,7 @@ public static void TestMapZeroSizeSlot(ж<testing.T> Ꮡt) {
     var length = tab.GroupsLength();
     @unsafe.Pointer end = (@unsafe.Pointer)((uintptr)start + length * (~typ).GroupSize - 1); // inclusive to ensure we have a valid pointer
     if ((uintptr)got < (uintptr)start || (uintptr)got > (uintptr)end) {
-        Ꮡt.Errorf("elem address outside groups allocation; got %p want [%p, %p]"u8, got, start, end);
+        Ꮡt.Errorf("elem address outside groups allocation; got %p want [%p, %p]"u8, @unsafe.Pointer.OrTypedNil(got), @unsafe.Pointer.OrTypedNil(start), @unsafe.Pointer.OrTypedNil(end));
     }
 }
 

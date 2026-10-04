@@ -30,7 +30,7 @@ using static go.crypto.mlkem_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/mlkem/mlkem_test.go", "mlkem_test.cs", "AB84goKUgri4goKUgoKCgpSCloKClIKUgoKUgpSCgoKUgpaCgpSClIKWgoKUgriCgpSCuLiCgoKUgoKEgoCCtoKCgoCCuIKAgraCgoKAgriCgIK2goKCgIIABxKigoKCgpSCgpaCgoKChIKCgoKUgoSCgoKEgoKUgpaCgoKUloKC3KKSgoKCgoK4ooKCgoKCgpSCgoKCgpSCuKKCgpSCgoKCgviCgoKUgoKCgpSigoKClIKEgoKUppKCgoKUgoKUzJKCloKWgpaCloKWgg==", "29-31:1;32-34:2;99-101:1;102-104:2;277-292:1;293-305:2")]
+[assembly: go.GoPositionMap("crypto/mlkem/mlkem_test.go", "mlkem_test.cs", "AB84goKUgri4goKUgoKCgpSCloKClIKUgoKUgpSCgoKUgpaCgpSClIKWgoKUgriCgpSCuLiCgoKUgoKEgoCCtoKCgoCCuIKAgraCgoKAgriCgIK2goKCgILamKKCgoKClIKCloKCgoKEgoKCgpSChIKCgoSCgpSCloKCgpSWgoLcopKCgoKCgriigoKCgoKClIKCgoKClIK4ooKClIKCgoKC+IKCgpSCgoKClKKCgoKUgoSCgpSmkoKCgpSCgpTMkoKWgpaCloKWgpaC", "29-31:1;32-34:2;99-101:1;102-104:2;277-292:1;293-305:2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

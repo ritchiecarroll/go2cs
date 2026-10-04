@@ -29,6 +29,7 @@ using static go.debug.dwarf_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("debug/dwarf/dwarf5ranges_test.go", "dwarf5ranges_test.cs", "ABIcgoKCloKCgIKkyoKClISEgg==")]
+[assembly: go.GoPositionMap("debug/dwarf/export_test.go", "export_test.cs", "AAkO")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;

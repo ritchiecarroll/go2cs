@@ -19,7 +19,7 @@ partial class buildinfo_internal_test_package {
     if (addr >= (uint64)len(x.b)) {
         return (default!, fmt.Errorf("ReadData(%d) out of bounds of %d-byte slice"u8, addr, len(x.b)));
     }
-    return (new buildinfo_test_package.bytes_ReaderжReaderAt(bytes.NewReader(x.b[(int)(addr)..])), default!);
+    return (new buildinfo_test_package.bytes_ReaderжReaderAt(bytes.NewReader(x.b.slice((nint)(addr)))), default!);
 }
 
 [GoRecv] internal static (uint64, uint64) DataStart(this ref byteExe x) {

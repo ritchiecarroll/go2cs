@@ -22,6 +22,8 @@ using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using ecdsa = go.crypto.ecdsa_package;
 using encoding;
 using fs = go.io.fs_package;
@@ -151,7 +153,7 @@ internal static (nint n, error err) Read(this ж<recordingConn> Ꮡr, slice<byte
                 goto ᒐdone;
             }
         }
-        b = b[..(int)(n)];
+        b = b.slice(0, n);
         Ꮡr.of(recordingConn.ᏑMutex).Lock();
         defer(Ꮡr.of(recordingConn.ᏑMutex).Unlock, ref ᒐ);
         {
@@ -160,7 +162,7 @@ internal static (nint n, error err) Read(this ж<recordingConn> Ꮡr, slice<byte
                 copy(buf, b);
                 r.flows = append(r.flows, buf);
             } else {
-                r.flows[l - 1] = appendꓸꓸꓸ(r.flows[l - 1], b[..(int)(n)]);
+                r.flows[l - 1] = appendꓸꓸꓸ(r.flows[l - 1], b.slice(0, n));
             }
         }
         r.reading = true;
@@ -182,7 +184,7 @@ internal static (nint n, error err) Write(this ж<recordingConn> Ꮡr, slice<byt
                 goto ᒐdone;
             }
         }
-        b = b[..(int)(n)];
+        b = b.slice(0, n);
         Ꮡr.of(recordingConn.ᏑMutex).Lock();
         defer(Ꮡr.of(recordingConn.ᏑMutex).Unlock, ref ᒐ);
         {
@@ -191,7 +193,7 @@ internal static (nint n, error err) Write(this ж<recordingConn> Ꮡr, slice<byt
                 copy(buf, b);
                 r.flows = append(r.flows, buf);
             } else {
-                r.flows[l - 1] = appendꓸꓸꓸ(r.flows[l - 1], b[..(int)(n)]);
+                r.flows[l - 1] = appendꓸꓸꓸ(r.flows[l - 1], b.slice(0, n));
             }
         }
         r.reading = false;
@@ -303,7 +305,7 @@ internal static (nint n, error err) Read(this ж<replayingConn> Ꮡr, slice<byte
             (n, err) = (0, fmt.Errorf("recording expected write, got read"u8)); goto ᒐdone;
         }
         n = copy(b, r.flows[0]);
-        r.flows[0] = r.flows[0][(int)(n)..];
+        r.flows[0] = r.flows[0].slice(n);
         if (len(r.flows[0]) == 0) {
             r.flows = r.flows[1..];
             if (len(r.flows) == 0){
@@ -336,7 +338,7 @@ internal static (nint n, error err) Write(this ж<replayingConn> Ꮡr, slice<byt
             r.t.Errorf("write mismatch: expected %x, got %x"u8, r.flows[0], b);
             (n, err) = (0, fmt.Errorf("write mismatch"u8)); goto ᒐdone;
         }
-        r.flows[0] = r.flows[0][(int)(len(b))..];
+        r.flows[0] = r.flows[0].slice(len(b));
         if (len(r.flows[0]) == 0) {
             r.flows = r.flows[1..];
             r.reading = true;
@@ -532,7 +534,7 @@ public static void TestMain(ж<testing.M> Ꮡm) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tcp6ˢ = "tcp6"u8;
 
-internal static nint runMain(ж<testing.M> Ꮡm) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static nint runMain(ж<testing.M> Ꮡm) {
     GoFrame ᒐ = default;
     try {
         // Cipher suites preferences change based on the architecture. Force them to
@@ -588,12 +590,15 @@ internal static nint runMain(ж<testing.M> Ꮡm) {
     finally { ᒐ.Run(); }
 }
 
-internal static (global::go.crypto.tls_package.ΔConnectionState serverState, global::go.crypto.tls_package.ΔConnectionState clientState, error err) testHandshake(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> ᏑclientConfig, ж<global::go.crypto.tls_package.Config> ᏑserverConfig) {
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string sentinelᶜ = "SENTINEL\n"u8;
+
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (global::go.crypto.tls_package.ΔConnectionState serverState, global::go.crypto.tls_package.ΔConnectionState clientState, error err) testHandshake(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> ᏑclientConfig, ж<global::go.crypto.tls_package.Config> ᏑserverConfig) {
     global::go.crypto.tls_package.ΔConnectionState serverState = default!;
     global::go.crypto.tls_package.ΔConnectionState clientState = default!;
     error err = default!;
 
-    @string sentinel = "SENTINEL\n"u8;
+    @string sentinel = sentinelᶜ;
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var errChan = new channel<error>(1);
     var cʗ1 = c;
@@ -789,7 +794,7 @@ MC4CAQAwBQYDK2VwBCIEINifzf07d9qx3d44e0FSbV4mC/xQxT644RRbpgNpin7I
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedErrorFromˢ2 = (@string)"expected error from incomplete handshake, got nil"u8;
 
-public static void TestServerHelloTrailingMessage(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServerHelloTrailingMessage(ж<testing.T> Ꮡt) {
     // In TLS 1.3 the change cipher spec message is optional. If a CCS message
     // is not sent, after reading the ServerHello, the read traffic secret is
     // set, and all following messages must be encrypted. If the server sends
@@ -843,7 +848,7 @@ public static void TestServerHelloTrailingMessage(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestClientHelloTrailingMessage(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestClientHelloTrailingMessage(ж<testing.T> Ꮡt) {
     // Same as TestServerHelloTrailingMessage but for the client side.
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var cʗ1 = c;
@@ -876,7 +881,7 @@ public static void TestClientHelloTrailingMessage(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestDoubleClientHelloHRR(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDoubleClientHelloHRR(ж<testing.T> Ꮡt) {
     // If a client sends two ClientHello messages in a single record, and the
     // server sends a HRR after reading the first ClientHello, the server must
     // either fail or ignore the trailing ClientHello.

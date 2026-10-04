@@ -28,7 +28,7 @@ using static go.crypto.hkdf_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/hkdf/hkdf_test.go", "hkdf_test.cs", "AKwC1gSCgoKClIKWgoKWgpaCgpaC+oKCgoKWgoKogoK4gqaCpoKmgqaigoKEgoSCgoIACgqCgpaCgoKUgqiCgoKUgqiCgoKUgg==")]
+[assembly: go.GoPositionMap("crypto/hkdf/hkdf_test.go", "hkdf_test.cs", "AB44AI0CngSCgoKClIKWgoKWgpaCgpaC+oKCgoKWgoKogoK4gqaCpoKmgqaigoKEgoSCgoIACgqCgpaCgoKUgqiCgoKUgqiCgoKUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

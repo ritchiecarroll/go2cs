@@ -29,7 +29,7 @@ using static go.@internal.runtime.maps_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/runtime/maps/export_swiss_test.go", "export_swiss_test.cs", "AA0cgoKCgg==")]
-[assembly: go.GoPositionMap("internal/runtime/maps/export_test.go", "export_test.cs", "ABoygoKmgoKUqJKCgpSWgoKCgoKUgpQAAhDygpaCgoKClISCgoKCqIKClIKClLqosoKWgoKmgqiSqJI=")]
+[assembly: go.GoPositionMap("internal/runtime/maps/export_test.go", "export_test.cs", "ABAgAAkSgoKmgoKUqJKCgpSWgoKCgoKUgpQAAhDygpaCgoKClISCgoKCqIKClIKClLqosoKWgoKmgqiSqJI=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

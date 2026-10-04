@@ -16,6 +16,8 @@ using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using exec = go.os.exec_package;
 using go.os;
 using path;
@@ -150,7 +152,7 @@ internal static (slice<ж<global::go.net_package.TCPListener>> lns, error err) n
     internal slice<global::go.net_package.Conn> cl; // accepted connection list
 }
 
-internal static error buildup(this ж<localServer> Ꮡls, Action<ж<localServer>, global::go.net_package.Listener> handler) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static error buildup(this ж<localServer> Ꮡls, Action<ж<localServer>, global::go.net_package.Listener> handler) {
     goǃ(() => {
         handler(Ꮡls, Ꮡls.Value.Listener);
         builtin.close(Ꮡls.Value.done);
@@ -215,7 +217,7 @@ internal static ж<localServer> newLocalServer(testing.TB t, @string network) {
     internal slice<global::go.net_package.Conn> cs; // established connections at the passive open side
 }
 
-internal static error buildup(this ж<dualStackServer> Ꮡdss, Action<ж<dualStackServer>, global::go.net_package.Listener> handler) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static error buildup(this ж<dualStackServer> Ꮡdss, Action<ж<dualStackServer>, global::go.net_package.Listener> handler) {
     ref var dss = ref Ꮡdss.DerefOrNull();
 
     foreach (var (i, _) in dss.lns) {
@@ -330,7 +332,7 @@ internal static void transponder(this ж<localServer> Ꮡls, global::go.net_pack
             return;
         }
         {
-            var (_, errΔ1) = c.Write(b[..(int)(n)]); if (errΔ1 != default!) {
+            var (_, errΔ1) = c.Write(b.slice(0, n)); if (errΔ1 != default!) {
                 {
                     var perr = parseWriteError(errΔ1); if (perr != default!) {
                         ch.ᐸꟷ(perr);
@@ -486,7 +488,7 @@ internal static (slice<ж<global::go.net_package.UDPConn>> cs, error err) newDua
     internal channel<bool> done; // signal that indicates server stopped
 }
 
-internal static error buildup(this ж<localPacketServer> Ꮡls, Action<ж<localPacketServer>, global::go.net_package.PacketConn> handler) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static error buildup(this ж<localPacketServer> Ꮡls, Action<ж<localPacketServer>, global::go.net_package.PacketConn> handler) {
     goǃ(() => {
         handler(Ꮡls, Ꮡls.Value.PacketConn);
         builtin.close(Ꮡls.Value.done);
@@ -550,11 +552,11 @@ internal static void packetTransponder(global::go.net_package.PacketConn c, chan
             // for connected-mode sockets
             var exprᴛ1 = c.LocalAddr().Network();
             if (exprᴛ1 == "udp"u8) {
-                var (ᴛ1, ᴛ2) = ResolveUDPAddr(udpˢ, ((@string)(b[..(int)(n)])));
+                var (ᴛ1, ᴛ2) = ResolveUDPAddr(udpˢ, ((@string)(b.slice(0, n))));
                 (peer, err) = (new global::go.net_package.UDPAddrжΔAddr(ᴛ1), ᴛ2);
             }
             else if (exprᴛ1 == "unixgram"u8) {
-                var (ᴛ1, ᴛ2) = ResolveUnixAddr(unixgramˢ, ((@string)(b[..(int)(n)])));
+                var (ᴛ1, ᴛ2) = ResolveUnixAddr(unixgramˢ, ((@string)(b.slice(0, n))));
                 (peer, err) = (new global::go.net_package.UnixAddrжΔAddr(ᴛ1), ᴛ2);
             }
 
@@ -564,7 +566,7 @@ internal static void packetTransponder(global::go.net_package.PacketConn c, chan
             }
         }
         {
-            var (_, errΔ1) = c.WriteTo(b[..(int)(n)], peer); if (errΔ1 != default!) {
+            var (_, errΔ1) = c.WriteTo(b.slice(0, n), peer); if (errΔ1 != default!) {
                 {
                     var perr = parseWriteError(errΔ1); if (perr != default!) {
                         ch.ᐸꟷ(perr);
@@ -618,7 +620,7 @@ internal static void packetTransceiver(global::go.net_package.PacketConn c, slic
     finally { ᒐ.Run(); }
 }
 
-internal static (global::go.net_package.Conn client, global::go.net_package.Conn server) spawnTestSocketPair(testing.TB t, @string net) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (global::go.net_package.Conn client, global::go.net_package.Conn server) spawnTestSocketPair(testing.TB t, @string net) {
     global::go.net_package.Conn client = default!;
     global::go.net_package.Conn server = default!;
     GoFrame ᒐ = default;
@@ -663,7 +665,7 @@ internal static readonly @string tmpdirˢ = "TMPDIR"u8;
     (ж<Δos.File>, error) File();
 }
 
-internal static (Action<testing.TB>, error) startTestSocketPeer(testing.TB t, global::go.net_package.Conn conn, @string op, nint chunkSize, nint totalSize) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (Action<testing.TB>, error) startTestSocketPeer(testing.TB t, global::go.net_package.Conn conn, @string op, nint chunkSize, nint totalSize) {
     t.Helper();
     if (Δruntime.GOOS == "windows"u8) {
         // TODO(panjf2000): Windows has not yet implemented FileConn,
@@ -758,7 +760,7 @@ internal static (Action<testing.TB>, error) startTestSocketPeer(testing.TB t, gl
         nint n = default!;
         for (nint count = 0; count < totalSize; count += n) {
             if (count + chunkSize > totalSize) {
-                buf = buf[..(int)(totalSize - count)];
+                buf = buf.slice(0, totalSize - count);
             }
             error errΔ1 = default!;
             {

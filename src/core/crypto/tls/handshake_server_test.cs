@@ -26,6 +26,8 @@ using strings = strings_package;
 using atomic = go.sync.atomic_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using ecdsa = go.crypto.ecdsa_package;
 using encoding;
 using fs = go.io.fs_package;
@@ -53,7 +55,7 @@ internal static void testFatal(ж<testing.T> Ꮡt, error err) {
     Ꮡt.Fatal(err);
 }
 
-internal static void testClientHelloFailure(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> ᏑserverConfig, global::go.crypto.tls_package.handshakeMessage m, @string expectedSubStr) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testClientHelloFailure(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> ᏑserverConfig, global::go.crypto.tls_package.handshakeMessage m, @string expectedSubStr) {
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var cʗ1 = c;
     goǃ(() => {
@@ -248,7 +250,7 @@ public static void TestDontSelectRSAWithECDSAKey(ж<testing.T> Ꮡt) {
     testClientHelloFailure(Ꮡt, serverConfig, new global::go.crypto.tls_package.clientHelloMsgжhandshakeMessage(clientHello), noCipherSuiteSupportedByˢ);
 }
 
-public static void TestRenegotiationExtension(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRenegotiationExtension(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     skipFIPS(Ꮡt); // #70505
@@ -279,7 +281,7 @@ public static void TestRenegotiationExtension(ж<testing.T> Ꮡt) {
             return;
         }
         cʗ1.Close();
-        bufChanʗ1.ᐸꟷ(bufΔ1[..(int)(n)]);
+        bufChanʗ1.ᐸꟷ(bufΔ1.slice(0, n));
     });
     Server(s, testConfig).Handshake();
     var buf = ᐸꟷ(bufChan);
@@ -293,7 +295,7 @@ public static void TestRenegotiationExtension(ж<testing.T> Ꮡt) {
     ref var serverHello = ref heap(new global::go.crypto.tls_package.serverHelloMsg(), out var ᏑserverHello);
     // unmarshal expects to be given the handshake header, but
     // serverHelloLen doesn't include it.
-    if (!ᏑserverHello.unmarshal(buf[5..(int)(9 + serverHelloLen)])) {
+    if (!ᏑserverHello.unmarshal(buf.slice(5, 9 + serverHelloLen))) {
         Ꮡt.Fatalf("Failed to parse ServerHello"u8);
     }
     if (!serverHello.secureRenegotiationSupported) {
@@ -301,7 +303,7 @@ public static void TestRenegotiationExtension(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestTLS12OnlyCipherSuites(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTLS12OnlyCipherSuites(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     skipFIPS(Ꮡt); // No TLS 1.1 in FIPS mode.
@@ -398,7 +400,7 @@ public static void TestTLSPointFormats(ж<testing.T> Ꮡt) {
             continue;
         }
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(tt.name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             var clientHello = Ꮡ(new clientHelloMsg(
                 vers: VersionTLS12,
                 random: new slice<byte>(32),
@@ -458,7 +460,7 @@ public static void TestTLSPointFormats(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestAlertForwarding(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAlertForwarding(ж<testing.T> Ꮡt) {
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var cʗ1 = c;
     goǃ(() => {
@@ -473,7 +475,7 @@ public static void TestAlertForwarding(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestClose(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestClose(ж<testing.T> Ꮡt) {
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var cʗ1 = c;
     goǃ(() => cʗ1.Close());
@@ -683,7 +685,7 @@ internal static readonly @string timedOutWaitingForˢ2 = "timed out waiting for 
 // connFromCommand starts opens a listening socket and starts the reference
 // client to connect to it. It returns a recordingConn that wraps the resulting
 // connection.
-internal static (ж<recordingConn> conn, ж<exec.Cmd> child, error err) connFromCommand(this ж<serverTest> Ꮡtest) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<recordingConn> conn, ж<exec.Cmd> child, error err) connFromCommand(this ж<serverTest> Ꮡtest) {
     ж<recordingConn> conn = default!;
     ж<exec.Cmd> child = default!;
     error err = default!;
@@ -1177,11 +1179,14 @@ public static void TestHandshakeServerSNIGetCertificateNotFound(ж<testing.T> �
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedOurˢ = (@string)"expected our GetCertificate test to be called twice"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string errMsgᶜ = "TestHandshakeServerGetCertificateExtensions error"u8;
+
 // TestHandshakeServerGetCertificateExtensions tests to make sure that the
 // Extensions passed to GetCertificate match what we expect based on the
 // clientHelloMsg
 public static void TestHandshakeServerGetCertificateExtensions(ж<testing.T> Ꮡt) {
-    @string errMsg = "TestHandshakeServerGetCertificateExtensions error"u8;
+    @string errMsg = errMsgᶜ;
     // ensure the test condition inside our GetCertificate callback
     // is actually invoked
     ref var called = ref heap(new atomic.Int32(), out var Ꮡcalled);
@@ -1234,10 +1239,13 @@ public static void TestHandshakeServerGetCertificateExtensions(ж<testing.T> Ꮡ
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string errMsgᶜ1 = "TestHandshakeServerSNIGetCertificateError error"u8;
+
 // TestHandshakeServerSNIGetCertificateError tests to make sure that errors in
 // GetCertificate result in a tls alert.
 public static void TestHandshakeServerSNIGetCertificateError(ж<testing.T> Ꮡt) {
-    @string errMsg = "TestHandshakeServerSNIGetCertificateError error"u8;
+    @string errMsg = errMsgᶜ1;
     var serverConfig = testConfig.Clone();
     serverConfig.Value.GetCertificate = (ж<global::go.crypto.tls_package.Certificate>, error) (ж<global::go.crypto.tls_package.ClientHelloInfo> clientHelloΔ1) => (default!, errors.New(errMsg));
     var clientHello = Ꮡ(new clientHelloMsg(
@@ -1253,10 +1261,13 @@ public static void TestHandshakeServerSNIGetCertificateError(ж<testing.T> Ꮡt)
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string noCertificatesˢ = "no certificates"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string errMsgᶜ2 = "TestHandshakeServerEmptyCertificates error"u8;
+
 // TestHandshakeServerEmptyCertificates tests that GetCertificates is called in
 // the case that Certificates is empty, even without SNI.
 public static void TestHandshakeServerEmptyCertificates(ж<testing.T> Ꮡt) {
-    @string errMsg = "TestHandshakeServerEmptyCertificates error"u8;
+    @string errMsg = errMsgᶜ2;
     var serverConfig = testConfig.Clone();
     serverConfig.Value.GetCertificate = (ж<global::go.crypto.tls_package.Certificate>, error) (ж<global::go.crypto.tls_package.ClientHelloInfo> clientHelloΔ1) => (default!, errors.New(errMsg));
     serverConfig.Value.Certificates = default!;
@@ -1446,7 +1457,7 @@ public static void TestHandshakeServerEd25519(ж<testing.T> Ꮡt) {
     runServerTestTLS13(Ꮡt, test);
 }
 
-internal static void benchmarkHandshakeServer(ж<testing.B> Ꮡb, uint16 version, uint16 cipherSuite, global::go.crypto.tls_package.CurveID curve, slice<byte> cert, cryptoꓸPrivateKey key) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkHandshakeServer(ж<testing.B> Ꮡb, uint16 version, uint16 cipherSuite, global::go.crypto.tls_package.CurveID curve, slice<byte> cert, cryptoꓸPrivateKey key) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var config = testConfig.Clone();
@@ -1494,36 +1505,36 @@ internal static readonly @string ecdheP521EcdsaP521ˢ = "ECDHE-P521-ECDSA-P521"u
 internal static readonly object testEcdsaKeyDoesnTUseˢ = (@string)"test ECDSA key doesn't use curve P-521"u8;
 
 public static void BenchmarkHandshakeServer(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(rsaˢ, (ж<testing.B> bΔ1) => {
+    Ꮡb.Run(rsaˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
         benchmarkHandshakeServer(bΔ1, VersionTLS12, TLS_RSA_WITH_AES_128_GCM_SHA256,
             0, testRSACertificate, testRSAPrivateKey.OrTypedNil());
     });
     Ꮡb.Run(ecdheP256Rsaˢ, (ж<testing.B> bΔ2) => {
-        bΔ2.Run(tlSv13ˢ, (ж<testing.B> bΔ3) => {
+        bΔ2.Run(tlSv13ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ3) => {
             benchmarkHandshakeServer(bΔ3, VersionTLS13, TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
                 CurveP256, testRSACertificate, testRSAPrivateKey.OrTypedNil());
         });
-        bΔ2.Run(tlSv12ˢ, (ж<testing.B> bΔ4) => {
+        bΔ2.Run(tlSv12ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ4) => {
             benchmarkHandshakeServer(bΔ4, VersionTLS12, TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
                 CurveP256, testRSACertificate, testRSAPrivateKey.OrTypedNil());
         });
     });
     Ꮡb.Run(ecdheP256EcdsaP256ˢ, (ж<testing.B> bΔ5) => {
-        bΔ5.Run(tlSv13ˢ, (ж<testing.B> bΔ6) => {
+        bΔ5.Run(tlSv13ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ6) => {
             benchmarkHandshakeServer(bΔ6, VersionTLS13, TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
                 CurveP256, testP256Certificate, testP256PrivateKey.OrTypedNil());
         });
-        bΔ5.Run(tlSv12ˢ, (ж<testing.B> bΔ7) => {
+        bΔ5.Run(tlSv12ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ7) => {
             benchmarkHandshakeServer(bΔ7, VersionTLS12, TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
                 CurveP256, testP256Certificate, testP256PrivateKey.OrTypedNil());
         });
     });
     Ꮡb.Run(ecdheX25519EcdsaP256ˢ, (ж<testing.B> bΔ8) => {
-        bΔ8.Run(tlSv13ˢ, (ж<testing.B> bΔ9) => {
+        bΔ8.Run(tlSv13ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ9) => {
             benchmarkHandshakeServer(bΔ9, VersionTLS13, TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
                 X25519, testP256Certificate, testP256PrivateKey.OrTypedNil());
         });
-        bΔ8.Run(tlSv12ˢ, (ж<testing.B> bΔ10) => {
+        bΔ8.Run(tlSv12ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ10) => {
             benchmarkHandshakeServer(bΔ10, VersionTLS12, TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
                 X25519, testP256Certificate, testP256PrivateKey.OrTypedNil());
         });
@@ -1532,11 +1543,11 @@ public static void BenchmarkHandshakeServer(ж<testing.B> Ꮡb) {
         if (!AreEqual((~testECDSAPrivateKey).PublicKey.Curve, elliptic.P521())) {
             bΔ11.Fatal(testEcdsaKeyDoesnTUseˢ);
         }
-        bΔ11.Run(tlSv13ˢ, (ж<testing.B> bΔ12) => {
+        bΔ11.Run(tlSv13ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ12) => {
             benchmarkHandshakeServer(bΔ12, VersionTLS13, TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
                 CurveP521, testECDSACertificate, testECDSAPrivateKey.OrTypedNil());
         });
-        bΔ11.Run(tlSv12ˢ, (ж<testing.B> bΔ13) => {
+        bΔ11.Run(tlSv12ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ13) => {
             benchmarkHandshakeServer(bΔ13, VersionTLS12, TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
                 CurveP521, testECDSACertificate, testECDSAPrivateKey.OrTypedNil());
         });
@@ -1621,10 +1632,13 @@ public static void TestClientAuth(ж<testing.T> Ꮡt) {
 internal static readonly object noErrorReportedFromˢ = (@string)"No error reported from server"u8;
 internal static readonly object handshakeRegisteredAsˢ = (@string)"Handshake registered as complete"u8;
 
-public static void TestSNIGivenOnFailure(ж<testing.T> Ꮡt) {
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectedServerNameᶜ = "test.testing"u8;
+
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSNIGivenOnFailure(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        @string expectedServerName = "test.testing"u8;
+        @string expectedServerName = expectedServerNameᶜ;
         var clientHello = Ꮡ(new clientHelloMsg(
             vers: VersionTLS12,
             random: new slice<byte>(32),
@@ -1759,7 +1773,7 @@ internal static void initᴛgetConfigForClientTests() { getConfigForClientTests 
     )
 }.slice(); }
 
-public static void TestGetConfigForClient(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestGetConfigForClient(ж<testing.T> Ꮡt) {
     var serverConfig = testConfig.Clone();
     var clientConfig = testConfig.Clone();
     clientConfig.Value.MinVersion = VersionTLS12;
@@ -1817,7 +1831,7 @@ public static void TestGetConfigForClient(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestCloseServerConnectionOnIdleClient(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCloseServerConnectionOnIdleClient(ж<testing.T> Ꮡt) {
     var (clientConn, serverConn) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var server = Server(serverConn, testConfig.Clone());
     var clientConnʗ1 = clientConn;
@@ -1877,7 +1891,7 @@ T+E0J8wlH24pgwQHzy7Ko2qLwn1b5PW8ecrlvP1g
 internal static readonly @string keySizeTooSmallˢ = "key size too small"u8;
 internal static readonly @string handshakeFailureˢ = "handshake failure"u8;
 
-public static void TestKeyTooSmallForRSAPSS(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestKeyTooSmallForRSAPSS(ж<testing.T> Ꮡt) {
     ref var cert = ref heap<global::go.crypto.tls_package.Certificate>(out var Ꮡcert);
     (cert, var err) = X509KeyPair(slice<byte>("""
 -----BEGIN CERTIFICATE-----
@@ -2214,7 +2228,7 @@ internal static readonly object serverConnectionWasNotˢ = (@string)"Server conn
 // TestServerHandshakeContextCancellation tests that canceling
 // the context given to the server side conn.HandshakeContext
 // interrupts the in-progress handshake.
-public static void TestServerHandshakeContextCancellation(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServerHandshakeContextCancellation(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
@@ -2256,7 +2270,7 @@ public static void TestServerHandshakeContextCancellation(ж<testing.T> Ꮡt) {
 // derived from the context provided to HandshakeContext, and
 // that those contexts are canceled after HandshakeContext has
 // returned.
-public static void TestHandshakeContextHierarchy(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestHandshakeContextHierarchy(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));

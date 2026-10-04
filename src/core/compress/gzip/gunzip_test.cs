@@ -11,6 +11,8 @@ using os = os_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.compress;
 using static go.compress.gzip_package;
@@ -434,7 +436,7 @@ public static void TestDecompressor(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testdataIssue6550Gzˢ = "testdata/issue6550.gz.base64"u8;
 
-public static void TestIssue6550(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestIssue6550(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // Apple’s notarization service will recursively attempt to decompress
@@ -565,7 +567,7 @@ public static void TestTruncatedStreams(ж<testing.T> Ꮡt) {
     // Intentionally iterate starting with at least one byte in the stream.
     foreach (var (_, tc) in cases) {
         for (nint i = 1; i < len(tc.data); i++) {
-            var (r, err) = NewReader(new gzip_test_package.strings_ReaderжReader(strings.NewReader(((@string)(tc.data[..(int)(i)])))));
+            var (r, err) = NewReader(new gzip_test_package.strings_ReaderжReader(strings.NewReader(((@string)(tc.data.slice(0, i))))));
             if (err != default!) {
                 if (!AreEqual(err, io.ErrUnexpectedEOF)) {
                     Ꮡt.Errorf("NewReader(%s-%d) on truncated stream: got %v, want %v"u8, tc.name, i, err, io.ErrUnexpectedEOF);

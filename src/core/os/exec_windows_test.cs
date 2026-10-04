@@ -11,6 +11,8 @@ using filepath = go.path.filepath_package;
 using Δsync = sync_package;
 using Δtesting = testing_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using exec = go.os.exec_package;
 using go.os;
 using go.path;
@@ -24,7 +26,7 @@ internal static readonly object slowTestSkippingˢ = (@string)"slow test; skippi
 internal static readonly @string testExeˢ = "test.exe"u8;
 internal static readonly @string testRunˢ = "-test.run=^$"u8;
 
-public static void TestRemoveAllWithExecutedProcess(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRemoveAllWithExecutedProcess(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

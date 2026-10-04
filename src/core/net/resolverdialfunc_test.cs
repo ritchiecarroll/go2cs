@@ -26,6 +26,9 @@ internal static readonly @string lookupIPˢ = "LookupIP"u8;
 internal static readonly @string lookupSRVˢ = "LookupSRV"u8;
 internal static readonly @string someServiceˢ = "some-service"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string fakeDomainᶜ = "something-that-is-a-not-a-real-domain.fake-tld."u8;
+
 public static void TestResolverDialFunc(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -61,7 +64,7 @@ public static void TestResolverDialFunc(ж<testing.T> Ꮡt) {
         )))
     ));
     var ctx = context.Background();
-    @string fakeDomain = "something-that-is-a-not-a-real-domain.fake-tld."u8;
+    @string fakeDomain = fakeDomainᶜ;
     var ctxʗ1 = ctx;
     var rʗ1 = r;
     Ꮡt.Run(lookupIPˢ, (ж<testing.T> tΔ1) => {

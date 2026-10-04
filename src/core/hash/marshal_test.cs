@@ -77,7 +77,7 @@ public static void TestMarshalHash(ж<testing.T> Ꮡt) {
             var h3 = ttʗ1.@new();
             const nint split = 249;
             for (nint i = 0; i < split; i++) {
-                h2.Write(buf[(int)(i)..(int)(i + 1)]);
+                h2.Write(buf.slice(i, i + 1));
             }
             var (h2m, ok) = h2._<Δencoding.BinaryMarshaler>(ᐧ);
             if (!ok) {

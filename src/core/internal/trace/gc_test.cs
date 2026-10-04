@@ -188,7 +188,7 @@ internal static float64 /*mmu*/ mmuSlow(slice<Δtrace.MutatorUtil> util, time.Du
             if (u.Time + (int64)window > util[len(util) - 1].Time) {
                 break;
             }
-            mmu = math.Min(mmu, muInWindowʗ1(util[(int)(i)..], u.Time + (int64)window));
+            mmu = math.Min(mmu, muInWindowʗ1(util.slice(i), u.Time + (int64)window));
         }
     }
     // Consider all left-aligned windows.

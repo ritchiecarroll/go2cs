@@ -6,6 +6,8 @@ namespace go;
 using Δruntime = runtime_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -18,7 +20,7 @@ partial class runtime_test_package {
     internal @unsafe.Pointer p;
 }
 
-public static void TestCleanup(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCleanup(ж<testing.T> Ꮡt) {
     var ch = new channel<bool>(1);
     var done = new channel<bool>(1);
     nint want = 97531;
@@ -51,7 +53,7 @@ public static void TestCleanup(ж<testing.T> Ꮡt) {
     internal @unsafe.Pointer p;
 }
 
-public static void TestCleanupMultiple(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCleanupMultiple(ж<testing.T> Ꮡt) {
     var ch = new channel<bool>(3);
     var done = new channel<bool>(1);
     nint want = 97531;
@@ -97,7 +99,7 @@ public static void TestCleanupZeroSizedStruct(ж<testing.T> Ꮡt) {
     internal @unsafe.Pointer p;
 }
 
-public static void TestCleanupAfterFinalizer(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCleanupAfterFinalizer(ж<testing.T> Ꮡt) {
     var ch = new channel<nint>(2);
     var done = new channel<bool>(1);
     nint want = 97531;
@@ -147,7 +149,7 @@ public static void TestCleanupAfterFinalizer(ж<testing.T> Ꮡt) {
     internal nint c;
 }
 
-public static void TestCleanupInteriorPointer(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCleanupInteriorPointer(ж<testing.T> Ꮡt) {
     var ch = new channel<bool>(3);
     var done = new channel<bool>(1);
     nint want = 97531;
@@ -189,7 +191,7 @@ internal static readonly object cleanupCalledWantNoˢ = (@string)"cleanup called
     internal @unsafe.Pointer p;
 }
 
-public static void TestCleanupStop(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCleanupStop(ж<testing.T> Ꮡt) {
     var done = new channel<bool>(1);
     var doneʗ1 = done;
     goǃ(() => {
@@ -216,7 +218,7 @@ public static void TestCleanupStop(ж<testing.T> Ꮡt) {
     internal @unsafe.Pointer p;
 }
 
-public static void TestCleanupStopMultiple(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCleanupStopMultiple(ж<testing.T> Ꮡt) {
     var done = new channel<bool>(1);
     var doneʗ1 = done;
     goǃ(() => {
@@ -245,7 +247,7 @@ public static void TestCleanupStopMultiple(ж<testing.T> Ꮡt) {
     internal @unsafe.Pointer p;
 }
 
-public static void TestCleanupStopinterleavedMultiple(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCleanupStopinterleavedMultiple(ж<testing.T> Ꮡt) {
     var ch = new channel<bool>(3);
     var done = new channel<bool>(1);
     var chʗ1 = ch;
@@ -283,7 +285,7 @@ public static void TestCleanupStopinterleavedMultiple(ж<testing.T> Ꮡt) {
     internal @unsafe.Pointer p;
 }
 
-public static void TestCleanupStopAfterCleanupRuns(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCleanupStopAfterCleanupRuns(ж<testing.T> Ꮡt) {
     var ch = new channel<bool>(1);
     var done = new channel<bool>(1);
     ref var stop = ref heap<Action>(out var Ꮡstop);

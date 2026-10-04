@@ -146,7 +146,7 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
             nint i = 0;
             for (nint y = 0; y < height; y++) {
                 for (nint x = 0; x < width; x++) {
-                    m0.SetColorIndex(x, y, (uint8)(i % tcʗ1.plen));
+                    m0.SetColorIndex(x, y, (uint8)(rem(i, tcʗ1.plen)));
                     i++;
                 }
             }
@@ -162,8 +162,8 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
             var data = b.Bytes();
             i = len(pngHeader);
             while (i < len(data) - chunkFieldsLength) {
-                var length = binary.BigEndian.Uint32(data[(int)(i)..(int)(i + 4)]);
-                @string name = ((@string)(data[(int)(i + 4)..(int)(i + 8)]));
+                var length = binary.BigEndian.Uint32(data.slice(i, i + 4));
+                @string name = ((@string)(data.slice(i + 4, i + 8)));
                 var exprᴛ1 = name;
                 if (exprᴛ1 == "IHDR"u8) {
                     var bitdepth = data[i + 8 + 8];
@@ -172,7 +172,7 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
                     }
                 }
                 else if (exprᴛ1 == "IDAT"u8) {
-                    var (r, err) = zlib.NewReader(new png_test_package.bytes_ReaderжReader(bytes.NewReader(data[(int)(i + 8)..(int)(i + 8 + (nint)length)])));
+                    var (r, err) = zlib.NewReader(new png_test_package.bytes_ReaderжReader(bytes.NewReader(data.slice(i + 8, i + 8 + (nint)length))));
                     if (err != default!) {
                         // Uncompress the image data
                         tΔ1.Error(err);

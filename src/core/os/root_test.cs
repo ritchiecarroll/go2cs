@@ -17,6 +17,8 @@ using slices = slices_package;
 using strings = strings_package;
 using Δtesting = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.io;
 using go.path;
 using static go.os_internal_test_package;
@@ -1295,7 +1297,7 @@ public static void TestRootUseAfterClose(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-public static void TestRootConcurrentClose(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRootConcurrentClose(ж<Δtesting.T> Ꮡt) {
     var (r, err) = Δos.OpenRoot(Ꮡt.TempDir());
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -1356,7 +1358,7 @@ internal static readonly object publicˢ = (@string)"public"u8;
 //
 // While opening this file, we rename base/a/a to base/b.
 // A naive lookup operation will resolve the path to base/f.
-public static void TestRootRaceRenameDir(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRootRaceRenameDir(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

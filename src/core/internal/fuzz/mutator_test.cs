@@ -35,7 +35,7 @@ public static void BenchmarkMutatorBytes(ж<testing.B> Ꮡb) {
                 bΔ1.ResetTimer();
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     // resize buffer to the correct shape and reset the PCG
-                    buf = buf[0..(int)(size)];
+                    buf = buf.slice(0, size);
                     mʗ1.Value.r = new global::go.@internal.fuzz_package.pcgRandжmutatorRand(newPcgRand());
                     mʗ1.mutate(new any[]{buf}.slice(), workerSharedMemSize);
                 }
@@ -69,7 +69,7 @@ public static void BenchmarkMutatorString(ж<testing.B> Ꮡb) {
                 bΔ1.ResetTimer();
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     // resize buffer to the correct shape and reset the PCG
-                    buf = buf[0..(int)(size)];
+                    buf = buf.slice(0, size);
                     mʗ1.Value.r = new global::go.@internal.fuzz_package.pcgRandжmutatorRand(newPcgRand());
                     mʗ1.mutate(new any[]{((@string)buf)}.slice(), workerSharedMemSize);
                 }

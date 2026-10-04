@@ -12,6 +12,8 @@ using Δruntime = runtime_package;
 using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.net_package;
 
 partial class net_internal_test_package {
@@ -212,7 +214,7 @@ public static void TestAcceptTimeout(ж<testing.T> Ꮡt) {
     }.slice();
     foreach (var (_, timeout) in timeouts) {
         var timeoutΔ1 = timeout;
-        Ꮡt.Run(fmt.Sprintf("%v"u8, timeoutΔ1), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(fmt.Sprintf("%v"u8, timeoutΔ1), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 tΔ1.Parallel();
@@ -332,7 +334,7 @@ public static void TestAcceptTimeoutMustReturn(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestAcceptTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAcceptTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
@@ -473,7 +475,7 @@ public static void TestReadTimeout(ж<testing.T> Ꮡt) {
 }
 
 // There is a very similar copy of this in os/timeout_test.go.
-public static void TestReadTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestReadTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
@@ -690,7 +692,7 @@ public static void TestWriteTimeout(ж<testing.T> Ꮡt) {
 }
 
 // There is a very similar copy of this in os/timeout_test.go.
-public static void TestWriteTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWriteTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
@@ -1251,7 +1253,7 @@ public static void TestReadWriteProlongedTimeout(ж<testing.T> Ꮡt) {
             Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
         }
 
-        var handler = (ж<localServer> lsΔ1, global::go.net_package.Listener ln) => {
+        var handler = [MethodImpl(MethodImplOptions.NoInlining)] (ж<localServer> lsΔ1, global::go.net_package.Listener ln) => {
             GoFrame ᒐ = default;
             try {
                 var (cΔ1, errΔ1) = ln.Accept();
@@ -1359,7 +1361,7 @@ public static void TestReadWriteProlongedTimeout(ж<testing.T> Ꮡt) {
 }
 
 // There is a very similar copy of this in os/timeout_test.go.
-public static void TestReadWriteDeadlineRace(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestReadWriteDeadlineRace(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
@@ -1446,7 +1448,7 @@ public static void TestReadWriteDeadlineRace(ж<testing.T> Ꮡt) {
 }
 
 // Issue 35367.
-public static void TestConcurrentSetDeadline(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentSetDeadline(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);

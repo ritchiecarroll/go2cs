@@ -13,6 +13,8 @@ using atomic = global::go.sync.atomic_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
 using encoding;
 using global::go.sync;
@@ -239,7 +241,7 @@ public static void TestMemmoveAtomicity(ж<testing.T> Ꮡt) {
             } else {
                 name += "-forward"u8;
             }
-            Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
+            Ꮡt.Run(name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
                 // Use overlapping src and dst to force forward/backward copy.
                 array<ж<nint>> s = new(100);
                 ref var src = ref heap<slice<ж<nint>>>(out var Ꮡsrc);

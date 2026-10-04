@@ -14,6 +14,8 @@ using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using template = text.template_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using parse = text.template.parse_package;
 using static go.html.template_package;
 using text;
@@ -721,7 +723,7 @@ internal static @string dddArg(nint a, params ꓸꓸꓸstring bʗp) {
 }
 
 // count returns a channel that will deliver n sequential 1-letter strings starting at "a"
-internal static channel<@string> count(nint n) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static channel<@string> count(nint n) {
     if (n == 0) {
         return default!;
     }
@@ -729,7 +731,7 @@ internal static channel<@string> count(nint n) {
     var cʗ1 = c;
     goǃ(() => {
         for (nint i = 0; i < n; i++) {
-            cʗ1.ᐸꟷ("abcdefghijklmnop"u8[(int)(i)..(int)(i + 1)]);
+            cʗ1.ᐸꟷ("abcdefghijklmnop"u8.slice(i, i + 1));
         }
         close(cʗ1);
     });
@@ -1921,7 +1923,7 @@ var v = "v";
 internal static readonly @string templHtmlˢ = "templ.html"u8;
 internal static readonly @string templateTemplHtmlˢ = @"{{ template ""templ.html"" .}}"u8;
 
-public static void TestEscapeRace(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestEscapeRace(ж<testing.T> Ꮡt) {
     var tmpl = New(""u8);
     var (_, err) = tmpl.New(templHtmlˢ).Parse(raceText);
     if (err != default!) {

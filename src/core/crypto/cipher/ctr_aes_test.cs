@@ -83,23 +83,23 @@ internal static void testCTR_AES(ж<testing.T> Ꮡt) {
             continue;
         }
         for (nint j = 0; j <= 5; j += 5) {
-            var @in = tt.@in[0..(int)(len(tt.@in) - j)];
+            var @in = tt.@in.slice(0, len(tt.@in) - j);
             var ctr = cipher.NewCTR(c, tt.iv);
             var encrypted = new slice<byte>(len(@in));
             ctr.XORKeyStream(encrypted, @in);
             {
-                var @out = tt.@out[..(int)(len(@in))]; if (!bytes.Equal(@out, encrypted)) {
+                var @out = tt.@out.slice(0, len(@in)); if (!bytes.Equal(@out, encrypted)) {
                     Ꮡt.Errorf("%s/%d: CTR\ninpt %x\nhave %x\nwant %x"u8, test, len(@in), @in, encrypted, @out);
                 }
             }
         }
         for (nint j = 0; j <= 7; j += 7) {
-            var @in = tt.@out[0..(int)(len(tt.@out) - j)];
+            var @in = tt.@out.slice(0, len(tt.@out) - j);
             var ctr = cipher.NewCTR(c, tt.iv);
             var plain = new slice<byte>(len(@in));
             ctr.XORKeyStream(plain, @in);
             {
-                var @out = tt.@in[..(int)(len(@in))]; if (!bytes.Equal(@out, plain)) {
+                var @out = tt.@in.slice(0, len(@in)); if (!bytes.Equal(@out, plain)) {
                     Ꮡt.Errorf("%s/%d: CTRReader\nhave %x\nwant %x"u8, test, len(@out), plain, @out);
                 }
             }
@@ -179,9 +179,9 @@ public static void TestCTR_AES_multiblock_random_IV(ж<testing.T> Ꮡt) {
                         tΔ2.Run(fmt.Sprintf("part2=%d"u8, part2Δ1), (ж<testing.T> tΔ3) => {
                             var (_, multiblockCtr) = makeTestingCiphers(aesBlockʗ2, ivʗ3);
                             var multiblockCiphertext = new slice<byte>(len(plaintextʗ2));
-                            multiblockCtr.XORKeyStream(multiblockCiphertext[..(int)(part1Δ1)], plaintextʗ2[..(int)(part1Δ1)]);
-                            multiblockCtr.XORKeyStream(multiblockCiphertext[(int)(part1Δ1)..(int)(part1Δ1 + part2Δ1)], plaintextʗ2[(int)(part1Δ1)..(int)(part1Δ1 + part2Δ1)]);
-                            multiblockCtr.XORKeyStream(multiblockCiphertext[(int)(part1Δ1 + part2Δ1)..], plaintextʗ2[(int)(part1Δ1 + part2Δ1)..]);
+                            multiblockCtr.XORKeyStream(multiblockCiphertext.slice(0, part1Δ1), plaintextʗ2.slice(0, part1Δ1));
+                            multiblockCtr.XORKeyStream(multiblockCiphertext.slice(part1Δ1, part1Δ1 + part2Δ1), plaintextʗ2.slice(part1Δ1, part1Δ1 + part2Δ1));
+                            multiblockCtr.XORKeyStream(multiblockCiphertext.slice(part1Δ1 + part2Δ1), plaintextʗ2.slice(part1Δ1 + part2Δ1));
                             if (!bytes.Equal(genericCiphertextʗ2, multiblockCiphertext)) {
                                 tΔ3.Fatal(multiblockCtrSOutputDoesˢ);
                             }
@@ -258,8 +258,8 @@ public static void TestCTR_AES_multiblock_overflow_IV(ж<testing.T> Ꮡt) {
                             var genericCiphertext = new slice<byte>(Size);
                             genericCtr.XORKeyStream(genericCiphertext, plaintextʗ3);
                             var multiblockCiphertext = new slice<byte>(Size);
-                            multiblockCtr.XORKeyStream(multiblockCiphertext, plaintextʗ3[..(int)(offsetΔ1)]);
-                            multiblockCtr.XORKeyStream(multiblockCiphertext[(int)(offsetΔ1)..], plaintextʗ3[(int)(offsetΔ1)..]);
+                            multiblockCtr.XORKeyStream(multiblockCiphertext, plaintextʗ3.slice(0, offsetΔ1));
+                            multiblockCtr.XORKeyStream(multiblockCiphertext.slice(offsetΔ1), plaintextʗ3.slice(offsetΔ1));
                             if (!bytes.Equal(genericCiphertext, multiblockCiphertext)) {
                                 tΔ3.Fatal(multiblockCtrSOutputDoesˢ);
                             }
@@ -312,8 +312,8 @@ public static void TestCTR_AES_multiblock_XORKeyStreamAt(ж<testing.T> Ꮡt) {
                 nint begin = boundaries[i];
                 nint end = boundaries[i + 1];
                 ctrAt.XORKeyStreamAt(
-                    multiblockCiphertext[(int)(begin)..(int)(end)],
-                    plaintextʗ1[(int)(begin)..(int)(end)],
+                    multiblockCiphertext.slice(begin, end),
+                    plaintextʗ1.slice(begin, end),
                     (uint64)begin);
             }
             if (!bytes.Equal(genericCiphertext, multiblockCiphertext)) {

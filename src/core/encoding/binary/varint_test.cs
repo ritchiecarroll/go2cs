@@ -28,7 +28,7 @@ public static void TestConstants(ж<testing.T> Ꮡt) {
 internal static void testVarint(ж<testing.T> Ꮡt, int64 x) {
     var buf = new slice<byte>(MaxVarintLen64);
     nint n = PutVarint(buf, x);
-    var (y, m) = Varint(buf[0..(int)(n)]);
+    var (y, m) = Varint(buf.slice(0, n));
     if (x != y) {
         Ꮡt.Errorf("Varint(%d): got %d"u8, x, y);
     }
@@ -37,8 +37,8 @@ internal static void testVarint(ж<testing.T> Ꮡt, int64 x) {
     }
     var buf2 = slice<byte>("prefix"u8);
     buf2 = AppendVarint(buf2, x);
-    if (((@string)buf2) != "prefix"u8 + ((sstring)(buf[..(int)(n)]))) {
-        Ꮡt.Errorf("AppendVarint(%d): got %q, want %q"u8, x, buf2, "prefix" + ((sstring)(buf[..(int)(n)])));
+    if (((@string)buf2) != "prefix"u8 + ((sstring)(buf.slice(0, n)))) {
+        Ꮡt.Errorf("AppendVarint(%d): got %q, want %q"u8, x, buf2, "prefix" + ((sstring)(buf.slice(0, n))));
     }
     (y, var err) = ReadVarint(new binary_test_package.bytes_ReaderжByteReader(bytes.NewReader(buf)));
     if (err != default!) {
@@ -52,7 +52,7 @@ internal static void testVarint(ж<testing.T> Ꮡt, int64 x) {
 internal static void testUvarint(ж<testing.T> Ꮡt, uint64 x) {
     var buf = new slice<byte>(MaxVarintLen64);
     nint n = PutUvarint(buf, x);
-    var (y, m) = Uvarint(buf[0..(int)(n)]);
+    var (y, m) = Uvarint(buf.slice(0, n));
     if (x != y) {
         Ꮡt.Errorf("Uvarint(%d): got %d"u8, x, y);
     }
@@ -61,8 +61,8 @@ internal static void testUvarint(ж<testing.T> Ꮡt, uint64 x) {
     }
     var buf2 = slice<byte>("prefix"u8);
     buf2 = AppendUvarint(buf2, x);
-    if (((@string)buf2) != "prefix"u8 + ((sstring)(buf[..(int)(n)]))) {
-        Ꮡt.Errorf("AppendUvarint(%d): got %q, want %q"u8, x, buf2, "prefix" + ((sstring)(buf[..(int)(n)])));
+    if (((@string)buf2) != "prefix"u8 + ((sstring)(buf.slice(0, n)))) {
+        Ꮡt.Errorf("AppendUvarint(%d): got %q, want %q"u8, x, buf2, "prefix" + ((sstring)(buf.slice(0, n))));
     }
     (y, var err) = ReadUvarint(new binary_test_package.bytes_ReaderжByteReader(bytes.NewReader(buf)));
     if (err != default!) {
@@ -117,7 +117,7 @@ public static void TestUvarint(ж<testing.T> Ꮡt) {
 public static void TestBufferTooSmall(ж<testing.T> Ꮡt) {
     var buf = new byte[]{0x80, 0x80, 0x80, 0x80}.slice();
     for (nint i = 0; i <= len(buf); i++) {
-        var bufΔ1 = buf[0..(int)(i)];
+        var bufΔ1 = buf.slice(0, i);
         var (x, n) = Uvarint(bufΔ1);
         if (x != 0 || n != 0) {
             Ꮡt.Errorf("Uvarint(%v): got x = %d, n = %d"u8, bufΔ1, x, n);

@@ -299,7 +299,7 @@ public static void TestLastIndexByte(ж<testing.T> Ꮡt) {
 internal static nint simpleIndex(@string s, @string sep) {
     nint n = len(sep);
     for (nint i = n; i <= len(s); i++) {
-        if (s[(int)(i - n)..(int)(i)] == sep) {
+        if (s.slice(i - n, i) == sep) {
             return i - n;
         }
     }
@@ -322,10 +322,10 @@ public static void TestIndexRandom(ж<testing.T> Ꮡt) {
             for (nint i = 0; i < 50; i++) {
                 nint begin = rand.Intn(len(s) + 1);
                 nint end = begin + rand.Intn(len(s) + 1 - begin);
-                @string sep = s[(int)(begin)..(int)(end)];
+                @string sep = s.slice(begin, end);
                 if (i % 4 == 0) {
                     nint pos = rand.Intn(len(sep) + 1);
-                    sep = sep[..(int)(pos)] + "A" + sep[(int)(pos)..];
+                    sep = sep.slice(0, pos) + "A" + sep.slice(pos);
                 }
                 nint want = simpleIndex(s, sep);
                 nint res = Index(s, sep);
@@ -2171,7 +2171,7 @@ public static void BenchmarkCountByte(ж<testing.B> Ꮡb) {
     foreach (var (_, size) in indexSizes) {
         var benchFuncʗ1 = benchFunc;
         Ꮡb.Run(fmt.Sprintf("%d"u8, size), (ж<testing.B> bΔ2) => {
-            benchFuncʗ1(bΔ2, benchStr[..(int)(size)]);
+            benchFuncʗ1(bΔ2, benchStr.slice(0, size));
         });
     }
 }
@@ -2188,7 +2188,7 @@ internal static Func<@string> makeFieldsInput = () => {
         else if (exprᴛ1 is 1) { matchᴛ1 = true;
             do {
                 if (i > 0 && x[i - 1] == (rune)'x') {
-                    copy(x[(int)(i - 1)..], "χ"u8);
+                    copy(x.slice(i - 1), "χ"u8);
                     break;
                 }
                 fallthrough = true;
@@ -2233,7 +2233,7 @@ public static void BenchmarkFields(ж<testing.B> Ꮡb) {
                 bΔ1.Run(fmt.Sprintf("%d"u8, j), (ж<testing.B> bΔ2) => {
                     bΔ2.ReportAllocs();
                     bΔ2.SetBytes((int64)j);
-                    @string data = sdʗ2.data[..(int)(j)];
+                    @string data = sdʗ2.data.slice(0, j);
                     for (nint i = 0; i < (~bΔ2).N; i++) {
                         Fields(data);
                     }
@@ -2256,7 +2256,7 @@ public static void BenchmarkFieldsFunc(ж<testing.B> Ꮡb) {
                 bΔ1.Run(fmt.Sprintf("%d"u8, j), (ж<testing.B> bΔ2) => {
                     bΔ2.ReportAllocs();
                     bΔ2.SetBytes((int64)j);
-                    @string data = sdʗ2.data[..(int)(j)];
+                    @string data = sdʗ2.data.slice(0, j);
                     for (nint i = 0; i < (~bΔ2).N; i++) {
                         FieldsFunc(data, Δunicode.IsSpace);
                     }
@@ -2312,7 +2312,7 @@ public static void BenchmarkRepeat(ж<testing.B> Ꮡb) {
         foreach (var (_, c) in new nint[]{0, 1, 2, 6}.slice()) {
             Ꮡb.Run(fmt.Sprintf("%dx%d"u8, n, c), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
-                    Repeat(s[..(int)(n)], c);
+                    Repeat(s.slice(0, n), c);
                 }
             });
         }
@@ -2323,12 +2323,12 @@ public static void BenchmarkRepeatLarge(ж<testing.B> Ꮡb) {
     @string s = Repeat("@"u8, 8 * 1024);
     for (nint j = 8; j <= 30; j++) {
         foreach (var (_, k) in new nint[]{1, 16, 4097}.slice()) {
-            @string sΔ1 = s[..(int)(k)];
-            nint n = (((nint)1).Lsh((uint64)(j))) / k;
+            @string sΔ1 = s.slice(0, k);
+            nint n = quo((((nint)1).Lsh((int64)(j))), k);
             if (n == 0) {
                 continue;
             }
-            Ꮡb.Run(fmt.Sprintf("%d/%d"u8, ((nint)1).Lsh((uint64)(j)), k), (ж<testing.B> bΔ1) => {
+            Ꮡb.Run(fmt.Sprintf("%d/%d"u8, ((nint)1).Lsh((int64)(j)), k), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     Repeat(sΔ1, n);
                 }
@@ -2356,7 +2356,7 @@ public static void BenchmarkIndexAnyASCII(ж<testing.B> Ꮡb) {
             var j = jᴛ1;
             Ꮡb.Run(fmt.Sprintf("%d:%d"u8, k, j), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
-                    IndexAny(x[..(int)(k)], cs[..(int)(j)]);
+                    IndexAny(x.slice(0, k), cs.slice(0, j));
                 }
             });
         }
@@ -2375,7 +2375,7 @@ public static void BenchmarkIndexAnyUTF8(ж<testing.B> Ꮡb) {
             var j = jᴛ1;
             Ꮡb.Run(fmt.Sprintf("%d:%d"u8, k, j), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
-                    IndexAny(x[..(int)(k)], cs[..(int)(j)]);
+                    IndexAny(x.slice(0, k), cs.slice(0, j));
                 }
             });
         }
@@ -2391,7 +2391,7 @@ public static void BenchmarkLastIndexAnyASCII(ж<testing.B> Ꮡb) {
             var j = jᴛ1;
             Ꮡb.Run(fmt.Sprintf("%d:%d"u8, k, j), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
-                    LastIndexAny(x[..(int)(k)], cs[..(int)(j)]);
+                    LastIndexAny(x.slice(0, k), cs.slice(0, j));
                 }
             });
         }
@@ -2407,7 +2407,7 @@ public static void BenchmarkLastIndexAnyUTF8(ж<testing.B> Ꮡb) {
             var j = jᴛ1;
             Ꮡb.Run(fmt.Sprintf("%d:%d"u8, k, j), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
-                    LastIndexAny(x[..(int)(k)], cs[..(int)(j)]);
+                    LastIndexAny(x.slice(0, k), cs.slice(0, j));
                 }
             });
         }
@@ -2421,9 +2421,9 @@ public static void BenchmarkTrimASCII(ж<testing.B> Ꮡb) {
         for (nint jᴛ1 = 1; jᴛ1 <= 16; jᴛ1 <<= (int)(1)) {
             var j = jᴛ1;
             Ꮡb.Run(fmt.Sprintf("%d:%d"u8, k, j), (ж<testing.B> bΔ1) => {
-                @string x = Repeat(cs[..(int)(j)], k); // Always matches set
+                @string x = Repeat(cs.slice(0, j), k); // Always matches set
                 for (nint i = 0; i < (~bΔ1).N; i++) {
-                    Trim(x[..(int)(k)], cs[..(int)(j)]);
+                    Trim(x.slice(0, k), cs.slice(0, j));
                 }
             });
         }
@@ -2464,7 +2464,7 @@ public static void BenchmarkJoin(ж<testing.B> Ꮡb) {
         var valsʗ1 = vals;
         Ꮡb.Run(strconv.Itoa(l), (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
-            var valsΔ1 = valsʗ1[..(int)(l)];
+            var valsΔ1 = valsʗ1.slice(0, l);
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 Join(valsΔ1, andˢ);
             }

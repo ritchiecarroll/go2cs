@@ -57,7 +57,7 @@ public static void TestQueue(ж<testing.T> Ꮡt) {
                     s = append(s, got._<nint>());
                 }
             }
-            want = (want + 1) % N;
+            want = rem((want + 1), N);
             {
                 nint n = q.len; if (n != N - i - 1) {
                     Ꮡt.Fatalf("after removing %d of %d elements, len is %d; want %d"u8, i + 1, r, n, N - i - 1);

@@ -111,7 +111,7 @@ public static void TestGolden(ж<testing.T> Ꮡt) {
                     n = size;
                 }
                 @string desc = fmt.Sprintf("#%d@[%d:%d]"u8, gi, off, off + n);
-                testEncrypt(Ꮡt, desc, c, data[(int)(off)..(int)(off + n)], expect[(int)(off)..(int)(off + n)]);
+                testEncrypt(Ꮡt, desc, c, data.slice(off, off + n), expect.slice(off, off + n));
                 off += n;
             }
         }
@@ -123,8 +123,8 @@ public static void TestBlock(ж<testing.T> Ꮡt) {
     var (c1b, _) = NewCipher(golden[1].key);
     var data1 = new slice<byte>((1 << (int)(20)));
     foreach (var (i, _) in data1) {
-        c1a.XORKeyStream(data1[(int)(i)..(int)(i + 1)], data1[(int)(i)..(int)(i + 1)]);
-        c1b.XORKeyStream(data1[(int)(i)..(int)(i + 1)], data1[(int)(i)..(int)(i + 1)]);
+        c1a.XORKeyStream(data1.slice(i, i + 1), data1.slice(i, i + 1));
+        c1b.XORKeyStream(data1.slice(i, i + 1), data1.slice(i, i + 1));
     }
     var (c2a, _) = NewCipher(golden[0].key);
     var (c2b, _) = NewCipher(golden[1].key);

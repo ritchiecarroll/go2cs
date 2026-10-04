@@ -17,6 +17,8 @@ using iotest = go.testing.iotest_package;
 using time = time_package;
 using utf8 = go.unicode.utf8_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using bufio = bufio_package;
 using go.testing;
 using go.unicode;
@@ -69,7 +71,7 @@ internal static @string readBytes(ж<bufio.Reader> Ꮡbuf) {
             throw panic("Data: " + err.Error());
         }
     }
-    return ((@string)(b[0..(int)(nb)]));
+    return ((@string)(b.slice(0, nb)));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -130,13 +132,13 @@ internal static @string reads(ж<bufio.Reader> Ꮡbuf, nint m) {
     array<byte> b = new(1000);
     nint nb = 0;
     while (ᐧ) {
-        var (n, err) = buf.Read(b[(int)(nb)..(int)(nb + m)]);
+        var (n, err) = buf.Read(b.slice(nb, nb + m));
         nb += n;
         if (AreEqual(err, Δio.EOF)) {
             break;
         }
     }
-    return ((@string)(b[0..(int)(nb)]));
+    return ((@string)(b.slice(0, nb)));
 }
 
 [GoType] partial struct bufReader {
@@ -204,7 +206,7 @@ internal static readonly object errorExpectedˢ = (@string)"error expected"u8;
 internal static readonly object unexpectedErrorˢ = (@string)"unexpected error:"u8;
 internal static readonly object testTimedOutEndlessLoopˢ = (@string)"test timed out (endless loop in ReadByte?)"u8;
 
-public static void TestZeroReader(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestZeroReader(ж<Δtesting.T> Ꮡt) {
     zeroReader z = default!;
     var r = NewReader(z);
     var c = new channel<error>(0);
@@ -742,7 +744,7 @@ public static void TestWriter(ж<Δtesting.T> Ꮡt) {
             w.Reset();
             var buf = NewWriterSize(new bufio_test_package.bytes_BufferжWriter(w), bs);
             @string context = fmt.Sprintf("nwrite=%d bufsize=%d"u8, nwrite, bs);
-            var (n, e1) = buf.Write(data[0..(int)(nwrite)]);
+            var (n, e1) = buf.Write(data.slice(0, nwrite));
             if (e1 != default! || n != nwrite) {
                 Ꮡt.Errorf("%s: buf.Write %d = %d, %v"u8, context, nwrite, n, e1);
                 continue;
@@ -759,7 +761,7 @@ public static void TestWriter(ж<Δtesting.T> Ꮡt) {
             for (nint l = 0; l < len(written); l++) {
                 if (written[l] != data[l]) {
                     Ꮡt.Errorf("wrong bytes written"u8);
-                    Ꮡt.Errorf("want=%q"u8, data[..(int)(len(written))]);
+                    Ꮡt.Errorf("want=%q"u8, data.slice(0, len(written)));
                     Ꮡt.Errorf("have=%q"u8, written);
                 }
             }
@@ -784,7 +786,7 @@ public static void TestWriterAppend(ж<Δtesting.T> Ꮡt) {
             b = b.slice(1, 1, cap(b));
         }
         // Append a random integer of varying width.
-        var n = (int64)rn.Intn(((nint)1).Lsh((uint64)(rn.Intn(30))));
+        var n = (int64)rn.Intn(((nint)1).Lsh((int64)(rn.Intn(30))));
         want = append(strconv.AppendInt(want, n, 10), (byte)((rune)' '));
         b = append(strconv.AppendInt(b, n, 10), (byte)((rune)' '));
         w.Write(b);
@@ -803,7 +805,7 @@ public static void TestWriterAppend(ж<Δtesting.T> Ꮡt) {
 }
 
 internal static (nint, error) Write(this errorWriterTest w, slice<byte> p) {
-    return (len(p) * w.n / w.m, w.err);
+    return (quo(len(p) * w.n, w.m), w.err);
 }
 
 internal static slice<errorWriterTest> errorWriterTests = new errorWriterTest[]{
@@ -1058,13 +1060,13 @@ public static void TestPeek(ж<Δtesting.T> Ꮡt) {
         }
     }
     {
-        var (n, err) = buf.Read(p[0..5]); if (((sstring)(p[0..(int)(n)])) != "abcd"u8 || err != default!) {
-            Ꮡt.Fatalf("Read after peek = %q, %v; want abcd, EOF"u8, p[0..(int)(n)], err);
+        var (n, err) = buf.Read(p[0..5]); if (((sstring)(p.slice(0, n))) != "abcd"u8 || err != default!) {
+            Ꮡt.Fatalf("Read after peek = %q, %v; want abcd, EOF"u8, p.slice(0, n), err);
         }
     }
     {
-        var (n, err) = buf.Read(p[0..1]); if (((sstring)(p[0..(int)(n)])) != ""u8 || !AreEqual(err, Δio.EOF)) {
-            Ꮡt.Fatalf(@"second Read after peek = %q, %v; want """", EOF"u8, p[0..(int)(n)], err);
+        var (n, err) = buf.Read(p[0..1]); if (((sstring)(p.slice(0, n))) != ""u8 || !AreEqual(err, Δio.EOF)) {
+            Ꮡt.Fatalf(@"second Read after peek = %q, %v; want """", EOF"u8, p.slice(0, n), err);
         }
     }
 }
@@ -1108,7 +1110,7 @@ internal static slice<byte> testInputrn = slice<byte>("012\r\n345\r\n678\r\n9ab\
         n = len(buf);
     }
     copy(buf, t.data);
-    t.data = t.data[(int)(n)..];
+    t.data = t.data.slice(n);
     if (len(t.data) == 0) {
         err = Δio.EOF;
     }
@@ -1138,7 +1140,7 @@ internal static void testReadLine(ж<Δtesting.T> Ꮡt, slice<byte> input) {
                 break;
             }
             {
-                var want = testOutput[(int)(done)..(int)(done + len(line))]; if (!bytes.Equal(want, line)) {
+                var want = testOutput.slice(done, done + len(line)); if (!bytes.Equal(want, line)) {
                     Ꮡt.Errorf("Bad line at stride %d: want: %x got: %x"u8, stride, want, line);
                 }
             }
@@ -1166,12 +1168,12 @@ public static void TestLineTooLong(ж<Δtesting.T> Ꮡt) {
     if (!isPrefix || !bytes.Equal(line, data[..(int)(minReadBufferSize)]) || err != default!) {
         Ꮡt.Errorf("bad result for first line: got %q want %q %v"u8, line, data[..(int)(minReadBufferSize)], err);
     }
-    data = data[(int)(len(line))..];
+    data = data.slice(len(line));
     (line, isPrefix, err) = l.ReadLine();
     if (!isPrefix || !bytes.Equal(line, data[..(int)(minReadBufferSize)]) || err != default!) {
         Ꮡt.Errorf("bad result for second line: got %q want %q %v"u8, line, data[..(int)(minReadBufferSize)], err);
     }
-    data = data[(int)(len(line))..];
+    data = data.slice(len(line));
     (line, isPrefix, err) = l.ReadLine();
     if (isPrefix || !bytes.Equal(line, data[..(int)(minReadBufferSize / 2)]) || err != default!) {
         Ꮡt.Errorf("bad result for third line: got %q want %q %v"u8, line, data[..(int)(minReadBufferSize / 2)], err);
@@ -1708,10 +1710,10 @@ public static void TestReadZero(ж<Δtesting.T> Ꮡt) {
             void want(@string s, error wantErr) {
                 var p = new slice<byte>(50);
                 var (n, err) = brʗ1.Read(p);
-                if (!AreEqual(err, wantErr) || n != len(s) || ((sstring)(p[..(int)(n)])) != s) {
-                    tΔ1.Fatalf("read(%d) = %q, %v, want %q, %v"u8, len(p), ((@string)(p[..(int)(n)])), err, s, wantErr);
+                if (!AreEqual(err, wantErr) || n != len(s) || ((sstring)(p.slice(0, n))) != s) {
+                    tΔ1.Fatalf("read(%d) = %q, %v, want %q, %v"u8, len(p), ((@string)(p.slice(0, n))), err, s, wantErr);
                 }
-                tΔ1.Logf("read(%d) = %q, %v"u8, len(p), ((@string)(p[..(int)(n)])), err);
+                tΔ1.Logf("read(%d) = %q, %v"u8, len(p), ((@string)(p.slice(0, n))), err);
             }
             want(abcˢ, default!);
             want(""u8, default!);
@@ -2011,7 +2013,7 @@ internal static Δio.Reader newScriptedReader(params Span<Func<slice<byte>, (nin
 
 [GoRecv] internal static (nint, error) Read(this ref eofReader r, slice<byte> p) {
     nint read = copy(p, r.buf);
-    r.buf = r.buf[(int)(read)..];
+    r.buf = r.buf.slice(read);
     var exprᴛ1 = read;
     if (exprᴛ1 == 0 || exprᴛ1 == len(r.buf)) {
         return (read, Δio.EOF);

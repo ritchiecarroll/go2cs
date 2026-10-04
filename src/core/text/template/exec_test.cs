@@ -13,6 +13,8 @@ using reflect = reflect_package;
 using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using parse = go.text.template.parse_package;
 using static go.text.template_package;
 using ꓸꓸꓸnint = Span<nint>;
@@ -142,8 +144,10 @@ internal static ref I siVal => ref ᏑsiVal.ValueSlot;
 // leave V2 as nil
 // leave W2 as nil
 // "x" is the value of .X
-internal static (ж<global::go.text.template_package.Template>, error) tupleᴛ1ʗ = New("x"u8).Parse("test template"u8);
-internal static ж<T> tVal = Ꮡ(new T(
+internal static ж<T> tVal;
+internal static void initᴛtVal() {
+    var (ᴛ1, ᴛ2) = New("x"u8).Parse("test template"u8);
+    tVal = Ꮡ(new T(
     True: true,
     I: 17,
     U16: 16,
@@ -202,8 +206,9 @@ internal static ж<T> tVal = Ꮡ(new T(
     },
     TooManyReturnCountFunc: () => ("", default!, 0),
     InvalidReturnTypeFunc: () => ("", false),
-    Tmpl: Must(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2)
+    Tmpl: Must(ᴛ1, ᴛ2)
 ));
+}
 
 internal static slice<ж<T>> tSliceOfNil = new ж<T>[]{default!}.slice();
 
@@ -794,7 +799,7 @@ internal static @string dddArg(nint a, params ꓸꓸꓸstring bʗp) {
 }
 
 // count returns a channel that will deliver n sequential 1-letter strings starting at "a"
-internal static channel<@string> count(nint n) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static channel<@string> count(nint n) {
     if (n == 0) {
         return default!;
     }
@@ -802,7 +807,7 @@ internal static channel<@string> count(nint n) {
     var cʗ1 = c;
     goǃ(() => {
         for (nint i = 0; i < n; i++) {
-            cʗ1.ᐸꟷ("abcdefghijklmnop"u8[(int)(i)..(int)(i + 1)]);
+            cʗ1.ᐸꟷ("abcdefghijklmnop"u8.slice(i, i + 1));
         }
         close(cʗ1);
     });
@@ -1071,10 +1076,10 @@ internal static readonly @string errˢ = "{{ err }}"u8;
 // Check that a custom error can be returned.
 public static void TestExecError_CustomError(ж<testing.T> Ꮡt) {
     var failingFunc = (@string, error) () => ("", new template_internal_test_package.CustomErrorжerror(Ꮡ(new CustomError(nil))));
-    var (ᴛ1, ᴛ2) = New(topˢ).Funcs(new FuncMap(new map<@string, any>{
+    var (ᴛ3, ᴛ4) = New(topˢ).Funcs(new FuncMap(new map<@string, any>{
         ["err"u8] = (failingFunc).OrTypedNilFunc()
     })).Parse(errˢ);
-    var tmpl = Must(ᴛ1, ᴛ2);
+    var tmpl = Must(ᴛ3, ᴛ4);
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡb), default!);
     ref var e = ref heap<ж<CustomError>>(out var Ꮡe);
@@ -1673,8 +1678,8 @@ public static void TestBlock(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    var (ᴛ3, ᴛ4) = tmpl.Clone();
-    (var tmpl2, err) = Must(ᴛ3, ᴛ4).Parse(overlay);
+    var (ᴛ5, ᴛ6) = tmpl.Clone();
+    (var tmpl2, err) = Must(ᴛ5, ᴛ6).Parse(overlay);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
@@ -1762,8 +1767,8 @@ public static void TestEvalFieldErrors(ж<testing.T> Ꮡt) {
 
         var tcʗ1 = tc;
         Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
-            var (ᴛ5, ᴛ6) = New(tmplˢ).Parse(tcʗ1.src);
-            var tmpl = Must(ᴛ5, ᴛ6);
+            var (ᴛ7, ᴛ8) = New(tmplˢ).Parse(tcʗ1.src);
+            var tmpl = Must(ᴛ7, ᴛ8);
             var err = tmpl.Execute(io.Discard, tcʗ1.value);
             @string got = nilˢ;
             if (err != default!) {
@@ -1787,8 +1792,8 @@ public static void TestMaxExecDepth(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
-    var (ᴛ7, ᴛ8) = New(tmplˢ).Parse(templateTmplˢ);
-    var tmpl = Must(ᴛ7, ᴛ8);
+    var (ᴛ9, ᴛ10) = New(tmplˢ).Parse(templateTmplˢ);
+    var tmpl = Must(ᴛ9, ᴛ10);
     var err = tmpl.Execute(io.Discard, default!);
     @string got = nilˢ;
     if (err != default!) {
@@ -1811,8 +1816,8 @@ public static void TestAddrOfIndex(ж<testing.T> Ꮡt) {
         @"{{with index . 0}}{{.String}}{{end}}"u8
     }.slice();
     foreach (var (_, text) in texts) {
-        var (ᴛ9, ᴛ10) = New(tmplˢ).Parse(text);
-        var tmpl = Must(ᴛ9, ᴛ10);
+        var (ᴛ11, ᴛ12) = New(tmplˢ).Parse(text);
+        var tmpl = Must(ᴛ11, ᴛ12);
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), reflect.ValueOf(new V[]{new(1)}.slice()));
         if (err != default!) {
@@ -1872,8 +1877,8 @@ public static void TestInterfaceValues(ж<testing.T> Ꮡt) {
         new(@"{{lt (index .Slice 1) .Zero}}"u8, "false"u8)
     }.slice();
     foreach (var (_, tt) in tests) {
-        var (ᴛ11, ᴛ12) = New(tmplˢ).Parse(tt.text);
-        var tmpl = Must(ᴛ11, ᴛ12);
+        var (ᴛ13, ᴛ14) = New(tmplˢ).Parse(tt.text);
+        var tmpl = Must(ᴛ13, ᴛ14);
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), new map<@string, any>{
             ["PlusOne"u8] = nint (nint n) => n + 1,
@@ -2099,8 +2104,8 @@ internal static readonly @string rangeOverSendOnlyChannelˢ = "range over send-o
 // Issue 43065, range over send only channel
 public static void TestIssue43065(ж<testing.T> Ꮡt) {
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
-    var (ᴛ13, ᴛ14) = New(""u8).Parse(rangeEndˢ);
-    var tmp = Must(ᴛ13, ᴛ14);
+    var (ᴛ15, ᴛ16) = New(""u8).Parse(rangeEndˢ);
+    var tmp = Must(ᴛ15, ᴛ16);
     var ch = new channel/*<-*/<nint>(0, GoChanDir.Send);
     var err = tmp.Execute(new template_test_package.bytes_BufferжWriter(Ꮡb), ch);
     if (err == default!){
@@ -2117,7 +2122,7 @@ internal static readonly @string templateBarˢ = @"{{ template ""bar"" . }}"u8;
 internal static readonly @string barˢ = "bar"u8;
 
 // Issue 39807: data race in html/template & text/template
-public static void TestIssue39807(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestIssue39807(ж<testing.T> Ꮡt) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     var (tplFoo, err) = New(fooˢ).Parse(templateBarˢ);
     if (err != default!) {

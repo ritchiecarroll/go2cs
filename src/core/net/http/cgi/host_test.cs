@@ -19,6 +19,8 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 using go.@internal;
 using go.net;
@@ -485,13 +487,13 @@ internal static readonly @string netHttpCgiHandlerˢ = @"net/http/cgi\.\(\*Handl
 
 // handlerRunning reports whether any goroutine is currently running
 // [Handler.ServeHTTP].
-internal static bool handlerRunning() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static bool handlerRunning() {
     var r = regexp.MustCompile(netHttpCgiHandlerˢ);
     var buf = new slice<byte>((64 << (int)(10)));
     while (ᐧ) {
         nint n = runtime.Stack(buf, true);
         if (n < len(buf)) {
-            return r.Match(buf[..(int)(n)]);
+            return r.Match(buf.slice(0, n));
         }
         // Buffer wasn't large enough for a full goroutine dump.
         // Resize it and try again.

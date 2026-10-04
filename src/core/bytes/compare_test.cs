@@ -47,7 +47,7 @@ public static void TestCompare(ж<testing.T> Ꮡt) {
         var buffer = new slice<byte>(len(tt.b) + numShifts);
         // vary the input alignment of tt.b
         for (nint offset = 0; offset <= numShifts; offset++) {
-            var shiftedB = buffer[(int)(offset)..(int)(len(tt.b) + offset)];
+            var shiftedB = buffer.slice(offset, len(tt.b) + offset);
             copy(shiftedB, tt.b);
             nint cmp = Compare(tt.a, shiftedB);
             if (cmp != tt.i) {
@@ -93,28 +93,28 @@ public static void TestCompareBytes(ж<testing.T> Ꮡt) {
             a[i] = 8;
             b[i] = 9;
         }
-        nint cmp = Compare(a[..(int)(lenΔ1)], b[..(int)(lenΔ1)]);
+        nint cmp = Compare(a.slice(0, lenΔ1), b.slice(0, lenΔ1));
         if (cmp != 0) {
             Ꮡt.Errorf(@"CompareIdentical(%d) = %d"u8, lenΔ1, cmp);
         }
         if (lenΔ1 > 0) {
-            cmp = Compare(a[..(int)(lenΔ1 - 1)], b[..(int)(lenΔ1)]);
+            cmp = Compare(a.slice(0, lenΔ1 - 1), b.slice(0, lenΔ1));
             if (cmp != -1) {
                 Ꮡt.Errorf(@"CompareAshorter(%d) = %d"u8, lenΔ1, cmp);
             }
-            cmp = Compare(a[..(int)(lenΔ1)], b[..(int)(lenΔ1 - 1)]);
+            cmp = Compare(a.slice(0, lenΔ1), b.slice(0, lenΔ1 - 1));
             if (cmp != 1) {
                 Ꮡt.Errorf(@"CompareBshorter(%d) = %d"u8, lenΔ1, cmp);
             }
         }
         for (nint k = 0; k < lenΔ1; k++) {
             b[k] = (byte)(a[k] - 1);
-            cmp = Compare(a[..(int)(lenΔ1)], b[..(int)(lenΔ1)]);
+            cmp = Compare(a.slice(0, lenΔ1), b.slice(0, lenΔ1));
             if (cmp != 1) {
                 Ꮡt.Errorf(@"CompareAbigger(%d,%d) = %d"u8, lenΔ1, k, cmp);
             }
             b[k] = (byte)(a[k] + 1);
-            cmp = Compare(a[..(int)(lenΔ1)], b[..(int)(lenΔ1)]);
+            cmp = Compare(a.slice(0, lenΔ1), b.slice(0, lenΔ1));
             if (cmp != -1) {
                 Ꮡt.Errorf(@"CompareBbigger(%d,%d) = %d"u8, lenΔ1, k, cmp);
             }
@@ -140,13 +140,13 @@ public static void TestEndianBaseCompare(ж<testing.T> Ꮡt) {
         for (nint j = 0; j < i - 1; j++) {
             a[j] = (byte)(b[j] - 1);
             a[j + 1] = (byte)(b[j + 1] + 1);
-            nint cmp = Compare(a[..(int)(i)], b[..(int)(i)]);
+            nint cmp = Compare(a.slice(0, i), b.slice(0, i));
             if (cmp != -1) {
                 Ꮡt.Errorf(@"CompareBbigger(%d,%d) = %d"u8, i, j, cmp);
             }
             a[j] = (byte)(b[j] + 1);
             a[j + 1] = (byte)(b[j + 1] - 1);
-            cmp = Compare(a[..(int)(i)], b[..(int)(i)]);
+            cmp = Compare(a.slice(0, i), b.slice(0, i));
             if (cmp != 1) {
                 Ꮡt.Errorf(@"CompareAbigger(%d,%d) = %d"u8, i, j, cmp);
             }
@@ -245,10 +245,10 @@ internal static void benchmarkCompareBytesBigUnaligned(ж<testing.B> Ꮡb, nint 
     while (len(b1) < (1 << (int)(20))) {
         b1 = append(b1, ((@string)"Hello Gophers!"u8).ꓸꓸꓸ);
     }
-    var b2 = appendꓸꓸꓸ(slice<byte>("12345678"u8)[..(int)(offset)], b1);
+    var b2 = appendꓸꓸꓸ(slice<byte>("12345678"u8).slice(0, offset), b1);
     b.StartTimer();
     for (nint j = 0; j < b.N; j++) {
-        if (Compare(b1, b2[(int)(offset)..]) != 0) {
+        if (Compare(b1, b2.slice(offset)) != 0) {
             Ꮡb.Fatal(b1B2ˢ);
         }
     }
@@ -277,11 +277,11 @@ internal static void benchmarkCompareBytesBigBothUnaligned(ж<testing.B> Ꮡb, n
     copy(b2, b1);
     b.StartTimer();
     for (nint j = 0; j < b.N; j++) {
-        if (Compare(b1[(int)(offset)..], b2[(int)(offset)..]) != 0) {
+        if (Compare(b1.slice(offset), b2.slice(offset)) != 0) {
             Ꮡb.Fatal(b1B2ˢ);
         }
     }
-    b.SetBytes((int64)len(b1[(int)(offset)..]));
+    b.SetBytes((int64)len(b1.slice(offset)));
 }
 
 public static void BenchmarkCompareBytesBigBothUnaligned(ж<testing.B> Ꮡb) {

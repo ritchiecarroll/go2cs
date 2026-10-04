@@ -99,7 +99,7 @@ public static void TestChaCha8Read(ж<testing.T> Ꮡt) {
         }
         var bufΔ1 = new slice<byte>(IntN(100));
         if (n + len(bufΔ1) > chacha8outlen) {
-            bufΔ1 = bufΔ1[..(int)(chacha8outlen - n)];
+            bufΔ1 = bufΔ1.slice(0, chacha8outlen - n);
         }
         n += len(bufΔ1);
         Ꮡt.Logf("reading %d bytes"u8, len(bufΔ1));

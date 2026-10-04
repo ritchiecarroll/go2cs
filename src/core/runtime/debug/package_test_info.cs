@@ -51,9 +51,9 @@ using static global::go.runtime.debug_test_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("runtime/debug/example_monitor_test.go", "example_monitor_test.cs", "AA8mwgACIAANApaCAAoS4oKUgoSCgpSUqIKClICCpICCpLqCgpSCgoKCgoKUgoCC")]
 [assembly: go.GoPositionMap("runtime/debug/garbage_test.go", "garbage_test.cs", "ABAgooSCgriCgpaChIKUgpSClIKClIKUgoKCgpSClIKUqIKCgpaCgrqClIKCgoKUtMi6gpaEgqgACBSEgrqCAAkWgoKClJSUggAGEqKWgoKCqIKClIKEkoKCgoKCgpaSgIK2gpSUgoKAgriClJSCgpSCgoKCtKSCgpSmAAgSgg==", "169-172:1")]
-[assembly: go.GoPositionMap("runtime/debug/heapdump_test.go", "heapdump_test.cs", "ABIcooKUgoKUgpKCgoKUgoCCxOyo0oKUgoKUgqaCgoKCloKWgoKiAAkQtJKUooKUgoKUgpKCgqI=")]
+[assembly: go.GoPositionMap("runtime/debug/heapdump_test.go", "heapdump_test.cs", "ABMcooKUgoKUgpKCgoKUgoCCxOyo0oKUgoKUgqaCgoKCloKWgoKiAAkQtJKUooKUgoKUgpKCgqI=")]
 [assembly: go.GoPositionMap("runtime/debug/mod_test.go", "mod_test.cs", "AA0ekoKClAAhBrSclgABEJ6MgoKUgrqCgoKWgg==", "55-74:1")]
-[assembly: go.GoPositionMap("runtime/debug/stack_test.go", "stack_test.cs", "AB4sgpSCpoKClICCpIK4yoKkggANKgAUAoKCgt6CgNyCgoKClIKCgoKUuKSCgpaCkoSCgpSEhIKClJSEgoKCguaCgoKCloSCgoKCgoKUAAoYgoKUgoKWyoKUgrqCgpSC", "113-129:1")]
+[assembly: go.GoPositionMap("runtime/debug/stack_test.go", "stack_test.cs", "AB8sgpSCpoKClICCpIK4yoKkggANKgAUAoKCgt6CgNyCgoKClIKCgoKUuKSCgpaCkoSCgpSEhIKClJSEgoKCguaCgoKCloSCgoKCgoKUAAoYgoKUgoKWyoKUgrqCgpSC", "113-129:1")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;

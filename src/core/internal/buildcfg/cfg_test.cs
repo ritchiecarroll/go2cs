@@ -176,8 +176,8 @@ public static void TestIsFIPSVersion(ж<testing.T> Ꮡt) {
     // truncated
     @string v = vᶜ;
     for (nint i = 0; i < len(v); i++) {
-        if (isFIPSVersion(v[..(int)(i)])) {
-            Ꮡt.Errorf("isFIPSVersion(%q) = true, want false"u8, v[..(int)(i)]);
+        if (isFIPSVersion(v.slice(0, i))) {
+            Ꮡt.Errorf("isFIPSVersion(%q) = true, want false"u8, v.slice(0, i));
         }
     }
     // bad

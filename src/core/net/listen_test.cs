@@ -12,6 +12,8 @@ using syscall = syscall_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.net_package;
 
 partial class net_internal_test_package {
@@ -757,7 +759,7 @@ internal static (bool, error) multicastRIBContains(global::go.net_package.IP ip)
 }
 
 // Issue 21856.
-public static void TestClosingListener(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestClosingListener(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);

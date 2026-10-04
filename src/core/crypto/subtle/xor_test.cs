@@ -21,12 +21,12 @@ public static void TestXORBytes(ж<testing.T> Ꮡt) {
         for (nint alignP = 0; alignP < 8; alignP++) {
             for (nint alignQ = 0; alignQ < 8; alignQ++) {
                 for (nint alignD = 0; alignD < 8; alignD++) {
-                    var p = new slice<byte>(alignP + n, alignP + n + 100)[(int)(alignP)..];
-                    var q = new slice<byte>(alignQ + n, alignQ + n + 100)[(int)(alignQ)..];
+                    var p = new slice<byte>(alignP + n, alignP + n + 100).slice(alignP);
+                    var q = new slice<byte>(alignQ + n, alignQ + n + 100).slice(alignQ);
                     if ((nint)(n & 1) != 0){
-                        p = p[..(int)(n)];
+                        p = p.slice(0, n);
                     } else {
-                        q = q[..(int)(n)];
+                        q = q.slice(0, n);
                     }
                     rand.Read(p);
                     rand.Read(q);
@@ -37,7 +37,7 @@ public static void TestXORBytes(ж<testing.T> Ꮡt) {
                         want[alignD + i] = (byte)(p[i] ^ q[i]);
                     }
                     {
-                        nint nn = XORBytes(d[(int)(alignD)..], p, q); if (!bytes.Equal(d, want)){
+                        nint nn = XORBytes(d.slice(alignD), p, q); if (!bytes.Equal(d, want)){
                             Ꮡt.Errorf("n=%d alignP=%d alignQ=%d alignD=%d:\n\tp = %x\n\tq = %x\n\td = %x\n\twant %x\n"u8, n, alignP, alignQ, alignD, p, q, d, want);
                         } else 
                         if (nn != n) {
@@ -46,7 +46,7 @@ public static void TestXORBytes(ж<testing.T> Ꮡt) {
                     }
                     var p1 = bytes.Clone(p);
                     {
-                        nint nn = XORBytes(p, p, q); if (!bytes.Equal(p, want[(int)(alignD)..(int)(alignD + n)])){
+                        nint nn = XORBytes(p, p, q); if (!bytes.Equal(p, want.slice(alignD, alignD + n))){
                             Ꮡt.Errorf("n=%d alignP=%d alignQ=%d alignD=%d:\n\tp = %x\n\tq = %x\n\td = %x\n\twant %x\n"u8, n, alignP, alignQ, alignD, p, q, d, want);
                         } else 
                         if (nn != n) {
@@ -54,7 +54,7 @@ public static void TestXORBytes(ж<testing.T> Ꮡt) {
                         }
                     }
                     {
-                        nint nn = XORBytes(q, p1, q); if (!bytes.Equal(q, want[(int)(alignD)..(int)(alignD + n)])){
+                        nint nn = XORBytes(q, p1, q); if (!bytes.Equal(q, want.slice(alignD, alignD + n))){
                             Ꮡt.Errorf("n=%d alignP=%d alignQ=%d alignD=%d:\n\tp = %x\n\tq = %x\n\td = %x\n\twant %x\n"u8, n, alignP, alignQ, alignD, p, q, d, want);
                         } else 
                         if (nn != n) {
@@ -114,8 +114,8 @@ public static void BenchmarkXORBytes(ж<testing.B> Ꮡb) {
         var data1ʗ1 = data1;
         var dstʗ1 = dst;
         Ꮡb.Run(fmt.Sprintf("%dBytes"u8, size), (ж<testing.B> bΔ1) => {
-            var s0 = data0ʗ1[..(int)(size)];
-            var s1 = data1ʗ1[..(int)(size)];
+            var s0 = data0ʗ1.slice(0, (nint)(size));
+            var s1 = data1ʗ1.slice(0, (nint)(size));
             bΔ1.SetBytes((int64)size);
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 XORBytes(dstʗ1, s0, s1);

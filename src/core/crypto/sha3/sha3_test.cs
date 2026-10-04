@@ -86,7 +86,7 @@ internal static void testUnalignedWrite(ж<testing.T> Ꮡt) {
                         j = v;
                     }
                 }
-                d.Write(buf[(int)(i)..(int)(i + j)]);
+                d.Write(buf.slice(i, i + j));
                 i += j;
             }
         }
@@ -116,7 +116,7 @@ internal static void testUnalignedWrite(ж<testing.T> Ꮡt) {
                         j = v;
                     }
                 }
-                d.Write(buf[(int)(i)..(int)(i + j)]);
+                d.Write(buf.slice(i, i + j));
                 i += j;
             }
         }
@@ -203,7 +203,7 @@ internal static void testSqueezing(ж<testing.T> Ꮡt) {
 // (See https://golang.org/issue/35128.)
 internal static slice<byte> sequentialBytes(nint size) {
     nint alignmentOffset = rand.Intn(8);
-    var result = new slice<byte>(size + alignmentOffset)[(int)(alignmentOffset)..];
+    var result = new slice<byte>(size + alignmentOffset).slice(alignmentOffset);
     foreach (var (i, _) in result) {
         result[i] = (byte)i;
     }
@@ -473,7 +473,7 @@ internal static void testMarshalUnmarshal(ж<testing.T> Ꮡt, ж<sha3.SHA3> Ꮡh
     Ꮡh.Write(buf);
     var want = h.Sum(default!);
     h.Reset();
-    Ꮡh.Write(buf[..(int)(n)]);
+    Ꮡh.Write(buf.slice(0, n));
     var (b, err) = h.MarshalBinary();
     if (err != default!) {
         Ꮡt.Errorf("MarshalBinary: %v"u8, err);
@@ -484,7 +484,7 @@ internal static void testMarshalUnmarshal(ж<testing.T> Ꮡt, ж<sha3.SHA3> Ꮡh
             Ꮡt.Errorf("UnmarshalBinary: %v"u8, errΔ1);
         }
     }
-    Ꮡh.Write(buf[(int)(n)..]);
+    Ꮡh.Write(buf.slice(n));
     var got = h.Sum(default!);
     if (!bytes.Equal(got, want)) {
         Ꮡt.Errorf("got %x, want %x"u8, got, want);
@@ -502,7 +502,7 @@ internal static void testMarshalUnmarshalSHAKE(ж<testing.T> Ꮡt, ж<sha3.SHAKE
     var want = new slice<byte>(32);
     Ꮡh.Read(want);
     Ꮡh.Reset();
-    Ꮡh.Write(buf[..(int)(n)]);
+    Ꮡh.Write(buf.slice(0, n));
     var (b, err) = h.MarshalBinary();
     if (err != default!) {
         Ꮡt.Errorf("MarshalBinary: %v"u8, err);
@@ -513,7 +513,7 @@ internal static void testMarshalUnmarshalSHAKE(ж<testing.T> Ꮡt, ж<sha3.SHAKE
             Ꮡt.Errorf("UnmarshalBinary: %v"u8, errΔ1);
         }
     }
-    Ꮡh.Write(buf[(int)(n)..]);
+    Ꮡh.Write(buf.slice(n));
     var got = new slice<byte>(32);
     Ꮡh.Read(got);
     if (!bytes.Equal(got, want)) {

@@ -12,6 +12,8 @@ using strconv = strconv_package;
 using sync = go.sync_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go;
 using go.@internal;
 
@@ -21,7 +23,7 @@ public static void TestNow(ж<testing.T> Ꮡt) {
     ref var start = ref heap<time.Time>(out var Ꮡstart);
     start = time.Date(2000, 1, 1, 0, 0, 0, 0, time.ΔUTC).In(time.ΔLocal);
     var startʗ1 = start;
-    synctest.Run(() => {
+    synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         // Time starts at 2000-1-1 00:00:00.
         {
             var (got, want) = (time.Now(), startʗ1); if (!got.Equal(want)) {
@@ -62,7 +64,7 @@ public static void TestSimpleWait(ж<testing.T> Ꮡt) {
 }
 
 public static void TestGoroutineWait(ж<testing.T> Ꮡt) {
-    synctest.Run(() => {
+    synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         goǃ(() => {
         });
         synctest.Wait();
@@ -72,12 +74,12 @@ public static void TestGoroutineWait(ж<testing.T> Ꮡt) {
 // TestWait starts a collection of goroutines.
 // It checks that synctest.Wait waits for all goroutines to exit before returning.
 public static void TestWait(ж<testing.T> Ꮡt) {
-    synctest.Run(() => {
+    synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         var done = false;
         var ch = new channel<nint>(0);
         ref var f = ref heap<Action>(out var Ꮡf);
         var chʗ1 = ch;
-        Ꮡf.ValueSlot = () => {
+        Ꮡf.ValueSlot = [MethodImpl(MethodImplOptions.NoInlining)] () => {
             nint count = ᐸꟷ(chʗ1);
             if (count == 0){
                 done = true;
@@ -97,12 +99,12 @@ public static void TestWait(ж<testing.T> Ꮡt) {
 
 public static void TestMallocs(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 100; i++) {
-        synctest.Run(() => {
+        synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
             var done = false;
             var ch = new channel<slice<byte>>(0);
             ref var f = ref heap<Action>(out var Ꮡf);
             var chʗ1 = ch;
-            Ꮡf.ValueSlot = () => {
+            Ꮡf.ValueSlot = [MethodImpl(MethodImplOptions.NoInlining)] () => {
                 var b = ᐸꟷ(chʗ1);
                 if (len(b) == 0){
                     done = true;
@@ -176,7 +178,7 @@ public static void TestTimerReset(ж<testing.T> Ꮡt) {
 public static void TestTimeAfter(ж<testing.T> Ꮡt) {
     synctest.Run(() => {
         nint i = 0;
-        time.AfterFunc(1 * time.ΔSecond, () => {
+        time.AfterFunc(1 * time.ΔSecond, [MethodImpl(MethodImplOptions.NoInlining)] () => {
             // Ensure synctest group membership propagates through the AfterFunc.
             i++; // 1
             goǃ(() => {
@@ -327,7 +329,7 @@ public static void TestTimerFromInsideBubble(ж<testing.T> Ꮡt) {
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(test.desc, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(test.desc, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             var donec = new channel<EmptyStruct>(0);
             var ch = new channel<ж<time.Timer>>(0);
             var chʗ1 = ch;
@@ -373,7 +375,7 @@ public static void TestDeadlockChild(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         defer(wantPanic, Ꮡt, deadlockAllGoroutinesInˢ, ref ᒐ);
-        synctest.Run(() => {
+        synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
             goǃ(() => {
                 switch (select()) {
 }
@@ -385,7 +387,7 @@ public static void TestDeadlockChild(ж<testing.T> Ꮡt) {
 }
 
 public static void TestCond(ж<testing.T> Ꮡt) {
-    synctest.Run(() => {
+    synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);
         var cond = sync.NewCond(new sync.MutexжLocker(Ꮡmu));
         var start = time.Now();
@@ -437,7 +439,7 @@ public static void TestCond(ж<testing.T> Ꮡt) {
 }
 
 public static void TestIteratorPush(ж<testing.T> Ꮡt) {
-    synctest.Run(() => {
+    synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         var seq = (Func<time.Time, bool> yield) => {
             while (yield(time.Now())) {
                 time.Sleep(1 * time.ΔSecond);
@@ -470,7 +472,7 @@ public static void TestIteratorPush(ж<testing.T> Ꮡt) {
 }
 
 public static void TestIteratorPull(ж<testing.T> Ꮡt) {
-    synctest.Run(() => {
+    synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         var seq = (Func<time.Time, bool> yield) => {
             while (yield(time.Now())) {
                 time.Sleep(1 * time.ΔSecond);
@@ -506,7 +508,7 @@ public static void TestIteratorPull(ж<testing.T> Ꮡt) {
     });
 }
 
-public static void TestReflectFuncOf(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestReflectFuncOf(ж<testing.T> Ꮡt) {
     void mkfunc(@string name, nint i) {
         reflect.FuncOf(new reflectꓸType[]{reflect.StructOf(new reflect.StructField[]{new(
             Name: name + strconv.Itoa(i),
@@ -530,7 +532,7 @@ public static void TestReflectFuncOf(ж<testing.T> Ꮡt) {
 }
 
 public static void TestWaitGroup(ж<testing.T> Ꮡt) {
-    synctest.Run(() => {
+    synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(1);
         time.Duration delay = /* 1 * time.Second */ 1000000000;

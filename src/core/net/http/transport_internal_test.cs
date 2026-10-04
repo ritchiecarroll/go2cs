@@ -13,7 +13,8 @@ using net = net_package;
 using testcert = global::go.net.http.@internal.testcert_package;
 using strings = strings_package;
 using testing = testing_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
 using global::go.net.http.@internal;
 using static global::go.net.http_package;
@@ -25,7 +26,7 @@ partial class http_internal_test_package {
 internal static readonly @string testOverˢ = "test over"u8;
 
 // Issue 15446: incorrect wrapping of errors when server closes an idle connection.
-public static void TestTransportPersistConnReadLoopEOF(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTransportPersistConnReadLoopEOF(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -236,7 +237,7 @@ internal static readonly @string requestˢ = "request"u8;
 internal static readonly object bodyLengthIsZeroˢ = (@string)"body length is zero"u8;
 
 // Issue 25009
-public static void TestTransportBodyAltRewind(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTransportBodyAltRewind(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var cert = ref heap<tls.Certificate>(out var Ꮡcert);

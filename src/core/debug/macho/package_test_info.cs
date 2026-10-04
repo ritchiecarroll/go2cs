@@ -45,7 +45,7 @@ using static global::go.debug.macho_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/macho/file_test.go", "file_test.cs", "AIoCxgOCgoKUpoKCgpSCgpSmgoKClIKClKaigsyCgoKUgoKUgoKmgoKCloKClpSCgsaCgoLGgoKC1raCgoKogoKClIKCgqaCgoKogoKCgoIACQ6igoKC6IKCgpaClIKWgoKEgpaC+oKCgIKmgoKClIL4goKUgviCgpSC+IKCgg==")]
+[assembly: go.GoPositionMap("debug/macho/file_test.go", "file_test.cs", "AEAuAMkBmAOCgoKUpoKCgpSCgpSmgoKClIKClKaigsyCgoKUgoKUgoKmgoKCloKClpSCgsaCgoLGgoKC1raCgoKogoKClIKCgqaCgoKogoKCgoIACQ6igoKC6IKCgpaClIKWgoKEgpaC+oKCgIKmgoKClIL4goKUgviCgpSC+IKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;

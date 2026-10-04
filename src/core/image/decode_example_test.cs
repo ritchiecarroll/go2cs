@@ -65,10 +65,10 @@ public static void Example() {
             var (r, g, b, a) = m.At(x, y).RGBA();
             // A color's RGBA method returns values in the range [0, 65535].
             // Shifting by 12 reduces this to the range [0, 15].
-            histogram[(nint)((r >> (int)(12)))][0]++;
-            histogram[(nint)((g >> (int)(12)))][1]++;
-            histogram[(nint)((b >> (int)(12)))][2]++;
-            histogram[(nint)((a >> (int)(12)))][3]++;
+            histogram[(r >> (int)(12))][0]++;
+            histogram[(g >> (int)(12))][1]++;
+            histogram[(b >> (int)(12))][2]++;
+            histogram[(a >> (int)(12))][3]++;
         }
     }
     // Print the results.

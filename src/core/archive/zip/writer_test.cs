@@ -418,7 +418,7 @@ public static void TestWriterDirAttributes(ж<testing.T> Ꮡt) {
     if (idx == -1) {
         Ꮡt.Fatal(fileHeaderNotFoundˢ);
     }
-    b = b[(int)(idx)..];
+    b = b.slice(idx);
     if (!bytes.Equal(b[6..10], new byte[]{0, 0, 0, 0}.slice())) {
         // FileHeader.Flags: 0, FileHeader.Method: 0
         Ꮡt.Errorf("unexpected method and flags: %v"u8, b[6..10]);
@@ -716,7 +716,7 @@ public static void TestWriterAddFS(ж<testing.T> Ꮡt) {
         }
     }
     // Add subfolder into fsys to match what we'll read from the zip.
-    tests = append(tests.slice(-1, 2, 2), new WriteTest(Name: "subfolder"u8, Mode: (fs.FileMode)(365 | os.ModeDir)), tests[2]);
+    tests = append(tests.slice(0, 2, 2), new WriteTest(Name: "subfolder"u8, Mode: (fs.FileMode)(365 | os.ModeDir)), tests[2]);
     // read it back
     (var r, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(buf.Bytes())), (int64)buf.Len());
     if (err != default!) {

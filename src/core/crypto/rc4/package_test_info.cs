@@ -32,7 +32,7 @@ using static global::go.crypto.rc4_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/rc4/rc4_test.go", "rc4_test.cs", "AE+eAaKCgoKCyoKCgoKWgoKWgoKCloKCgoKUgoLcgoKCgoKCloKCgoKEgriCgoK4ooKCgpSEgriCpoKmgg==", "142-145:1")]
+[assembly: go.GoPositionMap("crypto/rc4/rc4_test.go", "rc4_test.cs", "ABcmADd4ooKCgoLKgoKCgpaCgpaCgoKWgoKCgpSCgtyCgoKCgoKWgoKCgoSCuIKCgriigoKClISCuIKmgqaC", "142-145:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

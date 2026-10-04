@@ -20,6 +20,8 @@ using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = io.fs_package;
 using go.os;
 using io;
@@ -541,7 +543,7 @@ internal static slice<byte> runTest(ж<testing.T> Ꮡt, @string test) {
 
 // doRace provokes a data race that generates a race detector report if run
 // under the race detector and is otherwise benign.
-internal static void doRace() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void doRace() {
     nint x = default!;
     var c1 = new channel<bool>(0);
     var c1ʗ1 = c1;
@@ -560,7 +562,7 @@ private static readonly @string testRaceReportsˢ = "TestRaceReports"u8;
 public static void TestRaceReports(ж<testing.T> Ꮡt) {
     if (Δos.Getenv(goWantHelperProcessˢ) == "1"u8) {
         // Generate a race detector report in a sub test.
-        Ꮡt.Run(subˢ2, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(subˢ2, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             doRace();
         });
         return;
@@ -689,7 +691,7 @@ public static void TestDeepSubtestRace(ж<testing.T> Ꮡt) {
     if (Δos.Getenv(goWantHelperProcessˢ) == "1"u8) {
         Ꮡt.Run(subˢ, (ж<testing.T> tΔ1) => {
             tΔ1.Run(subsubˢ, (ж<testing.T> tΔ2) => {
-                tΔ2.Run(subsubsubˢ, (ж<testing.T> tΔ3) => {
+                tΔ2.Run(subsubsubˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ3) => {
                     doRace();
                 });
             });
@@ -709,7 +711,7 @@ public static void TestDeepSubtestRace(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestRaceDuringParallelFailsAllSubtests(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRaceDuringParallelFailsAllSubtests(ж<testing.T> Ꮡt) {
     if (Δos.Getenv(goWantHelperProcessˢ) == "1"u8) {
         ref var ready = ref heap(new Δsync.WaitGroup(), out var Ꮡready);
         Ꮡready.Add(2);
@@ -1031,7 +1033,7 @@ internal static (slice<@string> runningTests, bool ok) parseRunningTests(slice<b
     return (default!, false);
 }
 
-public static void TestConcurrentRun(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentRun(ж<testing.T> Ꮡt) {
     // Regression test for https://go.dev/issue/64402:
     // this deadlocked after https://go.dev/cl/506755.
     var block = new channel<EmptyStruct>(0);

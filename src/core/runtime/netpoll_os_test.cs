@@ -6,6 +6,8 @@ namespace go;
 using Δruntime = runtime_package;
 using Δsync = sync_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -17,7 +19,7 @@ internal static ref Δsync.WaitGroup wg => ref Ꮡwg.Value;
     runtime_internal_test_package.NetpollGenericInit();
 }
 
-public static void BenchmarkNetpollBreak(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkNetpollBreak(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.StartTimer();

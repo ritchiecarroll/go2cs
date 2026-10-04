@@ -33,9 +33,9 @@ using static go.image.draw_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/draw/bench_test.go", "bench_test.cs", "ABs20oSClIKCggAHEKSCgoIABxCoooKCgqaUuIKUpIKCggAHEKSCgoLKpIKCggAHEKSCgoIABxCkgoKCAAcQpIKCgoKCgpQAChSmgriSgoKmgrikpoKUgoS8kqaCpoKmgqaCpoKmgqaCpoKmgqaCpoKmgqaCpoKmgqqSpoKmgqaC")]
-[assembly: go.GoPositionMap("image/draw/clip_test.go", "clip_test.cs", "AJsBugKCgoKCgoKC0oKUqIKClIKClIKCgsyCpoKClJSCgg==")]
-[assembly: go.GoPositionMap("image/draw/draw_test.go", "draw_test.cs", "ABw0gKSApIKmgoKUgoKCgoKCAAcQgoKUgoKCgoKCpoKmgoCC7IKC7oKCgIIADhyApICkgqaCgpSCgoKCgoIABxCCgpSCgoKCgoKmgoKUgoKCgoKmgqaCgILsgoLugoKAgsiCgoKmgqaCpoKCgoKmpoKCgoKmpoKCgoKmpoIACBKCgqamgoKCgqamgoKCgqamgoKCgqamgoKCgqYAgQGEAqaCgoKClIKCgoKCgpSCgpSCgpaCsoKUgoKClIIABxCmggAKFoKCgoK4lLTIgoKClKaCpoKUuIKCgpQAChKCgoKCgoKCgpSCgoKmlIKCgoIAChSSgoKCgoKCgoIACQiCAA4esoKSkoKygoKCgtyCgqaUgoKClJSCgoKUlIKCgriCABc4goKCgoKChIKEgIKkgIKkgILKgoKCgoKCgIIACBDSlIKCgoKCgoKCgoKAggAQHsKCgpSSgoKUhJyYmoKCgoKCgoKCgoKUAAwQzIKCgpSUlAAQIoKCgILIgII=", "586-595:1;774-782:1")]
+[assembly: go.GoPositionMap("image/draw/bench_test.go", "bench_test.cs", "ABMmAAcQ0oSClIKCggAHEKSCgoIABxCoooKCgqaUuIKUpIKCggAHEKSCgoLKpIKCggAHEKSCgoIABxCkgoKCAAcQpIKCgoKCgpQAChSmgriSgoKmgrikpoKUgoS8kqaCpoKmgqaCpoKmgqaCpoKmgqaCpoKmgqaCpoKmgqqSpoKmgqaC")]
+[assembly: go.GoPositionMap("image/draw/clip_test.go", "clip_test.cs", "ABYqAIQBkAKCgoKCgoKC0oKUqIKClIKClIKCgsyCpoKClJSCgg==")]
+[assembly: go.GoPositionMap("image/draw/draw_test.go", "draw_test.cs", "ABw0gKSApIKmgoKUgoKCgoKCAAcQgoKUgoKCgoKCpoKmgoCC7IKC7oKCgIIADhyApICkgqaCgpSCgoKCgoIABxCCgpSCgoKCgoKmgoKUgoKCgoKmgqaCgILsgoLugoKAgsiCgoKmgqaCpoKCgoKmpoKCgoKmpoKCgoKmpoIACBKCgqamgoKCgqamgoKCgqamgoKCgqamgoKCgqYANBYATO4BpoKCgoKUgoKCgoKClIKClIKCloKygpSCgoKUggAHEKaCAAoWgoKCgriUtMiCgoKUpoKmgpS4goKClAAKEoKCgoKCgoKClIKCgqaUgoKCggAKFJKCgoKCgoKCggAJCIIADh6ygpKSgrKCgoKC3IKCppSCgoKUlIKCgpSUgoKCuIIAFziCgoKCgoKEgoSAgqSAgqSAgsqCgoKCgoKAggAIENKUgoKCgoKCgoKCgoCCABAewoKClJKCgpSEnJiagoKCgoKCgoKCgpQACQykzIKCgpSUlAAQIoKCgILIgII=", "586-595:1;774-782:1")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

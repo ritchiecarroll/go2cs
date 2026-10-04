@@ -10,6 +10,8 @@ using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using static go.sync.atomic_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 using math;
 
@@ -116,7 +118,7 @@ public static void TestValuePanic(ж<testing.T> Ꮡt) {
     }))();
 }
 
-public static void TestValueConcurrent(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestValueConcurrent(ж<testing.T> Ꮡt) {
     var tests = new slice<any>[]{
         new any[]{(uint16)0, unchecked((uint16)(~(uint16)0)), (uint16)(1 + (2 << (int)(8))), (uint16)(3 + (4 << (int)(8)))}.slice(),
         new any[]{(uint32)0, ~(uint32)0, (uint32)(1 + (2 << (int)(16))), (uint32)(3 + (4 << (int)(16)))}.slice(),
@@ -236,7 +238,7 @@ public static void TestValue_Swap(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestValueSwapConcurrent(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestValueSwapConcurrent(ж<testing.T> Ꮡt) {
     ref var v = ref heap(new atomic.Value(), out var Ꮡv);
     ref var count = ref heap(new uint64(), out var Ꮡcount);
     ref var g = ref heap(new sync.WaitGroup(), out var Ꮡg);
@@ -335,7 +337,7 @@ public static void TestValue_CompareAndSwap(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestValueCompareAndSwapConcurrent(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestValueCompareAndSwapConcurrent(ж<testing.T> Ꮡt) {
     ref var v = ref heap(new atomic.Value(), out var Ꮡv);
     ref var w = ref heap(new sync.WaitGroup(), out var Ꮡw);
     Ꮡv.Store((nint)(0));

@@ -30,7 +30,7 @@ using static go.go.constant_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/constant/value_test.go", "value_test.cs", "AG6KAoKCgoKCloKCgpSAgoKClKSCqIKCgoKWgpaCzqKCggB3mAKCgoKEksqCtKK2goKWhIKCgoKWgoKWgoLKgoKCgpQAOHSCgoKAgqSAggAFEKKClpSkpKaAlIKCpoKApIK0tLSC2AAXOMLYtMT44oSClpSkgqQAFiaigsqCgoKCAAsYgoKCloKWgIKmgILagoIAAhSCgoKClICCpICC7IKCAAsYgoKogoK6goKCggAJFICkggAKGoKCgtyCkoKCgoKCgoKUlIIAFCaCgoCC", "692-706:1")]
+[assembly: global::go.GoPositionMap("go/constant/value_test.go", "value_test.cs", "ABYgACFcACZqAA4kgoKCgoKWgoKClICCgoKUpIKogoKCgpaCloLOooKCAAsGAGuSAoKCgoSSyoK0oraCgpaEgoKCgpaCgpaCgsqCgoKClMwADwYAI2KCgoKAgqSAggAFEKKClpSkpKaAlIKCpoKApIK0tLSC2KYAFDLC2LTExKTihIKWlKSCpAAKDgALGKKCyoKCgoLK7oKCgpaCloCCpoCC2oKCAAIUgoKCgpSAgqSAguyCggALGIKCqIKCuoKCgoIACRSApIIAChqCgoLcgpKCgoKCgoKClJSCAAoMAAkagoKAgg==", "692-706:1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

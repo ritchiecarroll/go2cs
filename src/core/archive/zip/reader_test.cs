@@ -19,6 +19,8 @@ using testing = testing_package;
 using fstest = go.testing.fstest_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.io;
 using go.path;
@@ -592,13 +594,13 @@ public static void TestReader(ж<testing.T> Ꮡt) {
         zt = vᴛ1;
 
         var ztʗ1 = zt;
-        Ꮡt.Run(zt.Name, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(zt.Name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             readTestZip(tΔ1, ztʗ1);
         });
     }
 }
 
-internal static void readTestZip(ж<testing.T> Ꮡt, ZipTest zt) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void readTestZip(ж<testing.T> Ꮡt, ZipTest zt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -738,7 +740,7 @@ internal static void readTestFile(ж<testing.T> Ꮡt, ZipTest zt, ZipTestFile ft
         return;
     }
     var end = (uint64)start + f.CompressedSize64;
-    var want = raw[(int)(start)..(int)(end)];
+    var want = raw.slice((nint)(start), (nint)(end));
     if (!bytes.Equal(got, want)) {
         Ꮡt.Logf("got %q"u8, got);
         Ꮡt.Logf("want %q"u8, want);
@@ -820,7 +822,7 @@ public static void TestInvalidFiles(ж<testing.T> Ꮡt) {
     var sig = new slice<byte>(4);
     binary.LittleEndian.PutUint32(sig, directoryEndSignature);
     for (nint i = 0; i < (nint)(size - 4); i += 4) {
-        copy(b[(int)(i)..(int)(i + 4)], sig);
+        copy(b.slice(i, i + 4), sig);
     }
     (_, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(b)), size);
     if (!AreEqual(err, ErrFormat)) {

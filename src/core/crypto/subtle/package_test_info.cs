@@ -32,7 +32,7 @@ using static global::go.crypto.subtle_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/subtle/xor_test.go", "xor_test.cs", "AA8egoKClIKCgoKCgpSUgoSChIKCloCCpKSCgIKkpICCpKaAgqSkgIKkAAwQgoKUgpSCgpSCgriCgoKCgoKygoKCgtyigoKCpLSC1rY=", "75-77:1;78-80:2;81-84:3;85-88:4;97-104:1;110-122:1")]
+[assembly: go.GoPositionMap("crypto/subtle/xor_test.go", "xor_test.cs", "AA8egoKClIKCgoKCgpSUgoSChIKCloCCpKSCgIKkpICCpKaAgqSkgIKkAAwQgoKUgpSCgpSCgriCgoKCgoKygoKCgtyigoKCpLSC1rai", "75-77:1;78-80:2;81-84:3;85-88:4;97-104:1;110-122:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

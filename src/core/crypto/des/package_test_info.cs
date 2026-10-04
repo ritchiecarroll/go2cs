@@ -31,7 +31,7 @@ using static global::go.crypto.des_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/des/des_test.go", "des_test.cs", "AMYL5BOCgoKUqJKysoKCgrqChILMkoKSgoKCzIKEgsqCgoKChILKgoKCgoSCyoKCgoKEgsqCgoSChILMkoKEgoSCzJKChIKEggAEELKChIKEggAEELKChIKEgsySgoSChILMkoKEgoSCzJKChIKEgsySgoSChILMkoKEgoSCzJKChIKEggAIDJKCloLoooKCgpSCgoKCuKKCgoKUgoKCgriigoKClIKCgoK4ooKCgpSCgoKC", "1277-1282:1;1298-1303:1;1512-1514:1;1516-1518:2")]
+[assembly: go.GoPositionMap("crypto/des/des_test.go", "des_test.cs", "ACcsAHbeAQApRgAlOgBDiAEARg4AwwGIAwA6BgCLA5gGACIGAJYCiAQAhwGQAoKCgpSokrKygoKCuoKEgsySgpKCgoLMgoSCyoKCgoKEgsqCgoKChILKgoKCgoSCyoKChIKEgsySgoSChILMkoKEgoSCAAQQsoKEgoSCAAQQsoKEgoSCzJKChIKEgsySgoSChILMkoKEgoSCzJKChIKEgsySgoSChILMkoKEgoSCAAgMkoKWguiigoKClIKCgoK4ooKCgpSCgoKCuKKCgoKUgoKCgriigoKClIKCgoI=", "1277-1282:1;1298-1303:1;1512-1514:1;1516-1518:2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

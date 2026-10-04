@@ -1225,7 +1225,7 @@ public static void TestReadOldGNUSparseMap(ж<testing.T> Ꮡt) {
 
         ref var blk = ref heap(new global::go.archive.tar_package.block(), out var Ꮡblk);
         ref var hdr = ref heap(new global::go.archive.tar_package.Header(), out var Ꮡhdr);
-        v.input = v.input[(int)(copy(blk[..], v.input))..];
+        v.input = v.input.slice(copy(blk[..], v.input));
         var tr = new Reader(r: new tar_test_package.bytes_ReaderжReader(bytes.NewReader(v.input)));
         var (got, err) = tr.readOldGNUSparseMap(Ꮡhdr, Ꮡblk);
         if (!slices.Equal<global::go.archive.tar_package.sparseDatas, global::go.archive.tar_package.sparseEntry>(got, v.wantMap)) {
@@ -1250,7 +1250,7 @@ public static void TestReadOldGNUSparseMap(ж<testing.T> Ꮡt) {
 }
 
 public static void TestReadGNUSparsePAXHeaders(ж<testing.T> Ꮡt) {
-    @string padInput(@string s) => s + ((sstring)(zeroBlock[..(int)(blockPadding((int64)len(s)))]));
+    @string padInput(@string s) => s + ((sstring)(zeroBlock.slice(0, (nint)(blockPadding((int64)len(s))))));
     var vectors = new TestReadGNUSparsePAXHeaders_vectors[]{new(
         inputHdrs: default!,
         wantErr: default!
@@ -1697,7 +1697,7 @@ public static void TestFileReader(ж<testing.T> Ꮡt) {
                 var b = new slice<byte>(tfΔ1.cnt);
                 var (n, err) = fr.Read(b);
                 {
-                    @string got = ((@string)(b[..(int)(n)])); if (got != tfΔ1.wantStr || !AreEqual(err, tfΔ1.wantErr)) {
+                    @string got = ((@string)(b.slice(0, n))); if (got != tfΔ1.wantStr || !AreEqual(err, tfΔ1.wantErr)) {
                         Ꮡt.Errorf("test %d.%d, Read(%d):\ngot  (%q, %v)\nwant (%q, %v)"u8, i, j, tfΔ1.cnt, got, err, tfΔ1.wantStr, tfΔ1.wantErr);
                     }
                 }

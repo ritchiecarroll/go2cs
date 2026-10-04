@@ -9,6 +9,8 @@ using Δruntime = runtime_package;
 using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using context = context_package;
 using static go.context_internal_test_package;
 
@@ -38,11 +40,11 @@ public static void BenchmarkCommonParentCancel(ж<testing.B> Ꮡb) {
                     Ꮡb.Fatal(shouldNotBeReachedˢ);
                 }
                 for (nint i = 0; i < 100; i++) {
-                    x /= x + 1;
+                    x = quo(x, x + 1);
                 }
                 cancel();
                 for (nint i = 0; i < 100; i++) {
-                    x /= x + 1;
+                    x = quo(x, x + 1);
                 }
             }
         });
@@ -55,17 +57,17 @@ public static void BenchmarkWithTimeout(ж<testing.B> Ꮡb) {
     for (nint concurrencyᴛ1 = 40; concurrencyᴛ1 <= 400000; concurrencyᴛ1 *= 100) {
         var concurrency = concurrencyᴛ1;
         @string name = fmt.Sprintf("concurrency=%d"u8, concurrency);
-        Ꮡb.Run(name, (ж<testing.B> bΔ1) => {
+        Ꮡb.Run(name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
             benchmarkWithTimeout(bΔ1, concurrency);
         });
     }
 }
 
-internal static void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concurrentContexts) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concurrentContexts) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     nint gomaxprocs = Δruntime.GOMAXPROCS(0);
-    nint perPContexts = concurrentContexts / gomaxprocs;
+    nint perPContexts = quo(concurrentContexts, gomaxprocs);
     var root = Background();
     // Generate concurrent contexts.
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -207,7 +209,7 @@ public static void BenchmarkDeepValueNewGoRoutine(ж<testing.B> Ꮡb) {
         for (nint i = 0; i < depth; i++) {
             ctx = WithValue(ctx, i, i);
         }
-        Ꮡb.Run(fmt.Sprintf("depth=%d"u8, depth), (ж<testing.B> bΔ1) => {
+        Ꮡb.Run(fmt.Sprintf("depth=%d"u8, depth), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
                 Ꮡwg.Add(1);

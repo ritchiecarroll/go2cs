@@ -25,8 +25,8 @@ internal static void diff(ж<testing.T> Ꮡt, slice<byte> dst, slice<byte> src) 
         var d = dst[i];
         var s = src[i];
         if (d != s) {
-            Ꮡt.Errorf("dst:%d: %s\n"u8, line, dst[(int)(offs)..(int)(i + 1)]);
-            Ꮡt.Errorf("src:%d: %s\n"u8, line, src[(int)(offs)..(int)(i + 1)]);
+            Ꮡt.Errorf("dst:%d: %s\n"u8, line, dst.slice(offs, i + 1));
+            Ꮡt.Errorf("src:%d: %s\n"u8, line, src.slice(offs, i + 1));
             return;
         }
         if (s == (rune)'\n') {

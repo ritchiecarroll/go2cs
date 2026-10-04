@@ -31,7 +31,7 @@ using static global::go.@internal.chacha8rand_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/chacha8rand/rand_test.go", "rand_test.cs", "ABMggoKCgoKCgoKUlMqCgoKCgoKCgoKUgoKClJTKgoKCgoKCuKKChIKU9oKSgu6CgoKCgoKCgpSU")]
+[assembly: go.GoPositionMap("internal/chacha8rand/rand_test.go", "rand_test.cs", "ABMggoKCgoKCgoKUlMqCgoKCgoKCgoKUgoKClJTKgoKCgoKCuKKChIKU9oKSgu6CgoKCgoKCgpSUAAYQlA==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

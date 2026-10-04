@@ -37,7 +37,7 @@ using static global::go.@internal.fmtsort_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/fmtsort/sort_test.go", "sort_test.cs", "ADNgooKCgpKUlJSmgoKCgoKClLS0tIIAPnaCgoKUgoKClIKClP7CgKSCgoKmpIKCgqakgoKCpqQADBSClIKUhqaCgoKUpoKCgpSmgoKClAAHEIKCgoIACAq4ABEkggANEIKC", "200-202:1")]
+[assembly: go.GoPositionMap("internal/fmtsort/sort_test.go", "sort_test.cs", "ABcoABs4ooKCgpKUlJSmgoKCgoKClLS0tIIADBgAMV6CgoKUgoKClIKClP7CgKSCgoKmpIKCgqakgoKCpqQACAy4gpSClIamgoKClKaCgoKUpoKCgpQABxCCgoKCAAgKuAARJIIADRCCgg==", "200-202:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

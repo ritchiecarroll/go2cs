@@ -8,11 +8,13 @@ using fmt = fmt_package;
 using maps = maps_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.runtime.pprof_package;
 
 partial class pprof_internal_test_package {
 
-public static void TestSetGoroutineLabels(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSetGoroutineLabels(ж<testing.T> Ꮡt) {
     var sync = new channel<EmptyStruct>(0);
     ref var wantLabels = ref heap<map<@string, @string>>(out var ᏑwantLabels);
     wantLabels = new map<@string, @string>{};
@@ -76,7 +78,7 @@ public static void TestDo(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Expected parent goroutine's profile labels to be empty before Do, got %v"u8, gotLabels);
         }
     }
-    Do(context.Background(), Labels(key1ˢ, value1ˢ, key2ˢ, value2ˢ), (context.Context ctx) => {
+    Do(context.Background(), Labels(key1ˢ, value1ˢ, key2ˢ, value2ˢ), [MethodImpl(MethodImplOptions.NoInlining)] (context.Context ctx) => {
         var wantLabelsΔ1 = new map<@string, @string>{["key1"u8] = "value1"u8, ["key2"u8] = "value2"u8};
         {
             var gotLabels = getProfLabel(); if (!maps.Equal<map<@string, @string>, map<@string, @string>, @string, @string>(gotLabels, wantLabelsΔ1)) {

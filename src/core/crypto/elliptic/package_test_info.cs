@@ -36,8 +36,8 @@ using static global::go.crypto.elliptic_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/elliptic/elliptic_test.go", "elliptic_test.cs", "ABImwpL2ggAJGoKUgoKSgvqCgoKCyoKCgoKCloKCgoKEgoLKgoKmsqaigoSSlJKWkpSSlpKUkpaSuoKCgoKUgoKUgoKWgpaAgsiAgqSCgoKAggAICIKCgoKClIKCgpSCyoKU1oKCuoKChIKCgoSAgqamgoKEgqiChICCAAUQsoIACwaigoKogoKWgoKCloKCgpaCgoKWgoKC3oCCgpQACwiCgoKCgoKUgoKCgpaCgoKCqIKWgoKClPqigpSCgpaCgpaClIK4goKCgoKCAAkKggAFEoKCksqCgoKCgoKUyoKCgoKCgoIACQqCgoKigoKCgoK4ooKCgoKC", "43-46:1;52-56:1;61-77:1;157-170:1;229-233:1;278-283:1;284-289:2;291-297:3;303-309:4;337-343:1;358-360:1;365-374:1;378-386:1;390-412:1;392-401:1.1;402-411:1.2")]
-[assembly: go.GoPositionMap("crypto/elliptic/p224_test.go", "p224_test.cs", "AJsCtASCgoKCgpSCgpSCypSCgoKClIKClIL6lIKCgoI=")]
-[assembly: go.GoPositionMap("crypto/elliptic/p256_test.go", "p256_test.cs", "ACNGgoKEgoKClIKChIKCgoKWgsqCgoKCgoKChIKCAAgSgoKCAAgGgoyCloKEgoKCgpaCgqiCgqiCgqiCgoKWlIKCuIKCgoKCgpSCgg==")]
+[assembly: go.GoPositionMap("crypto/elliptic/p224_test.go", "p224_test.cs", "ABQmAIYCjgSCgoKCgpSCgpSCypSCgoKClIKClIL6lIKCgoI=")]
+[assembly: go.GoPositionMap("crypto/elliptic/p256_test.go", "p256_test.cs", "ABIkABAigoKEgoKClIKChIKCgoKWgsqCgoKCgoKChIKCAAgSgoKCAAgGgoyCloKEgoKCgpaCgqiCgqiCgqiCgoKWlIKCuIKCgoKCgpSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

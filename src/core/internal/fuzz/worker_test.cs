@@ -224,7 +224,7 @@ public static void BenchmarkWorkerMinimize(ж<testing.B> Ꮡb) {
         var ctx = context.Background();
         for (nint sz = 1; sz <= len(bytes); sz <<= (int)(1)) {
             nint szΔ1 = sz;
-            var input = new any[]{bytes[..(int)(szΔ1)]}.slice();
+            var input = new any[]{bytes.slice(0, szΔ1)}.slice();
             var encodedVals = marshalCorpusFile(input.ꓸꓸꓸ);
             mem = ᐸꟷ((~ws).memMu);
             mem.setValue(encodedVals);

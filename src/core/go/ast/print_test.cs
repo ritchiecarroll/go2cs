@@ -106,7 +106,7 @@ internal static @string trim(@string s) {
             i++;
         }
     }
-    return strings.Join(lines[0..(int)(i)], "\n"u8);
+    return strings.Join(lines.slice(0, i), "\n"u8);
 }
 
 public static void TestPrint(ж<testing.T> Ꮡt) {

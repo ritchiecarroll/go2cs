@@ -133,8 +133,8 @@ public static void TestImportedTypes(ж<testing.T> Ꮡt) {
         if (i < 0) {
             Ꮡt.Fatal(invalidTestDataFormatˢ);
         }
-        @string importPath = test.name[..(int)(i)];
-        @string objName = test.name[(int)(i + 1)..];
+        @string importPath = test.name.slice(0, i);
+        @string objName = test.name.slice(i + 1);
         var (pkg, err) = importer.ImportFrom(importPath, "."u8, 0);
         if (err != default!) {
             Ꮡt.Error(err);

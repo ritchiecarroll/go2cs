@@ -157,7 +157,7 @@ public static void TestCmdBisect(ж<testing.T> Ꮡt) {
     slice<@string> have = default!;
     foreach (var (_, line) in strings.Split(((@string)@out), "\n"u8)) {
         if (strings.Contains(line, godebugTestGoˢ2)) {
-            have = append(have, line[(int)(strings.LastIndex(line, godebugTestGoˢ2))..]);
+            have = append(have, line.slice(strings.LastIndex(line, godebugTestGoˢ2)));
         }
     }
     slices.Sort<slice<@string>, @string>(have);

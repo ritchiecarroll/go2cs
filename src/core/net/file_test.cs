@@ -8,6 +8,8 @@ using reflect = reflect_package;
 using Δruntime = runtime_package;
 using Δsync = sync_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.net_package;
 using time = time_package;
 
@@ -163,7 +165,7 @@ internal static slice<fileConnTestsᴛ1> fileListenerTests = new fileConnTests�
     new("unixpacket"u8)
 }.slice();
 
-public static void TestFileListener(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestFileListener(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
@@ -366,7 +368,7 @@ public static void TestFilePacketConn(ж<testing.T> Ꮡt) {
 internal static readonly object tcpNotSupportedˢ = (@string)"tcp not supported"u8;
 
 // Issue 24483.
-public static void TestFileCloseRace(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestFileCloseRace(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;

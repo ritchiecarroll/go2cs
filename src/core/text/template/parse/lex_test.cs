@@ -591,7 +591,7 @@ public static void TestPos(ж<testing.T> Ꮡt) {
             if (len(items) == len(test.items)) {
                 // Detailed print; avoid item.String() to expose the position value.
                 foreach (var (i, _) in items) {
-                    if (!equal(items[(int)(i)..(int)(i + 1)], test.items[(int)(i)..(int)(i + 1)], true)) {
+                    if (!equal(items.slice(i, i + 1), test.items.slice(i, i + 1), true)) {
                         var i1 = items[i];
                         var i2 = test.items[i];
                         Ꮡt.Errorf("\t#%d: got {%v %d %q %d} expected {%v %d %q %d}"u8,

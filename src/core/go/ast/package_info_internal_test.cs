@@ -34,8 +34,8 @@ using static go.go.ast_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/ast/ast_test.go", "ast_test.cs", "AChSgoKCspaCggAbNIKCgII=")]
-[assembly: global::go.GoPositionMap("go/ast/print_test.go", "print_test.cs", "AF6QAaKCgqKCgoKmpoKCgoKAgqSAkg==")]
+[assembly: global::go.GoPositionMap("go/ast/ast_test.go", "ast_test.cs", "AA8WABg8goKCspaCggAJCgARKoKCgII=")]
+[assembly: global::go.GoPositionMap("go/ast/print_test.go", "print_test.cs", "ACYYADd4ooKCooKCgqamgoKCgoCCpICS")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

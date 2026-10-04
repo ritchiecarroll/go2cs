@@ -66,9 +66,9 @@ using static global::go.@internal.trace_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/gc_test.go", "gc_test.cs", "ABEkooKUgoIACAaC3gAHEIQACRyAgqTKgpSCgoIACg7GlJSiqIKCgoIABhCAkoKCgoKCgoKCgvqSgoKClIKCgpSCgoKUgpSmuKKAgqaogoKCgoKClIKUlJKCgpS6poKClIKCgpSUlII=", "87-118:1;104-104:1.1;119-142:2;154-166:1;167-174:2")]
-[assembly: go.GoPositionMap("internal/trace/oldtrace_test.go", "oldtrace_test.cs", "ABcgooKClIKCgoKClKKCgpSUgoKWgoKCgoKClJSAgqaCggAKFpSAgsaCtoKCAAoOgg==", "28-84:1")]
-[assembly: go.GoPositionMap("internal/trace/reader_test.go", "reader_test.cs", "AB84goKClIKCgoKUgoKClMqItIKCgpSCgoKWgqaUpKSkpIKkpKQADBKigoKAgqSUgoKCgpSCgIKklIKUgIK2gILIgoSCgpSCgoKUgoKClIKUgIK25qKEgoKUgoKClJKAgqQ=", "39-45:1;55-93:1")]
+[assembly: go.GoPositionMap("internal/trace/gc_test.go", "gc_test.cs", "ABEkooKUgoIACAaC3gAHEIQACRyAgqTKgpSCgoIACg7GlJSiqIKCgoIABhCAkoKCgoKCgoKCgtiSkoKCgpSCgoKUgoKClIKUpriigIKmqIKCgoKCgpSClJSSgoKUuqaCgpSCgoKUlJSC", "87-118:1;104-104:1.1;119-142:2;154-166:1;167-174:2")]
+[assembly: go.GoPositionMap("internal/trace/oldtrace_test.go", "oldtrace_test.cs", "ABcgooKClIKCgoKClKKCgpSUgoKWgoKCgoKClJSAgqaCggAKFpSAgsaCtoKC+qSC", "28-84:1")]
+[assembly: go.GoPositionMap("internal/trace/reader_test.go", "reader_test.cs", "ABgwgtaCgoKUgoKCgpSCgoKUyoi0goKClIKCgpaCppSkpKSkgqSkpAAMEqKCgoCCpJSCgoKClIKAgqSUgpSAgraAgsiChIKClIKCgpSCgoKUgpSAgrbmooSCgpSCgoKUkoCCpA==", "39-45:1;55-93:1")]
 [assembly: go.GoPositionMap("internal/trace/summary_test.go", "summary_test.cs", "ABgcgoKsgoSCgoKAgqSAgraClIKUggALCIKCAAwggoKCgoKUgqaCAA4IgoIAABCCgpQAR5ABgoKClIKogoKktqiCgpSCgIKUtoKCuoKUgoLMgpSCgoKClILMlIK4goKCptaigoKUhJSClIKCuIKCgqaWgoKmgpKClIKUlOailIK2gpSCgpSCgqaCgpSClICC2KaUgraClIKClIKCpoKClIKUgILYAAsIooKUgpSClIKUgpSCgqaCgsqCgoKCqIKCmJKCgoKUgpSogoLsgoCClLaCgg==", "89-93:1")]
 [assembly: go.GoPositionMap("internal/trace/trace_test.go", "trace_test.cs", "ACYwgoIACiCCgpSCgoKUgpSCgpSClIKkgqSCpIKCgriCggAIDILWgoSUpOaipoKCgoKCgoKClIKUgIKkgt6CgoKCgpSCgoKSgpSClIKUgoKCgoKCgqaCpoKmgqQABhCCgoKCqIKCgoKUgriCgoKogoKClAAICqKOAAwMgoKCgpSCgoKUgsqCgpSCAAkUgpSCgpSCgoKUgpSClLaClLaClLaClLaUgvqC1oIAEAaiggABFgBPngHuyJSCABImgoKClICCtpSCgpSCgoKUgpSCgpSClIKClIKkpIKkgqSCgoKCuIKCAAgMgpSk1oKUpNaC1oKUgqTWgqaCkoSCgpSCgoKUgpSWloKEgJKkooKAkoIAEwqCloKEgoKUgoKUgpSClJSUlIzSgpSAgoKUpJaWgqi4goLulMimkpSSgpSUkoKU", "25-82:1;100-209:1;213-302:1;314-496:1;438-448:1.1;533-552:1;578-644:1;645-647:2;648-653:3;654-659:4")]
 // </GoSourcePositionMaps>

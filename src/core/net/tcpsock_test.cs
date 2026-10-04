@@ -15,6 +15,8 @@ using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.net_package;
 
 partial class net_internal_test_package {
@@ -66,7 +68,7 @@ public static void BenchmarkTCP6PersistentTimeout(ж<testing.B> Ꮡb) {
     benchmarkTCP(Ꮡb, true, true, "[::1]:0"u8);
 }
 
-internal static void benchmarkTCP(ж<testing.B> Ꮡb, bool persistent, bool timeout, @string laddr) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkTCP(ж<testing.B> Ꮡb, bool persistent, bool timeout, @string laddr) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -78,7 +80,7 @@ internal static void benchmarkTCP(ж<testing.B> Ꮡb, bool persistent, bool time
         nint msgs = 1;
         if (persistent) {
             conns = numConcurrent;
-            msgs = b.N / conns;
+            msgs = quo(b.N, conns);
             if (msgs == 0) {
                 msgs = 1;
             }
@@ -117,7 +119,7 @@ internal static void benchmarkTCP(ж<testing.B> Ꮡb, bool persistent, bool time
         var recvMsgʗ1 = recvMsg;
         var sendMsgʗ1 = sendMsg;
         var serverSemʗ1 = serverSem;
-        goǃ(() => {
+        goǃ([MethodImpl(MethodImplOptions.NoInlining)] () => {
             while (ᐧ) {
                 var (c, errΔ3) = lnʗ2.Accept();
                 if (errΔ3 != default!) {
@@ -207,7 +209,7 @@ public static void BenchmarkTCP6ConcurrentReadWrite(ж<testing.B> Ꮡb) {
     benchmarkTCPConcurrentReadWrite(Ꮡb, "[::1]:0"u8);
 }
 
-internal static void benchmarkTCPConcurrentReadWrite(ж<testing.B> Ꮡb, @string laddr) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkTCPConcurrentReadWrite(ж<testing.B> Ꮡb, @string laddr) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -219,7 +221,7 @@ internal static void benchmarkTCPConcurrentReadWrite(ж<testing.B> Ꮡb, @string
         // Such pattern is used in net/http and net/rpc.
         b.StopTimer();
         nint P = Δruntime.GOMAXPROCS(0);
-        nint N = b.N / P;
+        nint N = quo(b.N, P);
         nint W = 1000;
         // Setup P client/server connections.
         var clients = new slice<global::go.net_package.Conn>(P);
@@ -512,7 +514,7 @@ public static void TestIPv6LinkLocalUnicastTCP(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestTCPConcurrentAccept(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTCPConcurrentAccept(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(4), ref ᒐ);
@@ -561,7 +563,7 @@ public static void TestTCPConcurrentAccept(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestTCPReadWriteAllocs(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTCPReadWriteAllocs(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
@@ -653,7 +655,7 @@ public static void TestTCPReadWriteAllocs(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestTCPStress(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTCPStress(ж<testing.T> Ꮡt) {
     const nint conns = 2;
     UntypedInt msgLen = 512;
     nint msgs = (nint)10000;
@@ -689,7 +691,7 @@ public static void TestTCPStress(ж<testing.T> Ꮡt) {
     var lnʗ1 = ln;
     var recvMsgʗ1 = recvMsg;
     var sendMsgʗ1 = sendMsg;
-    goǃ(() => {
+    goǃ([MethodImpl(MethodImplOptions.NoInlining)] () => {
         GoFrame ᒐ = default;
         try {
             var doneʗ2 = doneʗ1;
@@ -771,7 +773,7 @@ public static void TestTCPBig(ж<testing.T> Ꮡt) {
         Ꮡt.Skip(testDisabledUseTcpbigToˢ);
     }
     foreach (var (_, writev) in new bool[]{false, true}.slice()) {
-        Ꮡt.Run(fmt.Sprintf("writev=%v"u8, writev), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(fmt.Sprintf("writev=%v"u8, writev), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), tcpˢ);
@@ -826,7 +828,7 @@ public static void TestTCPBig(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestCopyPipeIntoTCP(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCopyPipeIntoTCP(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
@@ -916,7 +918,7 @@ public static void TestCopyPipeIntoTCP(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void BenchmarkSetReadDeadline(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkSetReadDeadline(ж<testing.B> Ꮡb) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -985,7 +987,7 @@ public static void TestDialTCPDefaultKeepAlive(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestTCPListenAfterClose(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTCPListenAfterClose(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // Regression test for https://go.dev/issue/50216:

@@ -27,7 +27,7 @@ partial class heap_internal_test_package {
 [GoRecv] internal static any /*v*/ Pop(this ref myHeap h) {
     any v = default!;
 
-    (h, v) = ((h)[..(int)(h.Len() - 1)], (h)[h.Len() - 1]);
+    (h, v) = ((h).slice(0, h.Len() - 1), (h)[h.Len() - 1]);
     return v;
 }
 

@@ -75,7 +75,7 @@ public static void TestTestdata(ж<testing.T> Ꮡt) {
             foreach (var (_, f) in (~a).Files[1..]) {
                 var want = stripDollarsʗ1(f.Data);
                 while (len(want) >= 2 && want[len(want) - 1] == (rune)'\n' && want[len(want) - 2] == (rune)'\n') {
-                    want = want[..(int)(len(want) - 1)];
+                    want = want.slice(0, len(want) - 1);
                 }
                 slice<byte> @out = default!;
                 var exprᴛ1 = f.Name;

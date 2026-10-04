@@ -138,7 +138,7 @@ public static void TestMetaDataEncoderDecoder(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("err reading function %d: %v"u8, i, errΔ1);
             }
         }
-        @string res = cmpFuncDesc(cases[(nint)(i)], fn);
+        @string res = cmpFuncDesc(cases[i], fn);
         if (res != ""u8) {
             Ꮡt.Errorf("ReadFunc(%d): %s"u8, i, res);
         }
@@ -343,7 +343,7 @@ public static void TestMetaDataDecodeLitFlagIssue57942(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("err reading function %d: %v"u8, i, errΔ1);
             }
         }
-        @string res = cmpFuncDesc(wantfds[(nint)(i)], fn);
+        @string res = cmpFuncDesc(wantfds[i], fn);
         if (res != ""u8) {
             Ꮡt.Errorf("ReadFunc(%d): %s"u8, i, res);
         }

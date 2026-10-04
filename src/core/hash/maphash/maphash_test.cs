@@ -13,6 +13,8 @@ using strings = strings_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.hash.maphash_package;
 
 partial class maphash_internal_test_package {
@@ -228,7 +230,7 @@ public static void TestSeedFromReset(ж<testing.T> Ꮡt) {
 internal static T negativeZero<T>()
     where T : /* float32 | float64 */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
-    T f = default!;
+    T f = GoZero<T>();
     f = -f;
     return f;
 }
@@ -334,14 +336,14 @@ internal static void testComparable<T, Tᴺ>(ж<testing.T> Ꮡt, T v, params Spa
 internal static byte use;
 
 //go:noinline
-internal static void stackGrow(nint dep) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void stackGrow(nint dep) {
     if (dep == 0) {
         return;
     }
     array<byte> local = new(1024);
     // make sure local is allocated on the stack.
-    local[(nint)(randUint64() % 1024)] = (byte)randUint64();
-    use = local[(nint)(randUint64() % 1024)];
+    local[randUint64() % 1024] = (byte)randUint64();
+    use = local[randUint64() % 1024];
     stackGrow(dep - 1);
 }
 

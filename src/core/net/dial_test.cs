@@ -17,6 +17,8 @@ using syscall = syscall_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using net.@internal;
 using socktest = net.@internal.socktest_package;
 using static go.net_package;
@@ -93,7 +95,7 @@ public static void TestDialLocal(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object bothIPv4AndIPv6Areˢ = (@string)"both IPv4 and IPv6 are required"u8;
 
-public static void TestDialerDualStackFDLeak(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDialerDualStackFDLeak(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
@@ -276,7 +278,7 @@ public static void TestDialParallel(ж<testing.T> Ꮡt) {
         ttΔ1 = tt;
         var makeAddrsʗ1 = makeAddrs;
         var ttʗ1 = ttΔ1;
-        Ꮡt.Run(fmt.Sprint(iΔ1), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(fmt.Sprint(iΔ1), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             var ttʗ2 = ttʗ1;
             var dialTCP = (ж<global::go.net_package.TCPConn>, error) (context.Context ctxΔ1, @string network, ж<global::go.net_package.TCPAddr> laddr, ж<global::go.net_package.TCPAddr> raddr) => {
                 @string n = tcp6ˢ;
@@ -850,7 +852,7 @@ public static void TestDialerKeepAlive(ж<testing.T> Ꮡt) {
 internal static readonly object timeoutWaitingForDialToˢ = (@string)"timeout waiting for dial to fail"u8;
 internal static readonly object unexpectedSuccessfulˢ = (@string)"unexpected successful connection"u8;
 
-public static void TestDialCancel(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDialCancel(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         mustHaveExternalNetwork(Ꮡt);
@@ -940,7 +942,10 @@ public static void TestDialCancel(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object avoidingTimeSleepˢ = (@string)"avoiding time.Sleep"u8;
 
-public static void TestCancelAfterDial(ж<testing.T> Ꮡt) {
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string messageᶜ = "echo!\n"u8;
+
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCancelAfterDial(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
@@ -996,7 +1001,7 @@ public static void TestCancelAfterDial(ж<testing.T> Ꮡt) {
                 var cʗ1 = c;
                 defer(() => cʗ1.Close(), ref ᒐ);
                 // Send some data to confirm that the connection is still alive.
-                @string message = "echo!\n"u8;
+                @string message = messageᶜ;
                 {
                     var (_, errΔ1) = c.Write(slice<byte>(message)); if (errΔ1 != default!) {
                         Ꮡt.Fatal(errΔ1);

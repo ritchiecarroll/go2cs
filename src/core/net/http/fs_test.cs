@@ -170,7 +170,7 @@ Cases:
         @string ct = (~respΔ1).Header.Get(contentTypeˢ);
         if (len(rt.ranges) == 1) {
             var rng = rt.ranges[0];
-            var wantBody = @file[(int)(rng.start)..(int)(rng.end)];
+            var wantBody = @file.slice((nint)(rng.start), (nint)(rng.end));
             if (!bytes.Equal(bodyΔ2, wantBody)) {
                 Ꮡt.Errorf("range=%q: body = %q, want %q"u8, rt.r, bodyΔ2, wantBody);
             }
@@ -217,7 +217,7 @@ Cases:
                     Ꮡt.Errorf("range=%q, reading part index %d body: %v"u8, rt.r, ri, errΔ2);
                     goto continue_Cases;
                 }
-                var wantBody = @file[(int)(rng.start)..(int)(rng.end)];
+                var wantBody = @file.slice((nint)(rng.start), (nint)(rng.end));
                 if (!bytes.Equal(bodyΔ3, wantBody)) {
                     Ꮡt.Errorf("range=%q: body = %q, want %q"u8, rt.r, bodyΔ3, wantBody);
                 }

@@ -23,6 +23,8 @@ using syscall = syscall_package;
 using Δtesting = testing_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.io;
 using go.os;
 using static go.os_internal_test_package;
@@ -210,7 +212,7 @@ public static void TestStdPipe(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object iOOnClosedPipeˢ = (@string)"I/O on closed pipe unexpectedly succeeded"u8;
 
-internal static void testClosedPipeRace(ж<Δtesting.T> Ꮡt, bool read) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testClosedPipeRace(ж<Δtesting.T> Ꮡt, bool read) {
     GoFrame ᒐ = default;
     try {
         // This test cannot be run in parallel due to the same race as for TestEPIPE.
@@ -370,7 +372,7 @@ public static void TestCloseWithBlockingReadByFd(ж<Δtesting.T> Ꮡt) {
 }
 
 // Test that we don't let a blocking read prevent a close.
-internal static void testCloseWithBlockingRead(ж<Δtesting.T> Ꮡt, ж<Δos.File> Ꮡr, ж<Δos.File> Ꮡw) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testCloseWithBlockingRead(ж<Δtesting.T> Ꮡt, ж<Δos.File> Ꮡr, ж<Δos.File> Ꮡw) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
     ref var w = ref Ꮡw.DerefOrNull();
@@ -426,7 +428,7 @@ public static void TestPipeEOF(ж<Δtesting.T> Ꮡt) {
 //
 // This scenario previously failed to unblock the Read call on darwin.
 // (See https://go.dev/issue/24164.)
-internal static void testPipeEOF(ж<Δtesting.T> Ꮡt, Δio.ReadCloser r, Δio.WriteCloser w) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testPipeEOF(ж<Δtesting.T> Ꮡt, Δio.ReadCloser r, Δio.WriteCloser w) {
     GoFrame ᒐ = default;
     try {
         // parkDelay is an arbitrary delay we wait for a pipe-reader goroutine to park
@@ -492,7 +494,7 @@ internal static void testPipeEOF(ж<Δtesting.T> Ꮡt, Δio.ReadCloser r, Δio.W
 }
 
 // Issue 24481.
-public static void TestFdRace(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestFdRace(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // This test starts 100 simultaneous goroutines, which could bury a more
@@ -533,7 +535,7 @@ public static void TestFdRace(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object readTimedOutˢ = (@string)"read timed out"u8;
 
-public static void TestFdReadRace(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestFdReadRace(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

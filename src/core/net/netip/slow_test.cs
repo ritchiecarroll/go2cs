@@ -113,13 +113,13 @@ internal static (@string, error) normalizeIPv6Slow(@string orig) {
     if (i == -1) {
         return ("", fmt.Errorf("netaddr.ParseIP(%q): invalid IP address"u8, orig));
     }
-    if (strings.Contains(s[(int)(i + 1)..], "."u8)) {
-        var (ip, err) = parseIPv4Slow(s[(int)(i + 1)..]);
+    if (strings.Contains(s.slice(i + 1), "."u8)) {
+        var (ip, err) = parseIPv4Slow(s.slice(i + 1));
         if (err != default!) {
             return ("", err);
         }
         var a4 = ip.As4();
-        s = fmt.Sprintf("%s:%02x%02x:%02x%02x"u8, s[..(int)(i)], a4[0], a4[1], a4[2], a4[3]);
+        s = fmt.Sprintf("%s:%02x%02x:%02x%02x"u8, s.slice(0, i), a4[0], a4[1], a4[2], a4[3]);
     }
     // Find and expand a ::, if any.
     var fs = strings.Split(s, "::"u8);
@@ -149,7 +149,7 @@ internal static (@string, error) normalizeIPv6Slow(@string orig) {
             // fields to feature in the final normalized address.
             fs = append(fs, lhs);
         }
-        fs = appendꓸꓸꓸ(fs, zeros[..(int)(8 - nblocks)]);
+        fs = appendꓸꓸꓸ(fs, zeros.slice(0, 8 - nblocks));
         if (rhs != ""u8) {
             fs = append(fs, rhs);
         }

@@ -351,7 +351,7 @@ internal static readonly @string tmpnovolˢ = "{{tmpnovol}}"u8;
 public static void TestToNorm(ж<testing.T> Ꮡt) {
     var stubBase = (@string, error) (@string path) => {
         @string vol = filepath.VolumeName(path);
-        path = path[(int)(len(vol))..];
+        path = path.slice(len(vol));
         if (strings.Contains(path, "/"u8)) {
             return ("", fmt.Errorf("invalid path is given to base: %s"u8, vol + path));
         }
@@ -366,7 +366,7 @@ public static void TestToNorm(ж<testing.T> Ꮡt) {
         if (i == -1) {
             return (strings.ToUpper(path), default!);
         }
-        return (strings.ToUpper(path[(int)(i + 1)..]), default!);
+        return (strings.ToUpper(path.slice(i + 1)), default!);
     };
     // On this test, toNorm should be same as string.ToUpper(filepath.Clean(path)) except empty string.
     var tests = new TestToNorm_tests[]{
@@ -443,7 +443,7 @@ public static void TestToNorm(ж<testing.T> Ꮡt) {
     if (len(tmpVol) != 2) {
         Ꮡt.Fatalf("unexpected temp volume name %q"u8, tmpVol);
     }
-    @string tmpNoVol = ctmp[(int)(len(tmpVol))..];
+    @string tmpNoVol = ctmp.slice(len(tmpVol));
     var replacer = strings.NewReplacer(tmpˢ, ctmp, tmpvolˢ, tmpVol, tmpnovolˢ, tmpNoVol);
     foreach (var (_, test) in testsDir) {
         @string wd = replacer.Replace(test.wd);
@@ -677,7 +677,7 @@ public static void TestNTNamespaceSymlink(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    target = filepath.Join(target, @file[(int)(len(filepath.VolumeName(@file)))..]);
+    target = filepath.Join(target, @file.slice(len(filepath.VolumeName(@file))));
     @string filelink = filepath.Join(tmpdir, filelinkˢ);
     (output, err) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, filelink, target).CombinedOutput();
     if (err != default!) {

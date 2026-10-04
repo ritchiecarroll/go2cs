@@ -231,7 +231,7 @@ public static void TestStringsInScriptsWithJsonContentTypeAreCorrectlyEscaped(ж
             ref var got = ref heap(new @string(), out var Ꮡgot);
             {
                 var err = json.Unmarshal(trimmed, Ꮡgot); if (err != default!) {
-                    tΔ1.Fatalf("Cannot parse JS string %q as JSON: %v"u8, trimmed[1..(int)(len(trimmed) - 1)], err);
+                    tΔ1.Fatalf("Cannot parse JS string %q as JSON: %v"u8, trimmed.slice(1, len(trimmed) - 1), err);
                 }
             }
             if (got != ttʗ1.@in) {

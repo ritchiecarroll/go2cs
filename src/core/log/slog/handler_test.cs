@@ -16,6 +16,8 @@ using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.encoding;
 using path;
 using static go.log.slog_package;
@@ -131,7 +133,7 @@ public static void TestConcurrentWrites(ж<testing.T> Ꮡt) {
     nint count = 1000;
     foreach (var (_, handlerType) in new @string[]{"text"u8, "json"u8}.slice()) {
         var ctxʗ1 = ctx;
-        Ꮡt.Run(handlerType, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(handlerType, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             global::go.log.slog_package.ΔHandler h = default!;
             var exprᴛ1 = handlerType;

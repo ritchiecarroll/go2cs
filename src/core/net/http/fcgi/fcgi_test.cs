@@ -10,6 +10,8 @@ using http = go.net.http_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.net;
 using static go.net.http.fcgi_package;
 
@@ -32,7 +34,7 @@ public static void TestSize(ж<testing.T> Ꮡt) {
     var b = new slice<byte>(4);
     foreach (var (i, test) in sizeTests) {
         nint n = encodeSize(b, test.size);
-        if (!bytes.Equal(b[..(int)(n)], test.bytes)) {
+        if (!bytes.Equal(b.slice(0, n), test.bytes)) {
             Ꮡt.Errorf("%d expected %x, encoded %x"u8, i, test.bytes, b);
         }
         (var size, n) = readSize(test.bytes);
@@ -460,7 +462,7 @@ internal static readonly object fastCGIChildClosedˢ = (@string)"FastCGI child c
 
 // Test whether server properly closes connection when processing slow
 // requests
-public static void TestSlowRequest(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSlowRequest(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (pr, pw) = io.Pipe();

@@ -63,7 +63,7 @@ using static global::go.net.http.cgi_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("net/http/cgi/child_test.go", "child_test.cs", "ABwkggAMGoKClICSpICSpICSpICCpICSpIKUgJKkgJKkgJKkgpSClICS+IIACRSCgpSAkqSC6ILugoKUgpSAkviCAAgSgoKUgpSAksiCAAcQgoKUgJIADQiCABQyspKCyoKClICCpIKCgIKkgg==", "184-206:1")]
-[assembly: go.GoPositionMap("net/http/cgi/host_test.go", "host_test.cs", "ACE6tIKClqaCgoKClIKmpoKCgoLWxoKCgoKCgpS0tIKCgoKmtoKClIKCgqaCpoL4goK4ABImhICSpICS+IKCuAASKIKCgoKmgpKClIK4ytaCgrgABxDWgoK47qaCgqbcAAYYsoKmyqyAggAICoKCuO4ADAaCgoy47qaC6JKC/riCgoCSAAkKgoK4goCSpICS+IKCgoKUyrgABhDyhLiClIKClIKCgpSCgpSSgoKCloKUgoSCgoKCgpQACQyigoKCgoK46IKCksqmhIKCuKbWgoKEkgAIEtzmgoKCzIKCgoCSAAkIggAJGoKCgg==", "260-264:1;348-351:1")]
+[assembly: go.GoPositionMap("net/http/cgi/host_test.go", "host_test.cs", "ACM6tIKClqaCgoKClIKmpoKCgoLWxoKCgoKCgpS0tIKCgoKmtoKClIKCgqaCpoL4goK4ABImhICSpICS+IKCuAASKIKCgoKmgpKClIK4ytaCgrgABxDWgoK47qaCgqbcAAYYsoKmyqyAggAICoKCuO4ADAaCgoy47qaC6JKC/riCgoCSAAkKgoK4goCSpICS+IKCgoKUyrgABhDyhLiClIKClIKCgpSCgpSSgoKCloKUgoSCgoKCgpS02KKCgoKCgrjogoKSyqaEgoK4ptaCgoSSAAgS3OaCgoLMgoKCgJIACQiCAAkagoKC", "260-264:1;348-351:1")]
 [assembly: go.GoPositionMap("net/http/cgi/integration_test.go", "integration_test.cs", "AB42ooS4ABImhICSpICSAAkSggAKELKClIKClIKU2qKEuIKCgoKEgoLsooS4poKAkgAIDKKEuKaCAAgGgoS4ABQysqKCgoKAggAJDpDSgNKApIK4poKC", "179-186:1")]
 // </GoSourcePositionMaps>
 

@@ -42,8 +42,8 @@ using static global::go.go.build.constraint_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/build/constraint/expr_test.go", "expr_test.cs", "ACtUgrKSgoIAGzSCspKCgoKCgpSClIKClJSC3OKCgIKAgoKkuIIAFySCspKCgpSCABQmgrKSgoKUggATJIKykoKClIKCgpSSgpSCggAUMIKykoKCABs2grKSgoKCpJSUgoKUggAXKoKykoKClIKCgqSUlIKClIKClIIADQyCABQqkoKCooKClAAMDoKCAAwakoKCpA==", "44-49:1;75-95:1;100-108:1;131-139:1;158-166:1;184-203:1;194-197:1.1;226-231:1;258-275:1;296-321:1;347-358:1;377-384:1")]
-[assembly: global::go.GoPositionMap("go/build/constraint/vers_test.go", "vers_test.cs", "AB04goKCgpSCgoKklII=")]
+[assembly: global::go.GoPositionMap("go/build/constraint/expr_test.go", "expr_test.cs", "ABQgABY0grKSgoIACgwAECiCspKCgoKCgpSClIKClJSC3OKCgIKAgoKkuIIACwYACx6CspKCgpSCAAoMAAkagrKSgoKUggALDAAHGIKykoKClIKCgpSSgpSCgu4ADSKCspKCggALDAAPKoKykoKCgqSUlIKClIIADAwACh6CspKCgpSCgoKklJSCgpSCgpSCAA0MggAUKpKCgqKCgpQADA6CggAMGpKCgqQ=", "44-49:1;75-95:1;100-108:1;131-139:1;158-166:1;184-203:1;194-197:1.1;226-231:1;258-275:1;296-321:1;347-358:1;377-384:1")]
+[assembly: global::go.GoPositionMap("go/build/constraint/vers_test.go", "vers_test.cs", "ABAYAAwggoKCgpSCgoKklII=")]
 // </GoSourcePositionMaps>
 
 namespace go.go.build;

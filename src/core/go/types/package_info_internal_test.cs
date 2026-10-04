@@ -35,9 +35,9 @@ using static go.go.types_internal_test_package;
 [assembly: global::go.GoPositionMap("go/types/errors_test.go", "errors_test.cs", "ABAYgoKCgIKmgoKAgqaCgoCCAAgIggAGEoKC")]
 [assembly: global::go.GoPositionMap("go/types/sizeof_test.go", "sizeof_test.cs", "ABEakoQAHUiCgoKClII=")]
 [assembly: global::go.GoPositionMap("go/types/termlist_test.go", "termlist_test.cs", "AA0gkoKCgoKUpoKCuIIAChaAgtqCAAgSgoKCyoIACRSCgoIACAqCAA0ggoKCAAgKggAPJoKCgoIACAqCABEqgoKCggAJCoIAChyCgoKCAAkKggAMIIKCgoIACQqCABY0goKCggAJCoIAESqCgoKC")]
-[assembly: global::go.GoPositionMap("go/types/token_test.go", "token_test.cs", "ABw6hJKCuJSCgoKCgg==")]
+[assembly: global::go.GoPositionMap("go/types/token_test.go", "token_test.cs", "AA4eAA0chJKCuJSCgoKCgg==")]
 [assembly: global::go.GoPositionMap("go/types/typeset_test.go", "typeset_test.cs", "ABEcgoLoggAXOIKCgoKYkoKCqIKClIKCqIKC")]
-[assembly: global::go.GoPositionMap("go/types/typeterm_test.go", "typeterm_test.cs", "ABAgggANGoKCgILagoKClKaCgoKUpoIADyCCgoKCgIK2goCC2qIAH0KCgoKCgoCC2oIAESSCgoKCgIK2goCC2oIACRSCgoKCgILaggASJoKCgoKAgtqCAAsYgoKCgoCCtoKAgg==")]
+[assembly: global::go.GoPositionMap("go/types/typeterm_test.go", "typeterm_test.cs", "AA8egoK2AAkUgoKAgtqCgoKUpoKCgpSmggAPIIKCgoKAgraCgILaogAfQoKCgoKCgILaggARJIKCgoKAgraCgILaggAJFIKCgoKAgtqCABImgoKCgoCC2oIACxiCgoKCgIK2goCC")]
 [assembly: global::go.GoPositionMap("go/types/util_test.go", "util_test.cs", "AA8igKSgooA=")]
 // </GoSourcePositionMaps>
 

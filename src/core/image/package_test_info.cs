@@ -48,7 +48,7 @@ using static global::go.image_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("image/decode_example_test.go", "decode_example_test.cs", "ABowgoKCgpQACQYABxCCgoKUjtKCgqaCgoK6gqI=")]
-[assembly: go.GoPositionMap("image/decode_test.go", "decode_test.cs", "AC1aooKClJLWooKClJLWgoKClKaCgoKCgoKCpoKCgpaCgoKCgoKCgoKUlIKCgpSCgoKUgoKClLi4lIKCgpSCgg==", "82-85:1")]
+[assembly: go.GoPositionMap("image/decode_test.go", "decode_test.cs", "AB40AA4mooKClJLWooKClJLWgoKClKaCgoKCgoKCpoKCgpaCgoKCgoKCgoKUlIKCgpSCgoKUgoKClLi4lIKCgpSCgg==", "82-85:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

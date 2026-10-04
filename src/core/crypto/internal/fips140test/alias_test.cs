@@ -29,7 +29,7 @@ internal static slice<aliasingTestsᴛ1> aliasingTests = new aliasingTestsᴛ1[]
     new(a[..], default!, false, false),
     new(default!, default!, false, false),
     new(a[..], a[..0], false, false),
-    new(a[..10], a.slice(-1, 10, 20), true, false),
+    new(a[..10], a.slice(0, 10, 20), true, false),
     new(a[..10], a.slice(5, 10, 20), true, true)
 }.slice();
 

@@ -42,7 +42,7 @@ using static global::go.database.sql.driver_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("database/sql/driver/types_test.go", "types_test.cs", "AEeAAYKCgoKClIKmgpSCAAwaooKC")]
+[assembly: go.GoPositionMap("database/sql/driver/types_test.go", "types_test.cs", "ABMoABQaAB4+goKCgoKUgqaClIIADBqigoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.database.sql;

@@ -284,14 +284,14 @@ internal static void diff(ж<testing.T> Ꮡt, slice<byte> a, slice<byte> b) {
             if (j < 0) {
                 j = 0;
             }
-            Ꮡt.Errorf("diverge at %d: «%s» vs «%s»"u8, i, trim(a[(int)(j)..]), trim(b[(int)(j)..]));
+            Ꮡt.Errorf("diverge at %d: «%s» vs «%s»"u8, i, trim(a.slice(j)), trim(b.slice(j)));
             return;
         }
     }
 }
 
 internal static slice<byte> trim(slice<byte> b) {
-    return b[..(int)(min(len(b), 20))];
+    return b.slice(0, min(len(b), 20));
 }
 
 // Generate a random JSON object.
@@ -357,7 +357,7 @@ internal static slice<any> genArray(nint n) {
     }
     var x = new slice<any>(f);
     foreach (var (i, _) in x) {
-        x[i] = genValue(((i + 1) * n) / f - (i * n) / f);
+        x[i] = genValue(quo(((i + 1) * n), f) - quo((i * n), f));
     }
     return x;
 }
@@ -372,7 +372,7 @@ internal static map<@string, any> genMap(nint n) {
     }
     var x = new map<@string, any>();
     for (nint i = 0; i < f; i++) {
-        x[genString(10D)] = genValue(((i + 1) * n) / f - (i * n) / f);
+        x[genString(10D)] = genValue(quo(((i + 1) * n), f) - quo((i * n), f));
     }
     return x;
 }

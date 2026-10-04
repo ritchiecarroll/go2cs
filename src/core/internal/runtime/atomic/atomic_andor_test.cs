@@ -8,11 +8,13 @@ namespace go.@internal.runtime;
 
 using atomic = go.@internal.runtime.atomic_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.@internal.runtime;
 
 partial class atomic_test_package {
 
-public static void TestAnd32(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAnd32(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint32>(out var Ꮡx);
     x = (uint32)0xffffffffU;
@@ -33,7 +35,7 @@ public static void TestAnd32(ж<testing.T> Ꮡt) {
     // Clear array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 32; i++) {
-        var m = ~(uint32)(((uint32)1).Lsh((uint64)(i)));
+        var m = ~(uint32)(((uint32)1).Lsh((int64)(i)));
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
@@ -54,7 +56,7 @@ public static void TestAnd32(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestAnd64(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAnd64(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint64>(out var Ꮡx);
     x = (uint64)0xffffffffffffffffUL;
@@ -76,7 +78,7 @@ public static void TestAnd64(ж<testing.T> Ꮡt) {
     // Clear array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 64; i++) {
-        var m = ~(uint64)(((uint64)1).Lsh((uint64)(i)));
+        var m = ~(uint64)(((uint64)1).Lsh((int64)(i)));
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
@@ -97,7 +99,7 @@ public static void TestAnd64(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestOr32(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOr32(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint32>(out var Ꮡx);
     x = (uint32)0;
@@ -115,7 +117,7 @@ public static void TestOr32(ж<testing.T> Ꮡt) {
     // Set every bit in array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 32; i++) {
-        var m = (uint32)(((uint32)1).Lsh((uint64)(i)));
+        var m = (uint32)(((uint32)1).Lsh((int64)(i)));
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
@@ -136,7 +138,7 @@ public static void TestOr32(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestOr64(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOr64(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint64>(out var Ꮡx);
     x = (uint64)0;
@@ -155,7 +157,7 @@ public static void TestOr64(ж<testing.T> Ꮡt) {
     // Set every bit in array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 64; i++) {
-        var m = (uint64)(((uint64)1).Lsh((uint64)(i)));
+        var m = (uint64)(((uint64)1).Lsh((int64)(i)));
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {

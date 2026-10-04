@@ -6,13 +6,15 @@ namespace go.math.rand;
 using static global::go.math.rand.rand_package;
 using sync = sync_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.math.rand.rand_internal_test_package;
 
 partial class rand_test_package {
 
 // TestConcurrent exercises the rand API concurrently, triggering situations
 // where the race detector is likely to detect issues.
-public static void TestConcurrent(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrent(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         const nint numRoutines = 10;

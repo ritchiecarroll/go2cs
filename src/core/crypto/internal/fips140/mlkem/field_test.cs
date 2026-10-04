@@ -104,7 +104,7 @@ internal static uint16 CompressRat(global::go.crypto.@internal.fips140.mlkem_pac
         throw panic(err);
     }
     // If we rounded up, `rounded` may be equal to 2ᵈ, so we perform a final reduction.
-    return (uint16)(rounded % (((int64)1).Lsh((uint64)(d))));
+    return (uint16)(rem(rounded, (((int64)1).Lsh((uint64)(d)))));
 }
 
 public static void TestCompress(ж<testing.T> Ꮡt) {
@@ -139,7 +139,7 @@ internal static global::go.crypto.@internal.fips140.mlkem_package.fieldElement D
 
 public static void TestDecompress(ж<testing.T> Ꮡt) {
     for (nint d = 1; d < 12; d++) {
-        for (nint n = 0; n < (((nint)1).Lsh((uint64)(d))); n++) {
+        for (nint n = 0; n < (((nint)1).Lsh((int64)(d))); n++) {
             var expected = DecompressRat((uint16)n, (uint8)d);
             var result = decompress((uint16)n, (uint8)d);
             if (result != expected) {
@@ -196,9 +196,9 @@ public static void TestEncodeDecode(ж<testing.T> Ꮡt) {
     // Round-trip ringCompressAndEncode and ringDecodeAndDecompress.
     for (nint d = 1; d < 12; d++) {
         nint encodingSize = d * (nint)n / 8;
-        var gΔ1 = ringDecodeAndDecompress(b[..(int)(encodingSize)], (uint8)d);
+        var gΔ1 = ringDecodeAndDecompress(b.slice(0, encodingSize), (uint8)d);
         var outΔ1 = ringCompressAndEncode(default!, gΔ1, (uint8)d);
-        if (!bytes_package.Equal(outΔ1, b[..(int)(encodingSize)])) {
+        if (!bytes_package.Equal(outΔ1, b.slice(0, encodingSize))) {
             Ꮡt.Errorf("roundtrip failed for d = %d"u8, d);
         }
     }

@@ -45,11 +45,11 @@ using static global::go.@internal.zstd_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/zstd/fse_test.go", "fse_test.cs", "ACtQwgAWOoKSkoKCgIKmgoCCpoI=", "72-87:1")]
-[assembly: go.GoPositionMap("internal/zstd/fuzz_test.go", "fuzz_test.cs", "AB9AsoKUgpSCggADEOKEgqiCgoKUgoSCgoKCgoKAgqaCgoKUgv7ihIKogoCUgoKEgoKCgoKChIKCAAsagoKUgoKCgoKC", "39-42:1;65-83:1;97-97:1;99-139:2")]
+[assembly: go.GoPositionMap("internal/zstd/fse_test.go", "fse_test.cs", "AA0cAAcQ7gAOFsIAFjqCkpKCgoCCpoKAgqaC", "72-87:1")]
+[assembly: go.GoPositionMap("internal/zstd/fuzz_test.go", "fuzz_test.cs", "ABAgAA4gsoKUgpSCggADEOKEgqiCgoKUgoSCgoKCgoKAgqaCgoKUgv7ihIKogoCUgoKEgoKCgoKChIKCAAsagoKUgoKCgoKC2A==", "39-42:1;65-83:1;97-97:1;99-139:2")]
 [assembly: go.GoPositionMap("internal/zstd/window_test.go", "window_test.cs", "AAwaooKUpoKSgoKCgoKEsgAHFKKChIKChIKCgoSCloKWkoKCgoSC", "29-31:1")]
-[assembly: go.GoPositionMap("internal/zstd/xxhash_test.go", "xxhash_test.cs", "AB86goKCgoKAggAJCoKCloKCloKCgpSCgpSCloKCgviCgoKU1qKEgpSCgoKUgoSCgoKCgoCCpIKCgpaCgoKEgg==", "92-114:1")]
-[assembly: go.GoPositionMap("internal/zstd/zstd_test.go", "zstd_test.cs", "AETiAYKCkpKCgoKUgoLcgoKCgpKygoKCgpSCggAKGpKCgoKmgpTmgoKClAAHGLKEhJKCgoKCgoCCgqaUgpSqooKWgoSEgoKCloLqkoKClIKCgpSCgoKU+oKCgpaCgoKygoKUgviCgoKWgoKCloKCgpaCgoCCpISCggAIDIKCgoKC3KKChISEgoSCgoKC", "116-126:1;135-146:1;158-163:1;192-204:1;264-268:1;286-303:1;309-314:1")]
+[assembly: go.GoPositionMap("internal/zstd/xxhash_test.go", "xxhash_test.cs", "ABQeAAocgoKCgoKAggAJCoKCloKCloKCgpSCgpSCloKCgviCgoKU1qKEgpSCgoKUgoSCgoKCgoCCpIKCgpaCgoKEgg==", "92-114:1")]
+[assembly: go.GoPositionMap("internal/zstd/zstd_test.go", "zstd_test.cs", "ACMuACC0AYKCkpKCgoKUgoLcgoKCgpKygoKCgpSCggAKGpKCgoKmgpTmgoKClAAHGLKEhJKCgoKCgoCCgqaUgpSqooKWgoSEgoKCloLqkoKClIKCgpSCgoKU+oKCgpaCgoKygoKUgviCgoKWgoKCloKCgpaCgoCCpISCggAIDIKCgoKC3KKChISEgoSCgoKC", "116-126:1;135-146:1;158-163:1;192-204:1;264-268:1;286-303:1;309-314:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

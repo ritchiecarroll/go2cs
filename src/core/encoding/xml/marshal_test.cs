@@ -13,6 +13,11 @@ using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
+using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
+using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
 using static go.encoding.xml_package;
 using ꓸꓸꓸany = Span<any>;
 
@@ -77,39 +82,39 @@ public static DriveType ImprobabilityDrive => 1;
     public @string Title;
 }
 
-[GoType] public partial struct Event {
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] public partial struct Event {
     [GoTag(@"xml:""event""")]
-    public EmptyStruct XMLName;
+    [FieldOffset(0)] public readonly EmptyStruct XMLName;
     [GoTag(@"xml:"",chardata""")]
-    public nint Year;
+    [FieldOffset(0)] public nint Year;
 }
 
-[GoType] public partial struct Movie {
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] public partial struct Movie {
     [GoTag(@"xml:""movie""")]
-    public EmptyStruct XMLName;
+    [FieldOffset(0)] public readonly EmptyStruct XMLName;
     [GoTag(@"xml:"",chardata""")]
-    public nuint Length;
+    [FieldOffset(0)] public nuint Length;
 }
 
-[GoType] public partial struct Pi {
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] public partial struct Pi {
     [GoTag(@"xml:""pi""")]
-    public EmptyStruct XMLName;
+    [FieldOffset(0)] public readonly EmptyStruct XMLName;
     [GoTag(@"xml:"",chardata""")]
-    public float32 Approximation;
+    [FieldOffset(0)] public float32 Approximation;
 }
 
-[GoType] public partial struct Universe {
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] public partial struct Universe {
     [GoTag(@"xml:""universe""")]
-    public EmptyStruct XMLName;
+    [FieldOffset(0)] public readonly EmptyStruct XMLName;
     [GoTag(@"xml:"",chardata""")]
-    public float64 Visible;
+    [FieldOffset(0)] public float64 Visible;
 }
 
-[GoType] public partial struct Particle {
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 1)] public partial struct Particle {
     [GoTag(@"xml:""particle""")]
-    public EmptyStruct XMLName;
+    [FieldOffset(0)] public readonly EmptyStruct XMLName;
     [GoTag(@"xml:"",chardata""")]
-    public bool HasMass;
+    [FieldOffset(0)] public bool HasMass;
 }
 
 [GoType] public partial struct Departure {
@@ -1915,7 +1920,7 @@ internal static readonly @string writeLimitHitˢ = "write limit hit"u8;
         return (0, errors.New(writeLimitHitˢ));
     }
     if (len(p) > lw.remain) {
-        p = p[..(int)(lw.remain)];
+        p = p.slice(0, lw.remain);
         (n, _) = lw.w.Write(p);
         lw.remain = 0;
         return (n, errors.New(writeLimitHitˢ));
@@ -2550,7 +2555,7 @@ public static void TestDecodeEncode(ж<testing.T> Ꮡt) {
 }
 
 // Issue 9796. Used to fail with GORACE="halt_on_error=1" -race.
-public static void TestRace9796(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRace9796(ж<testing.T> Ꮡt) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < 2; i++) {
         Ꮡwg.Add(1);

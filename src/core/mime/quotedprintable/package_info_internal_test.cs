@@ -28,8 +28,8 @@ using static go.mime.quotedprintable_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("mime/quotedprintable/reader_test.go", "reader_test.cs", "ABoqggArYIKCgoCCpJSCxoCC1oLugoKClIIAGhCCgoKCqIKCgoKUkoKUgoKCgoKUgoKClIKUlKaClIKUgpSCgoKCgpSCsoKCgoKmuKKCgqa0gIKCpta2lIKClIKCiIKcgg==", "122-195:1;163-174:1.1;175-180:1.2")]
-[assembly: go.GoPositionMap("mime/quotedprintable/writer_test.go", "writer_test.cs", "AA0cgqaC5qIAQowBgoKEgoKCgqiAgoKkgIKCpIKCyoKCgoCCpICCpoKCgpSCggAGHqKCgoI=")]
+[assembly: go.GoPositionMap("mime/quotedprintable/reader_test.go", "reader_test.cs", "ABwqggArYIKCgoCCpJSCxoCC1oLugoKClIK4lAAUBIKCgoKogoKCgpSSgpSCgoKCgpSCgoKUgpSUpoKUgpSClIKCgoKClIKygoKCgqa4ooKCprSAgoKm1raUgoKUgoKIgpyC", "122-195:1;163-174:1.1;175-180:1.2")]
+[assembly: go.GoPositionMap("mime/quotedprintable/writer_test.go", "writer_test.cs", "AA0cgqaC5qIAQowBgoKEgoKCgqiAgoKkgIKCpIKCyoKCgoCCpICCpoKCgpSCgsoAARSigoKC")]
 // </GoSourcePositionMaps>
 
 namespace go.mime;

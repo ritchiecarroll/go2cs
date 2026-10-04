@@ -1652,7 +1652,7 @@ internal static void benchmarkReadRequest(ж<testing.B> Ꮡb, @string request) {
 }
 
 [GoRecv] internal static (nint, error) Read(this ref infiniteReader r, slice<byte> b) {
-    nint n = copy(b, r.buf[(int)(r.offset)..]);
+    nint n = copy(b, r.buf.slice(r.offset));
     r.offset = (r.offset + n) % len(r.buf);
     return (n, default!);
 }

@@ -1476,7 +1476,7 @@ public static void TestMarshalFloat(ж<testing.T> Ꮡt) {
         }
         var bad = badFloatREs;
         if (bits == 64) {
-            bad = bad[..(int)(len(bad) - 2)];
+            bad = bad.slice(0, len(bad) - 2);
         }
         foreach (var (_, re) in bad) {
             if (re.MatchString(@out)) {
@@ -1496,7 +1496,7 @@ public static void TestMarshalFloat(ж<testing.T> Ꮡt) {
         for (nint exp = -30; exp <= 30; exp++) {
             foreach (var (_, sign) in (@string)"+-"u8) {
                 for (nint bits = 32; bits <= 64; bits += 32) {
-                    @string s = fmt.Sprintf("%c%se%d"u8, sign, digits[..(int)(i)], exp);
+                    @string s = fmt.Sprintf("%c%se%d"u8, sign, digits.slice(0, i), exp);
                     var (f, err) = strconv.ParseFloat(s, bits);
                     if (err != default!) {
                         log.Fatal(err);

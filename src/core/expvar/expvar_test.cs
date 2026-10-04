@@ -15,6 +15,8 @@ using strconv = strconv_package;
 using Δsync = sync_package;
 using atomic = go.sync.atomic_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
 using encoding;
 using go.net.http;
@@ -631,7 +633,7 @@ public static void BenchmarkMapString(ж<testing.B> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tcpˢ = "tcp"u8;
 
-public static void BenchmarkRealworldExpvarUsage(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkRealworldExpvarUsage(ж<testing.B> Ꮡb) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -644,7 +646,7 @@ public static void BenchmarkRealworldExpvarUsage(ж<testing.B> Ꮡb) {
         // Such pattern is used in net/http and net/rpc.
         b.StopTimer();
         nint P = Δruntime.GOMAXPROCS(0);
-        nint N = b.N / P;
+        nint N = quo(b.N, P);
         nint W = 1000;
         // Setup P client/server connections.
         var clients = new slice<Δnet.Conn>(P);

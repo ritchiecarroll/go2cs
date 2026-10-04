@@ -10,6 +10,8 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.io_internal_test_package;
 using Δio = io_package;
 
@@ -27,7 +29,7 @@ internal static void checkWrite(ж<testing.T> Ꮡt, Δio.Writer w, slice<byte> d
 }
 
 // Test a single read/write pair.
-public static void TestPipe1(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipe1(ж<testing.T> Ꮡt) {
     var c = new channel<nint>(0);
     var (r, w) = Pipe();
     slice<byte> buf = new slice<byte>(64);
@@ -37,7 +39,7 @@ public static void TestPipe1(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("read: %v"u8, err);
     } else 
     if (n != 12 || ((sstring)(buf[0..12])) != "hello, world"u8) {
-        Ꮡt.Errorf("bad read: got %q"u8, buf[0..(int)(n)]);
+        Ꮡt.Errorf("bad read: got %q"u8, buf.slice(0, n));
     }
     ᐸꟷ(c);
     r.Close();
@@ -60,13 +62,13 @@ internal static void reader(ж<testing.T> Ꮡt, Δio.Reader r, channel<nint> c) 
 }
 
 // Test a sequence of read/write pairs.
-public static void TestPipe2(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipe2(ж<testing.T> Ꮡt) {
     var c = new channel<nint>(0);
     var (r, w) = Pipe();
     goǃ(reader, Ꮡt, new Δio.PipeReaderжReader(r), c);
     slice<byte> buf = new slice<byte>(64);
     for (nint i = 0; i < 5; i++) {
-        var p = buf[0..(int)(5 + i * 10)];
+        var p = buf.slice(0, 5 + i * 10);
         var (n, err) = w.Write(p);
         if (n != len(p)) {
             Ꮡt.Errorf("wrote %d, got %d"u8, len(p), n);
@@ -98,7 +100,7 @@ internal static void writer(Δio.WriteCloser w, slice<byte> buf, channel<pipeRet
     c.ᐸꟷ(new pipeReturn(n, err));
 }
 
-public static void TestPipe3(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipe3(ж<testing.T> Ꮡt) {
     var c = new channel<pipeReturn>(0);
     var (r, w) = Pipe();
     slice<byte> wdat = new slice<byte>(128);
@@ -109,7 +111,7 @@ public static void TestPipe3(ж<testing.T> Ꮡt) {
     slice<byte> rdat = new slice<byte>(1024);
     nint tot = 0;
     for (nint n = 1; n <= 256; n *= 2) {
-        var (nn, err) = r.Read(rdat[(int)(tot)..(int)(tot + n)]);
+        var (nn, err) = r.Read(rdat.slice(tot, tot + n));
         if (err != default! && !AreEqual(err, EOF)) {
             Ꮡt.Fatalf("read: %v"u8, err);
         }
@@ -183,7 +185,7 @@ internal static void delayClose(ж<testing.T> Ꮡt, closer cl, channel<nint> ch,
     ch.ᐸꟷ(0);
 }
 
-public static void TestPipeReadClose(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipeReadClose(ж<testing.T> Ꮡt) {
     foreach (var (_, vᴛ1) in pipeTests) {
         ref var tt = ref heap(new pipeTest(), out var Ꮡtt);
         tt = vᴛ1;
@@ -217,7 +219,7 @@ public static void TestPipeReadClose(ж<testing.T> Ꮡt) {
 }
 
 // Test close on Read side during Read.
-public static void TestPipeReadClose2(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipeReadClose2(ж<testing.T> Ꮡt) {
     var c = new channel<nint>(1);
     var (r, _) = Pipe();
     goǃ(delayClose, Ꮡt, new io_test_package.io_PipeReaderжcloser(r), c, new pipeTest(nil));
@@ -232,7 +234,7 @@ public static void TestPipeReadClose2(ж<testing.T> Ꮡt) {
 internal static readonly @string helloWorldˢ3 = "hello, world"u8;
 
 // Test write after/before reader close.
-public static void TestPipeWriteClose(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipeWriteClose(ж<testing.T> Ꮡt) {
     foreach (var (_, vᴛ1) in pipeTests) {
         ref var tt = ref heap(new pipeTest(), out var Ꮡtt);
         tt = vᴛ1;
@@ -265,7 +267,7 @@ public static void TestPipeWriteClose(ж<testing.T> Ꮡt) {
 }
 
 // Test close on Write side during Write.
-public static void TestPipeWriteClose2(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipeWriteClose2(ж<testing.T> Ꮡt) {
     var c = new channel<nint>(1);
     var (_, w) = Pipe();
     goǃ(delayClose, Ꮡt, new io_test_package.io_PipeWriterжcloser(w), c, new pipeTest(nil));
@@ -276,7 +278,7 @@ public static void TestPipeWriteClose2(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestWriteEmpty(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWriteEmpty(ж<testing.T> Ꮡt) {
     var (r, w) = Pipe();
     var wʗ1 = w;
     goǃ(() => {
@@ -288,7 +290,7 @@ public static void TestWriteEmpty(ж<testing.T> Ꮡt) {
     r.Close();
 }
 
-public static void TestWriteNil(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWriteNil(ж<testing.T> Ꮡt) {
     var (r, w) = Pipe();
     var wʗ1 = w;
     goǃ(() => {
@@ -300,7 +302,7 @@ public static void TestWriteNil(ж<testing.T> Ꮡt) {
     r.Close();
 }
 
-public static void TestWriteAfterWriterClose(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWriteAfterWriterClose(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (r, w) = Pipe();
@@ -325,7 +327,7 @@ public static void TestWriteAfterWriterClose(ж<testing.T> Ꮡt) {
         if (err != default! && !AreEqual(err, ErrUnexpectedEOF)) {
             Ꮡt.Fatalf("got: %q; want: %q"u8, err, ErrUnexpectedEOF);
         }
-        result = ((@string)(buf[0..(int)(n)]));
+        result = ((@string)(buf.slice(0, n)));
         ᐸꟷ(done);
         if (result != "hello"u8) {
             Ꮡt.Errorf("got: %q; want: %q"u8, result, helloˢ);
@@ -385,7 +387,7 @@ public static void TestPipeConcurrent(ж<testing.T> Ꮡt) {
     @string input = inputᶜ;
     UntypedInt count = 8;
     UntypedInt readSize = 2;
-    Ꮡt.Run(writeˢ, (ж<testing.T> tΔ1) => {
+    Ꮡt.Run(writeˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
         var (r, w) = Pipe();
         for (nint i = 0; i < count; i++) {
             var wʗ1 = w;
@@ -401,7 +403,7 @@ public static void TestPipeConcurrent(ж<testing.T> Ꮡt) {
         var buf = new slice<byte>((nint)count * len(input));
         for (nint i = 0; i < len(buf); i += readSize) {
             {
-                var (n, err) = r.Read(buf[(int)(i)..(int)(i + (nint)readSize)]); if (n != readSize || err != default!) {
+                var (n, err) = r.Read(buf.slice(i, i + (nint)readSize)); if (n != readSize || err != default!) {
                     tΔ1.Errorf("Read() = (%d, %v); want (%d, nil)"u8, n, err, (nint)(readSize));
                 }
             }
@@ -414,7 +416,7 @@ public static void TestPipeConcurrent(ж<testing.T> Ꮡt) {
             tΔ1.Errorf("got: %q; want: %q"u8, got, want);
         }
     });
-    Ꮡt.Run(readˢ, (ж<testing.T> tΔ2) => {
+    Ꮡt.Run(readˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         var (r, w) = Pipe();
         var c = new channel<slice<byte>>((nint)((nint)count * len(input)) / readSize);
         for (nint i = 0; i < cap(c); i++) {
@@ -456,8 +458,8 @@ public static void TestPipeConcurrent(ж<testing.T> Ꮡt) {
 internal static slice<byte> sortBytesInGroups(slice<byte> b, nint n) {
     slice<slice<byte>> groups = default!;
     while (len(b) > 0) {
-        groups = append(groups, b[..(int)(n)]);
-        b = b[(int)(n)..];
+        groups = append(groups, b.slice(0, n));
+        b = b.slice(n);
     }
     slices.SortFunc<slice<slice<byte>>, slice<byte>>(groups, bytes.Compare);
     return bytes.Join(groups, default!);

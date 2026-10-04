@@ -84,7 +84,7 @@ internal static int64 averageDeltaBound(image.Image m0, image.Image m1, image.Re
             n += 3;
         }
     }
-    return sum / n;
+    return quo(sum, n);
 }
 
 // lzw.NewWriter wants an interface which is basically the same thing as gif's

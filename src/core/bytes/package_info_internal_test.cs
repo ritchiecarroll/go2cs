@@ -40,6 +40,7 @@ using static go.bytes_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
+[assembly: go.GoPositionMap("bytes/export_test.go", "export_test.cs", "AAoQ")]
 // </GoSourcePositionMaps>
 
 namespace go;

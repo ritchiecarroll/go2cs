@@ -228,7 +228,7 @@ public static void TestLineBreaker(ж<testing.T> Ꮡt) {
         global::go.encoding.pem_package.lineBreaker breaker = new();
         breaker.@out = new pem_test_package.strings_BuilderжWriter(buf);
         for (nint iΔ1 = 0; iΔ1 < len(test.@in); iΔ1++) {
-            var (_, errΔ1) = breaker.Write(slice<byte>(test.@in[(int)(iΔ1)..(int)(iΔ1 + 1)]));
+            var (_, errΔ1) = breaker.Write(slice<byte>(test.@in.slice(iΔ1, iΔ1 + 1)));
             if (errΔ1 != default!) {
                 Ꮡt.Errorf("#%d: error from Write (byte by byte): %s"u8, iΔ1, errΔ1);
                 continue;

@@ -26,7 +26,8 @@ using Δruntime = runtime_package;
 using strings = strings_package;
 using Δsync = sync_package;
 using testing = testing_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 using Δio = io_package;
 
@@ -100,7 +101,7 @@ internal static readonly @string fRuntimeTestˢ = @"\[\] 0x[0-9a-f]+ \[runtime_t
     }
 }
 
-public static void TestDebugLogInterleaving(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDebugLogInterleaving(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     skipDebugLog(Ꮡt);

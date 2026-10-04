@@ -5,6 +5,8 @@ namespace go.crypto.@internal;
 
 using Δfips140 = go.crypto.@internal.fips140_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.crypto.@internal;
 
 partial class fipstest_internal_test_package {
@@ -19,7 +21,7 @@ internal static readonly object indicatorShouldBeFalseIfˢ4 = (@string)"indicato
 internal static readonly object indicatorShouldBeFalseIfˢ5 = (@string)"indicator should be false if RecordApproved is called in a different goroutine"u8;
 internal static readonly object indicatorShouldBeTrueIfˢ3 = (@string)"indicator should be true if RecordNonApproved is called in a different goroutine"u8;
 
-public static void TestIndicator(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestIndicator(ж<testing.T> Ꮡt) {
     Δfips140.ResetServiceIndicator();
     if (Δfips140.ServiceIndicator()) {
         Ꮡt.Error(indicatorShouldBeFalseIfˢ);

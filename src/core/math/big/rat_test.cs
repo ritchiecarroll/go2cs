@@ -5,6 +5,8 @@ namespace go.math;
 
 using math = math_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.math.big_package;
 
 partial class big_internal_test_package {
@@ -756,7 +758,7 @@ public static void TestIssue34919(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestDenomRace(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDenomRace(ж<testing.T> Ꮡt) {
     var x = NewRat(1, 2);
     const nint N = 3;
     var c = new channel<bool>(N);

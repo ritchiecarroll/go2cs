@@ -12,13 +12,18 @@ using Δruntime = runtime_package;
 using Δsync = sync_package;
 using testing = testing_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.net_package;
 using time = time_package;
 
 partial class net_internal_test_package {
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string storyᶜ = "once upon a time in Gopherland ... "u8;
+
 public static void TestBuffers_read(ж<testing.T> Ꮡt) {
-    @string story = "once upon a time in Gopherland ... "u8;
+    @string story = storyᶜ;
     ref var buffers = ref heap<global::go.net_package.Buffers>(out var Ꮡbuffers);
     buffers = new Buffers(new slice<byte>[]{
         slice<byte>("once "u8),
@@ -131,7 +136,7 @@ internal static void testBuffer_writeTo(ж<testing.T> Ꮡt, nint chunks, bool us
             ref var buffers = ref heap<global::go.net_package.Buffers>(out var Ꮡbuffers);
             buffers = new global::go.net_package.Buffers(chunks);
             foreach (var (i, _) in buffers) {
-                buffers[i] = Ꮡwant.Value.Bytes()[(int)(i)..(int)(i + 1)];
+                buffers[i] = Ꮡwant.Value.Bytes().slice(i, i + 1);
             }
             int64 n = default!;
             error err = default!;
@@ -199,7 +204,7 @@ internal static void testBuffer_writeTo(ж<testing.T> Ꮡt, nint chunks, bool us
 internal static readonly object noServerSideConnectionˢ = (@string)"no server side connection"u8;
 internal static readonly object buffersWriteToClosedConnˢ = (@string)"Buffers.WriteTo(closed conn) succeeded, want error"u8;
 
-public static void TestWritevError(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWritevError(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

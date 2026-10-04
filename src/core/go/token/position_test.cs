@@ -8,6 +8,8 @@ using rand = math.rand_package;
 using slices = slices_package;
 using sync = sync_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using math;
 using static global::go.go.token_package;
 
@@ -127,7 +129,7 @@ public static void TestPositions(ж<testing.T> Ꮡt) {
             if (f.LineCount() != i + 1) {
                 Ꮡt.Errorf("%s, AddLine: got unchanged line count %d; want %d"u8, f.Name(), f.LineCount(), i + 1);
             }
-            verifyPositions(Ꮡt, fset, f, test.lines[0..(int)(i + 1)]);
+            verifyPositions(Ꮡt, fset, f, test.lines.slice(0, i + 1));
         }
         // add lines with SetLines and verify all positions
         {
@@ -233,7 +235,7 @@ public static void TestFileSetCacheUnlikely(ж<testing.T> Ꮡt) {
 
 // issue 4345. Test that concurrent use of FileSet.Pos does not trigger a
 // race in the FileSet position cache.
-public static void TestFileSetRace(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestFileSetRace(ж<testing.T> Ꮡt) {
     var fset = NewFileSet();
     for (nint i = 0; i < 100; i++) {
         fset.AddFile(fmt.Sprintf("file-%d"u8, i), fset.Base(), 1031);
@@ -258,7 +260,7 @@ public static void TestFileSetRace(ж<testing.T> Ꮡt) {
 
 // issue 16548. Test that concurrent use of File.AddLine and FileSet.PositionFor
 // does not trigger a race in the FileSet position cache.
-public static void TestFileSetRace2(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestFileSetRace2(ж<testing.T> Ꮡt) {
     const nint N = 1000;
     ж<global::go.go.token_package.FileSet> fset = NewFileSet();
     ж<global::go.go.token_package.ΔFile> @file = fset.AddFile(""u8, -1, N);

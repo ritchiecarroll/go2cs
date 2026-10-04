@@ -477,7 +477,7 @@ internal static (nint n, error err) write(this ж<fakeNetConnHalf> Ꮡh, slice<b
     nint n = default!;
 
     while (n < len(b)) {
-        var (nn, errΔ1) = Ꮡh.writePartial(b[(int)(n)..]);
+        var (nn, errΔ1) = Ꮡh.writePartial(b.slice(n));
         n += nn;
         if (errΔ1 != default!) {
             return (n, errΔ1);
@@ -504,7 +504,7 @@ internal static (nint n, error err) writePartial(this ж<fakeNetConnHalf> Ꮡh, 
         }
         nint writeMax = h.bufMax - h.buf.Len();
         if (writeMax < len(b)) {
-            b = b[..(int)(writeMax)];
+            b = b.slice(0, writeMax);
         }
         (n, err) = h.buf.Write(b);
     }

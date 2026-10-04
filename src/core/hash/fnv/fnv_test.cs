@@ -128,7 +128,7 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
             foreach (var (_, g) in ttʗ1.gold) {
                 var h = ttʗ1.newHash();
                 var h2 = ttʗ1.newHash();
-                io.WriteString(h, g.@in[..(int)(len(g.@in) / 2)]);
+                io.WriteString(h, g.@in.slice(0, len(g.@in) / 2));
                 var (state, err) = h._<encoding.BinaryMarshaler>().MarshalBinary();
                 if (err != default!) {
                     tΔ1.Errorf("could not marshal: %v"u8, err);
@@ -154,8 +154,8 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
                         continue;
                     }
                 }
-                io.WriteString(h, g.@in[(int)(len(g.@in) / 2)..]);
-                io.WriteString(h2, g.@in[(int)(len(g.@in) / 2)..]);
+                io.WriteString(h, g.@in.slice(len(g.@in) / 2));
+                io.WriteString(h2, g.@in.slice(len(g.@in) / 2));
                 {
                     var (actual, actual2) = (h.Sum(default!), h2.Sum(default!)); if (!bytes.Equal(actual, actual2)) {
                         tΔ1.Errorf("hash(%q) = 0x%x != marshaled 0x%x"u8, g.@in, actual, actual2);

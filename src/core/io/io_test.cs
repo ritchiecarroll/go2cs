@@ -12,6 +12,8 @@ using strings = strings_package;
 using Δsync = sync_package;
 using atomic = go.sync.atomic_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 using static go.io_internal_test_package;
 using Δio = io_package;
@@ -397,12 +399,12 @@ public static void TestSectionReader_ReadAt(ж<testing.T> Ꮡt) {
         new(data: dat, off: 0, n: len(dat), bufLen: 0, at: 0, exp: ""u8, err: default!),
         new(data: dat, off: len(dat), n: 1, bufLen: 1, at: 0, exp: ""u8, err: EOF),
         new(data: dat, off: 0, n: len(dat) + 2, bufLen: len(dat), at: 0, exp: dat, err: default!),
-        new(data: dat, off: 0, n: len(dat), bufLen: len(dat) / 2, at: 0, exp: dat[..(int)(len(dat) / 2)], err: default!),
+        new(data: dat, off: 0, n: len(dat), bufLen: len(dat) / 2, at: 0, exp: dat.slice(0, len(dat) / 2), err: default!),
         new(data: dat, off: 0, n: len(dat), bufLen: len(dat), at: 0, exp: dat, err: default!),
-        new(data: dat, off: 0, n: len(dat), bufLen: len(dat) / 2, at: 2, exp: dat[2..(int)(2 + len(dat) / 2)], err: default!),
-        new(data: dat, off: 3, n: len(dat), bufLen: len(dat) / 2, at: 2, exp: dat[5..(int)(5 + len(dat) / 2)], err: default!),
-        new(data: dat, off: 3, n: len(dat) / 2, bufLen: len(dat) / 2 - 2, at: 2, exp: dat[5..(int)(5 + len(dat) / 2 - 2)], err: default!),
-        new(data: dat, off: 3, n: len(dat) / 2, bufLen: len(dat) / 2 + 2, at: 2, exp: dat[5..(int)(5 + len(dat) / 2 - 2)], err: EOF),
+        new(data: dat, off: 0, n: len(dat), bufLen: len(dat) / 2, at: 2, exp: dat.slice(2, 2 + len(dat) / 2), err: default!),
+        new(data: dat, off: 3, n: len(dat), bufLen: len(dat) / 2, at: 2, exp: dat.slice(5, 5 + len(dat) / 2), err: default!),
+        new(data: dat, off: 3, n: len(dat) / 2, bufLen: len(dat) / 2 - 2, at: 2, exp: dat.slice(5, 5 + len(dat) / 2 - 2), err: default!),
+        new(data: dat, off: 3, n: len(dat) / 2, bufLen: len(dat) / 2 + 2, at: 2, exp: dat.slice(5, 5 + len(dat) / 2 - 2), err: EOF),
         new(data: dat, off: 0, n: 0, bufLen: 0, at: -1, exp: ""u8, err: EOF),
         new(data: dat, off: 0, n: 0, bufLen: 0, at: 1, exp: ""u8, err: EOF)
     }.slice();
@@ -411,8 +413,8 @@ public static void TestSectionReader_ReadAt(ж<testing.T> Ꮡt) {
         var s = NewSectionReader(new io_test_package.strings_ReaderжReaderAt(r), (int64)tt.off, (int64)tt.n);
         var buf = new slice<byte>(tt.bufLen);
         {
-            var (n, err) = s.ReadAt(buf, (int64)tt.at); if (n != len(tt.exp) || ((sstring)(buf[..(int)(n)])) != tt.exp || !AreEqual(err, tt.err)) {
-                Ꮡt.Fatalf("%d: ReadAt(%d) = %q, %v; expected %q, %v"u8, i, tt.at, buf[..(int)(n)], err, tt.exp, tt.err);
+            var (n, err) = s.ReadAt(buf, (int64)tt.at); if (n != len(tt.exp) || ((sstring)(buf.slice(0, n))) != tt.exp || !AreEqual(err, tt.err)) {
+                Ꮡt.Fatalf("%d: ReadAt(%d) = %q, %v; expected %q, %v"u8, i, tt.at, buf.slice(0, n), err, tt.exp, tt.err);
             }
         }
         {
@@ -631,7 +633,7 @@ public static void TestOffsetWriter_WriteAt(ж<testing.T> Ꮡt) {
     @string content = contentᶜ;
     var contentSize = (int64)len(content);
     @string tmpdir = Ꮡt.TempDir();
-    void work(int64 off, int64 at) {
+    [MethodImpl(MethodImplOptions.NoInlining)] void work(int64 off, int64 at) {
         GoFrame ᒐ = default;
         try {
             @string position = fmt.Sprintf("off_%d_at_%d"u8, off, at);
@@ -668,7 +670,7 @@ public static void TestOffsetWriter_WriteAt(ж<testing.T> Ꮡt) {
             if (!AreEqual(err, EOF)) {
                 Ꮡt.Fatalf("ReadAt failed: %v"u8, err);
             }
-            @string readContent = ((@string)(buf[..(int)(contentSize)]));
+            @string readContent = ((@string)(buf.slice(0, (nint)(contentSize))));
             if (ᏑwriteN.Value != (int64)readN || ᏑwriteN.Value != contentSize || readContent != content) {
                 Ꮡt.Fatalf("%s:: WriteAt(%s, %d) error. \ngot n: %v, content: %s \nexpected n: %v, content: %v"u8,
                     position, content, at, readN, readContent, contentSize, content);
@@ -739,7 +741,7 @@ public static void TestOffsetWriter_Write(ж<testing.T> Ꮡt) {
         if (!AreEqual(err, EOF)) {
             Ꮡt.Fatalf("ReadAt failed, err: %v"u8, err);
         }
-        @string readContent = ((@string)(buf[..(int)(contentSize)]));
+        @string readContent = ((@string)(buf.slice(0, contentSize)));
         if (readN != contentSize || readContent != content) {
             Ꮡt.Fatalf("%s error. \ngot n: %v, content: %s \nexpected n: %v, content: %v"u8,
                 nameΔ2, readN, readContent, contentSize, content);

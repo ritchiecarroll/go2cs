@@ -13,6 +13,8 @@ using slices = slices_package;
 using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.net.textproto_package;
 
 partial class textproto_internal_test_package {
@@ -491,7 +493,7 @@ public static void TestCommonHeaders(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object canonicalMIMEHeaderKeyˢ = (@string)"CanonicalMIMEHeaderKey should initialize commonHeader"u8;
 
-public static void TestIssue46363(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestIssue46363(ж<testing.T> Ꮡt) {
     // Regression test for data race reported in issue 46363:
     // ReadMIMEHeader reads commonHeader before commonHeader has been initialized.
     // Run this test with the race detector enabled to catch the reported data race.

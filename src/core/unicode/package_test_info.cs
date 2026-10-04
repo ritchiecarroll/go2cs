@@ -31,10 +31,10 @@ using static global::go.unicode_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("unicode/digit_test.go", "digit_test.cs", "AGnUAYKCgqaCgsySgoI=")]
+[assembly: go.GoPositionMap("unicode/digit_test.go", "digit_test.cs", "AAsYADp2ACJGgoKCpoKCzJKCgg==")]
 [assembly: go.GoPositionMap("unicode/graphic_test.go", "graphic_test.cs", "AAsewoKCgpS0tILKooKCgoLKooKCgoLKooKCgoLKooKCgoLKooKCgoKUgsqigoKCgsqigoKCgsqigoKCgsqigoKCgg==")]
-[assembly: go.GoPositionMap("unicode/letter_test.go", "letter_test.cs", "AOIB3AOCgoKmgoKmgoLKgoKCpoKCpoKCAAoKgpSkpKSmgoKCgsqCgoKUgoLKgoKClIKCyoKCgpSCgsqCgoKmgoLOooKClIKUgpSClIKUgpSClILKgoKCgoKClIKUgpSClIKUggAXOoKCgoKCgIKkqICCAA8ggoKWgt6CgpKCgoKCuJKCgoKCuIKCgpSmgoKClKaCgoKClIKmppSCgoKCgoKUgpSmpoLugoKCgpSCAAkMhqKCgoK47gARJIKCgrqCgpSClIKUgpSClIKUgpSClIKUgpSClIKUgpSCyqKCuKKCAAkIgoKCgriCgoI=", "467-491:1;469-477:1.1;478-486:1.2;659-665:1;660-664:1.1")]
-[assembly: go.GoPositionMap("unicode/script_test.go", "script_test.cs", "AGO+AYKCgpSCgIKkgpSUgviCgoKUgoCCpIKUlII=")]
+[assembly: go.GoPositionMap("unicode/letter_test.go", "letter_test.cs", "ABAiABgyAA0cACJGAAwaACokAE/oAYKCgqaCgqaCgsqCgoKmgoKmgoIACgqClKSkpKaCgoKCyoKCgpSCgsqCgoKUgoLKgoKClIKCyoKCgqaCgs6igoKUgpSClIKUgpSClIKUgsqCgoKCgoKUgpSClIKUgpSCAAsKAAswgoKCgoKAgqSogIIADRyUgoKWgt6CgpKCgoKCuJKCgoKCuIKCgpSmgoKClKaCgoKClIKmppSCgoKCgoKUgpSmpoLugoKCgpSCAAkMhqKCgoK47gARJIKCgrqCgpSClIKUgpSClIKUgpSClIKUgpSClIKUgpSCyqKCuKKCAAkIgoKCgriCgoI=", "467-491:1;469-477:1.1;478-486:1.2;659-665:1;660-664:1.1")]
+[assembly: go.GoPositionMap("unicode/script_test.go", "script_test.cs", "ABEiACdQAClMgoKClIKAgqSClJSC+IKCgpSCgIKkgpSUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -17,6 +17,8 @@ using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
 using go.net;
 using static go.net.smtp_package;
@@ -828,7 +830,7 @@ QUIT
 
 """u8;
 
-public static void TestNewClientWithTLS(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestNewClientWithTLS(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -1040,7 +1042,7 @@ SendMail is working for me.
 
 """u8;
 
-public static void TestSendMail(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSendMail(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         @string server = strings.Join(strings.Split(sendMailServer, "\n"u8), "\r\n"u8);
@@ -1152,7 +1154,7 @@ internal static readonly object sendMailServerDoesnTˢ = (@string)"SendMail: Ser
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string wantMsgᶜ = "EHLO localhost"u8;
 
-public static void TestSendMailWithAuth(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSendMailWithAuth(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -1270,7 +1272,7 @@ QUIT
 
 """u8;
 
-public static void TestTLSClient(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTLSClient(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (runtime.GOOS == "freebsd"u8 || runtime.GOOS == "js"u8 || runtime.GOOS == "wasip1"u8) {
@@ -1306,7 +1308,7 @@ public static void TestTLSClient(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestTLSConnState(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTLSConnState(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(Ꮡt);

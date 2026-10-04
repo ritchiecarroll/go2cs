@@ -221,7 +221,7 @@ internal static int64 averageDelta(image.Image m0, image.Image m1) {
             n += 3;
         }
     }
-    return sum / n;
+    return quo(sum, n);
 }
 
 public static void TestEncodeYCbCr(ж<testing.T> Ꮡt) {

@@ -17,6 +17,8 @@ using filepath = path.filepath_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = global::go.io.fs_package;
 using global::go.go;
 using path;
@@ -85,7 +87,7 @@ internal static slice<byte> lineAt(slice<byte> text, nint offs) {
     while (i < len(text) && text[i] != (rune)'\n') {
         i++;
     }
-    return text[(int)(offs)..(int)(i)];
+    return text.slice(offs, i);
 }
 
 // checkEqual compares a and b.
@@ -146,7 +148,7 @@ internal static void runcheck(ж<testing.T> Ꮡt, @string source, @string golden
     }
 }
 
-internal static void check(ж<testing.T> Ꮡt, @string source, @string golden, checkMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void check(ж<testing.T> Ꮡt, @string source, @string golden, checkMode mode) {
     // run the test
     var cc = new channel<nint>(1);
     var ccʗ1 = cc;
@@ -380,7 +382,7 @@ internal static ast.Visitor /*w*/ Visit(this visitor v, ast.Node n) {
 }
 
 // idents is an iterator that returns all idents in f via the result channel.
-internal static /*<-*/channel<ж<ast.Ident>> idents(ж<ast.File> Ꮡf) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static /*<-*/channel<ж<ast.Ident>> idents(ж<ast.File> Ꮡf) {
     var v = new visitor(0);
     var vʗ1 = v;
     goǃ(() => {

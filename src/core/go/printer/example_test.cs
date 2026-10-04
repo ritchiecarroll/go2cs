@@ -54,7 +54,7 @@ internal static void printSelf() {
     // Remove braces {} enclosing the function body, unindent,
     // and trim leading and trailing white space.
     @string s = Ꮡbuf.String();
-    s = s[1..(int)(len(s) - 1)];
+    s = s.slice(1, len(s) - 1);
     s = strings.TrimSpace(strings.ReplaceAll(s, "\n\t"u8, "\n"u8));
     // Print the cleaned-up body text to stdout.
     fmt.Println(s);

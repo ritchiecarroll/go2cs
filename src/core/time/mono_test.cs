@@ -300,7 +300,7 @@ public static void TestMonotonicString(ж<Δtesting.T> Ꮡt) {
         t1Δ1 = Now();
         time_internal_test_package.SetMono(Ꮡt1Δ1, tt.mono);
         @string s = t1Δ1.String();
-        @string got = s[(int)(strings.LastIndex(s, " "u8) + 1)..];
+        @string got = s.slice(strings.LastIndex(s, " "u8) + 1);
         if (got != tt.want) {
             Ꮡt.Errorf("with mono=%d: got %q; want %q"u8, tt.mono, got, tt.want);
         }

@@ -37,7 +37,7 @@ using static global::go.crypto.@internal.fips140.edwards25519.field_internal_tes
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_alias_test.go", "fe_alias_test.cs", "AAwYgqK2gIK4gIK4uIKyxoCCuIKAgraCgIK4gIK4goCCtoKAgraCgIK4AAkcAAoCABAwggALIIKUtLSC", "13-28:1;32-74:1;102-104:1;111-114:2;118-120:3;124-126:4")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_test.go", "fe_test.cs", "ABcogqqigoKUpqKCAClWogAIEqKClKrCroLEgoKWgoKCgoSWgILIgoKCgoKWgoKCgpaCgoKCgoKCggAJCIKiqISUgIKmorqCgpSAgqgACR6ygoKCyoKClKaCsoSCgoSCloKElICCyrKCloKigoKUgqiCpoKCgpSokoSCgoKClIKopoKCgIIABBL+0oKUgoKEgpaEgoKUhIKEgriCkpSCgpaCgriCkoKUgoKEgpaEgoKUhIKChIKWkoKAgqTIgpKUlIKEgpaEgpaEgriCkoKCloKEgoKWloCCAAsIhAAnXIKCgoKCgsqCkoKEgoSClpaAgqaCuIKCkpSChIKWloCCyIKCkpKSlIKEgoKWmICCyIKCgpQ=", "107-121:1;156-164:1;169-178:2;216-231:1;411-426:1;493-505:1;517-529:1;537-553:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_test.go", "fe_test.cs", "ABcogqqigoKUpqKCAAoYAAwYABEmogAIEqKClKrCroLEgoKWgoKCgoSWgILIgoKCgoKWgoKCgpaCgoKCgoKCggAJCIKiqISUgIKmorqCgpSAgqgACR6ygoKCyoKClKaCsoSCgoSCloKElICCyrKCloKigoKUgqiCpoKCgpSokoSCgoKClIKopoKCgIIABBL+0oKUgoKEgpaEgoKUhIKEgriCkpSCgpaCgriCkoKUgoKEgpaEgoKUhIKChIKWkoKAgqTIgpKUlIKEgpaEgpaEgriCkoKCloKEgoKWloCCAAsIhAAnXIKCgoKCgsqCkoKEgoSClpaAgqaCuIKCkpSChIKWloCCyIKCkpKSlIKEgoKWmICCyIKCgpQ=", "107-121:1;156-164:1;169-178:2;216-231:1;411-426:1;493-505:1;517-529:1;537-553:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140.edwards25519;

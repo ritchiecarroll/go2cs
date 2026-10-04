@@ -410,7 +410,7 @@ public static void TestTypedContent(ж<testing.T> Ꮡt) {
             }
             {
                 @string want = test.want[i];
-                @string got = b.String()[(int)(pre)..(int)(b.Len() - post)]; if (want != got) {
+                @string got = b.String().slice(pre, b.Len() - post); if (want != got) {
                     Ꮡt.Errorf("%q with %v:\nwant\n\t%q,\ngot\n\t%q\n"u8, test.input, x, want, got);
                     continue;
                 }

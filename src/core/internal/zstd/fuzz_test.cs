@@ -133,8 +133,8 @@ public static void FuzzReverse(ж<testing.F> Ꮡf) {
                 if (c > builtin.len(zstdExp)) {
                     c = builtin.len(zstdExp);
                 }
-                goExp = goExp[..(int)(c)];
-                zstdExp = zstdExp[..(int)(c)];
+                goExp = goExp.slice(0, c);
+                zstdExp = zstdExp.slice(0, c);
                 if (!bytes.Equal(goExp, zstdExp)) {
                     t.Error(byteMismatchAfterErrorˢ);
                     t.Logf("Go error: %v\n"u8, goErr);

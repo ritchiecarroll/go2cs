@@ -25,7 +25,7 @@ partial class fuzz_internal_test_package {
 [GoRecv] internal static nint intn(this ref mockRand mr, nint n) {
     nint c = mr.values[mr.counter];
     mr.counter++;
-    return c % n;
+    return rem(c, n);
 }
 
 [GoRecv] internal static uint32 uint32n(this ref mockRand mr, uint32 n) {

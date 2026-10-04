@@ -137,7 +137,7 @@ internal static readonly @string missingSeparatorˢ = "missing separator"u8;
     if (pos == -1) {
         return errors.New(missingSeparatorˢ);
     }
-    (u.A, u.B) = (((@string)(b[..(int)(pos)])), ((@string)(b[(int)(pos + 1)..])));
+    (u.A, u.B) = (((@string)(b.slice(0, pos))), ((@string)(b.slice(pos + 1))));
     return default!;
 }
 
@@ -2436,7 +2436,7 @@ public static void TestUnmarshalUnexported(ж<testing.T> Ꮡt) {
     if (len(b) < 2 || b[0] != (rune)'"' || b[len(b) - 1] != (rune)'"') {
         return fmt.Errorf("types: failed to unmarshal non-string value %q as an RFC 3339 time"u8, b);
     }
-    var (tm, err) = time.Parse(time.RFC3339, ((@string)(b[1..(int)(len(b) - 1)])));
+    var (tm, err) = time.Parse(time.RFC3339, ((@string)(b.slice(1, len(b) - 1))));
     if (err != default!) {
         return err;
     }

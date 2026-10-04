@@ -858,7 +858,7 @@ public static void BenchmarkNatSetBytes(ж<testing.B> Ꮡb) {
         var nʗ1 = n;
         Ꮡb.Run(fmt.Sprint(l), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
-                nʗ1.setBytes(bufʗ1[..(int)(l)]);
+                nʗ1.setBytes(bufʗ1.slice(0, l));
             }
         });
     }

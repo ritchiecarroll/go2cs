@@ -129,7 +129,7 @@ internal static time.Duration measureSqr(nint words, nint nruns, @string mode) {
         });
         testval += res.NsPerOp();
     }
-    testval /= (int64)nruns;
+    testval = quo(testval, (int64)nruns);
     (basicSqrThreshold, karatsubaSqrThreshold) = (initBasicSqr, initKaratsubaSqr);
     return ((time.Duration)testval);
 }

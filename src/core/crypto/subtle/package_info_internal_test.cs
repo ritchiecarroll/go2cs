@@ -29,8 +29,8 @@ using static go.crypto.subtle_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/subtle/constant_time_test.go", "constant_time_test.cs", "ABkygoKAggASJIKClKaCgoCCtoKCuIKClKaCgoK4goKUlIKUpoKClJSCgqaCgoIAEB6CgoKC7qKUgpamopSClqailIKW")]
-[assembly: go.GoPositionMap("crypto/subtle/dit_test.go", "dit_test.cs", "ABUagoKWhIKCloKCqIKogviigpaEgoKClIKogoKW", "20-34:1;25-29:1.1;48-56:1;58-64:2")]
+[assembly: go.GoPositionMap("crypto/subtle/constant_time_test.go", "constant_time_test.cs", "ABEiAAcQgoKAggAKFAAHEIKClKaCgoCCtoKCuIKClKaCgoK4goKUlIKUpoKClJSCgqaCgoL4AAgWgoKCgu6ilIKWpqKUgpamopSClg==")]
+[assembly: go.GoPositionMap("crypto/subtle/dit_test.go", "dit_test.cs", "ABUagoKWhIKCloKCqIKogviigpaEgoKClIKogoKWtA==", "20-34:1;25-29:1.1;48-56:1;58-64:2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

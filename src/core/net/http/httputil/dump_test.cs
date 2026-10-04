@@ -16,6 +16,8 @@ using pprof = go.runtime.pprof_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.net;
 using go.runtime;
 using math;
@@ -176,7 +178,7 @@ internal static slice<dumpTest> dumpTests = new dumpTest[]{
     )
 }.slice();
 
-public static void TestDumpRequest(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDumpRequest(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Make a copy of dumpTests and add 10 new cases with an empty URL
@@ -269,7 +271,7 @@ public static void TestDumpRequest(ж<testing.T> Ꮡt) {
         runtime.Gosched();
     }
     var buf = new slice<byte>(4096);
-    buf = buf[..(int)(runtime.Stack(buf, true))];
+    buf = buf.slice(0, runtime.Stack(buf, true));
     Ꮡt.Errorf("Unexpectedly large number of new goroutines: %d new: %s"u8, dg, buf);
 }
 
@@ -437,7 +439,7 @@ internal static readonly @string httpExampleComˢ = "http://example.com"u8;
 internal static readonly @string goroutineˢ = "goroutine"u8;
 
 // Issue 38352: Check for deadlock on canceled requests.
-public static void TestDumpRequestOutIssue38352(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDumpRequestOutIssue38352(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

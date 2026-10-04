@@ -160,11 +160,11 @@ public static void TestDocs(ж<testing.T> Ꮡt) {
     if (updated){
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "go test -generate: writing new doc.go\n"u8);
         bytes.Buffer buf = default!;
-        buf.Write(src[..(int)(nint)(fdoc.Pos() - (~f).FileStart)]);
+        buf.Write(src.slice(0, fdoc.Pos() - (~f).FileStart));
         buf.WriteString("/*\n"u8);
         buf.Write(@new<comment.Printer>().Comment(docΔ1));
         buf.WriteString("*/"u8);
-        buf.Write(src[(int)(nint)(fdoc.End() - (~f).FileStart)..]);
+        buf.Write(src.slice(fdoc.End() - (~f).FileStart));
         var (srcΔ1, errΔ1) = format.Source(buf.Bytes());
         if (errΔ1 != default!) {
             Ꮡt.Fatal(errΔ1);

@@ -45,7 +45,7 @@ public static void BenchmarkDecode(ж<testing.B> Ꮡb) {
         }
         for (nint i = 0; i < n; i += len(buf0)) {
             if (len(buf0) > n - i) {
-                buf0 = buf0[..(int)(n - i)];
+                buf0 = buf0.slice(0, n - i);
             }
             io.Copy(new flate_test_package.flate_WriterжWriter(w), new flate_test_package.bytes_Readerжio_Reader(bytes.NewReader(buf0)));
         }

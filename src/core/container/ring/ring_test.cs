@@ -85,7 +85,7 @@ internal static void verify(ж<testing.T> Ꮡt, ж<global::go.container.ring_pac
     }
     for (nint i = 0; i < 10; i++) {
         nint ni = N + i;
-        nint mi = ni % N;
+        nint mi = rem(ni, N);
         if (Ꮡr.Move(ni) != Ꮡr.Move(mi)) {
             Ꮡt.Errorf("r.Move(%d) != r.Move(%d)"u8, ni, mi);
         }

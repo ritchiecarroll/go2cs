@@ -139,7 +139,7 @@ internal static slice<slice<nint>> build(nint n, params ꓸꓸꓸnint xʗp) {
     nint j = 0;
     foreach (var (i, _) in ret) {
         ret[i] = new slice<nint>(runLength);
-        copy(ret[i], x[(int)(j)..]);
+        copy(ret[i], x.slice(j));
         j += runLength;
         if (j > len(x)) {
             throw panic("invalid build entry");
@@ -170,7 +170,7 @@ public static void TestFind(ж<testing.T> Ꮡt) {
             break;
         }
         case {} when test.matches != default! && result != default!: {
-            @string expect = test.text[(int)(test.matches[0][0])..(int)(test.matches[0][1])];
+            @string expect = test.text.slice(test.matches[0][0], test.matches[0][1]);
             if (len(result) != cap(result)) {
                 Ꮡt.Errorf("expected capacity %d got %d: %s"u8, len(result), cap(result), test);
             }
@@ -203,7 +203,7 @@ public static void TestFindString(ж<testing.T> Ꮡt) {
             break;
         }
         case {} when test.matches != default! && result != ""u8: {
-            @string expect = test.text[(int)(test.matches[0][0])..(int)(test.matches[0][1])];
+            @string expect = test.text.slice(test.matches[0][0], test.matches[0][1]);
             if (expect != result) {
                 Ꮡt.Errorf("expected %q got %q: %s"u8, expect, result, test);
             }
@@ -293,7 +293,7 @@ public static void TestFindAll(ж<testing.T> Ꮡt) {
                 if (len(got) != cap(got)) {
                     Ꮡt.Errorf("match %d: expected capacity %d got %d: %s"u8, k, len(got), cap(got), test);
                 }
-                @string expect = test.text[(int)(e[0])..(int)(e[1])];
+                @string expect = test.text.slice(e[0], e[1]);
                 if (expect != ((sstring)got)) {
                     Ꮡt.Errorf("match %d: expected %q got %q: %s"u8, k, expect, got, test);
                 }
@@ -326,7 +326,7 @@ public static void TestFindAllString(ж<testing.T> Ꮡt) {
                 continue;
             }
             foreach (var (k, e) in test.matches) {
-                @string expect = test.text[(int)(e[0])..(int)(e[1])];
+                @string expect = test.text.slice(e[0], e[1]);
                 if (expect != result[k]) {
                     Ꮡt.Errorf("expected %q got %q: %s"u8, expect, result, test);
                 }
@@ -406,7 +406,7 @@ internal static void testSubmatchBytes(ж<FindTest> Ꮡtest, nint n, slice<nint>
             Ꮡt.Errorf("match %d: expected capacity %d got %d: %s"u8, n, len(got), cap(got), Ꮡtest.OrTypedNil());
             return;
         }
-        @string expect = test.text[(int)(submatches[k])..(int)(submatches[k + 1])];
+        @string expect = test.text.slice(submatches[k], submatches[k + 1]);
         if (expect != ((sstring)got)) {
             Ꮡt.Errorf("match %d: expected %q got %q: %s"u8, n, expect, got, Ꮡtest.OrTypedNil());
             return;
@@ -455,7 +455,7 @@ internal static void testSubmatchString(ж<FindTest> Ꮡtest, nint n, slice<nint
             }
             continue;
         }
-        @string expect = test.text[(int)(submatches[k])..(int)(submatches[k + 1])];
+        @string expect = test.text.slice(submatches[k], submatches[k + 1]);
         if (expect != result[k / 2]) {
             Ꮡt.Errorf("match %d: expected %q got %q: %s"u8, n, expect, result, Ꮡtest.OrTypedNil());
             return;

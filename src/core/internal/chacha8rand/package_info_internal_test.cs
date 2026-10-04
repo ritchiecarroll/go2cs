@@ -28,7 +28,7 @@ using static go.@internal.chacha8rand_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/chacha8rand/export_test.go", "export_test.cs", "AA0Uog==")]
+[assembly: go.GoPositionMap("internal/chacha8rand/export_test.go", "export_test.cs", "AAkOkpSi")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

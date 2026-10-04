@@ -292,7 +292,7 @@ public static void TestQUICFragmentaryData(ж<testing.T> Ꮡt) {
             // Provide the data one byte at a time.
             foreach (var (i, _) in e.Data) {
                 {
-                    var err = (~dst).conn.HandleData(e.Level, e.Data[(int)(i)..(int)(i + 1)]); if (err != default!) {
+                    var err = (~dst).conn.HandleData(e.Level, e.Data.slice(i, i + 1)); if (err != default!) {
                         Ꮡt.Errorf("HandleData: %v"u8, err);
                         break;
                     }
@@ -462,9 +462,15 @@ public static void TestQUICConnectionState(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string keyᶜ = "key"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string valueᶜ = "value"u8;
+
 public static void TestQUICStartContextPropagation(ж<testing.T> Ꮡt) {
-    @string key = "key"u8;
-    @string value = "value"u8;
+    @string key = keyᶜ;
+    @string value = valueᶜ;
     var ctx = context.WithValue(context.Background(), key, value);
     var config = Ꮡ(new QUICConfig(TLSConfig: testConfig.Clone()));
     config.Value.TLSConfig.Value.MinVersion = VersionTLS13;

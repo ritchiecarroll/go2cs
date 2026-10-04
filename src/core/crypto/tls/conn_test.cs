@@ -7,6 +7,8 @@ using bytes = bytes_package;
 using io = io_package;
 using net = net_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.crypto.tls_package;
 using time = time_package;
 
@@ -140,7 +142,7 @@ public static void TestCertificateSelection(ж<testing.T> Ꮡt) {
 }
 
 // Run with multiple crypto configs to test the logic for computing TLS record overheads.
-internal static void runDynamicRecordSizingTest(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> Ꮡconfig) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void runDynamicRecordSizingTest(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> Ꮡconfig) {
     GoFrame ᒐ = default;
     try {
         var (clientConn, serverConn) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
@@ -189,7 +191,7 @@ internal static void runDynamicRecordSizingTest(ж<testing.T> Ꮡt, ж<global::g
                     if (len(record) < length) {
                         record = new slice<byte>(length);
                     }
-                    (n, err) = io.ReadFull(new tls_test_package.net_ConnᴠReader(clientConnʗ1), record[..(int)(length)]);
+                    (n, err) = io.ReadFull(new tls_test_package.net_ConnᴠReader(clientConnʗ1), record.slice(0, length));
                     if (err != default! || n != length) {
                         Ꮡt.Errorf("io.ReadFull = %d, %v"u8, n, err);
                         return;
@@ -229,7 +231,7 @@ internal static void runDynamicRecordSizingTest(ж<testing.T> Ꮡt, ж<global::g
         }
         // Drop the size of the second to last record, which is likely to be
         // truncated, and the last record, which is a close_notify alert.
-        recordSizes = recordSizes[..(int)(len(recordSizes) - 2)];
+        recordSizes = recordSizes.slice(0, len(recordSizes) - 2);
         // recordSizes should contain a series of records smaller than
         // tcpMSSEstimate followed by some larger than maxPlaintext.
         var seenLargeRecord = false;
@@ -349,7 +351,7 @@ public static void TestHairpinInClose(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsReceivedRecordWithˢ = "tls: received record with version 1111 when expecting version 303"u8;
 
-public static void TestRecordBadVersionTLS13(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRecordBadVersionTLS13(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (client, server) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));

@@ -8,6 +8,8 @@ using static runtime_package;
 using Δsync = sync_package;
 using atomic = global::go.sync.atomic_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.sync;
 using static global::go.runtime_internal_test_package;
 using Δruntime = runtime_package;
@@ -76,7 +78,7 @@ public static void TestSemaHandoff2(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static bool testSemaHandoff() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static bool testSemaHandoff() {
     ref var sema = ref heap(new uint32(), out var Ꮡsema);
     ref var res = ref heap(new uint32(), out var Ꮡres);
     var done = new channel<EmptyStruct>(0);

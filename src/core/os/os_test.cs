@@ -24,6 +24,8 @@ using Δtesting = testing_package;
 using fstest = go.testing.fstest_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.io;
 using go.os;
 using go.path;
@@ -1896,7 +1898,7 @@ public static void TestChdirAndGetwd(ж<Δtesting.T> Ꮡt) {
 }
 
 // Test that Chdir+Getwd is program-wide.
-public static void TestProgWideChdir(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestProgWideChdir(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -3250,7 +3252,7 @@ internal static readonly object skippingOnWindowsˢ = (@string)"skipping on wind
 
 // Test that simultaneous RemoveAll do not report an error.
 // As long as it gets removed, we should be happy.
-public static void TestRemoveAllRace(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRemoveAllRace(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -3304,7 +3306,7 @@ internal static readonly object skippingOnJsNoSupportForˢ = (@string)"skipping 
 internal static readonly object skippingOnWasip1Noˢ = (@string)"skipping on wasip1; no support for os.Pipe"u8;
 
 // Test that reading from a pipe doesn't use up a thread.
-public static void TestPipeThreads(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipeThreads(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
@@ -3974,7 +3976,7 @@ internal static readonly @string pipeIsBeingClosedˢ = "pipe is being closed"u8;
 internal static readonly @string hungupChannelˢ = "hungup channel"u8;
 
 // Test that it's OK to have parallel I/O and Close on a pipe.
-public static void TestPipeIOCloseRace(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipeIOCloseRace(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Skip on wasm, which doesn't have pipes.
@@ -4070,7 +4072,7 @@ public static void TestPipeIOCloseRace(ж<Δtesting.T> Ꮡt) {
 }
 
 // Test that it's OK to call Close concurrently on a pipe.
-public static void TestPipeCloseRace(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipeCloseRace(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Skip on wasm, which doesn't have pipes.

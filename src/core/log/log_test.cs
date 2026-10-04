@@ -14,7 +14,8 @@ using strings = strings_package;
 using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.log_package;
 
 partial class log_internal_test_package {
@@ -70,7 +71,7 @@ internal static void testPrint(ж<testing.T> Ꮡt, nint flag, @string prefix, @s
         Println(helloˢ, (nint)(23), worldˢ);
     }
     @string line = buf.String();
-    line = line[0..(int)(len(line) - 1)];
+    line = line.slice(0, len(line) - 1);
     pattern = "^"u8 + pattern + "hello 23 world$"u8;
     var (matched, err) = Δregexp.MatchString(pattern, line);
     if (err != default!) {
@@ -118,7 +119,7 @@ public static void TestNonNewLogger(ж<testing.T> Ꮡt) {
     Ꮡl.Print(helloˢ);
 }
 
-public static void TestOutputRace(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOutputRace(ж<testing.T> Ꮡt) {
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var l = New(new log_test_package.bytes_BufferжWriter(Ꮡb), ""u8, 0);
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -310,7 +311,7 @@ internal static (nint, error) Write(this discard _, slice<byte> p) {
 internal static readonly @string prefixˢ = "prefix: "u8;
 internal static readonly @string helloWorldˢ = "hello, world!"u8;
 
-public static void BenchmarkConcurrent(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkConcurrent(ж<testing.B> Ꮡb) {
     var l = New(new discard(nil), prefixˢ, (nint)((nint)(UntypedInt)((UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | Llongfile) | (nint)Lmsgprefix));
     ref var group = ref heap(new Δsync.WaitGroup(), out var Ꮡgroup);
     for (nint i = Δruntime.NumCPU(); i > 0; i--) {

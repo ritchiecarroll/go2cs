@@ -6,6 +6,8 @@ namespace go;
 using Δruntime = runtime_package;
 using static sync_package;
 using Δtesting = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.sync_internal_test_package;
 
 partial class sync_test_package {
@@ -25,7 +27,7 @@ public static void BenchmarkSemaUncontended(ж<Δtesting.B> Ꮡb) {
     });
 }
 
-internal static void benchmarkSema(ж<Δtesting.B> Ꮡb, bool block, bool work) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkSema(ж<Δtesting.B> Ꮡb, bool block, bool work) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();

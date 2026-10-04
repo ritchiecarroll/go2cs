@@ -29,7 +29,7 @@ using static global::go.@internal.runtime.math_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/math/math_test.go", "math_test.cs", "ACNOgoKCgoKCpgAPFIKCgoKCgoK4goKCgoKC", "60-68:1;70-78:2")]
+[assembly: go.GoPositionMap("internal/runtime/math/math_test.go", "math_test.cs", "ABIsABAigoKCgoKCpgAPFIKCgoKCgoK4goKCgoKC", "60-68:1;70-78:2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

@@ -201,7 +201,7 @@ public static void TestLineAline(ж<testing.T> Ꮡt) {
                 break;
             }
             // cgo files are full of 'Z' symbols, which we don't handle
-            if (len(path) > 4 && path[(int)(len(path) - 4)..] == ".cgo") {
+            if (len(path) > 4 && path.slice(len(path) - 4) == ".cgo") {
                 continue;
             }
             {
@@ -247,11 +247,11 @@ public static void TestPCLine(ж<testing.T> Ꮡt) {
         nint wantLine = 0;
         for (var pc = sym.Value.Entry; pc < (~sym).End; pc++) {
             var offΔ1 = pc - (~text).Addr; // TODO(rsc): should not need off; bug in 8g
-            if (textdat[(nint)(offΔ1)] == 255) {
+            if (textdat[offΔ1] == 255) {
                 break;
             }
-            wantLine += (nint)textdat[(nint)(offΔ1)];
-            Ꮡt.Logf("off is %d %#x (max %d)"u8, offΔ1, textdat[(nint)(offΔ1)], (~sym).End - pc);
+            wantLine += (nint)textdat[offΔ1];
+            Ꮡt.Logf("off is %d %#x (max %d)"u8, offΔ1, textdat[offΔ1], (~sym).End - pc);
             var (@file, line, fn) = tab.PCToLine(pc);
             if (fn == nil){
                 Ꮡt.Errorf("failed to get line of PC %#x"u8, pc);
@@ -265,13 +265,13 @@ public static void TestPCLine(ж<testing.T> Ꮡt) {
         nint lookupline = -1;
         wantLine = 0;
         var off = (uint64)0; // TODO(rsc): should not need off; bug in 8g
-        for (var pc = sym.Value.Value; pc < (~sym).End; pc += 2 + (uint64)textdat[(nint)(off)]) {
+        for (var pc = sym.Value.Value; pc < (~sym).End; pc += 2 + (uint64)textdat[off]) {
             var (@file, line, fn) = tab.PCToLine(pc);
             off = pc - (~text).Addr;
-            if (textdat[(nint)(off)] == 255) {
+            if (textdat[off] == 255) {
                 break;
             }
-            wantLine += (nint)textdat[(nint)(off)];
+            wantLine += (nint)textdat[off];
             if (line != wantLine) {
                 Ꮡt.Errorf("expected line %d at PC %#x in pcfromline, got %d"u8, wantLine, pc, line);
                 off = pc + 1 - (~text).Addr;

@@ -1852,7 +1852,7 @@ public static void TestEvalSymlinksAboveRoot(ж<testing.T> Ꮡt) {
     }
     // Count the number of ".." elements to get to the root directory.
     @string vol = filepath.VolumeName(evalTmpDir);
-    nint c = strings.Count(evalTmpDir[(int)(len(vol))..], ((@string)(rune)os.PathSeparator));
+    nint c = strings.Count(evalTmpDir.slice(len(vol)), ((@string)(rune)os.PathSeparator));
     slice<@string> dd = default!;
     for (nint i = 0; i < c + 2; i++) {
         dd = append(dd, ".."u8);
@@ -1860,7 +1860,7 @@ public static void TestEvalSymlinksAboveRoot(ж<testing.T> Ꮡt) {
     @string wantSuffix = strings.Join(new @string[]{"a"u8, "file"u8}.slice(), ((@string)(rune)os.PathSeparator));
     // Try different numbers of "..".
     foreach (var (_, i) in new nint[]{c, c + 1, c + 2}.slice()) {
-        @string check = strings.Join(new @string[]{evalTmpDir, strings.Join(dd[..(int)(i)], ((@string)(rune)os.PathSeparator)), evalTmpDir[(int)(len(vol) + 1)..], "b"u8, "file"u8}.slice(), ((@string)(rune)os.PathSeparator));
+        @string check = strings.Join(new @string[]{evalTmpDir, strings.Join(dd.slice(0, i), ((@string)(rune)os.PathSeparator)), evalTmpDir.slice(len(vol) + 1), "b"u8, "file"u8}.slice(), ((@string)(rune)os.PathSeparator));
         var (resolved, errΔ4) = filepath.EvalSymlinks(check);
         switch (ᐧ) {
         case {} when runtime.GOOS == "darwin"u8 && errors.Is(errΔ4, fs.ErrNotExist): {

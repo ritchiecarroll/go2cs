@@ -5,6 +5,8 @@ namespace go.net;
 
 using errors = errors_package;
 using synctest = global::go.@internal.synctest_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.@internal;
 using static global::go.net.http_internal_test_package;
 
@@ -22,7 +24,7 @@ internal static error errStillRunning = errors.New("async op still running"u8);
 // It returns an asyncResult which acts as a future.
 //
 // Must be called from within a synctest bubble.
-internal static ж<asyncResult<T>> runAsync<T>(Func<(T, error)> f) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<asyncResult<T>> runAsync<T>(Func<(T, error)> f) {
     var r = Ꮡ(new asyncResult<T>(
         donec: new channel<EmptyStruct>(0)
     ));
@@ -55,7 +57,7 @@ internal static ж<asyncResult<T>> runAsync<T>(Func<(T, error)> f) {
         return (r.res, r.err);
     }
     default: {
-        T zero = default!;
+        T zero = GoZero<T>();
         return (zero, errStillRunning);
     }}
 }

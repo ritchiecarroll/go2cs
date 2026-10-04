@@ -117,7 +117,7 @@ internal static slice<nint> find(@string src, @string s, nint n) {
     if (s != ""u8 && n != 0) {
         // find at most n occurrences of s in src
         for (nint i = -1; n < 0 || builtin.len(res) < n; ) {
-            nint j = strings.Index(src[(int)(i + 1)..], s);
+            nint j = strings.Index(src.slice(i + 1), s);
             if (j < 0) {
                 break;
             }
@@ -147,7 +147,7 @@ internal static void testLookup(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<globa
         if (r < 0 || builtin.len(tc.source) <= r){
             Ꮡt.Errorf("test %q, lookup %q, result %d (n = %d): index %d out of range [0, %d["u8, tc.name, s, i, n, r, builtin.len(tc.source));
         } else 
-        if (!strings.HasPrefix(tc.source[(int)(r)..], s)) {
+        if (!strings.HasPrefix(tc.source.slice(r), s)) {
             Ꮡt.Errorf("test %q, lookup %q, result %d (n = %d): index %d not a match"u8, tc.name, s, i, n, r);
         }
         if (i > 0 && res[i - 1] == r) {
@@ -183,7 +183,7 @@ internal static void testFindAllIndex(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж
         if (r[0] < 0 || r[0] > r[1] || builtin.len(tc.source) < r[1]){
             Ꮡt.Errorf("test %q, FindAllIndex %q, result %d (n == %d): illegal match [%d, %d]"u8, tc.name, Ꮡrx.OrTypedNil(), i, n, r[0], r[1]);
         } else 
-        if (!Ꮡrx.MatchString(tc.source[(int)(r[0])..(int)(r[1])])) {
+        if (!Ꮡrx.MatchString(tc.source.slice(r[0], r[1]))) {
             Ꮡt.Errorf("test %q, FindAllIndex %q, result %d (n = %d): [%d, %d] not a match"u8, tc.name, Ꮡrx.OrTypedNil(), i, n, r[0], r[1]);
         }
     }
@@ -231,7 +231,7 @@ internal static void testLookups(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<glob
 }
 
 [GoRecv] internal static slice<byte> at(this ref index x, nint i) {
-    return x.data[(int)(x.sa.get(i))..];
+    return x.data.slice((nint)(x.sa.get(i)));
 }
 
 internal static void testConstruction(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> Ꮡx) {
@@ -393,7 +393,7 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
         }
         var x = new slice<byte>(size);
         foreach (var (i, _) in x) {
-            x[i] = "ab"u8[(int)(i % 2)];
+            x[i] = LiteralByteAt("ab"u8, i % 2);
         }
         testSA(tΔ1, x, build);
     });
@@ -427,7 +427,7 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
                 }
             }
         }
-        x[..(int)(cap(x))][builtin.len(x)] = 0; // for sais.New
+        x.slice(0, cap(x))[builtin.len(x)] = 0; // for sais.New
         testSA(tΔ2, x, build);
     });
     Ꮡt.Run(exhaustive2ˢ, (ж<testing.T> tΔ3) => {
@@ -441,7 +441,7 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
                 break;
             }
             x[n] = 0; // for sais.New
-            testRec(tΔ3, x[..(int)(n)], 0, 2, ᏑnumFail, build);
+            testRec(tΔ3, x.slice(0, n), 0, 2, ᏑnumFail, build);
         }
     });
     Ꮡt.Run(exhaustive3ˢ, (ж<testing.T> tΔ4) => {
@@ -455,7 +455,7 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
                 break;
             }
             x[n] = 0; // for sais.New
-            testRec(tΔ4, x[..(int)(n)], 0, 3, ᏑnumFail, build);
+            testRec(tΔ4, x.slice(0, n), 0, 3, ᏑnumFail, build);
         }
     });
 }
@@ -504,7 +504,7 @@ internal static bool testSA(ж<testing.T> Ꮡt, slice<byte> x, Func<slice<byte>,
                 Ꮡt.Errorf("build %s: sa out of range: %v\n"u8, x, sa);
                 return false;
             }
-            if (bytes.Compare(x[(int)(sa[i])..], x[(int)(sa[i + 1])..]) >= 0) {
+            if (bytes.Compare(x.slice(sa[i]), x.slice(sa[i + 1])) >= 0) {
                 Ꮡt.Errorf("build %v -> %v\nsa[%d:] = %d,%d out of order"u8, x, sa, i, sa[i], sa[i + 1]);
                 return false;
             }
@@ -608,7 +608,7 @@ public static void BenchmarkNew(ж<testing.B> Ꮡb) {
                 if (builtin.len(data) < size) {
                     continue;
                 }
-                var dataΔ1 = data[..(int)(size)];
+                var dataΔ1 = data.slice(0, size);
                 @string name = fmt.Sprintf("%dK"u8, size / 1000);
                 if (size >= 1000000) {
                     name = fmt.Sprintf("%dM"u8, size / 1000000);

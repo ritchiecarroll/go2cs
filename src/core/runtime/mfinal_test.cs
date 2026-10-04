@@ -9,6 +9,8 @@ using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -37,7 +39,7 @@ partial class runtime_test_package {
     internal @unsafe.Pointer p;
 }
 
-public static void TestFinalizerType(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestFinalizerType(ж<testing.T> Ꮡt) {
     var ch = new channel<bool>(10);
     var chʗ1 = ch;
     void finalize(ж<nint> x) {
@@ -117,7 +119,7 @@ public static void TestFinalizerType(ж<testing.T> Ꮡt) {
     internal @string up;
 }
 
-public static void TestFinalizerInterfaceBig(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestFinalizerInterfaceBig(ж<testing.T> Ꮡt) {
     var ch = new channel<bool>(0);
     var done = new channel<bool>(1);
     var chʗ1 = ch;

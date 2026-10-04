@@ -9,6 +9,8 @@ using net = net_package;
 using Δhttp = global::go.net.http_package;
 using httptrace = global::go.net.http.httptrace_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.net;
 using global::go.net.http;
 using static global::go.net.http_internal_test_package;
@@ -146,7 +148,7 @@ internal static ж<transportDialTester> newTransportDialTester(ж<testing.T> Ꮡ
 
 // roundTrip starts a RoundTrip.
 // It returns immediately, without waiting for the RoundTrip call to complete.
-internal static ж<transportDialTesterRoundTrip> roundTrip(this ж<transportDialTester> Ꮡdt) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<transportDialTesterRoundTrip> roundTrip(this ж<transportDialTester> Ꮡdt) {
     ref var dt = ref Ꮡdt.DerefOrNull();
 
     dt.t.Helper();

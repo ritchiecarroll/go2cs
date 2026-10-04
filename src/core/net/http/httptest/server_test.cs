@@ -9,6 +9,8 @@ using net = net_package;
 using http = go.net.http_package;
 using sync = sync_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.net;
 using static go.net.http.httptest_package;
 using time = time_package;
@@ -172,7 +174,7 @@ internal static void testServerCloseClientConnections(ж<testing.T> Ꮡt, Func<h
     GoFrame ᒐ = default;
     try {
         ref var s = ref heap<ж<global::go.net.http.httptest_package.Server>>(out var Ꮡs);
-        s = newServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        s = newServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (http.ResponseWriter w, ж<http.Request> r) => {
             Ꮡs.ValueSlot.CloseClientConnections();
         })));
         defer(Ꮡs.ValueSlot.Close, ref ᒐ);
@@ -279,7 +281,7 @@ internal static readonly object failedToHijackˢ = (@string)"failed to hijack"u8
 
 // Issue 51799: test hijacking a connection and then closing it
 // concurrently with closing the server.
-public static void TestCloseHijackedConnection(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCloseHijackedConnection(ж<testing.T> Ꮡt) {
     var hijacked = new channel<net.Conn>(0);
     var hijackedʗ1 = hijacked;
     var ts = NewServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {

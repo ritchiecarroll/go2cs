@@ -7,7 +7,8 @@ using Δruntime = runtime_package;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {

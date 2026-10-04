@@ -13,6 +13,8 @@ using strconv = strconv_package;
 using sync = sync_package;
 using testing = testing_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using exec = go.os.exec_package;
 using go.os;
 using static go.math.rand_internal_test_package;
@@ -67,7 +69,7 @@ public static void TestDefaultRace(ж<testing.T> Ꮡt) {
 // top-level math/rand functions. Make sure that we can make concurrent
 // calls to top-level functions and to Seed without any duplicate values.
 // This will also give the race detector a change to report any problems.
-internal static void doDefaultTest(ж<testing.T> Ꮡt, @string v) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void doDefaultTest(ж<testing.T> Ꮡt, @string v) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var (code, err) = strconv.Atoi(v);

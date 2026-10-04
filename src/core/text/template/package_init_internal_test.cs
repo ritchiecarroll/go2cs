@@ -6,6 +6,7 @@ namespace go.text;
 
 partial class template_internal_test_package {
     static template_internal_test_package() {
+        initᴛtVal();
         initᴛiVal();
         initᴛexecTests();
         initᴛmultiExecTests();

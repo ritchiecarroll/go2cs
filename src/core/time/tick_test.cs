@@ -8,6 +8,8 @@ using Δruntime = runtime_package;
 using Δsync = sync_package;
 using Δtesting = testing_package;
 using static time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.time_internal_test_package;
 using Δtime = time_package;
 
@@ -172,7 +174,7 @@ public static void TestTickerResetLtZeroDuration(ж<Δtesting.T> Ꮡt) {
 internal static readonly object outputChannelIsClosedˢ = (@string)"output channel is closed"u8;
 internal static readonly object timerExpiredˢ = (@string)"timer expired"u8;
 
-public static void TestLongAdjustTimers(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestLongAdjustTimers(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.GOOS == "android"u8 || Δruntime.GOOS == "ios"u8) {
@@ -421,7 +423,7 @@ public static void TestChan(ж<Δtesting.T> Ꮡt) {
     return pending;
 }
 
-internal static void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-*/channel<Δtime.Time> C, bool synctimerchan) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-*/channel<Δtime.Time> C, bool synctimerchan) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var (_, isTimer) = tim._<ж<Δtime.Timer>>(ᐧ);

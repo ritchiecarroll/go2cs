@@ -83,9 +83,9 @@ public static void TestConstantTimeEq(ж<testing.T> Ꮡt) {
 
 internal static slice<byte> makeCopy(nint v, slice<byte> x, slice<byte> y) {
     if (len(x) > len(y)){
-        x = x[..(int)(len(y))];
+        x = x.slice(0, len(y));
     } else {
-        y = y[..(int)(len(x))];
+        y = y.slice(0, len(x));
     }
     if (v == 1) {
         copy(x, y);
@@ -95,9 +95,9 @@ internal static slice<byte> makeCopy(nint v, slice<byte> x, slice<byte> y) {
 
 internal static slice<byte> constantTimeCopyWrapper(nint v, slice<byte> x, slice<byte> y) {
     if (len(x) > len(y)){
-        x = x[..(int)(len(y))];
+        x = x.slice(0, len(y));
     } else {
-        y = y[..(int)(len(x))];
+        y = y.slice(0, len(x));
     }
     v &= (nint)(1);
     ConstantTimeCopy(v, x, y);

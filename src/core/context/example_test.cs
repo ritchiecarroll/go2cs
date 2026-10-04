@@ -9,6 +9,8 @@ using fmt = fmt_package;
 using Δnet = net_package;
 using Δsync = sync_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.context_internal_test_package;
 
 partial class context_test_package {
@@ -26,7 +28,7 @@ public static void ExampleWithCancel() {
         // The callers of gen need to cancel the context once
         // they are done consuming generated integers not to leak
         // the internal goroutine started by gen.
-        /*<-*/channel<nint> gen(context.Context ctxΔ1) {
+        [MethodImpl(MethodImplOptions.NoInlining)] /*<-*/channel<nint> gen(context.Context ctxΔ1) {
             var dst = new channel<nint>(0);
             nint n = 1;
             var dstʗ1 = dst;
@@ -162,7 +164,7 @@ public static void ExampleWithValue() {
 
 // This example uses AfterFunc to define a function which waits on a sync.Cond,
 // stopping the wait when a context is canceled.
-public static void ExampleAfterFunc_cond() {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleAfterFunc_cond() {
     error waitOnCond(context.Context ctx, ж<Δsync.Cond> condΔ1, Func<bool> conditionMet) {
         GoFrame ᒐ = default;
         try {

@@ -43,8 +43,8 @@ using static global::go.os.user_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("os/user/user_test.go", "user_test.cs", "ABIkgoKCuMKCgpSCgoKClKaClILotIK4soKUgpSClIKUgriChIKCgpTegoKUpoKEgoKClKiCgpTWgoKCuMKCgpSChIKCgpSogriClIKWgoKUggAJCIKCgriChIKCgpSogoKUgriCgoKm", "27-29:1;122-124:1")]
-[assembly: go.GoPositionMap("os/user/user_windows_test.go", "user_windows_test.cs", "ACU80oKGspSCgoa2lJSGkpSCgoKWgoSSgoKCgoKm2oKCpoKAgoK2gqaSgIKCyO7SypSCgoKUgoKUgoKUgoKCgIKkgpSCgpTWwoKEkoKW3IKygIKkhIKmgpSUgpQACgrCgoSSgqiWgIKkgoKUqIKClAAKBoKmloKCgoKUgoKCgpSClIKCgoKCuJSEgoKWgpSCAA4agoKCgoKClILKgoKCgoKClIKUgsqCgoKCgoKUgsqCgoKCgoKUgg==", "38-49:1;94-100:2;135-137:1;161-180:1;200-206:1")]
+[assembly: go.GoPositionMap("os/user/user_test.go", "user_test.cs", "AAwcgsaCgoK4woKClIKCgoKUpoKUgrSktIK4soKUgpSClIKUgriChIKCgpTegoKUpoKEgoKClKiCgpTWgoKCuMKCgpSChIKCgpSogriClIKWgoKUgrTUgoKCuIKEgoKClKiCgpSCuIKCgqY=", "27-29:1;122-124:1")]
+[assembly: go.GoPositionMap("os/user/user_windows_test.go", "user_windows_test.cs", "ACU80oKGspSCgoa2lJSGkpSCgoKWgoSSgoKCgoKm2oKCpoKAgoK2gqaSgIKCyO7SypSCgoKUgoKUgoKUgoKCgIKkgpSCgpTWwoKEkoKW3IKygIKkhIKmgpSUgpSixKTCgoSSgqiWgIKkgoKUqIKClKL0gqaWgoKCgpSCgoKClIKUgoKCgoK4lISCgpaClIIACAgABRKCgoKCgoKUgsqCgoKCgoKUgpSCyoKCgoKCgpSCyoKCgoKCgpSC", "38-49:1;94-100:2;135-137:1;161-180:1;200-206:1")]
 // </GoSourcePositionMaps>
 
 namespace go.os;

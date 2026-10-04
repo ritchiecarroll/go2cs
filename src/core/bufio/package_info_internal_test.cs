@@ -29,7 +29,7 @@ using static go.bufio_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("bufio/export_test.go", "export_test.cs", "ABAggoKUgpSokg==")]
+[assembly: go.GoPositionMap("bufio/export_test.go", "export_test.cs", "AAwYuIKClIKUqJI=")]
 // </GoSourcePositionMaps>
 
 namespace go;

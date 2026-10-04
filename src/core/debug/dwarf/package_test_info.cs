@@ -52,8 +52,8 @@ using static global::go.debug.dwarf_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("debug/dwarf/entry_test.go", "entry_test.cs", "ABUe6oKCgoKUgpiigoCCpIIAERaCAAgQhMqEyoS41oIACBLWggAIEqaCgoKCgoKClIKUloKCgpSCABEKggAiVoKChIKCgoKWgpaAgqSCgoKUgpSWggALCtgAPGqCgoKWgoKUggAJCriCgpSCgoKCgoKCgpSClIKUgoKUuIKCgtyiAGDCAYKCAAYQgoKCgpSC3ILiqIKClII=", "293-321:1")]
-[assembly: go.GoPositionMap("debug/dwarf/line_test.go", "line_test.cs", "ABMo3gARJoSmzIKClgARJrr2zIKSgoKUgoKWABEmhNbMAA8ihKaUggAOHoQADgaCloKClIKCmJKCgoKEgoKClJSogoCCpLiCgoKCgrakuoCCpIKCgIKkloKCgIKkAA0MtJKCgoKCpJaCgsyCloKCpJaCgoKCgpSmgpSogoKCgoKClLqCgoKCgriCgpSCgpSClJTWgoKCgpS4goKCgpaCuIKUgoKUgoKCgqamgoIAJlSCgoKCyojyppSCgoKUgoKClIKClII=", "95-100:1")]
-[assembly: go.GoPositionMap("debug/dwarf/type_test.go", "type_test.cs", "ADBegoKCloKClKaCgoKWgoKUpoKCgpaCgpTmguaC1oLmgoKCgoKClIKUgoKClIKCgIKUpoCCgpSCgsiCqIKC+u6CgoKCgoKUgpSUyoKCgoIADRbKgoKCgoKClIKUgoKCgoKClIKCgpSCgpSEpoKCgoKmgoIADh6CgqaCgtaCgqaCgtaCgqaigoKCgpSCloKCgpaEgoKClIKUlpSClIKCgriCAAskAAkCgg==", "290-299:1")]
+[assembly: go.GoPositionMap("debug/dwarf/line_test.go", "line_test.cs", "AA8egoKW3gARJoSmzIKClgARJrr2zIKSgoKUgoKWABEmhNbMAA8ihKaUggAOHoQADgaCloKClIKCmJKCgoKEgoKClJSogoCCpLiCgoKCgrakuoCCpIKCgIKkloKCgIKkAA0MtJKCgoKCpJaCgsyCloKCpJaCgoKCgpSmgpSogoKCgoKClLqCgoKCgriCgpSCgpSClJTWgoKCgpS4goKCgpaCuIKUgoKUgoKCgqamgoIADxIAFkKCgoKCyojyppSCgoKUgoKClIKClII=", "95-100:1")]
+[assembly: go.GoPositionMap("debug/dwarf/type_test.go", "type_test.cs", "ABIiABgyyoKCgpaCgpSmgoKCloKClKaCgoKWgoKU5oLmgtaC5oKCgoKCgpSClIKCgpSCgoCClKaAgoKUgoLIgqiCgvrugoKCgoKClIKUlMqCgoKC2vzKgoKCgoKClIKUgoKCgoKClIKCgpSCgpSEpoKCgoKmgoLKysqCgqaCgtaCgqaCgtaCgqaigoKCgpSCloKCgpaEgoKClIKUlpSClIKCgriCygAGGgAJAoI=", "290-299:1")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;

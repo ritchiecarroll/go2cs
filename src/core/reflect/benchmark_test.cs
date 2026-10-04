@@ -274,7 +274,7 @@ public static void BenchmarkSelect(ж<Δtesting.B> Ꮡb) {
         Ꮡb.Run(strconv.Itoa(numCases), (ж<Δtesting.B> bΔ1) => {
             bΔ1.ReportAllocs();
             for (nint i = 0; i < (~bΔ1).N; i++) {
-                (_, _, _) = Select(casesʗ1[..(int)(numCases)]);
+                (_, _, _) = Select(casesʗ1.slice(0, numCases));
             }
         });
     }

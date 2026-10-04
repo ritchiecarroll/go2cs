@@ -47,18 +47,18 @@ using static global::go.strconv_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("strconv/atob_test.go", "atob_test.cs", "ACRIooKClIKmgriClIIAChaCgoCCABAggoKCgg==")]
-[assembly: go.GoPositionMap("strconv/atoc_test.go", "atoc_test.cs", "AB9CggCSAbYCgoKClIKClIKWgoKClIKCAAgOkoKEgoKClII=")]
-[assembly: go.GoPositionMap("strconv/atof_test.go", "atof_test.cs", "AMwD+AaCpqaCgoKmgoKCuoKUlIKCgoKWgoKCloKCuIKCgoLKgoKCgpSC3IKCgoKCgoKCqIKCgoKClIKCyoKCgoKClIKCuKaApICkgoKCgpQACgoAEiKCgoKCgpSCgpSCgoKUgoKUupKCgpSCgoKClISCgpS0tLSU2qKChIKCgpSCyqKCuKKCuKKCuKKCuKKCgoK4ooKCgriigoKClIKCgoKCgsqigriigriigriigoKCgpSCgriigoKCgpSCgg==")]
-[assembly: go.GoPositionMap("strconv/atoi_test.go", "atoi_test.cs", "AMQC/gSmgoKCpoKCgqaCgoKmgoKCpoKCgqaCgoLKgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoLcgpSCgoKC2oKCgoL+gpSCgoKC2oKCgoL+gpSCgoKCgpSC2oKCgoKClIL+gqaCpoIAGTCCgpSClNaCgoKCgoIACAyCgoKCgoLcgoKCgoKC3IKCgoKCggAIDIKCyoCCAAgKgoKC+IKClIIACBKC7rKSgoKC3IKClIK4gsqCyrKSgoKC", "615-617:1;618-620:2;637-643:1;648-650:1;651-653:2;669-675:1")]
-[assembly: go.GoPositionMap("strconv/ctoa_test.go", "ctoa_test.cs", "ABMYggAOMIKCgtyigoCCtg==", "47-51:1")]
-[assembly: go.GoPositionMap("strconv/decimal_test.go", "decimal_test.cs", "ACBAgoKCgoKCggAdPoKCgoKCgoKmgoKCgqaCgoKCABgygoKCgoKCgg==")]
-[assembly: go.GoPositionMap("strconv/fp_test.go", "fp_test.cs", "ABAggpSkpKSqooCCgoKUgoKClKaCgoKCgpSUgoKCgoKUlKSCgpSqooCCgoKClIKCgpSkgoKClAANBqKCgpSUhIKCgpSCgoKUgoKUgoKCgpSkgoKClIKkgriC")]
-[assembly: go.GoPositionMap("strconv/ftoa_test.go", "ftoa_test.cs", "ABUqgACPAbgCgoKCgoKUgoKUgoKClIKC3IKCgoKCgIK2goKCgILsgoKClIKCgoSCgoKCgpaCgoKCgoLKooKAgrYAMmSCspKC3IKCsqKC", "250-254:1;307-311:1;318-322:1")]
+[assembly: go.GoPositionMap("strconv/atob_test.go", "atob_test.cs", "ABMmABAiooKClIKmgriClILcyoKCgIIACxbKgoKCgg==")]
+[assembly: go.GoPositionMap("strconv/atoc_test.go", "atoc_test.cs", "ABAggoKChIKCggAHEoIAkgG2AoKCgpSCgpSCloKCgpSCggAIDpKChIKCgpSC")]
+[assembly: go.GoPositionMap("strconv/atof_test.go", "atof_test.cs", "AF0uAKkCjAUARL4BgqamgoKCpoKCgrqClJSCgoKCloKCgpaCgriCgoKCyoKCgoKUgtyCgoKCgoKCgqiCgoKCgpSCgsqCgoKCgpSCgrimgKSApIKCgoKUAAoKAA0GAAQcgoKCgoKUgoKUgoKClIKClLqSgoKUgoKCgpSEgoKUtLS0lNqigoSCgoKUgsqigriigriigriigriigoKCuKKCgoK4ooKCgpSCgoKCgoLKooK4ooK4ooK4ooKCgoKUgoK4ooKCgoKUgoI=")]
+[assembly: go.GoPositionMap("strconv/atoi_test.go", "atoi_test.cs", "ABYqACU2AFW8AQAqRgBGogEAGC4AIEDcpoKCgqaCgoKmgoKCpoKCgqaCgoKmgoKCyoKCgoKC3IKCgoKC3IKCgoKC3IKCgoKC3IKCgoKC3IKCgoKC3IKUgoKCgtqCgoKC/oKUgoKCgtqCgoKC/oKUgoKCgoKUgtqCgoKCgpSC/oKmgqaCAAcQ/gAJEoKClIKU1oKCgoKCggAIDIKCgoKCgtyCgoKCgoLcgoKCgoKCAAgMgoLKgIIACAqCgoL4goKUggAIEoLuspKCgoLcgoKUgriCyoLKspKCgoI=", "615-617:1;618-620:2;637-643:1;648-650:1;651-653:2;669-675:1")]
+[assembly: go.GoPositionMap("strconv/ctoa_test.go", "ctoa_test.cs", "ABMYggAOMIKCgtyigoCCtqI=", "47-51:1")]
+[assembly: go.GoPositionMap("strconv/decimal_test.go", "decimal_test.cs", "ABIkAA0cgoKCgoKCggAMGgAQJIKCgoKCgoKmgoKCgqaCgoKCAAsYAAwagoKCgoKCgg==")]
+[assembly: go.GoPositionMap("strconv/fp_test.go", "fp_test.cs", "ABAggpSkpKSqooCCgoKUgoKClKaCgoKCgpSUgoKCgoKUlKSCgpSqooCCgoKClIKCgpSkgoKClAANBqKCgpSUhIKCgpSCgoKUgoKUgoKCgpSkgoKClIKkgriCtA==")]
+[assembly: go.GoPositionMap("strconv/ftoa_test.go", "ftoa_test.cs", "ABUqgAASDgB8qgKCgoKCgpSCgpSCgoKUgoLcgoKCgoKAgraCgoKAguyCgoKUgoKChIKCgoKCloKCgoKCgsqigoCCtqIAEgQAHF6CspKC3IKCsqKC", "250-254:1;307-311:1;318-322:1")]
 [assembly: go.GoPositionMap("strconv/ftoaryu_test.go", "ftoaryu_test.cs", "AAwagoKCgoLKgoKCgoI=")]
-[assembly: go.GoPositionMap("strconv/itoa_test.go", "itoa_test.cs", "ADx8ooKCgqaCgqiCgoKmgoK6goKC3oKAgrYAFCSCgoKCpoKCACFCgoKCgsqigoKCyqKCgoKCyqKCgoLKooKCgoLKgoKCgoKC3KKCgoKCuIKykoKCgg==", "98-102:1;213-218:1;233-239:1")]
-[assembly: go.GoPositionMap("strconv/quote_test.go", "quote_test.cs", "AA0esoKCgoKCgt6ygoKCgoKCABgygoKAgqSAgtqCgoCCpICC2oKCgIKkgILaooK4ooLcooLcooIAGziCgoCCpICC2oKCgIKkgILagoKAgqSAggA5cIKCgIIAT6IBgoKUgpSCAAoKsgAGGoK4tIKCzIKUgoKUgoKCgpSC6KKC6KKC")]
-[assembly: go.GoPositionMap("strconv/strconv_test.go", "strconv_test.cs", "ABswgqSkgqSmoqKkpgAJDoKClIKmgoKUgoKAggAhIoKC7gAHEpKUkpSSlJKUkpSSlJKUkpSSlJIACwiCgoKCgoQABhaCgoKClICC", "90-97:1;91-96:1.1;99-101:2;102-104:3;105-107:4;108-110:5;111-113:6;114-116:7;117-119:8;120-122:9;123-125:10;126-128:11")]
+[assembly: go.GoPositionMap("strconv/itoa_test.go", "itoa_test.cs", "ABEkACpYooKCgqaCgqiCgoKmgoK6goKC3oKAgraiAAgQAAgSgoKCgqaCggAKDgAWNIKCgoLKooKCgsqigoKCgsqigoKCyqKCgoKCyoKCgoKCgtyigoKCgriCspKCgoI=", "98-102:1;213-218:1;233-239:1")]
+[assembly: go.GoPositionMap("strconv/quote_test.go", "quote_test.cs", "AA0esoKCgoKCgt6ygoKCgoKCAA0aAAoYgoKAgqSAgtqCgoCCpICC2oKCgIKkgILaooK4ooLcooLcooIACxYADyKCgoCCpICC2oKCgIKkgILagoKAgqSAggALFAAtXIKCgIIAChQAJVAAHj6CgpSClIIACgqyAAYagri0goLMgpSCgpSCgoKClILoooLoooI=")]
+[assembly: go.GoPositionMap("strconv/strconv_test.go", "strconv_test.cs", "AA8gAAkEnIKkpIKkpqKipKYACQ6CgpSCpoKClIKCgIIAISKCgu4ABxKSlJKUkpSSlJKUkpSSlJKUkpSSAAsIgoKCgoKEAAYWgoKCgpSAgg==", "90-97:1;91-96:1.1;99-101:2;102-104:3;105-107:4;108-110:5;111-113:6;114-116:7;117-119:8;120-122:9;123-125:10;126-128:11")]
 // </GoSourcePositionMaps>
 
 namespace go;

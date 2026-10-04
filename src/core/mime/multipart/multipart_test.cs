@@ -1056,7 +1056,7 @@ public static void TestParseAllSizes(ж<testing.T> Ꮡt) {
         buf.Reset();
         var w = NewWriter(new multipart_test_package.bytes_BufferжWriter(Ꮡbuf));
         var (part, _) = w.CreateFormField("f"u8);
-        part.Write(bodyb[..(int)(size)]);
+        part.Write(bodyb.slice(0, size));
         (part, _) = w.CreateFormField(keyˢ);
         part.Write(slice<byte>("val"u8));
         w.Close();
@@ -1070,7 +1070,7 @@ public static void TestParseAllSizes(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("For size %d, num parts = %d; want 2"u8, size, len(got));
             continue;
         }
-        if (got[0].body != body[..(int)(size)]) {
+        if (got[0].body != body.slice(0, size)) {
             Ꮡt.Errorf("For size %d, got unexpected len %d: %q"u8, size, len(got[0].body), got[0].body);
         }
     }

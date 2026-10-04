@@ -217,7 +217,7 @@ public static void BenchmarkEncodeInterfaceSlice(ж<testing.B> Ꮡb) {
     nint n = default!;
     error err = default!;
 
-    n = copy(p, b.data[(int)(b.offset)..]);
+    n = copy(p, b.data.slice(b.offset));
     if (n == 0) {
         return (0, io.EOF);
     }

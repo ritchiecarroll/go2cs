@@ -7,6 +7,8 @@ using rand = global::go.math.rand_package;
 using static runtime_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.math;
 using static global::go.runtime_internal_test_package;
 using Δruntime = runtime_package;
@@ -77,7 +79,7 @@ public static void TestLFStack(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestLFStackStress(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestLFStackStress(ж<testing.T> Ꮡt) {
     const nint K = 100;
     nint P = 4 * GOMAXPROCS(-1);
     nint N = 100000;

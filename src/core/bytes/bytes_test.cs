@@ -110,8 +110,8 @@ public static void TestEqualExhaustive(ж<testing.T> Ꮡt) {
         for (nint x = 0; x <= size - len; x++) {
             for (nint y = 0; y <= size - len; y++) {
                 copy(b, b_init);
-                copy(b[(int)(y)..(int)(y + len)], a[(int)(x)..(int)(x + len)]);
-                if (!Equal(a[(int)(x)..(int)(x + len)], b[(int)(y)..(int)(y + len)]) || !Equal(b[(int)(y)..(int)(y + len)], a[(int)(x)..(int)(x + len)])) {
+                copy(b.slice(y, y + len), a.slice(x, x + len));
+                if (!Equal(a.slice(x, x + len), b.slice(y, y + len)) || !Equal(b.slice(y, y + len), a.slice(x, x + len))) {
                     Ꮡt.Errorf("Equal(%d, %d, %d) = false"u8, len, x, y);
                 }
             }
@@ -133,7 +133,7 @@ public static void TestNotEqual(ж<testing.T> Ꮡt) {
             for (nint y = 0; y <= size - len; y++) {
                 for (nint diffpos = x; diffpos < x + len; diffpos++) {
                     a[diffpos] = 1;
-                    if (Equal(a[(int)(x)..(int)(x + len)], b[(int)(y)..(int)(y + len)]) || Equal(b[(int)(y)..(int)(y + len)], a[(int)(x)..(int)(x + len)])) {
+                    if (Equal(a.slice(x, x + len), b.slice(y, y + len)) || Equal(b.slice(y, y + len), a.slice(x, x + len))) {
                         Ꮡt.Errorf("NotEqual(%d, %d, %d, %d) = true"u8, len, x, y, diffpos);
                     }
                     a[diffpos] = 0;
@@ -391,7 +391,7 @@ public static void TestIndexByteBig(ж<testing.T> Ꮡt) {
     var b = new slice<byte>(n);
     for (nint i = 0; i < n; i++) {
         // different start alignments
-        var b1 = b[(int)(i)..];
+        var b1 = b.slice(i);
         for (nint j = 0; j < len(b1); j++) {
             b1[j] = (rune)'x';
             nint pos = IndexByte(b1, (rune)'x');
@@ -405,7 +405,7 @@ public static void TestIndexByteBig(ж<testing.T> Ꮡt) {
             }
         }
         // different end alignments
-        b1 = b[..(int)(i)];
+        b1 = b.slice(0, i);
         for (nint j = 0; j < len(b1); j++) {
             b1[j] = (rune)'x';
             nint pos = IndexByte(b1, (rune)'x');
@@ -419,7 +419,7 @@ public static void TestIndexByteBig(ж<testing.T> Ꮡt) {
             }
         }
         // different start and end alignments
-        b1 = b[(int)(i / 2)..(int)(n - (i + 1) / 2)];
+        b1 = b.slice(i / 2, n - (i + 1) / 2);
         for (nint j = 0; j < len(b1); j++) {
             b1[j] = (rune)'x';
             nint pos = IndexByte(b1, (rune)'x');
@@ -444,9 +444,9 @@ public static void TestIndexByteSmall(ж<testing.T> Ꮡt) {
             b[i + j] = (byte)(100 + j);
         }
         for (nint j = 0; j < 15; j++) {
-            nint p = IndexByte(b[(int)(i)..(int)(i + 15)], (byte)(100 + j));
+            nint p = IndexByte(b.slice(i, i + 15), (byte)(100 + j));
             if (p != j) {
-                Ꮡt.Errorf("IndexByte(%q, %d) = %d"u8, b[(int)(i)..(int)(i + 15)], 100 + j, p);
+                Ꮡt.Errorf("IndexByte(%q, %d) = %d"u8, b.slice(i, i + 15), 100 + j, p);
             }
         }
         for (nint j = 0; j < 15; j++) {
@@ -459,9 +459,9 @@ public static void TestIndexByteSmall(ж<testing.T> Ꮡt) {
             b[i + j] = 1;
         }
         for (nint j = 0; j < 15; j++) {
-            nint p = IndexByte(b[(int)(i)..(int)(i + 15)], (byte)0);
+            nint p = IndexByte(b.slice(i, i + 15), (byte)0);
             if (p != -1) {
-                Ꮡt.Errorf("IndexByte(%q, %d) = %d"u8, b[(int)(i)..(int)(i + 15)], (nint)(0), p);
+                Ꮡt.Errorf("IndexByte(%q, %d) = %d"u8, b.slice(i, i + 15), (nint)(0), p);
             }
         }
         for (nint j = 0; j < 15; j++) {
@@ -570,9 +570,9 @@ public static void TestCountByte(ж<testing.T> Ꮡt) {
     void testCountWindow(nint i, nint window) {
         for (nint j = 0; j < window; j++) {
             bʗ1[i + j] = (byte)100;
-            nint p = Count(bʗ1[(int)(i)..(int)(i + window)], new byte[]{100}.slice());
+            nint p = Count(bʗ1.slice(i, i + window), new byte[]{100}.slice());
             if (p != j + 1) {
-                Ꮡt.Errorf("TestCountByte.Count(%q, 100) = %d"u8, bʗ1[(int)(i)..(int)(i + window)], p);
+                Ꮡt.Errorf("TestCountByte.Count(%q, 100) = %d"u8, bʗ1.slice(i, i + window), p);
             }
         }
     }
@@ -581,8 +581,8 @@ public static void TestCountByte(ж<testing.T> Ꮡt) {
         foreach (var (_, vᴛ1) in windows) {
             var window = vᴛ1;
 
-            if (window > len(b[(int)(i)..])) {
-                window = len(b[(int)(i)..]);
+            if (window > len(b.slice(i))) {
+                window = len(b.slice(i));
             }
             testCountWindow(i, window);
             for (nint j = 0; j < window; j++) {
@@ -594,8 +594,8 @@ public static void TestCountByte(ж<testing.T> Ꮡt) {
         foreach (var (_, vᴛ2) in windows) {
             var window = vᴛ2;
 
-            if (window > len(b[(int)(i)..])) {
-                window = len(b[(int)(i)..]);
+            if (window > len(b.slice(i))) {
+                window = len(b.slice(i));
             }
             testCountWindow(i, window);
             for (nint j = 0; j < window; j++) {
@@ -615,17 +615,17 @@ public static void TestCountByteNoMatch(ж<testing.T> Ꮡt) {
         foreach (var (_, vᴛ1) in windows) {
             var window = vᴛ1;
 
-            if (window > len(b[(int)(i)..])) {
-                window = len(b[(int)(i)..]);
+            if (window > len(b.slice(i))) {
+                window = len(b.slice(i));
             }
             // Fill the window with non-match
             for (nint j = 0; j < window; j++) {
                 b[i + j] = (byte)100;
             }
             // Try to find something that doesn't exist
-            nint p = Count(b[(int)(i)..(int)(i + window)], new byte[]{0}.slice());
+            nint p = Count(b.slice(i, i + window), new byte[]{0}.slice());
             if (p != 0) {
-                Ꮡt.Errorf("TestCountByteNoMatch(%q, 0) = %d"u8, b[(int)(i)..(int)(i + window)], p);
+                Ꮡt.Errorf("TestCountByteNoMatch(%q, 0) = %d"u8, b.slice(i, i + window), p);
             }
             for (nint j = 0; j < window; j++) {
                 b[i + j] = (byte)0;
@@ -682,7 +682,7 @@ internal static readonly object badIndexˢ = (@string)"bad index"u8;
 
 internal static Action<ж<testing.B>, nint> bmIndexByte(Func<slice<byte>, byte, nint> index) {
     return (ж<testing.B> b, nint n) => {
-        var buf = bmbuf[0..(int)(n)];
+        var buf = bmbuf.slice(0, n);
         buf[n - 1] = (rune)'x';
         for (nint i = 0; i < (~b).N; i++) {
             nint j = index(buf, (rune)'x');
@@ -724,7 +724,7 @@ public static void BenchmarkIndexRuneUnicode(ж<testing.B> Ꮡb) {
 
 internal static Action<ж<testing.B>, nint> bmIndexRuneASCII(Func<slice<byte>, rune, nint> index) {
     return (ж<testing.B> b, nint n) => {
-        var buf = bmbuf[0..(int)(n)];
+        var buf = bmbuf.slice(0, n);
         buf[n - 1] = (rune)'x';
         for (nint i = 0; i < (~b).N; i++) {
             nint j = index(buf, (rune)'x');
@@ -738,8 +738,8 @@ internal static Action<ж<testing.B>, nint> bmIndexRuneASCII(Func<slice<byte>, r
 
 internal static Action<ж<testing.B>, nint> bmIndexRune(Func<slice<byte>, rune, nint> index) {
     return (ж<testing.B> b, nint n) => {
-        var buf = bmbuf[0..(int)(n)];
-        utf8.EncodeRune(buf[(int)(n - 3)..], (rune)'世');
+        var buf = bmbuf.slice(0, n);
+        utf8.EncodeRune(buf.slice(n - 3), (rune)'世');
         for (nint i = 0; i < (~b).N; i++) {
             nint j = index(buf, (rune)'世');
             if (j != n - 3) {
@@ -780,20 +780,20 @@ internal static Action<ж<testing.B>, nint> bmIndexRuneUnicode(ж<Δunicode.Rang
     });
     @string uchars = ((@string)rs);
     return (ж<testing.B> b, nint n) => {
-        var buf = bmbuf[0..(int)(n)];
+        var buf = bmbuf.slice(0, n);
         nint o = copy(buf, uchars);
         while (o < len(buf)) {
-            o += copy(buf[(int)(o)..], uchars);
+            o += copy(buf.slice(o), uchars);
         }
         // Make space for the needle rune at the end of buf.
         nint m = utf8.RuneLen(needle);
         for (nint oΔ1 = m; oΔ1 > 0; ) {
             var (_, sz) = utf8.DecodeLastRune(buf);
-            copy(buf[(int)(len(buf) - sz)..], "\x00\x00\x00\x00"u8);
-            buf = buf[..(int)(len(buf) - sz)];
+            copy(buf.slice(len(buf) - sz), "\x00\x00\x00\x00"u8);
+            buf = buf.slice(0, len(buf) - sz);
             oΔ1 -= sz;
         }
-        buf = utf8.AppendRune(buf[..(int)(n - m)], needle);
+        buf = utf8.AppendRune(buf.slice(0, n - m), needle);
         n -= m; // adjust for rune len
         for (nint i = 0; i < (~b).N; i++) {
             nint j = IndexRune(buf, needle);
@@ -836,8 +836,8 @@ internal static Action<ж<testing.B>, nint> bmEqual(Func<slice<byte>, slice<byte
         if (len(bmbuf) < 2 * n) {
             bmbuf = new slice<byte>(2 * n);
         }
-        var buf1 = bmbuf[0..(int)(n)];
-        var buf2 = bmbuf[(int)(n)..(int)(2 * n)];
+        var buf1 = bmbuf.slice(0, n);
+        var buf2 = bmbuf.slice(n, 2 * n);
         buf1[n - 1] = (rune)'x';
         buf2[n - 1] = (rune)'x';
         for (nint i = 0; i < (~b).N; i++) {
@@ -862,9 +862,9 @@ public static void BenchmarkEqualBothUnaligned(ж<testing.B> Ꮡb) {
     }
     foreach (var (_, n) in sizes) {
         foreach (var (_, off) in new nint[]{0, 1, 4, 7}.slice()) {
-            var buf1 = bmbuf[(int)(off)..(int)(off + n)];
+            var buf1 = bmbuf.slice(off, off + n);
             nint buf2Start = (len(bmbuf) / 2) + off;
-            var buf2 = bmbuf[(int)(buf2Start)..(int)(buf2Start + n)];
+            var buf2 = bmbuf.slice(buf2Start, buf2Start + n);
             buf1[n - 1] = (rune)'x';
             buf2[n - 1] = (rune)'x';
             var buf1ʗ1 = buf1;
@@ -886,10 +886,10 @@ public static void BenchmarkEqualBothUnaligned(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkIndex(ж<testing.B> Ꮡb) {
     benchBytes(Ꮡb, indexSizes, (ж<testing.B> bΔ1, nint n) => {
-        var buf = bmbuf[0..(int)(n)];
+        var buf = bmbuf.slice(0, n);
         buf[n - 1] = (rune)'x';
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            nint j = Index(buf, buf[(int)(n - 7)..]);
+            nint j = Index(buf, buf.slice(n - 7));
             if (j != n - 7) {
                 bΔ1.Fatal(badIndexˢ, j);
             }
@@ -900,11 +900,11 @@ public static void BenchmarkIndex(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkIndexEasy(ж<testing.B> Ꮡb) {
     benchBytes(Ꮡb, indexSizes, (ж<testing.B> bΔ1, nint n) => {
-        var buf = bmbuf[0..(int)(n)];
+        var buf = bmbuf.slice(0, n);
         buf[n - 1] = (rune)'x';
         buf[n - 7] = (rune)'x';
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            nint j = Index(buf, buf[(int)(n - 7)..]);
+            nint j = Index(buf, buf.slice(n - 7));
             if (j != n - 7) {
                 bΔ1.Fatal(badIndexˢ, j);
             }
@@ -919,10 +919,10 @@ internal static readonly object badCountˢ = (@string)"bad count"u8;
 
 public static void BenchmarkCount(ж<testing.B> Ꮡb) {
     benchBytes(Ꮡb, indexSizes, (ж<testing.B> bΔ1, nint n) => {
-        var buf = bmbuf[0..(int)(n)];
+        var buf = bmbuf.slice(0, n);
         buf[n - 1] = (rune)'x';
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            nint j = Count(buf, buf[(int)(n - 7)..]);
+            nint j = Count(buf, buf.slice(n - 7));
             if (j != 1) {
                 bΔ1.Fatal(badCountˢ, j);
             }
@@ -933,11 +933,11 @@ public static void BenchmarkCount(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkCountEasy(ж<testing.B> Ꮡb) {
     benchBytes(Ꮡb, indexSizes, (ж<testing.B> bΔ1, nint n) => {
-        var buf = bmbuf[0..(int)(n)];
+        var buf = bmbuf.slice(0, n);
         buf[n - 1] = (rune)'x';
         buf[n - 7] = (rune)'x';
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            nint j = Count(buf, buf[(int)(n - 7)..]);
+            nint j = Count(buf, buf.slice(n - 7));
             if (j != 1) {
                 bΔ1.Fatal(badCountˢ, j);
             }
@@ -949,12 +949,12 @@ public static void BenchmarkCountEasy(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkCountSingle(ж<testing.B> Ꮡb) {
     benchBytes(Ꮡb, indexSizes, (ж<testing.B> bΔ1, nint n) => {
-        var buf = bmbuf[0..(int)(n)];
+        var buf = bmbuf.slice(0, n);
         nint step = 8;
         for (nint i = 0; i < len(buf); i += step) {
             buf[i] = 1;
         }
-        nint expect = (len(buf) + (step - 1)) / step;
+        nint expect = quo((len(buf) + (step - 1)), step);
         for (nint i = 0; i < (~bΔ1).N; i++) {
             nint j = Count(buf, new byte[]{1}.slice());
             if (j != expect) {
@@ -1900,7 +1900,7 @@ public static void TestReplace(ж<testing.T> Ꮡt) {
 
     foreach (var (_, tt) in ReplaceTests) {
         var @in = append(slice<byte>(tt.@in), ((@string)"<spare>"u8).ꓸꓸꓸ);
-        @in = @in[..(int)(len(tt.@in))];
+        @in = @in.slice(0, len(tt.@in));
         var @out = Replace(@in, slice<byte>(tt.old), slice<byte>(tt.@new), tt.n);
         {
             @string s = ((@string)@out); if (s != tt.@out) {
@@ -2243,7 +2243,7 @@ internal static Func<slice<byte>> makeFieldsInput = () => {
         else if (exprᴛ1 is 1) { matchᴛ1 = true;
             do {
                 if (i > 0 && x[i - 1] == (rune)'x') {
-                    copy(x[(int)(i - 1)..], "χ"u8);
+                    copy(x.slice(i - 1), "χ"u8);
                     break;
                 }
                 fallthrough = true;
@@ -2293,7 +2293,7 @@ public static void BenchmarkFields(ж<testing.B> Ꮡb) {
                 bΔ1.Run(fmt.Sprintf("%d"u8, j), (ж<testing.B> bΔ2) => {
                     bΔ2.ReportAllocs();
                     bΔ2.SetBytes((int64)j);
-                    var data = sdʗ2.data[..(int)(j)];
+                    var data = sdʗ2.data.slice(0, j);
                     for (nint i = 0; i < (~bΔ2).N; i++) {
                         Fields(data);
                     }
@@ -2316,7 +2316,7 @@ public static void BenchmarkFieldsFunc(ж<testing.B> Ꮡb) {
                 bΔ1.Run(fmt.Sprintf("%d"u8, j), (ж<testing.B> bΔ2) => {
                     bΔ2.ReportAllocs();
                     bΔ2.SetBytes((int64)j);
-                    var data = sdʗ2.data[..(int)(j)];
+                    var data = sdʗ2.data.slice(0, j);
                     for (nint i = 0; i < (~bΔ2).N; i++) {
                         FieldsFunc(data, Δunicode.IsSpace);
                     }
@@ -2532,13 +2532,13 @@ public static void BenchmarkRepeatLarge(ж<testing.B> Ꮡb) {
     var s = Repeat(slice<byte>("@"u8), 8 * 1024);
     for (nint j = 8; j <= 30; j++) {
         foreach (var (_, k) in new nint[]{1, 16, 4097}.slice()) {
-            var sΔ1 = s[..(int)(k)];
-            nint n = (((nint)1).Lsh((uint64)(j))) / k;
+            var sΔ1 = s.slice(0, k);
+            nint n = quo((((nint)1).Lsh((int64)(j))), k);
             if (n == 0) {
                 continue;
             }
             var sʗ1 = sΔ1;
-            Ꮡb.Run(fmt.Sprintf("%d/%d"u8, ((nint)1).Lsh((uint64)(j)), k), (ж<testing.B> bΔ1) => {
+            Ꮡb.Run(fmt.Sprintf("%d/%d"u8, ((nint)1).Lsh((int64)(j)), k), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     Repeat(sʗ1, n);
                 }
@@ -2578,7 +2578,7 @@ public static void BenchmarkIndexAnyASCII(ж<testing.B> Ꮡb) {
             var xʗ1 = x;
             Ꮡb.Run(fmt.Sprintf("%d:%d"u8, k, j), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
-                    IndexAny(xʗ1[..(int)(k)], cs[..(int)(j)]);
+                    IndexAny(xʗ1.slice(0, k), cs.slice(0, j));
                 }
             });
         }
@@ -2598,7 +2598,7 @@ public static void BenchmarkIndexAnyUTF8(ж<testing.B> Ꮡb) {
             var xʗ1 = x;
             Ꮡb.Run(fmt.Sprintf("%d:%d"u8, k, j), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
-                    IndexAny(xʗ1[..(int)(k)], cs[..(int)(j)]);
+                    IndexAny(xʗ1.slice(0, k), cs.slice(0, j));
                 }
             });
         }
@@ -2615,7 +2615,7 @@ public static void BenchmarkLastIndexAnyASCII(ж<testing.B> Ꮡb) {
             var xʗ1 = x;
             Ꮡb.Run(fmt.Sprintf("%d:%d"u8, k, j), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
-                    LastIndexAny(xʗ1[..(int)(k)], cs[..(int)(j)]);
+                    LastIndexAny(xʗ1.slice(0, k), cs.slice(0, j));
                 }
             });
         }
@@ -2632,7 +2632,7 @@ public static void BenchmarkLastIndexAnyUTF8(ж<testing.B> Ꮡb) {
             var xʗ1 = x;
             Ꮡb.Run(fmt.Sprintf("%d:%d"u8, k, j), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
-                    LastIndexAny(xʗ1[..(int)(k)], cs[..(int)(j)]);
+                    LastIndexAny(xʗ1.slice(0, k), cs.slice(0, j));
                 }
             });
         }
@@ -2646,9 +2646,9 @@ public static void BenchmarkTrimASCII(ж<testing.B> Ꮡb) {
         for (nint jᴛ1 = 1; jᴛ1 <= 16; jᴛ1 <<= (int)(1)) {
             var j = jᴛ1;
             Ꮡb.Run(fmt.Sprintf("%d:%d"u8, k, j), (ж<testing.B> bΔ1) => {
-                var x = Repeat(slice<byte>(cs[..(int)(j)]), k); // Always matches set
+                var x = Repeat(slice<byte>(cs.slice(0, j)), k); // Always matches set
                 for (nint i = 0; i < (~bΔ1).N; i++) {
-                    Trim(x[..(int)(k)], cs[..(int)(j)]);
+                    Trim(x.slice(0, k), cs.slice(0, j));
                 }
             });
         }
@@ -2686,7 +2686,7 @@ public static void TestClone(ж<testing.T> Ꮡt) {
         new byte[]{}.slice(),
         Clone(new byte[]{}.slice()),
         slice<byte>(strings.Repeat("a"u8, 42))[..0],
-        slice<byte>(strings.Repeat("a"u8, 42)).slice(-1, 0, 0),
+        slice<byte>(strings.Repeat("a"u8, 42)).slice(0, 0, 0),
         slice<byte>("short"u8),
         slice<byte>(strings.Repeat("a"u8, 42))
     }.slice();

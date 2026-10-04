@@ -32,7 +32,7 @@ using static global::go.hash.adler32_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("hash/adler32/adler32_test.go", "adler32_test.cs", "AEKEAaKCgoKUpoKCgoKUgoCCgqSAgoLagoKChISCgoKWgoKClISCgpaCgpaAgoKmgoSCyqKCgoKUgoSCgoKC")]
+[assembly: go.GoPositionMap("hash/adler32/adler32_test.go", "adler32_test.cs", "ABQcAC1oooKCgpSmgoKCgpSCgIKCpICCgtqCgoKEhIKCgpaCgoKUhIKCloKCloCCgqaChILKooKCgpSChIKCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;

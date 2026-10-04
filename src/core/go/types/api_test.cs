@@ -17,6 +17,8 @@ using sync = sync_package;
 using testing = testing_package;
 using static global::go.go.types_package;
 using runtime = runtime_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.@internal;
 using global::go.go;
 using io = io_package;
@@ -73,14 +75,14 @@ internal static @string pkgName(@string src) {
     @string kw = kwᶜ;
     {
         nint i = strings.Index(src, kw); if (i >= 0) {
-            @string after = src[(int)(i + len(kw))..];
+            @string after = src.slice(i + len(kw));
             nint n = len(after);
             {
                 nint iΔ1 = strings.IndexAny(after, "\n\t ;/"u8); if (iΔ1 >= 0) {
                     n = iΔ1;
                 }
             }
-            return after[..(int)(n)];
+            return after.slice(0, n);
         }
     }
     throw panic("missing package header: " + src);
@@ -1885,7 +1887,7 @@ public static void TestSelection(ж<testing.T> Ꮡt) {
         _ = sel.String(); // assertion: must not panic
         nint start = fset.Position(e.Pos()).Offset;
         nint end = fset.Position(e.End()).Offset;
-        @string syntax = mainSrc[(int)(start)..(int)(end)]; // (all SelectorExprs are in main, not lib)
+        @string syntax = mainSrc.slice(start, end); // (all SelectorExprs are in main, not lib)
         @string direct = "."u8;
         if (sel.Indirect()) {
             direct = "->"u8;
@@ -2642,7 +2644,7 @@ type K = Nested[string]
 
 """u8;
 
-public static void TestInstantiateConcurrent(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestInstantiateConcurrent(ж<testing.T> Ꮡt) {
     @string src = srcᶜ6;
     var pkg = mustTypecheck(src, nil, nil);
     var insts = new ж<types.Interface>[]{
@@ -3386,7 +3388,7 @@ public static void TestAnyHijacking_Check(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     foreach (var (_, enableAlias) in new bool[]{false, true}.slice()) {
-        Ꮡt.Run(fmt.Sprintf("EnableAlias=%t"u8, enableAlias), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(fmt.Sprintf("EnableAlias=%t"u8, enableAlias), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             setGotypesalias(tΔ1, enableAlias);
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
             for (nint i = 0; i < 10; i++) {

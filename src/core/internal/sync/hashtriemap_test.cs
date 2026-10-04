@@ -11,6 +11,8 @@ using strconv = strconv_package;
 using sync = go.sync_package;
 using testing = testing_package;
 using weak = weak_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go;
 using go.@internal;
 using static go.@internal.sync_internal_test_package;
@@ -107,7 +109,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                 expectMissing(tΔ5, s, (nint)(0))(ᴛ23, ᴛ24);
             }
         });
-        tΔ4.Run(concurrentˢ, (ж<testing.T> tΔ6) => {
+        tΔ4.Run(concurrentˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ6) => {
             var m = newMap();
             // Load up the map.
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
@@ -240,7 +242,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                 expectMissing(tΔ11, s, (nint)(0))(ᴛ69, ᴛ70);
             }
         });
-        tΔ7.Run(concurrentUnsharedKeysˢ, (ж<testing.T> tΔ12) => {
+        tΔ7.Run(concurrentUnsharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ12) => {
             var m = newMap();
             nint gmp = Δruntime.GOMAXPROCS(-1);
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -283,7 +285,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             }
             Ꮡwg.Wait();
         });
-        tΔ7.Run(concurrentSharedKeysˢ, (ж<testing.T> tΔ13) => {
+        tΔ7.Run(concurrentSharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ13) => {
             var m = newMap();
             // Load up the map.
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
@@ -400,7 +402,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                 }
             }
         });
-        tΔ14.Run(concurrentUnsharedKeysˢ, (ж<testing.T> tΔ18) => {
+        tΔ14.Run(concurrentUnsharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ18) => {
             var m = newMap();
             nint gmp = Δruntime.GOMAXPROCS(-1);
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -443,7 +445,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             }
             Ꮡwg.Wait();
         });
-        tΔ14.Run("ConcurrentUnsharedKeysWithDelete"u8, (ж<testing.T> tΔ19) => {
+        tΔ14.Run("ConcurrentUnsharedKeysWithDelete"u8, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ19) => {
             var m = newMap();
             nint gmp = Δruntime.GOMAXPROCS(-1);
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -491,7 +493,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             }
             Ꮡwg.Wait();
         });
-        tΔ14.Run(concurrentSharedKeysˢ, (ж<testing.T> tΔ20) => {
+        tΔ14.Run(concurrentSharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ20) => {
             var m = newMap();
             // Load up the map.
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
@@ -605,7 +607,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                 }
             }
         });
-        tΔ21.Run(concurrentUnsharedKeysˢ, (ж<testing.T> tΔ25) => {
+        tΔ21.Run(concurrentUnsharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ25) => {
             var m = newMap();
             nint gmp = Δruntime.GOMAXPROCS(-1);
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -649,7 +651,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             }
             Ꮡwg.Wait();
         });
-        tΔ21.Run("ConcurrentUnsharedKeysWithDelete"u8, (ж<testing.T> tΔ26) => {
+        tΔ21.Run("ConcurrentUnsharedKeysWithDelete"u8, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ26) => {
             var m = newMap();
             nint gmp = Δruntime.GOMAXPROCS(-1);
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -698,7 +700,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             }
             Ꮡwg.Wait();
         });
-        tΔ21.Run(concurrentSharedKeysˢ, (ж<testing.T> tΔ27) => {
+        tΔ21.Run(concurrentSharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ27) => {
             var m = newMap();
             // Load up the map.
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
@@ -838,7 +840,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                 expectMissing(tΔ32, s, (nint)(0))(ᴛ317, ᴛ318);
             }
         });
-        tΔ28.Run(concurrentUnsharedKeysˢ, (ж<testing.T> tΔ33) => {
+        tΔ28.Run(concurrentUnsharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ33) => {
             var m = newMap();
             nint gmp = Δruntime.GOMAXPROCS(-1);
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -882,7 +884,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             }
             Ꮡwg.Wait();
         });
-        tΔ28.Run(concurrentSharedKeysˢ, (ж<testing.T> tΔ34) => {
+        tΔ28.Run(concurrentSharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ34) => {
             var m = newMap();
             // Load up the map.
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
@@ -1128,7 +1130,7 @@ internal static array<@string> testDataLarge = new(131072);
 // key-value pair, they must not both succeed.
 //
 // This test is a regression test for issue #70970.
-public static void TestConcurrentCache(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentCache(ж<testing.T> Ꮡt) {
     ref var m = ref heap(new isync.HashTrieMap<nint, weak.Pointer<TestConcurrentCache_dummy>>(), out var Ꮡm);
     var cleanup = (TestConcurrentCache_cleanupArg arg) => {
         Ꮡm.CompareAndDelete(arg.key, arg.value);

@@ -1426,7 +1426,7 @@ public static void TestDecodePartial(ж<testing.T> Ꮡt) {
     }
     var data = buf.Bytes();
     for (nint i = 0; i <= len(data); i++) {
-        var bufr = bytes.NewReader(data[..(int)(i)]);
+        var bufr = bytes.NewReader(data.slice(0, i));
         // Decode both values, stopping at the first error.
         ref var t1b = ref heap(new TestDecodePartial_T(), out var Ꮡt1b);
         ref var t2b = ref heap(new TestDecodePartial_T(), out var Ꮡt2b);

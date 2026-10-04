@@ -58,7 +58,7 @@ public static void TestCTR(ж<testing.T> Ꮡt) {
         var counter = new slice<byte>(size);
         for (nint i = 1; i < len(want) / size; i++) {
             inc(counter);
-            xor(want[(int)(i * size)..(int)((i + 1) * size)], counter);
+            xor(want.slice(i * size, (i + 1) * size), counter);
         }
         var dst = new slice<byte>(1024);
         ctr.XORKeyStream(dst, src);

@@ -579,12 +579,12 @@ internal static (slice<slice<array<nint>>>, map<nint, array<nint>>, @string) mak
             break;
         }
         default: {
-            buf = append(buf, text[..(int)(size)].ꓸꓸꓸ);
+            buf = append(buf, text.slice(0, size).ꓸꓸꓸ);
             col += size;
             break;
         }}
 
-        text = text[(int)(size)..];
+        text = text.slice(size);
     }
     return (positions, errPositions, ((@string)buf));
 }
@@ -604,8 +604,8 @@ internal static (slice<slice<array<nint>>>, map<nint, array<nint>>, @string) mak
         if (r.n <= 0 || r.s == ""u8) {
             return (n, io.EOF);
         }
-        nint n0 = copy(p, r.s[(int)(r.off)..]);
-        p = p[(int)(n0)..];
+        nint n0 = copy(p, r.s.slice(r.off));
+        p = p.slice(n0);
         n += n0;
         r.off += n0;
         if (r.off == len(r.s)) {

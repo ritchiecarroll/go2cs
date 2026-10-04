@@ -13,6 +13,8 @@ using atomic = go.sync.atomic_package;
 using Δtesting = testing_package;
 using quick = go.testing.quick_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.math;
 using go.sync;
 using go.testing;
@@ -181,7 +183,7 @@ public static void TestMapMatchesHashTrieMap(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-public static void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         UntypedInt mapSize = /* 1 << 10 */ 1024;
@@ -237,7 +239,7 @@ public static void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
             var seenʗ1 = seen;
             m.Range((any ki, any vi) => {
                 var (k, v) = (ki._<int64>(), vi._<int64>());
-                if (v % k != 0) {
+                if (rem(v, k) != 0) {
                     Ꮡt.Fatalf("while Storing multiples of %v, Range saw value %v"u8, k, v);
                 }
                 if (seenʗ1[k]) {
@@ -355,7 +357,7 @@ public static void TestMapRangeNoAllocations(ж<Δtesting.T> Ꮡt) {
 
 // TestConcurrentClear tests concurrent behavior of sync.Map properties to ensure no data races.
 // Checks for proper synchronization between Clear, Store, Load operations.
-public static void TestConcurrentClear(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentClear(ж<Δtesting.T> Ꮡt) {
     ref var m = ref heap(new Δsync.Map(), out var Ꮡm);
     ref var wg = ref heap<Δsync.WaitGroup>(out var Ꮡwg);
     wg = new Δsync.WaitGroup(nil);

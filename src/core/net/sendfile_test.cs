@@ -19,6 +19,8 @@ using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
 using encoding;
 using fs = go.io.fs_package;
@@ -124,7 +126,7 @@ public static void TestSendfileWithLargeFile(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object retrievedDataHashDidNotˢ = (@string)"retrieved data hash did not match"u8;
 
-internal static void testSendfile(ж<testing.T> Ꮡt, @string filePath, @string fileHash, int64 size, int64 limit) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testSendfile(ж<testing.T> Ꮡt, @string filePath, @string fileHash, int64 size, int64 limit) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
@@ -132,7 +134,7 @@ internal static void testSendfile(ж<testing.T> Ꮡt, @string filePath, @string 
         defer(() => lnʗ1.Close(), ref ᒐ);
         var errc = new channel<error>(1);
         var errcʗ1 = errc;
-        goǃ((global::go.net_package.Listener lnΔ1) => {
+        goǃ([MethodImpl(MethodImplOptions.NoInlining)] (global::go.net_package.Listener lnΔ1) => {
             // Wait for a connection.
             var (conn, errΔ1) = lnΔ1.Accept();
             if (errΔ1 != default!) {
@@ -223,7 +225,7 @@ internal static void testSendfile(ж<testing.T> Ꮡt, @string filePath, @string 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string producedˢ = "Produced "u8;
 
-public static void TestSendfileParts(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSendfileParts(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
@@ -231,7 +233,7 @@ public static void TestSendfileParts(ж<testing.T> Ꮡt) {
         defer(() => lnʗ1.Close(), ref ᒐ);
         var errc = new channel<error>(1);
         var errcʗ1 = errc;
-        goǃ((global::go.net_package.Listener lnΔ1) => {
+        goǃ([MethodImpl(MethodImplOptions.NoInlining)] (global::go.net_package.Listener lnΔ1) => {
             // Wait for a connection.
             var (conn, errΔ1) = lnΔ1.Accept();
             if (errΔ1 != default!) {
@@ -295,7 +297,7 @@ public static void TestSendfileParts(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestSendfileSeeked(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSendfileSeeked(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
@@ -305,7 +307,7 @@ public static void TestSendfileSeeked(ж<testing.T> Ꮡt) {
         UntypedInt sendSize = /* 10 << 10 */ 10240;
         var errc = new channel<error>(1);
         var errcʗ1 = errc;
-        goǃ((global::go.net_package.Listener lnΔ1) => {
+        goǃ([MethodImpl(MethodImplOptions.NoInlining)] (global::go.net_package.Listener lnΔ1) => {
             // Wait for a connection.
             var (conn, errΔ1) = lnΔ1.Accept();
             if (errΔ1 != default!) {
@@ -372,7 +374,7 @@ public static void TestSendfileSeeked(ж<testing.T> Ꮡt) {
 internal static readonly object readDidNotTimeOutˢ = (@string)"Read did not time out"u8;
 
 // Test that sendfile doesn't put a pipe into blocking mode.
-public static void TestSendfilePipe(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSendfilePipe(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -503,7 +505,7 @@ public static void TestSendfilePipe(ж<testing.T> Ꮡt) {
 }
 
 // Issue 43822: tests that returns EOF when conn write timeout.
-public static void TestSendfileOnWriteTimeoutExceeded(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSendfileOnWriteTimeoutExceeded(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -584,7 +586,7 @@ public static void TestSendfileOnWriteTimeoutExceeded(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testTxtˢ = "test.txt"u8;
 
-public static void BenchmarkSendfileZeroBytes(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkSendfileZeroBytes(ж<testing.B> Ꮡb) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -700,7 +702,7 @@ public static void BenchmarkSendFile(ж<testing.B> Ꮡb) {
 
 internal static void benchmarkSendFile(ж<testing.B> Ꮡb, @string proto) {
     for (nint i = 0; i <= 10; i++) {
-        nint size = ((nint)1).Lsh((uint64)((i + 10)));
+        nint size = ((nint)1).Lsh((int64)((i + 10)));
         var bench = new sendFileBench(
             proto: proto,
             chunkSize: size

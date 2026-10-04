@@ -8,6 +8,8 @@ using runtime = runtime_package;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 using static go.crypto.@internal.boring.bcache_package;
 
@@ -45,7 +47,7 @@ internal static @string str<T>(ж<T> Ꮡx)
     return fmt.Sprint(x);
 }
 
-public static void TestCache(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCache(ж<testing.T> Ꮡt) {
     // Use unregistered cache for functionality tests,
     // to keep the runtime from clearing behind our backs.
     var c = @new<global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>>();

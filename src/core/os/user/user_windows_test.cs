@@ -47,7 +47,7 @@ internal static (@string name, @string password) addUserAccount(ж<testing.T> �
     // leave space for a 4 digits random suffix.
     UntypedInt maxNameLen = 20;
     UntypedInt suffixLen = 4;
-    pattern = pattern[..(int)(min(len(pattern), (nint)(maxNameLen - suffixLen)))];
+    pattern = pattern.slice(0, min(len(pattern), (nint)(maxNameLen - suffixLen)));
     // Drop unusual characters from the account name.
     var mapper = (rune r) => {
         if (r < utf8.RuneSelf){
@@ -76,7 +76,7 @@ internal static (@string name, @string password) addUserAccount(ж<testing.T> �
         array<byte> suffix = new(2);
         rand.Read(suffix[..]);
         @string suffixStr = strconv.FormatUint((uint64)binary.LittleEndian.Uint16(suffix[..]), 10);
-        @string nameΔ1 = pattern + suffixStr[..(int)(min(len(suffixStr), (nint)(suffixLen)))];
+        @string nameΔ1 = pattern + suffixStr.slice(0, min(len(suffixStr), (nint)(suffixLen)));
         var (name16, errΔ1) = syscall.UTF16PtrFromString(nameΔ1);
         if (errΔ1 != default!) {
             Ꮡt.Fatal(errΔ1);

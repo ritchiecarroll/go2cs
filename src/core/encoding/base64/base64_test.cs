@@ -14,6 +14,8 @@ using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using runtime;
 using static go.encoding.base64_package;
 using ꓸꓸꓸany = Span<any>;
@@ -156,9 +158,9 @@ public static void TestEncoderBuffering(ж<testing.T> Ꮡt) {
             if (end > len(input)) {
                 end = len(input);
             }
-            var (n, errΔ1) = encoder.Write(input[(int)(pos)..(int)(end)]);
-            testEqual(Ꮡt, writeQGaveErrorVWantVˢ, input[(int)(pos)..(int)(end)], errΔ1, ((error)default!));
-            testEqual(Ꮡt, writeQGaveLengthVWantVˢ, input[(int)(pos)..(int)(end)], n, end - pos);
+            var (n, errΔ1) = encoder.Write(input.slice(pos, end));
+            testEqual(Ꮡt, writeQGaveErrorVWantVˢ, input.slice(pos, end), errΔ1, ((error)default!));
+            testEqual(Ꮡt, writeQGaveLengthVWantVˢ, input.slice(pos, end), n, end - pos);
         }
         var err = encoder.Close();
         testEqual(Ꮡt, closeGaveErrorVWantVˢ, err, ((error)default!));
@@ -184,14 +186,14 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
             var (count, err) = tt.enc.Decode(dbuf, slice<byte>(encoded));
             testEqual(Ꮡt, decodeQErrorVWantVˢ, encoded, err, ((error)default!));
             testEqual(Ꮡt, decodeQLengthVWantVˢ, encoded, count, len(p.decoded));
-            testEqual(Ꮡt, decodeQQWantQˢ, encoded, ((@string)(dbuf[0..(int)(count)])), p.decoded);
+            testEqual(Ꮡt, decodeQQWantQˢ, encoded, ((@string)(dbuf.slice(0, count))), p.decoded);
             (dbuf, err) = tt.enc.DecodeString(encoded);
             testEqual(Ꮡt, decodeStringQErrorVWantVˢ, encoded, err, ((error)default!));
             testEqual(Ꮡt, decodeStringQQWantQˢ, encoded, ((@string)dbuf), p.decoded);
             (var dst, err) = tt.enc.AppendDecode(slice<byte>("lead"u8), slice<byte>(encoded));
             testEqual(Ꮡt, appendDecodeQErrorVWantVˢ, p.encoded, err, ((error)default!));
             testEqual(Ꮡt, appendDecodeLeadQQWantQˢ, p.encoded, ((@string)dst), "lead" + p.decoded);
-            (var dst2, err) = tt.enc.AppendDecode(dst.slice(-1, 0, len(p.decoded)), slice<byte>(encoded));
+            (var dst2, err) = tt.enc.AppendDecode(dst.slice(0, 0, len(p.decoded)), slice<byte>(encoded));
             testEqual(Ꮡt, appendDecodeQErrorVWantVˢ, p.encoded, err, ((error)default!));
             testEqual(Ꮡt, appendDecodeQQWantQˢ, p.encoded, ((@string)dst2), p.decoded);
             if (len(dst) > 0 && len(dst2) > 0 && Ꮡ(dst, 0) != Ꮡ(dst2, 0)) {
@@ -216,7 +218,7 @@ public static void TestDecoder(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(readFailedˢ, err);
         }
         testEqual(Ꮡt, readFromQLengthVWantVˢ, p.encoded, count, len(p.decoded));
-        testEqual(Ꮡt, decodingOfQQWantQˢ, p.encoded, ((@string)(dbuf[0..(int)(count)])), p.decoded);
+        testEqual(Ꮡt, decodingOfQQWantQˢ, p.encoded, ((@string)(dbuf.slice(0, count))), p.decoded);
         if (!AreEqual(err, io.EOF)) {
             (_, err) = decoder.Read(dbuf);
         }
@@ -235,13 +237,13 @@ public static void TestDecoderBuffering(ж<testing.T> Ꮡt) {
         nint n = default!;
         error err = default!;
         for (total = 0; total < len(bigtest.decoded) && err == default!; ) {
-            (n, err) = decoder.Read(buf[(int)(total)..(int)(total + bs)]);
+            (n, err) = decoder.Read(buf.slice(total, total + bs));
             total += n;
         }
         if (err != default! && !AreEqual(err, io.EOF)) {
             Ꮡt.Errorf("Read from %q at pos %d = %d, unexpected error %v"u8, bigtest.encoded, total, n, err);
         }
-        testEqual(Ꮡt, decodingDOfQQWantQˢ, bs, bigtest.encoded, ((@string)(buf[0..(int)(total)])), bigtest.decoded);
+        testEqual(Ꮡt, decodingDOfQQWantQˢ, bs, bigtest.encoded, ((@string)(buf.slice(0, total))), bigtest.decoded);
     }
 }
 
@@ -309,7 +311,7 @@ public static void TestDecodeBounds(ж<testing.T> Ꮡt) {
     try {
         array<byte> buf = new(32);
         @string s = StdEncoding.EncodeToString(buf[..]);
-        defer(() => {
+        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             {
                 var errΔ1 = recover(); if (errΔ1 != default!) {
                     Ꮡt.Fatalf("Decode panicked unexpectedly: %v\n%s"u8, errΔ1, debug.Stack());
@@ -485,10 +487,10 @@ public static void TestNewLineCharacters(ж<testing.T> Ꮡt) {
 [GoRecv] internal static (nint, error) Read(this ref faultInjectReader r, slice<byte> p) {
     var nr = ᐸꟷ(r.nextc);
     if (len(p) > nr.n) {
-        p = p[..(int)(nr.n)];
+        p = p.slice(0, nr.n);
     }
     nint n = copy(p, r.source);
-    r.source = r.source[(int)(n)..];
+    r.source = r.source.slice(n);
     return (n, nr.err);
 }
 
@@ -496,7 +498,7 @@ public static void TestNewLineCharacters(ж<testing.T> Ꮡt) {
 internal static readonly @string myErrorˢ = "my error"u8;
 
 // tests that we don't ignore errors from our underlying reader
-public static void TestDecoderIssue3577(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDecoderIssue3577(ж<testing.T> Ꮡt) {
     var next = new channel<nextRead>(10);
     var wantErr = errors.New(myErrorˢ);
     next.ᐸꟷ(new nextRead(5, default!));

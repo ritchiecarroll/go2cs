@@ -9,6 +9,8 @@ using io = io_package;
 using bits = go.math.bits_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.math;
 using static go.math.big_package;
 
@@ -39,7 +41,7 @@ internal static slice<byte> itoa(global::go.math.big_package.nat x, nint @base) 
     }}
 
     // allocate buffer for conversion
-    nint i = x.bitLen() / log2(((global::go.math.big_package.Word)(nuint)@base)) + 1; // +1: round up
+    nint i = quo(x.bitLen(), log2(((global::go.math.big_package.Word)(nuint)@base))) + 1; // +1: round up
     var s = new slice<byte>(i);
     // don't destroy x
     var q = ((global::go.math.big_package.nat)default!).set(x);
@@ -48,9 +50,9 @@ internal static slice<byte> itoa(global::go.math.big_package.nat x, nint @base) 
         i--;
         global::go.math.big_package.Word r = default!;
         (q, r) = q.divW(q, ((global::go.math.big_package.Word)(nuint)@base));
-        s[i] = digits[(int)(nuint)(r)];
+        s[i] = digits[r];
     }
-    return s[(int)(i)..];
+    return s.slice(i);
 }
 
 
@@ -269,7 +271,7 @@ public static void TestScanPi(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestScanPiParallel(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestScanPiParallel(ж<testing.T> Ꮡt) {
     const nint n = 2;
     var c = new channel<nint>(0);
     for (nint i = 0; i < n; i++) {

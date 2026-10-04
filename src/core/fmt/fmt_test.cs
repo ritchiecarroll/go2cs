@@ -1185,27 +1185,27 @@ public static void TestSprintf(ж<Δtesting.T> Ꮡt) {
             @string pattern = default!;
             @string chars = default!;
             switch (ᐧ) {
-            case {} when strings.HasPrefix(tt.@out[(int)(i)..], ptrBˢ): {
+            case {} when strings.HasPrefix(tt.@out.slice(i), ptrBˢ): {
                 pattern = ptrBˢ;
                 chars = "01"u8;
                 break;
             }
-            case {} when strings.HasPrefix(tt.@out[(int)(i)..], ptrOˢ): {
+            case {} when strings.HasPrefix(tt.@out.slice(i), ptrOˢ): {
                 pattern = ptrOˢ;
                 chars = "01234567"u8;
                 break;
             }
-            case {} when strings.HasPrefix(tt.@out[(int)(i)..], ptrDˢ): {
+            case {} when strings.HasPrefix(tt.@out.slice(i), ptrDˢ): {
                 pattern = ptrDˢ;
                 chars = "0123456789"u8;
                 break;
             }
-            case {} when strings.HasPrefix(tt.@out[(int)(i)..], ptrXˢ): {
+            case {} when strings.HasPrefix(tt.@out.slice(i), ptrXˢ): {
                 pattern = ptrXˢ;
                 chars = "0123456789abcdef"u8;
                 break;
             }
-            case {} when strings.HasPrefix(tt.@out[(int)(i)..], ptrXˢ2): {
+            case {} when strings.HasPrefix(tt.@out.slice(i), ptrXˢ2): {
                 pattern = ptrXˢ2;
                 chars = "0123456789ABCDEF"u8;
                 break;
@@ -1216,10 +1216,10 @@ public static void TestSprintf(ж<Δtesting.T> Ꮡt) {
                 break;
             }}
 
-            @string p = s[..(int)(i)] + pattern;
+            @string p = s.slice(0, i) + pattern;
             for (nint j = i; j < len(s); j++) {
                 if (!strings.ContainsRune(chars, (rune)s[j])) {
-                    p += s[(int)(j)..];
+                    p += s.slice(j);
                     break;
                 }
             }
@@ -2165,7 +2165,7 @@ internal static readonly @string hello = "hello "u8;
 
 public static void TestAppendf(ж<Δtesting.T> Ꮡt) {
     var b = new slice<byte>(100);
-    b = b[..(int)(copy(b, hello))];
+    b = b.slice(0, copy(b, hello));
     var got = Appendf(b, "world, %d"u8, (nint)(23));
     if (((sstring)got) != appendResult) {
         Ꮡt.Fatalf("Appendf returns %q not %q"u8, got, appendResult);
@@ -2177,7 +2177,7 @@ public static void TestAppendf(ж<Δtesting.T> Ꮡt) {
 
 public static void TestAppend(ж<Δtesting.T> Ꮡt) {
     var b = new slice<byte>(100);
-    b = b[..(int)(copy(b, hello))];
+    b = b.slice(0, copy(b, hello));
     var got = Append(b, worldˢ, (@string)", "u8, (nint)(23));
     if (((sstring)got) != appendResult) {
         Ꮡt.Fatalf("Append returns %q not %q"u8, got, appendResult);
@@ -2192,7 +2192,7 @@ internal static readonly object worldˢ2 = (@string)"world,"u8;
 
 public static void TestAppendln(ж<Δtesting.T> Ꮡt) {
     var b = new slice<byte>(100);
-    b = b[..(int)(copy(b, hello))];
+    b = b.slice(0, copy(b, hello));
     var got = Appendln(b, worldˢ2, (nint)(23));
     if (((@string)got) != appendResult + "\n") {
         Ꮡt.Fatalf("Appendln returns %q not %q"u8, got, appendResult + "\n");

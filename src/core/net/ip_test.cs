@@ -290,7 +290,7 @@ public static void TestIPString(ж<testing.T> Ꮡt) {
 
 public static void TestIPAppendTextNoAllocs(ж<testing.T> Ꮡt) {
     // except the invalid IP
-    foreach (var (_, tt) in ipStringTests[..(int)(len(ipStringTests) - 1)]) {
+    foreach (var (_, tt) in ipStringTests.slice(0, len(ipStringTests) - 1)) {
         var ttʗ1 = tt;
         nint allocs = (nint)testing.AllocsPerRun(1000, () => {
             var buf = new slice<byte>(0, 64);

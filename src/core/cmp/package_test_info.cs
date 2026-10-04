@@ -30,7 +30,7 @@ using static global::go.cmp_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("cmp/cmp_test.go", "cmp_test.cs", "ADxyooKClLC0tLS0gsqCgoKUsLS0tLSCyqaCgoKClIIACQqCAAgYgoCCAAkKpoKEgoIACA7CAAgcvoI=", "160-166:1")]
+[assembly: go.GoPositionMap("cmp/cmp_test.go", "cmp_test.cs", "ABAkopLkAB9GooKClLC0tLS0gsqCgoKUsLS0tLSCyqaCgoKClIIACQqCAAgYgoCCAAkKpoKEgoIACA7CAAgcvoI=", "160-166:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

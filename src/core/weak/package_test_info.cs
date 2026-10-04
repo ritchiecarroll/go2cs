@@ -33,7 +33,7 @@ using static global::go.weak_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("weak/pointer_test.go", "pointer_test.cs", "ABwygoKClIKCloKCgIK2hICCtoSAgviCgoKCloKCgoKCgpSCgoKUgIKkgIKkgpSCuIKCgoKUgIKkgIKkgpSCppSCgoKClIKUgsqCgpKCooKUqIKClLqCgqiWgoK4goKCggAGFgALAoKUggAWMIKCsoKChKQACQqCgrKCgoKCkoKCgoKCgpSUpAAKDAAIBoKCgoKC", "128-133:1;206-217:1;220-242:2")]
+[assembly: go.GoPositionMap("weak/pointer_test.go", "pointer_test.cs", "AB4ygoKClIKCloKCgIK2hICCtoSAgviCgoKCloKCgoKCgpSCgoKUgIKkgIKkgpSCuIKCgoKUgIKkgIKkgpSCppSCgoKClIKUgsqCgpKCooKUqIKClLqCgqiWgoK4goKCggAGFgALAoKUggAWMIKCsoKChKQACQqCgrKCgoKCkoKCgoKCgpSUpAAKDKLUgoKCgoI=", "128-133:1;206-217:1;220-242:2")]
 // </GoSourcePositionMaps>
 
 namespace go;

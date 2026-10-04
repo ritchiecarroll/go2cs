@@ -32,7 +32,7 @@ using static go.encoding.base64_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/base64/base64_test.go", "base64_test.cs", "ADJokqiSgoKokqiSAAgQggAaNKKCgoKU5oKCgoKCgsqCgoKCgoIACQiCgoKCgoKCgpSCgpSCggANCIKCgoKCgoKChIKChIKChIKCgoIACwyCgoKCgoKUgoKClOiCgoKCgoKCgoKUgpQADQiCABk6goKCgoKUlJTE2qKCgoKAgraCggAMCIIADSaUgqSCpIKAggALCoIACiCUgqSCpIKAggAICoKCgoKClIKCgoKUgoKUgoKWgoKCgqbohJIADBqCgoKClICCABEigoKClIKC2JKCgoKCgsiCooKUtILGABkIggAAIISCgoKWgoKCgpaC6IKCgoKUgviCgoKClIKClIKCuKKCgoK4goKCgoKCgqaCksqigoKCgvqCgpaCgqiCgoKogoKC", "269-273:1;442-445:1;530-537:1;539-541:2")]
+[assembly: go.GoPositionMap("encoding/base64/base64_test.go", "base64_test.cs", "AB8yABQ2kqiSgoKokqiS7JSCAAgQAAwayqKCgoKU5oKCgoKCgsqCgoKCgoIACQiCgoKCgoKCgpSCgpSCggANCIKCgoKCgoKChIKChIKChIKCgoIACwyCgoKCgoKUgoKClOiCgoKCgoKCgoKUgpQADQiCABk6goKCgoKUlJTE2qKCgoKAgraCgrQACASCAA0mlIKkgqSCgIIACwqCAAoglIKkgqSCgIIACAqCgoKCgpSCgoKClIKClIKCloKCgoKm6ISSAAwagoKCgpSAggARIoKCgpSCgtiSgoKCgoLIgqKClLSCxgAZCIIAACCEgoKCloKCgoKWguiCgoKClIL4goKCgpSCgpSCgriigoKCuIKCgoKCgoKmgpLKooKCgoL6goKWgoKogoKCqIKCgg==", "269-273:1;442-445:1;530-537:1;539-541:2")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

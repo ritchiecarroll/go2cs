@@ -17,6 +17,8 @@ using atomic = go.sync.atomic_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 using net;
 using static go.net_package;
@@ -555,7 +557,7 @@ internal static readonly object deadlineExceededˢ = (@string)"deadline exceeded
     internal nint unknown;
 }
 
-public static void TestDNSFlood(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDNSFlood(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (!testDNSFlood.Value) {
@@ -682,13 +684,13 @@ loop:
                         if (j == iΔ1) {
                             continue;
                         }
-                        if (names[j] == name[..(int)(len(name) - 1)]) {
+                        if (names[j] == name.slice(0, len(name) - 1)) {
                             // It's OK if we find the name without the dot,
                             // as some systems say 127.0.0.1 localhost localhost.
                             goto continue_loop;
                         }
                     }
-                    Ꮡt.Errorf("%s: got %s; want %s"u8, mode, name, name[..(int)(len(name) - 1)]);
+                    Ꮡt.Errorf("%s: got %s; want %s"u8, mode, name, name.slice(0, len(name) - 1));
                 } else 
                 if (strings.Contains(name, "."u8) && !strings.HasSuffix(name, "."u8)) {
                     // "localhost.localdomain." not "localhost.localdomain"
@@ -1001,7 +1003,7 @@ public static void TestLookupContextCancel(ж<testing.T> Ꮡt) {
         // (ensuring that it has performed any synchronous cleanup).
         var cancelLookupʗ1 = cancelLookup;
         var unblockLookupʗ1 = unblockLookup;
-        testHookLookupIP = (slice<global::go.net_package.IPAddr>, error) (context.Context ctx, Func<context.Context, @string, @string, (slice<global::go.net_package.IPAddr>, error)> fn, @string network, @string host) => {
+        testHookLookupIP = [MethodImpl(MethodImplOptions.NoInlining)] (slice<global::go.net_package.IPAddr>, error) (context.Context ctx, Func<context.Context, @string, @string, (slice<global::go.net_package.IPAddr>, error)> fn, @string network, @string host) => {
             var selᴛ6 = unblockLookupʗ1;
             switch (trySelect(ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
             case 0 when selᴛ6.ꟷᐳ(out _): {
@@ -1086,6 +1088,12 @@ public static void TestNilResolverLookup(ж<testing.T> Ꮡt) {
     r.LookupTXT(ctx, gmailComˢ);
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string googleᶜ = "www.google.com"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string invalidDomainᶜ = "invalid.invalid"u8;
+
 // TestLookupHostCancel verifies that lookup works even after many
 // canceled lookups (see golang.org/issue/24178 for details).
 public static void TestLookupHostCancel(ж<testing.T> Ꮡt) {
@@ -1094,8 +1102,8 @@ public static void TestLookupHostCancel(ж<testing.T> Ꮡt) {
     mustHaveExternalNetwork(Ꮡt);
     testenv.SkipFlakyNet(new net_test_package.testing_TжTB(Ꮡt));
     Ꮡt.Parallel(); // Executes 600ms worth of sequential sleeps.
-    @string google = "www.google.com"u8;
-    @string invalidDomain = "invalid.invalid"u8; // RFC 2606 reserves .invalid
+    @string google = googleᶜ;
+    @string invalidDomain = invalidDomainᶜ; // RFC 2606 reserves .invalid
     const nint n = 600;      // this needs to be larger than threadLimit size
     var (_, err) = LookupHost(google);
     if (err != default!) {
@@ -1140,7 +1148,7 @@ internal static Func<context.Context, @string, @string, (global::go.net_package.
 
 // TestConcurrentPreferGoResolversDial tests that multiple resolvers with the
 // PreferGo option used concurrently are all dialed properly.
-public static void TestConcurrentPreferGoResolversDial(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentPreferGoResolversDial(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
@@ -1281,7 +1289,7 @@ public static void TestLookupIPAddrPreservesContextValues(ж<testing.T> Ꮡt) {
 }
 
 // Issue 30521: The lookup group should call the resolver for each network.
-public static void TestLookupIPAddrConcurrentCallsForNetworks(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestLookupIPAddrConcurrentCallsForNetworks(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var origTestHookLookupIP = testHookLookupIP;
@@ -1422,6 +1430,9 @@ internal static readonly object notSupportedˢ = (@string)"not supported"u8;
     internal Func<Action> fn;
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string hostᶜ = "google.com"u8;
+
 public static void TestResolverLookupIP(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
@@ -1461,7 +1472,7 @@ public static void TestResolverLookupIP(ж<testing.T> Ꮡt) {
                             }}
 
                             // google.com has both A and AAAA records.
-                            @string host = "google.com"u8;
+                            @string host = hostᶜ;
                             var (ips, err) = DefaultResolver.LookupIP(context.Background(), network, host);
                             if (err != default!) {
                                 testenv.SkipFlakyNet(new net_test_package.testing_TжTB(tΔ2));
@@ -1518,7 +1529,7 @@ internal static readonly @string golang1Orgˢ = "golang1.org"u8;
 internal static readonly @string golang2Orgˢ = "golang2.org"u8;
 
 // A context timeout should still return a DNSError.
-public static void TestDNSTimeout(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDNSTimeout(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -1751,6 +1762,12 @@ public static void TestLookupPortIPNetworkString(ж<testing.T> Ꮡt) {
 internal static readonly @string unknownˢ = "unknown"u8;
 internal static readonly object isNotFoundIsSetToFalseˢ = (@string)"IsNotFound is set to false"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testNXDOMAINᶜ = "invalid.invalid."u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string testNODATAᶜ = "_ldap._tcp.google.com."u8;
+
 [GoType("dyn")] internal partial struct TestLookupNoSuchHost_tests {
     internal @string name;
     internal Func<error> query;
@@ -1758,8 +1775,8 @@ internal static readonly object isNotFoundIsSetToFalseˢ = (@string)"IsNotFound 
 
 public static void TestLookupNoSuchHost(ж<testing.T> Ꮡt) {
     mustHaveExternalNetwork(Ꮡt);
-    @string testNXDOMAIN = "invalid.invalid."u8;
-    @string testNODATA = "_ldap._tcp.google.com."u8;
+    @string testNXDOMAIN = testNXDOMAINᶜ;
+    @string testNODATA = testNODATAᶜ;
     var tests = new TestLookupNoSuchHost_tests[]{
         new(
             name: "LookupCNAME NXDOMAIN"u8,

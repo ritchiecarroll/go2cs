@@ -14,7 +14,8 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using @internal;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using io = io_package;
 using static go.runtime.pprof_package;
 

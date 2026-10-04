@@ -28,7 +28,7 @@ using static go.@internal.abi_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/abi/export_test.go", "export_test.cs", "AAkOupI=")]
+[assembly: go.GoPositionMap("internal/abi/export_test.go", "export_test.cs", "AAsOupI=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

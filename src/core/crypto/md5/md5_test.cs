@@ -72,15 +72,15 @@ public static void TestGolden(ж<testing.T> Ꮡt) {
                 io.WriteString(c, g.@in);
             } else 
             if (j == 2){
-                io.WriteString(c, g.@in[..(int)(len(g.@in) / 2)]);
+                io.WriteString(c, g.@in.slice(0, len(g.@in) / 2));
                 c.Sum(default!);
-                io.WriteString(c, g.@in[(int)(len(g.@in) / 2)..]);
+                io.WriteString(c, g.@in.slice(len(g.@in) / 2));
             } else 
             if (j > 2) {
                 // test unaligned write
                 buf = buf[1..];
                 copy(buf, g.@in);
-                c.Write(buf[..(int)(len(g.@in))]);
+                c.Write(buf.slice(0, len(g.@in)));
             }
             @string sΔ1 = fmt.Sprintf("%x"u8, c.Sum(default!));
             if (sΔ1 != g.@out) {
@@ -95,7 +95,7 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
     foreach (var (_, g) in golden) {
         var h = New();
         var h2 = New();
-        io.WriteString(h, g.@in[..(int)(len(g.@in) / 2)]);
+        io.WriteString(h, g.@in.slice(0, len(g.@in) / 2));
         var (state, err) = h._<encoding.BinaryMarshaler>().MarshalBinary();
         if (err != default!) {
             Ꮡt.Errorf("could not marshal: %v"u8, err);
@@ -121,8 +121,8 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
                 continue;
             }
         }
-        io.WriteString(h, g.@in[(int)(len(g.@in) / 2)..]);
-        io.WriteString(h2, g.@in[(int)(len(g.@in) / 2)..]);
+        io.WriteString(h, g.@in.slice(len(g.@in) / 2));
+        io.WriteString(h2, g.@in.slice(len(g.@in) / 2));
         {
             var (actual, actual2) = (h.Sum(default!), h2.Sum(default!)); if (!bytes.Equal(actual, actual2)) {
                 Ꮡt.Errorf("md5(%q) = 0x%x != marshaled 0x%x"u8, g.@in, actual, actual2);
@@ -142,7 +142,7 @@ public static void TestLarge(ж<testing.T> Ꮡt) {
         }
         for (nint blockSize = 10; blockSize <= N; blockSize *= 10) {
             nint blocks = N / blockSize;
-            var b = block[(int)(offset)..(int)(offset + blockSize)];
+            var b = block.slice(offset, offset + blockSize);
             c.Reset();
             for (nint i = 0; i < blocks; i++) {
                 c.Write(b);
@@ -276,7 +276,7 @@ internal static void benchmarkSize(ж<testing.B> Ꮡb, nint size, bool unaligned
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         bench.Reset();
-        bench.Write(bufΔ1[..(int)(size)]);
+        bench.Write(bufΔ1.slice(0, size));
         bench.Sum(sum[..0]);
     }
 }

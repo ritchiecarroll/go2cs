@@ -16,6 +16,8 @@ using sync = sync_package;
 using atomic = global::go.sync.atomic_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.net.http;
 using global::go.sync;
 using static global::go.net.rpc_package;
@@ -71,7 +73,7 @@ internal static readonly @string divideByZeroˢ = "divide by zero"u8;
     if (args.B == 0) {
         return errors.New(divideByZeroˢ);
     }
-    reply.C = args.A / args.B;
+    reply.C = quo(args.A, args.B);
     return default!;
 }
 
@@ -154,7 +156,7 @@ internal static (net.Listener, @string) listenTCP() {
 internal static readonly @string netRpcArithˢ = "net.rpc.Arith"u8;
 internal static readonly object testRpcServerListeningOnˢ = (@string)"Test RPC server listening on"u8;
 
-internal static void startServer() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void startServer() {
     Register(@new<Arith>());
     Register(@new<Embed>());
     RegisterName(netRpcArithˢ, @new<Arith>());
@@ -172,7 +174,7 @@ internal static readonly @string newServerArithˢ = "newServer.Arith"u8;
 internal static readonly object newServerTestRpcServerˢ = (@string)"NewServer test RPC server listening on"u8;
 internal static readonly @string barˢ = "/bar"u8;
 
-internal static void startNewServer() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void startNewServer() {
     newServer = NewServer();
     newServer.Register(@new<Arith>());
     newServer.Register(@new<Embed>());
@@ -665,7 +667,7 @@ public static error Close(this WriteFailCodec _) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object deadlockˢ = (@string)"deadlock"u8;
 
-public static void TestSendDeadlock(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSendDeadlock(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var client = NewClientWithCodec(((WriteFailCodec)0));
@@ -881,7 +883,7 @@ public static void TestAcceptExitAfterListenerClose(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string arithSleepMilliˢ = "Arith.SleepMilli"u8;
 
-public static void TestShutdown(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestShutdown(ж<testing.T> Ꮡt) {
     net.Listener l = default!;
     (l, _) = listenTCP();
     var ch = new channel<net.Conn>(1);
@@ -971,7 +973,7 @@ internal static void benchmarkEndToEnd(Func<(ж<global::go.net.rpc_package.Clien
     finally { ᒐ.Run(); }
 }
 
-internal static void benchmarkEndToEndAsync(Func<(ж<global::go.net.rpc_package.Client>, error)> dial, ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkEndToEndAsync(Func<(ж<global::go.net.rpc_package.Client>, error)> dial, ж<testing.B> Ꮡb) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();

@@ -28,6 +28,7 @@ using static go.crypto.rsa_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
+[assembly: go.GoPositionMap("crypto/rsa/rsa_export_test.go", "rsa_export_test.cs", "AAoO")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

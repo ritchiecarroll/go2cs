@@ -6,6 +6,8 @@ namespace go;
 using fmt = fmt_package;
 using Δos = os_package;
 using Δsync = sync_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.sync_internal_test_package;
 
 partial class sync_test_package {
@@ -20,7 +22,7 @@ internal static httpPkg http;
 
 // This example fetches several URLs concurrently,
 // using a WaitGroup to block until all the fetches are complete.
-public static void ExampleWaitGroup() {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleWaitGroup() {
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     slice<@string> urls = new @string[]{
         "http://www.golang.org/"u8,
@@ -50,7 +52,7 @@ public static void ExampleWaitGroup() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object onlyOnceˢ = (@string)"Only once"u8;
 
-public static void ExampleOnce() {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleOnce() {
     ref var once = ref heap(new Δsync.Once(), out var Ꮡonce);
     var onceBody = () => {
         fmt.Println(onlyOnceˢ);
@@ -79,7 +81,7 @@ internal static readonly object gotˢ = (@string)"got"u8;
 
 // This example uses OnceValue to perform an "expensive" computation just once,
 // even when used concurrently.
-public static void ExampleOnceValue() {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleOnceValue() {
     var once = Δsync.OnceValue(nint () => {
         nint sum = 0;
         for (nint i = 0; i < 1000; i++) {
@@ -115,7 +117,7 @@ internal static readonly object errorˢ = (@string)"error:"u8;
 // Computed once: 499500
 
 // This example uses OnceValues to read a file just once.
-public static void ExampleOnceValues() {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleOnceValues() {
     var once = Δsync.OnceValues((slice<byte>, error) () => {
         fmt.Println(readingFileOnceˢ);
         return Δos.ReadFile(exampleTestGoˢ);

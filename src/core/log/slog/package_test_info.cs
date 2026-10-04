@@ -68,7 +68,7 @@ using static global::go.log.slog_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("log/slog/example_level_handler_test.go", "example_level_handler_test.cs", "ABcutICCpKqiqLKokqiSqJIABhYACAKCgoI=")]
-[assembly: go.GoPositionMap("log/slog/example_wrap_test.go", "example_wrap_test.cs", "ABUm0oKUgoKC1oKUgqaCgpSUgg==", "30-41:1")]
+[assembly: go.GoPositionMap("log/slog/example_wrap_test.go", "example_wrap_test.cs", "ABYm0oKUgoKC1oKUgqaCgpSUgg==", "30-41:1")]
 [assembly: go.GoPositionMap("log/slog/slogtest_test.go", "slogtest_test.cs", "ABokggAGEJKCgpKCgpSUgILsgoKCgpSCgpSUpoKCgIKkAAIS4oKCgoKCgpSUgoKCgoKClIKCqJSClA==", "24-24:1;25-25:2;27-40:3;30-36:3.1")]
 // </GoSourcePositionMaps>
 

@@ -13,6 +13,8 @@ using static sync_package;
 using atomic = go.sync.atomic_package;
 using Δtesting = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.runtime;
 using go.sync;
 using static go.sync_internal_test_package;
@@ -172,7 +174,7 @@ continue_loop:;
 break_loop:;
 }
 
-public static void TestPoolStress(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPoolStress(ж<Δtesting.T> Ꮡt) {
     const nint P = 10;
     nint N = (nint)1000000;
     if (Δtesting.Short()) {
@@ -211,7 +213,7 @@ public static void TestPoolChain(ж<Δtesting.T> Ꮡt) {
     testPoolDequeue(Ꮡt, sync_internal_test_package.NewPoolChain());
 }
 
-internal static void testPoolDequeue(ж<Δtesting.T> Ꮡt, global::go.sync_internal_test_package.PoolDequeue d) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testPoolDequeue(ж<Δtesting.T> Ꮡt, global::go.sync_internal_test_package.PoolDequeue d) {
     const nint P = 10;
     nint N = 2000000;
     if (Δtesting.Short()) {
@@ -408,7 +410,7 @@ public static void BenchmarkPoolSTW(ж<Δtesting.B> Ꮡb) {
             Δruntime.GC();
             // Record pause time.
             Δruntime.ReadMemStats(Ꮡmstats);
-            pauses = append(pauses, mstats.PauseNs[(nint)((mstats.NumGC + 255) % 256)]);
+            pauses = append(pauses, mstats.PauseNs[(mstats.NumGC + 255) % 256]);
         }
         // Get pause time stats.
         slices.Sort<slice<uint64>, uint64>(pauses);

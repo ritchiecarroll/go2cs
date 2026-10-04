@@ -114,8 +114,8 @@ public static void TestDecodeErr(ж<testing.T> Ꮡt) {
     foreach (var (_, tt) in errTests) {
         var @out = new slice<byte>(len(tt.@in) + 10);
         var (n, err) = Decode(@out, slice<byte>(tt.@in));
-        if (((sstring)(@out[..(int)(n)])) != tt.@out || !AreEqual(err, tt.err)) {
-            Ꮡt.Errorf("Decode(%q) = %q, %v, want %q, %v"u8, tt.@in, ((@string)(@out[..(int)(n)])), err, tt.@out, tt.err);
+        if (((sstring)(@out.slice(0, n))) != tt.@out || !AreEqual(err, tt.err)) {
+            Ꮡt.Errorf("Decode(%q) = %q, %v, want %q, %v"u8, tt.@in, ((@string)(@out.slice(0, n))), err, tt.@out, tt.err);
         }
     }
 }
@@ -202,7 +202,7 @@ public static void TestDumper(ж<testing.T> Ꮡt) {
             if (todo > len(@in)) {
                 todo = len(@in);
             }
-            dumper.Write(@in[(int)(done)..(int)(todo)]);
+            dumper.Write(@in.slice(done, todo));
             done = todo;
         }
         dumper.Close();

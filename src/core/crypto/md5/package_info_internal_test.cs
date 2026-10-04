@@ -28,7 +28,7 @@ using static go.crypto.md5_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/md5/md5_test.go", "md5_test.cs", "ADx2goKCgoKUgoKCgqSCgraCgpSCgpTKgoKChISCgoKWgoKClISCgpaCgpaAgoKmgoSAgtqCgoKCgoKClIKCgoKClIKCAAgOkoKCgoKCggAdPMKCgIK45oKEgoCCgqaCgoKWgsqCgoKSgqKCgpSCuIIACA6igoKCgqaCgoKCuIKmgqaCpoKmgqaCpoKmgqaCpoKmgqaC", "197-201:1;232-236:1")]
+[assembly: go.GoPositionMap("crypto/md5/md5_test.go", "md5_test.cs", "ABoyACFEgoKCgoKUgoKCgqSCgraCgpSCgpTKgoKChISCgoKWgoKClISCgpaCgpaAgoKmgoSAgtqCgoKCgoKClIKCgoKClIKCAAgOkoKCgoKCggASIgAKGsKCgIK45oKEgoCCgqaCgoKWgsqCgoKSgqKCgpSCuIKmkpKUooKCgoKmgoKCgriCpoKmgqaCpoKmgqaCpoKmgqaCpoKmgg==", "197-201:1;232-236:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

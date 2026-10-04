@@ -21,6 +21,8 @@ using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using compress;
 using static go.encoding.json_package;
 
@@ -91,8 +93,8 @@ internal static void codeInit() {
             for (nint i = 0; i < len(data) && i < len(codeJSON); i++) {
                 if (data[i] != codeJSON[i]) {
                     println((@string)"re-marshal: changed at byte"u8, i);
-                    println((@string)"orig: "u8, ((@string)(codeJSON[(int)(i - 10)..(int)(i + 10)])));
-                    println((@string)"new: "u8, ((@string)(data[(int)(i - 10)..(int)(i + 10)])));
+                    println((@string)"orig: "u8, ((@string)(codeJSON.slice(i - 10, i + 10))));
+                    println((@string)"new: "u8, ((@string)(data.slice(i - 10, i + 10))));
                     break;
                 }
             }
@@ -229,7 +231,7 @@ internal static Action<ж<testing.B>> benchMarshalBytes(nint n) {
     // Use a struct pointer, to avoid an allocation when passing it as an
     // interface parameter to Marshal.
     var v = Ꮡ(new benchMarshalBytes_type(
-        bytes.Repeat(sample, (n / len(sample)) + 1)[..(int)(n)]
+        bytes.Repeat(sample, (n / len(sample)) + 1).slice(0, n)
     ));
     var vʗ1 = v;
     return (ж<testing.B> b) => {
@@ -258,7 +260,7 @@ internal static Action<ж<testing.B>> benchMarshalBytesError(nint n) {
     // Use a struct pointer, to avoid an allocation when passing it as an
     // interface parameter to Marshal.
     var v = Ꮡ(new benchMarshalBytesError_type(
-        bytes.Repeat(sample, (n / len(sample)) + 1)[..(int)(n)]
+        bytes.Repeat(sample, (n / len(sample)) + 1).slice(0, n)
     ));
     ref var dummy = ref heap<benchMarshalBytesError_Dummy>(out var Ꮡdummy);
     dummy = new benchMarshalBytesError_Dummy(Name: "Dummy"u8);
@@ -619,10 +621,10 @@ public static void BenchmarkTypeFieldsCache(ж<testing.B> Ꮡb) {
     // MissTypes tests the performance of repeated cache misses.
     // This measures the time to rebuild a cache of size nt.
     for (nint nt = 1; nt <= maxTypes; nt *= 10) {
-        var ts = types[..(int)(nt)];
+        var ts = types.slice(0, nt);
         var clearCacheʗ1 = clearCache;
         var tsʗ1 = ts;
-        Ꮡb.Run(fmt.Sprintf("MissTypes%d"u8, nt), (ж<testing.B> bΔ1) => {
+        Ꮡb.Run(fmt.Sprintf("MissTypes%d"u8, nt), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
             nint nc = runtime.GOMAXPROCS(0);
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 clearCacheʗ1();
@@ -631,7 +633,7 @@ public static void BenchmarkTypeFieldsCache(ж<testing.B> Ꮡb) {
                     Ꮡwg.Add(1);
                     var tsʗ2 = tsʗ1;
                     goǃ((nint jΔ1) => {
-                        foreach (var (_, t) in tsʗ2[(int)((jΔ1 * len(tsʗ2)) / nc)..(int)(((jΔ1 + 1) * len(tsʗ2)) / nc)]) {
+                        foreach (var (_, t) in tsʗ2.slice(quo((jΔ1 * len(tsʗ2)), nc), quo(((jΔ1 + 1) * len(tsʗ2)), nc))) {
                             cachedTypeFields(t);
                         }
                         Ꮡwg.Done();
@@ -646,7 +648,7 @@ public static void BenchmarkTypeFieldsCache(ж<testing.B> Ꮡb) {
     for (nint nt = 1; nt <= maxTypes; nt *= 10) {
         // Pre-warm a cache of size nt.
         clearCache();
-        foreach (var (_, t) in types[..(int)(nt)]) {
+        foreach (var (_, t) in types.slice(0, nt)) {
             cachedTypeFields(t);
         }
         var typesʗ1 = types;

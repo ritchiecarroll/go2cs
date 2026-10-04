@@ -75,7 +75,7 @@ public static void TestPredefinedTables(ж<testing.T> Ꮡt) {
         var testʗ1 = testΔ1;
         Ꮡt.Run(testΔ1.name, (ж<testing.T> tΔ1) => {
             ref var r = ref heap(new global::go.@internal.zstd_package.Reader(), out var Ꮡr);
-            var table = new slice<global::go.@internal.zstd_package.fseEntry>(((nint)1).Lsh((uint64)(testʗ1.tableBits)));
+            var table = new slice<global::go.@internal.zstd_package.fseEntry>(((nint)1).Lsh((int64)(testʗ1.tableBits)));
             {
                 var err = r.buildFSE(0, testʗ1.distribution, table, testʗ1.tableBits); if (err != default!) {
                     tΔ1.Fatal(err);

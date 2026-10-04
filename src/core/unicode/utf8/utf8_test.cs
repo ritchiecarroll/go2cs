@@ -99,7 +99,7 @@ public static void TestFullRune(ж<testing.T> Ꮡt) {
         if (!FullRuneInString(s)) {
             Ꮡt.Errorf("FullRuneInString(%q) (%U) = false, want true"u8, s, m.r);
         }
-        var b1 = b[0..(int)(len(b) - 1)];
+        var b1 = b.slice(0, len(b) - 1);
         if (FullRune(b1)) {
             Ꮡt.Errorf("FullRune(%q) = true, want false"u8, b1);
         }
@@ -124,7 +124,7 @@ public static void TestEncodeRune(ж<testing.T> Ꮡt) {
         var b = slice<byte>(m.str);
         array<byte> buf = new(10);
         nint n = EncodeRune(buf[0..], m.r);
-        var b1 = buf[0..(int)(n)];
+        var b1 = buf.slice(0, n);
         if (!bytes.Equal(b, b1)) {
             Ꮡt.Errorf("EncodeRune(%#04x) = %q want %q"u8, m.r, b1, b);
         }
@@ -159,7 +159,7 @@ public static void TestDecodeRune(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("DecodeRuneInString(%q) = %#04x, %d want %#04x, %d"u8, s, r, size, m.r, len(b));
         }
         // there's an extra byte that bytes left behind - make sure trailing byte works
-        (r, size) = DecodeRune(b[0..(int)(cap(b))]);
+        (r, size) = DecodeRune(b.slice(0, cap(b)));
         if (r != m.r || size != len(b)) {
             Ꮡt.Errorf("DecodeRune(%q) = %#04x, %d want %#04x, %d"u8, b, r, size, m.r, len(b));
         }
@@ -173,11 +173,11 @@ public static void TestDecodeRune(ж<testing.T> Ꮡt) {
         if (wantsize >= len(b)) {
             wantsize = 0;
         }
-        (r, size) = DecodeRune(b[0..(int)(len(b) - 1)]);
+        (r, size) = DecodeRune(b.slice(0, len(b) - 1));
         if (r != RuneError || size != wantsize) {
-            Ꮡt.Errorf("DecodeRune(%q) = %#04x, %d want %#04x, %d"u8, b[..(int)(len(b) - 1)], r, size, (int32)(RuneError), wantsize);
+            Ꮡt.Errorf("DecodeRune(%q) = %#04x, %d want %#04x, %d"u8, b.slice(0, len(b) - 1), r, size, (int32)(RuneError), wantsize);
         }
-        s = m.str[0..(int)(len(m.str) - 1)];
+        s = m.str.slice(0, len(m.str) - 1);
         (r, size) = DecodeRuneInString(s);
         if (r != RuneError || size != wantsize) {
             Ꮡt.Errorf("DecodeRuneInString(%q) = %#04x, %d want %#04x, %d"u8, s, r, size, (int32)(RuneError), wantsize);
@@ -363,26 +363,26 @@ internal static void testSequence(ж<testing.T> Ꮡt, @string s) {
         }
         index[j] = new testSequence_info(i, r);
         j++;
-        var (r1, size1) = DecodeRune(b[(int)(i)..]);
+        var (r1, size1) = DecodeRune(b.slice(i));
         if (r != r1) {
-            Ꮡt.Errorf("DecodeRune(%q) = %#04x, want %#04x"u8, s[(int)(i)..], r1, r);
+            Ꮡt.Errorf("DecodeRune(%q) = %#04x, want %#04x"u8, s.slice(i), r1, r);
             return;
         }
-        var (r2, size2) = DecodeRuneInString(s[(int)(i)..]);
+        var (r2, size2) = DecodeRuneInString(s.slice(i));
         if (r != r2) {
-            Ꮡt.Errorf("DecodeRuneInString(%q) = %#04x, want %#04x"u8, s[(int)(i)..], r2, r);
+            Ꮡt.Errorf("DecodeRuneInString(%q) = %#04x, want %#04x"u8, s.slice(i), r2, r);
             return;
         }
         if (size1 != size2) {
-            Ꮡt.Errorf("DecodeRune/DecodeRuneInString(%q) size mismatch %d/%d"u8, s[(int)(i)..], size1, size2);
+            Ꮡt.Errorf("DecodeRune/DecodeRuneInString(%q) size mismatch %d/%d"u8, s.slice(i), size1, size2);
             return;
         }
         si += size1;
     }
     j--;
     for (si = len(s); si > 0; ) {
-        var (r1, size1) = DecodeLastRune(b[0..(int)(si)]);
-        var (r2, size2) = DecodeLastRuneInString(s[0..(int)(si)]);
+        var (r1, size1) = DecodeLastRune(b.slice(0, si));
+        var (r2, size2) = DecodeLastRuneInString(s.slice(0, si));
         if (size1 != size2) {
             Ꮡt.Errorf("DecodeLastRune/DecodeLastRuneInString(%q, %d) size mismatch %d/%d"u8, s, si, size1, size2);
             return;
@@ -410,9 +410,9 @@ internal static void testSequence(ж<testing.T> Ꮡt, @string s) {
 // Check that negative runes encode as U+FFFD.
 public static void TestNegativeRune(ж<testing.T> Ꮡt) {
     var errorbuf = new slice<byte>(UTFMax);
-    errorbuf = errorbuf[0..(int)(EncodeRune(errorbuf, RuneError))];
+    errorbuf = errorbuf.slice(0, EncodeRune(errorbuf, RuneError));
     var buf = new slice<byte>(UTFMax);
-    buf = buf[0..(int)(EncodeRune(buf, -1))];
+    buf = buf.slice(0, EncodeRune(buf, -1));
     if (!bytes.Equal(buf, errorbuf)) {
         Ꮡt.Errorf("incorrect encoding [% x] for -1; expected [% x]"u8, buf, errorbuf);
     }

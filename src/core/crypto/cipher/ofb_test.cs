@@ -78,20 +78,20 @@ public static void TestOFB(ж<testing.T> Ꮡt) {
             continue;
         }
         for (nint j = 0; j <= 5; j += 5) {
-            var plaintext = tt.@in[0..(int)(len(tt.@in) - j)];
+            var plaintext = tt.@in.slice(0, len(tt.@in) - j);
             var ofb = cipher.NewOFB(c, tt.iv);
             var ciphertext = new slice<byte>(len(plaintext));
             ofb.XORKeyStream(ciphertext, plaintext);
-            if (!bytes.Equal(ciphertext, tt.@out[..(int)(len(plaintext))])) {
+            if (!bytes.Equal(ciphertext, tt.@out.slice(0, len(plaintext)))) {
                 Ꮡt.Errorf("%s/%d: encrypting\ninput % x\nhave % x\nwant % x"u8, test, len(plaintext), plaintext, ciphertext, tt.@out);
             }
         }
         for (nint j = 0; j <= 5; j += 5) {
-            var ciphertext = tt.@out[0..(int)(len(tt.@in) - j)];
+            var ciphertext = tt.@out.slice(0, len(tt.@in) - j);
             var ofb = cipher.NewOFB(c, tt.iv);
             var plaintext = new slice<byte>(len(ciphertext));
             ofb.XORKeyStream(plaintext, ciphertext);
-            if (!bytes.Equal(plaintext, tt.@in[..(int)(len(ciphertext))])) {
+            if (!bytes.Equal(plaintext, tt.@in.slice(0, len(ciphertext)))) {
                 Ꮡt.Errorf("%s/%d: decrypting\nhave % x\nwant % x"u8, test, len(ciphertext), plaintext, tt.@in);
             }
         }

@@ -129,7 +129,7 @@ public static void TestAppendText(ж<testing.T> Ꮡt) {
         nint i = len(buf);
         buf = z.Append(buf, @base);
         {
-            @string got = ((@string)(buf[(int)(i)..])); if (got != test.@out) {
+            @string got = ((@string)(buf.slice(i))); if (got != test.@out) {
                 Ꮡt.Errorf("%v: got %s; want %s"u8, test, got, test.@out);
             }
         }

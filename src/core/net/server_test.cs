@@ -6,6 +6,8 @@ namespace go;
 using fmt = fmt_package;
 using Δos = os_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.net_package;
 using time = time_package;
 
@@ -56,7 +58,7 @@ public static void TestTCPServer(ж<testing.T> Ꮡt) {
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.snet + " "u8 + tt.saddr + "<-"u8 + tt.taddr, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(tt.snet + " "u8 + tt.saddr + "<-"u8 + tt.taddr, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 if (!testableListenArgs(ttʗ1.snet, ttʗ1.saddr, ttʗ1.taddr)) {
@@ -136,7 +138,7 @@ public static void TestTCPServer(ж<testing.T> Ꮡt) {
 
 // TestUnixAndUnixpacketServer tests concurrent accept-read-write
 // servers
-public static void TestUnixAndUnixpacketServer(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestUnixAndUnixpacketServer(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         slice<prohibitionaryDialArgTestsᴛ1> unixAndUnixpacketServerTests = new prohibitionaryDialArgTestsᴛ1[]{
@@ -266,7 +268,7 @@ public static void TestUDPServer(ж<testing.T> Ꮡt) {
         ref var ttΔ1 = ref heap<udpServerTestsᴛ1>(out var ᏑttΔ1);
         ttΔ1 = tt;
         var ttʗ1 = ttΔ1;
-        Ꮡt.Run(fmt.Sprint(iΔ1), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(fmt.Sprint(iΔ1), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 if (!testableListenArgs(ttʗ1.snet, ttʗ1.saddr, ttʗ1.taddr)) {
@@ -380,7 +382,7 @@ public static void TestUnixgramServer(ж<testing.T> Ꮡt) {
         ref var ttΔ1 = ref heap<TestUnixgramServer_type>(out var ᏑttΔ1);
         ttΔ1 = tt;
         var ttʗ1 = ttΔ1;
-        Ꮡt.Run(fmt.Sprint(iΔ1), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(fmt.Sprint(iΔ1), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 if (!testableListenArgs(unixgramˢ, ttʗ1.saddr, ""u8)) {

@@ -19,6 +19,8 @@ using os = os_package;
 using reflect = reflect_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = global::go.io.fs_package;
 using global::go.go;
 using global::go.math.rand;
@@ -169,7 +171,7 @@ continueᴛ2:;
 internal static readonly object updateNotGivenˢ = (@string)"-update not given"u8;
 internal static readonly @string exampleTestGoˢ = "example_test.go"u8;
 
-public static void TestUpdateExample(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestUpdateExample(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -239,11 +241,11 @@ internal static void replace(ж<testing.T> Ꮡt, @string @file, slice<byte> @new
     if (i < 0) {
         Ꮡt.Fatalf("cannot find %q in %s"u8, first, @file);
     }
-    nint j = bytes.Index(data[(int)(i + 1)..], slice<byte>("\n}\n"u8));
+    nint j = bytes.Index(data.slice(i + 1), slice<byte>("\n}\n"u8));
     if (j < 0) {
         Ꮡt.Fatalf("cannot find end in %s"u8, @file);
     }
-    data = appendꓸꓸꓸ(appendꓸꓸꓸ(data.slice(-1, i + 1, i + 1), @new), data[(int)(i + 1 + j + 1)..]);
+    data = appendꓸꓸꓸ(appendꓸꓸꓸ(data.slice(0, i + 1, i + 1), @new), data.slice(i + 1 + j + 1));
     (data, err) = format.Source(data);
     if (err != default!) {
         Ꮡt.Fatal(err);

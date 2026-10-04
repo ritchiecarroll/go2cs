@@ -17,6 +17,8 @@ using syscall = syscall_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.os;
 using static go.net_package;
 using ꓸꓸꓸstring = Span<@string>;
@@ -47,7 +49,7 @@ internal static readonly @string abcˢ = "abc"u8;
 // TestAcceptIgnoreSomeErrors tests that windows TCPListener.AcceptTCP
 // handles broken connections. It verifies that broken connections do
 // not affect future connections.
-public static void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         (@string, error) recv(global::go.net_package.Listener lnΔ1, bool ignoreSomeReadErrors) {
@@ -67,7 +69,7 @@ public static void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
                 var b = new slice<byte>(100);
                 (var n, errΔ1) = c.Read(b);
                 if (errΔ1 == default! || AreEqual(errΔ1, Δio.EOF)) {
-                    return (((@string)(b[..(int)(n)])), default!);
+                    return (((@string)(b.slice(0, n))), default!);
                 }
                 var (errno, ok) = toErrno(errΔ1);
                 if (ok && ignoreSomeReadErrors && (errno == syscall.ERROR_NETNAME_DELETED || errno == syscall.WSAECONNRESET)) {
@@ -291,7 +293,7 @@ internal static error netshInterfaceIPShowInterface(@string ipver, map<@string, 
     foreach (var (_, line) in lines) {
         if (bytes.HasPrefix(line, slice<byte>("Interface "u8)) && bytes.HasSuffix(line, slice<byte>(" Parameters"u8))) {
             var f = line[(int)(len("Interface "))..];
-            f = f[..(int)(len(f) - len(" Parameters"))];
+            f = f.slice(0, len(f) - len(" Parameters"));
             name = ((@string)f);
             continue;
         }
@@ -663,7 +665,7 @@ public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> Ꮡt) {
         if (i == -1) {
             Ꮡt.Fatalf("line %q has no : in it"u8, line);
         }
-        group[((@string)(line[..(int)(i)]))] = ((@string)bytes.TrimSpace(line[(int)(i + 1)..]));
+        group[((@string)(line.slice(0, i)))] = ((@string)bytes.TrimSpace(line.slice(i + 1)));
     }
     processGroup();
     var dups = new map<@string, slice<@string>>();

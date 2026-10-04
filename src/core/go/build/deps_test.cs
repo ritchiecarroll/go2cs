@@ -789,7 +789,7 @@ internal static (slice<@string>, error) listStdPkgs(@string goroot) {
         if (strings.HasPrefix(@base, "."u8) || strings.HasPrefix(@base, "_"u8) || @base == "testdata"u8) {
             return filepath.SkipDir;
         }
-        @string name = filepath.ToSlash(path[(int)(len(src))..]);
+        @string name = filepath.ToSlash(path.slice(len(src)));
         if (name == "builtin"u8 || name == "cmd"u8) {
             return filepath.SkipDir;
         }

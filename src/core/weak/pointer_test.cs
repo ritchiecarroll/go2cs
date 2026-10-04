@@ -12,6 +12,8 @@ using time = time_package;
 using @unsafe = unsafe_package;
 using weak = weak_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 
 partial class weak_test_package {
 
@@ -191,7 +193,7 @@ private static readonly object thisIsAStressTestThatˢ = (@string)"this is a str
 // is hidden in a blackened stack.
 //
 // Never fails if correct, fails with some high probability if incorrect.
-public static void TestIssue69210(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestIssue69210(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

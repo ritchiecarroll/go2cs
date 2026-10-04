@@ -72,7 +72,7 @@ public static void TestFuncPCCompileError(ж<testing.T> Ꮡt) {
     var want = new @string[]{"x.go:17"u8, "x.go:18"u8, "x.go:20"u8}.slice();
     var got = strings.Split(((@string)@out), "\n"u8);
     if (got[len(got) - 1] == "") {
-        got = got[..(int)(len(got) - 1)]; // remove last empty line
+        got = got.slice(0, len(got) - 1); // remove last empty line
     }
     foreach (var (i, s) in got) {
         if (!strings.Contains(s, want[i])) {

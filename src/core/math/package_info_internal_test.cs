@@ -29,6 +29,7 @@ using static go.math_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
+[assembly: go.GoPositionMap("math/export_test.go", "export_test.cs", "AAoQkpKSog==")]
 // </GoSourcePositionMaps>
 
 namespace go;

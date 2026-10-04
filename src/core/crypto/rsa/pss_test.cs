@@ -17,6 +17,8 @@ using os = os_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using compress;
 using encoding;
 using go.crypto;
@@ -40,7 +42,7 @@ internal static readonly @string newSignatureMarkerᶜ = "START NEW SIGNATURE"u8
 
 // TestPSSGolden tests all the test vectors in pss-vect.txt from
 // ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-1/pkcs-1v2-1-vec.zip
-public static void TestPSSGolden(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPSSGolden(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

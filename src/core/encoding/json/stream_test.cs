@@ -16,7 +16,8 @@ using runtime = runtime_package;
 using debug = go.runtime.debug_package;
 using strings = strings_package;
 using testing = testing_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.net;
 using go.net.http;
 using go.runtime;
@@ -87,7 +88,7 @@ public static void TestEncoder(ж<testing.T> Ꮡt) {
         // Check that enc.SetIndent("", "") turns off indentation.
         enc.SetIndent(">"u8, "."u8);
         enc.SetIndent(""u8, ""u8);
-        foreach (var (j, v) in streamTest[0..(int)(i)]) {
+        foreach (var (j, v) in streamTest.slice(0, i)) {
             {
                 var err = enc.Encode(v); if (err != default!) {
                     Ꮡt.Fatalf("#%d.%d Encode error: %v"u8, i, j, err);
@@ -315,7 +316,7 @@ public static void TestDecoder(ж<testing.T> Ꮡt) {
                 }
             }
         }
-        if (!reflect.DeepEqual(@out, streamTest[0..(int)(i)])) {
+        if (!reflect.DeepEqual(@out, streamTest.slice(0, i))) {
             Ꮡt.Errorf("decoding %d items: mismatch:"u8, i);
             foreach (var (j, _) in @out) {
                 if (!reflect.DeepEqual(@out[j], streamTest[j])) {
@@ -366,7 +367,7 @@ internal static @string nlines(@string s, nint n) {
         if (c == (rune)'\n') {
             {
                 n--; if (n == 0) {
-                    return s[0..(int)(i + 1)];
+                    return s.slice(0, i + 1);
                 }
             }
         }
@@ -456,7 +457,7 @@ public static void TestBlocking(ж<testing.T> Ꮡt) {
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.Name, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(tt.Name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             var (r, w) = net.Pipe();
             var wʗ1 = w;
             goǃ(ᴛ1 => wʗ1.Write(ᴛ1), slice<byte>(ttʗ1.@in));

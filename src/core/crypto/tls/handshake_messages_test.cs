@@ -104,7 +104,7 @@ public static void TestMarshalUnmarshal(ж<testing.T> Ꮡt) {
                     // data is optional and the length of the
                     // Finished varies across versions.
                     for (nint jΔ1 = 0; jΔ1 < len(marshaled); jΔ1++) {
-                        if (mʗ1.unmarshal(marshaled[0..(int)(jΔ1)])) {
+                        if (mʗ1.unmarshal(marshaled.slice(0, jΔ1))) {
                             tΔ1.Errorf("#%d unmarshaled a prefix of length %d of %#v"u8, i, jΔ1, m1);
                             break;
                         }
@@ -161,7 +161,7 @@ internal static @string randomString(nint n, ж<rand.Rand> Ꮡrand) {
     if (randΔ1.Intn(10) > 5) {
         m.Value.serverName = randomString(randΔ1.Intn(255), Ꮡrand);
         while (strings.HasSuffix((~m).serverName, "."u8)) {
-            m.Value.serverName = (~m).serverName[..(int)(len((~m).serverName) - 1)];
+            m.Value.serverName = (~m).serverName.slice(0, len((~m).serverName) - 1);
         }
     }
     m.Value.ocspStapling = randΔ1.Intn(10) > 5;
@@ -557,10 +557,10 @@ public static void TestRejectEmptySCTList(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(cannotFindSctInˢ);
     }
     slice<byte> serverHelloEmptySCT = default!;
-    serverHelloEmptySCT = appendꓸꓸꓸ(serverHelloEmptySCT, serverHelloBytes[..(int)(i - 6)]);
+    serverHelloEmptySCT = appendꓸꓸꓸ(serverHelloEmptySCT, serverHelloBytes.slice(0, i - 6));
     // Append the extension length and SCT list length for an empty list.
     serverHelloEmptySCT = appendꓸꓸꓸ(serverHelloEmptySCT, new byte[]{0, 2, 0, 0}.slice());
-    serverHelloEmptySCT = appendꓸꓸꓸ(serverHelloEmptySCT, serverHelloBytes[(int)(i + 4)..]);
+    serverHelloEmptySCT = appendꓸꓸꓸ(serverHelloEmptySCT, serverHelloBytes.slice(i + 4));
     // Update the handshake message length.
     serverHelloEmptySCT[1] = (byte)(((len(serverHelloEmptySCT) - 4) >> (int)(16)));
     serverHelloEmptySCT[2] = (byte)(((len(serverHelloEmptySCT) - 4) >> (int)(8)));

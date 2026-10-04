@@ -21,7 +21,8 @@ using time = time_package;
 using @unsafe = unsafe_package;
 using weak = weak_package;
 using @internal;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.math;
 using global::go.runtime;
 using global::go.sync;
@@ -381,7 +382,7 @@ public static void TestGCTestPointerClass(ж<testing.T> Ꮡt) {
     internal ж<byte> x, y;
 }
 
-public static void BenchmarkAllocation(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkAllocation(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     nint ngo = Δruntime.GOMAXPROCS(0);
@@ -414,7 +415,7 @@ public static void BenchmarkAllocation(ж<testing.B> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"Skipping in short mode"u8;
 
-public static void TestPrintGC(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPrintGC(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
@@ -580,7 +581,7 @@ internal static readonly object thisBenchmarkCanOnlyBeˢ = (@string)"This benchm
     internal array<ж<applyGCLoad_node>> children = new(16);
 }
 
-internal static Action applyGCLoad(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static Action applyGCLoad(ж<testing.B> Ꮡb) {
     // We’ll apply load to the runtime with maxProcs-1 goroutines
     // and use one more to actually benchmark. It doesn't make sense
     // to try to run this test with only 1 P (that's what
@@ -703,7 +704,7 @@ public static void TestUserForcedGC(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static void writeBarrierBenchmark(ж<testing.B> Ꮡb, Action f) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void writeBarrierBenchmark(ж<testing.B> Ꮡb, Action f) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -829,7 +830,7 @@ public static void BenchmarkBulkWriteBarrier(ж<testing.B> Ꮡb) {
     Δruntime.KeepAlive(ptrs);
 }
 
-public static void BenchmarkScanStackNoLocals(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkScanStackNoLocals(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     ref var ready = ref heap(new Δsync.WaitGroup(), out var Ꮡready);
@@ -937,7 +938,7 @@ public static void TestMyGenericFunc(ж<testing.T> Ꮡt) {
     internal nint b;
 }
 
-public static void TestWeakToStrongMarkTermination(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWeakToStrongMarkTermination(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

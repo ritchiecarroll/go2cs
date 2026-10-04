@@ -14,7 +14,8 @@ using strings = strings_package;
 using testing = testing_package;
 using iotest = global::go.testing.iotest_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.net;
 using global::go.testing;
 using static global::go.net.http_package;
@@ -770,7 +771,7 @@ internal static readonly @string http11204NoContentˢ = "HTTP/1.1 204 No Content
 // Unlike the original, this version doesn't mutate the req.Body and
 // try to restore it. It always dumps the whole body.
 // And it doesn't support https.
-internal static (slice<byte>, error) dumpRequestOut(ж<global::go.net.http_package.Request> Ꮡreq, Action onReadHeaders) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (slice<byte>, error) dumpRequestOut(ж<global::go.net.http_package.Request> Ꮡreq, Action onReadHeaders) {
     GoFrame ᒐ = default;
     try {
         // Use the actual Transport code to record what we would send

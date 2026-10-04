@@ -39,13 +39,13 @@ public static void TestWrap(ж<testing.T> Ꮡt) {
         if (n >= 11) {
             n++; // extra byte for α
         }
-        words = append(words, s[..(int)(n)]);
+        words = append(words, s.slice(0, n));
     }
     for (nint nᴛ1 = 1; nᴛ1 <= len(words) && !Ꮡt.Failed(); nᴛ1++) {
         var n = nᴛ1;
         var wordsʗ1 = words;
         Ꮡt.Run(fmt.Sprint((@string)"n="u8, n), (ж<testing.T> tΔ1) => {
-            var wordsΔ1 = wordsʗ1[..(int)(n)];
+            var wordsΔ1 = wordsʗ1.slice(0, n);
             tΔ1.Logf("words: %v"u8, wordsΔ1);
             for (nint maxᴛ1 = 1; maxᴛ1 < 100 && !tΔ1.Failed(); maxᴛ1++) {
                 var max = maxᴛ1;
@@ -69,14 +69,14 @@ public static void TestWrap(ж<testing.T> Ꮡt) {
                             tΔ2.Fatalf("wrap seq contains %d > %d: %v"u8, nΔ1, len(wordsʗ2), seq);
                         }
                         nint size = -1;
-                        foreach (var (_, sΔ1) in wordsʗ2[(int)(start)..(int)(nΔ1)]) {
+                        foreach (var (_, sΔ1) in wordsʗ2.slice(start, nΔ1)) {
                             size += 1 + utf8.RuneCountInString(sΔ1);
                         }
                         if (nΔ1 - start == 1 && size >= max){
                         } else 
                         if (size > max){
                             // no score
-                            tΔ2.Fatalf("wrap used overlong line %d:%d: %v"u8, start, nΔ1, wordsʗ2[(int)(start)..(int)(nΔ1)]);
+                            tΔ2.Fatalf("wrap used overlong line %d:%d: %v"u8, start, nΔ1, wordsʗ2.slice(start, nΔ1));
                         } else 
                         if (nΔ1 != len(wordsʗ2)) {
                             score += (int64)(max - size) * (int64)(max - size) + wrapPenalty(wordsʗ2[nΔ1 - 1]);

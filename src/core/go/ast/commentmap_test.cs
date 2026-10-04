@@ -154,8 +154,8 @@ public static void TestFilter(ж<testing.T> Ꮡt) {
     foreach (var (i, decl) in (~f).Decls) {
         {
             var (gen, ok) = decl._<ж<ast.GenDecl>>(ᐧ); if (ok && (~gen).Tok == token.VAR) {
-                copy((~f).Decls[(int)(i)..], (~f).Decls[(int)(i + 1)..]);
-                f.Value.Decls = (~f).Decls[..(int)(len((~f).Decls) - 1)];
+                copy((~f).Decls.slice(i), (~f).Decls.slice(i + 1));
+                f.Value.Decls = (~f).Decls.slice(0, len((~f).Decls) - 1);
                 break;
             }
         }

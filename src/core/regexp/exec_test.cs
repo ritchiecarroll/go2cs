@@ -93,7 +93,7 @@ internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
         if (strings.HasSuffix(@file, bz2ˢ)){
             var z = bzip2.NewReader(new regexp_test_package.os_FileжReader(f));
             txt = z;
-            @file = @file[..(int)(len(@file) - len(".bz2"))]; // for error messages
+            @file = @file.slice(0, len(@file) - len(".bz2")); // for error messages
         } else {
             txt = new regexp_test_package.os_FileжReader(f);
         }
@@ -357,7 +357,7 @@ internal static slice<nint> parseResult(ж<testing.T> Ꮡt, @string @file, nint 
     for (nint j = 0; j <= len(res); j++) {
         if (j == len(res) || res[j] == (rune)' ') {
             // Process a single pair.  - means no submatch.
-            @string pair = res[(int)(i)..(int)(j)];
+            @string pair = res.slice(i, j);
             if (pair == "-"u8){
                 @out[n] = -1;
                 @out[n + 1] = -1;
@@ -433,7 +433,7 @@ Reading:
             if (line[0] == (rune)'#' || line[0] == (rune)'\n') {
                 goto continue_Reading;
             }
-            line = line[..(int)(len(line) - 1)];
+            line = line.slice(0, len(line) - 1);
             var field = notab.FindAllString(line, -1);
             foreach (var (i, fΔ1) in field) {
                 if (fΔ1 == "NULL"u8) {
@@ -620,7 +620,7 @@ Testing:
                     goto continue_Testing;
                 }
                 if (len(have) > len(pos)) {
-                    have = have[..(int)(len(pos))];
+                    have = have.slice(0, len(pos));
                 }
                 if (!slices.Equal<slice<nint>, nint>(have, pos)) {
                     Ꮡt.Errorf("%s:%d: %#q.FindSubmatchIndex(%#q) = %v, want %v"u8, @file, lineno, pattern, text, have, pos);
@@ -700,15 +700,15 @@ internal static (bool ok, bool compiled, bool matched, slice<nint> pos) parseFow
         }
         nint v = -1;
         error err = default!;
-        if (s[..(int)(i)] != "?") {
-            (v, err) = strconv.Atoi(s[..(int)(i)]);
+        if (s.slice(0, i) != "?") {
+            (v, err) = strconv.Atoi(s.slice(0, i));
             if (err != default!) {
                 ok = false;
                 return (ok, compiled, matched, pos);
             }
         }
         x = append(x, v);
-        s = s[(int)(i + 1)..];
+        s = s.slice(i + 1);
     }
     if (len(x) % 2 != 0) {
         ok = false;
@@ -724,7 +724,7 @@ internal static slice<byte> text;
 
 internal static slice<byte> makeText(nint n) {
     if (len(text) >= n) {
-        return text[..(int)(n)];
+        return text.slice(0, n);
     }
     text = new slice<byte>(n);
     var x = ~(uint32)0;

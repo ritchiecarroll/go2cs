@@ -650,7 +650,7 @@ internal static ж<ast.Ident> newIdent(tokenꓸPos pos, @string name) {
 // insert inserts x at list[at] and moves the remaining elements up.
 internal static slice<ast.Expr> insert(slice<ast.Expr> list, nint at, ast.Expr x) {
     list = append(list, (ast.Expr)(default!));
-    copy(list[(int)(at + 1)..], list[(int)(at)..]);
+    copy(list.slice(at + 1), list.slice(at));
     list[at] = x;
     return list;
 }

@@ -108,9 +108,9 @@ internal static void testGolden(ж<testing.T> Ꮡt) {
             if (j < 2){
                 io.WriteString(c, g.@in);
             } else {
-                io.WriteString(c, g.@in[..(int)(len(g.@in) / 2)]);
+                io.WriteString(c, g.@in.slice(0, len(g.@in) / 2));
                 c.Sum(default!);
-                io.WriteString(c, g.@in[(int)(len(g.@in) / 2)..]);
+                io.WriteString(c, g.@in.slice(len(g.@in) / 2));
             }
             @string sΔ1 = fmt.Sprintf("%x"u8, c.Sum(default!));
             if (sΔ1 != g.@out) {
@@ -129,9 +129,9 @@ internal static void testGolden(ж<testing.T> Ꮡt) {
             if (j < 2){
                 io.WriteString(c, g.@in);
             } else {
-                io.WriteString(c, g.@in[..(int)(len(g.@in) / 2)]);
+                io.WriteString(c, g.@in.slice(0, len(g.@in) / 2));
                 c.Sum(default!);
-                io.WriteString(c, g.@in[(int)(len(g.@in) / 2)..]);
+                io.WriteString(c, g.@in.slice(len(g.@in) / 2));
             }
             @string sΔ1 = fmt.Sprintf("%x"u8, c.Sum(default!));
             if (sΔ1 != g.@out) {
@@ -166,7 +166,7 @@ internal static void testGoldenMarshal(ж<testing.T> Ꮡt) {
             foreach (var (_, g) in ttʗ1.gold) {
                 var h = ttʗ1.newHash();
                 var h2 = ttʗ1.newHash();
-                io.WriteString(h, g.@in[..(int)(len(g.@in) / 2)]);
+                io.WriteString(h, g.@in.slice(0, len(g.@in) / 2));
                 var (state, err) = h._<encoding.BinaryMarshaler>().MarshalBinary();
                 if (err != default!) {
                     tΔ1.Errorf("could not marshal: %v"u8, err);
@@ -192,8 +192,8 @@ internal static void testGoldenMarshal(ж<testing.T> Ꮡt) {
                         continue;
                     }
                 }
-                io.WriteString(h, g.@in[(int)(len(g.@in) / 2)..]);
-                io.WriteString(h2, g.@in[(int)(len(g.@in) / 2)..]);
+                io.WriteString(h, g.@in.slice(len(g.@in) / 2));
+                io.WriteString(h2, g.@in.slice(len(g.@in) / 2));
                 {
                     var (actual, actual2) = (h.Sum(default!), h2.Sum(default!)); if (!bytes.Equal(actual, actual2)) {
                         tΔ1.Errorf("sha%s(%q) = 0x%x != marshaled 0x%x"u8, ttʗ1.name, g.@in, actual, actual2);
@@ -388,7 +388,7 @@ internal static void benchmarkSize(ж<testing.B> Ꮡb, nint size) {
         bΔ1.SetBytes((int64)size);
         for (nint i = 0; i < (~bΔ1).N; i++) {
             bench.Reset();
-            bench.Write(buf[..(int)(size)]);
+            bench.Write(buf.slice(0, size));
             bench.Sum(sumʗ1[..0]);
         }
     });
@@ -396,14 +396,14 @@ internal static void benchmarkSize(ж<testing.B> Ꮡb, nint size) {
         bΔ2.ReportAllocs();
         bΔ2.SetBytes((int64)size);
         for (nint i = 0; i < (~bΔ2).N; i++) {
-            Sum224(buf[..(int)(size)]);
+            Sum224(buf.slice(0, size));
         }
     });
     Ꮡb.Run(sum256ˢ, (ж<testing.B> bΔ3) => {
         bΔ3.ReportAllocs();
         bΔ3.SetBytes((int64)size);
         for (nint i = 0; i < (~bΔ3).N; i++) {
-            Sum256(buf[..(int)(size)]);
+            Sum256(buf.slice(0, size));
         }
     });
 }

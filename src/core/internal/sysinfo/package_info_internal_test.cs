@@ -28,6 +28,7 @@ using static go.@internal.sysinfo_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
+[assembly: go.GoPositionMap("internal/sysinfo/export_test.go", "export_test.cs", "AAkO")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

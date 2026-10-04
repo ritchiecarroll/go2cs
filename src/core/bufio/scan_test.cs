@@ -154,7 +154,7 @@ public static void TestScanWords(ж<Δtesting.T> Ꮡt) {
 
 [GoRecv] internal static (nint n, error err) Read(this ref slowReader sr, slice<byte> p) {
     if (len(p) > sr.max) {
-        p = p[0..(int)(sr.max)];
+        p = p.slice(0, sr.max);
     }
     return sr.buf.Read(p);
 }
@@ -471,7 +471,7 @@ public static void TestScanWordsExcessiveWhiteSpace(ж<Δtesting.T> Ꮡt) {
 internal static (nint advance, slice<byte> token, error err) commaSplit(slice<byte> data, bool atEOF) {
     for (nint i = 0; i < len(data); i++) {
         if (data[i] == (rune)',') {
-            return (i + 1, data[..(int)(i)], default!);
+            return (i + 1, data.slice(0, i), default!);
         }
     }
     return (0, data, ErrFinalToken);

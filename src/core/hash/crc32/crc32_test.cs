@@ -9,13 +9,15 @@ using hash = hash_package;
 using io = io_package;
 using rand = math.rand_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using math;
 using static go.hash.crc32_package;
 
 partial class crc32_internal_test_package {
 
 // First test, so that it can be the one to initialize castagnoliTable.
-public static void TestCastagnoliRace(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCastagnoliRace(ж<testing.T> Ꮡt) {
     // The MakeTable(Castagnoli) lazily initializes castagnoliTable,
     // which races with the switch on tab during Write to check
     // whether tab == castagnoliTable.
@@ -129,7 +131,7 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
         foreach (var (_, g) in golden) {
             var h = New(IEEETable);
             var h2 = New(IEEETable);
-            io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h), g.@in[..(int)(len(g.@in) / 2)]);
+            io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h), g.@in.slice(0, len(g.@in) / 2));
             var (state, err) = h._<encoding.BinaryMarshaler>().MarshalBinary();
             if (err != default!) {
                 tΔ1.Errorf("could not marshal: %v"u8, err);
@@ -155,8 +157,8 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
                     continue;
                 }
             }
-            io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h), g.@in[(int)(len(g.@in) / 2)..]);
-            io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h2), g.@in[(int)(len(g.@in) / 2)..]);
+            io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h), g.@in.slice(len(g.@in) / 2));
+            io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h2), g.@in.slice(len(g.@in) / 2));
             if (h.Sum32() != h2.Sum32()) {
                 tΔ1.Errorf("IEEE(%s) = 0x%x != marshaled 0x%x"u8, g.@in, h.Sum32(), h2.Sum32());
             }
@@ -167,7 +169,7 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
         foreach (var (_, g) in golden) {
             var h = New(table);
             var h2 = New(table);
-            io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h), g.@in[..(int)(len(g.@in) / 2)]);
+            io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h), g.@in.slice(0, len(g.@in) / 2));
             var (state, err) = h._<encoding.BinaryMarshaler>().MarshalBinary();
             if (err != default!) {
                 tΔ2.Errorf("could not marshal: %v"u8, err);
@@ -193,8 +195,8 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
                     continue;
                 }
             }
-            io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h), g.@in[(int)(len(g.@in) / 2)..]);
-            io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h2), g.@in[(int)(len(g.@in) / 2)..]);
+            io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h), g.@in.slice(len(g.@in) / 2));
+            io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h2), g.@in.slice(len(g.@in) / 2));
             if (h.Sum32() != h2.Sum32()) {
                 tΔ2.Errorf("Castagnoli(%s) = 0x%x != marshaled 0x%x"u8, g.@in, h.Sum32(), h2.Sum32());
             }
@@ -273,8 +275,8 @@ public static void TestGolden(ж<testing.T> Ꮡt) {
             if (d >= len(b)) {
                 d = len(b);
             }
-            ieee.Write(b[..(int)(d)]);
-            ieee.Write(b[(int)(d)..]);
+            ieee.Write(b.slice(0, d));
+            ieee.Write(b.slice(d));
             return ieee.Sum32();
         });
     }
@@ -299,8 +301,8 @@ public static void TestGolden(ж<testing.T> Ꮡt) {
             if (d >= len(b)) {
                 d = len(b);
             }
-            castagnoli.Write(b[..(int)(d)]);
-            castagnoli.Write(b[(int)(d)..]);
+            castagnoli.Write(b.slice(0, d));
+            castagnoli.Write(b.slice(d));
             return castagnoli.Sum32();
         });
     }
@@ -341,7 +343,7 @@ internal static void benchmark(ж<testing.B> Ꮡb, hash.Hash32 h, int64 n, int64
 
     b.SetBytes(n);
     var data = new slice<byte>((nint)(n + alignment));
-    data = data[(int)(alignment)..];
+    data = data.slice((nint)(alignment));
     foreach (var (i, _) in data) {
         data[i] = (byte)i;
     }

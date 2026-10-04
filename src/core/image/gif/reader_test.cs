@@ -113,12 +113,12 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
             b.Write(enc);
             // Write extra bytes inside the same data sub-block where LZW data
             // ended. Each arbitrarily 0x02.
-            b.WriteString(extra[..(int)(tc.extraExisting)]);
+            b.WriteString(extra.slice(0, tc.extraExisting));
         }
         if (tc.extraSeparate > 0) {
             // Data sub-block size. This indicates how many extra bytes follow.
             b.WriteByte((byte)tc.extraSeparate);
-            b.WriteString(extra[..(int)(tc.extraSeparate)]);
+            b.WriteString(extra.slice(0, tc.extraSeparate));
         }
         b.WriteByte(0x00); // An empty block signifies the end of the image data.
         b.WriteString(trailerStr);
@@ -390,7 +390,7 @@ internal static readonly @string unexpectedEofˢ = ": unexpected EOF"u8;
 
 public static void TestUnexpectedEOF(ж<testing.T> Ꮡt) {
     for (nint i = len(testGIF) - 1; i >= 0; i--) {
-        var (_, err) = DecodeAll(new gif_internal_test_package.bytes_ReaderжReader(bytes.NewReader(testGIF[..(int)(i)])));
+        var (_, err) = DecodeAll(new gif_internal_test_package.bytes_ReaderжReader(bytes.NewReader(testGIF.slice(0, i))));
         if (AreEqual(err, errNotEnough)) {
             continue;
         }

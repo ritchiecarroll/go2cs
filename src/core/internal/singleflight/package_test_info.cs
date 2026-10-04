@@ -32,7 +32,7 @@ using static global::go.@internal.singleflight_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/singleflight/singleflight_test.go", "singleflight_test.cs", "ABYggoKGgJKkguiCgoKWgpSCuIKCkoKCkpSUgoSEloKCgoKCsoKCgoKClICC+KaCgoCCyIKElIKEgoKSsoKClJaChIKSpIKCqISCloKWgoSCloSAgsiihIKCgoKSgoKCgoKCgpSClKaEuILMgpQ=", "18-20:1;32-34:1;48-59:1;66-77:2;99-106:1;100-104:1.1;112-119:2;113-118:2.1;123-125:3;157-166:1;158-161:1.1")]
+[assembly: go.GoPositionMap("internal/singleflight/singleflight_test.go", "singleflight_test.cs", "ABgggoKGgJKkguiCgoKWgpSCuIKCkoKCkpSUgoSEloKCgoKCsoKCgoKClICCxKSmgoKAgsiChJSChIKCkrKCgpSWgoSCkqSCgqiEgpaCloKEgpaEgILIooSCgoKCkoKCgoKCgoKUgpSmhLiCzIKU", "18-20:1;32-34:1;48-59:1;66-77:2;99-106:1;100-104:1.1;112-119:2;113-118:2.1;123-125:3;157-166:1;158-161:1.1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

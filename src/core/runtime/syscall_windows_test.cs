@@ -21,6 +21,8 @@ using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.syscall.windows;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = global::go.io.fs_package;
 using global::go.os;
 using path;
@@ -302,7 +304,7 @@ public static void TestCallbackPanicLoop(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestBlockingCallback(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBlockingCallback(ж<testing.T> Ꮡt) {
     var c = new channel<nint>(0);
     var cʗ1 = c;
     goǃ(() => {
@@ -865,7 +867,7 @@ uintptr_t cfunc(callback f, uintptr_t n) {
     internal syscall.Errno err;
 }
 
-public static void TestReturnAfterStackGrowInCallback(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestReturnAfterStackGrowInCallback(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         {
@@ -1442,7 +1444,7 @@ internal static error setEvent(syscallꓸHandle h) {
     return default!;
 }
 
-public static void BenchmarkChanToSyscallPing(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkChanToSyscallPing(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     nint n = b.N;
@@ -1467,7 +1469,7 @@ public static void BenchmarkChanToSyscallPing(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkSyscallToSyscallPing(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkSyscallToSyscallPing(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     nint n = b.N;
@@ -1503,7 +1505,7 @@ public static void BenchmarkSyscallToSyscallPing(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkChanToChanPing(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkChanToChanPing(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     nint n = b.N;

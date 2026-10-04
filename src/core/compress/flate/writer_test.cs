@@ -21,9 +21,9 @@ public static void BenchmarkEncode(ж<testing.B> Ꮡb) {
         var buf1 = new slice<byte>(n);
         for (nint i = 0; i < n; i += len(buf0)) {
             if (len(buf0) > n - i) {
-                buf0 = buf0[..(int)(n - i)];
+                buf0 = buf0.slice(0, n - i);
             }
-            copy(buf1[(int)(i)..], buf0);
+            copy(buf1.slice(i), buf0);
         }
         buf0 = default!;
         var (w, err) = NewWriter(io.Discard, level);

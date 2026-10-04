@@ -32,7 +32,7 @@ using static go.context_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("context/context_test.go", "context_test.cs", "ACZMgoIACgbqgoKSgoKSkpTUtLS06oKCgoKCgoCCgraCpoSAgqSAgqSAgqaEgoKUloLWpICCtoKCgpaC1qSAgviigpKChLS02IKCgIKmgoKClJaEgoKClKjWpICCuKTWgIIAEQqCgoCCuIKCgoKChIKCgoKChIKCkoKCABYWgoKkooKCgoKCpoKCgoKUloKChIKChIKUgpKEgoKShIKShIKShIKShIKEgpKWgoKCkg==", "54-54:1;106-115:2;194-198:1;216-216:2;236-242:1;243-250:2")]
+[assembly: go.GoPositionMap("context/context_test.go", "context_test.cs", "ACZMgoIACgbqgoKSgoKSkpTUtLS06oKCgoKCgoCCgraCpoSAgqSAgqSAgqaEgoKUloLWpICCtoKCgpaC1qSAgsSkooKSgoS0tNiCgoCCpoKCgpSWhIKCgpSo1qSAgrik1oCC1gALBIKCgIK4goKCgoKEgoKCgoKEgoKSgoIAFhaCgqSigoKCgoKmgoKCgpSWgoKEgoKEgpSCkoSCgpKEgpKEgpKEgpKEgoSCkpaCgoKSog==", "54-54:1;106-115:2;194-198:1;216-216:2;236-242:1;243-250:2")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -90,7 +90,7 @@ internal static void test(ж<testing.T> Ꮡt, @string name, slice<byte> cipherTe
                 Ꮡt.Errorf("%v XORKeyStream did out of bounds write, want %v, got %v"u8, name, want, ((@string)plainTextʗ1));
             }
         }, ref ᒐ);
-        xor(plainText[..(int)(shorterLen)], cipherText);
+        xor(plainText.slice(0, shorterLen), cipherText);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

@@ -8,12 +8,14 @@ using atomic = go.@internal.runtime.atomic_package;
 using runtime = runtime_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.@internal;
 using go.@internal.runtime;
 
 partial class atomic_test_package {
 
-internal static void runParallel(nint N, nint iter, Action f) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void runParallel(nint N, nint iter, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(runtime.GOMAXPROCS, runtime.GOMAXPROCS((nint)N), ref ᒐ);
@@ -158,14 +160,14 @@ public static void TestUnaligned64(ж<testing.T> Ꮡt) {
     });
 }
 
-public static void TestAnd8(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAnd8(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint8>(out var Ꮡx);
     x = (uint8)0xff;
     for (var i = (uint8)0; i < 8; i++) {
         atomic.And8(Ꮡx, (uint8)(((uint8)(~(((uint8)1).Lsh((uint64)(i)))))));
         {
-            var r = (uint8)(((uint8)0xff).Lsh((uint64)((i + 1)))); if (x != r) {
+            var r = (uint8)(((uint8)0xff).Lsh((uint64)((uint8)(i + 1)))); if (x != r) {
                 Ꮡt.Fatalf("clearing bit %#x: want %#x, got %#x"u8, (uint8)(((uint8)1).Lsh((uint64)(i))), r, x);
             }
         }
@@ -178,7 +180,7 @@ public static void TestAnd8(ж<testing.T> Ꮡt) {
     // Clear array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 8; i++) {
-        var m = (uint8)(((uint8)(~(uint8)(((uint8)1).Lsh((uint64)(i))))));
+        var m = (uint8)(((uint8)(~(uint8)(((uint8)1).Lsh((int64)(i))))));
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
@@ -199,7 +201,7 @@ public static void TestAnd8(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestAnd(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAnd(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint32>(out var Ꮡx);
     x = (uint32)0xffffffffU;
@@ -219,7 +221,7 @@ public static void TestAnd(ж<testing.T> Ꮡt) {
     // Clear array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 32; i++) {
-        var m = ~(uint32)(((uint32)1).Lsh((uint64)(i)));
+        var m = ~(uint32)(((uint32)1).Lsh((int64)(i)));
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
@@ -240,14 +242,14 @@ public static void TestAnd(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestOr8(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOr8(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint8>(out var Ꮡx);
     x = (uint8)0;
     for (var i = (uint8)0; i < 8; i++) {
         atomic.Or8(Ꮡx, (uint8)(((uint8)1).Lsh((uint64)(i))));
         {
-            var r = (uint8)((((uint8)1).Lsh((uint64)((i + 1)))) - 1); if (x != r) {
+            var r = (uint8)((((uint8)1).Lsh((uint64)((uint8)(i + 1)))) - 1); if (x != r) {
                 Ꮡt.Fatalf("setting bit %#x: want %#x, got %#x"u8, ((uint8)1).Lsh((uint64)(i)), r, x);
             }
         }
@@ -257,7 +259,7 @@ public static void TestOr8(ж<testing.T> Ꮡt) {
     // Set every bit in array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 8; i++) {
-        var m = (uint8)(((uint8)1).Lsh((uint64)(i)));
+        var m = (uint8)(((uint8)1).Lsh((int64)(i)));
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
@@ -278,7 +280,7 @@ public static void TestOr8(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestOr(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOr(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint32>(out var Ꮡx);
     x = (uint32)0;
@@ -295,7 +297,7 @@ public static void TestOr(ж<testing.T> Ꮡt) {
     // Set every bit in array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 32; i++) {
-        var m = (uint32)(((uint32)1).Lsh((uint64)(i)));
+        var m = (uint32)(((uint32)1).Lsh((int64)(i)));
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
@@ -316,7 +318,7 @@ public static void TestOr(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestBitwiseContended8(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBitwiseContended8(ж<testing.T> Ꮡt) {
     // Start with every bit in array set to 0.
     var a = new slice<uint8>(16);
     // Iterations to try.
@@ -327,7 +329,7 @@ public static void TestBitwiseContended8(ж<testing.T> Ꮡt) {
     // Set and then clear every bit in the array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 8; i++) {
-        var m = (uint8)(((uint8)1).Lsh((uint64)(i)));
+        var m = (uint8)(((uint8)1).Lsh((int64)(i)));
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
@@ -357,7 +359,7 @@ public static void TestBitwiseContended8(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestBitwiseContended(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBitwiseContended(ж<testing.T> Ꮡt) {
     // Start with every bit in array set to 0.
     var a = new slice<uint32>(16);
     // Iterations to try.
@@ -368,7 +370,7 @@ public static void TestBitwiseContended(ж<testing.T> Ꮡt) {
     // Set and then clear every bit in the array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 32; i++) {
-        var m = (uint32)(((uint32)1).Lsh((uint64)(i)));
+        var m = (uint32)(((uint32)1).Lsh((int64)(i)));
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
@@ -412,9 +414,9 @@ public static void TestCasRel(ж<testing.T> Ꮡt) {
     x.before = _magic;
     x.after = _magic;
     for (nint j = 0; j < 32; j += 1) {
-        x.i = (((uint32)1).Lsh((uint64)(j))) + 0;
-        x.o = (((uint32)1).Lsh((uint64)(j))) + 0;
-        x.n = (((uint32)1).Lsh((uint64)(j))) + 1;
+        x.i = (((uint32)1).Lsh((int64)(j))) + 0;
+        x.o = (((uint32)1).Lsh((int64)(j))) + 0;
+        x.n = (((uint32)1).Lsh((int64)(j))) + 1;
         if (!atomic.CasRel(Ꮡx.of(TestCasRel_x.Ꮡi), x.o, x.n)) {
             Ꮡt.Fatalf("should have swapped %#x %#x"u8, x.o, x.n);
         }

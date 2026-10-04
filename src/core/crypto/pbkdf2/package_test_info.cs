@@ -29,7 +29,7 @@ using static global::go.crypto.pbkdf2_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/pbkdf2/pbkdf2_test.go", "pbkdf2_test.cs", "AJEBogKCgoKClIL6gtaCyqKCgoKCgoKmpoKmggAIBoKCloSCgoKUgqiCgoKUgqiCgoKUgvi4goKUgoKUgoKC+IKCgpSCgg==")]
+[assembly: go.GoPositionMap("crypto/pbkdf2/pbkdf2_test.go", "pbkdf2_test.cs", "ACU0ADaEAQA0aoKCgoKUgvqC1oLKooKCgoKCgqamgqaCAAgGgoKWhIKCgpSCqIKCgpSCqIKCgpSC+LiCgpSCgpSCgoL4goKClIKC")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

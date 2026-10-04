@@ -8,6 +8,8 @@ using fmt = fmt_package;
 using net = net_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.net.rpc_package;
 
 partial class rpc_internal_test_package {
@@ -73,7 +75,7 @@ internal static readonly object expectedReadingBodyˢ = (@string)"expected `read
 internal static readonly @string tcpˢ = "tcp"u8;
 internal static readonly @string sRecvˢ = "S.Recv"u8;
 
-public static void TestGobError(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestGobError(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         defer(() => {

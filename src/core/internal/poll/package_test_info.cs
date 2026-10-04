@@ -51,11 +51,11 @@ using static global::go.@internal.poll_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/poll/error_stub_test.go", "error_stub_test.cs", "AA0egqaC")]
-[assembly: go.GoPositionMap("internal/poll/error_test.go", "error_test.cs", "ABMggqKCgpS4hIKCgIIACAqCgoCCpICCpICCpICCpA==", "17-33:1")]
-[assembly: go.GoPositionMap("internal/poll/fd_mutex_test.go", "fd_mutex_test.cs", "ABUggoSClIKWgpSCloKUgriCgoKWgpSClIKUgriCgoKCgpKCgpS4gqTWgoLmtoKUguiCooKCpsaCgJKAkoCUgICAkoCAgJKAgICmgoKCgoL2ooKCgpSCgpSCqIKC6KKCgoKClIKCgoKCgrKSlIKClIKClIKCxoKClpKClIKCgoLGgoKWkoKUgoKCggAKDIKCpoKUgg==", "66-72:1;98-105:1;99-103:1.1;108-108:2;109-109:3;110-110:4;112-112:5;113-113:6;114-114:7;126-138:1;159-209:1;160-162:1.1")]
-[assembly: go.GoPositionMap("internal/poll/fd_posix_test.go", "fd_posix_test.cs", "ACVIgoKCgg==")]
-[assembly: go.GoPositionMap("internal/poll/fd_windows_test.go", "fd_windows_test.cs", "AB88woKEAAkOgoKEpsKChILawoKClIKUpqKCgpSCgpSUgoIACQiCgqLugoCCloLGlIKUgoIACwyigoKUkoKCgpSEgpKClKaCgpSEgAAIFKamgII=", "88-114:1")]
-[assembly: go.GoPositionMap("internal/poll/read_test.go", "read_test.cs", "ABIegoKCgoKCooKCgIKCpPq4goKUyOyCgoKClIKU", "16-34:1;21-30:1.1")]
+[assembly: go.GoPositionMap("internal/poll/error_test.go", "error_test.cs", "ABMggqKCgpS4hIKCgILEtoKCgIKkgIKkgIKkgIKk", "17-33:1")]
+[assembly: go.GoPositionMap("internal/poll/fd_mutex_test.go", "fd_mutex_test.cs", "ABcggoSClIKWgpSCloKUgriCgoKWgpSClIKUgriCgoKCgpKCgpS4gqTWgoLmtoKUguiCooKCpqKUgoCSgJKAlICAgJKAgICSgICApoKCgoKC9qKCgoKUgoKUgqiCgrSkooKCgoKUgoKCgoKCspKUgoKUgoKUgoLGgoKWkoKUgoKCgsaCgpaSgpSCgoKC+KSCgqaClIK0", "66-72:1;98-105:1;99-103:1.1;108-108:2;109-109:3;110-110:4;112-112:5;113-113:6;114-114:7;126-138:1;159-209:1;160-162:1.1")]
+[assembly: go.GoPositionMap("internal/poll/fd_posix_test.go", "fd_posix_test.cs", "ABYeAA4qgoKCgg==")]
+[assembly: go.GoPositionMap("internal/poll/fd_windows_test.go", "fd_windows_test.cs", "AB88woKE6qSCgoSmwoKEgtrCgoKUgpSmooKClIKClJSCgrTUgoKi7oKAgpaCxpSClIKCtPiigoKUkoKCgpSEgpKClKaCgpSEgAAIFKamgILW", "88-114:1")]
+[assembly: go.GoPositionMap("internal/poll/read_test.go", "read_test.cs", "ABQegoKCgoKCooKCgIKCpLS2uIKClMjsgoKCgpSClA==", "16-34:1;21-30:1.1")]
 [assembly: go.GoPositionMap("internal/poll/writev_test.go", "writev_test.cs", "ABMaggAkUoKSgoI=")]
 // </GoSourcePositionMaps>
 

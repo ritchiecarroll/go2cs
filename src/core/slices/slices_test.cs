@@ -603,10 +603,10 @@ public static void TestInsertOverlap(ж<testing.T> Ꮡt) {
                         a[k] = k;
                     }
                     want = want[..0];
-                    want = appendꓸꓸꓸ(want, a[..(int)(i)]);
-                    want = appendꓸꓸꓸ(want, a[(int)(x)..(int)(y)]);
-                    want = appendꓸꓸꓸ(want, a[(int)(i)..(int)(n)]);
-                    var got = Insert(a[..(int)(n)], i, a[(int)(x)..(int)(y)].ꓸꓸꓸ);
+                    want = appendꓸꓸꓸ(want, a.slice(0, i));
+                    want = appendꓸꓸꓸ(want, a.slice(x, y));
+                    want = appendꓸꓸꓸ(want, a.slice(i, n));
+                    var got = Insert(a.slice(0, n), i, a.slice(x, y).ꓸꓸꓸ);
                     if (!Equal<slice<nint>, nint>(got, want)) {
                         Ꮡt.Errorf("Insert with overlap failed n=%d i=%d x=%d y=%d, got %v want %v"u8, n, i, x, y, got, want);
                     }
@@ -628,15 +628,15 @@ public static void TestInsertPanics(ж<testing.T> Ꮡt) {
     var b = new nint[]{}.array(1);
     foreach (var (_, vᴛ1) in new TestInsertPanics_type[]{ // There are no values.
 
-        new("with negative index"u8, a.slice(-1, 1, 1), -1, default!),
-        new("with out-of-bounds index and > cap"u8, a.slice(-1, 1, 1), 2, default!),
-        new("with out-of-bounds index and = cap"u8, a.slice(-1, 1, 2), 2, default!),
-        new("with out-of-bounds index and < cap"u8, a.slice(-1, 1, 3), 2, default!), // There are values.
+        new("with negative index"u8, a.slice(0, 1, 1), -1, default!),
+        new("with out-of-bounds index and > cap"u8, a.slice(0, 1, 1), 2, default!),
+        new("with out-of-bounds index and = cap"u8, a.slice(0, 1, 2), 2, default!),
+        new("with out-of-bounds index and < cap"u8, a.slice(0, 1, 3), 2, default!), // There are values.
 
-        new("with negative index"u8, a.slice(-1, 1, 1), -1, b[..]),
-        new("with out-of-bounds index and > cap"u8, a.slice(-1, 1, 1), 2, b[..]),
-        new("with out-of-bounds index and = cap"u8, a.slice(-1, 1, 2), 2, b[..]),
-        new("with out-of-bounds index and < cap"u8, a.slice(-1, 1, 3), 2, b[..])
+        new("with negative index"u8, a.slice(0, 1, 1), -1, b[..]),
+        new("with out-of-bounds index and > cap"u8, a.slice(0, 1, 1), 2, b[..]),
+        new("with out-of-bounds index and = cap"u8, a.slice(0, 1, 2), 2, b[..]),
+        new("with out-of-bounds index and < cap"u8, a.slice(0, 1, 3), 2, b[..])
     }.slice()) {
         ref var test = ref heap(new TestInsertPanics_type(), out var Ꮡtest);
         test = vᴛ1;
@@ -1358,10 +1358,10 @@ public static void TestReplaceOverlap(ж<testing.T> Ꮡt) {
                             a[k] = k;
                         }
                         want = want[..0];
-                        want = appendꓸꓸꓸ(want, a[..(int)(i)]);
-                        want = appendꓸꓸꓸ(want, a[(int)(x)..(int)(y)]);
-                        want = appendꓸꓸꓸ(want, a[(int)(j)..(int)(n)]);
-                        var got = Replace(a[..(int)(n)], i, j, a[(int)(x)..(int)(y)].ꓸꓸꓸ);
+                        want = appendꓸꓸꓸ(want, a.slice(0, i));
+                        want = appendꓸꓸꓸ(want, a.slice(x, y));
+                        want = appendꓸꓸꓸ(want, a.slice(j, n));
+                        var got = Replace(a.slice(0, n), i, j, a.slice(x, y).ꓸꓸꓸ);
                         if (!Equal<slice<nint>, nint>(got, want)) {
                             Ꮡt.Errorf("Insert with overlap failed n=%d i=%d j=%d x=%d y=%d, got %v want %v"u8, n, i, j, x, y, got, want);
                         }

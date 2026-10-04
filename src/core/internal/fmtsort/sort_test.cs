@@ -225,7 +225,7 @@ internal static slice<channel<nint>> makeChans() {
     var cs = new channel<nint>[]{new channel<nint>(0), new channel<nint>(0), new channel<nint>(0)}.slice();
     // Order channels by address. See issue #49431.
     foreach (var (i, _) in cs) {
-        pin.Pin((uintptr)reflect.ValueOf(cs[i]).UnsafePointer());
+        pin.Pin(@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(cs[i]).UnsafePointer()));
     }
     slices.SortFunc(cs, (channel<nint> a, channel<nint> b) => cmp.Compare(reflect.ValueOf(a).Pointer(), reflect.ValueOf(b).Pointer()));
     return cs;

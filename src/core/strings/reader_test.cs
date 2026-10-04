@@ -9,6 +9,8 @@ using Δio = io_package;
 using strings = strings_package;
 using Δsync = sync_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.strings_internal_test_package;
 
 partial class strings_test_package {
@@ -55,7 +57,7 @@ public static void TestReader(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%d. read = %v; want %v"u8, i, err, tt.readerr);
             continue;
         }
-        @string got = ((@string)(buf[..(int)(n)]));
+        @string got = ((@string)(buf.slice(0, n)));
         if (got != tt.want) {
             Ꮡt.Errorf("%d. got %q; want %q"u8, i, got, tt.want);
         }
@@ -96,7 +98,7 @@ public static void TestReaderAt(ж<testing.T> Ꮡt) {
     foreach (var (i, tt) in tests) {
         var b = new slice<byte>(tt.n);
         var (rn, err) = r.ReadAt(b, tt.off);
-        @string got = ((@string)(b[..(int)(rn)]));
+        @string got = ((@string)(b.slice(0, rn)));
         if (got != tt.want) {
             Ꮡt.Errorf("%d. got %q; want %q"u8, i, got, tt.want);
         }
@@ -106,7 +108,7 @@ public static void TestReaderAt(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestReaderAtConcurrent(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestReaderAtConcurrent(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Test for the race detector, to verify ReadAt doesn't mutate
@@ -130,7 +132,7 @@ public static void TestReaderAtConcurrent(ж<testing.T> Ꮡt) {
     Ꮡwg.Wait();
 }
 
-public static void TestEmptyReaderConcurrent(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestEmptyReaderConcurrent(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Test for the race detector, to verify a Read that doesn't yield any bytes
@@ -171,7 +173,7 @@ internal static readonly @string strᶜ = "0123456789"u8;
 public static void TestWriteTo(ж<testing.T> Ꮡt) {
     @string str = strᶜ;
     for (nint i = 0; i <= len(str); i++) {
-        @string s = str[(int)(i)..];
+        @string s = str.slice(i);
         var r = strings.NewReader(s);
         ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
         var (n, err) = r.WriteTo(new strings_test_package.bytes_BufferжWriter(Ꮡb));

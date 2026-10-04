@@ -41,7 +41,7 @@ using static global::go.runtime.metrics_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("runtime/metrics/description_test.go", "description_test.cs", "AB88AAkElIKCgoKUgqiCgoKClISCgoKUgoKUgpS4goKCpqKCgoKUgpQADQqChIKClIKCgpSCgpSCgpSClIKCgoKClIKCxoKCgoKUgtyClIKCgoKCgoKCgoKUgILG")]
+[assembly: global::go.GoPositionMap("runtime/metrics/description_test.go", "description_test.cs", "AB88AAkElIKCgoKUgqiCgoKClISCgoKUgoKUgpS4goKCpqKCgoKUgpSmAAoEgoSCgpSCgoKUgoKUgoKUgpSCgoKCgpSCgsaCgoKClILcgpSCgoKCgoKCgoKClICCxg==")]
 [assembly: global::go.GoPositionMap("runtime/metrics/example_test.go", "example_test.cs", "AA4YhKaClrqC3oSmlJaCgqiWlKaUpKjIrgAMCqKCgpSCgoKCgqY=")]
 // </GoSourcePositionMaps>
 

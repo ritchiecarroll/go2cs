@@ -11,6 +11,8 @@ using Δsync = sync_package;
 using atomic = go.sync.atomic_package;
 using Δtesting = testing_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.runtime;
 using go.sync;
 using static go.sync_internal_test_package;
@@ -168,7 +170,7 @@ public static void TestOnceFuncPanicNil(ж<Δtesting.T> Ꮡt) {
     });
 }
 
-public static void TestOnceFuncGoexit(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOnceFuncGoexit(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // If f calls Goexit, the results are unspecified. But check that f doesn't
@@ -210,7 +212,7 @@ public static void TestOnceFuncPanicTraceback(ж<Δtesting.T> Ꮡt) {
         // Test that on the first invocation of a OnceFunc, the stack trace goes all
         // the way to the origin of the panic.
         var f = Δsync.OnceFunc(onceFuncPanic);
-        defer(() => {
+        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             {
                 var p = recover(); if (!AreEqual(p, (@string)("x"))) {
                     Ꮡt.Fatalf("want panic %v, got %v"u8, (@string)"x"u8, p);

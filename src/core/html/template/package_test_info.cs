@@ -55,7 +55,7 @@ using static global::go.html.template_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("html/template/examplefiles_test.go", "examplefiles_test.cs", "ABoqooKClIKCgpSSgoKmAAgMAAgIAAgSlrqUgoIACg4ACQi6zJKCzLiUgoIADhYADAjulqikgoKmgoK4goKUgoIAEBYADAjulqjMgoKmgoK6goKmgoK6goKUgoI=", "90-94:1")]
+[assembly: go.GoPositionMap("html/template/examplefiles_test.go", "examplefiles_test.cs", "ABoqooKClIKCgpSSgoKmAAgMAAgIAAgSlrqUgoK45gAJCLrMkoLMuJSCgrgACg4ADAjulqikgoKmgoK4goKUgoK6AAwMAAwI7paozIKCpoKCuoKCpoKCuoKClIKCvA==", "90-94:1")]
 [assembly: go.GoPositionMap("html/template/template_test.go", "template_test.cs", "ABogtIKCgpSCloKSgoKClICCAAkIgoKCgqaCgoKCgvaCgoKCgtaCgoKCgtaCgoKCgqaCgoKCgvaCgoK4guaCgoKCgvaCgoKCgIKkgIKkgIL4goKCABIGtAALGKqSsqKCgIKkgoKAgqSCAAkMgoKCgoKClIKClAAHEILcgqaigoK4ooKCuKKCgoKUgg==", "147-160:1")]
 // </GoSourcePositionMaps>
 

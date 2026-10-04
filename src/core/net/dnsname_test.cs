@@ -5,6 +5,8 @@ namespace go;
 
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.net_package;
 
 partial class net_internal_test_package {
@@ -49,17 +51,17 @@ internal static void emitDNSNameTest(channel/*<-*/<dnsNameTest> ch) {
         // Remember: wire format is two octets longer than presentation
         // (length octets for the first and [root] last labels).
         // 253 is fine:
-        ch.ᐸꟷ(new dnsNameTest(longDomain[(int)(len(longDomain) - 253)..], true));
+        ch.ᐸꟷ(new dnsNameTest(longDomain.slice(len(longDomain) - 253), true));
         // A terminal dot doesn't contribute to length:
-        ch.ᐸꟷ(new dnsNameTest(longDomain[(int)(len(longDomain) - 253)..] + ".", true));
+        ch.ᐸꟷ(new dnsNameTest(longDomain.slice(len(longDomain) - 253) + ".", true));
         // 254 is bad:
-        ch.ᐸꟷ(new dnsNameTest(longDomain[(int)(len(longDomain) - 254)..], false));
+        ch.ᐸꟷ(new dnsNameTest(longDomain.slice(len(longDomain) - 254), false));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static void TestDNSName(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDNSName(ж<testing.T> Ꮡt) {
     var ch = new channel<dnsNameTest>(0);
     goǃ(emitDNSNameTest, ch.WithDirection(GoChanDir.Send));
     foreach (var tc in ch) {

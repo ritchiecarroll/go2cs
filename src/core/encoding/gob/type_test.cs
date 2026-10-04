@@ -7,6 +7,8 @@ using bytes = bytes_package;
 using reflect = reflect_package;
 using sync = sync_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using io = io_package;
 using static go.encoding.gob_package;
 
@@ -236,7 +238,7 @@ public static void TestRegistrationNaming(ж<testing.T> Ꮡt) {
     public nint A;
 }
 
-public static void TestStressParallel(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStressParallel(ж<testing.T> Ꮡt) {
     var c = new channel<bool>(0);
     const nint N = 10;
     for (nint i = 0; i < N; i++) {
@@ -267,7 +269,7 @@ public static void TestStressParallel(ж<testing.T> Ꮡt) {
 internal static readonly object decodeUnexpectedlyˢ = (@string)"decode unexpectedly succeeded"u8;
 
 // Issue 23328. Note that this test name is known to cmd/dist/test.go.
-public static void TestTypeRace(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTypeRace(ж<testing.T> Ꮡt) {
     var c = new channel<bool>(0);
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < 2; i++) {

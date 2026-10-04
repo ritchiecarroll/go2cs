@@ -58,7 +58,7 @@ internal static slice<fuzzCommand> decode(slice<byte> b) {
     // bytes of input.
     nint entries = len(b) / fuzzCommandSize;
     nint usefulSize = entries * fuzzCommandSize;
-    b = b[..(int)(usefulSize)];
+    b = b.slice(0, usefulSize);
     ref var fc = ref heap<slice<fuzzCommand>>(out var Ꮡfc);
     fc = new slice<fuzzCommand>(entries);
     var buf = bytes.NewReader(b);

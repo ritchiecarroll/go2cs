@@ -55,7 +55,7 @@ internal static readonly @string unexpectedReadOperationˢ = "unexpected Read op
     }
     nint n = copy(b, s);
     if (len(s) > n){
-        f.ops[0] = s[(int)(n)..];
+        f.ops[0] = s.slice(n);
     } else {
         f.ops = f.ops[1..];
     }
@@ -81,7 +81,7 @@ internal static readonly @string unexpectedWriteOperationˢ = "unexpected Write 
         return (0, new testError(fmt.Errorf("got Write(%q), want Write(%q)"u8, b, s)));
     }
     if (len(s) > len(b)){
-        f.ops[0] = s[(int)(len(b))..];
+        f.ops[0] = s.slice(len(b));
     } else {
         f.ops = f.ops[1..];
     }

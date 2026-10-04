@@ -36,7 +36,7 @@ public static void TestOneByteReader_nonEmptyReader(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("Iteration #%d read %d bytes, want %d"u8, i, g, w);
             }
         }
-        got.Write(b[..(int)(n)]);
+        got.Write(b.slice(0, n));
     }
     {
         var (g, w) = (err, io.EOF); if (!AreEqual(g, w)) {
@@ -100,7 +100,7 @@ public static void TestHalfReader_nonEmptyReader(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("Iteration #%d read %d bytes, want %d"u8, i, g, w);
             }
         }
-        got.Write(b[..(int)(n)]);
+        got.Write(b.slice(0, n));
     }
     {
         var (g, w) = (err, io.EOF); if (!AreEqual(g, w)) {
@@ -243,7 +243,7 @@ public static void TestDataErrReader_nonEmptyReader(ж<testing.T> Ꮡt) {
     error err = default!;
     while (ᐧ) {
         (n, err) = der.Read(b);
-        got.Write(b[..(int)(n)]);
+        got.Write(b.slice(0, n));
         if (err != default!) {
             break;
         }

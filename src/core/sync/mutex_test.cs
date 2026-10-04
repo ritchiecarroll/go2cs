@@ -14,6 +14,8 @@ using static sync_package;
 using Δtesting = testing_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.os;
 using static go.sync_internal_test_package;
 using Δsync = sync_package;
@@ -28,7 +30,7 @@ public static void HammerSemaphore(ж<uint32> Ꮡs, nint loops, channel<bool> cd
     cdone.ᐸꟷ(true);
 }
 
-public static void TestSemaphore(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSemaphore(ж<Δtesting.T> Ꮡt) {
     var s = @new<uint32>();
     s.Value = 1;
     var c = new channel<bool>(0);
@@ -48,7 +50,7 @@ public static void BenchmarkUncontendedSemaphore(ж<Δtesting.B> Ꮡb) {
     HammerSemaphore(s, b.N, new channel<bool>(2));
 }
 
-public static void BenchmarkContendedSemaphore(ж<Δtesting.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkContendedSemaphore(ж<Δtesting.B> Ꮡb) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -82,7 +84,7 @@ public static void HammerMutex(ж<Δsync.Mutex> Ꮡm, nint loops, channel<bool> 
     cdone.ᐸꟷ(true);
 }
 
-public static void TestMutex(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMutex(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         {
@@ -227,7 +229,7 @@ public static void TestMutexMisuse(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-public static void TestMutexFairness(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMutexFairness(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -343,7 +345,7 @@ public static void BenchmarkMutexNoSpin(ж<Δtesting.B> Ꮡb) {
     uint64 acc0 = default!;
     uint64 acc1 = default!;
     b.SetParallelism(4);
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+    Ꮡb.RunParallel([MethodImpl(MethodImplOptions.NoInlining)] (ж<Δtesting.PB> pb) => {
         var c = new channel<bool>(0);
         array<uint64> data = new(4096); /* (4 << (int)(10)) */
         for (nint i = 0; pb.Next(); i++) {

@@ -82,7 +82,7 @@ public static void TestTraceAnnotations(ж<testing.T> Ꮡt) {
 
                 if (match) {
                     want[i] = want[len(want) - 1];
-                    want = want[..(int)(len(want) - 1)];
+                    want = want.slice(0, len(want) - 1);
                     break;
                 }
             }
@@ -540,7 +540,7 @@ public static void TestTraceStacks(ж<testing.T> Ꮡt) {
                 match = match && stackMatches(ev.Stack(), wantEv.frames);
                 if (match) {
                     want[i] = want[len(want) - 1];
-                    want = want[..(int)(len(want) - 1)];
+                    want = want.slice(0, len(want) - 1);
                     break;
                 }
             }

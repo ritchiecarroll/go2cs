@@ -81,7 +81,7 @@ internal static (ж<bigꓸInt> x, ж<bigꓸInt> y) CombinedMult(this synthCombin
     return s.Curve.Add(x1, y1, x2, y2);
 }
 
-[GoType("dyn")] internal partial interface TestP256CombinedMult_combinedMult :
+[GoType("dyn")] [GoLocalName("combinedMult")] internal partial interface TestP256CombinedMult_combinedMult :
     Curve
 {
     (ж<bigꓸInt> x, ж<bigꓸInt> y) CombinedMult(ж<bigꓸInt> bigX, ж<bigꓸInt> bigY, slice<byte> baseScalar, slice<byte> scalar);

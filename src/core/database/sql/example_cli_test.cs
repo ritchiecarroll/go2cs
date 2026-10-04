@@ -10,6 +10,8 @@ using log = log_package;
 using os = os_package;
 using signal = go.os.signal_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.database;
 using go.os;
 using static go.database.sql_internal_test_package;
@@ -28,7 +30,7 @@ internal static readonly object missingPersonIdˢ = (@string)"missing person ID"
 internal static readonly @string driverNameˢ = "driver-name"u8;
 internal static readonly object unableToUseDataSourceˢ = (@string)"unable to use data source name"u8;
 
-public static void Example_openDBCLI() {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void Example_openDBCLI() {
     GoFrame ᒐ = default;
     try {
         var id = flag.Int64("id"u8, 0, personIdToFindˢ);

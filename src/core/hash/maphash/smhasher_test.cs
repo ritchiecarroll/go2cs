@@ -43,8 +43,8 @@ public static void TestSmhasherSanity(ж<testing.T> Ꮡt) {
                 array<byte> c = new(176); /* KEYMAX + OFFMAX + 2 * PAD */
                 randBytes(r, b[..]);
                 randBytes(r, c[..]);
-                copy(c[(int)((nint)PAD + i)..(int)((nint)PAD + i + n)], b[(int)(PAD)..(int)((nint)PAD + n)]);
-                if (bytesHash(b[(int)(PAD)..(int)((nint)PAD + n)]) != bytesHash(c[(int)((nint)PAD + i)..(int)((nint)PAD + i + n)])) {
+                copy(c.slice((nint)PAD + i, (nint)PAD + i + n), b.slice(PAD, (nint)PAD + n));
+                if (bytesHash(b.slice(PAD, (nint)PAD + n)) != bytesHash(c.slice((nint)PAD + i, (nint)PAD + i + n))) {
                     Ꮡt.Errorf("hash depends on bytes outside key"u8);
                 }
             }
@@ -128,7 +128,7 @@ public static void TestSmhasherAppendedZeros(ж<testing.T> Ꮡt) {
     @string s = "hello"u8 + strings.Repeat("\x00"u8, 256);
     var h = newHashSet();
     for (nint i = 0; i <= len(s); i++) {
-        h.addS(s[..(int)(i)]);
+        h.addS(s.slice(0, i));
     }
     h.check(Ꮡt);
 }
@@ -165,7 +165,7 @@ public static void TestSmhasherZeros(ж<testing.T> Ꮡt) {
     var h = newHashSet();
     var b = new slice<byte>(N);
     for (nint i = 0; i <= N; i++) {
-        h.addB(b[..(int)(i)]);
+        h.addB(b.slice(0, i));
     }
     h.check(Ꮡt);
 }
@@ -237,7 +237,7 @@ public static void TestSmhasherCyclic(ж<testing.T> Ꮡt) {
             b[1] = (byte)(i * 43 % 137);
             b[2] = (byte)(i * 151 % 197);
             b[3] = (byte)(i * 199 % 251);
-            randBytes(r, b[4..(int)(n)]);
+            randBytes(r, b.slice(4, n));
             for (nint j = n; j < n * REPEAT; j++) {
                 b[j] = b[j - n];
             }
@@ -321,7 +321,7 @@ internal static void permutation(ж<testing.T> Ꮡt, ж<hashSet> Ꮡh, slice<uin
 internal static void genPerm(ж<hashSet> Ꮡh, slice<byte> b, slice<uint32> s, nint n) {
     ref var h = ref Ꮡh.DerefOrNull();
 
-    h.addB(b[..(int)(n)]);
+    h.addB(b.slice(0, n));
     if (n == len(b)) {
         return;
     }
@@ -460,7 +460,7 @@ internal static void windowed(ж<testing.T> Ꮡt, key k) {
             k.clear();
             for (nint j = 0; j < BITS; j++) {
                 if ((nint)(i.Rsh((nuint)j) & 1) != 0) {
-                    k.flipBit((j + r) % k.bits());
+                    k.flipBit(rem((j + r), k.bits()));
                 }
             }
             h.add(k.hash());
@@ -498,8 +498,8 @@ internal static void text(ж<testing.T> Ꮡt, ж<hashSet> Ꮡh, @string prefix, 
     const nint L = /* len(S) */ 50;
     var b = new slice<byte>(len(prefix) + N + len(suffix));
     copy(b, prefix);
-    copy(b[(int)(len(prefix) + N)..], suffix);
-    var c = b[(int)(len(prefix))..];
+    copy(b.slice(len(prefix) + N), suffix);
+    var c = b.slice(len(prefix));
     for (nint i = 0; i < L; i++) {
         c[0] = S[i];
         for (nint j = 0; j < L; j++) {

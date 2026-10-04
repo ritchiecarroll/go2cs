@@ -10,6 +10,8 @@ using os = os_package;
 using runtime = runtime_package;
 using sync = sync_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using compress;
 using exec = go.os.exec_package;
 using go.@internal;
@@ -24,7 +26,7 @@ public static void TestRead(ж<testing.T> Ꮡt) {
     var b = new slice<byte>((40 << (int)(20)));
     Read(b);
     if (testing.Short()) {
-        b = b[(int)(len(b) - 100_000)..];
+        b = b.slice(len(b) - 100_000);
     }
     ref var z = ref heap(new bytes.Buffer(), out var Ꮡz);
     var (f, _) = flate.NewWriter(new sysrand_internal_test_package.bytes_BufferжWriter(Ꮡz), 5);
@@ -55,7 +57,7 @@ public static void TestReadEmpty(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"skipping in short mode"u8;
 
-public static void TestConcurrentRead(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentRead(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }

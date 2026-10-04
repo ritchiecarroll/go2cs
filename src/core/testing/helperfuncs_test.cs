@@ -5,6 +5,8 @@ namespace go;
 
 using Δsync = sync_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 
 partial class testing_test_package {
 
@@ -89,7 +91,7 @@ internal static void testHelper(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string parallelˢ = "parallel"u8;
 
-internal static void parallelTestHelper(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void parallelTestHelper(ж<testing.T> Ꮡt) {
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < 5; i++) {
         Ꮡwg.Add(1);

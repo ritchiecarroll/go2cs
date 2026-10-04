@@ -6,6 +6,8 @@ namespace go;
 using static sync_package;
 using atomic = go.sync.atomic_package;
 using Δtesting = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 using static go.sync_internal_test_package;
 using Δsync = sync_package;
@@ -15,7 +17,7 @@ partial class sync_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object waitGroupReleasedGroupˢ = (@string)"WaitGroup released group too soon"u8;
 
-internal static void testWaitGroup(ж<Δtesting.T> Ꮡt, ж<Δsync.WaitGroup> Ꮡwg1, ж<Δsync.WaitGroup> Ꮡwg2) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testWaitGroup(ж<Δtesting.T> Ꮡt, ж<Δsync.WaitGroup> Ꮡwg1, ж<Δsync.WaitGroup> Ꮡwg2) {
     nint n = 16;
     Ꮡwg1.Add(n);
     Ꮡwg2.Add(n);
@@ -80,7 +82,7 @@ public static void TestWaitGroupMisuse(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object spuriousWakeupFromWaitˢ = (@string)"Spurious wakeup from Wait"u8;
 
-public static void TestWaitGroupRace(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWaitGroupRace(ж<Δtesting.T> Ꮡt) {
     // Run this test for about 1ms.
     for (nint i = 0; i < 1000; i++) {
         var wg = Ꮡ(new WaitGroup(nil));
@@ -114,7 +116,7 @@ public static void TestWaitGroupRace(ж<Δtesting.T> Ꮡt) {
     internal Δsync.WaitGroup wg;
 }
 
-public static void TestWaitGroupAlign(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWaitGroupAlign(ж<Δtesting.T> Ꮡt) {
     ref var x = ref heap(new TestWaitGroupAlign_X(), out var Ꮡx);
     Ꮡx.of(TestWaitGroupAlign_X.Ꮡwg).Add(1);
     goǃ((ж<TestWaitGroupAlign_X> xΔ1) => {
@@ -190,7 +192,7 @@ public static void BenchmarkWaitGroupActuallyWait(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+    Ꮡb.RunParallel([MethodImpl(MethodImplOptions.NoInlining)] (ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
             ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
             Ꮡwg.Add(1);

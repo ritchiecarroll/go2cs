@@ -77,8 +77,8 @@ public static void TestOffCurve(ж<testing.T> Ꮡt) {
         nint byteLen = ((~curve.Params()).BitSize + 7) / 8;
         var b = new slice<byte>(1 + 2 * byteLen);
         b[0] = 4; // uncompressed point
-        x.FillBytes(b[1..(int)(1 + byteLen)]);
-        y.FillBytes(b[(int)(1 + byteLen)..(int)(1 + 2 * byteLen)]);
+        x.FillBytes(b.slice(1, 1 + byteLen));
+        y.FillBytes(b.slice(1 + byteLen, 1 + 2 * byteLen));
         var (x1, y1) = Unmarshal(curve, b);
         if (x1 != nil || y1 != nil) {
             tΔ1.Errorf("unmarshaling a point not on the curve succeeded"u8);
@@ -214,8 +214,8 @@ internal static void testUnmarshalToLargeCoordinates(ж<testing.T> Ꮡt, global:
     y.ModSqrt(y, p);
     var invalid = new slice<byte>(byteLen * 2 + 1);
     invalid[0] = 4; // uncompressed encoding
-    x.FillBytes(invalid[1..(int)(1 + byteLen)]);
-    y.FillBytes(invalid[(int)(1 + byteLen)..]);
+    x.FillBytes(invalid.slice(1, 1 + byteLen));
+    y.FillBytes(invalid.slice(1 + byteLen));
     {
         var (X, Y) = Unmarshal(curve, invalid); if (X != nil || Y != nil) {
             Ꮡt.Errorf("Unmarshal accepts invalid X coordinate"u8);
@@ -231,8 +231,8 @@ internal static void testUnmarshalToLargeCoordinates(ж<testing.T> Ꮡt, global:
             Ꮡt.Fatal(yNotWithinExpectedRangeˢ);
         }
         // marshal
-        x.FillBytes(invalid[1..(int)(1 + byteLen)]);
-        y.FillBytes(invalid[(int)(1 + byteLen)..]);
+        x.FillBytes(invalid.slice(1, 1 + byteLen));
+        y.FillBytes(invalid.slice(1 + byteLen));
         {
             var (X, Y) = Unmarshal(curve, invalid); if (X != nil || Y != nil) {
                 Ꮡt.Errorf("Unmarshal accepts invalid Y coordinate"u8);

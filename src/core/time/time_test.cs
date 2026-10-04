@@ -18,6 +18,8 @@ using Δsync = sync_package;
 using Δtesting = testing_package;
 using quick = go.testing.quick_package;
 using static time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using fs = io.fs_package;
 using go.math;
@@ -450,7 +452,7 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
         if (di == 0) {
             di = 2;
         }
-        tns -= tns % di;
+        tns -= rem(tns, di);
         if (tns < 0){
             tns += di / 2;
         } else {
@@ -1167,7 +1169,7 @@ public static void TestParseDurationRoundTrip(ж<Δtesting.T> Ꮡt) {
 }
 
 // golang.org/issue/4622
-public static void TestLocationRace(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestLocationRace(ж<Δtesting.T> Ꮡt) {
     time_internal_test_package.ResetLocalOnceForTest(); // reset the Once to trigger the race
     var c = new channel<@string>(1);
     var cʗ1 = c;
@@ -1969,7 +1971,7 @@ public static void TestReadFileLimit(ж<Δtesting.T> Ꮡt) {
 // This test deliberately invokes a race condition.
 // We are testing that we don't crash with "fatal error: panic holding locks",
 // and that we also don't panic.
-public static void TestConcurrentTimerReset(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentTimerReset(ж<Δtesting.T> Ꮡt) {
     const nint goroutines = 8;
     const nint tries = 1000;
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -1993,7 +1995,7 @@ public static void TestConcurrentTimerReset(ж<Δtesting.T> Ꮡt) {
 }
 
 // Issue 37400: panic with "racy use of timers".
-public static void TestConcurrentTimerResetStop(ж<Δtesting.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentTimerResetStop(ж<Δtesting.T> Ꮡt) {
     UntypedInt goroutines = 8;
     const nint tries = 1000;
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);

@@ -192,7 +192,7 @@ internal static bool testableListenArgs(@string network, @string address, @strin
 }
 
 internal static void condFatalf(ж<testing.T> Ꮡt, @string network, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.slice();
+    var args = argsʗp.sslice();
 
     Ꮡt.Helper();
     // A few APIs like File and Read/WriteMsg{UDP,IP} are not

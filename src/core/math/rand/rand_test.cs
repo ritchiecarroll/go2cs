@@ -17,6 +17,8 @@ using sync = sync_package;
 using testing = testing_package;
 using iotest = go.testing.iotest_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.math;
 using go.testing;
 using rand = go.math.rand_package;
@@ -107,7 +109,7 @@ internal static void checkSampleSliceDistributions(ж<testing.T> Ꮡt, slice<flo
         } else {
             high = (i + 1) * chunk;
         }
-        checkSampleDistribution(Ꮡt, samples[(int)(low)..(int)(high)], Ꮡexpected);
+        checkSampleDistribution(Ꮡt, samples.slice(low, high), Ꮡexpected);
     }
 }
 
@@ -489,7 +491,7 @@ public static void TestShuffleSmall(ж<testing.T> Ꮡt) {
 internal static nint encodePerm(slice<nint> s) {
     // Convert to Lehmer code.
     foreach (var (i, x) in s) {
-        var r = s[(int)(i + 1)..];
+        var r = s.slice(i + 1);
         foreach (var (j, y) in r) {
             if (y > x) {
                 r[j]--;
@@ -797,7 +799,7 @@ public static void BenchmarkRead1000(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkConcurrent(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkConcurrent(ж<testing.B> Ꮡb) {
     const nint goroutines = 4;
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(goroutines);

@@ -1430,7 +1430,7 @@ internal static slice<byte> fromBase64(@string @in) {
     if (err != default!) {
         throw panic("failed to base64 decode");
     }
-    return @out[..(int)(n)];
+    return @out.slice(0, n);
 }
 
 public static void TestParseDERCRL(ж<testing.T> Ꮡt) {

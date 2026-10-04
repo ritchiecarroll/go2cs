@@ -32,7 +32,7 @@ using static global::go.@internal.pkgbits_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("internal/pkgbits/pkgbits_test.go", "pkgbits_test.cs", "ABAagsqSkoSCgoSShIIADhKCjAAKFoK6AAcQgg==")]
+[assembly: global::go.GoPositionMap("internal/pkgbits/pkgbits_test.go", "pkgbits_test.cs", "ABAagsqSkoSCgoSShILckuSCjAAKFoK6AAcQgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

@@ -268,7 +268,7 @@ public static void TestScan(ж<testing.T> Ꮡt) {
  e.lit[1] == (rune)'*'));
             if (elit[1] == (rune)'/') {
                 //-style comment literal doesn't contain newline
-                elit = elit[0..(int)(len(elit) - 1)];
+                elit = elit.slice(0, len(elit) - 1);
             }
         }
         else if (exprᴛ1 == token.IDENT) {
@@ -486,8 +486,8 @@ public static void TestSemicolons(ж<testing.T> Ꮡt) {
         // if the input ended in newlines, the input must tokenize the
         // same with or without those newlines
         for (nint i = len(input) - 1; i >= 0 && input[i] == (rune)'\n'; i--) {
-            checkSemi(Ꮡt, input[0..(int)(i)], want, 0);
-            checkSemi(Ꮡt, input[0..(int)(i)], want, ScanComments);
+            checkSemi(Ꮡt, input.slice(0, i), want, 0);
+            checkSemi(Ꮡt, input.slice(0, i), want, ScanComments);
         }
     }
 }

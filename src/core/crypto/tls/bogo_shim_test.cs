@@ -178,8 +178,8 @@ internal static void bogoShim() {
             @string alpns = advertiseALPN.Value;
             while (len(alpns) > 0) {
                 nint alpnLen = (nint)alpns[0];
-                cfg.Value.NextProtos = append((~cfg).NextProtos, alpns[1..(int)(1 + alpnLen)]);
-                alpns = alpns[(int)(alpnLen + 1)..];
+                cfg.Value.NextProtos = append((~cfg).NextProtos, alpns.slice(1, 1 + alpnLen));
+                alpns = alpns.slice(alpnLen + 1);
             }
         }
         if (rejectALPN.Value) {
@@ -300,7 +300,7 @@ internal static void bogoShim() {
                 if (err != default!) {
                     break;
                 }
-                buf = buf[..(int)(n)];
+                buf = buf.slice(0, n);
                 foreach (var (iΔ1, _) in buf) {
                     buf[iΔ1] ^= (byte)(0xff);
                 }
@@ -391,6 +391,9 @@ internal static readonly @string boringsslGooglesourceComˢ = "boringssl.googles
 internal static readonly @string resultsJsonˢ = "results.json"u8;
 internal static readonly @string sslTestRunnerˢ = "ssl/test/runner"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string boringsslModVerᶜ = "v0.0.0-20241120195446-5cce3fbd23e1"u8;
+
 public static void TestBogoSuite(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -414,7 +417,7 @@ public static void TestBogoSuite(ж<testing.T> Ꮡt) {
     if (bogoLocalDir.Value != ""u8){
         bogoDir = bogoLocalDir.Value;
     } else {
-        @string boringsslModVer = "v0.0.0-20241120195446-5cce3fbd23e1"u8;
+        @string boringsslModVer = boringsslModVerᶜ;
         bogoDir = cryptotest.FetchModule(Ꮡt, boringsslGooglesourceComˢ, boringsslModVer);
     }
     var (cwd, err) = os.Getwd();

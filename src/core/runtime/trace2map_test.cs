@@ -7,6 +7,8 @@ using static runtime_package;
 using strconv = strconv_package;
 using Δsync = sync_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 using Δruntime = runtime_package;
 
@@ -47,7 +49,7 @@ public static void TestTraceMap(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestTraceMapConcurrent(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTraceMapConcurrent(ж<testing.T> Ꮡt) {
     ref var m = ref heap(new global::go.runtime_internal_test_package.TraceMap(), out var Ꮡm);
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     foreach (var i in range(3)) {

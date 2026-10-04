@@ -32,6 +32,8 @@ using atomic = go.sync.atomic_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.net;
 using go.net.http;
 using go.os;
@@ -397,7 +399,7 @@ public static void TestCatStdin(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object echoˢ2 = (@string)"echo\n"u8;
 
-public static void TestEchoFileRace(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestEchoFileRace(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     var cmd = helperCommand(Ꮡt, echoˢ);
     var (stdin, err) = cmd.StdinPipe();
@@ -632,7 +634,7 @@ internal static readonly @string copyˢ = "Copy"u8;
 }
 
 // Issue 6270.
-public static void TestStdinClose(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStdinClose(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
@@ -687,7 +689,7 @@ internal static readonly @string unexpectedStringˢ = "unexpected string"u8;
 // that also used to fail when run under the race detector.
 // This test is run by cmd/dist under the race detector to verify that
 // the race detector no longer reports any problems.
-public static void TestStdinCloseRace(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStdinCloseRace(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -952,7 +954,7 @@ public static void TestExtraFiles(ж<testing.T> Ꮡt) {
 internal static readonly @string describefilesˢ = "describefiles"u8;
 internal static readonly object noOperatingSystemSupportˢ = (@string)"no operating system support; skipping"u8;
 
-public static void TestExtraFilesRace(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestExtraFilesRace(ж<testing.T> Ꮡt) {
     if (runtime.GOOS == "windows"u8) {
         maySkipHelperCommand(describefilesˢ);
         Ꮡt.Skip(noOperatingSystemSupportˢ);
@@ -1100,7 +1102,7 @@ public static void TestOutputStderrCapture(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedWaitFailureˢ = (@string)"expected Wait failure"u8;
 
-public static void TestContext(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestContext(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     var (ctx, cancel) = context.WithCancel(context.Background());
     var c = helperCommandContext(Ꮡt, ctx, pipetestˢ);
@@ -1125,7 +1127,7 @@ public static void TestContext(ж<testing.T> Ꮡt) {
     var buf = new slice<byte>(5);
     (var n, err) = io.ReadFull(stdout, buf);
     if (n != len(buf) || err != default! || ((sstring)buf) != "O:hi\n"u8) {
-        Ꮡt.Fatalf("ReadFull = %d, %v, %q"u8, n, err, buf[..(int)(n)]);
+        Ꮡt.Fatalf("ReadFull = %d, %v, %q"u8, n, err, buf.slice(0, n));
     }
     var cancelʗ1 = cancel;
     goǃ(() => cancelʗ1());
@@ -1316,7 +1318,7 @@ internal static readonly @string msgᶜ = "O:Hello, pipe!\n"u8;
 // TestDoubleStartLeavesPipesOpen checks for a regression in which calling
 // Start twice, which returns an error on the second call, would spuriously
 // close the pipes established in the first call.
-public static void TestDoubleStartLeavesPipesOpen(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDoubleStartLeavesPipesOpen(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     var cmd = helperCommand(Ꮡt, pipetestˢ);
     var (@in, err) = cmd.StdinPipe();
@@ -1367,7 +1369,7 @@ public static void TestDoubleStartLeavesPipesOpen(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static void cmdHang(params ꓸꓸꓸstring argsʗp) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void cmdHang(params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.slice();
 
     var (sleep, err) = time.ParseDuration(args[0]);
@@ -1479,7 +1481,7 @@ internal static ж<tickReader> newTickReader(time.Duration interval) {
         r.s = r.lastTick.Format(time.RFC3339Nano + "\n");
     }
     n = copy(p, r.s);
-    r.s = r.s[(int)(n)..];
+    r.s = r.s.slice(n);
     return (n, default!);
 }
 
@@ -1986,7 +1988,7 @@ public static void TestCancelErrors(ж<testing.T> Ꮡt) {
 //
 // Forking multiple child processes concurrently would sometimes hang on darwin.
 // (This test hung on a gomote with -count=100 after only a few iterations.)
-public static void TestConcurrentExec(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentExec(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var (ctx, cancel) = context.WithCancel(context.Background());
@@ -2068,7 +2070,7 @@ public static void TestConcurrentExec(ж<testing.T> Ꮡt) {
 
 // TestPathRace tests that [Cmd.String] can be called concurrently
 // with [Cmd.Start].
-public static void TestPathRace(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPathRace(ж<testing.T> Ꮡt) {
     var cmd = helperCommand(Ꮡt, exitˢ, "0"u8);
     var done = new channel<EmptyStruct>(0);
     var cmdʗ1 = cmd;

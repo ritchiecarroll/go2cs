@@ -31,6 +31,8 @@ using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
 using cryptobyte = vendor.golang.org.x.crypto.cryptobyte_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.@internal;
 using go.crypto;
@@ -155,6 +157,15 @@ internal static readonly @string beenSwitchedˢ = "been switched"u8;
 internal static readonly @string certificateˢ = "certificate"u8;
 internal static readonly @string nonsenseˢ = "NONSENSE"u8;
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string nonsensePEMᶜ = """
+
+-----BEGIN NONSENSE-----
+Zm9vZm9vZm9v
+-----END NONSENSE-----
+
+"""u8;
+
 public static void TestX509KeyPairErrors(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -176,13 +187,7 @@ public static void TestX509KeyPairErrors(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("Expected %q in the error when both arguments to X509KeyPair were certificates, but the error was %q"u8, subStr, err);
         }
     }
-    @string nonsensePEM = """
-
------BEGIN NONSENSE-----
-Zm9vZm9vZm9v
------END NONSENSE-----
-
-"""u8;
+    @string nonsensePEM = nonsensePEMᶜ;
     (_, err) = X509KeyPair(slice<byte>(nonsensePEM), slice<byte>(nonsensePEM));
     if (err == default!) {
         Ꮡt.Fatalf("X509KeyPair didn't return an error when both arguments were nonsense"u8);
@@ -274,7 +279,7 @@ internal static void skipFIPS(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestDialTimeout(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDialTimeout(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
@@ -341,7 +346,7 @@ internal static readonly object writeWhichPreviouslyˢ = (@string)"Write which p
 internal static readonly object writeTimedOutButˢ = (@string)"Write timed out but incorrectly classified the error as Temporary"u8;
 internal static readonly object writeTimedOutButDidNotˢ = (@string)"Write timed out but did not classify the error as a Timeout"u8;
 
-public static void TestDeadlineOnWrite(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDeadlineOnWrite(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
@@ -437,7 +442,7 @@ internal static (nint, error) Read(this readerFunc f, slice<byte> b) {
 // TestDialer tests that tls.Dialer.DialContext can abort in the middle of a handshake.
 // (The other cases are all handled by the existing dial tests in this package, which
 // all also flow through the same code shared code paths)
-public static void TestDialer(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDialer(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new tls_test_package.testing_TжTB(Ꮡt));
@@ -518,7 +523,7 @@ public static void TestConnReadNonzeroAndEOF(ж<testing.T> Ꮡt) {
     Ꮡt.Error(err);
 }
 
-internal static error testConnReadNonzeroAndEOF(ж<testing.T> Ꮡt, time.Duration delay) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static error testConnReadNonzeroAndEOF(ж<testing.T> Ꮡt, time.Duration delay) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -591,7 +596,7 @@ internal static readonly object secondSessionDidNotUseˢ = (@string)"second sess
 internal static readonly object clientAndServerChannelˢ2 = (@string)"client and server channel bindings differ when session resumption is used"u8;
 internal static readonly object resumptionTlsUniqueIsˢ = (@string)"resumption tls-unique is empty or zero"u8;
 
-public static void TestTLSUniqueMatches(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTLSUniqueMatches(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new tls_test_package.testing_TжTB(Ꮡt));
@@ -761,7 +766,7 @@ public static void TestRealResumption(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string connClosedForTestˢ = "conn closed for test"u8;
 
-public static void TestConnCloseBreakingWrite(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConnCloseBreakingWrite(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -857,7 +862,7 @@ public static void TestConnCloseBreakingWrite(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object deadlockˢ = (@string)"deadlock"u8;
 
-public static void TestConnCloseWrite(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConnCloseWrite(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new tls_test_package.testing_TжTB(Ꮡt));
@@ -999,7 +1004,10 @@ public static void TestConnCloseWrite(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unexpectedLackOfErrorˢ = "unexpected lack of error from server"u8;
 
-public static void TestWarningAlertFlood(ж<testing.T> Ꮡt) {
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string expectedᶜ = "too many ignored"u8;
+
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWarningAlertFlood(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new tls_test_package.testing_TжTB(Ꮡt));
@@ -1028,7 +1036,7 @@ public static void TestWarningAlertFlood(ж<testing.T> Ꮡt) {
                 if (errΔ1 == default!) {
                     return errors.New(unexpectedLackOfErrorˢ);
                 }
-                @string expected = "too many ignored"u8;
+                @string expected = expectedᶜ;
                 {
                     @string str = errΔ1.Error(); if (!strings.Contains(str, expected)) {
                         return fmt.Errorf("expected error containing %q, but saw: %s"u8, expected, str);
@@ -1275,7 +1283,7 @@ internal static error SetWriteDeadline(this changeImplConn recvᴛ, time.Time t)
     return w.Conn.Close();
 }
 
-internal static void throughput(ж<testing.B> Ꮡb, uint16 version, int64 totalBytes, bool dynamicRecordSizingDisabled) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void throughput(ж<testing.B> Ꮡb, uint16 version, int64 totalBytes, bool dynamicRecordSizingDisabled) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -1348,10 +1356,10 @@ public static void BenchmarkThroughput(ж<testing.B> Ꮡb) {
             var size = sizeᴛ1;
             @string name = fmt.Sprintf("%sPacket/%dMB"u8, mode, size);
             Ꮡb.Run(name, (ж<testing.B> bΔ1) => {
-                bΔ1.Run(tlSv12ˢ, (ж<testing.B> bΔ2) => {
+                bΔ1.Run(tlSv12ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ2) => {
                     throughput(bΔ2, VersionTLS12, (int64)((size << (int)(20))), mode == "Max"u8);
                 });
-                bΔ1.Run(tlSv13ˢ, (ж<testing.B> bΔ3) => {
+                bΔ1.Run(tlSv13ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ3) => {
                     throughput(bΔ3, VersionTLS13, (int64)((size << (int)(20))), mode == "Max"u8);
                 });
             });
@@ -1405,7 +1413,7 @@ internal static error SetWriteDeadline(this slowConn recvᴛ, time.Time t) => re
             allowed = len(p);
         }
         if (wrote < allowed) {
-            var (n, err) = c.Conn.Write(p[(int)(wrote)..(int)(allowed)]);
+            var (n, err) = c.Conn.Write(p.slice(wrote, allowed));
             wrote += n;
             if (err != default!) {
                 return (wrote, err);
@@ -1415,7 +1423,7 @@ internal static error SetWriteDeadline(this slowConn recvᴛ, time.Time t) => re
     return (len(p), default!);
 }
 
-internal static void latency(ж<testing.B> Ꮡb, uint16 version, nint bps, bool dynamicRecordSizingDisabled) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void latency(ж<testing.B> Ꮡb, uint16 version, nint bps, bool dynamicRecordSizingDisabled) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -1487,10 +1495,10 @@ public static void BenchmarkLatency(ж<testing.B> Ꮡb) {
         foreach (var (_, kbps) in new nint[]{200, 500, 1000, 2000, 5000}.slice()) {
             @string name = fmt.Sprintf("%sPacket/%dkbps"u8, mode, kbps);
             Ꮡb.Run(name, (ж<testing.B> bΔ1) => {
-                bΔ1.Run(tlSv12ˢ, (ж<testing.B> bΔ2) => {
+                bΔ1.Run(tlSv12ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ2) => {
                     latency(bΔ2, VersionTLS12, kbps * 1000, mode == "Max"u8);
                 });
-                bΔ1.Run(tlSv13ˢ, (ж<testing.B> bΔ3) => {
+                bΔ1.Run(tlSv13ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ3) => {
                     latency(bΔ3, VersionTLS13, kbps * 1000, mode == "Max"u8);
                 });
             });
@@ -1506,6 +1514,12 @@ public static void TestConnectionStateMarshal(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string alpnProtocolᶜ = "golang"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string serverNameᶜ = "example.golang"u8;
+
 public static void TestConnectionState(ж<testing.T> Ꮡt) {
     skipFIPS(Ꮡt); // Test certificates not FIPS compatible.
     var (issuer, err) = Δx509.ParseCertificate(testRSACertificateIssuer);
@@ -1514,8 +1528,8 @@ public static void TestConnectionState(ж<testing.T> Ꮡt) {
     }
     var rootCAs = Δx509.NewCertPool();
     rootCAs.AddCert(issuer);
-    @string alpnProtocol = "golang"u8;
-    @string serverName = "example.golang"u8;
+    @string alpnProtocol = alpnProtocolᶜ;
+    @string serverName = serverNameᶜ;
     slice<slice<byte>> scts = new slice<byte>[]{slice<byte>("dummy sct 1"u8), slice<byte>("dummy sct 2"u8)}.slice();
     slice<byte> ocsp = slice<byte>("dummy ocsp"u8);
     foreach (var (_, vᴛ1) in new uint16[]{VersionTLS12, VersionTLS13}.slice()) {
@@ -2505,7 +2519,7 @@ public static void TestX509KeyPairPopulateCertificate(ж<testing.T> Ꮡt) {
 internal static readonly @string tlsHandshakeMessageOfˢ = "tls: handshake message of length 131071 bytes exceeds maximum of 65536 bytes"u8;
 internal static readonly object unexpectedSuccessˢ = (@string)"unexpected success"u8;
 
-public static void TestEarlyLargeCertMsg(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestEarlyLargeCertMsg(ж<testing.T> Ꮡt) {
     var (client, server) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var clientʗ1 = client;
     goǃ(() => {

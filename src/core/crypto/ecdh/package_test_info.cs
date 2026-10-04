@@ -72,9 +72,9 @@ using static go.crypto.ecdh_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/ecdh/ecdh.go", "ecdh.cs", "AEKIAZaiAAIU8oKClKiCABI2AA4CgpSolqIAAhTygoKUqIKmgqqi")]
-[assembly: go.GoPositionMap("crypto/ecdh/ecdh_test.go", "ecdh_test.cs", "ADVMgoKCgpSCgpaCgpSClIKWgoKUgpSCloKClIKCloIACRSCgoKmgoKCgoIABhCAkgAuXoKCgoKClIKUgoKUgoKUggAIDIKCgpSmgoKCggAICoKCgoKEoJKg5oKCgpSCgpSCgpSCADl0goKCgoKkpAAzaIKCgoKCpKQACwyCgJKAkoCSgLaCgoKClKiCgpSCgoSEgoKClIKCgpSCgpTKgoCSgJKAkoDskoIAKDaygpSEgoKCgpaSgoKCgpSWgoKAgqqigoKCgpSCpoIACwiCAAUUgoKClrKClKKCgpSCgoI=", "39-83:1;98-113:1;159-180:1;192-197:1;206-206:1;207-207:2;283-294:1;344-355:1;359-359:1;360-360:2;361-361:3;362-362:4;366-401:1;405-405:1;406-406:2;407-407:3;408-408:4;456-464:1;511-521:1")]
-[assembly: go.GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "ABkwgtaigoKClIKClNyWgpaCgpYACRSCgoKUgoKUgpTWooKCgpSCgpTcloKClAAJFNbGgpS4goKClJSCgpSUpgAJEIKUAAIQ0AAIHAADEtAACBwAAxLQAAgc")]
-[assembly: go.GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABQ20AAKDILWgoKUgoKAgqTWgoKUgpSCgrjugoKUgpQACAyygoKClKaChIKCgoTigoKChIKCgoKCgoKEgoKCgoKCgoKCgoKChIKCgoKWgoSCgqiSgoKU")]
+[assembly: go.GoPositionMap("crypto/ecdh/ecdh_test.go", "ecdh_test.cs", "ACc85uqCgoKClIKCloKClIKUgpaCgpSClIKWgoKUgoKWggAJFIKCgqaCgoKCggAGEICSABAKAB1UgoKCgoKUgpSCgpSCgpSCAAgMgoKClKaCgoKCAAgKgoKCgoSgkqDmgoKClIKClIKClIIADQgAK2yCgoKCgqSkABEMACFcgoKCgoKkpAALDIKAkoCSgJKAtoKCgoKUqIKClIKChISCgoKUgoKClIKClMqCgJKAkoCSgOySgqYAJTCygpSEgoKCgpaSgoKCgpSWgoKAgqqigoKCgpSCpoIACwiCAAUUgoKClrKClKKCgpSCgoI=", "39-83:1;98-113:1;159-180:1;192-197:1;206-206:1;207-207:2;283-294:1;344-355:1;359-359:1;360-360:2;361-361:3;362-362:4;366-401:1;405-405:1;406-406:2;407-407:3;408-408:4;456-464:1;511-521:1")]
+[assembly: go.GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "ABkwgtaigoKClIKClNyWgpaCgpYACRSCgoKUgoKUgpTWooKCgpSCgpTcloKClAAJFNbGgpS4goKClJSCgpSUpgAJEIKUAAIQ0KQABRgAAxLQpAAFGAADEtCkAAUY")]
+[assembly: go.GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABQ20KT4gtaCgpSCgoCCpNaCgpSClIKCuO6CgpSClAAIDLKCgoKUpoKEgoKChOKCgoKEgoKCgoKCgoSCgoKCgoKCgoKCgoKEgoKCgpaChIKCqJKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

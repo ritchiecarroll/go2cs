@@ -642,8 +642,8 @@ internal static void testGCMCounterWrap(ж<testing.T> Ꮡt, Func<slice<byte>, ci
             Ꮡt.Fatal(err);
         }
         var got = aead.Seal(default!, nonce, plaintext, default!);
-        if (!bytes.Equal(got[(int)(len(plaintext))..], want)) {
-            Ꮡt.Errorf("test[%v]: got: %x, want: %x"u8, i, got[(int)(len(plaintext))..], want);
+        if (!bytes.Equal(got.slice(len(plaintext)), want)) {
+            Ꮡt.Errorf("test[%v]: got: %x, want: %x"u8, i, got.slice(len(plaintext)), want);
         }
         (_, err) = aead.Open(default!, nonce, got, default!);
         if (err != default!) {
@@ -753,10 +753,10 @@ public static void TestGCMAsm(ж<testing.T> Ꮡt) {
     }
     foreach (var (_, a) in perms) {
         var ad = new slice<byte>(a.align + a.length);
-        ad = ad[(int)(a.align)..];
+        ad = ad.slice(a.align);
         foreach (var (_, p) in perms) {
             var pt = new slice<byte>(p.align + p.length);
-            pt = pt[(int)(p.align)..];
+            pt = pt.slice(p.align);
             foreach (var (_, ks) in keySizes) {
                 {
                     var errΔ7 = test(ks, pt, ad); if (errΔ7 != default!) {

@@ -243,7 +243,7 @@ internal static void memset(slice<byte> a, byte b) {
     // but without allocation.
     a[0] = b;
     for ((nint i, nint l) = (1, len(a)); i < l; i *= 2) {
-        copy(a[(int)(i)..], a[..(int)(i)]);
+        copy(a.slice(i), a.slice(0, i));
     }
 }
 
@@ -255,12 +255,12 @@ internal static void memset(slice<byte> a, byte b) {
         return (n, err);
     }
     var (skipParts, _) = slices.BinarySearchFunc(r.buf, off, (repeatedByte rb, int64 offΔ1) => cmp.Compare(rb.off + rb.n, offΔ1));
-    var parts = r.buf[(int)(skipParts)..];
+    var parts = r.buf.slice(skipParts);
     if (len(parts) > 0) {
         var skipBytes = off - parts[0].off;
         foreach (var (_, part) in parts) {
             nint repeat = (nint)min(part.n - skipBytes, (int64)(len(p) - n));
-            memset(p[(int)(n)..(int)(n + repeat)], part.b);
+            memset(p.slice(n, n + repeat), part.b);
             n += repeat;
             if (n == len(p)) {
                 return (n, err);
@@ -293,8 +293,8 @@ public static void TestRLEBuffer(ж<testing.T> Ꮡt) {
             if (err != default! || n != len(buf)) {
                 Ꮡt.Errorf("ReadAt(%d, %d) = %d, %v; want %d, nil"u8, i, j, n, err, len(buf));
             }
-            if (!bytes.Equal(buf, all[(int)(i)..(int)(i + j)])) {
-                Ꮡt.Errorf("ReadAt(%d, %d) = %q; want %q"u8, i, j, buf, all[(int)(i)..(int)(i + j)]);
+            if (!bytes.Equal(buf, all.slice(i, i + j))) {
+                Ꮡt.Errorf("ReadAt(%d, %d) = %q; want %q"u8, i, j, buf, all.slice(i, i + j));
             }
         }
     }
@@ -471,7 +471,7 @@ internal static error errDiscardedBytes = errors.New("ReadAt of discarded bytes"
         return (0, errDiscardedBytes);
     }
     var suf = ss.Suffix();
-    n = copy(p, suf[(int)(len(suf) - (nint)back)..]);
+    n = copy(p, suf.slice(len(suf) - (nint)back));
     if (n != len(p)) {
         err = io.EOF;
     }
@@ -483,8 +483,8 @@ internal static error errDiscardedBytes = errors.New("ReadAt of discarded bytes"
         return ss.buf;
     }
     var buf = new slice<byte>(ss.keep);
-    nint n = copy(buf, ss.buf[(int)(ss.start)..]);
-    copy(buf[(int)(n)..], ss.buf[..]);
+    nint n = copy(buf, ss.buf.slice(ss.start));
+    copy(buf.slice(n), ss.buf[..]);
     return buf;
 }
 
@@ -500,12 +500,12 @@ internal static error errDiscardedBytes = errors.New("ReadAt of discarded bytes"
         if (add > space) {
             add = space;
         }
-        ss.buf = appendꓸꓸꓸ(ss.buf, p[..(int)(add)]);
-        p = p[(int)(add)..];
+        ss.buf = appendꓸꓸꓸ(ss.buf, p.slice(0, add));
+        p = p.slice(add);
     }
     while (len(p) > 0) {
-        nint nΔ1 = copy(ss.buf[(int)(ss.start)..], p);
-        p = p[(int)(nΔ1)..];
+        nint nΔ1 = copy(ss.buf.slice(ss.start), p);
+        p = p.slice(nΔ1);
         ss.start += nΔ1;
         if (ss.start == ss.keep) {
             ss.start = 0;
@@ -603,7 +603,7 @@ public static void TestZip64LargeDirectory(ж<testing.T> Ꮡt) {
                 remain -= (int64)thisRecLen;
                 var (f, err) = w.CreateHeader(Ꮡ(new FileHeader(
                     Name: uint16string,
-                    Comment: uint16string[..(int)(commentLen)]
+                    Comment: uint16string.slice(0, commentLen)
                 )));
                 if (err != default!) {
                     Ꮡt.Fatalf("CreateHeader: %v"u8, err);
@@ -667,7 +667,7 @@ internal static ж<rleBuffer> testZip64(testing.TB t, int64 size) {
     }
     {
         nint frag = (nint)(size % (int64)chunkSize); if (frag > 0) {
-            var (_, errΔ2) = f.Write(chunk[..(int)(frag)]);
+            var (_, errΔ2) = f.Write(chunk.slice(0, frag));
             if (errΔ2 != default!) {
                 t.Fatal(writeChunkˢ, errΔ2);
             }
@@ -702,7 +702,7 @@ internal static ж<rleBuffer> testZip64(testing.TB t, int64 size) {
     }
     {
         nint frag = (nint)(size % (int64)chunkSize); if (frag > 0) {
-            var (_, errΔ5) = io.ReadFull(rc, chunk[..(int)(frag)]);
+            var (_, errΔ5) = io.ReadFull(rc, chunk.slice(0, frag));
             if (errΔ5 != default!) {
                 t.Fatal(readˢ, errΔ5);
             }
@@ -918,16 +918,16 @@ public static void TestSuffixSaver(ж<testing.T> Ꮡt) {
     var buf = new slice<byte>((nint)(ss.Size()));
     for (var off = (int64)0; off < ss.Size(); off++) {
         for (nint size = 1; size <= (nint)(ss.Size() - off); size++) {
-            var readBuf = buf[..(int)(size)];
+            var readBuf = buf.slice(0, size);
             var (n, err) = ss.ReadAt(readBuf, off);
             if (off < ss.Size() - (int64)keep) {
                 if (!AreEqual(err, errDiscardedBytes)) {
-                    Ꮡt.Errorf("off %d, size %d = %v, %v (%q); want errDiscardedBytes"u8, off, size, n, err, readBuf[..(int)(n)]);
+                    Ꮡt.Errorf("off %d, size %d = %v, %v (%q); want errDiscardedBytes"u8, off, size, n, err, readBuf.slice(0, n));
                 }
                 continue;
             }
-            @string want = "abcdefghijklmno"u8[(int)(off)..(int)(off + (int64)size)];
-            @string got = ((@string)(readBuf[..(int)(n)]));
+            @string want = "abcdefghijklmno"u8.slice((nint)(off), (nint)(off + (int64)size));
+            @string got = ((@string)(readBuf.slice(0, n)));
             if (err != default! || got != want) {
                 Ꮡt.Errorf("off %d, size %d = %v, %v (%q); want %q"u8, off, size, n, err, got, want);
             }

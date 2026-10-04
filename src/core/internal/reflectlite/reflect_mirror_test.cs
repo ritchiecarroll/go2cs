@@ -14,6 +14,8 @@ using Δruntime = runtime_package;
 using strings = strings_package;
 using sync = global::go.sync_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go;
 using global::go.go;
 using global::go.io;
@@ -96,7 +98,7 @@ internal static readonly @string reflectˢ = "reflect"u8;
     internal visitor v;
 }
 
-public static void TestMirrorWithReflect(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMirrorWithReflect(ж<testing.T> Ꮡt) {
     // TODO when the dust clears, figure out what this should actually test.
     Ꮡt.Skipf("reflect and reflectlite are out of sync for now"u8);
     @string reflectDir = filepath.Join(Δruntime.GOROOT(), srcˢ, reflectˢ);

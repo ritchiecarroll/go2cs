@@ -10,6 +10,8 @@ using io = io_package;
 using os = os_package;
 using testing = testing_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.compress.zlib_package;
 
 partial class zlib_internal_test_package {
@@ -48,7 +50,7 @@ internal static void testFileLevelDict(ж<testing.T> Ꮡt, @string fn, nint leve
     finally { ᒐ.Run(); }
 }
 
-internal static void testLevelDict(ж<testing.T> Ꮡt, @string fn, slice<byte> b0, nint level, @string d) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testLevelDict(ж<testing.T> Ꮡt, @string fn, slice<byte> b0, nint level, @string d) {
     GoFrame ᒐ = default;
     try {
         // Make dictionary, if given.

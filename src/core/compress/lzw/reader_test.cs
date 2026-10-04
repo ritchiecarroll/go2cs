@@ -300,7 +300,7 @@ public static void BenchmarkDecoder(ж<testing.B> Ꮡb) {
         var w = NewWriter(new lzw_internal_test_package.bytes_BufferжWriter(compressed), LSB, 8);
         for (nint i = 0; i < n; i += len(bufΔ1)) {
             if (len(bufΔ1) > n - i) {
-                bufΔ1 = bufΔ1[..(int)(n - i)];
+                bufΔ1 = bufΔ1.slice(0, n - i);
             }
             w.Write(bufΔ1);
         }

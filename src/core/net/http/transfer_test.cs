@@ -29,17 +29,17 @@ public static void TestBodyReadBadTrailer(ж<testing.T> Ꮡt) {
     ));
     var buf = new slice<byte>(7);
     var (n, err) = b.Read(buf[..3]);
-    @string got = ((@string)(buf[..(int)(n)]));
+    @string got = ((@string)(buf.slice(0, n)));
     if (got != "foo"u8 || err != default!) {
         Ꮡt.Fatalf(@"first Read = %d (%q), %v; want 3 (""foo"")"u8, n, got, err);
     }
     (n, err) = b.Read(buf[..]);
-    got = ((@string)(buf[..(int)(n)]));
+    got = ((@string)(buf.slice(0, n)));
     if (got != "bar"u8 || err != default!) {
         Ꮡt.Fatalf(@"second Read = %d (%q), %v; want 3 (""bar"")"u8, n, got, err);
     }
     (n, err) = b.Read(buf[..]);
-    got = ((@string)(buf[..(int)(n)]));
+    got = ((@string)(buf.slice(0, n)));
     if (err == default!) {
         Ꮡt.Errorf("final Read was successful (%q), expected error from trailer read"u8, got);
     }

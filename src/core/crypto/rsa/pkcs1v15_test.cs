@@ -32,7 +32,7 @@ internal static slice<byte> decodeBase64(@string @in) {
     if (err != default!) {
         return default!;
     }
-    return @out[0..(int)(n)];
+    return @out.slice(0, n);
 }
 
 [GoType] partial struct DecryptPKCS1v15Test {
@@ -89,7 +89,7 @@ public static void TestEncryptPKCS1v15(ж<testing.T> Ꮡt) {
     var randomʗ1 = random;
     var tryEncryptDecrypt = (slice<byte> @in, bool blind) => {
         if (len(@in) > k - 11) {
-            @in = @in[0..(int)(k - 11)];
+            @in = @in.slice(0, k - 11);
         }
         var (ciphertext, err) = EncryptPKCS1v15(randomʗ1, rsaPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), @in);
         if (err != default!) {

@@ -29,6 +29,7 @@ using static go.syscall_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
+[assembly: go.GoPositionMap("syscall/export_windows_test.go", "export_windows_test.cs", "AAsOoqK4kg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

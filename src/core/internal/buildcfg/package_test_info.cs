@@ -40,7 +40,7 @@ using static global::go.@internal.buildcfg_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/buildcfg/cfg_test.go", "cfg_test.cs", "ABcYgoKClIKClIKCgIKmgoKUgoKUgoKAgqSCgoCCpIKCgIKkgoKAgqSCgpSCgpSCgpSCgpSCggAKCIKEgpaCloKWgpaCAAgIgoKEhIKCgpSClIKCgrqCABMilIKCqJKCgriCgg==")]
+[assembly: go.GoPositionMap("internal/buildcfg/cfg_test.go", "cfg_test.cs", "ABcYgoKClIKClIKCgIKmgoKUgoKUgoKAgqSCgoCCpIKCgIKkgoKAgqSCgpSCgpSCgpSCgpSCggAKCIKEgpaCloKWgpaCAAgIgoKEhIKCgpSClIKCgrqCpu4ACQ6UgoKokoKCuIKC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

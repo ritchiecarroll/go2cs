@@ -23,7 +23,8 @@ using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = global::go.io.fs_package;
 using global::go.os;
 using global::go.runtime;
@@ -456,7 +457,7 @@ public static void TestGoexitCrash(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestGoexitDefer(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestGoexitDefer(ж<testing.T> Ꮡt) {
     var c = new channel<EmptyStruct>(0);
     var cʗ1 = c;
     goǃ(() => {

@@ -275,7 +275,7 @@ public static void TestOffset(ж<testing.T> Ꮡt) {
     }
     // Use ReadAt with non-zero offset.
     off = (int64)7;
-    want = want[(int)(off)..];
+    want = want.slice((nint)(off));
     got = new slice<byte>(len(want));
     (n, err) = at.ReadAt(got, off);
     if (err != default!) {

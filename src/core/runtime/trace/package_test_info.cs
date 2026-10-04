@@ -39,8 +39,8 @@ using static global::go.runtime.trace_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("runtime/trace/example_test.go", "example_test.cs", "ABEi0oKClJKAgriAgqSW1oI=", "22-26:1")]
-[assembly: go.GoPositionMap("runtime/trace/trace_test.go", "trace_test.cs", "ABYkgoKUgoCCpIKCgpSCgpSmgoKUgoKAgqSAgqSCpqKClICC")]
+[assembly: go.GoPositionMap("runtime/trace/example_test.go", "example_test.cs", "ABEi0oKClJKAgriAgqSWoqSC", "22-26:1")]
+[assembly: go.GoPositionMap("runtime/trace/trace_test.go", "trace_test.cs", "ABAg1IKClIKAgqSCgoKUgoKUpoKClIKCgIKkgIKkgqaigpSAgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;

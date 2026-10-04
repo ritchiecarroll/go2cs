@@ -106,7 +106,7 @@ public static void TestFIPSCheckInfo(ж<testing.T> Ꮡt) {
     void sect(nint i, @string name, @unsafe.Pointer p) {
         var s = Linkinfo.Sects[i];
         if (!((uintptr)s.Start <= (uintptr)p && (uintptr)p < (uintptr)s.End)) {
-            Ꮡt.Errorf("checktest.%s (%#x) not in section #%d (%#x..%#x)"u8, name, p, i, s.Start, s.End);
+            Ꮡt.Errorf("checktest.%s (%#x) not in section #%d (%#x..%#x)"u8, name, @unsafe.Pointer.OrTypedNil(p), i, @unsafe.Pointer.OrTypedNil(s.Start), @unsafe.Pointer.OrTypedNil(s.End));
         }
     }
     sect(0, textˢ, (@unsafe.Pointer)abi.FuncPCABIInternal(checktest.TEXT));
@@ -129,7 +129,7 @@ public static void TestFIPSCheckInfo(ж<testing.T> Ꮡt) {
         foreach (var (_, i) in ix) {
             var s = Linkinfo.Sects[i];
             if ((uintptr)s.Start <= (uintptr)p && (uintptr)p < (uintptr)s.End) {
-                Ꮡt.Errorf("%s (%#x) unexpectedly in section #%d (%#x..%#x)"u8, name, p, i, s.Start, s.End);
+                Ꮡt.Errorf("%s (%#x) unexpectedly in section #%d (%#x..%#x)"u8, name, @unsafe.Pointer.OrTypedNil(p), i, @unsafe.Pointer.OrTypedNil(s.Start), @unsafe.Pointer.OrTypedNil(s.End));
             }
         }
     }

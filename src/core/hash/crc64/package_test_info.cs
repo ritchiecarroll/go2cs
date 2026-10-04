@@ -31,7 +31,7 @@ using static global::go.hash.crc64_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("hash/crc64/crc64_test.go", "crc64_test.cs", "ADhwgoKCgoKCgoKClIKCgoIACAqCgoKCgoSEgoKCloKCgpSEgoKWgoKWgIKCpoKEgriCgoKChISCgoKWgoKClISCgpaCgpaAgoKmgoSC3IKChIKCloCCyKKCgoKUgoSCgoKCAAsIgoKUgpSClIKUgpSC", "77-120:1;121-164:2;199-201:1;202-204:2;205-207:3;208-210:4;211-213:5;214-216:6")]
+[assembly: go.GoPositionMap("hash/crc64/crc64_test.go", "crc64_test.cs", "ABUqACJGgoKCgoKCgoKClIKCgoIACAqCgoKCgoSEgoKCloKCgpSEgoKWgoKWgIKCpoKEgriCgoKChISCgoKWgoKClISCgpaCgpaAgoKmgoSC3IKChIKCloCCyKKCgoKUgoSCgoKCAAsIgoKUgpSClIKUgpSC", "77-120:1;121-164:2;199-201:1;202-204:2;205-207:3;208-210:4;211-213:5;214-216:6")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;

@@ -11,6 +11,8 @@ using strings = strings_package;
 using static go.sync.atomic_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using atomic = go.sync.atomic_package;
 using go.runtime;
 using go.sync;
@@ -276,7 +278,7 @@ internal static slice<@unsafe.Pointer> testPointers() {
     slice<@unsafe.Pointer> pointers = default!;
     // globals
     for (nint i = 0; i < 10; i++) {
-        pointers = append(pointers, @unsafe.Pointer.FromPinnedBox(Ꮡglobal.at<byte>(((nint)1).Lsh((uint64)(i)) - 1)));
+        pointers = append(pointers, @unsafe.Pointer.FromPinnedBox(Ꮡglobal.at<byte>(((nint)1).Lsh((int64)(i)) - 1)));
     }
     // heap
     pointers = append(pointers, @unsafe.Pointer.FromPinnedBox(@new<byte>()));
@@ -301,7 +303,7 @@ public static void TestSwapPointer(ж<testing.T> Ꮡt) {
     foreach (var (_, p) in testPointers()) {
         @unsafe.Pointer k = (uintptr)SwapPointer(Ꮡx.of(TestSwapPointer_x.Ꮡi), p);
         if (x.i != p || k != j) {
-            Ꮡt.Fatalf("p=%p i=%p j=%p k=%p"u8, p, x.i, j, k);
+            Ꮡt.Fatalf("p=%p i=%p j=%p k=%p"u8, @unsafe.Pointer.OrTypedNil(p), @unsafe.Pointer.OrTypedNil(x.i), @unsafe.Pointer.OrTypedNil(j), @unsafe.Pointer.OrTypedNil(k));
         }
         j = p;
     }
@@ -1418,16 +1420,16 @@ public static void TestCompareAndSwapPointer(ж<testing.T> Ꮡt) {
     foreach (var (_, p) in testPointers()) {
         x.i = p;
         if (!CompareAndSwapPointer(Ꮡx.of(TestCompareAndSwapPointer_x.Ꮡi), p, q)) {
-            Ꮡt.Fatalf("should have swapped %p %p"u8, p, q);
+            Ꮡt.Fatalf("should have swapped %p %p"u8, @unsafe.Pointer.OrTypedNil(p), @unsafe.Pointer.OrTypedNil(q));
         }
         if (x.i != q) {
-            Ꮡt.Fatalf("wrong x.i after swap: x.i=%p want %p"u8, x.i, q);
+            Ꮡt.Fatalf("wrong x.i after swap: x.i=%p want %p"u8, @unsafe.Pointer.OrTypedNil(x.i), @unsafe.Pointer.OrTypedNil(q));
         }
         if (CompareAndSwapPointer(Ꮡx.of(TestCompareAndSwapPointer_x.Ꮡi), p, nil)) {
-            Ꮡt.Fatalf("should not have swapped %p nil"u8, p);
+            Ꮡt.Fatalf("should not have swapped %p nil"u8, @unsafe.Pointer.OrTypedNil(p));
         }
         if (x.i != q) {
-            Ꮡt.Fatalf("wrong x.i after swap: x.i=%p want %p"u8, x.i, q);
+            Ꮡt.Fatalf("wrong x.i after swap: x.i=%p want %p"u8, @unsafe.Pointer.OrTypedNil(x.i), @unsafe.Pointer.OrTypedNil(q));
         }
     }
     if (x.before != magicptr || x.after != magicptr) {
@@ -1723,7 +1725,7 @@ public static void TestLoadPointer(ж<testing.T> Ꮡt) {
         x.i = p;
         @unsafe.Pointer k = (uintptr)LoadPointer(Ꮡx.of(TestLoadPointer_x.Ꮡi));
         if (k != p) {
-            Ꮡt.Fatalf("p=%x k=%x"u8, p, k);
+            Ꮡt.Fatalf("p=%x k=%x"u8, @unsafe.Pointer.OrTypedNil(p), @unsafe.Pointer.OrTypedNil(k));
         }
     }
     if (x.before != magicptr || x.after != magicptr) {
@@ -2009,7 +2011,7 @@ public static void TestStorePointer(ж<testing.T> Ꮡt) {
     foreach (var (_, p) in testPointers()) {
         StorePointer(Ꮡx.of(TestStorePointer_x.Ꮡi), p);
         if (x.i != p) {
-            Ꮡt.Fatalf("x.i=%p p=%p"u8, x.i, p);
+            Ꮡt.Fatalf("x.i=%p p=%p"u8, @unsafe.Pointer.OrTypedNil(x.i), @unsafe.Pointer.OrTypedNil(p));
         }
     }
     if (x.before != magicptr || x.after != magicptr) {
@@ -2296,7 +2298,7 @@ internal static void hammerCompareAndSwapUintptr32Method(ж<uint32> Ꮡuaddr, ni
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string swapˢ = "Swap"u8;
 
-public static void TestHammer32(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestHammer32(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         UntypedInt p = 4;
@@ -2588,7 +2590,7 @@ internal static void hammerCompareAndSwapUintptr64Method(ж<uint64> Ꮡuaddr, ni
     }
 }
 
-public static void TestHammer64(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestHammer64(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         UntypedInt p = 4;
@@ -2854,7 +2856,7 @@ internal static void hammerStoreLoadPointerMethod(ж<testing.T> Ꮡt, @unsafe.Po
     addr.Store((ж<byte>)(uintptr)((@unsafe.Pointer)@new));
 }
 
-public static void TestHammerStoreLoad(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestHammerStoreLoad(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -2900,7 +2902,7 @@ public static void TestHammerStoreLoad(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestStoreLoadSeqCst32(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStoreLoadSeqCst32(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (runtime.NumCPU() == 1) {
@@ -2950,7 +2952,7 @@ public static void TestStoreLoadSeqCst32(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestStoreLoadSeqCst64(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStoreLoadSeqCst64(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (runtime.NumCPU() == 1) {
@@ -3008,7 +3010,7 @@ public static void TestStoreLoadSeqCst64(ж<testing.T> Ꮡt) {
     internal float32 data2;
 }
 
-public static void TestStoreLoadRelAcq32(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStoreLoadRelAcq32(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (runtime.NumCPU() == 1) {
@@ -3061,7 +3063,7 @@ public static void TestStoreLoadRelAcq32(ж<testing.T> Ꮡt) {
     internal float64 data2;
 }
 
-public static void TestStoreLoadRelAcq64(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStoreLoadRelAcq64(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (runtime.NumCPU() == 1) {

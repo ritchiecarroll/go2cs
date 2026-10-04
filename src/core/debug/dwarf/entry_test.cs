@@ -477,7 +477,7 @@ public static void TestIssue51758(ж<testing.T> Ꮡt) {
     // test to make sure we can handle the case where the input is
     // truncated as well.
     for (nint i = 0; i <= len(info); i++) {
-        var truncated = info[..(int)(i)];
+        var truncated = info.slice(0, i);
         var (dw, err) = New(abbrev, aranges, frame, truncated, default!, default!, default!, default!);
         if (err == default!){
             Ꮡt.Errorf("expected error"u8);

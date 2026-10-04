@@ -116,7 +116,7 @@ public static void TestTextHandler(ж<testing.T> Ꮡt) {
                     }
                     @string got = Ꮡbuf.String();
                     // Remove final newline.
-                    got = got[..(int)(len(got) - 1)];
+                    got = got.slice(0, len(got) - 1);
                     @string want = Ꮡopts.Value.wantPrefix + " "u8 + Ꮡopts.Value.modKey(testʗ2.wantKey) + "="u8 + testʗ2.wantVal;
                     if (got != want) {
                         tΔ2.Errorf("\ngot  %s\nwant %s"u8, got, want);

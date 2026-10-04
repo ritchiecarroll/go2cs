@@ -29,7 +29,7 @@ using static global::go.crypto.aes_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/aes/aes_test.go", "aes_test.cs", "ADtukqaCgoKCgpSCgoKCgt6SpoKCgoKClIKCgoKC3pKmgoKCAAkKgoCSgJKA5qKCgpSCgoKCuIKAkoCSgLaigoKUgoKCgriCgJKAkoC2ooKCgII=", "107-109:1;114-114:1;115-115:2;116-116:3;133-133:1;134-134:2;135-135:3;152-152:1;153-153:2;154-154:3")]
+[assembly: go.GoPositionMap("crypto/aes/aes_test.go", "aes_test.cs", "AB0uAB1AkqaCgoKCgpSCgoKCgt6SpoKCgoKClIKCgoKC3pKmgoKCAAkKgoCSgJKA5qKCgpSCgoKCuIKAkoCSgLaigoKUgoKCgriCgJKAkoC2ooKCgII=", "107-109:1;114-114:1;115-115:2;116-116:3;133-133:1;134-134:2;135-135:3;152-152:1;153-153:2;154-154:3")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

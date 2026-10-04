@@ -9,6 +9,8 @@ using mime = mime_package;
 using textproto = net.textproto_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using net;
 using static go.mime.multipart_package;
 
@@ -157,7 +159,7 @@ public static void TestWriterSetBoundary(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fooˢ = "foo"u8;
 
-public static void TestWriterBoundaryGoroutines(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWriterBoundaryGoroutines(ж<testing.T> Ꮡt) {
     // Verify there's no data race accessing any lazy boundary if it's used by
     // different goroutines. This was previously broken by
     // https://codereview.appspot.com/95760043/ and reverted in

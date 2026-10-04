@@ -113,7 +113,7 @@ internal static bool balancedParentheses(@string s) {
         if (top < 0 || stack[top] != open) {
             return false;
         }
-        stack = stack[..(int)(top)];
+        stack = stack.slice(0, top);
     }
     return len(stack) == 0;
 }

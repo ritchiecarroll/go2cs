@@ -7,6 +7,8 @@ using fmt = fmt_package;
 using static math_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.math_internal_test_package;
 
 partial class math_test_package {
@@ -3736,17 +3738,17 @@ public static void TestFMA(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-internal static float64 fmsub(float64 x, float64 y, float64 z) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static float64 fmsub(float64 x, float64 y, float64 z) {
     return FMA(x, y, -z);
 }
 
 //go:noinline
-internal static float64 fnmsub(float64 x, float64 y, float64 z) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static float64 fnmsub(float64 x, float64 y, float64 z) {
     return FMA(-x, y, z);
 }
 
 //go:noinline
-internal static float64 fnmadd(float64 x, float64 y, float64 z) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static float64 fnmadd(float64 x, float64 y, float64 z) {
     return FMA(-x, y, -z);
 }
 
@@ -4560,7 +4562,7 @@ internal static bool isPrime(nint i) {
     // that have one, whereas the obvious loop seems not to
     // demonstrate such a benefit.
     for (nint j = 2; (float64)j <= Sqrt((float64)i); j++) {
-        if (i % j == 0) {
+        if (rem(i, j) == 0) {
             return false;
         }
     }

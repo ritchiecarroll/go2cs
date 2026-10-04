@@ -6,6 +6,8 @@ namespace go.net;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.net.http_package;
 
 partial class http_internal_test_package {
@@ -424,7 +426,7 @@ public static void TestConflictsWith(ж<testing.T> Ꮡt) {
 internal static readonly @string aYZˢ = "/a/{y}/{z...}"u8;
 internal static readonly @string matchesTheSameRequestsAsˢ = "matches the same requests as"u8;
 
-public static void TestRegisterConflict(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRegisterConflict(ж<testing.T> Ꮡt) {
     var mux = NewServeMux();
     @string pat1 = "/a/{x}/"u8;
     {

@@ -31,6 +31,7 @@ using static go.io_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
+[assembly: go.GoPositionMap("io/export_test.go", "export_test.cs", "AAsQoqI=")]
 // </GoSourcePositionMaps>
 
 namespace go;

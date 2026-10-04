@@ -30,7 +30,7 @@ using static global::go.log.slog.@internal.buffer_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("log/slog/internal/buffer/buffer_test.go", "buffer_test.cs", "ABEaooKSgoKEgoKCAAoIgoKUgqKCksSC", "32-36:1")]
+[assembly: go.GoPositionMap("log/slog/internal/buffer/buffer_test.go", "buffer_test.cs", "ABEaooKSgoKEgoKCtOSCgpSCooKSopKC", "32-36:1")]
 // </GoSourcePositionMaps>
 
 namespace go.log.slog.@internal;

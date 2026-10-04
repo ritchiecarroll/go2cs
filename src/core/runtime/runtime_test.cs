@@ -19,7 +19,11 @@ using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using System.Runtime.InteropServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
+using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
+using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
 using global::go.math;
 using global::go.runtime;
 using static global::go.runtime_internal_test_package;
@@ -442,7 +446,7 @@ internal static readonly @string largeˢ = "large"u8;
 internal static readonly @string sparseNilˢ = "sparse-nil"u8;
 internal static readonly @string sparseˢ = "sparse"u8;
 
-public static void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     Action<ж<testing.B>> run(Func<bool> fn) {
@@ -654,7 +658,7 @@ public static void BenchmarkOSYield(ж<testing.B> Ꮡb) {
     internal cpu.CacheLinePad ___;
 }
 
-public static void BenchmarkMutexContention(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkMutexContention(ж<testing.B> Ꮡb) {
     // Measure throughput of a single mutex with all threads contending
     //
     // Share a single counter across all threads. Progress from any thread is
@@ -707,7 +711,7 @@ internal static readonly @string nsStarveP90ˢ = "ns/starve-p90"u8;
     internal cpu.CacheLinePad ___;
 }
 
-public static void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Measure mutex fairness.
@@ -813,7 +817,7 @@ internal static readonly @string slowPingPongˢ = "SlowPingPong"u8;
 }
 
 public static void BenchmarkMutexHandoff(ж<testing.B> Ꮡb) {
-    Action<ж<testing.B>> testcase(Action<ж<Mutex>> delay) => (ж<testing.B> bΔ1) => {
+    Action<ж<testing.B>> testcase(Action<ж<Mutex>> delay) => [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
             {
                 nint workers = 2; if (GOMAXPROCS(0) < workers) {
                     bΔ1.Skipf("requires GOMAXPROCS >= %d"u8, workers);

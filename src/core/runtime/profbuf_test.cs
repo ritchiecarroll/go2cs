@@ -8,6 +8,8 @@ using slices = slices_package;
 using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 using Δruntime = runtime_package;
 
@@ -41,7 +43,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
             tΔ2.Fatalf("unexpected eof"u8);
         }
     }
-    Action readBlock(ж<testing.T> tΔ3, ж<global::go.runtime_internal_test_package.ProfBuf> b, slice<uint64> data, slice<@unsafe.Pointer> tags) {
+    [MethodImpl(MethodImplOptions.NoInlining)] Action readBlock(ж<testing.T> tΔ3, ж<global::go.runtime_internal_test_package.ProfBuf> b, slice<uint64> data, slice<@unsafe.Pointer> tags) {
         var c = new channel<nint>(0);
         var cʗ1 = c;
         var dataʗ1 = data;

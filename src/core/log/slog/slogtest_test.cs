@@ -96,7 +96,7 @@ internal static (map<@string, any>, error) parseText(slice<byte> bs) {
         var keys = strings.Split(k, "."u8);
         // Populate a tree of maps for a dotted path such as "a.b.c=x".
         var m = top;
-        foreach (var (_, key) in keys[..(int)(len(keys) - 1)]) {
+        foreach (var (_, key) in keys.slice(0, len(keys) - 1)) {
             var (x, ok) = m[key, ꟷ];
             map<@string, any> m2 = default!;
             if (!ok){

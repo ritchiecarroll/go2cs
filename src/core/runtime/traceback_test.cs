@@ -16,7 +16,8 @@ using Δsync = sync_package;
 using testing = testing_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using @internal;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.runtime;
 using static global::go.runtime_internal_test_package;
 using ꓸꓸꓸany = Span<any>;
@@ -207,7 +208,7 @@ public static void TestTracebackElision(ж<testing.T> Ꮡt) {
     // in the paused physical frame, and eliding 10 so we have to advance the
     // physical frame forward.
     foreach (var (_, elided) in new nint[]{0, 1, 10}.slice()) {
-        Ꮡt.Run(fmt.Sprintf("elided=%d"u8, elided), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(fmt.Sprintf("elided=%d"u8, elided), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             nint n = elided + (nint)runtime_internal_test_package.TracebackInnerFrames + (nint)runtime_internal_test_package.TracebackOuterFrames;
             // Start a new goroutine so we have control over the whole stack.
             var stackChan = new channel<@string>(0);
@@ -792,7 +793,7 @@ internal static ref array<nint> testTracebackArgsSliceBackingStore => ref Ꮡtes
     return new nint[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}.array();
 }
 
-public static void TestTracebackParentChildGoroutines(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTracebackParentChildGoroutines(ж<testing.T> Ꮡt) {
     @string parent = fmt.Sprintf("goroutine %d"u8, runtime_internal_test_package.Goid());
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(1);

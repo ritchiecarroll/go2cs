@@ -25,7 +25,8 @@ using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.runtime;
 using global::go.sync;
 using static global::go.runtime_internal_test_package;
@@ -588,7 +589,7 @@ public static void BenchmarkReadMetricsLatency(ж<testing.B> Ꮡb) {
 
 internal static array<any> readMetricsSink = new(1024);
 
-public static void TestReadMetricsCumulative(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestReadMetricsCumulative(ж<testing.T> Ꮡt) {
     // Set up the set of metrics marked cumulative.
     var descs = metrics.All();
     array<slice<metrics.Sample>> samples = new(2);
@@ -810,7 +811,7 @@ internal static void Unlock2(this ж<rwmutexWriteRead> Ꮡm) {
 // to block a whole bunch of times on a sync.Mutex, returning
 // the minimum amount of time that should be visible in the
 // /sync/mutex-wait:seconds metric.
-internal static time.Duration generateMutexWaitTime(locker2 mu) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static time.Duration generateMutexWaitTime(locker2 mu) {
     // Set up the runtime to always track casgstatus transitions for metrics.
     runtime_internal_test_package.CasGStatusAlwaysTrack.Value = true;
     mu.Lock1();
@@ -1229,7 +1230,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                 float64 profileGrowth = default!;
                 int64 n = default!;
                 int64 value = default!;
-                (metricGrowth, profileGrowth, var p) = measureDeltaʗ2(tΔ3, () => {
+                (metricGrowth, profileGrowth, var p) = measureDeltaʗ2(tΔ3, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                     ref var started = ref heap(new Δsync.WaitGroup(), out var Ꮡstarted);
                     ref var stopped = ref heap(new Δsync.WaitGroup(), out var Ꮡstopped);
                     Ꮡstarted.Add(workers);
@@ -1577,7 +1578,7 @@ public static void TestCPUStats(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestMetricHeapUnusedLargeObjectOverflow(ж<testing.T> Ꮡt) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMetricHeapUnusedLargeObjectOverflow(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // This test makes sure /memory/classes/heap/unused:bytes

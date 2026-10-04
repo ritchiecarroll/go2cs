@@ -6,7 +6,8 @@ namespace go;
 using Δruntime = runtime_package;
 using Δsync = sync_package;
 using testing = testing_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -26,7 +27,7 @@ internal static @string Error(this myError _) {
     internal error err;
 }
 
-internal static (ж<response>, error) doRequest(bool useSelect) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<response>, error) doRequest(bool useSelect) {
     var ch = new channel<ж<doRequest_async>>(0);
     var done = new channel<EmptyStruct>(0);
     if (useSelect){
@@ -64,7 +65,7 @@ public static void TestChanSendBarrier(ж<testing.T> Ꮡt) {
     testChanSendBarrier(false);
 }
 
-internal static void testChanSendBarrier(bool useSelect) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testChanSendBarrier(bool useSelect) {
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     nint outer = 100;
     nint inner = 100000;

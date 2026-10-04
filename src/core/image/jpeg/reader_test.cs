@@ -128,10 +128,10 @@ internal static (image.Image, error) decodeFile(@string filename) {
 
     if (len(r.data) > 0){
         n = copy(b, r.data);
-        r.data = r.data[(int)(n)..];
+        r.data = r.data.slice(n);
     } else {
         n = copy(b, r.dataEOF);
-        r.dataEOF = r.dataEOF[(int)(n)..];
+        r.dataEOF = r.dataEOF.slice(n);
         if (len(r.dataEOF) == 0) {
             err = io.EOF;
             if (r.lenAtEOF == -1) {
@@ -153,7 +153,7 @@ public static void TestDecodeEOF(ж<testing.T> Ꮡt) {
     }
     nint n = len(data);
     for (nint i = 0; i < n; ) {
-        var r = Ꮡ(new eofReader(data[..(int)(n - i)], data[(int)(n - i)..], -1));
+        var r = Ꮡ(new eofReader(data.slice(0, n - i), data.slice(n - i), -1));
         var (_, errΔ1) = Decode(new jpeg_internal_test_package.eofReaderжReader(r));
         if (errΔ1 != default!) {
             Ꮡt.Errorf("Decode with Read() = %d, EOF: %v"u8, (~r).lenAtEOF, errΔ1);
@@ -234,7 +234,7 @@ public static void TestTruncatedSOSDataDoesntPanic(ж<testing.T> Ꮡt) {
         j = len(b);
     }
     for (; i < j; i++) {
-        Decode(new jpeg_internal_test_package.bytes_ReaderжReader(bytes.NewReader(b[..(int)(i)])));
+        Decode(new jpeg_internal_test_package.bytes_ReaderжReader(bytes.NewReader(b.slice(0, i))));
     }
 }
 
@@ -464,13 +464,13 @@ public static void TestExtraneousData(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("encoded JPEG is too short: %d bytes"u8, len(enc));
     }
     {
-        @string got = enc[(int)(len(enc) - 2)..];
+        @string got = enc.slice(len(enc) - 2);
         @string want = ((@string)(new byte[]{0xff, 0xd9})); if (got != want) {
             Ꮡt.Fatalf("encoded JPEG ends with %q, want %q"u8, got, want);
         }
     }
     {
-        @string s = enc[(int)(len(enc) - 64)..]; if (!strings.Contains(s, ((@string)(new byte[]{0xff, 0xda})))) {
+        @string s = enc.slice(len(enc) - 64); if (!strings.Contains(s, ((@string)(new byte[]{0xff, 0xda})))) {
             Ꮡt.Fatalf("encoded JPEG does not contain a SOS marker (ff da) near the end: % x"u8, s);
         }
     }
@@ -480,7 +480,7 @@ public static void TestExtraneousData(ж<testing.T> Ꮡt) {
     for ((nint i, nint nerr) = (0, 0); i < 1000 && nerr < 10; i++) {
         buf.Reset();
         // Write all but the trailing "\xff\xd9" EOI marker.
-        buf.WriteString(enc[..(int)(len(enc) - 2)]);
+        buf.WriteString(enc.slice(0, len(enc) - 2));
         // Write some random extraneous data.
         for (nint n = rnd.Intn(10); n > 0; n--) {
             {

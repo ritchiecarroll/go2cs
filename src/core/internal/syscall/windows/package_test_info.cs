@@ -39,7 +39,7 @@ using static global::go.@internal.syscall.windows_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/syscall/windows/at_windows_test.go", "at_windows_test.cs", "ABUegoSCgoKClIQACx6CgoKCgpSCgoKClII=")]
-[assembly: go.GoPositionMap("internal/syscall/windows/version_windows_test.go", "version_windows_test.cs", "AA0cooKAgqSWgoKClIKC")]
+[assembly: go.GoPositionMap("internal/syscall/windows/version_windows_test.go", "version_windows_test.cs", "AA0cooKAgqSWgoKClIKCtA==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.syscall;

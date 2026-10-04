@@ -20,7 +20,7 @@ public static void TestIndex(ж<testing.T> Ꮡt) {
     ref var idx = ref heap(new global::go.net.http_package.routingIndex(), out var Ꮡidx);
     foreach (var (i, pat) in patterns) {
         var got = indexConflicts(pat, Ꮡidx);
-        var want = trueConflicts(pat, patterns[..(int)(i)]);
+        var want = trueConflicts(pat, patterns.slice(0, i));
         if (!slices.Equal<slice<@string>, @string>(got, want)) {
             Ꮡt.Fatalf("%q:\ngot  %q\nwant %q"u8, pat.OrTypedNil(), got, want);
         }
@@ -69,10 +69,10 @@ internal static slice<ж<global::go.net.http_package.pattern>> generatePatterns(
                 Ꮡb.WriteString(s);
                 break;
             }
-            Ꮡb.WriteString(s[..(int)(i)]);
+            Ꮡb.WriteString(s.slice(0, i));
             fmt.Fprintf(new http_test_package.strings_BuilderжWriter(Ꮡb), "{x%d}"u8, wc);
             wc++;
-            s = s[(int)(i + 3)..];
+            s = s.slice(i + 3);
         }
         var (pat, err) = parsePattern(b.String());
         if (err != default!) {

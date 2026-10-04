@@ -7,6 +7,8 @@ using context = context_package;
 using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.context_internal_test_package;
 
 partial class context_test_package {
@@ -93,7 +95,7 @@ internal static Func<bool> ΔAfterFunc(this ж<afterFuncContext> Ꮡc, Action f)
     finally { ᒐ.Run(); }
 }
 
-internal static void cancel(this ж<afterFuncContext> Ꮡc, error err) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void cancel(this ж<afterFuncContext> Ꮡc, error err) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

@@ -11,6 +11,8 @@ using static runtime_package;
 using Δdebug = global::go.runtime.debug_package;
 using atomic = global::go.sync.atomic_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.runtime;
 using global::go.sync;
 using static global::go.runtime_internal_test_package;
@@ -27,7 +29,7 @@ internal static void parallelReader(ж<global::go.runtime_internal_test_package.
     cdone.ᐸꟷ(true);
 }
 
-internal static void doTestParallelReaders(nint numReaders) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void doTestParallelReaders(nint numReaders) {
     GOMAXPROCS(numReaders + 1);
     ref var m = ref heap(new global::go.runtime_internal_test_package.RWMutex(), out var Ꮡm);
     Ꮡm.Init();
@@ -106,7 +108,7 @@ internal static void writer(ж<global::go.runtime_internal_test_package.RWMutex>
     cdone.ᐸꟷ(true);
 }
 
-public static void HammerRWMutex(nint gomaxprocs, nint numReaders, nint num_iterations) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void HammerRWMutex(nint gomaxprocs, nint numReaders, nint num_iterations) {
     GOMAXPROCS(gomaxprocs);
     // Number of active readers + 10000 * number of active writers.
     ref var activity = ref heap(new int32(), out var Ꮡactivity);

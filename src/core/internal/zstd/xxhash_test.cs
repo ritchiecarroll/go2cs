@@ -63,7 +63,7 @@ public static void TestLargeXXHash(ж<testing.T> Ꮡt) {
         if (i + c > builtin.len(data)) {
             c = builtin.len(data) - i;
         }
-        xh.update(data[(int)(i)..(int)(i + c)]);
+        xh.update(data.slice(i, i + c));
         i += c;
     }
     var got = xh.digest();

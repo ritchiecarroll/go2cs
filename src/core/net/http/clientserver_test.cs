@@ -32,6 +32,8 @@ using sync = sync_package;
 using atomic = global::go.sync.atomic_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using bufio = bufio_package;
 using compress;
 using crypto;
@@ -936,7 +938,7 @@ internal static void testCancelRequestMidBody(ж<testing.T> Ꮡt, testMode mode)
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
-        firstRead = firstRead[..(int)(n)];
+        firstRead = firstRead.slice(0, n);
         builtin.close(cancel);
         (var rest, err) = io.ReadAll((~res).Body);
         @string all = ((sstring)firstRead) + ((sstring)rest);
@@ -1147,7 +1149,7 @@ internal static void testConcurrentReadWriteReqBody(ж<testing.T> Ꮡt, testMode
 
         @string reqBody = reqBodyᶜ;
         @string resBody = resBodyᶜ;
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
             Ꮡwg.Add(2);
             var didRead = new channel<bool>(1);
@@ -1424,7 +1426,7 @@ public static void TestTransportDiscardsUnneededConns(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testTransportDiscardsUnneededConns(Δp0, Δp1), new testMode[]{http2Mode}.slice());
 }
 
-internal static void testTransportDiscardsUnneededConns(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportDiscardsUnneededConns(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
@@ -2136,7 +2138,7 @@ public static void TestBidiStreamReverseProxy(ж<testing.T> Ꮡt) {
 internal static readonly @string putˢ = "PUT"u8;
 internal static readonly @string timeoutˢ = "timeout"u8;
 
-internal static void testBidiStreamReverseProxy(ж<testing.T> Ꮡt, testMode mode) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static void testBidiStreamReverseProxy(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -2164,7 +2166,7 @@ internal static void testBidiStreamReverseProxy(ж<testing.T> Ꮡt, testMode mod
         UntypedInt size = /* 4 << 20 */ 4194304;
         var bodyResʗ1 = bodyRes;
         var pwʗ1 = pw;
-        goǃ(() => {
+        goǃ([MethodImpl(MethodImplOptions.NoInlining)] () => {
             var h = sha1.New();
             var (_, errΔ2) = io.CopyN(io.MultiWriter(h, new io.PipeWriterжWriter(pwʗ1)), rand.Reader, size);
             var pwʗ2 = pwʗ1;

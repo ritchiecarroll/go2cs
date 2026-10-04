@@ -84,7 +84,7 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
         foreach (var (_, g) in golden) {
             var h = New(table);
             var h2 = New(table);
-            io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h), g.@in[..(int)(len(g.@in) / 2)]);
+            io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h), g.@in.slice(0, len(g.@in) / 2));
             var (state, err) = h._<encoding.BinaryMarshaler>().MarshalBinary();
             if (err != default!) {
                 tΔ1.Errorf("could not marshal: %v"u8, err);
@@ -110,8 +110,8 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
                     continue;
                 }
             }
-            io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h), g.@in[(int)(len(g.@in) / 2)..]);
-            io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h2), g.@in[(int)(len(g.@in) / 2)..]);
+            io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h), g.@in.slice(len(g.@in) / 2));
+            io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h2), g.@in.slice(len(g.@in) / 2));
             if (h.Sum64() != h2.Sum64()) {
                 tΔ1.Errorf("ISO crc64(%s) = 0x%x != marshaled (0x%x)"u8, g.@in, h.Sum64(), h2.Sum64());
             }
@@ -122,7 +122,7 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
         foreach (var (_, g) in golden) {
             var h = New(table);
             var h2 = New(table);
-            io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h), g.@in[..(int)(len(g.@in) / 2)]);
+            io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h), g.@in.slice(0, len(g.@in) / 2));
             var (state, err) = h._<encoding.BinaryMarshaler>().MarshalBinary();
             if (err != default!) {
                 tΔ2.Errorf("could not marshal: %v"u8, err);
@@ -148,8 +148,8 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
                     continue;
                 }
             }
-            io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h), g.@in[(int)(len(g.@in) / 2)..]);
-            io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h2), g.@in[(int)(len(g.@in) / 2)..]);
+            io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h), g.@in.slice(len(g.@in) / 2));
+            io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h2), g.@in.slice(len(g.@in) / 2));
             if (h.Sum64() != h2.Sum64()) {
                 tΔ2.Errorf("ECMA crc64(%s) = 0x%x != marshaled (0x%x)"u8, g.@in, h.Sum64(), h2.Sum64());
             }

@@ -88,28 +88,28 @@ public static void TestCompareStrings(ж<testing.T> Ꮡt) {
         }
         @string sa = unsafeString(a);
         @string sb = unsafeString(b);
-        nint cmp = Compare(sa[..(int)(lenΔ1)], sb[..(int)(lenΔ1)]);
+        nint cmp = Compare(sa.slice(0, lenΔ1), sb.slice(0, lenΔ1));
         if (cmp != 0) {
             Ꮡt.Errorf(@"CompareIdentical(%d) = %d"u8, lenΔ1, cmp);
         }
         if (lenΔ1 > 0) {
-            cmp = Compare(sa[..(int)(lenΔ1 - 1)], sb[..(int)(lenΔ1)]);
+            cmp = Compare(sa.slice(0, lenΔ1 - 1), sb.slice(0, lenΔ1));
             if (cmp != -1) {
                 Ꮡt.Errorf(@"CompareAshorter(%d) = %d"u8, lenΔ1, cmp);
             }
-            cmp = Compare(sa[..(int)(lenΔ1)], sb[..(int)(lenΔ1 - 1)]);
+            cmp = Compare(sa.slice(0, lenΔ1), sb.slice(0, lenΔ1 - 1));
             if (cmp != 1) {
                 Ꮡt.Errorf(@"CompareBshorter(%d) = %d"u8, lenΔ1, cmp);
             }
         }
         for (nint k = lastLen; k < lenΔ1; k++) {
             b[k] = (byte)(a[k] - 1);
-            cmp = Compare(unsafeString(a[..(int)(lenΔ1)]), unsafeString(b[..(int)(lenΔ1)]));
+            cmp = Compare(unsafeString(a.slice(0, lenΔ1)), unsafeString(b.slice(0, lenΔ1)));
             if (cmp != 1) {
                 Ꮡt.Errorf(@"CompareAbigger(%d,%d) = %d"u8, lenΔ1, k, cmp);
             }
             b[k] = (byte)(a[k] + 1);
-            cmp = Compare(unsafeString(a[..(int)(lenΔ1)]), unsafeString(b[..(int)(lenΔ1)]));
+            cmp = Compare(unsafeString(a.slice(0, lenΔ1)), unsafeString(b.slice(0, lenΔ1)));
             if (cmp != -1) {
                 Ꮡt.Errorf(@"CompareBbigger(%d,%d) = %d"u8, lenΔ1, k, cmp);
             }

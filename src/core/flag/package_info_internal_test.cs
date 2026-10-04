@@ -28,7 +28,7 @@ using static go.flag_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("flag/export_test.go", "export_test.cs", "AA8msoKCgg==")]
+[assembly: go.GoPositionMap("flag/export_test.go", "export_test.cs", "AA0cmrKCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go;

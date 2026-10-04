@@ -3,11 +3,13 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_package;
 
 partial class runtime_internal_test_package {
 
-public static void XTestSPWrite(TestingT t) {
+[MethodImpl(MethodImplOptions.NoInlining)] public static void XTestSPWrite(TestingT t) {
     // Test that we can traceback from the stack check prologue of a function
     // that writes to SP. See #62326.
     // Start a goroutine to minimize the initial stack and ensure we grow the stack.

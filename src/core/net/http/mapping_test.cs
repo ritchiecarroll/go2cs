@@ -111,7 +111,7 @@ public static void BenchmarkFindChild(ж<testing.B> Ꮡb) {
         throw panic("bad len");
     }
     foreach (var (_, n) in new nint[]{2, 4, 8, 16, 32}.slice()) {
-        var list = children[..(int)(n)];
+        var list = children.slice(0, n);
         var listʗ1 = list;
         Ꮡb.Run(fmt.Sprintf("n=%d"u8, n), (ж<testing.B> bΔ1) => {
             var listʗ2 = listʗ1;

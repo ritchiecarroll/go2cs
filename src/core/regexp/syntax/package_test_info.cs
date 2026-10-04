@@ -36,9 +36,9 @@ using static global::go.regexp.syntax_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("regexp/syntax/parse_test.go", "parse_test.cs", "AM8BuAOCAA4egu6CAAkUggAJFIKokoKCgoKUlJSCgs6igoIAGDjSgpSYgpSkgpSUgoKCggAFHwADLIKUgraCtoK2pIKkgoKUpIKCgoKCgpTIpoKCgoKCgqaCgriClKaCgpSCgoKUlKaCgoKClIKUlIK4isKCgpSCAFCQAYKCgIKkgIK2goCCpICCtoKAgqSAgtqigoKCgpSUlIKCgpaC3IKCgpSCgpaCggAdOIKCgoKClIKC")]
-[assembly: go.GoPositionMap("regexp/syntax/prog_test.go", "prog_test.cs", "AJAB2gGCgoKCgoLKooKCgoKUAAsMooKCgqaClA==")]
-[assembly: go.GoPositionMap("regexp/syntax/simplify_test.go", "simplify_test.cs", "AI0BmgKCgoKCgpSCgg==")]
+[assembly: go.GoPositionMap("regexp/syntax/parse_test.go", "parse_test.cs", "AComAKQBkgOC1gAIGIKmuIKm7oKm7oKokoKCgoKUlJSCgs6igoKmABUy0oKUmIKUpIKUlIKCgoIABR8AAyyClIK2graCtqSCpIKClKSCgoKCgoKUyKaCgoKCgoKmgoK4gpSmgoKUgoKClJSmgoKCgpSClJSCuIrCgoKUggAMCAAuXgALGAAIEoKCgIKkgIK2goCCpICCtoKAgqSAgtqigoKCgpSUlIKCgpaC3IKCgpSCgpaCggAKDAASLIKCgoKClIKC")]
+[assembly: go.GoPositionMap("regexp/syntax/prog_test.go", "prog_test.cs", "AA8SAIAByAGCgoKCgoLKooKCgoKUAAsMooKCgqaClA==")]
+[assembly: go.GoPositionMap("regexp/syntax/simplify_test.go", "simplify_test.cs", "ACcSAGWIAoKCgoKClIKC")]
 // </GoSourcePositionMaps>
 
 namespace go.regexp;

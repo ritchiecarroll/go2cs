@@ -177,7 +177,7 @@ internal static (@string name, bool decl, bool use) annotatedObj(@string lit) {
     bool use = default!;
 
     if (lit[1] == (rune)'*') {
-        lit = lit[..(int)(len(lit) - 2)]; // strip trailing */
+        lit = lit.slice(0, len(lit) - 2); // strip trailing */
     }
     lit = strings.TrimSpace(lit[2..]);
 scanLit:
@@ -192,7 +192,7 @@ scanLit:
             break;
         }
         default: {
-            name = lit[(int)(idx)..];
+            name = lit.slice(idx);
             goto break_scanLit;
             break;
         }}

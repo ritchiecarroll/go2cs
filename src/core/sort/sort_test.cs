@@ -479,17 +479,17 @@ internal static void testBentleyMcIlroy(ж<testing.T> Ꮡt, Action<sort.Interfac
             for (nint dist = 0; dist < _NDist; dist++) {
                 nint j = 0;
                 nint k = 1;
-                var data = tmp1[0..(int)(n)];
+                var data = tmp1.slice(0, n);
                 for (nint i = 0; i < n; i++) {
                     var exprᴛ1 = dist;
                     if (exprᴛ1 == _Sawtooth) {
-                        data[i] = i % m;
+                        data[i] = rem(i, m);
                     }
                     else if (exprᴛ1 == _Rand) {
                         data[i] = rand.IntN(m);
                     }
                     else if (exprᴛ1 == _Stagger) {
-                        data[i] = (i * m + i) % n;
+                        data[i] = rem((i * m + i), n);
                     }
                     else if (exprᴛ1 == _Plateau) {
                         data[i] = min(i, m);
@@ -505,7 +505,7 @@ internal static void testBentleyMcIlroy(ж<testing.T> Ꮡt, Action<sort.Interfac
                     }
 
                 }
-                var mdata = tmp2[0..(int)(n)];
+                var mdata = tmp2.slice(0, n);
                 for (nint mode = 0; mode < _NMode; mode++) {
                     var exprᴛ2 = mode;
                     if (exprᴛ2 == _Copy) {
@@ -550,7 +550,7 @@ internal static void testBentleyMcIlroy(ж<testing.T> Ꮡt, Action<sort.Interfac
 
                     ref var desc = ref heap<@string>(out var Ꮡdesc);
                     desc = fmt.Sprintf("n=%d m=%d dist=%s mode=%s"u8, n, m, dists[dist], modes[mode]);
-                    var d = Ꮡ(new testingData(desc: desc, t: Ꮡt, data: mdata[0..(int)(n)], maxswap: maxswap(n)));
+                    var d = Ꮡ(new testingData(desc: desc, t: Ꮡt, data: mdata.slice(0, n), maxswap: maxswap(n)));
                     sort(new sort_test_package.testingDataжInterface(d));
                     // Uncomment if you are trying to improve the number of compares/swaps.
                     //t.Logf("%s: ncmp=%d, nswp=%d", desc, d.ncmp, d.nswap)

@@ -62,14 +62,14 @@ using static global::go.io.fs_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("io/fs/format_test.go", "format_test.cs", "ABcugqaCpoKmgqaCpoKmgqaCADdsgrKCgsqCsoKC")]
-[assembly: go.GoPositionMap("io/fs/fs_test.go", "fs_test.cs", "AClUgoKCgg==")]
-[assembly: go.GoPositionMap("io/fs/glob_test.go", "glob_test.cs", "ABw2goKCgoKUgqaCgoKClILKgoKCgoLKpoKC/ID0goKCgrqCloI=", "74-79:1")]
+[assembly: go.GoPositionMap("io/fs/format_test.go", "format_test.cs", "ABcugqaCpoKmgqaCpoKmgqaCAAgGAC5mgrKCgsqCsoKC")]
+[assembly: go.GoPositionMap("io/fs/fs_test.go", "fs_test.cs", "AA8YABk8goKCgg==")]
+[assembly: go.GoPositionMap("io/fs/glob_test.go", "glob_test.cs", "ABQgAAcWgoKCgoKUgqaCgoKClILKgoKCgoLKpoKC/ID0goKCgrqCloI=", "74-79:1")]
 [assembly: go.GoPositionMap("io/fs/readdir_test.go", "readdir_test.cs", "ABUkgNSCgoKCgoKUuoKWgpaCgpSCAAgGggALHgADEoKSooKCloKAgqSAkqSAguyCgoKUAAkGgoKCgoCS", "21-30:1;76-92:1")]
-[assembly: go.GoPositionMap("io/fs/readfile_test.go", "readfile_test.cs", "ACREgAAKCJSCgqiCgqiCgpSCgriCgoKCgJI=")]
+[assembly: go.GoPositionMap("io/fs/readfile_test.go", "readfile_test.cs", "ABAeABMmgAAKCJSCgqiCgqiCgpSCgriCgoKCgJI=")]
 [assembly: go.GoPositionMap("io/fs/stat_test.go", "stat_test.cs", "ABEegOSCgoKCgoKUuoKWgg==", "18-27:1")]
 [assembly: go.GoPositionMap("io/fs/sub_test.go", "sub_test.cs", "ABEegAAKBIKCgoKClIKCloKCgoKUuoKWgoSCgpSCgpSCloKC", "18-37:1")]
-[assembly: go.GoPositionMap("io/fs/walk_test.go", "walk_test.cs", "ADFiooKCuIKCkoKUpqzSgoKCpoKCgpSUpoKEgpKCmIKClIKUgoKU+KKCgoCCtoKAgqSCgoKClIKUlIKUgoI=", "58-64:1;73-77:1;94-96:1;105-110:2;126-134:1")]
+[assembly: go.GoPositionMap("io/fs/walk_test.go", "walk_test.cs", "ABkuABc0ooKCuIKCkoKUpqzSgoKCpoKCgpSUpoKEgpKCmIKClIKUgoKU+KKCgoCCtoKAgqSCgoKClIKUlIKUgoK0", "58-64:1;73-77:1;94-96:1;105-110:2;126-134:1")]
 // </GoSourcePositionMaps>
 
 namespace go.io;
