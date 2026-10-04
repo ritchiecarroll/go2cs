@@ -216,23 +216,30 @@ public readonly struct UntypedInt : IEquatable<UntypedInt>
 
     public static implicit operator uint64(UntypedInt value) => CastTo<uint64>(value.m_value);
 
-    // Handle implicit conversions between 'float32' and struct 'UntypedInt'
-    public static implicit operator UntypedInt(float32 value) => new((int64)value);
+    // FROM a float or complex the conversion is EXPLICIT; TO one it stays implicit. A Go untyped integer
+    // constant beside a float operand converts to the FLOAT type (`f >= math.MaxUint64` compares two
+    // float64s). C# picks a user-defined operator whenever an implicit conversion reaches its operand
+    // type, and only then considers the built-in ones, so an implicit float -> UntypedInt made
+    // `f >= c` and `f * c` run UntypedInt's operator on `(int64)f`: saturated at 2^63, a fraction
+    // truncated (go-humanize's ParseBytes overflow guard never fired; 0.5 * c read 0). With no implicit
+    // conversion from a float, no UntypedInt operator applies, and C# uses the built-in float operator
+    // through the implicit UntypedInt -> float below, which rounds the constant as Go does.
+    public static explicit operator UntypedInt(float32 value) => new((int64)value);
 
     public static implicit operator float32(UntypedInt value) => value.ToFloat32();
 
     // Handle implicit conversions between 'float64' and struct 'UntypedInt'
-    public static implicit operator UntypedInt(float64 value) => new((int64)value);
+    public static explicit operator UntypedInt(float64 value) => new((int64)value);
 
     public static implicit operator float64(UntypedInt value) => value.ToFloat64();
 
     // Handle implicit conversions between 'complex64' and struct 'UntypedInt'
-    public static implicit operator UntypedInt(complex64 value) => new((int64)value.Real);
+    public static explicit operator UntypedInt(complex64 value) => new((int64)value.Real);
 
     public static implicit operator complex64(UntypedInt value) => value.ToFloat32();
 
     // Handle implicit conversions between 'complex128' and struct 'UntypedInt'
-    public static implicit operator UntypedInt(complex128 value) => new((int64)value.Real);
+    public static explicit operator UntypedInt(complex128 value) => new((int64)value.Real);
 
     public static implicit operator complex128(UntypedInt value) => value.ToFloat64();
 

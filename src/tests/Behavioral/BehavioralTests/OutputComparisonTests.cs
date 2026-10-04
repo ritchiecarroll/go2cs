@@ -527,6 +527,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckFixedArrayBufferPointer() => CheckTarget("FixedArrayBufferPointer");
 
     [TestMethod]
+    public void CheckFloatCompareUntypedMaxUint64() => CheckTarget("FloatCompareUntypedMaxUint64");
+
+    [TestMethod]
     public void CheckFloatConstIntContext() => CheckTarget("FloatConstIntContext");
 
     [TestMethod]
@@ -1005,6 +1008,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckMathFloatBits() => CheckTarget("MathFloatBits");
+
+    [TestMethod]
+    public void CheckMathHugeArgReduction() => CheckTarget("MathHugeArgReduction");
 
     [TestMethod]
     public void CheckMethodExprDotImport() => CheckTarget("MethodExprDotImport");

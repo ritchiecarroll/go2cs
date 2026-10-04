@@ -363,6 +363,35 @@ its float32-range question, a named-untyped-const pair in both a complex128 and 
 complex64 context, and the mixed call that must stay unchanged; neuter-proven — with the arm removed
 the guard's `over` prints `(+Inf+Infi)` and `over-fits-float32 true` where Go says `false`).
 
+## A named untyped integer constant beside a FLOAT operand compares and computes as a float
+Go converts an untyped constant to the other operand's type, so `f >= math.MaxUint64` compares two
+`float64`s and `f * c` multiplies two. The converter emits both as written —
+`f >= Δmath.MaxUint64` — against the constant's `UntypedInt` wrapper, and golib makes C# pick the
+built-in float operator:
+
+- **The C# rule.** A user-defined operator is chosen whenever an implicit conversion reaches its operand
+  type; only when none applies does C# consider the built-in operators. `UntypedInt` once converted
+  implicitly **from** `float32`/`float64`/`complex64`/`complex128`, so `f >= c` ran
+  `UntypedInt.operator>=` on `(int64)f` — saturated at 2^63, a fraction truncated. go-humanize's
+  `ParseBytes` overflow guard (`if f >= math.MaxUint64`) never fired, and `0.5 * c` read `0`.
+- **The rule now.** Those four conversions are `explicit`. No `UntypedInt` operator applies to a float
+  operand, so C# uses the float operator through the implicit `UntypedInt` → float conversion, which
+  rounds the constant to the float the way Go converts it. Nothing in the converted standard library
+  relied on the implicit form (it builds on windows, linux and darwin unchanged), and no emission moves.
+- **Not affected in practice:** math's `x >= reduceThreshold` (Sin, Cos, Sincos, Tan). The truncation
+  saturates for huge `x`, and the threshold is a small integer, so the comparison agreed with Go there.
+- **The siblings, not closed by this rule.** `UntypedFloat` and `UntypedComplex` keep an implicit
+  conversion from `float64` (constant initializers such as `=> 3.14` need it), and C# chains a built-in
+  widening into it. So a `float32` operand still compares against an unrounded `UntypedFloat` in
+  double (`float32(0.1) <= c` with `c = 0.1` reads false, where Go rounds `c` to float32 first), and an
+  `int64` operand compares against an integral `UntypedFloat` in double (exact in Go above 2^53).
+  Making the narrower conversions explicit does not close either; it needs dedicated float32 and
+  integer operators on the wrapper.
+
+Guarded by `UntypedIntFloatOperandTests` (GolibTests: 2^64 against `MaxUint64`, a fraction against 0,
+`0.5 * 3`) and the `FloatCompareUntypedMaxUint64` behavioral project; `MathHugeArgReduction` stands
+guard over the trigonometric reduction at 2^63, 2^64 and 1e300.
+
 ---
 
 [← Compiled Library versus Source Code](compiled-library-vs-source.md) · [Index](README.md) · [Native and Narrow Integer Types →](native-and-narrow-integers.md)
