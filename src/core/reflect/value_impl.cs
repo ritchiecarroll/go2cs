@@ -1281,6 +1281,12 @@ private static uintptr delegateMethodToken(Delegate d) {
     // only by running it. So the identity comes from the MethodInfo OBJECT, which is defined for
     // every method kind; whether that object is stable across two Method(i) calls is the question
     // this measures.
+    //
+    // A METHOD VALUE (receiver bound) tokens by a per-method key instead: Go runs every method value
+    // of T.M through one `-fm` wrapper whose pc is not T.M's (ManagedPointerTokens.IsMethodValue).
+    if (ManagedPointerTokens.IsMethodValue(d)) {
+        return ((uintptr)ManagedPointerTokens.IdentityToken(ManagedPointerTokens.MethodValueKey(method)));
+    }
     return ((uintptr)ManagedPointerTokens.IdentityToken(method));
 }
 
