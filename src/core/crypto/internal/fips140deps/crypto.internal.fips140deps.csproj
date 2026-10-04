@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
-    <RootNamespace>go.crypto.@internal</RootNamespace>
+    <RootNamespace>go.crypto.@internal.fips140deps</RootNamespace>
     <AssemblyName>crypto.internal.fips140deps</AssemblyName>
     <Product>go2cs</Product>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>

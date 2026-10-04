@@ -1,7 +1,7 @@
 // Copyright 2023 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go.@internal.trace.@internal.testgen;
+namespace go.@internal.trace.@internal.testgen.go122;
 
 using bytes = bytes_package;
 using binary = encoding.binary_package;

@@ -28,7 +28,7 @@ global using traceꓸTime = go.@internal.trace_package.ΔTime;
 // </ImportedTypeAliases>
 
 using go;
-using static go.@internal.trace.@internal.testgen.testkit_package;
+using static go.@internal.trace.@internal.testgen.go122.testkit_package;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -70,7 +70,7 @@ using static go.@internal.trace.@internal.testgen.testkit_package;
 [assembly: go.GoPositionMap("internal/trace/internal/testgen/go122/trace.go", "trace.cs", "ABsutIKClKaWloCCxAAXMpKCAAYSooKokqzSrLKu4tyCqJSSgoKogqiCqIKCqAAHEKKCgoCCtgANHgANJtKClMqCrsKClICCpIKCrsKClIKUgoKCgIKkgoKoxIKogoKWgoKigoKClJaCgqaWgoKCloKCpqaCAAse0oKClIKCgoKUlJSCgIKkgpSmgoKCgpSClKSkpKSkpKSkpKSkrNKWgoKClIKCqKiyyoI=")]
 // </GoSourcePositionMaps>
 
-namespace go.@internal.trace.@internal.testgen;
+namespace go.@internal.trace.@internal.testgen.go122;
 
 [GoPackage("testkit", ImportPath = "internal/trace/internal/testgen/go122")]
 public static partial class testkit_package
