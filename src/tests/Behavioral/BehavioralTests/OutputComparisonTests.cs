@@ -1895,6 +1895,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSortArrayType() => CheckTarget("SortArrayType");
 
     [TestMethod]
+    public void CheckSortMethodSelfCapture() => CheckTarget("SortMethodSelfCapture");
+
+    [TestMethod]
     public void CheckSparseArrayIfaceElem() => CheckTarget("SparseArrayIfaceElem");
 
     [TestMethod]

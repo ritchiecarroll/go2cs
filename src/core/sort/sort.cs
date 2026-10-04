@@ -127,7 +127,7 @@ public static void Swap(this IntSlice x, nint i, nint j) {
 
 // Sort is a convenience method: x.Sort() calls Sort(x).
 public static void Sort(this IntSlice x) {
-    Sort(x);
+    Sort((Interface)(x));
 }
 
 [GoType("[]float64")] partial struct Float64Slice;
@@ -157,7 +157,7 @@ internal static bool isNaN(float64 f) {
 
 // Sort is a convenience method: x.Sort() calls Sort(x).
 public static void Sort(this Float64Slice x) {
-    Sort(x);
+    Sort((Interface)(x));
 }
 
 [GoType("[]@string")] partial struct StringSlice;
@@ -176,7 +176,7 @@ public static void Swap(this StringSlice x, nint i, nint j) {
 
 // Sort is a convenience method: x.Sort() calls Sort(x).
 public static void Sort(this StringSlice x) {
-    Sort(x);
+    Sort((Interface)(x));
 }
 
 // Convenience wrappers for common cases

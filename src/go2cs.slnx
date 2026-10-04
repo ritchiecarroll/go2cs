@@ -939,6 +939,7 @@
     <Project Path="tests/Behavioral/SockaddrRoundTrip/SockaddrRoundTrip.csproj" />
     <Project Path="tests/Behavioral/Solitaire/Solitaire.csproj" />
     <Project Path="tests/Behavioral/SortArrayType/SortArrayType.csproj" />
+    <Project Path="tests/Behavioral/SortMethodSelfCapture/SortMethodSelfCapture.csproj" />
     <Project Path="tests/Behavioral/SpreadOperator/SpreadOperator.csproj" />
     <Project Path="tests/Behavioral/StatLayoutTruth/StatLayoutTruth.csproj" />
     <Project Path="tests/Behavioral/StdLibInternalAbi/StdLibInternalAbi.csproj" />

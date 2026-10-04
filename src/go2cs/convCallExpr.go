@@ -2361,6 +2361,16 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					lastArg = len(callExpr.Args) - 1
 				}
 
+				if i == 0 && !isEmpty {
+					if cast := v.sameNameMethodCapture(callExpr, paramType); cast != "" {
+						if callExprContext.sameNameCaptureCasts == nil {
+							callExprContext.sameNameCaptureCasts = make(map[int]string)
+						}
+
+						callExprContext.sameNameCaptureCasts[0] = cast
+					}
+				}
+
 				for j := i; j <= lastArg; j++ {
 					if !isEmpty {
 						callExprContext.interfaceTypes[j] = paramType
@@ -6974,4 +6984,77 @@ func isEmptyCompositeLit(expr ast.Expr) bool {
 	lit, ok := expr.(*ast.CompositeLit)
 
 	return ok && len(lit.Elts) == 0
+}
+
+// sameNameMethodCapture answers the C# type to cast a call's FIRST argument to, or "", when the call is to a
+// package-level FUNCTION F and the argument's type -- or a named type in F's package whose underlying type is
+// the argument's type -- declares a METHOD also named F in F's package, taking one fewer parameter than the call
+// passes. That method is emitted as the extension `F(this T x, ...)` in F's own package class, an ordinary static
+// member of it, so a bare argument of type T makes the extension the better C# overload (an exact match beats the
+// boxing conversion to F's interface parameter) and the call binds the METHOD where Go binds the function.
+// sort's `func (x StringSlice) Sort() { Sort(x) }` then called itself, overflowing the stack on every .Sort() of
+// IntSlice, Float64Slice and StringSlice (pflag's sortFlags, hence cobra). Casting the argument to the parameter's
+// interface type leaves the extension inapplicable. Only an INTERFACE parameter can be captured: a same-typed
+// parameter would make the function and the extension one C# signature, which the converter already renames.
+func (v *Visitor) sameNameMethodCapture(callExpr *ast.CallExpr, paramType types.Type) string {
+	if len(callExpr.Args) == 0 {
+		return ""
+	}
+
+	var calleeIdent *ast.Ident
+
+	switch fun := ast.Unparen(callExpr.Fun).(type) {
+	case *ast.Ident:
+		calleeIdent = fun
+	case *ast.SelectorExpr:
+		calleeIdent = fun.Sel
+	default:
+		return ""
+	}
+
+	callee, ok := v.info.Uses[calleeIdent].(*types.Func)
+
+	if !ok || callee.Pkg() == nil {
+		return ""
+	}
+
+	if sig, ok := callee.Type().(*types.Signature); !ok || sig.Recv() != nil {
+		return ""
+	}
+
+	argType := v.getType(callExpr.Args[0], false)
+
+	if argType == nil {
+		return ""
+	}
+
+	if ptr, ok := argType.(*types.Pointer); ok {
+		argType = ptr.Elem()
+	}
+
+	scope := callee.Pkg().Scope()
+
+	for _, name := range scope.Names() {
+		typeName, ok := scope.Lookup(name).(*types.TypeName)
+
+		if !ok {
+			continue
+		}
+
+		named, ok := types.Unalias(typeName.Type()).(*types.Named)
+
+		if !ok || !(types.Identical(named, argType) || types.Identical(named.Underlying(), argType)) {
+			continue
+		}
+
+		for i := 0; i < named.NumMethods(); i++ {
+			method := named.Method(i)
+
+			if method.Name() == callee.Name() && method.Type().(*types.Signature).Params().Len()+1 == len(callExpr.Args) {
+				return v.getCSharpTypeName(paramType)
+			}
+		}
+	}
+
+	return ""
 }

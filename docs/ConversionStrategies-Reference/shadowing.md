@@ -727,6 +727,33 @@ ordinary import, a white-box and a plain reference-model test project). The beha
 `UsingStaticNamespaceAlias` compiles and runs both alias sets beside bare `Unsafe`, `Closure` and
 `Marshal`.
 
+## A function called with a value whose type has a same-named method is cast to its parameter type
+
+Go resolves `Sort(x)` to the package function `Sort(data Interface)` even when `x`'s type has a method
+named `Sort`. In C# that method is the extension `Sort(this StringSlice x)`, an ordinary static member of
+the same package class as the function. A bare `StringSlice` argument makes the extension the better
+overload, because an exact match beats the boxing conversion to `Interface`, so the call binds the method.
+sort's own convenience methods are exactly this shape, and they called themselves:
+
+```go
+func (x StringSlice) Sort() { Sort(x) }
+```
+```csharp
+public static void Sort(this StringSlice x) {
+    Sort((Interface)(x));
+}
+```
+
+The converter casts the first argument to the function's interface parameter type wherever the argument's
+type, or a named type in the function's package whose underlying type it is, declares a method of the same
+name taking one fewer parameter. An argument emitted through an interface adapter (`new …ᴠInterface(x)`)
+already binds the function and is left alone. So is a simple-name call reached through `using static`,
+because C# does not import extension methods as simple names. Before the change, every `.Sort()` on
+`IntSlice`, `Float64Slice` or `StringSlice` overflowed the stack, which is how pflag's flag sorting, and
+cobra through it, failed. A bare `sort.Sort(sort.StringSlice(v))` in user code did too. (Guarded by the
+`SortMethodSelfCapture` behavioral project: the three methods, the bare qualified call, and a user package's
+own `Sort` function beside a `words.Sort()` method. It overflowed on the first arm before the change.)
+
 ---
 
 [← Multi-Assignment and Evaluation Order](multi-assignment.md) · [Index](README.md) · [Multi-Result Values and Comma-Ok Forms →](multi-result-and-comma-ok.md)
