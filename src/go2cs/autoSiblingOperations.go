@@ -13,7 +13,6 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -135,16 +134,8 @@ func writeAutoConversionSibling(autoFileName string, baseName string, content st
 		"//     *.cs) and is regenerated on every conversion for upgrade-time diff review. Do not edit." + "\r\n" +
 		"// </auto-generated>" + "\r\n" + "\r\n"
 
-	autoFile, err := os.Create(autoFileName)
-
-	if err != nil {
-		return fmt.Errorf("failed to create auto-conversion sibling file \"%s\": %s", autoFileName, err)
-	}
-
-	defer autoFile.Close()
-
-	if _, err = autoFile.WriteString(banner + content); err != nil {
-		return fmt.Errorf("failed to write to auto-conversion sibling file \"%s\": %s", autoFileName, err)
+	if _, err := writeSourceIfChanged(autoFileName, []byte(banner+content)); err != nil {
+		return fmt.Errorf("failed to write auto-conversion sibling file \"%s\": %s", autoFileName, err)
 	}
 
 	return nil

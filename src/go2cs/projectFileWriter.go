@@ -764,18 +764,15 @@ func (v *Visitor) writeOutputFile(outputFileName string) error {
 	// emitted source (positionMapOperations).
 	v.finalizePositionMap(outputFileName)
 
-	outputFile, err := os.Create(outputFileName)
+	content := []byte(v.outputBuilder.String())
 
-	if err != nil {
-		return fmt.Errorf("failed to create output source file \"%s\": %s", outputFileName, err)
-	}
+	// A file still holding DEFERRED MARKERS is rewritten by the marker passes once the package is visited, so its text
+	// here never equals the previous run's resolved file; remember that file so restoreUnchangedMarkedSources can give
+	// its time back when the resolved text turns out identical (incrementalWrites.go).
+	rememberIfMarked(outputFileName, content)
 
-	defer outputFile.Close()
-
-	_, err = outputFile.WriteString(v.outputBuilder.String())
-
-	if err != nil {
-		return fmt.Errorf("failed to write to output source file \"%s\": %s", outputFileName, err)
+	if _, err := writeSourceIfChanged(outputFileName, content); err != nil {
+		return fmt.Errorf("failed to write output source file \"%s\": %s", outputFileName, err)
 	}
 
 	return nil

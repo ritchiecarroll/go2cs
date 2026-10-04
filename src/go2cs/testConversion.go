@@ -1091,6 +1091,10 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 	// A model change between runs (or a recompile fallback) must not leave a stale bridge anchor
 	// on disk: it is merge-preserving, and a superseded record set would silently resurrect.
 	// The models that need it re-seed it below; everything else keeps the directory clean.
+	// The anchors are re-seeded (or removed) and then merged into, and the recompile-model fallback
+	// re-runs this function over files the abandoned attempt rewrote: remember every source as it
+	// stood before this run, so an unchanged one gets its time back (incrementalWrites.go).
+	rememberedSources := rememberSourcesIn(outputPath)
 	_ = os.Remove(filepath.Join(outputPath, internalTestPackageInfoFileName))
 
 	internalBridgeName := getSanitizedImport(production.Name + "_internal_test" + PackageSuffix)
@@ -1532,6 +1536,15 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 	if err := updateWarningEntries(outputPath, goosOfTarget(options.targetPlatform), true, testWarningFacts); err != nil {
 		showWarning("%s", err)
 	}
+
+	// Both marker passes have run on the test sources: give an unchanged one its previous time back
+	// (incrementalWrites.go).
+	restoreUnchangedMarkedSources(testAdapterResolveNames)
+	// Every source remembered before this run, and the three anchors by name: a fallback re-run's
+	// snapshot no longer lists the external anchor the abandoned attempt removed.
+	restoreUnchangedMarkedSources(append(rememberedSources, testInfoPath,
+		filepath.Join(outputPath, internalTestPackageInfoFileName),
+		filepath.Join(outputPath, externalTestPackageInfoFileName)))
 
 	return result, nil
 }

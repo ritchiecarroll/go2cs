@@ -106,6 +106,9 @@ func loadsPackageSubtree(inputFilePath string, options Options) bool {
 func processConversion(inputFilePath string, isDir bool, outputFilePath string, options Options) error {
 	var err error
 
+	// The writers that take no Options read the census's write-everything setting from here (incrementalWrites.go).
+	alwaysWriteSources.Store(options.alwaysWriteSources)
+
 	cfg := &packages.Config{
 		Mode:       packages.LoadAllSyntax,
 		Dir:        inputFilePath,
@@ -657,6 +660,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				showWarning("%s", err)
 			}
 		}
+
+		// Both marker passes have run: a marker-bearing source whose resolved text is what it held before this run
+		// gets its previous time back (incrementalWrites.go).
+		restoreUnchangedMarkedSources(outputFileNames)
 
 		// Emit the ordered package-var initialization file (no-op unless any initializer was
 		// relocated for init-order correctness). Package (directory) conversions only. Under
