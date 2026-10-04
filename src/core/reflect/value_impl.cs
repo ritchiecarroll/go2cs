@@ -1192,6 +1192,23 @@ public static uintptr Pointer(this ΔValue v) {
     return reflectPointerToken(v);
 }
 
+// UnsafeAddr returns a pointer to v's data, as a uintptr. It panics if v is not addressable.
+//
+// Go documents it as uintptr(v.Addr().UnsafePointer()), and that is what this answers. The auto body
+// returned uintptr(v.ptr), the Go data word this bridge never populates (see InterfaceData), so the
+// number named nothing: go-cmp's unexported-field read, NewAt(f.Type, v.UnsafeAddr()+f.Offset), then
+// had no storage to resolve. Through Addr the answer is the aliased box's token, REGISTERED by
+// reflectPointerToken, so NewAt resolves it, and token + a Go field offset, back to real storage.
+public static uintptr UnsafeAddr(this ΔValue v) {
+    if (v.typ() == nil) {
+        throw panic(Ꮡ(new ValueError("reflect.Value.UnsafeAddr"u8, Invalid)));
+    }
+    if ((flag)(v.flag & flagAddr) == 0) {
+        throw panic("reflect.Value.UnsafeAddr of unaddressable value");
+    }
+    return v.Addr().Pointer();
+}
+
 // InterfaceData returns a pair of unspecified uintptr values.
 //
 // THE CONTRACT HERE IS THE ABSENCE OF ONE, AND THAT IS WHAT MAKES THIS ANSWERABLE. Go's own doc
@@ -1658,13 +1675,21 @@ public static ΔValue NewAt(ΔType typ, @unsafe.Pointer p) {
     }
     nint[]? dims = arrayDimsOfReflectType(typ);
     GoChanDir chanDir = chanDirOfReflectType(typ);
-    // The box carries the POINTEE type over a zero, exactly as New does. gcbits -- verifyGCBits'
-    // only caller here -- reads that pointee type and dims off the result's descriptor, never p's
-    // memory. A raw-address box `(ж<st>)(uintptr)p` would fault (0xc0000005): a slice's
-    // UnsafePointer is a storage HASH, not an address, and a native box over it dereferences to
-    // nowhere on the first read. NewAt's true pointer identity is the SliceAt-disclosed class; it is
-    // not asked on this path, and asking it would reopen that ruling rather than this row.
-    object box = GoReflect.NewPointerBox(st, GoReflect.ZeroValueOf(st, dims, chanDir));
+    // On a MISS the box carries the POINTEE type over a zero, exactly as New does. gcbits --
+    // verifyGCBits' only caller here -- reads that pointee type and dims off the result's
+    // descriptor, never p's memory. A raw-address box `(ж<st>)(uintptr)p` would fault (0xc0000005):
+    // a slice's UnsafePointer is a storage HASH, not an address, and a native box over it
+    // dereferences to nowhere on the first read. The SliceAt-disclosed identity class is untouched:
+    // the resolution below reads the token table and changes no token value.
+    //
+    // A pointer that NAMES real storage resolves to it, so the result aliases that storage the way
+    // Go's does: go-cmp reads an unexported field as `NewAt(f.Type, v.UnsafeAddr() + f.Offset)`, and
+    // with the zero box every such field read as zero (cmpopts IgnoreUnexported and IgnoreFields
+    // compared differing structs equal). EXACT ONLY (ruled 2026-10-04): a live token, or a live
+    // token plus an offset landing exactly on a node of this type -- see
+    // GoReflect.ResolveNewAtPointee. Every miss keeps the zero box, so gcbits' path is unchanged.
+    object box = GoReflect.ResolveNewAtPointee((nuint)(uintptr)p, st) ??
+                 GoReflect.NewPointerBox(st, GoReflect.ZeroValueOf(st, dims, chanDir));
     return makeTypedValue(box, typeof(ж<>).MakeGenericType(st), null, default, chanDir);
 }
 

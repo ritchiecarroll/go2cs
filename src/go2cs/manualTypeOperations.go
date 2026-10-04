@@ -1135,6 +1135,11 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"Value.Field":         goosAny,
 		"Value.UnsafePointer": goosAny,
 		"Value.Pointer":       goosAny,
+		// The auto body is `return uintptr(v.ptr)`: the Go data word this bridge never populates, so
+		// it answered a number that names nothing, and NewAt(t, v.UnsafeAddr()+f.Offset) -- go-cmp's
+		// unexported-field read -- could not resolve it. Go documents it as
+		// uintptr(v.Addr().UnsafePointer()), the registered token. See reflect/value_impl.cs.
+		"Value.UnsafeAddr": goosAny,
 		// The last two type constructors on the typelinks path, joining PointerTo/ArrayOf/SliceOf/
 		// StructOf above for the same recorded reason: the auto body looks the constructed type up
 		// by NAME through typesByString -> typelinks(), the linker-built type table, which is a
