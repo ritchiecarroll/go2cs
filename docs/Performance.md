@@ -11,7 +11,7 @@ interface dispatch — plus raw compute loops where the two runtimes should be c
 exhaustive benchmark game; it gives the common expected range of differences. The short version:
 transpiled C# is **usually slower than Go, but not universally** — maps and the stack-string
 path run at parity or faster in both C# variants (maps dramatically so under Native AOT), while
-the rest ranges from ~1.5× on tight compute to the structural-interface assert, the honest
+the rest ranges from well under 2× on tight compute to the structural-interface assert, the honest
 outlier at the other end.
 
 ## The benchmarks
@@ -31,6 +31,7 @@ outlier at the other end.
 | **IfaceCall** | 50M iterations of pure interface method dispatch — interface values of statically-known types built once, called in a megamorphic hot loop; no asserts, no switches. The row that answers "what does calling an interface method cost?" |
 | **Iface** | 20M iterations of the **common** interface cases: method dispatch, concrete comma-ok assertions, and a type switch over a closed set — all resolved by the compile-time (nominal) machinery: generated adapters and cast-shaped asserts. What ordinary Go interface code costs. |
 | **IfaceShell** | 5M iterations × 2 duck-typed interface asserts + forwarded calls — one on a value-typed dynamic value (the reflective **object shell**), one on a pointer-sourced one (the delegate-bound **generic shell**). The one path with no compile-time answer, and the only shared mechanism whose Native AOT behavior is otherwise unexercised. |
+| **RefLower** | A pointer-heavy hot loop: pointer parameters passed on to pointer parameters, address-taken locals and field addresses — the shapes the converter's ref-lowering turns from heap boxes into native C# `ref`s. |
 
 Every benchmark prints a deterministic **checksum** (verified byte-identical across Go, C# JIT, and
 C# AOT before anything is measured) plus its own workload time measured in-program via
@@ -54,8 +55,8 @@ separately by the Startup row.
   same-machine. Ratios from different hardware are not comparable and are never mixed.
 - **The AOT column's numbers are runtime numbers; producing them is expensive, and we say so.**
   Each Native AOT publish compiles the entire converted-stdlib closure whole-program — hours per
-  publish, largely single-threaded, at a **15–18 GB** build-time working-set peak (re-measured per
-  hop) — which is also exactly what buys the column's lean images and runtime memory wins. The
+  publish, largely single-threaded, at a **15–18 GB** build-time working-set peak (re-measured at
+  each Go or .NET release move) — which is also exactly what buys the column's lean images and runtime memory wins. The
   full disclosure, the reasoning, and the compile-farm mitigation live in the suite README's
   ["What the AOT column costs to produce"](https://github.com/ritchiecarroll/go2cs/blob/master/src/tests/Performance/README.md#what-the-aot-column-costs-to-produce--the-honesty-footnote)
   section.
@@ -147,14 +148,13 @@ C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true
   assembly-loading and Go package initialization for the full converted-stdlib closure the binary
   references; **Native AOT removes the JIT-on-the-fly cost and starts several times faster than
   the JIT**, but still runs the same package initializers, so a gap to Go remains. For CLI-shaped
-  programs AOT is the deployment story on time — see the memory note below for its trade.
-- **Memory:** the working-set columns carry the cost of the full converted standard library. The
-  JIT column's floor is the .NET runtime plus loaded assemblies; the AOT column's is *higher* —
-  the self-contained binary maps the whole compiled closure into the process — so AOT currently
-  trades memory for its startup and per-benchmark wins. Reducing both floors is optimization
-  surface (trimming eligibility, lazy package init), not a semantic cost.
-- **Function calls / integers (Fib):** the closest compute workload — ~1.6× under the JIT and
-  ~1.5× under Native AOT, the one tight loop where AOT leads the JIT rather than trailing it.
+  programs AOT is the deployment story on time.
+- **Memory:** both C# columns carry the cost of the full converted standard library, so they sit
+  well above Go on every row but Map. The JIT column's floor is the .NET runtime plus loaded
+  assemblies; under .NET 10 the AOT column's floor is lower than the JIT's on every row. Reducing
+  both floors is optimization surface (trimming eligibility, lazy package init), not a semantic cost.
+- **Function calls / integers (Fib):** the closest compute workload, well under 2× Go in both C#
+  variants.
 - **Slices & floats (Sieve, MatMul):** the gap is `slice<T>` header emulation and bounds checks the
   JIT can't always elide, compounded on nested `[][]float64` access. **AOT is *slower* than the JIT
   here** — ILC lacks the JIT's dynamic PGO/OSR loop optimizations, trading tight-loop throughput for
@@ -165,7 +165,7 @@ C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true
   concat operand and its buffer is mutated), so they stay `@string` — see StringView for the eligible case.
 - **StringView:** the same `[]byte`→`string` cost, but for the subset the converter proves
   non-escaping and read/compare-only, where it emits a zero-copy stack string (`sstring`) instead of
-  `@string` (see [ConversionStrategies-Reference](https://github.com/ritchiecarroll/go2cs/blob/master/docs/ConversionStrategies-Reference.md)).
+  `@string` (see the [strings reference](https://github.com/ritchiecarroll/go2cs/blob/master/docs/ConversionStrategies-Reference/strings.md#a-non-escaping-stringbyte-local-emits-the-stack-string-sstring)).
   The converter hoists one `sstring` view per call rather than re-materializing it per comparison,
   since the JIT won't lift a `ref struct` view out of a loop on its own. **Runs at parity with Go
   or better in both C# variants** — and the number to watch as the eligibility surface widens; arc
@@ -181,7 +181,7 @@ C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true
 - **Sort:** the runtime's `sort.Interface` shim (`Interface<T>`) binds `Len`/`Less`/`Swap` via
   reflection-created delegates — cached, but a delegate hop per comparison.
 - **Channel:** `channel<T>` + goroutine emulation over managed threading vs Go's runtime scheduler —
-  real unbuffered rendezvous, single-fire select, operand-once hoisting. Currently ~2.3–2.8× on
+  real unbuffered rendezvous, single-fire select, operand-once hoisting. Currently between 2× and 3× on
   this producer→consumer churn: the rendezvous rides managed synchronization primitives where Go's
   scheduler hands off directly, a cost the cooperative-scheduler arc
   ([DESIGN-cooperative-scheduler.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-cooperative-scheduler.md))
@@ -206,8 +206,8 @@ C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true
   [DESIGN-iface-shell-caching.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-iface-shell-caching.md).
 - **RefLower:** the ж-bound hot path — pointer parameters feeding pointer parameters, address-taken
   locals, field addresses — after the ref-lowering arc replaced its heap boxes with native `ref`
-  (before that arc this shape ran ~25× Go; the lowering brought the JIT to ~2.9×). AOT currently
-  trails the JIT here by a wide margin (~8×) — ILC's codegen of the ref-lowered loop is a priced
+  (before that arc this shape ran about 25× Go; the lowering brought the JIT within 3×). AOT
+  trails the JIT here by a wide margin — ILC's codegen of the ref-lowered loop is a priced
   open question for the arc's next phase
   ([DESIGN-zh-box-reduction.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-zh-box-reduction.md)).
 
@@ -218,7 +218,7 @@ binary costs to **build**, and the cost is large enough that omitting it would m
 
 - **Build time.** Each benchmark is its own self-contained publish, and ILC compiles the **entire
   converted-stdlib closure** (~three hundred packages) into it, largely single-threaded (~1.1–1.3
-  effective cores regardless of machine). Measured at the .NET 10 hop: **hours per publish** on
+  effective cores regardless of machine). Measured at the move to .NET 10: **hours per publish** on
   laptop-class hardware — roughly an order of magnitude over the .NET 9 era on identical input —
   so a full 14-row AOT re-baseline is days serial, overnight when publishes run concurrently on a
   high-memory box (measured figures and the run series:
@@ -253,13 +253,13 @@ harness, same methodology, same host — only the toolchain moved.
 
 The Native AOT column above is **mixed-provenance**, deliberately and under a measured licence. A
 single Native AOT publish of this corpus costs ~3.3 h on the measurement host, so the fourteen-cell
-AOT ladder was completed by publishing eight of the binaries on a second fleet machine and adopting
-them here, each SHA-256-verified on receipt:
+AOT ladder was completed by publishing eight of the binaries on a second, higher-memory machine and
+adopting them here, each SHA-256-verified on receipt:
 
 | provenance | rows |
 |:--|:--|
 | **canon** — published on the measurement host itself | Startup, Fib, Sieve, MatMul, String, RefLower |
-| **farm-adopted** — published on the fleet's i9-13900K, hash-verified, then measured here | StringView, StringMatch, Map, Sort, Channel, IfaceCall, Iface, IfaceShell |
+| **farm-adopted** — published on the second machine, hash-verified, then measured here | StringView, StringMatch, Map, Sort, Channel, IfaceCall, Iface, IfaceShell |
 
 Every row, whatever its provenance, was **measured on the canon host only**, and every adopted
 binary passed the suite's own Verify phase (output-identical to Go) before it was timed. The
