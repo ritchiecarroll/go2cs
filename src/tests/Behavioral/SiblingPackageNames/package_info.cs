@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using foo1ꓸAlias = go.SiblingPackageNames.teststructs.foo1.foo_package.Pair;
-global using foo2ꓸAlias = go.SiblingPackageNames.teststructs.foo2.foo_package.Triple;
 // </ImportedTypeAliases>
 
 using go;
@@ -51,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "AAsigoaCgoaCgg==")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "AAsigoaCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

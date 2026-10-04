@@ -1,5 +1,3 @@
-global using Alias = go.SiblingPackageNames.teststructs.foo1.foo_package.Pair;
-
 namespace go.SiblingPackageNames.teststructs.foo1;
 
 partial class foo_package {

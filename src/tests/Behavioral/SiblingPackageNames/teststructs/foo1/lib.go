@@ -16,6 +16,3 @@ type Pair struct {
 func (p Pair) Sum() int {
 	return p.Left + p.Right
 }
-
-// Alias is this sibling's exported type alias.
-type Alias = Pair

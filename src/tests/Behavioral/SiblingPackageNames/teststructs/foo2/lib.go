@@ -16,6 +16,3 @@ type Triple struct {
 func (t Triple) Join() string {
 	return t.A + t.B + t.C
 }
-
-// Alias is this sibling's exported type alias.
-type Alias = Triple

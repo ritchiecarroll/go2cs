@@ -27,7 +27,6 @@ using static go.SiblingPackageNames.teststructs.foo1.foo_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Alias", "go.SiblingPackageNames.teststructs.foo1.foo_package.Pair")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -50,7 +49,7 @@ using static go.SiblingPackageNames.teststructs.foo1.foo_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("lib.go", "lib.cs", "AAkMggAGEoI=")]
+[assembly: go.GoPositionMap("lib.go", "lib.cs", "/IIABhKC")]
 // </GoSourcePositionMaps>
 
 namespace go.SiblingPackageNames.teststructs.foo1;
