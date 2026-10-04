@@ -380,17 +380,33 @@ built-in float operator:
   relied on the implicit form (it builds on windows, linux and darwin unchanged), and no emission moves.
 - **Not affected in practice:** math's `x >= reduceThreshold` (Sin, Cos, Sincos, Tan). The truncation
   saturates for huge `x`, and the threshold is a small integer, so the comparison agreed with Go there.
-- **The siblings, not closed by this rule.** `UntypedFloat` and `UntypedComplex` keep an implicit
-  conversion from `float64` (constant initializers such as `=> 3.14` need it), and C# chains a built-in
-  widening into it. So a `float32` operand still compares against an unrounded `UntypedFloat` in
-  double (`float32(0.1) <= c` with `c = 0.1` reads false, where Go rounds `c` to float32 first), and an
-  `int64` operand compares against an integral `UntypedFloat` in double (exact in Go above 2^53).
-  Making the narrower conversions explicit does not close either; it needs dedicated float32 and
-  integer operators on the wrapper.
+- **The siblings take the opposite fix: a cast at the comparison.** `UntypedFloat` and `UntypedComplex`
+  keep an implicit conversion from `float64` (constant initializers such as `=> 3.14` need it), and C#
+  chains a built-in widening into it, so making the narrower conversions explicit closes nothing: a
+  `float32` operand would still compare against an unrounded `UntypedFloat` in double. The converter
+  instead casts a bare named untyped float or complex constant to the other operand's type when that
+  type is one a double cannot hold exactly — `float32`, `complex64`, or a 64-bit or native integer —
+  the same cast arithmetic beside such a constant already takes:
+
+```go
+const tenth = 0.1
+const twoTo53 = 9007199254740992.0
+f <= tenth      // float32: true, tenth rounds to float32 first
+big > twoTo53   // int64 2^53+1: true, compared as integers
+```
+```csharp
+f <= (float32)tenth
+big > (int64)twoTo53
+```
+
+  A `float64` or narrower-integer operand keeps the bare reference (double holds it exactly), and an
+  untyped INTEGER constant is out of scope: its BigInteger-backed form is already cast at the reference.
 
 Guarded by `UntypedIntFloatOperandTests` (GolibTests: 2^64 against `MaxUint64`, a fraction against 0,
 `0.5 * 3`) and the `FloatCompareUntypedMaxUint64` behavioral project; `MathHugeArgReduction` stands
-guard over the trigonometric reduction at 2^63, 2^64 and 1e300.
+guard over the trigonometric reduction at 2^63, 2^64 and 1e300; `UntypedFloatTypedCompare` guards the
+comparison cast (float32 and 64-bit integer operands, with arithmetic, literal, computed-constant and
+float64 controls).
 
 ---
 

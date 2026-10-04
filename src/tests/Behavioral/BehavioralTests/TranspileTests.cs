@@ -2227,6 +2227,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckUntypedFloatDefault() => CheckTarget("UntypedFloatDefault");
 
     [TestMethod]
+    public void CheckUntypedFloatTypedCompare() => CheckTarget("UntypedFloatTypedCompare");
+
+    [TestMethod]
     public void CheckUntypedIntFloatContexts() => CheckTarget("UntypedIntFloatContexts");
 
     [TestMethod]

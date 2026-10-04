@@ -5654,7 +5654,7 @@ internal static void sysmon() {
                     if (next - now < sleep) {
                         sleep = next - now;
                     }
-                    var shouldRelax = sleep >= osRelaxMinNS;
+                    var shouldRelax = sleep >= (int64)osRelaxMinNS;
                     if (shouldRelax) {
                         osRelax(true);
                     }
