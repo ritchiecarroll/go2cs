@@ -31,6 +31,26 @@ validation-pack block already uses for the same population — `rewriteOfCorePac
 output-location test no fixture satisfies — but changing that gate risks silently un-publishing a
 real roster row's proof page, so it is a ruling for the roster owner rather than a fixture-side fix.
 
+# `ConsumerUsings`: the consumer usings gate
+
+`ConsumerUsings` is the consumer fixture for the global usings go.lib's `buildTransitive/go.lib.targets`
+gives every project that references a go.* or nugetgo.* package: `using go;` and
+`using static go.builtin;`. Its `Program.cs` declares neither, so it compiles only if the package
+supplies them. `test-consumer-usings.ps1` restores it from ONE feed into a fresh package cache and runs
+two arms:
+
+- a build and run with no usings in the source;
+- a control that proves the arm can fail: with `-p:GoConsumerUsings=false` the build must fail with
+  CS0246.
+
+```text
+pwsh src/tests/PackageTests/ConsumerUsings/test-consumer-usings.ps1 -Version <go.lib version> [-Source <feed dir or URL>]
+```
+
+Against a go.lib published before the usings existed, `-TargetsFile src/core/golib/buildTransitive/go.lib.targets`
+imports the working-tree file explicitly. That is how the gate was read red-first, against the published
+1.24.13.3: without the file the first arm FAILS with CS0246 and CS0103; with it, both arms PASS.
+
 # `RidCompileAsset`: the RID-selected compile asset gate
 
 `RidCompileAsset` is the consumer fixture for go.lib's `buildTransitive/go.lib.targets`. A
@@ -56,23 +76,3 @@ Against a package set that predates the targets file, `-TargetsFile src/core/gol
 imports the working-tree file explicitly. That is how the gate was read red-first, against the
 published 1.24.13.1: on Linux both build arms FAIL with CS0426 and the control PASSES. With the file,
 all four arms PASS on both platforms.
-
-# `ConsumerUsings`: the consumer usings gate
-
-`ConsumerUsings` is the consumer fixture for the global usings go.lib's `buildTransitive/go.lib.targets`
-gives every project that references a go.* or nugetgo.* package: `using go;` and
-`using static go.builtin;`. Its `Program.cs` declares neither, so it compiles only if the package
-supplies them. `test-consumer-usings.ps1` restores it from ONE feed into a fresh package cache and runs
-two arms:
-
-- a build and run with no usings in the source;
-- a control that proves the arm can fail: with `-p:GoConsumerUsings=false` the build must fail with
-  CS0246.
-
-```text
-pwsh src/tests/PackageTests/ConsumerUsings/test-consumer-usings.ps1 -Version <go.lib version> [-Source <feed dir or URL>]
-```
-
-Against a go.lib published before the usings existed, `-TargetsFile src/core/golib/buildTransitive/go.lib.targets`
-imports the working-tree file explicitly. That is how the gate was read red-first, against the published
-1.24.13.3: without the file the first arm FAILS with CS0246 and CS0103; with it, both arms PASS.
