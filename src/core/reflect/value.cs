@@ -1609,22 +1609,7 @@ public static bool CanUint(this ΔValue v) {
 // This prevents inlining Value.UnsafeAddr when -d=checkptr is enabled,
 // which ensures cmd/compile can recognize unsafe.Pointer(v.UnsafeAddr())
 // and make an exception.
-
-// UnsafeAddr returns a pointer to v's data, as a uintptr.
-// It panics if v is not addressable.
-//
-// It's preferred to use uintptr(Value.Addr().UnsafePointer()) to get the equivalent result.
-public static uintptr UnsafeAddr(this ΔValue v) {
-    if (v.typ() == nil) {
-        throw panic(Ꮡ(new ValueError("reflect.Value.UnsafeAddr"u8, Invalid)));
-    }
-    if ((flag)(v.flag & flagAddr) == 0) {
-        throw panic("reflect.Value.UnsafeAddr of unaddressable value");
-    }
-    // The compiler loses track as it converts to uintptr. Force escape.
-    escapes(@unsafe.Pointer.OrTypedNil(v.ptr));
-    return (uintptr)v.ptr;
-}
+// go2cs generated this placeholder — func UnsafeAddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func UnsafePointer is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
