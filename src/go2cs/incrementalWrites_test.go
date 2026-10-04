@@ -22,6 +22,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"golang.org/x/tools/go/packages"
 )
 
 // incrementalFixtureStamp is the instant every emitted .cs is set to between the two conversions. A FIXED old instant,
@@ -205,5 +207,81 @@ func Describe() string {
 
 	if moved := rewrittenSources(t, sources); len(moved) > 0 {
 		t.Errorf("an unchanged re-conversion rewrote %d of %d .cs files: %v", len(moved), len(sources), moved)
+	}
+}
+
+// A `-tests` conversion RE-SEEDS its metadata anchors on every run (package_test_info.cs is written from a seed, and
+// package_info_internal_test.cs is removed and re-seeded) before merging the variants' records into them, so the
+// merge's byte compare reads the seed, never the previous run's file. Measured on sweep row io: every re-run rewrote
+// exactly these two, byte-identical. Their previous state is remembered before the re-seed and an unchanged one gets
+// its time back.
+func TestUnchangedTestsReconversionKeepsMetadataAnchorsUntouched(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: loads the fixture package via go/packages")
+	}
+
+	// A census conversion earlier in this process leaves the setting on; processConversion is what sets it.
+	alwaysWriteSources.Store(false)
+
+	// A MIXED suite, as io's is: the internal bridge anchor is written only beside an external variant.
+	dir := t.TempDir()
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod":              "module example/mixed\n\ngo 1.23\n",
+		"shapes/shape.go":     "package shapes\n\nfunc Area(w, h int) int { return w * h }\n",
+		"shapes/area_test.go": "package shapes\n\nimport \"testing\"\n\nfunc TestArea(t *testing.T) {\n\tif Area(2, 3) != 6 {\n\t\tt.Fatal(\"area\")\n\t}\n}\n",
+		"shapes/ext_test.go":  "package shapes_test\n\nimport (\n\t\"testing\"\n\n\t\"example/mixed/shapes\"\n)\n\nfunc TestAreaExternal(t *testing.T) {\n\tif shapes.Area(1, 1) != 1 {\n\t\tt.Fatal(\"area\")\n\t}\n}\n",
+	})
+
+	inputPath := filepath.Join(dir, "shapes")
+	outputPath := t.TempDir()
+
+	convert := func() {
+		t.Helper()
+
+		loaded, err := packages.Load(&packages.Config{Mode: packages.LoadAllSyntax, Dir: inputPath, Tests: true}, ".")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		production := findProductionPackage(loaded, inputPath)
+		internal, external := findTestVariants(loaded, production)
+
+		if model := selectTestProjectModel(internal, external); model != testProjectWhiteboxReference {
+			t.Fatalf("fixture model = %v, want whitebox-reference (the model that seeds both anchors)", model)
+		}
+
+		resetPackageState(&packages.Package{})
+		packageNamespace = "go"
+
+		options := Options{
+			indentSpaces:        4,
+			preferVarDecl:       true,
+			useChannelOperators: true,
+			convertTests:        true,
+			targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
+			testPackagePath:     production.PkgPath,
+			testPackageName:     production.Name,
+		}
+
+		if _, err = convertTestVariants(testProjectWhiteboxReference, production, internal, external,
+			selectCompileExcludedTestFiles(internal, external), inputPath, outputPath, "go",
+			NewHashSet(supportedTestCapabilities()), options); err != nil {
+			t.Fatalf("convertTestVariants: %v", err)
+		}
+	}
+
+	convert()
+	sources := stampEmittedSources(t, outputPath)
+
+	for _, anchor := range []string{testPackageInfoFileName, internalTestPackageInfoFileName} {
+		if _, err := os.Stat(filepath.Join(outputPath, anchor)); err != nil {
+			t.Fatalf("the fixture no longer emits %s, so it cannot guard its re-seed: %v", anchor, err)
+		}
+	}
+
+	convert()
+
+	if moved := rewrittenSources(t, sources); len(moved) > 0 {
+		t.Errorf("an unchanged -tests re-conversion rewrote %d of %d .cs files: %v", len(moved), len(sources), moved)
 	}
 }
