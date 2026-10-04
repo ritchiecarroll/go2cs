@@ -451,6 +451,7 @@
     <None Include="$(MSBuildThisFileDirectory)visitValueSpec.go" />
     <None Include="$(MSBuildThisFileDirectory)licensing.go" />
     <None Include="$(MSBuildThisFileDirectory)licensing_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)liftedIfaceTestCast_integration_test.go" />
     <None Include="$(MSBuildThisFileDirectory)LICENSE" />
     <None Include="$(MSBuildThisFileDirectory)LICENSE-EXCEPTION" />
     <None Include="$(MSBuildThisFileDirectory)rootGoTypeDescriptor_test.go" />
