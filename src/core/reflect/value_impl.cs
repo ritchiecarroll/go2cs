@@ -198,6 +198,17 @@ internal static any /*i*/ packInterfaceValue(ΔValue v) {
     return (st is null ? null : GoReflect.CanonicalNilPointer(st))!;
 }
 
+// storedDatum is what a reflect WRITE path stores for x into a slot of kind slotKind. An INTERFACE
+// slot takes the interface packing of x -- packInterfaceValue, the same re-encoding Interface()
+// applies -- so a nil pointer or nil func read out of a struct FIELD (typed in typ_, null in its
+// datum) lands as Go's typed nil (type=*T, value=nil) rather than as the nil interface. Set and
+// SetMapIndex marshalled the raw datum, so `%T` of the stored value read <nil> where Go reads
+// *main.Nested (mapstructure's decodeMapFromStruct, which stores a nil *Nested field with
+// SetMapIndex). Append writes through Set. Any other slot keeps the datum: a typed nil is an
+// INTERFACE-space encoding, and a *T slot holds the plain null.
+internal static object? storedDatum(ΔValue x, ΔKind slotKind) =>
+    slotKind == ΔInterface ? packInterfaceValue(x) : x.live;
+
 // mustBeKind is Go's per-accessor kind check. Go writes it inline in each accessor — a switch whose
 // default is `panic(&ValueError{"reflect.Value.X", v.kind()})` — and reflect's own tests assert the
 // resulting text ("call of reflect.Value.Bool on float64 Value"), so the ValueError carries both the
@@ -1561,7 +1572,7 @@ public static void Set(this ΔValue v, ΔValue x) {
     // a direction nor a defined type's name.
     ΔType dstReflectType = v.Type();
     GoChanDir dstDir = chanDirOfReflectType(dstReflectType);
-    if (!GoReflect.TryMarshalAssignable(x.live, dstType, out object? marshalled, GoReflect.GoTypeRelation.Assignable, dstDir)) {
+    if (!GoReflect.TryMarshalAssignable(storedDatum(x, v.kind()), dstType, out object? marshalled, GoReflect.GoTypeRelation.Assignable, dstDir)) {
         throw panic("reflect.Set: value of type " + x.Type().String() +
                     " is not assignable to type " + dstReflectType.String());
     }
@@ -1851,7 +1862,7 @@ public static void SetMapIndex(this ΔValue v, ΔValue key, ΔValue elem) {
         throw panic("reflect.Value.SetMapIndex: key of type " + GoReflect.GoTypeName(key.live?.GetType()) +
                     " is not assignable to type " + GoReflect.GoTypeName(keyType));
     }
-    if (!GoReflect.TryMarshalAssignable(elem.live, elemType, out object? e, GoReflect.GoTypeRelation.Assignable)) {
+    if (!GoReflect.TryMarshalAssignable(storedDatum(elem, v.Type().Elem().Kind()), elemType, out object? e, GoReflect.GoTypeRelation.Assignable)) {
         throw panic("reflect.Value.SetMapIndex: value of type " + GoReflect.GoTypeName(elem.live?.GetType()) +
                     " is not assignable to type " + GoReflect.GoTypeName(elemType));
     }

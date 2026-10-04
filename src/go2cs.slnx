@@ -864,6 +864,7 @@
     <Project Path="tests/Behavioral/ReflectStructOf/ReflectStructOf.csproj" />
     <Project Path="tests/Behavioral/ReflectStructTagCopy/ReflectStructTagCopy.csproj" />
     <Project Path="tests/Behavioral/ReflectTypedNilInterface/ReflectTypedNilInterface.csproj" />
+    <Project Path="tests/Behavioral/ReflectTypedNilStore/ReflectTypedNilStore.csproj" />
     <Project Path="tests/Behavioral/ReflectUnexportedFieldFlags/ReflectUnexportedFieldFlags.csproj" />
     <Project Path="tests/Behavioral/ReflectValueMapKeyIdentity/ReflectValueMapKeyIdentity.csproj" />
     <Project Path="tests/Behavioral/ReflectValueSingles/ReflectValueSingles.csproj" />

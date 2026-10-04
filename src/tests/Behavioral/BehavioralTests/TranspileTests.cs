@@ -1753,6 +1753,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckReflectTypedNilInterface() => CheckTarget("ReflectTypedNilInterface");
 
     [TestMethod]
+    public void CheckReflectTypedNilStore() => CheckTarget("ReflectTypedNilStore");
+
+    [TestMethod]
     public void CheckReflectUnexportedFieldFlags() => CheckTarget("ReflectUnexportedFieldFlags");
 
     [TestMethod]
