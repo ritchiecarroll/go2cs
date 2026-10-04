@@ -50,7 +50,7 @@ using static go.html_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("html/entity.go", "entity.cs", "ABgqogDbELohAFzCAQ==")]
-[assembly: go.GoPositionMap("html/escape.go", "escape.cs", "ABQgACJQ4qqUgoKWgpKClIKCgoKCloKCgoKCgoKkgqSCtoKUgpSWkoKWlLaWvIKClIKUgpSWgsiiooKCpIKClIKAguqCgsYABhjCAAIQ0oSCloKCgoKClJSCgpaClJQ=")]
+[assembly: go.GoPositionMap("html/escape.go", "escape.cs", "ABQgACJQ4qqUgoKWgpKClIKCgoKCloKCgoKCgoKSgoKSgoKkgoKUgpSWkoKWlJKUlryCgpSClIKUloKUlICikoCCgpKCgoKUgoCC6oKCxgAGGMIAAhDShIKWgoKCgoKUlIKCloKUlA==")]
 // </GoSourcePositionMaps>
 
 namespace go;

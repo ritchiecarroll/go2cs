@@ -53,7 +53,7 @@ using static go.@internal.filepathlite_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/filepathlite/path.go", "path.cs", "ABQkAA0cgoKUpoKCgoKUgpSCpqKCpoKClKiSgoKCgpSUlN6CkpKCgpaClra2gpaCwsiSlIKC6qKWkuyCloKokqaCgpSCgoKCgoKmgpSClKiSgpSokoKUqJKClKaCgpSCgoKmqJKCgoKUqJKCgqaokoKmgqaUgoKUgqaClKiSgoKClIKUlKiSqqI=")]
-[assembly: go.GoPositionMap("internal/filepathlite/path_windows.go", "path_windows.cs", "AA8kgqaCgpSUlKaUgoKCgoKUgqaClIKUpoKClLaChJKCgoKUgoKUgqaUgoKCppQAAhDkgoKU2IKUgpSC3ICCpOaCgpS2gpSClpSkAAkSgpSClKaCgpSCgqamgoKUqJKCgqaClIKClAAFEuIAARKoAAoQAAcU4pSCgpSotKyygpSCgoK2poKUrLKCgoKCgriokoKCpqiSqsKCyoKClIKC3II=")]
+[assembly: go.GoPositionMap("internal/filepathlite/path_windows.go", "path_windows.cs", "AA8kgqaCgpSUlKaUgoKCgoKUgqaClIKUpoKClLaChJKCgoKUgoKUgqaUgoKCppQAAhDkgoKU2IKUgpSC3ICCpOaCgpS2gpSClpSkAAkSgpSClKaCgpSCgqamgoKUqJKCgqaClIKClAAFEuIAARKoAAoQAAcU4pSCgpSotKyygpSCgoKkgqaClKyygoKCgoK4qJKCgqaokqrCgsqCgpSCgtyC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
