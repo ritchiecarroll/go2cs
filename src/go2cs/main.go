@@ -331,6 +331,15 @@ func main() {
 		}
 	})
 
+	// -platforms given by the operator always wins; only the DEFAULT is replaced for a -tests run of a
+	// GOROOT package (testsTargetPlatform).
+	platformsExplicit := false
+	commandLine.Visit(func(f *flag.Flag) {
+		if f.Name == "platforms" {
+			platformsExplicit = true
+		}
+	})
+
 	buildTags := resolveBuildTags(convertStdLib, *convertTestsCmd, tagsExplicit, parseBuildTags(*buildTagsCmd))
 
 	if err != nil || (!convertStdLib && len(inputFilePath) == 0) {
@@ -738,6 +747,15 @@ Examples:
 		if err != nil {
 			log.Fatalf("Failed to get absolute file path \"%s\": %s\n", inputFilePath, err)
 			return
+		}
+
+		// A -tests run of a standard-library package re-emits it into the committed corpus, which is
+		// built for corpusArch on every GOOS; the host default would emit the binary's own GOARCH.
+		if platform, pinned := testsTargetPlatform(options.targetPlatform, platformsExplicit, options.convertTests, inputFilePath, options.goRoot); pinned {
+			log.Printf("-tests: %s is a GOROOT package, so the conversion targets the committed corpus's %s (not the host's %s); pass -platforms to override\n",
+				inputFilePath, platform, options.targetPlatform)
+			options.targetPlatform = platform
+			options.targetPlatforms = []string{platform}
 		}
 
 		if options.recurse && options.convertTests {
