@@ -2101,6 +2101,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckTypeSwitchBindingAddress() => CheckTarget("TypeSwitchBindingAddress");
 
     [TestMethod]
+    public void CheckTypeSwitchCollapsedFuncCase() => CheckTarget("TypeSwitchCollapsedFuncCase");
+
+    [TestMethod]
     public void CheckTypeSwitchGuardShadow() => CheckTarget("TypeSwitchGuardShadow");
 
     [TestMethod]

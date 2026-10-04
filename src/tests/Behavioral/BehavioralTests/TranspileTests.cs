@@ -2098,6 +2098,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckTypeSwitchBindingAddress() => CheckTarget("TypeSwitchBindingAddress");
 
     [TestMethod]
+    public void CheckTypeSwitchCollapsedFuncCase() => CheckTarget("TypeSwitchCollapsedFuncCase");
+
+    [TestMethod]
     public void CheckTypeSwitchGuardShadow() => CheckTarget("TypeSwitchGuardShadow");
 
     [TestMethod]

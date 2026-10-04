@@ -986,6 +986,7 @@
     <Project Path="tests/Behavioral/TypeInference/TypeInference.csproj" />
     <Project Path="tests/Behavioral/TypeSwitch/TypeSwitch.csproj" />
     <Project Path="tests/Behavioral/TypeSwitchBindingAddress/TypeSwitchBindingAddress.csproj" />
+    <Project Path="tests/Behavioral/TypeSwitchCollapsedFuncCase/TypeSwitchCollapsedFuncCase.csproj" />
     <Project Path="tests/Behavioral/TypeSwitchGuardShadow/TypeSwitchGuardShadow.csproj" />
     <Project Path="tests/Behavioral/TypeSwitchImpureTag/TypeSwitchImpureTag.csproj" />
     <Project Path="tests/Behavioral/TypeSwitchMultiCase/TypeSwitchMultiCase.csproj" />

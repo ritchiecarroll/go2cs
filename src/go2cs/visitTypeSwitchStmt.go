@@ -132,7 +132,7 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 	emittedCaseTypes := map[string]string{}
 
 	resolveCaseType := func(caseExpr string) string {
-		typeToken, _, _ := strings.Cut(caseExpr, " ")
+		typeToken := caseLabelType(caseExpr)
 
 		switch typeToken {
 		case "rune":
@@ -243,6 +243,19 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 				}
 
 				caseExpr := v.convExpr(expr, []ExprContext{identContext})
+
+				// A METHODLESS named func type is rendered as its base delegate everywhere and declares
+				// no type of its own (methodlessNamedFuncSignature), so a case naming it must spell the
+				// delegate, exactly as a type ASSERTION on it already does (convTypeAssertExpr). The Go
+				// name was emitted as-is: mapstructure's DecodeHookExec, `case DecodeHookFuncType:`,
+				// CS0246 (CS0103 without a binding). Two collapsed labels with the same signature now
+				// share one C# type — merged by the rule above when their bodies match, a CS8120
+				// compile error when they differ, never routed silently into the wrong body.
+				if caseType := v.getExprType(expr); caseType != nil {
+					if _, isCollapsed := methodlessNamedFuncSignature(caseType); isCollapsed {
+						caseExpr = v.getCSharpTypeName(caseType)
+					}
+				}
 
 				// An INTERFACE-typed case label (named or anonymous) dispatches by Go METHOD-SET
 				// semantics, not C# nominal implementation: the operand (`x.type()`) surfaces the
@@ -528,4 +541,27 @@ func typeSwitchHasRebindArm(caseClauses []*ast.CaseClause, targetIdent string) b
 	}
 
 	return false
+}
+
+// caseLabelType returns the C# type of an emitted case label, `<type>` or `<type> <binding>`. The
+// label is cut at its first space OUTSIDE brackets: a generic type spells a space between its type
+// arguments, and a cut at the first space keyed `Func<nint, nint> f` and `Func<nint, @string> f` both
+// as `Func<nint,`, so two DIFFERENT delegates with identical bodies were merged as duplicates.
+func caseLabelType(caseExpr string) string {
+	depth := 0
+
+	for i, r := range caseExpr {
+		switch r {
+		case '<', '(', '[':
+			depth++
+		case '>', ')', ']':
+			depth--
+		case ' ':
+			if depth == 0 {
+				return caseExpr[:i]
+			}
+		}
+	}
+
+	return caseExpr
 }
