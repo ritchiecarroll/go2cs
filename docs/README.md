@@ -337,8 +337,11 @@ internal static void Main() {
 > The conversion records the platform it targets, and the go2cs packages compile and run against that
 > platform's flavor: `win-x64` for a Windows conversion, `linux-x64` for a Linux one. Use the current go2cs
 > packages, with a converter built from a checkout at or after the commit that published them. The output
-> matches `go run`, including `fatih/color`'s colors in an interactive terminal, on both platforms. Other
-> platforms and architectures are tracked in the Roadmap's [Platforms section](Roadmap.md#platforms)._
+> matches `go run`, including `fatih/color`'s colors in an interactive terminal, on both platforms.
+> macOS (Intel and Apple silicon): packages ship for both chips, the behavioral suite passes on both, and the README
+> walkthrough runs. The standard library is not yet validated package by package on macOS, so don't expect it to be
+> fully operational there yet. Other platforms and architectures are tracked in the Roadmap's
+> [Platforms section](Roadmap.md#platforms)._
 
 **3 — C#: build the generated solution.** The app's per-project `.slnx` builds the app and its whole
 converted dependency tree, restoring the go2cs packages on the way; opening it in Visual Studio makes the
@@ -492,8 +495,8 @@ sides, by name. Every implementable package validates this way, on Windows and o
 and the few packages outside that set are each listed with the reason they cannot be validated.
 [Validated Test Packages](ValidatedTestPackages.md) carries the current counts, and the results are
 reproducible via [Try it yourself](#try-it-yourself--validate-a-converted-test-suite). Real third-party Go
-modules convert too, and `go2cs -tests -recurse` validates a module against its own test suites the same way;
-macOS support is in progress. go2cs moves to newer Go and .NET releases one at a time, and each move
+modules convert too, and `go2cs -tests -recurse` validates a module against its own test suites the same way.
+go2cs moves to newer Go and .NET releases one at a time, and each move
 re-validates every package against that release's own tests; see the [Roadmap](Roadmap.md).
 <!-- The prose no longer quotes the counts. They were 225 of 225 and 225 of 230 on 2026-10-01 at master
      c2591d5b95, read from the Phase 4 progress header of docs/ValidatedTestPackages.md, which carries
