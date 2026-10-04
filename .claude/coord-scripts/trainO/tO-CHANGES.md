@@ -126,3 +126,11 @@ csprojtemplate), `tO-i9-shard.sh`, `tO-linux-legs.sh`, `tO-regcheck.py` (LF only
 `COORD-LAUNCH-CHECKLIST.md`, `tO-premap.md` (dated section 8 appended), `tO-DERIVE-REPORT.md` (two in-place
 corrections), both lane briefs, `tO-follow.txt` (comment only: the entries hash stays e3b0c44298fc), this file.
 `bash -n` passes on every `.sh`, `compile()` on every `.py`, no `__pycache__`, every file LF.
+
+## BATTERY STOP 1 (2026-10-04 06:30, COORD): a purge with no retry, and a derived CB name that is no test
+
+| id | where | what changed | why |
+|:--|:--|:--|:--|
+| BS1 | `tO-battery.sh` `purge()` | the purge retries up to 6 times, 5 s apart, names what is left on each pass, stamps `retries=<n>`, and aborts only when a directory survives all of them | bat1 aborted at `PURGE(after-GT) purged=3049 remaining=1` (rc 3): the one directory (`src/tests/Behavioral/TypeAssert/obj`, an empty `Debug` folder) deleted by hand minutes later with no process to kill, a transient handle. Controls against a real Windows file lock: held 12 s -> clean after 2 retries, rc 0; held 75 s -> 6 retries, ABORT, rc 3 |
+| BS2 | `tO-battery.sh` PRE-D CB | a derived test name is kept only when a `func <name>(` line at HEAD sits outside a raw string (an even count of backticks above it); dropped names are stamped | bat1's CB read `not-PASS=[TestRunning]` (a FINDING): the name is a line of fixture source in a raw string (`warningEntries_test.go:259`), not a test. Run on the union: 29 derived -> 28 kept, `TestRunning` the one dropped |
+| BS3 | launch | `E_BISECT_SEATS='r-funclit-interface-target'` at launch | the default still names `g-method-value-fm-record`, which moved to TRAIN P at the freeze (PRE-D raised it as a FINDING in bat1) |

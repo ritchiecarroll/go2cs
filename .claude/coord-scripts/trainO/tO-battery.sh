@@ -366,6 +366,22 @@ dfind(){ finding "PRE-D ${1%%|*}: ${1#*|}"; }   # 'label|text': a literal the tr
 #     on a skip: the stdlib-metadata guard and the five projitems tests. (TRAIN M read 74 added at its head; N: derived.)
 CB_BASE='TestStdLibMetadataInSync TestProjitemsRegistersEveryGoSource TestProjitemsHasNoDanglingEntries TestProjitemsKeepsItsByteOrderMarkAndConsistentLineEndings TestProjitemsRegistrationClassifierFires TestProjitemsInsertionHintTakesTheNearestPredecessor'
 CB_ADDED=$(git diff "$MASTER" HEAD -- src/go2cs | sed -n 's/^+func \(Test[A-Za-z0-9_]*\)(.*/\1/p' | LC_ALL=C sort -u | tr '\n' ' ')
+# BATTERY STOP 1 at O (bat1, 04:58): CB read not-PASS=[TestRunning], a FINDING. The name is no test: it is a line of a
+# fixture's Go source held in a RAW STRING (warningEntries_test.go:259, p2-converter-warning-clears), and the text
+# derivation above cannot tell. A derived name is now kept only when at least one 'func <name>(' line at HEAD sits
+# OUTSIDE a raw string: an even count of backticks above it in its file. Names dropped are stamped, never silent.
+CB_KEPT=''; CB_DROPPED=''
+for t in $CB_ADDED; do
+  keep=0
+  while IFS=: read -r _ cbf cbl _; do
+    [ -n "$cbf" ] || continue
+    nbt=$(git show "HEAD:$cbf" | head -n "$((cbl - 1))" | tr -cd '`' | wc -c)
+    [ $((nbt % 2)) = 0 ] && keep=1
+  done < <(git grep -n "^func $t(" HEAD -- src/go2cs)
+  [ "$keep" = 1 ] && CB_KEPT="$CB_KEPT$t " || CB_DROPPED="$CB_DROPPED$t "
+done
+[ -z "$CB_DROPPED" ] || stamp "PRE-D CB: derived name(s) that are NOT tests (a 'func TestX(' line inside a raw-string fixture), dropped: [${CB_DROPPED% }]"
+CB_ADDED=$CB_KEPT
 CB_TESTS=$(printf '%s\n' $CB_ADDED $CB_BASE | LC_ALL=C sort -u | tr '\n' ' ')
 printf '%s\n' $CB_TESTS > "$LOGDIR/derived-cb-tests.txt"
 for t in $CB_BASE; do git grep -q "^func $t(" HEAD -- src/go2cs || dfind "CB_BASE|the literal CB_BASE names $t and no 'func $t(' is in src/go2cs at HEAD"; done
@@ -568,12 +584,24 @@ leg(){ # name, logfile-suffix, command...   (K verbatim + the R5 deadline check)
   return $rc
 }
 purge(){ # label [noabort]   (K verbatim, + the deadline path's no-abort mode: stamp, FINDING, return -- the caller exits 9)
-  local P left td
+  local P left td try=0 leftnames
   P=$(find src -type d \( -name bin -o -name obj -o -name Generated \) -prune -print | wc -l)
   find src -type d \( -name bin -o -name obj -o -name Generated \) -prune -exec rm -rf {} + 2>/dev/null
   left=$(find src -type d \( -name bin -o -name obj -o -name Generated \) -prune -print | wc -l)
+  # BATTERY STOP 1 at O (2026-10-04 06:30, bat1): after-GT read 'purged=3049 remaining=1' and ABORTED in the same second;
+  # the one directory (src/tests/Behavioral/TypeAssert/obj, holding only an EMPTY Debug folder) deleted by hand minutes
+  # later with no process to kill: a TRANSIENT handle (a build node or test host letting go late), not a leftover. The
+  # purge had no retry. It now waits and retries up to 6 times (5 s apart), names what is left on each pass, and aborts
+  # only when a directory SURVIVES all of them -- that is still a process to find by PID, never by name (floor 5).
+  while [ "$left" != 0 ] && [ "$try" -lt 6 ]; do
+    try=$((try + 1)); leftnames=$(find src -type d \( -name bin -o -name obj -o -name Generated \) -prune -print | head -n 5 | tr '\n' ' ')
+    stamp "  PURGE($1) retry $try of 6: $left left [$leftnames]"
+    sleep 5
+    find src -type d \( -name bin -o -name obj -o -name Generated \) -prune -exec rm -rf {} + 2>/dev/null
+    left=$(find src -type d \( -name bin -o -name obj -o -name Generated \) -prune -print | wc -l)
+  done
   td=$(git status --porcelain | grep -c '^ D')
-  stamp "PURGE($1) purged=$P remaining=$left tracked-deletions=$td free=$(freegb)G"
+  stamp "PURGE($1) purged=$P remaining=$left tracked-deletions=$td retries=$try free=$(freegb)G"
   if [ "$left" != 0 ] || [ "$td" != 0 ]; then
     [ "${2:-}" = noabort ] && { finding "PURGE-$1 incomplete or tracked deletions (remaining=$left deletions=$td): no abort on the deadline path"; return 0; }
     stamp "ABORT: purge incomplete or tracked deletions"; exit 3
