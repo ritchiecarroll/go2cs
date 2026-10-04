@@ -1,9 +1,9 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go.crypto.@internal;
+namespace go.crypto.@internal.fips140test;
 
-using Δfips140 = go.crypto.@internal.fips140_package;
+using fips140 = go.crypto.@internal.fips140_package;
 using static go.crypto.@internal.fips140.check_package;
 using checktest = go.crypto.@internal.fips140.check.checktest_package;
 using fmt = fmt_package;
@@ -41,7 +41,7 @@ public static void TestFIPSCheckVerify(ж<testing.T> Ꮡt) {
         return;
     }
     {
-        var errΔ1 = Δfips140.Supported(); if (errΔ1 != default!) {
+        var errΔ1 = fips140.Supported(); if (errΔ1 != default!) {
             Ꮡt.Skipf("skipping: %v"u8, errΔ1);
         }
     }
@@ -74,7 +74,7 @@ public static void TestFIPSCheckInfo(ж<testing.T> Ꮡt) {
         return;
     }
     {
-        var err = Δfips140.Supported(); if (err != default!) {
+        var err = fips140.Supported(); if (err != default!) {
             Ꮡt.Skipf("skipping: %v"u8, err);
         }
     }

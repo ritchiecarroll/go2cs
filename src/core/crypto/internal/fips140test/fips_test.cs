@@ -9,7 +9,7 @@
 // to either minimize, skip, or remove them. Finally, the module needs to avoid
 // importing internal packages like testenv and cryptotest to avoid locking in
 // their APIs.
-namespace go.crypto.@internal;
+namespace go.crypto.@internal.fips140test;
 
 using hex = encoding.hex_package;
 using strings = strings_package;

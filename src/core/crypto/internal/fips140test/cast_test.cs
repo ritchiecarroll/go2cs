@@ -1,7 +1,7 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go.crypto.@internal;
+namespace go.crypto.@internal.fips140test;
 
 using crypto = crypto_package;
 using rand = go.crypto.rand_package;
@@ -13,7 +13,7 @@ using regexp = regexp_package;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
-using Δfips140 = go.crypto.@internal.fips140_package;
+using fips140 = go.crypto.@internal.fips140_package;
 // blank import: go.crypto.@internal.fips140.aes_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 // blank import: go.crypto.@internal.fips140.aes.gcm_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 // blank import: go.crypto.@internal.fips140.drbg_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
@@ -130,7 +130,7 @@ public static void TestConditionals(ж<testing.T> Ꮡt) {
     if (err != default!){
         Ꮡt.Error(err);
     } else {
-        ecdsa.SignDeterministic<ecdsa.P256PointжPoint, Δfips140.Hash>(ecdsa.P256(), widen<ж<sha256.Digest>, Δfips140.Hash>(sha256.New, elemᴛ1 => new fipstest_internal_test_package.sha256_DigestжHash(elemᴛ1)), kDSA, new slice<byte>(32));
+        ecdsa.SignDeterministic<ecdsa.P256PointжPoint, fips140.Hash>(ecdsa.P256(), widen<ж<sha256.Digest>, fips140.Hash>(sha256.New, elemᴛ1 => new fipstest_internal_test_package.sha256_DigestжHash(elemᴛ1)), kDSA, new slice<byte>(32));
     }
     (var k25519, err) = ed25519.GenerateKey();
     if (err != default!){
@@ -154,7 +154,7 @@ internal static readonly @string testVˢ = "-test.v"u8;
 public static void TestCASTPasses(ж<testing.T> Ꮡt) {
     testenv.MustHaveExec(new fipstest_internal_test_package.testing_TжTB(Ꮡt));
     {
-        var errΔ1 = Δfips140.Supported(); if (errΔ1 != default!) {
+        var errΔ1 = fips140.Supported(); if (errΔ1 != default!) {
             Ꮡt.Skipf("FIPS140 not supported: %v"u8, errΔ1);
         }
     }
@@ -186,7 +186,7 @@ public static void TestCASTFailures(ж<testing.T> Ꮡt) {
 
     testenv.MustHaveExec(new fipstest_internal_test_package.testing_TжTB(Ꮡt));
     {
-        var err = Δfips140.Supported(); if (err != default!) {
+        var err = fips140.Supported(); if (err != default!) {
             Ꮡt.Skipf("FIPS140 not supported: %v"u8, err);
         }
     }

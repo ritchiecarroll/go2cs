@@ -1,7 +1,7 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go.crypto.@internal;
+namespace go.crypto.@internal.fips140test;
 
 using bytes = bytes_package;
 using ssh = go.crypto.@internal.fips140.ssh_package;
@@ -9,10 +9,10 @@ using sha256 = go.crypto.sha256_package;
 using hex = encoding.hex_package;
 using testing = testing_package;
 using encoding;
+using fips140 = go.crypto.@internal.fips140_package;
 using go.crypto;
 using go.crypto.@internal.fips140;
 using hash = hash_package;
-using Δfips140 = go.crypto.@internal.fips140_package;
 
 partial class fipstest_internal_test_package {
 
@@ -28,10 +28,10 @@ public static void TestSSHACVPVector(ж<testing.T> Ꮡt) {
     var encryptionKeyServer = fromHex("8BF4DEBEC96F4ADBBE5BB43828D56E6D"u8);
     var integrityKeyClient = fromHex("15F53BCCE2645D0AD1C539C09BF9054AA3A4B10B71E96B9E3A15672405341BB5"u8);
     var integrityKeyServer = fromHex("00BB773FD63AC7B7281A7B54C130CCAD363EE8928104E67CA5A3211EE3BBAB93"u8);
-    var (gotIVClient, gotKeyClient, gotIntegrityClient) = ssh.Keys<Δfips140.Hash>(
-        widen<hash.Hash, Δfips140.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.hash_HashᴠHash(elemᴛ0)), ssh.ClientKeys, K, H, sessionID, 16, 16, 32);
-    var (gotIVServer, gotKeyServer, gotIntegrityServer) = ssh.Keys<Δfips140.Hash>(
-        widen<hash.Hash, Δfips140.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.hash_HashᴠHash(elemᴛ0)), ssh.ServerKeys, K, H, sessionID, 16, 16, 32);
+    var (gotIVClient, gotKeyClient, gotIntegrityClient) = ssh.Keys<fips140.Hash>(
+        widen<hash.Hash, fips140.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.hash_HashᴠHash(elemᴛ0)), ssh.ClientKeys, K, H, sessionID, 16, 16, 32);
+    var (gotIVServer, gotKeyServer, gotIntegrityServer) = ssh.Keys<fips140.Hash>(
+        widen<hash.Hash, fips140.Hash>(sha256.New, elemᴛ0 => new fipstest_internal_test_package.hash_HashᴠHash(elemᴛ0)), ssh.ServerKeys, K, H, sessionID, 16, 16, 32);
     if (!bytes.Equal(gotIVClient, initialIVClient)) {
         Ꮡt.Errorf("got IV client %x, want %x"u8, gotIVClient, initialIVClient);
     }

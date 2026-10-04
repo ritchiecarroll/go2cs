@@ -1,7 +1,7 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go.crypto.@internal;
+namespace go.crypto.@internal.fips140test;
 
 // A module wrapper adapting the Go FIPS module to the protocol used by the
 // BoringSSL project's `acvptool`.
@@ -19,7 +19,7 @@ namespace go.crypto.@internal;
 using bufio = bufio_package;
 using bytes = bytes_package;
 using cryptotest = go.crypto.@internal.cryptotest_package;
-using Δfips140 = go.crypto.@internal.fips140_package;
+using fips140 = go.crypto.@internal.fips140_package;
 using ecdsa = go.crypto.@internal.fips140.ecdsa_package;
 using hmac = go.crypto.@internal.fips140.hmac_package;
 using mlkem = go.crypto.@internal.fips140.mlkem_package;
@@ -261,7 +261,7 @@ internal static command cmdGetConfig() {
 // and writes the resulting digest as a response.
 //
 // See https://pages.nist.gov/ACVP/draft-celi-acvp-sha.html
-internal static command cmdHashAft(Δfips140.Hash h) {
+internal static command cmdHashAft(fips140.Hash h) {
     return new command(
         requiredArgs: 1, // Message to hash.
 
@@ -289,7 +289,7 @@ internal static command cmdHashAft(Δfips140.Hash h) {
 //
 // [0]: https://pages.nist.gov/ACVP/draft-celi-acvp-sha.html#section-6.2
 // [1]: https://boringssl.googlesource.com/boringssl/+/refs/heads/master/util/fipstools/acvp/ACVP.md#testing-other-fips-modules
-internal static command cmdHashMct(Δfips140.Hash h) {
+internal static command cmdHashMct(fips140.Hash h) {
     return new command(
         requiredArgs: 1, // Seed message.
 
@@ -331,7 +331,7 @@ internal static command cmdHashMct(Δfips140.Hash h) {
 // like that handler it does not perform the outer 100 iterations.
 //
 // [0]: https://pages.nist.gov/ACVP/draft-celi-acvp-sha3.html#section-6.2.1
-internal static command cmdSha3Mct(Δfips140.Hash h) {
+internal static command cmdSha3Mct(fips140.Hash h) {
     return new command(
         requiredArgs: 1, // Seed message.
 
@@ -349,7 +349,7 @@ internal static command cmdSha3Mct(Δfips140.Hash h) {
     );
 }
 
-internal static command cmdHmacAft(Func<Δfips140.Hash> h) {
+internal static command cmdHmacAft(Func<fips140.Hash> h) {
     return new command(
         requiredArgs: 2, // Message and key
 
@@ -385,8 +385,8 @@ internal static command cmdPbkdf() {
     );
 }
 
-internal static (Func<Δfips140.Hash>, error) lookupHash(@string name) {
-    Func<Δfips140.Hash> h = default!;
+internal static (Func<fips140.Hash>, error) lookupHash(@string name) {
+    Func<fips140.Hash> h = default!;
     var exprᴛ1 = name;
     if (exprᴛ1 == "SHA2-224"u8) {
         h = () => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224());
@@ -537,7 +537,7 @@ internal static command cmdMlKem1024DecapAft() {
     );
 }
 
-internal static command cmdHmacDrbgAft(Func<Δfips140.Hash> h) {
+internal static command cmdHmacDrbgAft(Func<fips140.Hash> h) {
     return new command(
         requiredArgs: 6, // Output length, entropy, personalization, ad1, ad2, nonce
 

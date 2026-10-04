@@ -4,13 +4,13 @@
 // production types and no production class partial may be declared here. The first —
 // and only — class is the test metadata class the go2cs-gen generators anchor
 // generated adapters and partials to.
-global using static global::go.crypto.@internal.fipsdeps_package;
+global using static global::go.crypto.@internal.fips140deps.fipsdeps_package;
 
 // <ImportedTypeAliases>
 // </ImportedTypeAliases>
 
 using go;
-using static global::go.crypto.@internal.fipsdeps_internal_test_package;
+using static global::go.crypto.@internal.fips140deps.fipsdeps_internal_test_package;
 
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
@@ -33,7 +33,7 @@ using static global::go.crypto.@internal.fipsdeps_internal_test_package;
 [assembly: go.GoPositionMap("crypto/internal/fips140deps/fipsdeps_test.go", "fipsdeps_test.cs", "ADRAogAAFIKClKiCgoKClpaEgoKUhISCzIaUgpSCuoIAERSC")]
 // </GoSourcePositionMaps>
 
-namespace go.crypto.@internal;
+namespace go.crypto.@internal.fips140deps;
 
 [GoPackage("fipsdeps")]
 public static partial class fipsdeps_internal_test_package
@@ -63,6 +63,6 @@ public static partial class fipsdeps_internal_test_package
     // module constructor .NET would not run until something in it is touched, so that
     // initialization is forced before anything else in this test module runs.
     [GoInit] internal static void initᴛᴛproduction() {
-        builtin.initPackage(typeof(global::go.crypto.@internal.fipsdeps_package));
+        builtin.initPackage(typeof(global::go.crypto.@internal.fips140deps.fipsdeps_package));
     }
 }
