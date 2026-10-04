@@ -860,6 +860,7 @@
     <Project Path="tests/Behavioral/ReflectMakeFunc/ReflectMakeFunc.csproj" />
     <Project Path="tests/Behavioral/ReflectMapRangeNilKey/ReflectMapRangeNilKey.csproj" />
     <Project Path="tests/Behavioral/ReflectMethodTableWalk/ReflectMethodTableWalk.csproj" />
+    <Project Path="tests/Behavioral/ReflectNilMapKey/ReflectNilMapKey.csproj" />
     <Project Path="tests/Behavioral/ReflectStringWindow/ReflectStringWindow.csproj" />
     <Project Path="tests/Behavioral/ReflectStructOf/ReflectStructOf.csproj" />
     <Project Path="tests/Behavioral/ReflectStructTagCopy/ReflectStructTagCopy.csproj" />

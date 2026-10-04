@@ -1741,6 +1741,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckReflectMethodTableWalk() => CheckTarget("ReflectMethodTableWalk");
 
     [TestMethod]
+    public void CheckReflectNilMapKey() => CheckTarget("ReflectNilMapKey");
+
+    [TestMethod]
     public void CheckReflectStringWindow() => CheckTarget("ReflectStringWindow");
 
     [TestMethod]
