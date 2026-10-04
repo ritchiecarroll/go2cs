@@ -1171,6 +1171,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedArrayZeroValue() => CheckTarget("NamedArrayZeroValue");
 
     [TestMethod]
+    public void CheckNamedBasicConversion() => CheckTarget("NamedBasicConversion");
+
+    [TestMethod]
     public void CheckNamedBooleanLogic() => CheckTarget("NamedBooleanLogic");
 
     [TestMethod]

@@ -662,6 +662,7 @@
     <Project Path="tests/Behavioral/NamedArrayComposite/NamedArrayComposite.csproj" />
     <Project Path="tests/Behavioral/NamedArrayKeyedLiteral/NamedArrayKeyedLiteral.csproj" />
     <Project Path="tests/Behavioral/NamedArrayWrapper/NamedArrayWrapper.csproj" />
+    <Project Path="tests/Behavioral/NamedBasicConversion/NamedBasicConversion.csproj" />
     <Project Path="tests/Behavioral/NamedBooleanLogic/NamedBooleanLogic.csproj" />
     <Project Path="tests/Behavioral/NamedChannelType/NamedChannelType.csproj" />
     <Project Path="tests/Behavioral/NamedByteSliceFromStringLit/NamedByteSliceFromStringLit.csproj" />

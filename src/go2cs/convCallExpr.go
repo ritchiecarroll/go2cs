@@ -1269,6 +1269,33 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 		}
 
+		// The STRING/BOOL twin of the numeric rule below: a conversion between two NAMED types over the
+		// same string or bool underlying — `B(a)` with `type A string; type B string`, `pkgString(o)`
+		// with `type pkgString otherString`, go-cmp's function-local `myString(in)`. Each [GoType]
+		// wrapper converts only to and from its underlying, so the direct `((B)a)` chains two
+		// user-defined operators (CS0030); hop through the shared underlying, `((B)(@string)a)`.
+		// Same EXCEPTION as the numeric rule: when one was WRITTEN over the other ACROSS packages its
+		// wrapper keeps the named base and declares the one-step operator, so the plain cast binds
+		// (a same-package chain resolves to the basic underlying and has no named-base operator).
+		if named, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Named); ok {
+			if basic, ok := named.Underlying().(*types.Basic); ok && basic.Info()&(types.IsString|types.IsBoolean) != 0 {
+				if argNamed, ok := types.Unalias(v.info.TypeOf(arg)).(*types.Named); ok && argNamed != named && types.Identical(argNamed.Underlying(), basic) {
+					crossPackageWrittenBase := named.Obj().Pkg() != argNamed.Obj().Pkg() &&
+						(writtenRHSIsNamedType(argNamed, named) || writtenRHSIsNamedType(named, argNamed))
+
+					if !crossPackageWrittenBase {
+						underlyingCS := v.getCSharpTypeName(basic)
+
+						if v.needsParentheses(arg) {
+							return fmt.Sprintf("((%s)(%s)(%s))", targetTypeName, underlyingCS, expr)
+						}
+
+						return fmt.Sprintf("((%s)(%s)%s)", targetTypeName, underlyingCS, expr)
+					}
+				}
+			}
+		}
+
 		// underlying basic (the existing cast already binds → no churn). types.Unalias: os's
 		// `type FileMode = fs.FileMode` arrives as a *types.Alias, and the bare assertion
 		// skipped the hop (direct nint cast into the foreign wrapper, CS0030 removeall_noat).

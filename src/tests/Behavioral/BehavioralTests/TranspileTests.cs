@@ -1168,6 +1168,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedArrayZeroValue() => CheckTarget("NamedArrayZeroValue");
 
     [TestMethod]
+    public void CheckNamedBasicConversion() => CheckTarget("NamedBasicConversion");
+
+    [TestMethod]
     public void CheckNamedBooleanLogic() => CheckTarget("NamedBooleanLogic");
 
     [TestMethod]
