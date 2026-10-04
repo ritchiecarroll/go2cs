@@ -38,6 +38,10 @@
 *.props      text eol=crlf
 *.targets    text eol=crlf
 src/core/**/README.md text eol=crlf
+# The per-file warning entries a conversion writes beside a package's project file
+# (warningEntries.go). Only these: src/.editorconfig is hand-kept and stays as it is.
+src/core/**/.editorconfig text eol=crlf
+src/tests/Behavioral/**/.editorconfig text eol=crlf
 
 # ---------------------------------------------------------------------------
 # LF pin for shell scripts
