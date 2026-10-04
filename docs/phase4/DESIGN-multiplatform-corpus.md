@@ -1381,6 +1381,34 @@ compile group: `project.assets.json` resolves compile = `lib/` in the RID-less g
 conversion target's own flavor wherever the release ships one; a platform with no shipped twin
 (linux-arm64, osx) still compiles the reference flavor, as before.
 
+#### Amendment 2026-10-03 — macOS ships: increment 5's package half (go.* 1.24.13.4)
+
+The owner ruled macOS assets into 1.24.13.4, and the shape is the one sized on the mailbox
+(C1 → COORD, 2026-10-03): **two RID folders, one darwin build.**
+
+1. **`osx-x64` and `osx-arm64` carry the same bytes.** The corpus is emitted for darwin/amd64 and the
+   build has no architecture axis (`$(GoTargetOS)` alone selects sources), so the darwin assemblies are
+   AnyCPU IL identical for both Mac RIDs, and the build is deterministic. `push-nuget.ps1` therefore builds
+   once per distinct GoTargetOS (three passes, not four) and the merge writes the darwin pack into both
+   folders. A post-merge assert reads every RID-specific package back and refuses one that lacks a shipped
+   RID's folder, carries an unshipped RID's folder, or whose two Mac folders differ by a byte.
+2. **Explicit RIDs, not a portable `runtimes/osx/`.** Item 1 of the 2026-09-24 amendment builds the compile
+   twin's path from the EXACT RID (`$(NETCoreSdkRuntimeIdentifier)` is `osx-arm64` or `osx-x64` on a Mac); a
+   portable folder would never be found, and a Mac consumer would compile against the windows surface.
+3. **The conversion target pins the Mac compile RID** (`compileRuntimeIdentifierForTarget`): darwin/arm64 →
+   `osx-arm64`, any other darwin arch → `osx-x64`, so item 3 of the 2026-09-24 amendment now covers darwin.
+4. **Measured cost** (1.24.13.3 from nuget.org; darwin DLLs built at 8f46a9adae): each RID folder across the
+   37 L3 packages is ~4.4 MB compressed, darwin assemblies are within ~1% of linux's, so the two Mac folders
+   add ~9 MB to a ~80 MB set; one more build+pack pass adds ~17 min to a pack on the release machine. The
+   union of nuspec dependencies gains darwin-only edges in eight packages, all onto IDs already published.
+5. **The gate before it ships** is the `release-smoke` stage of `.github/workflows/os-matrix.yml`: the pack
+   rehearsed on a hosted windows runner, then both Mac legs consume that feed (the RID compile-asset gate,
+   a `-recurse=nuget` sample and `StatLayoutTruth` compared with `go run`, and the README walkthrough
+   measured but not gating).
+
+What this does NOT change: `runtime.GOARCH` reads `amd64` on Apple silicon (as on every RID — the arch axis
+of §5 is still unshipped), and `linux-arm64` still falls back to `lib/`.
+
 ---
 
 ## 13. What this design does **not** answer

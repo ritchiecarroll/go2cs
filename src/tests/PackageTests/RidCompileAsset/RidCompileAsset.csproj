@@ -13,6 +13,7 @@
     <_RidCompileAssetRid Condition="'$(_RidCompileAssetRid)' == ''">$(NETCoreSdkRuntimeIdentifier)</_RidCompileAssetRid>
     <DefineConstants Condition="$(_RidCompileAssetRid.StartsWith('linux'))">$(DefineConstants);GO_FLAVOUR_LINUX</DefineConstants>
     <DefineConstants Condition="$(_RidCompileAssetRid.StartsWith('win'))">$(DefineConstants);GO_FLAVOUR_WINDOWS</DefineConstants>
+    <DefineConstants Condition="$(_RidCompileAssetRid.StartsWith('osx'))">$(DefineConstants);GO_FLAVOUR_DARWIN</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

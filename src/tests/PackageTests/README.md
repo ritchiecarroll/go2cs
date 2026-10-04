@@ -38,14 +38,16 @@ multi-flavour `go.*` package (layout L3) ships its reference flavour (Windows) i
 each platform's flavour under `runtimes/<rid>/lib/<tfm>/`. NuGet resolves the COMPILE asset from `lib/`
 whatever the RID is, so before the targets file a Linux consumer compiled against the Windows surface.
 The fixture touches a type only the current platform's `go.syscall` flavour defines (`Rlimit` on
-Linux, `DLLError` on Windows). `test-rid-compile-asset.ps1` restores it from ONE feed into a fresh
+Linux, `DLLError` on Windows, `Kevent_t` on macOS, where `osx-x64` and `osx-arm64` ship the same darwin
+build). The flavour is chosen from the RID's prefix (`win`, `linux`, `osx`), so an SDK that reports a
+distro RID (`ubuntu.24.04-x64`, say) selects none and the control arm fails there. `test-rid-compile-asset.ps1` restores it from ONE feed into a fresh
 package cache and runs four arms:
 
 - a RID-less build and run;
 - the same with `-r <host rid>`;
 - a framework-dependent `dotnet publish -r <host rid>`, whose PUBLISHED app is then run;
-- a control that proves the arm can fail. On Linux, `-p:GoRidCompileAssets=false` must fail with
-  CS0426. On Windows, the reference platform, the control is the no-op proof: the `runtimes/win-x64`
+- a control that proves the arm can fail. On Linux and macOS, `-p:GoRidCompileAssets=false` must fail
+  with CS0426. On Windows, the reference platform, the control is the no-op proof: the `runtimes/win-x64`
   twin is byte-identical to `lib/`.
 
 ```text
@@ -56,3 +58,13 @@ Against a package set that predates the targets file, `-TargetsFile src/core/gol
 imports the working-tree file explicitly. That is how the gate was read red-first, against the
 published 1.24.13.1: on Linux both build arms FAIL with CS0426 and the control PASSES. With the file,
 all four arms PASS on both platforms.
+
+# `release-smoke.ps1`: consume a feed the way a user does
+
+`release-smoke.ps1 -Feed <dir> -Converter <go2cs> -WorkRoot <dir>` runs four arms against ONE local
+feed (a `push-nuget.ps1 -VersionSuffix` rehearsal's merged output), each restoring into a fresh cache
+with `go.*` mapped to the feed alone: (A) `RidCompileAsset` above; (B) a generated stdlib program
+converted with `go2cs -recurse=nuget`, built, run, and its stdout compared byte for byte with `go run`;
+(C) `Behavioral/StatLayoutTruth`, the same way; (D) the README walkthrough (`fatih/color`), the same
+way, MEASURED and never gating. It exits 0 when A, B and C pass. The `release-smoke` stage of
+`.github/workflows/os-matrix.yml` packs the feed on Windows and runs this on the chosen flavor's legs.
