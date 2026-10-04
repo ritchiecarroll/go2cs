@@ -1,4 +1,4 @@
-namespace go.AliasNamespaceShadow.sortlocal;
+namespace go.AliasNamespaceShadow;
 
 partial class sort_package {
 
