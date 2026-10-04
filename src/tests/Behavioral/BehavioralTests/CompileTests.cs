@@ -1171,6 +1171,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedArrayZeroValue() => CheckTarget("NamedArrayZeroValue");
 
     [TestMethod]
+    public void CheckNamedBasicConversion() => CheckTarget("NamedBasicConversion");
+
+    [TestMethod]
     public void CheckNamedBooleanLogic() => CheckTarget("NamedBooleanLogic");
 
     [TestMethod]

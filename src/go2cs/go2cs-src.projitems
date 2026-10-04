@@ -265,6 +265,7 @@
     <None Include="$(MSBuildThisFileDirectory)modulesLock.go" />
     <None Include="$(MSBuildThisFileDirectory)modulesLock_test.go" />
     <None Include="$(MSBuildThisFileDirectory)multiValueFuncDefine_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)namedBasicConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nameCollisionAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)namedCompositeGenericArg_test.go" />
     <None Include="$(MSBuildThisFileDirectory)namedResultLiveness.go" />
