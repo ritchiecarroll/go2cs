@@ -403,6 +403,22 @@ type, and the receiver restriction) converter unit tests. `go/scanner` **validat
 not bank — `TestAll` asserts the GO source file's own extension and line numbers, which the converted
 program does not carry; see *`runtime.Caller` works by severing the FUNNEL* below.
 
+**The PROMOTED-METHOD edge (2026-10-04).** A struct a TEST source declares with an embedded struct compiles into the test
+assembly together with the forwarders go2cs-gen emits there for every method that embed promotes (its "Promoted Struct
+Receivers", read from the embed's metadata), and each forwarder's signature spells the method's parameter and result
+types. go-cmp's `cmp/internal/function` suite declares `type myType struct{ bytes.Buffer }` and imports `bytes` but not
+`io`; `bytes.Buffer`'s `ReadFrom`/`WriteTo` take an `io.Reader`/`io.Writer`, and the compile failed
+`CS0234 … 'io_package' … namespace 'go'` ×4 in the generated `myType.g.cs`. The edge (`embedders` seeds, walked with
+`embeddedStructs`) reaches every named type in the promoted methods' signatures, with the generator's own membership:
+exported methods always, unexported ones only when the embed shares the embedding struct's package. It is
+`_test.go`-scoped for the member-access edge's reason (a production struct's forwarders are generated in the production
+assembly), and embedded INTERFACES are not walked. **Measured zero-drift** across the 229 committed `.tests.csproj`
+(a census of every test-declared embed against each project's committed references: 0 additions), with the census made
+to fire by deleting `io` from every reference set (3 hits: `go/types`, `io`, `net/http`, each a test type embedding
+`bytes.Buffer` in a project that already references `io`). Guarded by
+`TestDeclarationClosureImportsSurfacesPromotedMethodSignatures` (red before the edge) and
+`TestDeclarationClosureImportsPromotedEdgeIsEmbedAndTestScoped` (a NAMED field and a PRODUCTION embed surface nothing).
+
 ## Under the RECOMPILE model the test half CONTINUES the production emission (the `productionSeed`)
 
 The `recompile` model is the only one where the converted `_test.go` files land in the **same C# class**
