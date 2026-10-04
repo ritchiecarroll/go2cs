@@ -2981,6 +2981,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	performEscapeAnalysis(allEntries, pkg.Fset, pkg.Types, pkg.TypesInfo)
 	collectAddressedGlobals(allEntries, pkg.Types, pkg.TypesInfo)
 	computeImportAliasRenames(allEntries, pkg.Types, packageNamespace, options.go2csPath, goosOfTarget(options.targetPlatform), true)
+	collectPackageLevelLiteralStructFieldTypes(allEntries, pkg.Types, pkg.TypesInfo)
 	collectPublicizedTypes(pkg.Types)
 
 	// Bind the //go:cgo_import_dynamic pragmas here too, and not only because the sequence is
