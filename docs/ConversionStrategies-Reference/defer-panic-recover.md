@@ -995,16 +995,21 @@ defer(ᴛ0 => ᴛ0.Done(), Ꮡp.Value, ref ᒐ);                  // defer p.Don
 ```
 
 The receiver text is split off the rendered call itself (`<receiver>.<method>(ᴛ1, …)` under the temp-parameter
-form), so it is exactly the expression the call would have evaluated. It applies only where the method group was
-the form: a void nullary callee, or a non-variadic callee at arity N with no other reason to take the lambda. A
-RESULT-returning nullary callee (`defer s.cur.Close()`) and a variadic one already took the lambda form and keep it;
-both still read the receiver at unwind, a divergence that predates this rule and is recorded as a finding, not
-changed here. An interface receiver keeps its method group, and a pointer receiver keeps the box group above.
+form), so it is exactly the expression the call would have evaluated. It applies where the method group was the
+form (a void nullary callee, or a non-variadic callee at arity N with no other reason to take the lambda) and also
+where the LAMBDA was already the form — a RESULT-returning nullary callee (`defer s.cur.Close()`) or a variadic one
+— over a FIELD or DEREFERENCED receiver. Those had read the receiver at unwind and compiled, silently wrong (`close
+replaced` where Go prints `close orig`); they now take `defer(ᴛ0 => ᴛ0.Close(), Ꮡs.Value.cur, ref ᒐ)`. An
+IDENTIFIER receiver keeps the capture hoist that already copies it at the defer (`var kʗ1 = k; defer(() =>
+kʗ1.Close(), ref ᒐ)`), which is every one of the 24 lambda-form sites in the standard library and the behavioral
+corpus. An interface receiver keeps its method group, and a pointer receiver keeps the box group above.
 Census before the change: 0 sites in the converted standard library (production on three targets, tests on two)
 and 0 across 757 behavioral modules, because every site failed to compile. (Guarded by
 `deferValueReceiverSnapshot_test.go` and the `DeferValueReceiverSnapshot` behavioral test: a field of a pointer, a
 field of a value, a nullary call, a local and a dereferenced pointer, each reassigned after the defer, output-compared
-vs Go; CS1113 on the pre-change converter.)
+vs Go; CS1113 on the pre-change converter. The lambda-form half is guarded by `deferLambdaReceiverCopy_test.go` and
+the `DeferLambdaReceiverCopy` behavioral test, which COMPILES on the pre-change converter and fails its output
+comparison: `log replaced`, `close replaced` and `close replaced` against Go's `orig`, `orig` and `pointee`.)
 
 ## A deferred pointer-receiver method on an escaping value local captures by-box, not by-copy
 The emission above binds the box (`Ꮡstate.free`) for a `defer state.free()` on a value local — but the CAPTURE analysis must cooperate. `defer`/`go`/closure bodies are lambda-conversion scopes: a variable used inside them that escapes to the heap is normally snapshot-copied into a `var stateʗ1 = state;` declaration so the C# closure captures a value, not an uncapturable ref-local. For an escaping value local used **only** as the receiver of a pointer-receiver method call (`state` a `handleState` value, `free` a `*handleState` method — log/slog handler.go's `defer state.free()`), that snapshot is doubly wrong: the address-taking is *implicit* (Go auto-takes `&state`), so the emission still binds the box — but of the *snapshot name* `Ꮡstateʗ1`, which is a plain value with no `Ꮡ` companion:

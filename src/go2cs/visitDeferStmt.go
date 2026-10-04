@@ -125,10 +125,19 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 	// form for another reason is left exactly as it was.
 	recvSnapshot := false
 
-	if recvSig := v.deferCalleeValueReceiverMethod(deferStmt.Call); recvSig != nil && !recvSig.Variadic() {
-		// Arity N: only where the method group was the form. Arity 0: only the void callee the method
-		// group trim served; a result-returning nullary callee already takes `() => …` and keeps it.
-		recvSnapshot = paramCount > 0 && !renderLambdaParams || paramCount == 0 && recvSig.Results().Len() == 0
+	if recvSig := v.deferCalleeValueReceiverMethod(deferStmt.Call); recvSig != nil {
+		// Where the method group was the form: arity N with no lambda already forced, or the void nullary
+		// callee the method-group trim served.
+		methodGroupForm := !recvSig.Variadic() && (paramCount > 0 && !renderLambdaParams || paramCount == 0 && recvSig.Results().Len() == 0)
+
+		// And where the LAMBDA was already the form (a result-returning nullary callee, a variadic callee)
+		// over a FIELD or DEREFERENCED receiver: `() => Ꮡs.Value.cur.Close()` read the receiver when the
+		// thunk ran, so `s.cur = …` after the defer leaked in (`close replaced` where Go prints `close
+		// orig`). An IDENTIFIER receiver is already copied by the capture hoist (`var kʗ1 = k;`) and keeps
+		// that form. The receiver takes one of golib's 16 eager-argument slots.
+		lambdaFormLateReceiver := !v.deferReceiverIsIdentifier(deferStmt.Call)
+
+		recvSnapshot = (methodGroupForm || lambdaFormLateReceiver) && paramCount < 16
 	}
 
 	if recvSnapshot && paramCount > 0 {
@@ -528,6 +537,24 @@ func (v *Visitor) deferCalleeValueReceiverMethod(call *ast.CallExpr) *types.Sign
 	}
 
 	return sig
+}
+
+// deferReceiverIsIdentifier reports whether a deferred method call's receiver is a plain identifier reached
+// without an implicit dereference: the capture hoist copies such a receiver at the defer statement already.
+func (v *Visitor) deferReceiverIsIdentifier(call *ast.CallExpr) bool {
+	selectorExpr, ok := ast.Unparen(call.Fun).(*ast.SelectorExpr)
+
+	if !ok {
+		return false
+	}
+
+	if _, isIdent := ast.Unparen(selectorExpr.X).(*ast.Ident); !isIdent {
+		return false
+	}
+
+	selection, ok := v.info.Selections[selectorExpr]
+
+	return ok && !selection.Indirect()
 }
 
 // isPlainIdentifier reports whether s is a single C# identifier (no member access, call or cast).
