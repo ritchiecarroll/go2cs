@@ -155,6 +155,8 @@ func computeImportAliasRenames(files []FileEntry, pkg *types.Package, packageNS 
 	}
 
 	for path := range closure {
+		importPath := path
+
 		if isGorootPackage {
 			path = resolveGorootVendoredPath(path)
 		}
@@ -167,6 +169,13 @@ func computeImportAliasRenames(files []FileEntry, pkg *types.Package, packageNS 
 		for _, part := range parts[:len(parts)-1] {
 			ns += "." + getSanitizedImport(part)
 			packageChildNamespaces[ns] = true
+		}
+
+		// A package that keeps its directory segment (packageKeepsDirectorySegment) declares one level
+		// deeper: teststructs/foo1, `package foo`, is namespace <parent>.teststructs.foo1, so an alias
+		// `foo1` inside <parent>.teststructs collides with it (CS0576) like any other child namespace.
+		if tail := parts[len(parts)-1]; packageKeepsDirectorySegment(tail, closurePackageName(importPath, closurePackages)) {
+			packageChildNamespaces[ns+"."+getSanitizedImport(tail)] = true
 		}
 	}
 
@@ -240,6 +249,16 @@ func computeImportAliasRenames(files []FileEntry, pkg *types.Package, packageNS 
 			packageImportAliasRenames[name] = ShadowVarMarker + name
 		}
 	}
+}
+
+// closurePackageName is a closure package's Go name: from the loader when it holds the package, else
+// from the import graph. Empty when neither knows it, which keeps the path-derived namespace.
+func closurePackageName(importPath string, closurePackages map[string]*types.Package) string {
+	if pkg, ok := closurePackages[importPath]; ok {
+		return pkg.Name()
+	}
+
+	return importPackageDirs[importPath].Name
 }
 
 // importQualifier returns the (possibly collision-renamed) C# alias for a package qualifier.
