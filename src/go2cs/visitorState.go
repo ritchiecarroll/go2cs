@@ -191,6 +191,11 @@ type Visitor struct {
 	// restore around nested statements so an inner statement's decls don't leak to the outer buffer.
 	hoistedDecls *strings.Builder
 
+	// keptLiteralFloatConsts holds the literal-only float sub-expressions of an enclosing literal
+	// expression that foldedInexactLiteralFloatConst decided to keep in operator form; folding one of
+	// them on its own would change the value the enclosing expression computes (literalFloatConstFold.go).
+	keptLiteralFloatConsts map[*ast.BinaryExpr]bool
+
 	// resultDiscardedExpr is the expression of the statement currently being emitted as a bare
 	// EXPRESSION STATEMENT — the one syntactic slot where C# admits a call but not a cast. A call
 	// returning `unsafe.Pointer` takes a `(uintptr)` construct prefix (convCallExpr's pointer-cast
