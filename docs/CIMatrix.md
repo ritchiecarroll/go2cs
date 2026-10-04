@@ -142,7 +142,8 @@ every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
 
 - **A** the RID-selected compile asset gate (`RidCompileAsset`): rid-less, `-r`, publish, and its control;
 - **B** a small generated stdlib program converted with `-recurse=nuget`, its stdout compared with `go run`
-  (it prints `runtime.GOOS`, so a wrong-flavor load is a visible mismatch);
+  (it prints `runtime.GOOS`, so a wrong-flavor load is a visible mismatch, and it calls every `sort` form whose
+  converted body once called itself, so that defect fails the release as a named stack overflow);
 - **C** `Behavioral/StatLayoutTruth`, converted and compared the same way;
 - **D** the README walkthrough (`fatih/color`), compared the same way — it **gates on every leg**. darwin joined
   windows and linux once darwin-xsys-libc (TRAIN O) made `x/sys/unix` reach libc on a Mac.

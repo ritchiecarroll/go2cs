@@ -64,7 +64,10 @@ all four arms PASS on both platforms.
 `release-smoke.ps1 -Feed <dir> -Converter <go2cs> -WorkRoot <dir>` runs four arms against ONE local
 feed (a `push-nuget.ps1 -VersionSuffix` rehearsal's merged output), each restoring into a fresh cache
 with `go.*` mapped to the feed alone: (A) `RidCompileAsset` above; (B) a generated stdlib program
-converted with `go2cs -recurse=nuget`, built, run, and its stdout compared byte for byte with `go run`;
+(file I/O, plus every `sort` form whose converted body once called itself: `IntSlice`, `Float64Slice` and
+`StringSlice` `.Sort()` and the bare `sort.Sort(sort.StringSlice(v))`) converted with `go2cs -recurse=nuget`,
+built, run, and its stdout compared byte for byte with `go run`; a crash that prints "Stack overflow" is named
+as one in the verdict;
 (C) `Behavioral/StatLayoutTruth`, the same way; (D) the README walkthrough (`fatih/color`), the same
 way, gating only with `-GateWalkthrough` and MEASURED without it; the `release-smoke` stage passes it on every
 leg. It exits 0 when the gating arms pass. The `release-smoke` stage of
