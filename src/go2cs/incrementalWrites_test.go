@@ -14,6 +14,7 @@
 package main
 
 import (
+	"errors"
 	"go/build"
 	"io/fs"
 	"os"
@@ -283,5 +284,95 @@ func TestUnchangedTestsReconversionKeepsMetadataAnchorsUntouched(t *testing.T) {
 
 	if moved := rewrittenSources(t, sources); len(moved) > 0 {
 		t.Errorf("an unchanged -tests re-conversion rewrote %d of %d .cs files: %v", len(moved), len(sources), moved)
+	}
+}
+
+// A suite whose external tests record metadata that must anchor to a production type takes the RECOMPILE-MODEL
+// FALLBACK (processTestConversion): the reference-model attempt converts and writes first, then fails with
+// errProductionAnchoredRecords, and the conversion is re-run under the recompile model over the files that attempt
+// already rewrote (and over package_info_external_test.cs, which it removed). Measured on the -tests footprint: the
+// four packages in the tree with that anchor (crypto/ecdh, crypto/sha3, net/netip, text/tabwriter) moved 15 .cs on an
+// unchanged re-conversion, byte-identical.
+func TestUnchangedTestsReconversionThroughRecompileFallbackKeepsSourcesUntouched(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: loads the fixture package via go/packages")
+	}
+
+	pkgDir, outDir, options := incrementalFixture(t)
+
+	writeModuleFile(t, filepath.Join(pkgDir, "c.go"), "package incr\n\nfunc (p Point) String() string { return \"p\" }\n")
+	writeModuleFile(t, filepath.Join(pkgDir, "ext_test.go"), `package incr_test
+
+import (
+	"fmt"
+	"testing"
+
+	"example.com/incr"
+)
+
+type local struct{}
+
+func (*local) String() string { return "l" }
+
+func TestString(t *testing.T) {
+	var s fmt.Stringer = &incr.Point{X: 1, Y: 2}
+	var l fmt.Stringer = &local{}
+	if s.String() != "p" || l.String() != "l" {
+		t.Fatal("string")
+	}
+}
+`)
+
+	// What main and processTestConversion do, in that order: the production conversion, then the two models.
+	convert := func() {
+		t.Helper()
+
+		if err := processConversion(pkgDir, true, outDir, options); err != nil {
+			t.Fatalf("production conversion: %v", err)
+		}
+
+		loaded, err := packages.Load(&packages.Config{Mode: packages.LoadAllSyntax, Dir: pkgDir, Tests: true}, ".")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		production := findProductionPackage(loaded, pkgDir)
+		internal, external := findTestVariants(loaded, production)
+
+		if model := selectTestProjectModel(internal, external); model != testProjectReference {
+			t.Fatalf("fixture model = %v, want reference (the model that falls back)", model)
+		}
+
+		testOptions := options
+		testOptions.convertTests = true
+		testOptions.testPackagePath = production.PkgPath
+		testOptions.testPackageName = production.Name
+
+		_, projectNamespace := getProjectName(pkgDir, testOptions)
+		compileExcluded := selectCompileExcludedTestFiles(internal, external)
+		supported := NewHashSet(supportedTestCapabilities())
+
+		_, err = convertTestVariants(testProjectReference, production, internal, external, compileExcluded, pkgDir, outDir, projectNamespace, supported, testOptions)
+
+		if !errors.Is(err, errProductionAnchoredRecords) {
+			t.Fatalf("the fixture no longer takes the recompile fallback (reference attempt: %v)", err)
+		}
+
+		if _, err = convertTestVariants(testProjectRecompile, production, internal, external, compileExcluded, pkgDir, outDir, projectNamespace, supported, testOptions); err != nil {
+			t.Fatalf("recompile conversion: %v", err)
+		}
+	}
+
+	convert()
+	sources := stampEmittedSources(t, outDir)
+
+	if _, err := os.Stat(filepath.Join(outDir, externalTestPackageInfoFileName)); err != nil {
+		t.Fatalf("the fixture no longer emits %s, so it cannot guard its removal: %v", externalTestPackageInfoFileName, err)
+	}
+
+	convert()
+
+	if moved := rewrittenSources(t, sources); len(moved) > 0 {
+		t.Errorf("an unchanged re-conversion through the fallback rewrote %d of %d .cs files: %v", len(moved), len(sources), moved)
 	}
 }
