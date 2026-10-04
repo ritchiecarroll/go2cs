@@ -44,6 +44,7 @@
     <None Include="$(MSBuildThisFileDirectory)elidedAnyCompositeElems_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)embedPromotedClosure_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\corpusRelease_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetPackage.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetPackage_test.go" />

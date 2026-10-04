@@ -5328,6 +5328,35 @@ func declarationClosureImports(roots []*packages.Package, compileExcluded map[st
 
 			fieldEdge(named)
 		}
+
+		// The PROMOTED-METHOD edge. A struct a test source declares with an embedded struct gets a
+		// forwarder from go2cs-gen, in the test assembly, for every method that embed promotes (its
+		// "Promoted Struct Receivers", read from the embed's metadata), and each forwarder's signature
+		// spells the method's parameter and result types. go-cmp's internal/function suite declares
+		// `type myType struct{ bytes.Buffer }` and imports bytes but not io; bytes.Buffer's ReadFrom
+		// and WriteTo take an io.Reader and an io.Writer, and the compile failed
+		// `CS0234 … 'io_package' … namespace 'go'` x4 in the generated myType.g.cs. Membership
+		// follows the generator's own rule: exported methods always, unexported ones only when the
+		// embed belongs to the embedding struct's package. Embedded INTERFACES are not walked: the
+		// generator's promotion is for struct embeds.
+		for _, named := range seeds.embedders {
+			for _, embed := range embeddedStructs(named) {
+				methods := types.NewMethodSet(types.NewPointer(embed))
+
+				for i := range methods.Len() {
+					method, ok := methods.At(i).Obj().(*types.Func)
+
+					if !ok || !method.Exported() && method.Pkg() != named.Obj().Pkg() {
+						continue
+					}
+
+					for _, mentioned := range namedTypesIn(method.Type()) {
+						reach(mentioned)
+						enqueue(mentioned)
+					}
+				}
+			}
+		}
 	}
 
 	for len(queue) > 0 {
@@ -5477,6 +5506,40 @@ func namedTypesIn(typ types.Type) []*types.Named {
 	return result
 }
 
+// embeddedStructs returns the named STRUCT types a struct type embeds (`struct{ bytes.Buffer }`,
+// `struct{ *state }`), dereferenced; an embedded interface or a non-struct named type is skipped.
+func embeddedStructs(named *types.Named) []*types.Named {
+	structType, ok := named.Underlying().(*types.Struct)
+
+	if !ok {
+		return nil
+	}
+
+	var result []*types.Named
+
+	for i := range structType.NumFields() {
+		field := structType.Field(i)
+
+		if !field.Anonymous() {
+			continue
+		}
+
+		fieldType := types.Unalias(field.Type())
+
+		if pointer, ok := fieldType.(*types.Pointer); ok {
+			fieldType = types.Unalias(pointer.Elem())
+		}
+
+		if embed, ok := fieldType.(*types.Named); ok {
+			if _, isStruct := embed.Underlying().(*types.Struct); isStruct {
+				result = append(result, embed)
+			}
+		}
+	}
+
+	return result
+}
+
 // typeSeeds carries the seed sets declarationClosureImports takes from one compilation unit:
 // every named type its compiled files MENTION (what an interface base edge starts from) and the
 // named types a composite literal CONSTRUCTS (what the fieldwise-constructor edge starts from).
@@ -5495,6 +5558,10 @@ type typeSeeds struct {
 	// implemented-interface edge (see declarationClosureImports): the demand is on the type's
 	// realized base list, never on its own package, which the spelling already references.
 	memberBound []*types.Named
+	// embedders carries the struct types a compiled TEST source declares with an embedded struct
+	// field; the promoted-method edge reads the embeds' method signatures (see
+	// declarationClosureImports).
+	embedders []*types.Named
 }
 
 // referencedTypeSeeds collects those seeds from the files the test assembly actually COMPILES.
@@ -5637,6 +5704,18 @@ func referencedTypeSeeds(pkg *packages.Package, compileExcluded map[string]bool)
 
 						if named, ok := types.Unalias(variable.Type()).(*types.Named); ok {
 							seeds.constructedEmpty = append(seeds.constructedEmpty, named)
+						}
+					}
+				}
+			case *ast.TypeSpec:
+				// A struct declared in a TEST source compiles into the test assembly together with the
+				// forwarders go2cs-gen emits for its embeds' promoted methods (see
+				// declarationClosureImports). `_test.go`-scoped for the member-access edge's reason:
+				// a production struct's forwarders are generated in the production assembly.
+				if isTestFile {
+					if typeName, ok := pkg.TypesInfo.Defs[typed.Name].(*types.TypeName); ok {
+						if named, ok := typeName.Type().(*types.Named); ok && len(embeddedStructs(named)) > 0 {
+							seeds.embedders = append(seeds.embedders, named)
 						}
 					}
 				}
