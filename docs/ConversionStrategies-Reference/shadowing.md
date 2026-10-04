@@ -727,6 +727,39 @@ ordinary import, a white-box and a plain reference-model test project). The beha
 `UsingStaticNamespaceAlias` compiles and runs both alias sets beside bare `Unsafe`, `Closure` and
 `Marshal`.
 
+## A module hosted under `go.` shadows the root namespace the way a `go/*` import does
+
+A package's C# namespace is its import path, so a module whose first host label is `go` — `go.yaml.in/yaml/v3`,
+`go.uber.org/zap`, `go.opentelemetry.io/otel` — lands under `go.go`, exactly as the standard library's `go/ast`
+and `go/types` do. Any compilation that references one has a `go.go` member in namespace `go`, and C# binds the
+leading `go` of a using target inner-to-outer, so inside any `go.*` namespace a bare root-qualified alias binds to
+it and fails (CS0234). The converter already roots those targets with `global::` when a `go/*` package sits in
+the import closure; a `go.`-hosted module in the closure now raises the same flag:
+
+```go
+import (
+	"runtime/debug"
+	"unicode/utf8"
+	"go.shadowlib.in/lib"
+)
+```
+```csharp
+namespace go.GoHostModuleShadow;
+
+using debug = global::go.runtime.debug_package;
+using utf8 = global::go.unicode.utf8_package;
+using lib = global::go.go.shadowlib.@in.lib_package;
+using global::go.runtime;
+using global::go.unicode;
+```
+
+The qualification is per package and only where it is needed: a package whose transitive import closure holds no
+`go/*` package and no `go.`-hosted module emits its aliases exactly as before. The host is not renamed instead,
+because a module's namespace is its import path, and a package already converted under that path would keep it.
+This is what kept testify (which imports `go.yaml.in/yaml/v3`), and through it logrus and cobra's `doc` package,
+from compiling. (Guarded by the `GoHostModuleShadow` behavioral project, a consumer package that imports a
+`go.`-hosted module beside `runtime/debug` and `unicode/utf8`: four CS0234 before the change.)
+
 ---
 
 [← Multi-Assignment and Evaluation Order](multi-assignment.md) · [Index](README.md) · [Multi-Result Values and Comma-Ok Forms →](multi-result-and-comma-ok.md)

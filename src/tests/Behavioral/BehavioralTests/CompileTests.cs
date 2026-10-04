@@ -790,6 +790,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
 
     [TestMethod]
+    public void CheckGoHostModuleShadow() => CheckTarget("GoHostModuleShadow");
+
+    [TestMethod]
     public void CheckGoNamespaceShadow() => CheckTarget("GoNamespaceShadow");
 
     [TestMethod]

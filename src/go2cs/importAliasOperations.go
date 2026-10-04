@@ -168,6 +168,18 @@ func computeImportAliasRenames(files []FileEntry, pkg *types.Package, packageNS 
 			ns += "." + getSanitizedImport(part)
 			packageChildNamespaces[ns] = true
 		}
+
+		// A module whose first HOST label is `go` (go.yaml.in/yaml/v3, go.uber.org/zap,
+		// go.opentelemetry.io/…) converts to a namespace UNDER go.go -- its first path element is one
+		// dotted segment, so the chain above keys `go.go.yaml.in`, never `go.go` itself. The shadow is
+		// the same one a go/* import causes (rootNamespaceShadowed): the referenced assembly makes `go.go`
+		// a member of namespace `go`, and every bare `go.` using target in this package binds to it
+		// (testify's assert: `using debug = go.runtime.debug_package;`, CS0234). So it is keyed the same
+		// way, and only for a package whose closure holds such a module -- every other package emits as
+		// before.
+		if strings.HasPrefix(RootNamespace+"."+convertImportPathToNamespace(path, PackageSuffix), RootNamespace+"."+RootNamespace+".") {
+			packageChildNamespaces[RootNamespace+"."+RootNamespace] = true
+		}
 	}
 
 	// The package's OWN class is a member of its own namespace in every compilation, so it shadows
