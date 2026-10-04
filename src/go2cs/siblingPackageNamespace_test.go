@@ -41,6 +41,13 @@ func convertSiblingPackageFixture(t *testing.T) string {
 	writeModuleFile(t, filepath.Join(appDir, "teststructs", "foo2", "lib.go"),
 		"package foo\n\nfunc Name() string { return \"foo2\" }\n\ntype Triple struct{ A, B, C string }\n\ntype Alias = Triple\n")
 
+	// A package declared in the SIBLINGS' parent namespace (teststructs/bar, `package bar`, so namespace
+	// <parent>) importing a sibling under an alias that spells the sibling's directory: the sibling's
+	// namespace is now a child of that namespace, so the alias collides with it (CS0576) and must be
+	// renamed exactly as an alias colliding with any other child namespace is.
+	writeModuleFile(t, filepath.Join(appDir, "teststructs", "bar", "lib.go"),
+		"package bar\n\nimport foo1 \"example.com/sib/teststructs/foo1\"\n\nfunc Use() string { return foo1.Name() }\n")
+
 	// The exempt shapes, as controls: none of them may move.
 	writeModuleFile(t, filepath.Join(appDir, "codec", "v2", "lib.go"), "package codec\n\nfunc Version() int { return 2 }\n")
 	writeModuleFile(t, filepath.Join(appDir, "yaml.v3", "lib.go"), "package yaml\n\nfunc Version() int { return 3 }\n")
@@ -53,6 +60,7 @@ import (
 
 	"example.com/sib/codec/v2"
 	"example.com/sib/macos"
+	"example.com/sib/teststructs/bar"
 	foo1 "example.com/sib/teststructs/foo1"
 	foo2 "example.com/sib/teststructs/foo2"
 	"example.com/sib/yaml.v3"
@@ -61,7 +69,7 @@ import (
 func main() {
 	var a foo1.Alias = foo1.Pair{Left: 1, Right: 2}
 	var b foo2.Alias = foo2.Triple{A: "x"}
-	fmt.Println(foo1.Name(), foo2.Name(), a, b, codec.Version(), yaml.Version(), macOS.Version())
+	fmt.Println(foo1.Name(), foo2.Name(), a, b, codec.Version(), yaml.Version(), macOS.Version(), bar.Use())
 }
 `)
 
@@ -102,6 +110,7 @@ func TestSiblingPackagesSharingANameAreDistinctTypes(t *testing.T) {
 		{"teststructs/foo2/package_info.cs", `GoTypeAlias("Alias", "go.example.com.sib.teststructs.foo2.foo_package.Triple")`},
 		{"main.cs", "teststructs.foo1.foo_package;"},
 		{"main.cs", "teststructs.foo2.foo_package;"},
+		{"teststructs/bar/lib.cs", "using Δfoo1 = "},
 	} {
 		if text := readGenerated(t, filepath.Join(out, filepath.FromSlash(check.file))); !strings.Contains(text, check.want) {
 			t.Errorf("%s: missing %q in:\n%s", check.file, check.want, text)
