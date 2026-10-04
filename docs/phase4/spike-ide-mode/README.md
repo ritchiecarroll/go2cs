@@ -8,5 +8,8 @@ E8's C#-consumer shape. `hosts/gomain/GoMain.csproj` and `hosts/consumer/Consume
 the two E8 host projects. They convert `samples/multi` and `samples/shared` and expect `go2cs` on `PATH`.
 `tools/linedirect.py` is the option-(b) prototype of E6, E7 and E9 (use `--mode hidden --skip-comment-records`, plus
 `--goroot` for a standard-library package). `tools/swap.targets` compiles its output in place of the committed files.
-`tools/stmtlines` prints the Go statement lines that E6 and E9 count coverage against. These are spike inputs, not
-product code; nothing builds or tests them.
+`tools/stmtlines` prints the Go statement lines that E6 and E9 count coverage against, and `tools/dap.py` is the
+E2 driver that runs netcoredbg over DAP. [`desktop/`](desktop/CHECKLIST.md) is the kit for the owner's hands-on half:
+`prepare.ps1` builds the converter, converts and builds the stepping and caller samples with `#line` mapping and
+writes their VS Code launch files, and `CHECKLIST.md` lists the checks. These are spike inputs, not product code;
+nothing in the repository builds or tests them.

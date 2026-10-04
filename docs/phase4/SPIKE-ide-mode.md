@@ -466,3 +466,60 @@ The sections above stand as measured. These rulings supersede the parts of them 
 - 18 statement lines missed by every build, and 4 missed by (b) only, in `strconv` are not root-caused (E9).
 - E2 has not run: netcoredbg needs github.com, and that owner hand is open. If it is not granted, E2 joins the desktop
   checklist.
+
+## Amendment 2026-10-04: E2, netcoredbg over DAP — GREEN
+
+The release download host now answers in this environment, so netcoredbg 3.2.0-1 (the Linux x64 release asset) was
+installed and driven over DAP by a small script ([`spike-ide-mode/tools/dap.py`](spike-ide-mode/tools/dap.py)). The GitHub API is still scoped to the session's own repositories,
+which does not matter here.
+
+**Setup.** `samples/stepping` (E6), with `main.cs` regenerated in the ruled mode (`--mode hidden
+--skip-comment-records`, 22 records) and built Debug; its output equals `go run`'s. The launch request runs
+`dotnet <app.dll>` with `requireExactSource: true`.
+
+**Prediction** (written and hashed before the first run):
+1. All requested breakpoints (main.go 23, 16, 30, 35) report verified at their own lines.
+2. The first stop is main.go:23, with the absolute `main.go` path, in `main_package.Main`.
+3. Step-over from 23 stops on 24, 25 and 26, in that order.
+4. The breakpoint at 16, inside `work`, is reached from a goroutine, with `work` above a frame at main.go:30.
+5. Locals at 16 include `sum`, `n` and `i`, and `nint` values print as integers. `results` (a `slice<nint>`) shows
+   as a raw golib struct.
+6. A breakpoint on line 12 (the deferred literal's body) binds, and one on the blank line 9 moves or stays
+   unverified.
+
+**Scored:**
+
+| # | Result |
+|:--|:--|
+| 1 | MET in substance: `setBreakpoints` answers "pending" before launch, then a `breakpoint` event marks each one verified at its own line (23, 16, 30, 35). |
+| 2 | MET: the stop is `main.go:23`, with the absolute path of the `main.go` that was compiled, in `go.example.com.main_package.Main()`. |
+| 3 | MET: 24, 25, 26. |
+| 4 | MET: `work()` at 16 above `<>c__DisplayClass4_2.<Main>b__1()` at main.go:30. Below that are golib's `Goroutine.Run` frames, which have no source. |
+| 5 | MET: `n`, `sum` and `i` show as integers of type `IntPtr`, with golib's `ᐐ` (`GoFrame`) beside them. At 35, `results` shows as `{go.slice<IntPtr>}`. |
+| 6 | MET: line 12 binds at 12; line 9 moves to 10. |
+
+**Not predicted:**
+- **netcoredbg does not enforce the checksum.** With one line appended to `main.go`, so that its SHA-256 no longer
+  matches the PDB's, the breakpoint still bound and stopped at 23. `requireExactSource` is a vsdbg option, so the
+  checksum check belongs to the desktop half (vsdbg).
+- **Same-line repeats are visible when stepping.** netcoredbg stops at every sequence point, even when the line does
+  not change. In `work`'s loop each iteration stops on the `for` line two or three times and on the `if` line twice.
+  These are the repeats E6 counted, and hidden mode reduces them without removing them. Whether vsdbg merges them is
+  for the desktop half.
+- **Evaluation:** `results[2]` gives 12 and `results.Length` gives 3, through golib's C# indexer and property, but
+  `a + b` on two `nint` values fails (`0x80070057`).
+- **Names** are C# names everywhere (`Main`, `<Main>b__1`, `IntPtr`, the `Ꮡwg` heap box beside `wg`), as E7 found
+  for `runtime.Caller`. Readable values are Phase 1's work, which netcoredbg cannot show in any case (it supports
+  neither `DebuggerDisplay` nor `DebuggerTypeProxy`).
+
+**Verdict: GREEN.** `.go` breakpoints bind and stop through `#line` in netcoredbg, the stack shows `.go:line`, and
+stepping moves by Go line. The plan's stop gate (E2 red in both debuggers) cannot fire. The vsdbg half and the
+checksum check stay on the desktop checklist. This supersedes the "E2 NOT RUN" section and that residual.
+
+**Desktop kit (2026-10-04).** [`spike-ide-mode/desktop/`](spike-ide-mode/desktop/CHECKLIST.md) holds `prepare.ps1`
+and `CHECKLIST.md` for the hands-on half. Run under PowerShell 7.6 on this Linux box, `prepare.ps1` completed in 15
+s: it built the converter, converted both samples into their own output roots, wrote the `#line` copies, built them
+Debug through the swap, and wrote the VS Code files. Each `launch.json` names a program that exists. The stepping
+build's PDB names `main.go`, its output equals `go run`'s, and netcoredbg stopped at main.go 23, 24 and 30 in it. With
+Go removed from PATH the script refuses with a one-line message and exit code 1. Nothing in it is Windows-only, so no
+step was skipped here; Windows PowerShell 5.1 was not available to run it.
