@@ -23,7 +23,7 @@ The converter took two tries to get right. The first was written in C# and read 
 * The whole Go standard library converts and compiles as .NET assemblies.
 * Every standard-library package that *can* be validated passes its own Go test suite in C#, on Windows and on Linux. Each one has a [proof page](ValidatedTestPackages.md), Go's verdict beside go2cs's, test by test, and the few that can't be validated are [listed with their reasons](ValidatedTestPackages.md#excluded-packages).
 * Underneath, hundreds of small Go programs check the language features one by one, comparing the C# output against Go's.
-* Real third-party Go modules convert too, and `go2cs -tests -recurse` judges a whole module the way the standard library is judged: by its own test suites. [nugetgo.net](https://nugetgo.net) is the community registry for converted modules.
+* Real third-party Go modules convert too, and `go2cs -tests -recurse` judges a whole module the way the standard library is judged: by its own test suites ([validated modules](ValidatedModules.md)). [nugetgo.net](https://nugetgo.net) is the community registry for converted modules.
 
 Of course, everything is not peaches and cream. A tool like this is worth exactly as much as its worst *undisclosed* defect, so here are mine:
 
