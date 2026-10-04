@@ -35,6 +35,43 @@ namespace go;
 public static partial class GoReflect
 {
     /// <summary>
+    /// reflect.NewAt's resolution of its pointer: the box over REAL storage that <paramref name="number"/>
+    /// names as a <paramref name="target"/>, or <c>null</c> when it names none, and NewAt keeps the zero
+    /// box it has always returned.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// go-cmp reads an unexported field as <c>reflect.NewAt(f.Type, unsafe.Pointer(v.UnsafeAddr() +
+    /// f.Offset)).Elem()</c>. NewAt ignored its pointer, so every such field read as zero and two
+    /// structs that differed only there compared equal (cmpopts IgnoreUnexported, IgnoreFields).
+    /// </para>
+    /// <para>
+    /// EXACT ONLY (COORD ruling, 2026-10-04): the number must be a live registered token (or a pinned
+    /// address the table still validates), resolved at offset 0, or a live token's own block plus an
+    /// offset; and the resolution is the interior-alias walk above, which answers only where the Go
+    /// offset lands exactly on a <paramref name="target"/>-typed node. A token whose box has been
+    /// collected does not resolve (the table holds boxes WEAKLY), so a stale pointer answers
+    /// <c>null</c> too. No token value is minted or changed here.
+    /// </para>
+    /// </remarks>
+    public static object? ResolveNewAtPointee(nuint number, Type target)
+    {
+        if (number == 0)
+            return null;
+
+        if (ManagedPointerTokens.Resolve(number) is { } box)
+            return ResolveInteriorAlias(box, 0, target, out _);
+
+        if (ManagedPointerTokens.IsTokenArithmetic(number) &&
+            ManagedPointerTokens.ResolveArithmeticBase(number, out nuint offset) is { } baseBox)
+        {
+            return ResolveInteriorAlias(baseBox, offset, target, out _);
+        }
+
+        return null;
+    }
+
+    /// <summary>
     /// Resolves the Go interior pointer <c>(*V)(base + offset)</c> to an alias box over the real
     /// storage of <paramref name="baseBox"/>, or returns <c>null</c> when the offset does not land
     /// EXACTLY on a <paramref name="target"/>-typed node of the base's Go layout.

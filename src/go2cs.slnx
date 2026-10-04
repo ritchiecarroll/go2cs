@@ -859,6 +859,7 @@
     <Project Path="tests/Behavioral/ReceiverPointerValue/ReceiverPointerValue.csproj" />
     <Project Path="tests/Behavioral/RefLoweredDeferChain/RefLoweredDeferChain.csproj" />
     <Project Path="tests/Behavioral/RefPrimaryFieldReceiver/RefPrimaryFieldReceiver.csproj" />
+    <Project Path="tests/Behavioral/ReflectNewAtField/ReflectNewAtField.csproj" />
     <Project Path="tests/Behavioral/ReflectArrayOf/ReflectArrayOf.csproj" />
     <Project Path="tests/Behavioral/ReflectAssignabilityNamed/ReflectAssignabilityNamed.csproj" />
     <Project Path="tests/Behavioral/ReflectBridgeClosure/ReflectBridgeClosure.csproj" />
