@@ -420,6 +420,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 								v.writeOutput("%s %s = %s;", csTypeName, csIDName, zero)
 							} else {
 								v.writeOutput("%s %s = default!;", csTypeName, csIDName)
+								v.recordConstantInitializedLocal(def)
 							}
 						}
 					} else {
@@ -526,6 +527,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 							v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, nilChan)
 						} else {
 							v.writeOutput("%s static %s %s;", access, csTypeName, csIDName)
+
+							if access != "public" {
+								v.recordUnassignedFieldCandidate(def, ident.Name == "_")
+							}
 						}
 					}
 
@@ -1329,6 +1334,13 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					// variable. Primitive/string consts can still use "const" locally.
 					if isNamedType || nativeIntConst || uintptrConst || complexConst {
 						v.writeOutput("%s %s =%s %s;", csTypeName, csIDName, orgExpr, constValExpr)
+
+						// `unchecked((nint)…)` is a C# constant, so this local is the CS0219 shape
+						// when every use folded (bufio's `maxInt/2`); the struct-typed forms
+						// initialize through a conversion operator and are not.
+						if nativeIntConst && !isNamedType && (csTypeName == "nint" || csTypeName == "nuint") {
+							v.recordConstantInitializedLocal(c)
+						}
 					} else {
 						v.writeOutput("%s %s %s =%s %s;", constExpr, csTypeName, csIDName, orgExpr, constValExpr)
 					}

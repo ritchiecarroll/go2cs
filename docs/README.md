@@ -313,6 +313,9 @@ every third-party library under `csharp/pkg/<import-path>`. The standard library
 `go.<pkg>` packages, and the generated `csharp/Directory.Build.props` supplies the version they resolve —
 so the projects restore and build with no further configuration. A per-project `.slnx` sits next to every
 generated `.csproj`, each with that project plus its converted dependencies.
+Where Go's own semantics draw a C# warning in one file (a local whose every use folded to a constant, a
+package variable nothing writes), an `.editorconfig` beside that `.csproj` turns it off for that file only
+([Conversion Strategies](ConversionStrategies.md#package-conversion)).
 
 _Code converted from `main.go` should look like the following in `main.cs`:_
 ```c#

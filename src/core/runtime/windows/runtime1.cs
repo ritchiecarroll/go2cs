@@ -588,10 +588,10 @@ internal static void setTraceback(@string level) {
         t = ((uint32)1 << (int)(tracebackShift));
     }
     else if (exprᴛ1 == "all"u8) { matchᴛ1 = true;
-        t = (uint32)((1 << (int)(tracebackShift)) | (uint32)tracebackAll);
+        t = (uint32)((uint32)(1 << (int)(tracebackShift)) | (uint32)tracebackAll);
     }
     else if (exprᴛ1 == "system"u8) { matchᴛ1 = true;
-        t = (uint32)((2 << (int)(tracebackShift)) | (uint32)tracebackAll);
+        t = (uint32)((uint32)(2 << (int)(tracebackShift)) | (uint32)tracebackAll);
     }
     else if (exprᴛ1 == "crash"u8) { matchᴛ1 = true;
         t = (uint32)((UntypedInt)((2 << (int)(tracebackShift)) | tracebackAll) | (uint32)tracebackCrash);

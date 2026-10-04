@@ -393,6 +393,8 @@ func isComparisonOperator(op token.Token) bool {
 
 // Get the adjusted identifier name, considering captures and shadowing
 func (v *Visitor) getIdentName(ident *ast.Ident) string {
+	v.markRenderedLocal(ident)
+
 	// Check if we're in a lambda conversion
 	if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda {
 		// First check if we already have a mapping for this variable in this lambda

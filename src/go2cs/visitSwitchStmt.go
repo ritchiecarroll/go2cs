@@ -347,6 +347,22 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			matchVarName = v.getTempVarName("match")
 		}
 
+		// The running match flag is READ only by a case reached through fallthrough (`fallthrough ||
+		// !match && …`) and by a TRAILING default (`!match`). When neither exists — the only
+		// fallthrough target is a non-trailing default, which reads the precomputed any-match flag
+		// below — the flag is write-only (CS0219, encoding/json decodeState.array), so it is neither
+		// declared nor set. Its temp name is still taken, so the names that follow do not shift.
+		matchFlagRead := false
+
+		for ci, cc := range caseClauses {
+			reachedByFallthrough := ci > 0 && caseHasFallthroughStmt[ci-1]
+			trailing := ci == len(caseClauses)-1
+
+			if cc.List != nil && reachedByFallthrough || cc.List == nil && trailing && hasFallthroughs {
+				matchFlagRead = true
+			}
+		}
+
 		// A NON-TRAILING default participating in fallthrough (ascii85's leading
 		// `default: … fallthrough`) must run only when NO case matches while executing in
 		// SOURCE order — so a SECOND var PRECOMPUTES the OR of every case condition and the
@@ -501,7 +517,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			v.outputBuilder.WriteString(";" + v.newline)
 		}
 
-		if hasFallthroughs {
+		if hasFallthroughs && matchFlagRead {
 			if v.options.preferVarDecl {
 				v.writeOutput("var ")
 			} else {
@@ -669,7 +685,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 
 					v.outputBuilder.WriteString(") {")
 
-					if !nextClauseIsDefault || defaultCaseFallsThrough {
+					if (!nextClauseIsDefault || defaultCaseFallsThrough) && matchFlagRead {
 						v.outputBuilder.WriteRune(' ')
 						v.outputBuilder.WriteString(matchVarName)
 						v.outputBuilder.WriteString(" = true;")
