@@ -46,7 +46,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that feed on this flavor''s legs)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored)'
         type: choice
         required: true
         default: census
@@ -187,6 +187,19 @@ jobs:
               'darwin'  { @(@{ goos = 'darwin';  runner = 'macos-15';        rid = 'osx-arm64' },
                             @{ goos = 'darwin';  runner = 'macos-15-intel';  rid = 'osx-x64'   }) }
               default   { throw "Unknown goos '$($env:INPUT_GOOS)'." }
+          }
+
+          # release-smoke runs EVERY shipped RID from ONE pack, whatever goos says: its question is whether
+          # the packages a release would publish carry what this tree's converter emits, on every OS they
+          # ship for (C2, ec147f1d7f: N's converter emits unsafe.ArrayPointer, which the published 1.24.13.3
+          # lacks). Three dispatches would be three packs of the same tree; one pack feeds all four legs.
+          if ($env:INPUT_STAGE -eq 'release-smoke') {
+              $targets = @(
+                  @{ goos = 'windows'; runner = 'windows-latest';  rid = 'win-x64'   },
+                  @{ goos = 'linux';   runner = 'ubuntu-latest';   rid = 'linux-x64' },
+                  @{ goos = 'darwin';  runner = 'macos-15';        rid = 'osx-arm64' },
+                  @{ goos = 'darwin';  runner = 'macos-15-intel';  rid = 'osx-x64'   })
+              Write-Host "release-smoke: all four shipped RIDs from one pack (goos '$($env:INPUT_GOOS)' does not narrow it)"
           }
 
           # Job budgets, in MINUTES, scaled from CLAUDE.md's measured rows for a ~4-core runner.
@@ -1276,14 +1289,18 @@ jobs:
 
           $work = Join-Path $art "release-smoke-$goos-$rid"
           $log = Join-Path $art "release-smoke-$goos-$rid.log"
-          & ./src/tests/PackageTests/release-smoke.ps1 -Feed (Join-Path $PWD 'feed') -Converter (Join-Path $PWD "src/go2cs/bin/$exeName") -WorkRoot $work *>&1 |
+          # The README walkthrough GATES on every leg. darwin joined windows and linux once darwin-xsys-libc
+          # (TRAIN O) made x/sys/unix reach libc on a Mac: release-smoke 37155599211 ran it byte-identical to
+          # `go run` on both chips. A tree without that seat fails darwin's D, by design.
+          $gateWalkthrough = $true
+          & ./src/tests/PackageTests/release-smoke.ps1 -Feed (Join-Path $PWD 'feed') -Converter (Join-Path $PWD "src/go2cs/bin/$exeName") -WorkRoot $work -GateWalkthrough:$gateWalkthrough *>&1 |
               Tee-Object -FilePath $log
           $smokeExit = $LASTEXITCODE
 
           $summary = @(
               "## Release smoke -- GOOS=$goos ($rid)"
               ''
-              "exit ``$smokeExit`` (A, B and C gate; D is measured only)"
+              "exit ``$smokeExit`` (A, B and C gate; D $(if ($gateWalkthrough) { 'gates here' } else { 'is measured only here' }))"
               ''
               '```'
           ) + @(Get-Content -LiteralPath $log | Where-Object { $_ -match '^(release smoke:|PASS|FAIL|MEASURED)' }) + @('```')
