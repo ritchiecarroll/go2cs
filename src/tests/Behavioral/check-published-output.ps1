@@ -29,6 +29,11 @@
     the converter writes, independent of whether this tree has transpiled the project), and run
     -SingleFileRuns times. A run that passes -RunTimeoutSeconds FAILS the leg as HUNG.
 
+    ROOTED 2026-10-03 (see THE ONE-CPU ARM below): golib's extension-method scan and its AssemblyLoad
+    handler took one lock in opposite order with the runtime's type-load lock. With that fixed, a
+    single-file publish with ReadyToRun forced on hung 0 of 30 runs (28 of 30 at the red base), so the
+    profiles publish single-file WITH ReadyToRun again and this arm guards exactly that configuration.
+
 .PARAMETER Projects
     Behavioral project names to publish. Defaults to the fixed set.
 
