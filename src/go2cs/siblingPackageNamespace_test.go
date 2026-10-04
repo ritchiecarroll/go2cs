@@ -126,3 +126,38 @@ func TestExemptPackageNameDifferencesKeepTheirNamespace(t *testing.T) {
 		}
 	}
 }
+
+// A persisted package_info.cs is copied through verbatim outside its marker sections, so a package whose
+// namespace moved would keep the old declaration beside sources that declare the new one. The template's
+// own `using static` line moves with it; another package's `using static` does not.
+func TestPersistedPackageInfoConvergesOnMovedNamespace(t *testing.T) {
+	lines := []string{
+		"using go;",
+		"using static go.a.teststructs.foo_package;",
+		"using static go.a.teststructs.bar_package;",
+		"",
+		"namespace go.a.teststructs;",
+		"",
+		"public static partial class foo_package",
+	}
+
+	got := convergePackageNamespace(append([]string(nil), lines...), "go.a.teststructs.foo1", "foo_package")
+
+	want := []string{
+		"using go;",
+		"using static go.a.teststructs.foo1.foo_package;",
+		"using static go.a.teststructs.bar_package;",
+		"",
+		"namespace go.a.teststructs.foo1;",
+		"",
+		"public static partial class foo_package",
+	}
+
+	if strings.Join(got, "\n") != strings.Join(want, "\n") {
+		t.Errorf("converged:\n%s\nwant:\n%s", strings.Join(got, "\n"), strings.Join(want, "\n"))
+	}
+
+	if unchanged := convergePackageNamespace(append([]string(nil), want...), "go.a.teststructs.foo1", "foo_package"); strings.Join(unchanged, "\n") != strings.Join(want, "\n") {
+		t.Errorf("a file already on its namespace changed:\n%s", strings.Join(unchanged, "\n"))
+	}
+}

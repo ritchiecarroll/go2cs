@@ -1918,6 +1918,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckShiftPrecedenceUnsigned() => CheckTarget("ShiftPrecedenceUnsigned");
 
     [TestMethod]
+    public void CheckSiblingPackageNames() => CheckTarget("SiblingPackageNames");
+
+    [TestMethod]
     public void CheckSiblingTestAddressedGlobal() => CheckTarget("SiblingTestAddressedGlobal");
 
     [TestMethod]

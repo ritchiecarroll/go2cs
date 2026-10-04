@@ -979,8 +979,15 @@ func convertImportPathToNamespace(importPath string, packageSuffix string) strin
 	// second reaches the identical answer through the /vN branch below, and nothing in the corpus
 	// imports the last two — so trusting the graph everywhere keeps the promise the exclusion was
 	// making, instead of asserting it.
+	//
+	// When the name differs from the tail in a way that could COLLIDE, the tail stays in the namespace and
+	// the name is appended as the class segment instead: see packageKeepsDirectorySegment.
 	if meta, ok := importPackageDirs[graphKey]; ok && meta.Name != "" && len(importPathParts) > 0 {
-		importPathParts[len(importPathParts)-1] = meta.Name
+		if packageKeepsDirectorySegment(importPathParts[len(importPathParts)-1], meta.Name) {
+			importPathParts = append(importPathParts, meta.Name)
+		} else {
+			importPathParts[len(importPathParts)-1] = meta.Name
+		}
 	} else if len(importPathParts) > 1 {
 		// A MAJOR-VERSION directory (`math/rand/v2`): the Go package is named for the PARENT
 		// segment (`rand`), and the emitted class follows the package NAME — namespace
@@ -1018,10 +1025,71 @@ func convertImportPathToNamespace(importPath string, packageSuffix string) strin
 // `v2_package` — CS0426/CS0234, sort's test suite importing math/rand/v2) or a module directory
 // named differently from its package (github.com/mattn/go-isatty is `package isatty`). Unlike the
 // convention-based /vN branch above, this works from the type graph's authoritative package name.
+//
+// A package that keeps its directory segment (packageKeepsDirectorySegment) appends the name instead of
+// replacing the tail with it, so the returned path names the same class the namespace builder does.
 func packageClassPath(pkgPath string, pkgName string) string {
 	if idx := strings.LastIndex(pkgPath, "/"); idx != -1 && pkgPath[idx+1:] != pkgName {
+		if packageKeepsDirectorySegment(pkgPath[idx+1:], pkgName) {
+			return pkgPath + "/" + pkgName
+		}
+
 		return pkgPath[:idx+1] + pkgName
 	}
 
 	return pkgPath
+}
+
+// packageKeepsDirectorySegment reports whether a package whose import path ends in tail, and whose Go
+// package name is name, keeps tail as a namespace segment of its own, with the class named for the
+// package beneath it (`…/teststructs/foo1`, `package foo` → namespace `….teststructs.foo1`, class
+// `foo_package`).
+//
+// Dropping the tail is what the namespace has always done, and it is safe while the class carries the
+// tail's spelling. Once the name differs from the tail, two directories under one parent can declare the
+// same name — go-cmp's cmp/internal/teststructs/foo1 and foo2 are both `package foo` — and dropping the
+// tail makes them one fully qualified type (CS0433 in any compilation that references both). Go's own
+// identity for a package is its import path, so the path is what keeps them apart. Producer and consumer
+// both decide from the import path and the package name alone, so they agree with no registry.
+//
+// Three differences keep today's spelling, because none of them can collide:
+//   - a major-version tail (`math/rand/v2` is `package rand`), the convention a /vN directory follows;
+//   - a name.vN tail (`gopkg.in/yaml.v3` is `package yaml`), the same convention spelled as a suffix;
+//   - a difference in case only (`crypto/x509/internal/macos` is `package macOS`): Go's module rules forbid
+//     two paths in one module that differ only by case, so the parent cannot hold a second such sibling.
+//
+// `package main` never moves either: it emits as its own executable and is never referenced. An
+// external test package is decided by the name of the package it tests (`foo_test` → `foo`), so it
+// stays in its production package's namespace.
+func packageKeepsDirectorySegment(tail, name string) bool {
+	name = strings.TrimSuffix(name, "_test")
+
+	switch {
+	case name == "" || name == tail || name == "main":
+		return false
+	case strings.EqualFold(name, tail):
+		return false
+	case majorVersionSegmentRegex.MatchString(tail):
+		return false
+	case strings.HasPrefix(tail, name+".") && majorVersionSegmentRegex.MatchString(tail[len(name)+1:]):
+		return false
+	}
+
+	return true
+}
+
+// namespaceWithDirectorySegment is the DECLARATION side of packageKeepsDirectorySegment: it appends the
+// import path's tail to a namespace composed without it (getProjectName's), when the package keeps it.
+func namespaceWithDirectorySegment(namespace, importPath, name string) string {
+	tail := importPath
+
+	if idx := strings.LastIndex(tail, "/"); idx != -1 {
+		tail = tail[idx+1:]
+	}
+
+	if !packageKeepsDirectorySegment(tail, name) {
+		return namespace
+	}
+
+	return namespace + "." + getCoreSanitizedIdentifier(tail)
 }

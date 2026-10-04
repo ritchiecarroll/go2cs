@@ -249,6 +249,10 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	// verbatim import path changed (or that predates the ImportPath stamp) would keep a stale one.
 	packageInfoLines = convergeGoPackageStamps(packageInfoLines, packageNamespace)
 
+	// Converge the declared namespace too: it moves when a package starts keeping its directory segment
+	// (packageKeepsDirectorySegment), and a persisted file would otherwise keep the one it was created with.
+	packageInfoLines = convergePackageNamespace(packageInfoLines, packageNamespace, getSanitizedImport(packageName+PackageSuffix))
+
 	// Handle imported type aliases
 	startLineIndex := -1
 	endLineIndex := -1
@@ -1096,6 +1100,43 @@ func goReflectPackagePath(loaderPath string) string {
 // REGENERATED on every reconvert: the writer copies a persisted file verbatim outside its marker
 // sections, so a stale or missing ImportPath would otherwise survive forever. A stamp whose class
 // this conversion does not own (goPackageImportPathFor == "") is left exactly as it is.
+// convergePackageNamespace rewrites a persisted package_info.cs's own `namespace <ns>;` declaration and
+// the template's `using static <ns>.<class>;` line for this package's class, when <ns> is not the
+// current namespace. Outside its marker sections the file is copied through verbatim, so a namespace the
+// package no longer declares would survive in it, leaving the file's class in a different namespace from
+// the package's converted sources. Only the line naming THIS package's class under the OLD namespace is
+// touched, so a `using static` of another package is left alone.
+func convergePackageNamespace(lines []string, namespace, className string) []string {
+	namespaceIndex := -1
+	oldNamespace := ""
+
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+
+		if strings.HasPrefix(trimmed, "namespace ") && strings.HasSuffix(trimmed, ";") {
+			namespaceIndex = i
+			oldNamespace = strings.TrimSpace(trimmed[len("namespace ") : len(trimmed)-1])
+			break
+		}
+	}
+
+	if namespaceIndex < 0 || oldNamespace == namespace {
+		return lines
+	}
+
+	lines[namespaceIndex] = "namespace " + namespace + ";"
+	oldUsing := "using static " + oldNamespace + "." + className + ";"
+
+	for i := 0; i < namespaceIndex; i++ {
+		if strings.TrimSpace(lines[i]) == oldUsing {
+			lines[i] = "using static " + namespace + "." + className + ";"
+			break
+		}
+	}
+
+	return lines
+}
+
 func convergeGoPackageStamps(lines []string, namespace string) []string {
 	const classPrefix = "public static partial class "
 
