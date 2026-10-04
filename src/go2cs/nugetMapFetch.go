@@ -94,8 +94,7 @@ func loadNuGetMapSource(src string, refresh bool) (nugetMapSource, []string, err
 			return nugetMapSource{}, nil, err
 		}
 
-		parsed, err := parseNuGetMap(src, data)
-		return parsed, nil, err
+		return parseNuGetMap(src, data)
 	}
 
 	data, warning, err := fetchNuGetMapURL(src, refresh)
@@ -114,8 +113,8 @@ func loadNuGetMapSource(src string, refresh bool) (nugetMapSource, []string, err
 		warnings = append(warnings, warning)
 	}
 
-	parsed, err := parseNuGetMap(src, data)
-	return parsed, warnings, err
+	parsed, parseWarnings, err := parseNuGetMap(src, data)
+	return parsed, append(warnings, parseWarnings...), err
 }
 
 // readNuGetMapFile reads a local mapping file under the size cap.

@@ -437,8 +437,9 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 		projectDir = absDir
 	}
 
-	// Under -recurse=nuget, stdlib imports become go.<name> NuGet PackageReferences; the app's own
-	// converted packages (main-module + third-party, IsStdLib=false) stay local ProjectReferences.
+	// Under -recurse=nuget, stdlib imports become go.<name> NuGet PackageReferences; the main module's
+	// packages, and every third-party package whose module no -nuget-map mapping substitutes (below),
+	// stay local ProjectReferences.
 	var packageIds []string
 
 	// A substituted third-party module (nugetSubstitution.go): ONE PackageReference per module, whatever

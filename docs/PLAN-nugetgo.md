@@ -225,8 +225,10 @@ modules version).
 > substituted only while every module its package requires is either absent from the run's closure or substituted by the
 > same package at the same version; otherwise it is DEMOTED to local conversion, as a fixed point, and the provenance table
 > names the blocking module. (4) The corpus release a package must match is the converter's embedded `corpus-release.txt`,
-> the last PUBLISHED release (releasestamp.PublishedStamp); the release-procedure lines that regenerate it at each record are
-> held for the owner (COORD, 2026-10-02), and repoguard's TestCorpusReleaseMatchesThePublishedStamp catches a stale one.
+> the last PUBLISHED release (releasestamp.PublishedStamp); the release-procedure lines that regenerate it at each record
+> were owner-approved (GoCorpusMigration H11) and built by S3b -- `release-nuget.ps1`, `push-nuget.ps1` and
+> `migrate-gorelease.ps1` write it -- and repoguard's TestCorpusReleaseMatchesThePublishedStamp catches a stale one. (Noted
+> 2026-10-03: until then this clause read "held for the owner (COORD, 2026-10-02)", which S3b's own commit had overtaken.)
 
 ### 4.3 Metadata and version selection — the self-describing package
 
@@ -408,6 +410,13 @@ above (§1, §3, §4.3, OQ-3) point back to this block, and the earlier text sta
   (`NugetgoSelfDescription.psm1`) -- and the pack's own ID cannot be `go.`: `Get-NugetgoPackageId` always prefixes
   `nugetgo.` (`NugetgoIdentity.psm1`). A converted module's library project no longer writes a `go.`-prefixed
   `PackageId`: `nugetgo-pack.ps1` is the one place a module's ID is minted.
+  **AMENDED 2026-10-03 (COORD, from TRAIN N's shared-file review) -- four readers, and no reader is fatal.** The
+  output root's `go2cs.nuget.lock` is a FOURTH reader: a pinned ID the rule refuses (a lock written before the rule,
+  or edited by hand) is dropped with a warning and the module re-resolves from the sources (`resolveNuGetMappings`).
+  And the `-nuget-map` reader no longer refuses the whole source for such a row: the row is SKIPPED, with a warning
+  naming it by file:line, and the rest of the source still answers. The rule is a POLICY a newer converter can apply
+  more strictly than an older registry row was linted against, and with S3b the registry is read by default, so one
+  such row must never fail every user's conversion. A FORMAT fault in a row still refuses the source (corruption).
 - **B3 — versions.** The Go version without the `v` and without `+incompatible`. Rebuilds are
   `X.Y.Z.N` for a release and `L.0.N` for a prerelease or pseudo-version, never a fourth number on a
   prerelease; revisions rise with the corpus. `L` is the Go prerelease or pseudo-version string used
