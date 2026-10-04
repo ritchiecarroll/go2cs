@@ -26093,4 +26093,67 @@ viewed field with its Go offset. Only a disagreement over a root that is native 
 
 — C2
 
+## 2026-10-02 — G: the copying slice view (`(*[N]T)(ptr)[:n]` over a reinterpret or a raw pointer) — two rows, neither reachable today
+
+The converter lowers a pointer-to-array cast that is then sliced, where the element type differs
+from the source's or the source is a raw pointer, to `new slice<T>(new ReadOnlySpan<T>((T*)…, n))`
+(`convSliceExpr.go`, the `isPointerCast` branch). golib's `slice(ReadOnlySpan<T>)` constructor
+copies, so the result is a detached snapshot. That is exact for a site that only reads. A census at
+the TRAIN M union `e2008427b1` found 14 emissions of the branch in `src/core`: 11 read, 3 write
+through the view. A same-element-type cast does not take this branch (it takes
+`array<T>.AliasPointer`, a real window).
+
+**How this was read.** Writers and readers by reading each site. Reachability by caller grep over
+`src/core`, test sources included, not by an executed trace. Linux and darwin from the committed
+`linux/` and `darwin/` folders of a windows checkout, not from a fresh three-target emission.
+
+| Row | Site | What is wrong | Predicate (when it fires) |
+|---|---|---|---|
+| 1 | `runtime/iface.cs`, `itabInit`'s `methods` | Go's `methods[k] = ifn` stores each method entry into the itab's own `Fun` words through the view. The emitted `methods` is a copy, so the stores never reach `m.Fun`: every `Fun[k]`, k ≥ 1, stays zero. The same line also reads `ni` managed `unsafe.Pointer` structs out of one-word `uintptr` storage, and is the corpus's one remaining CS8500. | Anything calls `getitab`. Its callers are `assertE2I`, `assertE2I2`, `typeAssert`, `interfaceSwitch` and the two `ifaceE2I` linknames, the Go compiler's inserted entry points; no converted code calls them, and reflect's and reflectlite's `ifaceE2I` are hand-owned and do not. |
+| 2 | `runtime/heapdump.cs`, `makeheapobjbv`'s `tmpbuf` | The bitmap's writes and reads both land in the copy, so they agree. The `sysFree` beside it frees the address of the managed copy's first element, not the `sysAlloc`'d block: the block leaks and managed memory is handed to the allocator's free. | The full heap walk is wired. Today `runtime/debug.WriteHeapDump` is hand-owned and writes the minimal dump, so `writeheapdump_m` and `dumpobj` have no caller. |
+
+The third writer, `runtime/mbitmap.cs` `progToPointerMask`, is self-consistent in the copy (the
+`persistentalloc`'d block is simply unused) and owes no row; it is reached only from `modulesinit`.
+
+Ruled by COORD the same day: no red-first seat and no aliasing door for a managed element over
+`uintptr` words until a row's predicate fires. Accepted as a follow-up seat: the branch prints a
+conversion-time note naming file and line when the slice it produces is assigned through in the same
+function, with no emission change.
+
+— G
+
+## 2026-10-03 — G: UntypedFloat / UntypedComplex beside a float32 or 64-bit integer operand compute in double — open, routed to TRAIN O
+
+The sibling of A2 (claude/g-float-untyped-const-compare, which made `UntypedInt`'s conversions FROM a
+float explicit). A Go untyped constant beside a typed operand converts to the operand's type, and the
+operation happens at that type. golib's `UntypedFloat` and `UntypedComplex` convert implicitly from
+`float64`, which constant initializers need (`=> 3.14`), and C# chains a built-in widening into that
+user-defined conversion (`float32` → `double`, `long` → `double`). So the wrapper's DOUBLE operators
+apply to a `float32` or `int64` operand, and C# chooses a user-defined operator before any built-in one.
+
+| Case | Go | C# today |
+|---|---|---|
+| `float32(0.1) <= c`, `c` an untyped float constant `0.1` | true (`c` rounds to float32 first) | false (compared in double against the unrounded 0.1) |
+| `int64(2^53 + 1) > c`, `c` an untyped float constant `2^53` | true (exact integer comparison) | false (2^53 + 1 rounds to 2^53 in double) |
+
+**Measured, not argued:** making `UntypedFloat`/`UntypedComplex`'s conversions from `float32`, `int64`,
+`uint64`, `nint` and `nuint` explicit does NOT close either case — both arms still fail, through the
+chained widening into the `float64` conversion. The fix needs dedicated `float32` and integer operand
+operators on the wrappers (sizing owed: the operator set, a proof from C#'s overload rules that each is
+chosen over the chained widening, and the corpus footprint).
+
+**Red, ready:** two GolibTests arms, `AFloat32ComparesAgainstTheConstantRoundedToFloat32` and
+`AnInt64ComparesExactlyAgainstAnIntegralFloatConstant` (written for A2's sibling check, held out of that
+seat). Predicate for a live site: a converted comparison or arithmetic expression with a `float32` or
+64-bit integer operand and a NAMED untyped float or complex constant (literals render as C# literals and
+are unaffected). Corpus reach not yet censused.
+
+Routed by COORD 2026-10-03 as a TRAIN O seat, `claude/g-untyped-float-operators`, cut after A2 lands.
+
+— G
+
+## 2026-10-03 — R: **PARKED: Go type identity of a METHODLESS named func type (option C of `DESIGN-named-func-type-identity.md`), with its first consumer named: reflect `TestConvert`'s `func()` ↔ `MyFunc` pair (`all_test.go:4539-4540`).** The collapse rule (`methodlessNamedFuncSignature`) renders such a type as its base delegate everywhere, so a value stored in an interface reads the delegate where Go reads the name: `%T` prints `func(int) int` for `main.H`, `reflect.TypeOf(...).Name()` is empty, `reflect.TypeOf(H(f)) == reflect.TypeOf(f)` is true, and an assertion to the unnamed func type succeeds (all four measured at the A1+A3 merge; Go reads the reverse). Option A (ruled, seated with mapstructure's B2) makes type-switch cases follow the rule the assertion path already follows; it does not restore identity, and a switch with two same-signature collapsed cases becomes a C# compile error when their bodies differ. Option C restores identity by tagging the value only where it enters an interface (a generated sealed tag, unwrapped by case and assertion, its `[GoType]` read by reflect), the pattern the generator already uses for a named func type WITH methods. Census at master `8f46a9adae` (go/packages, tests, purego tags; identical on windows, linux and darwin): GOROOT std declares 70-73 collapsed types and reaches the interface boundary at 14 sites (10 boxes, 4 assertions), all of them `sync.Map` store-and-load of ONE type (archive/zip, encoding/json) except the reflect pair; mapstructure adds 3 cases and 4 boxes. **Unpark when** the reflect `TestConvert` pair, or any other row, is shown to diverge on it.
+
+**2026-10-03, CLOSED (COORD):** the UntypedFloat / UntypedComplex siblings entry above is closed by `claude/g-untyped-float-operators` (`cca633f1ba`, TRAIN O): a bare named untyped float or complex constant in a comparison is cast to the other operand's type when that type is float32, complex64 or a 64-bit or native integer. Untyped INTEGER constants keep the BigInteger-materialized path; the pure-literal float fold (`1 - .999`) is C2's separate TRAIN P seat.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
