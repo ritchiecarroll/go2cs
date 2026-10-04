@@ -39,6 +39,7 @@ easily, and a .NET developer can use Go code directly within the .NET ecosystem.
 * Run converted Go test validation: [Try it yourself](#try-it-yourself--validate-a-converted-test-suite)
 * Track which stdlib test suites pass in C#: [Validated Test Packages](ValidatedTestPackages.md)
 * Find converted Go modules as NuGet packages: [nugetgo.net](https://nugetgo.net)
+* Call converted Go from your C# code: [Consuming converted Go from C#](ConsumingGoFromCSharp.md)
 * Running converted programs on Ubuntu's packaged .NET: [Known issues](KnownIssues.md)
 * View example converted test: [`utf8_test.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/unicode/utf8/utf8_test.cs)
 * See current project [status](#status) and [milestones](#milestones)
