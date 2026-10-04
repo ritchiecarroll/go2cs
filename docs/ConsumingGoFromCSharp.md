@@ -6,7 +6,9 @@ maps, channels and goroutines appear to a C# caller.
 
 The examples use two converted modules, [`github.com/ritchiecarroll/hashset`](https://github.com/ritchiecarroll/hashset)
 (a generic set built on a Go map) and [`github.com/google/uuid`](https://github.com/google/uuid). Every snippet
-compiles and runs.
+comes from a small console app,
+[`src/tests/CSharpConsumer`](https://github.com/ritchiecarroll/go2cs/tree/master/src/tests/CSharpConsumer), which
+converts both modules, builds against them, and checks that each example still behaves as shown here.
 
 ## Getting a converted package
 
@@ -38,7 +40,9 @@ using errors = go.errors_package;
 ```
 
 `go` is the namespace of golib, the runtime library that carries Go's semantics. `go.builtin` holds Go's built-in
-functions and `nil`.
+functions and `nil`. When the converted code comes from NuGet packages, those two arrive with the packages as global
+usings, so you write only the package namespaces; set the MSBuild property `GoConsumerUsings` to `false` to turn
+them off. A local conversion that you reference as projects does not bring them, so add them yourself, as here.
 
 A Go name that would clash with another name in the same C# class gets a `Δ` prefix: uuid's `Version` type is
 `uuid_package.ΔVersion`, because the package class also holds the `Version` method.
