@@ -46,6 +46,9 @@ internal class ReceiverMethodTemplate : TemplateBase
             if (OverloadResolutionPriority is not null)
                 attributes += $", global::System.Runtime.CompilerServices.OverloadResolutionPriority({OverloadResolutionPriority})";
 
+            // The forwarder calls the user's [GoRecv] method: Just My Code steps through it.
+            attributes += $", {NonUserCodeAttribute}";
+
             return $"[{attributes}]";
         }
     }

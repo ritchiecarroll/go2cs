@@ -94,8 +94,8 @@ internal class StrTemplate : TemplateBase
         : "";
 
     private string ForwarderAttributes => NoInlining
-        ? $"[{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining), global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1){GoRecvMark}]"
-        : $"[{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1){GoRecvMark}]";
+        ? $"[{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining), global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1), {NonUserCodeAttribute}{GoRecvMark}]"
+        : $"[{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1), {NonUserCodeAttribute}{GoRecvMark}]";
 
     // A delegate TYPE ARGUMENT: a tuple loses its element names, which delegate identity ignores, so
     // the field's type reads as the converter's rendering of the same Go func type at every value site.

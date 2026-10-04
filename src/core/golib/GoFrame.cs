@@ -140,7 +140,12 @@ public ref struct GoFrame
     // NoInlining is a CONTRACT here, not a heuristic: runtime's captureCallers pairs each Run frame it
     // walks with this thread's panic-sequence entries (see GoThreadState.SequenceDepth), so an inlined Run would leave
     // no frame to pair and shift every splice by one sequence.
+    //
+    // DebuggerNonUserCode, not DebuggerStepThrough: this frame CALLS the user's deferred functions, so
+    // under Just My Code a step into the function's exit lands in the deferred call rather than here. It
+    // changes only the debugger's view; StackTrace (and so captureCallers' pairing) still sees the frame.
     [MethodImpl(MethodImplOptions.NoInlining)]
+    [System.Diagnostics.DebuggerNonUserCode]
     public void Run()
     {
         // The panic THIS frame is responsible for continuing, if any: the one its own catch just

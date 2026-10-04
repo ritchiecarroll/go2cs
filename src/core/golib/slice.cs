@@ -86,8 +86,22 @@ public interface ISlice<T> : IArray<T>, ISlice
 // option in the future, at least for slices that are private and used with internal package functions only.
 
 [Serializable]
+[System.Diagnostics.DebuggerDisplay("len = {Length}, cap = {Capacity}")]
+[System.Diagnostics.DebuggerTypeProxy(typeof(slice<>.DebugView))]
 public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquatable<ISlice>, IEquatable<IArray>, ISupportMake<slice<T>>, ISliceWrap<slice<T>, T>, IByteSeq<slice<T>, T>, ISliceBacking
 {
+    // The debugger's view (DebuggerTypeProxy): Go's len and cap, and the elements of the len window --
+    // never the backing array around it. Built only when a debugger expands a slice.
+    internal sealed class DebugView(slice<T> value)
+    {
+        public nint Length => value.Length;
+
+        public nint Capacity => value.Capacity;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        public T[] Items => value.ToSpan().ToArray();
+    }
+
     // The real backing store, answered WITHOUT copying — `Source` materializes a detached copy and
     // so cannot serve as an identity. Explicitly implemented and internal: this adds no public
     // surface, and its only consumer is GoReflect's element-dimension side table.

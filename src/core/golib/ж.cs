@@ -83,8 +83,17 @@ public enum PointerStorage
     Pinnable
 }
 
+[System.Diagnostics.DebuggerDisplay("{ToString(),nq}")]
+[System.Diagnostics.DebuggerTypeProxy(typeof(ж<>.DebugView))]
 public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess, IAllocationIdentity
 {
+    // The debugger's view (DebuggerTypeProxy): the pointee, or null for the nil pointer -- reading a nil
+    // box's Value would be Go's nil dereference, which a debugger must never trigger.
+    internal sealed class DebugView(ж<T> value)
+    {
+        public object? Value => value.IsNull ? null : value.Value;
+    }
+
     // The ONE storage fact every kind shares: whether this box IS the nil pointer. STRUCTURAL —
     // set only at construction, by the kind ctor contracts (see the class remarks); the
     // value-peeking refinement for a standard box lives in StandardBox.IsNull.

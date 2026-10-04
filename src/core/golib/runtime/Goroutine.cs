@@ -1256,6 +1256,9 @@ public sealed class Goroutine
         Run(body, Enter(creator, parentId, entry), bubble);
 
     // A `go` statement's root: the goroutine was registered by its creator (StartWithCreator).
+    // DebuggerNonUserCode: it calls the user's goroutine body, so Just My Code shows the body as the
+    // thread's first frame (the thread is named goroutine-N by Adopt).
+    [System.Diagnostics.DebuggerNonUserCode]
     private static void Run(Action body, Goroutine registered, SyncTestBubble? bubble)
     {
         Scope entered = Adopt(registered);

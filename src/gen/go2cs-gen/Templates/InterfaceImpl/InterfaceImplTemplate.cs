@@ -252,7 +252,7 @@ internal class InterfaceImplTemplate : TemplateBase
                     // collision-renamed (bare `ΔHandler.Enabled(…)` binds nothing, CS0103 —
                     // slogtest's `wrapper` embeds slog.ΔHandler as field `Handler`).
                     result.Append($"// '{simpleInterfaceName}.{simpleMethodName}()' implicit implementation mapped to promoted interface receiver method:\r\n        ");
-                    result.Append($"public {method.ReturnType} {method.GetSignature()} => {EmbedField}.{simpleMethodName}{method.GetGenericSignature()}({method.CallParameters});");
+                    result.Append($"[{NonUserCodeAttribute}] public {method.ReturnType} {method.GetSignature()} => {EmbedField}.{simpleMethodName}{method.GetGenericSignature()}({method.CallParameters});");
                 }
                 else
                 {
@@ -284,14 +284,14 @@ internal class InterfaceImplTemplate : TemplateBase
                         if (ValueEmbedHopStaticClass is not null)
                         {
                             string staticArgs = string.IsNullOrEmpty(method.CallParameters) ? $"this.{ValueEmbedHop}" : $"this.{ValueEmbedHop}, {method.CallParameters}";
-                            result.Append($"{method.ReturnType} {method.GetSignature()} => {ValueEmbedHopStaticClass}.{simpleMethodName}{method.GetGenericSignature()}({staticArgs});");
+                            result.Append($"[{NonUserCodeAttribute}] {method.ReturnType} {method.GetSignature()} => {ValueEmbedHopStaticClass}.{simpleMethodName}{method.GetGenericSignature()}({staticArgs});");
                             continue;
                         }
 
                         receiver = $"this.{ValueEmbedHop}";
                     }
 
-                    result.Append($"{method.ReturnType} {method.GetSignature()} => {receiver}.{forwardName}{method.GetGenericSignature()}({method.CallParameters});");
+                    result.Append($"[{NonUserCodeAttribute}] {method.ReturnType} {method.GetSignature()} => {receiver}.{forwardName}{method.GetGenericSignature()}({method.CallParameters});");
                 }
             }
 
