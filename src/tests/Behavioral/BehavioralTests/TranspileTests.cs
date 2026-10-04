@@ -1102,6 +1102,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMethodSelector() => CheckTarget("MethodSelector");
 
     [TestMethod]
+    public void CheckMethodValueFmRecord() => CheckTarget("MethodValueFmRecord");
+
+    [TestMethod]
     public void CheckMethodValueFuncNames() => CheckTarget("MethodValueFuncNames");
 
     [TestMethod]

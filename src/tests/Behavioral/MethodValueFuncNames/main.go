@@ -14,11 +14,11 @@
 // Every named function that holds a literal is //go:noinline, for the reason FuncLiteralCallerNames
 // records: gc renames a literal whose enclosing function was inlined, and go2cs performs no inlining.
 //
-// DISCLOSED, STRUCTURAL until its own seat: a VALUE-receiver method value (`t.valueMethod`, Go:
-// `main.T.valueMethod-fm`) is emitted as a lambda over a copy of the receiver, so it names as its
-// enclosing function's literal (`main.main.funcN`). Its lines move to MethodValueFmRecord, the red of
-// the follow-up seat claude/g-method-value-fm-record, which records the method value in
-// the GoPositionMap (Go line plus callee) so the runtime can name it without touching the emission.
+// A VALUE-receiver method value (`t.valueMethod`, Go: `main.T.valueMethod-fm`) is emitted as a lambda
+// over a copy of the receiver, so the runtime names it from the GoPositionMap record's method-value
+// map (its Go line plus its callee) rather than from the emission. Its own guard,
+// MethodValueFmRecord, pins that name, the -fm frame Go hides from runtime.Callers, and the
+// same-method literal the record must not capture.
 package main
 
 import (

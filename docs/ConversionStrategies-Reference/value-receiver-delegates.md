@@ -347,7 +347,17 @@ Three runtime rules make the names Go's. **A bound delegate tokens separately.**
 
 Go's `main` is emitted as C#'s entry point `Main`, and a Go function that is itself named `Main` is shadowed to `ΔMain`. So a receiver-less, parameterless `Main` in a package class is Go's `main`. Its own frame reads `main.main` and a literal inside it `main.main.funcN`, in a traceback, from `runtime.Caller`, and through `FuncForPC`.
 
-**Disclosed:** a VALUE-receiver method value (`t.valueMethod`, Go `main.T.valueMethod-fm`) is emitted as a lambda over a copy of the receiver (`() => tʗ1.valueMethod()`), so today it names as its enclosing function's literal. Recording it in the `GoPositionMap` (its Go line plus its callee) is the follow-up seat `claude/g-method-value-fm-record`. (Guarded by the `MethodValueFuncNames` behavioral test — 14 names against `go run`, 8 of them wrong before the change.)
+(Guarded by the `MethodValueFuncNames` behavioral test — 14 names against `go run`, 8 of them wrong before the change.)
+
+A VALUE-receiver method value (`t.valueMethod`, Go `main.T.valueMethod-fm`) is the one shape whose emission holds no method to name. It is a lambda over a copy of the receiver (`() => tʗ1.valueMethod()`), so on its own it reads as its enclosing function's literal. The converter therefore **records** it, invisibly: the file's `GoPositionMap` record takes a fifth argument, `<goLine>=<pkg.Recv.Method>` per method value, beside the literal names:
+
+```csharp
+[assembly: go.GoPositionMap("main.go", "main.cs", "AA0q…", "41-41:1", "38=main.T.valueMethod;39=main.T.valueMethod;45=main.T.valueMethod;51=main.T.walk")]
+```
+
+The runtime names a lambda `<pkg.Recv.Method>-fm` when both facts agree: its Go line carries an entry, and its body's single call targets a method of that name. Go spells the wrapper by the method's **declaring** receiver, so a promoted `s.M` of an embedded `E` is `main.E.M-fm`, and a generic receiver is `G[...]`. The runtime compares the method name only, because a promoted method's lambda calls the embedding type's forwarder. Go also **hides** the wrapper's frame: `runtime.Callers` from inside the method shows the caller next. `Frames.Next` skips a frame that resolves to `-fm`, and the panic traceback elides it the way it elides a method-expression wrapper.
+
+Two residuals, disclosed. A literal on the **same line** whose whole body is a call to the **same method** reads as the method value; Go names it `Outer.funcN`. And `runtime.Callers` still **counts** the wrapper's pc where Go's does not: the record needs the PDB, and a capture never reads it, so the frame is dropped at expansion, not at capture. (Guarded by the `MethodValueFmRecord` behavioral test — two method values, a same-method literal on its own line as the control, the receiver copy, and a `Callers` walk through `call(t.walk)`; 3 of its 7 lines differ on the runtime without the record.)
 
 ---
 
