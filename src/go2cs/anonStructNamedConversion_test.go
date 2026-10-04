@@ -23,6 +23,10 @@ import (
 // identical to the source; a struct-literal RHS provides no such operator. The cross-package
 // target saw no operand declared in this package, although the lifted source type is. Both cast
 // sites were CS0030 (go-cmp's teststructs `ts.AssignB(struct{ A int }{0})`).
+//
+// A pair that is not a Go conversion records nothing: the argument-recording loop compares every
+// argument with the callee's FIRST parameter, so `use(nil, &s)` presents the lifted `struct{ X
+// string }` against `*structs.AssignB`, which recorded a pointer-box conversion of the lifted type.
 func TestAnonymousStructToNamedStructConversionIsRecorded(t *testing.T) {
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
@@ -44,12 +48,16 @@ import (
 
 type local struct{ A int }
 
+func use(b *structs.AssignB, s *struct{ X string }) {}
+
 func main() {
 	b := structs.AssignB(struct{ A int }{3})
 	var s struct{ A int }
 	s.A = 4
 	c := local(s)
 	fmt.Println(b.Sum(), c.A)
+	var x struct{ X string }
+	use(nil, &x)
 }
 `)
 
@@ -81,18 +89,22 @@ func main() {
 
 	for _, target := range []string{
 		", local>]",           // same-package named struct target
-		", structs.AssignB>]", // cross-package named struct target
+		", structs.AssignB>]", // cross-package named struct target, and only the one conversion to it
 	} {
-		recorded := false
+		recorded := 0
 
 		for _, line := range strings.Split(packageInfo, "\n") {
 			if strings.HasPrefix(strings.TrimSpace(line), "[assembly: GoImplicitConv<") && strings.HasSuffix(strings.TrimSpace(line), target) {
-				recorded = true
+				recorded++
 			}
 		}
 
-		if !recorded {
-			t.Errorf("no GoImplicitConv record ending %q in:\n%s", target, packageInfo)
+		if recorded != 1 {
+			t.Errorf("%d GoImplicitConv records ending %q, want 1, in:\n%s", recorded, target, packageInfo)
 		}
+	}
+
+	if strings.Contains(packageInfo, "GoImplicitConv<use_") {
+		t.Errorf("a record over the lifted parameter type of use, which no conversion reaches, in:\n%s", packageInfo)
 	}
 }
