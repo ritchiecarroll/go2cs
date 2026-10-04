@@ -353,6 +353,7 @@
     <None Include="$(MSBuildThisFileDirectory)rootShadowQualification_test.go" />
     <None Include="$(MSBuildThisFileDirectory)safePushGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)seededAliasNameCollision_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)sameNameImportAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)samePackageImplements.go" />
     <None Include="$(MSBuildThisFileDirectory)samePackageImplements_test.go" />
     <None Include="$(MSBuildThisFileDirectory)sanitization_test.go" />

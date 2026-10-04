@@ -1831,6 +1831,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckSStringTwinPilot() => CheckTarget("SStringTwinPilot");
 
     [TestMethod]
+    public void CheckSameNameImportAlias() => CheckTarget("SameNameImportAlias");
+
+    [TestMethod]
     public void CheckSamePackageImplementNoWitness() => CheckTarget("SamePackageImplementNoWitness");
 
     [TestMethod]

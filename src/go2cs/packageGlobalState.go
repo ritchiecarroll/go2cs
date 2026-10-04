@@ -84,6 +84,21 @@ var importedTypeAliases map[string]string
 // aliasResolvedSelector's consultation of this map.
 var importedTypeAliasSourceDirs map[string]string
 
+// importedTypeAliasTargetsByDir records each dependency's OWN target for every key it publishes, keyed
+// `<SourceDir>\x00<key>`: the per-package half that importedTypeAliases, keyed by short name only, loses
+// when two same-named packages publish the same member. Read through ambiguousImportedTypeAliasTarget.
+var importedTypeAliasTargetsByDir map[string]string
+
+// ambiguousImportedTypeAliases marks the importedTypeAliases keys that two DIFFERENT dependencies (same
+// package name, different source directories) published with DIFFERENT targets: a/foo and b/foo, both
+// `package foo`, each exporting `Alias`. One `global using fooꓸAlias` cannot mean both, and the map kept
+// whichever loaded last, so both references bound one package's type (CS0029). A marked key is also
+// marked qualified, so it declares nothing (packageInfoWriter); a reference that knows its package
+// renders that package's own fully-qualified target (ambiguousImportedTypeAliasTarget), and one that
+// does not renders the key unresolved (getAliasedTypeName), failing at that site instead of binding the
+// other package's type. Reset per package.
+var ambiguousImportedTypeAliases hashset.HashSet[string]
+
 // packageInlineFuncTypeNames records the names of this package's NON-GENERIC METHODLESS named func
 // types — the ones visitFuncType renders inline as their base delegate and whose named declaration
 // is skipped (there is no `<name>_package.<Δname>` type). Their exported-type-alias must NOT be

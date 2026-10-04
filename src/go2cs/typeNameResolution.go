@@ -325,6 +325,13 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 					return v.getAliasQualifiedTypeName(targetNamed, isUnderlying)
 				}
 			}
+
+			// An alias name two same-named imports both publish has no `global using` to render
+			// through (see ambiguousImportedTypeAliases), so render its TARGET, which go/types
+			// resolved to the right package: `afoo.Alias` renders `afoo.Inner`.
+			if importedTypeAliasIsAmbiguous(aliasObj) {
+				return v.getAliasQualifiedTypeName(types.Unalias(t), isUnderlying)
+			}
 		}
 	}
 
@@ -611,6 +618,14 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 		}
 	}
 
+	// getAliasQualifiedTypeName's ambiguous-alias arm, kept in lockstep: an alias name two
+	// same-named imports both publish has no `global using`, so render its target.
+	if alias, ok := t.(*types.Alias); ok {
+		if aliasObj := alias.Obj(); aliasObj != nil && aliasObj.Pkg() != nil && aliasObj.Pkg() != v.pkg && importedTypeAliasIsAmbiguous(aliasObj) {
+			return v.getFullyQualifiedTypeName(types.Unalias(t), isUnderlying)
+		}
+	}
+
 	if pointer, ok := t.(*types.Pointer); ok {
 		return "*" + v.getFullyQualifiedTypeName(pointer.Elem(), isUnderlying)
 	}
@@ -889,7 +904,16 @@ func getAliasedTypeName(typeName string) string {
 	alias, exists := importedTypeAliases[typeName]
 	isConst := constImportedTypeAliases.Contains(typeName)
 	isQualified := qualifiedImportedTypeAliases.Contains(typeName)
+	isAmbiguous := ambiguousImportedTypeAliases.Contains(typeName)
 	packageLock.Unlock()
+
+	// Two same-named packages publish this key, and a short name alone cannot say which one is
+	// meant. A reference that knows its package resolved it before reaching here
+	// (ambiguousImportedTypeAliasTarget); this one is left unresolved rather than bound to
+	// whichever package loaded last.
+	if isAmbiguous {
+		return typeName
+	}
 
 	if exists {
 		// A key whose `global using` NAME the seeded production metadata already binds to a
@@ -1071,6 +1095,10 @@ func (v *Visitor) foreignAliasedTypeName(t types.Type) (string, bool) {
 	}
 
 	plainKey := fmt.Sprintf("%s.%s", getSanitizedIdentifier(pkg.Name()), getCoreSanitizedIdentifier(named.Obj().Name()))
+
+	if target, ok := ambiguousImportedTypeAliasTarget(plainKey, pkg); ok {
+		return target, true
+	}
 
 	packageLock.Lock()
 	_, aliasExists := importedTypeAliases[plainKey]
