@@ -1036,6 +1036,24 @@ function scanIpv4(lineno, text, lo, pass, joinAt,   pos, s, e, quad, lq, k, b, c
 # COST, stated: a percent-encoded PATH whose segment is an admitted handle is admitted by this arm.
 # The structural profile/home arms are untouched and are the mitigation, exactly as the denied-token
 # pass is the mitigation for the unicode-escape admit above.
+#
+# THE DOTTED MODULE-PATH SPELLING (COORD ruling 2026-10-03). A Go module path under an admitted
+# handle reaches C# and NuGet with its slashes turned into DOTS: the namespace `go.github.com.<handle>`,
+# the ID `nugetgo.github.com.<handle>.<module>`, the project file `github.com.<handle>.<module>.csproj`.
+# The dot is a WORD character for the split above, so the enclosing word is the whole dotted path and
+# never equals the handle. dottedHandleOK admits exactly that shape and nothing wider: the word is cut on
+# dots, an admitted handle must be a WHOLE segment directly after a `github` `com` segment pair, and every
+# segment that contains the denied literal must be such a segment. A different host, a segment that only
+# CONTAINS the handle, or the bare literal in another segment of the same word still refuses.
+function dottedHandleOK(w, tok,   n, S, j, mark, k) {
+    if (index(w, ".") == 0) return 0
+    n = split(w, S, ".")
+    for (j = 1; j + 2 <= n; j++)
+        if (S[j] == "github" && S[j + 1] == "com" && (S[j + 2] in ADM)) mark[j + 2] = 1
+    for (k = 1; k <= n; k++)
+        if (index(S[k], tok) > 0 && !(k in mark)) return 0
+    return 1
+}
 function admitWord(tok, text,   src, n, W, i, w, seen, ok) {
     if (nADM == 0 || tok == "") return 0
     src = tolower(text)
@@ -1046,7 +1064,7 @@ function admitWord(tok, text,   src, n, W, i, w, seen, ok) {
         w = W[i]
         if (w == "" || index(w, tok) == 0) continue
         seen++
-        if (!(w in ADM)) ok = 0
+        if (!(w in ADM) && !dottedHandleOK(w, tok)) ok = 0
     }
     return (seen > 0 && ok)
 }
@@ -2446,6 +2464,36 @@ idc_mode_selftest() {
     out="$d/h07.out"
     IDC_TEST_TOKENS="$ADMARM" IDC_TEST_ADMITS="$ADMSET" "$IDC_SELF" entry "$d/h07" > "$out" 2>&1; rc=$?
     idc_st_rc             "handle AND bare literal on one line REFUSES"   1 "$rc"
+
+    # (g) THE DOTTED MODULE-PATH SPELLING, ruled 2026-10-03: a module under the handle as C# spells it
+    # (namespace), as NuGet spells it (ID) and as a project path spells it. Remove dottedHandleOK from
+    # admitWord and the enclosing word is the whole dotted path, and this case reds.
+    printf 'using static go.github.com.%s.hashset_package; id nugetgo.github.com.%s.hashset in ../pkg/github.com.%s.hashset.csproj\n' "$ADMSET" "$ADMSET" "$ADMSET" > "$d/h09"
+    out="$d/h09.out"
+    IDC_TEST_TOKENS="$ADMARM" IDC_TEST_ADMITS="$ADMSET" "$IDC_SELF" entry "$d/h09" > "$out" 2>&1; rc=$?
+    idc_st_rc             "the DOTTED module-path handle is ADMITTED"     0 "$rc"
+    # One count per line and token; admitWord requires EVERY word on the line that holds the literal to
+    # pass, so this one line proves all three spellings at once.
+    idc_st_assert_present "  and the arm MATCHED and was ADMITTED, not missed" "PUBLIC-HANDLE ADMITS: 1" "$out"
+    # Its one-axis sibling: the same bytes off the admit set refuse.
+    out="$d/h09b.out"
+    IDC_TEST_TOKENS="$ADMARM" "$IDC_SELF" entry "$d/h09" > "$out" 2>&1; rc=$?
+    idc_st_rc             "  and the SAME BYTES REFUSE off the admit set" 1 "$rc"
+    # Only the github host: the same shape on another host refuses.
+    printf 'using go.gitlab.com.%s.thing;\n' "$ADMSET" > "$d/h10"
+    out="$d/h10.out"
+    IDC_TEST_TOKENS="$ADMARM" IDC_TEST_ADMITS="$ADMSET" "$IDC_SELF" entry "$d/h10" > "$out" 2>&1; rc=$?
+    idc_st_rc             "a dotted handle on ANOTHER host REFUSES"       1 "$rc"
+    # Containment is still not admission inside a dotted word.
+    printf 'using go.github.com.%sxyz.thing;\n' "$ADMSET" > "$d/h11"
+    out="$d/h11.out"
+    IDC_TEST_TOKENS="$ADMARM" IDC_TEST_ADMITS="$ADMSET" "$IDC_SELF" entry "$d/h11" > "$out" 2>&1; rc=$?
+    idc_st_rc             "a dotted segment CONTAINING the handle REFUSES" 1 "$rc"
+    # The admitted segment cannot launder the bare literal in another segment of the same word.
+    printf 'using go.github.com.%s.%s;\n' "$ADMSET" "zorbulax" > "$d/h12"
+    out="$d/h12.out"
+    IDC_TEST_TOKENS="$ADMARM" IDC_TEST_ADMITS="$ADMSET" "$IDC_SELF" entry "$d/h12" > "$out" 2>&1; rc=$?
+    idc_st_rc             "a dotted word with the bare literal REFUSES"   1 "$rc"
 
     # SCOPE, and it is the reason the admit travels as a per-arm marker in the DEFINITION rather than
     # as a list every arm shares. The SAME bytes and the SAME admit set, with the literal installed
