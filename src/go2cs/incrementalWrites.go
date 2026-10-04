@@ -10,7 +10,7 @@
 // disk, as every other converter output already is (needToWriteFile): an unchanged package keeps its sources'
 // timestamps, and MSBuild does not recompile its project after a re-conversion.
 //
-// Two cases need more than the byte compare:
+// Three cases need more than the byte compare:
 //   - The PLATFORM CENSUS tells "emitted by this run" from "seeded" by modification time against a sentinel it stamps
 //     on its seeded root (platformCensus.go snapshotConvertedRoot; h8-comparand.sh reads the staged root the same
 //     way). A census therefore writes every source, as before: Options.alwaysWriteSources, set only by runCensusTarget.
@@ -18,15 +18,21 @@
 //     marker passes after the package is visited, so its text at write time never equals the previous run's resolved
 //     file. Its previous bytes and time are remembered, and once the passes have run, a source whose resolved bytes
 //     equal its previous ones gets its previous time back: the run did not change it.
-//   - The -tests METADATA ANCHORS (package_test_info.cs, package_info_internal_test.cs) are re-seeded on every run and
-//     then merged into, so the merge's byte compare reads the seed. They are remembered the same way before the
-//     re-seed (rememberSource) and restored once the conversion's writes are done.
+//   - A -tests conversion re-seeds its METADATA ANCHORS (package_test_info.cs, package_info_internal_test.cs) on every
+//     run and then merges into them, so the merge's byte compare reads the seed; and its RECOMPILE-MODEL FALLBACK
+//     re-runs the whole conversion over files the abandoned reference attempt already rewrote (removing
+//     package_info_external_test.cs on the way). Every source in its output directory is therefore remembered before
+//     its first write (rememberSourcesIn) and restored once the conversion's writes are done.
+//
+// The FIRST state remembered for a file wins, so a re-run inside the same conversion compares against the file from
+// before the run, never against an abandoned attempt's.
 
 package main
 
 import (
 	"bytes"
 	"os"
+	"path/filepath"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -57,16 +63,31 @@ var markedSources sync.Map // output file name -> markedSourceState
 // rememberIfMarked records the current state of fileName when the content about to be written still holds a deferred
 // marker. Nothing is recorded under the census, or when the file does not exist yet.
 func rememberIfMarked(fileName string, content []byte) {
-	if alwaysWriteSources.Load() || !(bytes.Contains(content, []byte(dynamicTypeMarkerPrefix)) || bytes.Contains(content, []byte(adapterNameMarkerPrefix))) {
+	if !(bytes.Contains(content, []byte(dynamicTypeMarkerPrefix)) || bytes.Contains(content, []byte(adapterNameMarkerPrefix))) {
 		return
 	}
 
-	storeSourceState(fileName)
+	rememberSource(fileName)
 }
 
-// rememberSource records the current state of fileName before a writer replaces it with a seed it then merges into.
-// The FIRST state recorded wins: the recompile-model fallback re-runs the -tests conversion over the same files, and
-// the abandoned attempt's seed must not become the comparand.
+// rememberSourcesIn remembers every .cs directly in dir and returns their names: a -tests conversion's snapshot of its
+// output directory before its first write.
+func rememberSourcesIn(dir string) []string {
+	if alwaysWriteSources.Load() {
+		return nil
+	}
+
+	fileNames, _ := filepath.Glob(filepath.Join(dir, "*.cs"))
+
+	for _, fileName := range fileNames {
+		rememberSource(fileName)
+	}
+
+	return fileNames
+}
+
+// rememberSource records the current state of fileName unless a state is already recorded for it (the first wins).
+// Nothing is recorded under the census, or when the file does not exist yet.
 func rememberSource(fileName string) {
 	if alwaysWriteSources.Load() {
 		return
