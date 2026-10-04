@@ -1805,6 +1805,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckShiftPrecedenceUnsigned() => CheckTarget("ShiftPrecedenceUnsigned");
 
     [TestMethod]
+    public void CheckSiblingPackageNames() => CheckTarget("SiblingPackageNames");
+
+    [TestMethod]
     public void CheckSiblingTestAddressedGlobal() => CheckTarget("SiblingTestAddressedGlobal");
 
     [TestMethod]

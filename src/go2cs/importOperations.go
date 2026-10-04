@@ -574,6 +574,7 @@ func getLocalModulePackageInfo(importPath string, options Options) (PackageInfo,
 	// outside GOPATH was taken for a LOCAL module -- in-place output, a relative reference.
 	if isPathUnder(meta.Dir, goModCacheDir()) {
 		libProjectName, namespace := getProjectName(meta.Dir, options)
+		namespace = namespaceWithDirectorySegment(namespace, importPath, meta.Name)
 		targetDir := "$(go2csPath)pkg/" + importPath
 		projectReference := emittedProjectReference(targetDir, projectFileBaseName(libProjectName)+".csproj")
 
@@ -591,6 +592,7 @@ func getLocalModulePackageInfo(importPath string, options Options) (PackageInfo,
 	// (co-located with its Go source), and it generates `<projectName>.csproj` in its own directory.
 	// The absolute ProjectReference is rewritten relative to the referencing project by writeProjectFile.
 	libProjectName, namespace := getProjectName(meta.Dir, options)
+	namespace = namespaceWithDirectorySegment(namespace, importPath, meta.Name)
 	projectReference := filepath.Join(meta.Dir, projectFileBaseName(libProjectName)+".csproj")
 
 	return PackageInfo{
@@ -646,6 +648,7 @@ func getRecurseDependencyInfo(importPath string, options Options) (PackageInfo, 
 	}
 
 	libProjectName, namespace := getProjectName(meta.Dir, options)
+	namespace = namespaceWithDirectorySegment(namespace, importPath, meta.Name)
 	targetDir := filepath.Join(outputRoot, root, filepath.FromSlash(importPath))
 	projectReference := filepath.Join(targetDir, projectFileBaseName(libProjectName)+".csproj")
 

@@ -284,6 +284,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 		var projectName, projectFileName, projectFileContents string
 		projectName, packageNamespace = getProjectName(packageInputPath, options)
+		packageNamespace = namespaceWithDirectorySegment(packageNamespace, pkg.PkgPath, pkg.Name)
 		currentPackageGorootVendored = isGorootVendoredDir(packageInputPath, options.goRoot)
 
 		if projectFileName, projectFileContents, err = prepareProjectFiles(projectName, packageNamespace, packageOutputPath); err != nil {

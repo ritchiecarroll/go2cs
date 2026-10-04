@@ -289,20 +289,58 @@ using macOS = go.crypto.x509.@internal.macOS_package;
 
 `convertImportPathToNamespace` substitutes the import graph's authoritative package name for the path's last segment. It used to do that only for **non-stdlib** imports, reasoning that a stdlib package is named for its directory so stdlib references would stay byte-identical. That premise is true for every standard-library package but one, and the exception could not surface until darwin was built at all: `crypto/x509/internal/macos` is darwin-exclusive, so its importers emitted `macos_package` against a declared `macOS_package` for as long as the corpus was Windows-only. C# is case-sensitive, so the result is **CS0234** — and it reads like a missing project reference or an empty assembly, because the symbol genuinely exists nowhere.
 
-Censused across `windows`, `linux` and `darwin`, the standard-library paths whose package name differs from their tail are exactly four:
+Censused across `windows`, `linux` and `darwin`, the standard-library paths whose package name differs from their tail were exactly four at Go 1.23; Go 1.24 added the two `fips140` rows (re-censused 2026-10-04):
 
 | Import path | Package | Targets | Disposition |
 |---|---|---|---|
-| `crypto/x509/internal/macos` | `macOS` | darwin | the one that moves |
+| `crypto/x509/internal/macos` | `macOS` | darwin | the one that moves (case only, so its namespace keeps today's spelling) |
 | `math/rand/v2` | `rand` | all | already correct via the `/vN` branch |
-| `internal/trace/internal/testgen/go122` | `testkit` | all | nothing in the corpus imports it |
-| `runtime/internal/wasitest` | `wasi` | all | nothing in the corpus imports it |
+| `crypto/internal/fips140deps` | `fipsdeps` | all | keeps its directory segment; no std production package imports it |
+| `crypto/internal/fips140test` | `fipstest` | all | keeps its directory segment; test-only |
+| `internal/trace/internal/testgen/go122` | `testkit` | all | keeps its directory segment; no std production package imports it |
+| `runtime/internal/wasitest` | `wasi` | all | keeps its directory segment; test-only |
 
-So trusting the import graph *everywhere* **keeps** the byte-identity the stdlib exclusion was asserting rather than merely asserting it — and [CNR](../Glossary.md#cnr) is what proves the claim instead of the comment.
+So trusting the import graph *everywhere* **keeps** the byte-identity the stdlib exclusion was asserting rather than merely asserting it — and [CNR](../Glossary.md#cnr) is what proves the claim instead of the comment. The "keeps its directory segment" rows are the next section's rule.
 
 The fix restructures rather than special-cases: **when the graph knows a package's name, that name is the class segment; the `/vN` directory convention remains the fallback for when it does not.** A narrower "substitute only when the two differ" test would have looked equivalent and quietly broken the exotic case the convention branch was written for — a package literally *named* `vN`, which would then be rewritten to its parent. Preferring the authoritative name over the convention wherever both are available is what keeps the two rules from fighting.
 
 This is the same family as [the GOROOT-vendored reference](#a-goroot-vendored-reference-is-named-for-the-packages-on-disk-path) above: several independent derivations name one package, and they are correct only when they agree *structurally*. Guarded by `TestImportedPackageClassFollowsPackageName` (the rule, over a stdlib name/directory mismatch, an ordinary stdlib package, a `/vN` directory and a module dependency) and `TestMajorVersionFallbackAppliesWithoutGraphMetadata` (the fallback half), in `packageClassNaming_test.go`.
+
+## A package named differently from its directory keeps the directory in its NAMESPACE
+
+**When a package's name differs from the last segment of its import path, the namespace keeps the whole import path and the class is `<name>_package` beneath it.** Two directories under one parent may declare the same name, and Go keeps them apart by their import paths:
+
+```go
+// github.com/google/go-cmp/cmp/internal/teststructs/foo1   and   …/teststructs/foo2
+package foo                                      // both directories, one package name
+```
+
+```csharp
+// before: one fully qualified type for both, CS0433 in cmp's tests, which reference both
+namespace go.github.com.google.go_cmp.cmp.@internal.teststructs;
+partial class foo_package { … }
+
+// now: each keeps its directory
+namespace go.github.com.google.go_cmp.cmp.@internal.teststructs.foo1;
+partial class foo_package { … }
+
+// and an importer names the directory in its alias; the code using it still reads foo1.X, as in Go
+using foo1 = go.github.com.google.go_cmp.cmp.@internal.teststructs.foo1.foo_package;
+```
+
+Producer and consumer each derive the spelling from the import path and the package name alone (`packageKeepsDirectorySegment`), so there is no registry and no directory scan. A scheme that disambiguated only on an actual collision would need one: the consumer cannot tell from an import path that a same-named sibling exists. Spelling the directory into the CLASS name instead (`fooꓸfoo1_package`) was declined because every path that parses `*_package` would have to learn the compound form.
+
+Three differences keep today's spelling, because none of them can collide:
+
+| Difference | Example | Why it cannot collide |
+|---|---|---|
+| a `/vN` tail | `math/rand/v2` → `rand` | the major-version convention: the directory hosts the parent-named package |
+| a `name.vN` tail | `gopkg.in/yaml.v3` → `yaml` | the same convention spelled as a suffix |
+| case only | `crypto/x509/internal/macos` → `macOS` | Go's module rules forbid two paths in one module that differ only by case |
+
+`package main` never moves (it is its own executable and is never referenced), and an external test package is decided by the package it tests (`foo_test` → `foo`), so it shares its production package's namespace. Every other difference moves, a hyphenated module directory included: `github.com/mattn/go-isatty` (`package isatty`) is `go.github.com.mattn.go_isatty.isatty_package`.
+
+A persisted `package_info.cs` is copied through verbatim outside its marker sections, so its own `namespace` declaration and the template's `using static <namespace>.<class>;` line are converged on the current namespace (`convergePackageNamespace`); otherwise a package that started keeping its directory would carry the old namespace in that one file. Ruled 2026-10-04 (option 1 of [the design note](../phase4/DESIGN-sibling-package-name-collision.md)). Guarded by `siblingPackageNamespace_test.go` (two siblings sharing a name, the four exempt shapes, the convergence) and the behavioral `SiblingPackageNames` test.
 
 ## Generated output path: `$(OutDir)` defers to `$(BaseOutputPath)`
 

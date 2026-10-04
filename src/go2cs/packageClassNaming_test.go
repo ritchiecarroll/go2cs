@@ -59,11 +59,13 @@ func TestImportedPackageClassFollowsPackageName(t *testing.T) {
 			expected:   "math.rand.rand_package",
 		},
 		{
+			// The directory stays in the namespace: a name that differs from its directory other than
+			// by a version suffix or by case could collide with a sibling's (packageKeepsDirectorySegment).
 			name:       "module dependency named differently from its directory",
 			importPath: "github.com/mattn/go-isatty",
 			pkgName:    "isatty",
 			pkgDir:     filepath.Join("C:", "gopath", "pkg", "mod", "github.com", "mattn", "go-isatty"),
-			expected:   "github.com.mattn.isatty_package",
+			expected:   "github.com.mattn.go_isatty.isatty_package",
 		},
 	}
 
