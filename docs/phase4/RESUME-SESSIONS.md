@@ -38,6 +38,93 @@
 - **2026-10-02 02:03: go.* 1.24.13.3 PUBLISHED.** The owner built, signed and pushed 344 packages from `172d437e66` (nuget.org lists 344 / 344; the ID set equals 1.24.13.2's). The record is on origin: master `172d437e66` -> `5732917a95` (the release record: version.props, 342 README retargets, the frozen snapshot docs/validation/1.24.13.3 = 239 proof pages + the roster) -> `5f3a16943f` (the index row); tag `nuget-1.24.13.3` at `172d437e66`. **The freeze is lifted.** TRAIN L (union `02a0b44467`) lands next: merge master, roster commit, guards. **Base for every new cut: the L union `02a0b44467` until L lands, then master** (a cut on the union stays an ancestor). TRAIN M candidates so far: G's branch (tip `0af55d033e`), the i9's crash-class seat `7a8d02f6fe` and ChannelTests seat `73a7a15425`, C1's darwin seats (S7 `546eddf07e`, S6b-1 `35fb6b2bf8`, the run-timeout ref), C1's fixture-tracking seat, P1's templates and repros (`4b31ce1fc1`), P2's real-module fix batch (F4 `aa994a1a1c`, F5 `75d4d8d8a4`, F3 `d3358d81a9`, F7 `a216033728`, F1+F6 `1f2a73a3c2`, F8 `5556ef86cb`), C2's S3a (-nuget-map; cutting). Running notes: `.claude/coord-scripts/trainL/tL-seats-draft.txt` on this branch. Queued: the std-lib warning cleanup (`.claude/coord-scripts/coord-queue-stdlib-warnings.md`).
 - **2026-10-02 12:55: TRAIN L LANDED; TRAIN M's UNION IS PUSHED; ONE RED, fixup-2 pending.** master `5f3a16943f` -> `aa0a07d5fd` (TRAIN L, ledger 02:36). **TRAIN M**: `claude/coord-trainM-union` = `e2008427b1d6cbd3c0ec3378bd6d7514d43683bf` (25 signed seat merges on `aa0a07d5fd` + a signed fixup; list `.claude/coord-scripts/trainM/tM-seats-draft.txt`, rows-sha256 17a3ac86f374; ledger 11:00). The i9's shard read 131 of 132: go/types' TEST host does not build at the union (CS0229, `Unsafe`: a `using static` member against `using System.Runtime.CompilerServices;`, which the go-creator NoInlining rule now adds to that file). G has the fix (its own branch); it lands as a follow-up merge + `fixup-2: TRAIN M` ON TOP (the pushed sha is never replaced). The i7 battery is HELD until then (ledger 12:06). Darwin at the union (C1, both mac legs): only LookupServicePort fails, and C2's native-array-view seat `e1171e3279` clears it (mac acceptance PASS both legs). **Base for every new cut: the M union `e2008427b1`** (re-base once if a seat's footprint meets fixup-2: using lines in files that hold a `using static`). TRAIN N candidates: C2 native-array-view `e1171e3279` and S3b `459178b644`; P2's four warning clears + the per-file `.editorconfig` entries; P1's HashSet module seat (`claude/p1-hashset-module`; COORD tags v1.0.0 on the module after its gates); the i9's cross-package promoted forwarders; G's README sentences, CS8500 template fix and the golib trim-annotation sizing; R's jwt/v5 reading and the link/vendor ModuleAncestryTests arm. The i7 was rebooted at 12:10 (Windows Search moved off H:). Running notes: `.claude/coord-scripts/trainL/tL-seats-draft.txt`.
 - **2026-10-03 01:50: TRAIN M LANDED.** master `aa0a07d5fd` -> `8f46a9adae` (a fast-forward: 25 signed seat merges + `fixup` e2008427b1 + `fixup-2` 8f46a9adae; ledger c7f79f4264; announced to inbox/FLEET before the push). Gates: the i7 battery run 3 EXIT 0 (CNR 785; 93 sweep rows at banked counts; runtime 10819 + 71; runtime/pprof 145 + 7); landing precheck 0/0; roster guard both editions; the i9 132/132; P1/P2 linux known movers only; C1 darwin LookupServicePort only. Bank step a no-op. M13: committed -tests sources stand stale against the converter (TE-T files=43 hunks=207); COORD refreshes them once on TRAIN N's union from a windows re-emission. **Base for every cut: master `8f46a9adae`.** TRAIN N: the accepted seats are in `.claude/coord-scripts/trainL/tL-seats-draft.txt` (lines from 2026-10-02 19:26 on). Real-module readings so far: hashset v1.0.0 37/37, pkg/errors 44 agree, godotenv 43/43, gorilla/mux 320/320 (on local merges of N seats). COORD's own i7 items after M: root the single-file publish hang, a full-BoGo control run for the i9's TLS shim crash, the M13 refresh on N's union.
+- **2026-10-03 23:01: TRAIN N LANDED.** master `8f46a9adae` -> `54f7f4439d` (a fast-forward: 30 signed seat merges + `fixup` 59ee0d21bf + `fixup-2` 1a7f24d1c6 (the PS 5.1 test fix) + the MS13 refresh 54f7f4439d of 564 committed -tests sources; ledger f04f467cba; posted to inbox/FLEET). **Base for every cut until O lands: master `54f7f4439d`; TRAIN P cuts base on O's pushed union `eb88ab9492`.**
+
+## 1f. COORD STATE 2026-10-04 (a save-state refresh; START HERE to land TRAIN O and cut the release)
+
+Written 2026-10-04 07:40 local (the i7's clock). Everything below is on origin; nothing depends on a local memory file.
+
+### 1f.0 State in one screen
+
+- **master** = `54f7f4439d2ddf15be811cd463c581ad0096b9fd` (TRAIN N landed).
+- **TRAIN O**: `claude/coord-trainO-union` = `eb88ab9492dd61c25466ef942a7583f1af3f9b53` = 38 signed seat merges + `fixup: TRAIN O`
+  (first-parent 39/39 signed by key 941694536F21BAFF). Seat table, scripts, pre-map and the changes log:
+  `.claude/coord-scripts/trainO/` on this branch (`tO-seats-draft.txt` is FROZEN at 38 rows, rows-sha256 `716a21129c57`).
+- **O's i7 battery** runs DETACHED from the run folder `/h/go2cs-tmp-coord/coord-scratch/tO/bat2` in the worktree
+  `/h/go2cs-tmp-coord/tO` (launched 06:37, deadline 20:37, expected end about 17:30-18:30). It keeps running while the
+  machine is up, whatever happens to the COORD session. **The worktree is FROZEN until `battery rc=` appears in
+  `bat2/battery.console.log`.** bat1 (04:46) aborted at 06:30 on a purge with no retry (no test failed); the fix is in
+  `tO-battery.sh` (tO-CHANGES.md, BATTERY STOP 1).
+- **Lane readings for O**: C1 release gate GREEN (os-matrix release-smoke run 37193550625 at `eb88ab9492`: one pack, 344
+  packages, win-x64 / linux-x64 / osx-arm64 / osx-x64 all A-D PASS, D gating on both Macs) and darwin behavioral FULL
+  766/766 + 767/767 (run 37193552307). **Owed**: the i9's complement shard (132 rows; its GO went 04:49), P2's linux legs,
+  and P1's last four legs (LPB, LX, LB, LM; its first nine read clean before a disk stop the owner has since cleared).
+- **R**: STANDBY (available in spurts on notice). All of R's O rows are in the union.
+
+### 1f.1 COORD's next steps, in order
+
+1. **Read the battery.** `tail -n 12 /h/go2cs-tmp-coord/coord-scratch/tO/bat2/battery.console.log`, then
+   `bat2/tO-logs/SUMMARY.txt`. EXIT 0 = clean. EXIT 6 = a non-zero leg outside the expected controls (FXc1, FXc2, SIc, NVR)
+   or a FINDING: read each one before anything else. EXIT 3 = a disk or purge abort (relaunch from a FRESH folder). At N
+   the three reds were a test defect (fixup-2), an instrument launch defect (PUB) and one load timeout re-read in isolation.
+2. **Read the lane posts** (`git log origin/claude/mailbox -- docs/phase4/inbox/COORD`, whole range): the i9 (a bridge
+   message; its two patches are in its logs folder under `trainO/run/tO-i9-logs/`, copied by share and checked by
+   SHA-256), P1, P2. A mover is read against the brief's EXPECT lines (`tO-lane-brief-linux.md`, `tO-lane-brief-i9.md`).
+3. **Land O**: `.claude/coord-scripts/trainO/COORD-LAUNCH-CHECKLIST.md` section 6, exactly:
+   the landing precheck (`python -B tO-helpers.py precheck 'H:\go2cs-tmp-coord\tO' <BASE> <bat2>/tO-logs/seats-effective.txt head`)
+   and `src/check-roster-format.ps1` under pwsh 7 and Windows PowerShell 5.1 with `EXEC_ROWS_EXPECT=0`, BEFORE the bank step;
+   the bank step; **MS13** (restore the T legs' rewrites to HEAD, `tO-helpers.py testsrc-refresh` over `S-rewrites.patch`,
+   `T-rewrites.patch` and the i9's `tracked-changes.patch`, `git apply`, `--check-worktree`, ONE signed commit); the union
+   pushed (an existing ref: announce in the ledger, then push); master fast-forwarded to the union; the ledger line; the
+   FLEET post. A fix needed on top is a `fixup-2` commit, never a replaced SHA; one that touches the release paths owes
+   C1's release-smoke run again.
+4. **Release go.\* 1.24.13.4** from O's landed master (the release runbook; `src/release-nuget.ps1`). OWNER HANDS: the
+   GPG passphrase if the agent asks, and the signing PIN, once. The owner-approved macOS line, VERBATIM, for the release
+   record and the README platform note (R's docs seat already carries it in the README):
+   "macOS (Intel and Apple silicon): packages ship for both chips, the behavioral suite passes on both, and the README
+   walkthrough runs. The standard library is not yet validated package by package on macOS, so don't expect it to be
+   fully operational there yet."
+   The release gate for the tree is C1's release-smoke on EVERY shipped RID (green at `eb88ab9492`; a commit on top that
+   touches release paths owes it again).
+5. **After the release**: the first-wave packages (hashset first, then uuid and jwt; the checklist and README drafts are
+   COORD scratch, the rulings are in the ledger of 2026-10-03), the combined announcement, then TRAIN P.
+
+### 1f.2 TRAIN P: accepted so far (all pushed unless noted)
+
+| Seat | Tip | Note |
+|:--|:--|:--|
+| `claude/p2-cli-version-diagnostics` | `338ef4a2af` | `go2cs -version`, canonical MSBuild diagnostics |
+| `claude/p2-untyped-region-nil-safety` | `b4d7ff1cf9` | stacked on the row above; issue #33's best-effort contract kept |
+| `claude/c2-elseif-position-record` | `2265dcdb6e` | corpus footprint 123 `package_info.cs` |
+| `claude/c2-literal-float-fold` | `00f11c949b` | on G's float seat (an O row) |
+| `claude/c2-sibling-package-name-r2` | `6f54f28be2` | option 1 ruled 2026-10-04; on O's union |
+| `claude/c2-embed-promoted-refs` | `2fa2ccd83a` | go-cmp class K; on O's union |
+| `claude/c2-ide-spike` | `a4bfed39f5` | docs only: `docs/PLAN-ide-mode.md` + the Phase 0 spike record + the desktop kit |
+| `claude/g-debugger-views` | `5ec7b56a46` | IDE plan Phase 1; `docs/phase4/CHECKLIST-debugger-views.md` is an owner desktop item |
+| `claude/g-method-value-fm-record-r2` | `240512b217` | a re-base `-r3` on O's union is OWED (O carries its two parents) |
+| `claude/i9-incremental-cs-writes` | `d2e09a681c` | converted `.cs` written only when changed; census runs bypass |
+| `claude/r-csharp-consumer-guide` | `1c608d4c37` | re-base onto O's master owed; R's smoke + default-usings commits may still be LOCAL on R's box |
+
+In flight for P: C2's go-cmp classes I, H, L and the imported-type-alias table seat; G's Target Atlas proposal (testify,
+logrus, cobra + pflag, x/sync; no cut until COORD rules). tP derive items are in `trainO/tO-CHANGES.md` (BATTERY STOP 1)
+and COORD's notes (`trainL/tL-seats-draft.txt`, the 2026-10-04 lines).
+
+### 1f.3 Owner hands, open
+
+- The release PIN (step 4).
+- The desktop checklist, when convenient: the IDE spike's interactive half (`docs/phase4/spike-ide-mode/desktop/` on
+  `claude/c2-ide-spike`: `prepare.ps1`, then the 22 checks of `CHECKLIST.md`) and, after TRAIN P, G's debugger-views checklist.
+- Low: the stray ref `claude/c1-xsys-cpu-editorconfig-signed` (the same tree as the seated row; C1's proxy cannot delete refs).
+
+### 1f.4 PASTE PROMPT for a new COORD session
+
+```
+You are COORD of the go2cs fleet on the i7. Read docs/phase4/RESUME-SESSIONS.md section 1f on claude/coord-handover
+(worktree /h/go2cs-tmp-coord/hnd) and follow 1f.1 in order. First: is the TRAIN O battery done
+(/h/go2cs-tmp-coord/coord-scratch/tO/bat2/battery.console.log)? Do not touch /h/go2cs-tmp-coord/tO while it runs.
+Then read the whole mailbox range for inbox/COORD since the ledger's last line, land O by the trainO checklist section 6,
+and prepare release 1.24.13.4 for the owner's PIN. Rulings and running notes: .claude/coord-scripts/trainL/tL-seats-draft.txt.
+```
 
 ### 1e.1 THE MAILBOX-ONLY PROTOCOL (R, C1, C2, P1, P2)
 
