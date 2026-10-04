@@ -57,7 +57,7 @@ on:
           - behavioral-stderr
           - sweep-shard
       filter:
-        description: 'Shard filter — package substring for sweep-shard, project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr.'
+        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr.'
         type: string
         required: false
         default: ''
@@ -1050,16 +1050,49 @@ jobs:
 
           if ([string]::IsNullOrWhiteSpace($filter)) { $filter = 'container/heap' }
 
-          Write-Host "==> sweep shard: filter '$filter', GoTargetOS=$($env:GoTargetOS), timeout $($env:SWEEP_TEST_TIMEOUT)"
+          # The filter is a comma-separated list of EXACT roster package names, each swept with
+          # -Exact. The sweep's own -Filter is a substring, so "sort" alone swept internal/fmtsort
+          # too and "path" swept path/filepath; and the concurrency group above holds one pending
+          # run, so a row-by-row campaign could not be dispatched as separate runs either (the
+          # darwin row pilot, 2026-10-03, had to group rows by shared prefix). Every name is
+          # checked against the roster BEFORE anything builds: a typo refuses the run by name
+          # instead of sweeping nothing.
+          $names = [System.Collections.Generic.List[string]]::new()
+
+          foreach ($part in ($filter -split ',')) {
+              $name = $part.Trim()
+
+              if ($name -and -not $names.Contains($name)) { $names.Add($name) }
+          }
+
+          . ./src/_roster.ps1
+          $banked = @(Get-ValidatedRosterRows -Path ./docs/ValidatedTestPackages.md | ForEach-Object { $_.Package })
+          $unknown = @($names | Where-Object { $banked -notcontains $_ })
+
+          if ($unknown.Count -gt 0) {
+              throw "sweep-shard: not a banked roster package (names are exact, not substrings): $($unknown -join ', ')"
+          }
+
+          Write-Host "==> sweep shard: $($names.Count) row(s) by exact name -- $($names -join ', ') -- GoTargetOS=$($env:GoTargetOS), timeout $($env:SWEEP_TEST_TIMEOUT)"
 
           # The sweep builds the converter itself and refuses a toolchain whose release differs
-          # from version.props' pin -- which is exactly the version setup-go installed above.
+          # from version.props' pin -- which is exactly the version setup-go installed above. It
+          # builds once: every later name reuses that converter (-SkipBuild). The step's exit is
+          # the first non-zero row exit, so one failing row still reds the leg.
           $log = Join-Path $art "sweep-$goos-$rid.log"
+          $sweepExit = 0
+          $skipBuild = $false
 
-          & ./src/run-validated-sweep.ps1 -Filter $filter -TestTimeout $env:SWEEP_TEST_TIMEOUT -IgnoreDiskPreflight *>&1 |
-              Tee-Object -FilePath $log
+          foreach ($name in $names) {
+              & ./src/run-validated-sweep.ps1 -Filter $name -Exact -SkipBuild:$skipBuild -TestTimeout $env:SWEEP_TEST_TIMEOUT -IgnoreDiskPreflight *>&1 |
+                  Tee-Object -FilePath $log -Append
 
-          $sweepExit = $LASTEXITCODE
+              $rowExit = $LASTEXITCODE
+
+              if ($rowExit -ne 0 -and $sweepExit -eq 0) { $sweepExit = $rowExit }
+
+              $skipBuild = $true
+          }
 
           # ---- per-row evidence ---------------------------------------------------------------
           # The pipeline writes each swept package's comparison record beside its converted code.
@@ -1097,7 +1130,7 @@ jobs:
           $summary = @(
               "## Validated sweep shard -- GOOS=$goos ($rid)"
               ''
-              "Filter ``$filter`` -- -TestTimeout ``$($env:SWEEP_TEST_TIMEOUT)`` -- exit ``$sweepExit``"
+              "Rows (exact) ``$($names -join ', ')`` -- -TestTimeout ``$($env:SWEEP_TEST_TIMEOUT)`` -- exit ``$sweepExit``"
               ''
               'A non-Windows leg reports rows with no per-OS annotation as'
               '**comparison-validated-at-count** and exits non-zero by design: validated, but with'
