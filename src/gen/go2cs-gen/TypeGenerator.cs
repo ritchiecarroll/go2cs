@@ -484,7 +484,14 @@ public class TypeGenerator : ISourceGenerator
                         break;
 
                     default:
-                        throw new NotSupportedException($"Unsupported [{AttributeName}] on {targetSyntax.GetType().Name} type \"{identifier}\".");
+                        // A declaration kind this generator does not generate for costs that type only.
+                        // It threw, and a throwing generator contributes nothing: every other type in the
+                        // compilation lost its generated members with it. An ERROR, not a skip: a type
+                        // missing its generated members (constructors, operators, the forwarders golib
+                        // reads a method set from) could otherwise leave a green build wrong at run time.
+                        context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, attribute.GetLocation(),
+                            $"[{AttributeName}] on {targetSyntax.GetType().Name} \"{identifier}\"", "the TypeGenerator generates for structs, interfaces and pointer classes only"));
+                        continue;
                 }
 
                 // Add the source code to the compilation

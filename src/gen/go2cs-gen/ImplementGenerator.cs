@@ -29,18 +29,6 @@ public class ImplementGenerator : ISourceGenerator
     private const string AttributeName = "GoImplement";
     private const string FullAttributeName = $"{Namespace}.{AttributeName}Attribute<TStruct, TInterface>";
 
-    // RS2008 asks for analyzer release-tracking files; go2cs-gen is a source generator that ships
-    // with the converter and keeps none.
-#pragma warning disable RS2008
-    private static readonly DiagnosticDescriptor s_malformedRecord = new(
-        id: "GO2CS0002",
-        title: "Malformed GoImplement record",
-        messageFormat: "Skipped {0}: {1}; no implementation is generated for it",
-        category: "go2cs-gen",
-        defaultSeverity: DiagnosticSeverity.Warning,
-        isEnabledByDefault: true);
-#pragma warning restore RS2008
-
     // Renders a namespace for a `using` directive: no `global::`, keyword segments escaped
     // (`go.crypto.@internal`, not the invalid `go.crypto.internal`).
     private static readonly SymbolDisplayFormat s_namespaceUsingFormat = new(
@@ -237,9 +225,19 @@ public class ImplementGenerator : ISourceGenerator
             SemanticModel semanticModel = context.Compilation.GetSemanticModel(syntaxTree);
 
             string packageNamespace = GetNamespace(namespaceSyntax) ?? Namespace;
-            string packageClassName = GetFirstClassName(compilationUnit) ?? throw new MissingMemberException($"No package class found in same file as [assembly: {AttributeName}]");
+            // A record whose file holds no package class has nowhere to place its implementation. An
+            // ERROR, not a skip: the record is otherwise valid, and an adapter reached only dynamically
+            // (an embed's Promoted record has no cast site to fail) would go missing from a green build.
+            string? packageClassName = GetFirstClassName(compilationUnit);
+
+            if (packageClassName is null)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, attributeSyntax.GetLocation(), attributeSyntax.ToString(), "its file declares no package class to hold the implementation"));
+                continue;
+            }
+
             string packageName = packageClassName.EndsWith(PackageSuffix) ? packageClassName[..^PackageSuffix.Length] : packageClassName;
-            
+
             string[] usingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel);
 
             // Extract generic type arguments from "GoImplementAttribute"
@@ -252,13 +250,13 @@ public class ImplementGenerator : ISourceGenerator
             // skip such a record.
             if (structType is null || interfaceType is null)
             {
-                context.ReportDiagnostic(Diagnostic.Create(s_malformedRecord, attributeSyntax.GetLocation(), attributeSyntax.ToString(), "it must name two resolvable type arguments"));
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.MalformedRecord, attributeSyntax.GetLocation(), attributeSyntax.ToString(), "it must name two resolvable type arguments"));
                 continue;
             }
 
             if (interfaceType.TypeKind != TypeKind.Interface)
             {
-                context.ReportDiagnostic(Diagnostic.Create(s_malformedRecord, attributeSyntax.GetLocation(), attributeSyntax.ToString(), $"its second type argument, '{interfaceType.ToDisplayString()}', is not an interface"));
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.MalformedRecord, attributeSyntax.GetLocation(), attributeSyntax.ToString(), $"its second type argument, '{interfaceType.ToDisplayString()}', is not an interface"));
                 continue;
             }
 
