@@ -26,31 +26,50 @@ import (
 func TestResolveBuildTags(t *testing.T) {
 	explicit := []string{"foo", "bar"}
 
+	moduleTestTags := append(append([]string{}, defaultStdLibBuildTags...), defaultModuleBuildTags...)
+
 	tests := []struct {
 		name          string
 		convertStdLib bool
 		convertTests  bool
+		recurse       bool
+		moduleSafeTag bool
 		tagsExplicit  bool
 		explicit      []string
 		want          []string
 	}{
-		{"stdlib default -> purego", true, false, false, nil, defaultStdLibBuildTags},
-		{"tests default -> purego", false, true, false, nil, defaultStdLibBuildTags},
-		{"stdlib+tests default -> purego", true, true, false, nil, defaultStdLibBuildTags},
-		{"tests with explicit -tags -> explicit honored", false, true, true, explicit, explicit},
-		{"stdlib with explicit -tags -> explicit honored", true, false, true, explicit, explicit},
-		{"tests with -tags= (explicit clear) -> empty", false, true, true, nil, nil},
-		{"neither (single-file/recurse) -> tag-neutral", false, false, false, explicit, explicit},
+		{"stdlib default -> purego", true, false, false, true, false, nil, defaultStdLibBuildTags},
+		{"tests default -> purego", false, true, false, true, false, nil, defaultStdLibBuildTags},
+		{"stdlib+tests default -> purego", true, true, false, true, false, nil, defaultStdLibBuildTags},
+		{"tests with explicit -tags -> explicit honored", false, true, false, true, true, explicit, explicit},
+		{"stdlib with explicit -tags -> explicit honored", true, false, false, true, true, explicit, explicit},
+		{"tests with -tags= (explicit clear) -> empty", false, true, false, true, true, nil, nil},
+		{"neither (single-file) -> tag-neutral", false, false, false, true, false, explicit, explicit},
+		{"recurse default -> safe", false, false, true, true, false, nil, defaultModuleBuildTags},
+		{"recurse+tests default -> purego and safe", false, true, true, true, false, nil, moduleTestTags},
+		{"recurse with -module-safe-tag=false -> tag-neutral", false, false, true, false, false, nil, nil},
+		{"recurse+tests with -module-safe-tag=false -> purego only", false, true, true, false, false, nil, defaultStdLibBuildTags},
+		{"recurse with explicit -tags -> explicit honored", false, true, true, true, true, explicit, explicit},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := resolveBuildTags(tt.convertStdLib, tt.convertTests, tt.tagsExplicit, tt.explicit)
+			got := resolveBuildTags(tt.convertStdLib, tt.convertTests, tt.recurse, tt.moduleSafeTag, tt.tagsExplicit, tt.explicit)
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Fatalf("resolveBuildTags(%v, %v, %v, %v) = %v, want %v",
-					tt.convertStdLib, tt.convertTests, tt.tagsExplicit, tt.explicit, got, tt.want)
+				t.Fatalf("resolveBuildTags(%v, %v, %v, %v, %v, %v) = %v, want %v",
+					tt.convertStdLib, tt.convertTests, tt.recurse, tt.moduleSafeTag, tt.tagsExplicit, tt.explicit, got, tt.want)
 			}
 		})
+	}
+}
+
+// TestDefaultModuleBuildTagsContent pins the module default to exactly `safe`. `appengine` is the
+// tempting second spelling and must stay out: libraries switch behavior beyond unsafe on it (logrus
+// selects a different terminal check), so adding it would change what a converted module does rather
+// than only which fallback it takes.
+func TestDefaultModuleBuildTagsContent(t *testing.T) {
+	if !reflect.DeepEqual(defaultModuleBuildTags, []string{"safe"}) {
+		t.Fatalf("defaultModuleBuildTags = %v, want [safe]", defaultModuleBuildTags)
 	}
 }
 

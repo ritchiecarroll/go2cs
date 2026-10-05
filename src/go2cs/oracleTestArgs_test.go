@@ -35,7 +35,7 @@ func TestOracleTestArgsCarryResolvedBuildTags(t *testing.T) {
 	// resolveBuildTags' OWN answer for a -tests run with no explicit -tags -- not a copy of the
 	// expected tag list. A test that spelled the tags itself would go green against a converter
 	// whose defaults had drifted, which is the failure mode the corpus cannot afford.
-	resolved := resolveBuildTags(false, true, false, nil)
+	resolved := resolveBuildTags(false, true, false, false, false, nil)
 	if len(resolved) == 0 {
 		t.Fatalf("precondition: a -tests run resolves to no build tags; this arm would be vacuous")
 	}

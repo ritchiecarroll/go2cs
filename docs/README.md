@@ -202,9 +202,10 @@ go2cs -tests -recurse -test-action all module_dir out_root      # validate a who
 | Option | Description |
 |:--|:--|
 | `-stdlib` | Convert the Go standard library (optionally followed by specific package names). |
-| `-recurse` | Convert a downloaded module **and its third-party dependencies** in dependency order, referencing (not reconverting) the pre-converted standard library. An optional second positional sets the output root for the generated `src\` (app) and `pkg\` (dependency) trees. A package that fails to convert is reported and skipped. See [Converting a real-world module](#converting-a-real-world-module). |
+| `-recurse` | Convert a downloaded module **and its third-party dependencies** in dependency order, referencing (not reconverting) the pre-converted standard library. An optional second positional sets the output root for the generated `src\` (app) and `pkg\` (dependency) trees. A package that fails to convert is reported and skipped. The module is converted, and validated, as Go builds it with the `safe` build tag (see [Build tags](#build-tags-for-a-module)). See [Converting a real-world module](#converting-a-real-world-module). |
 | `-recurse=module` | Same, but convert only the module's own packages: third-party packages are referenced into `pkg\` but not converted, and are listed at the end of the run. See [converting the module only](#optional-convert-the-module-only-and-deal-with-its-dependencies-later). |
 | `-recurse=nuget` | Same, but the standard library, the `golib` runtime and the analyzer come from NuGet ([`go.<pkg>`](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll), [`go.lib`](https://www.nuget.org/packages/go.lib), [`go.gen`](https://www.nuget.org/packages/go.gen)), so nothing is staged locally. Third-party modules that the [nugetgo.net](https://nugetgo.net) registry maps are referenced as published packages when a qualifying version exists, and converted locally otherwise (see [Mapping modules to NuGet packages](#mapping-modules-to-nuget-packages)). Scope and reference style combine: `-recurse=module,nuget`. The published packages match the Go release go2cs is built with; go2cs checks the module against that release first, and refuses a mismatch, naming both versions. |
+| `-module-safe-tag=false` | With `-recurse`: convert and validate the module without the `safe` build tag, using the files a plain `go build` selects. On by default; see [Build tags](#build-tags-for-a-module). |
 | `-nuget-map <source>` | With `-recurse=nuget`: add a mapping source, a local file or an `https://` URL. Repeatable; the first source that names a module wins, and nugetgo.net answers the rest. `-nuget-map off` turns mapping off. See [Mapping modules to NuGet packages](#mapping-modules-to-nuget-packages). |
 | `-nuget-map-only` | With `-nuget-map`: use **only** the listed sources — the nugetgo.net fallback is dropped, so a module your sources do not name stays local, and nugetgo.net is never fetched. |
 | `-nuget-map-exclude <module-path>` | With `-recurse=nuget`: never map this module, whatever a source says. Repeatable. |
@@ -217,7 +218,7 @@ go2cs -tests -recurse -test-action all module_dir out_root      # validate a who
 | `-goroot` / `-gopath` | Override the detected Go root / path. |
 | `-platforms <os/arch>` | Target platform for build-tagged files (defaults to the host). A comma-separated **list** (`windows/amd64,linux/amd64,darwin/amd64`) is accepted and today requires `-platform-census`: a conversion still emits for exactly one target, so a list without the census flag is rejected rather than silently converting the first. |
 | `-platform-census <dir>` | With `-stdlib` and two or more `-platforms` targets: convert once per target into an isolated, seeded staging root under `<dir>`, compare what each run actually emitted, and write `<dir>\platform-manifest.json` classifying every artifact as shared, variant, partial or platform-exclusive. Produces **no** converted output of its own — `-go2cspath` is read as the seed and never written to. |
-| `-tags <list>` | Build tags applied when loading packages. `-stdlib` and `-tests` apply `purego` by default; an explicit value replaces it. |
+| `-tags <list>` | Build tags applied when loading packages. `-stdlib` and `-tests` apply `purego` by default, and `-recurse` adds `safe`; an explicit value replaces both. |
 | `-indent <n>` | Spaces per indent level (default 4). |
 | `-var` | Prefer `var` declarations where the type is obvious (default on). |
 | `-uco` | Emit channel operators instead of method calls (default on). |
@@ -261,6 +262,15 @@ open and build. With `-recurse=nuget` the standard library, the `golib` runtime 
 analyzer come from [nuget.org](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll), so nothing has to
 be staged on the machine beforehand. (Prefer the standard library as local C# source? See
 [building against a local standard library](#optional-build-against-a-local-standard-library) below.)
+
+#### Build tags for a module
+
+go2cs converts a module, and validates it against its own tests, as Go builds it with the `safe` build tag.
+Some libraries reach into Go's runtime internals with unsafe pointer arithmetic, which converted code cannot
+do, and ship a fallback for builds tagged `safe`; with the tag, that fallback is the code you get. The visible
+difference is small: testify's assertion messages, for example, do not print the unexported fields of a struct.
+When a module is validated, Go's own `go test` run uses the same tag, so both sides are compared on the same
+code. To convert the files a plain `go build` selects instead, pass `-module-safe-tag=false`.
 
 Wondering which real-world Go packages make good conversions? The
 **[go2cs Target Atlas](https://go2cs.net/TargetAtlas.html)** ranks the most-depended-on Go modules and
