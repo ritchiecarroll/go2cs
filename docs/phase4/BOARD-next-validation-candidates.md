@@ -26178,4 +26178,54 @@ Nine entries, most important first. The owner ruled at 10:05 that 1.24.13.4 wait
 
 **2026-10-04, INSTRUMENT (COORD):** four lessons from seating the train and from landing the one before it. (1) A PAIRWISE 3-way of every pushed seat against every other, and against O's union, run BEFORE the freeze, found three seat-by-seat conflicts that no lane's own gate could see, because each seat is clean on the base it was cut on. Two were position-map rows regenerating ONE `GoPositionMap` line (`g-method-value-fm-record-r3` against `c2-elseif-position-record-r2` in 5 `package_info.cs`; later go-cmp L against the else-if row in `reflect/package_info.cs`), and one was two inserts at one anchor (the sibling-name row against the `go.go` row in `importAliasOperations.go`). Each was ruled as a re-cut STACKED on the other seat, the shared line or block carrying both changes. The first pass (11:30) also found one seat against O's union itself (`PackageTests/README.md`). After the first two re-cuts the pass read 0 conflicts in 156 pairs over 21 seats and O's union (13:27); the third conflict arrived with the 23rd seat (14:05). (2) PLACEMENT keeps rows single-parent: two seats that each add a section at the tail of one doc (`shadowing.md`: the sort seat and the `go.go` seat) conflict, and moving one section to a non-tail anchor clears it with no merge-commit base. (3) The i7's git 2.35 has no `merge-tree --write-tree`: the pairwise instrument is a read-tree script, and the pre-map ran on a newer git's real ort merge. (4) A seat's `-tests` footprint is its own reading: TRAIN O's test-source refresh moved 18 committed test sources (explicit lambda result types, a bare `select();`, a cast on an untyped constant loop bound, two lifted type names, a byte cast around a shift) for seats whose rows declared no corpus footprint, because the fixup derives what the union emits from the `-stdlib` conversion only; and TRAIN O's battery read ONE finding class, an untracked `src/core/math/bits/.editorconfig` that a `-tests` run writes and no seat had committed, which this train's `claude/p2-test-warning-entries` (`8d89695095`) commits for all three flavours.
 
+## 2026-10-05 — C2: a named struct and an identical unnamed struct are assignable in Go; four forms do not compile — RECORDED AND DEFERRED
+
+Go lets a value move between a named struct `T` and an unnamed struct with an identical underlying
+type, in both directions, by assignment and by conversion. go2cs lifts each unnamed struct to its own
+C# struct, so the two are distinct types. One C# path bridges them: `checkForDynamicStructs`
+(`dynamicStructOperations.go`), which runs at call arguments and returns and only when the TARGET is
+the unnamed struct. It emits a fieldwise `new target(src.A, src.B)` when the source is public and the
+target internal (C# operators must be public), and otherwise registers an implicit conversion.
+
+**The four forms that do not compile.** Measured with `type T struct{ A int; B string }`, identically at
+master `7a1b2e3631` and the TRAIN P union `446d2c8ba0` (so H1, `claude/c2-anon-struct-named-conv`, changes
+none of them). The unnamed struct is lifted once, as `takesAnon_a`. Go prints `shape1 1`, `shape2 3`,
+`controls 1 4 1`.
+
+| Form | Go | Emitted | Compiler |
+|---|---|---|---|
+| named -> unnamed, conversion | `struct{ A int; B string }(l)` | `takesAnon_a(l)` | CS1955 |
+| unnamed -> named, argument | `takesT(struct{ A int; B string }{3, "c"})` | `takesT(new takesAnon_a(3, "c"u8))` | CS1503 |
+| named -> unnamed, `var` | `var x struct{ A int; B string } = l` | `takesAnon_a x = l;` | CS0029 |
+| unnamed -> named, `var` | `var y T = struct{ A int; B string }{4, "d"}` | `T y = new takesAnon_a(4, "d"u8);` | CS0029 |
+
+The control compiles: named -> unnamed at an ARGUMENT, `takesAnon(l)`, emits `new takesAnon_a(l.A, l.B)`.
+
+**Census.** go/types over every assignment-like site: assignments, `var` with a type, arguments
+(variadic included), returns, conversions (pointer conversions included), composite-literal fields,
+elements and map keys, and channel sends. Predicate: a value of struct type S flows to struct type D,
+S and D not identical, their underlying structs identical ignoring tags, at least one of them unnamed.
+Positive control: the repro above, 5 of 5 sites found.
+
+| Population | Sites | What they are |
+|---|---|---|
+| std, test packages included: linux 926, windows 923, darwin 922 packages, 0 load errors | 1 on each | `unique/handle_test.go:50`, `testZeroSize(struct{}{})`: an unnamed -> named CONVERSION, H1's shape |
+| `github.com/google/go-cmp` v0.7.0 | 2 | `cmp/compare_test.go:2356-2357`, `struct{A int}` -> `teststructs.AssignB` conversions: H1's motivating pair |
+| `BurntSushi/toml` v1.6.0, `x/sync` v0.19.0, `golang-jwt/jwt/v5` v5.3.1, `joho/godotenv` v1.5.1, `google/uuid` v1.6.0 | 0 each | |
+| `gopkg.in/yaml.v3` v3.0.1 | NOT MEASURED | its test dependency `gopkg.in/check.v1` had no go.sum entry on the offline box |
+
+No measured package reaches any of the four forms. Every real occurrence is the unnamed -> named
+conversion H1 fixes.
+
+**Size if cut.** One helper for the fieldwise construction in both directions (generalizing
+`dynamicCast`), wired at explicit conversions, assignments and `var` declarations, plus the reverse
+direction of the existing argument and return check: about 60-100 converter lines and one behavioral
+fixture covering all four forms. Predicted std footprint 0 files, from the census (unique's site
+already takes H1's path). Base: wherever H1 has landed, since the two touch the same conversion sites.
+
+**Trigger.** The first module that reaches one of the four forms. Ruled record-and-defer by COORD on
+2026-10-05 (04:03Z): no seat until then.
+
+— C2
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
