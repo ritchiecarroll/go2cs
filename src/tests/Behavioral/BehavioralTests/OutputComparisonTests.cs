@@ -1223,6 +1223,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedNumericSwitchLiteral() => CheckTarget("NamedNumericSwitchLiteral");
 
     [TestMethod]
+    public void CheckNamedPointerFieldAddress() => CheckTarget("NamedPointerFieldAddress");
+
+    [TestMethod]
     public void CheckNamedPointerReflectElem() => CheckTarget("NamedPointerReflectElem");
 
     [TestMethod]

@@ -1273,6 +1273,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedNumericSwitchLiteral() => CheckTarget("NamedNumericSwitchLiteral");
 
     [TestMethod]
+    public void CheckNamedPointerFieldAddress() => CheckTarget("NamedPointerFieldAddress");
+
+    [TestMethod]
     public void CheckNamedPointerReflectElem() => CheckTarget("NamedPointerReflectElem");
 
     [TestMethod]
