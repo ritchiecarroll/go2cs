@@ -208,4 +208,16 @@ public class SelfContainingMapHolderTests
     [TestMethod]
     public void AnOrdinaryMapKeepsItsMapInline() =>
         AssertInline(RunTypeGenerator(), "PlainMap", "map<nint, nint>");
+
+    // A nested map assignment `m[k1][k2] = v` emits `m[k1].Set(k2, v)` (an indexer setter on the rvalue
+    // element is CS1612), so every map wrapper declares Set, writing through the SAME map read its other
+    // members use: the inline field, or a self-containing map's holder through Value.
+    [TestMethod]
+    public void EveryMapWrapperDeclaresSetThroughItsMapRead()
+    {
+        Dictionary<string, string> sources = RunTypeGenerator();
+
+        StringAssert.Contains(GeneratedFor(sources, "PlainMap"), "public void Set(nint key, nint value) => m_value.Set(key, value);");
+        StringAssert.Contains(GeneratedFor(sources, "Direct"), "public void Set(nint key, Direct value) => Value.Set(key, value);");
+    }
 }

@@ -1240,6 +1240,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedMapMakeNonNil() => CheckTarget("NamedMapMakeNonNil");
 
     [TestMethod]
+    public void CheckNamedMapNestedAssign() => CheckTarget("NamedMapNestedAssign");
+
+    [TestMethod]
     public void CheckNamedMapRvalueIndexWrite() => CheckTarget("NamedMapRvalueIndexWrite");
 
     [TestMethod]

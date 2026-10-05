@@ -1190,6 +1190,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedMapMakeNonNil() => CheckTarget("NamedMapMakeNonNil");
 
     [TestMethod]
+    public void CheckNamedMapNestedAssign() => CheckTarget("NamedMapNestedAssign");
+
+    [TestMethod]
     public void CheckNamedMapRvalueIndexWrite() => CheckTarget("NamedMapRvalueIndexWrite");
 
     [TestMethod]
