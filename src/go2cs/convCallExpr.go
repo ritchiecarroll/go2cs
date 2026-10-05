@@ -4720,9 +4720,19 @@ func (v *Visitor) recordConversionPackageUsing(t types.Type) {
 				// attribute type names, so the resolving using must declare that exact alias
 				// (`using Δsyscall = go.syscall_package;`) — the plain-name using left the
 				// attributes unresolvable (CS0246 ×4). Unrenamed imports are unchanged
-				// (importQualifier is the identity for them).
+				// (importQualifier is the identity for them). An EXPLICITLY aliased import is
+				// rendered through THIS FILE's alias (getCSharpTypeName prefers
+				// importPathAliases), so the using must declare that alias too: go-cmp's test
+				// imports `ts "…/internal/teststructs"`, records `ts.AssignB`, and the
+				// package-name using left `ts` undeclared (CS0246).
+				qualifier := importQualifier(pkg.Name())
+
+				if fileAlias, ok := v.importPathAliases[pkg.Path()]; ok && fileAlias != "" {
+					qualifier = fileAlias
+				}
+
 				packageLock.Lock()
-				conversionPackageUsings[importQualifier(pkg.Name())] = convertImportPathToNamespace(pkg.Path(), PackageSuffix)
+				conversionPackageUsings[qualifier] = convertImportPathToNamespace(pkg.Path(), PackageSuffix)
 				packageLock.Unlock()
 			}
 		}

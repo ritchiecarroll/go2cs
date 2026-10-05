@@ -88,6 +88,7 @@
     <None Include="$(MSBuildThisFileDirectory)convCompositeLit.go" />
     <None Include="$(MSBuildThisFileDirectory)conversionDriver.go" />
     <None Include="$(MSBuildThisFileDirectory)conversionDriver_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)conversionRecordFileAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)converterStaleness.go" />
     <None Include="$(MSBuildThisFileDirectory)converterStaleness_test.go" />
     <None Include="$(MSBuildThisFileDirectory)convertTimeout_test.go" />
