@@ -1700,6 +1700,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckReflectMethodTableWalk() => CheckTarget("ReflectMethodTableWalk");
 
     [TestMethod]
+    public void CheckReflectNamedFuncAssign() => CheckTarget("ReflectNamedFuncAssign");
+
+    [TestMethod]
     public void CheckReflectNewAtField() => CheckTarget("ReflectNewAtField");
 
     [TestMethod]
