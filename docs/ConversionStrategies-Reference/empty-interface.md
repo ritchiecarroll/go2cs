@@ -145,6 +145,18 @@ see [Maps and Channels](maps-and-channels.md#maps-and-channels). (Guarded by the
 statement and select-case sends read back through a `string` type-switch and an `x.(string)`
 assertion to prove runtime identity, output-compared vs Go.)
 
+An explicit conversion through an interface type LITERAL — `interface{}("something")`, as testify's
+`objx` writes it — takes the same box. The conversion arm wrapped the operand in a cast to the literal's
+C# type and nothing else, so a string constant arrived as its u8 span: `(any)("something"u8)` (CS0030,
+no conversion from `ReadOnlySpan<byte>` to `object`). The arm now boxes a string CONSTANT through
+`@string` first, `(any)((@string)("something"u8))`, whether the operand is a literal or a named constant
+and whether the type is written bare or parenthesized (`(interface{})("x")`). Only a constant of the BASIC string type is affected: a constant of a
+NAMED string type keeps its own wrapper type, so its dynamic type stays `main.sname` rather than
+collapsing to `string`, and a string variable was never a span. The `any(…)` spelling takes a different
+route and is unchanged. (Guarded by the `IfaceLiteralStringConversion` behavioral output test — a
+literal, a parenthesized interface type, a named constant, a named-type constant, a string variable
+and an `any(…)` control, each printed with `%v %T` against Go.)
+
 ## An untyped constant boxed as `any` boxes at Go's DEFAULT TYPE
 
 The numeric twin of the `@string` boxing above. Go materializes an untyped constant into an interface

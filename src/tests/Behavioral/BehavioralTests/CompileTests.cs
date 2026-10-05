@@ -856,6 +856,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckIfaceFieldMethodValueBind() => CheckTarget("IfaceFieldMethodValueBind");
 
     [TestMethod]
+    public void CheckIfaceLiteralStringConversion() => CheckTarget("IfaceLiteralStringConversion");
+
+    [TestMethod]
     public void CheckIfaceToIfaceNarrow() => CheckTarget("IfaceToIfaceNarrow");
 
     [TestMethod]

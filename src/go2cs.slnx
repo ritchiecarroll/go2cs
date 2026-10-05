@@ -562,6 +562,7 @@
     <Project Path="tests/Behavioral/IfStatements/IfStatements.csproj" />
     <Project Path="tests/Behavioral/IfaceChainPointerAssert/IfaceChainPointerAssert.csproj" />
     <Project Path="tests/Behavioral/IfaceEmbedReflectAnonymous/IfaceEmbedReflectAnonymous.csproj" />
+    <Project Path="tests/Behavioral/IfaceLiteralStringConversion/IfaceLiteralStringConversion.csproj" />
     <Project Path="tests/Behavioral/IfaceToIfaceNarrow/IfaceToIfaceNarrow.csproj" />
     <Project Path="tests/Behavioral/IncDecPointerField/IncDecPointerField.csproj" />
     <Project Path="tests/Behavioral/IndexedElementDirectBoxMethod/IndexedElementDirectBoxMethod.csproj" />
