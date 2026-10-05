@@ -1310,14 +1310,31 @@ foreach ($row in $linuxRows) {
 # asked for. The two rows with no manifest at all are the fips140 relocation orphans, which this
 # guard already named before this change and still names.
 #
-# Compared against the MAXIMUM across applicable platforms rather than per platform, because the
-# manifest is per package and a pin absorbing on one platform is committed for all of them: the
-# largest claim is the one the file has to cover, and the smaller ones follow.
+# ⚠⚠ PER PLATFORM, AND ONLY THE PINS IN SCOPE THERE (2026-10-05). A pin's `platforms` list (absent or
+# empty = every platform) says where it can absorb, so a claim on a platform is held to the pins in
+# scope on THAT platform. Until this date every claim was held to the whole file's ceiling, the
+# maximum across platforms, and a pin scoped off a platform still counted toward that platform's
+# claim: crypto/tls's TestCertCache scoped to darwin left the windows claim green.
+#
+# ⚠ THE LIMIT, STATED: a COUNT cannot tell one pin from another. crypto/tls carries TestBogoSuite
+# (host-limit, every platform) beside TestCertCache, so with TestCertCache scoped off windows OR
+# deleted the windows claim still reads 1 against an in-scope ceiling of 1 -- measured, both pass this
+# arm. On windows the gate is therefore the NAME check of section 2b-names below, which reads the
+# disclosed rows of the row's own proof page. linux and darwin have no per-name proof page, so for
+# them this count is all there is: a claim padded by an unrelated in-scope pin passes, exactly as
+# crypto/tls's windows claim does here.
+function Test-DisclosureInScope {
+    # RED: a stub, so the arms below run and fail; the green commit implements it.
+    param($Entry, [string] $Platform)
+    return $true
+}
+
 function Get-DisclosureCeiling {
-    param([string] $Path)
+    param([string] $Path, [string] $Platform)
 
     $names = @(([System.IO.File]::ReadAllText($Path) | ConvertFrom-Json).disclosures |
                Where-Object { $null -ne $_ } |
+               Where-Object { Test-DisclosureInScope -Entry $_ -Platform $Platform } |
                ForEach-Object { [string]$_.name } |
                Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 
@@ -1359,19 +1376,88 @@ foreach ($row in $rows) {
     # said so. Asserting a second time on the same absence would double-count one fault.
     if (-not $present) { continue }
 
-    $largest = ($claims | Sort-Object { $_.Count } -Descending)[0]
+    foreach ($claim in $claims) {
+        $ceiling = $null
+        try { $ceiling = Get-DisclosureCeiling -Path $manifest -Platform $claim.Platform }
+        catch {
+            Assert-Equal "go2cs_test_disclosures.json is readable for the ceiling: $($row.Package) ($($_.Exception.Message))" $true $false
+            break
+        }
 
-    $ceiling = $null
-    try { $ceiling = Get-DisclosureCeiling -Path $manifest }
-    catch {
-        Assert-Equal "go2cs_test_disclosures.json is readable for the ceiling: $($row.Package) ($($_.Exception.Message))" $true $false
-        continue
+        Assert-Equal ("the manifest can account for the disclosed claim: $($row.Package) claims $($claim.Count) on $($claim.Platform), " +
+                      "the pins in scope there are $($ceiling.Pins) + $($ceiling.Implied) implied parent(s) = $($ceiling.Ceiling)") `
+            $true ($claim.Count -le $ceiling.Ceiling)
+    }
+}
+
+# ---- 2b-names. every test a windows proof page discloses has a pin in scope on windows ---------------
+# The count above cannot tell one pin from another (its header says how that was measured), so on
+# windows, the one platform whose proof pages name each verdict, the gate reads NAMES: every row the
+# package's own page marks `[disclosed]` must be pinned by an entry in scope on windows, or be the
+# PARENT of one (a parent of pinned subtests is a disclosed verdict that is not pinned itself; see
+# `pins < Disclosed` above). Row-driven, as the ceiling is: a page with no roster row is not read.
+function Get-ProofPageDisclosedNames {
+    # RED: a stub, so the arms below run and fail; the green commit implements it.
+    param([string] $Path)
+    return @()
+}
+
+function Get-UncoveredDisclosedNames {
+    # RED: a stub, so the arms below run and fail; the green commit implements it.
+    param([string[]] $Disclosed, [string[]] $Pins)
+    return @()
+}
+
+$proofPageDir = Join-Path (Join-Path (Split-Path $PSScriptRoot -Parent) 'docs') 'validation/current'
+$namedDisclosures = 0
+
+foreach ($row in $rows) {
+    $page = Join-Path $proofPageDir (($row.Package -replace '/', '.') + '.md')
+    if (-not (Test-Path -LiteralPath $page)) { continue }
+
+    $disclosed = @(Get-ProofPageDisclosedNames -Path $page)
+    if ($disclosed.Count -eq 0) { continue }
+    $namedDisclosures += $disclosed.Count
+
+    $manifest = Join-Path (Join-Path $PSScriptRoot 'core') ($row.Package + '/go2cs_test_disclosures.json')
+    $pins = @()
+    if (Test-Path -LiteralPath $manifest) {
+        $pins = @(([System.IO.File]::ReadAllText($manifest) | ConvertFrom-Json).disclosures |
+                  Where-Object { $null -ne $_ -and (Test-DisclosureInScope -Entry $_ -Platform 'windows') } |
+                  ForEach-Object { [string]$_.name })
     }
 
-    Assert-Equal ("the manifest can account for the disclosed claim: $($row.Package) claims $($largest.Count) on $($largest.Platform), " +
-                  "the manifest carries $($ceiling.Pins) pin(s) + $($ceiling.Implied) implied parent(s) = $($ceiling.Ceiling)") `
-        $true ($largest.Count -le $ceiling.Ceiling)
+    $uncovered = @(Get-UncoveredDisclosedNames -Disclosed $disclosed -Pins $pins)
+    Assert-Equal "every test the windows proof page discloses is pinned in scope on windows: $($row.Package) (uncovered: $($uncovered -join ', '))" 0 $uncovered.Count
 }
+
+# The pages this row-driven arm does NOT read, pinned by name: a proof page that discloses and has no
+# roster row. Today that is exactly the fips140 relocation pair, the 1.23.12-era pages for the old
+# package paths (their rows now live under crypto/internal/fips140/ and disclose nothing). A new page
+# of this shape is unread by every check above, so it fails here until it is either given a row or
+# added to this list deliberately.
+$rowPages = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::Ordinal)
+foreach ($row in $rows) { [void]$rowPages.Add(($row.Package -replace '/', '.')) }
+$unreadDisclosingPages = @(Get-ChildItem -LiteralPath $proofPageDir -Filter '*.md' |
+    Where-Object { -not $rowPages.Contains($_.BaseName) -and @(Get-ProofPageDisclosedNames -Path $_.FullName).Count -gt 0 } |
+    ForEach-Object { $_.BaseName } | Sort-Object)
+Assert-Equal 'the proof pages that disclose but have no roster row are exactly the fips140 relocation pair' `
+    'crypto.internal.edwards25519,crypto.internal.nistec' ($unreadDisclosingPages -join ',')
+
+# Synthetic arms: what the two checks above must refuse, independent of today's tree.
+Assert-Equal 'scope: an entry with no platforms is in scope everywhere' $true (Test-DisclosureInScope -Entry ([pscustomobject]@{ name = 'T' }) -Platform 'windows')
+Assert-Equal 'scope: an entry scoped to darwin is out of scope on windows' $false (Test-DisclosureInScope -Entry ([pscustomobject]@{ name = 'T'; platforms = @('darwin') }) -Platform 'windows')
+Assert-Equal 'scope: platform names compare exactly' $false (Test-DisclosureInScope -Entry ([pscustomobject]@{ name = 'T'; platforms = @('Windows') }) -Platform 'windows')
+Assert-Equal 'names: a disclosed test with no pin is uncovered' 'TestA' ((Get-UncoveredDisclosedNames -Disclosed @('TestA') -Pins @('TestB')) -join ',')
+Assert-Equal 'names: a pinned test is covered' 0 @(Get-UncoveredDisclosedNames -Disclosed @('TestA') -Pins @('TestA')).Count
+Assert-Equal 'names: a parent of a pinned subtest is covered' 0 @(Get-UncoveredDisclosedNames -Disclosed @('TestA') -Pins @('TestA/one')).Count
+Assert-Equal 'names: a sibling prefix is not a parent' 'TestA' ((Get-UncoveredDisclosedNames -Disclosed @('TestA') -Pins @('TestAB/one')) -join ',')
+Assert-Equal 'names: names compare exactly' 'TestA' ((Get-UncoveredDisclosedNames -Disclosed @('TestA') -Pins @('testa')) -join ',')
+$syntheticPage = [System.IO.Path]::GetTempFileName()
+[System.IO.File]::WriteAllLines($syntheticPage, @('| Test | `go test` | go2cs |', '|:--|:--:|:--:|', '| `TestKeep` | pass | pass |',
+    '| `TestCertCache` | pass | fail ([disclosed](#disclosed-divergences)) |', '| `TestBogoSuite` | pass | fail ([disclosed](#disclosed-divergences)) |'))
+Assert-Equal 'names: a proof page''s disclosed rows are read by name' 'TestCertCache,TestBogoSuite' ((Get-ProofPageDisclosedNames -Path $syntheticPage) -join ',')
+Remove-Item -LiteralPath $syntheticPage -ErrorAction SilentlyContinue
 
 
 # ---- 2c. every committed manifest's ENTRIES obey the deferred/structural contract ------------------
