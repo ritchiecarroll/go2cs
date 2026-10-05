@@ -117,9 +117,34 @@ as offsets into `libcoreclr.so` (frame #9 is re-entered at #19, after the ten fr
   (`sealed class Holder<T> { T Value; }` with a `Holder<Inner<Outer>>` field) or an `object` field
   loads cleanly with the interface kept.
 - **Removing the interface from `Outer`** (the `Control` type) avoids it.
-- **Where the outer struct reaches itself through another struct's field** instead of directly (a
-  generated wrapper whose dictionary value is a struct holding the wrapper), the failure is a
-  `TypeLoadException` ("Could not load type ...") rather than SIGSEGV.
+
+### Which shapes crash, which throw, which load
+
+The same fault, reached through the wrappers a Go-to-C# transpiler generates (see *Other
+information*). Each wrapper `M` is a struct implementing `IDictionary<long, V>` that holds, by value,
+a dictionary struct `Map<long, V>` (itself implementing `IDictionary<long, V>` over a `Dictionary`
+reference). Only the value type `V` varies. `Array<T>`, `Slice<T>`, `Map<K, V>` and `Channel<T>` are
+structs; `Ptr<T>` is a class. One variant per process; the Go program behind each runs correctly.
+
+| `V` (the map's value type)                         | Result on .NET 10.0.12      |
+|:---------------------------------------------------|:----------------------------|
+| `M` itself                                         | SIGSEGV (exit 139)          |
+| `Array<M>`                                         | SIGSEGV (exit 139)          |
+| `Slice<M>`                                         | SIGSEGV (exit 139)          |
+| `Map<long, M>`                                     | SIGSEGV (exit 139)          |
+| `struct S { M m; }`                                | `TypeLoadException` ("Could not load type '…M'") |
+| `struct A { B b; }`, `struct B { M m; }`            | `TypeLoadException`         |
+| `Array<S>` with `struct S { M m; }`                | `TypeLoadException`         |
+| `Ptr<M>` (a class)                                 | loads                       |
+| `Channel<M>` (a struct holding a reference)        | loads                       |
+| `Func<M>`                                          | loads                       |
+| an interface whose method returns `M`              | loads                       |
+
+So: a path to `M` that runs only through value types (struct fields, or the type arguments of the
+`Array`/`Slice`/`Map` structs) fails, and a path through a class, a delegate or an interface loads.
+`Channel<M>` is the exception: it is a struct, yet its wrapper loads. Holding `Map<long, V>` through
+a class field (a `StrongBox`) made every failing row we re-ran load: the first six (the `Array<S>` row
+was not re-run with the holder).
 
 ### Configuration
 
