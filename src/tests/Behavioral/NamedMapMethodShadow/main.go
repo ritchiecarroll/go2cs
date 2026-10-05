@@ -65,6 +65,10 @@ func (p Pipe) Send(v int) {
 	p <- v * 10
 }
 
+// Set is a map type NAMED Set, with no methods: its wrapper may not declare a member Set (CS0542),
+// so its nested assignment takes the door as well.
+type Set map[string]int
+
 // Hdr's Set takes (string, string) over map[string][]string: NOT the wrapper's shape (the control).
 type Hdr map[string][]string
 
@@ -115,4 +119,8 @@ func main() {
 	p := make(Pipe, 1)
 	p.Send(4)
 	fmt.Println("exact Send:", sends, <-p)
+
+	sets := map[string]Set{"a": {}}
+	sets["a"]["k"] = 7
+	fmt.Println("named Set nested:", sets["a"]["k"], len(sets["a"]))
 }

@@ -27,6 +27,7 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoTypeAlias("Set", "ΔSet")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -49,7 +50,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "AAkigMqA7oKCgqaCgoK4gMqAyoKCggAGEIKCzIAAHQSCgoKCgoSCgoKEgoKCgoKEgoKGgoKCgoKCgoSCgoKChIKEgoI=")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "AAkigMqA7oKCgqaCgoK4gMqAyoKCggAGEIKCAAYUgAAeBIKCgoKChIKCgoSCgoKCgoSCgoaCgoKCgoKChIKCgoKEgoSCgoSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -73,6 +74,7 @@ public static partial class main_package
     public partial struct PEnv {}
     public partial struct Pipe {}
     public partial struct Uniq<T> {}
+    public partial struct ΔSet {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

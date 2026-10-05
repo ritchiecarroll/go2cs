@@ -75,7 +75,15 @@ const ValueAdapterInfix = "\u1D20"               // ᴠ - value-form foreign ada
 const OverloadDiscriminator = "\uA7F7"           // Variants: ꟷ false
 const ChannelLeftOp = "\u1438\uA7F7"             // Example: `ch.ᐸꟷ(val)` for `ch <- val`
 const ChannelRightOp = "\uA7F7\u1433"            // Example: `ch.ꟷᐳ(out var val)` for `val := <-ch`
-const PointerDerefOp = "~"                       // Example: `~ptr` for dereferencing a pointer
+
+// MapWrapperSet is the name of the map write a named-map wrapper declares for the converter's
+// nested assignment `m[k1][k2] = v`, emitted `m[k1].Set‿(k2, v)` when the element's Go type
+// declares a method named Set (an indexer setter on that rvalue is CS1612). A Go method is emitted
+// as an extension, which loses to any same-named instance member, so the wrapper yields `Set` to
+// the Go method and keeps this door, which no Go identifier can spell (U+203F is a connector
+// punctuation character: legal in C#, illegal in Go).
+const MapWrapperSet = "Set\u203F"
+const PointerDerefOp = "~" // Example: `~ptr` for dereferencing a pointer
 
 // NilSafeDerefAccessor is the golib ж<T> extension method used in place of `.Value` to re-alias a
 // deref'd pointer parameter that is walked to a nil terminator (see nilSafePtrParamNames). Unlike

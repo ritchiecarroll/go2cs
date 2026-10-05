@@ -74,6 +74,13 @@ public class WrapperMemberYieldTests
 
                 [GoType("chan nint")] partial struct PlainPipe;
             }
+
+            public static partial class other_package
+            {
+                [GoType("map[T, nint]")] partial struct Set<T>;
+
+                [GoType("map[nint, nint]")] partial struct Clear;
+            }
         }
         """;
 
@@ -158,6 +165,20 @@ public class WrapperMemberYieldTests
             Assert.IsFalse(publicNames.Contains("Set") || explicitNames.Any(member => member.StartsWith("Set/")), $"{type} declares a Go method Set, so its wrapper must not declare Set at all");
             Assert.IsTrue(publicNames.Contains(SetDoor), $"{type}'s wrapper must declare {SetDoor}, the nested-map write the converter emits for it");
         }
+    }
+
+    // A member may not share its enclosing type's name (CS0542), so a wrapper yields its own name too:
+    // `type Set[T comparable] map[T]struct{}` (GenericDefinedMapChan) was CS0542 on the wrapper's Set.
+    [TestMethod]
+    public void AWrapperYieldsItsOwnName()
+    {
+        Dictionary<string, string> sources = RunTypeGenerator();
+
+        (HashSet<string> setPublic, HashSet<string> setExplicit) = Members(sources, "Set");
+        Assert.IsFalse(setPublic.Contains("Set") || setExplicit.Any(member => member.StartsWith("Set/")), "a map named Set must not declare Set");
+        Assert.IsTrue(setPublic.Contains(SetDoor), $"a map named Set must declare {SetDoor}");
+
+        AssertYields(sources, "Clear", "Clear/0");
     }
 
     [TestMethod]

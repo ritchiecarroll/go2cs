@@ -183,6 +183,7 @@ public class TypeGenerator : ISourceGenerator
                             TargetValueTypeName = valueTypeName,
                             TypeClass = "Map",
                             HoldsMapInHolder = MapValueContainsSelf(semanticModel, targetSyntax, valueTypeName),
+                            GoMethodNames = GoMethodNames(semanticModel, targetSyntax),
                             UsingStatements = usingStatements
 
                         }
@@ -202,6 +203,7 @@ public class TypeGenerator : ISourceGenerator
                             TypeName = $"channel<{typeName}>",
                             TargetTypeName = typeName,
                             TypeClass = "Channel",
+                            GoMethodNames = GoMethodNames(semanticModel, targetSyntax),
                             UsingStatements = usingStatements
                         }
                         .Generate();
@@ -886,6 +888,35 @@ public class TypeGenerator : ISourceGenerator
             ?.ConstructorArguments.FirstOrDefault().Value as string;
 
         return string.IsNullOrWhiteSpace(value) ? null : value;
+    }
+
+    // The member names a wrapper type may not declare publicly: the Go methods declared on it, and its
+    // own name. The converter emits each Go method as an extension method in the type's own package
+    // class -- `this T` for a value receiver, `[GoRecv] this ref T` for a pointer receiver -- and C#
+    // binds an applicable INSTANCE member before it considers extensions, so a public wrapper member of
+    // the same name and shape would run in place of the Go method, silently. And a member may not share
+    // its enclosing type's name (CS0542: `type Set[T comparable] map[T]struct{}` against the wrapper's
+    // Set). The templates read this set to yield those names (InheritedTypeTemplate.GoMethodNames).
+    private static HashSet<string> GoMethodNames(SemanticModel semanticModel, BaseTypeDeclarationSyntax declaration)
+    {
+        HashSet<string> names = new(StringComparer.Ordinal);
+
+        if (semanticModel.GetDeclaredSymbol(declaration) is not INamedTypeSymbol { ContainingType: { } packageClass } self)
+            return names;
+
+        names.Add(self.Name);
+
+        foreach (IMethodSymbol method in packageClass.GetMembers().OfType<IMethodSymbol>())
+        {
+            if (method.IsExtensionMethod && method.Parameters.Length > 0 &&
+                method.Parameters[0].Type is INamedTypeSymbol receiver &&
+                SymbolEqualityComparer.Default.Equals(receiver.OriginalDefinition, self.OriginalDefinition))
+            {
+                names.Add(method.Name);
+            }
+        }
+
+        return names;
     }
 
     // Whether a named map's VALUE type contains the map wrapper itself BY VALUE -- the wrappers

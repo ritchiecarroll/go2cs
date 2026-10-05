@@ -5,6 +5,8 @@
 // that can be found in the LICENSE file.
 
 using System;
+using System.Collections.Generic;
+using static go2cs.Symbols;
 
 namespace go2cs.Templates.InheritedType;
 
@@ -18,12 +20,35 @@ internal static class IMapTypeTemplate
     // through `Value` and stores a new holder; every other wrapper's emission is unchanged. The
     // indexer's setter writes through a LOCAL when mapValue is not the field: `Value[key] = v` assigns
     // into a property's return value (CS1612), while the copy shares the map's storage like the field.
-    public static string Generate(string structName, string constructorName, string keyTypeName, string valueTypeName, string mapValue = "m_value", Func<string, string>? storeMap = null) =>
-        GenerateBody(structName, constructorName, keyTypeName, valueTypeName, mapValue, (storeMap ?? (made => made))($"new map<{keyTypeName}, {valueTypeName}>(size)"),
+    //
+    // goMethods are the Go methods declared on the type, and its own name (InheritedTypeTemplate.
+    // GoMethodNames). A member whose name one of them claims moves to its explicit IDictionary or
+    // ICollection implementation, so the Go method -- an extension -- is what a call binds, and golib
+    // still reaches the member through the interface; Set, which no interface declares, is dropped (its
+    // door, MapWrapperSet, is always here).
+    public static string Generate(string structName, string constructorName, string keyTypeName, string valueTypeName, ICollection<string> goMethods, string mapValue = "m_value", Func<string, string>? storeMap = null) =>
+        GenerateBody(structName, constructorName, keyTypeName, valueTypeName, goMethods, mapValue, (storeMap ?? (made => made))($"new map<{keyTypeName}, {valueTypeName}>(size)"),
             mapValue == "m_value" ? "set => m_value[key] = value;" : $"set {{ map<{keyTypeName}, {valueTypeName}> target = {mapValue}; target[key] = value; }}");
 
-    private static string GenerateBody(string structName, string constructorName, string keyTypeName, string valueTypeName, string mapValue, string sizedMap, string indexerSetter) =>
-        $$"""
+    private static string GenerateBody(string structName, string constructorName, string keyTypeName, string valueTypeName, ICollection<string> goMethods, string mapValue, string sizedMap, string indexerSetter)
+    {
+        string dictionary = $"global::System.Collections.Generic.IDictionary<{keyTypeName}, {valueTypeName}>";
+        string collection = $"global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{keyTypeName}, {valueTypeName}>>";
+
+        // The public form, or -- when a Go method claims the name -- the same member implemented explicitly.
+        string Member(string name, string returnType, string interfaceName, string signature, string body) =>
+            goMethods.Contains(name) ?
+                $"{returnType} {interfaceName}.{name}({signature}) => {body};" :
+                $"public {returnType} {name}({signature}) => {body};";
+
+        string set = goMethods.Contains("Set") ? "" :
+            $$"""
+
+                /// <summary>The nested-map write under its plain name, for a map whose type declares no Go method Set.</summary>
+                public void Set({{keyTypeName}} key, {{valueTypeName}} value) => {{mapValue}}.Set(key, value);
+        """;
+
+        return $$"""
         
                 public nint Length => ((IMap){{mapValue}}).Length;
                 
@@ -71,26 +96,27 @@ internal static class IMapTypeTemplate
                 /// <summary>Comma-ok shaped-zero read.</summary>
                 public ({{valueTypeName}}, bool) this[{{keyTypeName}} key, global::System.Func<{{valueTypeName}}> zero, bool _] => {{mapValue}}[key, zero, _];
 
-                public void Add({{keyTypeName}} key, {{valueTypeName}} value) => {{mapValue}}.Add(key, value);
+                {{Member("Add", "void", dictionary, $"{keyTypeName} key, {valueTypeName} value", $"{mapValue}.Add(key, value)")}}
 
                 /// <summary>
                 /// The write a nested map assignment needs: `m[k1][k2] = v` assigns through `m[k1]`, an rvalue
-                /// struct, where an indexer SETTER is CS1612, so the converter emits `m[k1].Set(k2, v)` -- a
-                /// method call, which writes through to the shared store. golib's map has Set; a named map
-                /// element needs it here too (it was CS1501). A Go method `Set(k K, v V)` with EXACTLY this
-                /// key and value type would be shadowed by this member (C# prefers an instance method to the
-                /// extension the method is emitted as), the same as for Add above; none exists in std, the
-                /// behavioral corpus or go-cmp.
+                /// struct, where an indexer SETTER is CS1612, so the converter emits a method call, which writes
+                /// through to the shared store (a named map element was CS1501 without it). It is this door
+                /// when the element's Go type declares a method Set -- the converter reads that off go/types --
+                /// and the plain Set below otherwise, which this wrapper then drops: a Go method is an extension,
+                /// and a same-named instance member would run in its place (objx's Map.Set, a selector path walk,
+                /// became a one-key write). No Go identifier can spell this name.
                 /// </summary>
-                public void Set({{keyTypeName}} key, {{valueTypeName}} value) => {{mapValue}}.Set(key, value);
+                public void {{MapWrapperSet}}({{keyTypeName}} key, {{valueTypeName}} value) => {{mapValue}}.Set(key, value);
+        {{set}}
                 
-                public bool Remove({{keyTypeName}} key) => {{mapValue}}.Remove(key);
+                {{Member("Remove", "bool", dictionary, $"{keyTypeName} key", $"{mapValue}.Remove(key)")}}
                 
-                public void Clear() => {{mapValue}}.Clear();
+                {{Member("Clear", "void", collection, "", $"{mapValue}.Clear()")}}
                 
-                public bool TryGetValue({{keyTypeName}} key, out {{valueTypeName}} value) => {{mapValue}}.TryGetValue(key, out value);
+                {{Member("TryGetValue", "bool", dictionary, $"{keyTypeName} key, out {valueTypeName} value", $"{mapValue}.TryGetValue(key, out value)")}}
                 
-                public bool ContainsKey({{keyTypeName}} key) => {{mapValue}}.ContainsKey(key);
+                {{Member("ContainsKey", "bool", dictionary, $"{keyTypeName} key", $"{mapValue}.ContainsKey(key)")}}
                 
                 global::System.Collections.Generic.ICollection<{{keyTypeName}}> global::System.Collections.Generic.IDictionary<{{keyTypeName}}, {{valueTypeName}}>.Keys => ((global::System.Collections.Generic.IDictionary<{{keyTypeName}}, {{valueTypeName}}>){{mapValue}}).Keys;
 
@@ -110,4 +136,5 @@ internal static class IMapTypeTemplate
                 
                 global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
         """;
+    }
 }

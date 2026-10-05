@@ -567,6 +567,29 @@ func (v *Visitor) nativeBackedArrayPointerStore(lhs ast.Expr, rhs ast.Expr) (str
 		v.convExpr(unary, nil), elemType, v.convExpr(rhs, nil), destArray.Len()), true
 }
 
+// mapSetMethod names the write a nested map assignment `m[k1][k2] = v` calls on the element `m[k1]`.
+// A Go method is emitted as an extension method, and C# binds any same-named instance member first,
+// so a named map's wrapper YIELDS its `Set` to a Go method named Set (value or pointer receiver,
+// whatever its shape) and keeps MapWrapperSet, a name no Go identifier can spell. It yields it too
+// when the type is itself named Set, since a member may not share its type's name (CS0542). Every
+// other map -- golib's own and any other wrapper -- has the plain `Set`, so the door appears in
+// emitted code only where a Go method or type of that name exists.
+func mapSetMethod(mapType types.Type) string {
+	if named, isNamed := types.Unalias(mapType).(*types.Named); isNamed {
+		if named.Obj().Name() == "Set" {
+			return MapWrapperSet
+		}
+
+		if method, _, _ := types.LookupFieldOrMethod(types.NewPointer(mapType), false, nil, "Set"); method != nil {
+			if _, isFunc := method.(*types.Func); isFunc {
+				return MapWrapperSet
+			}
+		}
+	}
+
+	return "Set"
+}
+
 func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingContext) {
 	result := &strings.Builder{}
 
@@ -624,7 +647,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 						// SINGLE-index form `m[k] = n` has always been right — because it passes this context
 						// and this branch did not. One rule, now all three callers (single-index, key, value).
 						valExpr := v.convExpr(rhsExprs[0], v.appendRhsPtrContext(nil, rhsExprs[0]))
-						result.WriteString(fmt.Sprintf("%s.Set(%s, %s);", outerExpr, keyExpr, valExpr))
+						result.WriteString(fmt.Sprintf("%s.%s(%s, %s);", outerExpr, mapSetMethod(baseType), keyExpr, valExpr))
 
 						if hoistBuf != nil && hoistBuf.Len() > 0 {
 							v.outputBuilder.WriteString(hoistBuf.String())
