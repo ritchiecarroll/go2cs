@@ -6482,15 +6482,32 @@ func conversionOptionsDigest(options Options) string {
 // converter's output root, so the sources may not be present and a runtime edit then does NOT
 // invalidate the manifest ("runtime-unavailable" keeps the digest deterministic either way);
 // deployed (deploy-core) and -go2cspath-staged layouts get full invalidation.
+//
+// In core/testing only the HAND-OWNED host is hashed: the files carrying `[module: go.GoManualConversion]`. The same
+// directory receives the `testing` row's own -tests emission (its *_test.cs, go2cs_test_host.cs, package_test_info.cs),
+// and hashing that made every package's digest depend on whether `testing` had been re-emitted first -- a test-source
+// rewrite read as a runtime change. golib keeps every *.cs: no conversion writes there. An unmarked core/testing file
+// that is not a -tests emission is a host file that LOST its marker: it drops out, which moves the digest, and is named
+// in a warning, so a deleted marker cannot silently shrink what the stale check covers.
 func runtimeSourcesDigest(options Options) string {
 	var files []string
 
-	for _, dir := range []string{
-		filepath.Join(options.go2csPath, "core", "golib"),
-		filepath.Join(options.go2csPath, "core", "testing"),
-	} {
-		if matches, err := filepath.Glob(filepath.Join(dir, "*.cs")); err == nil {
-			files = append(files, matches...)
+	if matches, err := filepath.Glob(filepath.Join(options.go2csPath, "core", "golib", "*.cs")); err == nil {
+		files = append(files, matches...)
+	}
+
+	if matches, err := filepath.Glob(filepath.Join(options.go2csPath, "core", "testing", "*.cs")); err == nil {
+		for _, fileName := range matches {
+			handOwned, err := containsManualConversionMarker(fileName)
+			if err != nil {
+				return "runtime-unavailable"
+			}
+
+			if handOwned {
+				files = append(files, fileName)
+			} else if !isTestsEmittedSourceName(filepath.Base(fileName)) {
+				warnRuntimeHostMarkerLost(fileName)
+			}
 		}
 	}
 
@@ -6511,6 +6528,26 @@ func runtimeSourcesDigest(options Options) string {
 	}
 
 	return "runtime-" + hex.EncodeToString(hash.Sum(nil)[:8])
+}
+
+// isTestsEmittedSourceName reports whether a core/testing file name is one a -tests conversion emits: a converted test
+// source (every one ends in _test.cs, the per-variant anchors and init units included), the generated host, or the
+// test metadata anchor.
+func isTestsEmittedSourceName(name string) bool {
+	return strings.HasSuffix(name, "_test.cs") || name == testHostFileName || name == testPackageInfoFileName
+}
+
+// runtimeHostMarkerLostWarned keeps the lost-marker warning to one line per file per run: the digest is computed for
+// every converted package.
+var runtimeHostMarkerLostWarned sync.Map
+
+func warnRuntimeHostMarkerLost(fileName string) {
+	if _, warned := runtimeHostMarkerLostWarned.LoadOrStore(fileName, true); warned {
+		return
+	}
+
+	showWarning("runtime digest: %s carries no [module: go.GoManualConversion] marker and is not a -tests emission, "+
+		"so the test manifests' stale check no longer covers it; restore the marker if it is still hand-owned", fileName)
 }
 
 // testInputDigest fingerprints everything that determines a test conversion's outputs: the
