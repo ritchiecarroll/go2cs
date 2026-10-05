@@ -2526,6 +2526,7 @@ func seedProductionAliasLifts(pkg *packages.Package, productionInfoPath string) 
 		}
 
 		importedTypeAliases[name] = target
+		importedTypeAliasNamespacedKeys[name] = false // no publisher namespace: renders as written
 		packageLock.Unlock()
 	}
 }
@@ -2655,6 +2656,7 @@ func seedProductionInterfaceAliases(pkg *packages.Package, productionInfoPath st
 
 		productionAliasLiftedTypes[named] = aliasName
 		importedTypeAliases[aliasName] = target
+		importedTypeAliasNamespacedKeys[aliasName] = false // no publisher namespace: renders as written
 		packageLock.Unlock()
 	}
 }
