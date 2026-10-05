@@ -29,7 +29,7 @@ internal static array<@string> stringsData = new @string[]{""u8, "Hello"u8, "foo
 public static void TestSortIntSlice(ж<testing.T> Ꮡt) {
     var data = ints.Clone();
     var a = ((sort.IntSlice)(data[0..]));
-    Sort(a);
+    Sort((sort.Interface)(a));
     if (!IsSorted(a)) {
         Ꮡt.Errorf("sorted %v"u8, ints);
         Ꮡt.Errorf("   got %v"u8, data);
@@ -39,7 +39,7 @@ public static void TestSortIntSlice(ж<testing.T> Ꮡt) {
 public static void TestSortFloat64Slice(ж<testing.T> Ꮡt) {
     var data = float64s.Clone();
     var a = ((sort.Float64Slice)(data[0..]));
-    Sort(a);
+    Sort((sort.Interface)(a));
     if (!IsSorted(a)) {
         Ꮡt.Errorf("sorted %v"u8, float64s);
         Ꮡt.Errorf("   got %v"u8, data);
@@ -50,7 +50,7 @@ public static void TestSortFloat64Slice(ж<testing.T> Ꮡt) {
 public static void TestSortFloat64sCompareSlicesSort(ж<testing.T> Ꮡt) {
     var slice1 = slices.Clone<slice<float64>, float64>(float64s[..]);
     var slice2 = slices.Clone<slice<float64>, float64>(float64s[..]);
-    Sort(((sort.Float64Slice)slice1));
+    Sort((sort.Interface)(((sort.Float64Slice)slice1)));
     slices.Sort<slice<float64>, float64>(slice2);
     // Compare for equality using cmp.Compare, which considers NaNs equal.
     if (!slices.EqualFunc(slice1, slice2, (float64 a, float64 b) => cmp.Compare(a, b) == 0)) {
@@ -61,7 +61,7 @@ public static void TestSortFloat64sCompareSlicesSort(ж<testing.T> Ꮡt) {
 public static void TestSortStringSlice(ж<testing.T> Ꮡt) {
     var data = stringsData.Clone();
     var a = ((sort.StringSlice)(data[0..]));
-    Sort(a);
+    Sort((sort.Interface)(a));
     if (!IsSorted(a)) {
         Ꮡt.Errorf("sorted %v"u8, stringsData);
         Ꮡt.Errorf("   got %v"u8, data);
@@ -133,7 +133,7 @@ public static void TestReverseSortIntSlice(ж<testing.T> Ꮡt) {
     var data = ints.Clone();
     var data1 = ints.Clone();
     var a = ((sort.IntSlice)(data[0..]));
-    Sort(a);
+    Sort((sort.Interface)(a));
     var r = ((sort.IntSlice)(data1[0..]));
     Sort(Reverse(r));
     for (nint i = 0; i < len(data); i++) {
@@ -155,7 +155,7 @@ public static void TestBreakPatterns(ж<testing.T> Ꮡt) {
     data[(len(data) / 4) * 1] = 0;
     data[(len(data) / 4) * 2] = 1;
     data[(len(data) / 4) * 3] = 2;
-    Sort(((sort.IntSlice)data));
+    Sort((sort.Interface)(((sort.IntSlice)data)));
 }
 
 public static void TestReverseRange(ж<testing.T> Ꮡt) {
