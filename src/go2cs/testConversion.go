@@ -4589,13 +4589,15 @@ func writeTestProject(projectFile, projectName, namespace, importPath string, mo
 		//     -p:PublishSingleFile=false                     4 -> 4 -> 4
 		//     single-file + ExcludeFromSingleFile="true"     4 -> 4 -> 4
 		//
-		// So the deleter is the single-file BUNDLER, not the copy: on a republish it reclaims the
-		// output directory for the files it owns and takes the loose content with it. The first
-		// publish into a fresh directory is always correct, which is exactly why this hid — every
-		// bank re-converts fresh, and only a re-measurement over an existing publish tree can see
-		// it (R's isolation, both platforms, 2026-08-29). CopyToPublishDirectory does NOT fix it;
-		// measured too, and left out for that reason — the item was already reaching publish, the
-		// bundler was removing it afterwards.
+		// So the deleter is the single-file PUBLISH, not the copy: without the mark a fixture is
+		// named as published only by the bundler, and a republish that finds its bundle up to date
+		// skips the bundler and deletes the fixture as an orphan (the step was read from a binary
+		// log 2026-10-05; see removePublishedTestHost, which closes it for every file the bundler
+		// leaves loose). The first publish into a fresh directory is always correct, which is
+		// exactly why this hid — every bank re-converts fresh, and only a re-measurement over an
+		// existing publish tree can see it (R's isolation, both platforms, 2026-08-29).
+		// CopyToPublishDirectory does NOT fix it; measured too, and left out for that reason — the
+		// item was already reaching publish, and was removed afterwards.
 		//
 		// A fixture must be loose because a test opens it by relative path (`os.Open("testdata/x")`)
 		// — bundling it into the executable would take it out of the filesystem the test reads.
@@ -6802,7 +6804,8 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 // template resolves `$(go2csPath)` per configuration — a Release publish silently re-points every
 // stdlib reference at the deployed `~/go2cs` root instead of this tree. Publish is incremental
 // (MSBuild's up-to-date checks carry; only the bundling step re-runs warm), so build/run/compare
-// can each call this without re-paying the build.
+// can each call this without re-paying the build. The bundling step re-runs because the previous
+// host is removed first, and it has to (see removePublishedTestHost).
 //
 // options.testConfig == "Release" takes the OTHER honest seam instead: the template's
 // Debug-conditional default is inside a `Condition="'$(go2csPath)'==''"` guard
@@ -6815,10 +6818,51 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 // With -test-publish-binlog the publish also writes an MSBuild binary log, from the FIRST attempt,
 // and keeps it only when the publish fails (see settlePublishBinlog).
 func publishTestHost(outputPath, testProject string, options Options) error {
+	if err := removePublishedTestHost(outputPath, testProject); err != nil {
+		return err
+	}
+
 	binlog := preparePublishBinlog(outputPath, options)
 	args := withPublishBinlog(publishTestHostArgs(outputPath, testProject, options), binlog)
 	_, err := runCommandWithTimeout(testPublishTimeout(options), outputPath, options, "dotnet", args...)
 	return settlePublishBinlog(binlog, err)
+}
+
+// removePublishedTestHost deletes the executable an earlier publish left, so that the publish about
+// to run BUNDLES AGAIN. A publish that finds its bundle up to date deletes every file the bundler
+// leaves loose beside it, which is the symbol file of every referenced assembly. Measured 2026-10-05
+// on runtime/debug (SDK 10.0.400, binary log read), two publishes with nothing changed between them:
+//
+//	                                     first        second
+//	GenerateSingleFileBundle             runs         skipped, "all output files are up-to-date"
+//	GenerateBundle's ExcludedFiles       72 *.pdb     empty: the task did not run
+//	_IncrementalCleanPublishDirectory    deletes 0    deletes those 72, orphans of the first publish
+//	*.pdb beside the host                73           1
+//
+// The survivor is the test assembly's own, which the SDK marks ExcludeFromSingleFile itself; a
+// referenced assembly's symbol file is named as published ONLY by the bundler's ExcludedFiles. The
+// converted runtime reads those files for a traceback's source lines (runtime's managed_impl.cs,
+// openPortablePdb), so the unchanged second run of a package printed frames with no file:line and
+// failed runtime/debug's TestStack and runtime's TestTracebackElision and TestTracebackInlined. A
+// converter that rewrote every source on every run never published warm; one that keeps an
+// unchanged source's timestamp (incrementalWrites.go) does on every second run.
+//
+// The executable is the bundle target's one declared output, so removing it alone is enough,
+// measured from both states: symbols already deleted (72 copied back) and symbols present (0 copied,
+// 0 deleted). Nothing else in the directory is touched, so the fixtures and the Go sources staged
+// beside the host stay incremental; and the bundle costs nothing a warm publish can show (16.8 s
+// against 16.5 s, three publishes each).
+//
+// A host that cannot be removed is refused by name. The usual reason is an earlier run's host still
+// running it, and the publish would otherwise either fail on it or skip the bundle as before.
+func removePublishedTestHost(outputPath, testProject string) error {
+	host := publishedTestHostPath(outputPath, testProject)
+
+	if err := os.Remove(host); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return fmt.Errorf("the published test host cannot be removed before it is published again (is an earlier run's host still running?): %w", err)
+	}
+
+	return nil
 }
 
 // testPublishTimeoutFloor is the least time publishTestHost gives `dotnet publish`. -test-timeout is
