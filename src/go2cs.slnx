@@ -702,6 +702,7 @@
     <Project Path="tests/Behavioral/NamedArrayPointerConversion/NamedArrayPointerConversion.csproj" />
     <Project Path="tests/Behavioral/NamedArrayVsUnnamedCompare/NamedArrayVsUnnamedCompare.csproj" />
     <Project Path="tests/Behavioral/NamedArrayZeroValue/NamedArrayZeroValue.csproj" />
+    <Project Path="tests/Behavioral/NamedPointerReflectElem/NamedPointerReflectElem.csproj" />
     <Project Path="tests/Behavioral/NamedPointerReinterpret/NamedPointerReinterpret.csproj" />
     <Project Path="tests/Behavioral/NamedResultAddressEscape/NamedResultAddressEscape.csproj" />
     <Project Path="tests/Behavioral/NamedResultLambdaInfer/NamedResultLambdaInfer.csproj" />
