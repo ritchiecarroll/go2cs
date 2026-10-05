@@ -9354,7 +9354,13 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	// and deliberately NOT runtime.GOOS, which is the platform the converter binary happens to be
 	// running on. Those differ on every cross-target run, and reading the wrong one would scope a
 	// manifest by the wrong platform without any message saying so.
-	disclosures, outOfScopeDisclosures, disclosureNotes, disclosureErr := loadTestDisclosures(outputPath, goosOfTarget(options.targetPlatform))
+	// A third-party module row's manifest may live in the committed -module-disclosures tree instead of
+	// the output directory (moduleDisclosureRoot.go); the output directory's own manifest still wins.
+	manifestDir, manifestNote := resolveDisclosureManifestDir(outputPath, options.testModuleDisclosures, options.mainModulePath, options.mainModuleDir, inputPath)
+	if manifestNote != "" {
+		fmt.Println(manifestNote)
+	}
+	disclosures, outOfScopeDisclosures, disclosureNotes, disclosureErr := loadTestDisclosures(manifestDir, goosOfTarget(options.targetPlatform))
 	mintViolations, mintUnchecked := hostFatalMintViolations(outputPath, disclosures)
 	if len(mintViolations) > 0 {
 		// Refused BEFORE either child runs, so a bad entry cannot quietly withdraw a row that some
