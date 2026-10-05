@@ -252,6 +252,73 @@ public class TestingRuntimeTests
         CollectionAssert.Contains(patterns.ToArray(), "Wanted~Other");
     }
 
+    // Go's RunTests root writes to os.Stdout AS IT IS at the call, and only the process's stdout reaches
+    // test2json. testify's TestSuiteLogging redirects os.Stdout to a pipe, runs a suite with a failing and
+    // a passing test that both log, and reads its own output back: the failure (with its log line) is
+    // there, a passing test's log line only under -v, and go test -json reports none of the suite.
+    [TestMethod]
+    public void RunTestsWritesToARedirectedStdoutAndReportsNothingToTheRun()
+    {
+        (string captured, string results) = RunTestsUnderRedirectedStdout([]);
+
+        StringAssert.Contains(captured, "--- FAIL: TestOuter/Suite");
+        StringAssert.Contains(captured, "--- FAIL: TestOuter/Suite/Fails");
+        StringAssert.Contains(captured, "LOGFAIL");
+        Assert.IsFalse(captured.Contains("LOGPASS"), $"a passing test's log printed without -v:\n{captured}");
+        Assert.IsFalse(results.Contains("TestOuter/Suite"), "the redirected suite reached the run");
+
+        (string verboseCaptured, string verboseResults) = RunTestsUnderRedirectedStdout(["-v"]);
+
+        StringAssert.Contains(verboseCaptured, "=== RUN   TestOuter/Suite");
+        StringAssert.Contains(verboseCaptured, "LOGFAIL");
+        StringAssert.Contains(verboseCaptured, "LOGPASS");
+        Assert.IsFalse(verboseResults.Contains("TestOuter/Suite"), "the redirected suite reached the run under -v");
+    }
+
+    private static (string Captured, string Results) RunTestsUnderRedirectedStdout(string[] flags)
+    {
+        string resultPath = Path.Combine(Path.GetTempPath(), $"go2cs-results-{Guid.NewGuid():N}.json");
+        string capturePath = Path.Combine(Path.GetTempPath(), $"go2cs-stdout-{Guid.NewGuid():N}.txt");
+
+        try
+        {
+            TestRegistry registry = new("runtime/runtests-stdout", []);
+            registry.Add("TestOuter", _ =>
+            {
+                ж<os_package.File> saved = os_package.Stdout;
+                (ж<os_package.File> file, error err) = os_package.Create(capturePath);
+                Assert.IsNull(err);
+                os_package.Stdout = file;
+
+                try
+                {
+                    testing_package.RunTests((_, _) => (true, null!), new testing_package.InternalTest[]
+                    {
+                        new(Name: "TestOuter/Suite", F: t =>
+                        {
+                            t.Value.Run("Fails", c => { c.Log("LOGFAIL"); c.Error("expected"); });
+                            t.Value.Run("Passes", c => c.Log("LOGPASS"));
+                        }),
+                    }.slice());
+                }
+                finally
+                {
+                    os_package.Stdout = saved;
+                    file.Close();
+                }
+            }, "runtime_test.go", 1);
+
+            Assert.AreEqual(0, TestHost.Run(registry, [.. flags, "--result", resultPath]));
+
+            return (File.ReadAllText(capturePath), File.ReadAllText(resultPath));
+        }
+        finally
+        {
+            File.Delete(resultPath);
+            File.Delete(capturePath);
+        }
+    }
+
     [TestMethod]
     public void CrossGoroutineFatalRecordsInfrastructureFailureWithoutKillingProcess()
     {

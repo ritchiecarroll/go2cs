@@ -104,7 +104,15 @@ public static partial class testing_package
         foreach (var (_, test) in tests)
             list.Add((test.Name.ToString(), test.F));
 
-        bool ok = runner.RunTests(list, (pattern, name) => matchString(pattern, name).Item1, out bool ran);
+        // Go's root writes to os.Stdout as it is NOW. Redirected by the program (a pipe, a file: anything
+        // but the process's own stdout, which os names /dev/stdout), the root's output goes there and none
+        // of it reaches the run, as none of Go's reaches test2json.
+        Action<string>? redirected = null;
+
+        if (os_package.Stdout is ж<os_package.File> stdout && stdout.Name().ToString() != "/dev/stdout")
+            redirected = text => stdout.Write(System.Text.Encoding.UTF8.GetBytes(text).slice());
+
+        bool ok = runner.RunTests(list, (pattern, name) => matchString(pattern, name).Item1, redirected, out bool ran);
 
         if (!ran)
             Console.Error.WriteLine("testing: warning: no tests to run");

@@ -83,6 +83,9 @@ public sealed class TestRunner
     // -test.list was given: M.Run lists instead of running.
     internal bool Listing => m_options.ListPattern.Length > 0;
 
+    // -test.v (or --json, which implies it, as `go test -json` passes -test.v): Go's chatty output.
+    internal bool Verbose => m_options.Verbose;
+
     internal string WorkingDirectory { get; }
 
     /// <summary>
@@ -206,11 +209,19 @@ public sealed class TestRunner
     /// A <c>testing.RunTests</c> root: Go's fresh test context, which owns its own <c>-test.parallel</c>
     /// slots and the names its top-level tests have taken.
     /// </summary>
-    internal sealed class NestedRoot(int parallel)
+    /// <remarks>
+    /// Go's root writes to <c>os.Stdout</c> AS IT IS when RunTests is called (<c>w: os.Stdout</c>), and
+    /// only output on the process's stdout reaches test2json. So while the program has redirected it
+    /// (testify's TestSuiteLogging pipes it to read its own suite's log lines), <see cref="Redirected"/>
+    /// writes Go's text output to that file and the root reports nothing to the run.
+    /// </remarks>
+    internal sealed class NestedRoot(int parallel, Action<string>? redirected)
     {
         internal SemaphoreSlim ParallelLimiter { get; } = new(parallel);
 
         internal Dictionary<string, int> Names { get; } = new(StringComparer.Ordinal);
+
+        internal Action<string>? Redirected { get; } = redirected;
     }
 
     /// <summary>
@@ -219,7 +230,7 @@ public sealed class TestRunner
     /// subtest, selected by -run/-skip through the caller's matcher, serial until it calls Parallel,
     /// the parked ones released when the list is done -- and the result is whether all of them passed.
     /// </summary>
-    internal bool RunTests(IReadOnlyList<(string Name, Action<ж<testing_package.T>> F)> tests, Func<string, string, bool> matchString, out bool ran)
+    internal bool RunTests(IReadOnlyList<(string Name, Action<ж<testing_package.T>> F)> tests, Func<string, string, bool> matchString, Action<string>? redirectedStdout, out bool ran)
     {
         TestExecution? caller = TestExecution.Current;
         string source = caller?.Source ?? "";
@@ -232,7 +243,7 @@ public sealed class TestRunner
             if (count > 0 && !ran)
                 break;
 
-            NestedRoot root = new(m_options.Parallel);
+            NestedRoot root = new(m_options.Parallel, redirectedStdout);
             List<TestExecution> started = [];
             List<TestExecution> parallel = [];
 
