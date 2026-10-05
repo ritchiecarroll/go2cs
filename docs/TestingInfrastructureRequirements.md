@@ -157,6 +157,21 @@ per package, enforce timeouts, aggregate results, and return nonzero if any requ
 has an unexpected exclusion. It shall be able to emit a machine-readable result file and a common CI
 format such as JUnit XML or TRX.
 
+The host's command line is the converted program's `os.Args`, so the pipeline launches it with the
+arguments `go test -json` gives a Go test binary, and nothing else:
+
+```text
+<host> -test.v=test2json -test.timeout=20m0s [-test.run=<filter>] [-test.skip=<pattern>]
+```
+
+`-test.v=test2json` is the host's JSON mode (`--json` remains an accepted spelling). A package that
+reads its own arguments then sees what Go's binary sees: cobra's `Execute` with no `SetArgs` parses
+`os.Args[1:]`, and pflag skips every `-test.` flag. The pipeline's result and JUnit paths have no Go
+flag, so they arrive in the environment as `GO2CS_TEST_RESULT` and `GO2CS_TEST_JUNIT`. The host reads
+them once and removes them, so a test that re-executes the host does not write into the parent's
+files. An explicit `--result` or `--junit` argument still wins, which is how the in-process test tier
+passes them. `os.Args[0]` stays the real executable path, because tests re-execute themselves through it.
+
 ### 5.2 Isolation and fixtures
 
 Each package host shall run in its own process and an isolated working directory. The working tree shall
