@@ -25,6 +25,13 @@ internal static class PointerTypeTemplate
 
                 public ref {{targetTypeName}} Value => ref m_value.Value;
 
+                // The box's nil-check-free slot. The converter reads a dereference whose RESULT is
+                // itself reference-like (a map, slice, pointer...) through `ValueSlot` rather than
+                // `Value`, since Go's `*pp` may legally yield nil (convStarExpr). A NAMED pointer type
+                // is this wrapper rather than the box, so it forwards the same slot: without it
+                // `len(*p)` with `type P *M` was CS1061 at every such dereference.
+                public ref {{targetTypeName}} ValueSlot => ref m_value.ValueSlot;
+
                 public bool IsNull => m_value is null || m_value.IsNull;
 
                 // STRUCTURAL nil — pointer identity and the reflection bridge's nil probes; the
