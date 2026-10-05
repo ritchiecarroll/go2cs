@@ -1324,9 +1324,11 @@ foreach ($row in $linuxRows) {
 # them this count is all there is: a claim padded by an unrelated in-scope pin passes, exactly as
 # crypto/tls's windows claim does here.
 function Test-DisclosureInScope {
-    # RED: a stub, so the arms below run and fail; the green commit implements it.
     param($Entry, [string] $Platform)
-    return $true
+
+    if (-not $Platform -or $null -eq $Entry.platforms) { return $true }
+    $platforms = @($Entry.platforms)
+    return ($platforms.Count -eq 0 -or $platforms -ccontains $Platform)
 }
 
 function Get-DisclosureCeiling {
@@ -1397,15 +1399,23 @@ foreach ($row in $rows) {
 # PARENT of one (a parent of pinned subtests is a disclosed verdict that is not pinned itself; see
 # `pins < Disclosed` above). Row-driven, as the ceiling is: a page with no roster row is not read.
 function Get-ProofPageDisclosedNames {
-    # RED: a stub, so the arms below run and fail; the green commit implements it.
     param([string] $Path)
-    return @()
+
+    $names = New-Object System.Collections.Generic.List[string]
+    foreach ($line in [System.IO.File]::ReadAllLines($Path)) {
+        if ($line -cmatch '^\| `([^`]+)` \| [^|]+ \| [^|]*\[disclosed\]') { $names.Add($Matches[1]) }
+    }
+    return $names.ToArray()
 }
 
 function Get-UncoveredDisclosedNames {
-    # RED: a stub, so the arms below run and fail; the green commit implements it.
     param([string[]] $Disclosed, [string[]] $Pins)
-    return @()
+
+    return @(@($Disclosed) | Where-Object {
+        $name = $_
+        -not (@($Pins) -ccontains $name) -and
+            @(@($Pins) | Where-Object { $_.StartsWith($name + '/', [System.StringComparison]::Ordinal) }).Count -eq 0
+    })
 }
 
 $proofPageDir = Join-Path (Join-Path (Split-Path $PSScriptRoot -Parent) 'docs') 'validation/current'
