@@ -26178,4 +26178,30 @@ Nine entries, most important first. The owner ruled at 10:05 that 1.24.13.4 wait
 
 **2026-10-04, INSTRUMENT (COORD):** four lessons from seating the train and from landing the one before it. (1) A PAIRWISE 3-way of every pushed seat against every other, and against O's union, run BEFORE the freeze, found three seat-by-seat conflicts that no lane's own gate could see, because each seat is clean on the base it was cut on. Two were position-map rows regenerating ONE `GoPositionMap` line (`g-method-value-fm-record-r3` against `c2-elseif-position-record-r2` in 5 `package_info.cs`; later go-cmp L against the else-if row in `reflect/package_info.cs`), and one was two inserts at one anchor (the sibling-name row against the `go.go` row in `importAliasOperations.go`). Each was ruled as a re-cut STACKED on the other seat, the shared line or block carrying both changes. The first pass (11:30) also found one seat against O's union itself (`PackageTests/README.md`). After the first two re-cuts the pass read 0 conflicts in 156 pairs over 21 seats and O's union (13:27); the third conflict arrived with the 23rd seat (14:05). (2) PLACEMENT keeps rows single-parent: two seats that each add a section at the tail of one doc (`shadowing.md`: the sort seat and the `go.go` seat) conflict, and moving one section to a non-tail anchor clears it with no merge-commit base. (3) The i7's git 2.35 has no `merge-tree --write-tree`: the pairwise instrument is a read-tree script, and the pre-map ran on a newer git's real ort merge. (4) A seat's `-tests` footprint is its own reading: TRAIN O's test-source refresh moved 18 committed test sources (explicit lambda result types, a bare `select();`, a cast on an untyped constant loop bound, two lifted type names, a byte cast around a shift) for seats whose rows declared no corpus footprint, because the fixup derives what the union emits from the `-stdlib` conversion only; and TRAIN O's battery read ONE finding class, an untracked `src/core/math/bits/.editorconfig` that a `-tests` run writes and no seat had committed, which this train's `claude/p2-test-warning-entries` (`8d89695095`) commits for all three flavours.
 
+## 2026-10-05 — G: a conversion through a type written over ANOTHER package's named basic, in the two directions seat A does not cover — RECORDED AND DEFERRED (COORD)
+
+Seat A (`claude/g-foreign-defined-hop`, `82c3b347dc`, the train after P) makes a constant or basic value converted INTO a
+type the converting package declares over another package's named basic hop through that base:
+`((ΔLevel)(logrus.Level)0)`. Its battery measured two neighbouring directions it does not cover, each CS0030, and
+COORD ruled them record-and-defer: no seat, because neither the standard library nor any measured module reaches one.
+
+1. **INTO a type ANOTHER package declares.** `wraplib.Wrapped(2)` from `main`, with `type Wrapped levellib.Level` in
+   `wraplib`. `foreignWrittenBase` reads `packageTypeSpecRHS`, which holds only the converting package's own
+   declarations, so the cast stays direct and is two user-defined conversions. A source exists without a new metadata
+   field: the dependency's own syntax (`importedPackageSources`, as `foreignDerivedTypeAliases` already uses).
+2. **FROM such a type to its basic.** `uint32(w)` with `w wraplib.Wrapped`, and `int64(Dur(5))` with
+   `type Dur time.Duration`: the wrapper converts only to its named base, so the basic needs the reverse hop.
+
+**Repro** (both directions, 1 site each): a module with `levellib` (`type Level uint32`), `wraplib`
+(`import "…/levellib"; type Wrapped levellib.Level; func (w Wrapped) Raw() uint32 { return uint32(w) }`) and a `main`
+calling `wraplib.Wrapped(2).Raw()`.
+
+**Census** (go/types over `std` with tests; the instrument's control is that repro, which it reads as exactly 1 INTO
+and 1 FROM): INTO a foreign-owned foreign-written type, 0 on windows, linux and darwin; FROM such a type to a basic,
+0 on all three. No first-wave module measured so far (testify, logrus, cobra, pflag, x/sync, objx, yaml.v3) reaches
+either.
+
+**Trigger:** the first module that reaches one. If a first-wave module or a Target Atlas top row does, it becomes a
+seat that day.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
