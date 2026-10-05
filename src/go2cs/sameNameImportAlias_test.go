@@ -39,12 +39,19 @@ import (
 	bfoo "example.com/samename/b/foo"
 )
 
+type holder struct {
+	pick func(int) bfoo.Kind
+}
+
 func main() {
 	var x afoo.Alias = afoo.Inner{N: 1}
 	var y bfoo.Alias = bfoo.Other{S: "s"}
 	z := afoo.Alias{N: 2}
 	var ka afoo.Kind = afoo.S{}.Kind()
-	fmt.Println(x.N, y.S, z.N, ka)
+	var conv func(afoo.Kind) bfoo.Kind = func(k afoo.Kind) bfoo.Kind { return bfoo.Kind(fmt.Sprint(k)) }
+	h := holder{pick: func(int) bfoo.Kind { return bfoo.S{}.Kind() }}
+	kb := bfoo.Kind("x")
+	fmt.Println(x.N, y.S, z.N, ka, conv(afoo.Kind(3)), h.pick(0), kb)
 }
 `)
 
@@ -84,6 +91,20 @@ func main() {
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("missing %q in:\n%s", want, mainCs)
+		}
+	}
+
+	// The FIFTH arm: a reference that takes the qualified fallback spells the TARGET's member, collision
+	// rename included, in every position -- a func type's parameter and result (a local and a struct
+	// field) and a conversion. Kind is renamed ΔKind in both packages, so the Go name `Kind` must not
+	// survive as a type reference anywhere (logrus' hooks/slog test: `Func<…, slog.Level>`, CS0426).
+	if strings.Contains(mainCs, "foo.Kind") {
+		t.Errorf("a same-named import's renamed Kind is still spelled by its Go name in:\n%s", mainCs)
+	}
+
+	for _, want := range []string{"Func<nint, bfoo.ΔKind> pick", "((afoo.ΔKind)3)"} {
+		if !strings.Contains(mainCs, want) {
+			t.Errorf("missing the renamed member %q in:\n%s", want, mainCs)
 		}
 	}
 

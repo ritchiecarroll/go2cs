@@ -438,6 +438,15 @@ func (v *Visitor) aliasedElementTypeName(t types.Type) string {
 			}
 
 			if exists {
+				// Two same-named imports both publish this key -- hooks/slog's external test
+				// imports log/slog AND logrus' hooks/slog, both `package slog`, both renaming a
+				// method-colliding `Level` to ΔLevel -- so the short name cannot say which is
+				// meant, and getAliasedTypeName leaves it unresolved (`Func<…, slog.Level>`,
+				// CS0426). This element knows its package: take that package's own target.
+				if target, ok := ambiguousImportedTypeAliasTarget(plainKey, pkg); ok {
+					return target
+				}
+
 				return getAliasedTypeName(plainKey)
 			}
 		}
