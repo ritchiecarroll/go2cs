@@ -1003,6 +1003,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckLocalFunctionEmission() => CheckTarget("LocalFunctionEmission");
 
     [TestMethod]
+    public void CheckLocalNamedPointerConversion() => CheckTarget("LocalNamedPointerConversion");
+
+    [TestMethod]
     public void CheckLocalNamedTypeDecls() => CheckTarget("LocalNamedTypeDecls");
 
     [TestMethod]

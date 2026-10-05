@@ -615,6 +615,7 @@
     <Project Path="tests/Behavioral/LinknameVarPullLib/LinknameVarPullLib.csproj" />
     <Project Path="tests/Behavioral/LinuxSpawnBasics/LinuxSpawnBasics.csproj" />
     <Project Path="tests/Behavioral/LiteralFloatConstFold/LiteralFloatConstFold.csproj" />
+    <Project Path="tests/Behavioral/LocalNamedPointerConversion/LocalNamedPointerConversion.csproj" />
     <Project Path="tests/Behavioral/LocalNamedTypeDecls/LocalNamedTypeDecls.csproj" />
     <Project Path="tests/Behavioral/LocalFunctionEmission/LocalFunctionEmission.csproj" />
     <Project Path="tests/Behavioral/LocalShadowsEmbedHopType/LocalShadowsEmbedHopType.csproj" />
