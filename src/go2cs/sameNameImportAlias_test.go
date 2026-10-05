@@ -43,6 +43,8 @@ type holder struct {
 	pick func(int) bfoo.Kind
 }
 
+type D afoo.Alias
+
 func main() {
 	var x afoo.Alias = afoo.Inner{N: 1}
 	var y bfoo.Alias = bfoo.Other{S: "s"}
@@ -51,7 +53,8 @@ func main() {
 	var conv func(afoo.Kind) bfoo.Kind = func(k afoo.Kind) bfoo.Kind { return bfoo.Kind(fmt.Sprint(k)) }
 	h := holder{pick: func(int) bfoo.Kind { return bfoo.S{}.Kind() }}
 	kb := bfoo.Kind("x")
-	fmt.Println(x.N, y.S, z.N, ka, conv(afoo.Kind(3)), h.pick(0), kb)
+	d := D{N: 5}
+	fmt.Println(x.N, y.S, z.N, ka, conv(afoo.Kind(3)), h.pick(0), kb, d.N)
 }
 `)
 
@@ -106,6 +109,13 @@ func main() {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("missing the renamed member %q in:\n%s", want, mainCs)
 		}
+	}
+
+	// A defined type over an ambiguous alias renders its underlying through the FULLY qualified
+	// renderer (getFullyQualifiedTypeName's twin of the alias-qualified arm): its [GoType] must name
+	// a/foo's target, not the shared key `foo.Alias` that no `global using` declares.
+	if want := `[GoType("global::go.example.com.samename.a.foo_package.Inner")] partial struct D;`; !strings.Contains(mainCs, want) {
+		t.Errorf("missing the fully qualified alias target %q in:\n%s", want, mainCs)
 	}
 
 	// Both imports are renamed, so each package's types render through its own alias; supplying the
