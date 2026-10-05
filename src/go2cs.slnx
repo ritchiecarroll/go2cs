@@ -499,6 +499,7 @@
     <Project Path="tests/Behavioral/FuncLitStringConcatReturn/FuncLitStringConcatReturn.csproj" />
     <Project Path="tests/Behavioral/FuncLitUntypedConstReturn/FuncLitUntypedConstReturn.csproj" />
     <Project Path="tests/Behavioral/FuncTypeParam/FuncTypeParam.csproj" />
+    <Project Path="tests/Behavioral/FuncValueMethodClash/FuncValueMethodClash.csproj" />
     <Project Path="tests/Behavioral/FuncVsMethodOverload/FuncVsMethodOverload.csproj" />
     <Project Path="tests/Behavioral/GenericArrayConstraint/GenericArrayConstraint.csproj" />
     <Project Path="tests/Behavioral/GenericAtomicPointerField/GenericAtomicPointerField.csproj" />
