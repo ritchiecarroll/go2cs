@@ -2002,6 +2002,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckStatLayoutTruth() => CheckTarget("StatLayoutTruth");
 
     [TestMethod]
+    public void CheckStatementTableFuncNames() => CheckTarget("StatementTableFuncNames");
+
+    [TestMethod]
     public void CheckStdLibInternalAbi() => CheckTarget("StdLibInternalAbi");
 
     [TestMethod]

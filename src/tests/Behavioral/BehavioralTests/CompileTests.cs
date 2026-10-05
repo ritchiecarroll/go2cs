@@ -2002,6 +2002,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckStatLayoutTruth() => CheckTarget("StatLayoutTruth");
 
     [TestMethod]
+    public void CheckStatementTableFuncNames() => CheckTarget("StatementTableFuncNames");
+
+    [TestMethod]
     public void CheckStdLibInternalAbi() => CheckTarget("StdLibInternalAbi");
 
     [TestMethod]
