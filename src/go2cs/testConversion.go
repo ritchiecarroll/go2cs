@@ -7243,6 +7243,13 @@ type testComparison struct {
 	// disclosed tests have no subtests, which is all of them before crypto/tls's TestBogoSuite.
 	Withdrawn []string `json:"withdrawn,omitempty"`
 
+	// RuntimeDeclared names the top-level tests no declaration accounts for that BOTH sides ran and
+	// reported a verdict for: a testing.RunTests list whose entries are named outside their caller
+	// (testify's TestSuiteRecoverPanicInBeforeTest). They are compared like declared tests and counted
+	// here apart from them, so a reader sees how many tests a row declared at run time. A name only Go
+	// reported is still a census gap (F6).
+	RuntimeDeclared []string `json:"runtimeDeclared,omitempty"`
+
 	// DisclosedRecords publishes, for every disclosed test whose C# terminal event carried a record
 	// list, the records OUTSIDE its signature. A record-count pin catches an extra or a missing
 	// record but not a substitution at an unchanged count, so those records are printed at every
@@ -9162,6 +9169,42 @@ func manifestCensusGaps(goResults map[string]string, manifest testManifest) []st
 	return result
 }
 
+// admitRuntimeDeclared splits the census gaps into those the converted host ALSO ran -- it reported a
+// verdict under the very same name -- and the rest. A testing.RunTests list runs its entries as
+// top-level tests under whatever names it gives them, so testify's suite tests report
+// TestSuiteRecoverPanicInBeforeTest, which no declaration accounts for; both sides ran it, so it is a
+// test the row declared at run time, not one discovery missed. A name only Go reported stays a gap: F6
+// guards a test our side never ran.
+func admitRuntimeDeclared(gaps []string, csResults map[string]string) (remaining []string, admitted []string) {
+	for _, gap := range gaps {
+		if _, ran := csResults[gap]; ran {
+			admitted = append(admitted, gap)
+		} else {
+			remaining = append(remaining, gap)
+		}
+	}
+
+	return remaining, admitted
+}
+
+// addRuntimeDeclaredResults adds back, from the unfiltered results, every row under an admitted
+// runtime-declared top-level test, which the manifest-driven filter removed for want of a declaration.
+func addRuntimeDeclaredResults(filtered map[string]string, raw map[string]string, admitted []string) {
+	if len(admitted) == 0 {
+		return
+	}
+
+	set := hashset.NewHashSet(admitted)
+
+	for name, status := range raw {
+		topLevelName, _, _ := strings.Cut(name, "/")
+
+		if set.Contains(topLevelName) {
+			filtered[name] = status
+		}
+	}
+}
+
 // excludedDeclarations lists every disclosed-unsupported declaration the comparison excludes
 // (F2/F3): benchmarks, fuzz targets, Examples, and capability-blocked tests are filtered from
 // BOTH sides of the oracle, so the comparison record must say what was excluded and why —
@@ -9372,6 +9415,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	csRecords := terminalTestRecords(csOutput)
 	var manifest testManifest
 	var censusGaps []string
+	var runtimeDeclared []string
 	var gated []capabilityGatedDeclaration
 	manifestData, manifestErr := os.ReadFile(filepath.Join(outputPath, testManifestFileName))
 	if manifestErr == nil {
@@ -9380,13 +9424,16 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 			// F6 census gate: computed over the RAW Go results BEFORE the manifest-driven
 			// filtering below — the filter shares the manifest with discovery, so only the
 			// unfiltered stream can expose a declaration discovery missed.
-			censusGaps = manifestCensusGaps(goResults, manifest)
+			censusGaps, runtimeDeclared = admitRuntimeDeclared(manifestCensusGaps(goResults, manifest), csResults)
 			// Same window, same reason: the rows a capability gate withdraws exist only in the
 			// unfiltered stream, and the proof page publishes them so the matched count below
 			// never absorbs a subtest silently.
 			gated = capabilityGatedDeclarations(goResults, manifest)
+			rawGoResults, rawCSResults := goResults, csResults
 			goResults = eligibleTerminalTestResults(goResults, manifest)
 			csResults = eligibleTerminalTestResults(csResults, manifest)
+			addRuntimeDeclaredResults(goResults, rawGoResults, runtimeDeclared)
+			addRuntimeDeclaredResults(csResults, rawCSResults, runtimeDeclared)
 		}
 	}
 	pairAddressVariantNames(goResults, csResults, csOutputs, csRecords)
@@ -9415,7 +9462,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	result := testComparison{
 		Package: comparisonRecordPackage(manifest, inputPath), Status: status, Go: goResults, CSharp: csResults,
 		Matched: true, Skipped: []string{}, Disclosed: []string{}, Excluded: excludedDeclarations(manifest), Errors: []string{},
-		Gated: gated, Withdrawn: []string{}, Environment: environment,
+		Gated: gated, Withdrawn: []string{}, RuntimeDeclared: runtimeDeclared, Environment: environment,
 	}
 	if disclosureErr != nil {
 		result.Matched = false
