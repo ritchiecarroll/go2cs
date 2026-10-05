@@ -145,6 +145,7 @@
     <None Include="$(MSBuildThisFileDirectory)dynamicTypeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)embeddedAssets_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embeddedTemplates.go" />
+    <None Include="$(MSBuildThisFileDirectory)emptyInterfaceAssert_test.go" />
     <None Include="$(MSBuildThisFileDirectory)emptyInterfaceFuncLitPositions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)emptyStructConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)elseIfPositionRecord_test.go" />
