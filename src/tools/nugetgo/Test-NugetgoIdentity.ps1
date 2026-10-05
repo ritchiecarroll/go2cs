@@ -144,5 +144,63 @@ Check 'nugetgo-pack.ps1 resolves the module license through Find-NugetgoModuleLi
 Check 'nugetgo-pack.ps1 packs the license under its own name' ($pack.Contains('<PackageLicenseFile>$(& $esc $licenseName)</PackageLicenseFile>') -and
     $pack.Contains('<None Include="$(& $esc $licenseName)" Pack="true" PackagePath="" />') -and -not $pack.Contains('<None Include="LICENSE" Pack="true"')) 'the pack project still names LICENSE literally'
 
+Write-Host 'B6 -- the packed assemblies'' copyright (owner ruling 2026-10-04: the upstream holder)'
+# Every expected value is a LITERAL. The license texts are the fixture modules' own Copyright lines.
+$scaffold = 'go2cs scaffolding: Copyright (c) 2018-2026 The go2cs Authors'
+$copyRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('nugetgo-copyright-' + [guid]::NewGuid().ToString('N'))
+function Write-License([string]$dir, [string]$name, [string[]]$lines) {
+    $d = New-Item -ItemType Directory -Force (Join-Path $copyRoot $dir)
+    $path = Join-Path $d $name
+    [System.IO.File]::WriteAllText($path, (($lines + '') -join "`n"))
+    return $path
+}
+try {
+    # github.com/google/uuid v1.6.0: one line, a comma inside the holder, and a lower-case "copyright notice" clause.
+    $r = Get-NugetgoAssemblyCopyright -LicenseFile (Write-License 'uuid' 'LICENSE' @('Copyright (c) 2009,2014 Google Inc. All rights reserved.', '',
+        'Redistribution and use in source and binary forms, with or without', 'modification, are permitted provided that the following conditions are', 'met:', '',
+        '   * Redistributions of source code must retain the above', 'copyright notice, this list of conditions and the following disclaimer.'))
+    Check 'one upstream line (uuid): the holder, then the scaffolding line; the "copyright notice" clause is not a line' ($r.Copyright -ceq "Copyright (c) 2009,2014 Google Inc. All rights reserved.; $scaffold" -and -not $r.Skip) "got '$($r.Copyright)' skip $($r.Skip)"
+    # github.com/golang-jwt/jwt/v5 v5.3.1: TWO Copyright lines, kept in file order.
+    $r = Get-NugetgoAssemblyCopyright -LicenseFile (Write-License 'jwt' 'LICENSE' @('Copyright (c) 2012 Dave Grijalva', 'Copyright (c) 2021 golang-jwt maintainers', '',
+        'Permission is hereby granted, free of charge, to any person obtaining a copy'))
+    Check 'two upstream lines (jwt/v5): both, in file order, then the scaffolding line' ($r.Copyright -ceq "Copyright (c) 2012 Dave Grijalva; Copyright (c) 2021 golang-jwt maintainers; $scaffold") "got '$($r.Copyright)'"
+    # github.com/joho/godotenv v1.5.1 spells its file LICENCE: found by the shared lookup, read the same way.
+    [void](Write-License 'godotenv' 'LICENCE' @('Copyright (c) 2013 John Barton', '', 'MIT License'))
+    $found = Find-NugetgoModuleLicense -ModuleDir (Join-Path $copyRoot 'godotenv')
+    $r = if ($found.Path) { Get-NugetgoAssemblyCopyright -LicenseFile $found.Path } else { $null }
+    Check 'a LICENCE file (godotenv): found under its own name and read' ($found.Name -ceq 'LICENCE' -and $r.Copyright -ceq "Copyright (c) 2013 John Barton; $scaffold") "got Name '$($found.Name)', '$($r.Copyright)'"
+    # github.com/ritchiecarroll/hashset: its holder IS The go2cs Authors, so the template's value stands.
+    $r = Get-NugetgoAssemblyCopyright -LicenseFile (Write-License 'hashset' 'LICENSE' @('MIT License', '', 'Copyright (c) 2021-2026 The go2cs Authors'))
+    Check 'every line names The go2cs Authors (hashset): skipped, the template''s value stands' ($r.Skip -and $null -eq $r.Copyright -and $r.Reason -like '*The go2cs Authors*') "got skip $($r.Skip), '$($r.Copyright)', reason '$($r.Reason)'"
+    $r = Get-NugetgoAssemblyCopyright -LicenseFile (Write-License 'mixed' 'LICENSE' @('Copyright (c) 2021-2026 The go2cs Authors', 'Copyright (c) 2024 Someone Else'))
+    Check 'a go2cs line beside another holder: not skipped, both lines kept' (-not $r.Skip -and $r.Copyright -ceq "Copyright (c) 2021-2026 The go2cs Authors; Copyright (c) 2024 Someone Else; $scaffold") "got skip $($r.Skip), '$($r.Copyright)'"
+    $r = Get-NugetgoAssemblyCopyright -LicenseFile (Write-License 'nocopy' 'LICENSE' @('Public domain.'))
+    Check 'a license with no Copyright line: refused by name' ($null -eq $r.Copyright -and -not $r.Skip -and $r.Reason -like '*carries no Copyright line*') "got '$($r.Copyright)' skip $($r.Skip) reason '$($r.Reason)'"
+
+    # The escaping case: a semicolon, a comma and every MSBuild or XML special character survive as one property value.
+    $hostile = "Copyright (c) 2024 Alpha; Beta, Gamma & Delta <x> 100% `$(Evil) @(Items) it's *?; $scaffold"
+    $targets = New-NugetgoAssemblyMetadataTargets -ModulePath 'example.com/mod' -Copyright $hostile -Company 'go2cs conversion' -Authors 'go2cs conversion'
+    $xml = $null; try { $xml = [xml]$targets } catch { }
+    Check 'the generated Directory.Build.targets is well-formed XML carrying the pack''s marker' ($null -ne $xml -and $null -ne $xml.Project -and $targets.Contains('<!-- Generated by nugetgo-pack.ps1. -->') -and $targets.Contains((Get-NugetgoTargetsMarker))) 'not XML, or no marker'
+    Check 'a semicolon, a comma and MSBuild''s special characters are escaped as one literal value' ($targets.Contains('<Copyright>Copyright (c) 2024 Alpha%3B Beta, Gamma &amp; Delta &lt;x&gt; 100%25 %24(Evil) %40(Items) it%27s %2A%3F%3B go2cs scaffolding: Copyright (c) 2018-2026 The go2cs Authors</Copyright>')) $targets
+    Check 'company and authors are the given value' ($targets.Contains('<Company>go2cs conversion</Company>') -and $targets.Contains('<Authors>go2cs conversion</Authors>')) $targets
+    Check 'it imports the output root''s Directory.Build.targets first (MSBuild imports only the nearest one)' ($targets.Contains('<NugetgoParentBuildTargets>$([MSBuild]::GetPathOfFileAbove(''Directory.Build.targets'', ''$(MSBuildThisFileDirectory)../''))</NugetgoParentBuildTargets>') -and
+        $targets.Contains('<Import Project="$(NugetgoParentBuildTargets)" Condition="''$(NugetgoParentBuildTargets)'' != ''''" />')) $targets
+    Check 'it applies to the packed projects only: a library, never a converted test project' ($targets.Contains("<PropertyGroup Condition=`"'`$(OutputType)' == 'Library' and !`$(MSBuildProjectName.EndsWith('.tests'))`">")) $targets
+}
+finally { Remove-Item -Recurse -Force -LiteralPath $copyRoot -ErrorAction SilentlyContinue }
+
+# The pack script writes the targets beside the packed projects, shares the nupkg's Copyright extraction, refuses a
+# foreign file, and reads the attribute back from each dll taken out of the nupkg.
+Check 'nugetgo-pack.ps1 writes the assembly copyright beside the packed projects and reads it back from each dll' (
+    $pack.Contains('Get-NugetgoAssemblyCopyright -LicenseFile $LicenseFile') -and $pack.Contains('$moduleTargets = Join-Path $moduleSrc ''Directory.Build.targets''') -and
+    $pack.Contains('New-NugetgoAssemblyMetadataTargets -ModulePath $ModulePath') -and $pack.Contains('was not written by nugetgo-pack.ps1') -and
+    $pack.Contains('$copyright = (@(Get-NugetgoCopyrightLines -LicenseFile $LicenseFile) -join ''; '')') -and
+    $pack.Contains('[System.Diagnostics.FileVersionInfo]::GetVersionInfo($dll)')) 'the pack script does not wire the assembly copyright end to end'
+# The nupkg's own Copyright field takes the same MSBuild escaping (XML escaping alone let MSBuild expand a '$(...)' or
+# '@(...)' inside a holder string), and the read-back holds it to the license file's lines exactly.
+Check 'nugetgo-pack.ps1 escapes the nupkg Copyright for MSBuild and reads it back exactly' ($pack.Contains('<Copyright>$(ConvertTo-NugetgoMSBuildLiteral $copyright)</Copyright>') -and
+    $pack.Contains('if ($md.copyright -cne $copyright)')) 'the nupkg Copyright is not MSBuild-escaped or not read back'
+
 Write-Host "ran $ran, failed $failed"
 exit $failed

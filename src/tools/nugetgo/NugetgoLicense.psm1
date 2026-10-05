@@ -43,4 +43,13 @@ function Find-NugetgoModuleLicense {
     [pscustomobject]@{ Name = $null; Path = $null; Reason = "no license file in $ModuleDir (looked for $($script:NugetgoLicenseNames -join ', '))" }
 }
 
-Export-ModuleMember -Function Get-NugetgoLicenseNames, Find-NugetgoModuleLicense
+# RED: the packed assemblies' copyright (owner ruling 2026-10-04) is not implemented yet. These stubs let the arms
+# in Test-NugetgoIdentity.ps1 run and fail; the green commit replaces them.
+function Get-NugetgoCopyrightLines { param([string]$LicenseFile) @() }
+function Get-NugetgoAssemblyCopyright { param([string]$LicenseFile) [pscustomobject]@{ Copyright = $null; Skip = $false; Reason = $null } }
+function ConvertTo-NugetgoMSBuildLiteral([string]$Value) { $Value }
+function Get-NugetgoTargetsMarker { '' }
+function New-NugetgoAssemblyMetadataTargets { param([string]$ModulePath, [string]$Copyright, [string]$Company, [string]$Authors) '' }
+
+Export-ModuleMember -Function Get-NugetgoLicenseNames, Find-NugetgoModuleLicense, Get-NugetgoCopyrightLines, Get-NugetgoAssemblyCopyright,
+    ConvertTo-NugetgoMSBuildLiteral, Get-NugetgoTargetsMarker, New-NugetgoAssemblyMetadataTargets
