@@ -1516,6 +1516,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckParenthesizedConcatContext() => CheckTarget("ParenthesizedConcatContext");
 
     [TestMethod]
+    public void CheckParenthesizedTypeAssertion() => CheckTarget("ParenthesizedTypeAssertion");
+
+    [TestMethod]
     public void CheckPartialRedeclaration() => CheckTarget("PartialRedeclaration");
 
     [TestMethod]
