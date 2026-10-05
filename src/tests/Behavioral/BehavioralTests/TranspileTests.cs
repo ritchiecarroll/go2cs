@@ -1234,6 +1234,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedInterfacePointerMethodSet() => CheckTarget("NamedInterfacePointerMethodSet");
 
     [TestMethod]
+    public void CheckNamedMapClone() => CheckTarget("NamedMapClone");
+
+    [TestMethod]
     public void CheckNamedMapCrossPkgKey() => CheckTarget("NamedMapCrossPkgKey");
 
     [TestMethod]

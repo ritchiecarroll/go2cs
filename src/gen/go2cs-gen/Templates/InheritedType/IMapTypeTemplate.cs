@@ -28,7 +28,15 @@ internal static class IMapTypeTemplate
                 public nint Length => ((IMap){{mapValue}}).Length;
                 
                 public bool IsNil => ((IMap){{mapValue}}).IsNil;
-                
+
+                /// <summary>
+                /// maps.Clone of a NAMED map is that named type (Go: `func Clone[M ~map[K]V](m M) M`, whose
+                /// worker returns `clone(m).(M)`). golib's default CloneMap builds a plain map, so the
+                /// assertion failed (logrus' `maps.Clone(entry.Data)` panicked "is map, not logrus.Fields").
+                /// The copy reads this wrapper's map through the same expression every other member does.
+                /// </summary>
+                IMap IMap.CloneMap() => IsNil ? default({{structName}}) : new {{structName}}(new map<{{keyTypeName}}, {{valueTypeName}}>({{mapValue}}));
+
                 /// <summary>ISupportMake factory — a made named map wraps a made concrete map.</summary>
                 public static {{structName}} Make(nint p1, nint p2) => new {{structName}}(map<{{keyTypeName}}, {{valueTypeName}}>.Make(p1, p2));
 
