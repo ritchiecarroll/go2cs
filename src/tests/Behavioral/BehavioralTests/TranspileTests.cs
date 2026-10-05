@@ -1885,6 +1885,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckSelectStatement() => CheckTarget("SelectStatement");
 
     [TestMethod]
+    public void CheckSelfContainingMapHolder() => CheckTarget("SelfContainingMapHolder");
+
+    [TestMethod]
     public void CheckSendtoSeam() => CheckTarget("SendtoSeam");
 
     [TestMethod]
