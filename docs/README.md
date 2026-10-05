@@ -218,7 +218,7 @@ go2cs -tests -recurse -test-action all module_dir out_root      # validate a who
 | `-goroot` / `-gopath` | Override the detected Go root / path. |
 | `-platforms <os/arch>` | Target platform for build-tagged files (defaults to the host). A comma-separated **list** (`windows/amd64,linux/amd64,darwin/amd64`) is accepted and today requires `-platform-census`: a conversion still emits for exactly one target, so a list without the census flag is rejected rather than silently converting the first. |
 | `-platform-census <dir>` | With `-stdlib` and two or more `-platforms` targets: convert once per target into an isolated, seeded staging root under `<dir>`, compare what each run actually emitted, and write `<dir>\platform-manifest.json` classifying every artifact as shared, variant, partial or platform-exclusive. Produces **no** converted output of its own — `-go2cspath` is read as the seed and never written to. |
-| `-tags <list>` | Build tags applied when loading packages. `-stdlib` and `-tests` apply `purego` by default, and `-recurse` adds `safe`; an explicit value replaces both. |
+| `-tags <list>` | Build tags applied when loading packages. `-stdlib` and `-tests` apply `purego` by default, and `-recurse` adds `safe`. An explicit `-tags` replaces every default. |
 | `-indent <n>` | Spaces per indent level (default 4). |
 | `-var` | Prefer `var` declarations where the type is obvious (default on). |
 | `-uco` | Emit channel operators instead of method calls (default on). |
