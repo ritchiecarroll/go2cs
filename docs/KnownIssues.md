@@ -14,8 +14,16 @@ default tiered compilation:
 The fault needs the JIT's on-stack replacement. Microsoft's build of the same .NET version does not show it, and
 neither does Windows. No converted Go program has reproduced it so far, only a synthetic reproduction.
 
-**To avoid it**, run on Microsoft's .NET build, or turn off quick JIT for loops in the converted executable's
-project file, which removes on-stack replacement:
+**To avoid it**, run on Microsoft's .NET build, or turn off quick JIT for loops, which removes on-stack
+replacement. A build property does it without touching the converted project:
+
+```shell
+dotnet build -p:TieredCompilationQuickJitForLoops=false
+```
+
+The built program's `runtimeconfig.json` then carries
+`"System.Runtime.TieredCompilation.QuickJitForLoops": false`. Or set it in the converted executable's project
+file, though the next conversion rewrites that file:
 
 ```xml
 <TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>
