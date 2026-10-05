@@ -572,6 +572,13 @@ A pointer-receiver method promoted through two or more embedded VALUE structs de
 ```
 The own-receiver bare form joins the hop path (`recv.E1.E2.method(...)`); a chain broken by a pointer embed falls through unchanged. Guarded by `CrossPkgUser`.
 
+## A promotion forwarder's receiver never shares a name with the method's parameters
+go2cs-gen writes a forwarder for every method promoted through an embedded field, and names its receiver `target` (its box form `Ꮡtarget`). A promoted method can have a parameter of that very name: testify's `suite.Suite` promotes `ErrorAs(err error, target any, ...)` from `assert.Assertions`. Sharing the name declares it twice (CS0100), and inside the forwarder it could bind the parameter where the receiver was meant. The receiver therefore takes the converter's `Δ` prefix whenever a parameter already uses the name:
+```csharp
+internal static @string Pair(this ByValue Δtarget, @string target) => Δtarget.Base.Pair(target);
+```
+The rule covers forwarders for an embed in the same package and for an embed from another package alike. Guarded by the `PromotedTargetParam` behavioral test, whose output shows the receiver's state beside the parameter on every line.
+
 ## A nil embedded pointer is holdable and assignable — only its dereference panics
 
 Go permits an embedded pointer to *be* nil: constructing `&Setting{name: name}` with the embedded

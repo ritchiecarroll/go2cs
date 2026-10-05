@@ -1651,6 +1651,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPromotedPtrMethodValueSet() => CheckTarget("PromotedPtrMethodValueSet");
 
     [TestMethod]
+    public void CheckPromotedTargetParam() => CheckTarget("PromotedTargetParam");
+
+    [TestMethod]
     public void CheckPromotedValueEmbedExprRecv() => CheckTarget("PromotedValueEmbedExprRecv");
 
     [TestMethod]
