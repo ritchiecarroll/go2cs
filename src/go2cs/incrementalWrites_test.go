@@ -377,3 +377,70 @@ func TestString(t *testing.T) {
 		t.Errorf("an unchanged re-conversion through the fallback rewrote %d of %d .cs files: %v", len(moved), len(sources), moved)
 	}
 }
+
+// A hand-owned file's `.cs.auto` review sibling is written byte-compared, then rewritten by resolveDynamicTypeMarkers
+// when its text holds a deferred dynamic-type marker (an anonymous struct the package lifts). Its text at write time
+// therefore never equals the previous run's resolved sibling, and every unchanged re-conversion moved its time
+// (measured on the -tests footprint: sync/rwmutex.cs.auto and internal/syscall/windows exec_windows_test.cs.auto,
+// byte-identical). It takes the same remember/restore the marker-bearing .cs sources take.
+func TestUnchangedReconversionKeepsMarkerBearingAutoSiblingUntouched(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: loads the fixture package via go/packages")
+	}
+
+	pkgDir, outDir, options := incrementalFixture(t)
+
+	writeModuleFile(t, filepath.Join(pkgDir, "c.go"), `package incr
+
+var Origin = struct{ X, Y int }{1, 2}
+
+func Sum() int { return Origin.X + Origin.Y }
+`)
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("first conversion: %v", err)
+	}
+
+	// c.cs becomes hand-owned: the converter now writes its own emission to the c.cs.auto review sibling.
+	handOwned := filepath.Join(outDir, "c.cs")
+	writeModuleFile(t, handOwned, "// c.cs - hand-owned\n[module: go.GoManualConversion]\n\nnamespace go;\n")
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("second conversion: %v", err)
+	}
+
+	sibling := filepath.Join(outDir, "c.cs.auto")
+	content, err := os.ReadFile(sibling)
+
+	if err != nil {
+		t.Fatalf("the hand-owned c.cs produced no review sibling: %v", err)
+	}
+
+	if !strings.Contains(string(content), "struct") {
+		t.Fatalf("the sibling does not carry the lifted anonymous struct, so it no longer exercises the dynamic-type marker:\n%s", content)
+	}
+
+	if err := os.Chtimes(sibling, incrementalFixtureStamp, incrementalFixtureStamp); err != nil {
+		t.Fatal(err)
+	}
+
+	restoredBefore := markedSourcesRestored.Load()
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("third conversion: %v", err)
+	}
+
+	if markedSourcesRestored.Load() == restoredBefore {
+		t.Errorf("the unchanged re-conversion restored no marker-bearing source: the sibling's marker path did not run")
+	}
+
+	info, err := os.Stat(sibling)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !info.ModTime().Equal(incrementalFixtureStamp) {
+		t.Errorf("an unchanged re-conversion rewrote the marker-bearing c.cs.auto (its time moved to %s)", info.ModTime())
+	}
+}
