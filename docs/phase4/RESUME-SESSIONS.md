@@ -18,6 +18,146 @@
 
 ---
 
+## 1h. TRANSITION 2026-10-05 (owner order, 08:50): G and the i9 move to new sessions, MAILBOX ONLY. START HERE for G and the i9
+
+### 1h.0 What changed
+
+- **Owner order 08:50.** G and the i9 save state and move TODAY from their current sessions to NEW sessions on the fleet's other account. From then on both are MAILBOX-ONLY lanes, exactly as R, C1, C2, P1 and P2 are (1e.1). For G and the i9 this section supersedes the 1e heading's "unchanged" and every older G and i9 block in this file. COORD is unchanged (section 1g).
+- **What ends.** No direct session message reaches either lane, and neither sends one: 0a.0 rule 1's two-way path is retired for both (1h.1).
+- **State at the transition.** master `7a1b2e3631` (TRAIN O's landing). **TRAIN P is the release train**: union `claude/coord-trainP-union` = `d843ff263d` (`fixup-2`, the publish fix, on `446d2c8ba0`). Its fresh battery runs on the i7. The release of go.* 1.24.13.4 follows P's landing.
+- **Base for your cuts.** Every next-train seat is cut on `446d2c8ba0`.
+- **THE DEFECT EVERY LANE MUST KNOW.** At `446d2c8ba0` a SECOND unchanged -tests run into one tree deletes the dependency .pdb files beside the published test host, and traceback-reading tests then fail. `d843ff263d` fixes it. A tree whose converter was built at `446d2c8ba0` still has it: purge the package's bin/tests before a re-read.
+
+### 1h.1 Protocol (1e.1 and 0a by reference; then what is different for G and the i9)
+
+- **The protocol is section 1e.1, as written.** From this transition it binds G and the i9 as it binds the five lanes it names, and it replaces section 0a.0 rules 1, 7 and 9 for both.
+- **Every other rule in section 0a stands** (Step 0 GPG, the record, security, refs, pins, the floor). Where 0a says to arm no watcher it speaks of the retired broadcast watcher: your wait is 1e.1 step 4.
+
+What is different for these two lanes:
+
+- **No direct session message reaches you, and you send none.** COORD addresses you ONLY through `docs/phase4/inbox/G/` and `docs/phase4/inbox/i9/` on claude/mailbox, and you post to COORD with fleet-msg.sh (1e.1 step 3).
+- **Your own SAVE-STATE post is the FIRST thing your new session reads.** The old session posts it today to `docs/phase4/inbox/COORD/`, its subject starting `SAVE-STATE G` / `SAVE-STATE i9`. fleet-read.sh prints your inbox, never COORD's: open the file in the mailbox clone, the NEWEST one from your lane (`<UTC>-G.md` / `<UTC>-i9.md`, the subject on its first line) whose subject starts SAVE-STATE. Then read your own inbox for anything newer.
+- **The local paths stay on your own box.** The file `SAVE-STATE-<lane>.local.txt` in the lane's scratch root holds them (worktrees, clones, run folders); the post names it, and it is never pushed. If the post or the file is missing, say so in the ACK and work from 1h.4.
+
+### 1h.2 Model and effort (COORD's recommendation; the owner sets both when opening each session)
+
+| Lane | Model | Effort | Why |
+|---|---|---|---|
+| G | Opus 5.5 | high | Converter seats at type-identity gates (interface conversions, named pointers), one generated map-wrapper template edited in a chain with C2, and a FAITHFUL testing.RunTests. Delicate work that interacts with other lanes' seats. |
+| i9 | Opus 5.5 | high | The release train's shard and its tracked-changes patch, which the landing waits on; then a read-only author's review of the publish fix and the runtime windows row. Readings a release and another lane's seat depend on. |
+
+This is the class 1e.2 gives its Opus lanes and the fleet default of section 0a (Opus 5.5, effort high). COORD is Opus 5.5, max.
+
+### 1h.3 PASTE PROMPTS (one per lane; the owner sets the model and effort from 1h.2 first)
+
+Paste this on G-LAPTOP, with the model set to Opus 5.5 and the effort to high:
+
+```
+RESUME 2026-10-05 (a NEW session; the previous G session saved state on 2026-10-05 and is retired). You are lane G of
+the go2cs fleet, on G-LAPTOP (windows plus its linux arm). From today you are a MAILBOX-ONLY lane under COORD, exactly
+as R, C1, C2, P1 and P2 are: no direct session message reaches you, and you send none.
+Model and effort: Opus 5.5, high (name them in your ACK).
+Read, from origin, reading every tip by ls-remote:
+ - CLAUDE.md;
+ - on branch claude/coord-handover, docs/phase4/RESUME-SESSIONS.md: section 1h FIRST (what changed, what is different
+   for you, and your STATE BLOCK in 1h.4); then, as 1h.1 points to them, section 1e.1 (the MAILBOX-ONLY protocol) and
+   section 0a (the shared preamble: security, refs, pins, the floor -- its comms rules 1, 7 and 9 are REPLACED for
+   you by 1e.1). Ignore every older G block in that file.
+Comms are the mailbox ONLY (1e.1): read with fleet-read.sh, post with fleet-msg.sh, and wait with fleet-watch.sh in
+the background. The tools are not yours to change: report a defect to COORD in one line and keep working.
+First actions, in this order:
+ 1. fetch claude/coord-handover, and set up a FRESH mailbox clone of claude/mailbox in a new directory (1e.1 step 1;
+    do not reuse the previous session's clone or its NEXT-SINCE);
+ 2. do the reading above: section 1h, then 1e.1 and 0a;
+ 3. read your own SAVE-STATE post (in the mailbox clone, the newest file from lane G in docs/phase4/inbox/COORD/
+    whose subject starts "SAVE-STATE G") and the local file it names (SAVE-STATE-G.local.txt in your scratch root).
+    Where they differ from 1h.4, your own post wins. If either is missing, say so in the ACK and work from 1h.4;
+ 4. read your inbox (1e.1 step 2) for anything newer than that post;
+ 5. arm your watcher exactly as 1e.1 step 4 gives it;
+ 6. post your ACK to COORD (1e.1 step 8), adding the SAVE-STATE file you read, your worktrees, anything unpushed and
+    what you do first;
+ 7. start your queue (1h.4 NEXT, as your own post amends it).
+FIRST WORK: confirm every tip in your save-state at the remote, then the remaining arms of (e) and (f).
+```
+
+Paste this on the i9, with the model set to Opus 5.5 and the effort to high:
+
+```
+RESUME 2026-10-05 (a NEW session; the previous i9 session saved state on 2026-10-05 and is retired). You are lane i9
+of the go2cs fleet, on the i9 (windows). From today you are a MAILBOX-ONLY lane under COORD, exactly as R, C1, C2, P1
+and P2 are: no direct session message reaches you, and you send none.
+Model and effort: Opus 5.5, high (name them in your ACK).
+Read, from origin, reading every tip by ls-remote:
+ - CLAUDE.md;
+ - on branch claude/coord-handover, docs/phase4/RESUME-SESSIONS.md: section 1h FIRST (what changed, what is different
+   for you, and your STATE BLOCK in 1h.4); then, as 1h.1 points to them, section 1e.1 (the MAILBOX-ONLY protocol) and
+   section 0a (the shared preamble: security, refs, pins, the floor -- its comms rules 1, 7 and 9 are REPLACED for
+   you by 1e.1). Ignore every older i9 block in that file.
+Comms are the mailbox ONLY (1e.1): read with fleet-read.sh, post with fleet-msg.sh, and wait with fleet-watch.sh in
+the background. The tools are not yours to change: report a defect to COORD in one line and keep working.
+First actions, in this order:
+ 1. fetch claude/coord-handover, and set up a FRESH mailbox clone of claude/mailbox in a new directory (1e.1 step 1;
+    do not reuse the previous session's clone or its NEXT-SINCE);
+ 2. do the reading above: section 1h, then 1e.1 and 0a;
+ 3. read your own SAVE-STATE post (in the mailbox clone, the newest file from lane i9 in docs/phase4/inbox/COORD/
+    whose subject starts "SAVE-STATE i9") and the local file it names (SAVE-STATE-i9.local.txt in your scratch root).
+    Where they differ from 1h.4, your own post wins. If either is missing, say so in the ACK and work from 1h.4;
+ 4. read your inbox (1e.1 step 2) for anything newer than that post;
+ 5. arm your watcher exactly as 1e.1 step 4 gives it;
+ 6. post your ACK to COORD (1e.1 step 8), adding the SAVE-STATE file you read, your worktrees, anything unpushed and
+    what you do first;
+ 7. start your queue (1h.4 NEXT, as your own post amends it).
+FIRST WORK: TRAIN P's shard at the union d843ff263d, with its tracked-changes patch (1h.4 NEXT (1); your brief is
+.claude/coord-scripts/trainP/tP-lane-brief-i9.md on claude/coord-handover). The landing waits on it. One battery at a
+time on this box.
+```
+
+### 1h.4 STATE BLOCKS
+
+COORD-written minimums: the state as COORD holds it on 2026-10-05 at 08:55, every tip named read at origin by ls-remote. **Where a block differs from the lane's own SAVE-STATE post, the lane's post wins.** Each lane replaces its block with its own at the next save.
+
+#### G
+
+```
+LANE: G   MODEL: Opus 5.5/high   HOST: G-LAPTOP (windows + its linux arm)
+BRANCH: claude/g-alias-publicize 2598dad4f30d540c140be552fda2873185bc9119 on-origin yes accepted -- for the train after P
+BRANCH: claude/g-module-safe-tag f6c182c23f65e30c423844bf6fd9c63c821b86f7 on-origin yes accepted -- for the train after P
+BRANCH: claude/g-local-namedptr-lift 7372953bd3322204effa6e12cbb73d926c9e3b20 on-origin yes accepted -- for the train after P
+BRANCH: claude/g-testing-nil-ctor 0a40cc595cde41279fdf47322ab679f4d79cdfce on-origin yes accepted -- for the train after P
+BRANCH: claude/g-typeassert-unparen 40a76d780b33e993e49612b6b9978fd1ec0b73a9 on-origin yes accepted -- for the train after P
+BRANCH: claude/g-gen-receiver-name e981a2626081594ac17d6e397dd804cc43f597f7 on-origin yes accepted -- for the train after P
+BRANCH: claude/g-foreign-defined-hop 82c3b347dcee2693534dc4b47b5ece2fa22d611e on-origin yes accepted -- for the train after P; a BOARD row for its two deferred directions is owed (NEXT 10)
+BRANCH: claude/g-promoted-field-edge 0ee5681fe0dbdfe6328deea54c312565763ff935 on-origin yes accepted -- for the train after P
+BRANCH: claude/g-ambiguous-alias-target f4ca0f236cecab7f5693653326ef2ef1a5a1a995 on-origin yes accepted -- for the train after P; the same-name interface conversion seat stacks on it (NEXT 3)
+BRANCH: claude/g-detached-testing-t 88442fb39d1b93306cff6b269619c95fe9ec2a86 on-origin yes accepted -- for the train after P; testing.InternalTest and RunTests stack on it (NEXT 5)
+BRANCH: claude/g-host-go-argv 52a5d2e707e8e53b051aeb7e7d3a775e7abe09ad on-origin yes cut -- the test host takes Go's own argv (its runtime item is closed); ACCEPTED WHEN ITS FOOTPRINT ARMS ARE IN
+BRANCH: claude/g-named-map-clone 1643862c921b9ac950bcc7934e3812fc26c5be2e on-origin yes cut -- CloneMap, on C2's claude/c2-map-wrapper-set 3c38c44e25; NOT A SEAT until the i9's reading of claude/c2-self-map-holder 50f3b034aa is green; then its logrus acceptance (102 infrastructure errors -> 0)
+NOTE: nothing of yours is owed on TRAIN P. Everything here is next-train work, cut on 446d2c8ba0.
+NOTE: YOUR SAVE-STATE POST EXISTS: docs/phase4/inbox/COORD/20261005T135533Z-G.md on claude/mailbox (commit ca9c9cb4ed). COORD read it and found every tip it names on origin. It resolves the labels used below: "(e)" = claude/g-iface-literal-string-box 03b142b713 and "(f)" = claude/g-named-pointer-equality 0c6a2618fa (both CUT, GATES PARTIAL: go test ok and CNR 836 read, the -stdlib arms owed); "(d)" = go-cmp's TestNameOf (a live run, then a sizing), so NEXT 4 and NEXT 11 are one item; "F1" = claude/g-host-go-argv; the BOARD row of NEXT 10 is CUT and pushed (claude/g-board-foreign-defined-directions 6481ddbabb, seated by COORD); RECORD ONLY: claude/g-acceptance-merge-20261005 ab6721b68f and claude/g-probes-20261005 9aea4578d6. For NEXT 3 the post holds the measured root: the remap by package NAME is in the type-name renderer (convertToCSTypeName), so an identity test at the gate alone would record the wrong type.
+NOTE (THE CHAIN TO KNOW): three edits to ONE generated map-wrapper template go as one chain: the holder claude/c2-self-map-holder 50f3b034aa -> C2's Set claude/c2-map-wrapper-set 3c38c44e25 -> your CloneMap -> C2's member-shadowing seat (a wrapper member yields to a Go method of the same name; the internal door is spelled Set‿, U+203F, used only on a collision: owner ruling).
+LOCAL-ONLY: none known to COORD; your SAVE-STATE post and SAVE-STATE-G.local.txt are the record of it
+WORKTREE: as SAVE-STATE-G.local.txt lists them
+NEXT: (1) Confirm every tip in your save-state at the remote. (2) Finish (e)/(f)'s arms: the -tests two-arms and the three -stdlib arms on each. (3) The SAME-NAME INTERFACE CONVERSION seat (logrus hooks/slog: a module package named like a std package, with the same simple type name): compare type IDENTITY, not rendered strings, at interfaceConversion.go's recordable gates; stack it on claude/g-ambiguous-alias-target f4ca0f236c; read C2's claude/c2-alias-twin-reach a51a2cf441 first. (4) "(d)", as your own save-state names it. (5) testing.InternalTest and a FAITHFUL testing.RunTests, stacked on claude/g-detached-testing-t 88442fb39d: prove first that the runner takes a top-level Start from inside a running test; those tests report as TOP-LEVEL names. (6) Push CloneMap on the i9's word. (7) F1's footprint arms. (8) The runtime-floor seat: a 120 m sizing read at the union, bin/tests purged first. (9) The objx acceptance. (10) A BOARD row for the two deferred directions of the foreign-defined-hop seat. (11) go-cmp's TestNameOf.
+READ-FIRST: your SAVE-STATE post and SAVE-STATE-G.local.txt; section 1h.0 (the base and the defect); your inbox; C2's claude/c2-alias-twin-reach a51a2cf441 before NEXT 3; .claude/rules/converter.md
+BLOCKED-ON: none for NEXT 1 to 5; NEXT 6 waits on the i9's reading of claude/c2-self-map-holder 50f3b034aa
+TOOLS: section 0a's pins on the windows side and on the linux arm (GOROOT go1.24.13 spelled exactly as go env GOROOT prints it, DOTNET_ROOT the dotnet10 root, both first on PATH; verify by go version and dotnet --version OUTPUT); the box's own values are in SAVE-STATE-G.local.txt
+```
+
+#### i9
+
+```
+LANE: i9   MODEL: Opus 5.5/high   HOST: the i9 (windows)
+BRANCH: claude/i9-crash-verdict-mismatch-text 7d750ba428aea042f2dd9b36c053824309904a27 on-origin yes accepted -- for the train after P
+BRANCH: claude/i9-runtime-digest-handowned 330dc413138c2582ffdd677b7a46403b861cd205 on-origin yes accepted -- for the train after P
+NOTE: THE BOX has a known CPU defect: ONE battery at a time, MSBuild -m:4 and go -p 4, the WHEA count read on every leg.
+LOCAL-ONLY: none known to COORD; your SAVE-STATE post and SAVE-STATE-i9.local.txt are the record of it
+WORKTREE: as SAVE-STATE-i9.local.txt lists them
+NEXT: (1) TRAIN P at the union d843ff263db61ea03ceb6884d0e03651a3703dab (`fixup-2`): your shard and its tracked-changes patch. THE LANDING WAITS ON IT. On claude/coord-handover under .claude/coord-scripts/trainP/: the lane brief tP-lane-brief-i9.md, the driver tP-i9-shard.sh, the list tP-i9-shard.txt. The first run's patch is stale by rule: a fresh worktree at this SHA, a fresh run folder, a fresh patch. BASE, FIXUP, the list's sha256 and its row count come from COORD's GO for this SHA (your SAVE-STATE post or your inbox); if neither holds one, ask for it in the ACK and do the brief's setup (its section 1, steps 1 to 4) meanwhile. Before the launch, read that nothing of the old session still runs on the box. (2) A READ-ONLY author's review of the publish fix, claude/coord-p-publish-fresh 61d609344e (three commits on 446d2c8ba0; `fixup-2` carries the same tree): what else in a -tests or -recurse run depended on a rebuild that an unchanged second run no longer triggers. One message. (3) The runtime windows row at claude/c2-self-map-holder 50f3b034aa (the old session posted its behavioral and GenTests legs). G's CloneMap, claude/g-named-map-clone, is not a seat until this reading is green. (4) The .cs.auto sibling marker seat (its red exists). (5) The comparison driver's N:N address-variant pairing: equal-sized groups only, by run order, counted apart; time-valued names deferred.
+READ-FIRST: your SAVE-STATE post and SAVE-STATE-i9.local.txt; the lane brief, whole, before the launch; section 1h.0 (the defect: in a tree whose converter was built at 446d2c8ba0, purge the package's bin/tests before a re-read); your inbox
+BLOCKED-ON: none
+TOOLS: section 0a's pins and the brief's section 1 step 3 (GOROOT go1.24.13 spelled exactly as go env GOROOT prints it; a .NET 10 SDK that resolves under global.json); the box's own values are in SAVE-STATE-i9.local.txt
+```
+
 ## 1e. TRANSITION 2026-09-28 (owner order, 18:40): R, C1 and C2 move to new sessions and P1 and P2 return, all five on the MAILBOX ONLY. START HERE for those five lanes. G, the i9 and COORD are unchanged (section 1d.00 and the ledger).
 
 ### 1e.0 What changed
