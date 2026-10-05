@@ -3004,7 +3004,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	collectAddressedGlobals(allEntries, pkg.Types, pkg.TypesInfo)
 	computeImportAliasRenames(allEntries, pkg.Types, packageNamespace, options.go2csPath, goosOfTarget(options.targetPlatform), true)
 	collectPackageLevelLiteralStructFieldTypes(allEntries, pkg.Types, pkg.TypesInfo)
-	collectPublicizedTypes(pkg.Types)
+	collectPublicizedTypes(pkg.Types, pkg.Fset)
 
 	// Bind the //go:cgo_import_dynamic pragmas here too, and not only because the sequence is
 	// mirrored: a -tests conversion RECOMPILES the production sources into the test assembly, so
