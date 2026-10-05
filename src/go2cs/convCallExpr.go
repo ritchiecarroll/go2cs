@@ -1348,6 +1348,20 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 							// ambiguity castOperandNeedsParens covers.
 							_, operandIsBinary := arg.(*ast.BinaryExpr)
 
+							// A target written over ANOTHER package's named type (`type Level
+							// logrus.Level`) converts only from that base, so the constant hops
+							// through it: `((ΔLevel)(logrus.Level)0)` — one user-defined operator per
+							// cast, where `((ΔLevel)0)` would need two (CS0030).
+							if base := foreignWrittenBase(named); base != nil {
+								baseCS := convertToCSTypeName(v.getAliasQualifiedTypeName(base, false))
+
+								if operandIsBinary || castOperandNeedsParens(baseCS, expr) {
+									return fmt.Sprintf("((%s)(%s)(%s))", namedCS, baseCS, expr)
+								}
+
+								return fmt.Sprintf("((%s)(%s)%s)", namedCS, baseCS, expr)
+							}
+
 							if operandIsBinary || castOperandNeedsParens(namedCS, expr) {
 								return fmt.Sprintf("((%s)(%s))", namedCS, expr)
 							}
@@ -1400,7 +1414,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					}
 				}
 
-				if argType == nil || argIsDistinctNamedNumeric || !types.Identical(argType.Underlying(), basic) {
+				if argType == nil || argIsDistinctNamedNumeric || !types.Identical(argType.Underlying(), basic) || foreignWrittenBase(named) != nil {
 					underlyingCS := v.getCSharpTypeName(basic)
 					inner := expr
 
@@ -1418,6 +1432,19 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 								inner = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(argBasic), expr)
 							}
 						}
+					}
+
+					// The same foreign-base hop for a non-constant operand: the basic underlying
+					// reaches the target only through the base its wrapper names,
+					// `((Cross)(lib.Level)(uint)x)`.
+					if base := foreignWrittenBase(named); base != nil {
+						baseCS := convertToCSTypeName(v.getAliasQualifiedTypeName(base, false))
+
+						if v.needsParentheses(arg) {
+							return fmt.Sprintf("((%s)(%s)(%s)(%s))", targetTypeName, baseCS, underlyingCS, inner)
+						}
+
+						return fmt.Sprintf("((%s)(%s)(%s)%s)", targetTypeName, baseCS, underlyingCS, inner)
 					}
 
 					if v.needsParentheses(arg) {
@@ -3473,6 +3500,22 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		}
 
 		funcName = v.convExpr(callee, []ExprContext{lambdaContext, calleeIdentContext})
+
+		// A FUNCTION-LOCAL type constructed by name — `type sPtr *s; sPtr(ps)` (testify's
+		// assertions_test.go) — is emitted under its LIFTED name (`TestSame_sPtr`), but the ident
+		// renders the Go name and the constructor named a type that does not exist (CS0246). A
+		// conversion to a local named POINTER from a non-nil pointer lands here because
+		// isTypeConversion compares the arg's pointee, not the pointer, so the conversion arm (which
+		// names the lift) never claims it; a package-level type compiled only because its lift and
+		// its Go name coincide. Name the type the way the conversion arm does.
+		if constructType == "new " {
+			if ident, ok := ast.Unparen(callee).(*ast.Ident); ok {
+				if typeName, ok := v.info.ObjectOf(ident).(*types.TypeName); ok && typeName.Pkg() != nil &&
+					typeName.Parent() != nil && typeName.Parent() != typeName.Pkg().Scope() {
+					funcName = v.getAliasQualifiedTypeName(typeName.Type(), false)
+				}
+			}
+		}
 	}
 
 	// A VARIADIC func-literal callee renders as `(params ꓸꓸꓸ@string dirsʗp) => …`, which C# can

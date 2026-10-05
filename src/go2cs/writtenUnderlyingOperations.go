@@ -81,3 +81,25 @@ func writtenRHSIsNamedType(named *types.Named, base *types.Named) bool {
 	rhsNamed, isNamed := types.Unalias(rhs).(*types.Named)
 	return isNamed && rhsNamed == base
 }
+
+// foreignWrittenBase returns the named type ANOTHER package declares that `named` was written over —
+// `type Level logrus.Level` (logrus' hooks/slog), `type Dur time.Duration` — or nil. Such a wrapper
+// keeps the foreign base in its [GoType] (a same-package chain flattens to the basic underlying
+// instead), so its operators convert only from that base: a conversion into it from a constant or a
+// basic value must hop through the base, one user-defined operator per cast. Like
+// writtenRHSIsNamedType it answers only for a type this package declares.
+func foreignWrittenBase(named *types.Named) *types.Named {
+	rhs, ok := packageTypeSpecRHS[named.Obj()]
+
+	if !ok || rhs == nil {
+		return nil
+	}
+
+	base, isNamed := types.Unalias(rhs).(*types.Named)
+
+	if !isNamed || base.Obj().Pkg() == nil || base.Obj().Pkg() == named.Obj().Pkg() {
+		return nil
+	}
+
+	return base
+}

@@ -466,6 +466,8 @@
     <Project Path="tests/Behavioral/FloatFormatting/FloatFormatting.csproj" />
     <Project Path="tests/Behavioral/FloatKindConstArrayLength/FloatKindConstArrayLength.csproj" />
     <Project Path="tests/Behavioral/ForClauseSpill/ForClauseSpill.csproj" />
+    <Project Path="tests/Behavioral/ForeignDefinedConversion/ForeignDefinedConversion.csproj" />
+    <Project Path="tests/Behavioral/ForeignDefinedConversion/levellib/ForeignDefinedConversion.levellib.csproj" />
     <Project Path="tests/Behavioral/ForeignIfaceFieldPointer/ForeignIfaceFieldPointer.csproj" />
     <Project Path="tests/Behavioral/ForeignIfaceFieldPointer/addrlib/ForeignIfaceFieldPointer.addrlib.csproj" />
     <Project Path="tests/Behavioral/ForInitMixedTypes/ForInitMixedTypes.csproj" />
@@ -617,6 +619,7 @@
     <Project Path="tests/Behavioral/LinknameVarPullLib/LinknameVarPullLib.csproj" />
     <Project Path="tests/Behavioral/LinuxSpawnBasics/LinuxSpawnBasics.csproj" />
     <Project Path="tests/Behavioral/LiteralFloatConstFold/LiteralFloatConstFold.csproj" />
+    <Project Path="tests/Behavioral/LocalNamedPointerConversion/LocalNamedPointerConversion.csproj" />
     <Project Path="tests/Behavioral/LocalNamedTypeDecls/LocalNamedTypeDecls.csproj" />
     <Project Path="tests/Behavioral/LocalFunctionEmission/LocalFunctionEmission.csproj" />
     <Project Path="tests/Behavioral/LocalShadowsEmbedHopType/LocalShadowsEmbedHopType.csproj" />

@@ -610,6 +610,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]
+    public void CheckForeignDefinedConversion() => CheckTarget("ForeignDefinedConversion");
+
+    [TestMethod]
     public void CheckForeignIfaceFieldPointer() => CheckTarget("ForeignIfaceFieldPointer");
 
     [TestMethod]
@@ -1007,6 +1010,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckLocalFunctionEmission() => CheckTarget("LocalFunctionEmission");
+
+    [TestMethod]
+    public void CheckLocalNamedPointerConversion() => CheckTarget("LocalNamedPointerConversion");
 
     [TestMethod]
     public void CheckLocalNamedTypeDecls() => CheckTarget("LocalNamedTypeDecls");
