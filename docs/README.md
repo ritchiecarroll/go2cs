@@ -61,8 +61,8 @@ converted code stays close to the original Go.
 
 - **Reads like Go.** Receiver methods become extension methods, multiple returns become tuples, struct
   embedding becomes promoted fields — the shape of the code is preserved.
-- **Runs like Go.** Conversions prioritize behavioral equivalence first (e.g. a `goroutine` runs on the
-  thread pool rather than being rewritten into `async`).
+- **Runs like Go.** Conversions prioritize behavioral equivalence first (e.g. a `goroutine` runs on its
+  own thread rather than being rewritten into `async`).
 - **Managed first.** Output targets portable managed C#; native interop is a last resort, not the default.
 
 ## Example
@@ -130,7 +130,7 @@ go2cs converts the full Go language surface except a generic type alias whose ta
 
 **Concurrency**
 
-- Goroutines, run on the thread pool (behavioral equivalence first — not rewritten into `async`)
+- Goroutines, each on its own thread (behavioral equivalence first — not rewritten into `async`)
 - Channels with channel-operator (`<-`) lowering, and `select`-statement lowering
 
 **Composition & polymorphism**
