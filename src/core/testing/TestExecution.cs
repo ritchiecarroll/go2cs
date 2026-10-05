@@ -138,14 +138,24 @@ public sealed class TestExecution
     private bool m_skipped;
     private bool m_measurementUnitNoted;
 
-    internal TestExecution(TestRunner runner, string name, TestExecution? parent, string source, int line)
+    internal TestExecution(TestRunner runner, string name, TestExecution? parent, string source, int line, TestRunner.NestedRoot? nestedRoot = null)
     {
         m_runner = runner;
         m_parent = parent;
         Name = name;
         Source = source;
         Line = line;
+        NestedRoot = nestedRoot ?? parent?.NestedRoot;
     }
+
+    internal TestRunner Runner => m_runner;
+
+    /// <summary>
+    /// The <c>testing.RunTests</c> root this test runs under, inherited by its subtests; null for the
+    /// package's own tests. It carries that root's own <c>-test.parallel</c> slots, and a test under it
+    /// is no verdict of the package's (see <see cref="TestRunner.Completed"/>).
+    /// </summary>
+    internal TestRunner.NestedRoot? NestedRoot { get; }
 
     public string Name { get; }
 
@@ -659,7 +669,7 @@ public sealed class TestExecution
 
         // Released from the serial-phase gate; now compete for a -parallel slot so at most
         // Options.Parallel parallel tests RUN simultaneously (Go's -parallel semantics).
-        m_runner.AcquireParallelSlot();
+        m_runner.AcquireParallelSlot(NestedRoot);
         m_holdsParallelSlot = true;
     }
 
@@ -1274,7 +1284,7 @@ public sealed class TestExecution
             if (m_holdsParallelSlot)
             {
                 m_holdsParallelSlot = false;
-                m_runner.ReleaseParallelSlot();
+                m_runner.ReleaseParallelSlot(NestedRoot);
             }
 
             // ONE snapshot for both passes: a child added between them would be released and
@@ -1446,7 +1456,7 @@ public sealed class TestExecution
     /// like a mass failure and were none, on a top-level test that AGREED. Go's own rule is in
     /// testing/match.go (rewrite/isSpace) and strconv/quote.go (IsPrint/appendEscapedRune).
     /// </remarks>
-    private static string SanitizeName(string value)
+    internal static string SanitizeName(string value)
     {
         if (string.IsNullOrEmpty(value))
             return "#00";

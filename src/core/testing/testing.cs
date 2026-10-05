@@ -6,6 +6,7 @@
 // that can be found in the LICENSE file.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using go.testing_runtime;
 using any = System.Object;
@@ -60,6 +61,55 @@ public static partial class testing_package
         internal TestRunner? Runner;
 
         public M(NilType _) { }
+    }
+
+    /// <summary>
+    /// Go's InternalTest: a test function and its name. Internal to Go's toolchain, but exported, and
+    /// built by hand wherever a test runs a list of its own through <see cref="RunTests"/> (testify's
+    /// suite tests).
+    /// </summary>
+    public struct InternalTest
+    {
+        public @string Name;
+        public Action<ж<T>> F;
+
+        public InternalTest(NilType _) { F = default!; }
+
+        public InternalTest(@string Name = default, Action<ж<T>> F = default!)
+        {
+            this.Name = Name;
+            this.F = F;
+        }
+    }
+
+    /// <summary>
+    /// Go's <c>testing.RunTests</c>: runs <paramref name="tests"/> on a FRESH root, as Go's runTests does,
+    /// and reports whether every one that ran passed.
+    /// </summary>
+    /// <remarks>
+    /// Each entry is a TOP-LEVEL test under its own name (the root has no name of its own), selected by
+    /// <c>-test.run</c> and <c>-test.skip</c> through the caller's <paramref name="matchString"/>, one
+    /// pattern element per name element, and repeated per <c>-test.count</c>. The root has no parent, so a
+    /// failure in the list never fails the test that called this, nor the package: that is Go's, where
+    /// m.Run's verdict is its own list's. The list's parallel tests have their own <c>-test.parallel</c>
+    /// slots, as Go's fresh test context does, so a parallel caller cannot starve them.
+    /// </remarks>
+    public static bool RunTests(Func<@string, @string, (bool, error)> matchString, slice<InternalTest> tests)
+    {
+        TestRunner runner = TestExecution.Current?.Runner
+            ?? throw new PanicException("testing: RunTests called outside a running test");
+
+        List<(string Name, Action<ж<T>> F)> list = [];
+
+        foreach (var (_, test) in tests)
+            list.Add((test.Name.ToString(), test.F));
+
+        bool ok = runner.RunTests(list, (pattern, name) => matchString(pattern, name).Item1, out bool ran);
+
+        if (!ran)
+            Console.Error.WriteLine("testing: warning: no tests to run");
+
+        return ok;
     }
 
     /// <summary>

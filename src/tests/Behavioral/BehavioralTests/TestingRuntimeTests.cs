@@ -173,6 +173,85 @@ public class TestingRuntimeTests
         CollectionAssert.AreEqual(new[] { "wanted" }, ran.ToArray());
     }
 
+    // testing.RunTests, called from INSIDE a running test (testify's suite tests): Go runs the list on a
+    // FRESH root, so each entry is a top-level test under its own name -- serial until it calls Parallel,
+    // the parked ones released when the list is done -- and returns ok == false exactly when one failed.
+    // The root has no parent, so the CALLER is not failed, and the package still passes (m.Run's ok is
+    // its own list's).
+    [TestMethod]
+    public void RunTestsRunsItsListAsTopLevelTestsFromInsideARunningTest()
+    {
+        string resultPath = Path.Combine(Path.GetTempPath(), $"go2cs-results-{Guid.NewGuid():N}.json");
+        ConcurrentQueue<string> events = new();
+        bool okFailing = true, okPassing = false, callerFailed = true;
+
+        try
+        {
+            TestRegistry registry = new("runtime/runtests", []);
+            registry.Add("TestOuter", pointer =>
+            {
+                ref testing_package.T test = ref pointer.Value;
+                okFailing = testing_package.RunTests((_, _) => (true, null!), new testing_package.InternalTest[]
+                {
+                    new(Name: "TestOuter/Fails", F: t => { events.Enqueue("fails"); t.Error("expected"); }),
+                    new(Name: "TestOuter/Parallel", F: t => { t.Value.Parallel(); events.Enqueue("parallel"); }),
+                    new(Name: "TestOuter/Serial", F: _ => events.Enqueue("serial")),
+                }.slice());
+                okPassing = testing_package.RunTests((_, _) => (true, null!), new testing_package.InternalTest[]
+                {
+                    new(Name: "TestOuter/Passes", F: _ => events.Enqueue("passes")),
+                }.slice());
+                events.Enqueue("after");
+                callerFailed = test.Failed();
+            }, "runtime_test.go", 1);
+
+            Assert.AreEqual(0, TestHost.Run(registry, ["--result", resultPath]));
+            Assert.IsFalse(okFailing);
+            Assert.IsTrue(okPassing);
+            Assert.IsFalse(callerFailed);
+            CollectionAssert.AreEqual(new[] { "fails", "serial", "parallel", "passes", "after" }, events.ToArray());
+
+            string results = File.ReadAllText(resultPath);
+            StringAssert.Contains(results, "\"test\":\"TestOuter/Fails\",\"action\":\"fail\"");
+            StringAssert.Contains(results, "\"test\":\"TestOuter/Passes\",\"action\":\"pass\"");
+        }
+        finally
+        {
+            File.Delete(resultPath);
+        }
+    }
+
+    // RunTests' matcher is Go's newMatcher(matchString, *match, "-test.run", *skip): each -run ELEMENT goes
+    // to the CALLER's matchString, so testify's always-true filter runs the whole list whatever -run says,
+    // and a real matcher selects by element.
+    [TestMethod]
+    public void RunTestsHandsEachRunElementToTheCallersMatchString()
+    {
+        ConcurrentQueue<string> ran = new();
+        ConcurrentQueue<string> patterns = new();
+        TestRegistry registry = new("runtime/runtests-match", []);
+        registry.Add("TestOuter", _ =>
+        {
+            testing_package.RunTests((pattern, name) =>
+            {
+                patterns.Enqueue($"{pattern}~{name}");
+                return (System.Text.RegularExpressions.Regex.IsMatch(name.ToString(), pattern.ToString()), null!);
+            }, new testing_package.InternalTest[]
+            {
+                new(Name: "TestOuter/Wanted", F: _ => ran.Enqueue("wanted")),
+                new(Name: "TestOuter/Other", F: _ => ran.Enqueue("other")),
+            }.slice());
+            testing_package.RunTests((_, _) => (true, null!), new testing_package.InternalTest[]
+            {
+                new(Name: "TestOuter/Always", F: _ => ran.Enqueue("always")),
+            }.slice());
+        }, "runtime_test.go", 1);
+
+        Assert.AreEqual(0, TestHost.Run(registry, ["-run", "TestOuter/Wanted"]));
+        CollectionAssert.AreEqual(new[] { "wanted", "always" }, ran.ToArray());
+        CollectionAssert.Contains(patterns.ToArray(), "Wanted~Other");
+    }
+
     [TestMethod]
     public void CrossGoroutineFatalRecordsInfrastructureFailureWithoutKillingProcess()
     {
