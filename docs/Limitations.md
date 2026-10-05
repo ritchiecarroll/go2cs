@@ -109,18 +109,21 @@ The [validated modules](ValidatedModules.md) page is still short.
   program dies at startup. go-spew's `safe` tag selects its fallback, and nothing passes it for you.
 * **Tests that read `os.Args`** see the flags of the C# program that runs them. `flag.Parse()` is fine;
   a CLI framework that walks `os.Args[1:]` itself, as cobra and pflag do, diverges from `go test`.
-* **Converter bugs that surface as C# compile errors**, in corners of the type system: an exported alias
-  of an unexported type used from another package (`CS0122`; logrus and testify each have one), a
-  parenthesized type in a type assertion, a function-local pointer type or a defined type over another
-  package's type used as a conversion, and a promoted method with a parameter named `target`. In a
-  dependency, point a `replace` at a patched copy, or fix the generated `.cs` and mark the file
-  `[module: go.GoManualConversion]` so the next conversion leaves it alone. There will be others:
-  [tell me](#when-you-hit-a-seam).
+* **Converter bugs that surface as C# compile errors**, usually in corners of the type system. In your
+  own code, reshape the Go. In a dependency, point a `replace` at a patched copy, or fix the generated
+  `.cs` and mark the file `[module: go.GoManualConversion]` so the next conversion leaves it alone. New
+  ones still turn up: [tell me](#when-you-hit-a-seam).
 * **One bad dependency blocks everything above it.** A package that fails to convert is reported and
   skipped, the run still exits 0, and every project that imports it fails to build. Read the summary
   line, `Recursive conversion complete in ...: N/M packages converted (K failed: ...)`, not the exit
   code. `-recurse=module`
   [converts only your packages](README.md#optional-convert-the-module-only-and-deal-with-its-dependencies-later).
+
+> **Note -- known today, and temporary.** These converter bugs are being worked through and may be
+> resolved in a future release: an exported alias of an unexported type used from another package
+> (`CS0122`; logrus and testify each have one), a parenthesized type in a type assertion, a
+> function-local pointer type used as a conversion, a defined type over another package's type used as
+> a conversion, and a promoted method with a parameter named `target`.
 
 ## What "validated" means, and what it doesn't
 
