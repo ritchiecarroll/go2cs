@@ -251,8 +251,15 @@ func main() {
 	bare := []string{"z", "x", "y"}
 	sort.Sort(sort.StringSlice(bare))
 	fmt.Println("Sort =", ints, floats, strs, bare)
+
+	// Which file of the `safe` pair compiled: the converter's default tag set and the Go baseline must agree.
+	fmt.Println("BuildTag =", buildMode)
 }
 '@ | Set-Content -LiteralPath (Join-Path $sample 'main.go') -Encoding utf8
+# The build-tag probe: exactly one of these two files compiles. A -recurse conversion builds with the `safe` tag
+# by default, so the baseline `go run` must too; if the two ever disagree, line 5 of arm B names it.
+"//go:build safe`n`npackage main`n`nconst buildMode = `"safe`"`n" | Set-Content -LiteralPath (Join-Path $sample 'mode_safe.go') -Encoding utf8 -NoNewline
+"//go:build !safe`n`npackage main`n`nconst buildMode = `"default`"`n" | Set-Content -LiteralPath (Join-Path $sample 'mode_default.go') -Encoding utf8 -NoNewline
 $verdicts += Invoke-ConvertArm 'B-sample' $sample
 
 # ---- C: one behavioral project -------------------------------------------------------------------
