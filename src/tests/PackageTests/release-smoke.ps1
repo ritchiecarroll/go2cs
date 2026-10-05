@@ -126,7 +126,8 @@ function Invoke-ConvertArm([string]$Name, [string]$ModuleDir) {
         $goOut = Join-Path $arm 'go.stdout.txt'
         $env:NUGET_PACKAGES = $null
         $ErrorActionPreference = 'Continue'
-        & go run . 1> $goOut 2> (Join-Path $arm 'go.stderr.txt')
+        # `-tags safe`: every arm converts with -recurse, which builds with the `safe` tag by default, so the baseline must too.
+        & go run -tags safe . 1> $goOut 2> (Join-Path $arm 'go.stderr.txt')
         $ErrorActionPreference = 'Stop'
         if ($LASTEXITCODE -ne 0) { return "FAIL ($Name): go run exited $LASTEXITCODE (the Go baseline itself)" }
 
@@ -251,8 +252,15 @@ func main() {
 	bare := []string{"z", "x", "y"}
 	sort.Sort(sort.StringSlice(bare))
 	fmt.Println("Sort =", ints, floats, strs, bare)
+
+	// Which file of the `safe` pair compiled: the converter's default tag set and the Go baseline must agree.
+	fmt.Println("BuildTag =", buildMode)
 }
 '@ | Set-Content -LiteralPath (Join-Path $sample 'main.go') -Encoding utf8
+# The build-tag probe: exactly one of these two files compiles. A -recurse conversion builds with the `safe` tag
+# by default, so the baseline `go run` must too; if the two ever disagree, line 5 of arm B names it.
+"//go:build safe`n`npackage main`n`nconst buildMode = `"safe`"`n" | Set-Content -LiteralPath (Join-Path $sample 'mode_safe.go') -Encoding utf8 -NoNewline
+"//go:build !safe`n`npackage main`n`nconst buildMode = `"default`"`n" | Set-Content -LiteralPath (Join-Path $sample 'mode_default.go') -Encoding utf8 -NoNewline
 $verdicts += Invoke-ConvertArm 'B-sample' $sample
 
 # ---- C: one behavioral project -------------------------------------------------------------------
