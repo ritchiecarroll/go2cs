@@ -439,6 +439,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckDefinedElemStringConversion() => CheckTarget("DefinedElemStringConversion");
 
     [TestMethod]
+    public void CheckDefinedForeignStructConvert() => CheckTarget("DefinedForeignStructConvert");
+
+    [TestMethod]
     public void CheckDefinedOverNamedComposite() => CheckTarget("DefinedOverNamedComposite");
 
     [TestMethod]

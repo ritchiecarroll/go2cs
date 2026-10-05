@@ -411,6 +411,8 @@
     <Project Path="tests/Behavioral/DeferVariadicCallee/DeferVariadicCallee.csproj" />
     <Project Path="tests/Behavioral/DefinedComplexConst/DefinedComplexConst.csproj" />
     <Project Path="tests/Behavioral/DefinedElemStringConversion/DefinedElemStringConversion.csproj" />
+    <Project Path="tests/Behavioral/DefinedForeignStructConvert/DefinedForeignStructConvert.csproj" />
+    <Project Path="tests/Behavioral/DefinedForeignStructConvert/rec/DefinedForeignStructConvert.rec.csproj" />
     <Project Path="tests/Behavioral/DefinedOverNamedComposite/DefinedOverNamedComposite.csproj" />
     <Project Path="tests/Behavioral/DefinedOverNamedComposite/fslike/DefinedOverNamedComposite.fslike.csproj" />
     <Project Path="tests/Behavioral/DefinedStructArrayFields/DefinedStructArrayFields.csproj" />

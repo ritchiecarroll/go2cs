@@ -439,6 +439,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDefinedElemStringConversion() => CheckTarget("DefinedElemStringConversion");
 
     [TestMethod]
+    public void CheckDefinedForeignStructConvert() => CheckTarget("DefinedForeignStructConvert");
+
+    [TestMethod]
     public void CheckDefinedOverNamedComposite() => CheckTarget("DefinedOverNamedComposite");
 
     [TestMethod]
