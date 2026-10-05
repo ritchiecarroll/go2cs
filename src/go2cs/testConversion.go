@@ -3982,6 +3982,13 @@ func supportedTestCapabilities() []string {
 		// registered — see the "benchmark" case in discoverTestDeclarations), so supporting
 		// these members only unblocks Test functions that call testing.Benchmark themselves.
 		"testing.Benchmark", "B.N", "BenchmarkResult.NsPerOp",
+		// testing.RunTests runs a list of InternalTest on a fresh root from inside a running test
+		// (core/testing/testing.cs RunTests, on TestRunner.RunTests: top-level names, -run through
+		// the caller's matchString, its own parallel slots, ok false iff one failed, the caller and
+		// the package unfailed). Roster impact measured before widening: GOROOT's *_test.go call it
+		// NOWHERE (net/http and runtime/debug only name it inside expected-traceback strings), and
+		// of the modules only testify's suite_test.go does, 8 tests admitted there.
+		"testing.RunTests",
 	}
 	sort.Strings(capabilities)
 	return capabilities
