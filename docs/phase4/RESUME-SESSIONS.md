@@ -42,6 +42,8 @@
 
 ## 1g. COORD STATE 2026-10-04 15:30 (START HERE; it supersedes 1f.1 steps 4-5 and all of 1f.2)
 
+- **UPDATE 2026-10-04 19:40 (read this first).** TRAIN O LANDED at 18:08: master `7a1b2e3631c203149dc8b85dfd36acb45558487e`. TRAIN P is frozen at 24 rows (rows-sha256 `49c3ab180a98`), assembled, fixed up and PUSHED: `claude/coord-trainP-union` = `446d2c8ba074612c5eac3ae1d9c85d6d6cf685e3` (the fixup regenerated nothing in the corpus and moved no golden). Its i7 battery runs DETACHED from `/h/go2cs-tmp-coord/coord-scratch/tP/run1` in the worktree `/h/go2cs-tmp-coord/tP` (launched 19:33, deadline 2026-10-05 11:45; the worktree is FROZEN until `battery rc=` appears in `run1/battery.console.log`). GOs are out to the i9, P1, P2, C1 (the release gate) and G. NEXT: read the battery and the lane posts, then `trainP/COORD-LAUNCH-CHECKLIST.md` sections 6 (landing, with `run-csharp-consumer.ps1`) and 7 (the release, the owner's PIN). Steps 1 to 4 of the list below are DONE.
+
 Written 15:30 on the i7's clock. Everything below is on origin.
 
 - **Owner rulings today.** (1) Release go.\* 1.24.13.4 WAITS for TRAIN P: P carries the fix for a self-recursion in the
