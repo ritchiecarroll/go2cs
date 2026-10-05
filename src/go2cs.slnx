@@ -695,6 +695,7 @@
     <Project Path="tests/Behavioral/NamedImportInitOrder/reader/NamedImportInitOrder.reader.csproj" />
     <Project Path="tests/Behavioral/NamedImportInitOrder/store/NamedImportInitOrder.store.csproj" />
     <Project Path="tests/Behavioral/NamedImportInitOrder/writer/NamedImportInitOrder.writer.csproj" />
+    <Project Path="tests/Behavioral/NamedMapMethodShadow/NamedMapMethodShadow.csproj" />
     <Project Path="tests/Behavioral/NamedMapNestedAssign/NamedMapNestedAssign.csproj" />
     <Project Path="tests/Behavioral/NamedMapRvalueIndexWrite/NamedMapRvalueIndexWrite.csproj" />
     <Project Path="tests/Behavioral/NamedMapValuesCollision/NamedMapValuesCollision.csproj" />
