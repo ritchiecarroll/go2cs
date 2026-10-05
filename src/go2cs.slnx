@@ -835,6 +835,8 @@
     <Project Path="tests/Behavioral/PromotedFieldPointerDeref/PromotedFieldPointerDeref.csproj" />
     <Project Path="tests/Behavioral/PromotedMethodExpr/PromotedMethodExpr.csproj" />
     <Project Path="tests/Behavioral/PromotedPtrMethodValueSet/PromotedPtrMethodValueSet.csproj" />
+    <Project Path="tests/Behavioral/PromotedTargetParam/PromotedTargetParam.csproj" />
+    <Project Path="tests/Behavioral/PromotedTargetParam/targetlib/PromotedTargetParam.targetlib.csproj" />
     <Project Path="tests/Behavioral/PromotedValueEmbedExprRecv/PromotedValueEmbedExprRecv.csproj" />
     <Project Path="tests/Behavioral/PromotedValueEmbedLib/PromotedValueEmbedLib.csproj" />
     <Project Path="tests/Behavioral/PromotedValueEmbedUser/PromotedValueEmbedUser.csproj" />

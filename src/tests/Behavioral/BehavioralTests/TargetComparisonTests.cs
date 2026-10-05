@@ -1642,6 +1642,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPromotedPtrMethodValueSet() => CheckTarget("PromotedPtrMethodValueSet");
 
     [TestMethod]
+    public void CheckPromotedTargetParam() => CheckTarget("PromotedTargetParam");
+
+    [TestMethod]
     public void CheckPromotedValueEmbedExprRecv() => CheckTarget("PromotedValueEmbedExprRecv");
 
     [TestMethod]
