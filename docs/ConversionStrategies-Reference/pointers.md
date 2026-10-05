@@ -126,6 +126,14 @@ and `sync.Cond`'s copy detector both depend on, and which is also why `Ꮡ(IArra
 its target **by value**: see
 [A pointer's REFERENT, not its box, answers every lifetime and identity question](manual-conversions.md#a-pointers-referent-not-its-box-answers-every-lifetime-and-identity-question).
 
+A value of a NAMED pointer type (`type itemPtr *item`) is already a pointer value, so it compares as
+written: `ip == itemPtr(pi)` emits `ip == new itemPtr(pi)`. The ident renderer decided "already a
+pointer" by testing the type itself for `*types.Pointer`, which a named pointer is not — its UNDERLYING
+is — so the operand rendered in pointer context as `Ꮡip`, the box of a value local that does not exist
+(CS0103). The test now reads the underlying. A parameter or a heap-escaping local still renders its box
+as before. (Guarded by the `NamedPointerEquality` behavioral output test — same-pointer equality, two
+distinct allocations, nil, `!=` and self-comparison, against Go.)
+
 ## A pointer's nilness and identity are STRUCTURAL — the `IsNull` / `IsNilPointer` split
 
 `ж<T>` answers two different questions that a single predicate used to conflate, and the conflation was a defect *class*: `IsNull` was `m_isNull || m_val is null`, so it reported **true** for three unrelated things —
