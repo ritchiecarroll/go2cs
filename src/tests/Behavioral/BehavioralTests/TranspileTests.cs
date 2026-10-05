@@ -2125,6 +2125,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckTcpLoopbackRoundTrip() => CheckTarget("TcpLoopbackRoundTrip");
 
     [TestMethod]
+    public void CheckTestingStructZeroLiteral() => CheckTarget("TestingStructZeroLiteral");
+
+    [TestMethod]
     public void CheckTraceUserAnnotations() => CheckTarget("TraceUserAnnotations");
 
     [TestMethod]

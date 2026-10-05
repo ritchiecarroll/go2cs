@@ -2054,6 +2054,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckTcpLoopbackRoundTrip() => CheckTarget("TcpLoopbackRoundTrip");
 
     [TestMethod]
+    public void CheckTestingStructZeroLiteral() => CheckTarget("TestingStructZeroLiteral");
+
+    [TestMethod]
     public void CheckTraceUserAnnotations() => CheckTarget("TraceUserAnnotations");
 
     [TestMethod]
