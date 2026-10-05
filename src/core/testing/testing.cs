@@ -38,6 +38,11 @@ public static partial class testing_package
     {
         internal TestExecution? Execution;
 
+        // The zero-value constructor go2cs-gen gives every converted struct. An empty literal of a
+        // foreign struct converts to `new T(nil)` (`&testing.T{}` in testify's require tests), and
+        // these hand-owned structs have no generator behind them, so each declares it by hand.
+        public T(NilType _) { }
+
         internal readonly TestExecution RequiredExecution =>
             Execution ?? throw new InvalidOperationException("testing.T is not attached to a running test");
     }
@@ -45,6 +50,8 @@ public static partial class testing_package
     public struct M
     {
         internal TestRunner? Runner;
+
+        public M(NilType _) { }
     }
 
     /// <summary>
@@ -117,6 +124,8 @@ public static partial class testing_package
         // corpus cannot collide with. Benchmark() mints a fresh B per round, so it starts at zero
         // for each one without the driver having to reset it.
         internal nint LoopIteration;
+
+        public B(NilType _) { }
     }
 
     /// <summary>
@@ -211,6 +220,7 @@ public static partial class testing_package
     /// </summary>
     public struct PB
     {
+        public PB(NilType _) { }
     }
 
     /// <summary>
@@ -226,6 +236,7 @@ public static partial class testing_package
     /// </summary>
     public struct F
     {
+        public F(NilType _) { }
     }
 
     [GoRecv] public static void Error(this ref T t, params ꓸꓸꓸany args)
