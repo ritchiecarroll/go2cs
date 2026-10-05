@@ -96,7 +96,20 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		// double-dereferencing every single-star of a double-pointer field (runtime mheap.go's
 		// specialsIter walk — CS0029 in both assignment directions). A genuine `**pp` is two
 		// nested StarExprs, each contributing its own `.Value`.
-		if _, ok := v.getIdentType(selectorExpr.Sel).(*types.Pointer); !ok {
+		//
+		// A field of a NAMED pointer type (`type P *T`, held as `h.p`) is a pointer through its
+		// underlying type and derefs the same way -- its generated wrapper declares `Value`. Read
+		// only for a VALUE operand: matching *types.Pointer alone took `*h.p` for a pointer cast and
+		// rendered the type spelling `ж<h.p>` (CS0119).
+		_, selIsPointer := v.getIdentType(selectorExpr.Sel).(*types.Pointer)
+
+		if !selIsPointer {
+			if tv, isType := v.info.Types[starExpr.X]; !(isType && tv.IsType()) {
+				_, selIsPointer = types.Unalias(v.getType(starExpr.X, false)).Underlying().(*types.Pointer)
+			}
+		}
+
+		if !selIsPointer {
 			// Selector is not a pointer, assume this is a pointer cast operation
 			return fmt.Sprintf("%s<%s>", PointerPrefix, baseExpr)
 		}
