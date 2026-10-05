@@ -33,7 +33,7 @@ internal static @string show(any v) {
 }
 
 internal static any retAny() {
-    return Run;
+    return (Func<@string>)(Run);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -46,20 +46,20 @@ private static readonly object slotsˢ = (@string)"slots:"u8;
 private static readonly object controlˢ = (@string)"control:"u8;
 
 internal static void Main() {
-    var a = Run;
+    Func<@string> a = Run;
     Func<@string> b = Run;
     fmt.Println(sameˢ, a(), varˢ, b());
-    fmt.Println(sameAnyˢ, show(Run));
+    fmt.Println(sameAnyˢ, show((Func<@string>)(Run)));
     _ = (Func<@string>)(Run);
-    var c = time.After;
+    Func<time.Duration, /*<-*/channel<time.Time>> c = time.After;
     Func<time.Duration, /*<-*/channel<time.Time>> d = time.After;
     fmt.Println(importedˢ, show((c).OrTypedNilFunc()), varˢ, show((d).OrTypedNilFunc()));
-    fmt.Println(importedAnyˢ, show(time.After));
+    fmt.Println(importedAnyˢ, show((Func<time.Duration, /*<-*/channel<time.Time>>)(time.After)));
     _ = (Func<time.Duration, /*<-*/channel<time.Time>>)(time.After);
-    any f = Run;
+    any f = (Func<@string>)(Run);
     any h = default!;
-    h = time.After;
-    var g = new any[]{time.After, Run}.slice();
+    h = (Func<time.Duration, /*<-*/channel<time.Time>>)(time.After);
+    var g = new any[]{(Func<time.Duration, /*<-*/channel<time.Time>>)(time.After), (Func<@string>)(Run)}.slice();
     fmt.Println(slotsˢ, show(f), (@string)"|"u8, show(h), (@string)"|"u8, show(g[0]), (@string)"|"u8, show(g[1]), (@string)"|"u8, show(retAny()));
     Func<@string> e = Run;
     fmt.Println(controlˢ, e(), use(Run), new T(nil).Run());

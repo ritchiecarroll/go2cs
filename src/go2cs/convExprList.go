@@ -289,6 +289,9 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		// CONVERSION renders `(Action)(default!)`, where a bare trailing accessor would land on the
 		// operand instead of the cast's result.
 		if callContext != nil && callContext.anyBoxedFuncArgs[i] && !spreadArg && !totalReplacement {
+			// An ambiguous method group (a func named like a method of its package) has no
+			// natural type to box: give it its delegate type first (applyMethodGroupClashCast).
+			resultExpr = v.applyMethodGroupClashCast(expr, resultExpr)
 			resultExpr = v.applyTypedNilFuncBox(v.getType(expr, false), v.funcExprNeverRendersNull(expr), resultExpr)
 		}
 

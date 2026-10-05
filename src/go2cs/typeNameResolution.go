@@ -1241,6 +1241,98 @@ func (v *Visitor) discardTargetTypeName(expr ast.Expr) string {
 	return v.iifeDelegateType(sig)
 }
 
+// methodGroupClashDelegateType returns the C# delegate type a package-level func used as a VALUE must
+// be cast to when its package also declares a METHOD of the same name, or "" when no cast is needed.
+// Go methods are emitted as extension methods in the package class, so `func Run()` and
+// `func (T) Run()` — and, across packages, `time.After` and `Time.After` — are ONE C# method group.
+// Where the site supplies a delegate type (a func-typed parameter, var or field) C# picks the func
+// by signature; where it supplies none — a `:=` local, an `any` slot — the group has no natural type
+// (CS8917, CS1503). The structural `Func<…>`/`Action<…>` is used, never a package named func type: in
+// an interface slot the delegate type IS the dynamic type, and Go's dynamic type is the unnamed
+// signature.
+//
+// Any same-named method counts, whatever its visibility: one on an unexported type is invisible to
+// another assembly, but a test assembly can see it, and the cast is valid C# either way. A GENERIC
+// func is left alone (no instantiation to name).
+func (v *Visitor) methodGroupClashDelegateType(expr ast.Expr) string {
+	for {
+		paren, ok := expr.(*ast.ParenExpr)
+
+		if !ok {
+			break
+		}
+
+		expr = paren.X
+	}
+
+	var ident *ast.Ident
+
+	switch e := expr.(type) {
+	case *ast.Ident:
+		ident = e
+	case *ast.SelectorExpr:
+		ident = e.Sel
+	default:
+		return ""
+	}
+
+	fn, ok := v.info.ObjectOf(ident).(*types.Func)
+
+	if !ok || fn.Pkg() == nil || fn.Parent() != fn.Pkg().Scope() {
+		return ""
+	}
+
+	sig, ok := fn.Type().(*types.Signature)
+
+	if !ok || sig.Recv() != nil || sig.TypeParams().Len() > 0 || !packageDeclaresMethodNamed(fn.Pkg(), fn.Name()) {
+		return ""
+	}
+
+	return v.iifeDelegateType(sig)
+}
+
+// applyMethodGroupClashCast casts a rendered value to its delegate type when methodGroupClashDelegateType
+// says the bare method group is ambiguous; every other value passes through unchanged.
+func (v *Visitor) applyMethodGroupClashCast(expr ast.Expr, rendered string) string {
+	if expr == nil || rendered == "" {
+		return rendered
+	}
+
+	if delegateType := v.methodGroupClashDelegateType(expr); delegateType != "" {
+		return fmt.Sprintf("(%s)(%s)", delegateType, rendered)
+	}
+
+	return rendered
+}
+
+// packageDeclaresMethodNamed reports whether any named type declared at pkg's scope has a method
+// called name.
+func packageDeclaresMethodNamed(pkg *types.Package, name string) bool {
+	scope := pkg.Scope()
+
+	for _, typeName := range scope.Names() {
+		obj, ok := scope.Lookup(typeName).(*types.TypeName)
+
+		if !ok || obj.IsAlias() {
+			continue
+		}
+
+		named, ok := obj.Type().(*types.Named)
+
+		if !ok {
+			continue
+		}
+
+		for i := 0; i < named.NumMethods(); i++ {
+			if named.Method(i).Name() == name {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func convertToCSTypeName(typeName string) string {
 	return renderCSTypeName(typeName, false)
 }

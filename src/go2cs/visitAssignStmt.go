@@ -2109,6 +2109,13 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 									methodGroupDelegateType = v.iifeDelegateType(sig)
 								}
 							}
+
+							// A func whose package also declares a same-named METHOD is an ambiguous
+							// group with no natural type for `var` (CS8917): name the delegate type
+							// `var` would have inferred (see methodGroupClashDelegateType).
+							if methodGroupDelegateType == "" {
+								methodGroupDelegateType = v.methodGroupClashDelegateType(rhs)
+							}
 						}
 
 						// A string-underlying LHS always declares with its EXPLICIT type: `var`
