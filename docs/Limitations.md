@@ -44,8 +44,8 @@ Refused outright:
 
 Converted, and still not going to work:
 
-* **Hand-written assembly.** A function whose body lives in a `.s` file becomes a stub. The project
-  builds clean, and the first call throws a `NotImplementedException` saying
+* **Hand-written assembly.** A function whose body lives in a `.s` file usually becomes a stub. The
+  project builds clean, and the first call throws a `NotImplementedException` saying
   `no implementation reached this compilation`. Convert with the library's pure-Go build tag
   ([below](#third-party-modules-where-they-trip-today)); with no fallback, the body has to be written by
   hand in C#. `//go:linkname` into the runtime gets the same stub, outside a short list the converter
@@ -88,7 +88,7 @@ Converted, and still not going to work:
   goroutine only, and by default `pprof.StartCPUProfile` gives a valid profile with no samples: profile
   with .NET's tools. Facts Go's linker bakes in are gone, too. `debug.ReadBuildInfo()` answers
   `ok == false`, and `runtime.GOROOT()` is empty unless `GOROOT` is set, so on Windows
-  `time.LoadLocation("Europe/Berlin")` fails until you import `time/tzdata`.
+  `time.LoadLocation("Europe/Berlin")` fails until you import `time/tzdata` (or set `ZONEINFO`).
 * **One slice tops out near two billion elements**, the limit of a .NET array: `make([]byte, 3<<30)`
   panics.
 * **A few quiet ones**, each rare, where converted code gives a different answer and says nothing:
@@ -140,7 +140,7 @@ Third-party modules are just getting started: the [validated modules](ValidatedM
 short, and a `vendor/` folder or a `go.work` workspace of your own has no test behind it yet.
 
 * **A plain `-recurse` (your module plus its dependencies) applies no build tags for you**, while the
-  standard library is converted with `purego`. So a dependency with an assembly or `unsafe` fast path
+  standard library is converted with Go's portable tags, `purego` and `math_big_pure_go`. So a dependency with an assembly or `unsafe` fast path
   converts the fast path. Pass its portable tag: `purego` is the common one, and some libraries use
   their own. Under `-tests` (convert and run a package's Go tests) an explicit `-tags` replaces the
   default, so include `purego,math_big_pure_go` with yours.
@@ -174,7 +174,7 @@ It means a package's own Go `Test` functions were converted, run, and compared w
 for verdict, by full test name. That's a real bar. It is also narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets convert but never run. No race detector either.
-* **Matched is not the same as passed.** A test that skips on both sides, for lack of root say, counts
+* **Matched is not the same as passed.** A test that skips on both sides, for lack of root, say, counts
   as a match and measures nothing.
 * **Disclosed differences are real differences.** Where a Go test asserts something a managed runtime
   can't satisfy, or doesn't yet, its exact failure is pinned and listed on the package's proof page
@@ -234,8 +234,8 @@ for verdict, by full test name. That's a real bar. It is also narrower than the 
   project file only an `<ItemGroup Label="GoHandOwnReferences">` block survives), so pass build settings
   with `-p:`. For code, fix the Go, keep your own C# in a separate file beside it, or mark a whole file
   `[module: go.GoManualConversion]` ([how](ConversionStrategies.md#manually-converted-declarations)) and
-  merge later Go changes yourself. And the converter never deletes: a renamed Go file leaves its old
-  `.cs` behind, still compiled.
+  merge later Go changes yourself. And the converter never deletes a converted file: a renamed Go file
+  leaves its old `.cs` behind, still compiled.
 * **Start with `go2cs -recurse=nuget <module> <out>`**, the one form whose output restores and builds
   with nothing staged. A bare `go2cs main.go` or package conversion writes beside the Go source, and its
   project expects a runtime staged under the go2cs root (`-go2cspath`, default `~/go2cs`). Go comments
