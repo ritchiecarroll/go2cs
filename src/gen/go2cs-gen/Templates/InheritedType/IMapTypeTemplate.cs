@@ -64,6 +64,17 @@ internal static class IMapTypeTemplate
                 public ({{valueTypeName}}, bool) this[{{keyTypeName}} key, global::System.Func<{{valueTypeName}}> zero, bool _] => {{mapValue}}[key, zero, _];
 
                 public void Add({{keyTypeName}} key, {{valueTypeName}} value) => {{mapValue}}.Add(key, value);
+
+                /// <summary>
+                /// The write a nested map assignment needs: `m[k1][k2] = v` assigns through `m[k1]`, an rvalue
+                /// struct, where an indexer SETTER is CS1612, so the converter emits `m[k1].Set(k2, v)` -- a
+                /// method call, which writes through to the shared store. golib's map has Set; a named map
+                /// element needs it here too (it was CS1501). A Go method `Set(k K, v V)` with EXACTLY this
+                /// key and value type would be shadowed by this member (C# prefers an instance method to the
+                /// extension the method is emitted as), the same as for Add above; none exists in std, the
+                /// behavioral corpus or go-cmp.
+                /// </summary>
+                public void Set({{keyTypeName}} key, {{valueTypeName}} value) => {{mapValue}}.Set(key, value);
                 
                 public bool Remove({{keyTypeName}} key) => {{mapValue}}.Remove(key);
                 
