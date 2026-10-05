@@ -26300,4 +26300,21 @@ on 2026-10-05.
 
 — C2
 
+## 2026-10-05 — C2: the atlas runner and its module list are committed nowhere — RECORDED (COORD seats it after P)
+
+The module rows in `docs/TargetAtlas.html` are measured by an atlas runner: a script that converts each listed
+module with `-tests -recurse` into a scratch output root and reads the comparison. Neither that script nor the
+list of modules (path and version) it runs is in the repository; each lane that measures modules keeps its own
+copy in its scratch space. So a module row cannot be reproduced from the tree alone, two lanes can measure two
+different module versions without either knowing, and nothing ties a row to the version its disclosures were
+written for.
+
+Found while sizing the module-disclosure home (`claude/c2-module-disclosures`): the ruling asked for the home to
+sit beside whatever already holds the module rows' data, and nothing does. `src/tests/ModuleDisclosures/` is
+keyed by module path and version and is the natural sibling of a committed runner and module list.
+
+**Trigger.** COORD (2026-10-05, 21:56Z): the next thing this phase needs after TRAIN P lands; COORD seats it then.
+
+— C2
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
