@@ -6818,11 +6818,14 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 // With -test-publish-binlog the publish also writes an MSBuild binary log, from the FIRST attempt,
 // and keeps it only when the publish fails (see settlePublishBinlog).
 func publishTestHost(outputPath, testProject string, options Options) error {
+	// The binary log is prepared first, because preparing it removes the log an earlier attempt kept:
+	// a refused removal below fails THIS attempt, and that older log is not its evidence.
+	binlog := preparePublishBinlog(outputPath, options)
+
 	if err := removePublishedTestHost(outputPath, testProject); err != nil {
 		return err
 	}
 
-	binlog := preparePublishBinlog(outputPath, options)
 	args := withPublishBinlog(publishTestHostArgs(outputPath, testProject, options), binlog)
 	_, err := runCommandWithTimeout(testPublishTimeout(options), outputPath, options, "dotnet", args...)
 	return settlePublishBinlog(binlog, err)
@@ -6853,8 +6856,8 @@ func publishTestHost(outputPath, testProject string, options Options) error {
 // beside the host stay incremental; and the bundle costs nothing a warm publish can show (16.8 s
 // against 16.5 s, three publishes each).
 //
-// A host that cannot be removed is refused by name. The usual reason is an earlier run's host still
-// running it, and the publish would otherwise either fail on it or skip the bundle as before.
+// A host that cannot be removed is refused by name. The usual reason is an earlier run's host that
+// is still running, and the publish would otherwise either fail on it or skip the bundle as before.
 func removePublishedTestHost(outputPath, testProject string) error {
 	host := publishedTestHostPath(outputPath, testProject)
 

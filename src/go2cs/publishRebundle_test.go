@@ -105,9 +105,13 @@ func TestPublishIntoAFreshDirectoryStillReachesThePublish(t *testing.T) {
 	}
 }
 
-// A host that cannot be removed is refused by name. The usual reason is an earlier run's host still
-// running it; a directory holding a file stands in for that here, since it fails to remove on every
+// A host that cannot be removed is refused by name. The usual reason is an earlier run's host that is
+// still running; a directory holding a file stands in for that here, since it fails to remove on every
 // platform.
+//
+// The refusal is this attempt's failure, so the binary log an EARLIER failed publish kept is gone by
+// the time it is returned: the sweep files whatever log it finds beside a failed row as that row's
+// evidence (preparePublishBinlog's own rule, which the refusal does not step around).
 func TestPublishRefusesAHostItCannotRemove(t *testing.T) {
 	out := t.TempDir()
 	project := filepath.Join(out, "x.tests.csproj")
@@ -120,13 +124,22 @@ func TestPublishRefusesAHostItCannotRemove(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	staleBinlog := publishBinlogPath(out)
+
+	if err := os.WriteFile(staleBinlog, []byte("an earlier failed publish"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
 	takeDotnetOffPath(t)
 
-	err := publishTestHost(out, project, Options{})
+	err := publishTestHost(out, project, Options{testPublishBinlog: true})
 	if err == nil || errors.Is(err, exec.ErrNotFound) {
 		t.Fatalf("publishTestHost went on to the publish over a host it could not remove (returned %v)", err)
 	}
 	if !strings.Contains(err.Error(), host) {
 		t.Errorf("the refusal does not name the host %s: %v", host, err)
+	}
+	if _, statErr := os.Stat(staleBinlog); !os.IsNotExist(statErr) {
+		t.Errorf("an earlier attempt's binary log survives the refusal and would be read as this one's: %s", staleBinlog)
 	}
 }
