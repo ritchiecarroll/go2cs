@@ -50,6 +50,7 @@ easily, and a .NET developer can use Go code directly within the .NET ecosystem.
 
 * Why is a Go to C# transpiler needed? _[Integration opportunities](Background.md#background)._
 * Won't converted C# code be slower? _[Usually — but not always](#performance)._
+* OK, I want to try this — where will it fail or fight me? _[The honest limitations](Limitations.md)._
 
 ## Transpiler Goals
 

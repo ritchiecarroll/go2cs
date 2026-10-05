@@ -1,5 +1,8 @@
 # Known issues
 
+This page lists specific bugs, each with a workaround. For the limits that come with running Go on .NET, and
+the rough spots real code hits today, see [Limitations](Limitations.md).
+
 ## Ubuntu's packaged .NET 10 can end a converted program early
 
 On Ubuntu's own build of .NET 10 (the `dotnet` installed with `apt`, runtime identifier `ubuntu.*-x64`), a
