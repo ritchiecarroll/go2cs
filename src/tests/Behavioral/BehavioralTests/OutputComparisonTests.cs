@@ -575,6 +575,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckForVarMasksFuncLevel() => CheckTarget("ForVarMasksFuncLevel");
 
     [TestMethod]
+    public void CheckForeignDefinedConversion() => CheckTarget("ForeignDefinedConversion");
+
+    [TestMethod]
     public void CheckForeignIfaceFieldPointer() => CheckTarget("ForeignIfaceFieldPointer");
 
     [TestMethod]

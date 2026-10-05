@@ -1348,6 +1348,20 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 							// ambiguity castOperandNeedsParens covers.
 							_, operandIsBinary := arg.(*ast.BinaryExpr)
 
+							// A target written over ANOTHER package's named type (`type Level
+							// logrus.Level`) converts only from that base, so the constant hops
+							// through it: `((ΔLevel)(logrus.Level)0)` — one user-defined operator per
+							// cast, where `((ΔLevel)0)` would need two (CS0030).
+							if base := foreignWrittenBase(named); base != nil {
+								baseCS := convertToCSTypeName(v.getAliasQualifiedTypeName(base, false))
+
+								if operandIsBinary || castOperandNeedsParens(baseCS, expr) {
+									return fmt.Sprintf("((%s)(%s)(%s))", namedCS, baseCS, expr)
+								}
+
+								return fmt.Sprintf("((%s)(%s)%s)", namedCS, baseCS, expr)
+							}
+
 							if operandIsBinary || castOperandNeedsParens(namedCS, expr) {
 								return fmt.Sprintf("((%s)(%s))", namedCS, expr)
 							}
@@ -1400,7 +1414,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					}
 				}
 
-				if argType == nil || argIsDistinctNamedNumeric || !types.Identical(argType.Underlying(), basic) {
+				if argType == nil || argIsDistinctNamedNumeric || !types.Identical(argType.Underlying(), basic) || foreignWrittenBase(named) != nil {
 					underlyingCS := v.getCSharpTypeName(basic)
 					inner := expr
 
@@ -1418,6 +1432,19 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 								inner = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(argBasic), expr)
 							}
 						}
+					}
+
+					// The same foreign-base hop for a non-constant operand: the basic underlying
+					// reaches the target only through the base its wrapper names,
+					// `((Cross)(lib.Level)(uint)x)`.
+					if base := foreignWrittenBase(named); base != nil {
+						baseCS := convertToCSTypeName(v.getAliasQualifiedTypeName(base, false))
+
+						if v.needsParentheses(arg) {
+							return fmt.Sprintf("((%s)(%s)(%s)(%s))", targetTypeName, baseCS, underlyingCS, inner)
+						}
+
+						return fmt.Sprintf("((%s)(%s)(%s)%s)", targetTypeName, baseCS, underlyingCS, inner)
 					}
 
 					if v.needsParentheses(arg) {
