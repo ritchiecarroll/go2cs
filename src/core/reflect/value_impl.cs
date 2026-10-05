@@ -944,7 +944,10 @@ public static ΔValue Elem(this ΔValue v) {
         nint[]? pointeeKeyDims = v.typ_ == nil ? null : v.typ_.Value.keyDims;
         var t = abi.synthType(pointee, dims, null, pointeeDir, pointeeKeyDims);
         var elem = new ΔValue(t, default!, ((flag)(uintptr)(uint8)GoReflect.KindOf(pointee)) | flagAddr | flagIndir | ((flag)(v.flag & flagRO)));
-        elem.addrBox = cur;
+        // The pointee's address box is the ж<T> itself, never a named-pointer wrapper around it:
+        // `type sPtr *s` makes Elem() the same addressable value Go has for the *s it converts from
+        // (see GoReflect.AddressBoxOf for the three readers that depend on it).
+        elem.addrBox = GoReflect.AddressBoxOf(cur);
         return elem;
     }
     throw panic(Ꮡ(new ValueError("reflect.Value.Elem", v.kind())));
