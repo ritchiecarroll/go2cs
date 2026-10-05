@@ -201,6 +201,15 @@ Check 'nugetgo-pack.ps1 writes the assembly copyright beside the packed projects
 # '@(...)' inside a holder string), and the read-back holds it to the license file's lines exactly.
 Check 'nugetgo-pack.ps1 escapes the nupkg Copyright for MSBuild and reads it back exactly' ($pack.Contains('<Copyright>$(ConvertTo-NugetgoMSBuildLiteral $copyright)</Copyright>') -and
     $pack.Contains('if ($md.copyright -cne $copyright)')) 'the nupkg Copyright is not MSBuild-escaped or not read back'
+# The same for every other free-text value the generated project carries: the description (it quotes -Upstream), the
+# release notes, the authors, and both URLs (a URL's '%20' is an escape MSBuild would otherwise decode).
+Check 'nugetgo-pack.ps1 escapes the description, authors and URLs for MSBuild and reads authors and URLs back' (
+    $pack.Contains('<Authors>$(ConvertTo-NugetgoMSBuildLiteral $Authors)</Authors>') -and
+    $pack.Contains('<Description>$(ConvertTo-NugetgoMSBuildLiteral $description)</Description>') -and
+    $pack.Contains('<PackageReleaseNotes>$(ConvertTo-NugetgoMSBuildLiteral $description)</PackageReleaseNotes>') -and
+    $pack.Contains('<RepositoryUrl>$(ConvertTo-NugetgoMSBuildLiteral $RepositoryUrl)</RepositoryUrl>') -and
+    $pack.Contains('<PackageProjectUrl>$(ConvertTo-NugetgoMSBuildLiteral $RepositoryUrl)</PackageProjectUrl>') -and
+    $pack.Contains('if ($md.authors -cne $Authors)') -and $pack.Contains('$md.repository.url -cne $RepositoryUrl -or ([Uri]$md.projectUrl).AbsoluteUri -cne ([Uri]$RepositoryUrl).AbsoluteUri')) 'a free-text value is not MSBuild-escaped or not read back'
 
 Write-Host "ran $ran, failed $failed"
 exit $failed

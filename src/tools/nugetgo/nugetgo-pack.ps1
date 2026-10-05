@@ -215,15 +215,15 @@ $csproj = @"
     <TargetsForTfmSpecificContentInPackage>`$(TargetsForTfmSpecificContentInPackage);NugetgoModuleAssemblies</TargetsForTfmSpecificContentInPackage>
     <PackageId>$(& $esc $id.Id)</PackageId>
     <Version>$(& $esc $packageVersion)</Version>
-    <Authors>$(& $esc $Authors)</Authors>
-    <Description>$(& $esc $description)</Description>
-    <PackageReleaseNotes>$(& $esc $description)</PackageReleaseNotes>
+    <Authors>$(ConvertTo-NugetgoMSBuildLiteral $Authors)</Authors>
+    <Description>$(ConvertTo-NugetgoMSBuildLiteral $description)</Description>
+    <PackageReleaseNotes>$(ConvertTo-NugetgoMSBuildLiteral $description)</PackageReleaseNotes>
     <Copyright>$(ConvertTo-NugetgoMSBuildLiteral $copyright)</Copyright>
     <PackageLicenseFile>$(& $esc $licenseName)</PackageLicenseFile>
     <PackageReadmeFile>VALIDATION.md</PackageReadmeFile>
-    <RepositoryUrl>$(& $esc $RepositoryUrl)</RepositoryUrl>
+    <RepositoryUrl>$(ConvertTo-NugetgoMSBuildLiteral $RepositoryUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageProjectUrl>$(& $esc $RepositoryUrl)</PackageProjectUrl>
+    <PackageProjectUrl>$(ConvertTo-NugetgoMSBuildLiteral $RepositoryUrl)</PackageProjectUrl>
     <PackageTags>go2cs;golang;go;PROOF</PackageTags>
   </PropertyGroup>
   <ItemGroup>
@@ -315,6 +315,12 @@ Write-Host "    pages: $((@($entries | Where-Object { $_ -like '*.md' })) -join 
 if ($md.id -ne $id.Id -or $md.version -ne $packageVersion) { throw "read-back identity $($md.id) $($md.version) is not $($id.Id) $packageVersion" }
 if ($md.description -cne $description -or $md.releaseNotes -cne $description) { throw 'the read-back description or release notes are not the ruled text' }
 if ($md.copyright -cne $copyright) { throw "the read-back copyright '$($md.copyright)' is not the upstream license file's Copyright lines '$copyright'" }
+# Every free-text value reaches the nuspec intact: the generated project MSBuild-escapes each, so a '$(...)', '@(...)' or
+# '%XX' inside one is text, never an expansion or an escape MSBuild would decode.
+if ($md.authors -cne $Authors) { throw "the read-back authors '$($md.authors)' are not -Authors '$Authors'" }
+# NuGet writes projectUrl through System.Uri, which decodes an escape such as '%20' as it renders: that field is
+# compared as a URI, the repository url (written as given) as text.
+if ($md.repository.url -cne $RepositoryUrl -or ([Uri]$md.projectUrl).AbsoluteUri -cne ([Uri]$RepositoryUrl).AbsoluteUri) { throw "the read-back repository url '$($md.repository.url)' or project url '$($md.projectUrl)' is not -RepositoryUrl '$RepositoryUrl'" }
 if (-not $validationHead.StartsWith("> $description", [StringComparison]::Ordinal)) { throw 'the packed VALIDATION.md does not open with the ruled text' }
 if ($badDeps.Count) { throw "go.* dependencies not at the B4 range: $(($badDeps | ForEach-Object { "$($_.id) $($_.version)" }) -join ', ')" }
 if (@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count -ne $libraries.Count) { throw "lib/ carries $(@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count) assemblies for $($libraries.Count) packages" }
