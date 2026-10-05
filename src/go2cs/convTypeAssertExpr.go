@@ -60,7 +60,11 @@ func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string 
 	// convertToCSTypeName again: the conversion is not idempotent, re-sanitizing machinery
 	// names inside generic args (`d.(chan struct{})` → `channel<EmptyStruct>` whose inner
 	// arg re-sanitized to the reserved-Δ `ΔEmptyStruct` — context CS0246 ×4/CS0019).
-	typeExpr := v.convExpr(typeAssertExpr.Type, []ExprContext{context})
+	//
+	// Go allows the asserted type to be PARENTHESIZED — objx writes `v.data.((Map))` — and a
+	// ParenExpr renders with its parentheses, which a C# type argument cannot carry
+	// (`_<(Map)>()`, CS1525). The parentheses are syntax only, so the type is rendered unwrapped.
+	typeExpr := v.convExpr(ast.Unparen(typeAssertExpr.Type), []ExprContext{context})
 
 	// A methodless named func type collapses to its base C# delegate everywhere it is REFERENCED
 	// (getAliasQualifiedTypeName), so its NAME is never emitted. A type-assertion target `ci.(Compressor)` where
