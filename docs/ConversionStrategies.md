@@ -1516,7 +1516,10 @@ package passes in would then not match the copy the test uses. Referencing keeps
 
 **Known differences from Go are listed beside the package.** A hand-written `go2cs_test_disclosures.json`
 names each test whose C# result is known to differ from `go test`, with the reason. A test that fails
-without such an entry counts as a mismatch.
+without such an entry counts as a mismatch. A third-party module keeps its manifests in the committed tree
+`src/tests/ModuleDisclosures/<module path>@<version>/<package dir>/`, read when the run passes
+`-module-disclosures src/tests/ModuleDisclosures`. A manifest there applies only to that exact module
+version, and a manifest in the package's own output directory still takes precedence.
 
 **Full detail:** [Reference → Test suites reference the production project](ConversionStrategies-Reference/shadowing.md#test-suites-reference-the-production-project-instead-of-recompiling-it) — the test-project models and when each applies, the internal bridge class and its metadata files, test-side name collisions, and exactly which test files get no `.cs`.
 
