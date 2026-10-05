@@ -31,7 +31,6 @@ Of course, everything is not peaches and cream. A tool like this is worth exactl
 * **Some Go tests ask for the impossible, or the not-yet.** The impossible ones check things no managed runtime can promise, like the inner workings of Go's own runtime, or whether an object a test just stopped using can already be collected. The not-yet ones count allocations Go's compiler avoids and go2cs doesn't, and each carries a plan to retire it. None are quietly skipped: each one is pinned by its exact failure signature in a [committed file](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/bytes/go2cs_test_disclosures.json), so any *other* failure of that test still counts.
 * **Hand-written assembly doesn't make the trip.** .NET can't run Go's assembly code, so the converted library reproduces Go built with its portable fallbacks (`-tags purego`).
 * **Not every Go module converts cleanly yet.** Real-world code still turns up converter bugs. The [README](README.md#converting-a-real-world-module) shows how to convert a module's own code first and deal with its dependencies later.
-* **macOS is still catching up.** The library compiles there, and the work to run and validate it is under way, tracked on the [Roadmap](Roadmap.md#platforms).
 
 Bugs that would bite you are written up in the open, in [Known issues](KnownIssues.md).
 
