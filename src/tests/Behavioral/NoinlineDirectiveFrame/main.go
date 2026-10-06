@@ -35,7 +35,7 @@ func (c *counter) bump() string {
 }
 
 // forward is a thin forwarder TO a directed function; the directive does not
-// reach it, and it is not asked to keep a frame.
+// reach it (it is marked only by the module fixed-skip path closure).
 func forward(b []byte, i int) string { return keeper(b, i) }
 
 func main() {

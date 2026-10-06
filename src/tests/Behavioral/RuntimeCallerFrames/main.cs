@@ -30,7 +30,7 @@ partial class main_package {
     return grandLine();
 }
 
-internal static (nint, nint) sameSite() {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, nint) sameSite() {
     return (callerLine(), wrapGrand());
 }
 
