@@ -2160,28 +2160,14 @@ internal class StructTypeTemplate : TemplateBase
     // definitions to forward a multi-level defined type's fields.
     internal static string? InheritedStructDefinition(StructDeclarationSyntax structDecl)
     {
-        foreach (AttributeSyntax attribute in structDecl.AttributeLists.SelectMany(list => list.Attributes))
-        {
-            string name = attribute.Name.ToString();
+        // The [GoType("…")] argument, or the converted declaration's definition comment.
+        string? definition = structDecl.GetGoTypeDefinitionText();
 
-            if (name != GoTypeAttributeName && name != $"{GoTypeAttributeName}Attribute")
-                continue;
+        if (definition is null || definition.Length == 0 || definition == "dyn" || definition.StartsWith("[") ||
+            definition.StartsWith("map[") || definition.StartsWith("chan ") || definition.StartsWith("num:"))
+            return null;
 
-            (string _, string value)[] arguments = attribute.GetArgumentValues();
-
-            if (arguments.Length == 0 || arguments[0].value.Length <= 2)
-                return null;
-
-            string definition = arguments[0].value[1..^1].Trim();
-
-            if (definition.Length == 0 || definition == "dyn" || definition.StartsWith("[") ||
-                definition.StartsWith("map[") || definition.StartsWith("chan ") || definition.StartsWith("num:"))
-                return null;
-
-            return definition;
-        }
-
-        return null;
+        return definition;
     }
 
     // Symbol-based counterpart of the syntax walk above, for a type that reached us as compiled

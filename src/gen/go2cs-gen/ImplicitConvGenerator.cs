@@ -251,11 +251,7 @@ public class ImplicitConvGenerator : ISourceGenerator
                 ITypeSymbol srcSide = inverted ? targetType : sourceType;
                 StructDeclarationSyntax? srcDecl = GetStructDeclaration(syntaxContext, srcSide.Name);
 
-                string? goTypeTag = srcDecl?.AttributeLists
-                    .SelectMany(list => list.Attributes)
-                    .Where(attr => attr.Name.ToString() is "GoType" or "GoTypeAttribute")
-                    .Select(attr => attr.ArgumentList?.Arguments.FirstOrDefault()?.ToString().Trim('"'))
-                    .FirstOrDefault();
+                string? goTypeTag = srcDecl?.GetGoTypeDefinitionText();
 
                 if (goTypeTag == "num:uintptr")
                 {
@@ -373,11 +369,7 @@ public class ImplicitConvGenerator : ISourceGenerator
     // local declaration or no numeric GoType tag.
     private static string? GetNumBasic(GeneratorSyntaxContext context, string typeName)
     {
-        string? tag = GetStructDeclaration(context, typeName)?.AttributeLists
-            .SelectMany(list => list.Attributes)
-            .Where(attr => attr.Name.ToString() is "GoType" or "GoTypeAttribute")
-            .Select(attr => attr.ArgumentList?.Arguments.FirstOrDefault()?.ToString().Trim('"'))
-            .FirstOrDefault();
+        string? tag = GetStructDeclaration(context, typeName)?.GetGoTypeDefinitionText();
 
         return tag is not null && tag.StartsWith("num:") ? tag["num:".Length..] : null;
     }

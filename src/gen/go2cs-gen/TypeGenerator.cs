@@ -121,7 +121,7 @@ public class TypeGenerator : ISourceGenerator
             bool emitGoTypeAttribute = byRule;
 
             (Location location, string typeDefinition)[] definitions = byRule ?
-                [(targetSyntax.Identifier.GetLocation(), string.Empty)] :
+                [(targetSyntax.Identifier.GetLocation(), targetSyntax.GetDefinitionComment() ?? string.Empty)] :
                 attributes.Select(attribute => (attribute.GetLocation(), GetTypeDefinition(attribute))).ToArray();
 
             foreach ((Location attributeLocation, string typeDefinition) in definitions)
@@ -135,6 +135,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new StructTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             Scope = scope,
                             Context = context,
@@ -158,8 +160,7 @@ public class TypeGenerator : ISourceGenerator
                                 hasEqualityOperators ? null : structDeclaration.GetEqualityFallbackMembers(context.Compilation),
                                 structDeclaration.GetInterfaceValueMembers(context.Compilation)),
                             ValueCloneFields = valueCloneFields,
-                            UsingStatements = usingStatements,
-                            EmitGoTypeAttribute = emitGoTypeAttribute
+                            UsingStatements = usingStatements
                         }
                         .Generate();
 
@@ -177,6 +178,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             ObjectName = identifier,
                             Scope = scope,
@@ -197,6 +200,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             Scope = scope,
                             ObjectName = identifier,
@@ -217,6 +222,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             ObjectName = identifier,
                             Scope = scope,
@@ -238,6 +245,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             ObjectName = identifier,
                             ReadOnlyValue = false,
@@ -259,6 +268,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             ObjectName = identifier,
                             Scope = $"{scope} readonly",
@@ -412,6 +423,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             ObjectName = identifier,
                             Scope = scope,
@@ -471,6 +484,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InterfaceTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             Scope = scope,
                             InterfaceName = identifier,
@@ -481,8 +496,7 @@ public class TypeGenerator : ISourceGenerator
                             // one gets no shell rather than one that fails to implement it (CS0535).
                             EmitShells = shellEligible && interfaceMethods.Length > 0 &&
                                 interfaceMethods.All(method => method.IsSignatureRenderable),
-                            UsingStatements = usingStatements,
-                            EmitGoTypeAttribute = emitGoTypeAttribute
+                            UsingStatements = usingStatements
                         }
                         .Generate();
 
@@ -494,6 +508,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             ObjectName = identifier,
                             ObjectKind = "class",
@@ -885,28 +901,9 @@ public class TypeGenerator : ISourceGenerator
     // GoType attribute or no argument.
     private static string? GetGoTypeDefinition(StructDeclarationSyntax structDeclaration)
     {
-        foreach (AttributeListSyntax attributeList in structDeclaration.AttributeLists)
-        {
-            foreach (AttributeSyntax attribute in attributeList.Attributes)
-            {
-                string name = attribute.Name.ToString();
+        string? definition = structDeclaration.GetGoTypeDefinitionText();
 
-                if (name != AttributeName && name != $"{AttributeName}Attribute")
-                    continue;
-
-                (string _, string value)[] arguments = attribute.GetArgumentValues();
-
-                if (arguments.Length > 0)
-                {
-                    string value = arguments[0].value;
-
-                    if (!string.IsNullOrWhiteSpace(value) && value.Length > 2)
-                        return value[1..^1].Trim();
-                }
-            }
-        }
-
-        return null;
+        return string.IsNullOrWhiteSpace(definition) ? null : definition;
     }
 
     // METADATA counterpart to the overload above: reads a foreign symbol's own [GoType] attribute

@@ -20,6 +20,12 @@
     <!-- Referenced as a plain library, NOT as an analyzer: these tests exercise the
          generator's identifier helpers directly. -->
     <ProjectReference Include="..\..\gen\go2cs-gen\go2cs-gen.csproj" />
+    <!-- The real golib: GoTypeDefinitionCommentTests compiles converted declarations plus the
+         generator's output against it, so "a deleted definition comment fails the build" is read
+         from the compiler's own verdict, not inferred from the generated text. Aliased: golib and
+         go2cs-gen both declare go2cs.Symbols, so an unaliased reference makes every test that uses it
+         ambiguous (CS0433). -->
+    <ProjectReference Include="..\..\core\golib\golib.csproj" Aliases="golib" />
   </ItemGroup>
 
 </Project>

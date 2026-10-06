@@ -25,7 +25,13 @@ internal abstract class TemplateBase
     // so reflection reads the type exactly as it did when the converter wrote the attribute.
     public bool EmitGoTypeAttribute;
 
-    protected string GoTypeAttributePrefix => EmitGoTypeAttribute ? "[GoType] " : "";
+    // The definition the converter now writes as a comment after the type's name (`/*num:int64*/`),
+    // re-emitted as the attribute's argument so GoTypeAttribute.Definition reads as before; empty for a
+    // plain Go type.
+    public string GoTypeDefinition = "";
+
+    protected string GoTypeAttributePrefix => !EmitGoTypeAttribute ? "" :
+        string.IsNullOrEmpty(GoTypeDefinition) ? "[GoType] " : $"[GoType(\"{GoTypeDefinition}\")] ";
 
     private readonly HashSet<string> m_usings = new(
     [
