@@ -69,6 +69,104 @@ public class MemberRecordTests
         StringAssert.Contains(refusal.Message, "'gone'");
         StringAssert.Contains(refusal.Message, "MistaggedRecord");
     }
+
+    // Face lift D (5.4): a field's dims comment is recorded as [GoMemberRecord(member, Dims, dims)], a parameter's as
+    // [GoParamDims(method, parameter types, position, dims)] on the method's declaring type.
+
+    [TestMethod]
+    public void TheRecordGivesAFieldItsDims()
+    {
+        CollectionAssert.AreEqual(new nint[] { 3 }, Field(typeof(memberrecord_package.DimsRecorded), "p").ArrayDims);
+        Assert.IsNull(Field(typeof(memberrecord_package.DimsRecorded), "q").ArrayDims, "an unrecorded pointer field has none");
+    }
+
+    [TestMethod]
+    public void ADimsRecordNamingAFieldTheTypeDoesNotDeclareIsRefusedByName()
+    {
+        InvalidOperationException refusal = Assert.ThrowsException<InvalidOperationException>(() => GoReflect.GoFields(typeof(memberrecord_package.DimsMisrecorded)));
+
+        StringAssert.Contains(refusal.Message, "'absent'");
+    }
+
+    [TestMethod]
+    public void TheRecordGivesEachParameterItsDims()
+    {
+        nint[]?[]? hash = GoReflect.FuncParamDims((Func<array<byte>, nint>)paramdims_package.hash);
+        CollectionAssert.AreEqual(new nint[] { 32 }, hash![0]);
+
+        nint[]?[]? fill = GoReflect.FuncParamDims((Action<nint, ж<array<int>>, array<array<byte>>>)paramdims_package.fill);
+        Assert.IsNull(fill![0], "a parameter with no record");
+        CollectionAssert.AreEqual(new nint[] { 2 }, fill[1], "a pointer to an array carries its pointee's dims");
+        CollectionAssert.AreEqual(new nint[] { 4, 8 }, fill[2], "nested arrays, outermost first");
+
+        Assert.IsNull(GoReflect.FuncParamDims((Func<array<byte>, nint>)paramdims_package.unrecorded), "a method with no record");
+    }
+
+    [TestMethod]
+    public void TheHandWrittenAttributeStillGivesAParameterItsDims()
+    {
+        CollectionAssert.AreEqual(new nint[] { 4 }, GoReflect.FuncParamDims((Action<array<byte>>)paramdims_package.stamped)![0]);
+    }
+
+    [TestMethod]
+    public void AParameterRecordThatCannotBeResolvedIsRefusedByName()
+    {
+        InvalidOperationException none = Assert.ThrowsException<InvalidOperationException>(() => GoReflect.FuncParamDims((Action<array<byte>>)paramdims_nomethod.present));
+        StringAssert.Contains(none.Message, "'missing'");
+
+        InvalidOperationException notArray = Assert.ThrowsException<InvalidOperationException>(() => GoReflect.FuncParamDims((Action<nint>)paramdims_notarray.count));
+        StringAssert.Contains(notArray.Message, "'count'");
+        StringAssert.Contains(notArray.Message, "not an array");
+
+        InvalidOperationException outOfRange = Assert.ThrowsException<InvalidOperationException>(() => GoReflect.FuncParamDims((Action<array<byte>>)paramdims_position.only));
+        StringAssert.Contains(outOfRange.Message, "parameter 3 of 'only'");
+
+        InvalidOperationException ambiguous = Assert.ThrowsException<InvalidOperationException>(() => GoReflect.FuncParamDims((Action<array<byte>>)paramdims_twice.twin));
+        StringAssert.Contains(ambiguous.Message, "more than one");
+    }
+}
+
+// "package paramdims" -- converted funcs whose array parameters' dims are recorded on the package class, one
+// not recorded, and one hand-written with the attribute. The other classes each carry one record go2cs-gen
+// could never write, which the reader refuses by name.
+[GoParamDims("hash", new[] { typeof(array<byte>) }, 0, 32)]
+[GoParamDims("fill", new[] { typeof(nint), typeof(ж<array<int>>), typeof(array<array<byte>>) }, 1, 2)]
+[GoParamDims("fill", new[] { typeof(nint), typeof(ж<array<int>>), typeof(array<array<byte>>) }, 2, 4, 8)]
+public static class paramdims_package
+{
+    public static nint hash(array<byte> b) => 0;
+
+    public static void fill(nint n, ж<array<int>> p, array<array<byte>> grid) { }
+
+    public static nint unrecorded(array<byte> b) => 0;
+
+    public static void stamped([GoArrayDims(4)] array<byte> b) { }
+}
+
+[GoParamDims("missing", new[] { typeof(array<byte>) }, 0, 32)]
+public static class paramdims_nomethod
+{
+    public static void present(array<byte> b) { }
+}
+
+[GoParamDims("count", new[] { typeof(nint) }, 0, 32)]
+public static class paramdims_notarray
+{
+    public static void count(nint n) { }
+}
+
+[GoParamDims("only", new[] { typeof(array<byte>) }, 3, 32)]
+public static class paramdims_position
+{
+    public static void only(array<byte> b) { }
+}
+
+[GoParamDims("twin", new[] { typeof(array<byte>) }, 0, 32)]
+public static class paramdims_twice
+{
+    public static void twin(array<byte> b) { }
+
+    public static void twin<T>(array<byte> b) { }
 }
 
 // "package memberrecord" -- the converted shape (a record on the type), the hand-written shape (the
@@ -109,6 +207,19 @@ public static class memberrecord_package
     {
         public Inner ʗInner;
         public Inner Inner => ʗInner;
+    }
+
+    [GoMemberRecord("p", GoMemberFact.Dims, 3)]
+    public struct DimsRecorded
+    {
+        public ж<array<byte>> p;
+        public ж<array<byte>> q;
+    }
+
+    [GoMemberRecord("absent", GoMemberFact.Dims, 3)]
+    public struct DimsMisrecorded
+    {
+        public ж<array<byte>> present;
     }
 
     [GoMemberRecord("gone", GoMemberFact.Tag, "json:\"gone\"")]

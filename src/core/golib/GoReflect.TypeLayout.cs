@@ -1062,9 +1062,10 @@ public static partial class GoReflect
     /// </remarks>
     public static nint[]? FieldStampedDims(FieldInfo field)
     {
-        return field.GetCustomAttributes(typeof(GoArrayDimsAttribute), false) is [GoArrayDimsAttribute { Dims.Length: > 0 } stamped]
-            ? toNintDims(stamped.Dims)
-            : null;
+        if (field.GetCustomAttributes(typeof(GoArrayDimsAttribute), false) is [GoArrayDimsAttribute { Dims.Length: > 0 } stamped])
+            return toNintDims(stamped.Dims);
+
+        return RecordedDims(field) is { } recorded ? toNintDims(recorded) : null;
     }
 
     // -------- TYPE-level descriptor cargo (a DEFINED type's stamp beside its [GoType] marker) --------
@@ -1710,7 +1711,7 @@ public static partial class GoReflect
             return null;
         }
 
-        return paramDims(declared);
+        return paramDims(method, declared);
     }
 
     /// <summary>
@@ -1728,20 +1729,28 @@ public static partial class GoReflect
     /// </remarks>
     public static nint[]?[]? MethodParamDims(Type? t, int index)
     {
-        return paramDims(MethodAt(t, index).Method.GetParameters());
+        MethodInfo method = MethodAt(t, index).Method;
+        return paramDims(method, method.GetParameters());
     }
 
-    private static nint[]?[]? paramDims(ParameterInfo[] declared)
+    // A parameter's dims: its own [GoArrayDims] (a lambda's or a local function's, and hand-written code), or
+    // the [GoParamDims] record go2cs-gen wrote on the declaring type from the converter's `/*[N]*/` comment.
+    private static nint[]?[]? paramDims(MethodInfo method, ParameterInfo[] declared)
     {
         nint[]?[]? dims = null;
+        long[]?[]? recorded = method.DeclaringType is { } declaring && ParamDimsRecords(declaring).TryGetValue(method, out long[]?[]? found) ? found : null;
 
         for (int i = 0; i < declared.Length; i++)
         {
-            if (declared[i].GetCustomAttributes(typeof(GoArrayDimsAttribute), false) is not [GoArrayDimsAttribute { Dims.Length: > 0 } stamped])
+            long[]? stamped = declared[i].GetCustomAttributes(typeof(GoArrayDimsAttribute), false) is [GoArrayDimsAttribute { Dims.Length: > 0 } attribute]
+                ? attribute.Dims
+                : recorded?[i];
+
+            if (stamped is null)
                 continue;
 
             dims ??= new nint[]?[declared.Length];
-            dims[i] = toNintDims(stamped.Dims);
+            dims[i] = toNintDims(stamped);
         }
 
         return dims;
@@ -1818,22 +1827,7 @@ public static partial class GoReflect
 
         foreach (GoSigChanDirAttribute entry in entries)
         {
-            if (entry.Method != method.Name || entry.ParameterTypes.Length != parameters.Length)
-                continue;
-
-            bool matches = true;
-
-            for (int i = 0; i < parameters.Length && matches; i++)
-            {
-                Type parameterType = parameters[i].ParameterType;
-
-                if (parameterType.IsByRef)
-                    parameterType = parameterType.GetElementType()!;
-
-                matches = parameterType == entry.ParameterTypes[i];
-            }
-
-            if (!matches)
+            if (!SignatureMatches(method, entry.Method, entry.ParameterTypes))
                 continue;
 
             Type returnType = method.ReturnType;

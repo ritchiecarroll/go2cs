@@ -20,7 +20,13 @@ public enum GoMemberFact : byte
     /// The named field, or the partial property that declares an embedded field, carries the Go struct tag in
     /// <see cref="GoMemberRecordAttribute.Value"/> (what <c>[GoTag]</c> says).
     /// </summary>
-    Tag = 2
+    Tag = 2,
+
+    /// <summary>
+    /// The named field carries Go array dims in <see cref="GoMemberRecordAttribute.Dims"/>: what
+    /// <see cref="GoArrayDimsAttribute"/> says on a field (the dims its pointer or map hop hands down).
+    /// </summary>
+    Dims = 3
 }
 
 /// <summary>
@@ -56,6 +62,12 @@ public sealed class GoMemberRecordAttribute : Attribute
         Value = value;
     }
 
+    /// <summary>Records a fact whose value is Go array dims, outermost first.</summary>
+    public GoMemberRecordAttribute(string member, GoMemberFact fact, params long[] dims) : this(member, fact)
+    {
+        Dims = dims;
+    }
+
     /// <summary>The C# name of the member the fact is about.</summary>
     public string Member { get; }
 
@@ -64,4 +76,7 @@ public sealed class GoMemberRecordAttribute : Attribute
 
     /// <summary>The fact's value (a <see cref="GoMemberFact.Tag"/>'s tag), or null for a fact that has none.</summary>
     public string? Value { get; }
+
+    /// <summary>A <see cref="GoMemberFact.Dims"/> fact's dims, outermost first, or null for any other fact.</summary>
+    public long[]? Dims { get; }
 }

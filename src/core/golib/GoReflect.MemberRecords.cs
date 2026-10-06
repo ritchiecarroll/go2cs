@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace go;
@@ -44,6 +45,15 @@ public static partial class GoReflect
 
                         if (record.Value is null)
                             throw new InvalidOperationException($"go2cs: [GoMemberRecord] on {declaring.FullName} records a struct tag for '{record.Member}' with no tag");
+
+                        break;
+
+                    case GoMemberFact.Dims:
+                        if (declaring.GetField(record.Member, DeclaredFields) is null)
+                            throw new InvalidOperationException($"go2cs: [GoMemberRecord] on {declaring.FullName} records array dims for '{record.Member}', but {declaring.Name} declares no field of that name");
+
+                        if (record.Dims is not { Length: > 0 })
+                            throw new InvalidOperationException($"go2cs: [GoMemberRecord] on {declaring.FullName} records array dims for '{record.Member}' with no dims");
 
                         break;
 
@@ -89,5 +99,115 @@ public static partial class GoReflect
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// The Go array dims <paramref name="field"/> carries in the converter's dims comment, which go2cs-gen
+    /// records on its declaring type, or null when there is no such record.
+    /// </summary>
+    internal static long[]? RecordedDims(FieldInfo field)
+    {
+        if (field.DeclaringType is not { } declaring)
+            return null;
+
+        foreach (GoMemberRecordAttribute record in MemberRecords(declaring))
+        {
+            if (record.Fact == GoMemberFact.Dims && record.Member == field.Name)
+                return record.Dims;
+        }
+
+        return null;
+    }
+
+    private const BindingFlags DeclaredMethods = BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+
+    private static readonly ConcurrentDictionary<Type, Dictionary<MethodInfo, long[]?[]>> s_paramDimsRecords = new();
+
+    /// <summary>
+    /// The <see cref="GoParamDimsAttribute"/>s go2cs-gen generated on <paramref name="type"/>, each resolved to
+    /// the one method it names when the type is first read: per method, one entry per parameter, null where a
+    /// parameter has no record.
+    /// </summary>
+    /// <remarks>
+    /// A record is refused BY NAME, never applied, when it matches no method <paramref name="type"/> declares or
+    /// more than one, when its position is not one of the method's parameters, or when that parameter's type is
+    /// not an array or a pointer to one: the comment the generator read and the signature the compiler built
+    /// have drifted apart, and a dims-less answer would be silent.
+    /// </remarks>
+    internal static Dictionary<MethodInfo, long[]?[]> ParamDimsRecords(Type type) =>
+        s_paramDimsRecords.GetOrAdd(type, static declaring =>
+        {
+            Dictionary<MethodInfo, long[]?[]> resolved = new();
+
+            foreach (GoParamDimsAttribute record in (GoParamDimsAttribute[])declaring.GetCustomAttributes(typeof(GoParamDimsAttribute), false))
+            {
+                MethodInfo? target = null;
+
+                foreach (MethodInfo method in declaring.GetMethods(DeclaredMethods))
+                {
+                    if (!SignatureMatches(method, record.Method, record.ParameterTypes))
+                        continue;
+
+                    if (target is not null)
+                        throw new InvalidOperationException($"go2cs: [GoParamDims] on {declaring.FullName} for '{record.Method}' matches more than one method of that name and signature");
+
+                    target = method;
+                }
+
+                if (target is null)
+                    throw new InvalidOperationException($"go2cs: [GoParamDims] on {declaring.FullName} records array dims for '{record.Method}', but {declaring.Name} declares no method of that name and signature");
+
+                ParameterInfo[] parameters = target.GetParameters();
+
+                if (record.Position < 0 || record.Position >= parameters.Length)
+                    throw new InvalidOperationException($"go2cs: [GoParamDims] on {declaring.FullName} records array dims for parameter {record.Position} of '{record.Method}', which has {parameters.Length} parameters");
+
+                Type parameterType = parameters[record.Position].ParameterType;
+
+                if (parameterType.IsByRef)
+                    parameterType = parameterType.GetElementType()!;
+
+                if (record.Dims.Length == 0 || !(KindOf(parameterType) == Array || parameterType.IsGenericType && parameterType.GetGenericTypeDefinition() == typeof(ж<>) && KindOf(parameterType.GetGenericArguments()[0]) == Array))
+                    throw new InvalidOperationException($"go2cs: [GoParamDims] on {declaring.FullName} records array dims for parameter {record.Position} of '{record.Method}', whose type {parameterType.FullName} is not an array or a pointer to one");
+
+                if (!resolved.TryGetValue(target, out long[]?[]? dims))
+                {
+                    dims = new long[]?[parameters.Length];
+                    resolved[target] = dims;
+                }
+
+                dims[record.Position] = record.Dims;
+            }
+
+            return resolved;
+        });
+
+    /// <summary>
+    /// Whether <paramref name="method"/> is the one named <paramref name="name"/> with exactly
+    /// <paramref name="parameterTypes"/> (receiver included; a <c>ref</c> parameter by its element type): the one
+    /// key by which a generated record names a method (<see cref="GoParamDimsAttribute"/>, <see cref="GoSigChanDirAttribute"/>).
+    /// </summary>
+    internal static bool SignatureMatches(MethodInfo method, string name, Type[] parameterTypes)
+    {
+        if (method.Name != name)
+            return false;
+
+        ParameterInfo[] parameters = method.GetParameters();
+
+        if (parameters.Length != parameterTypes.Length)
+            return false;
+
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            Type parameterType = parameters[i].ParameterType;
+
+            if (parameterType.IsByRef)
+                parameterType = parameterType.GetElementType()!;
+
+            if (parameterType != parameterTypes[i])
+                return false;
+        }
+
+        return true;
     }
 }
