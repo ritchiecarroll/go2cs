@@ -95,9 +95,10 @@ func paramArrayDims(t types.Type) []int64 {
 
 // emitParamDims renders a parameter's array dims for a method or func DECLARATION as the dims comment
 // (dimsComment), which go2cs-gen records on the declaring type, and everywhere else as the attribute. The
-// attribute stays where a record cannot key the method (docs/PLAN-marker-comment-parity.md, 11): a func
-// literal (a lambda or a local function compiles to a compiler-named method), a generic func or a method of
-// a generic type (an attribute argument cannot name a type parameter), a func type and an interface member.
+// attribute stays where a record cannot key the method (docs/PLAN-marker-comment-parity.md, 11): "a parameter
+// of a function with no declared metadata name" (a lambda or a local function), a func type and an interface
+// member. A generic func or a method of a generic type is keyed (face lift D2): the key spells a type built
+// from a type parameter by its open definition.
 func emitParamDims(t types.Type, declaration bool) string {
 	if !declaration {
 		return emitGoArrayDimsAttribute(t)
@@ -108,12 +109,6 @@ func emitParamDims(t types.Type, declaration bool) string {
 	}
 
 	return ""
-}
-
-// recordableDeclaration reports whether signature belongs to a func or method declaration whose parameters
-// a go2cs-gen record can key: not generic, and not a method of a generic type.
-func recordableDeclaration(signature *types.Signature, declaration bool) bool {
-	return declaration && signature.TypeParams().Len() == 0 && signature.RecvTypeParams().Len() == 0
 }
 
 func (v *Visitor) convArrayType(arrayType *ast.ArrayType, context ArrayTypeContext) string {

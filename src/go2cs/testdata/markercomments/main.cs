@@ -10,7 +10,7 @@
 // beside the real facts. Converted with -comments, each Go comment is carried re-spelled, so the records
 // go2cs-gen writes for this file are those of the same source without them: the real embeds of marked
 // and tagged, the struct tags of tagged, each in the spelling a comment can hold, and the array dims of
-// the declarations below (a lambda's, a local function's and a generic func's stay attributes).
+// the declarations below, a generic func's included (a lambda's and a local function's stay attributes).
 namespace go.example.com;
 
 using fmt = fmt_package;
@@ -85,7 +85,7 @@ internal static void fill(nint n, ref array<int32> p, /*[4][8]*/ array<array<byt
 
 }
 
-internal static T first<T>([GoArrayDims(2)] array<T> a) {
+internal static T first<T>(/*[2]*/ array<T> a) {
     a = a.Clone();
 
     return a[0];

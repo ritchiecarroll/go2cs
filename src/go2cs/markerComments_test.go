@@ -118,8 +118,9 @@ func TestGoCommentsAreNeverMarkers(t *testing.T) {
 	}
 
 	// Array dims (5.4): the dims comment directly before the type on a declaration a go2cs-gen record can
-	// key (a func or method parameter, a field, a named array or pointer-to-array type), and the attribute
-	// where none can (a lambda, a local function, a generic func). A map key's dims stay an attribute.
+	// key (a func or method parameter, a generic one's included (D2), a field, a named array or
+	// pointer-to-array type), and the attribute where none can (a lambda, a local function). A map key's
+	// dims are still an attribute, not in this step.
 	for _, want := range []string{
 		"[GoType(\"[2]array<nint>\")] /*[2][3]*/ partial struct nn;",
 		"[GoType(\"ж<array<byte>>\")] /*[4]*/ partial class P;",
@@ -130,7 +131,7 @@ func TestGoCommentsAreNeverMarkers(t *testing.T) {
 		", /*[4][8]*/ array<array<byte>> grid) {",
 		"internal static void put(this ref holder h, /*[3]*/ array<nint> v) {",
 		"internal static nint noted(/*[4]*/ array<byte> a, nint b) {",
-		"internal static T first<T>([GoArrayDims(2)] array<T> a) {",
+		"internal static T first<T>(/*[2]*/ array<T> a) {",
 		"var lambda = ([GoArrayDims(32)] array<byte> x) => {",
 		"nint local([GoArrayDims(3)] array<nint> x) {",
 	} {
@@ -139,8 +140,8 @@ func TestGoCommentsAreNeverMarkers(t *testing.T) {
 		}
 	}
 
-	if got := strings.Count(mainCs, "GoArrayDims("); got != 3 {
-		t.Errorf("got %d [GoArrayDims(...)], want 3 (the generic func, the lambda, the local function):\n%s", got, mainCs)
+	if got := strings.Count(mainCs, "GoArrayDims("); got != 2 {
+		t.Errorf("got %d [GoArrayDims(...)], want 2 (the lambda, the local function):\n%s", got, mainCs)
 	}
 
 	// Every Go comment carried, re-spelled.

@@ -1266,7 +1266,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					// and this path is the one a `*[N]T` parameter always takes, because HAVING a
 					// pointer parameter is what triggers the rebuild. So the pointee dims of
 					// net/rpc's every reply argument could only ever be stamped here.
-					updatedSignature.WriteString(emitParamDims(param.Type(), recordableDeclaration(signature, true)))
+					updatedSignature.WriteString(emitParamDims(param.Type(), true))
 
 					updatedSignature.WriteString(v.getCSharpTypeName(param.Type()))
 					updatedSignature.WriteRune(' ')
@@ -1794,7 +1794,8 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 				continue
 			}
 
-			result.WriteString(emitParamDims(param.Type(), recordableDeclaration(signature, addRecv)))
+			// addRecv is set for a func or method DECLARATION only (visitFuncDecl), the one signature a record keys.
+			result.WriteString(emitParamDims(param.Type(), addRecv))
 
 			// A FUNC-LITERAL parameter typed as a `string | []byte`-union TYPE PARAMETER
 			// renders as the type parameter itself (`(T part) => ...`): the enclosing

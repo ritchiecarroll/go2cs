@@ -73,22 +73,99 @@ public static class GeneratedPartials
     /// <summary>
     /// The one spelling of a parameter type in a generated record's method key: <c>typeof(...)</c>, which the
     /// compiler resolves, so golib matches the key by Type identity and never by a name
-    /// (<c>GoReflect.SignatureMatches</c>; ChanDirSigGenerator, MemberRecordGenerator).
+    /// (<c>GoReflect.SignatureMatches</c>; ChanDirSigGenerator, MemberRecordGenerator). An attribute argument cannot
+    /// name a type parameter, so a type built from one is spelled by its open definition (<c>typeof(global::go.array&lt;&gt;)</c>)
+    /// and a bare type parameter, or any other type mentioning one, as <c>null</c>, which matches any type (face lift D2).
     /// </summary>
-    public static string TypeOf(ITypeSymbol type) => $"typeof({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
+    public static string TypeOf(ITypeSymbol type) => KeyOf(type) switch
+    {
+        null => "null",
+        { } keyed => $"typeof({keyed.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})"
+    };
+
+    // The type a key names for a parameter of this type: the type itself, its unbound generic definition when it is
+    // built from a type parameter, or null (any type) when no typeof can spell it.
+    private static ITypeSymbol? KeyOf(ITypeSymbol type)
+    {
+        if (!MentionsTypeParameter(type))
+            return type;
+
+        if (type is INamedTypeSymbol { IsGenericType: true, IsUnboundGenericType: false } named and not IErrorTypeSymbol &&
+            (named.ContainingType is null || !MentionsTypeParameter(named.ContainingType)))
+        {
+            return named.ConstructUnboundGenericType();
+        }
+
+        return null;
+    }
+
+    private static bool MentionsTypeParameter(ITypeSymbol type) => type switch
+    {
+        ITypeParameterSymbol => true,
+        IArrayTypeSymbol array => MentionsTypeParameter(array.ElementType),
+        INamedTypeSymbol named => named.TypeArguments.Any(MentionsTypeParameter) || named.ContainingType is { } outer && MentionsTypeParameter(outer),
+        _ => false
+    };
 
     /// <summary>
-    /// Whether an attribute argument can name <paramref name="type"/>, and so whether a method whose parameters
-    /// all pass can be keyed: no type parameter anywhere in it, and no unmanaged pointer.
+    /// Whether a method whose parameters all pass can be keyed: no unmanaged pointer, which <c>typeof</c> could only spell in
+    /// an unsafe context. A type parameter is keyed by <see cref="TypeOf"/>.
     /// </summary>
     public static bool IsNameable(ITypeSymbol type) => type switch
     {
-        ITypeParameterSymbol => false,
         IPointerTypeSymbol or IFunctionPointerTypeSymbol => false,
         IArrayTypeSymbol array => IsNameable(array.ElementType),
         INamedTypeSymbol named => named.TypeArguments.All(IsNameable) && (named.ContainingType is null || IsNameable(named.ContainingType)),
         _ => true
     };
+
+    /// <summary>
+    /// The OTHER methods of <paramref name="method"/>'s declaring type its key would also match, which golib would refuse
+    /// at run time (<c>GoReflect.SignatureMatches</c>, mirrored here over symbols): a record is refused at compile time,
+    /// naming both, rather than written. Generated overloads are invisible to a generator, and golib's refusal stays for them.
+    /// </summary>
+    public static IEnumerable<IMethodSymbol> KeyCollisions(IMethodSymbol method) =>
+        method.ContainingType.GetMembers(method.Name).OfType<IMethodSymbol>()
+            .Where(candidate => !SymbolEqualityComparer.Default.Equals(candidate, method) && KeyMatches(candidate, method.Parameters.Select(parameter => KeyOf(parameter.Type)).ToArray()));
+
+    /// <summary>The boxed receiver key a pointer-receiver method's ж&lt;T&gt; overload is matched by: <c>typeof(global::go.ж&lt;T&gt;)</c>, or its open definition.</summary>
+    public static string BoxedTypeOf(ITypeSymbol receiver) => MentionsTypeParameter(receiver) ?
+        "typeof(global::go.ж<>)" :
+        $"typeof(global::go.ж<{receiver.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>)";
+
+    private static bool KeyMatches(IMethodSymbol candidate, ITypeSymbol?[] key)
+    {
+        if (candidate.Parameters.Length != key.Length)
+            return false;
+
+        for (int index = 0; index < key.Length; index++)
+        {
+            ITypeSymbol parameterType = candidate.Parameters[index].Type;
+
+            switch (key[index])
+            {
+                case null:
+                    continue;
+
+                case INamedTypeSymbol { IsUnboundGenericType: true } open:
+                    if (parameterType is not INamedTypeSymbol { IsGenericType: true } constructed ||
+                        !SymbolEqualityComparer.Default.Equals(constructed.OriginalDefinition, open.OriginalDefinition))
+                    {
+                        return false;
+                    }
+
+                    continue;
+
+                case { } exact:
+                    if (!SymbolEqualityComparer.Default.Equals(parameterType, exact))
+                        return false;
+
+                    continue;
+            }
+        }
+
+        return true;
+    }
 
     // The declaring type and every type enclosing it, innermost first.
     private static IEnumerable<INamedTypeSymbol> EnclosingChain(INamedTypeSymbol type)

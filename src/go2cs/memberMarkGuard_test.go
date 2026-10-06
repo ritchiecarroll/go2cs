@@ -41,9 +41,9 @@ var (
 )
 
 // dimsAttributeStays reports whether a [GoArrayDims] on this line is one the converter still writes: a
-// lambda's or a local function's parameter, a generic func's (an attribute argument cannot name a type
-// parameter), a func type's or an interface member's. A field line, a named type's line and a non-generic
-// declaration's parameters carry the comment instead.
+// parameter of a function with no declared metadata name (a lambda or a local function), a func type's or
+// an interface member's. A field line, a named type's line and a declaration's parameters carry the comment
+// instead, a generic declaration's included (face lift D2).
 func dimsAttributeStays(line string) bool {
 	code := strings.TrimSpace(line)
 
@@ -57,8 +57,7 @@ func dimsAttributeStays(line string) bool {
 	case strings.Contains(code, " delegate "), strings.Contains(code, "=>"):
 		return true
 	case dimsMethodDecl.MatchString(code):
-		// Generic when the method NAME carries type parameters (`first<T>(`), not a return type (`slice<byte> f(`).
-		return strings.HasSuffix(strings.TrimSpace(code[:strings.Index(code, "(")]), ">")
+		return false
 	}
 
 	return true

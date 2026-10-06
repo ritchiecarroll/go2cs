@@ -10,7 +10,7 @@
 // beside the real facts. Converted with -comments, each Go comment is carried re-spelled, so the records
 // go2cs-gen writes for this file are those of the same source without them: the real embeds of marked
 // and tagged, the struct tags of tagged, each in the spelling a comment can hold, and the array dims of
-// the declarations below (a lambda's, a local function's and a generic func's stay attributes).
+// the declarations below, a generic func's included (a lambda's and a local function's stay attributes).
 package main
 
 import "fmt"

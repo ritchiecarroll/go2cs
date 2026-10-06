@@ -97,10 +97,11 @@ public sealed class ChanDirMarkerFinder : ISyntaxReceiver
 /// </summary>
 /// <remarks>
 /// Not carried, and recorded as such: a func LITERAL (a lambda or local function compiles to a
-/// compiler-named method that source cannot key), a generic method or one whose signature mentions a
-/// type parameter (an attribute argument cannot name one), a method of a type with an enclosing type that
-/// is not partial everywhere, and a signature with an unmanaged pointer (typeof of a pointer needs an
-/// unsafe context). A NESTED type is carried by repeating its enclosing partials around the generated one:
+/// compiler-named method that source cannot key), a method of a type with an enclosing type that is not
+/// partial everywhere, and a signature with an unmanaged pointer (typeof of a pointer needs an unsafe
+/// context). A generic method IS carried (face lift D2): its key spells a type built from a type parameter
+/// by its open definition and a bare type parameter as null (GeneratedPartials.TypeOf), and a key that
+/// would also match another method of the type is refused here, by name (GO2CS0003). A NESTED type is carried by repeating its enclosing partials around the generated one:
 /// every converted Go interface is nested in its package class. A pointer-receiver method (an unmarked
 /// <c>this ref</c>, or <c>[GoRecv]</c>) gets a second entry keyed on <c>ж&lt;T&gt;</c>, the receiver of the overload
 /// RecvGenerator adds for it, since a generator cannot see another generator's output.
@@ -126,7 +127,6 @@ public class ChanDirSigGenerator : ISourceGenerator
 
             if (semanticModel.GetDeclaredSymbol(methodSyntax) is not IMethodSymbol symbol ||
                 symbol.ContainingType is not { } declaringType ||
-                symbol.IsGenericMethod ||
                 symbol.Parameters.Any(parameter => !GeneratedPartials.IsNameable(parameter.Type)) ||
                 !GeneratedPartials.CanReopen(declaringType))
             {
@@ -140,6 +140,15 @@ public class ChanDirSigGenerator : ISourceGenerator
 
             byte[] parameterDirs = ChanDirMarkers.ParameterDirs(methodSyntax);
             byte[] resultDirs = ChanDirMarkers.ResultDirs(methodSyntax);
+            // A key that would also match another method of this type is refused here, naming both, never written for
+            // golib to refuse at run time (face lift D2).
+            if (GeneratedPartials.KeyCollisions(symbol).FirstOrDefault() is { } collision)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, methodSyntax.GetLocation(),
+                    $"The channel-direction record for {symbol.ToDisplayString()}", $"its key also matches {collision.ToDisplayString()}"));
+                continue;
+            }
+
             string[] parameterTypes = symbol.Parameters.Select(parameter => GeneratedPartials.TypeOf(parameter.Type)).ToArray();
 
             if (!byType.TryGetValue(declaringType, out (string ns, List<string> entries) slot))
@@ -155,7 +164,7 @@ public class ChanDirSigGenerator : ISourceGenerator
             if (symbol.IsPointerSetMethod() && symbol.Parameters.Length > 0 && symbol.Parameters[0].RefKind == RefKind.Ref)
             {
                 string[] boxed = (string[])parameterTypes.Clone();
-                boxed[0] = $"typeof(global::go.ж<{symbol.Parameters[0].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>)";
+                boxed[0] = GeneratedPartials.BoxedTypeOf(symbol.Parameters[0].Type);
                 slot.entries.Add(Entry(symbol.Name, boxed, parameterDirs, resultDirs));
             }
         }

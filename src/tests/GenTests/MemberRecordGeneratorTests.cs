@@ -43,6 +43,7 @@ public class MemberRecordGeneratorTests
         [System.AttributeUsage(System.AttributeTargets.Struct | System.AttributeTargets.Class, AllowMultiple = true)]
         public sealed class GoParamDimsAttribute(string method, System.Type[] parameterTypes, int position, params long[] dims) : System.Attribute { }
         public sealed class GoArrayDimsAttribute(params long[] dims) : System.Attribute { }
+        public sealed class array<T> { }
         """;
 
     private static readonly Lazy<string[]> s_generated = new(() => Run(FixtureSource()));
@@ -240,16 +241,17 @@ public class MemberRecordGeneratorTests
     {
         // The converter's own output: a parameter's dims on the package class, keyed by method name, the typeof of
         // every parameter and the position; a field's on its struct; a type's as the attribute on the type itself.
-        // The generic func, the lambda and the local function keep [GoArrayDims] and record nothing.
+        // The lambda and the local function keep [GoArrayDims] and record nothing; the generic func is keyed (D2).
         string[] generated = Run(MarkerCommentsFixture());
 
         string[] parameters = Recorded(generated, "GoParamDims");
-        CollectionAssert.AreEqual(new[] { "fill", "hash", "noted", "put" }, parameters.Select(record => record.Split(' ')[0]).ToArray(), string.Join("\n", parameters));
+        CollectionAssert.AreEqual(new[] { "fill", "first", "hash", "noted", "put" }, parameters.Select(record => record.Split(' ')[0]).ToArray(), string.Join("\n", parameters));
         StringAssert.EndsWith(parameters[0], "} 2 4 8");
-        StringAssert.EndsWith(parameters[1], "} 0 32");
-        StringAssert.EndsWith(parameters[2], "} 0 4");
-        StringAssert.EndsWith(parameters[3], "} 1 3");
-        StringAssert.Contains(parameters[3], "new global::System.Type[] { typeof(global::go.example.com.main_package.holder), ", "the receiver is keyed by its element type");
+        Assert.AreEqual("first new global::System.Type[] { typeof(global::go.array<>) } 0 2", parameters[1], "a generic func is keyed by the open definition (D2)");
+        StringAssert.EndsWith(parameters[2], "} 0 32");
+        StringAssert.EndsWith(parameters[3], "} 0 4");
+        StringAssert.EndsWith(parameters[4], "} 1 3");
+        StringAssert.Contains(parameters[4], "new global::System.Type[] { typeof(global::go.example.com.main_package.holder), ", "the receiver is keyed by its element type");
 
         CollectionAssert.AreEqual(new[] { "m global::go.GoMemberFact.Dims 3", "p global::go.GoMemberFact.Dims 3", "q global::go.GoMemberFact.Dims 6", "s global::go.GoMemberFact.Dims 5" },
             Recorded(generated, "GoMemberRecord").Where(record => record.Contains(".Dims ")).ToArray());
@@ -262,23 +264,24 @@ public class MemberRecordGeneratorTests
     [TestMethod]
     public void ADimsCommentNoRecordCanCarryIsAnErrorNeverASilentLoss()
     {
+        // A key that would also match another method of the type (face lift D2: a generic method's open key against a
+        // same-named method it covers), and a field of a type no generated partial can reopen.
         const string source = """
             namespace go;
 
             public partial class lib_package {
                 internal static T first<T>(/*[2]*/ array<T> a) => default!;
+                internal static byte first(array<byte> a) => 0;
             }
 
             public struct Sealed { internal /*[3]*/ int p; }
-
-            public sealed class array<T> { }
             """;
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new MemberRecordGenerator());
         ImmutableArray<Diagnostic> diagnostics = driver.RunGenerators(Compile(source)).GetRunResult().Diagnostics;
 
         Assert.AreEqual(2, diagnostics.Count(diagnostic => diagnostic.Id == "GO2CS0003" && diagnostic.Severity == DiagnosticSeverity.Error), string.Join("\n", diagnostics));
-        Assert.IsTrue(diagnostics.Any(diagnostic => diagnostic.GetMessage().Contains("first")), "the generic method is named");
+        Assert.IsTrue(diagnostics.Any(diagnostic => diagnostic.GetMessage().Contains("first<T>") && diagnostic.GetMessage().Contains("first(go.array<byte>)")), "the collision names both methods");
     }
 
     [TestMethod]

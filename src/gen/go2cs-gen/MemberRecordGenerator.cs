@@ -382,16 +382,22 @@ public class MemberRecordGenerator : ISourceGenerator
                     break;
 
                 // A parameter is keyed as GoSigChanDir keys a method: name, typeof each parameter type (the one
-                // spelling, GeneratedPartials.TypeOf), and position. A method an attribute cannot name (generic,
-                // or a signature with a type parameter or pointer) keeps [GoArrayDims] in converted code, so a dims
-                // comment on one is an error.
+                // spelling, GeneratedPartials.TypeOf; an open definition or null where a type parameter is), and
+                // position. A key no typeof can spell (a pointer) or one that would also match another method of the
+                // type is an error, naming what it collides with, never a silent loss.
                 case MethodDeclarationSyntax method:
                     if (semanticModel.GetDeclaredSymbol(method) is not IMethodSymbol methodSymbol)
                         break;
 
-                    if (methodSymbol.IsGenericMethod || methodSymbol.Parameters.Any(parameter => !GeneratedPartials.IsNameable(parameter.Type)))
+                    if (methodSymbol.Parameters.Any(parameter => !GeneratedPartials.IsNameable(parameter.Type)))
                     {
-                        context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, method.GetLocation(), $"The array dims comment on {methodSymbol.Name}'s parameters", "a record cannot name a generic method or a type parameter; the parameter keeps [GoArrayDims]"));
+                        context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, method.GetLocation(), $"The array dims record for {methodSymbol.ToDisplayString()}", "a key cannot name an unmanaged pointer"));
+                        break;
+                    }
+
+                    if (GeneratedPartials.KeyCollisions(methodSymbol).FirstOrDefault() is { } collision)
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, method.GetLocation(), $"The array dims record for {methodSymbol.ToDisplayString()}", $"its key also matches {collision.ToDisplayString()}"));
                         break;
                     }
 
