@@ -136,6 +136,11 @@ public abstract class BehavioralTestBase
 
     internal static int ConverterRuns(string targetProject) => s_converterRuns.TryGetValue(targetProject, out int runs) ? runs : 0;
 
+    // Projects this process has transpiled successfully. Every later UNFORCED call for one of them returns at once: the
+    // converter and the .go are frozen for the life of the process (Init builds the converter once), so a second run
+    // can only rewrite what the first wrote. See the memo check in TranspileProject.
+    private static readonly ConcurrentDictionary<string, bool> s_transpiledProjects = new(StringComparer.OrdinalIgnoreCase);
+
     [MethodImpl(MethodImplOptions.Synchronized)]
     protected static void Init(TestContext context)
     {
@@ -307,6 +312,13 @@ public abstract class BehavioralTestBase
             if (s_degradedProjects.TryGetValue(targetProject, out string[] previouslyDegraded))
                 AssertNotMeasured(targetProject, previouslyDegraded);
 
+            // Once per project per process. The up-to-date check below cannot say this on its own: the converter
+            // leaves an unchanged source untouched, so after a converter rebuild an unchanged emission stays OLDER than
+            // the converter, and every test class after Transpile failed that check and re-ran the converter over the
+            // same output -- three extra passes of the corpus per full run. A forced call still transpiles.
+            if (!forceBuild && s_transpiledProjects.ContainsKey(targetProject))
+                return;
+
             if (!forceBuild && File.Exists(csproj))
             {
                 // If all .cs files are newer than associated .go files AND newer than the converter that
@@ -377,6 +389,8 @@ public abstract class BehavioralTestBase
                 foreach (string line in BestEffortConversion.NotFullyRegeneratedLines(stdErr.ToString()))
                     degraded.Add($"{Path.GetFileName(pkgPath)}: {line}");
             }
+
+            s_transpiledProjects[targetProject] = true;
 
             if (degraded.Count > 0)
             {
