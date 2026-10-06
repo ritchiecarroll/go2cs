@@ -45,6 +45,7 @@
     <None Include="$(MSBuildThisFileDirectory)elidedAnyCompositeElems_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)embedMark_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embedPromotedClosure_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\corpusRelease_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetPackage.go" />
@@ -254,6 +255,7 @@
     <None Include="$(MSBuildThisFileDirectory)manualConversionMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualConversionScope_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualTypeOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)memberMarkGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)methodExpressionWrapper_test.go" />
     <None Include="$(MSBuildThisFileDirectory)mixedKeyedComposite_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleAncestryEmission_test.go" />
