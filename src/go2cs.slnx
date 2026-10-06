@@ -508,6 +508,7 @@
     <Project Path="tests/Behavioral/GenericEmbedPromotion/GenericEmbedPromotion.csproj" />
     <Project Path="tests/Behavioral/GenericFuncCall/GenericFuncCall.csproj" />
     <Project Path="tests/Behavioral/GenericFuncDecl/GenericFuncDecl.csproj" />
+    <Project Path="tests/Behavioral/GenericFuncInstantiationArg/GenericFuncInstantiationArg.csproj" />
     <Project Path="tests/Behavioral/GenericNamedArrayType/GenericNamedArrayType.csproj" />
     <Project Path="tests/Behavioral/GenericNegation/GenericNegation.csproj" />
     <Project Path="tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.csproj" />

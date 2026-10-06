@@ -420,6 +420,18 @@ func (v *Visitor) funcExprNeverRendersNull(expr ast.Expr) bool {
 		_, isFunc := v.info.Uses[expr.Sel].(*types.Func)
 
 		return isFunc
+	case *ast.IndexExpr:
+		// An explicit INSTANTIATION of a generic func — `pick[string]` — is the same method group
+		// as the bare identifier, with its type arguments spelled (`pick<@string>`), and can no
+		// more be null. It is treated exactly as the function's own identifier is: the indexed
+		// operand decides. An ordinary index — `table[0]` over a slice or map of funcs — has a
+		// variable or call as its operand, is nullable, and falls through to false. Without this
+		// arm the instantiation took the accessor and rendered `(pick<@string>).OrTypedNilFunc()`,
+		// which C# refuses (CS0119: member access on a method group).
+		return v.funcExprNeverRendersNull(expr.X)
+	case *ast.IndexListExpr:
+		// The same, for two or more type arguments (`pair[string, int]`).
+		return v.funcExprNeverRendersNull(expr.X)
 	case *ast.CallExpr:
 		// A func CONVERSION is exactly as nullable as its operand — the pointer twin's own words for
 		// the same shape. `Doubler(func(w int) int { … })` renders as a delegate CONSTRUCTION and can
