@@ -773,6 +773,7 @@
     <Project Path="tests/Behavioral/NilSliceConversion/NilSliceConversion.csproj" />
     <Project Path="tests/Behavioral/NilVarNamedFuncConv/NilVarNamedFuncConv.csproj" />
     <Project Path="tests/Behavioral/NoinlineDirectiveFrame/NoinlineDirectiveFrame.csproj" />
+    <Project Path="tests/Behavioral/NoInlinePartial/NoInlinePartial.csproj" />
     <Project Path="tests/Behavioral/OptionalInterfaceStructuralAssertion/OptionalInterfaceStructuralAssertion.csproj" />
     <Project Path="tests/Behavioral/PackageAliasRootedTypeArgs/PackageAliasRootedTypeArgs.csproj" />
     <Project Path="tests/Behavioral/PackageNameShadowing/PackageNameShadowing.csproj" />

@@ -1456,6 +1456,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNoinlineDirectiveFrame() => CheckTarget("NoinlineDirectiveFrame");
 
     [TestMethod]
+    public void CheckNoInlinePartial() => CheckTarget("NoInlinePartial");
+
+    [TestMethod]
     public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");
 
     [TestMethod]

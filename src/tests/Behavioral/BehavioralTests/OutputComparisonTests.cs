@@ -1403,6 +1403,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNoinlineDirectiveFrame() => CheckTarget("NoinlineDirectiveFrame");
 
     [TestMethod]
+    public void CheckNoInlinePartial() => CheckTarget("NoInlinePartial");
+
+    [TestMethod]
     public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");
 
     [TestMethod]
