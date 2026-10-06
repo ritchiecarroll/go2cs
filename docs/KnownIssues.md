@@ -32,3 +32,36 @@ file, though the next conversion rewrites that file:
 Converted executable projects carry this line, commented out. It costs about 90 ms (16%) more startup time,
 and steady-state loop speed stays within measurement noise. It becomes the default if a converted Go program
 ever reproduces the fault.
+
+## Publishing a converted program twice loses file and line numbers in stack traces
+
+<!-- Measured 2026-10-06 on the go.* 1.24.13.4 packages and on master: the i9's readings (mailbox 48323a941d,
+     40afec31fd: a first publish keeps every symbol file, the same publish again keeps only the program's own;
+     removing the executable or the folder restores them for one publish) and CI on linux-x64, win-x64, osx-x64
+     and osx-arm64 (run 37428852458). The fix is the seat claude/i9-publish-symbols-loose; delete this section
+     when a release carries it. -->
+
+A converted executable project carries publish profiles (`win-x64`, `linux-x64`, `osx-arm64` and the rest).
+Each one publishes a self-contained, single-file program into a fixed folder. When the same publish runs a
+second time with nothing changed, the .NET SDK skips rebuilding the single file and then removes, as
+leftovers, the symbol files (`.pdb`) of every library the program references as a project. Only the program's
+own `.pdb` stays. It happens on Windows, Linux and macOS.
+
+The program still runs correctly. What changes is its diagnostics. The converted Go runtime reads those symbol
+files to answer `runtime.Caller`, `debug.Stack` and a panic's traceback, so frames inside those libraries print
+with no file and line, and `runtime.Caller` reports line 0 for them. Frames in the program's own code keep
+theirs.
+
+Converting again does not bring the files back when the conversion changes nothing: an unchanged file keeps its
+timestamp, so the single file is still not rebuilt.
+
+**To avoid it**, delete the published executable, or the whole publish folder
+(`bin/Release/net10.0/publish/<profile>/`), before each publish. The next publish rebuilds the single file
+and copies every symbol file back:
+
+```shell
+dotnet publish -p:PublishProfile=win-x64
+```
+
+The step is needed before every publish, because the next unchanged publish removes the files again. A
+publish after a source change rebuilds the single file as well.
