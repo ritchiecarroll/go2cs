@@ -1381,22 +1381,16 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					// NAMED base (`[GoType("syscall_package.ΔHandle")]`); a same-package chain
 					// resolves to the basic underlying (`[GoType("num:uintptr")]` — no named-base
 					// operator exists) and the underlying hop already binds one-op-per-leg.
-					if rhs, okRHS := packageTypeSpecRHS[argNamed.Obj()]; okRHS && rhs != nil {
-						if rhsNamed, ok := types.Unalias(rhs).(*types.Named); ok && rhsNamed == named &&
-							named.Obj().Pkg() != argNamed.Obj().Pkg() {
-							return fmt.Sprintf("((%s)%s)", targetTypeName, expr)
-						}
+					if writtenRHSIsNamedType(argNamed, named) && named.Obj().Pkg() != argNamed.Obj().Pkg() {
+						return fmt.Sprintf("((%s)%s)", targetTypeName, expr)
 					}
 
 					// The FORWARD mirror: the conversion TARGET's written base IS the arg's named
 					// type (`Key(handle)` / `reading(celsius)` where `type reading lib.Celsius`) —
 					// the target's wrapper declares the one-step operator FROM exactly that type;
 					// the hop's second leg `(reading)(double)…` has no operator (CS0030).
-					if rhs, okRHS := packageTypeSpecRHS[named.Obj()]; okRHS && rhs != nil {
-						if rhsNamed, ok := types.Unalias(rhs).(*types.Named); ok && rhsNamed == argNamed &&
-							named.Obj().Pkg() != argNamed.Obj().Pkg() {
-							return fmt.Sprintf("((%s)%s)", targetTypeName, expr)
-						}
+					if writtenRHSIsNamedType(named, argNamed) && named.Obj().Pkg() != argNamed.Obj().Pkg() {
+						return fmt.Sprintf("((%s)%s)", targetTypeName, expr)
 					}
 				}
 
