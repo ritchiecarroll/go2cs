@@ -94,3 +94,6 @@ TIMEOUT on this arm is the same defect in its other shape;
 way, gating only with `-GateWalkthrough` and MEASURED without it; the `release-smoke` stage passes it on every
 leg. It exits 0 when the gating arms pass. The `release-smoke` stage of
 `.github/workflows/os-matrix.yml` packs the feed on Windows and runs this on all four shipped RIDs.
+`-Feed https://api.nuget.org/v3/index.json -Version <go.* version>` runs the same arms against a published
+release instead (a URL feed requires `-Version`; nuget.org is then the one source); the stage's `published_version`
+input does this on every leg, with no pack.
