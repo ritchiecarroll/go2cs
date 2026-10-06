@@ -3543,6 +3543,9 @@ FROM THE CLOSE SEAT ITSELF.** The seat stopped three times and each stop was rul
    then the signer with `-Apply -Overwrite` (one PIN), then Phase 3's exact push. Nothing is re-packed.
 5. **After the publish**, "indexed" means every id in the walkthrough's restore closure is listed — a partial
    index fails restore loudly (NU1102). Then the post-publish smoke, the removed-ID deprecations, the release record.
+   **The post-publish smoke** *(added 2026-10-06: 1.24.13.4, run 37426951507)* is the `release-smoke` dispatch
+   with `published_version` set to the version just pushed: no pack, and every leg restores from nuget.org, so
+   arms A-D read the published packages on all four shipped RIDs, D gating as before the publish.
 
 ---
 
