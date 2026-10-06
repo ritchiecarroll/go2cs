@@ -410,7 +410,8 @@ public static class StructDeclarationSyntaxExtensions
         // must be the test for a struct of THIS compilation: its generated operator does not exist
         // yet while this generator is running, so a member scan cannot see it.
         if (namedType.OriginalDefinition.GetAttributes().Any(attribute =>
-                attribute.AttributeClass is { Name: "GoTypeAttribute", ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } }))
+                attribute.AttributeClass is { Name: "GoTypeAttribute", ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } }) ||
+            namedType.OriginalDefinition.IsConvertedGoTypeSymbol())
         {
             return true;
         }
