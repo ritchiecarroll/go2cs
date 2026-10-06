@@ -1940,6 +1940,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckStatLayoutTruth() => CheckTarget("StatLayoutTruth");
 
     [TestMethod]
+    public void CheckStatementTableFuncNames() => CheckTarget("StatementTableFuncNames");
+
+    [TestMethod]
     public void CheckStdLibInternalAbi() => CheckTarget("StdLibInternalAbi");
 
     [TestMethod]
