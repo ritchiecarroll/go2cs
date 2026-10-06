@@ -3,7 +3,7 @@
 > Hand-implemented C# counterpart of the Go standard library's `unsafe` package, by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
 [![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/unsafe@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/unsafe) [![Source](https://img.shields.io/badge/Source-@1.24.13.3-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.3/src/core/unsafe)
+[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/unsafe) [![Source](https://img.shields.io/badge/Source-@1.24.13.4-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.4/src/core/unsafe)
 
 Package unsafe contains operations that step around the type safety of Go programs. In Go it is a compiler intrinsic with no Go source to convert; this package is its hand-maintained managed implementation — pointer reinterpretation, `Sizeof`/`Alignof`/`Offsetof`, and the `Slice`/`String`/`SliceData`/`StringData` constructors — built over the go2cs runtime's `ж<T>` box and pinned-buffer machinery.
 

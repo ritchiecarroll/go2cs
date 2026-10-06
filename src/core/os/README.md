@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-1106%2F1108_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.3/os.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/os@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/os) [![Source](https://img.shields.io/badge/Source-@1.24.13.3-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.3/src/core/os)
+[![Tests](https://img.shields.io/badge/Tests-1106%2F1108_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.4/os.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/os@go1.24.13)\
+[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/os) [![Source](https://img.shields.io/badge/Source-@1.24.13.4-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.4/src/core/os)
 
 Package os provides a platform-independent interface to operating system functionality. The design is Unix-like, although the error handling is Go-like; failing calls return values of type error rather than error numbers. Often, more information is available within the error. For example, if a call that takes a file name fails, such as \[Open] or \[Stat], the error will include the failing file name when printed and will be of type \[\*PathError], which may be unpacked for more information.
 

@@ -40,9 +40,8 @@ easily, and a .NET developer can use Go code directly within the .NET ecosystem.
 * Track which stdlib test suites pass in C#: [Validated Test Packages](ValidatedTestPackages.md)
 * Find converted Go modules as NuGet packages: [nugetgo.net](https://nugetgo.net)
 * Call converted Go from your C# code: [Consuming converted Go from C#](ConsumingGoFromCSharp.md)
-* Running converted programs on Ubuntu's packaged .NET: [Known issues](KnownIssues.md)
 * View example converted test: [`utf8_test.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/unicode/utf8/utf8_test.cs)
-* See current project [status](#status) and [milestones](#milestones)
+* See current project [status](#status), [milestones](#milestones), and [known issues](KnownIssues.md)
 
 [![Tour of go2cs showing Go and generated C# side by side](images/tour-of-go2cs.png)](images/tour-of-go2cs.png)
 
@@ -50,6 +49,7 @@ easily, and a .NET developer can use Go code directly within the .NET ecosystem.
 
 * Why is a Go to C# transpiler needed? _[Integration opportunities](Background.md#background)._
 * Won't converted C# code be slower? _[Usually — but not always](#performance)._
+* OK, I want to try this — where will it fail or fight me? _[The honest limitations](Limitations.md)._
 
 ## Transpiler Goals
 
@@ -60,8 +60,8 @@ converted code stays close to the original Go.
 
 - **Reads like Go.** Receiver methods become extension methods, multiple returns become tuples, struct
   embedding becomes promoted fields — the shape of the code is preserved.
-- **Runs like Go.** Conversions prioritize behavioral equivalence first (e.g. a `goroutine` runs on the
-  thread pool rather than being rewritten into `async`).
+- **Runs like Go.** Conversions prioritize behavioral equivalence first (e.g. a `goroutine` runs on its
+  own thread rather than being rewritten into `async`).
 - **Managed first.** Output targets portable managed C#; native interop is a last resort, not the default.
 
 ## Example
@@ -129,7 +129,7 @@ go2cs converts the full Go language surface except a generic type alias whose ta
 
 **Concurrency**
 
-- Goroutines, run on the thread pool (behavioral equivalence first — not rewritten into `async`)
+- Goroutines, each on its own thread (behavioral equivalence first — not rewritten into `async`)
 - Channels with channel-operator (`<-`) lowering, and `select`-statement lowering
 
 **Composition & polymorphism**

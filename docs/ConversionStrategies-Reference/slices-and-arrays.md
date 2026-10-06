@@ -554,9 +554,10 @@ element-wise transfers of nested-array elements (`copy(dst, src)`, spread `appen
 copy element structs without re-cloning; (2) an array-typed map KEY at an index-STORE (`mk[k] = v`
 stores `k` uncloned — only the composite-literal key form clones); (3) a named↔underlying array
 CONVERSION (`[4]int(named)`) hands the wrapper's backing through the implicit operator uncloned;
-(4) an EMBEDDED struct member is held as a `ж<T>` box, so a struct copy shares the embed outright
-(`b := a; b.n = 99` writes through to `a.n`) — a defect of the embed model, wider than arrays and
-untouched by the section below.
+(4) a fixed-size ARRAY reached only through an EMBEDDED struct member keeps a shared backing. An
+embed is an INLINE field (since 2026-08-14; see
+[An embedded struct is an INLINE field, so a value copy copies it](struct-embedding.md#an-embedded-struct-is-an-inline-field-so-a-value-copy-copies-it)),
+so a struct copy copies the embed itself, but the clone walk in the section below skips embeds.
 
 ## A STRUCT carrying array fields copies through its generated `ΔClone()`
 
@@ -646,11 +647,10 @@ Four details make this correct and collision-free:
 - **`array<T>.Clone()` recurses through the new marker.** It already re-cloned an element that is
   itself an array (`[2][3]int`); an element that is one of these structs (`[2]digest`) now clones the
   same way, through `IGoValueClone`/`ICloneable`.
-- **EMBEDDED members are never listed and never cloned.** go2cs-gen holds an embed in a `ж<T>` box
-  whose member accessor writes THROUGH the box, so assigning one in a clone would corrupt the
-  source. Embedded-struct copy aliasing is the separate, pre-existing gap (4) above; this change
-  neither fixes nor worsens it, and a struct that needs cloning only because of an embed is not
-  stamped.
+- **EMBEDDED members are never listed and never cloned.** go2cs-gen holds an embed as an INLINE
+  field, so the plain C# struct copy already copies it, as Go does. What the skip still costs is gap
+  (4) above: an array reached only through an embed is not seen, so a struct that needs cloning only
+  because of such an array is not stamped, and that array's backing stays shared.
 
 A BLANK or unnamed parameter is skipped: it is emitted under a synthetic name and can never be
 referenced, so there is nothing for the copy to protect — and the preamble would otherwise be

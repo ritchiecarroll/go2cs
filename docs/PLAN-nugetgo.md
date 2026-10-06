@@ -99,6 +99,9 @@ github.com/ritchiecarroll/hashset	go.github.com.ritchiecarroll.hashset	canonical
   **AMENDED 2026-10-02 (owner ruling):** the canonical-publisher exception is retired. Every converted Go module's ID
   is `nugetgo.` + the dotted module path, whoever publishes it; `go.` is the converted Go standard library only.
   Canonical stays a verified registry STATUS and grants no prefix.
+  **AMENDED 2026-10-04 (owner ruling):** the `nugetgo.` prefix is requested from nuget.org as a PUBLIC prefix, open
+  to every publisher, and the request is pending. The sentence above about squatting reads for the standard
+  library's `go.<root>` prefixes only. The row, not the prefix, says which package a module maps to (section 8, B5).
 - **`status`** — `canonical` or `community` (§2).
 - **`source-repo`** — the repo holding the CONVERSION (the C# side), for humans and for CI.
 - Remaining columns are provenance for humans; the converter reads only the first three.
@@ -368,6 +371,12 @@ the .NET 10 hop decides the deployment shape it would emit references for. ⟨OQ
    **AMENDED 2026-09-30 (owner ruling B5):** the pending request is narrowed to the standard
    library's 30 root prefixes, with a separate private `nugetgo.` request. One email carries both,
    after B1's publisher is settled, and the owner sends it.
+   **AMENDED 2026-10-04 (owner ruling):** the `nugetgo.` request asks for a PUBLIC prefix, not a private one; the
+   standard library's `go.<root>` prefixes in the same email stay a private request, as first asked. The owner has
+   sent an addendum on the pending thread asking for exactly that. nuget.org has decided neither request, and
+   nothing is reserved today. A public prefix, in nuget.org's words, "will not block future package submissions on
+   the prefix for any owner" (ID Prefix Reservation, learn.microsoft.com, read 2026-10-04). B5 below carries the
+   reasons, what is given up, and a named gap.
 4. **Multi-package Go modules** — **RULED: deferred as recommended.** One nupkg with one root ID
    is the v1 posture; the real decision waits for the first real multi-package module.
    **AMENDED 2026-09-29 — RULED (ledger 2026-09-29 16:38), no longer deferred.** D6 structure: one
@@ -433,6 +442,39 @@ above (§1, §3, §4.3, OQ-3) point back to this block, and the earlier text sta
   third-party packages takes the first revision built for the same corpus.
 - **B5 — the `go.` prefix request.** Narrowed to the standard library's 30 root prefixes, plus a
   private `nugetgo.` request, in one email after B1.
+  **AMENDED 2026-10-04 (owner ruling) -- `nugetgo.` is requested as a PUBLIC prefix.** The standard library's
+  `go.<root>` prefixes stay a private request; the `nugetgo.` request is for a public prefix, which keeps the
+  indicator nuget.org shows beside the reserving account's own packages and blocks no other account's new IDs. The
+  owner has sent an addendum on the pending thread asking for exactly that; nuget.org has decided neither request,
+  and nothing is reserved today. B1 stands: B1's account makes both requests and publishes the project's own
+  packages, and it is not the only account that may publish a `nugetgo.` ID. Three reasons.
+  (1) Under a private reservation nuget.org rejects every NEW ID that matches the prefix unless the reserving
+  account submits it, and `nugetgo-pack.ps1` mints `nugetgo.<dotted module path>` for every converted module,
+  whoever publishes it (B2, 2026-10-02). Every new package would then need that one account, or a prefix subset
+  that nuget.org delegates to its publisher at the reserving account's request, one request per publisher.
+  (2) Under a private prefix every new `nugetgo.` package shows the indicator, and a package that shows it always
+  keeps an owner who holds the reservation. A conversion could then pass wholly to its module's author only through
+  such a delegation. Under a public prefix a package its author publishes first carries no such tie. A package the
+  reserving account published keeps that account among its owners under either form.
+  (3) Trust never rested on the prefix: the converter references only a package that a mapping source names (the
+  registry, or a source the user adds), a community row waits for human review (section 2), section 3's check 4
+  compares a fresh conversion of the claimed module with the published assembly's embedded records (a maintainer
+  runs it by hand until the registry's validation CI exists), every applied mapping is printed with its status
+  (4.5), `go2cs.nuget.lock` pins what was resolved (4.4), and the nuget-id column is free-form (section 1).
+  **What is given up** is squat protection on nuget.org itself: another account can take a natural `nugetgo.` ID
+  and confuse a nuget.org search. That package reaches a build through go2cs only if a mapping source names it: the
+  converter never derives the ID of a package it references from a module path; it reads the ID from a mapping row
+  or the lock. The registry can map the real conversion under another ID, because the nuget-id column is free-form;
+  the pack yields B2's hash-shortened alternate when the taken ID is passed in `-ExistingIds`.
+  **A named gap:** the pack does not ask nuget.org whether an ID is held: it knows only the IDs passed in
+  `-ExistingIds`. The alternate is derived from the module path alone, so an account that takes the natural ID can
+  take the alternate too; the pack then refuses by name, and an ID override would be a pack change, which is not
+  built. Which ID a displaced conversion takes is not ruled: B2 rules the alternate for an ID that fails
+  nuget.org's ID rule or collides with another module's ID, not for an ID that another account holds on nuget.org.
+  **The indicator is not a registry status.** If nuget.org grants the request, its indicator marks packages the
+  reserving account owns: a canonical row's package can lack it, and a community row's package can show it.
+  The registry stays the authority on which package a module maps to. The ruling changes no check: no go2cs check
+  requires the `nugetgo.` prefix of a mapped ID, and none reads who owns a package on nuget.org.
 - **B6 — metadata.** Upstream copyright and LICENSE verbatim. The description reads "PROOF:
   unofficial go2cs C# conversion of <module> <ver>, built on the Go 1.24.13 standard library, not
   affiliated with or endorsed by <upstream> or the Go project", with the Go 1.24 standard-library

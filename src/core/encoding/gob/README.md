@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-106%2F106_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.3/encoding.gob.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/encoding/gob@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/encoding/gob) [![Source](https://img.shields.io/badge/Source-@1.24.13.3-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.3/src/core/encoding/gob)
+[![Tests](https://img.shields.io/badge/Tests-106%2F106_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.4/encoding.gob.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/encoding/gob@go1.24.13)\
+[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/encoding/gob) [![Source](https://img.shields.io/badge/Source-@1.24.13.4-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.4/src/core/encoding/gob)
 
 Package gob manages streams of gobs - binary values exchanged between an \[Encoder] (transmitter) and a \[Decoder] (receiver). A typical use is transporting arguments and results of remote procedure calls (RPCs) such as those provided by [net/rpc](https://pkg.go.dev/net/rpc@go1.24.13).
 
