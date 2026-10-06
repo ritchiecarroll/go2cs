@@ -6856,9 +6856,61 @@ func testPublishConfiguration(options Options) string {
 }
 
 // publishedSymbolsMissing answers the symbol files the publish's own build produced that are not beside the published
-// host.
+// host, sorted. The build output is the folder under bin/tests/<config>/ that holds the test assembly (the publish
+// builds for the host RID, so it is bin/tests/<config>/<tfm>/<rid>/; a RID-less layout is read too), and when more than
+// one matches, the newest is this publish's. A build output that cannot be found is an error, not a pass: after a
+// successful publish it exists, and a guard that cannot see must say so.
+//
+// It is the OUTCOME guard of the publish fix: removePublishedTestHost (and golib's go.lib.symbols.targets) are levers,
+// and this reads whether the host actually has its dependencies' symbol files, by whatever route they were lost.
+// Measured 2026-10-05 on the -tests output of a scratch row: the build output and the publish folder each held 62
+// .pdb after a good publish, and the publish folder 1 after an unbundled second one.
 func publishedSymbolsMissing(outputPath, testProject, config string) ([]string, error) {
-	return nil, nil
+	assembly := strings.TrimSuffix(filepath.Base(testProject), filepath.Ext(testProject)) + ".dll"
+	configRoot := filepath.Join(outputPath, "bin", "tests", config)
+
+	var candidates []string
+
+	for _, pattern := range []string{filepath.Join(configRoot, "*", "*", assembly), filepath.Join(configRoot, "*", assembly)} {
+		matches, err := filepath.Glob(pattern)
+
+		if err != nil {
+			return nil, err
+		}
+
+		candidates = append(candidates, matches...)
+	}
+
+	if len(candidates) == 0 {
+		return nil, fmt.Errorf("the published test host's build output (%s under %s) cannot be found, so its symbol files cannot be checked", assembly, configRoot)
+	}
+
+	newest, newestTime := "", time.Time{}
+
+	for _, candidate := range candidates {
+		if info, err := os.Stat(candidate); err == nil && info.ModTime().After(newestTime) {
+			newest, newestTime = candidate, info.ModTime()
+		}
+	}
+
+	built, err := filepath.Glob(filepath.Join(filepath.Dir(newest), "*.pdb"))
+
+	if err != nil {
+		return nil, err
+	}
+
+	publishDir := filepath.Dir(publishedTestHostPath(outputPath, testProject))
+	var missing []string
+
+	for _, symbols := range built {
+		if _, err := os.Stat(filepath.Join(publishDir, filepath.Base(symbols))); err != nil {
+			missing = append(missing, filepath.Base(symbols))
+		}
+	}
+
+	sort.Strings(missing)
+
+	return missing, nil
 }
 
 // removePublishedTestHost deletes the executable an earlier publish left, so that the publish about
