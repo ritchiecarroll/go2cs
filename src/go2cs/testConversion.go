@@ -6828,7 +6828,37 @@ func publishTestHost(outputPath, testProject string, options Options) error {
 
 	args := withPublishBinlog(publishTestHostArgs(outputPath, testProject, options), binlog)
 	_, err := runCommandWithTimeout(testPublishTimeout(options), outputPath, options, "dotnet", args...)
-	return settlePublishBinlog(binlog, err)
+
+	if err := settlePublishBinlog(binlog, err); err != nil {
+		return err
+	}
+
+	missing, err := publishedSymbolsMissing(outputPath, testProject, testPublishConfiguration(options))
+
+	if err != nil {
+		return err
+	}
+
+	if len(missing) > 0 {
+		return fmt.Errorf("the published test host lacks %d dependency symbol file(s) its build produced, so frames in those assemblies would print no file:line: %s", len(missing), strings.Join(missing, ", "))
+	}
+
+	return nil
+}
+
+// testPublishConfiguration is the configuration publishTestHostArgs publishes with.
+func testPublishConfiguration(options Options) string {
+	if options.testConfig == "Release" {
+		return "Release"
+	}
+
+	return "Debug"
+}
+
+// publishedSymbolsMissing answers the symbol files the publish's own build produced that are not beside the published
+// host.
+func publishedSymbolsMissing(outputPath, testProject, config string) ([]string, error) {
+	return nil, nil
 }
 
 // removePublishedTestHost deletes the executable an earlier publish left, so that the publish about

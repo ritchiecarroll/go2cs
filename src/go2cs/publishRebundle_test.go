@@ -143,3 +143,95 @@ func TestPublishRefusesAHostItCannotRemove(t *testing.T) {
 		t.Errorf("an earlier attempt's binary log survives the refusal and would be read as this one's: %s", staleBinlog)
 	}
 }
+
+// THE OUTCOME GUARD. The three guards above pin the LEVER (the previous host is gone before dotnet runs); this one pins
+// the OUTCOME, by any route: after a successful publish, every symbol file the publish's own build produced must be
+// beside the published host. A publish that skipped its bundle, an SDK that stops re-bundling, or a by-hand second
+// publish into the same root each leave the build's .pdb files behind and the publish folder without them, and frames
+// in those assemblies then print no file:line. The predicate compares the two folders by name.
+
+// seedHostBuild lays out a -tests output root: the publish's build output under bin/tests/<config>/net10.0/<rid>/ holding
+// the test assembly and the given symbol files, and the publish folder holding the host and the given symbol files.
+func seedHostBuild(t *testing.T, config string, built, published []string) (out, project string) {
+	t.Helper()
+
+	out = t.TempDir()
+	project = filepath.Join(out, "x.tests.csproj")
+	buildDir := filepath.Join(out, "bin", "tests", config, "net10.0", "win-x64")
+	publishDir := filepath.Dir(publishedTestHostPath(out, project))
+
+	for _, file := range append([]string{filepath.Join(buildDir, "x.tests.dll"), publishedTestHostPath(out, project)}, nil...) {
+		writeEmpty(t, file)
+	}
+	for _, name := range built {
+		writeEmpty(t, filepath.Join(buildDir, name))
+	}
+	for _, name := range published {
+		writeEmpty(t, filepath.Join(publishDir, name))
+	}
+
+	return out, project
+}
+
+func writeEmpty(t *testing.T, file string) {
+	t.Helper()
+
+	if err := os.MkdirAll(filepath.Dir(file), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(file, nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestPublishedHostLackingDependencySymbolsIsNamed(t *testing.T) {
+	out, project := seedHostBuild(t, "Release",
+		[]string{"x.tests.pdb", "golib.pdb", "fmt.pdb"},
+		[]string{"x.tests.pdb"})
+
+	missing, err := publishedSymbolsMissing(out, project, "Release")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Join(missing, ",") != "fmt.pdb,golib.pdb" {
+		t.Fatalf("missing = %v, want [fmt.pdb golib.pdb]: the host keeps only its own symbols, as an unbundled second publish leaves it", missing)
+	}
+}
+
+func TestPublishedHostWithEverySymbolIsSilent(t *testing.T) {
+	out, project := seedHostBuild(t, "Release",
+		[]string{"x.tests.pdb", "golib.pdb"},
+		[]string{"x.tests.pdb", "golib.pdb"})
+
+	missing, err := publishedSymbolsMissing(out, project, "Release")
+	if err != nil || len(missing) != 0 {
+		t.Fatalf("a host beside every symbol file its build produced was flagged: missing=%v err=%v", missing, err)
+	}
+}
+
+// The check reads the build output of THIS publish's configuration only: a Debug tree left beside a Release run (or a
+// Release tree beside a Debug one) is another build's output, not this host's.
+func TestTheOtherConfigurationsBuildOutputIsNotRead(t *testing.T) {
+	out, project := seedHostBuild(t, "Release",
+		[]string{"x.tests.pdb", "golib.pdb"},
+		[]string{"x.tests.pdb", "golib.pdb"})
+	writeEmpty(t, filepath.Join(out, "bin", "tests", "Debug", "net10.0", "win-x64", "x.tests.dll"))
+	writeEmpty(t, filepath.Join(out, "bin", "tests", "Debug", "net10.0", "win-x64", "debugonly.pdb"))
+
+	missing, err := publishedSymbolsMissing(out, project, "Release")
+	if err != nil || len(missing) != 0 {
+		t.Fatalf("the Debug build output was read for a Release host: missing=%v err=%v", missing, err)
+	}
+}
+
+// After a successful publish the build output exists; when it cannot be found the check cannot be made, and saying
+// nothing would make it a guard that passes by absence.
+func TestAMissingBuildOutputIsRefusedNotPassed(t *testing.T) {
+	out := t.TempDir()
+	project := filepath.Join(out, "x.tests.csproj")
+	writeEmpty(t, publishedTestHostPath(out, project))
+
+	if _, err := publishedSymbolsMissing(out, project, "Release"); err == nil {
+		t.Fatal("no build output beside the published host, and the check passed: a guard that cannot see must say so")
+	}
+}
