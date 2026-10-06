@@ -116,7 +116,8 @@ pwsh src/tests/PackageTests/PublishSymbols/test-publish-symbols-aot.ps1 -Version
 `PackageSymbols` is the consumer fixture for the go.* packages' OWN symbol files. Its program prints the first
 `go.sort` frame above a `sort.Slice` comparator as the converted runtime resolves it (`runtime.Caller`), which
 reads the frame's file:line from `go.sort`'s `.pdb` beside the application: `slice.go:<n>` or `zsortfunc.go:<n>`
-with the symbols, `none` without. `test-package-symbols.ps1` restores it from ONE feed into a fresh package cache:
+with the symbols, `none` without. `test-package-symbols.ps1` restores it into a fresh package cache, `go.*` from the
+feed under test ONLY and everything else (the runtime and ILCompiler packs a publish needs) from nuget.org:
 
 - RUN: `dotnet run` resolves the frame, and every dependency assembly in the build output has its `.pdb` beside it
   with the matching debug id (the RID-specific packages' assemblies included);
@@ -147,5 +148,6 @@ TIMEOUT on this arm is the same defect in its other shape;
 (C) `Behavioral/StatLayoutTruth`, the same way; (D) the README walkthrough (`fatih/color`), the same
 way, gating only with `-GateWalkthrough` and MEASURED without it; the `release-smoke` stage passes it on every
 leg; (E) `PublishSymbols` above, the guard and its AOT control against the same feed, MEASURED and never gating
-until it has read green on two trains. It exits 0 when the gating arms pass. The `release-smoke` stage of
+until it has read green on two trains; (F) `PackageSymbols` above with `-Aot`, the packages' own symbol files, MEASURED
+and never gating on the same terms, its frame lines and its AOT `.pdb` list carried into the verdict. It exits 0 when the gating arms pass. The `release-smoke` stage of
 `.github/workflows/os-matrix.yml` packs the feed on Windows and runs this on all four shipped RIDs.
