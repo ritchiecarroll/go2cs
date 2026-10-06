@@ -57,6 +57,13 @@ partial struct Type {
     [GoReflectCompanion] public nint[]?[]? funcParamDims;
     [GoReflectCompanion] public GoChanDir[]? chanDirChain;
     [GoReflectCompanion] public nint[]? keyDims;
+    // funcInChanDirs / funcOutChanDirs: a FUNC descriptor's per-parameter and per-result channel
+    // DIRECTION, the direction twin of funcParamDims. `func(<-chan int)` and `func(chan int)` are
+    // DISTINCT Go types over one managed delegate, so the direction joins the interning key and rides
+    // down to In(i)/Out(i). Read from the [GoSigChanDir] go2cs-gen generates beside the method's
+    // declaring type (GoReflect.FuncChanDirs / MethodChanDirs); null where nothing is carried.
+    [GoReflectCompanion] public GoChanDir[]? funcInChanDirs;
+    [GoReflectCompanion] public GoChanDir[]? funcOutChanDirs;
 }
 
 // synthType builds a managed-backed abi.Type from a System.Type: Kind_ classified from it (GoReflect),
@@ -125,6 +132,13 @@ private static GoChanDir[]? normalizeChanDirChain(GoChanDir[]? chain) {
 }
 
 public static ж<Type> synthType(System.Type? st, nint[]? arrayDims, nint[]?[]? funcParamDims, GoChanDir[]? chanDirChain, nint[]? keyDims) {
+    return synthType(st, arrayDims, funcParamDims, chanDirChain, keyDims, null, null);
+}
+
+// The FUNC direction cargo joins last: every earlier overload forwards with none, so no descriptor
+// the corpus already interned changes its key (descriptorDimsKey appends nothing for null).
+public static ж<Type> synthType(System.Type? st, nint[]? arrayDims, nint[]?[]? funcParamDims, GoChanDir[]? chanDirChain, nint[]? keyDims,
+    GoChanDir[]? funcInChanDirs, GoChanDir[]? funcOutChanDirs) {
     if (st is null) {
         return default!;
     }
@@ -151,7 +165,9 @@ public static ж<Type> synthType(System.Type? st, nint[]? arrayDims, nint[]?[]? 
         chanDirChain = stampedChain;
     }
     chanDirChain = normalizeChanDirChain(chanDirChain);
-    string dimsKey = descriptorDimsKey(arrayDims, funcParamDims, chanDirChain, keyDims);
+    funcInChanDirs = normalizeFuncChanDirs(funcInChanDirs);
+    funcOutChanDirs = normalizeFuncChanDirs(funcOutChanDirs);
+    string dimsKey = descriptorDimsKey(arrayDims, funcParamDims, chanDirChain, keyDims, funcInChanDirs, funcOutChanDirs);
     // The factory is STATIC and the captured state travels as GetOrAdd's TArg. A lambda that closes
     // over locals cannot be cached by Roslyn, so the display class and its delegate were constructed
     // on EVERY call -- and because GetOrAdd's factory argument is built BEFORE the lookup, a cache
@@ -162,8 +178,28 @@ public static ж<Type> synthType(System.Type? st, nint[]? arrayDims, nint[]?[]? 
     // outside golib's allocation counter and inside the CLR's, which is the meter AllocsPerRun reads.
     // This is the idiom the other ~28 GetOrAdd sites in reflect/golib/internal-abi already use.
     return s_descriptors.GetOrAdd((st, dimsKey),
-        static (_, a) => synthesizeDescriptor(a.st, a.arrayDims, a.funcParamDims, a.chanDirChain, a.keyDims),
-        (st, arrayDims, funcParamDims, chanDirChain, keyDims));
+        static (_, a) => synthesizeDescriptor(a.st, a.arrayDims, a.funcParamDims, a.chanDirChain, a.keyDims, a.funcInChanDirs, a.funcOutChanDirs),
+        (st, arrayDims, funcParamDims, chanDirChain, keyDims, funcInChanDirs, funcOutChanDirs));
+}
+
+// A func's direction vector is ABSENT unless some position is stamped Recv or Send: Both and
+// Unstamped are the same claim (nothing narrowed it), so a vector carrying neither says nothing its
+// absence would not say, and must key identically to it.
+private static GoChanDir[]? normalizeFuncChanDirs(GoChanDir[]? dirs) {
+    if (dirs is null) {
+        return null;
+    }
+    foreach (GoChanDir dir in dirs) {
+        if (dir == GoChanDir.Recv || dir == GoChanDir.Send) {
+            return dirs;
+        }
+    }
+    return null;
+}
+
+// funcChanDirAt is the direction of a func descriptor's i'th parameter or result, Unstamped when none.
+public static GoChanDir funcChanDirAt(GoChanDir[]? dirs, int i) {
+    return dirs is not null && i >= 0 && i < dirs.Length ? dirs[i] : GoChanDir.Unstamped;
 }
 
 // descriptorDimsKey renders the descriptor's dims cargo as the interning key's second component —
@@ -194,6 +230,28 @@ public static string descriptorDimsKey(nint[]? arrayDims, nint[]?[]? funcParamDi
 // ("@3,2" is `chan (<-chan T)`), and normalization guarantees the last entry is never a bare Both,
 // so no two spellings of one Go type can reach this function.
 public static string descriptorDimsKey(nint[]? arrayDims, nint[]?[]? funcParamDims, GoChanDir[]? chanDirChain, nint[]? keyDims) {
+    return descriptorDimsKey(arrayDims, funcParamDims, chanDirChain, keyDims, null, null);
+}
+
+// A func's direction vectors render "^" + the parameters' directions, "/" + the results', AFTER
+// everything the 4-argument form renders, and only when one is present -- so every key that form
+// produced is unchanged and nothing already interned re-interns.
+public static string descriptorDimsKey(nint[]? arrayDims, nint[]?[]? funcParamDims, GoChanDir[]? chanDirChain, nint[]? keyDims,
+    GoChanDir[]? funcInChanDirs, GoChanDir[]? funcOutChanDirs) {
+    string key = descriptorDimsKeyCore(arrayDims, funcParamDims, chanDirChain, keyDims);
+    funcInChanDirs = normalizeFuncChanDirs(funcInChanDirs);
+    funcOutChanDirs = normalizeFuncChanDirs(funcOutChanDirs);
+    if (funcInChanDirs is null && funcOutChanDirs is null) {
+        return key;
+    }
+    return key + "^" + renderChanDirs(funcInChanDirs) + "/" + renderChanDirs(funcOutChanDirs);
+}
+
+private static string renderChanDirs(GoChanDir[]? dirs) {
+    return dirs is null ? "" : string.Join(',', System.Array.ConvertAll(dirs, static d => ((byte)d).ToString()));
+}
+
+private static string descriptorDimsKeyCore(nint[]? arrayDims, nint[]?[]? funcParamDims, GoChanDir[]? chanDirChain, nint[]? keyDims) {
     // Normalized HERE as well as in synthType, and the distinction matters: the RULE has one
     // definition (normalizeChanDirChain) and is applied at both entry points, which is not the
     // per-site normalization the token-class lesson forbids. synthType must normalize what it
@@ -224,7 +282,8 @@ public static string descriptorDimsKey(nint[]? arrayDims, nint[]?[]? funcParamDi
 
 // The single builder — synthType is its only caller, and it always has every cargo slot in hand.
 // (The shorter private forwarders this replaced went dead when keyDims joined the chain.)
-private static ж<Type> synthesizeDescriptor(System.Type st, nint[]? arrayDims, nint[]?[]? funcParamDims, GoChanDir[]? chanDirChain, nint[]? keyDims) {
+private static ж<Type> synthesizeDescriptor(System.Type st, nint[]? arrayDims, nint[]?[]? funcParamDims, GoChanDir[]? chanDirChain, nint[]? keyDims,
+    GoChanDir[]? funcInChanDirs, GoChanDir[]? funcOutChanDirs) {
     ref var t = ref heap<Type>(out var Ꮡt);
     t.Kind_ = (ΔKind)((uint8)GoReflect.KindOf(st));
     // TFlagNamed — the descriptor bit that says "this is a DEFINED type", carried because three
@@ -255,6 +314,8 @@ private static ж<Type> synthesizeDescriptor(System.Type st, nint[]? arrayDims, 
     t.funcParamDims = funcParamDims;
     t.chanDirChain = chanDirChain;
     t.keyDims = keyDims;
+    t.funcInChanDirs = funcInChanDirs;
+    t.funcOutChanDirs = funcOutChanDirs;
     // Derivability is the question, not the sign: a Go size of 2^63 and up came back -1 from
     // the signed form and left Size_ UNSTAMPED on a type whose size was known exactly.
     if (GoReflect.TryGoSizeOf(st, arrayDims, out nuint size)) {
@@ -341,7 +402,9 @@ public static ж<Type> TypeOf(any a) {
                          : kind == GoReflect.Pointer ? GoReflect.PointeeChanCargo(a)
                          : null;
     dims ??= chanCargo?.ElemDims;
-    return synthType(dyn, dims, paramDims, chanCargo?.DirChain, keyDims);
+    // A FUNC value's per-position channel directions, read off its target method's [GoSigChanDir].
+    (GoChanDir[]? inDirs, GoChanDir[]? outDirs) = kind == GoReflect.Func ? GoReflect.FuncChanDirs(a) : (null, null);
+    return synthType(dyn, dims, paramDims, chanCargo?.DirChain, keyDims, inDirs, outDirs);
 }
 
 // ==== the descriptor SPECIALIZATIONS: StructType() / ArrayType() ====
@@ -521,7 +584,8 @@ private static slice<ж<Type>> synthesizeFuncSide(ж<ΔFuncType> Ꮡt, bool want
         // narrowing rather than an oversight — an array RESULT's length is the same gap one step
         // further out, and nothing measured reaches it yet.
         nint[]? paramDims = wantIns && dims is not null && i < dims.Length ? dims[i] : null;
-        descriptors[i] = synthType(side[i], paramDims);
+        GoChanDir dir = funcChanDirAt(wantIns ? Ꮡt.Value.Type.funcInChanDirs : Ꮡt.Value.Type.funcOutChanDirs, i);
+        descriptors[i] = synthType(side[i], paramDims, null, dir);
     }
     return new slice<ж<Type>>(descriptors);
 }
