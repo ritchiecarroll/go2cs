@@ -331,7 +331,7 @@ func (v *Visitor) writeCommentString(builder *strings.Builder, comment *ast.Comm
 			builder.WriteString(strings.Repeat(" ", padding))
 		}
 
-		builder.WriteString(comment.Text)
+		builder.WriteString(carriedComment(comment.Text))
 	}
 }
 

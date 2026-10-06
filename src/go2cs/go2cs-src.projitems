@@ -255,7 +255,9 @@
     <None Include="$(MSBuildThisFileDirectory)manualConversionMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualConversionScope_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualTypeOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)markerComments_test.go" />
     <None Include="$(MSBuildThisFileDirectory)memberMarkGuard_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)memberMarkers.go" />
     <None Include="$(MSBuildThisFileDirectory)methodExpressionWrapper_test.go" />
     <None Include="$(MSBuildThisFileDirectory)mixedKeyedComposite_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleAncestryEmission_test.go" />
@@ -400,6 +402,8 @@
     <None Include="$(MSBuildThisFileDirectory)testHostGoTargetOS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostLaunchDir_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\hostlaunch\fixture\keys\k" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\markercomments\main.cs" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\markercomments\main.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\validationproof\expected.md" />
     <None Include="$(MSBuildThisFileDirectory)testOnlyPackageEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)ToDo.md" />

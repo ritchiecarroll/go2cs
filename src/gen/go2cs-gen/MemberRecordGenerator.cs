@@ -23,19 +23,21 @@ public static class MemberMarkers
     public const string Embed = "/*embed*/";
 
     /// <summary>
-    /// Whether <paramref name="field"/> carries the <see cref="Embed"/> comment, written by the converter at
-    /// the start of the declaration after any attribute lists. Roslyn attaches it to the first token that
-    /// follows them as leading trivia, or, when it shares a line with the token before (`{ /*embed*/ public`),
-    /// to that token as trailing trivia, so both are read.
+    /// Whether <paramref name="field"/> carries the <see cref="Embed"/> comment where the converter writes it:
+    /// directly before the declaration's first token after any attribute lists, followed by one space
+    /// (<c>/*embed*/ public Reader Reader;</c>). A comment anywhere else is not a marker, and a Go comment the
+    /// converter carries is never spelled as one (memberMarkers.go, carriedComment), so neither can be read as
+    /// a fact about this field.
     /// </summary>
     public static bool HasEmbed(FieldDeclarationSyntax field)
     {
         SyntaxToken first = field.Modifiers.Count > 0 ? field.Modifiers[0] : field.Declaration.Type.GetFirstToken();
-        return IsEmbed(first.LeadingTrivia) || IsEmbed(first.GetPreviousToken().TrailingTrivia);
-    }
+        SyntaxTriviaList leading = first.LeadingTrivia;
 
-    private static bool IsEmbed(SyntaxTriviaList trivia) =>
-        trivia.Any(item => item.IsKind(SyntaxKind.MultiLineCommentTrivia) && item.ToString() == Embed);
+        return leading.Count >= 2 &&
+            leading[leading.Count - 1].IsKind(SyntaxKind.WhitespaceTrivia) && leading[leading.Count - 1].ToString() == " " &&
+            leading[leading.Count - 2].IsKind(SyntaxKind.MultiLineCommentTrivia) && leading[leading.Count - 2].ToString() == Embed;
+    }
 
     /// <summary>
     /// Whether <paramref name="field"/> is a Go embedded field, however it says so: <c>[GoEmbedded]</c> (hand-written

@@ -7,6 +7,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -48,6 +49,25 @@ public class MemberRecordGeneratorTests
 
         throw new FileNotFoundException("src/tests/Behavioral/IfaceEmbedReflectAnonymous/main.cs not found above " + AppContext.BaseDirectory);
     }
+
+    // The converter's own -comments output for Go comments spelled like the markers, committed beside its
+    // source and held to the converter's output by src/go2cs/markerComments_test.go.
+    private static string MarkerCommentsFixture()
+    {
+        for (DirectoryInfo? directory = new(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
+        {
+            string candidate = Path.Combine(directory.FullName, "src", "go2cs", "testdata", "markercomments", "main.cs");
+
+            if (File.Exists(candidate))
+                return File.ReadAllText(candidate);
+        }
+
+        throw new FileNotFoundException("src/go2cs/testdata/markercomments/main.cs not found above " + AppContext.BaseDirectory);
+    }
+
+    private static string[] RecordedMembers(string[] generated, string fact) =>
+        generated.SelectMany(source => Regex.Matches(source, $@"\[global::go\.GoMemberRecord\(""([^""]+)"", global::go\.GoMemberFact\.{fact}").Select(match => match.Groups[1].Value))
+            .OrderBy(member => member, StringComparer.Ordinal).ToArray();
 
     private static CSharpCompilation Compile(params string[] sources) =>
         CSharpCompilation.Create("test", [.. sources.Select(source => CSharpSyntaxTree.ParseText(source)), CSharpSyntaxTree.ParseText(Stubs)],
@@ -98,7 +118,10 @@ public class MemberRecordGeneratorTests
 
             public partial class lib_package {
                 public partial struct Hand { [GoEmbedded] public nint @int; }
-                public partial struct Marked { /*embed*/ public nint @int; public nint other; }
+                public partial struct Marked {
+                    /*embed*/ public nint @int;
+                    public nint other;
+                }
                 [GoMemberRecord("int", GoMemberFact.Embedded)] public partial struct Recorded { public nint @int; }
             }
             """;
@@ -120,5 +143,23 @@ public class MemberRecordGeneratorTests
         Assert.IsTrue(MemberMarkers.IsGoEmbedded(Field(library, "Marked", "int")), "the converter's comment, in source");
         Assert.IsFalse(MemberMarkers.IsGoEmbedded(Field(library, "Marked", "other")), "an unmarked field");
         Assert.IsTrue(MemberMarkers.IsGoEmbedded(Field(consumer, "Recorded", "int")), "the generated record, read from metadata");
+    }
+
+    [TestMethod]
+    public void GoCommentsShapedLikeTheMarkerAreNeverRecorded()
+    {
+        // Go comments spelled exactly like the marker, in every place the converter carries one: the converter
+        // writes each with a space after its `/*`, so only the two real embeds of `marked` are recorded, as for
+        // the same source without them.
+        string converted = MarkerCommentsFixture();
+        string[] realEmbeds = ["Reader", "int"];
+
+        CollectionAssert.AreEqual(realEmbeds, RecordedMembers(Run(converted), "Embedded"), "the converter's output");
+
+        // The reader's position rule holds on its own: carried as spelled, each lands somewhere the converter
+        // never writes a marker (its own line, after a field's `;`), so the records are unchanged.
+        string unspelled = converted.Replace("/* embed*/", MemberMarkers.Embed);
+        Assert.AreNotEqual(converted, unspelled);
+        CollectionAssert.AreEqual(realEmbeds, RecordedMembers(Run(unspelled), "Embedded"), "the Go comments carried as spelled");
     }
 }

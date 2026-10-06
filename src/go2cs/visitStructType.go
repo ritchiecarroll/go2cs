@@ -849,7 +849,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				// promoted through another package's embed is unique in this struct's tree — an unmarked
 				// io_test `Buffer{bytes.Buffer; ReaderFrom; WriterTo}` would otherwise be given the
 				// embedded Buffer's ReadFrom and WriteTo, which Go drops as ambiguous.
-				v.writeString(target, "/*embed*/ %s %s %s;", getAccess(goTypeName), csEmitTypeName, embedName)
+				v.writeString(target, "%s %s %s %s;", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName)
 			} else {
 				var handled bool
 
@@ -859,13 +859,13 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 							// An embedded pointer to a PREDECLARED type has nothing to promote and is a plain field;
 							// the `/*embed*/` comment is what lets the reflection projection report it Anonymous
 							// (a field named after its type is otherwise indistinguishable from an embed).
-							v.writeString(target, "/*embed*/ %s %s %s;", getAccess(goTypeName), csEmitTypeName, embedName)
+							v.writeString(target, "%s %s %s %s;", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName)
 							handled = true
 						}
 					} else if _, ok = identType.(*types.Struct); !ok {
 						if _, ok := identObj.Type().(*types.Named); !ok {
 							// An embedded PREDECLARED type (`struct{ int }`): the same plain-field emission, marked.
-							v.writeString(target, "/*embed*/ %s %s %s;", getAccess(goTypeName), csEmitTypeName, embedName)
+							v.writeString(target, "%s %s %s %s;", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName)
 							handled = true
 						}
 					}
