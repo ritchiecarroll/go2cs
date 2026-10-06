@@ -23,9 +23,11 @@ namespace go;
 /// <para>
 /// The signal travels with the package's source, so the source generators read it from the compilation and
 /// golib from the loaded assembly, through every build channel alike. A project that says nothing is a
-/// converted one. The packages that carry it are <c>testing</c> and <c>unsafe</c>, the two hand-owned
-/// projects with no converted file whose files do not all carry <see cref="GoManualConversionAttribute"/>'s
-/// file marker.
+/// converted one. The packages that carry it are <c>testing</c> and <c>unsafe</c>, the two go2cs never
+/// converts. It is policy, the declared off switch for an inference that turns on by what a file does NOT
+/// carry: no package needs it for correctness today, since every hand-written file in both already carries
+/// <see cref="GoManualConversionAttribute"/>'s file marker or its attributes. A converted package whose only
+/// file is hand-owned does not carry it; the file marker covers it file by file.
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly)]
