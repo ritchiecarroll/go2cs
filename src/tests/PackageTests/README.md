@@ -101,6 +101,28 @@ Read red-first against a go.lib packed from master 40a1f839c5 (2026-10-05, win-x
 publish kept only `PublishSymbols.pdb` and printed `:0`, and the control passed. The same happens with no go.lib
 at all: it is the SDK's behaviour for any single-file app with a referenced library.
 
+# `PackageSymbols`: a consumer's std frames resolve to their Go file:line
+
+`PackageSymbols` is the consumer fixture for the go.* packages' OWN symbol files. Its program prints the first
+`go.sort` frame above a `sort.Slice` comparator as the converted runtime resolves it (`runtime.Caller`), which
+reads the frame's file:line from `go.sort`'s `.pdb` beside the application: `slice.go:<n>` or `zsortfunc.go:<n>`
+with the symbols, `none` without. `test-package-symbols.ps1` restores it from ONE feed into a fresh package cache:
+
+- RUN: `dotnet run` resolves the frame, and every dependency assembly in the build output has its `.pdb` beside it
+  with the matching debug id (the RID-specific packages' assemblies included);
+- PUBLISH: a single-file, self-contained publish for the host's RID, twice into one folder, resolves it both times;
+- FDD: a framework-dependent publish that is not single-file resolves it, the `.pdb` matching as in RUN;
+- OFF: with `-p:GoCopyPackageSymbols=false` the output is today's (`none`, no dependency `.pdb`): the off switch,
+  and the proof the arms above can fail;
+- AOT (`-Aot` only; needs the ILCompiler packages): a Native AOT publish succeeds and its `.pdb` list is printed.
+
+```text
+pwsh src/tests/PackageTests/PackageSymbols/test-package-symbols.ps1 -Version <go.* version> [-Source <feed dir or URL>] [-FallbackFolder <package folder for the runtime pack>] [-Aot]
+```
+
+Read red-first (2026-10-06, win-x64) against a local pack in the published 1.24.13.4 shape (no `.pdb` in any
+package): RUN, PUBLISH and FDD failed (`none`; 31 dependency assemblies, 0 with a `.pdb`), OFF passed.
+
 # `release-smoke.ps1`: consume a feed the way a user does
 
 `release-smoke.ps1 -Feed <dir> -Converter <go2cs> -WorkRoot <dir>` runs four arms against ONE local
