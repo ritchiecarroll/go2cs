@@ -75,15 +75,20 @@ publish after a source change rebuilds the single file as well.
      fields -- its field metadata was removed, most likely by trimming"). The same with TrimMode=full. With the
      trim mode set to partial in its own project file: the publish ended after 2 h 24 min on a 4-core, 15 GB
      machine (about 70 min inside a hosted CI leg, run 37495989079), the executable ran (exit 0) and was 249 MB.
+     WINDOWS (C1, mailbox 079b80b37b; hosted aot-smoke run 37523439849, win-x64): with go.lib's packed default
+     of partial the publish succeeded (71 min) and the executable exited 2 at startup with
+     "System.InvalidOperationException: There is no metadata token available for the given member"; linux-x64 in
+     the same run passed (56 min). golib reads FieldInfo.MetadataToken at four sites to order a struct's fields
+     (the two header/slice boxes and GoLibcCall); which one windows reaches is not yet read from a stack.
      A trimmed non-AOT publish (PublishTrimmed, self-contained, no trim mode) ran. A converted project is not
      affected: src/go2cs/csproj-template.xml sets the mode. The fix for the failure is the seat
      claude/c1-golib-trim-default (go.lib's packed targets set the template's default when the consumer set
      none); delete the failure half of this section when a release carries it. The compile time stays until the
      runtime library's reflection is annotated for a full trim (the IL trim warning rows on the BOARD). -->
 
-A project that go2cs converts is not affected: its generated project file sets `TrimMode` to `partial`. This
-is about a C# project you write yourself that references the `go.*` packages from NuGet and publishes with
-Native AOT (`PublishAot`).
+A project that go2cs converts sets `TrimMode` to `partial` in its generated project file, so the trimming
+failure described here does not occur for it. This is about a C# project you write yourself that references
+the `go.*` packages from NuGet and publishes with Native AOT (`PublishAot`).
 
 Such a project gets the .NET SDK's own default for Native AOT, a full trim. A full trim removes field
 metadata that the converted Go runtime reads by reflection, and the published executable stops at startup
@@ -98,6 +103,12 @@ self-contained publish and a trimmed publish without Native AOT (`PublishTrimmed
   <TrimMode>partial</TrimMode>
 </PropertyGroup>
 ```
+
+**This is enough on Linux, and not on Windows.** With the setting, a Native AOT publish on Linux produces a
+program that runs. On Windows the publish succeeds and the program then stops at startup with a different
+error, `There is no metadata token available for the given member`: the runtime library asks reflection for a
+value that Native AOT does not provide. No setting avoids that one; on Windows, publish without Native AOT.
+macOS has not been measured.
 
 **What that costs.** With `partial`, Native AOT compiles every `go.*` assembly the program references in
 full, not only the parts the program uses. For a small program that references about thirty of them, the
