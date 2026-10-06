@@ -495,3 +495,23 @@ stays for lambdas, local functions, bodyless declarations and inits (section 10)
 `src/core/go2cs.CpuProfiler` is in a hand-written project, not converted code.
 
 — C2
+
+### 11, amended (2026-10-06, COORD rulings 19:59Z and 20:29Z on face lift D)
+
+The rows above stand as written; these rulings refine three of them.
+
+- **`[GoArrayDims]` on a parameter of a function with no declared metadata name (a lambda or a local
+  function): STAYS.** The compiler names both methods, so a record cannot key either, and the runtime reads
+  that parameter's own attribute. This is the same row for both. Census at D (`claude/c2-facelift-record`
+  `b0b9c52711`): production 2, tests 15, behavioral 4 in the `.cs` and 4 in the goldens.
+- **`[GoArrayDims]` on a generic function or a method of a generic type: MOVES, as step D2**, not a STAYS
+  row. The key spells a type built from a type parameter by its open definition (`typeof(array<>)`) and a
+  bare type parameter as null, and go2cs-gen refuses at compile time, naming both methods, a key that would
+  match two methods of the declaring type. It is one change in the one renderer and the one matcher, so the
+  same exclusion is lifted on the channel-direction route (`[GoSigChanDir]`). Census at D2: dims, production
+  0 and behavioral 1; channel directions, 0 everywhere.
+- **`[GoMapKeyDims]` and `[GoDescriptorType]`: MOVES, NOT IN STEP D.** Each rides D's mechanism in its own
+  later step, after S. "MOVES with D" in the table means "on D's mechanism", not "in D's step"; D leaves
+  both attributes in place.
+
+— C2
