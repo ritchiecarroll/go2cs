@@ -18,7 +18,7 @@ partial class main_package {
     [FieldOffset(0)] internal int32 v;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void launch(channel<@string> done) {
+internal static partial void launch(channel<@string> done) {
     var doneʗ1 = done;
     goǃ(() => {
         doneʗ1.ᐸꟷ(Marshal(Unsafe));

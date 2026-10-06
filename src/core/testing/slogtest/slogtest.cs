@@ -391,7 +391,7 @@ internal static slogꓸHandler WithGroup(this wrapper recvᴛ, @string name) => 
     return h.Handler.Handle(ctx, r);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string withSource(@string s) {
+internal static partial @string withSource(@string s) {
     var (_, @file, line, ok) = runtime.Caller(1);
     if (!ok) {
         throw panic("runtime.Caller failed");

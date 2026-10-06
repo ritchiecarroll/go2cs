@@ -14,7 +14,7 @@ partial class main_package {
     internal inner sub;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<counter> get(ж<counter> Ꮡc) {
+internal static partial ж<counter> get(ж<counter> Ꮡc) {
     return Ꮡc;
 }
 

@@ -16,11 +16,11 @@ partial class main_package {
     internal nint n;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<view> viewOf(ж<header> Ꮡhp) {
+internal static partial ж<view> viewOf(ж<header> Ꮡhp) {
     return Ꮡhp.Reinterpret<header, view>();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint readN(ж<view> Ꮡp) {
+internal static partial nint readN(ж<view> Ꮡp) {
     return (~viewOf(Ꮡp.Reinterpret<view, header>())).n;
 }
 

@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void run() {
+internal static partial void run() {
     var pcs = new uintptr[]{10, 20, 30}.slice();
     var pcsʗ1 = pcs;
     uintptr casePC(nint casi) {

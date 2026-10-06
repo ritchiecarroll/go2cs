@@ -9,11 +9,11 @@ internal static UntypedInt limit => /* 128 << 10 */ 131072;
 
 internal static UntypedInt floor => 16;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uintptr clampU(uintptr n) {
+internal static partial uintptr clampU(uintptr n) {
     return min(n, (uintptr)(limit));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static int32 clampI(int32 d) {
+internal static partial int32 clampI(int32 d) {
     return max(d, (int32)(floor));
 }
 
@@ -23,7 +23,7 @@ internal static UntypedInt floor => 16;
 
 [GoType("num:int8")] partial struct delta;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static fieldElement spread(fieldElement a, fieldElement b) {
+internal static partial fieldElement spread(fieldElement a, fieldElement b) {
     return min((fieldElement)(a - b), (fieldElement)(b - a), (fieldElement)(a - b + 3329), (fieldElement)(b - a + 3329));
 }
 

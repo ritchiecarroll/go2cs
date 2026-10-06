@@ -511,7 +511,7 @@ internal static error Err(this ж<cancelCtx> Ꮡc) {
 
 // propagateCancel arranges for child to be canceled when parent is.
 // It sets the parent context of cancelCtx.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void propagateCancel(this ж<cancelCtx> Ꮡc, Context parent, canceler child) {
+internal static partial void propagateCancel(this ж<cancelCtx> Ꮡc, Context parent, canceler child) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     c.Context = parent;

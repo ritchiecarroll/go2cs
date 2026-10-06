@@ -25,7 +25,7 @@ partial class main_package {
     internal slot s;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<holder> get(ж<holder> Ꮡh) {
+internal static partial ж<holder> get(ж<holder> Ꮡh) {
     return Ꮡh;
 }
 

@@ -22,7 +22,7 @@ partial class types_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string assertionFailedˢ = "assertion failed"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void assert(bool p) {
+internal static partial void assert(bool p) {
     if (!p) {
         @string msg = assertionFailedˢ;
         // Include information about the assertion location. Due to panic recovery,

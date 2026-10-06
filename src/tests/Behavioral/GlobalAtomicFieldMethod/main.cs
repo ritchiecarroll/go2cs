@@ -14,7 +14,7 @@ partial class main_package {
 internal static ж<controller> Ꮡctrl = new StandardBox<controller>(default(controller));
 internal static ref controller ctrl => ref Ꮡctrl.Value;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void keep(ж<controller> Ꮡc) {
+internal static partial void keep(ж<controller> Ꮡc) {
     _ = Ꮡc;
 }
 

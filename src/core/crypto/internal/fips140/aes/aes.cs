@@ -66,7 +66,7 @@ public static (ж<Block>, error) New(slice<byte> key) {
 // too complex to inline itself.
 //
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<Block>, error) newOutlined(ж<Block> Ꮡb, slice<byte> key) {
+internal static partial (ж<Block>, error) newOutlined(ж<Block> Ꮡb, slice<byte> key) {
     var exprᴛ1 = len(key);
     if (exprᴛ1 == aes128KeySize || exprᴛ1 == aes192KeySize || exprᴛ1 == aes256KeySize) {
     }

@@ -10,11 +10,11 @@ partial class main_package {
     internal nint val;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void onstack(Action f) {
+internal static partial void onstack(Action f) {
     f();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint run() {
+internal static partial nint run() {
     var s = Ꮡ(new span(largeType: 5, val: 100));
     nint total = 0;
     var sʗ1 = s;

@@ -18,7 +18,7 @@ private static readonly object countBeforeGoˢ = (@string)"Count before Go:"u8;
 private static readonly object accumTotalˢ = (@string)"accum total:"u8;
 private static readonly object mainFunctionˢ = (@string)"Main function"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     goǃ(ᴛ1 => fmt.Println(ᴛ1), firstˢ);
     goǃ(ᴛ1 => fmt.Println(ᴛ1), secondˢ);
     goǃ(ᴛ1 => fmt.Println(ᴛ1), thirdˢ);
@@ -81,7 +81,7 @@ private static readonly @string pairˢ = "pair"u8;
 private static readonly object handledˢ = (@string)"handled:"u8;
 private static readonly object innerFnRanˢ = (@string)"inner fn ran"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void runPair(channel<EmptyStruct> done) {
+internal static partial void runPair(channel<EmptyStruct> done) {
     @string tag = pairˢ;
     void handler(channel<EmptyStruct> ch, Action fn) {
         fn();
@@ -98,7 +98,7 @@ private static readonly object innerFnRanˢ = (@string)"inner fn ran"u8;
 private static readonly object goThreadSquareˢ = (@string)"Go thread square:"u8;
 private static readonly object immediateNˢ = (@string)"Immediate n:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void printSquare(nint n) {
+internal static partial void printSquare(nint n) {
     goǃ((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), goThreadSquareˢ, n * n);
     n++;
     fmt.Println(immediateNˢ, n);

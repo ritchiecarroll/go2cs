@@ -1551,7 +1551,7 @@ public static bool TrySend(this ΔValue v, ΔValue x) {
 // go2cs generated this placeholder — func Type is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ΔType typeSlow(this ΔValue v) {
+internal static partial ΔType typeSlow(this ΔValue v) {
     return new rtypeжΔType(toRType(v.abiTypeSlow()));
 }
 

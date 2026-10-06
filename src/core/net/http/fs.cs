@@ -286,7 +286,7 @@ internal static readonly @string contentLengthˢ = "Content-Length"u8;
 // if modtime.IsZero(), modtime is unknown.
 // content must be seeked to the beginning of the file.
 // The sizeFunc is called at most once. Its error, if any, is sent in the HTTP response.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void serveContent(ResponseWriter w, ref Request r, @string name, time.Time modtime, Func<(int64, error)> sizeFunc, io.ReadSeeker content) {
+internal static partial void serveContent(ResponseWriter w, ref Request r, @string name, time.Time modtime, Func<(int64, error)> sizeFunc, io.ReadSeeker content) {
     GoFrame ᒐ = default;
     try {
         setLastModified(w, modtime);

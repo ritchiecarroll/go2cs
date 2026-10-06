@@ -5,13 +5,13 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void forEach(slice<nint> items, Action<nint> f) {
+internal static partial void forEach(slice<nint> items, Action<nint> f) {
     foreach (var (_, x) in items) {
         f(x);
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint n, bool ok) run() {
+internal static partial (nint n, bool ok) run() {
     nint n = default!;
     bool ok = default!;
 

@@ -250,7 +250,7 @@ internal static uint32 capToMask(uintptr cap) {
 //go:noinline
 //go:norace
 //go:nocheckptr
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPipe, bool locked) forkAndExecInChild1(ж<byte> Ꮡargv0, slice<ж<byte>> argv, slice<ж<byte>> envv, ж<byte> Ꮡchroot, ж<byte> Ꮡdir, ref ProcAttr attr, ref SysProcAttr sys, nint pipe) {
+internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPipe, bool locked) forkAndExecInChild1(ж<byte> Ꮡargv0, slice<ж<byte>> argv, slice<ж<byte>> envv, ж<byte> Ꮡchroot, ж<byte> Ꮡdir, ref ProcAttr attr, ref SysProcAttr sys, nint pipe) {
     uintptr pid = default!;
     ref var pidfd = ref heap(new int32(), out var Ꮡpidfd);
     ref var err1 = ref heap(new Errno(), out var Ꮡerr1);
@@ -909,7 +909,7 @@ internal static error os_checkClonePidfd() {
 // and os_checkClonePidfd separate.
 //
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (uintptr pid, Errno errno) doCheckClonePidfd(ж<int32> Ꮡpidfd) {
+internal static partial (uintptr pid, Errno errno) doCheckClonePidfd(ж<int32> Ꮡpidfd) {
     uintptr pid = default!;
     Errno errno = default!;
 

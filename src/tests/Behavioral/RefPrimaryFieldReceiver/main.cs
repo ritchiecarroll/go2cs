@@ -52,7 +52,7 @@ internal static nint nBeforeTouch(this ж<counter> Ꮡc) {
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void bumpAsync(this ж<counter> Ꮡc, nint times, ж<Δsync.WaitGroup> Ꮡwg) {
+internal static partial void bumpAsync(this ж<counter> Ꮡc, nint times, ж<Δsync.WaitGroup> Ꮡwg) {
     goǃ(() => {
         GoFrame ᒐ = default;
         try {
@@ -88,7 +88,7 @@ private static readonly object crossGoroutineUnlockOkˢ = (@string)"cross-gorout
 private static readonly object viaLocalPointerˢ = (@string)"via local pointer:"u8;
 private static readonly object nilReceiverEarlyReturnˢ = (@string)"nil receiver, early return:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     UntypedInt workers = 8;
     UntypedInt each = 2000;
     var c = Ꮡ(new counter(nil));

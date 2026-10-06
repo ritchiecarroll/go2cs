@@ -33,7 +33,7 @@ internal static void acquireLockRankAndM(lockRank rank) {
     acquirem();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void unlockWithRank(ж<mutex> Ꮡl) {
+internal static partial void unlockWithRank(ж<mutex> Ꮡl) {
     unlock2(Ꮡl);
 }
 

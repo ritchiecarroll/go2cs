@@ -23,11 +23,11 @@ partial class main_package {
     internal nint n, m;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void setU32(ref uint32 p, uint32 v) {
+internal static partial void setU32(ref uint32 p, uint32 v) {
     p = v;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void setInt(ref nint p, nint v) {
+internal static partial void setInt(ref nint p, nint v) {
     p = v;
 }
 

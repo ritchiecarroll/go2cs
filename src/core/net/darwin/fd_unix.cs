@@ -58,7 +58,7 @@ internal static error init(this ж<netFD> Ꮡfd) {
 internal static readonly @string connectˢ = "connect"u8;
 internal static readonly @string getsockoptˢ = "getsockopt"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (syscall.Sockaddr rsa, error ret) connect(this ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
+internal static partial (syscall.Sockaddr rsa, error ret) connect(this ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
     syscall.Sockaddr rsa = default!;
     error ret = default!;
     GoFrame ᒐ = default;

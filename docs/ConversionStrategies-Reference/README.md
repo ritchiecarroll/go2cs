@@ -417,6 +417,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
 - **[Source Generators](source-generators.md)**
   - [`package_info.cs`'s `TypeAccessibility` section pins each type's accessibility IN SOURCE](source-generators.md#package_infocss-typeaccessibility-section-pins-each-types-accessibility-in-source)
   - [Extended attributes: what stays on the declaration and what moves](source-generators.md#extended-attributes-what-stays-on-the-declaration-and-what-moves)
+  - [The no-inline mark rides a generated declaring part](source-generators.md#the-no-inline-mark-rides-a-generated-declaring-part)
 - **[The standard-library conversion applies `-tags purego`](purego.md)**
   - [Known accepted divergence — `crypto/elliptic` P256 `Inverse` panics under purego](purego.md#known-accepted-divergence--cryptoelliptic-p256-inverse-panics-under-purego)
 - **[Manually-Converted Declarations](manual-conversions.md)**

@@ -587,7 +587,7 @@ internal static readonly @string unsupportedProtocolˢ = "unsupported protocol s
 internal static readonly @string httpNoHostInRequestUrlˢ = "http: no Host in request URL"u8;
 
 // roundTrip implements a RoundTripper over HTTP.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<Response>, error err) roundTrip(this ж<Transport> Ꮡt, ж<Request> Ꮡreq) {
+internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> Ꮡt, ж<Request> Ꮡreq) {
     ж<Response> _ᴛ1 = default!;
     error err = default!;
     GoFrame ᒐ = default;
@@ -1222,7 +1222,7 @@ internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> �
 // queueForIdleConn queues w to receive the next idle connection for w.cm.
 // As an optimization hint to the caller, queueForIdleConn reports whether
 // it successfully delivered an already-idle connection.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static bool /*delivered*/ queueForIdleConn(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
+internal static partial bool /*delivered*/ queueForIdleConn(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
     bool delivered = default!;
     GoFrame ᒐ = default;
     try {
@@ -1748,7 +1748,7 @@ internal static void queueForDial(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
 
 // startDialConnFor calls dialConn in a new goroutine.
 // t.connsPerHostMu must be held.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void startDialConnForLocked(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
+internal static partial void startDialConnForLocked(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.dialsInProgress.cleanFrontCanceled();
@@ -1858,7 +1858,7 @@ internal static void decConnsPerHost(this ж<Transport> Ꮡt, connectMethodKey k
 // Add TLS to a persistent connection, i.e. negotiate a TLS session. If pconn is already a TLS
 // tunnel, this function establishes a nested TLS session inside the encrypted channel.
 // The remote endpoint's name may be overridden by TLSClientConfig.ServerName.
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static error addTLS(this ref persistConn pconn, context.Context ctx, @string name, ж<httptrace.ClientTrace> Ꮡtrace) {
+[GoRecv] internal static partial error addTLS(this ref persistConn pconn, context.Context ctx, @string name, ж<httptrace.ClientTrace> Ꮡtrace) {
     ref var trace = ref Ꮡtrace.DerefOrNull();
 
     // Initiate TLS and check remote host name against certificate.
@@ -1929,7 +1929,7 @@ internal static readonly @string proxyAuthorizationˢ = "Proxy-Authorization"u8;
 internal static readonly @string unknownStatusCodeˢ = "unknown status code"u8;
 internal static readonly @string httpTransportDoesNotˢ = "http: Transport does not support unencrypted HTTP/2"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<persistConn> pconn, error err) dialConn(this ж<Transport> Ꮡt, context.Context ctx, connectMethod cm) {
+internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Transport> Ꮡt, context.Context ctx, connectMethod cm) {
     ж<persistConn> pconn = default!;
     error err = default!;
     GoFrame ᒐ = default;

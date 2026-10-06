@@ -35,7 +35,7 @@ private static readonly @string goroutineResumedˢ = "goroutine resumed (UNREACH
 private static readonly @string aLaterGoroutineStillRunsˢ = "a later goroutine still runs"u8;
 private static readonly object mainContinuesPastTheˢ = (@string)"main continues past the exited goroutine"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     var log = new channel<@string>(16);
     var done = new channel<EmptyStruct>(0);
     var doneʗ1 = done;

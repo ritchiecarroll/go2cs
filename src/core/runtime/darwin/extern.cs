@@ -301,7 +301,7 @@ partial class runtime_package {
 // the program counter, the file name (using forward slashes as path separator, even
 // on Windows), and the line number within the file of the corresponding call.
 // The boolean ok is false if it was not possible to recover the information.
-[MethodImpl(MethodImplOptions.NoInlining)] public static (uintptr pc, @string @file, nint line, bool ok) Caller(nint skip) {
+public static partial (uintptr pc, @string @file, nint line, bool ok) Caller(nint skip) {
     uintptr pc = default!;
     @string @file = default!;
     nint line = default!;

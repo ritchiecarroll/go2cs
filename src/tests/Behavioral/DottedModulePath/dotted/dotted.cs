@@ -16,7 +16,7 @@ public static nint F() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string noCallerˢ = "no caller"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static @string Where() {
+public static partial @string Where() {
     var (pc, _, _, ok) = runtime.Caller(0);
     if (!ok) {
         return noCallerˢ;

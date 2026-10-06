@@ -39,7 +39,7 @@ private static readonly object theParkedThreadFollowedˢ = (@string)"the parked 
 private static readonly object restoreFailedˢ = (@string)"restore failed:"u8;
 private static readonly object restoredMainˢ = (@string)"restored main:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     if (runtime.GOOS != "linux"u8) {
         fmt.Println(notLinuxNothingToObserveˢ);
         return;

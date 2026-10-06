@@ -6,20 +6,20 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static runtime.Frame capture() {
+internal static partial runtime.Frame capture() {
     var pcs = new slice<uintptr>(1);
     runtime.Callers(2, pcs);
     var (frame, _) = runtime.CallersFrames(pcs).Next();
     return frame;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (runtime.Frame, runtime.Frame) twoSites() {
+internal static partial (runtime.Frame, runtime.Frame) twoSites() {
     var first = capture();
     var second = capture();
     return (first, second);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static runtime.Frame other() {
+internal static partial runtime.Frame other() {
     return capture();
 }
 

@@ -1364,10 +1364,35 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// hand-written companion (e.g. sync/atomic's doc_impl.cs) or, when none exists, by
 	// the PartialStubGenerator (go2cs-gen), which emits a throwing default so the code
 	// still compiles.
+	//
+	// A method that takes the no-inline mark (the runtime.Caller closure, see noInliningPrefix) and
+	// HAS a body is emitted as a partial method's IMPLEMENTING part instead: the word `partial`
+	// stands where the `[MethodImpl(MethodImplOptions.NoInlining)]` prefix stood, and go2cs-gen's
+	// NoInliningPartialGenerator writes the declaring part carrying the attribute, which C# merges
+	// into the one compiled method (owner ruling 2026-10-06, docs/PLAN-marker-comment-parity.md
+	// section 10). A bodyless declaration above is already the declaring part, so it keeps the
+	// attribute itself, as do lambdas and local functions (litNoInliningPrefix), which cannot be partial.
+	// The runtime package's own init functions are written below as plain never-called methods with
+	// no attribute at all, so they carry no mark in either rendering and are never partial.
+	runtimeBootstrapInit := isModuleInitializer && v.pkg.Path() == "runtime"
+	noInliningPartial := false
+
 	if funcDecl.Body == nil && !hasLinknameForward {
+		v.replaceMarker(functionPartialMarker, " partial")
+	} else if fnObj := v.info.ObjectOf(funcDecl.Name); fnObj != nil && v.needsNoInlining[fnObj] && !runtimeBootstrapInit {
+		noInliningPartial = true
 		v.replaceMarker(functionPartialMarker, " partial")
 	} else {
 		v.replaceMarker(functionPartialMarker, "")
+	}
+
+	// The attribute prefix for every arm below: empty when the mark rides the generated declaring part.
+	// noInliningPrefix still registers its `using System.Runtime.CompilerServices` either way, so a
+	// file's using block reads the same in both renderings and only the signature line changes.
+	noInliningAttribute := v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name))
+
+	if noInliningPartial {
+		noInliningAttribute = ""
 	}
 
 	// An sstring TWIN (sstringTwinOperations.go): this declaration is the member that carries the
@@ -1403,15 +1428,15 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		// self-checks against zero-valued stub globals (arena's `% physPageSize` divides by
 		// zero at assembly load, before Main). The faithful conversion of the Go runtime
 		// bootstrap is to not run it: emit them as plain (never-called) methods.
-		if v.pkg.Path() == "runtime" {
+		if runtimeBootstrapInit {
 			v.replaceMarker(functionAttributeMarker, "/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ ")
 		} else {
-			v.replaceMarker(functionAttributeMarker, forwarderPrefix+v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name))+"[GoInit] ")
+			v.replaceMarker(functionAttributeMarker, forwarderPrefix+noInliningAttribute+"[GoInit] ")
 		}
 	} else if strings.HasPrefix(parameterSignature, "this ref ") {
-		v.replaceMarker(functionAttributeMarker, forwarderPrefix+twinMarker+v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name))+"[GoRecv] ")
+		v.replaceMarker(functionAttributeMarker, forwarderPrefix+twinMarker+noInliningAttribute+"[GoRecv] ")
 	} else {
-		v.replaceMarker(functionAttributeMarker, forwarderPrefix+twinMarker+v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name)))
+		v.replaceMarker(functionAttributeMarker, forwarderPrefix+twinMarker+noInliningAttribute)
 	}
 
 	var funcExecutionContext string

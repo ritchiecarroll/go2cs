@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static int64 f(int64 ns) {
+internal static partial int64 f(int64 ns) {
     var total = ns;
     if (ns < 0) {
         UntypedInt nsΔ1 = 10;

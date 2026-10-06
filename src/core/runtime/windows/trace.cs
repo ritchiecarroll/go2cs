@@ -718,7 +718,7 @@ internal static ref traceAdvancerState traceAdvancer => ref ᏑtraceAdvancer.Val
 }
 
 // start starts a new traceAdvancer.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void start(this ж<traceAdvancerState> Ꮡs) {
+internal static partial void start(this ж<traceAdvancerState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Start a goroutine to periodically advance the trace generation.

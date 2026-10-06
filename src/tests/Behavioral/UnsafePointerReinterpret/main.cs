@@ -5,25 +5,25 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @unsafe.Pointer indirectKey(@unsafe.Pointer k) {
+internal static partial @unsafe.Pointer indirectKey(@unsafe.Pointer k) {
     return ((ж<@unsafe.Pointer>)(uintptr)(k)).Value;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void store(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointer val) {
+internal static partial void store(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointer val) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
     dst = val;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void writeBarrier(@unsafe.Pointer ptr, @unsafe.Pointer val) {
+internal static partial void writeBarrier(@unsafe.Pointer ptr, @unsafe.Pointer val) {
     store((ж<@unsafe.Pointer>)(uintptr)(ptr), val);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (Action, bool) funcAt(@unsafe.Pointer p) {
+internal static partial (Action, bool) funcAt(@unsafe.Pointer p) {
     return (((ж<Action>)(uintptr)(p)).ValueSlot, true);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uint64 zeroPair(@unsafe.Pointer x) {
+internal static partial uint64 zeroPair(@unsafe.Pointer x) {
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
     return ((ж<array<uint64>>)(uintptr)(x)).Value[0];
@@ -31,7 +31,7 @@ partial class main_package {
 
 [GoType("num:uintptr")] partial struct linkaddr;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uintptr throughPointer(linkaddr v) {
+internal static partial uintptr throughPointer(linkaddr v) {
     return (uintptr)((@unsafe.Pointer)(uintptr)v);
 }
 

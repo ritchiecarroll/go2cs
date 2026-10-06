@@ -285,6 +285,35 @@ public class NoInliningPartialGeneratorTests
             $"the generator writes methods only, never the types they sit beside; {Describe(run)}");
     }
 
+    /// <summary>
+    /// The generated file repeats its source file's using directives so every type name resolves as it
+    /// does there. A <c>global using</c> is already in scope compilation-wide, and repeating an alias one
+    /// is CS1537, so it is not copied.
+    /// </summary>
+    [TestMethod]
+    public void ACarrierBesideAGlobalUsingAliasCompiles()
+    {
+        const string withGlobalUsing = """
+            global using Count = System.Int64;
+            using System;
+
+            namespace go;
+
+            partial class main_package {
+
+            internal static partial Count tally() {
+                return 0;
+            }
+
+            } // end main_package
+            """;
+
+        Run run = Generate([new NoInliningPartialGenerator()], Stubs, withGlobalUsing);
+
+        Assert.AreEqual(0, run.Errors.Length, Describe(run));
+        Assert.IsTrue(run.Methods["tally"].HasFlag(MethodImplAttributes.NoInlining), $"tally lost the NoInlining flag; {Describe(run)}");
+    }
+
     [TestMethod]
     public void LambdasAndLocalFunctionsKeepTheirOwnAttributeAndGainNoDeclaringPart()
     {

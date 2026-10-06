@@ -31,7 +31,7 @@ internal static int64 readBack(ж<box> Ꮡb) {
     return (~c).a + (~c).b;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void bump(ref int64 p) {
+internal static partial void bump(ref int64 p) {
     p = p + 7;
 }
 

@@ -969,7 +969,7 @@ internal static void crash() {
 
 // ensureSigM starts one global, sleeping thread to make sure at least one thread
 // is available to catch signals enabled for os/signal.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void ensureSigM() {
+internal static partial void ensureSigM() {
     if (maskUpdatedChan != default!) {
         return;
     }

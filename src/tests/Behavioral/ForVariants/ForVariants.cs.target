@@ -15,7 +15,7 @@ private static readonly object xFromThreadˢ = (@string)"x from thread"u8;
 private static readonly object iAfterThreadAndˢ = (@string)"i after thread and"u8;
 private static readonly object xAfterThreadˢ = (@string)"x after thread"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     nint i = 0;
     while (i < 10) {
         f(ref i);

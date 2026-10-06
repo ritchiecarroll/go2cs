@@ -9,6 +9,7 @@ Several Go semantics cannot be written directly in C#, so the converter emits co
 * **`ImplicitConvGenerator`** — emits the implicit conversion operators that let a [named type](type-aliasing.md#type-definitions) and its underlying types be used interchangeably.
 * **`StrGenerator`** — driven by `[GoStr]`. For an [sstring twin](strings.md#an-sstring-twin-a-registered-function-gains-an-sstring-overload-that-calls-bind), emits the `@string` overload that forwards to the `[GoStr]` member under `[OverloadResolutionPriority(-1)]`, and for a package-level function the canonical value delegate `<Name>ᶠ`. Types are rendered fully qualified from the symbols, because the converted file's `using` aliases are not in scope in a generated file.
 * **`PartialStubGenerator`** — emits a throwing `partial` implementation for any bodyless `partial` method that has no other implementing part (e.g. assembly/cgo functions with no convertible body), while leaving real hand-written companion implementations untouched.
+* **`NoInliningPartialGenerator`** — the other direction: for a `partial` method that HAS a body and no declaring part, emits the declaring part carrying `[MethodImpl(MethodImplOptions.NoInlining)]`. This is how the converter's no-inline mark reaches a declared method; see [The no-inline mark rides a generated declaring part](#the-no-inline-mark-rides-a-generated-declaring-part).
 
 Common attributes the converter emits for the generators (and tooling) to consume: `[GoType]` (type bodies), `[GoRecv]` (receiver methods), `[GoStr]` (sstring twins), `[GoTag]` (struct field tags), `[GoPackage]` (package info), and the test-only `[GoTestMatchingConsoleOutput]`. The full vocabulary — every stamp, where it lands, who reads it, and which of them are kept off the visible declaration — is classified in [Extended attributes: what stays on the declaration and what moves](#extended-attributes-what-stays-on-the-declaration-and-what-moves).
 
@@ -66,7 +67,7 @@ Measured, with a positive control (the `-tests` pipeline on `io`, whose `CS0535`
 
 The `[GoType]` declaration is the line a reader of converted code actually reads, so every *other* attribute stamped on it is machinery competing with the Go original for that reader's attention. `package_info.cs` already exists to hold per-type records out of view, and the `TypeAccessibility` section above already moved the access modifier there. **A stamp can follow it whenever its consumer reads the attribute off the TYPE rather than off a particular declaration** — C# unions the attributes of every part of a partial type, so which part carries one is invisible to runtime reflection and to any generator that resolves the symbol.
 
-That single criterion classifies the whole surface. The converter stamps nothing from the BCL — every `[StructLayout]`, `[MethodImpl]` or `[LibraryImport]` in the corpus is in `golib` or in a hand-owned file — so the vocabulary is exactly this:
+That single criterion classifies the whole surface. Apart from the no-inline mark, which a declared method now carries as the word `partial` ([below](#the-no-inline-mark-rides-a-generated-declaring-part)) and a func literal as `[MethodImpl(MethodImplOptions.NoInlining)]`, and the explicit layout of a struct with a zero-size field (`[StructLayout]`/`[FieldOffset]`), the converter stamps nothing from the BCL, so the vocabulary is exactly this:
 
 | Stamp | Lands on | Consumer | Verdict |
 |---|---|---|---|
@@ -98,6 +99,70 @@ Mechanics worth knowing:
 * **`TypeGenerator` reads the stamp across every partial declaration**, starting with the `[GoType]` one its receiver matched and continuing through the symbol's other `DeclaringSyntaxReferences`. That is what makes both placements equivalent rather than one replacing the other. The match itself stays syntactic, as it is for every attribute this generator reads.
 * **The section sorts on the DECLARATION, not the line.** `typeAccessibilityKey` strips the attribute prefix before comparing, so a stamped entry keeps the place its accessibility/kind/name earns instead of being pulled into a leading block by its `[`. Sorting the raw line is legal but scrambles a section whose whole value is being readable at a glance.
 * **Not a semantic change anywhere.** The relocation moves *where the attribute is written*, exactly as the `TypeAccessibility` section moved where the modifier is written. Nothing observes a difference: the generated `Clone()` is identical, and `GoReflect`'s `%T` output is identical.
+
+
+## The no-inline mark rides a generated declaring part
+
+**Rule (owner ruling 2026-10-06, `docs/PLAN-marker-comment-parity.md` section 10).** A function whose frame
+a Go stack walk counts must not be inlined by the JIT, or `runtime.Caller`, `runtime.Callers`,
+`runtime.Stack` and the profiles name the wrong function. `computeNoInliningClosure`
+(`src/go2cs/callerInliningAnalysis.go`) decides which functions those are: a direct `runtime.Caller` /
+`runtime.Callers` user, a thin forwarder into one, a function inside a constant skip window, a hop into a
+skip-counted walker, a `//go:noinline` function, a goroutine creator, and a thin allocator in a package
+that reads the heap profile. How each takes the mark:
+
+| Shape | Emitted form | Why |
+|---|---|---|
+| Declared function or method with a body | `partial` where the `[MethodImpl(MethodImplOptions.NoInlining)] ` prefix stood: `[GoRecv] internal static partial @string ptr(this ref counter c) {` | `NoInliningPartialGenerator` writes the declaring part with the attribute; C# merges the attributes of both parts into the one compiled method |
+| Func literal (lambda) | `[MethodImpl(MethodImplOptions.NoInlining)] @string () => here()` | a lambda has no partial form |
+| Local function (a literal only ever called) | `[MethodImpl(MethodImplOptions.NoInlining)] @string local() {` | a local function has no partial form |
+| Declaration with no Go body | `[MethodImpl(MethodImplOptions.NoInlining)] internal static partial … f(…);` | already the declaring part; its body is a `*_impl.cs` companion |
+| The `runtime` package's own `init` functions | neither | they are emitted as never-called methods, `/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */`, with no attribute in either rendering |
+| Hand-owned files | the attribute, written by hand | not converter output |
+
+The converter still registers `System.Runtime.CompilerServices` (or, in a file with a `using static`,
+the `MethodImplAttribute`/`MethodImplOptions` aliases) for a carrier, so a file's using block reads the
+same in both renderings and the change to a converted file is exactly the signature line.
+
+**What the generator matches.** `NoInliningPartials.IsCarrier`: a `partial` method with a body whose symbol
+has no declaring part (`IsPartialDefinition: false`, `PartialDefinitionPart: null`). A converted bodyless
+declaration plus its `*_impl.cs` body always has a declaring part, so it never matches; neither does a
+method without `partial`.
+
+**What it writes.** One `<file>.noinline.g.cs` per source file that holds carriers. The signature is
+copied as text from the implementing part with its attributes, body and the space before the body
+removed, so modifiers, return type (tuple element names included), type parameters, parameters (`this`,
+`ref`, `params`, names) and constraints match exactly; a mismatched parameter name would be CS8826. The
+file repeats the source file's `extern alias` and `using` directives, except `global using` (already in
+scope everywhere; repeating an alias one is CS1537), then the namespace's own usings, then the namespace
+and the containing type chain re-opened as `partial`. The attribute is written fully qualified, so it
+binds whatever the file's usings are. A default parameter value would have to move to the declaring part
+(CS1066 on the implementing one); the converter writes none on a carrier.
+
+**Readers of the mark.** `RecvGenerator` makes a pointer-receiver method's `ж<T>` overload no-inline when
+the method is, and `StrGenerator` does the same for an `sstring` twin's `@string` forwarder
+(`RecvGenerator.HasNoInliningMark`). Neither sees another generator's output, so both test the carrier
+shape as well as the attribute.
+
+**Failure mode.** If the generator does not run, every carrier is CS0759 (an implementing part with no
+declaring part): a build failure, never a silently inlinable method. A NuGet package carries the merged
+attribute in its compiled metadata.
+
+**Guards.**
+* GenTests `NoInliningPartialGeneratorTests` compiles the converter's rendering of each carrier shape
+  (thin forwarder, `params`, named-tuple result, generic, `this ref` and `this` receivers, a pointer
+  receiver on a generic type, `[GoInit]`, `Main`) and reads `NoInlining` back from the emitted metadata;
+  checks the declaring part's text; checks that a lambda and a local function keep their own attribute and
+  gain nothing, that a hand-owned declaration-plus-body pair gains nothing, that a carrier beside a
+  `global using` alias compiles, and that the `ж<T>` overloads of `ptr` and `get<T>` are no-inline while
+  an unmarked method's is not.
+* Behavioral `NoInlinePartial` runs with tiered compilation off (`runtimeconfig.template.json`), so the
+  first call is optimized code, and compares its output with `go run`: every shape prints the frame
+  `runtime.Caller` names. Built with a generator that writes the declaring part without the attribute,
+  six of its lines (`plain`, `variadic`, `generic`, `ptr`, `val`, `get`) print `main.main` instead.
+* The converter's frame tests (`noinlineDirective_test.go`, `callerSkipWindowFrames_test.go` and the
+  others) read the mark through `keepsOwnFrame` (a ` static partial ` declaration line that ends in a
+  body), and `goCreatorFrame_test.go` reads a literal's attribute directly.
 
 ---
 

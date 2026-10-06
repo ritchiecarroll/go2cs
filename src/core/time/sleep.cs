@@ -192,7 +192,7 @@ public static ж<Timer> AfterFunc(Duration d, Action f) {
     return newTimer(when(d), 0, goFunc, (f).OrTypedNilFunc(), nil);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void goFunc(any arg, uintptr seq, int64 delta) {
+internal static partial void goFunc(any arg, uintptr seq, int64 delta) {
     goǃ(arg._<Action>());
 }
 

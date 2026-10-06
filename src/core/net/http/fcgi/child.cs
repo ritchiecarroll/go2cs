@@ -215,7 +215,7 @@ public static error ErrConnClosed = errors.New("fcgi: connection to web server c
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fcgiReceivedIdThatIsˢ = "fcgi: received ID that is already in-flight"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡrec) {
+internal static partial error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡrec) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var rec = ref Ꮡrec.DerefOrNull();
 
@@ -373,7 +373,7 @@ internal static void serveRequest(this ж<child> Ꮡc, ж<request> Ꮡreq, io.Re
 // to reply to them.
 // If l is nil, Serve accepts connections from os.Stdin.
 // If handler is nil, [http.DefaultServeMux] is used.
-[MethodImpl(MethodImplOptions.NoInlining)] public static error Serve(net.Listener l, httpꓸHandler handler) {
+public static partial error Serve(net.Listener l, httpꓸHandler handler) {
     GoFrame ᒐ = default;
     try {
         if (l == default!) {

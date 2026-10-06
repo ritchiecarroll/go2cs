@@ -60,6 +60,12 @@ func launch(done chan string) {
 	go func() { done <- Unsafe }()
 }
 
+// launch above is a partial method's implementing part, which names no attribute; this literal executes
+// a go too and, unable to be partial, writes [MethodImpl(MethodImplOptions.NoInlining)] itself.
+func launcher(done chan string) func() {
+	return func() { go func() { done <- Unsafe }() }
+}
+
 func total(c counter) int { return Marshal(int(c.v)) }
 `)
 
@@ -128,14 +134,17 @@ func TestAFileWithAUsingStaticImportsNoDotNetNamespace(t *testing.T) {
 	const (
 		compilerServices = "using System.Runtime.CompilerServices;"
 		interopServices  = "using System.Runtime.InteropServices;"
-		noInlining       = "[MethodImpl(MethodImplOptions.NoInlining)]"
 		explicitLayout   = "[StructLayout(LayoutKind.Explicit, Size = 4)]"
 		fieldOffset      = "[FieldOffset(0)]"
 	)
 
 	// Controls: both files demand both namespaces, and the dotted one holds a using static.
 	for name, text := range map[string]string{"dotted.cs": dotted, "main.cs": plain} {
-		for _, emitted := range []string{noInlining, explicitLayout, fieldOffset} {
+		if !fileKeepsAFrame(text) {
+			t.Fatalf("control: %s must carry the no-inline mark, or this test proves nothing:\n%s", name, text)
+		}
+
+		for _, emitted := range []string{explicitLayout, fieldOffset} {
 			if !strings.Contains(text, emitted) {
 				t.Fatalf("control: %s must emit %s, or this test proves nothing:\n%s", name, emitted, text)
 			}
@@ -177,8 +186,8 @@ func TestAFileWithAUsingStaticImportsNoDotNetNamespace(t *testing.T) {
 	}
 
 	// The dot-import behind an ordinary import: its using static is not the block's first line.
-	if !strings.Contains(dottedLater, noInlining) || strings.HasPrefix(strings.TrimSpace(dottedLater[strings.Index(dottedLater, "using "):]), "using static ") {
-		t.Fatalf("control: dottedlater.cs must emit %s and open its usings with something other than the using static:\n%s", noInlining, dottedLater)
+	if !fileKeepsAFrame(dottedLater) || strings.HasPrefix(strings.TrimSpace(dottedLater[strings.Index(dottedLater, "using "):]), "using static ") {
+		t.Fatalf("control: dottedlater.cs must carry the no-inline mark and open its usings with something other than the using static:\n%s", dottedLater)
 	}
 
 	if strings.Contains(dottedLater, compilerServices) || !strings.Contains(dottedLater, "using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;") {
@@ -265,7 +274,6 @@ func TestEveryFileOfAReferenceModelTestProjectBindsByAlias(t *testing.T) {
 
 	const (
 		compilerServices = "using System.Runtime.CompilerServices;"
-		noInlining       = "[MethodImpl(MethodImplOptions.NoInlining)]"
 		optionsAlias     = "using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;"
 	)
 
@@ -273,8 +281,8 @@ func TestEveryFileOfAReferenceModelTestProjectBindsByAlias(t *testing.T) {
 		cs := readConvertedTestFile(t, outputPath, name)
 
 		// Control: each file executes a go, so its frame is kept and the namespace is demanded.
-		if !strings.Contains(cs, noInlining) {
-			t.Fatalf("control: %s must emit %s, or this test proves nothing:\n%s", name, noInlining, cs)
+		if !fileKeepsAFrame(cs) {
+			t.Fatalf("control: %s must carry the no-inline mark, or this test proves nothing:\n%s", name, cs)
 		}
 
 		if strings.Contains(cs, compilerServices) || !strings.Contains(cs, optionsAlias) {
@@ -334,7 +342,7 @@ func TestAnExternalOnlyTestFileBindsByAlias(t *testing.T) {
 
 	cs := readConvertedTestFile(t, outputPath, "outer_test.cs")
 
-	if !strings.Contains(cs, "[MethodImpl(MethodImplOptions.NoInlining)]") {
+	if !fileKeepsAFrame(cs) {
 		t.Fatalf("control: outer_test.cs executes a go and must keep its frame, or this test proves nothing:\n%s", cs)
 	}
 
@@ -345,4 +353,22 @@ func TestAnExternalOnlyTestFileBindsByAlias(t *testing.T) {
 	if strings.Contains(cs, "using System.Runtime.CompilerServices;") || !strings.Contains(cs, "using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;") {
 		t.Errorf("outer_test.cs is compiled under its project's global using static of the production class, and must take the aliases, not the namespace:\n%s", cs)
 	}
+}
+
+// fileKeepsAFrame reports whether a converted file carries the no-inline mark in either form: a func
+// literal keeps the [MethodImpl(MethodImplOptions.NoInlining)] attribute itself, and a declared function
+// is a partial method's implementing part whose declaring part go2cs-gen writes (keepsOwnFrame). The
+// converter demands the attribute's namespace for both.
+func fileKeepsAFrame(cs string) bool {
+	if strings.Contains(cs, "[MethodImpl(MethodImplOptions.NoInlining)]") {
+		return true
+	}
+
+	for _, line := range strings.Split(cs, "\n") {
+		if keepsOwnFrame(line) {
+			return true
+		}
+	}
+
+	return false
 }

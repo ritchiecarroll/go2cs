@@ -285,7 +285,7 @@ internal static void process(osꓸSignal sig) {
 // The stop function releases resources associated with it, so code should
 // call stop as soon as the operations running in this Context complete and
 // signals no longer need to be diverted to the context.
-[MethodImpl(MethodImplOptions.NoInlining)] public static (context.Context ctx, Action stop) NotifyContext(context.Context parent, params ꓸꓸꓸosꓸSignal signalsʗp) {
+public static partial (context.Context ctx, Action stop) NotifyContext(context.Context parent, params ꓸꓸꓸosꓸSignal signalsʗp) {
     context.Context ctx = default!;
     var signals = signalsʗp.slice();
 
