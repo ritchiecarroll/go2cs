@@ -26213,4 +26213,29 @@ channel in its signature.
 
 — C2
 
+
+## 2026-10-06 — C2: generated twins carry no Go array dims — RECORDED
+
+**What it is.** Several go2cs-gen emitters write a method whose parameter list mirrors a converted
+method: RecvGenerator's `this ж<T>` overload of a pointer-receiver method, StrGenerator's `@string`
+forwarder, and StructTypeTemplate's promoted forwarders and interface adapters. They rebuild each
+parameter from its type and name, so a `[GoArrayDims]` on the source parameter has never reached the
+twin. Face lift D (the `/*[N]*/` comment and the `[GoParamDims]` record) keeps that unchanged: its
+records name the converted method, never a twin. Before D and after it, a func value bound to a twin
+reads no dims for an array parameter. `reflect.TypeOf(f).In(i)` then answers a dims-less array, with
+`Len()` 0 and `String()` `[]uint8` for a `[N]uint8` parameter, the shape `reflect/value_impl.cs`
+records for the missing-cargo case.
+
+**Count**, from committed text at the record branch's base for D (`0a7280d5d4`), counting non-generic
+declarations that carry a dims stamp: production common 103 declarations, of which 17 have a pointer
+receiver (a `ж<T>` twin) and 3 an `@string` parameter (a string twin); production linux and darwin add
+3 and 2 string twins; tests 26, with 1 and 1; behavioral 18, with 1 pointer receiver. Promoted
+forwarders and adapters cannot be counted from text; a count needs the generated output of a build.
+
+**Trigger.** The first banked or module row whose verdict reads `In(i)` (or `reflect.New` of it) of a
+func value that resolves to a twin rather than to the converted method: a method value through a
+pointer, or a string-twin call path, taken as a func value and handed to reflection.
+
+— C2
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
