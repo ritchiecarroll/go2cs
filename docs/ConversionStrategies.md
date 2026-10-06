@@ -8104,7 +8104,10 @@ the process exits when `main` returns, even while goroutines are still running.
 **Converted code is ordinary blocking code, not `async` code.** A goroutine pauses by blocking its
 thread, so each goroutine needs a thread of its own. `goǃ` does not use the .NET thread pool, because
 a blocked goroutine would hold a shared pool thread and starve the others. golib cannot run many
-goroutines on fewer threads either, because .NET cannot move a running call to another stack.
+goroutines on fewer threads either, because .NET cannot move a running call to another stack. That is
+a property of today's .NET rather than of the conversion: goroutines are started in one place in golib,
+so if .NET gains threads its runtime can park cheaply, golib can adopt them and converted code stays as
+it is.
 
 **Each goroutine thread reserves a large stack.** Go stacks grow as needed, but a .NET stack overflow
 ends the process. Each goroutine thread therefore reserves 256 MB of address space; memory is

@@ -116,16 +116,14 @@ target OS ([design](phase4/DESIGN-multiplatform-corpus.md)). Each platform-varyi
 Windows record. Remaining Linux operational items are tracked in
 [`PLAN-linux-operation.md`](PLAN-linux-operation.md) and the multi-target design.
 
-**macOS.** The standard library compiles for macOS (Darwin), checked daily in CI on macOS arm64 and
-x64 runners ([`CIMatrix.md`](CIMatrix.md)). No macOS flavor ships, so on macOS the Windows
-flavor of a platform-varying package is what compiles and loads, and its platform-entangled behavior
-(local time zones, sockets, the `syscall` surface) follows Windows semantics or fails. A **macOS run
-layer** is built in parallel with the Go hops, off their critical path, on the same CI macOS runners.
-Its starting design is a managed dispatcher for the C library calls that Go's macOS port makes
-through assembly trampolines, and its first step needs no Mac. Every macOS test run is a CI round
-trip, without interactive debugging, so this work carries no committed date.
+**macOS (Intel and Apple silicon):** packages ship for both chips, the behavioral suite passes on both,
+and the README walkthrough runs. The standard library is not yet validated package by package on macOS,
+so don't expect it to be fully operational there yet. Its compile is checked daily in CI on macOS arm64
+and x64 runners ([`CIMatrix.md`](CIMatrix.md)).
 
-**Other architectures** receive the Windows flavor in the same way until a flavor ships for them.
+**Other architectures** receive the Windows flavor until a flavor ships for them: a platform-varying
+package's Windows flavor is what compiles and loads, and its platform-entangled behavior (local time
+zones, sockets, the `syscall` surface) follows Windows semantics or fails.
 
 ## Real-world Go modules
 
