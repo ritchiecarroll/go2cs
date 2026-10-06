@@ -2027,6 +2027,17 @@ $pkgs = @(Get-ChildItem $OutDir -Filter *.nupkg)
 Write-Step "Packed $($pkgs.Count) package(s)"
 if ($pkgs.Count -eq 0) { throw "No .nupkg produced in $OutDir" }
 
+# --- The path guard -----------------------------------------------------------------------------
+# Every assembly and symbol file of every package is read; one that embeds an absolute path (the pack box's own tree,
+# through a .pdb path or a [CallerFilePath] literal) refuses the pack by package and entry (check-pack-paths.ps1).
+. (Join-Path $PSScriptRoot 'check-pack-paths.ps1')
+$pathLeaks = Get-GoPackagePathLeaks $OutDir
+if ($pathLeaks.Count -gt 0) {
+    $pathLeaks | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+    throw "Pack paths: $($pathLeaks.Count) entr(y/ies) embed an absolute path -- nothing may ship that names the pack box's tree"
+}
+Write-Step "Pack paths: CLEAN -- no absolute path in any assembly or symbol file of $($pkgs.Count) package(s)"
+
 # --- Push gate ----------------------------------------------------------------------------------
 if (-not $Push) {
     Write-Host ""
