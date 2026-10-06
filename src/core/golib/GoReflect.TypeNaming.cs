@@ -112,6 +112,19 @@ public static partial class GoReflect
     }
 
     /// <summary>
+    /// <see cref="GoTypeName(Type?, nint[]?, GoChanDir[]?, nint[]?)"/> for a descriptor that also carries a
+    /// FUNC type's per-position channel directions: an unnamed func type prints each stamped parameter
+    /// and result as the directional channel Go names (<c>func(time.Duration) &lt;-chan time.Time</c>).
+    /// </summary>
+    public static string GoTypeName(Type? t, nint[]? arrayDims, GoChanDir[]? chanDirChain, nint[]? keyDims, GoChanDir[]? funcInChanDirs, GoChanDir[]? funcOutChanDirs)
+    {
+        if (t is not null && (funcInChanDirs is not null || funcOutChanDirs is not null) && isUnnamedFuncType(t))
+            return goFuncTypeString(t, funcInChanDirs, funcOutChanDirs);
+
+        return GoTypeName(t, arrayDims, chanDirChain, keyDims);
+    }
+
+    /// <summary>
     /// The Go source type string with the channel direction threaded as a PER-LEVEL CHAIN rather
     /// than one scalar. A scalar could only describe the outermost channel, so every nested
     /// direction was dropped on the way in and `chan (&lt;-chan int)` rendered `chan chan int` —
@@ -356,7 +369,17 @@ public static partial class GoReflect
     /// <c>...T</c> over its ELEMENT type; then nothing for no results, <c>" T"</c> for one, and
     /// <c>" (T, U)"</c> for several.
     /// </remarks>
-    private static string goFuncTypeString(Type t)
+    private static string goFuncTypeString(Type t) => goFuncTypeString(t, null, null);
+
+    // A position's channel direction, when the descriptor carries one, names it through the channel arm
+    // (GoTypeName's GoChanDir overload); every other position prints exactly as before.
+    private static string funcPositionName(Type type, GoChanDir[]? dirs, int i)
+    {
+        GoChanDir dir = dirs is not null && i < dirs.Length ? dirs[i] : GoChanDir.Unstamped;
+        return dir == GoChanDir.Unstamped ? GoTypeName(type) : GoTypeName(type, null, dir);
+    }
+
+    private static string goFuncTypeString(Type t, GoChanDir[]? funcInChanDirs, GoChanDir[]? funcOutChanDirs)
     {
         if (!TryFuncShape(t, out Type[]? ins, out Type[]? outs, out bool isVariadic))
             return "func()";
@@ -371,14 +394,14 @@ public static partial class GoReflect
             if (isVariadic && i == ins.Length - 1)
                 builder.Append("...").Append(GoTypeName(ElementType(ins[i])));
             else
-                builder.Append(GoTypeName(ins[i]));
+                builder.Append(funcPositionName(ins[i], funcInChanDirs, i));
         }
 
         builder.Append(')');
 
         if (outs.Length == 1)
         {
-            builder.Append(' ').Append(GoTypeName(outs[0]));
+            builder.Append(' ').Append(funcPositionName(outs[0], funcOutChanDirs, 0));
         }
         else if (outs.Length > 1)
         {
@@ -389,7 +412,7 @@ public static partial class GoReflect
                 if (i > 0)
                     builder.Append(", ");
 
-                builder.Append(GoTypeName(outs[i]));
+                builder.Append(funcPositionName(outs[i], funcOutChanDirs, i));
             }
 
             builder.Append(')');

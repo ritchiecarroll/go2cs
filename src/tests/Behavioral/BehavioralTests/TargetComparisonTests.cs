@@ -1756,6 +1756,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckReflectFuncArrayParamDims() => CheckTarget("ReflectFuncArrayParamDims");
 
     [TestMethod]
+    public void CheckReflectFuncChanDir() => CheckTarget("ReflectFuncChanDir");
+
+    [TestMethod]
     public void CheckReflectMakeFunc() => CheckTarget("ReflectMakeFunc");
 
     [TestMethod]

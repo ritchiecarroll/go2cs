@@ -1753,6 +1753,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckReflectFuncArrayParamDims() => CheckTarget("ReflectFuncArrayParamDims");
 
     [TestMethod]
+    public void CheckReflectFuncChanDir() => CheckTarget("ReflectFuncChanDir");
+
+    [TestMethod]
     public void CheckReflectMakeFunc() => CheckTarget("ReflectMakeFunc");
 
     [TestMethod]

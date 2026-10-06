@@ -1746,4 +1746,142 @@ public static partial class GoReflect
 
         return dims;
     }
+
+    // -------- func signature channel directions ([GoSigChanDir], NEW-1b) --------
+
+    private static readonly ConcurrentDictionary<Type, GoSigChanDirAttribute[]> s_sigChanDirs = new();
+
+    /// <summary>
+    /// The channel direction of each Go parameter and result of a converted func VALUE, or nulls when
+    /// nothing is carried — the direction twin of <see cref="FuncParamDims"/>, read off the delegate's
+    /// target method under the same arity guard.
+    /// </summary>
+    /// <remarks>
+    /// A delegate REBOUND over another delegate's <c>Invoke</c> (the named↔unnamed func marshalling,
+    /// <c>Delegate.CreateDelegate(dst, src, src.Invoke)</c>) targets <c>Invoke</c>, which carries
+    /// nothing; the chase follows it to the method the inner delegate wraps.
+    /// </remarks>
+    public static (GoChanDir[]? ins, GoChanDir[]? outs) FuncChanDirs(object? funcValue)
+    {
+        if (funcValue is not Delegate outer || outer.GetType().GetMethod("Invoke") is not { } invoke)
+            return (null, null);
+
+        Delegate current = outer;
+
+        for (int hops = 0; hops < 8 && current.Target is Delegate inner && current.Method.Name == "Invoke" &&
+                           current.Method.DeclaringType == inner.GetType(); hops++)
+        {
+            current = inner;
+        }
+
+        MethodInfo method = current.Method;
+
+        if (method.GetParameters().Length != invoke.GetParameters().Length)
+            return (null, null);
+
+        return MethodSigChanDirs(method);
+    }
+
+    /// <summary>
+    /// The channel directions of the <paramref name="index"/>'th method of <paramref name="t"/>'s method
+    /// set — <see cref="FuncChanDirs"/> for the func type <c>reflect.Type.Method(i).Type</c> reports, which
+    /// is built from the method table (receiver included, so indices are <c>In(i)</c>'s).
+    /// </summary>
+    public static (GoChanDir[]? ins, GoChanDir[]? outs) MethodChanDirs(Type? t, int index)
+    {
+        return MethodSigChanDirs(MethodAt(t, index).Method);
+    }
+
+    /// <summary>
+    /// Reads the <see cref="GoSigChanDirAttribute"/> go2cs-gen generated for <paramref name="method"/> on
+    /// its declaring type, matched by name and parameter types (a <c>ref</c> parameter by its element
+    /// type). Nulls when there is none, or when it stamps no direction.
+    /// </summary>
+    /// <remarks>
+    /// An entry that disagrees with the method it names — a parameter or result count that differs, or a
+    /// direction stamped on a position that is not a <c>channel&lt;T&gt;</c> — is refused BY NAME: the
+    /// stamp decides only when it can describe the signature it claims, and a mismatch means the marker
+    /// the generator read and the signature the compiler built have drifted apart.
+    /// </remarks>
+    public static (GoChanDir[]? ins, GoChanDir[]? outs) MethodSigChanDirs(MethodInfo? method)
+    {
+        if (method?.DeclaringType is not { } declaring)
+            return (null, null);
+
+        GoSigChanDirAttribute[] entries = s_sigChanDirs.GetOrAdd(declaring,
+            static type => (GoSigChanDirAttribute[])type.GetCustomAttributes(typeof(GoSigChanDirAttribute), false));
+
+        if (entries.Length == 0)
+            return (null, null);
+
+        ParameterInfo[] parameters = method.GetParameters();
+
+        foreach (GoSigChanDirAttribute entry in entries)
+        {
+            if (entry.Method != method.Name || entry.ParameterTypes.Length != parameters.Length)
+                continue;
+
+            bool matches = true;
+
+            for (int i = 0; i < parameters.Length && matches; i++)
+            {
+                Type parameterType = parameters[i].ParameterType;
+
+                if (parameterType.IsByRef)
+                    parameterType = parameterType.GetElementType()!;
+
+                matches = parameterType == entry.ParameterTypes[i];
+            }
+
+            if (!matches)
+                continue;
+
+            Type returnType = method.ReturnType;
+            Type[] results = returnType == typeof(void) ? Type.EmptyTypes : IsValueTuple(returnType) ? FlattenValueTuple(returnType) : [returnType];
+
+            if (entry.ParameterDirs.Length != parameters.Length || entry.ResultDirs.Length != results.Length)
+            {
+                throw new InvalidOperationException(
+                    $"go2cs: [GoSigChanDir] for {declaring.FullName}.{method.Name} stamps {entry.ParameterDirs.Length} parameter and " +
+                    $"{entry.ResultDirs.Length} result directions for a signature with {parameters.Length} parameters and {results.Length} results");
+            }
+
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                Type parameterType = parameters[i].ParameterType;
+
+                if (parameterType.IsByRef)
+                    parameterType = parameterType.GetElementType()!;
+
+                refuseNonChannelStamp(declaring, method.Name, "parameter", i, entry.ParameterDirs[i], parameterType);
+            }
+
+            for (int i = 0; i < results.Length; i++)
+                refuseNonChannelStamp(declaring, method.Name, "result", i, entry.ResultDirs[i], results[i]);
+
+            return (anyStamped(entry.ParameterDirs) ? entry.ParameterDirs : null, anyStamped(entry.ResultDirs) ? entry.ResultDirs : null);
+        }
+
+        return (null, null);
+    }
+
+    private static void refuseNonChannelStamp(Type declaring, string method, string position, int index, GoChanDir dir, Type type)
+    {
+        if (dir == GoChanDir.Unstamped || type.IsGenericType && type.GetGenericTypeDefinition() == typeof(channel<>))
+            return;
+
+        throw new InvalidOperationException(
+            $"go2cs: [GoSigChanDir] for {declaring.FullName}.{method} stamps {dir} on {position} {index}, whose type {type.FullName} is not a channel");
+    }
+
+    private static bool anyStamped(GoChanDir[] dirs)
+    {
+        foreach (GoChanDir dir in dirs)
+        {
+            if (dir != GoChanDir.Unstamped)
+                return true;
+        }
+
+        return false;
+    }
 }

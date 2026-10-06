@@ -1691,6 +1691,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckReflectFuncArrayParamDims() => CheckTarget("ReflectFuncArrayParamDims");
 
     [TestMethod]
+    public void CheckReflectFuncChanDir() => CheckTarget("ReflectFuncChanDir");
+
+    [TestMethod]
     public void CheckReflectMakeFunc() => CheckTarget("ReflectMakeFunc");
 
     [TestMethod]

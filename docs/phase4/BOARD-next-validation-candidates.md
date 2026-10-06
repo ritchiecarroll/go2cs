@@ -26178,4 +26178,39 @@ Nine entries, most important first. The owner ruled at 10:05 that 1.24.13.4 wait
 
 **2026-10-04, INSTRUMENT (COORD):** four lessons from seating the train and from landing the one before it. (1) A PAIRWISE 3-way of every pushed seat against every other, and against O's union, run BEFORE the freeze, found three seat-by-seat conflicts that no lane's own gate could see, because each seat is clean on the base it was cut on. Two were position-map rows regenerating ONE `GoPositionMap` line (`g-method-value-fm-record-r3` against `c2-elseif-position-record-r2` in 5 `package_info.cs`; later go-cmp L against the else-if row in `reflect/package_info.cs`), and one was two inserts at one anchor (the sibling-name row against the `go.go` row in `importAliasOperations.go`). Each was ruled as a re-cut STACKED on the other seat, the shared line or block carrying both changes. The first pass (11:30) also found one seat against O's union itself (`PackageTests/README.md`). After the first two re-cuts the pass read 0 conflicts in 156 pairs over 21 seats and O's union (13:27); the third conflict arrived with the 23rd seat (14:05). (2) PLACEMENT keeps rows single-parent: two seats that each add a section at the tail of one doc (`shadowing.md`: the sort seat and the `go.go` seat) conflict, and moving one section to a non-tail anchor clears it with no merge-commit base. (3) The i7's git 2.35 has no `merge-tree --write-tree`: the pairwise instrument is a read-tree script, and the pre-map ran on a newer git's real ort merge. (4) A seat's `-tests` footprint is its own reading: TRAIN O's test-source refresh moved 18 committed test sources (explicit lambda result types, a bare `select();`, a cast on an untyped constant loop bound, two lifted type names, a byte cast around a shift) for seats whose rows declared no corpus footprint, because the fixup derives what the union emits from the `-stdlib` conversion only; and TRAIN O's battery read ONE finding class, an untracked `src/core/math/bits/.editorconfig` that a `-tests` run writes and no seat had committed, which this train's `claude/p2-test-warning-entries` (`8d89695095`) commits for all three flavours.
 
+## 2026-10-06 — C2: NEW-1b's residuals, the channel directions the generator-side route does not carry — RECORDED
+
+**The route.** `claude/c2-func-chan-dir` carries a func signature's channel directions to reflect without
+changing converted code. go2cs-gen's `ChanDirSigGenerator` reads the `/*<-*/` marker the converter writes
+beside a `channel<T>` and emits one `[GoSigChanDir]` per method on a generated partial of the method's
+declaring type, keyed by method name and parameter types (receiver included). golib reads the entry back by
+`MethodInfo`, and abi carries the directions as func descriptor cargo inside the interning key. COORD ruled
+this route on 2026-10-05 (21:27Z), with the residuals below recorded rather than closed.
+
+**What a residual reads as.** In each case reflect reports a bidirectional `chan T` where Go reports
+`<-chan T` or `chan<- T`, and everything downstream follows from that: the func's `String()`,
+`In(i).ChanDir()` and `Out(i).ChanDir()`, and func type identity, assignability and convertibility. Nothing
+fails to compile and nothing panics; the reader refuses an entry only when the entry contradicts the
+method it names.
+
+1. **Func literals.** A lambda or local function compiles to a method the compiler names, which source
+   cannot key. Census from the sizing post (go/types, linux): 1 production site in std,
+   `net/lookup.go:337`; 7 in std test files; 0 in the 11 modules; 0 in the behavioral corpus.
+2. **A func type with no method behind it.** `reflect.TypeOf((*func(<-chan int))(nil)).Elem()`, a nil func
+   variable or field, and any other func type reflect reaches without a value whose target method carries
+   an entry. ReflectFuncChanDir's control row is this shape: `MakeFunc` over a nil `func() <-chan int`
+   still builds and asserts back, because both sides lose the direction alike.
+3. **A direction nested inside a position's own channel.** `chan<- <-chan int` carries the outer `Send` and
+   not the inner `Recv`. The sizing census found 2 such positions, both in std test files.
+4. **Methods the generator skips.** A generic method, or one whose parameters mention a type parameter (an
+   attribute argument cannot name one): 0 of the 24 production signatures in std. A method whose declaring
+   type, or a type enclosing it, is not `partial` in every declaration: none in converted code, where every
+   type is declared `partial`.
+
+**Trigger.** The first banked or module row whose verdict depends on one of the four. Items 1 and 2 are
+the likely ones: a Go test that takes `reflect.TypeOf` of a func literal or a nil func with a directional
+channel in its signature.
+
+— C2
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
