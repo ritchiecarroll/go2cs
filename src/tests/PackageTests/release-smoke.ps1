@@ -76,17 +76,26 @@ $env:GOTOOLCHAIN = 'local'
 function Write-FeedConfig([string]$Dir) {
     # go.* from the feed ONLY; everything else (the SDK's own packs) from nuget.org. The mapping is what
     # makes the feed authoritative for go.*: no other source is even consulted for those IDs.
+    $nugetOrg = 'https://api.nuget.org/v3/index.json'
+    if ($Feed.TrimEnd('/') -eq $nugetOrg) {
+        # The post-publish smoke: the feed IS nuget.org. Listing that URL under two keys makes NuGet drop the
+        # second, and the SDK's own packs (Microsoft.NET.ILLink.Tasks) then have no source: NU1100. One source.
+        $sources = "    <add key=`"nuget.org`" value=`"$nugetOrg`" />"
+        $mapping = '    <packageSource key="nuget.org"><package pattern="*" /></packageSource>'
+    }
+    else {
+        $sources = "    <add key=`"feed`" value=`"$Feed`" />`n    <add key=`"nuget.org`" value=`"$nugetOrg`" />"
+        $mapping = "    <packageSource key=`"feed`"><package pattern=`"go.*`" /></packageSource>`n    <packageSource key=`"nuget.org`"><package pattern=`"*`" /></packageSource>"
+    }
     @"
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <packageSources>
     <clear />
-    <add key="feed" value="$Feed" />
-    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+$sources
   </packageSources>
   <packageSourceMapping>
-    <packageSource key="feed"><package pattern="go.*" /></packageSource>
-    <packageSource key="nuget.org"><package pattern="*" /></packageSource>
+$mapping
   </packageSourceMapping>
 </configuration>
 "@ | Set-Content -LiteralPath (Join-Path $Dir 'nuget.config') -Encoding utf8
