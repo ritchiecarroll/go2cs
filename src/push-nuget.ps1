@@ -1764,8 +1764,14 @@ foreach ($rid in $buildOrder) {
     # ~160 s with csc per project and had not finished after 14 minutes without it (one core busy, 24
     # MSBuild nodes idle). Two RID passes make that the difference between a 6-minute release and an
     # hour-long one.
+    #
+    # ContinuousIntegrationBuild=true is the SDK's deterministic path mapping: every source path the compiler records
+    # (the .pdb path in each assembly's PE debug entry, a [CallerFilePath] literal, every .pdb document) is mapped from
+    # the repository root to /_/, so no package names the pack box's tree. Read 2026-10-06: unmapped, each of the 492
+    # assemblies of 1.24.13.4 embedded its .pdb path under the pack tree; mapped, a full pack holds none. PACK builds only:
+    # in-tree and -tests builds are unchanged. The path guard below refuses any package that still holds one.
     Write-Step "[$rid] Building $Configuration at -p:GoTargetOS=$goos (compiles the whole stdlib; several minutes)"
-    & dotnet build $slnx -c $Configuration -p:GoTargetOS=$goos -p:GeneratePackageOnBuild=false --no-incremental -p:UseSharedCompilation=false --nologo -v m
+    & dotnet build $slnx -c $Configuration -p:GoTargetOS=$goos -p:GeneratePackageOnBuild=false --no-incremental -p:UseSharedCompilation=false -p:ContinuousIntegrationBuild=true --nologo -v m
     if ($LASTEXITCODE -ne 0) { throw "[$rid] dotnet build failed ($LASTEXITCODE) at -p:GoTargetOS=$goos -- fix build errors before packing" }
 
     # go2cs-gen is GoTargetOS-neutral, yet under the FULL script's solution build its output copy has
@@ -1777,7 +1783,7 @@ foreach ($rid in $buildOrder) {
     $genOut = Join-Path $PSScriptRoot 'gen/go2cs-gen/bin' | Join-Path -ChildPath $Configuration | Join-Path -ChildPath 'netstandard2.0'
     if (-not (Test-Path (Join-Path $genOut 'go2cs-gen.dll'))) {
         Write-Step "[$rid] go2cs-gen output missing after the solution build -- repairing with a direct project build"
-        & dotnet build (Join-Path $PSScriptRoot 'gen/go2cs-gen/go2cs-gen.csproj') -c $Configuration -p:UseSharedCompilation=false --nologo -v m
+        & dotnet build (Join-Path $PSScriptRoot 'gen/go2cs-gen/go2cs-gen.csproj') -c $Configuration -p:UseSharedCompilation=false -p:ContinuousIntegrationBuild=true --nologo -v m
         if ($LASTEXITCODE -ne 0) { throw "[$rid] go2cs-gen repair build failed ($LASTEXITCODE)" }
         if (-not (Test-Path (Join-Path $genOut 'go2cs-gen.dll'))) { throw "[$rid] go2cs-gen output still missing after a direct build -- investigate before packing" }
     }
