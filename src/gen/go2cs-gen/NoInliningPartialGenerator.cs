@@ -69,7 +69,7 @@ public sealed class NoInliningPartialFinder : ISyntaxReceiver
 /// <summary>
 /// Writes the declaring part of every <see cref="NoInliningPartials.IsCarrier">no-inline carrier</see>:
 /// the implementing part's signature copied exactly (modifiers, return type, name, type parameters,
-/// parameters, constraints), its attributes and body removed, carrying
+/// parameters, constraints), its attributes (its parameters' and type parameters' too) and body removed, carrying
 /// <c>[MethodImpl(MethodImplOptions.NoInlining)]</c>.
 /// </summary>
 /// <remarks>
@@ -158,8 +158,16 @@ public class NoInliningPartialGenerator : ISourceGenerator
 
                 foreach (MethodDeclarationSyntax method in group)
                 {
+                    // No attribute is repeated: C# merges a partial method's parameter and type-parameter
+                    // attributes across its parts, so a copied [GoArrayDims] on a parameter is CS0579.
                     MethodDeclarationSyntax declaring = method
                         .WithAttributeLists(default)
+                        .WithParameterList(method.ParameterList.WithParameters(SyntaxFactory.SeparatedList(
+                            method.ParameterList.Parameters.Select(parameter => parameter.WithAttributeLists(default)),
+                            method.ParameterList.Parameters.GetSeparators())))
+                        .WithTypeParameterList(method.TypeParameterList?.WithParameters(SyntaxFactory.SeparatedList(
+                            method.TypeParameterList.Parameters.Select(typeParameter => typeParameter.WithAttributeLists(default)),
+                            method.TypeParameterList.Parameters.GetSeparators())))
                         .WithBody(null)
                         .WithExpressionBody(null)
                         .WithSemicolonToken(default);

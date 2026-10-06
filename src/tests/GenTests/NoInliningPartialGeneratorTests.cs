@@ -310,6 +310,38 @@ public class NoInliningPartialGeneratorTests
     }
 
     /// <summary>
+    /// C# merges the attributes of a partial method's PARAMETERS and TYPE PARAMETERS across its two parts,
+    /// so the declaring part repeats none: a converted parameter carries [GoArrayDims] (a named result's
+    /// array, the behavioral ZeroValueArrayNamedResult), and the copied attribute was CS0579. A return
+    /// attribute is a method-level list, which the declaring part never carried.
+    /// </summary>
+    [TestMethod]
+    public void ACarriersParameterAndTypeParameterAttributesAreNotRepeated()
+    {
+        const string withParameterAttributes = """
+            using System;
+
+            namespace go;
+
+            [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.GenericParameter | AttributeTargets.ReturnValue)]
+            public sealed class GoArrayDimsAttribute(int n) : Attribute;
+
+            partial class main_package {
+
+            [return: GoArrayDims(4)] internal static partial int[] first<[GoArrayDims(2)] T>([GoArrayDims(32)] int[] b, T t) {
+                return b;
+            }
+
+            } // end main_package
+            """;
+
+        Run run = Generate([new NoInliningPartialGenerator()], Stubs, withParameterAttributes);
+
+        Assert.AreEqual(0, run.Errors.Length, Describe(run));
+        Assert.IsTrue(run.Methods["first"].HasFlag(MethodImplAttributes.NoInlining), $"first lost the NoInlining flag; {Describe(run)}");
+    }
+
+    /// <summary>
     /// A Go init is a module initializer, and C# runs module initializers in declaration order, which
     /// for a partial method is its DECLARING part's: a generated file that sorts after every source
     /// file. A partial init would therefore run after the package's other inits. The converter never
