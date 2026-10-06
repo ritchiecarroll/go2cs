@@ -1,6 +1,6 @@
 # PLAN — fewer attributes in converted code: what can move into a comment, what can go, what must stay
 
-> **STATUS: PROPOSED — not ruled.** A scout for the owner, who asked whether the trick behind the channel-direction
+> **STATUS: PROPOSED — not ruled, except section 10, RULED 2026-10-06.** A scout for the owner, who asked whether the trick behind the channel-direction
 > fix (a fact carried by a short comment and a generated file instead of a visible attribute) could take other noisy
 > attributes out of the converted code. Nothing here is implemented. Every number is measured over the committed
 > tree at master `e1ad9dbc11` (2026-10-06) unless the text says otherwise. The owner reads it; a ruling follows.
@@ -357,6 +357,12 @@ For `[GoRecv]` specifically, the method-set code is on the path of every interfa
 largest validated packages that import `reflect`, chosen fresh from the roster when the cut runs.
 
 ## 10. Addendum (2026-10-06): `[MethodImpl(NoInlining)]` through a partial method
+
+> **RULED 2026-10-06 (owner: "partial ok").** The converter writes a no-inline METHOD as a partial method's implementing
+> part and go2cs-gen writes the declaring part carrying the attribute; lambdas, local functions and shapes that cannot be
+> partial keep the prefix; one rendering for the standard library, modules and the behavioral tests. The deciding gate:
+> the set of methods whose metadata carries the no-inline flag is identical before and after. The carrier is cut on
+> `claude/c2-noinline-partial`.
 
 Section 4 first listed `[MethodImpl(MethodImplOptions.NoInlining)]` as impossible to move, because a generated file
 cannot attach an attribute to a method declared somewhere else. C# has one exception: a **partial method** is declared in
