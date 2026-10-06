@@ -8,7 +8,11 @@
 
 package main
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+	"unicode/utf8"
+)
 
 // embedMarker marks a Go EMBEDDED field that has no `partial ref` shape to say so (a predeclared type, a
 // pointer to one, an interface): `/*embed*/ public Reader Reader;`. go2cs-gen's MemberRecordGenerator reads
@@ -16,9 +20,25 @@ import "strings"
 // is where golib's reflection reads it back (docs/PLAN-marker-comment-parity.md, 5.6).
 const embedMarker = "/*embed*/"
 
-// The bodies (the text after `/*`) of the comments go2cs-gen reads as member facts. A Go block comment that
-// opens with one of them is carried with a space after its `/*` (carriedComment).
-var memberMarkerOpenings = []string{strings.TrimPrefix(embedMarker, "/*")}
+// structTagComment is the comment converted code carries for a Go struct tag, at the end of the field's line
+// after its `;`. It is Go's backquoted spelling of the tag when a backquote can hold it in a comment, and
+// otherwise Go's quoted spelling, with any `*/` written `*\x2f`: both are Go's own spellings of the same string.
+// go2cs-gen reads either (MemberMarkers.TagOf) and records the tag on the struct, where golib's reflection
+// reads it back (docs/PLAN-marker-comment-parity.md, 5.5).
+func structTagComment(tag string) string {
+	if utf8.ValidString(tag) && !strings.ContainsRune(tag, '`') && !strings.Contains(tag, "*/") && strings.IndexFunc(tag, isNotPrint) < 0 {
+		return "/*`" + tag + "`*/"
+	}
+
+	return "/*" + strings.ReplaceAll(strconv.Quote(tag), "*/", `*\x2f`) + "*/"
+}
+
+func isNotPrint(r rune) bool { return !strconv.IsPrint(r) }
+
+// The bodies (the text after `/*`) of the comments go2cs-gen reads as member facts: the embed marker and
+// the two openings of a tag comment. A Go block comment that opens with one of them is carried with a space
+// after its `/*` (carriedComment).
+var memberMarkerOpenings = []string{strings.TrimPrefix(embedMarker, "/*"), "`", `"`}
 
 // carriedComment is the text converted code carries for a comment from the Go source. The member facts
 // above are block comments the converter writes itself, and go2cs-gen reads one only as spelled here, so

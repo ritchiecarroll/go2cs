@@ -6,12 +6,15 @@
 // version 3 only, which can be found in the LICENSE file.
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
-// Go comments shaped like the member facts go2cs-gen reads (docs/PLAN-marker-comment-parity.md, 6).
-// Converted with -comments, each is carried re-spelled, so the records go2cs-gen writes for this file
-// are those of the same source without them: the two real embeds of marked, and nothing else.
+// Go comments shaped like the member facts go2cs-gen reads (docs/PLAN-marker-comment-parity.md, 6),
+// beside the real facts. Converted with -comments, each Go comment is carried re-spelled, so the records
+// go2cs-gen writes for this file are those of the same source without them: the real embeds of marked
+// and tagged, and the struct tags of tagged, each in the spelling a comment can hold.
 package main
 
 import "fmt"
+
+type Inner struct{ n int }
 
 type Reader interface{ Read() int }
 
@@ -27,6 +30,23 @@ type marked struct {
 	int
 }
 
+type tagged struct {
+	Plain         string `json:"plain"`
+	Grouped, Pair int    `json:"g"`
+	Mixed, mixed  int    `json:"m"`
+	Quoted        string "a:\"`b`\""
+	Closer        string `x:"*/"`
+	Tabbed        string "t:\"\t\""
+	Separator     string "u:\"\u2028\""
+	Wide          string `json:"ü"`
+	Spaced        string `json:"s"` /*`json:"other"`*/
+	Bare          int    /*`json:"bare"`*/
+	Quote         int    /*"json:\"q\""*/
+	Empty         int    ""
+	Inner         `json:"inner"`
+	fmt.Stringer  `json:"str"`
+}
+
 func main() {
-	fmt.Println(inline{}, marked{})
+	fmt.Println(inline{}, marked{}, tagged{})
 }

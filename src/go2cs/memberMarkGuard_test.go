@@ -18,9 +18,15 @@ import (
 )
 
 // memberMarkKinds are the member facts converted code states as a comment rather than an attribute
-// (docs/PLAN-marker-comment-parity.md, sections 5.4-5.6), each by its old attribute and its new comment.
-var memberMarkKinds = []struct{ attribute, comment string }{
-	{"[GoEmbedded]", "/*embed*/"},
+// (docs/PLAN-marker-comment-parity.md, sections 5.4-5.6), each by its old attribute and the text that
+// opens its new comment: a tag comment follows a field's `;` or an embed property's `}`, in either of
+// Go's spellings.
+var memberMarkKinds = []struct {
+	attribute string
+	comments  []string
+}{
+	{"[GoEmbedded]", []string{embedMarker}},
+	{"[GoTag(", []string{"; /*`", `; /*"`, "} /*`", `} /*"`}},
 }
 
 // TestMemberMarksFollowTheCommentRule reads the COMMITTED corpus and the behavioral suite and holds each
@@ -93,13 +99,15 @@ func TestMemberMarksFollowTheCommentRule(t *testing.T) {
 						}
 					}
 
-					marks += strings.Count(line, kind.comment)
+					for _, comment := range kind.comments {
+						marks += strings.Count(line, comment)
+					}
 				}
 
-				comments[kind.comment] += marks
+				comments[kind.comments[0]] += marks
 
 				if convertedTest && attributes > 0 && marks > 0 {
-					mixedTests = append(mixedTests, rel+" ("+kind.attribute+" "+strconv.Itoa(attributes)+", "+kind.comment+" "+strconv.Itoa(marks)+")")
+					mixedTests = append(mixedTests, rel+" ("+kind.attribute+" "+strconv.Itoa(attributes)+", "+kind.comments[0]+" "+strconv.Itoa(marks)+")")
 				}
 			}
 

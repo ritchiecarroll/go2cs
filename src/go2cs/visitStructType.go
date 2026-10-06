@@ -13,6 +13,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"strconv"
 	"strings"
 
 	"github.com/ritchiecarroll/hashset"
@@ -392,11 +393,23 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	for _, field := range structType.Fields.List {
 		v.writeDocString(target, field.Doc, field.Pos())
 
+		// The field's Go struct tag rides in a comment at the end of each line that declares the field
+		// (structTagComment), ahead of any comment carried from the Go source, whose padding then counts
+		// from the tag as Go's does. An empty tag is Go's untagged field and writes nothing.
+		var tagComment string
+
 		if field.Tag != nil {
-			v.writeString(target, "[GoTag(")
-			target.WriteString(v.convBasicLit(field.Tag, BasicLitContext{u8StringOK: false, spanTargetUnsupported: true}))
-			target.WriteString(")]")
-			target.WriteString(v.newline)
+			if tag, err := strconv.Unquote(field.Tag.Value); err == nil && tag != "" {
+				tagComment = " " + structTagComment(tag)
+			}
+		}
+
+		goCommentPos := func(afterType token.Pos) token.Pos {
+			if tagComment != "" {
+				return field.Tag.End()
+			}
+
+			return afterType
 		}
 
 		// The array dims this field's type reaches through a hop no zero instance can measure — a
@@ -849,7 +862,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				// promoted through another package's embed is unique in this struct's tree — an unmarked
 				// io_test `Buffer{bytes.Buffer; ReaderFrom; WriterTo}` would otherwise be given the
 				// embedded Buffer's ReadFrom and WriteTo, which Go drops as ambiguous.
-				v.writeString(target, "%s %s %s %s;", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName)
+				v.writeString(target, "%s %s %s %s;%s", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
 			} else {
 				var handled bool
 
@@ -859,13 +872,13 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 							// An embedded pointer to a PREDECLARED type has nothing to promote and is a plain field;
 							// the `/*embed*/` comment is what lets the reflection projection report it Anonymous
 							// (a field named after its type is otherwise indistinguishable from an embed).
-							v.writeString(target, "%s %s %s %s;", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName)
+							v.writeString(target, "%s %s %s %s;%s", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
 							handled = true
 						}
 					} else if _, ok = identType.(*types.Struct); !ok {
 						if _, ok := identObj.Type().(*types.Named); !ok {
 							// An embedded PREDECLARED type (`struct{ int }`): the same plain-field emission, marked.
-							v.writeString(target, "%s %s %s %s;", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName)
+							v.writeString(target, "%s %s %s %s;%s", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
 							handled = true
 						}
 					}
@@ -873,11 +886,11 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 				// Handle promoted struct implementations
 				if !handled {
-					v.writeString(target, "%s partial ref %s %s { get; }", getAccess(goTypeName), csEmitTypeName, embedName)
+					v.writeString(target, "%s partial ref %s %s { get; }%s", getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
 				}
 			}
 
-			v.writeCommentString(target, field.Comment, field.Type.End()+typeLenDeviation)
+			v.writeCommentString(target, field.Comment, goCommentPos(field.Type.End()+typeLenDeviation))
 			target.WriteString(v.newline)
 		} else {
 			// Match the Go source's line grouping for readability: when a single Go field
@@ -918,8 +931,8 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 				layoutFieldIndex += len(field.Names)
 
-				v.writeString(target, "%s %s %s;", getAccess(field.Names[0].Name), csDisplayTypeName, strings.Join(fieldNames, ", "))
-				v.writeCommentString(target, field.Comment, field.Type.End()+displayLenDeviation)
+				v.writeString(target, "%s %s %s;%s", getAccess(field.Names[0].Name), csDisplayTypeName, strings.Join(fieldNames, ", "), tagComment)
+				v.writeCommentString(target, field.Comment, goCommentPos(field.Type.End()+displayLenDeviation))
 				target.WriteString(v.newline)
 			} else {
 				for _, ident := range field.Names {
@@ -957,8 +970,8 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 					layoutFieldIndex++
 
-					v.writeString(target, "%s%s %s%s %s%s;", offsetAttr, getAccess(ident.Name), readOnly, csDisplayTypeName, fieldName, fieldInitializer)
-					v.writeCommentString(target, field.Comment, field.Type.End()+displayLenDeviation)
+					v.writeString(target, "%s%s %s%s %s%s;%s", offsetAttr, getAccess(ident.Name), readOnly, csDisplayTypeName, fieldName, fieldInitializer, tagComment)
+					v.writeCommentString(target, field.Comment, goCommentPos(field.Type.End()+displayLenDeviation))
 					target.WriteString(v.newline)
 				}
 			}

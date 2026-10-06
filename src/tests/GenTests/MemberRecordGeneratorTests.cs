@@ -5,6 +5,7 @@
 // that can be found in the LICENSE file.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -30,9 +31,13 @@ public class MemberRecordGeneratorTests
         public sealed class GoTypeAttribute : System.Attribute { public GoTypeAttribute() { } public GoTypeAttribute(string type) { } }
         public sealed class GoTagAttribute(string tag) : System.Attribute { }
         public sealed class GoEmbeddedAttribute : System.Attribute { }
-        public enum GoMemberFact : byte { Embedded = 1 }
+        public enum GoMemberFact : byte { Embedded = 1, Tag = 2 }
         [System.AttributeUsage(System.AttributeTargets.Struct | System.AttributeTargets.Class, AllowMultiple = true)]
-        public sealed class GoMemberRecordAttribute(string member, GoMemberFact fact) : System.Attribute { }
+        public sealed class GoMemberRecordAttribute : System.Attribute
+        {
+            public GoMemberRecordAttribute(string member, GoMemberFact fact) { }
+            public GoMemberRecordAttribute(string member, GoMemberFact fact, string value) { }
+        }
         """;
 
     private static readonly Lazy<string[]> s_generated = new(() => Run(FixtureSource()));
@@ -63,6 +68,20 @@ public class MemberRecordGeneratorTests
         }
 
         throw new FileNotFoundException("src/go2cs/testdata/markercomments/main.cs not found above " + AppContext.BaseDirectory);
+    }
+
+    // Each Tag record's member and value, read back as C# reads the attribute's arguments.
+    private static SortedDictionary<string, string> RecordedTags(string[] generated)
+    {
+        SortedDictionary<string, string> tags = new(StringComparer.Ordinal);
+
+        foreach (AttributeSyntax attribute in generated.SelectMany(source => CSharpSyntaxTree.ParseText(source).GetRoot().DescendantNodes().OfType<AttributeSyntax>()))
+        {
+            if (attribute.ArgumentList?.Arguments is [{ Expression: LiteralExpressionSyntax member }, { Expression: var fact }, { Expression: LiteralExpressionSyntax value }] && fact.ToString().EndsWith(".Tag", StringComparison.Ordinal))
+                tags.Add(member.Token.ValueText, value.Token.ValueText);
+        }
+
+        return tags;
     }
 
     private static string[] RecordedMembers(string[] generated, string fact) =>
@@ -149,10 +168,10 @@ public class MemberRecordGeneratorTests
     public void GoCommentsShapedLikeTheMarkerAreNeverRecorded()
     {
         // Go comments spelled exactly like the marker, in every place the converter carries one: the converter
-        // writes each with a space after its `/*`, so only the two real embeds of `marked` are recorded, as for
-        // the same source without them.
+        // writes each with a space after its `/*`, so only the real embeds (two in `marked`, one in `tagged`)
+        // are recorded, as for the same source without them.
         string converted = MarkerCommentsFixture();
-        string[] realEmbeds = ["Reader", "int"];
+        string[] realEmbeds = ["Reader", "Stringer", "int"];
 
         CollectionAssert.AreEqual(realEmbeds, RecordedMembers(Run(converted), "Embedded"), "the converter's output");
 
@@ -161,5 +180,44 @@ public class MemberRecordGeneratorTests
         string unspelled = converted.Replace("/* embed*/", MemberMarkers.Embed);
         Assert.AreNotEqual(converted, unspelled);
         CollectionAssert.AreEqual(realEmbeds, RecordedMembers(Run(unspelled), "Embedded"), "the Go comments carried as spelled");
+    }
+
+    [TestMethod]
+    public void EachTagCommentIsRecordedWithGosOwnValue()
+    {
+        // The converter's own output: every tag of `tagged`, in whichever spelling it took, read back to the
+        // string Go's reflect.StructField.Tag reports. A Go comment shaped like a tag (Bare, Quote, the second
+        // comment on Spaced) is carried re-spelled and records nothing, nor does Go's empty tag (Empty).
+        SortedDictionary<string, string> expected = new(StringComparer.Ordinal)
+        {
+            ["Closer"] = "x:\"*/\"",
+            ["Grouped"] = "json:\"g\"",
+            ["Inner"] = "json:\"inner\"",
+            ["Mixed"] = "json:\"m\"",
+            ["Pair"] = "json:\"g\"",
+            ["Plain"] = "json:\"plain\"",
+            ["Quoted"] = "a:\"`b`\"",
+            ["Separator"] = "u:\"\u2028\"",
+            ["Spaced"] = "json:\"s\"",
+            ["Stringer"] = "json:\"str\"",
+            ["Tabbed"] = "t:\"\t\"",
+            ["Wide"] = "json:\"\u00fc\"",
+            ["mixed"] = "json:\"m\"",
+        };
+
+        CollectionAssert.AreEqual(expected.ToList(), RecordedTags(Run(MarkerCommentsFixture())).ToList());
+    }
+
+    [TestMethod]
+    public void GoUnquoteDecodesGosEscapesAndRefusesWhatGoRefuses()
+    {
+        // Go literals as written in Go source, so each backslash below is one of Go's.
+        Assert.AreEqual("a\a\b\f\n\r\t\v\\\"", MemberMarkers.GoUnquote(@"""a\a\b\f\n\r\t\v\\\"""""));
+        Assert.AreEqual("AA\u00fc\U0001F600", MemberMarkers.GoUnquote(@"""\x41\101\u00fc\U0001F600"""));
+        Assert.AreEqual("\u00fc", MemberMarkers.GoUnquote(@"""\xc3\xbc"""), "escaped bytes are UTF-8");
+        Assert.AreEqual("*/", MemberMarkers.GoUnquote(@"""*\x2f"""));
+
+        foreach (string refused in new[] { @"""\q""", @"""\x4""", @"""\400""", @"""\ud800""", @"""a""b""", @"""open", "`raw`" })
+            Assert.IsNull(MemberMarkers.GoUnquote(refused), refused);
     }
 }
