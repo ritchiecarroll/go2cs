@@ -26178,4 +26178,49 @@ Nine entries, most important first. The owner ruled at 10:05 that 1.24.13.4 wait
 
 **2026-10-04, INSTRUMENT (COORD):** four lessons from seating the train and from landing the one before it. (1) A PAIRWISE 3-way of every pushed seat against every other, and against O's union, run BEFORE the freeze, found three seat-by-seat conflicts that no lane's own gate could see, because each seat is clean on the base it was cut on. Two were position-map rows regenerating ONE `GoPositionMap` line (`g-method-value-fm-record-r3` against `c2-elseif-position-record-r2` in 5 `package_info.cs`; later go-cmp L against the else-if row in `reflect/package_info.cs`), and one was two inserts at one anchor (the sibling-name row against the `go.go` row in `importAliasOperations.go`). Each was ruled as a re-cut STACKED on the other seat, the shared line or block carrying both changes. The first pass (11:30) also found one seat against O's union itself (`PackageTests/README.md`). After the first two re-cuts the pass read 0 conflicts in 156 pairs over 21 seats and O's union (13:27); the third conflict arrived with the 23rd seat (14:05). (2) PLACEMENT keeps rows single-parent: two seats that each add a section at the tail of one doc (`shadowing.md`: the sort seat and the `go.go` seat) conflict, and moving one section to a non-tail anchor clears it with no merge-commit base. (3) The i7's git 2.35 has no `merge-tree --write-tree`: the pairwise instrument is a read-tree script, and the pre-map ran on a newer git's real ort merge. (4) A seat's `-tests` footprint is its own reading: TRAIN O's test-source refresh moved 18 committed test sources (explicit lambda result types, a bare `select();`, a cast on an untyped constant loop bound, two lifted type names, a byte cast around a shift) for seats whose rows declared no corpus footprint, because the fixup derives what the union emits from the `-stdlib` conversion only; and TRAIN O's battery read ONE finding class, an untracked `src/core/math/bits/.editorconfig` that a `-tests` run writes and no seat had committed, which this train's `claude/p2-test-warning-entries` (`8d89695095`) commits for all three flavours.
 
+## 2026-10-06 — C2: three rows from the whole-stdlib warnings census
+
+The census: the shipped tree `e1ad9dbc11` (tag `nuget-1.24.13.4`), whole standard library, Release,
+`--no-incremental`, one output directory per target: linux 67, windows 67, darwin 74 warnings, 0 errors.
+Linux and windows are site for site identical and equal to the owner's release log; darwin is linux plus
+seven (six CA1416 and one CS8826, ruled to P1). golib built alone at `7a1b2e3631`, the master before
+TRAIN P, gives the same 66 golib sites, so none of them is new with TRAIN P. COORD ruled the codes on
+2026-10-06; these three rows are the ones it asked to be recorded.
+
+**CS8500, `runtime/iface.cs(235)`: REAL, a converter question; G sizes it.** The line is `itabInit`'s
+`methods`, `new slice<@unsafe.Pointer>(new ReadOnlySpan<@unsafe.Pointer>((@unsafe.Pointer*)(uintptr)(…), (int)(ni)))`:
+a raw pointer whose element type, golib's `unsafe.Pointer`, is a managed struct, so the garbage collector
+does not track what the pointer reaches. It is the only CS8500 in the build on all three targets, and it
+is the same line as row 1 of G's 2026-10-02 entry above (the copying slice view whose stores never reach
+`m.Fun`). That entry's ruling stands for the store: no seat until its predicate fires. The warning is
+recorded here so the two readings of one line are found together.
+
+**Native AOT is a capability boundary for type synthesis, not a warning to remove (IL2111, IL2055,
+IL2060; NO CUT).** `reflect.FuncOf` and `reflect.StructOf` create types at run time with
+Reflection.Emit (`TypeBuilder`, `DefineType`: `golib/GoDelegateSynthesis.cs:155` and
+`golib/GoStructSynthesis.cs`), and Native AOT has no Reflection.Emit. `MakeGenericType` /
+`MakeGenericMethod` over a value-type instantiation that the compiler never saw cannot be created there
+either. Under JIT, and under the trimmed publish that ships (`TrimMode=partial`, golib and the converted
+packages fully rooted), these work; a converted program published as Native AOT cannot make those
+types (not measured here: no Native AOT program in the census reached these calls). The trim analyzer's warnings on golib (66 at the shipped tree) describe
+this; removing the analyzer from golib's build would hide them and fix nothing.
+
+**Nothing checks a REMOVED CONSTRUCTOR the way the field-metadata guard checks removed fields (IL2067;
+NO CUT).** `ZeroValueOf` (`golib/GoReflect.ValueMarshalling.cs:555, 571`) makes a converted struct's Go
+zero value through `Activator.CreateInstance` on the struct's type, which runs its parameterless
+constructor, where the struct's field initializers
+live (a blank `[4]byte` field is `internal array<byte> _ = new(4);`). In the configuration that ships the
+constructor cannot be trimmed: neither golib nor any converted package is `IsTrimmable`, and
+`TrimMode=partial` keeps every member of them. Under `TrimMode=full` a falsifier program (a struct
+reached only through `reflect.TypeOf((*T)(nil)).Elem()`, then `reflect.Zero` and `reflect.New`) never
+reaches `ZeroValueOf`: both Native AOT arms exit 2 at startup, when `GoFieldMetadata` refuses
+`internal/cpu`'s `option` struct ("its field metadata was removed, most likely by trimming"). So a full
+trim is refused today, and only because the field guard fires first. If a full trim ever got past it, by
+my reading of the code (not measured) a removed constructor would yield a zero value whose initialized
+fields are missing, and nothing would say so.
+**Predicate:** golib or a converted package declares itself trimmable, or a supported publish
+configuration moves to `TrimMode=full`.
+
+— C2
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
