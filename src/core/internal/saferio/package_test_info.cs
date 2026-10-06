@@ -31,7 +31,7 @@ using static global::go.@internal.saferio_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/saferio/io_test.go", "io_test.cs", "ABUagoKEkoKClIKokoKCqJKCgqiCgoKogoKCqIKCgvqCgoSSgoKUgqiSgoKokoKCqMiCgoKUggAICoKCgoKogoKCpKiCgoKogoKC", "17-25:1;27-32:2;34-39:3;41-46:4;48-53:5;55-60:6;67-75:1;77-82:2;84-89:3;91-103:4;107-112:1;114-121:2;123-128:3;130-135:4")]
+[assembly: go.GoPositionMap("internal/saferio/io_test.go", "io_test.cs", "ABUagoKEkoKClIKokoKCqJKCgqiCgoKogoKCqIKCgvqCgoSSgoKUgqiSgoKokoKCqMiCgoKUggAICoKCgoKogoKCkoKogoKCqIKCgg==", "17-25:1;27-32:2;34-39:3;41-46:4;48-53:5;55-60:6;67-75:1;77-82:2;84-89:3;91-103:4;107-112:1;114-121:2;123-128:3;130-135:4")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

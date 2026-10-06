@@ -96,7 +96,7 @@ using static global::go.math.big_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("math/big/alias_test.go", "alias_test.cs", "ABIggu6igoKCpqKCgpTuooKClIKU7oKC7qKCgpTuou6iAAIYAAwCloCCuICCgrgAAhwADwKWgKakuIKAgoK2goCCgtyCgoCCpLiAgoK2goCCgrimggAbIrq6AAQUgqKCuIKigrgAEEwABBAABxySkpSkpKSkgKY=", "183-185:1;186-188:2;189-191:3;192-194:4;195-197:5;198-202:6;199-201:6.1;203-207:7;204-206:7.1;208-212:8;209-211:8.1;213-217:9;214-216:9.1;218-224:10;220-223:10.1;225-231:11;227-230:11.1;232-236:12;233-235:12.1;237-239:13;240-242:14;243-245:15;246-248:16;249-251:17;252-254:18;255-257:19;258-260:20;261-266:21;262-265:21.1;267-269:22;270-274:23;271-273:23.1;275-277:24;278-282:25;279-281:25.1;283-285:26;286-288:27;289-291:28;293-310:29")]
+[assembly: go.GoPositionMap("math/big/alias_test.go", "alias_test.cs", "ABIggu6igoKCpqKCgpTuooKClIKU7oKC7qKCgpTuou6iAAIYAAwCloCCuICCgrgAAhwADwKWgKaSgriCgIKCtoKAgoLcgoKAgpKCuICCgraCgIKCuKaCABsiuroABBSCooK4gqKCuAAQTAAEEAAHHJKSlKSkpKSApg==", "183-185:1;186-188:2;189-191:3;192-194:4;195-197:5;198-202:6;199-201:6.1;203-207:7;204-206:7.1;208-212:8;209-211:8.1;213-217:9;214-216:9.1;218-224:10;220-223:10.1;225-231:11;227-230:11.1;232-236:12;233-235:12.1;237-239:13;240-242:14;243-245:15;246-248:16;249-251:17;252-254:18;255-257:19;258-260:20;261-266:21;262-265:21.1;267-269:22;270-274:23;271-273:23.1;275-277:24;278-282:25;279-281:25.1;283-285:26;286-288:27;289-291:28;293-310:29")]
 [assembly: go.GoPositionMap("math/big/example_rat_test.go", "example_rat_test.cs", "AAwoAAgCgoKUloK6hKyygro=")]
 // </GoSourcePositionMaps>
 

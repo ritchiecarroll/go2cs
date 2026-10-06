@@ -116,7 +116,7 @@ public static void TestMMUTrace(ж<testing.T> Ꮡt) {
             }, trace_internal_test_package.BandsPerSeries, ref ᒐ);
             trace_internal_test_package.BandsPerSeries = 1;
             var mmuCurve2 = Δtrace.NewMMUCurve(mu);
-            var quantiles = new float64[]{0D, 1D - .999D, 1D - .99D}.slice();
+            var quantiles = new float64[]{0D, /* 1 - .999 */ 0.001D, /* 1 - .99 */ 0.01D}.slice();
             for (var window = time.Microsecond; window < time.ΔSecond; window *= 10) {
                 var mud1 = mmuCurve.MUD(window, quantiles);
                 var mud2 = mmuCurve2.MUD(window, quantiles);

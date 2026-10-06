@@ -48,7 +48,7 @@ using static global::go.go.doc.comment_internal_test_package;
 [assembly: global::go.GoPositionMap("go/doc/comment/parse_test.go", "parse_test.cs", "AAoUkg==")]
 [assembly: global::go.GoPositionMap("go/doc/comment/std_test.go", "std_test.cs", "ABcegoKCloKCgqaEgoKC")]
 [assembly: global::go.GoPositionMap("go/doc/comment/testdata_test.go", "testdata_test.cs", "ABskgoKClIK4goKUlIKGlJbKlIKSgoKClIKCgqaClIKCgoKUgpikpKSkAAITAAIYgu6CgoKmgqS2goKCgoKUtoKCyLaCgsiCtoK2goLIgraCtoK2goLIgpSCyIKUgsiCgoLagraCyKKCgg==", "28-33:1;34-41:2;43-49:3;51-91:4")]
-[assembly: global::go.GoPositionMap("go/doc/comment/wrap_test.go", "wrap_test.cs", "ABEg1IKClIKWgoKCgoKClIKUlpKSgoKSkpaCgoKUgpSCgpSClIKClLaklJSCqIKCAAcYAAoKgoKCgpSClIKCgoKCgpSCgpSCgoLMgoKUgoKClA==", "41-88:1;45-86:1.1")]
+[assembly: global::go.GoPositionMap("go/doc/comment/wrap_test.go", "wrap_test.cs", "ABEg1IKClIKWgoKCgoKClIKUlpKSgoKSkpaCgoKUgpSCgpSClIKClJSSkoKUlIKogoIABxgACgqCgoKClIKUgoKCgoKClIKClIKCgsyCgpSCgoKU", "41-88:1;45-86:1.1")]
 // </GoSourcePositionMaps>
 
 namespace go.go.doc;

@@ -35,6 +35,7 @@ using static global::go.unique_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
+[assembly: GoImplicitConv<EmptyStruct, testZeroSize>]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

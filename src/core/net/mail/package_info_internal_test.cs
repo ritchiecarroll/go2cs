@@ -29,7 +29,7 @@ using static go.net.mail_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/mail/message_test.go", "message_test.cs", "AB0kAEGIAYKCgoKClIKmgoKClIKC3IKClIKCgpSCpgAKBoIAHUKCpoKCpJaCgqQACgqiAJoBugKCpoKC6rSWgoL6pAAMCoIAGz6CgoKokoKCgoIACg6CAOwCsgaCgoKCgpSCqIKCgpSCAAkKggB8mgKUgoKWlKSmuIKCgoKClIKogoKClIIACQqCAEiQAYKCgoKogoKCgpSC3sYAHjyCgoKClIKCgoKWgoK8ABMqgoKCgs6CAAsagoKCgpSClIL6goKClIKClIKClIKC", "407-415:1;995-1009:1")]
+[assembly: go.GoPositionMap("net/mail/message_test.go", "message_test.cs", "AB0kAEGIAYKCgoKClIKmgoKClIKC3IKClIKCgpSCpgAKBoIAHUKCpoKCkoKWgoKSggAKCqIAmgG6AoKmgoKSlqKSkpaCgpKWspKCAAwKggAbPoKCgqiSgoKCggAKDoIA7AKyBoKCgoKClIKogoKClIIACQqCAHyaApSCgpaUpKa4goKCgoKUgqiCgoKUggAJCoIASJABgoKCgqiCgoKClILexgAePIKCgoKUgoKCgpaCgrwAEyqCgoKCzoIACxqCgoKClIKUgvqCgoKUgoKUgoKUgoI=", "407-415:1;995-1009:1")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

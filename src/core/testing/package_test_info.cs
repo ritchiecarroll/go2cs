@@ -45,7 +45,7 @@ using static global::go.testing_test_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("testing/allocs_test.go", "allocs_test.cs", "ABEWmqKioqK2goKAgg==")]
 [assembly: go.GoPositionMap("testing/example_loop_test.go", "example_loop_test.cs", "AAsgAAkIgoKoyr6igoKUpoI=")]
-[assembly: go.GoPositionMap("testing/flag_test.go", "flag_test.cs", "AA8e6KKCgpaEgoKCgoKClIKCuJSCAA8OkoKCloKCpJaCgpSEgpSkpKSmgg==", "29-46:1")]
+[assembly: go.GoPositionMap("testing/flag_test.go", "flag_test.cs", "AA8e6KKCgpaEgoKCgoKClIKCuJSCAA8OkoKCloKCkoKWgoKUhIKUpKSkpoI=", "29-46:1")]
 [assembly: go.GoPositionMap("testing/helper_test.go", "helper_test.cs", "ACkegoKogoKWhIKCgoQAACaC+IKCgpaEgoKChISKtIKUgoCCyKKClIKUgoKCgpQ=", "89-91:1;92-94:2")]
 [assembly: go.GoPositionMap("testing/helperfuncs_test.go", "helperfuncs_test.cs", "AAwckqaCgqaCpoKCpoKCppSC9saCgoKWgoKUhIKCpoK6goKUgoK6qISC1oKCgoKCgqbWgoKCgriigoKCgIK2oqSCgg==", "52-55:1;58-65:2;69-72:3;73-76:4;94-97:1;104-107:1;112-117:1")]
 [assembly: go.GoPositionMap("testing/panic_test.go", "panic_test.cs", "ABMmkpKSAAoEgoQAgQHiAbKSgoKCgoKCgoCCAAsMgoKCgtaCgpSCgpS2pIKCgqaCgoKCgoKCgriClIKCgoKCgrgACwyihAAOJIKCgoKCgoKAggAJCoKCloKCyoKCloCSgg==", "141-152:1;176-181:1;184-209:2;187-192:2.1;200-205:2.2;252-256:1;253-255:1.1;264-264:1")]

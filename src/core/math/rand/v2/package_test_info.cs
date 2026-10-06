@@ -52,12 +52,12 @@ using static global::go.math.rand.rand_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("math/rand/v2/auto_test.go", "auto_test.cs", "AA0g2LKC3oKCgoKCgoI=")]
-[assembly: global::go.GoPositionMap("math/rand/v2/chacha8_test.go", "chacha8_test.cs", "ABYigoKCgIK4goKAgtqCgoSCgIKkpIKAgqaChIKAgqSCgIKmgoSAgqSmgoKCgoKUgpSAgraCgpSCgoCCpKSUgILIooKCuKKCgoKCuIKCgoKClIKWgoKCgpSCloKAgqSAgtqCgoKCgpSCloKCgoKUgpaCgIKkuKKCgoKUpqKCgoKCgoKUzLakAF/AAQD2Au4F")]
+[assembly: global::go.GoPositionMap("math/rand/v2/chacha8_test.go", "chacha8_test.cs", "ABYigoKCgIK4goKAgtqCgoSCgIKSgqSCgIKmgoSCgIKkgoCCpoKEgIKSgqaCgoKCgpSClICCtoKClIKCgIKSgqSUgILIooKCuKKCgoKCuIKCgoKClIKWgoKCgpSCloKAgqSAgtqCgoKCgpSCloKCgoKUgpaCgIKkuKKCgoKUpqKCgoKCgoKUzLakAF/AAQD2Au4F")]
 [assembly: global::go.GoPositionMap("math/rand/v2/example_test.go", "example_test.cs", "ABUmogAVLAAPCviWgpKSqIKWlrqCgqiCgpYAAhqkAAwCggADEMSW1oKCkpSmgoKUooKUgriCgoI=", "56-58:1;119-121:1;129-132:1")]
 [assembly: global::go.GoPositionMap("math/rand/v2/pcg_test.go", "pcg_test.cs", "AA0YooKCgpQACAaCgryCgoKWgoKCloKAgqSCloKCgriCggAVLoKAgg==")]
 [assembly: global::go.GoPositionMap("math/rand/v2/race_test.go", "race_test.cs", "AA4ewpiCgoKCooKCgoKCgoKCgoKCgoKmosQ=", "24-42:1")]
 [assembly: global::go.GoPositionMap("math/rand/v2/rand_test.go", "rand_test.cs", "ABsw0gAMEoKCkpSmmMKCgoKUgoKClKaCgpKCgpSCgqaCgoKCgriCgoKCgoKClJQAAxCygoKClKaWgoKWlpaqkoK4goKCgoKUgoKCgoIABhaygoKClKaWkpSCgpaWlqqSgriCgoKCggAFFPKCrIKChIKCgoKCgoKCgoKCgpSmwoKsgoKEgoKCgoKCgoKCgoKClKyygoKUlIKCpqyygoKUlIKCpqaCgoCCpICCpICCyIKCgIKkgIKkgIL4gpSq1NaUuIKWgoKCgsqUgpKAzsSCgoKCyoKCgoKU+JKCgoKUkqSCgqiCAAoQgpSQkqiy2oKClIKEkoKCpoKCgoKUgqiSgoKCggAKFoKmooKCgpSmooKClKaCgoKClLiigoKUpoKCgoKUuKKCgoKUyqKClKaigoKClKaigoKClKaigoKCgpSmooKCgoKUpqKCgoKClKaigoKCgpSmooKCgoKUpqKCgoKClKaigoKCgpSmooKCgoKUpqKCgoKClKaigoKCgpSmooKCgoKUpqKCgoKClKaigoKClKaigoKClKaigoKClKaigoKClKaigoKClKiigoKClKaigoKCgoKUkJKUqsKCgoKC3IKCgoKCooKCtKSmgoKCgg==", "365-365:1;400-463:1;413-413:1.1;414-414:1.2;415-422:1.3;420-420:1.3.1;426-461:1.4;493-499:1;511-517:1;739-739:1;750-754:1;763-768:1")]
-[assembly: global::go.GoPositionMap("math/rand/v2/regress_test.go", "regress_test.cs", "AB821KKCgoKChIKCgoKUgoKUgoKCgoKClIKCgoKCqoKClIK4goKUgpS2gpSCgoKClIKUpqampgACWwACYIKWgoKClIKUgoKClKSUlKSUgoKUgpSCpraC+MKCloKSloKClJKUooKCgpSCgpaCgoKCqJaCogACGAAKAoKCgoKUgoKUgoKUgoKClICCANgCCA==", "161-163:1;172-177:2")]
+[assembly: global::go.GoPositionMap("math/rand/v2/regress_test.go", "regress_test.cs", "AB821KKCgoKChIKCgoKUgoKUgoKCgoKClIKCgoKCqoKClIK4goKUgpS2gpSCgoKClIKUpqampgACWwACYIKWgoKClIKUgoKClJKClJSSgpSCgpSClIKmtoL4woKWgpKWgoKUkpSigoKClIKCloKCgoKoloKiAAIYAAoCgoKCgpSCgpSCgpSCgoKUgIIA2AII", "161-163:1;172-177:2")]
 // </GoSourcePositionMaps>
 
 namespace go.math.rand;

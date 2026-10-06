@@ -49,7 +49,7 @@ using static global::go.image.jpeg_internal_test_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("image/jpeg/dct_test.go", "dct_test.cs", "ABAeooKCgpSCgriCpoKmgoKWgoKCgoKUzLKygpSCgoKUgsyysoKClIKCurKygoKCAAQS8oKCgqaokoKUACIGACJeAAsCgoKCgoKCqriCAAMaAAsCgoKCgoKCqriCuIKCgoKCgpSUgrg=")]
 [assembly: go.GoPositionMap("image/jpeg/fuzz_test.go", "fuzz_test.cs", "ABggooKWgoKUgoKUgoKUloKCgpSClIKClKKCgoKCpIKCgqSCgoI=", "36-66:1")]
-[assembly: go.GoPositionMap("image/jpeg/reader_test.go", "reader_test.cs", "ABkysgALGIKCgoKUgoKClIKCpoKClpSCgIKCpICCgqSAgoLWgoCCguaC2qKCgpSSAAsSsoKClIKCgoKCuNaUgoKWgoKCgoKUgpTMkoKUgqaCgu6WgoKCgoIABxKmgoKCgoKUlOaCgoKUgoKClIKCgpSCAAkIzgAGRIKClJSCgrQAowEEhAABvAKCgpSAgsiUgoKCgIKkuIKUgJKkgILIgoKUlIKAgqbIloKCgoKUgoKClIKCgsqCgoKWhIKCAAgIgoKCpKSUhAALHIKChIKCgoKChILKooKClIKClIKCgoK4gtaC", "252-255:1")]
+[assembly: go.GoPositionMap("image/jpeg/reader_test.go", "reader_test.cs", "ABkysgALGIKCgoKUgoKClIKCpoKClpSCgIKCpICCgqSAgoLWgoCCguaC2qKCgpSSAAsSsoKClIKCgoKCuNaUgoKWgoKCgoKUgpTMkoKUgqaCgu6WgoKCgoIABxKmgoKCgoKUlOaCgoKUgoKClIKCgpSCAAkIzgAGRIKClJSCgrQAowEEhAABvAKCgpSAgsiUgoKCgIKkuIKUgJKkgILIgoKUlIKAgqbIloKCgoKUgoKClIKCgsqCgoKWhIKCAAgIgoKCkoKSgpSEAAscgoKEgoKCgoKEgsqigoKUgoKUgoKCgriC1oI=", "252-255:1")]
 [assembly: go.GoPositionMap("image/jpeg/writer_test.go", "writer_test.cs", "ABguAAoWgoKClIIACA4AFDKCgoKCgoKCgriCgoKCgoKCgqaUAAkIAAgagoKClKaigoKUktaClIKCgpaSgoKCpoKCgpSCgqaCgs6igoKUgoCCpIKClIKUgIK2goCCzKKCkoKCgoKCgoKCgqamgoKUgpSCgtyCgoKCgoKqooKCgriigoKCgoIABxCCgoKCgriigoKCgoKCgoKCpoKCgoKC")]
 // </GoSourcePositionMaps>
 

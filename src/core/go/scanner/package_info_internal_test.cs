@@ -30,7 +30,7 @@ using static go.go.scanner_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/scanner/scanner_test.go", "scanner_test.cs", "ABIgAAcSgpSkpKQADxIAfqICgoKCgpSmgoKCgqamoqaClIKUgpSCurKWgpiSlt6CgpaUgpSWgoKClIKogqiClpSStqSklIKCtraCloKogpiC+IIACxiCggAKCoKCgoKWgoKCgoKCgpSmgoKmgpSAggAJCABn9AGCgpKCqIKCABUWABxAzLj6koKCgpS4goKCmJKCgJKCgoIABhCC7AAKEpSSgpiSgoKCgpSCpqKWggAJCpKWgoKCgpSCgoKCqIKCgoKUgoKWggAJCIIABBKCgJSCgoKAgriCloKCloKCgpaCgoIACRSCgoKCgoKUgoKClIKUgoKUgpSClIIAEQgAP4wBgoIAGgqSAAAmgoKCgoKClIL6ooKCgoKCgoKmgsqigoKCgoKCgoKCgtym3IKCgoKClIKCgoKCgoKCgoIADBCCAHyyAoKCgoKmgoKWlKSkpoKClIKogrqCgpSC", "230-232:1;578-578:1;617-624:1;680-680:1;721-725:1;903-924:1;1084-1088:1")]
+[assembly: global::go.GoPositionMap("go/scanner/scanner_test.go", "scanner_test.cs", "ABIgAAcSgpSkpKQADxIAfqICgoKCgpSmgoKCgqamoqaClIKUgpSCurKWgpiSlt6CgpaUgpSWgoKClIKogqiClpSStqSklIKCpIK2gpaCqIKYgviCAAsYgoIACgqCgoKCloKCgoKCgoKUpoKCpoKUgIIACQgAZ/QBgoKSgqiCggAVFgAcQMy4+pKCgoKUuIKCgpiSgoCSgoKCAAYQguwAChKUkoKYkoKCgoKUgqailoIACQqSloKCgoKUgoKCgqiCgoKClIKCloIACQiCAAQSgoCUgoKCgIK4gpaCgpaCgoKWgoKCAAkUgoKCgoKClIKCgpSClIKClIKUgpSCABEIAD+MAYKCABoKkgAAJoKCgoKCgpSC+qKCgoKCgoKCpoLKooKCgoKCgoKCgoLcptyCgoKCgpSCgoKCgoKCgoKCAAwQggB8sgKCgoKCpoKClpSkpKaCgpSCqIK6goKUgg==", "230-232:1;578-578:1;617-624:1;680-680:1;721-725:1;903-924:1;1084-1088:1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

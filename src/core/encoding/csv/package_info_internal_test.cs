@@ -32,7 +32,7 @@ using static go.encoding.csv_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("encoding/csv/fuzz_test.go", "fuzz_test.cs", "AA8egoKEggAIEoKCgoKCgoKCgoSCgpSEgoKCgoKCgpSmlISCgoKCgoKCgoKogoLcmIKWgg==", "16-95:1;83-85:1.1")]
-[assembly: go.GoPositionMap("encoding/csv/reader_test.go", "reader_test.cs", "AC5QAPEC3gWCgoKEgpSCgpSUgoKClrKigoKAgoKUgqaClILKgoKCqIKCgoKCpJSCpoKClJSAgqSCgpSCgoCCAAgWsoKCpqaCgoKUgpSCgpSSgoKCAAIU8oKCgpKEgoKUgoK0gpS0grS0grSUAAkUsoKClIKCgoKCgpSCzsKCgoKUgoKClIIAEiKCpoKAtoKAAAwGgq6CgLaCgIC2goCAtoKA", "408-425:1;428-488:2;625-625:1;629-629:1;641-641:1;645-645:1;649-649:1;653-653:1")]
+[assembly: go.GoPositionMap("encoding/csv/reader_test.go", "reader_test.cs", "AC5QAPEC3gWCgoKEgpSCgpSUgoKClrKigoKAgoKUgqaClILKgoKCqIKCgoKCkoKUgqaCgpSUgIKkgoKUgoKAggAIFrKCgqamgoKClIKUgoKUkoKCggACFPKCgoKShIKClIKCtIKUtIK0tIK0lAAJFLKCgpSCgoKCgoKUgs7CgoKClIKCgpSCABIigqaCgLaCgAAMBoKugoC2goCAtoKAgLaCgA==", "408-425:1;428-488:2;625-625:1;629-629:1;641-641:1;645-645:1;649-649:1;653-653:1")]
 [assembly: go.GoPositionMap("encoding/csv/writer_test.go", "writer_test.cs", "ABccAB9MgoKCgoKClIKClIKCAAoOgtaCgoKCgoSCloKCgoSCuNyigoKCgpQ=")]
 // </GoSourcePositionMaps>
 

@@ -29,7 +29,7 @@ using static go.crypto.rand_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/rand/rand_test.go", "rand_test.cs", "AB0usoKUgriCpoKCgpSCgoKWgoKCgoK4gqaCgoKCgoKUgoLKgqaUgoCCpMiCpoKCgpSCgtyC1qKCgJKCgpSCgpSCtKSC1oKClIKCgoKCooKCgoKCxqTKgoKCgoKUggAMCKKClJaCgJKGgoKWgoKCgpSCgrSkgoKUgpSCuKKCgoKAgg==", "24-26:1;27-29:2;112-112:1;113-116:2;139-148:1;157-161:1;175-175:1;176-178:2;197-199:1;200-202:2;203-205:3")]
+[assembly: go.GoPositionMap("crypto/rand/rand_test.go", "rand_test.cs", "AB0usoKUgriCpoKCgpSCgoKWgoKCgoK4gqaCgoKCgoKUgoLKgqaUgoCCkoLIgqaCgoKUgoLcgtaigoCSgoKUgoKUgrSkgtaCgpSCgoKCgqKCgoKCgsakyoKCgoKClIIADAiigpSWgoCShoKCloKCgoKUgoK0pIKClIKUgriigoKCgII=", "24-26:1;27-29:2;112-112:1;113-116:2;139-148:1;157-161:1;175-175:1;176-178:2;197-199:1;200-202:2;203-205:3")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

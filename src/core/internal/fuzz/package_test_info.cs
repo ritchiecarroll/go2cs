@@ -60,7 +60,7 @@ using static global::go.@internal.fuzz_internal_test_package;
 [assembly: global::go.GoPositionMap("internal/fuzz/minimize_test.go", "minimize_test.cs", "AB4qggADFIKCgoKmgpQABxCCgpSClAAHEIKClIKUAAcQgoKUAAgQgoKCgqaClAAHEIKClAAHEIKCgpTegpKSgrqCgoKClIKUgIKkggAJErKWgoKCgoKUgpSAgg==", "31-43:1;49-58:2;64-73:3;79-85:4;91-103:5;109-115:6;121-128:7;136-158:8;139-141:8.1;166-168:1")]
 [assembly: global::go.GoPositionMap("internal/fuzz/mutator_test.go", "mutator_test.cs", "AA4eooKAkoKEAAcQkoKElIKC2KSigoCSgoQABxCSgoSUgoLYpKKCgJKChAAPIoKigoLYpIKCgoKCgoKClII=", "17-17:1;29-39:2;45-45:1;57-67:2;73-73:1;95-100:2")]
 [assembly: global::go.GoPositionMap("internal/fuzz/mutators_byteslice_test.go", "mutators_byteslice_test.cs", "ABImgoKCpoKCgqaCgoKmgoKCpoKmggAKBoIAceoBkoKClIKCggAKDIIAEzCykpKSgoKC", "169-179:1;209-219:1;211-217:1.1")]
-[assembly: global::go.GoPositionMap("internal/fuzz/queue_test.go", "queue_test.cs", "AAoSpJKAgqSAgriCgoKAgqSAgqTcgoKCgoCCpJSkgoCCtoKCgII=")]
+[assembly: global::go.GoPositionMap("internal/fuzz/queue_test.go", "queue_test.cs", "AAoSpJKAgqSAgriCgoKAgqSAgpKC3IKCgoKAgpKClKSCgIK2goKAgg==")]
 [assembly: global::go.GoPositionMap("internal/fuzz/worker_test.go", "worker_test.cs", "ABcslIKCgoKU1sKClIKAkoS6goKUkoCCuIKChISCgoKChLSowoKUgoKCgIIACA7CgpSCgoKCgriCgpSClIKUAAMQwoK4gpSCgoKCgoKUkoCCtoCCpJKAgramooKSgoCCxNSigpaokoKUgoCCtoSCgoKCgoKCgoKigoKCgpSUgoLY", "38-38:1;42-42:2;50-54:3;137-141:1;145-149:2;156-156:1;175-179:1;191-204:2;193-199:2.1")]
 // </GoSourcePositionMaps>
 

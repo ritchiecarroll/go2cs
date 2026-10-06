@@ -38,7 +38,7 @@ using static global::go.crypto.@internal.fips140.ecdsa_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa_test.go", "ecdsa_test.cs", "ABcegoCSgJKAkoAACgbCgJKCgLiSgIKClKSkpIKUloKAgoKUpKSkgpTMgpSAgoKUpKSkgriCgJKAkoCSgLaigoI=", "16-16:1;17-17:2;18-18:3;19-19:4;23-23:1;25-25:2;30-33:3;47-50:4;69-72:5;85-85:1;86-86:2;87-87:3;88-88:4")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa_test.go", "ecdsa_test.cs", "ABcegoCSgJKAkoAACgbCgJKCgLiSgIKClJKCkoKkgpSWgoCCgpSSgpKCpIKUzIKUgIKClJKCkoKkgriCgJKAkoCSgLaigoI=", "16-16:1;17-17:2;18-18:3;19-19:4;23-23:1;25-25:2;30-33:3;47-50:4;69-72:5;85-85:1;86-86:2;87-87:3;88-88:4")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
