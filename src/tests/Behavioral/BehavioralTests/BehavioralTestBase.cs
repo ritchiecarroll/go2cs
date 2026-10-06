@@ -464,7 +464,7 @@ public abstract class BehavioralTestBase
             // generated csproj concatenates it directly ($(go2csPath)core\<pkg>\...).
             Environment.SetEnvironmentVariable("go2csPath", Path.GetFullPath(Path.Combine(TestRootPath, "..", "..")) + Path.DirectorySeparatorChar);
 
-            if (!forceBuild && ExecutableIsCurrent(projExe, projPath, DateTime.MinValue))
+            if (!forceBuild && ExecutableIsCurrent(projExe, projPath, s_sharedBuildInputsNewestUtc.Value))
                 return;
 
             int exitCode;
@@ -485,8 +485,10 @@ public abstract class BehavioralTestBase
         }
     }
 
-    // Whether a fixture's built executable can be reused instead of rebuilt: it exists and is newer than every .cs in the
-    // fixture folder.
+    // Whether a fixture's built executable can be reused instead of rebuilt: it exists, and it is newer than every .cs in
+    // the fixture folder AND than the newest SHARED build input (golib, the source generator, every converted package).
+    // The fixture's .cs alone were enough only while a converter rebuild rewrote every .cs; with incremental writes an
+    // unchanged emission keeps its time, so a golib or generator change must invalidate the executable on its own.
     internal static bool ExecutableIsCurrent(string projExe, string projPath, DateTime sharedInputsNewestUtc)
     {
         if (!File.Exists(projExe))
@@ -494,8 +496,60 @@ public abstract class BehavioralTestBase
 
         FileInfo projExeInfo = new(projExe);
 
-        return Directory.GetFiles(projPath, "*.cs").Select(fileName => new FileInfo(fileName)).All(info => projExeInfo.LastWriteTimeUtc > info.LastWriteTimeUtc);
+        return projExeInfo.LastWriteTimeUtc > sharedInputsNewestUtc &&
+               Directory.GetFiles(projPath, "*.cs").Select(fileName => new FileInfo(fileName)).All(info => projExeInfo.LastWriteTimeUtc > info.LastWriteTimeUtc);
     }
+
+    // The newest write time across every shared build input of a behavioral program: src/core and src/gen (.cs, .csproj,
+    // .props, .targets; build output skipped) and the build files directly in src. A SUPERSET of what MSBuild reads for a
+    // fixture, so the skip above can only rebuild too often, never reuse a stale program. Read once per test process: the
+    // sources are frozen while a run is in flight, and a full walk costs about a second.
+    private static readonly Lazy<DateTime> s_sharedBuildInputsNewestUtc = new(() =>
+    {
+        string srcRoot = Path.GetFullPath(Path.Combine(TestRootPath, "..", ".."));
+        DateTime newest = DateTime.MinValue;
+
+        void Visit(string dir, bool recurse)
+        {
+            foreach (string file in Directory.EnumerateFiles(dir))
+            {
+                string extension = Path.GetExtension(file);
+
+                if (extension is ".cs" or ".csproj" or ".props" or ".targets")
+                {
+                    DateTime written = File.GetLastWriteTimeUtc(file);
+
+                    if (written > newest)
+                        newest = written;
+                }
+            }
+
+            if (!recurse)
+                return;
+
+            foreach (string child in Directory.EnumerateDirectories(dir))
+            {
+                string name = Path.GetFileName(child);
+
+                if (name is "bin" or "obj" || name.StartsWith("Generated", StringComparison.Ordinal))
+                    continue;
+
+                Visit(child, true);
+            }
+        }
+
+        Visit(srcRoot, false);
+
+        foreach (string tree in new[] { "core", "gen" })
+        {
+            string path = Path.Combine(srcRoot, tree);
+
+            if (Directory.Exists(path))
+                Visit(path, true);
+        }
+
+        return newest;
+    });
 
     protected void CompileGoProject(string targetProject)
     {
