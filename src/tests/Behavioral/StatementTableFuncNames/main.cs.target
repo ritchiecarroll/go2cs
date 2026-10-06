@@ -44,7 +44,7 @@ internal static @string nameOf(any fn) {
     internal @string label;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void table() {
+internal static partial void table() {
         var recvʗ1 = ~(Ꮡ(new T(nil)));
     var rows = new table_rows[]{
         new(() => {
