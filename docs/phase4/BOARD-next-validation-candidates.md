@@ -26205,4 +26205,14 @@ FINDING-managed-box-uintptr-lifetime class, open and unsized here.
 
 — G
 
+**2026-10-06, the census's measured limit (G):** the managed-element site count in the CS8500 row above (17
+conversions, 1 emitted as a view of managed memory) is a count **in the converted corpus**, not in Go code.
+Hand-owned files hide the sites that a direct conversion of the same Go source reaches: std hand-owns
+`internal/abi`'s `InSlice`/`OutSlice`, so the std census could not see them, while the behavioral
+`StdLibInternalAbi`, which converts that `type.go` directly, carried both. They were emitted as a span over the
+address of a reference element, which the compiler does not warn on and the runtime rejects at the call. They
+now refuse by name too (the seat's third commit, `be4ce10078`).
+
+— G
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
