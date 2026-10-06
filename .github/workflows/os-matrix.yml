@@ -325,13 +325,14 @@ jobs:
           $sw.Stop()
 
           $count = @(Get-ChildItem $feed -Filter *.nupkg -File -ErrorAction SilentlyContinue).Count
+          # The summary carries push-nuget's path guard verdict: its CLEAN step line, or the count in its refusal.
           $summary = @(
               '## Release-smoke pack (windows-latest)'
               ''
               "push-nuget.ps1 -VersionSuffix $suffix -- exit ``$packExit`` after $([int]$sw.Elapsed.TotalMinutes) min; $count merged package(s)"
               ''
               '```'
-          ) + @(Get-Content -LiteralPath $log | Select-String -Pattern '==> (Layout L3|Flavor comparison|  of |Merged|Shipped shape|Packed|\[)' | ForEach-Object { $_.Line }) + @('```')
+          ) + @(Get-Content -LiteralPath $log | Select-String -Pattern '==> (Layout L3|Flavor comparison|  of |Merged|Shipped shape|Packed|Pack paths|\[)|Pack paths: [0-9]+ entr' | ForEach-Object { $_.Line }) + @('```')
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
           & ./.github/annotate-summary.ps1 -Title 'release-smoke pack' -Lines $summary
 
