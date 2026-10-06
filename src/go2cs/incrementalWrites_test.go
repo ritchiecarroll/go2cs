@@ -448,3 +448,62 @@ func NewLocker() Locker { return &mutex{} }
 		t.Errorf("an unchanged re-conversion rewrote the marker-bearing c.cs.auto (its time moved to %s)", info.ModTime())
 	}
 }
+
+// The other caller of writeAutoConversionSibling: a FULLY hand-owned package emits its siblings through
+// emitAutoConversionSiblings, which never reaches the package's own restore. What the sibling writer remembers is
+// process-wide and first-wins, so that path must restore its own siblings too, or the entry outlives the conversion and
+// shadows the next one's (a later run of the same package in one process would restore a stale time).
+func TestFullyHandOwnedPackageLeavesNoRememberedSibling(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: loads the fixture package via go/packages")
+	}
+
+	pkgDir, outDir, options := incrementalFixture(t)
+
+	writeModuleFile(t, filepath.Join(pkgDir, "c.go"), `package incr
+
+type Locker interface {
+	Lock()
+	Unlock()
+}
+
+type mutex struct{ held bool }
+
+func (m *mutex) Lock()   { m.held = true }
+func (m *mutex) Unlock() { m.held = false }
+
+func NewLocker() Locker { return &mutex{} }
+`)
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("first conversion: %v", err)
+	}
+
+	// Every file becomes hand-owned: the package now takes the fully hand-owned path.
+	for _, name := range []string{"a", "b", "c"} {
+		writeModuleFile(t, filepath.Join(outDir, name+".cs"), "// "+name+".cs - hand-owned\n[module: go.GoManualConversion]\n\nnamespace go;\n")
+	}
+
+	for run := 2; run <= 3; run++ {
+		if err := processConversion(pkgDir, true, outDir, options); err != nil {
+			t.Fatalf("conversion %d: %v", run, err)
+		}
+	}
+
+	content, err := os.ReadFile(filepath.Join(outDir, "c.cs.auto"))
+
+	if err != nil {
+		t.Fatalf("the fully hand-owned package produced no c.cs.auto: %v", err)
+	}
+
+	if !strings.Contains(string(content), "mutex") || !strings.Contains(string(content), "Locker") {
+		t.Fatalf("the sibling no longer carries the pointer-adapter shape this guard needs:\n%s", content)
+	}
+
+	markedSources.Range(func(key, _ any) bool {
+		if strings.HasSuffix(key.(string), ".cs.auto") {
+			t.Errorf("a remembered sibling state outlived its conversion: %s", key)
+		}
+		return true
+	})
+}
