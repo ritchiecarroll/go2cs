@@ -3,14 +3,16 @@
     Guards the pack's path guard (src/check-pack-paths.ps1) on FABRICATED packages, so it is exercised without a pack.
 
 .DESCRIPTION
-    Builds a temporary feed of three packages and checks Get-GoPackagePathLeaks names exactly the planted entries:
+    Builds a temporary feed of four packages and checks Get-GoPackagePathLeaks names exactly the planted entries:
       clean    an assembly entry with a mapped /_/ .pdb path and no absolute one     -> NOT named
       ascii    an assembly entry holding an ASCII drive-letter .pdb path             -> named
       wide     an assembly entry holding a UTF-16 UNC .cs path (a [CallerFilePath])  -> named
                (assembled at run time, so this file never holds a share path the identifier census would refuse)
-    and that a feed that does not exist, or holds no package, THROWS rather than reading as clean. The .pdb decoding is not
-    fabricated here (a portable .pdb cannot be hand-written in a few bytes); it is read on real packs (the seat's record:
-    an unmapped golib .pdb named, a mapped one clean, and on PowerShell 5.1 a .pdb refused as unreadable).
+      badpdb   a .pdb entry that is not a portable .pdb                              -> named unreadable
+               (so the symbol-file reader, check-pack-pdbs.cs through `dotnet`, is run and its count agrees)
+    and that a feed that does not exist, or holds no package, THROWS rather than reading as clean. A DECODED absolute
+    document is not fabricated here (a portable .pdb cannot be hand-written in a few bytes); it is read on real packs (the
+    seat's record: an unmapped golib .pdb named, a mapped one clean, on PowerShell 7 and 5.1 alike).
 
     Exit 0 clean, 1 on any violation. Writes only under the host's temp directory.
 #>
@@ -46,10 +48,12 @@ try {
     New-FakePackage 'go.ascii.1.0.0.nupkg' 'lib/net10.0/ascii.dll' (Bytes 'Q:\planted\tree\obj\Release\net10.0\ascii.pdb' $ascii)
     $unc = ('\' * 2) + 'node' + '\' + 'share\src\wide.cs'
     New-FakePackage 'go.wide.1.0.0.nupkg' 'lib/net10.0/wide.dll' (Bytes $unc ([System.Text.Encoding]::Unicode))
+    New-FakePackage 'go.badpdb.1.0.0.nupkg' 'lib/net10.0/badpdb.pdb' (Bytes 'not a portable pdb' $ascii)
 
     # The function returns its array whole (`return , $array`); wrapping the call in @( ) would nest it.
     $found = Get-GoPackagePathLeaks $work
-    $want = @('go.ascii.1.0.0.nupkg :: lib/net10.0/ascii.dll (absolute path)', 'go.wide.1.0.0.nupkg :: lib/net10.0/wide.dll (absolute path)')
+    $want = @('go.ascii.1.0.0.nupkg :: lib/net10.0/ascii.dll (absolute path)', 'go.wide.1.0.0.nupkg :: lib/net10.0/wide.dll (absolute path)',
+              'go.badpdb.1.0.0.nupkg :: lib/net10.0/badpdb.pdb (symbol file unreadable)')
     if (($found -join '|') -ne ($want -join '|')) { $failures.Add("findings = [$($found -join '; ')], want [$($want -join '; ')]") }
 
     foreach ($missing in (Join-Path $work 'no-such-feed'), (New-Item -ItemType Directory -Path (Join-Path $work 'empty')).FullName) {
@@ -61,5 +65,5 @@ try {
 finally { Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue }
 
 if ($failures.Count -gt 0) { $failures | ForEach-Object { Write-Host "FAIL: $_" }; exit 1 }
-Write-Host "pack-paths selftest: PASS (3 packages: the ascii and wide plants named, the mapped one not; 2 empty feeds refused)"
+Write-Host "pack-paths selftest: PASS (4 packages: the ascii and wide plants named, the mapped one not, the bad .pdb unreadable; 2 empty feeds refused)"
 exit 0

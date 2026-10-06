@@ -13,10 +13,12 @@
 
     What counts as absolute: a drive-letter or UNC path ending in .pdb or .cs, in an entry's bytes read as ASCII and as
     UTF-16 (both alignments). A portable .pdb stores a document path as separator-joined PARTS, so its whole path is
-    never in the bytes: its document names are DECODED (System.Reflection.Metadata) and any absolute one is a finding.
-    Windows PowerShell 5.1 has no such reader, so there a .pdb in a package is reported as unreadable rather than
-    passed (the packages ship none today). A mapped /_/ path is not a finding. (A byte heuristic for the drive part was
-    tried and rejected: it matched random bytes of a fully mapped .pdb, measured 2026-10-06.)
+    never in the bytes: its document names are DECODED by check-pack-pdbs.cs, run once per feed through `dotnet` (the
+    release pack runs under Windows PowerShell 5.1, which has no System.Reflection.Metadata, and the SDK is on every
+    pack host), and any absolute one is a finding; so is a .pdb it cannot read. The reader's count of .pdb entries must
+    equal this script's, or the guard throws: a reader that read less must not pass. A mapped /_/ path is not a
+    finding. (A byte heuristic for the drive part was tried and rejected: it matched random bytes of a fully mapped
+    .pdb, measured 2026-10-06.)
 
     Standalone: pwsh ./check-pack-paths.ps1 -Feed <folder of .nupkg>   (exit 1 and the findings when any; 0 when clean)
     Dot-sourced (push-nuget.ps1): only the function is defined.
@@ -32,35 +34,47 @@ Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 # An absolute path ending in .pdb or .cs: a drive letter or a UNC root, then path characters.
 $script:GoAbsolutePathPattern = [regex] '(?:(?<![A-Za-z0-9])[A-Za-z]:[\\/]|\\\\[A-Za-z0-9])[^\x00-\x1F"<>|*?]{1,240}?\.(?:pdb|cs)(?![A-Za-z0-9])'
 
-# A portable .pdb's DOCUMENT names, decoded (they are stored as separator-joined parts, so no byte search sees them whole):
-# "absolute" when any is a drive-letter or UNC path, "mapped" otherwise, "unreadable" when this PowerShell has no
-# System.Reflection.Metadata (Windows PowerShell 5.1) -- an unreadable symbol file is reported, never passed.
-function Get-GoPdbDocumentVerdict([byte[]] $Bytes) {
-    if (-not ('System.Reflection.Metadata.MetadataReaderProvider' -as [type])) { return 'unreadable' }
+# The symbol-file reader beside this script, resolved now: inside a function dot-sourced into push-nuget.ps1 the
+# script root would be the caller's.
+$script:GoPackPdbReader = Join-Path $PSScriptRoot 'check-pack-pdbs.cs'
 
-    $provider = [System.Reflection.Metadata.MetadataReaderProvider]::FromPortablePdbStream((New-Object System.IO.MemoryStream (, $Bytes)))
+# The DECODED .pdb verdicts of a feed: check-pack-pdbs.cs, run once through `dotnet` from a temporary copy (so no
+# Directory.Build file of the tree it sits in applies to it). Returns the findings, "<nupkg> :: <entry>" -> reason, and
+# the number of .pdb entries the reader read. Its stderr is left on the console: under Windows PowerShell 5.1 a
+# redirected native stderr line becomes an error record, which the caller's Stop preference would throw on.
+function Invoke-GoPdbReader([string] $Feed) {
+    $work = Join-Path ([System.IO.Path]::GetTempPath()) ("go-pack-pdbs-" + [System.Guid]::NewGuid().ToString('N').Substring(0, 8))
+    New-Item -ItemType Directory -Path $work | Out-Null
+
     try {
-        $reader = $provider.GetMetadataReader()
-        foreach ($handle in $reader.Documents) {
-            $name = $reader.GetString($reader.GetDocument($handle).Name)
-            if ($name -match '^[A-Za-z]:[\\/]' -or $name -match '^\\\\') { return 'absolute' }
+        $app = Join-Path $work 'check-pack-pdbs.cs'
+        Copy-Item -LiteralPath $script:GoPackPdbReader -Destination $app
+        $lines = @(& dotnet run --file $app -- (Resolve-Path -LiteralPath $Feed).ProviderPath)
+        if ($LASTEXITCODE -ne 0) {
+            $lines | ForEach-Object { Write-Host "  $_" }
+            throw "pack paths: the symbol-file reader failed (exit $LASTEXITCODE)"
         }
-        return 'mapped'
     }
-    finally { $provider.Dispose() }
+    finally { Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue }
+
+    $findings = @{}
+    $read = @()
+
+    foreach ($line in $lines) {
+        if ("$line" -match '^(ABSOLUTE|UNREADABLE)\t([^\t]+)\t(.+)$') {
+            $findings["$($Matches[2]) :: $($Matches[3])"] = if ($Matches[1] -eq 'ABSOLUTE') { 'absolute path' } else { 'symbol file unreadable' }
+        }
+        elseif ("$line" -match '^READ\t(\d+)$') { $read += [int]$Matches[1] }
+    }
+
+    if ($read.Count -ne 1) { throw "pack paths: the symbol-file reader reported no count -- nothing it said can be trusted" }
+    return [pscustomobject]@{ Findings = $findings; Read = $read[0] }
 }
 
-# Why an entry is a finding ('absolute path', 'symbol file unreadable on this PowerShell'), or $null when it is clean.
-function Get-GoEntryPathFinding([byte[]] $Bytes, [bool] $IsSymbolFile) {
+# 'absolute path' when an entry's bytes hold one, read as ASCII and as UTF-16; $null when they do not.
+function Get-GoEntryPathFinding([byte[]] $Bytes) {
     $latin1 = [System.Text.Encoding]::GetEncoding(28591).GetString($Bytes)
     if ($script:GoAbsolutePathPattern.IsMatch($latin1)) { return 'absolute path' }
-
-    if ($IsSymbolFile) {
-        switch (Get-GoPdbDocumentVerdict $Bytes) {
-            'absolute' { return 'absolute path' }
-            'unreadable' { return 'symbol file unreadable on this PowerShell (pack under PowerShell 7)' }
-        }
-    }
 
     foreach ($offset in 0, 1) {
         if ($Bytes.Length - $offset -lt 2) { continue }
@@ -79,6 +93,8 @@ function Get-GoPackagePathLeaks([string] $Feed) {
     if ($nupkgs.Count -eq 0) { throw "pack paths: no .nupkg in '$Feed' -- nothing was read, so nothing can be called clean" }
 
     $findings = New-Object System.Collections.Generic.List[string]
+    $named = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::Ordinal)
+    $symbolFiles = 0
 
     foreach ($nupkg in $nupkgs) {
         $zip = [System.IO.Compression.ZipFile]::OpenRead($nupkg.FullName)
@@ -94,11 +110,22 @@ function Get-GoPackagePathLeaks([string] $Feed) {
                 }
                 finally { $stream.Dispose() }
 
-                $reason = Get-GoEntryPathFinding $buffer.ToArray() ($extension -eq '.pdb')
-                if ($reason) { $findings.Add("$($nupkg.Name) :: $($entry.FullName) ($reason)") }
+                if ($extension -eq '.pdb') { $symbolFiles++ }
+
+                $reason = Get-GoEntryPathFinding $buffer.ToArray()
+                if ($reason -and $named.Add("$($nupkg.Name) :: $($entry.FullName)")) { $findings.Add("$($nupkg.Name) :: $($entry.FullName) ($reason)") }
             }
         }
         finally { $zip.Dispose() }
+    }
+
+    if ($symbolFiles -gt 0) {
+        $pdbs = Invoke-GoPdbReader $Feed
+        if ($pdbs.Read -ne $symbolFiles) { throw "pack paths: the symbol-file reader read $($pdbs.Read) .pdb of the $symbolFiles in the feed" }
+
+        foreach ($key in @($pdbs.Findings.Keys | Sort-Object)) {
+            if ($named.Add($key)) { $findings.Add("$key ($($pdbs.Findings[$key]))") }
+        }
     }
 
     return , $findings.ToArray()
