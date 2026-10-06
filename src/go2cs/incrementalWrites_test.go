@@ -377,3 +377,74 @@ func TestString(t *testing.T) {
 		t.Errorf("an unchanged re-conversion through the fallback rewrote %d of %d .cs files: %v", len(moved), len(sources), moved)
 	}
 }
+
+// A hand-owned file's `.cs.auto` review sibling is written byte-compared BEFORE the package's deferred-marker passes,
+// and in a partly hand-owned package its name joins the files those passes rewrite. A sibling holding a pointer
+// adapter's deferred name (resolved only once the package's GoImplement records are final) therefore never equals the
+// previous run's resolved file at write time: every unchanged re-conversion wrote it, and the marker pass wrote it back
+// to the same bytes. Measured on the -tests footprint: sync/rwmutex.cs.auto (RLocker's rlockerжLocker), byte-identical,
+// its time moved. The marker-bearing .cs sources take remember/restore for exactly this; the sibling did not.
+func TestUnchangedReconversionKeepsMarkerBearingAutoSiblingUntouched(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: loads the fixture package via go/packages")
+	}
+
+	pkgDir, outDir, options := incrementalFixture(t)
+
+	writeModuleFile(t, filepath.Join(pkgDir, "c.go"), `package incr
+
+type Locker interface {
+	Lock()
+	Unlock()
+}
+
+type mutex struct{ held bool }
+
+func (m *mutex) Lock()   { m.held = true }
+func (m *mutex) Unlock() { m.held = false }
+
+func NewLocker() Locker { return &mutex{} }
+`)
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("first conversion: %v", err)
+	}
+
+	// c.cs becomes hand-owned, as sync/rwmutex.cs is: the converter now writes its own emission to the c.cs.auto
+	// review sibling, while a.cs and b.cs stay converted (the partly hand-owned path).
+	handOwned := filepath.Join(outDir, "c.cs")
+	writeModuleFile(t, handOwned, "// c.cs - hand-owned\n[module: go.GoManualConversion]\n\nnamespace go;\n")
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("second conversion: %v", err)
+	}
+
+	sibling := filepath.Join(outDir, "c.cs.auto")
+	content, err := os.ReadFile(sibling)
+
+	if err != nil {
+		t.Fatalf("the hand-owned c.cs produced no review sibling: %v", err)
+	}
+
+	if !strings.Contains(string(content), "mutexжLocker") || strings.Contains(string(content), adapterNameMarkerPrefix) {
+		t.Fatalf("the sibling does not carry the resolved adapter name mutexжLocker, so it no longer exercises the deferred adapter-name marker:\n%s", content)
+	}
+
+	if err := os.Chtimes(sibling, incrementalFixtureStamp, incrementalFixtureStamp); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("third conversion: %v", err)
+	}
+
+	info, err := os.Stat(sibling)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !info.ModTime().Equal(incrementalFixtureStamp) {
+		t.Errorf("an unchanged re-conversion rewrote the marker-bearing c.cs.auto (its time moved to %s)", info.ModTime())
+	}
+}
