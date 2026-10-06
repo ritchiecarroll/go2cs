@@ -59,7 +59,7 @@ internal static partial @string val(this counter c) {
 
 internal static @string fromInit;
 
-[GoInit] internal static partial void init() {
+[MethodImpl(MethodImplOptions.NoInlining)] [GoInit] internal static void init() {
     var (pc, _, _, _) = runtime.Caller(0);
     fromInit = runtime.FuncForPC(pc).Name();
 }

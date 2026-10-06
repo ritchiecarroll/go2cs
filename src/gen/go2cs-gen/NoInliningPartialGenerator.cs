@@ -44,6 +44,15 @@ public static class NoInliningPartials
     public static bool IsCarrier(MethodDeclarationSyntax method, SemanticModel? semanticModel) =>
         IsPartialWithBody(method) &&
         semanticModel?.GetDeclaredSymbol(method) is IMethodSymbol { IsPartialDefinition: false, PartialDefinitionPart: null };
+
+    /// <summary>
+    /// A module initializer (a Go init, <c>[GoInit]</c>) must never be carried: C# runs module
+    /// initializers in declaration order, and a partial method's declaration is its declaring part, so a
+    /// generated declaring part would run the init after every source file's (ruled 2026-10-06). The
+    /// converter writes such a method with the attribute; one written by hand is refused.
+    /// </summary>
+    public static bool IsModuleInitializer(IMethodSymbol method) =>
+        method.GetAttributes().Any(attribute => attribute.AttributeClass?.ToDisplayString() == "System.Runtime.CompilerServices.ModuleInitializerAttribute");
 }
 
 public sealed class NoInliningPartialFinder : ISyntaxReceiver
@@ -88,7 +97,21 @@ public class NoInliningPartialGenerator : ISourceGenerator
         foreach (IGrouping<SyntaxTree, MethodDeclarationSyntax> file in finder.Candidates.GroupBy(method => method.SyntaxTree))
         {
             SemanticModel semanticModel = context.Compilation.GetSemanticModel(file.Key);
-            List<MethodDeclarationSyntax> carriers = file.Where(method => NoInliningPartials.IsCarrier(method, semanticModel)).ToList();
+            List<MethodDeclarationSyntax> carriers = [];
+
+            foreach (MethodDeclarationSyntax method in file.Where(method => NoInliningPartials.IsCarrier(method, semanticModel)))
+            {
+                if (semanticModel.GetDeclaredSymbol(method) is IMethodSymbol symbol && NoInliningPartials.IsModuleInitializer(symbol))
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, method.Identifier.GetLocation(),
+                        $"The no-inline declaring part of module initializer '{method.Identifier.ValueText}'",
+                        "a module initializer runs in declaration order, and a generated declaring part would run it after every source file; write [MethodImpl(MethodImplOptions.NoInlining)] on the method instead of `partial`"));
+
+                    continue;
+                }
+
+                carriers.Add(method);
+            }
 
             if (carriers.Count == 0)
                 continue;

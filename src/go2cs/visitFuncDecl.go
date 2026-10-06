@@ -1372,14 +1372,16 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// into the one compiled method (owner ruling 2026-10-06, docs/PLAN-marker-comment-parity.md
 	// section 10). A bodyless declaration above is already the declaring part, so it keeps the
 	// attribute itself, as do lambdas and local functions (litNoInliningPrefix), which cannot be partial.
-	// The runtime package's own init functions are written below as plain never-called methods with
-	// no attribute at all, so they carry no mark in either rendering and are never partial.
+	// An init keeps the attribute too (ruled 2026-10-06): it is a module initializer, and C# runs those
+	// in declaration order, which for a partial method is its DECLARING part's -- a generated file that
+	// sorts after every source file -- so a marked init would run after the package's other inits. The
+	// runtime package's own inits are written below as never-called methods with no attribute at all.
 	runtimeBootstrapInit := isModuleInitializer && v.pkg.Path() == "runtime"
 	noInliningPartial := false
 
 	if funcDecl.Body == nil && !hasLinknameForward {
 		v.replaceMarker(functionPartialMarker, " partial")
-	} else if fnObj := v.info.ObjectOf(funcDecl.Name); fnObj != nil && v.needsNoInlining[fnObj] && !runtimeBootstrapInit {
+	} else if fnObj := v.info.ObjectOf(funcDecl.Name); fnObj != nil && v.needsNoInlining[fnObj] && !isModuleInitializer {
 		noInliningPartial = true
 		v.replaceMarker(functionPartialMarker, " partial")
 	} else {

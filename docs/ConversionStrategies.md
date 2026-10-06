@@ -11091,7 +11091,10 @@ internal static partial @string plain();
 ```
 
 A function literal cannot be `partial`, so a marked literal keeps the attribute itself:
-`var lit = [MethodImpl(MethodImplOptions.NoInlining)] @string () => here();`. A `partial` method with
+`var lit = [MethodImpl(MethodImplOptions.NoInlining)] @string () => here();`. A marked `init` keeps
+the attribute too. C# runs an `init` (a module initializer) in declaration order, and a partial
+method's declaration is the generated half, which comes after every source file, so a `partial`
+`init` would run after the package's other `init` functions. A `partial` method with
 no body is a different case, a function whose body is elsewhere ([Functions Without a Go
 Body](#functions-without-a-go-body)).
 

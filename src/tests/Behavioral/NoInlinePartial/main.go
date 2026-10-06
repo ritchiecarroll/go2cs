@@ -6,8 +6,9 @@
 // tiered compilation off (runtimeconfig.template.json), so the first call is already the optimizing
 // JIT's code and the loop below is not needed to reach it.
 //
-// The func literal and the local function cannot be partial: they keep the attribute themselves, and
-// are here so the fallback is exercised beside the carrier.
+// The func literal and the local function cannot be partial, and init must not be (a module
+// initializer's run order is its declaration's): all three keep the attribute themselves, and are
+// here so the fallback is exercised beside the carrier.
 package main
 
 import (
@@ -54,7 +55,7 @@ func (b *box[T]) get() string { return here() }
 
 var fromInit string
 
-// init is a module initializer as well as a carrier: it asks for its own frame directly.
+// init asks for its own frame directly, and keeps the attribute: see InitOrderNoInline.
 func init() {
 	pc, _, _, _ := runtime.Caller(0)
 	fromInit = runtime.FuncForPC(pc).Name()

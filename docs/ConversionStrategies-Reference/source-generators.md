@@ -116,6 +116,7 @@ that reads the heap profile. How each takes the mark:
 | Declared function or method with a body | `partial` where the `[MethodImpl(MethodImplOptions.NoInlining)] ` prefix stood: `[GoRecv] internal static partial @string ptr(this ref counter c) {` | `NoInliningPartialGenerator` writes the declaring part with the attribute; C# merges the attributes of both parts into the one compiled method |
 | Func literal (lambda) | `[MethodImpl(MethodImplOptions.NoInlining)] @string () => here()` | a lambda has no partial form |
 | Local function (a literal only ever called) | `[MethodImpl(MethodImplOptions.NoInlining)] @string local() {` | a local function has no partial form |
+| `init` | `[MethodImpl(MethodImplOptions.NoInlining)] [GoInit] internal static void initΔ2() {` | C# runs module initializers in declaration order, and a partial method's declaration is its DECLARING part, a generated file that sorts after every source file: a `partial` init ran after the package's other inits (found by G's stacked record, ruled 2026-10-06). The generator refuses a hand-written partial init by name (GO2CS0003, an error) |
 | Declaration with no Go body | `[MethodImpl(MethodImplOptions.NoInlining)] internal static partial … f(…);` | already the declaring part; its body is a `*_impl.cs` companion |
 | The `runtime` package's own `init` functions | neither | they are emitted as never-called methods, `/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */`, with no attribute in either rendering |
 | Hand-owned files | the attribute, written by hand | not converter output |
@@ -127,7 +128,8 @@ same in both renderings and the change to a converted file is exactly the signat
 **What the generator matches.** `NoInliningPartials.IsCarrier`: a `partial` method with a body whose symbol
 has no declaring part (`IsPartialDefinition: false`, `PartialDefinitionPart: null`). A converted bodyless
 declaration plus its `*_impl.cs` body always has a declaring part, so it never matches; neither does a
-method without `partial`.
+method without `partial`. A match that is a module initializer is refused by name (GO2CS0003) and gets no
+declaring part, so the build stays red at that method.
 
 **What it writes.** One `<file>.noinline.g.cs` per source file that holds carriers. The signature is
 copied as text from the implementing part with its attributes, body and the space before the body
@@ -151,7 +153,8 @@ attribute in its compiled metadata.
 **Guards.**
 * GenTests `NoInliningPartialGeneratorTests` compiles the converter's rendering of each carrier shape
   (thin forwarder, `params`, named-tuple result, generic, `this ref` and `this` receivers, a pointer
-  receiver on a generic type, `[GoInit]`, `Main`) and reads `NoInlining` back from the emitted metadata;
+  receiver on a generic type, `Main`) and reads `NoInlining` back from the emitted metadata; checks that
+  a hand-written partial `init` is refused by name;
   checks the declaring part's text; checks that a lambda and a local function keep their own attribute and
   gain nothing, that a hand-owned declaration-plus-body pair gains nothing, that a carrier beside a
   `global using` alias compiles, and that the `ж<T>` overloads of `ptr` and `get<T>` are no-inline while
@@ -160,6 +163,8 @@ attribute in its compiled metadata.
   first call is optimized code, and compares its output with `go run`: every shape prints the frame
   `runtime.Caller` names. Built with a generator that writes the declaring part without the attribute,
   six of its lines (`plain`, `variadic`, `generic`, `ptr`, `val`, `get`) print `main.main` instead.
+* Behavioral `InitOrderNoInline` puts inits in three files, one of them marked by `//go:noinline`, and
+  compares the order they print with `go run`; with the marked init written `partial` it ran last.
 * The converter's frame tests (`noinlineDirective_test.go`, `callerSkipWindowFrames_test.go` and the
   others) read the mark through `keepsOwnFrame` (a ` static partial ` declaration line that ends in a
   body), and `goCreatorFrame_test.go` reads a literal's attribute directly.
