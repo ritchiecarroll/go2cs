@@ -30,7 +30,7 @@ internal static partial nint wrapGrand() {
     return grandLine();
 }
 
-internal static (nint, nint) sameSite() {
+internal static partial (nint, nint) sameSite() {
     return (callerLine(), wrapGrand());
 }
 

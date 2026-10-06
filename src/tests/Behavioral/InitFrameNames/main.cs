@@ -21,7 +21,7 @@ internal static @string viaClosure2 = ((Func<@string>)([MethodImpl(MethodImplOpt
     return here();
 }))();
 
-[GoInit] internal static void initΔ1() {
+[GoInit] internal static partial void initΔ1() {
     fmt.Println((@string)"main.go init 1:"u8, here());
 }
 
