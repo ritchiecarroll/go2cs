@@ -8677,7 +8677,8 @@ var addressTokenPattern = regexp.MustCompile(`0x[0-9a-fA-F]+`)
 // name, keeps all originals — the rows stay one-sided and the comparison fails loud, never
 // masking. csOutputs and csRecords follow the C# rename so disclosure-signature matching keeps its
 // text and a record-count pin its records.
-func pairAddressVariantNames(goResults, csResults, csOutputs map[string]string, csRecords map[string]testRecords) {
+func pairAddressVariantNames(goResults, csResults, csOutputs map[string]string, csRecords map[string]testRecords, goOrder, csOrder map[string]int) addressPairCounts {
+	var counts addressPairCounts
 	goOnly := make(map[string][]string)
 	csOnly := make(map[string][]string)
 
@@ -8727,6 +8728,32 @@ func pairAddressVariantNames(goResults, csResults, csOutputs map[string]string, 
 			delete(csRecords, csNames[0])
 		}
 	}
+
+	return counts
+}
+
+// addressPairCounts is what pairAddressVariantNames re-keyed: OneToOne rows from a group of one name per side, NToN rows
+// from a group of N names per side (N > 1) paired by run order. Published on the comparison record when either is
+// nonzero, so a pairing by run order is never absorbed into the matched count unstated.
+type addressPairCounts struct {
+	OneToOne int `json:"oneToOne"`
+	NToN     int `json:"nToN"`
+}
+
+// testRunOrder is each test's position in a stream: the index of the first event that names it, which is the order the
+// tests started in. It reads both sides' streams (go test -json and the converted host's), as terminalTestResults does.
+func testRunOrder(output string) map[string]int {
+	order := make(map[string]int)
+	for _, line := range testStreamLines(output) {
+		var event normalizedTestEvent
+		if json.Unmarshal([]byte(line), &event) != nil || event.Test == "" {
+			continue
+		}
+		if _, seen := order[event.Test]; !seen {
+			order[event.Test] = len(order)
+		}
+	}
+	return order
 }
 
 // testRecords is one test's log-record list from the converted host's terminal event. Present is
@@ -9429,7 +9456,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 			csResults = eligibleTerminalTestResults(csResults, manifest)
 		}
 	}
-	pairAddressVariantNames(goResults, csResults, csOutputs, csRecords)
+	pairAddressVariantNames(goResults, csResults, csOutputs, csRecords, testRunOrder(goOutput), testRunOrder(csOutput))
 
 	names := make([]string, 0, len(goResults)+len(csResults))
 	seen := hashset.HashSet[string]{}
