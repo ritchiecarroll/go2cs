@@ -123,7 +123,11 @@ The [validated modules](ValidatedModules.md) page is still short.
 > resolved in a future release: an exported alias of an unexported type used from another package
 > (`CS0122`; logrus and testify each have one), a parenthesized type in a type assertion, a
 > function-local pointer type used as a conversion, a defined type over another package's type used as
-> a conversion, and a promoted method with a parameter named `target`.
+> a conversion, and a promoted method with a parameter named `target`. One more is silent rather than
+> a compile error: a method on a named map type that has the name and parameters of a map operation
+> the runtime library also provides (`Add(key, value)`, `Remove(key)`, `Clear()`, `ContainsKey(key)`,
+> and `Send(value)` on a named channel type) loses to the library's member, so the Go method does not
+> run.
 
 ## What "validated" means, and what it doesn't
 
