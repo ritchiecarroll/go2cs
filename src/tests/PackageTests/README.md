@@ -79,6 +79,28 @@ imports the working-tree file explicitly. That is how the gate was read red-firs
 published 1.24.13.1: on Linux both build arms FAIL with CS0426 and the control PASSES. With the file,
 all four arms PASS on both platforms.
 
+# `PublishSymbols`: the symbol files of a second single-file publish
+
+`PublishSymbols` is the consumer fixture for go.lib's `buildTransitive/go.lib.symbols.targets`. A single-file
+publish leaves each referenced assembly's `.pdb` loose beside the executable, but only the bundler names those
+files as published, and a publish that finds its bundle up to date skips the bundler; the SDK's incremental
+publish clean then deletes them. A frame in that assembly prints no file:line from then on. The go.* packages
+ship no `.pdb`, so the fixture's frame lives in its OWN referenced library (`lib/`). `test-publish-symbols.ps1`
+restores it from ONE feed into a fresh package cache and publishes it single-file and self-contained for the
+host's RID into ONE folder, twice, with nothing changed between:
+
+- a green arm: both publishes leave `PublishSymbolsLib.pdb` beside the host and the frame reads `Where.cs:<line>`;
+- a control that proves the arm can fail: with `-p:GoKeepSymbolsLoose=false` the second publish loses the file
+  and the frame reads `:0`.
+
+```text
+pwsh src/tests/PackageTests/PublishSymbols/test-publish-symbols.ps1 -Version <go.lib version> [-Source <feed dir or URL>] [-FallbackFolder <package folder for the runtime pack>]
+```
+
+Read red-first against a go.lib packed from master 40a1f839c5 (2026-10-05, win-x64): the green arm's second
+publish kept only `PublishSymbols.pdb` and printed `:0`, and the control passed. The same happens with no go.lib
+at all: it is the SDK's behaviour for any single-file app with a referenced library.
+
 # `release-smoke.ps1`: consume a feed the way a user does
 
 `release-smoke.ps1 -Feed <dir> -Converter <go2cs> -WorkRoot <dir>` runs four arms against ONE local
