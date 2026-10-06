@@ -31,7 +31,7 @@ private static readonly @string noCallerˢ = "<no caller>"u8;
     return callerName();
 }
 
-internal static @string forward(slice<byte> b, nint i) {
+[MethodImpl(MethodImplOptions.NoInlining)] internal static @string forward(slice<byte> b, nint i) {
     return keeper(b, i);
 }
 
