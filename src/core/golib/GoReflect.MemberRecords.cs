@@ -38,6 +38,15 @@ public static partial class GoReflect
 
                         break;
 
+                    case GoMemberFact.Tag:
+                        if (declaring.GetField(record.Member, DeclaredFields) is null && declaring.GetProperty(record.Member, DeclaredFields) is null)
+                            throw new InvalidOperationException($"go2cs: [GoMemberRecord] on {declaring.FullName} records a struct tag for '{record.Member}', but {declaring.Name} declares no field or embedded-field property of that name");
+
+                        if (record.Value is null)
+                            throw new InvalidOperationException($"go2cs: [GoMemberRecord] on {declaring.FullName} records a struct tag for '{record.Member}' with no tag");
+
+                        break;
+
                     default:
                         throw new InvalidOperationException($"go2cs: [GoMemberRecord] on {declaring.FullName} for '{record.Member}' carries an unknown fact ({(byte)record.Fact})");
                 }
@@ -65,5 +74,20 @@ public static partial class GoReflect
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// The Go struct tag <paramref name="member"/> of <paramref name="declaring"/> carries in the converter's tag
+    /// comment, which go2cs-gen records on the type, or null when there is no such record.
+    /// </summary>
+    internal static string? RecordedTag(Type declaring, string member)
+    {
+        foreach (GoMemberRecordAttribute record in MemberRecords(declaring))
+        {
+            if (record.Fact == GoMemberFact.Tag && record.Member == member)
+                return record.Value;
+        }
+
+        return null;
     }
 }

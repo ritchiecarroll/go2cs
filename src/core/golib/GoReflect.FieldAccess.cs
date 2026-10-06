@@ -284,8 +284,9 @@ public static partial class GoReflect
 
         /// <summary>
         /// The field's raw Go struct TAG, verbatim — <c>asn1:"optional,explicit,tag:0"</c> — or the
-        /// empty string when the field carries none. The converter emits every tagged field's tag as
-        /// <c>[GoTag]</c> at the declaration, so this is the declared text, not a reconstruction.
+        /// empty string when the field carries none. The converter carries every tagged field's tag in a
+        /// comment at the declaration, which go2cs-gen records on the struct (hand-written code may still
+        /// stamp <c>[GoTag]</c>), so this is the declared text, not a reconstruction.
         /// </summary>
         public readonly string Tag;
 
@@ -503,22 +504,25 @@ public static partial class GoReflect
         }
     }
 
-    // The declared Go struct tag of a converted field, or "" when it carries none. The converter
-    // emits `[GoTag("…")]` (aliased to DescriptionAttribute) at every tagged field declaration —
-    // it has done so all along, and until now nothing read it, which is why reflect.StructField.Tag
+    // The declared Go struct tag of a converted field, or "" when it carries none: the field's
+    // `[GoTag("…")]` (aliased to DescriptionAttribute; hand-written code and older converted code), or the
+    // [GoMemberRecord(…, Tag, …)] go2cs-gen writes on the struct from the converter's tag comment
+    // (`public @string Method; /*`json:"method"`*/`). Until the attribute was first read, reflect.StructField.Tag
     // came back empty for every converted struct and every tag-driven decoder saw an untagged type.
     private static string goTagOf(FieldInfo field)
     {
-        return field.GetCustomAttributes(typeof(GoTagAttribute), false) is [GoTagAttribute tag]
-            ? tag.Description
-            : "";
+        if (field.GetCustomAttributes(typeof(GoTagAttribute), false) is [GoTagAttribute tag])
+            return tag.Description;
+
+        return field.DeclaringType is { } declaring ? RecordedTag(declaring, field.Name) ?? "" : "";
     }
 
     // The declared Go struct tag of an EMBEDDED field, which lives at a DIFFERENT declaration site
     // from every other field's and therefore needs its own read.
     //
-    // An embed is emitted by the converter as a partial PROPERTY (`[GoTag("json:\"e,omitempty\"")]
-    // public partial ref ж<Embed0b> Embed0b { get; }`) and by go2cs-gen as the backing FIELD the
+    // An embed is emitted by the converter as a partial PROPERTY (`public partial ref ж<Embed0b> Embed0b
+    // { get; } /*`json:"e,omitempty"`*/`, recorded on the struct by go2cs-gen; `[GoTag]` on the property in
+    // older converted code) and by go2cs-gen as the backing FIELD the
     // property returns a ref to (`private ж<Embed0b> ʗEmbed0b;`). The generator does not carry the
     // declaration's attributes onto the field it mints, so reading the field alone reported EVERY
     // embedded field as untagged — silently, because "" is the right answer for most embeds. The
@@ -526,14 +530,18 @@ public static partial class GoReflect
     // emitted `"Embed0b":{…}` where Go emits `"e":{…}`, and marshalled the `json:"-"` embed it must
     // omit entirely.
     //
-    // The property is the DECLARATION, so it is asked first; the field keeps the fallback so a
-    // future generator that does propagate the attribute needs no change here.
+    // The property is the DECLARATION, so it is asked first (its attribute, then the record naming it);
+    // the field keeps the fallback so a future generator that does propagate the attribute needs no
+    // change here.
     private static string embedTagOf(Type declaringType, FieldInfo field, string goName)
     {
         PropertyInfo? declaration = declaringType.GetProperty(goName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
         if (declaration is not null && declaration.GetCustomAttributes(typeof(GoTagAttribute), false) is [GoTagAttribute tag])
             return tag.Description;
+
+        if (RecordedTag(declaringType, goName) is { } recorded)
+            return recorded;
 
         return goTagOf(field);
     }

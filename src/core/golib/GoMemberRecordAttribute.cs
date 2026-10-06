@@ -14,7 +14,13 @@ namespace go;
 public enum GoMemberFact : byte
 {
     /// <summary>The named field is a Go EMBEDDED field (what <see cref="GoEmbeddedAttribute"/> says).</summary>
-    Embedded = 1
+    Embedded = 1,
+
+    /// <summary>
+    /// The named field, or the partial property that declares an embedded field, carries the Go struct tag in
+    /// <see cref="GoMemberRecordAttribute.Value"/> (what <c>[GoTag]</c> says).
+    /// </summary>
+    Tag = 2
 }
 
 /// <summary>
@@ -35,11 +41,27 @@ public enum GoMemberFact : byte
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true, Inherited = false)]
-public sealed class GoMemberRecordAttribute(string member, GoMemberFact fact) : Attribute
+public sealed class GoMemberRecordAttribute : Attribute
 {
+    /// <summary>Records a fact that carries no value.</summary>
+    public GoMemberRecordAttribute(string member, GoMemberFact fact)
+    {
+        Member = member;
+        Fact = fact;
+    }
+
+    /// <summary>Records a fact with its value.</summary>
+    public GoMemberRecordAttribute(string member, GoMemberFact fact, string value) : this(member, fact)
+    {
+        Value = value;
+    }
+
     /// <summary>The C# name of the member the fact is about.</summary>
-    public string Member { get; } = member;
+    public string Member { get; }
 
     /// <summary>The fact.</summary>
-    public GoMemberFact Fact { get; } = fact;
+    public GoMemberFact Fact { get; }
+
+    /// <summary>The fact's value (a <see cref="GoMemberFact.Tag"/>'s tag), or null for a fact that has none.</summary>
+    public string? Value { get; }
 }
