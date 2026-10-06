@@ -204,11 +204,11 @@ public static class AdapterBinder
 
             if (receiver.IsByRef)
             {
-                // `this ref X` WITHOUT [GoRecv] is a VALUE-set method whose receiver is bound through
-                // a copy (GoTypeExtensions.IsCopyBoundReceiver): the probe counts it for a value
+                // `this ref X` marked [GoCopyBound] is a VALUE-set method whose receiver is bound
+                // through a copy (GoTypeExtensions.IsCopyBoundReceiver): the probe counts it for a value
                 // source, so the shell must bind it, or the two disagree and an assertion Go ACCEPTS
-                // misses — bufio.ReadWriter held by value, asserted to io.Reader. The [GoRecv] form
-                // stays skipped: it is a pointer-receiver method, bound through its ж<X> twin.
+                // misses — bufio.ReadWriter held by value, asserted to io.Reader. Every other by-ref
+                // receiver stays skipped: it is a pointer-receiver method, bound through its ж<X> twin.
                 if (GoTypeExtensions.IsCopyBoundReceiver(candidate, out _))
                     copyBound ??= candidate;
 

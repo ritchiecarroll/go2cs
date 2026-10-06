@@ -169,7 +169,7 @@ func TestSStringTwinEmission(t *testing.T) {
 		"[GoStr] public static @string Format(sstring format, params ꓸꓸꓸany aʗp) {",
 		"[GoStr] public static nint Count(sstring s) {",
 		"[GoStr] public static @string Mixed(@string prefix, sstring s) {",
-		"[GoStr] [GoRecv] internal static void write(this ref buf b, sstring s) {",
+		"[GoStr] internal static void write(this ref buf b, sstring s) {",
 
 		// the sstring gaps the pilot closes: range and spread over the view
 		"foreach ((_, _) in s) {",

@@ -824,7 +824,7 @@ public static class StructDeclarationSyntaxExtensions
 
     /// <summary>
     /// Ref-receiver counterpart to <see cref="GetBoxReceiverMethodNamesBySimpleName"/>: gets the
-    /// names of <c>[GoRecv]</c>-style ref extension methods (<c>static M(this ref T, …)</c>)
+    /// names of pointer-receiver ref extension methods (<c>static M(this ref T, …)</c>)
     /// declared anywhere in the CURRENT compilation whose receiver's simple type name matches
     /// <paramref name="simpleTypeName"/>.
     /// </summary>

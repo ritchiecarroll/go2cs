@@ -359,7 +359,7 @@ public class ImplementGenerator : ISourceGenerator
 
             // A referenced PRODUCTION struct can gain methods from the current compilation's friend
             // bridge — an internal white-box test package declaring `marshal(this ж<T>)` or
-            // `[GoRecv] unmarshal(this ref T, …)` for a production T reachable through the test
+            // `unmarshal(this ref T, …)` for a production T reachable through the test
             // model's InternalsVisibleTo grant. The declaration discovery above hands back
             // (null, null) for exactly that shape, so the local-implementation EVIDENCE must come
             // from a compilation-wide scan, in EVERY receiver form the local path counts (the ref
@@ -575,7 +575,7 @@ public class ImplementGenerator : ISourceGenerator
 
                 foreach (MethodInfo structMethod in structMethods ?? [])
                 {
-                    // A [GoRecv] ref extension has a RecvGenerator ж-twin that binds on the box;
+                    // A pointer-receiver ref extension has a RecvGenerator ж-twin that binds on the box;
                     // a plain value-receiver method needs the deref'd value (Go copies at the call).
                     forwardReceivers[structMethod.Name] = structMethod.IsRefRecv ? "m_box" : "m_box.Value";
                 }
@@ -592,7 +592,7 @@ public class ImplementGenerator : ISourceGenerator
                 // whatever qualification its own file needs (`this ж<Replacer>` via an imported
                 // alias, but `this ж<global::go.sync_package.poolChain>` once a `go/*` package in
                 // the closure shadows the root namespace), never one fixed display form. A bridge
-                // [GoRecv] ref extension binds the box through its RecvGenerator ж-twin, exactly as
+                // pointer-receiver ref extension binds the box through its RecvGenerator ж-twin, exactly as
                 // IsRefRecv routes the local form above.
                 if (structDecl is null)
                 {
@@ -635,7 +635,7 @@ public class ImplementGenerator : ISourceGenerator
                             boxBound.Add(method.Name);
                         }
 
-                        // A [GoRecv] ref extension called STATICALLY needs the ref keyword.
+                        // A pointer-receiver ref extension called STATICALLY needs the ref keyword.
                         if (method.DeclaredAccessibility == Accessibility.Public &&
                             method.Parameters[0].RefKind == RefKind.Ref &&
                             IsForeignReceiverOf(method.Parameters[0].Type, structType))
@@ -665,7 +665,7 @@ public class ImplementGenerator : ISourceGenerator
                         // receiver (CS1929). The bridge scan already bound it to the box; keep that.
                         // sync's export_test.go declares PushHead/PopTail on the production
                         // `*poolDequeue`/`*poolChain`, which is exactly this shape — and the ref
-                        // form (crypto/tls's `[GoRecv] unmarshal(this ref SessionState, …)`) binds
+                        // form (crypto/tls's `unmarshal(this ref SessionState, …)`) binds
                         // the box through its RecvGenerator ж-twin the same way.
                         if (bridgeBoxMethods.Contains(simpleName) || bridgeRefMethods.Contains(simpleName))
                             continue;
@@ -1609,7 +1609,7 @@ public class ImplementGenerator : ISourceGenerator
 
     /// <summary>
     /// Decides whether a foreign package-class extension's FIRST parameter names the struct under
-    /// adaptation — the box form's <c>ж&lt;T&gt;</c> argument, or a <c>[GoRecv]</c> ref extension's
+    /// adaptation — the box form's <c>ж&lt;T&gt;</c> argument, or a pointer-receiver ref extension's
     /// receiver.
     /// </summary>
     /// <remarks>

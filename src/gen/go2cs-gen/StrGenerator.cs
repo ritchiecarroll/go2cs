@@ -30,7 +30,7 @@ namespace go2cs;
 //     this field at every func-value site. Its lambda records the Go name ([GoTwinForwarder]) for
 //     GoNameOf / FuncForPC, and its body is an ordinary call that binds the body member.
 //
-// A [GoRecv] twin needs no ж overload for its forwarder: RecvGenerator gives the visible body member
+// A pointer-receiver twin needs no ж overload for its forwarder: RecvGenerator gives the visible body member
 // one, and a pointer-receiver call with an @string argument binds it through the implicit view. (It
 // could not anyway: a source generator never sees another generator's output.) The forwarder carries
 // [GeneratedCode], so a traceback skips it exactly as it skips RecvGenerator's forwarders.

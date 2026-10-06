@@ -1,13 +1,17 @@
 # Copy-bound promoted forwarders in the converted standard library.
 #
-# Each row is a generated `this ref <struct>` forwarder WITHOUT [GoRecv]: a POINTER-receiver method promoted through
-# an embed path that crosses a POINTER, which Go places in the outer type's VALUE method set. golib binds it through
-# a copy of the receiver (TypeExtensions.IsCopyBoundReceiver). A forwarder whose path holds value embeds only is a
-# pointer-set method and carries [GoRecv]; it must never appear here.
+# Each row is a generated `this ref <struct>` forwarder marked [GoCopyBound]: a POINTER-receiver method promoted
+# through an embed path that crosses a POINTER, which Go places in the outer type's VALUE method set. golib binds it
+# through a copy of the receiver (TypeExtensions.IsCopyBoundReceiver). A forwarder whose path holds value embeds only
+# is a pointer-set method and carries [GoRecv]; it must never appear here.
 #
 # Every row was classified VALUE independently, from the Go sources with go/types under the corpus build tags, for
-# each target OS in its fourth column. CopyBoundReceiverAllowlistTests fails on a by-ref receiver without [GoRecv]
-# that is not listed.
+# each target OS in its fourth column. CopyBoundReceiverAllowlistTests fails on a [GoCopyBound] receiver that is not
+# listed, and on a listed receiver that is not marked: an unmarked by-ref receiver is read as POINTER-set.
+#
+# Until face lift A (docs/PLAN-marker-comment-parity.md, 5.1) a row was the forwarder WITHOUT [GoRecv], and golib
+# read every unmarked by-ref receiver as copy-bound. A inverted the default: converted code writes no [GoRecv], so the
+# value-set forwarder is the one that carries a mark. The rows themselves did not change.
 #
 # Population, measured on the generated sources of go2cs-stdlib.slnx: 693 by-ref forwarders on windows, 492 in a
 # pointer set ([GoRecv]) and 201 in a value set (listed); 493 + 197 on linux; 493 + 201 on darwin.

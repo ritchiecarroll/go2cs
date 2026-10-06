@@ -20,7 +20,7 @@ import (
 
 const StructPrefixMarker = ">>MARKER:STRUCT_%s_PREFIX<<"
 
-// promotedInterfaceForwarder is one `[GoRecv]` extension a DUAL-embed struct owes: a method the
+// promotedInterfaceForwarder is one pointer-receiver extension a DUAL-embed struct owes: a method the
 // struct's *T method set obtains ONLY through an embedded-interface field (the pointer-only
 // satisfaction arm below). Collected during the embed walk, emitted right after the struct's
 // declaration closes.
@@ -762,7 +762,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					// value-form Promoted record would be an OVER-CLAIM here — a VALUE stored into
 					// `any` would assert true where Go says false (measured on the three-arm probe,
 					// 2026-09-02) — so this arm mints the POINTER-form record instead, and emits a
-					// `[GoRecv]` forwarder below for each method only the interface field provides,
+					// `this ref` forwarder below for each method only the interface field provides,
 					// which is what lets go2cs-gen's existing pointer-record adapter compose (under
 					// the record alone the ImplementGenerator emitted NOTHING for the pair, silently
 					// — the missing extension surface was why). Dispatch then matches Go: the box
@@ -1139,7 +1139,7 @@ func (v *Visitor) structZeroValueNeedsConstructionRec(t types.Type, seen map[*ty
 	return false
 }
 
-// emitPromotedInterfaceForwarders writes the `[GoRecv]` extensions collected since mark — one per
+// emitPromotedInterfaceForwarders writes the pointer-receiver extensions collected since mark — one per
 // method a DUAL-embed struct's *T method set obtains ONLY through an embedded-interface field —
 // immediately after the struct declaration, so the extension surface is complete before go2cs-gen
 // composes the pointer-form adapter the arm's `GoImplement<T, Iface>(Pointer = true)` record asks
@@ -1221,7 +1221,9 @@ func (v *Visitor) emitPromotedInterfaceForwarders(target *strings.Builder, mark 
 			// is a value method — the generator's own Promoted-path extension form.
 			v.writeStringLn(target, "%s static %s %s(this %s recvᴛ%s) => recvᴛ.%s.%s(%s);", access, resultType, methodName, fwd.structName, params.String(), fwd.embedName, methodName, args.String())
 		} else {
-			v.writeStringLn(target, "[GoRecv] %s static %s %s(this ref %s recvᴛ%s) => recvᴛ.%s.%s(%s);", access, resultType, methodName, fwd.structName, params.String(), fwd.embedName, methodName, args.String())
+			// `this ref` is the pointer-receiver shape: golib reads an unmarked by-ref receiver as a
+			// POINTER-set method (docs/PLAN-marker-comment-parity.md, 5.1).
+			v.writeStringLn(target, "%s static %s %s(this ref %s recvᴛ%s) => recvᴛ.%s.%s(%s);", access, resultType, methodName, fwd.structName, params.String(), fwd.embedName, methodName, args.String())
 		}
 	}
 

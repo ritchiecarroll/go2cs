@@ -1408,9 +1408,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		} else {
 			v.replaceMarker(functionAttributeMarker, forwarderPrefix+v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name))+"[GoInit] ")
 		}
-	} else if strings.HasPrefix(parameterSignature, "this ref ") {
-		v.replaceMarker(functionAttributeMarker, forwarderPrefix+twinMarker+v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name))+"[GoRecv] ")
 	} else {
+		// A Go pointer receiver is emitted `this ref T` (getRefParameterTypeName) and carries no
+		// mark: golib's method-set readers, RecvGenerator and TypeGenerator all read an unmarked
+		// by-ref receiver as a POINTER-set method (docs/PLAN-marker-comment-parity.md, 5.1). Only a
+		// generated forwarder that is VALUE-set while by-ref is marked, [GoCopyBound].
 		v.replaceMarker(functionAttributeMarker, forwarderPrefix+twinMarker+v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name)))
 	}
 

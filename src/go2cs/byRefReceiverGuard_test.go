@@ -19,19 +19,19 @@ import (
 	"testing"
 )
 
-// byRefReceiverHelpers is the ALLOWLIST of committed extension methods that take their receiver by
-// reference WITHOUT [GoRecv] and are not Go methods at all. golib binds any other such method as a Go
-// VALUE-receiver method through a copy of its receiver (TypeExtensions.IsCopyBoundReceiver), so a
-// by-ref receiver that is really a Go pointer-receiver method must say so with [GoRecv], or reflect
-// counts a method Go does not have and calls it on a copy. Each entry is tagged with the class that
-// keeps it out of every Go method set: its receiver is no Go type, or its name is not exported.
+// byRefReceiverHelpers is the ALLOWLIST of committed hand-written extension methods that take their
+// receiver by reference with neither mark and are not Go methods at all. golib reads every other
+// unmarked by-ref receiver as a Go POINTER-receiver method (TypeExtensions.IsPointerSetByRefReceiver),
+// so a hand-written by-ref receiver says what it is: [GoRecv] for a pointer receiver (hand-written
+// files keep the attribute; docs/PLAN-marker-comment-parity.md, 5.1), [GoCopyBound] for a VALUE-set
+// method, or an entry here. Each entry is tagged with the class that keeps it out of every Go method
+// set: its receiver is no Go type, or its name is not exported.
 var byRefReceiverHelpers = map[string]struct {
 	count int
 	class string
 }{
-	"golib/builtin.cs\tToUTF8Bytes":        {1, "span receiver (ReadOnlySpan<rune> is a ref struct, never a Go dynamic type)"},
-	"golib/slice.cs\tslice":                {4, "golib slicing helper (`in slice<T>`; the name is unexported, so no method table lists it)"},
-	"runtime/arena_impl.cs\tuserArenaKeep": {1, "hand-owned runtime helper with no Go counterpart (private, unexported)"},
+	"golib/builtin.cs\tToUTF8Bytes": {1, "span receiver (ReadOnlySpan<rune> is a ref struct, never a Go dynamic type)"},
+	"golib/slice.cs\tslice":         {4, "golib slicing helper (`in slice<T>`; the name is unexported, so no method table lists it)"},
 }
 
 // The declaration test reads PAST any parenthesis before the receiver: a tuple return type
@@ -40,19 +40,44 @@ var byRefReceiverHelpers = map[string]struct {
 var (
 	byRefReceiverDecl = regexp.MustCompile(`\bstatic\b.*\(this (?:ref|in) `)
 	byRefReceiverName = regexp.MustCompile(`([\pL_@][\pL\pN_@]*)\s*(?:<[^>(]*>)?\s*\(this (?:ref|in) `)
+	manualConversion  = regexp.MustCompile(`(?m)^\s*\[module:\s*(?:go\.)?GoManualConversion`)
 )
 
-// TestByRefReceiversCarryGoRecv reads the COMMITTED corpus (production, test and hand-owned files alike)
-// and requires every `this ref` / `this in` extension receiver to carry [GoRecv], on its own line or on
-// the attribute line directly above, unless it is one of the allowlisted helpers. The generated
-// promoted-method forwarders are not committed; their rule is the generator's (TypeGenerator stamps
-// [GoRecv] on a `this ref` forwarder exactly when its embed path holds no pointer hop), proved by the
-// PromotedPtrMethodValueSet behavioral test and golib's CopyBoundReceiverTests.
-func TestByRefReceiversCarryGoRecv(t *testing.T) {
+// isHandWritten reports whether a committed file under src/core is hand-owned rather than converted:
+// golib, unsafe and the hand-owned testing package, an `*_impl.cs` companion, or a whole-file
+// `[module: GoManualConversion]` replacement.
+func isHandWritten(rel string, data []byte) bool {
+	first, rest, _ := strings.Cut(rel, "/")
+
+	switch {
+	case first == "golib" || first == "unsafe":
+		return true
+	case first == "testing" && !strings.Contains(rest, "/"):
+		return true
+	case strings.HasSuffix(rel, "_impl.cs"):
+		return true
+	}
+
+	return manualConversion.Match(data)
+}
+
+// TestByRefReceiversFollowTheReceiverRule reads the COMMITTED corpus (production, test and hand-owned
+// files alike) and holds both halves of face lift A's receiver rule:
+//   - CONVERTED code carries no [GoRecv] and no [GoCopyBound]: a Go pointer receiver is `this ref T`
+//     and nothing more (the converter's own rendering is pinned by
+//     TestPointerReceiversAreEmittedByRefWithNoMark);
+//   - a HAND-WRITTEN `this ref` / `this in` receiver carries [GoRecv] or [GoCopyBound], on its own line
+//     or on the attribute line directly above, unless it is one of the allowlisted helpers.
+//
+// The generated promoted-method forwarders are not committed; their rule is the generator's
+// (TypeGenerator marks a `this ref` forwarder [GoCopyBound] exactly when its embed path holds a pointer
+// hop), proved by the PromotedPtrMethodValueSet behavioral test and golib's CopyBoundReceiverTests.
+func TestByRefReceiversFollowTheReceiverRule(t *testing.T) {
 	coreDir := filepath.Join("..", "core")
 
 	found := map[string][]string{}
-	marked, scanned := 0, 0
+	var convertedMarks []string
+	handMarked, convertedByRef, scanned := 0, 0, 0
 
 	err := filepath.WalkDir(coreDir, func(filePath string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -83,6 +108,7 @@ func TestByRefReceiversCarryGoRecv(t *testing.T) {
 
 		rel, _ := filepath.Rel(coreDir, filePath)
 		rel = filepath.ToSlash(rel)
+		handWritten := isHandWritten(rel, data)
 		previous := ""
 
 		for index, line := range strings.Split(string(data), "\n") {
@@ -92,9 +118,23 @@ func TestByRefReceiversCarryGoRecv(t *testing.T) {
 				continue
 			}
 
-			if byRefReceiverDecl.MatchString(line) {
-				if strings.Contains(line, "GoRecv") || (strings.HasPrefix(previous, "[") && strings.Contains(previous, "GoRecv")) {
-					marked++
+			code, _, _ := strings.Cut(line, "//")
+
+			if !handWritten {
+				if strings.Contains(code, "[GoRecv") || strings.Contains(code, "GoRecv]") || strings.Contains(code, "GoCopyBound") {
+					convertedMarks = append(convertedMarks, rel+":"+strconv.Itoa(index+1))
+				}
+
+				if byRefReceiverDecl.MatchString(line) {
+					convertedByRef++
+				}
+			} else if byRefReceiverDecl.MatchString(line) {
+				marked := func(text string) bool {
+					return strings.Contains(text, "GoRecv") || strings.Contains(text, "GoCopyBound")
+				}
+
+				if marked(line) || (strings.HasPrefix(previous, "[") && marked(previous)) {
+					handMarked++
 				} else {
 					name := "?"
 
@@ -119,10 +159,15 @@ func TestByRefReceiversCarryGoRecv(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// A guard that read nothing would pass on an empty corpus: the [GoRecv] population is in the thousands,
-	// and every allowlisted helper must still be where the list says it is.
-	if scanned < 4000 || marked < 4000 {
-		t.Fatalf("the guard read %d files and %d [GoRecv] by-ref receivers: too few to be the corpus", scanned, marked)
+	// A guard that read nothing would pass on an empty corpus: the converted pointer receivers are in
+	// the thousands and the hand-written [GoRecv] receivers in the hundreds, and every allowlisted
+	// helper must still be where the list says it is.
+	if scanned < 4000 || convertedByRef < 4000 || handMarked < 100 {
+		t.Fatalf("the guard read %d files, %d converted by-ref receivers and %d marked hand-written ones: too few to be the corpus", scanned, convertedByRef, handMarked)
+	}
+
+	for _, site := range convertedMarks {
+		t.Errorf("converted code carries a receiver mark: %s -- a Go pointer receiver is emitted `this ref T` unmarked; re-convert the package", site)
 	}
 
 	var keys []string
@@ -137,7 +182,7 @@ func TestByRefReceiversCarryGoRecv(t *testing.T) {
 		helper, allowed := byRefReceiverHelpers[key]
 
 		if !allowed {
-			t.Errorf("by-ref receiver without [GoRecv], not an allowlisted helper: %s -- a Go pointer-receiver method must carry [GoRecv]; golib would otherwise bind it through a COPY as a value-receiver method",
+			t.Errorf("hand-written by-ref receiver with neither [GoRecv] nor [GoCopyBound], not an allowlisted helper: %s -- golib reads it as a POINTER-receiver method; say which it is",
 				strings.Join(found[key], ", "))
 			continue
 		}
@@ -153,5 +198,6 @@ func TestByRefReceiversCarryGoRecv(t *testing.T) {
 		}
 	}
 
-	t.Logf("scanned %d files: %d by-ref receivers carry [GoRecv], %d allowlisted helper names", scanned, marked, len(found))
+	t.Logf("scanned %d files: %d converted by-ref receivers, %d marked hand-written by-ref receivers, %d converted marks, %d allowlisted helper names",
+		scanned, convertedByRef, handMarked, len(convertedMarks), len(found))
 }

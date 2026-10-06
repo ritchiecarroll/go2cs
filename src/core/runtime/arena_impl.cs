@@ -98,7 +98,7 @@ partial class runtime_package
         System.Type elem = userArenaManagedType(Ꮡtyp);
         object box = GoReflect.NewPointerBox(elem, GoReflect.ZeroValueOf(elem, Ꮡtyp.Value.arrayDims));
 
-        a.userArenaKeep(box, box, Ꮡtyp.Value.Size_);
+        userArenaKeep(ref a, box, box, Ꮡtyp.Value.Size_);
         return (INilPointer)box;
     }
 
@@ -130,7 +130,7 @@ partial class runtime_package
 
         // A zero-size element allocates nothing (Go hands back zerobase), and neither does cap 0.
         if (cap > 0 && (~et).Size_ != 0) {
-            a.userArenaKeep(slice, userArenaSliceReferent(slice), (~et).Size_ * (uintptr)cap);
+            userArenaKeep(ref a, slice, userArenaSliceReferent(slice), (~et).Size_ * (uintptr)cap);
         }
 
         if (sl is not IUntypedSlotAccess slot || !slot.TryStoreThrough(slice)) {
@@ -200,7 +200,7 @@ partial class runtime_package
 
     // userArenaKeep records one allocation: kept alive by the arena's list, and a member for Clone.
     // Over userArenaChunkMaxAllocBytes Go allocates from the heap instead, so neither applies.
-    private static void userArenaKeep(this ref userArena a, object allocation, object? referent, uintptr size)
+    private static void userArenaKeep(ref userArena a, object allocation, object? referent, uintptr size)
     {
         if (size > userArenaChunkMaxAllocBytes) {
             return;

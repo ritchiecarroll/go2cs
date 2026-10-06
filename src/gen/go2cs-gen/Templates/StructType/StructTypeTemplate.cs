@@ -1085,12 +1085,15 @@ internal class StructTypeTemplate : TemplateBase
                 // method. Through VALUE embeds only, the method is in the enclosing type's pointer set
                 // alone, so the forwarder says so with [GoRecv] — exactly what its source carries —
                 // and the run-time method set (GetGoMethodSetCandidates) leaves it out of the value
-                // set. Unmarked, it read as a VALUE-receiver method: reflect counted a method Go does
-                // not have and an interface assertion Go rejects succeeded. Through a POINTER embed
-                // the method IS in the value set, so that forwarder stays unmarked and golib binds
-                // it through a copy of the receiver (TypeExtensions.IsCopyBoundReceiver). The pointer
-                // forwarder below is the form every pointer-set consumer binds, in both cases.
-                string goRecv = method.IsRefRecv && !method.PathHasPointer ? "[global::go.GoRecv] " : "";
+                // set. Unmarked, it once read as a VALUE-receiver method: reflect counted a method Go
+                // does not have and an interface assertion Go rejects succeeded. Through a POINTER
+                // embed the method IS in the value set, so that forwarder is
+                // marked [GoCopyBound] and golib binds it through a copy of the receiver
+                // (TypeExtensions.IsCopyBoundReceiver): a by-ref receiver is otherwise read as a
+                // pointer-set method, since converted code no longer writes [GoRecv]
+                // (docs/PLAN-marker-comment-parity.md, 5.1). The pointer forwarder below is the form
+                // every pointer-set consumer binds, in both cases.
+                string goRecv = !method.IsRefRecv ? "" : method.PathHasPointer ? "[global::go.GoCopyBound] " : "[global::go.GoRecv] ";
 
                 result.Append($"\r\n    {goRecv}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{StructName} target");
 
@@ -1209,7 +1212,7 @@ internal class StructTypeTemplate : TemplateBase
     // "a metadata embed promotes FIELDS only") — minting cross-package forwarders here would be a
     // corpus-wide generated-code change this deliberately is not. What it serves is the `-tests`
     // reference model's white-box shape: net's resolvConfTest embeds *resolverConfig, whose
-    // init (box primary) and tryAcquireSema/releaseSema ([GoRecv] ref) live in the referenced
+    // init (box primary) and tryAcquireSema/releaseSema (pointer-receiver ref) live in the referenced
     // production assembly and are reachable through the friend grant, so Go's same-package
     // promotion must survive the assembly seam. Transitive promotion through the metadata type's
     // own embeds is not chased, matching the field scan's documented single-hop stance.
@@ -1368,7 +1371,7 @@ internal class StructTypeTemplate : TemplateBase
             (isBoxReceiver ? boxMethods : valueMethods).Add(info with { IsCrossPackage = isCross });
         }
 
-        // ONE Go method, TWO metadata members: a `[GoRecv]` value-receiver method (`this ref T`) is
+        // ONE Go method, TWO metadata members: a pointer-receiver method's `this ref T` form is
         // compiled beside the pointer twin RecvGenerator emits for it (`M(this ж<T>)`,
         // [GeneratedCode]), and a POINTER embed harvests both lists -- so the count pass saw the name
         // twice at one depth, read it as ANNIHILATED inside the embed, and emitted no forwarder at all.
