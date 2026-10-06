@@ -89,4 +89,7 @@
     <Using Include="go" />
     <Using Include="go.builtin" Static="true" />
   </ItemGroup>
+
+  <!-- The symbol files beside a single-file host, on every publish (see the file). -->
+  <Import Project="$(MSBuildThisFileDirectory)go.lib.symbols.targets" Condition="'$(GoLibSymbolsTargetsImported)' != 'true'" />
 </Project>
