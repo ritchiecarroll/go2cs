@@ -201,9 +201,18 @@ if ($Aot) {
         Clear-Build
         $out = Join-Path $work 'out-aot'
         [void](Invoke-Dotnet 'AOT' (@('publish', $project, '-c', 'Release', '-r', $rid, '-p:PublishAot=true', '-o', $out) + $common))
-        $line = Get-FrameLine (& (Join-Path $out $exe) 2>&1)
-        Write-Host "    AOT: $line :: .pdb in the output: $((@(Get-ChildItem $out -Filter '*.pdb' -File | ForEach-Object Name) | Sort-Object) -join ', ')"
-        return 'PASS (AOT publish succeeded)'
+        $run = @(& (Join-Path $out $exe) 2>&1 | ForEach-Object { "$_" })
+        $code = $LASTEXITCODE
+        $line = Get-FrameLine $run
+        Write-Host "    AOT: exit $code :: $line :: .pdb in the output: $((@(Get-ChildItem $out -Filter '*.pdb' -File | ForEach-Object Name) | Sort-Object) -join ', ')"
+        # The executable must RUN and print its frame line. A file:line is not required: what Native AOT resolves for a
+        # frame is printed, not judged. Before go.lib set TrimMode=partial, a consumer's AOT executable died at type
+        # initialization (exit 2) and printed no line at all.
+        if ($code -ne 0 -or $line -notlike 'PACKAGE-SYMBOLS:*') {
+            $why = @($run | Where-Object { $_ -match 'Exception' } | Select-Object -First 2) -join ' / '
+            return "FAIL (AOT): the Native AOT executable did not run to its frame line (exit $code$(if ($why) { "; $why" }))"
+        }
+        return "PASS (AOT): $line"
     }
 }
 
