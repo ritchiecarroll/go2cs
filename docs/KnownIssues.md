@@ -65,3 +65,42 @@ dotnet publish -p:PublishProfile=win-x64
 
 The step is needed before every publish, because the next unchanged publish removes the files again. A
 publish after a source change rebuilds the single file as well.
+
+## A hand-written project that references the packages fails at startup when published with Native AOT
+
+<!-- Measured 2026-10-06 against go.* 1.24.13.4 from nuget.org by C1 (mailbox bdfb01d50d, d543355364,
+     3ae3f16305): a C# consumer of go.lib, go.runtime and go.sort, 31 go.* assemblies in its closure, linux-x64.
+     With no trim mode of its own and PublishAot: exit 2 at startup, TypeInitializationException over an
+     InvalidOperationException from internal/cpu's initialiser ("... occupies 32 bytes and reports no instance
+     fields -- its field metadata was removed, most likely by trimming"). The same with TrimMode=full. With the
+     trim mode set to partial in its own project file: the publish ended after 2 h 24 min on a 4-core, 15 GB
+     machine (about 70 min inside a hosted CI leg, run 37495989079), the executable ran (exit 0) and was 249 MB.
+     A trimmed non-AOT publish (PublishTrimmed, self-contained, no trim mode) ran. A converted project is not
+     affected: src/go2cs/csproj-template.xml sets the mode. The fix for the failure is the seat
+     claude/c1-golib-trim-default (go.lib's packed targets set the template's default when the consumer set
+     none); delete the failure half of this section when a release carries it. The compile time stays until the
+     runtime library's reflection is annotated for a full trim (the IL trim warning rows on the BOARD). -->
+
+A project that go2cs converts is not affected: its generated project file sets `TrimMode` to `partial`. This
+is about a C# project you write yourself that references the `go.*` packages from NuGet and publishes with
+Native AOT (`PublishAot`).
+
+Such a project gets the .NET SDK's own default for Native AOT, a full trim. A full trim removes field
+metadata that the converted Go runtime reads by reflection, and the published executable stops at startup
+with a `TypeInitializationException`. Its inner message says that a type "reports no instance fields" and
+that its field metadata was removed by trimming. `dotnet run`, a framework-dependent publish, a
+self-contained publish and a trimmed publish without Native AOT (`PublishTrimmed`) all run correctly.
+
+**To avoid it**, set the trim mode in your own project file:
+
+```xml
+<PropertyGroup>
+  <TrimMode>partial</TrimMode>
+</PropertyGroup>
+```
+
+**What that costs.** With `partial`, Native AOT compiles every `go.*` assembly the program references in
+full, not only the parts the program uses. For a small program that references about thirty of them, the
+publish took a little over an hour on a CI runner and more than two hours on a four-core machine, and the
+executable was about 250 MB. A converted project pays the same cost, because it uses the same setting. A
+build, `dotnet run` and a publish without Native AOT are not affected.
