@@ -69,6 +69,11 @@ on:
         default: 10.0.x
         options:
           - 10.0.x
+      published_version:
+        description: 'release-smoke only: a go.* version ALREADY on nuget.org (e.g. 1.24.13.4). Blank packs this tree and consumes that pack (the pre-publish gate). Set, it skips the pack and every leg restores that version from nuget.org: the post-publish smoke.'
+        type: string
+        required: false
+        default: ''
       run_timeout:
         description: 'Per-program RUN budget in seconds for the behavioral stages (GO2CS_RUN_TIMEOUT), 1-1800. Blank takes 120, the budget every stage used before this input existed. Raise it to tell a slow program on the 3-core macos-15 runner from a real hang: a NOT MEASURED (timeout) row says only that the budget expired. A large value on behavioral-full can exceed that stage''s job budget.'
         type: string
@@ -115,6 +120,7 @@ jobs:
       filter: ${{ steps.derive.outputs.filter }}
       dotnet: ${{ steps.derive.outputs.dotnet }}
       run-timeout: ${{ steps.derive.outputs.run-timeout }}
+      published-version: ${{ steps.derive.outputs.published-version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -128,6 +134,7 @@ jobs:
           INPUT_FILTER: ${{ inputs.filter }}
           INPUT_DOTNET: ${{ inputs.dotnet }}
           INPUT_RUN_TIMEOUT: ${{ inputs.run_timeout }}
+          INPUT_PUBLISHED_VERSION: ${{ inputs.published_version }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           $ErrorActionPreference = 'Stop'
@@ -162,6 +169,15 @@ jobs:
               throw "run_timeout must be a whole number of seconds from 1 to 1800; got '$runTimeout'."
           }
           Write-Host "behavioral run budget: $runTimeout s per program"
+
+          # The post-publish smoke: a version nuget.org already serves. Only release-smoke reads it, and a malformed
+          # value FAILS the plan by name rather than reaching a restore as a version nothing serves.
+          $publishedVersion = if ($env:EVENT_NAME -eq 'schedule') { '' } else { "$env:INPUT_PUBLISHED_VERSION".Trim() }
+          if ($publishedVersion) {
+              if ($env:INPUT_STAGE -ne 'release-smoke') { throw "published_version applies to stage release-smoke only; got stage '$($env:INPUT_STAGE)'." }
+              if ($publishedVersion -notmatch '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$') { throw "published_version must be a four-part go.* version such as 1.24.13.4; got '$publishedVersion'." }
+              Write-Host "release-smoke: post-publish, go.* $publishedVersion from nuget.org (no pack)"
+          }
 
           $env:INPUT_GOOS = $goos
           $env:INPUT_STAGE = $stage
@@ -274,6 +290,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "filter=$filter" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dotnet=$dotnet" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "run-timeout=$runTimeout" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "published-version=$publishedVersion" -Encoding utf8
 
   # ---------------------------------------------------------------------------------------------
   # pack — release-smoke only: the release's own pack, as a rehearsal, on a hosted Windows runner.
@@ -286,7 +303,8 @@ jobs:
   # `powershell`, and the script declares 5.1.
   pack:
     needs: plan
-    if: needs.plan.outputs.stage == 'release-smoke'
+    # The post-publish smoke (published_version set) restores from nuget.org and packs nothing.
+    if: needs.plan.outputs.stage == 'release-smoke' && needs.plan.outputs.published-version == ''
     runs-on: windows-latest
     # PROVISIONAL: three Release build+pack passes of the whole stdlib solution on a 4-core runner
     # (the i7 measures ~17 min per pass); never yet run on a hosted runner.
@@ -1260,7 +1278,7 @@ jobs:
       # release-smoke — consume the pack job's feed the way a user does, on this leg's host.
       # -------------------------------------------------------------------------------------
       - name: Release smoke — download the feed
-        if: needs.plan.outputs.stage == 'release-smoke'
+        if: needs.plan.outputs.stage == 'release-smoke' && needs.plan.outputs.published-version == ''
         uses: actions/download-artifact@v5
         with:
           name: release-smoke-feed
@@ -1269,6 +1287,8 @@ jobs:
       - name: Release smoke — rid compile asset, sample, behavioral, walkthrough (measured)
         if: needs.plan.outputs.stage == 'release-smoke'
         shell: pwsh
+        env:
+          PUBLISHED_VERSION: ${{ needs.plan.outputs.published-version }}
         run: |
           $ErrorActionPreference = 'Continue'
 
@@ -1293,7 +1313,10 @@ jobs:
           # (TRAIN O) made x/sys/unix reach libc on a Mac: release-smoke 37155599211 ran it byte-identical to
           # `go run` on both chips. A tree without that seat fails darwin's D, by design.
           $gateWalkthrough = $true
-          & ./src/tests/PackageTests/release-smoke.ps1 -Feed (Join-Path $PWD 'feed') -Converter (Join-Path $PWD "src/go2cs/bin/$exeName") -WorkRoot $work -GateWalkthrough:$gateWalkthrough *>&1 |
+          # Pre-publish: this tree's pack. Post-publish (published_version): the version nuget.org serves.
+          $published = $env:PUBLISHED_VERSION
+          $feedArgs = if ($published) { @{ Feed = 'https://api.nuget.org/v3/index.json'; Version = $published } } else { @{ Feed = (Join-Path $PWD 'feed') } }
+          & ./src/tests/PackageTests/release-smoke.ps1 @feedArgs -Converter (Join-Path $PWD "src/go2cs/bin/$exeName") -WorkRoot $work -GateWalkthrough:$gateWalkthrough *>&1 |
               Tee-Object -FilePath $log
           $smokeExit = $LASTEXITCODE
 

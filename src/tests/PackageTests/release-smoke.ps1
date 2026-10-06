@@ -51,7 +51,10 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$Feed = (Resolve-Path $Feed).Path
+# A URL is a published feed (the post-publish smoke: -Feed https://api.nuget.org/v3/index.json); it carries
+# every version ever shipped, so the version under test must be named.
+if ($Feed -match '^https?://') { if (-not $Version) { throw "-Version is required when -Feed is a URL ($Feed)" } }
+else { $Feed = (Resolve-Path $Feed).Path }
 $Converter = (Resolve-Path $Converter).Path
 New-Item -ItemType Directory -Force $WorkRoot | Out-Null
 $WorkRoot = (Resolve-Path $WorkRoot).Path
