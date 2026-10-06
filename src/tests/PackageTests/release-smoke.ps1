@@ -293,14 +293,15 @@ $walkVerdict = if ($setup -ne 0) { "FAIL (D-walkthrough): the Go side did not se
 #
 # ---- F: the packages' OWN symbol files reach a consumer, measured, never gating ---------------------------------
 # PackageSymbols restores go.sort from this feed and prints a std frame's Go file:line on `dotnet run`, on a first and
-# a second unchanged single-file publish and on a framework-dependent publish; its off switch must print "none"; -Aot
-# adds a Native AOT publish and lists the .pdb it leaves. The packages ship .pdb from the release that ships symbols
+# a second unchanged single-file publish and on a framework-dependent publish; its off switch must print "none". Its
+# Native AOT run is NOT here: under go.lib's TrimMode=partial that publish compiles the whole go.* closure (about 70 min
+# on hosted linux), so it is os-matrix's own aot-smoke stage (COORD ruling 2026-10-06). The packages ship .pdb from the release that ships symbols
 # (owner ruling, 2026-10-06); every earlier release fails RUN, PUBLISH and FDD. Its frame lines are carried in the detail.
 $symbolVerdicts = @()
 foreach ($check in @(
         @{ Name = 'E-publish-symbols'; Dir = 'PublishSymbols'; Script = 'test-publish-symbols.ps1'; Extra = @{} },
         @{ Name = 'E-publish-symbols-aot'; Dir = 'PublishSymbols'; Script = 'test-publish-symbols-aot.ps1'; Extra = @{} },
-        @{ Name = 'F-package-symbols'; Dir = 'PackageSymbols'; Script = 'test-package-symbols.ps1'; Extra = @{ Aot = $true }
+        @{ Name = 'F-package-symbols'; Dir = 'PackageSymbols'; Script = 'test-package-symbols.ps1'; Extra = @{}
            Detail = '^\s+(RUN|PUBLISH [12]|FDD|OFF|AOT): ' })) {
     $checkLog = Join-Path $WorkRoot "$($check.Name).log"
     $extra = $check.Extra

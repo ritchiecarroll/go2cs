@@ -69,7 +69,7 @@ gh workflow run os-matrix.yml -f goos=linux  -f stage=sweep-shard -f filter=comp
 | Input | Values | Meaning |
 |:--|:--|:--|
 | `goos` | `windows` · `linux` · `darwin` | The corpus flavor to bind. Each maps to a runner + RID pair; **`darwin` fans out to BOTH mac runners** (arm64 and x64) in one dispatch. |
-| `stage` | `census` · `behavioral-smoke` · `sweep-shard` · `release-smoke` | What to run. One stage per dispatch. |
+| `stage` | `census` · `behavioral-smoke` · `sweep-shard` · `release-smoke` · `aot-smoke` | What to run. One stage per dispatch. |
 | `filter` | free text, optional | The shard. A package substring for `sweep-shard`, a project-name substring for `behavioral-smoke`. Blank takes the stage's documented default. |
 
 There is no `all` value: one dispatch per flavor keeps each leg's artifacts, budget and verdict
@@ -152,13 +152,24 @@ every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
   has read green on two trains; every `go.lib` before the symbols target fails the guard.
 - **F** `PackageSymbols`: the packages' OWN symbol files reach a consumer -- a std frame prints its Go file:line on
   `dotnet run`, on a first and a second unchanged single-file publish and on a framework-dependent publish, the off
-  switch prints `none`, and a Native AOT publish succeeds (its `.pdb` list is printed). **Measured, never gating** on
-  E's terms; every release before the one that ships symbols fails RUN, PUBLISH and FDD.
+  switch prints `none`. **Measured, never gating** on E's terms; every release before the one that ships symbols fails
+  RUN, PUBLISH and FDD. Its Native AOT run is the `aot-smoke` stage below, not an arm here.
 
 A leg is green when arms A-D pass. Dispatch it at the tree that ships, before every release:
 it is what proves the packages carry what that tree's converter emits on every OS (C2's 2026-10-03 finding: N's
 converter emits `unsafe.ArrayPointer`, which the published 1.24.13.3 lacks). The pack job's budget is its own
 (240 min; measured 38-53 min).
+
+### `aot-smoke` — a Native AOT publish of a package consumer
+
+The same `pack` job, then ONE Native AOT publish and run of `PackageSymbols` (a hand-written consumer that sets no trim
+mode of its own) on all four shipped RIDs: `test-package-symbols.ps1 -AotOnly`. The executable must exit 0 and print
+its `PACKAGE-SYMBOLS` line (the value printed, not judged); the publish wall time is a `READ` line. A consumer takes
+go.lib's `TrimMode=partial` default, under which the publish compiles every referenced go.* assembly whole: about 70
+min on hosted linux for this fixture's 31 assemblies, which is why it is its own stage and not a release-smoke arm.
+Without that default, the published 1.24.13.4 crashed such an executable at startup (a full trim removed the field
+metadata golib reads). **Non-gating on its first train (Q)**; from the release after, read before every release like
+the census, and a red holds the release.
 
 ## Results flow
 
@@ -228,6 +239,7 @@ disclosure count is half of what makes a row honest.
 | `behavioral-smoke` | 90 min | 135 min | Converter `go build` plus a filtered four-phase run whose shared core closure is built from nothing. |
 | `sweep-shard` | 210 min | 315 min | One convert/build/run/compare cycle per matched row; the sweep's own per-package floors are the reason this is the largest. |
 | `release-smoke` | 90 min | 135 min | The leg only: converter `go build` plus four small restore/build/run arms. The `pack` job (windows, 240 min) is separate. Provisional. |
+| `aot-smoke` | 240 min | 360 min | The leg only: one Native AOT publish of a 31-package consumer under `TrimMode=partial` (~70 min on hosted linux, 37495989079). Provisional until its first four-RID run. |
 
 The macOS multiplier is 1.5x because `macos-15` (arm64) is a 3-core runner and every phase here is
 parallel-MSBuild bound. GitHub's hard ceiling for a hosted job is 360 minutes and every value stays

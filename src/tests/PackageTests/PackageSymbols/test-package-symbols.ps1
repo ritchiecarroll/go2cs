@@ -16,7 +16,11 @@
       FDD        a framework-dependent publish that is not single-file: the frame resolves, the .pdb match as in RUN.
       OFF        `dotnet run` with -p:GoCopyPackageSymbols=false: today's output, the frame "none" and no go.* .pdb
                  beside the application -- the off switch, and the proof the arms above can fail.
-      AOT        (-Aot only; needs the ILCompiler packages) a Native AOT publish succeeds; its .pdb list is printed.
+      AOT        (-Aot or -AotOnly; needs the ILCompiler packages and the platform's native toolchain) a Native AOT
+                 publish of this consumer, which sets no trim mode of its own, RUNS: exit 0 and its PACKAGE-SYMBOLS line
+                 (the value printed, not judged); the publish wall time and the .pdb it leaves are printed. Under
+                 go.lib's TrimMode=partial the publish compiles every referenced go.* assembly whole, so it is long:
+                 release-smoke leaves it out and the os-matrix aot-smoke stage runs it alone (-AotOnly).
 
     Exit 0 only when every arm reads as expected. Against a feed whose packages ship no .pdb (the published 1.24.13.4
     shape) RUN, PUBLISH and FDD fail: that is the gate's red. Nothing outside a temporary work directory is written.
@@ -39,6 +43,7 @@ param(
     [string] $Source = 'https://api.nuget.org/v3/index.json',
     [string] $FallbackFolder,
     [switch] $Aot,
+    [switch] $AotOnly,
     [switch] $KeepWork
 )
 
@@ -151,6 +156,7 @@ function Add-Verdict([string] $Name, [scriptblock] $Arm) {
 
 Write-Host "Package symbols gate: go.* $Version from $Source ($rid)"
 
+if (-not $AotOnly) {
 Add-Verdict 'RUN' {
     Clear-Build
     $line = Get-FrameLine (Invoke-Dotnet 'RUN' (@('run', '--project', $project, '-c', 'Release') + $common))
@@ -196,11 +202,18 @@ Add-Verdict 'OFF' {
     return 'PASS (OFF)'
 }
 
-if ($Aot) {
+}
+
+if ($Aot -or $AotOnly) {
     Add-Verdict 'AOT' {
         Clear-Build
         $out = Join-Path $work 'out-aot'
+        $wall = [System.Diagnostics.Stopwatch]::StartNew()
         [void](Invoke-Dotnet 'AOT' (@('publish', $project, '-c', 'Release', '-r', $rid, '-p:PublishAot=true', '-o', $out) + $common))
+        $wall.Stop()
+        Write-Host "    AOT: publish wall $([int]$wall.Elapsed.TotalMinutes) min ($([int]$wall.Elapsed.TotalSeconds) s) for $(@(Get-ChildItem (Join-Path $work 'packages') -Directory -Filter 'go.*').Count) go.* package(s)"
+        Write-Host "READ (AOT publish wall): $([int]$wall.Elapsed.TotalSeconds) s"
+
         $run = @(& (Join-Path $out $exe) 2>&1 | ForEach-Object { "$_" })
         $code = $LASTEXITCODE
         $line = Get-FrameLine $run
@@ -218,5 +231,6 @@ if ($Aot) {
 
 $verdicts | ForEach-Object { Write-Host $_ }
 if (-not $KeepWork) { Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue }
-if (@($verdicts | Where-Object { $_ -like 'FAIL*' }).Count -gt 0 -or $verdicts.Count -lt 4) { exit 1 }
+$expected = if ($AotOnly) { 1 } else { 4 }
+if (@($verdicts | Where-Object { $_ -like 'FAIL*' }).Count -gt 0 -or $verdicts.Count -lt $expected) { exit 1 }
 exit 0
