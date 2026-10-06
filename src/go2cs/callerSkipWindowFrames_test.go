@@ -83,10 +83,14 @@ func useHandle(m *mux) {
 // SITE 2 -- runtime.Callers(2): only stackHere itself (depth 0) is skipped.
 func stackHere(pc []uintptr) int { return runtime.Callers(2, pc) }
 
-// CONTROL 2 -- depth 1 of SITE 2 is the first RECORDED frame, never marked.
+// CONTROL 2 -- depth 1 of SITE 2 is the first RECORDED frame, never marked. Large (a loop): a small one is
+// marked by the module-scope fixed-skip path closure instead (fixedSkipCallerClosure_test.go), and the
+// window marks any shape, so this one still bounds the window's depth.
 func wrap(pc []uintptr) int {
 	n := stackHere(pc)
-	n++
+	for i := 0; i < 1; i++ {
+		n++
+	}
 	return n
 }
 
@@ -110,10 +114,13 @@ func atDepth(d int) uintptr {
 	return pcs[0]
 }
 
-// CONTROL 3 -- a non-thin caller of SITE 4: out of scope, never marked.
+// CONTROL 3 -- a non-thin caller of SITE 4: out of the window's scope, never marked. Large (a loop): a small
+// one is marked by the module-scope fixed-skip path closure, which counts atDepth's parameter skip as fixed.
 func viaDepth() uintptr {
 	x := atDepth(2)
-	x++
+	for i := 0; i < 1; i++ {
+		x++
+	}
 	return x
 }
 
