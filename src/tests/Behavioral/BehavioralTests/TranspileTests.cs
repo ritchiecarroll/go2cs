@@ -1453,6 +1453,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNoinlineDirectiveFrame() => CheckTarget("NoinlineDirectiveFrame");
 
     [TestMethod]
+    public void CheckInitOrderNoInline() => CheckTarget("InitOrderNoInline");
+
+    [TestMethod]
     public void CheckNoInlinePartial() => CheckTarget("NoInlinePartial");
 
     [TestMethod]

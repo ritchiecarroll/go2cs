@@ -104,9 +104,6 @@ public class NoInliningPartialGeneratorTests
             return here();
         }
 
-        [GoInit] internal static partial void init() {
-        }
-
         internal static partial void Main() {
         }
 
@@ -183,7 +180,7 @@ public class NoInliningPartialGeneratorTests
         yield return MetadataReference.CreateFromFile(Path.Combine(coreDir, "System.Runtime.dll"));
     }
 
-    private sealed record Run(Dictionary<string, string> Generated, ImmutableArray<Diagnostic> Errors, Dictionary<string, MethodImplAttributes> Methods);
+    private sealed record Run(Dictionary<string, string> Generated, ImmutableArray<Diagnostic> Errors, Dictionary<string, MethodImplAttributes> Methods, ImmutableArray<Diagnostic> GeneratorDiagnostics);
 
     /// <summary>
     /// Runs the given generators over the sources, compiles the result, and reads every emitted
@@ -201,7 +198,7 @@ public class NoInliningPartialGeneratorTests
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generators, parseOptions: parseOptions);
-        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out Compilation updated, out ImmutableArray<Diagnostic> _);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out Compilation updated, out ImmutableArray<Diagnostic> generatorDiagnostics);
 
         Dictionary<string, string> generated = driver.GetRunResult().Results
             .SelectMany(result => result.GeneratedSources)
@@ -225,7 +222,7 @@ public class NoInliningPartialGeneratorTests
             }
         }
 
-        return new Run(generated, errors, methods);
+        return new Run(generated, errors, methods, generatorDiagnostics);
     }
 
     private static string Describe(Run run) =>
@@ -250,7 +247,6 @@ public class NoInliningPartialGeneratorTests
     [DataRow("ptr")]
     [DataRow("val")]
     [DataRow("get")]
-    [DataRow("init")]
     [DataRow("Main")]
     public void ACarrierCompilesWithTheNoInliningFlag(string name)
     {
@@ -272,8 +268,7 @@ public class NoInliningPartialGeneratorTests
             "internal static partial @string variadic(params ꓸꓸꓸnint xsʗp);",
             "internal static partial @string generic<T>(T x);",
             "internal static partial @string ptr(this ref counter c);",
-            "internal static partial @string get<T>(this ref box<T> b);",
-            "internal static partial void init();"
+            "internal static partial @string get<T>(this ref box<T> b);"
         })
         {
             StringAssert.Contains(text, signature, $"the declaring part must repeat the implementing part's signature exactly; {Describe(run)}");
@@ -312,6 +307,38 @@ public class NoInliningPartialGeneratorTests
 
         Assert.AreEqual(0, run.Errors.Length, Describe(run));
         Assert.IsTrue(run.Methods["tally"].HasFlag(MethodImplAttributes.NoInlining), $"tally lost the NoInlining flag; {Describe(run)}");
+    }
+
+    /// <summary>
+    /// A Go init is a module initializer, and C# runs module initializers in declaration order, which
+    /// for a partial method is its DECLARING part's: a generated file that sorts after every source
+    /// file. A partial init would therefore run after the package's other inits. The converter never
+    /// writes one (an init keeps the attribute itself), and the generator refuses a hand-written one
+    /// by name rather than move it.
+    /// </summary>
+    [TestMethod]
+    public void APartialInitIsRefusedByName()
+    {
+        const string partialInit = """
+            using GoInitAttribute = System.Runtime.CompilerServices.ModuleInitializerAttribute;
+
+            namespace go;
+
+            partial class main_package {
+
+            [GoInit] internal static partial void initΔ2() {
+            }
+
+            } // end main_package
+            """;
+
+        Run run = Generate([new NoInliningPartialGenerator()], Stubs, partialInit);
+
+        Diagnostic[] refusals = [.. run.GeneratorDiagnostics.Where(diagnostic => diagnostic.Id == "GO2CS0003" && diagnostic.GetMessage().Contains("initΔ2"))];
+
+        Assert.AreEqual(1, refusals.Length, $"the generator must refuse the partial init by name; {Describe(run)}; generator diagnostics: {string.Join("; ", run.GeneratorDiagnostics)}");
+        Assert.AreEqual(DiagnosticSeverity.Error, refusals[0].Severity, "a refused init keeps the build red at the method");
+        Assert.IsFalse(run.Generated.Values.Any(text => text.Contains("initΔ2")), $"no declaring part is written for it; {Describe(run)}");
     }
 
     [TestMethod]

@@ -1456,6 +1456,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNoinlineDirectiveFrame() => CheckTarget("NoinlineDirectiveFrame");
 
     [TestMethod]
+    public void CheckInitOrderNoInline() => CheckTarget("InitOrderNoInline");
+
+    [TestMethod]
     public void CheckNoInlinePartial() => CheckTarget("NoInlinePartial");
 
     [TestMethod]
