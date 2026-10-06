@@ -1,3 +1,4 @@
+# SUPERSEDED 2026-10-06 18:30: the table of record is tQ-seats-draft.txt (64 rows, rows-sha256 867eedd4d363). This file is COORD's first generated list, kept as the record of how the order was derived.
 # TRAIN Q seat table v0 -- generated 2026-10-06 13:06 from COORD's accepted list; base master 7098b8d3f958e68dfcd23a35d5030427b2638357
 # row = ref|seated sha|notes. Row order = merge order. PENDING rows are comments at the end.
 claude/c2-board-assignability-gap|476fbd381c|C2; cut=446d2c8ba0; commits-over-base=1; files=1; no-stack

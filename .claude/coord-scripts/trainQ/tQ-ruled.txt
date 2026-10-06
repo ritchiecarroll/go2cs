@@ -1,0 +1,57 @@
+# TRAIN Q -- the RULED resolutions the map and the assembly may make (tQ-resolve.py reads this file; nothing else does).
+# One line per (row, file):  ref|sha10|path|kind|hunks=N|ruling
+#   ref    the row's ref as the seat table writes it (no claude/ prefix)
+#   sha10  the first ten characters of the row's SEATED sha: a re-cut under the same name does NOT inherit the ruling
+#   path   the one file the ruling covers
+#   kind   append-both = an insert against an insert at one point (EMPTY base in the diff3 form), both sides kept
+#          whole, the union's lines first, the row's below them (merge order). No other kind exists.
+#   hunks  how many such hunks the file holds in that merge (tQ-map.md sections A and B: one each)
+# ANY conflict that no line here names ABORTS the map row and the assembly, with the row and every hunk named.
+# A line that no merge uses is printed as UNUSED by both scripts (the order moved, or the row merges clean now).
+# The file's content hash is stamped by the map and compared by the assembly: edit it BEFORE the map, never between.
+# Source of every line: trainQ/tQ-map.md (the i9's rehearsal, steps 1 and 2) and COORD's notes (L:n = trainL/tL-seats-draft.txt).
+#
+# --- the BOARD: ten writers, one insertion point (directly above the final guard line); tQ-map.md section A.
+#     The last two lines (review round 1, third pass) are the two docs rows the ledger accepted for Q at 16:55 and 17:38
+#     on 10-06, seated as rows 63 and 64. Neither was rehearsed, and each line is written from the ACCEPTANCE's own
+#     words ('one BOARD append', 'BOARD appends'), not from words that name the resolution: COORD confirms them at the
+#     freeze, with g-cs8500-managed-view's (below). Their hunks are read from git objects: 286 lines against 11, and
+#     297 against 29, empty base.
+c2-func-chan-dir|3196a93cdc|docs/phase4/BOARD-next-validation-candidates.md|append-both|hunks=1|L:352 'one resolution: the BOARD tail hunk, E's rows then D's'; rehearsal step 1
+c2-board-warnings|5aab7c91f2|docs/phase4/BOARD-next-validation-candidates.md|append-both|hunks=1|L:359 'six append-only hunks kept both (BOARD x4 ...)'; rehearsal step 1
+g-cs8500-managed-view|be4ce10078|docs/phase4/BOARD-next-validation-candidates.md|append-both|hunks=1|L:368 'one more BOARD append for be4ce10078, kept both'; rehearsal step 2
+g-board-foreign-defined-directions|6481ddbabb|docs/phase4/BOARD-next-validation-candidates.md|append-both|hunks=1|L:359; rehearsal step 1
+g-board-testing-t-deepequal|e13e0e2ecc|docs/phase4/BOARD-next-validation-candidates.md|append-both|hunks=1|L:359; rehearsal step 1
+c1-board-aot-partial-cost|513ab62499|docs/phase4/BOARD-next-validation-candidates.md|append-both|hunks=1|ledger 16:55 10-06 'ACCEPTED for TRAIN Q, a docs row ... (one BOARD append ...), taken at the freeze as row 63'; L:370 'another BOARD append-against-append for the assembler map'; NOT rehearsed; TO CONFIRM
+g-board-logrus-launchdir-line|5497b2d7b9|docs/phase4/BOARD-next-validation-candidates.md|append-both|hunks=1|ledger 17:38 10-06 'ACCEPTED as TRAIN Q docs rows (BOARD appends)'; COORD's post 22:37Z; NOT rehearsed; TO CONFIRM
+#
+# --- the registration files: ONE row, five files, one adjacent-insert hunk each; tQ-map.md section B
+g-named-pointer-equality|0c6a2618fa|src/go2cs.slnx|append-both|hunks=1|L:359 '(... slnx + four behavioral classes for G 0c6a2618fa)'; rehearsal step 1
+g-named-pointer-equality|0c6a2618fa|src/tests/Behavioral/BehavioralTests/TranspileTests.cs|append-both|hunks=1|L:359; rehearsal step 1
+g-named-pointer-equality|0c6a2618fa|src/tests/Behavioral/BehavioralTests/CompileTests.cs|append-both|hunks=1|L:359; rehearsal step 1
+g-named-pointer-equality|0c6a2618fa|src/tests/Behavioral/BehavioralTests/TargetComparisonTests.cs|append-both|hunks=1|L:359; rehearsal step 1
+g-named-pointer-equality|0c6a2618fa|src/tests/Behavioral/BehavioralTests/OutputComparisonTests.cs|append-both|hunks=1|L:359; rehearsal step 1
+#
+# --- NOT RULED, AND NOT NEEDED AS SEATED (QUESTION 1 of the seat table; tQ-map.md section D). Review round 1 seated
+#     g-board-cs8500-census-limit directly below its base row g-cs8500-managed-view, where the i9 rehearsed it: it
+#     merges clean there and no line is owed (the object-read simulation of the seated order reads exactly the twelve
+#     lines above, all used: ten on the 62 rows, and one for each of the two docs rows seated last). In v0's position, two BOARD rows lower, the docs row meets a hunk the rehearsal never
+#     made (30 lines against its 10, empty base): if COORD moves the row back there, the line below is the ruling,
+#     written by removing its '#' and naming the ruling's time and place. Left uncommented while the row sits where
+#     it does now, it would only print as UNUSED.
+#g-board-cs8500-census-limit|2b3aeb0630|docs/phase4/BOARD-next-validation-candidates.md|append-both|hunks=1|QUESTION 1: ruled <when, where>
+#
+# --- TO CONFIRM AT THE FREEZE (review round 1, a question and not a defect): the line for g-cs8500-managed-view
+#     be4ce10078 above comes from the i9's rehearsal STEP 2 through L:368 ('one more BOARD append for be4ce10078, kept
+#     both'), a line of COORD's notes that RECORDS the rehearsal; the four other BOARD lines and the five registration
+#     lines are the step 1 set of L:359. The table merges that row BEFORE the two G BOARD rows where the rehearsal
+#     merged it last, so its hunk has another shape here (219 lines against its 27; 249 there): the same kind, one
+#     hunk, empty base, by the object-read simulation; the map's first real run is the first real reading of it.
+#
+# --- NO LINE CAN BE WRITTEN FOR c1-aot-smoke 44f29d50e6 (QUESTION 7 of the seat table): as cut it conflicts with
+#     c1-release-smoke-published in .github/workflows/os-matrix.yml with a NON-EMPTY base (both rows rewrite one line,
+#     twice). append-both is the only kind and it requires an empty base: that conflict is closed by C1's re-cut, never
+#     here. Its second file (docs/CIMatrix.md, one insert-against-insert hunk) closes with the same re-cut.
+#
+# --- A BOARD ROW ADDED LATER (the one SLOT of the seat table that is still open: COORD's own Q BOARD row) is one more
+#     append-against-append hunk wherever it sits: one line here, with ITS sha, written before the map.
