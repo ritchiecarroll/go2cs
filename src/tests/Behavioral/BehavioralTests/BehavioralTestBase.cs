@@ -130,6 +130,12 @@ public abstract class BehavioralTestBase
     // Transpile pass on output the converter itself calls degraded.
     private static readonly ConcurrentDictionary<string, string[]> s_degradedProjects = new(StringComparer.OrdinalIgnoreCase);
 
+    // How many times THIS process ran the converter over each project. Read by TranspileMemoTests, which holds the
+    // harness to one transpile per project per process however many test classes ask for it.
+    private static readonly ConcurrentDictionary<string, int> s_converterRuns = new(StringComparer.OrdinalIgnoreCase);
+
+    internal static int ConverterRuns(string targetProject) => s_converterRuns.TryGetValue(targetProject, out int runs) ? runs : 0;
+
     [MethodImpl(MethodImplOptions.Synchronized)]
     protected static void Init(TestContext context)
     {
@@ -344,6 +350,8 @@ public abstract class BehavioralTestBase
             // asserted immediately, because a converter that failed outright is a louder and more
             // specific fact than the degradation it may have printed on the way down.
             List<string> degraded = new();
+
+            s_converterRuns.AddOrUpdate(targetProject, 1, (_, runs) => runs + 1);
 
             foreach (string pkgPath in GoPackageDirs(projPath))
             {
