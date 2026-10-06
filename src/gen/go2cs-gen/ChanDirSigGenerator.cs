@@ -101,8 +101,8 @@ public sealed class ChanDirMarkerFinder : ISyntaxReceiver
 /// type parameter (an attribute argument cannot name one), a method of a type with an enclosing type that
 /// is not partial everywhere, and a signature with an unmanaged pointer (typeof of a pointer needs an
 /// unsafe context). A NESTED type is carried by repeating its enclosing partials around the generated one:
-/// every converted Go interface is nested in its package class. A <c>[GoRecv]</c> method with a
-/// <c>ref</c> receiver gets a second entry keyed on <c>ж&lt;T&gt;</c>, the receiver of the overload
+/// every converted Go interface is nested in its package class. A pointer-receiver method (an unmarked
+/// <c>this ref</c>, or <c>[GoRecv]</c>) gets a second entry keyed on <c>ж&lt;T&gt;</c>, the receiver of the overload
 /// RecvGenerator adds for it, since a generator cannot see another generator's output.
 /// </remarks>
 [Generator]
@@ -150,9 +150,9 @@ public class ChanDirSigGenerator : ISourceGenerator
 
             slot.entries.Add(Entry(symbol.Name, parameterTypes, parameterDirs, resultDirs));
 
-            bool isGoRecv = symbol.GetAttributes().Any(attribute => attribute.AttributeClass?.Name is "GoRecvAttribute" or "GoRecv");
-
-            if (isGoRecv && symbol.Parameters.Length > 0 && symbol.Parameters[0].RefKind == RefKind.Ref)
+            // A pointer receiver by RecvGenerator's own rule (an unmarked `this ref`, or [GoRecv]), so the
+            // entry follows exactly the methods that get the ж<T> overload.
+            if (symbol.IsPointerSetMethod() && symbol.Parameters.Length > 0 && symbol.Parameters[0].RefKind == RefKind.Ref)
             {
                 string[] boxed = (string[])parameterTypes.Clone();
                 boxed[0] = $"typeof(global::go.ж<{symbol.Parameters[0].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>)";

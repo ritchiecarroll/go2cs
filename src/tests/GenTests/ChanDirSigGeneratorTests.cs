@@ -44,7 +44,10 @@ public class ChanDirSigGeneratorTests
     private const string Send = "global::go.GoChanDir.Send";
     private const string Unstamped = "global::go.GoChanDir.Unstamped";
 
-    private static readonly Lazy<string[]> s_generated = new(RunOverFixture);
+    private static readonly Lazy<string[]> s_generated = new(() => RunOverFixture(FixtureSource()));
+
+    // The same fixture as face lift A's converter emits it: a Go pointer receiver is an unmarked `this ref T`.
+    private static readonly Lazy<string[]> s_generatedUnmarked = new(() => RunOverFixture(FixtureSource().Replace("[GoRecv] ", "")));
 
     // The committed fixture emission, found by walking up from the test binary to the repository's src.
     private static string FixtureSource()
@@ -60,10 +63,10 @@ public class ChanDirSigGeneratorTests
         throw new FileNotFoundException("src/tests/Behavioral/ReflectFuncChanDir/main.cs not found above " + AppContext.BaseDirectory);
     }
 
-    private static string[] RunOverFixture()
+    private static string[] RunOverFixture(string fixture)
     {
         CSharpCompilation compilation = CSharpCompilation.Create("test",
-            [CSharpSyntaxTree.ParseText(FixtureSource()), CSharpSyntaxTree.ParseText(Stubs)],
+            [CSharpSyntaxTree.ParseText(fixture), CSharpSyntaxTree.ParseText(Stubs)],
             [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
@@ -76,8 +79,10 @@ public class ChanDirSigGeneratorTests
         $"new global::go.GoChanDir[] {{ {string.Join(", ", parameterDirs)} }}, " +
         $"new global::go.GoChanDir[] {{ {string.Join(", ", resultDirs)} }})]";
 
-    private static string PackageClassPart() =>
-        s_generated.Value.Single(source => source.Contains("partial class main_package") && !source.Contains("partial interface"));
+    private static string PackageClassPart() => PackageClassPart(s_generated.Value);
+
+    private static string PackageClassPart(string[] generated) =>
+        generated.Single(source => source.Contains("partial class main_package") && !source.Contains("partial interface"));
 
     [TestMethod]
     public void ARecvParameterIsReadBeforeTheType()
@@ -129,6 +134,16 @@ public class ChanDirSigGeneratorTests
     public void AGoRecvMethodIsAlsoKeyedOnItsBoxedReceiverOverload()
     {
         string part = PackageClassPart();
+        StringAssert.Contains(part, Entry("Feed", ["typeof(global::go.main_package.S)", "typeof(global::go.channel<nint>)"], [Unstamped, Send], []));
+        StringAssert.Contains(part, Entry("Feed", ["typeof(global::go.ж<global::go.main_package.S>)", "typeof(global::go.channel<nint>)"], [Unstamped, Send], []));
+    }
+
+    // Face lift A: the converter writes no [GoRecv], so a pointer receiver is known by its unmarked `this ref`
+    // alone (MethodDeclarationSyntaxExtensions.IsPointerSetMethod), and still gets its boxed-receiver entry.
+    [TestMethod]
+    public void AnUnmarkedRefReceiverIsAlsoKeyedOnItsBoxedReceiverOverload()
+    {
+        string part = PackageClassPart(s_generatedUnmarked.Value);
         StringAssert.Contains(part, Entry("Feed", ["typeof(global::go.main_package.S)", "typeof(global::go.channel<nint>)"], [Unstamped, Send], []));
         StringAssert.Contains(part, Entry("Feed", ["typeof(global::go.ж<global::go.main_package.S>)", "typeof(global::go.channel<nint>)"], [Unstamped, Send], []));
     }
