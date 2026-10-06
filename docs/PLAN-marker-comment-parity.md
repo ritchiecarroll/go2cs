@@ -21,8 +21,9 @@ Yes for some, and the biggest win does not need a comment at all.
   lengths on parameters, struct tags, and embedded fields. The first is read at run time from the type, like plain
   `[GoType]`. The other three are read from a field or a parameter, so they move the way the channel directions did,
   at the same kind of cost.
-- **Five kinds must stay**, because the C# compiler or the .NET runtime reads them as attributes and nothing else can
-  replace them.
+- **Four kinds must stay**, because the C# compiler or the .NET runtime reads them as attributes and nothing else can
+  replace them. A fifth, `[MethodImpl(NoInlining)]`, was listed here at first; most of its uses can move after all, by a
+  different route (section 10, added after a probe).
 
 The recommendation is to cut `[GoRecv]` first (section 8).
 
@@ -103,7 +104,7 @@ count per file population.
 
 | Attribute | Why it cannot move |
 |---|---|
-| `[MethodImpl(MethodImplOptions.NoInlining)]` | The JIT reads it from the method's metadata. A generator cannot attach it to a method declared in another file, and a type-level record means nothing to the JIT. The converter writes it where Go code asks for its caller (`runtime.Caller`), so inlining would change the answer. |
+| `[MethodImpl(MethodImplOptions.NoInlining)]` | The JIT reads it from the method's metadata, and a type-level record means nothing to the JIT. The converter writes it where Go code asks for its caller (`runtime.Caller`), so inlining would change the answer. **Amended:** a generator *can* attach it if the converted method is declared `partial`; section 10 measures that route. Only the uses on lambdas and local functions must stay. |
 | `[GoInit]` | It is a `using` alias for .NET's `[ModuleInitializer]`, which the C# compiler itself acts on. A generator could write a wrapper initializer that calls the method, but the order in which initializers run would then depend on the generator rather than on the converter, and Go's package initialization order is part of correct behavior. Almost all of these are in metadata files anyway (6,833 of 6,955). |
 | `[StructLayout]`, `[FieldOffset]`, `[DllImport]` | The .NET runtime lays out memory and binds native calls from them. They only appear where Go code describes a native structure or calls the operating system. |
 | the assembly-level records | Not noise in the code a reader opens: they sit in `package_info.cs`. |
@@ -354,5 +355,79 @@ The same gates the channel-direction fix ran:
 
 For `[GoRecv]` specifically, the method-set code is on the path of every interface assertion. Its canaries are the five
 largest validated packages that import `reflect`, chosen fresh from the roster when the cut runs.
+
+## 10. Addendum (2026-10-06): `[MethodImpl(NoInlining)]` through a partial method
+
+Section 4 first listed `[MethodImpl(MethodImplOptions.NoInlining)]` as impossible to move, because a generated file
+cannot attach an attribute to a method declared somewhere else. C# has one exception: a **partial method** is declared in
+two parts, and the attributes of both parts belong to the one compiled method. If the converter wrote such a method as
+`partial`, keeping its body, go2cs-gen could write the other part, carrying the attribute. The visible price is the word
+`partial` where the 43-character prefix stands today.
+
+Before and after, `log.(*Logger).Print`, which Go code reaches through `runtime.Caller`:
+
+```csharp
+// before (converted code)
+[MethodImpl(MethodImplOptions.NoInlining)] public static void Print(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+
+// after (converted code)
+public static partial void Print(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+
+// generated at build time, never committed
+[MethodImpl(MethodImplOptions.NoInlining)] public static partial void Print(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp);
+```
+
+**The probe.** A small program put each shape converted methods take into this form: a static method returning a named
+tuple, an extension method with a `this ref` receiver, one with a value receiver, a generic method with a constraint, a
+method with `ref` and `params` parameters, one with a default value, and one taking a pointer under `unsafe`. Each
+declaring part carried the attribute; each implementing part held the body. A plain method with no attribute was the
+control. With warnings treated as errors, it compiled clean. Read back at run time:
+
+| Shape | `NoInlining` in the compiled method | Kept as its own frame by the JIT |
+|---|---|---|
+| static, named-tuple result | yes | yes |
+| extension, `this ref` receiver | yes | yes |
+| extension, value receiver | yes | yes |
+| generic with a constraint | yes | yes |
+| `ref` and `params` parameters | yes | yes |
+| a default value | yes | yes |
+| a pointer, `unsafe` | yes | yes |
+| control (no attribute) | no | no: inlined into its caller |
+
+"Kept as its own frame" was read by having each method call a helper that names its caller, with tiered compilation
+off so the JIT optimizes, and inlines, from the first call. The control's row is what shows the test can tell the two
+apart.
+
+**What cannot take this form.** A lambda or a local function cannot be a partial method, and the converter also writes
+the attribute on func literals that reach `runtime.Caller`. In converted production code, 189 of the 207 uses are on
+methods and could move; 16 are on lambdas and 2 on local functions, and those stay. In converted tests the split is
+734 methods, 191 lambdas, 7 local functions.
+
+**The rules the generated part must follow.** C# requires the two parts to agree, so the generator copies the
+implementing part's signature exactly: return type including tuple element names, parameter names (a mismatch is the
+warning CS8826, the same one the darwin build shows today in a hand-written file), `this`, `ref` and `params`, generic
+constraints, and `unsafe`. One thing moves rather than copies: a default parameter value belongs on the declaring
+part; C# ignores it on the implementing part and warns (CS1066). Go functions have no default values, but a cut should
+count whether the converter ever emits one on these methods.
+
+**How the generator knows which methods want it.** A method written `partial`, with a body, and with no other
+declaration of it in the compilation. Converted code already uses partial methods the other way round: the converter
+writes a declaration *without* a body for an assembly or cgo function, and a hand-written `*_impl.cs` file supplies the
+body. Those always have their declaring part already, so the two uses never collide. Hand-written files that want the
+attribute keep writing it.
+
+One generator has to change with it: the one that writes the `ж<T>` overload of a pointer-receiver method reads the
+`NoInlining` attribute from the source today, so its forwarder is kept as a frame too. It cannot see another
+generator's output, so it would test for the same "`partial` with a body and no declaration" shape instead.
+
+**What happens when something goes wrong.** If the generator does not run, C# rejects an implementing part that has no
+declaring part (error CS0759), so the build fails loudly; the attribute cannot be lost silently. For packages consumed
+from NuGet, the merged attribute is compiled into the assembly, so nothing changes for consumers.
+
+**Where it ranks.** Each line it touches gets 35 characters shorter (a 43-character prefix becomes the 8-character
+word `partial`), against 9 for `[GoRecv]`, but on far fewer lines (189 in production, against 5,107). It touches only
+the converter and two generators, not the runtime. Its value is highest exactly
+where the attribute is about to multiply: G's remedy for a logging library's caller frames adds 103 of these prefixes to
+one module's converted code. If the owner chooses this route, those 103 would read `partial` instead.
 
 — C2
