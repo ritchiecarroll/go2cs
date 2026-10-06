@@ -39,6 +39,7 @@ param(
     [string] $Source = 'https://api.nuget.org/v3/index.json',
     [string] $FallbackFolder,
     [switch] $Aot,
+    [switch] $TrimReadings,
     [switch] $KeepWork
 )
 
@@ -213,6 +214,34 @@ if ($Aot) {
             return "FAIL (AOT): the Native AOT executable did not run to its frame line (exit $code$(if ($why) { "; $why" }))"
         }
         return "PASS (AOT): $line"
+    }
+}
+
+# PROBE-ONLY READINGS (the trim-default seat's one-off measurements; never PASS or FAIL, only READ).
+if ($TrimReadings) {
+    Add-Verdict 'TRIMMODE' {
+        Clear-Build
+        [void](Invoke-Dotnet 'TRIMMODE restore' (@('restore', $project, '-r', $rid) + $common))
+        foreach ($arm in @(@{ L = 'aot'; A = @('-p:PublishAot=true') }, @{ L = 'aot+full'; A = @('-p:PublishAot=true', '-p:TrimMode=full') },
+                           @{ L = 'trimmed'; A = @('-p:PublishTrimmed=true') })) {
+            $value = (& dotnet msbuild $project "-p:RuntimeIdentifier=$rid" @($arm.A) "-p:GoPackageVersion=$Version" -getProperty:TrimMode -nologo 2>&1 | Select-Object -Last 1)
+            Write-Host "    TRIMMODE: $($arm.L) evaluates TrimMode='$value'"
+        }
+        return 'READ (TRIMMODE)'
+    }
+    foreach ($reading in @(@{ L = 'TRIM-FULL'; A = @('-p:PublishAot=true', '-p:TrimMode=full') },
+                           @{ L = 'TRIMMED'; A = @('-p:PublishTrimmed=true', '--self-contained') })) {
+        Add-Verdict $reading.L {
+            Clear-Build
+            $out = Join-Path $work ('out-' + $reading.L.ToLowerInvariant())
+            [void](Invoke-Dotnet $reading.L (@('publish', $project, '-c', 'Release', '-r', $rid, '-o', $out) + $reading.A + $common))
+            $run = @(& (Join-Path $out $exe) 2>&1 | ForEach-Object { "$_" })
+            $code = $LASTEXITCODE
+            $line = Get-FrameLine $run
+            $why = @($run | Where-Object { $_ -match 'InvalidOperationException|TypeInitializationException' } | Select-Object -First 1) -join ''
+            Write-Host "    $($reading.L): exit $code :: $(if ($line) { $line } else { $why.Substring(0, [Math]::Min(300, $why.Length)) })"
+            return "READ ($($reading.L))"
+        }
     }
 }
 

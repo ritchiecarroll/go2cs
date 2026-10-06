@@ -300,8 +300,8 @@ $symbolVerdicts = @()
 foreach ($check in @(
         @{ Name = 'E-publish-symbols'; Dir = 'PublishSymbols'; Script = 'test-publish-symbols.ps1'; Extra = @{} },
         @{ Name = 'E-publish-symbols-aot'; Dir = 'PublishSymbols'; Script = 'test-publish-symbols-aot.ps1'; Extra = @{} },
-        @{ Name = 'F-package-symbols'; Dir = 'PackageSymbols'; Script = 'test-package-symbols.ps1'; Extra = @{ Aot = $true }
-           Detail = '^\s+(RUN|PUBLISH [12]|FDD|OFF|AOT): ' })) {
+        @{ Name = 'F-package-symbols'; Dir = 'PackageSymbols'; Script = 'test-package-symbols.ps1'; Extra = @{ Aot = $true; TrimReadings = $true }
+           Detail = '^\s+(RUN|PUBLISH [12]|FDD|OFF|AOT|TRIMMODE|TRIM-FULL|TRIMMED): |^READ ' })) {
     $checkLog = Join-Path $WorkRoot "$($check.Name).log"
     $extra = $check.Extra
     $code = Invoke-Logged $checkLog { & (Join-Path (Join-Path $PSScriptRoot $check.Dir) $check.Script) -Version $Version -Source $Feed @extra }
