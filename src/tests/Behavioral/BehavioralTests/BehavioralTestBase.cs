@@ -464,14 +464,8 @@ public abstract class BehavioralTestBase
             // generated csproj concatenates it directly ($(go2csPath)core\<pkg>\...).
             Environment.SetEnvironmentVariable("go2csPath", Path.GetFullPath(Path.Combine(TestRootPath, "..", "..")) + Path.DirectorySeparatorChar);
 
-            if (!forceBuild && File.Exists(projExe))
-            {
-                FileInfo projExeInfo = new(projExe);
-
-                // If exe is newer than all .cs source files, can skip build
-                if (Directory.GetFiles(projPath, "*.cs").Select(fileName => new FileInfo(fileName)).All(info => projExeInfo.LastWriteTimeUtc > info.LastWriteTimeUtc))
-                    return;
-            }
+            if (!forceBuild && ExecutableIsCurrent(projExe, projPath, DateTime.MinValue))
+                return;
 
             int exitCode;
 
@@ -489,6 +483,18 @@ public abstract class BehavioralTestBase
             if (MatchConsoleOutput(targetProject))
                 Exec(projExe, null, csExePath, timeoutMs: RunExecTimeoutMs);
         }
+    }
+
+    // Whether a fixture's built executable can be reused instead of rebuilt: it exists and is newer than every .cs in the
+    // fixture folder.
+    internal static bool ExecutableIsCurrent(string projExe, string projPath, DateTime sharedInputsNewestUtc)
+    {
+        if (!File.Exists(projExe))
+            return false;
+
+        FileInfo projExeInfo = new(projExe);
+
+        return Directory.GetFiles(projPath, "*.cs").Select(fileName => new FileInfo(fileName)).All(info => projExeInfo.LastWriteTimeUtc > info.LastWriteTimeUtc);
     }
 
     protected void CompileGoProject(string targetProject)
