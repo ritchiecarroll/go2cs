@@ -1738,7 +1738,7 @@ public static partial class GoReflect
     private static nint[]?[]? paramDims(MethodInfo method, ParameterInfo[] declared)
     {
         nint[]?[]? dims = null;
-        long[]?[]? recorded = method.DeclaringType is { } declaring && ParamDimsRecords(declaring).TryGetValue(method, out long[]?[]? found) ? found : null;
+        long[]?[]? recorded = method.DeclaringType is { } declaring && ParamDimsRecords(declaring).TryGetValue(RecordedMethod(method), out long[]?[]? found) ? found : null;
 
         for (int i = 0; i < declared.Length; i++)
         {

@@ -103,6 +103,18 @@ public class MemberRecordTests
     }
 
     [TestMethod]
+    public void AGenericMethodsParameterDimsAreReadThroughItsOpenKey()
+    {
+        // Face lift D2: a type built from a type parameter is keyed by its open definition, a bare type parameter
+        // by null, and a func value bound to a constructed method finds the record of its definition.
+        CollectionAssert.AreEqual(new nint[] { 2 }, GoReflect.FuncParamDims((Func<array<int>, int>)paramdims_generic.first<int>)![0]);
+
+        nint[]?[]? pick = GoReflect.FuncParamDims((Func<@string, array<@string>, @string>)paramdims_generic.pick<@string>);
+        Assert.IsNull(pick![0]);
+        CollectionAssert.AreEqual(new nint[] { 3 }, pick[1]);
+    }
+
+    [TestMethod]
     public void TheHandWrittenAttributeStillGivesAParameterItsDims()
     {
         CollectionAssert.AreEqual(new nint[] { 4 }, GoReflect.FuncParamDims((Action<array<byte>>)paramdims_package.stamped)![0]);
@@ -141,6 +153,15 @@ public static class paramdims_package
     public static nint unrecorded(array<byte> b) => 0;
 
     public static void stamped([GoArrayDims(4)] array<byte> b) { }
+}
+
+[GoParamDims("first", new[] { typeof(array<>) }, 0, 2)]
+[GoParamDims("pick", new Type?[] { null, typeof(array<>) }, 1, 3)]
+public static class paramdims_generic
+{
+    public static T first<T>(array<T> a) => default!;
+
+    public static T pick<T>(T x, array<T> a) => x;
 }
 
 [GoParamDims("missing", new[] { typeof(array<byte>) }, 0, 32)]

@@ -33,13 +33,16 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true, Inherited = false)]
-public sealed class GoSigChanDirAttribute(string method, Type[] parameterTypes, GoChanDir[] parameterDirs, GoChanDir[] resultDirs) : Attribute
+public sealed class GoSigChanDirAttribute(string method, Type?[] parameterTypes, GoChanDir[] parameterDirs, GoChanDir[] resultDirs) : Attribute
 {
     /// <summary>The C# method name.</summary>
     public string Method { get; } = method;
 
-    /// <summary>The C# parameter types, receiver included; a <c>ref</c> parameter by its element type.</summary>
-    public Type[] ParameterTypes { get; } = parameterTypes;
+    /// <summary>
+    /// The C# parameter types, receiver included; a <c>ref</c> parameter by its element type; for a generic method, an
+    /// open definition or null where a type parameter is (<c>GoReflect.SignatureMatches</c>).
+    /// </summary>
+    public Type?[] ParameterTypes { get; } = parameterTypes;
 
     /// <summary>One direction per C# parameter; <see cref="GoChanDir.Unstamped"/> where none.</summary>
     public GoChanDir[] ParameterDirs { get; } = parameterDirs;

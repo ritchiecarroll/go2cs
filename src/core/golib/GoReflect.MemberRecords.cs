@@ -183,11 +183,18 @@ public static partial class GoReflect
         });
 
     /// <summary>
-    /// Whether <paramref name="method"/> is the one named <paramref name="name"/> with exactly
-    /// <paramref name="parameterTypes"/> (receiver included; a <c>ref</c> parameter by its element type): the one
-    /// key by which a generated record names a method (<see cref="GoParamDimsAttribute"/>, <see cref="GoSigChanDirAttribute"/>).
+    /// Whether <paramref name="method"/> is the one named <paramref name="name"/> with <paramref name="parameterTypes"/>
+    /// (receiver included; a <c>ref</c> parameter by its element type): the one key by which a generated record names a
+    /// method (<see cref="GoParamDimsAttribute"/>, <see cref="GoSigChanDirAttribute"/>).
     /// </summary>
-    internal static bool SignatureMatches(MethodInfo method, string name, Type[] parameterTypes)
+    /// <remarks>
+    /// An attribute argument cannot name a type parameter, so a generic method's key spells a type built from one by
+    /// its open definition (<c>typeof(array&lt;&gt;)</c>, matching any <c>array&lt;X&gt;</c>) and a bare type parameter
+    /// as null (matching any type); every other entry matches by Type identity. Go has no overloading, so the methods
+    /// of one name in a declaring type differ by receiver type, which the key keeps; go2cs-gen refuses at compile time
+    /// a key that would still match two of them (face lift D2).
+    /// </remarks>
+    internal static bool SignatureMatches(MethodInfo method, string name, Type?[] parameterTypes)
     {
         if (method.Name != name)
             return false;
@@ -204,10 +211,28 @@ public static partial class GoReflect
             if (parameterType.IsByRef)
                 parameterType = parameterType.GetElementType()!;
 
-            if (parameterType != parameterTypes[i])
+            Type? keyed = parameterTypes[i];
+
+            if (keyed is null)
+                continue;
+
+            if (keyed.IsGenericTypeDefinition)
+            {
+                if (!parameterType.IsGenericType || parameterType.GetGenericTypeDefinition() != keyed)
+                    return false;
+
+                continue;
+            }
+
+            if (parameterType != keyed)
                 return false;
         }
 
         return true;
     }
+
+    // A func value bound to a constructed generic method (`first<int>`) finds the records of its definition, which is
+    // what a declaring type's methods are.
+    internal static MethodInfo RecordedMethod(MethodInfo method) =>
+        method.IsGenericMethod && !method.IsGenericMethodDefinition ? method.GetGenericMethodDefinition() : method;
 }

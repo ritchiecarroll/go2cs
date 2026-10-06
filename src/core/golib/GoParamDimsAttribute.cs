@@ -20,7 +20,9 @@ namespace go;
 /// generated file cannot add an attribute to another part's parameter. The method is identified as
 /// <see cref="GoSigChanDirAttribute"/> identifies it: by <see cref="Method"/> and <see cref="ParameterTypes"/>
 /// (the C# parameter types, receiver included; a <c>ref</c> parameter by its element type), which the
-/// generator writes as <c>typeof</c> expressions the compiler resolves, so no type is ever matched by name.
+/// generator writes as <c>typeof</c> expressions the compiler resolves, so no type is ever matched by name. For a
+/// generic method a type built from a type parameter is its open definition and a bare type parameter is null
+/// (<c>GoReflect.SignatureMatches</c>).
 /// </para>
 /// <para>
 /// <c>GoReflect.ParamDimsRecords</c> resolves each record when its type is first read and refuses BY NAME
@@ -30,13 +32,16 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true, Inherited = false)]
-public sealed class GoParamDimsAttribute(string method, Type[] parameterTypes, int position, params long[] dims) : Attribute
+public sealed class GoParamDimsAttribute(string method, Type?[] parameterTypes, int position, params long[] dims) : Attribute
 {
     /// <summary>The C# method name.</summary>
     public string Method { get; } = method;
 
-    /// <summary>The C# parameter types, receiver included; a <c>ref</c> parameter by its element type.</summary>
-    public Type[] ParameterTypes { get; } = parameterTypes;
+    /// <summary>
+    /// The C# parameter types, receiver included; a <c>ref</c> parameter by its element type; for a generic method, an
+    /// open definition or null where a type parameter is.
+    /// </summary>
+    public Type?[] ParameterTypes { get; } = parameterTypes;
 
     /// <summary>The C# parameter position the dims belong to.</summary>
     public int Position { get; } = position;
