@@ -1266,7 +1266,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					// and this path is the one a `*[N]T` parameter always takes, because HAVING a
 					// pointer parameter is what triggers the rebuild. So the pointee dims of
 					// net/rpc's every reply argument could only ever be stamped here.
-					updatedSignature.WriteString(emitGoArrayDimsAttribute(param.Type()))
+					updatedSignature.WriteString(emitParamDims(param.Type(), recordableDeclaration(signature, true)))
 
 					updatedSignature.WriteString(v.getCSharpTypeName(param.Type()))
 					updatedSignature.WriteRune(' ')
@@ -1780,7 +1780,8 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 			// One emission point serves all three signature builders (declarations/methods here,
 			// func literals and func types through convFuncType, interface methods through
 			// visitInterfaceType), so a Go func type's parameter dims are stated wherever its
-			// C# shape is written.
+			// C# shape is written: as the `/*[N]*/` comment on a declaration a go2cs-gen record can
+			// key, and as the attribute everywhere else (emitParamDims).
 			// A func-literal parameter at a CONSTRAINT-PROXY delegate position is DECLARED at the
 			// proxy under a synthesized incoming name; the literal's body prologue re-declares the
 			// Go name at this natural type (see constraintProxyLitParamTypes). Handled here rather
@@ -1793,7 +1794,7 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 				continue
 			}
 
-			result.WriteString(emitGoArrayDimsAttribute(param.Type()))
+			result.WriteString(emitParamDims(param.Type(), recordableDeclaration(signature, addRecv)))
 
 			// A FUNC-LITERAL parameter typed as a `string | []byte`-union TYPE PARAMETER
 			// renders as the type parameter itself (`(T part) => ...`): the enclosing

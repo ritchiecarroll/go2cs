@@ -17,8 +17,9 @@ namespace go2cs;
 
 /// <summary>
 /// The comments converted code writes for a Go fact about a MEMBER, in place of an attribute on it
-/// (docs/PLAN-marker-comment-parity.md, 5.5 and 5.6), and the one reader every consumer shares: the record
-/// writer below, and every compile-time reader. Run-time readers read the record.
+/// (docs/PLAN-marker-comment-parity.md, 5.4 to 5.6), and the one reader every consumer shares: the record
+/// writer below, and every compile-time reader (StructTypeTemplate for embeds, TypeGenerator for a type's
+/// dims). Run-time readers read the record.
 /// </summary>
 public static class MemberMarkers
 {
@@ -211,9 +212,72 @@ public static class MemberMarkers
         _ => -1
     };
 
-    // golib's GoMemberFact.Embedded and GoMemberFact.Tag.
+    /// <summary>
+    /// The Go array dims stated by the comment the converter writes directly before a type, outermost first
+    /// (<c>/*[32]*/ array&lt;byte&gt; hash</c>, <c>/*[4][8]*/</c>), or null when there is none. <paramref name="first"/>
+    /// is the first token after the comment: a parameter's or field's type, or a type declaration's first
+    /// modifier. Roslyn attaches a comment that follows another token on its line (`(`, `,`, a modifier, an
+    /// attribute list's `]`) to that token's trailing trivia, and one that opens a line to
+    /// <paramref name="first"/>'s leading trivia, so both are read; either way the comment must be the last
+    /// trivia before <paramref name="first"/> but for one space.
+    /// </summary>
+    public static long[]? DimsBefore(SyntaxToken first)
+    {
+        SyntaxTriviaList leading = first.LeadingTrivia;
+
+        if (leading.Count > 0 && !leading.All(trivia => trivia.IsKind(SyntaxKind.WhitespaceTrivia) || trivia.IsKind(SyntaxKind.EndOfLineTrivia)))
+            return DimsAtEnd(leading);
+
+        return DimsAtEnd(first.GetPreviousToken().TrailingTrivia);
+    }
+
+    /// <summary>The dims comment before <paramref name="parameter"/>'s type.</summary>
+    public static long[]? DimsOf(ParameterSyntax parameter) => parameter.Type is { } type ? DimsBefore(type.GetFirstToken()) : null;
+
+    /// <summary>The dims comment before <paramref name="field"/>'s type.</summary>
+    public static long[]? DimsOf(FieldDeclarationSyntax field) => DimsBefore(field.Declaration.Type.GetFirstToken());
+
+    /// <summary>The dims comment before a type declaration's first modifier (or its keyword).</summary>
+    public static long[]? DimsOf(BaseTypeDeclarationSyntax declaration) =>
+        DimsBefore(declaration.Modifiers.Count > 0 ? declaration.Modifiers[0] : declaration.GetFirstToken());
+
+    private static long[]? DimsAtEnd(SyntaxTriviaList trivia)
+    {
+        if (trivia.Count < 2 || !trivia[trivia.Count - 1].IsKind(SyntaxKind.WhitespaceTrivia) || trivia[trivia.Count - 1].ToString() != " " ||
+            !trivia[trivia.Count - 2].IsKind(SyntaxKind.MultiLineCommentTrivia))
+        {
+            return null;
+        }
+
+        return ParseDims(trivia[trivia.Count - 2].ToString());
+    }
+
+    /// <summary>The dims of a <c>/*[N]...*/</c> comment, outermost first, or null when it is not one.</summary>
+    public static long[]? ParseDims(string comment)
+    {
+        if (!comment.StartsWith("/*[", StringComparison.Ordinal) || !comment.EndsWith("]*/", StringComparison.Ordinal))
+            return null;
+
+        string body = comment.Substring(3, comment.Length - 6);
+        string[] parts = body.Split(new[] { "][" }, StringSplitOptions.None);
+        long[] dims = new long[parts.Length];
+
+        for (int index = 0; index < parts.Length; index++)
+        {
+            if (parts[index].Length == 0 || !parts[index].All(char.IsDigit) || !long.TryParse(parts[index], NumberStyles.None, CultureInfo.InvariantCulture, out dims[index]))
+                return null;
+        }
+
+        return dims;
+    }
+
+    /// <summary>The dims list as attribute arguments: <c>32</c>, <c>4, 8</c>.</summary>
+    public static string DimsArguments(long[] dims) => string.Join(", ", dims.Select(dim => dim.ToString(CultureInfo.InvariantCulture)));
+
+    // golib's GoMemberFact.Embedded, GoMemberFact.Tag and GoMemberFact.Dims.
     public const byte EmbeddedFact = 1;
     public const byte TagFact = 2;
+    public const byte DimsFact = 3;
 }
 
 public sealed class MemberMarkerFinder : ISyntaxReceiver
@@ -224,8 +288,10 @@ public sealed class MemberMarkerFinder : ISyntaxReceiver
     {
         switch (syntaxNode)
         {
-            case FieldDeclarationSyntax field when MemberMarkers.HasEmbed(field) || MemberMarkers.TagOf(field) is not null:
+            case FieldDeclarationSyntax field when MemberMarkers.HasEmbed(field) || MemberMarkers.TagOf(field) is not null || MemberMarkers.DimsOf(field) is not null:
             case PropertyDeclarationSyntax property when MemberMarkers.TagOf(property) is not null:
+            case MethodDeclarationSyntax method when method.ParameterList.Parameters.Any(parameter => MemberMarkers.DimsOf(parameter) is not null):
+            case StructDeclarationSyntax or ClassDeclarationSyntax when MemberMarkers.DimsOf((BaseTypeDeclarationSyntax)syntaxNode) is not null:
                 Members.Add((MemberDeclarationSyntax)syntaxNode);
                 break;
         }
@@ -256,10 +322,18 @@ public class MemberRecordGenerator : ISourceGenerator
 
         Dictionary<INamedTypeSymbol, (string ns, List<string> records)> byType = new(SymbolEqualityComparer.Default);
 
-        void record(SyntaxNode declaration, ISymbol? symbol, string fact, string? value = null)
+        void record(SyntaxNode declaration, ISymbol? symbol, string fact, string? value = null) =>
+            add(declaration, symbol?.ContainingType, $"[global::go.GoMemberRecord({SymbolDisplay.FormatLiteral(symbol?.Name ?? "", true)}, global::go.GoMemberFact.{fact}{(value is null ? "" : ", " + value)})]");
+
+        // An attribute on a generated partial of declaringType. A comment the converter writes only where a record
+        // can carry it (a converted type is partial everywhere) is an error anywhere else, never a silent loss.
+        void add(SyntaxNode declaration, INamedTypeSymbol? declaringType, string attribute)
         {
-            if (symbol is not { ContainingType: { } declaringType } || !GeneratedPartials.CanReopen(declaringType))
+            if (declaringType is null || !GeneratedPartials.CanReopen(declaringType))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, declaration.GetLocation(), attribute, "its declaring type is not partial everywhere"));
                 return;
+            }
 
             string ns = declaration.GetNamespaceName();
 
@@ -272,8 +346,7 @@ public class MemberRecordGenerator : ISourceGenerator
                 byType[declaringType] = slot;
             }
 
-            string payload = value is null ? "" : ", " + SymbolDisplay.FormatLiteral(value, true);
-            slot.records.Add($"[global::go.GoMemberRecord({SymbolDisplay.FormatLiteral(symbol.Name, true)}, global::go.GoMemberFact.{fact}{payload})]");
+            slot.records.Add(attribute);
         }
 
         foreach (MemberDeclarationSyntax member in finder.Members)
@@ -296,13 +369,49 @@ public class MemberRecordGenerator : ISourceGenerator
 
                         // An empty tag is Go's untagged field: nothing to record.
                         if (tag is { Length: > 0 })
-                            record(field, symbol, "Tag", tag);
+                            record(field, symbol, "Tag", SymbolDisplay.FormatLiteral(tag, true));
+
+                        if (MemberMarkers.DimsOf(field) is { } fieldDims)
+                            record(field, symbol, "Dims", MemberMarkers.DimsArguments(fieldDims));
                     }
 
                     break;
 
                 case PropertyDeclarationSyntax property when MemberMarkers.TagOf(property) is { Length: > 0 } propertyTag:
-                    record(property, semanticModel.GetDeclaredSymbol(property), "Tag", propertyTag);
+                    record(property, semanticModel.GetDeclaredSymbol(property), "Tag", SymbolDisplay.FormatLiteral(propertyTag, true));
+                    break;
+
+                // A parameter is keyed as GoSigChanDir keys a method: name, typeof each parameter type (the one
+                // spelling, GeneratedPartials.TypeOf), and position. A method an attribute cannot name (generic,
+                // or a signature with a type parameter or pointer) keeps [GoArrayDims] in converted code, so a dims
+                // comment on one is an error.
+                case MethodDeclarationSyntax method:
+                    if (semanticModel.GetDeclaredSymbol(method) is not IMethodSymbol methodSymbol)
+                        break;
+
+                    if (methodSymbol.IsGenericMethod || methodSymbol.Parameters.Any(parameter => !GeneratedPartials.IsNameable(parameter.Type)))
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, method.GetLocation(), $"The array dims comment on {methodSymbol.Name}'s parameters", "a record cannot name a generic method or a type parameter; the parameter keeps [GoArrayDims]"));
+                        break;
+                    }
+
+                    string parameterTypes = string.Join(", ", methodSymbol.Parameters.Select(parameter => GeneratedPartials.TypeOf(parameter.Type)));
+
+                    for (int position = 0; position < method.ParameterList.Parameters.Count; position++)
+                    {
+                        if (MemberMarkers.DimsOf(method.ParameterList.Parameters[position]) is { } parameterDims)
+                        {
+                            add(method, methodSymbol.ContainingType, $"[global::go.GoParamDims({SymbolDisplay.FormatLiteral(methodSymbol.Name, true)}, " +
+                                $"new global::System.Type[] {{ {parameterTypes} }}, {position}, {MemberMarkers.DimsArguments(parameterDims)})]");
+                        }
+                    }
+
+                    break;
+
+                // A type's dims ride a generated partial as the attribute itself, where golib's TypeStampedDims and
+                // TypeGenerator read them.
+                case BaseTypeDeclarationSyntax typeDeclaration when MemberMarkers.DimsOf(typeDeclaration) is { } typeDims:
+                    add(typeDeclaration, semanticModel.GetDeclaredSymbol(typeDeclaration), $"[global::go.GoArrayDims({MemberMarkers.DimsArguments(typeDims)})]");
                     break;
             }
         }

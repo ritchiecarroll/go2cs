@@ -12,6 +12,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -20,13 +21,47 @@ import (
 // memberMarkKinds are the member facts converted code states as a comment rather than an attribute
 // (docs/PLAN-marker-comment-parity.md, sections 5.4-5.6), each by its old attribute and the text that
 // opens its new comment: a tag comment follows a field's `;` or an embed property's `}`, in either of
-// Go's spellings.
+// Go's spellings; a dims comment precedes a type. stays names the lines on which the attribute is still
+// the converter's spelling (section 11's STAYS rows): those are counted, never reported.
 var memberMarkKinds = []struct {
 	attribute string
 	comments  []string
+	stays     func(line string) bool
 }{
-	{"[GoEmbedded]", []string{embedMarker}},
-	{"[GoTag(", []string{"; /*`", `; /*"`, "} /*`", `} /*"`}},
+	{"[GoEmbedded]", []string{embedMarker}, nil},
+	{"[GoTag(", []string{"; /*`", `; /*"`, "} /*`", `} /*"`}, nil},
+	{"[GoArrayDims(", []string{"/*["}, dimsAttributeStays},
+}
+
+var (
+	dimsFieldLine  = regexp.MustCompile(`^\[GoArrayDims\(`)
+	dimsTypeLine   = regexp.MustCompile(`\bpartial (struct|class) `)
+	dimsMethodDecl = regexp.MustCompile(`^(public|internal|private|protected)\b[^(=]*\(`)
+	leadingAttrs   = regexp.MustCompile(`^(\[[^\]]*\]\s*)+`)
+)
+
+// dimsAttributeStays reports whether a [GoArrayDims] on this line is one the converter still writes: a
+// lambda's or a local function's parameter, a generic func's (an attribute argument cannot name a type
+// parameter), a func type's or an interface member's. A field line, a named type's line and a non-generic
+// declaration's parameters carry the comment instead.
+func dimsAttributeStays(line string) bool {
+	code := strings.TrimSpace(line)
+
+	if !dimsFieldLine.MatchString(code) {
+		code = leadingAttrs.ReplaceAllString(code, "")
+	}
+
+	switch {
+	case dimsFieldLine.MatchString(code), dimsTypeLine.MatchString(code):
+		return false
+	case strings.Contains(code, " delegate "), strings.Contains(code, "=>"):
+		return true
+	case dimsMethodDecl.MatchString(code):
+		// Generic when the method NAME carries type parameters (`first<T>(`), not a return type (`slice<byte> f(`).
+		return strings.HasSuffix(strings.TrimSpace(code[:strings.Index(code, "(")]), ">")
+	}
+
+	return true
 }
 
 // TestMemberMarksFollowTheCommentRule reads the COMMITTED corpus and the behavioral suite and holds each
@@ -41,6 +76,7 @@ func TestMemberMarksFollowTheCommentRule(t *testing.T) {
 	var attributeSites, mixedTests []string
 	scanned := 0
 	comments := map[string]int{}
+	stays := map[string]int{}
 
 	walk := func(root string, behavioral bool) error {
 		return filepath.WalkDir(root, func(filePath string, entry fs.DirEntry, walkErr error) error {
@@ -91,7 +127,9 @@ func TestMemberMarksFollowTheCommentRule(t *testing.T) {
 						continue
 					}
 
-					if strings.Contains(line, kind.attribute) {
+					if strings.Contains(line, kind.attribute) && kind.stays != nil && kind.stays(line) {
+						stays[kind.attribute] += strings.Count(line, kind.attribute)
+					} else if strings.Contains(line, kind.attribute) {
 						attributes++
 
 						if !convertedTest {
@@ -135,5 +173,5 @@ func TestMemberMarksFollowTheCommentRule(t *testing.T) {
 		t.Errorf("converted test source mixes the old and new member mark: %s -- a file is one emission or the other (a hand edit?)", file)
 	}
 
-	t.Logf("read %d converted files: %d attribute sites where none may stand, %d mixed test sources, comments %v", scanned, len(attributeSites), len(mixedTests), comments)
+	t.Logf("read %d converted files: %d attribute sites where none may stand, %d mixed test sources, comments %v, attributes that stay %v", scanned, len(attributeSites), len(mixedTests), comments, stays)
 }

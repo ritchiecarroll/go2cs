@@ -117,12 +117,38 @@ func TestGoCommentsAreNeverMarkers(t *testing.T) {
 		t.Errorf("converted code still carries [GoTag]:\n%s", mainCs)
 	}
 
+	// Array dims (5.4): the dims comment directly before the type on a declaration a go2cs-gen record can
+	// key (a func or method parameter, a field, a named array or pointer-to-array type), and the attribute
+	// where none can (a lambda, a local function, a generic func). A map key's dims stay an attribute.
+	for _, want := range []string{
+		"[GoType(\"[2]array<nint>\")] /*[2][3]*/ partial struct nn;",
+		"[GoType(\"ж<array<byte>>\")] /*[4]*/ partial class P;",
+		"internal /*[3]*/ ж<array<nint>> p;",
+		"[GoMapKeyDims(2)]\n    internal /*[3]*/ map<array<@string>, array<nint>> m;",
+		"internal /*[5]*/ slice<ж<array<byte>>> s;",
+		"internal static nint hash(/*[32]*/ array<byte> b) {",
+		", /*[4][8]*/ array<array<byte>> grid) {",
+		"internal static void put(this ref holder h, /*[3]*/ array<nint> v) {",
+		"internal static nint noted(/*[4]*/ array<byte> a, nint b) {",
+		"internal static T first<T>([GoArrayDims(2)] array<T> a) {",
+		"var lambda = ([GoArrayDims(32)] array<byte> x) => {",
+		"nint local([GoArrayDims(3)] array<nint> x) {",
+	} {
+		if !strings.Contains(mainCs, want) {
+			t.Errorf("want %q in:\n%s", want, mainCs)
+		}
+	}
+
+	if got := strings.Count(mainCs, "GoArrayDims("); got != 3 {
+		t.Errorf("got %d [GoArrayDims(...)], want 3 (the generic func, the lambda, the local function):\n%s", got, mainCs)
+	}
+
 	// Every Go comment carried, re-spelled.
 	if got, want := strings.Count(mainCs, carriedComment(embedMarker)), strings.Count(string(source), embedMarker); got != want {
 		t.Errorf("got %d carried %s, want %d (one per Go comment):\n%s", got, carriedComment(embedMarker), want, mainCs)
 	}
 
-	for _, carried := range []string{"/* `json:\"other\"`*/", "/* `json:\"bare\"`*/", "/* \"json:\\\"q\\\"\"*/"} {
+	for _, carried := range []string{"/* `json:\"other\"`*/", "/* `json:\"bare\"`*/", "/* \"json:\\\"q\\\"\"*/", "/* [9]*/", "/* [7]*/", "/* [10]*/"} {
 		if !strings.Contains(mainCs, carried) {
 			t.Errorf("want the Go comment carried as %s in:\n%s", carried, mainCs)
 		}

@@ -9,6 +9,7 @@
 package main
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -35,10 +36,29 @@ func structTagComment(tag string) string {
 
 func isNotPrint(r rune) bool { return !strconv.IsPrint(r) }
 
-// The bodies (the text after `/*`) of the comments go2cs-gen reads as member facts: the embed marker and
-// the two openings of a tag comment. A Go block comment that opens with one of them is carried with a space
-// after its `/*` (carriedComment).
-var memberMarkerOpenings = []string{strings.TrimPrefix(embedMarker, "/*"), "`", `"`}
+// dimsComment is the comment converted code carries for Go array dims, directly before the type they
+// describe: Go's own array prefix, `/*[32]*/ array<byte> hash`, `/*[4][8]*/` for nested arrays, the pointee's
+// for a pointer to an array. go2cs-gen reads it (MemberMarkers.DimsBefore) and records it on the declaring
+// type, where golib's reflection reads it back (docs/PLAN-marker-comment-parity.md, 5.4). The trailing space
+// is part of the spelling: the reader takes the comment only directly before the type.
+func dimsComment(dims []int64) string {
+	var comment strings.Builder
+
+	comment.WriteString("/*")
+
+	for _, dim := range dims {
+		fmt.Fprintf(&comment, "[%d]", dim)
+	}
+
+	comment.WriteString("*/ ")
+
+	return comment.String()
+}
+
+// The bodies (the text after `/*`) of the comments go2cs-gen reads as member facts: the embed marker, the
+// two openings of a tag comment and the opening of a dims comment. A Go block comment that opens with one
+// of them is carried with a space after its `/*` (carriedComment).
+var memberMarkerOpenings = []string{strings.TrimPrefix(embedMarker, "/*"), "`", `"`, "["}
 
 // carriedComment is the text converted code carries for a comment from the Go source. The member facts
 // above are block comments the converter writes itself, and go2cs-gen reads one only as spelled here, so

@@ -375,8 +375,10 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			// any other pointee stamps nothing (census: production 0 named pointer-to-array types).
 			dimsAttr := ""
 
+			// As the dims comment (dimsComment), which go2cs-gen re-emits as [GoArrayDims] on a generated
+			// partial of the wrapper, where golib's TypeStampedDims reads it.
 			if dims := nilArrayPtrDims(v.info.TypeOf(typeSpecType)); len(dims) > 0 {
-				dimsAttr = fmt.Sprintf("[GoArrayDims(%s)] ", renderDimsList(dims))
+				dimsAttr = dimsComment(dims)
 			}
 
 			v.writeStringLn(target, "%s[GoType(\"%s\")] %s%spartial class %s;", v.localNameAttrFor(identType), rootGoTypeDescriptor(pointerTypeName), dimsAttr, access, getSanitizedIdentifier(name))

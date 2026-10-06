@@ -197,8 +197,10 @@ func constArrayLength(value constant.Value) (string, bool) {
 	return strconv.FormatInt(length, 10), true
 }
 
-// namedArrayElemDimsAttr renders the `[GoArrayDims(...)]` stamp a NAMED fixed-array type needs when
-// its ELEMENT is itself an unnamed fixed array (`type nn [2][3]int`), or "" for every other shape.
+// namedArrayElemDimsAttr renders the dims comment (`/*[2][3]*/`, dimsComment) a NAMED fixed-array type
+// needs when its ELEMENT is itself an unnamed fixed array (`type nn [2][3]int`), or "" for every other
+// shape. go2cs-gen reads it for the wrapper's backing and re-emits it as `[GoArrayDims(...)]` on a
+// generated partial, where golib reads it.
 //
 // It is the one fact about such a type that reaches C# nowhere else. The wrapper's descriptor is
 // `[2]array<nint>` — the inner 3 is gone — and go2cs-gen builds the wrapper's backing lazily as
@@ -222,7 +224,7 @@ func namedArrayElemDimsAttr(namedType types.Type) string {
 	}
 
 	if dims := goArrayDims(namedType.Underlying()); len(dims) > 1 {
-		return emitGoArrayDimsAttribute(namedType.Underlying())
+		return dimsComment(dims)
 	}
 
 	return ""

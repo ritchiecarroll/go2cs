@@ -413,10 +413,14 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		}
 
 		// The array dims this field's type reaches through a hop no zero instance can measure — a
-		// POINTER's pointee, a MAP's key or element. Every name in a Go field group shares
-		// field.Type, so one attribute line covers the whole group (see fieldDimsCargo.go).
-		if dimsAttributes := emitFieldDimsAttributes(v.getType(field.Type, false)); dimsAttributes != "" {
-			v.writeString(target, "%s", dimsAttributes)
+		// POINTER's pointee, a MAP's key or element (see fieldDimsCargo.go). The element dims ride a
+		// comment directly before the field's type on every line that declares it; a map key's are still
+		// an attribute line (not in this step; see emitFieldDims), which covers the whole group since every
+		// name in it shares field.Type.
+		keyDimsAttribute, fieldDimsComment := emitFieldDims(v.getType(field.Type, false))
+
+		if keyDimsAttribute != "" {
+			v.writeString(target, "%s", keyDimsAttribute)
 			target.WriteString(v.newline)
 		}
 
@@ -931,7 +935,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 				layoutFieldIndex += len(field.Names)
 
-				v.writeString(target, "%s %s %s;%s", getAccess(field.Names[0].Name), csDisplayTypeName, strings.Join(fieldNames, ", "), tagComment)
+				v.writeString(target, "%s %s%s %s;%s", getAccess(field.Names[0].Name), fieldDimsComment, csDisplayTypeName, strings.Join(fieldNames, ", "), tagComment)
 				v.writeCommentString(target, field.Comment, goCommentPos(field.Type.End()+displayLenDeviation))
 				target.WriteString(v.newline)
 			} else {
@@ -970,7 +974,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 					layoutFieldIndex++
 
-					v.writeString(target, "%s%s %s%s %s%s;%s", offsetAttr, getAccess(ident.Name), readOnly, csDisplayTypeName, fieldName, fieldInitializer, tagComment)
+					v.writeString(target, "%s%s %s%s%s %s%s;%s", offsetAttr, getAccess(ident.Name), readOnly, fieldDimsComment, csDisplayTypeName, fieldName, fieldInitializer, tagComment)
 					v.writeCommentString(target, field.Comment, goCommentPos(field.Type.End()+displayLenDeviation))
 					target.WriteString(v.newline)
 				}

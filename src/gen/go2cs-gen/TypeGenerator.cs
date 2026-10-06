@@ -608,13 +608,18 @@ public class TypeGenerator : ISourceGenerator
             $"new({dimension}, static () => {inner})";
     }
 
-    // The `[GoArrayDims(...)]` cargo on a type declaration, outermost first, or empty when absent.
-    // Mirrors GetValueCloneFields' shape: the stamp can sit on any of the type's partial
-    // declarations, and the converter writes it on the one carrying [GoType].
+    // The array dims cargo on a type declaration, outermost first, or empty when absent: the converter's
+    // `/*[2][3]*/` comment before the declaration's modifiers (read by MemberMarkers.DimsOf, the one
+    // parser; MemberRecordGenerator re-emits it as [GoArrayDims] on a generated partial for golib), or a
+    // hand-written `[GoArrayDims(...)]`. Mirrors GetValueCloneFields' shape: the cargo can sit on any of the
+    // type's partial declarations, and the converter writes it on the one carrying [GoType].
     private static long[] GetGoArrayDims(BaseTypeDeclarationSyntax targetSyntax, SemanticModel semanticModel)
     {
         foreach (BaseTypeDeclarationSyntax declaration in GetPartialDeclarations(targetSyntax, semanticModel))
         {
+            if (MemberMarkers.DimsOf(declaration) is { } commented)
+                return commented;
+
             foreach (AttributeListSyntax attributeList in declaration.AttributeLists)
             {
                 foreach (AttributeSyntax attribute in attributeList.Attributes)

@@ -9,7 +9,8 @@
 // Go comments shaped like the member facts go2cs-gen reads (docs/PLAN-marker-comment-parity.md, 6),
 // beside the real facts. Converted with -comments, each Go comment is carried re-spelled, so the records
 // go2cs-gen writes for this file are those of the same source without them: the real embeds of marked
-// and tagged, and the struct tags of tagged, each in the spelling a comment can hold.
+// and tagged, the struct tags of tagged, each in the spelling a comment can hold, and the array dims of
+// the declarations below (a lambda's, a local function's and a generic func's stay attributes).
 package main
 
 import "fmt"
@@ -47,6 +48,34 @@ type tagged struct {
 	fmt.Stringer  `json:"str"`
 }
 
+type nn [2][3]int
+
+type P *[4]byte
+
+type holder struct {
+	p        *[3]int
+	m        map[[2]string][3]int
+	s        []*[5]byte
+	n        int /*[9]*/
+	/*[7]*/ q *[6]int
+}
+
+func hash(b [32]byte) int { return len(b) }
+
+func fill(n int, p *[2]int32, grid [4][8]byte) {}
+
+func first[T any](a [2]T) T { return a[0] }
+
+func noted(a /*[9]*/ [4]byte, b /*[10]*/ int) int { return len(a) + b }
+
+func (h *holder) put(v [3]int) {}
+
 func main() {
-	fmt.Println(inline{}, marked{}, tagged{})
+	lambda := func(x [32]byte) int { return len(x) }
+	local := func(x [3]int) int { return len(x) }
+	var sink any = lambda
+	var h holder
+	h.put([3]int{})
+	fmt.Println(inline{}, marked{}, tagged{}, nn{}, P(nil), h, hash([32]byte{}), first([2]int{}), noted([4]byte{}, 1), local([3]int{}), sink != nil)
+	fill(0, nil, [4][8]byte{})
 }

@@ -70,6 +70,26 @@ public static class GeneratedPartials
         return GetValidFileName(unique);
     }
 
+    /// <summary>
+    /// The one spelling of a parameter type in a generated record's method key: <c>typeof(...)</c>, which the
+    /// compiler resolves, so golib matches the key by Type identity and never by a name
+    /// (<c>GoReflect.SignatureMatches</c>; ChanDirSigGenerator, MemberRecordGenerator).
+    /// </summary>
+    public static string TypeOf(ITypeSymbol type) => $"typeof({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
+
+    /// <summary>
+    /// Whether an attribute argument can name <paramref name="type"/>, and so whether a method whose parameters
+    /// all pass can be keyed: no type parameter anywhere in it, and no unmanaged pointer.
+    /// </summary>
+    public static bool IsNameable(ITypeSymbol type) => type switch
+    {
+        ITypeParameterSymbol => false,
+        IPointerTypeSymbol or IFunctionPointerTypeSymbol => false,
+        IArrayTypeSymbol array => IsNameable(array.ElementType),
+        INamedTypeSymbol named => named.TypeArguments.All(IsNameable) && (named.ContainingType is null || IsNameable(named.ContainingType)),
+        _ => true
+    };
+
     // The declaring type and every type enclosing it, innermost first.
     private static IEnumerable<INamedTypeSymbol> EnclosingChain(INamedTypeSymbol type)
     {

@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -31,13 +32,17 @@ public class MemberRecordGeneratorTests
         public sealed class GoTypeAttribute : System.Attribute { public GoTypeAttribute() { } public GoTypeAttribute(string type) { } }
         public sealed class GoTagAttribute(string tag) : System.Attribute { }
         public sealed class GoEmbeddedAttribute : System.Attribute { }
-        public enum GoMemberFact : byte { Embedded = 1, Tag = 2 }
+        public enum GoMemberFact : byte { Embedded = 1, Tag = 2, Dims = 3 }
         [System.AttributeUsage(System.AttributeTargets.Struct | System.AttributeTargets.Class, AllowMultiple = true)]
         public sealed class GoMemberRecordAttribute : System.Attribute
         {
             public GoMemberRecordAttribute(string member, GoMemberFact fact) { }
             public GoMemberRecordAttribute(string member, GoMemberFact fact, string value) { }
+            public GoMemberRecordAttribute(string member, GoMemberFact fact, params long[] dims) { }
         }
+        [System.AttributeUsage(System.AttributeTargets.Struct | System.AttributeTargets.Class, AllowMultiple = true)]
+        public sealed class GoParamDimsAttribute(string method, System.Type[] parameterTypes, int position, params long[] dims) : System.Attribute { }
+        public sealed class GoArrayDimsAttribute(params long[] dims) : System.Attribute { }
         """;
 
     private static readonly Lazy<string[]> s_generated = new(() => Run(FixtureSource()));
@@ -83,6 +88,15 @@ public class MemberRecordGeneratorTests
 
         return tags;
     }
+
+    // Each generated attribute of the given name, as "<first argument> <the remaining arguments>", the first read
+    // as C# reads a string literal.
+    private static string[] Recorded(string[] generated, string attributeName) =>
+        generated.SelectMany(source => CSharpSyntaxTree.ParseText(source).GetRoot().DescendantNodes().OfType<AttributeSyntax>())
+            .Where(attribute => attribute.Name.ToString() == $"global::go.{attributeName}")
+            .Select(attribute => string.Join(" ", attribute.ArgumentList!.Arguments.Select(argument =>
+                argument.Expression is LiteralExpressionSyntax literal && literal.IsKind(SyntaxKind.StringLiteralExpression) ? literal.Token.ValueText : argument.Expression.ToString())))
+            .OrderBy(text => text, StringComparer.Ordinal).ToArray();
 
     private static string[] RecordedMembers(string[] generated, string fact) =>
         generated.SelectMany(source => Regex.Matches(source, $@"\[global::go\.GoMemberRecord\(""([^""]+)"", global::go\.GoMemberFact\.{fact}").Select(match => match.Groups[1].Value))
@@ -219,5 +233,62 @@ public class MemberRecordGeneratorTests
 
         foreach (string refused in new[] { @"""\q""", @"""\x4""", @"""\400""", @"""\ud800""", @"""a""b""", @"""open", "`raw`" })
             Assert.IsNull(MemberMarkers.GoUnquote(refused), refused);
+    }
+
+    [TestMethod]
+    public void EachDimsCommentIsRecordedWhereGolibReadsIt()
+    {
+        // The converter's own output: a parameter's dims on the package class, keyed by method name, the typeof of
+        // every parameter and the position; a field's on its struct; a type's as the attribute on the type itself.
+        // The generic func, the lambda and the local function keep [GoArrayDims] and record nothing.
+        string[] generated = Run(MarkerCommentsFixture());
+
+        string[] parameters = Recorded(generated, "GoParamDims");
+        CollectionAssert.AreEqual(new[] { "fill", "hash", "noted", "put" }, parameters.Select(record => record.Split(' ')[0]).ToArray(), string.Join("\n", parameters));
+        StringAssert.EndsWith(parameters[0], "} 2 4 8");
+        StringAssert.EndsWith(parameters[1], "} 0 32");
+        StringAssert.EndsWith(parameters[2], "} 0 4");
+        StringAssert.EndsWith(parameters[3], "} 1 3");
+        StringAssert.Contains(parameters[3], "new global::System.Type[] { typeof(global::go.example.com.main_package.holder), ", "the receiver is keyed by its element type");
+
+        CollectionAssert.AreEqual(new[] { "m global::go.GoMemberFact.Dims 3", "p global::go.GoMemberFact.Dims 3", "q global::go.GoMemberFact.Dims 6", "s global::go.GoMemberFact.Dims 5" },
+            Recorded(generated, "GoMemberRecord").Where(record => record.Contains(".Dims ")).ToArray());
+
+        CollectionAssert.AreEqual(new[] { "2 3", "4" }, Recorded(generated, "GoArrayDims"));
+        StringAssert.Contains(generated.Single(source => source.Contains("GoArrayDims(2, 3)")), "partial struct nn\r\n");
+        StringAssert.Contains(generated.Single(source => source.Contains("GoArrayDims(4)")), "partial class P\r\n");
+    }
+
+    [TestMethod]
+    public void ADimsCommentNoRecordCanCarryIsAnErrorNeverASilentLoss()
+    {
+        const string source = """
+            namespace go;
+
+            public partial class lib_package {
+                internal static T first<T>(/*[2]*/ array<T> a) => default!;
+            }
+
+            public struct Sealed { internal /*[3]*/ int p; }
+
+            public sealed class array<T> { }
+            """;
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new MemberRecordGenerator());
+        ImmutableArray<Diagnostic> diagnostics = driver.RunGenerators(Compile(source)).GetRunResult().Diagnostics;
+
+        Assert.AreEqual(2, diagnostics.Count(diagnostic => diagnostic.Id == "GO2CS0003" && diagnostic.Severity == DiagnosticSeverity.Error), string.Join("\n", diagnostics));
+        Assert.IsTrue(diagnostics.Any(diagnostic => diagnostic.GetMessage().Contains("first")), "the generic method is named");
+    }
+
+    [TestMethod]
+    public void ParseDimsReadsGosArrayPrefixAndNothingElse()
+    {
+        CollectionAssert.AreEqual(new long[] { 32 }, MemberMarkers.ParseDims("/*[32]*/"));
+        CollectionAssert.AreEqual(new long[] { 4, 8 }, MemberMarkers.ParseDims("/*[4][8]*/"));
+        CollectionAssert.AreEqual(new long[] { 46912496118442 }, MemberMarkers.ParseDims("/*[46912496118442]*/"));
+
+        foreach (string refused in new[] { "/*[]*/", "/* [4]*/", "/*[4] */", "/*[a]*/", "/*[4]x*/", "/*[-1]*/", "/*[4][]*/", "/*embed*/" })
+            Assert.IsNull(MemberMarkers.ParseDims(refused), refused);
     }
 }

@@ -141,27 +141,24 @@ func elementArrayDims(elem types.Type) []int64 {
 	return nil
 }
 
-// emitFieldDimsAttributes renders the descriptor-cargo attribute line a struct field declaration
-// carries -- `[GoArrayDims(3)]`, `[GoArrayDims(2), GoMapKeyDims(2)]` -- or "" when the field's type
-// reaches no array the emission would otherwise lose.
-func emitFieldDimsAttributes(t types.Type) string {
+// emitFieldDims renders the descriptor cargo a struct field declaration carries, or "" for each part the
+// field's type does not reach: the element dims as the dims comment written directly before the field's
+// type (`internal /*[3]*/ ж<array<nint>> p;`, dimsComment; go2cs-gen records it on the struct), and the map
+// KEY dims as the `[GoMapKeyDims(2)]` attribute line. That attribute is not in this step: face lift D moves
+// [GoArrayDims] only, and [GoMapKeyDims] is a MOVES row of docs/PLAN-marker-comment-parity.md section 11 that
+// rides D's mechanism in its own later step.
+func emitFieldDims(t types.Type) (keyAttribute, elemComment string) {
 	elemDims, keyDims := fieldCargoDims(t)
 
-	if len(elemDims) == 0 && len(keyDims) == 0 {
-		return ""
+	if len(keyDims) > 0 {
+		keyAttribute = fmt.Sprintf("[GoMapKeyDims(%s)]", renderDimsList(keyDims))
 	}
-
-	var attributes []string
 
 	if len(elemDims) > 0 {
-		attributes = append(attributes, fmt.Sprintf("GoArrayDims(%s)", renderDimsList(elemDims)))
+		elemComment = dimsComment(elemDims)
 	}
 
-	if len(keyDims) > 0 {
-		attributes = append(attributes, fmt.Sprintf("GoMapKeyDims(%s)", renderDimsList(keyDims)))
-	}
-
-	return fmt.Sprintf("[%s]", strings.Join(attributes, ", "))
+	return keyAttribute, elemComment
 }
 
 // renderDimsList renders array dimensions as C# attribute arguments, outermost first.

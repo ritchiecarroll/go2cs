@@ -127,7 +127,7 @@ public class ChanDirSigGenerator : ISourceGenerator
             if (semanticModel.GetDeclaredSymbol(methodSyntax) is not IMethodSymbol symbol ||
                 symbol.ContainingType is not { } declaringType ||
                 symbol.IsGenericMethod ||
-                symbol.Parameters.Any(parameter => !IsNameable(parameter.Type)) ||
+                symbol.Parameters.Any(parameter => !GeneratedPartials.IsNameable(parameter.Type)) ||
                 !GeneratedPartials.CanReopen(declaringType))
             {
                 continue;
@@ -140,7 +140,7 @@ public class ChanDirSigGenerator : ISourceGenerator
 
             byte[] parameterDirs = ChanDirMarkers.ParameterDirs(methodSyntax);
             byte[] resultDirs = ChanDirMarkers.ResultDirs(methodSyntax);
-            string[] parameterTypes = symbol.Parameters.Select(parameter => TypeOf(parameter.Type)).ToArray();
+            string[] parameterTypes = symbol.Parameters.Select(parameter => GeneratedPartials.TypeOf(parameter.Type)).ToArray();
 
             if (!byType.TryGetValue(declaringType, out (string ns, List<string> entries) slot))
             {
@@ -177,17 +177,5 @@ public class ChanDirSigGenerator : ISourceGenerator
         ChanDirMarkers.Recv => "global::go.GoChanDir.Recv",
         ChanDirMarkers.Send => "global::go.GoChanDir.Send",
         _ => "global::go.GoChanDir.Unstamped"
-    };
-
-    private static string TypeOf(ITypeSymbol type) => $"typeof({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
-
-    // A type an attribute argument can name: no type parameter anywhere in it, and no unmanaged pointer.
-    private static bool IsNameable(ITypeSymbol type) => type switch
-    {
-        ITypeParameterSymbol => false,
-        IPointerTypeSymbol or IFunctionPointerTypeSymbol => false,
-        IArrayTypeSymbol array => IsNameable(array.ElementType),
-        INamedTypeSymbol named => named.TypeArguments.All(IsNameable) && (named.ContainingType is null || IsNameable(named.ContainingType)),
-        _ => true
     };
 }
