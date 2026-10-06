@@ -414,10 +414,11 @@ public static partial class GoReflect
             nint[]? dims = KindOf(field.FieldType) == Array ? FieldArrayDims(t, field) : FieldStampedDims(field);
             GoChanDir fieldDir = KindOf(field.FieldType) == Chan ? FieldChanDir(t, field) : GoChanDir.Unstamped;
             ChanCargo? fieldCargo = KindOf(field.FieldType) == Chan ? FieldChanCargo(t, field) : null;
-            // A plain field the converter stamped [GoEmbedded] is a Go EMBEDDED field of a predeclared
-            // type (`struct{ int }`) or of an interface type (`struct{ io.Reader }`): neither has the
-            // `partial ref` shape to key on, so the stamp is what makes the field Anonymous (E2b).
-            result.Add(new GoFieldInfo(projected, field.FieldType, dims, [.. prefixPath, field], [.. prefixHops, false], goTagOf(field), embedded: field.IsDefined(typeof(GoEmbeddedAttribute), false), chanDir: fieldDir, keyDims: FieldMapKeyDims(field), descriptorSelf: FieldDescriptorType(field), chanCargo: fieldCargo));
+            // A plain field the converter marks `/*embed*/` (recorded on the type by go2cs-gen) or a
+            // hand-written file stamps [GoEmbedded] is a Go EMBEDDED field of a predeclared type
+            // (`struct{ int }`) or of an interface type (`struct{ io.Reader }`): neither has the
+            // `partial ref` shape to key on, so the mark is what makes the field Anonymous (E2b).
+            result.Add(new GoFieldInfo(projected, field.FieldType, dims, [.. prefixPath, field], [.. prefixHops, false], goTagOf(field), embedded: FieldIsEmbedded(field), chanDir: fieldDir, keyDims: FieldMapKeyDims(field), descriptorSelf: FieldDescriptorType(field), chanCargo: fieldCargo));
         }
 
         reorderToGoDeclarationOrder(t, result, first);

@@ -1484,7 +1484,9 @@ internal class StructTypeTemplate : TemplateBase
                 add(name);
         }
 
-        static bool isGoEmbedded(ISymbol symbol) => symbol.GetAttributes().Any(a => a.AttributeClass?.Name == "GoEmbeddedAttribute");
+        // A Go embedded field: [GoEmbedded] (hand-written), the converter's `/*embed*/` comment in source, or
+        // the [GoMemberRecord] MemberRecordGenerator wrote on a metadata type's assembly.
+        static bool isGoEmbedded(ISymbol symbol) => symbol is IFieldSymbol field && MemberMarkers.IsGoEmbedded(field);
 
         void walkSource(StructDeclarationSyntax decl, Compilation comp, bool isRoot, HashSet<string> seen)
         {

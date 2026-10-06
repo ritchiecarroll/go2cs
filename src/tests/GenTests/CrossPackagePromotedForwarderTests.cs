@@ -207,6 +207,14 @@ public class CrossPackagePromotedForwarderTests
                     [GoEmbedded] public xa_package.ReadCloser ReadCloser;
                 }
 
+                // The same composite as the converter writes it since face lift F: the embed marked by
+                // the `/*embed*/` comment, which is read from the declaration, not from an attribute.
+                [GoType] partial struct CompositeMarked
+                {
+                    public partial ref xa_package.Inner Inner { get; }
+                    /*embed*/ public xa_package.ReadCloser ReadCloser;
+                }
+
                 // The same fields with the interface as a NAMED field: no marker, no provider.
                 [GoType] partial struct NamedIface
                 {
@@ -472,6 +480,12 @@ public class CrossPackagePromotedForwarderTests
         Assert.IsFalse(composite.Contains(" Read("), "Read is provided twice at depth 1: ambiguous, not promoted");
         Assert.IsFalse(composite.Contains(" Close("), "Close is provided twice at depth 1: ambiguous, not promoted");
         StringAssert.Contains(composite, " Name(this global::go.main_package.Composite target)", "a name the interface does not provide still promotes");
+
+        // The comment-marked twin reads the same: the `/*embed*/` comment makes the interface a provider.
+        (_, string marked) = Split(GeneratedFor(run, "CompositeMarked"), "mainᴛCompositeMarkedᴛxpkg");
+        Assert.IsFalse(marked.Contains(" Read("), "the comment-marked embed provides Read too: ambiguous, not promoted");
+        Assert.IsFalse(marked.Contains(" Close("), "the comment-marked embed provides Close too: ambiguous, not promoted");
+        StringAssert.Contains(marked, " Name(this global::go.main_package.CompositeMarked target)");
 
         // The control: the same interface as a NAMED field is no provider, and it is the
         // converter's [GoEmbedded] marker that tells the two apart.
