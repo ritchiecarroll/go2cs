@@ -61,11 +61,15 @@ func isHandWritten(rel string, data []byte) bool {
 	return manualConversion.Match(data)
 }
 
-// TestByRefReceiversFollowTheReceiverRule reads the COMMITTED corpus (production, test and hand-owned
-// files alike) and holds both halves of face lift A's receiver rule:
-//   - CONVERTED code carries no [GoRecv] and no [GoCopyBound]: a Go pointer receiver is `this ref T`
-//     and nothing more (the converter's own rendering is pinned by
-//     TestPointerReceiversAreEmittedByRefWithNoMark);
+// TestByRefReceiversFollowTheReceiverRule reads the COMMITTED corpus and the behavioral suite and holds
+// face lift A's receiver rule, in the halves COORD ruled (2026-10-06):
+//   - CONVERTED PRODUCTION code and the BEHAVIORAL sources and goldens (`.cs`, `.cs.target`) carry no
+//     [GoRecv] and no [GoCopyBound]: a Go pointer receiver is `this ref T` and nothing more (the
+//     converter's own rendering is pinned by TestPointerReceiversAreEmittedByRefWithNoMark);
+//   - CONVERTED TEST sources (`_test.cs`) are the windows emission of record, refreshed once at a train's
+//     landing, so until that refresh each FILE is all or none: every by-ref receiver marked (the old
+//     emission) or none (the new one), never a mixture, which a hand edit would make. The first seat
+//     after the landing tightens this half to none;
 //   - a HAND-WRITTEN `this ref` / `this in` receiver carries [GoRecv] or [GoCopyBound], on its own line
 //     or on the attribute line directly above, unless it is one of the allowlisted helpers.
 //
@@ -74,100 +78,139 @@ func isHandWritten(rel string, data []byte) bool {
 // hop), proved by the PromotedPtrMethodValueSet behavioral test and golib's CopyBoundReceiverTests.
 func TestByRefReceiversFollowTheReceiverRule(t *testing.T) {
 	coreDir := filepath.Join("..", "core")
+	behavioralDir := filepath.Join("..", "tests", "Behavioral")
 
 	found := map[string][]string{}
-	var convertedMarks []string
-	handMarked, convertedByRef, scanned := 0, 0, 0
+	var unmarkedRequired, mixedTests []string
+	handMarked, productionByRef, scanned, testsOld, testsNew := 0, 0, 0, 0, 0
 
-	err := filepath.WalkDir(coreDir, func(filePath string, entry fs.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
-		}
+	marked := func(text string) bool {
+		return strings.Contains(text, "GoRecv") || strings.Contains(text, "GoCopyBound")
+	}
 
-		if entry.IsDir() {
-			name := entry.Name()
-
-			if name == "bin" || name == "obj" || name == ".vs" || strings.HasPrefix(name, "Generated") {
-				return fs.SkipDir
+	walk := func(root string, behavioral bool) error {
+		return filepath.WalkDir(root, func(filePath string, entry fs.DirEntry, walkErr error) error {
+			if walkErr != nil {
+				return walkErr
 			}
 
-			return nil
-		}
+			if entry.IsDir() {
+				name := entry.Name()
 
-		if !strings.HasSuffix(entry.Name(), ".cs") {
-			return nil
-		}
+				if name == "bin" || name == "obj" || name == ".vs" || strings.HasPrefix(name, "Generated") {
+					return fs.SkipDir
+				}
 
-		data, readErr := os.ReadFile(filePath)
-
-		if readErr != nil {
-			return readErr
-		}
-
-		scanned++
-
-		rel, _ := filepath.Rel(coreDir, filePath)
-		rel = filepath.ToSlash(rel)
-		handWritten := isHandWritten(rel, data)
-		previous := ""
-
-		for index, line := range strings.Split(string(data), "\n") {
-			trimmed := strings.TrimSpace(line)
-
-			if strings.HasPrefix(trimmed, "//") {
-				continue
+				return nil
 			}
 
-			code, _, _ := strings.Cut(line, "//")
+			if !strings.HasSuffix(entry.Name(), ".cs") && !(behavioral && strings.HasSuffix(entry.Name(), ".cs.target")) {
+				return nil
+			}
 
-			if !handWritten {
-				if strings.Contains(code, "[GoRecv") || strings.Contains(code, "GoRecv]") || strings.Contains(code, "GoCopyBound") {
-					convertedMarks = append(convertedMarks, rel+":"+strconv.Itoa(index+1))
+			data, readErr := os.ReadFile(filePath)
+
+			if readErr != nil {
+				return readErr
+			}
+
+			scanned++
+
+			rel, _ := filepath.Rel(root, filePath)
+			rel = filepath.ToSlash(rel)
+			handWritten := !behavioral && isHandWritten(rel, data)
+			convertedTest := !behavioral && !handWritten && strings.HasSuffix(rel, "_test.cs")
+			fileMarks, fileByRef := 0, 0
+			previous := ""
+
+			if behavioral {
+				rel = "tests/Behavioral/" + rel
+			}
+
+			for index, line := range strings.Split(string(data), "\n") {
+				trimmed := strings.TrimSpace(line)
+
+				if strings.HasPrefix(trimmed, "//") {
+					continue
 				}
 
-				if byRefReceiverDecl.MatchString(line) {
-					convertedByRef++
-				}
-			} else if byRefReceiverDecl.MatchString(line) {
-				marked := func(text string) bool {
-					return strings.Contains(text, "GoRecv") || strings.Contains(text, "GoCopyBound")
-				}
+				code, _, _ := strings.Cut(line, "//")
+				isByRef := byRefReceiverDecl.MatchString(line)
 
-				if marked(line) || (strings.HasPrefix(previous, "[") && marked(previous)) {
-					handMarked++
-				} else {
-					name := "?"
+				switch {
+				case handWritten:
+					if isByRef {
+						if marked(line) || (strings.HasPrefix(previous, "[") && marked(previous)) {
+							handMarked++
+						} else {
+							name := "?"
 
-					if match := byRefReceiverName.FindStringSubmatch(line); match != nil {
-						name = match[1]
+							if match := byRefReceiverName.FindStringSubmatch(line); match != nil {
+								name = match[1]
+							}
+
+							key := rel + "\t" + name
+							found[key] = append(found[key], rel+":"+strconv.Itoa(index+1))
+						}
+					}
+				case convertedTest:
+					if isByRef {
+						fileByRef++
+
+						if marked(code) {
+							fileMarks++
+						}
+					}
+				default:
+					if marked(code) {
+						unmarkedRequired = append(unmarkedRequired, rel+":"+strconv.Itoa(index+1))
 					}
 
-					key := rel + "\t" + name
-					found[key] = append(found[key], rel+":"+strconv.Itoa(index+1))
+					if isByRef && !behavioral {
+						productionByRef++
+					}
+				}
+
+				if trimmed != "" {
+					previous = trimmed
 				}
 			}
 
-			if trimmed != "" {
-				previous = trimmed
+			switch {
+			case !convertedTest || fileByRef == 0:
+			case fileMarks == 0:
+				testsNew++
+			case fileMarks == fileByRef:
+				testsOld++
+			default:
+				mixedTests = append(mixedTests, rel+" ("+strconv.Itoa(fileMarks)+" of "+strconv.Itoa(fileByRef)+" by-ref receivers marked)")
 			}
-		}
 
-		return nil
-	})
+			return nil
+		})
+	}
 
-	if err != nil {
+	if err := walk(coreDir, false); err != nil {
 		t.Fatal(err)
 	}
 
-	// A guard that read nothing would pass on an empty corpus: the converted pointer receivers are in
-	// the thousands and the hand-written [GoRecv] receivers in the hundreds, and every allowlisted
-	// helper must still be where the list says it is.
-	if scanned < 4000 || convertedByRef < 4000 || handMarked < 100 {
-		t.Fatalf("the guard read %d files, %d converted by-ref receivers and %d marked hand-written ones: too few to be the corpus", scanned, convertedByRef, handMarked)
+	if err := walk(behavioralDir, true); err != nil {
+		t.Fatal(err)
 	}
 
-	for _, site := range convertedMarks {
-		t.Errorf("converted code carries a receiver mark: %s -- a Go pointer receiver is emitted `this ref T` unmarked; re-convert the package", site)
+	// A guard that read nothing would pass on an empty corpus: the converted production pointer receivers
+	// are in the thousands and the hand-written marked ones in the hundreds, and every allowlisted helper
+	// must still be where the list says it is.
+	if scanned < 5000 || productionByRef < 4000 || handMarked < 100 {
+		t.Fatalf("the guard read %d files, %d converted production by-ref receivers and %d marked hand-written ones: too few to be the corpus", scanned, productionByRef, handMarked)
+	}
+
+	for _, site := range unmarkedRequired {
+		t.Errorf("converted production or behavioral code carries a receiver mark: %s -- a Go pointer receiver is emitted `this ref T` unmarked; re-convert", site)
+	}
+
+	for _, file := range mixedTests {
+		t.Errorf("converted test source mixes old and new receiver emission: %s -- a file is the old emission or the new one, never a mixture (a hand edit?)", file)
 	}
 
 	var keys []string
@@ -198,6 +241,6 @@ func TestByRefReceiversFollowTheReceiverRule(t *testing.T) {
 		}
 	}
 
-	t.Logf("scanned %d files: %d converted by-ref receivers, %d marked hand-written by-ref receivers, %d converted marks, %d allowlisted helper names",
-		scanned, convertedByRef, handMarked, len(convertedMarks), len(found))
+	t.Logf("scanned %d files: %d converted production by-ref receivers, %d marks where none may stand; test sources %d old, %d new, %d mixed; %d marked hand-written by-ref receivers, %d allowlisted helper names",
+		scanned, productionByRef, len(unmarkedRequired), testsOld, testsNew, len(mixedTests), handMarked, len(found))
 }
