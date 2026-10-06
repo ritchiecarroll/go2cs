@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-2%2F2_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.3/debug.plan9obj.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/debug/plan9obj@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/debug/plan9obj) [![Source](https://img.shields.io/badge/Source-@1.24.13.3-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.3/src/core/debug/plan9obj)
+[![Tests](https://img.shields.io/badge/Tests-2%2F2_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.4/debug.plan9obj.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/debug/plan9obj@go1.24.13)\
+[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/debug/plan9obj) [![Source](https://img.shields.io/badge/Source-@1.24.13.4-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.4/src/core/debug/plan9obj)
 
 Package plan9obj implements access to Plan 9 a.out object files.
 

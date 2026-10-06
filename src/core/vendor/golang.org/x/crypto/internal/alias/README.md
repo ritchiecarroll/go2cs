@@ -3,7 +3,7 @@
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
 [![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@v0.30.0-00ADD8?logo=go)](https://pkg.go.dev/golang.org/x/crypto@v0.30.0/internal/alias)\
-[![Source](https://img.shields.io/badge/Source-@v0.30.0-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/vendor/golang.org/x/crypto/internal/alias) [![Source](https://img.shields.io/badge/Source-@1.24.13.3-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.3/src/core/vendor/golang.org/x/crypto/internal/alias)
+[![Source](https://img.shields.io/badge/Source-@v0.30.0-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/vendor/golang.org/x/crypto/internal/alias) [![Source](https://img.shields.io/badge/Source-@1.24.13.4-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.4/src/core/vendor/golang.org/x/crypto/internal/alias)
 
 Package alias implements memory aliasing tests.
 
