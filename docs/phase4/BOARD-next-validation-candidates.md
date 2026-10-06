@@ -26178,4 +26178,33 @@ Nine entries, most important first. The owner ruled at 10:05 that 1.24.13.4 wait
 
 **2026-10-04, INSTRUMENT (COORD):** four lessons from seating the train and from landing the one before it. (1) A PAIRWISE 3-way of every pushed seat against every other, and against O's union, run BEFORE the freeze, found three seat-by-seat conflicts that no lane's own gate could see, because each seat is clean on the base it was cut on. Two were position-map rows regenerating ONE `GoPositionMap` line (`g-method-value-fm-record-r3` against `c2-elseif-position-record-r2` in 5 `package_info.cs`; later go-cmp L against the else-if row in `reflect/package_info.cs`), and one was two inserts at one anchor (the sibling-name row against the `go.go` row in `importAliasOperations.go`). Each was ruled as a re-cut STACKED on the other seat, the shared line or block carrying both changes. The first pass (11:30) also found one seat against O's union itself (`PackageTests/README.md`). After the first two re-cuts the pass read 0 conflicts in 156 pairs over 21 seats and O's union (13:27); the third conflict arrived with the 23rd seat (14:05). (2) PLACEMENT keeps rows single-parent: two seats that each add a section at the tail of one doc (`shadowing.md`: the sort seat and the `go.go` seat) conflict, and moving one section to a non-tail anchor clears it with no merge-commit base. (3) The i7's git 2.35 has no `merge-tree --write-tree`: the pairwise instrument is a read-tree script, and the pre-map ran on a newer git's real ort merge. (4) A seat's `-tests` footprint is its own reading: TRAIN O's test-source refresh moved 18 committed test sources (explicit lambda result types, a bare `select();`, a cast on an untyped constant loop bound, two lifted type names, a byte cast around a shift) for seats whose rows declared no corpus footprint, because the fixup derives what the union emits from the `-stdlib` conversion only; and TRAIN O's battery read ONE finding class, an untracked `src/core/math/bits/.editorconfig` that a `-tests` run writes and no seat had committed, which this train's `claude/p2-test-warning-entries` (`8d89695095`) commits for all three flavours.
 
+## 2026-10-06 — G: logrus `TestNestedLoggingReportsCorrectCaller`, its own class after R2m: the launch directory and a non-leaf frame's line — open, to size after B and C
+
+Read on the R2m acceptance unions (control on the carrier `e7fcff2244`, seat `633b045e8a`; both with alias-publicize,
+CloneMap, the CS0030 on-hop, same-name and the `safe` tag merged), logrus v1.10.2, `-tests all -recurse`, Release
+with tiering off. On the control the row's `func` assertion read `testing.tRunner`, the R2m defect. On the seat
+`func` passes, and only the `file` assertion is left, at two sites (logrus_test.go:449 and :475). It fails for two
+independent reasons:
+
+**a. The launch directory.** The test builds the expected path from `os.Getwd()` beside the caller's file name.
+`go test` runs a package's tests IN that package's source directory, here the module cache's `logrus@v1.10.2`, so
+the two agree. The converted `-recurse` host ran in a temporary copy of the converted package
+(`<temp>/go2cs-tests/github.com_sirupsen_logrus/<run id>/src/github.com/sirupsen/logrus`), while the position
+record names the Go source file in the module cache. The expected path therefore carries the host's directory and
+the actual path the Go source's. To size: which of the two moves (Go's answer is the launch directory: run in the
+source directory), relative `testdata` included. This is "runs like Go", so a design line comes before a cut.
+
+**b. A non-leaf frame's line.** At both sites the converted `runtime.Caller(0)` answers Go's line (450 and 476).
+What differs is the line logrus reports for its CALLER frame, the `llog.Info(...)` / `....Print(...)` statement:
+Go 449 and 475, converted 450 and 476, which is the NEXT statement's line. (G's post d8a11debc3 read this as
+Caller(0) being one high; the statements read here correct that.) The shape fits a caller frame whose return
+address lies past the call, attributed to the following statement's sequence point. To size: which position the
+record carries for a call that ends a statement, and which one Go's pc-line table carries. A position record is
+invisible in emitted code, so a fix there is in bounds; a change to visible emission to satisfy a line number is
+not (the standing ruling).
+
+`hooks/slog` read failing on the control and validated on the seat, in the same runs; its reason is not read here.
+
+— G
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
