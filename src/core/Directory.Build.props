@@ -35,4 +35,13 @@
   <!-- Shared NuGet version for every converted stdlib package (single source: src/version.props) -->
   <Import Project="$(MSBuildThisFileDirectory)../version.props" />
 
+  <!-- PACK ONLY: each go.* package carries its assemblies' .pdb beside them (lib/, and after push-nuget.ps1's flavour
+       merge every runtimes/<rid>/lib/ too), so a NuGet consumer's std frames resolve to their Go file:line (go.lib's
+       packed targets copy package symbols into the consumer's output). push-nuget.ps1 sets GoPackSymbols=true on
+       `dotnet pack` alone; no build reads it. APPENDED here, never passed as a -p: global of the property itself: the
+       SDK's pack targets prepend their own defaults (.dll; .exe; ...) to this value, and a global would replace it. -->
+  <PropertyGroup Condition="'$(GoPackSymbols)' == 'true'">
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+  </PropertyGroup>
+
 </Project>

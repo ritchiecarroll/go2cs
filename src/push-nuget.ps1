@@ -1795,7 +1795,9 @@ foreach ($rid in $buildOrder) {
     # between the packages carries it too); a release passes nothing extra. The @( ) must wrap the whole `if`:
     # an `if` that yields a one-element array unrolls it to a bare string, and @ splats a string by character.
     $packVersionArgs = @(if ($VersionSuffix) { "-p:PackageVersion=$packVersion" })
-    & dotnet pack $slnx -c $Configuration -o $flavorOut -p:GoTargetOS=$goos -p:GeneratePackageOnBuild=false --no-build --nologo -v m @packVersionArgs
+    # GoPackSymbols=true puts each assembly's .pdb beside it in the package (src/core/Directory.Build.props): pack
+    # only, so no build -- in-tree, -tests or behavioral -- ever sees it. The merge below carries every .pdb with its DLL.
+    & dotnet pack $slnx -c $Configuration -o $flavorOut -p:GoTargetOS=$goos -p:GeneratePackageOnBuild=false -p:GoPackSymbols=true --no-build --nologo -v m @packVersionArgs
     if ($LASTEXITCODE -ne 0) { throw "[$rid] dotnet pack failed ($LASTEXITCODE)" }
 }
 
@@ -1814,12 +1816,17 @@ function Read-GoPackageFacts([string]$Path) {
         # Hash the compile/runtime payload only. README.md, VALIDATION.md, the icons and the .nuspec
         # are flavor-independent by construction, and the OPC bookkeeping parts (.psmdcp) carry a
         # freshly minted identifier on every pack, so including them would make every comparison differ.
+        #
+        # The ASSEMBLIES only: a .pdb records its flavor's documents and so differs in LENGTH between flavors even
+        # where the assembly does not, and comparing it would promote every platform-neutral package to RID-specific
+        # (measured 2026-10-06: 245 promoted, 1,472 assembly entries shipped instead of 492, the feed 76.8 -> 227.2 MB).
+        # A .pdb still travels with its DLL wherever the merge below copies lib/.
         $sha = [System.Security.Cryptography.SHA256]::Create()
         $lib = @{}
         $size = @{}
         try {
             foreach ($e in $zip.Entries) {
-                if ($e.FullName -notlike 'lib/*') { continue }
+                if ($e.FullName -notlike 'lib/*' -or $e.FullName -like '*.pdb') { continue }
                 $size[$e.FullName] = $e.Length
                 $s = $e.Open()
                 try { $lib[$e.FullName] = [BitConverter]::ToString($sha.ComputeHash($s)) } finally { $s.Dispose() }
