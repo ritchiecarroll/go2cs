@@ -1,9 +1,18 @@
 # PLAN — fewer attributes in converted code: what can move into a comment, what can go, what must stay
 
-> **STATUS: PROPOSED — not ruled, except section 10, RULED 2026-10-06.** A scout for the owner, who asked whether the trick behind the channel-direction
-> fix (a fact carried by a short comment and a generated file instead of a visible attribute) could take other noisy
-> attributes out of the converted code. Nothing here is implemented. Every number is measured over the committed
-> tree at master `e1ad9dbc11` (2026-10-06) unless the text says otherwise. The owner reads it; a ruling follows.
+> **STATUS: RULED — the owner, 2026-10-06, the whole plan, with `[GoStr]` added (5.7).** His rule: everything that
+> must stay an attribute stays an attribute; everything else that can be hidden in generated code should be. This plan
+> is now the campaign's record. It began as a scout for the owner, who asked whether the trick behind the
+> channel-direction fix (a fact carried by a short comment and a generated file instead of a visible attribute) could
+> take other noisy attributes out of the converted code. Every number is measured over the committed tree at master
+> `e1ad9dbc11` (2026-10-06) unless the text says otherwise; section 11's counts are at master `7098b8d3f9`.
+>
+> **The order (COORD, 2026-10-06).** TRAIN Q lands first, on today's rendering. The face lift is the train after it,
+> a strict chain, because every step rewrites the same corpus files and goldens: A `[GoRecv]` removed (5.1), B plain
+> `[GoType]` removed (5.2), C `[GoType("…")]` to a comment (5.3), F `[GoEmbedded]` (5.6), E `[GoTag]` (5.5), D
+> `[GoArrayDims]` (5.4), S `[GoStr]` (5.7), then the kinds section 11 moves. F, E and D share one mechanism: a
+> type-level record naming the member, and a reader that refuses a mismatch by name. Hand-written files keep the
+> attributes and every reader accepts them, permanently.
 
 ---
 
@@ -273,10 +282,25 @@ It is read from a field, so it needs a record like 5.4. Only 58 production uses.
 reports the field as not embedded (`StructField.Anonymous` reads false); what the one generator that reads it does
 without it must be checked before a cut.
 
-### 5.7 `[GoStr]` — leave it for now
+### 5.7 `[GoStr]` — remove it; the signature already says it (RULED: it moves, 2026-10-06)
 
-A generator trigger on 29 production functions. It could move like 5.6, but 29 uses do not justify a change of their
-own; it can be done in the same change as any other work on that generator.
+The owner ruled that it moves too, though it has only 29 uses, so the campaign does every kind the same way. It needs
+no marker in its place: the converter's rule for writing it is visible in the signature. `[GoStr]` marks the member
+of an sstring twin that carries the Go body, and the converter types each twinned parameter `sstring`
+(`sstringTwinSignature`). Nothing else in converted code takes an `sstring` parameter: at master `7098b8d3f9`, 29
+converted methods have one and all 29 carry `[GoStr]`; no hand-owned file (the `*_impl.cs` companions and the manual
+conversions) declares one. The only reader is `StrGenerator`, which would select a method by "a parameter of type
+`sstring`" instead of by the attribute, and still accept the attribute on a hand-written member.
+
+Before and after, from `src/core/unicode/utf8/utf8.cs` (Go: `func DecodeRuneInString(s string) (r rune, size int)`):
+
+```csharp
+// before
+[GoStr] public static (rune r, nint size) DecodeRuneInString(sstring s) {
+
+// after
+public static (rune r, nint size) DecodeRuneInString(sstring s) {
+```
 
 ## 6. Keeping a comment safe once it carries a fact
 
@@ -435,5 +459,39 @@ word `partial`), against 9 for `[GoRecv]`, but on far fewer lines (189 in produc
 the converter and two generators, not the runtime. Its value is highest exactly
 where the attribute is about to multiply: G's remedy for a logging library's caller frames adds 103 of these prefixes to
 one module's converted code. If the owner chooses this route, those 103 would read `partial` instead.
+
+— C2
+
+**RULED EXCEPTION, 2026-10-06: an `init` is never carried by `partial`.** G's stacked record found a marked Go `init`
+running out of order. C# runs module initializers in declaration order, and a partial method's declaration is its
+declaring part, which the generator writes into a file that sorts after every source file, so a `partial` init ran
+after the package's other inits (Go: a.go, main.go 1, main.go 2, z.go; the carrier: a.go, main.go 1, z.go, main.go 2).
+An init that takes the mark keeps `[MethodImpl(MethodImplOptions.NoInlining)] [GoInit]`, in the same fallback set as
+a lambda and a local function, for a different reason: its position is its meaning. The generator refuses a
+hand-written partial init by name (GO2CS0003, an error). Neither the corpus nor the behavioral goldens held a marked
+init, so the measured footprint does not change. Seated on `claude/c2-noinline-partial` (`c02f80e935`).
+
+## 11. Every other inline attribute kind (RULED 2026-10-06 by the owner's rule)
+
+Sections 4 and 5 rule the large kinds. This table rules every other attribute the converter writes inline in
+converted code, counted at master `7098b8d3f9` over the same populations as section 3 (applications anywhere in a
+file, parameter lists included; hand-written files excluded). The owner's rule decides each row, not its count.
+
+| Attribute | Production | Tests | Metadata | Behavioral | Sits on | Ruling |
+|---|---:|---:|---:|---:|---|---|
+| `[GoLocalName]` | 7 | 269 | 249 | 42 | a lifted function-local type (struct or descriptor interface) | **MOVES**, into the package's `TypeAccessibility` record in `package_info.cs` (or `package_test_info.cs`), which already carries it for production structs. Reflection reads it from the TYPE, through every partial declaration of it. |
+| `[GoValueClone]` | 0 | 41 | 574 | 0 | a struct | **MOVES**, the same record. Production already moved; the 41 left are in converted test files (why the record missed them is for the cut to find). |
+| `[GoChanDir]` | 0 | 6 | 0 | 2 | a defined channel type's wrapper struct | **MOVES with C (5.3).** It exists because `[GoType("chan …")]` drops the direction; the comment that replaces `[GoType("…")]` can spell the type as Go does (`chan<- int`), so the generator that re-emits `[GoType("…")]` on its generated part can emit this one beside it. |
+| `[GoMapKeyDims]` | 2 | 1 | 0 | 2 | a field or parameter whose map key is an array | **MOVES with D (5.4)**: it is `[GoArrayDims]`'s twin for `Key()`, and rides the same member record. |
+| `[GoDescriptorType]` | 3 | 1 | 0 | 3 | a field or parameter whose interface type a descriptor stands for | **MOVES with D**: its own documentation calls it the `[GoArrayDims]` pattern for a different lost datum, at the same positions. |
+| `[StackTraceHidden]` | 51 | 10 | 0 | 1 | a `//go:linkname` or trampoline forwarder method | **MOVES, through section 10's carrier.** The .NET runtime and `runtime.Callers` read it from the method, and a generated declaring part can carry it as it carries `NoInlining`. The forwarder needs a second signal, since `partial` alone means no-inline: the design (the shortest marker the generator can read) is cut with S or after it. |
+| `[GoWrapper]` | 0 | 8 | 0 | 3 | a lambda (a method expression's wrapper) | **STAYS.** The runtime reads it from `Delegate.Method`, the lambda's own generated method; a lambda has no partial form and no declaration a record can name. |
+| `[GoPackage]` | 0 | 0 | 736 | 0 | the package class, in `package_info.cs` | **STAYS where it is**: already in the metadata file, not in code a reader opens. |
+| `[GoTestMatchingConsoleOutput]` | 0 | 0 | — | — | a behavioral program's package class, in its `package_info.cs` | **STAYS**: metadata, read by the behavioral test harness. |
+| assembly-level records (`GoPositionMap`, `GoImplement`, `GoDynamicTypeLift`, `GoImplicitConv`, `GoTypeAlias`, `GoCgoImportDynamic`, `GoSStringTwin`, `GoRefPrimary`) | 0 | 0 | 8,126 | 0 | the assembly, in metadata files | **STAY** (section 3): not in the code a reader opens. |
+
+`[GoInit]`, `[StructLayout]`, `[FieldOffset]` and `[DllImport]` stay (section 4); `[MethodImpl]` moves for methods and
+stays for lambdas, local functions, bodyless declarations and inits (section 10). One `[ModuleInitializer]` in
+`src/core/go2cs.CpuProfiler` is in a hand-written project, not converted code.
 
 — C2
