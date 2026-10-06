@@ -101,6 +101,16 @@ Read red-first against a go.lib packed from master 40a1f839c5 (2026-10-05, win-x
 publish kept only `PublishSymbols.pdb` and printed `:0`, and the control passed. The same happens with no go.lib
 at all: it is the SDK's behaviour for any single-file app with a referenced library.
 
+`test-publish-symbols-aot.ps1` is the Native AOT control: the target is meant to be inert under `PublishAot`, so the
+fixture published with `PublishAot=true` and `PublishSingleFile=true`, once with the target on and once with
+`-p:GoKeepSymbolsLoose=false`, must leave identical publish folders (and the AOT executable must run). It needs the
+platform's native toolchain. Both scripts take `go.*` from `-Source` only and everything else from nuget.org, so a
+self-contained publish can restore the SDK's runtime and ILCompiler packs against a pack rehearsal's local feed.
+
+```text
+pwsh src/tests/PackageTests/PublishSymbols/test-publish-symbols-aot.ps1 -Version <go.lib version> [-Source <feed dir or URL>] [-TargetsFile <go.lib.targets>]
+```
+
 # `release-smoke.ps1`: consume a feed the way a user does
 
 `release-smoke.ps1 -Feed <dir> -Converter <go2cs> -WorkRoot <dir>` runs four arms against ONE local
@@ -114,5 +124,6 @@ compilation on): under Release with `DOTNET_TieredCompilation=0` the same self-c
 TIMEOUT on this arm is the same defect in its other shape;
 (C) `Behavioral/StatLayoutTruth`, the same way; (D) the README walkthrough (`fatih/color`), the same
 way, gating only with `-GateWalkthrough` and MEASURED without it; the `release-smoke` stage passes it on every
-leg. It exits 0 when the gating arms pass. The `release-smoke` stage of
+leg; (E) `PublishSymbols` above, the guard and its AOT control against the same feed, MEASURED and never gating
+until it has read green on two trains. It exits 0 when the gating arms pass. The `release-smoke` stage of
 `.github/workflows/os-matrix.yml` packs the feed on Windows and runs this on all four shipped RIDs.
