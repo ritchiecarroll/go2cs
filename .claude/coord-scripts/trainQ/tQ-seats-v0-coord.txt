@@ -1,0 +1,70 @@
+# TRAIN Q seat table v0 -- generated 2026-10-06 13:06 from COORD's accepted list; base master 7098b8d3f958e68dfcd23a35d5030427b2638357
+# row = ref|seated sha|notes. Row order = merge order. PENDING rows are comments at the end.
+claude/c2-board-assignability-gap|476fbd381c|C2; cut=446d2c8ba0; commits-over-base=1; files=1; no-stack
+claude/c2-nugetgo-pack-copyright|d6a2a9d04d|C2; cut=7a1b2e3631; commits-over-base=3; files=3; no-stack
+claude/c2-orphaned-disclosures-linux|f378bd2251|C2; cut=7a1b2e3631; commits-over-base=1; files=3; no-stack
+claude/c2-roster-ceiling-scope|426f4ea780|C2; cut=446d2c8ba0; commits-over-base=2; files=1; no-stack
+claude/c2-conv-record-file-alias|45082709bc|C2; cut=446d2c8ba0; commits-over-base=2; files=21; no-stack
+claude/c2-self-map-holder|50f3b034aa|C2; cut=446d2c8ba0; commits-over-base=3; files=18; no-stack
+claude/c2-map-wrapper-set|3c38c44e25|C2; cut=446d2c8ba0; commits-over-base=5; files=25; stack-on=50f3b034aa
+claude/g-named-map-clone|1643862c92|G; cut=446d2c8ba0; commits-over-base=6; files=34; stack-on=50f3b034aa stack-on=3c38c44e25
+claude/c2-wrapper-member-shadow|b6cdc9dd7e|C2; cut=446d2c8ba0; commits-over-base=8; files=48; stack-on=50f3b034aa stack-on=3c38c44e25 stack-on=1643862c92
+claude/g-ambiguous-alias-target|f4ca0f236c|G; cut=446d2c8ba0; commits-over-base=2; files=4; no-stack
+claude/c2-alias-twin-reach|a51a2cf441|C2; cut=446d2c8ba0; commits-over-base=2; files=4; no-stack
+claude/c2-named-pointer-valueslot|0bada15b86|C2; cut=446d2c8ba0; commits-over-base=2; files=14; no-stack
+claude/c2-struct-pkgpath|4334638651|C2; cut=446d2c8ba0; commits-over-base=2; files=19; no-stack
+claude/c2-namedptr-reflect-elem|aa09b35a4c|C2; cut=d843ff263d; commits-over-base=2; files=14; no-stack
+claude/c2-namedptr-field-address|8d4ab2d7fd|C2; cut=d843ff263d; commits-over-base=4; files=23; stack-on=aa09b35a4c
+claude/c2-reflect-named-func-call|60faaf0b24|C2; cut=d843ff263d; commits-over-base=2; files=13; no-stack
+claude/c2-funcvalue-clash|9dee75539e|C2; cut=d843ff263d; commits-over-base=2; files=16; no-stack
+claude/c2-module-disclosures|c585fa199d|C2; cut=d843ff263d; commits-over-base=9; files=10; stack-on=476fbd381c
+claude/c2-func-chan-dir|3196a93cdc|C2; cut=d843ff263d; commits-over-base=3; files=21; no-stack
+claude/c2-board-warnings|5aab7c91f2|C2; cut=BASE; commits-over-base=1; files=1; no-stack
+claude/c2-scout-marker-parity|a8db3c7e98|C2; cut=e1ad9dbc11; commits-over-base=4; files=1; no-stack
+claude/g-alias-publicize|2598dad4f3|G; cut=eb88ab9492; commits-over-base=2; files=27; no-stack
+claude/g-module-safe-tag|f6c182c23f|G; cut=446d2c8ba0; commits-over-base=2; files=10; no-stack
+claude/g-local-namedptr-lift|7372953bd3|G; cut=446d2c8ba0; commits-over-base=1; files=14; no-stack
+claude/g-testing-nil-ctor|0a40cc595c|G; cut=446d2c8ba0; commits-over-base=1; files=14; no-stack
+claude/g-typeassert-unparen|40a76d780b|G; cut=446d2c8ba0; commits-over-base=1; files=14; no-stack
+claude/g-gen-receiver-name|e981a26260|G; cut=446d2c8ba0; commits-over-base=2; files=20; no-stack
+claude/g-foreign-defined-hop|82c3b347dc|G; cut=446d2c8ba0; commits-over-base=2; files=29; stack-on=7372953bd3
+claude/g-foreign-written-rhs-on-hop|5254ba28eb|G; cut=446d2c8ba0; commits-over-base=3; files=31; stack-on=7372953bd3 stack-on=82c3b347dc
+claude/g-promoted-field-edge|0ee5681fe0|G; cut=446d2c8ba0; commits-over-base=1; files=3; no-stack
+claude/g-detached-testing-t|015e3c279e|G; cut=446d2c8ba0; commits-over-base=3; files=16; stack-on=0a40cc595c
+claude/g-testing-runtests|24bb3cf68b|G; cut=446d2c8ba0; commits-over-base=8; files=21; stack-on=0a40cc595c stack-on=015e3c279e
+claude/g-host-go-argv|52a5d2e707|G; cut=446d2c8ba0; commits-over-base=1; files=6; no-stack
+claude/g-iface-literal-string-box|03b142b713|G; cut=446d2c8ba0; commits-over-base=1; files=14; no-stack
+claude/g-named-pointer-equality|0c6a2618fa|G; cut=446d2c8ba0; commits-over-base=1; files=14; no-stack
+claude/g-same-pkgname-iface|8dde211641|G; cut=446d2c8ba0; commits-over-base=3; files=10; stack-on=f4ca0f236c
+claude/g-empty-iface-assert|d83c31465b|G; cut=446d2c8ba0; commits-over-base=1; files=3; no-stack
+claude/g-nameof-runtime|ca436147c0|G; cut=446d2c8ba0; commits-over-base=1; files=14; no-stack
+claude/g-sweep-runtime-floor|e6b30193a3|G; cut=e1ad9dbc11; commits-over-base=1; files=1; no-stack
+claude/g-cs8500-managed-view|be4ce10078|G; cut=BASE; commits-over-base=3; files=7; no-stack
+claude/g-board-foreign-defined-directions|6481ddbabb|G; cut=446d2c8ba0; commits-over-base=1; files=1; no-stack
+claude/g-board-testing-t-deepequal|e13e0e2ecc|G; cut=e1ad9dbc11; commits-over-base=1; files=1; no-stack
+claude/g-board-cs8500-census-limit|2b3aeb0630|G; cut=BASE; commits-over-base=4; files=7; stack-on=be4ce10078
+claude/i9-crash-verdict-mismatch-text|7d750ba428|i9; cut=446d2c8ba0; commits-over-base=2; files=2; no-stack
+claude/i9-runtime-digest-handowned|330dc41313|i9; cut=446d2c8ba0; commits-over-base=2; files=3; no-stack
+claude/i9-comparison-record-always-written|631100d823|i9; cut=d843ff263d; commits-over-base=2; files=2; no-stack
+claude/i9-auto-sibling-marker-restore|fc921c871f|i9; cut=446d2c8ba0; commits-over-base=2; files=2; no-stack
+claude/i9-address-variant-pairing-on-runtests|1f6e822670|i9; cut=446d2c8ba0; commits-over-base=10; files=21; stack-on=0a40cc595c stack-on=015e3c279e stack-on=24bb3cf68b
+claude/i9-mstest-compile-skip-closure|61cebb3ad5|i9; cut=40a1f839c5; commits-over-base=2; files=4; no-stack
+claude/i9-transpile-memo|1804f36748|i9; cut=BASE; commits-over-base=2; files=2; no-stack
+claude/i9-tests-host-symbol-check|a6ba14579a|i9; cut=e1ad9dbc11; commits-over-base=2; files=2; no-stack
+claude/i9-pack-symbols|c0c876fb27|i9; cut=BASE; commits-over-base=8; files=20; no-stack
+claude/c1-release-smoke-published|fd2b421bba|C1; cut=76a9508dfb; commits-over-base=3; files=5; no-stack
+claude/c1-release-smoke-package-symbols|dae4ce596f|C1; cut=BASE; commits-over-base=14; files=24; stack-on=c0c876fb27
+claude/c1-golib-trim-default|ab6aa8f443|C1; cut=BASE; commits-over-base=15; files=24; stack-on=c0c876fb27 stack-on=dae4ce596f; CAND
+claude/c1-release-nuget-preflight|20d7ac347e|C1; cut=BASE; commits-over-base=1; files=4; no-stack
+claude/c1-release-smoke-safe-tag|3b093f935a|C1; cut=446d2c8ba0; commits-over-base=3; files=13; stack-on=f6c182c23f
+claude/p1-darwin-warnings|d0a8d82373|P1; cut=BASE; commits-over-base=1; files=2; no-stack
+claude/c2-noinline-partial|e7fcff2244|C2; cut=BASE; commits-over-base=5; files=318; no-stack
+claude/g-r2m-caller-closure-v2|633b045e8a|G; cut=BASE; commits-over-base=7; files=324; stack-on=e7fcff2244; CAND
+# rows: 60
+# PENDING: C2 claude/c2-noinline-partial-on-nameof (the carrier + merge of G ca436147c0 + StatementTableFuncNames re-baseline): directly AFTER c2-noinline-partial, BEFORE g-r2m-caller-closure-v2.
+# CAND rows: c1-golib-trim-default (hosted probe 37495989079 out); g-r2m-caller-closure-v2 (logrus acceptance read owed by G).
+# SUPERSEDED, NOT ROWS: i9 850ff04577 (by 1f6e822670); C1 9ff16da875 (carried by dae4ce596f); G 48808637c9; G 0912a84755 (record).
+# ROWS ADDED SINCE v0 (2026-10-06 15:50; each read at the remote):
+claude/c2-noinline-partial-on-nameof|404e1ddb75|C2; the carrier + a merge of G ca436147c0 + the one-fixture re-baseline; rides DIRECTLY AFTER claude/c2-noinline-partial and before claude/g-r2m-caller-closure-v2; stack-on=e7fcff2244 stack-on=ca436147c0
+claude/c1-aot-smoke|44f29d50e6|C1; one commit on c1-golib-trim-default ab6aa8f443 (the AOT check as its own stage); rides directly after it; CAND until release-smoke 37523436862 is green on four RIDs inside budget; stack-on=ab6aa8f443
+# NO LONGER CAND: claude/g-r2m-caller-closure-v2 633b045e8a (logrus acceptance read, ledger f2f8b9686e).

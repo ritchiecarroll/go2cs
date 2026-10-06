@@ -11,12 +11,127 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-10-02 02:30 go.* 1.24.13.3 PUBLISHED (the record and the tag are on origin: master 5f3a16943f, tag nuget-1.24.13.3; the freeze is lifted; TRAIN L lands next; R has a NEW session prompt in 1e.5). Earlier: 2026-10-01 17:05 RELEASE DAY (master 172d437e66 = the 1.24.13.3 release tip, pre-stage green, freeze on; TRAIN L battery green, lands after the release; see the 1e.0 bullets). Earlier: 2026-10-01 02:40 TRAIN K LANDED (master 75648a022b, 225/225). Earlier: 2026-09-30 03:15 TRAIN J LANDED (master f819887fa3, 223/225). Earlier: 2026-09-28 19:10 TRANSITION (owner order 18:40): section **1e** is START HERE for R, C1, C2, P1 and P2, who run the MAILBOX-ONLY protocol (1e.1) with the models in 1e.2; G, the i9 and COORD continue from 1d.00 and the ledger. Earlier: 2026-09-27 17:09 FLEET SHUT DOWN (owner order; credits reset 2026-09-28 16:00 Central; the remaining credit is held for emergencies). FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
+> **Status of this revision:** 2026-10-06 15:50 section **1i** is START HERE for COORD (go.* 1.24.13.4 published, master 7098b8d3f9; TRAIN Q rehearsed green and not yet assembled; the face lift is the train after it; written at 76% of the week's usage, ahead of the 90% save-state). Earlier: 2026-10-02 02:30 go.* 1.24.13.3 PUBLISHED (the record and the tag are on origin: master 5f3a16943f, tag nuget-1.24.13.3; the freeze is lifted; TRAIN L lands next; R has a NEW session prompt in 1e.5). Earlier: 2026-10-01 17:05 RELEASE DAY (master 172d437e66 = the 1.24.13.3 release tip, pre-stage green, freeze on; TRAIN L battery green, lands after the release; see the 1e.0 bullets). Earlier: 2026-10-01 02:40 TRAIN K LANDED (master 75648a022b, 225/225). Earlier: 2026-09-30 03:15 TRAIN J LANDED (master f819887fa3, 223/225). Earlier: 2026-09-28 19:10 TRANSITION (owner order 18:40): section **1e** is START HERE for R, C1, C2, P1 and P2, who run the MAILBOX-ONLY protocol (1e.1) with the models in 1e.2; G, the i9 and COORD continue from 1d.00 and the ledger. Earlier: 2026-09-27 17:09 FLEET SHUT DOWN (owner order; credits reset 2026-09-28 16:00 Central; the remaining credit is held for emergencies). FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
 
 ---
+
+## 1i. COORD STATE 2026-10-06 15:50 (START HERE for COORD; it supersedes 1g for CURRENT STATE)
+
+Written 15:50 on the i7's clock, at 76% of the week's usage (owner order of this hour: run the save-state skill as
+usage nears 90%, so that the COORD session can be rolled to another session). Every ref below was read at the remote.
+Lanes are unchanged: all seven are MAILBOX-ONLY (sections 1e and 1h hold their protocol and paste prompts).
+
+### 1i.0 State in one screen
+
+- **master** = `7098b8d3f958e68dfcd23a35d5030427b2638357`: TRAIN P landed (`40a1f839c5`), go.\* 1.24.13.4 PUBLISHED
+  2026-10-06 (344 packages; tag `nuget-1.24.13.4` on `e1ad9dbc11`), the release record, and a known-issues entry.
+- **Owner rulings in force** (ledger, 2026-10-05 and 2026-10-06): timelines are COORD's and no gate is traded for a
+  date; the no-inline mark rides `partial`; symbols ship with the packages; THE FACE LIFT (C2's attribute plan in
+  full, plus `[GoStr]`: everything generated code can carry leaves converted code; consistency over rarity) is the
+  train AFTER Q, then a release, and ONLY THEN the first-wave nugetgo packages (hashset first) and the announcement.
+- **TRAIN Q** (accepted seats on today's rendering; base = master above). NOT assembled yet.
+  - The i9 REHEARSED the union on Windows by real merges and read it whole: map 54 of 56 clean with six
+    append-only hunks kept both in merge order, one restack, five late rows, one fix-up; every leg green at the
+    final union (local to the i9, never pushed). Its posts: `docs/phase4/inbox/COORD/20261006T143431Z-i9.md`,
+    `...T145239Z-i9.md`, `...T174143Z-i9.md`, `...T181555Z-i9.md`, `...T185725Z-i9.md` on `claude/mailbox`.
+  - The seat list in merge order is on this branch: `.claude/coord-scripts/trainQ/tQ-seats-v0-coord.txt` (60 rows
+    generated from git, plus the rows added since, listed at its end) with its generator beside it.
+  - ONE row is still conditional: C1's `claude/c1-aot-smoke` (it carries the trim default) until hosted
+    release-smoke run 37523436862 reads green on four RIDs inside its leg budgets. The aot-smoke run 37523439849
+    does not hold the table.
+  - Readings still out: P2's linux full behavioral at `claude/g-r2m-caller-closure-v2`.
+- **Two COORD workflows were running when this was written** (local to the i7; a new session reads their folders):
+  - THE NAME-CHECK FIX (the identifier census gained a hashed-word arm after a post named the owner on a cloud
+    box). It is UNCOMMITTED in the worktree `/h/go2cs-tmp-coord/wt-census` (three files under
+    `.claude/coord-scripts/`); the saved diff is `/h/go2cs-tmp-coord/coord-scratch/census-hashword/census-hashword.diff`.
+    Three checkers returned 11 blocking findings; a repair round and a re-check were running. NOT on master. Before
+    master: COORD reviews, pushes it on a BRANCH, and every lane runs the tool's self-test on its own box (the new
+    awk and scanner probes fail CLOSED, so a box that cannot answer could not post at all).
+  - THE TRAIN Q SCRIPTS, derived from `trainP/` into `.claude/coord-scripts/trainQ/` on this worktree (table step
+    done, derive step running, then two reviews and a fix round). Uncommitted until the run ends.
+
+### 1i.1 COORD's next steps, in order
+
+1. Read the whole mailbox range for `inbox/COORD` since the ledger's last line; answer what is owed.
+2. The name-check fix: read the workflow's result, review the diff, re-run the decisive check (the incident post on a
+   simulated generic box: base tool CLEAN, changed tool REFUSED) and the self-test, push a branch, ask the lanes for
+   their self-test tallies, then land on master (announce on FLEET, then push).
+3. TRAIN Q: read the derive workflow's result; freeze the table (add `claude/c2-noinline-partial-on-nameof` directly
+   after the carrier; C1's row = the tip release-smoke read green); assemble on master by the trainQ checklist (signed
+   `--no-ff`; the six append-only hunks resolved keep-both ONLY where the i9's map names them); fixup; push the union
+   (a new ref: push, read back, announce); GOs to the i9 (shard), P1 and P2 (linux legs), C1 (release gate + darwin
+   full); the i7 battery from a fresh folder; land by the checklist. ASK THE OWNER AT THE LANDING: a small release
+   after Q (publish-twice fix, path mapping, symbols, trim default), or everything with the face-lift release.
+4. A known-issues entry on master for published 1.24.13.4, once C1 posts its measured workaround line: a hand-written
+   consumer that publishes Native AOT fails at startup unless its project sets the trim mode to partial; with it the
+   publish compiles every referenced go.\* assembly whole (about 70 minutes hosted for a 31-assembly fixture).
+5. THE FACE LIFT after Q lands, a strict chain: A `[GoRecv]`, B plain `[GoType]`, C `[GoType("...")]`, F embed,
+   E tag, D dims, D2 (generic functions), S `[GoStr]`, then the table additions. C2 has A and the record kinds
+   (F, E, D pushed; D2 next); G has B (generator side pushed) and C. Every number is restated on Q's landed head
+   before any re-conversion. Rulings so far are ledger lines of 2026-10-06 (the opt-out stays on testing and unsafe;
+   one comment parser; a Go comment is never a marker; the key spelled once; lambdas and local functions are the only
+   must-stay parameters).
+6. Queued, not started: the nugetgo registry's validation CI (PLAN-nugetgo section 3), built in the local clone, the
+   owner asked before any push to that repository.
+
+### 1i.2 COORD: STATE BLOCK
+
+```
+LANE: COORD   MODEL: Opus/high   HOST: i7
+BRANCH: master 7098b8d3f958e68dfcd23a35d5030427b2638357 yes landed -- TRAIN P + release 1.24.13.4 record + known-issues entry
+BRANCH: claude/c2-noinline-partial e7fcff2244df0f5f50dc2b04d9945897f07b63d1 yes accepted -- TRAIN Q, the no-inline carrier, FINAL
+BRANCH: claude/c2-noinline-partial-on-nameof 404e1ddb75ff87e4dd95dd71d0f91d840ef576f6 yes accepted -- TRAIN Q, the carrier's one-fixture fix-up, rides directly after it
+BRANCH: claude/g-r2m-caller-closure-v2 633b045e8a83fa2e674dd622b03db38623d8cccf yes accepted -- TRAIN Q, last row, stacked on the carrier
+BRANCH: claude/g-cs8500-managed-view be4ce10078ffca52c8bfa16b60cfb33af6427391 yes accepted -- TRAIN Q
+BRANCH: claude/g-board-cs8500-census-limit 2b3aeb06306a22f76f205a2fe7d8bae638335e26 yes accepted -- TRAIN Q docs, stacked on the row above
+BRANCH: claude/i9-address-variant-pairing-on-runtests 1f6e82267081ce2c1d3b6deb78dd7c6fd22d17bc yes accepted -- TRAIN Q, replaces 850ff04577
+BRANCH: claude/i9-pack-symbols c0c876fb27c1c6d2590778f01448022e4470232a yes accepted -- TRAIN Q, symbols ship with the packages
+BRANCH: claude/c1-release-smoke-package-symbols dae4ce596f02113014bf841209903bbce9778b63 yes accepted -- TRAIN Q, arm F, replaces 9ff16da875
+BRANCH: claude/c1-golib-trim-default ab6aa8f443e02665d02fd2f69faa90e7b10c1bf2 yes cut -- carried by c1-aot-smoke
+BRANCH: claude/c1-aot-smoke 44f29d50e6483f98bafe181d822da2263511e384 yes cut -- TRAIN Q row once release-smoke 37523436862 is green on four RIDs
+BRANCH: claude/p1-darwin-warnings d0a8d82373c2e97ab0900caf060a49fbc3e5082e yes accepted -- TRAIN Q
+BRANCH: claude/c2-facelift-a-recv 7977ba47159ec2b4df24f7c5a056bc0dee97a730 yes cut -- face lift A, NOT a Q seat
+BRANCH: claude/c2-facelift-record b0b9c527119c4a2940b60597ff7ab8f94eb4a659 yes cut -- face lift F, E, D on A, NOT a Q seat
+BRANCH: claude/g-plain-gotype-removed f464628bf5c2079181823f235da19edef2362938 yes cut -- face lift B, generator side, NOT a Q seat
+BRANCH: claude/c2-scout-marker-parity a8db3c7e98805c34b13dbcb050f6d7abc284d252 yes accepted -- the face-lift plan, docs
+LOCAL-ONLY: wt-census (detached at master) uncommitted name-check fix; preserved as coord-scratch/census-hashword/census-hashword.diff on the i7; pushed as a branch at step 2
+WORKTREE: /h/go2cs-tmp-coord/hnd claude/coord-handover trainQ drafts uncommitted while the derive workflow runs
+WORKTREE: /h/go2cs-tmp-coord/wt-census detached 3 files uncommitted (see LOCAL-ONLY)
+NEXT: 1i.1 step 1, from the ledger's last line on claude/mailbox
+READ-FIRST: docs/phase4/LEDGER.md lines of 2026-10-06 on claude/mailbox; .claude/coord-scripts/trainL/tL-seats-draft.txt from the line stamped 2026-10-06 09:21 to its end; docs/PLAN-marker-comment-parity.md on claude/c2-scout-marker-parity
+BLOCKED-ON: none
+TOOLS: DOTNET_ROOT = the .NET 10 SDK folder on PATH first; GOROOT = go1.24.13 in the backslash spelling go env prints; GOTOOLCHAIN=local; python 3.11
+```
+
+NOTE: the other 44 accepted TRAIN Q rows are in `trainQ/tQ-seats-v0-coord.txt` with their short SHAs; each is the
+remote tip of its ref and is read by `ls-remote` at assembly.
+
+WAKE: COORD is woken by its inbox watcher (`watch-battery-inbox.sh <the 40-char tip last read> inbox`, in the
+background, re-armed as the last tool call of every turn) and by workflow notifications.
+
+### 1i.3 Owner hands, open
+
+- At Q's landing: release after Q, or with the face lift (1i.1 step 3).
+- The signing PIN at the next release; the GPG passphrase if the agent asks.
+- Low: stray files in the Git install root on the i7 (left by a COORD script fault of 2026-10-06, the launcher itself
+  restored); the i7's user PATH carries stale tool folders; filing the .NET SDK publish-twice bug upstream.
+
+### 1i.4 PASTE PROMPT for a new COORD session
+
+```
+You are COORD of the go2cs fleet on the i7 (Opus, high effort). All seven lanes are MAILBOX-ONLY. Read
+docs/phase4/RESUME-SESSIONS.md section 1i on claude/coord-handover (worktree /h/go2cs-tmp-coord/hnd) and follow 1i.1
+in order. First: read the ledger's last lines and the whole inbox/COORD range since then on claude/mailbox (clone
+/h/Projects/go2cs-mailbox), then the tail of .claude/coord-scripts/trainL/tL-seats-draft.txt from 2026-10-06 09:21.
+Check whether the two local workflows of 1i.0 left results (the wt-census worktree's diff; the trainQ folder). Post
+with fleet-msg.sh, record rulings with ledger-append.sh, run the identifier census as its own command on everything
+pushed, re-arm the inbox watcher as the last tool call of every turn, and end every reply on text. Nicknames only
+on pushed surfaces; the owner is "the owner". Read the week's usage at each wake and run the save-state skill as it
+nears 90 percent.
+```
 
 ## 1h. TRANSITION 2026-10-05 (owner order, 08:50): G and the i9 move to new sessions, MAILBOX ONLY. START HERE for G and the i9
 
