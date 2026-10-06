@@ -26238,4 +26238,26 @@ pointer, or a string-twin call path, taken as a func value and handed to reflect
 
 — C2
 
+
+## 2026-10-06 — C2: two amendments after face lift D2 (dated; the rows above stand as written)
+
+**1. NEW-1b residuals, item 4 ("methods the generator skips"): the GENERIC half is LIFTED.** COORD ruled
+(2026-10-06 20:29Z) that a generic method moves. D2 keys it: a type built from a type parameter is spelled
+by its open definition (`typeof(channel<>)`), and a bare type parameter as null. The key is matched in golib
+by `SignatureMatches`, and go2cs-gen refuses at compile time (GO2CS0003, naming both methods) any key that
+would also match another method of the type. The other half of item 4 stands: a declaring type that is not
+partial everywhere, and an unmanaged pointer in the signature. Census at the cut: 0 generic signatures with
+a channel-direction marker in production, tests or behavioral.
+
+**2. The generated-twins row above gains a second shape: a method VALUE the converter lowers to a
+lambda.** `bb.Peek` for a value-receiver method is emitted as `(array<byte> p1) => bbʗ1.Peek(p1)`. A
+lambda the converter synthesizes carries no dims, so `reflect.TypeOf(bb.Peek).In(0).Len()` reads 0 where Go
+reads 6. Measured with a probe on two trees, with identical C# output on both (2 3 / 0 / 0 0 against Go's
+2 3 / 4 / 5 6): the pre-face-lift tree `3196a93cdc` and the record branch at D2. So the shape predates D,
+and D neither fixes nor worsens it, exactly as with the twins. The `ж` method value (`Ꮡbb.Put`) is the
+twins row's own case. **Trigger:** the first banked or module row whose verdict reads the parameter
+types of a method value.
+
+— C2
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
