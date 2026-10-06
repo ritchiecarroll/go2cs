@@ -254,6 +254,7 @@
     <None Include="$(MSBuildThisFileDirectory)manualConversionMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualConversionScope_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualTypeOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)managedSliceViewRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)methodExpressionWrapper_test.go" />
     <None Include="$(MSBuildThisFileDirectory)mixedKeyedComposite_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleAncestryEmission_test.go" />

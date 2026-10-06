@@ -15,6 +15,8 @@ import (
 	"go/token"
 	"go/types"
 	"math"
+	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -99,6 +101,10 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 
 	// When converting a pointer expression to a slice, we use special handling
 	if isMatch, ptrType := isPointerCast(ident); isMatch && v.inFunction && sliceExpr.High != nil {
+		if refusal, ok := v.managedSliceViewRefusal(sliceExpr); ok {
+			return refusal
+		}
+
 		v.useUnsafeFunc = true
 		prefixLength := len(ptrType) + 5
 
@@ -461,6 +467,45 @@ func isIntegerLiteral(expr ast.Expr) bool {
 	}
 
 	return false
+}
+
+// managedSliceViewRefusal renders a Go slice view `(*[N]T)(p)[lo:hi:max]` over a MANAGED element T
+// (csManagedField) as a REFUSAL BY NAME at the site, never as the span-over-address view below. That
+// view reads the pointed-at memory as T values, and for a managed T those are object references: the
+// words behind p become fabricated managed references (C# says CS8500), and the span constructor
+// COPIES besides, so a write through the view never reaches p's storage. Where the pair DOES alias
+// (a Go pointer to an identical element type) the conversion already took arrayPointerAliasEmission's
+// door upstream and never reaches the span fusion; everything managed that does reach it is a pair no
+// door can serve. runtime's itabInit is the measured case and the corpus's only one: its
+// `(*[1 << 16]unsafe.Pointer)(unsafe.Pointer(&m.Fun[0]))[:ni:ni]` views uintptr words as
+// unsafe.Pointer, which is a class here, and the function is unreachable in the managed model.
+// A refusal is diagnosable where a fabricated reference is not. An unmanaged element keeps the view.
+func (v *Visitor) managedSliceViewRefusal(sliceExpr *ast.SliceExpr) (string, bool) {
+	xType := v.info.TypeOf(sliceExpr.X)
+
+	if xType == nil {
+		return "", false
+	}
+
+	ptr, ok := types.Unalias(xType).(*types.Pointer)
+
+	if !ok {
+		return "", false
+	}
+
+	arr, ok := types.Unalias(ptr.Elem()).(*types.Array)
+
+	if !ok || !csManagedField(arr.Elem(), 0) {
+		return "", false
+	}
+
+	elemName := convertToCSTypeName(v.getAliasQualifiedTypeName(arr.Elem(), false))
+	position := v.fset.Position(sliceExpr.Pos())
+
+	reason := fmt.Sprintf("go2cs: a slice view (*[N]%s)(p)[...] over a managed element has no managed aliasing pair (%s:%d)",
+		types.TypeString(arr.Elem(), types.RelativeTo(v.pkg)), filepath.Base(position.Filename), position.Line)
+
+	return fmt.Sprintf("(false ? default(slice<%s>) : throw panic(%s))", elemName, strconv.Quote(reason)), true
 }
 
 func isPointerCast(expr string) (bool, string) {

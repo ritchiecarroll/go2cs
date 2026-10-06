@@ -26178,4 +26178,31 @@ Nine entries, most important first. The owner ruled at 10:05 that 1.24.13.4 wait
 
 **2026-10-04, INSTRUMENT (COORD):** four lessons from seating the train and from landing the one before it. (1) A PAIRWISE 3-way of every pushed seat against every other, and against O's union, run BEFORE the freeze, found three seat-by-seat conflicts that no lane's own gate could see, because each seat is clean on the base it was cut on. Two were position-map rows regenerating ONE `GoPositionMap` line (`g-method-value-fm-record-r3` against `c2-elseif-position-record-r2` in 5 `package_info.cs`; later go-cmp L against the else-if row in `reflect/package_info.cs`), and one was two inserts at one anchor (the sibling-name row against the `go.go` row in `importAliasOperations.go`). Each was ruled as a re-cut STACKED on the other seat, the shared line or block carrying both changes. The first pass (11:30) also found one seat against O's union itself (`PackageTests/README.md`). After the first two re-cuts the pass read 0 conflicts in 156 pairs over 21 seats and O's union (13:27); the third conflict arrived with the 23rd seat (14:05). (2) PLACEMENT keeps rows single-parent: two seats that each add a section at the tail of one doc (`shadowing.md`: the sort seat and the `go.go` seat) conflict, and moving one section to a non-tail anchor clears it with no merge-commit base. (3) The i7's git 2.35 has no `merge-tree --write-tree`: the pairwise instrument is a read-tree script, and the pre-map ran on a newer git's real ort merge. (4) A seat's `-tests` footprint is its own reading: TRAIN O's test-source refresh moved 18 committed test sources (explicit lambda result types, a bare `select();`, a cast on an untyped constant loop bound, two lifted type names, a byte cast around a shift) for seats whose rows declared no corpus footprint, because the fixup derives what the union emits from the `-stdlib` conversion only; and TRAIN O's battery read ONE finding class, an untracked `src/core/math/bits/.editorconfig` that a `-tests` run writes and no seat had committed, which this train's `claude/p2-test-warning-entries` (`8d89695095`) commits for all three flavours.
 
+## 2026-10-06 — G: a slice view over a MANAGED element with no aliasing pair refuses by name (the corpus's one CS8500) — closed by this seat
+
+Row 1 of the 2026-10-02 copying-slice-view entry, `runtime/iface.cs` `itabInit`'s `methods`
+(`(*[1 << 16]unsafe.Pointer)(unsafe.Pointer(&m.Fun[0]))[:ni:ni]`), read `uintptr` words as
+`unsafe.Pointer`, which is a CLASS in golib: the span view fabricated managed references (C# CS8500)
+and copied besides, so its stores never reached `m.Fun`. No door serves the pair (a word in storage
+against a reference in the slice): `Reinterpret` cannot alias it, its pinned fallback reads the same
+words as references, and a carrying copy loses the writes. RULED by COORD (re-ruled to (e) after G
+withdrew the door candidate): the converter emits `(*[N]T)(p)[lo:hi:max]` over a managed element that
+reaches the span-over-address branch as a REFUSAL BY NAME at the site, a throw naming the shape and the
+Go position; an aliasing pair (a Go pointer to an identical element) keeps `array<T>.AliasPointer`, and
+an unmanaged element keeps the span view. `itabInit` is unreachable in the managed model (its callers
+`getitab` and up are the Go compiler's entry points; the one converted caller, `runfinq`, is dead
+behind the hand-owned `createfing`), so the refusal never fires today; it is diagnosable the day
+something reaches it, where a fabricated reference is not. Population, by a go/types census over std
+(windows, linux, darwin): 17 conversions `(*[N]T)(p)` over a managed element, 1 emitted as a view of
+managed memory (this one); the other 16 are hand-owned, transcribed by hand-owns, served by
+`array<T>.AliasPointer`, or not views.
+
+**The lifetime class, not this seat:** the same branch emits 14 span-over-address views in production
+`src/core` (runtime 6, runtime/windows 2, internal/syscall/windows/registry 4, internal/abi 2), 13 of
+them over unmanaged elements (byte 8, uint16 2, Method 3), which C# accepts. Whether each is GC-safe
+turns on what it points at (a pinned box, an unpinned box, or native memory): the
+FINDING-managed-box-uintptr-lifetime class, open and unsized here.
+
+— G
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
