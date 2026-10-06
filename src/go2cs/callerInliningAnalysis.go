@@ -13,6 +13,7 @@ import (
 	"go/constant"
 	"go/token"
 	"go/types"
+	"path/filepath"
 	"strings"
 )
 
@@ -34,7 +35,17 @@ import (
 // this chain would not have been inlined anyway, so leaving it unmarked costs nothing and keeps
 // the attribute from spreading past the functions that actually need it — the corpus-wide
 // blast-radius this census measures is the cost the dispatch asked to see.
-func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types.Info) map[types.Object]bool {
+//
+// moduleScope (see fixedSkipClosureApplies) adds the FIXED-SKIP PATH CLOSURE for a package outside the
+// standard library: every SMALL function (isSmallCallerBody) on a same-package call path, of any length,
+// up to a function whose runtime.Caller/Callers skip is FIXED (isFixedCallerSkip). logrus is the measured
+// case: getCaller's runtime.Callers(minimumCallerDepth, ...) assumes a fixed frame count up to
+// Entry.Info, the Release TieredCompilation=0 JIT inlines the small Info -> Log -> logArgs bodies (Log is
+// an if, so not thin, and the skip is a package var, so no window), and the reported caller lands one
+// frame too far out. Not the standard library: the same rule there measured +189 functions and no std
+// failure needs it (ROOT 3 census, 2026-10-06). Never an init function: the runtime runs it in declaration
+// order, no Go code calls it, and its reported name reads right unmarked -- the same reason std stays out.
+func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types.Info, moduleScope bool) map[types.Object]bool {
 	seed := map[types.Object]bool{}
 	// forwarderTarget[fn] = the function fn's single statement forwards to, when fn's body has
 	// exactly that shape. Built once per package; the fixed-point loop below only ever reads it.
@@ -82,6 +93,10 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 		depth int64
 	}
 	var windows []skipWindow
+	// fixedSkipUsers and smallBodies feed the fixed-skip path closure (moduleScope only), applied after
+	// the walk because a path's callers can be declared in any file.
+	fixedSkipUsers := map[types.Object]bool{}
+	smallBodies := map[types.Object]bool{}
 
 	for _, entry := range files {
 		if entry.file == nil {
@@ -114,6 +129,18 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 
 			if depth, ok := runtimeCallerSkipWindow(info, fn.Body); ok {
 				windows = append(windows, skipWindow{obj: obj, depth: depth})
+			}
+
+			if moduleScope {
+				if callsFixedSkipRuntimeCaller(info, fn) {
+					fixedSkipUsers[obj] = true
+				}
+
+				// An init is never selected: the runtime runs it, no Go code calls it, and its reported name
+				// already reads right unmarked (InitFrameNames).
+				if isSmallCallerBody(fn.Body) && !(fn.Recv == nil && fn.Name.Name == "init") {
+					smallBodies[obj] = true
+				}
 			}
 
 			if callsSkipCountedRuntimeCaller(info, fn.Body) || callsSkipCountedWalker(info, fn.Body) {
@@ -149,6 +176,38 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 	for _, window := range windows {
 		for _, caller := range callersWithinDepth(window.obj, window.depth, callers) {
 			seed[caller] = true
+		}
+	}
+
+	// The FIXED-SKIP PATH CLOSURE (moduleScope only -- see this function's doc comment): walk upward over
+	// every same-package caller, of any size, from each fixed-skip user, and mark the small functions on
+	// the way. A large function on the path is walked THROUGH (a small caller above it still shifts the
+	// count when inlined) but not marked: the JIT does not inline it.
+	if len(fixedSkipUsers) > 0 {
+		onPath := map[types.Object]bool{}
+		var queue []types.Object
+
+		for user := range fixedSkipUsers {
+			onPath[user] = true
+			queue = append(queue, user)
+		}
+
+		for len(queue) > 0 {
+			fn := queue[0]
+			queue = queue[1:]
+
+			for caller := range callers[fn] {
+				if onPath[caller] {
+					continue
+				}
+
+				onPath[caller] = true
+				queue = append(queue, caller)
+
+				if smallBodies[caller] {
+					seed[caller] = true
+				}
+			}
 		}
 	}
 
@@ -839,4 +898,125 @@ func callersWithinDepth(fn types.Object, depth int64, callers map[types.Object]m
 	}
 
 	return reached
+}
+
+// fixedSkipClosureApplies reports whether computeNoInliningClosure's fixed-skip path closure applies to the
+// package converted from dir: every package outside goRoot's src tree (GOROOT-vendored golang.org/x/...
+// included in the standard library). An unknown dir or GOROOT answers false, the conservative side.
+func fixedSkipClosureApplies(dir, goRoot string) bool {
+	if dir == "" || goRoot == "" {
+		return false
+	}
+
+	return !isPathUnder(dir, filepath.Join(goRoot, "src"))
+}
+
+// callsFixedSkipRuntimeCaller reports whether fn's OWN body (a nested *ast.FuncLit is a frame of its own)
+// calls runtime.Caller or runtime.Callers with a FIXED skip (isFixedCallerSkip).
+func callsFixedSkipRuntimeCaller(info *types.Info, fn *ast.FuncDecl) bool {
+	if fn == nil || fn.Body == nil || info == nil {
+		return false
+	}
+
+	found := false
+
+	ast.Inspect(fn.Body, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		if _, isLit := n.(*ast.FuncLit); isLit {
+			return false
+		}
+
+		call, ok := n.(*ast.CallExpr)
+
+		if !ok || len(call.Args) == 0 {
+			return true
+		}
+
+		sel, ok := call.Fun.(*ast.SelectorExpr)
+
+		if !ok {
+			return true
+		}
+
+		used, ok := info.Uses[sel.Sel].(*types.Func)
+
+		if !ok || used.Pkg() == nil || used.Pkg().Path() != "runtime" || (used.Name() != "Caller" && used.Name() != "Callers") {
+			return true
+		}
+
+		found = isFixedCallerSkip(info, fn, call.Args[0])
+
+		return !found
+	})
+
+	return found
+}
+
+// isFixedCallerSkip reports whether a runtime.Caller/Callers skip argument is FIXED -- the same count on
+// every call, so it assumes the frames between the call and its target exist: a constant, a package-level
+// variable (logrus' minimumCallerDepth), or a parameter of fn itself (log's output(pc, calldepth), whose
+// callers pass constants). A skip computed inside fn (a loop variable, arithmetic on a local) is not.
+func isFixedCallerSkip(info *types.Info, fn *ast.FuncDecl, arg ast.Expr) bool {
+	arg = ast.Unparen(arg)
+
+	if tv, ok := info.Types[arg]; ok && tv.Value != nil {
+		return true
+	}
+
+	ident, ok := arg.(*ast.Ident)
+
+	if !ok {
+		return false
+	}
+
+	v, ok := info.Uses[ident].(*types.Var)
+
+	if !ok {
+		return false
+	}
+
+	if v.Pkg() != nil && v.Parent() == v.Pkg().Scope() {
+		return true
+	}
+
+	if fn.Type.Params != nil {
+		for _, field := range fn.Type.Params.List {
+			for _, name := range field.Names {
+				if info.Defs[name] == v {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+}
+
+// isSmallCallerBody reports whether body is small enough for the Release TieredCompilation=0 JIT to want to
+// inline: at most 3 statements counted at every nesting level (an if and its one-statement body are 2), and
+// no loop, switch, select, defer, go statement or func literal.
+func isSmallCallerBody(body *ast.BlockStmt) bool {
+	if body == nil {
+		return false
+	}
+
+	count := 0
+	small := true
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		switch n.(type) {
+		case *ast.ForStmt, *ast.RangeStmt, *ast.SelectStmt, *ast.SwitchStmt, *ast.TypeSwitchStmt, *ast.DeferStmt, *ast.GoStmt, *ast.FuncLit:
+			small = false
+		case *ast.BlockStmt:
+		case ast.Stmt:
+			count++
+		}
+
+		return small
+	})
+
+	return small && count <= 3
 }
