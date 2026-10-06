@@ -207,7 +207,7 @@ public sealed class TestRunner
 
     /// <summary>
     /// A <c>testing.RunTests</c> root: Go's fresh test context, which owns its own <c>-test.parallel</c>
-    /// slots and the names its top-level tests have taken.
+    /// slots.
     /// </summary>
     /// <remarks>
     /// Go's root writes to <c>os.Stdout</c> AS IT IS when RunTests is called (<c>w: os.Stdout</c>), and
@@ -219,15 +219,13 @@ public sealed class TestRunner
     {
         internal SemaphoreSlim ParallelLimiter { get; } = new(parallel);
 
-        internal Dictionary<string, int> Names { get; } = new(StringComparer.Ordinal);
-
         internal Action<string>? Redirected { get; } = redirected;
     }
 
     /// <summary>
     /// Go's runTests for <c>testing.RunTests</c>, entered from inside a running test: per <c>-count</c>
-    /// iteration a fresh root runs the list as TOP-LEVEL tests -- each named as Go names a root's
-    /// subtest, selected by -run/-skip through the caller's matcher, serial until it calls Parallel,
+    /// iteration a fresh root runs the list as TOP-LEVEL tests -- each under the name it was given,
+    /// selected by -run/-skip through the caller's matcher, serial until it calls Parallel,
     /// the parked ones released when the list is done -- and the result is whether all of them passed.
     /// </summary>
     internal bool RunTests(IReadOnlyList<(string Name, Action<ж<testing_package.T>> F)> tests, Func<string, string, bool> matchString, Action<string>? redirectedStdout, out bool ran)
@@ -247,10 +245,11 @@ public sealed class TestRunner
             List<TestExecution> started = [];
             List<TestExecution> parallel = [];
 
-            foreach ((string requested, Action<ж<testing_package.T>> action) in tests)
+            // A child of the root is named as GIVEN: Go's matcher rewrites (spaces to `_`) and
+            // de-duplicates (`#01`) only below the root (fullName's `c.level > 0`), so testify's
+            // "signature validation" entry is reported as exactly that.
+            foreach ((string name, Action<ж<testing_package.T>> action) in tests)
             {
-                string name = RootTestName(root, requested);
-
                 if (!m_options.ShouldRun(name, matchString))
                     continue;
 
@@ -269,18 +268,6 @@ public sealed class TestRunner
         }
 
         return ok;
-    }
-
-    // A root's subtest name: Go's rewrite of the requested name, unique among the root's own names.
-    private static string RootTestName(NestedRoot root, string requested)
-    {
-        string baseName = TestExecution.SanitizeName(requested);
-        int sequence = root.Names.TryGetValue(baseName, out int current) ? current + 1 : 0;
-        root.Names[baseName] = sequence;
-
-        return requested.Length == 0
-            ? $"#{sequence:00}"
-            : sequence == 0 ? baseName : $"{baseName}#{sequence:00}";
     }
 
     private TestExecution Start(string name, Action<ж<testing_package.T>> action, TestExecution? parent, string source, int line, NestedRoot? nestedRoot = null)

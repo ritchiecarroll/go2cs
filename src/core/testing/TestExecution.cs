@@ -1513,7 +1513,7 @@ public sealed class TestExecution
     /// like a mass failure and were none, on a top-level test that AGREED. Go's own rule is in
     /// testing/match.go (rewrite/isSpace) and strconv/quote.go (IsPrint/appendEscapedRune).
     /// </remarks>
-    internal static string SanitizeName(string value)
+    private static string SanitizeName(string value)
     {
         if (string.IsNullOrEmpty(value))
             return "#00";

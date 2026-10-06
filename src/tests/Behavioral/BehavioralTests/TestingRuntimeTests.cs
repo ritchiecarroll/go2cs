@@ -252,6 +252,40 @@ public class TestingRuntimeTests
         CollectionAssert.Contains(patterns.ToArray(), "Wanted~Other");
     }
 
+    // A RunTests entry is a child of the ROOT, and Go's matcher rewrites (spaces to `_`) and de-duplicates
+    // (`#01`) only below it (fullName's `c.level > 0`): testify's "signature validation" entry is reported
+    // as exactly that, and two entries of one name are two tests of that name.
+    [TestMethod]
+    public void RunTestsNamesItsEntriesAsGiven()
+    {
+        string resultPath = Path.Combine(Path.GetTempPath(), $"go2cs-results-{Guid.NewGuid():N}.json");
+
+        try
+        {
+            TestRegistry registry = new("runtime/runtests-names", []);
+            registry.Add("TestOuter", _ =>
+            {
+                testing_package.RunTests((_, _) => (true, null!), new testing_package.InternalTest[]
+                {
+                    new(Name: "signature validation", F: _ => { }),
+                    new(Name: "dup", F: _ => { }),
+                    new(Name: "dup", F: _ => { }),
+                }.slice());
+            }, "runtime_test.go", 1);
+
+            Assert.AreEqual(0, TestHost.Run(registry, ["--result", resultPath]));
+
+            string results = File.ReadAllText(resultPath);
+            StringAssert.Contains(results, "\"test\":\"signature validation\",\"action\":\"pass\"");
+            Assert.AreEqual(2, System.Text.RegularExpressions.Regex.Matches(results, "\"test\":\"dup\",\"action\":\"pass\"").Count, results);
+            Assert.IsFalse(results.Contains("signature_validation") || results.Contains("dup#01"), results);
+        }
+        finally
+        {
+            File.Delete(resultPath);
+        }
+    }
+
     // Go's RunTests root writes to os.Stdout AS IT IS at the call, and only the process's stdout reaches
     // test2json. testify's TestSuiteLogging redirects os.Stdout to a pipe, runs a suite with a failing and
     // a passing test that both log, and reads its own output back: the failure (with its log line) is
