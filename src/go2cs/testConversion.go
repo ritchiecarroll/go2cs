@@ -7394,6 +7394,11 @@ type testComparison struct {
 	// reported is still a census gap (F6).
 	RuntimeDeclared []string `json:"runtimeDeclared,omitempty"`
 
+	// AddressPairs counts the one-sided rows pairAddressVariantNames re-keyed, 1:1 apart from the run-order (N:N) pairs,
+	// so a pairing is stated on the record rather than absorbed into the matched count. Absent when nothing was paired,
+	// which leaves every record that pairs nothing byte-identical to before.
+	AddressPairs *addressPairCounts `json:"addressPairs,omitempty"`
+
 	// DisclosedRecords publishes, for every disclosed test whose C# terminal event carried a record
 	// list, the records OUTSIDE its signature. A record-count pin catches an extra or a missing
 	// record but not a substitution at an unchanged count, so those records are printed at every
@@ -8783,12 +8788,16 @@ var addressTokenPattern = regexp.MustCompile(`0x[0-9a-fA-F]+`)
 // only by embedded 0x-hex address tokens onto a shared normalized key, so the status match
 // compares them as one row (errors' TestAsValidation/*string(0xc…) names). This is the SECOND
 // phase of matching — exact names already paired stay untouched, so a deterministic hex literal
-// used as a subtest name is never collapsed. Only UNAMBIGUOUS 1:1 pairs are re-keyed: a
-// normalized key claimed by multiple names on either side, or colliding with an existing exact
-// name, keeps all originals — the rows stay one-sided and the comparison fails loud, never
-// masking. csOutputs and csRecords follow the C# rename so disclosure-signature matching keeps its
-// text and a record-count pin its records.
-func pairAddressVariantNames(goResults, csResults, csOutputs map[string]string, csRecords map[string]testRecords) {
+// used as a subtest name is never collapsed. A group of ONE name per side pairs onto the normalized
+// key itself. A group of N names per side (N > 1, the same N on both) pairs by RUN ORDER — the i-th
+// name to start on one side with the i-th on the other, onto key#run<i> — because a table test's
+// cases run in the same order on both sides while their addresses differ (ruled 2026-10-05). Any
+// other group keeps all originals: sizes that differ, a name with no position in its stream, or a
+// target key that already names a row. Those rows stay one-sided and the comparison fails loud,
+// never masking. csOutputs and csRecords follow the C# rename so disclosure-signature matching
+// keeps its text and a record-count pin its records. The pairs are counted by kind.
+func pairAddressVariantNames(goResults, csResults, csOutputs map[string]string, csRecords map[string]testRecords, goOrder, csOrder map[string]int) addressPairCounts {
+	var counts addressPairCounts
 	goOnly := make(map[string][]string)
 	csOnly := make(map[string][]string)
 
@@ -8808,36 +8817,110 @@ func pairAddressVariantNames(goResults, csResults, csOutputs map[string]string, 
 		}
 	}
 
+	taken := func(key string) bool {
+		_, onGo := goResults[key]
+		_, onCS := csResults[key]
+		return onGo || onCS
+	}
+
+	rekey := func(goName, csName, key string) {
+		goResults[key] = goResults[goName]
+		delete(goResults, goName)
+		csResults[key] = csResults[csName]
+		delete(csResults, csName)
+
+		if output, ok := csOutputs[csName]; ok {
+			csOutputs[key] = output
+			delete(csOutputs, csName)
+		}
+
+		if records, ok := csRecords[csName]; ok {
+			csRecords[key] = records
+			delete(csRecords, csName)
+		}
+	}
+
 	for key, goNames := range goOnly {
 		csNames := csOnly[key]
 
-		if len(goNames) != 1 || len(csNames) != 1 {
+		if len(goNames) != len(csNames) {
 			continue
 		}
 
-		if _, exists := goResults[key]; exists {
+		if len(goNames) == 1 {
+			if !taken(key) {
+				rekey(goNames[0], csNames[0], key)
+				counts.OneToOne++
+			}
 			continue
 		}
 
-		if _, exists := csResults[key]; exists {
+		goRun, goOrdered := namesInRunOrder(goNames, goOrder)
+		csRun, csOrdered := namesInRunOrder(csNames, csOrder)
+
+		if !goOrdered || !csOrdered {
 			continue
 		}
 
-		goResults[key] = goResults[goNames[0]]
-		delete(goResults, goNames[0])
-		csResults[key] = csResults[csNames[0]]
-		delete(csResults, csNames[0])
+		keys := make([]string, len(goRun))
+		free := true
 
-		if output, ok := csOutputs[csNames[0]]; ok {
-			csOutputs[key] = output
-			delete(csOutputs, csNames[0])
+		for i := range goRun {
+			keys[i] = fmt.Sprintf("%s#run%d", key, i+1)
+			free = free && !taken(keys[i])
 		}
 
-		if records, ok := csRecords[csNames[0]]; ok {
-			csRecords[key] = records
-			delete(csRecords, csNames[0])
+		if !free {
+			continue
+		}
+
+		for i := range goRun {
+			rekey(goRun[i], csRun[i], keys[i])
+		}
+
+		counts.NToN += len(goRun)
+	}
+
+	return counts
+}
+
+// namesInRunOrder sorts names by their position in a stream. It reports false when any name has no position, so its
+// group is never paired by a guess.
+func namesInRunOrder(names []string, order map[string]int) ([]string, bool) {
+	for _, name := range names {
+		if _, ok := order[name]; !ok {
+			return nil, false
 		}
 	}
+
+	sorted := append([]string(nil), names...)
+	sort.Slice(sorted, func(i, j int) bool { return order[sorted[i]] < order[sorted[j]] })
+
+	return sorted, true
+}
+
+// addressPairCounts is what pairAddressVariantNames re-keyed: OneToOne rows from a group of one name per side, NToN rows
+// from a group of N names per side (N > 1) paired by run order. Published on the comparison record when either is
+// nonzero, so a pairing by run order is never absorbed into the matched count unstated.
+type addressPairCounts struct {
+	OneToOne int `json:"oneToOne"`
+	NToN     int `json:"nToN"`
+}
+
+// testRunOrder is each test's position in a stream: the index of the first event that names it, which is the order the
+// tests started in. It reads both sides' streams (go test -json and the converted host's), as terminalTestResults does.
+func testRunOrder(output string) map[string]int {
+	order := make(map[string]int)
+	for _, line := range testStreamLines(output) {
+		var event normalizedTestEvent
+		if json.Unmarshal([]byte(line), &event) != nil || event.Test == "" {
+			continue
+		}
+		if _, seen := order[event.Test]; !seen {
+			order[event.Test] = len(order)
+		}
+	}
+	return order
 }
 
 // testRecords is one test's log-record list from the converted host's terminal event. Present is
@@ -9585,7 +9668,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 			addRuntimeDeclaredResults(csResults, rawCSResults, runtimeDeclared)
 		}
 	}
-	pairAddressVariantNames(goResults, csResults, csOutputs, csRecords)
+	addressPairs := pairAddressVariantNames(goResults, csResults, csOutputs, csRecords, testRunOrder(goOutput), testRunOrder(csOutput))
 
 	names := make([]string, 0, len(goResults)+len(csResults))
 	seen := hashset.HashSet[string]{}
@@ -9612,6 +9695,9 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 		Package: comparisonRecordPackage(manifest, inputPath), Status: status, Go: goResults, CSharp: csResults,
 		Matched: true, Skipped: []string{}, Disclosed: []string{}, Excluded: excludedDeclarations(manifest), Errors: []string{},
 		Gated: gated, Withdrawn: []string{}, RuntimeDeclared: runtimeDeclared, Environment: environment,
+	}
+	if addressPairs != (addressPairCounts{}) {
+		result.AddressPairs = &addressPairs
 	}
 	if disclosureErr != nil {
 		result.Matched = false
