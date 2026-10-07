@@ -1002,6 +1002,15 @@ func applyExportedTypeAliases(results [][2]string, info PackageInfo, derived boo
 
 	packageName := getCoreSanitizedIdentifier(classPath)
 
+	// The namespace this package's OWN types render under, so renderCSFullTypeName can tell its keys
+	// from a same-named package's (importedTypeAliasTargetsByNamespace). Empty when the loader does
+	// not know the directory; such a key renders as it always has.
+	publisherNamespace := ""
+
+	if source := importedPackageSources[filepath.Clean(info.SourceDir)]; source != nil && source.PkgPath != "" {
+		publisherNamespace = renderedPackageNamespace(source.PkgPath, source.Name)
+	}
+
 	// A collision-renamed type whose renamed form is ITSELF an exported alias produces a TWO-HOP
 	// chain in the producer's package_info: encoding/json's `Token` type collides with
 	// `(*Decoder).Token()`, so the TYPE is Δ-renamed (`GoTypeAlias("Token", "ΔToken")`), and — Token
@@ -1074,6 +1083,20 @@ func applyExportedTypeAliases(results [][2]string, info PackageInfo, derived boo
 		importedTypeAliases[alias] = typeName
 		importedTypeAliasSourceDirs[alias] = sourceDir
 		importedTypeAliasTargetsByDir[sourceDir+"\x00"+alias] = typeName
+
+		if publisherNamespace == "" {
+			importedTypeAliasNamespacedKeys[alias] = false
+		} else {
+			if _, seen := importedTypeAliasNamespacedKeys[alias]; !seen {
+				importedTypeAliasNamespacedKeys[alias] = true
+			}
+
+			if _, seen := importedTypeAliasTargetsByNamespace[publisherNamespace+"\x00"+alias]; !seen {
+				importedTypeAliasPublisherNamespaces[alias] = append(importedTypeAliasPublisherNamespaces[alias], publisherNamespace)
+			}
+
+			importedTypeAliasTargetsByNamespace[publisherNamespace+"\x00"+alias] = typeName
+		}
 
 		if derived {
 			derivedTypeAliases.Add(alias)
