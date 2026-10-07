@@ -63,6 +63,17 @@ untracked file to exist.
      landed re-issues the error to the resumed lane. The two measured cases were an `index.lock` that was
      long gone and a landing that had already happened. -->
 
+- **EVERY SECTION NAMES ITS LANE'S COMMS ROUTE, MEASURED, AND COORD'S SECTION CARRIES THE SLACK DUTY.** Per lane:
+  how COORD reaches it and how it answers (a direct session message, by the FULL session title the session list
+  prints; an inbox file on `claude/mailbox`; a lane on another account is mailbox-only), and whether it runs a
+  mailbox watcher. COORD's section names the private Slack channel (#fleet; found by the connector's channel
+  search, never by an id written here), its three uses (private detail the public mailbox may not hold; COORD's
+  @mention pings to the owner for anything that needs him; his replies) and that nobody polls it. A new session
+  on another account needs its own Slack connector, and a connector toggled in a running session arrives only at
+  a turn the owner starts. <!-- ⚠ 2026-10-07, owner ruling (ledger 01:22, 02:0x): the routes and the owner's
+     Slack pings had lived only in a session's memory and one handover subsection; the owner asked that every
+     roll, on any account, carry them. -->
+
 ## 3. Verify, then push
 
 ```

@@ -27,15 +27,28 @@
 # Adding one spells nothing:   echo -n "<token>" | tr A-Z a-z | sha256sum
 #
 # HOW THE SHELL CENSUS USES IT, AND THE LIMIT OF THAT USE.
-# The Go guard hashes every candidate token of every tracked file in process. A shell census cannot:
-# hashing millions of tokens through a sha256sum subprocess is not an instrument, it is an outage.
-# So the shell census inverts the comparison. At startup it derives a handful of candidate literals
+# TWO WAYS, since 2026-10-06. (1) In its STRICT modes (entry, subject, converted) the TEXT_DENIED arm
+# does what the Go guard does: it hashes the candidate words of the text being censused -- only those
+# whose length is some row's length below, all in ONE process -- and a (length, hash) pair equal to a
+# denied row refuses. It also does what the Go guard does not: one scanner process hashes EVERY
+# WINDOW of every row's length below over the buffers the census passes read, so a denied word glued
+# inside a longer word, or broken by characters that are not its own, is found too. ONLY THE EXACT
+# BYTES OF A ROW ARE HASHED, so a row whose word itself contains a dot, a hyphen or an underscore is
+# found whole, glued or wrapped across one line break and NOT with its separator dropped or
+# re-spelled; closing that needs a second digest per such row, of its alphanumerics-only reduction,
+# and that row would be added to the Go list first. That arm needs nothing from the box, and it
+# REFUSES TO RUN (rc 2) if this file is missing, has a row that does not parse (a LEN written with a
+# leading zero is such a row), or yields zero denied rows. (2) The run-time arms, which
+# are older and are still the only token arms in `tree` mode, invert the comparison, because hashing
+# every token of a long shared surface through a subprocess is not an instrument, it is an outage.
+# So THOSE arms invert the comparison. At startup the census derives a handful of candidate literals
 # from the LOCAL BOX -- the never-push token file, basename "$HOME", $COMPUTERNAME, the pieces of
 # `git config --get user.name` -- hashes THOSE (a handful of sha256sum calls), and reports which of
 # the rows below the box could supply plaintext for. A matched literal becomes a live arm.
 #
-# WHAT THAT MISSES, STATED: a row below whose plaintext this box cannot derive is NOT an arm in the
-# shell census on this box. The Go guard still catches it over the tracked tree at `go test`, and an
+# WHAT THAT MISSES, STATED: a row below whose plaintext this box cannot derive is NOT one of the
+# RUN-TIME arms on this box -- TEXT_DENIED is what covers it before a post, in the strict modes. In
+# `tree` mode nothing does. The Go guard still catches it over the tracked tree at `go test`, and an
 # operator who needs it live in the pre-post gate puts the plaintext in the local never-push token
 # file. The census PRINTS `hashes=N matched=M unmatched=N-M` on every run, so the gap is a number on
 # the record and never an assumption.
@@ -68,8 +81,10 @@
 # path in either platform spelling, hostnames, share names and addresses.
 #
 # SCOPE IN THE SHELL CENSUS: only the arms whose NOTE in coord-identifier-patterns.txt carries
-# [PUBLIC-HANDLE-ADMIT] consult this section -- RUNTIME_ACCOUNT and RUNTIME_OWNERNAME. TOKENFILE and
-# RUNTIME_MACHINE do not, so a locally denied literal can never be cleared by a handle.
+# [PUBLIC-HANDLE-ADMIT] consult this section -- RUNTIME_ACCOUNT, RUNTIME_OWNERNAME and TEXT_DENIED.
+# TOKENFILE and RUNTIME_MACHINE do not, so a locally denied literal can never be cleared by a handle.
+# For TEXT_DENIED the handle need not be derivable by the box: a word of the text whose (length,
+# hash) is a row below joins the admit set for that census.
 #
 ADMIT	14	6e20b08e8ef15c17552c9ba5ee62ff640ea39552bbdccc1f0f6c0db5e5c92818	the GitHub organisation / NuGet author handle
 ADMIT	8	f73dc7a07d73876ae6a1e18eb95a99cc5d12a628644c33ea307397700ba6c1f3	the work-mail account handle
