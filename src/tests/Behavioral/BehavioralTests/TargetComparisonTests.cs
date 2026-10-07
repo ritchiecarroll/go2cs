@@ -82,6 +82,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAnonStructCrossFile() => CheckTarget("AnonStructCrossFile");
 
     [TestMethod]
+    public void CheckAnonStructAliasedConversion() => CheckTarget("AnonStructAliasedConversion");
+
+    [TestMethod]
     public void CheckAnonStructNamedConversion() => CheckTarget("AnonStructNamedConversion");
 
     [TestMethod]

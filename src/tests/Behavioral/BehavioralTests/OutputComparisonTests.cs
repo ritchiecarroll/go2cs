@@ -77,6 +77,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAnonStructCrossFile() => CheckTarget("AnonStructCrossFile");
 
     [TestMethod]
+    public void CheckAnonStructAliasedConversion() => CheckTarget("AnonStructAliasedConversion");
+
+    [TestMethod]
     public void CheckAnonStructNamedConversion() => CheckTarget("AnonStructNamedConversion");
 
     [TestMethod]
