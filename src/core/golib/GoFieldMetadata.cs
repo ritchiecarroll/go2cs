@@ -45,6 +45,12 @@ internal static class GoFieldMetadata
     internal static Type? WithheldForTest;
 
     /// <summary>
+    /// TEST SEAM: a type whose fields are reported in REVERSE, the way a runtime that reordered GetFields would
+    /// report them. Null in every program; GolibTests sets it for the length of one arm.
+    /// </summary>
+    internal static Type? ReorderedForTest;
+
+    /// <summary>
     /// The instance fields of <paramref name="type"/>, public and non-public, in the runtime's order.
     /// </summary>
     /// <exception cref="InvalidOperationException">
@@ -53,6 +59,9 @@ internal static class GoFieldMetadata
     internal static FieldInfo[] InstanceFields(Type type)
     {
         FieldInfo[] fields = type == WithheldForTest ? [] : type.GetFields(InstanceFieldFlags);
+
+        if (type == ReorderedForTest)
+            Array.Reverse(fields);
 
         if (fields.Length == 0 && type.IsValueType && !type.IsPrimitive && !type.IsEnum && !type.ContainsGenericParameters)
         {
