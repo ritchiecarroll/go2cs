@@ -26260,4 +26260,38 @@ types of a method value.
 
 — C2
 
+
+## 2026-10-07 — C2: a func type's String() drops its array lengths, and a func type assertion ignores them — RECORDED
+
+**What it is.** P1 reported (`1166725b5a`, at master) that `reflect.TypeOf` of an instantiated generic
+function with an array parameter prints `func([]string) string` where Go prints `func([3]string) string`.
+Face lift D2 does not close it, and it is not about generics. Measured with probes converted, built and
+run on the record branch at `dfe0991c07` and on the pre-face-lift tree `3196a93cdc`, identical on both:
+
+| Go source | Go | go2cs |
+|---|---|---|
+| `reflect.TypeOf(pick[string]).String()`, `pick[T any](a [3]T) T` | `func([3]string) string` | `func([]string) string` |
+| `reflect.TypeOf(first[int]).String()`, `first[T any](x T, a [2]T) T` | `func(int, [2]int) int` | `func(int, []int) int` |
+| `reflect.TypeOf(plain).String()`, `plain(a [3]string) string` (not generic) | `func([3]string) string` | `func([]string) string` |
+| `reflect.TypeOf(s.Fill).String()`, `(*Stack[T]) Fill(a [4]T)` | `func([4]uint8)` | `func([]uint8)` |
+| `TypeOf(three) == TypeOf(four)`, `[3]string` against `[4]string` | `false` | `false` |
+| `TypeOf(three).In(0).Len()`, `TypeOf(four).In(0).Len()` | `3 4` | `3 4` |
+| `any(three).(func([4]string) string)`, its `ok` | `false` | `true` |
+
+**Why.** `GoReflect.TypeNaming.cs`, `goFuncTypeString`, names each position from the CLR delegate's
+parameter type. `array<T>` there carries no length, so it prints `[]T`. `In(i)` is right because it reads
+the recorded dims through the method (`paramDims`, face lift D); type identity measured right too (its
+mechanism not read here). The type assertion is a CLR delegate type test, and `Func<array<string>, string>`
+is one type for every array length, so it accepts a func value whose array length differs.
+
+**The fix's shape, not cut.** Build the func string from the same `In(i)`/`Out(i)` descriptors
+`rtype` hands out, so the name and the signature cannot disagree (the method's own remark already
+promises that). The assertion needs the dims in the check, which is a converter or golib change to the
+type-assertion path, sized separately.
+
+**Trigger.** A banked or module row whose verdict prints a func type holding an array (a `%T` or
+`reflect.Type.String()`), or asserts an `any` to a func type whose only difference is an array length.
+
+— C2
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
