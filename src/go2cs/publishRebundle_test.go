@@ -151,13 +151,14 @@ func TestPublishRefusesAHostItCannotRemove(t *testing.T) {
 // in those assemblies then print no file:line. The predicate compares the two folders by name.
 
 // seedHostBuild lays out a -tests output root: the publish's build output under bin/tests/<config>/net10.0/<rid>/ holding
-// the test assembly and the given symbol files, and the publish folder holding the host and the given symbol files.
-func seedHostBuild(t *testing.T, config string, built, published []string) (out, project string) {
+// the test assembly and the given symbol files, and the publish folder holding the host and the given symbol files. It
+// returns the build output too, as publishBuildOutput reads it from the publish.
+func seedHostBuild(t *testing.T, config string, built, published []string) (out, project, buildDir string) {
 	t.Helper()
 
 	out = t.TempDir()
 	project = filepath.Join(out, "x.tests.csproj")
-	buildDir := filepath.Join(out, "bin", "tests", config, "net10.0", "win-x64")
+	buildDir = filepath.Join(out, "bin", "tests", config, "net10.0", "win-x64")
 	publishDir := filepath.Dir(publishedTestHostPath(out, project))
 
 	for _, file := range append([]string{filepath.Join(buildDir, "x.tests.dll"), publishedTestHostPath(out, project)}, nil...) {
@@ -170,7 +171,7 @@ func seedHostBuild(t *testing.T, config string, built, published []string) (out,
 		writeEmpty(t, filepath.Join(publishDir, name))
 	}
 
-	return out, project
+	return out, project, buildDir
 }
 
 func writeEmpty(t *testing.T, file string) {
@@ -185,11 +186,11 @@ func writeEmpty(t *testing.T, file string) {
 }
 
 func TestPublishedHostLackingDependencySymbolsIsNamed(t *testing.T) {
-	out, project := seedHostBuild(t, "Release",
+	out, project, buildDir := seedHostBuild(t, "Release",
 		[]string{"x.tests.pdb", "golib.pdb", "fmt.pdb"},
 		[]string{"x.tests.pdb"})
 
-	missing, err := publishedSymbolsMissing(out, project, "Release")
+	missing, err := publishedSymbolsMissing(buildDir, out, project)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -199,39 +200,49 @@ func TestPublishedHostLackingDependencySymbolsIsNamed(t *testing.T) {
 }
 
 func TestPublishedHostWithEverySymbolIsSilent(t *testing.T) {
-	out, project := seedHostBuild(t, "Release",
+	out, project, buildDir := seedHostBuild(t, "Release",
 		[]string{"x.tests.pdb", "golib.pdb"},
 		[]string{"x.tests.pdb", "golib.pdb"})
 
-	missing, err := publishedSymbolsMissing(out, project, "Release")
+	missing, err := publishedSymbolsMissing(buildDir, out, project)
 	if err != nil || len(missing) != 0 {
 		t.Fatalf("a host beside every symbol file its build produced was flagged: missing=%v err=%v", missing, err)
 	}
 }
 
-// The check reads the build output of THIS publish's configuration only: a Debug tree left beside a Release run (or a
-// Release tree beside a Debug one) is another build's output, not this host's.
+// The check reads the build output THIS publish stated only: a Debug tree left beside a Release run (or a Release tree
+// beside a Debug one) is another build's output, not this host's.
 func TestTheOtherConfigurationsBuildOutputIsNotRead(t *testing.T) {
-	out, project := seedHostBuild(t, "Release",
+	out, project, buildDir := seedHostBuild(t, "Release",
 		[]string{"x.tests.pdb", "golib.pdb"},
 		[]string{"x.tests.pdb", "golib.pdb"})
 	writeEmpty(t, filepath.Join(out, "bin", "tests", "Debug", "net10.0", "win-x64", "x.tests.dll"))
 	writeEmpty(t, filepath.Join(out, "bin", "tests", "Debug", "net10.0", "win-x64", "debugonly.pdb"))
 
-	missing, err := publishedSymbolsMissing(out, project, "Release")
+	stated, err := publishBuildOutput(filepath.Join(buildDir, "x.tests.dll")+"\n", project)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	missing, err := publishedSymbolsMissing(stated, out, project)
 	if err != nil || len(missing) != 0 {
 		t.Fatalf("the Debug build output was read for a Release host: missing=%v err=%v", missing, err)
 	}
 }
 
 // After a successful publish the build output exists; when it cannot be found the check cannot be made, and saying
-// nothing would make it a guard that passes by absence.
+// nothing would make it a guard that passes by absence. Two ways it cannot be found: the publish states no build
+// output, or the one it states is not there.
 func TestAMissingBuildOutputIsRefusedNotPassed(t *testing.T) {
 	out := t.TempDir()
 	project := filepath.Join(out, "x.tests.csproj")
 	writeEmpty(t, publishedTestHostPath(out, project))
 
-	if _, err := publishedSymbolsMissing(out, project, "Release"); err == nil {
-		t.Fatal("no build output beside the published host, and the check passed: a guard that cannot see must say so")
+	if _, err := publishBuildOutput("", project); err == nil {
+		t.Error("the publish stated no build output, and the check passed: a guard that cannot see must say so")
+	}
+
+	if _, err := publishBuildOutput(filepath.Join(out, "bin", "tests", "Release", "net10.0", "win-x64", "x.tests.dll")+"\n", project); err == nil {
+		t.Error("the publish stated a build output that is not there, and the check passed: a guard that cannot see must say so")
 	}
 }
