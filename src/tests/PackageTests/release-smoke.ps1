@@ -51,7 +51,10 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$Feed = (Resolve-Path $Feed).Path
+# A URL is a published feed (the post-publish smoke: -Feed https://api.nuget.org/v3/index.json); it carries
+# every version ever shipped, so the version under test must be named.
+if ($Feed -match '^https?://') { if (-not $Version) { throw "-Version is required when -Feed is a URL ($Feed)" } }
+else { $Feed = (Resolve-Path $Feed).Path }
 $Converter = (Resolve-Path $Converter).Path
 New-Item -ItemType Directory -Force $WorkRoot | Out-Null
 $WorkRoot = (Resolve-Path $WorkRoot).Path
@@ -73,17 +76,26 @@ $env:GOTOOLCHAIN = 'local'
 function Write-FeedConfig([string]$Dir) {
     # go.* from the feed ONLY; everything else (the SDK's own packs) from nuget.org. The mapping is what
     # makes the feed authoritative for go.*: no other source is even consulted for those IDs.
+    $nugetOrg = 'https://api.nuget.org/v3/index.json'
+    if ($Feed.TrimEnd('/') -eq $nugetOrg) {
+        # The post-publish smoke: the feed IS nuget.org. Listing that URL under two keys makes NuGet drop the
+        # second, and the SDK's own packs (Microsoft.NET.ILLink.Tasks) then have no source: NU1100. One source.
+        $sources = "    <add key=`"nuget.org`" value=`"$nugetOrg`" />"
+        $mapping = '    <packageSource key="nuget.org"><package pattern="*" /></packageSource>'
+    }
+    else {
+        $sources = "    <add key=`"feed`" value=`"$Feed`" />`n    <add key=`"nuget.org`" value=`"$nugetOrg`" />"
+        $mapping = "    <packageSource key=`"feed`"><package pattern=`"go.*`" /></packageSource>`n    <packageSource key=`"nuget.org`"><package pattern=`"*`" /></packageSource>"
+    }
     @"
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <packageSources>
     <clear />
-    <add key="feed" value="$Feed" />
-    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+$sources
   </packageSources>
   <packageSourceMapping>
-    <packageSource key="feed"><package pattern="go.*" /></packageSource>
-    <packageSource key="nuget.org"><package pattern="*" /></packageSource>
+$mapping
   </packageSourceMapping>
 </configuration>
 "@ | Set-Content -LiteralPath (Join-Path $Dir 'nuget.config') -Encoding utf8

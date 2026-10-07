@@ -71,6 +71,7 @@ gh workflow run os-matrix.yml -f goos=linux  -f stage=sweep-shard -f filter=comp
 | `goos` | `windows` · `linux` · `darwin` | The corpus flavor to bind. Each maps to a runner + RID pair; **`darwin` fans out to BOTH mac runners** (arm64 and x64) in one dispatch. |
 | `stage` | `census` · `behavioral-smoke` · `sweep-shard` · `release-smoke` | What to run. One stage per dispatch. |
 | `filter` | free text, optional | The shard. A package substring for `sweep-shard`, a project-name substring for `behavioral-smoke`. Blank takes the stage's documented default. |
+| `published_version` | a four-part go.* version, optional | `release-smoke` only. Blank packs this tree and consumes that pack (the pre-publish gate). Set, the pack is skipped and every leg restores that version from nuget.org (the post-publish smoke). |
 
 There is no `all` value: one dispatch per flavor keeps each leg's artifacts, budget and verdict
 separate, which is what makes a wall readable. Dispatching all three is three cheap clicks.
@@ -152,6 +153,12 @@ A leg is green when all four arms pass. Dispatch it at the tree that ships, befo
 it is what proves the packages carry what that tree's converter emits on every OS (C2's 2026-10-03 finding: N's
 converter emits `unsafe.ArrayPointer`, which the published 1.24.13.3 lacks). The pack job's budget is its own
 (240 min; measured 38-53 min).
+
+**After the publish**, the same stage with `published_version` set to the version just pushed (say
+`-f published_version=1.24.13.4`) skips the pack and runs the same four arms on the same four RIDs against
+nuget.org itself, `go.*` and everything else restored from there: the release as a user receives it. It is
+dispatchable once every id in the walkthrough's restore closure is listed (a partial index fails restore loudly,
+NU1102). The input is refused on any other stage and must be four numeric parts.
 
 ## Results flow
 
