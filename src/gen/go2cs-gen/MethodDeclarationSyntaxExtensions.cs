@@ -594,6 +594,28 @@ public static class MethodSyntaxExtensions
             ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true }
         });
 
+    // StrGenerator's twin rule (docs/PLAN-marker-comment-parity.md, 5.7), read from a declaration: [GoStr],
+    // or a parameter typed golib's `sstring` view in any spelling (`sstring`, `go.sstring`,
+    // `global::go.sstring`) -- the latter only outside a hand-owned package, where a method is a twin by
+    // [GoStr] alone. The converter types each twinned parameter `sstring` and nothing else in converted code
+    // takes one, so the signature says what the attribute said. Read from syntax alone, so the selection costs
+    // no semantic model per node; the template confirms the type is golib's (StrTemplate.IsRenderable).
+    public static bool IsSStringTwinBody(this MethodDeclarationSyntax methodDeclaration, bool handOwnedPackage)
+    {
+        if (methodDeclaration.HasGoAttribute("GoStr"))
+            return true;
+
+        if (handOwnedPackage)
+            return false;
+
+        return methodDeclaration.ParameterList.Parameters.Any(parameter => parameter.Type switch
+        {
+            IdentifierNameSyntax { Identifier.Text: "sstring" } => true,
+            QualifiedNameSyntax { Right.Identifier.Text: "sstring" } qualified => qualified.Left.ToString() is "go" or "global::go",
+            _ => false
+        });
+    }
+
     // Whether a declaration carries go.<name>Attribute, in any spelling the converter, the generators
     // or a hand-written file use: `GoRecv`, `GoRecvAttribute`, `go.GoRecv`, `global::go.GoRecv`.
     private static bool HasGoAttribute(this MethodDeclarationSyntax methodDeclaration, string name) =>

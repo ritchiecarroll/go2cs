@@ -15,10 +15,17 @@ namespace go;
 /// package-level function the canonical value delegate <c>&lt;Name&gt;ᶠ</c>.
 /// </summary>
 /// <remarks>
-/// A generator trigger, like <see cref="GoRecvAttribute"/>: every call with an <c>@string</c>, a C# string
-/// or a u8 literal binds the marked member, and every func value names the delegate. The package's
-/// <c>package_info.cs</c> separately PUBLISHES each exported package-level twin to other packages as
-/// <see cref="GoSStringTwinAttribute"/>, for the converter.
+/// <para>
+/// Converted code does not write it (docs/PLAN-marker-comment-parity.md, 5.7): the converter types each
+/// twinned parameter <c>sstring</c> and nothing else in converted code takes one, so StrGenerator selects
+/// the member by that parameter. A hand-written file may keep the attribute, and in a hand-owned package
+/// (<see cref="GoHandOwnedPackageAttribute"/>) a member is a twin by this attribute alone.
+/// </para>
+/// <para>
+/// Every call with an <c>@string</c>, a C# string or a u8 literal binds the member, and every func value
+/// names the delegate. The package's <c>package_info.cs</c> separately PUBLISHES each exported
+/// package-level twin to other packages as <see cref="GoSStringTwinAttribute"/>, for the converter.
+/// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class GoStrAttribute : Attribute;

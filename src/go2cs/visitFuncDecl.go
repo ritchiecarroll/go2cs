@@ -1371,16 +1371,15 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	}
 
 	// An sstring TWIN (sstringTwinOperations.go): this declaration is the member that carries the
-	// Go body, each registered parameter typed sstring and marked [GoStr]. go2cs-gen's
-	// StrGenerator emits its companions (the @string forwarder, and a package-level twin's
-	// canonical value delegate), so the visible file keeps one method per Go function.
+	// Go body, each registered parameter typed sstring and no mark: go2cs-gen's StrGenerator selects
+	// it by its sstring parameter (docs/PLAN-marker-comment-parity.md, 5.7) and emits its companions
+	// (the @string forwarder, and a package-level twin's canonical value delegate), so the visible
+	// file keeps one method per Go function.
 	twinFunc, _ := v.info.ObjectOf(funcDecl.Name).(*types.Func)
-	twinMarker := ""
 
 	if twinIndices := sstringTwinIndices(twinFunc); len(twinIndices) > 0 {
 		v.validateSStringTwin(funcDecl, twinFunc, twinIndices)
 		v.replaceMarker(functionParametersMarker, sstringTwinSignature(sstringTwinKey(twinFunc), parameterSignature, twinIndices, funcDecl.Recv != nil))
-		twinMarker = "[GoStr] "
 	} else {
 		v.replaceMarker(functionParametersMarker, parameterSignature)
 	}
@@ -1413,7 +1412,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		// mark: golib's method-set readers, RecvGenerator and TypeGenerator all read an unmarked
 		// by-ref receiver as a POINTER-set method (docs/PLAN-marker-comment-parity.md, 5.1). Only a
 		// generated forwarder that is VALUE-set while by-ref is marked, [GoCopyBound].
-		v.replaceMarker(functionAttributeMarker, forwarderPrefix+twinMarker+v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name)))
+		v.replaceMarker(functionAttributeMarker, forwarderPrefix+v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name)))
 	}
 
 	var funcExecutionContext string

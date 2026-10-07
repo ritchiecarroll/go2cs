@@ -165,11 +165,12 @@ func TestSStringTwinEmission(t *testing.T) {
 	}
 
 	for _, want := range []string{
-		// the sstring member: the body and the retyped registered parameter, marked for go2cs-gen
-		"[GoStr] public static @string Format(sstring format, params ꓸꓸꓸany aʗp) {",
-		"[GoStr] public static nint Count(sstring s) {",
-		"[GoStr] public static @string Mixed(@string prefix, sstring s) {",
-		"[GoStr] internal static void write(this ref buf b, sstring s) {",
+		// the sstring member: the body and the retyped registered parameter, with no mark: go2cs-gen
+		// selects it by its sstring parameter (face lift S, docs/PLAN-marker-comment-parity.md, 5.7)
+		"\npublic static @string Format(sstring format, params ꓸꓸꓸany aʗp) {",
+		"\npublic static nint Count(sstring s) {",
+		"\npublic static @string Mixed(@string prefix, sstring s) {",
+		"\ninternal static void write(this ref buf b, sstring s) {",
 
 		// the sstring gaps the pilot closes: range and spread over the view
 		"foreach ((_, _) in s) {",
@@ -183,7 +184,7 @@ func TestSStringTwinEmission(t *testing.T) {
 	// the companions are go2cs-gen's (StrGenerator): the converter emits neither the @string
 	// forwarder nor the canonical delegate, and no priority, so the visible file keeps one method per
 	// Go function. RED at claude/c2-sstring-twin-pilot 5b691c9c01, which emitted all three inline.
-	for _, refuse := range []string{"OverloadResolutionPriority", "GoTwinForwarder", "static readonly Funcꓸꓸꓸ<@string, any, @string> Formatᶠ", "Countᶠ =", "Count(@string s)", "write(this ref buf b, @string s)"} {
+	for _, refuse := range []string{"GoStr", "OverloadResolutionPriority", "GoTwinForwarder", "static readonly Funcꓸꓸꓸ<@string, any, @string> Formatᶠ", "Countᶠ =", "Count(@string s)", "write(this ref buf b, @string s)"} {
 		if strings.Contains(emitted, refuse) {
 			t.Errorf("the converter must not emit a twin companion (%q):\n%s", refuse, emitted)
 		}
