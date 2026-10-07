@@ -213,7 +213,7 @@ internal static bool shouldSendChunkedRequestBody(this ж<transferWriter> Ꮡt) 
 //
 // In other words, this delay will not normally affect anybody, and there
 // are workarounds if it does.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void probeRequestBody(this ж<transferWriter> Ꮡt) {
+internal static partial void probeRequestBody(this ж<transferWriter> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.ByteReadCh = new channel<readResult>(1);

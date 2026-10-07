@@ -26,7 +26,7 @@ internal static slice<@string> filenames = new @string[]{
 
 // testFile tests that compressing and then decompressing the given file with
 // the given options yields equivalent bytes to the original file.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testFile(ж<testing.T> Ꮡt, @string fn, global::go.compress.lzw_package.Order order, nint litWidth) {
+internal static partial void testFile(ж<testing.T> Ꮡt, @string fn, global::go.compress.lzw_package.Order order, nint litWidth) {
     GoFrame ᒐ = default;
     try {
         // Read the file, as golden output.

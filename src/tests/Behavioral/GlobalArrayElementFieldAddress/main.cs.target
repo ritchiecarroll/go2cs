@@ -24,7 +24,7 @@ internal static ref array<item> pool => ref Ꮡpool.Value;
 internal static ж<array<gridᴛ1>> Ꮡgrid = new StandardBox<array<gridᴛ1>>(new array<gridᴛ1>(3, () => new()));
 internal static ref array<gridᴛ1> grid => ref Ꮡgrid.Value;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void setInt(ref nint p) {
+internal static partial void setInt(ref nint p) {
     p = 7;
 }
 

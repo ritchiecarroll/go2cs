@@ -13,11 +13,11 @@ partial class main_package {
     public uint16 D;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<hdr> asHdr(slice<byte> b) {
+internal static partial ж<hdr> asHdr(slice<byte> b) {
     return Ꮡ(b, 0).Reinterpret<byte, hdr>();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void churn() {
+internal static partial void churn() {
     var keep = new slice<slice<byte>>(64);
     for (nint i = 0; i < 400000; i++) {
         keep[(nint)(i & 63)] = new slice<byte>(24);

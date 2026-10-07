@@ -24,7 +24,7 @@ internal static error errStillRunning = errors.New("async op still running"u8);
 // It returns an asyncResult which acts as a future.
 //
 // Must be called from within a synctest bubble.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<asyncResult<T>> runAsync<T>(Func<(T, error)> f) {
+internal static partial ж<asyncResult<T>> runAsync<T>(Func<(T, error)> f) {
     var r = Ꮡ(new asyncResult<T>(
         donec: new channel<EmptyStruct>(0)
     ));

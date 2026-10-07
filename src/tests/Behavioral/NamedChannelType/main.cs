@@ -24,7 +24,7 @@ internal static void Wait(this closeWaiter cw) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object waitedˢ = (@string)"waited"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     closeWaiter cw = default!;
     cw.Init();
     cw.Close();

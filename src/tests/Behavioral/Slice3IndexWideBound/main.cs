@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void run() {
+internal static partial void run() {
     var arr = new nint[]{10, 11, 12, 13, 14, 15, 16, 17}.array();
     var sl = new nint[]{20, 21, 22, 23, 24, 25}.slice();
     uintptr n = 5;

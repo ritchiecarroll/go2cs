@@ -82,6 +82,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAnonStructCrossFile() => CheckTarget("AnonStructCrossFile");
 
     [TestMethod]
+    public void CheckAnonStructAliasedConversion() => CheckTarget("AnonStructAliasedConversion");
+
+    [TestMethod]
     public void CheckAnonStructNamedConversion() => CheckTarget("AnonStructNamedConversion");
 
     [TestMethod]
@@ -442,6 +445,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDefinedElemStringConversion() => CheckTarget("DefinedElemStringConversion");
 
     [TestMethod]
+    public void CheckDefinedForeignStructConvert() => CheckTarget("DefinedForeignStructConvert");
+
+    [TestMethod]
     public void CheckDefinedOverNamedComposite() => CheckTarget("DefinedOverNamedComposite");
 
     [TestMethod]
@@ -538,6 +544,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckEscapedLoopVarSiblingIndex() => CheckTarget("EscapedLoopVarSiblingIndex");
 
     [TestMethod]
+    public void CheckExportedAliasUnexportedTarget() => CheckTarget("ExportedAliasUnexportedTarget");
+
+    [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]
@@ -607,6 +616,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]
+    public void CheckForeignDefinedConversion() => CheckTarget("ForeignDefinedConversion");
+
+    [TestMethod]
     public void CheckForeignIfaceFieldPointer() => CheckTarget("ForeignIfaceFieldPointer");
 
     [TestMethod]
@@ -671,6 +683,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckFuncTypeParam() => CheckTarget("FuncTypeParam");
+
+    [TestMethod]
+    public void CheckFuncValueMethodClash() => CheckTarget("FuncValueMethodClash");
 
     [TestMethod]
     public void CheckFuncVsMethodOverload() => CheckTarget("FuncVsMethodOverload");
@@ -859,6 +874,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckIfaceFieldMethodValueBind() => CheckTarget("IfaceFieldMethodValueBind");
 
     [TestMethod]
+    public void CheckIfaceLiteralStringConversion() => CheckTarget("IfaceLiteralStringConversion");
+
+    [TestMethod]
     public void CheckIfaceToIfaceNarrow() => CheckTarget("IfaceToIfaceNarrow");
 
     [TestMethod]
@@ -1004,6 +1022,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckLocalFunctionEmission() => CheckTarget("LocalFunctionEmission");
+
+    [TestMethod]
+    public void CheckLocalNamedPointerConversion() => CheckTarget("LocalNamedPointerConversion");
 
     [TestMethod]
     public void CheckLocalNamedTypeDecls() => CheckTarget("LocalNamedTypeDecls");
@@ -1237,10 +1258,19 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedInterfacePointerMethodSet() => CheckTarget("NamedInterfacePointerMethodSet");
 
     [TestMethod]
+    public void CheckNamedMapClone() => CheckTarget("NamedMapClone");
+
+    [TestMethod]
     public void CheckNamedMapCrossPkgKey() => CheckTarget("NamedMapCrossPkgKey");
 
     [TestMethod]
     public void CheckNamedMapMakeNonNil() => CheckTarget("NamedMapMakeNonNil");
+
+    [TestMethod]
+    public void CheckNamedMapMethodShadow() => CheckTarget("NamedMapMethodShadow");
+
+    [TestMethod]
+    public void CheckNamedMapNestedAssign() => CheckTarget("NamedMapNestedAssign");
 
     [TestMethod]
     public void CheckNamedMapRvalueIndexWrite() => CheckTarget("NamedMapRvalueIndexWrite");
@@ -1276,7 +1306,19 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedNumericSwitchLiteral() => CheckTarget("NamedNumericSwitchLiteral");
 
     [TestMethod]
+    public void CheckNamedPointerFieldAddress() => CheckTarget("NamedPointerFieldAddress");
+
+    [TestMethod]
+    public void CheckNamedPointerReflectElem() => CheckTarget("NamedPointerReflectElem");
+
+    [TestMethod]
+    public void CheckNamedPointerEquality() => CheckTarget("NamedPointerEquality");
+
+    [TestMethod]
     public void CheckNamedPointerReinterpret() => CheckTarget("NamedPointerReinterpret");
+
+    [TestMethod]
+    public void CheckNamedPointerValueSlot() => CheckTarget("NamedPointerValueSlot");
 
     [TestMethod]
     public void CheckNamedResultAddressEscape() => CheckTarget("NamedResultAddressEscape");
@@ -1456,6 +1498,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNoinlineDirectiveFrame() => CheckTarget("NoinlineDirectiveFrame");
 
     [TestMethod]
+    public void CheckInitOrderNoInline() => CheckTarget("InitOrderNoInline");
+
+    [TestMethod]
+    public void CheckNoInlinePartial() => CheckTarget("NoInlinePartial");
+
+    [TestMethod]
     public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");
 
     [TestMethod]
@@ -1508,6 +1556,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckParenthesizedConcatContext() => CheckTarget("ParenthesizedConcatContext");
+
+    [TestMethod]
+    public void CheckParenthesizedTypeAssertion() => CheckTarget("ParenthesizedTypeAssertion");
 
     [TestMethod]
     public void CheckPartialRedeclaration() => CheckTarget("PartialRedeclaration");
@@ -1642,6 +1693,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPromotedPtrMethodValueSet() => CheckTarget("PromotedPtrMethodValueSet");
 
     [TestMethod]
+    public void CheckPromotedTargetParam() => CheckTarget("PromotedTargetParam");
+
+    [TestMethod]
     public void CheckPromotedValueEmbedExprRecv() => CheckTarget("PromotedValueEmbedExprRecv");
 
     [TestMethod]
@@ -1768,6 +1822,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckReflectMethodTableWalk() => CheckTarget("ReflectMethodTableWalk");
 
     [TestMethod]
+    public void CheckReflectNamedFuncAssign() => CheckTarget("ReflectNamedFuncAssign");
+
+    [TestMethod]
     public void CheckReflectNewAtField() => CheckTarget("ReflectNewAtField");
 
     [TestMethod]
@@ -1891,6 +1948,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckSelectStatement() => CheckTarget("SelectStatement");
 
     [TestMethod]
+    public void CheckSelfContainingMapHolder() => CheckTarget("SelfContainingMapHolder");
+
+    [TestMethod]
     public void CheckSendtoSeam() => CheckTarget("SendtoSeam");
 
     [TestMethod]
@@ -2008,6 +2068,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckStatLayoutTruth() => CheckTarget("StatLayoutTruth");
 
     [TestMethod]
+    public void CheckStatementTableFuncNames() => CheckTarget("StatementTableFuncNames");
+
+    [TestMethod]
     public void CheckStdLibInternalAbi() => CheckTarget("StdLibInternalAbi");
 
     [TestMethod]
@@ -2120,6 +2183,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTcpLoopbackRoundTrip() => CheckTarget("TcpLoopbackRoundTrip");
+
+    [TestMethod]
+    public void CheckTestingStructZeroLiteral() => CheckTarget("TestingStructZeroLiteral");
 
     [TestMethod]
     public void CheckTraceUserAnnotations() => CheckTarget("TraceUserAnnotations");

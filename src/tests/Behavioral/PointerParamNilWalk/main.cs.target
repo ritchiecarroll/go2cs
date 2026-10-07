@@ -41,7 +41,7 @@ internal static ж<node> build(params ꓸꓸꓸnint valsʗp) {
     return head;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<node>, nint) advance(ref node p) {
+internal static partial (ж<node>, nint) advance(ref node p) {
     return (p.next, p.val);
 }
 
@@ -73,7 +73,7 @@ internal static void bumpFirstViaTuple(ж<node> Ꮡp) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<node> dropIfShort(ж<node> Ꮡp, nint min) {
+internal static partial ж<node> dropIfShort(ж<node> Ꮡp, nint min) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (sumList(Ꮡp) < min) {

@@ -89,7 +89,7 @@ public static void TestDebugLogTypes(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fRuntimeTestˢ = @"\[\] 0x[0-9a-f]+ \[runtime_test\.TestDebugLogSym\+0x[0-9a-f]+ .*/debuglog_test\.go:[0-9]+\]\n"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDebugLogSym(ж<testing.T> Ꮡt) {
+public static partial void TestDebugLogSym(ж<testing.T> Ꮡt) {
     skipDebugLog(Ꮡt);
     runtime_internal_test_package.ResetDebugLog();
     var (pc, _, _, _) = Δruntime.Caller(0);
@@ -101,7 +101,7 @@ internal static readonly @string fRuntimeTestˢ = @"\[\] 0x[0-9a-f]+ \[runtime_t
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDebugLogInterleaving(ж<testing.T> Ꮡt) {
+public static partial void TestDebugLogInterleaving(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     skipDebugLog(Ꮡt);

@@ -45,7 +45,7 @@ internal static void @catch(@string label, Action f) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static bool goexits(Action f) {
+internal static partial bool goexits(Action f) {
     var done = new channel<bool>(0);
     var doneʗ1 = done;
     goǃ(() => {

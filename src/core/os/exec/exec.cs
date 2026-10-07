@@ -390,7 +390,7 @@ internal static readonly @string godebugExecwait2Detectedˢ = "GODEBUG=execwait=
 // unquoting algorithm. In these or other similar cases, you can do the
 // quoting yourself and provide the full command line in SysProcAttr.CmdLine,
 // leaving Args empty.
-[MethodImpl(MethodImplOptions.NoInlining)] public static ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗp) {
+public static partial ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗp) {
     var arg = argʗp.sslice();
 
     var cmd = Ꮡ(new Cmd(
@@ -654,7 +654,7 @@ internal static readonly @string execCommandWithANonNilˢ = "exec: command with 
 //
 // After a successful call to Start the [Cmd.Wait] method must be called in
 // order to release associated system resources.
-[MethodImpl(MethodImplOptions.NoInlining)] public static error Start(this ж<Cmd> Ꮡc) {
+public static partial error Start(this ж<Cmd> Ꮡc) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();

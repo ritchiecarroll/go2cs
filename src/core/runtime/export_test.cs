@@ -227,7 +227,7 @@ public static void RunSchedLocalQueueStealTest() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string queueIsEmptyˢ = "queue is empty"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void RunSchedLocalQueueEmptyTest(nint iters) {
+public static partial void RunSchedLocalQueueEmptyTest(nint iters) {
     // Test that runq is not spuriously reported as empty.
     // Runq emptiness affects scheduling decisions and spurious emptiness
     // can lead to underutilization (both runnable Gs and idle Ps coexist
@@ -632,12 +632,12 @@ public static ж<bool> CasGStatusAlwaysTrack;
 internal static void initᴛCasGStatusAlwaysTrack() { CasGStatusAlwaysTrack = ᏑcasgstatusAlwaysTrack; }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] public static byte PanicForTesting(slice<byte> b, nint i) {
+public static partial byte PanicForTesting(slice<byte> b, nint i) {
     return unexportedPanicForTesting(b, i);
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static byte unexportedPanicForTesting(slice<byte> b, nint i) {
+internal static partial byte unexportedPanicForTesting(slice<byte> b, nint i) {
     return b[i];
 }
 
@@ -648,7 +648,7 @@ internal static void stackOverflow(ж<byte> Ꮡx) {
     stackOverflow(Ꮡbuf.at<byte>(0));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void RunGetgThreadSwitchTest() {
+public static partial void RunGetgThreadSwitchTest() {
     // Test that getg works correctly with thread switch.
     // With gccgo, if we generate getg inlined, the backend
     // may cache the address of the TLS variable, which
@@ -1546,7 +1546,7 @@ public static Func<int64, int32, ж<int32>, int32> Timediv = timediv;
     internal partial ref global::go.runtime_package.piController piController { get; }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static ж<PIController> NewPIController(float64 kp, float64 ti, float64 tt, float64 min, float64 max) {
+public static partial ж<PIController> NewPIController(float64 kp, float64 ti, float64 tt, float64 min, float64 max) {
     return Ꮡ(new PIController(new piController(
         kp: kp,
         ti: ti,
@@ -1632,7 +1632,7 @@ public static UntypedInt ScavengePercent => /* scavengePercent */ 1;
     internal /*<-*/channel<EmptyStruct> done = /*<-*/channel<EmptyStruct>.RecvOnly;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void Start(this ж<Scavenger> Ꮡs) {
+public static partial void Start(this ж<Scavenger> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.Sleep == default! || s.Scavenge == default! || s.ShouldStop == default! || s.GoMaxProcs == default!) {
@@ -1842,7 +1842,7 @@ public static uintptr UserArenaChunkBytes => /* userArenaChunkBytes */ 4194304;
     internal ж<global::go.runtime_package.userArena> arena;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static ж<UserArena> NewUserArena() {
+public static partial ж<UserArena> NewUserArena() {
     return Ꮡ(new UserArena(newUserArena()));
 }
 

@@ -505,7 +505,7 @@ public static ж<Type> Out(this ж<ΔFuncType> Ꮡt, nint i) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string tInCount0ˢ = "t.inCount > 0"u8;
 
-public static unsafe slice<ж<Type>> InSlice(this ж<ΔFuncType> Ꮡt) {
+public static slice<ж<Type>> InSlice(this ж<ΔFuncType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var uadd = /* unsafe.Sizeof(*t) */ (uintptr)56;
@@ -515,13 +515,13 @@ public static unsafe slice<ж<Type>> InSlice(this ж<ΔFuncType> Ꮡt) {
     if (t.InCount == 0) {
         return default!;
     }
-    return new slice<ж<Type>>(new ReadOnlySpan<ж<Type>>((Type**)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, tInCount0ˢ)), (int)(t.InCount)));
+    return (false ? default(slice<ж<Type>>) : throw panic("go2cs: a slice view (*[N]*Type)(p)[...] over a managed element has no managed aliasing pair (type.go:551)"));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string outCount0ˢ = "outCount > 0"u8;
 
-public static unsafe slice<ж<Type>> OutSlice(this ж<ΔFuncType> Ꮡt) {
+public static slice<ж<Type>> OutSlice(this ж<ΔFuncType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var outCount = (uint16)t.NumOut();
@@ -532,7 +532,7 @@ public static unsafe slice<ж<Type>> OutSlice(this ж<ΔFuncType> Ꮡt) {
     if ((TFlag)(t.TFlag & TFlagUncommon) != 0) {
         uadd += /* unsafe.Sizeof(UncommonType{}) */ (uintptr)16;
     }
-    return new slice<ж<Type>>(new ReadOnlySpan<ж<Type>>((Type**)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, outCount0ˢ)) + (int)(t.InCount), (int)((uint16)(t.InCount + outCount)) - (int)(t.InCount)));
+    return (false ? default(slice<ж<Type>>) : throw panic("go2cs: a slice view (*[N]*Type)(p)[...] over a managed element has no managed aliasing pair (type.go:562)"));
 }
 
 [GoRecv] public static bool IsVariadic(this ref ΔFuncType t) {

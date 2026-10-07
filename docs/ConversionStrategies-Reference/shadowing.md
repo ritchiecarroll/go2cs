@@ -419,6 +419,18 @@ to fire by deleting `io` from every reference set (3 hits: `go/types`, `io`, `ne
 `TestDeclarationClosureImportsSurfacesPromotedMethodSignatures` (red before the edge) and
 `TestDeclarationClosureImportsPromotedEdgeIsEmbedAndTestScoped` (a NAMED field and a PRODUCTION embed surface nothing).
 
+**The PROMOTED-FIELD edge** is the same generator's other half. Besides a forwarder per promoted method, go2cs-gen
+writes a ref accessor per promoted FIELD of the embed ("Promoted Struct Field Accessors") in the test assembly, and each
+accessor spells the field's type. testify's suite tests embed `suite.Suite`, whose unexported `mu sync.RWMutex` is a
+legal promoted field in the white-box variant (it is the same Go package); `sync` is imported only by the production
+`suite.go`, so the accessors failed `CS0234 … 'sync_package'` in all 13 generated suite files. The edge walks each
+embed's direct fields with the same membership rule as the methods: exported fields always, unexported ones only when
+the embed shares the embedding struct's package. A foreign embed's unexported fields add nothing, which is why go-cmp's
+`myType{ bytes.Buffer }` still surfaces `io` alone. The standard library has three test-declared embeds the edge reaches
+(`net`'s `lookupCustomResolver` needs `internal/singleflight`; `runtime`'s `GCController` and `TraceMap` need
+`internal/cpu` for a padding field), and each of those test projects already references the package through another
+edge. Guarded by `TestDeclarationClosureImportsSurfacesPromotedFieldTypes`.
+
 ## Under the RECOMPILE model the test half CONTINUES the production emission (the `productionSeed`)
 
 The `recompile` model is the only one where the converted `_test.go` files land in the **same C# class**

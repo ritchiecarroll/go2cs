@@ -279,7 +279,7 @@ internal static void skipFIPS(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDialTimeout(ж<testing.T> Ꮡt) {
+public static partial void TestDialTimeout(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
@@ -346,7 +346,7 @@ internal static readonly object writeWhichPreviouslyˢ = (@string)"Write which p
 internal static readonly object writeTimedOutButˢ = (@string)"Write timed out but incorrectly classified the error as Temporary"u8;
 internal static readonly object writeTimedOutButDidNotˢ = (@string)"Write timed out but did not classify the error as a Timeout"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDeadlineOnWrite(ж<testing.T> Ꮡt) {
+public static partial void TestDeadlineOnWrite(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
@@ -442,7 +442,7 @@ internal static (nint, error) Read(this readerFunc f, slice<byte> b) {
 // TestDialer tests that tls.Dialer.DialContext can abort in the middle of a handshake.
 // (The other cases are all handled by the existing dial tests in this package, which
 // all also flow through the same code shared code paths)
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDialer(ж<testing.T> Ꮡt) {
+public static partial void TestDialer(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new tls_test_package.testing_TжTB(Ꮡt));
@@ -523,7 +523,7 @@ public static void TestConnReadNonzeroAndEOF(ж<testing.T> Ꮡt) {
     Ꮡt.Error(err);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static error testConnReadNonzeroAndEOF(ж<testing.T> Ꮡt, time.Duration delay) {
+internal static partial error testConnReadNonzeroAndEOF(ж<testing.T> Ꮡt, time.Duration delay) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -596,7 +596,7 @@ internal static readonly object secondSessionDidNotUseˢ = (@string)"second sess
 internal static readonly object clientAndServerChannelˢ2 = (@string)"client and server channel bindings differ when session resumption is used"u8;
 internal static readonly object resumptionTlsUniqueIsˢ = (@string)"resumption tls-unique is empty or zero"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTLSUniqueMatches(ж<testing.T> Ꮡt) {
+public static partial void TestTLSUniqueMatches(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new tls_test_package.testing_TжTB(Ꮡt));
@@ -766,7 +766,7 @@ public static void TestRealResumption(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string connClosedForTestˢ = "conn closed for test"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConnCloseBreakingWrite(ж<testing.T> Ꮡt) {
+public static partial void TestConnCloseBreakingWrite(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -862,7 +862,7 @@ internal static readonly @string connClosedForTestˢ = "conn closed for test"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object deadlockˢ = (@string)"deadlock"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConnCloseWrite(ж<testing.T> Ꮡt) {
+public static partial void TestConnCloseWrite(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new tls_test_package.testing_TжTB(Ꮡt));
@@ -1007,7 +1007,7 @@ internal static readonly @string unexpectedLackOfErrorˢ = "unexpected lack of e
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string expectedᶜ = "too many ignored"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWarningAlertFlood(ж<testing.T> Ꮡt) {
+public static partial void TestWarningAlertFlood(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new tls_test_package.testing_TжTB(Ꮡt));
@@ -1283,7 +1283,7 @@ internal static error SetWriteDeadline(this changeImplConn recvᴛ, time.Time t)
     return w.Conn.Close();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void throughput(ж<testing.B> Ꮡb, uint16 version, int64 totalBytes, bool dynamicRecordSizingDisabled) {
+internal static partial void throughput(ж<testing.B> Ꮡb, uint16 version, int64 totalBytes, bool dynamicRecordSizingDisabled) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -1423,7 +1423,7 @@ internal static error SetWriteDeadline(this slowConn recvᴛ, time.Time t) => re
     return (len(p), default!);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void latency(ж<testing.B> Ꮡb, uint16 version, nint bps, bool dynamicRecordSizingDisabled) {
+internal static partial void latency(ж<testing.B> Ꮡb, uint16 version, nint bps, bool dynamicRecordSizingDisabled) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -2519,7 +2519,7 @@ public static void TestX509KeyPairPopulateCertificate(ж<testing.T> Ꮡt) {
 internal static readonly @string tlsHandshakeMessageOfˢ = "tls: handshake message of length 131071 bytes exceeds maximum of 65536 bytes"u8;
 internal static readonly object unexpectedSuccessˢ = (@string)"unexpected success"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestEarlyLargeCertMsg(ж<testing.T> Ꮡt) {
+public static partial void TestEarlyLargeCertMsg(ж<testing.T> Ꮡt) {
     var (client, server) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var clientʗ1 = client;
     goǃ(() => {

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "disclosures": [
+    {
+      "name": "TestDiff/Comparer/MapKeyPointer",
+      "class": "runtime-capability",
+      "signature": "+ \t&⟪0xdeadf00f⟫0: \"world\",\n- \t&⟪0xdeadf00f⟫0: \"hello\",",
+      "reason": "runtime-capability: cmp sorts pointer map keys by reflect.Value.Pointer(), and a go2cs standard heap box's PointerOrderToken is AllocationBase(RuntimeHelpers.GetHashCode(this)) (golib ж.StandardBox.cs): the CLR identity hash, assigned at its first request from a pseudo-random per-thread sequence, so two boxes order by hash rather than by allocation. Go's two consecutive allocations ascend, and cmp's expected report depends on that order. The keys and values match Go's; the two report lines are swapped. Measured identical in two runs (go-cmp v0.7.0, linux). Retires when heap-box tokens order by allocation, a per-box cost that needs its own ruling. COORD ruling 2026-10-05: record and disclose (no per-box cost); see the BOARD row of that date."
+    },
+    {
+      "name": "TestDiff/Reporter/LargeMapKey",
+      "class": "runtime-capability",
+      "signature": "got:\n  map[*[]uint8]int{\n+ \t&⟪0xdeadf00f⟫⟪ptr:0xdeadf00f, len:1048576, cap:1048576⟫",
+      "reason": "runtime-capability: cmp sorts pointer map keys by reflect.Value.Pointer(), and a go2cs standard heap box's PointerOrderToken is AllocationBase(RuntimeHelpers.GetHashCode(this)) (golib ж.StandardBox.cs): the CLR identity hash, assigned at its first request from a pseudo-random per-thread sequence, so two boxes order by hash rather than by allocation. Go's two consecutive allocations ascend, and cmp's expected report depends on that order. The keys and values match Go's; the two report lines are swapped. Measured identical in two runs (go-cmp v0.7.0, linux). Retires when heap-box tokens order by allocation, a per-box cost that needs its own ruling. COORD ruling 2026-10-05: record and disclose (no per-box cost); see the BOARD row of that date."
+    }
+  ]
+}

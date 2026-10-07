@@ -376,7 +376,7 @@ internal static bool knownRoundTripperImpl(RoundTripper rt, ж<Request> Ꮡreq) 
 // Second was Request.Cancel.
 // Third was Request.Context.
 // This function populates the second and third, and uses the first if it really needs to.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (Action stopTimer, Func<bool> didTimeout) setRequestCancel(ж<Request> Ꮡreq, RoundTripper rt, time.Time deadline) {
+internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCancel(ж<Request> Ꮡreq, RoundTripper rt, time.Time deadline) {
     Action stopTimer = default!;
 
     ref var req = ref Ꮡreq.DerefOrNull();

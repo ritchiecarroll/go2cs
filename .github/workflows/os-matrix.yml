@@ -46,7 +46,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure)'
         type: choice
         required: true
         default: census
@@ -57,6 +57,7 @@ on:
           - behavioral-stderr
           - sweep-shard
           - release-smoke
+          - aot-smoke
       filter:
         description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr.'
         type: string
@@ -69,6 +70,11 @@ on:
         default: 10.0.x
         options:
           - 10.0.x
+      published_version:
+        description: 'release-smoke only: a go.* version ALREADY on nuget.org (e.g. 1.24.13.4). Blank packs this tree and consumes that pack (the pre-publish gate). Set, it skips the pack and every leg restores that version from nuget.org: the post-publish smoke.'
+        type: string
+        required: false
+        default: ''
       run_timeout:
         description: 'Per-program RUN budget in seconds for the behavioral stages (GO2CS_RUN_TIMEOUT), 1-1800. Blank takes 120, the budget every stage used before this input existed. Raise it to tell a slow program on the 3-core macos-15 runner from a real hang: a NOT MEASURED (timeout) row says only that the budget expired. A large value on behavioral-full can exceed that stage''s job budget.'
         type: string
@@ -115,6 +121,7 @@ jobs:
       filter: ${{ steps.derive.outputs.filter }}
       dotnet: ${{ steps.derive.outputs.dotnet }}
       run-timeout: ${{ steps.derive.outputs.run-timeout }}
+      published-version: ${{ steps.derive.outputs.published-version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -128,6 +135,7 @@ jobs:
           INPUT_FILTER: ${{ inputs.filter }}
           INPUT_DOTNET: ${{ inputs.dotnet }}
           INPUT_RUN_TIMEOUT: ${{ inputs.run_timeout }}
+          INPUT_PUBLISHED_VERSION: ${{ inputs.published_version }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           $ErrorActionPreference = 'Stop'
@@ -163,6 +171,15 @@ jobs:
           }
           Write-Host "behavioral run budget: $runTimeout s per program"
 
+          # The post-publish smoke: a version nuget.org already serves. Only release-smoke reads it, and a malformed
+          # value FAILS the plan by name rather than reaching a restore as a version nothing serves.
+          $publishedVersion = if ($env:EVENT_NAME -eq 'schedule') { '' } else { "$env:INPUT_PUBLISHED_VERSION".Trim() }
+          if ($publishedVersion) {
+              if ($env:INPUT_STAGE -ne 'release-smoke') { throw "published_version applies to stage release-smoke only (aot-smoke reads this tree's pack; a published version is refused there); got stage '$($env:INPUT_STAGE)'." }
+              if ($publishedVersion -notmatch '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$') { throw "published_version must be a four-part go.* version such as 1.24.13.4; got '$publishedVersion'." }
+              Write-Host "release-smoke: post-publish, go.* $publishedVersion from nuget.org (no pack)"
+          }
+
           $env:INPUT_GOOS = $goos
           $env:INPUT_STAGE = $stage
 
@@ -193,13 +210,14 @@ jobs:
           # the packages a release would publish carry what this tree's converter emits, on every OS they
           # ship for (C2, ec147f1d7f: N's converter emits unsafe.ArrayPointer, which the published 1.24.13.3
           # lacks). Three dispatches would be three packs of the same tree; one pack feeds all four legs.
-          if ($env:INPUT_STAGE -eq 'release-smoke') {
+          # aot-smoke reads the same pack on the same four RIDs.
+          if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke') {
               $targets = @(
                   @{ goos = 'windows'; runner = 'windows-latest';  rid = 'win-x64'   },
                   @{ goos = 'linux';   runner = 'ubuntu-latest';   rid = 'linux-x64' },
                   @{ goos = 'darwin';  runner = 'macos-15';        rid = 'osx-arm64' },
                   @{ goos = 'darwin';  runner = 'macos-15-intel';  rid = 'osx-x64'   })
-              Write-Host "release-smoke: all four shipped RIDs from one pack (goos '$($env:INPUT_GOOS)' does not narrow it)"
+              Write-Host "$($env:INPUT_STAGE): all four shipped RIDs from one pack (goos '$($env:INPUT_GOOS)' does not narrow it)"
           }
 
           # Job budgets, in MINUTES, scaled from CLAUDE.md's measured rows for a ~4-core runner.
@@ -242,6 +260,12 @@ jobs:
                                          # go build + four small restore/build/run arms against the
                                          # feed, each restoring into a fresh cache. PROVISIONAL
                                          # until the first run.
+              'aot-smoke'        = 240   # the LEG only: ONE Native AOT publish + run of PackageSymbols
+                                         # under go.lib's TrimMode=partial, which compiles the whole
+                                         # go.* closure (31 assemblies): ~70 min on hosted linux
+                                         # (37495989079), and the windows/mac legs of that run passed
+                                         # 90/135 still compiling. The pack's order, as ruled; the
+                                         # mac multiplier takes it to 360, GitHub's ceiling.
           }
 
           $entries = foreach ($t in $targets) {
@@ -274,6 +298,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "filter=$filter" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dotnet=$dotnet" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "run-timeout=$runTimeout" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "published-version=$publishedVersion" -Encoding utf8
 
   # ---------------------------------------------------------------------------------------------
   # pack — release-smoke only: the release's own pack, as a rehearsal, on a hosted Windows runner.
@@ -286,7 +311,11 @@ jobs:
   # `powershell`, and the script declares 5.1.
   pack:
     needs: plan
-    if: needs.plan.outputs.stage == 'release-smoke'
+    # The post-publish smoke (published_version set) restores from nuget.org and packs nothing. aot-smoke always reads this
+    # tree's pack: the plan refuses published_version on any stage but release-smoke.
+    #   release-smoke, no published_version -> pack    release-smoke, published_version -> no pack (nuget.org)
+    #   aot-smoke                           -> pack    every other stage                -> no pack
+    if: (needs.plan.outputs.stage == 'release-smoke' || needs.plan.outputs.stage == 'aot-smoke') && needs.plan.outputs.published-version == ''
     runs-on: windows-latest
     # PROVISIONAL: three Release build+pack passes of the whole stdlib solution on a 4-core runner
     # (the i7 measures ~17 min per pass); never yet run on a hosted runner.
@@ -325,13 +354,14 @@ jobs:
           $sw.Stop()
 
           $count = @(Get-ChildItem $feed -Filter *.nupkg -File -ErrorAction SilentlyContinue).Count
+          # The summary carries push-nuget's path guard verdict: its CLEAN step line, or the count in its refusal.
           $summary = @(
               '## Release-smoke pack (windows-latest)'
               ''
               "push-nuget.ps1 -VersionSuffix $suffix -- exit ``$packExit`` after $([int]$sw.Elapsed.TotalMinutes) min; $count merged package(s)"
               ''
               '```'
-          ) + @(Get-Content -LiteralPath $log | Select-String -Pattern '==> (Layout L3|Flavor comparison|  of |Merged|Shipped shape|Packed|\[)' | ForEach-Object { $_.Line }) + @('```')
+          ) + @(Get-Content -LiteralPath $log | Select-String -Pattern '==> (Layout L3|Flavor comparison|  of |Merged|Shipped shape|Packed|Pack paths|\[)|Pack paths: [0-9]+ entr' | ForEach-Object { $_.Line }) + @('```')
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
           & ./.github/annotate-summary.ps1 -Title 'release-smoke pack' -Lines $summary
 
@@ -1260,7 +1290,7 @@ jobs:
       # release-smoke — consume the pack job's feed the way a user does, on this leg's host.
       # -------------------------------------------------------------------------------------
       - name: Release smoke — download the feed
-        if: needs.plan.outputs.stage == 'release-smoke'
+        if: (needs.plan.outputs.stage == 'release-smoke' || needs.plan.outputs.stage == 'aot-smoke') && needs.plan.outputs.published-version == ''
         uses: actions/download-artifact@v5
         with:
           name: release-smoke-feed
@@ -1269,6 +1299,8 @@ jobs:
       - name: Release smoke — rid compile asset, sample, behavioral, walkthrough (measured)
         if: needs.plan.outputs.stage == 'release-smoke'
         shell: pwsh
+        env:
+          PUBLISHED_VERSION: ${{ needs.plan.outputs.published-version }}
         run: |
           $ErrorActionPreference = 'Continue'
 
@@ -1293,7 +1325,10 @@ jobs:
           # (TRAIN O) made x/sys/unix reach libc on a Mac: release-smoke 37155599211 ran it byte-identical to
           # `go run` on both chips. A tree without that seat fails darwin's D, by design.
           $gateWalkthrough = $true
-          & ./src/tests/PackageTests/release-smoke.ps1 -Feed (Join-Path $PWD 'feed') -Converter (Join-Path $PWD "src/go2cs/bin/$exeName") -WorkRoot $work -GateWalkthrough:$gateWalkthrough *>&1 |
+          # Pre-publish: this tree's pack. Post-publish (published_version): the version nuget.org serves.
+          $published = $env:PUBLISHED_VERSION
+          $feedArgs = if ($published) { @{ Feed = 'https://api.nuget.org/v3/index.json'; Version = $published } } else { @{ Feed = (Join-Path $PWD 'feed') } }
+          & ./src/tests/PackageTests/release-smoke.ps1 @feedArgs -Converter (Join-Path $PWD "src/go2cs/bin/$exeName") -WorkRoot $work -GateWalkthrough:$gateWalkthrough *>&1 |
               Tee-Object -FilePath $log
           $smokeExit = $LASTEXITCODE
 
@@ -1312,6 +1347,49 @@ jobs:
           Get-ChildItem $work -Recurse -Directory -Filter '.artifacts' -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
           exit $smokeExit
+
+      # -------------------------------------------------------------------------------------
+      # aot-smoke — ONE Native AOT publish and run of a hand-written consumer of the pack's packages.
+      # A consumer with no trim mode of its own takes go.lib's TrimMode=partial, so the publish compiles
+      # every referenced go.* assembly whole (COORD ruling 2026-10-06: its own stage, out of release-smoke).
+      # The executable must exit 0 and print its PACKAGE-SYMBOLS line; the publish wall time is a READ line.
+      # Non-gating on its first train; from the release after, read before a release like the census.
+      # -------------------------------------------------------------------------------------
+      - name: AOT smoke — Native AOT publish and run of a package consumer
+        if: needs.plan.outputs.stage == 'aot-smoke'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          $goos = $env:GOOS_TARGET
+          $rid = $env:RID
+          $art = Join-Path $PWD 'artifacts'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+
+          # The consumer is not a corpus project; the leg-wide GoTargetOS binding must not reach it.
+          Remove-Item Env:GoTargetOS -ErrorAction SilentlyContinue
+
+          $feed = Join-Path $PWD 'feed'
+          $lib = @(Get-ChildItem $feed -Filter 'go.lib.*.nupkg' | Where-Object { $_.Name -match '^go\.lib\.(\d.*)\.nupkg$' })
+          if ($lib.Count -ne 1) { Write-Host "::error::expected exactly one go.lib nupkg in the feed; found $($lib.Count)"; exit 1 }
+          $version = [regex]::Match($lib[0].Name, '^go\.lib\.(\d.*)\.nupkg$').Groups[1].Value
+
+          $log = Join-Path $art "aot-smoke-$goos-$rid.log"
+          & ./src/tests/PackageTests/PackageSymbols/test-package-symbols.ps1 -Version $version -Source $feed -AotOnly *>&1 |
+              Tee-Object -FilePath $log
+          $aotExit = $LASTEXITCODE
+
+          $summary = @(
+              "## AOT smoke -- GOOS=$goos ($rid)"
+              ''
+              "exit ``$aotExit`` -- go.* $version from the pack"
+              ''
+              '```'
+          ) + @(Get-Content -LiteralPath $log | Where-Object { $_ -match '^(Package symbols gate|PASS|FAIL|READ|\s+AOT:)' }) + @('```')
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "aot-smoke $goos/$rid" -Lines $summary
+
+          exit $aotExit
 
       # -------------------------------------------------------------------------------------
       # Artifacts — always, because a failed leg is the reading this workflow exists to produce.

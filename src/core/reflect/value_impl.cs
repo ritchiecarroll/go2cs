@@ -944,7 +944,10 @@ public static ΔValue Elem(this ΔValue v) {
         nint[]? pointeeKeyDims = v.typ_ == nil ? null : v.typ_.Value.keyDims;
         var t = abi.synthType(pointee, dims, null, pointeeDir, pointeeKeyDims);
         var elem = new ΔValue(t, default!, ((flag)(uintptr)(uint8)GoReflect.KindOf(pointee)) | flagAddr | flagIndir | ((flag)(v.flag & flagRO)));
-        elem.addrBox = cur;
+        // The pointee's address box is the ж<T> itself, never a named-pointer wrapper around it:
+        // `type sPtr *s` makes Elem() the same addressable value Go has for the *s it converts from
+        // (see GoReflect.AddressBoxOf for the three readers that depend on it).
+        elem.addrBox = GoReflect.AddressBoxOf(cur);
         return elem;
     }
     throw panic(Ꮡ(new ValueError("reflect.Value.Elem", v.kind())));
@@ -3329,10 +3332,18 @@ private static bool haveIdenticalStructShape(ж<abi.Type> ᏑT, ж<abi.Type> Ꮡ
 // structTypePkgPath is Go's abi.StructType.PkgPath: the declaring package when the struct holds an
 // unexported field, "" otherwise. It is what makes two structurally identical structs from
 // DIFFERENT packages non-identical when either hides a field.
+//
+// The package is the one that DECLARED the field, read off the field exactly as rtype.Field's
+// StructField.PkgPath is, never the owner type's. A defined type over a FOREIGN struct (`type
+// customTime time.Time`) is a [GoType] wrapper declared in its own package, while the struct
+// underlying it is time's: reading the wrapper's package made customTime and time.Time two
+// "different" structs, so ConvertibleTo, CanConvert and Convert refused a conversion Go allows
+// (testify's assert.Compare on a defined time type, "object should be comparable for type
+// time.Time"). Identical to the owner for every non-wrapper struct.
 private static @string structTypePkgPath(System.Type st, GoReflect.GoFieldInfo[] fields) {
     foreach (GoReflect.GoFieldInfo f in fields) {
         if (!f.Exported) {
-            return (@string)GoReflect.GoPackagePath(st);
+            return (@string)GoReflect.GoPackagePath(f.DeclaringType ?? st);
         }
     }
     return "";

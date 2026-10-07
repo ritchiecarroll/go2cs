@@ -39,12 +39,22 @@ import (
 	bfoo "example.com/samename/b/foo"
 )
 
+type holder struct {
+	pick func(int) bfoo.Kind
+}
+
+type D afoo.Alias
+
 func main() {
 	var x afoo.Alias = afoo.Inner{N: 1}
 	var y bfoo.Alias = bfoo.Other{S: "s"}
 	z := afoo.Alias{N: 2}
 	var ka afoo.Kind = afoo.S{}.Kind()
-	fmt.Println(x.N, y.S, z.N, ka)
+	var conv func(afoo.Kind) bfoo.Kind = func(k afoo.Kind) bfoo.Kind { return bfoo.Kind(fmt.Sprint(k)) }
+	h := holder{pick: func(int) bfoo.Kind { return bfoo.S{}.Kind() }}
+	kb := bfoo.Kind("x")
+	d := D{N: 5}
+	fmt.Println(x.N, y.S, z.N, ka, conv(afoo.Kind(3)), h.pick(0), kb, d.N)
 }
 `)
 
@@ -85,6 +95,27 @@ func main() {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("missing %q in:\n%s", want, mainCs)
 		}
+	}
+
+	// The FIFTH arm: a reference that takes the qualified fallback spells the TARGET's member, collision
+	// rename included, in every position -- a func type's parameter and result (a local and a struct
+	// field) and a conversion. Kind is renamed ΔKind in both packages, so the Go name `Kind` must not
+	// survive as a type reference anywhere (logrus' hooks/slog test: `Func<…, slog.Level>`, CS0426).
+	if strings.Contains(mainCs, "foo.Kind") {
+		t.Errorf("a same-named import's renamed Kind is still spelled by its Go name in:\n%s", mainCs)
+	}
+
+	for _, want := range []string{"Func<nint, bfoo.ΔKind> pick", "((afoo.ΔKind)3)"} {
+		if !strings.Contains(mainCs, want) {
+			t.Errorf("missing the renamed member %q in:\n%s", want, mainCs)
+		}
+	}
+
+	// A defined type over an ambiguous alias renders its underlying through the FULLY qualified
+	// renderer (getFullyQualifiedTypeName's twin of the alias-qualified arm): its [GoType] must name
+	// a/foo's target, not the shared key `foo.Alias` that no `global using` declares.
+	if want := `[GoType("global::go.example.com.samename.a.foo_package.Inner")] partial struct D;`; !strings.Contains(mainCs, want) {
+		t.Errorf("missing the fully qualified alias target %q in:\n%s", want, mainCs)
 	}
 
 	// Both imports are renamed, so each package's types render through its own alias; supplying the

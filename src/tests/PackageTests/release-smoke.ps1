@@ -51,7 +51,10 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$Feed = (Resolve-Path $Feed).Path
+# A URL is a published feed (the post-publish smoke: -Feed https://api.nuget.org/v3/index.json); it carries
+# every version ever shipped, so the version under test must be named.
+if ($Feed -match '^https?://') { if (-not $Version) { throw "-Version is required when -Feed is a URL ($Feed)" } }
+else { $Feed = (Resolve-Path $Feed).Path }
 $Converter = (Resolve-Path $Converter).Path
 New-Item -ItemType Directory -Force $WorkRoot | Out-Null
 $WorkRoot = (Resolve-Path $WorkRoot).Path
@@ -73,17 +76,26 @@ $env:GOTOOLCHAIN = 'local'
 function Write-FeedConfig([string]$Dir) {
     # go.* from the feed ONLY; everything else (the SDK's own packs) from nuget.org. The mapping is what
     # makes the feed authoritative for go.*: no other source is even consulted for those IDs.
+    $nugetOrg = 'https://api.nuget.org/v3/index.json'
+    if ($Feed.TrimEnd('/') -eq $nugetOrg) {
+        # The post-publish smoke: the feed IS nuget.org. Listing that URL under two keys makes NuGet drop the
+        # second, and the SDK's own packs (Microsoft.NET.ILLink.Tasks) then have no source: NU1100. One source.
+        $sources = "    <add key=`"nuget.org`" value=`"$nugetOrg`" />"
+        $mapping = '    <packageSource key="nuget.org"><package pattern="*" /></packageSource>'
+    }
+    else {
+        $sources = "    <add key=`"feed`" value=`"$Feed`" />`n    <add key=`"nuget.org`" value=`"$nugetOrg`" />"
+        $mapping = "    <packageSource key=`"feed`"><package pattern=`"go.*`" /></packageSource>`n    <packageSource key=`"nuget.org`"><package pattern=`"*`" /></packageSource>"
+    }
     @"
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <packageSources>
     <clear />
-    <add key="feed" value="$Feed" />
-    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+$sources
   </packageSources>
   <packageSourceMapping>
-    <packageSource key="feed"><package pattern="go.*" /></packageSource>
-    <packageSource key="nuget.org"><package pattern="*" /></packageSource>
+$mapping
   </packageSourceMapping>
 </configuration>
 "@ | Set-Content -LiteralPath (Join-Path $Dir 'nuget.config') -Encoding utf8
@@ -126,7 +138,8 @@ function Invoke-ConvertArm([string]$Name, [string]$ModuleDir) {
         $goOut = Join-Path $arm 'go.stdout.txt'
         $env:NUGET_PACKAGES = $null
         $ErrorActionPreference = 'Continue'
-        & go run . 1> $goOut 2> (Join-Path $arm 'go.stderr.txt')
+        # `-tags safe`: every arm converts with -recurse, which builds with the `safe` tag by default, so the baseline must too.
+        & go run -tags safe . 1> $goOut 2> (Join-Path $arm 'go.stderr.txt')
         $ErrorActionPreference = 'Stop'
         if ($LASTEXITCODE -ne 0) { return "FAIL ($Name): go run exited $LASTEXITCODE (the Go baseline itself)" }
 
@@ -251,8 +264,15 @@ func main() {
 	bare := []string{"z", "x", "y"}
 	sort.Sort(sort.StringSlice(bare))
 	fmt.Println("Sort =", ints, floats, strs, bare)
+
+	// Which file of the `safe` pair compiled: the converter's default tag set and the Go baseline must agree.
+	fmt.Println("BuildTag =", buildMode)
 }
 '@ | Set-Content -LiteralPath (Join-Path $sample 'main.go') -Encoding utf8
+# The build-tag probe: exactly one of these two files compiles. A -recurse conversion builds with the `safe` tag
+# by default, so the baseline `go run` must too; if the two ever disagree, line 5 of arm B names it.
+"//go:build safe`n`npackage main`n`nconst buildMode = `"safe`"`n" | Set-Content -LiteralPath (Join-Path $sample 'mode_safe.go') -Encoding utf8 -NoNewline
+"//go:build !safe`n`npackage main`n`nconst buildMode = `"default`"`n" | Set-Content -LiteralPath (Join-Path $sample 'mode_default.go') -Encoding utf8 -NoNewline
 $verdicts += Invoke-ConvertArm 'B-sample' $sample
 
 # ---- C: one behavioral project -------------------------------------------------------------------
@@ -285,10 +305,37 @@ try {
 finally { Pop-Location }
 $walkVerdict = if ($setup -ne 0) { "FAIL (D-walkthrough): the Go side did not set up (exit $setup)" } else { Invoke-ConvertArm 'D-walkthrough' $walk }
 
+# ---- E: symbol files beside a single-file host, measured, never gating ------------------------------
+# go.lib.symbols.targets keeps every referenced assembly's .pdb beside a single-file host across a SECOND unchanged
+# publish (the SDK deletes them when the bundle step is skipped). PublishSymbols' guard reads that against this feed's
+# go.lib, and its AOT control reads that the target leaves a Native AOT publish untouched. NOT GATING until it has read
+# green on two trains (COORD, 2026-10-06): a go.lib without the target, every release up to 1.24.13.4, fails the guard.
+#
+# ---- F: the packages' OWN symbol files reach a consumer, measured, never gating ---------------------------------
+# PackageSymbols restores go.sort from this feed and prints a std frame's Go file:line on `dotnet run`, on a first and
+# a second unchanged single-file publish and on a framework-dependent publish; its off switch must print "none". Its
+# Native AOT run is NOT here: under go.lib's TrimMode=partial that publish compiles the whole go.* closure (about 70 min
+# on hosted linux), so it is os-matrix's own aot-smoke stage (COORD ruling 2026-10-06). The packages ship .pdb from the release that ships symbols
+# (owner ruling, 2026-10-06); every earlier release fails RUN, PUBLISH and FDD. Its frame lines are carried in the detail.
+$symbolVerdicts = @()
+foreach ($check in @(
+        @{ Name = 'E-publish-symbols'; Dir = 'PublishSymbols'; Script = 'test-publish-symbols.ps1'; Extra = @{} },
+        @{ Name = 'E-publish-symbols-aot'; Dir = 'PublishSymbols'; Script = 'test-publish-symbols-aot.ps1'; Extra = @{} },
+        @{ Name = 'F-package-symbols'; Dir = 'PackageSymbols'; Script = 'test-package-symbols.ps1'; Extra = @{}
+           Detail = '^\s+(RUN|PUBLISH [12]|FDD|OFF|AOT): ' })) {
+    $checkLog = Join-Path $WorkRoot "$($check.Name).log"
+    $extra = $check.Extra
+    $code = Invoke-Logged $checkLog { & (Join-Path (Join-Path $PSScriptRoot $check.Dir) $check.Script) -Version $Version -Source $Feed @extra }
+    $pattern = if ($check.Detail) { "^(PASS|FAIL) |$($check.Detail)" } else { '^(PASS|FAIL) ' }
+    $detail = @(Get-Content -LiteralPath $checkLog -ErrorAction SilentlyContinue | Where-Object { $_ -match $pattern } | ForEach-Object { $_.Trim() }) -join ' | '
+    $symbolVerdicts += if ($code -eq 0) { "PASS ($($check.Name)): $detail" } else { "FAIL ($($check.Name)): exit $code -- $detail (see $($check.Name).log)" }
+}
+
 # ---- verdicts ------------------------------------------------------------------------------------
 if ($GateWalkthrough) { $verdicts += $walkVerdict }
 $verdicts | ForEach-Object { Write-Host $_ }
 if (-not $GateWalkthrough) { Write-Host "MEASURED, NOT GATING: $walkVerdict" }
+$symbolVerdicts | ForEach-Object { Write-Host "MEASURED, NOT GATING: $_" }
 
 if ($verdicts | Where-Object { $_ -like 'FAIL*' }) { exit 1 }
 exit 0

@@ -534,7 +534,7 @@ public static void TestMain(ж<testing.M> Ꮡm) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tcp6ˢ = "tcp6"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint runMain(ж<testing.M> Ꮡm) {
+internal static partial nint runMain(ж<testing.M> Ꮡm) {
     GoFrame ᒐ = default;
     try {
         // Cipher suites preferences change based on the architecture. Force them to
@@ -593,7 +593,7 @@ internal static readonly @string tcp6ˢ = "tcp6"u8;
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string sentinelᶜ = "SENTINEL\n"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (global::go.crypto.tls_package.ΔConnectionState serverState, global::go.crypto.tls_package.ΔConnectionState clientState, error err) testHandshake(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> ᏑclientConfig, ж<global::go.crypto.tls_package.Config> ᏑserverConfig) {
+internal static partial (global::go.crypto.tls_package.ΔConnectionState serverState, global::go.crypto.tls_package.ΔConnectionState clientState, error err) testHandshake(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> ᏑclientConfig, ж<global::go.crypto.tls_package.Config> ᏑserverConfig) {
     global::go.crypto.tls_package.ΔConnectionState serverState = default!;
     global::go.crypto.tls_package.ΔConnectionState clientState = default!;
     error err = default!;
@@ -794,7 +794,7 @@ MC4CAQAwBQYDK2VwBCIEINifzf07d9qx3d44e0FSbV4mC/xQxT644RRbpgNpin7I
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedErrorFromˢ2 = (@string)"expected error from incomplete handshake, got nil"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServerHelloTrailingMessage(ж<testing.T> Ꮡt) {
+public static partial void TestServerHelloTrailingMessage(ж<testing.T> Ꮡt) {
     // In TLS 1.3 the change cipher spec message is optional. If a CCS message
     // is not sent, after reading the ServerHello, the read traffic secret is
     // set, and all following messages must be encrypted. If the server sends
@@ -848,7 +848,7 @@ internal static readonly object expectedErrorFromˢ2 = (@string)"expected error 
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestClientHelloTrailingMessage(ж<testing.T> Ꮡt) {
+public static partial void TestClientHelloTrailingMessage(ж<testing.T> Ꮡt) {
     // Same as TestServerHelloTrailingMessage but for the client side.
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var cʗ1 = c;
@@ -881,7 +881,7 @@ internal static readonly object expectedErrorFromˢ2 = (@string)"expected error 
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDoubleClientHelloHRR(ж<testing.T> Ꮡt) {
+public static partial void TestDoubleClientHelloHRR(ж<testing.T> Ꮡt) {
     // If a client sends two ClientHello messages in a single record, and the
     // server sends a HRR after reading the first ClientHello, the server must
     // either fail or ignore the trailing ClientHello.

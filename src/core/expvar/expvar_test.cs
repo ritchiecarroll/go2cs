@@ -633,7 +633,7 @@ public static void BenchmarkMapString(ж<testing.B> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tcpˢ = "tcp"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkRealworldExpvarUsage(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkRealworldExpvarUsage(ж<testing.B> Ꮡb) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();

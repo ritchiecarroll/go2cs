@@ -902,7 +902,7 @@ internal static int64 mReserveID() {
 }
 
 // Pre-allocated ID may be passed as 'id', or omitted by passing -1.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void mcommoninit(ж<m> Ꮡmp, int64 id) {
+internal static partial void mcommoninit(ж<m> Ꮡmp, int64 id) {
     ref var mp = ref Ꮡmp.DerefOrNull();
 
     var gp = getg();
@@ -952,7 +952,7 @@ internal static void mProfStackInit(ref m mp) {
 // makeProfStackFP creates a buffer large enough to hold a maximum-sized stack
 // trace as well as any additional frames needed for frame pointer unwinding
 // with delayed inline expansion.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<uintptr> makeProfStackFP() {
+internal static partial slice<uintptr> makeProfStackFP() {
     // The "1" term is to account for the first stack entry being
     // taken up by a "skip" sentinel value for profilers which
     // defer inline frame expansion until the profile is reported.
@@ -964,12 +964,12 @@ internal static void mProfStackInit(ref m mp) {
 
 // makeProfStack returns a buffer large enough to hold a maximum-sized stack
 // trace.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<uintptr> makeProfStack() {
+internal static partial slice<uintptr> makeProfStack() {
     return new slice<uintptr>(debug.profstackdepth);
 }
 
 //go:linkname pprof_makeProfStack
-[MethodImpl(MethodImplOptions.NoInlining)] public static slice<uintptr> pprof_makeProfStack() {
+public static partial slice<uintptr> pprof_makeProfStack() {
     return makeProfStack();
 }
 
@@ -1773,7 +1773,7 @@ internal static readonly @string badRuntimeMstartˢ = "bad runtime·mstart"u8;
 // so that we can set up g0.sched to return to the call of mstart1 above.
 //
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void mstart1() {
+internal static partial void mstart1() {
     var gp = getg();
     if (gp != (~(~gp).m).g0) {
         @throw(badRuntimeMstartˢ);
@@ -4705,7 +4705,7 @@ internal static ж<g> newproc1(ж<funcval> Ꮡfn, ж<g> Ꮡcallergp, uintptr cal
 // saveAncestors copies previous ancestors of the given caller g and
 // includes info for the current caller into a new set of tracebacks for
 // a g being created.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<slice<ancestorInfo>> saveAncestors(ж<g> Ꮡcallergp) {
+internal static partial ж<slice<ancestorInfo>> saveAncestors(ж<g> Ꮡcallergp) {
     ref var callergp = ref Ꮡcallergp.DerefOrNull();
 
     // Copy all prior info, except for the root goroutine (goid 0).

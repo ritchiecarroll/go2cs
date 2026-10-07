@@ -4,6 +4,7 @@
     {
       "name": "TestCertCache",
       "class": "codegen-liveness",
+      "platforms": ["windows", "darwin"],
       "signature": "timed out waiting for expected ref count",
       "reason": "The test nils its own local and then asserts, from inside the same still-running frame, that the object it dropped has become collectible: `certA = nil; runtime.GC()`, then a four-second poll for the cache entry's reference count to fall from 2 to 1, ending in this t.Fatal. The finalizer that would decrement it works — runtime.SetFinalizer is the hand-owned ConditionalWeakTable-and-sentinel bridge, runtime.GC() is Collect then WaitForPendingFinalizers then Collect, and sync's banked TestPoolGC measures 98 of 100 objects finalizing on the first try — but `certA, err := cc.newCert(p.Bytes)` is a two-result call whose results materialize an address-exposed frame temp, and an address-exposed slot is not lifetime-tracked: the CLR reports it live for the whole method, so the activeCert stays reachable until TestCertCache RETURNS and the count cannot fall while the test is looking. Measured to fail at the FIRST check identically in a separately built optimized Release host, so it is the CLR's GC-info conservatism rather than the non-optimizing JIT's frame-wide liveness. Same mechanism, and the same non-satisfiable-at-any-layer-go2cs-owns conclusion, as sync's TestOnceXGC and TestPoolGC disclosures."
     },

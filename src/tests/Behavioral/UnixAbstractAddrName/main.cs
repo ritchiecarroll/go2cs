@@ -20,7 +20,7 @@ private static readonly object netˢ = (@string)"net       ="u8;
 private static readonly object nameLenˢ = (@string)"name len  ="u8;
 private static readonly object nameIsˢ = (@string)"name is @ ="u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     GoFrame ᒐ = default;
     try {
         var (dir, err) = os.MkdirTemp(""u8, abstractaddrˢ);

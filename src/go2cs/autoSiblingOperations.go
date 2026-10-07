@@ -122,6 +122,10 @@ func emitAutoConversionSiblings(markedFiles []FileEntry, fset *token.FileSet, pa
 	// Resolve any deferred dynamic (anonymous struct) type markers in the sibling output using
 	// the package registry, which now also contains the siblings' own lifted names.
 	resolveDynamicTypeMarkers(autoFileNames)
+
+	// Give an unchanged sibling its previous time back, and clear what writeAutoConversionSibling remembered: the record
+	// is process-wide and first-wins, so an entry left here would shadow the next conversion's.
+	restoreUnchangedMarkedSources(autoFileNames)
 }
 
 // writeAutoConversionSibling writes the `.cs.auto` content prefixed with a stable banner that
@@ -134,7 +138,15 @@ func writeAutoConversionSibling(autoFileName string, baseName string, content st
 		"//     *.cs) and is regenerated on every conversion for upgrade-time diff review. Do not edit." + "\r\n" +
 		"// </auto-generated>" + "\r\n" + "\r\n"
 
-	if _, err := writeSourceIfChanged(autoFileName, []byte(banner+content)); err != nil {
+	sibling := []byte(banner + content)
+
+	// A sibling still holding a deferred marker is rewritten by the package's marker passes after this write, so its text
+	// here never equals the previous run's resolved sibling; remember the file so restoreUnchangedMarkedSources can give
+	// its time back when the resolved text turns out identical (incrementalWrites.go). Both callers restore: the partly
+	// hand-owned path over its output files, emitAutoConversionSiblings over its own.
+	rememberIfMarked(autoFileName, sibling)
+
+	if _, err := writeSourceIfChanged(autoFileName, sibling); err != nil {
 		return fmt.Errorf("failed to write auto-conversion sibling file \"%s\": %s", autoFileName, err)
 	}
 

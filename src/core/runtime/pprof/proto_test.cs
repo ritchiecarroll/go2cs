@@ -80,12 +80,12 @@ public static void TestConvertCPUProfileNoSamples(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void f1() {
+internal static partial void f1() {
     f1();
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void f2() {
+internal static partial void f2() {
     f2();
 }
 

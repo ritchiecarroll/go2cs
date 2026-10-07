@@ -23,7 +23,6 @@ import (
 	"go/build"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"testing"
 )
 
@@ -121,16 +120,14 @@ func main() {
 func TestSkipCountedWalkerHopsAreNotInlined(t *testing.T) {
 	mainCs := convertBlockEventFixture(t)
 
-	const attribute = "[MethodImpl(MethodImplOptions.NoInlining)]"
-
 	for _, name := range []string{"save", "blockevent", "profEvent", "stackOf"} {
-		if line := declarationLine(t, mainCs, name); !strings.Contains(line, attribute) {
+		if line := declarationLine(t, mainCs, name); !keepsOwnFrame(line) {
 			t.Errorf("%s is a hop the skip counts, but it is not marked: %s", name, line)
 		}
 	}
 
 	for _, name := range []string{"twoStep", "other"} {
-		if line := declarationLine(t, mainCs, name); strings.Contains(line, attribute) {
+		if line := declarationLine(t, mainCs, name); keepsOwnFrame(line) {
 			t.Errorf("%s is marked, but no walk counts its frame: %s", name, line)
 		}
 	}

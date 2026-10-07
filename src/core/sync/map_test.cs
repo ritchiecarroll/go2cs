@@ -183,7 +183,7 @@ public static void TestMapMatchesHashTrieMap(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
+public static partial void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         UntypedInt mapSize = /* 1 << 10 */ 1024;
@@ -357,7 +357,7 @@ public static void TestMapRangeNoAllocations(ж<Δtesting.T> Ꮡt) {
 
 // TestConcurrentClear tests concurrent behavior of sync.Map properties to ensure no data races.
 // Checks for proper synchronization between Clear, Store, Load operations.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentClear(ж<Δtesting.T> Ꮡt) {
+public static partial void TestConcurrentClear(ж<Δtesting.T> Ꮡt) {
     ref var m = ref heap(new Δsync.Map(), out var Ꮡm);
     ref var wg = ref heap<Δsync.WaitGroup>(out var Ꮡwg);
     wg = new Δsync.WaitGroup(nil);

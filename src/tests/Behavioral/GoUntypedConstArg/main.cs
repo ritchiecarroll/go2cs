@@ -15,7 +15,7 @@ internal static uint32 compute(uint32 p) {
     return r;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     goǃ(ᴛ1 => compute(ᴛ1), (uint32)(poly));
     var stored = ᐸꟷ(done);
     fmt.Printf("%#x\n"u8, stored);

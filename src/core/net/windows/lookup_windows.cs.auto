@@ -59,7 +59,7 @@ internal static (nint proto, error err) getprotobyname(@string name) {
 }
 
 // lookupProtocol looks up IP protocol name and returns correspondent protocol number.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, error) lookupProtocol(context.Context ctx, @string name) {
+internal static partial (nint, error) lookupProtocol(context.Context ctx, @string name) {
     var ch = new channel<lookupProtocol_result>(0); // unbuffered
     var chʗ1 = ch;
     goǃ(() => {
@@ -128,7 +128,7 @@ internal static (slice<@string>, error) lookupHost(this ж<Resolver> Ꮡr, conte
     internal error err;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (slice<IPAddr>, error) lookupIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string name) {
+internal static partial (slice<IPAddr>, error) lookupIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string name) {
     {
         var (order, conf) = systemConf().hostLookupOrder(Ꮡr, name); if (order != hostLookupCgo) {
             return Ꮡr.goLookupIP(ctx, network, name, order, conf);

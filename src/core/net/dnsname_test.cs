@@ -61,7 +61,7 @@ internal static void emitDNSNameTest(channel/*<-*/<dnsNameTest> ch) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDNSName(ж<testing.T> Ꮡt) {
+public static partial void TestDNSName(ж<testing.T> Ꮡt) {
     var ch = new channel<dnsNameTest>(0);
     goǃ(emitDNSNameTest, ch.WithDirection(GoChanDir.Send));
     foreach (var tc in ch) {

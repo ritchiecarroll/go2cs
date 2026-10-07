@@ -6,61 +6,61 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint selfLine() {
+internal static partial nint selfLine() {
     var (_, _, line, _) = runtime.Caller(0);
     return line;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint callerLine() {
+internal static partial nint callerLine() {
     var (_, _, line, _) = runtime.Caller(1);
     return line;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string callerFile() {
+internal static partial @string callerFile() {
     var (_, @file, _, _) = runtime.Caller(1);
     return @file;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint grandLine() {
+internal static partial nint grandLine() {
     var (_, _, line, _) = runtime.Caller(2);
     return line;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint wrapGrand() {
+internal static partial nint wrapGrand() {
     return grandLine();
 }
 
-internal static (nint, nint) sameSite() {
+internal static partial (nint, nint) sameSite() {
     return (callerLine(), wrapGrand());
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint siteA() {
+internal static partial nint siteA() {
     return callerLine();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint siteB() {
+internal static partial nint siteB() {
     return callerLine();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static bool okAt(nint skip) {
+internal static partial bool okAt(nint skip) {
     var (_, _, _, ok) = runtime.Caller(skip);
     return ok;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static bool deepOK() {
+internal static partial bool deepOK() {
     return okAt(2);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint depth() {
+internal static partial nint depth() {
     var pc = new slice<uintptr>(256);
     return runtime.Callers(0, pc);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint depthPlus1() {
+internal static partial nint depthPlus1() {
     return depth();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint depthPlus2() {
+internal static partial nint depthPlus2() {
     return depthPlus1();
 }
 
@@ -101,7 +101,7 @@ private static readonly object tracebackNamesPlainFuncˢ = (@string)"traceback n
 private static readonly @string mainPlainFrameˢ = "main.plainFrame"u8;
 private static readonly object tracebackParenthesizesˢ = (@string)"traceback parenthesizes plain func:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     var (x, y) = sameSite();
     fmt.Println(sameLineAgreementˢ, x == y);
     fmt.Println(selfLineConstantˢ, selfLine() == selfLine());
@@ -148,12 +148,12 @@ internal static bool hasByte(@string s, byte b) {
     return false;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (bool fwd, bool back) callerSeparators() {
+internal static partial (bool fwd, bool back) callerSeparators() {
     var (_, @file, _, _) = runtime.Caller(0);
     return (hasByte(@file, (rune)'/'), hasByte(@file, (rune)'\\'));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (bool fwd, bool back) framesSeparators() {
+internal static partial (bool fwd, bool back) framesSeparators() {
     bool fwd = default!;
     bool back = default!;
 
@@ -173,7 +173,7 @@ internal static bool hasByte(@string s, byte b) {
     return (fwd, back);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string callerFileTail() {
+internal static partial @string callerFileTail() {
     var (_, @file, _, _) = runtime.Caller(0);
     nint cut = 0;
     nint seen = 0;
@@ -189,7 +189,7 @@ internal static bool hasByte(@string s, byte b) {
     return @file.slice(cut);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static bool callerFileRooted() {
+internal static partial bool callerFileRooted() {
     var (_, @file, _, _) = runtime.Caller(0);
     if (len(@file) > 0 && @file[0] == (rune)'/') {
         return true;
@@ -197,7 +197,7 @@ internal static bool hasByte(@string s, byte b) {
     return len(@file) > 1 && @file[1] == (rune)':';
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static bool stackHasBackslash() {
+internal static partial bool stackHasBackslash() {
     var buf = new slice<byte>(8192);
     nint n = runtime.Stack(buf, false);
     return hasByte(((@string)(buf.slice(0, n))), (rune)'\\');
@@ -219,7 +219,7 @@ internal static bool hasSub(@string s, @string sub) {
     return false;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string stackText() {
+internal static partial @string stackText() {
     var buf = new slice<byte>(8192);
     nint n = runtime.Stack(buf, false);
     return ((@string)(buf.slice(0, n)));
@@ -231,19 +231,19 @@ internal static bool hasSub(@string s, @string sub) {
     internal X v;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static @string ptrFrame(this ref recvT t) {
+[GoRecv] internal static partial @string ptrFrame(this ref recvT t) {
     return stackText();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string valueFrame(this recvT t) {
+internal static partial @string valueFrame(this recvT t) {
     return t.ptrFrame();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string genFrame<X>(this genRecv<X> g) {
+internal static partial @string genFrame<X>(this genRecv<X> g) {
     return stackText();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string plainFrame() {
+internal static partial @string plainFrame() {
     return stackText();
 }
 

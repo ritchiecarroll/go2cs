@@ -154,6 +154,37 @@ $branch = (git -C $RepoRoot branch --show-current 2>$null)
 Write-Host "  branch           : $branch"
 if ($branch -ne 'master') { Write-Host '    (not master -- intentional?)' -ForegroundColor Yellow }
 
+# THE SDK IS READ HERE, NOT DISCOVERED BY THE FIRST BUILD (2026-10-06, the 1.24.13.4 run on the i7).
+# That run's shell resolved a machine dotnet with no SDK satisfying global.json, and the first build
+# to notice was Phase 1's -- AFTER version.props was bumped, the tag minted, the snapshot frozen and
+# the READMEs retargeted. `dotnet --version` run from the repository root applies global.json's own
+# resolution (version and rollForward) and exits non-zero when nothing satisfies it, so its exit code
+# is the whole test. Every child process inherits this PATH, so the SDK read here is the one Phase 1
+# packs with. 'Continue' in this function only: under 'Stop', Windows PowerShell turns the muxer's
+# first stderr line into a terminating error and the remedy below would never print (see
+# Invoke-Sibling). A dotnet absent from PATH is caught as the same refusal.
+function Read-DotnetSdk {
+    $ErrorActionPreference = 'Continue'
+    Push-Location $RepoRoot
+    try {
+        $out = @(& dotnet --version 2>&1 | ForEach-Object { "$_" })
+        [pscustomobject]@{ Output = $out; ExitCode = $LASTEXITCODE }
+    } catch {
+        [pscustomobject]@{ Output = @("$_"); ExitCode = -1 }
+    } finally {
+        Pop-Location
+    }
+}
+$sdkWanted = (Get-Content -Raw (Join-Path $RepoRoot 'global.json') | ConvertFrom-Json).sdk
+$sdk = Read-DotnetSdk
+if ($sdk.ExitCode -ne 0) {
+    $sdk.Output | Where-Object { $_.Trim() } | Select-Object -First 8 | ForEach-Object { Write-Host "    $_" -ForegroundColor DarkGray }
+    Die ("No .NET SDK satisfying global.json ($($sdkWanted.version), rollForward $($sdkWanted.rollForward)) resolves from the repository root (dotnet --version exit $($sdk.ExitCode)). " +
+         "Put that SDK's root first on PATH in this shell, confirm with 'dotnet --version' from $RepoRoot, and re-run. Nothing was bumped, tagged, frozen or packed.")
+}
+$dotnetPath = (Get-Command dotnet).Source
+Write-Host "  .NET SDK         : $($sdk.Output[-1]) ($dotnetPath; global.json $($sdkWanted.version), rollForward $($sdkWanted.rollForward))"
+
 if (-not $env:NuGetCertFingerprint -and -not $OfflineSigning) {
     Die 'NuGetCertFingerprint is not set. Set it, or pass -OfflineSigning to sign elsewhere.'
 }
@@ -231,7 +262,7 @@ Write-Host ''
 Write-Host '  A published version can be UNLISTED but never DELETED.' -ForegroundColor Yellow
 
 if (-not $Yes) {
-    $answer = Read-Host "  Publish $($packages.Count) package(s) as $ver? (type 'publish' to proceed)"
+    $answer = Read-Host "  Publish $($packages.Count) package(s) as ${ver}? (type 'publish' to proceed)"
     if ($answer -ne 'publish') { Die '  Not published. Nothing was sent; the signed packages remain in the artifacts folder.' }
 }
 

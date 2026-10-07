@@ -415,7 +415,7 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string rgbˢ = "# rgb = ("u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestReader(ж<testing.T> Ꮡt) {
+public static partial void TestReader(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var names = filenames;

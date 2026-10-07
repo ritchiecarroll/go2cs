@@ -51,7 +51,7 @@ internal static nint nestedStructCapture() {
     return ᐸꟷ(@out);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint selfRefCapture() {
+internal static partial nint selfRefCapture() {
     var done = new channel<nint>(1);
     var doneʗ1 = done;
     void worker(Action cb) {

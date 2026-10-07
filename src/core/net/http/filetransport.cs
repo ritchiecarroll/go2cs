@@ -51,7 +51,7 @@ public static RoundTripper NewFileTransportFS(fs.FS fsys) {
     return NewFileTransport(FS(fsys));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<Response> resp, error err) RoundTrip(this fileTransport t, ж<Request> Ꮡreq) {
+internal static partial (ж<Response> resp, error err) RoundTrip(this fileTransport t, ж<Request> Ꮡreq) {
     // We start ServeHTTP in a goroutine, which may take a long
     // time if the file is large. The newPopulateResponseWriter
     // call returns a channel which either ServeHTTP or finish()

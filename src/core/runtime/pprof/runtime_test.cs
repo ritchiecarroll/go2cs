@@ -14,7 +14,7 @@ using static go.runtime.pprof_package;
 
 partial class pprof_internal_test_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSetGoroutineLabels(ж<testing.T> Ꮡt) {
+public static partial void TestSetGoroutineLabels(ж<testing.T> Ꮡt) {
     var sync = new channel<EmptyStruct>(0);
     ref var wantLabels = ref heap<map<@string, @string>>(out var ᏑwantLabels);
     wantLabels = new map<@string, @string>{};

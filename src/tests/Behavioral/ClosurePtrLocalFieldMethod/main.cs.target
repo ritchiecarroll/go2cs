@@ -22,11 +22,11 @@ partial class main_package {
     internal nint pad;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void run(Action f) {
+internal static partial void run(Action f) {
     f();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<cachelike> alloc() {
+internal static partial ж<cachelike> alloc() {
     return Ꮡ(new cachelike(nil));
 }
 
@@ -45,7 +45,7 @@ internal static (nint, nint) allocShape() {
     internal counter v;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<gauge> newGauge() {
+internal static partial ж<gauge> newGauge() {
     return Ꮡ(new gauge(nil));
 }
 

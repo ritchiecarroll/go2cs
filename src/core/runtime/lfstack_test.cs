@@ -79,7 +79,7 @@ public static void TestLFStack(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestLFStackStress(ж<testing.T> Ꮡt) {
+public static partial void TestLFStackStress(ж<testing.T> Ꮡt) {
     const nint K = 100;
     nint P = 4 * GOMAXPROCS(-1);
     nint N = 100000;

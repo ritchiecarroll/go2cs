@@ -14,7 +14,7 @@ partial class main_package {
     c.n += (nint)d;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @unsafe.Pointer add(@unsafe.Pointer p, uintptr x) {
+internal static partial @unsafe.Pointer add(@unsafe.Pointer p, uintptr x) {
     return (@unsafe.Pointer)((uintptr)p + x);
 }
 

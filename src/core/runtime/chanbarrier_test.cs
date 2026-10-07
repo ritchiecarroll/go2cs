@@ -27,7 +27,7 @@ internal static @string Error(this myError _) {
     internal error err;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<response>, error) doRequest(bool useSelect) {
+internal static partial (ж<response>, error) doRequest(bool useSelect) {
     var ch = new channel<ж<doRequest_async>>(0);
     var done = new channel<EmptyStruct>(0);
     if (useSelect){
@@ -65,7 +65,7 @@ public static void TestChanSendBarrier(ж<testing.T> Ꮡt) {
     testChanSendBarrier(false);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testChanSendBarrier(bool useSelect) {
+internal static partial void testChanSendBarrier(bool useSelect) {
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     nint outer = 100;
     nint inner = 100000;
@@ -98,7 +98,7 @@ public static void TestChanSendBarrier(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<byte> makeByte() {
+internal static partial slice<byte> makeByte() {
     return new slice<byte>((1 << (int)(10)));
 }
 

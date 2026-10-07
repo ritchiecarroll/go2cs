@@ -173,6 +173,186 @@ public class TestingRuntimeTests
         CollectionAssert.AreEqual(new[] { "wanted" }, ran.ToArray());
     }
 
+    // testing.RunTests, called from INSIDE a running test (testify's suite tests): Go runs the list on a
+    // FRESH root, so each entry is a top-level test under its own name -- serial until it calls Parallel,
+    // the parked ones released when the list is done -- and returns ok == false exactly when one failed.
+    // The root has no parent, so the CALLER is not failed, and the package still passes (m.Run's ok is
+    // its own list's).
+    [TestMethod]
+    public void RunTestsRunsItsListAsTopLevelTestsFromInsideARunningTest()
+    {
+        string resultPath = Path.Combine(Path.GetTempPath(), $"go2cs-results-{Guid.NewGuid():N}.json");
+        ConcurrentQueue<string> events = new();
+        bool okFailing = true, okPassing = false, callerFailed = true;
+
+        try
+        {
+            TestRegistry registry = new("runtime/runtests", []);
+            registry.Add("TestOuter", pointer =>
+            {
+                ref testing_package.T test = ref pointer.Value;
+                okFailing = testing_package.RunTests((_, _) => (true, null!), new testing_package.InternalTest[]
+                {
+                    new(Name: "TestOuter/Fails", F: t => { events.Enqueue("fails"); t.Error("expected"); }),
+                    new(Name: "TestOuter/Parallel", F: t => { t.Value.Parallel(); events.Enqueue("parallel"); }),
+                    new(Name: "TestOuter/Serial", F: _ => events.Enqueue("serial")),
+                }.slice());
+                okPassing = testing_package.RunTests((_, _) => (true, null!), new testing_package.InternalTest[]
+                {
+                    new(Name: "TestOuter/Passes", F: _ => events.Enqueue("passes")),
+                }.slice());
+                events.Enqueue("after");
+                callerFailed = test.Failed();
+            }, "runtime_test.go", 1);
+
+            Assert.AreEqual(0, TestHost.Run(registry, ["--result", resultPath]));
+            Assert.IsFalse(okFailing);
+            Assert.IsTrue(okPassing);
+            Assert.IsFalse(callerFailed);
+            CollectionAssert.AreEqual(new[] { "fails", "serial", "parallel", "passes", "after" }, events.ToArray());
+
+            string results = File.ReadAllText(resultPath);
+            StringAssert.Contains(results, "\"test\":\"TestOuter/Fails\",\"action\":\"fail\"");
+            StringAssert.Contains(results, "\"test\":\"TestOuter/Passes\",\"action\":\"pass\"");
+        }
+        finally
+        {
+            File.Delete(resultPath);
+        }
+    }
+
+    // RunTests' matcher is Go's newMatcher(matchString, *match, "-test.run", *skip): each -run ELEMENT goes
+    // to the CALLER's matchString, so testify's always-true filter runs the whole list whatever -run says,
+    // and a real matcher selects by element.
+    [TestMethod]
+    public void RunTestsHandsEachRunElementToTheCallersMatchString()
+    {
+        ConcurrentQueue<string> ran = new();
+        ConcurrentQueue<string> patterns = new();
+        TestRegistry registry = new("runtime/runtests-match", []);
+        registry.Add("TestOuter", _ =>
+        {
+            testing_package.RunTests((pattern, name) =>
+            {
+                patterns.Enqueue($"{pattern}~{name}");
+                return (System.Text.RegularExpressions.Regex.IsMatch(name.ToString(), pattern.ToString()), null!);
+            }, new testing_package.InternalTest[]
+            {
+                new(Name: "TestOuter/Wanted", F: _ => ran.Enqueue("wanted")),
+                new(Name: "TestOuter/Other", F: _ => ran.Enqueue("other")),
+            }.slice());
+            testing_package.RunTests((_, _) => (true, null!), new testing_package.InternalTest[]
+            {
+                new(Name: "TestOuter/Always", F: _ => ran.Enqueue("always")),
+            }.slice());
+        }, "runtime_test.go", 1);
+
+        Assert.AreEqual(0, TestHost.Run(registry, ["-run", "TestOuter/Wanted"]));
+        CollectionAssert.AreEqual(new[] { "wanted", "always" }, ran.ToArray());
+        CollectionAssert.Contains(patterns.ToArray(), "Wanted~Other");
+    }
+
+    // A RunTests entry is a child of the ROOT, and Go's matcher rewrites (spaces to `_`) and de-duplicates
+    // (`#01`) only below it (fullName's `c.level > 0`): testify's "signature validation" entry is reported
+    // as exactly that, and two entries of one name are two tests of that name.
+    [TestMethod]
+    public void RunTestsNamesItsEntriesAsGiven()
+    {
+        string resultPath = Path.Combine(Path.GetTempPath(), $"go2cs-results-{Guid.NewGuid():N}.json");
+
+        try
+        {
+            TestRegistry registry = new("runtime/runtests-names", []);
+            registry.Add("TestOuter", _ =>
+            {
+                testing_package.RunTests((_, _) => (true, null!), new testing_package.InternalTest[]
+                {
+                    new(Name: "signature validation", F: _ => { }),
+                    new(Name: "dup", F: _ => { }),
+                    new(Name: "dup", F: _ => { }),
+                }.slice());
+            }, "runtime_test.go", 1);
+
+            Assert.AreEqual(0, TestHost.Run(registry, ["--result", resultPath]));
+
+            string results = File.ReadAllText(resultPath);
+            StringAssert.Contains(results, "\"test\":\"signature validation\",\"action\":\"pass\"");
+            Assert.AreEqual(2, System.Text.RegularExpressions.Regex.Matches(results, "\"test\":\"dup\",\"action\":\"pass\"").Count, results);
+            Assert.IsFalse(results.Contains("signature_validation") || results.Contains("dup#01"), results);
+        }
+        finally
+        {
+            File.Delete(resultPath);
+        }
+    }
+
+    // Go's RunTests root writes to os.Stdout AS IT IS at the call, and only the process's stdout reaches
+    // test2json. testify's TestSuiteLogging redirects os.Stdout to a pipe, runs a suite with a failing and
+    // a passing test that both log, and reads its own output back: the failure (with its log line) is
+    // there, a passing test's log line only under -v, and go test -json reports none of the suite.
+    [TestMethod]
+    public void RunTestsWritesToARedirectedStdoutAndReportsNothingToTheRun()
+    {
+        (string captured, string results) = RunTestsUnderRedirectedStdout([]);
+
+        StringAssert.Contains(captured, "--- FAIL: TestOuter/Suite");
+        StringAssert.Contains(captured, "--- FAIL: TestOuter/Suite/Fails");
+        StringAssert.Contains(captured, "LOGFAIL");
+        Assert.IsFalse(captured.Contains("LOGPASS"), $"a passing test's log printed without -v:\n{captured}");
+        Assert.IsFalse(results.Contains("TestOuter/Suite"), "the redirected suite reached the run");
+
+        (string verboseCaptured, string verboseResults) = RunTestsUnderRedirectedStdout(["-v"]);
+
+        StringAssert.Contains(verboseCaptured, "=== RUN   TestOuter/Suite");
+        StringAssert.Contains(verboseCaptured, "LOGFAIL");
+        StringAssert.Contains(verboseCaptured, "LOGPASS");
+        Assert.IsFalse(verboseResults.Contains("TestOuter/Suite"), "the redirected suite reached the run under -v");
+    }
+
+    private static (string Captured, string Results) RunTestsUnderRedirectedStdout(string[] flags)
+    {
+        string resultPath = Path.Combine(Path.GetTempPath(), $"go2cs-results-{Guid.NewGuid():N}.json");
+        string capturePath = Path.Combine(Path.GetTempPath(), $"go2cs-stdout-{Guid.NewGuid():N}.txt");
+
+        try
+        {
+            TestRegistry registry = new("runtime/runtests-stdout", []);
+            registry.Add("TestOuter", _ =>
+            {
+                ж<os_package.File> saved = os_package.Stdout;
+                (ж<os_package.File> file, error err) = os_package.Create(capturePath);
+                Assert.IsNull(err);
+                os_package.Stdout = file;
+
+                try
+                {
+                    testing_package.RunTests((_, _) => (true, null!), new testing_package.InternalTest[]
+                    {
+                        new(Name: "TestOuter/Suite", F: t =>
+                        {
+                            t.Value.Run("Fails", c => { c.Log("LOGFAIL"); c.Error("expected"); });
+                            t.Value.Run("Passes", c => c.Log("LOGPASS"));
+                        }),
+                    }.slice());
+                }
+                finally
+                {
+                    os_package.Stdout = saved;
+                    file.Close();
+                }
+            }, "runtime_test.go", 1);
+
+            Assert.AreEqual(0, TestHost.Run(registry, [.. flags, "--result", resultPath]));
+
+            return (File.ReadAllText(capturePath), File.ReadAllText(resultPath));
+        }
+        finally
+        {
+            File.Delete(resultPath);
+            File.Delete(capturePath);
+        }
+    }
+
     [TestMethod]
     public void CrossGoroutineFatalRecordsInfrastructureFailureWithoutKillingProcess()
     {
@@ -353,6 +533,7 @@ public class TestingRuntimeTests
         Assert.AreEqual((0, true, true), RunArgv("--v"));
         Assert.AreEqual((0, true, true), RunArgv("--json"), "--json implies -v");
         Assert.AreEqual((0, true, true), RunArgv("-json"));
+        Assert.AreEqual((0, true, true), RunArgv("-test.v=test2json"), "go test -json's own spelling is the host's --json");
 
         // The first non-flag STOPS the parse — the run proceeds instead of dying at startup.
         Assert.AreEqual((0, true, false), RunArgv("cat"));
@@ -499,8 +680,10 @@ public class TestingRuntimeTests
         // B6 guard (strings/bytes blocker map): capability-excluded benchmark bodies still
         // COMPILE — exclusion gates the run registry, not emission — so every B member the
         // strings/bytes suites reference must exist on the compile-only shim, through both
-        // receiver shapes converted code binds (the ж<B> box and the ref-local value), and
-        // stay a safe non-throwing no-op.
+        // receiver shapes converted code binds (the ж<B> box and the ref-local value). The timer and
+        // reporting members are no-ops; the failure and skip members are Go's ZERO B (measured on
+        // go1.24.13): Errorf sets Failed, Skip sets Skipped, and Fatal, Fatalf and Skip end the
+        // calling goroutine (runtime.Goexit).
         ж<testing_package.B> benchmark = new StandardBox<testing_package.B>(new testing_package.B());
 
         benchmark.ReportAllocs();
@@ -509,9 +692,11 @@ public class TestingRuntimeTests
         benchmark.StopTimer();
         benchmark.StartTimer();
         benchmark.Errorf("errorf %d", 1);
-        benchmark.Fatal("fatal");
-        benchmark.Fatalf("fatalf %d", 2);
-        benchmark.Skip("skip");
+        Assert.IsTrue(benchmark.Failed());
+        Assert.ThrowsException<GoexitException>(() => benchmark.Fatal("fatal"));
+        Assert.ThrowsException<GoexitException>(() => benchmark.Fatalf("fatalf %d", 2));
+        Assert.ThrowsException<GoexitException>(() => benchmark.Skip("skip"));
+        Assert.IsTrue(benchmark.Skipped());
         Assert.IsTrue(benchmark.Run("sub", _ => { }));
 
         ref testing_package.B direct = ref benchmark.Value;
@@ -521,9 +706,9 @@ public class TestingRuntimeTests
         direct.StopTimer();
         direct.StartTimer();
         direct.Errorf("errorf");
-        direct.Fatal("fatal");
-        direct.Fatalf("fatalf");
-        direct.Skip("skip");
+        ExpectGoexit(ref direct, (ref testing_package.B b) => b.Fatal("fatal"));
+        ExpectGoexit(ref direct, (ref testing_package.B b) => b.Fatalf("fatalf"));
+        ExpectGoexit(ref direct, (ref testing_package.B b) => b.Skip("skip"));
         Assert.AreEqual((nint)0, direct.N);
 
         // strings TestIndexRune branches on `testing.CoverMode() == ""` — the shim must report
@@ -537,34 +722,38 @@ public class TestingRuntimeTests
         // Fuzz declarations are disclosed-unsupported exactly as benchmarks are, but their bodies
         // still COMPILE — math/big's `func FuzzExpMont(f *testing.F)` failed the whole package
         // build with CS0426 before F existed. Every member must be present on both receiver shapes
-        // converted code binds, and stay a safe non-throwing no-op.
+        // converted code binds. The rest are no-ops; the failure and skip members are Go's ZERO F
+        // (measured on go1.24.13): Error, Errorf and Fail set Failed, the Skip family sets Skipped,
+        // and Fatal, Fatalf, FailNow and the Skip family end the calling goroutine (runtime.Goexit).
         ж<testing_package.F> fuzz = new StandardBox<testing_package.F>(new testing_package.F());
 
         fuzz.Add(1, "seed");
-        fuzz.Error("error");
-        fuzz.Errorf("errorf %d", 1);
         fuzz.Log("log");
         fuzz.Logf("logf %d", 2);
-        fuzz.Fatal("fatal");
-        fuzz.Fatalf("fatalf %d", 3);
-        fuzz.Skip("skip");
-        fuzz.Skipf("skipf %d", 4);
-        fuzz.Fail();
-        fuzz.FailNow();
-        fuzz.SkipNow();
         fuzz.Helper();
         fuzz.Cleanup(() => { });
         fuzz.Setenv("K", "V");
         Assert.IsFalse(fuzz.Failed());
         Assert.IsFalse(fuzz.Skipped());
+        fuzz.Error("error");
+        fuzz.Errorf("errorf %d", 1);
+        fuzz.Fail();
+        Assert.IsTrue(fuzz.Failed());
+        Assert.ThrowsException<GoexitException>(() => fuzz.Fatal("fatal"));
+        Assert.ThrowsException<GoexitException>(() => fuzz.Fatalf("fatalf %d", 3));
+        Assert.ThrowsException<GoexitException>(() => fuzz.FailNow());
+        Assert.ThrowsException<GoexitException>(() => fuzz.Skip("skip"));
+        Assert.ThrowsException<GoexitException>(() => fuzz.Skipf("skipf %d", 4));
+        Assert.ThrowsException<GoexitException>(() => fuzz.SkipNow());
+        Assert.IsTrue(fuzz.Skipped());
         Assert.IsTrue(fuzz.Name() == "");
         Assert.IsTrue(fuzz.TempDir() == "");
 
         ref testing_package.F direct = ref fuzz.Value;
         direct.Add(2);
         direct.Errorf("errorf");
-        direct.Fatal("fatal");
-        direct.Skip("skip");
+        ExpectGoexit(ref direct, (ref testing_package.F f) => f.Fatal("fatal"));
+        ExpectGoexit(ref direct, (ref testing_package.F f) => f.Skip("skip"));
         direct.Helper();
 
         // Fuzz takes a System.Delegate because a Go fuzz target's signature is arbitrary — the
@@ -840,4 +1029,22 @@ public class TestingRuntimeTests
     }
 
     private delegate void ActionRef(ref testing_package.T test);
+
+    private delegate void RefAction<TValue>(ref TValue value);
+
+    // A terminating member called on a ref-local receiver (which a lambda cannot capture): it must end
+    // the calling goroutine.
+    private static void ExpectGoexit<TValue>(ref TValue value, RefAction<TValue> action)
+    {
+        try
+        {
+            action(ref value);
+        }
+        catch (GoexitException)
+        {
+            return;
+        }
+
+        Assert.Fail("expected runtime.Goexit");
+    }
 }

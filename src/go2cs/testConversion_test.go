@@ -246,7 +246,7 @@ func TestPairAddressVariantNames(t *testing.T) {
 		"TestAsValidation/*string(0x10d6126)": "captured output",
 	}
 
-	pairAddressVariantNames(goResults, csResults, csOutputs, nil)
+	pairAddressVariantNames(goResults, csResults, csOutputs, nil, nil, nil)
 
 	if _, ok := goResults["TestAsValidation/*string(0x?)"]; !ok {
 		t.Fatalf("go side not re-keyed: %#v", goResults)
@@ -265,6 +265,95 @@ func TestPairAddressVariantNames(t *testing.T) {
 	}
 	if _, ok := csResults["TestAmbiguous/p(0xbbb)"]; !ok {
 		t.Fatalf("ambiguous cs rows must keep their originals: %#v", csResults)
+	}
+}
+
+// N:N address pairing (ruled 2026-10-05): a masked group with the SAME number of names on both sides (N > 1) pairs by RUN
+// ORDER, the i-th started on one side with the i-th on the other, each pair onto key#run<i>; a group whose sizes differ
+// stays one-sided (fail loud, as before); 1:1 is unchanged; the two kinds are counted apart. The equal group is built so
+// that pairing by NAME order would mismatch (a1 pass vs 0x91 fail) and pairing by run order matches every row.
+func TestPairAddressVariantNamesByRunOrder(t *testing.T) {
+	goStream := strings.Join([]string{
+		`{"Action":"run","Test":"TestEq/p(0xa2)"}`,
+		`{"Action":"run","Test":"TestEq/p(0xa1)"}`,
+		`{"Action":"run","Test":"TestUneq/q(0xb1)"}`,
+		`{"Action":"run","Test":"TestUneq/q(0xb2)"}`,
+		`{"Action":"run","Test":"TestOne/r(0xc1)"}`,
+	}, "\n")
+	csStream := strings.Join([]string{
+		`{"test":"TestEq/p(0x91)","action":"run"}`,
+		`{"test":"TestEq/p(0x92)","action":"run"}`,
+		`{"test":"TestUneq/q(0xd1)","action":"run"}`,
+		`{"test":"TestUneq/q(0xd2)","action":"run"}`,
+		`{"test":"TestUneq/q(0xd3)","action":"run"}`,
+		`{"test":"TestOne/r(0xe1)","action":"run"}`,
+	}, "\n")
+
+	goResults := map[string]string{
+		"TestEq/p(0xa1)":   "pass",
+		"TestEq/p(0xa2)":   "fail",
+		"TestUneq/q(0xb1)": "pass",
+		"TestUneq/q(0xb2)": "pass",
+		"TestOne/r(0xc1)":  "pass",
+	}
+	csResults := map[string]string{
+		"TestEq/p(0x91)":   "fail",
+		"TestEq/p(0x92)":   "pass",
+		"TestUneq/q(0xd1)": "pass",
+		"TestUneq/q(0xd2)": "pass",
+		"TestUneq/q(0xd3)": "pass",
+		"TestOne/r(0xe1)":  "pass",
+	}
+	csOutputs := map[string]string{"TestEq/p(0x91)": "the first run's output"}
+
+	counts := pairAddressVariantNames(goResults, csResults, csOutputs, nil, testRunOrder(goStream), testRunOrder(csStream))
+
+	for i, want := range []string{"fail", "pass"} {
+		key := fmt.Sprintf("TestEq/p(0x?)#run%d", i+1)
+		if goResults[key] != want || csResults[key] != want {
+			t.Errorf("%s: go=%q cs=%q, want both %q (the %s-started name on each side)", key, goResults[key], csResults[key], want, []string{"first", "second"}[i])
+		}
+	}
+	if csOutputs["TestEq/p(0x?)#run1"] != "the first run's output" {
+		t.Errorf("csOutputs did not follow the run-order rename: %#v", csOutputs)
+	}
+	for _, name := range []string{"TestEq/p(0xa1)", "TestEq/p(0xa2)"} {
+		if _, left := goResults[name]; left {
+			t.Errorf("a paired original is still keyed: %s", name)
+		}
+	}
+
+	if _, ok := goResults["TestUneq/q(0xb1)"]; !ok {
+		t.Errorf("a group of 2 against 3 was paired; it must stay one-sided: %#v", goResults)
+	}
+	if _, ok := csResults["TestUneq/q(0xd3)"]; !ok {
+		t.Errorf("the unequal group's C# names must keep their originals: %#v", csResults)
+	}
+
+	if _, ok := goResults["TestOne/r(0x?)"]; !ok {
+		t.Errorf("the 1:1 pair is no longer re-keyed onto its plain key: %#v", goResults)
+	}
+
+	if counts != (addressPairCounts{OneToOne: 1, NToN: 2}) {
+		t.Errorf("counts = %+v, want 1 one-to-one pair and 2 run-order pairs, counted apart", counts)
+	}
+}
+
+// A name with no position in its stream cannot be ordered, so its whole group stays one-sided rather than pairing by a
+// guess.
+func TestRunOrderPairingRefusesAnUnorderedName(t *testing.T) {
+	goResults := map[string]string{"TestEq/p(0xa1)": "pass", "TestEq/p(0xa2)": "pass"}
+	csResults := map[string]string{"TestEq/p(0x91)": "pass", "TestEq/p(0x92)": "pass"}
+	goOrder := map[string]int{"TestEq/p(0xa1)": 0, "TestEq/p(0xa2)": 1}
+	csOrder := map[string]int{"TestEq/p(0x91)": 0} // 0x92 never appeared in the stream
+
+	counts := pairAddressVariantNames(goResults, csResults, map[string]string{}, nil, goOrder, csOrder)
+
+	if len(goResults) != 2 || len(csResults) != 2 {
+		t.Fatalf("an unorderable group was re-keyed: go=%#v cs=%#v", goResults, csResults)
+	}
+	if _, ok := csResults["TestEq/p(0x92)"]; !ok || counts.NToN != 0 {
+		t.Fatalf("the unorderable group must keep its originals and count nothing: cs=%#v counts=%+v", csResults, counts)
 	}
 }
 
@@ -639,6 +728,51 @@ func TestManifestCensusDetectsUndeclaredTests(t *testing.T) {
 	goResults["TestPhantom"] = "fail"
 	if gaps := manifestCensusGaps(goResults, manifest); !reflect.DeepEqual(gaps, []string{"TestGhost", "TestPhantom"}) {
 		t.Fatalf("census gaps = %v, want [TestGhost TestPhantom]", gaps)
+	}
+}
+
+// A testing.RunTests list runs its entries as top-level tests under the names it gives them, so Go
+// reports names no declaration accounts for (testify's TestSuiteRecoverPanicInBeforeTest). Such a name
+// is admitted -- compared, and counted apart -- ONLY when the converted host reported the very same
+// name with a verdict of its own; a name only Go reported is still a census gap (the control).
+func TestRuntimeDeclaredNamesAreAdmittedOnlyWhenBothSidesRanThem(t *testing.T) {
+	manifest := testManifest{Tests: []testDeclaration{{Name: "TestKnown", Kind: "test", Status: "included"}}}
+
+	goResults := map[string]string{
+		"TestKnown":             "pass",
+		"TestSuiteInBefore":     "fail",
+		"TestSuiteInBefore/Sub": "fail",
+		"TestPhantom":           "pass",
+	}
+	csResults := map[string]string{
+		"TestKnown":             "pass",
+		"TestSuiteInBefore":     "fail",
+		"TestSuiteInBefore/Sub": "fail",
+	}
+
+	remaining, admitted := admitRuntimeDeclared(manifestCensusGaps(goResults, manifest), csResults)
+
+	if !reflect.DeepEqual(remaining, []string{"TestPhantom"}) {
+		t.Fatalf("census gaps = %v, want [TestPhantom] (Go reported it, the host never ran it)", remaining)
+	}
+
+	if !reflect.DeepEqual(admitted, []string{"TestSuiteInBefore"}) {
+		t.Fatalf("runtime-declared = %v, want [TestSuiteInBefore]", admitted)
+	}
+
+	goFiltered := eligibleTerminalTestResults(goResults, manifest)
+	csFiltered := eligibleTerminalTestResults(csResults, manifest)
+	addRuntimeDeclaredResults(goFiltered, goResults, admitted)
+	addRuntimeDeclaredResults(csFiltered, csResults, admitted)
+
+	for _, filtered := range []map[string]string{goFiltered, csFiltered} {
+		if filtered["TestSuiteInBefore"] != "fail" || filtered["TestSuiteInBefore/Sub"] != "fail" {
+			t.Fatalf("an admitted test's rows are not compared: %v", filtered)
+		}
+	}
+
+	if _, compared := goFiltered["TestPhantom"]; compared {
+		t.Fatalf("a census gap was admitted into the comparison: %v", goFiltered)
 	}
 }
 

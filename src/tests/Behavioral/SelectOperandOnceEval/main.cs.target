@@ -16,7 +16,7 @@ internal static channel<nint> fresh() {
 
 internal static nint afterCalls;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static channel<nint> after() {
+internal static partial channel<nint> after() {
     afterCalls++;
     var ch = new channel<nint>(0);
     var chʗ1 = ch;

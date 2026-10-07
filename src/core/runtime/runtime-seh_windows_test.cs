@@ -101,12 +101,12 @@ internal static slice<uintptr> sehCallers() {
 // SEH unwinding does not report inlined frames.
 //
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<uintptr> sehf3(bool pan) {
+internal static partial slice<uintptr> sehf3(bool pan) {
     return sehf4(pan);
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<uintptr> sehf4(bool pan) {
+internal static partial slice<uintptr> sehf4(bool pan) {
     slice<uintptr> pcs = default!;
     if (pan) {
         throw panic("sehf4");

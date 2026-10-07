@@ -336,7 +336,7 @@ internal static void testComparable<T, Tᴺ>(ж<testing.T> Ꮡt, T v, params Spa
 internal static byte use;
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void stackGrow(nint dep) {
+internal static partial void stackGrow(nint dep) {
     if (dep == 0) {
         return;
     }

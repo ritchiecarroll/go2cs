@@ -457,7 +457,7 @@ public static void TestGoexitCrash(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestGoexitDefer(ж<testing.T> Ꮡt) {
+public static partial void TestGoexitDefer(ж<testing.T> Ꮡt) {
     var c = new channel<EmptyStruct>(0);
     var cʗ1 = c;
     goǃ(() => {

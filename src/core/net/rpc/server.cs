@@ -486,7 +486,7 @@ internal static readonly object rpcˢ = (@string)"rpc:"u8;
 
 // ServeCodec is like [ServeConn] but uses the specified codec to
 // decode requests and encode responses.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void ServeCodec(this ж<Server> Ꮡserver, ServerCodec codec) {
+public static partial void ServeCodec(this ж<Server> Ꮡserver, ServerCodec codec) {
     var sending = @new<sync.Mutex>();
     var wg = @new<sync.WaitGroup>();
     while (ᐧ) {
@@ -684,7 +684,7 @@ internal static readonly object rpcServeAcceptˢ = (@string)"rpc.Serve: accept:"
 // for each incoming connection. Accept blocks until the listener
 // returns a non-nil error. The caller typically invokes Accept in a
 // go statement.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void Accept(this ж<Server> Ꮡserver, net.Listener lis) {
+public static partial void Accept(this ж<Server> Ꮡserver, net.Listener lis) {
     while (ᐧ) {
         var (conn, err) = lis.Accept();
         if (err != default!) {

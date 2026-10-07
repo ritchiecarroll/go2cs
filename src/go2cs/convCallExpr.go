@@ -408,6 +408,17 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// convertToInterfaceType still runs first: it records the witness the lift needs.
 			converted := v.convertToInterfaceType(ifaceType, argType, v.convExpr(callExpr.Args[0], nil))
 
+			// A STRING CONSTANT renders as a u8 literal, a ReadOnlySpan<byte> that cannot box, so the
+			// `any("y")` spelling of the same conversion boxes it through @string first; this arm did
+			// not, and objx's `interface{}("something")` emitted `(any)("something"u8)` (CS0030).
+			// Only a BASIC string constant: a constant of a NAMED string type keeps that type as its
+			// dynamic type in Go, and boxing it through @string would lose it.
+			if tv := v.info.Types[callExpr.Args[0]]; tv.Value != nil && tv.Value.Kind() == constant.String {
+				if basic, ok := types.Unalias(tv.Type).(*types.Basic); ok && basic.Info()&types.IsString != 0 {
+					converted = fmt.Sprintf("(@string)(%s)", converted)
+				}
+			}
+
 			return fmt.Sprintf("(%s)(%s)", v.getCSharpTypeName(ifaceType), converted)
 		}
 	}
@@ -1348,6 +1359,20 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 							// ambiguity castOperandNeedsParens covers.
 							_, operandIsBinary := arg.(*ast.BinaryExpr)
 
+							// A target written over ANOTHER package's named type (`type Level
+							// logrus.Level`) converts only from that base, so the constant hops
+							// through it: `((ΔLevel)(logrus.Level)0)` — one user-defined operator per
+							// cast, where `((ΔLevel)0)` would need two (CS0030).
+							if base := foreignWrittenBase(named); base != nil {
+								baseCS := convertToCSTypeName(v.getAliasQualifiedTypeName(base, false))
+
+								if operandIsBinary || castOperandNeedsParens(baseCS, expr) {
+									return fmt.Sprintf("((%s)(%s)(%s))", namedCS, baseCS, expr)
+								}
+
+								return fmt.Sprintf("((%s)(%s)%s)", namedCS, baseCS, expr)
+							}
+
 							if operandIsBinary || castOperandNeedsParens(namedCS, expr) {
 								return fmt.Sprintf("((%s)(%s))", namedCS, expr)
 							}
@@ -1381,26 +1406,20 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					// NAMED base (`[GoType("syscall_package.ΔHandle")]`); a same-package chain
 					// resolves to the basic underlying (`[GoType("num:uintptr")]` — no named-base
 					// operator exists) and the underlying hop already binds one-op-per-leg.
-					if rhs, okRHS := packageTypeSpecRHS[argNamed.Obj()]; okRHS && rhs != nil {
-						if rhsNamed, ok := types.Unalias(rhs).(*types.Named); ok && rhsNamed == named &&
-							named.Obj().Pkg() != argNamed.Obj().Pkg() {
-							return fmt.Sprintf("((%s)%s)", targetTypeName, expr)
-						}
+					if writtenRHSIsNamedType(argNamed, named) && named.Obj().Pkg() != argNamed.Obj().Pkg() {
+						return fmt.Sprintf("((%s)%s)", targetTypeName, expr)
 					}
 
 					// The FORWARD mirror: the conversion TARGET's written base IS the arg's named
 					// type (`Key(handle)` / `reading(celsius)` where `type reading lib.Celsius`) —
 					// the target's wrapper declares the one-step operator FROM exactly that type;
 					// the hop's second leg `(reading)(double)…` has no operator (CS0030).
-					if rhs, okRHS := packageTypeSpecRHS[named.Obj()]; okRHS && rhs != nil {
-						if rhsNamed, ok := types.Unalias(rhs).(*types.Named); ok && rhsNamed == argNamed &&
-							named.Obj().Pkg() != argNamed.Obj().Pkg() {
-							return fmt.Sprintf("((%s)%s)", targetTypeName, expr)
-						}
+					if writtenRHSIsNamedType(named, argNamed) && named.Obj().Pkg() != argNamed.Obj().Pkg() {
+						return fmt.Sprintf("((%s)%s)", targetTypeName, expr)
 					}
 				}
 
-				if argType == nil || argIsDistinctNamedNumeric || !types.Identical(argType.Underlying(), basic) {
+				if argType == nil || argIsDistinctNamedNumeric || !types.Identical(argType.Underlying(), basic) || foreignWrittenBase(named) != nil {
 					underlyingCS := v.getCSharpTypeName(basic)
 					inner := expr
 
@@ -1418,6 +1437,19 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 								inner = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(argBasic), expr)
 							}
 						}
+					}
+
+					// The same foreign-base hop for a non-constant operand: the basic underlying
+					// reaches the target only through the base its wrapper names,
+					// `((Cross)(lib.Level)(uint)x)`.
+					if base := foreignWrittenBase(named); base != nil {
+						baseCS := convertToCSTypeName(v.getAliasQualifiedTypeName(base, false))
+
+						if v.needsParentheses(arg) {
+							return fmt.Sprintf("((%s)(%s)(%s)(%s))", targetTypeName, baseCS, underlyingCS, inner)
+						}
+
+						return fmt.Sprintf("((%s)(%s)(%s)%s)", targetTypeName, baseCS, underlyingCS, inner)
 					}
 
 					if v.needsParentheses(arg) {
@@ -3473,6 +3505,22 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		}
 
 		funcName = v.convExpr(callee, []ExprContext{lambdaContext, calleeIdentContext})
+
+		// A FUNCTION-LOCAL type constructed by name — `type sPtr *s; sPtr(ps)` (testify's
+		// assertions_test.go) — is emitted under its LIFTED name (`TestSame_sPtr`), but the ident
+		// renders the Go name and the constructor named a type that does not exist (CS0246). A
+		// conversion to a local named POINTER from a non-nil pointer lands here because
+		// isTypeConversion compares the arg's pointee, not the pointer, so the conversion arm (which
+		// names the lift) never claims it; a package-level type compiled only because its lift and
+		// its Go name coincide. Name the type the way the conversion arm does.
+		if constructType == "new " {
+			if ident, ok := ast.Unparen(callee).(*ast.Ident); ok {
+				if typeName, ok := v.info.ObjectOf(ident).(*types.TypeName); ok && typeName.Pkg() != nil &&
+					typeName.Parent() != nil && typeName.Parent() != typeName.Pkg().Scope() {
+					funcName = v.getAliasQualifiedTypeName(typeName.Type(), false)
+				}
+			}
+		}
 	}
 
 	// A VARIADIC func-literal callee renders as `(params ꓸꓸꓸ@string dirsʗp) => …`, which C# can
@@ -4720,9 +4768,19 @@ func (v *Visitor) recordConversionPackageUsing(t types.Type) {
 				// attribute type names, so the resolving using must declare that exact alias
 				// (`using Δsyscall = go.syscall_package;`) — the plain-name using left the
 				// attributes unresolvable (CS0246 ×4). Unrenamed imports are unchanged
-				// (importQualifier is the identity for them).
+				// (importQualifier is the identity for them). An EXPLICITLY aliased import is
+				// rendered through THIS FILE's alias (getCSharpTypeName prefers
+				// importPathAliases), so the using must declare that alias too: go-cmp's test
+				// imports `ts "…/internal/teststructs"`, records `ts.AssignB`, and the
+				// package-name using left `ts` undeclared (CS0246).
+				qualifier := importQualifier(pkg.Name())
+
+				if fileAlias, ok := v.importPathAliases[pkg.Path()]; ok && fileAlias != "" {
+					qualifier = fileAlias
+				}
+
 				packageLock.Lock()
-				conversionPackageUsings[importQualifier(pkg.Name())] = convertImportPathToNamespace(pkg.Path(), PackageSuffix)
+				conversionPackageUsings[qualifier] = convertImportPathToNamespace(pkg.Path(), PackageSuffix)
 				packageLock.Unlock()
 			}
 		}

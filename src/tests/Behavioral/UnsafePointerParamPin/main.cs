@@ -8,7 +8,7 @@ partial class main_package {
 
 [GoType("num:uintptr")] partial struct utp;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uintptr readViaParam(ж<uintptr> Ꮡp) {
+internal static partial uintptr readViaParam(ж<uintptr> Ꮡp) {
     var q = Ꮡp;
     return q.Value;
 }
@@ -32,18 +32,18 @@ internal static uintptr tricky(this ж<utp> Ꮡr) {
     internal uintptr v;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @unsafe.Pointer pick(bool cond, @unsafe.Pointer a, @unsafe.Pointer zero) {
+internal static partial @unsafe.Pointer pick(bool cond, @unsafe.Pointer a, @unsafe.Pointer zero) {
     if (cond) {
         return a;
     }
     return zero;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (uint32, @unsafe.Pointer) advance(@unsafe.Pointer fd, uint32 n) {
+internal static partial (uint32, @unsafe.Pointer) advance(@unsafe.Pointer fd, uint32 n) {
     return (n + 1, fd);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<uintptr> same(ж<uintptr> Ꮡp) {
+internal static partial ж<uintptr> same(ж<uintptr> Ꮡp) {
     return Ꮡp;
 }
 

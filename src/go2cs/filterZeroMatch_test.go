@@ -217,6 +217,64 @@ func TestGatedArrayAndFilterStampCoexist(t *testing.T) {
 	}
 }
 
+// THE RECORD IS A PER-RUN ARTIFACT, so every run writes it, even when its bytes equal the last run's. The record
+// carries no per-run field, and a row that reads the same twice (a repeated failure set, an unchanged re-read into a
+// warm tree) produces it byte for byte. Skipped as identical, it kept the EARLIER run's write time, and both readers
+// that ask "did THIS run write it" answer by that time: the sweep's Get-OracleOnlyVerdict (-Since the attempt's start)
+// read "predates this attempt" and lost the oracle-only answer, and run-h10-recon.ps1 read the row as STALE. Measured
+// 2026-10-05 on unicode/utf16, two runs into one root: sha c3617f1e45bcc935 both times, the write time still run 1's.
+var comparisonRecordStamp = time.Date(2001, 1, 1, 0, 0, 0, 0, time.UTC)
+
+func TestAnUnchangedComparisonRecordIsWrittenAgain(t *testing.T) {
+	dir := t.TempDir()
+	record := filepath.Join(dir, "go2cs_test_comparison.json")
+	result := testComparison{Package: "unicode/utf16", Status: "validated", Matched: true}
+
+	if err := writeComparisonRecord(dir, &result, ""); err != nil {
+		t.Fatalf("first write: %v", err)
+	}
+	if err := os.Chtimes(record, comparisonRecordStamp, comparisonRecordStamp); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeComparisonRecord(dir, &result, ""); err != nil {
+		t.Fatalf("second write: %v", err)
+	}
+
+	info, err := os.Stat(record)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.ModTime().Equal(comparisonRecordStamp) {
+		t.Fatal("a run that produced the same record as the last one left the last run's write time on it, so a reader asking \"did this run write it\" answers no")
+	}
+}
+
+// ...and ONLY the record. The other writeJSONFile callers are the two test manifests, which an unchanged re-conversion
+// must leave untouched (their time is part of the incremental story: an identical manifest is not a new input). The
+// control that keeps this cut from widening into "every JSON file is always written".
+func TestAnUnchangedJSONFileOtherThanTheRecordKeepsItsTime(t *testing.T) {
+	manifest := filepath.Join(t.TempDir(), testManifestFileName)
+	value := testManifest{SchemaVersion: 1, PackageImportPath: "unicode/utf16"}
+
+	if err := writeJSONFile(manifest, value); err != nil {
+		t.Fatalf("first write: %v", err)
+	}
+	if err := os.Chtimes(manifest, comparisonRecordStamp, comparisonRecordStamp); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeJSONFile(manifest, value); err != nil {
+		t.Fatalf("second write: %v", err)
+	}
+
+	info, err := os.Stat(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !info.ModTime().Equal(comparisonRecordStamp) {
+		t.Fatalf("an identical manifest was rewritten (its time moved to %s): only the comparison record is a per-run artifact", info.ModTime())
+	}
+}
+
 
 // THE RUN ACTION'S FILTER. `-test-filter` was honoured by `compare` and SILENTLY IGNORED by
 // `run`: the run action built its own argv of `--json -timeout` and never passed `--run`, so a
@@ -236,23 +294,20 @@ func TestGatedArrayAndFilterStampCoexist(t *testing.T) {
 func TestRunActionHostArgvCarriesTheFilter(t *testing.T) {
 	args := convertedHostArgs(Options{testFilter: "^TestFinalizerType$", testTimeout: 5 * time.Minute})
 
-	idx := -1
-	for i, a := range args {
-		if a == "--run" {
-			idx = i
+	found := false
+	for _, a := range args {
+		if a == "-test.run=^TestFinalizerType$" {
+			found = true
 		}
 	}
-	if idx < 0 {
-		t.Fatalf("a -test-filter run must hand the host --run, or the run measures the whole package while reading as gated; got %v", args)
-	}
-	if idx+1 >= len(args) || args[idx+1] != "^TestFinalizerType$" {
-		t.Fatalf("--run must be followed by the filter VERBATIM, the same string compare hands both sides; got %v", args)
+	if !found {
+		t.Fatalf("a -test-filter run must hand the host -test.run=<filter> VERBATIM, the same string compare hands both sides, or the run measures the whole package while reading as gated; got %v", args)
 	}
 
 	// The prefix the host needs regardless of gating stays present -- a filter must ADD to the
 	// argv, never replace it.
-	if len(args) < 3 || args[0] != "--json" || args[1] != "-timeout" {
-		t.Fatalf("the host argv must still open with --json -timeout; got %v", args)
+	if len(args) != 3 || args[0] != "-test.v=test2json" || args[1] != "-test.timeout=5m0s" {
+		t.Fatalf("the host argv must still open with -test.v=test2json -test.timeout=<d>; got %v", args)
 	}
 }
 
@@ -264,11 +319,32 @@ func TestUngatedRunActionHostArgvCarriesNoFilter(t *testing.T) {
 	args := convertedHostArgs(Options{testTimeout: 5 * time.Minute})
 
 	for _, a := range args {
-		if a == "--run" {
-			t.Fatalf("an ungated run must pass no --run at all, not an empty one; got %v", args)
+		if strings.HasPrefix(a, "-test.run") {
+			t.Fatalf("an ungated run must pass no -test.run at all, not an empty one; got %v", args)
 		}
 	}
-	if len(args) != 3 || args[0] != "--json" || args[1] != "-timeout" {
-		t.Fatalf("the ungated host argv is exactly --json -timeout <d>; got %v", args)
+	if len(args) != 2 || args[0] != "-test.v=test2json" || args[1] != "-test.timeout=5m0s" {
+		t.Fatalf("the ungated host argv is exactly -test.v=test2json -test.timeout=<d>; got %v", args)
+	}
+}
+
+// The host's argv is the converted program's os.Args, so it carries nothing a Go test binary run by
+// `go test -json` would not see: every element is a `-test.` flag. A package that parses its own
+// os.Args (cobra's Execute with no SetArgs, through pflag, which skips `-test.` flags) then reads
+// what Go's binary reads. The pipeline's own result and JUnit paths travel in the environment.
+func TestHostArgvCarriesOnlyGoTestFlags(t *testing.T) {
+	args := convertedHostArgs(Options{testFilter: "^TestX$", testTimeout: 20 * time.Minute})
+
+	for _, a := range args {
+		if !strings.HasPrefix(a, "-test.") {
+			t.Fatalf("the host argv must hold only `-test.` flags, as Go's test binary does; %q is not one (argv %v)", a, args)
+		}
+	}
+
+	env := strings.Join(convertedHostResultEnv(`C:\out`), "\n")
+	for _, want := range []string{"GO2CS_TEST_RESULT=", "GO2CS_TEST_JUNIT="} {
+		if !strings.Contains(env, want) {
+			t.Fatalf("the result and JUnit paths must travel in the environment (%s missing); got %q", want, env)
+		}
 	}
 }

@@ -14,7 +14,7 @@ partial class rand_test_package {
 
 // TestConcurrent exercises the rand API concurrently, triggering situations
 // where the race detector is likely to detect issues.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrent(ж<testing.T> Ꮡt) {
+public static partial void TestConcurrent(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         const nint numRoutines = 10;

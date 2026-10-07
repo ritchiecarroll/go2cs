@@ -15,7 +15,7 @@ using go.@internal.runtime;
 
 partial class atomic_test_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void runParallel(nint N, nint iter, Action f) {
+internal static partial void runParallel(nint N, nint iter, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(runtime.GOMAXPROCS, runtime.GOMAXPROCS((nint)N), ref ᒐ);
@@ -160,7 +160,7 @@ public static void TestUnaligned64(ж<testing.T> Ꮡt) {
     });
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAnd8(ж<testing.T> Ꮡt) {
+public static partial void TestAnd8(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint8>(out var Ꮡx);
     x = (uint8)0xff;
@@ -201,7 +201,7 @@ public static void TestUnaligned64(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAnd(ж<testing.T> Ꮡt) {
+public static partial void TestAnd(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint32>(out var Ꮡx);
     x = (uint32)0xffffffffU;
@@ -242,7 +242,7 @@ public static void TestUnaligned64(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOr8(ж<testing.T> Ꮡt) {
+public static partial void TestOr8(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint8>(out var Ꮡx);
     x = (uint8)0;
@@ -280,7 +280,7 @@ public static void TestUnaligned64(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOr(ж<testing.T> Ꮡt) {
+public static partial void TestOr(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint32>(out var Ꮡx);
     x = (uint32)0;
@@ -318,7 +318,7 @@ public static void TestUnaligned64(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBitwiseContended8(ж<testing.T> Ꮡt) {
+public static partial void TestBitwiseContended8(ж<testing.T> Ꮡt) {
     // Start with every bit in array set to 0.
     var a = new slice<uint8>(16);
     // Iterations to try.
@@ -359,7 +359,7 @@ public static void TestUnaligned64(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBitwiseContended(ж<testing.T> Ꮡt) {
+public static partial void TestBitwiseContended(ж<testing.T> Ꮡt) {
     // Start with every bit in array set to 0.
     var a = new slice<uint32>(16);
     // Iterations to try.

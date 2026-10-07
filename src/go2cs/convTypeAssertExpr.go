@@ -53,6 +53,15 @@ func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string 
 		safeAssertDescriminator = TrueMarker
 	}
 
+	// An assertion to the anonymous EMPTY interface holds for every non-nil dynamic value and fails
+	// only on a nil interface -- Go's rule, and `any`'s exactly. Written as a type literal it reached
+	// convInterfaceType, which LIFTED it to a dynamic interface (objx's `v.data.(interface{})` became
+	// `_<Inter_type>`), and no value implements that: every non-nil assert failed ("interface {} is
+	// string, not interface {}"). It is `any`, as the identifier already spells it.
+	if iface, ok := v.getExprType(typeAssertExpr.Type).(*types.Interface); ok && iface.Empty() {
+		return fmt.Sprintf("%s._<any>(%s)", v.convExpr(typeAssertExpr.X, nil), safeAssertDescriminator)
+	}
+
 	context := DefaultIdentContext()
 	context.isType = true
 
@@ -60,7 +69,11 @@ func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string 
 	// convertToCSTypeName again: the conversion is not idempotent, re-sanitizing machinery
 	// names inside generic args (`d.(chan struct{})` → `channel<EmptyStruct>` whose inner
 	// arg re-sanitized to the reserved-Δ `ΔEmptyStruct` — context CS0246 ×4/CS0019).
-	typeExpr := v.convExpr(typeAssertExpr.Type, []ExprContext{context})
+	//
+	// Go allows the asserted type to be PARENTHESIZED — objx writes `v.data.((Map))` — and a
+	// ParenExpr renders with its parentheses, which a C# type argument cannot carry
+	// (`_<(Map)>()`, CS1525). The parentheses are syntax only, so the type is rendered unwrapped.
+	typeExpr := v.convExpr(ast.Unparen(typeAssertExpr.Type), []ExprContext{context})
 
 	// A methodless named func type collapses to its base C# delegate everywhere it is REFERENCED
 	// (getAliasQualifiedTypeName), so its NAME is never emitted. A type-assertion target `ci.(Compressor)` where

@@ -87,7 +87,7 @@ internal static uint64 /*result*/ deferWrites() {
     return Ꮡresult.Value;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uint64 goWrites() {
+internal static partial uint64 goWrites() {
     ref var x = ref heap(new uint64(), out var Ꮡx);
     var done = new channel<bool>(0);
     goǃ((ᴛ1, ᴛ2, ᴛ3) => setVal(ref ᴛ1.DerefOrNull(), ᴛ2, ᴛ3), Ꮡx, (uint64)(21), done);

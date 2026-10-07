@@ -9,7 +9,7 @@ partial class main_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object mainReturnedWithThreeˢ = (@string)"main returned with three goroutines parked forever"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     channel<nint> nilc = default!;
     goǃ(() => {
         select();

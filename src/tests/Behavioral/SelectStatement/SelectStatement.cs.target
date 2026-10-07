@@ -76,7 +76,7 @@ internal static void filter(/*<-*/channel<nint> src, channel/*<-*/<nint> dst, ni
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void sieve() {
+internal static partial void sieve() {
     var ch = new channel<nint>(0);
     goǃ(generate, ch.WithDirection(GoChanDir.Send));
     while (ᐧ) {
@@ -106,7 +106,7 @@ private static readonly object unexpectedˢ = (@string)"unexpected: "u8;
 private static readonly @string helloˢ = "hello"u8;
 private static readonly object racedˢ = (@string)"raced:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     var ch = new channel<nint>(2);
     ch.ᐸꟷ(1);
     ch.ᐸꟷ(2);

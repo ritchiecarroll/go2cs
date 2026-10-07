@@ -84,7 +84,7 @@ partial class fuzz_package {
 //
 // If a crash occurs, the function will return an error containing information
 // about the crash, which can be reported to the user.
-[MethodImpl(MethodImplOptions.NoInlining)] public static error /*err*/ CoordinateFuzzing(context.Context ctx, CoordinateFuzzingOpts opts) {
+public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, CoordinateFuzzingOpts opts) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {

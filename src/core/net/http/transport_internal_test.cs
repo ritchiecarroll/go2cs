@@ -26,7 +26,7 @@ partial class http_internal_test_package {
 internal static readonly @string testOverˢ = "test over"u8;
 
 // Issue 15446: incorrect wrapping of errors when server closes an idle connection.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTransportPersistConnReadLoopEOF(ж<testing.T> Ꮡt) {
+public static partial void TestTransportPersistConnReadLoopEOF(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -227,7 +227,7 @@ public static void TestTransportShouldRetryRequest(ж<testing.T> Ꮡt) {
 
 internal delegate (ж<global::go.net.http_package.Response>, error) roundTripFunc(ж<global::go.net.http_package.Request> r);
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<global::go.net.http_package.Response>, error) RoundTrip(this roundTripFunc f, ж<global::go.net.http_package.Request> Ꮡr) {
+internal static partial (ж<global::go.net.http_package.Response>, error) RoundTrip(this roundTripFunc f, ж<global::go.net.http_package.Request> Ꮡr) {
     return f(Ꮡr);
 }
 
@@ -237,7 +237,7 @@ internal static readonly @string requestˢ = "request"u8;
 internal static readonly object bodyLengthIsZeroˢ = (@string)"body length is zero"u8;
 
 // Issue 25009
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTransportBodyAltRewind(ж<testing.T> Ꮡt) {
+public static partial void TestTransportBodyAltRewind(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var cert = ref heap<tls.Certificate>(out var Ꮡcert);

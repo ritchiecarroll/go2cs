@@ -34,11 +34,11 @@ internal static void allocateTransient1M() {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void allocateTransient2M() {
+internal static partial void allocateTransient2M() {
     memSink = new slice<byte>((2 << (int)(20)));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void allocateTransient2MInline() {
+internal static partial void allocateTransient2MInline() {
     memSink = new slice<byte>((2 << (int)(20)));
 }
 
@@ -58,7 +58,7 @@ internal static void allocatePersistent1K() {
 }
 
 // Allocate transient memory using reflect.Call.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void allocateReflectTransient() {
+internal static partial void allocateReflectTransient() {
     memSink = new slice<byte>((2 << (int)(20)));
 }
 

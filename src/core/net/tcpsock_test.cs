@@ -68,7 +68,7 @@ public static void BenchmarkTCP6PersistentTimeout(ж<testing.B> Ꮡb) {
     benchmarkTCP(Ꮡb, true, true, "[::1]:0"u8);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkTCP(ж<testing.B> Ꮡb, bool persistent, bool timeout, @string laddr) {
+internal static partial void benchmarkTCP(ж<testing.B> Ꮡb, bool persistent, bool timeout, @string laddr) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -209,7 +209,7 @@ public static void BenchmarkTCP6ConcurrentReadWrite(ж<testing.B> Ꮡb) {
     benchmarkTCPConcurrentReadWrite(Ꮡb, "[::1]:0"u8);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkTCPConcurrentReadWrite(ж<testing.B> Ꮡb, @string laddr) {
+internal static partial void benchmarkTCPConcurrentReadWrite(ж<testing.B> Ꮡb, @string laddr) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -514,7 +514,7 @@ public static void TestIPv6LinkLocalUnicastTCP(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTCPConcurrentAccept(ж<testing.T> Ꮡt) {
+public static partial void TestTCPConcurrentAccept(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(4), ref ᒐ);
@@ -563,7 +563,7 @@ public static void TestIPv6LinkLocalUnicastTCP(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTCPReadWriteAllocs(ж<testing.T> Ꮡt) {
+public static partial void TestTCPReadWriteAllocs(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
@@ -655,7 +655,7 @@ public static void TestIPv6LinkLocalUnicastTCP(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTCPStress(ж<testing.T> Ꮡt) {
+public static partial void TestTCPStress(ж<testing.T> Ꮡt) {
     const nint conns = 2;
     UntypedInt msgLen = 512;
     nint msgs = (nint)10000;
@@ -828,7 +828,7 @@ public static void TestTCPBig(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCopyPipeIntoTCP(ж<testing.T> Ꮡt) {
+public static partial void TestCopyPipeIntoTCP(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
@@ -918,7 +918,7 @@ public static void TestTCPBig(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkSetReadDeadline(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkSetReadDeadline(ж<testing.B> Ꮡb) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -987,7 +987,7 @@ public static void TestDialTCPDefaultKeepAlive(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTCPListenAfterClose(ж<testing.T> Ꮡt) {
+public static partial void TestTCPListenAfterClose(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // Regression test for https://go.dev/issue/50216:

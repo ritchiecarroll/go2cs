@@ -27,7 +27,7 @@ internal static void parallelReader(ж<Δsync.RWMutex> Ꮡm, channel<bool> clock
     cdone.ᐸꟷ(true);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void doTestParallelReaders(nint numReaders, nint gomaxprocs) {
+internal static partial void doTestParallelReaders(nint numReaders, nint gomaxprocs) {
     Δruntime.GOMAXPROCS(gomaxprocs);
     ref var m = ref heap(new Δsync.RWMutex(), out var Ꮡm);
     var clocked = new channel<bool>(0);
@@ -93,7 +93,7 @@ internal static void writer(ж<Δsync.RWMutex> Ꮡrwm, nint num_iterations, ж<i
     cdone.ᐸꟷ(true);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void HammerRWMutex(nint gomaxprocs, nint numReaders, nint num_iterations) {
+public static partial void HammerRWMutex(nint gomaxprocs, nint numReaders, nint num_iterations) {
     Δruntime.GOMAXPROCS(gomaxprocs);
     // Number of active readers + 10000 * number of active writers.
     ref var activity = ref heap(new int32(), out var Ꮡactivity);
@@ -165,7 +165,7 @@ public static void TestRWMutex(ж<Δtesting.T> Ꮡt) {
 internal static readonly object rLockerDidnTReadLockItˢ = (@string)"RLocker() didn't read-lock it"u8;
 internal static readonly object rLockerDidnTRespectTheˢ = (@string)"RLocker() didn't respect the write lock"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRLocker(ж<Δtesting.T> Ꮡt) {
+public static partial void TestRLocker(ж<Δtesting.T> Ꮡt) {
     ref var wl = ref heap(new Δsync.RWMutex(), out var Ꮡwl);
     Δsync.Locker rl = default!;
     var wlocked = new channel<bool>(1);

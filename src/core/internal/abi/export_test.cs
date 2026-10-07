@@ -14,7 +14,7 @@ public static partial void FuncPCTestFn();
 public static uintptr FuncPCTestFnAddr; // address of FuncPCTestFn, directly retrieved from assembly
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] public static uintptr FuncPCTest() {
+public static partial uintptr FuncPCTest() {
     return FuncPCABI0(FuncPCTestFn);
 }
 

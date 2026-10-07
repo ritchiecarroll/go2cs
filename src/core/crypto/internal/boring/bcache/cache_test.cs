@@ -47,7 +47,7 @@ internal static @string str<T>(ж<T> Ꮡx)
     return fmt.Sprint(x);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCache(ж<testing.T> Ꮡt) {
+public static partial void TestCache(ж<testing.T> Ꮡt) {
     // Use unregistered cache for functionality tests,
     // to keep the runtime from clearing behind our backs.
     var c = @new<global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>>();

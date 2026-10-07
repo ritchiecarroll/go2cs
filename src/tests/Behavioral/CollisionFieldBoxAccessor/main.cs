@@ -26,7 +26,7 @@ internal static ref holder h => ref Ꮡh.Value;
 internal static ж<Δmark> Ꮡgm = new StandardBox<Δmark>(default(Δmark));
 internal static ref Δmark gm => ref Ꮡgm.Value;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint localShadowsCollisionType() {
+internal static partial nint localShadowsCollisionType() {
     var m = Ꮡ(new Δmark(id: 10));
     var pid = m.of(main_package.Δmark.Ꮡid);
     pid.Value = 55;
@@ -39,11 +39,11 @@ internal static ref Δmark gm => ref Ꮡgm.Value;
     internal nint other;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void run(Action f) {
+internal static partial void run(Action f) {
     f();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint capturedLocalNamedAfterType() {
+internal static partial nint capturedLocalNamedAfterType() {
     var w = Ꮡ(new w(park: 30, other: 4));
     nint got = 0;
     var wʗ1 = w;
@@ -55,7 +55,7 @@ internal static ref Δmark gm => ref Ꮡgm.Value;
     return got + (~w).other;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint boxRefCapturedValueNamedAfterType() {
+internal static partial nint boxRefCapturedValueNamedAfterType() {
     ref var w = ref heap<w>(out var Ꮡw);
     w = new w(park: 100, other: 9);
     nint got = 0;

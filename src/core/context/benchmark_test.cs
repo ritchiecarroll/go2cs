@@ -63,7 +63,7 @@ public static void BenchmarkWithTimeout(ж<testing.B> Ꮡb) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concurrentContexts) {
+internal static partial void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concurrentContexts) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     nint gomaxprocs = Δruntime.GOMAXPROCS(0);

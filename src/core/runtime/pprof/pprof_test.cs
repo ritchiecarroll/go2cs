@@ -352,7 +352,7 @@ internal static nint inlinedCallee(nint x, nint n) {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void dumpCallers(slice<uintptr> pcs) {
+internal static partial void dumpCallers(slice<uintptr> pcs) {
     if (pcs == default!) {
         return;
     }
@@ -361,11 +361,11 @@ internal static nint inlinedCallee(nint x, nint n) {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void inlinedCallerDump(slice<uintptr> pcs) {
+internal static partial void inlinedCallerDump(slice<uintptr> pcs) {
     inlinedCalleeDump(pcs);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void inlinedCalleeDump(slice<uintptr> pcs) {
+internal static partial void inlinedCalleeDump(slice<uintptr> pcs) {
     dumpCallers(pcs);
 }
 
@@ -376,7 +376,7 @@ internal static nint inlinedCallee(nint x, nint n) {
 [GoType] internal partial struct inlineWrapper {
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void dump(this inlineWrapper h, slice<uintptr> pcs) {
+internal static partial void dump(this inlineWrapper h, slice<uintptr> pcs) {
     dumpCallers(pcs);
 }
 
@@ -665,7 +665,7 @@ internal static Func<ж<testing.T>, ж<profile.Profile>, bool> matchAndAvoidStac
 
 // Fork can hang if preempted with signals frequently enough (see issue 5517).
 // Ensure that we do not do this.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCPUProfileWithFork(ж<testing.T> Ꮡt) {
+public static partial void TestCPUProfileWithFork(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -849,12 +849,12 @@ public static void TestMorestack(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void growstack1() {
+internal static partial void growstack1() {
     growstack(10);
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void growstack(nint n) {
+internal static partial void growstack(nint n) {
     array<byte> buf = new(2097152); /* (8 << (int)(18)) */
     use(buf);
     if (n > 0) {
@@ -863,7 +863,7 @@ public static void TestMorestack(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void use([GoArrayDims(2097152)] array<byte> x) {
+internal static partial void use([GoArrayDims(2097152)] array<byte> x) {
     x = x.Clone();
 
 }
@@ -1065,7 +1065,7 @@ internal static slice<slice<@string>> /*res*/ profileStacks(ж<profile.Profile> 
     return res;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<slice<@string>> /*res*/ blockRecordStacks(slice<runtime.BlockProfileRecord> records) {
+internal static partial slice<slice<@string>> /*res*/ blockRecordStacks(slice<runtime.BlockProfileRecord> records) {
     slice<slice<@string>> res = default!;
 
     foreach (var (_, vᴛ1) in records) {
@@ -1108,7 +1108,7 @@ internal static readonly @string allˢ = "all"u8;
 // awaitBlockedGoroutine spins on runtime.Gosched until a runtime stack dump
 // shows a goroutine in the given state with a stack frame in
 // runtime/pprof.<fName>.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void awaitBlockedGoroutine(ж<testing.T> Ꮡt, @string state, @string fName, nint count) {
+internal static partial void awaitBlockedGoroutine(ж<testing.T> Ꮡt, @string state, @string fName, nint count) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -1152,7 +1152,7 @@ internal static readonly @string allˢ = "all"u8;
 internal static readonly @string chanReceiveˢ = "chan receive"u8;
 internal static readonly @string blockChanRecvˢ = "blockChanRecv"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockChanRecv(ж<testing.T> Ꮡt) {
+internal static partial void blockChanRecv(ж<testing.T> Ꮡt) {
     var c = new channel<bool>(0);
     var cʗ1 = c;
     goǃ(() => {
@@ -1166,7 +1166,7 @@ internal static readonly @string blockChanRecvˢ = "blockChanRecv"u8;
 internal static readonly @string chanSendˢ = "chan send"u8;
 internal static readonly @string blockChanSendˢ = "blockChanSend"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockChanSend(ж<testing.T> Ꮡt) {
+internal static partial void blockChanSend(ж<testing.T> Ꮡt) {
     var c = new channel<bool>(0);
     var cʗ1 = c;
     goǃ(() => {
@@ -1179,7 +1179,7 @@ internal static readonly @string blockChanSendˢ = "blockChanSend"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string blockChanCloseˢ = "blockChanClose"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockChanClose(ж<testing.T> Ꮡt) {
+internal static partial void blockChanClose(ж<testing.T> Ꮡt) {
     var c = new channel<bool>(0);
     var cʗ1 = c;
     goǃ(() => {
@@ -1193,7 +1193,7 @@ internal static readonly @string blockChanCloseˢ = "blockChanClose"u8;
 internal static readonly @string selectˢ = "select"u8;
 internal static readonly @string blockSelectRecvAsyncˢ = "blockSelectRecvAsync"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockSelectRecvAsync(ж<testing.T> Ꮡt) {
+internal static partial void blockSelectRecvAsync(ж<testing.T> Ꮡt) {
     const nint numTries = 3;
     var c = new channel<bool>(1);
     var c2 = new channel<bool>(1);
@@ -1220,7 +1220,7 @@ internal static readonly @string blockSelectRecvAsyncˢ = "blockSelectRecvAsync"
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string blockSelectSendSyncˢ = "blockSelectSendSync"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockSelectSendSync(ж<testing.T> Ꮡt) {
+internal static partial void blockSelectSendSync(ж<testing.T> Ꮡt) {
     var c = new channel<bool>(0);
     var c2 = new channel<bool>(0);
     var cʗ1 = c;
@@ -1243,7 +1243,7 @@ internal static readonly @string blockSelectSendSyncˢ = "blockSelectSendSync"u8
 internal static readonly @string syncMutexLockˢ = "sync.Mutex.Lock"u8;
 internal static readonly @string blockMutexˢ = "blockMutex"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockMutex(ж<testing.T> Ꮡt) {
+internal static partial void blockMutex(ж<testing.T> Ꮡt) {
     ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);
     Ꮡmu.Lock();
     goǃ(() => {
@@ -1257,7 +1257,7 @@ internal static readonly @string blockMutexˢ = "blockMutex"u8;
     Ꮡmu.Lock();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockMutexN(ж<testing.T> Ꮡt, nint n, time.Duration d) {
+internal static partial void blockMutexN(ж<testing.T> Ꮡt, nint n, time.Duration d) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);
     Ꮡmu.Lock();
@@ -1290,7 +1290,7 @@ internal static readonly @string blockMutexˢ = "blockMutex"u8;
 internal static readonly @string syncCondWaitˢ = "sync.Cond.Wait"u8;
 internal static readonly @string blockCondˢ = "blockCond"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockCond(ж<testing.T> Ꮡt) {
+internal static partial void blockCond(ж<testing.T> Ꮡt) {
     ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);
     var c = sync.NewCond(new sync.MutexжLocker(Ꮡmu));
     Ꮡmu.Lock();
@@ -1596,7 +1596,7 @@ internal static readonly @string selfValueˢ = "self-value"u8;
 internal static readonly @string fingLabelˢ = "fing-label"u8;
 internal static readonly @string fingValueˢ = "fing-value"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestGoroutineCounts(ж<testing.T> Ꮡt) {
+public static partial void TestGoroutineCounts(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // Setting GOMAXPROCS to 1 ensures we can force all goroutines to the
@@ -2026,7 +2026,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
 }
 
 // Regression test for #69998.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestGoroutineProfileCoro(ж<testing.T> Ꮡt) {
+public static partial void TestGoroutineProfileCoro(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     testenv.MustHaveParallelism(new pprof_internal_test_package.testing_TжTB(Ꮡt));
@@ -2480,7 +2480,7 @@ internal static void labelHog(channel<EmptyStruct> stop, nint gogc) {
 }
 
 // parallelLabelHog runs GOMAXPROCS goroutines running labelHog.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void parallelLabelHog(context.Context ctx, time.Duration dur, nint gogc) {
+internal static partial void parallelLabelHog(context.Context ctx, time.Duration dur, nint gogc) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     var stop = new channel<EmptyStruct>(0);
     for (nint i = 0; i < runtime.GOMAXPROCS(0); i++) {
@@ -2506,7 +2506,7 @@ internal static readonly @string profatomicˢ = "profatomic"u8;
 
 // Check that there is no deadlock when the program receives SIGPROF while in
 // 64bit atomics' critical section. Used to happen on mips{,le}. See #20146.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAtomicLoadStore64(ж<testing.T> Ꮡt) {
+public static partial void TestAtomicLoadStore64(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = os.CreateTemp(""u8, profatomicˢ);
@@ -2542,7 +2542,7 @@ internal static readonly @string profatomicˢ = "profatomic"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string proftracebackˢ = "proftraceback"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTracebackAll(ж<testing.T> Ꮡt) {
+public static partial void TestTracebackAll(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // With gccgo, if a profiling signal arrives at the wrong time
@@ -2891,7 +2891,7 @@ internal static readonly @string runtimePprofˢ = "runtime/pprof.produceProfileE
     internal slice<@string> prefix;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestProfilerStackDepth(ж<testing.T> Ꮡt) {
+public static partial void TestProfilerStackDepth(ж<testing.T> Ꮡt) {
     Ꮡt.Cleanup(disableSampling());
     UntypedInt depth = 128;
     goǃ(produceProfileEvents, Ꮡt, (nint)(depth));
@@ -2989,7 +2989,7 @@ internal static readonly @string blockChanDeepˢ = "blockChanDeep"u8;
 
 // blockChanDeep produces a block profile event at stack depth n, including the
 // caller.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockChanDeep(ж<testing.T> Ꮡt, nint n) {
+internal static partial void blockChanDeep(ж<testing.T> Ꮡt, nint n) {
     if (n > 1) {
         blockChanDeep(Ꮡt, n - 1);
         return;
@@ -3008,7 +3008,7 @@ internal static readonly @string blockMutexDeepˢ = "blockMutexDeep"u8;
 
 // blockMutexDeep produces a block profile event at stack depth n, including the
 // caller.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void blockMutexDeep(ж<testing.T> Ꮡt, nint n) {
+internal static partial void blockMutexDeep(ж<testing.T> Ꮡt, nint n) {
     if (n > 1) {
         blockMutexDeep(Ꮡt, n - 1);
         return;
@@ -3050,7 +3050,7 @@ internal static void produceProfileEvents(ж<testing.T> Ꮡt, nint depth) {
     goroutineDeep(Ꮡt, depth - 4); // -4 for produceProfileEvents, **, chanrecv1, chanrev, gopark
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<@string> getProfileStacks(Func<slice<runtime.BlockProfileRecord>, (nint, bool)> collect, bool fileLine) {
+internal static partial slice<@string> getProfileStacks(Func<slice<runtime.BlockProfileRecord>, (nint, bool)> collect, bool fileLine) {
     nint n = default!;
     bool ok = default!;
     slice<runtime.BlockProfileRecord> p = default!;
@@ -3091,7 +3091,7 @@ internal static void produceProfileEvents(ж<testing.T> Ꮡt, nint depth) {
     return stacks;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMutexBlockFullAggregation(ж<testing.T> Ꮡt) {
+public static partial void TestMutexBlockFullAggregation(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // This regression test is adapted from
@@ -3197,7 +3197,7 @@ internal static readonly object didNotSeeExpectedStackˢ = (@string)"did not see
     public @string SubStack;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBlockMutexProfileInlineExpansion(ж<testing.T> Ꮡt) {
+public static partial void TestBlockMutexProfileInlineExpansion(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         runtime.SetBlockProfileRate(1);

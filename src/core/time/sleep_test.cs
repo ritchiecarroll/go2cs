@@ -68,7 +68,7 @@ internal static Δtime.Duration adjustDelay(ж<Δtesting.T> Ꮡt, Δtime.Duratio
 
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSleep(ж<Δtesting.T> Ꮡt) {
+public static partial void TestSleep(ж<Δtesting.T> Ꮡt) {
     Δtime.Duration delay = /* 100 * Millisecond */ 100000000;
     goǃ(() => {
         Sleep(delay / 2);
@@ -104,7 +104,7 @@ public static void TestAfterFunc(ж<Δtesting.T> Ꮡt) {
     ᐸꟷ(c);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTickerStress(ж<Δtesting.T> Ꮡt) {
+public static partial void TestTickerStress(ж<Δtesting.T> Ꮡt) {
     ref var stop = ref heap(new atomic.Bool(), out var Ꮡstop);
     goǃ(() => {
         while (!Ꮡstop.Load()) {
@@ -123,7 +123,7 @@ public static void TestAfterFunc(ж<Δtesting.T> Ꮡt) {
     Ꮡstop.Store(true);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTickerConcurrentStress(ж<Δtesting.T> Ꮡt) {
+public static partial void TestTickerConcurrentStress(ж<Δtesting.T> Ꮡt) {
     ref var stop = ref heap(new atomic.Bool(), out var Ꮡstop);
     goǃ(() => {
         while (!Ꮡstop.Load()) {
@@ -156,7 +156,7 @@ public static void TestAfterFunc(ж<Δtesting.T> Ꮡt) {
     Ꮡstop.Store(true);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAfterFuncStarvation(ж<Δtesting.T> Ꮡt) {
+public static partial void TestAfterFuncStarvation(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // Start two goroutines ping-ponging on a channel send.
@@ -199,7 +199,7 @@ public static void TestAfterFunc(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmark(ж<Δtesting.B> Ꮡb, Action<ж<Δtesting.PB>> bench) {
+internal static partial void benchmark(ж<Δtesting.B> Ꮡb, Action<ж<Δtesting.PB>> bench) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Create equal number of garbage timers on each P before starting
@@ -504,7 +504,7 @@ internal static void await(nint slot, channel/*<-*/<afterResult> result, /*<-*/c
     result.ᐸꟷ(new afterResult(slot, ᐸꟷ(ac)));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static error testAfterQueuing1(Δtime.Duration delta, Func<Δtime.Duration, /*<-*/channel<Δtime.Time>> after) {
+internal static partial error testAfterQueuing1(Δtime.Duration delta, Func<Δtime.Duration, /*<-*/channel<Δtime.Time>> after) {
     // make the result channel buffered because we don't want
     // to depend on channel queuing semantics that might
     // possibly change in the future.
@@ -535,7 +535,7 @@ internal static void await(nint slot, channel/*<-*/<afterResult> result, /*<-*/c
     return default!;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTimerStopStress(ж<Δtesting.T> Ꮡt) {
+public static partial void TestTimerStopStress(ж<Δtesting.T> Ꮡt) {
     if (Δtesting.Short()) {
         return;
     }
@@ -552,7 +552,7 @@ internal static void await(nint slot, channel/*<-*/<afterResult> result, /*<-*/c
     Sleep((Δtime.Duration)(3000000000L));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSleepZeroDeadlock(ж<Δtesting.T> Ꮡt) {
+public static partial void TestSleepZeroDeadlock(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // Sleep(0) used to hang, the sequence of events was as follows.
@@ -644,7 +644,7 @@ public static void TestReset(ж<Δtesting.T> Ꮡt) {
 // overflows does not result in a short sleep duration. Nor does it interfere
 // with execution of other timers. If it does, timers in this or subsequent
 // tests may not fire.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOverflowSleep(ж<Δtesting.T> Ꮡt) {
+public static partial void TestOverflowSleep(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Δtime.Duration big = /* Duration(int64(1<<63 - 1)) */ 9223372036854775807;
@@ -951,7 +951,7 @@ internal static void testStopResetResult(ж<Δtesting.T> Ꮡt, bool testStop) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string godebugˢ = "GODEBUG"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testStopResetResultGODEBUG(ж<Δtesting.T> Ꮡt, bool testStop, @string godebug) {
+internal static partial void testStopResetResultGODEBUG(ж<Δtesting.T> Ꮡt, bool testStop, @string godebug) {
     Ꮡt.Setenv(godebugˢ, "asynctimerchan="u8 + godebug);
     bool stopOrReset(ж<Δtime.Timer> timer) {
         if (testStop){
@@ -1006,7 +1006,7 @@ internal static readonly @string godebugˢ = "GODEBUG"u8;
 
 // Test having a large number of goroutines wake up a ticker simultaneously.
 // This used to trigger a crash when run under x/tools/cmd/stress.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMultiWakeupTicker(ж<Δtesting.T> Ꮡt) {
+public static partial void TestMultiWakeupTicker(ж<Δtesting.T> Ꮡt) {
     if (Δtesting.Short()) {
         Ꮡt.Skip(shortˢ);
     }
@@ -1041,7 +1041,7 @@ internal static readonly @string godebugˢ = "GODEBUG"u8;
 
 // Test having a large number of goroutines wake up a timer simultaneously.
 // This used to trigger a crash when run under x/tools/cmd/stress.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMultiWakeupTimer(ж<Δtesting.T> Ꮡt) {
+public static partial void TestMultiWakeupTimer(ж<Δtesting.T> Ꮡt) {
     if (Δtesting.Short()) {
         Ꮡt.Skip(shortˢ);
     }
@@ -1236,7 +1236,7 @@ public static void BenchmarkStaggeredTickerLatency(ж<Δtesting.B> Ꮡb) {
 
 // warmupScheduler ensures the scheduler has at least targetThreadCount threads
 // in its thread pool.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void warmupScheduler(nint targetThreadCount) {
+internal static partial void warmupScheduler(nint targetThreadCount) {
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     ref var count = ref heap(new int32(), out var Ꮡcount);
     for (nint i = 0; i < targetThreadCount; i++) {

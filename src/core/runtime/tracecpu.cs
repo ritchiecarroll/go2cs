@@ -43,7 +43,7 @@ internal static readonly @string traceStartReadCPUCalledˢ = "traceStartReadCPU 
 // data into an active trace.
 //
 // traceAdvanceSema must be held.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void traceStartReadCPU() {
+internal static partial void traceStartReadCPU() {
     if (!traceEnabled()) {
         @throw(traceStartReadCPUCalledˢ);
     }

@@ -16,7 +16,7 @@ partial class main_package {
     internal ticket t;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static array<byte> /*a16*/ as16(uint64 hi, uint64 lo) {
+internal static partial array<byte> /*a16*/ as16(uint64 hi, uint64 lo) {
     array<byte> a16 = new(16);
 
     putUint64(a16[..8], hi);
@@ -30,7 +30,7 @@ internal static void putUint64(slice<byte> b, uint64 v) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ticket /*key*/ ticketFromBytes([GoArrayDims(32)] array<byte> b) {
+internal static partial ticket /*key*/ ticketFromBytes([GoArrayDims(32)] array<byte> b) {
     ticket key = new();
 
     b = b.Clone();
@@ -40,7 +40,7 @@ internal static void putUint64(slice<byte> b, uint64 v) {
     return key.ΔClone();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static box /*bx*/ makeBox() {
+internal static partial box /*bx*/ makeBox() {
     box bx = new();
 
     bx.id = 3;
@@ -49,7 +49,7 @@ internal static void putUint64(slice<byte> b, uint64 v) {
     return bx.ΔClone();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (array<byte> a4, error err) withDefer() {
+internal static partial (array<byte> a4, error err) withDefer() {
     array<byte> a4 = new(4);
     error err = default!;
     GoFrame ᒐ = default;
@@ -71,7 +71,7 @@ internal static Func<array<byte>> literalAs3 = () => {
     return a3.Clone();
 };
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint n, @string s) scalars() {
+internal static partial (nint n, @string s) scalars() {
     nint n = default!;
     @string s = default!;
 

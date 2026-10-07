@@ -36,17 +36,17 @@ internal static @string nameOf(any fn) {
     return emptyNameˢ;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Func<nint> makeLiteral() {
+internal static partial Func<nint> makeLiteral() {
     return () => 1;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (Func<nint>, Func<nint>) twoLiterals() {
+internal static partial (Func<nint>, Func<nint>) twoLiterals() {
     var first = nint () => 1;
     var second = nint () => 2;
     return (first, second);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string boundInsideLiteral(ж<T> Ꮡt) {
+internal static partial @string boundInsideLiteral(ж<T> Ꮡt) {
     return ((Func<@string>)(() => {
         return nameOf(Ꮡt.pointerMethod);
     }))();
@@ -68,7 +68,7 @@ private static readonly object literalInsideMainˢ = (@string)"literal inside ma
 private static readonly object mainSOwnFrameˢ = (@string)"main's own frame:                    "u8;
 private static readonly object interfaceMethodValueˢ = (@string)"interface method value:              "u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     ref var t = ref heap<T>(out var Ꮡt);
     t = new T(n: 1);
     var p = Ꮡt;

@@ -2469,7 +2469,7 @@ internal static (ж<Δhttp.Response>, error) RoundTrip(this roundTripperWithClos
     throw panic("unused");
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void CloseIdleConnections(this roundTripperWithCloseIdle f) {
+internal static partial void CloseIdleConnections(this roundTripperWithCloseIdle f) {
     f();
 }
 
@@ -2494,7 +2494,7 @@ public static void TestClientCloseIdleConnections(ж<testing.T> Ꮡt) {
 
 internal delegate (ж<Δhttp.Response>, error) testRoundTripper(ж<Δhttp.Request> _);
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<Δhttp.Response>, error) RoundTrip(this testRoundTripper t, ж<Δhttp.Request> Ꮡreq) {
+internal static partial (ж<Δhttp.Response>, error) RoundTrip(this testRoundTripper t, ж<Δhttp.Request> Ꮡreq) {
     return t(Ꮡreq);
 }
 
@@ -2705,7 +2705,7 @@ public static void TestProbeZeroLengthBody(ж<testing.T> Ꮡt) {
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string contentᶜ = "body"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testProbeZeroLengthBody(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testProbeZeroLengthBody(ж<testing.T> Ꮡt, testMode mode) {
     var reqc = new channel<EmptyStruct>(0);
     var reqcʗ1 = reqc;
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {

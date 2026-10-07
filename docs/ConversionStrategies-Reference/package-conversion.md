@@ -857,6 +857,21 @@ That subprocess costs ~300 ms on Windows, so it is contained twice. Resolution i
 
 Guarded by `src/go2cs/buildConstraints_test.go` (release tags bare/negated/compound, the legacy `+build` grammar, extraction precedence, loader-toolchain resolution), each assertion verified to fail against the pre-fix converter.
 
+## Default build tags: `purego` for the standard library, `safe` for modules
+
+A build tag decides which Go files a build compiles, so the tags a conversion applies decide what the converted code is. go2cs applies two by default, each for one thing converted code cannot do.
+
+* **`purego` for the standard library** (with `math_big_pure_go`, the same switch under math/big's older spelling). Go binds its hottest crypto, hash and big-number routines to `.s` assembly, and C# has no way to run assembly. These tags select Go's own portable implementations instead. They apply to `-stdlib` and to every `-tests` run. [The standard-library conversion applies `-tags purego`](purego.md#the-standard-library-conversion-applies--tags-purego) covers them in full.
+* **`safe` for modules.** Some libraries do pointer arithmetic into the runtime's private layout: testify's internal copy of spew adds a computed byte offset to a `reflect.Value` to reach its private flag word. Converted code keeps those values in .NET's own layout, so golib refuses that arithmetic with a panic rather than reading the wrong memory. Such libraries ship a fallback for builds tagged `safe`, and a `-recurse` conversion adds the tag so the fallback is what converts. The cost is the fallback's own: spew cannot print unexported fields, so testify's assertion messages show less of a struct than a default Go build would. The standard library uses the tag nowhere, so it changes nothing there. `-module-safe-tag=false` turns it off.
+
+**The Go baseline uses the same tags.** When `-tests` validates a package, the `go test` run that produces Go's verdicts is given exactly the tags the conversion used (`oracleTestArgs` reads the one resolved set). Both sides therefore compile the same files, and a verdict compares like with like. A module's proof pages and its `MODULE.md` state the tags their verdicts were read under.
+
+**`appengine` is not set**, although some libraries treat it as a second name for "avoid unsafe". It also changes behavior that has nothing to do with unsafe: logrus, for example, switches its terminal check on it. Adding it would change what a converted module does, not only which fallback it takes.
+
+**An explicit `-tags` replaces every default**, `-tags=` included, so a caller can always choose the exact set.
+
+Guarded by `TestResolveBuildTags` (the default for each mode, the switch, and the explicit override), `TestDefaultModuleBuildTagsContent` (exactly `safe`, never `appengine`), `TestOracleTestArgsCarryResolvedBuildTags`, and the proof-page tests for the build-tags sentence.
+
 ## An import forces the imported package's `init` to run
 
 Go guarantees an imported package is fully initialized **before** the importing package's own

@@ -2555,7 +2555,7 @@ public static void TestDecodeEncode(ж<testing.T> Ꮡt) {
 }
 
 // Issue 9796. Used to fail with GORACE="halt_on_error=1" -race.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRace9796(ж<testing.T> Ꮡt) {
+public static partial void TestRace9796(ж<testing.T> Ꮡt) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < 2; i++) {
         Ꮡwg.Add(1);

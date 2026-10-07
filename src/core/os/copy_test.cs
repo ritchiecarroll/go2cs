@@ -29,7 +29,7 @@ internal static readonly @string tcpˢ = "tcp"u8;
 // Exercise sendfile/splice fast paths with a moderately large file.
 //
 // https://go.dev/issue/70000
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestLargeCopyViaNetwork(ж<Δtesting.T> Ꮡt) {
+public static partial void TestLargeCopyViaNetwork(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         UntypedInt size = /* 10 * 1024 * 1024 */ 10485760;
@@ -269,7 +269,7 @@ internal static ж<randReader> newRandReader() {
     return (len(p), default!);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (Δnet.Conn client, Δnet.Conn server) createSocketPair(ж<Δtesting.T> Ꮡt, @string proto) {
+internal static partial (Δnet.Conn client, Δnet.Conn server) createSocketPair(ж<Δtesting.T> Ꮡt, @string proto) {
     Δnet.Conn client = default!;
     Δnet.Conn server = default!;
 

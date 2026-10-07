@@ -517,7 +517,7 @@ internal static readonly @string dialˢ = "dial"u8;
 //
 // See func [Dial] for a description of the network and address
 // parameters.
-[MethodImpl(MethodImplOptions.NoInlining)] public static (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ctx, @string network, @string address) {
+public static partial (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ctx, @string network, @string address) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -604,7 +604,7 @@ internal static readonly @string dialˢ = "dial"u8;
 // head start. It returns the first established connection and
 // closes the others. Otherwise it returns an error from the first
 // primary address.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, context.Context ctx, addrList primaries, addrList fallbacks) {
+internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, context.Context ctx, addrList primaries, addrList fallbacks) {
     GoFrame ᒐ = default;
     try {
         if (len(fallbacks) == 0) {

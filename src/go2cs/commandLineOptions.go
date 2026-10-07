@@ -73,6 +73,7 @@ type Options struct {
 	testConfig             string        // -test-config Debug|Release: publish/run configuration for the converted test host (default Debug -- unchanged pipeline behavior); Release also publishes with an explicit -p:go2csPath, replacing the Debug-conditional csproj-template default. See docs/phase4 tiering census
 	testTiered             bool          // -test-tiered: explicit opt-back-IN to the CLR's default tiered JIT when testConfig is Release (Release's own default is DOTNET_TieredCompilation=0, for deterministic timing-bounded verdicts -- see the tiering census); meaningless when testConfig is Debug
 	testPublishBinlog      bool          // -test-publish-binlog: the test host's dotnet publish writes bin/tests/publish.binlog from the first attempt and keeps it only when the publish fails (see preparePublishBinlog); off by default, since it costs ~35% of a warm publish
+	testModuleDisclosures  string        // -module-disclosures: the committed tree of third-party module rows' disclosure manifests, <root>/<module>@<version>/<pkg>/go2cs_test_disclosures.json; consulted only when the output directory holds none, and only for the resolved version (moduleDisclosureRoot.go)
 	testAllowHandOwn       bool          // -test-allow-handown: deliberately convert a package the -stdlib queue skips (testing, unsafe, ...) into a SCRATCH root; refused by default because the default output path IS the hand-owned tree -- see requireConvertibleTestTarget
 	testHandOwnHost        bool          // DERIVED, never a flag: the package under test is a hand-owned host already present at the output path, so this run converts its TESTS ONLY -- no production emission, external variant only. Set from testTargetKind; see handOwnHostTestTarget
 	testProductionPath     string        // original package path retained after reference-mode self-binding is cleared
@@ -259,6 +260,17 @@ func parseArgsInterspersed(fs *flag.FlagSet, args []string) ([]string, error) {
 // failure (TestTruncateRound → big.Int.Mul → mulAddVWW), but the scope is all of math/big.
 var defaultStdLibBuildTags = []string{"purego", "math_big_pure_go"}
 
+// defaultModuleBuildTags are added to a `-recurse` module conversion unless `-module-safe-tag=false`
+// or an explicit `-tags` says otherwise. `safe` is the tag libraries use to choose their own fallback
+// over unsafe pointer arithmetic into Go's runtime internals, which golib refuses by design:
+// testify's internal/spew computes reflect.Value's private `flag` offset at init and dereferences
+// `&v` plus that offset, so every converted test host importing testify panicked before its first
+// test, while bypasssafe.go (`-tags safe`) is spew's shipped answer. The standard library uses the
+// tag nowhere, so it changes no stdlib file selection. `appengine`, the older spelling some
+// libraries also honor for the same purpose, is deliberately NOT added: it changes behavior beyond
+// unsafe (logrus switches its terminal check on it).
+var defaultModuleBuildTags = []string{"safe"}
+
 // resolveBuildTags picks the effective build tags for a conversion run. A bare `-stdlib` run and a
 // `-tests` run both apply the purego default (unless `-tags` was passed explicitly, even `-tags=` to
 // clear it — a deliberate override honored verbatim). `-tests` needs the SAME default as `-stdlib`
@@ -267,13 +279,29 @@ var defaultStdLibBuildTags = []string{"purego", "math_big_pure_go"}
 // tree is Go built with `-tags purego`). Without this, a package whose asm and pure-Go variants are
 // gated `!purego`/`purego` (crypto/subtle's xor_amd64.go vs xor_generic.go, both declaring xorBytes)
 // gets BOTH files converted and collides (CS0111), and the regenerated production .cs diverges from
-// the committed purego emission. All other conversions stay tag-neutral (explicit tags only).
-func resolveBuildTags(convertStdLib, convertTests, tagsExplicit bool, explicit []string) []string {
-	if (convertStdLib || convertTests) && !tagsExplicit {
-		return defaultStdLibBuildTags
+// the committed purego emission. A `-recurse` module conversion adds defaultModuleBuildTags when
+// moduleSafeTag is set. All other conversions stay tag-neutral (explicit tags only). The `go test`
+// oracle of a validation run reads the same answer (oracleTestArgs), so both sides build one file set.
+func resolveBuildTags(convertStdLib, convertTests, recurse, moduleSafeTag, tagsExplicit bool, explicit []string) []string {
+	if tagsExplicit {
+		return explicit
 	}
 
-	return explicit
+	var tags []string
+
+	if convertStdLib || convertTests {
+		tags = append(tags, defaultStdLibBuildTags...)
+	}
+
+	if recurse && moduleSafeTag {
+		tags = append(tags, defaultModuleBuildTags...)
+	}
+
+	if tags == nil {
+		return explicit
+	}
+
+	return tags
 }
 
 // parseBuildTags splits a -tags value into individual build tags. Commas and whitespace are both

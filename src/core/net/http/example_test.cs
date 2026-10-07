@@ -157,7 +157,7 @@ public static void ExampleResponseWriter_trailers() {
     });
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleServer_Shutdown() {
+public static partial void ExampleServer_Shutdown() {
     ref var srv = ref heap(new Δhttp.Server(), out var Ꮡsrv);
     var idleConnsClosed = new channel<EmptyStruct>(0);
     var idleConnsClosedʗ1 = idleConnsClosed;

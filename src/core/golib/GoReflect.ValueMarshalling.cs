@@ -438,7 +438,50 @@ public static partial class GoReflect
             return true;
         }
 
+        // Go's func named/unnamed assignability: a NAMED func type (`type AssignA func() int`) and
+        // its unnamed type are assignable both ways (identical underlying, one side unnamed). The
+        // converter emits a named func type that carries methods as its OWN delegate type, so the
+        // two are different managed types of one signature and no arm above relates them --
+        // go-cmp's Equal-method path refused `Call using AssignA as type func() int`. The delegate
+        // is re-bound to the destination type over the source's own Invoke, which keeps the very
+        // function value (its target and closure) and works for every delegate the conversion
+        // makes, including a DynamicMethod's. Two different NAMED func types stay refused under
+        // Assignable, as in Go.
+        if (dynamicSrc is Delegate srcDelegate && typeof(Delegate).IsAssignableFrom(dstType) &&
+            !RefusedByGoAssignability(relation, srcDelegate.GetType(), dstType) &&
+            haveIdenticalDelegateSignature(srcDelegate.GetType(), dstType))
+        {
+            marshalled = Delegate.CreateDelegate(dstType, srcDelegate, srcDelegate.GetType().GetMethod("Invoke")!);
+            return true;
+        }
+
         return false;
+    }
+
+    // Whether two delegate types take the same parameters (types and ref-kinds) and return the same
+    // type: the underlying-identity test for two func types, read off their Invoke signatures.
+    private static bool haveIdenticalDelegateSignature(Type a, Type b)
+    {
+        if (a == b)
+            return true;
+
+        MethodInfo? ia = a.GetMethod("Invoke"), ib = b.GetMethod("Invoke");
+
+        if (ia is null || ib is null || ia.ReturnType != ib.ReturnType)
+            return false;
+
+        ParameterInfo[] pa = ia.GetParameters(), pb = ib.GetParameters();
+
+        if (pa.Length != pb.Length)
+            return false;
+
+        for (int i = 0; i < pa.Length; i++)
+        {
+            if (pa[i].ParameterType != pb[i].ParameterType)
+                return false;
+        }
+
+        return true;
     }
 
     // Go's haveIdenticalUnderlyingType for two struct types, over the bridge's own field

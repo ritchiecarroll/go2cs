@@ -164,7 +164,7 @@ public static void ExampleWithValue() {
 
 // This example uses AfterFunc to define a function which waits on a sync.Cond,
 // stopping the wait when a context is canceled.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleAfterFunc_cond() {
+public static partial void ExampleAfterFunc_cond() {
     error waitOnCond(context.Context ctx, ж<Δsync.Cond> condΔ1, Func<bool> conditionMet) {
         GoFrame ᒐ = default;
         try {

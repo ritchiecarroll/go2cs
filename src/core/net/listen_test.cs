@@ -759,7 +759,7 @@ internal static (bool, error) multicastRIBContains(global::go.net_package.IP ip)
 }
 
 // Issue 21856.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestClosingListener(ж<testing.T> Ꮡt) {
+public static partial void TestClosingListener(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);

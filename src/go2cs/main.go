@@ -260,9 +260,11 @@ func main() {
 	testConfigCmd := commandLine.String("test-config", "Release", "Publish/run configuration for the converted test host: Release (default since 2026-09-02 -- the validation configuration of RECORD, with an explicit -p:go2csPath replacing the Debug-conditional csproj-template default, and the CLR's tiered JIT disabled by default, see -test-tiered) or Debug (the pre-2026-09-02 default, still fully supported by flag). Recorded on every proof page and in the comparison record so a verdict carries the level it was measured at. The default moved on the deployment owner's ruling, gated on the Release census (docs/phase4/CENSUS-release-tc0-delta.md), not on this flag's own authority")
 	testTieredCmd := commandLine.Bool("test-tiered", false, "With -test-config Release, opt back IN to the CLR's default tiered JIT (Release's own default is DOTNET_TieredCompilation=0, since a verdict that depends on JIT promotion timing is not reproducible run to run). Meaningless with -test-config Debug. It changes what the C# host's JIT does, not what the converter emits")
 	testPublishBinlogCmd := commandLine.Bool("test-publish-binlog", false, "Have the converted test host's dotnet publish write an MSBuild binary log to <output>/bin/tests/publish.binlog, from the first attempt, KEPT only when the publish fails and deleted when it succeeds. For census and battery sweeps chasing a build failure that passes on a re-run; costs ~35% of a warm publish")
+	testModuleDisclosuresCmd := commandLine.String("module-disclosures", "", "With -tests on a third-party module: the committed tree of module rows' disclosure manifests (<root>/<module>@<version>/<package dir>/go2cs_test_disclosures.json, e.g. src/tests/ModuleDisclosures). Read only when the package's output directory holds no manifest, and only for the module version this run resolved")
 	testAllowHandOwnCmd := commandLine.Bool("test-allow-handown", false, "Convert a package the -stdlib queue deliberately skips (testing, unsafe, builtin, cmd/...) as a -tests target anyway. Refused by default: `testing` IS the hand-owned Phase-4 test host, and the pipeline's natural output path is the very directory the host lives in, so a mistyped command overwrites it (measured 2026-09-03 -- the run replaced src/core/testing/testing.cs with Go's converted testing.go). Pass this ONLY with a BARE scratch output root, for a deliberate measurement whose emission is thrown away; it is not a route to banking such a package, which would still hit the F15b 'ONE testing package, period' collision. Consulted AFTER the hand-own host path since 2026-09-20, so what this flag does depends on what is AT the output root: on a BARE root it keeps the full production census measured 2026-09-03 (no csproj there, so the host path cannot open), while at a hand-owned counterpart's own directory -- or at a root SEEDED from src/core, which carries that counterpart's csproj and markers and so is NOT bare -- the host path wins instead, the run converts TESTS ONLY, and no production file is emitted over a hand-own")
 	var recurseVal recurseMode
 	commandLine.Var(&recurseVal, "recurse", "Recursively convert an end-user module and its third-party dependencies (references the pre-converted standard library); use -recurse=module to convert only the module's own packages, leaving the third-party closure referenced but unconverted, and -recurse=nuget to reference the published go2cs NuGet packages (go.<pkg>/go.lib/go.gen) instead of local project references (values combine: -recurse=module,nuget)")
+	moduleSafeTagCmd := commandLine.Bool("module-safe-tag", true, "With -recurse: convert the module, and with -tests run its go test baseline, with the `safe` build tag, so a library that ships a fallback for unsafe pointer arithmetic into Go runtime internals (which converted code cannot perform) uses it, e.g. testify's internal/spew; -module-safe-tag=false builds the module's default file set (an explicit -tags overrides both)")
 	var nugetMapVals, nugetMapExcludeVals stringListFlag
 	commandLine.Var(&nugetMapVals, "nuget-map", "With -recurse=nuget (where mapping is ON by default): a Go-module -> NuGet-package mapping source, a local file or an https:// URL in nugetgo.net's schema v1; REPEATABLE, and the listed order is the precedence (the first source naming a module answers it). The nugetgo.net registry (https://nugetgo.net/v1/mappings.txt) answers every module the listed sources do not name, unless -nuget-map-only. A mapped module is referenced as its published package (one exact-pinned PackageReference, locked in go2cs.nuget.lock) when a version built for this go2cs release describes it exactly; otherwise it converts locally and the report says why. 'off' disables mapping entirely")
 	nugetMapOnlyCmd := commandLine.Bool("nuget-map-only", false, "With -nuget-map: use only the listed sources, dropping the nugetgo.net fallback, so a module they do not name stays local and the registry is never fetched")
@@ -347,7 +349,7 @@ func main() {
 		}
 	})
 
-	buildTags := resolveBuildTags(convertStdLib, *convertTestsCmd, tagsExplicit, parseBuildTags(*buildTagsCmd))
+	buildTags := resolveBuildTags(convertStdLib, *convertTestsCmd, recurseVal.enabled, *moduleSafeTagCmd, tagsExplicit, parseBuildTags(*buildTagsCmd))
 
 	if err != nil || (!convertStdLib && len(inputFilePath) == 0) {
 		if err != nil {
@@ -578,6 +580,8 @@ Examples:
 		dualRecv:            *dualRecvCmd,
 		dualRecvParams:      *dualRecvParamsCmd,
 	}
+
+	options.testModuleDisclosures = absPathOrEmpty(strings.TrimSpace(*testModuleDisclosuresCmd))
 
 	// -dual-recv-params (S1) is a refinement of -dual-recv (S0), never standalone: the parameter
 	// half emits into the ref-return primaries S0 declares, and the X3 relaxation only pays off

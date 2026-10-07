@@ -428,7 +428,7 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string @file, nint 
 // MatchStack assigns the current call stack a change ID.
 // If the stack should be printed, MatchStack prints it.
 // Then MatchStack reports whether a change at the current call stack should be enabled.
-[MethodImpl(MethodImplOptions.NoInlining)] public static bool Stack(this ж<Matcher> Ꮡm, Writer w) {
+public static partial bool Stack(this ж<Matcher> Ꮡm, Writer w) {
     if (Ꮡm == nil) {
         return true;
     }
@@ -437,7 +437,7 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string @file, nint 
 
 // stack does the real work for Stack.
 // This lets stack's body handle m == nil and potentially be inlined.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static bool stack(this ж<Matcher> Ꮡm, Writer w) {
+internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     UntypedInt maxStack = 16;

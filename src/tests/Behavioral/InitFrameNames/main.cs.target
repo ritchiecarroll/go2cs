@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string here() {
+internal static partial @string here() {
     var (pc, _, line, _) = runtime.Caller(1);
     return fmt.Sprintf("%s:%d"u8, runtime.FuncForPC(pc).Name(), line);
 }

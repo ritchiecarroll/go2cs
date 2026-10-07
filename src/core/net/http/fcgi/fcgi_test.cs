@@ -462,7 +462,7 @@ internal static readonly object fastCGIChildClosedˢ = (@string)"FastCGI child c
 
 // Test whether server properly closes connection when processing slow
 // requests
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSlowRequest(ж<testing.T> Ꮡt) {
+public static partial void TestSlowRequest(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (pr, pw) = io.Pipe();

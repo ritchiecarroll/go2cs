@@ -1743,6 +1743,13 @@ partial class runtime_package
         if (declaring is null)
             return symbol = method.Name;
 
+        // A promoted method VALUE (`(&t).Write` where Write is promoted from an embedded bytes.Buffer)
+        // binds to go2cs-gen's forwarder; Go names that function value by the method it promotes
+        // (`bytes.(*Buffer).Write`, to which the method-value `-fm` is added as for any other bound
+        // method). Function values only: a forwarder's FRAME keeps the name it has today.
+        if (ilOffset < 0 && goPromotedForwardTarget(method) is System.Reflection.MethodBase promoted)
+            return goFrameName(promoted, StackFrame.OFFSET_UNKNOWN, out symbol);
+
         if (goImportPathOf(declaring) is not string importPath)
             return symbol = $"{declaring.FullName ?? declaring.Name}.{method.Name}";
 
@@ -1794,6 +1801,16 @@ partial class runtime_package
 
                 string outer = name[1..close];
                 string? recorded = ilOffset < 0 ? goFuncLiteralSuffix(method) : goFuncLiteralSuffix(method, ilOffset);
+
+                // Written inside a multi-line statement, the literal or method value resolves to the
+                // statement's first line; its own record is read by its place in the statement.
+                if (recorded is null && goStatementSiblingName(method, outer) is var (siblingSuffix, siblingMethodValue))
+                {
+                    if (siblingMethodValue is not null)
+                        return symbol = siblingMethodValue + "-fm";
+
+                    recorded = siblingSuffix;
+                }
 
                 // The outer function's Go name: package initialization's (goInitFrameName) or, for the
                 // entry point, Go's `main` (goLiteralOuterName); any other outer keeps its own name.
@@ -1855,6 +1872,96 @@ partial class runtime_package
             ? "main"
             : method.Name;
 
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, (string? Suffix, string? MethodValue)?> s_statementSiblingNames = new();
+
+    // The Go name of a function literal or value-receiver method value written INSIDE a multi-line Go
+    // statement, or null. The record's line table has one entry per STATEMENT, so every lambda inside
+    // go-cmp's `tests := []struct{...}{ {func() {}, ...}, {(myType{}).valueMethod, ...} }` resolves to the
+    // statement's first Go line, where no literal or method-value entry sits, and fell to Roslyn's
+    // ordinal (`func0`). The record still holds each item on its own line, so the statement's lambdas --
+    // every `<Outer>b__` of the package class that resolves to the same statement, in C# source order --
+    // pair with the literals and method values that start inside the statement's Go span, in Go line
+    // order. Only when both lists have the SAME count, no two items share a Go line, and a method value's
+    // lambda calls a method of the recorded name; anything else answers null and keeps today's name.
+    private static (string? Suffix, string? MethodValue)? goStatementSiblingName(System.Reflection.MethodBase lambda, string outer) =>
+        s_statementSiblingNames.GetOrAdd(lambda, method => statementSiblingName(method, outer));
+
+    private static (string? Suffix, string? MethodValue)? statementSiblingName(System.Reflection.MethodBase lambda, string outer)
+    {
+        (string? csFile, int csLine, _) = methodSourceStart(lambda);
+
+        if (csFile is null || csLine <= 0 || goPositionMapRecord(lambda, goSourcePath(csFile)) is not GoPositionMapRecord record)
+            return null;
+
+        (int start, int end) = record.StatementGoSpan(csLine);
+
+        if (start <= 0 || record.StatementItems(start, end) is not { Count: > 0 } items)
+            return null;
+
+        Type? packageClass = lambda.DeclaringType;
+
+        while (packageClass is not null && !packageClass.Name.EndsWith("_package", StringComparison.Ordinal))
+            packageClass = packageClass.DeclaringType;
+
+        if (packageClass is null)
+            return null;
+
+        const System.Reflection.BindingFlags anyMember = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance |
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly;
+
+        string prefix = "<" + outer + ">b__";
+        List<(int Line, int Column, System.Reflection.MethodBase Method)> siblings = [];
+        Stack<Type> pending = new(packageClass.GetNestedTypes(anyMember));
+
+        while (pending.Count > 0)
+        {
+            Type nested = pending.Pop();
+
+            foreach (Type inner in nested.GetNestedTypes(anyMember))
+                pending.Push(inner);
+
+            foreach (System.Reflection.MethodInfo candidate in nested.GetMethods(anyMember))
+            {
+                if (!candidate.Name.StartsWith(prefix, StringComparison.Ordinal) ||
+                    candidate.IsDefined(typeof(GoWrapperAttribute), inherit: false) ||
+                    candidate.IsDefined(typeof(GoTwinForwarderAttribute), inherit: false))
+                    continue;
+
+                (string? file, int line, int column) = methodSourceStart(candidate);
+
+                if (file is null || !string.Equals(file, csFile, StringComparison.OrdinalIgnoreCase) || record.GoLineFor(line) != start)
+                    continue;
+
+                siblings.Add((line, column, candidate));
+            }
+        }
+
+        if (siblings.Count != items.Count)
+            return null;
+
+        siblings.Sort((left, right) => left.Line != right.Line ? left.Line.CompareTo(right.Line) : left.Column.CompareTo(right.Column));
+
+        int index = siblings.FindIndex(sibling => sibling.Method.MetadataToken == lambda.MetadataToken && sibling.Method.Module == lambda.Module);
+
+        if (index < 0)
+            return null;
+
+        (_, string? suffix, string? methodValue) = items[index];
+
+        if (suffix is not null)
+            return (suffix, null);
+
+        string methodName = methodValue![(methodValue.LastIndexOf('.') + 1)..];
+
+        foreach (System.Reflection.MethodBase callee in callees(lambda))
+        {
+            if (callee.Name.TrimStart('Δ') == methodName)
+                return (null, methodValue);
+        }
+
+        return null;
+    }
+
     // The recorded `pkg.Recv.Method` a compiler-generated lambda stands for when it is a value-receiver
     // METHOD VALUE, or null. Two facts must agree: the frame's Go line carries a method-value entry in
     // the file's record, and the lambda's body makes exactly ONE call, to a method of that name (a
@@ -1888,11 +1995,63 @@ partial class runtime_package
 
     // The target of a method's only call-like instruction, or null when it makes none or more than one,
     // or the target cannot be resolved (a calli, no IL body).
-    private static System.Reflection.MethodBase? singleCallee(System.Reflection.MethodBase method)
-    {
-        if (callSiteOffsets(method) is not [int offset])
-            return null;
+    private static System.Reflection.MethodBase? singleCallee(System.Reflection.MethodBase method) =>
+        callSiteOffsets(method) is [int offset] ? calleeAt(method, offset) : null;
 
+    // The targets of every call-like instruction the method makes that resolve, in IL order.
+    private static List<System.Reflection.MethodBase> callees(System.Reflection.MethodBase method)
+    {
+        List<System.Reflection.MethodBase> targets = [];
+
+        if (callSiteOffsets(method) is int[] offsets)
+        {
+            foreach (int offset in offsets)
+            {
+                if (calleeAt(method, offset) is System.Reflection.MethodBase target)
+                    targets.Add(target);
+            }
+        }
+
+        return targets;
+    }
+
+    // The method a go2cs-gen PROMOTED-METHOD forwarder forwards to, or null. go2cs-gen emits each method
+    // an embedded field promotes as a forwarder on a generated class (`<pkg>ᴛ<Type>ᴛxpkg` for a foreign
+    // embedded type) whose body calls the embedded value's method of the SAME name. That class is not
+    // converted Go, so the runtime has no Go name for it; Go names a promoted method VALUE by the method
+    // it promotes. A forwarder over a forwarder (a promotion two embeddings deep) resolves to the end.
+    private static System.Reflection.MethodBase? goPromotedForwardTarget(System.Reflection.MethodBase method)
+    {
+        for (int depth = 0; depth < 8; depth++)
+        {
+            if (method.DeclaringType?.GetCustomAttributes(typeof(System.CodeDom.Compiler.GeneratedCodeAttribute), inherit: false)
+                is not [System.CodeDom.Compiler.GeneratedCodeAttribute { Tool: "go2cs-gen" }])
+                return depth == 0 ? null : method;
+
+            string name = method.Name.TrimStart('Δ');
+            System.Reflection.MethodBase? next = null;
+
+            foreach (System.Reflection.MethodBase callee in callees(method))
+            {
+                if (callee.Name.TrimStart('Δ') == name)
+                {
+                    next = callee;
+                    break;
+                }
+            }
+
+            if (next is null)
+                return null;
+
+            method = next;
+        }
+
+        return null;
+    }
+
+    // The target of the call-like instruction at a call-site offset, or null when it cannot be resolved.
+    private static System.Reflection.MethodBase? calleeAt(System.Reflection.MethodBase method, int offset)
+    {
         try
         {
             byte[]? il = method.GetMethodBody()?.GetILAsByteArray();
@@ -2177,6 +2336,38 @@ partial class runtime_package
                 return null;
             }
         });
+
+    // A method's FIRST non-hidden sequence point, with its column: the source order of two lambdas that
+    // start on one line.
+    private static (string? file, int line, int column) methodSourceStart(System.Reflection.MethodBase method)
+    {
+        System.Reflection.Metadata.MetadataReaderProvider? provider = symbolReader(method.Module.Assembly);
+
+        if (provider is null)
+            return (null, 0, 0);
+
+        try
+        {
+            lock (s_pdbLock)
+            {
+                System.Reflection.Metadata.MetadataReader pdb = provider.GetMetadataReader();
+                var definition = System.Reflection.Metadata.Ecma335.MetadataTokens.MethodDefinitionHandle(method.MetadataToken);
+                System.Reflection.Metadata.MethodDebugInformation information = pdb.GetMethodDebugInformation(definition.ToDebugInformationHandle());
+
+                foreach (System.Reflection.Metadata.SequencePoint point in information.GetSequencePoints())
+                {
+                    if (!point.IsHidden)
+                        return (pdb.GetString(pdb.GetDocument(point.Document).Name), point.StartLine, point.StartColumn);
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // An unreadable PDB names no position.
+        }
+
+        return (null, 0, 0);
+    }
 
     // A method's first non-hidden sequence point (document name, line), or (null, 0). Given an IL
     // offset (not StackFrame.OFFSET_UNKNOWN), the last non-hidden sequence point at or before it
@@ -2669,6 +2860,70 @@ partial class runtime_package
             int best = innermostFuncLiteral(goLine);
 
             return best < 0 ? null : m_litSuffixes![best];
+        }
+
+        // StatementGoSpan answers the Go lines [start, end) of the statement the given C# line was
+        // emitted for: start is GoLineFor's answer, end the next mapped Go line beyond it (int.MaxValue
+        // for the file's last statement). A multi-line Go statement -- a table of composite literals --
+        // is ONE entry in the line table, so everything written inside it answers its first line.
+        public (int Start, int End) StatementGoSpan(int csLine)
+        {
+            decode();
+
+            int[] csLines = m_csLines!;
+            int[] goLines = m_goLines!;
+            int start = GoLineFor(csLine);
+
+            if (start <= 0)
+                return (0, 0);
+
+            int index = Array.FindLastIndex(csLines, line => line <= csLine);
+
+            for (int next = index + 1; next < goLines.Length; next++)
+            {
+                if (goLines[next] > start)
+                    return (start, goLines[next]);
+            }
+
+            return (start, int.MaxValue);
+        }
+
+        // StatementItems answers the function literals (their recorded suffix) and value-receiver method
+        // values (their recorded name) that START on a Go line in [start, end), in Go line order, or null
+        // when two of them share a line (their order is not recoverable from lines alone) or a map is
+        // malformed. A nested literal (`2.1`) is not an item of the statement: it belongs to its enclosing
+        // literal.
+        public List<(int Line, string? Suffix, string? MethodValue)>? StatementItems(int start, int end)
+        {
+            decodeFuncLits();
+            _ = MethodValuesFor(0);
+
+            List<(int Line, string? Suffix, string? MethodValue)> items = [];
+
+            for (int i = 0; i < m_litStarts!.Length; i++)
+            {
+                if (m_litStarts[i] >= start && m_litStarts[i] < end && !m_litSuffixes![i].Contains('.'))
+                    items.Add((m_litStarts[i], m_litSuffixes[i], null));
+            }
+
+            foreach ((int line, string[] names) in m_methodValues!)
+            {
+                if (line < start || line >= end)
+                    continue;
+
+                foreach (string name in names)
+                    items.Add((line, null, name));
+            }
+
+            items.Sort((left, right) => left.Line.CompareTo(right.Line));
+
+            for (int i = 1; i < items.Count; i++)
+            {
+                if (items[i].Line == items[i - 1].Line)
+                    return null;
+            }
+
+            return items;
         }
 
         // FuncLiteralStartFor answers the Go line of the `func` keyword of the innermost recorded

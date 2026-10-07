@@ -13,7 +13,7 @@ private static readonly @string readReturnedNoErrorˢ = "read returned no error"
 private static readonly object readUnblockedˢ = (@string)"read unblocked:"u8;
 private static readonly object readDidNotUnblockˢ = (@string)"read did NOT unblock"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     var (r, w, err) = os.Pipe();
     if (err != default!) {
         fmt.Println(pipeErrorˢ, err);

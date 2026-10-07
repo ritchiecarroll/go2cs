@@ -14,7 +14,7 @@ partial class main_package {
     internal uintptr guard;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<outer> get(ж<outer> Ꮡo) {
+internal static partial ж<outer> get(ж<outer> Ꮡo) {
     return Ꮡo;
 }
 

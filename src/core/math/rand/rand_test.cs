@@ -799,7 +799,7 @@ public static void BenchmarkRead1000(ж<testing.B> Ꮡb) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkConcurrent(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkConcurrent(ж<testing.B> Ꮡb) {
     const nint goroutines = 4;
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(goroutines);

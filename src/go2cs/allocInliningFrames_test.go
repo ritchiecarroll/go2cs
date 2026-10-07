@@ -121,24 +121,31 @@ func declarationLine(t *testing.T, cs, name string) string {
 	return ""
 }
 
+// keepsOwnFrame reports whether an emitted declaration line carries the no-inline mark. A declared
+// function with a body takes it as a partial method's implementing part -- the word `partial` where the
+// [MethodImpl(MethodImplOptions.NoInlining)] prefix stood -- and go2cs-gen writes the declaring part
+// that carries the attribute (owner ruling 2026-10-06). A bodyless `partial` declaration ends in `;`
+// and is not a carrier.
+func keepsOwnFrame(line string) bool {
+	return strings.Contains(line, " static partial ") && !strings.HasSuffix(strings.TrimSpace(line), ";")
+}
+
 func TestThinAllocatorsInAHeapProfileReaderAreNotInlined(t *testing.T) {
 	mainCs, libCs := convertAllocInliningFixture(t)
 
-	const attribute = "[MethodImpl(MethodImplOptions.NoInlining)]"
-
 	for _, name := range []string{"genericAlloc", "newBox"} {
-		if line := declarationLine(t, mainCs, name); !strings.Contains(line, attribute) {
+		if line := declarationLine(t, mainCs, name); !keepsOwnFrame(line) {
 			t.Errorf("thin allocator %s in a heap-profile reader is not marked: %s", name, line)
 		}
 	}
 
 	for _, name := range []string{"add", "twoStep"} {
-		if line := declarationLine(t, mainCs, name); strings.Contains(line, attribute) {
+		if line := declarationLine(t, mainCs, name); keepsOwnFrame(line) {
 			t.Errorf("%s is marked, but it is not a thin allocator: %s", name, line)
 		}
 	}
 
-	if line := declarationLine(t, libCs, "Alloc"); strings.Contains(line, attribute) {
+	if line := declarationLine(t, libCs, "Alloc"); keepsOwnFrame(line) {
 		t.Errorf("lib.Alloc is marked, but its package reads no heap profile: %s", line)
 	}
 }

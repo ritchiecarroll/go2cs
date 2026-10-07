@@ -132,8 +132,11 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		// address-taken box (identHasHeapBox): here the pointer VALUE is the ident itself
 		// (`new Middle(Inner: inner)`), and `Ꮡinner` (the ж<ж<T>> box) is only what an explicit
 		// `&inner` wants — that renders through convUnaryExpr.
+		// A NAMED pointer type (`type itemPtr *item`) is already a pointer value too: its UNDERLYING
+		// is the pointer, so `ip == itemPtr(pi)` compares the two pointers as written. Testing the
+		// type itself rendered `Ꮡip`, the box of a value local, which does not exist (CS0103).
 		if !isCurrentRefReceiver {
-			if _, ok := identType.(*types.Pointer); !ok || v.identIsParameter(ident) || (identEscapesHeap && !isInherentlyHeapAllocatedType(identType)) {
+			if _, ok := types.Unalias(identType).Underlying().(*types.Pointer); !ok || v.identIsParameter(ident) || (identEscapesHeap && !isInherentlyHeapAllocatedType(identType)) {
 				return AddressPrefix + v.boxBaseName(ident)
 			}
 		}

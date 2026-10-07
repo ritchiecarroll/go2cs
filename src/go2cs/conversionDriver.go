@@ -373,7 +373,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				collectHoistedLiterals(files, packageTypes, info, goosOfTarget(options.targetPlatform), nil, true)
 				collectMovedInitVars(fset, packageTypes, info, pkg.Syntax)
 				collectPackageLevelLiteralStructFieldTypes(files, packageTypes, info)
-				collectPublicizedTypes(packageTypes)
+				collectPublicizedTypes(packageTypes, fset)
 
 				// ж-box A1: the ref-lowering classification runs in the hand-owned-sibling driver
 				// too (the three-driver rule, DESIGN-zh-box-reduction §3.5) — analysis only, no
@@ -439,7 +439,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// Package-wide, computed once and shared by every file's Visitor — see
 		// callerInliningAnalysis.go. Must run after `files` is fully populated (it walks every
 		// file's declarations) but has no other ordering dependency on the analyses above/below it.
-		needsNoInlining := computeNoInliningClosure(files, packageTypes, info)
+		needsNoInlining := computeNoInliningClosure(files, packageTypes, info, fixedSkipClosureApplies(packageInputPath, options.goRoot))
 
 		// Perform escape analysis for each file
 		// Identify capture-mode methods (those taking &recv.field) — across the package
@@ -484,7 +484,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// Find unexported types used as exported struct fields so they can be emitted as public
 		// (an exported field's type must be at least as accessible — CS0051/CS0052).
 		collectPackageLevelLiteralStructFieldTypes(files, packageTypes, info)
-		collectPublicizedTypes(packageTypes)
+		collectPublicizedTypes(packageTypes, fset)
 
 		// Find this package's definition-side one-arg //go:linkname handles (Go 1.23's opt-in that
 		// authorizes cross-package linkname pulls) so the handled vars emit `public` — letting a

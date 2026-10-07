@@ -223,7 +223,7 @@ public static Index Flush(this ж<Encoder> Ꮡw) {
     return i;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] public static void Sync(this ref Encoder w, SyncMarker m) {
+[GoRecv] public static partial void Sync(this ref Encoder w, SyncMarker m) {
     if (!w.p.SyncMarkers()) {
         return;
     }

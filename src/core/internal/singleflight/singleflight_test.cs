@@ -52,7 +52,7 @@ public static void TestDoErr(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDoDupSuppress(ж<testing.T> Ꮡt) {
+public static partial void TestDoDupSuppress(ж<testing.T> Ꮡt) {
     ref var g = ref heap(new global::go.@internal.singleflight_package.Group(), out var Ꮡg);
     ref var wg1 = ref heap(new sync.WaitGroup(), out var Ꮡwg1);
     ref var wg2 = ref heap(new sync.WaitGroup(), out var Ꮡwg2);
@@ -107,7 +107,7 @@ public static void TestDoErr(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestForgetUnshared(ж<testing.T> Ꮡt) {
+public static partial void TestForgetUnshared(ж<testing.T> Ꮡt) {
     ref var g = ref heap(new global::go.@internal.singleflight_package.Group(), out var Ꮡg);
     ref var firstStarted = ref heap(new sync.WaitGroup(), out var ᏑfirstStarted);
     ref var firstFinished = ref heap(new sync.WaitGroup(), out var ᏑfirstFinished);
@@ -160,7 +160,7 @@ public static void TestDoErr(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDoAndForgetUnsharedRace(ж<testing.T> Ꮡt) {
+public static partial void TestDoAndForgetUnsharedRace(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.Parallel();

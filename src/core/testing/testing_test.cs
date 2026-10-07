@@ -543,7 +543,7 @@ internal static slice<byte> runTest(ж<testing.T> Ꮡt, @string test) {
 
 // doRace provokes a data race that generates a race detector report if run
 // under the race detector and is otherwise benign.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void doRace() {
+internal static partial void doRace() {
     nint x = default!;
     var c1 = new channel<bool>(0);
     var c1ʗ1 = c1;
@@ -711,7 +711,7 @@ public static void TestDeepSubtestRace(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRaceDuringParallelFailsAllSubtests(ж<testing.T> Ꮡt) {
+public static partial void TestRaceDuringParallelFailsAllSubtests(ж<testing.T> Ꮡt) {
     if (Δos.Getenv(goWantHelperProcessˢ) == "1"u8) {
         ref var ready = ref heap(new Δsync.WaitGroup(), out var Ꮡready);
         Ꮡready.Add(2);
@@ -1033,7 +1033,7 @@ internal static (slice<@string> runningTests, bool ok) parseRunningTests(slice<b
     return (default!, false);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentRun(ж<testing.T> Ꮡt) {
+public static partial void TestConcurrentRun(ж<testing.T> Ꮡt) {
     // Regression test for https://go.dev/issue/64402:
     // this deadlocked after https://go.dev/cl/506755.
     var block = new channel<EmptyStruct>(0);

@@ -292,7 +292,7 @@ internal static void logCloseHangDebugInfo(this ж<Server> Ꮡs) {
 }
 
 // CloseClientConnections closes any open HTTP connections to the test Server.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void CloseClientConnections(this ж<Server> Ꮡs) {
+public static partial void CloseClientConnections(this ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -345,7 +345,7 @@ internal static void logCloseHangDebugInfo(this ж<Server> Ꮡs) {
     return s.client;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void goServe(this ж<Server> Ꮡs) {
+internal static partial void goServe(this ж<Server> Ꮡs) {
     Ꮡs.of(Server.Ꮡwg).Add(1);
     goǃ(() => {
         GoFrame ᒐ = default;

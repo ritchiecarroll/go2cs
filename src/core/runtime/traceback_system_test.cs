@@ -33,7 +33,7 @@ internal static readonly @string systemˢ = "system"u8;
 
 // This is the entrypoint of the child process used by
 // TestTracebackSystem/panic. It prints a crash report to stdout.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void crashViaPanic() {
+internal static partial void crashViaPanic() {
     // Ensure that we get pc=0x%x values in the traceback.
     Δdebug.SetTraceback(systemˢ);
     writeSentinel(new Δos.FileжWriter(Δos.Stdout));
@@ -47,7 +47,7 @@ internal static readonly @string systemˢ = "system"u8;
 
 // This is the entrypoint of the child process used by
 // TestTracebackSystem/trap. It prints a crash report to stdout.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void crashViaTrap() {
+internal static partial void crashViaTrap() {
     // Ensure that we get pc=0x%x values in the traceback.
     Δdebug.SetTraceback(systemˢ);
     writeSentinel(new Δos.FileжWriter(Δos.Stdout));
@@ -76,29 +76,29 @@ internal static void child4() {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void child5() {
+internal static partial void child5() {
     // test trace through second of two call instructions
     child6bad();
     child6(); // appears in stack trace
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void child6bad() {
+internal static partial void child6bad() {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void child6() {
+internal static partial void child6() {
     // test trace through first of two call instructions
     child7(); // appears in stack trace
     child7bad();
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void child7bad() {
+internal static partial void child7bad() {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void child7() {
+internal static partial void child7() {
     // Write runtime.Caller's view of the stack to stderr, for debugging.
     array<uintptr> pcs = new(16);
     nint n = Δruntime.Callers(1, pcs[..]);

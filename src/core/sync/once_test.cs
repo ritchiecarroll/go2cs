@@ -33,7 +33,7 @@ internal static void run(ж<Δtesting.T> Ꮡt, ж<Δsync.Once> Ꮡonce, ж<one> 
     c.ᐸꟷ(true);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOnce(ж<Δtesting.T> Ꮡt) {
+public static partial void TestOnce(ж<Δtesting.T> Ꮡt) {
     var o = @new<one>();
     var once = @new<Δsync.Once>();
     var c = new channel<bool>(0);

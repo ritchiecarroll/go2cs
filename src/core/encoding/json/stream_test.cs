@@ -34,7 +34,7 @@ partial class json_internal_test_package {
 }
 
 // Name annotates a case name with the file and line of the caller.
-[MethodImpl(MethodImplOptions.NoInlining)] public static CaseName /*c*/ Name(@string s) {
+public static partial CaseName /*c*/ Name(@string s) {
     CaseName c = new();
 
     c.Name = s;

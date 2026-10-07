@@ -167,7 +167,7 @@ internal static any packEface(Value v) {
 
 // mustBeExported panics if f records that the value was obtained using
 // an unexported field.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void mustBeExported(this flag f) {
+internal static partial void mustBeExported(this flag f) {
     if (f == 0) {
         throw panic(Ꮡ(new ValueError(methodName(), 0)));
     }
@@ -179,7 +179,7 @@ internal static any packEface(Value v) {
 // mustBeAssignable panics if f records that the value is not assignable,
 // which is to say that either it was obtained using an unexported field
 // or it is not addressable.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void mustBeAssignable(this flag f) {
+internal static partial void mustBeAssignable(this flag f) {
     if (f == 0) {
         throw panic(Ꮡ(new ValueError(methodName(), abi.Invalid)));
     }

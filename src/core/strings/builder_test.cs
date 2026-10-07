@@ -284,7 +284,7 @@ public static void TestBuilderAllocs(ж<testing.T> Ꮡt) {
     internal bool wantPanic;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBuilderCopyPanic(ж<testing.T> Ꮡt) {
+public static partial void TestBuilderCopyPanic(ж<testing.T> Ꮡt) {
     var tests = new TestBuilderCopyPanic_tests[]{
         new(
             name: "String"u8,

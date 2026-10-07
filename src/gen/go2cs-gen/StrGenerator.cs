@@ -78,7 +78,7 @@ public class StrGenerator : ISourceGenerator
                 PackageName = packageName,
                 Method = method,
                 ParameterNames = methodSyntax.ParameterList.Parameters.Select(parameter => parameter.Identifier.Text).ToArray(),
-                NoInlining = RecvGenerator.HasNoInliningMark(methodSyntax)
+                NoInlining = RecvGenerator.HasNoInliningMark(methodSyntax, semanticModel)
             };
 
             // A twin whose shape the forwarder cannot re-declare is not emitted: the converter refuses

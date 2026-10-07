@@ -9,11 +9,11 @@ partial class main_package {
     internal ж<node> next;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static void link(this ref node n, ж<node> Ꮡm) {
+[GoRecv] internal static partial void link(this ref node n, ж<node> Ꮡm) {
     n.next = Ꮡm;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static array<nint> process(nint n) {
+internal static partial array<nint> process(nint n) {
     array<nint> a = new(5);
     for (nint i = 0; i < n; i++) {
         a[i] = i * 10;
@@ -30,7 +30,7 @@ partial class main_package {
     return a.Clone();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint mapShadow(nint ns) {
+internal static partial nint mapShadow(nint ns) {
     var m = new map<nint, nint>{};
     m[ns] = ns * 100;
     {
@@ -40,7 +40,7 @@ partial class main_package {
     return m[ns] * 10 + len(m);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint boxedSiblings(nint kind) {
+internal static partial nint boxedSiblings(nint kind) {
     nint total = 0;
     switch (kind) {
     case 1: {
@@ -64,7 +64,7 @@ partial class main_package {
     return total;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint caseSiblings(nint kind) {
+internal static partial nint caseSiblings(nint kind) {
     nint total = 0;
     switch (kind) {
     case 1: {

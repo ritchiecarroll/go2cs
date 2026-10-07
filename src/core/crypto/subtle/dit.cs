@@ -28,7 +28,7 @@ partial class subtle_package {
 // with no other side-effects.
 //
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] public static void WithDataIndependentTiming(Action f) {
+public static partial void WithDataIndependentTiming(Action f) {
     GoFrame ᒐ = default;
     try {
         if (!sys.DITSupported) {

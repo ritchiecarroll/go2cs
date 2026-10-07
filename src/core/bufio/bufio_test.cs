@@ -206,7 +206,7 @@ internal static readonly object errorExpectedˢ = (@string)"error expected"u8;
 internal static readonly object unexpectedErrorˢ = (@string)"unexpected error:"u8;
 internal static readonly object testTimedOutEndlessLoopˢ = (@string)"test timed out (endless loop in ReadByte?)"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestZeroReader(ж<Δtesting.T> Ꮡt) {
+public static partial void TestZeroReader(ж<Δtesting.T> Ꮡt) {
     zeroReader z = default!;
     var r = NewReader(z);
     var c = new channel<error>(0);

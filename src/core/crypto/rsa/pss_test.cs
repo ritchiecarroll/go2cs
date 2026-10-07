@@ -42,7 +42,7 @@ internal static readonly @string newSignatureMarkerᶜ = "START NEW SIGNATURE"u8
 
 // TestPSSGolden tests all the test vectors in pss-vect.txt from
 // ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-1/pkcs-1v2-1-vec.zip
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPSSGolden(ж<testing.T> Ꮡt) {
+public static partial void TestPSSGolden(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

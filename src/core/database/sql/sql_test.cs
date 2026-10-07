@@ -820,7 +820,7 @@ public static void TestQueryNamedArg(ж<testing.T> Ꮡt) {
 internal static readonly object longTestˢ = (@string)"long test"u8;
 internal static readonly @string selectPeopleNamePhotoˢ = "SELECT|people|name,photo|"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPoolExhaustOnCancel(ж<testing.T> Ꮡt) {
+public static partial void TestPoolExhaustOnCancel(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
@@ -1218,7 +1218,7 @@ public static void TestStatementClose(ж<testing.T> Ꮡt) {
 }
 
 // golang.org/issue/3734
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStatementQueryRowConcurrent(ж<testing.T> Ꮡt) {
+public static partial void TestStatementQueryRowConcurrent(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var db = newTestDB(new sql_test_package.testing_TжTB(Ꮡt), peopleˢ);
@@ -2551,7 +2551,7 @@ internal static readonly @string magicqueryˢ = "magicquery"u8;
 internal static readonly @string selectMagicqueryOpOpˢ = "SELECT|magicquery|op|op=?,millis=?"u8;
 internal static readonly object sleepˢ = (@string)"sleep"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMaxOpenConns(ж<testing.T> Ꮡt) {
+public static partial void TestMaxOpenConns(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
@@ -2745,7 +2745,7 @@ internal static readonly @string willNeverRunˢ = "will never run"u8;
 
 // Issue 10886: tests that all connection attempts return when more than
 // DB.maxOpen connections are in flight and the first DB.maxOpen fail.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPendingConnsAfterErr(ж<testing.T> Ꮡt) {
+public static partial void TestPendingConnsAfterErr(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         UntypedInt maxOpen = 2;
@@ -2979,7 +2979,7 @@ public static void TestConnMaxLifetime(ж<testing.T> Ꮡt) {
 }
 
 // golang.org/issue/5323
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStmtCloseDeps(ж<testing.T> Ꮡt) {
+public static partial void TestStmtCloseDeps(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
@@ -4273,7 +4273,7 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     return ct.test(t);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void doConcurrentTest(testing.TB t, concurrentTest ct) {
+internal static partial void doConcurrentTest(testing.TB t, concurrentTest ct) {
     GoFrame ᒐ = default;
     try {
         nint maxProcs = 1;
@@ -4374,7 +4374,7 @@ public static void TestIssue6081(ж<testing.T> Ꮡt) {
 //
 // The addition of calling rows.Next also tests
 // Issue 21117.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestIssue18429(ж<testing.T> Ꮡt) {
+public static partial void TestIssue18429(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -4435,7 +4435,7 @@ public static void TestIssue6081(ж<testing.T> Ꮡt) {
 }
 
 // TestIssue20160 attempts to test a short context life on a stmt Query.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestIssue20160(ж<testing.T> Ꮡt) {
+public static partial void TestIssue20160(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var db = newTestDB(new sql_test_package.testing_TжTB(Ꮡt), peopleˢ);
@@ -4603,7 +4603,7 @@ public static void TestConcurrency(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConnectionLeak(ж<testing.T> Ꮡt) {
+public static partial void TestConnectionLeak(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var db = newTestDB(new sql_test_package.testing_TжTB(Ꮡt), peopleˢ);
@@ -5311,7 +5311,7 @@ public static void TestContextCancelDuringRawBytesScan(ж<testing.T> Ꮡt) {
 }
 
 // From go.dev/issue/60304
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testContextCancelDuringRawBytesScan(ж<testing.T> Ꮡt, @string mode) {
+internal static partial void testContextCancelDuringRawBytesScan(ж<testing.T> Ꮡt, @string mode) {
     GoFrame ᒐ = default;
     try {
         var db = newTestDB(new sql_test_package.testing_TжTB(Ꮡt), peopleˢ);
@@ -5438,7 +5438,7 @@ internal static error Scan(this testScanner ts, any src) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string selectPeopleNameNameˢ = "SELECT|people|name|name=?"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestContextCancelDuringScan(ж<testing.T> Ꮡt) {
+public static partial void TestContextCancelDuringScan(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var db = newTestDB(new sql_test_package.testing_TжTB(Ꮡt), peopleˢ);

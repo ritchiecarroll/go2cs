@@ -487,7 +487,7 @@ internal static readonly @string netHttpCgiHandlerˢ = @"net/http/cgi\.\(\*Handl
 
 // handlerRunning reports whether any goroutine is currently running
 // [Handler.ServeHTTP].
-[MethodImpl(MethodImplOptions.NoInlining)] internal static bool handlerRunning() {
+internal static partial bool handlerRunning() {
     var r = regexp.MustCompile(netHttpCgiHandlerˢ);
     var buf = new slice<byte>((64 << (int)(10)));
     while (ᐧ) {

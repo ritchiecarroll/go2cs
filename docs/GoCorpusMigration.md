@@ -3539,10 +3539,25 @@ FROM THE CLOSE SEAT ITSELF.** The seat stopped three times and each stop was rul
    (an agent's credential checks are refused by the permission classifier). **No GPG signing on the release
    machine during NuGet Phase 2, or `disable-scdaemon` in gpg-agent.conf when no GPG key lives on a card** (the
    owner's call): the likely cause was a woken scdaemon resetting the signing card's session per package.
+   **The environment, read back before the script** *(added 2026-10-06: the 1.24.13.4 run's first attempt resolved
+   a machine dotnet with no SDK satisfying `global.json` and failed at Phase 1's first build, after the bump, the
+   tag, the snapshot and the README retarget)*. In the shell that will run `release-nuget.ps1`, the .NET 10 SDK root
+   and the pinned Go first on PATH, then both read back from the repository root:
+   ```powershell
+   $env:PATH = '<.NET 10 SDK root>;<pinned Go root>\bin;' + $env:PATH
+   dotnet --version                       # an SDK global.json admits (10.0.100, rollForward latestFeature)
+   $env:GOTOOLCHAIN = 'local'; go version; Remove-Item Env:GOTOOLCHAIN   # the pin itself, not a re-exec
+   ```
+   Phase 0 refuses a dotnet whose `--version` fails from the repository root, before anything moves, and prints
+   the SDK it resolved. The script has no gate on the Go pin, so `go version` here is the only check of it (the
+   repository root carries no `go.mod`, so `GOTOOLCHAIN=local` reads the bare toolchain).
 4. **To resume a failed Phase 2, NEVER re-run release-nuget** — it re-bumps the version. Run the signer's census,
    then the signer with `-Apply -Overwrite` (one PIN), then Phase 3's exact push. Nothing is re-packed.
 5. **After the publish**, "indexed" means every id in the walkthrough's restore closure is listed — a partial
    index fails restore loudly (NU1102). Then the post-publish smoke, the removed-ID deprecations, the release record.
+   **The post-publish smoke** *(added 2026-10-06: 1.24.13.4, run 37426951507)* is the `release-smoke` dispatch
+   with `published_version` set to the version just pushed: no pack, and every leg restores from nuget.org, so
+   arms A-D read the published packages on all four shipped RIDs, D gating as before the publish.
 
 ---
 

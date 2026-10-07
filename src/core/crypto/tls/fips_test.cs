@@ -230,7 +230,7 @@ public static void TestFIPSServerCurves(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (error clientErr, error serverErr) fipsHandshake(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> ᏑclientConfig, ж<global::go.crypto.tls_package.Config> ᏑserverConfig) {
+internal static partial (error clientErr, error serverErr) fipsHandshake(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> ᏑclientConfig, ж<global::go.crypto.tls_package.Config> ᏑserverConfig) {
     error clientErr = default!;
     error serverErr = default!;
 
@@ -321,7 +321,7 @@ public static void TestFIPSClientHello(ж<testing.T> Ꮡt) {
     runWithFIPSEnabled(Ꮡt, testFIPSClientHello);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testFIPSClientHello(ж<testing.T> Ꮡt) {
+internal static partial void testFIPSClientHello(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // Test that no matter what we put in the client config,

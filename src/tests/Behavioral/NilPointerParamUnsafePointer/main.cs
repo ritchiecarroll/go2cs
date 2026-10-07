@@ -8,19 +8,19 @@ partial class main_package {
 
 [GoType("num:uintptr")] partial struct Handle;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uintptr addrOfNamed(ж<Handle> Ꮡh) {
+internal static partial uintptr addrOfNamed(ж<Handle> Ꮡh) {
     return (uintptr)Ꮡh;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uintptr addrOfPtrPtr(ж<ж<uint16>> Ꮡpp) {
+internal static partial uintptr addrOfPtrPtr(ж<ж<uint16>> Ꮡpp) {
     return (uintptr)Ꮡpp;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uintptr addrOfBasic(ж<uint16> Ꮡb) {
+internal static partial uintptr addrOfBasic(ж<uint16> Ꮡb) {
     return (uintptr)Ꮡb;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (uintptr, Handle) liveAlias(ж<Handle> Ꮡh) {
+internal static partial (uintptr, Handle) liveAlias(ж<Handle> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     h = h + 7;
@@ -32,11 +32,11 @@ partial class main_package {
     internal ж<node> parent;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<node> newNode(nint id, ж<node> Ꮡparent) {
+internal static partial ж<node> newNode(nint id, ж<node> Ꮡparent) {
     return Ꮡ(new node(id: id, parent: Ꮡparent));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint depth(ref node n) {
+internal static partial nint depth(ref node n) {
     nint d = 0;
     for (var p = n.parent; p != nil; p = p.Value.parent) {
         d++;

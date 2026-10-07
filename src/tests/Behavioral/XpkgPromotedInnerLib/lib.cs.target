@@ -39,7 +39,7 @@ public static @string String(this Inner i) {
     return innerˢ2;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static bool Where(this Inner i) {
+public static partial bool Where(this Inner i) {
     var (_, _, _, ok) = runtime.Caller(1);
     return ok;
 }

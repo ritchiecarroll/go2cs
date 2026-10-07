@@ -232,7 +232,7 @@ internal static unsafe @string itabInit(ж<itab> Ꮡm, bool firstTime) {
     nint nt = (nint)(~x).Mcount;
     var xmhdr = new slice<abi.Method>(new ReadOnlySpan<abi.Method>((abi.Method*)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(x), (uintptr)(~x).Moff)), (int)(nt)));
     nint j = 0;
-    var methods = new slice<@unsafe.Pointer>(new ReadOnlySpan<@unsafe.Pointer>((@unsafe.Pointer*)(uintptr)(@unsafe.Pointer.FromBox(Ꮡm.at(itab.ᏑFun, 0))), (int)(ni)));
+    var methods = (false ? default(slice<@unsafe.Pointer>) : throw panic("go2cs: a slice view (*[N]unsafe.Pointer)(p)[...] over a managed element has no managed aliasing pair (iface.go:217)"));
     @unsafe.Pointer fun0 = default!;
 imethods:
     for (nint k = 0; k < ni; k++) {

@@ -202,7 +202,7 @@ func TestSStringTwinEmission(t *testing.T) {
 	}
 
 	// a deferred or go'd twin takes the lambda form (a method group would be CS0123)
-	body := liftFunctionBody(t, emitted, "internal static @string use(")
+	body := liftFunctionBody(t, emitted, "internal static partial @string use(") // use executes a go: a no-inline carrier
 
 	for _, want := range []string{"defer(ᴛ1 => Ꮡb.ValueSlot.write(ᴛ1),", "defer(ᴛ1 => Count(ᴛ1),", "goǃ(ᴛ1 => Count(ᴛ1),"} {
 		if !strings.Contains(body, want) {

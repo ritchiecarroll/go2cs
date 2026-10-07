@@ -138,7 +138,7 @@ public static void TestTCPServer(ж<testing.T> Ꮡt) {
 
 // TestUnixAndUnixpacketServer tests concurrent accept-read-write
 // servers
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestUnixAndUnixpacketServer(ж<testing.T> Ꮡt) {
+public static partial void TestUnixAndUnixpacketServer(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         slice<prohibitionaryDialArgTestsᴛ1> unixAndUnixpacketServerTests = new prohibitionaryDialArgTestsᴛ1[]{

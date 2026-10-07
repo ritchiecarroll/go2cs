@@ -121,6 +121,7 @@ paths:
      and accepted through a named land-script path keyed on the attribute. -->
 
 ## MSTest, testhost and GolibTests
+- **The MSTest tier's compile skip reads SHARED inputs too.** `CompileCSProject` reuses a fixture's executable only when it is newer than every fixture `.cs` AND than the newest file under `src/core`/`src/gen` (`.cs`, `.csproj`, `.props`, `.targets`; build output skipped). Since incremental `.cs` writes an unchanged emission keeps its time, so the fixture's `.cs` alone no longer witness a golib or generator change. <!-- 2026-10-05, measured on ZeroValueStructVar with a golib module initializer printing a marker: the Output test PASSED on the stale executable after a golib-only change and after a converter rebuild plus a golib change; the guard is CompileSkipTests. -->
 - **`MSB3027` "file locked by testhost" is not a compile error.** A stray `testhost`/`vstest.console` from a prior run locks `BehavioralTests.dll`; kill it, and `dotnet build-server shutdown` frees bin/obj locks. **Prefer `src/tests/Behavioral/run-behavioral-tests.ps1`** — it clears stale hosts *before* the build, where the lock manifests, and runs with `--blame-hang` — over a bare `dotnet test`. <!-- Root cause + mitigation 2026-06-30: MSTest's Exec() used an unbounded WaitForExit(), so a hung
      child (a deadlocked transpiled program, or a build blocked on a lock) hung the suite forever and
      orphaned testhost. Exec now has a per-call timeout (180s build/transpile, 30s run) that kills the
@@ -385,7 +386,12 @@ paths:
      immediately before Compile, so the batch is never an incremental no-op. For scale, a full
      `dotnet build src/go2cs.slnx -c Debug -m -p:UseSharedCompilation=false` of the same tree took
      1,432s cold (573 projects, 0 errors), ~5x the old 300s batch budget; a single cold filtered
-     project measured 163s. -->
+     project measured 163s.
+     CORRECTED 2026-10-05: "the Transpile phase rewrites every .cs immediately before Compile" was true
+     when measured and is not since incremental .cs writes (TRAIN P): an unchanged emission keeps its
+     time. Its consequence for the MSTest tier -- CompileCSProject reused a fixture's executable after a
+     golib or generator change -- is closed by ExecutableIsCurrent's shared-input half
+     (BehavioralTestBase.cs). -->
 - **A budget that EXPIRES is reported as `NOT MEASURED`, never as a failure** — a fourth `Status.Timeout` alongside Pass/Fail/Skip, borrowing CNR's word. Timeouts still fail the run and still exit 1 (an unmeasured project must never read as a pass) but are counted, listed and summarized separately, and the per-project fallback bails out after **3 consecutive** timeouts. <!-- This closes a FALSE RED, the mirror of the false-green routes: on the cold slow machine the batch
      timed out, all 555 projects fell to the sequential per-project fallback, each also exceeded 180s
      (every one must first build the core dependency closure), and ~15 minutes produced zero assemblies
