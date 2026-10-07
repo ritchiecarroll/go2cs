@@ -175,7 +175,7 @@ internal static ж<g> wakefing() {
     return default!;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void createfing() {
+internal static partial void createfing() {
     // start the finalizer goroutine exactly once
     if (ᏑfingStatus.Load() == fingUninitialized && ᏑfingStatus.CompareAndSwap(fingUninitialized, fingCreated)) {
         goǃ(runfinq);

@@ -2298,7 +2298,7 @@ internal static void hammerCompareAndSwapUintptr32Method(ж<uint32> Ꮡuaddr, ni
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string swapˢ = "Swap"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestHammer32(ж<testing.T> Ꮡt) {
+public static partial void TestHammer32(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         UntypedInt p = 4;
@@ -2590,7 +2590,7 @@ internal static void hammerCompareAndSwapUintptr64Method(ж<uint64> Ꮡuaddr, ni
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestHammer64(ж<testing.T> Ꮡt) {
+public static partial void TestHammer64(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         UntypedInt p = 4;
@@ -2856,7 +2856,7 @@ internal static void hammerStoreLoadPointerMethod(ж<testing.T> Ꮡt, @unsafe.Po
     addr.Store((ж<byte>)(uintptr)((@unsafe.Pointer)@new));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestHammerStoreLoad(ж<testing.T> Ꮡt) {
+public static partial void TestHammerStoreLoad(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -2902,7 +2902,7 @@ internal static void hammerStoreLoadPointerMethod(ж<testing.T> Ꮡt, @unsafe.Po
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStoreLoadSeqCst32(ж<testing.T> Ꮡt) {
+public static partial void TestStoreLoadSeqCst32(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (runtime.NumCPU() == 1) {
@@ -2952,7 +2952,7 @@ internal static void hammerStoreLoadPointerMethod(ж<testing.T> Ꮡt, @unsafe.Po
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStoreLoadSeqCst64(ж<testing.T> Ꮡt) {
+public static partial void TestStoreLoadSeqCst64(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (runtime.NumCPU() == 1) {
@@ -3010,7 +3010,7 @@ internal static void hammerStoreLoadPointerMethod(ж<testing.T> Ꮡt, @unsafe.Po
     internal float32 data2;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStoreLoadRelAcq32(ж<testing.T> Ꮡt) {
+public static partial void TestStoreLoadRelAcq32(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (runtime.NumCPU() == 1) {
@@ -3063,7 +3063,7 @@ internal static void hammerStoreLoadPointerMethod(ж<testing.T> Ꮡt, @unsafe.Po
     internal float64 data2;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStoreLoadRelAcq64(ж<testing.T> Ꮡt) {
+public static partial void TestStoreLoadRelAcq64(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (runtime.NumCPU() == 1) {

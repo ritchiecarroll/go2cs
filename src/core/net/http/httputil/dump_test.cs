@@ -178,7 +178,7 @@ internal static slice<dumpTest> dumpTests = new dumpTest[]{
     )
 }.slice();
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDumpRequest(ж<testing.T> Ꮡt) {
+public static partial void TestDumpRequest(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Make a copy of dumpTests and add 10 new cases with an empty URL
@@ -439,7 +439,7 @@ internal static readonly @string httpExampleComˢ = "http://example.com"u8;
 internal static readonly @string goroutineˢ = "goroutine"u8;
 
 // Issue 38352: Check for deadlock on canceled requests.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDumpRequestOutIssue38352(ж<testing.T> Ꮡt) {
+public static partial void TestDumpRequestOutIssue38352(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

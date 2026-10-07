@@ -17,7 +17,7 @@ partial class main_package {
 internal static ж<outer> Ꮡg = new StandardBox<outer>(default(outer));
 internal static ref outer g => ref Ꮡg.Value;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void keep(ж<outer> Ꮡp) {
+internal static partial void keep(ж<outer> Ꮡp) {
     _ = Ꮡp;
 }
 

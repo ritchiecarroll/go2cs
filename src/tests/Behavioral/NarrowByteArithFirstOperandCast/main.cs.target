@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static array<byte> encode(nint e) {
+internal static partial array<byte> encode(nint e) {
     array<byte> buf = new(3);
     buf[0] = (byte)((byte)(e / 100) + (rune)'0');
     buf[1] = (byte)((byte)(e / 10) % 10 + (rune)'0');
@@ -13,7 +13,7 @@ partial class main_package {
     return buf.Clone();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static byte wrapCase(byte x) {
+internal static partial byte wrapCase(byte x) {
     array<byte> buf = new(1);
     buf[0] = (byte)((byte)x + (byte)x + (rune)'0');
     return buf[0];

@@ -100,12 +100,14 @@ func main() {
 	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "gsr", "main.cs"))
 
 	// The method is direct-ж, so the go statement binds the receiver box's method group.
+	// Each of these executes a go statement, so it keeps its frame as the goroutine's creator and is
+	// written as a partial method's implementing part (the no-inline carrier).
 	for _, want := range []string{
-		"internal static void start(this ж<tracker> Ꮡt)",
+		"internal static partial void start(this ж<tracker> Ꮡt)",
 		"goǃ(Ꮡt.loop);",
-		"internal static void startArg(this ж<tracker> Ꮡt)",
+		"internal static partial void startArg(this ж<tracker> Ꮡt)",
 		"goǃ(Ꮡt.loopArg, (nint)(9));",
-		"internal static void startInner(this ж<tracker> Ꮡt)",
+		"internal static partial void startInner(this ж<tracker> Ꮡt)",
 		"goǃ(Ꮡt.of(tracker.Ꮡin).send);",
 	} {
 		if !strings.Contains(mainCs, want) {
@@ -117,7 +119,7 @@ func main() {
 	for _, want := range []string{
 		"internal static void stop(this ж<tracker> Ꮡt)",
 		"defer(Ꮡt.bump, ref ᒐ);",
-		"internal static void other(this ref tracker t, ж<tracker> Ꮡo)",
+		"internal static partial void other(this ref tracker t, ж<tracker> Ꮡo)",
 		"goǃ(Ꮡo.loop);",
 	} {
 		if !strings.Contains(mainCs, want) {

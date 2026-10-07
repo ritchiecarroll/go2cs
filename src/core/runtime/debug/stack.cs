@@ -16,13 +16,13 @@ using System.Runtime.CompilerServices;
 partial class debug_package {
 
 // PrintStack prints to standard error the stack trace returned by runtime.Stack.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void PrintStack() {
+public static partial void PrintStack() {
     os.Stderr.Write(Stack());
 }
 
 // Stack returns a formatted stack trace of the goroutine that calls it.
 // It calls [runtime.Stack] with a large enough buffer to capture the entire trace.
-[MethodImpl(MethodImplOptions.NoInlining)] public static slice<byte> Stack() {
+public static partial slice<byte> Stack() {
     var buf = new slice<byte>(1024);
     while (ᐧ) {
         nint n = runtime.Stack(buf, false);

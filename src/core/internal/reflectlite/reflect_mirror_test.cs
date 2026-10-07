@@ -98,7 +98,7 @@ internal static readonly @string reflectˢ = "reflect"u8;
     internal visitor v;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMirrorWithReflect(ж<testing.T> Ꮡt) {
+public static partial void TestMirrorWithReflect(ж<testing.T> Ꮡt) {
     // TODO when the dust clears, figure out what this should actually test.
     Ꮡt.Skipf("reflect and reflectlite are out of sync for now"u8);
     @string reflectDir = filepath.Join(Δruntime.GOROOT(), srcˢ, reflectˢ);

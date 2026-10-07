@@ -233,7 +233,7 @@ internal static readonly object doneˢ = (@string)"Done!"u8;
 internal static readonly object currentTimeˢ = (@string)"Current time: "u8;
 
 // Output: Go launched at 2009-11-10 15:00:00 -0800 PST
-[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleNewTicker() {
+public static partial void ExampleNewTicker() {
     GoFrame ᒐ = default;
     try {
         var ticker = Δtime.NewTicker(Δtime.ΔSecond);

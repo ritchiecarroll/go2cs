@@ -710,6 +710,14 @@ the same way:
 Outside the bridge nothing comes back and the record stays in `package_info.cs`, so production emission and the
 external test variant are unchanged. Guarded by `internalTestLocalInterfaceStamp_test.go`.
 
+**A local type constructed by name is named by its lift.** A conversion to a function-local named pointer from a
+non-nil pointer, `type sPtr *s; dps := sPtr(ps)` (testify's `assertions_test.go`), is emitted as a constructor call.
+The constructor names the lifted type, `new topLevel_sPtr(ps)`, the same name a conversion from `nil` already used
+(`((fromNil_sPtr)nil)`), and never the Go spelling `sPtr`, which names no C# type (CS0246). The function containing
+the type does not change the rule: a type declared inside a closure is named by its lift too. A package-level type
+is unaffected, because its lifted name and its Go name are the same. Guarded by the `LocalNamedPointerConversion`
+behavioral test.
+
 ## A lift inside a PACKAGE-LEVEL func literal flushes at package scope, seeded by the declaration
 A func literal's body is function scope, and `convFuncLit` sets `inFunction` for it accordingly —
 but that flag does **not** say there is an enclosing function DECLARATION. `currentFuncName` and

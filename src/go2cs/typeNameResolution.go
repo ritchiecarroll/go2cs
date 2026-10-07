@@ -521,6 +521,19 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 				aliasQualifier = fileAlias
 			}
 
+			// Two same-named imports both publish this type's key (see ambiguousImportedTypeAliases),
+			// so no `global using` names it and the short Go name would be the qualified fallback --
+			// which must spell the TARGET's member, collision rename included: log/slog's `Level` is
+			// `ΔLevel` (it collides with its own method), so `slog.Level` would be CS0426. The
+			// qualifier is already this file's own for the package, so the member alone is swapped.
+			if named.TypeArgs().Len() == 0 {
+				key := getSanitizedIdentifier(pkg.Name()) + "." + getCoreSanitizedIdentifier(obj.Name())
+
+				if target, ok := ambiguousImportedTypeAliasTarget(key, pkg); ok {
+					return aliasQualifier + "." + target[strings.LastIndex(target, ".")+1:]
+				}
+			}
+
 			pkgPrefix = aliasQualifier + "."
 			plainPkgPrefix = pkg.Name() + "."
 			foreignPathPrefix = pkg.Path() + "."
@@ -1241,6 +1254,98 @@ func (v *Visitor) discardTargetTypeName(expr ast.Expr) string {
 	return v.iifeDelegateType(sig)
 }
 
+// methodGroupClashDelegateType returns the C# delegate type a package-level func used as a VALUE must
+// be cast to when its package also declares a METHOD of the same name, or "" when no cast is needed.
+// Go methods are emitted as extension methods in the package class, so `func Run()` and
+// `func (T) Run()` — and, across packages, `time.After` and `Time.After` — are ONE C# method group.
+// Where the site supplies a delegate type (a func-typed parameter, var or field) C# picks the func
+// by signature; where it supplies none — a `:=` local, an `any` slot — the group has no natural type
+// (CS8917, CS1503). The structural `Func<…>`/`Action<…>` is used, never a package named func type: in
+// an interface slot the delegate type IS the dynamic type, and Go's dynamic type is the unnamed
+// signature.
+//
+// Any same-named method counts, whatever its visibility: one on an unexported type is invisible to
+// another assembly, but a test assembly can see it, and the cast is valid C# either way. A GENERIC
+// func is left alone (no instantiation to name).
+func (v *Visitor) methodGroupClashDelegateType(expr ast.Expr) string {
+	for {
+		paren, ok := expr.(*ast.ParenExpr)
+
+		if !ok {
+			break
+		}
+
+		expr = paren.X
+	}
+
+	var ident *ast.Ident
+
+	switch e := expr.(type) {
+	case *ast.Ident:
+		ident = e
+	case *ast.SelectorExpr:
+		ident = e.Sel
+	default:
+		return ""
+	}
+
+	fn, ok := v.info.ObjectOf(ident).(*types.Func)
+
+	if !ok || fn.Pkg() == nil || fn.Parent() != fn.Pkg().Scope() {
+		return ""
+	}
+
+	sig, ok := fn.Type().(*types.Signature)
+
+	if !ok || sig.Recv() != nil || sig.TypeParams().Len() > 0 || !packageDeclaresMethodNamed(fn.Pkg(), fn.Name()) {
+		return ""
+	}
+
+	return v.iifeDelegateType(sig)
+}
+
+// applyMethodGroupClashCast casts a rendered value to its delegate type when methodGroupClashDelegateType
+// says the bare method group is ambiguous; every other value passes through unchanged.
+func (v *Visitor) applyMethodGroupClashCast(expr ast.Expr, rendered string) string {
+	if expr == nil || rendered == "" {
+		return rendered
+	}
+
+	if delegateType := v.methodGroupClashDelegateType(expr); delegateType != "" {
+		return fmt.Sprintf("(%s)(%s)", delegateType, rendered)
+	}
+
+	return rendered
+}
+
+// packageDeclaresMethodNamed reports whether any named type declared at pkg's scope has a method
+// called name.
+func packageDeclaresMethodNamed(pkg *types.Package, name string) bool {
+	scope := pkg.Scope()
+
+	for _, typeName := range scope.Names() {
+		obj, ok := scope.Lookup(typeName).(*types.TypeName)
+
+		if !ok || obj.IsAlias() {
+			continue
+		}
+
+		named, ok := obj.Type().(*types.Named)
+
+		if !ok {
+			continue
+		}
+
+		for i := 0; i < named.NumMethods(); i++ {
+			if named.Method(i).Name() == name {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func convertToCSTypeName(typeName string) string {
 	return renderCSTypeName(typeName, false)
 }
@@ -1666,14 +1771,101 @@ func renderCSFullTypeName(typeName string, rootNested bool) string {
 				aliasType, exists := importedTypeAliases[alias]
 				packageLock.Unlock()
 
+				// The key is a package NAME plus a member, and two packages can share the name:
+				// logrus' hooks/slog is `package slog` and declares `Handler`, log/slog publishes
+				// `slog.Handler` -> ΔHandler, and taking that alias rendered hooks/slog's *Handler as
+				// log/slog's interface -- an interface conversion of it then read as an identity
+				// (`~h`, CS1503). The namespace in front of the class still says which package this
+				// type is: take the alias only from the package that published it under that name.
 				if exists {
-					return aliasType
+					target, decided := importedTypeAliasForNamespace(alias, strings.Join(parts[:count-1], "."))
+
+					if !decided {
+						return aliasType
+					}
+
+					if target != "" {
+						return target
+					}
 				}
 			}
 		}
 
 		return fmt.Sprintf("%s.%s", RootNamespace, getSanitizedIdentifier(getAliasedTypeName(typeName)))
 	}
+}
+
+// renderedPackageNamespace returns the namespace-and-class prefix renderCSFullTypeName gives the types
+// of the package at pkgPath (`log.slog_package`, `sloghandler.lib.slog_package`). It renders a member
+// of the package exactly as getFullyQualifiedTypeName spells a foreign named type, so the prefix is the
+// one the renderer itself will see for that package; see importedTypeAliasTargetsByNamespace.
+func renderedPackageNamespace(pkgPath string, pkgName string) string {
+	const member = "go2csNamespaceProbe"
+
+	rendered := convertToCSFullTypeName(getSanitizedImport(packageClassPath(pkgPath, pkgName)+PackageSuffix) + "." + member)
+	rendered = strings.TrimPrefix(rendered, RootNamespace+".")
+
+	if !strings.HasSuffix(rendered, "."+member) {
+		return ""
+	}
+
+	return normalizedAliasNamespace(strings.TrimSuffix(rendered, "."+member))
+}
+
+// normalizedAliasNamespace drops the escapes a namespace segment can carry (`Δnet`, where the segment
+// would be shadowed in the current compilation, and a keyword's `@`). Both depend on the compilation
+// doing the rendering, not on the package, so the same package reads `Δnet.http_package` in one
+// rendering and `net.http_package` in another; the comparison is of the package, so neither counts.
+func normalizedAliasNamespace(namespace string) string {
+	segments := strings.Split(namespace, ".")
+
+	for i, segment := range segments {
+		segments[i] = strings.TrimPrefix(strings.TrimPrefix(segment, ShadowVarMarker), "@")
+	}
+
+	return strings.Join(segments, ".")
+}
+
+// importedTypeAliasForNamespace returns the target the package rendered under namespace published for
+// key. decided is false when the namespace cannot tell (a publisher of key not known by namespace, or a
+// SHORT form -- `http_package` -- that ends a publisher's `net.http_package`): the alias renders as it
+// always has. A decided empty target means the namespace is spelled in full and is no publisher's, so
+// the type is not the alias's and renders under its own name.
+func importedTypeAliasForNamespace(key string, namespaces ...string) (target string, decided bool) {
+	packageLock.Lock()
+	defer packageLock.Unlock()
+
+	if !importedTypeAliasNamespacedKeys[key] {
+		return "", false
+	}
+
+	var candidates []string
+
+	for _, namespace := range namespaces {
+		namespace = normalizedAliasNamespace(namespace)
+		candidates = append(candidates, namespace)
+
+		// A caller may hand the name already rooted (`go.log.slog_package.Handler`).
+		if rooted, ok := strings.CutPrefix(namespace, RootNamespace+"."); ok {
+			candidates = append(candidates, rooted)
+		}
+	}
+
+	for _, candidate := range candidates {
+		if target, ok := importedTypeAliasTargetsByNamespace[candidate+"\x00"+key]; ok {
+			return target, true
+		}
+	}
+
+	for _, publisher := range importedTypeAliasPublisherNamespaces[key] {
+		for _, candidate := range candidates {
+			if strings.HasSuffix(publisher, "."+candidate) {
+				return "", false
+			}
+		}
+	}
+
+	return "", true
 }
 
 // implicitConvStructTypeName renders the C# name a GoImplicitConv attribute can carry for a

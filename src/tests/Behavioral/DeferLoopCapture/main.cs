@@ -74,7 +74,7 @@ internal static void deferIndexedReceiverInLoop() {
 private static readonly object red2GoCICloseˢ = (@string)"-- red 2: go c[i].Close() --"u8;
 private static readonly object closedˢ = (@string)"closed"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void goIndexedReceiverInLoop() {
+internal static partial void goIndexedReceiverInLoop() {
     fmt.Println(red2GoCICloseˢ);
     var @out = new channel<@string>(3);
     ref var c = ref heap(new array<closer>(3), out var Ꮡc);

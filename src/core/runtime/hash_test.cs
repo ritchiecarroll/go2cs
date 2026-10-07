@@ -100,7 +100,7 @@ public static void TestSmhasherSanity(ж<testing.T> Ꮡt) {
     internal slice<uintptr> list; // list of hashes added
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<HashSet> newHashSet() {
+internal static partial ж<HashSet> newHashSet() {
     return Ꮡ(new HashSet(list: new slice<uintptr>(0, 1024)));
 }
 
@@ -393,7 +393,7 @@ internal static void genPerm(ж<HashSet> Ꮡh, slice<byte> b, slice<uint32> s, n
     k.b[(i >> (int)(3))] ^= (byte)((byte)(((byte)1).Lsh((nuint)((nint)(i & 7)))));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static uintptr hash(this ref BytesKey k) {
+[GoRecv] internal static partial uintptr hash(this ref BytesKey k) {
     return runtime_internal_test_package.BytesHash(k.b, 0);
 }
 
@@ -423,7 +423,7 @@ internal static void genPerm(ж<HashSet> Ꮡh, slice<byte> b, slice<uint32> s, n
     k.i ^= (uint32)(((uint32)1).Lsh((nuint)i));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static uintptr hash(this ref Int32Key k) {
+[GoRecv] internal static partial uintptr hash(this ref Int32Key k) {
     return runtime_internal_test_package.Int32Hash(k.i, 0);
 }
 
@@ -456,7 +456,7 @@ internal static readonly @string int32ˢ = "int32"u8;
     k.i ^= (uint64)(((uint64)1).Lsh((nuint)i));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static uintptr hash(this ref Int64Key k) {
+[GoRecv] internal static partial uintptr hash(this ref Int64Key k) {
     return runtime_internal_test_package.Int64Hash(k.i, 0);
 }
 
@@ -492,7 +492,7 @@ internal static readonly @string int64ˢ = "int64"u8;
     k.i = (uint64)(k.i._<uint64>() ^ ((uint64)1).Lsh((nuint)i));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static uintptr hash(this ref EfaceKey k) {
+[GoRecv] internal static partial uintptr hash(this ref EfaceKey k) {
     return runtime_internal_test_package.EfaceHash(k.i, 0);
 }
 
@@ -534,7 +534,7 @@ internal static void F(this fInter x) {
     k.i = (fInter)(k.i._<fInter>() ^ (((fInter)1) << (int)((nuint)i)));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static uintptr hash(this ref IfaceKey k) {
+[GoRecv] internal static partial uintptr hash(this ref IfaceKey k) {
     return runtime_internal_test_package.IfaceHash(k.i, 0);
 }
 

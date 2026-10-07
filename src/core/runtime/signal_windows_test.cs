@@ -256,7 +256,7 @@ internal static readonly @string testdataTestwinlibsignalˢ2 = "testdata/testwin
 
 // TestLibraryCtrlHandler tests that Go DLL allows calling program to handle console control events.
 // See https://golang.org/issues/35965.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestLibraryCtrlHandler(ж<testing.T> Ꮡt) {
+public static partial void TestLibraryCtrlHandler(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (flagQuick.Value) {

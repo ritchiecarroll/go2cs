@@ -95,6 +95,13 @@ The written right-hand side is recovered from `packageTypeSpecRHS` (`writtenUnde
 
 Measured on `testing/fstest`, whose whole 7-verdict suite sat behind this one CS0030: it now runs at **6 of 7**, the residual being `TestShuffledFS`'s runtime assertion that the returned `*shuffledFile` satisfies `fs.ReadDirFile` — the pointer-adapter identity class, unrelated. (Guarded by the `DefinedOverNamedComposite` behavioral test: a child package owning the named map/slice/array, defined types over each in both directions plus a same-package one, and the net/mail two-raw-map control in the same program so the hop is proven to still fire.)
 
+**A constant or a basic value converted into a type written over another package's named numeric hops through that base.** logrus' `hooks/slog` declares `type Level logrus.Level` and writes `var _ slog.Leveler = Level(0)`. The wrapper keeps `logrus.Level` in its `[GoType]`, so its operators convert only from that base, and the direct cast `((Level)0)` would need two user-defined conversions (CS0030). The conversion now names the base between the two, one operator per cast:
+```csharp
+internal static slog.Leveler _ᴛ2ʗ = ((ΔLevel)(logrus.Level)0);
+var l = ((Level)(levellib.Level)(uint32)n);   // a non-constant operand: basic, then base, then target
+```
+`foreignWrittenBase` reads the written base from the same `packageTypeSpecRHS` pre-pass, so the rule applies to a type the converted package declares itself. A typed const declaration already took this shape through its own path (windows registry's `CLASSES_ROOT = Key(syscall.HKEY_CLASSES_ROOT)` emits `unchecked((Key)(syscallꓸHandle)2147483648)`). (Guarded by the `ForeignDefinedConversion` behavioral test: a constant at package level and in an expression, a `uint32` operand, an `int` expression, and a type over `time.Duration`.)
+
 > A defined type over a named COMPOSITE gets an inherited wrapper that does not expose the golib sequence surface, so `len(x)` directly on one is CS0315 against `builtin.len<TSeq>`. That is a separate, pre-existing gap — no corpus site asks for it, and the guard above deliberately measures through the base type instead.
 
 (Guarded by `NamedNumericConversion`, `NamedNumericShiftConv`, `NamedTypeBitwiseConst`, `IotaEnum`, `FuncTypeParam`, and `CrossPkgUser`; the `string`-target exception is guarded by `StringConvPostfix` and `UnsafeOperations`; verified by the full behavioral suite — output comparisons confirm the precedence is unchanged.)

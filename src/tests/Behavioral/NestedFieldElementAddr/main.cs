@@ -28,11 +28,11 @@ partial class main_package {
     return s.data;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void bump(ref uintptr p) {
+internal static partial void bump(ref uintptr p) {
     p = p + 7;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void bumpInt(ref nint p) {
+internal static partial void bumpInt(ref nint p) {
     p = p + 3;
 }
 

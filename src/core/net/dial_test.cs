@@ -95,7 +95,7 @@ public static void TestDialLocal(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object bothIPv4AndIPv6Areˢ = (@string)"both IPv4 and IPv6 are required"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDialerDualStackFDLeak(ж<testing.T> Ꮡt) {
+public static partial void TestDialerDualStackFDLeak(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
@@ -852,7 +852,7 @@ public static void TestDialerKeepAlive(ж<testing.T> Ꮡt) {
 internal static readonly object timeoutWaitingForDialToˢ = (@string)"timeout waiting for dial to fail"u8;
 internal static readonly object unexpectedSuccessfulˢ = (@string)"unexpected successful connection"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDialCancel(ж<testing.T> Ꮡt) {
+public static partial void TestDialCancel(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         mustHaveExternalNetwork(Ꮡt);
@@ -945,7 +945,7 @@ internal static readonly object avoidingTimeSleepˢ = (@string)"avoiding time.Sl
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string messageᶜ = "echo!\n"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCancelAfterDial(ж<testing.T> Ꮡt) {
+public static partial void TestCancelAfterDial(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {

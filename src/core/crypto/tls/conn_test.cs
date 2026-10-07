@@ -142,7 +142,7 @@ public static void TestCertificateSelection(ж<testing.T> Ꮡt) {
 }
 
 // Run with multiple crypto configs to test the logic for computing TLS record overheads.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void runDynamicRecordSizingTest(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> Ꮡconfig) {
+internal static partial void runDynamicRecordSizingTest(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> Ꮡconfig) {
     GoFrame ᒐ = default;
     try {
         var (clientConn, serverConn) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
@@ -351,7 +351,7 @@ public static void TestHairpinInClose(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsReceivedRecordWithˢ = "tls: received record with version 1111 when expecting version 303"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRecordBadVersionTLS13(ж<testing.T> Ꮡt) {
+public static partial void TestRecordBadVersionTLS13(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (client, server) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));

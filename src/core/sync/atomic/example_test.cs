@@ -22,7 +22,7 @@ internal static channel<nint> requests() {
 
 // The following example shows how to use Value for periodic program config updates
 // and propagation of the changes to worker goroutines.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleValue_config() {
+public static partial void ExampleValue_config() {
     ref var config = ref heap(new atomic.Value(), out var Ꮡconfig);                    // holds current server configuration
     // Create initial config value and store into config.
     Ꮡconfig.Store(loadConfig());

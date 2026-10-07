@@ -506,7 +506,7 @@ public static void TestIteratorPull(ж<testing.T> Ꮡt) {
     });
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestReflectFuncOf(ж<testing.T> Ꮡt) {
+public static partial void TestReflectFuncOf(ж<testing.T> Ꮡt) {
     void mkfunc(@string name, nint i) {
         reflect.FuncOf(new reflectꓸType[]{reflect.StructOf(new reflect.StructField[]{new(
             Name: name + strconv.Itoa(i),

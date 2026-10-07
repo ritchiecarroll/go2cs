@@ -188,6 +188,7 @@ func applyHostCrash(result *testComparison, rawErr error, output string, eligibl
 			result.Errors = append(result.Errors, fmt.Sprintf("%s: C# timed out (in flight at the package deadline)", name))
 		}
 
+		rewriteInFlightMismatches(result, named, "fail (in flight at the package deadline)")
 		return
 	}
 
@@ -206,5 +207,21 @@ func applyHostCrash(result *testComparison, rawErr error, output string, eligibl
 
 	for _, name := range named {
 		result.Errors = append(result.Errors, fmt.Sprintf("%s: C# crashed in flight (%s)%s", name, crash.Label, head))
+	}
+
+	rewriteInFlightMismatches(result, named, "fail (crashed in flight)")
+}
+
+// rewriteInFlightMismatches brings the mismatch line matching wrote for each named test into agreement with the verdict
+// this arm just gave it. Matching ran first, saw no C# verdict, and wrote `<name>: Go="..." C#=""`; that exact line,
+// and no other, now reads the verdict. The `: Go=` boundary keeps a parent's name from matching its subtest's line.
+func rewriteInFlightMismatches(result *testComparison, named []string, verdict string) {
+	for index, line := range result.Errors {
+		for _, name := range named {
+			if strings.HasPrefix(line, name+": Go=") && strings.HasSuffix(line, ` C#=""`) {
+				result.Errors[index] = strings.TrimSuffix(line, `""`) + fmt.Sprintf("%q", verdict)
+				break
+			}
+		}
 	}
 }

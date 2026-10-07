@@ -7,7 +7,7 @@ partial class main_package {
 
 internal static UntypedInt maxBits => 57;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (uintptr, nuint, nint) run() {
+internal static partial (uintptr, nuint, nint) run() {
     uintptr p = default!;
     p = (uintptr)(144115188075855872L - 1);
     nuint u = default!;

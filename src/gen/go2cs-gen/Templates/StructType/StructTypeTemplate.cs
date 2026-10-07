@@ -1054,8 +1054,9 @@ internal class StructTypeTemplate : TemplateBase
                     {
                         string embedBox = GetUnsanitizedIdentifier(promotedMemberName);
                         string shimScope = GetScope(GetSimpleName(method.Name)) == "public" ? methodScope : "internal";
+                        string shimReceiver = ReceiverName(method.Parameters);
 
-                        result.Append($"\r\n    {shimScope} static {returnType} {method.Name}(this {PointerPrefix}<{StructName}> {AddressPrefix}target");
+                        result.Append($"\r\n    {shimScope} static {returnType} {method.Name}(this {PointerPrefix}<{StructName}> {AddressPrefix}{shimReceiver}");
 
                         if (method.Parameters.Length > 1)
                         {
@@ -1063,7 +1064,7 @@ internal class StructTypeTemplate : TemplateBase
                             result.Append(typedParams);
                         }
 
-                        result.Append($") => {AddressPrefix}target.of({StructName}.{AddressPrefix}{embedBox}).{method.Name}(");
+                        result.Append($") => {AddressPrefix}{shimReceiver}.of({StructName}.{AddressPrefix}{embedBox}).{method.Name}(");
                         result.Append(string.Join(", ", method.Parameters.Skip(1).Select(ArgumentName)));
                         result.Append(");");
                     }
@@ -1094,8 +1095,9 @@ internal class StructTypeTemplate : TemplateBase
                 // (docs/PLAN-marker-comment-parity.md, 5.1). The pointer forwarder below is the form
                 // every pointer-set consumer binds, in both cases.
                 string goRecv = !method.IsRefRecv ? "" : method.PathHasPointer ? "[global::go.GoCopyBound] " : "[global::go.GoRecv] ";
+                string receiver = ReceiverName(method.Parameters);
 
-                result.Append($"\r\n    {goRecv}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{StructName} target");
+                result.Append($"\r\n    {goRecv}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{StructName} {receiver}");
 
                 if (method.Parameters.Length > 1)
                 {
@@ -1103,12 +1105,12 @@ internal class StructTypeTemplate : TemplateBase
                     result.Append(typedParams);
                 }
 
-                result.Append($") => target.{embedAccess}.{method.Name}(");
+                result.Append($") => {receiver}.{embedAccess}.{method.Name}(");
                 result.Append(string.Join(", ", method.Parameters.Skip(1).Select(ArgumentName)));
                 result.Append(");");
 
                 // Add pointer extension method
-                result.Append($"\r\n    {methodScope} static {returnType} {method.Name}{methodTypeParams}(this {PointerPrefix}<{StructName}> {AddressPrefix}target");
+                result.Append($"\r\n    {methodScope} static {returnType} {method.Name}{methodTypeParams}(this {PointerPrefix}<{StructName}> {AddressPrefix}{receiver}");
 
                 if (method.Parameters.Length > 1)
                 {
@@ -1118,8 +1120,8 @@ internal class StructTypeTemplate : TemplateBase
 
                 result.AppendLine(")");
                 result.AppendLine("    {");
-                result.AppendLine($"        ref var target = ref {AddressPrefix}target.Value;");
-                result.Append($"        {(method.ReturnType == "void" ? "" : "return ")}target.{method.Name}(");
+                result.AppendLine($"        ref var {receiver} = ref {AddressPrefix}{receiver}.Value;");
+                result.Append($"        {(method.ReturnType == "void" ? "" : "return ")}{receiver}.{method.Name}(");
                 result.Append(string.Join(", ", method.Parameters.Skip(1).Select(ArgumentName)));
                 result.AppendLine(");");
                 result.Append("    }");
@@ -1393,6 +1395,21 @@ internal class StructTypeTemplate : TemplateBase
     // three sites independently.
     private static string ArgumentName((string type, string name) parameter) =>
         MethodInfo.ParameterIdentifier(parameter.name);
+
+    // ReceiverName is the name a promotion forwarder gives its receiver: `target`, unless the forwarded
+    // method has a parameter of that name (or of its box form, `Ꮡtarget`) -- testify's suite.Suite
+    // promotes `ErrorAs(err error, target any, ...)`. Sharing the name was CS0100, and worse than that:
+    // inside the forwarder body `target` would bind whichever declaration C# resolved, not reliably the
+    // receiver. A colliding name takes the converter's usual Δ prefix until it is free.
+    private static string ReceiverName((string type, string name)[] parameters)
+    {
+        string name = "target";
+
+        while (parameters.Skip(1).Select(ArgumentName).Any(param => param == name || param == $"{AddressPrefix}{name}"))
+            name = $"Δ{name}";
+
+        return name;
+    }
 
     // ---------------------------------------------------------------------------------------------
     // Methods promoted through ANOTHER package's embed.
@@ -1693,13 +1710,14 @@ internal class StructTypeTemplate : TemplateBase
         string args = string.Join(", ", method.Parameters.Skip(1).Select(ArgumentName));
         string sep = method.Parameters.Length > 1 ? ", " : "";
         string ret = method.ReturnType == "void" ? "" : "return ";
+        string receiver = ReceiverName(method.Parameters);
 
         if (method.IsValueEmbedBoxRecv)
         {
             // A box primary through a DIRECT value embed: the pointer-set shim alone, descending
             // through the embed's box-field accessor exactly as the same-package path emits it.
             string embedBox = GetUnsanitizedIdentifier(promotedMemberName);
-            m_xpkg.Append($"\r\n    {scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}target{sep}{typedParams}) => {AddressPrefix}target.of({qualified}.{AddressPrefix}{embedBox}).{method.Name}({args});");
+            m_xpkg.Append($"\r\n    {scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}{receiver}{sep}{typedParams}) => {AddressPrefix}{receiver}.of({qualified}.{AddressPrefix}{embedBox}).{method.Name}({args});");
             return;
         }
 
@@ -1721,9 +1739,9 @@ internal class StructTypeTemplate : TemplateBase
         string recvMod = pointerSetOnly ? "ref " : "";
         string goRecv = pointerSetOnly ? "[global::go.GoRecv] " : "";
 
-        m_xpkg.Append($"\r\n    {goRecv}{scope} static {method.ReturnType} {method.Name}(this {recvMod}{qualified} target{sep}{typedParams}) => target.{embedAccess}.{method.Name}({args});");
-        m_xpkg.Append($"\r\n    {scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}target{sep}{typedParams})");
-        m_xpkg.Append($"\r\n    {{\r\n        ref var target = ref {AddressPrefix}target.Value;\r\n        {ret}target.{embedAccess}.{method.Name}({args});\r\n    }}");
+        m_xpkg.Append($"\r\n    {goRecv}{scope} static {method.ReturnType} {method.Name}(this {recvMod}{qualified} {receiver}{sep}{typedParams}) => {receiver}.{embedAccess}.{method.Name}({args});");
+        m_xpkg.Append($"\r\n    {scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}{receiver}{sep}{typedParams})");
+        m_xpkg.Append($"\r\n    {{\r\n        ref var {receiver} = ref {AddressPrefix}{receiver}.Value;\r\n        {ret}{receiver}.{embedAccess}.{method.Name}({args});\r\n    }}");
     }
 
     public override string TemplateFooter

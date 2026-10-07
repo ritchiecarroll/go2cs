@@ -1,0 +1,19 @@
+<Project>
+  <!--
+    Directory.Build.targets - Gbtc
+    Copyright © 2026 The go2cs Authors. All rights reserved.
+
+    Use of this source code is governed by an MIT-style license
+    that can be found in the LICENSE file.
+
+    Every in-tree project (src/core, the -tests hosts the converter publishes there, the behavioral programs)
+    keeps the dependency symbol files beside a single-file host on EVERY publish, not only on the publish
+    that runs the bundler. The definition is golib's own (core/golib/buildTransitive/go.lib.symbols.targets),
+    which go.lib.targets gives every NuGet consumer; a project reference to golib never imports
+    buildTransitive, so the tree imports the one file here. A Directory.Build.targets nearer a project
+    (src/tests/Performance has one) shadows this file, and that runner's Native AOT path is the publish the
+    target must not touch anyway.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)core/golib/buildTransitive/go.lib.symbols.targets"
+          Condition="'$(GoLibSymbolsTargetsImported)' != 'true' and Exists('$(MSBuildThisFileDirectory)core/golib/buildTransitive/go.lib.symbols.targets')" />
+</Project>

@@ -13,7 +13,7 @@ internal static ж<box> get(this ж<box> Ꮡb) {
     return Ꮡb;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint run() {
+internal static partial nint run() {
     ref var arr = ref heap(new array<box>(3), out var Ꮡarr);
     for (nint i = 0; i < 3; i++) {
         var xΔ1 = Ꮡarr.at<box>(i);

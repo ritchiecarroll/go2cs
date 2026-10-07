@@ -2526,6 +2526,7 @@ func seedProductionAliasLifts(pkg *packages.Package, productionInfoPath string) 
 		}
 
 		importedTypeAliases[name] = target
+		importedTypeAliasNamespacedKeys[name] = false // no publisher namespace: renders as written
 		packageLock.Unlock()
 	}
 }
@@ -2655,6 +2656,7 @@ func seedProductionInterfaceAliases(pkg *packages.Package, productionInfoPath st
 
 		productionAliasLiftedTypes[named] = aliasName
 		importedTypeAliases[aliasName] = target
+		importedTypeAliasNamespacedKeys[aliasName] = false // no publisher namespace: renders as written
 		packageLock.Unlock()
 	}
 }
@@ -2966,7 +2968,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// Over allEntries, not prodEntries: a _test.go file can call runtime.Caller/Callers directly
 	// (io/multi_test.go's flatten-depth assertions are the measured case) and needs the same
 	// protection production code does — see callerInliningAnalysis.go.
-	needsNoInlining := computeNoInliningClosure(allEntries, pkg.Types, pkg.TypesInfo)
+	needsNoInlining := computeNoInliningClosure(allEntries, pkg.Types, pkg.TypesInfo, fixedSkipClosureApplies(pkg.Dir, options.goRoot))
 
 	collectCaptureModeMethods(pkg)
 	collectTypeSpecRHS(pkg)
@@ -3004,7 +3006,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	collectAddressedGlobals(allEntries, pkg.Types, pkg.TypesInfo)
 	computeImportAliasRenames(allEntries, pkg.Types, packageNamespace, options.go2csPath, goosOfTarget(options.targetPlatform), true)
 	collectPackageLevelLiteralStructFieldTypes(allEntries, pkg.Types, pkg.TypesInfo)
-	collectPublicizedTypes(pkg.Types)
+	collectPublicizedTypes(pkg.Types, pkg.Fset)
 
 	// Bind the //go:cgo_import_dynamic pragmas here too, and not only because the sequence is
 	// mirrored: a -tests conversion RECOMPILES the production sources into the test assembly, so
@@ -3982,6 +3984,13 @@ func supportedTestCapabilities() []string {
 		// registered — see the "benchmark" case in discoverTestDeclarations), so supporting
 		// these members only unblocks Test functions that call testing.Benchmark themselves.
 		"testing.Benchmark", "B.N", "BenchmarkResult.NsPerOp",
+		// testing.RunTests runs a list of InternalTest on a fresh root from inside a running test
+		// (core/testing/testing.cs RunTests, on TestRunner.RunTests: top-level names, -run through
+		// the caller's matchString, its own parallel slots, ok false iff one failed, the caller and
+		// the package unfailed). Roster impact measured before widening: GOROOT's *_test.go call it
+		// NOWHERE (net/http and runtime/debug only name it inside expected-traceback strings), and
+		// of the modules only testify's suite_test.go does, 8 tests admitted there.
+		"testing.RunTests",
 	}
 	sort.Strings(capabilities)
 	return capabilities
@@ -5370,6 +5379,29 @@ func declarationClosureImports(roots []*packages.Package, compileExcluded map[st
 						enqueue(mentioned)
 					}
 				}
+
+				// The PROMOTED-FIELD edge, the generator's other half: besides a forwarder per promoted
+				// method it writes a ref accessor per promoted FIELD of the embed ("Promoted Struct Field
+				// Accessors"), in the test assembly, and each accessor spells the field's type. testify's
+				// suite tests embed suite.Suite, whose `mu sync.RWMutex` is a legal promoted field in the
+				// white-box variant (the same Go package); sync is imported only by production suite.go,
+				// so `go.sync_package` was CS0234 in all 13 generated suite files. The same membership rule
+				// as the methods: exported fields always, unexported ones when the embed belongs to the
+				// embedding struct's package.
+				fields := embed.Underlying().(*types.Struct)
+
+				for i := range fields.NumFields() {
+					field := fields.Field(i)
+
+					if !field.Exported() && embed.Obj().Pkg() != named.Obj().Pkg() {
+						continue
+					}
+
+					for _, mentioned := range namedTypesIn(field.Type()) {
+						reach(mentioned)
+						enqueue(mentioned)
+					}
+				}
 			}
 		}
 	}
@@ -6484,15 +6516,32 @@ func conversionOptionsDigest(options Options) string {
 // converter's output root, so the sources may not be present and a runtime edit then does NOT
 // invalidate the manifest ("runtime-unavailable" keeps the digest deterministic either way);
 // deployed (deploy-core) and -go2cspath-staged layouts get full invalidation.
+//
+// In core/testing only the HAND-OWNED host is hashed: the files carrying `[module: go.GoManualConversion]`. The same
+// directory receives the `testing` row's own -tests emission (its *_test.cs, go2cs_test_host.cs, package_test_info.cs),
+// and hashing that made every package's digest depend on whether `testing` had been re-emitted first -- a test-source
+// rewrite read as a runtime change. golib keeps every *.cs: no conversion writes there. An unmarked core/testing file
+// that is not a -tests emission is a host file that LOST its marker: it drops out, which moves the digest, and is named
+// in a warning, so a deleted marker cannot silently shrink what the stale check covers.
 func runtimeSourcesDigest(options Options) string {
 	var files []string
 
-	for _, dir := range []string{
-		filepath.Join(options.go2csPath, "core", "golib"),
-		filepath.Join(options.go2csPath, "core", "testing"),
-	} {
-		if matches, err := filepath.Glob(filepath.Join(dir, "*.cs")); err == nil {
-			files = append(files, matches...)
+	if matches, err := filepath.Glob(filepath.Join(options.go2csPath, "core", "golib", "*.cs")); err == nil {
+		files = append(files, matches...)
+	}
+
+	if matches, err := filepath.Glob(filepath.Join(options.go2csPath, "core", "testing", "*.cs")); err == nil {
+		for _, fileName := range matches {
+			handOwned, err := containsManualConversionMarker(fileName)
+			if err != nil {
+				return "runtime-unavailable"
+			}
+
+			if handOwned {
+				files = append(files, fileName)
+			} else if !isTestsEmittedSourceName(filepath.Base(fileName)) {
+				warnRuntimeHostMarkerLost(fileName)
+			}
 		}
 	}
 
@@ -6513,6 +6562,26 @@ func runtimeSourcesDigest(options Options) string {
 	}
 
 	return "runtime-" + hex.EncodeToString(hash.Sum(nil)[:8])
+}
+
+// isTestsEmittedSourceName reports whether a core/testing file name is one a -tests conversion emits: a converted test
+// source (every one ends in _test.cs, the per-variant anchors and init units included), the generated host, or the
+// test metadata anchor.
+func isTestsEmittedSourceName(name string) bool {
+	return strings.HasSuffix(name, "_test.cs") || name == testHostFileName || name == testPackageInfoFileName
+}
+
+// runtimeHostMarkerLostWarned keeps the lost-marker warning to one line per file per run: the digest is computed for
+// every converted package.
+var runtimeHostMarkerLostWarned sync.Map
+
+func warnRuntimeHostMarkerLost(fileName string) {
+	if _, warned := runtimeHostMarkerLostWarned.LoadOrStore(fileName, true); warned {
+		return
+	}
+
+	showWarning("runtime digest: %s carries no [module: go.GoManualConversion] marker and is not a -tests emission, "+
+		"so the test manifests' stale check no longer covers it; restore the marker if it is still hand-owned", fileName)
 }
 
 // testInputDigest fingerprints everything that determines a test conversion's outputs: the
@@ -6660,19 +6729,36 @@ func writeComparisonRecord(outputPath string, result any, testFilter string) err
 				"pass *testComparison or map[string]any, or a gated record would publish as a full run", result)
 		}
 	}
-	return writeJSONFile(filepath.Join(outputPath, "go2cs_test_comparison.json"), result)
-}
 
-func writeJSONFile(fileName string, value any) error {
-	data, err := json.MarshalIndent(value, "", "  ")
+	// ALWAYS written, never skipped as identical: the record is this run's evidence, and its write time is how a reader
+	// tells this run's record from an earlier one's (run-validated-sweep.ps1's -Since rule, run-h10-recon.ps1's STALE
+	// test, the batteries' -nt checks). It carries no per-run field, so a validated row re-read into a warm tree produces
+	// it byte for byte; skipped, it kept the earlier run's time and read as "not written by this run".
+	data, err := jsonFileBytes(result)
 	if err != nil {
 		return err
 	}
-	data = append(data, '\n')
+	return os.WriteFile(filepath.Join(outputPath, "go2cs_test_comparison.json"), data, 0644)
+}
+
+// writeJSONFile skips a write whose bytes equal the file's, so an unchanged re-conversion leaves a manifest's time alone.
+func writeJSONFile(fileName string, value any) error {
+	data, err := jsonFileBytes(value)
+	if err != nil {
+		return err
+	}
 	if needToWriteFile(fileName, data) {
 		return os.WriteFile(fileName, data, 0644)
 	}
 	return nil
+}
+
+func jsonFileBytes(value any) ([]byte, error) {
+	data, err := json.MarshalIndent(value, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	return append(data, '\n'), nil
 }
 
 // converterRevision identifies the converter BINARY that produced a manifest. The executable
@@ -6827,8 +6913,92 @@ func publishTestHost(outputPath, testProject string, options Options) error {
 	}
 
 	args := withPublishBinlog(publishTestHostArgs(outputPath, testProject, options), binlog)
-	_, err := runCommandWithTimeout(testPublishTimeout(options), outputPath, options, "dotnet", args...)
-	return settlePublishBinlog(binlog, err)
+	output, err := runCommandWithTimeout(testPublishTimeout(options), outputPath, options, "dotnet", args...)
+
+	if err := settlePublishBinlog(binlog, err); err != nil {
+		return err
+	}
+
+	buildOutput, err := publishBuildOutput(output, testProject)
+
+	if err != nil {
+		return err
+	}
+
+	missing, err := publishedSymbolsMissing(buildOutput, outputPath, testProject)
+
+	if err != nil {
+		return err
+	}
+
+	if len(missing) > 0 {
+		return fmt.Errorf("the published test host lacks %d dependency symbol file(s) its build produced, so frames in those assemblies would print no file:line: %s", len(missing), strings.Join(missing, ", "))
+	}
+
+	return nil
+}
+
+// publishTargetPathProperty is the property the publish is asked to state (publishTestHostArgs' -getProperty): the test
+// assembly as its build wrote it, whose folder is the build output publishedSymbolsMissing reads.
+const publishTargetPathProperty = "TargetPath"
+
+// publishBuildOutput answers the folder the publish's own build wrote the test assembly to, as MSBuild stated it in the
+// publish's output (-getProperty:TargetPath, a line of its own after the build). The build output is TAKEN FROM THE
+// BUILD rather than found by a glob, because where it lands is the build's decision: a stdlib row builds in-tree under
+// bin/tests/<config>/<tfm>/<rid>/, while a -recurse module's Directory.Build.props redirects every project's
+// BaseOutputPath to <out root>/.artifacts/bin/<hash>/ (generateRecurseBuildFiles), and a glob over the first layout
+// refused every module row at TRAIN Q's union (13c0800c21) before any verdict. A stated path follows any layout a props
+// or the SDK chooses, so there is no second spelling of it to drift.
+//
+// A publish that states no path, or a path whose assembly does not exist, is an error, never a pass: after a successful
+// publish the build output exists, and a guard that cannot see must say so.
+func publishBuildOutput(output, testProject string) (string, error) {
+	assembly := strings.TrimSuffix(filepath.Base(testProject), filepath.Ext(testProject)) + ".dll"
+	lines := strings.Split(output, "\n")
+
+	for i := len(lines) - 1; i >= 0; i-- {
+		line := strings.TrimSpace(lines[i])
+
+		if !filepath.IsAbs(line) || !strings.EqualFold(filepath.Base(line), assembly) {
+			continue
+		}
+
+		if _, err := os.Stat(line); err != nil {
+			return "", fmt.Errorf("the published test host's build output, stated by the publish as %s, cannot be found, so its symbol files cannot be checked: %w", line, err)
+		}
+
+		return filepath.Dir(line), nil
+	}
+
+	return "", fmt.Errorf("the publish did not state the published test host's build output (%s, -getProperty:%s), so its symbol files cannot be checked", assembly, publishTargetPathProperty)
+}
+
+// publishedSymbolsMissing answers the symbol files the publish's own build produced (every .pdb in buildOutput, the
+// folder publishBuildOutput read from the publish) that are not beside the published host, sorted.
+//
+// It is the OUTCOME guard of the publish fix: removePublishedTestHost (and golib's go.lib.symbols.targets) are levers,
+// and this reads whether the host actually has its dependencies' symbol files, by whatever route they were lost.
+// Measured 2026-10-05 on the -tests output of a scratch row: the build output and the publish folder each held 62
+// .pdb after a good publish, and the publish folder 1 after an unbundled second one.
+func publishedSymbolsMissing(buildOutput, outputPath, testProject string) ([]string, error) {
+	built, err := filepath.Glob(filepath.Join(buildOutput, "*.pdb"))
+
+	if err != nil {
+		return nil, err
+	}
+
+	publishDir := filepath.Dir(publishedTestHostPath(outputPath, testProject))
+	var missing []string
+
+	for _, symbols := range built {
+		if _, err := os.Stat(filepath.Join(publishDir, filepath.Base(symbols))); err != nil {
+			missing = append(missing, filepath.Base(symbols))
+		}
+	}
+
+	sort.Strings(missing)
+
+	return missing, nil
 }
 
 // removePublishedTestHost deletes the executable an earlier publish left, so that the publish about
@@ -6890,6 +7060,12 @@ func testPublishTimeout(options Options) time.Duration {
 // compile the linux flavour whatever the caller's environment holds. goosOfTarget is the pipeline's
 // own source of truth for the platform a run is FOR (the same value that routes the sources and
 // scopes the disclosure manifest); a run with no target set leaves the csproj default alone.
+//
+// The publish also states its build output (-getProperty:TargetPath), which publishBuildOutput reads. MSBuild prints
+// the value after the build and, asked for a property, writes no build log to the console: errors still reach the
+// captured output (on stderr), and the exit code is the build's. Measured 2026-10-07 (SDK 10, a project whose
+// BaseOutputPath is redirected as a -recurse props does): the redirected path printed on success, and on a compile
+// error the CS line with exit 1.
 func publishTestHostArgs(outputPath, testProject string, options Options) []string {
 	publishDir := filepath.Join(outputPath, "bin", "tests", "publish")
 
@@ -6903,12 +7079,12 @@ func publishTestHostArgs(outputPath, testProject string, options Options) []stri
 		go2csPathArg := strings.TrimRight(filepath.ToSlash(options.go2csPath), "/") + "/"
 		args := []string{"publish", testProject, "-c", "Release", "-p:go2csPath=" + go2csPathArg}
 
-		return append(append(args, targetOS...), "-o", publishDir)
+		return append(append(args, targetOS...), "-o", publishDir, "-getProperty:"+publishTargetPathProperty)
 	}
 
 	args := []string{"publish", testProject, "-c", "Debug"}
 
-	return append(append(args, targetOS...), "-o", publishDir)
+	return append(append(args, targetOS...), "-o", publishDir, "-getProperty:"+publishTargetPathProperty)
 }
 
 // withPublishBinlog appends `-bl:<binlog>` to a publish argument list when a binlog path is given, and
@@ -7113,12 +7289,30 @@ func driverTerminal() string {
 // the probe runbook that asked for both a gated row and the run action got a reading of
 // NOTHING whose own validity check still read clean (i9, mailbox 4dc421f02). A flag silently
 // ignored by one action and honoured by another is the shape a shared derivation removes.
+//
+// The flags are spelled the way `go test -json` hands them to a Go test binary -- `-test.v=test2json`,
+// `-test.timeout=…`, `-test.run=…` -- because the host's argv IS the converted program's os.Args. A
+// package that reads its own arguments sees what Go's binary sees: cobra's Execute with no SetArgs
+// parses os.Args[1:], and pflag skips every `-test.` flag, so Go's run of TestCalledAs finds no
+// arguments while the old `--json -timeout 20m0s --result …` failed it with `unknown flag: --json`.
+// Pipeline-only settings travel in the environment instead (convertedHostResultEnv).
 func convertedHostArgs(options Options) []string {
-	args := []string{"--json", "-timeout", options.testTimeout.String()}
+	args := []string{"-test.v=test2json", "-test.timeout=" + options.testTimeout.String()}
 	if options.testFilter != "" {
-		args = append(args, "--run", options.testFilter)
+		args = append(args, "-test.run="+options.testFilter)
 	}
 	return args
+}
+
+// convertedHostResultEnv passes the host the result-file and JUnit-file paths, which Go's test binary has
+// no flag for and which must therefore stay off argv (see convertedHostArgs). The host reads both once
+// and removes them from its own environment (TestOptions.TakeEnvironmentVariable), so a test that
+// re-executes the host does not write into the parent's files.
+func convertedHostResultEnv(outputPath string) []string {
+	return []string{
+		"GO2CS_TEST_RESULT=" + filepath.Join(outputPath, "go2cs_test_results.json"),
+		"GO2CS_TEST_JUNIT=" + filepath.Join(outputPath, "go2cs_test_results.xml"),
+	}
 }
 
 // testHostLaunchDir is the working directory the converted test host STARTS in: the package's Go
@@ -7282,6 +7476,18 @@ type testComparison struct {
 	// proof page so the omission is stated rather than absorbed. Empty for every package whose
 	// disclosed tests have no subtests, which is all of them before crypto/tls's TestBogoSuite.
 	Withdrawn []string `json:"withdrawn,omitempty"`
+
+	// RuntimeDeclared names the top-level tests no declaration accounts for that BOTH sides ran and
+	// reported a verdict for: a testing.RunTests list whose entries are named outside their caller
+	// (testify's TestSuiteRecoverPanicInBeforeTest). They are compared like declared tests and counted
+	// here apart from them, so a reader sees how many tests a row declared at run time. A name only Go
+	// reported is still a census gap (F6).
+	RuntimeDeclared []string `json:"runtimeDeclared,omitempty"`
+
+	// AddressPairs counts the one-sided rows pairAddressVariantNames re-keyed, 1:1 apart from the run-order (N:N) pairs,
+	// so a pairing is stated on the record rather than absorbed into the matched count. Absent when nothing was paired,
+	// which leaves every record that pairs nothing byte-identical to before.
+	AddressPairs *addressPairCounts `json:"addressPairs,omitempty"`
 
 	// DisclosedRecords publishes, for every disclosed test whose C# terminal event carried a record
 	// list, the records OUTSIDE its signature. A record-count pin catches an extra or a missing
@@ -8672,12 +8878,16 @@ var addressTokenPattern = regexp.MustCompile(`0x[0-9a-fA-F]+`)
 // only by embedded 0x-hex address tokens onto a shared normalized key, so the status match
 // compares them as one row (errors' TestAsValidation/*string(0xc…) names). This is the SECOND
 // phase of matching — exact names already paired stay untouched, so a deterministic hex literal
-// used as a subtest name is never collapsed. Only UNAMBIGUOUS 1:1 pairs are re-keyed: a
-// normalized key claimed by multiple names on either side, or colliding with an existing exact
-// name, keeps all originals — the rows stay one-sided and the comparison fails loud, never
-// masking. csOutputs and csRecords follow the C# rename so disclosure-signature matching keeps its
-// text and a record-count pin its records.
-func pairAddressVariantNames(goResults, csResults, csOutputs map[string]string, csRecords map[string]testRecords) {
+// used as a subtest name is never collapsed. A group of ONE name per side pairs onto the normalized
+// key itself. A group of N names per side (N > 1, the same N on both) pairs by RUN ORDER — the i-th
+// name to start on one side with the i-th on the other, onto key#run<i> — because a table test's
+// cases run in the same order on both sides while their addresses differ (ruled 2026-10-05). Any
+// other group keeps all originals: sizes that differ, a name with no position in its stream, or a
+// target key that already names a row. Those rows stay one-sided and the comparison fails loud,
+// never masking. csOutputs and csRecords follow the C# rename so disclosure-signature matching
+// keeps its text and a record-count pin its records. The pairs are counted by kind.
+func pairAddressVariantNames(goResults, csResults, csOutputs map[string]string, csRecords map[string]testRecords, goOrder, csOrder map[string]int) addressPairCounts {
+	var counts addressPairCounts
 	goOnly := make(map[string][]string)
 	csOnly := make(map[string][]string)
 
@@ -8697,36 +8907,110 @@ func pairAddressVariantNames(goResults, csResults, csOutputs map[string]string, 
 		}
 	}
 
+	taken := func(key string) bool {
+		_, onGo := goResults[key]
+		_, onCS := csResults[key]
+		return onGo || onCS
+	}
+
+	rekey := func(goName, csName, key string) {
+		goResults[key] = goResults[goName]
+		delete(goResults, goName)
+		csResults[key] = csResults[csName]
+		delete(csResults, csName)
+
+		if output, ok := csOutputs[csName]; ok {
+			csOutputs[key] = output
+			delete(csOutputs, csName)
+		}
+
+		if records, ok := csRecords[csName]; ok {
+			csRecords[key] = records
+			delete(csRecords, csName)
+		}
+	}
+
 	for key, goNames := range goOnly {
 		csNames := csOnly[key]
 
-		if len(goNames) != 1 || len(csNames) != 1 {
+		if len(goNames) != len(csNames) {
 			continue
 		}
 
-		if _, exists := goResults[key]; exists {
+		if len(goNames) == 1 {
+			if !taken(key) {
+				rekey(goNames[0], csNames[0], key)
+				counts.OneToOne++
+			}
 			continue
 		}
 
-		if _, exists := csResults[key]; exists {
+		goRun, goOrdered := namesInRunOrder(goNames, goOrder)
+		csRun, csOrdered := namesInRunOrder(csNames, csOrder)
+
+		if !goOrdered || !csOrdered {
 			continue
 		}
 
-		goResults[key] = goResults[goNames[0]]
-		delete(goResults, goNames[0])
-		csResults[key] = csResults[csNames[0]]
-		delete(csResults, csNames[0])
+		keys := make([]string, len(goRun))
+		free := true
 
-		if output, ok := csOutputs[csNames[0]]; ok {
-			csOutputs[key] = output
-			delete(csOutputs, csNames[0])
+		for i := range goRun {
+			keys[i] = fmt.Sprintf("%s#run%d", key, i+1)
+			free = free && !taken(keys[i])
 		}
 
-		if records, ok := csRecords[csNames[0]]; ok {
-			csRecords[key] = records
-			delete(csRecords, csNames[0])
+		if !free {
+			continue
+		}
+
+		for i := range goRun {
+			rekey(goRun[i], csRun[i], keys[i])
+		}
+
+		counts.NToN += len(goRun)
+	}
+
+	return counts
+}
+
+// namesInRunOrder sorts names by their position in a stream. It reports false when any name has no position, so its
+// group is never paired by a guess.
+func namesInRunOrder(names []string, order map[string]int) ([]string, bool) {
+	for _, name := range names {
+		if _, ok := order[name]; !ok {
+			return nil, false
 		}
 	}
+
+	sorted := append([]string(nil), names...)
+	sort.Slice(sorted, func(i, j int) bool { return order[sorted[i]] < order[sorted[j]] })
+
+	return sorted, true
+}
+
+// addressPairCounts is what pairAddressVariantNames re-keyed: OneToOne rows from a group of one name per side, NToN rows
+// from a group of N names per side (N > 1) paired by run order. Published on the comparison record when either is
+// nonzero, so a pairing by run order is never absorbed into the matched count unstated.
+type addressPairCounts struct {
+	OneToOne int `json:"oneToOne"`
+	NToN     int `json:"nToN"`
+}
+
+// testRunOrder is each test's position in a stream: the index of the first event that names it, which is the order the
+// tests started in. It reads both sides' streams (go test -json and the converted host's), as terminalTestResults does.
+func testRunOrder(output string) map[string]int {
+	order := make(map[string]int)
+	for _, line := range testStreamLines(output) {
+		var event normalizedTestEvent
+		if json.Unmarshal([]byte(line), &event) != nil || event.Test == "" {
+			continue
+		}
+		if _, seen := order[event.Test]; !seen {
+			order[event.Test] = len(order)
+		}
+	}
+	return order
 }
 
 // testRecords is one test's log-record list from the converted host's terminal event. Present is
@@ -9202,6 +9486,42 @@ func manifestCensusGaps(goResults map[string]string, manifest testManifest) []st
 	return result
 }
 
+// admitRuntimeDeclared splits the census gaps into those the converted host ALSO ran -- it reported a
+// verdict under the very same name -- and the rest. A testing.RunTests list runs its entries as
+// top-level tests under whatever names it gives them, so testify's suite tests report
+// TestSuiteRecoverPanicInBeforeTest, which no declaration accounts for; both sides ran it, so it is a
+// test the row declared at run time, not one discovery missed. A name only Go reported stays a gap: F6
+// guards a test our side never ran.
+func admitRuntimeDeclared(gaps []string, csResults map[string]string) (remaining []string, admitted []string) {
+	for _, gap := range gaps {
+		if _, ran := csResults[gap]; ran {
+			admitted = append(admitted, gap)
+		} else {
+			remaining = append(remaining, gap)
+		}
+	}
+
+	return remaining, admitted
+}
+
+// addRuntimeDeclaredResults adds back, from the unfiltered results, every row under an admitted
+// runtime-declared top-level test, which the manifest-driven filter removed for want of a declaration.
+func addRuntimeDeclaredResults(filtered map[string]string, raw map[string]string, admitted []string) {
+	if len(admitted) == 0 {
+		return
+	}
+
+	set := hashset.NewHashSet(admitted)
+
+	for name, status := range raw {
+		topLevelName, _, _ := strings.Cut(name, "/")
+
+		if set.Contains(topLevelName) {
+			filtered[name] = status
+		}
+	}
+}
+
 // excludedDeclarations lists every disclosed-unsupported declaration the comparison excludes
 // (F2/F3): benchmarks, fuzz targets, Examples, and capability-blocked tests are filtered from
 // BOTH sides of the oracle, so the comparison record must say what was excluded and why —
@@ -9354,7 +9674,13 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	// and deliberately NOT runtime.GOOS, which is the platform the converter binary happens to be
 	// running on. Those differ on every cross-target run, and reading the wrong one would scope a
 	// manifest by the wrong platform without any message saying so.
-	disclosures, outOfScopeDisclosures, disclosureNotes, disclosureErr := loadTestDisclosures(outputPath, goosOfTarget(options.targetPlatform))
+	// A third-party module row's manifest may live in the committed -module-disclosures tree instead of
+	// the output directory (moduleDisclosureRoot.go); the output directory's own manifest still wins.
+	manifestDir, manifestNote := resolveDisclosureManifestDir(outputPath, options.testModuleDisclosures, options.mainModulePath, options.mainModuleDir, inputPath)
+	if manifestNote != "" {
+		fmt.Println(manifestNote)
+	}
+	disclosures, outOfScopeDisclosures, disclosureNotes, disclosureErr := loadTestDisclosures(manifestDir, goosOfTarget(options.targetPlatform))
 	mintViolations, mintUnchecked := hostFatalMintViolations(outputPath, disclosures)
 	if len(mintViolations) > 0 {
 		// Refused BEFORE either child runs, so a bad entry cannot quietly withdraw a row that some
@@ -9393,11 +9719,10 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 
 	csArgs := convertedHostArgs(options)
 	if hostFatalSkip != "" {
-		csArgs = append(csArgs, "--skip", hostFatalSkip)
+		csArgs = append(csArgs, "-test.skip="+hostFatalSkip)
 	}
-	csArgs = append(csArgs,
-		"--result", filepath.Join(outputPath, "go2cs_test_results.json"), "--junit", filepath.Join(outputPath, "go2cs_test_results.xml"))
-	csOutput, csErr := runCommandWithTimeoutEnv(testChildTimeout(options), testHostLaunchDir(inputPath, outputPath), options, testHostEnv(inputPath, options), publishedTestHostPath(outputPath, testProject), csArgs...)
+	csEnv := append(testHostEnv(inputPath, options), convertedHostResultEnv(outputPath)...)
+	csOutput, csErr := runCommandWithTimeoutEnv(testChildTimeout(options), testHostLaunchDir(inputPath, outputPath), options, csEnv, publishedTestHostPath(outputPath, testProject), csArgs...)
 
 	// The RAW command errors, snapshotted here because the two forgiveness arms far below nil them
 	// out — and the record's diagnostic tail (comparisonStderrTails) is attached on exactly the
@@ -9412,6 +9737,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	csRecords := terminalTestRecords(csOutput)
 	var manifest testManifest
 	var censusGaps []string
+	var runtimeDeclared []string
 	var gated []capabilityGatedDeclaration
 	manifestData, manifestErr := os.ReadFile(filepath.Join(outputPath, testManifestFileName))
 	if manifestErr == nil {
@@ -9420,16 +9746,19 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 			// F6 census gate: computed over the RAW Go results BEFORE the manifest-driven
 			// filtering below — the filter shares the manifest with discovery, so only the
 			// unfiltered stream can expose a declaration discovery missed.
-			censusGaps = manifestCensusGaps(goResults, manifest)
+			censusGaps, runtimeDeclared = admitRuntimeDeclared(manifestCensusGaps(goResults, manifest), csResults)
 			// Same window, same reason: the rows a capability gate withdraws exist only in the
 			// unfiltered stream, and the proof page publishes them so the matched count below
 			// never absorbs a subtest silently.
 			gated = capabilityGatedDeclarations(goResults, manifest)
+			rawGoResults, rawCSResults := goResults, csResults
 			goResults = eligibleTerminalTestResults(goResults, manifest)
 			csResults = eligibleTerminalTestResults(csResults, manifest)
+			addRuntimeDeclaredResults(goResults, rawGoResults, runtimeDeclared)
+			addRuntimeDeclaredResults(csResults, rawCSResults, runtimeDeclared)
 		}
 	}
-	pairAddressVariantNames(goResults, csResults, csOutputs, csRecords)
+	addressPairs := pairAddressVariantNames(goResults, csResults, csOutputs, csRecords, testRunOrder(goOutput), testRunOrder(csOutput))
 
 	names := make([]string, 0, len(goResults)+len(csResults))
 	seen := hashset.HashSet[string]{}
@@ -9455,7 +9784,10 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	result := testComparison{
 		Package: comparisonRecordPackage(manifest, inputPath), Status: status, Go: goResults, CSharp: csResults,
 		Matched: true, Skipped: []string{}, Disclosed: []string{}, Excluded: excludedDeclarations(manifest), Errors: []string{},
-		Gated: gated, Withdrawn: []string{}, Environment: environment,
+		Gated: gated, Withdrawn: []string{}, RuntimeDeclared: runtimeDeclared, Environment: environment,
+	}
+	if addressPairs != (addressPairCounts{}) {
+		result.AddressPairs = &addressPairs
 	}
 	if disclosureErr != nil {
 		result.Matched = false

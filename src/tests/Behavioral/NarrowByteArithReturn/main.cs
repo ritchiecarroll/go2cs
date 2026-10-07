@@ -5,14 +5,14 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static byte lower(byte c) {
+internal static partial byte lower(byte c) {
     if ((rune)'A' <= c && c <= (rune)'Z') {
         return (byte)(c + ((rune)'a' - (rune)'A'));
     }
     return c;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static byte wrapRet(byte x) {
+internal static partial byte wrapRet(byte x) {
     return (byte)(x + x + 1);
 }
 

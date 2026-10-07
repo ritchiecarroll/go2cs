@@ -78,7 +78,7 @@ public static void TestSemaHandoff2(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static bool testSemaHandoff() {
+internal static partial bool testSemaHandoff() {
     ref var sema = ref heap(new uint32(), out var Ꮡsema);
     ref var res = ref heap(new uint32(), out var Ꮡres);
     var done = new channel<EmptyStruct>(0);

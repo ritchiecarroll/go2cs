@@ -347,96 +347,96 @@ internal static slice<any> abiCallTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void passNone() {
+internal static partial void passNone() {
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint passInt(nint a) {
+internal static partial nint passInt(nint a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static int8 passInt8(int8 a) {
+internal static partial int8 passInt8(int8 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static int16 passInt16(int16 a) {
+internal static partial int16 passInt16(int16 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static int32 passInt32(int32 a) {
+internal static partial int32 passInt32(int32 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static int64 passInt64(int64 a) {
+internal static partial int64 passInt64(int64 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nuint passUint(nuint a) {
+internal static partial nuint passUint(nuint a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uint8 passUint8(uint8 a) {
+internal static partial uint8 passUint8(uint8 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uint16 passUint16(uint16 a) {
+internal static partial uint16 passUint16(uint16 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uint32 passUint32(uint32 a) {
+internal static partial uint32 passUint32(uint32 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uint64 passUint64(uint64 a) {
+internal static partial uint64 passUint64(uint64 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static float32 passFloat32(float32 a) {
+internal static partial float32 passFloat32(float32 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static float64 passFloat64(float64 a) {
+internal static partial float64 passFloat64(float64 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static complex64 passComplex64(complex64 a) {
+internal static partial complex64 passComplex64(complex64 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static complex128 passComplex128(complex128 a) {
+internal static partial complex128 passComplex128(complex128 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static array<uint32> passArray1([GoArrayDims(1)] array<uint32> a) {
+internal static partial array<uint32> passArray1([GoArrayDims(1)] array<uint32> a) {
     a = a.Clone();
 
     return a.Clone();
@@ -444,7 +444,7 @@ internal static slice<any> abiCallTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static array<uintptr> passArray([GoArrayDims(2)] array<uintptr> a) {
+internal static partial array<uintptr> passArray([GoArrayDims(2)] array<uintptr> a) {
     a = a.Clone();
 
     return a.Clone();
@@ -452,7 +452,7 @@ internal static slice<any> abiCallTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, array<uint32>, float64) passArray1Mix(nint a, [GoArrayDims(1)] array<uint32> b, float64 c) {
+internal static partial (nint, array<uint32>, float64) passArray1Mix(nint a, [GoArrayDims(1)] array<uint32> b, float64 c) {
     b = b.Clone();
 
     return (a, b.Clone(), c);
@@ -460,43 +460,43 @@ internal static slice<any> abiCallTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string passString(@string a) {
+internal static partial @string passString(@string a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<byte> passSlice(slice<byte> a) {
+internal static partial slice<byte> passSlice(slice<byte> a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<byte> passPointer(ж<byte> Ꮡa) {
+internal static partial ж<byte> passPointer(ж<byte> Ꮡa) {
     return Ꮡa;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, nint, nint, nint, nint, nint, nint, nint, nint, nint) passManyInt(nint a, nint b, nint c, nint d, nint e, nint f, nint g, nint h, nint i, nint j) {
+internal static partial (nint, nint, nint, nint, nint, nint, nint, nint, nint, nint) passManyInt(nint a, nint b, nint c, nint d, nint e, nint f, nint g, nint h, nint i, nint j) {
     return (a, b, c, d, e, f, g, h, i, j);
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64) passManyFloat64(float64 a, float64 b, float64 c, float64 d, float64 e, float64 f, float64 g, float64 h, float64 i, float64 j, float64 l, float64 m, float64 n, float64 o, float64 p, float64 q, float64 r, float64 s, float64 t) {
+internal static partial (float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64) passManyFloat64(float64 a, float64 b, float64 c, float64 d, float64 e, float64 f, float64 g, float64 h, float64 i, float64 j, float64 l, float64 m, float64 n, float64 o, float64 p, float64 q, float64 r, float64 s, float64 t) {
     return (a, b, c, d, e, f, g, h, i, j, l, m, n, o, p, q, r, s, t);
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct1 passStruct1(Struct1 a) {
+internal static partial Struct1 passStruct1(Struct1 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct2 passStruct2(Struct2 a) {
+internal static partial Struct2 passStruct2(Struct2 a) {
     a = a.ΔClone();
 
     return a.ΔClone();
@@ -504,7 +504,7 @@ internal static slice<any> abiCallTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct3 passStruct3(Struct3 a) {
+internal static partial Struct3 passStruct3(Struct3 a) {
     a = a.ΔClone();
 
     return a.ΔClone();
@@ -512,67 +512,67 @@ internal static slice<any> abiCallTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct4 passStruct4(Struct4 a) {
+internal static partial Struct4 passStruct4(Struct4 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct5 passStruct5(Struct5 a) {
+internal static partial Struct5 passStruct5(Struct5 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct6 passStruct6(Struct6 a) {
+internal static partial Struct6 passStruct6(Struct6 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct7 passStruct7(Struct7 a) {
+internal static partial Struct7 passStruct7(Struct7 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct8 passStruct8(Struct8 a) {
+internal static partial Struct8 passStruct8(Struct8 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct9 passStruct9(Struct9 a) {
+internal static partial Struct9 passStruct9(Struct9 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct10 passStruct10(Struct10 a) {
+internal static partial Struct10 passStruct10(Struct10 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct11 passStruct11(Struct11 a) {
+internal static partial Struct11 passStruct11(Struct11 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct12 passStruct12(Struct12 a) {
+internal static partial Struct12 passStruct12(Struct12 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct13 passStruct13(Struct13 a) {
+internal static partial Struct13 passStruct13(Struct13 a) {
     return a;
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct14 passStruct14(Struct14 a) {
+internal static partial Struct14 passStruct14(Struct14 a) {
     a = a.ΔClone();
 
     return a.ΔClone();
@@ -580,7 +580,7 @@ internal static slice<any> abiCallTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct15 passStruct15(Struct15 a) {
+internal static partial Struct15 passStruct15(Struct15 a) {
     a = a.ΔClone();
 
     return a.ΔClone();
@@ -588,13 +588,13 @@ internal static slice<any> abiCallTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (Struct1 x, Struct1 y) pass2Struct1(Struct1 a, Struct1 b) {
+internal static partial (Struct1 x, Struct1 y) pass2Struct1(Struct1 a, Struct1 b) {
     return (a, b);
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, EmptyStruct, float64) passEmptyStruct(nint a, EmptyStruct b, float64 c) {
+internal static partial (nint, EmptyStruct, float64) passEmptyStruct(nint a, EmptyStruct b, float64 c) {
     return (a, b, c);
 }
 
@@ -603,7 +603,7 @@ internal static slice<any> abiCallTestCases = new any[]{
 //
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (Struct10, byte, nuint) passStruct10AndSmall(Struct10 a, byte b, nuint c) {
+internal static partial (Struct10, byte, nuint) passStruct10AndSmall(Struct10 a, byte b, nuint c) {
     return (a, b, c);
 }
 
@@ -655,97 +655,97 @@ internal static slice<any> abiMakeFuncTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void callArgsNone(Action<MagicLastTypeNameForTestingRegisterABI> f) {
+internal static partial void callArgsNone(Action<MagicLastTypeNameForTestingRegisterABI> f) {
     f(new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint callArgsInt(Func<nint, MagicLastTypeNameForTestingRegisterABI, nint> f, nint a0) {
+internal static partial nint callArgsInt(Func<nint, MagicLastTypeNameForTestingRegisterABI, nint> f, nint a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static int8 callArgsInt8(Func<int8, MagicLastTypeNameForTestingRegisterABI, int8> f, int8 a0) {
+internal static partial int8 callArgsInt8(Func<int8, MagicLastTypeNameForTestingRegisterABI, int8> f, int8 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static int16 callArgsInt16(Func<int16, MagicLastTypeNameForTestingRegisterABI, int16> f, int16 a0) {
+internal static partial int16 callArgsInt16(Func<int16, MagicLastTypeNameForTestingRegisterABI, int16> f, int16 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static int32 callArgsInt32(Func<int32, MagicLastTypeNameForTestingRegisterABI, int32> f, int32 a0) {
+internal static partial int32 callArgsInt32(Func<int32, MagicLastTypeNameForTestingRegisterABI, int32> f, int32 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static int64 callArgsInt64(Func<int64, MagicLastTypeNameForTestingRegisterABI, int64> f, int64 a0) {
+internal static partial int64 callArgsInt64(Func<int64, MagicLastTypeNameForTestingRegisterABI, int64> f, int64 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nuint callArgsUint(Func<nuint, MagicLastTypeNameForTestingRegisterABI, nuint> f, nuint a0) {
+internal static partial nuint callArgsUint(Func<nuint, MagicLastTypeNameForTestingRegisterABI, nuint> f, nuint a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uint8 callArgsUint8(Func<uint8, MagicLastTypeNameForTestingRegisterABI, uint8> f, uint8 a0) {
+internal static partial uint8 callArgsUint8(Func<uint8, MagicLastTypeNameForTestingRegisterABI, uint8> f, uint8 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uint16 callArgsUint16(Func<uint16, MagicLastTypeNameForTestingRegisterABI, uint16> f, uint16 a0) {
+internal static partial uint16 callArgsUint16(Func<uint16, MagicLastTypeNameForTestingRegisterABI, uint16> f, uint16 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uint32 callArgsUint32(Func<uint32, MagicLastTypeNameForTestingRegisterABI, uint32> f, uint32 a0) {
+internal static partial uint32 callArgsUint32(Func<uint32, MagicLastTypeNameForTestingRegisterABI, uint32> f, uint32 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uint64 callArgsUint64(Func<uint64, MagicLastTypeNameForTestingRegisterABI, uint64> f, uint64 a0) {
+internal static partial uint64 callArgsUint64(Func<uint64, MagicLastTypeNameForTestingRegisterABI, uint64> f, uint64 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static float32 callArgsFloat32(Func<float32, MagicLastTypeNameForTestingRegisterABI, float32> f, float32 a0) {
+internal static partial float32 callArgsFloat32(Func<float32, MagicLastTypeNameForTestingRegisterABI, float32> f, float32 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static float64 callArgsFloat64(Func<float64, MagicLastTypeNameForTestingRegisterABI, float64> f, float64 a0) {
+internal static partial float64 callArgsFloat64(Func<float64, MagicLastTypeNameForTestingRegisterABI, float64> f, float64 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static complex64 callArgsComplex64(Func<complex64, MagicLastTypeNameForTestingRegisterABI, complex64> f, complex64 a0) {
+internal static partial complex64 callArgsComplex64(Func<complex64, MagicLastTypeNameForTestingRegisterABI, complex64> f, complex64 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static complex128 callArgsComplex128(Func<complex128, MagicLastTypeNameForTestingRegisterABI, complex128> f, complex128 a0) {
+internal static partial complex128 callArgsComplex128(Func<complex128, MagicLastTypeNameForTestingRegisterABI, complex128> f, complex128 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static array<uint32> callArgsArray1(Func<array<uint32>, MagicLastTypeNameForTestingRegisterABI, array<uint32>> f, [GoArrayDims(1)] array<uint32> a0) {
+internal static partial array<uint32> callArgsArray1(Func<array<uint32>, MagicLastTypeNameForTestingRegisterABI, array<uint32>> f, [GoArrayDims(1)] array<uint32> a0) {
     a0 = a0.Clone();
 
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
@@ -753,7 +753,7 @@ internal static slice<any> abiMakeFuncTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static array<uintptr> callArgsArray(Func<array<uintptr>, MagicLastTypeNameForTestingRegisterABI, array<uintptr>> f, [GoArrayDims(2)] array<uintptr> a0) {
+internal static partial array<uintptr> callArgsArray(Func<array<uintptr>, MagicLastTypeNameForTestingRegisterABI, array<uintptr>> f, [GoArrayDims(2)] array<uintptr> a0) {
     a0 = a0.Clone();
 
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
@@ -761,7 +761,7 @@ internal static slice<any> abiMakeFuncTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, array<uint32>, float64) callArgsArray1Mix(Func<nint, array<uint32>, float64, MagicLastTypeNameForTestingRegisterABI, (nint, array<uint32>, float64)> f, nint a0, [GoArrayDims(1)] array<uint32> a1, float64 a2) {
+internal static partial (nint, array<uint32>, float64) callArgsArray1Mix(Func<nint, array<uint32>, float64, MagicLastTypeNameForTestingRegisterABI, (nint, array<uint32>, float64)> f, nint a0, [GoArrayDims(1)] array<uint32> a1, float64 a2) {
     a1 = a1.Clone();
 
     return f(a0, a1, a2, new MagicLastTypeNameForTestingRegisterABI(nil));
@@ -769,43 +769,43 @@ internal static slice<any> abiMakeFuncTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string callArgsString(Func<@string, MagicLastTypeNameForTestingRegisterABI, @string> f, @string a0) {
+internal static partial @string callArgsString(Func<@string, MagicLastTypeNameForTestingRegisterABI, @string> f, @string a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<byte> callArgsSlice(Func<slice<byte>, MagicLastTypeNameForTestingRegisterABI, slice<byte>> f, slice<byte> a0) {
+internal static partial slice<byte> callArgsSlice(Func<slice<byte>, MagicLastTypeNameForTestingRegisterABI, slice<byte>> f, slice<byte> a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<byte> callArgsPointer(Func<ж<byte>, MagicLastTypeNameForTestingRegisterABI, ж<byte>> f, ж<byte> Ꮡa0) {
+internal static partial ж<byte> callArgsPointer(Func<ж<byte>, MagicLastTypeNameForTestingRegisterABI, ж<byte>> f, ж<byte> Ꮡa0) {
     return f(Ꮡa0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, nint, nint, nint, nint, nint, nint, nint, nint, nint) callArgsManyInt(Func<nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, MagicLastTypeNameForTestingRegisterABI, (nint, nint, nint, nint, nint, nint, nint, nint, nint, nint)> f, nint a0, nint a1, nint a2, nint a3, nint a4, nint a5, nint a6, nint a7, nint a8, nint a9) {
+internal static partial (nint, nint, nint, nint, nint, nint, nint, nint, nint, nint) callArgsManyInt(Func<nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, MagicLastTypeNameForTestingRegisterABI, (nint, nint, nint, nint, nint, nint, nint, nint, nint, nint)> f, nint a0, nint a1, nint a2, nint a3, nint a4, nint a5, nint a6, nint a7, nint a8, nint a9) {
     return f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (float64 r0, float64 r1, float64 r2, float64 r3, float64 r4, float64 r5, float64 r6, float64 r7, float64 r8, float64 r9, float64 r10, float64 r11, float64 r12, float64 r13, float64 r14, float64 r15, float64 r16, float64 r17, float64 r18) callArgsManyFloat64(Func<float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, MagicLastTypeNameForTestingRegisterABI, (float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64)> f, float64 a0, float64 a1, float64 a2, float64 a3, float64 a4, float64 a5, float64 a6, float64 a7, float64 a8, float64 a9, float64 a10, float64 a11, float64 a12, float64 a13, float64 a14, float64 a15, float64 a16, float64 a17, float64 a18) {
+internal static partial (float64 r0, float64 r1, float64 r2, float64 r3, float64 r4, float64 r5, float64 r6, float64 r7, float64 r8, float64 r9, float64 r10, float64 r11, float64 r12, float64 r13, float64 r14, float64 r15, float64 r16, float64 r17, float64 r18) callArgsManyFloat64(Func<float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, MagicLastTypeNameForTestingRegisterABI, (float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64)> f, float64 a0, float64 a1, float64 a2, float64 a3, float64 a4, float64 a5, float64 a6, float64 a7, float64 a8, float64 a9, float64 a10, float64 a11, float64 a12, float64 a13, float64 a14, float64 a15, float64 a16, float64 a17, float64 a18) {
     return f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct1 callArgsStruct1(Func<Struct1, MagicLastTypeNameForTestingRegisterABI, Struct1> f, Struct1 a0) {
+internal static partial Struct1 callArgsStruct1(Func<Struct1, MagicLastTypeNameForTestingRegisterABI, Struct1> f, Struct1 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct2 callArgsStruct2(Func<Struct2, MagicLastTypeNameForTestingRegisterABI, Struct2> f, Struct2 a0) {
+internal static partial Struct2 callArgsStruct2(Func<Struct2, MagicLastTypeNameForTestingRegisterABI, Struct2> f, Struct2 a0) {
     a0 = a0.ΔClone();
 
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
@@ -813,7 +813,7 @@ internal static slice<any> abiMakeFuncTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct3 callArgsStruct3(Func<Struct3, MagicLastTypeNameForTestingRegisterABI, Struct3> f, Struct3 a0) {
+internal static partial Struct3 callArgsStruct3(Func<Struct3, MagicLastTypeNameForTestingRegisterABI, Struct3> f, Struct3 a0) {
     a0 = a0.ΔClone();
 
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
@@ -821,67 +821,67 @@ internal static slice<any> abiMakeFuncTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct4 callArgsStruct4(Func<Struct4, MagicLastTypeNameForTestingRegisterABI, Struct4> f, Struct4 a0) {
+internal static partial Struct4 callArgsStruct4(Func<Struct4, MagicLastTypeNameForTestingRegisterABI, Struct4> f, Struct4 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct5 callArgsStruct5(Func<Struct5, MagicLastTypeNameForTestingRegisterABI, Struct5> f, Struct5 a0) {
+internal static partial Struct5 callArgsStruct5(Func<Struct5, MagicLastTypeNameForTestingRegisterABI, Struct5> f, Struct5 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct6 callArgsStruct6(Func<Struct6, MagicLastTypeNameForTestingRegisterABI, Struct6> f, Struct6 a0) {
+internal static partial Struct6 callArgsStruct6(Func<Struct6, MagicLastTypeNameForTestingRegisterABI, Struct6> f, Struct6 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct7 callArgsStruct7(Func<Struct7, MagicLastTypeNameForTestingRegisterABI, Struct7> f, Struct7 a0) {
+internal static partial Struct7 callArgsStruct7(Func<Struct7, MagicLastTypeNameForTestingRegisterABI, Struct7> f, Struct7 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct8 callArgsStruct8(Func<Struct8, MagicLastTypeNameForTestingRegisterABI, Struct8> f, Struct8 a0) {
+internal static partial Struct8 callArgsStruct8(Func<Struct8, MagicLastTypeNameForTestingRegisterABI, Struct8> f, Struct8 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct9 callArgsStruct9(Func<Struct9, MagicLastTypeNameForTestingRegisterABI, Struct9> f, Struct9 a0) {
+internal static partial Struct9 callArgsStruct9(Func<Struct9, MagicLastTypeNameForTestingRegisterABI, Struct9> f, Struct9 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct10 callArgsStruct10(Func<Struct10, MagicLastTypeNameForTestingRegisterABI, Struct10> f, Struct10 a0) {
+internal static partial Struct10 callArgsStruct10(Func<Struct10, MagicLastTypeNameForTestingRegisterABI, Struct10> f, Struct10 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct11 callArgsStruct11(Func<Struct11, MagicLastTypeNameForTestingRegisterABI, Struct11> f, Struct11 a0) {
+internal static partial Struct11 callArgsStruct11(Func<Struct11, MagicLastTypeNameForTestingRegisterABI, Struct11> f, Struct11 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct12 callArgsStruct12(Func<Struct12, MagicLastTypeNameForTestingRegisterABI, Struct12> f, Struct12 a0) {
+internal static partial Struct12 callArgsStruct12(Func<Struct12, MagicLastTypeNameForTestingRegisterABI, Struct12> f, Struct12 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct13 callArgsStruct13(Func<Struct13, MagicLastTypeNameForTestingRegisterABI, Struct13> f, Struct13 a0) {
+internal static partial Struct13 callArgsStruct13(Func<Struct13, MagicLastTypeNameForTestingRegisterABI, Struct13> f, Struct13 a0) {
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct14 callArgsStruct14(Func<Struct14, MagicLastTypeNameForTestingRegisterABI, Struct14> f, Struct14 a0) {
+internal static partial Struct14 callArgsStruct14(Func<Struct14, MagicLastTypeNameForTestingRegisterABI, Struct14> f, Struct14 a0) {
     a0 = a0.ΔClone();
 
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
@@ -889,7 +889,7 @@ internal static slice<any> abiMakeFuncTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Struct15 callArgsStruct15(Func<Struct15, MagicLastTypeNameForTestingRegisterABI, Struct15> f, Struct15 a0) {
+internal static partial Struct15 callArgsStruct15(Func<Struct15, MagicLastTypeNameForTestingRegisterABI, Struct15> f, Struct15 a0) {
     a0 = a0.ΔClone();
 
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
@@ -897,13 +897,13 @@ internal static slice<any> abiMakeFuncTestCases = new any[]{
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (Struct1 r0, Struct1 r1) callArgs2Struct1(Func<Struct1, Struct1, MagicLastTypeNameForTestingRegisterABI, (Struct1, Struct1)> f, Struct1 a0, Struct1 a1) {
+internal static partial (Struct1 r0, Struct1 r1) callArgs2Struct1(Func<Struct1, Struct1, MagicLastTypeNameForTestingRegisterABI, (Struct1, Struct1)> f, Struct1 a0, Struct1 a1) {
     return f(a0, a1, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 
 //go:registerparams
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, EmptyStruct, float64) callArgsEmptyStruct(Func<nint, EmptyStruct, float64, MagicLastTypeNameForTestingRegisterABI, (nint, EmptyStruct, float64)> f, nint a0, EmptyStruct a1, float64 a2) {
+internal static partial (nint, EmptyStruct, float64) callArgsEmptyStruct(Func<nint, EmptyStruct, float64, MagicLastTypeNameForTestingRegisterABI, (nint, EmptyStruct, float64)> f, nint a0, EmptyStruct a1, float64 a2) {
     return f(a0, a1, a2, new MagicLastTypeNameForTestingRegisterABI(nil));
 }
 

@@ -20,20 +20,20 @@ partial class runtime_test_package {
 //
 // The "start line" of a function should be the line containing the func
 // keyword.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint normalFunc() {
+internal static partial nint normalFunc() {
     return callerStartLine(false);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint multilineDeclarationFunc() {
+internal static partial nint multilineDeclarationFunc() {
     return multilineDeclarationFunc1(0, 0, 0);
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint multilineDeclarationFunc1(nint a, nint b, nint c) {
+internal static partial nint multilineDeclarationFunc1(nint a, nint b, nint c) {
     return callerStartLine(false);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint blankLinesFunc() {
+internal static partial nint blankLinesFunc() {
     // Some
     // lines
     // without
@@ -41,11 +41,11 @@ partial class runtime_test_package {
     return callerStartLine(false);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint inlineFunc() {
+internal static partial nint inlineFunc() {
     return inlineFunc1();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint inlineFunc1() {
+internal static partial nint inlineFunc1() {
     return callerStartLine(true);
 }
 
@@ -122,7 +122,7 @@ public static void TestStartLine(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint callerStartLine(bool wantInlined) {
+internal static partial nint callerStartLine(bool wantInlined) {
     array<uintptr> pcs = new(1);
     nint n = Δruntime.Callers(2, pcs[..]);
     if (n != 1) {

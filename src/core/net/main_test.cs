@@ -167,7 +167,7 @@ internal static void printRunningGoroutines() {
 internal static readonly @string createdByNetˢ = "created by net"u8;
 
 // runningGoroutines returns a list of remaining goroutines.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<@string> runningGoroutines() {
+internal static partial slice<@string> runningGoroutines() {
     slice<@string> gss = default!;
     var b = new slice<byte>((2 << (int)(20)));
     b = b.slice(0, Δruntime.Stack(b, true));

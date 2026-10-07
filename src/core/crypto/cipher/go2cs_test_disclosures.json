@@ -4,7 +4,7 @@
     {
       "name": "TestGCMAsm",
       "class": "platform-skip",
-      "platforms": ["linux", "darwin"],
+      "platforms": ["darwin"],
       "signature": "no assembly implementation of GCM",
       "reason": "source-defined platform skip, and the first row of this class: gcm_test.go's own t.Skipf fires when the assembly GCM implementation is the same type as the generic one, and the converted corpus is permanently such a platform - it has no .s codepaths at all, by design. Go reports pass because the real toolchain's windows/amd64 build HAS a distinct assembly GCM to compare; the converted side reports skip by executing the branch Go's own source wrote for platforms that do not. The divergence is therefore between two platforms' verdicts on one test, not between Go and the conversion on one platform, and the verdict pair (Go pass / C# skip) is recorded openly here and on the proof page rather than folded into a count. runtime-capability's refusal stands and does not apply: building a second GCM whose only consumer is a differential test would manufacture a platform property instead of measuring one. Pinned to the upstream skip message, so the row becomes a hard mismatch if the converted side ever skips for a different reason or stops skipping"
     }

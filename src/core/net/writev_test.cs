@@ -204,7 +204,7 @@ internal static void testBuffer_writeTo(ж<testing.T> Ꮡt, nint chunks, bool us
 internal static readonly object noServerSideConnectionˢ = (@string)"no server side connection"u8;
 internal static readonly object buffersWriteToClosedConnˢ = (@string)"Buffers.WriteTo(closed conn) succeeded, want error"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWritevError(ж<testing.T> Ꮡt) {
+public static partial void TestWritevError(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

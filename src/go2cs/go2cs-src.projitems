@@ -14,6 +14,7 @@
     <None Include="$(MSBuildThisFileDirectory)adapterPassSeparation_test.go" />
     <None Include="$(MSBuildThisFileDirectory)adapterStructLocality_test.go" />
     <None Include="$(MSBuildThisFileDirectory)addressTakenPredicates_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)aliasPublicization_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasReferenceImports_test.go" />
     <None Include="$(MSBuildThisFileDirectory)allocInliningFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)corpusRelease.go" />
@@ -88,6 +89,7 @@
     <None Include="$(MSBuildThisFileDirectory)convCompositeLit.go" />
     <None Include="$(MSBuildThisFileDirectory)conversionDriver.go" />
     <None Include="$(MSBuildThisFileDirectory)conversionDriver_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)conversionRecordFileAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)converterStaleness.go" />
     <None Include="$(MSBuildThisFileDirectory)converterStaleness_test.go" />
     <None Include="$(MSBuildThisFileDirectory)convertTimeout_test.go" />
@@ -145,6 +147,7 @@
     <None Include="$(MSBuildThisFileDirectory)dynamicTypeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)embeddedAssets_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embeddedTemplates.go" />
+    <None Include="$(MSBuildThisFileDirectory)emptyInterfaceAssert_test.go" />
     <None Include="$(MSBuildThisFileDirectory)emptyInterfaceFuncLitPositions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)emptyStructConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)elseIfPositionRecord_test.go" />
@@ -156,11 +159,13 @@
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo_test.go" />
     <None Include="$(MSBuildThisFileDirectory)filterZeroMatch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)finalizerDoorGuard_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)fixedSkipCallerClosure_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fixtureWritesTracked_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)foreignWrittenRHS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcResultProjection_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericDefinedMapChan_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericTypeAlias_test.go" />
@@ -229,6 +234,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeCallGateWindows_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeFieldArrayViewTranscription_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeRootFieldViewCensus_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\psQuestionMarkVariable_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\publishedCounterReset_test.go" />
     <None Include="$(MSBuildThisFileDirectory)liftedTypeNames.go" />
     <None Include="$(MSBuildThisFileDirectory)lineEndingSeams_test.go" />
@@ -254,6 +260,7 @@
     <None Include="$(MSBuildThisFileDirectory)manualConversionMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualConversionScope_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualTypeOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)managedSliceViewRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)methodExpressionWrapper_test.go" />
     <None Include="$(MSBuildThisFileDirectory)mixedKeyedComposite_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleAncestryEmission_test.go" />
@@ -261,6 +268,8 @@
     <None Include="$(MSBuildThisFileDirectory)moduleConverter.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleConverter_integration_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleConverter_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)moduleDisclosureRoot.go" />
+    <None Include="$(MSBuildThisFileDirectory)moduleDisclosureRoot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleNamespaceAgreement_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleProofPages_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleTestsDriver.go" />
@@ -326,6 +335,7 @@
     <None Include="$(MSBuildThisFileDirectory)processGroup_test.go" />
     <None Include="$(MSBuildThisFileDirectory)processGroupWindows.go" />
     <None Include="$(MSBuildThisFileDirectory)publishBinlog_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)publishBuildLayout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publishRebundle_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publishTimeout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)profiles\linux-arm.pubxml" />
@@ -363,9 +373,11 @@
     <None Include="$(MSBuildThisFileDirectory)returnOperandOrder_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rootEscapedRecordDedupe_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rootShadowQualification_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)runtimeDigestHandOwned_test.go" />
     <None Include="$(MSBuildThisFileDirectory)safePushGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)seededAliasNameCollision_test.go" />
     <None Include="$(MSBuildThisFileDirectory)sameNameImportAlias_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)sameNamePackageInterface_test.go" />
     <None Include="$(MSBuildThisFileDirectory)samePackageImplements.go" />
     <None Include="$(MSBuildThisFileDirectory)samePackageImplements_test.go" />
     <None Include="$(MSBuildThisFileDirectory)sanitization_test.go" />

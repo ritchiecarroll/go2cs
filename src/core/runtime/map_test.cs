@@ -330,7 +330,7 @@ public static void TestIterGrowWithGC(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testConcurrentReadsAfterGrowth(ж<testing.T> Ꮡt, bool useReflect) {
+internal static partial void testConcurrentReadsAfterGrowth(ж<testing.T> Ꮡt, bool useReflect) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();

@@ -222,7 +222,7 @@ public static ж<Client> NewClient(io.ReadWriteCloser conn) {
 
 // NewClientWithCodec is like [NewClient] but uses the specified
 // codec to encode requests and decode responses.
-[MethodImpl(MethodImplOptions.NoInlining)] public static ж<Client> NewClientWithCodec(ClientCodec codec) {
+public static partial ж<Client> NewClientWithCodec(ClientCodec codec) {
     var client = Ꮡ(new Client(
         codec: codec,
         pending: new map<uint64, ж<ΔCall>>()

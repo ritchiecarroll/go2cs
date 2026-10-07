@@ -26178,6 +26178,145 @@ Nine entries, most important first. The owner ruled at 10:05 that 1.24.13.4 wait
 
 **2026-10-04, INSTRUMENT (COORD):** four lessons from seating the train and from landing the one before it. (1) A PAIRWISE 3-way of every pushed seat against every other, and against O's union, run BEFORE the freeze, found three seat-by-seat conflicts that no lane's own gate could see, because each seat is clean on the base it was cut on. Two were position-map rows regenerating ONE `GoPositionMap` line (`g-method-value-fm-record-r3` against `c2-elseif-position-record-r2` in 5 `package_info.cs`; later go-cmp L against the else-if row in `reflect/package_info.cs`), and one was two inserts at one anchor (the sibling-name row against the `go.go` row in `importAliasOperations.go`). Each was ruled as a re-cut STACKED on the other seat, the shared line or block carrying both changes. The first pass (11:30) also found one seat against O's union itself (`PackageTests/README.md`). After the first two re-cuts the pass read 0 conflicts in 156 pairs over 21 seats and O's union (13:27); the third conflict arrived with the 23rd seat (14:05). (2) PLACEMENT keeps rows single-parent: two seats that each add a section at the tail of one doc (`shadowing.md`: the sort seat and the `go.go` seat) conflict, and moving one section to a non-tail anchor clears it with no merge-commit base. (3) The i7's git 2.35 has no `merge-tree --write-tree`: the pairwise instrument is a read-tree script, and the pre-map ran on a newer git's real ort merge. (4) A seat's `-tests` footprint is its own reading: TRAIN O's test-source refresh moved 18 committed test sources (explicit lambda result types, a bare `select();`, a cast on an untyped constant loop bound, two lifted type names, a byte cast around a shift) for seats whose rows declared no corpus footprint, because the fixup derives what the union emits from the `-stdlib` conversion only; and TRAIN O's battery read ONE finding class, an untracked `src/core/math/bits/.editorconfig` that a `-tests` run writes and no seat had committed, which this train's `claude/p2-test-warning-entries` (`8d89695095`) commits for all three flavours.
 
+## 2026-10-05 — C2: a named struct and an identical unnamed struct are assignable in Go; four forms do not compile — RECORDED AND DEFERRED
+
+Go lets a value move between a named struct `T` and an unnamed struct with an identical underlying
+type, in both directions, by assignment and by conversion. go2cs lifts each unnamed struct to its own
+C# struct, so the two are distinct types. One C# path bridges them: `checkForDynamicStructs`
+(`dynamicStructOperations.go`), which runs at call arguments and returns and only when the TARGET is
+the unnamed struct. It emits a fieldwise `new target(src.A, src.B)` when the source is public and the
+target internal (C# operators must be public), and otherwise registers an implicit conversion.
+
+**The four forms that do not compile.** Measured with `type T struct{ A int; B string }`, identically at
+master `7a1b2e3631` and the TRAIN P union `446d2c8ba0` (so H1, `claude/c2-anon-struct-named-conv`, changes
+none of them). The unnamed struct is lifted once, as `takesAnon_a`. Go prints `shape1 1`, `shape2 3`,
+`controls 1 4 1`.
+
+| Form | Go | Emitted | Compiler |
+|---|---|---|---|
+| named -> unnamed, conversion | `struct{ A int; B string }(l)` | `takesAnon_a(l)` | CS1955 |
+| unnamed -> named, argument | `takesT(struct{ A int; B string }{3, "c"})` | `takesT(new takesAnon_a(3, "c"u8))` | CS1503 |
+| named -> unnamed, `var` | `var x struct{ A int; B string } = l` | `takesAnon_a x = l;` | CS0029 |
+| unnamed -> named, `var` | `var y T = struct{ A int; B string }{4, "d"}` | `T y = new takesAnon_a(4, "d"u8);` | CS0029 |
+
+The control compiles: named -> unnamed at an ARGUMENT, `takesAnon(l)`, emits `new takesAnon_a(l.A, l.B)`.
+
+**Census.** go/types over every assignment-like site: assignments, `var` with a type, arguments
+(variadic included), returns, conversions (pointer conversions included), composite-literal fields,
+elements and map keys, and channel sends. Predicate: a value of struct type S flows to struct type D,
+S and D not identical, their underlying structs identical ignoring tags, at least one of them unnamed.
+Positive control: the repro above, 5 of 5 sites found.
+
+| Population | Sites | What they are |
+|---|---|---|
+| std, test packages included: linux 926, windows 923, darwin 922 packages, 0 load errors | 1 on each | `unique/handle_test.go:50`, `testZeroSize(struct{}{})`: an unnamed -> named CONVERSION, H1's shape |
+| `github.com/google/go-cmp` v0.7.0 | 2 | `cmp/compare_test.go:2356-2357`, `struct{A int}` -> `teststructs.AssignB` conversions: H1's motivating pair |
+| `BurntSushi/toml` v1.6.0, `x/sync` v0.19.0, `golang-jwt/jwt/v5` v5.3.1, `joho/godotenv` v1.5.1, `google/uuid` v1.6.0 | 0 each | |
+| `gopkg.in/yaml.v3` v3.0.1 | NOT MEASURED | its test dependency `gopkg.in/check.v1` had no go.sum entry on the offline box |
+
+No measured package reaches any of the four forms. Every real occurrence is the unnamed -> named
+conversion H1 fixes.
+
+**Size if cut.** One helper for the fieldwise construction in both directions (generalizing
+`dynamicCast`), wired at explicit conversions, assignments and `var` declarations, plus the reverse
+direction of the existing argument and return check: about 60-100 converter lines and one behavioral
+fixture covering all four forms. Predicted std footprint 0 files, from the census (unique's site
+already takes H1's path). Base: wherever H1 has landed, since the two touch the same conversion sites.
+
+**Trigger.** The first module that reaches one of the four forms. Ruled record-and-defer by COORD on
+2026-10-05 (04:03Z): no seat until then.
+
+— C2
+
+## 2026-10-05 — C2: go-cmp reports two pointer-keyed maps in the other order — RECORDED AND DISCLOSED (runtime-capability), in the first module disclosure manifest
+
+**The two rows.** go-cmp v0.7.0, `cmp` package, linux, at a local union of C2's seats (never pushed; it adds
+nothing to pointer identity). Both are subtests of `TestDiff`, Go pass, C# fail:
+
+| Row | What the report shows |
+|---|---|
+| `TestDiff/Comparer/MapKeyPointer` | `map[*int]string`, two keys from two `new(int)` calls: the `got` block lists `+ "world"` before `- "hello"`; Go lists `- "hello"` first |
+| `TestDiff/Reporter/LargeMapKey` | `map[*[]uint8]int`, each key the address `&b` of a local 1 MiB slice: the same swap, `+` line before `-` line |
+
+The keys and values in the report are the same as Go's. Only the ORDER of the two report lines differs.
+
+**Root.** cmp sorts map keys before printing them, and orders pointer keys by `reflect.Value.Pointer()`. In
+go2cs that is the box's `PointerOrderToken`, and for a standard heap box (`ж.StandardBox.cs`) the token is
+`AllocationBase(RuntimeHelpers.GetHashCode(this))`: the CLR identity hash, lifted. The CLR assigns that hash
+when it is first requested, from a pseudo-random per-thread sequence, so two boxes order by their hashes and
+not by the order they were allocated. Go's addresses for two consecutive small allocations ascend, so Go's
+report lists the first-allocated key first, and cmp's expected text depends on it. Nothing in the converter
+is involved.
+
+**Pinned signatures** (the C# failure text contains these; Go's never does):
+
+- MapKeyPointer: `+ \t&⟪0xdeadf00f⟫0: "world",\n- \t&⟪0xdeadf00f⟫0: "hello",` (the `got` block's two lines in
+  the swapped order).
+- LargeMapKey: `got:\n  map[*[]uint8]int{\n+ \t&⟪0xdeadf00f⟫⟪ptr:0xdeadf00f, len:1048576, cap:1048576⟫` (the
+  `got` block opening on the `+` line).
+
+**The disclosure.** Both rows are disclosed as `runtime-capability` in
+`src/tests/ModuleDisclosures/github.com/google/go-cmp@v0.7.0/cmp/go2cs_test_disclosures.json`, read when a
+run passes `-module-disclosures src/tests/ModuleDisclosures` (this seat). Before it, a module row had no
+committed home for a disclosure: the loader reads `go2cs_test_disclosures.json` from the package's output
+directory (`loadTestDisclosures`), which for std is the committed `src/core/<pkg>` and for a module is
+whatever root the run was given. COORD ruled the home on 2026-10-05 (21:27Z): a committed tree keyed by
+module path AND version, consulted only when the output directory holds no manifest and only for the
+version the run resolved; the orphan rule applies unchanged.
+
+**Retirement.** The rows retire when a heap box's token orders by allocation: for example a monotonic
+sequence number taken when the box is constructed, with `AllocationBase` built from it instead of the
+identity hash. That is a field on every `ж<T>` heap box, which the Architecture map rules a corpus-wide byte
+cost, so it is a design question with its own ruling, not a seat. COORD ruled on 2026-10-05: record and
+disclose, no per-box cost. Until then the two rows are a runtime-capability divergence; retiring them removes
+both entries from that manifest, and the orphaned-disclosure line says when they start passing.
+
+— C2
+
+## 2026-10-05 — C2: three shapes recorded and deferred (no seat)
+
+All three fail loudly (a compile error), never silently, and each has a census of 0.
+
+1. **The address of an array element through a named pointer**, `&pp.arr[i]` and `&(*pp).arr[i]`, where
+   `type PP *S` and `S` has an array field `arr`. Found while cutting the lost-write seat
+   (`claude/c2-namedptr-field-address`, 8d4ab2d7fd), which fixed `&pp.f` and `&(*pp).f` and left this form
+   alone: the named-pointer wrapper has no `.arr` member and no field-reference `at` overload, so the
+   emission does not compile. Census (go/types, every address taken through a dereference of a named pointer,
+   classified by the selector chain after it; positive control 3 of 3 array-element sites): 0 array-element
+   sites in std on linux, windows and darwin and 0 in the 11 modules. The behavioral corpus was not
+   re-measured for this form.
+2. **A defined map type with an anonymous-struct key**, `type MK map[struct{ a int }]int`. The key is emitted
+   in Go spelling (`struct{a int}`) in the `GoType` attribute and in `new map<…>`, which does not compile. An
+   unnamed map with the same key lifts the struct correctly.
+3. **A defined map type with an anonymous non-empty interface value**, `type MV map[int]interface{ M() }`.
+   Same mechanism: Go spelling in `new map<…>`, CS1031.
+
+Census for 2 and 3 (go/types over every defined type whose underlying type is a map; positive control 2 of
+2, with `map[int]interface{}`, a named-struct key and an unnamed map as negative controls): 0 in std on
+linux, windows and darwin, test packages included, and 0 in the 11 modules.
+
+**Trigger.** The first module or banked row that reaches one of the three. COORD ruled each record-and-defer
+on 2026-10-05.
+
+— C2
+
+## 2026-10-05 — C2: the atlas runner and its module list are committed nowhere — RECORDED (COORD seats it after P)
+
+The module rows in `docs/TargetAtlas.html` are measured by an atlas runner: a script that converts each listed
+module with `-tests -recurse` into a scratch output root and reads the comparison. Neither that script nor the
+list of modules (path and version) it runs is in the repository; each lane that measures modules keeps its own
+copy in its scratch space. So a module row cannot be reproduced from the tree alone, two lanes can measure two
+different module versions without either knowing, and nothing ties a row to the version its disclosures were
+written for.
+
+Found while sizing the module-disclosure home (`claude/c2-module-disclosures`): the ruling asked for the home to
+sit beside whatever already holds the module rows' data, and nothing does. `src/tests/ModuleDisclosures/` is
+keyed by module path and version and is the natural sibling of a committed runner and module list.
+
+**Trigger.** COORD (2026-10-05, 21:56Z): the next thing this phase needs after TRAIN P lands; COORD seats it then.
+
+— C2
+
 ## 2026-10-06 — C2: NEW-1b's residuals, the channel directions the generator-side route does not carry — RECORDED
 
 **The route.** `claude/c2-func-chan-dir` carries a func signature's channel directions to reflect without
@@ -26212,5 +26351,157 @@ the likely ones: a Go test that takes `reflect.TypeOf` of a func literal or a ni
 channel in its signature.
 
 — C2
+
+## 2026-10-06 — C2: three rows from the whole-stdlib warnings census
+
+The census: the shipped tree `e1ad9dbc11` (tag `nuget-1.24.13.4`), whole standard library, Release,
+`--no-incremental`, one output directory per target: linux 67, windows 67, darwin 74 warnings, 0 errors.
+Linux and windows are site for site identical and equal to the owner's release log; darwin is linux plus
+seven (six CA1416 and one CS8826, ruled to P1). golib built alone at `7a1b2e3631`, the master before
+TRAIN P, gives the same 66 golib sites, so none of them is new with TRAIN P. COORD ruled the codes on
+2026-10-06; these three rows are the ones it asked to be recorded.
+
+**CS8500, `runtime/iface.cs(235)`: REAL, a converter question; G sizes it.** The line is `itabInit`'s
+`methods`, `new slice<@unsafe.Pointer>(new ReadOnlySpan<@unsafe.Pointer>((@unsafe.Pointer*)(uintptr)(…), (int)(ni)))`:
+a raw pointer whose element type, golib's `unsafe.Pointer`, is a managed struct, so the garbage collector
+does not track what the pointer reaches. It is the only CS8500 in the build on all three targets, and it
+is the same line as row 1 of G's 2026-10-02 entry above (the copying slice view whose stores never reach
+`m.Fun`). That entry's ruling stands for the store: no seat until its predicate fires. The warning is
+recorded here so the two readings of one line are found together.
+
+**Native AOT is a capability boundary for type synthesis, not a warning to remove (IL2111, IL2055,
+IL2060; NO CUT).** `reflect.FuncOf` and `reflect.StructOf` create types at run time with
+Reflection.Emit (`TypeBuilder`, `DefineType`: `golib/GoDelegateSynthesis.cs:155` and
+`golib/GoStructSynthesis.cs`), and Native AOT has no Reflection.Emit. `MakeGenericType` /
+`MakeGenericMethod` over a value-type instantiation that the compiler never saw cannot be created there
+either. Under JIT, and under the trimmed publish that ships (`TrimMode=partial`, golib and the converted
+packages fully rooted), these work; a converted program published as Native AOT cannot make those
+types (not measured here: no Native AOT program in the census reached these calls). The trim analyzer's warnings on golib (66 at the shipped tree) describe
+this; removing the analyzer from golib's build would hide them and fix nothing.
+
+**Nothing checks a REMOVED CONSTRUCTOR the way the field-metadata guard checks removed fields (IL2067;
+NO CUT).** `ZeroValueOf` (`golib/GoReflect.ValueMarshalling.cs:555, 571`) makes a converted struct's Go
+zero value through `Activator.CreateInstance` on the struct's type, which runs its parameterless
+constructor, where the struct's field initializers
+live (a blank `[4]byte` field is `internal array<byte> _ = new(4);`). In the configuration that ships the
+constructor cannot be trimmed: neither golib nor any converted package is `IsTrimmable`, and
+`TrimMode=partial` keeps every member of them. Under `TrimMode=full` a falsifier program (a struct
+reached only through `reflect.TypeOf((*T)(nil)).Elem()`, then `reflect.Zero` and `reflect.New`) never
+reaches `ZeroValueOf`: both Native AOT arms exit 2 at startup, when `GoFieldMetadata` refuses
+`internal/cpu`'s `option` struct ("its field metadata was removed, most likely by trimming"). So a full
+trim is refused today, and only because the field guard fires first. If a full trim ever got past it, by
+my reading of the code (not measured) a removed constructor would yield a zero value whose initialized
+fields are missing, and nothing would say so.
+**Predicate:** golib or a converted package declares itself trimmable, or a supported publish
+configuration moves to `TrimMode=full`.
+
+— C2
+
+## 2026-10-06 — G: a slice view over a MANAGED element with no aliasing pair refuses by name (the corpus's one CS8500) — closed by this seat
+
+Row 1 of the 2026-10-02 copying-slice-view entry, `runtime/iface.cs` `itabInit`'s `methods`
+(`(*[1 << 16]unsafe.Pointer)(unsafe.Pointer(&m.Fun[0]))[:ni:ni]`), read `uintptr` words as
+`unsafe.Pointer`, which is a CLASS in golib: the span view fabricated managed references (C# CS8500)
+and copied besides, so its stores never reached `m.Fun`. No door serves the pair (a word in storage
+against a reference in the slice): `Reinterpret` cannot alias it, its pinned fallback reads the same
+words as references, and a carrying copy loses the writes. RULED by COORD (re-ruled to (e) after G
+withdrew the door candidate): the converter emits `(*[N]T)(p)[lo:hi:max]` over a managed element that
+reaches the span-over-address branch as a REFUSAL BY NAME at the site, a throw naming the shape and the
+Go position; an aliasing pair (a Go pointer to an identical element) keeps `array<T>.AliasPointer`, and
+an unmanaged element keeps the span view. `itabInit` is unreachable in the managed model (its callers
+`getitab` and up are the Go compiler's entry points; the one converted caller, `runfinq`, is dead
+behind the hand-owned `createfing`), so the refusal never fires today; it is diagnosable the day
+something reaches it, where a fabricated reference is not. Population, by a go/types census over std
+(windows, linux, darwin): 17 conversions `(*[N]T)(p)` over a managed element, 1 emitted as a view of
+managed memory (this one); the other 16 are hand-owned, transcribed by hand-owns, served by
+`array<T>.AliasPointer`, or not views.
+
+**The lifetime class, not this seat:** the same branch emits 14 span-over-address views in production
+`src/core` (runtime 6, runtime/windows 2, internal/syscall/windows/registry 4, internal/abi 2), 13 of
+them over unmanaged elements (byte 8, uint16 2, Method 3), which C# accepts. Whether each is GC-safe
+turns on what it points at (a pinned box, an unpinned box, or native memory): the
+FINDING-managed-box-uintptr-lifetime class, open and unsized here.
+
+— G
+
+**2026-10-06, the census's measured limit (G):** the managed-element site count in the CS8500 row above (17
+conversions, 1 emitted as a view of managed memory) is a count **in the converted corpus**, not in Go code.
+Hand-owned files hide the sites that a direct conversion of the same Go source reaches: std hand-owns
+`internal/abi`'s `InSlice`/`OutSlice`, so the std census could not see them, while the behavioral
+`StdLibInternalAbi`, which converts that `type.go` directly, carried both. They were emitted as a span over the
+address of a reference element, which the compiler does not warn on and the runtime rejects at the call. They
+now refuse by name too (the seat's third commit, `be4ce10078`).
+
+— G
+
+## 2026-10-05 — G: a conversion through a type written over ANOTHER package's named basic, in the two directions seat A does not cover — RECORDED AND DEFERRED (COORD)
+
+Seat A (`claude/g-foreign-defined-hop`, `82c3b347dc`, the train after P) makes a constant or basic value converted INTO a
+type the converting package declares over another package's named basic hop through that base:
+`((ΔLevel)(logrus.Level)0)`. Its battery measured two neighbouring directions it does not cover, each CS0030, and
+COORD ruled them record-and-defer: no seat, because neither the standard library nor any measured module reaches one.
+
+1. **INTO a type ANOTHER package declares.** `wraplib.Wrapped(2)` from `main`, with `type Wrapped levellib.Level` in
+   `wraplib`. `foreignWrittenBase` reads `packageTypeSpecRHS`, which holds only the converting package's own
+   declarations, so the cast stays direct and is two user-defined conversions. A source exists without a new metadata
+   field: the dependency's own syntax (`importedPackageSources`, as `foreignDerivedTypeAliases` already uses).
+2. **FROM such a type to its basic.** `uint32(w)` with `w wraplib.Wrapped`, and `int64(Dur(5))` with
+   `type Dur time.Duration`: the wrapper converts only to its named base, so the basic needs the reverse hop.
+
+**Repro** (both directions, 1 site each): a module with `levellib` (`type Level uint32`), `wraplib`
+(`import "…/levellib"; type Wrapped levellib.Level; func (w Wrapped) Raw() uint32 { return uint32(w) }`) and a `main`
+calling `wraplib.Wrapped(2).Raw()`.
+
+**Census** (go/types over `std` with tests; the instrument's control is that repro, which it reads as exactly 1 INTO
+and 1 FROM): INTO a foreign-owned foreign-written type, 0 on windows, linux and darwin; FROM such a type to a basic,
+0 on all three. No first-wave module measured so far (testify, logrus, cobra, pflag, x/sync, objx, yaml.v3) reaches
+either.
+
+**Trigger:** the first module that reaches one. If a first-wave module or a Target Atlas top row does, it becomes a
+seat that day.
+
+## 2026-10-06 — G: two different `*testing.T` compare deep-equal under reflect (testify `TestRunSuite/TestSubtest`) — open, not a seat
+
+**OPEN (G; recorded on COORD's ruling of 2026-10-06).** testify's `SuiteTester.TestSubtest` asserts `NotEqual(suiteT, subTestT)`, a suite's `*testing.T` against its subtest's, and testify compares by `reflect.DeepEqual` (via `ObjectsAreEqual`). In Go the two differ (name, parent, level and more). The hand-owned `testing.T` (`src/core/testing/testing.cs`) shows reflect an opaque `Execution` reference and the two detached-state flags only, so the two pointees deep-compare EQUAL and the assertion fails: `TestRunSuite/TestSubtest/first` and `/second` (Go pass, C# fail), `TestRunSuite/TestSubtest` (pass, fail) and `TestRunSuite` (Go skip, C# fail). Measured on testify v1.12.1 at the acceptance merge `ab6721b68f` + `claude/g-testing-runtests` `24bb3cf68b`, and present without the RunTests capability too, so it is not that seat's. Repro: `-tests -recurse` of testify, the `suite` package. **Unpark when** a ruling asks for `testing.T`'s reflect surface to carry Go's identity (the test's name at minimum); until then the four rows are this record's.
+
+## 2026-10-06 — C1: **Native AOT under `TrimMode=partial` compiles a package consumer's WHOLE go.* closure** — open, the cost of the ruled trim default
+
+**What.** go.lib's packed targets now default `TrimMode=partial` (`claude/c1-golib-trim-default` `ab6aa8f443`, TRAIN Q), the setting a converted project's csproj template already carries. Without it a hand-written consumer of the published 1.24.13.4 crashed at startup under `PublishAot` (exit 2, `TypeInitializationException` <- `go.internal.cpu_package+option` "reports no instance fields": a full trim removed the field metadata golib reads). `partial` trims the framework only, so ILC compiles every referenced go.* assembly whole.
+
+**Measured**, on `src/tests/PackageTests/PackageSymbols` (references go.lib, go.runtime and go.sort; **31 go.* assemblies** in its closure), one Native AOT publish:
+- hosted linux-x64, `aot-smoke` run 37523439849 (`claude/c1-aot-smoke` `44f29d50e6`): **56 min (3,371 s)**, executable exit 0;
+- the same publish against the published 1.24.13.4 on a 4-core / 15 GB cloud box, the consumer's own `<TrimMode>partial</TrimMode>`: 2 h 24 min; executable 249 MB plus a 401 MB `.dbg`;
+- before the AOT run left release-smoke, it pushed that stage's legs from 3-10 min to 84 min on linux, and windows and both Macs past their 90/135-minute budgets (37495989079). It is now its own stage, `aot-smoke` (budget 240, Macs 360).
+
+**The route that would remove the cost** is a full trim, and a full trim needs golib's reflection annotated (`DynamicallyAccessedMembers`, `DynamicDependency`, justified `UnconditionalSuppressMessage`) so the trimmer keeps what golib reaches by name. Already recorded, and not sized here: this board's **"Backlog: the AOT full-trim column, deferred with its reasoning"** (2026-08-11: full trim "strips exactly the metadata golib reaches reflectively", so it fails Verify); `docs/CleanupBacklog.md` item (c) (golib's `IL####` warnings want those annotations, never a `NoWarn`); and `docs/phase4/CENSUS-stdlib-warnings-2026-10-02.md`, where every IL trim-analysis diagnostic in the stdlib BUILD is golib's own (`IL2070` 23, `IL2075` 11, `IL2067` 10, `IL2026` 6, among others). At PUBLISH the converted assemblies add their own (the local AOT publish above reported `IL2104` "produced trim warnings" for `unsafe` and `slices`, and `IL3053` "produced AOT analysis warnings" for `internal.abi`), so golib is where a full trim starts, not necessarily where it ends. A trimmed NON-AOT publish of the same consumer (ILLink, `PublishTrimmed`) runs under a full trim of 1.24.13.4 already: the crash and the cost are Native AOT's.
+
+## 2026-10-06 — G: logrus `TestNestedLoggingReportsCorrectCaller`, its own class after R2m: the launch directory and a non-leaf frame's line — open, to size after B and C
+
+Read on the R2m acceptance unions (control on the carrier `e7fcff2244`, seat `633b045e8a`; both with alias-publicize,
+CloneMap, the CS0030 on-hop, same-name and the `safe` tag merged), logrus v1.10.2, `-tests all -recurse`, Release
+with tiering off. On the control the row's `func` assertion read `testing.tRunner`, the R2m defect. On the seat
+`func` passes, and only the `file` assertion is left, at two sites (logrus_test.go:449 and :475). It fails for two
+independent reasons:
+
+**a. The launch directory.** The test builds the expected path from `os.Getwd()` beside the caller's file name.
+`go test` runs a package's tests IN that package's source directory, here the module cache's `logrus@v1.10.2`, so
+the two agree. The converted `-recurse` host ran in a temporary copy of the converted package
+(`<temp>/go2cs-tests/github.com_sirupsen_logrus/<run id>/src/github.com/sirupsen/logrus`), while the position
+record names the Go source file in the module cache. The expected path therefore carries the host's directory and
+the actual path the Go source's. To size: which of the two moves (Go's answer is the launch directory: run in the
+source directory), relative `testdata` included. This is "runs like Go", so a design line comes before a cut.
+
+**b. A non-leaf frame's line.** At both sites the converted `runtime.Caller(0)` answers Go's line (450 and 476).
+What differs is the line logrus reports for its CALLER frame, the `llog.Info(...)` / `....Print(...)` statement:
+Go 449 and 475, converted 450 and 476, which is the NEXT statement's line. (G's post d8a11debc3 read this as
+Caller(0) being one high; the statements read here correct that.) The shape fits a caller frame whose return
+address lies past the call, attributed to the following statement's sequence point. To size: which position the
+record carries for a call that ends a statement, and which one Go's pc-line table carries. A position record is
+invisible in emitted code, so a fix there is in bounds; a change to visible emission to satisfy a line number is
+not (the standing ruling).
+
+`hooks/slog` read failing on the control and validated on the seat, in the same runs; its reason is not read here.
+
+— G
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -91,7 +91,7 @@ internal static void testHelper(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string parallelˢ = "parallel"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void parallelTestHelper(ж<testing.T> Ꮡt) {
+internal static partial void parallelTestHelper(ж<testing.T> Ꮡt) {
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < 5; i++) {
         Ꮡwg.Add(1);

@@ -126,7 +126,7 @@ public static void TestSendfileWithLargeFile(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object retrievedDataHashDidNotˢ = (@string)"retrieved data hash did not match"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testSendfile(ж<testing.T> Ꮡt, @string filePath, @string fileHash, int64 size, int64 limit) {
+internal static partial void testSendfile(ж<testing.T> Ꮡt, @string filePath, @string fileHash, int64 size, int64 limit) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
@@ -225,7 +225,7 @@ internal static readonly object retrievedDataHashDidNotˢ = (@string)"retrieved 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string producedˢ = "Produced "u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSendfileParts(ж<testing.T> Ꮡt) {
+public static partial void TestSendfileParts(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
@@ -297,7 +297,7 @@ internal static readonly @string producedˢ = "Produced "u8;
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSendfileSeeked(ж<testing.T> Ꮡt) {
+public static partial void TestSendfileSeeked(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
@@ -374,7 +374,7 @@ internal static readonly @string producedˢ = "Produced "u8;
 internal static readonly object readDidNotTimeOutˢ = (@string)"Read did not time out"u8;
 
 // Test that sendfile doesn't put a pipe into blocking mode.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSendfilePipe(ж<testing.T> Ꮡt) {
+public static partial void TestSendfilePipe(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -505,7 +505,7 @@ internal static readonly object readDidNotTimeOutˢ = (@string)"Read did not tim
 }
 
 // Issue 43822: tests that returns EOF when conn write timeout.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSendfileOnWriteTimeoutExceeded(ж<testing.T> Ꮡt) {
+public static partial void TestSendfileOnWriteTimeoutExceeded(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -586,7 +586,7 @@ internal static readonly object readDidNotTimeOutˢ = (@string)"Read did not tim
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testTxtˢ = "test.txt"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkSendfileZeroBytes(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkSendfileZeroBytes(ж<testing.B> Ꮡb) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();

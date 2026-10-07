@@ -634,7 +634,7 @@ internal static void unlock(this ж<connReader> Ꮡcr) {
     cr.mu.Unlock();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void startBackgroundRead(this ж<connReader> Ꮡcr) {
+internal static partial void startBackgroundRead(this ж<connReader> Ꮡcr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1207,7 +1207,7 @@ internal static readonly @string netHttpˢ = "net/http."u8;
 
 // relevantCaller searches the call stack for the first function outside of net/http.
 // The purpose of this function is to provide more helpful error messages.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static runtime.Frame relevantCaller() {
+internal static partial runtime.Frame relevantCaller() {
     var pc = new slice<uintptr>(16);
     nint n = runtime.Callers(1, pc);
     var frames = runtime.CallersFrames(pc.slice(0, n));
@@ -2396,7 +2396,7 @@ internal static bool requestBodyRemains(io.ReadCloser rc) {
 public delegate void HandlerFunc(ResponseWriter _Δp0, ж<Request> _Δp1);
 
 // ServeHTTP calls f(w, r).
-[MethodImpl(MethodImplOptions.NoInlining)] public static void ServeHTTP(this HandlerFunc f, ResponseWriter w, ж<Request> Ꮡr) {
+public static partial void ServeHTTP(this HandlerFunc f, ResponseWriter w, ж<Request> Ꮡr) {
     f(w, Ꮡr);
 }
 
@@ -2970,7 +2970,7 @@ public static void ServeHTTP(this ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Requ
 // Handle registers the handler for the given pattern.
 // If the given pattern conflicts, with one that is already registered, Handle
 // panics.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void Handle(this ж<ServeMux> Ꮡmux, @string pattern, ΔHandler handler) {
+public static partial void Handle(this ж<ServeMux> Ꮡmux, @string pattern, ΔHandler handler) {
     if (use121){
         Ꮡmux.of(ServeMux.Ꮡmux121).handle(pattern, handler);
     } else {
@@ -2981,7 +2981,7 @@ public static void ServeHTTP(this ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Requ
 // HandleFunc registers the handler function for the given pattern.
 // If the given pattern conflicts, with one that is already registered, HandleFunc
 // panics.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void HandleFunc(this ж<ServeMux> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
+public static partial void HandleFunc(this ж<ServeMux> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
     if (use121){
         Ꮡmux.of(ServeMux.Ꮡmux121).handleFunc(pattern, handler);
     } else {
@@ -2991,7 +2991,7 @@ public static void ServeHTTP(this ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Requ
 
 // Handle registers the handler for the given pattern in [DefaultServeMux].
 // The documentation for [ServeMux] explains how patterns are matched.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void Handle(@string pattern, ΔHandler handler) {
+public static partial void Handle(@string pattern, ΔHandler handler) {
     if (use121){
         DefaultServeMux.of(ServeMux.Ꮡmux121).handle(pattern, handler);
     } else {
@@ -3001,7 +3001,7 @@ public static void ServeHTTP(this ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Requ
 
 // HandleFunc registers the handler function for the given pattern in [DefaultServeMux].
 // The documentation for [ServeMux] explains how patterns are matched.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void HandleFunc(@string pattern, Action<ResponseWriter, ж<Request>> handler) {
+public static partial void HandleFunc(@string pattern, Action<ResponseWriter, ж<Request>> handler) {
     if (use121){
         DefaultServeMux.of(ServeMux.Ꮡmux121).handleFunc(pattern, handler);
     } else {
@@ -3009,7 +3009,7 @@ public static void ServeHTTP(this ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Requ
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void register(this ж<ServeMux> Ꮡmux, @string pattern, ΔHandler handler) {
+internal static partial void register(this ж<ServeMux> Ꮡmux, @string pattern, ΔHandler handler) {
     {
         var err = Ꮡmux.registerErr(pattern, handler); if (err != default!) {
             throw panic(err);
@@ -3022,7 +3022,7 @@ internal static readonly @string httpInvalidPatternˢ = "http: invalid pattern"u
 internal static readonly @string httpNilHandlerˢ = "http: nil handler"u8;
 internal static readonly @string unknownLocationˢ = "unknown location"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static error registerErr(this ж<ServeMux> Ꮡmux, @string patstr, ΔHandler handler) {
+internal static partial error registerErr(this ж<ServeMux> Ꮡmux, @string patstr, ΔHandler handler) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3283,7 +3283,7 @@ internal static time.Duration shutdownPollIntervalMax => /* 500 * time.Milliseco
 //
 // Once Shutdown has been called on a server, it may not be reused;
 // future calls to methods such as Serve will return ErrServerClosed.
-[MethodImpl(MethodImplOptions.NoInlining)] public static error Shutdown(this ж<Server> Ꮡs, context.Context ctx) {
+public static partial error Shutdown(this ж<Server> Ꮡs, context.Context ctx) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -3533,7 +3533,7 @@ public static error ErrServerClosed = errors.New("http: Server closed"u8);
 //
 // Serve always returns a non-nil error and closes l.
 // After [Server.Shutdown] or [Server.Close], the returned error is [ErrServerClosed].
-[MethodImpl(MethodImplOptions.NoInlining)] public static error Serve(this ж<Server> Ꮡs, net.Listener lʗp) {
+public static partial error Serve(this ж<Server> Ꮡs, net.Listener lʗp) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -3998,7 +3998,7 @@ internal static readonly @string htmlHeadTitleTimeoutˢ = "<html><head><title>Ti
     return htmlHeadTitleTimeoutˢ;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWriter w, ж<Request> Ꮡr) {
+internal static partial void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWriter w, ж<Request> Ꮡr) {
     GoFrame ᒐ = default;
     try {
         ref var h = ref Ꮡh.DerefOrNull();

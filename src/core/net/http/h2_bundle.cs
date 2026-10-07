@@ -569,7 +569,7 @@ internal static (ж<http2ClientConn>, error) getClientConn(this ж<http2clientCo
 }
 
 // requires p.mu is held.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<http2dialCall> getStartDialLocked(this ж<http2clientConnPool> Ꮡp, context.Context ctx, @string addr) {
+internal static partial ж<http2dialCall> getStartDialLocked(this ж<http2clientConnPool> Ꮡp, context.Context ctx, @string addr) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     {
@@ -609,7 +609,7 @@ internal static (ж<http2ClientConn>, error) getClientConn(this ж<http2clientCo
 // This code decides which ones live or die.
 // The return value used is whether c was used.
 // c is never closed.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (bool used, error err) addConnIfNeeded(this ж<http2clientConnPool> Ꮡp, @string key, ж<http2Transport> Ꮡt, net.Conn c) {
+internal static partial (bool used, error err) addConnIfNeeded(this ж<http2clientConnPool> Ꮡp, @string key, ж<http2Transport> Ꮡt, net.Conn c) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.mu.Lock();
@@ -3175,7 +3175,7 @@ internal static void checkNotOn(this http2goroutineLock g) {
 
 internal static slice<byte> http2goroutineSpace = slice<byte>("goroutine "u8);
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uint64 http2curGoroutineID() {
+internal static partial uint64 http2curGoroutineID() {
     GoFrame ᒐ = default;
     try {
         var bp = Ꮡhttp2littleBuf.Get()._<ж<slice<byte>>>();
@@ -5002,7 +5002,7 @@ internal static void notePanic(this ж<http2serverConn> Ꮡsc) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void serve(this ж<http2serverConn> Ꮡsc, http2http2Config conf) {
+internal static partial void serve(this ж<http2serverConn> Ꮡsc, http2http2Config conf) {
     GoFrame ᒐ = default;
     try {
         ref var sc = ref Ꮡsc.DerefOrNull();
@@ -5261,7 +5261,7 @@ internal static error http2errPrefaceTimeout = errors.New("timeout waiting for c
 // readPreface reads the ClientPreface greeting from the peer or
 // returns errPrefaceTimeout on timeout, or an error if the greeting
 // is invalid.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static error readPreface(this ж<http2serverConn> Ꮡsc) {
+internal static partial error readPreface(this ж<http2serverConn> Ꮡsc) {
     GoFrame ᒐ = default;
     try {
         ref var sc = ref Ꮡsc.DerefOrNull();
@@ -5472,7 +5472,7 @@ internal static void writeFrame(this ж<http2serverConn> Ꮡsc, http2FrameWriteR
 // startFrameWrite starts a goroutine to write wr (in a separate
 // goroutine since that might block on the network), and updates the
 // serve goroutine's state about the world, updated from info in wr.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void startFrameWrite(this ж<http2serverConn> Ꮡsc, http2FrameWriteRequest wr) {
+internal static partial void startFrameWrite(this ж<http2serverConn> Ꮡsc, http2FrameWriteRequest wr) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -6427,7 +6427,7 @@ internal static error processHeaders(this ж<http2serverConn> Ꮡsc, ж<http2Met
     return Ꮡsc.scheduleHandler(id, rw, req, new Action<ResponseWriter, ж<Request>>(handler));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void upgradeRequest(this ж<http2serverConn> Ꮡsc, ж<Request> Ꮡreq) {
+internal static partial void upgradeRequest(this ж<http2serverConn> Ꮡsc, ж<Request> Ꮡreq) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var req = ref Ꮡreq.DerefOrNull();
 
@@ -6752,7 +6752,7 @@ internal static readonly @string tooManyEarlyResetsˢ = "too_many_early_resets"u
 
 // scheduleHandler starts a handler goroutine,
 // or schedules one to start as soon as an existing handler finishes.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static error scheduleHandler(this ж<http2serverConn> Ꮡsc, uint32 streamID, ж<http2responseWriter> Ꮡrw, ж<Request> Ꮡreq, Action<ResponseWriter, ж<Request>> handler) {
+internal static partial error scheduleHandler(this ж<http2serverConn> Ꮡsc, uint32 streamID, ж<http2responseWriter> Ꮡrw, ж<Request> Ꮡreq, Action<ResponseWriter, ж<Request>> handler) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -6774,7 +6774,7 @@ internal static readonly @string tooManyEarlyResetsˢ = "too_many_early_resets"u
     return default!;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void handlerDone(this ж<http2serverConn> Ꮡsc) {
+internal static partial void handlerDone(this ж<http2serverConn> Ꮡsc) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -7369,7 +7369,7 @@ internal static readonly @string http2TrailerPrefix = "Trailer:"u8;
     return err;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static /*<-*/channel<bool> CloseNotify(this ref http2responseWriter w) {
+[GoRecv] internal static partial /*<-*/channel<bool> CloseNotify(this ref http2responseWriter w) {
     var rws = w.rws;
     if (rws == nil) {
         throw panic("CloseNotify called after Handler finished");
@@ -8332,7 +8332,7 @@ internal static void abortRequestBodyWrite(this ж<http2clientStream> Ꮡcs) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void closeReqBodyLocked(this ж<http2clientStream> Ꮡcs) {
+internal static partial void closeReqBodyLocked(this ж<http2clientStream> Ꮡcs) {
     ref var cs = ref Ꮡcs.DerefOrNull();
 
     if (cs.reqBodyClosed != default!) {
@@ -8674,7 +8674,7 @@ internal static (ж<http2ClientConn>, error) NewClientConn(this ж<http2Transpor
     return Ꮡt.newClientConn(c, t.disableKeepAlives());
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<http2ClientConn>, error) newClientConn(this ж<http2Transport> Ꮡt, net.Conn c, bool singleUse) {
+internal static partial (ж<http2ClientConn>, error) newClientConn(this ж<http2Transport> Ꮡt, net.Conn c, bool singleUse) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var conf = http2configFromTransport(ref (Ꮡt).DerefOrNull());
@@ -9103,7 +9103,7 @@ internal static Action http2shutdownEnterWaitStateHook = () => {
 };
 
 // Shutdown gracefully closes the client connection, waiting for running streams to complete.
-[MethodImpl(MethodImplOptions.NoInlining)] public static error Shutdown(this ж<http2ClientConn> Ꮡcc, context.Context ctx) {
+public static partial error Shutdown(this ж<http2ClientConn> Ꮡcc, context.Context ctx) {
     ref var cc = ref Ꮡcc.DerefOrNull();
 
     {
@@ -9336,7 +9336,7 @@ public static (ж<Response>, error) RoundTrip(this ж<http2ClientConn> Ꮡcc, ж
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string acceptEncodingˢ = "Accept-Encoding"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<Response>, error) roundTrip(this ж<http2ClientConn> Ꮡcc, ж<Request> Ꮡreq, Action<ж<http2clientStream>> streamf) {
+internal static partial (ж<Response>, error) roundTrip(this ж<http2ClientConn> Ꮡcc, ж<Request> Ꮡreq, Action<ж<http2clientStream>> streamf) {
     ref var cc = ref Ꮡcc.DerefOrNull();
     ref var req = ref Ꮡreq.DerefOrNull();
 
@@ -11509,7 +11509,7 @@ internal static error processResetStream(this ж<http2clientConnReadLoop> Ꮡrl,
 }
 
 // Ping sends a PING frame to the server and waits for the ack.
-[MethodImpl(MethodImplOptions.NoInlining)] public static error Ping(this ж<http2ClientConn> Ꮡcc, context.Context ctx) {
+public static partial error Ping(this ж<http2ClientConn> Ꮡcc, context.Context ctx) {
     ref var cc = ref Ꮡcc.DerefOrNull();
 
     var c = new channel<EmptyStruct>(0);

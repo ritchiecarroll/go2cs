@@ -21,7 +21,7 @@ internal static slice<splitTest> tests = new splitTest[]{
     new("zero"u8, maxInt - maxInt)
 }.slice();
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint half(nint n) {
+internal static partial nint half(nint n) {
     return n / 2;
 }
 

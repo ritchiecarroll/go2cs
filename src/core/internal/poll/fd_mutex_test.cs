@@ -62,7 +62,7 @@ public static void TestMutexClose(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMutexCloseUnblock(ж<testing.T> Ꮡt) {
+public static partial void TestMutexCloseUnblock(ж<testing.T> Ꮡt) {
     var c = new channel<bool>(4);
     ref var mu = ref heap(new global::go.@internal.poll_internal_test_package.XFDMutex(), out var Ꮡmu);
     Ꮡmu.RWLock(true);
@@ -189,7 +189,7 @@ public static void TestMutexOverflowPanic(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMutexStress(ж<testing.T> Ꮡt) {
+public static partial void TestMutexStress(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         nint P = 8;

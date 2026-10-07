@@ -11,7 +11,7 @@ partial class main_package {
     internal slice<nint> tail;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<holder> makeHolder(@string name) {
+internal static partial ж<holder> makeHolder(@string name) {
     var h = Ꮡ(new holder(
         name: name,
         tail: new slice<nint>(2)

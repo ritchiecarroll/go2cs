@@ -182,6 +182,8 @@ public class TypeGenerator : ISourceGenerator
                             TargetTypeName = keyTypeName,
                             TargetValueTypeName = valueTypeName,
                             TypeClass = "Map",
+                            HoldsMapInHolder = MapValueContainsSelf(semanticModel, targetSyntax, valueTypeName),
+                            GoMethodNames = GoMethodNames(semanticModel, targetSyntax),
                             UsingStatements = usingStatements
 
                         }
@@ -201,6 +203,7 @@ public class TypeGenerator : ISourceGenerator
                             TypeName = $"channel<{typeName}>",
                             TargetTypeName = typeName,
                             TypeClass = "Channel",
+                            GoMethodNames = GoMethodNames(semanticModel, targetSyntax),
                             UsingStatements = usingStatements
                         }
                         .Generate();
@@ -885,6 +888,134 @@ public class TypeGenerator : ISourceGenerator
             ?.ConstructorArguments.FirstOrDefault().Value as string;
 
         return string.IsNullOrWhiteSpace(value) ? null : value;
+    }
+
+    // The member names a wrapper type may not declare publicly: the Go methods declared on it, and its
+    // own name. The converter emits each Go method as an extension method in the type's own package
+    // class -- `this T` for a value receiver, `[GoRecv] this ref T` for a pointer receiver -- and C#
+    // binds an applicable INSTANCE member before it considers extensions, so a public wrapper member of
+    // the same name and shape would run in place of the Go method, silently. And a member may not share
+    // its enclosing type's name (CS0542: `type Set[T comparable] map[T]struct{}` against the wrapper's
+    // Set). The templates read this set to yield those names (InheritedTypeTemplate.GoMethodNames).
+    private static HashSet<string> GoMethodNames(SemanticModel semanticModel, BaseTypeDeclarationSyntax declaration)
+    {
+        HashSet<string> names = new(StringComparer.Ordinal);
+
+        if (semanticModel.GetDeclaredSymbol(declaration) is not INamedTypeSymbol { ContainingType: { } packageClass } self)
+            return names;
+
+        names.Add(self.Name);
+
+        foreach (IMethodSymbol method in packageClass.GetMembers().OfType<IMethodSymbol>())
+        {
+            if (method.IsExtensionMethod && method.Parameters.Length > 0 &&
+                method.Parameters[0].Type is INamedTypeSymbol receiver &&
+                SymbolEqualityComparer.Default.Equals(receiver.OriginalDefinition, self.OriginalDefinition))
+            {
+                names.Add(method.Name);
+            }
+        }
+
+        return names;
+    }
+
+    // Whether a named map's VALUE type contains the map wrapper itself BY VALUE -- the wrappers
+    // InheritedTypeTemplate.HoldsMapInHolder must hold their map in a reference holder because .NET
+    // cannot load them with it inline. The walk follows exactly the shapes measured to fail (.NET
+    // 10.0.12, one type per process): the wrapper itself, a struct's instance fields, the type arguments
+    // of golib's `array<T>`, `slice<T>` and `map<K,V>`, and a named [GoType] wrapper's own definition
+    // (its fields are generated, so the definition is all this compilation can see of it). It stops at
+    // everything else -- a class (`ж<T>`), an interface, a delegate, and golib's `channel<T>`, which is
+    // a struct too but whose wrapper was measured to load. Over-approximating is safe (a holder only
+    // costs one load per access); missing a shape is the crash, so a generic named wrapper's type
+    // arguments are walked as well as its definition.
+    private static bool MapValueContainsSelf(SemanticModel semanticModel, BaseTypeDeclarationSyntax declaration, string valueTypeName)
+    {
+        if (semanticModel.GetDeclaredSymbol(declaration) is not INamedTypeSymbol self)
+            return false;
+
+        ITypeSymbol? valueType = ResolveTypeAt(semanticModel, declaration.SpanStart, valueTypeName);
+
+        return valueType is not null &&
+               ReachesSelfByValue(semanticModel.Compilation, valueType, self.OriginalDefinition, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
+    }
+
+    private static bool ReachesSelfByValue(Compilation compilation, ITypeSymbol type, INamedTypeSymbol self, HashSet<ITypeSymbol> seen)
+    {
+        // A CLR array, pointer or type parameter holds no Go value inline.
+        if (type is not INamedTypeSymbol named)
+            return false;
+
+        if (SymbolEqualityComparer.Default.Equals(named.OriginalDefinition, self))
+            return true;
+
+        if (named.TypeKind != TypeKind.Struct || !seen.Add(named))
+            return false;
+
+        // golib's own types sit directly in namespace `go`; a converted package's types are nested in
+        // its `<name>_package` class.
+        if (named.ContainingType is null)
+        {
+            return named.ContainingNamespace?.ToDisplayString() == "go" &&
+                   named.Name is "array" or "slice" or "map" &&
+                   named.TypeArguments.Any(argument => ReachesSelfByValue(compilation, argument, self, seen));
+        }
+
+        if (GetGoTypeDefinition(named) is { } definition && definition != "dyn")
+        {
+            return DefinitionReachesSelfByValue(compilation, named, definition, self, seen) ||
+                   named.TypeArguments.Any(argument => ReachesSelfByValue(compilation, argument, self, seen));
+        }
+
+        return named.GetMembers()
+            .OfType<IFieldSymbol>()
+            .Where(field => !field.IsStatic)
+            .Any(field => ReachesSelfByValue(compilation, field.Type, self, seen));
+    }
+
+    // A named wrapper's [GoType] definition, read as the Go type it spells: a map's key and value,
+    // a slice's or fixed-size array's element, or the single type a defined type is over. A channel
+    // stops the walk, as above.
+    private static bool DefinitionReachesSelfByValue(Compilation compilation, INamedTypeSymbol wrapper, string definition, INamedTypeSymbol self, HashSet<ITypeSymbol> seen)
+    {
+        string[] parts;
+
+        if (definition.StartsWith("map["))
+        {
+            (string keyTypeName, string valueTypeName) = SplitMapTypes(definition);
+            parts = [keyTypeName, valueTypeName];
+        }
+        else if (definition.StartsWith("["))
+        {
+            int closeBracket = definition.IndexOf(']');
+            parts = closeBracket > 0 ? [definition[(closeBracket + 1)..].Trim()] : [];
+        }
+        else if (definition.StartsWith("chan "))
+        {
+            return false;
+        }
+        else
+        {
+            parts = [definition];
+        }
+
+        if (wrapper.OriginalDefinition.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() is not { } site)
+            return false;
+
+        SemanticModel model = compilation.GetSemanticModel(site.SyntaxTree);
+
+        return parts.Any(part => ResolveTypeAt(model, site.SpanStart, part) is { } partType &&
+                                 ReachesSelfByValue(compilation, partType, self, seen));
+    }
+
+    private static ITypeSymbol? ResolveTypeAt(SemanticModel model, int position, string typeName)
+    {
+        if (string.IsNullOrWhiteSpace(typeName))
+            return null;
+
+        ITypeSymbol? type = model.GetSpeculativeTypeInfo(position, Microsoft.CodeAnalysis.CSharp.SyntaxFactory.ParseTypeName(typeName), SpeculativeBindingOption.BindAsTypeOrNamespace).Type;
+
+        return type is null || type.TypeKind == TypeKind.Error ? null : type;
     }
 
     // Unions the two reasons a member cannot compare with C# `==` into the one set the template

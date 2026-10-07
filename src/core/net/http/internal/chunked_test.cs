@@ -226,7 +226,7 @@ internal static readonly @string malformedˢ = "malformed"u8;
 
 // Issue 17355: ChunkedReader shouldn't block waiting for more data
 // if it can return something.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestChunkReadPartial(ж<testing.T> Ꮡt) {
+public static partial void TestChunkReadPartial(ж<testing.T> Ꮡt) {
     var (pr, pw) = io.Pipe();
     var pwʗ1 = pw;
     goǃ(() => {

@@ -124,7 +124,10 @@ func (v *Visitor) applyTypedNilPointerBox(value ast.Expr, rendered string) strin
 		// synthesized natural delegate becomes the box's dynamic type; and a func value that can
 		// be NULL must carry its type through a carrier, since the cast is erased at the box.
 		// Cast first, then carry — the cast is what makes the carrier's type word the Go one.
-		// See the file header.
+		// See the file header. A method group whose name is also a method of its package has no
+		// natural type at all, so it takes its delegate cast first (applyMethodGroupClashCast).
+		rendered = v.applyMethodGroupClashCast(value, rendered)
+
 		return v.applyTypedNilFuncBox(valueType, v.funcExprNeverRendersNull(value), v.applyVariadicFuncBoxCast(valueType, rendered))
 	}
 

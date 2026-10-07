@@ -89,6 +89,21 @@ var importedTypeAliasSourceDirs map[string]string
 // when two same-named packages publish the same member. Read through ambiguousImportedTypeAliasTarget.
 var importedTypeAliasTargetsByDir map[string]string
 
+// importedTypeAliasTargetsByNamespace is importedTypeAliasTargetsByDir keyed by the publishing package's
+// rendered NAMESPACE (`<namespace>\x00<key>`, see renderedPackageNamespace) -- the one identity a
+// type-name STRING still carries once go/types is gone. renderCSFullTypeName reads it through
+// importedTypeAliasForNamespace so a type is never remapped to the alias another same-named package
+// published: logrus' hooks/slog declares `Handler`, and log/slog publishes `slog.Handler` -> ΔHandler.
+var importedTypeAliasTargetsByNamespace map[string]string
+
+// importedTypeAliasPublisherNamespaces lists, per key, the rendered namespaces of the packages that
+// published it (the namespace halves of importedTypeAliasTargetsByNamespace).
+var importedTypeAliasPublisherNamespaces map[string][]string
+
+// importedTypeAliasNamespacedKeys marks the importedTypeAliases keys whose publishers are all known by
+// namespace. A key written anywhere else (the -tests alias shadows) is not marked, and renders as before.
+var importedTypeAliasNamespacedKeys map[string]bool
+
 // ambiguousImportedTypeAliases marks the importedTypeAliases keys that two DIFFERENT dependencies (same
 // package name, different source directories) published with DIFFERENT targets: a/foo and b/foo, both
 // `package foo`, each exporting `Alias`. One `global using fooꓸAlias` cannot mean both, and the map kept

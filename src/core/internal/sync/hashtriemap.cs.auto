@@ -42,7 +42,7 @@ internal static void init<K, V>(this ж<HashTrieMap<K, V>> Ꮡht) {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void initSlow<K, V>(this ж<HashTrieMap<K, V>> Ꮡht) {
+internal static partial void initSlow<K, V>(this ж<HashTrieMap<K, V>> Ꮡht) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

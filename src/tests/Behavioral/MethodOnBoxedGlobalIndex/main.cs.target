@@ -9,7 +9,7 @@ partial class main_package {
     internal nint n;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void add(ref nint p, nint d) {
+internal static partial void add(ref nint p, nint d) {
     p += d;
 }
 
@@ -30,7 +30,7 @@ internal static void bump(this ж<buf> Ꮡb) {
 internal static ж<tracer> Ꮡtr = new StandardBox<tracer>(default(tracer));
 internal static ref tracer tr => ref Ꮡtr.Value;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void keep(ж<tracer> Ꮡt) {
+internal static partial void keep(ж<tracer> Ꮡt) {
     _ = Ꮡt;
 }
 

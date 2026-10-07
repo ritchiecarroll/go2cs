@@ -998,6 +998,13 @@ func TestRecurseGoFileFreeContainerDirsKeepDistinctProjectNames(t *testing.T) {
 	if !strings.Contains(targets, "<CompilerGeneratedFilesOutputPath>$(Go2csArtifactsRoot)gen\\$(Go2csArtifactToken)</CompilerGeneratedFilesOutputPath>") {
 		t.Errorf("output-root Directory.Build.targets does not redirect generator output correctly:\n%s", targets)
 	}
+
+	// Under local project references golib's buildTransitive is never imported, so the output root imports golib's
+	// go.lib.symbols.targets itself: without it a module's single-file executable loses its dependency symbol files on
+	// a second unchanged publish (src/tests/PackageTests/PublishSymbols).
+	if !strings.Contains(targets, `<Import Project="$(go2csPath)core/golib/buildTransitive/go.lib.symbols.targets"`) {
+		t.Errorf("output-root Directory.Build.targets does not import golib's go.lib.symbols.targets:\n%s", targets)
+	}
 }
 
 // assertEmittedPathsInsideBudget fails if anything the conversion wrote under root exceeds

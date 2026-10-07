@@ -11,7 +11,7 @@ internal static channel<bool> sink = new channel<bool>(1);
     internal nint n;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static nint fork(this ref runner r, nint c, Action<nint> dispatch) {
+[GoRecv] internal static partial nint fork(this ref runner r, nint c, Action<nint> dispatch) {
     var done = new channel<bool>(0);
     var doneʗ1 = done;
     goǃ(() => {

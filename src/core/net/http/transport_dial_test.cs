@@ -148,7 +148,7 @@ internal static ж<transportDialTester> newTransportDialTester(ж<testing.T> Ꮡ
 
 // roundTrip starts a RoundTrip.
 // It returns immediately, without waiting for the RoundTrip call to complete.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<transportDialTesterRoundTrip> roundTrip(this ж<transportDialTester> Ꮡdt) {
+internal static partial ж<transportDialTesterRoundTrip> roundTrip(this ж<transportDialTester> Ꮡdt) {
     ref var dt = ref Ꮡdt.DerefOrNull();
 
     dt.t.Helper();

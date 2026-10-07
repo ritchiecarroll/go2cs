@@ -83,6 +83,9 @@ public sealed class TestRunner
     // -test.list was given: M.Run lists instead of running.
     internal bool Listing => m_options.ListPattern.Length > 0;
 
+    // -test.v (or --json, which implies it, as `go test -json` passes -test.v): Go's chatty output.
+    internal bool Verbose => m_options.Verbose;
+
     internal string WorkingDirectory { get; }
 
     /// <summary>
@@ -202,9 +205,74 @@ public sealed class TestRunner
         return !child.Failed;
     }
 
-    private TestExecution Start(string name, Action<ж<testing_package.T>> action, TestExecution? parent, string source, int line)
+    /// <summary>
+    /// A <c>testing.RunTests</c> root: Go's fresh test context, which owns its own <c>-test.parallel</c>
+    /// slots.
+    /// </summary>
+    /// <remarks>
+    /// Go's root writes to <c>os.Stdout</c> AS IT IS when RunTests is called (<c>w: os.Stdout</c>), and
+    /// only output on the process's stdout reaches test2json. So while the program has redirected it
+    /// (testify's TestSuiteLogging pipes it to read its own suite's log lines), <see cref="Redirected"/>
+    /// writes Go's text output to that file and the root reports nothing to the run.
+    /// </remarks>
+    internal sealed class NestedRoot(int parallel, Action<string>? redirected)
     {
-        TestExecution execution = new(this, name, parent, source, line);
+        internal SemaphoreSlim ParallelLimiter { get; } = new(parallel);
+
+        internal Action<string>? Redirected { get; } = redirected;
+    }
+
+    /// <summary>
+    /// Go's runTests for <c>testing.RunTests</c>, entered from inside a running test: per <c>-count</c>
+    /// iteration a fresh root runs the list as TOP-LEVEL tests -- each under the name it was given,
+    /// selected by -run/-skip through the caller's matcher, serial until it calls Parallel,
+    /// the parked ones released when the list is done -- and the result is whether all of them passed.
+    /// </summary>
+    internal bool RunTests(IReadOnlyList<(string Name, Action<ж<testing_package.T>> F)> tests, Func<string, string, bool> matchString, Action<string>? redirectedStdout, out bool ran)
+    {
+        TestExecution? caller = TestExecution.Current;
+        string source = caller?.Source ?? "";
+        int line = caller?.Line ?? 0;
+        bool ok = true;
+        ran = false;
+
+        for (int count = 0; count < m_options.Count; count++)
+        {
+            if (count > 0 && !ran)
+                break;
+
+            NestedRoot root = new(m_options.Parallel, redirectedStdout);
+            List<TestExecution> started = [];
+            List<TestExecution> parallel = [];
+
+            // A child of the root is named as GIVEN: Go's matcher rewrites (spaces to `_`) and
+            // de-duplicates (`#01`) only below the root (fullName's `c.level > 0`), so testify's
+            // "signature validation" entry is reported as exactly that.
+            foreach ((string name, Action<ж<testing_package.T>> action) in tests)
+            {
+                if (!m_options.ShouldRun(name, matchString))
+                    continue;
+
+                ran = true;
+                TestExecution execution = Start(name, action, null, source, line, root);
+                started.Add(execution);
+                WaitForSerialBoundary(execution, parallel.Add);
+            }
+
+            foreach (TestExecution execution in parallel)
+                execution.ReleaseParallel();
+            foreach (TestExecution execution in parallel)
+                execution.Wait();
+
+            ok = ok && started.All(execution => !execution.Failed);
+        }
+
+        return ok;
+    }
+
+    private TestExecution Start(string name, Action<ж<testing_package.T>> action, TestExecution? parent, string source, int line, NestedRoot? nestedRoot = null)
+    {
+        TestExecution execution = new(this, name, parent, source, line, nestedRoot);
         execution.Start(action);
         return execution;
     }
@@ -223,11 +291,14 @@ public sealed class TestRunner
             execution.Wait();
     }
 
+    // A failed test under a testing.RunTests root is the caller's ok == false, never the package's
+    // verdict: Go's m.Run passes on its own list's results. An infrastructure failure still counts --
+    // that is the HOST failing, wherever the test was started from.
     internal void Completed(TestExecution execution)
     {
         if (execution.InfrastructureFailed)
             Interlocked.Increment(ref m_infrastructureFailures);
-        else if (execution.Failed)
+        else if (execution.Failed && execution.NestedRoot is null)
             Interlocked.Increment(ref m_failures);
     }
 
@@ -335,9 +406,9 @@ public sealed class TestRunner
     // A parallel test holds one slot while it RUNS (acquired after its serial-phase gate opens,
     // released before it waits on its own parallel children — Go's tRunner does the same, so a
     // parallel parent never starves its children under a small -parallel cap).
-    internal void AcquireParallelSlot() => m_parallelLimiter.Wait();
+    internal void AcquireParallelSlot(NestedRoot? root) => (root?.ParallelLimiter ?? m_parallelLimiter).Wait();
 
-    internal void ReleaseParallelSlot() => m_parallelLimiter.Release();
+    internal void ReleaseParallelSlot(NestedRoot? root) => (root?.ParallelLimiter ?? m_parallelLimiter).Release();
 
     internal void Report(TestEvent testEvent) => m_reporter.Report(testEvent);
 

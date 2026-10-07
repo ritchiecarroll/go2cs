@@ -17,7 +17,7 @@ private static readonly object lenˢ = (@string)"len:"u8;
 private static readonly object bytesˢ = (@string)"bytes:"u8;
 private static readonly object eachIovecDeliveredItsOwnˢ = (@string)"each iovec delivered its own byte in order:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     GoFrame ᒐ = default;
     try {
         var (ln, err) = Δnet.Listen(tcpˢ, "127.0.0.1:0"u8);

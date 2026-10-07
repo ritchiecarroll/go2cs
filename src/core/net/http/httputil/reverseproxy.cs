@@ -357,7 +357,7 @@ internal static readonly @string forwardedˢ = "Forwarded"u8;
 internal static readonly @string userAgentˢ = "User-Agent"u8;
 internal static readonly @string trailerˢ = "Trailer"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
+public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -810,7 +810,7 @@ internal static @string upgradeType(httpꓸHeader h) {
     return h.Get(upgradeˢ);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡres) {
+internal static partial void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡres) {
     GoFrame ᒐ = default;
     try {
         ref var req = ref Ꮡreq.DerefOrNull();

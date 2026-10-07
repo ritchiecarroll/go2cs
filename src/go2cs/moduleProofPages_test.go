@@ -164,3 +164,69 @@ func TestThirdPartyProofPageIsWrittenBesideTheConversion(t *testing.T) {
 		t.Errorf("the checkout's docs/validation/current gained %d file(s) from a third-party package", len(entries))
 	}
 }
+
+// A module's verdicts are Go's under the build tags the reading used (a -recurse run adds `safe`), so
+// each module proof page states them, and MODULE.md states them once when every page agrees and says
+// so when they do not. A standard-library page carries no such sentence: its purego default is
+// documented once for the whole library, and adding one would rewrite every banked page.
+func TestModuleProofPagesStateTheirBuildTags(t *testing.T) {
+	temp := t.TempDir()
+	root, _ := fakeCheckout(t, filepath.Join(temp, "repo"))
+	outRoot := filepath.Join(root, "modout")
+	moduleTags := resolveBuildTags(false, true, true, true, false, nil)
+
+	emit := func(importPath string, tags []string) {
+		t.Helper()
+
+		comparison := testComparison{
+			Package: importPath, Status: "validated", Matched: true,
+			Go: map[string]string{"TestA": "pass"}, CSharp: map[string]string{"TestA": "pass"},
+		}
+		manifest := testManifest{PackageImportPath: importPath, ModulePath: "example.com/mod", GoVersion: "go1.24.13"}
+		output := filepath.Join(append([]string{outRoot, "src"}, strings.Split(importPath, "/")...)...)
+
+		if err := emitValidationProofPage(output, comparison, manifest, nil, nil,
+			Options{targetPlatform: "windows/amd64", buildTags: tags}); err != nil {
+			t.Fatalf("emitValidationProofPage(%s): %v", importPath, err)
+		}
+	}
+
+	read := func(parts ...string) string {
+		t.Helper()
+
+		data, err := os.ReadFile(filepath.Join(append([]string{outRoot, "validation", "example.com", "mod"}, parts...)...))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		return string(data)
+	}
+
+	emit("example.com/mod/sub", moduleTags)
+
+	tagsText := "`-tags " + strings.Join(moduleTags, ",") + "`"
+
+	if page := read("sub.md"); !strings.Contains(page, "Both sides were built with "+tagsText+".") {
+		t.Errorf("a module proof page must state its build tags (%s):\n%s", tagsText, page)
+	}
+
+	if module := read("MODULE.md"); !strings.Contains(module, "Both sides of every reading were built with "+tagsText+".") {
+		t.Errorf("MODULE.md must state the tags its pages agree on (%s):\n%s", tagsText, module)
+	}
+
+	// A second package read under other tags: MODULE.md no longer names one set.
+	emit("example.com/mod/other", defaultStdLibBuildTags)
+
+	module := read("MODULE.md")
+	if !strings.Contains(module, "read with different build tags") || strings.Contains(module, "Both sides of every reading") {
+		t.Errorf("MODULE.md must say the pages' build tags differ rather than name one set:\n%s", module)
+	}
+
+	stdlib := renderValidationProofPage(proofPageProvenance{importPath: "sort", goVersion: "1.24.13", platform: "windows/amd64", buildTags: moduleTags},
+		testComparison{Package: "sort", Status: "validated", Matched: true, Go: map[string]string{"TestA": "pass"}, CSharp: map[string]string{"TestA": "pass"}},
+		nil, nil)
+
+	if strings.Contains(stdlib, "Both sides were built with") {
+		t.Errorf("a standard-library page must render exactly as before, with no build-tags sentence:\n%s", stdlib)
+	}
+}

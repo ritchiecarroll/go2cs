@@ -426,7 +426,7 @@ public static void TestConflictsWith(ж<testing.T> Ꮡt) {
 internal static readonly @string aYZˢ = "/a/{y}/{z...}"u8;
 internal static readonly @string matchesTheSameRequestsAsˢ = "matches the same requests as"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRegisterConflict(ж<testing.T> Ꮡt) {
+public static partial void TestRegisterConflict(ж<testing.T> Ꮡt) {
     var mux = NewServeMux();
     @string pat1 = "/a/{x}/"u8;
     {

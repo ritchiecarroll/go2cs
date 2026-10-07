@@ -112,7 +112,7 @@ internal static void probeE2() {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void probeF1() {
+internal static partial void probeF1() {
     ref var t = ref heap<Tally>(out var Ꮡt);
     t = new Tally(5, "s"u8);
     var done = new channel<nint>(0);

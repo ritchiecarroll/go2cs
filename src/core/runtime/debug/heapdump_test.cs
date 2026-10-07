@@ -95,7 +95,7 @@ public static void TestWriteHeapDumpFinalizers(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] public static void M<T>(this G<T> g) {
+public static partial void M<T>(this G<T> g) {
 }
 
 internal static I dummy = new G<nint>(nil);

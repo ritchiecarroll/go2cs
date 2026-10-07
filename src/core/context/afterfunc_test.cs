@@ -95,7 +95,7 @@ internal static Func<bool> ΔAfterFunc(this ж<afterFuncContext> Ꮡc, Action f)
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void cancel(this ж<afterFuncContext> Ꮡc, error err) {
+internal static partial void cancel(this ж<afterFuncContext> Ꮡc, error err) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

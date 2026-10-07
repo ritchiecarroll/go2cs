@@ -52,7 +52,7 @@ internal static readonly object skippingInShortModeˢ = (@string)"skipping in sh
 internal static readonly @string srcˢ = "src"u8;
 internal static readonly object packagesTypecheckedInˢ = (@string)"packages typechecked in"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestStdlib(ж<testing.T> Ꮡt) {
+public static partial void TestStdlib(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (testing.Short()) {

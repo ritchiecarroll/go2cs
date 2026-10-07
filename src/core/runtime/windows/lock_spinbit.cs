@@ -153,7 +153,7 @@ internal static void @lock(ж<mutex> Ꮡl) {
 
 // go2cs generated this placeholder — func lock2 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void unlock(ж<mutex> Ꮡl) {
+internal static partial void unlock(ж<mutex> Ꮡl) {
     unlockWithRank(Ꮡl);
 }
 

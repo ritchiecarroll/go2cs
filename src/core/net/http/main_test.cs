@@ -43,7 +43,7 @@ internal static readonly @string createdByRuntimeGcˢ = "created by runtime.gc"u
 internal static readonly @string interestingGoroutinesˢ = "interestingGoroutines"u8;
 internal static readonly @string runtimeMHeapScavengerˢ = "runtime.MHeap_Scavenger"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<@string> /*gs*/ interestingGoroutines() {
+internal static partial slice<@string> /*gs*/ interestingGoroutines() {
     slice<@string> gs = default!;
 
     var buf = new slice<byte>((2 << (int)(20)));

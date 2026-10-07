@@ -68,7 +68,7 @@ internal static ж<abi.Type> stringType = rtypeOf((@string)""u8);
 // Equivalent to runtime.mapIterStart.
 //
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void mapIterStart(ж<abi.SwissMapType> Ꮡt, ж<mapsꓸMap> Ꮡm, ж<maps.Iter> Ꮡit) {
+internal static partial void mapIterStart(ж<abi.SwissMapType> Ꮡt, ж<mapsꓸMap> Ꮡm, ж<maps.Iter> Ꮡit) {
     ref var it = ref Ꮡit.DerefOrNull();
 
     if (race.Enabled && Ꮡm != nil) {
@@ -82,7 +82,7 @@ internal static ж<abi.Type> stringType = rtypeOf((@string)""u8);
 // Equivalent to runtime.mapIterNext.
 //
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void mapIterNext(ж<maps.Iter> Ꮡit) {
+internal static partial void mapIterNext(ж<maps.Iter> Ꮡit) {
     ref var it = ref Ꮡit.DerefOrNull();
 
     if (race.Enabled) {
@@ -122,7 +122,7 @@ internal static ж<abi.Type> stringType = rtypeOf((@string)""u8);
 // TODO: undo when the inliner is no longer bottom-up only.
 //
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void panicNotMap(this flag f) {
+internal static partial void panicNotMap(this flag f) {
     f.mustBe(Map);
 }
 

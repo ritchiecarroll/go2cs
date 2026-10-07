@@ -30,7 +30,7 @@ internal static readonly @string attemptedToTraceStackOfAˢ = "attempted to trac
 // Avoid calling this function directly. gen needs to be the current generation
 // that this stack trace is being written out for, which needs to be synchronized with
 // generations moving forward. Prefer traceEventWriter.stack.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
+internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     array<uintptr> pcBuf = new(128); /* traceStackSize */

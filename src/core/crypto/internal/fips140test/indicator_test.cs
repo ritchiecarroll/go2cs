@@ -21,7 +21,7 @@ internal static readonly object indicatorShouldBeFalseIfˢ4 = (@string)"indicato
 internal static readonly object indicatorShouldBeFalseIfˢ5 = (@string)"indicator should be false if RecordApproved is called in a different goroutine"u8;
 internal static readonly object indicatorShouldBeTrueIfˢ3 = (@string)"indicator should be true if RecordNonApproved is called in a different goroutine"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestIndicator(ж<testing.T> Ꮡt) {
+public static partial void TestIndicator(ж<testing.T> Ꮡt) {
     fips140.ResetServiceIndicator();
     if (fips140.ServiceIndicator()) {
         Ꮡt.Error(indicatorShouldBeFalseIfˢ);

@@ -17,7 +17,7 @@ using static go.hash.crc32_package;
 partial class crc32_internal_test_package {
 
 // First test, so that it can be the one to initialize castagnoliTable.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCastagnoliRace(ж<testing.T> Ꮡt) {
+public static partial void TestCastagnoliRace(ж<testing.T> Ꮡt) {
     // The MakeTable(Castagnoli) lazily initializes castagnoliTable,
     // which races with the switch on tab during Write to check
     // whether tab == castagnoliTable.

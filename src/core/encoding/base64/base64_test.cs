@@ -498,7 +498,7 @@ public static void TestNewLineCharacters(ж<testing.T> Ꮡt) {
 internal static readonly @string myErrorˢ = "my error"u8;
 
 // tests that we don't ignore errors from our underlying reader
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDecoderIssue3577(ж<testing.T> Ꮡt) {
+public static partial void TestDecoderIssue3577(ж<testing.T> Ꮡt) {
     var next = new channel<nextRead>(10);
     var wantErr = errors.New(myErrorˢ);
     next.ᐸꟷ(new nextRead(5, default!));

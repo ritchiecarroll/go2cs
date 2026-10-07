@@ -35,7 +35,7 @@ internal static readonly @string cmdˢ = "cmd"u8;
 internal static readonly @string vendorˢ3 = "/vendor/"u8;
 
 // Verify that the vendor directories contain only packages matching the list above.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestVendorPackages(ж<testing.T> Ꮡt) {
+public static partial void TestVendorPackages(ж<testing.T> Ꮡt) {
     var (_, thisFile, _, _) = runtime.Caller(0);
     @string goBin = testenv.GoToolPath(new build_internal_test_package.testing_TжTB(Ꮡt));
     var listCmd = testenv.Command(new build_internal_test_package.testing_TжTB(Ꮡt), goBin, listˢ, stdˢ, cmdˢ);

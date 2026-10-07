@@ -270,7 +270,7 @@ public static void TestGCTestMoveStackOnNextCall(ж<testing.T> Ꮡt) {
 // growth check and move the stack.
 //
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static bool moveStackCheck(ж<testing.T> Ꮡt, ж<nint> Ꮡnew, uintptr old) {
+internal static partial bool moveStackCheck(ж<testing.T> Ꮡt, ж<nint> Ꮡnew, uintptr old) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // new should have been updated by the stack move;
@@ -302,7 +302,7 @@ public static void TestGCTestMoveStackRepeatedly(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void moveStack1(bool x) {
+internal static partial void moveStack1(bool x) {
     // Make sure this function doesn't get auto-nosplit.
     if (x) {
         println((@string)"x"u8);
@@ -382,7 +382,7 @@ public static void TestGCTestPointerClass(ж<testing.T> Ꮡt) {
     internal ж<byte> x, y;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkAllocation(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkAllocation(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     nint ngo = Δruntime.GOMAXPROCS(0);
@@ -415,7 +415,7 @@ public static void TestGCTestPointerClass(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"Skipping in short mode"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPrintGC(ж<testing.T> Ꮡt) {
+public static partial void TestPrintGC(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
@@ -486,7 +486,7 @@ internal static error testAssertVar(any x) {
 internal static bool a;
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testIfaceEqual(any x) {
+internal static partial void testIfaceEqual(any x) {
     if (AreEqual(x, (@string)("abc"))) {
         a = true;
     }
@@ -581,7 +581,7 @@ internal static readonly object thisBenchmarkCanOnlyBeˢ = (@string)"This benchm
     internal array<ж<applyGCLoad_node>> children = new(16);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static Action applyGCLoad(ж<testing.B> Ꮡb) {
+internal static partial Action applyGCLoad(ж<testing.B> Ꮡb) {
     // We’ll apply load to the runtime with maxProcs-1 goroutines
     // and use one more to actually benchmark. It doesn't make sense
     // to try to run this test with only 1 P (that's what
@@ -704,7 +704,7 @@ public static void TestUserForcedGC(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void writeBarrierBenchmark(ж<testing.B> Ꮡb, Action f) {
+internal static partial void writeBarrierBenchmark(ж<testing.B> Ꮡb, Action f) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -830,7 +830,7 @@ public static void BenchmarkBulkWriteBarrier(ж<testing.B> Ꮡb) {
     Δruntime.KeepAlive(ptrs);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkScanStackNoLocals(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkScanStackNoLocals(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     ref var ready = ref heap(new Δsync.WaitGroup(), out var Ꮡready);
@@ -938,7 +938,7 @@ public static void TestMyGenericFunc(ж<testing.T> Ꮡt) {
     internal nint b;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWeakToStrongMarkTermination(ж<testing.T> Ꮡt) {
+public static partial void TestWeakToStrongMarkTermination(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

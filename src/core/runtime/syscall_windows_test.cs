@@ -304,7 +304,7 @@ public static void TestCallbackPanicLoop(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBlockingCallback(ж<testing.T> Ꮡt) {
+public static partial void TestBlockingCallback(ж<testing.T> Ꮡt) {
     var c = new channel<nint>(0);
     var cʗ1 = c;
     goǃ(() => {
@@ -867,7 +867,7 @@ uintptr_t cfunc(callback f, uintptr_t n) {
     internal syscall.Errno err;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestReturnAfterStackGrowInCallback(ж<testing.T> Ꮡt) {
+public static partial void TestReturnAfterStackGrowInCallback(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         {
@@ -1444,7 +1444,7 @@ internal static error setEvent(syscallꓸHandle h) {
     return default!;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkChanToSyscallPing(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkChanToSyscallPing(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     nint n = b.N;
@@ -1469,7 +1469,7 @@ internal static error setEvent(syscallꓸHandle h) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkSyscallToSyscallPing(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkSyscallToSyscallPing(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     nint n = b.N;
@@ -1505,7 +1505,7 @@ internal static error setEvent(syscallꓸHandle h) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkChanToChanPing(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkChanToChanPing(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     nint n = b.N;

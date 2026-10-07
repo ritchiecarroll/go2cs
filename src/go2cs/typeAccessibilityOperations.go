@@ -665,7 +665,9 @@ func collectPackageLevelLiteralStructFieldTypes(files []FileEntry, pkg *types.Pa
 // field of any package-level struct (directly, or through a pointer/slice/array/map/channel
 // element). Scanning the exported fields of every struct in one pass is sufficient: a publicized
 // struct's own exported-field types are already covered because that struct was itself scanned.
-func collectPublicizedTypes(pkg *types.Package) {
+// fset locates declarations, so an alias declared in a `_test.go` file can be told apart from a
+// production one (see the alias arm below).
+func collectPublicizedTypes(pkg *types.Package, fset *token.FileSet) {
 	if packagePublicizedTypes == nil {
 		packagePublicizedTypes = map[types.Object]bool{}
 	}
@@ -690,6 +692,19 @@ func collectPublicizedTypes(pkg *types.Package) {
 			// MUST be public, CS0558, so an internal wrapper is not an option). Publicize the
 			// written RHS to match the wrapper's accessibility.
 			if obj.Exported() {
+				// An EXPORTED ALIAS of an unexported type — logrus's `type MutexWrap = mutexWrap`,
+				// testify's `type CompareType = compareResult`. Go makes the target nameable from any
+				// importer through the alias, and every importer declares the alias as a `global
+				// using` over the target (ImportedTypeAliases), so an internal target is CS0122 in
+				// each of them, used or not. Publicize what the alias exposes; the cascade below then
+				// carries the target's exported methods. An alias declared in a `_test.go` file is
+				// skipped: export_test.go's `type G = g` (runtime) is consumed only by the package's
+				// own tests, which already see internals, and widening `g` in the test variant would
+				// contradict production's `internal partial struct g` (CS0262).
+				if obj.IsAlias() && !isTestFileObject(fset, obj) {
+					collectUnexportedNamedTypes(types.Unalias(obj.Type()), pkg)
+				}
+
 				collectPublicizedWrapperRHS(obj, pkg)
 
 				// An EXPORTED type's EXPORTED methods are emitted public; an unexported
@@ -771,6 +786,16 @@ func collectPublicizedTypes(pkg *types.Package) {
 	}
 
 	collectSiblingTestPublicizedTypes(scope, pkg)
+}
+
+// isTestFileObject reports whether obj is declared in a `_test.go` file. Without a FileSet nothing
+// can be located, and the object is treated as production.
+func isTestFileObject(fset *token.FileSet, obj types.Object) bool {
+	if fset == nil || !obj.Pos().IsValid() {
+		return false
+	}
+
+	return strings.HasSuffix(strings.ToLower(fset.Position(obj.Pos()).Filename), "_test.go")
 }
 
 // collectSiblingTestPublicizedTypes folds in the seed contributed by the package's IN-PACKAGE

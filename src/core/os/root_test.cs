@@ -1297,7 +1297,7 @@ public static void TestRootUseAfterClose(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRootConcurrentClose(ж<Δtesting.T> Ꮡt) {
+public static partial void TestRootConcurrentClose(ж<Δtesting.T> Ꮡt) {
     var (r, err) = Δos.OpenRoot(Ꮡt.TempDir());
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -1358,7 +1358,7 @@ internal static readonly object publicˢ = (@string)"public"u8;
 //
 // While opening this file, we rename base/a/a to base/b.
 // A naive lookup operation will resolve the path to base/f.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRootRaceRenameDir(ж<Δtesting.T> Ꮡt) {
+public static partial void TestRootRaceRenameDir(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

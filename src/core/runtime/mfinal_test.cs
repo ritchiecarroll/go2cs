@@ -39,7 +39,7 @@ partial class runtime_test_package {
     internal @unsafe.Pointer p;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestFinalizerType(ж<testing.T> Ꮡt) {
+public static partial void TestFinalizerType(ж<testing.T> Ꮡt) {
     var ch = new channel<bool>(10);
     var chʗ1 = ch;
     void finalize(ж<nint> x) {
@@ -119,7 +119,7 @@ partial class runtime_test_package {
     internal @string up;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestFinalizerInterfaceBig(ж<testing.T> Ꮡt) {
+public static partial void TestFinalizerInterfaceBig(ж<testing.T> Ꮡt) {
     var ch = new channel<bool>(0);
     var done = new channel<bool>(1);
     var chʗ1 = ch;

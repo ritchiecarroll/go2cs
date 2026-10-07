@@ -458,7 +458,7 @@ public static void TestSetAttrs(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSetDefault(ж<testing.T> Ꮡt) {
+public static partial void TestSetDefault(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // Verify that setting the default to itself does not result in deadlock.
@@ -844,7 +844,7 @@ public static void BenchmarkNopLog(ж<testing.B> Ꮡb) {
 }
 
 // callerPC returns the program counter at the given stack depth.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uintptr callerPC(nint depth) {
+internal static partial uintptr callerPC(nint depth) {
     array<uintptr> pcs = new(1);
     runtime.Callers(depth, pcs[..]);
     return pcs[0];

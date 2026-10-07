@@ -71,7 +71,7 @@ public static (any v, error err, bool shared) Do(this ж<Group> Ꮡg, @string ke
 
 // DoChan is like Do but returns a channel that will receive the
 // results when they are ready.
-[MethodImpl(MethodImplOptions.NoInlining)] public static /*<-*/channel<Result> DoChan(this ж<Group> Ꮡg, @string key, Func<(any, error)> fn) {
+public static partial /*<-*/channel<Result> DoChan(this ж<Group> Ꮡg, @string key, Func<(any, error)> fn) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     var ch = new channel<Result>(1);

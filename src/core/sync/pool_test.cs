@@ -174,7 +174,7 @@ continue_loop:;
 break_loop:;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPoolStress(ж<Δtesting.T> Ꮡt) {
+public static partial void TestPoolStress(ж<Δtesting.T> Ꮡt) {
     const nint P = 10;
     nint N = (nint)1000000;
     if (Δtesting.Short()) {
@@ -213,7 +213,7 @@ public static void TestPoolChain(ж<Δtesting.T> Ꮡt) {
     testPoolDequeue(Ꮡt, sync_internal_test_package.NewPoolChain());
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testPoolDequeue(ж<Δtesting.T> Ꮡt, global::go.sync_internal_test_package.PoolDequeue d) {
+internal static partial void testPoolDequeue(ж<Δtesting.T> Ꮡt, global::go.sync_internal_test_package.PoolDequeue d) {
     const nint P = 10;
     nint N = 2000000;
     if (Δtesting.Short()) {

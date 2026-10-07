@@ -55,7 +55,7 @@ internal static void isAddrinfoErrno(this addrinfoErrno eai) {
 // cancellation (cgo, syscalls). blocking func may still be running after this function finishes.
 // For the duration of the execution of the blocking function, the thread is 'acquired' using [acquireThread],
 // blocking might not be executed when the context gets canceled early.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (T, error) doBlockingWithCtx<T>(context.Context ctx, @string lookupName, Func<(T, error)> blocking) {
+internal static partial (T, error) doBlockingWithCtx<T>(context.Context ctx, @string lookupName, Func<(T, error)> blocking) {
     GoFrame ᒐ = default;
     try {
         {

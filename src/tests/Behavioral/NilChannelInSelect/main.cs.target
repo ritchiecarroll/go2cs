@@ -15,7 +15,7 @@ private static readonly object rendezvousRecvˢ = (@string)"rendezvous recv:"u8;
 private static readonly object liveSendFiredˢ = (@string)"live send fired"u8;
 private static readonly object outˢ = (@string)"out:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     channel<nint> nilCh = default!;
     fmt.Println(nilLenˢ, len(nilCh), capˢ, cap(nilCh));
     var live = new channel<nint>(1);

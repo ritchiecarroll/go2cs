@@ -1,0 +1,45 @@
+<Project>
+  <!--
+    go.lib.symbols.targets - Gbtc
+    Copyright © 2026 The go2cs Authors. All rights reserved.
+
+    Use of this source code is governed by an MIT-style license
+    that can be found in the LICENSE file.
+
+    SYMBOL FILES BESIDE A SINGLE-FILE HOST, ON EVERY PUBLISH.
+
+    The converted runtime reads a frame's file:line from the loose portable PDB of the assembly that holds
+    the frame (runtime.Caller, debug.Stack, a panic's traceback), and a single-file publish leaves each
+    referenced assembly's .pdb beside the executable. But only the bundler names those files as published
+    (its ExcludedFiles), and a publish that finds its bundle up to date skips the bundler, after which the
+    SDK's incremental publish clean deletes every one of them as an orphan of the previous publish. Measured
+    2026-10-05 on a converted program published twice through its win-x64 profile with nothing changed: 62
+    .pdb beside the host after the first publish, 1 after the second (the program's own, which the SDK marks
+    ExcludeFromSingleFile itself), and every frame in a dependency then printed with no file:line.
+
+    Marking every published .pdb ExcludeFromSingleFile puts it in the ordinary publish list, the one the
+    incremental clean reads, whether or not the bundle runs (measured: 62 kept across two unchanged
+    publishes). It changes nothing about what is bundled: a .pdb is never bundled into a single-file host.
+
+    ONE definition, three importers: go.lib.targets (every NuGet consumer of a go.* package), the
+    repository's src/Directory.Build.targets (every in-tree project, the -tests hosts included) and the
+    Directory.Build.targets that `go2cs -recurse` generates (a module conversion in local-reference mode).
+    The guard property keeps a second import inert.
+
+    Inert unless the publish is single-file and not Native AOT. Set GoKeepSymbolsLoose=false to turn it off.
+  -->
+  <PropertyGroup Condition="'$(GoLibSymbolsTargetsImported)' != 'true'">
+    <GoLibSymbolsTargetsImported>true</GoLibSymbolsTargetsImported>
+    <GoKeepSymbolsLoose Condition="'$(GoKeepSymbolsLoose)' == ''">true</GoKeepSymbolsLoose>
+  </PropertyGroup>
+
+  <Target Name="GoKeepSymbolsBesideSingleFileHost"
+          AfterTargets="ComputeResolvedFilesToPublishList"
+          Condition="'$(GoKeepSymbolsLoose)' == 'true' and '$(PublishSingleFile)' == 'true' and '$(PublishAot)' != 'true'">
+    <ItemGroup>
+      <ResolvedFileToPublish Update="@(ResolvedFileToPublish)"
+                             Condition="'%(ResolvedFileToPublish.Extension)' == '.pdb'"
+                             ExcludeFromSingleFile="true" />
+    </ItemGroup>
+  </Target>
+</Project>

@@ -79,18 +79,84 @@ imports the working-tree file explicitly. That is how the gate was read red-firs
 published 1.24.13.1: on Linux both build arms FAIL with CS0426 and the control PASSES. With the file,
 all four arms PASS on both platforms.
 
+# `PublishSymbols`: the symbol files of a second single-file publish
+
+`PublishSymbols` is the consumer fixture for go.lib's `buildTransitive/go.lib.symbols.targets`. A single-file
+publish leaves each referenced assembly's `.pdb` loose beside the executable, but only the bundler names those
+files as published, and a publish that finds its bundle up to date skips the bundler; the SDK's incremental
+publish clean then deletes them. A frame in that assembly prints no file:line from then on. The go.* packages
+ship no `.pdb`, so the fixture's frame lives in its OWN referenced library (`lib/`). `test-publish-symbols.ps1`
+restores it from ONE feed into a fresh package cache and publishes it single-file and self-contained for the
+host's RID into ONE folder, twice, with nothing changed between:
+
+- a green arm: both publishes leave `PublishSymbolsLib.pdb` beside the host and the frame reads `Where.cs:<line>`;
+- a control that proves the arm can fail: with `-p:GoKeepSymbolsLoose=false` the second publish loses the file
+  and the frame reads `:0`.
+
+```text
+pwsh src/tests/PackageTests/PublishSymbols/test-publish-symbols.ps1 -Version <go.lib version> [-Source <feed dir or URL>] [-FallbackFolder <package folder for the runtime pack>]
+```
+
+Read red-first against a go.lib packed from master 40a1f839c5 (2026-10-05, win-x64): the green arm's second
+publish kept only `PublishSymbols.pdb` and printed `:0`, and the control passed. The same happens with no go.lib
+at all: it is the SDK's behaviour for any single-file app with a referenced library.
+
+`test-publish-symbols-aot.ps1` is the Native AOT control: the target is meant to be inert under `PublishAot`, so the
+fixture published with `PublishAot=true` and `PublishSingleFile=true`, once with the target on and once with
+`-p:GoKeepSymbolsLoose=false`, must leave identical publish folders (and the AOT executable must run). It needs the
+platform's native toolchain. Both scripts take `go.*` from `-Source` only and everything else from nuget.org, so a
+self-contained publish can restore the SDK's runtime and ILCompiler packs against a pack rehearsal's local feed.
+
+```text
+pwsh src/tests/PackageTests/PublishSymbols/test-publish-symbols-aot.ps1 -Version <go.lib version> [-Source <feed dir or URL>] [-TargetsFile <go.lib.targets>]
+```
+
+# `PackageSymbols`: a consumer's std frames resolve to their Go file:line
+
+`PackageSymbols` is the consumer fixture for the go.* packages' OWN symbol files. Its program prints the first
+`go.sort` frame above a `sort.Slice` comparator as the converted runtime resolves it (`runtime.Caller`), which
+reads the frame's file:line from `go.sort`'s `.pdb` beside the application: `slice.go:<n>` or `zsortfunc.go:<n>`
+with the symbols, `none` without. `test-package-symbols.ps1` restores it into a fresh package cache, `go.*` from the
+feed under test ONLY and everything else (the runtime and ILCompiler packs a publish needs) from nuget.org:
+
+- RUN: `dotnet run` resolves the frame, and every dependency assembly in the build output has its `.pdb` beside it
+  with the matching debug id (the RID-specific packages' assemblies included);
+- PUBLISH: a single-file, self-contained publish for the host's RID, twice into one folder, resolves it both times;
+- FDD: a framework-dependent publish that is not single-file resolves it, the `.pdb` matching as in RUN;
+- OFF: with `-p:GoCopyPackageSymbols=false` the output is today's (`none`, no dependency `.pdb`): the off switch,
+  and the proof the arms above can fail;
+- AOT (`-Aot`, or `-AotOnly` for this arm alone; needs the ILCompiler packages and the native toolchain): a Native AOT
+  publish of the consumer, which sets no trim mode, RUNS -- exit 0 and its frame line (the value printed, not judged);
+  the publish wall time and its `.pdb` list are printed. Under go.lib's `TrimMode=partial` the publish compiles every
+  referenced go.* assembly whole, so it is long: os-matrix's `aot-smoke` stage runs it alone.
+
+```text
+pwsh src/tests/PackageTests/PackageSymbols/test-package-symbols.ps1 -Version <go.* version> [-Source <feed dir or URL>] [-FallbackFolder <package folder for the runtime pack>] [-Aot | -AotOnly]
+```
+
+Read red-first (2026-10-06, win-x64) against a local pack in the published 1.24.13.4 shape (no `.pdb` in any
+package): RUN, PUBLISH and FDD failed (`none`; 31 dependency assemblies, 0 with a `.pdb`), OFF passed.
+
 # `release-smoke.ps1`: consume a feed the way a user does
 
 `release-smoke.ps1 -Feed <dir> -Converter <go2cs> -WorkRoot <dir>` runs four arms against ONE local
 feed (a `push-nuget.ps1 -VersionSuffix` rehearsal's merged output), each restoring into a fresh cache
 with `go.*` mapped to the feed alone: (A) `RidCompileAsset` above; (B) a generated stdlib program
 (file I/O, plus every `sort` form whose converted body once called itself: `IntSlice`, `Float64Slice` and
-`StringSlice` `.Sort()` and the bare `sort.Sort(sort.StringSlice(v))`) converted with `go2cs -recurse=nuget`,
-built, run, and its stdout compared byte for byte with `go run`; a crash that prints "Stack overflow" is named
+`StringSlice` `.Sort()` and the bare `sort.Sort(sort.StringSlice(v))`, plus a build-tag probe: two files, one
+`//go:build safe` and one `//go:build !safe`, and a line saying which compiled) converted with
+`go2cs -recurse=nuget`, built, run, and its stdout compared byte for byte with `go run -tags safe` (every arm's
+baseline carries `-tags safe`, because a `-recurse` conversion builds with that tag by default; if the converter's
+default and the baseline ever disagree, arm B's `BuildTag =` line names it); a crash that prints "Stack overflow" is named
 as one in the verdict. That red reading is the tiered-JIT shape (the arm runs a Debug build with tiered
 compilation on): under Release with `DOTNET_TieredCompilation=0` the same self-call loops forever instead, so a
 TIMEOUT on this arm is the same defect in its other shape;
 (C) `Behavioral/StatLayoutTruth`, the same way; (D) the README walkthrough (`fatih/color`), the same
 way, gating only with `-GateWalkthrough` and MEASURED without it; the `release-smoke` stage passes it on every
-leg. It exits 0 when the gating arms pass. The `release-smoke` stage of
+leg; (E) `PublishSymbols` above, the guard and its AOT control against the same feed, MEASURED and never gating
+until it has read green on two trains; (F) `PackageSymbols` above (its AOT arm excepted: that is the `aot-smoke` stage), the
+packages' own symbol files, MEASURED and never gating on the same terms, its frame lines carried into the verdict. It exits 0 when the gating arms pass. The `release-smoke` stage of
 `.github/workflows/os-matrix.yml` packs the feed on Windows and runs this on all four shipped RIDs.
+`-Feed https://api.nuget.org/v3/index.json -Version <go.* version>` runs the same arms against a published
+release instead (a URL feed requires `-Version`; nuget.org is then the one source); the stage's `published_version`
+input does this on every leg, with no pack.

@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static any /*r*/ tryMake(nint length, nint capacity) {
+internal static partial any /*r*/ tryMake(nint length, nint capacity) {
     any r = default!;
     GoFrame ᒐ = default;
     try {

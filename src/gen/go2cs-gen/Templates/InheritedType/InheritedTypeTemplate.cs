@@ -82,6 +82,35 @@ internal class InheritedTypeTemplate : TemplateBase
     // strongly-typed Clone() from their own templates and are excluded below.
     public bool ValueClone = false;
 
+    // Set for a named MAP whose VALUE contains the wrapper itself BY VALUE: directly (`type M
+    // map[int]M`, go-cmp's cycleTests), or through any chain of struct fields, fixed-size array
+    // elements, slice elements or map keys/values (`map[int]struct{ m M }`, `map[int][]M`,
+    // `map[int]map[int]M`); NOT through a pointer, channel, func or interface. TypeGenerator's
+    // MapValueContainsSelf owns the predicate. The KEY side never qualifies: Go forbids a map key that
+    // contains a map by value (a map is not comparable).
+    //
+    // Such a wrapper cannot hold its golib `map<K,V>` inline. .NET 10 fails to LOAD the wrapper type
+    // -- a SIGSEGV inside the runtime's type loader for the direct, array, slice and map shapes, a
+    // TypeLoadException for the struct shapes -- before any of its code runs; measured on .NET 10.0.12,
+    // where every shape above crashed and every excluded one loaded. The fault reproduces with BCL
+    // types alone (a struct implementing IEnumerable<KeyValuePair<K, Self>> that holds, by value, a
+    // generic struct implementing the same interface; docs/phase4/REPRO-clr-typeload-self-containing-
+    // struct.md), so it is the runtime's and not golib's. The wrapper therefore holds its map in the
+    // same one-word StrongBox the Array kind publishes its backing through: a class field breaks the
+    // load-time cycle and keeps every member. `default` stays the nil map (a null holder reads as
+    // `default(map<K,V>)`), and golib's reflection already unwraps the holder (TryUnwrapWrapperValue's
+    // IStrongBox step), so the Go value seen through reflect is the map itself.
+    public bool HoldsMapInHolder = false;
+
+    // The Go methods declared on this type, and its own name (TypeGenerator.GoMethodNames). A Go method
+    // is an extension method, which loses to any applicable instance member, and a member may not share
+    // its type's name, so a map or channel wrapper YIELDS each of these names: a member implementing an interface becomes its explicit implementation, and Set is
+    // dropped for its door (Symbols.MapWrapperSet). IChannelTypeTemplate's explicit-only Close is the
+    // same rule, applied before there was a census.
+    public ICollection<string> GoMethodNames = [];
+
+    private bool UsesHolder => TypeClass == "Array" || HoldsMapInHolder;
+
     private string ImplementedInterface => TypeClass switch
     {
         "Slice" => $" : ISlice<{TargetTypeName}>, ISupportMake<{ObjectName}>, ISliceWrap<{ObjectName}, {TargetTypeName}>",
@@ -138,8 +167,10 @@ internal class InheritedTypeTemplate : TemplateBase
     private string InterfaceImplementation => TypeClass switch
     {
         "Slice" => ISliceTypeTemplate.Generate(ObjectName, ConstructorName, TypeName, TargetTypeName),
-        "Map" => IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!),
-        "Channel" => IChannelTypeTemplate.Generate(ObjectName, ConstructorName, TypeName, TargetTypeName),
+        "Map" => HoldsMapInHolder ?
+            IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!, GoMethodNames, "Value", made => $"new {ValueFieldType}({made})") :
+            IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!, GoMethodNames),
+        "Channel" => IChannelTypeTemplate.Generate(ObjectName, ConstructorName, TypeName, TargetTypeName, GoMethodNames),
         "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName, TargetTypeSize),
         "Numeric" => NumericTypeTemplate.Generate(TypeName, TargetTypeName),
         "Pointer" => PointerTypeTemplate.Generate(ObjectName, TargetTypeName),
@@ -180,7 +211,7 @@ internal class InheritedTypeTemplate : TemplateBase
     private string Value => TypeClass switch
     {
         "Array" => "Value", // Null-coalescing property auto-creates array on first reference
-        _ => "m_value"
+        _ => HoldsMapInHolder ? "Value" : "m_value"
     };
 
     // The Pointer class supplies its own ref-returning Value (PointerTypeTemplate); emitting the
@@ -298,6 +329,9 @@ internal class InheritedTypeTemplate : TemplateBase
                           }
                       }
               """,
+        // A self-containing map's holder (see HoldsMapInHolder): a null holder is the nil map. READONLY,
+        // because the map template's readonly indexer reads the map through this property.
+        _ when HoldsMapInHolder => $"        {MemberScope} readonly {TypeName} Value => m_value is {{ }} holder ? holder.Value : default;",
         _ => $"        {MemberScope} {TypeName} Value => {ValueGetter};"
     };
 
@@ -510,7 +544,11 @@ internal class InheritedTypeTemplate : TemplateBase
     // over the same underlying is a different Go type and never equal), while the comparison itself
     // delegates to array<E>'s element-wise Equals/GetHashCode — so neither depends on the slot's shape
     // any more, and a future change of carrier cannot move them again.
-    private string EqualityOverrides => TypeClass == "Array" ?
+    // A self-containing map's holder is a REFERENCE too, so it takes the same pair: ValueType.Equals
+    // would compare holder identity, and two wrappers over the same map (or two nil maps, one carried
+    // in a holder) would differ where the inline field compared map<K,V>'s own identity. map<K,V>.Equals
+    // is that identity, so delegating to it keeps the inline wrapper's answer exactly, nil included.
+    private string EqualityOverrides => UsesHolder ?
         $"""
 
                 public override bool Equals(object? obj) => obj is {ObjectName} other && {Value}.Equals(other.{Value});
@@ -524,17 +562,17 @@ internal class InheritedTypeTemplate : TemplateBase
     // Only the lazily-allocated Array backing needs a nullable slot (null == "not yet materialized").
     // Other mutable cases (a struct-forwarding named type) keep a non-nullable value slot — decoupled
     // from ReadOnlyValue so struct forwarding can be mutable yet non-nullable.
-    private string Nullable => TypeClass == "Array" ? "?" : "";
+    private string Nullable => UsesHolder ? "?" : "";
 
     // The Array kind's slot holds its `array<E>` inside a StrongBox, so the lazy backing can be
     // published with an interlocked CAS — see ValueProperty for why one machine word is the
     // requirement, why the holder (not the bare `E[]`) is what preserves the value, and why the holder
     // is TYPED rather than a plain `object`.
-    private string ValueFieldType => TypeClass == "Array" ? $"global::System.Runtime.CompilerServices.StrongBox<{TypeName}>" : TypeName;
+    private string ValueFieldType => UsesHolder ? $"global::System.Runtime.CompilerServices.StrongBox<{TypeName}>" : TypeName;
 
     // The Array kind's constructor wraps its incoming value in the publish holder; every other kind
     // stores it directly.
-    private string ValueConstructorArgument => TypeClass == "Array" ? $"new {ValueFieldType}(value)" : "value";
+    private string ValueConstructorArgument => UsesHolder ? $"new {ValueFieldType}(value)" : "value";
 
     // Forwarding properties for a defined-type-over-struct, exposing the underlying struct's fields on
     // the wrapper. `m_value` is mutable (ReadOnlyValue=false) so a write through a ж<T>.Value ref —

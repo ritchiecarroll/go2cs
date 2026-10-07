@@ -436,7 +436,7 @@ public static void TestDecompressor(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testdataIssue6550Gzˢ = "testdata/issue6550.gz.base64"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestIssue6550(ж<testing.T> Ꮡt) {
+public static partial void TestIssue6550(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // Apple’s notarization service will recursively attempt to decompress

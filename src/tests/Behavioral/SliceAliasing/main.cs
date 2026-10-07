@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void run() {
+internal static partial void run() {
     var @base = new slice<uint32>(6);
     var d = @base[2..5];
     copy(d, new uint32[]{7, 8, 9}.slice());

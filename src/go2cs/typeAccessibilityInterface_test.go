@@ -79,7 +79,7 @@ func (c Conn) poke(h alsoHidden) {}
 	packagePublicizedTypes = nil
 	packagePublicizedLiftedTypes = nil
 
-	collectPublicizedTypes(production.Types)
+	collectPublicizedTypes(production.Types, production.Fset)
 
 	publicized := publicizedTypeNames()
 
@@ -131,7 +131,7 @@ var _ sealed = nil
 	packagePublicizedTypes = nil
 	packagePublicizedLiftedTypes = nil
 
-	collectPublicizedTypes(production.Types)
+	collectPublicizedTypes(production.Types, production.Fset)
 
 	if publicizedTypeNames()["quiet"] {
 		t.Fatalf("an unexported interface's signature types must stay internal; publicized: %v", publicizedTypeNames())
@@ -170,7 +170,7 @@ func (h Holder) Addr() sealed { return nil }
 	packagePublicizedTypes = nil
 	packagePublicizedLiftedTypes = nil
 
-	collectPublicizedTypes(production.Types)
+	collectPublicizedTypes(production.Types, production.Fset)
 
 	publicized := publicizedTypeNames()
 
@@ -211,7 +211,7 @@ type Outer interface {
 	packagePublicizedTypes = nil
 	packagePublicizedLiftedTypes = nil
 
-	collectPublicizedTypes(production.Types)
+	collectPublicizedTypes(production.Types, production.Fset)
 
 	if !publicizedTypeNames()["embLen"] {
 		t.Fatalf("an EMBEDDED unexported interface method's signature types must be publicized; publicized: %v", publicizedTypeNames())
@@ -338,7 +338,7 @@ func (n Nat) Equal(o Nat) choice { return 0 }
 	packagePublicizedTypes = nil
 	packagePublicizedLiftedTypes = nil
 
-	collectPublicizedTypes(production.Types)
+	collectPublicizedTypes(production.Types, production.Fset)
 
 	if !publicizedTypeNames()["choice"] {
 		t.Fatalf("an EXPORTED method's unexported result type must be publicized (bigmod's Nat.Equal); publicized: %v", publicizedTypeNames())

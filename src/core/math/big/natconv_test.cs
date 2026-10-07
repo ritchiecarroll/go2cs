@@ -271,7 +271,7 @@ public static void TestScanPi(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestScanPiParallel(ж<testing.T> Ꮡt) {
+public static partial void TestScanPiParallel(ж<testing.T> Ꮡt) {
     const nint n = 2;
     var c = new channel<nint>(0);
     for (nint i = 0; i < n; i++) {

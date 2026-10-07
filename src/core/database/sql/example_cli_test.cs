@@ -30,7 +30,7 @@ internal static readonly object missingPersonIdˢ = (@string)"missing person ID"
 internal static readonly @string driverNameˢ = "driver-name"u8;
 internal static readonly object unableToUseDataSourceˢ = (@string)"unable to use data source name"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void Example_openDBCLI() {
+public static partial void Example_openDBCLI() {
     GoFrame ᒐ = default;
     try {
         var id = flag.Int64("id"u8, 0, personIdToFindˢ);

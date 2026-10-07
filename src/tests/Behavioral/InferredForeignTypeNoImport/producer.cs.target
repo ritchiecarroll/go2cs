@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<strings.Reader> makeReader() {
+internal static partial ж<strings.Reader> makeReader() {
     return strings.NewReader("hi"u8);
 }
 

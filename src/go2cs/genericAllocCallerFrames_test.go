@@ -12,7 +12,6 @@ import (
 	"go/build"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"testing"
 )
 
@@ -121,21 +120,19 @@ func GenericCaller[T any](a bool) {
 func TestGenericCallersOfASeededThinAllocatorAreNotInlined(t *testing.T) {
 	mainCs, libCs := convertGenericAllocCallerFixture(t)
 
-	const attribute = "[MethodImpl(MethodImplOptions.NoInlining)]"
-
-	if line := declarationLine(t, mainCs, "storeAlloc"); !strings.Contains(line, attribute) {
+	if line := declarationLine(t, mainCs, "storeAlloc"); !keepsOwnFrame(line) {
 		t.Fatalf("precondition: the thin allocator storeAlloc is not seeded: %s", line)
 	}
 
-	if line := declarationLine(t, mainCs, "genericCaller"); !strings.Contains(line, attribute) {
+	if line := declarationLine(t, mainCs, "genericCaller"); !keepsOwnFrame(line) {
 		t.Errorf("genericCaller, a generic caller of the seeded thin allocator, is not marked: %s", line)
 	}
 
-	if line := declarationLine(t, mainCs, "plainCaller"); strings.Contains(line, attribute) {
+	if line := declarationLine(t, mainCs, "plainCaller"); keepsOwnFrame(line) {
 		t.Errorf("plainCaller is marked, but it is not generic: %s", line)
 	}
 
-	if line := declarationLine(t, libCs, "GenericCaller"); strings.Contains(line, attribute) {
+	if line := declarationLine(t, libCs, "GenericCaller"); keepsOwnFrame(line) {
 		t.Errorf("lib.GenericCaller is marked, but its package reads no heap profile: %s", line)
 	}
 }

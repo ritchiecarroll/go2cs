@@ -458,6 +458,7 @@ code, and the section that explains it in full.
 | `ᴋ` | A temporary that keeps a pointer passed to a system call alive until the call returns | `var ᴋ0 = @unsafe.SliceData(p);` | [`unsafe.Pointer` and `uintptr`](#unsafepointer-and-uintptr) |
 | `ᴅ`, `ᴺ` suffix | Keep a Go type name. `ᴅ` is an empty C# marker interface, never implemented, whose `[GoLocalName]` attribute holds the Go name of a type converted to a `using` alias. `ᴺ` is an extra type parameter for a type argument's name | `[GoLocalName("Token")] public interface Tokenᴅ { }`, `nameOf<T, Tᴺ>` | [Reflection](#reflection-reflect) |
 | `_Δp0` | A made-up name for an unnamed or `_` parameter where a plain `_` would not work: C# forbids two parameters with the same name, and a parameter named `_` would capture the body's own `_ =` discards. Interface methods and function types name every unnamed parameter this way. Otherwise a lone blank parameter stays `_` | `Read(slice<byte> _Δp0)`, `Seq2Like<K, V>(K _Δp0, V _Δp1)` | The naming rules in this section |
+| `Set‿` | The map write that a nested assignment `m[k1][k2] = v` calls on the element `m[k1]`, used only when the element's Go type declares a method named `Set` or is itself named `Set`. A Go method becomes an extension method, and C# runs a same-named member of the generated wrapper in its place, so the wrapper gives up that name: `Set` is dropped, and `Add`, `Remove`, `Clear`, `ContainsKey`, `TryGetValue` and a channel's `Send` and `Sent` become explicit interface implementations. `‿` (U+203F) is connector punctuation, legal in a C# name and impossible in a Go one | `envs["x"u8].Set‿(mixedˢ, "m"u8);` | [Source Generators](#source-generators) |
 | `<func>_<type>` | A type declared inside a function, lifted to package scope | `main_point` | [Struct Types](#struct-types) |
 | `<pkg>_internal_test_package`, `<pkg>_test_package` | The classes for in-package test files and for the external `_test` package | `strings_internal_test_package` | [Converted Tests](#converted-tests) |
 
@@ -1516,7 +1517,10 @@ package passes in would then not match the copy the test uses. Referencing keeps
 
 **Known differences from Go are listed beside the package.** A hand-written `go2cs_test_disclosures.json`
 names each test whose C# result is known to differ from `go test`, with the reason. A test that fails
-without such an entry counts as a mismatch.
+without such an entry counts as a mismatch. A third-party module keeps its manifests in the committed tree
+`src/tests/ModuleDisclosures/<module path>@<version>/<package dir>/`, read when the run passes
+`-module-disclosures src/tests/ModuleDisclosures`. A manifest there applies only to that exact module
+version, and a manifest in the package's own output directory still takes precedence.
 
 **Full detail:** [Reference → Test suites reference the production project](ConversionStrategies-Reference/shadowing.md#test-suites-reference-the-production-project-instead-of-recompiling-it) — the test-project models and when each applies, the internal bridge class and its metadata files, test-side name collisions, and exactly which test files get no `.cs`.
 
@@ -10897,7 +10901,7 @@ Go's `int`. A literal such as `"%s=%d"u8` is a C# UTF-8 string literal, which go
 string. See [Strings](#strings-string-and-sstring), [Slices and Arrays](#slices-and-arrays) and
 [Integer Types and Arithmetic](#integer-types-and-arithmetic).
 
-**Each generator reacts to one marker the converter emits: an attribute, or, for stubs, a `partial` method with no body.**
+**Each generator reacts to one marker the converter emits: an attribute, or a `partial` method, with no body for a stub and with a body for a method that must keep its own frame.**
 
 | Generator | Driven by | Produces |
 |---|---|---|
@@ -10907,6 +10911,7 @@ string. See [Strings](#strings-string-and-sstring), [Slices and Arrays](#slices-
 | `ImplicitConvGenerator` | `[assembly: GoImplicitConv<S, T>]` | a conversion operator between two types C# cannot convert directly, such as two named numeric types or two structs with the same underlying type; the C# still writes the conversion where Go does, and the operator lets it compile |
 | `StrGenerator` | `[GoStr]` on a method | for a function that takes its string as an `sstring` (golib's stack-only string view, a `ref struct`), the matching `@string` overload ([Strings](#strings-string-and-sstring)) |
 | `PartialStubGenerator` | a `partial` method with no body | a stub that throws, when no hand-written body exists ([Functions Without a Go Body](#functions-without-a-go-body)) |
+| `NoInliningPartialGenerator` | a `partial` method with a body and no other declaration | the method's declaring part, carrying `[MethodImpl(MethodImplOptions.NoInlining)]`, so the JIT never inlines the method and `runtime.Caller` still sees its frame ([A `partial` method with a body keeps its own frame](#a-partial-method-with-a-body-keeps-its-own-frame)) |
 
 ### A `[GoType]` struct lists only its fields
 
@@ -11035,6 +11040,67 @@ internal static wrap wrapped(this ж<mc> Ꮡc) {
 
 The receiver `Ꮡc` is the box itself, so the `wrap` it returns points at the caller's `mc`, as in Go
 ([Pointers](#pointers)).
+
+### A `partial` method with a body keeps its own frame
+
+Go code can ask which function is running: `runtime.Caller(n)` names the function `n` frames up the
+stack. That answer depends on each of those functions having a frame of its own. The .NET JIT copies
+small methods into their callers (inlining), and an inlined method has no frame, so `runtime.Caller`
+would name the wrong function. The converter therefore marks every function whose frame a Go stack walk
+counts, and the mark tells the JIT not to inline it.
+
+The mark is the word `partial`. A converted method with a body that is written `partial` is one half of
+a C# partial method. `NoInliningPartialGenerator` writes the other half, the declaration, with the
+attribute `[MethodImpl(MethodImplOptions.NoInlining)]`, and C# compiles the two halves into one method
+that carries the attribute. Here `here` asks for its caller, and `plain` is a one-line function that the
+JIT would otherwise inline:
+
+<!-- source: src/tests/Behavioral/NoInlinePartial/main.go:18-28 -->
+```go
+// here names the function that called it.
+func here() string {
+	pc, _, _, ok := runtime.Caller(1)
+	if !ok {
+		return "<no caller>"
+	}
+	return runtime.FuncForPC(pc).Name()
+}
+
+// plain is a thin forwarder to here: the closure marks it, and only the mark keeps its frame.
+func plain() string { return here() }
+```
+<!-- source: src/tests/Behavioral/NoInlinePartial/main.cs.target:13-23 -->
+```csharp
+internal static partial @string here() {
+    var (pc, _, _, ok) = runtime.Caller(1);
+    if (!ok) {
+        return noCallerˢ;
+    }
+    return runtime.FuncForPC(pc).Name();
+}
+
+internal static partial @string plain() {
+    return here();
+}
+```
+
+The generated half, in the project's `Generated` folder:
+
+<!-- source: the NoInliningPartialGenerator output for src/tests/Behavioral/NoInlinePartial (main.noinline.g.cs), abridged -->
+```csharp
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+internal static partial @string here();
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+internal static partial @string plain();
+```
+
+A function literal cannot be `partial`, so a marked literal keeps the attribute itself:
+`var lit = [MethodImpl(MethodImplOptions.NoInlining)] @string () => here();`. A marked `init` keeps
+the attribute too. C# runs an `init` (a module initializer) in declaration order, and a partial
+method's declaration is the generated half, which comes after every source file, so a `partial`
+`init` would run after the package's other `init` functions. A `partial` method with
+no body is a different case, a function whose body is elsewhere ([Functions Without a Go
+Body](#functions-without-a-go-body)).
 
 ### The converter decides interface satisfaction; a generator builds it
 
@@ -11754,6 +11820,15 @@ result is unpacked with `var (inverse, err) = …`:
      ECDSA is unaffected. Inverse is reached via the deprecated `invertible` interface. The inline panic
      literal is deliberate: the converter exempts `panic`'s argument from literal hoisting
      (src/go2cs/hoistedLiteralOperations.go:612-614), since it costs nothing until a panic fires. -->
+
+**A module converts with `-tags safe`, for a different reason.** Some libraries reach into Go's runtime with
+unsafe pointer arithmetic, adding a byte offset to a value to read one of its private fields. Converted code
+keeps its values in .NET's own layout, so golib refuses that arithmetic rather than read the wrong memory.
+Libraries that do this usually ship a fallback for builds tagged `safe`, so a `-recurse` conversion adds the
+tag and the fallback is what converts. When a module is validated, Go's own `go test` run gets the same tags,
+so the two sides compile the same files. The tag `appengine`, which some libraries read the same way, is not
+added, because it also changes unrelated behavior. `-module-safe-tag=false` turns `safe` off. See
+[Reference → Default build tags](ConversionStrategies-Reference/package-conversion.md#default-build-tags-purego-for-the-standard-library-safe-for-modules).
 
 **Full detail:** [Reference → The standard-library conversion applies `-tags purego`](ConversionStrategies-Reference/purego.md#the-standard-library-conversion-applies--tags-purego) — why the tag is on by default and the alternatives weighed, how `-tests` shares it, the `math/big` fallback tag, the three outcomes with more packages named, and the `crypto/elliptic` gating in full.
 

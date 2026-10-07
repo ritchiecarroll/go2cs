@@ -55,11 +55,11 @@ public static void TestMain(ж<testing.M> Ꮡm) {
 
 [GoType("num:nint")] partial struct T;
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static slice<byte> ptrmethod(this ref T t) {
+[GoRecv] internal static partial slice<byte> ptrmethod(this ref T t) {
     return Stack();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<byte> method(this T t) {
+internal static partial slice<byte> method(this T t) {
     return t.ptrmethod();
 }
 

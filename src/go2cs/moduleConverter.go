@@ -944,6 +944,13 @@ func (m *ModuleConverter) generateRecurseBuildFiles() {
 		"    <CompilerGeneratedFilesOutputPath>$(Go2csArtifactsRoot)gen\\$(Go2csArtifactToken)</CompilerGeneratedFilesOutputPath>",
 		"  </PropertyGroup>",
 		"",
+		"  <!-- The dependency symbol files stay beside a single-file host on EVERY publish (golib's",
+		"       go.lib.symbols.targets). Under local project references golib's buildTransitive is never",
+		"       imported, so the output root imports the one file itself; a package consumer gets it from",
+		"       go.lib.targets, and the guard keeps a second import inert. -->",
+		"  <Import Project=\"$(go2csPath)core/golib/buildTransitive/go.lib.symbols.targets\"",
+		"          Condition=\"'$(GoLibSymbolsTargetsImported)' != 'true' and '$(go2csPath)' != '' and Exists('$(go2csPath)core/golib/buildTransitive/go.lib.symbols.targets')\" />",
+		"",
 		"</Project>",
 		"",
 	}

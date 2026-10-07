@@ -75,7 +75,7 @@ internal static readonly object expectedReadingBodyˢ = (@string)"expected `read
 internal static readonly @string tcpˢ = "tcp"u8;
 internal static readonly @string sRecvˢ = "S.Recv"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestGobError(ж<testing.T> Ꮡt) {
+public static partial void TestGobError(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         defer(() => {

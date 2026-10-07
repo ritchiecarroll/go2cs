@@ -70,6 +70,8 @@
     <!-- The RID-selected compile asset for the multi-flavour go.* packages (see the file). Every
          converted package depends on go.lib, so buildTransitive reaches every consumer. -->
     <None Include="buildTransitive/go.lib.targets" Pack="true" PackagePath="buildTransitive/" />
+    <!-- Imported by go.lib.targets: the symbol files beside a single-file host, on every publish. -->
+    <None Include="buildTransitive/go.lib.symbols.targets" Pack="true" PackagePath="buildTransitive/" />
   </ItemGroup>
 
   <ItemGroup>

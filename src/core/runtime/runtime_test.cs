@@ -446,7 +446,7 @@ internal static readonly @string largeˢ = "large"u8;
 internal static readonly @string sparseNilˢ = "sparse-nil"u8;
 internal static readonly @string sparseˢ = "sparse"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     Action<ж<testing.B>> run(Func<bool> fn) {
@@ -658,7 +658,7 @@ public static void BenchmarkOSYield(ж<testing.B> Ꮡb) {
     internal cpu.CacheLinePad ___;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkMutexContention(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkMutexContention(ж<testing.B> Ꮡb) {
     // Measure throughput of a single mutex with all threads contending
     //
     // Share a single counter across all threads. Progress from any thread is
@@ -711,7 +711,7 @@ internal static readonly @string nsStarveP90ˢ = "ns/starve-p90"u8;
     internal cpu.CacheLinePad ___;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Measure mutex fairness.

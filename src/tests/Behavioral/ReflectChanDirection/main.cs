@@ -43,7 +43,7 @@ internal static @string walkRangeShape(reflectꓸValue v) {
     return "["u8 + strings.Join(@out, " "u8) + "]"u8;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static channel<@string> count(nint n) {
+internal static partial channel<@string> count(nint n) {
     var ch = new channel<@string>(0);
     var chʗ1 = ch;
     goǃ(() => {
@@ -101,7 +101,7 @@ private static readonly @string lastˢ = "last"u8;
 private static readonly object recvOnSendOnlyˢ = (@string)"recv on send-only:"u8;
 private static readonly object sendOnRecvOnlyˢ = (@string)"send on recv-only:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     var send = new channel/*<-*/<nint>(0, GoChanDir.Send);
     var recv = new /*<-*/channel<nint>(2, GoChanDir.Recv);
     var both = new channel<nint>(0);

@@ -119,7 +119,7 @@ public class RecvGenerator : ISourceGenerator
                 Scope = scope,
                 Method = method,
                 ReceiverTypeIsPublic = receiverTypeIsPublic,
-                NoInlining = HasNoInliningMark(methodSyntax),
+                NoInlining = HasNoInliningMark(methodSyntax, semanticModel),
                 OverloadResolutionPriority = GetOverloadResolutionPriority(methodSyntax),
                 UsingStatements = usingStatements
             }
@@ -206,11 +206,16 @@ public class RecvGenerator : ISourceGenerator
     }
 
     // The converter's frame-preserving mark, read as it is SPELLED in the emission --
-    // `[MethodImpl(MethodImplOptions.NoInlining)]` (computeNoInliningClosure) -- so the forwarder
-    // inherits exactly the functions the converter protected and nothing else. StrGenerator
-    // reads the same mark for the same reason.
-    internal static bool HasNoInliningMark(MethodDeclarationSyntax methodSyntax)
+    // `[MethodImpl(MethodImplOptions.NoInlining)]` (computeNoInliningClosure), or the no-inline
+    // carrier shape that replaced it on methods, a partial method's implementing part with no
+    // declaring part (NoInliningPartials; NoInliningPartialGenerator writes that declaring part, and
+    // a generator cannot see another's output) -- so the forwarder inherits exactly the functions the
+    // converter protected and nothing else. StrGenerator reads the same mark for the same reason.
+    internal static bool HasNoInliningMark(MethodDeclarationSyntax methodSyntax, SemanticModel? semanticModel)
     {
+        if (NoInliningPartials.IsCarrier(methodSyntax, semanticModel))
+            return true;
+
         foreach (AttributeListSyntax list in methodSyntax.AttributeLists)
         {
             foreach (AttributeSyntax attribute in list.Attributes)

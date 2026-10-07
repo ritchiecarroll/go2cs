@@ -263,6 +263,47 @@ func TestHostCrashHonoursEligibility(t *testing.T) {
 	}
 }
 
+// The comparison wrote its MISMATCH line for an in-flight test before the crash arm ran, so it read C#="" while the
+// record's verdict said fail (x/sync singleflight in TRAIN P's battery: the record held the fails, the printed
+// comparison line still read Go="pass" C#=""). The crash arm brings the crashed names' mismatch lines into agreement,
+// and leaves every other line, including another test's identical-looking one, as matching wrote it.
+func TestHostCrashRewritesTheInFlightTestsMismatchLines(t *testing.T) {
+	output, err := runStandInHost(t, "overflow-in-flight")
+
+	result := newCrashComparison(terminalTestResults(output))
+	result.Errors = append(result.Errors, `TestOverflow: Go="pass" C#=""`, `TestElsewhere: Go="pass" C#=""`)
+	applyHostCrash(result, err, output, everythingEligible)
+
+	joined := strings.Join(result.Errors, "\n")
+
+	if !strings.Contains(joined, `TestOverflow: Go="pass" C#="fail (crashed in flight)"`) {
+		t.Errorf("the in-flight test's mismatch line must read its crash verdict:\n%s", joined)
+	}
+
+	if strings.Contains(joined, `TestOverflow: Go="pass" C#=""`) {
+		t.Errorf("the in-flight test's mismatch line still reads no verdict:\n%s", joined)
+	}
+
+	if !strings.Contains(joined, `TestElsewhere: Go="pass" C#=""`) {
+		t.Errorf("a test that was NOT in flight keeps its mismatch line as matching wrote it:\n%s", joined)
+	}
+}
+
+// The live-host twin: a test held until the package deadline reads "fail (in flight at the package deadline)".
+func TestHostTimeoutRewritesTheInFlightTestsMismatchLine(t *testing.T) {
+	output, err := runStandInHost(t, "host-timeout")
+
+	result := newCrashComparison(terminalTestResults(output))
+	result.Errors = append(result.Errors, `TestBlocks: Go="pass" C#=""`)
+	applyHostCrash(result, err, output, everythingEligible)
+
+	joined := strings.Join(result.Errors, "\n")
+
+	if !strings.Contains(joined, `TestBlocks: Go="pass" C#="fail (in flight at the package deadline)"`) || strings.Contains(joined, `TestBlocks: Go="pass" C#=""`) {
+		t.Errorf("the in-flight test's mismatch line must read its deadline verdict:\n%s", joined)
+	}
+}
+
 func TestInFlightTestsReadsTheStreamInOrder(t *testing.T) {
 	output := strings.Join([]string{
 		`{"package":"p","test":"","action":"run"}`,

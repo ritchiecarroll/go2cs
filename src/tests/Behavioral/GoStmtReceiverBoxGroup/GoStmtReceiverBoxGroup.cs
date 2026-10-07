@@ -31,15 +31,15 @@ partial class main_package {
     t.n++;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void start(this ж<tracker> Ꮡt) {
+internal static partial void start(this ж<tracker> Ꮡt) {
     goǃ(Ꮡt.loop);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void startArg(this ж<tracker> Ꮡt) {
+internal static partial void startArg(this ж<tracker> Ꮡt) {
     goǃ(Ꮡt.loopArg, (nint)(9));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void startInner(this ж<tracker> Ꮡt) {
+internal static partial void startInner(this ж<tracker> Ꮡt) {
     goǃ(Ꮡt.of(tracker.Ꮡin).send);
 }
 
@@ -52,7 +52,7 @@ internal static void stop(this ж<tracker> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static void other(this ref tracker t, ж<tracker> Ꮡo) {
+[GoRecv] internal static partial void other(this ref tracker t, ж<tracker> Ꮡo) {
     goǃ(Ꮡo.loop);
 }
 
