@@ -24,6 +24,22 @@ Written 15:50 on the i7's clock, at 76% of the week's usage (owner order of this
 usage nears 90%, so that the COORD session can be rolled to another session). Every ref below was read at the remote.
 Lanes are unchanged: all seven are MAILBOX-ONLY (sections 1e and 1h hold their protocol and paste prompts).
 
+- **UPDATE 2026-10-06 19:50 (read this first).** master is `0457242046c8d5c29a6ff547bcbcc0e74c1fe973` (two docs
+  commits since 15:50: the known-issues entry for Native AOT and its correction to "linux only"). TRAIN Q's table is
+  FROZEN (64 rows, rows-sha256 `48eb5249eb30`; `.claude/coord-scripts/trainQ/tQ-seats-draft.txt` on this branch,
+  with the whole script set and `COORD-LAUNCH-CHECKLIST.md`). The union is ASSEMBLED and LOCAL, not pushed yet:
+  worktree `/h/go2cs-tmp-coord/tQ`, head `304350b932abede307b020ebf11e5c99925d2518` (64 signed merges; checklist
+  sections 0 to 3 done; precheck 0 hard failures). The FIXUP (checklist section 4) runs DETACHED from the run folder
+  `/h/go2cs-tmp-coord/coord-scratch/tQ/run1`: read `run1/fixup.console.log` to its `fixup rc=` line and
+  `run1/tQ-fixup-logs/SUMMARY.txt`; the worktree is FROZEN until that line appears. THEN: the signature read, push
+  `claude/coord-trainQ-union` (a new ref), the GOs to the i9, P1, P2, C1 and G (section 4's table), the battery
+  (section 5; try the never-run leg PUB2 with its control on the union first), the landing (section 6), the owner's
+  question (section 7). COORD's stepper for those steps: `/h/go2cs-tmp-coord/coord-scratch/tQ/coord-step.sh`.
+  THE NAME-CHECK FIX is on a branch, `claude/coord-census-text-denied` (one commit on master), NOT on master: every
+  lane was asked (FLEET, 19:48) to run its self-test on its own box; it lands AFTER Q lands. Still out and not
+  holding Q: the i9's reading of the windows Native AOT failure (reproduce, stack, sizing); P1's and G's seats for
+  the train after Q. Steps 2 and 3 of 1i.1 below are overtaken by this paragraph; steps 4 to 6 stand (step 4 is done).
+
 ### 1i.0 State in one screen
 
 - **master** = `7098b8d3f958e68dfcd23a35d5030427b2638357`: TRAIN P landed (`40a1f839c5`), go.\* 1.24.13.4 PUBLISHED
