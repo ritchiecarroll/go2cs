@@ -11,14 +11,130 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-10-06 15:50 section **1i** is START HERE for COORD (go.* 1.24.13.4 published, master 7098b8d3f9; TRAIN Q rehearsed green and not yet assembled; the face lift is the train after it; written at 76% of the week's usage, ahead of the 90% save-state). Earlier: 2026-10-02 02:30 go.* 1.24.13.3 PUBLISHED (the record and the tag are on origin: master 5f3a16943f, tag nuget-1.24.13.3; the freeze is lifted; TRAIN L lands next; R has a NEW session prompt in 1e.5). Earlier: 2026-10-01 17:05 RELEASE DAY (master 172d437e66 = the 1.24.13.3 release tip, pre-stage green, freeze on; TRAIN L battery green, lands after the release; see the 1e.0 bullets). Earlier: 2026-10-01 02:40 TRAIN K LANDED (master 75648a022b, 225/225). Earlier: 2026-09-30 03:15 TRAIN J LANDED (master f819887fa3, 223/225). Earlier: 2026-09-28 19:10 TRANSITION (owner order 18:40): section **1e** is START HERE for R, C1, C2, P1 and P2, who run the MAILBOX-ONLY protocol (1e.1) with the models in 1e.2; G, the i9 and COORD continue from 1d.00 and the ledger. Earlier: 2026-09-27 17:09 FLEET SHUT DOWN (owner order; credits reset 2026-09-28 16:00 Central; the remaining credit is held for emergencies). FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
+> **Status of this revision:** 2026-10-06 22:50 section **1j** is START HERE for COORD (the session roll to the fleet's shared account, direct messaging back, the first task a comms test with the P threads' coordinator; TRAIN Q's union 13c0800c21 is in its battery, a fixup-2 follows for one finding; no release after Q by the owner's ruling). Earlier: 2026-10-06 15:50 section **1i** was START HERE for COORD (go.* 1.24.13.4 published, master 7098b8d3f9; TRAIN Q rehearsed green and not yet assembled; the face lift is the train after it; written at 76% of the week's usage, ahead of the 90% save-state). Earlier: 2026-10-02 02:30 go.* 1.24.13.3 PUBLISHED (the record and the tag are on origin: master 5f3a16943f, tag nuget-1.24.13.3; the freeze is lifted; TRAIN L lands next; R has a NEW session prompt in 1e.5). Earlier: 2026-10-01 17:05 RELEASE DAY (master 172d437e66 = the 1.24.13.3 release tip, pre-stage green, freeze on; TRAIN L battery green, lands after the release; see the 1e.0 bullets). Earlier: 2026-10-01 02:40 TRAIN K LANDED (master 75648a022b, 225/225). Earlier: 2026-09-30 03:15 TRAIN J LANDED (master f819887fa3, 223/225). Earlier: 2026-09-28 19:10 TRANSITION (owner order 18:40): section **1e** is START HERE for R, C1, C2, P1 and P2, who run the MAILBOX-ONLY protocol (1e.1) with the models in 1e.2; G, the i9 and COORD continue from 1d.00 and the ledger. Earlier: 2026-09-27 17:09 FLEET SHUT DOWN (owner order; credits reset 2026-09-28 16:00 Central; the remaining credit is held for emergencies). FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
 
 ---
 
-## 1i. COORD STATE 2026-10-06 15:50 (START HERE for COORD; it supersedes 1g for CURRENT STATE)
+## 1j. COORD ROLLS TO A NEW SESSION 2026-10-06 22:50 (owner order). START HERE for COORD, then read section 1i
+
+Written 22:50 on the i7's clock by the outgoing COORD session. Section 1i below holds TRAIN Q's state (its dated
+paragraphs at the top are the newest); this section holds what changed with the roll and what to do first.
+
+### 1j.0 What changed
+
+- **Owner order, 22:40.** COORD is rolled to a NEW session on the fleet's shared account, the one G, the i9 and the
+  cloud sessions already run on. The outgoing session's context was at 82% and every wake was costly.
+- **Comms.** With COORD on that account, DIRECT session messaging returns (PROTOCOL v4, section 0a.0): COORD
+  messages a lane's session by name, and a desktop lane (G, the i9) answers the same way. A CLOUD session receives a
+  direct message but cannot send one back, so it answers by an inbox file on `claude/mailbox`, as today. The mailbox
+  stays the fallback for every lane, and the LEDGER stays the record: one line per ruling, whatever carried it.
+- **The P threads.** P1 and P2 are threads of a project that has a coordinator session of its own ("P-Threads",
+  Opus 5.5, low effort), built to take commands and run threads. The owner has enabled remote control on it.
+
+### 1j.1 FIRST TASK (owner order): the comms test with P-Threads
+
+Do this before anything else, and report the outcome to the owner in plain words.
+
+1. (a) Find the P-Threads coordinator session (list the sessions you can message) and send it ONE direct message:
+   who you are, and a request for a one-line answer saying whether it can message its threads P1 and P2 and how its
+   answer will reach COORD.
+2. (b) If it answers, send ONE relay test: ask it to pass a single line to P1 and to P2 and to return each thread's
+   one-line reply. Make the line harmless: each thread states the leg it is on. P1 and P2 are in the middle of
+   TRAIN Q's linux legs; the test must not stop or restart a run.
+3. (c) Rule the route from what you measured, write a ledger line, and tell the owner:
+   - both work: P-Threads is the address for P1 and P2. COORD sends one message naming the thread, answers return
+     through it, and P1 and P2 leave the mailbox protocol.
+   - the direct message does not arrive, or no answer returns: P-Threads goes on the mailbox protocol (it reads an
+     inbox on `claude/mailbox` and relays), so P1 and P2 still do not have to.
+
+### 1j.2 Reaching each lane after the roll
+
+| Lane | Kind | COORD to lane | Lane to COORD |
+|:--|:--|:--|:--|
+| G | desktop session | direct message | direct message |
+| i9 | desktop session | direct message | direct message |
+| C1, C2 | cloud sessions | direct message | an inbox file on `claude/mailbox` |
+| P1, P2 | threads under P-Threads | through P-Threads if 1j.1 works, else the mailbox | through P-Threads, else an inbox file |
+| R | standby | a mailbox note in its inbox | an inbox file |
+
+First contact after the test: one short direct message to each of G, the i9, C1 and C2 naming the route, and one
+FLEET post on the mailbox saying the same, so a lane that misses the message still reads it. Keep the inbox watcher
+armed: cloud answers arrive there. Everything else is unchanged: a ledger line per ruling, the identifier census as
+its own command on everything pushed, announce then push for an existing ref, nicknames only.
+
+### 1j.3 State at the roll, and what is next
+
+- **TRAIN Q's battery** runs detached on the i7 at the union `13c0800c21` (run folder
+  `/h/go2cs-tmp-coord/coord-scratch/tQ/run1`): no finding at 22:45, in its GolibTests legs. EXPECT it to end EXIT 6
+  with the MODULE leg red for the ruled finding (1i, FINDING 21:50) and nothing else.
+- **The follow-up for that finding is cut and read by its author:** `claude/i9-tests-host-symbol-check-followup` @
+  `fbcd37f3e9` (merge THAT tip, not `110f646d94`). G's acceptance: the five modules exactly as predicted on a local
+  merge of the union and the follow-up, unicode/utf16 unchanged, `go test` ok. OWED: the i9's review (two questions:
+  is the in-tree lookup unchanged; does the refusal still fire on a missing symbol file). Then 1i's fixup-2 route
+  when the battery ends.
+- **C1's hosted gate for TRAIN Q is GREEN at the union** (release-smoke on four RIDs with D gating, the darwin census
+  344 of 344, the darwin full behavioral 799 and 798 with every slice green, the docs-site build). Its aot-smoke
+  reading is still running and is not a gate.
+- **The i9's shard is read:** 132 of 132, no movers; its two patch digests are in the ledger line of 21:57.
+- **P1 and P2** are running the linux legs. P1's module leg (LM) will be refused by the known finding: one re-read at
+  the fixup-2 tip.
+- **Owner rulings of this evening:** no release after TRAIN Q, everything ships with the face lift (21:24); P1 is
+  unblocked to push.
+- **Seats waiting for the train after Q, at its front:** the i9's Native AOT metadata-token seat (ruled GO, not cut
+  yet); P1's `claude/p1-generic-instantiation-arg` (accepted in substance; COORD owes its windows reading after the
+  battery); G's `claude/g-caller-line-callee` (accepted in substance) and its launch-directory seat (cut locally, its
+  battery running); C1's `claude/c1-aot-smoke-three-rids` and `claude/c1-board-aot-osx`. Then the face lift's
+  chain: A on `claude/c2-facelift-a-recv`; F, E, D, D2 and S on `claude/c2-facelift-record`; B and C's generator
+  sides on `claude/g-plain-gotype-removed` and `claude/g-gotype-arg-comment`. Every number is restated on Q's LANDED
+  head before any re-conversion.
+- **After Q lands:** a docs commit on the landed head (the known-issues entry's windows sentence: the failure is at
+  the first runtime.Caller, a program that never asks for its caller runs; macOS on Intel runs, Apple silicon is not
+  measured; the Limitations page's temporary note), then the name-check fix
+  `claude/coord-census-text-denied` onto master (every active lane's self-test is green).
+- **Not answered yet by COORD (do it in your first round):** G's acceptance post (accepted, pending the i9's
+  review); C1's gate posts (acknowledge the green gate); C2's BOARD row for the function-type string finding (noted,
+  no ruling owed).
+- **The mailbox was read through** `14e9781e41755a9a95cb72c9cd7eab0ca3e72bd1`: that is the watcher's anchor.
+
+```
+LANE: COORD   MODEL: Opus/high   HOST: i7
+BRANCH: claude/coord-trainQ-union 13c0800c21de63182994c74a8d6643f5c5c85b8e yes cut -- TRAIN Q's union, in its battery; a fixup-2 follows
+BRANCH: claude/i9-tests-host-symbol-check-followup fbcd37f3e9fbebf222c04dd095d8dee91fe1a6fe yes cut -- the follow-up for the module refusal; merged at fixup-2
+BRANCH: claude/coord-census-text-denied a8cd22248e9a2f2e423ee71a3222da29aaab8c25 yes cut -- the name-check fix, lands after Q
+NEXT: 1j.1, the comms test with P-Threads
+READ-FIRST: this section; section 1i; the last lines of docs/phase4/LEDGER.md on claude/mailbox
+BLOCKED-ON: none
+```
+
+WAKE: the inbox watcher (`watch-battery-inbox.sh <the 40-char tip last read> inbox`, in the background, re-armed as
+the last tool call of every turn), direct messages from the desktop lanes, and background-task notifications.
+
+### 1j.4 PASTE PROMPT for the new COORD session
+
+```
+You are COORD of the go2cs fleet, on the i7, resuming after a session roll to the fleet's shared account
+(Opus 5.5, high effort). All work is on H:. Before acting, read, in this order:
+  1. docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover, in the worktree /h/go2cs-tmp-coord/hnd (pull it
+     first): section 1j (the roll, the comms change, your first tasks), then section 1i (TRAIN Q, newest paragraph first);
+  2. the last 12 lines of docs/phase4/LEDGER.md on claude/mailbox (clone /h/Projects/go2cs-mailbox), and every post
+     under docs/phase4/inbox/COORD after the tip that 1j.3 names;
+  3. the tail of .claude/coord-scripts/trainL/tL-seats-draft.txt in that worktree, from the line stamped 2026-10-06 18:30.
+FIRST TASK, by owner order: the comms test with the "P-Threads" coordinator session, steps (a), (b), (c) of 1j.1.
+Report its outcome to the owner in plain words before anything else. Then tell each lane how you now reach it
+(1j.2), answer what 1j.3 lists as not yet answered, and carry TRAIN Q on: read the battery when it ends, merge the
+follow-up, cut fixup-2, re-read, land by the trainQ checklist.
+How you work: direct messages to lanes, a ledger line for every ruling (ledger-append.sh), fleet-msg.sh for mailbox
+posts, the identifier census as its own command on everything pushed, announce then push for an existing ref, signed
+commits, never a force-push. On every pushed surface machines go by nickname and the owner is "the owner". Re-arm
+the inbox watcher as the last tool call of every turn and end every reply on text. Read the week's usage at each
+wake and run the save-state skill as it nears 90 percent. Rulings on design are yours; anything that changes how
+converted code runs like Go or reads like Go goes to the owner first.
+```
+
+## 1i. COORD STATE 2026-10-06 15:50 (it supersedes 1g for CURRENT STATE; section 1j above is read first)
 
 Written 15:50 on the i7's clock, at 76% of the week's usage (owner order of this hour: run the save-state skill as
 usage nears 90%, so that the COORD session can be rolled to another session). Every ref below was read at the remote.
