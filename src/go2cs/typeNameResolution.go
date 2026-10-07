@@ -521,6 +521,19 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 				aliasQualifier = fileAlias
 			}
 
+			// Two same-named imports both publish this type's key (see ambiguousImportedTypeAliases),
+			// so no `global using` names it and the short Go name would be the qualified fallback --
+			// which must spell the TARGET's member, collision rename included: log/slog's `Level` is
+			// `ΔLevel` (it collides with its own method), so `slog.Level` would be CS0426. The
+			// qualifier is already this file's own for the package, so the member alone is swapped.
+			if named.TypeArgs().Len() == 0 {
+				key := getSanitizedIdentifier(pkg.Name()) + "." + getCoreSanitizedIdentifier(obj.Name())
+
+				if target, ok := ambiguousImportedTypeAliasTarget(key, pkg); ok {
+					return aliasQualifier + "." + target[strings.LastIndex(target, ".")+1:]
+				}
+			}
+
 			pkgPrefix = aliasQualifier + "."
 			plainPkgPrefix = pkg.Name() + "."
 			foreignPathPrefix = pkg.Path() + "."

@@ -65,6 +65,8 @@ wants the same answer. (Guarded by `mixedKeyedComposite_test.go`'s
 `TestRootedUsingAliasKeepsGlobalQualifier`, which asserts the rooted *and* unrooted renders both
 leave such a name alone.)
 
+**Two imported packages that share a name keep their own aliases, and a reference names its own package's target.** `a/foo` and `b/foo` are both `package foo`, so an alias name both publish (`Alias`, or the rename a method-colliding type is published under, `Kind` for `ΔKind`) has no single `global using`: neither is declared, and each reference resolves through the package go/types says it belongs to. Where a reference can only be written with the file's import qualifier, it spells the TARGET's member, the collision rename included, in every position: a declaration, a func type's parameter and result, a struct field of func type, and a conversion. logrus' `hooks/slog` test imports `log/slog` and logrus' own `hooks/slog`, both `package slog`, whose `Level` types are both renamed `ΔLevel`, so a field `mapper func(logrus.Level) slog.Level` emits `Func<logrus.Level, slog.ΔLevel>`; spelling the Go name, `slog.Level`, names no type (CS0426). (Guarded by `TestSameNamedImportsKeepTheirOwnTypeAliases` and the `SameNameImportAlias` behavioral test.)
+
 ## Generic Type Aliases
 
 A Go 1.24 generic alias (`type A[T any] = Box[T]`) cannot be a C# `using` alias: a `using` directive cannot declare type parameters (`using A<T> = Box<T>;` is CS1002), and a closed alias cannot take type arguments at a use (CS0307). A Go alias *is* its target (identity, method set, assignability), so the converter renders the target wherever the alias is named:
