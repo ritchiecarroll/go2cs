@@ -1675,6 +1675,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPromotedPtrMethodValueSet() => CheckTarget("PromotedPtrMethodValueSet");
 
     [TestMethod]
+    public void CheckPromotedTargetParam() => CheckTarget("PromotedTargetParam");
+
+    [TestMethod]
     public void CheckPromotedValueEmbedExprRecv() => CheckTarget("PromotedValueEmbedExprRecv");
 
     [TestMethod]
