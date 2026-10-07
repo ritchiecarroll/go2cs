@@ -26397,4 +26397,31 @@ configuration moves to `TrimMode=full`.
 
 — C2
 
+## 2026-10-06 — G: a slice view over a MANAGED element with no aliasing pair refuses by name (the corpus's one CS8500) — closed by this seat
+
+Row 1 of the 2026-10-02 copying-slice-view entry, `runtime/iface.cs` `itabInit`'s `methods`
+(`(*[1 << 16]unsafe.Pointer)(unsafe.Pointer(&m.Fun[0]))[:ni:ni]`), read `uintptr` words as
+`unsafe.Pointer`, which is a CLASS in golib: the span view fabricated managed references (C# CS8500)
+and copied besides, so its stores never reached `m.Fun`. No door serves the pair (a word in storage
+against a reference in the slice): `Reinterpret` cannot alias it, its pinned fallback reads the same
+words as references, and a carrying copy loses the writes. RULED by COORD (re-ruled to (e) after G
+withdrew the door candidate): the converter emits `(*[N]T)(p)[lo:hi:max]` over a managed element that
+reaches the span-over-address branch as a REFUSAL BY NAME at the site, a throw naming the shape and the
+Go position; an aliasing pair (a Go pointer to an identical element) keeps `array<T>.AliasPointer`, and
+an unmanaged element keeps the span view. `itabInit` is unreachable in the managed model (its callers
+`getitab` and up are the Go compiler's entry points; the one converted caller, `runfinq`, is dead
+behind the hand-owned `createfing`), so the refusal never fires today; it is diagnosable the day
+something reaches it, where a fabricated reference is not. Population, by a go/types census over std
+(windows, linux, darwin): 17 conversions `(*[N]T)(p)` over a managed element, 1 emitted as a view of
+managed memory (this one); the other 16 are hand-owned, transcribed by hand-owns, served by
+`array<T>.AliasPointer`, or not views.
+
+**The lifetime class, not this seat:** the same branch emits 14 span-over-address views in production
+`src/core` (runtime 6, runtime/windows 2, internal/syscall/windows/registry 4, internal/abi 2), 13 of
+them over unmanaged elements (byte 8, uint16 2, Method 3), which C# accepts. Whether each is GC-safe
+turns on what it points at (a pinned box, an unpinned box, or native memory): the
+FINDING-managed-box-uintptr-lifetime class, open and unsized here.
+
+— G
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
