@@ -499,8 +499,10 @@ public class TestingRuntimeTests
         // B6 guard (strings/bytes blocker map): capability-excluded benchmark bodies still
         // COMPILE — exclusion gates the run registry, not emission — so every B member the
         // strings/bytes suites reference must exist on the compile-only shim, through both
-        // receiver shapes converted code binds (the ж<B> box and the ref-local value), and
-        // stay a safe non-throwing no-op.
+        // receiver shapes converted code binds (the ж<B> box and the ref-local value). The timer and
+        // reporting members are no-ops; the failure and skip members are Go's ZERO B (measured on
+        // go1.24.13): Errorf sets Failed, Skip sets Skipped, and Fatal, Fatalf and Skip end the
+        // calling goroutine (runtime.Goexit).
         ж<testing_package.B> benchmark = new StandardBox<testing_package.B>(new testing_package.B());
 
         benchmark.ReportAllocs();
@@ -509,9 +511,11 @@ public class TestingRuntimeTests
         benchmark.StopTimer();
         benchmark.StartTimer();
         benchmark.Errorf("errorf %d", 1);
-        benchmark.Fatal("fatal");
-        benchmark.Fatalf("fatalf %d", 2);
-        benchmark.Skip("skip");
+        Assert.IsTrue(benchmark.Failed());
+        Assert.ThrowsException<GoexitException>(() => benchmark.Fatal("fatal"));
+        Assert.ThrowsException<GoexitException>(() => benchmark.Fatalf("fatalf %d", 2));
+        Assert.ThrowsException<GoexitException>(() => benchmark.Skip("skip"));
+        Assert.IsTrue(benchmark.Skipped());
         Assert.IsTrue(benchmark.Run("sub", _ => { }));
 
         ref testing_package.B direct = ref benchmark.Value;
@@ -521,9 +525,9 @@ public class TestingRuntimeTests
         direct.StopTimer();
         direct.StartTimer();
         direct.Errorf("errorf");
-        direct.Fatal("fatal");
-        direct.Fatalf("fatalf");
-        direct.Skip("skip");
+        ExpectGoexit(ref direct, (ref testing_package.B b) => b.Fatal("fatal"));
+        ExpectGoexit(ref direct, (ref testing_package.B b) => b.Fatalf("fatalf"));
+        ExpectGoexit(ref direct, (ref testing_package.B b) => b.Skip("skip"));
         Assert.AreEqual((nint)0, direct.N);
 
         // strings TestIndexRune branches on `testing.CoverMode() == ""` — the shim must report
@@ -537,34 +541,38 @@ public class TestingRuntimeTests
         // Fuzz declarations are disclosed-unsupported exactly as benchmarks are, but their bodies
         // still COMPILE — math/big's `func FuzzExpMont(f *testing.F)` failed the whole package
         // build with CS0426 before F existed. Every member must be present on both receiver shapes
-        // converted code binds, and stay a safe non-throwing no-op.
+        // converted code binds. The rest are no-ops; the failure and skip members are Go's ZERO F
+        // (measured on go1.24.13): Error, Errorf and Fail set Failed, the Skip family sets Skipped,
+        // and Fatal, Fatalf, FailNow and the Skip family end the calling goroutine (runtime.Goexit).
         ж<testing_package.F> fuzz = new StandardBox<testing_package.F>(new testing_package.F());
 
         fuzz.Add(1, "seed");
-        fuzz.Error("error");
-        fuzz.Errorf("errorf %d", 1);
         fuzz.Log("log");
         fuzz.Logf("logf %d", 2);
-        fuzz.Fatal("fatal");
-        fuzz.Fatalf("fatalf %d", 3);
-        fuzz.Skip("skip");
-        fuzz.Skipf("skipf %d", 4);
-        fuzz.Fail();
-        fuzz.FailNow();
-        fuzz.SkipNow();
         fuzz.Helper();
         fuzz.Cleanup(() => { });
         fuzz.Setenv("K", "V");
         Assert.IsFalse(fuzz.Failed());
         Assert.IsFalse(fuzz.Skipped());
+        fuzz.Error("error");
+        fuzz.Errorf("errorf %d", 1);
+        fuzz.Fail();
+        Assert.IsTrue(fuzz.Failed());
+        Assert.ThrowsException<GoexitException>(() => fuzz.Fatal("fatal"));
+        Assert.ThrowsException<GoexitException>(() => fuzz.Fatalf("fatalf %d", 3));
+        Assert.ThrowsException<GoexitException>(() => fuzz.FailNow());
+        Assert.ThrowsException<GoexitException>(() => fuzz.Skip("skip"));
+        Assert.ThrowsException<GoexitException>(() => fuzz.Skipf("skipf %d", 4));
+        Assert.ThrowsException<GoexitException>(() => fuzz.SkipNow());
+        Assert.IsTrue(fuzz.Skipped());
         Assert.IsTrue(fuzz.Name() == "");
         Assert.IsTrue(fuzz.TempDir() == "");
 
         ref testing_package.F direct = ref fuzz.Value;
         direct.Add(2);
         direct.Errorf("errorf");
-        direct.Fatal("fatal");
-        direct.Skip("skip");
+        ExpectGoexit(ref direct, (ref testing_package.F f) => f.Fatal("fatal"));
+        ExpectGoexit(ref direct, (ref testing_package.F f) => f.Skip("skip"));
         direct.Helper();
 
         // Fuzz takes a System.Delegate because a Go fuzz target's signature is arbitrary — the
@@ -840,4 +848,22 @@ public class TestingRuntimeTests
     }
 
     private delegate void ActionRef(ref testing_package.T test);
+
+    private delegate void RefAction<TValue>(ref TValue value);
+
+    // A terminating member called on a ref-local receiver (which a lambda cannot capture): it must end
+    // the calling goroutine.
+    private static void ExpectGoexit<TValue>(ref TValue value, RefAction<TValue> action)
+    {
+        try
+        {
+            action(ref value);
+        }
+        catch (GoexitException)
+        {
+            return;
+        }
+
+        Assert.Fail("expected runtime.Goexit");
+    }
 }

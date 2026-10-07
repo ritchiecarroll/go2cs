@@ -43,6 +43,14 @@ public static partial class testing_package
         // these hand-owned structs have no generator behind them, so each declares it by hand.
         public T(NilType _) { }
 
+        // A DETACHED T -- `new(testing.T)`, `&testing.T{}`, never handed to a test -- is a legal Go
+        // value: testify's assert tests pass one to every assertion and read Failed afterwards. Go's
+        // zero T, measured on go1.24.13 inside `go test`: Helper, Log, Name and Cleanup do nothing;
+        // Error and Fail set failed; FailNow and Fatal set failed and runtime.Goexit the CALLING
+        // goroutine; Skip and SkipNow set skipped and Goexit. These two flags are that state.
+        internal bool DetachedFailed;
+        internal bool DetachedSkipped;
+
         internal readonly TestExecution RequiredExecution =>
             Execution ?? throw new InvalidOperationException("testing.T is not attached to a running test");
     }
@@ -107,9 +115,10 @@ public static partial class testing_package
     /// in the manifest (execution is deferred to Phase 4D) and are never registered with the host,
     /// but their converted BODIES still compile into the test assembly, so the members they
     /// reference must exist. Go's B embeds `common`, so that surface is Run, the timer/allocation
-    /// reporters, AND the whole TB member set below; every one stays a safe non-throwing no-op
-    /// answering the "nothing went wrong" value — a disclosed declaration is never invoked, so
-    /// there is no run to time, fail, skip, name or clean up. N is the exception: it is set by
+    /// reporters, AND the whole TB member set below. A disclosed declaration is never invoked, so
+    /// there is no run to time, name or clean up, and those members are no-ops. The failure and skip
+    /// members behave as Go's zero (detached) B does: Error and Fail set Failed, Skip sets Skipped,
+    /// and FailNow, Fatal and Skip end the calling goroutine (runtime.Goexit). N is the exception: it is set by
     /// <see cref="Benchmark"/>, which DOES drive a
     /// closure in-process (a converted Test can legitimately call testing.Benchmark itself —
     /// unicode's TestCalibrate does), so a b.N loop inside such a closure iterates the measured
@@ -126,6 +135,11 @@ public static partial class testing_package
         internal nint LoopIteration;
 
         public B(NilType _) { }
+
+        // A B is never run here, so every B is a detached one; Go's zero B (measured on go1.24.13)
+        // records Error/Fail in Failed and Goexits on FailNow/Fatal/SkipNow, like a zero T.
+        internal bool DetachedFailed;
+        internal bool DetachedSkipped;
     }
 
     /// <summary>
@@ -229,7 +243,8 @@ public static partial class testing_package
     /// and never registered with the host, but their converted BODIES still compile into the test
     /// assembly, so the members they reference must exist. There is no fuzzing engine, so Fuzz
     /// never invokes the target and Add never records a seed: with no run to perform there is
-    /// nothing to time, seed or fail, and every member is a safe non-throwing no-op. The member
+    /// nothing to time or seed, and those members are no-ops; the failure and skip members behave as
+    /// Go's zero (detached) F does, exactly as B's do. The member
     /// set is Go 1.23's full public surface for *testing.F — the TB members it inherits from the
     /// embedded common, plus its own Add and Fuzz — so the compiled shape never drifts as more
     /// fuzz targets convert (the same rule TB above is declared under).
@@ -237,18 +252,32 @@ public static partial class testing_package
     public struct F
     {
         public F(NilType _) { }
+
+        // As for B: every F is detached, and Go's zero F behaves like a zero T.
+        internal bool DetachedFailed;
+        internal bool DetachedSkipped;
     }
 
     [GoRecv] public static void Error(this ref T t, params ꓸꓸꓸany args)
     {
-        TestExecution execution = t.RequiredExecution;
+        if (t.Execution is not { } execution)
+        {
+            t.DetachedFailed = true;
+            return;
+        }
+
         execution.Log(Sprint(args));
         execution.Fail();
     }
 
     [GoRecv] public static void Errorf(this ref T t, @string format, params ꓸꓸꓸany args)
     {
-        TestExecution execution = t.RequiredExecution;
+        if (t.Execution is not { } execution)
+        {
+            t.DetachedFailed = true;
+            return;
+        }
+
         execution.Log(Sprintf(format, args));
         execution.Fail();
     }
@@ -291,59 +320,111 @@ public static partial class testing_package
         return (time_package.Unix(seconds, remainder * 100L), true);
     }
 
-    [GoRecv] public static void Fail(this ref T t) => t.RequiredExecution.Fail();
+    [GoRecv] public static void Fail(this ref T t)
+    {
+        if (t.Execution is not { } execution)
+        {
+            t.DetachedFailed = true;
+            return;
+        }
 
-    [GoRecv] public static void FailNow(this ref T t) => t.RequiredExecution.FailNow();
+        execution.Fail();
+    }
 
-    [GoRecv] public static bool Failed(this ref T t) => t.RequiredExecution.Failed;
+    [GoRecv] public static void FailNow(this ref T t)
+    {
+        if (t.Execution is not { } execution)
+        {
+            // Go: c.Fail(); runtime.Goexit() -- on the calling goroutine, detached or not.
+            t.DetachedFailed = true;
+            throw new GoexitException();
+        }
+
+        execution.FailNow();
+    }
+
+    [GoRecv] public static bool Failed(this ref T t) =>
+        t.Execution is { } execution ? execution.Failed : t.DetachedFailed;
 
     [GoRecv] public static void Fatal(this ref T t, params ꓸꓸꓸany args)
     {
-        TestExecution execution = t.RequiredExecution;
+        if (t.Execution is not { } execution)
+        {
+            t.DetachedFailed = true;
+            throw new GoexitException();
+        }
+
         execution.Log(Sprint(args));
         execution.FailNow();
     }
 
     [GoRecv] public static void Fatalf(this ref T t, @string format, params ꓸꓸꓸany args)
     {
-        TestExecution execution = t.RequiredExecution;
+        if (t.Execution is not { } execution)
+        {
+            t.DetachedFailed = true;
+            throw new GoexitException();
+        }
+
         execution.Log(Sprintf(format, args));
         execution.FailNow();
     }
 
     [GoRecv] public static void Log(this ref T t, params ꓸꓸꓸany args) =>
-        t.RequiredExecution.Log(Sprint(args));
+        t.Execution?.Log(Sprint(args));
 
     [GoRecv] public static void Logf(this ref T t, @string format, params ꓸꓸꓸany args) =>
-        t.RequiredExecution.Log(Sprintf(format, args));
+        t.Execution?.Log(Sprintf(format, args));
 
-    [GoRecv] public static void Helper(this ref T t) => t.RequiredExecution.Helper();
+    [GoRecv] public static void Helper(this ref T t) => t.Execution?.Helper();
 
-    [GoRecv] public static @string Name(this ref T t) => t.RequiredExecution.Name;
+    [GoRecv] public static @string Name(this ref T t) =>
+        t.Execution is { } execution ? execution.Name : (@string)"";
 
     [GoRecv] public static void Cleanup(this ref T t, Action cleanup) =>
-        t.RequiredExecution.Cleanup(cleanup);
+        t.Execution?.Cleanup(cleanup);
 
     [GoRecv] public static bool Run(this ref T t, @string name, Action<ж<T>> test) =>
         t.RequiredExecution.Run(name.ToString(), test);
 
     [GoRecv] public static void Skip(this ref T t, params ꓸꓸꓸany args)
     {
-        TestExecution execution = t.RequiredExecution;
+        if (t.Execution is not { } execution)
+        {
+            t.DetachedSkipped = true;
+            throw new GoexitException();
+        }
+
         execution.Log(Sprint(args));
         execution.SkipNow();
     }
 
     [GoRecv] public static void Skipf(this ref T t, @string format, params ꓸꓸꓸany args)
     {
-        TestExecution execution = t.RequiredExecution;
+        if (t.Execution is not { } execution)
+        {
+            t.DetachedSkipped = true;
+            throw new GoexitException();
+        }
+
         execution.Log(Sprintf(format, args));
         execution.SkipNow();
     }
 
-    [GoRecv] public static void SkipNow(this ref T t) => t.RequiredExecution.SkipNow();
+    [GoRecv] public static void SkipNow(this ref T t)
+    {
+        if (t.Execution is not { } execution)
+        {
+            // Go: c.skipped = true; runtime.Goexit() -- on the calling goroutine.
+            t.DetachedSkipped = true;
+            throw new GoexitException();
+        }
 
-    [GoRecv] public static bool Skipped(this ref T t) => t.RequiredExecution.Skipped;
+        execution.SkipNow();
+    }
+
+    [GoRecv] public static bool Skipped(this ref T t) =>
+        t.Execution is { } execution ? execution.Skipped : t.DetachedSkipped;
 
     [GoRecv] public static @string TempDir(this ref T t) => t.RequiredExecution.TempDir();
 
@@ -463,16 +544,20 @@ public static partial class testing_package
 
     // Go's testing.B embeds `common`, so a benchmark body may call ANY of the TB members — not
     // just the timer/allocation reporters above. The whole embedded surface is declared here for
-    // the same compile-only reason (internal/zstd's benchmarks call Cleanup/Error/Log/…), and
-    // every member is a safe non-throwing no-op answering the "nothing went wrong" value: a
-    // benchmark is never registered or run, so there is nothing to fail, skip, name or clean up.
+    // the same compile-only reason (internal/zstd's benchmarks call Cleanup/Error/Log/…). A
+    // benchmark is never registered or run, so there is nothing to name or clean up, and those
+    // members are no-ops; the failure and skip members keep Go's zero-B state (see B).
     [GoRecv] public static void Cleanup(this ref B b, Action cleanup) { }
 
-    [GoRecv] public static void Fail(this ref B b) { }
+    [GoRecv] public static void Fail(this ref B b) => b.DetachedFailed = true;
 
-    [GoRecv] public static void FailNow(this ref B b) { }
+    [GoRecv] public static void FailNow(this ref B b)
+    {
+        b.DetachedFailed = true;
+        throw new GoexitException();
+    }
 
-    [GoRecv] public static bool Failed(this ref B b) => false;
+    [GoRecv] public static bool Failed(this ref B b) => b.DetachedFailed;
 
     [GoRecv] public static void Helper(this ref B b) { }
 
@@ -480,9 +565,13 @@ public static partial class testing_package
 
     [GoRecv] public static void Setenv(this ref B b, @string key, @string value) { }
 
-    [GoRecv] public static void SkipNow(this ref B b) { }
+    [GoRecv] public static void SkipNow(this ref B b)
+    {
+        b.DetachedSkipped = true;
+        throw new GoexitException();
+    }
 
-    [GoRecv] public static bool Skipped(this ref B b) => false;
+    [GoRecv] public static bool Skipped(this ref B b) => b.DetachedSkipped;
 
     [GoRecv] public static @string TempDir(this ref B b) => ""u8;
 
@@ -539,22 +628,38 @@ public static partial class testing_package
 
     // Params-taking B members need the same explicit ж<B> overloads as T's above (params
     // collections are ref-like Spans the RecvGenerator does not synthesize overloads for).
-    // Failure reporting is a no-op: benchmark bodies never execute, so there is no run to fail.
-    [GoRecv] public static void Error(this ref B b, params ꓸꓸꓸany args) { }
+    // Failure reporting keeps Go's zero-B state: Error sets Failed, Fatal also ends the goroutine.
+    [GoRecv] public static void Error(this ref B b, params ꓸꓸꓸany args) => b.DetachedFailed = true;
 
-    [GoRecv] public static void Errorf(this ref B b, @string format, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Errorf(this ref B b, @string format, params ꓸꓸꓸany args) => b.DetachedFailed = true;
 
-    [GoRecv] public static void Fatal(this ref B b, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Fatal(this ref B b, params ꓸꓸꓸany args)
+    {
+        b.DetachedFailed = true;
+        throw new GoexitException();
+    }
 
-    [GoRecv] public static void Fatalf(this ref B b, @string format, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Fatalf(this ref B b, @string format, params ꓸꓸꓸany args)
+    {
+        b.DetachedFailed = true;
+        throw new GoexitException();
+    }
 
     [GoRecv] public static void Log(this ref B b, params ꓸꓸꓸany args) { }
 
     [GoRecv] public static void Logf(this ref B b, @string format, params ꓸꓸꓸany args) { }
 
-    [GoRecv] public static void Skip(this ref B b, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Skip(this ref B b, params ꓸꓸꓸany args)
+    {
+        b.DetachedSkipped = true;
+        throw new GoexitException();
+    }
 
-    [GoRecv] public static void Skipf(this ref B b, @string format, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Skipf(this ref B b, @string format, params ꓸꓸꓸany args)
+    {
+        b.DetachedSkipped = true;
+        throw new GoexitException();
+    }
 
     public static void Error(this ж<B> b, params ꓸꓸꓸany args) => Error(ref b.Value, args);
 
@@ -580,19 +685,27 @@ public static partial class testing_package
     // fuzzing engine to consume either.
     [GoRecv] public static void Fuzz(this ref F f, Delegate target) { }
 
-    [GoRecv] public static void Fail(this ref F f) { }
+    [GoRecv] public static void Fail(this ref F f) => f.DetachedFailed = true;
 
-    [GoRecv] public static void FailNow(this ref F f) { }
+    [GoRecv] public static void FailNow(this ref F f)
+    {
+        f.DetachedFailed = true;
+        throw new GoexitException();
+    }
 
-    [GoRecv] public static bool Failed(this ref F f) => false;
+    [GoRecv] public static bool Failed(this ref F f) => f.DetachedFailed;
 
     [GoRecv] public static void Helper(this ref F f) { }
 
     [GoRecv] public static @string Name(this ref F f) => ""u8;
 
-    [GoRecv] public static void SkipNow(this ref F f) { }
+    [GoRecv] public static void SkipNow(this ref F f)
+    {
+        f.DetachedSkipped = true;
+        throw new GoexitException();
+    }
 
-    [GoRecv] public static bool Skipped(this ref F f) => false;
+    [GoRecv] public static bool Skipped(this ref F f) => f.DetachedSkipped;
 
     [GoRecv] public static void Cleanup(this ref F f, Action cleanup) { }
 
@@ -613,21 +726,37 @@ public static partial class testing_package
     // collections are ref-like Spans the RecvGenerator does not synthesize overloads for).
     [GoRecv] public static void Add(this ref F f, params ꓸꓸꓸany args) { }
 
-    [GoRecv] public static void Error(this ref F f, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Error(this ref F f, params ꓸꓸꓸany args) => f.DetachedFailed = true;
 
-    [GoRecv] public static void Errorf(this ref F f, @string format, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Errorf(this ref F f, @string format, params ꓸꓸꓸany args) => f.DetachedFailed = true;
 
-    [GoRecv] public static void Fatal(this ref F f, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Fatal(this ref F f, params ꓸꓸꓸany args)
+    {
+        f.DetachedFailed = true;
+        throw new GoexitException();
+    }
 
-    [GoRecv] public static void Fatalf(this ref F f, @string format, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Fatalf(this ref F f, @string format, params ꓸꓸꓸany args)
+    {
+        f.DetachedFailed = true;
+        throw new GoexitException();
+    }
 
     [GoRecv] public static void Log(this ref F f, params ꓸꓸꓸany args) { }
 
     [GoRecv] public static void Logf(this ref F f, @string format, params ꓸꓸꓸany args) { }
 
-    [GoRecv] public static void Skip(this ref F f, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Skip(this ref F f, params ꓸꓸꓸany args)
+    {
+        f.DetachedSkipped = true;
+        throw new GoexitException();
+    }
 
-    [GoRecv] public static void Skipf(this ref F f, @string format, params ꓸꓸꓸany args) { }
+    [GoRecv] public static void Skipf(this ref F f, @string format, params ꓸꓸꓸany args)
+    {
+        f.DetachedSkipped = true;
+        throw new GoexitException();
+    }
 
     public static void Add(this ж<F> f, params ꓸꓸꓸany args) => Add(ref f.Value, args);
 
