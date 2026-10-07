@@ -919,6 +919,7 @@
     <Project Path="tests/Behavioral/SelectSendTupleSpread/SelectSendTupleSpread.csproj" />
     <Project Path="tests/Behavioral/SelectSingleFire/SelectSingleFire.csproj" />
     <Project Path="tests/Behavioral/SelectStatement/SelectStatement.csproj" />
+    <Project Path="tests/Behavioral/SelfContainingMapHolder/SelfContainingMapHolder.csproj" />
     <Project Path="tests/Behavioral/SetFinalizerBridge/SetFinalizerBridge.csproj" />
     <Project Path="tests/Behavioral/ShadowedStdlibImportAlias/ShadowedStdlibImportAlias.csproj" />
     <Project Path="tests/Behavioral/ShadowedStdlibImportAlias/errors/ShadowedStdlibImportAlias.errors.csproj" />

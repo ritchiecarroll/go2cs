@@ -1823,6 +1823,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSelectSingleFire() => CheckTarget("SelectSingleFire");
 
     [TestMethod]
+    public void CheckSelfContainingMapHolder() => CheckTarget("SelfContainingMapHolder");
+
+    [TestMethod]
     public void CheckSendtoSeam() => CheckTarget("SendtoSeam");
 
     [TestMethod]

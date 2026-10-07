@@ -1888,6 +1888,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckSelectStatement() => CheckTarget("SelectStatement");
 
     [TestMethod]
+    public void CheckSelfContainingMapHolder() => CheckTarget("SelfContainingMapHolder");
+
+    [TestMethod]
     public void CheckSendtoSeam() => CheckTarget("SendtoSeam");
 
     [TestMethod]

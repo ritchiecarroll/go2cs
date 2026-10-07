@@ -11,20 +11,31 @@ namespace go2cs.Templates.InheritedType;
 internal static class IMapTypeTemplate
 {
     // constructorName is structName without a generic type's parameters (a C# constructor never carries them).
-    public static string Generate(string structName, string constructorName, string keyTypeName, string valueTypeName) =>
+    //
+    // mapValue is the expression that reads the wrapper's map, and storeMap(made) the value the
+    // capacity constructor stores into m_value. Both default to the inline field. A self-containing
+    // map wrapper (InheritedTypeTemplate.HoldsMapInHolder) holds its map in a reference holder, reads it
+    // through `Value` and stores a new holder; every other wrapper's emission is unchanged. The
+    // indexer's setter writes through a LOCAL when mapValue is not the field: `Value[key] = v` assigns
+    // into a property's return value (CS1612), while the copy shares the map's storage like the field.
+    public static string Generate(string structName, string constructorName, string keyTypeName, string valueTypeName, string mapValue = "m_value", Func<string, string>? storeMap = null) =>
+        GenerateBody(structName, constructorName, keyTypeName, valueTypeName, mapValue, (storeMap ?? (made => made))($"new map<{keyTypeName}, {valueTypeName}>(size)"),
+            mapValue == "m_value" ? "set => m_value[key] = value;" : $"set {{ map<{keyTypeName}, {valueTypeName}> target = {mapValue}; target[key] = value; }}");
+
+    private static string GenerateBody(string structName, string constructorName, string keyTypeName, string valueTypeName, string mapValue, string sizedMap, string indexerSetter) =>
         $$"""
         
-                public nint Length => ((IMap)m_value).Length;
+                public nint Length => ((IMap){{mapValue}}).Length;
                 
-                public bool IsNil => ((IMap)m_value).IsNil;
+                public bool IsNil => ((IMap){{mapValue}}).IsNil;
                 
                 /// <summary>ISupportMake factory — a made named map wraps a made concrete map.</summary>
                 public static {{structName}} Make(nint p1, nint p2) => new {{structName}}(map<{{keyTypeName}}, {{valueTypeName}}>.Make(p1, p2));
 
                 /// <summary>Capacity form — `make(NamedMap, n)` emits `new NamedMap(n)` (socktest's Sockets).</summary>
-                public {{constructorName}}(nint size) => m_value = new map<{{keyTypeName}}, {{valueTypeName}}>(size);
+                public {{constructorName}}(nint size) => m_value = {{sizedMap}};
 
-                public int Count => m_value.Count;
+                public int Count => {{mapValue}}.Count;
                 
                 /// <summary>
                 /// READONLY, and that is what makes `f()[k] = v` legal — Go's own rule for a named
@@ -40,43 +51,43 @@ internal static class IMapTypeTemplate
                 /// </summary>
                 public readonly {{valueTypeName}} this[{{keyTypeName}} key]
                 {
-                    get => m_value[key];
-                    set => m_value[key] = value;
+                    get => {{mapValue}}[key];
+                    {{indexerSetter}}
                 }
                 
-                public ({{valueTypeName}}, bool) this[{{keyTypeName}} key, bool _] => m_value[key, _];
+                public ({{valueTypeName}}, bool) this[{{keyTypeName}} key, bool _] => {{mapValue}}[key, _];
 
                 /// <summary>Shaped-zero read — an element type whose Go zero carries run-time shape (a fixed-size array) takes its zero from the call site.</summary>
-                public {{valueTypeName}} this[{{keyTypeName}} key, global::System.Func<{{valueTypeName}}> zero] => m_value[key, zero];
+                public {{valueTypeName}} this[{{keyTypeName}} key, global::System.Func<{{valueTypeName}}> zero] => {{mapValue}}[key, zero];
 
                 /// <summary>Comma-ok shaped-zero read.</summary>
-                public ({{valueTypeName}}, bool) this[{{keyTypeName}} key, global::System.Func<{{valueTypeName}}> zero, bool _] => m_value[key, zero, _];
+                public ({{valueTypeName}}, bool) this[{{keyTypeName}} key, global::System.Func<{{valueTypeName}}> zero, bool _] => {{mapValue}}[key, zero, _];
 
-                public void Add({{keyTypeName}} key, {{valueTypeName}} value) => m_value.Add(key, value);
+                public void Add({{keyTypeName}} key, {{valueTypeName}} value) => {{mapValue}}.Add(key, value);
                 
-                public bool Remove({{keyTypeName}} key) => m_value.Remove(key);
+                public bool Remove({{keyTypeName}} key) => {{mapValue}}.Remove(key);
                 
-                public void Clear() => m_value.Clear();
+                public void Clear() => {{mapValue}}.Clear();
                 
-                public bool TryGetValue({{keyTypeName}} key, out {{valueTypeName}} value) => m_value.TryGetValue(key, out value);
+                public bool TryGetValue({{keyTypeName}} key, out {{valueTypeName}} value) => {{mapValue}}.TryGetValue(key, out value);
                 
-                public bool ContainsKey({{keyTypeName}} key) => m_value.ContainsKey(key);
+                public bool ContainsKey({{keyTypeName}} key) => {{mapValue}}.ContainsKey(key);
                 
-                global::System.Collections.Generic.ICollection<{{keyTypeName}}> global::System.Collections.Generic.IDictionary<{{keyTypeName}}, {{valueTypeName}}>.Keys => ((global::System.Collections.Generic.IDictionary<{{keyTypeName}}, {{valueTypeName}}>)m_value).Keys;
+                global::System.Collections.Generic.ICollection<{{keyTypeName}}> global::System.Collections.Generic.IDictionary<{{keyTypeName}}, {{valueTypeName}}>.Keys => ((global::System.Collections.Generic.IDictionary<{{keyTypeName}}, {{valueTypeName}}>){{mapValue}}).Keys;
 
-                global::System.Collections.Generic.ICollection<{{valueTypeName}}> global::System.Collections.Generic.IDictionary<{{keyTypeName}}, {{valueTypeName}}>.Values => ((global::System.Collections.Generic.IDictionary<{{keyTypeName}}, {{valueTypeName}}>)m_value).Values;
+                global::System.Collections.Generic.ICollection<{{valueTypeName}}> global::System.Collections.Generic.IDictionary<{{keyTypeName}}, {{valueTypeName}}>.Values => ((global::System.Collections.Generic.IDictionary<{{keyTypeName}}, {{valueTypeName}}>){{mapValue}}).Values;
                 
-                void global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>.Add(global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}> item) => ((global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>)m_value).Add(item);
+                void global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>.Add(global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}> item) => ((global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>){{mapValue}}).Add(item);
                 
-                bool global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>.Contains(global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}> item) => ((global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>)m_value).Contains(item);
+                bool global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>.Contains(global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}> item) => ((global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>){{mapValue}}).Contains(item);
                 
-                void global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>.CopyTo(global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>[] array, int arrayIndex) => ((global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>)m_value).CopyTo(array, arrayIndex);
+                void global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>.CopyTo(global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>[] array, int arrayIndex) => ((global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>){{mapValue}}).CopyTo(array, arrayIndex);
                 
-                bool global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>.Remove(global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}> item) => ((global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>)m_value).Remove(item);
+                bool global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>.Remove(global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}> item) => ((global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>){{mapValue}}).Remove(item);
                 
                 bool global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>.IsReadOnly => false;
                 
-                public global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>> GetEnumerator() => ((global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>)m_value).GetEnumerator();
+                public global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>> GetEnumerator() => ((global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>){{mapValue}}).GetEnumerator();
                 
                 global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
         """;

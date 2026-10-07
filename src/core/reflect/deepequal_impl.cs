@@ -522,6 +522,12 @@ private static (object? data, nint low) sliceData(object? boxed) {
 // reported deeply equal REGARDLESS of their contents (identityRoot was blind the same way, so a
 // named-map cycle was never detected either). The recursion terminates because the nested value is a
 // strictly smaller struct — map<K,V>'s own backing store IS an IDictionary.
+//
+// A SELF-CONTAINING named map (`type M map[int]M`) is the one wrapper that holds its map<K,V> in a
+// StrongBox instead (go2cs-gen's InheritedTypeTemplate.HoldsMapInHolder: .NET cannot load the wrapper
+// with the map inline), so the probe also steps through a holder of an IMap — the step
+// GoReflect.TryUnwrapWrapperValue already takes. Without it both sides resolved to null again and any
+// two such maps compared deeply equal (SelfContainingMapHolder: `DeepEqual(M{1: nil}, M{2: nil})`).
 private static IDictionary? mapBacking(object? boxed) {
     if (boxed is null) {
         return null;
@@ -532,14 +538,22 @@ private static IDictionary? mapBacking(object? boxed) {
             if (typeof(IDictionary).IsAssignableFrom(f.FieldType)) {
                 return f;
             }
-            if (nested is null && typeof(IMap).IsAssignableFrom(f.FieldType)) {
+            if (nested is null && (typeof(IMap).IsAssignableFrom(f.FieldType) || isMapHolder(f.FieldType))) {
                 nested = f;
             }
         }
         return nested;
     });
     object? value = field?.GetValue(boxed);
+    if (value is IStrongBox holder) {
+        value = holder.Value;
+    }
     return value as IDictionary ?? (value is IMap ? mapBacking(value) : null);
+}
+
+private static bool isMapHolder(Type fieldType) {
+    return fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(StrongBox<>) &&
+           typeof(IMap).IsAssignableFrom(fieldType.GetGenericArguments()[0]);
 }
 
 } // end reflect_package
