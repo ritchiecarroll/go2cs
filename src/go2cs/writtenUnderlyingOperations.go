@@ -11,6 +11,7 @@ package main
 import (
 	"go/ast"
 	"go/types"
+	"sync"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -28,6 +29,10 @@ var packageTypeSpecRHS map[types.Object]types.Type
 
 func collectTypeSpecRHS(pkg *packages.Package) {
 	packageTypeSpecRHS = map[types.Object]types.Type{}
+
+	foreignTypeSpecRHSLock.Lock()
+	foreignTypeSpecRHSByPackage = map[*types.Package]map[types.Object]types.Type{}
+	foreignTypeSpecRHSLock.Unlock()
 
 	for _, file := range pkg.Syntax {
 		ast.Inspect(file, func(n ast.Node) bool {
@@ -69,10 +74,18 @@ func writtenRHSIsUnnamedArray(named *types.Named) bool {
 // conversion's shape: the wrapper's implicit operators target its WRITTEN RHS, so
 // `MapFS(fsys)` binds as ONE user-defined conversion and needs no hop, while the
 // shared-underlying hop the two-distinct-defined-types case requires would be the illegal
-// two-operator chain here (shuffledFS -> MapFS -> map, CS0030). Unknown or cross-package
-// types miss and callers keep the pre-existing route.
+// two-operator chain here (shuffledFS -> MapFS -> map, CS0030). A type declared in ANOTHER
+// package is read from that package's loaded syntax (foreignTypeSpecRHS): a conversion OUTSIDE
+// the declaring package -- logrus hooks/slog's external test converting `logrus.Level` to its
+// `type Level logrus.Level` -- needs the same answer its own package gets, or it hops through the
+// number into an operator the wrapper does not declare (CS0030). Unknown types miss and callers
+// keep the pre-existing route.
 func writtenRHSIsNamedType(named *types.Named, base *types.Named) bool {
 	rhs, ok := packageTypeSpecRHS[named.Obj()]
+
+	if !ok {
+		rhs, ok = foreignTypeSpecRHS(named.Obj())
+	}
 
 	if !ok || rhs == nil {
 		return false
@@ -86,8 +99,8 @@ func writtenRHSIsNamedType(named *types.Named, base *types.Named) bool {
 // `type Level logrus.Level` (logrus' hooks/slog), `type Dur time.Duration` — or nil. Such a wrapper
 // keeps the foreign base in its [GoType] (a same-package chain flattens to the basic underlying
 // instead), so its operators convert only from that base: a conversion into it from a constant or a
-// basic value must hop through the base, one user-defined operator per cast. Like
-// writtenRHSIsNamedType it answers only for a type this package declares.
+// basic value must hop through the base, one user-defined operator per cast. It answers only for a
+// type this package declares (writtenRHSIsNamedType also reads another package's declarations).
 func foreignWrittenBase(named *types.Named) *types.Named {
 	rhs, ok := packageTypeSpecRHS[named.Obj()]
 
@@ -102,4 +115,53 @@ func foreignWrittenBase(named *types.Named) *types.Named {
 	}
 
 	return base
+}
+
+var foreignTypeSpecRHSLock sync.Mutex
+
+// foreignTypeSpecRHSByPackage caches, per IMPORTED package, the written RHS of each of its defined
+// types, read from the package's own syntax the loader already holds (importedPackages). Reset with
+// packageTypeSpecRHS each package.
+var foreignTypeSpecRHSByPackage map[*types.Package]map[types.Object]types.Type
+
+// foreignTypeSpecRHS answers the written RHS of a defined type declared in an imported package, or
+// false when the loader holds no syntax for it.
+func foreignTypeSpecRHS(obj types.Object) (types.Type, bool) {
+	pkg := obj.Pkg()
+
+	if pkg == nil {
+		return nil, false
+	}
+
+	foreignTypeSpecRHSLock.Lock()
+	defer foreignTypeSpecRHSLock.Unlock()
+
+	rhsByObject, cached := foreignTypeSpecRHSByPackage[pkg]
+
+	if !cached {
+		rhsByObject = map[types.Object]types.Type{}
+
+		if source := importedPackages[pkg.Path()]; source != nil && source.Types == pkg && source.TypesInfo != nil {
+			for _, file := range source.Syntax {
+				ast.Inspect(file, func(n ast.Node) bool {
+					typeSpec, ok := n.(*ast.TypeSpec)
+
+					if !ok || typeSpec.Assign.IsValid() {
+						return true
+					}
+
+					if defined := source.TypesInfo.Defs[typeSpec.Name]; defined != nil {
+						rhsByObject[defined] = source.TypesInfo.TypeOf(typeSpec.Type)
+					}
+
+					return true
+				})
+			}
+		}
+
+		foreignTypeSpecRHSByPackage[pkg] = rhsByObject
+	}
+
+	rhs, ok := rhsByObject[obj]
+	return rhs, ok
 }
