@@ -334,6 +334,7 @@
     <None Include="$(MSBuildThisFileDirectory)processGroup_test.go" />
     <None Include="$(MSBuildThisFileDirectory)processGroupWindows.go" />
     <None Include="$(MSBuildThisFileDirectory)publishBinlog_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)publishBuildLayout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publishRebundle_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publishTimeout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)profiles\linux-arm.pubxml" />

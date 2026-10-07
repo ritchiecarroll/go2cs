@@ -6913,13 +6913,19 @@ func publishTestHost(outputPath, testProject string, options Options) error {
 	}
 
 	args := withPublishBinlog(publishTestHostArgs(outputPath, testProject, options), binlog)
-	_, err := runCommandWithTimeout(testPublishTimeout(options), outputPath, options, "dotnet", args...)
+	output, err := runCommandWithTimeout(testPublishTimeout(options), outputPath, options, "dotnet", args...)
 
 	if err := settlePublishBinlog(binlog, err); err != nil {
 		return err
 	}
 
-	missing, err := publishedSymbolsMissing(outputPath, testProject, testPublishConfiguration(options))
+	buildOutput, err := publishBuildOutput(output, testProject)
+
+	if err != nil {
+		return err
+	}
+
+	missing, err := publishedSymbolsMissing(buildOutput, outputPath, testProject)
 
 	if err != nil {
 		return err
@@ -6932,54 +6938,50 @@ func publishTestHost(outputPath, testProject string, options Options) error {
 	return nil
 }
 
-// testPublishConfiguration is the configuration publishTestHostArgs publishes with.
-func testPublishConfiguration(options Options) string {
-	if options.testConfig == "Release" {
-		return "Release"
+// publishTargetPathProperty is the property the publish is asked to state (publishTestHostArgs' -getProperty): the test
+// assembly as its build wrote it, whose folder is the build output publishedSymbolsMissing reads.
+const publishTargetPathProperty = "TargetPath"
+
+// publishBuildOutput answers the folder the publish's own build wrote the test assembly to, as MSBuild stated it in the
+// publish's output (-getProperty:TargetPath, a line of its own after the build). The build output is TAKEN FROM THE
+// BUILD rather than found by a glob, because where it lands is the build's decision: a stdlib row builds in-tree under
+// bin/tests/<config>/<tfm>/<rid>/, while a -recurse module's Directory.Build.props redirects every project's
+// BaseOutputPath to <out root>/.artifacts/bin/<hash>/ (generateRecurseBuildFiles), and a glob over the first layout
+// refused every module row at TRAIN Q's union (13c0800c21) before any verdict. A stated path follows any layout a props
+// or the SDK chooses, so there is no second spelling of it to drift.
+//
+// A publish that states no path, or a path whose assembly does not exist, is an error, never a pass: after a successful
+// publish the build output exists, and a guard that cannot see must say so.
+func publishBuildOutput(output, testProject string) (string, error) {
+	assembly := strings.TrimSuffix(filepath.Base(testProject), filepath.Ext(testProject)) + ".dll"
+	lines := strings.Split(output, "\n")
+
+	for i := len(lines) - 1; i >= 0; i-- {
+		line := strings.TrimSpace(lines[i])
+
+		if !filepath.IsAbs(line) || !strings.EqualFold(filepath.Base(line), assembly) {
+			continue
+		}
+
+		if _, err := os.Stat(line); err != nil {
+			return "", fmt.Errorf("the published test host's build output, stated by the publish as %s, cannot be found, so its symbol files cannot be checked: %w", line, err)
+		}
+
+		return filepath.Dir(line), nil
 	}
 
-	return "Debug"
+	return "", fmt.Errorf("the publish did not state the published test host's build output (%s, -getProperty:%s), so its symbol files cannot be checked", assembly, publishTargetPathProperty)
 }
 
-// publishedSymbolsMissing answers the symbol files the publish's own build produced that are not beside the published
-// host, sorted. The build output is the folder under bin/tests/<config>/ that holds the test assembly (the publish
-// builds for the host RID, so it is bin/tests/<config>/<tfm>/<rid>/; a RID-less layout is read too), and when more than
-// one matches, the newest is this publish's. A build output that cannot be found is an error, not a pass: after a
-// successful publish it exists, and a guard that cannot see must say so.
+// publishedSymbolsMissing answers the symbol files the publish's own build produced (every .pdb in buildOutput, the
+// folder publishBuildOutput read from the publish) that are not beside the published host, sorted.
 //
 // It is the OUTCOME guard of the publish fix: removePublishedTestHost (and golib's go.lib.symbols.targets) are levers,
 // and this reads whether the host actually has its dependencies' symbol files, by whatever route they were lost.
 // Measured 2026-10-05 on the -tests output of a scratch row: the build output and the publish folder each held 62
 // .pdb after a good publish, and the publish folder 1 after an unbundled second one.
-func publishedSymbolsMissing(outputPath, testProject, config string) ([]string, error) {
-	assembly := strings.TrimSuffix(filepath.Base(testProject), filepath.Ext(testProject)) + ".dll"
-	configRoot := filepath.Join(outputPath, "bin", "tests", config)
-
-	var candidates []string
-
-	for _, pattern := range []string{filepath.Join(configRoot, "*", "*", assembly), filepath.Join(configRoot, "*", assembly)} {
-		matches, err := filepath.Glob(pattern)
-
-		if err != nil {
-			return nil, err
-		}
-
-		candidates = append(candidates, matches...)
-	}
-
-	if len(candidates) == 0 {
-		return nil, fmt.Errorf("the published test host's build output (%s under %s) cannot be found, so its symbol files cannot be checked", assembly, configRoot)
-	}
-
-	newest, newestTime := "", time.Time{}
-
-	for _, candidate := range candidates {
-		if info, err := os.Stat(candidate); err == nil && info.ModTime().After(newestTime) {
-			newest, newestTime = candidate, info.ModTime()
-		}
-	}
-
-	built, err := filepath.Glob(filepath.Join(filepath.Dir(newest), "*.pdb"))
+func publishedSymbolsMissing(buildOutput, outputPath, testProject string) ([]string, error) {
+	built, err := filepath.Glob(filepath.Join(buildOutput, "*.pdb"))
 
 	if err != nil {
 		return nil, err
@@ -7058,6 +7060,12 @@ func testPublishTimeout(options Options) time.Duration {
 // compile the linux flavour whatever the caller's environment holds. goosOfTarget is the pipeline's
 // own source of truth for the platform a run is FOR (the same value that routes the sources and
 // scopes the disclosure manifest); a run with no target set leaves the csproj default alone.
+//
+// The publish also states its build output (-getProperty:TargetPath), which publishBuildOutput reads. MSBuild prints
+// the value after the build and, asked for a property, writes no build log to the console: errors still reach the
+// captured output (on stderr), and the exit code is the build's. Measured 2026-10-07 (SDK 10, a project whose
+// BaseOutputPath is redirected as a -recurse props does): the redirected path printed on success, and on a compile
+// error the CS line with exit 1.
 func publishTestHostArgs(outputPath, testProject string, options Options) []string {
 	publishDir := filepath.Join(outputPath, "bin", "tests", "publish")
 
@@ -7071,12 +7079,12 @@ func publishTestHostArgs(outputPath, testProject string, options Options) []stri
 		go2csPathArg := strings.TrimRight(filepath.ToSlash(options.go2csPath), "/") + "/"
 		args := []string{"publish", testProject, "-c", "Release", "-p:go2csPath=" + go2csPathArg}
 
-		return append(append(args, targetOS...), "-o", publishDir)
+		return append(append(args, targetOS...), "-o", publishDir, "-getProperty:"+publishTargetPathProperty)
 	}
 
 	args := []string{"publish", testProject, "-c", "Debug"}
 
-	return append(append(args, targetOS...), "-o", publishDir)
+	return append(append(args, targetOS...), "-o", publishDir, "-getProperty:"+publishTargetPathProperty)
 }
 
 // withPublishBinlog appends `-bl:<binlog>` to a publish argument list when a binlog path is given, and
