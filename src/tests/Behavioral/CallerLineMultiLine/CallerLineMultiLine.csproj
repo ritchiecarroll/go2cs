@@ -153,6 +153,7 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
   </ItemGroup>
 

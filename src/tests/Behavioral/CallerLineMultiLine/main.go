@@ -2,11 +2,25 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"runtime"
 )
 
 // A call inside a MULTI-LINE statement: Go answers the caller's line with the line of the call's own
 // `(`, never the statement's first line. Every value printed is a line number of this file.
+//
+// The converted program answers it exactly where the JIT's native-to-IL map is per call, which a
+// Debug (unoptimized) build is. An optimized build maps only some of these shapes per call, so by
+// default the program prints the two shapes an optimized build answers exactly (the behavioral suite
+// runs Release), and with GO2CS_CALLER_LINE_ALL_SHAPES=1 it prints all eleven (GolibTests'
+// CallerLineMultiLineDebugTests builds this project Debug and compares every shape with Go's).
+var all = os.Getenv("GO2CS_CALLER_LINE_ALL_SHAPES") == "1"
+
+func show(exactInRelease bool, args ...any) {
+	if all || exactInRelease {
+		fmt.Println(args...)
+	}
+}
 
 func line() int {
 	_, _, l, _ := runtime.Caller(1)
@@ -23,10 +37,9 @@ func (c *chain) Add(n int) *chain {
 
 func (c *chain) Done(label string) {
 	_, _, l, _ := runtime.Caller(1)
-	fmt.Println(label, c.lines, l)
+	show(false, label, c.lines, l)
+	show(true, label+"-terminal", l)
 }
-
-type liner interface{ Line() int }
 
 type impl struct{}
 
@@ -68,9 +81,9 @@ func ret() []int {
 }
 
 func main() {
-	fmt.Println("pkgSlice", pkgSlice)
-	fmt.Println("pkgSum", pkgSum)
-	fmt.Println("pkgStructs", pkgStructs)
+	show(false, "pkgSlice", pkgSlice)
+	show(false, "pkgSum", pkgSum)
+	show(false, "pkgStructs", pkgStructs)
 
 	// S1: a method chain opened on one line and continued on later ones.
 	(&chain{}).Add(1).
@@ -79,7 +92,7 @@ func main() {
 		Done("S1")
 
 	// S2: a multi-line call, one argument call per line.
-	fmt.Println("S2", three(line(),
+	show(false, "S2", three(line(),
 		line(),
 		line()))
 
@@ -87,30 +100,30 @@ func main() {
 	sum := line() +
 		line() +
 		line()
-	fmt.Println("S3", sum)
+	show(false, "S3", sum)
 
 	// S4: a func value called on a later line.
 	f := line
-	fmt.Println("S4", f(),
+	show(false, "S4", f(),
 		f())
 
 	// S5: a method called on a later line.
 	var im impl
-	fmt.Println("S5", im.Line(),
+	show(false, "S5", im.Line(),
 		im.Line())
 
 	// S6: a multi-line if condition.
 	if rec(line()) &&
 		rec(line()) {
-		fmt.Println("S6", recorded)
+		show(true, "S6", recorded)
 	}
 
 	// S7: a composite literal in a function body.
 	local := []int{line(),
 		line(),
 	}
-	fmt.Println("S7", local)
+	show(false, "S7", local)
 
 	// S8: the return of a multi-line call.
-	fmt.Println("S8", ret())
+	show(false, "S8", ret())
 }

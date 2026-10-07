@@ -1,10 +1,22 @@
 namespace go;
 
 using fmt = fmt_package;
+using os = os_package;
 using runtime = runtime_package;
 using System.Runtime.CompilerServices;
+using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {
+
+internal static bool all = os.Getenv("GO2CS_CALLER_LINE_ALL_SHAPES"u8) == "1"u8;
+
+internal static void show(bool exactInRelease, params ꓸꓸꓸany argsʗp) {
+    var args = argsʗp.sslice();
+
+    if (all || exactInRelease) {
+        fmt.Println(args.ꓸꓸꓸ);
+    }
+}
 
 [MethodImpl(MethodImplOptions.NoInlining)] internal static nint line() {
     var (_, _, l, _) = runtime.Caller(1);
@@ -25,11 +37,8 @@ partial class main_package {
 
 [MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static void Done(this ref chain c, @string label) {
     var (_, _, l, _) = runtime.Caller(1);
-    fmt.Println(label, c.lines, l);
-}
-
-[GoType] partial interface liner {
-    nint Line();
+    show(false, label, c.lines, l);
+    show(true, label + "-terminal", l);
 }
 
 [GoType] partial struct impl {
@@ -82,29 +91,29 @@ private static readonly object pkgSumˢ = (@string)"pkgSum"u8;
 private static readonly object pkgStructsˢ = (@string)"pkgStructs"u8;
 
 internal static void Main() {
-    fmt.Println(pkgSliceˢ, pkgSlice);
-    fmt.Println(pkgSumˢ, pkgSum);
-    fmt.Println(pkgStructsˢ, pkgStructs);
+    show(false, pkgSliceˢ, pkgSlice);
+    show(false, pkgSumˢ, pkgSum);
+    show(false, pkgStructsˢ, pkgStructs);
     (Ꮡ(new chain(nil))).Add(1).Add(2).Add(3).Done("S1"u8);
-    fmt.Println((@string)"S2"u8, three(line(),
+    show(false, (@string)"S2"u8, three(line(),
         line(),
         line()));
     nint sum = line() + line() + line();
-    fmt.Println((@string)"S3"u8, sum);
+    show(false, (@string)"S3"u8, sum);
     var f = line;
-    fmt.Println((@string)"S4"u8, f(),
+    show(false, (@string)"S4"u8, f(),
         f());
     impl im = default!;
-    fmt.Println((@string)"S5"u8, im.Line(),
+    show(false, (@string)"S5"u8, im.Line(),
         im.Line());
     if (rec(line()) && rec(line())) {
-        fmt.Println((@string)"S6"u8, recorded);
+        show(true, (@string)"S6"u8, recorded);
     }
     var local = new nint[]{line(),
         line()
     }.slice();
-    fmt.Println((@string)"S7"u8, local);
-    fmt.Println((@string)"S8"u8, ret());
+    show(false, (@string)"S7"u8, local);
+    show(false, (@string)"S8"u8, ret());
 }
 
 } // end main_package
