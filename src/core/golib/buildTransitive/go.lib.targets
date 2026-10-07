@@ -89,4 +89,20 @@
     <Using Include="go" />
     <Using Include="go.builtin" Static="true" />
   </ItemGroup>
+
+  <!--
+    THE PACKAGES' OWN SYMBOL FILES IN THE CONSUMER'S OUTPUT. Each go.* package ships its assemblies' .pdb beside
+    them, and the converted runtime reads a frame's file:line (runtime.Caller, debug.Stack, a panic's traceback) from
+    the .pdb beside the APPLICATION, never from the package folder: without a copy, every std frame prints no
+    file:line. The SDK's own switch copies package symbol files to the output (and so to a publish); it is set here
+    unless the consumer already chose, and GoCopyPackageSymbols=false leaves it untouched. It applies to every
+    package that ships symbols, not only go.* ones: the SDK's switch has no per-package form. A project reference to
+    golib never imports buildTransitive, so the corpus and the -tests hosts are untouched.
+  -->
+  <PropertyGroup Condition="'$(GoCopyPackageSymbols)' != 'false' and '$(CopyDebugSymbolFilesFromPackages)' == ''">
+    <CopyDebugSymbolFilesFromPackages>true</CopyDebugSymbolFilesFromPackages>
+  </PropertyGroup>
+
+  <!-- The symbol files beside a single-file host, on every publish (see the file). -->
+  <Import Project="$(MSBuildThisFileDirectory)go.lib.symbols.targets" Condition="'$(GoLibSymbolsTargetsImported)' != 'true'" />
 </Project>

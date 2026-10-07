@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Consumer fixture for go.lib's go.lib.symbols.targets (src/core/golib/buildTransitive/). Driven by
+       test-publish-symbols.ps1, which restores it from a chosen feed into a fresh package cache and publishes it
+       single-file TWICE into one folder; it is not a solution member and is never built by the corpus. Its own
+       library (lib/) holds the frame the program prints: the go.* packages ship no .pdb, so a consumer's own
+       referenced library is where a lost symbol file shows. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="go.lib" Version="$(GoPackageVersion)" />
+    <ProjectReference Include="lib/PublishSymbolsLib.csproj" />
+    <!-- The library is a separate project in a subfolder: its sources and its own obj/ (generated AssemblyInfo)
+         must not be globbed into this one, or the second publish fails with duplicate assembly attributes. -->
+    <Compile Remove="lib/**" />
+    <None Remove="lib/**" />
+  </ItemGroup>
+
+  <!-- Pre-pack only: point GoLibTargets at the working-tree go.lib.targets to exercise it against an already-built
+       package. A packed go.lib brings the same file (and the symbols file it imports) through buildTransitive. -->
+  <Import Project="$(GoLibTargets)" Condition="'$(GoLibTargets)' != ''" />
+</Project>
