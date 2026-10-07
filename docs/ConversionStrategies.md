@@ -11759,6 +11759,15 @@ result is unpacked with `var (inverse, err) = …`:
      literal is deliberate: the converter exempts `panic`'s argument from literal hoisting
      (src/go2cs/hoistedLiteralOperations.go:612-614), since it costs nothing until a panic fires. -->
 
+**A module converts with `-tags safe`, for a different reason.** Some libraries reach into Go's runtime with
+unsafe pointer arithmetic, adding a byte offset to a value to read one of its private fields. Converted code
+keeps its values in .NET's own layout, so golib refuses that arithmetic rather than read the wrong memory.
+Libraries that do this usually ship a fallback for builds tagged `safe`, so a `-recurse` conversion adds the
+tag and the fallback is what converts. When a module is validated, Go's own `go test` run gets the same tags,
+so the two sides compile the same files. The tag `appengine`, which some libraries read the same way, is not
+added, because it also changes unrelated behavior. `-module-safe-tag=false` turns `safe` off. See
+[Reference → Default build tags](ConversionStrategies-Reference/package-conversion.md#default-build-tags-purego-for-the-standard-library-safe-for-modules).
+
 **Full detail:** [Reference → The standard-library conversion applies `-tags purego`](ConversionStrategies-Reference/purego.md#the-standard-library-conversion-applies--tags-purego) — why the tag is on by default and the alternatives weighed, how `-tests` shares it, the `math/big` fallback tag, the three outcomes with more packages named, and the `crypto/elliptic` gating in full.
 
 ---
