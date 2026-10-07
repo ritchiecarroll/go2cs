@@ -24,6 +24,15 @@ Written 15:50 on the i7's clock, at 76% of the week's usage (owner order of this
 usage nears 90%, so that the COORD session can be rolled to another session). Every ref below was read at the remote.
 Lanes are unchanged: all seven are MAILBOX-ONLY (sections 1e and 1h hold their protocol and paste prompts).
 
+- **FINDING 2026-10-06 21:50, IT CHANGES THE LANDING (read before section 6).** At the union every -recurse MODULE -tests run
+  is REFUSED by a Q row's own guard (i9-tests-host-symbol-check cannot see the artifacts layout). G cuts the follow-up
+  `claude/i9-tests-host-symbol-check-followup` (the i9 reviews it). The battery CONTINUES at `13c0800c21`; its module leg
+  is expected RED for this cause. WHEN IT ENDS: list the follow-up in `tQ-follow.txt`, merge it signed `--no-ff`, run
+  `tQ-fixup.sh` again from a FRESH run folder (it commits `fixup-2: TRAIN Q`), push the union (an existing ref: announce,
+  then push), then read AT THAT HEAD: the converter suite, the module legs (`tQ-modules-legs.sh`), the two-pass and
+  publish arms; name the new tip to G (its five modules) and to P1 (its LM leg). The landing is then ruled on the
+  battery at `13c0800c21` plus those re-reads (the landing scripts take `BATTERY_HEAD_OK` and `BATTERY_RC_OK` for
+  exactly this, each a ruling written in the ledger).
 - **OWNER RULING 2026-10-06 21:24: NO RELEASE AFTER TRAIN Q -- "everything with the face lift".** Checklist section 7's
   question is ANSWERED: Q lands as an ordinary train with no version bump; the next release is the face-lift train's and
   aot-smoke gates that one. P1 is unblocked to push `claude/p1-generic-instantiation-arg`.
