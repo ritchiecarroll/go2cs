@@ -125,10 +125,13 @@ feed under test ONLY and everything else (the runtime and ILCompiler packs a pub
 - FDD: a framework-dependent publish that is not single-file resolves it, the `.pdb` matching as in RUN;
 - OFF: with `-p:GoCopyPackageSymbols=false` the output is today's (`none`, no dependency `.pdb`): the off switch,
   and the proof the arms above can fail;
-- AOT (`-Aot` only; needs the ILCompiler packages): a Native AOT publish succeeds and its `.pdb` list is printed.
+- AOT (`-Aot`, or `-AotOnly` for this arm alone; needs the ILCompiler packages and the native toolchain): a Native AOT
+  publish of the consumer, which sets no trim mode, RUNS -- exit 0 and its frame line (the value printed, not judged);
+  the publish wall time and its `.pdb` list are printed. Under go.lib's `TrimMode=partial` the publish compiles every
+  referenced go.* assembly whole, so it is long: os-matrix's `aot-smoke` stage runs it alone.
 
 ```text
-pwsh src/tests/PackageTests/PackageSymbols/test-package-symbols.ps1 -Version <go.* version> [-Source <feed dir or URL>] [-FallbackFolder <package folder for the runtime pack>] [-Aot]
+pwsh src/tests/PackageTests/PackageSymbols/test-package-symbols.ps1 -Version <go.* version> [-Source <feed dir or URL>] [-FallbackFolder <package folder for the runtime pack>] [-Aot | -AotOnly]
 ```
 
 Read red-first (2026-10-06, win-x64) against a local pack in the published 1.24.13.4 shape (no `.pdb` in any
@@ -148,8 +151,8 @@ TIMEOUT on this arm is the same defect in its other shape;
 (C) `Behavioral/StatLayoutTruth`, the same way; (D) the README walkthrough (`fatih/color`), the same
 way, gating only with `-GateWalkthrough` and MEASURED without it; the `release-smoke` stage passes it on every
 leg; (E) `PublishSymbols` above, the guard and its AOT control against the same feed, MEASURED and never gating
-until it has read green on two trains; (F) `PackageSymbols` above with `-Aot`, the packages' own symbol files, MEASURED
-and never gating on the same terms, its frame lines and its AOT `.pdb` list carried into the verdict. It exits 0 when the gating arms pass. The `release-smoke` stage of
+until it has read green on two trains; (F) `PackageSymbols` above (its AOT arm excepted: that is the `aot-smoke` stage), the
+packages' own symbol files, MEASURED and never gating on the same terms, its frame lines carried into the verdict. It exits 0 when the gating arms pass. The `release-smoke` stage of
 `.github/workflows/os-matrix.yml` packs the feed on Windows and runs this on all four shipped RIDs.
 `-Feed https://api.nuget.org/v3/index.json -Version <go.* version>` runs the same arms against a published
 release instead (a URL feed requires `-Version`; nuget.org is then the one source); the stage's `published_version`
