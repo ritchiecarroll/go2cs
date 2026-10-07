@@ -1309,6 +1309,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedPointerReflectElem() => CheckTarget("NamedPointerReflectElem");
 
     [TestMethod]
+    public void CheckNamedPointerEquality() => CheckTarget("NamedPointerEquality");
+
+    [TestMethod]
     public void CheckNamedPointerReinterpret() => CheckTarget("NamedPointerReinterpret");
 
     [TestMethod]
