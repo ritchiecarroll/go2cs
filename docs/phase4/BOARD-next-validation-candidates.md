@@ -26434,4 +26434,30 @@ now refuse by name too (the seat's third commit, `be4ce10078`).
 
 — G
 
+## 2026-10-05 — G: a conversion through a type written over ANOTHER package's named basic, in the two directions seat A does not cover — RECORDED AND DEFERRED (COORD)
+
+Seat A (`claude/g-foreign-defined-hop`, `82c3b347dc`, the train after P) makes a constant or basic value converted INTO a
+type the converting package declares over another package's named basic hop through that base:
+`((ΔLevel)(logrus.Level)0)`. Its battery measured two neighbouring directions it does not cover, each CS0030, and
+COORD ruled them record-and-defer: no seat, because neither the standard library nor any measured module reaches one.
+
+1. **INTO a type ANOTHER package declares.** `wraplib.Wrapped(2)` from `main`, with `type Wrapped levellib.Level` in
+   `wraplib`. `foreignWrittenBase` reads `packageTypeSpecRHS`, which holds only the converting package's own
+   declarations, so the cast stays direct and is two user-defined conversions. A source exists without a new metadata
+   field: the dependency's own syntax (`importedPackageSources`, as `foreignDerivedTypeAliases` already uses).
+2. **FROM such a type to its basic.** `uint32(w)` with `w wraplib.Wrapped`, and `int64(Dur(5))` with
+   `type Dur time.Duration`: the wrapper converts only to its named base, so the basic needs the reverse hop.
+
+**Repro** (both directions, 1 site each): a module with `levellib` (`type Level uint32`), `wraplib`
+(`import "…/levellib"; type Wrapped levellib.Level; func (w Wrapped) Raw() uint32 { return uint32(w) }`) and a `main`
+calling `wraplib.Wrapped(2).Raw()`.
+
+**Census** (go/types over `std` with tests; the instrument's control is that repro, which it reads as exactly 1 INTO
+and 1 FROM): INTO a foreign-owned foreign-written type, 0 on windows, linux and darwin; FROM such a type to a basic,
+0 on all three. No first-wave module measured so far (testify, logrus, cobra, pflag, x/sync, objx, yaml.v3) reaches
+either.
+
+**Trigger:** the first module that reaches one. If a first-wave module or a Target Atlas top row does, it becomes a
+seat that day.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
