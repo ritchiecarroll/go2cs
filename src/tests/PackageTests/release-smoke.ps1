@@ -297,10 +297,36 @@ try {
 finally { Pop-Location }
 $walkVerdict = if ($setup -ne 0) { "FAIL (D-walkthrough): the Go side did not set up (exit $setup)" } else { Invoke-ConvertArm 'D-walkthrough' $walk }
 
+# ---- E: symbol files beside a single-file host, measured, never gating ------------------------------
+# go.lib.symbols.targets keeps every referenced assembly's .pdb beside a single-file host across a SECOND unchanged
+# publish (the SDK deletes them when the bundle step is skipped). PublishSymbols' guard reads that against this feed's
+# go.lib, and its AOT control reads that the target leaves a Native AOT publish untouched. NOT GATING until it has read
+# green on two trains (COORD, 2026-10-06): a go.lib without the target, every release up to 1.24.13.4, fails the guard.
+#
+# ---- F: the packages' OWN symbol files reach a consumer, measured, never gating ---------------------------------
+# PackageSymbols restores go.sort from this feed and prints a std frame's Go file:line on `dotnet run`, on a first and
+# a second unchanged single-file publish and on a framework-dependent publish; its off switch must print "none"; -Aot
+# adds a Native AOT publish and lists the .pdb it leaves. The packages ship .pdb from the release that ships symbols
+# (owner ruling, 2026-10-06); every earlier release fails RUN, PUBLISH and FDD. Its frame lines are carried in the detail.
+$symbolVerdicts = @()
+foreach ($check in @(
+        @{ Name = 'E-publish-symbols'; Dir = 'PublishSymbols'; Script = 'test-publish-symbols.ps1'; Extra = @{} },
+        @{ Name = 'E-publish-symbols-aot'; Dir = 'PublishSymbols'; Script = 'test-publish-symbols-aot.ps1'; Extra = @{} },
+        @{ Name = 'F-package-symbols'; Dir = 'PackageSymbols'; Script = 'test-package-symbols.ps1'; Extra = @{ Aot = $true }
+           Detail = '^\s+(RUN|PUBLISH [12]|FDD|OFF|AOT): ' })) {
+    $checkLog = Join-Path $WorkRoot "$($check.Name).log"
+    $extra = $check.Extra
+    $code = Invoke-Logged $checkLog { & (Join-Path (Join-Path $PSScriptRoot $check.Dir) $check.Script) -Version $Version -Source $Feed @extra }
+    $pattern = if ($check.Detail) { "^(PASS|FAIL) |$($check.Detail)" } else { '^(PASS|FAIL) ' }
+    $detail = @(Get-Content -LiteralPath $checkLog -ErrorAction SilentlyContinue | Where-Object { $_ -match $pattern } | ForEach-Object { $_.Trim() }) -join ' | '
+    $symbolVerdicts += if ($code -eq 0) { "PASS ($($check.Name)): $detail" } else { "FAIL ($($check.Name)): exit $code -- $detail (see $($check.Name).log)" }
+}
+
 # ---- verdicts ------------------------------------------------------------------------------------
 if ($GateWalkthrough) { $verdicts += $walkVerdict }
 $verdicts | ForEach-Object { Write-Host $_ }
 if (-not $GateWalkthrough) { Write-Host "MEASURED, NOT GATING: $walkVerdict" }
+$symbolVerdicts | ForEach-Object { Write-Host "MEASURED, NOT GATING: $_" }
 
 if ($verdicts | Where-Object { $_ -like 'FAIL*' }) { exit 1 }
 exit 0

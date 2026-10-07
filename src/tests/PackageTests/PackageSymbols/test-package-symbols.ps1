@@ -60,14 +60,25 @@ if ($FallbackFolder) {
 "@
 }
 
-# ONE source and a cache nothing else has touched: a green read must come from the packages under test.
+# go.* from the source under test ONLY, and a cache nothing else has touched: a green read must come from the packages
+# under test. The self-contained and Native AOT publishes also need the SDK's runtime and ILCompiler packs, which a pack
+# rehearsal's local feed does not carry, so everything else maps to nuget.org (release-smoke's arm F runs this against
+# such a feed). When the source IS nuget.org it is listed once: NuGet drops a URL listed under two keys.
+$nugetOrg = 'https://api.nuget.org/v3/index.json'
+$sources = if ($Source.TrimEnd('/') -eq $nugetOrg) { "    <add key=`"under-test`" value=`"$nugetOrg`" />" }
+           else { "    <add key=`"under-test`" value=`"$Source`" />`n    <add key=`"nuget.org`" value=`"$nugetOrg`" />" }
+$mapping = if ($Source.TrimEnd('/') -eq $nugetOrg) { '    <packageSource key="under-test"><package pattern="*" /></packageSource>' }
+           else { "    <packageSource key=`"under-test`"><package pattern=`"go.*`" /></packageSource>`n    <packageSource key=`"nuget.org`"><package pattern=`"*`" /></packageSource>" }
 @"
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <packageSources>
     <clear />
-    <add key="under-test" value="$Source" />
+$sources
   </packageSources>
+  <packageSourceMapping>
+$mapping
+  </packageSourceMapping>
 $fallback
 </configuration>
 "@ | Set-Content -Path (Join-Path $work 'nuget.config') -Encoding utf8

@@ -148,8 +148,15 @@ every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
 - **C** `Behavioral/StatLayoutTruth`, converted and compared the same way;
 - **D** the README walkthrough (`fatih/color`), compared the same way — it **gates on every leg**. darwin joined
   windows and linux once darwin-xsys-libc (TRAIN O) made `x/sys/unix` reach libc on a Mac.
+- **E** `PublishSymbols`: the dependency symbol files survive a second single-file publish (the guard) and the target
+  leaves a Native AOT publish untouched (the AOT control), against the same feed. **Measured, never gating** until it
+  has read green on two trains; every `go.lib` before the symbols target fails the guard.
+- **F** `PackageSymbols`: the packages' OWN symbol files reach a consumer -- a std frame prints its Go file:line on
+  `dotnet run`, on a first and a second unchanged single-file publish and on a framework-dependent publish, the off
+  switch prints `none`, and a Native AOT publish succeeds (its `.pdb` list is printed). **Measured, never gating** on
+  E's terms; every release before the one that ships symbols fails RUN, PUBLISH and FDD.
 
-A leg is green when all four arms pass. Dispatch it at the tree that ships, before every release:
+A leg is green when arms A-D pass. Dispatch it at the tree that ships, before every release:
 it is what proves the packages carry what that tree's converter emits on every OS (C2's 2026-10-03 finding: N's
 converter emits `unsafe.ArrayPointer`, which the published 1.24.13.3 lacks). The pack job's budget is its own
 (240 min; measured 38-53 min).
