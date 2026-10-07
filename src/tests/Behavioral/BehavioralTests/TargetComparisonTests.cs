@@ -1789,6 +1789,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckReflectMethodTableWalk() => CheckTarget("ReflectMethodTableWalk");
 
     [TestMethod]
+    public void CheckReflectNamedFuncAssign() => CheckTarget("ReflectNamedFuncAssign");
+
+    [TestMethod]
     public void CheckReflectNewAtField() => CheckTarget("ReflectNewAtField");
 
     [TestMethod]
