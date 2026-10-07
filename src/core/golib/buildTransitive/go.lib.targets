@@ -91,6 +91,20 @@
   </ItemGroup>
 
   <!--
+    THE TRIM MODE. golib derives a Go struct's size, layout and call arguments from its fields by reflection, so a full
+    trim that removes field metadata breaks converted code at type initialization. A converted project's csproj template
+    sets TrimMode=partial (trim the framework only); a hand-written consumer of the packages got the SDK's full trim
+    under PublishAot or PublishTrimmed, and its Native AOT executable crashed at startup (2026-10-06, the published
+    1.24.13.4: go.internal.cpu_package+option "reports no instance fields", exit 2). The same default is set here, so a
+    consumer gets the configuration a converted project gets wherever the project came from, and one who chose a mode
+    keeps the choice. The SDK sets no TrimMode in evaluation (read: empty after a full evaluation under both PublishAot
+    and PublishTrimmed); its trimmers default an empty one themselves, so this default reaches them.
+  -->
+  <PropertyGroup>
+    <TrimMode Condition="'$(TrimMode)'==''">partial</TrimMode>
+  </PropertyGroup>
+
+  <!--
     THE PACKAGES' OWN SYMBOL FILES IN THE CONSUMER'S OUTPUT. Each go.* package ships its assemblies' .pdb beside
     them, and the converted runtime reads a frame's file:line (runtime.Caller, debug.Stack, a panic's traceback) from
     the .pdb beside the APPLICATION, never from the package folder: without a copy, every std frame prints no
