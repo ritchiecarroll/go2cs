@@ -424,6 +424,13 @@ rather than covered speculatively (the r39d rule).
 asserted verbatim, every nil and type-mismatch non-trigger, and the comparable positive controls,
 output-compared vs `go run`.)
 
+## A parenthesized asserted type is rendered without its parentheses
+
+Go lets the asserted type carry parentheses: objx writes `v.data.((Map))`. They are syntax only, so the
+converter renders the type unwrapped, `v.data._<Map>()` and `v.data._<Map>(ᐧ)` for the comma-ok form, because a
+C# type argument cannot be parenthesized (`_<(Map)>()` is CS1525). A parenthesized pointer type takes the same
+route: `p.((*point))` becomes `p._<ж<point>>(ᐧ)`. (Guarded by the `ParenthesizedTypeAssertion` behavioral test.)
+
 ---
 
 [← Nil and Zero Values](nil-and-zero-values.md) · [Index](README.md) · [Multi-Assignment and Evaluation Order →](multi-assignment.md)
