@@ -217,6 +217,64 @@ func TestGatedArrayAndFilterStampCoexist(t *testing.T) {
 	}
 }
 
+// THE RECORD IS A PER-RUN ARTIFACT, so every run writes it, even when its bytes equal the last run's. The record
+// carries no per-run field, and a row that reads the same twice (a repeated failure set, an unchanged re-read into a
+// warm tree) produces it byte for byte. Skipped as identical, it kept the EARLIER run's write time, and both readers
+// that ask "did THIS run write it" answer by that time: the sweep's Get-OracleOnlyVerdict (-Since the attempt's start)
+// read "predates this attempt" and lost the oracle-only answer, and run-h10-recon.ps1 read the row as STALE. Measured
+// 2026-10-05 on unicode/utf16, two runs into one root: sha c3617f1e45bcc935 both times, the write time still run 1's.
+var comparisonRecordStamp = time.Date(2001, 1, 1, 0, 0, 0, 0, time.UTC)
+
+func TestAnUnchangedComparisonRecordIsWrittenAgain(t *testing.T) {
+	dir := t.TempDir()
+	record := filepath.Join(dir, "go2cs_test_comparison.json")
+	result := testComparison{Package: "unicode/utf16", Status: "validated", Matched: true}
+
+	if err := writeComparisonRecord(dir, &result, ""); err != nil {
+		t.Fatalf("first write: %v", err)
+	}
+	if err := os.Chtimes(record, comparisonRecordStamp, comparisonRecordStamp); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeComparisonRecord(dir, &result, ""); err != nil {
+		t.Fatalf("second write: %v", err)
+	}
+
+	info, err := os.Stat(record)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.ModTime().Equal(comparisonRecordStamp) {
+		t.Fatal("a run that produced the same record as the last one left the last run's write time on it, so a reader asking \"did this run write it\" answers no")
+	}
+}
+
+// ...and ONLY the record. The other writeJSONFile callers are the two test manifests, which an unchanged re-conversion
+// must leave untouched (their time is part of the incremental story: an identical manifest is not a new input). The
+// control that keeps this cut from widening into "every JSON file is always written".
+func TestAnUnchangedJSONFileOtherThanTheRecordKeepsItsTime(t *testing.T) {
+	manifest := filepath.Join(t.TempDir(), testManifestFileName)
+	value := testManifest{SchemaVersion: 1, PackageImportPath: "unicode/utf16"}
+
+	if err := writeJSONFile(manifest, value); err != nil {
+		t.Fatalf("first write: %v", err)
+	}
+	if err := os.Chtimes(manifest, comparisonRecordStamp, comparisonRecordStamp); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeJSONFile(manifest, value); err != nil {
+		t.Fatalf("second write: %v", err)
+	}
+
+	info, err := os.Stat(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !info.ModTime().Equal(comparisonRecordStamp) {
+		t.Fatalf("an identical manifest was rewritten (its time moved to %s): only the comparison record is a per-run artifact", info.ModTime())
+	}
+}
+
 
 // THE RUN ACTION'S FILTER. `-test-filter` was honoured by `compare` and SILENTLY IGNORED by
 // `run`: the run action built its own argv of `--json -timeout` and never passed `--run`, so a

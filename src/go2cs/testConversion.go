@@ -6729,19 +6729,36 @@ func writeComparisonRecord(outputPath string, result any, testFilter string) err
 				"pass *testComparison or map[string]any, or a gated record would publish as a full run", result)
 		}
 	}
-	return writeJSONFile(filepath.Join(outputPath, "go2cs_test_comparison.json"), result)
-}
 
-func writeJSONFile(fileName string, value any) error {
-	data, err := json.MarshalIndent(value, "", "  ")
+	// ALWAYS written, never skipped as identical: the record is this run's evidence, and its write time is how a reader
+	// tells this run's record from an earlier one's (run-validated-sweep.ps1's -Since rule, run-h10-recon.ps1's STALE
+	// test, the batteries' -nt checks). It carries no per-run field, so a validated row re-read into a warm tree produces
+	// it byte for byte; skipped, it kept the earlier run's time and read as "not written by this run".
+	data, err := jsonFileBytes(result)
 	if err != nil {
 		return err
 	}
-	data = append(data, '\n')
+	return os.WriteFile(filepath.Join(outputPath, "go2cs_test_comparison.json"), data, 0644)
+}
+
+// writeJSONFile skips a write whose bytes equal the file's, so an unchanged re-conversion leaves a manifest's time alone.
+func writeJSONFile(fileName string, value any) error {
+	data, err := jsonFileBytes(value)
+	if err != nil {
+		return err
+	}
 	if needToWriteFile(fileName, data) {
 		return os.WriteFile(fileName, data, 0644)
 	}
 	return nil
+}
+
+func jsonFileBytes(value any) ([]byte, error) {
+	data, err := json.MarshalIndent(value, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	return append(data, '\n'), nil
 }
 
 // converterRevision identifies the converter BINARY that produced a manifest. The executable
