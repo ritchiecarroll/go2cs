@@ -262,6 +262,8 @@
     <None Include="$(MSBuildThisFileDirectory)moduleConverter.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleConverter_integration_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleConverter_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)moduleDisclosureRoot.go" />
+    <None Include="$(MSBuildThisFileDirectory)moduleDisclosureRoot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleNamespaceAgreement_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleProofPages_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleTestsDriver.go" />

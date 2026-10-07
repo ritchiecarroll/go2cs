@@ -26228,4 +26228,93 @@ already takes H1's path). Base: wherever H1 has landed, since the two touch the 
 
 — C2
 
+## 2026-10-05 — C2: go-cmp reports two pointer-keyed maps in the other order — RECORDED AND DISCLOSED (runtime-capability), in the first module disclosure manifest
+
+**The two rows.** go-cmp v0.7.0, `cmp` package, linux, at a local union of C2's seats (never pushed; it adds
+nothing to pointer identity). Both are subtests of `TestDiff`, Go pass, C# fail:
+
+| Row | What the report shows |
+|---|---|
+| `TestDiff/Comparer/MapKeyPointer` | `map[*int]string`, two keys from two `new(int)` calls: the `got` block lists `+ "world"` before `- "hello"`; Go lists `- "hello"` first |
+| `TestDiff/Reporter/LargeMapKey` | `map[*[]uint8]int`, each key the address `&b` of a local 1 MiB slice: the same swap, `+` line before `-` line |
+
+The keys and values in the report are the same as Go's. Only the ORDER of the two report lines differs.
+
+**Root.** cmp sorts map keys before printing them, and orders pointer keys by `reflect.Value.Pointer()`. In
+go2cs that is the box's `PointerOrderToken`, and for a standard heap box (`ж.StandardBox.cs`) the token is
+`AllocationBase(RuntimeHelpers.GetHashCode(this))`: the CLR identity hash, lifted. The CLR assigns that hash
+when it is first requested, from a pseudo-random per-thread sequence, so two boxes order by their hashes and
+not by the order they were allocated. Go's addresses for two consecutive small allocations ascend, so Go's
+report lists the first-allocated key first, and cmp's expected text depends on it. Nothing in the converter
+is involved.
+
+**Pinned signatures** (the C# failure text contains these; Go's never does):
+
+- MapKeyPointer: `+ \t&⟪0xdeadf00f⟫0: "world",\n- \t&⟪0xdeadf00f⟫0: "hello",` (the `got` block's two lines in
+  the swapped order).
+- LargeMapKey: `got:\n  map[*[]uint8]int{\n+ \t&⟪0xdeadf00f⟫⟪ptr:0xdeadf00f, len:1048576, cap:1048576⟫` (the
+  `got` block opening on the `+` line).
+
+**The disclosure.** Both rows are disclosed as `runtime-capability` in
+`src/tests/ModuleDisclosures/github.com/google/go-cmp@v0.7.0/cmp/go2cs_test_disclosures.json`, read when a
+run passes `-module-disclosures src/tests/ModuleDisclosures` (this seat). Before it, a module row had no
+committed home for a disclosure: the loader reads `go2cs_test_disclosures.json` from the package's output
+directory (`loadTestDisclosures`), which for std is the committed `src/core/<pkg>` and for a module is
+whatever root the run was given. COORD ruled the home on 2026-10-05 (21:27Z): a committed tree keyed by
+module path AND version, consulted only when the output directory holds no manifest and only for the
+version the run resolved; the orphan rule applies unchanged.
+
+**Retirement.** The rows retire when a heap box's token orders by allocation: for example a monotonic
+sequence number taken when the box is constructed, with `AllocationBase` built from it instead of the
+identity hash. That is a field on every `ж<T>` heap box, which the Architecture map rules a corpus-wide byte
+cost, so it is a design question with its own ruling, not a seat. COORD ruled on 2026-10-05: record and
+disclose, no per-box cost. Until then the two rows are a runtime-capability divergence; retiring them removes
+both entries from that manifest, and the orphaned-disclosure line says when they start passing.
+
+— C2
+
+## 2026-10-05 — C2: three shapes recorded and deferred (no seat)
+
+All three fail loudly (a compile error), never silently, and each has a census of 0.
+
+1. **The address of an array element through a named pointer**, `&pp.arr[i]` and `&(*pp).arr[i]`, where
+   `type PP *S` and `S` has an array field `arr`. Found while cutting the lost-write seat
+   (`claude/c2-namedptr-field-address`, 8d4ab2d7fd), which fixed `&pp.f` and `&(*pp).f` and left this form
+   alone: the named-pointer wrapper has no `.arr` member and no field-reference `at` overload, so the
+   emission does not compile. Census (go/types, every address taken through a dereference of a named pointer,
+   classified by the selector chain after it; positive control 3 of 3 array-element sites): 0 array-element
+   sites in std on linux, windows and darwin and 0 in the 11 modules. The behavioral corpus was not
+   re-measured for this form.
+2. **A defined map type with an anonymous-struct key**, `type MK map[struct{ a int }]int`. The key is emitted
+   in Go spelling (`struct{a int}`) in the `GoType` attribute and in `new map<…>`, which does not compile. An
+   unnamed map with the same key lifts the struct correctly.
+3. **A defined map type with an anonymous non-empty interface value**, `type MV map[int]interface{ M() }`.
+   Same mechanism: Go spelling in `new map<…>`, CS1031.
+
+Census for 2 and 3 (go/types over every defined type whose underlying type is a map; positive control 2 of
+2, with `map[int]interface{}`, a named-struct key and an unnamed map as negative controls): 0 in std on
+linux, windows and darwin, test packages included, and 0 in the 11 modules.
+
+**Trigger.** The first module or banked row that reaches one of the three. COORD ruled each record-and-defer
+on 2026-10-05.
+
+— C2
+
+## 2026-10-05 — C2: the atlas runner and its module list are committed nowhere — RECORDED (COORD seats it after P)
+
+The module rows in `docs/TargetAtlas.html` are measured by an atlas runner: a script that converts each listed
+module with `-tests -recurse` into a scratch output root and reads the comparison. Neither that script nor the
+list of modules (path and version) it runs is in the repository; each lane that measures modules keeps its own
+copy in its scratch space. So a module row cannot be reproduced from the tree alone, two lanes can measure two
+different module versions without either knowing, and nothing ties a row to the version its disclosures were
+written for.
+
+Found while sizing the module-disclosure home (`claude/c2-module-disclosures`): the ruling asked for the home to
+sit beside whatever already holds the module rows' data, and nothing does. `src/tests/ModuleDisclosures/` is
+keyed by module path and version and is the natural sibling of a committed runner and module list.
+
+**Trigger.** COORD (2026-10-05, 21:56Z): the next thing this phase needs after TRAIN P lands; COORD seats it then.
+
+— C2
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
