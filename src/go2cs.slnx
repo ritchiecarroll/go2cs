@@ -322,6 +322,7 @@
     <Project Path="tests/Behavioral/AtomicPointerToNil/AtomicPointerToNil.csproj" />
     <Project Path="tests/Behavioral/AtomicValues/AtomicValues.csproj" />
     <Project Path="tests/Behavioral/CallerLineCallSite/CallerLineCallSite.csproj" />
+    <Project Path="tests/Behavioral/CallerLineMultiLine/CallerLineMultiLine.csproj" />
     <Project Path="tests/Behavioral/CanonicalTypeIdentity/CanonicalTypeIdentity.csproj" />
     <Project Path="tests/Behavioral/CaptureHoistThroughConversion/CaptureHoistThroughConversion.csproj" />
     <Project Path="tests/Behavioral/CaptureModeFieldAddress/CaptureModeFieldAddress.csproj" />

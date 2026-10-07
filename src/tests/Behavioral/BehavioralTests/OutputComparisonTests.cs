@@ -197,6 +197,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckCallerLineCallSite() => CheckTarget("CallerLineCallSite");
 
     [TestMethod]
+    public void CheckCallerLineMultiLine() => CheckTarget("CallerLineMultiLine");
+
+    [TestMethod]
     public void CheckCanonicalTypeIdentity() => CheckTarget("CanonicalTypeIdentity");
 
     [TestMethod]
