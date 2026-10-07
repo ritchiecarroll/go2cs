@@ -544,6 +544,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckEscapedLoopVarSiblingIndex() => CheckTarget("EscapedLoopVarSiblingIndex");
 
     [TestMethod]
+    public void CheckExportedAliasUnexportedTarget() => CheckTarget("ExportedAliasUnexportedTarget");
+
+    [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]
