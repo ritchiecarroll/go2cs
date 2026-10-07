@@ -22,6 +22,13 @@
     the PROOF description, RepositoryUrl = the per-module conversion-source repo. D7: the module's MODULE.md ships as
     VALIDATION.md, with every per-package proof page beside it.
 
+    Assembly copyright (owner ruling 2026-10-04): each packed assembly's own copyright attribute names the UPSTREAM
+    holder -- the same Copyright lines, then one go2cs scaffolding line -- and its company and authors are -Authors.
+    The pack writes them into <RecurseRoot>/src/<module path>/Directory.Build.targets, which the conversion repository
+    pushed from that tree carries, so a rebuild from it produces the same attribute. A module whose every Copyright
+    line already names The go2cs Authors keeps the csproj template's values and gets no such file. The read-back
+    checks each dll taken out of the nupkg.
+
     Self-description (docs/PLAN-nugetgo.md section 5, stage S2, format v1 as COORD ruled it on 2026-10-02): the
     package carries go2cs/source-metadata.txt -- the module path and version, the go2cs corpus release it was built
     against (-ClosureVersion), one `package` line per packed Go package, one `require` line per third-party module
@@ -119,8 +126,26 @@ if (-not $LicenseFile) {
 }
 if (-not (Test-Path -LiteralPath $LicenseFile -PathType Leaf)) { Refuse "no upstream license file at $LicenseFile" }
 $licenseName = Split-Path -Leaf $LicenseFile
-$copyright = (@(Get-Content -LiteralPath $LicenseFile | Where-Object { $_ -cmatch '^\s*Copyright\b' } | ForEach-Object { $_.Trim() }) -join '; ')
+$copyright = (@(Get-NugetgoCopyrightLines -LicenseFile $LicenseFile) -join '; ')
 if (-not $copyright) { Refuse "the upstream license file carries no Copyright line: $LicenseFile" }
+# Each packed assembly's own copyright attribute names the UPSTREAM holder too (owner ruling 2026-10-04): the same
+# Copyright lines, then the go2cs scaffolding line. It is set by a Directory.Build.targets in the converted module's
+# own directory, so the conversion repository pushed from <RecurseRoot> rebuilds the same attribute. Escaped -p:
+# globals would not: they reach every project the build touches (a third-party pkg/ project reference included),
+# split at ',' and ';', and live in no file a rebuild from the pushed sources reads.
+$assemblyCopyright = Get-NugetgoAssemblyCopyright -LicenseFile $LicenseFile
+$moduleTargets = Join-Path $moduleSrc 'Directory.Build.targets'
+$ownTargets = (Test-Path -LiteralPath $moduleTargets) -and ([System.IO.File]::ReadAllText($moduleTargets)).Contains((Get-NugetgoTargetsMarker))
+if ((Test-Path -LiteralPath $moduleTargets) -and -not $ownTargets) { Refuse "$moduleTargets exists and was not written by nugetgo-pack.ps1: the packed assemblies' copyright cannot be set beside it" }
+if ($assemblyCopyright.Skip) {
+    if ($ownTargets) { Remove-Item -LiteralPath $moduleTargets }
+    Write-Host "  assembly copyright: the csproj template's ($($assemblyCopyright.Reason))"
+}
+else {
+    [System.IO.File]::WriteAllText($moduleTargets, (New-NugetgoAssemblyMetadataTargets -ModulePath $ModulePath -Copyright $assemblyCopyright.Copyright -Company $Authors -Authors $Authors),
+        (New-Object System.Text.UTF8Encoding($false)))
+    Write-Host "  assembly copyright: $($assemblyCopyright.Copyright)  (set by $moduleTargets)"
+}
 # The description, exactly as ruled (COORD, within B6, 2026-09-30). The Go release is the closure's own (its first three
 # components), never a literal, so the text cannot outlive the corpus it describes. The same two sentences head
 # VALIDATION.md and are the release notes.
@@ -190,15 +215,15 @@ $csproj = @"
     <TargetsForTfmSpecificContentInPackage>`$(TargetsForTfmSpecificContentInPackage);NugetgoModuleAssemblies</TargetsForTfmSpecificContentInPackage>
     <PackageId>$(& $esc $id.Id)</PackageId>
     <Version>$(& $esc $packageVersion)</Version>
-    <Authors>$(& $esc $Authors)</Authors>
-    <Description>$(& $esc $description)</Description>
-    <PackageReleaseNotes>$(& $esc $description)</PackageReleaseNotes>
-    <Copyright>$(& $esc $copyright)</Copyright>
+    <Authors>$(ConvertTo-NugetgoMSBuildLiteral $Authors)</Authors>
+    <Description>$(ConvertTo-NugetgoMSBuildLiteral $description)</Description>
+    <PackageReleaseNotes>$(ConvertTo-NugetgoMSBuildLiteral $description)</PackageReleaseNotes>
+    <Copyright>$(ConvertTo-NugetgoMSBuildLiteral $copyright)</Copyright>
     <PackageLicenseFile>$(& $esc $licenseName)</PackageLicenseFile>
     <PackageReadmeFile>VALIDATION.md</PackageReadmeFile>
-    <RepositoryUrl>$(& $esc $RepositoryUrl)</RepositoryUrl>
+    <RepositoryUrl>$(ConvertTo-NugetgoMSBuildLiteral $RepositoryUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageProjectUrl>$(& $esc $RepositoryUrl)</PackageProjectUrl>
+    <PackageProjectUrl>$(ConvertTo-NugetgoMSBuildLiteral $RepositoryUrl)</PackageProjectUrl>
     <PackageTags>go2cs;golang;go;PROOF</PackageTags>
   </PropertyGroup>
   <ItemGroup>
@@ -270,6 +295,11 @@ try {
     $selfEntry = $zip.Entries | Where-Object { $_.FullName -eq 'go2cs/source-metadata.txt' } | Select-Object -First 1
     $packedSelfDescription = Join-Path $Scratch 'read-back-source-metadata.txt'
     if ($selfEntry) { [System.IO.Compression.ZipFileExtensions]::ExtractToFile($selfEntry, $packedSelfDescription, $true) }
+    $libDir = Join-Path $Scratch 'read-back-lib'
+    if (Test-Path $libDir) { Remove-Item -Recurse -Force $libDir }
+    New-Item -ItemType Directory -Force $libDir | Out-Null
+    $libFiles = @($zip.Entries | Where-Object { $_.FullName -like 'lib/*.dll' } | ForEach-Object {
+        $out = Join-Path $libDir $_.Name; [System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, $out, $true); $out })
 }
 finally { $zip.Dispose() }
 $md = $nuspec.package.metadata
@@ -284,9 +314,28 @@ Write-Host "    description: $($md.description)"
 Write-Host "    pages: $((@($entries | Where-Object { $_ -like '*.md' })) -join ', ')"
 if ($md.id -ne $id.Id -or $md.version -ne $packageVersion) { throw "read-back identity $($md.id) $($md.version) is not $($id.Id) $packageVersion" }
 if ($md.description -cne $description -or $md.releaseNotes -cne $description) { throw 'the read-back description or release notes are not the ruled text' }
+if ($md.copyright -cne $copyright) { throw "the read-back copyright '$($md.copyright)' is not the upstream license file's Copyright lines '$copyright'" }
+# Every free-text value reaches the nuspec intact: the generated project MSBuild-escapes each, so a '$(...)', '@(...)' or
+# '%XX' inside one is text, never an expansion or an escape MSBuild would decode.
+if ($md.authors -cne $Authors) { throw "the read-back authors '$($md.authors)' are not -Authors '$Authors'" }
+# NuGet writes projectUrl through System.Uri, which decodes an escape such as '%20' as it renders: that field is
+# compared as a URI, the repository url (written as given) as text.
+if ($md.repository.url -cne $RepositoryUrl -or ([Uri]$md.projectUrl).AbsoluteUri -cne ([Uri]$RepositoryUrl).AbsoluteUri) { throw "the read-back repository url '$($md.repository.url)' or project url '$($md.projectUrl)' is not -RepositoryUrl '$RepositoryUrl'" }
 if (-not $validationHead.StartsWith("> $description", [StringComparison]::Ordinal)) { throw 'the packed VALIDATION.md does not open with the ruled text' }
 if ($badDeps.Count) { throw "go.* dependencies not at the B4 range: $(($badDeps | ForEach-Object { "$($_.id) $($_.version)" }) -join ', ')" }
 if (@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count -ne $libraries.Count) { throw "lib/ carries $(@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count) assemblies for $($libraries.Count) packages" }
+# Each assembly's copyright and company, read from the dll taken back OUT of the nupkg: its version resource, the
+# values a file's properties show.
+foreach ($dll in $libFiles) {
+    $info = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($dll)
+    Write-Host "    assembly $(Split-Path -Leaf $dll): copyright '$($info.LegalCopyright)', company '$($info.CompanyName)'"
+    if ($assemblyCopyright.Skip) {
+        if (-not ([string]$info.LegalCopyright).Contains('The go2cs Authors')) { throw "$(Split-Path -Leaf $dll) does not keep the csproj template's copyright: '$($info.LegalCopyright)'" }
+    }
+    elseif ($info.LegalCopyright -cne $assemblyCopyright.Copyright -or $info.CompanyName -cne $Authors) {
+        throw "$(Split-Path -Leaf $dll) carries copyright '$($info.LegalCopyright)' and company '$($info.CompanyName)', not '$($assemblyCopyright.Copyright)' and '$Authors'"
+    }
+}
 # S2: the self-description is in the package, byte for byte what was written, and the CONVERTER'S OWN parser reads it.
 if (-not $selfEntry) { throw 'the package carries no go2cs/source-metadata.txt' }
 if ([System.IO.File]::ReadAllText($packedSelfDescription) -cne [System.IO.File]::ReadAllText($selfDescription)) { throw 'the packed go2cs/source-metadata.txt differs from the one written' }
