@@ -19,7 +19,7 @@ internal static ref Δsync.WaitGroup wg => ref Ꮡwg.Value;
     runtime_internal_test_package.NetpollGenericInit();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkNetpollBreak(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkNetpollBreak(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.StartTimer();

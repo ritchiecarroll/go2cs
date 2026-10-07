@@ -723,7 +723,7 @@ internal static @string dddArg(nint a, params ꓸꓸꓸstring bʗp) {
 }
 
 // count returns a channel that will deliver n sequential 1-letter strings starting at "a"
-[MethodImpl(MethodImplOptions.NoInlining)] internal static channel<@string> count(nint n) {
+internal static partial channel<@string> count(nint n) {
     if (n == 0) {
         return default!;
     }
@@ -1923,7 +1923,7 @@ var v = "v";
 internal static readonly @string templHtmlˢ = "templ.html"u8;
 internal static readonly @string templateTemplHtmlˢ = @"{{ template ""templ.html"" .}}"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestEscapeRace(ж<testing.T> Ꮡt) {
+public static partial void TestEscapeRace(ж<testing.T> Ꮡt) {
     var tmpl = New(""u8);
     var (_, err) = tmpl.New(templHtmlˢ).Parse(raceText);
     if (err != default!) {

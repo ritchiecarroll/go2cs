@@ -171,7 +171,7 @@ continueᴛ2:;
 internal static readonly object updateNotGivenˢ = (@string)"-update not given"u8;
 internal static readonly @string exampleTestGoˢ = "example_test.go"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestUpdateExample(ж<testing.T> Ꮡt) {
+public static partial void TestUpdateExample(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

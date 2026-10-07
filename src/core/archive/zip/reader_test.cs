@@ -600,7 +600,7 @@ public static void TestReader(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void readTestZip(ж<testing.T> Ꮡt, ZipTest zt) {
+internal static partial void readTestZip(ж<testing.T> Ꮡt, ZipTest zt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

@@ -170,7 +170,7 @@ public static void TestOnceFuncPanicNil(ж<Δtesting.T> Ꮡt) {
     });
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOnceFuncGoexit(ж<Δtesting.T> Ꮡt) {
+public static partial void TestOnceFuncGoexit(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // If f calls Goexit, the results are unspecified. But check that f doesn't

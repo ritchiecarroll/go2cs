@@ -160,7 +160,7 @@ public static void TestImplicitSendConversion(ж<Δtesting.T> Ꮡt) {
 
 public static void TestImplicitCallConversion(ж<Δtesting.T> Ꮡt) {
     // Arguments must be assignable to parameter types.
-    var fv = ValueOf(Δio.WriteString);
+    var fv = ValueOf((Func<Δio.Writer, @string, (nint, error)>)(Δio.WriteString));
     var b = @new<strings.Builder>();
     fv.Call(new reflectꓸValue[]{ValueOf(b.OrTypedNil()), ValueOf(helloWorldˢ)}.slice());
     if (b.String() != "hello world"u8) {

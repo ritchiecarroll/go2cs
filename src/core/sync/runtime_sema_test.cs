@@ -27,7 +27,7 @@ public static void BenchmarkSemaUncontended(ж<Δtesting.B> Ꮡb) {
     });
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkSema(ж<Δtesting.B> Ꮡb, bool block, bool work) {
+internal static partial void benchmarkSema(ж<Δtesting.B> Ꮡb, bool block, bool work) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();

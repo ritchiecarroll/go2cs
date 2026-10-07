@@ -557,7 +557,7 @@ internal static readonly object deadlineExceededˢ = (@string)"deadline exceeded
     internal nint unknown;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDNSFlood(ж<testing.T> Ꮡt) {
+public static partial void TestDNSFlood(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (!testDNSFlood.Value) {
@@ -1148,7 +1148,7 @@ internal static Func<context.Context, @string, @string, (global::go.net_package.
 
 // TestConcurrentPreferGoResolversDial tests that multiple resolvers with the
 // PreferGo option used concurrently are all dialed properly.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentPreferGoResolversDial(ж<testing.T> Ꮡt) {
+public static partial void TestConcurrentPreferGoResolversDial(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
@@ -1289,7 +1289,7 @@ public static void TestLookupIPAddrPreservesContextValues(ж<testing.T> Ꮡt) {
 }
 
 // Issue 30521: The lookup group should call the resolver for each network.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestLookupIPAddrConcurrentCallsForNetworks(ж<testing.T> Ꮡt) {
+public static partial void TestLookupIPAddrConcurrentCallsForNetworks(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var origTestHookLookupIP = testHookLookupIP;
@@ -1529,7 +1529,7 @@ internal static readonly @string golang1Orgˢ = "golang1.org"u8;
 internal static readonly @string golang2Orgˢ = "golang2.org"u8;
 
 // A context timeout should still return a DNSError.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDNSTimeout(ж<testing.T> Ꮡt) {
+public static partial void TestDNSTimeout(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

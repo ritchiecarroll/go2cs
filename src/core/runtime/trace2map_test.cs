@@ -49,7 +49,7 @@ public static void TestTraceMap(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTraceMapConcurrent(ж<testing.T> Ꮡt) {
+public static partial void TestTraceMapConcurrent(ж<testing.T> Ꮡt) {
     ref var m = ref heap(new global::go.runtime_internal_test_package.TraceMap(), out var Ꮡm);
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     foreach (var i in range(3)) {

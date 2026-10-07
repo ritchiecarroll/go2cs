@@ -1169,7 +1169,7 @@ public static void TestParseDurationRoundTrip(ж<Δtesting.T> Ꮡt) {
 }
 
 // golang.org/issue/4622
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestLocationRace(ж<Δtesting.T> Ꮡt) {
+public static partial void TestLocationRace(ж<Δtesting.T> Ꮡt) {
     time_internal_test_package.ResetLocalOnceForTest(); // reset the Once to trigger the race
     var c = new channel<@string>(1);
     var cʗ1 = c;
@@ -1971,7 +1971,7 @@ public static void TestReadFileLimit(ж<Δtesting.T> Ꮡt) {
 // This test deliberately invokes a race condition.
 // We are testing that we don't crash with "fatal error: panic holding locks",
 // and that we also don't panic.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentTimerReset(ж<Δtesting.T> Ꮡt) {
+public static partial void TestConcurrentTimerReset(ж<Δtesting.T> Ꮡt) {
     const nint goroutines = 8;
     const nint tries = 1000;
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -1995,7 +1995,7 @@ public static void TestReadFileLimit(ж<Δtesting.T> Ꮡt) {
 }
 
 // Issue 37400: panic with "racy use of timers".
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentTimerResetStop(ж<Δtesting.T> Ꮡt) {
+public static partial void TestConcurrentTimerResetStop(ж<Δtesting.T> Ꮡt) {
     UntypedInt goroutines = 8;
     const nint tries = 1000;
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);

@@ -98,7 +98,7 @@ public static void TestConvertMemProfile(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static slice<T> genericAllocFunc<T>(nint n)
+internal static partial slice<T> genericAllocFunc<T>(nint n)
     where T : /* interface{uint32 | uint64} */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
     return new slice<T>(n);
@@ -190,11 +190,11 @@ public static void TestGenericsHashKeyInPprofBuilder(ж<testing.T> Ꮡt) {
 
 internal static slice<byte> sink;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void storeAlloc() {
+internal static partial void storeAlloc() {
     sink = new slice<byte>(16);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void nonRecursiveGenericAllocFunction<CurrentOp, OtherOp>(bool alloc) {
+internal static partial void nonRecursiveGenericAllocFunction<CurrentOp, OtherOp>(bool alloc) {
     if (alloc){
         storeAlloc();
     } else {

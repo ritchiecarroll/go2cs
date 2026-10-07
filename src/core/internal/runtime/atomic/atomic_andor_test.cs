@@ -14,7 +14,7 @@ using go.@internal.runtime;
 
 partial class atomic_test_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAnd32(ж<testing.T> Ꮡt) {
+public static partial void TestAnd32(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint32>(out var Ꮡx);
     x = (uint32)0xffffffffU;
@@ -56,7 +56,7 @@ partial class atomic_test_package {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAnd64(ж<testing.T> Ꮡt) {
+public static partial void TestAnd64(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint64>(out var Ꮡx);
     x = (uint64)0xffffffffffffffffUL;
@@ -99,7 +99,7 @@ partial class atomic_test_package {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOr32(ж<testing.T> Ꮡt) {
+public static partial void TestOr32(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint32>(out var Ꮡx);
     x = (uint32)0;
@@ -138,7 +138,7 @@ partial class atomic_test_package {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOr64(ж<testing.T> Ꮡt) {
+public static partial void TestOr64(ж<testing.T> Ꮡt) {
     // Basic sanity check.
     ref var x = ref heap<uint64>(out var Ꮡx);
     x = (uint64)0;

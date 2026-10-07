@@ -1109,7 +1109,7 @@ public static void TestBestSpeedShiftOffsets(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMaxStackSize(ж<testing.T> Ꮡt) {
+public static partial void TestMaxStackSize(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // This test must not run in parallel with other tests as debug.SetMaxStack

@@ -119,7 +119,7 @@ public static void TestNonNewLogger(ж<testing.T> Ꮡt) {
     Ꮡl.Print(helloˢ);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOutputRace(ж<testing.T> Ꮡt) {
+public static partial void TestOutputRace(ж<testing.T> Ꮡt) {
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var l = New(new log_test_package.bytes_BufferжWriter(Ꮡb), ""u8, 0);
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -311,7 +311,7 @@ internal static (nint, error) Write(this discard _, slice<byte> p) {
 internal static readonly @string prefixˢ = "prefix: "u8;
 internal static readonly @string helloWorldˢ = "hello, world!"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkConcurrent(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkConcurrent(ж<testing.B> Ꮡb) {
     var l = New(new discard(nil), prefixˢ, (nint)((nint)(UntypedInt)((UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | Llongfile) | (nint)Lmsgprefix));
     ref var group = ref heap(new Δsync.WaitGroup(), out var Ꮡgroup);
     for (nint i = Δruntime.NumCPU(); i > 0; i--) {

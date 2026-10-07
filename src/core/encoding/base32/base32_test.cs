@@ -676,7 +676,7 @@ public static void TestDecodeWithWrongPadding(ж<testing.T> Ꮡt) {
     internal error expected;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBufferedDecodingSameError(ж<testing.T> Ꮡt) {
+public static partial void TestBufferedDecodingSameError(ж<testing.T> Ꮡt) {
     var testcases = new TestBufferedDecodingSameError_testcases[]{ // NBSWY3DPO5XXE3DE == helloworld
  // Test with "ZZ" as extra input
 
@@ -751,7 +751,7 @@ public static void TestDecodeWithWrongPadding(ж<testing.T> Ꮡt) {
     internal @string expectedError;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestBufferedDecodingPadding(ж<testing.T> Ꮡt) {
+public static partial void TestBufferedDecodingPadding(ж<testing.T> Ꮡt) {
     var testcases = new TestBufferedDecodingPadding_testcases[]{
         new(new @string[]{
             "I4======"u8,

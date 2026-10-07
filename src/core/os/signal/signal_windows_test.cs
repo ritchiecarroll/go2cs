@@ -71,7 +71,7 @@ func main() {
 
 """u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCtrlBreak(ж<testing.T> Ꮡt) {
+public static partial void TestCtrlBreak(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // create source file

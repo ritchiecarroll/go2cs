@@ -7650,7 +7650,7 @@ public static void TestChanOfDir(ж<Δtesting.T> Ꮡt) {
 
 [GoLocalName("T")] [GoType("ж<uintptr>")] internal partial class TestChanOfGC_T;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestChanOfGC(ж<Δtesting.T> Ꮡt) {
+public static partial void TestChanOfGC(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var done = new channel<bool>(1);
@@ -8752,7 +8752,7 @@ internal static slice<byte> trimBitmap(slice<byte> b) {
     return b;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void verifyGCBits(ж<Δtesting.T> Ꮡt, reflectꓸType typ, slice<byte> bits) {
+internal static partial void verifyGCBits(ж<Δtesting.T> Ꮡt, reflectꓸType typ, slice<byte> bits) {
     var heapBits = reflect_internal_test_package.GCBits(New(typ).Interface());
     // Trim scalars at the end, as bits might end in zero,
     // e.g. with rep(2, lit(1, 0)).
@@ -8771,7 +8771,7 @@ internal static slice<byte> trimBitmap(slice<byte> b) {
     Ꮡt.Errorf("line %d: heapBits incorrect for %v\nhave %v\nwant %v"u8, line, typ, heapBits, bits);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void verifyGCBitsSlice(ж<Δtesting.T> Ꮡt, reflectꓸType typ, nint cap, slice<byte> bits) {
+internal static partial void verifyGCBitsSlice(ж<Δtesting.T> Ꮡt, reflectꓸType typ, nint cap, slice<byte> bits) {
     // Creating a slice causes the runtime to repeat a bitmap,
     // which exercises a different path from making the compiler
     // repeat a bitmap for a small array or executing a repeat in
@@ -9194,7 +9194,7 @@ public static void TestTypeStrings(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestOffsetLock(ж<Δtesting.T> Ꮡt) {
+public static partial void TestOffsetLock(ж<Δtesting.T> Ꮡt) {
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < 4; i++) {
         nint iΔ1 = i;
@@ -10410,7 +10410,7 @@ public static void TestValue_EqualNonComparable(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestInitFuncTypes(ж<Δtesting.T> Ꮡt) {
+public static partial void TestInitFuncTypes(ж<Δtesting.T> Ꮡt) {
     nint n = 100;
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(n);

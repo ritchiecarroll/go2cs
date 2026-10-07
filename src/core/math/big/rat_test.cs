@@ -758,7 +758,7 @@ public static void TestIssue34919(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDenomRace(ж<testing.T> Ꮡt) {
+public static partial void TestDenomRace(ж<testing.T> Ꮡt) {
     var x = NewRat(1, 2);
     const nint N = 3;
     var c = new channel<bool>(N);

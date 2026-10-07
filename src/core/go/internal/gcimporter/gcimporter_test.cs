@@ -872,7 +872,7 @@ type S struct {
 
 """u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestIssue69912(ж<testing.T> Ꮡt) {
+public static partial void TestIssue69912(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
     // This package only handles gc export data.
     if (runtime.Compiler != "gc") {

@@ -357,7 +357,7 @@ public static void TestPacketConnClose(ж<testing.T> Ꮡt) {
 }
 
 // See golang.org/issue/6163, golang.org/issue/6987.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAcceptIgnoreAbortedConnRequest(ж<testing.T> Ꮡt) {
+public static partial void TestAcceptIgnoreAbortedConnRequest(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
@@ -508,7 +508,7 @@ public static void TestZeroByteRead(ж<testing.T> Ꮡt) {
 // withTCPConnPair sets up a TCP connection between two peers, then
 // runs peer1 and peer2 concurrently. withTCPConnPair returns when
 // both have completed.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void withTCPConnPair(ж<testing.T> Ꮡt, Func<ж<global::go.net_package.TCPConn>, error> peer1, Func<ж<global::go.net_package.TCPConn>, error> peer2) {
+internal static partial void withTCPConnPair(ж<testing.T> Ꮡt, Func<ж<global::go.net_package.TCPConn>, error> peer1, Func<ж<global::go.net_package.TCPConn>, error> peer2) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Helper();
@@ -640,7 +640,7 @@ internal static readonly object readSucceededˢ = (@string)"Read succeeded unexp
 internal static readonly object readUnexpectedlyReturnedˢ = (@string)"Read unexpectedly returned io.EOF after socket was abruptly closed"u8;
 
 // Issue 24808: verify that ECONNRESET is not temporary for read.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestNotTemporaryRead(ж<testing.T> Ꮡt) {
+public static partial void TestNotTemporaryRead(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();

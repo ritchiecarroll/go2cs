@@ -63,7 +63,7 @@ public static void TestOpenAndNonOpenDefers(ж<testing.T> Ꮡt) {
 internal static readonly object expectedTestOpenPanicˢ = (@string)"expected testOpen panic"u8;
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testOpen(ж<testing.T> Ꮡt, nint arg) {
+internal static partial void testOpen(ж<testing.T> Ꮡt, nint arg) {
     GoFrame ᒐ = default;
     try {
         defer((nint n) => {
@@ -266,7 +266,7 @@ internal static nint globint2;
 internal static nint globint3;
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static int64 sideeffect(int64 n) {
+internal static partial int64 sideeffect(int64 n) {
     globint2++;
     return n;
 }
@@ -335,7 +335,7 @@ public static void TestNonSSAableArgs(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void doPanic() {
+internal static partial void doPanic() {
     throw panic("Test panic");
 }
 
@@ -449,11 +449,11 @@ public static void TestIssue37688(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static void method1(this ref foo f) {
+[GoRecv] internal static partial void method1(this ref foo f) {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static void method2(this ref foo f) {
+[GoRecv] internal static partial void method2(this ref foo f) {
 }
 
 internal static void g2() {

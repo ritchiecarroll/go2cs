@@ -29,7 +29,7 @@ internal static void checkWrite(ж<testing.T> Ꮡt, Δio.Writer w, slice<byte> d
 }
 
 // Test a single read/write pair.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipe1(ж<testing.T> Ꮡt) {
+public static partial void TestPipe1(ж<testing.T> Ꮡt) {
     var c = new channel<nint>(0);
     var (r, w) = Pipe();
     slice<byte> buf = new slice<byte>(64);
@@ -62,7 +62,7 @@ internal static void reader(ж<testing.T> Ꮡt, Δio.Reader r, channel<nint> c) 
 }
 
 // Test a sequence of read/write pairs.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipe2(ж<testing.T> Ꮡt) {
+public static partial void TestPipe2(ж<testing.T> Ꮡt) {
     var c = new channel<nint>(0);
     var (r, w) = Pipe();
     goǃ(reader, Ꮡt, new Δio.PipeReaderжReader(r), c);
@@ -100,7 +100,7 @@ internal static void writer(Δio.WriteCloser w, slice<byte> buf, channel<pipeRet
     c.ᐸꟷ(new pipeReturn(n, err));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipe3(ж<testing.T> Ꮡt) {
+public static partial void TestPipe3(ж<testing.T> Ꮡt) {
     var c = new channel<pipeReturn>(0);
     var (r, w) = Pipe();
     slice<byte> wdat = new slice<byte>(128);
@@ -185,7 +185,7 @@ internal static void delayClose(ж<testing.T> Ꮡt, closer cl, channel<nint> ch,
     ch.ᐸꟷ(0);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipeReadClose(ж<testing.T> Ꮡt) {
+public static partial void TestPipeReadClose(ж<testing.T> Ꮡt) {
     foreach (var (_, vᴛ1) in pipeTests) {
         ref var tt = ref heap(new pipeTest(), out var Ꮡtt);
         tt = vᴛ1;
@@ -219,7 +219,7 @@ internal static void delayClose(ж<testing.T> Ꮡt, closer cl, channel<nint> ch,
 }
 
 // Test close on Read side during Read.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipeReadClose2(ж<testing.T> Ꮡt) {
+public static partial void TestPipeReadClose2(ж<testing.T> Ꮡt) {
     var c = new channel<nint>(1);
     var (r, _) = Pipe();
     goǃ(delayClose, Ꮡt, new io_test_package.io_PipeReaderжcloser(r), c, new pipeTest(nil));
@@ -234,7 +234,7 @@ internal static void delayClose(ж<testing.T> Ꮡt, closer cl, channel<nint> ch,
 internal static readonly @string helloWorldˢ3 = "hello, world"u8;
 
 // Test write after/before reader close.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipeWriteClose(ж<testing.T> Ꮡt) {
+public static partial void TestPipeWriteClose(ж<testing.T> Ꮡt) {
     foreach (var (_, vᴛ1) in pipeTests) {
         ref var tt = ref heap(new pipeTest(), out var Ꮡtt);
         tt = vᴛ1;
@@ -267,7 +267,7 @@ internal static readonly @string helloWorldˢ3 = "hello, world"u8;
 }
 
 // Test close on Write side during Write.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPipeWriteClose2(ж<testing.T> Ꮡt) {
+public static partial void TestPipeWriteClose2(ж<testing.T> Ꮡt) {
     var c = new channel<nint>(1);
     var (_, w) = Pipe();
     goǃ(delayClose, Ꮡt, new io_test_package.io_PipeWriterжcloser(w), c, new pipeTest(nil));
@@ -278,7 +278,7 @@ internal static readonly @string helloWorldˢ3 = "hello, world"u8;
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWriteEmpty(ж<testing.T> Ꮡt) {
+public static partial void TestWriteEmpty(ж<testing.T> Ꮡt) {
     var (r, w) = Pipe();
     var wʗ1 = w;
     goǃ(() => {
@@ -290,7 +290,7 @@ internal static readonly @string helloWorldˢ3 = "hello, world"u8;
     r.Close();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWriteNil(ж<testing.T> Ꮡt) {
+public static partial void TestWriteNil(ж<testing.T> Ꮡt) {
     var (r, w) = Pipe();
     var wʗ1 = w;
     goǃ(() => {
@@ -302,7 +302,7 @@ internal static readonly @string helloWorldˢ3 = "hello, world"u8;
     r.Close();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWriteAfterWriterClose(ж<testing.T> Ꮡt) {
+public static partial void TestWriteAfterWriterClose(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (r, w) = Pipe();

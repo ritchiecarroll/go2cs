@@ -22,7 +22,7 @@ internal static httpPkg http;
 
 // This example fetches several URLs concurrently,
 // using a WaitGroup to block until all the fetches are complete.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleWaitGroup() {
+public static partial void ExampleWaitGroup() {
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     slice<@string> urls = new @string[]{
         "http://www.golang.org/"u8,
@@ -52,7 +52,7 @@ internal static httpPkg http;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object onlyOnceˢ = (@string)"Only once"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleOnce() {
+public static partial void ExampleOnce() {
     ref var once = ref heap(new Δsync.Once(), out var Ꮡonce);
     var onceBody = () => {
         fmt.Println(onlyOnceˢ);
@@ -81,7 +81,7 @@ internal static readonly object gotˢ = (@string)"got"u8;
 
 // This example uses OnceValue to perform an "expensive" computation just once,
 // even when used concurrently.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleOnceValue() {
+public static partial void ExampleOnceValue() {
     var once = Δsync.OnceValue(nint () => {
         nint sum = 0;
         for (nint i = 0; i < 1000; i++) {
@@ -117,7 +117,7 @@ internal static readonly object errorˢ = (@string)"error:"u8;
 // Computed once: 499500
 
 // This example uses OnceValues to read a file just once.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void ExampleOnceValues() {
+public static partial void ExampleOnceValues() {
     var once = Δsync.OnceValues((slice<byte>, error) () => {
         fmt.Println(readingFileOnceˢ);
         return Δos.ReadFile(exampleTestGoˢ);

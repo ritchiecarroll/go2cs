@@ -700,7 +700,7 @@ internal static ж<url.URL> mustParseURL(@string s) {
 
 internal delegate (nint, error) writerFunc(slice<byte> _);
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, error) Write(this writerFunc f, slice<byte> p) {
+internal static partial (nint, error) Write(this writerFunc f, slice<byte> p) {
     return f(p);
 }
 
@@ -771,7 +771,7 @@ internal static readonly @string http11204NoContentˢ = "HTTP/1.1 204 No Content
 // Unlike the original, this version doesn't mutate the req.Body and
 // try to restore it. It always dumps the whole body.
 // And it doesn't support https.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (slice<byte>, error) dumpRequestOut(ж<global::go.net.http_package.Request> Ꮡreq, Action onReadHeaders) {
+internal static partial (slice<byte>, error) dumpRequestOut(ж<global::go.net.http_package.Request> Ꮡreq, Action onReadHeaders) {
     GoFrame ᒐ = default;
     try {
         // Use the actual Transport code to record what we would send

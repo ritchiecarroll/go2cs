@@ -808,7 +808,7 @@ internal static slice<T> genValues<T>(nint start, nint end) {
 // Avoid inlining to force a heap allocation.
 //
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<T> newSink<T>() {
+internal static partial ж<T> newSink<T>() {
     return @new<T>();
 }
 
@@ -845,7 +845,7 @@ internal static void checkAllocSize<K, E>(ж<testing.B> Ꮡb, nint n) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkMapIter<K, E>(ж<testing.B> Ꮡb, nint n) {
+internal static partial void benchmarkMapIter<K, E>(ж<testing.B> Ꮡb, nint n) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     checkAllocSize<K, E>(Ꮡb, n);
@@ -889,7 +889,7 @@ public static void BenchmarkMapIter(ж<testing.B> Ꮡb) {
     Ꮡb.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapIter<int32, ж<int32>>));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkMapIterLowLoad<K, E>(ж<testing.B> Ꮡb, nint n) {
+internal static partial void benchmarkMapIterLowLoad<K, E>(ж<testing.B> Ꮡb, nint n) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Only insert one entry regardless of map size.
@@ -927,7 +927,7 @@ public static void BenchmarkMapIterLowLoad(ж<testing.B> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object canTAccessEmptyMapˢ = (@string)"can't access empty map"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkMapAccessHit<K, E>(ж<testing.B> Ꮡb, nint n) {
+internal static partial void benchmarkMapAccessHit<K, E>(ж<testing.B> Ꮡb, nint n) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (n == 0) {

@@ -799,7 +799,7 @@ internal static @string dddArg(nint a, params ꓸꓸꓸstring bʗp) {
 }
 
 // count returns a channel that will deliver n sequential 1-letter strings starting at "a"
-[MethodImpl(MethodImplOptions.NoInlining)] internal static channel<@string> count(nint n) {
+internal static partial channel<@string> count(nint n) {
     if (n == 0) {
         return default!;
     }
@@ -2122,7 +2122,7 @@ internal static readonly @string templateBarˢ = @"{{ template ""bar"" . }}"u8;
 internal static readonly @string barˢ = "bar"u8;
 
 // Issue 39807: data race in html/template & text/template
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestIssue39807(ж<testing.T> Ꮡt) {
+public static partial void TestIssue39807(ж<testing.T> Ꮡt) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     var (tplFoo, err) = New(fooˢ).Parse(templateBarˢ);
     if (err != default!) {

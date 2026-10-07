@@ -211,7 +211,7 @@ internal static handlerTest newHandlerTest(httpꓸHandler h) {
     return new handlerTest(handler: h);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string rawResponse(this ж<handlerTest> Ꮡht, @string req) {
+internal static partial @string rawResponse(this ж<handlerTest> Ꮡht, @string req) {
     ref var ht = ref Ꮡht.DerefOrNull();
 
     var reqb = reqBytes(req);
@@ -235,7 +235,7 @@ internal static handlerTest newHandlerTest(httpꓸHandler h) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object gotNilFirstRequestˢ = (@string)"Got nil first request."u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConsumingBodyOnNextConn(ж<testing.T> Ꮡt) {
+public static partial void TestConsumingBodyOnNextConn(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
@@ -853,7 +853,7 @@ internal static void testServerTimeouts(ж<testing.T> Ꮡt, testMode mode) {
 internal static readonly @string req1ˢ = "req=1"u8;
 internal static readonly @string req2ˢ = "req=2"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static error testServerTimeoutsWithTimeout(ж<testing.T> Ꮡt, time.Duration timeout, testMode mode) {
+internal static partial error testServerTimeoutsWithTimeout(ж<testing.T> Ꮡt, time.Duration timeout, testMode mode) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -1808,7 +1808,7 @@ public static void TestServerAllowsBlockingRemoteAddr(ж<testing.T> Ꮡt) {
 internal static readonly @string ra1212121212ˢ = "RA:12.12.12.12:12"u8;
 internal static readonly @string ra2121212121ˢ = "RA:21.21.21.21:21"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testServerAllowsBlockingRemoteAddr(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testServerAllowsBlockingRemoteAddr(ж<testing.T> Ꮡt, testMode mode) {
     var conns = new channel<net.Conn>(0);
     var connsʗ1 = conns;
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
@@ -2055,7 +2055,7 @@ internal static void testTLSServer(ж<testing.T> Ꮡt, testMode mode) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServeTLS(ж<testing.T> Ꮡt) {
+public static partial void TestServeTLS(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         http_internal_test_package.CondSkipHTTP2(new http_test_package.testing_TжTB(Ꮡt));
@@ -2274,7 +2274,7 @@ public static void TestAutomaticHTTP2_ListenAndServe_GetConfigForClient(ж<testi
     )));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testAutomaticHTTP2_ListenAndServe(ж<testing.T> Ꮡt, ж<tls.Config> ᏑtlsConf) {
+internal static partial void testAutomaticHTTP2_ListenAndServe(ж<testing.T> Ꮡt, ж<tls.Config> ᏑtlsConf) {
     GoFrame ᒐ = default;
     try {
         http_internal_test_package.CondSkipHTTP2(new http_test_package.testing_TжTB(Ꮡt));
@@ -2513,7 +2513,7 @@ internal static void testServerExpect(ж<testing.T> Ꮡt, testMode mode) {
 
 // Under a ~256KB (maxPostHandlerReadBytes) threshold, the server
 // should consume client request bodies that a handler didn't read.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServerUnreadRequestBodyLittle(ж<testing.T> Ꮡt) {
+public static partial void TestServerUnreadRequestBodyLittle(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         setParallel(Ꮡt);
@@ -2574,7 +2574,7 @@ internal static void testServerExpect(ж<testing.T> Ꮡt, testMode mode) {
 // Over a ~256KB (maxPostHandlerReadBytes) threshold, the server
 // should ignore client request bodies that a handler didn't read
 // and close the connection.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServerUnreadRequestBodyLarge(ж<testing.T> Ꮡt) {
+public static partial void TestServerUnreadRequestBodyLarge(ж<testing.T> Ꮡt) {
     setParallel(Ꮡt);
     if (testing.Short() && testenv.Builder() == ""u8) {
         Ꮡt.Log(skippingInShortModeˢ);
@@ -2718,7 +2718,7 @@ public static void TestHandlerBodyClose(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string getHttp11HostTestˢ = "GET / HTTP/1.1\r\nHost: test\r\n\r\n"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testHandlerBodyClose(ж<testing.T> Ꮡt, nint i, handlerBodyCloseTest tt) {
+internal static partial void testHandlerBodyClose(ж<testing.T> Ꮡt, nint i, handlerBodyCloseTest tt) {
     var conn = @new<testConn>();
     @string body = strings.Repeat("x"u8, tt.bodySize);
     if (tt.bodyChunked){
@@ -2796,7 +2796,7 @@ internal static slice<testHandlerBodyConsumer> testHandlerBodyConsumers = new te
 internal static readonly @string secretˢ = "secret"u8;
 internal static readonly object requestForSecretˢ = (@string)"Request for /secret encountered, should not have happened."u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRequestBodyReadErrorClosesConnection(ж<testing.T> Ꮡt) {
+public static partial void TestRequestBodyReadErrorClosesConnection(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         setParallel(Ꮡt);
@@ -2829,7 +2829,7 @@ internal static readonly object requestForSecretˢ = (@string)"Request for /secr
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestInvalidTrailerClosesConnection(ж<testing.T> Ꮡt) {
+public static partial void TestInvalidTrailerClosesConnection(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         setParallel(Ꮡt);
@@ -2983,7 +2983,7 @@ restart:
     return (len(b), default!);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRequestBodyTimeoutClosesConnection(ж<testing.T> Ꮡt) {
+public static partial void TestRequestBodyTimeoutClosesConnection(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
@@ -3123,7 +3123,7 @@ public static void TestTimeoutHandlerRace(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testTimeoutHandlerRace(Δp0, Δp1));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTimeoutHandlerRace(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testTimeoutHandlerRace(ж<testing.T> Ꮡt, testMode mode) {
     var delayHi = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         var (ms, _) = strconv.Atoi((~(~r).URL).Path[1..]);
         if (ms == 0) {
@@ -3176,7 +3176,7 @@ public static void TestTimeoutHandlerRaceHeader(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testTimeoutHandlerRaceHeader(Δp0, Δp1));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTimeoutHandlerRaceHeader(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testTimeoutHandlerRaceHeader(ж<testing.T> Ꮡt, testMode mode) {
     var delay204 = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.WriteHeader(204);
     });
@@ -3626,7 +3626,7 @@ public static void TestHandlerPanicWithHijack(ж<testing.T> Ꮡt) {
     }, new testMode[]{http1Mode}.slice());
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testHandlerPanic(ж<testing.T> Ꮡt, bool withHijack, testMode mode, Func<httpꓸHandler, httpꓸHandler> wrapper, any panicValue) {
+internal static partial void testHandlerPanic(ж<testing.T> Ꮡt, bool withHijack, testMode mode, Func<httpꓸHandler, httpꓸHandler> wrapper, any panicValue) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -4055,7 +4055,7 @@ internal static void testClientWriteShutdown(ж<testing.T> Ꮡt, testMode mode) 
 
 // Tests that chunked server responses that write 1 byte at a time are
 // buffered before chunk headers are added, not after chunk headers.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServerBufferedChunking(ж<testing.T> Ꮡt) {
+public static partial void TestServerBufferedChunking(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var conn = @new<testConn>();
@@ -4233,7 +4233,7 @@ public static void TestCloseNotifier(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testCloseNotifier(Δp0, Δp1), new testMode[]{http1Mode}.slice());
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testCloseNotifier(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testCloseNotifier(ж<testing.T> Ꮡt, testMode mode) {
     var gotReq = new channel<bool>(1);
     var sawClose = new channel<bool>(1);
     var gotReqʗ1 = gotReq;
@@ -4295,7 +4295,7 @@ internal static readonly object tooManyRequestsˢ = (@string)"too many requests"
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string reqᶜ = "GET / HTTP/1.1\r\nConnection: keep-alive\r\nHost: foo\r\n\r\n"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testCloseNotifierPipelined(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testCloseNotifierPipelined(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         var gotReq = new channel<bool>(2);
@@ -4365,7 +4365,7 @@ internal static readonly @string reqᶜ = "GET / HTTP/1.1\r\nConnection: keep-al
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string getHttp10HostGolangOrgˢ = "GET / HTTP/1.0\nHost: golang.org"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCloseNotifierChanLeak(ж<testing.T> Ꮡt) {
+public static partial void TestCloseNotifierChanLeak(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -4876,7 +4876,7 @@ public static void TestAcceptMaxFds(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string hijackToBufwHijackToConnˢ = "[hijack-to-bufw][hijack-to-conn]"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWriteAfterHijack(ж<testing.T> Ꮡt) {
+public static partial void TestWriteAfterHijack(ж<testing.T> Ꮡt) {
     var req = reqBytes(getHttp11HostGolangOrgˢ);
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var wrotec = new channel<bool>(1);
@@ -4915,7 +4915,7 @@ internal static readonly @string hijackToBufwHijackToConnˢ = "[hijack-to-bufw][
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDoubleHijack(ж<testing.T> Ꮡt) {
+public static partial void TestDoubleHijack(ж<testing.T> Ꮡt) {
     var req = reqBytes(getHttp11HostGolangOrgˢ);
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var conn = Ꮡ(new rwTestConn(
@@ -5232,7 +5232,7 @@ public static void TestRequestBodyCloseDoesntBlock(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object readWasNilExpectedErrorˢ = (@string)"Read was nil. Expected error."u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testRequestBodyCloseDoesntBlock(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testRequestBodyCloseDoesntBlock(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
@@ -5566,7 +5566,7 @@ public static void TestServerEmptyBodyRace(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testServerEmptyBodyRace(Δp0, Δp1));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testServerEmptyBodyRace(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testServerEmptyBodyRace(ж<testing.T> Ꮡt, testMode mode) {
     ref var n = ref heap(new int32(), out var Ꮡn);
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter rw, ж<Δhttp.Request> req) => {
         atomic.AddInt32(Ꮡn, 1);
@@ -5729,7 +5729,7 @@ public static void TestServerKeepAliveAfterWriteError(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testServerKeepAliveAfterWriteError(Δp0, Δp1), new testMode[]{http1Mode}.slice());
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testServerKeepAliveAfterWriteError(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testServerKeepAliveAfterWriteError(ж<testing.T> Ꮡt, testMode mode) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ2);
     }
@@ -5844,7 +5844,7 @@ internal static void testNoContentLengthIfTransferEncoding(ж<testing.T> Ꮡt, t
 
 // tolerate extra CRLF(s) before Request-Line on subsequent requests on a conn
 // Issue 10876.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTolerateCRLFBeforeRequestLine(ж<testing.T> Ꮡt) {
+public static partial void TestTolerateCRLFBeforeRequestLine(ж<testing.T> Ꮡt) {
     var req = slice<byte>((@string)("POST / HTTP/1.1\r\nHost: golang.org\r\nContent-Length: 3\r\n\r\nABC"u8 + "\r\n\r\n"u8 + "GET / HTTP/1.1\r\nHost: golang.org\r\n\r\n"u8));
     // <-- this stuff is bogus, but we'll ignore it
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
@@ -5880,7 +5880,7 @@ HelloWorld
 """u8;
 internal static readonly object expectHeaderShouldNotBeˢ = (@string)"Expect header should not be filtered out"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestIssue13893_Expect100(ж<testing.T> Ꮡt) {
+public static partial void TestIssue13893_Expect100(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // test that the Server doesn't filter out Expect headers.
@@ -5925,7 +5925,7 @@ Host: foo
 """u8;
 internal static readonly @string helloWorldˢ4 = "Hello world!"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestIssue11549_Expect100(ж<testing.T> Ꮡt) {
+public static partial void TestIssue11549_Expect100(ж<testing.T> Ꮡt) {
     var req = reqBytes(putReadbodyHttp11Userˢ2);
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var conn = Ꮡ(new rwTestConn(
@@ -5953,7 +5953,7 @@ internal static readonly @string helloWorldˢ4 = "Hello world!"u8;
 
 // If a Handler finishes and there's an unread request body,
 // verify the server implicitly tries to do a read on it before replying.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestHandlerFinishSkipBigContentLengthRead(ж<testing.T> Ꮡt) {
+public static partial void TestHandlerFinishSkipBigContentLengthRead(ж<testing.T> Ꮡt) {
     setParallel(Ꮡt);
     var conn = newTestConn();
     conn.of(testConn.ᏑreadBuf).WriteString(
@@ -6019,7 +6019,7 @@ internal static readonly @string httpˢ3 = "HTTP/"u8;
 
 // Test that we validate the Host header.
 // Issue 11206 (invalid bytes in Host) and 13624 (Host present in HTTP/1.1)
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServerValidatesHostHeader(ж<testing.T> Ꮡt) {
+public static partial void TestServerValidatesHostHeader(ж<testing.T> Ꮡt) {
     var tests = new TestServerValidatesHostHeader_tests[]{
         new("HTTP/0.9"u8, ""u8, 505),
         new("HTTP/1.1"u8, ""u8, 400),
@@ -6149,7 +6149,7 @@ internal static void testServerHandlersCanHandleH2PRI(ж<testing.T> Ꮡt, testMo
 
 // Test that we validate the valid bytes in HTTP/1 headers.
 // Issue 11207.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServerValidatesHeaders(ж<testing.T> Ꮡt) {
+public static partial void TestServerValidatesHeaders(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     setParallel(Ꮡt);
@@ -6557,7 +6557,7 @@ internal static readonly @string testBenchBenchmarkClientˢ = "-test.bench=^Benc
 
 // A benchmark for profiling the client without the HTTP server code.
 // The server code runs in a subprocess.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkClient(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkClient(ж<testing.B> Ꮡb) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -6730,7 +6730,7 @@ Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3
 
 """u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkServerFakeConnWithKeepAlive(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkServerFakeConnWithKeepAlive(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
@@ -6765,7 +6765,7 @@ Host: golang.org
 
 // same as above, but representing the most simple possible request
 // and handler. Notably: the handler does not call rw.Header().
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkServerFakeConnWithKeepAliveLite(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkServerFakeConnWithKeepAliveLite(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
@@ -6830,7 +6830,7 @@ public static void BenchmarkServerHandlerNoHeader(ж<testing.B> Ꮡb) {
     })));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkHandler(ж<testing.B> Ꮡb, httpꓸHandler h) {
+internal static partial void benchmarkHandler(ж<testing.B> Ꮡb, httpꓸHandler h) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
@@ -6910,7 +6910,7 @@ internal static void benchmarkCloseNotifier(ж<testing.B> Ꮡb, testMode mode) {
 }
 
 // Verify this doesn't race (Issue 16505)
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentServerServe(ж<testing.T> Ꮡt) {
+public static partial void TestConcurrentServerServe(ж<testing.T> Ꮡt) {
     setParallel(Ꮡt);
     for (nint i = 0; i < 100; i++) {
         var ln1 = Ꮡ(new oneConnListener(conn: default!));
@@ -7444,7 +7444,7 @@ public static void TestServerDuplicateBackgroundRead(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testServerDuplicateBackgroundRead(Δp0, Δp1), new testMode[]{http1Mode}.slice());
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testServerDuplicateBackgroundRead(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testServerDuplicateBackgroundRead(ж<testing.T> Ꮡt, testMode mode) {
     if (runtime.GOOS == "netbsd"u8 && runtime.GOARCH == "arm"u8) {
         testenv.SkipFlaky(new http_test_package.testing_TжTB(Ꮡt), 24826);
     }
@@ -7658,7 +7658,7 @@ internal static void testServerHijackGetsBackgroundByte_big(ж<testing.T> Ꮡt, 
 }
 
 // Issue 18319: test that the Server validates the request method.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServerValidatesMethod(ж<testing.T> Ꮡt) {
+public static partial void TestServerValidatesMethod(ж<testing.T> Ꮡt) {
     var tests = new TestServerValidatesMethod_tests[]{
         new("GET"u8, 200),
         new("GE(T"u8, 400)
@@ -7727,7 +7727,7 @@ internal static error Close(this ж<countCloseListener> Ꮡp) {
 }
 
 // Issue 24803: don't call Listener.Close on Server.Shutdown.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServerCloseListenerOnce(ж<testing.T> Ꮡt) {
+public static partial void TestServerCloseListenerOnce(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         setParallel(Ꮡt);
@@ -8046,7 +8046,7 @@ internal static readonly @string timedOutHereˢ = "timed out here!"u8;
     internal @string wantResp;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTimeoutHandlerSuperfluousLogs(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testTimeoutHandlerSuperfluousLogs(ж<testing.T> Ꮡt, testMode mode) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (testing.Short()) {
@@ -9007,7 +9007,7 @@ public static void TestServerTLSNextProtos(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testServerTLSNextProtos(Δp0, Δp1), new testMode[]{https1Mode, http2Mode}.slice());
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testServerTLSNextProtos(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testServerTLSNextProtos(ж<testing.T> Ꮡt, testMode mode) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     http_internal_test_package.CondSkipHTTP2(new http_test_package.testing_TжTB(Ꮡt));

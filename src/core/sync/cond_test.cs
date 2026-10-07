@@ -18,7 +18,7 @@ partial class sync_test_package {
 internal static readonly object goroutineNotAsleepˢ = (@string)"goroutine not asleep"u8;
 internal static readonly object tooManyGoroutinesAwakeˢ = (@string)"too many goroutines awake"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCondSignal(ж<Δtesting.T> Ꮡt) {
+public static partial void TestCondSignal(ж<Δtesting.T> Ꮡt) {
     ref var m = ref heap(new Δsync.Mutex(), out var Ꮡm);
     var c = NewCond(new Δsync.MutexжLocker(Ꮡm));
     nint n = 2;
@@ -67,7 +67,7 @@ internal static readonly object tooManyGoroutinesAwakeˢ = (@string)"too many go
     c.Signal();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCondSignalGenerations(ж<Δtesting.T> Ꮡt) {
+public static partial void TestCondSignalGenerations(ж<Δtesting.T> Ꮡt) {
     ref var m = ref heap(new Δsync.Mutex(), out var Ꮡm);
     var c = NewCond(new Δsync.MutexжLocker(Ꮡm));
     nint n = 100;
@@ -101,7 +101,7 @@ internal static readonly object tooManyGoroutinesAwakeˢ = (@string)"too many go
 internal static readonly object goroutineWokeUpTwiceˢ = (@string)"goroutine woke up twice"u8;
 internal static readonly object goroutineDidNotExitˢ = (@string)"goroutine did not exit"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCondBroadcast(ж<Δtesting.T> Ꮡt) {
+public static partial void TestCondBroadcast(ж<Δtesting.T> Ꮡt) {
     ref var m = ref heap(new Δsync.Mutex(), out var Ꮡm);
     var c = NewCond(new Δsync.MutexжLocker(Ꮡm));
     nint n = 200;
@@ -168,7 +168,7 @@ internal static readonly object goroutineDidNotExitˢ = (@string)"goroutine did 
 internal static readonly object want2ˢ = (@string)"want 2"u8;
 internal static readonly object want3ˢ = (@string)"want 3"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRace(ж<Δtesting.T> Ꮡt) {
+public static partial void TestRace(ж<Δtesting.T> Ꮡt) {
     nint x = 0;
     var c = NewCond(new Δsync.MutexжLocker(Ꮡ(new Mutex(nil))));
     var done = new channel<bool>(0);
@@ -230,7 +230,7 @@ internal static readonly object want3ˢ = (@string)"want 3"u8;
     ᐸꟷ(done);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCondSignalStealing(ж<Δtesting.T> Ꮡt) {
+public static partial void TestCondSignalStealing(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     for (nint iters = 0; iters < 1000; iters++) {
@@ -327,7 +327,7 @@ public static void BenchmarkCond32(ж<Δtesting.B> Ꮡb) {
     benchmarkCond(Ꮡb, 32);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkCond(ж<Δtesting.B> Ꮡb, nint waiters) {
+internal static partial void benchmarkCond(ж<Δtesting.B> Ꮡb, nint waiters) {
     var c = NewCond(new Δsync.MutexжLocker(Ꮡ(new Mutex(nil))));
     var done = new channel<bool>(0);
     nint id = 0;

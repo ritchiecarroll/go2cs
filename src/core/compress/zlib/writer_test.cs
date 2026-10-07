@@ -50,7 +50,7 @@ internal static void testFileLevelDict(ж<testing.T> Ꮡt, @string fn, nint leve
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testLevelDict(ж<testing.T> Ꮡt, @string fn, slice<byte> b0, nint level, @string d) {
+internal static partial void testLevelDict(ж<testing.T> Ꮡt, @string fn, slice<byte> b0, nint level, @string d) {
     GoFrame ᒐ = default;
     try {
         // Make dictionary, if given.

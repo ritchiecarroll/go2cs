@@ -69,7 +69,7 @@ public static void TestDefaultRace(ж<testing.T> Ꮡt) {
 // top-level math/rand functions. Make sure that we can make concurrent
 // calls to top-level functions and to Seed without any duplicate values.
 // This will also give the race detector a change to report any problems.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void doDefaultTest(ж<testing.T> Ꮡt, @string v) {
+internal static partial void doDefaultTest(ж<testing.T> Ꮡt, @string v) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var (code, err) = strconv.Atoi(v);

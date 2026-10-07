@@ -26,7 +26,7 @@ internal static readonly object slowTestSkippingˢ = (@string)"slow test; skippi
 internal static readonly @string testExeˢ = "test.exe"u8;
 internal static readonly @string testRunˢ = "-test.run=^$"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestRemoveAllWithExecutedProcess(ж<Δtesting.T> Ꮡt) {
+public static partial void TestRemoveAllWithExecutedProcess(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

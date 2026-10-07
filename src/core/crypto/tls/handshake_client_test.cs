@@ -303,7 +303,7 @@ internal static (slice<slice<byte>> flows, error err) loadData(this ж<clientTes
     ᒐdone: return (flows, err);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void run(this ж<clientTest> Ꮡtest, ж<testing.T> Ꮡt, bool write) {
+internal static partial void run(this ж<clientTest> Ꮡtest, ж<testing.T> Ꮡt, bool write) {
     GoFrame ᒐ = default;
     try {
         ref var test = ref Ꮡtest.DerefOrNull();
@@ -1218,7 +1218,7 @@ public static void TestLRUClientSessionCache(ж<testing.T> Ꮡt) {
 internal static readonly @string clientˢ = "client"u8;
 internal static readonly @string serverˢ = "server"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestKeyLogTLS12(ж<testing.T> Ꮡt) {
+public static partial void TestKeyLogTLS12(ж<testing.T> Ꮡt) {
     ref var serverBuf = ref heap(new bytes.Buffer(), out var ᏑserverBuf);
     ref var clientBuf = ref heap(new bytes.Buffer(), out var ᏑclientBuf);
     var clientConfig = testConfig.Clone();
@@ -1280,7 +1280,7 @@ internal static readonly @string serverˢ = "server"u8;
     checkKeylogLine(serverˢ, ᏑserverBuf.String());
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestKeyLogTLS13(ж<testing.T> Ꮡt) {
+public static partial void TestKeyLogTLS13(ж<testing.T> Ꮡt) {
     ref var serverBuf = ref heap(new bytes.Buffer(), out var ᏑserverBuf);
     ref var clientBuf = ref heap(new bytes.Buffer(), out var ᏑclientBuf);
     var clientConfig = testConfig.Clone();
@@ -1349,7 +1349,7 @@ public static void TestHandshakeClientALPNMatch(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string serverSelectedˢ = "server selected unadvertised ALPN protocol"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServerSelectingUnconfiguredApplicationProtocol(ж<testing.T> Ꮡt) {
+public static partial void TestServerSelectingUnconfiguredApplicationProtocol(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // This checks that the server can't select an application protocol that the
@@ -1565,7 +1565,7 @@ internal static slice<hostnameInSNITestsᴛ1> hostnameInSNITests = new hostnameI
     new("[::1%lo0]"u8, ""u8)
 }.slice();
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestHostnameInSNI(ж<testing.T> Ꮡt) {
+public static partial void TestHostnameInSNI(ж<testing.T> Ꮡt) {
     foreach (var (_, vᴛ1) in hostnameInSNITests) {
         ref var tt = ref heap(new hostnameInSNITestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
@@ -1607,7 +1607,7 @@ internal static slice<hostnameInSNITestsᴛ1> hostnameInSNITests = new hostnameI
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unconfiguredCipherˢ = "unconfigured cipher"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestServerSelectingUnconfiguredCipherSuite(ж<testing.T> Ꮡt) {
+public static partial void TestServerSelectingUnconfiguredCipherSuite(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // This checks that the server can't select a cipher suite that the
@@ -1948,7 +1948,7 @@ internal static readonly @string gotLenValidatedChains0ˢ = "got len(validatedCh
     internal Action<ж<testing.T>, nint, bool, bool, error, error> validate;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testVerifyPeerCertificate(ж<testing.T> Ꮡt, uint16 version) {
+internal static partial void testVerifyPeerCertificate(ж<testing.T> Ꮡt, uint16 version) {
     // Note: using RSA 2048 test certificates because they are compatible with FIPS mode.
     ref var err = ref heap<error>(out var Ꮡerr);
     (var issuer, err) = Δx509.ParseCertificate(testRSA2048CertificateIssuer);
@@ -2317,7 +2317,7 @@ internal static error brokenConnErr = errors.New("too many writes to brokenConn"
     return b.Conn.Write(data);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestFailedWrite(ж<testing.T> Ꮡt) {
+public static partial void TestFailedWrite(ж<testing.T> Ꮡt) {
     // Test that a write error during the handshake is returned.
     foreach (var (_, vᴛ1) in new nint[]{0, 1}.slice()) {
         ref var breakAfter = ref heap(new nint(), out var ᏑbreakAfter);
@@ -2391,7 +2391,7 @@ public static void TestBuffering(ж<testing.T> Ꮡt) {
     });
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testBuffering(ж<testing.T> Ꮡt, uint16 version) {
+internal static partial void testBuffering(ж<testing.T> Ꮡt, uint16 version) {
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var done = new channel<bool>(0);
     var clientWCC = Ꮡ(new writeCountingConn(Conn: c));
@@ -2438,7 +2438,7 @@ internal static readonly object clientUnexpectedlyˢ = (@string)"client unexpect
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string expectedErrorᶜ = "remote error: tls: internal error"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAlertFlushing(ж<testing.T> Ꮡt) {
+public static partial void TestAlertFlushing(ж<testing.T> Ꮡt) {
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var done = new channel<bool>(0);
     var clientWCC = Ꮡ(new writeCountingConn(Conn: c));
@@ -2480,7 +2480,7 @@ internal static readonly @string expectedErrorᶜ = "remote error: tls: internal
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestHandshakeRace(ж<testing.T> Ꮡt) {
+public static partial void TestHandshakeRace(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ2);
     }
@@ -2644,7 +2644,7 @@ public static void TestGetClientCertificate(ж<testing.T> Ꮡt) {
     internal error err;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testGetClientCertificate(ж<testing.T> Ꮡt, uint16 version) {
+internal static partial void testGetClientCertificate(ж<testing.T> Ꮡt, uint16 version) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Note: using RSA 2048 test certificates because they are compatible with FIPS mode.
@@ -2768,7 +2768,7 @@ RwBA9Xk1KBNF
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCloseClientConnectionOnIdleServer(ж<testing.T> Ꮡt) {
+public static partial void TestCloseClientConnectionOnIdleServer(ж<testing.T> Ꮡt) {
     var (clientConn, serverConn) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var client = Client(clientConn, testConfig.Clone());
     var clientʗ1 = client;
@@ -2962,7 +2962,7 @@ internal static readonly object clientConnectionWasNotˢ = (@string)"Client conn
 // TestClientHandshakeContextCancellation tests that canceling
 // the context given to the client side conn.HandshakeContext
 // interrupts the in-progress handshake.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestClientHandshakeContextCancellation(ж<testing.T> Ꮡt) {
+public static partial void TestClientHandshakeContextCancellation(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));

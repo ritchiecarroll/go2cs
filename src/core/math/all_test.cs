@@ -3738,17 +3738,17 @@ public static void TestFMA(ж<testing.T> Ꮡt) {
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static float64 fmsub(float64 x, float64 y, float64 z) {
+internal static partial float64 fmsub(float64 x, float64 y, float64 z) {
     return FMA(x, y, -z);
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static float64 fnmsub(float64 x, float64 y, float64 z) {
+internal static partial float64 fnmsub(float64 x, float64 y, float64 z) {
     return FMA(-x, y, z);
 }
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static float64 fnmadd(float64 x, float64 y, float64 z) {
+internal static partial float64 fnmadd(float64 x, float64 y, float64 z) {
     return FMA(-x, y, -z);
 }
 

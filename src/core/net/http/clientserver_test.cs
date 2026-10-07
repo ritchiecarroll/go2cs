@@ -1426,7 +1426,7 @@ public static void TestTransportDiscardsUnneededConns(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testTransportDiscardsUnneededConns(Δp0, Δp1), new testMode[]{http2Mode}.slice());
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testTransportDiscardsUnneededConns(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testTransportDiscardsUnneededConns(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
@@ -2138,7 +2138,7 @@ public static void TestBidiStreamReverseProxy(ж<testing.T> Ꮡt) {
 internal static readonly @string putˢ = "PUT"u8;
 internal static readonly @string timeoutˢ = "timeout"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testBidiStreamReverseProxy(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testBidiStreamReverseProxy(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

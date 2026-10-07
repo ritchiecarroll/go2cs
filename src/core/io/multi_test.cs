@@ -194,12 +194,12 @@ internal static void testMultiWriter(ж<testing.T> Ꮡt, testMultiWriter_sink si
 
 internal delegate (nint, error) writerFunc(slice<byte> p);
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, error) Write(this writerFunc f, slice<byte> p) {
+internal static partial (nint, error) Write(this writerFunc f, slice<byte> p) {
     return f(p);
 }
 
 // Test that MultiWriter properly flattens chained multiWriters.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMultiWriterSingleChainFlatten(ж<testing.T> Ꮡt) {
+public static partial void TestMultiWriterSingleChainFlatten(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var pc = new slice<uintptr>(1000); // 1000 should fit the full stack
@@ -271,7 +271,7 @@ public static void TestMultiWriterCopy(ж<testing.T> Ꮡt) {
 
 internal delegate (nint, error) readerFunc(slice<byte> p);
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, error) Read(this readerFunc f, slice<byte> p) {
+internal static partial (nint, error) Read(this readerFunc f, slice<byte> p) {
     return f(p);
 }
 
@@ -292,7 +292,7 @@ internal static nint /*depth*/ callDepth(slice<uintptr> callers) {
 internal static readonly @string irrelevantˢ = "irrelevant"u8;
 
 // Test that MultiReader properly flattens chained multiReaders when Read is called
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMultiReaderFlatten(ж<testing.T> Ꮡt) {
+public static partial void TestMultiReaderFlatten(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var pc = new slice<uintptr>(1000); // 1000 should fit the full stack

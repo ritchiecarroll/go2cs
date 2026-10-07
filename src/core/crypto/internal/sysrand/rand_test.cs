@@ -57,7 +57,7 @@ public static void TestReadEmpty(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"skipping in short mode"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentRead(ж<testing.T> Ꮡt) {
+public static partial void TestConcurrentRead(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }

@@ -453,7 +453,7 @@ public static void BenchmarkGoroutineForRange(ж<testing.B> Ꮡb) {
     benchHelper(Ꮡb, n.Value, read);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchHelper(ж<testing.B> Ꮡb, nint n, Action<channel<EmptyStruct>> read) {
+internal static partial void benchHelper(ж<testing.B> Ꮡb, nint n, Action<channel<EmptyStruct>> read) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = new slice<channel<EmptyStruct>>(n);
@@ -481,7 +481,7 @@ public static void BenchmarkGoroutineForRange(ж<testing.B> Ꮡb) {
     time.Sleep(10 * time.Millisecond);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkGoroutineIdle(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkGoroutineIdle(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var quit = new channel<EmptyStruct>(0);

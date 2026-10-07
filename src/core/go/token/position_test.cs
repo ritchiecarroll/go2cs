@@ -235,7 +235,7 @@ public static void TestFileSetCacheUnlikely(ж<testing.T> Ꮡt) {
 
 // issue 4345. Test that concurrent use of FileSet.Pos does not trigger a
 // race in the FileSet position cache.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestFileSetRace(ж<testing.T> Ꮡt) {
+public static partial void TestFileSetRace(ж<testing.T> Ꮡt) {
     var fset = NewFileSet();
     for (nint i = 0; i < 100; i++) {
         fset.AddFile(fmt.Sprintf("file-%d"u8, i), fset.Base(), 1031);
@@ -260,7 +260,7 @@ public static void TestFileSetCacheUnlikely(ж<testing.T> Ꮡt) {
 
 // issue 16548. Test that concurrent use of File.AddLine and FileSet.PositionFor
 // does not trigger a race in the FileSet position cache.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestFileSetRace2(ж<testing.T> Ꮡt) {
+public static partial void TestFileSetRace2(ж<testing.T> Ꮡt) {
     const nint N = 1000;
     ж<global::go.go.token_package.FileSet> fset = NewFileSet();
     ж<global::go.go.token_package.ΔFile> @file = fset.AddFile(""u8, -1, N);

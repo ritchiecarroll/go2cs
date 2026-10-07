@@ -108,7 +108,7 @@ public static void TestReaderAt(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestReaderAtConcurrent(ж<testing.T> Ꮡt) {
+public static partial void TestReaderAtConcurrent(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Test for the race detector, to verify ReadAt doesn't mutate
@@ -132,7 +132,7 @@ public static void TestReaderAt(ж<testing.T> Ꮡt) {
     Ꮡwg.Wait();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestEmptyReaderConcurrent(ж<testing.T> Ꮡt) {
+public static partial void TestEmptyReaderConcurrent(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Test for the race detector, to verify a Read that doesn't yield any bytes

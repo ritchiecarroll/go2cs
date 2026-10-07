@@ -2644,7 +2644,7 @@ type K = Nested[string]
 
 """u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestInstantiateConcurrent(ж<testing.T> Ꮡt) {
+public static partial void TestInstantiateConcurrent(ж<testing.T> Ꮡt) {
     @string src = srcᶜ6;
     var pkg = mustTypecheck(src, nil, nil);
     var insts = new ж<types.Interface>[]{

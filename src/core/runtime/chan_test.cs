@@ -18,7 +18,7 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestChan(ж<testing.T> Ꮡt) {
+public static partial void TestChan(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(4), ref ᒐ);
@@ -231,7 +231,7 @@ partial class runtime_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object chanIsNotReadyˢ = (@string)"chan is not ready"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestNonblockRecvRace(ж<testing.T> Ꮡt) {
+public static partial void TestNonblockRecvRace(ж<testing.T> Ꮡt) {
     nint n = 10000;
     if (testing.Short()) {
         n = 100;
@@ -276,7 +276,7 @@ internal static readonly object noChanIsReadyˢ = (@string)"no chan is ready"u8;
 // From the time the second goroutine is created, at least one of c1 and c2
 // is always ready for receiving, so the select in the second goroutine must
 // always receive from one or the other. It must never execute the default case.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestNonblockSelectRace(ж<testing.T> Ꮡt) {
+public static partial void TestNonblockSelectRace(ж<testing.T> Ꮡt) {
     nint n = 100000;
     if (testing.Short()) {
         n = 1000;
@@ -321,7 +321,7 @@ internal static readonly object noChanIsReadyˢ = (@string)"no chan is ready"u8;
 }
 
 // Same as TestNonblockSelectRace, but close(c2) replaces c2 <- 1.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestNonblockSelectRace2(ж<testing.T> Ꮡt) {
+public static partial void TestNonblockSelectRace2(ж<testing.T> Ꮡt) {
     nint n = 100000;
     if (testing.Short()) {
         n = 1000;
@@ -365,7 +365,7 @@ internal static readonly object noChanIsReadyˢ = (@string)"no chan is ready"u8;
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSelfSelect(ж<testing.T> Ꮡt) {
+public static partial void TestSelfSelect(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         // Ensure that send/recv on the same chan in select
@@ -425,7 +425,7 @@ internal static readonly object noChanIsReadyˢ = (@string)"no chan is ready"u8;
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSelectStress(ж<testing.T> Ꮡt) {
+public static partial void TestSelectStress(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(10), ref ᒐ);
@@ -553,7 +553,7 @@ internal static readonly object noChanIsReadyˢ = (@string)"no chan is ready"u8;
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSelectFairness(ж<testing.T> Ꮡt) {
+public static partial void TestSelectFairness(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     UntypedInt trials = 10000;
@@ -680,7 +680,7 @@ public static void TestChanSendInterface(ж<testing.T> Ꮡt) {
     }}
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestPseudoRandomSend(ж<testing.T> Ꮡt) {
+public static partial void TestPseudoRandomSend(ж<testing.T> Ꮡt) {
     nint n = 100;
     foreach (var (_, chanCap) in new nint[]{0, n}.slice()) {
         var c = new channel<nint>(chanCap);
@@ -720,7 +720,7 @@ public static void TestChanSendInterface(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMultiConsumer(ж<testing.T> Ꮡt) {
+public static partial void TestMultiConsumer(ж<testing.T> Ꮡt) {
     UntypedInt nwork = 23;
     const nint niter = 271828;
     var pn = new nint[]{2, 3, 7, 11, 13, 17, 19, 23, 27, 31}.slice();
@@ -772,7 +772,7 @@ public static void TestChanSendInterface(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestShrinkStackDuringBlockedSend(ж<testing.T> Ꮡt) {
+public static partial void TestShrinkStackDuringBlockedSend(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // make sure that channel operations still work when we are
@@ -806,7 +806,7 @@ public static void TestChanSendInterface(ж<testing.T> Ꮡt) {
     ᐸꟷ(done);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestNoShrinkStackWhileParking(ж<testing.T> Ꮡt) {
+public static partial void TestNoShrinkStackWhileParking(ж<testing.T> Ꮡt) {
     if (Δruntime.GOOS == "netbsd"u8 && Δruntime.GOARCH == "arm64"u8) {
         testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 49382);
     }
@@ -870,7 +870,7 @@ public static void TestChanSendInterface(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSelectDuplicateChannel(ж<testing.T> Ꮡt) {
+public static partial void TestSelectDuplicateChannel(ж<testing.T> Ꮡt) {
     // This test makes sure we can queue a G on
     // the same channel multiple times.
     var c = new channel<nint>(0);
@@ -913,7 +913,7 @@ internal static readonly object cxNoLongerPointsToValˢ = (@string)"cx no longer
 internal static readonly object valChangedˢ = (@string)"val changed"u8;
 internal static readonly object changingCxFailedToChangeˢ = (@string)"changing *cx failed to change val"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSelectStackAdjust(ж<testing.T> Ꮡt) {
+public static partial void TestSelectStackAdjust(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Test that channel receive slots that contain local stack
@@ -1237,7 +1237,7 @@ public static void BenchmarkChanContended(ж<testing.B> Ꮡb) {
     });
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkChanSync(ж<testing.B> Ꮡb, nint work) {
+internal static partial void benchmarkChanSync(ж<testing.B> Ꮡb, nint work) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     const nint CallsPerSched = 1000;
@@ -1285,7 +1285,7 @@ public static void BenchmarkChanSyncWork(ж<testing.B> Ꮡb) {
     benchmarkChanSync(Ꮡb, 1000);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void benchmarkChanProdCons(ж<testing.B> Ꮡb, nint chanSize, nint localWork) {
+internal static partial void benchmarkChanProdCons(ж<testing.B> Ꮡb, nint chanSize, nint localWork) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     const nint CallsPerSched = 1000;
@@ -1358,7 +1358,7 @@ public static void BenchmarkChanProdConsWork100(ж<testing.B> Ꮡb) {
     benchmarkChanProdCons(Ꮡb, 100, 100);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkSelectProdCons(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkSelectProdCons(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     const nint CallsPerSched = 1000;
@@ -1483,7 +1483,7 @@ public static void BenchmarkChanSem(ж<testing.B> Ꮡb) {
     });
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkChanPopular(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkChanPopular(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     const nint n = 1000;

@@ -172,7 +172,7 @@ internal static void mutexHog2(ж<sync.Mutex> Ꮡmu1, ж<sync.Mutex> Ꮡmu2, tim
 
 // mutexHog starts multiple goroutines that runs the given hogger function for the specified duration.
 // The hogger function will be given two mutexes to lock & unlock.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void mutexHog(time.Duration duration, Action<ж<sync.Mutex>, ж<sync.Mutex>, time.Time, time.Duration> hogger) {
+internal static partial void mutexHog(time.Duration duration, Action<ж<sync.Mutex>, ж<sync.Mutex>, time.Time, time.Duration> hogger) {
     ref var start = ref heap<time.Time>(out var Ꮡstart);
     start = time.Now();
     var mu1 = @new<sync.Mutex>();
@@ -202,7 +202,7 @@ internal static readonly @string debugPprofMutexˢ = "/debug/pprof/mutex"u8;
 internal static readonly @string mutexHog1ˢ = "mutexHog1"u8;
 internal static readonly @string mutexHog2ˢ = "mutexHog2"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestDeltaProfile(ж<testing.T> Ꮡt) {
+public static partial void TestDeltaProfile(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         if (strings.HasPrefix(runtime.GOARCH, armˢ)) {

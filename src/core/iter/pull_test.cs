@@ -561,7 +561,7 @@ internal static iter.Seq2<nint, nint> goexitCleanupSeq2() {
     };
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static bool goexits(ж<testing.T> Ꮡt, Action f) {
+internal static partial bool goexits(ж<testing.T> Ꮡt, Action f) {
     Ꮡt.Helper();
     var exit = new channel<bool>(0);
     var exitʗ1 = exit;

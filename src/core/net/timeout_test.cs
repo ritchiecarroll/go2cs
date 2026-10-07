@@ -334,7 +334,7 @@ public static void TestAcceptTimeoutMustReturn(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAcceptTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
+public static partial void TestAcceptTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
@@ -475,7 +475,7 @@ public static void TestReadTimeout(ж<testing.T> Ꮡt) {
 }
 
 // There is a very similar copy of this in os/timeout_test.go.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestReadTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
+public static partial void TestReadTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
@@ -692,7 +692,7 @@ public static void TestWriteTimeout(ж<testing.T> Ꮡt) {
 }
 
 // There is a very similar copy of this in os/timeout_test.go.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWriteTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
+public static partial void TestWriteTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
@@ -1361,7 +1361,7 @@ public static void TestReadWriteProlongedTimeout(ж<testing.T> Ꮡt) {
 }
 
 // There is a very similar copy of this in os/timeout_test.go.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestReadWriteDeadlineRace(ж<testing.T> Ꮡt) {
+public static partial void TestReadWriteDeadlineRace(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
@@ -1448,7 +1448,7 @@ public static void TestReadWriteProlongedTimeout(ж<testing.T> Ꮡt) {
 }
 
 // Issue 35367.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentSetDeadline(ж<testing.T> Ꮡt) {
+public static partial void TestConcurrentSetDeadline(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);

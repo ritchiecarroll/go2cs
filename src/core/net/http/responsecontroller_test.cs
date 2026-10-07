@@ -222,7 +222,7 @@ public static void TestResponseControllerSetPastReadDeadline(ж<testing.T> Ꮡt)
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string textFooˢ = "text/foo"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testResponseControllerSetPastReadDeadline(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testResponseControllerSetPastReadDeadline(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         var readc = new channel<EmptyStruct>(0);

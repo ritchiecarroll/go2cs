@@ -9,7 +9,7 @@ using static global::go.runtime_package;
 
 partial class runtime_internal_test_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void XTestSPWrite(TestingT t) {
+public static partial void XTestSPWrite(TestingT t) {
     // Test that we can traceback from the stack check prologue of a function
     // that writes to SP. See #62326.
     // Start a goroutine to minimize the initial stack and ensure we grow the stack.

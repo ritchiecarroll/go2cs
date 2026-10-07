@@ -13,7 +13,7 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCaller(ж<testing.T> Ꮡt) {
+public static partial void TestCaller(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         nint procs = Δruntime.GOMAXPROCS(-1);
@@ -40,7 +40,7 @@ partial class runtime_test_package {
 // in testCallerBar.
 //
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testCallerFoo(ж<testing.T> Ꮡt) {
+internal static partial void testCallerFoo(ж<testing.T> Ꮡt) {
     testCallerBar(Ꮡt);
 }
 
@@ -50,7 +50,7 @@ internal static readonly @string testCallerBarˢ = "testCallerBar"u8;
 internal static readonly @string testCallerFooˢ = "testCallerFoo"u8;
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void testCallerBar(ж<testing.T> Ꮡt) {
+internal static partial void testCallerBar(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     for (nint i = 0; i < 2; i++) {
@@ -63,7 +63,7 @@ internal static readonly @string testCallerFooˢ = "testCallerFoo"u8;
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint lineNumber() {
+internal static partial nint lineNumber() {
     var (_, _, line, _) = Δruntime.Caller(1);
     return line; // return 0 for error
 }
@@ -240,7 +240,7 @@ internal static void inlined() {
 // No inline to ensure this complete function appears in output.
 //
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uintptr tracebackFunc(ж<testing.T> Ꮡt) {
+internal static partial uintptr tracebackFunc(ж<testing.T> Ꮡt) {
     // This body must be more complex than a single call to inlined to get
     // an inline tree.
     inlined();
@@ -319,7 +319,7 @@ internal static readonly @string entryˢ = "Entry"u8;
 internal static readonly object zeroPcˢ = (@string)"zero PC"u8;
 internal static readonly @string fileLineˢ = "FileLine"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkFunc(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkFunc(ж<testing.B> Ꮡb) {
     var (pc, _, _, ok) = Δruntime.Caller(0);
     if (!ok) {
         Ꮡb.Fatal(failedToLookUpPcˢ);

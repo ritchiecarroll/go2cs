@@ -49,7 +49,7 @@ internal static readonly @string abcˢ = "abc"u8;
 // TestAcceptIgnoreSomeErrors tests that windows TCPListener.AcceptTCP
 // handles broken connections. It verifies that broken connections do
 // not affect future connections.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
+public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         (@string, error) recv(global::go.net_package.Listener lnΔ1, bool ignoreSomeReadErrors) {

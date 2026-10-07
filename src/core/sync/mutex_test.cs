@@ -30,7 +30,7 @@ public static void HammerSemaphore(ж<uint32> Ꮡs, nint loops, channel<bool> cd
     cdone.ᐸꟷ(true);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSemaphore(ж<Δtesting.T> Ꮡt) {
+public static partial void TestSemaphore(ж<Δtesting.T> Ꮡt) {
     var s = @new<uint32>();
     s.Value = 1;
     var c = new channel<bool>(0);
@@ -50,7 +50,7 @@ public static void BenchmarkUncontendedSemaphore(ж<Δtesting.B> Ꮡb) {
     HammerSemaphore(s, b.N, new channel<bool>(2));
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void BenchmarkContendedSemaphore(ж<Δtesting.B> Ꮡb) {
+public static partial void BenchmarkContendedSemaphore(ж<Δtesting.B> Ꮡb) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -84,7 +84,7 @@ public static void HammerMutex(ж<Δsync.Mutex> Ꮡm, nint loops, channel<bool> 
     cdone.ᐸꟷ(true);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMutex(ж<Δtesting.T> Ꮡt) {
+public static partial void TestMutex(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         {
@@ -229,7 +229,7 @@ public static void TestMutexMisuse(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestMutexFairness(ж<Δtesting.T> Ꮡt) {
+public static partial void TestMutexFairness(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

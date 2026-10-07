@@ -281,7 +281,7 @@ internal static readonly object failedToHijackˢ = (@string)"failed to hijack"u8
 
 // Issue 51799: test hijacking a connection and then closing it
 // concurrently with closing the server.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCloseHijackedConnection(ж<testing.T> Ꮡt) {
+public static partial void TestCloseHijackedConnection(ж<testing.T> Ꮡt) {
     var hijacked = new channel<net.Conn>(0);
     var hijackedʗ1 = hijacked;
     var ts = NewServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {

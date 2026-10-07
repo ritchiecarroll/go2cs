@@ -440,7 +440,7 @@ public static void TestAllocs(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestSimultaneousCancels(ж<testing.T> Ꮡt) {
+public static partial void TestSimultaneousCancels(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (root, cancel) = WithCancel(Background());
@@ -512,7 +512,7 @@ public static void TestAllocs(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestInterlockedCancels(ж<testing.T> Ꮡt) {
+public static partial void TestInterlockedCancels(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (parent, cancelParent) = WithCancel(Background());
@@ -695,7 +695,7 @@ public static void TestWithCancelCanceledParent(ж<testing.T> Ꮡt) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestWithCancelSimultaneouslyCanceledParent(ж<testing.T> Ꮡt) {
+public static partial void TestWithCancelSimultaneouslyCanceledParent(ж<testing.T> Ꮡt) {
     // Cancel the parent goroutine concurrently with creating a child.
     for (nint i = 0; i < 100; i++) {
         var (parent, pcancel) = WithCancelCause(Background());
@@ -1071,7 +1071,7 @@ public static void TestCause(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testCauseRaceˢ = "TestCauseRace"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestCauseRace(ж<testing.T> Ꮡt) {
+public static partial void TestCauseRace(ж<testing.T> Ꮡt) {
     var cause = errors.New(testCauseRaceˢ);
     var (ctx, cancel) = WithCancelCause(Background());
     var cancelʗ1 = cancel;

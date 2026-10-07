@@ -193,7 +193,7 @@ private static readonly object thisIsAStressTestThatˢ = (@string)"this is a str
 // is hidden in a blackened stack.
 //
 // Never fails if correct, fails with some high probability if incorrect.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestIssue69210(ж<testing.T> Ꮡt) {
+public static partial void TestIssue69210(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();

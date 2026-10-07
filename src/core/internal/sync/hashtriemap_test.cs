@@ -1130,7 +1130,7 @@ internal static array<@string> testDataLarge = new(131072);
 // key-value pair, they must not both succeed.
 //
 // This test is a regression test for issue #70970.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestConcurrentCache(ж<testing.T> Ꮡt) {
+public static partial void TestConcurrentCache(ж<testing.T> Ꮡt) {
     ref var m = ref heap(new isync.HashTrieMap<nint, weak.Pointer<TestConcurrentCache_dummy>>(), out var Ꮡm);
     var cleanup = (TestConcurrentCache_cleanupArg arg) => {
         Ꮡm.CompareAndDelete(arg.key, arg.value);

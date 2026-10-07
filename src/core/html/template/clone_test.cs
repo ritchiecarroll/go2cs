@@ -311,7 +311,7 @@ internal static readonly @string inputᶜ = @"<title>{{block ""a"" .}}a{{end}}</
 internal static readonly @string overlayᶜ = @"{{define ""b""}}A{{end}}"u8;
 
 // https://golang.org/issue/16101
-[MethodImpl(MethodImplOptions.NoInlining)] public static void TestTemplateCloneExecuteRace(ж<testing.T> Ꮡt) {
+public static partial void TestTemplateCloneExecuteRace(ж<testing.T> Ꮡt) {
     @string input = inputᶜ;
     @string overlay = overlayᶜ;
     var (ᴛ47, ᴛ48) = New(outerˢ).Parse(input);
