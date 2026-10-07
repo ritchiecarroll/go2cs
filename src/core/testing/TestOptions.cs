@@ -274,6 +274,28 @@ internal sealed class TestOptions
     public bool ShouldRun(string fullName) =>
         Matches(Filters, fullName) && !(SkipFilters is not null && Matches(SkipFilters, fullName));
 
+    // testing.RunTests' selection: the same element walk, with each -run / -skip ELEMENT handed to the
+    // CALLER's matchString, as Go's newMatcher(matchString, *match, "-test.run", *skip) does. A caller
+    // whose matcher always answers true (testify's suite tests) runs its whole list whatever -run says.
+    public bool ShouldRun(string fullName, Func<string, string, bool> matchString) =>
+        Matches(RunPattern, fullName, matchString) && !(SkipPattern.Length > 0 && Matches(SkipPattern, fullName, matchString));
+
+    private static bool Matches(string pattern, string fullName, Func<string, string, bool> matchString)
+    {
+        if (pattern.Length == 0)
+            return true;
+
+        string[] filters = pattern.Split('/');
+        string[] nameParts = fullName.Split('/');
+        int count = Math.Min(nameParts.Length, filters.Length);
+        for (int i = 0; i < count; i++)
+        {
+            if (!matchString(filters[i], nameParts[i]))
+                return false;
+        }
+        return true;
+    }
+
     // ONE matcher for both directions on purpose. -run and -skip differ only in the SIGN of the
     // answer, so sharing the segment walk is what keeps them from drifting -- a -skip matching
     // subtests differently from -run would withdraw a different set on each side of the comparison.

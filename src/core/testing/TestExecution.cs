@@ -138,13 +138,80 @@ public sealed class TestExecution
     private bool m_skipped;
     private bool m_measurementUnitNoted;
 
-    internal TestExecution(TestRunner runner, string name, TestExecution? parent, string source, int line)
+    internal TestExecution(TestRunner runner, string name, TestExecution? parent, string source, int line, TestRunner.NestedRoot? nestedRoot = null)
     {
         m_runner = runner;
         m_parent = parent;
         Name = name;
         Source = source;
         Line = line;
+        NestedRoot = nestedRoot ?? parent?.NestedRoot;
+    }
+
+    internal TestRunner Runner => m_runner;
+
+    /// <summary>
+    /// The <c>testing.RunTests</c> root this test runs under, inherited by its subtests; null for the
+    /// package's own tests. It carries that root's own <c>-test.parallel</c> slots, and a test under it
+    /// is no verdict of the package's (see <see cref="TestRunner.Completed"/>).
+    /// </summary>
+    internal TestRunner.NestedRoot? NestedRoot { get; }
+
+    private int Depth => m_parent is null ? 0 : m_parent.Depth + 1;
+
+    // The report blocks of a redirected RunTests root's failed subtests, held for the parent's own block
+    // (Go appends a subtest's report to its parent's output, printed after the parent's `--- FAIL` line).
+    private readonly System.Text.StringBuilder m_redirectedChildReports = new();
+
+    // Every event goes to the run, except under a RunTests root whose program redirected os.Stdout: then it
+    // is Go's text output on that file (TestRunner.NestedRoot.Redirected) and the run hears nothing. Verbose
+    // (-test.v, or --json) is Go's chatty printer, which writes each line as it happens; otherwise only a
+    // failure prints, its subtests' reports inside its own. An infrastructure failure is the host's, and
+    // always goes to the run.
+    private void ReportEvent(TestEvent testEvent)
+    {
+        if (NestedRoot?.Redirected is not Action<string> write || testEvent.Action is not ("run" or "pass" or "fail" or "skip"))
+        {
+            m_runner.Report(testEvent);
+            return;
+        }
+
+        bool verbose = m_runner.Verbose;
+        string indent = new(' ', 4 * Depth);
+
+        if (testEvent.Action == "run")
+        {
+            if (verbose)
+                write($"=== RUN   {Name}\n");
+
+            return;
+        }
+
+        if (testEvent.Action != "fail" && !verbose)
+            return;
+
+        System.Text.StringBuilder block = new();
+        block.Append($"{indent}--- {testEvent.Action.ToUpperInvariant()}: {Name} ({testEvent.Elapsed:0.00}s)\n");
+
+        if (testEvent.Output is string output)
+        {
+            foreach (string line in output.Split('\n'))
+                block.Append(indent).Append("    ").Append(line.TrimEnd('\r')).Append('\n');
+        }
+
+        lock (m_syncRoot)
+            block.Append(m_redirectedChildReports);
+
+        if (verbose || m_parent is null)
+            write(block.ToString());
+        else
+            m_parent.AppendRedirectedChildReport(block.ToString());
+    }
+
+    private void AppendRedirectedChildReport(string report)
+    {
+        lock (m_syncRoot)
+            m_redirectedChildReports.Append(report);
     }
 
     public string Name { get; }
@@ -659,7 +726,7 @@ public sealed class TestExecution
 
         // Released from the serial-phase gate; now compete for a -parallel slot so at most
         // Options.Parallel parallel tests RUN simultaneously (Go's -parallel semantics).
-        m_runner.AcquireParallelSlot();
+        m_runner.AcquireParallelSlot(NestedRoot);
         m_holdsParallelSlot = true;
     }
 
@@ -1145,7 +1212,7 @@ public sealed class TestExecution
         }
 
         m_parent?.FailFromChild();
-        m_runner.Report(new TestEvent(m_runner.Package, Name, "fail", 0.0D, output, Source, Line, records, dropped));
+        ReportEvent(new TestEvent(m_runner.Package, Name, "fail", 0.0D, output, Source, Line, records, dropped));
         m_runner.Completed(this);
     }
 
@@ -1226,7 +1293,7 @@ public sealed class TestExecution
         m_ownerThread = Environment.CurrentManagedThreadId;
         m_ownerGoroutine = Goroutine.Current;
         s_current.Value = this;
-        m_runner.Report(new TestEvent(m_runner.Package, Name, "run", Source: Source, Line: Line));
+        ReportEvent(new TestEvent(m_runner.Package, Name, "run", Source: Source, Line: Line));
 
         testing_package.T t = new() { Execution = this };
         try
@@ -1274,7 +1341,7 @@ public sealed class TestExecution
             if (m_holdsParallelSlot)
             {
                 m_holdsParallelSlot = false;
-                m_runner.ReleaseParallelSlot();
+                m_runner.ReleaseParallelSlot(NestedRoot);
             }
 
             // ONE snapshot for both passes: a child added between them would be released and
@@ -1309,7 +1376,7 @@ public sealed class TestExecution
                 (records, dropped) = LogRecords(terminal);
             }
 
-            m_runner.Report(new TestEvent(m_runner.Package, Name, terminal, timer.Elapsed.TotalSeconds, output, Source, Line, records, dropped));
+            ReportEvent(new TestEvent(m_runner.Package, Name, terminal, timer.Elapsed.TotalSeconds, output, Source, Line, records, dropped));
             m_runner.Completed(this);
         }
     }

@@ -642,6 +642,51 @@ func TestManifestCensusDetectsUndeclaredTests(t *testing.T) {
 	}
 }
 
+// A testing.RunTests list runs its entries as top-level tests under the names it gives them, so Go
+// reports names no declaration accounts for (testify's TestSuiteRecoverPanicInBeforeTest). Such a name
+// is admitted -- compared, and counted apart -- ONLY when the converted host reported the very same
+// name with a verdict of its own; a name only Go reported is still a census gap (the control).
+func TestRuntimeDeclaredNamesAreAdmittedOnlyWhenBothSidesRanThem(t *testing.T) {
+	manifest := testManifest{Tests: []testDeclaration{{Name: "TestKnown", Kind: "test", Status: "included"}}}
+
+	goResults := map[string]string{
+		"TestKnown":             "pass",
+		"TestSuiteInBefore":     "fail",
+		"TestSuiteInBefore/Sub": "fail",
+		"TestPhantom":           "pass",
+	}
+	csResults := map[string]string{
+		"TestKnown":             "pass",
+		"TestSuiteInBefore":     "fail",
+		"TestSuiteInBefore/Sub": "fail",
+	}
+
+	remaining, admitted := admitRuntimeDeclared(manifestCensusGaps(goResults, manifest), csResults)
+
+	if !reflect.DeepEqual(remaining, []string{"TestPhantom"}) {
+		t.Fatalf("census gaps = %v, want [TestPhantom] (Go reported it, the host never ran it)", remaining)
+	}
+
+	if !reflect.DeepEqual(admitted, []string{"TestSuiteInBefore"}) {
+		t.Fatalf("runtime-declared = %v, want [TestSuiteInBefore]", admitted)
+	}
+
+	goFiltered := eligibleTerminalTestResults(goResults, manifest)
+	csFiltered := eligibleTerminalTestResults(csResults, manifest)
+	addRuntimeDeclaredResults(goFiltered, goResults, admitted)
+	addRuntimeDeclaredResults(csFiltered, csResults, admitted)
+
+	for _, filtered := range []map[string]string{goFiltered, csFiltered} {
+		if filtered["TestSuiteInBefore"] != "fail" || filtered["TestSuiteInBefore/Sub"] != "fail" {
+			t.Fatalf("an admitted test's rows are not compared: %v", filtered)
+		}
+	}
+
+	if _, compared := goFiltered["TestPhantom"]; compared {
+		t.Fatalf("a census gap was admitted into the comparison: %v", goFiltered)
+	}
+}
+
 // ONE-TREE guard (2026-08-01, replacing the F15/F15b mixed-tree remap guards). The converted
 // standard library lives at src/core — the exact path every resolver already emits — so a test
 // project's stdlib dependencies are used VERBATIM, with no tree mapping in between. What still

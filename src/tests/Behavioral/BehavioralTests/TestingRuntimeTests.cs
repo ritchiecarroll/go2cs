@@ -173,6 +173,186 @@ public class TestingRuntimeTests
         CollectionAssert.AreEqual(new[] { "wanted" }, ran.ToArray());
     }
 
+    // testing.RunTests, called from INSIDE a running test (testify's suite tests): Go runs the list on a
+    // FRESH root, so each entry is a top-level test under its own name -- serial until it calls Parallel,
+    // the parked ones released when the list is done -- and returns ok == false exactly when one failed.
+    // The root has no parent, so the CALLER is not failed, and the package still passes (m.Run's ok is
+    // its own list's).
+    [TestMethod]
+    public void RunTestsRunsItsListAsTopLevelTestsFromInsideARunningTest()
+    {
+        string resultPath = Path.Combine(Path.GetTempPath(), $"go2cs-results-{Guid.NewGuid():N}.json");
+        ConcurrentQueue<string> events = new();
+        bool okFailing = true, okPassing = false, callerFailed = true;
+
+        try
+        {
+            TestRegistry registry = new("runtime/runtests", []);
+            registry.Add("TestOuter", pointer =>
+            {
+                ref testing_package.T test = ref pointer.Value;
+                okFailing = testing_package.RunTests((_, _) => (true, null!), new testing_package.InternalTest[]
+                {
+                    new(Name: "TestOuter/Fails", F: t => { events.Enqueue("fails"); t.Error("expected"); }),
+                    new(Name: "TestOuter/Parallel", F: t => { t.Value.Parallel(); events.Enqueue("parallel"); }),
+                    new(Name: "TestOuter/Serial", F: _ => events.Enqueue("serial")),
+                }.slice());
+                okPassing = testing_package.RunTests((_, _) => (true, null!), new testing_package.InternalTest[]
+                {
+                    new(Name: "TestOuter/Passes", F: _ => events.Enqueue("passes")),
+                }.slice());
+                events.Enqueue("after");
+                callerFailed = test.Failed();
+            }, "runtime_test.go", 1);
+
+            Assert.AreEqual(0, TestHost.Run(registry, ["--result", resultPath]));
+            Assert.IsFalse(okFailing);
+            Assert.IsTrue(okPassing);
+            Assert.IsFalse(callerFailed);
+            CollectionAssert.AreEqual(new[] { "fails", "serial", "parallel", "passes", "after" }, events.ToArray());
+
+            string results = File.ReadAllText(resultPath);
+            StringAssert.Contains(results, "\"test\":\"TestOuter/Fails\",\"action\":\"fail\"");
+            StringAssert.Contains(results, "\"test\":\"TestOuter/Passes\",\"action\":\"pass\"");
+        }
+        finally
+        {
+            File.Delete(resultPath);
+        }
+    }
+
+    // RunTests' matcher is Go's newMatcher(matchString, *match, "-test.run", *skip): each -run ELEMENT goes
+    // to the CALLER's matchString, so testify's always-true filter runs the whole list whatever -run says,
+    // and a real matcher selects by element.
+    [TestMethod]
+    public void RunTestsHandsEachRunElementToTheCallersMatchString()
+    {
+        ConcurrentQueue<string> ran = new();
+        ConcurrentQueue<string> patterns = new();
+        TestRegistry registry = new("runtime/runtests-match", []);
+        registry.Add("TestOuter", _ =>
+        {
+            testing_package.RunTests((pattern, name) =>
+            {
+                patterns.Enqueue($"{pattern}~{name}");
+                return (System.Text.RegularExpressions.Regex.IsMatch(name.ToString(), pattern.ToString()), null!);
+            }, new testing_package.InternalTest[]
+            {
+                new(Name: "TestOuter/Wanted", F: _ => ran.Enqueue("wanted")),
+                new(Name: "TestOuter/Other", F: _ => ran.Enqueue("other")),
+            }.slice());
+            testing_package.RunTests((_, _) => (true, null!), new testing_package.InternalTest[]
+            {
+                new(Name: "TestOuter/Always", F: _ => ran.Enqueue("always")),
+            }.slice());
+        }, "runtime_test.go", 1);
+
+        Assert.AreEqual(0, TestHost.Run(registry, ["-run", "TestOuter/Wanted"]));
+        CollectionAssert.AreEqual(new[] { "wanted", "always" }, ran.ToArray());
+        CollectionAssert.Contains(patterns.ToArray(), "Wanted~Other");
+    }
+
+    // A RunTests entry is a child of the ROOT, and Go's matcher rewrites (spaces to `_`) and de-duplicates
+    // (`#01`) only below it (fullName's `c.level > 0`): testify's "signature validation" entry is reported
+    // as exactly that, and two entries of one name are two tests of that name.
+    [TestMethod]
+    public void RunTestsNamesItsEntriesAsGiven()
+    {
+        string resultPath = Path.Combine(Path.GetTempPath(), $"go2cs-results-{Guid.NewGuid():N}.json");
+
+        try
+        {
+            TestRegistry registry = new("runtime/runtests-names", []);
+            registry.Add("TestOuter", _ =>
+            {
+                testing_package.RunTests((_, _) => (true, null!), new testing_package.InternalTest[]
+                {
+                    new(Name: "signature validation", F: _ => { }),
+                    new(Name: "dup", F: _ => { }),
+                    new(Name: "dup", F: _ => { }),
+                }.slice());
+            }, "runtime_test.go", 1);
+
+            Assert.AreEqual(0, TestHost.Run(registry, ["--result", resultPath]));
+
+            string results = File.ReadAllText(resultPath);
+            StringAssert.Contains(results, "\"test\":\"signature validation\",\"action\":\"pass\"");
+            Assert.AreEqual(2, System.Text.RegularExpressions.Regex.Matches(results, "\"test\":\"dup\",\"action\":\"pass\"").Count, results);
+            Assert.IsFalse(results.Contains("signature_validation") || results.Contains("dup#01"), results);
+        }
+        finally
+        {
+            File.Delete(resultPath);
+        }
+    }
+
+    // Go's RunTests root writes to os.Stdout AS IT IS at the call, and only the process's stdout reaches
+    // test2json. testify's TestSuiteLogging redirects os.Stdout to a pipe, runs a suite with a failing and
+    // a passing test that both log, and reads its own output back: the failure (with its log line) is
+    // there, a passing test's log line only under -v, and go test -json reports none of the suite.
+    [TestMethod]
+    public void RunTestsWritesToARedirectedStdoutAndReportsNothingToTheRun()
+    {
+        (string captured, string results) = RunTestsUnderRedirectedStdout([]);
+
+        StringAssert.Contains(captured, "--- FAIL: TestOuter/Suite");
+        StringAssert.Contains(captured, "--- FAIL: TestOuter/Suite/Fails");
+        StringAssert.Contains(captured, "LOGFAIL");
+        Assert.IsFalse(captured.Contains("LOGPASS"), $"a passing test's log printed without -v:\n{captured}");
+        Assert.IsFalse(results.Contains("TestOuter/Suite"), "the redirected suite reached the run");
+
+        (string verboseCaptured, string verboseResults) = RunTestsUnderRedirectedStdout(["-v"]);
+
+        StringAssert.Contains(verboseCaptured, "=== RUN   TestOuter/Suite");
+        StringAssert.Contains(verboseCaptured, "LOGFAIL");
+        StringAssert.Contains(verboseCaptured, "LOGPASS");
+        Assert.IsFalse(verboseResults.Contains("TestOuter/Suite"), "the redirected suite reached the run under -v");
+    }
+
+    private static (string Captured, string Results) RunTestsUnderRedirectedStdout(string[] flags)
+    {
+        string resultPath = Path.Combine(Path.GetTempPath(), $"go2cs-results-{Guid.NewGuid():N}.json");
+        string capturePath = Path.Combine(Path.GetTempPath(), $"go2cs-stdout-{Guid.NewGuid():N}.txt");
+
+        try
+        {
+            TestRegistry registry = new("runtime/runtests-stdout", []);
+            registry.Add("TestOuter", _ =>
+            {
+                ж<os_package.File> saved = os_package.Stdout;
+                (ж<os_package.File> file, error err) = os_package.Create(capturePath);
+                Assert.IsNull(err);
+                os_package.Stdout = file;
+
+                try
+                {
+                    testing_package.RunTests((_, _) => (true, null!), new testing_package.InternalTest[]
+                    {
+                        new(Name: "TestOuter/Suite", F: t =>
+                        {
+                            t.Value.Run("Fails", c => { c.Log("LOGFAIL"); c.Error("expected"); });
+                            t.Value.Run("Passes", c => c.Log("LOGPASS"));
+                        }),
+                    }.slice());
+                }
+                finally
+                {
+                    os_package.Stdout = saved;
+                    file.Close();
+                }
+            }, "runtime_test.go", 1);
+
+            Assert.AreEqual(0, TestHost.Run(registry, [.. flags, "--result", resultPath]));
+
+            return (File.ReadAllText(capturePath), File.ReadAllText(resultPath));
+        }
+        finally
+        {
+            File.Delete(resultPath);
+            File.Delete(capturePath);
+        }
+    }
+
     [TestMethod]
     public void CrossGoroutineFatalRecordsInfrastructureFailureWithoutKillingProcess()
     {
