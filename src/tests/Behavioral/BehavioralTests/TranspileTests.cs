@@ -871,6 +871,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckIfaceFieldMethodValueBind() => CheckTarget("IfaceFieldMethodValueBind");
 
     [TestMethod]
+    public void CheckIfaceLiteralStringConversion() => CheckTarget("IfaceLiteralStringConversion");
+
+    [TestMethod]
     public void CheckIfaceToIfaceNarrow() => CheckTarget("IfaceToIfaceNarrow");
 
     [TestMethod]

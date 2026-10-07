@@ -408,6 +408,17 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// convertToInterfaceType still runs first: it records the witness the lift needs.
 			converted := v.convertToInterfaceType(ifaceType, argType, v.convExpr(callExpr.Args[0], nil))
 
+			// A STRING CONSTANT renders as a u8 literal, a ReadOnlySpan<byte> that cannot box, so the
+			// `any("y")` spelling of the same conversion boxes it through @string first; this arm did
+			// not, and objx's `interface{}("something")` emitted `(any)("something"u8)` (CS0030).
+			// Only a BASIC string constant: a constant of a NAMED string type keeps that type as its
+			// dynamic type in Go, and boxing it through @string would lose it.
+			if tv := v.info.Types[callExpr.Args[0]]; tv.Value != nil && tv.Value.Kind() == constant.String {
+				if basic, ok := types.Unalias(tv.Type).(*types.Basic); ok && basic.Info()&types.IsString != 0 {
+					converted = fmt.Sprintf("(@string)(%s)", converted)
+				}
+			}
+
 			return fmt.Sprintf("(%s)(%s)", v.getCSharpTypeName(ifaceType), converted)
 		}
 	}
