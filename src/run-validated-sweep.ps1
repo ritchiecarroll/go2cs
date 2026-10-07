@@ -1203,7 +1203,14 @@ function Invoke-SweepRow {
 # crypto/tls: raised 30m -> 60m 2026-09-23 (H10 step 5): the banked raised-wall row (R, 3ec2c9ff39,
 # GOFLAGS=-timeout=40m) walled 1,761 s = 0.98x of 30m; 60m puts it at 0.49x; AZ1's standard-wall
 # full-host row (fad839a224) walled 467 s.
-$longTimeouts = @{ 'hash/maphash' = '60m'; 'index/suffixarray' = '120m'; 'crypto/dsa' = '120m'; 'archive/zip' = '60m'; 'go/parser' = '90m'; 'crypto/internal/fips140/mlkem' = '30m'; 'crypto/mlkem' = '30m'; 'time' = '40m'; 'crypto/tls' = '60m'; 'sync/atomic' = '150m'; 'net' = '120m'; 'net/http' = '60m' }
+# runtime: 120m, added 2026-10-06 (COORD ruling on G's floor sizing). The row had NO floor, so it ran
+# at the 10m default, which the i7 clears (553-727 s) and a mobile-class laptop host does not: there the default is a
+# package-timeout kill (871 s wall) and 30m still times out with the Smhasher family in flight (2,006 s
+# wall), both at the union 446d2c8ba0. At master 40a1f839c5, solo, -TestTimeout 120m VALIDATED all
+# 10819 in 4,234 s (70.6 min, Release with tiering off) -- ~6x the i7's wall on this row. 120m is 1.7x
+# that wall, inside the 1.3-1.8x full-sweep-load multipliers measured on archive/zip and go/parser above,
+# and a floor costs a fast host nothing unless a genuine hang has to be declared.
+$longTimeouts = @{ 'hash/maphash' = '60m'; 'index/suffixarray' = '120m'; 'crypto/dsa' = '120m'; 'archive/zip' = '60m'; 'go/parser' = '90m'; 'crypto/internal/fips140/mlkem' = '30m'; 'crypto/mlkem' = '30m'; 'time' = '40m'; 'crypto/tls' = '60m'; 'sync/atomic' = '150m'; 'net' = '120m'; 'net/http' = '60m'; 'runtime' = '120m' }
 # 'net' joined 2026-09-02 at 40m (RAISED to 120m by the Go 1.24.13 re-check below): at the 10m default the C# host dies an EXPLICIT results-tail deadline kill on
 # the i7 class (the mass-empty shape), and at 40m the same tree validates 472/472 in ~1,480 s -- deadline
 # sizing, not divergence (measured twice: the MakeFunc canary gate 2026-08-29 and the A2a gate 2026-09-02).
