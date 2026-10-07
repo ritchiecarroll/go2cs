@@ -2542,7 +2542,8 @@ internal static ΔType canonType(ж<abi.Type> Ꮡt) {
     // type's per-parameter dims, without which `func([32]byte) bool` and `func([64]byte) bool`
     // (ONE managed delegate type, no arrayDims of their own) would share a wrapper and the first to
     // intern would answer In(0).Len() for both.
-    string dimsKey = abi.descriptorDimsKey(Ꮡt.Value.arrayDims, Ꮡt.Value.funcParamDims, Ꮡt.Value.chanDirChain, Ꮡt.Value.keyDims);
+    string dimsKey = abi.descriptorDimsKey(Ꮡt.Value.arrayDims, Ꮡt.Value.funcParamDims, Ꮡt.Value.chanDirChain, Ꮡt.Value.keyDims,
+        Ꮡt.Value.funcInChanDirs, Ꮡt.Value.funcOutChanDirs);
     // STATIC factory, captured state as GetOrAdd's TArg -- the twin of the descriptor cache at
     // abi/type_impl.cs and for the same reason: a capturing lambda allocates a display class and a
     // delegate on every call, cache HITS included. TypeOf crosses BOTH sites in sequence, which is
@@ -2577,7 +2578,8 @@ internal static ΔType toType(ж<abi.Type> Ꮡt) {
 
 // String returns the Go source type string (`main.Point`, `[]int`, `*T`) — the value of %T.
 internal static @string String(this ж<rtype> Ꮡt) {
-    return (@string)GoReflect.GoTypeName(Ꮡt.Value.t.sysType, Ꮡt.Value.t.arrayDims, Ꮡt.Value.t.chanDirChain, Ꮡt.Value.t.keyDims);
+    return (@string)GoReflect.GoTypeName(Ꮡt.Value.t.sysType, Ꮡt.Value.t.arrayDims, Ꮡt.Value.t.chanDirChain, Ꮡt.Value.t.keyDims,
+        Ꮡt.Value.t.funcInChanDirs, Ꮡt.Value.t.funcOutChanDirs);
 }
 
 // Name returns the type's name within its package (empty for an unnamed composite). The gate is
@@ -2709,10 +2711,18 @@ internal static ΔMethod Method(this ж<rtype> Ꮡt, nint i) {
         // through a delegate instance, so abi.TypeOf's func-value route cannot supply them here.
         // net/rpc reads exactly this — mtype.In(2) for every service method's reply — and without
         // the cargo a `*[1]int` reply allocated a ZERO-length array through reflect.New.
-        Type: toType(abi.synthType(GoReflect.GoMethodFuncType(st, (int)i), null, GoReflect.MethodParamDims(st, (int)i))),
+        Type: toType(methodFuncType(st, (int)i)),
         Func: fn is null ? new ΔValue(nil) : makeReflectValue(fn),
         Index: i
     );
+}
+
+// methodFuncType is the func type Method(i) reports: the method TABLE's signature, with the per-parameter
+// array dims and the per-position channel directions that table carries ([GoArrayDims] on the method's
+// parameters; the [GoSigChanDir] go2cs-gen emits beside its declaring type).
+private static ж<abi.Type> methodFuncType(System.Type? st, int i) {
+    (GoChanDir[]? inDirs, GoChanDir[]? outDirs) = GoReflect.MethodChanDirs(st, i);
+    return abi.synthType(GoReflect.GoMethodFuncType(st, i), null, GoReflect.MethodParamDims(st, i), null, null, inDirs, outDirs);
 }
 
 // MethodByName returns the method with that name from the same table, over the same name
@@ -3247,15 +3257,19 @@ private static bool haveIdenticalFuncShape(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV,
     }
     nint[]?[]? tParamDims = ᏑT.Value.funcParamDims;
     nint[]?[]? vParamDims = ᏑV.Value.funcParamDims;
+    // A position's channel DIRECTION rides the func's direction cargo, so `func(<-chan int)` and
+    // `func(chan int)` — ONE managed delegate type — compare as the distinct types they are.
     for (int i = 0; i < tin.Length; i++) {
-        var tp = abi.synthType(tin[i], funcParamDimsAt(tParamDims, i));
-        var vp = abi.synthType(vin[i], funcParamDimsAt(vParamDims, i));
+        var tp = abi.synthType(tin[i], funcParamDimsAt(tParamDims, i), null, abi.funcChanDirAt(ᏑT.Value.funcInChanDirs, i));
+        var vp = abi.synthType(vin[i], funcParamDimsAt(vParamDims, i), null, abi.funcChanDirAt(ᏑV.Value.funcInChanDirs, i));
         if (!haveIdenticalType(tp, vp, cmpTags)) {
             return false;
         }
     }
     for (int i = 0; i < tout.Length; i++) {
-        if (!haveIdenticalType(abi.synthType(tout[i]), abi.synthType(vout[i]), cmpTags)) {
+        var tr = abi.synthType(tout[i], null, null, abi.funcChanDirAt(ᏑT.Value.funcOutChanDirs, i));
+        var vr = abi.synthType(vout[i], null, null, abi.funcChanDirAt(ᏑV.Value.funcOutChanDirs, i));
+        if (!haveIdenticalType(tr, vr, cmpTags)) {
             return false;
         }
     }
@@ -4188,7 +4202,10 @@ internal static nint NumIn(this ж<rtype> Ꮡt) {
 internal static ΔType In(this ж<rtype> Ꮡt, nint i) {
     nint[]?[]? paramDims = Ꮡt.Value.t.funcParamDims;
     nint[]? dims = paramDims is not null && i >= 0 && (int)i < paramDims.Length ? paramDims[(int)i] : null;
-    return toType(abi.synthType(funcShapeOf(Ꮡt, "In"u8).ins[(int)i], dims));
+    // Its channel DIRECTION rides funcInChanDirs the same way: `<-chan int` and `chan int` are one
+    // managed channel<nint>, so the position's direction is the func descriptor's to carry.
+    GoChanDir dir = abi.funcChanDirAt(Ꮡt.Value.t.funcInChanDirs, (int)i);
+    return toType(abi.synthType(funcShapeOf(Ꮡt, "In"u8).ins[(int)i], dims, null, dir));
 }
 
 internal static nint NumOut(this ж<rtype> Ꮡt) {
@@ -4196,7 +4213,8 @@ internal static nint NumOut(this ж<rtype> Ꮡt) {
 }
 
 internal static ΔType Out(this ж<rtype> Ꮡt, nint i) {
-    return toType(abi.synthType(funcShapeOf(Ꮡt, "Out"u8).outs[(int)i]));
+    GoChanDir dir = abi.funcChanDirAt(Ꮡt.Value.t.funcOutChanDirs, (int)i);
+    return toType(abi.synthType(funcShapeOf(Ꮡt, "Out"u8).outs[(int)i], null, null, dir));
 }
 
 internal static bool IsVariadic(this ж<rtype> Ꮡt) {

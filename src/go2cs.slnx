@@ -883,6 +883,7 @@
     <Project Path="tests/Behavioral/ReflectFieldMetadata/ReflectFieldMetadata.csproj" />
     <Project Path="tests/Behavioral/ReflectFieldMetadata/fieldlib/ReflectFieldMetadata.fieldlib.csproj" />
     <Project Path="tests/Behavioral/ReflectFuncArrayParamDims/ReflectFuncArrayParamDims.csproj" />
+    <Project Path="tests/Behavioral/ReflectFuncChanDir/ReflectFuncChanDir.csproj" />
     <Project Path="tests/Behavioral/ReflectMakeFunc/ReflectMakeFunc.csproj" />
     <Project Path="tests/Behavioral/ReflectMapRangeNilKey/ReflectMapRangeNilKey.csproj" />
     <Project Path="tests/Behavioral/ReflectMethodTableWalk/ReflectMethodTableWalk.csproj" />
