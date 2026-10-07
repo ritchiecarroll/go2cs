@@ -144,6 +144,33 @@ public static partial class GoReflect
         return tryPointerBoxShape(boxType, out _, out elemType);
     }
 
+    /// <summary>
+    /// The box a pointer's pointee lives in, as reflect's ADDRESS box for that pointee: a closed
+    /// <c>ж&lt;T&gt;</c> is its own, and a generated named-pointer wrapper (<c>type P *T</c>, a class
+    /// over a <c>ж&lt;T&gt;</c>) hands back the <c>ж&lt;T&gt;</c> it wraps.
+    /// </summary>
+    /// <remarks>
+    /// A named pointer type is a pointer TYPE, not a second box around the storage: in Go,
+    /// <c>reflect.ValueOf(P(p)).Elem()</c> is the same addressable value as <c>reflect.ValueOf(p).Elem()</c>,
+    /// and its <c>Addr()</c> is a plain <c>*T</c>. Every address-box consumer is written for the
+    /// <c>ж&lt;T&gt;</c>: <see cref="FieldAliasBox"/>'s accessor reads its <c>ValueSlot</c> (the wrapper
+    /// has none, so fmt's <c>%#v</c> through <c>type sPtr *s</c> died on a nil dereference -- testify's
+    /// assert.Same printing its failure), <see cref="ElementAliasBoxOfBox"/> casts to <c>ж&lt;C&gt;</c>,
+    /// and <c>Addr()</c> surfaces the box as the pointer, so the wrapper read back as <c>sPtr</c> where
+    /// Go has <c>*s</c>. Unwrapping once, where the address box is taken, answers all three.
+    /// </remarks>
+    public static object AddressBoxOf(object pointer)
+    {
+        if (pointer is not IUnsafePointer &&
+            tryPointerBoxShape(pointer.GetType(), out bool viaInterface, out _) && viaInterface &&
+            TryUnwrapWrapperValue(pointer, out object? box) && TryBoxPointee(box.GetType(), out _))
+        {
+            return box;
+        }
+
+        return pointer;
+    }
+
     // A raw closed ж<T> uses the ValueSlot pair; a generated named-pointer wrapper (a non-generic
     // class implementing IPointer<T>) routes through the interface's ref-returning Value.
     private static bool tryPointerBoxShape(Type? boxType, out bool viaInterface, [NotNullWhen(true)] out Type? elemType)
