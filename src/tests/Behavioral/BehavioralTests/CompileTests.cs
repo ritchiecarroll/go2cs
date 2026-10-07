@@ -613,6 +613,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]
+    public void CheckForeignDefinedConversion() => CheckTarget("ForeignDefinedConversion");
+
+    [TestMethod]
     public void CheckForeignIfaceFieldPointer() => CheckTarget("ForeignIfaceFieldPointer");
 
     [TestMethod]

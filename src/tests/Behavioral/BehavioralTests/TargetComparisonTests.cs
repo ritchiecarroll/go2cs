@@ -616,6 +616,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]
+    public void CheckForeignDefinedConversion() => CheckTarget("ForeignDefinedConversion");
+
+    [TestMethod]
     public void CheckForeignIfaceFieldPointer() => CheckTarget("ForeignIfaceFieldPointer");
 
     [TestMethod]
