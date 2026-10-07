@@ -2968,7 +2968,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// Over allEntries, not prodEntries: a _test.go file can call runtime.Caller/Callers directly
 	// (io/multi_test.go's flatten-depth assertions are the measured case) and needs the same
 	// protection production code does — see callerInliningAnalysis.go.
-	needsNoInlining := computeNoInliningClosure(allEntries, pkg.Types, pkg.TypesInfo)
+	needsNoInlining := computeNoInliningClosure(allEntries, pkg.Types, pkg.TypesInfo, fixedSkipClosureApplies(pkg.Dir, options.goRoot))
 
 	collectCaptureModeMethods(pkg)
 	collectTypeSpecRHS(pkg)

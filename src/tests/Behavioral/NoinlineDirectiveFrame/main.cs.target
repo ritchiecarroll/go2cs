@@ -31,7 +31,7 @@ internal static partial @string keeper(slice<byte> b, nint i) {
     return callerName();
 }
 
-internal static @string forward(slice<byte> b, nint i) {
+internal static partial @string forward(slice<byte> b, nint i) {
     return keeper(b, i);
 }
 
