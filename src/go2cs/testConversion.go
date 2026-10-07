@@ -5370,6 +5370,29 @@ func declarationClosureImports(roots []*packages.Package, compileExcluded map[st
 						enqueue(mentioned)
 					}
 				}
+
+				// The PROMOTED-FIELD edge, the generator's other half: besides a forwarder per promoted
+				// method it writes a ref accessor per promoted FIELD of the embed ("Promoted Struct Field
+				// Accessors"), in the test assembly, and each accessor spells the field's type. testify's
+				// suite tests embed suite.Suite, whose `mu sync.RWMutex` is a legal promoted field in the
+				// white-box variant (the same Go package); sync is imported only by production suite.go,
+				// so `go.sync_package` was CS0234 in all 13 generated suite files. The same membership rule
+				// as the methods: exported fields always, unexported ones when the embed belongs to the
+				// embedding struct's package.
+				fields := embed.Underlying().(*types.Struct)
+
+				for i := range fields.NumFields() {
+					field := fields.Field(i)
+
+					if !field.Exported() && embed.Obj().Pkg() != named.Obj().Pkg() {
+						continue
+					}
+
+					for _, mentioned := range namedTypesIn(field.Type()) {
+						reach(mentioned)
+						enqueue(mentioned)
+					}
+				}
 			}
 		}
 	}

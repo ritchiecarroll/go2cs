@@ -45,6 +45,35 @@ func TestDeclarationClosureImportsSurfacesPromotedMethodSignatures(t *testing.T)
 	}
 }
 
+// The PROMOTED-FIELD edge: go2cs-gen also writes a ref accessor per promoted FIELD of the embed, which
+// spells the field's type. testify's suite tests embed suite.Suite, whose unexported `mu sync.RWMutex` is
+// a legal promoted field in the white-box variant; sync is imported only by the production file, so the
+// generated accessors were CS0234 `go.sync_package` in all 13 suite files. The test above is this edge's
+// control: bytes.Buffer's fields are all unexported and FOREIGN, so they add nothing beside io.
+func TestDeclarationClosureImportsSurfacesPromotedFieldTypes(t *testing.T) {
+	dir := t.TempDir()
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod": "module example/suite\n\ngo 1.23\n",
+		"suite.go": "package suite\n" +
+			"import \"sync\"\n" +
+			"type Suite struct {\n\tmu sync.RWMutex\n\tName string\n}\n" +
+			"func (s *Suite) Lock() { s.mu.Lock(); s.mu.Unlock() }\n",
+		"suite_test.go": "package suite\n" +
+			"import \"testing\"\n" +
+			"type mySuite struct{ Suite }\n" +
+			"func TestSuite(t *testing.T) {\n\tvar s mySuite\n\ts.Lock()\n\tif s.Name != \"\" {\n\t\tt.Fatal(\"bad\")\n\t}\n}\n",
+	})
+
+	production := loadProductionForDir(t, dir)
+	internal, external := loadTestVariantsForDir(t, dir)
+	roots := []*packages.Package{production, internal, external}
+	referenced := []string{production.PkgPath, "testing"}
+
+	if got := declarationClosureImports(roots, nil, referenced, nil, nil); len(got) != 1 || got[0] != "sync" {
+		t.Fatalf("mySuite embeds Suite, whose promoted field mu is a sync.RWMutex; got %v", got)
+	}
+}
+
 // The boundaries: a NAMED field promotes nothing, and a PRODUCTION file's embed is generated in the
 // production assembly (with its own references), never in the test assembly.
 func TestDeclarationClosureImportsPromotedEdgeIsEmbedAndTestScoped(t *testing.T) {
