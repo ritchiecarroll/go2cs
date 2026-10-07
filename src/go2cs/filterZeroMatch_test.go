@@ -236,23 +236,20 @@ func TestGatedArrayAndFilterStampCoexist(t *testing.T) {
 func TestRunActionHostArgvCarriesTheFilter(t *testing.T) {
 	args := convertedHostArgs(Options{testFilter: "^TestFinalizerType$", testTimeout: 5 * time.Minute})
 
-	idx := -1
-	for i, a := range args {
-		if a == "--run" {
-			idx = i
+	found := false
+	for _, a := range args {
+		if a == "-test.run=^TestFinalizerType$" {
+			found = true
 		}
 	}
-	if idx < 0 {
-		t.Fatalf("a -test-filter run must hand the host --run, or the run measures the whole package while reading as gated; got %v", args)
-	}
-	if idx+1 >= len(args) || args[idx+1] != "^TestFinalizerType$" {
-		t.Fatalf("--run must be followed by the filter VERBATIM, the same string compare hands both sides; got %v", args)
+	if !found {
+		t.Fatalf("a -test-filter run must hand the host -test.run=<filter> VERBATIM, the same string compare hands both sides, or the run measures the whole package while reading as gated; got %v", args)
 	}
 
 	// The prefix the host needs regardless of gating stays present -- a filter must ADD to the
 	// argv, never replace it.
-	if len(args) < 3 || args[0] != "--json" || args[1] != "-timeout" {
-		t.Fatalf("the host argv must still open with --json -timeout; got %v", args)
+	if len(args) != 3 || args[0] != "-test.v=test2json" || args[1] != "-test.timeout=5m0s" {
+		t.Fatalf("the host argv must still open with -test.v=test2json -test.timeout=<d>; got %v", args)
 	}
 }
 
@@ -264,11 +261,32 @@ func TestUngatedRunActionHostArgvCarriesNoFilter(t *testing.T) {
 	args := convertedHostArgs(Options{testTimeout: 5 * time.Minute})
 
 	for _, a := range args {
-		if a == "--run" {
-			t.Fatalf("an ungated run must pass no --run at all, not an empty one; got %v", args)
+		if strings.HasPrefix(a, "-test.run") {
+			t.Fatalf("an ungated run must pass no -test.run at all, not an empty one; got %v", args)
 		}
 	}
-	if len(args) != 3 || args[0] != "--json" || args[1] != "-timeout" {
-		t.Fatalf("the ungated host argv is exactly --json -timeout <d>; got %v", args)
+	if len(args) != 2 || args[0] != "-test.v=test2json" || args[1] != "-test.timeout=5m0s" {
+		t.Fatalf("the ungated host argv is exactly -test.v=test2json -test.timeout=<d>; got %v", args)
+	}
+}
+
+// The host's argv is the converted program's os.Args, so it carries nothing a Go test binary run by
+// `go test -json` would not see: every element is a `-test.` flag. A package that parses its own
+// os.Args (cobra's Execute with no SetArgs, through pflag, which skips `-test.` flags) then reads
+// what Go's binary reads. The pipeline's own result and JUnit paths travel in the environment.
+func TestHostArgvCarriesOnlyGoTestFlags(t *testing.T) {
+	args := convertedHostArgs(Options{testFilter: "^TestX$", testTimeout: 20 * time.Minute})
+
+	for _, a := range args {
+		if !strings.HasPrefix(a, "-test.") {
+			t.Fatalf("the host argv must hold only `-test.` flags, as Go's test binary does; %q is not one (argv %v)", a, args)
+		}
+	}
+
+	env := strings.Join(convertedHostResultEnv(`C:\out`), "\n")
+	for _, want := range []string{"GO2CS_TEST_RESULT=", "GO2CS_TEST_JUNIT="} {
+		if !strings.Contains(env, want) {
+			t.Fatalf("the result and JUnit paths must travel in the environment (%s missing); got %q", want, env)
+		}
 	}
 }

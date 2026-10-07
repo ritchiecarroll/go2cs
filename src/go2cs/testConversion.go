@@ -7143,12 +7143,30 @@ func driverTerminal() string {
 // the probe runbook that asked for both a gated row and the run action got a reading of
 // NOTHING whose own validity check still read clean (i9, mailbox 4dc421f02). A flag silently
 // ignored by one action and honoured by another is the shape a shared derivation removes.
+//
+// The flags are spelled the way `go test -json` hands them to a Go test binary -- `-test.v=test2json`,
+// `-test.timeout=…`, `-test.run=…` -- because the host's argv IS the converted program's os.Args. A
+// package that reads its own arguments sees what Go's binary sees: cobra's Execute with no SetArgs
+// parses os.Args[1:], and pflag skips every `-test.` flag, so Go's run of TestCalledAs finds no
+// arguments while the old `--json -timeout 20m0s --result …` failed it with `unknown flag: --json`.
+// Pipeline-only settings travel in the environment instead (convertedHostResultEnv).
 func convertedHostArgs(options Options) []string {
-	args := []string{"--json", "-timeout", options.testTimeout.String()}
+	args := []string{"-test.v=test2json", "-test.timeout=" + options.testTimeout.String()}
 	if options.testFilter != "" {
-		args = append(args, "--run", options.testFilter)
+		args = append(args, "-test.run="+options.testFilter)
 	}
 	return args
+}
+
+// convertedHostResultEnv passes the host the result-file and JUnit-file paths, which Go's test binary has
+// no flag for and which must therefore stay off argv (see convertedHostArgs). The host reads both once
+// and removes them from its own environment (TestOptions.TakeEnvironmentVariable), so a test that
+// re-executes the host does not write into the parent's files.
+func convertedHostResultEnv(outputPath string) []string {
+	return []string{
+		"GO2CS_TEST_RESULT=" + filepath.Join(outputPath, "go2cs_test_results.json"),
+		"GO2CS_TEST_JUNIT=" + filepath.Join(outputPath, "go2cs_test_results.xml"),
+	}
 }
 
 // testHostLaunchDir is the working directory the converted test host STARTS in: the package's Go
@@ -9472,11 +9490,10 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 
 	csArgs := convertedHostArgs(options)
 	if hostFatalSkip != "" {
-		csArgs = append(csArgs, "--skip", hostFatalSkip)
+		csArgs = append(csArgs, "-test.skip="+hostFatalSkip)
 	}
-	csArgs = append(csArgs,
-		"--result", filepath.Join(outputPath, "go2cs_test_results.json"), "--junit", filepath.Join(outputPath, "go2cs_test_results.xml"))
-	csOutput, csErr := runCommandWithTimeoutEnv(testChildTimeout(options), testHostLaunchDir(inputPath, outputPath), options, testHostEnv(inputPath, options), publishedTestHostPath(outputPath, testProject), csArgs...)
+	csEnv := append(testHostEnv(inputPath, options), convertedHostResultEnv(outputPath)...)
+	csOutput, csErr := runCommandWithTimeoutEnv(testChildTimeout(options), testHostLaunchDir(inputPath, outputPath), options, csEnv, publishedTestHostPath(outputPath, testProject), csArgs...)
 
 	// The RAW command errors, snapshotted here because the two forgiveness arms far below nil them
 	// out — and the record's diagnostic tail (comparisonStderrTails) is attached on exactly the

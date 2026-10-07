@@ -533,6 +533,7 @@ public class TestingRuntimeTests
         Assert.AreEqual((0, true, true), RunArgv("--v"));
         Assert.AreEqual((0, true, true), RunArgv("--json"), "--json implies -v");
         Assert.AreEqual((0, true, true), RunArgv("-json"));
+        Assert.AreEqual((0, true, true), RunArgv("-test.v=test2json"), "go test -json's own spelling is the host's --json");
 
         // The first non-flag STOPS the parse — the run proceeds instead of dying at startup.
         Assert.AreEqual((0, true, false), RunArgv("cat"));

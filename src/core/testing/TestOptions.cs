@@ -56,6 +56,24 @@ internal sealed class TestOptions
     public TimeSpan Timeout { get; private set; } = TimeSpan.FromMinutes(10.0D);
     public string? ResultFile { get; private set; }
     public string? JUnitFile { get; private set; }
+
+    /// <summary>Environment variable the pipeline passes the result-file path in.</summary>
+    public const string ResultFileEnvironmentVariable = "GO2CS_TEST_RESULT";
+
+    /// <summary>Environment variable the pipeline passes the JUnit-file path in.</summary>
+    public const string JUnitFileEnvironmentVariable = "GO2CS_TEST_JUNIT";
+
+    // Reads an environment variable and removes it from this process, so nothing this process
+    // starts inherits it.
+    private static string? TakeEnvironmentVariable(string name)
+    {
+        string? value = Environment.GetEnvironmentVariable(name);
+
+        if (value is not null)
+            Environment.SetEnvironmentVariable(name, null);
+
+        return string.IsNullOrWhiteSpace(value) ? null : value;
+    }
     private Regex[]? Filters { get; set; }
 
     // -skip is -run's inverse and MUST compile identically: same `/` split, same per-segment regexes.
@@ -141,6 +159,16 @@ internal sealed class TestOptions
     {
         TestOptions options = new();
 
+        // The result and JUnit paths are the pipeline's, not the Go test binary's, so the pipeline
+        // hands them over in the environment and keeps argv exactly the shape `go test` gives a
+        // test binary: a package that reads its own os.Args (cobra's Execute with no SetArgs) then
+        // sees only `-test.*` flags, which it skips as Go's would. Read once and CLEARED, so a test
+        // that re-executes this host (os/exec's `exec.Command(os.Args[0], ...)`) does not hand the
+        // child the parent's result file. An explicit --result / --junit below still wins: the
+        // in-process tier passes them directly.
+        options.ResultFile = TakeEnvironmentVariable(ResultFileEnvironmentVariable);
+        options.JUnitFile = TakeEnvironmentVariable(JUnitFileEnvironmentVariable);
+
         for (int index = 0; index < args.Length; index++)
         {
             string arg = args[index];
@@ -190,6 +218,16 @@ internal sealed class TestOptions
                     break;
                 case "v":
                 case "test.v":
+                    // `go test -json` hands its test binary `-test.v=test2json`: verbose output in the
+                    // framing test2json reads. This host is that binary and test2json in one process,
+                    // so the value means exactly what `--json` means.
+                    if (value == "test2json")
+                    {
+                        options.Json = true;
+                        options.Verbose = true;
+                        break;
+                    }
+
                     options.Verbose = value is null || bool.Parse(value);
                     break;
                 case "short":
