@@ -112,9 +112,8 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
             return;
 
         Type element = source.GetGenericArguments()[0];
-        FieldInfo[] fields = GoFieldMetadata.InstanceFields(header)
-            .OrderBy(field => field.MetadataToken)
-            .ToArray();
+        // Declaration order is GoFieldMetadata's order (no metadata token under Native AOT; see there).
+        FieldInfo[] fields = GoFieldMetadata.InstanceFields(header);
 
         if (fields.Length != 3)
             return;
