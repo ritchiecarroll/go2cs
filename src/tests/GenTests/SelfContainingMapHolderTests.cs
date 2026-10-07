@@ -220,4 +220,18 @@ public class SelfContainingMapHolderTests
         StringAssert.Contains(GeneratedFor(sources, "PlainMap"), "public void Set(nint key, nint value) => m_value.Set(key, value);");
         StringAssert.Contains(GeneratedFor(sources, "Direct"), "public void Set(nint key, Direct value) => Value.Set(key, value);");
     }
+
+    // maps.Clone of a named map must return the named type (`clone(m).(M)`), so every map wrapper
+    // implements IMap.CloneMap itself, copying through the SAME map read as Set: the inline field, or a
+    // self-containing map's holder through Value -- never the holder's storage.
+    [TestMethod]
+    public void EveryMapWrapperClonesToItsOwnTypeThroughItsMapRead()
+    {
+        Dictionary<string, string> sources = RunTypeGenerator();
+
+        StringAssert.Contains(GeneratedFor(sources, "PlainMap"), "IMap IMap.CloneMap() => IsNil ? default(PlainMap) : new PlainMap(new map<nint, nint>(m_value));");
+        StringAssert.Contains(GeneratedFor(sources, "Direct"), "IMap IMap.CloneMap() => IsNil ? default(Direct) : new Direct(new map<nint, Direct>(Value));");
+        AssertParses("PlainMap", GeneratedFor(sources, "PlainMap"));
+        AssertParses("Direct", GeneratedFor(sources, "Direct"));
+    }
 }

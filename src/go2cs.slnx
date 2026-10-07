@@ -700,6 +700,7 @@
     <Project Path="tests/Behavioral/NamedMapNestedAssign/NamedMapNestedAssign.csproj" />
     <Project Path="tests/Behavioral/NamedMapRvalueIndexWrite/NamedMapRvalueIndexWrite.csproj" />
     <Project Path="tests/Behavioral/NamedMapValuesCollision/NamedMapValuesCollision.csproj" />
+    <Project Path="tests/Behavioral/NamedMapClone/NamedMapClone.csproj" />
     <Project Path="tests/Behavioral/NamedMapCrossPkgKey/NamedMapCrossPkgKey.csproj" />
     <Project Path="tests/Behavioral/NamedMapMakeNonNil/NamedMapMakeNonNil.csproj" />
     <Project Path="tests/Behavioral/NamedArrayPointerConversion/NamedArrayPointerConversion.csproj" />

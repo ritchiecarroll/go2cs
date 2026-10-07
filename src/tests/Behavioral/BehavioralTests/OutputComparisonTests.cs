@@ -1187,6 +1187,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedInterfacePointerMethodSet() => CheckTarget("NamedInterfacePointerMethodSet");
 
     [TestMethod]
+    public void CheckNamedMapClone() => CheckTarget("NamedMapClone");
+
+    [TestMethod]
     public void CheckNamedMapCrossPkgKey() => CheckTarget("NamedMapCrossPkgKey");
 
     [TestMethod]

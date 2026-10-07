@@ -1064,7 +1064,20 @@ internal static any clone(any m) {
 }
 ```
 
-`builtin.mapclone(any m)` is Go's `runtime.mapclone` at golib level: it recovers the boxed map's concrete key/value types through `IMap.CloneMap()` (a default interface method on `IMap<TKey, TValue>`, so both the concrete `map<K, V>` and the generated named-map wrappers get it with no source-generator change — no reflection) and returns a fresh `map<K, V>` populated from the source's entries. The clone's backing `Dictionary` is **independent** — Go's shallow clone (keys/values copied by ordinary assignment), so mutating the clone never touches the original — and a nil map clones to nil. This is what carries the `maps` package to full Phase-4 validation (14/14 tests vs `go test`; the 6 Clone/Copy/DeleteFunc tests previously threw). Extend `linknameForwardBuiltins` when another linkname intrinsic gains a golib builtin. Guarded by the `MapCloneLinkname` behavioral test — the exact `//go:linkname clone maps.clone` shape in a `main` package, cloning a `map[string]int`, mutating the clone (overwrite/add/delete) and asserting the original is unchanged, output-compared vs `go run`; proven to emit the throwing stub against the un-fixed converter.
+`builtin.mapclone(any m)` is Go's `runtime.mapclone` at golib level: it recovers the boxed map's concrete key/value types through `IMap.CloneMap()` (a default interface method on `IMap<TKey, TValue>` for the concrete `map<K, V>`, which a generated named-map wrapper overrides to keep its own type — see below; no reflection either way) and returns a fresh `map<K, V>` populated from the source's entries. The clone's backing `Dictionary` is **independent** — Go's shallow clone (keys/values copied by ordinary assignment), so mutating the clone never touches the original — and a nil map clones to nil. This is what carries the `maps` package to full Phase-4 validation (14/14 tests vs `go test`; the 6 Clone/Copy/DeleteFunc tests previously threw). Extend `linknameForwardBuiltins` when another linkname intrinsic gains a golib builtin. Guarded by the `MapCloneLinkname` behavioral test — the exact `//go:linkname clone maps.clone` shape in a `main` package, cloning a `map[string]int`, mutating the clone (overwrite/add/delete) and asserting the original is unchanged, output-compared vs `go run`; proven to emit the throwing stub against the un-fixed converter.
+
+**A NAMED map clones to its own type.** The default above returns a plain `map<K, V>` for every
+receiver, but `maps.Clone[M ~map[K]V](m M) M` asserts its worker's result back to `M`
+(`clone(m).(M)`), so cloning a defined map type panicked: logrus's `maps.Clone(entry.Data)` on
+`type Fields map[string]interface{}` read "interface {} is map, not logrus.Fields" on a goroutine and
+cost the module 102 infrastructure errors. go2cs-gen's Map template now implements `IMap.CloneMap` on
+every generated wrapper: a nil wrapper clones to the wrapper's own `default`, any other to
+`new Named(new map<K, V>(…))` over the wrapper's map. The map is read through the same expression every
+other member uses, which for a self-containing wrapper (`type Tree map[string]Tree`, held in a reference
+holder) is `Value` and never the holder's storage. (Guarded by the `NamedMapClone` behavioral output
+test — an ordinary named map, a nil one and a self-containing one, each read back through `%T`, with
+the clone's storage independent and a `.(Fields)` assertion true where `.(map[string]any)` is false,
+against Go.)
 
 **A pure-JMP ASSEMBLY TRAMPOLINE takes the same forwarder** (`asmTrampolines.go`, 2026-09-24). A bodyless
 function whose platform-selected `.s` block holds ONE instruction, a jump to a Go function, is Go's own
