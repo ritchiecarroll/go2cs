@@ -443,6 +443,23 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 	return v.narrowArithmeticSelfCast(unaryExpr, core)
 }
 
+// pointerToStruct reports whether t is a pointer -- plain or a named pointer type -- to a struct.
+func pointerToStruct(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+
+	ptr, ok := types.Unalias(t).Underlying().(*types.Pointer)
+
+	if !ok {
+		return false
+	}
+
+	_, isStruct := ptr.Elem().Underlying().(*types.Struct)
+
+	return isStruct
+}
+
 func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprContext) string {
 	// Check if the unary expression is a pointer dereference
 	if unaryExpr.Op == token.AND {
@@ -522,6 +539,17 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 		// case is handled above and a value-struct field falls through to the struct branch below.
 		if selectorExpr, ok := unaryExpr.X.(*ast.SelectorExpr); ok {
 			base := selectorExpr.X
+
+			// `&(*p).f` is Go's explicit spelling of `&p.f`: the dereference names the struct the
+			// pointer already boxes, so take the field through the POINTER, exactly as the implicit
+			// form does. Rendering the dereferenced VALUE instead fell to the struct arm below, whose
+			// `Ꮡ(value).of(…)` boxes a COPY of the struct, and every write through the result was
+			// lost -- for a plain `*T` and a named `type P *T` alike. A dereference that is itself a
+			// pointer (`&(*pprev).alllink` over a `**m`) keeps the deref-base arm below.
+			if star, ok := ast.Unparen(base).(*ast.StarExpr); ok && pointerToStruct(v.getType(star.X, false)) {
+				base = star.X
+			}
+
 			_, baseIsIdent := base.(*ast.Ident)
 			_, baseIsSelector := base.(*ast.SelectorExpr)
 			_, baseIsIndex := base.(*ast.IndexExpr)
@@ -561,7 +589,11 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 			}
 
 			if baseIsIdent || baseIsSelector || baseIsCall || baseIsIndex || baseIsStar || baseIsTypeAssert {
-				if ptrType, ok := v.getType(base, false).(*types.Pointer); ok {
+				// A NAMED pointer type (`type P *T`) is a pointer through its underlying type: its
+				// generated wrapper declares the same `of` a ж<T> does, so the field-ref form applies
+				// unchanged. Matching only *types.Pointer sent `&pp.f` to the struct arm, which
+				// rendered a `pp.f` the wrapper does not have.
+				if ptrType, ok := types.Unalias(v.getType(base, false)).Underlying().(*types.Pointer); ok {
 					if _, ok := ptrType.Elem().Underlying().(*types.Struct); ok {
 						structExpr := v.convExpr(base, nil)
 
@@ -571,8 +603,13 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 						// The box keeps the RAW parameter name: a collision/shadow-renamed param `p`→`Δp`
 						// is `ref var Δp = ref Ꮡp.Value`, so its box is `Ꮡp`, not `ᏑΔp` (CS0103). boxBaseName
 						// yields the raw name when shadow-renamed and the sanitized name otherwise (no churn).
+						//
+						// Only a PLAIN `*T` parameter is deref-aliased that way: a named pointer type's
+						// parameter is its generated wrapper, already the box (`P pp`, no `Ꮡpp`).
 						if baseIdent, ok := base.(*ast.Ident); ok && v.identIsParameter(baseIdent) {
-							structExpr = AddressPrefix + v.boxBaseName(baseIdent)
+							if _, plain := types.Unalias(v.getType(base, false)).(*types.Pointer); plain {
+								structExpr = AddressPrefix + v.boxBaseName(baseIdent)
+							}
 						}
 
 						typeName := convertToCSTypeName(v.getAliasQualifiedTypeName(ptrType.Elem(), false))
