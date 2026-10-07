@@ -26352,4 +26352,49 @@ channel in its signature.
 
 — C2
 
+## 2026-10-06 — C2: three rows from the whole-stdlib warnings census
+
+The census: the shipped tree `e1ad9dbc11` (tag `nuget-1.24.13.4`), whole standard library, Release,
+`--no-incremental`, one output directory per target: linux 67, windows 67, darwin 74 warnings, 0 errors.
+Linux and windows are site for site identical and equal to the owner's release log; darwin is linux plus
+seven (six CA1416 and one CS8826, ruled to P1). golib built alone at `7a1b2e3631`, the master before
+TRAIN P, gives the same 66 golib sites, so none of them is new with TRAIN P. COORD ruled the codes on
+2026-10-06; these three rows are the ones it asked to be recorded.
+
+**CS8500, `runtime/iface.cs(235)`: REAL, a converter question; G sizes it.** The line is `itabInit`'s
+`methods`, `new slice<@unsafe.Pointer>(new ReadOnlySpan<@unsafe.Pointer>((@unsafe.Pointer*)(uintptr)(…), (int)(ni)))`:
+a raw pointer whose element type, golib's `unsafe.Pointer`, is a managed struct, so the garbage collector
+does not track what the pointer reaches. It is the only CS8500 in the build on all three targets, and it
+is the same line as row 1 of G's 2026-10-02 entry above (the copying slice view whose stores never reach
+`m.Fun`). That entry's ruling stands for the store: no seat until its predicate fires. The warning is
+recorded here so the two readings of one line are found together.
+
+**Native AOT is a capability boundary for type synthesis, not a warning to remove (IL2111, IL2055,
+IL2060; NO CUT).** `reflect.FuncOf` and `reflect.StructOf` create types at run time with
+Reflection.Emit (`TypeBuilder`, `DefineType`: `golib/GoDelegateSynthesis.cs:155` and
+`golib/GoStructSynthesis.cs`), and Native AOT has no Reflection.Emit. `MakeGenericType` /
+`MakeGenericMethod` over a value-type instantiation that the compiler never saw cannot be created there
+either. Under JIT, and under the trimmed publish that ships (`TrimMode=partial`, golib and the converted
+packages fully rooted), these work; a converted program published as Native AOT cannot make those
+types (not measured here: no Native AOT program in the census reached these calls). The trim analyzer's warnings on golib (66 at the shipped tree) describe
+this; removing the analyzer from golib's build would hide them and fix nothing.
+
+**Nothing checks a REMOVED CONSTRUCTOR the way the field-metadata guard checks removed fields (IL2067;
+NO CUT).** `ZeroValueOf` (`golib/GoReflect.ValueMarshalling.cs:555, 571`) makes a converted struct's Go
+zero value through `Activator.CreateInstance` on the struct's type, which runs its parameterless
+constructor, where the struct's field initializers
+live (a blank `[4]byte` field is `internal array<byte> _ = new(4);`). In the configuration that ships the
+constructor cannot be trimmed: neither golib nor any converted package is `IsTrimmable`, and
+`TrimMode=partial` keeps every member of them. Under `TrimMode=full` a falsifier program (a struct
+reached only through `reflect.TypeOf((*T)(nil)).Elem()`, then `reflect.Zero` and `reflect.New`) never
+reaches `ZeroValueOf`: both Native AOT arms exit 2 at startup, when `GoFieldMetadata` refuses
+`internal/cpu`'s `option` struct ("its field metadata was removed, most likely by trimming"). So a full
+trim is refused today, and only because the field guard fires first. If a full trim ever got past it, by
+my reading of the code (not measured) a removed constructor would yield a zero value whose initialized
+fields are missing, and nothing would say so.
+**Predicate:** golib or a converted package declares itself trimmable, or a supported publish
+configuration moves to `TrimMode=full`.
+
+— C2
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
