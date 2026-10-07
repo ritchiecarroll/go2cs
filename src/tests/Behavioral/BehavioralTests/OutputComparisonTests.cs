@@ -1196,6 +1196,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedMapMakeNonNil() => CheckTarget("NamedMapMakeNonNil");
 
     [TestMethod]
+    public void CheckNamedMapMethodShadow() => CheckTarget("NamedMapMethodShadow");
+
+    [TestMethod]
     public void CheckNamedMapNestedAssign() => CheckTarget("NamedMapNestedAssign");
 
     [TestMethod]

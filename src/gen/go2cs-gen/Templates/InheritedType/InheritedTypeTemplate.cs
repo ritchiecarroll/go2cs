@@ -102,6 +102,13 @@ internal class InheritedTypeTemplate : TemplateBase
     // IStrongBox step), so the Go value seen through reflect is the map itself.
     public bool HoldsMapInHolder = false;
 
+    // The Go methods declared on this type, and its own name (TypeGenerator.GoMethodNames). A Go method
+    // is an extension method, which loses to any applicable instance member, and a member may not share
+    // its type's name, so a map or channel wrapper YIELDS each of these names: a member implementing an interface becomes its explicit implementation, and Set is
+    // dropped for its door (Symbols.MapWrapperSet). IChannelTypeTemplate's explicit-only Close is the
+    // same rule, applied before there was a census.
+    public ICollection<string> GoMethodNames = [];
+
     private bool UsesHolder => TypeClass == "Array" || HoldsMapInHolder;
 
     private string ImplementedInterface => TypeClass switch
@@ -161,9 +168,9 @@ internal class InheritedTypeTemplate : TemplateBase
     {
         "Slice" => ISliceTypeTemplate.Generate(ObjectName, ConstructorName, TypeName, TargetTypeName),
         "Map" => HoldsMapInHolder ?
-            IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!, "Value", made => $"new {ValueFieldType}({made})") :
-            IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!),
-        "Channel" => IChannelTypeTemplate.Generate(ObjectName, ConstructorName, TypeName, TargetTypeName),
+            IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!, GoMethodNames, "Value", made => $"new {ValueFieldType}({made})") :
+            IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!, GoMethodNames),
+        "Channel" => IChannelTypeTemplate.Generate(ObjectName, ConstructorName, TypeName, TargetTypeName, GoMethodNames),
         "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName, TargetTypeSize),
         "Numeric" => NumericTypeTemplate.Generate(TypeName, TargetTypeName),
         "Pointer" => PointerTypeTemplate.Generate(ObjectName, TargetTypeName),

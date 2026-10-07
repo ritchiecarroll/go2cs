@@ -66,6 +66,13 @@ public static class Symbols
     // channel wrapper template forwards these to its underlying channel<T>.
     public const string ChannelLeftOp = "ᐸꟷ";
     public const string ChannelRightOp = "ꟷᐳ";
+    // MapWrapperSet is the name of the map write a named-map wrapper declares for the converter's
+    // nested assignment `m[k1][k2] = v`, emitted `m[k1].Set‿(k2, v)` when the element's Go type
+    // declares a method named Set (an indexer setter on that rvalue is CS1612). A Go method is emitted
+    // as an extension, which loses to any same-named instance member, so the wrapper yields `Set` to
+    // the Go method and keeps this door, which no Go identifier can spell (U+203F is a connector
+    // punctuation character: legal in C#, illegal in Go).
+    public const string MapWrapperSet = "Set‿";
     // NilDeferringDerefAccessor is the golib ж<T> extension method used in place of `.Value`
     // for EVERY direct-ж pointer entry deref alias - a RECEIVER and a PARAMETER alike, in the
     // converter's own preamble, in the pointer-reassignment re-alias, and in the RecvGenerator

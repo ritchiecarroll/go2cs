@@ -4,6 +4,7 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using System.Collections.Generic;
 using static go2cs.Symbols;
 
 namespace go2cs.Templates.InheritedType;
@@ -11,8 +12,19 @@ namespace go2cs.Templates.InheritedType;
 internal static class IChannelTypeTemplate
 {
     // constructorName is structName without a generic type's parameters (a C# constructor never carries them).
-    public static string Generate(string structName, string constructorName, string typeName, string targetTypeName) =>
-        $$"""
+    //
+    // goMethods are the Go methods declared on the type, and its own name (InheritedTypeTemplate.
+    // GoMethodNames). Send and Sent bind a call without any argument modifier (`in`), so a Go method of either name loses to the
+    // public member; when one is declared, the member moves to its explicit IChannel<T> implementation.
+    // The converter never calls either by name (a send is ChannelLeftOp), so nothing else changes.
+    public static string Generate(string structName, string constructorName, string typeName, string targetTypeName, ICollection<string> goMethods)
+    {
+        string Member(string name, string returnType, string body) =>
+            goMethods.Contains(name) ?
+                $"{returnType} IChannel<{targetTypeName}>.{name}(in {targetTypeName} value) => {body};" :
+                $"public {returnType} {name}(in {targetTypeName} value) => {body};";
+
+        return $$"""
 
                 public nint Capacity => m_value.Capacity;
 
@@ -30,7 +42,7 @@ internal static class IChannelTypeTemplate
                 // through the golib free function, so no public surface is lost.
                 void IChannel.Close() => ((IChannel)m_value).Close();
 
-                public void Send(in {{targetTypeName}} value) => m_value.Send(value);
+                {{Member("Send", "void", "m_value.Send(value)")}}
 
                 public void {{ChannelLeftOp}}(in {{targetTypeName}} value) => m_value.Send(value);
 
@@ -38,7 +50,7 @@ internal static class IChannelTypeTemplate
 
                 public global::go.SelectOp {{ChannelLeftOp}}(in {{targetTypeName}} value, NilType _) => m_value.Sending(value);
 
-                public bool Sent(in {{targetTypeName}} value) => m_value.Sent(value);
+                {{Member("Sent", "bool", "m_value.Sent(value)")}}
 
                 public bool {{ChannelLeftOp}}(in {{targetTypeName}} value, bool _) => m_value.Sent(value);
 
@@ -74,4 +86,5 @@ internal static class IChannelTypeTemplate
 
                 public {{constructorName}}(nint size) => m_value = new {{typeName}}(size);
         """;
+    }
 }
