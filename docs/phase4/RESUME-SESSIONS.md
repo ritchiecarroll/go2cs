@@ -24,6 +24,9 @@ Written 15:50 on the i7's clock, at 76% of the week's usage (owner order of this
 usage nears 90%, so that the COORD session can be rolled to another session). Every ref below was read at the remote.
 Lanes are unchanged: all seven are MAILBOX-ONLY (sections 1e and 1h hold their protocol and paste prompts).
 
+- **OWNER RULING 2026-10-06 21:24: NO RELEASE AFTER TRAIN Q -- "everything with the face lift".** Checklist section 7's
+  question is ANSWERED: Q lands as an ordinary train with no version bump; the next release is the face-lift train's and
+  aot-smoke gates that one. P1 is unblocked to push `claude/p1-generic-instantiation-arg`.
 - **UPDATE 2026-10-06 21:00 (read this FIRST; it overtakes the 19:50 paragraph's "local, not pushed").** TRAIN Q's
   union is PUSHED: `claude/coord-trainQ-union` = `13c0800c21de63182994c74a8d6643f5c5c85b8e` (64 signed seat merges
   on master `0457242046` + `fixup: TRAIN Q`, which had nothing to carry). THE i7 BATTERY runs DETACHED (launched
