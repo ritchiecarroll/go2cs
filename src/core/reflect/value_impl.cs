@@ -3315,10 +3315,18 @@ private static bool haveIdenticalStructShape(ж<abi.Type> ᏑT, ж<abi.Type> Ꮡ
 // structTypePkgPath is Go's abi.StructType.PkgPath: the declaring package when the struct holds an
 // unexported field, "" otherwise. It is what makes two structurally identical structs from
 // DIFFERENT packages non-identical when either hides a field.
+//
+// The package is the one that DECLARED the field, read off the field exactly as rtype.Field's
+// StructField.PkgPath is, never the owner type's. A defined type over a FOREIGN struct (`type
+// customTime time.Time`) is a [GoType] wrapper declared in its own package, while the struct
+// underlying it is time's: reading the wrapper's package made customTime and time.Time two
+// "different" structs, so ConvertibleTo, CanConvert and Convert refused a conversion Go allows
+// (testify's assert.Compare on a defined time type, "object should be comparable for type
+// time.Time"). Identical to the owner for every non-wrapper struct.
 private static @string structTypePkgPath(System.Type st, GoReflect.GoFieldInfo[] fields) {
     foreach (GoReflect.GoFieldInfo f in fields) {
         if (!f.Exported) {
-            return (@string)GoReflect.GoPackagePath(st);
+            return (@string)GoReflect.GoPackagePath(f.DeclaringType ?? st);
         }
     }
     return "";

@@ -445,6 +445,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDefinedElemStringConversion() => CheckTarget("DefinedElemStringConversion");
 
     [TestMethod]
+    public void CheckDefinedForeignStructConvert() => CheckTarget("DefinedForeignStructConvert");
+
+    [TestMethod]
     public void CheckDefinedOverNamedComposite() => CheckTarget("DefinedOverNamedComposite");
 
     [TestMethod]
