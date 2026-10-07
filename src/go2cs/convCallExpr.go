@@ -3473,6 +3473,22 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		}
 
 		funcName = v.convExpr(callee, []ExprContext{lambdaContext, calleeIdentContext})
+
+		// A FUNCTION-LOCAL type constructed by name — `type sPtr *s; sPtr(ps)` (testify's
+		// assertions_test.go) — is emitted under its LIFTED name (`TestSame_sPtr`), but the ident
+		// renders the Go name and the constructor named a type that does not exist (CS0246). A
+		// conversion to a local named POINTER from a non-nil pointer lands here because
+		// isTypeConversion compares the arg's pointee, not the pointer, so the conversion arm (which
+		// names the lift) never claims it; a package-level type compiled only because its lift and
+		// its Go name coincide. Name the type the way the conversion arm does.
+		if constructType == "new " {
+			if ident, ok := ast.Unparen(callee).(*ast.Ident); ok {
+				if typeName, ok := v.info.ObjectOf(ident).(*types.TypeName); ok && typeName.Pkg() != nil &&
+					typeName.Parent() != nil && typeName.Parent() != typeName.Pkg().Scope() {
+					funcName = v.getAliasQualifiedTypeName(typeName.Type(), false)
+				}
+			}
+		}
 	}
 
 	// A VARIADIC func-literal callee renders as `(params ꓸꓸꓸ@string dirsʗp) => …`, which C# can
