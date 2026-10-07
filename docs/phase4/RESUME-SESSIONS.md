@@ -24,7 +24,19 @@ Written 15:50 on the i7's clock, at 76% of the week's usage (owner order of this
 usage nears 90%, so that the COORD session can be rolled to another session). Every ref below was read at the remote.
 Lanes are unchanged: all seven are MAILBOX-ONLY (sections 1e and 1h hold their protocol and paste prompts).
 
-- **UPDATE 2026-10-06 19:50 (read this first).** master is `0457242046c8d5c29a6ff547bcbcc0e74c1fe973` (two docs
+- **UPDATE 2026-10-06 21:00 (read this FIRST; it overtakes the 19:50 paragraph's "local, not pushed").** TRAIN Q's
+  union is PUSHED: `claude/coord-trainQ-union` = `13c0800c21de63182994c74a8d6643f5c5c85b8e` (64 signed seat merges
+  on master `0457242046` + `fixup: TRAIN Q`, which had nothing to carry). THE i7 BATTERY runs DETACHED (launched
+  20:53; run folder `/h/go2cs-tmp-coord/coord-scratch/tQ/run1`; deadline 2026-10-07 13:00): read
+  `run1/battery.console.log` for its `battery rc=` line, then `run1/tQ-logs/SUMMARY.txt`. EXIT 0 = clean; EXIT 6 = a
+  red or a finding, read by name; EXIT 7 = green with a re-read owed at the landing head. The worktree
+  `/h/go2cs-tmp-coord/tQ` is FROZEN until that line appears. The GOs went out on FLEET (3c46b5ef14): the i9's shard,
+  P1's and P2's linux legs, C1's hosted gate, G's module re-reads; read each lane's post against its brief's EXPECT
+  lines. THEN: the landing by `trainQ/COORD-LAUNCH-CHECKLIST.md` section 6, the owner's question of section 7, a
+  docs commit on the landed head (the known-issues entry's windows sentence: the failure is at the first
+  runtime.Caller, not at startup; the Limitations page's temporary note), and the name-check fix's landing on master
+  (every active lane's self-test is green, ledger a48146ac0f).
+- **UPDATE 2026-10-06 19:50.** master is `0457242046c8d5c29a6ff547bcbcc0e74c1fe973` (two docs
   commits since 15:50: the known-issues entry for Native AOT and its correction to "linux only"). TRAIN Q's table is
   FROZEN (64 rows, rows-sha256 `48eb5249eb30`; `.claude/coord-scripts/trainQ/tQ-seats-draft.txt` on this branch,
   with the whole script set and `COORD-LAUNCH-CHECKLIST.md`). The union is ASSEMBLED and LOCAL, not pushed yet:
