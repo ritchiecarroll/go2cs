@@ -1,0 +1,11 @@
+# TRAIN Q -- RULED LOST LINES of the precheck's BOTH arm (tQ-helpers.py). One line per (row, path):
+#   row|path|lost-count|digest|ruling
+# digest = the first 12 hex of sha256 over the lost lines, each stripped, sorted, joined by newlines (the arm prints
+# 'lost-digest=<d>' on a FAIL, and coord-scratch/tQ/both-lost.py prints the lines themselves). A line here admits
+# EXACTLY those lost lines on that pair and nothing else; a line no merge uses is itself a FAIL.
+# WHY THESE EXIST: a seat cut on a local merge of two earlier rows that rewrites a line one of them added. The arm reads
+# one merge-base, so the other base's line is charged to the union side and reads as lost. Each drop below was read line
+# by line by COORD at the assembled union 304350b932 on 2026-10-06.
+c2-noinline-partial-on-nameof|src/tests/Behavioral/StatementTableFuncNames/main.cs|1|41def9cf3560|COORD 2026-10-06: the seat's whole purpose (ledger 71de41ff1c, 2c116fb088): G's new fixture's one no-inline line, written before the carrier, is re-baselined to the carrier's partial form; the i9 read the fixture four of four and CNR byte-identical on the union with it
+c2-noinline-partial-on-nameof|src/tests/Behavioral/StatementTableFuncNames/main.cs.target|1|41def9cf3560|COORD 2026-10-06: the same line in the fixture's golden, the same ruling
+c1-aot-smoke-on-published|.github/workflows/os-matrix.yml|4|02008a6c5882|COORD 2026-10-06 (ledger 315007c8e6): C1's re-cut rewrites four lines of its OWN earlier seat fd2b421bba -- the two if-lines of the pack job and the feed download (composed with the aot-smoke stage), the plan's refusal line (its message now names aot-smoke), and one comment replaced by the truth table; hosted release-smoke run 37544965420 read the composed file green on four RIDs and control 37544984723 read the refusal

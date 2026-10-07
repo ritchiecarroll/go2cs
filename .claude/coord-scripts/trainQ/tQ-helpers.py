@@ -366,6 +366,21 @@ def precheck(repo, base, seats_file, mode='head'):
     # 0 back, 0 duplicated. A listed row with no merge of its own on the first-parent line is a FAIL (at the bare base:
     # 15 of 15). The fixup's own commit has one parent and is not read here; neither is the worktree.
     full_of = {git(repo, 'rev-parse', sha + '^{commit}').strip(): name for name, sha in seats}
+    # Q (COORD, 2026-10-06, at the first precheck of the assembled union): a seat cut on a LOCAL MERGE of two earlier rows
+    # that REWRITES a line one of them added (the carrier's one-fixture fix-up; C1's re-cut composing two workflow
+    # conditions) reads here as that line LOST: this arm takes ONE merge-base, and with two best common ancestors the
+    # other base's line is charged to the union side. The drop is the seat's own resolution, so it is admitted ONLY by a
+    # ruling keyed on its CONTENT: tQ-ruled-both.txt, beside this file, one line 'row|path|lost-count|digest|ruling',
+    # digest = the first 12 hex of sha256 over the lost lines, stripped, sorted, joined by newlines. Any other lost line on
+    # that pair, a different count, a line that came back or was duplicated, still FAILS; a ruled line no merge used FAILS.
+    import hashlib as _hl
+    ruled_both, _rb = {}, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tQ-ruled-both.txt')
+    if os.path.exists(_rb):
+        for _l in open(_rb, encoding='utf-8').read().replace('\r', '').split('\n'):
+            if not _l.strip() or _l.startswith('#'): continue
+            _f = _l.split('|')
+            if len(_f) < 5 or not _f[2].isdigit() or len(_f[3]) != 12: hard.append(f'FAIL BOTH-RULED a line of tQ-ruled-both.txt does not parse: {_l[:80]}'); continue
+            ruled_both[(_f[0], _f[1], _f[2], _f[3])] = 0
     cnt = lambda t: Counter(l for l in t.split('\n') if len(l.strip()) >= 12)
     names = lambda a, b: set(x for x in git(repo, '-c', 'core.quotepath=false', 'diff', '--name-only', '-z', a, b).split('\0') if x)
     nboth, nmerge, merged_p2 = 0, 0, set()
@@ -392,10 +407,18 @@ def precheck(repo, base, seats_file, mode='head'):
                     rems += 1
                     if ch[l] > cm[l] + min(ds, db): backl.append(l)
             badb = lostl or backl or dupl
+            rtag = ''
+            if lostl and not backl and not dupl:
+                _dg = _hl.sha256('\n'.join(x.strip() for x in sorted(lostl)).encode('utf-8')).hexdigest()[:12]
+                _k = (name, path, str(len(lostl)), _dg)
+                if _k in ruled_both: ruled_both[_k] += 1; badb = False; rtag = f' :: RULED-LOST {len(lostl)} line(s) digest={_dg} (tQ-ruled-both.txt)'
+                else: rtag = f' :: lost-digest={_dg}'
             (hard if badb else soft).append(
                 f'{"FAIL" if badb else "ok  "} BOTH {name} {path} (merge {c[:10]}): lines added by either side={adds} removed={rems} lost={len(lostl)} back={len(backl)} duplicated={len(dupl)}'
                 + (f' :: first lost: {lostl[0].strip()[:110]}' if lostl else '') + (f' :: first back: {backl[0].strip()[:110]}' if backl else '')
-                + (f' :: first duplicated: {dupl[0].strip()[:110]}' if dupl else ''))
+                + (f' :: first duplicated: {dupl[0].strip()[:110]}' if dupl else '') + rtag)
+    for _k, _n in ruled_both.items():
+        if _n == 0: hard.append(f'FAIL BOTH-RULED unused line of tQ-ruled-both.txt: {_k[0]} {_k[1]} lost={_k[2]} digest={_k[3]} (no merge lost exactly these lines)')
     for sha_, name in full_of.items():
         if sha_ not in merged_p2: hard.append(f'FAIL BOTH {name}: no first-parent merge of {sha_[:10]} between {base} and HEAD (the row is not merged as itself)')
     soft.append(f'ok   BOTH: {nmerge} first-parent merge(s), {nboth} (merge, path) pair(s) where both sides changed the path since their merge-base')
