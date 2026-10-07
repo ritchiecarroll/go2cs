@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void run() {
+internal static partial void run() {
     uintptr n = 6;
     var a = new slice<byte>((nint)(n / 2));
     var b = new slice<uint64>((nint)(n));

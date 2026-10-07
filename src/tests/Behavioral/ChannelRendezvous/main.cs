@@ -17,7 +17,7 @@ private static readonly object replyˢ = (@string)"reply:"u8;
 private static readonly object afterRendezvousLenˢ = (@string)"after rendezvous: len:"u8;
 private static readonly object pongˢ = (@string)"pong:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     var ch = new channel<nint>(0);
     fmt.Println(capˢ, cap(ch), lenˢ, len(ch));
     var selᴛ1 = ch.ᐸꟷ(1, ꓸꓸꓸ);

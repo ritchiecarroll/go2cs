@@ -384,7 +384,7 @@ internal static @string String(this textValue v) {
 
 internal delegate error funcValue(@string _);
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static error Set(this funcValue f, @string s) {
+internal static partial error Set(this funcValue f, @string s) {
     return f(s);
 }
 
@@ -394,7 +394,7 @@ internal static @string String(this funcValue f) {
 
 internal delegate error boolFuncValue(@string _);
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static error Set(this boolFuncValue f, @string s) {
+internal static partial error Set(this boolFuncValue f, @string s) {
     return f(s);
 }
 
@@ -548,11 +548,11 @@ public static ж<Flag> Lookup(@string name) {
 }
 
 // Set sets the value of the named flag.
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] public static error Set(this ref FlagSet f, @string name, @string value) {
+[GoRecv] public static partial error Set(this ref FlagSet f, @string name, @string value) {
     return f.set(name, value);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static error set(this ref FlagSet f, @string name, @string value) {
+[GoRecv] internal static partial error set(this ref FlagSet f, @string name, @string value) {
     var (flag, ok) = f.formal[name, ꟷ];
     if (!ok) {
         // Remember that a flag that isn't defined is being set.
@@ -586,7 +586,7 @@ public static ж<Flag> Lookup(@string name) {
 }
 
 // Set sets the value of the named command-line flag.
-[MethodImpl(MethodImplOptions.NoInlining)] public static error Set(@string name, @string value) {
+public static partial error Set(@string name, @string value) {
     return CommandLine.set(name, value);
 }
 
@@ -1361,7 +1361,7 @@ public static ж<FlagSet> CommandLine;
     CommandLine.Value.Usage = commandLineUsage;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void commandLineUsage() {
+internal static partial void commandLineUsage() {
     Usage();
 }
 

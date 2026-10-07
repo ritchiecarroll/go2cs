@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string who() {
+internal static partial @string who() {
     var pc = new slice<uintptr>(1);
     if (runtime.Callers(2, pc) == 0) {
         return ""u8;
@@ -20,7 +20,7 @@ partial class main_package {
 private static readonly object sibling1ˢ = (@string)"sibling-1:"u8;
 private static readonly object sibling2ˢ = (@string)"sibling-2:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void siblings() {
+internal static partial void siblings() {
     void f1() {
         fmt.Println(sibling1ˢ, who());
     }
@@ -36,7 +36,7 @@ private static readonly object nestedInnerˢ = (@string)"nested-inner:"u8;
 private static readonly object nestedOuterˢ = (@string)"nested-outer:"u8;
 private static readonly object afterNestˢ = (@string)"after-nest:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void nested() {
+internal static partial void nested() {
     var outer = () => {
         void inner() {
             fmt.Println(nestedInnerˢ, who());
@@ -54,7 +54,7 @@ private static readonly object afterNestˢ = (@string)"after-nest:"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object secondFnˢ = (@string)"second-fn:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void second() {
+internal static partial void second() {
     void g() {
         fmt.Println(secondFnˢ, who());
     }
@@ -66,7 +66,7 @@ private static readonly object deep3ˢ = (@string)"deep-3:"u8;
 private static readonly object deep2ˢ = (@string)"deep-2:"u8;
 private static readonly object deep1ˢ = (@string)"deep-1:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void deep() {
+internal static partial void deep() {
     var l1 = () => {
         var l2 = () => {
             void l3() {
@@ -85,7 +85,7 @@ private static readonly object deep1ˢ = (@string)"deep-1:"u8;
 private static readonly object nestSibAˢ = (@string)"nest-sib-a:"u8;
 private static readonly object nestSibBˢ = (@string)"nest-sib-b:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void nestedSiblings() {
+internal static partial void nestedSiblings() {
     var o = () => {
         void a() {
             fmt.Println(nestSibAˢ, who());
@@ -99,14 +99,14 @@ private static readonly object nestSibBˢ = (@string)"nest-sib-b:"u8;
     run(o);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void run(Action f) {
+internal static partial void run(Action f) {
     f();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object viaArgˢ = (@string)"via-arg:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void viaArg() {
+internal static partial void viaArg() {
     run(() => {
         fmt.Println(viaArgˢ, who());
     });
@@ -116,7 +116,7 @@ private static readonly object viaArgˢ = (@string)"via-arg:"u8;
 private static readonly object namedControlˢ = (@string)"named-control:"u8;
 private static readonly object deferredˢ = (@string)"deferred:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void deferred() {
+internal static partial void deferred() {
     GoFrame ᒐ = default;
     try {
         fmt.Println(namedControlˢ, who());

@@ -348,7 +348,7 @@ internal static error startAndPing(this ж<worker> Ꮡw, context.Context ctx) {
 //
 // When the process terminates, w.waitErr is set to the error (if any), and
 // w.termC is closed.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static error /*err*/ start(this ж<worker> Ꮡw) {
+internal static partial error /*err*/ start(this ж<worker> Ꮡw) {
     error err = default!;
     GoFrame ᒐ = default;
     try {
@@ -421,7 +421,7 @@ internal static error startAndPing(this ж<worker> Ꮡw, context.Context ctx) {
 //
 // stop must be called at least once after start returns successfully, even if
 // the worker process terminates unexpectedly.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static error stop(this ж<worker> Ꮡw) {
+internal static partial error stop(this ж<worker> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.termC == default!) {
@@ -1310,7 +1310,7 @@ internal static error ping(this ж<workerClient> Ꮡwc, context.Context ctx) {
     internal io.Reader r;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, error) Read(this ж<contextReader> Ꮡcr, slice<byte> b) {
+internal static partial (nint, error) Read(this ж<contextReader> Ꮡcr, slice<byte> b) {
     ref var cr = ref Ꮡcr.DerefOrNull();
 
     {

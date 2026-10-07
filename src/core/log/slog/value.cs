@@ -608,7 +608,7 @@ public static Value /*rv*/ Resolve(this Value v) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string noStackˢ = "(no stack)"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string stack(nint skip, nint nFrames) {
+internal static partial @string stack(nint skip, nint nFrames) {
     var pcs = new slice<uintptr>(nFrames + 1);
     nint n = runtime.Callers(skip + 1, pcs);
     if (n == 0) {

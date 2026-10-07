@@ -26,7 +26,6 @@ import (
 	"go/build"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"testing"
 )
 
@@ -158,17 +157,15 @@ func main() {
 func TestCallerSkipWindowFramesAreNotInlined(t *testing.T) {
 	mainCs := convertCallerSkipWindowFixture(t)
 
-	const attribute = "[MethodImpl(MethodImplOptions.NoInlining)]"
-
 	// The direct callers were marked before the window existed; the window adds register, Handle, logIt.
 	for _, name := range []string{"registerErr", "register", "Handle", "stackHere", "record", "logIt", "atDepth"} {
-		if line := declarationLine(t, mainCs, name); !strings.Contains(line, attribute) {
+		if line := declarationLine(t, mainCs, name); !keepsOwnFrame(line) {
 			t.Errorf("%s is a frame the skip counts, but it is not marked: %s", name, line)
 		}
 	}
 
 	for _, name := range []string{"useHandle", "wrap", "viaDepth"} {
-		if line := declarationLine(t, mainCs, name); strings.Contains(line, attribute) {
+		if line := declarationLine(t, mainCs, name); keepsOwnFrame(line) {
 			t.Errorf("%s is marked, but no skip counts its frame: %s", name, line)
 		}
 	}

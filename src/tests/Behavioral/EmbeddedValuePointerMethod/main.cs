@@ -26,7 +26,7 @@ partial class main_package {
     internal partial ref inner inner { get; }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void viaParam(ж<outer> Ꮡo) {
+internal static partial void viaParam(ж<outer> Ꮡo) {
     Ꮡo.of(outer.Ꮡinner).bump(100);
 }
 

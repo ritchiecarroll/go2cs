@@ -15,7 +15,7 @@ private static readonly object rendezvousˢ = (@string)"rendezvous:"u8;
 private static readonly object totalˢ = (@string)"total:"u8;
 private static readonly object matchˢ = (@string)"match:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     ref var start = ref heap(new Δsync.WaitGroup(), out var Ꮡstart);
     Ꮡstart.Add(1);
     ref var done = ref heap(new Δsync.WaitGroup(), out var Ꮡdone);

@@ -9,7 +9,7 @@ partial class main_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string noCallerˢ = "<no caller>"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string callerName() {
+internal static partial @string callerName() {
     var (pc, _, _, ok) = runtime.Caller(1);
     if (!ok) {
         return noCallerˢ;
@@ -17,7 +17,7 @@ private static readonly @string noCallerˢ = "<no caller>"u8;
     return runtime.FuncForPC(pc).Name();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string keeper(slice<byte> b, nint i) {
+internal static partial @string keeper(slice<byte> b, nint i) {
     @string name = callerName();
     return fmt.Sprintf("%s read %d"u8, name, b[i]);
 }
@@ -26,7 +26,7 @@ private static readonly @string noCallerˢ = "<no caller>"u8;
     internal nint n;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static @string bump(this ref counter c) {
+[GoRecv] internal static partial @string bump(this ref counter c) {
     c.n++;
     return callerName();
 }

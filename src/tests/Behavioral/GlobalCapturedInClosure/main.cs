@@ -17,15 +17,15 @@ partial class main_package {
 internal static ж<heap> Ꮡmheap = new StandardBox<heap>(default(heap));
 internal static ref heap mheap => ref Ꮡmheap.Value;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void keep(ж<heap> Ꮡh) {
+internal static partial void keep(ж<heap> Ꮡh) {
     _ = Ꮡh;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void run(Action f) {
+internal static partial void run(Action f) {
     f();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint boxedLocal() {
+internal static partial nint boxedLocal() {
     ref var h = ref heap(new heap(), out var Ꮡh);
     var p = Ꮡh;
     p.Value.count += 7;

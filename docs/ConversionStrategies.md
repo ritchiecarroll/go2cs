@@ -10901,7 +10901,7 @@ Go's `int`. A literal such as `"%s=%d"u8` is a C# UTF-8 string literal, which go
 string. See [Strings](#strings-string-and-sstring), [Slices and Arrays](#slices-and-arrays) and
 [Integer Types and Arithmetic](#integer-types-and-arithmetic).
 
-**Each generator reacts to one marker the converter emits: an attribute, or, for stubs, a `partial` method with no body.**
+**Each generator reacts to one marker the converter emits: an attribute, or a `partial` method, with no body for a stub and with a body for a method that must keep its own frame.**
 
 | Generator | Driven by | Produces |
 |---|---|---|
@@ -10911,6 +10911,7 @@ string. See [Strings](#strings-string-and-sstring), [Slices and Arrays](#slices-
 | `ImplicitConvGenerator` | `[assembly: GoImplicitConv<S, T>]` | a conversion operator between two types C# cannot convert directly, such as two named numeric types or two structs with the same underlying type; the C# still writes the conversion where Go does, and the operator lets it compile |
 | `StrGenerator` | `[GoStr]` on a method | for a function that takes its string as an `sstring` (golib's stack-only string view, a `ref struct`), the matching `@string` overload ([Strings](#strings-string-and-sstring)) |
 | `PartialStubGenerator` | a `partial` method with no body | a stub that throws, when no hand-written body exists ([Functions Without a Go Body](#functions-without-a-go-body)) |
+| `NoInliningPartialGenerator` | a `partial` method with a body and no other declaration | the method's declaring part, carrying `[MethodImpl(MethodImplOptions.NoInlining)]`, so the JIT never inlines the method and `runtime.Caller` still sees its frame ([A `partial` method with a body keeps its own frame](#a-partial-method-with-a-body-keeps-its-own-frame)) |
 
 ### A `[GoType]` struct lists only its fields
 
@@ -11039,6 +11040,67 @@ internal static wrap wrapped(this ж<mc> Ꮡc) {
 
 The receiver `Ꮡc` is the box itself, so the `wrap` it returns points at the caller's `mc`, as in Go
 ([Pointers](#pointers)).
+
+### A `partial` method with a body keeps its own frame
+
+Go code can ask which function is running: `runtime.Caller(n)` names the function `n` frames up the
+stack. That answer depends on each of those functions having a frame of its own. The .NET JIT copies
+small methods into their callers (inlining), and an inlined method has no frame, so `runtime.Caller`
+would name the wrong function. The converter therefore marks every function whose frame a Go stack walk
+counts, and the mark tells the JIT not to inline it.
+
+The mark is the word `partial`. A converted method with a body that is written `partial` is one half of
+a C# partial method. `NoInliningPartialGenerator` writes the other half, the declaration, with the
+attribute `[MethodImpl(MethodImplOptions.NoInlining)]`, and C# compiles the two halves into one method
+that carries the attribute. Here `here` asks for its caller, and `plain` is a one-line function that the
+JIT would otherwise inline:
+
+<!-- source: src/tests/Behavioral/NoInlinePartial/main.go:18-28 -->
+```go
+// here names the function that called it.
+func here() string {
+	pc, _, _, ok := runtime.Caller(1)
+	if !ok {
+		return "<no caller>"
+	}
+	return runtime.FuncForPC(pc).Name()
+}
+
+// plain is a thin forwarder to here: the closure marks it, and only the mark keeps its frame.
+func plain() string { return here() }
+```
+<!-- source: src/tests/Behavioral/NoInlinePartial/main.cs.target:13-23 -->
+```csharp
+internal static partial @string here() {
+    var (pc, _, _, ok) = runtime.Caller(1);
+    if (!ok) {
+        return noCallerˢ;
+    }
+    return runtime.FuncForPC(pc).Name();
+}
+
+internal static partial @string plain() {
+    return here();
+}
+```
+
+The generated half, in the project's `Generated` folder:
+
+<!-- source: the NoInliningPartialGenerator output for src/tests/Behavioral/NoInlinePartial (main.noinline.g.cs), abridged -->
+```csharp
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+internal static partial @string here();
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+internal static partial @string plain();
+```
+
+A function literal cannot be `partial`, so a marked literal keeps the attribute itself:
+`var lit = [MethodImpl(MethodImplOptions.NoInlining)] @string () => here();`. A marked `init` keeps
+the attribute too. C# runs an `init` (a module initializer) in declaration order, and a partial
+method's declaration is the generated half, which comes after every source file, so a `partial`
+`init` would run after the package's other `init` functions. A `partial` method with
+no body is a different case, a function whose body is elsewhere ([Functions Without a Go
+Body](#functions-without-a-go-body)).
 
 ### The converter decides interface satisfaction; a generator builds it
 

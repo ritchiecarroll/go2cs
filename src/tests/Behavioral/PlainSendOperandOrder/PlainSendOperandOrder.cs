@@ -50,7 +50,7 @@ private static readonly object indexˢ = (@string)"index:"u8;
 private static readonly object deferˢ = (@string)"defer:"u8;
 private static readonly object bareˢ = (@string)"bare:"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     var ch = new channel<nint>(8);
     var chanᴛ2 = chanFor(ch);
     var (ᴛ3, ᴛ4) = pair();

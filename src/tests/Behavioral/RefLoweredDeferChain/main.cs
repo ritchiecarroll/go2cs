@@ -33,7 +33,7 @@ internal static nint /*seen*/ deferChain<T>(ref Root r, T mark) {
     return seen;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint goChain(ref Root r) {
+internal static partial nint goChain(ref Root r) {
     goǃ(r.root.release);
     return ᐸꟷ((~r.root).done);
 }

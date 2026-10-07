@@ -159,7 +159,7 @@ internal static readonly @string tlsConfigMinVersionMustˢ = "tls: Config MinVer
 // It may produce connection events, which may be read with [QUICConn.NextEvent].
 //
 // Start must be called at most once.
-[MethodImpl(MethodImplOptions.NoInlining)] public static error Start(this ж<QUICConn> Ꮡq, context.Context ctx) {
+public static partial error Start(this ж<QUICConn> Ꮡq, context.Context ctx) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     if ((~(~q.conn).quic).started) {

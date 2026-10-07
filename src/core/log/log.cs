@@ -218,7 +218,7 @@ public static error Output(this ж<Logger> Ꮡl, nint calldepth, @string s) {
 
 // output can take either a calldepth or a pc to get source line information.
 // It uses the pc if it is non-zero.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static error output(this ж<Logger> Ꮡl, uintptr pc, nint calldepth, Func<slice<byte>, slice<byte>> appendOutput) {
+internal static partial error output(this ж<Logger> Ꮡl, uintptr pc, nint calldepth, Func<slice<byte>, slice<byte>> appendOutput) {
     GoFrame ᒐ = default;
     try {
         ref var l = ref Ꮡl.DerefOrNull();
@@ -276,7 +276,7 @@ public static error Output(this ж<Logger> Ꮡl, nint calldepth, @string s) {
 
 // Print calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Print].
-[MethodImpl(MethodImplOptions.NoInlining)] public static void Print(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+public static partial void Print(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -285,7 +285,7 @@ public static error Output(this ж<Logger> Ꮡl, nint calldepth, @string s) {
 
 // Printf calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Printf].
-[MethodImpl(MethodImplOptions.NoInlining)] public static void Printf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
+public static partial void Printf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -294,7 +294,7 @@ public static error Output(this ж<Logger> Ꮡl, nint calldepth, @string s) {
 
 // Println calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Println].
-[MethodImpl(MethodImplOptions.NoInlining)] public static void Println(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+public static partial void Println(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -432,7 +432,7 @@ public static Δio.Writer Writer() {
 
 // Print calls Output to print to the standard logger.
 // Arguments are handled in the manner of [fmt.Print].
-[MethodImpl(MethodImplOptions.NoInlining)] public static void Print(params ꓸꓸꓸany vʗp) {
+public static partial void Print(params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -441,7 +441,7 @@ public static Δio.Writer Writer() {
 
 // Printf calls Output to print to the standard logger.
 // Arguments are handled in the manner of [fmt.Printf].
-[MethodImpl(MethodImplOptions.NoInlining)] public static void Printf(@string format, params ꓸꓸꓸany vʗp) {
+public static partial void Printf(@string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -450,7 +450,7 @@ public static Δio.Writer Writer() {
 
 // Println calls Output to print to the standard logger.
 // Arguments are handled in the manner of [fmt.Println].
-[MethodImpl(MethodImplOptions.NoInlining)] public static void Println(params ꓸꓸꓸany vʗp) {
+public static partial void Println(params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;

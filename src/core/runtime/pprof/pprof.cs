@@ -354,7 +354,7 @@ public static nint Count(this ж<Profile> Ꮡp) {
 //
 // Passing skip=0 begins the stack trace at the call to Add inside rpc.NewClient.
 // Passing skip=1 begins the stack trace at the call to NewClient inside mypkg.Run.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void Add(this ж<Profile> Ꮡp, any value, nint skip) {
+public static partial void Add(this ж<Profile> Ꮡp, any value, nint skip) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -815,7 +815,7 @@ internal static error writeGoroutine(io.Writer w, nint debug) {
     return writeRuntimeProfile(w, debug, goroutineˢ, pprof_goroutineProfileWithLabels);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static error writeGoroutineStacks(io.Writer w) {
+internal static partial error writeGoroutineStacks(io.Writer w) {
     // We don't know how big the buffer needs to be to collect
     // all the goroutines. Start with 1 MB and try a few times, doubling each time.
     // Give up and use a truncated trace if 64 MB is not enough.
@@ -899,7 +899,7 @@ internal static ref cpuᴛ1 cpu => ref Ꮡcpu.Value;
 // not to the one used by Go. To make it work, call [os/signal.Notify]
 // for [syscall.SIGPROF], but note that doing so may break any profiling
 // being done by the main program.
-[MethodImpl(MethodImplOptions.NoInlining)] public static error StartCPUProfile(io.Writer w) {
+public static partial error StartCPUProfile(io.Writer w) {
     GoFrame ᒐ = default;
     try {
         // The runtime routines allow a variable profiling rate,

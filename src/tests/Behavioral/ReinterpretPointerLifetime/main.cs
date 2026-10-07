@@ -18,11 +18,11 @@ partial class main_package {
     internal @string name;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<view> asView(ж<header> Ꮡh) {
+internal static partial ж<view> asView(ж<header> Ꮡh) {
     return Ꮡh.Reinterpret<header, view>();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void churn() {
+internal static partial void churn() {
     var keep = new slice<slice<byte>>(64);
     for (nint i = 0; i < 400000; i++) {
         keep[(nint)(i & 63)] = new slice<byte>(24);

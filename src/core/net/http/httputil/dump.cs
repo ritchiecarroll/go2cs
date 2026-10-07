@@ -102,7 +102,7 @@ internal static readonly @string http11204NoContentˢ = "HTTP/1.1 204 No Content
 // DumpRequestOut is like [DumpRequest] but for outgoing client requests. It
 // includes any headers that the standard [http.Transport] adds, such as
 // User-Agent.
-[MethodImpl(MethodImplOptions.NoInlining)] public static (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡreq, bool body) {
+public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡreq, bool body) {
     GoFrame ᒐ = default;
     try {
         ref var req = ref Ꮡreq.DerefOrNull();

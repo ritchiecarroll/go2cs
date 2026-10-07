@@ -6,12 +6,12 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint lineNumber() {
+internal static partial nint lineNumber() {
     var (_, _, line, _) = runtime.Caller(1);
     return line;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (nint, nint) lineAndOne() {
+internal static partial (nint, nint) lineAndOne() {
     var (_, _, line, _) = runtime.Caller(1);
     return (line, 1);
 }

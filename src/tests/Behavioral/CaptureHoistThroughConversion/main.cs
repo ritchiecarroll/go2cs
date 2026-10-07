@@ -36,7 +36,7 @@ internal static Handler makeHandler(slice<@string> g) {
     });
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     var a = new @string[]{"a="u8}.slice();
     var aʗ1 = a;
     goǃ(serve, new HandlerᴠIface(new Handler((nint i) => {

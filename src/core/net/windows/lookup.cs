@@ -341,7 +341,7 @@ internal static context.Context withUnexpiredValuesPreserved(context.Context loo
 
 // lookupIPAddr looks up host using the local resolver and particular network.
 // It returns a slice of that host's IPv4 and IPv6 addresses.
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
+internal static partial (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
     // Make sure that no matter what we do later, host=="" is rejected.
     if (host == ""u8) {
         return (default!, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), host, ""u8)));

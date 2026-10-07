@@ -23,7 +23,6 @@ import (
 	"go/build"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"testing"
 )
 
@@ -110,16 +109,14 @@ func main() {
 func TestNoinlineDirectiveKeepsTheFunctionsOwnFrame(t *testing.T) {
 	mainCs := convertNoinlineDirectiveFixture(t)
 
-	const attribute = "[MethodImpl(MethodImplOptions.NoInlining)]"
-
 	for _, name := range []string{"mid", "bump"} {
-		if line := declarationLine(t, mainCs, name); !strings.Contains(line, attribute) {
+		if line := declarationLine(t, mainCs, name); !keepsOwnFrame(line) {
 			t.Errorf("//go:noinline function %s is not marked: %s", name, line)
 		}
 	}
 
 	for _, name := range []string{"fwd", "split", "prose", "Put"} {
-		if line := declarationLine(t, mainCs, name); strings.Contains(line, attribute) {
+		if line := declarationLine(t, mainCs, name); keepsOwnFrame(line) {
 			t.Errorf("%s is marked, but Go's source does not mark it //go:noinline: %s", name, line)
 		}
 	}

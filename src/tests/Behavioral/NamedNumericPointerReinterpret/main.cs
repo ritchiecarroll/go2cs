@@ -5,13 +5,13 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uint64 load64(ж<uint64> Ꮡp) {
+internal static partial uint64 load64(ж<uint64> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     return p;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uint32 load32(ж<uint32> Ꮡp) {
+internal static partial uint32 load32(ж<uint32> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     return p;
@@ -35,11 +35,11 @@ internal static uint64 peekVia(ж<lfstack> Ꮡp) {
 
 [GoType("num:uint64")] partial struct hexval;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static uint64 describe(hexval v) {
+internal static partial uint64 describe(hexval v) {
     return (uint64)v;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void storeInt(ж<nint> Ꮡp, nint v) {
+internal static partial void storeInt(ж<nint> Ꮡp, nint v) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p = v;
@@ -57,14 +57,14 @@ internal static void set(this ж<gobber> Ꮡg, nint v) {
 
 [GoType("coord")] partial struct point;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void bump(ж<coord> Ꮡc) {
+internal static partial void bump(ж<coord> Ꮡc) {
     var p = Ꮡc.Reinterpret<coord, point>();
     (p.Value.X, p.Value.Y) = (3, 4);
 }
 
 [GoType("@string")] partial struct namedString;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void setStr(ref namedString s, @string v) {
+internal static partial void setStr(ref namedString s, @string v) {
     s = ((namedString)v);
 }
 
@@ -101,7 +101,7 @@ internal static void Main() {
     fmt.Println(Ꮡd.peek(), d);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void storeInt64(ref uint64 p, uint64 v) {
+internal static partial void storeInt64(ref uint64 p, uint64 v) {
     p = v;
 }
 

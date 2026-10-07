@@ -132,16 +132,17 @@ func main() {
 func TestGoCreatorFramesAreNotInlined(t *testing.T) {
 	mainCs := convertGoCreatorFixture(t)
 
+	// A func literal cannot be partial, so a marked literal keeps the attribute itself.
 	const attribute = "[MethodImpl(MethodImplOptions.NoInlining)]"
 
 	for _, name := range []string{"launchTail", "launchMid", "start", "spawnLit"} {
-		if line := declarationLine(t, mainCs, name); !strings.Contains(line, attribute) {
+		if line := declarationLine(t, mainCs, name); !keepsOwnFrame(line) {
 			t.Errorf("%s executes a go statement, but its frame is not kept: %s", name, line)
 		}
 	}
 
 	for _, name := range []string{"callsLauncher", "withLit", "plain"} {
-		if line := declarationLine(t, mainCs, name); strings.Contains(line, attribute) {
+		if line := declarationLine(t, mainCs, name); keepsOwnFrame(line) {
 			t.Errorf("%s executes no go statement of its own, but is marked: %s", name, line)
 		}
 	}

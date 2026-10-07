@@ -35,7 +35,7 @@ private static readonly @string cipherNewGCMRequires128ˢ = "cipher: NewGCM requ
 // too complex to inline itself.
 //
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (ж<GCM>, error) newGCM(ж<GCM> Ꮡg, ж<aes.Block> Ꮡcipher, nint nonceSize, nint tagSize) {
+internal static partial (ж<GCM>, error) newGCM(ж<GCM> Ꮡg, ж<aes.Block> Ꮡcipher, nint nonceSize, nint tagSize) {
     ref var g = ref Ꮡg.DerefOrNull();
     ref var cipher = ref Ꮡcipher.DerefOrNull();
 

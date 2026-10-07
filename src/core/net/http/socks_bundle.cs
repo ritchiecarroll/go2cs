@@ -28,7 +28,7 @@ internal static readonly @string unknownAddressTypeˢ = "unknown address type"u8
 internal static readonly @string fqdnTooLongˢ = "FQDN too long"u8;
 internal static readonly @string nonZeroReservedFieldˢ = "non-zero reserved field"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static (netꓸAddr, error ctxErr) connect(this ж<socksDialer> Ꮡd, context.Context ctx, net.Conn c, @string address) {
+internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> Ꮡd, context.Context ctx, net.Conn c, @string address) {
     netꓸAddr _ᴛ1 = default!;
     error ctxErr = default!;
     GoFrame ᒐ = default;

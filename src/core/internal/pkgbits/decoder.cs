@@ -297,7 +297,7 @@ internal static int64 rawVarint(this ж<Decoder> Ꮡr) {
 // that it matches the expected marker.
 //
 // If EnableSync is false, then Sync is a no-op.
-[MethodImpl(MethodImplOptions.NoInlining)] public static void Sync(this ж<Decoder> Ꮡr, SyncMarker mWant) {
+public static partial void Sync(this ж<Decoder> Ꮡr, SyncMarker mWant) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (!(~r.common).sync) {

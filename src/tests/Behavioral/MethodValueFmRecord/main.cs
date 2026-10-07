@@ -59,7 +59,7 @@ internal static void Main() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object frameˢ = (@string)"frame:                               "u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint walk(this T t) {
+internal static partial nint walk(this T t) {
     var pc = new slice<uintptr>(8);
     var frames = runtime.CallersFrames(pc.slice(0, runtime.Callers(1, pc)));
     while (ᐧ) {
@@ -71,7 +71,7 @@ private static readonly object frameˢ = (@string)"frame:                       
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint call(Func<nint> f) {
+internal static partial nint call(Func<nint> f) {
     return f();
 }
 

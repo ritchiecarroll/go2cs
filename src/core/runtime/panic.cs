@@ -341,7 +341,7 @@ internal static error rangeMissingPanicError = ((error)((errorString)(@string)"r
 internal static readonly @string unexpectedStatePassedToˢ = "unexpected state passed to panicrangestate"u8;
 
 //go:noinline
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void panicrangestate(nint state) {
+internal static partial void panicrangestate(nint state) {
     var exprᴛ1 = ((abi.RF_State)state);
     if (exprᴛ1 == abi.RF_DONE) {
         throw panic(rangeDoneError);

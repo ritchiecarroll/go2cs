@@ -24,7 +24,7 @@ internal static bool present(@string dump, @string state) {
     return strings.Contains(dump, "["u8 + state + "]:"u8);
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static @string dump(slice<byte> buf) {
+internal static partial @string dump(slice<byte> buf) {
     return ((@string)(buf.slice(0, runtime.Stack(buf, true))));
 }
 
@@ -56,7 +56,7 @@ private static readonly @string waitgroupˢ = "waitgroup"u8;
 private static readonly @string runningˢ = "running"u8;
 private static readonly @string chanSendˢ = "chan send"u8;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void Main() {
+internal static partial void Main() {
     var buf = new slice<byte>(dumpSize);
     ref var mu = ref heap(new Δsync.Mutex(), out var Ꮡmu);
     Ꮡmu.Lock();

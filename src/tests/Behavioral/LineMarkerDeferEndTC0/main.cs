@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void where(@string tag) {
+internal static partial void where(@string tag) {
     var (_, _, line, _) = runtime.Caller(1);
     fmt.Printf("%s: %d\n"u8, tag, line);
 }
