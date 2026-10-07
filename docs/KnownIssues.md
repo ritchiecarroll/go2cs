@@ -84,7 +84,14 @@ publish after a source change rebuilds the single file as well.
      affected: src/go2cs/csproj-template.xml sets the mode. The fix for the failure is the seat
      claude/c1-golib-trim-default (go.lib's packed targets set the template's default when the consumer set
      none); delete the failure half of this section when a release carries it. The compile time stays until the
-     runtime library's reflection is annotated for a full trim (the IL trim warning rows on the BOARD). -->
+     runtime library's reflection is annotated for a full trim (the IL trim warning rows on the BOARD).
+     2026-10-07 (COORD): WINDOWS read from a stack by the i9 (ledger 2026-10-06 20:40): the failing site is the
+     converted runtime's internCallerFrame, which keyed a call site by its method's metadata token, reached at the
+     first runtime.Caller; a converted program that never asks for its caller ran under Native AOT on windows with
+     output identical to Go. The fix is the i9's seat claude/i9-aot-metadata-token for the train after TRAIN Q.
+     macOS: C1's hosted aot-smoke, the same consumer with the partial trim mode, osx-x64 PASS three times (runs
+     37523439849, 37559598601, 37564030683; publish 256 to 293 min); osx-arm64 cancelled twice by the six-hour
+     job limit inside the publish (37523439849, 37559598601). -->
 
 A project that go2cs converts sets `TrimMode` to `partial` in its generated project file, so the trimming
 failure described here does not occur for it. This is about a C# project you write yourself that references
@@ -104,11 +111,13 @@ self-contained publish and a trimmed publish without Native AOT (`PublishTrimmed
 </PropertyGroup>
 ```
 
-**This is enough on Linux, and not on Windows.** With the setting, a Native AOT publish on Linux produces a
-program that runs. On Windows the publish succeeds and the program then stops at startup with a different
-error, `There is no metadata token available for the given member`: the runtime library asks reflection for a
-value that Native AOT does not provide. No setting avoids that one; on Windows, publish without Native AOT.
-macOS has not been measured.
+**This is enough on Linux and on macOS on Intel, and not on Windows.** With the setting, a Native AOT publish
+on Linux or on an Intel Mac produces a program that runs. On Windows the publish succeeds, and the program stops
+the first time it asks for a caller's frame (`runtime.Caller`; the measured program does so at startup) with a
+different error, `There is no metadata token available for the given member`: the runtime library asks
+reflection for a value that Native AOT does not provide. A program that never asks for a caller's frame runs.
+No setting avoids that error; on Windows, publish without Native AOT. On a Mac with Apple silicon the publish
+has not been measured: it does not finish within the six hours a hosted CI job is allowed.
 
 **What that costs.** With `partial`, Native AOT compiles every `go.*` assembly the program references in
 full, not only the parts the program uses. For a small program that references about thirty of them, the
