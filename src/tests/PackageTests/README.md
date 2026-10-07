@@ -143,8 +143,11 @@ package): RUN, PUBLISH and FDD failed (`none`; 31 dependency assemblies, 0 with 
 feed (a `push-nuget.ps1 -VersionSuffix` rehearsal's merged output), each restoring into a fresh cache
 with `go.*` mapped to the feed alone: (A) `RidCompileAsset` above; (B) a generated stdlib program
 (file I/O, plus every `sort` form whose converted body once called itself: `IntSlice`, `Float64Slice` and
-`StringSlice` `.Sort()` and the bare `sort.Sort(sort.StringSlice(v))`) converted with `go2cs -recurse=nuget`,
-built, run, and its stdout compared byte for byte with `go run`; a crash that prints "Stack overflow" is named
+`StringSlice` `.Sort()` and the bare `sort.Sort(sort.StringSlice(v))`, plus a build-tag probe: two files, one
+`//go:build safe` and one `//go:build !safe`, and a line saying which compiled) converted with
+`go2cs -recurse=nuget`, built, run, and its stdout compared byte for byte with `go run -tags safe` (every arm's
+baseline carries `-tags safe`, because a `-recurse` conversion builds with that tag by default; if the converter's
+default and the baseline ever disagree, arm B's `BuildTag =` line names it); a crash that prints "Stack overflow" is named
 as one in the verdict. That red reading is the tiered-JIT shape (the arm runs a Debug build with tiered
 compilation on): under Release with `DOTNET_TieredCompilation=0` the same self-call loops forever instead, so a
 TIMEOUT on this arm is the same defect in its other shape;
