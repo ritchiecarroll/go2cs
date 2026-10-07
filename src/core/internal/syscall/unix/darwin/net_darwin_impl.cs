@@ -264,7 +264,11 @@ partial class unix_package
     // life, and a native box already carries an address -- there is no token case to consider at
     // this element type. The KeepAlive holds that pin across the scan and the copy, which is the
     // whole window the address is read in.
-    internal static partial @string gostring(ж<byte> Ꮡp) {
+    internal static partial @string gostring(ж<byte> _) {
+        // The converted declaring part (net_darwin.cs) names the parameter `_`, and CS8826 wants the
+        // two parts to agree, so the body binds the name it reads through here.
+        ж<byte> Ꮡp = _;
+
         if (Ꮡp == nil) {
             return ""u8;
         }

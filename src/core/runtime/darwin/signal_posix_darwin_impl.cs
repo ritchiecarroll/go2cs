@@ -182,6 +182,11 @@ partial class runtime_package
     // null for the residual.
     private static PosixSignal? MapPosixSignal(uint32 sig)
     {
+        // The PosixSignal members below are unsupported on windows (CA1416); this file is darwin-only, so
+        // the guard is never taken at run time and answers the unmapped value if it ever were.
+        if (OperatingSystem.IsWindows())
+            return null;
+
         switch ((int)sig)
         {
             case sigHUP:   return PosixSignal.SIGHUP;
