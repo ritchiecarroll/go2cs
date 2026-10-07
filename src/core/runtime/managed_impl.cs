@@ -2482,6 +2482,68 @@ partial class runtime_package
     public static string GoResolveRecordedFileProbe(string goFile, string csPath, string linkRoot) =>
         resolveRecordedGoFile(goFile, csPath, linkRoot);
 
+    // THE MODULE UNDER TEST'S STAGED COPY. A -recurse module's records name the absolute Go source the
+    // converter read, the module-cache file. `go test` runs the package IN that directory, so a Go test's
+    // working directory and its Caller's directory agree. The test host runs it in a staged COPY of the
+    // module instead (testing's TestHost, PackageAncestry.TryStageModule), so the host registers
+    // module root -> copy here, and a frame of the module under test names the file its test's working
+    // directory holds: logrus's TestNestedLoggingReportsCorrectCaller compares the two strings.
+    //
+    // Only the test host registers one, so a converted PROGRAM's frames are unchanged. A dependency
+    // module sits under its own root and is unchanged, as Go names it in the cache too. A record resolved
+    // BEFORE registration keeps the cache path, because the resolution is cached per record
+    // (GoPositionMapRecord.ResolveGoFile) and per call site; measured 2026-10-06, no banked module row
+    // and none of ten other module versions reads a caller path or the working directory at init.
+    //
+    // Both ends are held forward-slashed with no trailing separator, the form every recorded path has.
+    // The entry is immutable and the property answers a value tuple, so a caller that saves the previous
+    // value and restores it holds a copy, never a reference to state a later run replaces.
+    private sealed record ModuleSourceRemapEntry(string From, string To);
+
+    private static ModuleSourceRemapEntry? s_moduleSourceRemap;
+
+    /// <summary>
+    /// The module root whose recorded frames are answered under a staged copy, and that copy, or null
+    /// for none (every process that is not a test host). Set by testing's TestHost after it stages a
+    /// module, and restored when its run ends.
+    /// </summary>
+    public static (string From, string To)? GoModuleSourceRemap
+    {
+        get => Volatile.Read(ref s_moduleSourceRemap) is { } entry ? (entry.From, entry.To) : null;
+        set => Volatile.Write(ref s_moduleSourceRemap, normalizeModuleSourceRemap(value));
+    }
+
+    private static ModuleSourceRemapEntry? normalizeModuleSourceRemap((string From, string To)? remap)
+    {
+        if (remap is not { } pair || string.IsNullOrWhiteSpace(pair.From) || string.IsNullOrWhiteSpace(pair.To))
+            return null;
+
+        string from = pair.From.Replace('\\', '/').TrimEnd('/');
+        string to = pair.To.Replace('\\', '/').TrimEnd('/');
+
+        return from.Length == 0 || to.Length == 0 ? null : new ModuleSourceRemapEntry(from, to);
+    }
+
+    // remapModuleSource answers a resolved Go file under the staged copy when it lies under the module
+    // root, at a path boundary; every other file as it is. Case-insensitively on Windows, where one
+    // directory is legitimately spelled several ways (the converter's sameDirectory).
+    private static string remapModuleSource(string goFile, (string From, string To)? remap)
+    {
+        if (remap is not { } pair || goFile.Length <= pair.From.Length || goFile[pair.From.Length] != '/')
+            return goFile;
+
+        StringComparison comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+        return goFile.StartsWith(pair.From, comparison) ? string.Concat(pair.To, goFile.AsSpan(pair.From.Length)) : goFile;
+    }
+
+    /// <summary>
+    /// GolibTests' probe (ModuleSourceRemapTests): how a resolved Go file is answered under the remap
+    /// <paramref name="moduleRoot"/> -> <paramref name="stagedRoot"/>, without touching the process's own.
+    /// </summary>
+    public static string GoRemapModuleSourceProbe(string goFile, string moduleRoot, string stagedRoot) =>
+        remapModuleSource(goFile, normalizeModuleSourceRemap((moduleRoot, stagedRoot)) is { } entry ? (entry.From, entry.To) : null);
+
     // One converted file's recorded position map.
     private sealed class GoPositionMapRecord(string goFile, string table, string funcLits = "", string methodValues = "")
     {
@@ -2547,9 +2609,11 @@ partial class runtime_package
         //     With no link-time root, the recorded form is answered as recorded, which is Go's
         //     -trimpath form;
         //   - an already-absolute path, verbatim.
+        // A file of the module under test is then answered under its staged copy when the test host
+        // has registered one (GoModuleSourceRemap).
         public string ResolveGoFile(string csPath)
         {
-            return m_resolvedGoFile ??= resolveRecordedGoFile(goFile, csPath, defaultGOROOT.ToString());
+            return m_resolvedGoFile ??= remapModuleSource(resolveRecordedGoFile(goFile, csPath, defaultGOROOT.ToString()), GoModuleSourceRemap);
         }
 
         // GoLineFor answers the Go line the given emitted C# line was converted for — a PREDECESSOR

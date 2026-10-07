@@ -166,6 +166,7 @@ public static class TestHost
         string previousDirectory = Environment.CurrentDirectory;
         string? previousTimezone = Environment.GetEnvironmentVariable("TZ");
         string? previousSandboxMarker = Environment.GetEnvironmentVariable(SandboxMarkerVariable);
+        (string From, string To)? previousModuleSourceRemap = global::go.runtime_package.GoModuleSourceRemap;
 
         // A RE-EXEC'D HELPER of an outer host run keeps the state its parent assigned instead of
         // sandboxing again. Go's re-exec'd test binary performs no chdir of its own, and the
@@ -242,6 +243,9 @@ public static class TestHost
                     registry.ModulePath, registry.Package, runRoot, workingDirectory,
                     Environment.GetEnvironmentVariable(PackageAncestry.ModuleGoModEnvironmentVariable));
 
+                if (moduleStaged)
+                    RegisterModuleSourceRemap(runRoot, registry.ModulePath);
+
                 CreateFixtureDirectories(registry.FixtureDirectories, workingDirectory, runRoot);
 
                 // AFTER the run-directory shape and BEFORE the copies. After, because a link at
@@ -278,6 +282,12 @@ public static class TestHost
                 // local zone rather than agreeing. That is the TZ arc's own question, with its own
                 // measurement in flight; this merge unit carries only what its gates measured.
                 Environment.SetEnvironmentVariable("TZ", "UTC");
+            }
+            else
+            {
+                // A re-exec'd helper runs the same package's code in the sandbox its parent staged, so its
+                // frames name the same copy: Go's child is the same binary, and answers the same files.
+                RegisterModuleSourceRemap(runRoot, registry.ModulePath);
             }
 
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
@@ -449,6 +459,10 @@ public static class TestHost
             if (!helperReExec)
                 PublishEnvironmentVariable(SandboxMarkerVariable, previousSandboxMarker);
 
+            // The module-source remap is withdrawn for the same reason: a later in-process run must not
+            // answer this run's module under this run's deleted sandbox.
+            global::go.runtime_package.GoModuleSourceRemap = previousModuleSourceRemap;
+
             try
             {
                 // Released BEFORE the sandbox is torn down, and in its own guard so that a failure
@@ -572,6 +586,25 @@ public static class TestHost
     // Output-directory folder holding fixtures that reach ABOVE the package. MUST match the
     // converter's SharedFixtureStagingRoot, which emits the matching csproj <Link>.
     private const string SharedFixtureStagingRoot = "go2cs_shared_fixtures";
+
+    // A frame of the module under test names the file its test's working directory holds: the staged
+    // copy, where `go test` would name the module-cache file it runs the package in (runtime's
+    // GoModuleSourceRemap has the why and the bounds). Registered only when the copy is there, from the
+    // module root the converter's run hands over; a host with no module root (every standard-library
+    // run) registers nothing. A helper whose spawner filtered the environment has no root either, and
+    // answers the cache path, as every host did before.
+    private static void RegisterModuleSourceRemap(string runRoot, string modulePath)
+    {
+        string? moduleRoot = Environment.GetEnvironmentVariable(PackageAncestry.ModuleRootEnvironmentVariable);
+
+        if (string.IsNullOrWhiteSpace(moduleRoot) || string.IsNullOrEmpty(modulePath))
+            return;
+
+        string mirrorRoot = PackageAncestry.ModuleMirrorRoot(runRoot, modulePath);
+
+        if (Directory.Exists(mirrorRoot))
+            global::go.runtime_package.GoModuleSourceRemap = (Path.GetFullPath(moduleRoot), mirrorRoot);
+    }
 
     // Planted in the host's own environment the moment its sandbox exists, so every descendant
     // process can tell it is a RE-EXEC'D HELPER of this run rather than a fresh host — the value
