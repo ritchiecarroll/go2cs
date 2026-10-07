@@ -26460,4 +26460,8 @@ either.
 **Trigger:** the first module that reaches one. If a first-wave module or a Target Atlas top row does, it becomes a
 seat that day.
 
+## 2026-10-06 — G: two different `*testing.T` compare deep-equal under reflect (testify `TestRunSuite/TestSubtest`) — open, not a seat
+
+**OPEN (G; recorded on COORD's ruling of 2026-10-06).** testify's `SuiteTester.TestSubtest` asserts `NotEqual(suiteT, subTestT)`, a suite's `*testing.T` against its subtest's, and testify compares by `reflect.DeepEqual` (via `ObjectsAreEqual`). In Go the two differ (name, parent, level and more). The hand-owned `testing.T` (`src/core/testing/testing.cs`) shows reflect an opaque `Execution` reference and the two detached-state flags only, so the two pointees deep-compare EQUAL and the assertion fails: `TestRunSuite/TestSubtest/first` and `/second` (Go pass, C# fail), `TestRunSuite/TestSubtest` (pass, fail) and `TestRunSuite` (Go skip, C# fail). Measured on testify v1.12.1 at the acceptance merge `ab6721b68f` + `claude/g-testing-runtests` `24bb3cf68b`, and present without the RunTests capability too, so it is not that seat's. Repro: `-tests -recurse` of testify, the `suite` package. **Unpark when** a ruling asks for `testing.T`'s reflect surface to carry Go's identity (the test's name at minimum); until then the four rows are this record's.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
