@@ -26475,4 +26475,33 @@ seat that day.
 
 **The route that would remove the cost** is a full trim, and a full trim needs golib's reflection annotated (`DynamicallyAccessedMembers`, `DynamicDependency`, justified `UnconditionalSuppressMessage`) so the trimmer keeps what golib reaches by name. Already recorded, and not sized here: this board's **"Backlog: the AOT full-trim column, deferred with its reasoning"** (2026-08-11: full trim "strips exactly the metadata golib reaches reflectively", so it fails Verify); `docs/CleanupBacklog.md` item (c) (golib's `IL####` warnings want those annotations, never a `NoWarn`); and `docs/phase4/CENSUS-stdlib-warnings-2026-10-02.md`, where every IL trim-analysis diagnostic in the stdlib BUILD is golib's own (`IL2070` 23, `IL2075` 11, `IL2067` 10, `IL2026` 6, among others). At PUBLISH the converted assemblies add their own (the local AOT publish above reported `IL2104` "produced trim warnings" for `unsafe` and `slices`, and `IL3053` "produced AOT analysis warnings" for `internal.abi`), so golib is where a full trim starts, not necessarily where it ends. A trimmed NON-AOT publish of the same consumer (ILLink, `PublishTrimmed`) runs under a full trim of 1.24.13.4 already: the crash and the cost are Native AOT's.
 
+## 2026-10-06 — G: logrus `TestNestedLoggingReportsCorrectCaller`, its own class after R2m: the launch directory and a non-leaf frame's line — open, to size after B and C
+
+Read on the R2m acceptance unions (control on the carrier `e7fcff2244`, seat `633b045e8a`; both with alias-publicize,
+CloneMap, the CS0030 on-hop, same-name and the `safe` tag merged), logrus v1.10.2, `-tests all -recurse`, Release
+with tiering off. On the control the row's `func` assertion read `testing.tRunner`, the R2m defect. On the seat
+`func` passes, and only the `file` assertion is left, at two sites (logrus_test.go:449 and :475). It fails for two
+independent reasons:
+
+**a. The launch directory.** The test builds the expected path from `os.Getwd()` beside the caller's file name.
+`go test` runs a package's tests IN that package's source directory, here the module cache's `logrus@v1.10.2`, so
+the two agree. The converted `-recurse` host ran in a temporary copy of the converted package
+(`<temp>/go2cs-tests/github.com_sirupsen_logrus/<run id>/src/github.com/sirupsen/logrus`), while the position
+record names the Go source file in the module cache. The expected path therefore carries the host's directory and
+the actual path the Go source's. To size: which of the two moves (Go's answer is the launch directory: run in the
+source directory), relative `testdata` included. This is "runs like Go", so a design line comes before a cut.
+
+**b. A non-leaf frame's line.** At both sites the converted `runtime.Caller(0)` answers Go's line (450 and 476).
+What differs is the line logrus reports for its CALLER frame, the `llog.Info(...)` / `....Print(...)` statement:
+Go 449 and 475, converted 450 and 476, which is the NEXT statement's line. (G's post d8a11debc3 read this as
+Caller(0) being one high; the statements read here correct that.) The shape fits a caller frame whose return
+address lies past the call, attributed to the following statement's sequence point. To size: which position the
+record carries for a call that ends a statement, and which one Go's pc-line table carries. A position record is
+invisible in emitted code, so a fix there is in bounds; a change to visible emission to satisfy a line number is
+not (the standing ruling).
+
+`hooks/slog` read failing on the control and validated on the seat, in the same runs; its reason is not read here.
+
+— G
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
