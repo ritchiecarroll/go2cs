@@ -72,7 +72,9 @@ namespace BehavioralRunner
         // table is baselined on) at 555 enumerated packages: the one-shot parallel build exceeded
         // 300 s on a cold tree AND on a warm one. Warm state cannot save it -- the Transpile phase
         // rewrites every .cs immediately before Compile, so the batch is never an incremental no-op
-        // and every project genuinely recompiles. The batch therefore timed out on every run and
+        // and every project genuinely recompiles. (Corrected 2026-10-05: true when measured, no longer
+        // since incremental .cs writes -- Transpile now rewrites only the .cs whose bytes change, so a
+        // warm batch over an unchanged emission IS largely an incremental no-op.) The batch therefore timed out on every run and
         // dropped the whole corpus onto the per-project fallback, where each project must first build
         // the core dependency closure and so ALSO exceeded 180 s cold: ~15 minutes producing zero
         // assemblies and 555 Fail entries that were pure infrastructure. For scale, a full
@@ -864,8 +866,11 @@ namespace BehavioralRunner
         // newer than every shared dependency was necessarily produced from exactly the inputs in play now,
         // so a stale artifact from an earlier converter (or an earlier golib) can never be mistaken for a
         // fresh success. Note this degrades to attributing everything in the case that matters most: a
-        // converter change rewrites every .cs, which makes every assembly stale and every project a
-        // suspect. The narrowing only ever pays off when the inputs really did not move.
+        // golib or generator change makes every assembly stale and every project a suspect. (A converter
+        // change rewrote every .cs too until incremental .cs writes, 2026-10; now it rewrites only the
+        // .cs whose emission moved, and an unchanged .cs keeps its time, so the shared-dependency half
+        // of this check is what catches a runtime change.) The narrowing only ever pays off when the
+        // inputs really did not move.
         private static List<string> SuspectProjects(IReadOnlyList<string> projects, string buildOutput)
         {
             HashSet<string> suspects = new(StringComparer.OrdinalIgnoreCase);
