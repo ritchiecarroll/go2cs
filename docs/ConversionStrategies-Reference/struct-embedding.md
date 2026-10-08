@@ -202,12 +202,14 @@ still-virgin wrapper the backing materialized on the call site's boxing temp and
 storage was never written** — see *The element address of a VIRGIN named array must materialize
 through the receiver* below, which is why the emission carries `.Value`:
 
-<!-- illustration: not converter output -->
+<!-- source: src/tests/Behavioral/NamedArrayAnonElement/main.cs.target:18-20 -->
 ```csharp
 internal static ж<semaRoot> rootFor(this ref semTable t, nint i) {
-    return Ꮡ(t.Value, i).of(semTableᴛ1.Ꮡroot);     // was: Ꮡ(t.Value[i]).of(…) — a COPY
+    return Ꮡ(t.Value, i).of(semTableᴛ1.Ꮡroot);
 }
 ```
+
+The element address was `Ꮡ(t.Value[i]).of(…)` before, which addressed a COPY.
 
 That is exactly the treatment the receiver's array FIELD already gets in the same arm (see *Element
 address of an ARRAY FIELD of the receiver* under Slices and Arrays), for the same reason. A

@@ -591,23 +591,24 @@ return, channel send, `append` element, range key/value, function/func-literal p
 receiver) clones a struct too. The struct declaration is stamped with the fields that need it, and
 go2cs-gen turns the stamp into the deep copy:
 
-<!-- illustration: not converter output -->
+<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:45-51, 192, 195-197 -->
 ```csharp
-partial struct digest {
+partial struct Digest {
     internal array<uint32> h = new(8);
     internal array<byte> x = new(chunk);
     internal nint nx;
     internal uint64 len;
-    internal bool is224;
+    internal bool is224; // mark if this digest is SHA-224
 }
-
-internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
-    ref var d0 = ref heap<digest>(out var Ꮡd0);
-    d0 = d.ΔClone();                 // was `d0 = d;` — the arrays were shared
+…
+public static slice<byte> Sum(this ref Digest d, slice<byte> @in) {
+…
+    ref var d0 = ref heap<Digest>(out var Ꮡd0);
+    d0 = d.ΔClone();
     var hash = Ꮡd0.checkSum();
-    …
-}
 ```
+
+`d0 = d.ΔClone();` was `d0 = d;` before, which shared the two arrays between the copies.
 
 <!-- illustration: not converter output -->
 ```csharp
