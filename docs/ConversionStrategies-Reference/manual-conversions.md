@@ -760,6 +760,7 @@ interface method have no declaration a record can name, so there it stays the at
 ```go
 f1 := func(in [32]byte, sc Scalar) bool { … }      // edwards25519's scalar_test.go
 ```
+<!-- illustration: not converter output -->
 <!-- attribute-shown: a converted func literal keeps [GoArrayDims] on its parameters -->
 ```csharp
 var f1 = ([GoArrayDims(32)] array<byte> @in, Scalar sc) => { … };
@@ -2147,6 +2148,7 @@ ch := make(chan<- int)                       // text/template's TestIssue43065
 p  := new(chan<- string)                     // reflectlite's TestSetValue row
 type holder struct{ x chan<- string }        // reflectlite's TestTypes row
 ```
+<!-- illustration: not converter output -->
 ```csharp
 var ch = new channel/*<-*/<nint>(0, GoChanDir.Send);
 var p = Ꮡ(channel/*<-*/<@string>.SendOnly);
@@ -3203,10 +3205,13 @@ The fork is confined to the **slot representation** and keeps every other line o
 the packed `head`/`tail`, the fullness test, the CAS protocol, the single-producer/multi-consumer
 contract, and the entire `poolChain` half:
 
+<!-- source: src/core/sync/poolqueue.cs:73-78 -->
+<!-- attribute-shown: a hand-written file keeps the attribute -->
 ```csharp
 // eface is Go's two-word {type, value} representation of an `any`. Under the CLR an `any` IS a single
-// managed reference, so the slot holds that reference directly.
-partial struct eface {
+// managed reference, so the slot holds that reference directly; see the file header for why the
+// two-word form cannot be reinterpreted here.
+[GoType] partial struct eface {
     internal any? val;
 }
 ```

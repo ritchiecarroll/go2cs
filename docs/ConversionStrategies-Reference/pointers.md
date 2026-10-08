@@ -1223,6 +1223,7 @@ A Go conversion `(*Base)(p)` where `p` is a `*Def` and `Base`/`Def` share an *id
 ```go
 func (s *mspan) newPinnerBits() *pinnerBits { return (*pinnerBits)(newMarkBits(s.nelems * 2)) }   // newMarkBits returns *gcBits
 ```
+<!-- illustration: not converter output -->
 ```csharp
 internal static ж<pinnerBits> newPinnerBits(this ref mspan s) {
     return Ꮡ((pinnerBits)(~newMarkBits(((uintptr)s.nelems) * 2)));   // deref the ж<gcBits> box, value-convert, re-box
@@ -1665,6 +1666,7 @@ records `testingT` (it runs over the test-augmented package, so the exported `*t
 but the emission ignored it: `internal partial interface testingT` under a `public` method, CS0051 ×4.
 Publicization now outranks, and the inline arm supplies the DEFAULT:
 
+<!-- illustration: not converter output -->
 ```csharp
 public partial interface testingT {   // was: internal
 ```

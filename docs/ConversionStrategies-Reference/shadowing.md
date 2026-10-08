@@ -64,6 +64,7 @@ Go keeps types and methods in separate namespaces, so a package may legally decl
 
 This needs an extra step when the colliding name is also a **golib reserved word** (`slice`, `array`, `channel`, `map`, …). Such a name is `Δ`-prefixed *anyway* — to avoid the golib runtime type (`slice<T>` etc.) — so the method too becomes `Δslice`, and the plain `Δ` no longer separates type from method. In that case the converter appends the type marker `ᴛ` to the **type** only, giving it a name distinct from the method:
 
+<!-- illustration: not converter output -->
 ```csharp
 partial struct Δsliceᴛ { … }                          // Go `type slice struct{…}`
 internal static Δsliceᴛ Δslice(this ref builder b, …) // Go `func (*builder) slice(…)`
@@ -75,6 +76,7 @@ A **struct field** named like a colliding package-level identifier is *not* rena
 
 One case *does* rename the field: when its name equals its **enclosing type's** name *and* that type is itself `Δ`-renamed for a type-vs-method collision. internal/trace's `type Label struct{ Label string }` sits alongside `func (e Event) Label() Label`, so the type becomes `ΔLabel`; the field, whose name equals the type, is renamed to differ (CS0542 — a member cannot share its type's name). The existing rename prefixed a single `Δ`, but that yields `ΔLabel` — *equal* to the renamed type, so the collision persisted. `typeCollidingFieldName` now **doubles** the marker (`ΔΔLabel`) when the name is a package-level collision, exactly as it already did for the keyword-family case (a reserved-word type is `Δ`-renamed too). Deterministic from the name, so the field declaration, the keyed composite-literal key, and every access site all agree:
 
+<!-- illustration: not converter output -->
 ```csharp
 partial struct ΔLabel {                 // Go `type Label struct{ Label string }`
     public @string ΔΔLabel;                      // field name == type name, doubled to differ

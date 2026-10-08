@@ -510,6 +510,7 @@ crypto-curve family (elliptic, ecdh, nistec) COMPILE (+3 packages):
    PARAMETER (`Func<Point>`, `pointFromAffine` returning `(Point, error)`); the template rewrites each to
    the instantiation's type ARGUMENT before emission —
 
+   <!-- illustration: not converter output -->
    ```csharp
    internal ref global::System.Func<P256PointжnistPoint> newPoint => ref nistCurve.newPoint;
    internal static (P256PointжnistPoint p, error err) pointFromAffine(this ref p256Curve target, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy)

@@ -16,6 +16,7 @@ One resolved instance: an argument to the **`min`/`max` builtins** that is a nam
 
 **Named numeric types.** A Go type definition over a numeric base — `type Celsius float64`, `type level int`, `type Flags uint` — is emitted as a partial struct whose name is followed by a `/*num:…*/` comment, and the `TypeGenerator` source generator fills in the body:
 
+<!-- illustration: not converter output -->
 ```csharp
 partial struct level /*num:nint*/;   // type level int
 partial struct Flags /*num:nuint*/;   // type Flags uint
@@ -136,6 +137,7 @@ in another C# assembly — two problems appear that only manifest cross-assembly
 
 So for a foreign *constructed* type the generator emits, fully-qualified and hosted in the local type:
 
+<!-- illustration: not converter output -->
 ```csharp
 // runtime, dur↔hex style: foreign abi.NameOff constructed from local Δhex
 partial struct Δhex {

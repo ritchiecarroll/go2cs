@@ -1349,7 +1349,7 @@ using testing = testing_package;
 
 partial class path_test_package {
 …
-[GoType] partial struct ExtTest {
+partial struct ExtTest {
     internal @string path, ext;
 }
 
@@ -11472,6 +11472,7 @@ The hand-written C# keeps the `any` in its one field. It reads the field with .N
 atomic, ordered load of one object reference:
 
 <!-- source: src/core/sync/atomic/value.cs:6-35 -->
+<!-- attribute-shown: a hand-written file keeps the attributes -->
 ```csharp
 [module: go.GoManualConversion]
 
@@ -11492,11 +11493,13 @@ partial class atomic_package {
 }
 ```
 
+<!-- attribute-shown: a hand-written file keeps the attributes -->
 The file uses the same shapes the converter emits, so callers see no difference:
 - `atomic_package` is the `static partial class` that holds the Go package's members, so a Go method
   becomes a C# extension method. See [Package Conversion](#package-conversion).
-- A `partial` type is a Go type. A method with a Go pointer receiver is written
-  `this ref Value v`; a source generator adds the overload that takes a pointer. See
+- A hand-written file keeps the two attributes converted code no longer needs: `[GoType]` marks a Go
+  type, and `[GoRecv]` a method with a Go pointer receiver, written `this ref Value v`. A source
+  generator adds the overload that takes a pointer. See
   [Functions and Methods](#functions-and-methods) and [Source Generators](#source-generators).
 
 `Store` and `Swap` read the field with `Volatile.Read` and replace it with `Interlocked.CompareExchange`.

@@ -71,6 +71,7 @@ call-argument path under builtin `new`'s UNNAMED parameter — an EMPTY lift nam
 (mirroring the composite-literal and hpke map-value lifts), so the declaration, the `@new<…>` type
 argument, the `GoImplement` recordings, and the pointer-adapter names all resolve through
 `liftedTypeMap`:
+<!-- illustration: not converter output -->
 ```csharp
 partial struct reservedᴛ1 /*dyn*/ {
     public global::go.go.types_package.ΔType Type;
@@ -112,6 +113,7 @@ The probe is now a recursive descent over the type-composing syntax — pointer,
 same helper, an anonymous interface) is found wherever it sits. The `AnonStructComposedTypes` golden
 shows the same shape lifting and its elements constructing normally:
 
+<!-- illustration: not converter output -->
 ```csharp
 partial struct ptrElemsᴛ1 /*dyn*/ {
     internal nint @in;
@@ -162,6 +164,7 @@ type Composed struct {
 	ByKey map[string]struct{ Count int }
 }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 partial struct Composed_Ptrs /*dyn*/  { public uint32 Size; }
 partial struct Composed_ByKey /*dyn*/ { public nint Count; }
@@ -185,6 +188,7 @@ converted package declares a composed anonymous-struct field. What the A/B *did*
 in two packages, all one incidental canonicalization — the shared helpers exclude the **empty**
 `struct{}`/`interface{}`, and the old field arm did not:
 
+<!-- illustration: not converter output -->
 ```csharp
 - partial struct Func_opaque /*dyn*/ { }          // …and NamedArg__NamedFieldsRequired, Out__…
 - partial struct Func { internal Func_opaque opaque; }
@@ -686,6 +690,7 @@ package scope under a function-prefixed name. Two Go type-identity rules ride th
 func TestNoFixedSize(t *testing.T) {
 	type Person struct { … }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 partial struct TestNoFixedSize_Person /*dyn*/ {
 
@@ -754,6 +759,7 @@ declaration order within the file.
 A package-level literal now gets its **own** sink, flushed at package scope, and takes its name
 seed from the declaration being initialized (`packageInitLiftName`, set by `visitValueSpec`):
 
+<!-- illustration: not converter output -->
 ```csharp
 partial struct readersᴛ1 /*dyn*/ { … }   // the OUTER anonymous struct (unchanged)
 
@@ -785,6 +791,7 @@ A **non-generic** named func type with **no methods** is therefore rendered AS i
 delegate (`Action`/`Func<…>`) everywhere it is referenced (`getAliasQualifiedTypeName`/`getFullyQualifiedTypeName` return
 the underlying signature), and its declaration is skipped (`visitFuncType` emits only a marker
 comment). Every named↔underlying conversion becomes identity, exactly as Go models it:
+<!-- illustration: not converter output -->
 ```csharp
 // type releaseConn is a methodless func type — rendered inline as its base delegate
 internal static (ж<driverConn>, Action<error>, error) grabConn(this ж<ΔConn> Ꮡc, context.Context _) { … }

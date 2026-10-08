@@ -186,6 +186,7 @@ func (t Token) First() byte { return t[0] }
 const done Token = "done"
 next := done + "-next"
 ```
+<!-- illustration: not converter output -->
 ```csharp
 partial struct Token /*@string*/;
 internal static readonly Token done = "done"u8;
@@ -234,6 +235,7 @@ switch string(cmd) {
 case "get": …
 }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 if (((sstring)(hdr[..4])) == "ZLIB"u8) { … }
 var exprᴛ1 = ((sstring)cmd);
@@ -257,6 +259,7 @@ A `string` parameter is an `@string`, so every literal argument is copied into o
 
 - **`StrGenerator`** (go2cs-gen) emits the companions into a generated file. The first is the `@string` member, which forwards under a lower overload priority. The second, for a package-level function only, is the canonical value delegate (attribute names shortened):
 
+  <!-- illustration: not converter output -->
   ```csharp
   [GeneratedCode("go2cs-gen", …), OverloadResolutionPriority(-1)]
   public static global::go.@string Sprintf(global::go.@string format, params global::System.Span<object> aʗp) => Sprintf((global::go.sstring)format, aʗp);

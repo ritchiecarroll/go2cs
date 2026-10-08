@@ -113,6 +113,7 @@ enclosing value's storage) and moves the burden to the call site, where C#'s ref
 reject precisely the cases Go also rejects. It is the same technique the `InheritedTypeTemplate`
 already used to forward a defined-type-over-struct's fields.
 
+<!-- illustration: not converter output -->
 ```csharp
 public partial struct Var
 {
@@ -201,6 +202,7 @@ still-virgin wrapper the backing materialized on the call site's boxing temp and
 storage was never written** — see *The element address of a VIRGIN named array must materialize
 through the receiver* below, which is why the emission carries `.Value`:
 
+<!-- illustration: not converter output -->
 ```csharp
 internal static ж<semaRoot> rootFor(this ref semTable t, nint i) {
     return Ꮡ(t.Value, i).of(semTableᴛ1.Ꮡroot);     // was: Ꮡ(t.Value[i]).of(…) — a COPY
@@ -461,6 +463,7 @@ type (
     holder struct{ myInt; MyInt }
 )
 ```
+<!-- illustration: not converter output -->
 ```csharp
 partial struct embeddedLocalTypes_holder /*dyn*/ {
     internal partial ref embeddedLocalTypes_myInt myInt { get; }
@@ -543,6 +546,7 @@ same rename for the box accessor. Only the EMBEDDED-field DECLARATION path was o
 emitted `getCoreSanitizedIdentifier(goTypeName)` raw, so the declaration and its accesses disagreed
 and the struct itself was CS0542:
 
+<!-- illustration: not converter output -->
 ```csharp
 partial struct Buffer {
     public partial ref bytes_package.Buffer ΔBuffer { get; }   // was: `Buffer { get; }`, CS0542

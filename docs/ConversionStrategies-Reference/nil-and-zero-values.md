@@ -152,6 +152,7 @@ saw a null descriptor:
 tBytes     = bootstrapType("bytes", (*[]byte)(nil))
 tReserved7 = bootstrapType("_reserved1", (*struct{ r7 int })(nil))
 ```
+<!-- illustration: not converter output -->
 ```csharp
 internal static typeId tBytes = bootstrapType("bytes"u8, ((ж<slice<byte>>)nil));
     partial struct Δtype /*dyn*/ {

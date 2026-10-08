@@ -19,6 +19,7 @@ func describe() Stringer {
     return point{1, 2}    // point implements Stringer -> assignable directly
 }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 partial interface Stringer {
     @string String();
@@ -49,6 +50,7 @@ The prune matches a FOREIGN base by its **canonical name**: the inheritance trac
 
 **Promoted forwarders through a Δ-renamed embedded interface use the markerless FIELD name.** The converter names an embedded field after the **Go embed name**, so a struct value-embedding an interface whose C# TYPE was collision-renamed (see [Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)) declares `public log.slog_package.ΔHandler Handler;` — the marker lives on the type only. testing/slogtest's `type wrapper struct { slog.Handler; mod func(*slog.Record) }` (slog has both a `Handler` type and a `Logger.Handler()` method, so the type is `ΔHandler`) broke in BOTH generated wrapper forms because the `ImplementGenerator` derived the promoted-forwarder field name from the interface TYPE's simple name: the value partial struct emitted bare `ΔHandler.Enabled(…)` (CS0103 cross-package, CS0120 same-package where the bare name binds the nested interface type), and the pointer adapter emitted `m_box.Value.ΔHandler.Enabled(…)` (CS1061). The field name is now the `Δ`-stripped simple name (`GetSimpleName(…, dropCollisionPrefix: true)`, the same derivation `StructTypeTemplate` already used for embedded-field accessors) in all three places: the value template's promoted arm, the pointer arm's promoted fallback, and the pointer arm's semantic embedded-interface-field detection (which compares field name to type name and otherwise never matches `Handler` vs `ΔHandler`):
 
+<!-- illustration: not converter output -->
 ```csharp
 // value partial struct — promoted members forward through the field:
 public bool Enabled(nint level) => Handler.Enabled(level);
@@ -97,6 +99,7 @@ The `GoImplement` STRUCTURAL recorders were a compile-time *approximation* of Go
 
 With no dynamic code generation available (Native AOT), a **per-interface compile-time artifact is the irreducible minimum**, and it must live in the **interface's own package class** — the only placement guaranteed loaded at every asserting site, and the only one that yields a single cross-assembly identity. `TypeGenerator` therefore emits, for every non-generic, non-constraint, non-empty converted interface, **two sibling shells**, discovered through a new `[GoInterfaceShell]` stamp on the interface itself. No static member is added to the interface — that shape would be inherited by every embedding interface, which is both a large CS0108 hiding class and a method-set corruption (no Go type can implement a static helper), and it makes the shell NAMES non-contractual so the generator may disambiguate freely:
 
+<!-- illustration: not converter output -->
 ```csharp
 [global::go.GoInterfaceShell(typeof(ΔSpeaker<>), typeof(ΔSpeakerᴛObj), "Speak")]
 public partial interface Speaker
@@ -405,6 +408,7 @@ A Go **type** whose name is a C# reserved keyword (`type fixed struct{…}`, `ty
    above rely on: a keyword + suffix is never a keyword).
 
 Emitted form (from the `KeywordNamedTypes` goldens and its generated adapters):
+<!-- illustration: not converter output -->
 ```csharp
 sizer p = new fixedжsizer(Ꮡf);                          // converter cast site — composed, no marker
 @lock lp = new fixedжlock(Ꮡf);
@@ -858,6 +862,7 @@ and publicizes the unexported named types in its parameters and results:
 type options struct{ … }        // unexported
 type Option func(*options)       // exported -> public delegate
 ```
+<!-- illustration: not converter output -->
 ```csharp
 public partial struct options { … }   // publicized to match the delegate
 public delegate void Option(ж<options> _);
@@ -1128,6 +1133,7 @@ interface from a **directly imported** package (checked with `types.Implements`)
 emits real C# inheritance at the declaration and **skips re-declaring the covered members**
 (redeclaring would HIDE the base member — implementers would need both):
 
+<!-- illustration: not converter output -->
 ```csharp
 partial interface File :
     io_package.ReadCloser
@@ -1400,6 +1406,7 @@ it is present — the marker resolves as one unit to the already-simple lifted n
 `GoImplement` attribute writer resolves or drops it (mirroring the implicit-conversion writer).
 `registerDynamicTypeName` keeps the lexically smallest name for a signature so the winner is
 well-defined even when several files lift the same shape. Emitted form:
+<!-- illustration: not converter output -->
 ```csharp
 // batch.cs (declaring file):
 partial interface readBatch_r /*dyn*/ : /* io.Reader */ … { … }
@@ -1426,6 +1433,7 @@ declaration in the file read as a namespace-level one:
 // crypto/ecdh's test half opens with the documented-interface witness idiom:
 var _ interface{ Equal(x crypto.PublicKey) bool } = &ecdh.PublicKey{}
 ```
+<!-- illustration: not converter output -->
 ```csharp
 // before — CS1519/CS1002 at the site, then CS0106 on every remaining member, CS1022 at EOF:
 internal static interface{Equal(x crypto.PublicKey) bool} _ᴛ1ʗ =
@@ -1498,6 +1506,7 @@ to the registry; hex digits pass through every transform untouched, and the enco
 function of the signature so equal signatures still render the identical (comparable) string.
 Emitted form:
 
+<!-- illustration: not converter output -->
 ```csharp
 // zvars.cs (declaring file, visited AFTER the reference):
 partial struct compareTestsᴛ1 /*dyn*/ { … }
@@ -1550,6 +1559,7 @@ with two deliberate exemptions:
   process). The **EXTERNAL** variant is not seeded: its `<pkg>_test_package` is a separate class
   and may reuse every production name freely.
 
+<!-- illustration: not converter output -->
 ```csharp
 // type.cs (production, pinned):        encoder_test.cs (internal variant, steps around):
 partial struct Δtype /*dyn*/ {  partial struct Δtypeᴛ7 /*dyn*/ {
@@ -1639,6 +1649,7 @@ The interface-field record+route loop was extracted from `checkStructFields` int
 `recordStructFieldInterfaceCasts(compositeLit, structType, callContext)` and is now called from **both** the
 typed path and the elided path (against the inferred `*types.Struct`), so an elided struct composite routes
 its interface fields identically:
+<!-- illustration: not converter output -->
 ```csharp
 new(new poserжerror(poser), err1, true)                      // *poser  → error  (Pointer = true)
 new(new errorUncomparableжerror(Ꮡ(new errorUncomparable(nil))), …)  // *errorUncomparable → error

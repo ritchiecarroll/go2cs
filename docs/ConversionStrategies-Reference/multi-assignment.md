@@ -17,6 +17,7 @@ The simultaneous deconstruction is **mandatory** whenever the targets alias — 
 ```go
 func (h *myHeap) Swap(i, j int) { (*h)[i], (*h)[j] = (*h)[j], (*h)[i] }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 // before: two sequential stores drop the temporary — (h)[i] and (h)[j] both end up as the old (h)[j]
 internal static void Swap(this ref myHeap h, nint i, nint j) {

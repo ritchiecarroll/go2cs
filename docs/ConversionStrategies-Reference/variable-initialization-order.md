@@ -15,6 +15,7 @@ Go initializes package-level variables in **dependency order** (spec: "within a 
 var procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx")
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 // syscall_windows.cs
 internal static ж<LazyProc> procSetFilePointerEx;

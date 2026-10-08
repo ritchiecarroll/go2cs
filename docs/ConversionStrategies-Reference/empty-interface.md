@@ -45,6 +45,7 @@ a named `I` and an anonymous `interface{}` parameter; a type assertion, a type s
 ## A string literal in an `any` slot boxes through `@string` — as `(@string)"…"u8`
 A Go string literal normally emits as a `"…"u8` `ReadOnlySpan<byte>` (which converts implicitly to `@string`). But a `ReadOnlySpan<byte>` has **no conversion to `object`**, so a string literal RETURNED (or returned as a tuple element) where the result type is the empty interface fails with CS0029 — testing's `func (f *chattyFlag) Get() any { return "test2json" }`. Such a result must box a golib `@string` (preserving Go string identity for a later `x.(string)` assertion), so `visitReturnStmt` renders the literal as `(@string)"…"u8` for an empty-interface result element:
 
+<!-- illustration: not converter output -->
 ```csharp
 internal static any Get(this ref chattyFlag f) {
     if (f.json) {

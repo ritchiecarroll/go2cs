@@ -76,6 +76,7 @@ spellings. `getProjectName` (`importOperations.go`) is the DECLARATION side: it 
 marker was elided by the first and kept by the second, so every reference to a `go2cs/…` path named a
 namespace that nothing emits, and such a package could not be imported at all:
 
+<!-- illustration: not converter output -->
 ```csharp
 // value.cs — the DECLARATION                    // external_test.cs — the IMPORT
 namespace go;                                    using harness = go2cs.convertedtestharness_package;
@@ -278,6 +279,7 @@ Guarded by `TestGorootVendoredReferenceNamesTheVendoredProject` (the vendored sp
 package macOS                                    // directory `macos`, package `macOS`
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 // the declaration side has always followed the package name
 namespace go.crypto.x509.@internal;
@@ -315,6 +317,7 @@ This is the same family as [the GOROOT-vendored reference](#a-goroot-vendored-re
 package foo                                      // both directories, one package name
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 // before: one fully qualified type for both, CS0433 in cmp's tests, which reference both
 namespace go.github.com.google.go_cmp.cmp.@internal.teststructs;
@@ -956,6 +959,7 @@ import (
     "BlankImportSideEffects/registry"
 )
 ```
+<!-- illustration: not converter output -->
 ```csharp
 // blank import: BlankImportSideEffects.jpeglike_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 // blank import: BlankImportSideEffects.pnglike_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
@@ -1019,6 +1023,7 @@ the enclosing type declarations **outward first**. A nested type sharing that id
 occludes the namespace for the whole class body — while the alias a few lines above keeps working, which
 is what makes the failure read like a converter regression somewhere else entirely:
 
+<!-- illustration: not converter output -->
 ```csharp
 using palette = image.color.palette_package;   // namespace scope — resolves
 
@@ -1131,6 +1136,7 @@ The remedy is one hook, seeded into `package_test_info.cs`'s anchor class by
 `referenceModelTestPackageInfoSeed`, using the same `RunModuleConstructor` mechanism as the import
 hooks:
 
+<!-- illustration: not converter output -->
 ```csharp
 [GoPackage("pprof")]
 public static partial class pprof_internal_test_package

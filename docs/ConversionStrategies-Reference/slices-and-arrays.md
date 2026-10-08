@@ -86,6 +86,7 @@ A **generic** named array type carries its type parameters (and their constraint
 ```go
 type table[T any] [3]atomic.Pointer[T]
 ```
+<!-- illustration: not converter output -->
 ```csharp
 partial struct table<T> /*[3]sync.atomic_package.Pointer<T>*/
     where T : new();
@@ -590,6 +591,7 @@ return, channel send, `append` element, range key/value, function/func-literal p
 receiver) clones a struct too. The struct declaration is stamped with the fields that need it, and
 go2cs-gen turns the stamp into the deep copy:
 
+<!-- illustration: not converter output -->
 ```csharp
 partial struct digest {
     internal array<uint32> h = new(8);
@@ -607,6 +609,7 @@ internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
 }
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 // generated (go2cs-gen StructTypeTemplate)
 internal partial struct digest : IGoValueClone

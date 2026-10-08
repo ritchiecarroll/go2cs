@@ -35,6 +35,7 @@ The deeper alternative — having the converter emit the access modifier on its 
 
 **Resolved (2026-07-25).** The blind spot above is closed at the root, without touching a single converted `.cs`: `package_info.cs` gains a **`TypeAccessibility`** section, emitted **inside the package class body** (its entries are type declarations, and the types they name are nested in that class), carrying one condensed single-line partial declaration per converter-emitted converted type:
 
+<!-- source: src/core/io/package_info.cs:88-146 -->
 ```csharp
 [GoPackage("io")]
 public static partial class io_package
@@ -80,6 +81,7 @@ That single criterion classifies the whole surface. Apart from the no-inline mar
 
 So the movable set is `[GoValueClone]` and `[GoLocalName]`, and both moved. `[GoValueClone("intbuf")] partial struct pp {` reads `partial struct pp {`, with the record in `package_info.cs` carrying the rest:
 
+<!-- source: src/tests/Behavioral/NestedFixedArrays/package_info.cs:67-71 -->
 ```csharp
     // <TypeAccessibility>
     [GoValueClone("grid")] internal partial struct holder {}
