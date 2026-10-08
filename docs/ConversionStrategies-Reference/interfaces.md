@@ -1133,10 +1133,10 @@ interface from a **directly imported** package (checked with `types.Implements`)
 emits real C# inheritance at the declaration and **skips re-declaring the covered members**
 (redeclaring would HIDE the base member — implementers would need both):
 
-<!-- illustration: not converter output -->
+<!-- source: src/core/io/fs/fs.cs:86-90 -->
 ```csharp
 partial interface File :
-    io_package.ReadCloser
+    io.ReadCloser
 {
     (FileInfo, error) Stat();
 }

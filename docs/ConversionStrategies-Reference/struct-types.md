@@ -113,12 +113,12 @@ The probe is now a recursive descent over the type-composing syntax — pointer,
 same helper, an anonymous interface) is found wherever it sits. The `AnonStructComposedTypes` golden
 shows the same shape lifting and its elements constructing normally:
 
-<!-- illustration: not converter output -->
+<!-- source: src/tests/Behavioral/AnonStructComposedTypes/main.cs.target:8-16 -->
 ```csharp
 partial struct ptrElemsᴛ1 /*dyn*/ {
     internal nint @in;
     internal @string str;
-    internal error error;
+    /*embed*/ internal error error;
 }
 internal static slice<ж<ptrElemsᴛ1>> ptrElems = new ж<ptrElemsᴛ1>[]{
     Ꮡ(new ptrElemsᴛ1(1, "one"u8, default!)),
