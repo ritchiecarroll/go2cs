@@ -9,7 +9,7 @@ Two mechanisms deliver this, chosen by granularity:
 * **Whole-file** (pre-existing): a hand-finished file marked `[module: GoManualConversion]` is never overwritten by the converter when it exists in place (`containsManualConversionMarker`), and is restored over auto output by the overlay on fresh (unseeded) reconversions. Right when the whole file is hand-owned (sync/atomic `type.cs`). The marked file's Go source is NOT dropped from conversion (2026-07-17 fix): it is still analyzed and visited with its package — its anonymous-struct lifts, package-var registrations, and other package-wide state must keep feeding the package's sibling files, or those emit corrupted (raw Go `struct{…}` text in selectors, package-var assignments re-declared as shadowing locals) — with emission redirected to a non-compiled `<name>.cs.auto` review sibling. Guarded by the `ManualConversionSiblingState` behavioral test.
 * **Type-level** (`go2cs/manualTypeOperations.go`): the `manualConversionTypes`/`manualConversionFuncs` registry (keyed by package path and raw Go names) makes the converter skip emitting the listed **type declarations**, every **method on those types**, listed **adjacent free functions** (`setGNoWB`), and **`GoImplicitConv` assembly attributes** referencing the types — each replaced by a marker comment pointing at the package's `*_impl.cs`. Right when the types live in a large file (runtime2.go) that must otherwise keep receiving converter improvements. Each `manualConversionFuncs` entry also carries a **platform scope** — see *Hand-owns have a platform* below.
 
-The hand implementation (`src/core/<pkg>/<file>_impl.cs`, e.g. `core/runtime/runtime2_impl.cs`) declares the same type/extension surface the auto call sites bind: value-receiver methods as `this T` extensions, pointer-receiver methods as `[GoRecv] this ref T`, and the conversion operators call sites need. For the guintptr family that surface is: `.ptr()` returns the stored box, `.set()` stores it, `.cas()` is a real `Interlocked.CompareExchange` on the reference slot (the Go original's `atomic.Casuintptr` maps to a throwing asm stub — the managed model makes it *work*), `== 0`/`= 0` bind zero-comparison/nil operators, and numeric escapes are deliberate and loud: converting a non-zero integer **panics** (a number can never faithfully become a managed reference), and converting *to* a number (print/`hex` diagnostics) yields a stable object-identity hash — an opaque token, never an address.
+The hand implementation (`src/core/<pkg>/<file>_impl.cs`, e.g. `core/runtime/runtime2_impl.cs`) declares the same type/extension surface the auto call sites bind: value-receiver methods as `this T` extensions, pointer-receiver methods as `this ref T`, and the conversion operators call sites need. For the guintptr family that surface is: `.ptr()` returns the stored box, `.set()` stores it, `.cas()` is a real `Interlocked.CompareExchange` on the reference slot (the Go original's `atomic.Casuintptr` maps to a throwing asm stub — the managed model makes it *work*), `== 0`/`= 0` bind zero-comparison/nil operators, and numeric escapes are deliberate and loud: converting a non-zero integer **panics** (a number can never faithfully become a managed reference), and converting *to* a number (print/`hex` diagnostics) yields a stable object-identity hash — an opaque token, never an address.
 
 One call-site emission cooperates (`convCallExpr.go`): a conversion **to** a manual type from an `unsafe.Pointer` — `guintptr(unsafe.Pointer(newg))` — unwraps the inner conversion and emits the referent-preserving ctor form `new Δguintptr(newg)` instead of the numeric cast chain `(Δguintptr)(uintptr)new @unsafe.Pointer(newg)`, which would lose the referent at the `(uintptr)` hop.
 
@@ -515,7 +515,7 @@ The whole table is now ONE list — `TypeExtensions.GetGoMethodSetEntries` — a
 `.Count`, so a size and an order can no longer be derived separately and disagree. It is built over
 `GetGoMethodSetCandidates`, the same candidate source `StructurallyImplements` and `AdapterBinder`
 resolve through, then: deduplicated by projected Go name (keeping the shape a delegate can bind —
-a `[GoRecv] this ref X` receiver cannot be a `Func<>` parameter, and the RecvGenerator's `ж<X>`
+a `this ref X` receiver cannot be a `Func<>` parameter, and the RecvGenerator's `ж<X>`
 overload always sits beside it), exported-only for a concrete type, and **sorted ORDINALLY by Go
 method name**, which is Go's own method-table order (verified against `go run`: a promoted embedded
 method sorts *in place*, it is not appended).
@@ -1524,7 +1524,7 @@ shape the converted corpus actually interns these agree:
 * **`ж<T>`** (`unique`'s own `map[*abi.Type]any`) implements `IEquatable<ж<T>>` as pointer IDENTITY with a
   matching identity hash, and `abi.TypeFor<T>()` interns one descriptor box per `System.Type` — so one Go
   type always presents one key, and a second `TypeFor` call finds the first call's entry.
-* **A `[GoType]` struct** — `net/netip`'s `addrDetail{isV6 bool; zoneV6 string}`, the shape `unique`
+* **A converted struct** — `net/netip`'s `addrDetail{isV6 bool; zoneV6 string}`, the shape `unique`
   actually interns — carries a generated field-wise `Equals` over `==` plus a `HashCode.Combine` of the
   same fields, which is Go's struct `==` exactly. It does **not** implement `IEquatable<T>`, so
   `EqualityComparer<T>.Default` routes through the `object` override; that lands on the same comparison, at
@@ -1964,7 +1964,7 @@ The gate is now `GoReflect.HasGoName`, the managed stand-in for `TFlagNamed`. It
 trimmed — the two disagreeing would let a type report a name it does not have, or hide one it does.
 False for exactly the arms that render Go structurally: the raw golib containers matched by open
 generic definition (`slice<>`/`array<>`/`map<,>`/`channel<>`/`ж<>`), `object` (`interface {}`),
-`EmptyStruct` (`struct {}`), an anonymous-struct lift (`[GoType("dyn")]` without a `[GoLocalName]`,
+`EmptyStruct` (`struct {}`), an anonymous-struct lift (`/*dyn*/` without a `[GoLocalName]`,
 which would make it a named function-local type), and the pointer-sourced adapter that stands for
 `*T`. True everywhere else — including the predeclared scalars, since Go's `int` IS a named type.
 
@@ -3485,7 +3485,7 @@ the chain is severed at the API boundary that does — the same severing rule th
 applied at `methodName`. `CallersFrames` itself is pure Go (slice bookkeeping) and stays auto.
 
 What makes the projection *semantically* faithful is the **Go-frame filter**: a managed frame counts
-only when it is a function the **Go source declares** — a free function or `[GoRecv]` receiver on a
+only when it is a function the **Go source declares** — a free function or `this ref` receiver on a
 `go.*` `<pkg>_package` class, a method on a struct nested in one, or a function literal (its compiler
 display class nests in the same scope). go2cs **dispatch machinery is invisible**, exactly as Go's
 interface dispatch adds no frame: generated adapter shells (any `IGoAdapter`) and go2cs-gen's
@@ -4036,7 +4036,7 @@ The mint carries five things, and each answers exactly one downstream reader:
 
 | Emitted | Read by | Why it cannot be dropped |
 |:--|:--|:--|
-| `[GoType("dyn")]` on the type | `HasGoName`, `GoTypeName` | a `StructOf` result is a Go ANONYMOUS struct: `Name()` must be `""` and `String()` must render structurally |
+| `/*dyn*/` on the type | `HasGoName`, `GoTypeName` | a `StructOf` result is a Go ANONYMOUS struct: `Name()` must be `""` and `String()` must render structurally |
 | a **parameterless constructor** seeding every array-kinded field | `GoReflect.FieldArrayDims` | an array field's Go LENGTH |
 | `[GoTag("…")]` on a field | `goTagOf` | `StructField.Tag` |
 | `[GoArrayDims]` / `[GoMapKeyDims]` on a field | `FieldStampedDims` / `FieldMapKeyDims` | the pointer-hop and map hops |

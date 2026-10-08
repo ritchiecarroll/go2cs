@@ -85,7 +85,7 @@ nint secondsEastOfUTC = (nint)(28800000000000L).Seconds();   // CS1929 — long 
 The compile error is the loud half; the silent half is `d`, which is now a `long` and prints as its
 digit count where a `Duration` prints `8h0m0s`. The fold now carries the named type in the same
 parenthesized `(T)(…)` shape the native-int arm uses — `(time.Duration)(28800000000000L)` — which
-`wholeExprIsCastOfType` already recognizes, so enclosing paths do not re-wrap it. The `[GoType]` wrapper
+`wholeExprIsCastOfType` already recognizes, so enclosing paths do not re-wrap it. The generated wrapper
 converts implicitly from its underlying, so the cast is always legal, and Go's own parentheses around a
 method-call receiver keep the postfix `.M()` binding to the cast rather than to the literal. Only
 constants outside `int32` reach this arm at all, so the corpus footprint is the handful of computed

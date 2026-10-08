@@ -173,7 +173,7 @@ The decision is made in the literal pre-pass (`collectLocalConsts`), and the fun
 
 ## Named string types
 
-`type Token string` becomes a `[GoType("@string")]` wrapper struct. The `InheritedType` template gives it the string surface, since C# indexing and `+` do not apply user-defined conversions:
+`type Token string` becomes a `/*@string*/` wrapper struct. The `InheritedType` template gives it the string surface, since C# indexing and `+` do not apply user-defined conversions:
 - `byte this[int]` and `this[nint]` indexers;
 - a `Range` indexer that returns the wrapper, so a sub-slice keeps the named type;
 - `nint Length` for `len`;

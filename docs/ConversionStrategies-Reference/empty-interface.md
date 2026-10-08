@@ -220,7 +220,7 @@ all classified by one rule. Whether the rendering is a wrapper struct comes from
 `Info.Uses`) to a `*types.Const` whose **OWN** declared type is `UntypedInt`/`UntypedRune`/
 `UntypedFloat` — `info.Types[arg]` cannot answer this, since it reports plain `int` for a literal and a
 named untyped const alike. A defined-type-over-int constant (`type MyInt int`) is excluded (its box is
-the `[GoType]` wrapper, asserted as `MyInt`). Call arguments reuse the per-argument `castArgToType`
+the generated wrapper, asserted as `MyInt`). Call arguments reuse the per-argument `castArgToType`
 plumbing; the other positions wrap through `boxUntypedConstAsDefaultType`.
 
 **Deliberate exclusions and known residues:**

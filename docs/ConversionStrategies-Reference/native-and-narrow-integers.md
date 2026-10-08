@@ -153,7 +153,7 @@ own parentheses once its content is a cast: `(a+a)/2` becomes `(int8)((int8)(a +
 itself reaches a typed consumer. The one exception is a guarded shift's receiver, which is parenthesized
 again because a cast binds looser than the `.Rsh(n)` member access.
 
-**Not covered here.** A named narrow type (`type T uint8`) is excluded: its `[GoType]` wrapper operators already
+**Not covered here.** A named narrow type (`type T uint8`) is excluded: its generated wrapper operators already
 cast back. So are the operators whose emission already narrows its whole result: `& | ^ &^`, a native
 `<<`, a guarded `>>` or `<<`, and an unsigned unary `^`. So is a constant expression, which cannot overflow its type in Go (and whose cast would be
 CS0221). A named interface declared inline, `type I interface{}`, rejects every basic value, narrow or not,

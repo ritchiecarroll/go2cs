@@ -284,8 +284,8 @@ pointer-identity flavor, and the protocol membership itself.)
 
 ## Named map types and constrained map access
 
-A defined map type — `type Grades map[string]int` — emits the `[GoType("map[K, V]")] partial struct` forward declaration (completing the long-standing `visitMapType` stub), implemented by go2cs-gen's Map template: full forwarding of `IMap<K, V>` (including the two-value comma-ok indexer), `IDictionary<K, V>`, enumeration, and the `ISupportMake` factory through the wrapped `map<K, V>`. Its composite literal wraps the concrete map literal in the named constructor — `new Grades(new map<@string, nint>{["a"u8] = 1})` — mirroring named arrays/slices (a direct indexer-initializer would target a default wrapper with no backing dictionary; the old emission produced Go-style `key: value` inside C# braces — CS1513). Comma-ok indexing works through a **constrained map type parameter** too: `v, ok := m[k]` where `M ~map[K]V` detects the map CORE of the constraint (both at the assignment's tuple gate and in the index emission) and routes the same `m[k, ꟷ]` two-value indexer, which lives on `IMap<K, V>` itself. The **nil comparison** `m == nil` — Go's only legal map comparison, maps.Clone's nil-preserve guard — emits the `IMap.IsNil` property (`if (m.IsNil)`; backing-store null, distinct from an allocated empty map — no operator exists on a type parameter, CS8761), and `delete(m, k)` on a constrained map binds a golib `delete(IMap<K, V>, K)` overload (key/value types infer from the interface conversion). (Guarded by the `GenericTypeInference` extension `EqualMaps` — a maps.Equal clone over a named map type through the constraint, comma-ok + comparable-erased equality, values vs Go.)
-For source-generated named-map wrappers, the generator parses the `[GoType("map[K, V]")]` payload at the top-level comma, not every comma in the string. This matters for function-valued maps: `type opTable map[CrossPkgLib.Ticks]func(int, int) int` emits `map<global::go.CrossPkgLib_package.Ticks, Func<nint, nint, nint>>`, preserving the full delegate as the value type. Any source-file alias used inside the `[GoType]` payload is resolved through Roslyn and rewritten to its fully-qualified target before the template emits `IMap<K, V>`, `IDictionary<K, V>`, and `ICollection<KeyValuePair<K, V>>`; generated files therefore do not depend on file-local package aliases such as `using token = ...`. (Guarded by `NamedMapCrossPkgKey`.)
+A defined map type — `type Grades map[string]int` — emits the `partial struct … /*map[K, V]*/` forward declaration (completing the long-standing `visitMapType` stub), implemented by go2cs-gen's Map template: full forwarding of `IMap<K, V>` (including the two-value comma-ok indexer), `IDictionary<K, V>`, enumeration, and the `ISupportMake` factory through the wrapped `map<K, V>`. Its composite literal wraps the concrete map literal in the named constructor — `new Grades(new map<@string, nint>{["a"u8] = 1})` — mirroring named arrays/slices (a direct indexer-initializer would target a default wrapper with no backing dictionary; the old emission produced Go-style `key: value` inside C# braces — CS1513). Comma-ok indexing works through a **constrained map type parameter** too: `v, ok := m[k]` where `M ~map[K]V` detects the map CORE of the constraint (both at the assignment's tuple gate and in the index emission) and routes the same `m[k, ꟷ]` two-value indexer, which lives on `IMap<K, V>` itself. The **nil comparison** `m == nil` — Go's only legal map comparison, maps.Clone's nil-preserve guard — emits the `IMap.IsNil` property (`if (m.IsNil)`; backing-store null, distinct from an allocated empty map — no operator exists on a type parameter, CS8761), and `delete(m, k)` on a constrained map binds a golib `delete(IMap<K, V>, K)` overload (key/value types infer from the interface conversion). (Guarded by the `GenericTypeInference` extension `EqualMaps` — a maps.Equal clone over a named map type through the constraint, comma-ok + comparable-erased equality, values vs Go.)
+For source-generated named-map wrappers, the generator parses the `/*map[K, V]*/` payload at the top-level comma, not every comma in the string. This matters for function-valued maps: `type opTable map[CrossPkgLib.Ticks]func(int, int) int` emits `map<global::go.CrossPkgLib_package.Ticks, Func<nint, nint, nint>>`, preserving the full delegate as the value type. Any source-file alias used inside the `[GoType]` payload is resolved through Roslyn and rewritten to its fully-qualified target before the template emits `IMap<K, V>`, `IDictionary<K, V>`, and `ICollection<KeyValuePair<K, V>>`; generated files therefore do not depend on file-local package aliases such as `using token = ...`. (Guarded by `NamedMapCrossPkgKey`.)
 
 The named arm must also **carry the map type into the key/value slot emission**, exactly as the
 unnamed arm does. Every `MapSource` slot rule in `convKeyValueExpr` is gated on that type: a pointer
@@ -352,7 +352,7 @@ impl sent through a `chan speaker`, method-dispatched on receive, output-compare
 ## Named channel types
 
 A defined channel type — `type closeWaiter chan struct{}` (net/http's h2 bundle) — emits the
-`[GoType("chan T")] partial struct` forward declaration (completing the long-standing
+`partial struct … /*chan T*/` forward declaration (completing the long-standing
 `visitChanType` stub; the whole corpus previously had NO `GoType("chan …")` — CS0246 at every use),
 implemented by go2cs-gen's Channel template: the wrapper holds a `channel<T>` and forwards its full
 surface — the Go-visual send/receive members (`ᐸꟷ`, `ꟷᐳ`, including the select-registration
@@ -434,7 +434,7 @@ and `GenericInheritedShellConstructorTests` on the generated constructors.)
 ## A function-LOCAL named type declaration hoists to member level (slice/map/channel/array/pointer)
 
 C# forbids a type declaration inside a method body, so a `type X []T` / `type X map[K]V` /
-`type X chan T` / `type X [N]T` declared **inside a function** cannot emit its `[GoType(…)] partial
+`type X chan T` / `type X [N]T` declared **inside a function** cannot emit its `partial
 struct X;` forward declaration in place — the following statements would then parse as MEMBER
 declarations (`CS1519 Invalid token 'foreach' in a member declaration`, `CS1513 } expected`, the
 map form's `CS8124`). A local `type X struct{…}` already hoists: `visitStructType`/`visitIdent`/
@@ -467,7 +467,7 @@ Two completions of the same rule, both demonstrated by `encoding/gob`'s test sui
 * **A SELF-REFERENTIAL local type re-resolves its element after the hoist.** The array/map/channel
   emitters resolved the element/key/value name *before* the declaration's own hoist registered its
   lifted name, so `type recursiveSlice []recursiveSlice` / `type recursiveMap
-  map[string]recursiveMap` (gob's `encoder_test.go`) emitted `[GoType("[]recursiveSlice")]` on a
+  map[string]recursiveMap` (gob's `encoder_test.go`) emitted `/*[]recursiveSlice*/` on a
   member-level `TestRecursiveSliceType_recursiveSlice` — a name that no longer exists, `CS0246`
   inside the generated slice/map partial. Each emitter now re-resolves its element through
   `liftedTypeMap` **when the hoist actually renamed the declaration**; a package-level declaration
