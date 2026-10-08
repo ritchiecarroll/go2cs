@@ -27,6 +27,7 @@ public static partial class GoReflect
     // The per-delegate-type factory for a variadic func delegate -- the reverse of
     // buildVariadicInvoker. Mirrors its type-argument extraction exactly (the family's type
     // arguments ARE the delegate's own parameter types), then closes the matching make-trampoline.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2060", Justification = GoTypeRegistry.RegisteredGenericJustification)]
     internal static Func<Func<object?[], object?>, Delegate> BuildVariadicMakeFactory(
         Type delegateType, MethodInfo invoke, ParameterInfo[] parameters)
     {

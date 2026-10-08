@@ -63,6 +63,7 @@ internal static class GoFieldMetadata
     /// <exception cref="InvalidOperationException">
     /// <paramref name="type"/> is a value type that occupies storage and reports no instance field.
     /// </exception>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     internal static FieldInfo[] InstanceFields(Type type)
     {
         FieldInfo[] fields = type == WithheldForTest ? [] : type.GetFields(InstanceFieldFlags);

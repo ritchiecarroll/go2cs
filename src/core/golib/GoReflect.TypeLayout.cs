@@ -739,6 +739,7 @@ public static partial class GoReflect
 
     // The `m_value` of a named slice-of-ARRAY wrapper, or null for every other type: a single instance
     // field of that name whose type is a slice<E> (the only ISliceBacking) with an array element.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static FieldInfo? namedSliceValueField(Type type)
     {
         return s_namedSliceValueFields.GetOrAdd(type, static t =>
@@ -890,6 +891,7 @@ public static partial class GoReflect
     /// <see cref="FieldChanDir"/>, which recovers a channel field's direction the same way and is
     /// untouched by this.
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2067", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     public static nint[]? FieldArrayDims(Type declaringType, FieldInfo field)
     {
         if (FieldStampedDims(field) is { Length: > 0 } stamped)
@@ -1221,6 +1223,7 @@ public static partial class GoReflect
     /// (<c>= channel&lt;@string&gt;.SendOnly</c>) that the generated parameterless constructor runs,
     /// which is the same route <see cref="FieldArrayDims"/> takes for an array field's length.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2067", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     public static GoChanDir FieldChanDir(Type declaringType, FieldInfo field)
     {
         if (!declaringType.IsValueType)
@@ -1262,6 +1265,7 @@ public static partial class GoReflect
     }
 
     /// <summary>The cargo of a channel-typed STRUCT FIELD, off the declaring struct's cached zero instance: the <c>typeTests</c> position.</summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2067", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     public static ChanCargo? FieldChanCargo(Type declaringType, FieldInfo field)
     {
         if (!declaringType.IsValueType)
@@ -1379,6 +1383,7 @@ public static partial class GoReflect
 
     // Go's result list as ONE managed return type: none is void, one is itself, and several are the
     // ValueTuple the converter already returns from a multi-result func.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2055", Justification = GoTypeRegistry.RegisteredGenericJustification)]
     private static Type makeGoResultType(Type[] outs)
     {
         // Each definition is named by `typeof` AT its MakeGenericType call: the trim analyzer can
@@ -1564,6 +1569,8 @@ public static partial class GoReflect
         return invoker.Call(bound, fixedArgs, tail);
     }
 
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2055", Justification = GoTypeRegistry.RegisteredGenericJustification)]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2060", Justification = GoTypeRegistry.RegisteredGenericJustification)]
     private static VariadicInvoker buildVariadicInvoker(Type delegateType)
     {
         MethodInfo? invoke = delegateType.GetMethod("Invoke");

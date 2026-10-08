@@ -40,6 +40,7 @@ internal static class GoLayoutFacts<T>
     /// <summary>Whether a native view over <typeparamref name="T"/> would stride differently from Go.</summary>
     internal static readonly bool SizeDiverges = Diverges(typeof(T), 0);
 
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static bool Diverges(Type type, int depth)
     {
         if (depth > 16 || !type.IsValueType || type.IsPrimitive || type.IsEnum || type.IsPointer)

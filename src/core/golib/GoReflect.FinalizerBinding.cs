@@ -232,6 +232,7 @@ public static partial class GoReflect
     /// fail to convert, which is the shape of the defect this whole file replaces.
     /// </para>
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static bool tryPointeeOf(Type? t, out Type? pointee, out bool unnamed)
     {
         pointee = null;

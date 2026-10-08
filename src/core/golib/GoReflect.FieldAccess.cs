@@ -381,6 +381,7 @@ public static partial class GoReflect
         });
     }
 
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static void collectGoFields(Type t, FieldInfo[] prefixPath, bool[] prefixHops, List<GoFieldInfo> result)
     {
         FieldInfo[] fields = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
@@ -467,6 +468,7 @@ public static partial class GoReflect
     // struct's metadata order IS declaration order (the converter declares every field inline),
     // and a struct with no matching constructor keeps metadata order — today's behavior, never a
     // half-applied guess.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static void reorderToGoDeclarationOrder(Type t, List<GoFieldInfo> result, int first)
     {
         int count = result.Count - first;
@@ -560,6 +562,7 @@ public static partial class GoReflect
     // The property is the DECLARATION, so it is asked first (its attribute, then the record naming it);
     // the field keeps the fallback so a future generator that does propagate the attribute needs no
     // change here.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static string embedTagOf(Type declaringType, FieldInfo field, string goName)
     {
         PropertyInfo? declaration = declaringType.GetProperty(goName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);

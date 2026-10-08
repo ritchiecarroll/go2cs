@@ -44,6 +44,9 @@ internal class AdapterImplTemplate : TemplateBase
     public string TypeParameters = "";
     public string ConstraintClause = "";
 
+    // `<Point>` as an open generic's `<>`, `<K, V>` as `<,>`: the adapter's own definition, for typeof.
+    private string OpenTypeParameters => TypeParameters.Length == 0 ? "" : $"<{new string(',', TypeParameters.Split(',').Length - 1)}>";
+
     // Maps an interface member's simple name to its forwarding receiver expression:
     // "m_box" when the struct method binds on the box (direct-ж primary form, or a
     // pointer-receiver ref extension whose RecvGenerator ж-twin exists), or "m_box.Value" for
@@ -80,6 +83,8 @@ internal class AdapterImplTemplate : TemplateBase
                  // Box): the interface value keeps its Go dynamic type, typed-nil equality holds
                  // across the any/interface boundary, and `case *T:` matches with a nil pointee —
                  // Go's interface-holding-nil-pointer semantics. See ж<T>.NilBox.
+                 // The dependency registers this adapter for trimming (golib's GoTypeRegistry) whenever it is constructed.
+                 {{string.Format(AdapterRegistration, AdapterName + OpenTypeParameters)}}
                  public {{AdapterName}}(ж<{{StructName}}> box) => m_box = box ?? ж<{{StructName}}>.NilBox;
 
                  public object? Box => m_box;{{RegistryInitialization}}

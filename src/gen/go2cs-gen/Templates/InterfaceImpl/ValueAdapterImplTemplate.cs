@@ -60,6 +60,8 @@ internal class ValueAdapterImplTemplate : TemplateBase
              {
                  private readonly {{StructName}} m_value;
 
+                 // The dependency registers this adapter for trimming (golib's GoTypeRegistry) whenever it is constructed.
+                 {{string.Format(AdapterRegistration, AdapterName)}}
                  public {{AdapterName}}({{StructName}} value) => m_value = value;
 
                  // The Go DYNAMIC TYPE of this interface value is the wrapped struct, never this

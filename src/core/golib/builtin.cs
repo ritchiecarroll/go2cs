@@ -1999,6 +1999,7 @@ public static partial class builtin
             };
         }
 
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
         private static int Classify(Type type)
         {
             if (type == typeof(double))
@@ -3450,6 +3451,7 @@ public static partial class builtin
     /// machinery emitted <c>_&lt;T&gt;</c> sites use, so reflection and direct asserts can never
     /// disagree about a method set. See docs/phase4/DESIGN-reflection-bridge.md.
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2060", Justification = GoTypeRegistry.RegisteredGenericJustification)]
     public static bool TryTypeAssert(object? target, Type type, [NotNullWhen(true)] out object? value)
     {
         MethodInfo closedAssert = s_tryTypeAssertByType.GetOrAdd(type, static assertedType =>

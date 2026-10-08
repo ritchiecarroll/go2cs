@@ -24,6 +24,7 @@ public static partial class GoReflect
     /// against the member it names when first read: a record naming a member the type does not declare, or one
     /// that cannot hold its fact, is refused BY NAME rather than applied.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     internal static GoMemberRecordAttribute[] MemberRecords(Type type) =>
         s_memberRecords.GetOrAdd(type, static declaring =>
         {

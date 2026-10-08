@@ -688,6 +688,7 @@ public static partial class GoReflect
 
     // One family rung instantiated, with the SAME loud refusal the BCL arm raises — a parameter a
     // generic family cannot take is exactly what MakeGenericType rejects here.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2055", Justification = GoTypeRegistry.RegisteredGenericJustification)]
     private static Type InstantiateFamily(Type family, Type[] arguments, Type[] parameterTypes, Type returnType)
     {
         try
