@@ -1480,6 +1480,16 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 			if model == testProjectWhiteboxReference {
 				metadataAnchorClassPrefix = internalAnchor
 				metadataAnchorLocalTypes = true
+
+				// The bridge is this file's first class, so its attribute-only partials land here
+				// (packageBridgeTypeAccess); a line recorded for any other class is refused by name.
+				bridgeAccess, err := bridgeTypeAccessFor(internalBridgeName)
+
+				if err != nil {
+					return result, err
+				}
+
+				packageEmittedTypeAccess.UnionWithSet(bridgeAccess)
 			}
 			writePackageInfoFile(testInfoPath, true)
 		}
@@ -3651,11 +3661,20 @@ func writeWhiteboxVariantMetadata(testInfoPath, outputPath, productionClassName,
 			}
 		}
 
+		// The bridge's types keep their accessibility on the declaration; what they would otherwise
+		// carry inline rides attribute-only partials in this unit, whose first class is the bridge
+		// (packageBridgeTypeAccess). A line recorded for any other class is refused by name.
+		bridgeAccess, err := bridgeTypeAccessFor(bridgeClassName)
+
+		if err != nil {
+			return "", err
+		}
+
 		savedImported, savedExported := importedTypeAliases, exportedTypeAliases
 		savedAccess := packageEmittedTypeAccess
 		importedTypeAliases = map[string]string{}
 		exportedTypeAliases = map[string]string{}
-		packageEmittedTypeAccess = hashset.HashSet[string]{}
+		packageEmittedTypeAccess = bridgeAccess
 
 		bridgeAnchored.install()
 		metadataAnchorClassPrefix = internalAnchor
