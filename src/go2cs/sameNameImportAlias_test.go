@@ -112,9 +112,9 @@ func main() {
 	}
 
 	// A defined type over an ambiguous alias renders its underlying through the FULLY qualified
-	// renderer (getFullyQualifiedTypeName's twin of the alias-qualified arm): its [GoType] must name
+	// renderer (getFullyQualifiedTypeName's twin of the alias-qualified arm): its definition must name
 	// a/foo's target, not the shared key `foo.Alias` that no `global using` declares.
-	if want := `[GoType("global::go.example.com.samename.a.foo_package.Inner")] partial struct D;`; !strings.Contains(mainCs, want) {
+	if want := `partial struct D /*global::go.example.com.samename.a.foo_package.Inner*/;`; !strings.Contains(mainCs, want) {
 		t.Errorf("missing the fully qualified alias target %q in:\n%s", want, mainCs)
 	}
 

@@ -40,14 +40,19 @@ public class TypeGenerator : ISourceGenerator
             Debugger.Launch();
     #endif
 
-        // Register to find "GoTypeAttribute" on type declarations
-        context.RegisterForSyntaxNotifications(() => new AttributeFinder<BaseTypeDeclarationSyntax>(FullAttributeName));
+        // Register to find the Go type declarations: "GoTypeAttribute" on a type declaration, or a
+        // converted Go type the converter no longer marks (see GoTypeDeclarationFinder)
+        context.RegisterForSyntaxNotifications(() => new GoTypeDeclarationFinder(FullAttributeName));
     }
 
     public void Execute(GeneratorExecutionContext context)
     {
-        if (context.SyntaxContextReceiver is not AttributeFinder<BaseTypeDeclarationSyntax> { HasAttributes: true } attributeFinder)
+        if (context.SyntaxContextReceiver is not GoTypeDeclarationFinder { HasTargets: true } goTypeFinder)
             return;
+
+        // A hand-owned package opts out of the converted-Go-type rule as a whole: inside one, a type
+        // is a Go type only by its [GoType] attribute.
+        bool handOwned = IsHandOwnedAssembly(context.Compilation);
 
         HashSet<string> emittedHintNames = new(StringComparer.OrdinalIgnoreCase);
 
@@ -57,10 +62,30 @@ public class TypeGenerator : ISourceGenerator
         // answer one assembly's question with another's answer.
         Dictionary<string, bool> needsConstructionCache = new(StringComparer.Ordinal);
 
-        foreach ((BaseTypeDeclarationSyntax targetSyntax, List<AttributeSyntax> attributes) in attributeFinder.TargetAttributes)
+        // The types found by rule this Execute has generated for (see the byRule gate below).
+        HashSet<ISymbol> ruleSelectedTypes = new(SymbolEqualityComparer.Default);
+
+        foreach ((BaseTypeDeclarationSyntax targetSyntax, List<AttributeSyntax> attributes, bool byRule) in goTypeFinder.Targets)
         {
+            if (byRule && handOwned)
+                continue;
+
             SyntaxTree syntaxTree = targetSyntax.SyntaxTree;
             SemanticModel semanticModel = context.Compilation.GetSemanticModel(syntaxTree);
+
+            // A type found by rule is generated ONCE, and not at all when another of its declarations
+            // carries [GoType] (a hand-written partial's opt-in): that declaration is this generator's
+            // target already, and a second pass would emit every member twice.
+            if (byRule)
+            {
+                ISymbol? typeSymbol = semanticModel.GetDeclaredSymbol(targetSyntax);
+
+                if (typeSymbol is null || !ruleSelectedTypes.Add(typeSymbol))
+                    continue;
+
+                if (typeSymbol.DeclaringSyntaxReferences.Any(reference => reference.GetSyntax() is BaseTypeDeclarationSyntax declaration && declaration.HasGoTypeAttribute()))
+                    continue;
+            }
 
             string packageNamespace = targetSyntax.GetNamespaceName();
             string packageClassName = targetSyntax.GetParentClassName();
@@ -90,21 +115,21 @@ public class TypeGenerator : ISourceGenerator
             // (see GoValueCloneAttribute / StructTypeTemplate.ValueCloneImplementation).
             string[] valueCloneFields = GetValueCloneFields(targetSyntax, semanticModel);
 
-            foreach (AttributeSyntax attribute in attributes)
+            // A converted Go type found by rule reads as a plain [GoType] (an empty definition), and its
+            // generated part re-emits the attribute so reflection sees what it saw when the converter
+            // wrote it. No declaration of it carries one (checked above), so this is the only one.
+            bool emitGoTypeAttribute = byRule;
+
+            // A directional channel's comment (`/*<-chan T*/`) dispatches as `chan T`, its direction re-emitted
+            // beside the attribute (Common.NormalizeChanDefinition); "" for every other definition.
+            string chanDir = "";
+
+            (Location location, string typeDefinition)[] definitions = byRule ?
+                [(targetSyntax.Identifier.GetLocation(), Common.NormalizeChanDefinition(targetSyntax.GetDefinitionComment(), out chanDir) ?? string.Empty)] :
+                attributes.Select(attribute => (attribute.GetLocation(), GetTypeDefinition(attribute))).ToArray();
+
+            foreach ((Location attributeLocation, string typeDefinition) in definitions)
             {
-                // Get the attribute's argument values
-                (string _, string value)[] arguments = attribute.GetArgumentValues();
-
-                // Get the attribute's first constructor argument value, the type definition
-                string typeDefinition = string.Empty;
-
-                if (arguments.Length > 0)
-                {
-                    string value = arguments[0].value;
-                    
-                    if (!string.IsNullOrWhiteSpace(value) && value.Length > 2)
-                        typeDefinition = value[1..^1].Trim();
-                }
 
                 string generatedSource, typeName;
 
@@ -114,6 +139,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new StructTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             Scope = scope,
                             Context = context,
@@ -155,6 +182,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             ObjectName = identifier,
                             Scope = scope,
@@ -175,6 +204,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             Scope = scope,
                             ObjectName = identifier,
@@ -197,6 +228,9 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
+                            GoChanDir = chanDir,
                             PackageName = packageName,
                             ObjectName = identifier,
                             Scope = scope,
@@ -219,6 +253,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             ObjectName = identifier,
                             ReadOnlyValue = false,
@@ -240,6 +276,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             ObjectName = identifier,
                             Scope = $"{scope} readonly",
@@ -393,6 +431,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             ObjectName = identifier,
                             Scope = scope,
@@ -452,6 +492,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InterfaceTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             Scope = scope,
                             InterfaceName = identifier,
@@ -474,6 +516,8 @@ public class TypeGenerator : ISourceGenerator
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
                             PackageName = packageName,
                             ObjectName = identifier,
                             ObjectKind = "class",
@@ -493,7 +537,7 @@ public class TypeGenerator : ISourceGenerator
                         // compilation lost its generated members with it. An ERROR, not a skip: a type
                         // missing its generated members (constructors, operators, the forwarders golib
                         // reads a method set from) could otherwise leave a green build wrong at run time.
-                        context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, attribute.GetLocation(),
+                        context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, attributeLocation,
                             $"[{AttributeName}] on {targetSyntax.GetType().Name} \"{identifier}\"", "the TypeGenerator generates for structs, interfaces and pointer classes only"));
                         continue;
                 }
@@ -668,6 +712,20 @@ public class TypeGenerator : ISourceGenerator
         return structSymbol.GetMembers("Equals").OfType<IMethodSymbol>().Any(method =>
             !method.IsImplicitlyDeclared && method.Parameters.Length == 1 &&
             SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, structSymbol));
+    }
+
+    // The type definition a [GoType] attribute carries as its first constructor argument, or empty for a
+    // plain [GoType].
+    private static string GetTypeDefinition(AttributeSyntax attribute)
+    {
+        (string _, string value)[] arguments = attribute.GetArgumentValues();
+
+        if (arguments.Length == 0)
+            return string.Empty;
+
+        string value = arguments[0].value;
+
+        return !string.IsNullOrWhiteSpace(value) && value.Length > 2 ? value[1..^1].Trim() : string.Empty;
     }
 
     private static string[] GetValueCloneFields(BaseTypeDeclarationSyntax targetSyntax, SemanticModel semanticModel)
@@ -856,28 +914,9 @@ public class TypeGenerator : ISourceGenerator
     // GoType attribute or no argument.
     private static string? GetGoTypeDefinition(StructDeclarationSyntax structDeclaration)
     {
-        foreach (AttributeListSyntax attributeList in structDeclaration.AttributeLists)
-        {
-            foreach (AttributeSyntax attribute in attributeList.Attributes)
-            {
-                string name = attribute.Name.ToString();
+        string? definition = structDeclaration.GetGoTypeDefinitionText();
 
-                if (name != AttributeName && name != $"{AttributeName}Attribute")
-                    continue;
-
-                (string _, string value)[] arguments = attribute.GetArgumentValues();
-
-                if (arguments.Length > 0)
-                {
-                    string value = arguments[0].value;
-
-                    if (!string.IsNullOrWhiteSpace(value) && value.Length > 2)
-                        return value[1..^1].Trim();
-                }
-            }
-        }
-
-        return null;
+        return string.IsNullOrWhiteSpace(definition) ? null : definition;
     }
 
     // METADATA counterpart to the overload above: reads a foreign symbol's own [GoType] attribute

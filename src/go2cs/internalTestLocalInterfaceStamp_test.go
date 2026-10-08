@@ -84,8 +84,8 @@ func TestAnInternalTestLocalInterfaceCarriesItsLocalNameStamp(t *testing.T) {
 		t.Errorf("converted bridge code still carries [GoLocalName]:\n%s", testCs)
 	}
 
-	if !strings.Contains(testCs, `[GoType("dyn")] internal partial interface TestLocalEmbeddedInterface_Inner`) ||
-		!strings.Contains(testCs, `[GoType("dyn")] internal partial struct TestLocalEmbeddedInterface_Outer`) {
+	if !strings.Contains(testCs, `internal partial interface TestLocalEmbeddedInterface_Inner /*dyn*/`) ||
+		!strings.Contains(testCs, `internal partial struct TestLocalEmbeddedInterface_Outer /*dyn*/`) {
 		t.Errorf("the lifts must keep their declarations and accessibility:\n%s", testCs)
 	}
 

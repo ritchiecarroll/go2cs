@@ -67,6 +67,7 @@
     <None Include="$(MSBuildThisFileDirectory)cgoUnsafeArgsLift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDynamicImports_test.go" />
     <None Include="$(MSBuildThisFileDirectory)chainedCallScaling_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)chanDirComment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)chanDirectionCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)childEnvGo2CSPath_test.go" />
     <None Include="$(MSBuildThisFileDirectory)collapsedLambdaTrailingComment_test.go" />
@@ -176,6 +177,7 @@
     <None Include="$(MSBuildThisFileDirectory)go.sum" />
     <None Include="$(MSBuildThisFileDirectory)goFrameOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)goStmtReceiverBoxMethodGroup_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)goTypeMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goModFile.go" />
@@ -430,6 +432,7 @@
     <None Include="$(MSBuildThisFileDirectory)transitiveAliasRename_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeAccessibilityInterface_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeAccessibilityOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)typeAccessibilityProse_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typedNilInterfaceBoxing.go" />
     <None Include="$(MSBuildThisFileDirectory)typedNilUnsafePointer_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeNameResolution.go" />

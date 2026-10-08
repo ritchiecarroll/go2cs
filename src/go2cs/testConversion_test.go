@@ -4212,7 +4212,7 @@ func TestTestVariantPinsProductionLiftedTypeNames(t *testing.T) {
 
 	unseededCs := readConvertedTestFile(t, unseeded, "value_test.cs")
 
-	if !strings.Contains(unseededCs, "partial struct "+baseName+" {") {
+	if !strings.Contains(unseededCs, "partial struct "+baseName+" /*dyn*/ {") {
 		t.Fatalf("an unseeded lift must claim the base name %q:\n%s", baseName, unseededCs)
 	}
 
@@ -4227,10 +4227,10 @@ func TestTestVariantPinsProductionLiftedTypeNames(t *testing.T) {
 
 	seededCs := readConvertedTestFile(t, seeded, "value_test.cs")
 
-	if strings.Contains(seededCs, "partial struct "+baseName+" {") {
+	if strings.Contains(seededCs, "partial struct "+baseName+" /*dyn*/ {") {
 		t.Fatalf("a test-side lift must not re-declare the production-pinned name %q:\n%s", baseName, seededCs)
 	}
-	if !strings.Contains(seededCs, "partial struct "+steppedName+" {") {
+	if !strings.Contains(seededCs, "partial struct "+steppedName+" /*dyn*/ {") {
 		t.Fatalf("the test-side lift must step to %q:\n%s", steppedName, seededCs)
 	}
 }

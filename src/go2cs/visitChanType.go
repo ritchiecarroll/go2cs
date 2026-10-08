@@ -64,8 +64,9 @@ func (v *Visitor) visitChanType(chanType *ast.ChanType, identType types.Type, na
 	// walks the UNDERLYING channel (chanDirChain refuses a Named type by design); a bidirectional type
 	// stamps nothing, so no existing emission moves (census: production 0 named directional channel types).
 	dirAttr := ""
+	chain := chanDirChain(identType.Underlying())
 
-	if chain := chanDirChain(identType.Underlying()); len(chain) > 0 {
+	if len(chain) > 0 {
 		members := make([]string, len(chain))
 
 		for i, dir := range chain {
@@ -75,7 +76,25 @@ func (v *Visitor) visitChanType(chanType *ast.ChanType, identType types.Type, na
 		dirAttr = "[GoChanDir(" + strings.Join(members, ", ") + ")] "
 	}
 
-	v.writeStringLn(target, "%s[GoType(\"chan %s\")] %s%spartial struct %s%s%s;", localName, rootGoTypeDescriptor(elemType), dirAttr, access, getSanitizedIdentifier(name), typeParams, constraints)
+	goTypeAttr, goTypeComment := goTypeMarker(fmt.Sprintf("chan %s", rootGoTypeDescriptor(elemType)))
+
+	// Face-lift row 3 (docs/PLAN-marker-comment-parity.md §11): a direction on the OUTERMOST level only rides
+	// the definition comment, spelled as Go spells it -- `partial struct R /*<-chan T*/;` -- in place of
+	// [GoChanDir]; go2cs-gen reads it back as `chan T` and re-emits both attributes on its generated part
+	// (Common.NormalizeChanDefinition). A NESTED chain has no such spelling over the C# element, and a
+	// definition kept as an attribute (goTypeMarker) keeps its chain beside it, both exactly as before.
+	if len(chain) == 1 && goTypeAttr == "" {
+		spelling := "<-chan "
+
+		if chain[0] == types.SendOnly {
+			spelling = "chan<- "
+		}
+
+		if attr, comment := goTypeMarker(spelling + rootGoTypeDescriptor(elemType)); attr == "" {
+			goTypeComment, dirAttr = comment, ""
+		}
+	}
+	v.writeStringLn(target, "%s%s%s%spartial struct %s%s%s%s;", localName, goTypeAttr, dirAttr, access, getSanitizedIdentifier(name), typeParams, goTypeComment, constraints)
 	finish()
 }
 
