@@ -9721,9 +9721,10 @@ Go's rule that any fitting value can be assigned without a conversion. A type de
 `interface { … }` list becomes a real C# interface instead.
 
 An alias leaves nothing in compiled code, so `reflect` alone could not recover the name `eface`. The
-converter therefore also emits an empty interface named with a `ᴅ` suffix, the *carrier*. Nothing ever
-implements it; its `[GoLocalName]` only holds the Go name. A struct field of the aliased type points
-`reflect` at the carrier with `[GoDescriptorType(Self = …)]`, where `Self` names the field's own type.
+converter therefore also declares an empty interface named with a `ᴅ` suffix, the *carrier*, in the
+`TypeAccessibility` section of `package_info.cs`. Nothing ever implements it; its `[GoLocalName]` only holds
+the Go name. A struct field of the aliased type carries no mark of its own: the struct's record in the same
+section names the field and its carrier, and that points `reflect` at it.
 The comments in the test name the two shapes that gain a carrier, class (i) and (ii), and the controls
 that must not:
 
@@ -11308,7 +11309,8 @@ func init() {
 }
 ```
 
-Instead of a `partial` method, the converter writes a real body that calls the target. Reading the C#:
+Instead of a bodiless stub, the converter writes a `partial` method with a real body that calls the target.
+Reading the C#:
 
 - `go.time_package` is the class for package `time`, spelled in full because the Go file has no import to
   alias.
@@ -11317,8 +11319,8 @@ Instead of a `partial` method, the converter writes a real body that calls the t
   carries several results ([Multi-Result Values](#multi-result-values-and-comma-ok-forms)), and a func
   type becomes a `Func<…>` delegate ([Function Values and Closures](#function-values-and-closures)).
 - Go's unnamed parameter is named `_` in C#.
-- `[StackTraceHidden]` keeps the forwarder out of .NET stack traces, because in Go the two names are one
-  function.
+- `/*linkname*/` asks a source generator to write the method's declaring part with `[StackTraceHidden]`,
+  which keeps the forwarder out of .NET stack traces, because in Go the two names are one function.
 - `[GoInit]` marks Go's `init` function ([Package-Level Variable Initialization Order](#package-level-variable-initialization-order)).
 
 The converter cannot tell from the directive alone whether the target has a C# body: in Go, many linkname
