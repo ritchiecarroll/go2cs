@@ -9,6 +9,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/types"
 )
@@ -59,6 +60,7 @@ func (v *Visitor) visitMapType(mapType *ast.MapType, identType types.Type, name 
 	typeParams, constraints := v.getGenericDefinition(identType)
 
 	v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), typeParams, access, "")
-	v.writeStringLn(target, "%s[GoType(\"map[%s, %s]\")] %spartial struct %s%s%s;", v.localNameAttrFor(identType), rootGoTypeDescriptor(keyType), rootGoTypeDescriptor(valueType), access, getSanitizedIdentifier(name), typeParams, constraints)
+	goTypeAttr, goTypeComment := goTypeMarker(fmt.Sprintf("map[%s, %s]", rootGoTypeDescriptor(keyType), rootGoTypeDescriptor(valueType)))
+	v.writeStringLn(target, "%s%s%spartial struct %s%s%s%s;", v.localNameAttrFor(identType), goTypeAttr, access, getSanitizedIdentifier(name), typeParams, goTypeComment, constraints)
 	finish()
 }

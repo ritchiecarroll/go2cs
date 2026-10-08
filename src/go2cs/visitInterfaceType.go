@@ -21,6 +21,7 @@ import (
 
 const InterfaceTypeAttributeMarker = ">>MARKER:INTERFACE_TYPE_ATTRS<<"
 const InterfacePostAtributeMarker = ">>MARKER:POST_INTERFACE_ATTRS<<"
+const InterfaceDefinitionCommentMarker = ">>MARKER:INTERFACE_DEFINITION_COMMENT<<"
 const InterfaceInheritanceMarker = ">>MARKER:INHERITED_INTERFACES<<"
 const InterfaceConstraintMarker = ">>MARKER:INTERFACE_CONSTRAINTS<<"
 
@@ -294,7 +295,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	}
 
 	result.WriteString(outerIndent)
-	result.WriteString(fmt.Sprintf("[GoType%s]%spartial interface %s%s%s%s{", InterfaceTypeAttributeMarker, InterfacePostAtributeMarker, getSanitizedIdentifier(interfaceTypeName), genericTypeParams, InterfaceInheritanceMarker, InterfaceConstraintMarker))
+	result.WriteString(fmt.Sprintf("%s%spartial interface %s%s%s%s%s{", InterfaceTypeAttributeMarker, InterfacePostAtributeMarker, getSanitizedIdentifier(interfaceTypeName), genericTypeParams, InterfaceDefinitionCommentMarker, InterfaceInheritanceMarker, InterfaceConstraintMarker))
 	result.WriteString(v.newline)
 
 	v.indentLevel++
@@ -431,9 +432,12 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	// The CRTP `<ΔT>` marker list serves Go's ARITY-0 constraint interfaces (`Ordered`,
 	// `Number`) — a GENERIC constraint interface (`PtrOf[T any] interface{ *T }`) already
 	// carries its own `<T>` list above, and appending both produced a malformed double list
-	// (`PtrOf<T><ΔT>`, CS1003).
+	// (`PtrOf<T><ΔT>`, CS1003). It is the declaration's type-parameter list, so the definition
+	// comment follows it (go2cs-gen reads the comment after the list's `>`).
+	crtpTypeParams := ""
+
 	if len(typeConstraints) > 0 && genericTypeParams == "" {
-		inheritedResult = fmt.Sprintf("%s<%s>", inheritedResult, TypeT)
+		crtpTypeParams = fmt.Sprintf("<%s>", TypeT)
 	}
 
 	interfaceAttrs := ""
@@ -460,14 +464,20 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		postAttrs = v.newline
 	}
 
-	if len(interfaceAttrs) > 0 {
-		interfaceAttrs = fmt.Sprintf("(\"%s\")", interfaceAttrs)
+	// The definition (`dyn`, `operators = …`) rides the declaration's name as its face-lift comment
+	// (goTypeMarker), so no attribute precedes the declaration and nothing separates it from
+	// `partial interface`. A definition no comment can hold keeps the attribute and its separator.
+	goTypeAttr, goTypeComment := goTypeMarker(interfaceAttrs)
+
+	if goTypeAttr == "" {
+		postAttrs = ""
+	} else {
+		goTypeAttr = strings.TrimSuffix(goTypeAttr, " ")
 	}
 
-	// Inject the publicized access modifier (if any) into the slot between `[GoType…]` and
-	// `partial interface`. postAttrs is " " normally or a newline when operator sets are present;
-	// appending `access` ("public ") yields `[GoType] public partial interface` (or the newline
-	// form `[GoType(…)]\npublic partial interface`). Empty when not publicized — no churn.
+	// Inject the publicized access modifier (if any) into the slot ahead of `partial interface`:
+	// after the attribute and its separator (" ", or a newline when operator sets are present) when
+	// one is written, else at the start of the declaration. Empty when not publicized — no churn.
 	postAttrs += access
 
 	// The declaration's type-parameter list for the package_info.cs accessibility section: a
@@ -540,9 +550,10 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		inheritedResult += " "
 	}
 
-	target.WriteString(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(result.String(),
-		InterfaceTypeAttributeMarker, interfaceAttrs),
+	target.WriteString(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(result.String(),
+		InterfaceTypeAttributeMarker, goTypeAttr),
 		InterfacePostAtributeMarker, postAttrs),
+		InterfaceDefinitionCommentMarker, crtpTypeParams+goTypeComment),
 		InterfaceInheritanceMarker, inheritedResult),
 		InterfaceConstraintMarker, genericConstraints))
 

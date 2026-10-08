@@ -150,7 +150,7 @@ func liftFunctionBody(t *testing.T, mainCs, declaration string) string {
 	end := strings.Index(rest, "\ninternal static ")
 
 	if end < 0 {
-		end = strings.Index(rest, "\n[GoType")
+		end = strings.Index(rest, "\ninternal partial struct ")
 	}
 
 	if end < 0 {
@@ -160,13 +160,14 @@ func liftFunctionBody(t *testing.T, mainCs, declaration string) string {
 	return declaration + rest[:end]
 }
 
-// liftRequireBlock requires the emitted `[GoType("dyn")]` block declaration named `name` with exactly
-// `fields` in order — compared LINE BY LINE with the indentation stripped, since a module conversion
-// nests the package class one level deeper than the corpus's file-scoped form.
+// liftRequireBlock requires the emitted `dyn` block declaration named `name` (its definition carried as
+// the `/*dyn*/` comment after the name) with exactly `fields` in order — compared LINE BY LINE with the
+// indentation stripped, since a module conversion nests the package class one level deeper than the
+// corpus's file-scoped form.
 func liftRequireBlock(t *testing.T, mainCs, name string, fields []string) {
 	t.Helper()
 
-	header := "[GoType(\"dyn\")] internal partial struct " + name + " {"
+	header := "internal partial struct " + name + " /*dyn*/ {"
 	lines := strings.Split(mainCs, "\n")
 
 	for i, line := range lines {

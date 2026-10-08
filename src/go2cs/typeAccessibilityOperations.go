@@ -60,7 +60,7 @@ const typeAccessibilityIndent = "    "
 func typeAccessibilityProseLines() []string {
 	return []string{
 		typeAccessibilityIndent + "// C# nested types declared with no access modifier are always private, and the",
-		typeAccessibilityIndent + "// `[GoType]` declarations in this package's converted sources are deliberately",
+		typeAccessibilityIndent + "// Go type declarations in this package's converted sources are deliberately",
 		typeAccessibilityIndent + "// bare so they read more like the original Go code. The real accessibility for",
 		typeAccessibilityIndent + "// the types - public for a Go-exported name, internal otherwise - are defined",
 		typeAccessibilityIndent + "// via declarations below.",

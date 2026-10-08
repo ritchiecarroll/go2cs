@@ -306,7 +306,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	var dynamic string
 
 	if lifted {
-		dynamic = "(\"dyn\")"
+		dynamic = "dyn"
 	}
 
 	// A lifted function-local NAMED type carries its original Go name so the reflection
@@ -379,7 +379,8 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		v.addRequiredUsing("System.Runtime.InteropServices")
 	}
 
-	v.writeStringLn(target, "[GoType%s] %s%s%spartial struct %s%s%s{", dynamic, inlineAttrs, structLayoutAttr, access, structTypeName, typeParams, constraints)
+	goTypeAttr, goTypeComment := goTypeMarker(dynamic)
+	v.writeStringLn(target, "%s%s%s%spartial struct %s%s%s%s{", goTypeAttr, inlineAttrs, structLayoutAttr, access, structTypeName, typeParams, goTypeComment, constraints)
 	v.indentLevel++
 
 	var prevNameDiscardedCount int

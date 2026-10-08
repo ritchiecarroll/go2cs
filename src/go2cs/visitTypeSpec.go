@@ -339,7 +339,8 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			// fixed-size ARRAY fields needs the forwarded `Clone()` (see wrapperValueCloneAttr).
 			inlineAttrs := v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), "", access, wrapperValueCloneAttr(rhsType))
 
-			v.writeStringLn(target, "%s[GoType(\"%s\")] %s%spartial struct %s;", v.localNameAttrFor(identType), rootGoTypeDescriptor(csName), inlineAttrs, access, getSanitizedIdentifier(name))
+			goTypeAttr, goTypeComment := goTypeMarker(rootGoTypeDescriptor(csName))
+			v.writeStringLn(target, "%s%s%s%spartial struct %s%s;", v.localNameAttrFor(identType), goTypeAttr, inlineAttrs, access, getSanitizedIdentifier(name), goTypeComment)
 			finish()
 		} else {
 			v.outputBuilder.WriteString(v.convSelectorExpr(typeSpecType, DefaultLambdaContext()))
@@ -379,7 +380,8 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 				dimsAttr = fmt.Sprintf("[GoArrayDims(%s)] ", renderDimsList(dims))
 			}
 
-			v.writeStringLn(target, "%s[GoType(\"%s\")] %s%spartial class %s;", v.localNameAttrFor(identType), rootGoTypeDescriptor(pointerTypeName), dimsAttr, access, getSanitizedIdentifier(name))
+			goTypeAttr, goTypeComment := goTypeMarker(rootGoTypeDescriptor(pointerTypeName))
+			v.writeStringLn(target, "%s%s%s%spartial class %s%s;", v.localNameAttrFor(identType), goTypeAttr, dimsAttr, access, getSanitizedIdentifier(name), goTypeComment)
 			usesUnsafeCode = true
 			finish()
 		}
@@ -461,6 +463,33 @@ func (v *Visitor) localNameAttrFor(identType types.Type) string {
 	}
 
 	return ""
+}
+
+// goTypeMarker renders a converted Go type declaration's marker in its face-lift form
+// (docs/PLAN-marker-comment-parity.md §5.2 and §5.3): the ATTRIBUTE written ahead of the declaration,
+// and the COMMENT written right after its name, or after its type-parameter list when it has one.
+//
+// A plain Go type (definition "") carries neither. go2cs-gen's TypeGenerator recognizes a type declared
+// directly inside a `*_package` class of a converted file as a Go type (Common.IsConvertedGoTypeDeclaration)
+// and puts `[GoType]` on its own generated part, so reflection reads exactly what it read before. A
+// defined type's definition (`num:int64`, `dyn`, `chan T`, `ж<T>`, ...) moves into the comment, the same
+// text the attribute argument held: `partial struct Duration /*num:int64*/;`. The generator reads it back
+// (Common.GetDefinitionComment) and re-emits the attribute with it. A definition no block comment can
+// hold, one carrying `/*` or `*/`, keeps the attribute, which the generator reads first.
+//
+// Every declaration this converter writes is directly inside the package class (a function-local type
+// is lifted to member level) and in a converted file, which is the shape the generator's rule admits.
+// The returned attribute carries its trailing space; the comment carries its leading one.
+func goTypeMarker(definition string) (attribute string, comment string) {
+	if definition == "" {
+		return "", ""
+	}
+
+	if strings.Contains(definition, "/*") || strings.Contains(definition, "*/") {
+		return fmt.Sprintf("[GoType(\"%s\")] ", definition), ""
+	}
+
+	return "", " /*" + definition + "*/"
 }
 
 // liftedTypeDeclaredBy reports whether t is the type the given declaration INTRODUCES, rather than

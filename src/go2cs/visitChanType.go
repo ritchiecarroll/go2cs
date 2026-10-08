@@ -72,7 +72,8 @@ func (v *Visitor) visitChanType(chanType *ast.ChanType, identType types.Type, na
 		dirAttr = "[GoChanDir(" + strings.Join(members, ", ") + ")] "
 	}
 
-	v.writeStringLn(target, "%s[GoType(\"chan %s\")] %s%spartial struct %s%s%s;", v.localNameAttrFor(identType), rootGoTypeDescriptor(elemType), dirAttr, access, getSanitizedIdentifier(name), typeParams, constraints)
+	goTypeAttr, goTypeComment := goTypeMarker(fmt.Sprintf("chan %s", rootGoTypeDescriptor(elemType)))
+	v.writeStringLn(target, "%s%s%s%spartial struct %s%s%s%s;", v.localNameAttrFor(identType), goTypeAttr, dirAttr, access, getSanitizedIdentifier(name), typeParams, goTypeComment, constraints)
 	finish()
 }
 

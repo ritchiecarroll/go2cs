@@ -76,7 +76,7 @@ func TestAnInternalTestLocalInterfaceCarriesItsLocalNameStamp(t *testing.T) {
 
 	testCs := string(data)
 
-	const stamped = `[GoType("dyn")] [GoLocalName("Inner")] internal partial interface TestLocalEmbeddedInterface_Inner`
+	const stamped = `[GoLocalName("Inner")] internal partial interface TestLocalEmbeddedInterface_Inner /*dyn*/`
 
 	if !strings.Contains(testCs, stamped) {
 		t.Errorf("want %q: the inline-access bridge must stamp the interface lift on its declaration:\n%s", stamped, testCs)
@@ -87,7 +87,7 @@ func TestAnInternalTestLocalInterfaceCarriesItsLocalNameStamp(t *testing.T) {
 	}
 
 	// CONTROLS: the struct lift keeps its inline stamp, and the anonymous interface lift has no Go name to stamp.
-	if !strings.Contains(testCs, `[GoType("dyn")] [GoLocalName("Outer")] internal partial struct TestLocalEmbeddedInterface_Outer`) {
+	if !strings.Contains(testCs, `[GoLocalName("Outer")] internal partial struct TestLocalEmbeddedInterface_Outer /*dyn*/`) {
 		t.Errorf("control: the struct lift's inline stamp must be unchanged:\n%s", testCs)
 	}
 
