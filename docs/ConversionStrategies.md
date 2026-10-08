@@ -186,7 +186,7 @@ internal static @string add(this ref reg r, @string name) {
 
 What to notice:
 
-- **A struct holds only its fields.** `[GoType]` asks a [source generator](#source-generators) to add the
+- **A struct holds only its fields.** A [source generator](#source-generators) adds the
   rest at compile time: constructors, `==` and a Go-style `ToString()` ([Struct Types](#struct-types)).
   Lower-case Go names become `internal`, and capitalized ones become `public`.
 - **A slice is golib's `slice<T>`.** `[]string` becomes `slice<@string>` ([Slices and Arrays](#slices-and-arrays)).
@@ -197,7 +197,7 @@ What to notice:
   that starts with `Ꮡ`, such as `Ꮡx` in the table, is a different use of the glyph: it is the box that
   holds a local whose address is taken ([Pointers](#pointers)).
 - **A pointer-receiver method is an extension method on `ref`.** `this ref reg r` lets the method change the
-  caller's struct without a copy. `[GoRecv]` asks a generator to add an overload that takes a `ж<reg>`, so
+  caller's struct without a copy. A generator adds an overload that takes a `ж<reg>`, so
   the method also works on a pointer ([Functions and Methods](#functions-and-methods)).
 - **Built-ins keep their Go names.** `append` here, like `len`, `cap` and `copy`, is a golib function that
   behaves as Go's does ([Built-in Functions](#built-in-functions)).
@@ -377,8 +377,8 @@ Read it piece by piece:
 - `nint` is Go's `int`: both are the size of a pointer ([Integer Types and Arithmetic](#integer-types-and-arithmetic)).
 - The method becomes a static extension method. Its pointer receiver `(a *accum)` is written
   `this ref accum a`, so the method changes the caller's value ([Functions and Methods](#functions-and-methods)).
-- `[GoRecv]` asks the source generator for a second overload that takes the box `ж<accum>` and forwards to
-  the `ref` method. That overload is what makes `Ꮡa.add(p1)` work.
+- From the `this ref` receiver, the source generator writes a second overload that takes the box `ж<accum>`
+  and forwards to the `ref` method. That overload is what makes `Ꮡa.add(p1)` work.
 - `ж<accum> Ꮡa` is Go's `a *accum`. `ж<T>` (read "zhe") is golib's heap box for a Go pointer, and the `Ꮡ`
   prefix marks a name that holds one ([Pointers](#pointers)).
 - `"bound add:"u8` is a C# UTF-8 byte literal. A Go string is UTF-8 bytes too, so golib's `@string` is built
@@ -444,7 +444,7 @@ code, and the section that explains it in full.
 | `break_L`, `continue_L` | `goto` targets for Go's labeled `break L` and `continue L` | `goto break_scan;`, `continue_scan:;` | [Loops, Range and Labels](#loops-range-and-labels) |
 | `XжI`, `XᴠI` | An adapter class: pointer `*X` (`ж`) or value `X` (`ᴠ`) as interface `I` | `new joinErrorжerror(e)`, `new HandlerᴠIface(…)` | [Interfaces](#interfaces) |
 | `default!` | Go `nil` (golib `nil` in pointer contexts), and the zero value of a variable declared without a value | `return (n, default!);` | [Nil and Zero Values](#nil-and-zero-values) |
-| `[GoType]`, `[GoRecv]` | Mark a converted Go type, or a pointer-receiver method; a source generator completes it | `partial struct accum`, `internal static nint len(this ref box b)` | [Source Generators](#source-generators) |
+| `partial struct`, `this ref` | A converted Go type, and a pointer-receiver method; a source generator completes each | `partial struct accum`, `internal static nint len(this ref box b)` | [Source Generators](#source-generators) |
 | `nint`, `nuint` | Go `int`, `uint` | `internal nint total;` | [Integer Types and Arithmetic](#integer-types-and-arithmetic) |
 | `@name` | A C# keyword used as a name | `@in`, `@unsafe`, `@string` | The naming rules in this section |
 | `<pkg>_package` | The static partial class that holds a package | `partial class strings_package` | [Package Conversion](#package-conversion) |
@@ -671,8 +671,8 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
 length is 4, as in Go. Each `"…"u8` is a C# UTF-8 literal; `@string` converts it implicitly
 ([Strings](#strings-string-and-sstring)).
 
-The other names in this example come from other sections. Go's `type kindT uint` becomes a struct marked
-`[GoType("num:nuint")]`. That tells a source generator to fill in a numeric type backed by `nuint`, with its
+The other names in this example come from other sections. Go's `type kindT uint` becomes a struct whose
+name is followed by the comment `/*num:nuint*/`. That tells a source generator to fill in a numeric type backed by `nuint`, with its
 operators and conversions ([Named Numeric Types and Constant Contexts](#named-numeric-types-and-constant-contexts)).
 The literal's keys are constants, so `kindT(1)` becomes the plain index `1`. The index expression keeps
 Go's `kindT(3)` as a cast. `kindT` converts implicitly to its underlying `nuint`, so it indexes the slice as
@@ -1207,8 +1207,8 @@ internal static @string pipeLabel;
 internal static void initᴛpipeLabel() { pipeLabel = ((@string)labelPipe) + "!"u8; }
 ```
 
-`[GoType("@string")]` marks `label` as a named type built on `@string`; a source generator fills in its
-members ([Source Generators](#source-generators)).
+The comment `/*@string*/` after its name makes `label` a named type built on `@string`; a source generator
+fills in its members ([Source Generators](#source-generators)).
 
 **A hoisted string literal counts the same way.** go2cs moves a string literal used inside a function
 into a `static readonly` field whose name ends in `ˢ`, so the string is built once, not on every call
@@ -1381,7 +1381,7 @@ How to read the C#:
 - A plain import becomes an alias: `"testing"` becomes `using testing = testing_package;`, so `testing.T`
   keeps its Go spelling. The dot import `. "path"` becomes `using static path_package;`, so `Ext` needs no
   qualifier ([Package Conversion](#package-conversion)).
-- `[GoType]` marks a Go struct. It is `partial` so a [source generator](#source-generators) can add Go
+- A Go struct is `partial` so a [source generator](#source-generators) can add Go
   members to it, such as the constructor that each table entry calls, `new("path.go"u8, ".go"u8)`
   ([Struct Types](#struct-types)).
 - `.slice()` turns the C# array into a Go slice ([Slices and Arrays](#slices-and-arrays)).
@@ -1599,7 +1599,7 @@ second prints 1. Reading the C#, line by line:
   reads and writes like the Go local.
 - `b = new Buffer(nil);` is Go's `b := Buffer{}`, kept as its own line. The `nil` argument picks the
   constructor that sets every field to its Go zero value ([Nil and Zero Values](#nil-and-zero-values)).
-- The `[GoType]` attribute asks a [source generator](#source-generators) to add that constructor. It
+- A [source generator](#source-generators) adds that constructor. It
   also adds `Buffer.Ꮡoff`, a static accessor that names the `off` field ([Struct Types](#struct-types)).
 - `Ꮡb.of(Buffer.Ꮡoff)` is Go's `&b.off`: a pointer to the `off` field inside the box `Ꮡb`.
 - In `PrintValPtr`, `DerefOrNull()` binds `ptr` to the value the box holds. The body then uses `ptr`
@@ -2325,8 +2325,8 @@ how integer literals are written.
 ## Named Numeric Types and Constant Contexts
 
 A Go type defined over a number type, such as `type Duration int64`, becomes a small C# wrapper struct.
-The converter emits one line: a `partial struct` marked
-[`[GoType("num:<underlying>")]`](../src/core/golib/GoTypeAttribute.cs). The `TypeGenerator`
+The converter emits one line: a `partial struct` whose name is followed by the comment
+`/*num:<underlying>*/`. The `TypeGenerator`
 [source generator](#source-generators) writes the rest of the struct when the project compiles. So code that
 uses the type reads almost line for line as in Go.
 
@@ -2382,7 +2382,7 @@ public static float64 Seconds(this Duration d) {
 
 Reading the C#, piece by piece:
 
-- `[GoType("num:int64")]` says the struct wraps an `int64`. Go's `int` and `uint` appear as `num:nint` and
+- The comment `/*num:int64*/` says the struct wraps an `int64`. Go's `int` and `uint` appear as `num:nint` and
   `num:nuint`, C#'s native-sized integers ([Integer Types and Arithmetic](#integer-types-and-arithmetic)).
 - Each constant is a static get-only property typed `Duration`. Its value is computed ahead of time, and the
   Go expression stays beside it as a `/* … */` comment ([Constant Values](#constant-values)).
@@ -2704,8 +2704,8 @@ internal static void Main() {
 `passThrough` forwards its pointer to `inner`, which only compares it with `nil`. Go's `main` calls
 `onlyNilCheck` and `passThrough` each once with `nil` and once with `&node{}`. Go and C# both print `nil`,
 `set`, `true`, `false`. `&node{}` becomes `Ꮡ(new node(nil))`: `new node(nil)` builds a zero-value `node`,
-and `Ꮡ(…)` boxes it and takes its address. `[GoType]` marks a struct that a
-[source generator](#source-generators) completes. `nilˢ` and `setˢ` are hoisted string literals
+and `Ꮡ(…)` boxes it and takes its address. A
+[source generator](#source-generators) completes the `partial struct`. `nilˢ` and `setˢ` are hoisted string literals
 ([Strings](#strings-string-and-sstring)).
 
 golib has two forms of a nil pointer. `default!` gives a C# `null`. Converting golib's `nil` to a pointer
@@ -2832,8 +2832,8 @@ internal static void Main() {
     point p = default!;
 ```
 
-`wrapper` is constructed too, because its `holder` field needs construction. `[GoType]` marks a struct that a
-[source generator](#source-generators) completes, including its constructors ([Struct Types](#struct-types)).
+`wrapper` is constructed too, because its `holder` field needs construction. A
+[source generator](#source-generators) completes each `partial struct`, including its constructors ([Struct Types](#struct-types)).
 
 **A struct that embeds another type is constructed with `new(nil)`.** The embedded field lives in a heap box.
 C# reaches it through a `ref` property of the same name, and only a constructor allocates the box
@@ -3096,7 +3096,7 @@ internal static nint freeLen() {
 }
 ```
 
-`[GoType]` marks a converted Go type ([Struct Types](#struct-types)). `[GoRecv]` marks a method, and
+`partial struct box` is a converted Go type ([Struct Types](#struct-types)). In the method,
 `this ref box b` is its receiver: the method gets the `box` by reference, which is how go2cs writes a
 pointer receiver. The method call itself stays `b.len()`.
 
@@ -3298,7 +3298,7 @@ internal static void keep(ж<pp> Ꮡq) {
     fmt.Println((~c).id);
 ```
 
-The Go struct `pp` becomes a C# struct marked `[GoType]` ([Struct Types](#struct-types)). `slice<T>` is
+The Go struct `pp` becomes a C# `partial struct` ([Struct Types](#struct-types)). `slice<T>` is
 golib's Go slice, and `freeList[..(int)(n - 1)]` is Go's `freeList[:n-1]`
 ([Slices and Arrays](#slices-and-arrays)). golib's `@new<pp>()` is Go's `new(pp)`: it returns a box
 holding a zero `pp`.
@@ -3506,7 +3506,7 @@ internal static (nint, nint) readThenBump() {
 
 Go's `readThenBump` returns `1 1`. Without the temporary, `return (c.n, c.bump())` would copy `c.n` while it is still `0` and return `0 1`. The same shape in a real parser would return an empty result beside a nil error.
 
-In the C#, a pointer-receiver method becomes an extension method on `ref counter`, marked `[GoRecv]`; the `ref` is what lets `bump` change the caller's `c` ([Functions and Methods](#functions-and-methods)). `default!` is C#'s default value, here Go's zero `counter`. The `!` matters only for reference types, where it tells the compiler a null is intended; the converter writes it everywhere ([Nil and Zero Values](#nil-and-zero-values)).
+In the C#, a pointer-receiver method becomes an extension method on `ref counter`; the `ref` is what lets `bump` change the caller's `c` ([Functions and Methods](#functions-and-methods)). `default!` is C#'s default value, here Go's zero `counter`. The `!` matters only for reference types, where it tells the compiler a null is intended; the converter writes it everywhere ([Nil and Zero Values](#nil-and-zero-values)).
 
 **Most returns stay one tuple, as written in Go.** A call can change an earlier operand only when it gets that operand's address. That happens through a pointer-receiver method on it, an `&x` argument, or a pointer the operand is read through. The converter checks just those cases, within the `return` statement itself. When the call works on something else, as here, nothing moves.
 
@@ -4286,7 +4286,7 @@ internal static void test(/*[2]*/ array<@string> a) {
 ```
 
 `goodbyeˢ` is the `"Goodbye"` literal, created once as a static field; the `ˢ` suffix marks it
-([Strings](#strings-string-and-sstring)). `[GoArrayDims(2)]` records the Go array length, which
+([Strings](#strings-string-and-sstring)). The comment `/*[2]*/` records the Go array length, which
 `array<T>` does not carry, for [Reflection](#reflection-reflect).
 
 Slicing an array does not copy it. `test3(a[:])` becomes `test3(a[..])`, and a write through that slice
@@ -4621,8 +4621,8 @@ internal static @string makeGreeting(@string who) {
 }
 ```
 
-**Named string types** (`type version string`) become wrapper structs. The `[GoType("@string")]`
-attribute asks the [source generators](#source-generators) to fill in the wrapper. It keeps the whole
+**Named string types** (`type version string`) become wrapper structs. The comment `/*@string*/`
+after the name asks the [source generators](#source-generators) to fill in the wrapper. It keeps the whole
 string surface: indexing, slicing, `len`, comparison, `+` and conversions. A concatenation keeps the
 named type, as in Go. The type's methods become static extension methods, so `this version v` is the
 receiver ([Functions and Methods](#functions-and-methods)):
@@ -4732,7 +4732,7 @@ public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
 }
 ```
 
-The `[GoStr]` attribute asks the generators for the twin. `params ꓸꓸꓸany aʗp` is Go's variadic
+The `sstring` parameter is what asks the generators for the twin. `params ꓸꓸꓸany aʗp` is Go's variadic
 `a ...any`: `ꓸꓸꓸany` is the file's alias for `Span<any>`, the `ʗp` suffix marks the raw incoming pack,
 and the first line of the body turns it into the slice `a` that the Go code uses.
 [Functions and Methods](#functions-and-methods) covers variadic parameters.
@@ -4940,7 +4940,7 @@ A write such as `m["x"] = 1` on a nil map panics with Go's message, "assignment 
 deferred `recover` catches that panic as it would in Go
 ([Defer / Panic / Recover](#defer--panic--recover)).
 
-**A named map type is a wrapper struct.** `type registry map[uint32]entry` becomes a `[GoType]` partial
+**A named map type is a wrapper struct.** `type registry map[uint32]entry` becomes a partial
 struct declared with no body. Its comma-ok read looks like a plain map's:
 
 <!-- source: src/tests/Behavioral/EmptyStructMapSet/EmptyStructMapSet.go:32-45 -->
@@ -4981,7 +4981,7 @@ internal static (@string, bool) lookup(registry reg, uint32 id) {
 }
 ```
 
-The `[GoType]` attribute marks a converted Go type, and its argument names the underlying map. A
+The comment after the struct's name names the underlying map. A
 [source generator](#source-generators) writes the body of `registry` at compile time. It wraps a
 `map<uint32, entry>` and adds the indexers, `len`, `range` and a size constructor.
 
@@ -5117,7 +5117,7 @@ internal static float64 totalArea<S>(slice<S> shapes)
 }
 ```
 
-`[GoType]` marks a converted Go type that a [source generator](#source-generators) completes. Go's `[]S`
+A [source generator](#source-generators) completes each converted Go type. Go's `[]S`
 is golib's [`slice<S>`](#slices-and-arrays), `@string` is Go's string
 ([Strings](#strings-string-and-sstring)), and `float64` is C# `double` under its Go name. `default!` is
 the zero value ([Nil and Zero Values](#nil-and-zero-values)). A `range` loop becomes a `foreach` over
@@ -5166,7 +5166,7 @@ public static float64 Area(this ref Circle c) {
     fmt.Printf("shapes: %.2f\n"u8, totalArea(shapes));
 ```
 
-`[GoRecv] … this ref Circle` is a pointer-receiver method ([Functions and Methods](#functions-and-methods)).
+`this ref Circle` is the receiver of a pointer-receiver method ([Functions and Methods](#functions-and-methods)).
 `Ꮡ(…)` takes an address, as Go's `&` does, and `.slice()` turns a C# array into a golib slice
 ([Slices and Arrays](#slices-and-arrays)). The ᴛ in `elemᴛ0` marks a name the converter makes up, here the
 adapter lambda's parameter ([Reading Converted Code](#reading-converted-code-names-and-glyphs)). Each
@@ -5230,7 +5230,7 @@ internal static bool eq<T>(T a, T b) {
 ```
 
 **A generic type keeps its type parameters, and each method repeats them.** A Go method becomes a C#
-extension method, and a pointer receiver becomes `[GoRecv] this ref`
+extension method, and a pointer receiver becomes `this ref`
 ([Functions and Methods](#functions-and-methods)). An extension method cannot borrow its receiver type's
 parameters. So each method declares `<T>` and restates the `where` clause:
 
@@ -5285,8 +5285,8 @@ public static (T, bool) Pop<T>(this ref Stack<T> s)
 ```
 
 The three `where` clauses are identical. The set `~int | ~string` includes `string`, so, as with
-`Ordered`, only `+` and the comparisons are common to every member. Here too, `[GoType]` lets the source
-generator complete `Stack<T>`, including its zero-value constructor used below.
+`Ordered`, only `+` and the comparisons are common to every member. Here too, the source
+generator completes `Stack<T>`, including its zero-value constructor used below.
 
 `Pop`'s two results become a C# tuple ([Multi-Result Values](#multi-result-values-and-comma-ok-forms)).
 `var zero T` becomes `T zero = default!`, the zero value of `T`. The sub-slice `s.elements[:index]` becomes
@@ -5380,8 +5380,8 @@ partial struct numbers /*[]nint*/;
     fmt.Println(b);
 ```
 
-A named slice type such as `numbers` becomes a wrapper struct marked `[GoType("[]nint")]` that behaves as
-a slice. A slice literal builds a C# array and turns it into a slice with `.slice()`
+A named slice type such as `numbers` becomes a wrapper struct, its name followed by `/*[]nint*/`, that
+behaves as a slice. A slice literal builds a C# array and turns it into a slice with `.slice()`
 ([Slices and Arrays](#slices-and-arrays)). Calls C# can infer, such as `totalArea(shapes)`, stay bare.
 
 Where Go writes the type arguments itself, C# keeps them. Here `T` appears in no parameter, so Go
@@ -5493,7 +5493,7 @@ Every converted file sits in `namespace go`. A package's declarations live in on
 `CrossPkgLib_package` ([Package Conversion](#package-conversion)). The `global using` directives come first, outside
 both.
 
-- `[GoType("num:float64")]` marks a converted Go type whose underlying type is `float64`. A
+- The comment `/*num:float64*/` after a struct's name gives its underlying type, `float64`. A
   [source generator](#source-generators) fills in its value, operators and conversions.
 - `Freezing` is declared to return `Temperature`, and C# reads that as `Celsius`, exactly as Go does.
 - `100D` is a C# `double` literal, the type Go's `float64` maps to.
@@ -5759,16 +5759,16 @@ The receiver's C# form shows how the method uses it:
 | Go receiver | C# receiver | Used when |
 |---|---|---|
 | `(d dog)` | `this dog d` | A value receiver: the method works on its own copy |
-| `(c *cat)` | `[GoRecv] this ref cat c` | A pointer receiver that only reads and writes through the pointer |
+| `(c *cat)` | `this ref cat c` | A pointer receiver that only reads and writes through the pointer |
 | `(r *ring)` | `this ж<ring> Ꮡr` | A pointer receiver that needs the pointer itself: it stores, returns or compares it, takes a field's address, or passes it to a method that needs the box |
 
 `ж<T>` (read "zhe") is golib's heap box, the C# form of Go's pointer `*T`. By convention, a name with the
 `Ꮡ` prefix, such as `Ꮡr`, holds such a box. [Pointers](#pointers) explains both, and
 [Names and Glyphs](#reading-converted-code-names-and-glyphs) lists every glyph.
 
-**A value receiver is `this T`, and a pointer receiver is `[GoRecv] this ref T`.** A value receiver gets its
+**A value receiver is `this T`, and a pointer receiver is `this ref T`.** A value receiver gets its
 own copy, as in Go. A pointer receiver reads and writes the caller's storage through a C# `ref`, with no box
-and no allocation. `[GoType]` marks a converted Go struct ([Struct Types](#struct-types)):
+and no allocation. Each `partial struct` is a converted Go struct ([Struct Types](#struct-types)):
 
 <!-- source: src/tests/Behavioral/AnyStringLitChanSend/main.go:9-23 -->
 ```go
@@ -5808,7 +5808,7 @@ internal static @string speak(this ref cat c) {
 ```
 
 `@string` is golib's Go string, and `"woof:"u8` is a C# UTF-8 literal ([Strings](#strings-string-and-sstring)).
-`[GoRecv]` asks a [source generator](#source-generators) for a second overload that takes the box,
+For each `this ref` method a [source generator](#source-generators) writes a second overload that takes the box,
 `this ж<cat>`, and forwards to this method. So `speak` works on a `cat` value and on a `*cat` pointer, as in Go.
 
 **A value receiver copies arrays too.** Go copies a struct's arrays whenever it copies the struct. golib's
@@ -5913,7 +5913,7 @@ write through `r` then fails, and golib reports it as Go's nil-pointer panic
 **On a pointer, a call reads as it does in Go.** Besides its use as a name prefix, `Ꮡ` is also a golib
 function: `Ꮡ(value)` puts a value in a new box, like Go's `&`. So `&ring{…}` becomes `Ꮡ(new ring(…))`.
 A box method such as `initSelf` takes the box directly. A `this ref` method such as `linkTo` binds the
-`ж<T>` overload that `[GoRecv]` generates:
+`ж<T>` overload that the generator writes for it:
 
 <!-- source: src/tests/Behavioral/ReceiverPointerValue/main.go:58-69 -->
 ```go
@@ -6398,7 +6398,7 @@ internal static void probeA1() {
 }
 ```
 
-`[GoType]` marks a converted Go type ([Struct Types](#struct-types)).
+Each `partial struct` is a converted Go type ([Struct Types](#struct-types)).
 
 **A captured variable that nothing writes after the closure exists is read through a copy.** The copy
 always matches, because the variable never changes afterward. The `ʗ` suffix marks a copy the converter
@@ -6526,8 +6526,8 @@ internal static (nint, nint) viaLocal() {
 }
 ```
 
-A pointer-receiver method is written as an extension method on `this ref counter`. Its `[GoRecv]` attribute
-tells a [source generator](#source-generators) to add the matching `dec` overload on `ж<counter>`, which
+A pointer-receiver method is written as an extension method on `this ref counter`. From that receiver
+a [source generator](#source-generators) adds the matching `dec` overload on `ж<counter>`, which
 `Ꮡc.dec` binds to ([Functions and Methods](#functions-and-methods)). `applyInt` is the function from the
 first example in this section.
 
@@ -8419,7 +8419,7 @@ value with `ok` false.
 
 ## Struct Types
 
-A Go struct becomes a C# `partial struct` marked `[GoType]`. The converter writes only the fields, so the
+A Go struct becomes a C# `partial struct`. The converter writes only the fields, so the
 declaration reads like the Go original. A [source generator](#source-generators) completes the other
 `partial` half at compile time, adding constructors, equality and more. Like a Go struct, a C# struct is a
 value type: it is copied on assignment and needs no heap allocation of its own.
@@ -8463,7 +8463,7 @@ Go's `int` is C# `nint`, a native-size integer ([Integer Types and Arithmetic](#
 Go's `string` is golib's `@string`, a byte string. `"tag"u8` is a C# UTF-8 literal that converts to one
 ([Strings](#strings-string-and-sstring)).
 
-**The generator completes each struct.** For every `[GoType]` struct it adds:
+**The generator completes each struct.** For every converted struct it adds:
 
 - a constructor that takes every field as an optional argument, a parameterless one, and one that takes
   `nil` and gives the zero value;
@@ -8695,7 +8695,7 @@ internal static void identCopy() {
 
 `c := d` becomes `d.ΔClone()`. A value receiver or value parameter of such a struct is cloned at the top
 of the function, as `show` does with `d = d.ΔClone();`. Methods become C# extension methods, and
-`[GoRecv]` marks a pointer receiver ([Functions and Methods](#functions-and-methods)).
+`this ref` is a pointer receiver ([Functions and Methods](#functions-and-methods)).
 <!-- parameter clone: StructArrayFieldValueCopy.go:35 takeValue(c digest) -> StructArrayFieldValueCopy.cs.target:32-33 `c = c.ΔClone();` -->
 
 `identˢ` is the string literal `"ident:      "`, created once in a static field; the `ˢ` suffix marks
@@ -8704,8 +8704,8 @@ is only used as an `any` value ([Empty Interface](#empty-interface-any)). A lite
 such as `"|"`, stays inline and is cast to `@string` in place.
 
 **A struct type declared inside a function moves to package scope**, since C# allows no type in a method
-body. It takes the function's name as a prefix, so `point` in `main` becomes `main_point`. It is marked
-`[GoType("dyn")]`, which tells the generator and golib's reflection that the type was lifted and its C#
+body. It takes the function's name as a prefix, so `point` in `main` becomes `main_point`. Its name is followed by the comment
+`/*dyn*/`, which tells the generator and golib's reflection that the type was lifted and its C#
 name is not its Go name. An anonymous struct is lifted the same way, named after the first variable that
 uses it. Go treats identical anonymous structs as one type, so `a` and `b` share `main_a`:
 
@@ -8898,7 +8898,7 @@ internal static void Main() {
 
 Some other things in this example that the reader will see throughout converted code:
 
-- `[GoType]` marks a converted Go struct that the generator completes ([Struct Types](#struct-types)).
+- Each `partial struct` is a converted Go struct that the generator completes ([Struct Types](#struct-types)).
 - A capitalized (exported) Go name becomes `public`, and any other name becomes `internal`. So the
   `Person` embed is `public`, and the `name` field is `internal`
   ([Names and Glyphs](#reading-converted-code-names-and-glyphs)).
@@ -9056,8 +9056,8 @@ internal static void Main() {
 ```
 
 `bump` and `get` have pointer receivers, `(l *leaf)`. Each becomes a static method whose receiver is
-`this ref leaf l`, so it works on the caller's `leaf` through a C# `ref`. `[GoRecv]` marks such a method,
-and asks a source generator for a second overload that takes the box, `ж<leaf>`
+`this ref leaf l`, so it works on the caller's `leaf` through a C# `ref`. For such a method
+a source generator writes a second overload that takes the box, `ж<leaf>`
 ([Functions and Methods](#functions-and-methods)). The forwarder for the promoted `h.bump()` calls
 `bump` on the `leaf` that `h`'s pointer points to.
 
@@ -9184,7 +9184,7 @@ promoted call is routed.
 
 ## Interfaces
 
-A Go interface becomes a C# `partial interface` marked `[GoType]`. In Go, a type satisfies an interface
+A Go interface becomes a C# `partial interface`. In Go, a type satisfies an interface
 just by having its methods. C# needs each type to declare the interfaces it implements. A
 [source generator](#source-generators) closes that gap at compile time, so converted code puts values into
 interfaces and calls through them as Go does.
@@ -9203,7 +9203,7 @@ The examples in this section use these names and glyphs
   ([Strings](#strings-string-and-sstring)). Each example shows its declaration.
 - `ᐧ` is golib's constant `true`. Passed to a type assertion, it selects the comma-ok form.
 - `ᴛ` marks a temporary the converter makes up, such as `exprᴛ1`.
-- `[GoType]` marks a converted Go type, and `[GoRecv]` a pointer-receiver method. A generator completes
+- A `partial` type is a converted Go type, and `this ref` a pointer receiver. A generator completes
   both ([Source Generators](#source-generators)).
 
 **An interface keeps its method list, and an embedded interface becomes a C# base interface.** Go's
@@ -9414,8 +9414,8 @@ The two pointer-receiver methods take two forms ([Functions and Methods](#functi
 - `Inc` takes `&c.n`, so it needs the box itself: `this ж<Counter> Ꮡc`. `DerefOrNull()` binds `c` to the
   struct inside the box. `ref nonnil(ref c).n` is Go's `&c.n`, and `nonnil` panics as Go does if `c` is
   nil ([Pointers](#pointers)).
-- `Total` only reads the struct, so it takes `this ref Counter`, with no box. `[GoRecv]` makes the
-  generator add an overload that takes `ж<Counter>`, so `Total()` can be called on a box too.
+- `Total` only reads the struct, so it takes `this ref Counter`, with no box. The
+  generator adds an overload that takes `ж<Counter>`, so `Total()` can be called on a box too.
 
 Putting a `*Counter` into an `Incrementer`, then calling through it and asserting it back:
 
@@ -9590,9 +9590,9 @@ The C# version asks .NET for the value's `System.Type` instead, and golib's
 [`GoReflect`](../src/core/golib/GoReflect.cs) class answers every question from that type
 ([The golib Runtime Library](#the-golib-runtime-library)).
 
-A few things a CLR type cannot hold, such as a Go struct tag or a Go type name, travel as attributes the
-converter writes on the converted code. In converted code you notice those attributes, such as `[GoTag]`,
-and two naming marks, `ᴅ` and `ᴺ`. Every glyph is listed in
+A few things a CLR type cannot hold, such as a Go struct tag or an array's length, travel as short
+comments the converter writes beside the declaration, in Go's own spelling. In converted code you notice
+those comments, such as ``/*`json:"name"`*/``, and two naming marks, `ᴅ` and `ᴺ`. Every glyph is listed in
 [Reading Converted Code](#reading-converted-code-names-and-glyphs).
 
 **`Kind` follows the C# representation.** Each Go kind has its own C# form, so the kind is read off the type.
@@ -9605,18 +9605,19 @@ and two naming marks, `ᴅ` and `ᴺ`. Every glyph is listed in
 | `ж<T>`, `@unsafe.Pointer` | `Pointer`, `UnsafePointer` |
 | a delegate | `Func` |
 | `object` (Go `any`) or a C# interface | `Interface` |
-| a `[GoType]` struct | `Struct` |
+| a converted `partial struct` | `Struct` |
 | a named type, such as `partial struct counter /*num:nint*/` (Go `type counter int`) | its underlying kind, here `Int` |
 
-The `@` prefix lets a C# keyword, such as `string` or `unsafe`, serve as a name. `[GoType]` marks a type
-converted from Go, and a [source generator](#source-generators) completes it. Its argument, when present,
-is the Go type's underlying type; `num:` marks a numeric one
+The `@` prefix lets a C# keyword, such as `string` or `unsafe`, serve as a name. A `partial` type is a type
+converted from Go, and a [source generator](#source-generators) completes it. The comment after its name,
+when present, is the Go type's underlying type; `num:` marks a numeric one
 ([Named Numeric Types](#named-numeric-types-and-constant-contexts)). The [Pointers](#pointers) and
 [`unsafe.Pointer`](#unsafepointer-and-uintptr) sections explain the pointer rows.
 
-**A struct tag is copied verbatim into `[GoTag]`.** A C# field has no place for a Go struct tag, so the
-converter writes the tag as an attribute on the field. An untagged field gets no attribute. The tag is a C#
-verbatim string, `@"…"`, in which `""` stands for one quote character:
+**A struct tag is copied verbatim into a comment.** A C# field has no place for a Go struct tag, so the
+converter writes the tag as a comment at the end of the field's line, in Go's backquoted spelling. An
+untagged field gets no comment. A [source generator](#source-generators) reads the comment and records
+the tag on the struct:
 
 <!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.go:30-35 -->
 ```go
@@ -9637,7 +9638,7 @@ partial struct record {
 }
 ```
 
-**`StructField.Tag` reads the attribute back.** So reflection code, and the standard library's tag-driven
+**`StructField.Tag` reads the tag back.** So reflection code, and the standard library's tag-driven
 encoders such as `encoding/json` and `encoding/asn1`, see the same tag Go does:
 
 <!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.go:71-150 -->
@@ -9697,8 +9698,8 @@ A few names in that C# need a word:
 - `(@string)fΔ1.Tag` is Go's conversion `string(f.Tag)`, and `var (v, ok) = …` is Go's two-result
   assignment ([Comma-Ok Forms](#multi-result-values-and-comma-ok-forms)).
 
-**Other attributes carry what a CLR type cannot hold.** For example, golib's `array<T>` does not hold its
-length in its type, so `[GoArrayDims]` records it wherever `reflect` may need it:
+**Other comments carry what a CLR type cannot hold.** For example, golib's `array<T>` does not hold its
+length in its type, so a comment in Go's array-prefix form records it wherever `reflect` may need it:
 
 <!-- source: src/tests/Behavioral/AddressOfParamWrite/main.go:62 -->
 ```go
@@ -9709,8 +9710,9 @@ func bumpParamElem(a [3]int) [3]int {
 internal static array<nint> bumpParamElem(/*[3]*/ array<nint> a) {
 ```
 
-Similar attributes record a channel direction, an embedded field and the Go name of a type declared inside
-a function. The reference lists them.
+Similar comments record a channel direction and an embedded field. The
+[reference](ConversionStrategies-Reference/source-generators.md#marker-comments-what-converted-code-carries-instead-of-an-attribute)
+lists them.
 
 **A type defined over an existing interface gets a descriptor carrier, marked `ᴅ`.** Go's `type eface any`
 and `type namedIface fmt.Stringer` define new types that just reuse an existing interface. The converter
@@ -9999,7 +10001,7 @@ internal static void Main() {
 }
 ```
 
-`[GoType]` marks a converted Go type ([Struct Types](#struct-types)). `base` is a C# keyword, so it is
+Each `partial struct` is a converted Go type ([Struct Types](#struct-types)). `base` is a C# keyword, so it is
 [escaped](#reading-converted-code-names-and-glyphs) as `@base`. `get` returns its pointer as it is, so its
 parameter stays a plain box; the pointer-parameter rule in this section says when a parameter gets more.
 
@@ -10207,8 +10209,8 @@ public static int32 Get(this ref Counter c) {
 }
 ```
 
-`Get` only reads, so it takes `this ref Counter`. `[GoRecv]` asks a [source generator](#source-generators)
-to add a matching overload that takes `ж<Counter>`, so `Get` can also be called through a pointer.
+`Get` only reads, so it takes `this ref Counter`. A [source generator](#source-generators)
+adds a matching overload that takes `ж<Counter>`, so `Get` can also be called through a pointer.
 
 `Set` and `Add` take `&c.n`, so they take the box. `Ꮡc.of(Counter.Ꮡn)` is `&c.n`, where `Counter.Ꮡn` is a
 field reference the generator adds to the struct. `bump` only dereferences its pointer, so it takes
@@ -10287,7 +10289,7 @@ internal static void bump(ж<coord> Ꮡc) {
     fmt.Println(xy.X, xy.Y);
 ```
 
-`[GoType("coord")]` declares `point` as a new type over `coord`, and a
+The comment `/*coord*/` after its name declares `point` as a new type over `coord`, and a
 [source generator](#source-generators) fills in its body ([Struct Types](#struct-types)). `xy` is boxed at
 its zero value and then assigned, because `bump(&xy)` needs its address. The program prints `3 4`. <!-- stdlib instance: GOROOT/src/flag/flag.go:130 `return (*boolValue)(p)` -> src/core/flag/flag.cs:133 `return Ꮡp.Reinterpret<bool, boolValue>();` -->
 
@@ -10352,7 +10354,7 @@ golib's `DerefOrNull()` returns a null `ref` instead of failing at once. The fir
 `t` then raises Go's nil pointer dereference panic, at the same point Go would.
 <!-- DerefOrNull binds Unsafe.NullRef<T>() for a nil box; the first use throws NullReferenceException, which golib maps to Go's "invalid memory address or nil pointer dereference" runtime error: src/core/golib/ж.PointerExtensions.cs:445-451 and its remarks. -->
 
-`row` is Go's array type `[4]uint32`, and `[GoType]` marks it for the [source generators](#source-generators).
+`row` is Go's array type `[4]uint32`, completed by the [source generators](#source-generators).
 An array's length is fixed, so `len(t)` becomes the constant `4` ([Slices and Arrays](#slices-and-arrays)).
 Go's `int` is C#'s `nint` ([Integer Types and Arithmetic](#integer-types-and-arithmetic)). `@base` is Go's
 `base`, [escaped](#reading-converted-code-names-and-glyphs) because `base` is a C# keyword.
@@ -10446,7 +10448,7 @@ its own copy of the value, exactly as in Go.
 <!-- source: src/tests/Behavioral/AddressOfParamWrite/main.go:190-191; src/tests/Behavioral/AddressOfParamWrite/main.cs.target:169 (rq := &Box{...}; rq.BumpedRecv() becomes (~rq).BumpedRecv(), where BumpedRecv is a value method, main.go:90). The worked example is left out here because its golden uses unrelated glyphs; the reference covers it. -->
 
 **A pointer method on a variable takes the variable's address for you.** A pointer-receiver method
-usually becomes a C# extension method whose receiver is `this ref T`, marked `[GoRecv]`
+usually becomes a C# extension method whose receiver is `this ref T`
 ([Functions and Methods](#functions-and-methods)). C# passes the variable by reference, so `u.start(3)`
 stays `u.start(3)` and changes `u` itself. There is no box and no allocation.
 
@@ -10503,13 +10505,13 @@ The `!` only silences C# nullable warnings.
 <!-- source: src/tests/Behavioral/EmbeddedValuePointerMethod/main.go:90-91 and main.cs.target:77-78 (c := chunk{}; c.alloc(5) stays c.alloc(5)); src/tests/Behavioral/EmbeddedValuePointerMethod/main.go:51; main.cs.target:47 ([GoRecv] internal static void alloc(this ref chunk c, uint16 n) {) -->
 <!-- Moved to the reference (pointers.md): a method that keeps its receiver as a pointer takes this ж<T>, and a variable used as its receiver lives in a heap box, so b.Grow(n) becomes Ꮡb.Grow(n) (src/core/strings/strings.cs:522-523; src/core/strings/builder.cs:76). -->
 
-**A pointer method on a pointer local is called the same way.** `[GoRecv]` asks the
-[source generators](#source-generators) to add a second overload whose receiver is the box, `this ж<T>`.
+**A pointer method on a pointer local is called the same way.** For a `this ref` method the
+[source generators](#source-generators) add a second overload whose receiver is the box, `this ж<T>`.
 That overload binds a `ref` to the box's value and forwards the call. So `b.linkTo(c)` stays
 `b.linkTo(c)` when `b` is a pointer local.
 
 A method that uses its receiver as a pointer, such as `initSelf`, which stores `r` in a pointer field,
-works the other way round. It takes the box directly, `this ж<ring> Ꮡr`, and has no `[GoRecv]`. Its body
+works the other way round. It takes the box directly, `this ж<ring> Ꮡr`, and needs no second overload. Its body
 binds a `ref` alias `r`, like a pointer parameter, and a pointer local calls it directly: `a.initSelf()`.
 
 <!-- source: src/tests/Behavioral/ReceiverPointerValue/main.go:15-84 -->
@@ -10655,7 +10657,7 @@ internal static uintptr addrOf(ж<point> Ꮡp) {
 }
 ```
 
-`point` holds only two `int32`s, so its storage can be pinned. `[GoType]` marks a type declared in Go,
+`point` holds only two `int32`s, so its storage can be pinned. It is a type declared in Go,
 which the [source generators](#source-generators) complete.
 <!-- nil gives 0: UintptrUnsafePointerIdiom/main.go:45-46 -> main.cs.target:36-37 (`ж<point> missing = default!;` / `addrOf(missing) == 0`); golib's ж<T> -> uintptr operator returns 0 for a nil box (src/core/golib/ж.cs:933-945). point is reference-free (main.go:23-25), so it is pinnable. A reference-bearing pointee returns value.PointerOrderToken instead: ж.cs:979, with PointerStorage.None from ж.StandardBox.cs:173-174 and ж.ElemRefBox.cs:251-253. -->
 
@@ -10889,15 +10891,15 @@ string. See [Strings](#strings-string-and-sstring), [Slices and Arrays](#slices-
 
 | Generator | Driven by | Produces |
 |---|---|---|
-| `TypeGenerator` | `[GoType]` on a type | the body of each type: struct constructors, field references, equality and `ToString`; wrappers for named numeric, slice, array, map and channel types; for an interface, the code that converts a value to it at run time, as a type assertion does ([Interfaces](#interfaces)); members promoted by [struct embedding](#struct-type-embedding) |
-| `RecvGenerator` | `[GoRecv]` on a method | a `ж<T>` overload of each pointer-receiver method, so it can be called on a box |
+| `TypeGenerator` | a `partial` struct, class or interface declared in the package class | the body of each type: struct constructors, field references, equality and `ToString`; wrappers for named numeric, slice, array, map and channel types; for an interface, the code that converts a value to it at run time, as a type assertion does ([Interfaces](#interfaces)); members promoted by [struct embedding](#struct-type-embedding) |
+| `RecvGenerator` | a method whose receiver is `this ref T` | a `ж<T>` overload of each pointer-receiver method, so it can be called on a box |
 | `ImplementGenerator` | `[assembly: GoImplement<T, I>]` | the code that lets `T` or `*T` be used as interface `I` ([Interfaces](#interfaces)) |
 | `ImplicitConvGenerator` | `[assembly: GoImplicitConv<S, T>]` | a conversion operator between two types C# cannot convert directly, such as two named numeric types or two structs with the same underlying type; the C# still writes the conversion where Go does, and the operator lets it compile |
-| `StrGenerator` | `[GoStr]` on a method | for a function that takes its string as an `sstring` (golib's stack-only string view, a `ref struct`), the matching `@string` overload ([Strings](#strings-string-and-sstring)) |
+| `StrGenerator` | a method with an `sstring` parameter | for a function that takes its string as an `sstring` (golib's stack-only string view, a `ref struct`), the matching `@string` overload ([Strings](#strings-string-and-sstring)) |
 | `PartialStubGenerator` | a `partial` method with no body | a stub that throws, when no hand-written body exists ([Functions Without a Go Body](#functions-without-a-go-body)) |
 | `NoInliningPartialGenerator` | a `partial` method with a body and no other declaration | the method's declaring part, carrying `[MethodImpl(MethodImplOptions.NoInlining)]`, so the JIT never inlines the method and `runtime.Caller` still sees its frame ([A `partial` method with a body keeps its own frame](#a-partial-method-with-a-body-keeps-its-own-frame)) |
 
-### A `[GoType]` struct lists only its fields
+### A converted struct lists only its fields
 
 The converter writes a Go struct as a C# `partial struct` that holds only the fields. `partial` lets
 `TypeGenerator` supply the other half: constructors, the `==` operator, `ToString`, and one field
@@ -10954,10 +10956,10 @@ Reading the C# line by line:
 
 ### A pointer-receiver method gains a box overload
 
-A Go method with a pointer receiver usually becomes a C# extension method on `ref T`, marked `[GoRecv]`.
+A Go method with a pointer receiver usually becomes a C# extension method on `ref T`.
 The `ref` lets the method change the caller's value, as Go's pointer receiver does
 ([Functions and Methods](#functions-and-methods)). A method with a value receiver takes `T` itself and
-has no `[GoRecv]`.
+gets no second overload.
 
 <!-- source: src/tests/Behavioral/NamedInterfacePointerMethodSet/main.go:32-76 -->
 ```go
@@ -10990,7 +10992,7 @@ call reads exactly like the Go.
 
 **A method that needs its receiver as a real pointer is written on `ж<T>` directly.** Examples are taking
 a field's address (`&c.n`), returning the receiver, storing or comparing it, and using it inside a
-closure. Such a method has no `[GoRecv]` and needs no generated overload. Here the receiver is stored in
+closure. Such a method needs no generated overload. Here the receiver is stored in
 a struct's pointer field:
 
 <!-- source: src/tests/Behavioral/DirectBoxReceiverPassedWhole/main.go:5-34 -->
@@ -11493,7 +11495,7 @@ public static any /*val*/ Load(this ref Value v) {
 The file uses the same shapes the converter emits, so callers see no difference:
 - `atomic_package` is the `static partial class` that holds the Go package's members, so a Go method
   becomes a C# extension method. See [Package Conversion](#package-conversion).
-- `[GoType]` marks a Go type. `[GoRecv]` marks a method with a Go pointer receiver, written
+- A `partial` type is a Go type. A method with a Go pointer receiver is written
   `this ref Value v`; a source generator adds the overload that takes a pointer. See
   [Functions and Methods](#functions-and-methods) and [Source Generators](#source-generators).
 
@@ -11966,7 +11968,7 @@ partial struct acceptRange {
 }
 ```
 
-`[GoType]` marks a converted Go type that a [source generator](#source-generators) completes ([Struct Types](#struct-types)). `uint8` is an alias for C# `byte`, declared in each project file ([Integer Types and Arithmetic](#integer-types-and-arithmetic)).
+A [source generator](#source-generators) completes each converted Go type ([Struct Types](#struct-types)). `uint8` is an alias for C# `byte`, declared in each project file ([Integer Types and Arithmetic](#integer-types-and-arithmetic)).
 
 A statement's trailing comment follows the statement's last C# line, after one space. It does not keep Go's column alignment, because the converted lines have different lengths. Here `first` is a lookup table and `xx` a constant of the same package:
 
