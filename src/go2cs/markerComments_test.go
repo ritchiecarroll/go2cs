@@ -122,8 +122,8 @@ func TestGoCommentsAreNeverMarkers(t *testing.T) {
 	// pointer-to-array type), and the attribute where none can (a lambda, a local function). A map key's
 	// dims are the dims comment directly before the key type argument, through any pointers (section 11).
 	for _, want := range []string{
-		"[GoType(\"[2]array<nint>\")] /*[2][3]*/ partial struct nn;",
-		"[GoType(\"ж<array<byte>>\")] /*[4]*/ partial class P;",
+		"/*[2][3]*/ partial struct nn /*[2]array<nint>*/;",
+		"/*[4]*/ partial class P /*ж<array<byte>>*/;",
 		"internal /*[3]*/ ж<array<nint>> p;",
 		"internal /*[3]*/ map</*[2]*/ array<@string>, array<nint>> m;",
 		"internal ж<map</*[3]*/ array<byte>, nint>> pm;",

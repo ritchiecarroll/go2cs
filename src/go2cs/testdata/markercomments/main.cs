@@ -17,20 +17,20 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Inner {
+partial struct Inner {
     internal nint n;
 }
 
-[GoType] partial interface Reader {
+partial interface Reader {
     nint Read();
 }
 
-[GoType] partial struct inline {
+partial struct inline {
 /* embed*/
     internal nint x;
 }
 
-[GoType] partial struct marked {
+partial struct marked {
 /* embed*/
     internal nint a;
     /* embed*/
@@ -42,7 +42,7 @@ partial class main_package {
     /*embed*/ internal nint @int;
 }
 
-[GoType] partial struct tagged {
+partial struct tagged {
     public @string Plain; /*`json:"plain"`*/
     public nint Grouped, Pair; /*`json:"g"`*/
     public nint Mixed; /*`json:"m"`*/
@@ -60,11 +60,11 @@ partial class main_package {
     /*embed*/ public fmt_package.Stringer Stringer; /*`json:"str"`*/
 }
 
-[GoType("[2]array<nint>")] /*[2][3]*/ partial struct nn;
+/*[2][3]*/ partial struct nn /*[2]array<nint>*/;
 
-[GoType("ж<array<byte>>")] /*[4]*/ partial class P;
+/*[4]*/ partial class P /*ж<array<byte>>*/;
 
-[GoType] partial struct holder {
+partial struct holder {
     internal /*[3]*/ ж<array<nint>> p;
     internal /*[3]*/ map</*[2]*/ array<@string>, array<nint>> m;
     internal ж<map</*[3]*/ array<byte>, nint>> pm;
