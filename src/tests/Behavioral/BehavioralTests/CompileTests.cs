@@ -718,6 +718,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGenericFuncDecl() => CheckTarget("GenericFuncDecl");
 
     [TestMethod]
+    public void CheckGenericFuncInstantiationArg() => CheckTarget("GenericFuncInstantiationArg");
+
+    [TestMethod]
     public void CheckGenericInterfaceConstraint() => CheckTarget("GenericInterfaceConstraint");
 
     [TestMethod]

@@ -686,6 +686,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGenericFuncDecl() => CheckTarget("GenericFuncDecl");
 
     [TestMethod]
+    public void CheckGenericFuncInstantiationArg() => CheckTarget("GenericFuncInstantiationArg");
+
+    [TestMethod]
     public void CheckGenericInterfaceConstraint() => CheckTarget("GenericInterfaceConstraint");
 
     [TestMethod]
