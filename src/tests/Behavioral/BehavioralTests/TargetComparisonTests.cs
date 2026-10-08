@@ -202,6 +202,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckByteTableStringVar() => CheckTarget("ByteTableStringVar");
 
     [TestMethod]
+    public void CheckCallerLineCallSite() => CheckTarget("CallerLineCallSite");
+
+    [TestMethod]
     public void CheckCanonicalTypeIdentity() => CheckTarget("CanonicalTypeIdentity");
 
     [TestMethod]

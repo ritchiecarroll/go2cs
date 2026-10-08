@@ -3235,6 +3235,10 @@ partial class runtime_package
         public int ILOffset;
         public bool ReturnAddress;
 
+        // The frame is suspended in the call AT ILOffset itself, read at capture from the callee (see
+        // suspendedAtReportedCall), so the line is that call's rather than returnSiteILOffset's answer.
+        public bool SuspendedAtReportedCall;
+
         // A method value's `-fm` wrapper (goMethodValueName): Go's traceback never shows one, so
         // Frames.Next skips it. Known at RESOLVE time only -- it needs the PDB, which capture never reads
         // -- so runtime.Callers still COUNTS the wrapper's pc where Go's does not.
@@ -3265,7 +3269,7 @@ partial class runtime_package
                     // The LINE is the call's (Go's pc-1): see returnSiteILOffset. The NAME below is read
                     // at the REPORTED offset, as it always was -- a literal is named by the frame's own
                     // line, never by the method's first sequence point.
-                    int callSite = ReturnAddress ? returnSiteILOffset(Method, ILOffset) : -1;
+                    int callSite = !ReturnAddress ? -1 : SuspendedAtReportedCall ? ILOffset : returnSiteILOffset(Method, ILOffset);
                     (string file, int line) = goILPosition(Method, callSite >= 0 ? callSite : ILOffset);
                     File = file;
                     Line = line;
@@ -3291,7 +3295,7 @@ partial class runtime_package
     // TieredCompilation=0 default a site has one pc for the life of the process (pinned by GolibTests'
     // LazyCallersTests.ACallSiteHasOnePcAcrossCalls); only a tiering promotion, which recompiles the
     // method, can give the same site a second one.
-    private readonly record struct CallSiteKey(System.Reflection.Module Module, int MethodToken, int ILOffset, bool ReturnAddress);
+    private readonly record struct CallSiteKey(System.Reflection.Module Module, int MethodToken, int ILOffset, bool ReturnAddress, bool SuspendedAtReportedCall);
 
     private static readonly object s_callerTableLock = new();
     private static readonly Dictionary<string, nuint> s_callerTokens = new();
@@ -3437,7 +3441,7 @@ partial class runtime_package
             if (count >= len(pc))
                 return count;
 
-            pc[count++] = root is null ? internCallerFrame(method, frame) : internRootFrame(root.Function, root.File, root.Line);
+            pc[count++] = root is null ? internCallerFrame(method, frame, callee: i > 0 ? frames[i - 1].GetMethod() : null) : internRootFrame(root.Function, root.File, root.Line);
         }
 
         // GO'S BOTTOM FRAME. Go's unwinder ends every goroutine at runtime.goexit, the return address
@@ -3628,13 +3632,13 @@ partial class runtime_package
                 site.RemoveAt(site.Count - 1);
 
                 foreach (StackFrame siteFrame in site)
-                    spliced.Add(internCallerFrame(siteFrame.GetMethod()!, siteFrame, returnAddress: !isFaultingFrame(siteFrame, raw)));
+                    spliced.Add(internCallerFrame(siteFrame.GetMethod()!, siteFrame, returnAddress: !isFaultingFrame(siteFrame, raw), callee: rawCalleeOf(siteFrame, raw)));
 
                 return spliced;
             }
 
             foreach (StackFrame siteFrame in site)
-                spliced.Add(internCallerFrame(siteFrame.GetMethod()!, siteFrame, returnAddress: !isFaultingFrame(siteFrame, raw)));
+                spliced.Add(internCallerFrame(siteFrame.GetMethod()!, siteFrame, returnAddress: !isFaultingFrame(siteFrame, raw), callee: rawCalleeOf(siteFrame, raw)));
         }
 
         return spliced;
@@ -3840,23 +3844,35 @@ partial class runtime_package
     // of every frame of a panic site but its innermost, the faulting instruction. Go resolves such a
     // PC at pc-1, the call instruction, so its line is the line of the call; see returnSiteILOffset for
     // why the CLR's own answer is not that line under the full-opt JIT. The key carries the mode, so one
-    // IL offset seen both ways is two sites.
-    private static uintptr internCallerFrame(System.Reflection.MethodBase method, StackFrame frame, bool returnAddress = true)
+    // IL offset seen both ways is two sites. `callee` is the raw frame directly inside this one (the method
+    // this frame is suspended calling, or its generated forwarder), null where none is known; see
+    // suspendedAtReportedCall. It joins the key too: one reported offset can be either kind of mapping.
+    private static uintptr internCallerFrame(System.Reflection.MethodBase method, StackFrame frame, bool returnAddress = true, System.Reflection.MethodBase? callee = null)
     {
         int ilOffset = frame.GetILOffset();
-        CallSiteKey key = new(method.Module, method.MetadataToken, ilOffset, returnAddress);
+        bool atReportedCall = returnAddress && callee is not null && suspendedAtReportedCall(method, ilOffset, callee);
+        CallSiteKey key = new(method.Module, method.MetadataToken, ilOffset, returnAddress, atReportedCall);
 
         lock (s_callerTableLock)
         {
             if (s_callSiteTokens.TryGetValue(key, out nuint token))
                 return token;
 
-            s_callerRecords.Add(new CallerFrameRecord { Method = method, ILOffset = ilOffset, ReturnAddress = returnAddress });
+            s_callerRecords.Add(new CallerFrameRecord { Method = method, ILOffset = ilOffset, ReturnAddress = returnAddress, SuspendedAtReportedCall = atReportedCall });
             // The middle of the new site's span; never 0, so Go's zero-pc sentinel stays invalid.
             token = callerSpanStart(s_callerRecords.Count - 1) + ((nuint)1 << (CallerSpanShift - 1));
             s_callSiteTokens[key] = token;
             return token;
         }
+    }
+
+    // The method of the raw frame directly inside `siteFrame` in `raw` (the frame it is suspended calling),
+    // or null when `siteFrame` is the innermost or is not in `raw`.
+    private static System.Reflection.MethodBase? rawCalleeOf(StackFrame siteFrame, StackFrame[] raw)
+    {
+        int index = Array.IndexOf(raw, siteFrame);
+
+        return index > 0 ? raw[index - 1].GetMethod() : null;
     }
 
     // Whether a panic site's frame is the exception's TOP frame -- the faulting instruction (a throw, a
@@ -3907,6 +3923,64 @@ partial class runtime_package
 
         return index < calls.Length ? calls[index] : -1;
     }
+
+    // THE REPORTED CALL ITSELF. returnSiteILOffset reads a reported offset that is not a statement boundary
+    // as a PREVIOUS call's record, which is the CLR's usual answer. It is not the only one: when the last
+    // call-like IL instruction before the suspended call in its statement is a value-type `newobj` (a struct
+    // literal `P{1, 2}`, or the params wrapper of a variadic call), the CLR reports the SUSPENDED call's own
+    // offset, under the tiered and the full-opt JIT alike. "Strictly after" then skips to the next
+    // statement's first call, and the caller's line lands one statement late (logrus's
+    // TestNestedLoggingReportsCorrectCaller at `llog.Info(looksDeliciousˢ)`; measured 2026-10-06 on a probe
+    // whose struct-arg and one-literal-variadic shapes, method and plain function alike, read the next
+    // statement while a literal argument with no `newobj` read right).
+    //
+    // The IL alone cannot tell the two readings apart; the CALLEE can. The frame is suspended calling the
+    // method of the raw frame directly inside it, so when the call at the reported offset targets that
+    // method (or, for a virtual or interface call, a method of the same name the callee implements), the
+    // reported offset IS the suspended call. Anything else, including a callee the JIT inlined away and so
+    // left no frame for, keeps returnSiteILOffset's reading.
+    private static bool suspendedAtReportedCall(System.Reflection.MethodBase method, int ilOffset, System.Reflection.MethodBase callee)
+    {
+        if (ilOffset < 0 || callSiteOffsets(method) is not { } calls || Array.BinarySearch(calls, ilOffset) < 0)
+            return false;
+
+        if (callTarget(method, ilOffset) is not { } target)
+            return false;
+
+        if (target.Module == callee.Module && target.MetadataToken == callee.MetadataToken)
+            return true;
+
+        // A virtual or interface call names the slot; the frame is the override or the implementation.
+        return (target.IsVirtual || target.IsAbstract) &&
+            (callee.Name == target.Name || callee.Name.EndsWith("." + target.Name, StringComparison.Ordinal));
+    }
+
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<(System.Reflection.MethodBase, int), System.Reflection.MethodBase?> s_callTargets = new();
+
+    // The method a call-like instruction at `ilOffset` names (call, callvirt or newobj; calli names none),
+    // resolved in the caller's generic context, or null when it cannot be read. Cached per site.
+    private static System.Reflection.MethodBase? callTarget(System.Reflection.MethodBase method, int ilOffset) =>
+        s_callTargets.GetOrAdd((method, ilOffset), static key =>
+        {
+            (System.Reflection.MethodBase m, int offset) = key;
+
+            try
+            {
+                byte[]? il = m.GetMethodBody()?.GetILAsByteArray();
+
+                if (il is null || offset + 5 > il.Length || il[offset] is not (0x28 or 0x6F or 0x73))
+                    return null;
+
+                Type[]? typeArguments = m.DeclaringType is { IsGenericType: true } declaring ? declaring.GetGenericArguments() : null;
+                Type[]? methodArguments = m.IsGenericMethod ? m.GetGenericArguments() : null;
+
+                return m.Module.ResolveMethod(BitConverter.ToInt32(il, offset + 1), typeArguments, methodArguments);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        });
 
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, int[]?> s_callSiteOffsets = new();
 

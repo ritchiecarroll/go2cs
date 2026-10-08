@@ -199,6 +199,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckByteTableStringVar() => CheckTarget("ByteTableStringVar");
 
     [TestMethod]
+    public void CheckCallerLineCallSite() => CheckTarget("CallerLineCallSite");
+
+    [TestMethod]
     public void CheckCanonicalTypeIdentity() => CheckTarget("CanonicalTypeIdentity");
 
     [TestMethod]
