@@ -80,16 +80,16 @@ internal static void Main() {
     fmt.Println(throughPointerˢ, (~rows[0].ptr).x, (~rows[1].ptr).x);
 }
 
-[GoType] partial struct point {
+partial struct point {
     internal nint x, y;
 }
 
-[GoType] partial struct row {
+partial struct row {
     internal point v;
     internal ж<point> ptr;
 }
 
-[GoRecv] internal static nint bump(this ref point p) {
+internal static nint bump(this ref point p) {
     p.x++;
     return p.x + p.y;
 }

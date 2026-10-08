@@ -120,7 +120,7 @@ internal static error release(this ж<Process> Ꮡp) {
     return default!;
 }
 
-[GoRecv] internal static void closeHandle(this ref Process p) {
+internal static void closeHandle(this ref Process p) {
     syscall.CloseHandle(((syscallꓸHandle)p.handle));
 }
 
@@ -225,11 +225,11 @@ internal static time.Duration ftToDuration(ж<syscall.Filetime> Ꮡft) {
     return ((time.Duration)(n * 100)) * time.ΔNanosecond;
 }
 
-[GoRecv] internal static time.Duration userTime(this ref ProcessState p) {
+internal static time.Duration userTime(this ref ProcessState p) {
     return ftToDuration(p.rusage.of(syscall.Rusage.ᏑUserTime));
 }
 
-[GoRecv] internal static time.Duration systemTime(this ref ProcessState p) {
+internal static time.Duration systemTime(this ref ProcessState p) {
     return ftToDuration(p.rusage.of(syscall.Rusage.ᏑKernelTime));
 }
 

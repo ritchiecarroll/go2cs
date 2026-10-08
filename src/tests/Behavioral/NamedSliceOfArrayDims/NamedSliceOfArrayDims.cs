@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[16]byte")] partial struct UUID;
+partial struct UUID /*[16]byte*/;
 
-[GoType("[]UUID")] partial struct UUIDs;
+partial struct UUIDs /*[]UUID*/;
 
 public static slice<@string> Strings(this UUIDs us) {
     var @out = new slice<@string>(len(us));
@@ -18,7 +18,7 @@ public static slice<@string> Strings(this UUIDs us) {
     return @out;
 }
 
-[GoType("[]array<nint>")] partial struct Rows;
+partial struct Rows /*[]array<nint>*/;
 
 public static nint Sum(this Rows r) {
     nint total = 0;

@@ -17,7 +17,7 @@ partial class raw_package {
 
 // TextReader parses a text format trace with only very basic validation
 // into an event stream.
-[GoType] partial struct TextReader {
+partial struct TextReader {
     internal version.Version v;
     internal slice<Δevent.Spec> specs;
     internal map<@string, Δevent.Type> names;
@@ -62,12 +62,12 @@ public static (ж<TextReader>, error) NewTextReader(io.Reader r) {
 }
 
 // Version returns the version of the trace that we're reading.
-[GoRecv] public static version.Version Version(this ref TextReader r) {
+public static version.Version Version(this ref TextReader r) {
     return r.v;
 }
 
 // ReadEvent reads and returns the next trace event in the text stream.
-[GoRecv] public static (Event, error) ReadEvent(this ref TextReader r) {
+public static (Event, error) ReadEvent(this ref TextReader r) {
     var (line, err) = r.nextLine();
     if (err != default!) {
         return (new Event(nil), err);
@@ -121,7 +121,7 @@ public static (ж<TextReader>, error) NewTextReader(io.Reader r) {
     ), default!);
 }
 
-[GoRecv] internal static (@string, error) nextLine(this ref TextReader r) {
+internal static (@string, error) nextLine(this ref TextReader r) {
     while (ᐧ) {
         if (!r.s.Scan()) {
             {

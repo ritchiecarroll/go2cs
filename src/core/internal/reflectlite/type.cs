@@ -36,7 +36,7 @@ partial class reflectlite_package {
 // Type values are comparable, such as with the == operator,
 // so they can be used as map keys.
 // Two Type values are equal if they represent identical types.
-[GoType] partial interface ΔType {
+partial interface ΔType {
 // Methods applicable to all types.
 
     // Name returns the type's name within its package for a defined type.
@@ -84,7 +84,7 @@ public static abiꓸKind Slice => /* abi.Slice */ 23;
 public static abiꓸKind ΔString => /* abi.String */ 24;
 public static abiꓸKind Struct => /* abi.Struct */ 25;
 
-[GoType] partial struct rtype {
+partial struct rtype {
     public partial ref ж<@internal.abi_package.Type> Type { get; }
 }
 
@@ -111,7 +111,7 @@ public static abiꓸKind Struct => /* abi.Struct */ 25;
 //
 // If a name starts with "*", then the exported bit represents
 // whether the pointed to type is exported.
-[GoType] partial struct Δname {
+partial struct Δname {
     internal ж<byte> bytes;
 }
 

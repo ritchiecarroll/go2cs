@@ -16,7 +16,7 @@ partial class abi_package {
 // or the functions in compiletype.go to access this type instead.
 // (TODO: this admonition applies to every type in this package.
 // Put it in some shared location?)
-[GoType] partial struct Type {
+partial struct Type {
     public uintptr Size_;
     public uintptr PtrBytes; // number of (prefix) bytes in the type that can contain pointers
     public uint32 Hash;  // hash of type; avoids computation in hash tables
@@ -43,7 +43,7 @@ partial class abi_package {
     public TypeOff PtrToThis; // type for pointer to this type, may be zero
 }
 
-[GoType("num:uint8")] partial struct ΔKind;
+partial struct ΔKind /*num:uint8*/;
 
 public static ΔKind Invalid => /* iota */ 0;
 public static ΔKind Bool => 1;
@@ -76,7 +76,7 @@ public static ΔKind UnsafePointer => 26;
 public static ΔKind KindDirectIface => /* 1 << 5 */ 32;
 public static ΔKind KindMask => /* (1 << 5) - 1 */ 31;
 
-[GoType("num:uint8")] partial struct TFlag;
+partial struct TFlag /*num:uint8*/;
 
 public static TFlag TFlagUncommon => /* 1 << 0 */ 1;
 public static TFlag TFlagExtraStar => /* 1 << 1 */ 2;
@@ -84,11 +84,11 @@ public static TFlag TFlagNamed => /* 1 << 2 */ 4;
 public static TFlag TFlagRegularMemory => /* 1 << 3 */ 8;
 public static TFlag TFlagGCMaskOnDemand => /* 1 << 4 */ 16;
 
-[GoType("num:int32")] partial struct NameOff;
+partial struct NameOff /*num:int32*/;
 
-[GoType("num:int32")] partial struct TypeOff;
+partial struct TypeOff /*num:int32*/;
 
-[GoType("num:int32")] partial struct TextOff;
+partial struct TextOff /*num:int32*/;
 
 // String returns the name of k.
 public static @string String(this ΔKind k) {
@@ -141,30 +141,30 @@ public static ж<Type> TypeFor<T>() {
     return TypeOf(((ж<T>)nil)).Elem(); // only for an interface kind
 }
 
-[GoRecv] public static ΔKind Kind(this ref Type t) {
+public static ΔKind Kind(this ref Type t) {
     return (ΔKind)(t.Kind_ & KindMask);
 }
 
-[GoRecv] public static bool HasName(this ref Type t) {
+public static bool HasName(this ref Type t) {
     return (TFlag)(t.TFlag & TFlagNamed) != 0;
 }
 
 // Pointers reports whether t contains pointers.
-[GoRecv] public static bool Pointers(this ref Type t) {
+public static bool Pointers(this ref Type t) {
     return t.PtrBytes != 0;
 }
 
 // IfaceIndir reports whether t is stored indirectly in an interface value.
-[GoRecv] public static bool IfaceIndir(this ref Type t) {
+public static bool IfaceIndir(this ref Type t) {
     return (ΔKind)(t.Kind_ & KindDirectIface) == 0;
 }
 
 // isDirectIface reports whether t is stored directly in an interface value.
-[GoRecv] public static bool IsDirectIface(this ref Type t) {
+public static bool IsDirectIface(this ref Type t) {
     return (ΔKind)(t.Kind_ & KindDirectIface) != 0;
 }
 
-[GoRecv] public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) {
+public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) {
     if ((TFlag)(t.TFlag & TFlagGCMaskOnDemand) != 0) {
         throw panic("GcSlice can't handle on-demand gcdata types");
     }
@@ -172,7 +172,7 @@ public static ж<Type> TypeFor<T>() {
 }
 
 // Method on non-interface type
-[GoType] partial struct Method {
+partial struct Method {
     public NameOff Name; // name of method
     public TypeOff Mtyp; // method type (without receiver)
     public TextOff Ifn; // fn used in interface call (one-word receiver)
@@ -183,7 +183,7 @@ public static ж<Type> TypeFor<T>() {
 // (if T is a defined type, the uncommonTypes for T and *T have methods).
 // Using a pointer to this struct reduces the overall size required
 // to describe a non-defined type with no methods.
-[GoType] partial struct UncommonType {
+partial struct UncommonType {
     public NameOff PkgPath; // import path; empty for built-in types like int, string
     public uint16 Mcount;  // number of methods
     public uint16 Xcount;  // number of exported methods
@@ -227,13 +227,13 @@ internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string
 }
 
 // Imethod represents a method on an interface type
-[GoType] partial struct Imethod {
+partial struct Imethod {
     public NameOff Name; // name of method
     public TypeOff Typ; // .(*FuncType) underneath
 }
 
 // ArrayType represents a fixed array type.
-[GoType] partial struct ΔArrayType {
+partial struct ΔArrayType {
     public partial ref Type Type { get; }
     public ж<Type> Elem; // array element type
     public ж<Type> Slice; // slice type
@@ -246,7 +246,7 @@ public static ж<Type> Common(this ж<Type> Ꮡt) {
     return Ꮡt;
 }
 
-[GoType("num:nint")] partial struct ΔChanDir;
+partial struct ΔChanDir /*num:nint*/;
 
 public static ΔChanDir RecvDir => /* 1 << iota */ 1;                // <-chan
 public static ΔChanDir SendDir => 2;                // chan<-
@@ -254,55 +254,55 @@ public static ΔChanDir BothDir => /* RecvDir | SendDir */ 3; // chan
 public static ΔChanDir InvalidDir => 0;
 
 // ChanType represents a channel type
-[GoType] partial struct ChanType {
+partial struct ChanType {
     public partial ref Type Type { get; }
     public ж<Type> Elem;
     public ΔChanDir Dir;
 }
 
-[GoType] partial struct structTypeUncommon {
+partial struct structTypeUncommon {
     public partial ref ΔStructType StructType { get; }
     internal UncommonType u;
 }
 
 // go2cs generated this placeholder — func ChanDir is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoType("dyn")] internal partial struct Uncommon_u {
+internal partial struct Uncommon_u /*dyn*/ {
     public partial ref PtrType PtrType { get; }
     internal UncommonType u;
 }
 
-[GoType("dyn")] internal partial struct Uncommon_uᴛ1 {
+internal partial struct Uncommon_uᴛ1 /*dyn*/ {
     public partial ref ΔFuncType FuncType { get; }
     internal UncommonType u;
 }
 
-[GoType("dyn")] internal partial struct Uncommon_uᴛ2 {
+internal partial struct Uncommon_uᴛ2 /*dyn*/ {
     public partial ref SliceType SliceType { get; }
     internal UncommonType u;
 }
 
-[GoType("dyn")] internal partial struct Uncommon_uᴛ3 {
+internal partial struct Uncommon_uᴛ3 /*dyn*/ {
     public partial ref ΔArrayType ArrayType { get; }
     internal UncommonType u;
 }
 
-[GoType("dyn")] internal partial struct Uncommon_uᴛ4 {
+internal partial struct Uncommon_uᴛ4 /*dyn*/ {
     public partial ref ChanType ChanType { get; }
     internal UncommonType u;
 }
 
-[GoType("dyn")] internal partial struct Uncommon_uᴛ5 {
+internal partial struct Uncommon_uᴛ5 /*dyn*/ {
     internal partial ref mapType mapType { get; }
     internal UncommonType u;
 }
 
-[GoType("dyn")] internal partial struct Uncommon_uᴛ6 {
+internal partial struct Uncommon_uᴛ6 /*dyn*/ {
     public partial ref ΔInterfaceType InterfaceType { get; }
     internal UncommonType u;
 }
 
-[GoType("dyn")] internal partial struct Uncommon_uᴛ7 {
+internal partial struct Uncommon_uᴛ7 /*dyn*/ {
     public partial ref Type Type { get; }
     internal UncommonType u;
 }
@@ -366,20 +366,20 @@ public static ж<ΔInterfaceType> InterfaceType(this ж<Type> Ꮡt) {
 }
 
 // Size returns the size of data with type t.
-[GoRecv] public static uintptr Size(this ref Type t) {
+public static uintptr Size(this ref Type t) {
     return t.Size_;
 }
 
 // Align returns the alignment of data with type t.
-[GoRecv] public static nint Align(this ref Type t) {
+public static nint Align(this ref Type t) {
     return (nint)t.Align_;
 }
 
-[GoRecv] public static nint FieldAlign(this ref Type t) {
+public static nint FieldAlign(this ref Type t) {
     return (nint)t.FieldAlign_;
 }
 
-[GoType] partial struct ΔInterfaceType {
+partial struct ΔInterfaceType {
     public partial ref Type Type { get; }
     public ΔName PkgPath;      // import path
     public slice<Imethod> Methods; // sorted by hash
@@ -404,13 +404,13 @@ public static nint NumMethod(this ж<Type> Ꮡt) {
 }
 
 // NumMethod returns the number of interface methods in the type's method set.
-[GoRecv] public static nint NumMethod(this ref ΔInterfaceType t) {
+public static nint NumMethod(this ref ΔInterfaceType t) {
     return len(t.Methods);
 }
 
 // go2cs generated this placeholder — func Key is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoType] partial struct SliceType {
+partial struct SliceType {
     public partial ref Type Type { get; }
     public ж<Type> Elem; // slice element type
 }
@@ -426,7 +426,7 @@ public static nint NumMethod(this ж<Type> Ꮡt) {
 //		uncommonType
 //		[2]*rtype    // [0] is in, [1] is out
 //	}
-[GoType] partial struct ΔFuncType {
+partial struct ΔFuncType {
     public partial ref Type Type { get; }
     public uint16 InCount;
     public uint16 OutCount; // top bit is set if last input parameter is ...
@@ -436,11 +436,11 @@ public static ж<Type> In(this ж<ΔFuncType> Ꮡt, nint i) {
     return Ꮡt.InSlice()[i];
 }
 
-[GoRecv] public static nint NumIn(this ref ΔFuncType t) {
+public static nint NumIn(this ref ΔFuncType t) {
     return (nint)t.InCount;
 }
 
-[GoRecv] public static nint NumOut(this ref ΔFuncType t) {
+public static nint NumOut(this ref ΔFuncType t) {
     return (nint)((uint16)(t.OutCount & ((1 << (int)(15)) - 1)));
 }
 
@@ -452,26 +452,26 @@ public static ж<Type> Out(this ж<ΔFuncType> Ꮡt, nint i) {
 
 // go2cs generated this placeholder — func OutSlice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoRecv] public static bool IsVariadic(this ref ΔFuncType t) {
+public static bool IsVariadic(this ref ΔFuncType t) {
     return (uint16)(t.OutCount & ((uint16)(1 << (int)(15)))) != 0;
 }
 
-[GoType] partial struct PtrType {
+partial struct PtrType {
     public partial ref Type Type { get; }
     public ж<Type> Elem; // pointer element (pointed at) type
 }
 
-[GoType] partial struct StructField {
+partial struct StructField {
     public ΔName Name;    // name is always non-empty
     public ж<Type> Typ; // type of field
     public uintptr Offset; // byte offset of field
 }
 
-[GoRecv] public static bool Embedded(this ref StructField f) {
+public static bool Embedded(this ref StructField f) {
     return f.Name.IsEmbedded();
 }
 
-[GoType] partial struct ΔStructType {
+partial struct ΔStructType {
     public partial ref Type Type { get; }
     public ΔName PkgPath;
     public slice<StructField> Fields;
@@ -502,7 +502,7 @@ public static ж<Type> Out(this ж<ΔFuncType> Ꮡt, nint i) {
 // Note: this encoding must match here and in:
 //   cmd/compile/internal/reflectdata/reflect.go
 //   cmd/link/internal/ld/decodesym.go
-[GoType] partial struct ΔName {
+partial struct ΔName {
     public ж<byte> Bytes;
 }
 

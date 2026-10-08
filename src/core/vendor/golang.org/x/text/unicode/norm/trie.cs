@@ -5,12 +5,12 @@ namespace go.vendor.golang.org.x.text.unicode;
 
 partial class norm_package {
 
-[GoType] partial struct valueRange {
+partial struct valueRange {
     internal uint16 value; // header: value:stride
     internal byte lo, hi;   // header: lo:n
 }
 
-[GoType] partial struct sparseBlocks {
+partial struct sparseBlocks {
     internal slice<valueRange> values;
     internal slice<uint16> offset;
 }
@@ -36,7 +36,7 @@ internal static ж<nfkcTrie> nfkcData = newNfkcTrie(0);
 // For n < t.cutoff, the block is a simple lookup table. Otherwise, the block
 // is a list of ranges with an accompanying value. Given a matching range r,
 // the value for b is by r.value + (b - r.lo) * stride.
-[GoRecv] internal static uint16 lookup(this ref sparseBlocks t, uint32 n, byte b) {
+internal static uint16 lookup(this ref sparseBlocks t, uint32 n, byte b) {
     var offset = t.offset[n];
     var header = t.values[offset];
     var lo = (uint16)(offset + 1);

@@ -72,7 +72,7 @@ internal static ж<bigꓸInt> bigOne = big.NewInt(1);
 // The value of the modulus N is considered secret by this library and protected
 // from leaking through timing side-channels. However, neither the value of the
 // exponent E nor the precise bit size of N are similarly protected.
-[GoType] partial struct PublicKey {
+partial struct PublicKey {
     public ж<bigꓸInt> N; // modulus
     public nint E;     // public exponent
 }
@@ -82,12 +82,12 @@ internal static ж<bigꓸInt> bigOne = big.NewInt(1);
 
 // Size returns the modulus size in bytes. Raw signatures and ciphertexts
 // for or by this public key will have the same size.
-[GoRecv] public static nint Size(this ref PublicKey pub) {
+public static nint Size(this ref PublicKey pub) {
     return (pub.N.BitLen() + 7) / 8;
 }
 
 // Equal reports whether pub and x have the same value.
-[GoRecv] public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) {
+public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) {
     var (xx, ok) = x._<ж<PublicKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -97,7 +97,7 @@ internal static ж<bigꓸInt> bigOne = big.NewInt(1);
 
 // OAEPOptions is an interface for passing options to OAEP decryption using the
 // crypto.Decrypter interface.
-[GoType] partial struct OAEPOptions {
+partial struct OAEPOptions {
     // Hash is the hash function that will be used when generating the mask.
     public crypto.Hash Hash;
     // MGFHash is the hash function used for MGF1.
@@ -109,7 +109,7 @@ internal static ж<bigꓸInt> bigOne = big.NewInt(1);
 }
 
 // A PrivateKey represents an RSA key
-[GoType] partial struct PrivateKey {
+partial struct PrivateKey {
     public partial ref PublicKey PublicKey { get; }            // public part.
     public ж<bigꓸInt> D; // private exponent
     public slice<ж<bigꓸInt>> Primes; // prime factors of N, has >= 2 elements.
@@ -126,7 +126,7 @@ public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡpriv) {
 
 // Equal reports whether priv and x have equivalent values. It ignores
 // Precomputed values.
-[GoRecv] public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) {
+public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) {
     var (xx, ok) = x._<ж<PrivateKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -219,7 +219,7 @@ public static (slice<byte> plaintext, error err) Decrypt(this ж<PrivateKey> Ꮡ
     }}
 }
 
-[GoType] partial struct PrecomputedValues {
+partial struct PrecomputedValues {
     public ж<bigꓸInt> Dp, Dq; // D mod (P-1) (or mod Q-1)
     public ж<bigꓸInt> Qinv; // Q^-1 mod P
     // CRTValues is used for the 3rd and subsequent primes. Due to a
@@ -236,7 +236,7 @@ public static (slice<byte> plaintext, error err) Decrypt(this ж<PrivateKey> Ꮡ
 }
 
 // CRTValue contains the precomputed Chinese remainder theorem values.
-[GoType] partial struct CRTValue {
+partial struct CRTValue {
     public ж<bigꓸInt> Exp; // D mod (prime-1).
     public ж<bigꓸInt> Coeff; // R·Coeff ≡ 1 mod Prime.
     public ж<bigꓸInt> R; // product of primes prior to this (inc p and q).
@@ -249,7 +249,7 @@ internal static readonly @string cryptoRsaMissingPrimesˢ = "crypto/rsa: missing
 // It returns nil if the key is valid, or else an error describing a problem.
 //
 // It runs faster on valid keys if run after [Precompute].
-[GoRecv] public static error Validate(this ref PrivateKey priv) {
+public static error Validate(this ref PrivateKey priv) {
     // We can operate on keys based on d alone, but it isn't possible to encode
     // with [crypto/x509.MarshalPKCS1PrivateKey], which unfortunately doesn't
     // return an error.
@@ -528,7 +528,7 @@ public static error ErrVerification = errors.New("crypto/rsa: verification error
 
 // Precompute performs some calculations that speed up private key operations
 // in the future. It is safe to run on non-validated private keys.
-[GoRecv] public static void Precompute(this ref PrivateKey priv) {
+public static void Precompute(this ref PrivateKey priv) {
     if (priv.Precomputed.fips != nil) {
         return;
     }
@@ -546,7 +546,7 @@ internal static readonly @string cryptoRsaMissingPrivateˢ = "crypto/rsa: missin
 internal static readonly @string cryptoRsaPrimePIsNilˢ = "crypto/rsa: prime P is nil"u8;
 internal static readonly @string cryptoRsaPrimeQIsNilˢ = "crypto/rsa: prime Q is nil"u8;
 
-[GoRecv] internal static (PrecomputedValues, error) precompute(this ref PrivateKey priv) {
+internal static (PrecomputedValues, error) precompute(this ref PrivateKey priv) {
     PrecomputedValues precomputed = default!;
     if (priv.N == nil) {
         return (precomputed, errors.New(cryptoRsaMissingPublicˢ));
@@ -595,7 +595,7 @@ internal static readonly @string cryptoRsaPrimeFactorIsˢ = "crypto/rsa: prime f
 internal static readonly @string cryptoRsaPrimeFactorIs1ˢ = "crypto/rsa: prime factor is <= 1"u8;
 internal static readonly @string cryptoRsaPrimeFactorsAreˢ = "crypto/rsa: prime factors are not relatively prime"u8;
 
-[GoRecv] internal static (PrecomputedValues, error) precomputeLegacy(this ref PrivateKey priv) {
+internal static (PrecomputedValues, error) precomputeLegacy(this ref PrivateKey priv) {
     PrecomputedValues precomputed = default!;
     var (k, err) = rsa.NewPrivateKeyWithoutCRT(priv.N.Bytes(), priv.E, priv.D.Bytes());
     if (err != default!) {

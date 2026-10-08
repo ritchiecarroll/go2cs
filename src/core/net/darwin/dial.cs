@@ -28,13 +28,13 @@ internal const bool defaultMPTCPEnabledDial = false;
 //	3 == MPTCP enabled on dialers only
 internal static ж<godebug.Setting> multipathtcp = godebug.New("multipathtcp"u8);
 
-[GoType("num:uint8")] partial struct mptcpStatusDial;
+partial struct mptcpStatusDial /*num:uint8*/;
 
 internal static mptcpStatusDial mptcpUseDefaultDial => /* iota */ 0;
 internal static mptcpStatusDial mptcpEnabledDial => 1;
 internal static mptcpStatusDial mptcpDisabledDial => 2;
 
-[GoRecv] internal static bool get(this ref mptcpStatusDial m) {
+internal static bool get(this ref mptcpStatusDial m) {
     var exprᴛ1 = m;
     if (exprᴛ1 == mptcpEnabledDial) {
         return true;
@@ -51,7 +51,7 @@ internal static mptcpStatusDial mptcpDisabledDial => 2;
     return defaultMPTCPEnabledDial;
 }
 
-[GoRecv] internal static void set(this ref mptcpStatusDial m, bool use) {
+internal static void set(this ref mptcpStatusDial m, bool use) {
     if (use){
         m = mptcpEnabledDial;
     } else {
@@ -59,13 +59,13 @@ internal static mptcpStatusDial mptcpDisabledDial => 2;
     }
 }
 
-[GoType("num:uint8")] partial struct mptcpStatusListen;
+partial struct mptcpStatusListen /*num:uint8*/;
 
 internal static mptcpStatusListen mptcpUseDefaultListen => /* iota */ 0;
 internal static mptcpStatusListen mptcpEnabledListen => 1;
 internal static mptcpStatusListen mptcpDisabledListen => 2;
 
-[GoRecv] internal static bool get(this ref mptcpStatusListen m) {
+internal static bool get(this ref mptcpStatusListen m) {
     var exprᴛ1 = m;
     if (exprᴛ1 == mptcpEnabledListen) {
         return true;
@@ -83,7 +83,7 @@ internal static mptcpStatusListen mptcpDisabledListen => 2;
     return defaultMPTCPEnabledListen;
 }
 
-[GoRecv] internal static void set(this ref mptcpStatusListen m, bool use) {
+internal static void set(this ref mptcpStatusListen m, bool use) {
     if (use){
         m = mptcpEnabledListen;
     } else {
@@ -98,7 +98,7 @@ internal static mptcpStatusListen mptcpDisabledListen => 2;
 // is therefore equivalent to just calling the [Dial] function.
 //
 // It is safe to call Dialer's methods concurrently.
-[GoType] partial struct Dialer {
+partial struct Dialer {
     // Timeout is the maximum amount of time a dial will wait for
     // a connect to complete. If Deadline is also set, it may fail
     // earlier.
@@ -194,7 +194,7 @@ internal static mptcpStatusListen mptcpDisabledListen => 2;
     internal mptcpStatusDial mptcpStatus;
 }
 
-[GoRecv] internal static bool dualStack(this ref Dialer d) {
+internal static bool dualStack(this ref Dialer d) {
     return d.FallbackDelay >= 0;
 }
 
@@ -214,7 +214,7 @@ internal static time.Time minNonzeroTime(time.Time a, time.Time b) {
 //   - the context's deadline
 //
 // Or zero, if none of Timeout, Deadline, or context's deadline is set.
-[GoRecv] internal static time.Time /*earliest*/ deadline(this ref Dialer d, context.Context ctx, time.Time now) {
+internal static time.Time /*earliest*/ deadline(this ref Dialer d, context.Context ctx, time.Time now) {
     time.Time earliest = default!;
 
     if (d.Timeout != 0) {
@@ -229,7 +229,7 @@ internal static time.Time minNonzeroTime(time.Time a, time.Time b) {
     return minNonzeroTime(earliest, d.Deadline);
 }
 
-[GoRecv] internal static ж<Resolver> resolver(this ref Dialer d) {
+internal static ж<Resolver> resolver(this ref Dialer d) {
     if (d.Resolver != nil) {
         return d.Resolver;
     }
@@ -260,7 +260,7 @@ internal static (time.Time, error) partialDeadline(time.Time now, time.Time dead
     return (now.Add(timeout), default!);
 }
 
-[GoRecv] internal static time.Duration fallbackDelay(this ref Dialer d) {
+internal static time.Duration fallbackDelay(this ref Dialer d) {
     if (d.FallbackDelay > 0){
         return d.FallbackDelay;
     } else {
@@ -395,7 +395,7 @@ internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, contex
 //
 // This method doesn't check if MPTCP is supported by the operating
 // system or not.
-[GoRecv] public static bool MultipathTCP(this ref Dialer d) {
+public static bool MultipathTCP(this ref Dialer d) {
     return d.mptcpStatus.get();
 }
 
@@ -405,7 +405,7 @@ internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, contex
 //
 // If MPTCP is not available on the host or not supported by the server,
 // the Dial methods will fall back to TCP.
-[GoRecv] public static void SetMultipathTCP(this ref Dialer d, bool use) {
+public static void SetMultipathTCP(this ref Dialer d, bool use) {
     d.mptcpStatus.set(use);
 }
 
@@ -479,7 +479,7 @@ public static (Conn, error) DialTimeout(@string network, @string address, time.D
 }
 
 // sysDialer contains a Dial's parameters and configuration.
-[GoType] partial struct sysDialer {
+partial struct sysDialer {
     public partial ref Dialer Dialer { get; }
     internal @string network, address;
     internal Func<context.Context, @string, ж<TCPAddr>, ж<TCPAddr>, (ж<TCPConn>, error)> testHookDialTCP;
@@ -593,9 +593,9 @@ public static partial (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Co
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct dialParallel_dialResult {
-    [GoEmbedded] public Conn Conn;
-    [GoEmbedded] internal error error;
+internal partial struct dialParallel_dialResult /*dyn*/ {
+    /*embed*/ public Conn Conn;
+    /*embed*/ internal error error;
     internal bool primary;
     internal bool done;
 }
@@ -808,7 +808,7 @@ internal static (Conn c, error err) dialSingle(this ж<sysDialer> Ꮡsd, context
 }
 
 // ListenConfig contains options for listening to an address.
-[GoType] partial struct ListenConfig {
+partial struct ListenConfig {
     // If Control is not nil, it is called after creating the network
     // connection but before binding it to the operating system.
     //
@@ -846,7 +846,7 @@ internal static (Conn c, error err) dialSingle(this ж<sysDialer> Ꮡsd, context
 //
 // This method doesn't check if MPTCP is supported by the operating
 // system or not.
-[GoRecv] public static bool MultipathTCP(this ref ListenConfig lc) {
+public static bool MultipathTCP(this ref ListenConfig lc) {
     return lc.mptcpStatus.get();
 }
 
@@ -856,7 +856,7 @@ internal static (Conn c, error err) dialSingle(this ж<sysDialer> Ꮡsd, context
 //
 // If MPTCP is not available on the host or not supported by the client,
 // the Listen method will fall back to TCP.
-[GoRecv] public static void SetMultipathTCP(this ref ListenConfig lc, bool use) {
+public static void SetMultipathTCP(this ref ListenConfig lc, bool use) {
     lc.mptcpStatus.set(use);
 }
 
@@ -870,7 +870,7 @@ internal static readonly @string listenˢ = "listen"u8;
 //
 // The ctx argument is used while resolving the address on which to listen;
 // it does not affect the returned Listener.
-[GoRecv] public static (Listener, error) Listen(this ref ListenConfig lc, context.Context ctx, @string network, @string address) {
+public static (Listener, error) Listen(this ref ListenConfig lc, context.Context ctx, @string network, @string address) {
     var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢ, network, address, default!);
     if (err != default!) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: default!, Err: err))));
@@ -915,7 +915,7 @@ internal static readonly @string listenˢ = "listen"u8;
 //
 // The ctx argument is used while resolving the address on which to listen;
 // it does not affect the returned Listener.
-[GoRecv] public static (PacketConn, error) ListenPacket(this ref ListenConfig lc, context.Context ctx, @string network, @string address) {
+public static (PacketConn, error) ListenPacket(this ref ListenConfig lc, context.Context ctx, @string network, @string address) {
     var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢ, network, address, default!);
     if (err != default!) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: default!, Err: err))));
@@ -954,7 +954,7 @@ internal static readonly @string listenˢ = "listen"u8;
 }
 
 // sysListener contains a Listen's parameters and configuration.
-[GoType] partial struct sysListener {
+partial struct sysListener {
     public partial ref ListenConfig ListenConfig { get; }
     internal @string network, address;
 }

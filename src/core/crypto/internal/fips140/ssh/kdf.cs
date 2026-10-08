@@ -12,7 +12,7 @@ using go.crypto.@internal;
 
 partial class ssh_package {
 
-[GoType] partial struct Direction {
+partial struct Direction {
     internal slice<byte> ivTag;
     internal slice<byte> keyTag;
     internal slice<byte> macKeyTag;

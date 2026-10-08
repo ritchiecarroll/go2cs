@@ -16,7 +16,7 @@ partial class image_package {
 public static error ErrFormat = errors.New("image: unknown format"u8);
 
 // A format holds an image format's name, magic header and how to decode it.
-[GoType] partial struct format {
+partial struct format {
     internal @string name, magic;
     internal Func<io.Reader, (Image, error)> decode;
     internal Func<io.Reader, (Config, error)> decodeConfig;
@@ -43,7 +43,7 @@ public static void RegisterFormat(@string name, @string magic, Func<io.Reader, (
 }
 
 // A reader is an io.Reader that can also peek ahead.
-[GoType] partial interface reader :
+partial interface reader :
     io.Reader
 {
     (slice<byte>, error) Peek(nint _Δp0);

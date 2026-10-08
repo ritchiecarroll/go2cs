@@ -23,7 +23,7 @@ internal const bool debug = false;
 // Position describes an arbitrary source position
 // including the file, line, and column location.
 // A Position is valid if the line number is > 0.
-[GoType] partial struct ΔPosition {
+partial struct ΔPosition {
     public @string Filename; // filename, if any
     public nint Offset;   // offset, starting at 0
     public nint Line;   // line number, starting at 1
@@ -31,7 +31,7 @@ internal const bool debug = false;
 }
 
 // IsValid reports whether the position is valid.
-[GoRecv] public static bool IsValid(this ref ΔPosition pos) {
+public static bool IsValid(this ref ΔPosition pos) {
     return pos.Line > 0;
 }
 
@@ -60,7 +60,7 @@ public static @string String(this ΔPosition pos) {
     return s;
 }
 
-[GoType("num:nint")] partial struct ΔPos;
+partial struct ΔPos /*num:nint*/;
 
 // The zero value for [Pos] is NoPos; there is no file and line information
 // associated with it, and NoPos.IsValid() is false. NoPos is always
@@ -78,7 +78,7 @@ public static bool IsValid(this ΔPos p) {
 
 // A File is a handle for a file belonging to a [FileSet].
 // A File has a name, size, and line offset table.
-[GoType] partial struct ΔFile {
+partial struct ΔFile {
     internal @string name; // file name as provided to AddFile
     internal nint @base;   // Pos value range for this file is [base...base+size]
     internal nint size;   // file size as provided to AddFile
@@ -89,17 +89,17 @@ public static bool IsValid(this ΔPos p) {
 }
 
 // Name returns the file name of file f as registered with AddFile.
-[GoRecv] public static @string Name(this ref ΔFile f) {
+public static @string Name(this ref ΔFile f) {
     return f.name;
 }
 
 // Base returns the base offset of file f as registered with AddFile.
-[GoRecv] public static nint Base(this ref ΔFile f) {
+public static nint Base(this ref ΔFile f) {
     return f.@base;
 }
 
 // Size returns the size of file f as registered with AddFile.
-[GoRecv] public static nint Size(this ref ΔFile f) {
+public static nint Size(this ref ΔFile f) {
     return f.size;
 }
 
@@ -242,7 +242,7 @@ public static ΔPos LineStart(this ж<ΔFile> Ꮡf, nint line) {
 // A lineInfo object describes alternative file, line, and column
 // number information (such as provided via a //line directive)
 // for a given file offset.
-[GoType] public partial struct lineInfo {
+public partial struct lineInfo {
     // fields are exported to make them accessible to gob
     public nint Offset;
     public @string Filename;
@@ -276,7 +276,7 @@ public static void AddLineColumnInfo(this ж<ΔFile> Ꮡf, nint offset, @string 
 }
 
 // fixOffset fixes an out-of-bounds offset such that 0 <= offset <= f.size.
-[GoRecv] internal static nint fixOffset(this ref ΔFile f, nint offset) {
+internal static nint fixOffset(this ref ΔFile f, nint offset) {
     switch (ᐧ) {
     case {} when offset is < 0: {
         if (!debug) {
@@ -313,7 +313,7 @@ public static void AddLineColumnInfo(this ж<ΔFile> Ꮡf, nint offset, @string 
 // The following invariant, though not true for Pos values
 // in general, holds for the result p:
 // f.Pos(f.Offset(p)) == p.
-[GoRecv] public static ΔPos Pos(this ref ΔFile f, nint offset) {
+public static ΔPos Pos(this ref ΔFile f, nint offset) {
     return ((ΔPos)(f.@base + f.fixOffset(offset)));
 }
 
@@ -326,7 +326,7 @@ public static void AddLineColumnInfo(this ж<ΔFile> Ꮡf, nint offset, @string 
 // The following invariant, though not true for offset values
 // in general, holds for the result offset:
 // f.Offset(f.Pos(offset)) == offset
-[GoRecv] public static nint Offset(this ref ΔFile f, ΔPos p) {
+public static nint Offset(this ref ΔFile f, ΔPos p) {
     return f.fixOffset((nint)p - f.@base);
 }
 
@@ -452,7 +452,7 @@ public static ΔPosition /*pos*/ Position(this ж<ΔFile> Ꮡf, ΔPos p) {
 //
 // A [File] may be removed from a FileSet when it is no longer needed.
 // This may reduce memory usage in a long-running application.
-[GoType] partial struct FileSet {
+partial struct FileSet {
     internal sync.RWMutex mutex;         // protects the file set
     internal nint @base;                 // base offset for the next file
     internal slice<ж<ΔFile>> files;      // list of files in the order added to the set

@@ -5,7 +5,7 @@ namespace go.reflect.@internal;
 
 partial class example2_package {
 
-[GoType] partial struct MyStruct {
+partial struct MyStruct {
     public slice<MyStruct> MyStructs;
     public ж<MyStruct> ΔMyStruct;
 }

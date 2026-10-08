@@ -12,7 +12,7 @@ internal static any ret() {
     return (nint)(42);
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal any v;
 }
 

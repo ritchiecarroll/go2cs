@@ -45,7 +45,7 @@ using text;
 
 partial class cformat_package {
 
-[GoType] partial struct Formatter {
+partial struct Formatter {
     // Maps import path to package state.
     internal map<@string, ж<pstate>> pm;
     // Records current package being visited.
@@ -60,7 +60,7 @@ partial class cformat_package {
 // - a table of functions (file/fname/literal)
 // - a map recording the index/ID of each func encountered so far
 // - a table storing execution count for the coverable units in each func
-[GoType] partial struct pstate {
+partial struct pstate {
     // slice of unique functions
     internal slice<fnfile> funcs;
     // maps function to index in slice above (index acts as function ID)
@@ -70,13 +70,13 @@ partial class cformat_package {
 }
 
 // extcu encapsulates a coverable unit within some function.
-[GoType] partial struct extcu {
+partial struct extcu {
     internal uint32 fnfid; // index into p.funcs slice
     public partial ref go.@internal.coverage_package.CoverableUnit CoverableUnit { get; }
 }
 
 // fnfile is a function-name/file-name tuple.
-[GoType] partial struct fnfile {
+partial struct fnfile {
     internal @string @file;
     internal @string fname;
     internal bool lit;
@@ -93,7 +93,7 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
 // coverage data for the package with the specified import path.
 // Note that it's OK to call SetPackage more than once with the
 // same import path; counter data values will be accumulated.
-[GoRecv] public static void SetPackage(this ref Formatter fm, @string importpath) {
+public static void SetPackage(this ref Formatter fm, @string importpath) {
     if (importpath == fm.pkg) {
         return;
     }
@@ -111,7 +111,7 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
 // AddUnit passes info on a single coverable unit (file, funcname,
 // literal flag, range of lines, and counter value) to the formatter.
 // Counter values will be accumulated where appropriate.
-[GoRecv] public static void AddUnit(this ref Formatter fm, @string @file, @string fname, bool isfnlit, coverage.CoverableUnit unit, uint32 count) {
+public static void AddUnit(this ref Formatter fm, @string @file, @string fname, bool isfnlit, coverage.CoverableUnit unit, uint32 count) {
     if (fm.p == nil) {
         throw panic("AddUnit invoked before SetPackage");
     }
@@ -181,7 +181,7 @@ internal static void sortUnits(this ж<pstate> Ꮡp, slice<extcu> units) {
 // importpath, source file, and line number before emitting (this sorting
 // is not explicitly mandated by the format, but seems like a good idea
 // for repeatable/deterministic dumps).
-[GoRecv] public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.Writer w) {
+public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.Writer w) {
     if (fm.cm == coverage.CtrModeInvalid) {
         throw panic("internal error, counter mode unset");
     }
@@ -225,7 +225,7 @@ internal static void sortUnits(this ж<pstate> Ꮡp, slice<extcu> units) {
 // EmitPercent writes out a "percentage covered" string to the writer
 // 'w', selecting the set of packages in 'pkgs' and suffixing the
 // printed string with 'inpkgs'.
-[GoRecv] public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@string> pkgs, @string inpkgs, bool noteEmpty, bool aggregate) {
+public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@string> pkgs, @string inpkgs, bool noteEmpty, bool aggregate) {
     if (len(pkgs) == 0) {
         pkgs = new slice<@string>(0, len(fm.pm));
         foreach (var (importpath, _) in fm.pm) {

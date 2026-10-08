@@ -6,22 +6,22 @@ using FormatTypeAdapters;
 
 partial class main_package {
 
-[GoType] partial interface greeter {
+partial interface greeter {
     @string greet();
 }
 
-[GoType] partial struct loud {
+partial struct loud {
     internal nint n;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string loudˢ = "LOUD"u8;
 
-[GoRecv] internal static @string greet(this ref loud l) {
+internal static @string greet(this ref loud l) {
     return loudˢ;
 }
 
-[GoType] partial struct soft {
+partial struct soft {
     internal nint n;
 }
 
@@ -32,7 +32,7 @@ internal static @string greet(this soft s) {
     return softˢ;
 }
 
-[GoType] partial interface stamper {
+partial interface stamper {
     @string Stamp();
 }
 

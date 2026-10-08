@@ -259,7 +259,7 @@ internal static (ж<netFD>, error) accept(this ж<netFD> Ꮡfd) {
 }
 
 // Unimplemented functions.
-[GoRecv] internal static (ж<os.File>, error) dup(this ref netFD fd) {
+internal static (ж<os.File>, error) dup(this ref netFD fd) {
     // TODO: Implement this, perhaps using internal/poll.DupCloseOnExec.
     return (default!, syscall.EWINDOWS);
 }

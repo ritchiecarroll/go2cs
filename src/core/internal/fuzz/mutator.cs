@@ -11,7 +11,7 @@ using encoding;
 
 partial class fuzz_package {
 
-[GoType] partial struct mutator {
+partial struct mutator {
     internal mutatorRand r;
     internal slice<byte> scratch; // scratch slice to avoid additional allocations
 }
@@ -20,11 +20,11 @@ internal static ж<mutator> newMutator() {
     return Ꮡ(new mutator(r: new pcgRandжmutatorRand(newPcgRand())));
 }
 
-[GoRecv] internal static nint rand(this ref mutator m, nint n) {
+internal static nint rand(this ref mutator m, nint n) {
     return m.r.intn(n);
 }
 
-[GoRecv] internal static binary.ByteOrder randByteOrder(this ref mutator m) {
+internal static binary.ByteOrder randByteOrder(this ref mutator m) {
     if (m.r.@bool()) {
         return binary.LittleEndian;
     }
@@ -33,7 +33,7 @@ internal static ж<mutator> newMutator() {
 
 // chooseLen chooses length of range mutation in range [1,n]. It gives
 // preference to shorter ranges.
-[GoRecv] internal static nint chooseLen(this ref mutator m, nint n) {
+internal static nint chooseLen(this ref mutator m, nint n) {
     {
         nint x = m.rand(100);
         switch (ᐧ) {
@@ -156,7 +156,7 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
     }}
 }
 
-[GoRecv] internal static int64 mutateInt(this ref mutator m, int64 v, int64 maxValue) {
+internal static int64 mutateInt(this ref mutator m, int64 v, int64 maxValue) {
     int64 max = default!;
     while (ᐧ) {
         max = 100;
@@ -189,7 +189,7 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
     }
 }
 
-[GoRecv] internal static uint64 mutateUInt(this ref mutator m, uint64 v, uint64 maxValue) {
+internal static uint64 mutateUInt(this ref mutator m, uint64 v, uint64 maxValue) {
     uint64 max = default!;
     while (ᐧ) {
         max = 100;
@@ -222,7 +222,7 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
     }
 }
 
-[GoRecv] internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxValue) {
+internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxValue) {
     float64 max = default!;
     while (ᐧ) {
         switch (m.rand(4)) {

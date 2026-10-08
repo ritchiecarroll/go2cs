@@ -59,16 +59,15 @@ internal static nint dynamicFn1() {
     return 4;
 }
 
-[GoType] partial interface NodeR {
+partial interface NodeR {
     nint Pos();
     nint End12();
     @string Name(nint offset);
 }
 
-[GoType] partial struct Person {
+partial struct Person {
     public @string Name;
-    [GoTag(@"json:""Tag""")]
-    public nint Age;
+    public nint Age; /*`json:"Tag"`*/
     public float32 ShoeSize;
 }
 
@@ -76,17 +75,17 @@ internal static void consumeOne(ref slice<Person> v) {
     v = (v)[1..];
 }
 
-[GoType("[]Person")] partial struct PeopleByShoeSize;
+partial struct PeopleByShoeSize /*[]Person*/;
 
-[GoType("[]Person")] partial struct PeopleByAge;
+partial struct PeopleByAge /*[]Person*/;
 
-[GoType("[]Person")] partial struct Roster;
+partial struct Roster /*[]Person*/;
 
 internal static nint headcount(this Roster r) {
     return len(r);
 }
 
-[GoType("num:uint32")] partial struct levelToken;
+partial struct levelToken /*num:uint32*/;
 
 internal static UntypedInt markerConst => 256;
 

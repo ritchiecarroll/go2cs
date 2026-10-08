@@ -16,9 +16,9 @@ internal static T negateSum<T>(T a, T b)
     return -(a + b);
 }
 
-[GoType("num:uint64")] partial struct counter;
+partial struct counter /*num:uint64*/;
 
-[GoType("num:int32")] partial struct offset;
+partial struct offset /*num:int32*/;
 
 internal static T negateNamed<T>(T x)
     where T : /* ~uint64 */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()

@@ -42,13 +42,13 @@ using math;
 
 partial class fiat_package {
 
-[GoType("num:uint64")] partial struct p256Uint1;
+partial struct p256Uint1 /*num:uint64*/;
 
-[GoType("num:int64")] partial struct p256Int1;
+partial struct p256Int1 /*num:int64*/;
 
-[GoType("[4]uint64")] partial struct p256MontgomeryDomainFieldElement;
+partial struct p256MontgomeryDomainFieldElement /*[4]uint64*/;
 
-[GoType("[4]uint64")] partial struct p256NonMontgomeryDomainFieldElement;
+partial struct p256NonMontgomeryDomainFieldElement /*[4]uint64*/;
 
 // p256CmovznzU64 is a single-word conditional move.
 //

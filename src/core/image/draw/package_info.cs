@@ -55,7 +55,7 @@ using static go.image.draw_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/draw/draw.go", "draw.cs", "ADNuogALGMiigoKUrOKCgoKClIKCgpSCgoKCuIKskqrSgoIACBSUgoKUgoKUlKSCpIKswsaCpIKkgIKUgqSCpIKoosiClIKCpIKClKSCpILGgqSCuIKkgoCCgoKCgpSCgoKClJKCguiCgIKCgpTogoCCgoKU2qKigoIABxSAgoCCgoKCgoKCgoKUgoKCAAgSlICCgoKCgoKCgpSmxrSCgoKC7gALFAAKFIKCgoKCgoKCgpSUpsa0goKCgoKCgpSCgoKcAAsMtIKCgoKCgoKChIKCgpSCuKKCgoK4goKCgoKClIKCgoK4spKCgsiCgoK4goKCgpSCgoKCgoKCgpaEgoKCgpSCvrrC3IKCgpSCgoK4goKCgoSCgoKChJSCgoKChIKCgoKWhIKCgsqCgoKChIKCgoKElIKCgoKEgoKCgsqCgoKChIKCgoKEgoKCgoKCyoKCgoKEgoKCgoSCgoKCysKCgoKCgoKCgpSWhIKCgoKUgoK4wqKigoKCqIKCgoKCgoKCgoKCgoKCgoSCgoKCAAYQhIKCgpS4wqKigoKCqIKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIABhCEgoKClLiyoqKCgoKogoKCgoKCgoKCgoKCgoKCgoIABhCEgoKClLiioqKCgoKogoKCgoKCAAYQgIKCgoKCgoKCgoKCgoKCgpSmgoKCgoKCgpSmlICCgoKCgoKCgoKCgoKCgoKUpoKCgoKCgoKClKYACRKCgoKClIKCgoKCggAGEISCgoKWgoKCprqSgpSClK74gqYABxKigIKCgoKCgoKUrMKCgpSAyJSAxIDEgMiSgqaCgoKCgoKWuJKigoKCgriEgpSCgoKWgoKCyoSClIKCgoKogoKCgoKCgoKCgoKCgoKCqIKC", "986-986:1;992-992:2;994-994:3;996-996:4")]
+[assembly: go.GoPositionMap("image/draw/draw.go", "draw.cs", "ADNuogALGMiigoKUrOKCgoKClIKCgpSCgoKCuIKskqrSgoIACBSUgoKUgoKUlKSCpIKswsaCpIKkgIKUgqSCpIKoosiClIKCpIKClKSCpILGgqSCuIKkgoCCgoKCgpSCgoKClJKCguiCgIKCgpTogoCCgoKU2qKigoIABxSAgoCCgoKCgoKCgoKUgoKCAAgSlICCgoKCgoKCgpSmxrSCgoKC7gALFAAKFIKCgoKCgoKCgpSUpsa0goKCgoKCgpSCgoKcAAsMtIKCgoKCgoKChIKCgpSCuKKCgoK4goKCgoKClIKCgoK4spKCgsiCgoK4goKCgpSCgoKCgoKCgpaEgoKCgpSCvrrC3IKCgpSCgoK4goKCgoSCgoKChJSCgoKChIKCgoKWhIKCgsqCgoKChIKCgoKElIKCgoKEgoKCgsqCgoKChIKCgoKEgoKCgoKCyoKCgoKEgoKCgoSCgoKCysKCgoKCgoKCgpSWhIKCgoKUgoK4wqKigoKCqIKCgoKCgoKCgoKCgoKCgoSCgoKCAAYQhIKCgpS4wqKigoKCqIKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIABhCEgoKClLiyoqKCgoKogoKCgoKCgoKCgoKCgoKCgoIABhCEgoKClLiioqKCgoKogoKCgoKCAAYQgIKCgoKCgoKCgoKCgoKCgpSmgoKCgoKCgpSmlICCgoKCgoKCgoKCgoKCgoKUpoKCgoKCgoKClKYACRKCgoKClIKCgoKCggAGEISCgoKWgoKCprqSgpSClK74gqYABxKigIKCgoKCgoKUrMKCgpSAyJSAxIDEgMiSgqaCgoKCgoKWuJKigoKCgriEgpSCgoKWgoKCyoSClIKCgoKogoKCgoKCgoKCgoKCgoKCqIKC", "986-986:1;992-992:2;994-994:3;996-996:4", "", "109=Sub/1/1/1,Add/1/1/1,Overlaps/1/1/1;209=Dx/1/1/1;268=Dx/1/1/1;282=Dx/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.image;
@@ -64,7 +64,7 @@ namespace go.image;
 public static partial class draw_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

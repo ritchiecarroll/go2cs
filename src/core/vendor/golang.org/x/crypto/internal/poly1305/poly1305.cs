@@ -28,7 +28,7 @@ public static UntypedInt TagSize => 16;
 // Sum generates an authenticator for msg using a one-time key and puts the
 // 16-byte result into out. Authenticating two different messages with the same
 // key allows an attacker to forge messages at will.
-public static void Sum([GoArrayDims(16)] ж<array<byte>> Ꮡout, slice<byte> m, [GoArrayDims(32)] ж<array<byte>> Ꮡkey) {
+public static void Sum(/*[16]*/ ж<array<byte>> Ꮡout, slice<byte> m, /*[32]*/ ж<array<byte>> Ꮡkey) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var h = New(Ꮡkey);
@@ -37,7 +37,7 @@ public static void Sum([GoArrayDims(16)] ж<array<byte>> Ꮡout, slice<byte> m, 
 }
 
 // Verify returns true if mac is a valid authenticator for m with the given key.
-public static bool Verify([GoArrayDims(16)] ж<array<byte>> Ꮡmac, slice<byte> m, [GoArrayDims(32)] ж<array<byte>> Ꮡkey) {
+public static bool Verify(/*[16]*/ ж<array<byte>> Ꮡmac, slice<byte> m, /*[32]*/ ж<array<byte>> Ꮡkey) {
     ref var mac = ref Ꮡmac.DerefOrNull();
 
     ref var tmp = ref heap(new array<byte>(16), out var Ꮡtmp);
@@ -54,7 +54,7 @@ public static bool Verify([GoArrayDims(16)] ж<array<byte>> Ꮡmac, slice<byte> 
 // The key must be unique for each message, as authenticating
 // two different messages with the same key allows an attacker
 // to forge messages at will.
-public static ж<MAC> New([GoArrayDims(32)] ж<array<byte>> Ꮡkey) {
+public static ж<MAC> New(/*[32]*/ ж<array<byte>> Ꮡkey) {
     var m = Ꮡ(new MAC(nil));
     initialize(Ꮡkey, ref (m.of(MAC.ᏑmacState)).DerefOrNull());
     return m;
@@ -67,13 +67,13 @@ public static ж<MAC> New([GoArrayDims(32)] ж<array<byte>> Ꮡkey) {
 // because using a poly1305 key twice breaks its security.
 // Therefore writing data to a running MAC after calling
 // Sum or Verify causes it to panic.
-[GoType] partial struct MAC {
+partial struct MAC {
     internal partial ref mac mac { get; } // platform-dependent implementation
     internal bool finalized;
 }
 
 // Size returns the number of bytes Sum will return.
-[GoRecv] public static nint Size(this ref MAC h) {
+public static nint Size(this ref MAC h) {
     return TagSize;
 }
 
@@ -92,7 +92,7 @@ public static (nint n, error err) Write(this ж<MAC> Ꮡh, slice<byte> p) {
 
 // Sum computes the authenticator of all data written to the
 // message authentication code.
-[GoRecv] public static slice<byte> Sum(this ref MAC h, slice<byte> b) {
+public static slice<byte> Sum(this ref MAC h, slice<byte> b) {
     ref var mac = ref heap(new array<byte>(16), out var Ꮡmac);
     h.mac.macGeneric.Sum(Ꮡmac);
     h.finalized = true;
@@ -101,7 +101,7 @@ public static (nint n, error err) Write(this ж<MAC> Ꮡh, slice<byte> p) {
 
 // Verify returns whether the authenticator of all data written to
 // the message authentication code matches the expected value.
-[GoRecv] public static bool Verify(this ref MAC h, slice<byte> expected) {
+public static bool Verify(this ref MAC h, slice<byte> expected) {
     ref var mac = ref heap(new array<byte>(16), out var Ꮡmac);
     h.mac.macGeneric.Sum(Ꮡmac);
     h.finalized = true;

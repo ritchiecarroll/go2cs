@@ -28,17 +28,17 @@ internal static slice<uint16> sortedSupportedAEADs;
     slices.Sort<slice<uint16>, uint16>(sortedSupportedAEADs);
 }
 
-[GoType] public partial struct echCipher {
+public partial struct echCipher {
     public uint16 KDFID;
     public uint16 AEADID;
 }
 
-[GoType] public partial struct echExtension {
+public partial struct echExtension {
     public uint16 Type;
     public slice<byte> Data;
 }
 
-[GoType] partial struct echConfig {
+partial struct echConfig {
     internal slice<byte> raw;
     public uint16 Version;
     public uint16 Length;
@@ -263,7 +263,7 @@ internal static bool skipUint16LengthPrefixed(ж<cryptobyte.String> Ꮡs) {
     return s.Skip((nint)skip);
 }
 
-[GoType] partial struct rawExtension {
+partial struct rawExtension {
     internal uint16 extType;
     internal slice<byte> data;
 }
@@ -530,14 +530,14 @@ internal static bool validDNSName(@string name) {
 //
 // The client may treat an ECHRejectionError with an empty set of RetryConfigs
 // as a secure signal from the server.
-[GoType] partial struct ECHRejectionError {
+partial struct ECHRejectionError {
     public slice<byte> RetryConfigList;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsServerRejectedEchˢ = "tls: server rejected ECH"u8;
 
-[GoRecv] public static @string Error(this ref ECHRejectionError e) {
+public static @string Error(this ref ECHRejectionError e) {
     return tlsServerRejectedEchˢ;
 }
 
@@ -545,7 +545,7 @@ internal static error errMalformedECHExt = errors.New("tls: malformed encrypted_
 
 internal static error errInvalidECHExt = errors.New("tls: client sent invalid encrypted_client_hello extension"u8);
 
-[GoType("num:uint8")] partial struct echExtType;
+partial struct echExtType /*num:uint8*/;
 
 internal static echExtType innerECHExt => 1;
 internal static echExtType outerECHExt => 0;

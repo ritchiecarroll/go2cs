@@ -7,11 +7,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("dyn")] internal partial struct test_R0 {
-    [GoEmbedded] internal @string @string;
-    [GoEmbedded] internal ж<nint> @int;
-    [GoEmbedded] public P P;
-    [GoEmbedded] public M M;
+internal partial struct test_R0 /*dyn*/ {
+    /*embed*/ internal @string @string;
+    /*embed*/ internal ж<nint> @int;
+    /*embed*/ public P P;
+    /*embed*/ public M M;
 }
 
 internal static test_R0 test() {

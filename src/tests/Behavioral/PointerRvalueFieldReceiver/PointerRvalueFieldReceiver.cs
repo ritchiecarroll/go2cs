@@ -4,15 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct slot {
+partial struct slot {
     internal nint v;
 }
 
-[GoRecv] internal static void set(this ref slot s, nint x) {
+internal static void set(this ref slot s, nint x) {
     s.v = x;
 }
 
-[GoType] partial struct node {
+partial struct node {
     internal slot s;
 }
 
@@ -22,11 +22,11 @@ internal static ж<node> getNode() {
     return theNode;
 }
 
-[GoType] partial struct queue {
+partial struct queue {
     internal ж<node> last;
 }
 
-[GoRecv] internal static ж<node> tail(this ref queue q) {
+internal static ж<node> tail(this ref queue q) {
     return q.last;
 }
 

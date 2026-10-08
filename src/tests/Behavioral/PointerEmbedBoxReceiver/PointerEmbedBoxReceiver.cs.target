@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Inner {
+partial struct Inner {
     internal nint total;
 }
 
@@ -13,7 +13,7 @@ public static void Add(this ж<Inner> Ꮡn, nint x) {
     p.Value += x;
 }
 
-[GoType] partial struct Outer {
+partial struct Outer {
     public partial ref ж<Inner> Inner { get; }
     internal @string tag;
 }

@@ -12,7 +12,7 @@ internal static void makeSwap(any fptr) {
     fn.Set(v);
 }
 
-[GoType] partial struct traceHooks {
+partial struct traceHooks {
     public Action<@string> OnEvent;
     public Func<nint, nint, (nint, @string)> Sum;
 }

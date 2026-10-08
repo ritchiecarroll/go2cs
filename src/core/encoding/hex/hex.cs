@@ -50,7 +50,7 @@ public static slice<byte> AppendEncode(slice<byte> dst, slice<byte> src) {
 // The stream-based Decoder returns [io.ErrUnexpectedEOF] instead of ErrLength.
 public static error ErrLength = errors.New("encoding/hex: odd length hex string"u8);
 
-[GoType("num:byte")] partial struct InvalidByteError;
+partial struct InvalidByteError /*num:byte*/;
 
 public static @string Error(this InvalidByteError e) {
     return fmt.Sprintf("encoding/hex: invalid byte: %#U"u8, (rune)(byte)e);
@@ -146,7 +146,7 @@ public static @string Dump(slice<byte> data) {
 // bufferSize is the number of hexadecimal characters to buffer in encoder and decoder.
 internal static UntypedInt bufferSize => 1024;
 
-[GoType] partial struct encoder {
+partial struct encoder {
     internal io.Writer w;
     internal error err;
     internal array<byte> @out = new(bufferSize); // output buffer
@@ -157,7 +157,7 @@ public static io.Writer NewEncoder(io.Writer w) {
     return new encoderжWriter(Ꮡ(new encoder(w: w)));
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
+internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
     nint n = default!;
 
     while (len(p) > 0 && e.err == default!) {
@@ -174,7 +174,7 @@ public static io.Writer NewEncoder(io.Writer w) {
     return (n, e.err);
 }
 
-[GoType] partial struct decoder {
+partial struct decoder {
     internal io.Reader r;
     internal error err;
     internal slice<byte> @in;      // input buffer (encoded form)
@@ -187,7 +187,7 @@ public static io.Reader NewDecoder(io.Reader r) {
     return new decoderжReader(Ꮡ(new decoder(r: r)));
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
+internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     error err = default!;
 
     // Fill internal buffer with sufficient bytes to decode
@@ -231,7 +231,7 @@ public static io.WriteCloser Dumper(io.Writer w) {
     return new dumperжWriteCloser(Ꮡ(new dumper(w: w)));
 }
 
-[GoType] partial struct dumper {
+partial struct dumper {
     internal io.Writer w;
     internal array<byte> rightChars = new(18);
     internal array<byte> buf = new(14);
@@ -250,7 +250,7 @@ internal static byte toChar(byte b) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string encodingHexDumperClosedˢ = "encoding/hex: dumper closed"u8;
 
-[GoRecv] internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) {
+internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) {
     nint n = default!;
     error err = default!;
 
@@ -312,7 +312,7 @@ internal static readonly @string encodingHexDumperClosedˢ = "encoding/hex: dump
     return (n, err);
 }
 
-[GoRecv] internal static error /*err*/ Close(this ref dumper h) {
+internal static error /*err*/ Close(this ref dumper h) {
     error err = default!;
 
     // See the comments in Write() for the details of this format.

@@ -39,28 +39,28 @@ internal static void dumpregs(ж<sigctxt> Ꮡc) {
 
 //go:nosplit
 //go:nowritebarrierrec
-[GoRecv] internal static uintptr sigpc(this ref sigctxt c) {
+internal static uintptr sigpc(this ref sigctxt c) {
     return (uintptr)c.rip();
 }
 
-[GoRecv] internal static void setsigpc(this ref sigctxt c, uint64 x) {
+internal static void setsigpc(this ref sigctxt c, uint64 x) {
     c.set_rip(x);
 }
 
-[GoRecv] internal static uintptr sigsp(this ref sigctxt c) {
+internal static uintptr sigsp(this ref sigctxt c) {
     return (uintptr)c.rsp();
 }
 
-[GoRecv] internal static uintptr siglr(this ref sigctxt c) {
+internal static uintptr siglr(this ref sigctxt c) {
     return 0;
 }
 
-[GoRecv] internal static uintptr fault(this ref sigctxt c) {
+internal static uintptr fault(this ref sigctxt c) {
     return (uintptr)c.sigaddr();
 }
 
 // preparePanic sets up the stack to look like a call to sigpanic.
-[GoRecv] internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
+internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // Work around Leopard bug that doesn't set FPE_INTDIV.
@@ -94,7 +94,7 @@ internal static void dumpregs(ж<sigctxt> Ꮡc) {
     }
 }
 
-[GoRecv] internal static void pushCall(this ref sigctxt c, uintptr targetPC, uintptr resumePC) {
+internal static void pushCall(this ref sigctxt c, uintptr targetPC, uintptr resumePC) {
     // Make it look like we called target at resumePC.
     var sp = (uintptr)c.rsp();
     sp -= goarch.PtrSize;

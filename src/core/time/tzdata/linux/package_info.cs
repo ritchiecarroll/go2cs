@@ -53,7 +53,7 @@ using static go.time.tzdata_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("time/tzdata/tzdata.go", "tzdata.cs", "ABtA5IKokoKUqJKClN7CAAYWhIKChJSClIKCgoKCgoKCgpSCqIKIlIKClg==")]
+[assembly: go.GoPositionMap("time/tzdata/tzdata.go", "tzdata.cs", "ABtA5IKokoKUqJKClN7CAAYWhIKChJSClIKCgoKCgoKCgpSCqIKIlIKClg==", "", "", "95=get2s/1/2/1,get2s/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go.time;
@@ -62,7 +62,7 @@ namespace go.time;
 public static partial class tzdata_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

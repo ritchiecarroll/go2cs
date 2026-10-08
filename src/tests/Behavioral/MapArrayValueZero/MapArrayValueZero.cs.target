@@ -42,7 +42,7 @@ internal static void mapMissNested() {
     fmt.Println(nestedHitˢ, len(h), len(h[0]), h[0][2], h[1][0]);
 }
 
-[GoType("map[nint, array<byte>]")] partial struct quadMap;
+partial struct quadMap /*map[nint, array<byte>]*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object nilNamedˢ = (@string)"nil named:"u8;

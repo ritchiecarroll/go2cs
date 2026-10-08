@@ -6,7 +6,7 @@ namespace go.@internal;
 partial class trace_package {
 
 // Frame is a frame in stack traces.
-[GoType] partial struct Frame {
+partial struct Frame {
     public uint64 PC;
     public @string Fn;
     public @string File;

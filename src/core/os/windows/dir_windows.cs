@@ -16,7 +16,7 @@ using go.io;
 partial class os_package {
 
 // Auxiliary information if the File describes a directory
-[GoType] partial struct dirInfo {
+partial struct dirInfo {
     internal Δsync.Mutex mu;
     // buf is a slice pointer so the slice header
     // does not escape to the heap when returning
@@ -40,7 +40,7 @@ internal static ж<Δsync.Pool> ᏑdirBufPool = new StandardBox<Δsync.Pool>(new
 ));
 internal static ref Δsync.Pool dirBufPool => ref ᏑdirBufPool.Value;
 
-[GoRecv] internal static void close(this ref dirInfo d) {
+internal static void close(this ref dirInfo d) {
     d.h = 0;
     if (d.buf != nil) {
         ᏑdirBufPool.Put(d.buf.OrTypedNil());
@@ -91,7 +91,7 @@ internal static void init(this ж<dirInfo> Ꮡd, syscallꓸHandle h) {
 
 // go2cs generated this placeholder — func readdir is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoType] partial struct dirEntry {
+partial struct dirEntry {
     internal ж<fileStat> fs;
 }
 

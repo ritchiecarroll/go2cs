@@ -141,7 +141,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct tstate {
+partial struct tstate {
     public partial ref go.@internal.coverage.calloc_package.BatchCounterAlloc BatchCounterAlloc { get; }
     internal ж<cmerge.Merger> cm;
     internal ж<cformat.Formatter> cf;
@@ -277,7 +277,7 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct pkfunc {
+partial struct pkfunc {
     internal uint32 pk, fcn;
 }
 

@@ -18,7 +18,7 @@ partial class net_package {
 // routed to an IPv6 socket - two separate sockets are required if
 // both address families are to be supported.
 // See inet6(4) for details.
-[GoType] partial struct ipStackCapabilities {
+partial struct ipStackCapabilities {
     public partial ref sync_package.Once Once { get; }             // guards following
     internal bool ipv4Enabled;
     internal bool ipv6Enabled;
@@ -57,7 +57,7 @@ internal static bool supportsIPv4map() {
     return ipStackCaps.ipv4MappedIPv6Enabled;
 }
 
-[GoType("[]ΔAddr")] partial struct addrList;
+partial struct addrList /*[]ΔAddr*/;
 
 // isIPv4 reports whether addr contains an IPv4 address.
 internal static bool isIPv4(ΔAddr addr) {

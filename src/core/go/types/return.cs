@@ -13,7 +13,7 @@ partial class types_package {
 // isTerminating reports if s is a terminating statement.
 // If s is labeled, label is the label name; otherwise s
 // is "".
-[GoRecv] internal static bool isTerminating(this ref Checker check, ast.Stmt s, @string label) {
+internal static bool isTerminating(this ref Checker check, ast.Stmt s, @string label) {
     switch (s.type()) {
     default: {
         var sΔ1 = s;
@@ -87,7 +87,7 @@ partial class types_package {
     return false;
 }
 
-[GoRecv] internal static bool isTerminatingList(this ref Checker check, slice<ast.Stmt> list, @string label) {
+internal static bool isTerminatingList(this ref Checker check, slice<ast.Stmt> list, @string label) {
     // trailing empty statements are permitted - skip them
     for (nint i = len(list) - 1; i >= 0; i--) {
         {
@@ -99,7 +99,7 @@ partial class types_package {
     return false; // all statements are empty
 }
 
-[GoRecv] internal static bool isTerminatingSwitch(this ref Checker check, ж<ast.BlockStmt> Ꮡbody, @string label) {
+internal static bool isTerminatingSwitch(this ref Checker check, ж<ast.BlockStmt> Ꮡbody, @string label) {
     ref var body = ref Ꮡbody.DerefOrNull();
 
     var hasDefault = false;

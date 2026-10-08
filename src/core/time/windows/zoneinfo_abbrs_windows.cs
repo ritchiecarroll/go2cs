@@ -7,7 +7,7 @@ namespace go;
 
 partial class time_package {
 
-[GoType] partial struct abbr {
+partial struct abbr {
     internal @string std;
     internal @string dst;
 }

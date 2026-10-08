@@ -13,7 +13,7 @@ using @internal.runtime;
 partial class runtime_package {
 
 // A stkframe holds information about a single physical stack frame.
-[GoType] partial struct stkframe {
+partial struct stkframe {
     // fn is the function being run in this frame. If there is
     // inlining, this is the outermost function.
     internal ΔfuncInfo fn;
@@ -60,14 +60,14 @@ partial class runtime_package {
 
 // reflectMethodValue is a partial duplicate of reflect.makeFuncImpl
 // and reflect.methodValue.
-[GoType] partial struct reflectMethodValue {
+partial struct reflectMethodValue {
     internal uintptr fn;
     internal ж<bitvector> stack; // ptrmap for both args and results
     internal uintptr argLen;    // just args
 }
 
 // argBytes returns the argument frame size for a call to frame.fn.
-[GoRecv] internal static uintptr argBytes(this ref stkframe frame) {
+internal static uintptr argBytes(this ref stkframe frame) {
     if (frame.fn.args != abi.ArgsSizeUnknown) {
         return (uintptr)frame.fn.args;
     }
@@ -92,7 +92,7 @@ internal static readonly @string reflectMismatchˢ = "reflect mismatch"u8;
 //
 // hasReflectStackObj indicates that this frame also has a reflect
 // function stack object, which the caller must synthesize.
-[GoRecv] internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal(this ref stkframe frame) {
+internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal(this ref stkframe frame) {
     bitvector argMap = default!;
     bool hasReflectStackObj = default!;
 
@@ -162,7 +162,7 @@ internal static readonly @string badSymbolTableˢ = "bad symbol table"u8;
 
 // getStackMap returns the locals and arguments live pointer maps, and
 // stack object list for frame.
-[GoRecv] internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs) getStackMap(this ref stkframe frame, bool debug) {
+internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs) getStackMap(this ref stkframe frame, bool debug) {
     bitvector locals = default!;
     bitvector args = default!;
     slice<stackObjectRecord> objs = default!;

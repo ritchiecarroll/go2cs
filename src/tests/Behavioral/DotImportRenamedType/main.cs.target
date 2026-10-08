@@ -7,7 +7,7 @@ using renamedlib = DotImportRenamedType.renamedlib_package;
 
 partial class main_package {
 
-[GoType] partial struct ΔLocal {
+partial struct ΔLocal {
     public @string Tag;
 }
 

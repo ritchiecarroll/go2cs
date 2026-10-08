@@ -14,14 +14,14 @@ using encoding;
 partial class macho_package {
 
 // A FatFile is a Mach-O universal binary that contains at least one architecture.
-[GoType] partial struct FatFile {
+partial struct FatFile {
     public uint32 Magic;
     public slice<FatArch> Arches;
     internal io.Closer closer;
 }
 
 // A FatArchHeader represents a fat header for a specific image architecture.
-[GoType] partial struct FatArchHeader {
+partial struct FatArchHeader {
     public Cpu Cpu;
     public uint32 SubCpu;
     public uint32 Offset;
@@ -32,7 +32,7 @@ partial class macho_package {
 internal static UntypedInt fatArchHeaderSize => /* 5 * 4 */ 20;
 
 // A FatArch is a Mach-O File inside a FatFile.
-[GoType] partial struct FatArch {
+partial struct FatArch {
     public partial ref FatArchHeader FatArchHeader { get; }
     public partial ref ж<File> File { get; }
 }
@@ -138,7 +138,7 @@ public static (ж<FatFile>, error) OpenFat(@string name) {
     return (ff, default!);
 }
 
-[GoRecv] public static error Close(this ref FatFile ff) {
+public static error Close(this ref FatFile ff) {
     error err = default!;
     if (ff.closer != default!) {
         err = ff.closer.Close();

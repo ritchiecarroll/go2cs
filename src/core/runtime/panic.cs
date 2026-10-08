@@ -15,7 +15,7 @@ using System.Runtime.CompilerServices;
 
 partial class runtime_package {
 
-[GoType("num:uint32")] partial struct throwType;
+partial struct throwType /*num:uint32*/;
 
 internal static throwType throwTypeNone => /* iota */ 0;
 internal static throwType throwTypeUser => 1;
@@ -746,7 +746,7 @@ internal static (uint32, @unsafe.Pointer) readvarintUnsafe(@unsafe.Pointer fd) {
 // Before Go 1.21, programs that called panic(nil) observed recover returning nil.
 // Starting in Go 1.21, programs that call panic(nil) observe recover returning a *PanicNilError.
 // Programs can change back to the old behavior by setting GODEBUG=panicnil=1.
-[GoType] partial struct PanicNilError {
+partial struct PanicNilError {
     // This field makes PanicNilError structurally different from
     // any other struct in this package, and the _ makes it different
     // from any struct in other packages too.
@@ -759,11 +759,11 @@ internal static (uint32, @unsafe.Pointer) readvarintUnsafe(@unsafe.Pointer fd) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string panicCalledWithNilˢ = "panic called with nil argument"u8;
 
-[GoRecv] public static @string Error(this ref PanicNilError _) {
+public static @string Error(this ref PanicNilError _) {
     return panicCalledWithNilˢ;
 }
 
-[GoRecv] public static void RuntimeError(this ref PanicNilError _) {
+public static void RuntimeError(this ref PanicNilError _) {
 }
 
 internal static ж<godebugInc> panicnil = Ꮡ(new godebugInc(name: "panicnil"u8));
@@ -1009,7 +1009,7 @@ internal static bool /*ok*/ nextFrame(this ж<_panic> Ꮡp) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string missingDeferreturnˢ = "missing deferreturn"u8;
 
-[GoRecv] internal static bool initOpenCodedDefers(this ref _panic Δp, ΔfuncInfo fn, @unsafe.Pointer varp) {
+internal static bool initOpenCodedDefers(this ref _panic Δp, ΔfuncInfo fn, @unsafe.Pointer varp) {
     @unsafe.Pointer fd = (uintptr)funcdata(fn, abi.FUNCDATA_OpenCodedDeferInfo);
     if (fd == nil) {
         return false;

@@ -60,9 +60,9 @@ using static go.crypto.cipher_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/cipher/cbc.go", "cbc.cs", "ABs6ggAQKLKClICCpIKUgIKkrsKClKaApIKClIKUgpSAgqaElIKWgoKopoKClAALHrKClICCpIKUgIKkrsKClKaApIKClIKUgpSAgqSCuoKClpaCgoSCgqiClqaCgpQ=")]
+[assembly: go.GoPositionMap("crypto/cipher/cbc.go", "cbc.cs", "ABs6ggAQKLKClICCpIKUgIKkrsKClKaApIKClIKUgpSAgqaElIKWgoKopoKClAALHrKClICCpIKUgIKkrsKClKaApIKClIKUgpSAgqSCuoKClpaCgoSCgqiClqaCgpQ=", "", "", "29=BlockSize/1/2/2,Clone/1/1/3,BlockSize/2/2/4")]
 [assembly: go.GoPositionMap("crypto/cipher/cfb.go", "cfb.cs", "ABcwgoKUgpSCgoKWypSCgpSCggADGgAJAoKUAAIYAAkCgpSmgpKUlO6E")]
-[assembly: go.GoPositionMap("crypto/cipher/ctr.go", "ctr.cs", "ACVSooCCpIKUgIKkgpSCgpQADBqCpoKCgoKCgoKWgoKCuIKmgoKUgpSAgqSCgpSCgoI=")]
+[assembly: go.GoPositionMap("crypto/cipher/ctr.go", "ctr.cs", "ACVSooCCpIKUgIKkgpSCgpQADBqCpoKCgoKCgoKWgoKCuIKmgoKUgpSAgqSCgpSCgoI=", "", "", "61=Clone/1/1/2")]
 [assembly: go.GoPositionMap("crypto/cipher/gcm.go", "gcm.cs", "ABw84oKUAAIU8oKUAAIWAAgCgpTWgoKCgpS4goKUAAUaAAoCgoKUgoKU7oKmgqaCgpaCgpSClIIAFzKCgpaCpoKClIKWgoKUgtyCgoKClIKWgoKUAA4UgoKUgpSAgqSClAALGIKmgqaCgpSClIKWgoKUgpaigoKEhIKChKaUgoKUgpaClIKWgoKUgpaigoKEgoSCgsqCloSmooKClIKCgriigoKChIKClIKCgriigqaigoKCgq7ygIKUgqSC")]
 [assembly: go.GoPositionMap("crypto/cipher/io.go", "io.cs", "ABMmsoKCAA0csoKCgpKUqqKAgqQ=")]
 [assembly: go.GoPositionMap("crypto/cipher/ofb.go", "ofb.cs", "ABY+AAkCgpaCgpSCgpTegqaCgoKClIKCgoKClIKmgoKUgpSCgpSCgoI=")]
@@ -74,7 +74,7 @@ namespace go.crypto;
 public static partial class cipher_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

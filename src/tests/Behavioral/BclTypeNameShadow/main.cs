@@ -4,13 +4,13 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Range {
+partial struct Range {
     public nint Start, End;
 }
 
-[GoType("@string")] partial struct ViewType;
+partial struct ViewType /*@string*/;
 
-[GoType("[]byte")] partial struct byteView;
+partial struct byteView /*[]byte*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string abcdefˢ = "abcdef"u8;

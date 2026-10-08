@@ -24,7 +24,7 @@ using fmt = fmt_package;
 
 partial class profile_package {
 
-[GoType] partial struct buffer {
+partial struct buffer {
     internal nint field;
     internal nint typ;
     internal uint64 u64;
@@ -34,7 +34,7 @@ partial class profile_package {
 
 // type Δdecoder is a methodless func type — rendered inline as its base delegate
 
-[GoType] partial interface message {
+partial interface message {
     slice<Func<ж<buffer>, message, error>> decoder();
     void encode(ж<buffer> _);
 }

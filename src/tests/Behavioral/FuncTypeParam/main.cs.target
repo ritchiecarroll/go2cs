@@ -14,7 +14,7 @@ internal static void consume(ж<atomic.Int32> Ꮡv, Action<ж<atomic.Int32>> sin
     sink(Ꮡv);
 }
 
-[GoType] partial struct runner {
+partial struct runner {
     internal Func<ж<atomic.Int32>, nint> gen;
 }
 

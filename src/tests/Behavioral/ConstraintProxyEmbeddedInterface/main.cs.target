@@ -4,17 +4,17 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface Base {
+partial interface Base {
     @string Name();
 }
 
-[GoType] partial interface Middle :
+partial interface Middle :
     Base
 {
     nint Size();
 }
 
-[GoType] partial interface Constrained<T> :
+partial interface Constrained<T> :
     Middle
 {
     T Clone();
@@ -22,29 +22,29 @@ partial class main_package {
     T Pick(Func<T> gen);
 }
 
-[GoType] partial struct Impl {
+partial struct Impl {
     internal @string n;
     internal nint s;
 }
 
-[GoRecv] public static @string Name(this ref Impl p) {
+public static @string Name(this ref Impl p) {
     return p.n;
 }
 
-[GoRecv] public static nint Size(this ref Impl p) {
+public static nint Size(this ref Impl p) {
     return p.s;
 }
 
-[GoRecv] public static ж<Impl> Clone(this ref Impl p) {
+public static ж<Impl> Clone(this ref Impl p) {
     return Ꮡ(new Impl(p.n, p.s + 1));
 }
 
-[GoRecv] public static bool Each(this ref Impl p, @string label, Action<ж<Impl>> f) {
+public static bool Each(this ref Impl p, @string label, Action<ж<Impl>> f) {
     f(Ꮡ(new Impl(p.n + "/"u8 + label, p.s)));
     return true;
 }
 
-[GoRecv] public static ж<Impl> Pick(this ref Impl p, Func<ж<Impl>> gen) {
+public static ж<Impl> Pick(this ref Impl p, Func<ж<Impl>> gen) {
     return gen();
 }
 

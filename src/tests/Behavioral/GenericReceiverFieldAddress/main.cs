@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Box<T> {
+partial struct Box<T> {
     internal T v;
 }
 

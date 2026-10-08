@@ -2,11 +2,11 @@ namespace go.ForeignValueImplementSuppression;
 
 partial class hue_package {
 
-[GoType] partial interface Tint {
+partial interface Tint {
     (uint32 l, uint32 a) Shade();
 }
 
-[GoType] partial struct ΔShade {
+partial struct ΔShade {
     public uint8 L, A;
 }
 
@@ -14,7 +14,7 @@ public static (uint32, uint32) Shade(this ΔShade s) {
     return ((uint32)s.L * 0x101, (uint32)s.A * 0x101);
 }
 
-[GoType] partial struct Gray {
+partial struct Gray {
     public uint8 Y;
 }
 

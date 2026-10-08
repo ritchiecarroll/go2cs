@@ -29,7 +29,7 @@ partial class big_package {
 // attacker-controlled inputs and the determination of whether a bug in math/big
 // is considered a security vulnerability might depend on the impact on the
 // standard library.
-[GoType] partial struct ΔInt {
+partial struct ΔInt {
     internal bool neg; // sign
     internal nat abs;  // absolute value of the integer
 }
@@ -41,7 +41,7 @@ internal static void initᴛintOne() { intOne = Ꮡ(new ΔInt(false, natOne)); }
 //   - -1 if x < 0;
 //   - 0 if x == 0;
 //   - +1 if x > 0.
-[GoRecv] public static nint Sign(this ref ΔInt x) {
+public static nint Sign(this ref ΔInt x) {
     // This function is used in cryptographic operations. It must not leak
     // anything but the Int's sign and bit size through side-channels. Any
     // changes must be reviewed by a security expert.
@@ -113,7 +113,7 @@ public static ж<ΔInt> Set(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx) {
 // the same underlying array.
 // Bits is intended to support implementation of missing low-level [Int]
 // functionality outside this package; it should be avoided otherwise.
-[GoRecv] public static slice<Word> Bits(this ref ΔInt x) {
+public static slice<Word> Bits(this ref ΔInt x) {
     // This function is used in cryptographic operations. It must not leak
     // anything but the Int's sign and bit size through side-channels. Any
     // changes must be reviewed by a security expert.
@@ -461,7 +461,7 @@ public static nint /*r*/ Cmp(this ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
 //   - -1 if |x| < |y|;
 //   - 0 if |x| == |y|;
 //   - +1 if |x| > |y|.
-[GoRecv] public static nint CmpAbs(this ref ΔInt x, ж<ΔInt> Ꮡy) {
+public static nint CmpAbs(this ref ΔInt x, ж<ΔInt> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     return x.abs.cmp(y.abs);
@@ -489,7 +489,7 @@ internal static uint64 low64(nat x) {
 
 // Int64 returns the int64 representation of x.
 // If x cannot be represented in an int64, the result is undefined.
-[GoRecv] public static int64 Int64(this ref ΔInt x) {
+public static int64 Int64(this ref ΔInt x) {
     var v = (int64)low64(x.abs);
     if (x.neg) {
         v = -v;
@@ -499,12 +499,12 @@ internal static uint64 low64(nat x) {
 
 // Uint64 returns the uint64 representation of x.
 // If x cannot be represented in a uint64, the result is undefined.
-[GoRecv] public static uint64 Uint64(this ref ΔInt x) {
+public static uint64 Uint64(this ref ΔInt x) {
     return low64(x.abs);
 }
 
 // IsInt64 reports whether x can be represented as an int64.
-[GoRecv] public static bool IsInt64(this ref ΔInt x) {
+public static bool IsInt64(this ref ΔInt x) {
     if (len(x.abs) <= (nint)(64 / _W)) {
         var w = (int64)low64(x.abs);
         return w >= 0 || x.neg && w == -w;
@@ -513,7 +513,7 @@ internal static uint64 low64(nat x) {
 }
 
 // IsUint64 reports whether x can be represented as a uint64.
-[GoRecv] public static bool IsUint64(this ref ΔInt x) {
+public static bool IsUint64(this ref ΔInt x) {
     return !x.neg && len(x.abs) <= (nint)(64 / _W);
 }
 
@@ -593,7 +593,7 @@ public static ж<ΔInt> SetBytes(this ж<ΔInt> Ꮡz, slice<byte> buf) {
 // Bytes returns the absolute value of x as a big-endian byte slice.
 //
 // To use a fixed length slice, or a preallocated one, use [Int.FillBytes].
-[GoRecv] public static slice<byte> Bytes(this ref ΔInt x) {
+public static slice<byte> Bytes(this ref ΔInt x) {
     // This function is used in cryptographic operations. It must not leak
     // anything but the Int's sign and bit size through side-channels. Any
     // changes must be reviewed by a security expert.
@@ -605,7 +605,7 @@ public static ж<ΔInt> SetBytes(this ж<ΔInt> Ꮡz, slice<byte> buf) {
 // big-endian byte slice, and returns buf.
 //
 // If the absolute value of x doesn't fit in buf, FillBytes will panic.
-[GoRecv] public static slice<byte> FillBytes(this ref ΔInt x, slice<byte> buf) {
+public static slice<byte> FillBytes(this ref ΔInt x, slice<byte> buf) {
     // Clear whole buffer.
     clear(buf);
     x.abs.bytes(buf);
@@ -614,7 +614,7 @@ public static ж<ΔInt> SetBytes(this ж<ΔInt> Ꮡz, slice<byte> buf) {
 
 // BitLen returns the length of the absolute value of x in bits.
 // The bit length of 0 is 0.
-[GoRecv] public static nint BitLen(this ref ΔInt x) {
+public static nint BitLen(this ref ΔInt x) {
     // This function is used in cryptographic operations. It must not leak
     // anything but the Int's sign and bit size through side-channels. Any
     // changes must be reviewed by a security expert.
@@ -623,7 +623,7 @@ public static ж<ΔInt> SetBytes(this ж<ΔInt> Ꮡz, slice<byte> buf) {
 
 // TrailingZeroBits returns the number of consecutive least significant zero
 // bits of |x|.
-[GoRecv] public static nuint TrailingZeroBits(this ref ΔInt x) {
+public static nuint TrailingZeroBits(this ref ΔInt x) {
     return x.abs.trailingZeroBits();
 }
 
@@ -1257,7 +1257,7 @@ public static ж<ΔInt> Rsh(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, nuint n) {
 
 // Bit returns the value of the i'th bit of x. That is, it
 // returns (x>>i)&1. The bit index i must be >= 0.
-[GoRecv] public static nuint Bit(this ref ΔInt x, nint i) {
+public static nuint Bit(this ref ΔInt x, nint i) {
     if (i == 0) {
         // optimization for common case: odd/even test of x
         if (len(x.abs) > 0) {

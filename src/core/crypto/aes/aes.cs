@@ -26,7 +26,7 @@ partial class aes_package {
 // The AES block size in bytes.
 public static UntypedInt BlockSize => 16;
 
-[GoType("num:nint")] partial struct KeySizeError;
+partial struct KeySizeError /*num:nint*/;
 
 public static @string Error(this KeySizeError k) {
     return "crypto/aes: invalid key size "u8 + strconv.Itoa((nint)k);

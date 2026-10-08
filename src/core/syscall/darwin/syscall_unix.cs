@@ -36,7 +36,7 @@ internal static nint clen(slice<byte> n) {
 }
 
 // Mmap manager, for use by operating system-specific implementations.
-[GoType] partial struct mmapper {
+partial struct mmapper {
     public partial ref sync_package.Mutex Mutex { get; }
     internal map<ж<byte>, slice<byte>> active; // active mappings; key is last byte in mapping
     internal Func<uintptr, uintptr, nint, nint, nint, int64, (uintptr, error)> mmap;
@@ -103,7 +103,7 @@ internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) {
     ᒐdone: return err;
 }
 
-[GoType("num:uintptr")] partial struct Errno;
+partial struct Errno /*num:uintptr*/;
 
 public static @string Error(this Errno e) {
     if (0 <= (nint)(uintptr)e && (nint)(uintptr)e < len(errors)) {
@@ -169,7 +169,7 @@ internal static error errnoErr(Errno e) {
     return e;
 }
 
-[GoType("num:nint")] partial struct ΔSignal;
+partial struct ΔSignal /*num:nint*/;
 
 public static void Signal(this ΔSignal s) {
 }
@@ -279,24 +279,24 @@ public static (nint n, error err) Pwrite(nint fd, slice<byte> p, int64 offset) {
 // creation of IPv6 sockets to return [EAFNOSUPPORT].
 public static bool SocketDisableIPv6;
 
-[GoType] partial interface Sockaddr {
+partial interface Sockaddr {
     (@unsafe.Pointer ptr, _Socklen len, error err) sockaddr(); // lowercase; only we can define Sockaddrs
 }
 
-[GoType] partial struct SockaddrInet4 {
+partial struct SockaddrInet4 {
     public nint Port;
     public array<byte> Addr = new(4);
     internal RawSockaddrInet4 raw;
 }
 
-[GoType] partial struct SockaddrInet6 {
+partial struct SockaddrInet6 {
     public nint Port;
     public uint32 ZoneId;
     public array<byte> Addr = new(16);
     internal RawSockaddrInet6 raw;
 }
 
-[GoType] partial struct SockaddrUnix {
+partial struct SockaddrUnix {
     public @string Name;
     internal RawSockaddrUnix raw;
 }
@@ -475,7 +475,7 @@ public static error /*err*/ SetsockoptInt(nint fd, nint level, nint opt, nint va
     return setsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡn), 4);
 }
 
-public static error /*err*/ SetsockoptInet4Addr(nint fd, nint level, nint opt, [GoArrayDims(4)] array<byte> valueʗp) {
+public static error /*err*/ SetsockoptInet4Addr(nint fd, nint level, nint opt, /*[4]*/ array<byte> valueʗp) {
     ref var value = ref heap(valueʗp.Clone(), out var Ꮡvalue);
 
     return setsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡvalue.at<byte>(0)), 4);

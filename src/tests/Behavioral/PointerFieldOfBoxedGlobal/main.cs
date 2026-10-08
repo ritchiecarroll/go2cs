@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct profBuf {
+partial struct profBuf {
     internal slice<nint> data;
 }
 
@@ -18,7 +18,7 @@ internal static void appendInt(ref slice<nint> s, nint v) {
     s = append(s, v);
 }
 
-[GoRecv] internal static nint sum(this ref profBuf b) {
+internal static nint sum(this ref profBuf b) {
     nint t = 0;
     foreach (var (_, x) in b.data) {
         t += x;
@@ -26,7 +26,7 @@ internal static void appendInt(ref slice<nint> s, nint v) {
     return t;
 }
 
-[GoType] partial struct cpuProfile {
+partial struct cpuProfile {
     internal nint count;
     internal ж<profBuf> log;
 }
@@ -44,7 +44,7 @@ internal static void run() {
     cpuprof.log.push(cpuprof.count);
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal ж<cpuProfile> span;
 }
 

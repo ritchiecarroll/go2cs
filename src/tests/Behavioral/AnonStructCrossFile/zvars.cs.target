@@ -3,7 +3,7 @@ namespace go;
 partial class main_package {
 
 
-[GoType("dyn")] partial struct compareTestsᴛ1 {
+partial struct compareTestsᴛ1 /*dyn*/ {
     internal slice<byte> a, b;
     internal nint i;
 }

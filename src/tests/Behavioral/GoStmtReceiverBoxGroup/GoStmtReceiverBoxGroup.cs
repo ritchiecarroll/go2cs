@@ -5,29 +5,29 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct inner {
+partial struct inner {
     internal channel<nint> ch;
 }
 
-[GoRecv] internal static void send(this ref inner @in) {
+internal static void send(this ref inner @in) {
     @in.ch.ᐸꟷ(3);
 }
 
-[GoType] partial struct tracker {
+partial struct tracker {
     internal channel<nint> done;
     internal nint n;
     internal inner @in;
 }
 
-[GoRecv] internal static void loop(this ref tracker t) {
+internal static void loop(this ref tracker t) {
     t.done.ᐸꟷ(t.n);
 }
 
-[GoRecv] internal static void loopArg(this ref tracker t, nint k) {
+internal static void loopArg(this ref tracker t, nint k) {
     t.done.ᐸꟷ(k);
 }
 
-[GoRecv] internal static void bump(this ref tracker t) {
+internal static void bump(this ref tracker t) {
     t.n++;
 }
 
@@ -52,7 +52,7 @@ internal static void stop(this ж<tracker> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoRecv] internal static partial void other(this ref tracker t, ж<tracker> Ꮡo) {
+internal static partial void other(this ref tracker t, ж<tracker> Ꮡo) {
     goǃ(Ꮡo.loop);
 }
 

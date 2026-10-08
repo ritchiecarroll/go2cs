@@ -16,7 +16,7 @@ partial class types_package {
 // API
 
 // A Struct represents a struct type.
-[GoType] partial struct Struct {
+partial struct Struct {
     internal slice<ж<Var>> fields; // fields != nil indicates the struct is set up (possibly with len(fields) == 0)
     internal slice<@string> tags; // field tags; nil if there are no tags
 }
@@ -41,17 +41,17 @@ public static ж<Struct> NewStruct(slice<ж<Var>> fields, slice<@string> tags) {
 }
 
 // NumFields returns the number of fields in the struct (including blank and embedded fields).
-[GoRecv] public static nint NumFields(this ref Struct s) {
+public static nint NumFields(this ref Struct s) {
     return len(s.fields);
 }
 
 // Field returns the i'th field for 0 <= i < NumFields().
-[GoRecv] public static ж<Var> Field(this ref Struct s, nint i) {
+public static ж<Var> Field(this ref Struct s, nint i) {
     return s.fields[i];
 }
 
 // Tag returns the i'th field tag for 0 <= i < NumFields().
-[GoRecv] public static @string Tag(this ref Struct s, nint i) {
+public static @string Tag(this ref Struct s, nint i) {
     if (i < len(s.tags)) {
         return s.tags[i];
     }
@@ -68,7 +68,7 @@ public static @string String(this ж<Struct> Ꮡt) {
 
 // ----------------------------------------------------------------------------
 // Implementation
-[GoRecv] internal static void markComplete(this ref Struct s) {
+internal static void markComplete(this ref Struct s) {
     if (s.fields == default!) {
         s.fields = new slice<ж<Var>>(0);
     }

@@ -40,13 +40,13 @@ using io = io_package;
 partial class txtar_package {
 
 // An Archive is a collection of files.
-[GoType] partial struct Archive {
+partial struct Archive {
     public slice<byte> Comment;
     public slice<File> Files;
 }
 
 // A File is a single file in an archive.
-[GoType] partial struct File {
+partial struct File {
     public @string Name; // name of file ("foo/bar.txt")
     public slice<byte> Data; // text content of file
 }

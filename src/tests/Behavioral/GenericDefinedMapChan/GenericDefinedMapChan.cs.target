@@ -5,18 +5,18 @@ using sort = sort_package;
 
 partial class main_package {
 
-[GoType] public partial struct @void {
+public partial struct @void {
 }
 
-[GoType("map[T, @void]")] partial struct Set<T>;
+partial struct Set<T> /*map[T, @void]*/;
 
-[GoType("map[T, EmptyStruct]")] partial struct Bag<T>;
+partial struct Bag<T> /*map[T, EmptyStruct]*/;
 
-[GoType("map[K, V]")] partial struct Index<K, V>;
+partial struct Index<K, V> /*map[K, V]*/;
 
-[GoType("chan T")] partial struct Pipe<T>;
+partial struct Pipe<T> /*chan T*/;
 
-[GoType("[]T")] partial struct Stack<T>;
+partial struct Stack<T> /*[]T*/;
 
 public static Set<T> NewSet<T>(params Span<T> itemsʗp) {
     var items = itemsʗp.sslice();
@@ -43,7 +43,7 @@ public static bool Has<T>(this Set<T> s, T item) {
     return ok;
 }
 
-[GoRecv] public static void Reset<T>(this ref Set<T> s) {
+public static void Reset<T>(this ref Set<T> s) {
     s = new Set<T>(0);
 }
 
@@ -51,7 +51,7 @@ public static void Put<T>(this Bag<T> b, T item) {
     b[item] = new EmptyStruct();
 }
 
-[GoRecv] public static void Drop<T>(this ref Bag<T> b, T item) {
+public static void Drop<T>(this ref Bag<T> b, T item) {
     delete(b, item);
 }
 
@@ -60,7 +60,7 @@ public static (V, bool) Get<K, V>(this Index<K, V> ix, K key) {
     return (value, ok);
 }
 
-[GoRecv] public static void Put<K, V>(this ref Index<K, V> ix, K key, V value) {
+public static void Put<K, V>(this ref Index<K, V> ix, K key, V value) {
     if (ix == default!) {
         ix = new Index<K, V>(0);
     }
@@ -71,7 +71,7 @@ public static void Send<T>(this Pipe<T> p, T value) {
     p.ᐸꟷ(value);
 }
 
-[GoRecv] public static slice<T> Drain<T>(this ref Pipe<T> p) {
+public static slice<T> Drain<T>(this ref Pipe<T> p) {
     close<T>(p);
     slice<T> @out = default!;
     foreach (var value in p) {
@@ -80,7 +80,7 @@ public static void Send<T>(this Pipe<T> p, T value) {
     return @out;
 }
 
-[GoRecv] public static void Push<T>(this ref Stack<T> s, T value) {
+public static void Push<T>(this ref Stack<T> s, T value) {
     s = append(s, value);
 }
 

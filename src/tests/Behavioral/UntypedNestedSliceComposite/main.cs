@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:nint")] partial struct rank;
+partial struct rank /*num:nint*/;
 
 internal static rank rA => /* iota */ 0;
 internal static rank rB => 1;
@@ -21,7 +21,7 @@ internal static slice<array<nint>> grid = GoReflect.WithElemDims(new array<nint>
     new nint[]{3, 4}.array()
 }.slice(), 2);
 
-[GoType] partial struct dbgVar {
+partial struct dbgVar {
     internal @string name;
     internal ж<int32> value;
 }
@@ -34,7 +34,7 @@ internal static slice<ж<dbgVar>> dbgvars = new ж<dbgVar>[]{
     Ꮡ(new dbgVar(name: "b"u8, value: Ꮡx))
 }.slice();
 
-[GoType("num:nint")] partial struct js;
+partial struct js /*num:nint*/;
 
 internal static js j0 => /* iota */ 0;
 internal static js j1 => 1;

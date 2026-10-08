@@ -114,18 +114,18 @@ partial class exec_package {
 
 // Error is returned by [LookPath] when it fails to classify a file as an
 // executable.
-[GoType] partial struct ΔError {
+partial struct ΔError {
     // Name is the file name for which the error occurred.
     public @string Name;
     // Err is the underlying error.
     public error Err;
 }
 
-[GoRecv] public static @string Error(this ref ΔError e) {
+public static @string Error(this ref ΔError e) {
     return "exec: "u8 + strconv.Quote(e.Name) + ": "u8 + e.Err.Error();
 }
 
-[GoRecv] public static error Unwrap(this ref ΔError e) {
+public static error Unwrap(this ref ΔError e) {
     return e.Err;
 }
 
@@ -135,7 +135,7 @@ partial class exec_package {
 public static error ErrWaitDelay = errors.New("exec: WaitDelay expired before I/O complete"u8);
 
 // wrappedError wraps an error without relying on fmt.Errorf.
-[GoType] partial struct wrappedError {
+partial struct wrappedError {
     internal @string prefix;
     internal error err;
 }
@@ -148,7 +148,7 @@ internal static error Unwrap(this wrappedError w) {
     return w.err;
 }
 
-[GoType("dyn")] partial struct Cmd_cachedLookExtensions {
+partial struct Cmd_cachedLookExtensions /*dyn*/ {
     internal @string @in, @out;
 }
 
@@ -156,7 +156,7 @@ internal static error Unwrap(this wrappedError w) {
 //
 // A Cmd cannot be reused after calling its [Cmd.Run], [Cmd.Output] or [Cmd.CombinedOutput]
 // methods.
-[GoType] partial struct Cmd {
+partial struct Cmd {
     // Path is the path of the command to run.
     //
     // This is the only field that must be set to a non-zero
@@ -349,7 +349,7 @@ internal static error Unwrap(this wrappedError w) {
 
 // A ctxResult reports the result of watching the Context associated with a
 // running command (and sending corresponding signals if needed).
-[GoType] partial struct ctxResult {
+partial struct ctxResult {
     internal error err;
     // If timer is non-nil, it expires after WaitDelay has elapsed after
     // the Context is done.
@@ -492,7 +492,7 @@ public static ж<Cmd> CommandContext(context.Context ctx, @string name, params �
 // It is intended only for debugging.
 // In particular, it is not suitable for use as input to a shell.
 // The output of String may vary across Go releases.
-[GoRecv] public static @string String(this ref Cmd c) {
+public static @string String(this ref Cmd c) {
     if (c.Err != default! || c.lookPathErr != default!) {
         // failed to resolve path; report the original requested path (plus args)
         return strings.Join(c.Args, " "u8);
@@ -521,7 +521,7 @@ internal static bool interfaceEqual(any a, any b) {
     finally { ᒐ.Run(); }
 }
 
-[GoRecv] internal static slice<@string> argv(this ref Cmd c) {
+internal static slice<@string> argv(this ref Cmd c) {
     if (len(c.Args) > 0) {
         return c.Args;
     }
@@ -566,11 +566,11 @@ internal static (ж<os.File>, error) childStdin(this ж<Cmd> Ꮡc) {
     return (pr, default!);
 }
 
-[GoRecv] internal static (ж<os.File>, error) childStdout(this ref Cmd c) {
+internal static (ж<os.File>, error) childStdout(this ref Cmd c) {
     return c.writerDescriptor(c.Stdout);
 }
 
-[GoRecv] internal static (ж<os.File>, error) childStderr(this ref Cmd c, ж<os.File> ᏑchildStdout) {
+internal static (ж<os.File>, error) childStderr(this ref Cmd c, ж<os.File> ᏑchildStdout) {
     if (c.Stderr != default! && interfaceEqual(c.Stderr, c.Stdout)) {
         return (ᏑchildStdout, default!);
     }
@@ -581,7 +581,7 @@ internal static (ж<os.File>, error) childStdin(this ж<Cmd> Ꮡc) {
 // can write to send data to w.
 //
 // If w is nil, writerDescriptor returns a File that writes to os.DevNull.
-[GoRecv] internal static (ж<os.File>, error) writerDescriptor(this ref Cmd c, io.Writer w) {
+internal static (ж<os.File>, error) writerDescriptor(this ref Cmd c, io.Writer w) {
     if (w == default!) {
         var (f, errΔ1) = os.OpenFile(os.DevNull, os.O_WRONLY, 0);
         if (errΔ1 != default!) {
@@ -643,7 +643,7 @@ internal static readonly @string execAlreadyStartedˢ = "exec: already started"u
 internal static readonly @string execNoCommandˢ = "exec: no command"u8;
 internal static readonly @string execCommandWithANonNilˢ = "exec: command with a non-nil Cancel was not created with CommandContext"u8;
 
-[GoType("dyn")] internal partial struct Start_goroutineStatus {
+internal partial struct Start_goroutineStatus /*dyn*/ {
     internal nint running;
     internal error firstErr;
 }
@@ -805,7 +805,7 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
 //
 // watchCtx manipulates c.goroutineErr, so its result must be received before
 // c.awaitGoroutines is called.
-[GoRecv] internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) {
+internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) {
     var selᴛ2 = resultc.ᐸꟷ(new ctxResult(nil), ꓸꓸꓸ);
     var selᴛ3 = c.ctx.Done();
     switch (select(selᴛ2, ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
@@ -906,7 +906,7 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
 }
 
 // An ExitError reports an unsuccessful exit by a command.
-[GoType] partial struct ExitError {
+partial struct ExitError {
     public partial ref ж<os_package.ProcessState> ProcessState { get; }
     // Stderr holds a subset of the standard error output from the
     // Cmd.Output method if standard error was not otherwise being
@@ -921,7 +921,7 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
     public slice<byte> Stderr;
 }
 
-[GoRecv] public static @string Error(this ref ExitError e) {
+public static @string Error(this ref ExitError e) {
     return e.ProcessState.String();
 }
 
@@ -1105,7 +1105,7 @@ internal static readonly @string execStdinPipeAfterˢ = "exec: StdinPipe after p
 // A caller need only call Close to force the pipe to close sooner.
 // For example, if the command being run will not exit until standard input
 // is closed, the caller must close the pipe.
-[GoRecv] public static (io.WriteCloser, error) StdinPipe(this ref Cmd c) {
+public static (io.WriteCloser, error) StdinPipe(this ref Cmd c) {
     if (c.Stdin != default!) {
         return (default!, errors.New(execStdinAlreadySetˢ));
     }
@@ -1133,7 +1133,7 @@ internal static readonly @string execStdoutPipeAfterˢ = "exec: StdoutPipe after
 // before all reads from the pipe have completed.
 // For the same reason, it is incorrect to call [Cmd.Run] when using StdoutPipe.
 // See the example for idiomatic usage.
-[GoRecv] public static (io.ReadCloser, error) StdoutPipe(this ref Cmd c) {
+public static (io.ReadCloser, error) StdoutPipe(this ref Cmd c) {
     if (c.Stdout != default!) {
         return (default!, errors.New(execStdoutAlreadySetˢ));
     }
@@ -1161,7 +1161,7 @@ internal static readonly @string execStderrPipeAfterˢ = "exec: StderrPipe after
 // before all reads from the pipe have completed.
 // For the same reason, it is incorrect to use [Cmd.Run] when using StderrPipe.
 // See the StdoutPipe example for idiomatic usage.
-[GoRecv] public static (io.ReadCloser, error) StderrPipe(this ref Cmd c) {
+public static (io.ReadCloser, error) StderrPipe(this ref Cmd c) {
     if (c.Stderr != default!) {
         return (default!, errors.New(execStderrAlreadySetˢ));
     }
@@ -1181,7 +1181,7 @@ internal static readonly @string execStderrPipeAfterˢ = "exec: StderrPipe after
 // prefixSuffixSaver is an io.Writer which retains the first N bytes
 // and the last N bytes written to it. The Bytes() methods reconstructs
 // it with a pretty error message.
-[GoType] partial struct prefixSuffixSaver {
+partial struct prefixSuffixSaver {
     public nint N; // max size of prefix or suffix
     internal slice<byte> prefix;
     internal slice<byte> suffix; // ring buffer once len(suffix) == N
@@ -1223,7 +1223,7 @@ internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice
 
 // fill appends up to len(p) bytes of p to *dst, such that *dst does not
 // grow larger than w.N. It returns the un-appended suffix of p.
-[GoRecv] internal static slice<byte> /*pRemain*/ fill(this ref prefixSuffixSaver w, ж<slice<byte>> Ꮡdst, slice<byte> p) {
+internal static slice<byte> /*pRemain*/ fill(this ref prefixSuffixSaver w, ж<slice<byte>> Ꮡdst, slice<byte> p) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
     {
@@ -1240,7 +1240,7 @@ internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice
 internal static readonly @string omittingˢ = "\n... omitting "u8;
 internal static readonly @string bytesˢ = " bytes ...\n"u8;
 
-[GoRecv] internal static slice<byte> Bytes(this ref prefixSuffixSaver w) {
+internal static slice<byte> Bytes(this ref prefixSuffixSaver w) {
     if (w.suffix == default!) {
         return w.prefix;
     }
@@ -1261,7 +1261,7 @@ internal static readonly @string bytesˢ = " bytes ...\n"u8;
 // environ returns a best-effort copy of the environment in which the command
 // would be run as it is currently configured. If an error occurs in computing
 // the environment, it is returned alongside the best-effort copy.
-[GoRecv] internal static (slice<@string>, error) environ(this ref Cmd c) {
+internal static (slice<@string>, error) environ(this ref Cmd c) {
     error err = default!;
     var env = c.Env;
     if (env == default!) {
@@ -1306,7 +1306,7 @@ internal static readonly @string bytesˢ = " bytes ...\n"u8;
 
 // Environ returns a copy of the environment in which the command would be run
 // as it is currently configured.
-[GoRecv] public static slice<@string> Environ(this ref Cmd c) {
+public static slice<@string> Environ(this ref Cmd c) {
     //  Intentionally ignore errors: environ returns a best-effort environment no matter what.
     var (env, _) = c.environ();
     return env;

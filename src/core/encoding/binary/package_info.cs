@@ -60,7 +60,7 @@ using static go.encoding.binary_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/binary/binary.go", "binary.cs", "ACBCACNIkoKokoKCqJLOkoKokoKCgoKokgAGEpKCqpKCgoKCgoKCgqiSAA0YgNSA2pKCqJKCgqiSzpKCqJKCgoKCqJIABhKSgqqSgoKCgoKCgoKokgANGIDUgNSA1IAAAiQAEQSAgoKAgqaCyoKClIKkpIKWgoCCpIKuwoCCgpaCyoKClIKkpIKWgpSCgqaClLS0tLS0tLS0tLS0ksaCxrSCxoLGgsaCxoLGgsaCxoLWlAACFgAJBICCgoKWgriCgoKWgoKCgq7UgIKCloK4goKCloKUgoKu1ICCgoK4goKCloKCgqaClIKUxoKUxoKClNi0tILGtLS0tLSCxrS0gsa0tILGtLSCxrS0gsa0tILGtLSCxrS0ggAFELLEpIKUpIKUpIKUpKSkxKSClKSClKSkxKSClKSClKSkxKSClKSClKSkpKSClKSkgpSkpJQABRLClIKAgqaCgoKUuIKAgqSCgqaCuKiSlICCyIKCgoKUlKymAAwYgoKCpoKClJSmgoKCpoKCpoKCgqaCgqaCgoKmgoKmgoKCpoKCpoCkgKSApICkgKSApICkgKSClIKCuIKC3ICClNqCgrimpKSkpqSkpKakpsrugpSCgriCgpSAgpTagoK4pqSkpKakpKSmpKaCgqSCgsiCpoKCgqyy9KSkpOSkpOSkpOSkpMTEpKSUqqKCgg==")]
+[assembly: go.GoPositionMap("encoding/binary/binary.go", "binary.cs", "ACBCACNIkoKokoKCqJLOkoKokoKCgoKokgAGEpKCqpKCgoKCgoKCgqiSAA0YgNSA2pKCqJKCgqiSzpKCqJKCgoKCqJIABhKSgqqSgoKCgoKCgoKokgANGIDUgNSA1IAAAiQAEQSAgoKAgqaCyoKClIKkpIKWgoCCpIKuwoCCgpaCyoKClIKkpIKWgpSCgqaClLS0tLS0tLS0tLS0ksaCxrSCxoLGgsaCxoLGgsaCxoLWlAACFgAJBICCgoKWgriCgoKWgoKCgq7UgIKCloK4goKCloKUgoKu1ICCgoK4goKCloKCgqaClIKUxoKUxoKClNi0tILGtLS0tLSCxrS0gsa0tILGtLSCxrS0gsa0tILGtLSCxrS0ggAFELLEpIKUpIKUpIKUpKSkxKSClKSClKSkxKSClKSClKSkxKSClKSClKSkpKSClKSkgpSkpJQABRLClIKAgqaCgoKUuIKAgqSCgqaCuKiSlICCyIKCgoKUlKymAAwYgoKCpoKClJSmgoKCpoKCpoKCgqaCgqaCgoKmgoKmgoKCpoKCpoCkgKSApICkgKSApICkgKSClIKCuIKC3ICClNqCgrimpKSkpqSkpKakpsrugpSCgriCgpSAgpTagoK4pqSkpKakpKSmpKaCgqSCgsiCpoKCgqyy9KSkpOSkpOSkpOSkpMTEpKSUqqKCgg==", "", "", "1106=uint32/1/2/1,Float32frombits/1/2/1,uint32/2/2/2,Float32frombits/2/2/2;1111=uint64/1/2/1,Float64frombits/1/2/1,uint64/2/2/2,Float64frombits/2/2/2")]
 [assembly: go.GoPositionMap("encoding/binary/varint.go", "varint.cs", "ACRSooKClKqigoKCgpSCAAIS4oKCgqaUgoKUlIKUqqKCgpSqooKClAACEuKCgoKUppzCgoKCgoKClJSCgpSUgpSuwoKCgpQ=")]
 // </GoSourcePositionMaps>
 
@@ -70,7 +70,7 @@ namespace go.encoding;
 public static partial class binary_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

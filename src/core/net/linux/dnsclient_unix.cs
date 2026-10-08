@@ -387,7 +387,7 @@ internal static (dnsmessage.Parser, @string, error) tryOneName(this ж<Resolver>
 }
 
 // A resolverConfig represents a DNS stub resolver configuration.
-[GoType] partial struct resolverConfig {
+partial struct resolverConfig {
     internal Δsync.Once initOnce; // guards init of resolverConfig
     // ch is used as a semaphore that only allows one lookup at a
     // time to recheck resolv.conf.
@@ -470,7 +470,7 @@ internal static void tryUpdate(this ж<resolverConfig> Ꮡconf, @string name) {
     finally { if (ᒐd1) Ꮡconf.DerefOrNull().releaseSema(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static bool tryAcquireSema(this ref resolverConfig conf) {
+internal static bool tryAcquireSema(this ref resolverConfig conf) {
     var selᴛ8 = conf.ch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
     switch (trySelect(selᴛ8)) {
     case 0: {
@@ -481,7 +481,7 @@ internal static void tryUpdate(this ж<resolverConfig> Ꮡconf, @string name) {
     }}
 }
 
-[GoRecv] internal static void releaseSema(this ref resolverConfig conf) {
+internal static void releaseSema(this ref resolverConfig conf) {
     ᐸꟷ(conf.ch);
 }
 
@@ -545,7 +545,7 @@ internal static bool avoidDNS(@string name) {
 }
 
 // nameList returns a list of names for sequential DNS queries.
-[GoRecv] internal static slice<@string> nameList(this ref dnsConfig conf, @string name) {
+internal static slice<@string> nameList(this ref dnsConfig conf, @string name) {
     // Check name length (see isDomainName).
     nint l = len(name);
     var rooted = l > 0 && name[l - 1] == (rune)'.';
@@ -582,7 +582,7 @@ internal static bool avoidDNS(@string name) {
     return names;
 }
 
-[GoType("num:nint")] partial struct ΔhostLookupOrder;
+partial struct ΔhostLookupOrder /*num:nint*/;
 
 internal static ΔhostLookupOrder hostLookupCgo => /* iota */ 0;
 internal static ΔhostLookupOrder hostLookupFilesDNS => 1; // files first
@@ -664,10 +664,10 @@ internal static (slice<IPAddr> addrs, error err) goLookupIP(this ж<Resolver> �
     return (addrs, err);
 }
 
-[GoType("dyn")] internal partial struct goLookupIPCNAMEOrder_result {
+internal partial struct goLookupIPCNAMEOrder_result /*dyn*/ {
     internal dnsmessage.Parser p;
     internal @string server;
-    [GoEmbedded] internal error error;
+    /*embed*/ internal error error;
 }
 
 internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookupIPCNAMEOrder(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string name, ΔhostLookupOrder order, ж<dnsConfig> Ꮡconf) {

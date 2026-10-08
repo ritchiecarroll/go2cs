@@ -8,18 +8,18 @@ using DefinedForeignStructConvert;
 
 partial class main_package {
 
-[GoType("global::go.time_package.Time")] partial struct customTime;
+partial struct customTime /*global::go.time_package.Time*/;
 
-[GoType("global::go.DefinedForeignStructConvert.rec_package.Hidden")] partial struct customHidden;
+partial struct customHidden /*global::go.DefinedForeignStructConvert.rec_package.Hidden*/;
 
-[GoType("global::go.DefinedForeignStructConvert.rec_package.Open")] partial struct customOpen;
+partial struct customOpen /*global::go.DefinedForeignStructConvert.rec_package.Open*/;
 
-[GoType] partial struct local {
+partial struct local {
     internal nint n;
     internal @string s;
 }
 
-[GoType("local")] partial struct customLocal;
+partial struct customLocal /*local*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object canConvertˢ = (@string)"CanConvert:"u8;

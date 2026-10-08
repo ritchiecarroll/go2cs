@@ -17,8 +17,8 @@ partial class runtime_package {
 // There is no fundamental theory behind this number.
 internal static UntypedInt tmpStringBufSize => 32;
 
-[GoType("[32]byte")] /* [tmpStringBufSize]byte */
-partial struct tmpBuf;
+/* [tmpStringBufSize]byte */
+partial struct tmpBuf /*[32]byte*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string stringConcatenationTooˢ = "string concatenation too long"u8;
@@ -230,7 +230,7 @@ internal static slice<byte> stringtoslicebyte(ж<tmpBuf> Ꮡbuf, @string s) {
     return b;
 }
 
-internal static slice<rune> stringtoslicerune([GoArrayDims(32)] ж<array<rune>> Ꮡbuf, @string s) {
+internal static slice<rune> stringtoslicerune(/*[32]*/ ж<array<rune>> Ꮡbuf, @string s) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     // two passes.
@@ -284,13 +284,13 @@ internal static @string slicerunetostring(ж<tmpBuf> Ꮡbuf, slice<rune> a) {
     return s.slice(0, size2);
 }
 
-[GoType] partial struct stringStruct {
+partial struct stringStruct {
     internal @unsafe.Pointer str;
     internal nint len;
 }
 
 // Variant with *byte pointer type for DWARF debugging.
-[GoType] partial struct stringStructDWARF {
+partial struct stringStructDWARF {
     internal ж<byte> str;
     internal nint len;
 }
@@ -299,7 +299,7 @@ internal static ж<stringStruct> stringStructOf(ж<@string> Ꮡsp) {
     return Ꮡsp.Reinterpret<@string, stringStruct>();
 }
 
-internal static @string /*s*/ intstring([GoArrayDims(4)] ж<array<byte>> Ꮡbuf, int64 v) {
+internal static @string /*s*/ intstring(/*[4]*/ ж<array<byte>> Ꮡbuf, int64 v) {
     @string s = default!;
 
     ref var buf = ref Ꮡbuf.DerefOrNull();

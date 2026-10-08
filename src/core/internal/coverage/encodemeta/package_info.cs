@@ -55,8 +55,8 @@ using static go.@internal.coverage.encodemeta_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/encodemeta/encode.go", "encode.cs", "ACVIgoKUuIKCgoKCgoKCpoKCgoIABhCSgoKCgoKCgoKCgoKUgoKUgoKCgqaCgoKCgpSmgoKAgpKCpKaCgriCgoKCgIKSgszGooIACBKClICCpJaWgqiAgqSWgoKCgrqCgIKkgoKUqqKCgoKCgqiSgoKCgoKCgpSCgpQ=")]
-[assembly: go.GoPositionMap("internal/coverage/encodemeta/encodefile.go", "encodefile.cs", "ACE+gsqCgqaygoKChIKCqIKCqAAKFoKAgqaCqIKCgoKCgIKkgpSClIKCgoCCpIKUqICCuIKCgoKUgIKkgqaogIKk")]
+[assembly: go.GoPositionMap("internal/coverage/encodemeta/encode.go", "encode.cs", "ACVIgoKUuIKCgoKCgoKCpoKCgoIABhCSgoKCgoKCgoKCgoKUgoKUgoKCgqaCgoKCgpSmgoKAgpKCpKaCgriCgoKCgIKSgszGooIACBKClICCpJaWgqiAgqSWgoKCgrqCgIKkgoKUqqKCgoKCgqiSgoKCgoKCgpSCgpQ=", "", "", "42=New128a/1/1/2;146=Nentries/1/1/5")]
+[assembly: go.GoPositionMap("internal/coverage/encodemeta/encodefile.go", "encodefile.cs", "ACE+gsqCgqaygoKChIKCqIKCqAAKFoKAgqaCqIKCgoKCgIKkgpSClIKCgoCCpIKUqICCuIKCgoKUgIKkgqaogIKk", "", "", "35=NewWriter/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
@@ -65,7 +65,7 @@ namespace go.@internal.coverage;
 public static partial class encodemeta_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

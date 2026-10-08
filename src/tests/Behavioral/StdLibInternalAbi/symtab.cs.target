@@ -6,13 +6,13 @@ namespace go;
 
 partial class main_package {
 
-[GoType("num:uint8")] partial struct FuncFlag;
+partial struct FuncFlag /*num:uint8*/;
 
 public static FuncFlag FuncFlagTopFrame => /* 1 << iota */ 1;
 public static FuncFlag FuncFlagSPWrite => 2;
 public static FuncFlag FuncFlagAsm => 4;
 
-[GoType("num:uint8")] partial struct FuncID;
+partial struct FuncID /*num:uint8*/;
 
 public static FuncID FuncIDNormal => /* iota */ 0;
 public static FuncID FuncID_abort => 1;

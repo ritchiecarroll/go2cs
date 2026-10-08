@@ -147,7 +147,7 @@ public static ref ж<Resolver> DefaultResolver => ref ᏑDefaultResolver.ValueSl
 // A Resolver looks up names and numbers.
 //
 // A nil *Resolver is equivalent to a zero Resolver.
-[GoType] partial struct Resolver {
+partial struct Resolver {
     // PreferGo controls whether Go's built-in DNS resolver is preferred
     // on platforms where it's available. It is equivalent to setting
     // GODEBUG=netdns=go, but scoped to just this resolver.
@@ -300,8 +300,8 @@ public static (slice<netipꓸAddr>, error) LookupNetIP(this ж<Resolver> Ꮡr, c
 
 // onlyValuesCtx is a context that uses an underlying context
 // for value lookup if the underlying context hasn't yet expired.
-[GoType] partial struct onlyValuesCtx {
-    [GoEmbedded] public context_package.Context Context;
+partial struct onlyValuesCtx {
+    /*embed*/ public context_package.Context Context;
     internal context.Context lookupValues;
 }
 
@@ -320,7 +320,7 @@ internal static error Err(this onlyValuesCtx recvᴛ) => recvᴛ.Context.Err();
 internal static context.Context _ᴛ1ʗ = new onlyValuesCtxжContext(((ж<onlyValuesCtx>)nil));
 
 // Value performs a lookup if the original context hasn't expired.
-[GoRecv] internal static any Value(this ref onlyValuesCtx ovc, any key) {
+internal static any Value(this ref onlyValuesCtx ovc, any key) {
     var selᴛ13 = ovc.lookupValues.Done();
     switch (trySelect(ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
     case 0 when selᴛ13.ꟷᐳ(out _): {

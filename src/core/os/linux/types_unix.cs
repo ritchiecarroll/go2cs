@@ -10,7 +10,7 @@ using time = time_package;
 partial class os_package {
 
 // A fileStat is the implementation of FileInfo returned by Stat and Lstat.
-[GoType] partial struct fileStat {
+partial struct fileStat {
     internal @string name;
     internal int64 size;
     internal FileMode mode;
@@ -18,15 +18,15 @@ partial class os_package {
     internal syscall.Stat_t sys;
 }
 
-[GoRecv] internal static int64 Size(this ref fileStat fs) {
+internal static int64 Size(this ref fileStat fs) {
     return fs.size;
 }
 
-[GoRecv] internal static FileMode Mode(this ref fileStat fs) {
+internal static FileMode Mode(this ref fileStat fs) {
     return fs.mode;
 }
 
-[GoRecv] internal static time.Time ModTime(this ref fileStat fs) {
+internal static time.Time ModTime(this ref fileStat fs) {
     return fs.modTime;
 }
 

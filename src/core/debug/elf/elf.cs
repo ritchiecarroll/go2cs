@@ -69,7 +69,7 @@ public static UntypedInt EI_NIDENT => 16; /* Size of e_ident array. */
 // Initial magic number for ELF files.
 public static readonly @string ELFMAG = "\u007fELF"u8;
 
-[GoType("num:byte")] partial struct Version;
+partial struct Version /*num:byte*/;
 
 public static Version EV_NONE => 0;
 public static Version EV_CURRENT => 1;
@@ -87,7 +87,7 @@ public static @string GoString(this Version i) {
     return stringName((uint32)(byte)i, versionStrings, true);
 }
 
-[GoType("num:byte")] partial struct Class;
+partial struct Class /*num:byte*/;
 
 public static Class ELFCLASSNONE => 0; /* Unknown class. */
 public static Class ELFCLASS32 => 1; /* 32-bit architecture. */
@@ -107,7 +107,7 @@ public static @string GoString(this Class i) {
     return stringName((uint32)(byte)i, classStrings, true);
 }
 
-[GoType("num:byte")] partial struct ΔData;
+partial struct ΔData /*num:byte*/;
 
 public static ΔData ELFDATANONE => 0; /* Unknown data format. */
 public static ΔData ELFDATA2LSB => 1; /* 2's complement little-endian. */
@@ -127,7 +127,7 @@ public static @string GoString(this ΔData i) {
     return stringName((uint32)(byte)i, dataStrings, true);
 }
 
-[GoType("num:byte")] partial struct OSABI;
+partial struct OSABI /*num:byte*/;
 
 public static OSABI ELFOSABI_NONE => 0;       /* UNIX System V ABI */
 public static OSABI ELFOSABI_HPUX => 1;       /* HP-UX operating system */
@@ -181,7 +181,7 @@ public static @string GoString(this OSABI i) {
     return stringName((uint32)(byte)i, osabiStrings, true);
 }
 
-[GoType("num:uint16")] partial struct Type;
+partial struct Type /*num:uint16*/;
 
 public static Type ET_NONE => 0;      /* Unknown type. */
 public static Type ET_REL => 1;       /* Relocatable. */
@@ -213,7 +213,7 @@ public static @string GoString(this Type i) {
     return stringName((uint32)(uint16)i, typeStrings, true);
 }
 
-[GoType("num:uint16")] partial struct Machine;
+partial struct Machine /*num:uint16*/;
 
 public static Machine EM_NONE => 0;          /* Unknown machine. */
 public static Machine EM_M32 => 1;           /* AT&T WE32100. */
@@ -602,7 +602,7 @@ public static @string GoString(this Machine i) {
     return stringName((uint32)(uint16)i, machineStrings, true);
 }
 
-[GoType("num:nint")] partial struct SectionIndex;
+partial struct SectionIndex /*num:nint*/;
 
 public static SectionIndex SHN_UNDEF => 0;        /* Undefined, missing, irrelevant. */
 public static SectionIndex SHN_LORESERVE => 0xff00;    /* First of reserved range. */
@@ -632,7 +632,7 @@ public static @string GoString(this SectionIndex i) {
     return stringName((uint32)(nint)i, shnStrings, true);
 }
 
-[GoType("num:uint32")] partial struct SectionType;
+partial struct SectionType /*num:uint32*/;
 
 public static SectionType SHT_NULL => 0;                  /* inactive */
 public static SectionType SHT_PROGBITS => 1;              /* program defined information */
@@ -705,7 +705,7 @@ public static @string GoString(this SectionType i) {
     return stringName((uint32)i, shtStrings, true);
 }
 
-[GoType("num:uint32")] partial struct SectionFlag;
+partial struct SectionFlag /*num:uint32*/;
 
 public static SectionFlag SHF_WRITE => 0x1;                   /* Section contains writable data. */
 public static SectionFlag SHF_ALLOC => 0x2;                   /* Section occupies memory. */
@@ -743,7 +743,7 @@ public static @string GoString(this SectionFlag i) {
     return flagName((uint32)i, shfStrings, true);
 }
 
-[GoType("num:nint")] partial struct CompressionType;
+partial struct CompressionType /*num:nint*/;
 
 public static CompressionType COMPRESS_ZLIB => 1;          /* ZLIB compression. */
 public static CompressionType COMPRESS_ZSTD => 2;          /* ZSTD compression. */
@@ -769,7 +769,7 @@ public static @string GoString(this CompressionType i) {
     return stringName((uint32)(nint)i, compressionStrings, true);
 }
 
-[GoType("num:nint")] partial struct ProgType;
+partial struct ProgType /*num:nint*/;
 
 public static ProgType PT_NULL => 0;  /* Unused entry. */
 public static ProgType PT_LOAD => 1;  /* Loadable segment. */
@@ -840,7 +840,7 @@ public static @string GoString(this ProgType i) {
     return stringName((uint32)(nint)i, ptStrings, true);
 }
 
-[GoType("num:uint32")] partial struct ProgFlag;
+partial struct ProgFlag /*num:uint32*/;
 
 public static ProgFlag PF_X => 0x1;               /* Executable. */
 public static ProgFlag PF_W => 0x2;               /* Writable. */
@@ -862,7 +862,7 @@ public static @string GoString(this ProgFlag i) {
     return flagName((uint32)i, pfStrings, true);
 }
 
-[GoType("num:nint")] partial struct DynTag;
+partial struct DynTag /*num:nint*/;
 
 public static DynTag DT_NULL => 0;        /* Terminating entry. */
 public static DynTag DT_NEEDED => 1;      /* String table offset of a needed shared library. */
@@ -1086,7 +1086,7 @@ public static @string GoString(this DynTag i) {
     return stringName((uint32)(nint)i, dtStrings, true);
 }
 
-[GoType("num:nint")] partial struct DynFlag;
+partial struct DynFlag /*num:nint*/;
 
 public static DynFlag DF_ORIGIN => 0x0001;    /* Indicates that the object being loaded may
 	   make reference to the
@@ -1117,7 +1117,7 @@ public static @string GoString(this DynFlag i) {
     return flagName((uint32)(nint)i, dflagStrings, true);
 }
 
-[GoType("num:uint32")] partial struct DynFlag1;
+partial struct DynFlag1 /*num:uint32*/;
 
 public static DynFlag1 DF_1_NOW => 0x00000001;
 public static DynFlag1 DF_1_GLOBAL => 0x00000002;
@@ -1193,7 +1193,7 @@ public static @string GoString(this DynFlag1 i) {
     return flagName((uint32)i, dflag1Strings, true);
 }
 
-[GoType("num:nint")] partial struct NType;
+partial struct NType /*num:nint*/;
 
 public static NType NT_PRSTATUS => 1; /* Process status. */
 public static NType NT_FPREGSET => 2; /* Floating point registers. */
@@ -1213,7 +1213,7 @@ public static @string GoString(this NType i) {
     return stringName((uint32)(nint)i, ntypeStrings, true);
 }
 
-[GoType("num:nint")] partial struct SymBind;
+partial struct SymBind /*num:nint*/;
 
 public static SymBind STB_LOCAL => 0; /* Local symbol */
 public static SymBind STB_GLOBAL => 1; /* Global symbol */
@@ -1241,7 +1241,7 @@ public static @string GoString(this SymBind i) {
     return stringName((uint32)(nint)i, stbStrings, true);
 }
 
-[GoType("num:nint")] partial struct SymType;
+partial struct SymType /*num:nint*/;
 
 public static SymType STT_NOTYPE => 0; /* Unspecified type. */
 public static SymType STT_OBJECT => 1; /* Data object. */
@@ -1282,7 +1282,7 @@ public static @string GoString(this SymType i) {
     return stringName((uint32)(nint)i, sttStrings, true);
 }
 
-[GoType("num:nint")] partial struct SymVis;
+partial struct SymVis /*num:nint*/;
 
 public static SymVis STV_DEFAULT => 0x0;   /* Default visibility (see binding). */
 public static SymVis STV_INTERNAL => 0x1;  /* Special meaning in relocatable objects. */
@@ -1304,7 +1304,7 @@ public static @string GoString(this SymVis i) {
     return stringName((uint32)(nint)i, stvStrings, true);
 }
 
-[GoType("num:nint")] partial struct R_X86_64;
+partial struct R_X86_64 /*num:nint*/;
 
 /*
  * Relocation types.
@@ -1407,7 +1407,7 @@ public static @string GoString(this R_X86_64 i) {
     return stringName((uint32)(nint)i, rx86_64Strings, true);
 }
 
-[GoType("num:nint")] partial struct R_AARCH64;
+partial struct R_AARCH64 /*num:nint*/;
 
 public static R_AARCH64 R_AARCH64_NONE => 0;
 public static R_AARCH64 R_AARCH64_P32_ABS32 => 1;
@@ -1681,7 +1681,7 @@ public static @string GoString(this R_AARCH64 i) {
     return stringName((uint32)(nint)i, raarch64Strings, true);
 }
 
-[GoType("num:nint")] partial struct R_ALPHA;
+partial struct R_ALPHA /*num:nint*/;
 
 public static R_ALPHA R_ALPHA_NONE => 0;          /* No reloc */
 public static R_ALPHA R_ALPHA_REFLONG => 1;       /* Direct 32 bit */
@@ -1751,7 +1751,7 @@ public static @string GoString(this R_ALPHA i) {
     return stringName((uint32)(nint)i, ralphaStrings, true);
 }
 
-[GoType("num:nint")] partial struct R_ARM;
+partial struct R_ARM /*num:nint*/;
 
 public static R_ARM R_ARM_NONE => 0;             /* No relocation. */
 public static R_ARM R_ARM_PC24 => 1;
@@ -2053,7 +2053,7 @@ public static @string GoString(this R_ARM i) {
     return stringName((uint32)(nint)i, rarmStrings, true);
 }
 
-[GoType("num:nint")] partial struct R_386;
+partial struct R_386 /*num:nint*/;
 
 public static R_386 R_386_NONE => 0;         /* No relocation. */
 public static R_386 R_386_32 => 1;           /* Add symbol value. */
@@ -2151,7 +2151,7 @@ public static @string GoString(this R_386 i) {
     return stringName((uint32)(nint)i, r386Strings, true);
 }
 
-[GoType("num:nint")] partial struct R_MIPS;
+partial struct R_MIPS /*num:nint*/;
 
 public static R_MIPS R_MIPS_NONE => 0;
 public static R_MIPS R_MIPS_16 => 1;
@@ -2263,7 +2263,7 @@ public static @string GoString(this R_MIPS i) {
     return stringName((uint32)(nint)i, rmipsStrings, true);
 }
 
-[GoType("num:nint")] partial struct R_LARCH;
+partial struct R_LARCH /*num:nint*/;
 
 public static R_LARCH R_LARCH_NONE => 0;
 public static R_LARCH R_LARCH_32 => 1;
@@ -2473,7 +2473,7 @@ public static @string GoString(this R_LARCH i) {
     return stringName((uint32)(nint)i, rlarchStrings, true);
 }
 
-[GoType("num:nint")] partial struct R_PPC;
+partial struct R_PPC /*num:nint*/;
 
 public static R_PPC R_PPC_NONE => 0;           // R_POWERPC_NONE
 public static R_PPC R_PPC_ADDR32 => 1;         // R_POWERPC_ADDR32
@@ -2641,7 +2641,7 @@ public static @string GoString(this R_PPC i) {
     return stringName((uint32)(nint)i, rppcStrings, true);
 }
 
-[GoType("num:nint")] partial struct R_PPC64;
+partial struct R_PPC64 /*num:nint*/;
 
 public static R_PPC64 R_PPC64_NONE => 0;              // R_POWERPC_NONE
 public static R_PPC64 R_PPC64_ADDR32 => 1;            // R_POWERPC_ADDR32
@@ -2977,7 +2977,7 @@ public static @string GoString(this R_PPC64 i) {
     return stringName((uint32)(nint)i, rppc64Strings, true);
 }
 
-[GoType("num:nint")] partial struct R_RISCV;
+partial struct R_RISCV /*num:nint*/;
 
 public static R_RISCV R_RISCV_NONE => 0;         /* No relocation. */
 public static R_RISCV R_RISCV_32 => 1;           /* Add 32 bit zero extended symbol value */
@@ -3099,7 +3099,7 @@ public static @string GoString(this R_RISCV i) {
     return stringName((uint32)(nint)i, rriscvStrings, true);
 }
 
-[GoType("num:nint")] partial struct R_390;
+partial struct R_390 /*num:nint*/;
 
 public static R_390 R_390_NONE => 0;
 public static R_390 R_390_8 => 1;
@@ -3235,7 +3235,7 @@ public static @string GoString(this R_390 i) {
     return stringName((uint32)(nint)i, r390Strings, true);
 }
 
-[GoType("num:nint")] partial struct R_SPARC;
+partial struct R_SPARC /*num:nint*/;
 
 public static R_SPARC R_SPARC_NONE => 0;
 public static R_SPARC R_SPARC_8 => 1;
@@ -3365,7 +3365,7 @@ public static @string GoString(this R_SPARC i) {
 public static UntypedInt ARM_MAGIC_TRAMP_NUMBER => 0x5c000003;
 
 // ELF32 File header.
-[GoType] partial struct Header32 {
+partial struct Header32 {
     public array<byte> Ident = new(EI_NIDENT); /* File identification. */
     public uint16 Type;          /* File type. */
     public uint16 Machine;          /* Machine architecture. */
@@ -3383,7 +3383,7 @@ public static UntypedInt ARM_MAGIC_TRAMP_NUMBER => 0x5c000003;
 }
 
 // ELF32 Section header.
-[GoType] partial struct Section32 {
+partial struct Section32 {
     public uint32 Name; /* Section name (index into the section header string table). */
     public uint32 Type; /* Section type. */
     public uint32 Flags; /* Section flags. */
@@ -3397,7 +3397,7 @@ public static UntypedInt ARM_MAGIC_TRAMP_NUMBER => 0x5c000003;
 }
 
 // ELF32 Program header.
-[GoType] partial struct Prog32 {
+partial struct Prog32 {
     public uint32 Type; /* Entry type. */
     public uint32 Off; /* File offset of contents. */
     public uint32 Vaddr; /* Virtual address in memory image. */
@@ -3409,13 +3409,13 @@ public static UntypedInt ARM_MAGIC_TRAMP_NUMBER => 0x5c000003;
 }
 
 // ELF32 Dynamic structure. The ".dynamic" section contains an array of them.
-[GoType] partial struct Dyn32 {
+partial struct Dyn32 {
     public int32 Tag;  /* Entry type. */
     public uint32 Val; /* Integer/Address value. */
 }
 
 // ELF32 Compression header.
-[GoType] partial struct Chdr32 {
+partial struct Chdr32 {
     public uint32 Type;
     public uint32 Size;
     public uint32 Addralign;
@@ -3426,13 +3426,13 @@ public static UntypedInt ARM_MAGIC_TRAMP_NUMBER => 0x5c000003;
  */
 
 // ELF32 Relocations that don't need an addend field.
-[GoType] partial struct Rel32 {
+partial struct Rel32 {
     public uint32 Off; /* Location to be relocated. */
     public uint32 Info; /* Relocation type and symbol index. */
 }
 
 // ELF32 Relocations that need an addend field.
-[GoType] partial struct Rela32 {
+partial struct Rela32 {
     public uint32 Off; /* Location to be relocated. */
     public uint32 Info; /* Relocation type and symbol index. */
     public int32 Addend;  /* Addend. */
@@ -3451,7 +3451,7 @@ public static uint32 R_INFO32(uint32 sym, uint32 typ) {
 }
 
 // ELF32 Symbol.
-[GoType] partial struct Sym32 {
+partial struct Sym32 {
     public uint32 Name;
     public uint32 Value;
     public uint32 Size;
@@ -3483,7 +3483,7 @@ public static SymVis ST_VISIBILITY(uint8 other) {
  */
 
 // ELF64 file header.
-[GoType] partial struct Header64 {
+partial struct Header64 {
     public array<byte> Ident = new(EI_NIDENT); /* File identification. */
     public uint16 Type;          /* File type. */
     public uint16 Machine;          /* Machine architecture. */
@@ -3501,7 +3501,7 @@ public static SymVis ST_VISIBILITY(uint8 other) {
 }
 
 // ELF64 Section header.
-[GoType] partial struct Section64 {
+partial struct Section64 {
     public uint32 Name; /* Section name (index into the section header string table). */
     public uint32 Type; /* Section type. */
     public uint64 Flags; /* Section flags. */
@@ -3515,7 +3515,7 @@ public static SymVis ST_VISIBILITY(uint8 other) {
 }
 
 // ELF64 Program header.
-[GoType] partial struct Prog64 {
+partial struct Prog64 {
     public uint32 Type; /* Entry type. */
     public uint32 Flags; /* Access permission flags. */
     public uint64 Off; /* File offset of contents. */
@@ -3527,13 +3527,13 @@ public static SymVis ST_VISIBILITY(uint8 other) {
 }
 
 // ELF64 Dynamic structure. The ".dynamic" section contains an array of them.
-[GoType] partial struct Dyn64 {
+partial struct Dyn64 {
     public int64 Tag;  /* Entry type. */
     public uint64 Val; /* Integer/address value */
 }
 
 // ELF64 Compression header.
-[GoType] partial struct Chdr64 {
+partial struct Chdr64 {
     public uint32 Type;
     internal uint32 _; /* Reserved. */
     public uint64 Size;
@@ -3545,13 +3545,13 @@ public static SymVis ST_VISIBILITY(uint8 other) {
  */
 
 /* ELF64 relocations that don't need an addend field. */
-[GoType] partial struct Rel64 {
+partial struct Rel64 {
     public uint64 Off; /* Location to be relocated. */
     public uint64 Info; /* Relocation type and symbol index. */
 }
 
 /* ELF64 relocations that need an addend field. */
-[GoType] partial struct Rela64 {
+partial struct Rela64 {
     public uint64 Off; /* Location to be relocated. */
     public uint64 Info; /* Relocation type and symbol index. */
     public int64 Addend;  /* Addend. */
@@ -3570,7 +3570,7 @@ public static uint64 R_INFO(uint32 sym, uint32 typ) {
 }
 
 // ELF64 symbol table entries.
-[GoType] partial struct Sym64 {
+partial struct Sym64 {
     public uint32 Name; /* String table index of name. */
     public uint8 Info;  /* Type and binding information. */
     public uint8 Other;  /* Reserved (not used). */
@@ -3581,12 +3581,12 @@ public static uint64 R_INFO(uint32 sym, uint32 typ) {
 
 public static UntypedInt Sym64Size => 24;
 
-[GoType] partial struct intName {
+partial struct intName {
     internal uint32 i;
     internal @string s;
 }
 
-[GoType("num:uint16")] partial struct DynamicVersionFlag;
+partial struct DynamicVersionFlag /*num:uint16*/;
 
 public static DynamicVersionFlag VER_FLG_BASE => 0x1; /* Version definition of the file. */
 public static DynamicVersionFlag VER_FLG_WEAK => 0x2; /* Weak version identifier. */

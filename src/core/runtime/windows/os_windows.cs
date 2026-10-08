@@ -16,7 +16,7 @@ partial class runtime_package {
 // TODO(brainman): should not need those
 internal static UntypedInt _NSIG => 65;
 
-[GoType("global::go.unsafe_package.Pointer")] partial struct stdFunction;
+partial struct stdFunction /*global::go.unsafe_package.Pointer*/;
 
 //go:cgo_import_dynamic runtime._AddVectoredContinueHandler AddVectoredContinueHandler%2 "kernel32.dll"
 //go:cgo_import_dynamic runtime._AddVectoredExceptionHandler AddVectoredExceptionHandler%2 "kernel32.dll"
@@ -143,7 +143,7 @@ internal static partial void tstart_stdcall(ж<m> newm);
 // Init-time helper
 internal static partial void wintls();
 
-[GoType] partial struct mOS {
+partial struct mOS {
     internal mutex threadLock;   // protects "thread" and prevents closing
     internal uintptr thread; // thread handle
     internal uintptr waitsema; // semaphore for parking on locks
@@ -191,7 +191,7 @@ internal static int32 read(int32 fd, @unsafe.Pointer Δp, int32 n) {
     return -1;
 }
 
-[GoType] partial struct sigset {
+partial struct sigset {
 }
 
 // Call a Windows function with stdcall conventions,
@@ -200,7 +200,7 @@ internal static partial void asmstdcall(@unsafe.Pointer fn);
 
 internal static @unsafe.Pointer asmstdcallAddr;
 
-[GoType("libcall")] partial struct winlibcall;
+partial struct winlibcall /*libcall*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string usageˢ = "usage"u8;
@@ -285,7 +285,7 @@ internal static void loadOptionalSyscalls() {
     _RtlGetVersion = windowsFindfunc(n32, slice<byte>("RtlGetVersion\u0000"u8));
 }
 
-[GoType("dyn")] internal partial struct monitorSuspendResume__DEVICE_NOTIFY_SUBSCRIBE_PARAMETERS {
+internal partial struct monitorSuspendResume__DEVICE_NOTIFY_SUBSCRIBE_PARAMETERS /*dyn*/ {
     internal uintptr callback;
     internal uintptr context;
 }

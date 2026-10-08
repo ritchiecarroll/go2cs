@@ -2,7 +2,7 @@ namespace go.ForeignDefinedConversion;
 
 partial class levellib_package {
 
-[GoType("num:uint32")] partial struct Level;
+partial struct Level /*num:uint32*/;
 
 public static uint32 Double(this Level l) {
     return (uint32)l * 2;

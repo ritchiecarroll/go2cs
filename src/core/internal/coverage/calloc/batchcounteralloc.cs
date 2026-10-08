@@ -10,11 +10,11 @@ partial class calloc_package {
 // coverage data files. Collections of counter arrays tend to all be
 // live/dead over the same time period, so a good fit for batch
 // allocation.
-[GoType] partial struct BatchCounterAlloc {
+partial struct BatchCounterAlloc {
     internal slice<uint32> pool;
 }
 
-[GoRecv] public static slice<uint32> AllocateCounters(this ref BatchCounterAlloc ca, nint n) {
+public static slice<uint32> AllocateCounters(this ref BatchCounterAlloc ca, nint n) {
     const nint chunk = 8192;
     if (n > cap(ca.pool)) {
         nint siz = chunk;

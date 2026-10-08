@@ -10,7 +10,7 @@ partial class hpack_package {
 internal const uint32 uint32Max = /* ^uint32(0) */ 4294967295;
 internal static UntypedInt initialHeaderTableSize => 4096;
 
-[GoType] partial struct Encoder {
+partial struct Encoder {
     internal dynamicTable dynTab;
     // minSize is the minimum table size set by
     // SetMaxDynamicTableSize after the previous Header Table Size
@@ -102,7 +102,7 @@ internal static (uint64 i, bool nameValueMatch) searchTable(this ж<Encoder> Ꮡ
 // SetMaxDynamicTableSize changes the dynamic header table size to v.
 // The actual size is bounded by the value passed to
 // SetMaxDynamicTableSizeLimit.
-[GoRecv] public static void SetMaxDynamicTableSize(this ref Encoder e, uint32 v) {
+public static void SetMaxDynamicTableSize(this ref Encoder e, uint32 v) {
     if (v > e.maxSizeLimit) {
         v = e.maxSizeLimit;
     }
@@ -114,7 +114,7 @@ internal static (uint64 i, bool nameValueMatch) searchTable(this ж<Encoder> Ꮡ
 }
 
 // MaxDynamicTableSize returns the current dynamic header table size.
-[GoRecv] public static uint32 /*v*/ MaxDynamicTableSize(this ref Encoder e) {
+public static uint32 /*v*/ MaxDynamicTableSize(this ref Encoder e) {
     return e.dynTab.maxSize;
 }
 
@@ -125,7 +125,7 @@ internal static (uint64 i, bool nameValueMatch) searchTable(this ж<Encoder> Ꮡ
 // dynamic header table size is strictly greater than v, "Header Table
 // Size Update" will be done in the next WriteField call and the
 // maximum dynamic header table size is truncated to v.
-[GoRecv] public static void SetMaxDynamicTableSizeLimit(this ref Encoder e, uint32 v) {
+public static void SetMaxDynamicTableSizeLimit(this ref Encoder e, uint32 v) {
     e.maxSizeLimit = v;
     if (e.dynTab.maxSize > v) {
         e.tableSizeUpdate = true;
@@ -134,7 +134,7 @@ internal static (uint64 i, bool nameValueMatch) searchTable(this ж<Encoder> Ꮡ
 }
 
 // shouldIndex reports whether f should be indexed.
-[GoRecv] internal static bool shouldIndex(this ref Encoder e, HeaderField f) {
+internal static bool shouldIndex(this ref Encoder e, HeaderField f) {
     return !f.Sensitive && f.Size() <= e.dynTab.maxSize;
 }
 

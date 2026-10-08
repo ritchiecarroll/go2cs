@@ -28,7 +28,7 @@ private static readonly object definedFloat64KeyAfterˢ = (@string)"defined floa
 private static readonly object definedFloat32KeyAfterˢ = (@string)"defined float32 key after overwrite:"u8;
 private static readonly object definedComplex128Keyˢ = (@string)"defined complex128 key after overwrite:"u8;
 
-[GoType("dyn")] internal partial struct keyUpdate_pt {
+internal partial struct keyUpdate_pt /*dyn*/ {
     internal float64 x, y;
 }
 
@@ -86,11 +86,11 @@ internal static void keyUpdate() {
     }
 }
 
-[GoType("num:float64")] partial struct F64;
+partial struct F64 /*num:float64*/;
 
-[GoType("num:float32")] partial struct F32;
+partial struct F32 /*num:float32*/;
 
-[GoType("num:complex128")] partial struct C128;
+partial struct C128 /*num:complex128*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object float64NaNTwiceThen0ˢ = (@string)"float64 NaN twice then ±0:"u8;

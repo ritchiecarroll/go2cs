@@ -58,7 +58,7 @@ partial class http_package {
 //     with the expectation that the Jar will insert those mutated cookies
 //     with the updated values (assuming the origin matches).
 //     If Jar is nil, the initial cookies are forwarded without change.
-[GoType] partial struct Client {
+partial struct Client {
     // Transport specifies the mechanism by which individual
     // HTTP requests are made.
     // If nil, DefaultTransport is used.
@@ -114,7 +114,7 @@ public static ж<Client> DefaultClient = Ꮡ(new Client(nil));
 //
 // A RoundTripper must be safe for concurrent use by multiple
 // goroutines.
-[GoType] partial interface RoundTripper {
+partial interface RoundTripper {
     // RoundTrip executes a single HTTP transaction, returning
     // a Response for the provided Request.
     //
@@ -173,7 +173,7 @@ internal static @string refererForURL(ж<url.URL> ᏑlastReq, ref url.URL newReq
 }
 
 // didTimeout is non-nil only if err != nil.
-[GoRecv] internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(this ref Client c, ж<Request> Ꮡreq, time.Time deadline) {
+internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(this ref Client c, ж<Request> Ꮡreq, time.Time deadline) {
     ж<Response> resp = default!;
     Func<bool> didTimeout = default!;
     error err = default!;
@@ -198,14 +198,14 @@ internal static @string refererForURL(ж<url.URL> ᏑlastReq, ref url.URL newReq
     return (resp, default!, default!);
 }
 
-[GoRecv] internal static time.Time deadline(this ref Client c) {
+internal static time.Time deadline(this ref Client c) {
     if (c.Timeout > 0) {
         return time.Now().Add(c.Timeout);
     }
     return new time.Time(nil);
 }
 
-[GoRecv] internal static RoundTripper transport(this ref Client c) {
+internal static RoundTripper transport(this ref Client c) {
     if (c.Transport != default!) {
         return c.Transport;
     }
@@ -363,7 +363,7 @@ internal static bool knownRoundTripperImpl(RoundTripper rt, ж<Request> Ꮡreq) 
 
 // The first way, used only for RoundTripper
 // implementations written before Go 1.5 or Go 1.6.
-[GoType("dyn")] internal partial interface setRequestCancel_canceler {
+internal partial interface setRequestCancel_canceler /*dyn*/ {
     void CancelRequest(ж<Request> _);
 }
 
@@ -538,7 +538,7 @@ public static error ErrUseLastResponse = errors.New("net/http: use last response
 
 // checkRedirect calls either the user's configured CheckRedirect
 // function, or the default.
-[GoRecv] internal static error checkRedirect(this ref Client c, ж<Request> Ꮡreq, slice<ж<Request>> via) {
+internal static error checkRedirect(this ref Client c, ж<Request> Ꮡreq, slice<ж<Request>> via) {
     var fn = c.CheckRedirect;
     if (fn == default!) {
         fn = defaultCheckRedirect;
@@ -1034,7 +1034,7 @@ public static (ж<Response> resp, error err) Head(this ж<Client> Ꮡc, @string 
     return Ꮡc.Do(req);
 }
 
-[GoType("dyn")] internal partial interface CloseIdleConnections_closeIdler {
+internal partial interface CloseIdleConnections_closeIdler /*dyn*/ {
     void CloseIdleConnections();
 }
 
@@ -1045,7 +1045,7 @@ public static (ж<Response> resp, error err) Head(this ж<Client> Ꮡc, @string 
 //
 // If [Client.Transport] does not have a [Client.CloseIdleConnections] method
 // then this method does nothing.
-[GoRecv] public static void CloseIdleConnections(this ref Client c) {
+public static void CloseIdleConnections(this ref Client c) {
     {
         var (tr, ok) = c.transport()._<CloseIdleConnections_closeIdler>(ᐧ); if (ok) {
             tr.CloseIdleConnections();
@@ -1057,13 +1057,13 @@ public static (ж<Response> resp, error err) Head(this ж<Client> Ꮡc, @string 
 //  1. On Read error or close, the stop func is called.
 //  2. On Read failure, if reqDidTimeout is true, the error is wrapped and
 //     marked as net.Error that hit its timeout.
-[GoType] partial struct cancelTimerBody {
+partial struct cancelTimerBody {
     internal Action stop; // stops the time.Timer waiting to cancel the request
     internal io.ReadCloser rc;
     internal Func<bool> reqDidTimeout;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref cancelTimerBody b, slice<byte> p) {
+internal static (nint n, error err) Read(this ref cancelTimerBody b, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -1080,7 +1080,7 @@ public static (ж<Response> resp, error err) Head(this ж<Client> Ꮡc, @string 
     return (n, err);
 }
 
-[GoRecv] internal static error Close(this ref cancelTimerBody b) {
+internal static error Close(this ref cancelTimerBody b) {
     var err = b.rc.Close();
     b.stop();
     return err;

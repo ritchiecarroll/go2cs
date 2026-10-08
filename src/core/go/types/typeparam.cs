@@ -27,7 +27,7 @@ internal static uint64 nextID() {
 //
 // A TypeParam has a name; use the [TypeParam.Obj] method to access
 // its [TypeName] object.
-[GoType] partial struct TypeParam {
+partial struct TypeParam {
     internal ж<Checker> check; // for lazy type bound completion
     internal uint64 id;    // unique id, for debugging only
     internal ж<TypeName> obj; // corresponding type name
@@ -73,18 +73,18 @@ internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeNam
 }
 
 // Obj returns the type name for the type parameter t.
-[GoRecv] public static ж<TypeName> Obj(this ref TypeParam t) {
+public static ж<TypeName> Obj(this ref TypeParam t) {
     return t.obj;
 }
 
 // Index returns the index of the type param within its param list, or -1 if
 // the type parameter has not yet been bound to a type.
-[GoRecv] public static nint Index(this ref TypeParam t) {
+public static nint Index(this ref TypeParam t) {
     return t.index;
 }
 
 // Constraint returns the type constraint specified for t.
-[GoRecv] public static ΔType Constraint(this ref TypeParam t) {
+public static ΔType Constraint(this ref TypeParam t) {
     return t.bound;
 }
 
@@ -94,7 +94,7 @@ internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeNam
 // fully defined, and before using the type parameter in any way other than to
 // form other types. Once SetConstraint returns the receiver, t is safe for
 // concurrent use.
-[GoRecv] public static void SetConstraint(this ref TypeParam t, ΔType bound) {
+public static void SetConstraint(this ref TypeParam t, ΔType bound) {
     if (bound == default!) {
         throw panic("nil constraint");
     }
@@ -108,7 +108,7 @@ internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeNam
 // the underlying type of its constraint. This type is always an interface.
 //
 // [underlying type]: https://go.dev/ref/spec#Underlying_types.
-[GoRecv] public static ΔType Underlying(this ref TypeParam t) {
+public static ΔType Underlying(this ref TypeParam t) {
     return new InterfaceжΔType(t.iface());
 }
 
@@ -118,13 +118,13 @@ public static @string String(this ж<TypeParam> Ꮡt) {
 
 // ----------------------------------------------------------------------------
 // Implementation
-[GoRecv] internal static void cleanup(this ref TypeParam t) {
+internal static void cleanup(this ref TypeParam t) {
     t.iface();
     t.check = default!;
 }
 
 // iface returns the constraint interface of t.
-[GoRecv] internal static ж<Interface> iface(this ref TypeParam t) {
+internal static ж<Interface> iface(this ref TypeParam t) {
     var bound = t.bound;
     // determine constraint interface
     ж<Interface> ityp = default!;
@@ -168,7 +168,7 @@ public static @string String(this ж<TypeParam> Ꮡt) {
 // is calls f with the specific type terms of t's constraint and reports whether
 // all calls to f returned true. If there are no specific terms, is
 // returns the result of f(nil).
-[GoRecv] internal static bool @is(this ref TypeParam t, Func<ж<Δterm>, bool> f) {
+internal static bool @is(this ref TypeParam t, Func<ж<Δterm>, bool> f) {
     return t.iface().typeSet().@is(f);
 }
 
@@ -176,7 +176,7 @@ public static @string String(this ж<TypeParam> Ꮡt) {
 // specific type terms of t's constraint.
 // If there are no specific terms, typeset calls yield with (nil, nil).
 // In any case, typeset is guaranteed to call yield at least once.
-[GoRecv] internal static void typeset(this ref TypeParam t, Func<ΔType, ΔType, bool> yield) {
+internal static void typeset(this ref TypeParam t, Func<ΔType, ΔType, bool> yield) {
     t.iface().typeSet().typeset(yield);
 }
 

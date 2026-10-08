@@ -84,7 +84,7 @@ partial class runtime_package {
 //	if uint32(overflow) > 0 {
 //		emit entry for uint32(overflow), time
 //	}
-[GoType] partial struct profBuf {
+partial struct profBuf {
     // accessed atomically
     internal profAtomic r, w;
     internal atomic.Uint64 overflow;
@@ -100,9 +100,9 @@ partial class runtime_package {
     internal note wait;
 }
 
-[GoType("num:uint64")] partial struct profAtomic;
+partial struct profAtomic /*num:uint64*/;
 
-[GoType("num:uint64")] partial struct profIndex;
+partial struct profIndex /*num:uint64*/;
 
 internal static profIndex profReaderSleeping => /* 1 << 32 */ unchecked((profIndex)4294967296);   // reader is sleeping and must be woken up
 internal static profIndex profWriteExtra => /* 1 << 33 */ unchecked((profIndex)8589934592);       // overflow or eof waiting
@@ -326,7 +326,7 @@ internal static void wakeupExtra(this ж<profBuf> Ꮡb) {
     }
 }
 
-[GoType("num:nint")] public partial struct profBufReadMode;
+public partial struct profBufReadMode /*num:nint*/;
 
 internal static profBufReadMode profBufBlocking => /* iota */ 0;
 internal static profBufReadMode profBufNonBlocking => 1;

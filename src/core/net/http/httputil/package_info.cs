@@ -80,7 +80,7 @@ using static go.net.http.httputil_package;
 [assembly: go.GoPositionMap("net/http/httputil/dump.go", "dump.cs", "ABQy8pSUgoCCpICCpAAIEoCigKKAooCigKKAyIKClKqigpSClOzygoKCgoKCpoKCggAGEIKCgoKCggABENKCkpKEysqUsoKmgpToyISCgoKCgpTegoCCtgANFoKCgoCCtqiSgpS2AAosABICgoKClIKCqAAGEIKClpaCgoKClIKogoKWgoKWhIKCgpSCgoKogoKUygAIEICigLaWsoKCgoSmgpSkgpSCgqaCgpSCgoKU", "119-121:1;130-144:2")]
 [assembly: go.GoPositionMap("net/http/httputil/httputil.go", "httputil.cs", "AA4o4gACHAALAso=")]
 [assembly: go.GoPositionMap("net/http/httputil/persist.go", "persist.cs", "ABEmhoa6ABEw8oKUrgAJAoKCgoKCgtiSgoKUrgAIAoKWgoKCgoKCpoKCqIKSgpSCgpSSgpSCgoKWuIKCgoKCqIKCgoK4gpSCpoKCgoKU2vKCggAIDAAJBoKCgoKClJaChIKCgpSSgpSCgoKUuJSEgoKCgoKUhAAWNPKClAAHGtKCgq4ACgKCgoKCgoLYkoKClAACEAAKApaCgoKCgoKmgoKogpKClIKClJKClIKmlISCgoKCgpSE2vKCgt4ACwSCgoKCgpSWgoSCgoKUkoKUgoKClriCgoKCgqiCgoKCgpSEhIKClNiSgoKU", "95-106:1;305-316:1")]
-[assembly: go.GoPositionMap("net/http/httputil/reverseproxy.go", "reverseproxy.cs", "ACxsAAwCggAILAATAoKCgoKUlJSCgpQAbOgBgoKClKSkprKCuIKEgoSUpKQAAi4AFAKClKaigoKCgoKUuIKCggAMFAALGIKCpqKClKrSgpSAgoKCpAALBtKCgpaCAAEWgAAKAoKCkoKytAAIDIKClO6kgpaCgpaCgoKmhIKCgpTegrqCgpa4goKCloS4gpSAuIKCgpSCyoCmppi0goKmlIKCloLWhIKCgoKCgqiCgpSCloSClqiCgoKClJaEgoLIgoKUlIS4loKClqKCgsYABBLylJSmuKikgqKAgv6C7MKogIK4gpamwoSCyqaChJaCgoKUgtqigpSCgoKClIKCgpSClIKmgoKUyqKClAAMHOKCgoKCgpSClIKUlILW0oKCkpSCoqTSgoKCgrSkgoKUptKCgpKClIKCloKCgpaCgoKCloLGAAgIlISCgpSUhIKCgIKCpICCgqSCkpKSogAIEIKCpoKCpoKCgpSClKSClLTGpoKUpKSk", "263-265:1;355-361:1;462-477:2;763-771:1;816-819:1")]
+[assembly: go.GoPositionMap("net/http/httputil/reverseproxy.go", "reverseproxy.cs", "ACxsAAwCggAILAATAoKCgoKUlJSCgpQAbOgBgoKClKSkprKCuIKEgoSUpKQAAi4AFAKClKaigoKCgoKUuIKCggAMFAALGIKCpqKClKrSgpSAgoKCpAALBtKCgpaCAAEWgAAKAoKCkoKytAAIDIKClO6kgpaCgpaCgoKmhIKCgpTegrqCgpa4goKCloS4gpSAuIKCgpSCyoCmppi0goKmlIKCloLWhIKCgoKCgqiCgpSCloSClqiCgoKClJaEgoLIgoKUlIS4loKClqKCgsYABBLylJSmuKikgqKAgv6C7MKogIK4gpamwoSCyqaChJaCgoKUgtqigpSCgoKClIKCgpSClIKmgoKUyqKClAAMHOKCgoKCgpSClIKUlILW0oKCkpSCoqTSgoKCgrSkgoKUptKCgpKClIKCloKCgpaCgoKCloLGAAgIlISCgpSUhIKCgIKCpICCgqSCkpKSogAIEIKCpoKCpoKCgpSClKSClLTGpoKUpKSk", "263-265:1;355-361:1;462-477:2;763-771:1;816-819:1", "", "665=NewResponseController/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -89,7 +89,7 @@ namespace go.net.http;
 public static partial class httputil_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

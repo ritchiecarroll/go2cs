@@ -5,7 +5,7 @@ namespace go;
 
 partial class syscall_package {
 
-[GoType] partial struct WSAData {
+partial struct WSAData {
     public uint16 Version;
     public uint16 HighVersion;
     public uint16 MaxSockets;
@@ -15,7 +15,7 @@ partial class syscall_package {
     public array<byte> SystemStatus = new(WSASYS_STATUS_LEN + 1);
 }
 
-[GoType] partial struct Servent {
+partial struct Servent {
     public ж<byte> Name;
     public ж<ж<byte>> Aliases;
     public ж<byte> Proto;

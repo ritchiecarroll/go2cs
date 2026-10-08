@@ -13,7 +13,7 @@ internal static UntypedInt maxTraceStringLen => 1024;
 
 // traceStringTable is map of string -> unique ID that also manages
 // writing strings out into the trace.
-[GoType] partial struct traceStringTable {
+partial struct traceStringTable {
     // lock protects buf.
     internal mutex @lock;
     internal ж<traceBuf> buf; // string batches to write out to the trace.

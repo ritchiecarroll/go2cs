@@ -78,9 +78,9 @@ using static go.runtime.pprof_package;
 [assembly: go.GoPositionMap("runtime/pprof/label.go", "label.cs", "ABs2goKClAAJGMKClISCloKqooKmgoKSgpaSgoKUkqSSpJKCyoKEAAISAAgCgpSCgoKClJSGgoKClKaUqqKCgoKmqqKCgoI=", "114-116:1")]
 [assembly: go.GoPositionMap("runtime/pprof/map.go", "map.cs", "ABw4lIKCgpSChpKCgoKUgoK4goKClMiClIKCgoSCpoKEgpSClIKCgpSClA==")]
 [assembly: go.GoPositionMap("runtime/pprof/pe.go", "pe.cs", "AAwawoKClA==")]
-[assembly: go.GoPositionMap("runtime/pprof/pprof.go", "pprof.cs", "AMYBgAPs7Pzs7NyCgpQAChaCAAISAAgCgoKClIKUuILYsoKC2LKChIKClobYkqjigoKClAAFKAAWAoKUgpaCgoKUloKCgpSiqPKCgqIAAiIAEQKClIKogoKClJaEyoCigKKAAAwesoKCgqaCgoKm7tSCgoKChISCgoKCgqaCgpSC2qSSgoKCgpSCgpSUgoKCgoKCgoKUloSUgoKCgpSogoKChIKCgqaCgoKCkoK4lIIACBKAooCigpKSgpTqooKCgoKCgoKSpoKUgqamgpSuwqiSgqiS2qKmgoKmggABFPKCuIKCgoK6gpaIgoKEgoKCgoKCzAAGEIKCgpa6goKmgpSCuoKCgoKCgoKEgoKCgoKEgoKCgoKEgoKCgoKCgpaEgqiSgtjIgrqS2JKClKa4goKCgoKUlJSUgqaO4oKEuIKCgoKCugAHEICigKKAAAsmAA0UAAkEgoKCpoKUgoKCAAUQAAkEgoKCgoKCgIKkgqamlIKs0oKEgpSCgqKmkoKokoLYktiS6JKCgoKCgoKCqIiCloKChIKCgpSCgoKCgoKClIKCqIKUqNbG1tbW1sY=", "287-289:1;464-475:1;518-522:2;637-639:1;740-742:1;939-941:1")]
+[assembly: go.GoPositionMap("runtime/pprof/pprof.go", "pprof.cs", "AMYBgAPs7Pzs7NyCgpQAChaCAAISAAgCgoKClIKUuILYsoKC2LKChIKClobYkqjigoKClAAFKAAWAoKUgpaCgoKUloKCgpSiqPKCgqIAAiIAEQKClIKogoKClJaEyoCigKKAAAwesoKCgqaCgoKm7tSCgoKChISCgoKCgqaCgpSC2qSSgoKCgpSCgpSUgoKCgoKCgoKUloSUgoKCgpSogoKChIKCgqaCgoKCkoK4lIIACBKAooCigpKSgpTqooKCgoKCgoKSpoKUgqamgpSuwqiSgqiS2qKmgoKmggABFPKCuIKCgoK6gpaIgoKEgoKCgoKCzAAGEIKCgpa6goKmgpSCuoKCgoKCgoKEgoKCgoKEgoKCgoKEgoKCgoKCgpaEgqiSgtjIgrqS2JKClKa4goKCgoKUlJSUgqaO4oKEuIKCgoKCugAHEICigKKAAAsmAA0UAAkEgoKCpoKUgoKCAAUQAAkEgoKCgoKCgIKkgqamlIKs0oKEgpSCgqKmkoKokoLYktiS6JKCgoKCgoKCqIiCloKChIKCgpSCgoKCgoKClIKCqIKUqNbG1tbW1sY=", "287-289:1;464-475:1;518-522:2;637-639:1;740-742:1;939-941:1", "", "732=InUseObjects/1/1/1;738=InUseObjects/1/1/1,InUseBytes/1/1/1")]
 [assembly: go.GoPositionMap("runtime/pprof/pprof_rusage.go", "pprof_rusage.cs", "AA0ikoKUpKSkpoKCgg==")]
-[assembly: go.GoPositionMap("runtime/pprof/proto.go", "proto.cs", "ABQusABS3AGigoKCgpSmgoKCgrqSgoKCqJKCgoKClIKokoKCgoKokoKCgqiSgoKCgoKC7oKUpsqCgqaWgoKWppSCgoKUAA8swoIACBKCrsKUgpSCuIKCpgAQJIKClIKUgpSCgoKChJSC7paClOiyhIKSgoKCgpaChJKChIKCkoK6hJaCgryCggACGAALApaChIKCgAALGIKAgoLKgIK43oKUgqaCkoCCpIKWgIKC2oCCuICCgpSCtoCSpAA4dIKCgoKCrLKAppKSkpSSlpKUkraCgoKCgpQACw4ACQKClISCio6C3oKCgsSCgoKCgu6UgoKEgoKCppaCgoKCgoKCloLWksQAFCymgoKCgpaCgoKCgpSCgpSCgpSClJSCgpSCgoKUloKCgpbKAAgWgriCpoI=", "369-373:1;687-692:1")]
+[assembly: go.GoPositionMap("runtime/pprof/proto.go", "proto.cs", "ABQusABS3AGigoKCgpSmgoKCgrqSgoKCqJKCgoKClIKokoKCgoKokoKCgqiSgoKCgoKC7oKUpsqCgqaWgoKWppSCgoKUAA8swoIACBKCrsKUgpSCuIKCpgAQJIKClIKUgpSCgoKChJSC7paClOiyhIKSgoKCgpaChJKChIKCkoK6hJaCgryCggACGAALApaChIKCgAALGIKAgoLKgIK43oKUgqaCkoCCpIKWgIKC2oCCuICCgpSCtoCSpAA4dIKCgoKCrLKAppKSkpSSlpKUkraCgoKCgpQACw4ACQKClISCio6C3oKCgsSCgoKCgu6UgoKEgoKCppaCgoKCgoKCloLWksQAFCymgoKCgpaCgoKCgpSCgpSCgpSClJSCgpSCgoKUloKCgpbKAAgWgriCpoI=", "369-373:1;687-692:1", "", "234=Now/1/1/3;302=FuncPCABIInternal/1/1/4;616=runtime_FrameStartLine/1/1/4")]
 [assembly: go.GoPositionMap("runtime/pprof/proto_other.go", "proto_other.cs", "ABA4gg==")]
 [assembly: go.GoPositionMap("runtime/pprof/protobuf.go", "protobuf.cs", "AA4cgoKClKaCgqaUgqaClIKClIKCgoKCgpSCuIKClKaCgqaCgpSmgpSCgpSCgoKCgoKUgriCgqaCgriCgpSmgoKUuIKClMqCgqaCgoKCgoKCgg==")]
 [assembly: go.GoPositionMap("runtime/pprof/protomem.go", "protomem.cs", "ABUgkoKCgoKCgoKCloKCooKCuIKCgIK2gqaCgpSWgoKCgpSSgriCAAIYAAkCgpamloKE", "60-64:1")]
@@ -93,7 +93,7 @@ namespace go.runtime;
 public static partial class pprof_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

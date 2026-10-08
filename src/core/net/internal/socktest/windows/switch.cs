@@ -13,7 +13,7 @@ partial class socktest_package {
 
 // A Switch represents a callpath point switch for socket system
 // calls.
-[GoType] partial struct Switch {
+partial struct Switch {
     internal sync.Once once;
     internal sync.RWMutex fmu;
     internal map<FilterType, Filter> fltab;
@@ -22,7 +22,7 @@ partial class socktest_package {
     internal stats stats;
 }
 
-[GoRecv] internal static void init(this ref Switch sw) {
+internal static void init(this ref Switch sw) {
     sw.fltab = new map<FilterType, Filter>();
     sw.sotab = new ΔSockets(0);
     sw.stats = new stats(0);
@@ -55,7 +55,7 @@ public static ΔSockets Sockets(this ж<Switch> Ꮡsw) {
     return tab;
 }
 
-[GoType("num:uint64")] partial struct Cookie;
+partial struct Cookie /*num:uint64*/;
 
 // Family returns an address family.
 public static nint Family(this Cookie c) {
@@ -77,7 +77,7 @@ internal static Cookie cookie(nint family, nint sotype, nint proto) {
 }
 
 // A Status represents the status of a socket.
-[GoType] partial struct Status {
+partial struct Status {
     public Cookie Cookie;
     public error Err; // error status of socket system call
     public error SocketErr; // error status of socket by SO_ERROR
@@ -88,7 +88,7 @@ public static @string String(this Status so) {
 }
 
 // A Stat represents a per-cookie socket statistics.
-[GoType] partial struct Stat {
+partial struct Stat {
     public nint Family; // address family
     public nint Type; // socket type
     public nint Protocol; // protocol number
@@ -108,7 +108,7 @@ public static @string String(this Stat st) {
     return fmt.Sprintf("(%s, %s, %s): opened=%d connected=%d listened=%d accepted=%d closed=%d openfailed=%d connectfailed=%d listenfailed=%d acceptfailed=%d closefailed=%d"u8, familyString(st.Family), typeString(st.Type), protocolString(st.Protocol), st.Opened, st.Connected, st.Listened, st.Accepted, st.Closed, st.OpenFailed, st.ConnectFailed, st.ListenFailed, st.AcceptFailed, st.CloseFailed);
 }
 
-[GoType("map[Cookie, ж<Stat>]")] partial struct stats;
+partial struct stats /*map[Cookie, ж<Stat>]*/;
 
 internal static ж<Stat> getLocked(this stats st, Cookie c) {
     var (s, ok) = st[c, ꟷ];
@@ -119,7 +119,7 @@ internal static ж<Stat> getLocked(this stats st, Cookie c) {
     return s;
 }
 
-[GoType("num:nint")] partial struct FilterType;
+partial struct FilterType /*num:nint*/;
 
 public static FilterType FilterSocket => /* iota */ 0;         // for Socket
 public static FilterType FilterConnect => 1;        // for Connect or ConnectEx

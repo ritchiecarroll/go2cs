@@ -23,7 +23,7 @@ public static UntypedInt PSSSaltLengthAuto => 0;
 public static UntypedInt PSSSaltLengthEqualsHash => -1;
 
 // PSSOptions contains options for creating and verifying PSS signatures.
-[GoType] partial struct PSSOptions {
+partial struct PSSOptions {
     // SaltLength controls the length of the salt used in the PSS signature. It
     // can either be a positive number of bytes, or one of the special
     // PSSSaltLength constants.
@@ -35,7 +35,7 @@ public static UntypedInt PSSSaltLengthEqualsHash => -1;
 }
 
 // HashFunc returns opts.Hash so that [PSSOptions] implements [crypto.SignerOpts].
-[GoRecv] public static crypto.Hash HashFunc(this ref PSSOptions opts) {
+public static crypto.Hash HashFunc(this ref PSSOptions opts) {
     return opts.Hash;
 }
 

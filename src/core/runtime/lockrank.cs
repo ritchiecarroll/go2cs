@@ -3,7 +3,7 @@ namespace go;
 
 partial class runtime_package {
 
-[GoType("num:nint")] partial struct lockRank;
+partial struct lockRank /*num:nint*/;
 
 // Constants representing the ranks of all non-leaf runtime locks, in rank order.
 // Locks with lower rank must be taken before locks with higher rank,

@@ -18,7 +18,7 @@ using log;
 
 partial class slogtest_package {
 
-[GoType] partial struct testCase {
+partial struct testCase {
     // Subtest name.
     internal @string name;
     // If non-empty, explanation explains the violated constraint.
@@ -367,8 +367,8 @@ internal static Func<map<@string, any>, @string> inGroup(@string name, Func<map<
     };
 }
 
-[GoType] partial struct wrapper {
-    [GoEmbedded] public log.slog_package.ΔHandler Handler;
+partial struct wrapper {
+    /*embed*/ public log.slog_package.ΔHandler Handler;
     internal Action<ж<slog.Record>> mod;
 }
 
@@ -384,7 +384,7 @@ internal static slogꓸHandler WithAttrs(this wrapper recvᴛ, slice<slog.Attr> 
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
 internal static slogꓸHandler WithGroup(this wrapper recvᴛ, @string name) => recvᴛ.Handler.WithGroup(name);
 
-[GoRecv] internal static error Handle(this ref wrapper h, context.Context ctx, slog.Record rʗp) {
+internal static error Handle(this ref wrapper h, context.Context ctx, slog.Record rʗp) {
     ref var r = ref heap(rʗp.ΔClone(), out var Ꮡr);
 
     h.mod(Ꮡr);
@@ -399,15 +399,15 @@ internal static partial @string withSource(@string s) {
     return fmt.Sprintf("%s (%s:%d)"u8, s, @file, line);
 }
 
-[GoType] partial struct replace {
+partial struct replace {
     internal any v;
 }
 
-[GoRecv] internal static slog.Value LogValue(this ref replace r) {
+internal static slog.Value LogValue(this ref replace r) {
     return slog.AnyValue(r.v);
 }
 
-[GoRecv] internal static @string String(this ref replace r) {
+internal static @string String(this ref replace r) {
     return fmt.Sprintf("<replace(%v)>"u8, r.v);
 }
 

@@ -797,7 +797,7 @@ internal static readonly @string sAllocCountSNelemsˢ2 = "s.allocCount > s.nelem
 //
 // Must run in a non-preemptible context since otherwise the owner of
 // c could change.
-[GoRecv] internal static (gclinkptr v, ж<mspan> s, bool checkGCTrigger) nextFree(this ref mcache c, spanClass spc) {
+internal static (gclinkptr v, ж<mspan> s, bool checkGCTrigger) nextFree(this ref mcache c, spanClass spc) {
     gclinkptr v = default!;
     ж<mspan> s = default!;
     bool checkGCTrigger = default!;
@@ -1757,13 +1757,13 @@ internal static int64 nextSampleNoFP() {
     return 0;
 }
 
-[GoType] partial struct persistentAlloc {
+partial struct persistentAlloc {
     internal ж<notInHeap> @base;
     internal uintptr off;
 }
 
 
-[GoType("dyn")] partial struct globalAllocᴛ1 {
+partial struct globalAllocᴛ1 /*dyn*/ {
     internal partial ref mutex mutex { get; }
     internal partial ref persistentAlloc persistentAlloc { get; }
 }
@@ -1810,14 +1810,14 @@ internal static @unsafe.Pointer persistentalloc(uintptr size, uintptr align, ж<
 // as needed.
 //
 // The caller is responsible for locking.
-[GoType] partial struct linearAlloc {
+partial struct linearAlloc {
     internal uintptr next; // next free byte
     internal uintptr mapped; // one byte past end of mapped space
     internal uintptr end; // end of reserved space
     internal bool mapMemory; // transition memory from Reserved to Ready if true
 }
 
-[GoRecv] internal static void init(this ref linearAlloc l, uintptr @base, uintptr size, bool mapMemory) {
+internal static void init(this ref linearAlloc l, uintptr @base, uintptr size, bool mapMemory) {
     if (@base + size < @base) {
         // Chop off the last byte. The runtime isn't prepared
         // to deal with situations where the bounds could overflow.
@@ -1830,7 +1830,7 @@ internal static @unsafe.Pointer persistentalloc(uintptr size, uintptr align, ж<
     l.mapMemory = mapMemory;
 }
 
-[GoRecv] internal static @unsafe.Pointer alloc(this ref linearAlloc l, uintptr size, uintptr align, ж<sysMemStat> ᏑsysStat) {
+internal static @unsafe.Pointer alloc(this ref linearAlloc l, uintptr size, uintptr align, ж<sysMemStat> ᏑsysStat) {
     var Δp = alignUp(l.next, align);
     if (Δp + size > l.end) {
         return default!;
@@ -1858,7 +1858,7 @@ internal static @unsafe.Pointer persistentalloc(uintptr size, uintptr align, ж<
 // for situations where that isn't possible (like in the allocators).
 //
 // TODO: Use this as the return type of sysAlloc, persistentAlloc, etc?
-[GoType] partial struct notInHeap {
+partial struct notInHeap {
     internal sys.NotInHeap _;
 }
 

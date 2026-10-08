@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:float64")] partial struct Celsius;
+partial struct Celsius /*num:float64*/;
 
-[GoType("num:int16")] partial struct Level;
+partial struct Level /*num:int16*/;
 
 internal static UntypedInt k => 4;
 

@@ -70,7 +70,7 @@ using static go.net.http.httptest_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("net/http/httptest/httptest.go", "httptest.cs", "ABMmkgAINAAXAoKUgoKUloKChIKUtLTEpICClO6EgpaC3g==")]
 [assembly: go.GoPositionMap("net/http/httptest/recorder.go", "recorder.cs", "AC1mkgAKHsKCgoKUAAYU8oKUgpaEgoKCgpSWqqKCgpSqooKClKYACxiCupKCloKCgoKUqqKClAAGJAAPAoKUgpTugoKUgoKUlISAgoKCooKUlIKClIKCyIKClIKUgqYAAhDSgoKUgoKU")]
-[assembly: go.GoPositionMap("net/http/httptest/server.go", "server.cs", "ADt4goKCgpSUgoKAgrYADhyCgriCgoKmqqKCggACEuIACA6ygpSClIKCgoKCurKClIKUgoKWgoKUlIKCgpSUgpSCgpSCgtyCgoKqooKCAAYS4oKCgoKCABImgriCpLqAgriCgIK4otTSgoKCgoKUoqbSgoKCgpQABhCCkoLoxqjCrsKmgoKigqK6woKygoSUgIKkgpiCguq2gIKClMaAgoKUpIK6gKKmxoK0uqCoooKC", "309-312:1;319-372:1")]
+[assembly: go.GoPositionMap("net/http/httptest/server.go", "server.cs", "ADt4goKCgpSUgoKAgrYADhyCgriCgoKmqqKCggACEuIACA6ygpSClIKCgoKCurKClIKUgoKWgoKUlIKCgpSUgpSCgpSCgtyCgoKqooKCAAYS4oKCgoKCABImgriCpLqAgriCgIK4otTSgoKCgoKUoqbSgoKCgpQABhCCkoLoxqjCrsKmgoKigqK6woKygoSUgIKkgpiCguq2gIKClMaAgoKUpIK6gKKmxoK0uqCoooKC", "309-312:1;319-372:1", "", "121=newLocalListener/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -79,7 +79,7 @@ namespace go.net.http;
 public static partial class httptest_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

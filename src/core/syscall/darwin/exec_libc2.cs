@@ -12,7 +12,7 @@ using go.sync;
 
 partial class syscall_package {
 
-[GoType] partial struct SysProcAttr {
+partial struct SysProcAttr {
     public @string Chroot;     // Chroot.
     public ж<Credential> Credential; // Credential.
     public bool Ptrace;        // Enable tracing.

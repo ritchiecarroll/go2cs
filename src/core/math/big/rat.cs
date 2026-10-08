@@ -18,7 +18,7 @@ partial class big_package {
 // an existing (or newly allocated) Rat must be set to
 // a new value using the [Rat.Set] method; shallow copies
 // of Rats are not supported and may lead to errors.
-[GoType] partial struct ΔRat {
+partial struct ΔRat {
     // To make zero values for Rat work w/o initialization,
     // a zero value of b (len(b) == 0) acts like b == 1. At
     // the earliest opportunity (when an assignment to the Rat
@@ -265,7 +265,7 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
 // whether f represents x exactly. If the magnitude of x is too large to
 // be represented by a float32, f is an infinity and exact is false.
 // The sign of f always matches the sign of x, even if f == 0.
-[GoRecv] public static (float32 f, bool exact) Float32(this ref ΔRat x) {
+public static (float32 f, bool exact) Float32(this ref ΔRat x) {
     float32 f = default!;
     bool exact = default!;
 
@@ -284,7 +284,7 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
 // whether f represents x exactly. If the magnitude of x is too large to
 // be represented by a float64, f is an infinity and exact is false.
 // The sign of f always matches the sign of x, even if f == 0.
-[GoRecv] public static (float64 f, bool exact) Float64(this ref ΔRat x) {
+public static (float64 f, bool exact) Float64(this ref ΔRat x) {
     float64 f = default!;
     bool exact = default!;
 
@@ -413,12 +413,12 @@ public static ж<ΔRat> Inv(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
 //   - -1 if x < 0;
 //   - 0 if x == 0;
 //   - +1 if x > 0.
-[GoRecv] public static nint Sign(this ref ΔRat x) {
+public static nint Sign(this ref ΔRat x) {
     return x.a.Sign();
 }
 
 // IsInt reports whether the denominator of x is 1.
-[GoRecv] public static bool IsInt(this ref ΔRat x) {
+public static bool IsInt(this ref ΔRat x) {
     return len(x.b.abs) == 0 || x.b.abs.cmp(natOne) == 0;
 }
 

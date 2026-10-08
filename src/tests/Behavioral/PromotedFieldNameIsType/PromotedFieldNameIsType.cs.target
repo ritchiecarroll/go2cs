@@ -4,13 +4,13 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct sym {
+partial struct sym {
     public ж<Node> Node;
     public nint Value;
     public @string Name;
 }
 
-[GoType] partial struct Node {
+partial struct Node {
     internal partial ref ж<sym> sym { get; }
     public nint Weight;
 }

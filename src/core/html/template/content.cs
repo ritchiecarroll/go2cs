@@ -9,21 +9,21 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class template_package {
 
-[GoType("@string")] partial struct CSS;
+partial struct CSS /*@string*/;
 
-[GoType("@string")] partial struct HTML;
+partial struct HTML /*@string*/;
 
-[GoType("@string")] partial struct HTMLAttr;
+partial struct HTMLAttr /*@string*/;
 
-[GoType("@string")] partial struct JS;
+partial struct JS /*@string*/;
 
-[GoType("@string")] partial struct JSStr;
+partial struct JSStr /*@string*/;
 
-[GoType("@string")] partial struct URL;
+partial struct URL /*@string*/;
 
-[GoType("@string")] partial struct Srcset;
+partial struct Srcset /*@string*/;
 
-[GoType("num:uint8")] partial struct contentType;
+partial struct contentType /*num:uint8*/;
 
 internal static contentType contentTypePlain => /* iota */ 0;
 internal static contentType contentTypeCSS => 1;

@@ -11,18 +11,18 @@ using ꓸꓸꓸstring = Span<@string>;
 
 partial class pprof_package {
 
-[GoType] partial struct label {
+partial struct label {
     internal @string key;
     internal @string value;
 }
 
 // LabelSet is a set of labels.
-[GoType] partial struct LabelSet {
+partial struct LabelSet {
     internal slice<label> list;
 }
 
 // labelContextKey is the type of contextKeys used for profiler labels.
-[GoType] partial struct labelContextKey {
+partial struct labelContextKey {
 }
 
 internal static labelMap labelValue(context.Context ctx) {
@@ -36,7 +36,7 @@ internal static labelMap labelValue(context.Context ctx) {
 // labelMap is the representation of the label set held in the context type.
 // This is an initial implementation, but it will be replaced with something
 // that admits incremental immutable modification more efficiently.
-[GoType] partial struct labelMap {
+partial struct labelMap {
     public partial ref LabelSet LabelSet { get; }
 }
 

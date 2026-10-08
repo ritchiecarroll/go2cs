@@ -116,7 +116,7 @@ internal static void removeAnonymousField(@string name, ref ast.InterfaceType it
 // in place and reports whether fields were removed. Anonymous fields are
 // recorded with the parent type. filterType is called with the types of
 // all remaining fields.
-[GoRecv] internal static bool /*removedFields*/ filterFieldList(this ref reader r, ж<namedType> Ꮡparent, ж<ast.FieldList> Ꮡfields, ж<ast.InterfaceType> Ꮡityp) {
+internal static bool /*removedFields*/ filterFieldList(this ref reader r, ж<namedType> Ꮡparent, ж<ast.FieldList> Ꮡfields, ж<ast.InterfaceType> Ꮡityp) {
     bool removedFields = default!;
 
     ref var fields = ref Ꮡfields.DerefOrNull();
@@ -174,7 +174,7 @@ internal static void removeAnonymousField(@string name, ref ast.InterfaceType it
 }
 
 // filterParamList applies filterType to each parameter type in fields.
-[GoRecv] internal static void filterParamList(this ref reader r, ж<ast.FieldList> Ꮡfields) {
+internal static void filterParamList(this ref reader r, ж<ast.FieldList> Ꮡfields) {
     ref var fields = ref Ꮡfields.DerefOrNull();
 
     if (Ꮡfields != nil) {
@@ -187,7 +187,7 @@ internal static void removeAnonymousField(@string name, ref ast.InterfaceType it
 // filterType strips any unexported struct fields or method types from typ
 // in place. If fields (or methods) have been removed, the corresponding
 // struct or interface type has the Incomplete field set to true.
-[GoRecv] internal static void filterType(this ref reader r, ж<namedType> Ꮡparent, ast.Expr typ) {
+internal static void filterType(this ref reader r, ж<namedType> Ꮡparent, ast.Expr typ) {
     switch (typ.type()) {
     case ж<ast.Ident> t: {
         break;
@@ -250,7 +250,7 @@ internal static void removeAnonymousField(@string name, ref ast.InterfaceType it
     }}
 }
 
-[GoRecv] internal static bool filterSpec(this ref reader r, ast.Spec spec) {
+internal static bool filterSpec(this ref reader r, ast.Spec spec) {
     switch (spec.type()) {
     case ж<ast.ImportSpec> s: {
         return true;
@@ -321,7 +321,7 @@ internal static ast.Expr copyConstType(ast.Expr typ, tokenꓸPos pos) {
     return default!; // shouldn't happen, but be conservative and don't panic
 }
 
-[GoRecv] internal static slice<ast.Spec> filterSpecList(this ref reader r, slice<ast.Spec> list, token.Token tok) {
+internal static slice<ast.Spec> filterSpecList(this ref reader r, slice<ast.Spec> list, token.Token tok) {
     if (tok == token.CONST) {
         // Propagate any type information that would get lost otherwise
         // when unexported constants are filtered.
@@ -350,7 +350,7 @@ internal static ast.Expr copyConstType(ast.Expr typ, tokenꓸPos pos) {
     return list.slice(0, j);
 }
 
-[GoRecv] internal static bool filterDecl(this ref reader r, ast.Decl decl) {
+internal static bool filterDecl(this ref reader r, ast.Decl decl) {
     switch (decl.type()) {
     case ж<ast.GenDecl> d: {
         d.Value.Specs = r.filterSpecList((~d).Specs, (~d).Tok);
@@ -367,7 +367,7 @@ internal static ast.Expr copyConstType(ast.Expr typ, tokenꓸPos pos) {
 }
 
 // fileExports removes unexported declarations from src in place.
-[GoRecv] internal static void fileExports(this ref reader r, ж<ast.File> Ꮡsrc) {
+internal static void fileExports(this ref reader r, ж<ast.File> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     nint j = 0;

@@ -34,7 +34,7 @@ internal static readonly @string rleLiteralMissingˢ = "RLE literal missing"u8;
 
 // readRawRLELiterals reads and decompresses a Raw_Literals_Block or
 // a RLE_Literals_Block. RFC 3.1.1.3.1.1.
-[GoRecv] internal static (nint, slice<byte>, error) readRawRLELiterals(this ref Reader r, block data, nint off, byte hdr, slice<byte> outbuf) {
+internal static (nint, slice<byte>, error) readRawRLELiterals(this ref Reader r, block data, nint off, byte hdr, slice<byte> outbuf) {
     var raw = ((byte)(hdr & 3)) == 0;
     nint regeneratedSize = default!;
     switch ((byte)(((hdr >> (int)(2))) & 3)) {

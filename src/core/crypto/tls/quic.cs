@@ -12,7 +12,7 @@ using net = net_package;
 
 partial class tls_package {
 
-[GoType("num:nint")] partial struct QUICEncryptionLevel;
+partial struct QUICEncryptionLevel /*num:nint*/;
 
 public static QUICEncryptionLevel QUICEncryptionLevelInitial => /* QUICEncryptionLevel(iota) */ 0;
 public static QUICEncryptionLevel QUICEncryptionLevelEarly => 1;
@@ -49,13 +49,13 @@ public static @string String(this QUICEncryptionLevel l) {
 // transport as described in RFC 9001.
 //
 // Methods of QUICConn are not safe for concurrent use.
-[GoType] partial struct QUICConn {
+partial struct QUICConn {
     internal ж<Conn> conn;
     internal bool sessionTicketSent;
 }
 
 // A QUICConfig configures a [QUICConn].
-[GoType] partial struct QUICConfig {
+partial struct QUICConfig {
     public ж<Config> TLSConfig;
     // EnableSessionEvents may be set to true to enable the
     // [QUICStoreSession] and [QUICResumeSession] events for client connections.
@@ -65,7 +65,7 @@ public static @string String(this QUICEncryptionLevel l) {
     public bool EnableSessionEvents;
 }
 
-[GoType("num:nint")] partial struct QUICEventKind;
+partial struct QUICEventKind /*num:nint*/;
 
 public static QUICEventKind QUICNoEvent => /* iota */ 0;
 public static QUICEventKind QUICSetReadSecret => 1;
@@ -82,7 +82,7 @@ public static QUICEventKind QUICStoreSession => 9;
 //
 // The type of event is specified by the Kind field.
 // The contents of the other fields are kind-specific.
-[GoType] partial struct QUICEvent {
+partial struct QUICEvent {
     public QUICEventKind Kind;
     // Set for QUICSetReadSecret, QUICSetWriteSecret, and QUICWriteData.
     public QUICEncryptionLevel Level;
@@ -95,7 +95,7 @@ public static QUICEventKind QUICStoreSession => 9;
     public ж<SessionState> SessionState;
 }
 
-[GoType] partial struct quicState {
+partial struct quicState {
     internal slice<QUICEvent> events;
     internal nint nextEvent;
     // eventArr is a statically allocated event array, large enough to handle
@@ -180,7 +180,7 @@ public static partial error Start(this ж<QUICConn> Ꮡq, context.Context ctx) {
 
 // NextEvent returns the next event occurring on the connection.
 // It returns an event with a Kind of [QUICNoEvent] when no events are available.
-[GoRecv] public static QUICEvent NextEvent(this ref QUICConn q) {
+public static QUICEvent NextEvent(this ref QUICConn q) {
     var qs = q.conn.Value.quic;
     {
         nint last = (~qs).nextEvent - 1; if (last >= 0 && len((~qs).events[last].Data) > 0) {
@@ -206,7 +206,7 @@ public static partial error Start(this ж<QUICConn> Ꮡq, context.Context ctx) {
 }
 
 // Close closes the connection and stops any in-progress handshake.
-[GoRecv] public static error Close(this ref QUICConn q) {
+public static error Close(this ref QUICConn q) {
     if ((~(~q.conn).quic).cancel == default!) {
         return default!; // never started
     }
@@ -269,7 +269,7 @@ public static error HandleData(this ж<QUICConn> Ꮡq, QUICEncryptionLevel level
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct QUICSessionTicketOptions {
+partial struct QUICSessionTicketOptions {
     // EarlyData specifies whether the ticket may be used for 0-RTT.
     public bool EarlyData;
     public slice<slice<byte>> Extra;
@@ -283,7 +283,7 @@ internal static readonly @string tlsSendSessionTicketˢ3 = "tls: SendSessionTick
 // SendSessionTicket sends a session ticket to the client.
 // It produces connection events, which may be read with [QUICConn.NextEvent].
 // Currently, it can only be called once.
-[GoRecv] public static error SendSessionTicket(this ref QUICConn q, QUICSessionTicketOptions opts) {
+public static error SendSessionTicket(this ref QUICConn q, QUICSessionTicketOptions opts) {
     var c = q.conn;
     if (!c.of(Conn.ᏑisHandshakeComplete).Load()) {
         return quicError(errors.New(tlsSendSessionTicketˢ));
@@ -305,7 +305,7 @@ internal static readonly @string tlsStoreSessionTicketˢ = "tls: StoreSessionTic
 // in the ClientSessionCache.
 // The application may process additional events or modify the SessionState
 // before storing the session.
-[GoRecv] public static error StoreSession(this ref QUICConn q, ж<SessionState> Ꮡsession) {
+public static error StoreSession(this ref QUICConn q, ж<SessionState> Ꮡsession) {
     var c = q.conn;
     if (!(~c).isClient) {
         return quicError(errors.New(tlsStoreSessionTicketˢ));
@@ -320,7 +320,7 @@ internal static readonly @string tlsStoreSessionTicketˢ = "tls: StoreSessionTic
 }
 
 // ConnectionState returns basic TLS details about the connection.
-[GoRecv] public static ΔConnectionState ConnectionState(this ref QUICConn q) {
+public static ΔConnectionState ConnectionState(this ref QUICConn q) {
     return q.conn.ConnectionState();
 }
 
@@ -328,7 +328,7 @@ internal static readonly @string tlsStoreSessionTicketˢ = "tls: StoreSessionTic
 //
 // Server connections may delay setting the transport parameters until after
 // receiving the client's transport parameters. See [QUICTransportParametersRequired].
-[GoRecv] public static void SetTransportParameters(this ref QUICConn q, slice<byte> @params) {
+public static void SetTransportParameters(this ref QUICConn q, slice<byte> @params) {
     if (@params == default!) {
         @params = new byte[]{}.slice();
     }
@@ -391,7 +391,7 @@ internal static error quicSetReadSecret(this ж<Conn> Ꮡc, QUICEncryptionLevel 
     return default!;
 }
 
-[GoRecv] internal static void quicSetWriteSecret(this ref Conn c, QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
+internal static void quicSetWriteSecret(this ref Conn c, QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
     c.quic.Value.events = append((~c.quic).events, new QUICEvent(
         Kind: QUICSetWriteSecret,
         Level: level,
@@ -400,7 +400,7 @@ internal static error quicSetReadSecret(this ж<Conn> Ꮡc, QUICEncryptionLevel 
     ));
 }
 
-[GoRecv] internal static void quicWriteCryptoData(this ref Conn c, QUICEncryptionLevel level, slice<byte> data) {
+internal static void quicWriteCryptoData(this ref Conn c, QUICEncryptionLevel level, slice<byte> data) {
     ж<QUICEvent> last = default!;
     if (len((~c.quic).events) > 0) {
         last = Ꮡ((~c.quic).events, len((~c.quic).events) - 1);
@@ -433,14 +433,14 @@ internal static error quicResumeSession(this ж<Conn> Ꮡc, ж<SessionState> Ꮡ
     return default!;
 }
 
-[GoRecv] internal static void quicStoreSession(this ref Conn c, ж<SessionState> Ꮡsession) {
+internal static void quicStoreSession(this ref Conn c, ж<SessionState> Ꮡsession) {
     c.quic.Value.events = append((~c.quic).events, new QUICEvent(
         Kind: QUICStoreSession,
         SessionState: Ꮡsession
     ));
 }
 
-[GoRecv] internal static void quicSetTransportParameters(this ref Conn c, slice<byte> @params) {
+internal static void quicSetTransportParameters(this ref Conn c, slice<byte> @params) {
     c.quic.Value.events = append((~c.quic).events, new QUICEvent(
         Kind: QUICTransportParameters,
         Data: @params
@@ -465,13 +465,13 @@ internal static (slice<byte>, error) quicGetTransportParameters(this ж<Conn> �
     return ((~c.quic).transportParams, default!);
 }
 
-[GoRecv] internal static void quicHandshakeComplete(this ref Conn c) {
+internal static void quicHandshakeComplete(this ref Conn c) {
     c.quic.Value.events = append((~c.quic).events, new QUICEvent(
         Kind: QUICHandshakeDone
     ));
 }
 
-[GoRecv] internal static void quicRejectedEarlyData(this ref Conn c) {
+internal static void quicRejectedEarlyData(this ref Conn c) {
     c.quic.Value.events = append((~c.quic).events, new QUICEvent(
         Kind: QUICRejectedEarlyData
     ));

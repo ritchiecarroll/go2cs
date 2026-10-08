@@ -49,7 +49,7 @@ internal const bool traceInference = false;
 // A unifier maintains a list of type parameters and
 // corresponding types inferred for each type parameter.
 // A unifier is created by calling newUnifier.
-[GoType] partial struct unifier {
+partial struct unifier {
     // handles maps each type parameter to its inferred type through
     // an indirection *Type called (inferred type) "handle".
     // Initially, each type parameter has its own, separate handle,
@@ -85,7 +85,7 @@ internal static ж<unifier> newUnifier(slice<ж<TypeParam>> tparams, slice<ΔTyp
     return Ꮡ(new unifier(handles, 0, enableInterfaceInference));
 }
 
-[GoType("num:nuint")] partial struct unifyMode;
+partial struct unifyMode /*num:nuint*/;
 
 internal static unifyMode Δassign => /* 1 << iota */ 1;
 internal static unifyMode exact => 2;
@@ -121,7 +121,7 @@ internal static bool unify(this ж<unifier> Ꮡu, ΔType x, ΔType y, unifyMode 
     return Ꮡu.nify(x, y, mode, nil);
 }
 
-[GoRecv] internal static void tracef(this ref unifier u, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void tracef(this ref unifier u, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     fmt.Println(strings.Repeat(".  "u8, u.depth) + sprintf(nil, default!, true, format, args.ꓸꓸꓸ));
@@ -129,7 +129,7 @@ internal static bool unify(this ж<unifier> Ꮡu, ΔType x, ΔType y, unifyMode 
 
 // String returns a string representation of the current mapping
 // from type parameters to types.
-[GoRecv] internal static @string String(this ref unifier u) {
+internal static @string String(this ref unifier u) {
     // sort type parameters for reproducible strings
     var tparams = new typeParamsById(len(u.handles));
     nint i = 0;
@@ -153,7 +153,7 @@ internal static bool unify(this ж<unifier> Ꮡu, ΔType x, ΔType y, unifyMode 
     return Ꮡbuf.String();
 }
 
-[GoType("[]ж<TypeParam>")] partial struct typeParamsById;
+partial struct typeParamsById /*[]ж<TypeParam>*/;
 
 internal static nint Len(this typeParamsById s) {
     return len(s);
@@ -170,7 +170,7 @@ internal static void Swap(this typeParamsById s, nint i, nint j) {
 // join unifies the given type parameters x and y.
 // If both type parameters already have a type associated with them
 // and they are not joined, join fails and returns false.
-[GoRecv] internal static bool join(this ref unifier u, ж<TypeParam> Ꮡx, ж<TypeParam> Ꮡy) {
+internal static bool join(this ref unifier u, ж<TypeParam> Ꮡx, ж<TypeParam> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -209,7 +209,7 @@ internal static void Swap(this typeParamsById s, nint i, nint j) {
 
 // asBoundTypeParam returns x.(*TypeParam) if x is a type parameter recorded with u.
 // Otherwise, the result is nil.
-[GoRecv] internal static ж<TypeParam> asBoundTypeParam(this ref unifier u, ΔType x) {
+internal static ж<TypeParam> asBoundTypeParam(this ref unifier u, ΔType x) {
     {
         var (xΔ1, _) = Unalias(x)._<ж<TypeParam>>(ᐧ); if (xΔ1 != nil) {
             {
@@ -224,7 +224,7 @@ internal static void Swap(this typeParamsById s, nint i, nint j) {
 
 // setHandle sets the handle for type parameter x
 // (and all its joined type parameters) to h.
-[GoRecv] internal static void setHandle(this ref unifier u, ж<TypeParam> Ꮡx, ж<ΔType> Ꮡh) {
+internal static void setHandle(this ref unifier u, ж<TypeParam> Ꮡx, ж<ΔType> Ꮡh) {
     var hx = u.handles[Ꮡx];
     assert(hx != nil);
     foreach (var (y, hy) in u.handles) {
@@ -235,13 +235,13 @@ internal static void Swap(this typeParamsById s, nint i, nint j) {
 }
 
 // at returns the (possibly nil) type for type parameter x.
-[GoRecv] internal static ΔType at(this ref unifier u, ж<TypeParam> Ꮡx) {
+internal static ΔType at(this ref unifier u, ж<TypeParam> Ꮡx) {
     return u.handles[Ꮡx].ValueSlot;
 }
 
 // set sets the type t for type parameter x;
 // t must not be nil.
-[GoRecv] internal static void set(this ref unifier u, ж<TypeParam> Ꮡx, ΔType t) {
+internal static void set(this ref unifier u, ж<TypeParam> Ꮡx, ΔType t) {
     assert(t != default!);
     if (traceInference) {
         u.tracef("%s ➞ %s"u8, Ꮡx.OrTypedNil(), t);
@@ -250,7 +250,7 @@ internal static void Swap(this typeParamsById s, nint i, nint j) {
 }
 
 // unknowns returns the number of type parameters for which no type has been set yet.
-[GoRecv] internal static nint unknowns(this ref unifier u) {
+internal static nint unknowns(this ref unifier u) {
     nint n = 0;
     foreach (var (_, h) in u.handles) {
         if (h.ValueSlot == default!) {
@@ -264,7 +264,7 @@ internal static void Swap(this typeParamsById s, nint i, nint j) {
 // The result is never nil and has the same length as tparams; result types that
 // could not be inferred are nil. Corresponding type parameters and result types
 // have identical indices.
-[GoRecv] internal static slice<ΔType> inferred(this ref unifier u, slice<ж<TypeParam>> tparams) {
+internal static slice<ΔType> inferred(this ref unifier u, slice<ж<TypeParam>> tparams) {
     var list = new slice<ΔType>(len(tparams));
     foreach (var (i, x) in tparams) {
         list[i] = u.at(x);

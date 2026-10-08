@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Pair<T, U> {
+partial struct Pair<T, U> {
     public T First;
     public U Second;
 }

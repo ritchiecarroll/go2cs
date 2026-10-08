@@ -4,15 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("map[nint, nint]")] partial struct M;
+partial struct M /*map[nint, nint]*/;
 
-[GoType("ж<M>")] partial class P;
+partial class P /*ж<M>*/;
 
-[GoType("ж<map<@string, nint>>")] partial class PM;
+partial class PM /*ж<map<@string, nint>>*/;
 
-[GoType("ж<slice<nint>>")] partial class PS;
+partial class PS /*ж<slice<nint>>*/;
 
-[GoType("ж<ж<nint>>")] partial class PP;
+partial class PP /*ж<ж<nint>>*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object namedMapˢ = (@string)"named map:"u8;

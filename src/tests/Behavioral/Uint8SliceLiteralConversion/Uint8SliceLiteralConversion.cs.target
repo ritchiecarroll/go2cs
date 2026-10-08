@@ -6,7 +6,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[]uint8")] partial struct buf;
+partial struct buf /*[]uint8*/;
 
 internal static nint take(slice<uint8> b) {
     return len(b);

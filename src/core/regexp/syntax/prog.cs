@@ -16,13 +16,13 @@ partial class syntax_package {
 // May not belong in this package, but convenient for now.
 
 // A Prog is a compiled regular expression program.
-[GoType] partial struct Prog {
+partial struct Prog {
     public slice<Inst> Inst;
     public nint Start; // index of start instruction
     public nint NumCap; // number of InstCapture insts in re
 }
 
-[GoType("num:uint8")] partial struct InstOp;
+partial struct InstOp /*num:uint8*/;
 
 public static InstOp InstAlt => /* iota */ 0;
 public static InstOp InstAltMatch => 1;
@@ -57,7 +57,7 @@ public static @string String(this InstOp i) {
     return instOpNames[i];
 }
 
-[GoType("num:uint8")] partial struct EmptyOp;
+partial struct EmptyOp /*num:uint8*/;
 
 public static EmptyOp EmptyBeginLine => /* 1 << iota */ 1;
 public static EmptyOp EmptyEndLine => 2;
@@ -120,7 +120,7 @@ public static bool IsWordChar(rune r) {
 }
 
 // An Inst is a single instruction in a regular expression program.
-[GoType] partial struct Inst {
+partial struct Inst {
     public InstOp Op;
     public uint32 Out; // all but InstMatch, InstFail
     public uint32 Arg; // InstAlt, InstAltMatch, InstCapture, InstEmptyWidth
@@ -134,7 +134,7 @@ public static @string String(this ж<Prog> Ꮡp) {
 }
 
 // skipNop follows any no-op or capturing instructions.
-[GoRecv] internal static ж<Inst> skipNop(this ref Prog p, uint32 pc) {
+internal static ж<Inst> skipNop(this ref Prog p, uint32 pc) {
     var i = Ꮡ(p.Inst, pc);
     while ((~i).Op == InstNop || (~i).Op == InstCapture) {
         i = Ꮡ(p.Inst, (~i).Out);
@@ -143,7 +143,7 @@ public static @string String(this ж<Prog> Ꮡp) {
 }
 
 // op returns i.Op but merges all the Rune special cases into InstRune
-[GoRecv] internal static InstOp op(this ref Inst i) {
+internal static InstOp op(this ref Inst i) {
     var op = i.Op;
     var exprᴛ1 = op;
     if (exprᴛ1 == InstRune1 || exprᴛ1 == InstRuneAny || exprᴛ1 == InstRuneAnyNotNL) {
@@ -156,7 +156,7 @@ public static @string String(this ж<Prog> Ꮡp) {
 // Prefix returns a literal string that all matches for the
 // regexp must start with. Complete is true if the prefix
 // is the entire match.
-[GoRecv] public static (@string prefix, bool complete) Prefix(this ref Prog p) {
+public static (@string prefix, bool complete) Prefix(this ref Prog p) {
     var i = p.skipNop((uint32)p.Start);
     // Avoid allocation of buffer if prefix is empty.
     if (i.op() != InstRune || len((~i).Rune) != 1) {
@@ -173,7 +173,7 @@ public static @string String(this ж<Prog> Ꮡp) {
 
 // StartCond returns the leading empty-width conditions that must
 // be true in any match. It returns ^EmptyOp(0) if no matches are possible.
-[GoRecv] public static EmptyOp StartCond(this ref Prog p) {
+public static EmptyOp StartCond(this ref Prog p) {
     EmptyOp flag = default!;
     var pc = (uint32)p.Start;
     var i = Ꮡ(p.Inst, pc);
@@ -205,7 +205,7 @@ internal static UntypedInt noMatch => -1;
 
 // MatchRune reports whether the instruction matches (and consumes) r.
 // It should only be called when i.Op == [InstRune].
-[GoRecv] public static bool MatchRune(this ref Inst i, rune r) {
+public static bool MatchRune(this ref Inst i, rune r) {
     return i.MatchRunePos(r) != noMatch;
 }
 
@@ -214,7 +214,7 @@ internal static UntypedInt noMatch => -1;
 // (or, when len(i.Rune) == 1, rune singleton).
 // If not, MatchRunePos returns -1.
 // MatchRunePos should only be called when i.Op == [InstRune].
-[GoRecv] public static nint MatchRunePos(this ref Inst i, rune r) {
+public static nint MatchRunePos(this ref Inst i, rune r) {
     var rune = i.Rune;
     switch (len(rune)) {
     case 0: {
@@ -277,7 +277,7 @@ internal static UntypedInt noMatch => -1;
 // MatchEmptyWidth reports whether the instruction matches
 // an empty string between the runes before and after.
 // It should only be called when i.Op == [InstEmptyWidth].
-[GoRecv] public static bool MatchEmptyWidth(this ref Inst i, rune before, rune after) {
+public static bool MatchEmptyWidth(this ref Inst i, rune before, rune after) {
     var exprᴛ1 = ((EmptyOp)(uint8)i.Arg);
     if (exprᴛ1 == EmptyBeginLine) {
         return before == (rune)'\n' || before == -1;

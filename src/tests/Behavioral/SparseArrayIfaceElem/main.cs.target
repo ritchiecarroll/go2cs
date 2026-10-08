@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface shape {
+partial interface shape {
     @string name();
 }
 
-[GoType] partial struct circle {
+partial struct circle {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -18,7 +18,7 @@ internal static @string name(this circle _) {
     return circleˢ;
 }
 
-[GoType] partial struct square {
+partial struct square {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -40,7 +40,7 @@ internal static shape lookup(nint i) {
 internal static array<shape> registry = new golib.SparseArray<shape>{[kCircle] = new circle(nil), [kSquare] = new square(nil)
 }.array(4);
 
-[GoType("num:nuint")] partial struct hashKind;
+partial struct hashKind /*num:nuint*/;
 
 internal static hashKind hCircle => 5;
 internal static hashKind hSquare => 6;

@@ -28,7 +28,7 @@ public static slice<@string> defaultNS = new @string[]{"127.0.0.1:53"u8, "[::1]:
 
 internal static Func<(@string, error)> getHostname = os.Hostname;      // variable for testing
 
-[GoType] partial struct dnsConfig {
+partial struct dnsConfig {
     internal slice<@string> servers; // server addresses (in host:port form) to use
     internal slice<@string> search; // rooted suffixes to append to local name
     internal nint ndots;          // number of dots in name to trigger absolute lookup

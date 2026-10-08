@@ -113,7 +113,7 @@ public static (AEAD, error) NewGCMWithRandomNonce(Block cipher) {
     return (new gcmWithRandomNonce(g), default!);
 }
 
-[GoType] partial struct gcmWithRandomNonce {
+partial struct gcmWithRandomNonce {
     public partial ref ж<crypto.@internal.fips140.aes.gcm_package.GCM> GCM { get; }
 }
 
@@ -206,7 +206,7 @@ internal static (slice<byte>, error) Open(this gcmWithRandomNonce g, slice<byte>
 // gcmAble is an interface implemented by ciphers that have a specific optimized
 // implementation of GCM. crypto/aes doesn't use this anymore, and we'd like to
 // eventually remove it.
-[GoType] partial interface gcmAble {
+partial interface gcmAble {
     (AEAD, error) NewGCM(nint nonceSize, nint tagSize);
 }
 
@@ -236,21 +236,21 @@ internal static (AEAD, error) newGCMFallback(Block cipher, nint nonceSize, nint 
 // gcmFallback is only used for non-AES ciphers, which regrettably we
 // theoretically support. It's a copy of the generic implementation from
 // crypto/internal/fips140/aes/gcm/gcm_generic.go, refer to that file for more details.
-[GoType] partial struct gcmFallback {
+partial struct gcmFallback {
     internal Block cipher;
     internal nint nonceSize;
     internal nint tagSize;
 }
 
-[GoRecv] internal static nint NonceSize(this ref gcmFallback g) {
+internal static nint NonceSize(this ref gcmFallback g) {
     return g.nonceSize;
 }
 
-[GoRecv] internal static nint Overhead(this ref gcmFallback g) {
+internal static nint Overhead(this ref gcmFallback g) {
     return g.tagSize;
 }
 
-[GoRecv] internal static slice<byte> Seal(this ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static slice<byte> Seal(this ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     if (len(nonce) != g.nonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }
@@ -282,7 +282,7 @@ internal static (AEAD, error) newGCMFallback(Block cipher, nint nonceSize, nint 
 
 internal static error errOpen = errors.New("cipher: message authentication failed"u8);
 
-[GoRecv] internal static (slice<byte>, error) Open(this ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) Open(this ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     if (len(nonce) != g.nonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }
@@ -324,7 +324,7 @@ internal static error errOpen = errors.New("cipher: message authentication faile
     return (ret, default!);
 }
 
-internal static void deriveCounter([GoArrayDims(16)] ж<array<byte>> ᏑH, [GoArrayDims(16)] ж<array<byte>> Ꮡcounter, slice<byte> nonce) {
+internal static void deriveCounter(/*[16]*/ ж<array<byte>> ᏑH, /*[16]*/ ж<array<byte>> Ꮡcounter, slice<byte> nonce) {
     ref var counter = ref Ꮡcounter.DerefOrNull();
 
     if (len(nonce) == gcmStandardNonceSize){
@@ -338,7 +338,7 @@ internal static void deriveCounter([GoArrayDims(16)] ж<array<byte>> ᏑH, [GoAr
     }
 }
 
-internal static void gcmCounterCryptGeneric(Block b, slice<byte> @out, slice<byte> src, [GoArrayDims(16)] ж<array<byte>> Ꮡcounter) {
+internal static void gcmCounterCryptGeneric(Block b, slice<byte> @out, slice<byte> src, /*[16]*/ ж<array<byte>> Ꮡcounter) {
     ref var counter = ref Ꮡcounter.DerefOrNull();
 
     array<byte> mask = new(16); /* gcmBlockSize */
@@ -356,14 +356,14 @@ internal static void gcmCounterCryptGeneric(Block b, slice<byte> @out, slice<byt
     }
 }
 
-internal static void gcmInc32([GoArrayDims(16)] ж<array<byte>> ᏑcounterBlock) {
+internal static void gcmInc32(/*[16]*/ ж<array<byte>> ᏑcounterBlock) {
     ref var counterBlock = ref ᏑcounterBlock.DerefOrNull();
 
     var ctr = counterBlock[(int)(16 - 4)..];
     byteorder.BEPutUint32(ctr, byteorder.BEUint32(ctr) + 1);
 }
 
-internal static void gcmAuth(slice<byte> @out, [GoArrayDims(16)] ж<array<byte>> ᏑH, [GoArrayDims(16)] ж<array<byte>> ᏑtagMask, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static void gcmAuth(slice<byte> @out, /*[16]*/ ж<array<byte>> ᏑH, /*[16]*/ ж<array<byte>> ᏑtagMask, slice<byte> ciphertext, slice<byte> additionalData) {
     ref var tagMask = ref ᏑtagMask.DerefOrNull();
 
     var lenBlock = new slice<byte>(16);

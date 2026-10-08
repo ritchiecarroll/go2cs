@@ -172,7 +172,7 @@ internal static array<int64> rngCooked = new int64[]{
     8382142935188824023L, 9103922860780351547L, 4152330101494654406L
 }.array();
 
-[GoType] partial struct rngSource {
+partial struct rngSource {
     internal nint tap;          // index into vec
     internal nint feed;          // index into vec
     internal array<int64> vec = new(rngLen); // current feedback register
@@ -193,7 +193,7 @@ internal static int32 seedrand(int32 x) {
 }
 
 // Seed uses the provided seed value to initialize the generator to a deterministic state.
-[GoRecv] internal static void Seed(this ref rngSource rng, int64 seed) {
+internal static void Seed(this ref rngSource rng, int64 seed) {
     rng.tap = 0;
     rng.feed = rngLen - rngTap;
     seed = seed % (int64)int32max;
@@ -220,12 +220,12 @@ internal static int32 seedrand(int32 x) {
 }
 
 // Int63 returns a non-negative pseudo-random 63-bit integer as an int64.
-[GoRecv] internal static int64 Int63(this ref rngSource rng) {
+internal static int64 Int63(this ref rngSource rng) {
     return (int64)((uint64)(rng.Uint64() & (uint64)rngMask));
 }
 
 // Uint64 returns a non-negative pseudo-random 64-bit integer as a uint64.
-[GoRecv] internal static uint64 Uint64(this ref rngSource rng) {
+internal static uint64 Uint64(this ref rngSource rng) {
     rng.tap--;
     if (rng.tap < 0) {
         rng.tap += rngLen;

@@ -27,7 +27,7 @@ partial class pem_package {
 //	-----END Type-----
 //
 // where [Block.Headers] is a possibly empty sequence of Key: Value lines.
-[GoType] partial struct Block {
+partial struct Block {
     public @string Type;           // The type, taken from the preamble (i.e. "RSA PRIVATE KEY").
     public map<@string, @string> Headers; // Optional headers.
     public slice<byte> Bytes;       // The decoded bytes of the contents. Typically a DER encoded ASN.1 structure.
@@ -192,7 +192,7 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
 
 internal static UntypedInt pemLineLength => 64;
 
-[GoType] partial struct lineBreaker {
+partial struct lineBreaker {
     internal array<byte> line = new(pemLineLength);
     internal nint used;
     internal io.Writer @out;
@@ -200,7 +200,7 @@ internal static UntypedInt pemLineLength => 64;
 
 internal static slice<byte> nl = new byte[]{(rune)'\n'}.slice();
 
-[GoRecv] internal static (nint n, error err) Write(this ref lineBreaker l, slice<byte> b) {
+internal static (nint n, error err) Write(this ref lineBreaker l, slice<byte> b) {
     nint n = default!;
     error err = default!;
 
@@ -226,7 +226,7 @@ internal static slice<byte> nl = new byte[]{(rune)'\n'}.slice();
     return l.Write(b.slice(excess));
 }
 
-[GoRecv] internal static error /*err*/ Close(this ref lineBreaker l) {
+internal static error /*err*/ Close(this ref lineBreaker l) {
     error err = default!;
 
     if (l.used > 0) {

@@ -15,7 +15,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class types_package {
 
-[GoType("map[token.Token, Func<ΔType, bool>]")] partial struct opPredicates;
+partial struct opPredicates /*map[token.Token, Func<ΔType, bool>]*/;
 
 /*
 Basic algorithm:
@@ -371,7 +371,7 @@ internal static void updateExprType(this ж<Checker> Ꮡcheck, ast.Expr x, ΔTyp
 }
 
 // updateExprVal updates the value of x to val.
-[GoRecv] internal static void updateExprVal(this ref Checker check, ast.Expr x, constant.Value val) {
+internal static void updateExprVal(this ref Checker check, ast.Expr x, constant.Value val) {
     {
         var (info, ok) = check.untyped[x, ꟷ]; if (ok) {
             info.val = val;
@@ -960,7 +960,7 @@ internal static void matchTypes(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
     }
 }
 
-[GoType("num:nint")] partial struct exprKind;
+partial struct exprKind /*num:nint*/;
 
 internal static exprKind Δconversion => /* iota */ 0;
 internal static exprKind expression => 1;
@@ -968,7 +968,7 @@ internal static exprKind statement => 2;
 
 // target represent the (signature) type and description of the LHS
 // variable of an assignment, or of a function result variable.
-[GoType] partial struct target {
+partial struct target {
     internal ж<ΔSignature> sig;
     internal @string desc;
 }

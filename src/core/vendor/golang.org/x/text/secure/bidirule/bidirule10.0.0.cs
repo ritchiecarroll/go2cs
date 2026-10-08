@@ -6,7 +6,7 @@ namespace go.vendor.golang.org.x.text.secure;
 
 partial class bidirule_package {
 
-[GoRecv] internal static bool isFinal(this ref Transformer t) {
+internal static bool isFinal(this ref Transformer t) {
     return t.state == ruleLTRFinal || t.state == ruleRTLFinal || t.state == ruleInitial;
 }
 

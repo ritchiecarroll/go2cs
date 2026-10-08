@@ -9,7 +9,7 @@ partial class color_package {
 
 // Color can convert itself to alpha-premultiplied 16-bits per channel RGBA.
 // The conversion may be lossy.
-[GoType] partial interface Color {
+partial interface Color {
     // RGBA returns the alpha-premultiplied red, green, blue and alpha values
     // for the color. Each value ranges within [0, 0xffff], but is represented
     // by a uint32 so that multiplying by a blend factor up to 0xffff will not
@@ -25,7 +25,7 @@ partial class color_package {
 //
 // An alpha-premultiplied color component C has been scaled by alpha (A), so
 // has valid values 0 <= C <= A.
-[GoType] partial struct ΔRGBA {
+partial struct ΔRGBA {
     public uint8 R, G, B, A;
 }
 
@@ -51,7 +51,7 @@ public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this ΔRGBA c) {
 //
 // An alpha-premultiplied color component C has been scaled by alpha (A), so
 // has valid values 0 <= C <= A.
-[GoType] partial struct RGBA64 {
+partial struct RGBA64 {
     public uint16 R, G, B, A;
 }
 
@@ -60,7 +60,7 @@ public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this RGBA64 c) {
 }
 
 // NRGBA represents a non-alpha-premultiplied 32-bit color.
-[GoType] partial struct NRGBA {
+partial struct NRGBA {
     public uint8 R, G, B, A;
 }
 
@@ -89,7 +89,7 @@ public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this NRGBA c) {
 
 // NRGBA64 represents a non-alpha-premultiplied 64-bit color,
 // having 16 bits for each of red, green, blue and alpha.
-[GoType] partial struct NRGBA64 {
+partial struct NRGBA64 {
     public uint16 R, G, B, A;
 }
 
@@ -113,7 +113,7 @@ public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this NRGBA64 c) {
 }
 
 // Alpha represents an 8-bit alpha color.
-[GoType] partial struct Alpha {
+partial struct Alpha {
     public uint8 A;
 }
 
@@ -126,7 +126,7 @@ public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Alpha c) {
 }
 
 // Alpha16 represents a 16-bit alpha color.
-[GoType] partial struct Alpha16 {
+partial struct Alpha16 {
     public uint16 A;
 }
 
@@ -138,7 +138,7 @@ public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Alpha16 c) {
 }
 
 // Gray represents an 8-bit grayscale color.
-[GoType] partial struct Gray {
+partial struct Gray {
     public uint8 Y;
 }
 
@@ -149,7 +149,7 @@ public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Gray c) {
 }
 
 // Gray16 represents a 16-bit grayscale color.
-[GoType] partial struct Gray16 {
+partial struct Gray16 {
     public uint16 Y;
 }
 
@@ -160,7 +160,7 @@ public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Gray16 c) {
 
 // Model can convert any [Color] to one from its own color model. The conversion
 // may be lossy.
-[GoType] partial interface Model {
+partial interface Model {
     Color Convert(Color c);
 }
 
@@ -174,11 +174,11 @@ public static Model ModelFunc(Func<Color, Color> f) {
     return new modelFuncжModel(Ꮡ(new modelFunc(f)));
 }
 
-[GoType] partial struct modelFunc {
+partial struct modelFunc {
     internal Func<Color, Color> f;
 }
 
-[GoRecv] internal static Color Convert(this ref modelFunc m, Color c) {
+internal static Color Convert(this ref modelFunc m, Color c) {
     return m.f(c);
 }
 
@@ -314,7 +314,7 @@ internal static Color gray16Model(Color c) {
     return new Gray16((uint16)y);
 }
 
-[GoType("[]Color")] partial struct Palette;
+partial struct Palette /*[]Color*/;
 
 // Convert returns the palette color closest to c in Euclidean R,G,B space.
 public static Color Convert(this Palette p, Color c) {

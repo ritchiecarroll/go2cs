@@ -23,36 +23,36 @@ internal static UntypedInt privateKeySize => /* seedSize + publicKeySize */ 64;
 internal static UntypedInt signatureSize => 64;
 internal static UntypedInt sha512Size => 64;
 
-[GoType] partial struct PrivateKey {
+partial struct PrivateKey {
     internal array<byte> seed = new(seedSize);
     internal array<byte> pub = new(publicKeySize);
     internal Δedwards25519.Scalar s;
     internal array<byte> prefix = new(sha512Size / 2);
 }
 
-[GoRecv] public static slice<byte> Bytes(this ref PrivateKey priv) {
+public static slice<byte> Bytes(this ref PrivateKey priv) {
     var k = new slice<byte>(0, privateKeySize);
     k = appendꓸꓸꓸ(k, priv.seed[..]);
     k = appendꓸꓸꓸ(k, priv.pub[..]);
     return k;
 }
 
-[GoRecv] public static slice<byte> Seed(this ref PrivateKey priv) {
+public static slice<byte> Seed(this ref PrivateKey priv) {
     var seed = priv.seed.Clone();
     return seed[..];
 }
 
-[GoRecv] public static slice<byte> PublicKey(this ref PrivateKey priv) {
+public static slice<byte> PublicKey(this ref PrivateKey priv) {
     var pub = priv.pub.Clone();
     return pub[..];
 }
 
-[GoType] partial struct ΔPublicKey {
+partial struct ΔPublicKey {
     internal Δedwards25519.Point a;
     internal array<byte> aBytes = new(32);
 }
 
-[GoRecv] public static slice<byte> Bytes(this ref ΔPublicKey pub) {
+public static slice<byte> Bytes(this ref ΔPublicKey pub) {
     var a = pub.aBytes.Clone();
     return a[..];
 }

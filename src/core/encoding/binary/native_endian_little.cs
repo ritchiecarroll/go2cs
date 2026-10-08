@@ -6,7 +6,7 @@ namespace go.encoding;
 
 partial class binary_package {
 
-[GoType] public partial struct nativeEndian {
+public partial struct nativeEndian {
     internal partial ref littleEndian littleEndian { get; }
 }
 

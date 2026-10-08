@@ -39,7 +39,7 @@ partial class runtime_package {
 // and ppc64le.
 internal static UntypedInt traceTimeDiv => /* (1-osHasLowResClockInt)*64 + osHasLowResClockInt*(256-224*(goarch.IsPpc64|goarch.IsPpc64le)) */ 64;
 
-[GoType("num:uint64")] partial struct traceTime;
+partial struct traceTime /*num:uint64*/;
 
 // traceClockNow returns a monotonic timestamp. The clock this function gets
 // the timestamp from is specific to tracing, and shouldn't be mixed with other

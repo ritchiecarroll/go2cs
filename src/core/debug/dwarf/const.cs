@@ -6,7 +6,7 @@ namespace go.debug;
 
 partial class dwarf_package {
 
-[GoType("num:uint32")] partial struct Attr;
+partial struct Attr /*num:uint32*/;
 
 //go:generate stringer -type Attr -trimprefix=Attr
 public static Attr AttrSibling => 0x01;
@@ -140,7 +140,7 @@ public static @string GoString(this Attr a) {
     return "dwarf."u8 + a.String();
 }
 
-[GoType("num:uint32")] partial struct format;
+partial struct format /*num:uint32*/;
 
 internal static format formAddr => 0x01;
 internal static format formDwarfBlock2 => 0x03;
@@ -188,7 +188,7 @@ internal static format formAddrx4 => 0x2C;
 internal static format formGnuRefAlt => 0x1f20;
 internal static format formGnuStrpAlt => 0x1f21;
 
-[GoType("num:uint32")] partial struct Tag;
+partial struct Tag /*num:uint32*/;
 
 //go:generate stringer -type Tag -trimprefix=Tag
 public static Tag TagArrayType => 0x01;

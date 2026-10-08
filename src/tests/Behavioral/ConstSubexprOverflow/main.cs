@@ -83,12 +83,12 @@ internal static void Main() {
     showInt32((int32)((2147483648L - 1) - 2));
 }
 
-[GoType] partial struct row {
+partial struct row {
     internal @string @in;
     internal int32 @out;
 }
 
-[GoType("num:uintptr")] partial struct Word;
+partial struct Word /*num:uintptr*/;
 
 internal static UntypedInt _W => 64;
 internal static readonly GoBigConst _B = /* 1 << _W */

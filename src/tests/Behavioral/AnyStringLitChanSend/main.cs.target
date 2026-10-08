@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface speaker {
+partial interface speaker {
     @string speak();
 }
 
-[GoType] partial struct dog {
+partial struct dog {
     internal @string name;
 }
 
@@ -16,11 +16,11 @@ internal static @string speak(this dog d) {
     return "woof:"u8 + d.name;
 }
 
-[GoType] partial struct cat {
+partial struct cat {
     internal @string name;
 }
 
-[GoRecv] internal static @string speak(this ref cat c) {
+internal static @string speak(this ref cat c) {
     return "meow:"u8 + c.name;
 }
 

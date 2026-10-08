@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:rune")] partial struct Delim;
+partial struct Delim /*num:rune*/;
 
-[GoType("num:nint")] partial struct Code;
+partial struct Code /*num:nint*/;
 
 public static @string String(this Delim d) {
     return ((@string)(rune)d);

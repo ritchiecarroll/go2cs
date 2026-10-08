@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Thing {
+partial struct Thing {
     internal nint val;
 }
 
-[GoType] partial struct Wrap {
+partial struct Wrap {
     internal Thing inner;
     internal ж<Thing> ptr;
 }
@@ -38,7 +38,7 @@ internal static nint pointerHop() {
     return t.val;
 }
 
-[GoRecv] internal static nint methodBody(this ref Thing t) {
+internal static nint methodBody(this ref Thing t) {
     ref var y = ref heap<Thing>(out var Ꮡy);
     y = new Thing(val: 1);
     var p = Ꮡy.of(Thing.Ꮡval);
@@ -46,11 +46,11 @@ internal static nint pointerHop() {
     return y.val;
 }
 
-[GoType] partial struct Embed {
+partial struct Embed {
     internal nint ev;
 }
 
-[GoType] partial struct Outer {
+partial struct Outer {
     public partial ref Embed Embed { get; }
     internal nint other;
 }
@@ -63,7 +63,7 @@ internal static nint promotedValueEmbed() {
     return o.ev;
 }
 
-[GoType] partial struct PtrHolder {
+partial struct PtrHolder {
     internal ж<nint> p;
 }
 

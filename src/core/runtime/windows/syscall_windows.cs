@@ -13,7 +13,7 @@ partial class runtime_package {
 
 // cbs stores all registered Go callbacks.
 
-[GoType("dyn")] partial struct cbsᴛ1 {
+partial struct cbsᴛ1 /*dyn*/ {
     internal mutex @lock; // use cbsLock / cbsUnlock for race instrumentation.
     internal array<winCallback> ctxt = new(2000);
     internal map<winCallbackKey, nint> index;
@@ -41,20 +41,20 @@ internal static void cbsUnlock() {
 }
 
 // winCallback records information about a registered Go callback.
-[GoType] partial struct winCallback {
+partial struct winCallback {
     internal ж<funcval> fn; // Go function
     internal uintptr retPop;  // For 386 cdecl, how many bytes to pop on return
     internal abiDesc abiMap;
 }
 
-[GoType("num:nint")] partial struct abiPartKind;
+partial struct abiPartKind /*num:nint*/;
 
 internal static abiPartKind abiPartBad => /* iota */ 0;
 internal static abiPartKind abiPartStack => 1; // Move a value from memory to the stack.
 internal static abiPartKind abiPartReg => 2; // Move a value from memory to a register.
 
 // abiPart encodes a step in translating between calling ABIs.
-[GoType] partial struct abiPart {
+partial struct abiPart {
     internal abiPartKind kind;
     internal uintptr srcStackOffset;
     internal uintptr dstStackOffset; // used if kind == abiPartStack
@@ -62,7 +62,7 @@ internal static abiPartKind abiPartReg => 2; // Move a value from memory to a re
     internal uintptr len;
 }
 
-[GoRecv] internal static bool tryMerge(this ref abiPart a, abiPart b) {
+internal static bool tryMerge(this ref abiPart a, abiPart b) {
     if (a.kind != abiPartStack || b.kind != abiPartStack) {
         return false;
     }
@@ -78,7 +78,7 @@ internal static abiPartKind abiPartReg => 2; // Move a value from memory to a re
 // the result is always a uintptr. If the C ABI is fastcall,
 // this assumes the four fastcall registers were first spilled
 // to the shadow space.
-[GoType] partial struct abiDesc {
+partial struct abiDesc {
     internal slice<abiPart> parts;
     internal uintptr srcStackSize; // stdcall/fastcall stack space tracking
     internal uintptr dstStackSize; // Go stack space used
@@ -89,7 +89,7 @@ internal static abiPartKind abiPartReg => 2; // Move a value from memory to a re
     internal uintptr retOffset;
 }
 
-[GoRecv] internal static void assignArg(this ref abiDesc Δp, ж<_type> Ꮡt) {
+internal static void assignArg(this ref abiDesc Δp, ж<_type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Size_ > goarch.PtrSize) {
@@ -170,7 +170,7 @@ internal static abiPartKind abiPartReg => 2; // Move a value from memory to a re
 // Assumes t.size <= goarch.PtrSize and t.size != 0.
 //
 // Returns whether the assignment succeeded.
-[GoRecv] internal static bool tryRegAssignArg(this ref abiDesc Δp, ж<_type> Ꮡt, uintptr offset) {
+internal static bool tryRegAssignArg(this ref abiDesc Δp, ж<_type> Ꮡt, uintptr offset) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     {
@@ -214,7 +214,7 @@ internal static abiPartKind abiPartReg => 2; // Move a value from memory to a re
 // value in the C ABI space.
 //
 // Returns whether the assignment was successful.
-[GoRecv] internal static bool assignReg(this ref abiDesc Δp, uintptr size, uintptr offset) {
+internal static bool assignReg(this ref abiDesc Δp, uintptr size, uintptr offset) {
     if (Δp.dstRegisters >= intArgRegs) {
         return false;
     }
@@ -228,7 +228,7 @@ internal static abiPartKind abiPartReg => 2; // Move a value from memory to a re
     return true;
 }
 
-[GoType] partial struct winCallbackKey {
+partial struct winCallbackKey {
     internal ж<funcval> fn;
     internal bool cdecl;
 }
@@ -352,7 +352,7 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
     return callbackasmAddr(n);
 }
 
-[GoType] partial struct callbackArgs {
+partial struct callbackArgs {
     internal uintptr index;
     // args points to the argument block.
     //

@@ -81,7 +81,7 @@ internal static UntypedInt maxHandshake => 65536; // maximum handshake we suppor
 internal static UntypedInt maxHandshakeCertificateMsg => 262144; // maximum certificate message size (256 KiB)
 internal static UntypedInt maxUselessRecords => 16; // maximum number of consecutive non-advancing records
 
-[GoType("num:uint8")] partial struct recordType;
+partial struct recordType /*num:uint8*/;
 
 internal static recordType recordTypeChangeCipherSpec => 20;
 internal static recordType recordTypeAlert => 21;
@@ -170,7 +170,7 @@ internal const uint16 extensionEncryptedClientHello = 0xfe0d;
 // TLS signaling cipher suite values
 internal const uint16 scsvRenegotiation = 0x00ff;
 
-[GoType("num:uint16")] partial struct CurveID;
+partial struct CurveID /*num:uint16*/;
 
 public static CurveID CurveP256 => 23;
 public static CurveID CurveP384 => 24;
@@ -187,7 +187,7 @@ internal static bool isPQKeyExchange(CurveID curve) {
 }
 
 // TLS 1.3 Key Share. See RFC 8446, Section 4.2.8.
-[GoType] partial struct keyShare {
+partial struct keyShare {
     internal CurveID group;
     internal slice<byte> data;
 }
@@ -199,7 +199,7 @@ internal const uint8 pskModeDHE = 1;
 
 // TLS 1.3 PSK Identity. Can be a Session Ticket, or a reference to a saved
 // session. See RFC 8446, Section 4.2.11.
-[GoType] partial struct pskIdentity {
+partial struct pskIdentity {
     internal slice<byte> label;
     internal uint32 obfuscatedTicketAge;
 }
@@ -249,7 +249,7 @@ internal static readonly @string downgradeCanaryTLS11 = "DOWNGRD\x00"u8;
 internal static bool testingOnlyForceDowngradeCanary;
 
 // ConnectionState records basic TLS details about the connection.
-[GoType] partial struct ΔConnectionState {
+partial struct ΔConnectionState {
     // Version is the TLS version used by the connection (e.g. VersionTLS12).
     public uint16 Version;
     // HandshakeComplete is true if the handshake has concluded.
@@ -322,11 +322,11 @@ internal static bool testingOnlyForceDowngradeCanary;
 // in Go 1.22 due to security issues (see the Security Considerations sections
 // of RFC 5705 and RFC 7627), but can be re-enabled with the GODEBUG setting
 // tlsunsafeekm=1.
-[GoRecv] public static (slice<byte>, error) ExportKeyingMaterial(this ref ΔConnectionState cs, @string label, slice<byte> context, nint length) {
+public static (slice<byte>, error) ExportKeyingMaterial(this ref ΔConnectionState cs, @string label, slice<byte> context, nint length) {
     return cs.ekm(label, context, length);
 }
 
-[GoType("num:nint")] partial struct ClientAuthType;
+partial struct ClientAuthType /*num:nint*/;
 
 public static ClientAuthType NoClientCert => /* iota */ 0;
 public static ClientAuthType RequestClientCert => 1;
@@ -353,7 +353,7 @@ internal static bool requiresClientCert(ClientAuthType c) {
 // goroutines. Up to TLS 1.2, only ticket-based resumption is supported, not
 // SessionID-based resumption. In TLS 1.3 they were merged into PSK modes, which
 // are supported via this interface.
-[GoType] partial interface ClientSessionCache {
+partial interface ClientSessionCache {
     // Get searches for a ClientSessionState associated with the given key.
     // On return, ok is true if one was found.
     (ж<ClientSessionState> session, bool ok) Get(@string sessionKey);
@@ -364,7 +364,7 @@ internal static bool requiresClientCert(ClientAuthType c) {
     void Put(@string sessionKey, ж<ClientSessionState> cs);
 }
 
-[GoType("num:uint16")] partial struct SignatureScheme;
+partial struct SignatureScheme /*num:uint16*/;
 
 //go:generate stringer -linecomment -type=SignatureScheme,CurveID,ClientAuthType -output=common_string.go
 public static SignatureScheme PKCS1WithSHA256 => 0x0401;
@@ -382,7 +382,7 @@ public static SignatureScheme ECDSAWithSHA1 => 0x0203;
 
 // ClientHelloInfo contains information from a ClientHello message in order to
 // guide application logic in the GetCertificate and GetConfigForClient callbacks.
-[GoType] partial struct ClientHelloInfo {
+partial struct ClientHelloInfo {
     // CipherSuites lists the CipherSuites supported by the client (e.g.
     // TLS_AES_128_GCM_SHA256, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256).
     public slice<uint16> CipherSuites;
@@ -434,14 +434,14 @@ public static SignatureScheme ECDSAWithSHA1 => 0x0203;
 // Context returns the context of the handshake that is in progress.
 // This context is a child of the context passed to HandshakeContext,
 // if any, and is canceled when the handshake concludes.
-[GoRecv] public static context.Context Context(this ref ClientHelloInfo c) {
+public static context.Context Context(this ref ClientHelloInfo c) {
     return c.ctx;
 }
 
 // CertificateRequestInfo contains information from a server's
 // CertificateRequest message, which is used to demand a certificate and proof
 // of control from a client.
-[GoType] partial struct CertificateRequestInfo {
+partial struct CertificateRequestInfo {
     // AcceptableCAs contains zero or more, DER-encoded, X.501
     // Distinguished Names. These are the names of root or intermediate CAs
     // that the server wishes the returned certificate to be signed by. An
@@ -459,11 +459,11 @@ public static SignatureScheme ECDSAWithSHA1 => 0x0203;
 // Context returns the context of the handshake that is in progress.
 // This context is a child of the context passed to HandshakeContext,
 // if any, and is canceled when the handshake concludes.
-[GoRecv] public static context.Context Context(this ref CertificateRequestInfo c) {
+public static context.Context Context(this ref CertificateRequestInfo c) {
     return c.ctx;
 }
 
-[GoType("num:nint")] partial struct RenegotiationSupport;
+partial struct RenegotiationSupport /*num:nint*/;
 
 public static RenegotiationSupport RenegotiateNever => /* iota */ 0;
 public static RenegotiationSupport RenegotiateOnceAsClient => 1;
@@ -473,7 +473,7 @@ public static RenegotiationSupport RenegotiateFreelyAsClient => 2;
 // After one has been passed to a TLS function it must not be
 // modified. A Config may be reused; the tls package will also not
 // modify it.
-[GoType] partial struct Config {
+partial struct Config {
     // Rand provides the source of entropy for nonces and RSA blinding.
     // If Rand is nil, TLS uses the cryptographic random reader in package
     // crypto/rand.
@@ -772,7 +772,7 @@ public static RenegotiationSupport RenegotiateFreelyAsClient => 2;
 
 // EncryptedClientHelloKey holds a private key that is associated
 // with a specific ECH config known to a client.
-[GoType] partial struct EncryptedClientHelloKey {
+partial struct EncryptedClientHelloKey {
     // Config should be a marshalled ECHConfig associated with PrivateKey. This
     // must match the config provided to clients byte-for-byte. The config
     // should only specify the DHKEM(X25519, HKDF-SHA256) KEM ID (0x0020), the
@@ -792,7 +792,7 @@ internal static time.Duration ticketKeyLifetime => /* 7 * 24 * time.Hour */ 6048
 internal static time.Duration ticketKeyRotation => /* 24 * time.Hour */ 86400000000000;
 
 // ticketKey is the internal representation of a session ticket key.
-[GoType] partial struct ticketKey {
+partial struct ticketKey {
     internal array<byte> aesKey = new(16);
     internal array<byte> hmacKey = new(16);
     // created is the time at which this ticket key was created. See Config.ticketKeys.
@@ -802,7 +802,7 @@ internal static time.Duration ticketKeyRotation => /* 24 * time.Hour */ 86400000
 // ticketKeyFromBytes converts from the external representation of a session
 // ticket key to a ticketKey. Externally, session ticket keys are 32 random
 // bytes and this function expands that into sufficient name and key material.
-[GoRecv] internal static ticketKey /*key*/ ticketKeyFromBytes(this ref Config c, [GoArrayDims(32)] array<byte> b) {
+internal static ticketKey /*key*/ ticketKeyFromBytes(this ref Config c, /*[32]*/ array<byte> b) {
     ticketKey key = new();
 
     b = b.Clone();
@@ -1031,7 +1031,7 @@ public static void SetSessionTicketKeys(this ж<Config> Ꮡc, slice<array<byte>>
     Ꮡc.of(Config.Ꮡmutex).Unlock();
 }
 
-[GoRecv] internal static io.Reader rand(this ref Config c) {
+internal static io.Reader rand(this ref Config c) {
     var r = c.Rand;
     if (r == default!) {
         return go.crypto.rand_package.Reader;
@@ -1039,7 +1039,7 @@ public static void SetSessionTicketKeys(this ж<Config> Ꮡc, slice<array<byte>>
     return r;
 }
 
-[GoRecv] internal static time.Time time(this ref Config c) {
+internal static time.Time time(this ref Config c) {
     var t = c.Time;
     if (t == default!) {
         t = time_package.Now;
@@ -1047,7 +1047,7 @@ public static void SetSessionTicketKeys(this ж<Config> Ꮡc, slice<array<byte>>
     return t();
 }
 
-[GoRecv] internal static slice<uint16> cipherSuites(this ref Config c) {
+internal static slice<uint16> cipherSuites(this ref Config c) {
     if (c.CipherSuites == default!) {
         if (fips140tls.Required()) {
             return defaultCipherSuitesFIPS;
@@ -1179,7 +1179,7 @@ public static error errNoCertificates = errors.New("tls: no certificates configu
 
 // getCertificate returns the best certificate for the given ClientHelloInfo,
 // defaulting to the first element of c.Certificates.
-[GoRecv] internal static (ж<Certificate>, error) getCertificate(this ref Config c, ж<ClientHelloInfo> ᏑclientHello) {
+internal static (ж<Certificate>, error) getCertificate(this ref Config c, ж<ClientHelloInfo> ᏑclientHello) {
     ref var clientHello = ref ᏑclientHello.DerefOrNull();
 
     if (c.GetCertificate != default! && (len(c.Certificates) == 0 || len(clientHello.ServerName) > 0)) {
@@ -1418,7 +1418,7 @@ internal static readonly @string chainIsNotSignedByAnˢ = "chain is not signed b
 // SupportsCertificate returns nil if the provided certificate is supported by
 // the server that sent the CertificateRequest. Otherwise, it returns an error
 // describing the reason for the incompatibility.
-[GoRecv] public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<Certificate> Ꮡc) {
+public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<Certificate> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     {
@@ -1457,7 +1457,7 @@ internal static readonly @string chainIsNotSignedByAnˢ = "chain is not signed b
 // Deprecated: NameToCertificate only allows associating a single certificate
 // with a given name. Leave that field nil to let the library select the first
 // compatible chain from Certificates.
-[GoRecv] public static void BuildNameToCertificate(this ref Config c) {
+public static void BuildNameToCertificate(this ref Config c) {
     c.NameToCertificate = new map<@string, ж<Certificate>>();
     foreach (var (i, _) in c.Certificates) {
         var cert = Ꮡ(c.Certificates, i);
@@ -1482,7 +1482,7 @@ internal static readonly @string keyLogLabelServerHandshake = "SERVER_HANDSHAKE_
 internal static readonly @string keyLogLabelClientTraffic = "CLIENT_TRAFFIC_SECRET_0"u8;
 internal static readonly @string keyLogLabelServerTraffic = "SERVER_TRAFFIC_SECRET_0"u8;
 
-[GoRecv] internal static error writeKeyLog(this ref Config c, @string label, slice<byte> clientRandom, slice<byte> secret) {
+internal static error writeKeyLog(this ref Config c, @string label, slice<byte> clientRandom, slice<byte> secret) {
     if (c.KeyLogWriter == default!) {
         return default!;
     }
@@ -1499,13 +1499,12 @@ internal static ж<sync.Mutex> ᏑwriterMutex = new StandardBox<sync.Mutex>(defa
 internal static ref sync.Mutex writerMutex => ref ᏑwriterMutex.Value;
 
 // A Certificate is a chain of one or more certificates, leaf first.
-[GoType] partial struct Certificate {
+partial struct Certificate {
     public slice<slice<byte>> ΔCertificate;
     // PrivateKey contains the private key corresponding to the public key in
     // Leaf. This must implement crypto.Signer with an RSA, ECDSA or Ed25519 PublicKey.
     // For a server up to TLS 1.2, it can also implement crypto.Decrypter with
     // an RSA PublicKey.
-    [GoDescriptorType(Self = typeof(go.crypto_package.PrivateKeyᴅ))]
     public cryptoꓸPrivateKey PrivateKey;
     // SupportedSignatureAlgorithms is an optional list restricting what
     // signature algorithms the PrivateKey can be used for.
@@ -1524,19 +1523,19 @@ internal static ref sync.Mutex writerMutex => ref ᏑwriterMutex.Value;
 
 // leaf returns the parsed leaf certificate, either from c.Leaf or by parsing
 // the corresponding c.Certificate[0].
-[GoRecv] internal static (ж<Δx509.Certificate>, error) leaf(this ref Certificate c) {
+internal static (ж<Δx509.Certificate>, error) leaf(this ref Certificate c) {
     if (c.Leaf != nil) {
         return (c.Leaf, default!);
     }
     return Δx509.ParseCertificate(c.ΔCertificate[0]);
 }
 
-[GoType] partial interface handshakeMessage {
+partial interface handshakeMessage {
     (slice<byte>, error) marshal();
     bool unmarshal(slice<byte> _);
 }
 
-[GoType] partial interface handshakeMessageWithOriginalBytes :
+partial interface handshakeMessageWithOriginalBytes :
     handshakeMessage
 {
     // originalBytes should return the original bytes that were passed to
@@ -1547,14 +1546,14 @@ internal static ref sync.Mutex writerMutex => ref ᏑwriterMutex.Value;
 
 // lruSessionCache is a ClientSessionCache implementation that uses an LRU
 // caching strategy.
-[GoType] partial struct lruSessionCache {
+partial struct lruSessionCache {
     public partial ref sync_package.Mutex Mutex { get; }
     internal map<@string, ж<list.Element>> m;
     internal ж<list.List> q;
     internal nint capacity;
 }
 
-[GoType] partial struct lruSessionCacheEntry {
+partial struct lruSessionCacheEntry {
     internal @string sessionKey;
     internal ж<ClientSessionState> state;
 }
@@ -1665,17 +1664,17 @@ internal static bool isSupportedSignatureAlgorithm(SignatureScheme sigAlg, slice
 }
 
 // CertificateVerificationError is returned when certificate verification fails during the handshake.
-[GoType] partial struct CertificateVerificationError {
+partial struct CertificateVerificationError {
     // UnverifiedCertificates and its contents should not be modified.
     public slice<ж<Δx509.Certificate>> UnverifiedCertificates;
     public error Err;
 }
 
-[GoRecv] public static @string Error(this ref CertificateVerificationError e) {
+public static @string Error(this ref CertificateVerificationError e) {
     return fmt.Sprintf("tls: failed to verify certificate: %s"u8, e.Err);
 }
 
-[GoRecv] public static error Unwrap(this ref CertificateVerificationError e) {
+public static error Unwrap(this ref CertificateVerificationError e) {
     return e.Err;
 }
 

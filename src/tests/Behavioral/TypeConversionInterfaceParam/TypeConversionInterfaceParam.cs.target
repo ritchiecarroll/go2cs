@@ -4,17 +4,17 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("dyn")] public partial struct DataProcessor_data {
+public partial struct DataProcessor_data /*dyn*/ {
 public nint ID;
 public @string Name;
 public bool Valid;
 }
 
-[GoType] partial interface DataProcessor {
+partial interface DataProcessor {
     void Process(DataProcessor_data data);
 }
 
-[GoType] partial struct Processor {
+partial struct Processor {
 }
 
 public static void Process(this Processor p, DataProcessor_data data) {

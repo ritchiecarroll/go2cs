@@ -14,7 +14,7 @@ partial class sort_package {
 
 // An implementation of Interface can be sorted by the routines in this package.
 // The methods refer to elements of the underlying collection by integer index.
-[GoType] partial interface Interface {
+partial interface Interface {
     // Len is the number of elements in the collection.
     nint Len();
     // Less reports whether the element with index i
@@ -52,15 +52,15 @@ public static void Sort(Interface data) {
     pdqsort(data, 0, n, limit);
 }
 
-[GoType("num:nint")] partial struct sortedHint;
+partial struct sortedHint /*num:nint*/;
 
 internal static sortedHint unknownHint => /* iota */ 0;
 internal static sortedHint increasingHint => 1;
 internal static sortedHint decreasingHint => 2;
 
-[GoType("num:uint64")] partial struct xorshift;
+partial struct xorshift /*num:uint64*/;
 
-[GoRecv] internal static uint64 Next(this ref xorshift r) {
+internal static uint64 Next(this ref xorshift r) {
     r ^= (xorshift)((r << (int)(13)));
     r ^= (xorshift)((r >> (int)(7)));
     r ^= (xorshift)((r << (int)(17)));
@@ -75,15 +75,15 @@ internal static nuint nextPowerOfTwo(nint length) {
 // lessSwap is a pair of Less and Swap function for use with the
 // auto-generated func-optimized variant of sort.go in
 // zfuncversion.go.
-[GoType] partial struct lessSwap {
+partial struct lessSwap {
     public Func<nint, nint, bool> Less;
     public Action<nint, nint> Swap;
 }
 
-[GoType] partial struct reverse {
+partial struct reverse {
     // This embedded Interface permits Reverse to use the methods of
     // another Interface implementation.
-    [GoEmbedded] public Interface Interface;
+    /*embed*/ public Interface Interface;
 }
 
 // Less returns the opposite of the embedded implementation's Less method.
@@ -110,7 +110,7 @@ public static bool IsSorted(Interface data) {
     return true;
 }
 
-[GoType("[]nint")] partial struct IntSlice;
+partial struct IntSlice /*[]nint*/;
 
 // Convenience types for common cases
 public static nint Len(this IntSlice x) {
@@ -130,7 +130,7 @@ public static void Sort(this IntSlice x) {
     Sort((Interface)(x));
 }
 
-[GoType("[]float64")] partial struct Float64Slice;
+partial struct Float64Slice /*[]float64*/;
 
 public static nint Len(this Float64Slice x) {
     return len(x);
@@ -160,7 +160,7 @@ public static void Sort(this Float64Slice x) {
     Sort((Interface)(x));
 }
 
-[GoType("[]@string")] partial struct StringSlice;
+partial struct StringSlice /*[]@string*/;
 
 public static nint Len(this StringSlice x) {
     return len(x);

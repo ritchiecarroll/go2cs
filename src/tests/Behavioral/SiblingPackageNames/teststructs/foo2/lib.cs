@@ -9,7 +9,7 @@ public static @string Name() {
     return foo2ˢ;
 }
 
-[GoType] partial struct Triple {
+partial struct Triple {
     public @string A, B, C;
 }
 

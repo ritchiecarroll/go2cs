@@ -4,28 +4,28 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface reader {
+partial interface reader {
     @string Read();
 }
 
-[GoType] partial interface readCloser {
+partial interface readCloser {
     @string Read();
     @string Close();
 }
 
-[GoType] partial struct conn {
+partial struct conn {
     internal @string data;
 }
 
-[GoRecv] internal static @string Read(this ref conn c) {
+internal static @string Read(this ref conn c) {
     return "read:"u8 + c.data;
 }
 
-[GoRecv] internal static @string Close(this ref conn c) {
+internal static @string Close(this ref conn c) {
     return "closed:"u8 + c.data;
 }
 
-[GoType] partial struct valConn {
+partial struct valConn {
     internal @string tag;
 }
 

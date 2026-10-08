@@ -39,7 +39,7 @@ internal static void Main() {
     _ = op;
 }
 
-[GoType("ж<array<nint>>")] [GoArrayDims(4)] partial class opaque;
+/*[4]*/ partial class opaque /*ж<array<nint>>*/;
 
 internal static bool never;
 

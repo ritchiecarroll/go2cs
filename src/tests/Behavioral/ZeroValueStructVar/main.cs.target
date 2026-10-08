@@ -4,18 +4,18 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct holder {
+partial struct holder {
     internal @string name;
     internal array<nint> tbl = new(8);
     internal slice<nint> tail;
 }
 
-[GoType] partial struct wrapper {
+partial struct wrapper {
     internal nint id;
     internal holder h;
 }
 
-[GoType] partial struct point {
+partial struct point {
     internal nint x, y;
 }
 

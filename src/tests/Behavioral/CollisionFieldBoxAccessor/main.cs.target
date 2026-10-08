@@ -5,17 +5,17 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct Δmark {
+partial struct Δmark {
     internal nint id;
 }
 
-[GoType] partial struct tagger {
+partial struct tagger {
 }
 
 internal static void mark(this tagger _) {
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal nint mark;
     internal nint extra;
 }
@@ -34,7 +34,7 @@ internal static partial nint localShadowsCollisionType() {
     return pid.Value + Δmark;
 }
 
-[GoType] partial struct w {
+partial struct w {
     internal nint park;
     internal nint other;
 }

@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct myErr {
+partial struct myErr {
     internal @string msg;
 }
 
-[GoRecv] internal static @string Error(this ref myErr e) {
+internal static @string Error(this ref myErr e) {
     return e.msg;
 }
 

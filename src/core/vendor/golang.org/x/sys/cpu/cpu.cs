@@ -19,7 +19,7 @@ partial class cpu_package {
 public static bool Initialized;
 
 // CacheLinePad is used to pad structs to avoid false sharing.
-[GoType] partial struct CacheLinePad {
+partial struct CacheLinePad {
     internal array<byte> _ = new(cacheLineSize);
 }
 
@@ -31,7 +31,7 @@ public static bool Initialized;
 // and HasAVX2 are only set if the OS supports XMM and YMM
 // registers in addition to the CPUID feature bit being set.
 
-[GoType("dyn")] partial struct X86ᴛ1 {
+partial struct X86ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasAES; // AES hardware implementation (AES NI)
     public bool HasADX; // Multi-precision add-carry instruction extensions
@@ -84,7 +84,7 @@ public static ref X86ᴛ1 X86 => ref ᏑX86.Value;
 // current ARMv8(aarch64) platform. If the current platform
 // is not arm64 then all feature flags are false.
 
-[GoType("dyn")] partial struct ARM64ᴛ1 {
+partial struct ARM64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasFP; // Floating-point instruction set (always available)
     public bool HasASIMD; // Advanced SIMD (always available)
@@ -122,7 +122,7 @@ public static ARM64ᴛ1 ARM64;
 //  1. the current platform is not arm, or
 //  2. the current operating system is not Linux.
 
-[GoType("dyn")] partial struct ARMᴛ1 {
+partial struct ARMᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasSWP; // SWP instruction support
     public bool HasHALF; // Half-word load and store support
@@ -159,7 +159,7 @@ public static ARMᴛ1 ARM;
 // platforms. If the current platform is not mips64/mips64le or the current
 // operating system is not Linux then all feature flags are false.
 
-[GoType("dyn")] partial struct MIPS64Xᴛ1 {
+partial struct MIPS64Xᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasMSA; // MIPS SIMD architecture
     internal CacheLinePad __;
@@ -174,7 +174,7 @@ public static MIPS64Xᴛ1 MIPS64X;
 // require kernel support to work (DARN, SCV), so there are feature bits for
 // those as well. The struct is padded to avoid false sharing.
 
-[GoType("dyn")] partial struct PPC64ᴛ1 {
+partial struct PPC64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasDARN; // Hardware random number generator (requires kernel enablement)
     public bool HasSCV; // Syscall vectored (requires kernel enablement)
@@ -192,7 +192,7 @@ public static PPC64ᴛ1 PPC64;
 // if the OS supports vector registers in addition to the STFLE
 // feature bit being set.
 
-[GoType("dyn")] partial struct S390Xᴛ1 {
+partial struct S390Xᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasZARCH; // z/Architecture mode is active [mandatory]
     public bool HasSTFLE; // store facility list extended
@@ -225,7 +225,7 @@ public static S390Xᴛ1 S390X;
 // this structure cannot run successfully if some of the RV64G extensions are missing.
 // The struct is padded to avoid false sharing.
 
-[GoType("dyn")] partial struct RISCV64ᴛ1 {
+partial struct RISCV64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasFastMisaligned; // Fast misaligned accesses
     public bool HasC; // Compressed instruction-set extension
@@ -250,7 +250,7 @@ public static RISCV64ᴛ1 RISCV64;
 internal static slice<option> options;
 
 // Option names should be lower case. e.g. avx instead of AVX.
-[GoType] partial struct option {
+partial struct option {
     public @string Name;
     public ж<bool> Feature;
     public bool Specified; // whether feature value was specified in GODEBUG

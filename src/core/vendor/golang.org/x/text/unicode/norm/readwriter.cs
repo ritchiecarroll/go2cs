@@ -7,7 +7,7 @@ using io = io_package;
 
 partial class norm_package {
 
-[GoType] partial struct normWriter {
+partial struct normWriter {
     internal reorderBuffer rb;
     internal io.Writer w;
     internal slice<byte> buf;
@@ -54,7 +54,7 @@ internal static (nint n, error err) Write(this ж<normWriter> Ꮡw, slice<byte> 
 }
 
 // Close forces data that remains in the buffer to be written.
-[GoRecv] internal static error Close(this ref normWriter w) {
+internal static error Close(this ref normWriter w) {
     if (len(w.buf) > 0) {
         var (_, err) = w.w.Write(w.buf);
         if (err != default!) {
@@ -74,7 +74,7 @@ public static io.WriteCloser Writer(this Form f, io.Writer w) {
     return new normWriterжWriteCloser(wr);
 }
 
-[GoType] partial struct normReader {
+partial struct normReader {
     internal reorderBuffer rb;
     internal io.Reader r;
     internal slice<byte> inbuf;

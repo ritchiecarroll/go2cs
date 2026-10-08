@@ -17,7 +17,7 @@ internal static ref Δsync.RWMutex envLock => ref ᏑenvLock.Value;
 internal static map<@string, nint> env;
 internal static slice<@string> envs = runtime_envs();
 
-[global::System.Diagnostics.StackTraceHidden] internal static slice<@string> runtime_envs() {
+/*linkname*/ internal static partial slice<@string> runtime_envs() {
     return runtime.syscall_runtime_envs();
 }
 

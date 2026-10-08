@@ -14,7 +14,7 @@ using go.crypto.@internal.fips140;
 partial class gcm_package {
 
 // GCM represents a Galois Counter Mode with a specific key.
-[GoType] partial struct GCM {
+partial struct GCM {
     internal aes.Block cipher;
     internal nint nonceSize;
     internal nint tagSize;
@@ -60,11 +60,11 @@ internal static UntypedInt gcmTagSize => 16;
 internal static UntypedInt gcmMinimumTagSize => 12; // NIST SP 800-38D recommends tags with 12 or more bytes.
 internal static UntypedInt gcmStandardNonceSize => 12;
 
-[GoRecv] public static nint NonceSize(this ref GCM g) {
+public static nint NonceSize(this ref GCM g) {
     return g.nonceSize;
 }
 
-[GoRecv] public static nint Overhead(this ref GCM g) {
+public static nint Overhead(this ref GCM g) {
     return g.tagSize;
 }
 

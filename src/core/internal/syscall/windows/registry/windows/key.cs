@@ -41,7 +41,7 @@ public static UntypedInt WOW64_32KEY => 0x00200;
 public static UntypedInt WOW64_64KEY => 0x00100;
 public static UntypedInt WRITE => 0x20006;
 
-[GoType("global::go.syscall_package.ΔHandle")] partial struct Key;
+partial struct Key /*global::go.syscall_package.ΔHandle*/;
 
 public static Key CLASSES_ROOT => /* Key(syscall.HKEY_CLASSES_ROOT) */ unchecked((Key)(syscallꓸHandle)2147483648);
 public static Key CURRENT_USER => /* Key(syscall.HKEY_CURRENT_USER) */ unchecked((Key)(syscallꓸHandle)2147483649);
@@ -139,7 +139,7 @@ public static error DeleteKey(Key k, @string path) {
 }
 
 // A KeyInfo describes the statistics of a key. It is returned by Stat.
-[GoType] partial struct KeyInfo {
+partial struct KeyInfo {
     public uint32 SubKeyCount;
     public uint32 MaxSubKeyLen; // size of the key's subkey with the longest name, in Unicode characters, not including the terminating zero byte
     public uint32 ValueCount;

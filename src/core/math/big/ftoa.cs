@@ -321,7 +321,7 @@ internal static slice<byte> fmtF(slice<byte> buf, nint prec, @decimal d) {
 // representation.
 // The sign of x is ignored, and x must not be an Inf.
 // (The caller handles Inf before invoking fmtB.)
-[GoRecv] internal static slice<byte> fmtB(this ref Float x, slice<byte> buf) {
+internal static slice<byte> fmtB(this ref Float x, slice<byte> buf) {
     if (x.form == zero) {
         return append(buf, (byte)((rune)'0'));
     }
@@ -430,7 +430,7 @@ internal static slice<byte> fmtX(this ж<Float> Ꮡx, slice<byte> buf, nint prec
 // The mantissa is normalized such that 0.5 <= 0.mantissa < 1.0.
 // The sign of x is ignored, and x must not be an Inf.
 // (The caller handles Inf before invoking fmtP.)
-[GoRecv] internal static slice<byte> fmtP(this ref Float x, slice<byte> buf) {
+internal static slice<byte> fmtP(this ref Float x, slice<byte> buf) {
     if (x.form == zero) {
         return append(buf, (byte)((rune)'0'));
     }

@@ -8,12 +8,12 @@ namespace go.go;
 partial class types_package {
 
 // A Chan represents a channel type.
-[GoType] partial struct Chan {
+partial struct Chan {
     internal ChanDir dir;
     internal ΔType elem;
 }
 
-[GoType("num:nint")] partial struct ChanDir;
+partial struct ChanDir /*num:nint*/;
 
 // The direction of a channel is indicated by one of these constants.
 public static ChanDir SendRecv => /* iota */ 0;
@@ -28,12 +28,12 @@ public static ж<Chan> NewChan(ChanDir dir, ΔType elem) {
 }
 
 // Dir returns the direction of channel c.
-[GoRecv] public static ChanDir Dir(this ref Chan c) {
+public static ChanDir Dir(this ref Chan c) {
     return c.dir;
 }
 
 // Elem returns the element type of channel c.
-[GoRecv] public static ΔType Elem(this ref Chan c) {
+public static ΔType Elem(this ref Chan c) {
     return c.elem;
 }
 

@@ -26,7 +26,7 @@ using unicode;
 
 partial class constant_package {
 
-[GoType("num:nint")] partial struct ΔKind;
+partial struct ΔKind /*num:nint*/;
 
 //go:generate stringer -type Kind
 public static ΔKind Unknown => /* iota */ 0;
@@ -37,7 +37,7 @@ public static ΔKind Float => 4;
 public static ΔKind Complex => 5;
 
 // A Value represents the value of a Go constant.
-[GoType] partial interface Value :
+partial interface Value :
     fmt.Stringer
 {
     // Kind returns the value kind.
@@ -70,33 +70,33 @@ internal static UntypedInt prec => 512;
 // a ratVal. The reasoning is that all representations but floatVal are mathematically
 // exact, but once that precision is lost (by moving to floatVal), moving back to
 // a different representation implies a precision that's not actually there.
-[GoType] partial struct unknownVal {
+partial struct unknownVal {
 }
 
-[GoType("bool")] partial struct boolVal;
+partial struct boolVal /*bool*/;
 
-[GoType] partial struct stringVal {
+partial struct stringVal {
     // Lazy value: either a string (l,r==nil) or an addition (l,r!=nil).
     internal sync.Mutex mu;
     internal @string s;
     internal ж<stringVal> l, r;
 }
 
-[GoType("num:int64")] partial struct int64Val;
+partial struct int64Val /*num:int64*/;
 
-[GoType] partial struct intVal {
+partial struct intVal {
     internal ж<bigꓸInt> val;
 }
 
-[GoType] partial struct ratVal {
+partial struct ratVal {
     internal ж<bigꓸRat> val;
 }
 
-[GoType] partial struct floatVal {
+partial struct floatVal {
     internal ж<big.Float> val;
 }
 
-[GoType] partial struct complexVal {
+partial struct complexVal {
     internal Value re, im;
 }
 
@@ -108,7 +108,7 @@ internal static ΔKind Kind(this boolVal _) {
     return Bool;
 }
 
-[GoRecv] internal static ΔKind Kind(this ref stringVal _) {
+internal static ΔKind Kind(this ref stringVal _) {
     return ΔString;
 }
 
@@ -328,7 +328,7 @@ internal static void implementsValue(this unknownVal _) {
 internal static void implementsValue(this boolVal _) {
 }
 
-[GoRecv] internal static void implementsValue(this ref stringVal _) {
+internal static void implementsValue(this ref stringVal _) {
 }
 
 internal static void implementsValue(this int64Val _) {

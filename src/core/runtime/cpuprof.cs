@@ -22,7 +22,7 @@ internal static UntypedInt maxCPUProfStack => 64;
 internal static UntypedInt profBufWordCount => /* 1 << 17 */ 131072;
 internal static UntypedInt profBufTagCount => /* 1 << 14 */ 16384;
 
-[GoType] partial struct cpuProfile {
+partial struct cpuProfile {
     internal mutex @lock;
     internal bool on;     // profiling is on
     internal ж<profBuf> log; // profile events written here
@@ -90,7 +90,7 @@ public static void SetCPUProfileRate(nint hz) {
 // of stack.
 //
 //go:nowritebarrierrec
-[GoRecv] internal static void add(this ref cpuProfile Δp, ж<@unsafe.Pointer> ᏑtagPtr, slice<uintptr> stk) {
+internal static void add(this ref cpuProfile Δp, ж<@unsafe.Pointer> ᏑtagPtr, slice<uintptr> stk) {
     // Simple cas-lock to coordinate with setcpuprofilerate.
     while (!Ꮡprof.of(profᴛ1.ᏑsignalLock).CompareAndSwap(0, 1)) {
         // TODO: Is it safe to osyield here? https://go.dev/issue/52672
@@ -121,7 +121,7 @@ public static void SetCPUProfileRate(nint hz) {
 //
 //go:nosplit
 //go:nowritebarrierrec
-[GoRecv] internal static void addNonGo(this ref cpuProfile Δp, slice<uintptr> stk) {
+internal static void addNonGo(this ref cpuProfile Δp, slice<uintptr> stk) {
     // Simple cas-lock to coordinate with SetCPUProfileRate.
     // (Other calls to add or addNonGo should be blocked out
     // by the fact that only one SIGPROF can be handled by the
@@ -148,7 +148,7 @@ public static void SetCPUProfileRate(nint hz) {
 // addExtra is called either from a signal handler on a Go thread
 // or from an ordinary goroutine; either way it can use stack
 // and has a g. The world may be stopped, though.
-[GoRecv] internal static void addExtra(this ref cpuProfile Δp) {
+internal static void addExtra(this ref cpuProfile Δp) {
     // Copy accumulated non-Go profile events.
     var hdr = new uint64[]{1}.array();
     for (nint i = 0; i < Δp.numExtra; ) {

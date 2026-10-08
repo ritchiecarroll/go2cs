@@ -22,12 +22,12 @@ internal static nint rtaAlignOf(nint attrlen) {
 
 // NetlinkRouteRequest represents a request message to receive routing
 // and link states from the kernel.
-[GoType] partial struct NetlinkRouteRequest {
+partial struct NetlinkRouteRequest {
     public NlMsghdr Header;
     public RtGenmsg Data;
 }
 
-[GoRecv] internal static slice<byte> toWireFormat(this ref NetlinkRouteRequest rr) {
+internal static slice<byte> toWireFormat(this ref NetlinkRouteRequest rr) {
     var b = new slice<byte>((nint)(rr.Header.Len));
     (Ꮡ(b[0..4], 0).Reinterpret<byte, uint32>()).Value = rr.Header.Len;
     (Ꮡ(b[4..6], 0).Reinterpret<byte, uint16>()).Value = rr.Header.Type;
@@ -124,7 +124,7 @@ break_done:;
 }
 
 // NetlinkMessage represents a netlink message.
-[GoType] partial struct NetlinkMessage {
+partial struct NetlinkMessage {
     public NlMsghdr Header;
     public slice<byte> Data;
 }
@@ -155,7 +155,7 @@ internal static (ж<NlMsghdr>, slice<byte>, nint, error) netlinkMessageHeaderAnd
 }
 
 // NetlinkRouteAttr represents a netlink route attribute.
-[GoType] partial struct NetlinkRouteAttr {
+partial struct NetlinkRouteAttr {
     public RtAttr Attr;
     public slice<byte> Value;
 }

@@ -18,7 +18,7 @@ partial class nistec_package {
 internal static UntypedInt p224ElementLength => 28;
 
 // P224Point is a P224 point. The zero value is NOT valid.
-[GoType] partial struct P224Point {
+partial struct P224Point {
     // The point is represented in projective coordinates (X:Y:Z),
     // where x = X/Z and y = Y/Z.
     internal ж<fiat.P224Element> x, y, z;
@@ -159,14 +159,14 @@ internal static error p224CheckOnCurve(ж<fiat.P224Element> Ꮡx, ж<fiat.P224El
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
 // infinity is shorter than all other encodings.
-[GoRecv] public static slice<byte> Bytes(this ref P224Point p) {
+public static slice<byte> Bytes(this ref P224Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(57), out var Ꮡout);
     return p.bytes(Ꮡout);
 }
 
-[GoRecv] internal static slice<byte> bytes(this ref P224Point p, [GoArrayDims(57)] ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes(this ref P224Point p, /*[57]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -183,7 +183,7 @@ internal static error p224CheckOnCurve(ж<fiat.P224Element> Ꮡx, ж<fiat.P224El
 
 // BytesX returns the encoding of the x-coordinate of p, as specified in SEC 1,
 // Version 2.0, Section 2.3.5, or an error if p is the point at infinity.
-[GoRecv] public static (slice<byte>, error) BytesX(this ref P224Point p) {
+public static (slice<byte>, error) BytesX(this ref P224Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(28), out var Ꮡout);
@@ -193,7 +193,7 @@ internal static error p224CheckOnCurve(ж<fiat.P224Element> Ꮡx, ж<fiat.P224El
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string p224PointIsThePointAtˢ = "P224 point is the point at infinity"u8;
 
-[GoRecv] internal static (slice<byte>, error) bytesX(this ref P224Point p, [GoArrayDims(28)] ж<array<byte>> Ꮡout) {
+internal static (slice<byte>, error) bytesX(this ref P224Point p, /*[28]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -207,14 +207,14 @@ internal static readonly @string p224PointIsThePointAtˢ = "P224 point is the po
 // BytesCompressed returns the compressed or infinity encoding of p, as
 // specified in SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the
 // point at infinity is shorter than all other encodings.
-[GoRecv] public static slice<byte> BytesCompressed(this ref P224Point p) {
+public static slice<byte> BytesCompressed(this ref P224Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(29), out var Ꮡout);
     return p.bytesCompressed(Ꮡout);
 }
 
-[GoRecv] internal static slice<byte> bytesCompressed(this ref P224Point p, [GoArrayDims(29)] ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytesCompressed(this ref P224Point p, /*[29]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -347,11 +347,11 @@ public static ж<P224Point> Select(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1,
     return Ꮡq;
 }
 
-[GoType("[15]ж<P224Point>")] partial struct p224Table;
+partial struct p224Table /*[15]ж<P224Point>*/;
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
-[GoRecv] internal static void Select(this ref p224Table table, ж<P224Point> Ꮡp, uint8 n) {
+internal static void Select(this ref p224Table table, ж<P224Point> Ꮡp, uint8 n) {
     if (n >= 16) {
         throw panic("nistec: internal error: p224Table called with out-of-bounds value");
     }
@@ -413,7 +413,7 @@ internal static ref sync.Once p224GeneratorTableOnce => ref Ꮡp224GeneratorTabl
 // generatorTable returns a sequence of p224Tables. The first table contains
 // multiples of G. Each successive table is the previous table doubled four
 // times.
-[GoRecv] internal static ж<array<p224Table>> generatorTable(this ref P224Point p) {
+internal static ж<array<p224Table>> generatorTable(this ref P224Point p) {
     Ꮡp224GeneratorTableOnce.Do(() => {
         p224GeneratorTable = Ꮡ(new array<p224Table>(56));
         var @base = NewP224Point().SetGenerator();

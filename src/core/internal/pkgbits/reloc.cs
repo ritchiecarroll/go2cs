@@ -5,15 +5,15 @@ namespace go.@internal;
 
 partial class pkgbits_package {
 
-[GoType("num:int32")] partial struct RelocKind;
+partial struct RelocKind /*num:int32*/;
 
-[GoType("num:int32")] partial struct Index;
+partial struct Index /*num:int32*/;
 
 // A relocEnt (relocation entry) is an entry in an element's local
 // reference table.
 //
 // TODO(mdempsky): Rename this too.
-[GoType] partial struct RelocEnt {
+partial struct RelocEnt {
     public RelocKind Kind;
     public Index Idx;
 }

@@ -18,7 +18,7 @@ partial class httptest_package {
 
 // ResponseRecorder is an implementation of [http.ResponseWriter] that
 // records its mutations for later inspection in tests.
-[GoType] partial struct ResponseRecorder {
+partial struct ResponseRecorder {
     // Code is the HTTP response code set by WriteHeader.
     //
     // Note that if a Handler never calls WriteHeader or Write,
@@ -60,7 +60,7 @@ public static readonly @string DefaultRemoteAddr = "1.2.3.4"u8;
 // headers to mutate within a handler. To test the headers that were
 // written after a handler completes, use the [ResponseRecorder.Result] method and see
 // the returned Response value's Header.
-[GoRecv] public static httpꓸHeader Header(this ref ResponseRecorder rw) {
+public static httpꓸHeader Header(this ref ResponseRecorder rw) {
     var m = rw.HeaderMap;
     if (m == default!) {
         m = new httpꓸHeader(0);
@@ -80,7 +80,7 @@ internal static readonly @string transferEncodingˢ = "Transfer-Encoding"u8;
 // We pass both to avoid unnecessarily generate garbage
 // in rw.WriteString which was created for performance reasons.
 // Non-nil bytes win.
-[GoRecv] internal static void writeHeader(this ref ResponseRecorder rw, slice<byte> b, @string str) {
+internal static void writeHeader(this ref ResponseRecorder rw, slice<byte> b, @string str) {
     if (rw.wroteHeader) {
         return;
     }
@@ -101,7 +101,7 @@ internal static readonly @string transferEncodingˢ = "Transfer-Encoding"u8;
 
 // Write implements http.ResponseWriter. The data in buf is written to
 // rw.Body, if not nil.
-[GoRecv] public static (nint, error) Write(this ref ResponseRecorder rw, slice<byte> buf) {
+public static (nint, error) Write(this ref ResponseRecorder rw, slice<byte> buf) {
     rw.writeHeader(buf, ""u8);
     if (rw.Body != nil) {
         rw.Body.Write(buf);
@@ -111,7 +111,7 @@ internal static readonly @string transferEncodingˢ = "Transfer-Encoding"u8;
 
 // WriteString implements [io.StringWriter]. The data in str is written
 // to rw.Body, if not nil.
-[GoRecv] public static (nint, error) WriteString(this ref ResponseRecorder rw, @string str) {
+public static (nint, error) WriteString(this ref ResponseRecorder rw, @string str) {
     rw.writeHeader(default!, str);
     if (rw.Body != nil) {
         rw.Body.WriteString(str);
@@ -137,7 +137,7 @@ internal static void checkWriteHeaderCode(nint code) {
 }
 
 // WriteHeader implements [http.ResponseWriter].
-[GoRecv] public static void WriteHeader(this ref ResponseRecorder rw, nint code) {
+public static void WriteHeader(this ref ResponseRecorder rw, nint code) {
     if (rw.wroteHeader) {
         return;
     }
@@ -152,7 +152,7 @@ internal static void checkWriteHeaderCode(nint code) {
 
 // Flush implements [http.Flusher]. To test whether Flush was
 // called, see rw.Flushed.
-[GoRecv] public static void Flush(this ref ResponseRecorder rw) {
+public static void Flush(this ref ResponseRecorder rw) {
     if (!rw.wroteHeader) {
         rw.WriteHeader(200);
     }
@@ -178,7 +178,7 @@ internal static readonly @string trailerˢ = "Trailer"u8;
 // guaranteed to not return any error other than [io.EOF].
 //
 // Result must only be called after the handler has finished running.
-[GoRecv] public static ж<http.Response> Result(this ref ResponseRecorder rw) {
+public static ж<http.Response> Result(this ref ResponseRecorder rw) {
     if (rw.result != nil) {
         return rw.result;
     }

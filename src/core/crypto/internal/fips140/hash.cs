@@ -10,7 +10,7 @@ partial class fips140_package {
 // Hash is the common interface implemented by all hash functions. It is a copy
 // of [hash.Hash] from the standard library, to avoid depending on security
 // definitions from outside of the module.
-[GoType] partial interface Hash :
+partial interface Hash :
     io.Writer
 {
     // Sum appends the current hash to b and returns the resulting slice.

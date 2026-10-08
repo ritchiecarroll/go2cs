@@ -490,7 +490,7 @@ internal static uintptr int64Hash(uint64 iʗp, uintptr seed) {
 
 // go2cs generated this placeholder — func efaceHash is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoType("dyn")] internal partial interface ifaceHash_i {
+internal partial interface ifaceHash_i /*dyn*/ {
     void F();
 }
 

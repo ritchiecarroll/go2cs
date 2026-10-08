@@ -24,13 +24,13 @@ partial class big_package {
 // with the most-significant mantissa digit at index 0. For the zero decimal, the
 // mantissa length and exponent are 0.
 // The zero value for decimal represents a ready-to-use 0.0.
-[GoType] partial struct @decimal {
+partial struct @decimal {
     internal slice<byte> mant; // mantissa ASCII digits, big-endian
     internal nint exp;   // exponent
 }
 
 // at returns the i'th mantissa digit, starting with the most significant digit at 0.
-[GoRecv] internal static byte at(this ref @decimal d, nint i) {
+internal static byte at(this ref @decimal d, nint i) {
     if (0 <= i && i < len(d.mant)) {
         return d.mant[i];
     }
@@ -149,7 +149,7 @@ internal static void shr(ref @decimal x, nuint s) {
     trim(ref x);
 }
 
-[GoRecv] internal static @string String(this ref @decimal x) {
+internal static @string String(this ref @decimal x) {
     if (len(x.mant) == 0) {
         return "0"u8;
     }
@@ -215,7 +215,7 @@ internal static void round(this ж<@decimal> Ꮡx, nint n) {
     }
 }
 
-[GoRecv] internal static void roundUp(this ref @decimal x, nint n) {
+internal static void roundUp(this ref @decimal x, nint n) {
     if (n < 0 || n >= len(x.mant)) {
         return; // nothing to do
     }

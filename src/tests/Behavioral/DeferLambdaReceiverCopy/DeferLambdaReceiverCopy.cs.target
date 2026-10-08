@@ -5,7 +5,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {
 
-[GoType] partial struct path {
+partial struct path {
     internal @string name;
 }
 
@@ -26,7 +26,7 @@ internal static void Log(this path p, params ꓸꓸꓸany argsʗp) {
     fmt.Println(logˢ, p.name, args);
 }
 
-[GoType] partial struct state {
+partial struct state {
     internal path cur;
 }
 

@@ -92,13 +92,13 @@ public static void SetDefault(ж<Logger> Ꮡl) {
 
 // handlerWriter is an io.Writer that calls a Handler.
 // It is used to link the default log.Logger to the default slog.Logger.
-[GoType] partial struct handlerWriter {
+partial struct handlerWriter {
     internal ΔHandler h;
     internal Leveler level;
     internal bool capturePC;
 }
 
-[GoRecv] internal static partial (nint, error) Write(this ref handlerWriter w, slice<byte> buf) {
+internal static partial (nint, error) Write(this ref handlerWriter w, slice<byte> buf) {
     ΔLevel level = w.level.Level();
     if (!w.h.Enabled(context.Background(), level)) {
         return (0, default!);
@@ -123,18 +123,18 @@ public static void SetDefault(ж<Logger> Ꮡl) {
 //
 // To create a new Logger, call [New] or a Logger method
 // that begins "With".
-[GoType] partial struct Logger {
+partial struct Logger {
     internal ΔHandler handler; // for structured logging
 }
 
-[GoRecv] internal static ж<Logger> clone(this ref Logger l) {
+internal static ж<Logger> clone(this ref Logger l) {
     ref var c = ref heap<Logger>(out var Ꮡc);
     c = l;
     return Ꮡc;
 }
 
 // Handler returns l's Handler.
-[GoRecv] public static ΔHandler Handler(this ref Logger l) {
+public static ΔHandler Handler(this ref Logger l) {
     return l.handler;
 }
 
@@ -186,7 +186,7 @@ public static ж<Logger> With(params ꓸꓸꓸany argsʗp) {
 }
 
 // Enabled reports whether l emits log records at the given context and level.
-[GoRecv] public static bool Enabled(this ref Logger l, context.Context ctx, ΔLevel level) {
+public static bool Enabled(this ref Logger l, context.Context ctx, ΔLevel level) {
     if (ctx == default!) {
         ctx = context.Background();
     }
@@ -210,70 +210,70 @@ public static ж<log.Logger> NewLogLogger(ΔHandler h, ΔLevel level) {
 //     the following argument is treated as the value and the two are combined
 //     into an Attr.
 //   - Otherwise, the argument is treated as a value with key "!BADKEY".
-[GoRecv] public static partial void Log(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void Log(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(ctx, level, msg, args.ꓸꓸꓸ);
 }
 
 // LogAttrs is a more efficient version of [Logger.Log] that accepts only Attrs.
-[GoRecv] public static partial void LogAttrs(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
+public static partial void LogAttrs(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
     var attrs = attrsʗp.sslice();
 
     l.logAttrs(ctx, level, msg, attrs.ꓸꓸꓸ);
 }
 
 // Debug logs at [LevelDebug].
-[GoRecv] public static partial void Debug(this ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void Debug(this ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(context.Background(), LevelDebug, msg, args.ꓸꓸꓸ);
 }
 
 // DebugContext logs at [LevelDebug] with the given context.
-[GoRecv] public static partial void DebugContext(this ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void DebugContext(this ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(ctx, LevelDebug, msg, args.ꓸꓸꓸ);
 }
 
 // Info logs at [LevelInfo].
-[GoRecv] public static partial void Info(this ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void Info(this ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(context.Background(), LevelInfo, msg, args.ꓸꓸꓸ);
 }
 
 // InfoContext logs at [LevelInfo] with the given context.
-[GoRecv] public static partial void InfoContext(this ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void InfoContext(this ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(ctx, LevelInfo, msg, args.ꓸꓸꓸ);
 }
 
 // Warn logs at [LevelWarn].
-[GoRecv] public static partial void Warn(this ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void Warn(this ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(context.Background(), LevelWarn, msg, args.ꓸꓸꓸ);
 }
 
 // WarnContext logs at [LevelWarn] with the given context.
-[GoRecv] public static partial void WarnContext(this ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void WarnContext(this ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(ctx, LevelWarn, msg, args.ꓸꓸꓸ);
 }
 
 // Error logs at [LevelError].
-[GoRecv] public static partial void Error(this ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void Error(this ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(context.Background(), LevelError, msg, args.ꓸꓸꓸ);
 }
 
 // ErrorContext logs at [LevelError] with the given context.
-[GoRecv] public static partial void ErrorContext(this ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void ErrorContext(this ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(ctx, LevelError, msg, args.ꓸꓸꓸ);
@@ -282,7 +282,7 @@ public static ж<log.Logger> NewLogLogger(ΔHandler h, ΔLevel level) {
 // log is the low-level logging method for methods that take ...any.
 // It must always be called directly by an exported logging method
 // or function, because it uses a fixed call depth to obtain the pc.
-[GoRecv] internal static partial void log(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸany argsʗp) {
+internal static partial void log(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     if (!l.Enabled(ctx, level)) {
@@ -304,7 +304,7 @@ public static ж<log.Logger> NewLogLogger(ΔHandler h, ΔLevel level) {
 }
 
 // logAttrs is like [Logger.log], but for methods that take ...Attr.
-[GoRecv] internal static partial void logAttrs(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
+internal static partial void logAttrs(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
     var attrs = attrsʗp.sslice();
 
     if (!l.Enabled(ctx, level)) {

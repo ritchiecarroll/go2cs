@@ -16,13 +16,13 @@ using go.image.@internal;
 
 partial class jpeg_package {
 
-[GoType("@string")] partial struct FormatError;
+partial struct FormatError /*@string*/;
 
 public static @string Error(this FormatError e) {
     return "invalid JPEG format: "u8 + ((@string)e);
 }
 
-[GoType("@string")] partial struct UnsupportedError;
+partial struct UnsupportedError /*@string*/;
 
 public static @string Error(this UnsupportedError e) {
     return "unsupported JPEG feature: "u8 + ((@string)e);
@@ -31,7 +31,7 @@ public static @string Error(this UnsupportedError e) {
 internal static UnsupportedError errUnsupportedSubsamplingRatio = ((UnsupportedError)(@string)"luma/chroma subsampling ratio"u8);
 
 // Component specification, specified in section B.2.2.
-[GoType] partial struct component {
+partial struct component {
     internal nint h;  // Horizontal sampling factor.
     internal nint v;  // Vertical sampling factor.
     internal uint8 c; // Component identifier.
@@ -84,7 +84,7 @@ internal static array<nint> unzig = new nint[]{
 
 // Deprecated: Reader is not used by the [image/jpeg] package and should
 // not be used by others. It is kept for compatibility.
-[GoType] partial interface Reader :
+partial interface Reader :
     io.ByteReader,
     io.Reader
 {
@@ -93,13 +93,13 @@ internal static array<nint> unzig = new nint[]{
 // bits holds the unprocessed bits that have been taken from the byte-stream.
 // The n least significant bits of a form the unread bits, to be read in MSB to
 // LSB order.
-[GoType] partial struct bits {
+partial struct bits {
     internal uint32 a; // accumulator.
     internal uint32 m; // mask. m==1<<(n-1) when n>0, with m==0 when n==0.
     internal int32 n;  // the number of unread bits in a.
 }
 
-[GoType("dyn")] partial struct decoder_bytes {
+partial struct decoder_bytes /*dyn*/ {
     // buf[i:j] are the buffered bytes read from the underlying
     // io.Reader that haven't yet been passed further on.
     internal array<byte> buf = new(4096);
@@ -109,7 +109,7 @@ internal static array<nint> unzig = new nint[]{
     internal nint nUnreadable;
 }
 
-[GoType] partial struct decoder {
+partial struct decoder {
     internal io.Reader r;
     internal bits bits;
     // bytes is a byte buffer, similar to a bufio.Reader, except that it
@@ -143,7 +143,7 @@ internal static array<nint> unzig = new nint[]{
 
 // fill fills up the d.bytes.buf buffer from the underlying io.Reader. It
 // should only be called when there are no unread bytes in d.bytes.
-[GoRecv] internal static error fill(this ref decoder d) {
+internal static error fill(this ref decoder d) {
     if (d.bytes.i != d.bytes.j) {
         throw panic("jpeg: fill called when unread bytes exist");
     }
@@ -171,7 +171,7 @@ internal static array<nint> unzig = new nint[]{
 // requires at least 8 bits for look-up, which means that Huffman decoding can
 // sometimes overshoot and read one or two too many bytes. Two-byte overshoot
 // can happen when expecting to read a 0xff 0x00 byte-stuffed byte.
-[GoRecv] internal static void unreadByteStuffedByte(this ref decoder d) {
+internal static void unreadByteStuffedByte(this ref decoder d) {
     d.bytes.i -= d.bytes.nUnreadable;
     d.bytes.nUnreadable = 0;
     if (d.bits.n >= 8) {
@@ -183,7 +183,7 @@ internal static array<nint> unzig = new nint[]{
 
 // readByte returns the next byte, whether buffered or not buffered. It does
 // not care about byte stuffing.
-[GoRecv] internal static (byte x, error err) readByte(this ref decoder d) {
+internal static (byte x, error err) readByte(this ref decoder d) {
     byte x = default!;
     error err = default!;
 
@@ -205,7 +205,7 @@ internal static array<nint> unzig = new nint[]{
 internal static FormatError errMissingFF00 = ((FormatError)(@string)"missing 0xff00 sequence"u8);
 
 // readByteStuffedByte is like readByte but is for byte-stuffed Huffman data.
-[GoRecv] internal static (byte x, error err) readByteStuffedByte(this ref decoder d) {
+internal static (byte x, error err) readByteStuffedByte(this ref decoder d) {
     byte x = default!;
     error err = default!;
 
@@ -246,7 +246,7 @@ internal static FormatError errMissingFF00 = ((FormatError)(@string)"missing 0xf
 
 // readFull reads exactly len(p) bytes into p. It does not care about byte
 // stuffing.
-[GoRecv] internal static error readFull(this ref decoder d, slice<byte> p) {
+internal static error readFull(this ref decoder d, slice<byte> p) {
     // Unread the overshot bytes, if any.
     if (d.bytes.nUnreadable != 0) {
         if (d.bits.n >= 8) {
@@ -271,7 +271,7 @@ internal static FormatError errMissingFF00 = ((FormatError)(@string)"missing 0xf
 }
 
 // ignore ignores the next n bytes.
-[GoRecv] internal static error ignore(this ref decoder d, nint n) {
+internal static error ignore(this ref decoder d, nint n) {
     // Unread the overshot bytes, if any.
     if (d.bytes.nUnreadable != 0) {
         if (d.bits.n >= 8) {
@@ -308,7 +308,7 @@ internal static readonly @string badTqValueˢ = "bad Tq value"u8;
 internal static readonly @string lumaChromaSubsamplingˢ = "luma/chroma subsampling ratio"u8;
 
 // Specified in section B.2.2.
-[GoRecv] internal static error processSOF(this ref decoder d, nint n) {
+internal static error processSOF(this ref decoder d, nint n) {
     if (d.nComp != 0) {
         return ((FormatError)(@string)multipleSofMarkersˢ);
     }
@@ -461,7 +461,7 @@ internal static readonly @string badPqValueˢ = "bad Pq value"u8;
 internal static readonly @string dqtHasWrongLengthˢ = "DQT has wrong length"u8;
 
 // Specified in section B.2.4.1.
-[GoRecv] internal static error processDQT(this ref decoder d, nint n) {
+internal static error processDQT(this ref decoder d, nint n) {
 loop:
     while (n > 0) {
         n--;
@@ -521,7 +521,7 @@ break_loop:;
 internal static readonly @string driHasWrongLengthˢ = "DRI has wrong length"u8;
 
 // Specified in section B.2.4.4.
-[GoRecv] internal static error processDRI(this ref decoder d, nint n) {
+internal static error processDRI(this ref decoder d, nint n) {
     if (n != 2) {
         return ((FormatError)(@string)driHasWrongLengthˢ);
     }
@@ -534,7 +534,7 @@ internal static readonly @string driHasWrongLengthˢ = "DRI has wrong length"u8;
     return default!;
 }
 
-[GoRecv] internal static error processApp0Marker(this ref decoder d, nint n) {
+internal static error processApp0Marker(this ref decoder d, nint n) {
     if (n < 5) {
         return d.ignore(n);
     }
@@ -551,7 +551,7 @@ internal static readonly @string driHasWrongLengthˢ = "DRI has wrong length"u8;
     return default!;
 }
 
-[GoRecv] internal static error processApp14Marker(this ref decoder d, nint n) {
+internal static error processApp14Marker(this ref decoder d, nint n) {
     if (n < 12) {
         return d.ignore(n);
     }
@@ -578,7 +578,7 @@ internal static readonly @string unknownMarkerˢ = "unknown marker"u8;
 internal static readonly @string missingSosMarkerˢ = "missing SOS marker"u8;
 
 // decode reads a JPEG image from r and returns it as an image.Image.
-[GoRecv] internal static (image.Image, error) decode(this ref decoder d, io.Reader r, bool configOnly) {
+internal static (image.Image, error) decode(this ref decoder d, io.Reader r, bool configOnly) {
     d.r = r;
     // Check for the Start Of Image marker.
     {
@@ -742,7 +742,7 @@ internal static readonly @string missingSosMarkerˢ = "missing SOS marker"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unknownColorModel4ˢ = "unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata"u8;
 
-[GoType("dyn")] internal partial struct applyBlack_translations {
+internal partial struct applyBlack_translations /*dyn*/ {
     internal slice<byte> src;
     internal nint stride;
 }
@@ -754,7 +754,7 @@ internal static readonly @string unknownColorModel4ˢ = "unknown color model: 4-
 // Adobe CMYK JPEG images are inverted, where 255 means no ink instead of full
 // ink, so we apply "v = 255 - v" at various points. Note that a double
 // inversion is a no-op, so inversions might be implicit in the code below.
-[GoRecv] internal static (image.Image, error) applyBlack(this ref decoder d) {
+internal static (image.Image, error) applyBlack(this ref decoder d) {
     if (!d.adobeTransformValid) {
         return (default!, ((UnsupportedError)(@string)unknownColorModel4ˢ));
     }
@@ -813,7 +813,7 @@ internal static readonly @string unknownColorModel4ˢ = "unknown color model: 4-
     return (new image.CMYKжImage(img), default!);
 }
 
-[GoRecv] internal static bool isRGB(this ref decoder d) {
+internal static bool isRGB(this ref decoder d) {
     if (d.jfif) {
         return false;
     }
@@ -825,7 +825,7 @@ internal static readonly @string unknownColorModel4ˢ = "unknown color model: 4-
     return d.comp[0].c == (rune)'R' && d.comp[1].c == (rune)'G' && d.comp[2].c == (rune)'B';
 }
 
-[GoRecv] internal static (image.Image, error) convertToRGB(this ref decoder d) {
+internal static (image.Image, error) convertToRGB(this ref decoder d) {
     nint cScale = quo(d.comp[0].h, d.comp[1].h);
     var bounds = d.img3.Bounds();
     var img = image.NewRGBA(bounds);

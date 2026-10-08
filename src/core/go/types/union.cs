@@ -16,7 +16,7 @@ partial class types_package {
 // API
 
 // A Union represents a union of terms embedded in an interface.
-[GoType] partial struct Union {
+partial struct Union {
     internal slice<ж<ΔTerm>> terms; // list of syntactical terms (not a canonicalized termlist)
 }
 
@@ -29,11 +29,11 @@ public static ж<Union> NewUnion(slice<ж<ΔTerm>> terms) {
     return Ꮡ(new Union(terms));
 }
 
-[GoRecv] public static nint Len(this ref Union u) {
+public static nint Len(this ref Union u) {
     return len(u.terms);
 }
 
-[GoRecv] public static ж<ΔTerm> Term(this ref Union u, nint i) {
+public static ж<ΔTerm> Term(this ref Union u, nint i) {
     return u.terms[i];
 }
 
@@ -45,18 +45,18 @@ public static @string String(this ж<Union> Ꮡu) {
     return TypeString(new UnionжΔType(Ꮡu), default!);
 }
 
-[GoType("Δterm")] partial struct ΔTerm;
+partial struct ΔTerm /*Δterm*/;
 
 // NewTerm returns a new union term.
 public static ж<ΔTerm> NewTerm(bool tilde, ΔType typ) {
     return Ꮡ(new ΔTerm(new Δterm(tilde, typ)));
 }
 
-[GoRecv] public static bool Tilde(this ref ΔTerm t) {
+public static bool Tilde(this ref ΔTerm t) {
     return t.tilde;
 }
 
-[GoRecv] public static ΔType Type(this ref ΔTerm t) {
+public static ΔType Type(this ref ΔTerm t) {
     return t.typ;
 }
 

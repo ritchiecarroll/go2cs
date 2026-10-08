@@ -103,14 +103,14 @@ internal const bool stackTraceDebug = false;
 
 // Buffer for pointers found during stack tracing.
 // Must be smaller than or equal to workbuf.
-[GoType] partial struct stackWorkBuf {
+partial struct stackWorkBuf {
     internal sys.NotInHeap _;
     internal partial ref stackWorkBufHdr stackWorkBufHdr { get; }
     internal array<uintptr> obj = new((uintptr)((uintptr)_WorkbufSize - /* unsafe.Sizeof(stackWorkBufHdr{}) */ (uintptr)32) / goarch.PtrSize);
 }
 
 // Header declaration must come after the buf declaration above, because of issue #14620.
-[GoType] partial struct stackWorkBufHdr {
+partial struct stackWorkBufHdr {
     internal sys.NotInHeap _;
     internal partial ref workbufhdr workbufhdr { get; }
     internal ж<stackWorkBuf> next; // linked list of workbufs
@@ -122,13 +122,13 @@ internal const bool stackTraceDebug = false;
 
 // Buffer for stack objects found on a goroutine stack.
 // Must be smaller than or equal to workbuf.
-[GoType] partial struct stackObjectBuf {
+partial struct stackObjectBuf {
     internal sys.NotInHeap _;
     internal partial ref stackObjectBufHdr stackObjectBufHdr { get; }
     internal array<stackObject> obj = new((uintptr)((uintptr)_WorkbufSize - /* unsafe.Sizeof(stackObjectBufHdr{}) */ (uintptr)32) / /* unsafe.Sizeof(stackObject{}) */ (uintptr)32);
 }
 
-[GoType] partial struct stackObjectBufHdr {
+partial struct stackObjectBufHdr {
     internal sys.NotInHeap _;
     internal partial ref workbufhdr workbufhdr { get; }
     internal ж<stackObjectBuf> next;
@@ -145,7 +145,7 @@ internal const bool stackTraceDebug = false;
 
 // A stackObject represents a variable on the stack that has had
 // its address taken.
-[GoType] partial struct stackObject {
+partial struct stackObject {
     internal sys.NotInHeap _;
     internal uint32 off;             // offset above stack.lo
     internal uint32 size;             // size of object
@@ -165,7 +165,7 @@ internal static void setRecord(this ж<stackObject> Ꮡobj, ж<stackObjectRecord
 
 // A stackScanState keeps track of the state used during the GC walk
 // of a goroutine.
-[GoType] partial struct stackScanState {
+partial struct stackScanState {
     // stack limits
     internal Δstack stack;
     // conservative indicates that the next frame must be scanned conservatively.
@@ -273,7 +273,7 @@ internal static (uintptr Δp, bool conservative) getPtr(this ж<stackScanState> 
 internal static readonly @string objectsAddedOutOfOrderOrˢ = "objects added out of order or overlapping"u8;
 
 // addObject adds a stack object at addr of type typ to the set of stack objects.
-[GoRecv] internal static void addObject(this ref stackScanState s, uintptr addr, ж<stackObjectRecord> Ꮡr) {
+internal static void addObject(this ref stackScanState s, uintptr addr, ж<stackObjectRecord> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var x = s.tail;
@@ -307,7 +307,7 @@ internal static readonly @string objectsAddedOutOfOrderOrˢ = "objects added out
 // buildIndex initializes s.root to a binary search tree.
 // It should be called after all addObject calls but before
 // any call of findObject.
-[GoRecv] internal static void buildIndex(this ref stackScanState s) {
+internal static void buildIndex(this ref stackScanState s) {
     (s.root, _, _) = binarySearchTree(s.head, 0, s.nobjs);
 }
 
@@ -340,7 +340,7 @@ internal static (ж<stackObject> root, ж<stackObjectBuf> restBuf, nint restIdx)
 
 // findObject returns the stack object containing address a, if any.
 // Must have called buildIndex previously.
-[GoRecv] internal static ж<stackObject> findObject(this ref stackScanState s, uintptr a) {
+internal static ж<stackObject> findObject(this ref stackScanState s, uintptr a) {
     var off = (uint32)(a - s.stack.lo);
     var obj = s.root;
     while (ᐧ) {

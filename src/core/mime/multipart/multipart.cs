@@ -53,7 +53,7 @@ internal static map<@string, @string> emptyParams = new map<@string, @string>();
 internal static UntypedInt peekBufferSize => 4096;
 
 // A Part represents a single part in a multipart body.
-[GoType] partial struct Part {
+partial struct Part {
     // The headers of the body, if any, with the keys canonicalized
     // in the same fashion that the Go http.Request headers are.
     // For example, "foo-bar" changes case to "Foo-Bar"
@@ -76,7 +76,7 @@ internal static readonly @string nameˢ = "name"u8;
 
 // FormName returns the name parameter if p has a Content-Disposition
 // of type "form-data".  Otherwise it returns the empty string.
-[GoRecv] public static @string FormName(this ref Part p) {
+public static @string FormName(this ref Part p) {
     // See https://tools.ietf.org/html/rfc2183 section 2 for EBNF
     // of Content-Disposition value format.
     if (p.dispositionParams == default!) {
@@ -94,7 +94,7 @@ internal static readonly @string filenameˢ = "filename"u8;
 // FileName returns the filename parameter of the [Part]'s Content-Disposition
 // header. If not empty, the filename is passed through filepath.Base (which is
 // platform dependent) before being returned.
-[GoRecv] public static @string FileName(this ref Part p) {
+public static @string FileName(this ref Part p) {
     if (p.dispositionParams == default!) {
         p.parseContentDisposition();
     }
@@ -110,7 +110,7 @@ internal static readonly @string filenameˢ = "filename"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string contentDispositionˢ = "Content-Disposition"u8;
 
-[GoRecv] internal static void parseContentDisposition(this ref Part p) {
+internal static void parseContentDisposition(this ref Part p) {
     @string v = p.Header.Get(contentDispositionˢ);
     error err = default!;
     (p.disposition, p.dispositionParams, err) = mime.ParseMediaType(v);
@@ -141,12 +141,12 @@ public static ж<Reader> NewReader(io.Reader r, @string boundary) {
 // interface's contract promises nothing about the return values of
 // Read calls after an error, yet this package does do multiple Reads
 // after error)
-[GoType] partial struct stickyErrorReader {
+partial struct stickyErrorReader {
     internal io.Reader r;
     internal error err;
 }
 
-[GoRecv] internal static (nint n, error) Read(this ref stickyErrorReader r, slice<byte> p) {
+internal static (nint n, error) Read(this ref stickyErrorReader r, slice<byte> p) {
     nint n = default!;
 
     if (r.err != default!) {
@@ -184,7 +184,7 @@ internal static (ж<Part>, error) newPart(ж<Reader> Ꮡmr, bool rawPart, int64 
     return (bp, default!);
 }
 
-[GoRecv] internal static error populateHeaders(this ref Part p, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
+internal static error populateHeaders(this ref Part p, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
     var r = textproto.NewReader((~p.mr).bufReader);
     var (header, err) = readMIMEHeader(r, maxMIMEHeaderSize, maxMIMEHeaders);
     if (err == default!) {
@@ -199,13 +199,13 @@ internal static (ж<Part>, error) newPart(ж<Reader> Ꮡmr, bool rawPart, int64 
 
 // Read reads the body of a part, after its headers and before the
 // next part (if any) begins.
-[GoRecv] public static (nint n, error err) Read(this ref Part p, slice<byte> d) {
+public static (nint n, error err) Read(this ref Part p, slice<byte> d) {
     return p.r.Read(d);
 }
 
 // partReader implements io.Reader by reading raw bytes directly from the
 // wrapped *Part, without doing any Transfer-Encoding decoding.
-[GoType] partial struct partReader {
+partial struct partReader {
     internal ж<Part> p;
 }
 
@@ -349,7 +349,7 @@ public static error Close(this ж<Part> Ꮡp) {
 // Reader is an iterator over parts in a MIME multipart body.
 // Reader's underlying parser consumes its input as needed. Seeking
 // isn't supported.
-[GoType] partial struct Reader {
+partial struct Reader {
     internal ж<bufio.Reader> bufReader;
     internal @string tempDir; // used in tests
     internal ж<Part> currentPart;
@@ -460,7 +460,7 @@ internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, i
 // isFinalBoundary reports whether line is the final boundary line
 // indicating that all parts are over.
 // It matches `^--boundary--[ \t]*(\r\n)?$`
-[GoRecv] internal static bool isFinalBoundary(this ref Reader r, slice<byte> line) {
+internal static bool isFinalBoundary(this ref Reader r, slice<byte> line) {
     if (!bytes.HasPrefix(line, r.dashBoundaryDash)) {
         return false;
     }
@@ -469,7 +469,7 @@ internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, i
     return len(rest) == 0 || bytes.Equal(rest, r.nl);
 }
 
-[GoRecv] internal static bool /*ret*/ isBoundaryDelimiterLine(this ref Reader r, slice<byte> line) {
+internal static bool /*ret*/ isBoundaryDelimiterLine(this ref Reader r, slice<byte> line) {
     // https://tools.ietf.org/html/rfc2046#section-5.1
     //   The boundary delimiter line is then defined as a line
     //   consisting entirely of two hyphen characters ("-",

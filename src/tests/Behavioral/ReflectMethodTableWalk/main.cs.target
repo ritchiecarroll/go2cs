@@ -7,16 +7,16 @@ using strings = strings_package;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static nint Add(this ref counter c, nint d) {
+internal static nint Add(this ref counter c, nint d) {
     c.n += d;
     return c.n;
 }
 
-[GoRecv] internal static void Reset(this ref counter c) {
+internal static void Reset(this ref counter c) {
     c.n = 0;
 }
 
@@ -32,7 +32,7 @@ internal static nint hidden(this counter c) {
     return -1;
 }
 
-[GoType] partial struct embedded {
+partial struct embedded {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -42,7 +42,7 @@ internal static @string Zeta(this embedded _) {
     return zetaˢ;
 }
 
-[GoType] partial struct outer {
+partial struct outer {
     internal partial ref embedded embedded { get; }
 }
 
@@ -146,7 +146,7 @@ internal static void Main() {
     fmt.Println(ifaceDispatchˢ, reflect.ValueOf(s).MethodByName(stringˢ).Call(default!)[0].Interface());
 }
 
-[GoType("@string")] partial struct stringish;
+partial struct stringish /*@string*/;
 
 internal static @string String(this stringish s) {
     return "<"u8 + ((@string)s) + ">"u8;

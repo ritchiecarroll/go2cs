@@ -25,18 +25,18 @@ partial class dsa_package {
 
 // Parameters represents the domain parameters for a key. These parameters can
 // be shared across many keys. The bit length of Q must be a multiple of 8.
-[GoType] partial struct Parameters {
+partial struct Parameters {
     public ж<bigꓸInt> P, Q, G;
 }
 
 // PublicKey represents a DSA public key.
-[GoType] partial struct PublicKey {
+partial struct PublicKey {
     public partial ref Parameters Parameters { get; }
     public ж<bigꓸInt> Y;
 }
 
 // PrivateKey represents a DSA private key.
-[GoType] partial struct PrivateKey {
+partial struct PrivateKey {
     public partial ref PublicKey PublicKey { get; }
     public ж<bigꓸInt> X;
 }
@@ -47,7 +47,7 @@ partial class dsa_package {
 // this error must be handled.
 public static error ErrInvalidPublicKey = errors.New("crypto/dsa: invalid public key"u8);
 
-[GoType("num:nint")] partial struct ParameterSizes;
+partial struct ParameterSizes /*num:nint*/;
 
 public static ParameterSizes L1024N160 => /* iota */ 0;
 public static ParameterSizes L2048N224 => 1;

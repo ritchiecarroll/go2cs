@@ -141,7 +141,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast32(ж<abi.SwissMa
     }
 }
 
-[GoRecv] internal static @unsafe.Pointer putSlotSmallFast32(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, uint32 key) {
+internal static @unsafe.Pointer putSlotSmallFast32(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, uint32 key) {
     var g = new groupReference(
         data: m.dirPtr
     );

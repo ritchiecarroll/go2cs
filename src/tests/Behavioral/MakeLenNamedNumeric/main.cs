@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:nuint")] partial struct Size;
+partial struct Size /*num:nuint*/;
 
 internal static Size total => 3;
 

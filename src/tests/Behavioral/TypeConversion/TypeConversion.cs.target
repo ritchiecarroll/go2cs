@@ -4,28 +4,24 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("dyn")] partial struct Person_Address {
+partial struct Person_Address /*dyn*/ {
     public @string Street;
     public @string City;
 }
 
-[GoType] partial struct Person {
+partial struct Person {
     public @string Name;
     public ж<Person_Address> Address;
 }
 
-[GoType("dyn")] internal partial struct main_data_Address {
-    [GoTag(@"json:""street""")]
-    public @string Street;
-    [GoTag(@"json:""city""")]
-    public @string City;
+internal partial struct main_data_Address /*dyn*/ {
+    public @string Street; /*`json:"street"`*/
+    public @string City; /*`json:"city"`*/
 }
 
-[GoType("dyn")] internal partial struct main_data {
-    [GoTag(@"json:""name""")]
-    public @string Name;
-    [GoTag(@"json:""address""")]
-    public ж<main_data_Address> Address;
+internal partial struct main_data /*dyn*/ {
+    public @string Name; /*`json:"name"`*/
+    public ж<main_data_Address> Address; /*`json:"address"`*/
 }
 
 internal static void Main() {

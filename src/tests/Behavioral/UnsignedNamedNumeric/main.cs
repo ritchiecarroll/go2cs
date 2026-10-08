@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:nuint")] partial struct Flags;
+partial struct Flags /*num:nuint*/;
 
-[GoType("num:uintptr")] partial struct Mask;
+partial struct Mask /*num:uintptr*/;
 
 internal static void Main() {
     Flags a = 6;

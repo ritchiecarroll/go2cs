@@ -270,7 +270,7 @@ public static httpꓸHandler Handler(@string name) {
     return ((handler)name);
 }
 
-[GoType("@string")] partial struct handler;
+partial struct handler /*@string*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unknownProfileˢ = "Unknown profile"u8;
@@ -416,7 +416,7 @@ internal static map<@string, @string> profileDescriptions = new map<@string, @st
     ["trace"u8] = "A trace of execution of the current program. You can specify the duration in the seconds GET parameter. After you get the trace file, use the go tool trace command to investigate the trace."u8
 };
 
-[GoType] partial struct profileEntry {
+partial struct profileEntry {
     public @string Name;
     public @string Href;
     public @string Desc;

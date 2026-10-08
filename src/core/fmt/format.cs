@@ -16,7 +16,7 @@ internal const bool signed = true;
 internal const bool unsigned = false;
 
 // flags placed in a separate struct for easy clearing.
-[GoType] partial struct fmtFlags {
+partial struct fmtFlags {
     internal bool widPresent;
     internal bool precPresent;
     internal bool minus;
@@ -33,7 +33,7 @@ internal const bool unsigned = false;
 
 // A fmt is the raw formatter used by Printf etc.
 // It prints into a buffer that must be set up separately.
-[GoType] partial struct fmt {
+partial struct fmt {
     internal ж<buffer> buf;
     internal partial ref fmtFlags fmtFlags { get; }
     internal nint wid; // width
@@ -43,13 +43,13 @@ internal const bool unsigned = false;
     internal array<byte> intbuf = new(68);
 }
 
-[GoRecv] internal static void clearflags(this ref fmt f) {
+internal static void clearflags(this ref fmt f) {
     f.fmtFlags = new fmtFlags(nil);
     f.wid = 0;
     f.prec = 0;
 }
 
-[GoRecv] internal static void init(this ref fmt f, ж<buffer> Ꮡbuf) {
+internal static void init(this ref fmt f, ж<buffer> Ꮡbuf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     f.buf = Ꮡbuf;
@@ -57,7 +57,7 @@ internal const bool unsigned = false;
 }
 
 // writePadding generates n bytes of padding.
-[GoRecv] internal static void writePadding(this ref fmt f, nint n) {
+internal static void writePadding(this ref fmt f, nint n) {
     if (n <= 0) {
         // No padding bytes needed.
         return;
@@ -85,7 +85,7 @@ internal const bool unsigned = false;
 }
 
 // pad appends b to f.buf, padded on left (!f.minus) or right (f.minus).
-[GoRecv] internal static void pad(this ref fmt f, slice<byte> b) {
+internal static void pad(this ref fmt f, slice<byte> b) {
     if (!f.widPresent || f.wid == 0) {
         f.buf.write(b);
         return;
@@ -103,7 +103,7 @@ internal const bool unsigned = false;
 }
 
 // padString appends s to f.buf, padded on left (!f.minus) or right (f.minus).
-[GoStr] [GoRecv] internal static void padString(this ref fmt f, sstring s) {
+internal static void padString(this ref fmt f, sstring s) {
     if (!f.widPresent || f.wid == 0) {
         f.buf.writeString(s);
         return;
@@ -125,7 +125,7 @@ internal static readonly @string trueˢ = "true"u8;
 internal static readonly @string falseˢ = "false"u8;
 
 // fmtBoolean formats a boolean.
-[GoRecv] internal static void fmtBoolean(this ref fmt f, bool v) {
+internal static void fmtBoolean(this ref fmt f, bool v) {
     if (v){
         f.padString(trueˢ);
     } else {
@@ -134,7 +134,7 @@ internal static readonly @string falseˢ = "false"u8;
 }
 
 // fmtUnicode formats a uint64 as "U+0078" or with f.sharp set as "U+0078 'x'".
-[GoRecv] internal static void fmtUnicode(this ref fmt f, uint64 u) {
+internal static void fmtUnicode(this ref fmt f, uint64 u) {
     var buf = f.intbuf[0..];
     // With default precision set the maximum needed buf length is 18
     // for formatting -1 with %#U ("U+FFFFFFFFFFFFFFFF") which fits
@@ -189,7 +189,7 @@ internal static readonly @string falseˢ = "false"u8;
 }
 
 // fmtInteger formats signed and unsigned integers.
-[GoStr] [GoRecv] internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSigned, rune verb, sstring digits) {
+internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSigned, rune verb, sstring digits) {
     var negative = isSigned && (int64)u < 0;
     if (negative) {
         u = ((uint64)0 - u);
@@ -333,7 +333,7 @@ internal static readonly @string falseˢ = "false"u8;
 }
 
 // truncateString truncates the string s to the specified precision, if present.
-[GoRecv] internal static @string truncateString(this ref fmt f, @string s) {
+internal static @string truncateString(this ref fmt f, @string s) {
     if (f.precPresent) {
         nint n = f.prec;
         foreach (var (i, _) in s) {
@@ -347,7 +347,7 @@ internal static readonly @string falseˢ = "false"u8;
 }
 
 // truncate truncates the byte slice b as a string of the specified precision, if present.
-[GoRecv] internal static slice<byte> truncate(this ref fmt f, slice<byte> b) {
+internal static slice<byte> truncate(this ref fmt f, slice<byte> b) {
     if (f.precPresent) {
         nint n = f.prec;
         for (nint i = 0; i < len(b); ) {
@@ -366,19 +366,19 @@ internal static readonly @string falseˢ = "false"u8;
 }
 
 // fmtS formats a string.
-[GoRecv] internal static void fmtS(this ref fmt f, @string s) {
+internal static void fmtS(this ref fmt f, @string s) {
     s = f.truncateString(s);
     f.padString(s);
 }
 
 // fmtBs formats the byte slice b as if it was formatted as string with fmtS.
-[GoRecv] internal static void fmtBs(this ref fmt f, slice<byte> b) {
+internal static void fmtBs(this ref fmt f, slice<byte> b) {
     b = f.truncate(b);
     f.pad(b);
 }
 
 // fmtSbx formats a string or byte slice as a hexadecimal encoding of its bytes.
-[GoStr] [GoRecv] internal static void fmtSbx(this ref fmt f, sstring s, slice<byte> b, sstring digits) {
+internal static void fmtSbx(this ref fmt f, sstring s, slice<byte> b, sstring digits) {
     nint length = len(b);
     if (b == default!) {
         // No byte slice present. Assume string s should be encoded.
@@ -446,19 +446,19 @@ internal static readonly @string falseˢ = "false"u8;
 }
 
 // fmtSx formats a string as a hexadecimal encoding of its bytes.
-[GoStr] [GoRecv] internal static void fmtSx(this ref fmt f, sstring s, sstring digits) {
+internal static void fmtSx(this ref fmt f, sstring s, sstring digits) {
     f.fmtSbx(s, default!, digits);
 }
 
 // fmtBx formats a byte slice as a hexadecimal encoding of its bytes.
-[GoStr] [GoRecv] internal static void fmtBx(this ref fmt f, slice<byte> b, sstring digits) {
+internal static void fmtBx(this ref fmt f, slice<byte> b, sstring digits) {
     f.fmtSbx(""u8, b, digits);
 }
 
 // fmtQ formats a string as a double-quoted, escaped Go string constant.
 // If f.sharp is set a raw (backquoted) string may be returned instead
 // if the string does not contain any control characters other than tab.
-[GoRecv] internal static void fmtQ(this ref fmt f, @string s) {
+internal static void fmtQ(this ref fmt f, @string s) {
     s = f.truncateString(s);
     if (f.sharp && strconv.CanBackquote(s)) {
         f.padString("`"u8 + s + "`"u8);
@@ -474,7 +474,7 @@ internal static readonly @string falseˢ = "false"u8;
 
 // fmtC formats an integer as a Unicode character.
 // If the character is not valid Unicode, it will print '\ufffd'.
-[GoRecv] internal static void fmtC(this ref fmt f, uint64 c) {
+internal static void fmtC(this ref fmt f, uint64 c) {
     // Explicitly check whether c exceeds utf8.MaxRune since the conversion
     // of a uint64 to a rune may lose precision that indicates an overflow.
     var r = (rune)c;
@@ -487,7 +487,7 @@ internal static readonly @string falseˢ = "false"u8;
 
 // fmtQc formats an integer as a single-quoted, escaped Go character constant.
 // If the character is not valid Unicode, it will print '\ufffd'.
-[GoRecv] internal static void fmtQc(this ref fmt f, uint64 c) {
+internal static void fmtQc(this ref fmt f, uint64 c) {
     var r = (rune)c;
     if (c > utf8.MaxRune) {
         r = utf8.RuneError;
@@ -502,7 +502,7 @@ internal static readonly @string falseˢ = "false"u8;
 
 // fmtFloat formats a float64. It assumes that verb is a valid format specifier
 // for strconv.AppendFloat and therefore fits into a byte.
-[GoRecv] internal static void fmtFloat(this ref fmt f, float64 v, nint size, rune verb, nint prec) {
+internal static void fmtFloat(this ref fmt f, float64 v, nint size, rune verb, nint prec) {
     // Explicit precision in format specifier overrules default precision.
     if (f.precPresent) {
         prec = f.prec;

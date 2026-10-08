@@ -13,7 +13,7 @@ using go.crypto.@internal.fips140;
 
 partial class cipher_package {
 
-[GoType] partial struct cfb {
+partial struct cfb {
     internal Block b;
     internal slice<byte> next;
     internal slice<byte> @out;
@@ -21,7 +21,7 @@ partial class cipher_package {
     internal bool decrypt;
 }
 
-[GoRecv] internal static void XORKeyStream(this ref cfb x, slice<byte> dst, slice<byte> src) {
+internal static void XORKeyStream(this ref cfb x, slice<byte> dst, slice<byte> src) {
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }

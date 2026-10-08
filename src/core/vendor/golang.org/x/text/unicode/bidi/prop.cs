@@ -9,7 +9,7 @@ using go.unicode;
 partial class bidi_package {
 
 // Properties provides access to BiDi properties of runes.
-[GoType] partial struct Properties {
+partial struct Properties {
     internal uint8 entry;
     internal uint8 last;
 }

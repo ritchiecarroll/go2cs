@@ -42,7 +42,7 @@ partial class types_package {
 // Starting in go1.23, this variable is enabled by default.
 // This setting also causes the predeclared type "any" to be
 // represented as an Alias, not a bare [Interface].
-[GoType] partial struct Alias {
+partial struct Alias {
     internal ж<TypeName> obj;   // corresponding declared alias object
     internal ж<Alias> orig;      // original, uninstantiated alias
     internal ж<TypeParamList> tparams; // type parameters, or nil
@@ -62,7 +62,7 @@ public static ж<Alias> NewAlias(ж<TypeName> Ꮡobj, ΔType rhs) {
 
 // Obj returns the type name for the declaration defining the alias type a.
 // For instantiated types, this is same as the type name of the origin type.
-[GoRecv] public static ж<TypeName> Obj(this ref Alias a) {
+public static ж<TypeName> Obj(this ref Alias a) {
     return (~a.orig).obj;
 }
 
@@ -81,32 +81,32 @@ public static ΔType Underlying(this ж<Alias> Ꮡa) {
 
 // Origin returns the generic Alias type of which a is an instance.
 // If a is not an instance of a generic alias, Origin returns a.
-[GoRecv] public static ж<Alias> Origin(this ref Alias a) {
+public static ж<Alias> Origin(this ref Alias a) {
     return a.orig;
 }
 
 // TypeParams returns the type parameters of the alias type a, or nil.
 // A generic Alias and its instances have the same type parameters.
-[GoRecv] public static ж<TypeParamList> TypeParams(this ref Alias a) {
+public static ж<TypeParamList> TypeParams(this ref Alias a) {
     return a.tparams;
 }
 
 // SetTypeParams sets the type parameters of the alias type a.
 // The alias a must not have type arguments.
-[GoRecv] public static void SetTypeParams(this ref Alias a, slice<ж<TypeParam>> tparams) {
+public static void SetTypeParams(this ref Alias a, slice<ж<TypeParam>> tparams) {
     assert(a.targs == nil);
     a.tparams = bindTParams(tparams);
 }
 
 // TypeArgs returns the type arguments used to instantiate the Alias type.
 // If a is not an instance of a generic alias, the result is nil.
-[GoRecv] public static ж<TypeList> TypeArgs(this ref Alias a) {
+public static ж<TypeList> TypeArgs(this ref Alias a) {
     return a.targs;
 }
 
 // Rhs returns the type R on the right-hand side of an alias
 // declaration "type A = R", which may be another alias.
-[GoRecv] public static ΔType Rhs(this ref Alias a) {
+public static ΔType Rhs(this ref Alias a) {
     return a.fromRHS;
 }
 

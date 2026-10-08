@@ -31,17 +31,17 @@ internal static void report(Actionꓸꓸꓸ<@string, any> emit) {
     emit(bareˢ);
 }
 
-[GoType] partial struct logger {
+partial struct logger {
     internal @string tag;
 }
 
-[GoRecv] internal static void errorf(this ref logger l, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf(this ref logger l, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     fmt.Printf(l.tag + "!"u8 + format + "\n"u8, args.ꓸꓸꓸ);
 }
 
-[GoRecv] internal static void logf(this ref logger l, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void logf(this ref logger l, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     fmt.Printf(l.tag + "~"u8 + format + "\n"u8, args.ꓸꓸꓸ);

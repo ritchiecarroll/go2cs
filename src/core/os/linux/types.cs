@@ -20,7 +20,7 @@ public static nint Getpagesize() {
 // File represents an open file descriptor.
 //
 // The methods of File are safe for concurrent use.
-[GoType] partial struct File {
+partial struct File {
     internal partial ref ж<@file> @file { get; } // os specific
 }
 
@@ -59,11 +59,11 @@ public static fs.FileMode ModeType => /* fs.ModeType */ 2401763328;
 
 public static fs.FileMode ModePerm => /* fs.ModePerm */ 511; // Unix permission bits, 0o777
 
-[GoRecv] internal static @string Name(this ref fileStat fs) {
+internal static @string Name(this ref fileStat fs) {
     return fs.name;
 }
 
-[GoRecv] internal static bool IsDir(this ref fileStat fs) {
+internal static bool IsDir(this ref fileStat fs) {
     return fs.Mode().IsDir();
 }
 

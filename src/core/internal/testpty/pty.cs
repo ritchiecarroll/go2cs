@@ -12,7 +12,7 @@ using os = os_package;
 
 partial class testpty_package {
 
-[GoType] partial struct PtyError {
+partial struct PtyError {
     public @string FuncName;
     public @string ErrorString;
     public error Errno;
@@ -22,11 +22,11 @@ internal static ж<PtyError> ptyError(@string name, error err) {
     return Ꮡ(new PtyError(name, err.Error(), err));
 }
 
-[GoRecv] public static @string Error(this ref PtyError e) {
+public static @string Error(this ref PtyError e) {
     return fmt.Sprintf("%s: %s"u8, e.FuncName, e.ErrorString);
 }
 
-[GoRecv] public static error Unwrap(this ref PtyError e) {
+public static error Unwrap(this ref PtyError e) {
     return e.Errno;
 }
 

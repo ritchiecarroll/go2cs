@@ -21,17 +21,17 @@ public static UntypedInt SecurityDelegation => 3;
 public static UntypedInt TOKEN_ADJUST_PRIVILEGES => 0x0020;
 public static UntypedInt SE_PRIVILEGE_ENABLED => 0x00000002;
 
-[GoType] partial struct LUID {
+partial struct LUID {
     public uint32 LowPart;
     public int32 HighPart;
 }
 
-[GoType] partial struct LUID_AND_ATTRIBUTES {
+partial struct LUID_AND_ATTRIBUTES {
     public LUID Luid;
     public uint32 Attributes;
 }
 
-[GoType] partial struct TOKEN_PRIVILEGES {
+partial struct TOKEN_PRIVILEGES {
     public uint32 PrivilegeCount;
     public array<LUID_AND_ATTRIBUTES> Privileges = new(1);
 }
@@ -55,22 +55,22 @@ public static error AdjustTokenPrivileges(syscall.Token token, bool disableAllPr
 
 //sys DuplicateTokenEx(hExistingToken syscall.Token, dwDesiredAccess uint32, lpTokenAttributes *syscall.SecurityAttributes, impersonationLevel uint32, tokenType TokenType, phNewToken *syscall.Token) (err error) = advapi32.DuplicateTokenEx
 //sys SetTokenInformation(tokenHandle syscall.Token, tokenInformationClass uint32, tokenInformation uintptr, tokenInformationLength uint32) (err error) = advapi32.SetTokenInformation
-[GoType] partial struct SID_AND_ATTRIBUTES {
+partial struct SID_AND_ATTRIBUTES {
     public ж<syscall.SID> Sid;
     public uint32 Attributes;
 }
 
-[GoType] partial struct TOKEN_MANDATORY_LABEL {
+partial struct TOKEN_MANDATORY_LABEL {
     public SID_AND_ATTRIBUTES Label;
 }
 
-[GoRecv] public static uint32 Size(this ref TOKEN_MANDATORY_LABEL tml) {
+public static uint32 Size(this ref TOKEN_MANDATORY_LABEL tml) {
     return (uint32)/* unsafe.Sizeof(TOKEN_MANDATORY_LABEL{}) */ (uintptr)16 + syscall.GetLengthSid(tml.Label.Sid);
 }
 
 public static UntypedInt SE_GROUP_INTEGRITY => 0x00000020;
 
-[GoType("num:uint32")] partial struct TokenType;
+partial struct TokenType /*num:uint32*/;
 
 public static TokenType TokenPrimary => 1;
 public static TokenType TokenImpersonation => 2;
@@ -79,7 +79,7 @@ public static TokenType TokenImpersonation => 2;
 public static UntypedInt LG_INCLUDE_INDIRECT => 0x1;
 public static UntypedInt MAX_PREFERRED_LENGTH => 0xFFFFFFFF;
 
-[GoType] partial struct LocalGroupUserInfo0 {
+partial struct LocalGroupUserInfo0 {
     public ж<uint16> Name;
 }
 
@@ -88,7 +88,7 @@ public static syscall.Errno NERR_UserExists => 2224;
 
 public static UntypedInt USER_PRIV_USER => 1;
 
-[GoType] partial struct UserInfo1 {
+partial struct UserInfo1 {
     public ж<uint16> Name;
     public ж<uint16> Password;
     public uint32 PasswordAge;
@@ -99,7 +99,7 @@ public static UntypedInt USER_PRIV_USER => 1;
     public ж<uint16> ScriptPath;
 }
 
-[GoType] partial struct UserInfo4 {
+partial struct UserInfo4 {
     public ж<uint16> Name;
     public ж<uint16> Password;
     public uint32 PasswordAge;
@@ -139,7 +139,7 @@ public static UntypedInt USER_PRIV_USER => 1;
 // directory, which is typically, though not always, `C:\Windows\System32`.
 //
 //go:linkname GetSystemDirectory
-[global::System.Diagnostics.StackTraceHidden] public static @string GetSystemDirectory() {
+/*linkname*/ public static partial @string GetSystemDirectory() {
     return runtime.windows_GetSystemDirectory();
 }
 
@@ -167,7 +167,7 @@ public static (@string, error) GetUserName(uint32 format) {
 
 // go2cs generated this placeholder — func getTokenInfo is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoType] partial struct TOKEN_GROUPS {
+partial struct TOKEN_GROUPS {
     public uint32 GroupCount;
     public array<SID_AND_ATTRIBUTES> Groups = new(1);
 }
@@ -177,7 +177,7 @@ public static (@string, error) GetUserName(uint32 format) {
 // go2cs generated this placeholder — func GetTokenGroups is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-sid_identifier_authority
-[GoType] partial struct SID_IDENTIFIER_AUTHORITY {
+partial struct SID_IDENTIFIER_AUTHORITY {
     public array<byte> Value = new(6);
 }
 

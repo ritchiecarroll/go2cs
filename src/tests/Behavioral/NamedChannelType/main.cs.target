@@ -5,9 +5,9 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType("chan EmptyStruct")] partial struct closeWaiter;
+partial struct closeWaiter /*chan EmptyStruct*/;
 
-[GoRecv] internal static void Init(this ref closeWaiter cw) {
+internal static void Init(this ref closeWaiter cw) {
     cw = new closeWaiter(0);
 }
 
@@ -19,7 +19,7 @@ internal static void Wait(this closeWaiter cw) {
     ᐸꟷ<EmptyStruct>(cw);
 }
 
-[GoType("chan nint")] partial struct intQueue;
+partial struct intQueue /*chan nint*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object waitedˢ = (@string)"waited"u8;

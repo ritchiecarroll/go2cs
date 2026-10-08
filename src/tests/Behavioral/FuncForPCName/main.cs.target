@@ -14,7 +14,7 @@ internal static @string passString(@string s) {
     return s;
 }
 
-[GoType] partial struct receiver {
+partial struct receiver {
 }
 
 internal static void method(this receiver _) {

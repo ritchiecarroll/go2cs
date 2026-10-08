@@ -29,7 +29,7 @@ internal static @unsafe.Pointer data(this ж<Cmsghdr> Ꮡh, uintptr offset) {
 }
 
 // SocketControlMessage represents a socket control message.
-[GoType] partial struct SocketControlMessage {
+partial struct SocketControlMessage {
     public Cmsghdr Header;
     public slice<byte> Data;
 }

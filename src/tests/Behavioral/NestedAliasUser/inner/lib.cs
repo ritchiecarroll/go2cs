@@ -4,7 +4,7 @@ namespace go.NestedAliasUser;
 
 partial class inner_package {
 
-[GoType("dyn")] public partial struct Entryᴛ1 {
+public partial struct Entryᴛ1 /*dyn*/ {
     public @string Name;
     public slice<byte> Data;
     public nint Count;

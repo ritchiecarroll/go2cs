@@ -10,7 +10,7 @@ using @unsafe = unsafe_package;
 partial class unix_package {
 
 //go:linkname ioctlPtr syscall.ioctlPtr
-[global::System.Diagnostics.StackTraceHidden] internal static error /*err*/ ioctlPtr(nint fd, nuint req, @unsafe.Pointer arg) {
+/*linkname*/ internal static partial error /*err*/ ioctlPtr(nint fd, nuint req, @unsafe.Pointer arg) {
     return syscall.ioctlPtr(fd, req, arg);
 }
 

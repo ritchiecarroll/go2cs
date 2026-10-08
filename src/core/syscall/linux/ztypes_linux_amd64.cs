@@ -11,25 +11,25 @@ internal static UntypedInt sizeofLong => 0x8;
 internal static UntypedInt sizeofLongLong => 0x8;
 public static UntypedInt PathMax => 0x1000;
 
-[GoType("num:int16")] partial struct _C_short;
+partial struct _C_short /*num:int16*/;
 
-[GoType("num:int32")] partial struct _C_int;
+partial struct _C_int /*num:int32*/;
 
-[GoType("num:int64")] partial struct _C_long;
+partial struct _C_long /*num:int64*/;
 
-[GoType("num:int64")] partial struct _C_long_long;
+partial struct _C_long_long /*num:int64*/;
 
-[GoType] partial struct Timespec {
+partial struct Timespec {
     public int64 Sec;
     public int64 Nsec;
 }
 
-[GoType] partial struct Timeval {
+partial struct Timeval {
     public int64 Sec;
     public int64 Usec;
 }
 
-[GoType] partial struct Timex {
+partial struct Timex {
     public uint32 Modes;
     public array<byte> Pad_cgo_0 = new(4);
     public int64 Offset;
@@ -56,21 +56,21 @@ public static UntypedInt PathMax => 0x1000;
     public array<byte> Pad_cgo_3 = new(44);
 }
 
-[GoType("num:int64")] partial struct Time_t;
+partial struct Time_t /*num:int64*/;
 
-[GoType] partial struct Tms {
+partial struct Tms {
     public int64 Utime;
     public int64 Stime;
     public int64 Cutime;
     public int64 Cstime;
 }
 
-[GoType] partial struct Utimbuf {
+partial struct Utimbuf {
     public int64 Actime;
     public int64 Modtime;
 }
 
-[GoType] partial struct Rusage {
+partial struct Rusage {
     public Timeval Utime;
     public Timeval Stime;
     public int64 Maxrss;
@@ -89,14 +89,14 @@ public static UntypedInt PathMax => 0x1000;
     public int64 Nivcsw;
 }
 
-[GoType] partial struct Rlimit {
+partial struct Rlimit {
     public uint64 Cur;
     public uint64 Max;
 }
 
-[GoType("num:uint32")] partial struct _Gid_t;
+partial struct _Gid_t /*num:uint32*/;
 
-[GoType] partial struct Stat_t {
+partial struct Stat_t {
     public uint64 Dev;
     public uint64 Ino;
     public uint64 Nlink;
@@ -114,7 +114,7 @@ public static UntypedInt PathMax => 0x1000;
     public array<int64> X__unused = new(3);
 }
 
-[GoType] partial struct Statfs_t {
+partial struct Statfs_t {
     public int64 Type;
     public int64 Bsize;
     public uint64 Blocks;
@@ -129,7 +129,7 @@ public static UntypedInt PathMax => 0x1000;
     public array<int64> Spare = new(4);
 }
 
-[GoType] partial struct Dirent {
+partial struct Dirent {
     public uint64 Ino;
     public int64 Off;
     public uint16 Reclen;
@@ -138,11 +138,11 @@ public static UntypedInt PathMax => 0x1000;
     public array<byte> Pad_cgo_0 = new(5);
 }
 
-[GoType] partial struct Fsid {
+partial struct Fsid {
     public array<int32> X__val = new(2);
 }
 
-[GoType] partial struct Flock_t {
+partial struct Flock_t {
     public int16 Type;
     public int16 Whence;
     public array<byte> Pad_cgo_0 = new(4);
@@ -152,14 +152,14 @@ public static UntypedInt PathMax => 0x1000;
     public array<byte> Pad_cgo_1 = new(4);
 }
 
-[GoType] partial struct RawSockaddrInet4 {
+partial struct RawSockaddrInet4 {
     public uint16 Family;
     public uint16 Port;
     public array<byte> Addr = new(4); /* in_addr */
     public array<uint8> Zero = new(8);
 }
 
-[GoType] partial struct RawSockaddrInet6 {
+partial struct RawSockaddrInet6 {
     public uint16 Family;
     public uint16 Port;
     public uint32 Flowinfo;
@@ -167,12 +167,12 @@ public static UntypedInt PathMax => 0x1000;
     public uint32 Scope_id;
 }
 
-[GoType] partial struct RawSockaddrUnix {
+partial struct RawSockaddrUnix {
     public uint16 Family;
     public array<int8> Path = new(108);
 }
 
-[GoType] partial struct RawSockaddrLinklayer {
+partial struct RawSockaddrLinklayer {
     public uint16 Family;
     public uint16 Protocol;
     public int32 Ifindex;
@@ -182,52 +182,52 @@ public static UntypedInt PathMax => 0x1000;
     public array<uint8> Addr = new(8);
 }
 
-[GoType] partial struct RawSockaddrNetlink {
+partial struct RawSockaddrNetlink {
     public uint16 Family;
     public uint16 Pad;
     public uint32 Pid;
     public uint32 Groups;
 }
 
-[GoType] partial struct RawSockaddr {
+partial struct RawSockaddr {
     public uint16 Family;
     public array<int8> Data = new(14);
 }
 
-[GoType] partial struct RawSockaddrAny {
+partial struct RawSockaddrAny {
     public RawSockaddr Addr;
     public array<int8> Pad = new(96);
 }
 
-[GoType("num:uint32")] public partial struct _Socklen;
+public partial struct _Socklen /*num:uint32*/;
 
-[GoType] partial struct Linger {
+partial struct Linger {
     public int32 Onoff;
     public int32 ΔLinger;
 }
 
-[GoType] partial struct Iovec {
+partial struct Iovec {
     public ж<byte> Base;
     public uint64 Len;
 }
 
-[GoType] partial struct IPMreq {
+partial struct IPMreq {
     public array<byte> Multiaddr = new(4); /* in_addr */
     public array<byte> Interface = new(4); /* in_addr */
 }
 
-[GoType] partial struct IPMreqn {
+partial struct IPMreqn {
     public array<byte> Multiaddr = new(4); /* in_addr */
     public array<byte> Address = new(4); /* in_addr */
     public int32 Ifindex;
 }
 
-[GoType] partial struct IPv6Mreq {
+partial struct IPv6Mreq {
     public array<byte> Multiaddr = new(16); /* in6_addr */
     public uint32 Interface;
 }
 
-[GoType] partial struct Msghdr {
+partial struct Msghdr {
     public ж<byte> Name;
     public uint32 Namelen;
     public array<byte> Pad_cgo_0 = new(4);
@@ -239,39 +239,39 @@ public static UntypedInt PathMax => 0x1000;
     public array<byte> Pad_cgo_1 = new(4);
 }
 
-[GoType] partial struct Cmsghdr {
+partial struct Cmsghdr {
     public uint64 Len;
     public int32 Level;
     public int32 Type;
 }
 
-[GoType] partial struct Inet4Pktinfo {
+partial struct Inet4Pktinfo {
     public int32 Ifindex;
     public array<byte> Spec_dst = new(4); /* in_addr */
     public array<byte> Addr = new(4); /* in_addr */
 }
 
-[GoType] partial struct Inet6Pktinfo {
+partial struct Inet6Pktinfo {
     public array<byte> Addr = new(16); /* in6_addr */
     public uint32 Ifindex;
 }
 
-[GoType] partial struct IPv6MTUInfo {
+partial struct IPv6MTUInfo {
     public RawSockaddrInet6 Addr;
     public uint32 Mtu;
 }
 
-[GoType] partial struct ICMPv6Filter {
+partial struct ICMPv6Filter {
     public array<uint32> Data = new(8);
 }
 
-[GoType] partial struct Ucred {
+partial struct Ucred {
     public int32 Pid;
     public uint32 Uid;
     public uint32 Gid;
 }
 
-[GoType] partial struct TCPInfo {
+partial struct TCPInfo {
     public uint8 State;
     public uint8 Ca_state;
     public uint8 Retransmits;
@@ -416,7 +416,7 @@ public static UntypedInt SizeofIfAddrmsg => 0x8;
 public static UntypedInt SizeofRtMsg => 0xc;
 public static UntypedInt SizeofRtNexthop => 0x8;
 
-[GoType] partial struct NlMsghdr {
+partial struct NlMsghdr {
     public uint32 Len;
     public uint16 Type;
     public uint16 Flags;
@@ -424,26 +424,26 @@ public static UntypedInt SizeofRtNexthop => 0x8;
     public uint32 Pid;
 }
 
-[GoType] partial struct NlMsgerr {
+partial struct NlMsgerr {
     public int32 Error;
     public NlMsghdr Msg;
 }
 
-[GoType] partial struct RtGenmsg {
+partial struct RtGenmsg {
     public uint8 Family;
 }
 
-[GoType] partial struct NlAttr {
+partial struct NlAttr {
     public uint16 Len;
     public uint16 Type;
 }
 
-[GoType] partial struct RtAttr {
+partial struct RtAttr {
     public uint16 Len;
     public uint16 Type;
 }
 
-[GoType] partial struct IfInfomsg {
+partial struct IfInfomsg {
     public uint8 Family;
     public uint8 X__ifi_pad;
     public uint16 Type;
@@ -452,7 +452,7 @@ public static UntypedInt SizeofRtNexthop => 0x8;
     public uint32 Change;
 }
 
-[GoType] partial struct IfAddrmsg {
+partial struct IfAddrmsg {
     public uint8 Family;
     public uint8 Prefixlen;
     public uint8 Flags;
@@ -460,7 +460,7 @@ public static UntypedInt SizeofRtNexthop => 0x8;
     public uint32 Index;
 }
 
-[GoType] partial struct RtMsg {
+partial struct RtMsg {
     public uint8 Family;
     public uint8 Dst_len;
     public uint8 Src_len;
@@ -472,7 +472,7 @@ public static UntypedInt SizeofRtNexthop => 0x8;
     public uint32 Flags;
 }
 
-[GoType] partial struct RtNexthop {
+partial struct RtNexthop {
     public uint16 Len;
     public uint8 Flags;
     public uint8 Hops;
@@ -482,20 +482,20 @@ public static UntypedInt SizeofRtNexthop => 0x8;
 public static UntypedInt SizeofSockFilter => 0x8;
 public static UntypedInt SizeofSockFprog => 0x10;
 
-[GoType] partial struct SockFilter {
+partial struct SockFilter {
     public uint16 Code;
     public uint8 Jt;
     public uint8 Jf;
     public uint32 K;
 }
 
-[GoType] partial struct SockFprog {
+partial struct SockFprog {
     public uint16 Len;
     public array<byte> Pad_cgo_0 = new(6);
     public ж<SockFilter> Filter;
 }
 
-[GoType] partial struct InotifyEvent {
+partial struct InotifyEvent {
     public int32 Wd;
     public uint32 Mask;
     public uint32 Cookie;
@@ -505,7 +505,7 @@ public static UntypedInt SizeofSockFprog => 0x10;
 
 public static UntypedInt SizeofInotifyEvent => 0x10;
 
-[GoType] partial struct PtraceRegs {
+partial struct PtraceRegs {
     public uint64 R15;
     public uint64 R14;
     public uint64 R13;
@@ -535,11 +535,11 @@ public static UntypedInt SizeofInotifyEvent => 0x10;
     public uint64 Gs;
 }
 
-[GoType] partial struct FdSet {
+partial struct FdSet {
     public array<int64> Bits = new(16);
 }
 
-[GoType] partial struct Sysinfo_t {
+partial struct Sysinfo_t {
     public int64 Uptime;
     public array<uint64> Loads = new(3);
     public uint64 Totalram;
@@ -558,7 +558,7 @@ public static UntypedInt SizeofInotifyEvent => 0x10;
     public array<byte> Pad_cgo_1 = new(4);
 }
 
-[GoType] partial struct Utsname {
+partial struct Utsname {
     public array<int8> Sysname = new(65);
     public array<int8> Nodename = new(65);
     public array<int8> Release = new(65);
@@ -567,7 +567,7 @@ public static UntypedInt SizeofInotifyEvent => 0x10;
     public array<int8> Domainname = new(65);
 }
 
-[GoType] partial struct Ustat_t {
+partial struct Ustat_t {
     public int32 Tfree;
     public array<byte> Pad_cgo_0 = new(4);
     public uint64 Tinode;
@@ -576,7 +576,7 @@ public static UntypedInt SizeofInotifyEvent => 0x10;
     public array<byte> Pad_cgo_1 = new(4);
 }
 
-[GoType] partial struct EpollEvent {
+partial struct EpollEvent {
     public uint32 Events;
     public int32 Fd;
     public int32 Pad;
@@ -588,13 +588,13 @@ internal static UntypedInt _AT_SYMLINK_NOFOLLOW => 0x100;
 internal static UntypedInt _AT_EACCESS => 0x200;
 internal static UntypedInt _AT_EMPTY_PATH => 0x1000;
 
-[GoType] partial struct pollFd {
+partial struct pollFd {
     public int32 Fd;
     public int16 Events;
     public int16 Revents;
 }
 
-[GoType] partial struct Termios {
+partial struct Termios {
     public uint32 Iflag;
     public uint32 Oflag;
     public uint32 Cflag;

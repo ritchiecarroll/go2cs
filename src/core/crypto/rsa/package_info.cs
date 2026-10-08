@@ -57,10 +57,10 @@ using static go.crypto.rsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/rsa/fips.go", "fips.cs", "ACRYkqaigpQACBgADAKAgqaCloKCgpSUhISAgqSClIKWgoKWgoKUlIKCtqiiuAADGAAJAoCCpoKCgpSAgqSWhICCpIKWgoKWgoKUlKSkAAQsABYCgIKmhIKCgoKUgoKUlISEgIKkgpSCloKClAAGGgAMAoLWooCCpoKChJSCgpSCgpSWgoSAgqSCgqiCgpYABh4ADgKCgoKUloCCpoKCgpSWgIKkgpaCgpQAAxYACAKCgoKUloCCpoKCgpSAgqSWgIKkgpaCgpSmgpSkpKSmggAJBoKClIKUgpSClIKUgpTmgoKUgIKkgpSClA==")]
+[assembly: go.GoPositionMap("crypto/rsa/fips.go", "fips.cs", "ACRYkqaigpQACBgADAKAgqaCloKCgpSUhISAgqSClIKWgoKWgoKUlIKCtqiiuAADGAAJAoCCpoKCgpSAgqSWhICCpIKWgoKWgoKUlKSkAAQsABYCgIKmhIKCgoKUgoKUlISEgIKkgpSCloKClAAGGgAMAoLWooCCpoKChJSCgpSCgpSWgoSAgqSCgqiCgpYABh4ADgKCgoKUloCCpoKCgpSWgIKkgpaCgpQAAxYACAKCgoKUloCCpoKCgpSAgqSWgIKkgpaCgpSmgpSkpKSmggAJBoKClIKUgpSClIKUgpTmgoKUgIKkgpSClA==", "", "", "280=Size/1/1/1")]
 [assembly: go.GoPositionMap("crypto/rsa/notboring.go", "notboring.cs", "AAsWgqSC")]
 [assembly: go.GoPositionMap("crypto/rsa/pkcs1v15.go", "pkcs1v15.cs", "ACFUAA8CgpaAgqaEgoKWgoKClJSWgoKCgoKUgoSCgoKClJaCgpQAAhYACgKAgqaCgoKUgoKUloKClIKUAAJKACQCgIKmgoKWgoKWppaCggACEgALAoKWgoKCloKCgoKUgoKmgoKUgoKogsyEgoKCuoSCgqiygoKWgoKCgrio")]
-[assembly: go.GoPositionMap("crypto/rsa/rsa.go", "rsa.cs", "AEN6AAsi0qiSgoKUABo+kqqigoKUgpSClIKCpqrSAAIWAAgCgIKm3NKClpSClMiAgoKAgqSAgqSU6AAdQviCuIKUgsqUgoKUgoKU1oKClAAFGgAKAoCCpoSCgpSCgoKCgoKCgoKClgAOHJaClIKUgpaCAAoWgqaClIIAEiQABywAEwKClIKWhIKEgpaClKamgoKohIKCAAsYgpSCgoKClKiCgoK6goKCgoKClLiWgoKEgoKCyIKAgqbcuLiYooKWgqaU9oKEgpSClIKUgpSCqIKmgpSCgoKWlIKWgoKCgoKC9oKEgoKUhIKogoKUgqiChIKEgoKWgoKCgoSChIKCgpaWpoKCgpSmooKUgoKU")]
+[assembly: go.GoPositionMap("crypto/rsa/rsa.go", "rsa.cs", "AEN6AAsi0qiSgoKUABo+kqqigoKUgpSClIKCpqrSAAIWAAgCgIKm3NKClpSClMiAgoKAgqSAgqSU6AAdQviCuIKUgsqUgoKUgoKU1oKClAAFGgAKAoCCpoSCgpSCgoKCgoKCgoKClgAOHJaClIKUgpaCAAoWgqaClIIAEiQABywAEwKClIKWhIKEgpaClKamgoKohIKCAAsYgpSCgoKClKiCgoK6goKCgoKClLiWgoKEgoKCyIKAgqbcuLiYooKWgqaU9oKEgpSClIKUgpSCqIKmgpSCgoKWlIKWgoKCgoKC9oKEgoKUhIKogoKUgqiChIKEgoKWgoKCgoSChIKCgpaWpoKCgpSmooKUgoKU", "", "", "375=SetBytes/1/7/2,SetBytes/2/7/5,SetBytes/3/7/7,SetBytes/4/7/8,SetBytes/5/7/12,SetBytes/6/7/13,SetBytes/7/7/14;568=Bytes/3/7/1,Bytes/4/7/1,Bytes/5/7/2,Bytes/6/7/2,Bytes/7/7/2;579=Bytes/3/4/1,Bytes/4/4/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -69,7 +69,7 @@ namespace go.crypto;
 public static partial class rsa_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

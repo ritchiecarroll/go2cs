@@ -4,12 +4,12 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
     internal nint calls;
 }
 
-[GoRecv] internal static nint dec(this ref counter c, nint step) {
+internal static nint dec(this ref counter c, nint step) {
     c.n -= step;
     c.calls++;
     return c.n;
@@ -19,13 +19,13 @@ internal static nint peek(this counter c) {
     return c.n;
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal counter c;
 }
 
-[GoType("[]nint")] partial struct intList;
+partial struct intList /*[]nint*/;
 
-[GoRecv] internal static void push(this ref intList l, nint v) {
+internal static void push(this ref intList l, nint v) {
     l = append(l, v);
 }
 

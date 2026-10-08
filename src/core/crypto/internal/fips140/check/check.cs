@@ -34,7 +34,7 @@ public static bool Verified;
 //
 //go:linkname Linkinfo go:fipsinfo
 
-[GoType("dyn")] partial struct Linkinfoᴛ1_Sects {
+partial struct Linkinfoᴛ1_Sects /*dyn*/ {
     // Note: These must be unsafe.Pointer, not uintptr,
     // or else checkptr panics about turning uintptrs
     // into pointers into the data segment during
@@ -43,7 +43,7 @@ public static bool Verified;
     public @unsafe.Pointer End;
 }
 
-[GoType("dyn")] partial struct Linkinfoᴛ1 {
+partial struct Linkinfoᴛ1 /*dyn*/ {
     public array<byte> Magic = new(16);
     public array<byte> Sum = new(32);
     public uintptr Self;

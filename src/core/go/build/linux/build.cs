@@ -41,7 +41,7 @@ using ꓸꓸꓸstring = Span<@string>;
 partial class build_package {
 
 // A Context specifies the supporting context for a build.
-[GoType] partial struct Context {
+partial struct Context {
     public @string GOARCH; // target architecture
     public @string GOOS; // target operating system
     public @string GOROOT; // Go root
@@ -112,7 +112,7 @@ partial class build_package {
 }
 
 // joinPath calls ctxt.JoinPath (if not nil) or else filepath.Join.
-[GoRecv] internal static @string joinPath(this ref Context ctxt, params ꓸꓸꓸstring elemʗp) {
+internal static @string joinPath(this ref Context ctxt, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
 
     {
@@ -124,7 +124,7 @@ partial class build_package {
 }
 
 // splitPathList calls ctxt.SplitPathList (if not nil) or else filepath.SplitList.
-[GoRecv] internal static slice<@string> splitPathList(this ref Context ctxt, @string s) {
+internal static slice<@string> splitPathList(this ref Context ctxt, @string s) {
     {
         var f = ctxt.SplitPathList; if (f != default!) {
             return f(s);
@@ -134,7 +134,7 @@ partial class build_package {
 }
 
 // isAbsPath calls ctxt.IsAbsPath (if not nil) or else filepath.IsAbs.
-[GoRecv] internal static bool isAbsPath(this ref Context ctxt, @string path) {
+internal static bool isAbsPath(this ref Context ctxt, @string path) {
     {
         var f = ctxt.IsAbsPath; if (f != default!) {
             return f(path);
@@ -144,7 +144,7 @@ partial class build_package {
 }
 
 // isDir calls ctxt.IsDir (if not nil) or else uses os.Stat.
-[GoRecv] internal static bool isDir(this ref Context ctxt, @string path) {
+internal static bool isDir(this ref Context ctxt, @string path) {
     {
         var f = ctxt.IsDir; if (f != default!) {
             return f(path);
@@ -156,7 +156,7 @@ partial class build_package {
 
 // hasSubdir calls ctxt.HasSubdir (if not nil) or else uses
 // the local file system to answer the question.
-[GoRecv] internal static (@string rel, bool ok) hasSubdir(this ref Context ctxt, @string root, @string dir) {
+internal static (@string rel, bool ok) hasSubdir(this ref Context ctxt, @string root, @string dir) {
     @string rel = default!;
     bool ok = default!;
 
@@ -208,7 +208,7 @@ internal static (@string rel, bool ok) hasSubdir(@string root, @string dir) {
 }
 
 // readDir calls ctxt.ReadDir (if not nil) or else os.ReadDir.
-[GoRecv] internal static (slice<fs.DirEntry>, error) readDir(this ref Context ctxt, @string path) {
+internal static (slice<fs.DirEntry>, error) readDir(this ref Context ctxt, @string path) {
     // TODO: add a fs.DirEntry version of Context.ReadDir
     {
         var f = ctxt.ReadDir; if (f != default!) {
@@ -227,7 +227,7 @@ internal static (@string rel, bool ok) hasSubdir(@string root, @string dir) {
 }
 
 // openFile calls ctxt.OpenFile (if not nil) or else os.Open.
-[GoRecv] internal static (io.ReadCloser, error) openFile(this ref Context ctxt, @string path) {
+internal static (io.ReadCloser, error) openFile(this ref Context ctxt, @string path) {
     {
         var fn = ctxt.OpenFile; if (fn != default!) {
             return fn(path);
@@ -243,7 +243,7 @@ internal static (@string rel, bool ok) hasSubdir(@string root, @string dir) {
 // isFile determines whether path is a file by trying to open it.
 // It reuses openFile instead of adding another function to the
 // list in Context.
-[GoRecv] internal static bool isFile(this ref Context ctxt, @string path) {
+internal static bool isFile(this ref Context ctxt, @string path) {
     var (f, err) = ctxt.openFile(path);
     if (err != default!) {
         return false;
@@ -253,7 +253,7 @@ internal static (@string rel, bool ok) hasSubdir(@string root, @string dir) {
 }
 
 // gopath returns the list of Go path directories.
-[GoRecv] internal static slice<@string> gopath(this ref Context ctxt) {
+internal static slice<@string> gopath(this ref Context ctxt) {
     slice<@string> all = default!;
     foreach (var (_, p) in ctxt.splitPathList(ctxt.GOPATH)) {
         if (p == ""u8 || p == ctxt.GOROOT) {
@@ -289,7 +289,7 @@ internal static readonly @string srcˢ = "src"u8;
 // SrcDirs returns a list of package source root directories.
 // It draws from the current Go root and Go path but omits directories
 // that do not exist.
-[GoRecv] public static slice<@string> SrcDirs(this ref Context ctxt) {
+public static slice<@string> SrcDirs(this ref Context ctxt) {
     slice<@string> all = default!;
     if (ctxt.GOROOT != ""u8 && ctxt.Compiler != "gccgo"u8) {
         @string dir = ctxt.joinPath(ctxt.GOROOT, srcˢ);
@@ -424,7 +424,7 @@ internal static @string envOr(@string name, @string def) {
     return s;
 }
 
-[GoType("num:nuint")] partial struct ImportMode;
+partial struct ImportMode /*num:nuint*/;
 
 public static ImportMode FindOnly => /* 1 << iota */ 1;
 public static ImportMode AllowBinary => 2;
@@ -432,7 +432,7 @@ public static ImportMode ImportComment => 4;
 public static ImportMode IgnoreVendor => 8;
 
 // A Package describes the Go package found in a directory.
-[GoType] partial struct Package {
+partial struct Package {
     public @string Dir;  // directory containing package sources
     public @string Name;  // package name
     public @string ImportComment;  // path in import comment on package statement
@@ -498,7 +498,7 @@ public static ImportMode IgnoreVendor => 8;
 }
 
 // A Directive is a Go directive comment (//go:zzz...) found in a source file.
-[GoType] partial struct Directive {
+partial struct Directive {
     public @string Text;        // full line comment including leading slashes
     public tokenꓸPosition Pos; // position of comment
 }
@@ -506,7 +506,7 @@ public static ImportMode IgnoreVendor => 8;
 // IsCommand reports whether the package is considered a
 // command to be installed (not just a library).
 // Packages named "main" are treated as commands.
-[GoRecv] public static bool IsCommand(this ref Package p) {
+public static bool IsCommand(this ref Package p) {
     return p.Name == "main"u8;
 }
 
@@ -519,23 +519,23 @@ public static (ж<Package>, error) ImportDir(this ж<Context> Ꮡctxt, @string d
 // NoGoError is the error used by [Import] to describe a directory
 // containing no buildable Go source files. (It may still contain
 // test files, files hidden by build tags, and so on.)
-[GoType] partial struct NoGoError {
+partial struct NoGoError {
     public @string Dir;
 }
 
-[GoRecv] public static @string Error(this ref NoGoError e) {
+public static @string Error(this ref NoGoError e) {
     return "no buildable Go source files in "u8 + e.Dir;
 }
 
 // MultiplePackageError describes a directory containing
 // multiple buildable Go source files for multiple packages.
-[GoType] partial struct MultiplePackageError {
+partial struct MultiplePackageError {
     public @string Dir;  // directory containing files
     public slice<@string> Packages; // package names found
     public slice<@string> Files; // corresponding files: Files[i] declares package Packages[i]
 }
 
-[GoRecv] public static @string Error(this ref MultiplePackageError e) {
+public static @string Error(this ref MultiplePackageError e) {
     // Error string limited to two entries for compatibility.
     return fmt.Sprintf("found packages %s (%s) and %s (%s) in %s"u8, e.Packages[0], e.Files[0], e.Packages[1], e.Files[1], e.Dir);
 }
@@ -565,7 +565,7 @@ internal static readonly @string testGoˢ = "_test.go"u8;
 internal static readonly @string testˢ = "_test"u8;
 internal static readonly @string cgoˢ = "cgo"u8;
 
-[GoType("dyn")] internal partial struct Import_tried {
+internal partial struct Import_tried /*dyn*/ {
     internal slice<@string> vendor;
     internal @string goroot;
     internal slice<@string> gopath;
@@ -1167,7 +1167,7 @@ internal static readonly @string fDirImportPathRootGorootˢ = "-f={{.Dir}}\n{{.I
 // about the requested package and all dependencies and then only reports about the requested package.
 // Then we reinvoke it for every dependency. But this is still better than not working at all.
 // See golang.org/issue/26504.
-[GoRecv] internal static error importGo(this ref Context ctxt, ж<Package> Ꮡp, @string path, @string srcDir, ImportMode mode) {
+internal static error importGo(this ref Context ctxt, ж<Package> Ꮡp, @string path, @string srcDir, ImportMode mode) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // To invoke the go command,
@@ -1464,7 +1464,7 @@ internal static ж<Package> ᏑdummyPkg = new StandardBox<Package>(default(Packa
 internal static ref Package dummyPkg => ref ᏑdummyPkg.Value;
 
 // fileInfo records information learned about a file included in a build.
-[GoType] partial struct fileInfo {
+partial struct fileInfo {
     internal @string name; // full name including dir
     internal slice<byte> header;
     internal ж<token.FileSet> fset;
@@ -1475,13 +1475,13 @@ internal static ref Package dummyPkg => ref ᏑdummyPkg.Value;
     internal slice<Directive> directives;
 }
 
-[GoType] partial struct fileImport {
+partial struct fileImport {
     internal @string path;
     internal tokenꓸPos pos;
     internal ж<ast.CommentGroup> doc;
 }
 
-[GoType] partial struct fileEmbed {
+partial struct fileEmbed {
     internal @string pattern;
     internal tokenꓸPosition pos;
 }
@@ -1878,7 +1878,7 @@ internal static (@string, bool) expandSrcDir(@string str, @string srcdir) {
 // Using filepath.IsAbs and filepath.Join here means the results will be
 // different on different systems, but that's OK: -I and -L options are
 // inherently system-dependent.
-[GoRecv] internal static void makePathsAbsolute(this ref Context ctxt, slice<@string> args, @string srcDir) {
+internal static void makePathsAbsolute(this ref Context ctxt, slice<@string> args, @string srcDir) {
     var nextPath = false;
     foreach (var (i, arg) in args) {
         if (nextPath){
@@ -2039,7 +2039,7 @@ internal static readonly @string goexperimentBoringcryptoˢ = "goexperiment.bori
 //	tag (if tag is listed in ctxt.BuildTags, ctxt.ToolTags, or ctxt.ReleaseTags)
 //
 // It records all consulted tags in allTags.
-[GoRecv] internal static bool matchTag(this ref Context ctxt, @string name, map<@string, bool> allTags) {
+internal static bool matchTag(this ref Context ctxt, @string name, map<@string, bool> allTags) {
     if (allTags != default!) {
         allTags[name] = true;
     }
@@ -2099,7 +2099,7 @@ internal static readonly @string goexperimentBoringcryptoˢ = "goexperiment.bori
 // if GOOS=android, then files with GOOS=linux are also matched.
 // if GOOS=illumos, then files with GOOS=solaris are also matched.
 // if GOOS=ios, then files with GOOS=darwin are also matched.
-[GoRecv] internal static bool goodOSArchFile(this ref Context ctxt, @string name, map<@string, bool> allTags) {
+internal static bool goodOSArchFile(this ref Context ctxt, @string name, map<@string, bool> allTags) {
     (name, _, _) = strings.Cut(name, "."u8);
     // Before Go 1.4, a file called "linux.go" would be equivalent to having a
     // build tag "linux" in that file. For Go 1.4 and beyond, we require this

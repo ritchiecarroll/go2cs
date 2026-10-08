@@ -15,7 +15,7 @@ partial class fiat_package {
 // P521Element is an integer modulo 2^521 - 1.
 //
 // The zero value is a valid zero element.
-[GoType] partial struct P521Element {
+partial struct P521Element {
     // Values are represented internally always in the Montgomery domain, and
     // converted in Bytes and SetBytes.
     internal p521MontgomeryDomainFieldElement x;
@@ -62,7 +62,7 @@ public static slice<byte> Bytes(this ж<P521Element> Ꮡe) {
     return Ꮡe.bytes(Ꮡout);
 }
 
-internal static slice<byte> bytes(this ж<P521Element> Ꮡe, [GoArrayDims(66)] ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes(this ж<P521Element> Ꮡe, /*[66]*/ ж<array<byte>> Ꮡout) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 

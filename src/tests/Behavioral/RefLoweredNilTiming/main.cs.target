@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct elem {
+partial struct elem {
     internal uint64 x;
 }
 

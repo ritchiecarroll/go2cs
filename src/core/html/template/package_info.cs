@@ -75,7 +75,7 @@ using static go.html.template_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("html/template/attr.go", "attr.cs", "ABQmAHnyAaK4koCCgqakgIK2ggAJFoaU")]
+[assembly: go.GoPositionMap("html/template/attr.go", "attr.cs", "ABQmAHnyAaK4koCCgqakgIK2ggAJFoaU", "", "", "178=Contains/2/3/1,Contains/3/3/2")]
 [assembly: go.GoPositionMap("html/template/attr_string.go", "attr_string.cs", "/oaigoKCgoLKlIKClA==")]
 [assembly: go.GoPositionMap("html/template/content.go", "content.cs", "ACXmAaKClICUpIKClKiCnLKClIKClKrCgpSkpKSkpKSkpoK4gpaClA==")]
 [assembly: go.GoPositionMap("html/template/context.go", "context.cs", "ACJGgoKClKiSAAIWtIKUgoKUgpSClIKUgpQAI7ABopSkqJKUpKzolKQ=")]
@@ -83,13 +83,13 @@ using static go.html.template_package;
 [assembly: go.GoPositionMap("html/template/delim_string.go", "delim_string.cs", "/oaigoKCypSCgpQ=")]
 [assembly: go.GoPositionMap("html/template/element_string.go", "element_string.cs", "/oaigoKCgsqUgoKU")]
 [assembly: go.GoPositionMap("html/template/error.go", "error.cs", "AEfOA4KUgqSkpKrC")]
-[assembly: go.GoPositionMap("html/template/escape.go", "escape.cs", "ABUw8oKCgpKClJSAgoKCpJSCgIKCpKrUgoCCtoKUyAAxZpIAFiiSlKSCgqSkgoKkpKSkpKSUppaylJSUgoIABxCUgoCChP6ClKSkgqSUpMak2saEpLSkpKSkyIK0pIKUtri0pILc0pTKgoKCgIKAlNyCgriCgoKCpqb8goKCgoKAgraCyqbKABEOAAcokqqigIKkygAPMMKAgoKCgraokgAFMAAUApamptSssoKUgpSClIKUgpaCgpSCloKClIIABhCAgoCCyN6ygpSCgoKUgoLMgoKCgriCgpSCgoKmgqa4goKCgoKmgoKCgoKmqLKClIKCgqauwpKUgoKClIKCgoKUgpSCpqiygoKUqsaSgoCUpIKmgsrKpoKCgoKUlKrUgpSAgsiCyqzSkpSUpqbcggAKCAAFKoKWgqaCppaysoKCgoKCgoKCgriCgoKCtoIAARLylLaklJSClJKUlIKUgoKClIKUloKClJSqooKCpqaqgoKUAAcQgILsyoKClJaWgpaUuKiSgIKkqJKAgqSokoCCpKqigriCgoCCtoKUgpSCuIKCgqi2goKUqqKClK7CqJKqwqiSqJKqwqrC", "687-699:1")]
+[assembly: go.GoPositionMap("html/template/escape.go", "escape.cs", "ABUw8oKCgpKClJSAgoKCpJSCgIKCpKrUgoCCtoKUyAAxZpIAFiiSlKSCgqSkgoKkpKSkpKSUppaylJSUgoIABxCUgoCChP6ClKSkgqSUpMak2saEpLSkpKSkyIK0pIKUtri0pILc0pTKgoKCgIKAlNyCgriCgoKCpqb8goKCgoKAgraCyqbKABEOAAcokqqigIKkygAPMMKAgoKCgraokgAFMAAUApamptSssoKUgpSClIKUgpaCgpSCloKClIIABhCAgoCCyN6ygpSCgoKUgoLMgoKCgriCgpSCgoKmgqa4goKCgoKmgoKCgoKmqLKClIKCgqauwpKUgoKClIKCgoKUgpSCpqiygoKUqsaSgoCUpIKmgsrKpoKCgoKUlKrUgpSAgsiCyqzSkpSUpqbcggAKCAAFKoKWgqaCppaysoKCgoKCgoKCgriCgoKCtoIAARLylLaklJSClJKUlIKUgoKClIKUloKClJSqooKCpqaqgoKUAAcQgILsyoKClJaWgpaUuKiSgIKkqJKAgqSokoCCpKqigriCgoCCtoKUgpSCuIKCgqi2goKUqqKClK7CqJKqwqiSqJKqwqrC", "687-699:1", "", "223=errorf/1/1/2;257=errorf/1/1/2;481=NewIdentifier/1/1/2,SetTree/1/1/2,SetPos/1/1/2;572=errorf/1/1/2;718=errorf/1/1/2;723=errorf/1/1/2;759=Name/1/1/2,errorf/1/1/2;934=errorf/1/1/2")]
 [assembly: go.GoPositionMap("html/template/html.go", "html.cs", "AA8esoKClIKUqLKCgpSosoKClKiygoKUAAoKAAskABw0ABYuABAsopKSuIKCgIKClIKCtJaigpSCpoKUgqqigtaCgpSClIKClIKCgoKCuJSUgpSCgpSUlJSCkoKUqsKCgpTclIKAlKSC+LYAAhIACAI=")]
 [assembly: go.GoPositionMap("html/template/js.go", "js.cs", "ABdEAA0EgoKogLiEspSmlKaSlKioqKgAAhqoggAVApSCAAgMygAQIpjqgpaCgpSm+MKCgoKUptjWgpS4ggAUKoKCgoIABhCmlIKCpoKClKaCgoKCkoKUgoKClJSCgoKUlKzSgoKUpqKCruKCgpSUAAIQ0oKilIKClLS0tLS0gpSCgpSClIK2ABAcABYsABkyABMkAB1IwpSkpKSkpKwACQ6CgoIAASqk")]
 [assembly: go.GoPositionMap("html/template/jsctx_string.go", "jsctx_string.cs", "/oaigoLKlIKClA==")]
 [assembly: go.GoPositionMap("html/template/state_string.go", "state_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgsqUgoKU")]
-[assembly: go.GoPositionMap("html/template/template.go", "template.cs", "ACdEAAkY4oKCpIKClAAFKgAVAoKq4oKUgoKClNjSgoKCgoKUgIK0gpQABRQACQKAgqQAAhTygoKUrAAJAoKCgoKClIKUgpSClIKU3LIAAhwADwKAgqaCgsyCgoKCgoKUgpTeAAgCgIKmgoKCgpTcggAFFgAMAoKCgpSCgpSCgtyCgoKCgpSCAAcQ2JKCgtyCAAIUAAsCgoLYktyAgoKkgqiSAAIU8oIAAhDygqrigoIABRDSgpQAAhgACwIAAhYACgKq0oCCppSUgoKClI7igpSClJSCgqYAAhgACQIAAhoACgKokoCCpIKClIKUrLKu4q7ipoKCgoKClIKUlKbCgoKmgrKCgg==", "525-529:1")]
-[assembly: go.GoPositionMap("html/template/transition.go", "transition.cs", "ABAgAB4+kpaSgoKCgpKClIKCgoKUlIKCgqaUuAAHEqSCgpSCyoKClIKCzIKClJSkpKS4gpSUqJKCgpKClKikgoKSlIKUlKYACBSSgoKmgpS0tIKokoCCpMoABhCCmqKmgpSAgraokoKClIKClJSClIKUlJSokqiSgpKmlKiSgpSClIKUtLS0lLS0tLQACBryxoLIksqilLSCnILClIK0tKaCgoKCgpSUgoL8goKCyIK0lqqigpSkppKCgoKUlIKC/LS6spKCgsiSgsaWpsymlpKCgpSUpKSkqJKCgpSkAAISAAkGgoKU3KgAGziCgoKClJaSgoKUtLS0xoKUgqSC6IKkgqS6koKUpKikxoKCgoKClIKCgtyClIK6kq7CgpSqAAoKpgAGEJKokqiSgpSCgoKCgqaCgpSUqJKCyMY=")]
+[assembly: go.GoPositionMap("html/template/template.go", "template.cs", "ACdEAAkY4oKCpIKClAAFKgAVAoKq4oKUgoKClNjSgoKCgoKUgIK0gpQABRQACQKAgqQAAhTygoKUrAAJAoKCgoKClIKUgpSClIKU3LIAAhwADwKAgqaCgsyCgoKCgoKUgpTeAAgCgIKmgoKCgpTcggAFFgAMAoKCgpSCgpSCgtyCgoKCgpSCAAcQ2JKCgtyCAAIUAAsCgoLYktyAgoKkgqiSAAIU8oIAAhDygqrigoIABRDSgpQAAhgACwIAAhYACgKq0oCCppSUgoKClI7igpSClJSCgqYAAhgACQIAAhoACgKokoCCpIKClIKUrLKu4q7ipoKCgoKClIKUlKbCgoKmgrKCgg==", "525-529:1", "", "356=New/1/1/2;388=New/1/1/2")]
+[assembly: go.GoPositionMap("html/template/transition.go", "transition.cs", "ABAgAB4+kpaSgoKCgpKClIKCgoKUlIKCgqaUuAAHEqSCgpSCyoKClIKCzIKClJSkpKS4gpSUqJKCgpKClKikgoKSlIKUlKYACBSSgoKmgpS0tIKokoCCpMoABhCCmqKmgpSAgraokoKClIKClJSClIKUlJSokqiSgpKmlKiSgpSClIKUtLS0lLS0tLQACBryxoLIksqilLSCnILClIK0tKaCgoKCgpSUgoL8goKCyIK0lqqigpSkppKCgoKUlIKC/LS6spKCgsiSgsaWpsymlpKCgpSUpKSkqJKCgpSkAAISAAkGgoKU3KgAGziCgoKClJaSgoKUtLS0xoKUgqSC6IKkgqS6koKUpKikxoKCgoKClIKCgtyClIK6kq7CgpSqAAoKpgAGEJKokqiSgpSCgoKCgqaCgpSUqJKCyMY=", "", "", "110=errorf/1/1/2;326=errorf/1/1/2;404=errorf/1/1/2;453=errorf/1/1/2;495=errorf/1/1/2;675=errorf/1/1/2")]
 [assembly: go.GoPositionMap("html/template/url.go", "url.cs", "AAxEABgCgoKUgpT6ooCCgraqwgACEPKqwoKClIKClKqigu6CggABEOIABBC24siSlIKUgsaCgpSCqsKClKiigpa2goKCgoKCpoIABRCipoKmgoKClIKCgoKmgKaCgoKCpoKCgoK2gg==")]
 [assembly: go.GoPositionMap("html/template/urlpart_string.go", "urlpart_string.cs", "/oaigoKCypSCgpQ=")]
 // </GoSourcePositionMaps>
@@ -100,7 +100,7 @@ namespace go.html;
 public static partial class template_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

@@ -57,7 +57,7 @@ using static go.crypto.@internal.hpke_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/hpke/hpke.go", "hpke.cs", "ACI6ooKCgoKCtqKCgoKCgoIAFiAABhKCgoKUAAsQooKmwoKClJSClIKClISChKaygoKUgoKUhAAUMoKCgpQADxYACh4ADQqChIKClISCgpaCgoKEhJKSlIKClgAJFIKCgpSCgpaCgpamgoKClIKCloKClqaCgoKUpqaClKaCgoKmgoKClIKmgoKCgoKC1oKCgpSmgoKClO6CgqaCpoKCgoI=", "", "35=crypto.Hash.New;45=crypto.Hash.New")]
+[assembly: go.GoPositionMap("crypto/internal/hpke/hpke.go", "hpke.cs", "ACI6ooKCgoKCtqKCgoKCgoIAFiAABhKCgoKUAAsQooKmwoKClJSClIKClISChKaygoKUgoKUhAAUMoKCgpQADxYACh4ADQqChIKClISCgpaCgoKEhJKSlIKClgAJFIKCgpSCgpaCgpamgoKClIKCloKClqaCgoKUpqaClKaCgoKmgoKClIKmgoKCgoKC1oKCgpSmgoKClO6CgqaCpoKCgoI=", "", "35=crypto.Hash.New;45=crypto.Hash.New", "79=X25519/1/1/6;91=BEAppendUint16/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;
@@ -66,7 +66,7 @@ namespace go.crypto.@internal;
 public static partial class hpke_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

@@ -4,12 +4,12 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
     internal @string tag;
 }
 
-[GoRecv] internal static void add(this ref counter c, nint k) {
+internal static void add(this ref counter c, nint k) {
     c.n += k;
     c.tag += "+"u8;
 }

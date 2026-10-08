@@ -6,11 +6,11 @@ using sort = sort_package;
 
 partial class main_package {
 
-[GoType] partial struct T {
+partial struct T {
     internal nint n;
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     public ж<T> P;
 }
 

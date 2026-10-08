@@ -16,7 +16,7 @@ using go.unicode;
 
 partial class mime_package {
 
-[GoType("num:byte")] partial struct WordEncoder;
+partial struct WordEncoder /*num:byte*/;
 
 public static WordEncoder BEncoding => /* WordEncoder('b') */ 98;
 public static WordEncoder QEncoding => /* WordEncoder('q') */ 113;
@@ -181,7 +181,7 @@ internal static bool isUTF8(@string charset) {
 internal static readonly @string upperhex = "0123456789ABCDEF"u8;
 
 // A WordDecoder decodes MIME headers containing RFC 2047 encoded-words.
-[GoType] partial struct WordDecoder {
+partial struct WordDecoder {
     // CharsetReader, if non-nil, defines a function to generate
     // charset-conversion readers, converting from the provided
     // charset into UTF-8.
@@ -192,7 +192,7 @@ internal static readonly @string upperhex = "0123456789ABCDEF"u8;
 }
 
 // Decode decodes an RFC 2047 encoded-word.
-[GoRecv] public static (@string, error) Decode(this ref WordDecoder d, @string word) {
+public static (@string, error) Decode(this ref WordDecoder d, @string word) {
     // See https://tools.ietf.org/html/rfc2047#section-2 for details.
     // Our decoder is permissive, we accept empty encoded-text.
     if (len(word) < 8 || !strings.HasPrefix(word, "=?"u8) || !strings.HasSuffix(word, "?="u8) || strings.Count(word, "?"u8) != 4) {
@@ -223,7 +223,7 @@ internal static readonly @string upperhex = "0123456789ABCDEF"u8;
 
 // DecodeHeader decodes all encoded-words of the given string. It returns an
 // error if and only if [WordDecoder.CharsetReader] of d returns an error.
-[GoRecv] public static (@string, error) DecodeHeader(this ref WordDecoder d, @string header) {
+public static (@string, error) DecodeHeader(this ref WordDecoder d, @string header) {
     // If there is no encoded-word, returns before creating a buffer.
     nint i = strings.Index(header, "=?"u8);
     if (i == -1) {
@@ -305,7 +305,7 @@ internal static readonly @string utf8ˢ2 = "utf-8"u8;
 internal static readonly @string iso88591ˢ = "iso-8859-1"u8;
 internal static readonly @string usAsciiˢ = "us-ascii"u8;
 
-[GoRecv] internal static error convert(this ref WordDecoder d, ж<strings.Builder> Ꮡbuf, @string charset, slice<byte> content) {
+internal static error convert(this ref WordDecoder d, ж<strings.Builder> Ꮡbuf, @string charset, slice<byte> content) {
     switch (ᐧ) {
     case {} when strings.EqualFold(utf8ˢ2, charset): {
         Ꮡbuf.Write(content);

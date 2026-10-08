@@ -58,7 +58,7 @@ internal static bool isTT(byte b) {
     return false;
 }
 
-[GoType] partial interface sniffSig {
+partial interface sniffSig {
     // match returns the MIME type of the data, or "" if unknown.
     @string match(slice<byte> data, nint firstNonWS);
 }
@@ -140,25 +140,25 @@ internal static slice<sniffSig> sniffSignatures = new sniffSig[]{((htmlSig)slice
 ))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("\x00\x01\x00\x00"u8), "font/ttf"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("OTTO"u8), "font/otf"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("ttcf"u8), "font/collection"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("wOFF"u8), "font/woff"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("wOF2"u8), "font/woff2"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>(((@string)(new byte[]{0x1f, 0x8b, 0x08}))), "application/x-gzip"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("PK\x03\x04"u8), "application/zip"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("Rar!\x1A\x07\x00"u8), "application/x-rar-compressed"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("Rar!\x1A\x07\x01\x00"u8), "application/x-rar-compressed"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("\x00\x61\x73\x6D"u8), "application/wasm"u8))), new textSig(nil)
 }.slice();
 
-[GoType] partial struct exactSig {
+partial struct exactSig {
     internal slice<byte> sig;
     internal @string ct;
 }
 
-[GoRecv] internal static @string match(this ref exactSig e, slice<byte> data, nint firstNonWS) {
+internal static @string match(this ref exactSig e, slice<byte> data, nint firstNonWS) {
     if (bytes.HasPrefix(data, e.sig)) {
         return e.ct;
     }
     return ""u8;
 }
 
-[GoType] partial struct maskedSig {
+partial struct maskedSig {
     internal slice<byte> mask, pat;
     internal bool skipWS;
     internal @string ct;
 }
 
-[GoRecv] internal static @string match(this ref maskedSig m, slice<byte> data, nint firstNonWS) {
+internal static @string match(this ref maskedSig m, slice<byte> data, nint firstNonWS) {
     // pattern matching algorithm section 6
     // https://mimesniff.spec.whatwg.org/#pattern-matching-algorithm
     if (m.skipWS) {
@@ -179,7 +179,7 @@ internal static slice<sniffSig> sniffSignatures = new sniffSig[]{((htmlSig)slice
     return m.ct;
 }
 
-[GoType("[]byte")] partial struct htmlSig;
+partial struct htmlSig /*[]byte*/;
 
 internal static @string match(this htmlSig h, slice<byte> data, nint firstNonWS) {
     data = data.slice(firstNonWS);
@@ -206,7 +206,7 @@ internal static slice<byte> mp4ftype = slice<byte>("ftyp"u8);
 
 internal static slice<byte> mp4 = slice<byte>("mp4"u8);
 
-[GoType] partial struct mp4Sig {
+partial struct mp4Sig {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -237,7 +237,7 @@ internal static @string match(this mp4Sig _, slice<byte> data, nint firstNonWS) 
     return ""u8;
 }
 
-[GoType] partial struct textSig {
+partial struct textSig {
 }
 
 internal static @string match(this textSig _, slice<byte> data, nint firstNonWS) {

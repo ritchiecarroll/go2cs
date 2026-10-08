@@ -37,11 +37,11 @@ internal static partial @string generic<T>(T x) {
     return here();
 }
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static partial @string ptr(this ref counter c) {
+internal static partial @string ptr(this ref counter c) {
     return here();
 }
 
@@ -49,11 +49,11 @@ internal static partial @string val(this counter c) {
     return here();
 }
 
-[GoType] partial struct box<T> {
+partial struct box<T> {
     internal T v;
 }
 
-[GoRecv] internal static partial @string get<T>(this ref box<T> b) {
+internal static partial @string get<T>(this ref box<T> b) {
     return here();
 }
 

@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct counts {
+partial struct counts {
     internal array<nint> vals = new(4);
     internal nint n;
 }

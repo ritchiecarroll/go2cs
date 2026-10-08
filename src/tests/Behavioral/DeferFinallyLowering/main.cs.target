@@ -4,25 +4,25 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct tracer {
+partial struct tracer {
     internal @string id;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object touchˢ = (@string)"touch"u8;
 
-[GoRecv] internal static void touch(this ref tracer t) {
+internal static void touch(this ref tracer t) {
     fmt.Println(touchˢ, t.id);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object doneˢ = (@string)"done"u8;
 
-[GoRecv] internal static void done(this ref tracer t) {
+internal static void done(this ref tracer t) {
     fmt.Println(doneˢ, t.id);
 }
 
-[GoType] partial struct box {
+partial struct box {
     internal tracer a;
     internal tracer b;
 }
@@ -174,7 +174,7 @@ internal static void condPrefix(this ж<box> Ꮡx, bool f) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object finishˢ = (@string)"finish"u8;
 
-[GoRecv] internal static void finish(this ref box x) {
+internal static void finish(this ref box x) {
     fmt.Println(finishˢ, x.a.id);
 }
 

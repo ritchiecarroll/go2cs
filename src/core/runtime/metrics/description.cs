@@ -9,7 +9,7 @@ using @internal;
 partial class metrics_package {
 
 // Description describes a runtime metric.
-[GoType] partial struct Description {
+partial struct Description {
     // Name is the full name of the metric which includes the unit.
     //
     // The format of the metric may be described by the following regular expression.

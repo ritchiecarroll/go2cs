@@ -15,7 +15,7 @@ partial class bytes_package {
 // a byte slice.
 // Unlike a [Buffer], a Reader is read-only and supports seeking.
 // The zero value for Reader operates like a Reader of an empty slice.
-[GoType] partial struct Reader {
+partial struct Reader {
     internal slice<byte> s;
     internal int64 i; // current reading index
     internal nint prevRune;  // index of previous rune; or < 0
@@ -23,7 +23,7 @@ partial class bytes_package {
 
 // Len returns the number of bytes of the unread portion of the
 // slice.
-[GoRecv] public static nint Len(this ref Reader r) {
+public static nint Len(this ref Reader r) {
     if (r.i >= (int64)len(r.s)) {
         return 0;
     }
@@ -33,12 +33,12 @@ partial class bytes_package {
 // Size returns the original length of the underlying byte slice.
 // Size is the number of bytes available for reading via [Reader.ReadAt].
 // The result is unaffected by any method calls except [Reader.Reset].
-[GoRecv] public static int64 Size(this ref Reader r) {
+public static int64 Size(this ref Reader r) {
     return (int64)len(r.s);
 }
 
 // Read implements the [io.Reader] interface.
-[GoRecv] public static (nint n, error err) Read(this ref Reader r, slice<byte> b) {
+public static (nint n, error err) Read(this ref Reader r, slice<byte> b) {
     nint n = default!;
     error err = default!;
 
@@ -55,7 +55,7 @@ partial class bytes_package {
 internal static readonly @string bytesReaderReadAtˢ = "bytes.Reader.ReadAt: negative offset"u8;
 
 // ReadAt implements the [io.ReaderAt] interface.
-[GoRecv] public static (nint n, error err) ReadAt(this ref Reader r, slice<byte> b, int64 off) {
+public static (nint n, error err) ReadAt(this ref Reader r, slice<byte> b, int64 off) {
     nint n = default!;
     error err = default!;
 
@@ -74,7 +74,7 @@ internal static readonly @string bytesReaderReadAtˢ = "bytes.Reader.ReadAt: neg
 }
 
 // ReadByte implements the [io.ByteReader] interface.
-[GoRecv] public static (byte, error) ReadByte(this ref Reader r) {
+public static (byte, error) ReadByte(this ref Reader r) {
     r.prevRune = -1;
     if (r.i >= (int64)len(r.s)) {
         return (0, io.EOF);
@@ -88,7 +88,7 @@ internal static readonly @string bytesReaderReadAtˢ = "bytes.Reader.ReadAt: neg
 internal static readonly @string bytesReaderUnreadByteAtˢ = "bytes.Reader.UnreadByte: at beginning of slice"u8;
 
 // UnreadByte complements [Reader.ReadByte] in implementing the [io.ByteScanner] interface.
-[GoRecv] public static error UnreadByte(this ref Reader r) {
+public static error UnreadByte(this ref Reader r) {
     if (r.i <= 0) {
         return errors.New(bytesReaderUnreadByteAtˢ);
     }
@@ -98,7 +98,7 @@ internal static readonly @string bytesReaderUnreadByteAtˢ = "bytes.Reader.Unrea
 }
 
 // ReadRune implements the [io.RuneReader] interface.
-[GoRecv] public static (rune ch, nint size, error err) ReadRune(this ref Reader r) {
+public static (rune ch, nint size, error err) ReadRune(this ref Reader r) {
     rune ch = default!;
     nint size = default!;
     error err = default!;
@@ -124,7 +124,7 @@ internal static readonly @string bytesReaderUnreadRuneAtˢ = "bytes.Reader.Unrea
 internal static readonly @string bytesReaderUnreadRuneˢ = "bytes.Reader.UnreadRune: previous operation was not ReadRune"u8;
 
 // UnreadRune complements [Reader.ReadRune] in implementing the [io.RuneScanner] interface.
-[GoRecv] public static error UnreadRune(this ref Reader r) {
+public static error UnreadRune(this ref Reader r) {
     if (r.i <= 0) {
         return errors.New(bytesReaderUnreadRuneAtˢ);
     }
@@ -141,7 +141,7 @@ internal static readonly @string bytesReaderSeekInvalidˢ = "bytes.Reader.Seek: 
 internal static readonly @string bytesReaderSeekNegativeˢ = "bytes.Reader.Seek: negative position"u8;
 
 // Seek implements the [io.Seeker] interface.
-[GoRecv] public static (int64, error) Seek(this ref Reader r, int64 offset, nint whence) {
+public static (int64, error) Seek(this ref Reader r, int64 offset, nint whence) {
     r.prevRune = -1;
     int64 abs = default!;
     var exprᴛ1 = whence;
@@ -166,7 +166,7 @@ internal static readonly @string bytesReaderSeekNegativeˢ = "bytes.Reader.Seek:
 }
 
 // WriteTo implements the [io.WriterTo] interface.
-[GoRecv] public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) {
+public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) {
     int64 n = default!;
     error err = default!;
 
@@ -188,7 +188,7 @@ internal static readonly @string bytesReaderSeekNegativeˢ = "bytes.Reader.Seek:
 }
 
 // Reset resets the [Reader] to be reading from b.
-[GoRecv] public static void Reset(this ref Reader r, slice<byte> b) {
+public static void Reset(this ref Reader r, slice<byte> b) {
     r = new Reader(b, 0, -1);
 }
 

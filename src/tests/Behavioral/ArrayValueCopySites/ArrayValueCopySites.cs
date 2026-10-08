@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[3]nint")] partial struct Row;
+partial struct Row /*[3]nint*/;
 
-[GoType] partial struct holder {
+partial struct holder {
     internal array<nint> arr = new(3);
 }
 
@@ -34,7 +34,7 @@ internal static array<nint> get(this holder h) {
     return h.arr.Clone();
 }
 
-internal static void modDirect([GoArrayDims(3)] array<nint> a) {
+internal static void modDirect(/*[3]*/ array<nint> a) {
     a = a.Clone();
 
     a[0] = 99;
@@ -46,7 +46,7 @@ internal static void modNamed(Row r) {
     r[0] = 99;
 }
 
-internal static void modDeep([GoArrayDims(2, 3)] array<array<nint>> m) {
+internal static void modDeep(/*[2][3]*/ array<array<nint>> m) {
     m = m.Clone();
 
     m[0][0] = 99;

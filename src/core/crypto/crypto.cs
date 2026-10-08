@@ -15,7 +15,7 @@ using strconv = strconv_package;
 
 partial class crypto_package {
 
-[GoType("num:nuint")] partial struct Hash;
+partial struct Hash /*num:nuint*/;
 
 // HashFunc simply returns the value of h so that [Hash] implements [SignerOpts].
 public static Hash HashFunc(this Hash h) {
@@ -189,16 +189,10 @@ public static void RegisterHash(Hash h, Func<hash.Hash> f) {
     }
     hashes[h] = f;
 }
-// Descriptor carrier for `PublicKey` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("PublicKey")] public interface PublicKeyᴅ { }
-
-// Descriptor carrier for `PrivateKey` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("PrivateKey")] public interface PrivateKeyᴅ { }
-
 
 // Signer is an interface for an opaque private key that can be used for
 // signing operations. For example, an RSA key kept in a hardware module.
-[GoType] partial interface Signer {
+partial interface Signer {
     // Public returns the public key corresponding to the opaque,
     // private key.
     PublicKey Public();
@@ -219,7 +213,7 @@ public static void RegisterHash(Hash h, Func<hash.Hash> f) {
 }
 
 // SignerOpts contains options for signing with a [Signer].
-[GoType] partial interface SignerOpts {
+partial interface SignerOpts {
     // HashFunc returns an identifier for the hash function used to produce
     // the message passed to Signer.Sign, or else zero to indicate that no
     // hashing was done.
@@ -229,7 +223,7 @@ public static void RegisterHash(Hash h, Func<hash.Hash> f) {
 // Decrypter is an interface for an opaque private key that can be used for
 // asymmetric decryption operations. An example would be an RSA key
 // kept in a hardware module.
-[GoType] partial interface Decrypter {
+partial interface Decrypter {
     // Public returns the public key corresponding to the opaque,
     // private key.
     PublicKey Public();
@@ -238,8 +232,5 @@ public static void RegisterHash(Hash h, Func<hash.Hash> f) {
     // details.
     (slice<byte> plaintext, error err) Decrypt(io.Reader rand, slice<byte> msg, DecrypterOpts opts);
 }
-// Descriptor carrier for `DecrypterOpts` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("DecrypterOpts")] public interface DecrypterOptsᴅ { }
-
 
 } // end crypto_package

@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct holder {
+partial struct holder {
     internal ж<slice<nint>> xs;
     internal ж<nint> cnt;
 }

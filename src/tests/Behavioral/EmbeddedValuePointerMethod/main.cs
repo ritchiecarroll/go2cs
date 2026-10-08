@@ -5,23 +5,23 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct inner {
+partial struct inner {
     internal nint n;
 }
 
-[GoRecv] internal static void bump(this ref inner i, nint d) {
+internal static void bump(this ref inner i, nint d) {
     i.n += d;
 }
 
-[GoRecv] internal static void reset0(this ref inner i) {
+internal static void reset0(this ref inner i) {
     i.n = 0;
 }
 
-[GoRecv] internal static nint total(this ref inner i) {
+internal static nint total(this ref inner i) {
     return i.n;
 }
 
-[GoType] partial struct outer {
+partial struct outer {
     internal nint tag;
     internal partial ref inner inner { get; }
 }
@@ -30,34 +30,34 @@ internal static partial void viaParam(ж<outer> Ꮡo) {
     Ꮡo.of(outer.Ꮡinner).bump(100);
 }
 
-[GoType("num:uint8")] partial struct flags;
+partial struct flags /*num:uint8*/;
 
-[GoRecv] internal static void set(this ref flags f, flags bit) {
+internal static void set(this ref flags f, flags bit) {
     f |= (flags)(bit);
 }
 
-[GoRecv] internal static void clear(this ref flags f, flags bit) {
+internal static void clear(this ref flags f, flags bit) {
     f &= unchecked((flags)~(flags)(bit));
 }
 
-[GoType] partial struct chunk {
+partial struct chunk {
     internal uint16 inUse;
     internal partial ref flags flags { get; }
 }
 
-[GoRecv] internal static void alloc(this ref chunk c, uint16 n) {
+internal static void alloc(this ref chunk c, uint16 n) {
     c.inUse += n;
     if (c.inUse >= 4) {
         c.flags.set(1);
     }
 }
 
-[GoRecv] internal static void free(this ref chunk c, uint16 n) {
+internal static void free(this ref chunk c, uint16 n) {
     c.inUse -= n;
     c.flags.clear(1);
 }
 
-[GoRecv] internal static void bump(this ref chunk c, ж<chunk> Ꮡother) {
+internal static void bump(this ref chunk c, ж<chunk> Ꮡother) {
     {
         var cΔ1 = Ꮡother;
         cΔ1.of(chunk.Ꮡflags).set(2);

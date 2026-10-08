@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct vec {
+partial struct vec {
     internal uint64 x, y;
 }
 

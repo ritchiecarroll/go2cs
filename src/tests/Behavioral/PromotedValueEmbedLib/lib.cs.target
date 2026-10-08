@@ -2,15 +2,15 @@ namespace go;
 
 partial class PromotedValueEmbedLib_package {
 
-[GoType] partial struct common {
+partial struct common {
     internal @string label;
 }
 
-[GoRecv] internal static @string Name(this ref common c) {
+internal static @string Name(this ref common c) {
     return c.label;
 }
 
-[GoType] partial struct Widget {
+partial struct Widget {
     internal partial ref common common { get; }
 }
 
@@ -18,11 +18,11 @@ public static ж<Widget> New(@string label) {
     return Ꮡ(new Widget(common: new common(label: label)));
 }
 
-[GoType] partial struct Gadget {
+partial struct Gadget {
     internal @string tag;
 }
 
-[GoRecv] public static @string Name(this ref Gadget g) {
+public static @string Name(this ref Gadget g) {
     return g.tag;
 }
 

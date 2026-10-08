@@ -25,13 +25,13 @@ partial class net_package {
 // implemented.
 
 // IPAddr represents the address of an IP end point.
-[GoType] partial struct IPAddr {
+partial struct IPAddr {
     public IP IP;
     public @string Zone; // IPv6 scoped addressing zone
 }
 
 // Network returns the address's network name, "ip".
-[GoRecv] public static @string Network(this ref IPAddr a) {
+public static @string Network(this ref IPAddr a) {
     return "ip"u8;
 }
 
@@ -102,7 +102,7 @@ public static (ж<IPAddr>, error) ResolveIPAddr(@string network, @string address
 
 // IPConn is the implementation of the [Conn] and [PacketConn] interfaces
 // for IP network connections.
-[GoType] partial struct IPConn {
+partial struct IPConn {
     internal partial ref conn conn { get; }
 }
 

@@ -39,14 +39,14 @@ partial class types_package {
 //
 // The use of a shared context does not guarantee that identical instances are
 // deduplicated in all cases.
-[GoType] partial struct Context {
+partial struct Context {
     internal sync.Mutex mu;
     internal map<@string, slice<ctxtEntry>> typeMap; // type hash -> instances entries
     internal nint nextID;                   // next unique ID
     internal map<ΔType, nint> originIDs;        // origin type -> unique ID
 }
 
-[GoType] partial struct ctxtEntry {
+partial struct ctxtEntry {
     internal ΔType orig;
     internal slice<ΔType> targs;
     internal ΔType instance; // = orig[targs]

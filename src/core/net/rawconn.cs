@@ -17,7 +17,7 @@ partial class net_package {
 // method will fail immediately.
 // BUG(mikio): On JS and Plan 9, the Control, Read and Write
 // methods of syscall.RawConn are not implemented.
-[GoType] partial struct rawConn {
+partial struct rawConn {
     internal ж<netFD> fd;
 }
 
@@ -96,19 +96,19 @@ internal static ж<rawConn> newRawConn(ж<netFD> Ꮡfd) {
 // extension method so that they can distinguish different socket types.
 //
 // Network is not intended for use outside the standard library.
-[GoRecv] internal static poll.String Network(this ref rawConn c) {
+internal static poll.String Network(this ref rawConn c) {
     return ((poll.String)(~c.fd).net);
 }
 
-[GoType] partial struct rawListener {
+partial struct rawListener {
     internal partial ref rawConn rawConn { get; }
 }
 
-[GoRecv] internal static error Read(this ref rawListener l, Func<uintptr, bool> _) {
+internal static error Read(this ref rawListener l, Func<uintptr, bool> _) {
     return syscall.EINVAL;
 }
 
-[GoRecv] internal static error Write(this ref rawListener l, Func<uintptr, bool> _) {
+internal static error Write(this ref rawListener l, Func<uintptr, bool> _) {
     return syscall.EINVAL;
 }
 

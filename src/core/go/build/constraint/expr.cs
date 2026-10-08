@@ -23,7 +23,7 @@ internal static UntypedInt maxSize => 1000;
 
 // An Expr is a build tag constraint expression.
 // The underlying concrete type is *[AndExpr], *[OrExpr], *[NotExpr], or *[TagExpr].
-[GoType] partial interface Expr {
+partial interface Expr {
     // String returns the string form of the expression,
     // using the boolean syntax used in //go:build lines.
     @string String();
@@ -37,18 +37,18 @@ internal static UntypedInt maxSize => 1000;
 }
 
 // A TagExpr is an [Expr] for the single tag Tag.
-[GoType] partial struct TagExpr {
+partial struct TagExpr {
     public @string Tag; // for example, “linux” or “cgo”
 }
 
-[GoRecv] internal static void isExpr(this ref TagExpr x) {
+internal static void isExpr(this ref TagExpr x) {
 }
 
-[GoRecv] public static bool Eval(this ref TagExpr x, Func<@string, bool> ok) {
+public static bool Eval(this ref TagExpr x, Func<@string, bool> ok) {
     return ok(x.Tag);
 }
 
-[GoRecv] public static @string String(this ref TagExpr x) {
+public static @string String(this ref TagExpr x) {
     return x.Tag;
 }
 
@@ -57,18 +57,18 @@ internal static Expr tag(@string tag) {
 }
 
 // A NotExpr represents the expression !X (the negation of X).
-[GoType] partial struct NotExpr {
+partial struct NotExpr {
     public Expr X;
 }
 
-[GoRecv] internal static void isExpr(this ref NotExpr x) {
+internal static void isExpr(this ref NotExpr x) {
 }
 
-[GoRecv] public static bool Eval(this ref NotExpr x, Func<@string, bool> ok) {
+public static bool Eval(this ref NotExpr x, Func<@string, bool> ok) {
     return !x.X.Eval(ok);
 }
 
-[GoRecv] public static @string String(this ref NotExpr x) {
+public static @string String(this ref NotExpr x) {
     @string s = x.X.String();
     switch (x.X.type()) {
     case ж<AndExpr> _:
@@ -85,21 +85,21 @@ internal static Expr not(Expr x) {
 }
 
 // An AndExpr represents the expression X && Y.
-[GoType] partial struct AndExpr {
+partial struct AndExpr {
     public Expr X, Y;
 }
 
-[GoRecv] internal static void isExpr(this ref AndExpr x) {
+internal static void isExpr(this ref AndExpr x) {
 }
 
-[GoRecv] public static bool Eval(this ref AndExpr x, Func<@string, bool> ok) {
+public static bool Eval(this ref AndExpr x, Func<@string, bool> ok) {
     // Note: Eval both, to make sure ok func observes all tags.
     var xok = x.X.Eval(ok);
     var yok = x.Y.Eval(ok);
     return xok && yok;
 }
 
-[GoRecv] public static @string String(this ref AndExpr x) {
+public static @string String(this ref AndExpr x) {
     return andArg(x.X) + " && "u8 + andArg(x.Y);
 }
 
@@ -118,21 +118,21 @@ internal static Expr and(Expr x, Expr y) {
 }
 
 // An OrExpr represents the expression X || Y.
-[GoType] partial struct OrExpr {
+partial struct OrExpr {
     public Expr X, Y;
 }
 
-[GoRecv] internal static void isExpr(this ref OrExpr x) {
+internal static void isExpr(this ref OrExpr x) {
 }
 
-[GoRecv] public static bool Eval(this ref OrExpr x, Func<@string, bool> ok) {
+public static bool Eval(this ref OrExpr x, Func<@string, bool> ok) {
     // Note: Eval both, to make sure ok func observes all tags.
     var xok = x.X.Eval(ok);
     var yok = x.Y.Eval(ok);
     return xok || yok;
 }
 
-[GoRecv] public static @string String(this ref OrExpr x) {
+public static @string String(this ref OrExpr x) {
     return orArg(x.X) + " || "u8 + orArg(x.Y);
 }
 
@@ -151,12 +151,12 @@ internal static Expr or(Expr x, Expr y) {
 }
 
 // A SyntaxError reports a syntax error in a parsed build expression.
-[GoType] partial struct SyntaxError {
+partial struct SyntaxError {
     public nint Offset;   // byte offset in input where error was detected
     public @string Err; // description of error
 }
 
-[GoRecv] public static @string Error(this ref SyntaxError e) {
+public static @string Error(this ref SyntaxError e) {
     return e.Err;
 }
 
@@ -215,7 +215,7 @@ internal static (@string expr, bool ok) splitGoBuild(@string line) {
 }
 
 // An exprParser holds state for parsing a build expression.
-[GoType] partial struct exprParser {
+partial struct exprParser {
     internal @string s; // input string
     internal nint i;   // next read location in s
     internal @string tok; // last token read
@@ -356,7 +356,7 @@ internal static Expr atom(this ж<exprParser> Ꮡp) {
 // and p.pos records the byte offset of the start of the token in the input stream.
 // If lex reaches the end of the input, p.tok is set to the empty string.
 // For any other syntax error, lex panics with a SyntaxError.
-[GoRecv] internal static void lex(this ref exprParser p) {
+internal static void lex(this ref exprParser p) {
     p.isTag = false;
     while (p.i < len(p.s) && (p.s[p.i] == (rune)' ' || p.s[p.i] == (rune)'\t')) {
         p.i++;

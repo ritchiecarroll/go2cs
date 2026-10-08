@@ -187,7 +187,7 @@ internal static (uint8 sigType, crypto.Hash hash, error err) legacyTypeAndHashFr
 //    emLen >= len(prefix) + hLen + 11
 // TLS 1.3 dropped support for PKCS #1 v1.5 in favor of RSA-PSS.
 
-[GoType("dyn")] partial struct rsaSignatureSchemesᴛ1 {
+partial struct rsaSignatureSchemesᴛ1 /*dyn*/ {
     internal SignatureScheme scheme;
     internal nint minModulusBytes;
     internal uint16 maxVersion;

@@ -12,7 +12,7 @@ partial class fs_package {
 
 // ReadDirFS is the interface implemented by a file system
 // that provides an optimized implementation of [ReadDir].
-[GoType] partial interface ReadDirFS :
+partial interface ReadDirFS :
     FS
 {
     // ReadDir reads the named directory
@@ -56,7 +56,7 @@ public static (slice<DirEntry>, error) ReadDir(FS fsys, @string name) {
 }
 
 // dirInfo is a DirEntry based on a FileInfo.
-[GoType] partial struct dirInfo {
+partial struct dirInfo {
     internal FileInfo fileInfo;
 }
 

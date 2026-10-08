@@ -225,13 +225,13 @@ internal static partial @string stackText() {
     return ((@string)(buf.slice(0, n)));
 }
 
-[GoType("num:nint")] partial struct recvT;
+partial struct recvT /*num:nint*/;
 
-[GoType] partial struct genRecv<X> {
+partial struct genRecv<X> {
     internal X v;
 }
 
-[GoRecv] internal static partial @string ptrFrame(this ref recvT t) {
+internal static partial @string ptrFrame(this ref recvT t) {
     return stackText();
 }
 

@@ -180,7 +180,7 @@ internal static (ж<syscall.SockaddrInet4>, bool) sockaddrOf(netꓸAddr addr) {
     return (sa, true);
 }
 
-internal static bool sameIPv4(Δnet.IP ip, [GoArrayDims(4)] array<byte> raw) {
+internal static bool sameIPv4(Δnet.IP ip, /*[4]*/ array<byte> raw) {
     raw = raw.Clone();
 
     var four = ip.To4();

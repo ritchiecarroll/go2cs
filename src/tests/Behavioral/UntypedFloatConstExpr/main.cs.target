@@ -17,7 +17,7 @@ internal static UntypedFloat twoPi => /* 2 * Pi */ 6.283185307179586;
 internal static UntypedFloat halfPi => /* Pi / 2 */ 1.5707963267948966;
 internal static UntypedFloat third => /* 1.0 / 3.0 */ 0.3333333333333333;
 
-[GoType("num:float64")] partial struct MyFloat;
+partial struct MyFloat /*num:float64*/;
 
 public static float64 Abs(this MyFloat f) {
     if (f < 0D) {

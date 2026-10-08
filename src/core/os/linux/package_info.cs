@@ -95,7 +95,7 @@ using static go.os_package;
 [assembly: go.GoPositionMap("os/getwd.go", "getwd.cs", "ABc0AAsCyoKaooKCgoKUgoIABhCCyoK6goKCuIKCgoKCgsyClJSCzIKCkpSCgpaCgoLKgpSUgoKCgrqCgoKClIKmqIKChA==")]
 [assembly: go.GoPositionMap("os/path.go", "path.cs", "AA0mAAgEgoKClAAFEIKClIKUgrqAgoKCyoKmgoKUlAACENKokoKUgpQ=")]
 [assembly: go.GoPositionMap("os/path_unix.go", "path_unix.cs", "AAsekqikloKWloKoloKCgpSUgqg=")]
-[assembly: go.GoPositionMap("os/pidfd_linux.go", "pidfd_linux.cs", "ABk80oKWhIK4gpKClqqigpaCgoKClJSmgoKWgoKU1gAKEIKa1KSEmIaCuIIACQ6ygpSkpITWgrYABhIACwaCgrqCgpSWmIKogIIABxCAgqbcysY=", "105-107:1;164-166:1")]
+[assembly: go.GoPositionMap("os/pidfd_linux.go", "pidfd_linux.cs", "ABk80oKWhIK4gpKClqqigpaCgoKClJSmgoKWgoKU1gAKEIKa1KSEmIaCuIIACQ6ygpSkpITWgrYABhIACwaCgrqCgpSWmIKogIIABxCAgqbcysY=", "105-107:1;164-166:1", "", "114=WaitStatus/1/1/2")]
 [assembly: go.GoPositionMap("os/pipe2_unix.go", "pipe2_unix.cs", "AA0aooSCgpY=")]
 [assembly: go.GoPositionMap("os/proc.go", "proc.cs", "ABAkgpSUprrQqrCqsKqw3MKCAAIQ0rgABhCEpg==")]
 [assembly: go.GoPositionMap("os/rawconn.go", "rawconn.cs", "ABMkgoCCpIKC1oKAgqSCgtaCgIKkgoKmgg==")]
@@ -122,7 +122,7 @@ namespace go;
 public static partial class os_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

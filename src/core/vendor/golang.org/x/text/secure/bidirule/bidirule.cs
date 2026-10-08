@@ -47,7 +47,7 @@ partial class bidirule_package {
 // ErrInvalid indicates a label is invalid according to the Bidi Rule.
 public static error ErrInvalid = errors.New("bidirule: failed Bidi Rule"u8);
 
-[GoType("num:uint8")] partial struct ruleState;
+partial struct ruleState /*num:uint8*/;
 
 internal static ruleState ruleInitial => /* iota */ 0;
 internal static ruleState ruleLTR => 1;
@@ -56,7 +56,7 @@ internal static ruleState ruleRTL => 3;
 internal static ruleState ruleRTLFinal => 4;
 internal static ruleState ruleInvalid => 5;
 
-[GoType] partial struct ruleTransition {
+partial struct ruleTransition {
     internal ruleState next;
     internal uint16 mask;
 }
@@ -184,7 +184,7 @@ public static ж<Transformer> New() {
 }
 
 // Transformer implements transform.Transform.
-[GoType] partial struct Transformer {
+partial struct Transformer {
     internal ruleState state;
     internal bool hasRTL;
     internal uint16 seen;
@@ -192,19 +192,19 @@ public static ж<Transformer> New() {
 
 // A rule can only be violated for "Bidi Domain names", meaning if one of the
 // following categories has been observed.
-[GoRecv] internal static bool isRTL(this ref Transformer t) {
+internal static bool isRTL(this ref Transformer t) {
     const uint16 isRTL = /* 1<<bidi.R | 1<<bidi.AL | 1<<bidi.AN */ 8226;
     return (uint16)(t.seen & isRTL) != 0;
 }
 
 // Reset implements transform.Transformer.
-[GoRecv] public static void Reset(this ref Transformer t) {
+public static void Reset(this ref Transformer t) {
     t = new Transformer(nil);
 }
 
 // Transform implements transform.Transformer. This Transformer has state and
 // needs to be reset between uses.
-[GoRecv] public static (nint nDst, nint nSrc, error err) Transform(this ref Transformer t, slice<byte> dst, slice<byte> src, bool atEOF) {
+public static (nint nDst, nint nSrc, error err) Transform(this ref Transformer t, slice<byte> dst, slice<byte> src, bool atEOF) {
     error err = default!;
 
     if (len(dst) < len(src)) {
@@ -221,7 +221,7 @@ public static ж<Transformer> New() {
 }
 
 // Span returns the first n bytes of src that conform to the Bidi rule.
-[GoRecv] public static (nint n, error err) Span(this ref Transformer t, slice<byte> src, bool atEOF) {
+public static (nint n, error err) Span(this ref Transformer t, slice<byte> src, bool atEOF) {
     nint n = default!;
     error err = default!;
 
@@ -261,7 +261,7 @@ internal static array<bidi.Properties> asciiTable = new(128);
     }
 }
 
-[GoRecv] internal static (nint n, bool ok) advance(this ref Transformer t, slice<byte> s) {
+internal static (nint n, bool ok) advance(this ref Transformer t, slice<byte> s) {
     nint n = default!;
 
     bidi.Properties e = default!;
@@ -314,7 +314,7 @@ internal static array<bidi.Properties> asciiTable = new(128);
     return (n, true);
 }
 
-[GoRecv] internal static (nint n, bool ok) advanceString(this ref Transformer t, @string s) {
+internal static (nint n, bool ok) advanceString(this ref Transformer t, @string s) {
     nint n = default!;
 
     bidi.Properties e = default!;

@@ -63,7 +63,7 @@ using static go.vendor.golang.org.x.net.http.httpproxy_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/http/httpproxy/proxy.go", "proxy.cs", "AFe0AfIABxCigoCCtgACGgALBKaC1qKCgpKCgoKmgpSClqaCgpaCuICCtoKUrLKClIKClIKUgoKCgoKohIKCgriCgqamgoCCpICCpqKCgpaCgoKogIKCuIKClJSCpqaAgoKmlN6ClIKCgpSAgqS43rKCgIKkgoKUqqCkAAkUgpSmgoKCpgANGoLuggAHEIKClAAIFIKClIKU")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/http/httpproxy/proxy.go", "proxy.cs", "AFe0AfIABxCigoCCtgACGgALBKaC1qKCgpKCgoKmgpSClqaCgpaCuICCtoKUrLKClIKClIKUgoKCgoKohIKCgriCgqamgoCCpICCpqKCgpaCgoKogIKCuIKClJSCpqaAgoKmlN6ClIKCgpSAgqS43rKCgIKkgoKUqqCkAAkUgpSmgoKCpgANGoLuggAHEIKClAAIFIKClIKU", "", "", "96=getEnvAny/1/3/1,getEnvAny/2/3/2,getEnvAny/3/3/3,Getenv/1/1/4")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.net.http;
@@ -72,7 +72,7 @@ namespace go.vendor.golang.org.x.net.http;
 public static partial class httpproxy_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

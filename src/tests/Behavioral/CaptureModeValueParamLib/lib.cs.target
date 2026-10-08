@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class CaptureModeValueParamLib_package {
 
-[GoType] partial struct Config {
+partial struct Config {
     public nint Indent;
     internal @string trace;
 }
@@ -35,7 +35,7 @@ public static (@string, error) Fprint(this ж<Config> Ꮡcfg, @string label) {
     return Ꮡcfg.fprint(label);
 }
 
-[GoRecv] public static @string Trace(this ref Config cfg) {
+public static @string Trace(this ref Config cfg) {
     return cfg.trace;
 }
 

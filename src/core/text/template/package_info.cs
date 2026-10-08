@@ -66,7 +66,7 @@ using static go.text.template_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("text/template/exec.go", "exec.cs", "ABgslIKClAATKpKokqiSqqKCgoKmqJKokoKCpoL+lJSCqJKqogAOHoKmgqiygoKUgpQADRyCzsKCgpS0tMTWAAISAAkCgoKUAAIaAAoCpuKCgoKUyoKUggAIDgAJAoKUgoKCgoKUgpSUlOqSmsKCmKKCxua0tILGtLSAgtbEzOKCgoKClIKClKSCtKqyprKUlJSkpKSkpKSkpKSm0oKCgIK2gpSCooKmgpTKpoKCuKaClICCtqKStoKClIKClJSClMSClIKUxIKUgoKUxIKUgoKUgoKCgpSUgpTExIKCgpSCgqaUgpSUgoKCgoLKpoKUlLSkgrSkooKCgpSCpoKSgpSCAAIWAAsCgpSCgoKUgqaCgpSmpoKCuKKClKSmtpKklIKClKSktKSUgt4ACQiClKqmgoKUprSmgqaCpqKCpqKCgpSCpoKmtIKCgoKUrLKCgqamooKCgoKUrLKCkpSUgoKmgrqCgpSAgqSUlIKCgoKUgqaClLiCkoKUgoK4pMbGgoKApraCxoKogoKcsoKUgoKClIKCgoKkgpSAgqaCgpSogoKCgoKmpu6UqJSCgqaCgoK4goKCprimuoKClJSUgpamgoKUqJKUpKSokoKUlJSUlIKUgoKCggAHEJSCgsa0xqaCgpSkgpS0pKSkpJSUpKSkpIK2grakpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoCCgoKkgqaCgpSkpKSmtKSktJSCrLKCgqauwoKUgpSqooKCgpSCguyigpSCloKClJTI", "354-358:1;363-396:2;389-394:2.1;794-799:1")]
+[assembly: go.GoPositionMap("text/template/exec.go", "exec.cs", "ABgslIKClAATKpKokqiSqqKCgoKmqJKokoKCpoL+lJSCqJKqogAOHoKmgqiygoKUgpQADRyCzsKCgpS0tMTWAAISAAkCgoKUAAIaAAoCpuKCgoKUyoKUggAIDgAJAoKUgoKCgoKUgpSUlOqSmsKCmKKCxua0tILGtLSAgtbEzOKCgoKClIKClKSCtKqyprKUlJSkpKSkpKSkpKSm0oKCgIK2gpSCooKmgpTKpoKCuKaClICCtqKStoKClIKClJSClMSClIKUxIKUgoKUxIKUgoKUgoKCgpSUgpTExIKCgpSCgqaUgpSUgoKCgoLKpoKUlLSkgrSkooKCgpSCpoKSgpSCAAIWAAsCgpSCgoKUgqaCgpSmpoKCuKKClKSmtpKklIKClKSktKSUgt4ACQiClKqmgoKUprSmgqaCpqKCpqKCgpSCpoKmtIKCgoKUrLKCgqamooKCgoKUrLKCkpSUgoKmgrqCgpSAgqSUlIKCgoKUgqaClLiCkoKUgoK4pMbGgoKApraCxoKogoKcsoKUgoKClIKCgoKkgpSAgqaCgpSogoKCgoKmpu6UqJSCgqaCgoK4goKCprimuoKClJSUgpamgoKUqJKUpKSokoKUlJSUlIKUgoKCggAHEJSCgsa0xqaCgpSkgpS0pKSkpJSUpKSkpIK2grakpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoCCgoKkgqaCgpSkpKSmtKSktJSCrLKCgqauwoKUgpSqooKCgpSCguyigpSCloKClJTI", "354-358:1;363-396:2;389-394:2.1;794-799:1", "", "149=Name/1/1/1,Errorf/1/1/2")]
 [assembly: go.GoPositionMap("text/template/funcs.go", "funcs.cs", "ABdOwgAlQKKClKiSgoKokoKClIKClICCpLyigrqkgKSkpKTakoKUgsaktqgACAKCgoKAgraAgqTqooKClJSClIKClKaClKSkqJKClKSkpKSClAACEPKCgpSigoKAgqSUgoKUpIKClICClMikxgACEgAIAoKClIKUgpSClKSktoKCgoKUpoKUgqaClKyygoKUlKSqsqrCgoKUgoKWgIKkgoKCgpSUgqaCopSCgpaCgIK2quKCgIKAgpTYgoKU6pKCqsKqwqiSAAQQgoIACx6ClKSkpKSkpKiSgpSUpKqigoKCpqiygoKUgqKCgoKUlLS0gtiUpKSkpKSkgpSClIKUyIKmqKSCqJKCgoKUgoKClIKUlLS0tpSkpKSkpLaopIKClKikgoKUqKSCgpS8goKCgoKYkoKCgpS0tLS0tLS0goKUqKSClIKCqsK8goSCgoKCgoKYkoKChJSUhKaUtLS0tLS0tIKCgtiCgpSUlJSopIKUgoKmgpSkqsKqwgACFPKClIKUgoKCgqaU", "73-75:1;366-374:1")]
 [assembly: go.GoPositionMap("text/template/helper.go", "helper.cs", "ABEw8oKUAAIYAAsCAAIcAA4CgqrSlJSCgoKUjuKClIKUlIKCpgACGAAJAgACFgAKAoKokoKClIKUruKu8oKmgoKCgoKUgpSUpsKCgqaCsoKC", "173-177:1")]
 [assembly: go.GoPositionMap("text/template/option.go", "option.cs", "ABVUABUCgoKUpoKCpoCClJSCpIKkgug=")]
@@ -79,7 +79,7 @@ namespace go.text;
 public static partial class template_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

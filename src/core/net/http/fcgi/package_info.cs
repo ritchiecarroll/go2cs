@@ -70,7 +70,7 @@ using static go.net.http.fcgi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/fcgi/child.go", "child.cs", "ACZKgsqCqJKCgoKCgpSCgoKUgoKUgoKCggANHKLugqaCgpSClAAIBoKClIKClIKClIIAAxDCgpSCgoCCpIKCpoKClKaCggAIFILuwoKCgoKAgqSAggAICpS4uMSygpSWlKaWgoCCpIKClIKCqKKClIKkgoKCpqSUlKaUgoKmpIKCpqSSgoKUlJSkgoKCzKKCgoKmprKCgpSClIKCgoKmgoIABxKChIK4goKmAAQU8oKCgoKUlIKUgoKClIIABxLygtq0mqSC3JS2")]
+[assembly: go.GoPositionMap("net/http/fcgi/child.go", "child.cs", "ACZKgsqCqJKCgoKCgpSCgoKUgoKUgoKCggANHKLugqaCgpSClAAIBoKClIKClIKClIIAAxDCgpSCgoCCpIKCpoKClKaCggAIFILuwoKCgoKAgqSAggAICpS4uMSygpSWlKaWgoCCpIKClIKCqKKClIKkgoKCpqSUlKaUgoKmpIKCpqSSgoKUlJSkgoKCzKKCgoKmprKCgpSClIKCgoKmgoIABxKChIK4goKmAAQU8oKCgoKUlIKUgoKClIIABxLygtq0mqSC3JS2", "", "", "88=newWriter/1/1/3;171=newConn/1/1/1")]
 [assembly: go.GoPositionMap("net/http/fcgi/fcgi.go", "fcgi.cs", "AEeeAYKClIKC7oKCgoKCAA0egqjigoKCgpQADRCygIKkgpSCgIKkpoKo4oKCgoKAgqSAgqSAgqSC1oKCgoKmgoKCgoKCgIKkgIKkgIK2gqaCgpSSgoKUgoKUpoKClKaCgoKClIIACRSCgIKCpKaCgoIAChaCgoKCgpSAgqSClKaU")]
 // </GoSourcePositionMaps>
 
@@ -80,7 +80,7 @@ namespace go.net.http;
 public static partial class fcgi_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

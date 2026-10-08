@@ -21,7 +21,7 @@ partial class gosym_package {
  */
 
 // A Sym represents a single symbol table entry.
-[GoType] partial struct Sym {
+partial struct Sym {
     public uint64 Value;
     public byte Type;
     public @string Name;
@@ -32,7 +32,7 @@ partial class gosym_package {
 }
 
 // Static reports whether this symbol is static (not visible outside its file).
-[GoRecv] public static bool Static(this ref Sym s) {
+public static bool Static(this ref Sym s) {
     return s.Type >= (rune)'a';
 }
 
@@ -41,7 +41,7 @@ partial class gosym_package {
 // returns s.Name with all the contents between (and including) the outermost left
 // and right bracket removed. This is useful to ignore any extra slashes or dots
 // inside the brackets from the string searches below, where needed.
-[GoRecv] internal static @string nameWithoutInst(this ref Sym s) {
+internal static @string nameWithoutInst(this ref Sym s) {
     nint start = strings.Index(s.Name, "["u8);
     if (start < 0) {
         return s.Name;
@@ -60,7 +60,7 @@ internal static readonly @string typeˢ2 = "type."u8;
 
 // PackageName returns the package part of the symbol name,
 // or the empty string if there is none.
-[GoRecv] public static @string PackageName(this ref Sym s) {
+public static @string PackageName(this ref Sym s) {
     @string name = s.nameWithoutInst();
     // Since go1.20, a prefix of "type:" and "go:" is a compiler-generated symbol,
     // they do not belong to any package.
@@ -88,7 +88,7 @@ internal static readonly @string typeˢ2 = "type."u8;
 // ReceiverName returns the receiver type name of this symbol,
 // or the empty string if there is none.  A receiver name is only detected in
 // the case that s.Name is fully-specified with a package name.
-[GoRecv] public static @string ReceiverName(this ref Sym s) {
+public static @string ReceiverName(this ref Sym s) {
     @string name = s.nameWithoutInst();
     // If we find a slash in name, it should precede any bracketed expression
     // that was removed, so pathend will apply correctly to name and s.Name.
@@ -113,7 +113,7 @@ internal static readonly @string typeˢ2 = "type."u8;
 }
 
 // BaseName returns the symbol name without the package or receiver name.
-[GoRecv] public static @string BaseName(this ref Sym s) {
+public static @string BaseName(this ref Sym s) {
     @string name = s.nameWithoutInst();
     {
         nint i = strings.LastIndex(name, "."u8); if (i != -1) {
@@ -134,7 +134,7 @@ internal static readonly @string typeˢ2 = "type."u8;
 }
 
 // A Func collects information about a single function.
-[GoType] partial struct Func {
+partial struct Func {
     public uint64 Entry;
     public partial ref ж<Sym> Sym { get; }
     public uint64 End;
@@ -156,7 +156,7 @@ internal static readonly @string typeˢ2 = "type."u8;
 // and one Obj per C source file.
 //
 // In Go 1.2, there is a single Obj for the entire program.
-[GoType] partial struct Obj {
+partial struct Obj {
     // Funcs is a list of functions in the Obj.
     public slice<Func> Funcs;
     // In Go 1.1 and earlier, Paths is a list of symbols corresponding
@@ -173,7 +173,7 @@ internal static readonly @string typeˢ2 = "type."u8;
 // Table represents a Go symbol table. It stores all of the
 // symbols decoded from the program and provides methods to translate
 // between symbols, names, and addresses.
-[GoType] partial struct Table {
+partial struct Table {
     public slice<Sym> Syms; // nil for Go 1.3 and later binaries
     public slice<Func> Funcs;
     public map<@string, ж<Obj>> Files; // for Go 1.2 and later all files map to one Obj
@@ -181,7 +181,7 @@ internal static readonly @string typeˢ2 = "type."u8;
     internal ж<LineTable> go12line; // Go 1.2 line number table
 }
 
-[GoType] partial struct sym {
+partial struct sym {
     internal uint64 value;
     internal uint64 gotype;
     internal byte typ;
@@ -572,7 +572,7 @@ break_countloop:;
 
 // PCToFunc returns the function containing the program counter pc,
 // or nil if there is no such function.
-[GoRecv] public static ж<Func> PCToFunc(this ref Table t, uint64 pc) {
+public static ж<Func> PCToFunc(this ref Table t, uint64 pc) {
     var funcs = t.Funcs;
     while (len(funcs) > 0) {
         nint m = len(funcs) / 2;
@@ -596,7 +596,7 @@ break_countloop:;
 
 // PCToLine looks up line number information for a program counter.
 // If there is no information, it returns fn == nil.
-[GoRecv] public static (@string @file, nint line, ж<Func> fn) PCToLine(this ref Table t, uint64 pc) {
+public static (@string @file, nint line, ж<Func> fn) PCToLine(this ref Table t, uint64 pc) {
     @string @file = default!;
     nint line = default!;
     ж<Func> fn = default!;
@@ -618,7 +618,7 @@ break_countloop:;
 // LineToPC looks up the first program counter on the given line in
 // the named file. It returns [UnknownFileError] or [UnknownLineError] if
 // there is an error looking up this line.
-[GoRecv] public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @string @file, nint line) {
+public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @string @file, nint line) {
     uint64 pc = default!;
     ж<Func> fn = default!;
     error err = default!;
@@ -650,7 +650,7 @@ break_countloop:;
 
 // LookupSym returns the text, data, or bss symbol with the given name,
 // or nil if no such symbol is found.
-[GoRecv] public static ж<Sym> LookupSym(this ref Table t, @string name) {
+public static ж<Sym> LookupSym(this ref Table t, @string name) {
     // TODO(austin) Maybe make a map
     foreach (var (i, _) in t.Syms) {
         var s = Ꮡ(t.Syms, i);
@@ -668,7 +668,7 @@ break_countloop:;
 
 // LookupFunc returns the text, data, or bss symbol with the given name,
 // or nil if no such symbol is found.
-[GoRecv] public static ж<Func> LookupFunc(this ref Table t, @string name) {
+public static ж<Func> LookupFunc(this ref Table t, @string name) {
     foreach (var (i, _) in t.Funcs) {
         var f = Ꮡ(t.Funcs, i);
         if ((~(~f).Sym).Name == name) {
@@ -679,7 +679,7 @@ break_countloop:;
 }
 
 // SymByAddr returns the text, data, or bss symbol starting at the given address.
-[GoRecv] public static ж<Sym> SymByAddr(this ref Table t, uint64 addr) {
+public static ж<Sym> SymByAddr(this ref Table t, uint64 addr) {
     foreach (var (i, _) in t.Syms) {
         var s = Ꮡ(t.Syms, i);
         switch ((~s).Type) {
@@ -697,7 +697,7 @@ break_countloop:;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string malformedSymbolTableˢ = "<malformed symbol table>"u8;
 
-[GoType("dyn")] internal partial struct lineFromAline_stackEnt {
+internal partial struct lineFromAline_stackEnt /*dyn*/ {
     internal @string path;
     internal nint start;
     internal nint offset;
@@ -713,7 +713,7 @@ internal static readonly @string malformedSymbolTableˢ = "<malformed symbol tab
 // we never quite found all the corner cases.
 //
 // Go 1.2 and later use a simpler format, documented at golang.org/s/go12symtab.
-[GoRecv] internal static (@string, nint) lineFromAline(this ref Obj o, nint aline) {
+internal static (@string, nint) lineFromAline(this ref Obj o, nint aline) {
     var noPath = Ꮡ(new lineFromAline_stackEnt(""u8, 0, 0, nil));
     var tos = noPath;
 pathloop:
@@ -754,7 +754,7 @@ break_pathloop:;
     return ((~tos).path, aline - (~tos).start - (~tos).offset + 1);
 }
 
-[GoRecv] internal static (nint, error) alineFromLine(this ref Obj o, @string path, nint line) {
+internal static (nint, error) alineFromLine(this ref Obj o, @string path, nint line) {
     if (line < 1) {
         return (0, new UnknownLineErrorжerror(Ꮡ(new UnknownLineError(path, line))));
     }
@@ -800,7 +800,7 @@ break_pathloop:;
     return (0, ((UnknownFileError)path));
 }
 
-[GoType("@string")] partial struct UnknownFileError;
+partial struct UnknownFileError /*@string*/;
 
 /*
  * Errors
@@ -812,24 +812,24 @@ public static @string Error(this UnknownFileError e) {
 // UnknownLineError represents a failure to map a line to a program
 // counter, either because the line is beyond the bounds of the file
 // or because there is no code on the given line.
-[GoType] partial struct UnknownLineError {
+partial struct UnknownLineError {
     public @string File;
     public nint Line;
 }
 
-[GoRecv] public static @string Error(this ref UnknownLineError e) {
+public static @string Error(this ref UnknownLineError e) {
     return "no code at "u8 + e.File + ":"u8 + strconv.Itoa(e.Line);
 }
 
 // DecodingError represents an error during the decoding of
 // the symbol table.
-[GoType] partial struct DecodingError {
+partial struct DecodingError {
     internal nint off;
     internal @string msg;
     internal any val;
 }
 
-[GoRecv] public static @string Error(this ref DecodingError e) {
+public static @string Error(this ref DecodingError e) {
     @string msg = e.msg;
     if (e.val != default!) {
         msg += fmt.Sprintf(" '%v'"u8, e.val);

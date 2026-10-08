@@ -5,13 +5,13 @@ using Δmath = math_package;
 
 partial class main_package {
 
-[GoType] partial interface Interface {
+partial interface Interface {
     nint Len();
     bool Less(nint i, nint j);
     void Swap(nint i, nint j);
 }
 
-[GoType("[]float64")] partial struct Float64Slice;
+partial struct Float64Slice /*[]float64*/;
 
 public static nint Len(this Float64Slice x) {
     return len(x);
@@ -29,8 +29,8 @@ internal static bool fisNaN(float64 f) {
     return f != f;
 }
 
-[GoType] partial struct reverse {
-    [GoEmbedded] public Interface Interface;
+partial struct reverse {
+    /*embed*/ public Interface Interface;
 }
 
 internal static bool Less(this reverse r, nint i, nint j) {
@@ -50,8 +50,7 @@ internal static void insertionSort(Interface data) {
     }
 }
 
-[GoType("operators = Sum, Comparable, Ordered")]
-partial interface ordered<ΔT> {
+partial interface ordered<ΔT> /*operators = Sum, Comparable, Ordered*/ {
     //  Type constraints: ~int | ~float32 | ~float64 | ~string
     // Derived operators: +, ==, !=, <, <=, >, >=
 }

@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct item {
+partial struct item {
     internal nint n;
 }
 
-[GoType("num:uintptr")] partial struct handle;
+partial struct handle /*num:uintptr*/;
 
 internal static handle invalid => /* ^handle(0) */ unchecked((handle)18446744073709551615);
 
@@ -46,7 +46,7 @@ internal static error closeIt(ж<nint> Ꮡp, nint tag) {
     return default!;
 }
 
-internal static byte first([GoArrayDims(4)] array<byte> valueʗp) {
+internal static byte first(/*[4]*/ array<byte> valueʗp) {
     ref var value = ref heap(valueʗp.Clone(), out var Ꮡvalue);
 
     var p = Ꮡvalue.at<byte>(0);
@@ -97,7 +97,7 @@ internal static void Main() {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct res {
+partial struct res {
     internal nint id;
 }
 

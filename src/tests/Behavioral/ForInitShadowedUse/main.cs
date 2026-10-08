@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static nint start(this ref counter c) {
+internal static nint start(this ref counter c) {
     return c.n;
 }
 

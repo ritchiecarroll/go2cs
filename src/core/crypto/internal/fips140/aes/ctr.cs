@@ -15,7 +15,7 @@ using math;
 
 partial class aes_package {
 
-[GoType] partial struct CTR {
+partial struct CTR {
     internal Block b;
     internal uint64 ivlo, ivhi; // start counter as 64-bit limbs
     internal uint64 offset; // for XORKeyStream only

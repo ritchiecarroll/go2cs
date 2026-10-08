@@ -57,12 +57,12 @@ public static UntypedInt IF_TYPE_IEEE80211 => 71;
 public static UntypedInt IF_TYPE_TUNNEL => 131;
 public static UntypedInt IF_TYPE_IEEE1394 => 144;
 
-[GoType] partial struct SocketAddress {
+partial struct SocketAddress {
     public ж<syscall.RawSockaddrAny> Sockaddr;
     public int32 SockaddrLength;
 }
 
-[GoType] partial struct IpAdapterUnicastAddress {
+partial struct IpAdapterUnicastAddress {
     public uint32 Length;
     public uint32 Flags;
     public ж<IpAdapterUnicastAddress> Next;
@@ -76,28 +76,28 @@ public static UntypedInt IF_TYPE_IEEE1394 => 144;
     public uint8 OnLinkPrefixLength;
 }
 
-[GoType] partial struct IpAdapterAnycastAddress {
+partial struct IpAdapterAnycastAddress {
     public uint32 Length;
     public uint32 Flags;
     public ж<IpAdapterAnycastAddress> Next;
     public SocketAddress Address;
 }
 
-[GoType] partial struct IpAdapterMulticastAddress {
+partial struct IpAdapterMulticastAddress {
     public uint32 Length;
     public uint32 Flags;
     public ж<IpAdapterMulticastAddress> Next;
     public SocketAddress Address;
 }
 
-[GoType] partial struct IpAdapterDnsServerAdapter {
+partial struct IpAdapterDnsServerAdapter {
     public uint32 Length;
     public uint32 Reserved;
     public ж<IpAdapterDnsServerAdapter> Next;
     public SocketAddress Address;
 }
 
-[GoType] partial struct IpAdapterPrefix {
+partial struct IpAdapterPrefix {
     public uint32 Length;
     public uint32 Flags;
     public ж<IpAdapterPrefix> Next;
@@ -105,21 +105,21 @@ public static UntypedInt IF_TYPE_IEEE1394 => 144;
     public uint32 PrefixLength;
 }
 
-[GoType] partial struct IpAdapterWinsServerAddress {
+partial struct IpAdapterWinsServerAddress {
     public uint32 Length;
     public uint32 Reserved;
     public ж<IpAdapterWinsServerAddress> Next;
     public SocketAddress Address;
 }
 
-[GoType] partial struct IpAdapterGatewayAddress {
+partial struct IpAdapterGatewayAddress {
     public uint32 Length;
     public uint32 Reserved;
     public ж<IpAdapterGatewayAddress> Next;
     public SocketAddress Address;
 }
 
-[GoType] partial struct IpAdapterAddresses {
+partial struct IpAdapterAddresses {
     public uint32 Length;
     public uint32 IfIndex;
     public ж<IpAdapterAddresses> Next;
@@ -147,13 +147,13 @@ public static UntypedInt IF_TYPE_IEEE1394 => 144;
 }
 
 /* more fields might be present here. */
-[GoType] partial struct SecurityAttributes {
+partial struct SecurityAttributes {
     public uint16 Length;
     public uintptr SecurityDescriptor;
     public bool InheritHandle;
 }
 
-[GoType] partial struct FILE_BASIC_INFO {
+partial struct FILE_BASIC_INFO {
     public int64 CreationTime;
     public int64 LastAccessTime;
     public int64 LastWriteTime;
@@ -191,7 +191,7 @@ public static UntypedInt TH32CS_SNAPMODULE32 => 0x10;
 
 public static UntypedInt MAX_MODULE_NAME32 => 255;
 
-[GoType] partial struct ModuleEntry32 {
+partial struct ModuleEntry32 {
     public uint32 Size;
     public uint32 ModuleID;
     public uint32 ProcessID;
@@ -235,7 +235,7 @@ public static ж<syscall.GUID> ᏑWSAID_WSARECVMSG = new StandardBox<syscall.GUI
 public static ref syscall.GUID WSAID_WSARECVMSG => ref ᏑWSAID_WSARECVMSG.Value;
 
 
-[GoType("dyn")] partial struct sendRecvMsgFuncᴛ1 {
+partial struct sendRecvMsgFuncᴛ1 /*dyn*/ {
     internal sync.Once once;
     internal uintptr sendAddr;
     internal uintptr recvAddr;
@@ -244,7 +244,7 @@ public static ref syscall.GUID WSAID_WSARECVMSG => ref ᏑWSAID_WSARECVMSG.Value
 internal static ж<sendRecvMsgFuncᴛ1> ᏑsendRecvMsgFunc = new StandardBox<sendRecvMsgFuncᴛ1>(default(sendRecvMsgFuncᴛ1));
 internal static ref sendRecvMsgFuncᴛ1 sendRecvMsgFunc => ref ᏑsendRecvMsgFunc.Value;
 
-[GoType] partial struct WSAMsg {
+partial struct WSAMsg {
     public syscall.Pointer Name;
     public int32 Namelen;
     public ж<syscall.WSABuf> Buffers;
@@ -306,7 +306,7 @@ public static UntypedInt STYPE_DISKTREE => 0x00;
 
 public static UntypedInt STYPE_TEMPORARY => 0x40000000;
 
-[GoType] partial struct SHARE_INFO_2 {
+partial struct SHARE_INFO_2 {
     public ж<uint16> Netname;
     public uint32 Type;
     public ж<uint16> Remark;
@@ -335,7 +335,7 @@ public static error ErrorLoadingGetTempPath2() {
 //sys	DestroyEnvironmentBlock(block *uint16) (err error) = userenv.DestroyEnvironmentBlock
 //sys	CreateEvent(eventAttrs *SecurityAttributes, manualReset uint32, initialState uint32, name *uint16) (handle syscall.Handle, err error) = kernel32.CreateEventW
 //sys	ProcessPrng(buf []byte) (err error) = bcryptprimitives.ProcessPrng
-[GoType] partial struct FILE_ID_BOTH_DIR_INFO {
+partial struct FILE_ID_BOTH_DIR_INFO {
     public uint32 NextEntryOffset;
     public uint32 FileIndex;
     public syscall.Filetime CreationTime;
@@ -353,7 +353,7 @@ public static error ErrorLoadingGetTempPath2() {
     public array<uint16> FileName = new(1);
 }
 
-[GoType] partial struct FILE_FULL_DIR_INFO {
+partial struct FILE_FULL_DIR_INFO {
     public uint32 NextEntryOffset;
     public uint32 FileIndex;
     public syscall.Filetime CreationTime;
@@ -372,7 +372,7 @@ public static error ErrorLoadingGetTempPath2() {
 //sys	GetVolumeNameForVolumeMountPoint(volumeMountPoint *uint16, volumeName *uint16, bufferlength uint32) (err error) = GetVolumeNameForVolumeMountPointW
 //sys	RtlLookupFunctionEntry(pc uintptr, baseAddress *uintptr, table *byte) (ret uintptr) = kernel32.RtlLookupFunctionEntry
 //sys	RtlVirtualUnwind(handlerType uint32, baseAddress uintptr, pc uintptr, entry uintptr, ctxt uintptr, data *uintptr, frame *uintptr, ctxptrs *byte) (ret uintptr) = kernel32.RtlVirtualUnwind
-[GoType] partial struct SERVICE_STATUS {
+partial struct SERVICE_STATUS {
     public uint32 ServiceType;
     public uint32 CurrentState;
     public uint32 ControlsAccepted;
@@ -416,7 +416,7 @@ public static partial int64 QueryPerformanceCounter();
 //go:linkname QueryPerformanceFrequency
 public static partial int64 QueryPerformanceFrequency();
 
-[GoType("num:uint32")] partial struct NTStatus;
+partial struct NTStatus /*num:uint32*/;
 
 // Implemented in runtime package.
 //sys   GetModuleHandle(modulename *uint16) (handle syscall.Handle, err error) = kernel32.GetModuleHandleW

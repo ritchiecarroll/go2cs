@@ -6,9 +6,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("@string")] partial struct Network;
+partial struct Network /*@string*/;
 
-[GoType("@string")] partial struct Label;
+partial struct Label /*@string*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string tcpˢ = "tcp"u8;

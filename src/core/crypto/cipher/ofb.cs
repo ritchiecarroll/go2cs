@@ -13,7 +13,7 @@ using go.crypto.@internal.fips140;
 
 partial class cipher_package {
 
-[GoType] partial struct ofb {
+partial struct ofb {
     internal Block b;
     internal slice<byte> cipher;
     internal slice<byte> @out;
@@ -51,7 +51,7 @@ public static Stream NewOFB(Block b, slice<byte> iv) {
     return new ofbжStream(x);
 }
 
-[GoRecv] internal static void refill(this ref ofb x) {
+internal static void refill(this ref ofb x) {
     nint bs = x.b.BlockSize();
     nint remain = len(x.@out) - x.outUsed;
     if (remain > x.outUsed) {
@@ -68,7 +68,7 @@ public static Stream NewOFB(Block b, slice<byte> iv) {
     x.outUsed = 0;
 }
 
-[GoRecv] internal static void XORKeyStream(this ref ofb x, slice<byte> dst, slice<byte> src) {
+internal static void XORKeyStream(this ref ofb x, slice<byte> dst, slice<byte> src) {
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }

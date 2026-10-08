@@ -32,7 +32,7 @@ public static UntypedInt Castagnoli => 0x82f63b78;
 
 public static UntypedInt Koopman => 0xeb31d82e;
 
-[GoType("[256]uint32")] partial struct Table;
+partial struct Table /*[256]uint32*/;
 
 // This file makes use of functions implemented in architecture-specific files.
 // The interface that they implement is as follows:
@@ -128,7 +128,7 @@ public static ж<Table> MakeTable(uint32 poly) {
 }
 
 // digest represents the partial evaluation of a checksum.
-[GoType] partial struct digest {
+partial struct digest {
     internal uint32 crc;
     internal ж<Table> tab;
 }
@@ -154,29 +154,29 @@ public static hash.Hash32 NewIEEE() {
     return New(IEEETable);
 }
 
-[GoRecv] internal static nint Size(this ref digest d) {
+internal static nint Size(this ref digest d) {
     return ΔSize;
 }
 
-[GoRecv] internal static nint BlockSize(this ref digest d) {
+internal static nint BlockSize(this ref digest d) {
     return 1;
 }
 
-[GoRecv] internal static void Reset(this ref digest d) {
+internal static void Reset(this ref digest d) {
     d.crc = 0;
 }
 
 internal static readonly @string magic = "crc\x01"u8;
 internal const nint marshaledSize = /* len(magic) + 4 + 4 */ 12;
 
-[GoRecv] internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint32(b, tableSum(d.tab));
     b = byteorder.BEAppendUint32(b, d.crc);
     return (b, default!);
 }
 
-[GoRecv] internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
+internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
@@ -185,7 +185,7 @@ internal static readonly @string hashCrc32InvalidHashˢ = "hash/crc32: invalid h
 internal static readonly @string hashCrc32InvalidHashˢ2 = "hash/crc32: invalid hash state size"u8;
 internal static readonly @string hashCrc32TablesDoNotˢ = "hash/crc32: tables do not match"u8;
 
-[GoRecv] internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
+internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
         return errors.New(hashCrc32InvalidHashˢ);
     }
@@ -223,18 +223,18 @@ public static uint32 Update(uint32 crc, ж<Table> Ꮡtab, slice<byte> p) {
     return update(crc, Ꮡtab, p, true);
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref digest d, slice<byte> p) {
+internal static (nint n, error err) Write(this ref digest d, slice<byte> p) {
     // We only create digest objects through New() which takes care of
     // initialization in this case.
     d.crc = update(d.crc, d.tab, p, false);
     return (len(p), default!);
 }
 
-[GoRecv] internal static uint32 Sum32(this ref digest d) {
+internal static uint32 Sum32(this ref digest d) {
     return d.crc;
 }
 
-[GoRecv] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
+internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     var s = d.Sum32();
     return append(@in, (byte)((s >> (int)(24))), (byte)((s >> (int)(16))), (byte)((s >> (int)(8))), (byte)s);
 }

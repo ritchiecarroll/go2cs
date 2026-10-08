@@ -221,7 +221,7 @@ internal static (@string, nint, error) sockssplitHostPort(@string address) {
     return (host, portnum, default!);
 }
 
-[GoType("num:nint")] partial struct socksCommand;
+partial struct socksCommand /*num:nint*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string socksConnectˢ = "socks connect"u8;
@@ -241,9 +241,9 @@ internal static @string String(this socksCommand cmd) {
 
 }
 
-[GoType("num:nint")] public partial struct socksAuthMethod;
+public partial struct socksAuthMethod /*num:nint*/;
 
-[GoType("num:nint")] partial struct socksReply;
+partial struct socksReply /*num:nint*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string succeededˢ = "succeeded"u8;
@@ -314,7 +314,7 @@ internal static socksReply socksStatusSucceeded => 0x00;
 
 // An Addr represents a SOCKS-specific address.
 // Either Name or IP is used exclusively.
-[GoType] partial struct socksAddr {
+partial struct socksAddr {
     public @string Name; // fully-qualified domain name
     public net.IP IP;
     public nint Port;
@@ -323,7 +323,7 @@ internal static socksReply socksStatusSucceeded => 0x00;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string socksˢ = "socks"u8;
 
-[GoRecv] internal static @string Network(this ref socksAddr a) {
+internal static @string Network(this ref socksAddr a) {
     return socksˢ;
 }
 
@@ -344,8 +344,8 @@ internal static @string String(this ж<socksAddr> Ꮡa) {
 }
 
 // A Conn represents a forward proxy connection.
-[GoType] partial struct socksConn {
-    [GoEmbedded] public net_package.Conn Conn;
+partial struct socksConn {
+    /*embed*/ public net_package.Conn Conn;
     internal netꓸAddr boundAddr;
 }
 
@@ -361,7 +361,7 @@ internal static netꓸAddr BoundAddr(this ж<socksConn> Ꮡc) {
 }
 
 // A Dialer holds SOCKS-specific options.
-[GoType] partial struct socksDialer {
+partial struct socksDialer {
     internal socksCommand cmd; // either CmdConnect or cmdBind
     internal @string proxyNetwork;      // network between a proxy server and a client
     internal @string proxyAddress;      // proxy server address
@@ -491,7 +491,7 @@ internal static (net.Conn, error) Dial(this ж<socksDialer> Ꮡd, @string networ
 internal static readonly @string networkNotImplementedˢ = "network not implemented"u8;
 internal static readonly @string commandNotImplementedˢ = "command not implemented"u8;
 
-[GoRecv] internal static error validateTarget(this ref socksDialer d, @string network, @string address) {
+internal static error validateTarget(this ref socksDialer d, @string network, @string address) {
     var exprᴛ1 = network;
     if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp6"u8 || exprᴛ1 == "tcp4"u8) {
     }
@@ -509,7 +509,7 @@ internal static readonly @string commandNotImplementedˢ = "command not implemen
     return default!;
 }
 
-[GoRecv] internal static (netꓸAddr proxy, netꓸAddr dst, error err) pathAddrs(this ref socksDialer d, @string address) {
+internal static (netꓸAddr proxy, netꓸAddr dst, error err) pathAddrs(this ref socksDialer d, @string address) {
     netꓸAddr proxy = default!;
     netꓸAddr dst = default!;
     error err = default!;
@@ -545,7 +545,7 @@ internal static UntypedInt socksauthStatusSucceeded => 0x00;
 
 // UsernamePassword are the credentials for the username/password
 // authentication method.
-[GoType] partial struct socksUsernamePassword {
+partial struct socksUsernamePassword {
     public @string Username;
     public @string Password;
 }
@@ -557,7 +557,7 @@ internal static readonly @string usernamePasswordˢ = "username/password authent
 
 // Authenticate authenticates a pair of username and password with the
 // proxy server.
-[GoRecv] internal static error Authenticate(this ref socksUsernamePassword up, context.Context ctx, io.ReadWriter rw, socksAuthMethod auth) {
+internal static error Authenticate(this ref socksUsernamePassword up, context.Context ctx, io.ReadWriter rw, socksAuthMethod auth) {
     var exprᴛ1 = auth;
     if (exprᴛ1 == socksAuthMethodNotRequired) {
         return default!;

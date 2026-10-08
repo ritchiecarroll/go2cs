@@ -130,7 +130,7 @@ internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
 
 // traceStackTable maps stack traces (arrays of PC's) to unique uint32 ids.
 // It is lock-free for reading.
-[GoType] partial struct traceStackTable {
+partial struct traceStackTable {
     internal traceMap tab;
 }
 
@@ -215,7 +215,7 @@ internal static slice<traceFrame> makeTraceFrames(uintptr gen, slice<uintptr> pc
     }
 }
 
-[GoType] partial struct traceFrame {
+partial struct traceFrame {
     public uintptr PC;
     internal uint64 funcID;
     internal uint64 fileID;

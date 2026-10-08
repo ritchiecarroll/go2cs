@@ -215,7 +215,7 @@ internal static ref uint32 gcphase => ref Ꮡgcphase.Value;
 //
 //go:linkname writeBarrier
 
-[GoType("dyn")] partial struct writeBarrierᴛ1 {
+partial struct writeBarrierᴛ1 /*dyn*/ {
     internal bool enabled;    // compiler emits a check of this before calling write barrier
     internal array<byte> pad = new(3); // compiler uses 32-bit load for "enabled" field
     internal uint64 alignme;  // guarantee alignment so that compiler can use a 32 or 64-bit load
@@ -238,7 +238,7 @@ internal static void setGCPhase(uint32 x) {
     writeBarrier.enabled = gcphase == _GCmark || gcphase == _GCmarktermination;
 }
 
-[GoType("num:nint")] partial struct gcMarkWorkerMode;
+partial struct gcMarkWorkerMode /*num:nint*/;
 
 internal static gcMarkWorkerMode gcMarkWorkerNotWorker => /* iota */ 0;
 internal static gcMarkWorkerMode gcMarkWorkerDedicatedMode => 1;
@@ -275,7 +275,7 @@ internal static bool pollFractionalWorkerExit() {
 internal static ж<workType> Ꮡwork = new StandardBox<workType>(new workType(nil));
 internal static ref workType work => ref Ꮡwork.Value;
 
-[GoType("dyn")] partial struct workType_wbufSpans {
+partial struct workType_wbufSpans /*dyn*/ {
     internal mutex @lock;
     // free is a list of spans dedicated to workbufs, but
     // that don't currently contain any workbufs.
@@ -285,17 +285,17 @@ internal static ref workType work => ref Ꮡwork.Value;
     internal mSpanList busy;
 }
 
-[GoType("dyn")] partial struct workType_assistQueue {
+partial struct workType_assistQueue /*dyn*/ {
     internal mutex @lock;
     internal gQueue q;
 }
 
-[GoType("dyn")] partial struct workType_sweepWaiters {
+partial struct workType_sweepWaiters /*dyn*/ {
     internal mutex @lock;
     internal gList list;
 }
 
-[GoType("dyn")] partial struct workType_strongFromWeak {
+partial struct workType_strongFromWeak /*dyn*/ {
     // block is a flag set during mark termination that prevents
     // new weak->strong conversions from executing by blocking the
     // goroutine and enqueuing it onto q.
@@ -312,7 +312,7 @@ internal static ref workType work => ref Ꮡwork.Value;
     internal gQueue q;
 }
 
-[GoType] partial struct workType {
+partial struct workType {
     internal lfstack full;          // lock-free list of full blocks workbuf
     internal cpu.CacheLinePad _; // prevents false-sharing between full and empty
     internal lfstack empty;          // lock-free list of empty blocks workbuf
@@ -434,7 +434,7 @@ internal static void gcWaitOnMark(uint32 n) {
     }
 }
 
-[GoType("num:nint")] partial struct gcMode;
+partial struct gcMode /*num:nint*/;
 
 internal static gcMode gcBackgroundMode => /* iota */ 0; // concurrent GC and sweep
 internal static gcMode gcForceMode => 1;     // stop-the-world GC now, concurrent sweep
@@ -442,13 +442,13 @@ internal static gcMode gcForceBlockMode => 2; // stop-the-world GC now and STW s
 
 // A gcTrigger is a predicate for starting a GC cycle. Specifically,
 // it is an exit condition for the _GCoff phase.
-[GoType] partial struct gcTrigger {
+partial struct gcTrigger {
     internal gcTriggerKind kind;
     internal int64 now;  // gcTriggerTime: current time
     internal uint32 n; // gcTriggerCycle: cycle number to start
 }
 
-[GoType("num:nint")] partial struct gcTriggerKind;
+partial struct gcTriggerKind /*num:nint*/;
 
 internal static gcTriggerKind gcTriggerHeap => /* iota */ 0;
 internal static gcTriggerKind gcTriggerTime => 1;
@@ -683,7 +683,7 @@ internal static ref uint32 gcMarkDoneFlushed => ref ᏑgcMarkDoneFlushed.Value;
 
 // gcDebugMarkDone contains fields used to debug/test mark termination.
 
-[GoType("dyn")] partial struct gcDebugMarkDoneᴛ1 {
+partial struct gcDebugMarkDoneᴛ1 /*dyn*/ {
     // spinAfterRaggedBarrier forces gcMarkDone to spin after it executes
     // the ragged barrier.
     internal atomic.Bool spinAfterRaggedBarrier;
@@ -1175,7 +1175,7 @@ internal static void gcBgMarkPrepare() {
 
 // gcBgMarkWorkerNode is an entry in the gcBgMarkWorkerPool. It points to a single
 // gcBgMarkWorker goroutine.
-[GoType] partial struct gcBgMarkWorkerNode {
+partial struct gcBgMarkWorkerNode {
     // Unused workers are managed in a lock-free stack. This field must be first.
     internal lfnode node;
     // The g of this worker.

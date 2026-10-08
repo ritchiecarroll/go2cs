@@ -12,7 +12,7 @@ partial class ring_package {
 // serves as reference to the entire ring. Empty rings are represented
 // as nil Ring pointers. The zero value for a Ring is a one-element
 // ring with a nil Value.
-[GoType] partial struct Ring {
+partial struct Ring {
     internal ж<Ring> next, prev;
     public any Value; // for use by client; untouched by this library
 }

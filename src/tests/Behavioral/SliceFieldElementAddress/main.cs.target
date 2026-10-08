@@ -4,15 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct grid {
+partial struct grid {
     internal slice<slice<nint>> rows;
 }
 
-[GoRecv] internal static void addLine(this ref grid g) {
+internal static void addLine(this ref grid g) {
     g.rows = append(g.rows, (slice<nint>)(default!));
 }
 
-[GoRecv] internal static void push(this ref grid g, nint v) {
+internal static void push(this ref grid g, nint v) {
     var row = Ꮡ(g.rows, len(g.rows) - 1);
     row.ValueSlot = append(row.ValueSlot, v);
 }

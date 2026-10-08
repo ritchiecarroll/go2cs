@@ -4,15 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("map[@string, slice<@string>]")] partial struct ΔHeader;
+partial struct ΔHeader /*map[@string, slice<@string>]*/;
 
-[GoType("map[@string, nint]")] partial struct Counts;
+partial struct Counts /*map[@string, nint]*/;
 
-[GoType] partial struct response {
+partial struct response {
     internal ΔHeader hdr;
 }
 
-[GoRecv] internal static ΔHeader Header(this ref response r) {
+internal static ΔHeader Header(this ref response r) {
     return r.hdr;
 }
 

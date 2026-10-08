@@ -4,13 +4,13 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:uint64")] partial struct traceArg;
+partial struct traceArg /*num:uint64*/;
 
-[GoType("num:nuint")] partial struct arenaIdx;
+partial struct arenaIdx /*num:nuint*/;
 
-[GoType("num:int32")] partial struct nameOff;
+partial struct nameOff /*num:int32*/;
 
-[GoType("num:nuint")] partial struct idx;
+partial struct idx /*num:nuint*/;
 
 internal static void Main() {
     int32 procs = 5;
@@ -36,6 +36,6 @@ internal static void Main() {
     fmt.Println(h);
 }
 
-[GoType("num:uint8")] partial struct traceGoStatus;
+partial struct traceGoStatus /*num:uint8*/;
 
 } // end main_package

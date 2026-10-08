@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType("num:uintptr")] partial struct utp;
+partial struct utp /*num:uintptr*/;
 
 internal static partial uintptr readViaParam(ж<uintptr> Ꮡp) {
     var q = Ꮡp;
@@ -28,7 +28,7 @@ internal static uintptr tricky(this ж<utp> Ꮡr) {
     }
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal uintptr v;
 }
 

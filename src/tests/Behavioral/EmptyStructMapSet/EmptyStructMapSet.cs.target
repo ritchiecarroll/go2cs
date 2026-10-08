@@ -13,12 +13,12 @@ internal static bool contains(map<nint, EmptyStruct> seen, nint k) {
     return ok;
 }
 
-[GoType] partial struct entry {
+partial struct entry {
     internal @string tag;
     internal nint size;
 }
 
-[GoType("map[uint32, entry]")] partial struct registry;
+partial struct registry /*map[uint32, entry]*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string missingˢ = "missing"u8;

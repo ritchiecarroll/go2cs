@@ -7,7 +7,7 @@ using strings = strings_package;
 
 partial class json_package {
 
-[GoType("@string")] partial struct tagOptions;
+partial struct tagOptions /*@string*/;
 
 // parseTag splits a struct field's json tag into its name and
 // comma-separated options.

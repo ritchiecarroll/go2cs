@@ -499,7 +499,7 @@ internal static void dieFromException(ж<exceptionrecord> Ꮡinfo, ж<context> �
 }
 
 // gsignalStack is unused on Windows.
-[GoType] partial struct gsignalStack {
+partial struct gsignalStack {
 }
 
 } // end runtime_package

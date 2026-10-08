@@ -6,7 +6,7 @@ namespace go.io;
 partial class fs_package {
 
 // A StatFS is a file system with a Stat method.
-[GoType] partial interface StatFS :
+partial interface StatFS :
     FS
 {
     // Stat returns a FileInfo describing the file.

@@ -43,11 +43,11 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint f
     return ipToSockaddr(family, a.IP, a.Port, a.Zone);
 }
 
-[GoRecv] internal static Δsockaddr toLocal(this ref UDPAddr a, @string net) {
+internal static Δsockaddr toLocal(this ref UDPAddr a, @string net) {
     return new UDPAddrжΔsockaddr(Ꮡ(new UDPAddr(loopbackIP(net), a.Port, a.Zone)));
 }
 
-[GoRecv] internal static (nint, ж<UDPAddr>, error) readFrom(this ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
+internal static (nint, ж<UDPAddr>, error) readFrom(this ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
     nint n = default!;
@@ -77,7 +77,7 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint f
     return (n, Ꮡaddr, err);
 }
 
-[GoRecv] internal static (nint n, netip.AddrPort addr, error err) readFromAddrPort(this ref UDPConn c, slice<byte> b) {
+internal static (nint n, netip.AddrPort addr, error err) readFromAddrPort(this ref UDPConn c, slice<byte> b) {
     nint n = default!;
     netip.AddrPort addr = default!;
     error err = default!;
@@ -108,7 +108,7 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint f
     return (n, addr, err);
 }
 
-[GoRecv] internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) readMsg(this ref UDPConn c, slice<byte> b, slice<byte> oob) {
+internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) readMsg(this ref UDPConn c, slice<byte> b, slice<byte> oob) {
     nint n = default!;
     nint oobn = default!;
     nint flags = default!;
@@ -132,7 +132,7 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint f
     return (n, oobn, flags, addr, err);
 }
 
-[GoRecv] internal static (nint, error) writeTo(this ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
+internal static (nint, error) writeTo(this ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
     if ((~c.fd).isConnected) {
@@ -164,7 +164,7 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint f
 
 }
 
-[GoRecv] internal static (nint, error) writeToAddrPort(this ref UDPConn c, slice<byte> b, netip.AddrPort addr) {
+internal static (nint, error) writeToAddrPort(this ref UDPConn c, slice<byte> b, netip.AddrPort addr) {
     if ((~c.fd).isConnected) {
         return (0, ErrWriteToConnected);
     }
@@ -194,7 +194,7 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint f
 
 }
 
-[GoRecv] internal static (nint n, nint oobn, error err) writeMsg(this ref UDPConn c, slice<byte> b, slice<byte> oob, ж<UDPAddr> Ꮡaddr) {
+internal static (nint n, nint oobn, error err) writeMsg(this ref UDPConn c, slice<byte> b, slice<byte> oob, ж<UDPAddr> Ꮡaddr) {
     error err = default!;
 
     if ((~c.fd).isConnected && Ꮡaddr != nil) {
@@ -210,7 +210,7 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint f
     return c.fd.writeMsg(b, oob, sa);
 }
 
-[GoRecv] internal static (nint n, nint oobn, error err) writeMsgAddrPort(this ref UDPConn c, slice<byte> b, slice<byte> oob, netip.AddrPort addr) {
+internal static (nint n, nint oobn, error err) writeMsgAddrPort(this ref UDPConn c, slice<byte> b, slice<byte> oob, netip.AddrPort addr) {
     if ((~c.fd).isConnected && addr.IsValid()) {
         return (0, 0, ErrWriteToConnected);
     }

@@ -12,7 +12,7 @@ partial class http_package {
 // The basic idea is to rule out patterns that cannot conflict with a given
 // pattern because they have a different literal in a corresponding segment.
 // See the comments in [routingIndex.possiblyConflictingPatterns] for more details.
-[GoType] partial struct routingIndex {
+partial struct routingIndex {
     // map from a particular segment position and value to all registered patterns
     // with that value in that position.
     // For example, the key {1, "b"} would hold the patterns "/a/b" and "/a/b/c"
@@ -24,12 +24,12 @@ partial class http_package {
     internal slice<ж<pattern>> multis;
 }
 
-[GoType] partial struct routingIndexKey {
+partial struct routingIndexKey {
     internal nint pos;   // 0-based segment position
     internal @string s; // literal, or empty for wildcard
 }
 
-[GoRecv] internal static void addPattern(this ref routingIndex idx, ж<pattern> Ꮡpat) {
+internal static void addPattern(this ref routingIndex idx, ж<pattern> Ꮡpat) {
     ref var pat = ref Ꮡpat.DerefOrNull();
 
     if (pat.lastSegment().multi){
@@ -57,7 +57,7 @@ partial class http_package {
 // For instance, an implementation that returns all registered patterns is correct.
 // We use this fact throughout, simplifying the implementation by returning more
 // patterns that we might need to.
-[GoRecv] internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex idx, ж<pattern> Ꮡpat, Func<ж<pattern>, error> f) {
+internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex idx, ж<pattern> Ꮡpat, Func<ж<pattern>, error> f) {
     error err = default!;
 
     ref var pat = ref Ꮡpat.DerefOrNull();

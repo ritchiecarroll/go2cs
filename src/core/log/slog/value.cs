@@ -20,7 +20,7 @@ partial class slog_package {
 // A Value can represent any Go value, but unlike type any,
 // it can represent most small values without an allocation.
 // The zero Value corresponds to nil.
-[GoType] partial struct Value {
+partial struct Value {
     internal array<Action> _ = new(0); // disallow ==
     // num holds the value for Kinds Int64, Uint64, Float64, Bool and Duration,
     // the string length for KindString, and nanoseconds since the epoch for KindTime.
@@ -37,11 +37,11 @@ partial class slog_package {
     internal any any;
 }
 
-[GoType("ж<byte>")] partial class stringptr;
+partial class stringptr /*ж<byte>*/;
 
-[GoType("ж<Attr>")] partial class groupptr;
+partial class groupptr /*ж<Attr>*/;
 
-[GoType("num:nint")] partial struct ΔKind;
+partial struct ΔKind /*num:nint*/;
 
 // The following list is sorted alphabetically, but it's also important that
 // KindAny is 0 so that a zero Value represents nil.
@@ -79,7 +79,7 @@ public static @string String(this ΔKind k) {
     return unknownSlogKindˢ;
 }
 
-[GoType("num:nint")] partial struct kind;
+partial struct kind /*num:nint*/;
 
 // Kind returns v's Kind.
 public static ΔKind Kind(this Value v) {
@@ -147,9 +147,9 @@ public static Value BoolValue(bool v) {
     return new Value(num: u, any: KindBool);
 }
 
-[GoType("ж<timeꓸLocation>")] partial class timeLocation;
+partial class timeLocation /*ж<timeꓸLocation>*/;
 
-[GoType("global::go.time_package.Time")] partial struct timeTime;
+partial struct timeTime /*global::go.time_package.Time*/;
 
 // TimeValue returns a [Value] for a [time.Time].
 // It discards the monotonic portion.
@@ -566,7 +566,7 @@ internal static slice<byte> append(this Value v, slice<byte> dst) {
 //
 // This mechanism may be used to defer expensive operations until they are
 // needed, or to expand a single value into a sequence of components.
-[GoType] partial interface ΔLogValuer {
+partial interface ΔLogValuer {
     Value LogValue();
 }
 

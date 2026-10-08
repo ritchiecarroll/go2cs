@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("bool")] partial struct main_MyBool;
+partial struct main_MyBool /*bool*/;
 
 public static void ShowValue(fmt.Stringer val) {
     fmt.Println(val.String());
@@ -21,7 +21,7 @@ internal static @string String(this main_MyBool b) {
     return falseIshˢ;
 }
 
-[GoLocalName("MyBool")] [GoType("bool")] internal partial struct main_MyBoolᴛ1;
+internal partial struct main_MyBoolᴛ1 /*bool*/;
 
 internal static void Main() {
     const bool c = /* 3 < 4 */ true;

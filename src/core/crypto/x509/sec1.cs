@@ -26,13 +26,11 @@ internal static UntypedInt ecPrivKeyVersion => 1;
 //
 // Per RFC 5915 the NamedCurveOID is marked as ASN.1 OPTIONAL, however in
 // most cases it is not.
-[GoType] partial struct ecPrivateKey {
+partial struct ecPrivateKey {
     public nint Version;
     public slice<byte> PrivateKey;
-    [GoTag(@"asn1:""optional,explicit,tag:0""")]
-    public asn1.ObjectIdentifier NamedCurveOID;
-    [GoTag(@"asn1:""optional,explicit,tag:1""")]
-    public asn1.BitString PublicKey;
+    public asn1.ObjectIdentifier NamedCurveOID; /*`asn1:"optional,explicit,tag:0"`*/
+    public asn1.BitString PublicKey; /*`asn1:"optional,explicit,tag:1"`*/
 }
 
 // ParseECPrivateKey parses an EC private key in SEC 1, ASN.1 DER form.

@@ -185,7 +185,7 @@ internal static void gcPaceScavenger(int64 memoryLimit, uint64 heapGoal, uint64 
 }
 
 
-[GoType("dyn")] partial struct Δscavengeᴛ1 {
+partial struct Δscavengeᴛ1 /*dyn*/ {
     // gcPercentGoal is the amount of retained heap memory (measured by
     // heapRetained) that the runtime will try to maintain by returning
     // memory to the OS. This goal is derived from gcController.gcPercent
@@ -217,7 +217,7 @@ internal static UntypedFloat minScavWorkTime => 1e6;
 internal static ж<scavengerState> Ꮡscavenger = new StandardBox<scavengerState>(new scavengerState());
 internal static ref scavengerState scavenger => ref Ꮡscavenger.Value;
 
-[GoType] partial struct scavengerState {
+partial struct scavengerState {
     // lock protects all fields below.
     internal mutex @lock;
     // g is the goroutine the scavenger is bound to.
@@ -660,7 +660,7 @@ internal static void printScavTrace(uintptr releasedBg, uintptr releasedEager, b
 // Must run on the systemstack because it acquires p.mheapLock.
 //
 //go:systemstack
-[GoRecv] internal static uintptr scavengeOne(this ref pageAlloc Δp, chunkIdx ci, nuint searchIdx, uintptr max) {
+internal static uintptr scavengeOne(this ref pageAlloc Δp, chunkIdx ci, nuint searchIdx, uintptr max) {
     // Calculate the maximum number of pages to scavenge.
     //
     // This should be alignUp(max, pageSize) / pageSize but max can and will
@@ -834,7 +834,7 @@ internal static readonly @string minTooLargeˢ = "min too large"u8;
 // will round up). That is, even if max is small, the returned size is not guaranteed
 // to be equal to max. max is allowed to be less than min, in which case it is as if
 // max == min.
-[GoRecv] internal static (nuint, nuint) findScavengeCandidate(this ref pallocData m, nuint searchIdx, uintptr minimum, uintptr max) {
+internal static (nuint, nuint) findScavengeCandidate(this ref pallocData m, nuint searchIdx, uintptr minimum, uintptr max) {
     if ((uintptr)(minimum & (minimum - 1)) != 0 || minimum == 0){
         print((@string)"runtime: min = "u8, minimum, (@string)"\n"u8);
         @throw(minMustBeANonZeroPowerOfˢ);
@@ -928,7 +928,7 @@ internal static readonly @string minTooLargeˢ = "min too large"u8;
 
 // scavengeIndex is a structure for efficiently managing which pageAlloc chunks have
 // memory available to scavenge.
-[GoType] partial struct scavengeIndex {
+partial struct scavengeIndex {
     // chunks is a scavChunkData-per-chunk structure that indicates the presence of pages
     // available for scavenging. Updates to the index are serialized by the pageAlloc lock.
     //
@@ -1070,7 +1070,7 @@ internal static (chunkIdx, nuint) find(this ж<scavengeIndex> Ꮡs, bool force) 
 // eagerly collapsing).
 //
 // alloc may only run concurrently with find.
-[GoRecv] internal static void alloc(this ref scavengeIndex s, chunkIdx ci, nuint npages) {
+internal static void alloc(this ref scavengeIndex s, chunkIdx ci, nuint npages) {
     var sc = Ꮡ(s.chunks, ci).load();
     sc.alloc(npages, s.gen);
     // TODO(mknyszek): Consider eagerly backing memory with huge pages
@@ -1128,7 +1128,7 @@ internal static void nextGen(this ж<scavengeIndex> Ꮡs) {
 // at the same chunk.
 //
 // setEmpty may only run concurrently with find.
-[GoRecv] internal static void setEmpty(this ref scavengeIndex s, chunkIdx ci) {
+internal static void setEmpty(this ref scavengeIndex s, chunkIdx ci) {
     var val = Ꮡ(s.chunks, ci).load();
     val.scavChunkFlags.setEmpty();
     Ꮡ(s.chunks, ci).store(val);
@@ -1136,7 +1136,7 @@ internal static void nextGen(this ж<scavengeIndex> Ꮡs) {
 
 // atomicScavChunkData is an atomic wrapper around a scavChunkData
 // that stores it in its packed form.
-[GoType] partial struct atomicScavChunkData {
+partial struct atomicScavChunkData {
     internal atomic.Uint64 value;
 }
 
@@ -1155,7 +1155,7 @@ internal static void store(this ж<atomicScavChunkData> Ꮡsc, scavChunkData ssc
 // scavenging. It packs well into 64 bits.
 //
 // The zero value always represents a valid newly-grown chunk.
-[GoType] partial struct scavChunkData {
+partial struct scavChunkData {
     // inUse indicates how many pages in this chunk are currently
     // allocated.
     //
@@ -1196,20 +1196,20 @@ internal static UntypedInt scavChunkFlagsMask => /* (1 << scavChunkMaxFlags) - 1
 internal static UntypedInt logScavChunkInUseMax => /* logPallocChunkPages + 1 */ 10;
 internal static UntypedInt scavChunkInUseMask => /* (1 << logScavChunkInUseMax) - 1 */ 1023;
 
-[GoType("num:uint8")] partial struct scavChunkFlags;
+partial struct scavChunkFlags /*num:uint8*/;
 
 // isEmpty returns true if the hasFree flag is unset.
-[GoRecv] internal static bool isEmpty(this ref scavChunkFlags sc) {
+internal static bool isEmpty(this ref scavChunkFlags sc) {
     return (scavChunkFlags)((sc) & scavChunkHasFree) == 0;
 }
 
 // setEmpty clears the hasFree flag.
-[GoRecv] internal static void setEmpty(this ref scavChunkFlags sc) {
+internal static void setEmpty(this ref scavChunkFlags sc) {
     sc &= unchecked((scavChunkFlags)~(scavChunkFlags)(scavChunkHasFree));
 }
 
 // setNonEmpty sets the hasFree flag.
-[GoRecv] internal static void setNonEmpty(this ref scavChunkFlags sc) {
+internal static void setNonEmpty(this ref scavChunkFlags sc) {
     sc |= (scavChunkFlags)(scavChunkHasFree);
 }
 
@@ -1239,7 +1239,7 @@ internal static bool shouldScavenge(this scavChunkData sc, uint32 currGen, bool 
 internal static readonly @string tooManyPagesAllocatedInˢ = "too many pages allocated in chunk?"u8;
 
 // alloc updates sc given that npages were allocated in the corresponding chunk.
-[GoRecv] internal static void alloc(this ref scavChunkData sc, nuint npages, uint32 newGen) {
+internal static void alloc(this ref scavChunkData sc, nuint npages, uint32 newGen) {
     if ((nuint)sc.inUse + npages > pallocChunkPages) {
         print((@string)"runtime: inUse="u8, sc.inUse, (@string)" npages="u8, npages, (@string)"\n"u8);
         @throw(tooManyPagesAllocatedInˢ);
@@ -1259,7 +1259,7 @@ internal static readonly @string tooManyPagesAllocatedInˢ = "too many pages all
 internal static readonly @string allocatedPagesBelowZeroˢ = "allocated pages below zero?"u8;
 
 // free updates sc given that npages was freed in the corresponding chunk.
-[GoRecv] internal static void free(this ref scavChunkData sc, nuint npages, uint32 newGen) {
+internal static void free(this ref scavChunkData sc, nuint npages, uint32 newGen) {
     if ((nuint)sc.inUse < npages) {
         print((@string)"runtime: inUse="u8, sc.inUse, (@string)" npages="u8, npages, (@string)"\n"u8);
         @throw(allocatedPagesBelowZeroˢ);
@@ -1274,7 +1274,7 @@ internal static readonly @string allocatedPagesBelowZeroˢ = "allocated pages be
     sc.scavChunkFlags.setNonEmpty();
 }
 
-[GoType] partial struct piController {
+partial struct piController {
     internal float64 kp; // Proportional constant.
     internal float64 ti; // Integral time constant.
     internal float64 tt; // Reset time.
@@ -1297,7 +1297,7 @@ internal static readonly @string allocatedPagesBelowZeroˢ = "allocated pages be
 //
 // In the specific case of an error overflow occurs, the errOverflow field will be
 // set and the rest of the controller's internal state will be fully reset.
-[GoRecv] internal static (float64, bool) next(this ref piController c, float64 input, float64 setpoint, float64 period) {
+internal static (float64, bool) next(this ref piController c, float64 input, float64 setpoint, float64 period) {
     // Compute the raw output value.
     var prop = c.kp * (setpoint - input);
     var rawOutput = prop + c.errIntegral;
@@ -1333,7 +1333,7 @@ internal static readonly @string allocatedPagesBelowZeroˢ = "allocated pages be
 }
 
 // reset resets the controller state, except for controller error flags.
-[GoRecv] internal static void reset(this ref piController c) {
+internal static void reset(this ref piController c) {
     c.errIntegral = 0D;
 }
 

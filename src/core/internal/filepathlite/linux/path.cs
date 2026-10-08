@@ -24,7 +24,7 @@ internal static error errInvalidPath = errors.New("invalid path"u8);
 // It supports append, reading previously appended bytes,
 // and retrieving the final string. It does not allocate a buffer
 // to hold the output until that output diverges from s.
-[GoType] partial struct lazybuf {
+partial struct lazybuf {
     internal @string path;
     internal slice<byte> buf;
     internal nint w;
@@ -32,14 +32,14 @@ internal static error errInvalidPath = errors.New("invalid path"u8);
     internal nint volLen;
 }
 
-[GoRecv] internal static byte index(this ref lazybuf b, nint i) {
+internal static byte index(this ref lazybuf b, nint i) {
     if (b.buf != default!) {
         return b.buf[i];
     }
     return b.path[i];
 }
 
-[GoRecv] internal static void append(this ref lazybuf b, byte c) {
+internal static void append(this ref lazybuf b, byte c) {
     if (b.buf == default!) {
         if (b.w < len(b.path) && b.path[b.w] == c) {
             b.w++;
@@ -52,14 +52,14 @@ internal static error errInvalidPath = errors.New("invalid path"u8);
     b.w++;
 }
 
-[GoRecv] internal static void prepend(this ref lazybuf b, params ꓸꓸꓸbyte prefixʗp) {
+internal static void prepend(this ref lazybuf b, params ꓸꓸꓸbyte prefixʗp) {
     var prefix = prefixʗp.sslice();
 
     b.buf = slices.Insert(b.buf, 0, prefix.ꓸꓸꓸ);
     b.w += len(prefix);
 }
 
-[GoRecv] internal static @string @string(this ref lazybuf b) {
+internal static @string @string(this ref lazybuf b) {
     if (b.buf == default!) {
         return b.volAndPath.slice(0, b.volLen + b.w);
     }

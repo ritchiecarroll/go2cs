@@ -7,13 +7,13 @@ using strconv = strconv_package;
 
 partial class tls_package {
 
-[GoType("num:uint8")] partial struct AlertError;
+partial struct AlertError /*num:uint8*/;
 
 public static @string Error(this AlertError e) {
     return ((alert)(uint8)e).String();
 }
 
-[GoType("num:uint8")] partial struct alert;
+partial struct alert /*num:uint8*/;
 
 internal static UntypedInt alertLevelWarning => 1;
 internal static UntypedInt alertLevelError => 2;

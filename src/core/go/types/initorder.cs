@@ -187,7 +187,7 @@ internal static void reportCycle(this ж<Checker> Ꮡcheck, slice<Object> cycle)
 // expression. Only constants, variables, and functions can be dependencies.
 // Constants are here because constant expression cycles are reported during
 // initialization order computation.
-[GoType] partial interface dependency :
+partial interface dependency :
     Object
 {
     void isDependency();
@@ -197,7 +197,7 @@ internal static void reportCycle(this ж<Checker> Ꮡcheck, slice<Object> cycle)
 // Each node p in n.pred represents an edge p->n, and each node
 // s in n.succ represents an edge n->s; with a->b indicating that
 // a depends on b.
-[GoType] partial struct graphNode {
+partial struct graphNode {
     internal dependency obj; // object represented by this node
     internal nodeSet pred, succ;    // consumers and dependencies of this node (lazily initialized)
     internal nint index;       // node index in graph slice/priority queue
@@ -206,13 +206,13 @@ internal static void reportCycle(this ж<Checker> Ꮡcheck, slice<Object> cycle)
 
 // cost returns the cost of removing this node, which involves copying each
 // predecessor to each successor (and vice-versa).
-[GoRecv] internal static nint cost(this ref graphNode n) {
+internal static nint cost(this ref graphNode n) {
     return len(n.pred) * len(n.succ);
 }
 
-[GoType("map[ж<graphNode>, bool]")] partial struct nodeSet;
+partial struct nodeSet /*map[ж<graphNode>, bool]*/;
 
-[GoRecv] internal static void add(this ref nodeSet s, ж<graphNode> Ꮡp) {
+internal static void add(this ref nodeSet s, ж<graphNode> Ꮡp) {
     if (s == default!) {
         s = new nodeSet(0);
     }
@@ -301,7 +301,7 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
     return G;
 }
 
-[GoType("[]ж<graphNode>")] partial struct nodeQueue;
+partial struct nodeQueue /*[]ж<graphNode>*/;
 
 // ----------------------------------------------------------------------------
 // Priority queue
@@ -328,11 +328,11 @@ internal static bool Less(this nodeQueue a, nint i, nint j) {
     return (~x).ndeps < (~y).ndeps || (~x).ndeps == (~y).ndeps && (~x).obj.order() < (~y).obj.order();
 }
 
-[GoRecv] internal static void Push(this ref nodeQueue a, any x) {
+internal static void Push(this ref nodeQueue a, any x) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static any Pop(this ref nodeQueue a) {
+internal static any Pop(this ref nodeQueue a) {
     nint n = len(a);
     var x = (a)[n - 1];
     x.Value.index = -1; // for safety

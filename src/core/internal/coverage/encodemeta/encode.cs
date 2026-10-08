@@ -23,7 +23,7 @@ using go.hash;
 
 partial class encodemeta_package {
 
-[GoType] partial struct CoverageMetaDataBuilder {
+partial struct CoverageMetaDataBuilder {
     internal stringtab.Writer stab;
     internal slice<funcDesc> funcs;
     internal slice<byte> tmp; // temp work slice
@@ -61,12 +61,12 @@ internal static void h32(uint32 x, hash.Hash h, slice<byte> tmp) {
     h.Write(tmp);
 }
 
-[GoType] partial struct funcDesc {
+partial struct funcDesc {
     internal slice<byte> encoded;
 }
 
 // AddFunc registers a new function with the meta data builder.
-[GoRecv] public static nuint AddFunc(this ref CoverageMetaDataBuilder b, coverage.FuncDesc f) {
+public static nuint AddFunc(this ref CoverageMetaDataBuilder b, coverage.FuncDesc f) {
     hashFuncDesc(b.h, ref f, b.tmp);
     var fd = new funcDesc(nil);
     b.tmp = b.tmp[..0];
@@ -91,7 +91,7 @@ internal static void h32(uint32 x, hash.Hash h, slice<byte> tmp) {
     return rv;
 }
 
-[GoRecv] internal static int64 emitFuncOffsets(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off) {
+internal static int64 emitFuncOffsets(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off) {
     nint nFuncs = len(b.funcs);
     int64 foff = (int64)coverage.CovMetaHeaderSize + (int64)b.stab.Size() + (int64)nFuncs * 4;
     for (nint idx = 0; idx < nFuncs; idx++) {
@@ -101,7 +101,7 @@ internal static void h32(uint32 x, hash.Hash h, slice<byte> tmp) {
     return off + ((int64)len(b.funcs) * 4);
 }
 
-[GoRecv] internal static (int64, error) emitFunc(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off, funcDesc f) {
+internal static (int64, error) emitFunc(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off, funcDesc f) {
     nint ew = len(f.encoded);
     {
         var (nw, err) = w.Write(f.encoded); if (err != default!){
@@ -114,13 +114,13 @@ internal static void h32(uint32 x, hash.Hash h, slice<byte> tmp) {
     return (off + (int64)ew, default!);
 }
 
-[GoRecv] internal static void reportWriteError(this ref CoverageMetaDataBuilder b, error err) {
+internal static void reportWriteError(this ref CoverageMetaDataBuilder b, error err) {
     if (b.werr != default!) {
         b.werr = err;
     }
 }
 
-[GoRecv] internal static void wrUint32(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, uint32 v) {
+internal static void wrUint32(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, uint32 v) {
     b.tmp = b.tmp[..0];
     b.tmp = append(b.tmp, (byte)(0), (byte)(0), (byte)(0), (byte)(0));
     binary.LittleEndian.PutUint32(b.tmp, v);

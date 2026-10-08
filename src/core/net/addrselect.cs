@@ -63,7 +63,7 @@ internal static slice<netipꓸAddr> srcAddrs(slice<IPAddr> addrs) {
     return srcs;
 }
 
-[GoType] partial struct ipAttr {
+partial struct ipAttr {
     public scope Scope;
     public uint8 Precedence;
     public uint8 Label;
@@ -81,7 +81,7 @@ internal static ipAttr ipAttrOf(netipꓸAddr ip) {
     );
 }
 
-[GoType] partial struct byRFC6724Info {
+partial struct byRFC6724Info {
     internal IPAddr addr;
     internal ipAttr addrAttr;
     internal netipꓸAddr src;
@@ -198,13 +198,13 @@ internal static nint compareByRFC6724(byRFC6724Info aʗp, byRFC6724Info bʗp) {
     return 0; // "equal"
 }
 
-[GoType] partial struct policyTableEntry {
+partial struct policyTableEntry {
     public netipꓸPrefix Prefix;
     public uint8 Precedence;
     public uint8 Label;
 }
 
-[GoType("[]policyTableEntry")] partial struct policyTable;
+partial struct policyTable /*[]policyTableEntry*/;
 
 // "::1/128"
 // "::ffff:0:0/96"
@@ -284,7 +284,7 @@ internal static policyTableEntry Classify(this policyTable t, netipꓸAddr ip) {
     return new policyTableEntry(nil);
 }
 
-[GoType("num:uint8")] public partial struct scope;
+public partial struct scope /*num:uint8*/;
 
 internal static scope scopeInterfaceLocal => 0x1;
 internal static scope scopeLinkLocal => 0x2;

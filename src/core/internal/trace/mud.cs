@@ -23,7 +23,7 @@ partial class trace_package {
 // It is represented as the sum of scaled uniform distribution
 // functions and Dirac delta functions (which are treated as
 // degenerate uniform distributions).
-[GoType] partial struct mud {
+partial struct mud {
     internal slice<edge> sorted, unsorted;
     // trackMass is the inverse cumulative sum to track as the
     // distribution is updated.
@@ -41,7 +41,7 @@ partial class trace_package {
 
 internal static UntypedInt mudDegree => 1024;
 
-[GoType] partial struct edge {
+partial struct edge {
     // At x, the function increases by y.
     internal float64 x, delta;
     // Additionally at x is a Dirac delta function with area dirac.
@@ -114,7 +114,7 @@ internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) 
 // Specifically, mass is a cumulative duration, and the mutator
 // utilization bounds for this duration can be queried using
 // approxInvCumulativeSum.
-[GoRecv] internal static void setTrackMass(this ref mud d, float64 mass) {
+internal static void setTrackMass(this ref mud d, float64 mass) {
     d.trackMass = mass;
     // Find the bucket currently containing trackMass by computing
     // the cumulative sum.
@@ -138,7 +138,7 @@ internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) 
 // approximation of the inverse cumulative sum.
 //
 // The true inverse cumulative sum will be in the range [lower, upper).
-[GoRecv] internal static (float64, float64, bool) approxInvCumulativeSum(this ref mud d) {
+internal static (float64, float64, bool) approxInvCumulativeSum(this ref mud d) {
     if (d.trackBucket == len(d.hist)) {
         return (math.NaN(), math.NaN(), false);
     }
@@ -152,7 +152,7 @@ internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) 
 // Specifically, y is a cumulative duration, and invCumulativeSum
 // returns the mutator utilization x such that at least y time has
 // been spent with mutator utilization <= x.
-[GoRecv] internal static (float64, bool) invCumulativeSum(this ref mud d, float64 y) {
+internal static (float64, bool) invCumulativeSum(this ref mud d, float64 y) {
     if (len(d.sorted) == 0 && len(d.unsorted) == 0) {
         return (math.NaN(), false);
     }

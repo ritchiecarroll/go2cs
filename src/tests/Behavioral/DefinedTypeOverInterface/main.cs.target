@@ -6,18 +6,12 @@ namespace go;
 using fmt = fmt_package;
 
 partial class main_package {
-// Descriptor carrier for `Token` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("Token")] public interface Tokenᴅ { }
 
-
-[GoType] partial interface Stringer {
+partial interface Stringer {
     @string String();
 }
-// Descriptor carrier for `Named` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("Named")] public interface Namedᴅ { }
 
-
-[GoType] partial struct point {
+partial struct point {
     internal nint x, y;
 }
 

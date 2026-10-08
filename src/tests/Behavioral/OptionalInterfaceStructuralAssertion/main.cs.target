@@ -4,16 +4,16 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface Describer {
+partial interface Describer {
     @string Describe();
 }
 
-[GoType] partial interface Tagger {
+partial interface Tagger {
     @string Describe();
     @string Tag();
 }
 
-[GoType] partial struct widget {
+partial struct widget {
     internal @string name;
 }
 
@@ -25,7 +25,7 @@ internal static @string Tag(this widget w) {
     return "tag:"u8 + w.name;
 }
 
-[GoType] partial struct plain {
+partial struct plain {
 }
 
 internal static Describer newDescriber(@string name) {

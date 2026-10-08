@@ -5,30 +5,30 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType] partial interface Addr :
+partial interface Addr :
     fmt.Stringer
 {
     @string Network();
 }
 
-[GoType] partial struct UnixAddr {
+partial struct UnixAddr {
     public @string Name;
     public @string Net;
 }
 
-[GoRecv] public static @string Network(this ref UnixAddr a) {
+public static @string Network(this ref UnixAddr a) {
     return a.Net;
 }
 
-[GoRecv] public static @string String(this ref UnixAddr a) {
+public static @string String(this ref UnixAddr a) {
     return a.Name;
 }
 
-[GoType("dyn")] internal partial struct main_type {
+internal partial struct main_type /*dyn*/ {
     internal Addr got, want;
 }
 
-[GoType("dyn")] internal partial struct main_named {
+internal partial struct main_named /*dyn*/ {
     internal Addr got;
 }
 

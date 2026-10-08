@@ -4,17 +4,17 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("@string")] partial struct namedString;
+partial struct namedString /*@string*/;
 
-[GoType("num:byte")] partial struct namedByte;
+partial struct namedByte /*num:byte*/;
 
-[GoType("num:rune")] partial struct namedRune;
+partial struct namedRune /*num:rune*/;
 
-[GoType("[]namedByte")] partial struct namedByteSlice;
+partial struct namedByteSlice /*[]namedByte*/;
 
-[GoType("[]namedRune")] partial struct namedRuneSlice;
+partial struct namedRuneSlice /*[]namedRune*/;
 
-[GoType("[]byte")] partial struct plainByteSlice;
+partial struct plainByteSlice /*[]byte*/;
 
 internal static nint takesBytes(slice<byte> b) {
     return len(b);

@@ -2,11 +2,11 @@ namespace go;
 
 partial class PromotedEmbedLib_package {
 
-[GoType] partial struct Reading {
+partial struct Reading {
     public nint Sum;
 }
 
-[GoType] partial struct common {
+partial struct common {
     internal nint sum;
 }
 
@@ -20,7 +20,7 @@ internal static Reading Report(this ж<common> Ꮡc) {
     return new Reading(Sum: p.Value);
 }
 
-[GoType] partial struct Counter {
+partial struct Counter {
     internal partial ref common common { get; }
     public @string Label;
 }

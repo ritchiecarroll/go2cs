@@ -4,19 +4,19 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Stack<T>
+partial struct Stack<T>
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
     internal slice<T> elements;
 }
 
-[GoRecv] public static void Push<T>(this ref Stack<T> s, T element)
+public static void Push<T>(this ref Stack<T> s, T element)
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
     s.elements = append(s.elements, element);
 }
 
-[GoRecv] public static (T, bool) Pop<T>(this ref Stack<T> s)
+public static (T, bool) Pop<T>(this ref Stack<T> s)
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
     T zero = GoZero<T>();

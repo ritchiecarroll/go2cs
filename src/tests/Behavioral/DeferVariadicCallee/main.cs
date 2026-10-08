@@ -21,11 +21,11 @@ internal static void note(params ꓸꓸꓸstring tagsʗp) {
     }
 }
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static void bump(this ref counter c, params ꓸꓸꓸnint deltasʗp) {
+internal static void bump(this ref counter c, params ꓸꓸꓸnint deltasʗp) {
     var deltas = deltasʗp.sslice();
 
     if (len(deltas) == 0) {

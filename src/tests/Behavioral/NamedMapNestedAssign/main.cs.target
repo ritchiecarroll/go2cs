@@ -4,13 +4,13 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("map[@string, nint]")] partial struct Inner;
+partial struct Inner /*map[@string, nint]*/;
 
-[GoType("map[@string, Inner]")] partial struct Outer;
+partial struct Outer /*map[@string, Inner]*/;
 
-[GoType("map[@string, map<@string, nint>]")] partial struct OuterU;
+partial struct OuterU /*map[@string, map<@string, nint>]*/;
 
-[GoType("map[@string, Tree]")] partial struct Tree;
+partial struct Tree /*map[@string, Tree]*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object namedOfNamedˢ = (@string)"named of named:"u8;

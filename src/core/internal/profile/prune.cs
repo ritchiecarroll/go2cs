@@ -12,7 +12,7 @@ partial class profile_package {
 // Prune removes all nodes beneath a node matching dropRx, and not
 // matching keepRx. If the root node of a Sample matches, the sample
 // will have an empty stack.
-[GoRecv] public static void Prune(this ref Profile p, ж<regexp.Regexp> ᏑdropRx, ж<regexp.Regexp> ᏑkeepRx) {
+public static void Prune(this ref Profile p, ж<regexp.Regexp> ᏑdropRx, ж<regexp.Regexp> ᏑkeepRx) {
     var prune = new map<uint64, bool>();
     var pruneBeneath = new map<uint64, bool>();
     foreach (var (_, loc) in p.Location) {
@@ -74,7 +74,7 @@ partial class profile_package {
 
 // RemoveUninteresting prunes and elides profiles using built-in
 // tables of uninteresting function names.
-[GoRecv] public static error RemoveUninteresting(this ref Profile p) {
+public static error RemoveUninteresting(this ref Profile p) {
     ж<regexp.Regexp> keep = default!;
     ж<regexp.Regexp> drop = default!;
     error err = default!;

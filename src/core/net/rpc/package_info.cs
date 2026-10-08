@@ -84,7 +84,7 @@ using static go.net.rpc_package;
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("net/rpc/client.go", "client.cs", "ABUsgqYAKlrigpaCgoKCgpSCgoKWgoKCgoKCgoKCgsbUooKCgoKCgpSCgoKChJ6C0syCgrKUtIKClNiCgoKCgoKUpoKClIKCguii3LIABRwACQKCgqqiuJIACRSigIKkgIKkpoKmgqaCqqKqooKClKiCgpSClIIABxKSgoKUqsKCgoKUgoLewoKCgoKC3IKmgoKokoI=")]
 [assembly: global::go.GoPositionMap("net/rpc/debug.go", "debug.cs", "ACpQABQogKKAooCkgKKAooAACQ6UkoKCgoKUhoKUhoKC", "76-87:1;82-84:1.1;88-90:2")]
-[assembly: global::go.GoPositionMap("net/rpc/server.go", "server.cs", "AJYBrAIALFySuJaSgrgAAhwACwKqou6CgoKCgoKUgoKClIKCgpSWhIKWgoKUlIKWgIKkqqKCgpKClIKmgoKUpoKCgpSmgoKClKaCgpSmgoKUpoCCgpSklNzEopSCgoKUgoKCgpSCprKCgoKm0oKUgoKClJSCgoKUgqIAChSCpoLmooCCpoKUpICCpoKUpKaClJSCAAIS4oLc2qKCgoKigoKUgqaCgpSUgsiCqqKCgoKCpoKClJSCpqKCgoKUgpSCprKCgoKmooKCgpSClIKmsoKCgqYACAKCgoKmgqiCgpSCpoCCpIKWhJSkpKYACASCgoKCgpSCuoSCgoKUgpaCgoKUgoKClN7CgoKCgpS6kKiiABI04qqiqqKssAALDLKCgoKClIKCgpSCrLKCrLI=")]
+[assembly: global::go.GoPositionMap("net/rpc/server.go", "server.cs", "AJYBrAIALFySuJaSgrgAAhwACwKqou6CgoKCgoKUgoKClIKCgpSWhIKWgoKUlIKWgIKkqqKCgpKClIKmgoKUpoKCgpSmgoKClKaCgpSmgoKUpoCCgpSklNzEopSCgoKUgoKCgpSCprKCgoKm0oKUgoKClJSCgoKUgqIAChSCpoLmooCCpoKUpICCpoKUpKaClJSCAAIS4oLc2qKCgoKigoKUgqaCgpSUgsiCqqKCgoKCpoKClJSCpqKCgoKUgpSCprKCgoKmooKCgpSClIKmsoKCgqYACAKCgoKmgqiCgpSCpoCCpIKWhJSkpKYACASCgoKCgpSCuoSCgoKUgpaCgoKUgoKClN7CgoKCgpS6kKiiABI04qqiqqKssAALDLKCgoKClIKCgpSCrLKCrLI=", "", "", "475=NewDecoder/1/1/2,NewEncoder/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -93,7 +93,7 @@ namespace go.net;
 public static partial class rpc_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

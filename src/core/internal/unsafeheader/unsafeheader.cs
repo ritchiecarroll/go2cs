@@ -19,7 +19,7 @@ partial class unsafeheader_package {
 //
 // Unlike reflect.SliceHeader, its Data field is sufficient to guarantee the
 // data it references will not be garbage collected.
-[GoType] partial struct Slice {
+partial struct Slice {
     public @unsafe.Pointer Data;
     public nint Len;
     public nint Cap;
@@ -31,7 +31,7 @@ partial class unsafeheader_package {
 //
 // Unlike reflect.StringHeader, its Data field is sufficient to guarantee the
 // data it references will not be garbage collected.
-[GoType] partial struct String {
+partial struct String {
     public @unsafe.Pointer Data;
     public nint Len;
 }

@@ -55,7 +55,7 @@ using static go.os.user_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("os/user/lookup.go", "lookup.cs", "AAwcntKAkoKUkgAMGKKAgqSqooCCpKqiqqKokg==", "22-22:1")]
-[assembly: go.GoPositionMap("os/user/lookup_windows.go", "lookup_windows.cs", "ABEigoKCgoKUgqaCAAUugoKCgoKmgoLKqqKSgoKCgpSClILKgqYABxCElJikpoKUpKSmgpSsAAIQAAwEqOKCgpSClNjSgoKUgoKClOiSgoKUgpQABF6CkpKClO4ABRSIsqKCgpSCgoKUgoKUkoKUkoKUkoKUkoKUkqaU7sSs0oKCuIKClKaCgpSCgoCCpIKm2uKUgpSClAAEeIKCgpSCgpSCypSCggALGILKgoKUlKaCgoKUgpSmgoKClKaCkoKUpoKCgpSSgpSClKaCgoCmooKClIKCgpSCgoKUlMSCpoKClIKClIKC2oKCpg==", "256-300:1;310-320:1;330-332:2;501-519:1")]
+[assembly: go.GoPositionMap("os/user/lookup_windows.go", "lookup_windows.cs", "ABEigoKCgoKUgqaCAAUugoKCgoKmgoLKqqKSgoKCgpSClILKgqYABxCElJikpoKUpKSmgpSsAAIQAAwEqOKCgpSClNjSgoKUgoKClOiSgoKUgpQABF6CkpKClO4ABRSIsqKCgpSCgoKUgoKUkoKUkoKUkoKUkoKUkqaU7sSs0oKCuIKClKaCgpSCgoCCpIKm2uKUgpSClAAEeIKCgpSCgpSCypSCggALGILKgoKUlKaCgoKUgpSmgoKClKaCkoKUpoKCgpSSgpSClKaCgoCmooKClIKCgpSCgoKUlMSCpoKClIKClIKC2oKCpg==", "256-300:1;310-320:1;330-332:2;501-519:1", "", "86=GetSidIdentifierAuthority/1/1/1")]
 [assembly: go.GoPositionMap("os/user/user.go", "user.cs", "AEOKAYLOgs6CzoI=")]
 // </GoSourcePositionMaps>
 
@@ -65,7 +65,7 @@ namespace go.os;
 public static partial class user_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

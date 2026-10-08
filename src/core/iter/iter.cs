@@ -219,7 +219,7 @@ public delegate void Seq<V>(Func<V, bool> yield);
 
 public delegate void Seq2<K, V>(Func<K, V, bool> yield);
 
-[GoType] partial struct coro {
+partial struct coro {
 }
 
 //go:linkname newcoro runtime.newcoro

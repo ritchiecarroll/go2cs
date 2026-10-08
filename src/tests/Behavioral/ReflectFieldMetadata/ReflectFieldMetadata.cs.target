@@ -7,21 +7,21 @@ using ReflectFieldMetadata;
 
 partial class main_package {
 
-[GoType("dyn")] partial struct sElemᴛ1 {
+partial struct sElemᴛ1 /*dyn*/ {
     public nint C;
 }
 
-[GoType("[]sElemᴛ1")] partial struct sElem;
+partial struct sElem /*[]sElemᴛ1*/;
 
-[GoType] partial struct embeds {
+partial struct embeds {
     internal partial ref sElem sElem { get; }
 }
 
-[GoType] partial struct holds {
+partial struct holds {
     internal sElem f;
 }
 
-[GoType] partial struct @base {
+partial struct @base {
     public nint B;
 }
 
@@ -29,46 +29,46 @@ internal static nint M(this @base b) {
     return b.B;
 }
 
-[GoType] partial struct viaX {
+partial struct viaX {
     internal partial ref @base @base { get; }
 }
 
-[GoType] partial struct viaY {
+partial struct viaY {
     internal partial ref @base @base { get; }
 }
 
-[GoType] partial struct twice {
+partial struct twice {
     internal partial ref viaX viaX { get; }
     internal partial ref ж<viaY> viaY { get; }
     public nint D;
 }
 
-[GoType] partial struct once {
+partial struct once {
     internal partial ref viaX viaX { get; }
     public nint D;
 }
 
-[GoType] partial struct deeper {
+partial struct deeper {
     internal partial ref twice twice { get; }
 }
 
-[GoType("global::go.ReflectFieldMetadata.fieldlib_package.Outer")] partial struct local;
+partial struct local /*global::go.ReflectFieldMetadata.fieldlib_package.Outer*/;
 
-[GoType("num:nint")] partial struct myInt;
+partial struct myInt /*num:nint*/;
 
-[GoType] partial struct embedsInt {
-    [GoEmbedded] internal nint @int;
+partial struct embedsInt {
+    /*embed*/ internal nint @int;
 }
 
-[GoType] partial struct embedsIntPtr {
-    [GoEmbedded] internal ж<nint> @int;
+partial struct embedsIntPtr {
+    /*embed*/ internal ж<nint> @int;
 }
 
-[GoType] partial struct holdsNamed {
+partial struct holdsNamed {
     internal myInt n;
 }
 
-[GoType] partial struct embedsNamed {
+partial struct embedsNamed {
     internal partial ref myInt myInt { get; }
 }
 
@@ -98,7 +98,7 @@ private static readonly @string structIntˢ2 = "struct{ *int }"u8;
 private static readonly @string structNTˢ = "struct{ n T }"u8;
 private static readonly @string structMyIntˢ = "struct{ myInt }"u8;
 
-[GoType("dyn")] internal partial struct main_i {
+internal partial struct main_i /*dyn*/ {
     internal nint u;
 }
 

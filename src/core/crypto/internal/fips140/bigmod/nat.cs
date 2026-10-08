@@ -15,7 +15,7 @@ partial class bigmod_package {
 internal static UntypedInt _W => /* bits.UintSize */ 64;
 internal static UntypedInt _S => /* _W / 8 */ 8;
 
-[GoType("num:nuint")] public partial struct choice;
+public partial struct choice /*num:nuint*/;
 
 // Note: These functions make many loops over all the words in a Nat.
 // These loops used to be in assembly, invisible to -race, -asan, and -msan,
@@ -52,7 +52,7 @@ internal static choice ctEq(nuint x, nuint y) {
 // Each Nat has an announced length, which is the number of limbs it has stored.
 // Operations on this number are allowed to leak this length, but will not leak
 // any information about the values contained in those limbs.
-[GoType] partial struct ΔNat {
+partial struct ΔNat {
     // limbs is little-endian in base 2^W with W = bits.UintSize.
     internal slice<nuint> limbs;
 }
@@ -149,7 +149,7 @@ internal static ж<ΔNat> set(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy) {
 // Bits returns x as a little-endian slice of uint. The length of the slice
 // matches the announced length of x. The result and x share the same underlying
 // array.
-[GoRecv] public static slice<nuint> Bits(this ref ΔNat x) {
+public static slice<nuint> Bits(this ref ΔNat x) {
     return x.limbs;
 }
 
@@ -157,7 +157,7 @@ internal static ж<ΔNat> set(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy) {
 // slice will match the size of m.
 //
 // x must have the same size as m and it must be less than or equal to m.
-[GoRecv] public static slice<byte> Bytes(this ref ΔNat x, ж<Modulus> Ꮡm) {
+public static slice<byte> Bytes(this ref ΔNat x, ж<Modulus> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     nint i = m.Size();
@@ -242,7 +242,7 @@ internal static nuint bigEndianUint(slice<byte> buf) {
     return (nuint)byteorder.BEUint32(buf);
 }
 
-[GoRecv] internal static error setBytes(this ref ΔNat x, slice<byte> b) {
+internal static error setBytes(this ref ΔNat x, slice<byte> b) {
     nint i = len(b);
     nint k = 0;
     while (k < len(x.limbs) && i >= _S) {
@@ -276,7 +276,7 @@ public static ж<ΔNat> SetUint(this ж<ΔNat> Ꮡx, nuint y) {
 // Both operands must have the same announced length.
 //
 //go:norace
-[GoRecv] public static choice Equal(this ref ΔNat x, ж<ΔNat> Ꮡy) {
+public static choice Equal(this ref ΔNat x, ж<ΔNat> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     // Eliminate bounds checks in the loop.
@@ -293,7 +293,7 @@ public static ж<ΔNat> SetUint(this ж<ΔNat> Ꮡx, nuint y) {
 // IsZero returns 1 if x == 0, and 0 otherwise.
 //
 //go:norace
-[GoRecv] public static choice IsZero(this ref ΔNat x) {
+public static choice IsZero(this ref ΔNat x) {
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
     var xLimbs = x.limbs.slice(0, size);
@@ -307,7 +307,7 @@ public static ж<ΔNat> SetUint(this ж<ΔNat> Ꮡx, nuint y) {
 // IsOne returns 1 if x == 1, and 0 otherwise.
 //
 //go:norace
-[GoRecv] public static choice IsOne(this ref ΔNat x) {
+public static choice IsOne(this ref ΔNat x) {
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
     var xLimbs = x.limbs.slice(0, size);
@@ -327,7 +327,7 @@ public static ж<ΔNat> SetUint(this ж<ΔNat> Ꮡx, nuint y) {
 // modulo m.
 //
 //go:norace
-[GoRecv] public static choice IsMinusOne(this ref ΔNat x, ж<Modulus> Ꮡm) {
+public static choice IsMinusOne(this ref ΔNat x, ж<Modulus> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var minusOne = m.Nat();
@@ -336,7 +336,7 @@ public static ж<ΔNat> SetUint(this ж<ΔNat> Ꮡx, nuint y) {
 }
 
 // IsOdd returns 1 if x is odd, and 0 otherwise.
-[GoRecv] public static choice IsOdd(this ref ΔNat x) {
+public static choice IsOdd(this ref ΔNat x) {
     if (len(x.limbs) == 0) {
         return no;
     }
@@ -344,7 +344,7 @@ public static ж<ΔNat> SetUint(this ж<ΔNat> Ꮡx, nuint y) {
 }
 
 // TrailingZeroBitsVarTime returns the number of trailing zero bits in x.
-[GoRecv] public static nuint TrailingZeroBitsVarTime(this ref ΔNat x) {
+public static nuint TrailingZeroBitsVarTime(this ref ΔNat x) {
     nuint t = default!;
     var limbs = x.limbs;
     foreach (var (_, l) in limbs) {
@@ -363,7 +363,7 @@ public static ж<ΔNat> SetUint(this ж<ΔNat> Ꮡx, nuint y) {
 // Both operands must have the same announced length.
 //
 //go:norace
-[GoRecv] internal static choice cmpGeq(this ref ΔNat x, ж<ΔNat> Ꮡy) {
+internal static choice cmpGeq(this ref ΔNat x, ж<ΔNat> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     // Eliminate bounds checks in the loop.
@@ -404,7 +404,7 @@ internal static ж<ΔNat> assign(this ж<ΔNat> Ꮡx, choice on, ж<ΔNat> Ꮡy)
 // Both operands must have the same announced length.
 //
 //go:norace
-[GoRecv] internal static nuint /*c*/ add(this ref ΔNat x, ж<ΔNat> Ꮡy) {
+internal static nuint /*c*/ add(this ref ΔNat x, ж<ΔNat> Ꮡy) {
     nuint c = default!;
 
     ref var y = ref Ꮡy.DerefOrNull();
@@ -423,7 +423,7 @@ internal static ж<ΔNat> assign(this ж<ΔNat> Ꮡx, choice on, ж<ΔNat> Ꮡy)
 // Both operands must have the same announced length.
 //
 //go:norace
-[GoRecv] internal static nuint /*c*/ sub(this ref ΔNat x, ж<ΔNat> Ꮡy) {
+internal static nuint /*c*/ sub(this ref ΔNat x, ж<ΔNat> Ꮡy) {
     nuint c = default!;
 
     ref var y = ref Ꮡy.DerefOrNull();
@@ -471,7 +471,7 @@ public static ж<ΔNat> ShiftRightVarTime(this ж<ΔNat> Ꮡx, nuint n) {
 //
 // The actual size of x (but nothing more) leaks through timing side-channels.
 // Note that this is ordinarily secret, as opposed to the announced size of x.
-[GoRecv] public static nint BitLenVarTime(this ref ΔNat x) {
+public static nint BitLenVarTime(this ref ΔNat x) {
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
     var xLimbs = x.limbs.slice(0, size);
@@ -501,7 +501,7 @@ internal static nint bitLen(nuint n) {
 //
 // A Modulus can leak the exact number of bits needed to store its value
 // and is stored without padding. Its actual value is still kept secret.
-[GoType] partial struct Modulus {
+partial struct Modulus {
     // The underlying natural number for this modulus.
     //
     // This will be stored without any padding, and shouldn't alias with any
@@ -616,17 +616,17 @@ internal static (ж<Modulus>, error) newModulus(ж<ΔNat> Ꮡn) {
 }
 
 // Size returns the size of m in bytes.
-[GoRecv] public static nint Size(this ref Modulus m) {
+public static nint Size(this ref Modulus m) {
     return (m.BitLen() + 7) / 8;
 }
 
 // BitLen returns the size of m in bits.
-[GoRecv] public static nint BitLen(this ref Modulus m) {
+public static nint BitLen(this ref Modulus m) {
     return m.nat.BitLenVarTime();
 }
 
 // Nat returns m as a Nat.
-[GoRecv] public static ж<ΔNat> Nat(this ref Modulus m) {
+public static ж<ΔNat> Nat(this ref Modulus m) {
     // Make a copy so that the caller can't modify m.nat or alias it with
     // another Nat in a modulus operation.
     var n = NewNat();
@@ -1285,7 +1285,7 @@ internal static void rshift1(ref ΔNat a, nuint carry) {
 // It panics if y is zero.
 //
 //go:norace
-[GoRecv] public static nuint DivShortVarTime(this ref ΔNat x, nuint y) {
+public static nuint DivShortVarTime(this ref ΔNat x, nuint y) {
     if (y == 0) {
         throw panic("bigmod: division by zero");
     }

@@ -5,7 +5,7 @@ namespace go.compress;
 
 partial class bzip2_package {
 
-[GoType("[]byte")] partial struct moveToFrontDecoder;
+partial struct moveToFrontDecoder /*[]byte*/;
 
 // newMTFDecoder creates a move-to-front decoder with an explicit initial list
 // of symbols.

@@ -35,7 +35,7 @@ public static partial slice<byte> Stack() {
 
 // CrashOptions provides options that control the formatting of the
 // fatal crash message.
-[GoType] partial struct CrashOptions {
+partial struct CrashOptions {
 }
 
 /* for future expansion */

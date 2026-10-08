@@ -55,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "AB9IgKSApKCkgKSigpaCgIK4ogAtBISCgoKClIKCgoKCgoKUgoKClIaCgpiGioKClJKCkpKCloKCgpiCgoaGgpSklIKUpJSCgpSkmIKCgoKUpJSkmoKCgpSCgpiSgpiWgoKClIKCkpiGgoKYgoI=", "49-53:1;60-60:1;61-61:2;62-65:3;66-66:4;67-67:5;68-68:6;69-74:7;75-79:8;80-80:9;83-86:10;89-89:11;92-94:12;103-103:13;104-104:14;105-105:15;106-106:16;109-113:17;116-116:18;117-117:19;118-118:20;121-121:21;124-130:22;131-137:23;138-145:24;148-161:25;165-169:26;170-173:27;176-179:28;182-184:29;185-189:30;190-190:31;191-194:32;192-192:32.1;197-197:33;200-203:34;206-209:35")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "ABxIgKSApKCkgKSigpaCgIK4ogAtBISCgoKClIKCgoKCgoKUgoKClIaCgpiGioKClJKCkpKCloKCgpiCgoaGgpSklIKUpJSCgpSkmIKCgoKUpJSkmoKCgpSCgpiSgpiWgoKClIKCkpiGgoKYgoI=", "49-53:1;60-60:1;61-61:2;62-65:3;66-66:4;67-67:5;68-68:6;69-74:7;75-79:8;80-80:9;83-86:10;89-89:11;92-94:12;103-103:13;104-104:14;105-105:15;106-106:16;109-113:17;116-116:18;117-117:19;118-118:20;121-121:21;124-130:22;131-137:23;138-145:24;148-161:25;165-169:26;170-173:27;176-179:28;182-184:29;185-189:30;190-190:31;191-194:32;192-192:32.1;197-197:33;200-203:34;206-209:35")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -65,13 +65,14 @@ namespace go;
 public static partial class main_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
 
     // <TypeAccessibility>
     internal partial struct holder {}
+    [GoLocalName("I")] public partial interface Iᴅ {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

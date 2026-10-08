@@ -57,7 +57,7 @@ internal static uint8 unpackNetpollSource(uintptr key) {
 
 // pollOperation must be the same as beginning of internal/poll.operation.
 // Keep these in sync.
-[GoType] partial struct pollOperation {
+partial struct pollOperation {
     // used by windows
     internal overlapped _;
     // used by netpoll
@@ -88,7 +88,7 @@ internal static ж<pollOperation> pollOperationFromOverlappedEntry(ref overlappe
 
 // overlappedEntry contains the information returned by a call to GetQueuedCompletionStatusEx.
 // https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-overlapped_entry
-[GoType] partial struct overlappedEntry {
+partial struct overlappedEntry {
     internal uintptr key;
     internal ж<overlapped> ov;
     internal uintptr @internal;

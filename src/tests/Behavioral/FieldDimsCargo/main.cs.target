@@ -5,24 +5,18 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType("[3]nint")] partial struct Row;
+partial struct Row /*[3]nint*/;
 
-[GoType] partial struct Target {
-    [GoArrayDims(2), GoMapKeyDims(2)]
-    public map<array<@string>, array<ж<float64>>> Marr;
-    [GoArrayDims(3)]
-    public ж<array<float64>> N;
-    [GoArrayDims(3)]
-    public ж<ж<ж<array<nint>>>> Deep;
-    [GoArrayDims(5)]
-    public map<@string, array<nint>> MapElem;
-    [GoMapKeyDims(4)]
-    public map<array<byte>, nint> MapKey;
+partial struct Target {
+    public /*[2]*/ map</*[2]*/ array<@string>, array<ж<float64>>> Marr;
+    public /*[3]*/ ж<array<float64>> N;
+    public /*[3]*/ ж<ж<ж<array<nint>>>> Deep;
+    public /*[5]*/ map<@string, array<nint>> MapElem;
+    public map</*[4]*/ array<byte>, nint> MapKey;
     public array<byte> Plain = new(4);
     public array<array<nint>> Nested = new(2, () => new(3));
     public ж<Row> Named;
-    [GoArrayDims(2)]
-    public slice<array<nint>> SlcArr;
+    public /*[2]*/ slice<array<nint>> SlcArr;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

@@ -22,7 +22,7 @@ internal static error errMessageTooLarge = errors.New("message too large"u8);
 
 // A Reader implements convenience methods for reading requests
 // or responses from a text protocol network connection.
-[GoType] partial struct Reader {
+partial struct Reader {
     public ж<bufio.Reader> R;
     internal ж<dotReader> dot;
     internal slice<byte> buf; // a re-usable buffer for readContinuedLineSlice
@@ -39,13 +39,13 @@ public static ж<Reader> NewReader(ж<bufio.Reader> Ꮡr) {
 
 // ReadLine reads a single line from r,
 // eliding the final \n or \r\n from the returned string.
-[GoRecv] public static (@string, error) ReadLine(this ref Reader r) {
+public static (@string, error) ReadLine(this ref Reader r) {
     var (line, err) = r.readLineSlice(-1);
     return (((@string)line), err);
 }
 
 // ReadLineBytes is like [Reader.ReadLine] but returns a []byte instead of a string.
-[GoRecv] public static (slice<byte>, error) ReadLineBytes(this ref Reader r) {
+public static (slice<byte>, error) ReadLineBytes(this ref Reader r) {
     var (line, err) = r.readLineSlice(-1);
     if (line != default!) {
         line = bytes.Clone(line);
@@ -56,7 +56,7 @@ public static ж<Reader> NewReader(ж<bufio.Reader> Ꮡr) {
 // readLineSlice reads a single line from r,
 // up to lim bytes long (or unlimited if lim is less than 0),
 // eliding the final \r or \r\n from the returned string.
-[GoRecv] internal static (slice<byte>, error) readLineSlice(this ref Reader r, int64 lim) {
+internal static (slice<byte>, error) readLineSlice(this ref Reader r, int64 lim) {
     r.closeDot();
     slice<byte> line = default!;
     while (ᐧ) {
@@ -97,7 +97,7 @@ public static ж<Reader> NewReader(ж<bufio.Reader> Ꮡr) {
 // and the second will return "Line 2".
 //
 // Empty lines are never continued.
-[GoRecv] public static (@string, error) ReadContinuedLine(this ref Reader r) {
+public static (@string, error) ReadContinuedLine(this ref Reader r) {
     var (line, err) = r.readContinuedLineSlice(-1, noValidation);
     return (((@string)line), err);
 }
@@ -118,7 +118,7 @@ internal static slice<byte> trim(slice<byte> s) {
 
 // ReadContinuedLineBytes is like [Reader.ReadContinuedLine] but
 // returns a []byte instead of a string.
-[GoRecv] public static (slice<byte>, error) ReadContinuedLineBytes(this ref Reader r) {
+public static (slice<byte>, error) ReadContinuedLineBytes(this ref Reader r) {
     var (line, err) = r.readContinuedLineSlice(-1, noValidation);
     if (line != default!) {
         line = bytes.Clone(line);
@@ -131,7 +131,7 @@ internal static slice<byte> trim(slice<byte> s) {
 // is run on the first read line, and if it returns an error then this
 // error is returned from readContinuedLineSlice.
 // It reads up to lim bytes of data (or unlimited if lim is less than 0).
-[GoRecv] internal static (slice<byte>, error) readContinuedLineSlice(this ref Reader r, int64 lim, Func<slice<byte>, error> validateFirstLine) {
+internal static (slice<byte>, error) readContinuedLineSlice(this ref Reader r, int64 lim, Func<slice<byte>, error> validateFirstLine) {
     if (validateFirstLine == default!) {
         return (default!, fmt.Errorf("missing validateFirstLine func"u8));
     }
@@ -182,7 +182,7 @@ internal static slice<byte> trim(slice<byte> s) {
 }
 
 // skipSpace skips R over all spaces and returns the number of bytes skipped.
-[GoRecv] internal static nint skipSpace(this ref Reader r) {
+internal static nint skipSpace(this ref Reader r) {
     nint n = 0;
     while (ᐧ) {
         var (c, err) = r.R.ReadByte();
@@ -199,7 +199,7 @@ internal static slice<byte> trim(slice<byte> s) {
     return n;
 }
 
-[GoRecv] internal static (nint code, bool continued, @string message, error err) readCodeLine(this ref Reader r, nint expectCode) {
+internal static (nint code, bool continued, @string message, error err) readCodeLine(this ref Reader r, nint expectCode) {
     nint code = default!;
     bool continued = default!;
     @string message = default!;
@@ -252,7 +252,7 @@ internal static (nint code, bool continued, @string message, error err) parseCod
 // If the response is multi-line, ReadCodeLine returns an error.
 //
 // An expectCode <= 0 disables the check of the status code.
-[GoRecv] public static (nint code, @string message, error err) ReadCodeLine(this ref Reader r, nint expectCode) {
+public static (nint code, @string message, error err) ReadCodeLine(this ref Reader r, nint expectCode) {
     nint code = default!;
     @string message = default!;
     error err = default!;
@@ -290,7 +290,7 @@ internal static (nint code, bool continued, @string message, error err) parseCod
 // the status is not in the range [310,319].
 //
 // An expectCode <= 0 disables the check of the status code.
-[GoRecv] public static (nint code, @string message, error err) ReadResponse(this ref Reader r, nint expectCode) {
+public static (nint code, @string message, error err) ReadResponse(this ref Reader r, nint expectCode) {
     ref var code = ref heap(new nint(), out var Ꮡcode);
     @string message = default!;
     error err = default!;
@@ -348,7 +348,7 @@ public static io.Reader DotReader(this ж<Reader> Ꮡr) {
     return new dotReaderжReader(r.dot);
 }
 
-[GoType] partial struct dotReader {
+partial struct dotReader {
     internal ж<Reader> r;
     internal nint state;
 }
@@ -453,7 +453,7 @@ internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b)
 
 // closeDot drains the current DotReader if any,
 // making sure that it reads until the ending dot line.
-[GoRecv] internal static void closeDot(this ref Reader r) {
+internal static void closeDot(this ref Reader r) {
     if (r.dot == nil) {
         return;
     }
@@ -476,7 +476,7 @@ public static (slice<byte>, error) ReadDotBytes(this ж<Reader> Ꮡr) {
 // containing the decoded lines, with the final \r\n or \n elided from each.
 //
 // See the documentation for the [Reader.DotReader] method for details about dot-encoding.
-[GoRecv] public static (slice<@string>, error) ReadDotLines(this ref Reader r) {
+public static (slice<@string>, error) ReadDotLines(this ref Reader r) {
     // We could use ReadDotBytes and then Split it,
     // but reading a line at a time avoids needing a
     // large contiguous block of memory and is simpler.
@@ -635,7 +635,7 @@ internal static slice<byte> nl = slice<byte>("\n"u8);
 
 // upcomingHeaderKeys returns an approximation of the number of keys
 // that will be in this header. If it gets confused, it returns 0.
-[GoRecv] internal static nint /*n*/ upcomingHeaderKeys(this ref Reader r) {
+internal static nint /*n*/ upcomingHeaderKeys(this ref Reader r) {
     nint n = default!;
 
     // Try to determine the 'hint' size.

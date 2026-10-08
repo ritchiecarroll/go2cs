@@ -51,7 +51,7 @@ using static go.crypto.@internal.fips140.bigmod_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/bigmod/nat.go", "nat.cs", "ABNGAAgA7JCotIKCABMssoKosoKUgoKCgpSCgoKosoKClIKCAAIQ8oKAgqSo1oKClJSowoKCrLKu4oKCooKCgoKUlIKmAAUSAAkCgoCCpIKUAAUQAAgCgoCC2oKUgqqigpSmgpKCgoKUgoKUgpSs0oKCAAIQAAgEgoKEgoKUrMSChIKClKzEgoSCloKClAACEgAIAoKCqJKClKiSgoKCgoKUgpQAAhAACASCgoSCgrgAAhAACQSCgoSCgpQAAhAACQSCgoSClAACEAAJBIKChIKUAAIQAAgEgoSChIKCloKCgpaCgqiu1IKEgoKmrLKmgoKUABIqsoKCgqiUggAIFqiCgpSCuoKCgoKorgAKDoKClAACENKCrsKCgoKClNaCgoKUgoKClKiSqJKotoKCAAIQAAgCloKCggAHEoKCgoKCgoKCypQAAhQACwLcpoKClIKCpoKClKzSrNIAAhwADgKCpoIAAhIACQKUgoKCrOKCpgACEgAIAoKCAAIUAAsGrviCggACFAAMAoKCgoQAAYYBACcCgoKCgoKCgpSCpoKCgoKCgoKClIKmgoKCgoKCgoKUggACzQGCgpSMwoIAACaCioyCAAEYggACYgACEPKCgoKmgoKCgpQAAhIACgKmgpaCgoQAASjSgoKUpIKCgpSkgoKClAACR4KClIaCmAAESAAMAoIABRDsgoKWgoKCgoKmgoKCloKCqIKoAAISAAgCgsqCgoKCgIK2AAIWAAoCgoKUgpSuwoKClAAGEAAhMoKUgpaCgoSCgoKCggANHqaCgoKClIKCuoKogoKCgpSCtoKCgpSCqILMkoKEgoKClAAEFNKCloKClA==")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/bigmod/nat.go", "nat.cs", "ABNGAAgA7JCotIKCABMssoKosoKUgoKCgpSCgoKosoKClIKCAAIQ8oKAgqSo1oKClJSowoKCrLKu4oKCooKCgoKUlIKmAAUSAAkCgoCCpIKUAAUQAAgCgoCC2oKUgqqigpSmgpKCgoKUgoKUgpSs0oKCAAIQAAgEgoKEgoKUrMSChIKClKzEgoSCloKClAACEgAIAoKCqJKClKiSgoKCgoKUgpQAAhAACASCgoSCgrgAAhAACQSCgoSCgpQAAhAACQSCgoSClAACEAAJBIKChIKUAAIQAAgEgoSChIKCloKCgpaCgqiu1IKEgoKmrLKmgoKUABIqsoKCgqiUggAIFqiCgpSCuoKCgoKorgAKDoKClAACENKCrsKCgoKClNaCgoKUgoKClKiSqJKotoKCAAIQAAgCloKCggAHEoKCgoKCgoKCypQAAhQACwLcpoKClIKCpoKClKzSrNIAAhwADgKCpoIAAhIACQKUgoKCrOKCpgACEgAIAoKCAAIUAAsGrviCggACFAAMAoKCgoQAAYYBACcCgoKCgoKCgpSCpoKCgoKCgoKClIKmgoKCgoKCgoKUggACzQGCgpSMwoIAACaCioyCAAEYggACYgACEPKCgoKmgoKCgpQAAhIACgKmgpaCgoQAASjSgoKUpIKCgpSkgoKClAACR4KClIaCmAAESAAMAoIABRDsgoKWgoKCgoKmgoKCloKCqIKoAAISAAgCgsqCgoKCgIK2AAIWAAoCgoKUgpSuwoKClAAGEAAhMoKUgpaCgoSCgoKCggANHqaCgoKClIKCuoKogoKCgpSCtoKCgpSCqILMkoKEgoKClAAEFNKCloKClA==", "", "", "1061=NewNat/1/15/2,NewNat/2/15/2,NewNat/3/15/2,NewNat/4/15/2,NewNat/5/15/2,NewNat/6/15/3,NewNat/7/15/3,NewNat/8/15/3,NewNat/9/15/3,NewNat/10/15/3,NewNat/11/15/4,NewNat/12/15/4,NewNat/13/15/4,NewNat/14/15/4,NewNat/15/15/4")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/bigmod/nat_noasm.go", "nat_noasm.cs", "AAoWgqaCpoI=")]
 // </GoSourcePositionMaps>
 
@@ -61,7 +61,7 @@ namespace go.crypto.@internal.fips140;
 public static partial class bigmod_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

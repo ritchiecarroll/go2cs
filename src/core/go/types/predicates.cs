@@ -306,25 +306,25 @@ internal static bool samePkg(ж<Package> Ꮡa, ж<Package> Ꮡb) {
 }
 
 // An ifacePair is a node in a stack of interface type pairs compared for identity.
-[GoType] partial struct ifacePair {
+partial struct ifacePair {
     internal ж<Interface> x, y;
     internal ж<ifacePair> prev;
 }
 
-[GoRecv] internal static bool identical(this ref ifacePair p, ж<ifacePair> Ꮡq) {
+internal static bool identical(this ref ifacePair p, ж<ifacePair> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     return p.x == q.x && p.y == q.y || p.x == q.y && p.y == q.x;
 }
 
 // A comparer is used to compare types.
-[GoType] partial struct comparer {
+partial struct comparer {
     internal bool ignoreTags; // if set, identical ignores struct tags
     internal bool ignoreInvalids; // if set, identical treats an invalid type as identical to any type
 }
 
 // For changes to this code the corresponding changes should be made to unifier.nify.
-[GoRecv] internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<ifacePair> Ꮡp) {
+internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<ifacePair> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     x = Unalias(x);

@@ -99,12 +99,12 @@ internal static bool collapse(Spec prev, Spec next) {
     return (~prev._<ж<ImportSpec>>()).Comment == nil;
 }
 
-[GoType] partial struct posSpan {
+partial struct posSpan {
     public tokenꓸPos Start;
     public tokenꓸPos End;
 }
 
-[GoType] partial struct cgPos {
+partial struct cgPos {
     internal bool left; // true if comment is to the left of the spec, false otherwise.
     internal ж<CommentGroup> cg;
 }

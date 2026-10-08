@@ -69,7 +69,7 @@ public static Action InitWSA = sync.OnceFunc(() => {
 });
 
 // operation contains superset of data necessary to perform all async IO.
-[GoType] partial struct operation {
+partial struct operation {
     // Used by IOCP interface, it must be first field
     // of the struct, as our code rely on it.
     internal Δsyscall.Overlapped o;
@@ -89,7 +89,7 @@ public static Action InitWSA = sync.OnceFunc(() => {
     internal slice<Δsyscall.WSABuf> bufs;
 }
 
-[GoRecv] internal static void InitBuf(this ref operation o, slice<byte> buf) {
+internal static void InitBuf(this ref operation o, slice<byte> buf) {
     o.buf.Len = (uint32)len(buf);
     o.buf.Buf = default!;
     if (len(buf) != 0) {
@@ -97,7 +97,7 @@ public static Action InitWSA = sync.OnceFunc(() => {
     }
 }
 
-[GoRecv] internal static void InitBufs(this ref operation o, ж<slice<slice<byte>>> Ꮡbuf) {
+internal static void InitBufs(this ref operation o, ж<slice<slice<byte>>> Ꮡbuf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     if (o.bufs == default!){
@@ -124,7 +124,7 @@ public static Action InitWSA = sync.OnceFunc(() => {
 
 // ClearBufs clears all pointers to Buffers parameter captured
 // by InitBufs, so it can be released by garbage collector.
-[GoRecv] internal static void ClearBufs(this ref operation o) {
+internal static void ClearBufs(this ref operation o) {
     foreach (var (i, _) in o.bufs) {
         o.bufs[i].Buf = default!;
     }
@@ -234,7 +234,7 @@ internal static (nint, error) execIO(ж<operation> Ꮡo, Func<ж<operation>, err
 
 // FD is a file descriptor. The net and os packages embed this type in
 // a larger type representing a network connection or OS file.
-[GoType] partial struct FD {
+partial struct FD {
     // Lock sysfd and serialize access to Read and Write methods.
     internal fdMutex fdmu;
     // System file descriptor. Immutable until Close.
@@ -267,7 +267,7 @@ internal static (nint, error) execIO(ж<operation> Ꮡo, Func<ж<operation>, err
     internal fileKind kind;
 }
 
-[GoType("num:byte")] partial struct fileKind;
+partial struct fileKind /*num:byte*/;
 
 internal static fileKind kindNet => /* iota */ 0;
 internal static fileKind kindFile => 1;
@@ -478,7 +478,7 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, e
 // readConsole reads utf16 characters from console File,
 // encodes them into utf8 and stores them in buffer b.
 // It returns the number of utf8 bytes read and an error, if any.
-[GoRecv] internal static (nint, error) readConsole(this ref FD fd, slice<byte> b) {
+internal static (nint, error) readConsole(this ref FD fd, slice<byte> b) {
     if (len(b) == 0) {
         return (0, default!);
     }
@@ -778,7 +778,7 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> buf) {
 
 // writeConsole writes len(b) bytes to the console File.
 // It returns the number of bytes written and an error, if any.
-[GoRecv] internal static (nint, error) writeConsole(this ref FD fd, slice<byte> b) {
+internal static (nint, error) writeConsole(this ref FD fd, slice<byte> b) {
     nint n = len(b);
     var runes = new slice<rune>(0, 256);
     if (len(fd.lastbits) > 0) {

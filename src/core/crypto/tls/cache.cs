@@ -12,7 +12,7 @@ using go.sync;
 
 partial class tls_package {
 
-[GoType] partial struct cacheEntry {
+partial struct cacheEntry {
     internal atomic.Int64 refs;
     internal ж<Δx509.Certificate> cert;
 }
@@ -36,7 +36,7 @@ partial class tls_package {
 // See https://boringssl.googlesource.com/boringssl/+/master/include/openssl/pool.h
 // and https://boringssl.googlesource.com/boringssl/+/master/crypto/pool/pool.c
 // for the BoringSSL reference.
-[GoType] partial struct certCache {
+partial struct certCache {
     public partial ref sync_package.Map Map { get; }
 }
 
@@ -45,7 +45,7 @@ internal static ж<certCache> globalCertCache = @new<certCache>();
 // activeCert is a handle to a certificate held in the cache. Once there are
 // no alive activeCerts for a given certificate, the certificate is removed
 // from the cache by a finalizer.
-[GoType] partial struct activeCert {
+partial struct activeCert {
     internal ж<Δx509.Certificate> cert;
 }
 

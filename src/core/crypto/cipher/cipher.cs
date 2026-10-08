@@ -14,7 +14,7 @@ partial class cipher_package {
 // using a given key. It provides the capability to encrypt
 // or decrypt individual blocks. The mode implementations
 // extend that capability to streams of blocks.
-[GoType] partial interface Block {
+partial interface Block {
     // BlockSize returns the cipher's block size.
     nint BlockSize();
     // Encrypt encrypts the first block in src into dst.
@@ -26,7 +26,7 @@ partial class cipher_package {
 }
 
 // A Stream represents a stream cipher.
-[GoType] partial interface Stream {
+partial interface Stream {
     // XORKeyStream XORs each byte in the given slice with a byte from the
     // cipher's key stream. Dst and src must overlap entirely or not at all.
     //
@@ -42,7 +42,7 @@ partial class cipher_package {
 
 // A BlockMode represents a block cipher running in a block-based mode (CBC,
 // ECB etc).
-[GoType] partial interface BlockMode {
+partial interface BlockMode {
     // BlockSize returns the mode's block size.
     nint BlockSize();
     // CryptBlocks encrypts or decrypts a number of blocks. The length of
@@ -62,7 +62,7 @@ partial class cipher_package {
 // AEAD is a cipher mode providing authenticated encryption with associated
 // data. For a description of the methodology, see
 // https://en.wikipedia.org/wiki/Authenticated_encryption.
-[GoType] partial interface AEAD {
+partial interface AEAD {
     // NonceSize returns the size of the nonce that must be passed to Seal
     // and Open.
     nint NonceSize();

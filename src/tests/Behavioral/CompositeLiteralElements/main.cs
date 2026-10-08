@@ -4,28 +4,28 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct S {
+partial struct S {
     public nint A;
     public @string B;
 }
 
-[GoType] partial struct withArray {
+partial struct withArray {
     public array<array<nint>> A = new(2, () => new(3));
 }
 
-[GoType("[4]byte")] partial struct nb;
+partial struct nb /*[4]byte*/;
 
-[GoType("[2]array<nint>")] [GoArrayDims(2, 3)] partial struct nn;
+/*[2][3]*/ partial struct nn /*[2]array<nint>*/;
 
-[GoType("[2]withArray")] partial struct ns;
+partial struct ns /*[2]withArray*/;
 
-[GoType("[3]nint")] partial struct ni;
+partial struct ni /*[3]nint*/;
 
-[GoType("[2]ni")] partial struct no;
+partial struct no /*[2]ni*/;
 
-[GoType("[]nint")] partial struct nsl;
+partial struct nsl /*[]nint*/;
 
-[GoType("map[@string, nint]")] partial struct nmp;
+partial struct nmp /*map[@string, nint]*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object paExplicitˢ = (@string)"paExplicit:"u8;
@@ -66,7 +66,7 @@ private static readonly object nnKeyedˢ = (@string)"nnKeyed:"u8;
 private static readonly object ctrlˢ = (@string)"ctrl:"u8;
 private static readonly object ctrlLitˢ = (@string)"ctrlLit:"u8;
 
-[GoType("dyn")] internal partial struct main_sa {
+internal partial struct main_sa /*dyn*/ {
     public array<array<nint>> A = new(2, () => new(3));
 }
 

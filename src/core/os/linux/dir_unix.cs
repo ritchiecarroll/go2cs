@@ -18,7 +18,7 @@ using go.sync;
 partial class os_package {
 
 // Auxiliary information if the File describes a directory
-[GoType] partial struct dirInfo {
+partial struct dirInfo {
     internal Δsync.Mutex mu;
     internal ж<slice<byte>> buf; // buffer for directory I/O
     internal nint nbuf;    // length of buf; return value from Getdirentries
@@ -36,7 +36,7 @@ internal static ж<Δsync.Pool> ᏑdirBufPool = new StandardBox<Δsync.Pool>(new
 ));
 internal static ref Δsync.Pool dirBufPool => ref ᏑdirBufPool.Value;
 
-[GoRecv] internal static void close(this ref dirInfo d) {
+internal static void close(this ref dirInfo d) {
     if (d.buf != nil) {
         ᏑdirBufPool.Put(d.buf.OrTypedNil());
         d.buf = default!;

@@ -11,7 +11,7 @@ partial class poll_package {
 // fdMutex is a specialized synchronization primitive that manages
 // lifetime of an fd and serializes access to Read, Write and Close
 // methods on FD.
-[GoType] partial struct fdMutex {
+partial struct fdMutex {
     internal uint64 state;
     internal uint32 rsema;
     internal uint32 wsema;

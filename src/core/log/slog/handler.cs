@@ -28,7 +28,7 @@ partial class slog_package {
 //
 // Users of the slog package should not invoke Handler methods directly.
 // They should use the methods of [Logger] instead.
-[GoType] partial interface ΔHandler {
+partial interface ΔHandler {
     // Enabled reports whether the handler handles records at the given level.
     // The handler ignores records whose level is lower.
     // It is called early, before any arguments are processed,
@@ -83,7 +83,7 @@ partial class slog_package {
     ΔHandler WithGroup(@string name);
 }
 
-[GoType] partial struct defaultHandler {
+partial struct defaultHandler {
     internal ж<commonHandler> ch;
     // internal.DefaultOutput, except for testing
     internal Func<uintptr, slice<byte>, error> output;
@@ -96,7 +96,7 @@ internal static ж<defaultHandler> newDefaultHandler(Func<uintptr, slice<byte>, 
     ));
 }
 
-[GoRecv] internal static bool Enabled(this ref defaultHandler _Δp0, context.Context _Δp1, ΔLevel l) {
+internal static bool Enabled(this ref defaultHandler _Δp0, context.Context _Δp1, ΔLevel l) {
     return l >= ᏑlogLoggerLevel.Level();
 }
 
@@ -123,17 +123,17 @@ internal static error Handle(this ж<defaultHandler> Ꮡh, context.Context ctx, 
     finally { ᒐ.Run(); }
 }
 
-[GoRecv] internal static ΔHandler WithAttrs(this ref defaultHandler h, slice<Attr> @as) {
+internal static ΔHandler WithAttrs(this ref defaultHandler h, slice<Attr> @as) {
     return new defaultHandlerжΔHandler(Ꮡ(new defaultHandler(h.ch.withAttrs(@as), h.output)));
 }
 
-[GoRecv] internal static ΔHandler WithGroup(this ref defaultHandler h, @string name) {
+internal static ΔHandler WithGroup(this ref defaultHandler h, @string name) {
     return new defaultHandlerжΔHandler(Ꮡ(new defaultHandler(h.ch.withGroup(name), h.output)));
 }
 
 // HandlerOptions are options for a [TextHandler] or [JSONHandler].
 // A zero HandlerOptions consists entirely of default values.
-[GoType] partial struct HandlerOptions {
+partial struct HandlerOptions {
     // AddSource causes the handler to compute the source code position
     // of the log statement and add a SourceKey attribute to the output.
     public bool AddSource;
@@ -180,7 +180,7 @@ public static readonly @string MessageKey = "msg"u8;
 
 public static readonly @string SourceKey = "source"u8;
 
-[GoType] partial struct commonHandler {
+partial struct commonHandler {
     internal bool json; // true => output JSON; false => output text
     internal HandlerOptions opts;
     internal slice<byte> preformattedAttrs;
@@ -195,7 +195,7 @@ public static readonly @string SourceKey = "source"u8;
     internal io.Writer w;
 }
 
-[GoRecv] internal static ж<commonHandler> clone(this ref commonHandler h) {
+internal static ж<commonHandler> clone(this ref commonHandler h) {
     // We can't use assignment because we can't copy the mutex.
     return Ꮡ(new commonHandler(
         json: h.json,
@@ -213,7 +213,7 @@ public static readonly @string SourceKey = "source"u8;
 
 // enabled reports whether l is greater than or equal to the
 // minimum level.
-[GoRecv] internal static bool enabled(this ref commonHandler h, ΔLevel l) {
+internal static bool enabled(this ref commonHandler h, ΔLevel l) {
     ΔLevel minLevel = LevelInfo;
     if (h.opts.Level != default!) {
         minLevel = h.opts.Level.Level();
@@ -263,7 +263,7 @@ internal static ж<commonHandler> withAttrs(this ж<commonHandler> Ꮡh, slice<A
     finally { ᒐ.Run(); }
 }
 
-[GoRecv] internal static ж<commonHandler> withGroup(this ref commonHandler h, @string name) {
+internal static ж<commonHandler> withGroup(this ref commonHandler h, @string name) {
     var h2 = h.clone();
     h2.Value.groups = builtin.append((~h2).groups, name);
     return h2;
@@ -382,7 +382,7 @@ internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
 }
 
 // attrSep returns the separator between attributes.
-[GoRecv] internal static @string attrSep(this ref commonHandler h) {
+internal static @string attrSep(this ref commonHandler h) {
     if (h.json) {
         return ","u8;
     }
@@ -392,7 +392,7 @@ internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
 // handleState holds state for a single call to commonHandler.handle.
 // The initial value of sep determines whether to emit a separator
 // before the next key, after which it stays true.
-[GoType] partial struct handleState {
+partial struct handleState {
     internal ж<commonHandler> h;
     internal ж<buffer.Buffer> buf;
     internal bool freeBuf;           // should buf be freed?
@@ -425,7 +425,7 @@ internal static handleState newHandleState(this ж<commonHandler> Ꮡh, ж<buffe
     return s;
 }
 
-[GoRecv] internal static void free(this ref handleState s) {
+internal static void free(this ref handleState s) {
     if (s.freeBuf) {
         s.buf.Free();
     }
@@ -438,7 +438,7 @@ internal static handleState newHandleState(this ж<commonHandler> Ꮡh, ж<buffe
     s.prefix.Free();
 }
 
-[GoRecv] internal static void openGroups(this ref handleState s) {
+internal static void openGroups(this ref handleState s) {
     foreach (var (_, n) in (~s.h).groups.slice((~s.h).nOpenGroups)) {
         s.openGroup(n);
     }
@@ -449,7 +449,7 @@ internal static UntypedInt keyComponentSep => /* '.' */ 46;
 
 // openGroup starts a new group of attributes
 // with the given name.
-[GoRecv] internal static void openGroup(this ref handleState s, @string name) {
+internal static void openGroup(this ref handleState s, @string name) {
     if ((~s.h).json){
         s.appendKey(name);
         s.buf.WriteByte((rune)'{');
@@ -465,7 +465,7 @@ internal static UntypedInt keyComponentSep => /* '.' */ 46;
 }
 
 // closeGroup ends the group with the given name.
-[GoRecv] internal static void closeGroup(this ref handleState s, @string name) {
+internal static void closeGroup(this ref handleState s, @string name) {
     if ((~s.h).json){
         s.buf.WriteByte((rune)'}');
     } else {
@@ -555,11 +555,11 @@ internal static bool appendAttr(this ж<handleState> Ꮡs, Attr a) {
     return true;
 }
 
-[GoRecv] internal static void appendError(this ref handleState s, error err) {
+internal static void appendError(this ref handleState s, error err) {
     s.appendString(fmt.Sprintf("!ERROR:%v"u8, err));
 }
 
-[GoRecv] internal static void appendKey(this ref handleState s, @string key) {
+internal static void appendKey(this ref handleState s, @string key) {
     s.buf.WriteString(s.sep);
     if (s.prefix != nil && len(s.prefix.ValueSlot) > 0){
         // TODO: optimize by avoiding allocation.
@@ -575,7 +575,7 @@ internal static bool appendAttr(this ж<handleState> Ꮡs, Attr a) {
     s.sep = s.h.attrSep();
 }
 
-[GoRecv] internal static void appendString(this ref handleState s, @string str) {
+internal static void appendString(this ref handleState s, @string str) {
     if ((~s.h).json){
         s.buf.WriteByte((rune)'"');
         s.buf.ValueSlot = appendEscapedJSONString(s.buf.ValueSlot, str);
@@ -660,7 +660,7 @@ internal static slice<byte> appendRFC3339Millis(slice<byte> b, time.Time t) {
 // DiscardHandler.Enabled returns false for all Levels.
 public static ΔHandler DiscardHandler = new discardHandler(nil);
 
-[GoType] partial struct discardHandler {
+partial struct discardHandler {
 }
 
 internal static bool Enabled(this discardHandler dh, context.Context _Δp1, ΔLevel _Δp2) {

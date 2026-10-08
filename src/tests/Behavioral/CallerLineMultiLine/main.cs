@@ -18,16 +18,16 @@ internal static void show(bool exactInRelease, params ꓸꓸꓸany argsʗp) {
     }
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint line() {
+internal static partial nint line() {
     var (_, _, l, _) = runtime.Caller(1);
     return l;
 }
 
-[GoType] partial struct chain {
+partial struct chain {
     internal slice<nint> lines;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static ж<chain> Add(this ж<chain> Ꮡc, nint n) {
+internal static partial ж<chain> Add(this ж<chain> Ꮡc, nint n) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (_, _, l, _) = runtime.Caller(1);
@@ -35,16 +35,16 @@ internal static void show(bool exactInRelease, params ꓸꓸꓸany argsʗp) {
     return Ꮡc;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] internal static void Done(this ref chain c, @string label) {
+internal static partial void Done(this ref chain c, @string label) {
     var (_, _, l, _) = runtime.Caller(1);
     show(false, label, c.lines, l);
     show(true, label + "-terminal", l);
 }
 
-[GoType] partial struct impl {
+partial struct impl {
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint Line(this impl _Δp0) {
+internal static partial nint Line(this impl _Δp0) {
     var (_, _, l, _) = runtime.Caller(1);
     return l;
 }
@@ -68,7 +68,7 @@ internal static slice<nint> pkgSlice = new nint[]{line(),
 internal static nint pkgSum = line() + line() + line();
 
 
-[GoType("dyn")] partial struct pkgStructsᴛ1 {
+partial struct pkgStructsᴛ1 /*dyn*/ {
     internal nint a, b;
 }
 internal static slice<pkgStructsᴛ1> pkgStructs = new pkgStructsᴛ1[]{
@@ -79,7 +79,7 @@ internal static slice<pkgStructsᴛ1> pkgStructs = new pkgStructsᴛ1[]{
     )
 }.slice();
 
-internal static slice<nint> ret() {
+internal static partial slice<nint> ret() {
     return three(line(),
         line(),
         line());

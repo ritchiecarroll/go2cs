@@ -14,7 +14,7 @@ internal static (CrossPkgLibꓸStatus, nint) gauge(CrossPkgLibꓸStatus st) {
     return (new CrossPkgLibꓸStatus(Code: st.Code + 1), st.Code);
 }
 
-[GoType] partial struct meterBox {
+partial struct meterBox {
     internal CrossPkgLibꓸStatus st;
     internal nint sat;
 }
@@ -26,18 +26,18 @@ internal static ж<CrossPkgLibꓸStatus> statusPtr(ж<CrossPkgLibꓸStatus> Ꮡs
     return Ꮡst;
 }
 
-[GoType] partial struct Holder<T> {
+partial struct Holder<T> {
     internal T item;
 }
 
 internal static ж<Holder<ж<CrossPkgLib.Sensor>>> sensorHolder = Ꮡ(new Holder<ж<CrossPkgLib.Sensor>>(nil));
 
-[GoType] partial struct sensorBox {
+partial struct sensorBox {
     public partial ref Holder<ж<CrossPkgLib_package.Sensor>> Holder { get; }
     internal @string tag;
 }
 
-[GoType] partial struct ledger {
+partial struct ledger {
     internal ж<CrossPkgLibꓸStatus> cur;
 }
 
@@ -48,7 +48,7 @@ internal static void note(nint n) {
     fmt.Println(notedˢ, n);
 }
 
-[GoType] partial struct badge {
+partial struct badge {
     internal @string name;
 }
 
@@ -56,13 +56,13 @@ internal static @string Label(this badge b) {
     return "badge:"u8 + b.name;
 }
 
-[GoType] partial interface namedLabel :
+partial interface namedLabel :
     CrossPkgLib.Labeled
 {
     nint Rank();
 }
 
-[GoType] partial struct emblem {
+partial struct emblem {
     internal @string name;
     internal nint rank;
 }
@@ -75,17 +75,17 @@ internal static nint Rank(this emblem e) {
     return e.rank;
 }
 
-[GoType] partial interface stamped :
+partial interface stamped :
     CrossPkgLib.Labeled
 {
     @string Stamp();
 }
 
-[GoType] partial interface Labeled {
+partial interface Labeled {
     @string Label();
 }
 
-[GoType] partial struct seal {
+partial struct seal {
     internal @string name;
 }
 
@@ -97,15 +97,15 @@ internal static @string Stamp(this seal s) {
     return "ok:"u8 + s.name;
 }
 
-[GoType] partial struct dial {
+partial struct dial {
     internal @string n;
 }
 
-[GoRecv] internal static @string Label(this ref dial d) {
+internal static @string Label(this ref dial d) {
     return "dial:"u8 + d.n;
 }
 
-[GoType] partial interface certificate :
+partial interface certificate :
     CrossPkgLib.Rated,
     CrossPkgLib.Sealed
 {
@@ -113,7 +113,7 @@ internal static @string Stamp(this seal s) {
     nint Serial();
 }
 
-[GoType] partial struct cert {
+partial struct cert {
     internal nint id;
 }
 
@@ -139,16 +139,16 @@ internal static nint Serial(this cert c) {
     return c.id;
 }
 
-[GoType] partial struct holder<T> {
+partial struct holder<T> {
     public partial ref ж<CrossPkgLib_package.Cache<T>> Cache { get; }
     internal @string name;
 }
 
-[GoType] partial struct relay {
+partial struct relay {
     internal @string tag;
 }
 
-[GoRecv] internal static @string Report(this ref relay r) {
+internal static @string Report(this ref relay r) {
     return "relay:"u8 + r.tag;
 }
 
@@ -353,11 +353,11 @@ internal static void Main() {
     finally { ᒐ.Run(); }
 }
 
-[GoType("num:float64")] partial struct localCelsius;
+partial struct localCelsius /*num:float64*/;
 
-[GoType("global::go.CrossPkgLib_package.Celsius")] partial struct reading;
+partial struct reading /*global::go.CrossPkgLib_package.Celsius*/;
 
-[GoType("global::go.CrossPkgLib_package.Ticks")] partial struct stamp;
+partial struct stamp /*global::go.CrossPkgLib_package.Ticks*/;
 
 internal static stamp bigStamp => unchecked((stamp)(CrossPkgLib.Ticks)0x80000001);
 
@@ -372,17 +372,17 @@ internal static (ж<CrossPkgLib.Node>, error) simpleResolve(map<@string, ж<Cros
     return (Ꮡ(new CrossPkgLib.Node(ID: len(path))), default!);
 }
 
-[GoType] partial struct probe {
+partial struct probe {
     public partial ref ж<CrossPkgLib_package.Sensor> Sensor { get; }
     internal nint id;
 }
 
-[GoType] partial struct tagged {
+partial struct tagged {
     public partial ref CrossPkgLib_package.Sensor Sensor { get; }
     internal nint n;
 }
 
-[GoType] partial interface ΔMeter {
+partial interface ΔMeter {
     nint Bump();
 }
 
@@ -393,20 +393,20 @@ internal static @string Meter(this tagged t) {
     return taggedMeterˢ;
 }
 
-[GoType] partial struct counter {
+partial struct counter {
     public partial ref ж<CrossPkgLib_package.Meter> Meter { get; }
 }
 
-[GoType] partial struct rig {
+partial struct rig {
     public partial ref CrossPkgLib_package.Device Device { get; }
     internal nint id;
 }
 
-[GoType] partial struct tallies {
+partial struct tallies {
     internal nint pts;
 }
 
-[GoRecv] internal static nint Score(this ref tallies t) {
+internal static nint Score(this ref tallies t) {
     return t.pts;
 }
 

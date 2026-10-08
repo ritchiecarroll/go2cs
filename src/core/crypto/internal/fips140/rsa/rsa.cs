@@ -12,18 +12,18 @@ using go.crypto.@internal.fips140;
 
 partial class rsa_package {
 
-[GoType] partial struct ΔPublicKey {
+partial struct ΔPublicKey {
     public ж<bigmod.Modulus> N;
     public nint E;
 }
 
 // Size returns the modulus size in bytes. Raw signatures and ciphertexts
 // for or by this public key will have the same size.
-[GoRecv] public static nint Size(this ref ΔPublicKey pub) {
+public static nint Size(this ref ΔPublicKey pub) {
     return (pub.N.BitLen() + 7) / 8;
 }
 
-[GoType] partial struct PrivateKey {
+partial struct PrivateKey {
     // pub has already been checked with checkPublicKey.
     internal ΔPublicKey pub;
     internal ж<bigmodꓸNat> d;
@@ -181,7 +181,7 @@ public static (ж<PrivateKey>, error) NewPrivateKeyWithoutCRT(slice<byte> N, nin
 //
 // P, Q, dP, dQ, and qInv may be nil if the key was created with
 // NewPrivateKeyWithoutCRT.
-[GoRecv] public static (slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q, slice<byte> dP, slice<byte> dQ, slice<byte> qInv) Export(this ref PrivateKey priv) {
+public static (slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q, slice<byte> dP, slice<byte> dQ, slice<byte> qInv) Export(this ref PrivateKey priv) {
     slice<byte> N = default!;
     nint e = default!;
     slice<byte> d = default!;

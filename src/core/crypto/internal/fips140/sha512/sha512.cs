@@ -56,7 +56,7 @@ internal static UntypedInt init7_384 => 0x47b5481dbefa4fa4;
 
 // Digest is a SHA-384, SHA-512, SHA-512/224, or SHA-512/256 [hash.Hash]
 // implementation.
-[GoType] partial struct Digest {
+partial struct Digest {
     internal array<uint64> h = new(8);
     internal array<byte> x = new(chunk);
     internal nint nx;
@@ -64,7 +64,7 @@ internal static UntypedInt init7_384 => 0x47b5481dbefa4fa4;
     internal nint size; // size224, size256, size384, or size512
 }
 
-[GoRecv] public static void Reset(this ref Digest d) {
+public static void Reset(this ref Digest d) {
     var exprᴛ1 = d.size;
     if (exprᴛ1 == size384) {
         d.h[0] = init0_384;
@@ -120,11 +120,11 @@ internal static readonly @string magic512_256 = "sha\x06"u8;
 internal static readonly @string magic512 = "sha\x07"u8;
 internal const nint marshaledSize = /* len(magic512) + 8*8 + chunk + 8 */ 204;
 
-[GoRecv] public static (slice<byte>, error) MarshalBinary(this ref Digest d) {
+public static (slice<byte>, error) MarshalBinary(this ref Digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
-[GoRecv] public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b) {
+public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b) {
     var exprᴛ1 = d.size;
     if (exprᴛ1 == size384) {
         b = append(b, magic384.ꓸꓸꓸ);
@@ -160,7 +160,7 @@ internal const nint marshaledSize = /* len(magic512) + 8*8 + chunk + 8 */ 204;
 private static readonly @string cryptoSha512InvalidHashˢ = "crypto/sha512: invalid hash state identifier"u8;
 private static readonly @string cryptoSha512InvalidHashˢ2 = "crypto/sha512: invalid hash state size"u8;
 
-[GoRecv] public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
+public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
     if (len(b) < len(magic512)) {
         return errors.New(cryptoSha512InvalidHashˢ);
     }
@@ -231,11 +231,11 @@ public static ж<Digest> New384() {
     return d;
 }
 
-[GoRecv] public static nint Size(this ref Digest d) {
+public static nint Size(this ref Digest d) {
     return d.size;
 }
 
-[GoRecv] public static nint BlockSize(this ref Digest d) {
+public static nint BlockSize(this ref Digest d) {
     return blockSize;
 }
 
@@ -266,7 +266,7 @@ public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
     return (nn, err);
 }
 
-[GoRecv] public static slice<byte> Sum(this ref Digest d, slice<byte> @in) {
+public static slice<byte> Sum(this ref Digest d, slice<byte> @in) {
     fips140.RecordApproved();
     // Make a copy of d so that caller can keep writing and summing.
     var d0 = @new<Digest>();

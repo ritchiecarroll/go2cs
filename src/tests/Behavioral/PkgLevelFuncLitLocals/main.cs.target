@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
@@ -17,7 +17,7 @@ internal static nint get(this counter c) {
     return c.n;
 }
 
-[GoType] partial struct entry {
+partial struct entry {
     internal @string name;
     internal Func<nint> f;
 }

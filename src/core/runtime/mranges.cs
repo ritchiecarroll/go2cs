@@ -18,7 +18,7 @@ partial class runtime_package {
 // addrRange represents a region of address space.
 //
 // An addrRange must never span a gap in the address space.
-[GoType] partial struct addrRange {
+partial struct addrRange {
     // base and limit together represent the region of address space
     // [base, limit). That is, base is inclusive, limit is exclusive.
     // These are address over an offset view of the address space on
@@ -82,7 +82,7 @@ internal static addrRange subtract(this addrRange a, addrRange b) {
 // takeFromFront takes len bytes from the front of the address range, aligning
 // the base to align first. On success, returns the aligned start of the region
 // taken and true.
-[GoRecv] internal static (uintptr, bool) takeFromFront(this ref addrRange a, uintptr len, uint8 align) {
+internal static (uintptr, bool) takeFromFront(this ref addrRange a, uintptr len, uint8 align) {
     var @base = alignUp(a.@base.addr(), (uintptr)align) + len;
     if (@base > a.limit.addr()) {
         return (0, false);
@@ -94,7 +94,7 @@ internal static addrRange subtract(this addrRange a, addrRange b) {
 // takeFromBack takes len bytes from the end of the address range, aligning
 // the limit to align after subtracting len. On success, returns the aligned
 // start of the region taken and true.
-[GoRecv] internal static (uintptr, bool) takeFromBack(this ref addrRange a, uintptr len, uint8 align) {
+internal static (uintptr, bool) takeFromBack(this ref addrRange a, uintptr len, uint8 align) {
     var limit = alignDown(a.limit.addr() - len, (uintptr)align);
     if (a.@base.addr() > limit) {
         return (0, false);
@@ -121,7 +121,7 @@ internal static offAddr maxOffAddr = new offAddr(unchecked((nuint)(1407374883553
 // offAddr represents an address in a contiguous view
 // of the address space on systems where the address space is
 // segmented. On other systems, it's just a normal address.
-[GoType] partial struct offAddr {
+partial struct offAddr {
     // a is just the virtual address, but should never be used
     // directly. Call addr() to get this value instead.
     internal uintptr a;
@@ -170,7 +170,7 @@ internal static uintptr addr(this offAddr l) {
 // atomicOffAddr is like offAddr, but operations on it are atomic.
 // It also contains operations to be able to store marked addresses
 // to ensure that they're not overridden until they've been seen.
-[GoType] partial struct atomicOffAddr {
+partial struct atomicOffAddr {
     // a contains the offset address, unlike offAddr.
     internal atomic.Int64 a;
 }
@@ -240,7 +240,7 @@ internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
 // and thus there is no way to free it.
 //
 // addrRanges is not thread-safe.
-[GoType] partial struct addrRanges {
+partial struct addrRanges {
     // ranges is a slice of ranges sorted by base.
     internal slice<addrRange> ranges;
     // totalBytes is the total amount of address space in bytes counted by
@@ -254,7 +254,7 @@ internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
 
 // findSucc returns the first index in a such that addr is
 // less than the base of the addrRange at that index.
-[GoRecv] internal static nint findSucc(this ref addrRanges a, uintptr addr) {
+internal static nint findSucc(this ref addrRanges a, uintptr addr) {
     var @base = new offAddr(addr);
     // Narrow down the search space via a binary search
     // for large addrRanges until we have at most iterMax
@@ -299,7 +299,7 @@ internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
 // then it returns addr. The second return value indicates whether
 // such an address exists for addr in a. That is, if addr is larger than
 // any address known to a, the second return value will be false.
-[GoRecv] internal static (uintptr, bool) findAddrGreaterEqual(this ref addrRanges a, uintptr addr) {
+internal static (uintptr, bool) findAddrGreaterEqual(this ref addrRanges a, uintptr addr) {
     nint i = a.findSucc(addr);
     if (i == 0) {
         return (a.ranges[0].@base.addr(), true);
@@ -314,7 +314,7 @@ internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
 }
 
 // contains returns true if a covers the address addr.
-[GoRecv] internal static bool contains(this ref addrRanges a, uintptr addr) {
+internal static bool contains(this ref addrRanges a, uintptr addr) {
     nint i = a.findSucc(addr);
     if (i == 0) {
         return false;
@@ -327,7 +327,7 @@ internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
 // removeLast removes and returns the highest-addressed contiguous range
 // of a, or the last nBytes of that range, whichever is smaller. If a is
 // empty, it returns an empty range.
-[GoRecv] internal static addrRange removeLast(this ref addrRanges a, uintptr nBytes) {
+internal static addrRange removeLast(this ref addrRanges a, uintptr nBytes) {
     if (len(a.ranges) == 0) {
         return new addrRange(nil);
     }
@@ -346,7 +346,7 @@ internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
 
 // removeGreaterEqual removes the ranges of a which are above addr, and additionally
 // splits any range containing addr.
-[GoRecv] internal static void removeGreaterEqual(this ref addrRanges a, uintptr addr) {
+internal static void removeGreaterEqual(this ref addrRanges a, uintptr addr) {
     nint pivot = a.findSucc(addr);
     if (pivot == 0) {
         // addr is before all ranges in a.

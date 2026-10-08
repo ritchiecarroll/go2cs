@@ -10,7 +10,7 @@ internal static partial @unsafe.Pointer add(@unsafe.Pointer p, uintptr x) {
     return (@unsafe.Pointer)((uintptr)p + x);
 }
 
-[GoType] partial struct nih {
+partial struct nih {
     internal uint32 a, b;
 }
 
@@ -28,7 +28,7 @@ internal static partial uint32 step(ж<uint32> Ꮡv) {
     return q.Value;
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal uint32 x, y;
 }
 

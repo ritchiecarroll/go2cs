@@ -75,7 +75,7 @@ internal static dloggerFake dlogFake() {
 //
 // To obtain a dloggerImpl, call dlog(). When done with the dloggerImpl, call
 // end().
-[GoType] partial struct dloggerImpl {
+partial struct dloggerImpl {
     internal sys.NotInHeap _;
     internal debugLogWriter w;
     // allLink is the next dlogger in the allDloggers list.
@@ -92,7 +92,7 @@ internal static ж<ж<dloggerImpl>> ᏑallDloggers = new StandardBox<ж<dloggerI
 internal static ref ж<dloggerImpl> allDloggers => ref ᏑallDloggers.ValueSlot;
 
 // A dloggerFake is a no-op implementation of dlogger.
-[GoType] partial struct dloggerFake {
+partial struct dloggerFake {
 }
 
 //go:nosplit
@@ -364,7 +364,7 @@ internal static ж<dloggerImpl> traceback(this ж<dloggerImpl> Ꮡl, slice<uintp
 // overwrite old records. Hence, it maintains a reader that consumes
 // the log as it gets overwritten. That reader state is where an
 // actual log reader would start.
-[GoType] partial struct debugLogWriter {
+partial struct debugLogWriter {
     internal sys.NotInHeap _;
     internal uint64 write;
     internal debugLogBuf data;
@@ -380,7 +380,7 @@ internal static ж<dloggerImpl> traceback(this ж<dloggerImpl> Ꮡl, slice<uintp
     internal array<byte> buf = new(10);
 }
 
-[GoType] partial struct debugLogBuf {
+partial struct debugLogBuf {
     internal sys.NotInHeap _;
     internal array<byte> b = new(debugLogBytes);
 }
@@ -392,7 +392,7 @@ internal static UntypedInt debugLogSyncSize => /* debugLogHeaderSize + 2*8 */ 18
 internal static readonly @string recordWrappedAroundˢ = "record wrapped around"u8;
 
 //go:nosplit
-[GoRecv] internal static void ensure(this ref debugLogWriter l, uint64 n) {
+internal static void ensure(this ref debugLogWriter l, uint64 n) {
     while (l.write + n >= l.r.begin + (uint64)len(l.data.b)) {
         // Consume record at begin.
         if (l.r.skip() == ~(uint64)0) {
@@ -408,14 +408,14 @@ internal static readonly @string recordWrappedAroundˢ = "record wrapped around"
 }
 
 //go:nosplit
-[GoRecv] internal static bool writeFrameAt(this ref debugLogWriter l, uint64 pos, uint64 size) {
+internal static bool writeFrameAt(this ref debugLogWriter l, uint64 pos, uint64 size) {
     l.data.b[pos % (uint64)len(l.data.b)] = (uint8)size;
     l.data.b[(pos + 1) % (uint64)len(l.data.b)] = (uint8)((size >> (int)(8)));
     return size <= 0xFFFF;
 }
 
 //go:nosplit
-[GoRecv] internal static void writeSync(this ref debugLogWriter l, uint64 tick, uint64 nano) {
+internal static void writeSync(this ref debugLogWriter l, uint64 tick, uint64 nano) {
     (l.tick, l.nano) = (tick, nano);
     l.ensure(debugLogHeaderSize);
     l.writeFrameAt(l.write, 0);
@@ -426,7 +426,7 @@ internal static readonly @string recordWrappedAroundˢ = "record wrapped around"
 }
 
 //go:nosplit
-[GoRecv] internal static void writeUint64LE(this ref debugLogWriter l, uint64 x) {
+internal static void writeUint64LE(this ref debugLogWriter l, uint64 x) {
     array<byte> b = new(8);
     b[0] = (byte)x;
     b[1] = (byte)((x >> (int)(8)));
@@ -440,7 +440,7 @@ internal static readonly @string recordWrappedAroundˢ = "record wrapped around"
 }
 
 //go:nosplit
-[GoRecv] internal static void @byte(this ref debugLogWriter l, byte x) {
+internal static void @byte(this ref debugLogWriter l, byte x) {
     l.ensure(1);
     var pos = l.write;
     l.write++;
@@ -448,7 +448,7 @@ internal static readonly @string recordWrappedAroundˢ = "record wrapped around"
 }
 
 //go:nosplit
-[GoRecv] internal static void bytes(this ref debugLogWriter l, slice<byte> x) {
+internal static void bytes(this ref debugLogWriter l, slice<byte> x) {
     l.ensure((uint64)len(x));
     var pos = l.write;
     l.write += (uint64)len(x);
@@ -460,7 +460,7 @@ internal static readonly @string recordWrappedAroundˢ = "record wrapped around"
 }
 
 //go:nosplit
-[GoRecv] internal static void varint(this ref debugLogWriter l, int64 x) {
+internal static void varint(this ref debugLogWriter l, int64 x) {
     uint64 u = default!;
     if (x < 0){
         u = (uint64)(((~(uint64)x << (int)(1))) | 1); // complement i, bit 0 is 1
@@ -471,7 +471,7 @@ internal static readonly @string recordWrappedAroundˢ = "record wrapped around"
 }
 
 //go:nosplit
-[GoRecv] internal static void uvarint(this ref debugLogWriter l, uint64 u) {
+internal static void uvarint(this ref debugLogWriter l, uint64 u) {
     nint i = 0;
     while (u >= 0x80) {
         l.buf[i] = (byte)((byte)u | 0x80);
@@ -483,7 +483,7 @@ internal static readonly @string recordWrappedAroundˢ = "record wrapped around"
     l.bytes(l.buf.slice(0, i));
 }
 
-[GoType] partial struct debugLogReader {
+partial struct debugLogReader {
     internal ж<debugLogBuf> data;
     // begin and end are the positions in the log of the beginning
     // and end of the log data, modulo len(data).
@@ -493,7 +493,7 @@ internal static readonly @string recordWrappedAroundˢ = "record wrapped around"
 }
 
 //go:nosplit
-[GoRecv] internal static uint64 skip(this ref debugLogReader r) {
+internal static uint64 skip(this ref debugLogReader r) {
     // Read size at pos.
     if (r.begin + (uint64)debugLogHeaderSize > r.end) {
         return ~(uint64)0;
@@ -513,12 +513,12 @@ internal static readonly @string recordWrappedAroundˢ = "record wrapped around"
 }
 
 //go:nosplit
-[GoRecv] internal static uint16 readUint16LEAt(this ref debugLogReader r, uint64 pos) {
+internal static uint16 readUint16LEAt(this ref debugLogReader r, uint64 pos) {
     return (uint16)((uint16)(~r.data).b[pos % (uint64)len((~r.data).b)] | (uint16)((uint16)(~r.data).b[(pos + 1) % (uint64)len((~r.data).b)] << (int)(8)));
 }
 
 //go:nosplit
-[GoRecv] internal static uint64 readUint64LEAt(this ref debugLogReader r, uint64 pos) {
+internal static uint64 readUint64LEAt(this ref debugLogReader r, uint64 pos) {
     array<byte> b = new(8);
     foreach (var (i, _) in b) {
         b[i] = (~r.data).b[pos % (uint64)len((~r.data).b)];
@@ -527,7 +527,7 @@ internal static readonly @string recordWrappedAroundˢ = "record wrapped around"
     return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)b[0] | ((uint64)b[1] << (int)(8))) | ((uint64)b[2] << (int)(16))) | ((uint64)b[3] << (int)(24))) | ((uint64)b[4] << (int)(32))) | ((uint64)b[5] << (int)(40))) | ((uint64)b[6] << (int)(48))) | ((uint64)b[7] << (int)(56)));
 }
 
-[GoRecv] internal static uint64 /*tick*/ peek(this ref debugLogReader r) {
+internal static uint64 /*tick*/ peek(this ref debugLogReader r) {
     // Consume any sync records.
     var size = (uint64)0;
     while (size == 0) {
@@ -566,7 +566,7 @@ internal static readonly @string recordWrappedAroundˢ = "record wrapped around"
     return r.tick + u;
 }
 
-[GoRecv] internal static (uint64 end, uint64 tick, uint64 nano, nint Δp) header(this ref debugLogReader r) {
+internal static (uint64 end, uint64 tick, uint64 nano, nint Δp) header(this ref debugLogReader r) {
     uint64 end = default!;
     uint64 tick = default!;
     uint64 nano = default!;
@@ -584,7 +584,7 @@ internal static readonly @string recordWrappedAroundˢ = "record wrapped around"
     return (end, tick, nano, Δp);
 }
 
-[GoRecv] internal static uint64 uvarint(this ref debugLogReader r) {
+internal static uint64 uvarint(this ref debugLogReader r) {
     uint64 u = default!;
     for (nuint i = (nuint)0; ᐧ ; i += 7) {
         var b = (~r.data).b[r.begin % (uint64)len((~r.data).b)];
@@ -597,7 +597,7 @@ internal static readonly @string recordWrappedAroundˢ = "record wrapped around"
     return u;
 }
 
-[GoRecv] internal static int64 varint(this ref debugLogReader r) {
+internal static int64 varint(this ref debugLogReader r) {
     var u = r.uvarint();
     int64 v = default!;
     if ((uint64)(u & 1) == 0){

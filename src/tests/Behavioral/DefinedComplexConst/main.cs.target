@@ -5,19 +5,19 @@ using ꓸꓸꓸC128 = Span<main_package.C128>;
 
 partial class main_package {
 
-[GoType("num:complex128")] partial struct C128;
+partial struct C128 /*num:complex128*/;
 
-[GoType("num:complex64")] partial struct C64;
+partial struct C64 /*num:complex64*/;
 
-[GoType("num:complex128")] partial struct C128b;
+partial struct C128b /*num:complex128*/;
 
-[GoType("num:float64")] partial struct F64;
+partial struct F64 /*num:float64*/;
 
-[GoType("num:float32")] partial struct F32;
+partial struct F32 /*num:float32*/;
 
-[GoType("num:float32")] partial struct F32b;
+partial struct F32b /*num:float32*/;
 
-[GoType] partial struct pair {
+partial struct pair {
     internal C128 a;
     internal C64 b;
 }

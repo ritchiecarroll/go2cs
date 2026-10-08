@@ -7,7 +7,7 @@ partial class main_package {
 
 internal static error errInvalid = errors.New("invalid argument"u8);
 
-[GoType] partial struct File {
+partial struct File {
     internal @string name;
     internal nint fd;
 }
@@ -55,18 +55,18 @@ public static @string BoxAnnounce(this ж<File> Ꮡf) {
     return f.name;
 }
 
-[GoRecv] public static @string ValName(this ref File f) {
+public static @string ValName(this ref File f) {
     return f.name;
 }
 
-[GoRecv] public static nint ValFd(this ref File f) {
+public static nint ValFd(this ref File f) {
     return f.fd + 1;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object sideEffectRanRefShapeˢ = (@string)"  side effect ran (ref shape)"u8;
 
-[GoRecv] public static @string ValAnnounce(this ref File f) {
+public static @string ValAnnounce(this ref File f) {
     fmt.Println(sideEffectRanRefShapeˢ);
     return f.name;
 }

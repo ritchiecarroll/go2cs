@@ -5,7 +5,7 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-[GoType] partial struct point {
+partial struct point {
     internal int32 x, y;
 }
 

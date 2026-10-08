@@ -58,7 +58,7 @@ internal static void labels(this ж<Checker> Ꮡcheck, ж<ast.BlockStmt> Ꮡbody
 }
 
 // A block tracks label declarations in a block and its enclosing blocks.
-[GoType] partial struct block {
+partial struct block {
     internal ж<block> parent;                   // enclosing block
     internal ж<ast.LabeledStmt> lstmt;         // labeled statement to which this block belongs, or nil
     internal map<@string, ж<ast.LabeledStmt>> labels; // allocated lazily

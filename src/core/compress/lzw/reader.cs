@@ -24,7 +24,7 @@ using io = io_package;
 
 partial class lzw_package {
 
-[GoType("num:nint")] partial struct Order;
+partial struct Order /*num:nint*/;
 
 public static Order LSB => /* iota */ 0;
 public static Order MSB => 1;
@@ -35,7 +35,7 @@ internal static UntypedInt flushBuffer => /* 1 << maxWidth */ 4096;
 
 // Reader is an io.Reader which can be used to read compressed data in the
 // LZW format.
-[GoType] partial struct Reader {
+partial struct Reader {
     internal io.ByteReader r;
     internal uint32 bits;
     internal nuint nBits;
@@ -75,7 +75,7 @@ internal static UntypedInt flushBuffer => /* 1 << maxWidth */ 4096;
 }
 
 // readLSB returns the next code for "Least Significant Bits first" data.
-[GoRecv] internal static (uint16, error) readLSB(this ref Reader r) {
+internal static (uint16, error) readLSB(this ref Reader r) {
     while (r.nBits < r.width) {
         var (x, err) = r.r.ReadByte();
         if (err != default!) {
@@ -91,7 +91,7 @@ internal static UntypedInt flushBuffer => /* 1 << maxWidth */ 4096;
 }
 
 // readMSB returns the next code for "Most Significant Bits first" data.
-[GoRecv] internal static (uint16, error) readMSB(this ref Reader r) {
+internal static (uint16, error) readMSB(this ref Reader r) {
     while (r.nBits < r.width) {
         var (x, err) = r.r.ReadByte();
         if (err != default!) {
@@ -235,14 +235,14 @@ internal static error errClosed = errors.New("lzw: reader/writer is closed"u8);
 
 // Close closes the [Reader] and returns an error for any future read operation.
 // It does not close the underlying [io.Reader].
-[GoRecv] public static error Close(this ref Reader r) {
+public static error Close(this ref Reader r) {
     r.err = errClosed; // in case any Reads come along
     return default!;
 }
 
 // Reset clears the [Reader]'s state and allows it to be reused again
 // as a new [Reader].
-[GoRecv] public static void Reset(this ref Reader r, io.Reader src, Order order, nint litWidth) {
+public static void Reset(this ref Reader r, io.Reader src, Order order, nint litWidth) {
     r = new Reader(nil);
     r.init(src, order, litWidth);
 }
@@ -272,7 +272,7 @@ internal static ж<Reader> newReader(io.Reader src, Order order, nint litWidth) 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string lzwUnknownOrderˢ = "lzw: unknown order"u8;
 
-[GoRecv] internal static void init(this ref Reader r, io.Reader src, Order order, nint litWidth) {
+internal static void init(this ref Reader r, io.Reader src, Order order, nint litWidth) {
     var exprᴛ1 = order;
     if (exprᴛ1 == LSB) {
         r.read = ((Func<ж<Reader>, (uint16, error)>)(readLSB));

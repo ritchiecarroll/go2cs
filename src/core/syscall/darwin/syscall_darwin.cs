@@ -26,7 +26,7 @@ public static partial (uintptr r1, uintptr r2, Errno err) RawSyscall6(uintptr tr
 
 internal static uintptr dupTrampoline = abi.FuncPCABI0(libc_dup2_trampoline);
 
-[GoType] partial struct SockaddrDatalink {
+partial struct SockaddrDatalink {
     public uint8 Len;
     public uint8 Family;
     public uint16 Index;

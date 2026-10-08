@@ -15,7 +15,7 @@ partial class strings_package {
 // A Builder is used to efficiently build a string using [Builder.Write] methods.
 // It minimizes memory copying. The zero value is ready to use.
 // Do not copy a non-zero Builder.
-[GoType] partial struct Builder {
+partial struct Builder {
     internal ж<Builder> addr; // of receiver, to detect copies by value
     // External users should never get direct access to this buffer, since
     // the slice at some point will be converted to a string using unsafe, also
@@ -40,31 +40,31 @@ internal static void copyCheck(this ж<Builder> Ꮡb) {
 }
 
 // String returns the accumulated string.
-[GoRecv] public static @string String(this ref Builder b) {
+public static @string String(this ref Builder b) {
     return @unsafe.String(@unsafe.SliceData(b.buf), len(b.buf));
 }
 
 // Len returns the number of accumulated bytes; b.Len() == len(b.String()).
-[GoRecv] public static nint Len(this ref Builder b) {
+public static nint Len(this ref Builder b) {
     return len(b.buf);
 }
 
 // Cap returns the capacity of the builder's underlying byte slice. It is the
 // total space allocated for the string being built and includes any bytes
 // already written.
-[GoRecv] public static nint Cap(this ref Builder b) {
+public static nint Cap(this ref Builder b) {
     return cap(b.buf);
 }
 
 // Reset resets the [Builder] to be empty.
-[GoRecv] public static void Reset(this ref Builder b) {
+public static void Reset(this ref Builder b) {
     b.addr = default!;
     b.buf = default!;
 }
 
 // grow copies the buffer to a new, larger buffer so that there are at least n
 // bytes of capacity beyond len(b.buf).
-[GoRecv] internal static void grow(this ref Builder b, nint n) {
+internal static void grow(this ref Builder b, nint n) {
     var buf = bytealg.MakeNoZero(2 * cap(b.buf) + n).slice(0, len(b.buf));
     copy(buf, b.buf);
     b.buf = buf;

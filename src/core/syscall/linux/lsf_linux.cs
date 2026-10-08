@@ -39,7 +39,7 @@ public static (nint, error) LsfSocket(nint ifindex, nint proto) {
     return (s, default!);
 }
 
-[GoType] partial struct iflags {
+partial struct iflags {
     internal array<byte> name = new(IFNAMSIZ);
     internal uint16 flags;
 }

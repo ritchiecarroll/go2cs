@@ -7,60 +7,60 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {
 
-[GoType] partial struct E {
+partial struct E {
     internal nint n;
 }
 
-[GoType] partial struct P {
+partial struct P {
     internal nint a, b;
 }
 
 internal static nint got;
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint viaCallers() {
+internal static partial nint viaCallers() {
     var pcs = new slice<uintptr>(8);
     nint n = runtime.Callers(3, pcs);
     var (frame, _) = runtime.CallersFrames(pcs.slice(0, n)).Next();
     return frame.Line;
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] public static void Info(this ref E e, params ꓸꓸꓸany argsʗp) {
+public static partial void Info(this ref E e, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     got = viaCallers();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] public static void Take(this ref E e, P p) {
+public static partial void Take(this ref E e, P p) {
     got = viaCallers();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] public static void One(this ref E e, any a) {
+public static partial void One(this ref E e, any a) {
     got = viaCallers();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] public static void Bare(this ref E e) {
+public static partial void Bare(this ref E e) {
     got = viaCallers();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] [GoRecv] public static nint Value(this ref E e, any a) {
+public static partial nint Value(this ref E e, any a) {
     return viaCallers();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void takeP(P p) {
+internal static partial void takeP(P p) {
     got = viaCallers();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void plain(any a) {
+internal static partial void plain(any a) {
     got = viaCallers();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static void plainV(params ꓸꓸꓸany argsʗp) {
+internal static partial void plainV(params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     got = viaCallers();
 }
 
-[MethodImpl(MethodImplOptions.NoInlining)] internal static nint line() {
+internal static partial nint line() {
     var (_, _, l, _) = runtime.Caller(1);
     return l;
 }

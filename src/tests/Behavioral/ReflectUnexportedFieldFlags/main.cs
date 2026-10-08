@@ -5,16 +5,15 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType] partial struct mixed {
+partial struct mixed {
     public nint Exported;
     internal nint unexported;
     internal nint _;
-    [GoTag(@"probe:""yes""")]
-    public @string Tagged;
+    public @string Tagged; /*`probe:"yes"`*/
     internal @string secret;
 }
 
-[GoType] partial struct allExported {
+partial struct allExported {
     public nint A;
     public nint B;
 }

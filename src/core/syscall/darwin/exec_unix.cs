@@ -124,7 +124,7 @@ public static error /*err*/ SetNonblock(nint fd, bool nonblocking) {
 
 // Credential holds user and group identities to be assumed
 // by a child process started by [StartProcess].
-[GoType] partial struct Credential {
+partial struct Credential {
     public uint32 Uid;   // User ID.
     public uint32 Gid;   // Group ID.
     public slice<uint32> Groups; // Supplementary group IDs.
@@ -133,7 +133,7 @@ public static error /*err*/ SetNonblock(nint fd, bool nonblocking) {
 
 // ProcAttr holds attributes that will be applied to a new process started
 // by [StartProcess].
-[GoType] partial struct ProcAttr {
+partial struct ProcAttr {
     public @string Dir;   // Current working directory.
     public slice<@string> Env; // Environment.
     public slice<uintptr> Files; // File descriptors.

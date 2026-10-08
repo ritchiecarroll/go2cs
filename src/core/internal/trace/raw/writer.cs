@@ -19,7 +19,7 @@ partial class raw_package {
 // produced by the runtime, because it may be missing extra padding
 // in the LEB128 encoding that the runtime adds but isn't necessary
 // when you know the data up-front.
-[GoType] partial struct Writer {
+partial struct Writer {
     internal io.Writer w;
     internal slice<byte> buf;
     internal version.Version v;
@@ -33,7 +33,7 @@ public static (ж<Writer>, error) NewWriter(io.Writer w, version.Version v) {
 }
 
 // WriteEvent writes a single event to the trace wire format stream.
-[GoRecv] public static error WriteEvent(this ref Writer w, Event e) {
+public static error WriteEvent(this ref Writer w, Event e) {
     // Check version.
     if (e.Version != w.v) {
         return fmt.Errorf("mismatched version between writer (go 1.%d) and event (go 1.%d)"u8, w.v, e.Version);

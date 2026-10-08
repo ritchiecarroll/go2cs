@@ -6,28 +6,28 @@ namespace go.crypto.@internal.fips140;
 
 partial class aes_package {
 
-internal static void ctrBlocks1(ref Block b, [GoArrayDims(16)] ж<array<byte>> Ꮡdst, [GoArrayDims(16)] ж<array<byte>> Ꮡsrc, uint64 ivlo, uint64 ivhi) {
+internal static void ctrBlocks1(ref Block b, /*[16]*/ ж<array<byte>> Ꮡdst, /*[16]*/ ж<array<byte>> Ꮡsrc, uint64 ivlo, uint64 ivhi) {
     ref var dst = ref Ꮡdst.DerefOrNull();
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     ctrBlocks(ref b, dst[..], src[..], ivlo, ivhi);
 }
 
-internal static void ctrBlocks2(ref Block b, [GoArrayDims(32)] ж<array<byte>> Ꮡdst, [GoArrayDims(32)] ж<array<byte>> Ꮡsrc, uint64 ivlo, uint64 ivhi) {
+internal static void ctrBlocks2(ref Block b, /*[32]*/ ж<array<byte>> Ꮡdst, /*[32]*/ ж<array<byte>> Ꮡsrc, uint64 ivlo, uint64 ivhi) {
     ref var dst = ref Ꮡdst.DerefOrNull();
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     ctrBlocks(ref b, dst[..], src[..], ivlo, ivhi);
 }
 
-internal static void ctrBlocks4(ref Block b, [GoArrayDims(64)] ж<array<byte>> Ꮡdst, [GoArrayDims(64)] ж<array<byte>> Ꮡsrc, uint64 ivlo, uint64 ivhi) {
+internal static void ctrBlocks4(ref Block b, /*[64]*/ ж<array<byte>> Ꮡdst, /*[64]*/ ж<array<byte>> Ꮡsrc, uint64 ivlo, uint64 ivhi) {
     ref var dst = ref Ꮡdst.DerefOrNull();
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     ctrBlocks(ref b, dst[..], src[..], ivlo, ivhi);
 }
 
-internal static void ctrBlocks8(ref Block b, [GoArrayDims(128)] ж<array<byte>> Ꮡdst, [GoArrayDims(128)] ж<array<byte>> Ꮡsrc, uint64 ivlo, uint64 ivhi) {
+internal static void ctrBlocks8(ref Block b, /*[128]*/ ж<array<byte>> Ꮡdst, /*[128]*/ ж<array<byte>> Ꮡsrc, uint64 ivlo, uint64 ivhi) {
     ref var dst = ref Ꮡdst.DerefOrNull();
     ref var src = ref Ꮡsrc.DerefOrNull();
 

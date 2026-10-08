@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 partial class dotted_package {
 
-[GoType] partial struct T {
+partial struct T {
     public nint N;
 }
 

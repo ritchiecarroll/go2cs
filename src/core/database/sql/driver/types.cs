@@ -26,7 +26,7 @@ partial class driver_package {
 //
 //   - by the [database/sql] package, for converting from a driver's [Value] type
 //     to a user's type in a scan.
-[GoType] partial interface ValueConverter {
+partial interface ValueConverter {
     // ConvertValue converts a value to a driver Value.
     (Value, error) ConvertValue(any v);
 }
@@ -39,7 +39,7 @@ partial class driver_package {
 //
 // Types implementing Valuer interface are able to convert
 // themselves to a driver [Value].
-[GoType] partial interface Valuer {
+partial interface Valuer {
     // Value returns a driver Value.
     // Value must not panic.
     (Value, error) Value();
@@ -57,7 +57,7 @@ partial class driver_package {
 //   - all other types are an error
 public static boolType Bool;
 
-[GoType] public partial struct boolType {
+public partial struct boolType {
 }
 
 internal static ValueConverter _ᴛ3ʗ = new boolType(nil);
@@ -112,7 +112,7 @@ public static (Value, error) ConvertValue(this boolType _, any src) {
 // respecting the limits of an int32 value.
 public static int32Type Int32;
 
-[GoType] public partial struct int32Type {
+public partial struct int32Type {
 }
 
 internal static ValueConverter _ᴛ4ʗ = new int32Type(nil);
@@ -151,7 +151,7 @@ public static (Value, error) ConvertValue(this int32Type _, any v) {
 // with fmt.Sprintf("%v", v).
 public static stringType ΔString;
 
-[GoType] public partial struct stringType {
+public partial struct stringType {
 }
 
 public static (Value, error) ConvertValue(this stringType _, any v) {
@@ -166,7 +166,7 @@ public static (Value, error) ConvertValue(this stringType _, any v) {
 
 // Null is a type that implements [ValueConverter] by allowing nil
 // values but otherwise delegating to another [ValueConverter].
-[GoType] partial struct Null {
+partial struct Null {
     public ValueConverter Converter;
 }
 
@@ -179,7 +179,7 @@ public static (Value, error) ConvertValue(this Null n, any v) {
 
 // NotNull is a type that implements [ValueConverter] by disallowing nil
 // values but otherwise delegating to another [ValueConverter].
-[GoType] partial struct NotNull {
+partial struct NotNull {
     public ValueConverter Converter;
 }
 
@@ -233,7 +233,7 @@ public static bool IsScanValue(any v) {
 // are an error.
 public static defaultConverter DefaultParameterConverter;
 
-[GoType] public partial struct defaultConverter {
+public partial struct defaultConverter {
 }
 
 internal static ValueConverter _ᴛ5ʗ = new defaultConverter(nil);
@@ -322,7 +322,7 @@ public static (Value, error) ConvertValue(this defaultConverter _, any v) {
     return (default!, fmt.Errorf("unsupported type %T, a %s"u8, v, rv.Kind()));
 }
 
-[GoType] partial interface decimalDecompose {
+partial interface decimalDecompose {
     // Decompose returns the internal decimal state into parts.
     // If the provided buf has sufficient capacity, buf may be returned as the coefficient with
     // the value set and length set as appropriate.

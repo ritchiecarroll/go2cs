@@ -26,7 +26,7 @@ partial class runtime_package {
 //
 // notesleep/notetsleep are generally called on g0,
 // notetsleepg is similar to notetsleep but is called on user g.
-[GoType] partial struct note {
+partial struct note {
     // Futex-based impl treats it as uint32 key,
     // while sema-based impl as M* waitm.
     internal uintptr key;

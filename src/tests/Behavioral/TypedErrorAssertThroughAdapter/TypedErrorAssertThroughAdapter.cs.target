@@ -4,15 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct myErr {
+partial struct myErr {
     internal nint code;
 }
 
-[GoRecv] internal static @string Error(this ref myErr e) {
+internal static @string Error(this ref myErr e) {
     return fmt.Sprintf("myErr %d"u8, e.code);
 }
 
-[GoType] partial struct valErr {
+partial struct valErr {
     internal @string tag;
 }
 
@@ -40,7 +40,7 @@ private static readonly object unreachableˢ = (@string)"unreachable"u8;
 private static readonly object ifaceAssertˢ = (@string)"iface-assert"u8;
 private static readonly object ifaceAssertMissedˢ = (@string)"iface-assert-missed"u8;
 
-[GoType("dyn")] internal partial interface main_type {
+internal partial interface main_type /*dyn*/ {
     @string Error();
 }
 

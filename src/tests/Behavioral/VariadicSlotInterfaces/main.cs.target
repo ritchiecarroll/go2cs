@@ -6,23 +6,23 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {
 
-[GoType] partial interface Shape {
+partial interface Shape {
     nint Area();
 }
 
-[GoType] partial struct Rect {
+partial struct Rect {
     internal nint w, h;
 }
 
-[GoRecv] public static nint Area(this ref Rect r) {
+public static nint Area(this ref Rect r) {
     return r.w * r.h;
 }
 
-[GoType] partial struct Circle {
+partial struct Circle {
     internal nint r;
 }
 
-[GoRecv] public static nint Area(this ref Circle c) {
+public static nint Area(this ref Circle c) {
     return 3 * c.r * c.r;
 }
 
@@ -56,7 +56,7 @@ internal static nint describe(params ꓸꓸꓸShape shapesʗp) {
     return len(shapes);
 }
 
-[GoType("[]any")] partial struct anyList;
+partial struct anyList /*[]any*/;
 
 internal static @string nest(params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();

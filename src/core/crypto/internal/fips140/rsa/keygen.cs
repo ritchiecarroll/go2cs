@@ -346,7 +346,7 @@ internal static slice<byte> productOfPrimes = new byte[]{
     0x9f, 0x7e, 0xcb, 0x29, 0xba, 0xda, 0x8f, 0x98, 0x0d, 0xec, 0xec, 0xe9, 0x2e, 0x30, 0xc4, 0x8f
 }.slice();
 
-[GoType] partial struct millerRabin {
+partial struct millerRabin {
     internal ж<bigmod.Modulus> w;
     internal nuint a;
     internal slice<byte> m;

@@ -42,7 +42,7 @@ internal static error validateNamedValueName(@string name) {
 // ccChecker wraps the driver.ColumnConverter and allows it to be used
 // as if it were a NamedValueChecker. If the driver ColumnConverter
 // is not present then the NamedValueChecker will return driver.ErrSkip.
-[GoType] partial struct ccChecker {
+partial struct ccChecker {
     internal driver.ColumnConverter cci;
     internal nint want;
 }
@@ -655,20 +655,20 @@ internal static (driverꓸValue v, error err) callValuerValue(driver.Valuer vr) 
 // are supported.
 //
 // NOTE(kardianos): This is an experimental interface. See https://golang.org/issue/30870
-[GoType] partial interface @decimal :
+partial interface @decimal :
     decimalDecompose,
     decimalCompose
 {
 }
 
-[GoType] partial interface decimalDecompose {
+partial interface decimalDecompose {
     // Decompose returns the internal decimal state in parts.
     // If the provided buf has sufficient capacity, buf may be returned as the coefficient with
     // the value set and length set as appropriate.
     (byte form, bool negative, slice<byte> coefficient, int32 exponent) Decompose(slice<byte> buf);
 }
 
-[GoType] partial interface decimalCompose {
+partial interface decimalCompose {
     // Compose sets the internal decimal value from parts. If the value cannot be
     // represented then an error should be returned.
     error Compose(byte form, bool negative, slice<byte> coefficient, int32 exponent);

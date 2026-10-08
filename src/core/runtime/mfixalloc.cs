@@ -27,7 +27,7 @@ partial class runtime_package {
 //
 // Consider marking fixalloc'd types not in heap by embedding
 // internal/runtime/sys.NotInHeap.
-[GoType] partial struct fixalloc {
+partial struct fixalloc {
     internal uintptr size;
     internal Action<@unsafe.Pointer, @unsafe.Pointer> first;   // called first time p is returned
     internal @unsafe.Pointer arg;
@@ -45,7 +45,7 @@ partial class runtime_package {
 // this cannot be used by some of the internal GC structures. For example when
 // the sweeper is placing an unmarked object on the free list it does not want the
 // write barrier to be called since that could result in the object being reachable.
-[GoType] partial struct mlink {
+partial struct mlink {
     internal sys.NotInHeap _;
     internal ж<mlink> next;
 }
@@ -55,7 +55,7 @@ internal static readonly @string runtimeFixallocSizeTooˢ = "runtime: fixalloc s
 
 // Initialize f to allocate objects of the given size,
 // using the allocator to obtain chunks of memory.
-[GoRecv] internal static void init(this ref fixalloc f, uintptr size, Action<@unsafe.Pointer, @unsafe.Pointer> first, @unsafe.Pointer arg, ж<sysMemStat> Ꮡstat) {
+internal static void init(this ref fixalloc f, uintptr size, Action<@unsafe.Pointer, @unsafe.Pointer> first, @unsafe.Pointer arg, ж<sysMemStat> Ꮡstat) {
     ref var stat = ref Ꮡstat.DerefOrNull();
 
     if (size > _FixAllocChunk) {
@@ -77,7 +77,7 @@ internal static readonly @string runtimeFixallocSizeTooˢ = "runtime: fixalloc s
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string runtimeInternalErrorˢ = "runtime: internal error"u8;
 
-[GoRecv] internal static @unsafe.Pointer alloc(this ref fixalloc f) {
+internal static @unsafe.Pointer alloc(this ref fixalloc f) {
     if (f.size == 0) {
         print((@string)"runtime: use of FixAlloc_Alloc before FixAlloc_Init\n"u8);
         @throw(runtimeInternalErrorˢ);
@@ -105,7 +105,7 @@ internal static readonly @string runtimeInternalErrorˢ = "runtime: internal err
     return v;
 }
 
-[GoRecv] internal static void free(this ref fixalloc f, @unsafe.Pointer Δp) {
+internal static void free(this ref fixalloc f, @unsafe.Pointer Δp) {
     f.inuse -= f.size;
     var v = (ж<mlink>)(uintptr)(Δp);
     v.Value.next = f.list;

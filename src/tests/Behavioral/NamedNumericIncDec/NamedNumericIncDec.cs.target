@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:nuint")] partial struct idx;
+partial struct idx /*num:nuint*/;
 
-[GoType("num:nint")] partial struct sidx;
+partial struct sidx /*num:nint*/;
 
-[GoType("num:complex128")] partial struct cx;
+partial struct cx /*num:complex128*/;
 
 internal static void Main() {
     nint n = 0;

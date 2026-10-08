@@ -60,8 +60,8 @@ using static go.net.rpc.jsonrpc_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("net/rpc/jsonrpc/client.go", "client.cs", "ACNKkgAQHLKCgoKCgoIACxKCgoLWsoKAgqaCgoKEgoKCgoKUgpSUpoKClKaCqqKokoKClA==")]
-[assembly: global::go.GoPositionMap("net/rpc/jsonrpc/server.go", "server.cs", "AA8eABIskgAQHIKCggALErKCgIKkuoKCgoKChKaCgpSCnMKCptSygoKCgpSChJSUgoKUlKaCrLI=")]
+[assembly: global::go.GoPositionMap("net/rpc/jsonrpc/client.go", "client.cs", "ACNKkgANHLKCgoKCgoIACBKCgoLWsoKAgqaCgoKEgoKCgoKUgpSUpoKClKaCqqKokoKClA==", "", "", "38=NewDecoder/1/1/1,NewEncoder/1/1/2")]
+[assembly: global::go.GoPositionMap("net/rpc/jsonrpc/server.go", "server.cs", "AA8eABIskgANHIKCggAIErKCgIKkuoKCgoKChKaCgpSCnMKCptSygoKCgpSChJSUgoKUlKaCrLI=", "", "", "37=NewDecoder/1/1/1,NewEncoder/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.net.rpc;
@@ -70,7 +70,7 @@ namespace go.net.rpc;
 public static partial class jsonrpc_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

@@ -25,7 +25,7 @@ partial class hash_package {
 // decode data written with any previously released version,
 // subject to issues such as security fixes.
 // See the Go compatibility document for background: https://golang.org/doc/go1compat
-[GoType] partial interface Hash :
+partial interface Hash :
     io.Writer
 {
     // Sum appends the current hash to b and returns the resulting slice.
@@ -43,14 +43,14 @@ partial class hash_package {
 }
 
 // Hash32 is the common interface implemented by all 32-bit hash functions.
-[GoType] partial interface Hash32 :
+partial interface Hash32 :
     Hash
 {
     uint32 Sum32();
 }
 
 // Hash64 is the common interface implemented by all 64-bit hash functions.
-[GoType] partial interface Hash64 :
+partial interface Hash64 :
     Hash
 {
     uint64 Sum64();

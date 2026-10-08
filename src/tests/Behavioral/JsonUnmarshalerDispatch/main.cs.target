@@ -7,9 +7,9 @@ using encoding;
 
 partial class main_package {
 
-[GoType("num:float64")] partial struct Celsius;
+partial struct Celsius /*num:float64*/;
 
-[GoRecv] public static error UnmarshalJSON(this ref Celsius c, slice<byte> data) {
+public static error UnmarshalJSON(this ref Celsius c, slice<byte> data) {
     ref var f = ref heap(new float64(), out var Ꮡf);
     {
         var err = json.Unmarshal(data, Ꮡf); if (err != default!) {
@@ -20,7 +20,7 @@ partial class main_package {
     return default!;
 }
 
-[GoType("dyn")] internal partial struct main_s {
+internal partial struct main_s /*dyn*/ {
     public time.Time T;
     public Celsius C;
 }

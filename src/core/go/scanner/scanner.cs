@@ -26,7 +26,7 @@ partial class scanner_package {
 // A Scanner holds the scanner's internal state while processing
 // a given text. It can be allocated as part of another data
 // structure but must be initialized via [Scanner.Init] before use.
-[GoType] partial struct Scanner {
+partial struct Scanner {
     // immutable state
     internal ж<tokenꓸFile> @file; // source file handle
     internal @string dir;      // directory portion of file.Name()
@@ -57,7 +57,7 @@ internal static readonly @string illegalByteOrderMarkˢ = "illegal byte order ma
 //
 // For optimization, there is some overlap between this method and
 // s.scanIdentifier.
-[GoRecv] internal static void next(this ref Scanner s) {
+internal static void next(this ref Scanner s) {
     if (s.rdOffset < len(s.src)){
         s.offset = s.rdOffset;
         if (s.ch == (rune)'\n') {
@@ -97,14 +97,14 @@ internal static readonly @string illegalByteOrderMarkˢ = "illegal byte order ma
 
 // peek returns the byte following the most recently read character without
 // advancing the scanner. If the scanner is at EOF, peek returns 0.
-[GoRecv] internal static byte peek(this ref Scanner s) {
+internal static byte peek(this ref Scanner s) {
     if (s.rdOffset < len(s.src)) {
         return s.src[s.rdOffset];
     }
     return 0;
 }
 
-[GoType("num:nuint")] partial struct Mode;
+partial struct Mode /*num:nuint*/;
 
 public static Mode ScanComments => /* 1 << iota */ 1;          // return comments as COMMENT tokens
 internal static Mode dontInsertSemis => 2;     // do not automatically insert semicolons - for testing only
@@ -123,7 +123,7 @@ internal static Mode dontInsertSemis => 2;     // do not automatically insert se
 //
 // Note that Init may call err if there is an error in the first character
 // of the file.
-[GoRecv] public static void Init(this ref Scanner s, ж<tokenꓸFile> Ꮡfile, slice<byte> src, Action<tokenꓸPosition, @string> err, Mode mode) {
+public static void Init(this ref Scanner s, ж<tokenꓸFile> Ꮡfile, slice<byte> src, Action<tokenꓸPosition, @string> err, Mode mode) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     // Explicitly initialize all fields since a scanner may be reused.
@@ -147,14 +147,14 @@ internal static Mode dontInsertSemis => 2;     // do not automatically insert se
     }
 }
 
-[GoRecv] internal static void error(this ref Scanner s, nint offs, @string msg) {
+internal static void error(this ref Scanner s, nint offs, @string msg) {
     if (s.err != default!) {
         s.err(s.@file.Position(s.@file.Pos(offs)), msg);
     }
     s.ErrorCount++;
 }
 
-[GoRecv] internal static void errorf(this ref Scanner s, nint offs, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf(this ref Scanner s, nint offs, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     s.error(offs, fmt.Sprintf(format, args.ꓸꓸꓸ));
@@ -166,7 +166,7 @@ internal static readonly @string commentNotTerminatedˢ = "comment not terminate
 // scanComment returns the text of the comment and (if nonzero)
 // the offset of the first newline within it, which implies a
 // /*...*/ comment.
-[GoRecv] internal static (@string, nint) scanComment(this ref Scanner s) {
+internal static (@string, nint) scanComment(this ref Scanner s) {
     // initial '/' already consumed; s.ch == '/' || s.ch == '*'
     nint offs = s.offset - 1; // position of initial '/'
     nint next = -1; // position immediately following the comment; < 0 means invalid comment
@@ -235,7 +235,7 @@ internal static slice<byte> prefix = slice<byte>("line "u8);
 // updateLineInfo parses the incoming comment text at offset offs
 // as a line directive. If successful, it updates the line info table
 // for the position next per the line directive.
-[GoRecv] internal static void updateLineInfo(this ref Scanner s, nint next, nint offs, slice<byte> text) {
+internal static void updateLineInfo(this ref Scanner s, nint next, nint offs, slice<byte> text) {
     // extract comment text
     if (text[1] == (rune)'*') {
         text = text.slice(0, len(text) - 2); // lop off trailing "*/"
@@ -317,7 +317,7 @@ internal static bool isDigit(rune ch) {
 //
 // Be careful when making changes to this function: it is optimized and affects
 // scanning performance significantly.
-[GoRecv] internal static @string scanIdentifier(this ref Scanner s) {
+internal static @string scanIdentifier(this ref Scanner s) {
     nint offs = s.offset;
     // Optimize for the common case of an ASCII identifier.
     //
@@ -390,7 +390,7 @@ internal static bool isHex(rune ch) {
 // in *invalid, if *invalid < 0.
 // digits returns a bitset describing whether the sequence contained
 // digits (bit 0 is set), or separators '_' (bit 1 is set).
-[GoRecv] internal static nint /*digsep*/ digits(this ref Scanner s, nint @base, ж<nint> Ꮡinvalid) {
+internal static nint /*digsep*/ digits(this ref Scanner s, nint @base, ж<nint> Ꮡinvalid) {
     nint digsep = default!;
 
     ref var invalid = ref Ꮡinvalid.DerefOrNull();
@@ -425,7 +425,7 @@ internal static readonly @string exponentHasNoDigitsˢ = "exponent has no digits
 internal static readonly @string hexadecimalMantissaˢ = "hexadecimal mantissa requires a 'p' exponent"u8;
 internal static readonly @string mustSeparateSuccessiveˢ = "'_' must separate successive digits"u8;
 
-[GoRecv] internal static (token.Token, @string) scanNumber(this ref Scanner s) {
+internal static (token.Token, @string) scanNumber(this ref Scanner s) {
     nint offs = s.offset;
     token.Token tok = token.ILLEGAL;
     nint @base = 10; // number base
@@ -595,7 +595,7 @@ internal static readonly @string escapeSequenceIsInvalidˢ = "escape sequence is
 // escaped quote. In case of a syntax error, it stops at the offending
 // character (without consuming it) and returns false. Otherwise
 // it returns true.
-[GoRecv] internal static bool scanEscape(this ref Scanner s, rune quote) {
+internal static bool scanEscape(this ref Scanner s, rune quote) {
     nint offs = s.offset;
     nint n = default!;
     uint32 @base = default!;
@@ -655,7 +655,7 @@ internal static readonly @string escapeSequenceIsInvalidˢ = "escape sequence is
 internal static readonly @string runeLiteralNotTerminatedˢ = "rune literal not terminated"u8;
 internal static readonly @string illegalRuneLiteralˢ = "illegal rune literal"u8;
 
-[GoRecv] internal static @string scanRune(this ref Scanner s) {
+internal static @string scanRune(this ref Scanner s) {
     // '\'' opening already consumed
     nint offs = s.offset - 1;
     var valid = true;
@@ -691,7 +691,7 @@ internal static readonly @string illegalRuneLiteralˢ = "illegal rune literal"u8
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string stringLiteralNotˢ = "string literal not terminated"u8;
 
-[GoRecv] internal static @string scanString(this ref Scanner s) {
+internal static @string scanString(this ref Scanner s) {
     // '"' opening already consumed
     nint offs = s.offset - 1;
     while (ᐧ) {
@@ -731,7 +731,7 @@ internal static slice<byte> stripCR(slice<byte> b, bool comment) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string rawStringLiteralNotˢ = "raw string literal not terminated"u8;
 
-[GoRecv] internal static @string scanRawString(this ref Scanner s) {
+internal static @string scanRawString(this ref Scanner s) {
     // '`' opening already consumed
     nint offs = s.offset - 1;
     var hasCR = false;
@@ -756,7 +756,7 @@ internal static readonly @string rawStringLiteralNotˢ = "raw string literal not
     return ((@string)lit);
 }
 
-[GoRecv] internal static void skipWhitespace(this ref Scanner s) {
+internal static void skipWhitespace(this ref Scanner s) {
     while (s.ch == (rune)' ' || s.ch == (rune)'\t' || s.ch == (rune)'\n' && !s.insertSemi || s.ch == (rune)'\r') {
         s.next();
     }
@@ -767,7 +767,7 @@ internal static readonly @string rawStringLiteralNotˢ = "raw string literal not
 // of ch_i. If a token ends in '=', the result is tok1 or tok3
 // respectively. Otherwise, the result is tok0 if there was no other
 // matching character, or tok2 if the matching character was ch2.
-[GoRecv] internal static token.Token switch2(this ref Scanner s, token.Token tok0, token.Token tok1) {
+internal static token.Token switch2(this ref Scanner s, token.Token tok0, token.Token tok1) {
     if (s.ch == (rune)'=') {
         s.next();
         return tok1;
@@ -775,7 +775,7 @@ internal static readonly @string rawStringLiteralNotˢ = "raw string literal not
     return tok0;
 }
 
-[GoRecv] internal static token.Token switch3(this ref Scanner s, token.Token tok0, token.Token tok1, rune ch2, token.Token tok2) {
+internal static token.Token switch3(this ref Scanner s, token.Token tok0, token.Token tok1, rune ch2, token.Token tok2) {
     if (s.ch == (rune)'=') {
         s.next();
         return tok1;
@@ -787,7 +787,7 @@ internal static readonly @string rawStringLiteralNotˢ = "raw string literal not
     return tok0;
 }
 
-[GoRecv] internal static token.Token switch4(this ref Scanner s, token.Token tok0, token.Token tok1, rune ch2, token.Token tok2, token.Token tok3) {
+internal static token.Token switch4(this ref Scanner s, token.Token tok0, token.Token tok1, rune ch2, token.Token tok2, token.Token tok3) {
     if (s.ch == (rune)'=') {
         s.next();
         return tok1;
@@ -833,7 +833,7 @@ internal static readonly @string rawStringLiteralNotˢ = "raw string literal not
 // Scan adds line information to the file added to the file
 // set with Init. Token positions are relative to that file
 // and thus relative to the file set.
-[GoRecv] public static (tokenꓸPos pos, token.Token tok, @string lit) Scan(this ref Scanner s) {
+public static (tokenꓸPos pos, token.Token tok, @string lit) Scan(this ref Scanner s) {
     tokenꓸPos pos = default!;
     token.Token tok = default!;
     @string lit = default!;

@@ -15,7 +15,7 @@ using global::go.sync;
 
 partial class fuzz_package {
 
-[GoType] partial interface mutatorRand {
+partial interface mutatorRand {
     uint32 uint32();
     nint intn(nint _);
     uint32 uint32n(uint32 _);
@@ -36,7 +36,7 @@ internal const uint64 multiplier = 6364136223846793005;
 
 // pcgRand is a PRNG. It should not be copied or shared. No Rand methods are
 // concurrency safe.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 16)] partial struct pcgRand {
+[StructLayout(LayoutKind.Explicit, Size = 16)] partial struct pcgRand {
     [FieldOffset(0)] internal readonly noCopy noCopy; // help avoid mistakes: ask vet to ensure that we don't make a copy
     [FieldOffset(0)] internal uint64 state;
     [FieldOffset(8)] internal uint64 inc;
@@ -79,12 +79,12 @@ internal static ж<pcgRand> newPcgRand() {
     return r;
 }
 
-[GoRecv] internal static void step(this ref pcgRand r) {
+internal static void step(this ref pcgRand r) {
     r.state *= multiplier;
     r.state += r.inc;
 }
 
-[GoRecv] internal static void save(this ref pcgRand r, ж<uint64> ᏑrandState, ж<uint64> ᏑrandInc) {
+internal static void save(this ref pcgRand r, ж<uint64> ᏑrandState, ж<uint64> ᏑrandInc) {
     ref var randState = ref ᏑrandState.DerefOrNull();
     ref var randInc = ref ᏑrandInc.DerefOrNull();
 
@@ -92,13 +92,13 @@ internal static ж<pcgRand> newPcgRand() {
     randInc = r.inc;
 }
 
-[GoRecv] internal static void restore(this ref pcgRand r, uint64 randState, uint64 randInc) {
+internal static void restore(this ref pcgRand r, uint64 randState, uint64 randInc) {
     r.state = randState;
     r.inc = randInc;
 }
 
 // uint32 returns a pseudo-random uint32.
-[GoRecv] internal static uint32 uint32(this ref pcgRand r) {
+internal static uint32 uint32(this ref pcgRand r) {
     var x = r.state;
     r.step();
     return bits.RotateLeft32((uint32)((((uint64)(((x >> (int)(18))) ^ x)) >> (int)(27))), -(nint)((x >> (int)(59))));
@@ -106,7 +106,7 @@ internal static ж<pcgRand> newPcgRand() {
 
 // intn returns a pseudo-random number in [0, n).
 // n must fit in a uint32.
-[GoRecv] internal static nint intn(this ref pcgRand r, nint n) {
+internal static nint intn(this ref pcgRand r, nint n) {
     if ((nint)(uint32)n != n) {
         throw panic("large Intn");
     }
@@ -118,7 +118,7 @@ internal static ж<pcgRand> newPcgRand() {
 // For implementation details, see:
 // https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction
 // https://lemire.me/blog/2016/06/30/fast-random-shuffling
-[GoRecv] internal static uint32 uint32n(this ref pcgRand r, uint32 n) {
+internal static uint32 uint32n(this ref pcgRand r, uint32 n) {
     var v = r.uint32();
     var prod = (uint64)v * (uint64)n;
     var low = (uint32)prod;
@@ -134,7 +134,7 @@ internal static ж<pcgRand> newPcgRand() {
 }
 
 // bool generates a random bool.
-[GoRecv] internal static bool @bool(this ref pcgRand r) {
+internal static bool @bool(this ref pcgRand r) {
     return (uint32)(r.uint32() & 1) == 0;
 }
 
@@ -143,14 +143,14 @@ internal static ж<pcgRand> newPcgRand() {
 //
 // See https://golang.org/issues/8005#issuecomment-190753527
 // for details.
-[GoType] partial struct noCopy {
+partial struct noCopy {
 }
 
 // Lock is a no-op used by -copylocks checker from `go vet`.
-[GoRecv] internal static void Lock(this ref noCopy _) {
+internal static void Lock(this ref noCopy _) {
 }
 
-[GoRecv] internal static void Unlock(this ref noCopy _) {
+internal static void Unlock(this ref noCopy _) {
 }
 
 } // end fuzz_package

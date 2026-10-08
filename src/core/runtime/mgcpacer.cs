@@ -39,7 +39,7 @@ internal static UntypedInt memoryLimitHeapGoalHeadroomPercent => 3;
 internal static ж<gcControllerState> ᏑgcController = new StandardBox<gcControllerState>(new gcControllerState());
 internal static ref gcControllerState gcController => ref ᏑgcController.Value;
 
-[GoType] partial struct gcControllerState {
+partial struct gcControllerState {
     // Initialized from GOGC. GOGC=off means no GC.
     internal atomic.Int32 gcPercent;
     // memoryLimit is the soft memory limit in bytes.

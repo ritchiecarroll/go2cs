@@ -5,7 +5,7 @@ namespace go.@internal.types;
 
 partial class errors_package {
 
-[GoType("num:nint")] partial struct Code;
+partial struct Code /*num:nint*/;
 
 //go:generate go run golang.org/x/tools/cmd/stringer@latest -type Code codes.go
 // This file defines the error codes that can be produced during type-checking.

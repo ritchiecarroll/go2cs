@@ -5,18 +5,18 @@ using ForeignPtrEmbedIfaceLib = ForeignPtrEmbedIfaceLib_package;
 
 partial class main_package {
 
-[GoType] partial interface accumulator {
+partial interface accumulator {
     nint Add(nint delta);
     nint Total();
 }
 
-[GoType] partial interface combo {
+partial interface combo {
     nint Add(nint delta);
     void Set(nint v);
     nint Get();
 }
 
-[GoType] partial struct meterBox {
+partial struct meterBox {
     public partial ref ж<ForeignPtrEmbedIfaceLib_package.Meter> Meter { get; }
 }
 

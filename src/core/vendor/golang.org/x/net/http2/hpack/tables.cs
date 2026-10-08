@@ -9,7 +9,7 @@ partial class hpack_package {
 
 // headerFieldTable implements a list of HeaderFields.
 // This is used to implement the static and dynamic tables.
-[GoType] partial struct headerFieldTable {
+partial struct headerFieldTable {
     // For static tables, entries are never evicted.
     //
     // For dynamic tables, entries are evicted from ents[0] and added to the end.
@@ -35,22 +35,22 @@ partial class hpack_package {
     internal map<pairNameValue, uint64> byNameValue;
 }
 
-[GoType] partial struct pairNameValue {
+partial struct pairNameValue {
     internal @string name, value;
 }
 
-[GoRecv] internal static void init(this ref headerFieldTable t) {
+internal static void init(this ref headerFieldTable t) {
     t.byName = new map<@string, uint64>();
     t.byNameValue = new map<pairNameValue, uint64>();
 }
 
 // len reports the number of entries in the table.
-[GoRecv] internal static nint len(this ref headerFieldTable t) {
+internal static nint len(this ref headerFieldTable t) {
     return builtin.len(t.ents);
 }
 
 // addEntry adds a new entry.
-[GoRecv] internal static void addEntry(this ref headerFieldTable t, HeaderField f) {
+internal static void addEntry(this ref headerFieldTable t, HeaderField f) {
     var id = (uint64)t.len() + t.evictCount + 1;
     t.byName[f.Name] = id;
     t.byNameValue[new pairNameValue(f.Name, f.Value)] = id;
@@ -58,7 +58,7 @@ partial class hpack_package {
 }
 
 // evictOldest evicts the n oldest entries in the table.
-[GoRecv] internal static void evictOldest(this ref headerFieldTable t, nint n) {
+internal static void evictOldest(this ref headerFieldTable t, nint n) {
     if (n > t.len()) {
         throw panic(fmt.Sprintf("evictOldest(%v) on table with %v entries"u8, n, t.len()));
     }

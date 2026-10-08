@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct sample {
+partial struct sample {
     internal @string name;
     internal float64 value;
     internal float32 small;

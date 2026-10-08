@@ -17,7 +17,7 @@ partial class gcimporter_package {
 
 // A pkgReader holds the shared state for reading a unified IR package
 // description.
-[GoType] partial struct pkgReader {
+partial struct pkgReader {
     public partial ref global::go.@internal.pkgbits_package.PkgDecoder PkgDecoder { get; }
     internal fakeFileSet fake;
     internal ж<types.Context> ctxt;
@@ -36,7 +36,7 @@ partial class gcimporter_package {
 }
 
 // later adds a function to be invoked at the end of import reading.
-[GoRecv] internal static void later(this ref pkgReader pr, Action fn) {
+internal static void later(this ref pkgReader pr, Action fn) {
     pr.laterFns = append(pr.laterFns, fn);
 }
 
@@ -101,7 +101,7 @@ internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> Ꮡfset, 
 
 // A reader holds the state for reading a single unified IR element
 // within a package.
-[GoType] partial struct reader {
+partial struct reader {
     public partial ref global::go.@internal.pkgbits_package.Decoder Decoder { get; }
     internal ж<pkgReader> p;
     internal ж<readerDict> dict;
@@ -109,7 +109,7 @@ internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> Ꮡfset, 
 
 // A readerDict holds the state for type parameters that parameterize
 // the current unified IR element.
-[GoType] partial struct readerDict {
+partial struct readerDict {
     // bounds is a slice of typeInfos corresponding to the underlying
     // bounds of the element's type parameters.
     internal slice<typeInfo> bounds;
@@ -135,7 +135,7 @@ internal static ж<reader> tempReader(this ж<pkgReader> Ꮡpr, pkgbits.RelocKin
     ));
 }
 
-[GoRecv] internal static void retireReader(this ref pkgReader pr, ж<reader> Ꮡr) {
+internal static void retireReader(this ref pkgReader pr, ж<reader> Ꮡr) {
     pr.PkgDecoder.RetireDecoder(Ꮡr.of(reader.ᏑDecoder));
 }
 

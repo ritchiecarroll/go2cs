@@ -18,7 +18,7 @@ partial class runtime_package {
 internal static ж<ticksType> Ꮡticks = new StandardBox<ticksType>(new ticksType());
 internal static ref ticksType ticks => ref Ꮡticks.Value;
 
-[GoType] partial struct ticksType {
+partial struct ticksType {
     // lock protects access to start* and val.
     internal mutex @lock;
     internal int64 startTicks;
@@ -29,7 +29,7 @@ internal static ref ticksType ticks => ref Ꮡticks.Value;
 // init initializes ticks to maximize the chance that we have a good ticksPerSecond reference.
 //
 // Must not run concurrently with ticksPerSecond.
-[GoRecv] internal static void init(this ref ticksType t) {
+internal static void init(this ref ticksType t) {
     @lock(Ꮡticks.of(ticksType.Ꮡlock));
     t.startTime = nanotime();
     t.startTicks = cputicks();
@@ -166,7 +166,7 @@ internal static void godebug_setNewIncNonDefault(Func<@string, Action> newIncNon
 // A godebugInc provides access to internal/godebug's IncNonDefault function
 // for a given GODEBUG setting.
 // Calls before internal/godebug registers itself are dropped on the floor.
-[GoType] partial struct godebugInc {
+partial struct godebugInc {
     internal @string name;
     internal atomic.Pointer<Action> inc;
 }

@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:uint8")] partial struct Tag;
+partial struct Tag /*num:uint8*/;
 
 internal static UntypedInt classConstructed => 0x20;
 
@@ -18,7 +18,7 @@ public static Tag Context(this Tag t) {
     return (Tag)(t | (uint8)classContext);
 }
 
-[GoType("num:uint64")] partial struct word;
+partial struct word /*num:uint64*/;
 
 internal static UntypedInt tagBits => 19;
 
@@ -49,7 +49,7 @@ internal static word maskFor(nuint s) {
     return m;
 }
 
-[GoType] partial struct channels {
+partial struct channels {
     public uint16 R, G, B, A;
 }
 

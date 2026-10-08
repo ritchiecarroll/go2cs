@@ -198,13 +198,13 @@ internal static (nint, error) splice(nint @out, nint @in, nint max, nint flags) 
     return ((nint)n, err);
 }
 
-[GoType] partial struct splicePipeFields {
+partial struct splicePipeFields {
     internal nint rfd;
     internal nint wfd;
     internal nint data;
 }
 
-[GoType] partial struct splicePipe {
+partial struct splicePipe {
     internal partial ref splicePipeFields splicePipeFields { get; }
     // We want to use a finalizer, so ensure that the size is
     // large enough to not use the tiny allocator.

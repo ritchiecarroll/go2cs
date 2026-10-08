@@ -4,33 +4,33 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface shape {
+partial interface shape {
     @string name();
 }
 
-[GoType] partial struct circle {
+partial struct circle {
     internal nint r;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string circleˢ = "circle"u8;
 
-[GoRecv] internal static @string name(this ref circle c) {
+internal static @string name(this ref circle c) {
     return circleˢ;
 }
 
-[GoType] partial struct square {
+partial struct square {
     internal nint s;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string squareˢ = "square"u8;
 
-[GoRecv] internal static @string name(this ref square q) {
+internal static @string name(this ref square q) {
     return squareˢ;
 }
 
-[GoType] partial struct dot {
+partial struct dot {
     internal nint tag;
 }
 

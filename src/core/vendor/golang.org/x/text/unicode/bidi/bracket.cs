@@ -10,7 +10,7 @@ using container;
 
 partial class bidi_package {
 
-[GoType("num:byte")] partial struct bracketType;
+partial struct bracketType /*num:byte*/;
 
 // This file contains a port of the reference implementation of the
 // Bidi Parentheses Algorithm:
@@ -39,16 +39,16 @@ internal static bracketType bpClose => 2;
 
 // bracketPair holds a pair of index values for opening and closing bracket
 // location of a bracket pair.
-[GoType] partial struct bracketPair {
+partial struct bracketPair {
     internal nint opener;
     internal nint closer;
 }
 
-[GoRecv] internal static @string String(this ref bracketPair b) {
+internal static @string String(this ref bracketPair b) {
     return fmt.Sprintf("(%v, %v)"u8, b.opener, b.closer);
 }
 
-[GoType("[]bracketPair")] partial struct bracketPairs;
+partial struct bracketPairs /*[]bracketPair*/;
 
 internal static nint Len(this bracketPairs b) {
     return len(b);
@@ -85,7 +85,7 @@ internal static void resolvePairedBrackets(ref ΔisolatingRunSequence s) {
     p.resolveBrackets(dirEmbed, (~s.p).initialTypes);
 }
 
-[GoType] partial struct bracketPairer {
+partial struct bracketPairer {
     internal ΔClass sos; // direction corresponding to start of sequence
 // The following is a restatement of BD 16 using non-algorithmic language.
 //
@@ -113,7 +113,7 @@ internal static void resolvePairedBrackets(ref ΔisolatingRunSequence s) {
 
 // matchOpener reports whether characters at given positions form a matching
 // bracket pair.
-[GoRecv] internal static bool matchOpener(this ref bracketPairer p, slice<rune> pairValues, nint opener, nint closer) {
+internal static bool matchOpener(this ref bracketPairer p, slice<rune> pairValues, nint opener, nint closer) {
     return pairValues[p.indexes[opener]] == pairValues[p.indexes[closer]];
 }
 
@@ -124,7 +124,7 @@ internal static UntypedInt maxPairingDepth => 63;
 // This implementation uses a linked list instead of a stack, because, while
 // elements are added at the front (like a push) they are not generally removed
 // in atomic 'pop' operations, reducing the benefit of the stack archetype.
-[GoRecv] internal static void locateBrackets(this ref bracketPairer p, slice<bracketType> pairTypes, slice<rune> pairValues) {
+internal static void locateBrackets(this ref bracketPairer p, slice<bracketType> pairTypes, slice<rune> pairValues) {
     // traverse the run
     // do that explicitly (not in a for-each) so we can record position
     foreach (var (i, index) in p.indexes) {
@@ -222,7 +222,7 @@ internal static UntypedInt maxPairingDepth => 63;
 // by rule N0.
 //
 // TODO: have separate type for "strong" directionality.
-[GoRecv] internal static ΔClass getStrongTypeN0(this ref bracketPairer p, nint index) {
+internal static ΔClass getStrongTypeN0(this ref bracketPairer p, nint index) {
     var exprᴛ1 = p.codesIsolatedRun[index];
     if (exprᴛ1 == EN || exprᴛ1 == AN || exprᴛ1 == AL || exprᴛ1 == R) {
         return R;
@@ -245,7 +245,7 @@ internal static UntypedInt maxPairingDepth => 63;
 // it returns this type. Otherwise it returns the embedding direction.
 //
 // TODO: use separate type for "strong" directionality.
-[GoRecv] internal static ΔClass classifyPairContent(this ref bracketPairer p, bracketPair loc, ΔClass dirEmbed) {
+internal static ΔClass classifyPairContent(this ref bracketPairer p, bracketPair loc, ΔClass dirEmbed) {
     ΔClass dirOpposite = ON;
     for (nint i = loc.opener + 1; i < loc.closer; i++) {
         ΔClass dir = p.getStrongTypeN0(i);
@@ -263,7 +263,7 @@ internal static UntypedInt maxPairingDepth => 63;
 
 // classBeforePair determines which strong types are present before a Bracket
 // Pair. Return R or L if strong type found, otherwise ON.
-[GoRecv] internal static ΔClass classBeforePair(this ref bracketPairer p, bracketPair loc) {
+internal static ΔClass classBeforePair(this ref bracketPairer p, bracketPair loc) {
     for (nint i = loc.opener - 1; i >= 0; i--) {
         {
             ΔClass dir = p.getStrongTypeN0(i); if (dir != ON) {
@@ -276,7 +276,7 @@ internal static UntypedInt maxPairingDepth => 63;
 }
 
 // assignBracketType implements rule N0 for a single bracket pair.
-[GoRecv] internal static void assignBracketType(this ref bracketPairer p, bracketPair loc, ΔClass dirEmbed, slice<ΔClass> initialTypes) {
+internal static void assignBracketType(this ref bracketPairer p, bracketPair loc, ΔClass dirEmbed, slice<ΔClass> initialTypes) {
     // rule "N0, a", inspect contents of pair
     ΔClass dirPair = p.classifyPairContent(loc, dirEmbed);
     // dirPair is now L, R, or N (no strong type found)
@@ -300,7 +300,7 @@ internal static UntypedInt maxPairingDepth => 63;
     p.setBracketsToType(loc, dirPair, initialTypes);
 }
 
-[GoRecv] internal static void setBracketsToType(this ref bracketPairer p, bracketPair loc, ΔClass dirPair, slice<ΔClass> initialTypes) {
+internal static void setBracketsToType(this ref bracketPairer p, bracketPair loc, ΔClass dirPair, slice<ΔClass> initialTypes) {
     p.codesIsolatedRun[loc.opener] = dirPair;
     p.codesIsolatedRun[loc.closer] = dirPair;
     for (nint i = loc.opener + 1; i < loc.closer; i++) {
@@ -320,7 +320,7 @@ internal static UntypedInt maxPairingDepth => 63;
 }
 
 // resolveBrackets implements rule N0 for a list of pairs.
-[GoRecv] internal static void resolveBrackets(this ref bracketPairer p, ΔClass dirEmbed, slice<ΔClass> initialTypes) {
+internal static void resolveBrackets(this ref bracketPairer p, ΔClass dirEmbed, slice<ΔClass> initialTypes) {
     foreach (var (_, loc) in p.pairPositions) {
         p.assignBracketType(loc, dirEmbed, initialTypes);
     }

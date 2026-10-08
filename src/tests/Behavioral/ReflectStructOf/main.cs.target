@@ -5,7 +5,7 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType] partial struct stringer {
+partial struct stringer {
     internal nint n;
 }
 
@@ -76,7 +76,7 @@ private static readonly object duplicateˢ = (@string)"duplicate:"u8;
 private static readonly object unexportedNoPkgpathˢ = (@string)"unexported no pkgpath:"u8;
 private static readonly object anonymousWithPkgpathˢ = (@string)"anonymous with pkgpath:"u8;
 
-[GoType("dyn")] internal partial struct main_i {
+internal partial struct main_i /*dyn*/ {
     public int64 Q;
 }
 
@@ -183,6 +183,6 @@ internal static void Main() {
     }));
 }
 
-[GoType("num:float64")] partial struct Celsius;
+partial struct Celsius /*num:float64*/;
 
 } // end main_package

@@ -6,13 +6,13 @@ partial class main_package {
 
 internal static UntypedInt mask => 7;
 
-[GoType] partial struct hasher {
+partial struct hasher {
     internal array<uint32> head = new(mask + 1);
     internal array<uint32> prev = new(16);
     internal array<array<nint>> pairs = new(2, () => new(3));
 }
 
-[GoRecv] internal static uint32 storeHead(this ref hasher h, uint32 hash, uint32 index) {
+internal static uint32 storeHead(this ref hasher h, uint32 hash, uint32 index) {
     var hh = Ꮡ(h.head, (uint32)(hash & (uint32)mask));
     var previous = hh.Value;
     h.prev[(uint32)(index & 15)] = previous;
@@ -20,12 +20,12 @@ internal static UntypedInt mask => 7;
     return previous;
 }
 
-[GoRecv] internal static void bumpPair(this ref hasher h, nint i, nint j) {
+internal static void bumpPair(this ref hasher h, nint i, nint j) {
     var p = Ꮡ(h.pairs[i], j);
     p.Value += 10;
 }
 
-[GoRecv] internal static uint32 headAt(this ref hasher h, nint i) {
+internal static uint32 headAt(this ref hasher h, nint i) {
     return h.head[i];
 }
 

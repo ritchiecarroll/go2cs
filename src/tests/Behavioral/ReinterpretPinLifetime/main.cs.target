@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct hdr {
+partial struct hdr {
     public uint16 A;
     public uint16 B;
     public uint16 C;

@@ -19,17 +19,17 @@ internal static bool parseable(this RIBType typ) {
 }
 
 // RouteMetrics represents route metrics.
-[GoType] partial struct RouteMetrics {
+partial struct RouteMetrics {
     public nint PathMTU; // path maximum transmission unit
 }
 
 // SysType implements the SysType method of Sys interface.
-[GoRecv] public static ΔSysType SysType(this ref RouteMetrics rmx) {
+public static ΔSysType SysType(this ref RouteMetrics rmx) {
     return SysMetrics;
 }
 
 // Sys implements the Sys method of Message interface.
-[GoRecv] public static slice<ΔSys> Sys(this ref RouteMessage m) {
+public static slice<ΔSys> Sys(this ref RouteMessage m) {
     return new ΔSys[]{new RouteMetricsжΔSys(Ꮡ(new RouteMetrics(
         PathMTU: (nint)nativeEndian.Uint32(m.raw.slice(m.extOff + 4, m.extOff + 8))
     )))
@@ -37,18 +37,18 @@ internal static bool parseable(this RIBType typ) {
 }
 
 // InterfaceMetrics represents interface metrics.
-[GoType] partial struct InterfaceMetrics {
+partial struct InterfaceMetrics {
     public nint Type; // interface type
     public nint MTU; // maximum transmission unit
 }
 
 // SysType implements the SysType method of Sys interface.
-[GoRecv] public static ΔSysType SysType(this ref InterfaceMetrics imx) {
+public static ΔSysType SysType(this ref InterfaceMetrics imx) {
     return SysMetrics;
 }
 
 // Sys implements the Sys method of Message interface.
-[GoRecv] public static slice<ΔSys> Sys(this ref InterfaceMessage m) {
+public static slice<ΔSys> Sys(this ref InterfaceMessage m) {
     return new ΔSys[]{new InterfaceMetricsжΔSys(Ꮡ(new InterfaceMetrics(
         Type: (nint)m.raw[m.extOff],
         MTU: (nint)nativeEndian.Uint32(m.raw.slice(m.extOff + 8, m.extOff + 12))

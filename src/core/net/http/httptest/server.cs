@@ -26,7 +26,7 @@ partial class httptest_package {
 
 // A Server is an HTTP server listening on a system-chosen port on the
 // local loopback interface, for use in end-to-end HTTP tests.
-[GoType] partial struct Server {
+partial struct Server {
     public @string URL; // base URL of form http://ipaddr:port with no trailing slash
     public net.Listener Listener;
     // EnableHTTP2 controls whether HTTP/2 is enabled
@@ -202,7 +202,7 @@ public static ж<Server> NewTLSServer(httpꓸHandler handler) {
     return ts;
 }
 
-[GoType] partial interface closeIdleTransport {
+partial interface closeIdleTransport {
     void CloseIdleConnections();
 }
 
@@ -333,7 +333,7 @@ public static partial void CloseClientConnections(this ж<Server> Ꮡs) {
 
 // Certificate returns the certificate used by the server, or nil if
 // the server doesn't use TLS.
-[GoRecv] public static ж<x509.Certificate> Certificate(this ref Server s) {
+public static ж<x509.Certificate> Certificate(this ref Server s) {
     return s.certificate;
 }
 
@@ -341,7 +341,7 @@ public static partial void CloseClientConnections(this ж<Server> Ꮡs) {
 // It is configured to trust the server's TLS test certificate and will
 // close its idle connections on [Server.Close].
 // Use Server.URL as the base URL to send requests to the server.
-[GoRecv] public static ж<http.Client> Client(this ref Server s) {
+public static ж<http.Client> Client(this ref Server s) {
     return s.client;
 }
 
@@ -439,13 +439,13 @@ internal static void wrap(this ж<Server> Ꮡs) {
 
 // closeConn closes c.
 // s.mu must be held.
-[GoRecv] internal static void closeConn(this ref Server s, net.Conn c) {
+internal static void closeConn(this ref Server s, net.Conn c) {
     s.closeConnChan(c, default!);
 }
 
 // closeConnChan is like closeConn, but takes an optional channel to receive a value
 // when the goroutine closing c is done.
-[GoRecv] internal static void closeConnChan(this ref Server s, net.Conn c, channel/*<-*/<EmptyStruct> done) {
+internal static void closeConnChan(this ref Server s, net.Conn c, channel/*<-*/<EmptyStruct> done) {
     c.Close();
     if (done != default!) {
         done.ᐸꟷ(new EmptyStruct());

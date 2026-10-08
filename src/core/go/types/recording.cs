@@ -14,7 +14,7 @@ using token = global::go.go.token_package;
 
 partial class types_package {
 
-[GoRecv] internal static void record(this ref Checker check, ж<operand> Ꮡx) {
+internal static void record(this ref Checker check, ж<operand> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // convert x into a user-friendly set of values
@@ -64,7 +64,7 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
     }
 }
 
-[GoRecv] internal static void recordTypeAndValue(this ref Checker check, ast.Expr x, operandMode mode, ΔType typ, constant.Value val) {
+internal static void recordTypeAndValue(this ref Checker check, ast.Expr x, operandMode mode, ΔType typ, constant.Value val) {
     assert(x != default!);
     assert(typ != default!);
     if (mode == invalid) {
@@ -84,7 +84,7 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
     check.recordTypeAndValueInSyntax(x, mode, typ, val);
 }
 
-[GoRecv] internal static void recordBuiltinType(this ref Checker check, ast.Expr f, ж<ΔSignature> Ꮡsig) {
+internal static void recordBuiltinType(this ref Checker check, ast.Expr f, ж<ΔSignature> Ꮡsig) {
     // f must be a (possibly parenthesized, possibly qualified)
     // identifier denoting a built-in (including unsafe's non-constant
     // functions Add and Slice): record the signature for f and possible
@@ -111,7 +111,7 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
 
 // recordCommaOkTypes updates recorded types to reflect that x is used in a commaOk context
 // (and therefore has tuple type).
-[GoRecv] internal static void recordCommaOkTypes(this ref Checker check, ast.Expr x, slice<ж<operand>> a) {
+internal static void recordCommaOkTypes(this ref Checker check, ast.Expr x, slice<ж<operand>> a) {
     assert(x != default!);
     assert(len(a) == 2);
     if ((~a[0]).mode == invalid) {
@@ -147,7 +147,7 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
 //
 // TODO(rfindley): the expr parameter is fragile. See if we can access the
 // instantiated identifier in some other way.
-[GoRecv] internal static void recordInstance(this ref Checker check, ast.Expr expr, slice<ΔType> targs, ΔType typ) {
+internal static void recordInstance(this ref Checker check, ast.Expr expr, slice<ΔType> targs, ΔType typ) {
     var ident = instantiatedIdent(expr);
     assert(ident != nil);
     assert(typ != default!);
@@ -158,7 +158,7 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
     }
 }
 
-[GoRecv] internal static void recordDef(this ref Checker check, ж<ast.Ident> Ꮡid, Object obj) {
+internal static void recordDef(this ref Checker check, ж<ast.Ident> Ꮡid, Object obj) {
     assert(Ꮡid != nil);
     {
         var m = check.Defs; if (m != default!) {
@@ -167,7 +167,7 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
     }
 }
 
-[GoRecv] internal static void recordUse(this ref Checker check, ж<ast.Ident> Ꮡid, Object obj) {
+internal static void recordUse(this ref Checker check, ж<ast.Ident> Ꮡid, Object obj) {
     assert(Ꮡid != nil);
     assert(obj != default!);
     {
@@ -177,7 +177,7 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
     }
 }
 
-[GoRecv] internal static void recordImplicit(this ref Checker check, ast.Node node, Object obj) {
+internal static void recordImplicit(this ref Checker check, ast.Node node, Object obj) {
     assert(node != default!);
     assert(obj != default!);
     {
@@ -187,7 +187,7 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
     }
 }
 
-[GoRecv] internal static void recordSelection(this ref Checker check, ж<ast.SelectorExpr> Ꮡx, SelectionKind kind, ΔType recv, Object obj, slice<nint> index, bool indirect) {
+internal static void recordSelection(this ref Checker check, ж<ast.SelectorExpr> Ꮡx, SelectionKind kind, ΔType recv, Object obj, slice<nint> index, bool indirect) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     assert(obj != default! && (recv == default! || len(index) > 0));
@@ -199,7 +199,7 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
     }
 }
 
-[GoRecv] internal static void recordScope(this ref Checker check, ast.Node node, ж<ΔScope> Ꮡscope) {
+internal static void recordScope(this ref Checker check, ast.Node node, ж<ΔScope> Ꮡscope) {
     assert(node != default!);
     assert(Ꮡscope != nil);
     {

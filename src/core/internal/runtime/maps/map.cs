@@ -193,7 +193,7 @@ internal static uintptr h2(uintptr h) {
     return (uintptr)(h & 0x7f);
 }
 
-[GoType] partial struct ΔMap {
+partial struct ΔMap {
     // The number of filled slots (i.e. the number of elements in all
     // tables). Excludes deleted slots.
     // Must be first (known by the compiler, for len() builtin).
@@ -313,22 +313,22 @@ public static ж<ΔMap> NewEmptyMap() {
     return m;
 }
 
-[GoRecv] internal static uintptr directoryIndex(this ref ΔMap m, uintptr hash) {
+internal static uintptr directoryIndex(this ref ΔMap m, uintptr hash) {
     if (m.dirLen == 1) {
         return 0;
     }
     return (hash >> (int)(((uint8)(m.globalShift & 63))));
 }
 
-[GoRecv] internal static ж<table> directoryAt(this ref ΔMap m, uintptr i) {
+internal static ж<table> directoryAt(this ref ΔMap m, uintptr i) {
     return ~(ж<ж<table>>)(uintptr)((@unsafe.Pointer)((uintptr)m.dirPtr + (uintptr)goarch.PtrSize * i));
 }
 
-[GoRecv] internal static void directorySet(this ref ΔMap m, uintptr i, ж<table> Ꮡnt) {
+internal static void directorySet(this ref ΔMap m, uintptr i, ж<table> Ꮡnt) {
     ((ж<ж<table>>)(uintptr)((@unsafe.Pointer)((uintptr)m.dirPtr + (uintptr)goarch.PtrSize * i))).ValueSlot = Ꮡnt;
 }
 
-[GoRecv] internal static void replaceTable(this ref ΔMap m, ж<table> Ꮡnt) {
+internal static void replaceTable(this ref ΔMap m, ж<table> Ꮡnt) {
     ref var nt = ref Ꮡnt.DerefOrNull();
 
     // The number of entries that reference the same table doubles for each
@@ -340,7 +340,7 @@ public static ж<ΔMap> NewEmptyMap() {
     }
 }
 
-[GoRecv] internal static void installTableSplit(this ref ΔMap m, ж<table> Ꮡold, ж<table> Ꮡleft, ж<table> Ꮡright) {
+internal static void installTableSplit(this ref ΔMap m, ж<table> Ꮡold, ж<table> Ꮡleft, ж<table> Ꮡright) {
     ref var old = ref Ꮡold.DerefOrNull();
     ref var left = ref Ꮡleft.DerefOrNull();
     ref var right = ref Ꮡright.DerefOrNull();
@@ -376,20 +376,20 @@ public static ж<ΔMap> NewEmptyMap() {
     m.replaceTable(Ꮡright);
 }
 
-[GoRecv] public static uint64 Used(this ref ΔMap m) {
+public static uint64 Used(this ref ΔMap m) {
     return m.used;
 }
 
 // Get performs a lookup of the key that key points to. It returns a pointer to
 // the element, or false if the key doesn't exist.
-[GoRecv] public static (@unsafe.Pointer, bool) Get(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, @unsafe.Pointer key) {
+public static (@unsafe.Pointer, bool) Get(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, @unsafe.Pointer key) {
     return m.getWithoutKey(Ꮡtyp, key);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string concurrentMapReadAndMapˢ = "concurrent map read and map write"u8;
 
-[GoRecv] internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.Used() == 0) {
@@ -406,7 +406,7 @@ internal static readonly @string concurrentMapReadAndMapˢ = "concurrent map rea
     return m.directoryAt(idx).getWithKey(Ꮡtyp, hash, key);
 }
 
-[GoRecv] internal static (@unsafe.Pointer, bool) getWithoutKey(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, bool) getWithoutKey(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.Used() == 0) {
@@ -424,7 +424,7 @@ internal static readonly @string concurrentMapReadAndMapˢ = "concurrent map rea
     return m.directoryAt(idx).getWithoutKey(Ꮡtyp, hash, key);
 }
 
-[GoRecv] internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var g = new groupReference(
@@ -513,7 +513,7 @@ public static @unsafe.Pointer PutSlot(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string smallMapWithNoEmptySlotˢ = "small map with no empty slot (concurrent map writes?)"u8;
 
-[GoRecv] internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var g = new groupReference(
@@ -566,7 +566,7 @@ internal static readonly @string smallMapWithNoEmptySlotˢ = "small map with no 
     return slotElem;
 }
 
-[GoRecv] internal static void growToSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp) {
+internal static void growToSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp) {
     var grp = newGroups(ref (Ꮡtyp).DerefOrNull(), 1);
     m.dirPtr = grp.data;
     var g = new groupReference(
@@ -575,7 +575,7 @@ internal static readonly @string smallMapWithNoEmptySlotˢ = "small map with no 
     g.ctrls().setEmpty();
 }
 
-[GoRecv] internal static void growToTable(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp) {
+internal static void growToTable(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var tab = newTable(Ꮡtyp, 2 * abi.SwissMapGroupSlots, 0, 0);
@@ -643,7 +643,7 @@ public static void Delete(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> Ꮡtyp, @uns
     m.writing ^= (uint8)(1);
 }
 
-[GoRecv] internal static void deleteSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static void deleteSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var g = new groupReference(
@@ -724,7 +724,7 @@ public static void Clear(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> Ꮡtyp) {
     m.writing ^= (uint8)(1);
 }
 
-[GoRecv] internal static void clearSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp) {
+internal static void clearSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var g = new groupReference(

@@ -20,7 +20,7 @@ partial class gcm_package {
 //
 // It's optimized for use in XAES-256-GCM (https://c2sp.org/XAES-256-GCM),
 // rather than for exposing it to applications as a stand-alone KDF.
-[GoType] partial struct CounterKDF {
+partial struct CounterKDF {
     internal CMAC mac;
 }
 
@@ -30,7 +30,7 @@ public static ж<CounterKDF> NewCounterKDF(ж<aes.Block> Ꮡb) {
 }
 
 // DeriveKey derives a key from the given label and context.
-public static array<byte> DeriveKey(this ж<CounterKDF> Ꮡkdf, byte label, [GoArrayDims(12)] array<byte> context) {
+public static array<byte> DeriveKey(this ж<CounterKDF> Ꮡkdf, byte label, /*[12]*/ array<byte> context) {
     context = context.Clone();
 
     fips140.RecordApproved();

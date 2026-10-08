@@ -16,7 +16,7 @@ using io = io_package;
 
 partial class syslog_package {
 
-[GoType("num:nint")] partial struct Priority;
+partial struct Priority /*num:nint*/;
 
 internal static UntypedInt severityMask => 0x07;
 
@@ -59,7 +59,7 @@ public static Priority LOG_LOCAL6 => 176;
 public static Priority LOG_LOCAL7 => 184;
 
 // A Writer is a connection to a syslog server.
-[GoType] partial struct Writer {
+partial struct Writer {
     internal Priority priority;
     internal @string tag;
     internal @string hostname;
@@ -75,12 +75,12 @@ public static Priority LOG_LOCAL7 => 184;
 // sources have a syslog_solaris.go file that implements unixSyslog to
 // return a type that satisfies this interface and simply calls the C
 // library syslog function.
-[GoType] partial interface serverConn {
+partial interface serverConn {
     error writeString(Priority p, @string hostname, @string tag, @string s, @string nl);
     error close();
 }
 
-[GoType] partial struct netConn {
+partial struct netConn {
     internal bool local;
     internal net.Conn conn;
 }
@@ -139,7 +139,7 @@ internal static readonly @string localhostˢ = "localhost"u8;
 
 // connect makes a connection to the syslog server.
 // It must be called with w.mu held.
-[GoRecv] internal static error /*err*/ connect(this ref Writer w) {
+internal static error /*err*/ connect(this ref Writer w) {
     error err = default!;
 
     if (w.conn != default!) {
@@ -280,7 +280,7 @@ internal static (nint, error) writeAndRetry(this ж<Writer> Ꮡw, Priority p, @s
 
 // write generates and writes a syslog formatted string. The
 // format is as follows: <PRI>TIMESTAMP HOSTNAME TAG[PID]: MSG
-[GoRecv] internal static (nint, error) write(this ref Writer w, Priority p, @string msg) {
+internal static (nint, error) write(this ref Writer w, Priority p, @string msg) {
     // ensure it ends in a \n
     @string nl = ""u8;
     if (!strings.HasSuffix(msg, "\n"u8)) {
@@ -296,7 +296,7 @@ internal static (nint, error) writeAndRetry(this ж<Writer> Ꮡw, Priority p, @s
     return (len(msg), default!);
 }
 
-[GoRecv] internal static error writeString(this ref netConn n, Priority p, @string hostname, @string tag, @string msg, @string nl) {
+internal static error writeString(this ref netConn n, Priority p, @string hostname, @string tag, @string msg, @string nl) {
     if (n.local) {
         // Compared to the network form below, the changes are:
         //	1. Use time.Stamp instead of time.RFC3339.
@@ -314,7 +314,7 @@ internal static (nint, error) writeAndRetry(this ж<Writer> Ꮡw, Priority p, @s
     return err;
 }
 
-[GoRecv] internal static error close(this ref netConn n) {
+internal static error close(this ref netConn n) {
     return n.conn.Close();
 }
 

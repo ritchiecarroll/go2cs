@@ -20,7 +20,7 @@ using vendor.golang.org.x.crypto;
 partial class tls_package {
 
 // A SessionState is a resumable session.
-[GoType] partial struct SessionState {
+partial struct SessionState {
 // Encoded as a SessionState (in the language of RFC 8446, Section 3).
 //
 //   enum { server(1), client(2) } SessionStateType;
@@ -306,7 +306,7 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
 
 // sessionState returns a partially filled-out [SessionState] with information
 // from the current connection.
-[GoRecv] internal static ж<SessionState> sessionState(this ref Conn c) {
+internal static ж<SessionState> sessionState(this ref Conn c) {
     return Ꮡ(new SessionState(
         version: c.vers,
         cipherSuite: c.cipherSuite,
@@ -338,7 +338,7 @@ public static (slice<byte>, error) EncryptTicket(this ж<Config> Ꮡc, ΔConnect
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsInternalErrorSessionˢ = "tls: internal error: session ticket keys unavailable"u8;
 
-[GoRecv] internal static (slice<byte>, error) encryptTicket(this ref Config c, slice<byte> state, slice<ticketKey> ticketKeys) {
+internal static (slice<byte>, error) encryptTicket(this ref Config c, slice<byte> state, slice<ticketKey> ticketKeys) {
     if (len(ticketKeys) == 0) {
         return (default!, errors.New(tlsInternalErrorSessionˢ));
     }
@@ -383,7 +383,7 @@ public static (ж<SessionState>, error) DecryptTicket(this ж<Config> Ꮡc, slic
     return (s, default!);
 }
 
-[GoRecv] internal static slice<byte> decryptTicket(this ref Config c, slice<byte> encrypted, slice<ticketKey> ticketKeys) {
+internal static slice<byte> decryptTicket(this ref Config c, slice<byte> encrypted, slice<ticketKey> ticketKeys) {
     if (len(encrypted) < (nint)(aes.BlockSize + sha256.Size)) {
         return default!;
     }
@@ -413,7 +413,7 @@ public static (ж<SessionState>, error) DecryptTicket(this ж<Config> Ꮡc, slic
 
 // ClientSessionState contains the state needed by a client to
 // resume a previous TLS session.
-[GoType] partial struct ClientSessionState {
+partial struct ClientSessionState {
     internal ж<SessionState> session;
 }
 

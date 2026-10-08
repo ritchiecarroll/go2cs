@@ -7,11 +7,11 @@ partial class main_package {
 
 internal static channel<bool> sink = new channel<bool>(1);
 
-[GoType] partial struct runner {
+partial struct runner {
     internal nint n;
 }
 
-[GoRecv] internal static partial nint fork(this ref runner r, nint c, Action<nint> dispatch) {
+internal static partial nint fork(this ref runner r, nint c, Action<nint> dispatch) {
     var done = new channel<bool>(0);
     var doneʗ1 = done;
     goǃ(() => {

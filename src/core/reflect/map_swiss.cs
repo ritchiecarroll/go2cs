@@ -96,7 +96,7 @@ internal static partial void mapIterNext(ж<maps.Iter> Ꮡit) {
 
 // A MapIter is an iterator for ranging over a map.
 // See [Value.MapRange].
-[GoType] partial struct MapIter {
+partial struct MapIter {
     internal ΔValue m;
     internal maps.Iter hiter;
 }

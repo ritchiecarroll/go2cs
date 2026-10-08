@@ -17,7 +17,7 @@ internal const bool debugSelect = false;
 // Select case descriptor.
 // Known to compiler.
 // Changes here must also be made in src/cmd/compile/internal/walk/select.go's scasetype.
-[GoType] partial struct scase {
+partial struct scase {
     internal ж<Δhchan> c;      // chan
     internal @unsafe.Pointer elem; // data element
 }
@@ -530,14 +530,14 @@ internal static uintptr sortkey(this ж<Δhchan> Ꮡc) {
 
 // A runtimeSelect is a single case passed to rselect.
 // This must match ../reflect/value.go:/runtimeSelect
-[GoType] partial struct runtimeSelect {
+partial struct runtimeSelect {
     internal selectDir dir;
     internal @unsafe.Pointer typ; // channel type (not used here)
     internal ж<Δhchan> ch;      // channel
     internal @unsafe.Pointer val; // ptr to data (SendDir) or ptr to receive buffer (RecvDir)
 }
 
-[GoType("num:nint")] partial struct selectDir;
+partial struct selectDir /*num:nint*/;
 
 internal static selectDir _ᴛ1ʗ => /* iota */ 0;
 internal static selectDir selectSend => 1; // case Chan <- Send
@@ -601,7 +601,7 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
     return (chosen, recvOK);
 }
 
-[GoRecv] internal static void dequeueSudoG(this ref waitq q, ж<sudog> Ꮡsgp) {
+internal static void dequeueSudoG(this ref waitq q, ж<sudog> Ꮡsgp) {
     ref var sgp = ref Ꮡsgp.DerefOrNull();
 
     var x = sgp.prev;

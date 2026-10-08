@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface badge {
+partial interface badge {
     @string label();
 }
 
-[GoType] partial struct gold {
+partial struct gold {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -19,8 +19,8 @@ internal static @string label(this gold _) {
 }
 
 
-[GoType("dyn")] partial struct reservedᴛ1 {
-    [GoEmbedded] internal badge badge;
+partial struct reservedᴛ1 /*dyn*/ {
+    /*embed*/ internal badge badge;
 }
 internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
 

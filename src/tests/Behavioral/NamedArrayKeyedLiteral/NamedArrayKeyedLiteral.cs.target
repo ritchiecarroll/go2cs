@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[4]uint64")] partial struct args;
+partial struct args /*[4]uint64*/;
 
 internal static args keyed(uint64 a, uint64 b) {
     return new args(new array<uint64>(4){[1] = a, [3] = b});

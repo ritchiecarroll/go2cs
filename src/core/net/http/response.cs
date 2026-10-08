@@ -33,7 +33,7 @@ internal static map<@string, bool> respExcludeHeader = new map<@string, bool>{
 // The [Client] and [Transport] return Responses from servers once
 // the response headers have been received. The response body
 // is streamed on demand as the Body field is read.
-[GoType] partial struct Response {
+partial struct Response {
     public @string Status; // e.g. "200 OK"
     public nint StatusCode;   // e.g. 200
     public @string Proto; // e.g. "HTTP/1.0"
@@ -114,7 +114,7 @@ internal static map<@string, bool> respExcludeHeader = new map<@string, bool>{
 }
 
 // Cookies parses and returns the cookies set in the Set-Cookie headers.
-[GoRecv] public static slice<ж<ΔCookie>> Cookies(this ref Response r) {
+public static slice<ж<ΔCookie>> Cookies(this ref Response r) {
     return readSetCookies(r.Header);
 }
 
@@ -126,7 +126,7 @@ public static error ErrNoLocation = errors.New("http: no Location header in resp
 // if present. Relative redirects are resolved relative to
 // [Response.Request]. [ErrNoLocation] is returned if no
 // Location header is present.
-[GoRecv] public static (ж<url.URL>, error) Location(this ref Response r) {
+public static (ж<url.URL>, error) Location(this ref Response r) {
     @string lv = r.Header.Get(locationˢ);
     if (lv == ""u8) {
         return (default!, ErrNoLocation);
@@ -221,16 +221,16 @@ internal static void fixPragmaCacheControl(ΔHeader header) {
 
 // ProtoAtLeast reports whether the HTTP protocol used
 // in the response is at least major.minor.
-[GoRecv] public static bool ProtoAtLeast(this ref Response r, nint major, nint minor) {
+public static bool ProtoAtLeast(this ref Response r, nint major, nint minor) {
     return r.ProtoMajor > major || r.ProtoMajor == major && r.ProtoMinor >= minor;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string contentLength0ˢ = "Content-Length: 0\r\n"u8;
 
-[GoType("dyn")] internal partial struct Write_r1 {
-    [GoEmbedded] public io_package.Reader Reader;
-    [GoEmbedded] public io_package.Closer Closer;
+internal partial struct Write_r1 /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
+    /*embed*/ public io_package.Closer Closer;
 }
 
 // Write writes r to w in the HTTP/1.x server response format,
@@ -249,7 +249,7 @@ internal static readonly @string contentLength0ˢ = "Content-Length: 0\r\n"u8;
 //	Header, values for non-canonical keys will have unpredictable behavior
 //
 // The Response Body is closed after it is sent.
-[GoRecv] public static error Write(this ref Response r, io.Writer w) {
+public static error Write(this ref Response r, io.Writer w) {
     // Status line
     @string text = r.Status;
     if (text == ""u8){
@@ -335,7 +335,7 @@ internal static readonly @string contentLength0ˢ = "Content-Length: 0\r\n"u8;
     return default!;
 }
 
-[GoRecv] internal static void closeBody(this ref Response r) {
+internal static void closeBody(this ref Response r) {
     if (r.Body != default!) {
         r.Body.Close();
     }
@@ -348,14 +348,14 @@ internal static readonly @string contentLength0ˢ = "Content-Length: 0\r\n"u8;
 // connection is done being managed from its perspective. Once we
 // return a writable response body to a user, the net/http package is
 // done managing that connection.
-[GoRecv] internal static bool bodyIsWritable(this ref Response r) {
+internal static bool bodyIsWritable(this ref Response r) {
     var (_, ok) = r.Body._<io.Writer>(ᐧ);
     return ok;
 }
 
 // isProtocolSwitch reports whether the response code and header
 // indicate a successful protocol upgrade response.
-[GoRecv] internal static bool isProtocolSwitch(this ref Response r) {
+internal static bool isProtocolSwitch(this ref Response r) {
     return isProtocolSwitchResponse(r.StatusCode, r.Header);
 }
 

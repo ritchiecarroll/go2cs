@@ -9,7 +9,7 @@ public static @string Name() {
     return foo1ˢ;
 }
 
-[GoType] partial struct Pair {
+partial struct Pair {
     public nint Left, Right;
 }
 

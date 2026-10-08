@@ -12,7 +12,7 @@ using go.@internal;
 
 partial class cmerge_package {
 
-[GoType("num:uint8")] partial struct ModeMergePolicy;
+partial struct ModeMergePolicy /*num:uint8*/;
 
 public static ModeMergePolicy ModeMergeStrict => /* iota */ 0;
 public static ModeMergePolicy ModeMergeRelaxed => 1;
@@ -21,20 +21,20 @@ public static ModeMergePolicy ModeMergeRelaxed => 1;
 // merging together coverage counter data for a given function, for
 // tools that need to implicitly merge counter as they read multiple
 // coverage counter data files.
-[GoType] partial struct Merger {
+partial struct Merger {
     internal coverage.CounterMode cmode;
     internal coverage.CounterGranularity cgran;
     internal ModeMergePolicy policy;
     internal bool overflow;
 }
 
-[GoRecv] public static void SetModeMergePolicy(this ref Merger cm, ModeMergePolicy policy) {
+public static void SetModeMergePolicy(this ref Merger cm, ModeMergePolicy policy) {
     cm.policy = policy;
 }
 
 // MergeCounters takes the counter values in 'src' and merges them
 // into 'dst' according to the correct counter mode.
-[GoRecv] public static (error, bool) MergeCounters(this ref Merger m, slice<uint32> dst, slice<uint32> src) {
+public static (error, bool) MergeCounters(this ref Merger m, slice<uint32> dst, slice<uint32> src) {
     if (len(src) != len(dst)) {
         return (fmt.Errorf("merging counters: len(dst)=%d len(src)=%d"u8, len(dst), len(src)), false);
     }
@@ -57,7 +57,7 @@ public static ModeMergePolicy ModeMergeRelaxed => 1;
 // Saturating add does a saturating addition of 'dst' and 'src',
 // returning added value or math.MaxUint32 if there is an overflow.
 // Overflows are recorded in case the client needs to track them.
-[GoRecv] public static uint32 SaturatingAdd(this ref Merger m, uint32 dst, uint32 src) {
+public static uint32 SaturatingAdd(this ref Merger m, uint32 dst, uint32 src) {
     var (result, overflow) = SaturatingAdd(dst, src);
     if (overflow) {
         m.overflow = true;
@@ -83,7 +83,7 @@ public static (uint32, bool) SaturatingAdd(uint32 dst, uint32 src) {
 // data files from different binaries, where we're combining data from
 // more than one meta-data file, we need to check for and resolve
 // mode/granularity clashes.
-[GoRecv] public static error SetModeAndGranularity(this ref Merger cm, @string mdf, coverage.CounterMode cmode, coverage.CounterGranularity cgran) {
+public static error SetModeAndGranularity(this ref Merger cm, @string mdf, coverage.CounterMode cmode, coverage.CounterGranularity cgran) {
     if (cm.cmode == coverage.CtrModeInvalid){
         // Set merger mode based on what we're seeing here.
         cm.cmode = cmode;
@@ -109,17 +109,17 @@ public static (uint32, bool) SaturatingAdd(uint32 dst, uint32 src) {
     return default!;
 }
 
-[GoRecv] public static void ResetModeAndGranularity(this ref Merger cm) {
+public static void ResetModeAndGranularity(this ref Merger cm) {
     cm.cmode = coverage.CtrModeInvalid;
     cm.cgran = coverage.CtrGranularityInvalid;
     cm.overflow = false;
 }
 
-[GoRecv] public static coverage.CounterMode Mode(this ref Merger cm) {
+public static coverage.CounterMode Mode(this ref Merger cm) {
     return cm.cmode;
 }
 
-[GoRecv] public static coverage.CounterGranularity Granularity(this ref Merger cm) {
+public static coverage.CounterGranularity Granularity(this ref Merger cm) {
     return cm.cgran;
 }
 

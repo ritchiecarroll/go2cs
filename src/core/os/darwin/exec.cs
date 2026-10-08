@@ -18,12 +18,12 @@ partial class os_package {
 // ErrProcessDone indicates a [Process] has finished.
 public static error ErrProcessDone = errors.New("os: process already finished"u8);
 
-[GoType("num:uint8")] partial struct processMode;
+partial struct processMode /*num:uint8*/;
 
 internal static processMode modePID => /* iota */ 0;
 internal static processMode modeHandle => 1;
 
-[GoType("num:uint64")] partial struct processStatus;
+partial struct processStatus /*num:uint64*/;
 
 internal static processStatus statusOK => 0;
 internal static processStatus statusDone => /* 1 << 62 */ unchecked((processStatus)4611686018427387904);
@@ -31,7 +31,7 @@ internal static processStatus statusReleased => /* 1 << 63 */ unchecked((process
 internal static UntypedInt processStatusMask => /* 0x3 << 62 */ 13835058055282163712;
 
 // Process stores the information about a process created by [StartProcess].
-[GoType] partial struct Process {
+partial struct Process {
     public nint Pid;
     internal processMode mode;
     // State contains the atomic process state.
@@ -226,7 +226,7 @@ internal static void pidDeactivate(this ж<Process> Ꮡp, processStatus reason) 
 
 // ProcAttr holds the attributes that will be applied to a new process
 // started by StartProcess.
-[GoType] partial struct ProcAttr {
+partial struct ProcAttr {
     // If Dir is non-empty, the child changes into the directory before
     // creating the process.
     public @string Dir;
@@ -253,7 +253,7 @@ internal static void pidDeactivate(this ж<Process> Ꮡp, processStatus reason) 
 // A Signal represents an operating system signal.
 // The usual underlying implementation is operating system-dependent:
 // on Unix it is syscall.Signal.
-[GoType] partial interface ΔSignal {
+partial interface ΔSignal {
     @string String();
     void Signal(); // to distinguish from other Stringers
 }
@@ -347,32 +347,32 @@ public static error Signal(this ж<Process> Ꮡp, ΔSignal sig) {
 }
 
 // UserTime returns the user CPU time of the exited process and its children.
-[GoRecv] public static time.Duration UserTime(this ref ProcessState p) {
+public static time.Duration UserTime(this ref ProcessState p) {
     return p.userTime();
 }
 
 // SystemTime returns the system CPU time of the exited process and its children.
-[GoRecv] public static time.Duration SystemTime(this ref ProcessState p) {
+public static time.Duration SystemTime(this ref ProcessState p) {
     return p.systemTime();
 }
 
 // Exited reports whether the program has exited.
 // On Unix systems this reports true if the program exited due to calling exit,
 // but false if the program terminated due to a signal.
-[GoRecv] public static bool Exited(this ref ProcessState p) {
+public static bool Exited(this ref ProcessState p) {
     return p.exited();
 }
 
 // Success reports whether the program exited successfully,
 // such as with exit status 0 on Unix.
-[GoRecv] public static bool Success(this ref ProcessState p) {
+public static bool Success(this ref ProcessState p) {
     return p.success();
 }
 
 // Sys returns system-dependent exit information about
 // the process. Convert it to the appropriate underlying
 // type, such as [syscall.WaitStatus] on Unix, to access its contents.
-[GoRecv] public static any Sys(this ref ProcessState p) {
+public static any Sys(this ref ProcessState p) {
     return p.sys();
 }
 
@@ -381,7 +381,7 @@ public static error Signal(this ж<Process> Ꮡp, ΔSignal sig) {
 // type, such as [*syscall.Rusage] on Unix, to access its contents.
 // (On Unix, *syscall.Rusage matches struct rusage as defined in the
 // getrusage(2) manual page.)
-[GoRecv] public static any SysUsage(this ref ProcessState p) {
+public static any SysUsage(this ref ProcessState p) {
     return p.sysUsage();
 }
 

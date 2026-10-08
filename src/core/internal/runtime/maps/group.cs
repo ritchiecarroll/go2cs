@@ -20,7 +20,7 @@ internal static UntypedInt bitsetMSB => 0x8080808080808080;
 internal const uint64 bitsetEmpty = /* bitsetLSB * uint64(ctrlEmpty) */ 9259542123273814144;
 internal const uint64 bitsetDeleted = /* bitsetLSB * uint64(ctrlDeleted) */ 18374403900871474942;
 
-[GoType("num:uint64")] partial struct bitset;
+partial struct bitset /*num:uint64*/;
 
 // first returns the relative index of the first control byte in the group that
 // is in the set.
@@ -86,9 +86,9 @@ internal static bitset bitsetShiftOutLowest(bitset b) {
     return (b >> (int)(8));
 }
 
-[GoType("num:uint8")] partial struct ctrl;
+partial struct ctrl /*num:uint8*/;
 
-[GoType("num:uint64")] partial struct ctrlGroup;
+partial struct ctrlGroup /*num:uint64*/;
 
 // get returns the i-th control byte.
 internal static ctrl get(this ж<ctrlGroup> Ꮡg, uintptr i) {
@@ -112,7 +112,7 @@ internal static void set(this ж<ctrlGroup> Ꮡg, uintptr i, ctrl c) {
 }
 
 // setEmpty sets all the control bytes to empty.
-[GoRecv] internal static void setEmpty(this ref ctrlGroup g) {
+internal static void setEmpty(this ref ctrlGroup g) {
     g = ((ctrlGroup)bitsetEmpty);
 }
 
@@ -203,7 +203,7 @@ internal static bitset ctrlGroupMatchFull(ctrlGroup g) {
 //
 // A group holds abi.SwissMapGroupSlots slots (key/elem pairs) plus their
 // control word.
-[GoType] partial struct groupReference {
+partial struct groupReference {
     // data points to the group, which is described by typ.Group and has
     // layout:
     //
@@ -242,12 +242,12 @@ internal static (uint64, bool) alignUpPow2(uint64 n) {
 }
 
 // ctrls returns the group control word.
-[GoRecv] internal static ж<ctrlGroup> ctrls(this ref groupReference g) {
+internal static ж<ctrlGroup> ctrls(this ref groupReference g) {
     return (ж<ctrlGroup>)(uintptr)(g.data);
 }
 
 // key returns a pointer to the key at index i.
-[GoRecv] internal static @unsafe.Pointer key(this ref groupReference g, ж<abi.SwissMapType> Ꮡtyp, uintptr i) {
+internal static @unsafe.Pointer key(this ref groupReference g, ж<abi.SwissMapType> Ꮡtyp, uintptr i) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var offset = groupSlotsOffset + i * typ.SlotSize;
@@ -255,7 +255,7 @@ internal static (uint64, bool) alignUpPow2(uint64 n) {
 }
 
 // elem returns a pointer to the element at index i.
-[GoRecv] internal static @unsafe.Pointer elem(this ref groupReference g, ж<abi.SwissMapType> Ꮡtyp, uintptr i) {
+internal static @unsafe.Pointer elem(this ref groupReference g, ж<abi.SwissMapType> Ꮡtyp, uintptr i) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var offset = groupSlotsOffset + i * typ.SlotSize + typ.ElemOff;
@@ -264,7 +264,7 @@ internal static (uint64, bool) alignUpPow2(uint64 n) {
 
 // groupsReference is a wrapper type describing an array of groups stored at
 // data.
-[GoType] partial struct groupsReference {
+partial struct groupsReference {
     // data points to an array of groups. See groupReference above for the
     // definition of group.
     internal @unsafe.Pointer data; // data *[length]typ.Group
@@ -286,7 +286,7 @@ internal static groupsReference newGroups(ref abi.SwissMapType typ, uint64 lengt
 }
 
 // group returns the group at index i.
-[GoRecv] internal static groupReference group(this ref groupsReference g, ж<abi.SwissMapType> Ꮡtyp, uint64 i) {
+internal static groupReference group(this ref groupsReference g, ж<abi.SwissMapType> Ꮡtyp, uint64 i) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     // TODO(prattmic): Do something here about truncation on cast to

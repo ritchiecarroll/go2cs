@@ -5,7 +5,7 @@ namespace go.debug;
 
 partial class macho_package {
 
-[GoType("num:nint")] partial struct RelocTypeGeneric;
+partial struct RelocTypeGeneric /*num:nint*/;
 
 //go:generate stringer -type=RelocTypeGeneric,RelocTypeX86_64,RelocTypeARM,RelocTypeARM64 -output reloctype_string.go
 public static RelocTypeGeneric GENERIC_RELOC_VANILLA => 0;
@@ -19,7 +19,7 @@ public static @string GoString(this RelocTypeGeneric r) {
     return "macho."u8 + r.String();
 }
 
-[GoType("num:nint")] partial struct RelocTypeX86_64;
+partial struct RelocTypeX86_64 /*num:nint*/;
 
 public static RelocTypeX86_64 X86_64_RELOC_UNSIGNED => 0;
 public static RelocTypeX86_64 X86_64_RELOC_SIGNED => 1;
@@ -36,7 +36,7 @@ public static @string GoString(this RelocTypeX86_64 r) {
     return "macho."u8 + r.String();
 }
 
-[GoType("num:nint")] partial struct RelocTypeARM;
+partial struct RelocTypeARM /*num:nint*/;
 
 public static RelocTypeARM ARM_RELOC_VANILLA => 0;
 public static RelocTypeARM ARM_RELOC_PAIR => 1;
@@ -53,7 +53,7 @@ public static @string GoString(this RelocTypeARM r) {
     return "macho."u8 + r.String();
 }
 
-[GoType("num:nint")] partial struct RelocTypeARM64;
+partial struct RelocTypeARM64 /*num:nint*/;
 
 public static RelocTypeARM64 ARM64_RELOC_UNSIGNED => 0;
 public static RelocTypeARM64 ARM64_RELOC_SUBTRACTOR => 1;

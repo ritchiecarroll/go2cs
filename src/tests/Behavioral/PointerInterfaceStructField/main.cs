@@ -4,20 +4,20 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface Describer {
+partial interface Describer {
     @string Describe();
 }
 
-[GoType] partial struct Setting {
+partial struct Setting {
     internal @string name;
     internal nint value;
 }
 
-[GoRecv] public static @string Describe(this ref Setting s) {
+public static @string Describe(this ref Setting s) {
     return fmt.Sprintf("%s=%d"u8, s.name, s.value);
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal Describer d;
     internal @string label;
 }

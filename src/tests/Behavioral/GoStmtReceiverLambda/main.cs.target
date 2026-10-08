@@ -5,23 +5,23 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
     internal channel<bool> done;
 }
 
-[GoRecv] internal static error bump(this ref counter c, nint delta) {
+internal static error bump(this ref counter c, nint delta) {
     c.n += delta;
     c.done.ᐸꟷ(true);
     return default!;
 }
 
-[GoRecv] internal static error report(this ref counter c) {
+internal static error report(this ref counter c) {
     c.done.ᐸꟷ(true);
     return default!;
 }
 
-[GoType] partial struct engine {
+partial struct engine {
     internal ж<counter> tally;
 }
 
@@ -33,7 +33,7 @@ internal static partial void ping(this ж<engine> Ꮡe) {
     goǃ(() => Ꮡe.Value.tally.report());
 }
 
-[GoType] partial struct valueSender {
+partial struct valueSender {
     internal channel<nint> c;
 }
 

@@ -554,7 +554,7 @@ internal static bool isParameterized(slice<ж<TypeParam>> tparams, ΔType typ) {
     return Ꮡw.isParameterized(typ);
 }
 
-[GoType] partial struct tpWalker {
+partial struct tpWalker {
     internal slice<ж<TypeParam>> tparams;
     internal map<ΔType, bool> seen;
 }
@@ -715,7 +715,7 @@ internal static void killCycles(slice<ж<TypeParam>> tparams, slice<ΔType> infe
     }
 }
 
-[GoType] partial struct cycleFinder {
+partial struct cycleFinder {
     internal slice<ж<TypeParam>> tparams;
     internal slice<ΔType> inferred;
     internal map<ΔType, bool> seen;

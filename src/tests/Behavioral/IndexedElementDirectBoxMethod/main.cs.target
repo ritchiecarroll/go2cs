@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
@@ -13,11 +13,11 @@ internal static void inc(this ж<counter> Ꮡc) {
     p.Value++;
 }
 
-[GoRecv] internal static nint get(this ref counter c) {
+internal static nint get(this ref counter c) {
     return c.n;
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal array<counter> arr = new(3);
 }
 

@@ -65,7 +65,7 @@ internal static UntypedInt infoZipUnixExtraID => 0x5855; // Info-ZIP Unix extens
 // See the [ZIP specification] for details.
 //
 // [ZIP specification]: https://support.pkware.com/pkzip/appnote
-[GoType] partial struct FileHeader {
+partial struct FileHeader {
     // Name is the name of the file.
     //
     // It must be a relative path, not start with a drive letter (such as "C:"),
@@ -135,7 +135,7 @@ public static fs.FileInfo FileInfo(this ж<FileHeader> Ꮡh) {
 }
 
 // headerFileInfo implements [fs.FileInfo].
-[GoType] partial struct headerFileInfo {
+partial struct headerFileInfo {
     internal ж<FileHeader> fh;
 }
 
@@ -204,7 +204,7 @@ public static (ж<FileHeader>, error) FileInfoHeader(fs.FileInfo fi) {
     return (fh, default!);
 }
 
-[GoType] partial struct directoryEnd {
+partial struct directoryEnd {
     internal uint32 diskNbr; // unused
     internal uint32 dirDiskNbr; // unused
     internal uint64 dirRecordsThisDisk; // unused
@@ -262,7 +262,7 @@ internal static (uint16 fDate, uint16 fTime) timeToMsDosTime(time.Time t) {
 // [ModifiedDate] and [ModifiedTime] fields.
 //
 // Deprecated: Use [Modified] instead.
-[GoRecv] public static time.Time ModTime(this ref FileHeader h) {
+public static time.Time ModTime(this ref FileHeader h) {
     return msDosTimeToTime(h.ModifiedDate, h.ModifiedTime);
 }
 
@@ -270,7 +270,7 @@ internal static (uint16 fDate, uint16 fTime) timeToMsDosTime(time.Time t) {
 // to the given time in UTC.
 //
 // Deprecated: Use [Modified] instead.
-[GoRecv] public static void SetModTime(this ref FileHeader h, time.Time t) {
+public static void SetModTime(this ref FileHeader h, time.Time t) {
     t = t.UTC(); // Convert to UTC for compatibility
     h.Modified = t;
     (h.ModifiedDate, h.ModifiedTime) = timeToMsDosTime(t);
@@ -291,7 +291,7 @@ internal static UntypedInt msdosDir => 0x10;
 internal static UntypedInt msdosReadOnly => 0x01;
 
 // Mode returns the permission and mode bits for the [FileHeader].
-[GoRecv] public static fs.FileMode /*mode*/ Mode(this ref FileHeader h) {
+public static fs.FileMode /*mode*/ Mode(this ref FileHeader h) {
     fs.FileMode mode = default!;
 
     var exprᴛ1 = (h.CreatorVersion >> (int)(8));
@@ -309,7 +309,7 @@ internal static UntypedInt msdosReadOnly => 0x01;
 }
 
 // SetMode changes the permission and mode bits for the [FileHeader].
-[GoRecv] public static void SetMode(this ref FileHeader h, fs.FileMode mode) {
+public static void SetMode(this ref FileHeader h, fs.FileMode mode) {
     h.CreatorVersion = (uint16)((uint16)(h.CreatorVersion & 0xff) | (uint16)(creatorUnix << (int)(8)));
     h.ExternalAttrs = (fileModeToUnixMode(mode) << (int)(16));
     // set MSDOS attributes too, as the original zip does.
@@ -322,11 +322,11 @@ internal static UntypedInt msdosReadOnly => 0x01;
 }
 
 // isZip64 reports whether the file size exceeds the 32 bit limit
-[GoRecv] internal static bool isZip64(this ref FileHeader h) {
+internal static bool isZip64(this ref FileHeader h) {
     return h.CompressedSize64 >= uint32max || h.UncompressedSize64 >= uint32max;
 }
 
-[GoRecv] internal static bool hasDataDescriptor(this ref FileHeader h) {
+internal static bool hasDataDescriptor(this ref FileHeader h) {
     return (uint16)(h.Flags & 0x8) != 0;
 }
 

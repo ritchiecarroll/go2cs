@@ -9,7 +9,7 @@ using ꓸꓸꓸany = Span<any>;
 partial class slog_package {
 
 // An Attr is a key-value pair.
-[GoType] partial struct Attr {
+partial struct Attr {
     public @string Key;
     public Value Value;
 }

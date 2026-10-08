@@ -59,21 +59,21 @@ namespace go;
 public static partial class main_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial class main_NodePtr {}
+    [GoLocalName("NodePtr")] internal partial class main_NodePtr {}
     [GoLocalName("Node")] internal partial struct main_Node {}
     [GoLocalName("Point")] internal partial struct main_Point {}
-    internal partial struct main_Points {}
-    internal partial struct main_Stream {}
-    internal partial struct main_Tally {}
-    internal partial struct main_Triple {}
-    internal partial struct main_recursiveMap {}
-    internal partial struct main_recursiveSlice {}
+    [GoLocalName("Points")] internal partial struct main_Points {}
+    [GoLocalName("Stream")] internal partial struct main_Stream {}
+    [GoLocalName("Tally")] internal partial struct main_Tally {}
+    [GoLocalName("Triple")] internal partial struct main_Triple {}
+    [GoLocalName("recursiveMap")] internal partial struct main_recursiveMap {}
+    [GoLocalName("recursiveSlice")] internal partial struct main_recursiveSlice {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

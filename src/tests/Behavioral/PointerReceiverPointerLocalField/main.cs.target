@@ -5,23 +5,23 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct slot {
+partial struct slot {
     internal nint n;
 }
 
-[GoRecv] internal static void inc(this ref slot s) {
+internal static void inc(this ref slot s) {
     s.n++;
 }
 
-[GoRecv] internal static void add(this ref slot s, nint d) {
+internal static void add(this ref slot s, nint d) {
     s.n += d;
 }
 
-[GoRecv] internal static nint get(this ref slot s) {
+internal static nint get(this ref slot s) {
     return s.n;
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal slot s;
 }
 

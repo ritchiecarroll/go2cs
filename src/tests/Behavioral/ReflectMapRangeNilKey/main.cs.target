@@ -5,7 +5,7 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType("map[any, nint]")] partial struct namedAny;
+partial struct namedAny /*map[any, nint]*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object anyˢ = (@string)"any:"u8;

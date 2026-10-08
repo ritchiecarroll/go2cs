@@ -4,32 +4,27 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
-partial interface Signed<ΔT> {
+partial interface Signed<ΔT> /*operators = Sum, Arithmetic, Integer, Comparable, Ordered*/ {
     //  Type constraints: ~int | ~int8 | ~int16 | ~int32 | ~int64
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
-partial interface Unsigned<ΔT> {
+partial interface Unsigned<ΔT> /*operators = Sum, Arithmetic, Integer, Comparable, Ordered*/ {
     //  Type constraints: ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
-partial interface Integer<ΔT> {
+partial interface Integer<ΔT> /*operators = Sum, Arithmetic, Integer, Comparable, Ordered*/ {
     //  Type constraints: Signed | Unsigned
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType("operators = Sum, Arithmetic, Comparable, Ordered")]
-partial interface Float<ΔT> {
+partial interface Float<ΔT> /*operators = Sum, Arithmetic, Comparable, Ordered*/ {
     //  Type constraints: ~float32 | ~float64
     // Derived operators: +, -, *, /, ==, !=, <, <=, >, >=
 }
 
-[GoType("operators = Sum, Comparable, Ordered")]
-partial interface Ordered<ΔT> {
+partial interface Ordered<ΔT> /*operators = Sum, Comparable, Ordered*/ {
     //  Type constraints: Integer | Float | ~string
     // Derived operators: +, ==, !=, <, <=, >, >=
 }

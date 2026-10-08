@@ -5,11 +5,11 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct node {
+partial struct node {
     internal ж<node> next;
 }
 
-[GoRecv] internal static partial void link(this ref node n, ж<node> Ꮡm) {
+internal static partial void link(this ref node n, ж<node> Ꮡm) {
     n.next = Ꮡm;
 }
 

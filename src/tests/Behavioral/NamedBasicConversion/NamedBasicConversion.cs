@@ -4,17 +4,17 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("@string")] partial struct A;
+partial struct A /*@string*/;
 
-[GoType("@string")] partial struct B;
+partial struct B /*@string*/;
 
-[GoType("@string")] partial struct otherString;
+partial struct otherString /*@string*/;
 
-[GoType("@string")] partial struct pkgString;
+partial struct pkgString /*@string*/;
 
-[GoType("bool")] partial struct T;
+partial struct T /*bool*/;
 
-[GoType("bool")] partial struct U;
+partial struct U /*bool*/;
 
 public static nint Len(this A a) {
     return len(a);
@@ -24,11 +24,11 @@ public static nint Len(this A a) {
 private static readonly @string abcˢ = "abc"u8;
 private static readonly @string xyzˢ = "xyz"u8;
 
-[GoLocalName("myString")] [GoType("@string")] internal partial struct main_myString;
+internal partial struct main_myString /*@string*/;
 
-[GoLocalName("N")] [GoType("num:nint")] internal partial struct main_N;
+internal partial struct main_N /*num:nint*/;
 
-[GoLocalName("M")] [GoType("num:nint")] internal partial struct main_M;
+internal partial struct main_M /*num:nint*/;
 
 internal static void Main() {
     A a = ((A)(@string)abcˢ);

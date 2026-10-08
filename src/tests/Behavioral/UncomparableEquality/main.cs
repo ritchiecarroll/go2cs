@@ -4,46 +4,46 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("map[@string, nint]")] partial struct myMap;
+partial struct myMap /*map[@string, nint]*/;
 
-[GoType("[]nint")] partial struct mySlice;
+partial struct mySlice /*[]nint*/;
 
 // type myFunc is a methodless func type — rendered inline as its base delegate
 
-[GoType] partial struct withSlice {
+partial struct withSlice {
     public nint A;
     public slice<nint> B;
 }
 
-[GoType] partial struct withMap {
+partial struct withMap {
     public nint A;
     public map<@string, nint> M;
 }
 
-[GoType] partial struct withFunc {
+partial struct withFunc {
     public Action F;
 }
 
-[GoType] public partial struct inner {
+public partial struct inner {
     public slice<byte> S;
 }
 
-[GoType] partial struct outer {
+partial struct outer {
     public inner I;
     public nint N;
 }
 
-[GoType] partial struct point {
+partial struct point {
     public nint X;
     public nint Y;
 }
 
-[GoType] partial struct withAny {
+partial struct withAny {
     public nint A;
     public any V;
 }
 
-[GoType] partial struct sliceErr {
+partial struct sliceErr {
     public slice<nint> S;
 }
 
@@ -141,7 +141,7 @@ private static readonly object theVerdictIsStableAcrossˢ = (@string)"== the ver
 private static readonly @string repeatMapˢ = "repeat map"u8;
 private static readonly @string repeatComparableˢ = "repeat comparable"u8;
 
-[GoType("dyn")] internal partial struct main_nestedComparable {
+internal partial struct main_nestedComparable /*dyn*/ {
     public point P;
     public array<nint> A = new(2);
 }

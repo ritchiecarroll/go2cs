@@ -22,11 +22,11 @@ internal static partial @string keeper(slice<byte> b, nint i) {
     return fmt.Sprintf("%s read %d"u8, name, b[i]);
 }
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static partial @string bump(this ref counter c) {
+internal static partial @string bump(this ref counter c) {
     c.n++;
     return callerName();
 }

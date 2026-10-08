@@ -29,7 +29,7 @@ using ꓸꓸꓸstring = Span<@string>;
 partial class srcimporter_package {
 
 // An Importer provides the context for importing packages from source code.
-[GoType] partial struct Importer {
+partial struct Importer {
     internal ж<build.Context> ctxt;
     internal ж<token.FileSet> fset;
     internal types.Sizes sizes;
@@ -282,13 +282,13 @@ internal static (ж<ast.File>, error) cgo(this ж<Importer> Ꮡp, ж<build.Packa
 }
 
 // context-controlled file system operations
-[GoRecv] internal static (@string, error) absPath(this ref Importer p, @string path) {
+internal static (@string, error) absPath(this ref Importer p, @string path) {
     // TODO(gri) This should be using p.ctxt.AbsPath which doesn't
     // exist but probably should. See also issue #14282.
     return filepath.Abs(path);
 }
 
-[GoRecv] internal static bool isAbsPath(this ref Importer p, @string path) {
+internal static bool isAbsPath(this ref Importer p, @string path) {
     {
         var f = p.ctxt.Value.IsAbsPath; if (f != default!) {
             return f(path);
@@ -297,7 +297,7 @@ internal static (ж<ast.File>, error) cgo(this ж<Importer> Ꮡp, ж<build.Packa
     return filepath.IsAbs(path);
 }
 
-[GoRecv] internal static @string joinPath(this ref Importer p, params ꓸꓸꓸstring elemʗp) {
+internal static @string joinPath(this ref Importer p, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
 
     {
@@ -309,7 +309,7 @@ internal static (ж<ast.File>, error) cgo(this ж<Importer> Ꮡp, ж<build.Packa
 }
 
 //go:linkname setUsesCgo go/types.srcimporter_setUsesCgo
-[global::System.Diagnostics.StackTraceHidden] internal static void setUsesCgo(ж<types.Config> conf) {
+/*linkname*/ internal static partial void setUsesCgo(ж<types.Config> conf) {
     types.srcimporter_setUsesCgo(conf);
 }
 

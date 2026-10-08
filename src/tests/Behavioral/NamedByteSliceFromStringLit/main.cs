@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[]byte")] partial struct htmlSig;
+partial struct htmlSig /*[]byte*/;
 
-[GoType("[]rune")] partial struct runeSig;
+partial struct runeSig /*[]rune*/;
 
 internal static nint sigLen(htmlSig s) {
     return len(s);

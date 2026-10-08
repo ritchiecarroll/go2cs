@@ -12,7 +12,7 @@ using io = io_package;
 
 partial class types_package {
 
-[GoType("num:nint")] partial struct SelectionKind;
+partial struct SelectionKind /*num:nint*/;
 
 public static SelectionKind FieldVal => /* iota */ 0;    // x.f is a struct field selector
 public static SelectionKind MethodVal => 1;   // x.f is a method selector
@@ -33,7 +33,7 @@ public static SelectionKind MethodExpr => 2;  // x.f is a method expression
 //	p.x         FieldVal      T       x      int        {0}       true
 //	p.m         MethodVal     *T      m      func()     {1, 0}    true
 //	T.m         MethodExpr    T       m      func(T)    {1, 0}    false
-[GoType] partial struct Selection {
+partial struct Selection {
     internal SelectionKind kind;
     internal ΔType recv;   // type of x
     internal Object obj; // object denoted by x.f
@@ -42,24 +42,24 @@ public static SelectionKind MethodExpr => 2;  // x.f is a method expression
 }
 
 // Kind returns the selection kind.
-[GoRecv] public static SelectionKind Kind(this ref Selection s) {
+public static SelectionKind Kind(this ref Selection s) {
     return s.kind;
 }
 
 // Recv returns the type of x in x.f.
-[GoRecv] public static ΔType Recv(this ref Selection s) {
+public static ΔType Recv(this ref Selection s) {
     return s.recv;
 }
 
 // Obj returns the object denoted by x.f; a *Var for
 // a field selection, and a *Func in all other cases.
-[GoRecv] public static Object Obj(this ref Selection s) {
+public static Object Obj(this ref Selection s) {
     return s.obj;
 }
 
 // Type returns the type of x.f, which may be different from the type of f.
 // See Selection for more information.
-[GoRecv] public static ΔType Type(this ref Selection s) {
+public static ΔType Type(this ref Selection s) {
     var exprᴛ1 = s.kind;
     if (exprᴛ1 == MethodVal) {
         ref var sig = ref heap<ΔSignature>(out var Ꮡsig);
@@ -105,7 +105,7 @@ public static SelectionKind MethodExpr => 2;  // x.f is a method expression
 //
 // The earlier index entries are the indices of the embedded fields implicitly
 // traversed to get from (the type of) x to f, starting at embedding depth 0.
-[GoRecv] public static slice<nint> Index(this ref Selection s) {
+public static slice<nint> Index(this ref Selection s) {
     return s.index;
 }
 
@@ -116,7 +116,7 @@ public static SelectionKind MethodExpr => 2;  // x.f is a method expression
 // MethodVal selection in which the receiver argument and parameter
 // both have type *T so there is no indirection.
 // Unfortunately, a fix is too risky.
-[GoRecv] public static bool Indirect(this ref Selection s) {
+public static bool Indirect(this ref Selection s) {
     return s.indirect;
 }
 

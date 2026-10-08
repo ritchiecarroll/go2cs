@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[]nint")] partial struct stack;
+partial struct stack /*[]nint*/;
 
 internal static void growTo(ref stack s, nint v) {
     s = append(s, v);

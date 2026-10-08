@@ -67,7 +67,7 @@ namespace go;
 public static partial class main_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
@@ -76,16 +76,16 @@ public static partial class main_package
     [GoLocalName("I")] internal partial interface localInterfaceEmbed_I {}
     [GoLocalName("i")] internal partial interface localInterfaceEmbed_i {}
     internal partial struct embedImpl {}
-    internal partial struct embeddedLocalTypes_MyInt {}
+    [GoLocalName("MyInt")] internal partial struct embeddedLocalTypes_MyInt {}
     [GoLocalName("embed")] internal partial struct embeddedLocalTypes_embed {}
     [GoLocalName("holder")] internal partial struct embeddedLocalTypes_holder {}
-    internal partial struct embeddedLocalTypes_myInt {}
+    [GoLocalName("myInt")] internal partial struct embeddedLocalTypes_myInt {}
     [GoLocalName("ptrHolder")] internal partial struct embeddedLocalTypes_ptrHolder {}
-    internal partial struct foreignUnderlyingLocalTypesAgain_myDur {}
-    internal partial struct foreignUnderlyingLocalTypesAgain_myTime {}
-    internal partial struct foreignUnderlyingLocalTypes_inner {}
-    internal partial struct foreignUnderlyingLocalTypes_myDur {}
-    internal partial struct foreignUnderlyingLocalTypes_myTime {}
+    [GoLocalName("myDur")] internal partial struct foreignUnderlyingLocalTypesAgain_myDur {}
+    [GoLocalName("myTime")] internal partial struct foreignUnderlyingLocalTypesAgain_myTime {}
+    [GoLocalName("inner")] internal partial struct foreignUnderlyingLocalTypes_inner {}
+    [GoLocalName("myDur")] internal partial struct foreignUnderlyingLocalTypes_myDur {}
+    [GoLocalName("myTime")] internal partial struct foreignUnderlyingLocalTypes_myTime {}
     internal partial struct main_a {}
     [GoLocalName("point")] internal partial struct main_point {}
     // </TypeAccessibility>

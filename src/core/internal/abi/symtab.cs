@@ -5,13 +5,13 @@ namespace go.@internal;
 
 partial class abi_package {
 
-[GoType("num:uint8")] partial struct FuncFlag;
+partial struct FuncFlag /*num:uint8*/;
 
 public static FuncFlag FuncFlagTopFrame => /* 1 << iota */ 1;
 public static FuncFlag FuncFlagSPWrite => 2;
 public static FuncFlag FuncFlagAsm => 4;
 
-[GoType("num:uint8")] partial struct FuncID;
+partial struct FuncID /*num:uint8*/;
 
 // If you add a FuncID, you probably also want to add an entry to the map in
 // ../../cmd/internal/objabi/funcid.go

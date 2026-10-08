@@ -5,11 +5,11 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType] partial struct Nested {
+partial struct Nested {
     public nint X;
 }
 
-[GoType] partial struct Holder {
+partial struct Holder {
     public ж<Nested> Nested;
     public Action Fn;
     public map<@string, nint> M;

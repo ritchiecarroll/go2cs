@@ -17,15 +17,15 @@ private static readonly object b2DifferentShapeˢ = (@string)"B2 different shape
 private static readonly object b3SameNamesDifferentˢ = (@string)"B3 same names different types:"u8;
 private static readonly object b4MismatchedAssertionˢ = (@string)"B4 mismatched assertion:"u8;
 
-[GoType("dyn")] internal partial struct main_p {
+internal partial struct main_p /*dyn*/ {
     public nint X, Y;
 }
 
-[GoType("dyn")] internal partial struct main_s {
+internal partial struct main_s /*dyn*/ {
     public @string A;
 }
 
-[GoType("dyn")] internal partial struct main_type {
+internal partial struct main_type /*dyn*/ {
     public @string X, Y;
 }
 

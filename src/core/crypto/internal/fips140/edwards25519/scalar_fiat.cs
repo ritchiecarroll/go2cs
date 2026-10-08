@@ -42,13 +42,13 @@ using math;
 
 partial class edwards25519_package {
 
-[GoType("num:uint64")] partial struct fiatScalarUint1;
+partial struct fiatScalarUint1 /*num:uint64*/;
 
-[GoType("num:int64")] partial struct fiatScalarInt1;
+partial struct fiatScalarInt1 /*num:int64*/;
 
-[GoType("[4]uint64")] partial struct fiatScalarMontgomeryDomainFieldElement;
+partial struct fiatScalarMontgomeryDomainFieldElement /*[4]uint64*/;
 
-[GoType("[4]uint64")] partial struct fiatScalarNonMontgomeryDomainFieldElement;
+partial struct fiatScalarNonMontgomeryDomainFieldElement /*[4]uint64*/;
 
 // fiatScalarCmovznzU64 is a single-word conditional move.
 //
@@ -1076,7 +1076,7 @@ internal static void fiatScalarToBytes(ref array<uint8> out1, ref array<uint64> 
 // Output Bounds:
 //
 //	out1: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0x1fffffffffffffff]]
-internal static void fiatScalarFromBytes(ref array<uint64> out1, [GoArrayDims(32)] ж<array<uint8>> Ꮡarg1) {
+internal static void fiatScalarFromBytes(ref array<uint64> out1, /*[32]*/ ж<array<uint8>> Ꮡarg1) {
     ref var arg1 = ref Ꮡarg1.DerefOrNull();
 
     var x1 = (((uint64)arg1[31] << (int)(56)));

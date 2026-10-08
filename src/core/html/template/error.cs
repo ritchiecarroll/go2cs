@@ -11,7 +11,7 @@ using ꓸꓸꓸany = Span<any>;
 partial class template_package {
 
 // Error describes a problem encountered during template Escaping.
-[GoType] partial struct ΔError {
+partial struct ΔError {
     // ErrorCode describes the kind of error.
     public ErrorCode ErrorCode;
     // Node is the node that caused the problem, if known.
@@ -25,7 +25,7 @@ partial class template_package {
     public @string Description;
 }
 
-[GoType("num:nint")] partial struct ErrorCode;
+partial struct ErrorCode /*num:nint*/;
 
 // We define codes for each error that manifests while escaping templates, but
 // escaped templates may also fail at runtime.
@@ -69,7 +69,7 @@ public static ErrorCode ErrPredefinedEscaper => 11;
 
 public static ErrorCode ErrJSTemplate => 12;
 
-[GoRecv] public static @string Error(this ref ΔError e) {
+public static @string Error(this ref ΔError e) {
     switch (ᐧ) {
     case {} when e.Node != default!: {
         var (loc, _) = (((ж<parse.Tree>)nil)).ErrorContext(e.Node);

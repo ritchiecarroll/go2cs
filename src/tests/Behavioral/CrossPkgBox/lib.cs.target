@@ -4,7 +4,7 @@ using CrossPkgLib = CrossPkgLib_package;
 
 partial class CrossPkgBox_package {
 
-[GoType] partial struct Box {
+partial struct Box {
     public CrossPkgLibꓸStatus S;
 }
 

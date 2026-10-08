@@ -122,7 +122,7 @@ internal static void g7() {
     fmt.Println((@string)"g7:"u8, fs[0](), fs[1](), fs[2]());
 }
 
-[GoType] partial struct pt {
+partial struct pt {
     internal nint x, y;
 }
 

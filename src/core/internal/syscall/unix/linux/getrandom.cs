@@ -13,7 +13,7 @@ partial class unix_package {
 
 //go:linkname vgetrandom runtime.vgetrandom
 //go:noescape
-[global::System.Diagnostics.StackTraceHidden] internal static (nint ret, bool supported) vgetrandom(slice<byte> p, uint32 flags) {
+/*linkname*/ internal static partial (nint ret, bool supported) vgetrandom(slice<byte> p, uint32 flags) {
     var (ᴛ1, ᴛ2) = go.runtime_package.vgetrandom(p, flags);
     return (ᴛ1, ᴛ2);
 }
@@ -21,7 +21,7 @@ partial class unix_package {
 internal static ж<atomic.Bool> ᏑgetrandomUnsupported = new StandardBox<atomic.Bool>(default(atomic.Bool));
 internal static ref atomic.Bool getrandomUnsupported => ref ᏑgetrandomUnsupported.Value;
 
-[GoType("num:uintptr")] partial struct GetRandomFlag;
+partial struct GetRandomFlag /*num:uintptr*/;
 
 // GetRandom calls the getrandom system call.
 public static (nint n, error err) GetRandom(slice<byte> p, GetRandomFlag flags) {

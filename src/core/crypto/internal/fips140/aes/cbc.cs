@@ -11,21 +11,21 @@ using go.crypto.@internal.fips140;
 
 partial class aes_package {
 
-[GoType] partial struct CBCEncrypter {
+partial struct CBCEncrypter {
     internal Block b;
     internal array<byte> iv = new(ΔBlockSize);
 }
 
 // NewCBCEncrypter returns a [cipher.BlockMode] which encrypts in cipher block
 // chaining mode, using the given Block.
-public static ж<CBCEncrypter> NewCBCEncrypter(ж<Block> Ꮡb, [GoArrayDims(16)] array<byte> iv) {
+public static ж<CBCEncrypter> NewCBCEncrypter(ж<Block> Ꮡb, /*[16]*/ array<byte> iv) {
     iv = iv.Clone();
 
     ref var b = ref Ꮡb.DerefOrNull();
     return Ꮡ(new CBCEncrypter(b: b, iv: iv.Clone()));
 }
 
-[GoRecv] public static nint BlockSize(this ref CBCEncrypter c) {
+public static nint BlockSize(this ref CBCEncrypter c) {
     return ΔBlockSize;
 }
 
@@ -48,14 +48,14 @@ public static void CryptBlocks(this ж<CBCEncrypter> Ꮡc, slice<byte> dst, slic
     cryptBlocksEnc(ref nonnil(ref c).b, Ꮡc.of(CBCEncrypter.Ꮡiv), dst, src);
 }
 
-[GoRecv] public static void SetIV(this ref CBCEncrypter x, slice<byte> iv) {
+public static void SetIV(this ref CBCEncrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }
     copy(x.iv[..], iv);
 }
 
-internal static void cryptBlocksEncGeneric(ref Block b, [GoArrayDims(16)] ж<array<byte>> Ꮡciv, slice<byte> dst, slice<byte> src) {
+internal static void cryptBlocksEncGeneric(ref Block b, /*[16]*/ ж<array<byte>> Ꮡciv, slice<byte> dst, slice<byte> src) {
     ref var civ = ref Ꮡciv.DerefOrNull();
 
     var iv = civ[..];
@@ -72,21 +72,21 @@ internal static void cryptBlocksEncGeneric(ref Block b, [GoArrayDims(16)] ж<arr
     copy(civ[..], iv);
 }
 
-[GoType] partial struct CBCDecrypter {
+partial struct CBCDecrypter {
     internal Block b;
     internal array<byte> iv = new(ΔBlockSize);
 }
 
 // NewCBCDecrypter returns a [cipher.BlockMode] which decrypts in cipher block
 // chaining mode, using the given Block.
-public static ж<CBCDecrypter> NewCBCDecrypter(ж<Block> Ꮡb, [GoArrayDims(16)] array<byte> iv) {
+public static ж<CBCDecrypter> NewCBCDecrypter(ж<Block> Ꮡb, /*[16]*/ array<byte> iv) {
     iv = iv.Clone();
 
     ref var b = ref Ꮡb.DerefOrNull();
     return Ꮡ(new CBCDecrypter(b: b, iv: iv.Clone()));
 }
 
-[GoRecv] public static nint BlockSize(this ref CBCDecrypter c) {
+public static nint BlockSize(this ref CBCDecrypter c) {
     return ΔBlockSize;
 }
 
@@ -109,14 +109,14 @@ public static void CryptBlocks(this ж<CBCDecrypter> Ꮡc, slice<byte> dst, slic
     cryptBlocksDec(ref nonnil(ref c).b, Ꮡc.of(CBCDecrypter.Ꮡiv), dst, src);
 }
 
-[GoRecv] public static void SetIV(this ref CBCDecrypter x, slice<byte> iv) {
+public static void SetIV(this ref CBCDecrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }
     copy(x.iv[..], iv);
 }
 
-internal static void cryptBlocksDecGeneric(ref Block b, [GoArrayDims(16)] ж<array<byte>> Ꮡciv, slice<byte> dst, slice<byte> src) {
+internal static void cryptBlocksDecGeneric(ref Block b, /*[16]*/ ж<array<byte>> Ꮡciv, slice<byte> dst, slice<byte> src) {
     ref var civ = ref Ꮡciv.DerefOrNull();
 
     // For each block, we need to xor the decrypted data with the previous

@@ -6,7 +6,7 @@ namespace go.net.@internal;
 
 partial class socktest_package {
 
-[GoType("map[nint, Status]")] partial struct ΔSockets;
+partial struct ΔSockets /*map[nint, Status]*/;
 
 internal static ж<Status> sockso(this ж<Switch> Ꮡsw, nint s) {
     GoFrame ᒐ = default;

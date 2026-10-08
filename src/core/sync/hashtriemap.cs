@@ -37,7 +37,7 @@ partial class sync_package {
 // and [Map.CompareAndDelete] is a write operation when it returns deleted set to true.
 //
 // [the Go memory model]: https://go.dev/ref/mem
-[GoType] partial struct Map {
+partial struct Map {
     internal noCopy _;
     internal isync.HashTrieMap<any, any> m;
 }

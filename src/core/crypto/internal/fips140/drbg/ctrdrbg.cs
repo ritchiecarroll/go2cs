@@ -24,7 +24,7 @@ partial class drbg_package {
 // We support a narrow range of parameters that fit the needs of our RNG:
 // AES-256, no derivation function, no personalization string, no prediction
 // resistance, and 384-bit additional input.
-[GoType] partial struct Counter {
+partial struct Counter {
     // c is instantiated with K as the key and V as the counter.
     internal aes.CTR c;
     internal uint64 reseedCounter;
@@ -35,7 +35,7 @@ public static UntypedInt SeedSize => /* keySize + aes.BlockSize */ 48;
 internal static UntypedInt reseedInterval => /* 1 << 48 */ 281474976710656;
 internal static UntypedInt maxRequestSize => /* (1 << 19) / 8 */ 65536;
 
-public static ж<Counter> NewCounter([GoArrayDims(48)] ж<array<byte>> Ꮡentropy) {
+public static ж<Counter> NewCounter(/*[48]*/ ж<array<byte>> Ꮡentropy) {
     // CTR_DRBG_Instantiate_algorithm, per Section 10.2.1.3.1.
     fips140.RecordApproved();
     var K = new slice<byte>(keySize);
@@ -54,7 +54,7 @@ public static ж<Counter> NewCounter([GoArrayDims(48)] ж<array<byte>> Ꮡentrop
     return c;
 }
 
-internal static void update(this ж<Counter> Ꮡc, [GoArrayDims(48)] ж<array<byte>> Ꮡseed) {
+internal static void update(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡseed) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var seed = ref Ꮡseed.DerefOrNull();
 
@@ -72,7 +72,7 @@ internal static void update(this ж<Counter> Ꮡc, [GoArrayDims(48)] ж<array<by
     c.c = aes.NewCTR(cipher, V).Value;
 }
 
-internal static void increment([GoArrayDims(16)] ж<array<byte>> Ꮡv) {
+internal static void increment(/*[16]*/ ж<array<byte>> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     var hi = byteorder.BEUint64(v[..8]);
@@ -83,7 +83,7 @@ internal static void increment([GoArrayDims(16)] ж<array<byte>> Ꮡv) {
     byteorder.BEPutUint64(v[8..], lo);
 }
 
-public static void Reseed(this ж<Counter> Ꮡc, [GoArrayDims(48)] ж<array<byte>> Ꮡentropy, [GoArrayDims(48)] ж<array<byte>> ᏑadditionalInput) {
+public static void Reseed(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡentropy, /*[48]*/ ж<array<byte>> ᏑadditionalInput) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var entropy = ref Ꮡentropy.DerefOrNull();
     ref var additionalInput = ref ᏑadditionalInput.DerefOrNull();
@@ -97,7 +97,7 @@ public static void Reseed(this ж<Counter> Ꮡc, [GoArrayDims(48)] ж<array<byte
 }
 
 // Generate produces at most maxRequestSize bytes of random data in out.
-public static bool /*reseedRequired*/ Generate(this ж<Counter> Ꮡc, slice<byte> @out, [GoArrayDims(48)] ж<array<byte>> ᏑadditionalInput) {
+public static bool /*reseedRequired*/ Generate(this ж<Counter> Ꮡc, slice<byte> @out, /*[48]*/ ж<array<byte>> ᏑadditionalInput) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var additionalInput = ref ᏑadditionalInput.DerefOrNull();
 

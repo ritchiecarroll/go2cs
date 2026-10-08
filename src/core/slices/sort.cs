@@ -195,15 +195,15 @@ public static (nint, bool) BinarySearchFunc<S, E, T>(S x, T target, Func<E, T, n
     return (i, i < n && cmp(x[i], target) == 0);
 }
 
-[GoType("num:nint")] partial struct sortedHint;
+partial struct sortedHint /*num:nint*/;
 
 internal static sortedHint unknownHint => /* iota */ 0;
 internal static sortedHint increasingHint => 1;
 internal static sortedHint decreasingHint => 2;
 
-[GoType("num:uint64")] partial struct xorshift;
+partial struct xorshift /*num:uint64*/;
 
-[GoRecv] internal static uint64 Next(this ref xorshift r) {
+internal static uint64 Next(this ref xorshift r) {
     r ^= (xorshift)((r << (int)(13)));
     r ^= (xorshift)((r >> (int)(7)));
     r ^= (xorshift)((r << (int)(17)));

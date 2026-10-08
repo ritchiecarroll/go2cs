@@ -34,7 +34,7 @@ partial class pods_package {
 // data file (within the slice of input dirs handed to CollectPods).
 // The ProcessIDs field will be populated with the process ID of each
 // data file in the CounterDataFiles slice.
-[GoType] partial struct Pod {
+partial struct Pod {
     public @string MetaFile;
     public slice<@string> CounterDataFiles;
     public slice<nint> Origins;
@@ -79,13 +79,13 @@ public static slice<Pod> CollectPodsFromFiles(slice<@string> files, bool warn) {
     return collectPodsImpl(files, default!, warn);
 }
 
-[GoType] partial struct fileWithAnnotations {
+partial struct fileWithAnnotations {
     internal @string @file;
     internal nint origin;
     internal nint pid;
 }
 
-[GoType] partial struct protoPod {
+partial struct protoPod {
     internal @string mf;
     internal slice<fileWithAnnotations> elements;
 }

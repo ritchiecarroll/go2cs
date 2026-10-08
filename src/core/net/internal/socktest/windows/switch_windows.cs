@@ -7,7 +7,7 @@ using syscall = syscall_package;
 
 partial class socktest_package {
 
-[GoType("map[syscallꓸHandle, Status]")] partial struct ΔSockets;
+partial struct ΔSockets /*map[syscallꓸHandle, Status]*/;
 
 internal static ж<Status> sockso(this ж<Switch> Ꮡsw, syscallꓸHandle s) {
     GoFrame ᒐ = default;

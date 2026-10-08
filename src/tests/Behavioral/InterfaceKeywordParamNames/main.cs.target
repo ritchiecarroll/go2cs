@@ -4,17 +4,17 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface swapper {
+partial interface swapper {
     bool CompareAndSwap(any key, any old, any @new);
     @string Guard(@string @lock, @string @base, nint @event);
 }
 
-[GoType] partial struct cell {
+partial struct cell {
     internal any value;
     internal @string tag;
 }
 
-[GoRecv] internal static bool CompareAndSwap(this ref cell c, any key, any old, any @new) {
+internal static bool CompareAndSwap(this ref cell c, any key, any old, any @new) {
     if (!AreEqual(c.value, old)) {
         return false;
     }
@@ -23,11 +23,11 @@ partial class main_package {
     return true;
 }
 
-[GoRecv] internal static @string Guard(this ref cell c, @string @lock, @string @base, nint @event) {
+internal static @string Guard(this ref cell c, @string @lock, @string @base, nint @event) {
     return fmt.Sprintf("%s|%s|%d|%s"u8, @lock, @base, @event, c.tag);
 }
 
-[GoType] partial struct frozen {
+partial struct frozen {
     internal @string label;
 }
 

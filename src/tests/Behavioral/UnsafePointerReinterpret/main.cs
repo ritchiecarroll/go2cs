@@ -29,7 +29,7 @@ internal static partial uint64 zeroPair(@unsafe.Pointer x) {
     return ((ж<array<uint64>>)(uintptr)(x)).Value[0];
 }
 
-[GoType("num:uintptr")] partial struct linkaddr;
+partial struct linkaddr /*num:uintptr*/;
 
 internal static partial uintptr throughPointer(linkaddr v) {
     return (uintptr)((@unsafe.Pointer)(uintptr)v);

@@ -20,7 +20,7 @@ partial class cryptobyte_package {
 // BuilderContinuation, which is a function that writes the inner contents of
 // the value to a given Builder. See the documentation for BuilderContinuation
 // for details.
-[GoType] partial struct Builder {
+partial struct Builder {
     internal error err;
     internal slice<byte> result;
     internal bool fixedSize;
@@ -52,13 +52,13 @@ public static ж<Builder> NewFixedBuilder(slice<byte> buffer) {
 
 // SetError sets the value to be returned as the error from Bytes. Writes
 // performed after calling SetError are ignored.
-[GoRecv] public static void SetError(this ref Builder b, error err) {
+public static void SetError(this ref Builder b, error err) {
     b.err = err;
 }
 
 // Bytes returns the bytes written by the builder or an error if one has
 // occurred during building.
-[GoRecv] public static (slice<byte>, error) Bytes(this ref Builder b) {
+public static (slice<byte>, error) Bytes(this ref Builder b) {
     if (b.err != default!) {
         return (default!, b.err);
     }
@@ -67,7 +67,7 @@ public static ж<Builder> NewFixedBuilder(slice<byte> buffer) {
 
 // BytesOrPanic returns the bytes written by the builder or panics if an error
 // has occurred during building.
-[GoRecv] public static slice<byte> BytesOrPanic(this ref Builder b) {
+public static slice<byte> BytesOrPanic(this ref Builder b) {
     if (b.err != default!) {
         throw panic(b.err);
     }
@@ -75,38 +75,38 @@ public static ж<Builder> NewFixedBuilder(slice<byte> buffer) {
 }
 
 // AddUint8 appends an 8-bit value to the byte string.
-[GoRecv] public static void AddUint8(this ref Builder b, uint8 v) {
+public static void AddUint8(this ref Builder b, uint8 v) {
     b.add((byte)v);
 }
 
 // AddUint16 appends a big-endian, 16-bit value to the byte string.
-[GoRecv] public static void AddUint16(this ref Builder b, uint16 v) {
+public static void AddUint16(this ref Builder b, uint16 v) {
     b.add((byte)((v >> (int)(8))), (byte)v);
 }
 
 // AddUint24 appends a big-endian, 24-bit value to the byte string. The highest
 // byte of the 32-bit input value is silently truncated.
-[GoRecv] public static void AddUint24(this ref Builder b, uint32 v) {
+public static void AddUint24(this ref Builder b, uint32 v) {
     b.add((byte)((v >> (int)(16))), (byte)((v >> (int)(8))), (byte)v);
 }
 
 // AddUint32 appends a big-endian, 32-bit value to the byte string.
-[GoRecv] public static void AddUint32(this ref Builder b, uint32 v) {
+public static void AddUint32(this ref Builder b, uint32 v) {
     b.add((byte)((v >> (int)(24))), (byte)((v >> (int)(16))), (byte)((v >> (int)(8))), (byte)v);
 }
 
 // AddUint48 appends a big-endian, 48-bit value to the byte string.
-[GoRecv] public static void AddUint48(this ref Builder b, uint64 v) {
+public static void AddUint48(this ref Builder b, uint64 v) {
     b.add((byte)((v >> (int)(40))), (byte)((v >> (int)(32))), (byte)((v >> (int)(24))), (byte)((v >> (int)(16))), (byte)((v >> (int)(8))), (byte)v);
 }
 
 // AddUint64 appends a big-endian, 64-bit value to the byte string.
-[GoRecv] public static void AddUint64(this ref Builder b, uint64 v) {
+public static void AddUint64(this ref Builder b, uint64 v) {
     b.add((byte)((v >> (int)(56))), (byte)((v >> (int)(48))), (byte)((v >> (int)(40))), (byte)((v >> (int)(32))), (byte)((v >> (int)(24))), (byte)((v >> (int)(16))), (byte)((v >> (int)(8))), (byte)v);
 }
 
 // AddBytes appends a sequence of bytes to the byte string.
-[GoRecv] public static void AddBytes(this ref Builder b, slice<byte> v) {
+public static void AddBytes(this ref Builder b, slice<byte> v) {
     b.add(v.ꓸꓸꓸ);
 }
 
@@ -115,7 +115,7 @@ public static ж<Builder> NewFixedBuilder(slice<byte> buffer) {
 // BuildError wraps an error. If a BuilderContinuation panics with this value,
 // the panic will be recovered and the inner error will be returned from
 // Builder.Bytes.
-[GoType] partial struct BuildError {
+partial struct BuildError {
     public error Err;
 }
 
@@ -199,7 +199,7 @@ internal static void addLengthPrefixed(this ж<Builder> Ꮡb, nint lenLen, bool 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string pendingAsn1ChildTooLongˢ = "pending ASN.1 child too long"u8;
 
-[GoRecv] internal static void flushChild(this ref Builder b) {
+internal static void flushChild(this ref Builder b) {
     if (b.child == nil) {
         return;
     }
@@ -278,7 +278,7 @@ private static readonly @string pendingAsn1ChildTooLongˢ = "pending ASN.1 child
 private static readonly @string cryptobyteLengthOverflowˢ = "cryptobyte: length overflow"u8;
 private static readonly @string cryptobyteBuilderIsˢ = "cryptobyte: Builder is exceeding its fixed-size buffer"u8;
 
-[GoRecv] internal static void add(this ref Builder b, params ꓸꓸꓸbyte bytesʗp) {
+internal static void add(this ref Builder b, params ꓸꓸꓸbyte bytesʗp) {
     var bytes = bytesʗp.sslice();
 
     if (b.err != default!) {
@@ -300,7 +300,7 @@ private static readonly @string cryptobyteBuilderIsˢ = "cryptobyte: Builder is 
 // Unwrite rolls back non-negative n bytes written directly to the Builder.
 // An attempt by a child builder passed to a continuation to unwrite bytes
 // from its parent will panic.
-[GoRecv] public static void Unwrite(this ref Builder b, nint n) {
+public static void Unwrite(this ref Builder b, nint n) {
     if (b.err != default!) {
         return;
     }
@@ -321,7 +321,7 @@ private static readonly @string cryptobyteBuilderIsˢ = "cryptobyte: Builder is 
 }
 
 // A MarshalingValue marshals itself into a Builder.
-[GoType] partial interface MarshalingValue {
+partial interface MarshalingValue {
     // Marshal is called by Builder.AddValue. It receives a pointer to a builder
     // to marshal itself into. It may return an error that occurred during
     // marshaling, such as unset or invalid values.

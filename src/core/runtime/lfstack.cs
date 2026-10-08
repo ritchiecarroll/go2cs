@@ -10,7 +10,7 @@ using @internal.runtime;
 
 partial class runtime_package {
 
-[GoType("num:uint64")] partial struct lfstack;
+partial struct lfstack /*num:uint64*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string lfstackPushˢ = "lfstack.push"u8;

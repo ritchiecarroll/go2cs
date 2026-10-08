@@ -13,14 +13,14 @@ using @internal.runtime;
 
 partial class runtime_package {
 
-[GoType] partial struct Δsliceᴛ {
+partial struct Δsliceᴛ {
     internal @unsafe.Pointer Δarray;
     internal nint len;
     internal nint cap;
 }
 
 // A notInHeapSlice is a slice backed by internal/runtime/sys.NotInHeap memory.
-[GoType] partial struct notInHeapSlice {
+partial struct notInHeapSlice {
     internal ж<notInHeap> Δarray;
     internal nint len;
     internal nint cap;

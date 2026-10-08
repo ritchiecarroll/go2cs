@@ -72,13 +72,13 @@ using static go.vendor.golang.org.x.net.route_package;
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/route/address.go", "address.cs", "ABg4kKSCgqaCgoKUkoKUgoKClIKCgoKUgoKClKaCgpSCgpSCqgARIKKClIKUgpSCgpSCgoKCgpSCgpQABxKQpIKmgoKClIKCggAIFJCkgqaCgoKUgoKCgpSokpiUgpSCgoKClIKkgpSCgoKUgoKUgsqCgoKmpMwAFSiCpoKmlIKYyJSCgqSCgpSUpIKCpIKSlJQACxiQpIKCpoKCgpSClIKCpoKClIKmgoKClIK0grSCtIK2qqKCgpSCgpSCtIKClIK0goKUgrSCgpSCtqaCgoKCgpSClIKClIKCgpSoooKCgpSUgoKUpIKClIKCgpTIgoKUgoKClO4=")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/route/binary.go", "binary.cs", "ABs8goKmgoKCpoKCpoKCgoKCpoKC3IKCpoKCgqaCgqaCgoKCgqaCgg==")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/route/interface.go", "interface.cs", "AB5EkAANHpAADR6Q")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/route/interface_classic.go", "interface_classic.cs", "AAscgoKUgoKUgoKUAAgSgoKUgoKmgoKUgoKU3IKUlIKCgpQ=")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/route/interface_multicast.go", "interface_multicast.cs", "AAgSgoKUgoKU7oKCgpQ=")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/route/interface_classic.go", "interface_classic.cs", "AAscgoKUgoKUgoKUAAgSgoKUgoKmgoKUgoKU3IKUlIKCgpQ=", "", "", "24=Uint32/1/1/4,Uint16/1/1/5;50=Uint32/1/1/3")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/route/interface_multicast.go", "interface_multicast.cs", "AAgSgoKUgoKU7oKCgpQ=", "", "", "17=Uint32/1/1/3,Uint16/1/1/4")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/route/message.go", "message.cs", "ABpCooKUgpKCgoKClIKUgoKUgIKUgoKUgpS2poKU")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/route/route.go", "route.cs", "ABMsgoKCgoIAOHiSAAoqAAoCgoKCgpKAgqSClIKAiLKClKQ=")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/route/route_classic.go", "route_classic.cs", "AAscgoKClIKmlIKCgpSUgoKCgoKCgpSClKaCgpSCgpQACRSCgpSCgoKU")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/route/route_classic.go", "route_classic.cs", "AAscgoKClIKmlIKCgpSUgoKCgoKCgpSClKaCgpSCgpQACRSCgpSCgoKU", "", "", "53=Uint32/1/3/3,Uint16/1/1/4,Uint32/2/3/5,Uint32/3/3/6")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/route/sys.go", "sys.cs", "ABJEgoKU")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/route/sys_darwin.go", "sys_darwin.cs", "AAkSgpSkAAkUkKaSAAsckKaSAAYQgoKSgpKCkoKSgpKCkoKk")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/route/sys_darwin.go", "sys_darwin.cs", "AAkSgpSkAAkUkKaSAAsckKaSAAYQgoKSgpKCkoKSgpKCkoKk", "", "", "33=Uint32/1/1/2;52=Uint32/1/1/3")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/route/syscall.go", "syscall.cs", "AAoY")]
 // </GoSourcePositionMaps>
 
@@ -88,7 +88,7 @@ namespace go.vendor.golang.org.x.net;
 public static partial class route_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

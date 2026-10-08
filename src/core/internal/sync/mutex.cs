@@ -19,7 +19,7 @@ partial class sync_package {
 // A Mutex is a mutual exclusion lock.
 //
 // See package [sync.Mutex] documentation.
-[GoType] partial struct Mutex {
+partial struct Mutex {
     internal int32 state;
     internal uint32 sema;
 }

@@ -86,7 +86,7 @@ internal static (ж<netFD> fd, error err) socket(context.Context ctx, @string ne
     return (fd, default!);
 }
 
-[GoRecv] internal static @string ctrlNetwork(this ref netFD fd) {
+internal static @string ctrlNetwork(this ref netFD fd) {
     var exprᴛ1 = fd.net;
     if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8) {
         return fd.net;

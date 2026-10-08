@@ -74,7 +74,7 @@ internal static nint between(nint lo, nint hi, params ꓸꓸꓸnint valsʗp) {
     return n;
 }
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint @base;
 }
 

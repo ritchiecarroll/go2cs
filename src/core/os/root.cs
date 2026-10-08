@@ -66,7 +66,7 @@ public static (ж<File>, error) OpenInRoot(@string dir, @string name) {
 //     escape the root.
 //   - When GOOS=plan9 or GOOS=js, Root does not track directories across renames.
 //     On these platforms, a Root references a directory name, not a file descriptor.
-[GoType] partial struct Root {
+partial struct Root {
     internal ж<root> root;
 }
 
@@ -82,13 +82,13 @@ public static (ж<Root>, error) OpenRoot(@string name) {
 // Name returns the name of the directory presented to OpenRoot.
 //
 // It is safe to call Name after [Close].
-[GoRecv] public static @string Name(this ref Root r) {
+public static @string Name(this ref Root r) {
     return r.root.Name();
 }
 
 // Close closes the Root.
 // After Close is called, methods on Root return errors.
-[GoRecv] public static error Close(this ref Root r) {
+public static error Close(this ref Root r) {
     return r.root.Close();
 }
 
@@ -175,7 +175,7 @@ public static (FileInfo, error) Lstat(this ж<Root> Ꮡr, @string name) {
     return rootStat(ref (Ꮡr).DerefOrNull(), name, true);
 }
 
-[GoRecv] internal static void logOpen(this ref Root r, @string name) {
+internal static void logOpen(this ref Root r, @string name) {
     {
         var log = testlog.Logger(); if (log != default!) {
             // This won't be right if r's name has changed since it was opened,
@@ -185,7 +185,7 @@ public static (FileInfo, error) Lstat(this ж<Root> Ꮡr, @string name) {
     }
 }
 
-[GoRecv] internal static void logStat(this ref Root r, @string name) {
+internal static void logStat(this ref Root r, @string name) {
     {
         var log = testlog.Logger(); if (log != default!) {
             // This won't be right if r's name has changed since it was opened,
@@ -269,7 +269,7 @@ public static fs.FS FS(this ж<Root> Ꮡr) {
     return new rootFSжFS(Ꮡr.Reinterpret<Root, rootFS>());
 }
 
-[GoType("Root")] partial struct rootFS;
+partial struct rootFS /*Root*/;
 
 internal static (fs.File, error) Open(this ж<rootFS> Ꮡrfs, @string name) {
     var r = Ꮡrfs.Reinterpret<rootFS, Root>();

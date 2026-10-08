@@ -2,7 +2,7 @@ namespace go;
 
 partial class ForeignPtrEmbedIfaceLib_package {
 
-[GoType] partial struct Meter {
+partial struct Meter {
     internal nint total;
 }
 
@@ -17,19 +17,19 @@ public static nint Total(this ж<Meter> Ꮡm) {
     return p.Value;
 }
 
-[GoType] partial struct Gauge {
+partial struct Gauge {
     internal nint value;
 }
 
-[GoRecv] public static void Set(this ref Gauge g, nint v) {
+public static void Set(this ref Gauge g, nint v) {
     g.value = v;
 }
 
-[GoRecv] public static nint Get(this ref Gauge g) {
+public static nint Get(this ref Gauge g) {
     return g.value;
 }
 
-[GoType] partial struct Pair {
+partial struct Pair {
     public partial ref ж<Meter> Meter { get; }
     public partial ref ж<Gauge> Gauge { get; }
 }

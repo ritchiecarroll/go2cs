@@ -40,7 +40,7 @@ internal static array<byte> bitCount = new byte[]{
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
 }.array();
 
-[GoType("num:nint")] partial struct quantIndex;
+partial struct quantIndex /*num:nint*/;
 
 internal static quantIndex quantIndexLuminance => /* iota */ 0;
 internal static quantIndex quantIndexChrominance => 1;
@@ -73,7 +73,7 @@ internal static array<array<byte>> unscaledQuant = new array<byte>[]{
         99, 99, 99, 99, 99, 99, 99, 99}.array()
 }.array();
 
-[GoType("num:nint")] partial struct huffIndex;
+partial struct huffIndex /*num:nint*/;
 
 internal static huffIndex huffIndexLuminanceDC => /* iota */ 0;
 internal static huffIndex huffIndexLuminanceAC => 1;
@@ -82,7 +82,7 @@ internal static huffIndex huffIndexChrominanceAC => 3;
 internal static huffIndex nHuffIndex => 4;
 
 // huffmanSpec specifies a Huffman encoding.
-[GoType] partial struct huffmanSpec {
+partial struct huffmanSpec {
     // count[i] is the number of codes of length i+1 bits.
     internal array<byte> count = new(16);
     // value[i] is the decoded value of the i'th codeword.
@@ -166,9 +166,9 @@ internal static array<huffmanSpec> theHuffmanSpec = new huffmanSpec[]{
     )
 }.array();
 
-[GoType("[]uint32")] partial struct huffmanLUT;
+partial struct huffmanLUT /*[]uint32*/;
 
-[GoRecv] internal static void init(this ref huffmanLUT h, huffmanSpec s) {
+internal static void init(this ref huffmanLUT h, huffmanSpec s) {
     s = s.ΔClone();
 
     nint maxValue = 0;
@@ -204,7 +204,7 @@ internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Valu
 }
 
 // writer is a buffered writer.
-[GoType] partial interface writer :
+partial interface writer :
     io.Writer,
     io.ByteWriter
 {
@@ -212,7 +212,7 @@ internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Valu
 }
 
 // encoder encodes an image to the JPEG format.
-[GoType] partial struct encoder {
+partial struct encoder {
     // w is the writer to write to. err is the first error encountered during
     // writing. All attempted writes after the first error become no-ops.
     internal writer w;
@@ -225,21 +225,21 @@ internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Valu
     internal array<array<byte>> quant = new(nQuantIndex, () => new(64));
 }
 
-[GoRecv] internal static void flush(this ref encoder e) {
+internal static void flush(this ref encoder e) {
     if (e.err != default!) {
         return;
     }
     e.err = e.w.Flush();
 }
 
-[GoRecv] internal static void write(this ref encoder e, slice<byte> p) {
+internal static void write(this ref encoder e, slice<byte> p) {
     if (e.err != default!) {
         return;
     }
     (_, e.err) = e.w.Write(p);
 }
 
-[GoRecv] internal static void writeByte(this ref encoder e, byte b) {
+internal static void writeByte(this ref encoder e, byte b) {
     if (e.err != default!) {
         return;
     }
@@ -248,7 +248,7 @@ internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Valu
 
 // emit emits the least significant nBits bits of bits to the bit-stream.
 // The precondition is bits < 1<<nBits && nBits <= 16.
-[GoRecv] internal static void emit(this ref encoder e, uint32 bits, uint32 nBits) {
+internal static void emit(this ref encoder e, uint32 bits, uint32 nBits) {
     nBits += e.nBits;
     bits.LshAssign((uint64)(32 - nBits));
     bits |= (uint32)(e.bits);
@@ -265,14 +265,14 @@ internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Valu
 }
 
 // emitHuff emits the given value with the given Huffman encoder.
-[GoRecv] internal static void emitHuff(this ref encoder e, huffIndex h, int32 value) {
+internal static void emitHuff(this ref encoder e, huffIndex h, int32 value) {
     var x = theHuffmanLUT[h][value];
     e.emit((uint32)(x & ((1 << (int)(24)) - 1)), (x >> (int)(24)));
 }
 
 // emitHuffRLE emits a run of runLength copies of value encoded with the given
 // Huffman encoder.
-[GoRecv] internal static void emitHuffRLE(this ref encoder e, huffIndex h, int32 runLength, int32 value) {
+internal static void emitHuffRLE(this ref encoder e, huffIndex h, int32 runLength, int32 value) {
     var (a, b) = (value, value);
     if (a < 0) {
         (a, b) = (-value, value - 1);
@@ -290,7 +290,7 @@ internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Valu
 }
 
 // writeMarkerHeader writes the header for a marker with the given length.
-[GoRecv] internal static void writeMarkerHeader(this ref encoder e, uint8 marker, nint markerlen) {
+internal static void writeMarkerHeader(this ref encoder e, uint8 marker, nint markerlen) {
     e.buf[0] = 0xff;
     e.buf[1] = marker;
     e.buf[2] = (uint8)((markerlen >> (int)(8)));
@@ -299,7 +299,7 @@ internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Valu
 }
 
 // writeDQT writes the Define Quantization Table marker.
-[GoRecv] internal static void writeDQT(this ref encoder e) {
+internal static void writeDQT(this ref encoder e) {
     const nint markerlen = /* 2 + int(nQuantIndex)*(1+blockSize) */ 132;
     e.writeMarkerHeader(dqtMarker, markerlen);
     foreach (var (i, _) in e.quant) {
@@ -309,7 +309,7 @@ internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Valu
 }
 
 // writeSOF0 writes the Start Of Frame (Baseline Sequential) marker.
-[GoRecv] internal static void writeSOF0(this ref encoder e, image.Point size, nint nComponent) {
+internal static void writeSOF0(this ref encoder e, image.Point size, nint nComponent) {
     nint markerlen = 8 + 3 * nComponent;
     e.writeMarkerHeader(sof0Marker, markerlen);
     e.buf[0] = 8; // 8-bit color.
@@ -335,7 +335,7 @@ internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Valu
 }
 
 // writeDHT writes the Define Huffman Table marker.
-[GoRecv] internal static void writeDHT(this ref encoder e, nint nComponent) {
+internal static void writeDHT(this ref encoder e, nint nComponent) {
     nint markerlen = 2;
     var specs = theHuffmanSpec[..];
     if (nComponent == 1) {
@@ -360,7 +360,7 @@ internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Valu
 // writeBlock writes a block of pixel data using the given quantization table,
 // returning the post-quantized DC value of the DCT-transformed block. b is in
 // natural (not zig-zag) order.
-[GoRecv] internal static int32 writeBlock(this ref encoder e, ж<block> Ꮡb, quantIndex q, int32 prevDC) {
+internal static int32 writeBlock(this ref encoder e, ж<block> Ꮡb, quantIndex q, int32 prevDC) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     fdct(Ꮡb);
@@ -516,7 +516,7 @@ internal static slice<byte> sosHeaderYCbCr = new byte[]{
 }.slice();
 
 // writeSOS writes the StartOfScan marker.
-[GoRecv] internal static void writeSOS(this ref encoder e, image.Image m) {
+internal static void writeSOS(this ref encoder e, image.Image m) {
     switch (m.type()) {
     case ж<image.Gray>: {
         e.write(sosHeaderY);
@@ -583,7 +583,7 @@ public static UntypedInt DefaultQuality => 75;
 
 // Options are the encoding parameters.
 // Quality ranges from 1 to 100 inclusive, higher is better.
-[GoType] partial struct Options {
+partial struct Options {
     public nint Quality;
 }
 

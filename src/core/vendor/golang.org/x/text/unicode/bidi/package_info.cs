@@ -54,8 +54,8 @@ using static go.vendor.golang.org.x.text.unicode.bidi_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bidi.go", "bidi.cs", "ACaKAQALAoIADzIACQKClIKChIKCgoKClIKCgpKmgpSCpgACEPKCggACEPKCgqyyrLIAAhDSgoKCgoKmpoKEgoSmgoKUlIKCgoKUgqaCgoKosoKWgpSCgpSCgpaEgqqigoKClIKCAAsesqiSqJLKABAkkqiSAAIS4qqirLKCgoSCgoKogpSErLKCgoKCgoKUpg==", "70-72:1")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bracket.go", "bracket.cs", "AC5wgsyAooCigAACFAAIAtyCgpSCABxKogAEFPaWlJSWkoKWqIKigoKUlIKUpgAFfAA5ApakpAAEFgAJAoKCgoKUgpSmqqKCgILIqKS8gpaUgpQABhCmgoKEgoKClJaCgoKUupKC")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/core.go", "core.cs", "ADd6soKCpgAXSPKCgIKkgIKkgIKkgIKmAAYSgqaAqMLMgqiCqAAHFKaoqKiWzAACJAAPAoKEgpaChICCgoKAgpKCgIKCgtiCAAkW0paCgIKCkoKCgtqWpKQAEh6AooCigKSCgoKCpoKmgqaCqJKCtoSUlIKGkpSCgoKogpSmloKC3JSkpLaCyoKkgt6SkqaCgpSClKqElLKSggADEIKCgoKmgsIADyKApIKClKrCgoKCqIKClIKCloKCgqaCloKCppIACRzWqIKCgsrMgoKCgIKClO6CggAOIoKCgoKCgpKCzKKUgpaCgpSCgoKmgqa6goK6opSCgoKSgqaC3qaEopaClqiilIKCpoKUgoKogpTKlobakoK4goK6poSChJKUlJKkyJS2AAUQooKCvtKCgoKCgqa0qsKCgoKCpgAFFOKCgoSCgpSSgqaUuIKUqLKWgoKCqISEooKClJSEgoKClKamrsKCgoLegpSCggAEIgAWGIS6gpSWgpKU3oKCgpKUppYAAiQADwKEqqKEgoKChIKUlKyylILMgoKCgpSCqIKClIKCgpaCprqqopSkqJKUpKiSgpSmgoKUgoKmpoKGlKaCgoKClJSClKaCgpSCtramgoKUgpQ=")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bracket.go", "bracket.cs", "AC5wgsyAooCigAACFAAIAtyCgpSCABxKogAEFPaWlJSWkoKWqIKigoKUlIKUpgAFfAA5ApakpAAEFgAJAoKCgoKUgpSmqqKCgILIqKS8gpaUgpQABhCmgoKEgoKClJaCgoKUupKC", "", "", "74=New/1/1/2")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/core.go", "core.cs", "ADd6soKCpgAXSPKCgIKkgIKkgIKkgIKmAAYSgqaAqMLMgqiCqAAHFKaoqKiWzAACJAAPAoKEgpaChICCgoKAgpKCgIKCgtiCAAkW0paCgIKCkoKCgtqWpKQAEh6AooCigKSCgoKCpoKmgqaCqJKCtoSUlIKGkpSCgoKogpSmloKC3JSkpLaCyoKkgt6SkqaCgpSClKqElLKSggADEIKCgoKmgsIADyKApIKClKrCgoKCqIKClIKCloKCgqaCloKCppIACRzWqIKCgsrMgoKCgIKClO6CggAOIoKCgoKCgpKCzKKUgpaCgpSCgoKmgqa6goK6opSCgoKSgqaC3qaEopaClqiilIKCpoKUgoKogpTKlobakoK4goK6poSChJKUlJKkyJS2AAUQooKCvtKCgoKCgqa0qsKCgoKCpgAFFOKCgoSCgpSSgqaUuIKUqLKWgoKCqISEooKClJSEgoKClKamrsKCgoLegpSCggAEIgAWGIS6gpSWgpKU3oKCgpKUppYAAiQADwKEqqKEgoKChIKUlKyylILMgoKCgpSCqIKClIKCgpaCprqqopSkqJKUpKiSgpSmgoKUgoKmpoKGlKaCgoKClJSClKaCgpSCtramgoKUgpQ=", "", "", "490=maxLevel/1/2/5,typeForLevel/1/2/5,maxLevel/2/2/6,typeForLevel/2/2/6")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/prop.go", "prop.cs", "ABAeAAEaAAsCgoKUqJCooKaSAAsGAAsakoKCAAIqABICgpS0pJKUgoKClKSSlIKCgpSCgoKClKSSlIKCgpSCgoKClIKCgoKUtqyygpS0pJKUgoKClKSSlIKCgpSCgoKClKSSlIKCgpSCgoKClIKCgoKUtg==")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/tables15.0.0.go", "tables15.0.0.cs", "AAwYvrKClKSkopSCgoKUpJKUgoKClIKCgoKUpJKUgoKClIKCgoKUgoKCgpS2qqKCkpSCkpSCkpSCkpSssoKUpKSilIKCgpSkkpSCgoKUgoKCgpSkkpSCgoKUgoKCgpSCgoKClLaqooKSlIKSlIKSlIKSlOyCqJKUAIkCDADHC+Ia")]
 // </GoSourcePositionMaps>
@@ -66,7 +66,7 @@ namespace go.vendor.golang.org.x.text.unicode;
 public static partial class bidi_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

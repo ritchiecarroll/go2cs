@@ -12,11 +12,11 @@ using ꓸꓸꓸжPoint = Span<ж<edwards25519_package.Point>>;
 partial class edwards25519_package {
 
 // Point types.
-[GoType] partial struct projP1xP1 {
+partial struct projP1xP1 {
     public field.Element X, Y, Z, T;
 }
 
-[GoType] partial struct projP2 {
+partial struct projP2 {
     public field.Element X, Y, Z;
 }
 
@@ -26,7 +26,7 @@ partial class edwards25519_package {
 // are allowed to alias.
 //
 // The zero value is NOT valid, and it may be used only as a receiver.
-[GoType] partial struct Point {
+partial struct Point {
     // Make the type not comparable (i.e. used with == or as a map key), as
     // equivalent points can be represented by different Go values.
     internal incomparable _;
@@ -35,7 +35,7 @@ partial class edwards25519_package {
     internal field.Element x, y, z, t;
 }
 
-[GoType("[0]Action")] partial struct incomparable;
+partial struct incomparable /*[0]Action*/;
 
 internal static void checkInitialized(params ꓸꓸꓸжPoint pointsʗp) {
     var points = pointsʗp.sslice();
@@ -47,11 +47,11 @@ internal static void checkInitialized(params ꓸꓸꓸжPoint pointsʗp) {
     }
 }
 
-[GoType] partial struct projCached {
+partial struct projCached {
     public field.Element YplusX, YminusX, Z, T2d;
 }
 
-[GoType] partial struct affineCached {
+partial struct affineCached {
     public field.Element YplusX, YminusX, T2d;
 }
 
@@ -127,7 +127,7 @@ public static slice<byte> Bytes(this ж<Point> Ꮡv) {
     return Ꮡv.bytes(Ꮡbuf);
 }
 
-internal static slice<byte> bytes(this ж<Point> Ꮡv, [GoArrayDims(32)] ж<array<byte>> Ꮡbuf) {
+internal static slice<byte> bytes(this ж<Point> Ꮡv, /*[32]*/ ж<array<byte>> Ꮡbuf) {
     checkInitialized(Ꮡv);
     ref var zInv = ref heap(new field.Element(), out var ᏑzInv);
     ref var x = ref heap(new field.Element(), out var Ꮡx);
@@ -191,7 +191,7 @@ public static (ж<Point>, error) SetBytes(this ж<Point> Ꮡv, slice<byte> x) {
     return (Ꮡv, default!);
 }
 
-internal static slice<byte> copyFieldElement([GoArrayDims(32)] ж<array<byte>> Ꮡbuf, ж<field.Element> Ꮡv) {
+internal static slice<byte> copyFieldElement(/*[32]*/ ж<array<byte>> Ꮡbuf, ж<field.Element> Ꮡv) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
     ref var v = ref Ꮡv.DerefOrNull();
 

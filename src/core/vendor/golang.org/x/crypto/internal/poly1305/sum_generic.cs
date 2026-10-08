@@ -27,14 +27,14 @@ partial class poly1305_package {
 //
 // All the complexity is about doing performant constant-time math on numbers
 // larger than any available numeric type.
-internal static void sumGeneric([GoArrayDims(16)] ж<array<byte>> Ꮡout, slice<byte> msg, [GoArrayDims(32)] ж<array<byte>> Ꮡkey) {
+internal static void sumGeneric(/*[16]*/ ж<array<byte>> Ꮡout, slice<byte> msg, /*[32]*/ ж<array<byte>> Ꮡkey) {
     ref var h = ref heap<macGeneric>(out var Ꮡh);
     h = newMACGeneric(Ꮡkey);
     Ꮡh.Write(msg);
     h.Sum(Ꮡout);
 }
 
-internal static macGeneric newMACGeneric([GoArrayDims(32)] ж<array<byte>> Ꮡkey) {
+internal static macGeneric newMACGeneric(/*[32]*/ ж<array<byte>> Ꮡkey) {
     var m = new macGeneric(nil);
     initialize(Ꮡkey, ref m.macState);
     return m.ΔClone();
@@ -42,7 +42,7 @@ internal static macGeneric newMACGeneric([GoArrayDims(32)] ж<array<byte>> Ꮡke
 
 // macState holds numbers in saturated 64-bit little-endian limbs. That is,
 // the value of [x0, x1, x2] is x[0] + x[1] * 2⁶⁴ + x[2] * 2¹²⁸.
-[GoType] partial struct macState {
+partial struct macState {
     // h is the main accumulator. It is to be interpreted modulo 2¹³⁰ - 5, but
     // can grow larger during and after rounds. It must, however, remain below
     // 2 * (2¹³⁰ - 5).
@@ -52,7 +52,7 @@ internal static macGeneric newMACGeneric([GoArrayDims(32)] ж<array<byte>> Ꮡke
     internal array<uint64> s = new(2);
 }
 
-[GoType] partial struct macGeneric {
+partial struct macGeneric {
     internal partial ref macState macState { get; }
     internal array<byte> buffer = new(TagSize);
     internal nint offset;
@@ -89,7 +89,7 @@ internal static (nint, error) Write(this ж<macGeneric> Ꮡh, slice<byte> p) {
 // Sum flushes the last incomplete chunk from the buffer, if any, and generates
 // the MAC output. It does not modify its state, in order to allow for multiple
 // calls to Sum, even if no Write is allowed after Sum.
-[GoRecv] internal static void Sum(this ref macGeneric h, [GoArrayDims(16)] ж<array<byte>> Ꮡout) {
+internal static void Sum(this ref macGeneric h, /*[16]*/ ж<array<byte>> Ꮡout) {
     var state = h.macState.ΔClone();
     if (h.offset > 0) {
         updateGeneric(ref state, h.buffer.slice(0, h.offset));
@@ -105,7 +105,7 @@ internal static UntypedInt rMask0 => 0x0FFFFFFC0FFFFFFF;
 internal static UntypedInt rMask1 => 0x0FFFFFFC0FFFFFFC;
 
 // initialize loads the 256-bit key into the two 128-bit secret values r and s.
-internal static void initialize([GoArrayDims(32)] ж<array<byte>> Ꮡkey, ref macState m) {
+internal static void initialize(/*[32]*/ ж<array<byte>> Ꮡkey, ref macState m) {
     ref var key = ref Ꮡkey.DerefOrNull();
 
     m.r[0] = (uint64)(binary.LittleEndian.Uint64(key[0..8]) & (uint64)rMask0);
@@ -116,7 +116,7 @@ internal static void initialize([GoArrayDims(32)] ж<array<byte>> Ꮡkey, ref ma
 
 // uint128 holds a 128-bit number as two 64-bit limbs, for use with the
 // bits.Mul64 and bits.Add64 intrinsics.
-[GoType] partial struct uint128 {
+partial struct uint128 {
     internal uint64 lo, hi;
 }
 
@@ -268,7 +268,7 @@ internal static UntypedInt p2 => 0x0000000000000003;
 // finalize completes the modular reduction of h and computes
 //
 //	out = h + s  mod  2¹²⁸
-internal static void finalize([GoArrayDims(16)] ж<array<byte>> Ꮡout, ref array<uint64> h, ref array<uint64> s) {
+internal static void finalize(/*[16]*/ ж<array<byte>> Ꮡout, ref array<uint64> h, ref array<uint64> s) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var (h0, h1, h2) = (h[0], h[1], h[2]);

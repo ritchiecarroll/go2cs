@@ -6,7 +6,7 @@ using runtime = runtime_package;
 
 partial class main_package {
 
-[GoType("num:int8")] partial struct count;
+partial struct count /*num:int8*/;
 
 internal static nint one = 1;
 internal static int64 big = 1099511627776L;

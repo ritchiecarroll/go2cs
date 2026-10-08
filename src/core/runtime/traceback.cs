@@ -26,7 +26,7 @@ internal const bool usesLR = /* sys.MinFrameSize > 0 */ false;
 internal static UntypedInt tracebackInnerFrames => 50;
 internal static UntypedInt tracebackOuterFrames => 50;
 
-[GoType("num:uint8")] partial struct unwindFlags;
+partial struct unwindFlags /*num:uint8*/;
 
 internal static unwindFlags unwindPrintErrors => /* 1 << iota */ 1;
 internal static unwindFlags unwindSilentErrors => 2;
@@ -52,7 +52,7 @@ internal static unwindFlags unwindJumpStack => 8;
 // returned by value and can contain pointers. We could potentially hide that
 // we're doing that in trivial methods that are inlined into the caller that has
 // the stack allocation, but that's fragile.
-[GoType] partial struct unwinder {
+partial struct unwinder {
     // frame is the current physical stack frame, or all 0s if
     // there is no frame.
     internal stkframe frame;
@@ -183,7 +183,7 @@ internal static void initAt(this ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, ui
     Ꮡu.resolveInternal(true, isSyscall);
 }
 
-[GoRecv] internal static bool valid(this ref unwinder u) {
+internal static bool valid(this ref unwinder u) {
     return u.frame.pc != 0;
 }
 
@@ -481,7 +481,7 @@ internal static readonly @string tracebackDidNotUnwindˢ = "traceback did not un
 // finishInternal is an unwinder-internal helper called after the stack has been
 // exhausted. It sets the unwinder to an invalid state and checks that it
 // successfully unwound the entire stack.
-[GoRecv] internal static void finishInternal(this ref unwinder u) {
+internal static void finishInternal(this ref unwinder u) {
     u.frame.pc = 0;
     // Note that panic != nil is okay here: there can be leftover panics,
     // because the defers on the panic stack do not nest in frame order as
@@ -541,7 +541,7 @@ internal static readonly @string tracebackDidNotUnwindˢ = "traceback did not un
 // frame.pc can be at function entry when the frame is initialized without
 // actually running code, like in runtime.mstart, in which case this returns
 // frame.pc because that's the best we can do.
-[GoRecv] internal static uintptr symPC(this ref unwinder u) {
+internal static uintptr symPC(this ref unwinder u) {
     if ((unwindFlags)(u.flags & unwindTrap) == 0 && u.frame.pc > u.frame.fn.entry()) {
         // Regular call.
         return u.frame.pc - 1;
@@ -554,7 +554,7 @@ internal static readonly @string tracebackDidNotUnwindˢ = "traceback did not un
 // the registered cgo unwinder. It returns the number of PCs written to pcBuf.
 // If the current frame is not a cgo frame or if there's no registered cgo
 // unwinder, it returns 0.
-[GoRecv] internal static nint cgoCallers(this ref unwinder u, slice<uintptr> pcBuf) {
+internal static nint cgoCallers(this ref unwinder u, slice<uintptr> pcBuf) {
     if (cgoTraceback == nil || u.frame.fn.funcID != abi.FuncID_cgocallback || u.cgoCtxt < 0) {
         // We don't have a cgo unwinder (typical case), or we do but we're not
         // in a cgo frame or we're out of cgo context.
@@ -1500,7 +1500,7 @@ internal static @unsafe.Pointer cgoContext;
 internal static @unsafe.Pointer cgoSymbolizer;
 
 // cgoTracebackArg is the type passed to cgoTraceback.
-[GoType] partial struct cgoTracebackArg {
+partial struct cgoTracebackArg {
     internal uintptr context;
     internal uintptr sigContext;
     internal ж<uintptr> buf;
@@ -1508,12 +1508,12 @@ internal static @unsafe.Pointer cgoSymbolizer;
 }
 
 // cgoContextArg is the type passed to the context function.
-[GoType] partial struct cgoContextArg {
+partial struct cgoContextArg {
     internal uintptr context;
 }
 
 // cgoSymbolizerArg is the type passed to cgoSymbolizer.
-[GoType] partial struct cgoSymbolizerArg {
+partial struct cgoSymbolizerArg {
     internal uintptr pc;
     internal ж<byte> @file;
     internal uintptr lineno;

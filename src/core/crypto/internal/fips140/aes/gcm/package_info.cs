@@ -58,7 +58,7 @@ using static go.crypto.@internal.fips140.aes.gcm_package;
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_generic.go", "gcm_generic.cs", "AA0agqKCgoSEgoKmoqKCgoSChIKCgpaErAALDoKClIKCvtKEgoKEgoKWgoKCvMKCqsKCgoKCgoI=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_noasm.go", "gcm_noasm.cs", "AAgS2KSCpoI=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_nonces.go", "gcm_nonces.cs", "ABEwAAgCgpSClIKUgpSClIKCAAIS4oKClAAKFoCkgKSigpaClIKClIKUloKUgpSEgqaCggACENKCgpQABxCApICkooKWloKUgpSEgqaCgqqigoKUAAkUgKSApKKCloKUgpSWgpSClISCpoKCrsKCgpQACRSApICkooKWgpSClJaClIKUhIKmgoI=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/ghash.go", "ghash.cs", "ABg20oKCgq4ACAb+uISCgpaCgpaCqJKCgqikqLKWgoIABxKClqbMkoSCgoK6goKCgoKohIKCqKqigoKCgryigoSCgoI=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/ghash.go", "ghash.cs", "ABg20oKCgq4ACAb+uISCgpaCgpaCqJKCgqikqLKWgoIABxKClqbMkoSCgoK6goKCgoKohIKCqKqigoKCgryigoSCgoI=", "", "", "54=BEUint64/1/2/1,BEUint64/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140.aes;
@@ -67,7 +67,7 @@ namespace go.crypto.@internal.fips140.aes;
 public static partial class gcm_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

@@ -4,21 +4,21 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct @fixed {
+partial struct @fixed {
     internal nint n;
 }
 
-[GoType] partial interface sizer {
+partial interface sizer {
     nint size(@string of);
 }
 
-[GoType] partial interface @lock {
+partial interface @lock {
     bool held();
 }
 
-[GoType("num:int16")] partial struct @short;
+partial struct @short /*num:int16*/;
 
-[GoType("num:uint32")] partial struct dword;
+partial struct dword /*num:uint32*/;
 
 internal static @short toShort(dword d) {
     return ((@short)(int16)(uint32)d);
@@ -28,7 +28,7 @@ internal static nint size(this @fixed f, @string of) {
     return f.n + len(of);
 }
 
-[GoRecv] internal static void grow(this ref @fixed f, nint by) {
+internal static void grow(this ref @fixed f, nint by) {
     f.n += by;
 }
 
@@ -36,7 +36,7 @@ internal static bool held(this @fixed f) {
     return f.n > 3;
 }
 
-[GoType("dyn")] internal partial struct keywordLocalStruct_params {
+internal partial struct keywordLocalStruct_params /*dyn*/ {
     internal uintptr size;
     internal uint32 flags;
 }
@@ -48,7 +48,7 @@ internal static uintptr keywordLocalStruct() {
     return @params.size + (uintptr)@params.flags;
 }
 
-[GoType("dyn")] internal partial interface keywordLocalIface_params {
+internal partial interface keywordLocalIface_params /*dyn*/ {
     bool held();
 }
 
@@ -63,7 +63,7 @@ internal static nint keywordLocalIface() {
     return 0;
 }
 
-[GoType("dyn")] internal partial struct keywordLocalRef_ref {
+internal partial struct keywordLocalRef_ref /*dyn*/ {
     internal nint n;
 }
 
@@ -73,7 +73,7 @@ internal static nint keywordLocalRef() {
     return @ref.n;
 }
 
-[GoType("dyn")] internal partial struct plainLocalStruct_sizes {
+internal partial struct plainLocalStruct_sizes /*dyn*/ {
     internal uintptr size;
 }
 

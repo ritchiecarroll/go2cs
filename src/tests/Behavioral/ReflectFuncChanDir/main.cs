@@ -7,26 +7,26 @@ using time = time_package;
 
 partial class main_package {
 
-[GoType] partial struct R {
+partial struct R {
 }
 
 public static bool Equal(this R _, /*<-*/channel<bool> y) {
     return true;
 }
 
-[GoType] partial struct S {
+partial struct S {
     internal nint n;
 }
 
-[GoRecv] public static void Feed(this ref S s, channel/*<-*/<nint> c) {
+public static void Feed(this ref S s, channel/*<-*/<nint> c) {
     s.n++;
 }
 
-[GoType] partial interface Notifier {
+partial interface Notifier {
     /*<-*/channel<EmptyStruct> Done();
 }
 
-[GoType("chan bool")] [GoChanDir(GoChanDir.Recv)] partial struct AssignD;
+partial struct AssignD /*<-chan bool*/;
 
 public static bool Equal(this AssignD x, /*<-*/channel<bool> y) {
     return true;

@@ -6,15 +6,15 @@ using NamedInterfacePointerMethodSet;
 
 partial class main_package {
 
-[GoType] partial struct PtrOnly {
+partial struct PtrOnly {
     internal @string name;
 }
 
-[GoRecv] public static @string Speak(this ref PtrOnly p) {
+public static @string Speak(this ref PtrOnly p) {
     return "ptr:"u8 + p.name;
 }
 
-[GoType] partial struct ValOnly {
+partial struct ValOnly {
     internal @string name;
 }
 
@@ -22,7 +22,7 @@ public static @string Speak(this ValOnly v) {
     return "val:"u8 + v.name;
 }
 
-[GoType] partial struct Mixed {
+partial struct Mixed {
     internal nint n;
 }
 
@@ -30,11 +30,11 @@ public static @string Speak(this Mixed m) {
     return fmt.Sprintf("mixed:%d"u8, m.n);
 }
 
-[GoRecv] public static void Bump(this ref Mixed m) {
+public static void Bump(this ref Mixed m) {
     m.n++;
 }
 
-[GoType] partial struct WrongSig {
+partial struct WrongSig {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -44,7 +44,7 @@ public static @string Speak(this WrongSig w, nint times) {
     return wrongˢ;
 }
 
-[GoType] partial struct gbox<T> {
+partial struct gbox<T> {
     internal T v;
 }
 

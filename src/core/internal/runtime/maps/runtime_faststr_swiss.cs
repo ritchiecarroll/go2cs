@@ -14,7 +14,7 @@ using go.@internal.runtime;
 
 partial class maps_package {
 
-[GoRecv] internal static @unsafe.Pointer getWithoutKeySmallFastStr(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, @string keyʗp) {
+internal static @unsafe.Pointer getWithoutKeySmallFastStr(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, @string keyʗp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     ref var key = ref heap(keyʗp, out var Ꮡkey);
@@ -93,7 +93,7 @@ internal static bool longStringQuickEqualityTest(@string a, @string b) {
     return true;
 }
 
-[GoType("dyn")] internal partial struct stringPtr_stringStruct {
+internal partial struct stringPtr_stringStruct /*dyn*/ {
     internal @unsafe.Pointer ptr;
     internal nint len;
 }
@@ -212,7 +212,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_faststr(ж<abi.SwissM
     }
 }
 
-[GoRecv] internal static @unsafe.Pointer putSlotSmallFastStr(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @string key) {
+internal static @unsafe.Pointer putSlotSmallFastStr(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @string key) {
     var g = new groupReference(
         data: m.dirPtr
     );

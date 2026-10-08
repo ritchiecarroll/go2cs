@@ -14,7 +14,7 @@ partial class dwarf_package {
 
 // The typeUnit format is a single type with a signature. It holds
 // the same data as a compilation unit.
-[GoType] partial struct typeUnit {
+partial struct typeUnit {
     internal partial ref unit unit { get; }
     internal Offset toff; // Offset to signature type within data.
     internal @string name; // Name of .debug_type section.
@@ -110,7 +110,7 @@ internal static (ΔType, error) sigToType(this ж<Data> Ꮡd, uint64 sig) {
 }
 
 // typeUnitReader is a typeReader for a tagTypeUnit.
-[GoType] partial struct typeUnitReader {
+partial struct typeUnitReader {
     internal ж<Data> d;
     internal ж<typeUnit> tu;
     internal buf b;
@@ -118,7 +118,7 @@ internal static (ΔType, error) sigToType(this ж<Data> Ꮡd, uint64 sig) {
 }
 
 // Seek to a new position in the type unit.
-[GoRecv] internal static void Seek(this ref typeUnitReader tur, Offset off) {
+internal static void Seek(this ref typeUnitReader tur, Offset off) {
     tur.err = default!;
     var doff = off - (~tur.tu).off;
     if (doff < 0 || doff >= ((Offset)(uint32)len((~tur.tu).data))) {
@@ -129,7 +129,7 @@ internal static (ΔType, error) sigToType(this ж<Data> Ꮡd, uint64 sig) {
 }
 
 // AddressSize returns the size in bytes of addresses in the current type unit.
-[GoRecv] internal static nint AddressSize(this ref typeUnitReader tur) {
+internal static nint AddressSize(this ref typeUnitReader tur) {
     return (~tur.tu).unit.asize;
 }
 
@@ -152,7 +152,7 @@ internal static (ж<Entry>, error) Next(this ж<typeUnitReader> Ꮡtur) {
 }
 
 // clone returns a new reader for the type unit.
-[GoRecv] internal static typeReader clone(this ref typeUnitReader tur) {
+internal static typeReader clone(this ref typeUnitReader tur) {
     return new typeUnitReaderжtypeReader(Ꮡ(new typeUnitReader(
         d: tur.d,
         tu: tur.tu,
@@ -161,7 +161,7 @@ internal static (ж<Entry>, error) Next(this ж<typeUnitReader> Ꮡtur) {
 }
 
 // offset returns the current offset.
-[GoRecv] internal static Offset offset(this ref typeUnitReader tur) {
+internal static Offset offset(this ref typeUnitReader tur) {
     return tur.b.off;
 }
 

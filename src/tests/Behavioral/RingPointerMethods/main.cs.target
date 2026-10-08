@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Ring {
+partial struct Ring {
     internal ж<Ring> next, prev;
     public nint Value;
 }

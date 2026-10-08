@@ -35,12 +35,12 @@ internal static RoutingMessage toRoutingMessage(this ж<anyMessage> Ꮡany, slic
 // containing network interface address entries.
 //
 // Deprecated: Use golang.org/x/net/route instead.
-[GoType] partial struct InterfaceMulticastAddrMessage {
+partial struct InterfaceMulticastAddrMessage {
     public IfmaMsghdr2 Header;
     public slice<byte> Data;
 }
 
-[GoRecv] internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMulticastAddrMessage m) {
+internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMulticastAddrMessage m) {
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
     var b = m.Data[..];
     for (nuint i = (nuint)0; i < RTAX_MAX && len(b) >= minRoutingSockaddrLen; i++) {

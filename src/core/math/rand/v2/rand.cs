@@ -27,12 +27,12 @@ partial class rand_package {
 // pseudo-random uint64 values in the range [0, 1<<64).
 //
 // A Source is not safe for concurrent use by multiple goroutines.
-[GoType] partial interface Source {
+partial interface Source {
     uint64 Uint64();
 }
 
 // A Rand is a source of random numbers.
-[GoType] partial struct Rand {
+partial struct Rand {
     internal Source src;
 }
 
@@ -43,38 +43,38 @@ public static ж<Rand> New(Source src) {
 }
 
 // Int64 returns a non-negative pseudo-random 63-bit integer as an int64.
-[GoRecv] public static int64 Int64(this ref Rand r) {
+public static int64 Int64(this ref Rand r) {
     return (int64)((uint64)(r.src.Uint64() & ~(((uint64)1 << (int)(63)))));
 }
 
 // Uint32 returns a pseudo-random 32-bit value as a uint32.
-[GoRecv] public static uint32 Uint32(this ref Rand r) {
+public static uint32 Uint32(this ref Rand r) {
     return (uint32)((r.src.Uint64() >> (int)(32)));
 }
 
 // Uint64 returns a pseudo-random 64-bit value as a uint64.
-[GoRecv] public static uint64 Uint64(this ref Rand r) {
+public static uint64 Uint64(this ref Rand r) {
     return r.src.Uint64();
 }
 
 // Int32 returns a non-negative pseudo-random 31-bit integer as an int32.
-[GoRecv] public static int32 Int32(this ref Rand r) {
+public static int32 Int32(this ref Rand r) {
     return (int32)((r.src.Uint64() >> (int)(33)));
 }
 
 // Int returns a non-negative pseudo-random int.
-[GoRecv] public static nint Int(this ref Rand r) {
+public static nint Int(this ref Rand r) {
     return (nint)((((nuint)r.src.Uint64() << (int)(1)) >> (int)(1)));
 }
 
 // Uint returns a pseudo-random uint.
-[GoRecv] public static nuint Uint(this ref Rand r) {
+public static nuint Uint(this ref Rand r) {
     return (nuint)r.src.Uint64();
 }
 
 // Int64N returns, as an int64, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n <= 0.
-[GoRecv] public static int64 Int64N(this ref Rand r, int64 n) {
+public static int64 Int64N(this ref Rand r, int64 n) {
     if (n <= 0) {
         throw panic("invalid argument to Int64N");
     }
@@ -83,7 +83,7 @@ public static ж<Rand> New(Source src) {
 
 // Uint64N returns, as a uint64, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n == 0.
-[GoRecv] public static uint64 Uint64N(this ref Rand r, uint64 n) {
+public static uint64 Uint64N(this ref Rand r, uint64 n) {
     if (n == 0) {
         throw panic("invalid argument to Uint64N");
     }
@@ -91,7 +91,7 @@ public static ж<Rand> New(Source src) {
 }
 
 // uint64n is the no-bounds-checks version of Uint64N.
-[GoRecv] internal static uint64 uint64n(this ref Rand r, uint64 n) {
+internal static uint64 uint64n(this ref Rand r, uint64 n) {
     if (is32bit && (uint64)(uint32)n == n) {
         return (uint64)r.uint32n((uint32)n);
     }
@@ -141,7 +141,7 @@ public static ж<Rand> New(Source src) {
 
 // uint32n is an identical computation to uint64n
 // but optimized for 32-bit systems.
-[GoRecv] internal static uint32 uint32n(this ref Rand r, uint32 n) {
+internal static uint32 uint32n(this ref Rand r, uint32 n) {
     if ((uint32)(n & (n - 1)) == 0) {
         // n is power of two, can mask
         return (uint32)((uint32)r.Uint64() & (n - 1));
@@ -182,7 +182,7 @@ public static ж<Rand> New(Source src) {
 
 // Int32N returns, as an int32, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n <= 0.
-[GoRecv] public static int32 Int32N(this ref Rand r, int32 n) {
+public static int32 Int32N(this ref Rand r, int32 n) {
     if (n <= 0) {
         throw panic("invalid argument to Int32N");
     }
@@ -191,7 +191,7 @@ public static ж<Rand> New(Source src) {
 
 // Uint32N returns, as a uint32, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n == 0.
-[GoRecv] public static uint32 Uint32N(this ref Rand r, uint32 n) {
+public static uint32 Uint32N(this ref Rand r, uint32 n) {
     if (n == 0) {
         throw panic("invalid argument to Uint32N");
     }
@@ -202,7 +202,7 @@ internal const bool is32bit = /* ^uint(0)>>32 == 0 */ false;
 
 // IntN returns, as an int, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n <= 0.
-[GoRecv] public static nint IntN(this ref Rand r, nint n) {
+public static nint IntN(this ref Rand r, nint n) {
     if (n <= 0) {
         throw panic("invalid argument to IntN");
     }
@@ -211,7 +211,7 @@ internal const bool is32bit = /* ^uint(0)>>32 == 0 */ false;
 
 // UintN returns, as a uint, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n == 0.
-[GoRecv] public static nuint UintN(this ref Rand r, nuint n) {
+public static nuint UintN(this ref Rand r, nuint n) {
     if (n == 0) {
         throw panic("invalid argument to UintN");
     }
@@ -219,20 +219,20 @@ internal const bool is32bit = /* ^uint(0)>>32 == 0 */ false;
 }
 
 // Float64 returns, as a float64, a pseudo-random number in the half-open interval [0.0,1.0).
-[GoRecv] public static float64 Float64(this ref Rand r) {
+public static float64 Float64(this ref Rand r) {
     // There are exactly 1<<53 float64s in [0,1). Use Intn(1<<53) / (1<<53).
     return (float64)(((r.Uint64() << (int)(11)) >> (int)(11))) / (9007199254740992D);
 }
 
 // Float32 returns, as a float32, a pseudo-random number in the half-open interval [0.0,1.0).
-[GoRecv] public static float32 Float32(this ref Rand r) {
+public static float32 Float32(this ref Rand r) {
     // There are exactly 1<<24 float32s in [0,1). Use Intn(1<<24) / (1<<24).
     return (float32)(((r.Uint32() << (int)(8)) >> (int)(8))) / ((1 << (int)(24)));
 }
 
 // Perm returns, as a slice of n ints, a pseudo-random permutation of the integers
 // in the half-open interval [0,n).
-[GoRecv] public static slice<nint> Perm(this ref Rand r, nint n) {
+public static slice<nint> Perm(this ref Rand r, nint n) {
     var p = new slice<nint>(n);
     foreach (var (i, _) in p) {
         p[i] = i;
@@ -247,7 +247,7 @@ internal const bool is32bit = /* ^uint(0)>>32 == 0 */ false;
 // Shuffle pseudo-randomizes the order of elements.
 // n is the number of elements. Shuffle panics if n < 0.
 // swap swaps the elements with indexes i and j.
-[GoRecv] public static void Shuffle(this ref Rand r, nint n, Action<nint, nint> swap) {
+public static void Shuffle(this ref Rand r, nint n, Action<nint, nint> swap) {
     if (n < 0) {
         throw panic("invalid argument to Shuffle");
     }
@@ -275,7 +275,7 @@ internal static ж<Rand> globalRand = Ꮡ(new Rand(src: new runtimeSource(nil)))
 internal static partial uint64 runtime_rand();
 
 // runtimeSource is a Source that uses the runtime fastrand functions.
-[GoType] partial struct runtimeSource {
+partial struct runtimeSource {
 }
 
 internal static uint64 Uint64(this runtimeSource _) {
@@ -370,8 +370,7 @@ public static Int N<Int>(Int n)
     return ConvertToType<Int>(globalRand.uint64n(ConvertToUInt64<Int>(n)));
 }
 
-[GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
-partial interface intType<ΔT> {
+partial interface intType<ΔT> /*operators = Sum, Arithmetic, Integer, Comparable, Ordered*/ {
     //  Type constraints: ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }

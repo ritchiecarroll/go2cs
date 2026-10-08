@@ -19,7 +19,7 @@ using global::go.go;
 partial class types_package {
 
 // A declInfo describes a package-level const, type, var, or func declaration.
-[GoType] partial struct declInfo {
+partial struct declInfo {
     internal ж<ΔScope> @file;     // scope of file containing this declaration
     internal goVersion version;     // Go version of file containing this declaration
     internal slice<ж<Var>> lhs; // lhs of n:1 variable declarations, or nil
@@ -34,12 +34,12 @@ partial class types_package {
 
 // hasInitializer reports whether the declared object has an initialization
 // expression or function body.
-[GoRecv] internal static bool hasInitializer(this ref declInfo d) {
+internal static bool hasInitializer(this ref declInfo d) {
     return d.init != default! || d.fdecl != nil && (~d.fdecl).Body != nil;
 }
 
 // addDep adds obj to the set of objects d's init expression depends on.
-[GoRecv] internal static void addDep(this ref declInfo d, Object obj) {
+internal static void addDep(this ref declInfo d, Object obj) {
     var m = d.deps;
     if (m == default!) {
         m = new map<Object, bool>();
@@ -144,7 +144,7 @@ internal static void declarePkgObj(this ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡi
 }
 
 // filename returns a filename suitable for debugging output.
-[GoRecv] internal static @string filename(this ref Checker check, nint fileNo) {
+internal static @string filename(this ref Checker check, nint fileNo) {
     var @file = check.files[fileNo];
     {
         tokenꓸPos pos = @file.Pos(); if (pos.IsValid()) {
@@ -247,7 +247,7 @@ internal static readonly @string cannotRenameImportCˢ = @"cannot rename import 
 internal static readonly @string cannotImportPackageAsˢ = "cannot import package as init - init must be a func"u8;
 internal static readonly @string methodHasNoReceiverˢ = "method has no receiver"u8;
 
-[GoType("dyn")] internal partial struct collectObjects_methodInfo {
+internal partial struct collectObjects_methodInfo /*dyn*/ {
     internal ж<Func> obj;   // method
     internal bool ptr;       // true if pointer receiver
     internal ж<ast.Ident> recv; // receiver type name
@@ -611,7 +611,7 @@ internal static (bool ptr, ast.Expr @base, slice<ж<ast.Ident>> tparams) unpackR
 // in package scope, and there can be at most one pointer indirection. Traversals
 // through generic alias types are not permitted. If no such type name exists, the
 // returned base is nil.
-[GoRecv] internal static (bool ptr_, ж<TypeName> @base) resolveBaseTypeName(this ref Checker check, bool ptr, ж<ast.Ident> Ꮡname) {
+internal static (bool ptr_, ж<TypeName> @base) resolveBaseTypeName(this ref Checker check, bool ptr, ж<ast.Ident> Ꮡname) {
     ref var name = ref Ꮡname.DerefOrNull();
 
     // Algorithm: Starting from name, which is expected to denote a type,

@@ -67,7 +67,7 @@ using static go.context_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("context/context.go", "context.cs", "AKYBzgK4+ICigKKA/LKmgqaCpoIACQqCAAkKgq7CrsIABCDygpAABTQACwKCkLaCgpSCggACEgAIAoCCgpL+AAUoABECpoKSgoKUgpQADRyigoKUggATMOKCgpSCgpSCgpSokoCCgqSCgpSCgpQAChaUggARHqKClKbSgoKUgoKCgoKU1qKCgoKqwoSCgpamksiAlIKUlIKUlIKmgJSCgpS4gqaCgrQADBSCgIKkpoKs0oKUgpSCgoKUgoKCgpSUlJSChIIAAxDCgpTusqaCpoKmgqaCAAIYAAkCrNKClICUpKaCgoKCkKSCkoKSppAADxqCpoKqooKUlIKCgpQAAhoACgKssgACIAANAoKUgpSClAAYGrKUpKSUpoKqgoKUpoKClIKUtIKUtKaUtIKU1LQ=", "242-242:1;270-270:1;324-333:1;326-328:1.1;351-353:1;501-503:1;513-519:2;638-638:1;643-645:2;647-647:3")]
+[assembly: go.GoPositionMap("context/context.go", "context.cs", "AKYBzgK4+ICigKKA/LKmgqaCpoIACQqCAAkKgq7CrsIABCDygpAABTQACwKCkLaCgpSCggACEgAIAoCCgpL+AAUoABECpoKSgoKUgpQADRyigoKUggATMOKCgpSCgpSCgpSokoCCgqSCgpSCgpQAChaUggARHqKClKbSgoKUgoKCgoKU1qKCgoKqwoSCgpamksiAlIKUlIKUlIKmgJSCgpS4gqaCgrQADBSCgIKkpoKs0oKUgpSCgoKUgoKCgpSUlJSChIIAAxDCgpTusqaCpoKmgqaCAAIYAAkCrNKClICUpKaCgoKCkKSCkoKSppAADxqCpoKqooKUlIKCgpQAAhoACgKssgACIAANAoKUgpSClAAYGrKUpKSUpoKqgoKUpoKClIKUtIKUtKaUtIKU1LQ=", "242-242:1;270-270:1;324-333:1;326-328:1.1;351-353:1;501-503:1;513-519:2;638-638:1;643-645:2;647-647:3", "", "742=String/1/2/1,Until/1/1/2,String/2/2/2;848=stringify/1/2/1,stringify/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -76,7 +76,7 @@ namespace go;
 public static partial class context_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

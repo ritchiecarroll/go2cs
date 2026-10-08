@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:nuint")] partial struct Class;
+partial struct Class /*num:nuint*/;
 
-[GoType("num:uint64")] partial struct Big;
+partial struct Big /*num:uint64*/;
 
 internal static Class allClass => /* ^Class(0) */ unchecked((Class)18446744073709551615);
 internal static Big allBig => /* ^Big(0) */ unchecked((Big)18446744073709551615);

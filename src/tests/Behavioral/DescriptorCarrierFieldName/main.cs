@@ -8,21 +8,13 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 
 partial class main_package {
-// Descriptor carrier for `eface` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("eface")] internal interface efaceᴅ { }
 
-// Descriptor carrier for `namedIface` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("namedIface")] internal interface namedIfaceᴅ { }
-
-
-[GoType] public partial interface realIface {
+public partial interface realIface {
     void Do();
 }
 
-[GoType] partial struct holder {
-    [GoDescriptorType(Self = typeof(efaceᴅ))]
+partial struct holder {
     public eface E;
-    [GoDescriptorType(Self = typeof(namedIfaceᴅ))]
     public namedIface N;
     public realIface R;
     public aliasIface A;

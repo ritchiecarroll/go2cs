@@ -149,7 +149,7 @@ internal static @string probe(any x) {
     }}
 }
 
-[GoType("num:byte")] partial struct marker;
+partial struct marker /*num:byte*/;
 
 internal static byte tag(this marker _Δp0, slice<byte> b) {
     _ = b[1];

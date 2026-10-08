@@ -16,7 +16,7 @@ partial class stringtab_package {
 // counter-data files.
 
 // Writer implements a string table writing utility.
-[GoType] partial struct Writer {
+partial struct Writer {
     internal map<@string, uint32> stab;
     internal slice<@string> strs;
     internal slice<byte> tmp;
@@ -24,19 +24,19 @@ partial class stringtab_package {
 }
 
 // InitWriter initializes a stringtab.Writer.
-[GoRecv] public static void InitWriter(this ref Writer stw) {
+public static void InitWriter(this ref Writer stw) {
     stw.stab = new map<@string, uint32>();
     stw.tmp = new slice<byte>(64);
 }
 
 // Nentries returns the number of strings interned so far.
-[GoRecv] public static uint32 Nentries(this ref Writer stw) {
+public static uint32 Nentries(this ref Writer stw) {
     return (uint32)len(stw.strs);
 }
 
 // Lookup looks up string 's' in the writer's table, adding
 // a new entry if need be, and returning an index into the table.
-[GoRecv] public static uint32 Lookup(this ref Writer stw, @string s) {
+public static uint32 Lookup(this ref Writer stw, @string s) {
     {
         var (idxΔ1, ok) = stw.stab[s, ꟷ]; if (ok) {
             return idxΔ1;
@@ -53,7 +53,7 @@ partial class stringtab_package {
 
 // Size computes the memory in bytes needed for the serialized
 // version of a stringtab.Writer.
-[GoRecv] public static uint32 Size(this ref Writer stw) {
+public static uint32 Size(this ref Writer stw) {
     var rval = (uint32)0;
     stw.tmp = stw.tmp[..0];
     stw.tmp = uleb128.AppendUleb128(stw.tmp, (nuint)len(stw.strs));
@@ -112,13 +112,13 @@ public static error Write(this ж<Writer> Ꮡstw, io.Writer w) {
 // allowed, only lookups of existing strings (if a lookup triggers
 // addition, a panic will result). Useful as a mechanism for
 // "finalizing" a string table prior to writing it out.
-[GoRecv] public static void Freeze(this ref Writer stw) {
+public static void Freeze(this ref Writer stw) {
     stw.frozen = true;
 }
 
 // Reader is a helper for reading a string table previously
 // serialized by a Writer.Write call.
-[GoType] partial struct Reader {
+partial struct Reader {
     internal ж<slicereader.Reader> r;
     internal slice<@string> strs;
 }
@@ -133,7 +133,7 @@ public static ж<Reader> NewReader(ж<slicereader.Reader> Ꮡr) {
 }
 
 // Read reads/decodes a string table using the reader provided.
-[GoRecv] public static void Read(this ref Reader str) {
+public static void Read(this ref Reader str) {
     nint numEntries = (nint)str.r.ReadULEB128();
     str.strs = new slice<@string>(0, numEntries);
     for (nint idx = 0; idx < numEntries; idx++) {
@@ -143,12 +143,12 @@ public static ж<Reader> NewReader(ж<slicereader.Reader> Ꮡr) {
 }
 
 // Entries returns the number of decoded entries in a string table.
-[GoRecv] public static nint Entries(this ref Reader str) {
+public static nint Entries(this ref Reader str) {
     return len(str.strs);
 }
 
 // Get returns string 'idx' within the string table.
-[GoRecv] public static @string Get(this ref Reader str, uint32 idx) {
+public static @string Get(this ref Reader str, uint32 idx) {
     return str.strs[idx];
 }
 

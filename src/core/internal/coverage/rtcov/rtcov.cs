@@ -17,7 +17,7 @@ partial class rtcov_package {
 // the init function for a coverage-instrumented package executes, it
 // will make a call into the runtime which will create a covMetaBlob
 // object for the package and chain it onto a global list.
-[GoType] partial struct CovMetaBlob {
+partial struct CovMetaBlob {
     public ж<byte> P;
     public uint32 Len;
     public array<byte> Hash = new(16);
@@ -31,7 +31,7 @@ partial class rtcov_package {
 // (BSS variable) for an instrumented Go module. Here "counters"
 // points to the counter payload and "len" is the number of uint32
 // entries in the section.
-[GoType] partial struct CovCounterBlob {
+partial struct CovCounterBlob {
     public ж<uint32> Counters;
     public uint64 Len;
 }
@@ -39,7 +39,7 @@ partial class rtcov_package {
 // Meta is the top-level container for bits of state related to
 // code coverage meta-data in the runtime.
 
-[GoType("dyn")] partial struct Metaᴛ1 {
+partial struct Metaᴛ1 /*dyn*/ {
     // List contains the list of currently registered meta-data
     // blobs for the running program.
     public slice<CovMetaBlob> List;
@@ -61,7 +61,7 @@ public static Metaᴛ1 Meta;
 // counter mode and granularity requested by the user. Return value is
 // the ID for the package for use by the package code itself,
 // or 0 for impossible errors.
-public static uint32 AddMeta(@unsafe.Pointer p, uint32 dlen, [GoArrayDims(16)] array<byte> hash, @string pkgpath, nint pkgid, uint8 cmode, uint8 cgran) {
+public static uint32 AddMeta(@unsafe.Pointer p, uint32 dlen, /*[16]*/ array<byte> hash, @string pkgpath, nint pkgid, uint8 cmode, uint8 cgran) {
     hash = hash.Clone();
 
     nint slot = len(Meta.List);

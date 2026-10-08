@@ -101,7 +101,7 @@ internal static @string sotypeToNet(nint sotype) {
 
 }
 
-[GoRecv] internal static nint family(this ref UnixAddr a) {
+internal static nint family(this ref UnixAddr a) {
     return syscall.AF_UNIX;
 }
 
@@ -118,7 +118,7 @@ internal static Δsockaddr toLocal(this ж<UnixAddr> Ꮡa, @string net) {
     return new UnixAddrжΔsockaddr(Ꮡa);
 }
 
-[GoRecv] internal static (nint, ж<UnixAddr>, error) readFrom(this ref UnixConn c, slice<byte> b) {
+internal static (nint, ж<UnixAddr>, error) readFrom(this ref UnixConn c, slice<byte> b) {
     ж<UnixAddr> addr = default!;
     var (n, sa, err) = c.fd.readFrom(b);
     switch (sa.type()) {
@@ -131,7 +131,7 @@ internal static Δsockaddr toLocal(this ж<UnixAddr> Ꮡa, @string net) {
     return (n, addr, err);
 }
 
-[GoRecv] internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) readMsg(this ref UnixConn c, slice<byte> b, slice<byte> oob) {
+internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) readMsg(this ref UnixConn c, slice<byte> b, slice<byte> oob) {
     nint n = default!;
     nint oobn = default!;
     nint flags = default!;
@@ -153,7 +153,7 @@ internal static Δsockaddr toLocal(this ж<UnixAddr> Ꮡa, @string net) {
     return (n, oobn, flags, addr, err);
 }
 
-[GoRecv] internal static (nint, error) writeTo(this ref UnixConn c, slice<byte> b, ж<UnixAddr> Ꮡaddr) {
+internal static (nint, error) writeTo(this ref UnixConn c, slice<byte> b, ж<UnixAddr> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
     if ((~c.fd).isConnected) {
@@ -169,7 +169,7 @@ internal static Δsockaddr toLocal(this ж<UnixAddr> Ꮡa, @string net) {
     return c.fd.writeTo(b, new syscall.SockaddrUnixжΔSockaddr(sa));
 }
 
-[GoRecv] internal static (nint n, nint oobn, error err) writeMsg(this ref UnixConn c, slice<byte> b, slice<byte> oob, ж<UnixAddr> Ꮡaddr) {
+internal static (nint n, nint oobn, error err) writeMsg(this ref UnixConn c, slice<byte> b, slice<byte> oob, ж<UnixAddr> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
     if ((~c.fd).sotype == syscall.SOCK_DGRAM && (~c.fd).isConnected) {
@@ -199,7 +199,7 @@ internal static (ж<UnixConn>, error) dialUnix(this ж<sysDialer> Ꮡsd, context
     return (newUnixConn(fd), default!);
 }
 
-[GoRecv] internal static (ж<UnixConn>, error) accept(this ref UnixListener ln) {
+internal static (ж<UnixConn>, error) accept(this ref UnixListener ln) {
     var (fd, err) = ln.fd.accept();
     if (err != default!) {
         return (default!, err);
@@ -229,7 +229,7 @@ internal static error close(this ж<UnixListener> Ꮡln) {
     return ln.fd.Close();
 }
 
-[GoRecv] internal static (ж<os.File>, error) @file(this ref UnixListener ln) {
+internal static (ж<os.File>, error) @file(this ref UnixListener ln) {
     var (f, err) = ln.fd.dup();
     if (err != default!) {
         return (default!, err);
@@ -245,7 +245,7 @@ internal static error close(this ж<UnixListener> Ꮡln) {
 // Listen or ListenUnix, then by default closing the listener will remove the socket file.
 // but if the listener was created by a call to FileListener to use an already existing
 // socket file, then by default closing the listener will not remove the socket file.
-[GoRecv] public static void SetUnlinkOnClose(this ref UnixListener l, bool unlink) {
+public static void SetUnlinkOnClose(this ref UnixListener l, bool unlink) {
     l.unlink = unlink;
 }
 

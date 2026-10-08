@@ -25,14 +25,14 @@ internal static @string parseLiteralIP(@string addr) {
     return ip.String();
 }
 
-[GoType] partial struct byName {
+partial struct byName {
     internal slice<@string> addrs;
     internal @string canonicalName;
 }
 
 // hosts contains known host entries.
 
-[GoType("dyn")] partial struct hostsᴛ1 {
+partial struct hostsᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
     // Key for the list of literal IP addresses must be a host
     // name. It would be part of DNS labels, a FQDN or an absolute

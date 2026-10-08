@@ -159,7 +159,7 @@ public static error DecodeElement(this ж<Decoder> Ꮡd, any v, ж<StartElement>
     return Ꮡd.unmarshal(val.Elem(), Ꮡstart, 0);
 }
 
-[GoType("@string")] partial struct UnmarshalError;
+partial struct UnmarshalError /*@string*/;
 
 public static @string Error(this UnmarshalError e) {
     return ((@string)e);
@@ -180,7 +180,7 @@ public static @string Error(this UnmarshalError e) {
 // Another common strategy is to use d.Token to process the
 // XML object one token at a time.
 // UnmarshalXML may not use d.RawToken.
-[GoType] partial interface Unmarshaler {
+partial interface Unmarshaler {
     error UnmarshalXML(ж<Decoder> d, StartElement start);
 }
 
@@ -192,7 +192,7 @@ public static @string Error(this UnmarshalError e) {
 // returns that error.
 // UnmarshalXMLAttr is used only for struct fields with the
 // "attr" option in the field tag.
-[GoType] partial interface UnmarshalerAttr {
+partial interface UnmarshalerAttr {
     error UnmarshalXMLAttr(Attr attr);
 }
 
@@ -229,7 +229,7 @@ internal static error unmarshalInterface(this ж<Decoder> Ꮡd, Unmarshaler val,
 // unmarshalTextInterface unmarshals a single XML element into val.
 // The chardata contained in the element (but not its children)
 // is passed to the text unmarshaler.
-[GoRecv] internal static error unmarshalTextInterface(this ref Decoder d, encoding.TextUnmarshaler val) {
+internal static error unmarshalTextInterface(this ref Decoder d, encoding.TextUnmarshaler val) {
     slice<byte> buf = default!;
     nint depth = 1;
     while (depth > 0) {
@@ -257,7 +257,7 @@ internal static error unmarshalInterface(this ж<Decoder> Ꮡd, Unmarshaler val,
 }
 
 // unmarshalAttr unmarshals a single XML attribute into val.
-[GoRecv] internal static error unmarshalAttr(this ref Decoder d, reflectꓸValue val, Attr attr) {
+internal static error unmarshalAttr(this ref Decoder d, reflectꓸValue val, Attr attr) {
     if (val.Kind() == reflect.ΔPointer) {
         if (val.IsNil()) {
             val.Set(reflect.New(val.Type().Elem()));
@@ -804,7 +804,7 @@ break_Loop:;
 // skipping nested structures.
 // It returns nil if it finds an end element matching the start
 // element; otherwise it returns an error describing the problem.
-[GoRecv] public static error Skip(this ref Decoder d) {
+public static error Skip(this ref Decoder d) {
     int64 depth = default!;
     while (ᐧ) {
         var (tok, err) = d.Token();

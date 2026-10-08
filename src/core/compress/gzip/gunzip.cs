@@ -46,7 +46,7 @@ internal static error noEOF(error err) {
 //
 // Strings must be UTF-8 encoded and may only contain Unicode code points
 // U+0001 through U+00FF, due to limitations of the GZIP file format.
-[GoType] partial struct Header {
+partial struct Header {
     public @string Comment;   // comment
     public slice<byte> Extra; // "extra data"
     public time.Time ModTime; // modification time
@@ -68,7 +68,7 @@ internal static error noEOF(error err) {
 // have the expected length or checksum. Clients should treat data
 // returned by [Reader.Read] as tentative until they receive the [io.EOF]
 // marking the end of the data.
-[GoType] partial struct Reader {
+partial struct Reader {
     public partial ref Header Header { get; }       // valid after NewReader or Reader.Reset
     internal flate.Reader r;
     internal io.ReadCloser decompressor;
@@ -99,7 +99,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 // Reset discards the [Reader] z's state and makes it equivalent to the
 // result of its original state from [NewReader], but reading from r instead.
 // This permits reusing a [Reader] rather than allocating a new one.
-[GoRecv] public static error Reset(this ref Reader z, io.Reader r) {
+public static error Reset(this ref Reader z, io.Reader r) {
     z = new Reader(
         decompressor: z.decompressor,
         multistream: true
@@ -131,7 +131,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 // in order to be left positioned just after the gzip stream.
 // To start the next stream, call z.Reset(r) followed by z.Multistream(false).
 // If there is no next stream, z.Reset(r) will return [io.EOF].
-[GoRecv] public static void Multistream(this ref Reader z, bool ok) {
+public static void Multistream(this ref Reader z, bool ok) {
     z.multistream = ok;
 }
 
@@ -139,7 +139,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 // It treats the bytes read as being encoded as ISO 8859-1 (Latin-1) and
 // will output a string encoded using UTF-8.
 // This method always updates z.digest with the data read.
-[GoRecv] internal static (@string, error) readString(this ref Reader z) {
+internal static (@string, error) readString(this ref Reader z) {
     error err = default!;
     var needConv = false;
     for (nint i = 0; ᐧ ; i++) {
@@ -171,7 +171,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 
 // readHeader reads the GZIP header according to section 2.3.1.
 // This method does not set z.err.
-[GoRecv] internal static (Header hdr, error err) readHeader(this ref Reader z) {
+internal static (Header hdr, error err) readHeader(this ref Reader z) {
     Header hdr = default!;
     error err = default!;
 
@@ -255,7 +255,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 }
 
 // Read implements [io.Reader], reading uncompressed bytes from its underlying [Reader].
-[GoRecv] public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
+public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
     nint n = default!;
 
     if (z.err != default!) {
@@ -300,7 +300,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 // Close closes the [Reader]. It does not close the underlying [io.Reader].
 // In order for the GZIP checksum to be verified, the reader must be
 // fully consumed until the [io.EOF].
-[GoRecv] public static error Close(this ref Reader z) {
+public static error Close(this ref Reader z) {
     return z.decompressor.Close();
 }
 

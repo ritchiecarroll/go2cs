@@ -5,12 +5,12 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-[GoType] partial struct item {
+partial struct item {
     internal @string key;
     internal nint val;
 }
 
-[GoType] partial struct group {
+partial struct group {
     internal ж<item> ptr;
     internal nint n;
 }

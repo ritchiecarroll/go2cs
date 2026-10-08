@@ -18,7 +18,7 @@ partial class abi_package {
 // RegArgs also contains additional space to hold pointers
 // when it may not be safe to keep them only in the integer
 // register space otherwise.
-[GoType] partial struct RegArgs {
+partial struct RegArgs {
     // Values in these slots should be precisely the bit-by-bit
     // representation of how they would appear in a register.
     //
@@ -42,7 +42,7 @@ partial class abi_package {
     public IntArgRegBitmap ReturnIsPtr;
 }
 
-[GoRecv] public static void Dump(this ref RegArgs r) {
+public static void Dump(this ref RegArgs r) {
     print((@string)"Ints:"u8);
     foreach (var (_, x) in r.Ints.ΔRangeSnapshot()) {
         print((@string)" "u8, x);
@@ -69,7 +69,7 @@ partial class abi_package {
 // architectures, since sub-word-sized arguments in big endian architectures
 // need to be "aligned" to the upper edge of the register to be interpreted
 // by the CPU correctly.
-[GoRecv] public static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintptr argSize) {
+public static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintptr argSize) {
     if (argSize > goarch.PtrSize || argSize == 0 || (uintptr)(argSize & (argSize - 1)) != 0) {
         throw panic("invalid argSize");
     }
@@ -80,11 +80,11 @@ partial class abi_package {
     return (@unsafe.Pointer)((uintptr)@unsafe.Pointer.FromBox(Ꮡ(r.Ints, reg)) + offset);
 }
 
-[GoType("[2]uint8")] /* [(IntArgRegs + 7) / 8]uint8 */
-partial struct IntArgRegBitmap;
+/* [(IntArgRegs + 7) / 8]uint8 */
+partial struct IntArgRegBitmap /*[2]uint8*/;
 
 // Set sets the i'th bit of the bitmap to 1.
-[GoRecv] public static void Set(this ref IntArgRegBitmap b, nint i) {
+public static void Set(this ref IntArgRegBitmap b, nint i) {
     b.Value[i / 8] |= (uint8)(((uint8)1).Lsh((int64)((i % 8))));
 }
 
@@ -94,7 +94,7 @@ partial struct IntArgRegBitmap;
 // on the reflectcall return path.
 //
 //go:nosplit
-[GoRecv] public static bool Get(this ref IntArgRegBitmap b, nint i) {
+public static bool Get(this ref IntArgRegBitmap b, nint i) {
     return (uint8)(b.Value[i / 8] & (((uint8)1).Lsh((int64)((i % 8))))) != 0;
 }
 

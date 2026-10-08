@@ -5,7 +5,7 @@ using strings = strings_package;
 
 partial class main_package {
 
-[GoType] partial struct reader {
+partial struct reader {
     internal @string src;
     internal nint pos;
 }
@@ -22,36 +22,36 @@ internal static (nint, error) Read(this ж<reader> Ꮡr, slice<byte> p) {
     return (n, default!);
 }
 
-[GoRecv] internal static error Close(this ref reader r) {
+internal static error Close(this ref reader r) {
     r.pos = len(r.src);
     return default!;
 }
 
-[GoType] partial struct writer {
+partial struct writer {
     internal slice<byte> @out;
     internal nint flush;
 }
 
-[GoRecv] internal static (nint, error) Write(this ref writer w, slice<byte> p) {
+internal static (nint, error) Write(this ref writer w, slice<byte> p) {
     w.@out = appendꓸꓸꓸ(w.@out, p);
     return (len(p), default!);
 }
 
-[GoRecv] internal static error Close(this ref writer w) {
+internal static error Close(this ref writer w) {
     w.flush++;
     return default!;
 }
 
-[GoRecv] internal static @string String(this ref writer w) {
+internal static @string String(this ref writer w) {
     return ((@string)w.@out);
 }
 
-[GoType] partial struct duplex {
+partial struct duplex {
     internal partial ref ж<reader> reader { get; }
     internal partial ref ж<writer> writer { get; }
 }
 
-[GoRecv] internal static error Close(this ref duplex d) {
+internal static error Close(this ref duplex d) {
     {
         var err = d.reader.Close(); if (err != default!) {
             return err;
@@ -60,23 +60,23 @@ internal static (nint, error) Read(this ж<reader> Ꮡr, slice<byte> p) {
     return d.writer.Close();
 }
 
-[GoType] partial interface readWriteCloser {
+partial interface readWriteCloser {
     (nint, error) Read(slice<byte> p);
     (nint, error) Write(slice<byte> p);
     error Close();
 }
 
-[GoType] partial interface readWriter {
+partial interface readWriter {
     (nint, error) Read(slice<byte> p);
     (nint, error) Write(slice<byte> p);
 }
 
-[GoType] partial struct foreign {
+partial struct foreign {
     public partial ref ж<strings_package.Reader> Reader { get; }
     public partial ref ж<strings_package.Builder> Builder { get; }
 }
 
-[GoType] partial interface readStringWriter {
+partial interface readStringWriter {
     (nint, error) Read(slice<byte> p);
     (nint, error) WriteString(@string s);
 }

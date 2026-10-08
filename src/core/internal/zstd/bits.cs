@@ -8,10 +8,10 @@ using math;
 
 partial class zstd_package {
 
-[GoType("[]byte")] partial struct block;
+partial struct block /*[]byte*/;
 
 // bitReader reads a bit stream going forward.
-[GoType] partial struct bitReader {
+partial struct bitReader {
     internal ж<Reader> r; // for error reporting
     internal block data;   // the bits to read
     internal uint32 off;  // current offset into data
@@ -30,7 +30,7 @@ internal static bitReader makeBitReader(this ж<Reader> Ꮡr, block data, nint o
 
 // moreBits is called to read more bits.
 // This ensures that at least 16 bits are available.
-[GoRecv] internal static error moreBits(this ref bitReader br) {
+internal static error moreBits(this ref bitReader br) {
     while (br.cnt < 16) {
         if (br.off >= (uint32)builtin.len(br.data)) {
             return br.r.makeEOFError((nint)br.off);
@@ -44,7 +44,7 @@ internal static bitReader makeBitReader(this ж<Reader> Ꮡr, block data, nint o
 }
 
 // val is called to fetch a value of b bits.
-[GoRecv] internal static uint32 val(this ref bitReader br, uint8 b) {
+internal static uint32 val(this ref bitReader br, uint8 b) {
     var r = (uint32)(br.bits & ((((uint32)1).Lsh((uint64)(b))) - 1));
     br.bits.RshAssign((uint64)(b));
     br.cnt -= (uint32)b;
@@ -52,7 +52,7 @@ internal static bitReader makeBitReader(this ж<Reader> Ꮡr, block data, nint o
 }
 
 // backup steps back to the last byte we used.
-[GoRecv] internal static void backup(this ref bitReader br) {
+internal static void backup(this ref bitReader br) {
     while (br.cnt >= 8) {
         br.off--;
         br.cnt -= 8;
@@ -60,12 +60,12 @@ internal static bitReader makeBitReader(this ж<Reader> Ꮡr, block data, nint o
 }
 
 // makeError returns an error at the current offset wrapping a string.
-[GoRecv] internal static error makeError(this ref bitReader br, @string msg) {
+internal static error makeError(this ref bitReader br, @string msg) {
     return br.r.makeError((nint)br.off, msg);
 }
 
 // reverseBitReader reads a bit stream in reverse.
-[GoType] partial struct reverseBitReader {
+partial struct reverseBitReader {
     internal ж<Reader> r; // for error reporting
     internal block data;   // the bits to read
     internal uint32 off;  // current offset into data
@@ -99,7 +99,7 @@ internal static (reverseBitReader, error) makeReverseBitReader(this ж<Reader> �
 }
 
 // val is called to fetch a value of b bits.
-[GoRecv] internal static (uint32, error) val(this ref reverseBitReader rbr, uint8 b) {
+internal static (uint32, error) val(this ref reverseBitReader rbr, uint8 b) {
     if (!rbr.fetch(b)) {
         return (0, rbr.r.makeEOFError((nint)rbr.off));
     }
@@ -111,7 +111,7 @@ internal static (reverseBitReader, error) makeReverseBitReader(this ж<Reader> �
 // fetch is called to ensure that at least b bits are available.
 // It reports false if this can't be done,
 // in which case only rbr.cnt bits are available.
-[GoRecv] internal static bool fetch(this ref reverseBitReader rbr, uint8 b) {
+internal static bool fetch(this ref reverseBitReader rbr, uint8 b) {
     while (rbr.cnt < (uint32)b) {
         if (rbr.off <= rbr.start) {
             return false;
@@ -126,7 +126,7 @@ internal static (reverseBitReader, error) makeReverseBitReader(this ж<Reader> �
 }
 
 // makeError returns an error at the current offset wrapping a string.
-[GoRecv] internal static error makeError(this ref reverseBitReader rbr, @string msg) {
+internal static error makeError(this ref reverseBitReader rbr, @string msg) {
     return rbr.r.makeError((nint)rbr.off, msg);
 }
 

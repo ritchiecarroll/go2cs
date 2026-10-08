@@ -24,7 +24,7 @@ private static readonly @string modˢ = "mod"u8;
 private static readonly @string downloadˢ = "download"u8;
 private static readonly @string jsonˢ = "-json"u8;
 
-[GoType("dyn")] internal partial struct FetchModule_j {
+internal partial struct FetchModule_j /*dyn*/ {
     public @string Dir;
 }
 

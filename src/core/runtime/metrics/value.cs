@@ -8,7 +8,7 @@ using @unsafe = unsafe_package;
 
 partial class metrics_package {
 
-[GoType("num:nint")] partial struct ValueKind;
+partial struct ValueKind /*num:nint*/;
 
 public static ValueKind KindBad => /* iota */ 0;
 public static ValueKind KindUint64 => 1;
@@ -16,7 +16,7 @@ public static ValueKind KindFloat64 => 2;
 public static ValueKind KindFloat64Histogram => 3;
 
 // Value represents a metric value returned by the runtime.
-[GoType] partial struct Value {
+partial struct Value {
     internal ValueKind kind;
     internal uint64 scalar;         // contains scalar values for scalar Kinds.
     internal @unsafe.Pointer pointer; // contains non-scalar values.

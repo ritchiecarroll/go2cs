@@ -50,7 +50,7 @@ internal static readonly @string invReflectString = "<invalid reflect.Value>"u8;
 // State represents the printer state passed to custom formatters.
 // It provides access to the [io.Writer] interface plus information about
 // the flags and options for the operand's format specifier.
-[GoType] partial interface State :
+partial interface State :
     Δio.Writer
 {
     // Width returns the value of the width option and whether it has been set.
@@ -64,7 +64,7 @@ internal static readonly @string invReflectString = "<invalid reflect.Value>"u8;
 // Formatter is implemented by any value that has a Format method.
 // The implementation controls how [State] and rune are interpreted,
 // and may call [Sprint] or [Fprint](f) etc. to generate its output.
-[GoType] partial interface Formatter {
+partial interface Formatter {
     void Format(State f, rune verb);
 }
 
@@ -73,7 +73,7 @@ internal static readonly @string invReflectString = "<invalid reflect.Value>"u8;
 // The String method is used to print values passed as an operand
 // to any format that accepts a string or to an unformatted printer
 // such as [Print].
-[GoType] partial interface Stringer {
+partial interface Stringer {
     @string String();
 }
 
@@ -81,7 +81,7 @@ internal static readonly @string invReflectString = "<invalid reflect.Value>"u8;
 // which defines the Go syntax for that value.
 // The GoString method is used to print values passed as an operand
 // to a %#v format.
-[GoType] partial interface GoStringer {
+partial interface GoStringer {
     @string GoString();
 }
 
@@ -116,26 +116,26 @@ public static @string FormatString(State state, rune verb) {
     return ((@string)b);
 }
 
-[GoType("[]byte")] partial struct buffer;
+partial struct buffer /*[]byte*/;
 
-[GoRecv] internal static void write(this ref buffer b, slice<byte> p) {
+internal static void write(this ref buffer b, slice<byte> p) {
     b = appendꓸꓸꓸ(b, p);
 }
 
-[GoStr] [GoRecv] internal static void writeString(this ref buffer b, sstring s) {
+internal static void writeString(this ref buffer b, sstring s) {
     b = append(b, s.ꓸꓸꓸ);
 }
 
-[GoRecv] internal static void writeByte(this ref buffer b, byte c) {
+internal static void writeByte(this ref buffer b, byte c) {
     b = append(b, c);
 }
 
-[GoRecv] internal static void writeRune(this ref buffer b, rune r) {
+internal static void writeRune(this ref buffer b, rune r) {
     b = utf8.AppendRune(b, r);
 }
 
 // pp is used to store a printer's state and is reused with sync.Pool to avoid allocations.
-[GoType] partial struct pp {
+partial struct pp {
     internal buffer buf;
     // arg holds the current item, as an interface{}.
     internal any arg;
@@ -197,15 +197,15 @@ internal static void free(this ж<pp> Ꮡp) {
     ᏑppFree.Put(Ꮡp.OrTypedNil());
 }
 
-[GoRecv] internal static (nint wid, bool ok) Width(this ref pp p) {
+internal static (nint wid, bool ok) Width(this ref pp p) {
     return (p.fmt.wid, p.fmt.widPresent);
 }
 
-[GoRecv] internal static (nint prec, bool ok) Precision(this ref pp p) {
+internal static (nint prec, bool ok) Precision(this ref pp p) {
     return (p.fmt.prec, p.fmt.precPresent);
 }
 
-[GoRecv] internal static bool Flag(this ref pp p, nint b) {
+internal static bool Flag(this ref pp p, nint b) {
     switch (b) {
     case (rune)'-': {
         return p.fmt.minus;
@@ -228,14 +228,14 @@ internal static void free(this ж<pp> Ꮡp) {
 
 // Write implements [io.Writer] so we can call [Fprintf] on a pp (through [State]), for
 // recursive use in custom verbs.
-[GoRecv] internal static (nint ret, error err) Write(this ref pp p, slice<byte> b) {
+internal static (nint ret, error err) Write(this ref pp p, slice<byte> b) {
     p.buf.write(b);
     return (len(b), default!);
 }
 
 // WriteString implements [io.StringWriter] so that we can call [io.WriteString]
 // on a pp (through state), for efficiency.
-[GoRecv] internal static (nint ret, error err) WriteString(this ref pp p, @string s) {
+internal static (nint ret, error err) WriteString(this ref pp p, @string s) {
     p.buf.writeString(s);
     return (len(s), default!);
 }
@@ -244,7 +244,7 @@ internal static void free(this ж<pp> Ꮡp) {
 
 // Fprintf formats according to a format specifier and writes to w.
 // It returns the number of bytes written and any write error encountered.
-[GoStr] public static (nint n, error err) Fprintf(Δio.Writer w, sstring format, params ꓸꓸꓸany aʗp) {
+public static (nint n, error err) Fprintf(Δio.Writer w, sstring format, params ꓸꓸꓸany aʗp) {
     nint n = default!;
     error err = default!;
     var a = aʗp.slice();
@@ -258,14 +258,14 @@ internal static void free(this ж<pp> Ꮡp) {
 
 // Printf formats according to a format specifier and writes to standard output.
 // It returns the number of bytes written and any write error encountered.
-[GoStr] public static (nint n, error err) Printf(sstring format, params ꓸꓸꓸany aʗp) {
+public static (nint n, error err) Printf(sstring format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.sslice();
 
     return Fprintf(new os.FileжWriter(os.Stdout), format, a.ꓸꓸꓸ);
 }
 
 // Sprintf formats according to a format specifier and returns the resulting string.
-[GoStr] public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
+public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
 
     var p = newPrinter();
@@ -277,7 +277,7 @@ internal static void free(this ж<pp> Ꮡp) {
 
 // Appendf formats according to a format specifier, appends the result to the byte
 // slice, and returns the updated slice.
-[GoStr] public static slice<byte> Appendf(slice<byte> b, sstring format, params ꓸꓸꓸany aʗp) {
+public static slice<byte> Appendf(slice<byte> b, sstring format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
 
     var p = newPrinter();
@@ -409,7 +409,7 @@ internal static bool tooLarge(nint x) {
 }
 
 // parsenum converts ASCII to integer.  num is 0 (and isnum is false) if no number present.
-[GoStr] internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start, nint end) {
+internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start, nint end) {
     nint num = default!;
     bool isnum = default!;
     nint newi = default!;
@@ -427,7 +427,7 @@ internal static bool tooLarge(nint x) {
     return (num, isnum, newi);
 }
 
-[GoRecv] internal static void unknownType(this ref pp p, reflectꓸValue v) {
+internal static void unknownType(this ref pp p, reflectꓸValue v) {
     if (!v.IsValid()) {
         p.buf.writeString(nilAngleString);
         return;
@@ -483,7 +483,7 @@ internal static void fmtBool(this ж<pp> Ꮡp, bool v, rune verb) {
 
 // fmt0x64 formats a uint64 in hexadecimal and prefixes it with 0x or
 // not, as requested, by temporarily setting the sharp flag.
-[GoRecv] internal static void fmt0x64(this ref pp p, uint64 v, bool leading0x) {
+internal static void fmt0x64(this ref pp p, uint64 v, bool leading0x) {
     var sharp = p.fmt.sharp;
     p.fmt.sharp = leading0x;
     p.fmt.fmtInteger(v, 16, unsigned, (rune)'v', ldigits);
@@ -633,7 +633,7 @@ internal static void fmtString(this ж<pp> Ꮡp, @string v, rune verb) {
 
 }
 
-[GoStr] internal static void fmtBytes(this ж<pp> Ꮡp, slice<byte> v, rune verb, sstring typeString) {
+internal static void fmtBytes(this ж<pp> Ꮡp, slice<byte> v, rune verb, sstring typeString) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
@@ -1238,7 +1238,7 @@ internal static (nint num, bool isInt, nint newArgNum) intFromArg(slice<any> a, 
 // The returned values are the index, the number of bytes to consume
 // up to the closing paren, if present, and whether the number parsed
 // ok. The bytes to consume will be 1 if no closing paren is present.
-[GoStr] internal static (nint index, nint wid, bool ok) parseArgNumber(sstring format) {
+internal static (nint index, nint wid, bool ok) parseArgNumber(sstring format) {
     // There must be at least 3 bytes: [n].
     if (len(format) < 3) {
         return (0, 1, false);
@@ -1259,7 +1259,7 @@ internal static (nint num, bool isInt, nint newArgNum) intFromArg(slice<any> a, 
 // argNumber returns the next argument to evaluate, which is either the value of the passed-in
 // argNum or the value of the bracketed integer that begins format[i:]. It also returns
 // the new value of i, that is, the index of the next byte of the format to process.
-[GoStr] [GoRecv] internal static (nint newArgNum, nint newi, bool found) argNumber(this ref pp p, nint argNum, sstring format, nint i, nint numArgs) {
+internal static (nint newArgNum, nint newi, bool found) argNumber(this ref pp p, nint argNum, sstring format, nint i, nint numArgs) {
     if (len(format) <= i || format[i] != (rune)'[') {
         return (argNum, i, false);
     }
@@ -1272,19 +1272,19 @@ internal static (nint num, bool isInt, nint newArgNum) intFromArg(slice<any> a, 
     return (argNum, i + wid, ok);
 }
 
-[GoRecv] internal static void badArgNum(this ref pp p, rune verb) {
+internal static void badArgNum(this ref pp p, rune verb) {
     p.buf.writeString(percentBangString);
     p.buf.writeRune(verb);
     p.buf.writeString(badIndexString);
 }
 
-[GoRecv] internal static void missingArg(this ref pp p, rune verb) {
+internal static void missingArg(this ref pp p, rune verb) {
     p.buf.writeString(percentBangString);
     p.buf.writeRune(verb);
     p.buf.writeString(missingString);
 }
 
-[GoStr] internal static void doPrintf(this ж<pp> Ꮡp, sstring format, slice<any> a) {
+internal static void doPrintf(this ж<pp> Ꮡp, sstring format, slice<any> a) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     nint end = len(format);

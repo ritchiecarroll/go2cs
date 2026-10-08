@@ -28,7 +28,7 @@ using go.unicode;
 
 partial class x509_package {
 
-[GoType("num:nint")] partial struct InvalidReason;
+partial struct InvalidReason /*num:nint*/;
 
 public static InvalidReason NotAuthorizedToSign => /* iota */ 0;
 public static InvalidReason Expired => 1;
@@ -44,7 +44,7 @@ public static InvalidReason NoValidChains => 10;
 
 // CertificateInvalidError results when an odd error occurs. Users of this
 // library probably want to handle all these errors uniformly.
-[GoType] partial struct CertificateInvalidError {
+partial struct CertificateInvalidError {
     public ж<Certificate> Cert;
     public InvalidReason Reason;
     public @string Detail;
@@ -101,7 +101,7 @@ public static @string Error(this CertificateInvalidError e) {
 
 // HostnameError results when the set of authorized names doesn't match the
 // requested name.
-[GoType] partial struct HostnameError {
+partial struct HostnameError {
     public ж<Certificate> Certificate;
     public @string Host;
 }
@@ -145,7 +145,7 @@ public static @string Error(this HostnameError h) {
 }
 
 // UnknownAuthorityError results when the certificate issuer is unknown
-[GoType] partial struct UnknownAuthorityError {
+partial struct UnknownAuthorityError {
     public ж<Certificate> Cert;
     // hintErr contains an error that may be helpful in determining why an
     // authority wasn't found.
@@ -175,7 +175,7 @@ public static @string Error(this UnknownAuthorityError e) {
 }
 
 // SystemRootsError results when we fail to load the system root certificates.
-[GoType] partial struct SystemRootsError {
+partial struct SystemRootsError {
     public error Err;
 }
 
@@ -199,7 +199,7 @@ public static error Unwrap(this SystemRootsError se) {
 internal static error errNotParsed = errors.New("x509: missing ASN.1 contents; use ParseCertificate"u8);
 
 // VerifyOptions contains parameters for Certificate.Verify.
-[GoType] partial struct VerifyOptions {
+partial struct VerifyOptions {
     // DNSName, if set, is checked against the leaf certificate with
     // Certificate.VerifyHostname or the platform verifier.
     public @string DNSName;
@@ -249,7 +249,7 @@ internal static UntypedInt rootCertificate => 2;
 // rfc2821Mailbox represents a “mailbox” (which is an email address to most
 // people) by breaking it into the “local” (i.e. before the '@') and “domain”
 // parts.
-[GoType] partial struct rfc2821Mailbox {
+partial struct rfc2821Mailbox {
     internal @string local, domain;
 }
 
@@ -902,7 +902,7 @@ internal static slice<ж<Certificate>> appendToFreshChain(slice<ж<Certificate>>
     return n;
 }
 
-[GoType("dyn")] internal partial interface alreadyInChain_pubKeyEqual {
+internal partial interface alreadyInChain_pubKeyEqual /*dyn*/ {
     bool Equal(cryptoꓸPublicKey _);
 }
 
@@ -1261,7 +1261,7 @@ internal static OID mustNewOIDFromInts(slice<uint64> ints) {
     return oid;
 }
 
-[GoType] partial struct policyGraphNode {
+partial struct policyGraphNode {
     internal OID validPolicy;
     internal slice<OID> expectedPolicySet;
 // we do not implement qualifiers, so we don't track qualifier_set
@@ -1283,7 +1283,7 @@ internal static ж<policyGraphNode> newPolicyGraphNode(OID valid, slice<ж<polic
     return n;
 }
 
-[GoType] partial struct policyGraph {
+partial struct policyGraph {
     internal slice<map<@string, ж<policyGraphNode>>> strata;
     // map of OID -> nodes at strata[depth-1] with OID in their expectedPolicySet
     internal map<@string, slice<ж<policyGraphNode>>> parentIndex;
@@ -1307,42 +1307,42 @@ internal static ж<policyGraph> newPolicyGraph() {
     ));
 }
 
-[GoRecv] internal static void insert(this ref policyGraph pg, ж<policyGraphNode> Ꮡn) {
+internal static void insert(this ref policyGraph pg, ж<policyGraphNode> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     pg.strata[pg.depth].Set(((@string)n.validPolicy.der), Ꮡn);
 }
 
-[GoRecv] internal static slice<ж<policyGraphNode>> parentsWithExpected(this ref policyGraph pg, OID expected) {
+internal static slice<ж<policyGraphNode>> parentsWithExpected(this ref policyGraph pg, OID expected) {
     if (pg.depth == 0) {
         return default!;
     }
     return pg.parentIndex[tmpstring(expected.der)];
 }
 
-[GoRecv] internal static ж<policyGraphNode> parentWithAnyPolicy(this ref policyGraph pg) {
+internal static ж<policyGraphNode> parentWithAnyPolicy(this ref policyGraph pg) {
     if (pg.depth == 0) {
         return default!;
     }
     return pg.strata[pg.depth - 1][tmpstring(anyPolicyOID.der)];
 }
 
-[GoRecv] internal static iter.Seq<ж<policyGraphNode>> parents(this ref policyGraph pg) {
+internal static iter.Seq<ж<policyGraphNode>> parents(this ref policyGraph pg) {
     if (pg.depth == 0) {
         return default!;
     }
     return maps.Values<map<@string, ж<policyGraphNode>>, @string, ж<policyGraphNode>>(pg.strata[pg.depth - 1]);
 }
 
-[GoRecv] internal static map<@string, ж<policyGraphNode>> leaves(this ref policyGraph pg) {
+internal static map<@string, ж<policyGraphNode>> leaves(this ref policyGraph pg) {
     return pg.strata[pg.depth];
 }
 
-[GoRecv] internal static ж<policyGraphNode> leafWithPolicy(this ref policyGraph pg, OID policy) {
+internal static ж<policyGraphNode> leafWithPolicy(this ref policyGraph pg, OID policy) {
     return pg.strata[pg.depth][tmpstring(policy.der)];
 }
 
-[GoRecv] internal static void deleteLeaf(this ref policyGraph pg, OID policy) {
+internal static void deleteLeaf(this ref policyGraph pg, OID policy) {
     var n = pg.strata[pg.depth][tmpstring(policy.der)];
     if (n == nil) {
         return;
@@ -1356,7 +1356,7 @@ internal static ж<policyGraph> newPolicyGraph() {
     delete(pg.strata[pg.depth], ((@string)policy.der));
 }
 
-[GoRecv] internal static slice<ж<policyGraphNode>> validPolicyNodes(this ref policyGraph pg) {
+internal static slice<ж<policyGraphNode>> validPolicyNodes(this ref policyGraph pg) {
     slice<ж<policyGraphNode>> validNodes = default!;
     for (nint i = pg.depth; i >= 0; i--) {
         foreach (var (_, n) in pg.strata[i]) {
@@ -1375,7 +1375,7 @@ internal static ж<policyGraph> newPolicyGraph() {
     return validNodes;
 }
 
-[GoRecv] internal static void prune(this ref policyGraph pg) {
+internal static void prune(this ref policyGraph pg) {
     for (nint i = pg.depth - 1; i > 0; i--) {
         foreach (var (_, n) in pg.strata[i]) {
             if (builtin.len((~n).children) == 0) {
@@ -1388,7 +1388,7 @@ internal static ж<policyGraph> newPolicyGraph() {
     }
 }
 
-[GoRecv] internal static void incrDepth(this ref policyGraph pg) {
+internal static void incrDepth(this ref policyGraph pg) {
     pg.parentIndex = new map<@string, slice<ж<policyGraphNode>>>{};
     foreach (var (_, n) in pg.strata[pg.depth]) {
         foreach (var (_, e) in (~n).expectedPolicySet) {

@@ -31,7 +31,7 @@ private static readonly object renameˢ = (@string)"rename:"u8;
 private static readonly object removeOneˢ = (@string)"remove one:"u8;
 private static readonly object removeallˢ = (@string)"removeall:"u8;
 
-[GoType("dyn")] internal partial struct main_probes {
+internal partial struct main_probes /*dyn*/ {
     internal @string label;
     internal @string path;
 }

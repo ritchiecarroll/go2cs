@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct box {
+partial struct box {
     internal nint v;
 }
 
@@ -41,11 +41,11 @@ internal static void Main() {
     fmt.Println(si.String(), fi());
 }
 
-[GoType] partial interface stringer {
+partial interface stringer {
     @string String();
 }
 
-[GoType] partial struct sval {
+partial struct sval {
     internal @string s;
 }
 

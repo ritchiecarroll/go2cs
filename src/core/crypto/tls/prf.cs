@@ -174,7 +174,7 @@ internal static ΔfinishedHash newFinishedHash(uint16 version, ref cipherSuite c
 
 // A finishedHash calculates the hash of a set of handshake messages suitable
 // for including in a Finished message.
-[GoType] partial struct ΔfinishedHash {
+partial struct ΔfinishedHash {
     internal hash.Hash client;
     internal hash.Hash server;
     // Prior to TLS 1.2, an additional MD5 hash is required.
@@ -186,7 +186,7 @@ internal static ΔfinishedHash newFinishedHash(uint16 version, ref cipherSuite c
     internal Func<slice<byte>, @string, slice<byte>, nint, slice<byte>> prf;
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref ΔfinishedHash h, slice<byte> msg) {
+internal static (nint n, error err) Write(this ref ΔfinishedHash h, slice<byte> msg) {
     h.client.Write(msg);
     h.server.Write(msg);
     if (h.version < VersionTLS12) {
@@ -242,7 +242,7 @@ internal static slice<byte> hashForClientCertificate(this ΔfinishedHash h, uint
 
 // discardHandshakeBuffer is called when there is no more need to
 // buffer the entirety of the handshake messages.
-[GoRecv] internal static void discardHandshakeBuffer(this ref ΔfinishedHash h) {
+internal static void discardHandshakeBuffer(this ref ΔfinishedHash h) {
     h.buffer = default!;
 }
 

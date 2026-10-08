@@ -6,7 +6,7 @@ using sync;
 
 partial class main_package {
 
-[GoType] partial struct holder {
+partial struct holder {
     internal atomic.Int64 count;
 }
 

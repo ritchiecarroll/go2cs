@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:nint")] partial struct calc;
+partial struct calc /*num:nint*/;
 
 internal static @string Zero(this calc c) {
     return fmt.Sprintf("z(%d)"u8, (nint)c);
@@ -38,7 +38,7 @@ internal static @string Mixed(this calc c, @string name, bool flag, nint n) {
     return fmt.Sprintf("m(%d,%s,%t,%d)"u8, (nint)c, name, flag, n);
 }
 
-[GoType("dyn")] internal partial interface main_type {
+internal partial interface main_type /*dyn*/ {
     @string Zero();
     @string One(nint a);
     @string Two(nint a, nint b);

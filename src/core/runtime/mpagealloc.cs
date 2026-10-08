@@ -73,7 +73,7 @@ internal static offAddr maxSearchAddr() {
     return maxOffAddr;
 }
 
-[GoType("num:nuint")] partial struct chunkIdx;
+partial struct chunkIdx /*num:nuint*/;
 
 // chunkIndex returns the global index of the palloc chunk containing the
 // pointer p.
@@ -154,7 +154,7 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
     return ((nint)alignDown((uintptr)lo, e), (nint)alignUp((uintptr)hi, e));
 }
 
-[GoType("dyn")] partial struct pageAlloc_scav {
+partial struct pageAlloc_scav /*dyn*/ {
     // index is an efficient index of chunks that have pages available to
     // scavenge.
     internal scavengeIndex index;
@@ -166,7 +166,7 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
     internal atomic.Uintptr releasedEager;
 }
 
-[GoType] partial struct pageAlloc {
+partial struct pageAlloc {
     // Radix tree of summaries.
     //
     // Each slice's cap represents the whole memory reservation.
@@ -303,7 +303,7 @@ internal static void init(this ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sy
 // tryChunkOf returns the bitmap data for the given chunk.
 //
 // Returns nil if the chunk data has not been mapped.
-[GoRecv] internal static ж<pallocData> tryChunkOf(this ref pageAlloc Δp, chunkIdx ci) {
+internal static ж<pallocData> tryChunkOf(this ref pageAlloc Δp, chunkIdx ci) {
     var l2 = Δp.chunks[ci.l1()];
     if (l2 == nil) {
         return default!;
@@ -314,7 +314,7 @@ internal static void init(this ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sy
 // chunkOf returns the chunk at the given chunk index.
 //
 // The chunk index must be valid or this method may throw.
-[GoRecv] internal static ж<pallocData> chunkOf(this ref pageAlloc Δp, chunkIdx ci) {
+internal static ж<pallocData> chunkOf(this ref pageAlloc Δp, chunkIdx ci) {
     return Δp.chunks[ci.l1()].at<pallocData>((ulong)(ci.l2()));
 }
 
@@ -410,7 +410,7 @@ internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) 
 // Must be called on the system stack because it acquires the heap lock.
 //
 //go:systemstack
-[GoRecv] internal static void enableChunkHugePages(this ref pageAlloc Δp) {
+internal static void enableChunkHugePages(this ref pageAlloc Δp) {
     // Grab the heap lock to turn on huge pages for new chunks and clone the current
     // heap address space ranges.
     //
@@ -450,7 +450,7 @@ internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) 
 // whether the operation performed was an allocation or a free.
 //
 // p.mheapLock must be held.
-[GoRecv] internal static void update(this ref pageAlloc Δp, uintptr @base, uintptr npages, bool contig, bool alloc) {
+internal static void update(this ref pageAlloc Δp, uintptr @base, uintptr npages, bool contig, bool alloc) {
     assertLockHeld(Δp.mheapLock);
     // base, limit, start, and end are inclusive.
     var limit = @base + npages * (uintptr)pageSize - 1;
@@ -528,7 +528,7 @@ internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) 
 // allocated range.
 //
 // p.mheapLock must be held.
-[GoRecv] internal static uintptr allocRange(this ref pageAlloc Δp, uintptr @base, uintptr npages) {
+internal static uintptr allocRange(this ref pageAlloc Δp, uintptr @base, uintptr npages) {
     assertLockHeld(Δp.mheapLock);
     var limit = @base + npages * (uintptr)pageSize - 1;
     chunkIdx sc = chunkIndex(@base);
@@ -569,7 +569,7 @@ internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) 
 // it returns maxOffAddr.
 //
 // p.mheapLock must be held.
-[GoRecv] internal static offAddr findMappedAddr(this ref pageAlloc Δp, offAddr addr) {
+internal static offAddr findMappedAddr(this ref pageAlloc Δp, offAddr addr) {
     assertLockHeld(Δp.mheapLock);
     // If we're not in a test, validate first by checking mheap_.arenas.
     // This is a fast path which is only safe to use outside of testing.
@@ -592,7 +592,7 @@ internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) 
 internal static readonly @string rangePartiallyOverlapsˢ = "range partially overlaps"u8;
 internal static readonly @string badSummaryDataˢ = "bad summary data"u8;
 
-[GoType("dyn")] internal partial struct find_firstFree {
+internal partial struct find_firstFree /*dyn*/ {
     internal offAddr @base, bound;
 }
 
@@ -612,7 +612,7 @@ internal static readonly @string badSummaryDataˢ = "bad summary data"u8;
 // searchAddr returned is invalid and must be ignored.
 //
 // p.mheapLock must be held.
-[GoRecv] internal static (uintptr, offAddr) find(this ref pageAlloc Δp, uintptr npages) {
+internal static (uintptr, offAddr) find(this ref pageAlloc Δp, uintptr npages) {
     assertLockHeld(Δp.mheapLock);
     // Search algorithm.
     //
@@ -827,7 +827,7 @@ break_nextLevel:;
 // Must run on the system stack because p.mheapLock must be held.
 //
 //go:systemstack
-[GoRecv] internal static (uintptr addr, uintptr scav) alloc(this ref pageAlloc Δp, uintptr npages) {
+internal static (uintptr addr, uintptr scav) alloc(this ref pageAlloc Δp, uintptr npages) {
     uintptr addr = default!;
     uintptr scav = default!;
 
@@ -940,7 +940,7 @@ internal static pallocSum freeChunkSum => /* pallocSum(uint64(pallocChunkPages) 
 	uint64(pallocChunkPages<<logMaxPackedValue) |
 	uint64(pallocChunkPages<<(2*logMaxPackedValue))) */ unchecked((pallocSum)2251800887427584);
 
-[GoType("num:uint64")] partial struct pallocSum;
+partial struct pallocSum /*num:uint64*/;
 
 // packPallocSum takes a start, max, and end value and produces a pallocSum.
 internal static pallocSum packPallocSum(nuint start, nuint max, nuint end) {

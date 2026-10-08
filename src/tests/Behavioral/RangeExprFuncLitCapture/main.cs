@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct probe {
+partial struct probe {
     internal @string name;
     internal Func<nint> run;
 }

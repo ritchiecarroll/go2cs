@@ -40,11 +40,11 @@ public static io.Reader Reader;
     Reader = new readerжReader(Ꮡ(new reader(nil)));
 }
 
-[GoType] partial struct reader {
-    [GoEmbedded] public go.crypto.@internal.fips140.drbg_package.DefaultReader DefaultReader;
+partial struct reader {
+    /*embed*/ public go.crypto.@internal.fips140.drbg_package.DefaultReader DefaultReader;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref reader r, slice<byte> b) {
+internal static (nint n, error err) Read(this ref reader r, slice<byte> b) {
     boring.Unreachable();
     if (fips140.Enabled){
         drbg.Read(b);

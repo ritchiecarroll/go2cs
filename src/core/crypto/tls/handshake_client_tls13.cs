@@ -26,7 +26,7 @@ using Δx509 = go.crypto.x509_package;
 
 partial class tls_package {
 
-[GoType] partial struct clientHandshakeStateTLS13 {
+partial struct clientHandshakeStateTLS13 {
     internal ж<Conn> c;
     internal context.Context ctx;
     internal ж<serverHelloMsg> serverHello;
@@ -197,7 +197,7 @@ internal static readonly @string tlsServerChangedCipherˢ = "tls: server changed
 
 // checkServerHelloOrHRR does validity checks that apply to both ServerHello and
 // HelloRetryRequest messages. It sets hs.suite.
-[GoRecv] internal static error checkServerHelloOrHRR(this ref clientHandshakeStateTLS13 hs) {
+internal static error checkServerHelloOrHRR(this ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
     if ((~hs.serverHello).supportedVersion == 0) {
         c.sendAlert(alertMissingExtension);
@@ -239,7 +239,7 @@ internal static readonly @string tlsServerChangedCipherˢ = "tls: server changed
 
 // sendDummyChangeCipherSpec sends a ChangeCipherSpec record for compatibility
 // with middleboxes that didn't implement TLS correctly. See RFC 8446, Appendix D.4.
-[GoRecv] internal static error sendDummyChangeCipherSpec(this ref clientHandshakeStateTLS13 hs) {
+internal static error sendDummyChangeCipherSpec(this ref clientHandshakeStateTLS13 hs) {
     if ((~hs.c).quic != nil) {
         return default!;
     }
@@ -261,7 +261,7 @@ internal static readonly @string tlsServerSentAnˢ2 = "tls: server sent an unnec
 
 // processHelloRetryRequest handles the HRR in hs.serverHello, modifies and
 // resends hs.hello, and reads the new ServerHello into hs.serverHello.
-[GoRecv] internal static error processHelloRetryRequest(this ref clientHandshakeStateTLS13 hs) {
+internal static error processHelloRetryRequest(this ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
     // The first ClientHello gets double-hashed into the transcript upon a
     // HelloRetryRequest. (The idea is that the server might offload transcript
@@ -509,7 +509,7 @@ internal static readonly @string tlsInvalidServerˢ = "tls: invalid server X2551
 internal static readonly @string tlsInvalidServerKeyShareˢ = "tls: invalid server key share"u8;
 internal static readonly @string tlsInvalidX25519mlkem768ˢ = "tls: invalid X25519MLKEM768 server key share"u8;
 
-[GoRecv] internal static error establishHandshakeKeys(this ref clientHandshakeStateTLS13 hs) {
+internal static error establishHandshakeKeys(this ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
     var ecdhePeerData = hs.serverHello.Value.serverShare.data;
     if ((~hs.serverHello).serverShare.group == X25519MLKEM768) {
@@ -586,7 +586,7 @@ internal static readonly @string tlsServerAccepted0Rttˢ = "tls: server accepted
 internal static readonly @string tlsServerAccepted0Rttˢ2 = "tls: server accepted 0-RTT with the wrong ALPN"u8;
 internal static readonly @string tlsServerSentEncryptedˢ = "tls: server sent encrypted client hello retry configs after accepting encrypted client hello"u8;
 
-[GoRecv] internal static error readServerParameters(this ref clientHandshakeStateTLS13 hs) {
+internal static error readServerParameters(this ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
     var (msg, err) = c.readHandshake(new hash_HashᴠtranscriptHash(hs.transcript));
     if (err != default!) {
@@ -654,7 +654,7 @@ internal static readonly @string tlsServerSentEncryptedˢ = "tls: server sent en
 internal static readonly @string tlsReceivedEmptyˢ = "tls: received empty certificates message"u8;
 internal static readonly @string tlsCertificateUsedWithˢ = "tls: certificate used with invalid signature algorithm"u8;
 
-[GoRecv] internal static error readServerCertificate(this ref clientHandshakeStateTLS13 hs) {
+internal static error readServerCertificate(this ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
     // Either a PSK or a certificate is always used, but not both.
     // See RFC 8446, Section 4.1.1.
@@ -744,7 +744,7 @@ internal static readonly @string tlsCertificateUsedWithˢ = "tls: certificate us
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsInvalidServerFinishedˢ = "tls: invalid server finished hash"u8;
 
-[GoRecv] internal static error readServerFinished(this ref clientHandshakeStateTLS13 hs) {
+internal static error readServerFinished(this ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
     // finishedMsg is included in the transcript, but not until after we
     // check the client version, since the state before this message was
@@ -790,7 +790,7 @@ internal static readonly @string tlsInvalidServerFinishedˢ = "tls: invalid serv
     return default!;
 }
 
-[GoRecv] internal static error sendClientCertificate(this ref clientHandshakeStateTLS13 hs) {
+internal static error sendClientCertificate(this ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
     if (hs.certReq == nil) {
         return default!;
@@ -858,7 +858,7 @@ internal static readonly @string tlsInvalidServerFinishedˢ = "tls: invalid serv
     return default!;
 }
 
-[GoRecv] internal static error sendClientFinished(this ref clientHandshakeStateTLS13 hs) {
+internal static error sendClientFinished(this ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
     var finished = Ꮡ(new finishedMsg(
         verifyData: hs.suite.finishedHash((~c).@out.trafficSecret, hs.transcript)

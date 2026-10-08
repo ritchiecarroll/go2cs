@@ -190,11 +190,11 @@ internal static readonly @string float32nan3ˢ = "float32nan3"u8;
 internal static readonly @string fixedStackIsNotPowerOf2ˢ = "FixedStack is not power-of-2"u8;
 internal static readonly @string assemblyChecksFailedˢ = "assembly checks failed"u8;
 
-[GoType("dyn")] internal partial struct check_x1t {
+internal partial struct check_x1t /*dyn*/ {
     internal uint8 x;
 }
 
-[GoType("dyn")] internal partial struct check_y1t {
+internal partial struct check_y1t /*dyn*/ {
     internal check_x1t x1;
     internal uint8 y;
 }
@@ -334,7 +334,7 @@ internal static void check() {
     }
 }
 
-[GoType] partial struct dbgVar {
+partial struct dbgVar {
     internal @string name;
     internal ж<int32> value;     // for variables that can only be set at startup
     internal ж<atomic.Int32> atomic; // for variables that can be changed during execution
@@ -346,7 +346,7 @@ internal static void check() {
 // existing int var for that value, which may
 // already have an initial value.
 
-[GoType("dyn")] partial struct debugᴛ1 {
+partial struct debugᴛ1 /*dyn*/ {
     internal int32 cgocheck;
     internal int32 clobberfree;
     internal int32 disablethp;

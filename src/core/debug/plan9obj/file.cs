@@ -27,7 +27,7 @@ using encoding;
 partial class plan9obj_package {
 
 // A FileHeader represents a Plan 9 a.out file header.
-[GoType] partial struct FileHeader {
+partial struct FileHeader {
     public uint32 Magic;
     public uint32 Bss;
     public uint64 Entry;
@@ -37,7 +37,7 @@ partial class plan9obj_package {
 }
 
 // A File represents an open Plan 9 a.out file.
-[GoType] partial struct File {
+partial struct File {
     public partial ref FileHeader FileHeader { get; }
     public slice<ж<ΔSection>> Sections;
     internal io.Closer closer;
@@ -46,14 +46,14 @@ partial class plan9obj_package {
 // A SectionHeader represents a single Plan 9 a.out section header.
 // This structure doesn't exist on-disk, but eases navigation
 // through the object file.
-[GoType] partial struct SectionHeader {
+partial struct SectionHeader {
     public @string Name;
     public uint32 Size;
     public uint32 Offset;
 }
 
 // A Section represents a single section in a Plan 9 a.out file.
-[GoType] partial struct ΔSection {
+partial struct ΔSection {
     public partial ref SectionHeader SectionHeader { get; }
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
@@ -61,22 +61,22 @@ partial class plan9obj_package {
     // If a client wants Read and Seek it must use
     // Open() to avoid fighting over the seek offset
     // with other clients.
-    [GoEmbedded] public io_package.ReaderAt ReaderAt;
+    /*embed*/ public io_package.ReaderAt ReaderAt;
     internal ж<io.SectionReader> sr;
 }
 
 // Data reads and returns the contents of the Plan 9 a.out section.
-[GoRecv] public static (slice<byte>, error) Data(this ref ΔSection s) {
+public static (slice<byte>, error) Data(this ref ΔSection s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), (uint64)s.Size, 0);
 }
 
 // Open returns a new ReadSeeker reading the Plan 9 a.out section.
-[GoRecv] public static io.ReadSeeker Open(this ref ΔSection s) {
+public static io.ReadSeeker Open(this ref ΔSection s) {
     return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
 }
 
 // A Symbol represents an entry in a Plan 9 a.out symbol table section.
-[GoType] partial struct Sym {
+partial struct Sym {
     public uint64 Value;
     public rune Type;
     public @string Name;
@@ -88,13 +88,13 @@ partial class plan9obj_package {
 
 // formatError is returned by some operations if the data does
 // not have the correct format for an object file.
-[GoType] partial struct formatError {
+partial struct formatError {
     internal nint off;
     internal @string msg;
     internal any val;
 }
 
-[GoRecv] internal static @string Error(this ref formatError e) {
+internal static @string Error(this ref formatError e) {
     @string msg = e.msg;
     if (e.val != default!) {
         msg += fmt.Sprintf(" '%v'"u8, e.val);
@@ -121,7 +121,7 @@ public static (ж<File>, error) Open(@string name) {
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
-[GoRecv] public static error Close(this ref File f) {
+public static error Close(this ref File f) {
     error err = default!;
     if (f.closer != default!) {
         err = f.closer.Close();
@@ -140,7 +140,7 @@ internal static (uint32, error) parseMagic(slice<byte> magic) {
     return (0, new formatErrorжerror(Ꮡ(new formatError(0, "bad magic number"u8, magic))));
 }
 
-[GoType("dyn")] internal partial struct NewFile_type {
+internal partial struct NewFile_type /*dyn*/ {
     internal @string name;
     internal uint32 size;
 }
@@ -331,7 +331,7 @@ internal static readonly @string symsˢ = "syms"u8;
 internal static readonly @string cannotLoadSymbolSectionˢ = "cannot load symbol section"u8;
 
 // Symbols returns the symbol table for f.
-[GoRecv] public static (slice<Sym>, error) Symbols(this ref File f) {
+public static (slice<Sym>, error) Symbols(this ref File f) {
     var symtabSection = f.Section(symsˢ);
     if (symtabSection == nil) {
         return (default!, ErrNoSymbols);
@@ -345,7 +345,7 @@ internal static readonly @string cannotLoadSymbolSectionˢ = "cannot load symbol
 
 // Section returns a section with the given name, or nil if no such
 // section exists.
-[GoRecv] public static ж<ΔSection> Section(this ref File f, @string name) {
+public static ж<ΔSection> Section(this ref File f, @string name) {
     foreach (var (_, s) in f.Sections) {
         if ((~s).Name == name) {
             return s;

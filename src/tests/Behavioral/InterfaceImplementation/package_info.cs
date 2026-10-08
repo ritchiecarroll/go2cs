@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("InterfaceImplementation.go", "InterfaceImplementation.cs", "AB4ugoKCkoSCgoyChIKChIKEgpaEhoaCAAcSgsqCgpQACQaCgoKUgpqUpKT+goLWooKipKKEouiC1oLWgtaC")]
+[assembly: go.GoPositionMap("InterfaceImplementation.go", "InterfaceImplementation.cs", "ABsugoKCkoSCgoyChIKChIKEgpaEhoaCAAcSgsqCgpQACQaCgoKUgpqUpKT+goLWooKipKKEouiC1oLWgtaC")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -63,7 +63,7 @@ namespace go;
 public static partial class main_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
@@ -71,6 +71,7 @@ public static partial class main_package
     // <TypeAccessibility>
     internal partial struct errno {}
     public partial interface Animal {}
+    [GoLocalName("Test")] public partial interface Testᴅ {}
     public partial struct Dog {}
     public partial struct Frog {}
     // </TypeAccessibility>

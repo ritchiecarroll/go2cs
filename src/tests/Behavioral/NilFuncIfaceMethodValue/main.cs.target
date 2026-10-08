@@ -21,7 +21,7 @@ public static @string Shout(this Greeter g) {
     return g() + "!"u8;
 }
 
-[GoType] partial interface Greetable {
+partial interface Greetable {
     @string Greet();
     @string Shout();
 }

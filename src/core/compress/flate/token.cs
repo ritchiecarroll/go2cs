@@ -61,7 +61,7 @@ internal static array<uint32> offsetCodes = new uint32[]{
     15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15
 }.array();
 
-[GoType("num:uint32")] partial struct token;
+partial struct token /*num:uint32*/;
 
 // Convert a literal into a literal token.
 internal static token literalToken(uint32 literal) {

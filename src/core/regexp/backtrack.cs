@@ -21,7 +21,7 @@ partial class regexp_package {
 
 // A job is an entry on the backtracker's job stack. It holds
 // the instruction pc and the position in the input.
-[GoType] partial struct job {
+partial struct job {
     internal uint32 pc;
     internal bool arg;
     internal nint pos;
@@ -32,7 +32,7 @@ internal static UntypedInt maxBacktrackProg => 500; // len(prog.Inst) <= max
 internal static UntypedInt maxBacktrackVector => /* 256 * 1024 */ 262144; // bit vector size <= max (bits)
 
 // bitState holds state for the backtracker.
-[GoType] partial struct bitState {
+partial struct bitState {
     internal nint end;
     internal slice<nint> cap;
     internal slice<nint> matchcap;
@@ -77,7 +77,7 @@ internal static bool shouldBacktrack(ref syntax.Prog prog) {
 // reset resets the state of the backtracker.
 // end is the end position in the input.
 // ncap is the number of captures.
-[GoRecv] internal static void reset(this ref bitState b, ж<syntax.Prog> Ꮡprog, nint end, nint ncap) {
+internal static void reset(this ref bitState b, ж<syntax.Prog> Ꮡprog, nint end, nint ncap) {
     ref var prog = ref Ꮡprog.DerefOrNull();
 
     b.end = end;
@@ -113,7 +113,7 @@ internal static bool shouldBacktrack(ref syntax.Prog prog) {
 
 // shouldVisit reports whether the combination of (pc, pos) has not
 // been visited yet.
-[GoRecv] internal static bool shouldVisit(this ref bitState b, uint32 pc, nint pos) {
+internal static bool shouldVisit(this ref bitState b, uint32 pc, nint pos) {
     nuint n = (nuint)((nint)pc * (b.end + 1) + pos);
     if ((uint32)(b.visited[n / (nuint)visitedBits] & (((uint32)1 << (int)(((nuint)(n & (nuint)(visitedBits - 1))))))) != 0) {
         return false;
@@ -124,7 +124,7 @@ internal static bool shouldBacktrack(ref syntax.Prog prog) {
 
 // push pushes (pc, pos, arg) onto the job stack if it should be
 // visited.
-[GoRecv] internal static void push(this ref bitState b, ж<Regexp> Ꮡre, uint32 pc, nint pos, bool arg) {
+internal static void push(this ref bitState b, ж<Regexp> Ꮡre, uint32 pc, nint pos, bool arg) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     // Only check shouldVisit when arg is false.

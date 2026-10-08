@@ -24,17 +24,17 @@ public static error ErrRange = errors.New("value out of range"u8);
 public static error ErrSyntax = errors.New("invalid syntax"u8);
 
 // A NumError records a failed conversion.
-[GoType] partial struct NumError {
+partial struct NumError {
     public @string Func; // the failing function (ParseBool, ParseInt, ParseUint, ParseFloat, ParseComplex)
     public @string Num; // the input
     public error Err;  // the reason the conversion failed (e.g. ErrRange, ErrSyntax, etc.)
 }
 
-[GoRecv] public static @string Error(this ref NumError e) {
+public static @string Error(this ref NumError e) {
     return "strconv."u8 + e.Func + ": "u8 + "parsing "u8 + Quote(e.Num) + ": "u8 + e.Err.Error();
 }
 
-[GoRecv] public static error Unwrap(this ref NumError e) {
+public static error Unwrap(this ref NumError e) {
     return e.Err;
 }
 

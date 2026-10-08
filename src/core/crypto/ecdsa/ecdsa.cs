@@ -46,8 +46,8 @@ using vendor.golang.org.x.crypto.cryptobyte;
 partial class ecdsa_package {
 
 // PublicKey represents an ECDSA public key.
-[GoType] partial struct PublicKey {
-    [GoEmbedded] public go.crypto.elliptic_package.Curve Curve;
+partial struct PublicKey {
+    /*embed*/ public go.crypto.elliptic_package.Curve Curve;
     public ж<bigꓸInt> X, Y;
 }
 
@@ -61,7 +61,7 @@ internal static readonly @string ecdsaInvalidPublicKeyˢ = "ecdsa: invalid publi
 // ECDH returns k as a [ecdh.PublicKey]. It returns an error if the key is
 // invalid according to the definition of [ecdh.Curve.NewPublicKey], or if the
 // Curve is not supported by crypto/ecdh.
-[GoRecv] public static (ж<ecdhꓸPublicKey>, error) ECDH(this ref PublicKey k) {
+public static (ж<ecdhꓸPublicKey>, error) ECDH(this ref PublicKey k) {
     var c = curveToECDH(k.Curve);
     if (c == default!) {
         return (default!, errors.New(ecdsaUnsupportedCurveByˢ));
@@ -77,7 +77,7 @@ internal static readonly @string ecdsaInvalidPublicKeyˢ = "ecdsa: invalid publi
 // Two keys are only considered to have the same value if they have the same Curve value.
 // Note that for example [elliptic.P256] and elliptic.P256().Params() are different
 // values, as the latter is a generic not constant time implementation.
-[GoRecv] public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) {
+public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) {
     var (xx, ok) = x._<ж<PublicKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -91,7 +91,7 @@ internal static readonly @string ecdsaInvalidPublicKeyˢ = "ecdsa: invalid publi
 // better to err on the side of safety.
 
 // PrivateKey represents an ECDSA private key.
-[GoType] partial struct PrivateKey {
+partial struct PrivateKey {
     public partial ref PublicKey PublicKey { get; }
     public ж<bigꓸInt> D;
 }
@@ -102,7 +102,7 @@ internal static readonly @string ecdsaInvalidPrivateKeyˢ = "ecdsa: invalid priv
 // ECDH returns k as a [ecdh.PrivateKey]. It returns an error if the key is
 // invalid according to the definition of [ecdh.Curve.NewPrivateKey], or if the
 // Curve is not supported by [crypto/ecdh].
-[GoRecv] public static (ж<ecdh.PrivateKey>, error) ECDH(this ref PrivateKey k) {
+public static (ж<ecdh.PrivateKey>, error) ECDH(this ref PrivateKey k) {
     var c = curveToECDH(k.Curve);
     if (c == default!) {
         return (default!, errors.New(ecdsaUnsupportedCurveByˢ));
@@ -139,7 +139,7 @@ public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡpriv) {
 // Equal reports whether priv and x have the same value.
 //
 // See [PublicKey.Equal] for details on how Curve is compared.
-[GoRecv] public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) {
+public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) {
     var (xx, ok) = x._<ж<PrivateKey>>(ᐧ);
     if (!ok) {
         return false;

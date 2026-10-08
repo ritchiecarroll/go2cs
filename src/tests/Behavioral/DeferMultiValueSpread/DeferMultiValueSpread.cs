@@ -78,7 +78,7 @@ internal static void goShow(nint n, @string s) {
     done.ᐸꟷ(true);
 }
 
-[GoType] partial struct sink {
+partial struct sink {
     internal @string tag;
 }
 
@@ -86,7 +86,7 @@ internal static void goShow(nint n, @string s) {
 private static readonly object sinkˢ = (@string)"  sink"u8;
 private static readonly object tookˢ = (@string)"took"u8;
 
-[GoRecv] internal static void take(this ref sink s, nint n, @string msg) {
+internal static void take(this ref sink s, nint n, @string msg) {
     fmt.Println(sinkˢ, s.tag, tookˢ, n, msg);
 }
 

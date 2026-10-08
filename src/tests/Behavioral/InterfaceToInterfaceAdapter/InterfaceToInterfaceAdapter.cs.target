@@ -5,7 +5,7 @@ using CrossPkgLib = CrossPkgLib_package;
 
 partial class main_package {
 
-[GoType] partial interface localLabel {
+partial interface localLabel {
     @string Label();
 }
 

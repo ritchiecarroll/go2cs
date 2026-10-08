@@ -15,7 +15,7 @@ partial class types_package {
 // API
 
 // An Interface represents an interface type.
-[GoType] partial struct Interface {
+partial struct Interface {
     internal ж<Checker> check;  // for error reporting; nil once type set is computed
     internal slice<ж<Func>> methods; // ordered list of explicitly declared methods
     internal slice<ΔType> embeddeds;  // ordered list of explicitly embedded elements
@@ -92,23 +92,23 @@ internal static ж<Interface> newInterface(this ж<Checker> Ꮡcheck) {
 // corresponds to a constraint literal such as ~T or A|B without explicit
 // interface embedding. MarkImplicit should be called before any concurrent use
 // of implicit interfaces.
-[GoRecv] public static void MarkImplicit(this ref Interface t) {
+public static void MarkImplicit(this ref Interface t) {
     t.@implicit = true;
 }
 
 // NumExplicitMethods returns the number of explicitly declared methods of interface t.
-[GoRecv] public static nint NumExplicitMethods(this ref Interface t) {
+public static nint NumExplicitMethods(this ref Interface t) {
     return len(t.methods);
 }
 
 // ExplicitMethod returns the i'th explicitly declared method of interface t for 0 <= i < t.NumExplicitMethods().
 // The methods are ordered by their unique [Id].
-[GoRecv] public static ж<Func> ExplicitMethod(this ref Interface t, nint i) {
+public static ж<Func> ExplicitMethod(this ref Interface t, nint i) {
     return t.methods[i];
 }
 
 // NumEmbeddeds returns the number of embedded types in interface t.
-[GoRecv] public static nint NumEmbeddeds(this ref Interface t) {
+public static nint NumEmbeddeds(this ref Interface t) {
     return len(t.embeddeds);
 }
 
@@ -116,12 +116,12 @@ internal static ж<Interface> newInterface(this ж<Checker> Ꮡcheck) {
 // The result is nil if the i'th embedded type is not a defined type.
 //
 // Deprecated: Use [Interface.EmbeddedType] which is not restricted to defined (*[Named]) types.
-[GoRecv] public static ж<Named> Embedded(this ref Interface t, nint i) {
+public static ж<Named> Embedded(this ref Interface t, nint i) {
     return asNamed(t.embeddeds[i]);
 }
 
 // EmbeddedType returns the i'th embedded type of interface t for 0 <= i < t.NumEmbeddeds().
-[GoRecv] public static ΔType EmbeddedType(this ref Interface t, nint i) {
+public static ΔType EmbeddedType(this ref Interface t, nint i) {
     return t.embeddeds[i];
 }
 
@@ -153,7 +153,7 @@ public static bool IsMethodSet(this ж<Interface> Ꮡt) {
 }
 
 // IsImplicit reports whether the interface t is a wrapper for a type set literal.
-[GoRecv] public static bool IsImplicit(this ref Interface t) {
+public static bool IsImplicit(this ref Interface t) {
     return t.@implicit;
 }
 

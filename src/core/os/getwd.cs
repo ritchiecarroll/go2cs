@@ -10,7 +10,7 @@ using syscall = syscall_package;
 partial class os_package {
 
 
-[GoType("dyn")] partial struct getwdCacheᴛ1 {
+partial struct getwdCacheᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
     internal @string dir;
 }

@@ -281,7 +281,7 @@ internal static partial void reflectcall(ж<_type> stackArgsType, @unsafe.Pointe
 //go:linkname procyield
 internal static partial void procyield(uint32 cycles);
 
-[GoType] partial struct neverCallThisFunction {
+partial struct neverCallThisFunction {
 }
 
 // goexit is the return stub at the top of every goroutine call stack.

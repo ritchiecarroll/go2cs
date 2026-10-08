@@ -2,11 +2,11 @@ namespace go.SamePackageImplementNoWitness;
 
 partial class ledger_package {
 
-[GoType] partial interface Metric {
+partial interface Metric {
     nint Value();
 }
 
-[GoType] partial struct Counter {
+partial struct Counter {
     public nint N;
 }
 
@@ -14,7 +14,7 @@ public static nint Value(this Counter c) {
     return c.N;
 }
 
-[GoType("num:nint")] partial struct Gauge;
+partial struct Gauge /*num:nint*/;
 
 public static nint Value(this Gauge g) {
     return (nint)g * 2;
@@ -26,19 +26,19 @@ public static nint Value(this Meter m) {
     return m();
 }
 
-[GoType] partial struct Tally {
+partial struct Tally {
     public nint N;
 }
 
-[GoRecv] public static nint Value(this ref Tally t) {
+public static nint Value(this ref Tally t) {
     return t.N;
 }
 
-[GoType] partial struct tick {
+partial struct tick {
     public nint N;
 }
 
-[GoRecv] internal static nint Value(this ref tick t) {
+internal static nint Value(this ref tick t) {
     return t.N;
 }
 
@@ -46,7 +46,7 @@ public static nint Count(nint n) {
     return (Ꮡ(new tick(N: n))).Value();
 }
 
-[GoType] partial struct Box<T> {
+partial struct Box<T> {
     public T V;
 }
 
@@ -54,11 +54,11 @@ public static nint Value<T>(this Box<T> b) {
     return 3;
 }
 
-[GoType] partial interface probe {
+partial interface probe {
     nint depth();
 }
 
-[GoType] partial struct well {
+partial struct well {
     public nint D;
 }
 

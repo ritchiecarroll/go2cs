@@ -187,11 +187,11 @@ internal static (ж<Process> p, error err) findProcess(nint pid) {
     return (newHandleProcess(pid, h), default!);
 }
 
-[GoRecv] internal static time.Duration userTime(this ref ProcessState p) {
+internal static time.Duration userTime(this ref ProcessState p) {
     return ((time.Duration)p.rusage.of(syscall.Rusage.ᏑUtime).Nano()) * time.ΔNanosecond;
 }
 
-[GoRecv] internal static time.Duration systemTime(this ref ProcessState p) {
+internal static time.Duration systemTime(this ref ProcessState p) {
     return ((time.Duration)p.rusage.of(syscall.Rusage.ᏑStime).Nano()) * time.ΔNanosecond;
 }
 

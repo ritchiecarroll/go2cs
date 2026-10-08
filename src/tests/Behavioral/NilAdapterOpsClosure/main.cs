@@ -11,7 +11,7 @@ public static void Greet(this Greeter g, @string name) {
     g(name);
 }
 
-[GoType] partial interface Greetable {
+partial interface Greetable {
     void Greet(@string name);
 }
 

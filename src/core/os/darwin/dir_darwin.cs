@@ -12,11 +12,11 @@ using fs = go.io.fs_package;
 partial class os_package {
 
 // Auxiliary information if the File describes a directory
-[GoType] partial struct dirInfo {
+partial struct dirInfo {
     internal uintptr dir; // Pointer to DIR structure from dirent.h
 }
 
-[GoRecv] internal static void close(this ref dirInfo d) {
+internal static void close(this ref dirInfo d) {
     if (d.dir == 0) {
         return;
     }
@@ -56,7 +56,7 @@ internal static FileMode dtToType(uint8 typ) {
 // Implemented in syscall/syscall_darwin.go.
 
 //go:linkname closedir syscall.closedir
-[global::System.Diagnostics.StackTraceHidden] internal static error /*err*/ closedir(uintptr dir) {
+/*linkname*/ internal static partial error /*err*/ closedir(uintptr dir) {
     return syscall.closedir((uintptr)dir);
 }
 

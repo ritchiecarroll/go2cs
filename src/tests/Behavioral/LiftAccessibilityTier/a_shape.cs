@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("dyn")] internal partial struct RegisterInternalShape_a {
+internal partial struct RegisterInternalShape_a /*dyn*/ {
     public nint X;
 }
 

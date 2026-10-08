@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct inner {
+partial struct inner {
     internal nint n;
     internal nint p;
 }
@@ -13,12 +13,12 @@ internal static @string describe(this inner i) {
     return fmt.Sprintf("n=%d p=%d"u8, i.n, i.p);
 }
 
-[GoType] partial struct mid {
+partial struct mid {
     internal partial ref inner inner { get; }
     internal nint m;
 }
 
-[GoType] partial struct top {
+partial struct top {
     internal partial ref mid mid { get; }
     internal nint t;
 }

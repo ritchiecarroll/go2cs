@@ -71,7 +71,7 @@ internal static partial void Main() {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct sema {
+partial struct sema {
     internal bool held;
     internal channel<nint> @out;
 }
@@ -79,12 +79,12 @@ internal static partial void Main() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object semaReleasedˢ = (@string)"sema released"u8;
 
-[GoRecv] internal static void release(this ref sema s) {
+internal static void release(this ref sema s) {
     s.held = false;
     fmt.Println(semaReleasedˢ);
 }
 
-[GoRecv] internal static void send(this ref sema s, nint n) {
+internal static void send(this ref sema s, nint n) {
     s.@out.ᐸꟷ(n);
 }
 
@@ -144,7 +144,7 @@ internal static nint notifyAll(params ꓸꓸꓸnint valsʗp) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct acc {
+partial struct acc {
     internal nint total;
 }
 

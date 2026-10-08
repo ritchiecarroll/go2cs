@@ -20,7 +20,7 @@ partial class rsa_package {
 
 // PKCS1v15DecryptOptions is for passing options to PKCS #1 v1.5 decryption using
 // the [crypto.Decrypter] interface.
-[GoType] partial struct PKCS1v15DecryptOptions {
+partial struct PKCS1v15DecryptOptions {
     // SessionKeyLen is the length of the session key that is being
     // decrypted. If not zero, then a padding error during decryption will
     // cause a random plaintext of this length to be returned rather than

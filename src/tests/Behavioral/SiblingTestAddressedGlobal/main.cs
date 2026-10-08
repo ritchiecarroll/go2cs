@@ -12,7 +12,7 @@ internal static ref nint counter => ref Ꮡcounter.Value;
 
 internal static nint untouched = 5;
 
-[GoType] partial struct entry {
+partial struct entry {
     internal @string name;
 }
 

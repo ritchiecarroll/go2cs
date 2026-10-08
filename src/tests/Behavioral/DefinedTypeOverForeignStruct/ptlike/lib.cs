@@ -4,7 +4,7 @@ using ꓸꓸꓸnint = Span<nint>;
 
 partial class ptlike_package {
 
-[GoType] partial struct Inner {
+partial struct Inner {
     public slice<nint> Vals;
 }
 
@@ -12,11 +12,11 @@ public static nint Len(this Inner i) {
     return len(i.Vals);
 }
 
-[GoRecv] public static void Push(this ref Inner i, nint v) {
+public static void Push(this ref Inner i, nint v) {
     i.Vals = append(i.Vals, v);
 }
 
-[GoType] partial struct Outer {
+partial struct Outer {
     public @string Name;
     public Inner In;
 }

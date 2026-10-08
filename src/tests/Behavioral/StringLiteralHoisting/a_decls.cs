@@ -7,11 +7,11 @@ internal static @string pkgLevelLiteral = "package level literal stays inline"u8
 internal static @string derivedAtInit;
 internal static void initᴛderivedAtInit() { derivedAtInit = describe(); }
 
-[GoType] partial struct box {
+partial struct box {
     internal @string name;
     internal @string tag;
 }
 
-[GoType("@string")] partial struct label;
+partial struct label /*@string*/;
 
 } // end main_package

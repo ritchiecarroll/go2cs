@@ -7,8 +7,8 @@ using EmbeddedInterfaceWitness;
 
 partial class main_package {
 
-[GoType] partial struct wrapper {
-    [GoEmbedded] public EmbeddedInterfaceWitness.iolike_package.Reader Reader;
+partial struct wrapper {
+    /*embed*/ public EmbeddedInterfaceWitness.iolike_package.Reader Reader;
     internal @string prefix;
 }
 
@@ -16,7 +16,7 @@ internal static @string Write(this wrapper w, @string s) {
     return w.prefix + s;
 }
 
-[GoType] partial struct plain {
+partial struct plain {
     internal @string tag;
 }
 
@@ -28,7 +28,7 @@ internal static @string Write(this plain p, @string s) {
     return "p:"u8 + s;
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     public iolike.Reader Reader;
     internal @string prefix;
 }
@@ -81,8 +81,8 @@ private static readonly object localDirectˢ = (@string)"local direct:"u8;
 private static readonly object localAssertˢ = (@string)"local assert:"u8;
 private static readonly object localAssertNoˢ = (@string)"local assert: no"u8;
 
-[GoType("dyn")] internal partial struct LocalPromotion_inner {
-    [GoEmbedded] public EmbeddedInterfaceWitness.iolike_package.Reader Reader;
+internal partial struct LocalPromotion_inner /*dyn*/ {
+    /*embed*/ public EmbeddedInterfaceWitness.iolike_package.Reader Reader;
 }
 
 public static void LocalPromotion() {
@@ -98,9 +98,9 @@ public static void LocalPromotion() {
     }
 }
 
-[GoType] partial struct conflicted {
+partial struct conflicted {
     public partial ref EmbeddedInterfaceWitness.iolike_package.Base Base { get; }
-    [GoEmbedded] public EmbeddedInterfaceWitness.iolike_package.Reader Reader;
+    /*embed*/ public EmbeddedInterfaceWitness.iolike_package.Reader Reader;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -120,16 +120,16 @@ internal static void checkConflicted() {
     fmt.Println(conflictedNumMethodˢ, reflect.TypeOf(v).NumMethod());
 }
 
-[GoType] partial struct pointerBase {
+partial struct pointerBase {
     internal @string tag;
 }
 
-[GoRecv] internal static @string Write(this ref pointerBase b, @string s) {
+internal static @string Write(this ref pointerBase b, @string s) {
     return "pb:"u8 + s + b.tag;
 }
 
-[GoType] partial struct pointerOnly {
-    [GoEmbedded] public EmbeddedInterfaceWitness.iolike_package.ReadWriter ReadWriter;
+partial struct pointerOnly {
+    /*embed*/ public EmbeddedInterfaceWitness.iolike_package.ReadWriter ReadWriter;
     internal partial ref pointerBase pointerBase { get; }
 }
 
@@ -137,7 +137,7 @@ internal static void checkConflicted() {
 // interface field in *pointerOnly's method set; see the pointer-only satisfaction record.
 internal static @string Read(this pointerOnly recvᴛ) => recvᴛ.ReadWriter.Read();
 
-[GoRecv] internal static @string Write(this ref pointerOnly p, @string s) {
+internal static @string Write(this ref pointerOnly p, @string s) {
     return "po:"u8 + s;
 }
 

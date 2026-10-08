@@ -5,12 +5,12 @@ using Δsync = sync_package;
 
 partial class main_package {
 
-[GoType] partial struct state {
+partial struct state {
     public partial ref sync_package.Mutex Mutex { get; }
     internal bool broken;
 }
 
-[GoType] partial struct conn {
+partial struct conn {
     internal @string name;
     internal partial ref ж<state> state { get; }
 }

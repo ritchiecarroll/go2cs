@@ -22,7 +22,7 @@ partial class fcgi_package {
 
 // request holds the state for an in-progress request. As soon as it's complete,
 // it's converted to an http.Request.
-[GoType] partial struct request {
+partial struct request {
     internal ж<io.PipeWriter> pw;
     internal uint16 reqId;
     internal map<@string, @string> @params;
@@ -33,7 +33,7 @@ partial class fcgi_package {
 
 // envVarsContextKey uniquely identifies a mapping of CGI
 // environment variables to their values in a request context
-[GoType] partial struct envVarsContextKey {
+partial struct envVarsContextKey {
 }
 
 internal static ж<request> newRequest(uint16 reqId, uint8 flags) {
@@ -47,7 +47,7 @@ internal static ж<request> newRequest(uint16 reqId, uint8 flags) {
 }
 
 // parseParams reads an encoded []byte into Params.
-[GoRecv] internal static void parseParams(this ref request r) {
+internal static void parseParams(this ref request r) {
     var text = r.rawParams;
     r.rawParams = default!;
     while (len(text) > 0) {
@@ -73,7 +73,7 @@ internal static ж<request> newRequest(uint16 reqId, uint8 flags) {
 }
 
 // response implements http.ResponseWriter.
-[GoType] partial struct response {
+partial struct response {
     internal ж<request> req;
     internal httpꓸHeader header;
     internal nint code;
@@ -92,11 +92,11 @@ internal static ж<response> newResponse(ref child c, ж<request> Ꮡreq) {
     ));
 }
 
-[GoRecv] internal static httpꓸHeader Header(this ref response r) {
+internal static httpꓸHeader Header(this ref response r) {
     return r.header;
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref response r, slice<byte> p) {
+internal static (nint n, error err) Write(this ref response r, slice<byte> p) {
     if (!r.wroteHeader) {
         r.WriteHeader(http.StatusOK);
     }
@@ -112,7 +112,7 @@ internal static readonly @string contentLengthˢ = "Content-Length"u8;
 internal static readonly @string transferEncodingˢ = "Transfer-Encoding"u8;
 internal static readonly @string dateˢ = "Date"u8;
 
-[GoRecv] internal static void WriteHeader(this ref response r, nint code) {
+internal static void WriteHeader(this ref response r, nint code) {
     if (r.wroteHeader) {
         return;
     }
@@ -133,7 +133,7 @@ internal static readonly @string dateˢ = "Date"u8;
 // p is not written by writeHeader, but is the first chunk of the body
 // that will be written. It is sniffed for a Content-Type if none is
 // set explicitly.
-[GoRecv] internal static void writeCGIHeader(this ref response r, slice<byte> p) {
+internal static void writeCGIHeader(this ref response r, slice<byte> p) {
     if (r.wroteCGIHeader) {
         return;
     }
@@ -149,19 +149,19 @@ internal static readonly @string dateˢ = "Date"u8;
     r.w.Value.Writer.Value.Flush();
 }
 
-[GoRecv] internal static void Flush(this ref response r) {
+internal static void Flush(this ref response r) {
     if (!r.wroteHeader) {
         r.WriteHeader(http.StatusOK);
     }
     r.w.Value.Writer.Value.Flush();
 }
 
-[GoRecv] internal static error Close(this ref response r) {
+internal static error Close(this ref response r) {
     r.Flush();
     return r.w.Close();
 }
 
-[GoType] partial struct child {
+partial struct child {
     internal ж<conn> conn;
     internal httpꓸHandler handler;
     internal map<uint16, ж<request>> requests; // keyed by request ID
@@ -358,7 +358,7 @@ internal static void serveRequest(this ж<child> Ꮡc, ж<request> Ꮡreq, io.Re
     }
 }
 
-[GoRecv] internal static void cleanUp(this ref child c) {
+internal static void cleanUp(this ref child c) {
     foreach (var (_, req) in c.requests) {
         if ((~req).pw != nil) {
             // race with call to Close in c.serveRequest doesn't matter because

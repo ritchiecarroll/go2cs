@@ -28,7 +28,7 @@ internal static error errClosed = errors.New("i/o operation on closed connection
 // We should have deleted it before Go 1.
 //
 // Deprecated: Use the Server in package [net/http] instead.
-[GoType] partial struct ServerConn {
+partial struct ServerConn {
     internal sync.Mutex mu; // read-write protects the following fields
     internal net.Conn c;
     internal ж<bufio.Reader> r;
@@ -250,7 +250,7 @@ public static error Write(this ж<ServerConn> Ꮡsc, ж<http.Request> Ꮡreq, ж
 // We should have deleted it before Go 1.
 //
 // Deprecated: Use Client or Transport in package [net/http] instead.
-[GoType] partial struct ClientConn {
+partial struct ClientConn {
     internal sync.Mutex mu; // read-write protects the following fields
     internal net.Conn c;
     internal ж<bufio.Reader> r;

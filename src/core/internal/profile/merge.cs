@@ -63,7 +63,7 @@ public static (ж<Profile>, error) Merge(slice<ж<Profile>> srcs) {
 // Normalize normalizes the source profile by multiplying each value in profile by the
 // ratio of the sum of the base profile's values of that sample type to the sum of the
 // source profile's value of that sample type.
-[GoRecv] public static error Normalize(this ref Profile p, ж<Profile> Ꮡpb) {
+public static error Normalize(this ref Profile p, ж<Profile> Ꮡpb) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
     {
@@ -104,7 +104,7 @@ internal static bool isZeroSample(ref Sample s) {
     return true;
 }
 
-[GoType] partial struct profileMerger {
+partial struct profileMerger {
     internal ж<Profile> p;
     // Memoization tables within a profile.
     internal map<uint64, ж<Location>> locationsByID;
@@ -117,12 +117,12 @@ internal static bool isZeroSample(ref Sample s) {
     internal map<mappingKey, ж<Mapping>> mappings;
 }
 
-[GoType] partial struct mapInfo {
+partial struct mapInfo {
     internal ж<Mapping> m;
     internal int64 offset;
 }
 
-[GoRecv] internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsrc) {
+internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     var s = Ꮡ(new Sample(
@@ -168,7 +168,7 @@ internal static bool isZeroSample(ref Sample s) {
 }
 
 // key generates sampleKey to be used as a key for maps.
-[GoRecv] internal static sampleKey key(this ref Sample sample) {
+internal static sampleKey key(this ref Sample sample) {
     var ids = new slice<@string>(len(sample.Location));
     foreach (var (i, l) in sample.Location) {
         ids[i] = strconv.FormatUint((~l).ID, 16);
@@ -190,13 +190,13 @@ internal static bool isZeroSample(ref Sample s) {
     );
 }
 
-[GoType] partial struct sampleKey {
+partial struct sampleKey {
     internal @string locations;
     internal @string labels;
     internal @string numlabels;
 }
 
-[GoRecv] internal static ж<Location> mapLocation(this ref profileMerger pm, ж<Location> Ꮡsrc) {
+internal static ж<Location> mapLocation(this ref profileMerger pm, ж<Location> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     if (Ꮡsrc == nil) {
@@ -235,7 +235,7 @@ internal static bool isZeroSample(ref Sample s) {
 }
 
 // key generates locationKey to be used as a key for maps.
-[GoRecv] internal static locationKey key(this ref Location l) {
+internal static locationKey key(this ref Location l) {
     var key = new locationKey(
         addr: l.Address,
         isFolded: l.IsFolded
@@ -256,13 +256,13 @@ internal static bool isZeroSample(ref Sample s) {
     return key;
 }
 
-[GoType] partial struct locationKey {
+partial struct locationKey {
     internal uint64 addr, mappingID;
     internal @string lines;
     internal bool isFolded;
 }
 
-[GoRecv] internal static mapInfo mapMapping(this ref profileMerger pm, ж<Mapping> Ꮡsrc) {
+internal static mapInfo mapMapping(this ref profileMerger pm, ж<Mapping> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     if (Ꮡsrc == nil) {
@@ -304,7 +304,7 @@ internal static bool isZeroSample(ref Sample s) {
 
 // key generates encoded strings of Mapping to be used as a key for
 // maps.
-[GoRecv] internal static mappingKey key(this ref Mapping m) {
+internal static mappingKey key(this ref Mapping m) {
     // Normalize addresses to handle address space randomization.
     // Round up to next 4K boundary to avoid minor discrepancies.
     const uint64 mapsizeRounding = 0x1000;
@@ -334,12 +334,12 @@ internal static bool isZeroSample(ref Sample s) {
     return key;
 }
 
-[GoType] partial struct mappingKey {
+partial struct mappingKey {
     internal uint64 size, offset;
     internal @string buildIDOrFile;
 }
 
-[GoRecv] internal static Line mapLine(this ref profileMerger pm, Line src) {
+internal static Line mapLine(this ref profileMerger pm, Line src) {
     var ln = new Line(
         Function: pm.mapFunction(src.Function),
         ΔLine: src.ΔLine
@@ -347,7 +347,7 @@ internal static bool isZeroSample(ref Sample s) {
     return ln;
 }
 
-[GoRecv] internal static ж<Function> mapFunction(this ref profileMerger pm, ж<Function> Ꮡsrc) {
+internal static ж<Function> mapFunction(this ref profileMerger pm, ж<Function> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     if (Ꮡsrc == nil) {
@@ -379,7 +379,7 @@ internal static bool isZeroSample(ref Sample s) {
 }
 
 // key generates a struct to be used as a key for maps.
-[GoRecv] internal static functionKey key(this ref Function f) {
+internal static functionKey key(this ref Function f) {
     return new functionKey(
         f.StartLine,
         f.Name,
@@ -388,7 +388,7 @@ internal static bool isZeroSample(ref Sample s) {
     );
 }
 
-[GoType] partial struct functionKey {
+partial struct functionKey {
     internal int64 startLine;
     internal @string name, systemName, fileName;
 }
@@ -447,7 +447,7 @@ internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
 // compatible determines if two profiles can be compared/merged.
 // returns nil if the profiles are compatible; otherwise an error with
 // details on the incompatibility.
-[GoRecv] internal static error compatible(this ref Profile p, ж<Profile> Ꮡpb) {
+internal static error compatible(this ref Profile p, ж<Profile> Ꮡpb) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
     if (!equalValueType(ref (p.PeriodType).DerefOrNull(), ref (pb.PeriodType).DerefOrNull())) {

@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("map[@string, nint]")] partial struct StrIntMap;
+partial struct StrIntMap /*map[@string, nint]*/;
 
 internal static void Main() {
     var m = new StrIntMap(0);

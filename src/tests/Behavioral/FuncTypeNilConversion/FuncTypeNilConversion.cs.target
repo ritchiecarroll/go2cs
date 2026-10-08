@@ -7,7 +7,7 @@ using ꓸꓸꓸжPoint = Span<ж<main_package.Point>>;
 
 partial class main_package {
 
-[GoType] partial struct Point {
+partial struct Point {
     public nint X, Y;
 }
 

@@ -5,7 +5,7 @@ using ꓸꓸꓸnint = Span<nint>;
 
 partial class main_package {
 
-[GoType("num:nint")] partial struct Code;
+partial struct Code /*num:nint*/;
 
 public static Code A => /* iota */ 0;
 internal static Code _ᴛ1ʗ => 1;
@@ -67,11 +67,11 @@ internal static nint total(params ꓸꓸꓸnint aʗp) {
     return n;
 }
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static nint bump(this ref counter c, nint d) {
+internal static nint bump(this ref counter c, nint d) {
     c.n += d;
     return c.n;
 }

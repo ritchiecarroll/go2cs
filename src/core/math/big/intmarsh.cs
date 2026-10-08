@@ -31,7 +31,7 @@ public static (slice<byte>, error) GobEncode(this ж<ΔInt> Ꮡx) {
 }
 
 // GobDecode implements the [encoding/gob.GobDecoder] interface.
-[GoRecv] public static error GobDecode(this ref ΔInt z, slice<byte> buf) {
+public static error GobDecode(this ref ΔInt z, slice<byte> buf) {
     if (len(buf) == 0) {
         // Other side sent a nil or default value.
         z = new ΔInt(nil);

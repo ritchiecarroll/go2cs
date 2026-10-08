@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct pusher {
+partial struct pusher {
     internal @string id;
 }
 
@@ -21,14 +21,14 @@ internal static @string Label(this pusher p) {
     return "pusher:"u8 + p.id;
 }
 
-[GoType] partial struct setter {
+partial struct setter {
     internal @string id;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object setˢ = (@string)"set"u8;
 
-[GoRecv] internal static void Set(this ref setter s, @string value) {
+internal static void Set(this ref setter s, @string value) {
     fmt.Println(setˢ, value, (@string)"on"u8, s.id);
 }
 
@@ -37,7 +37,7 @@ private static readonly object errˢ = (@string)"err:"u8;
 private static readonly @string styleCssˢ = "/style.css"u8;
 private static readonly object notAPusherˢ = (@string)"not a pusher"u8;
 
-[GoType("dyn")] internal partial interface serve_type {
+internal partial interface serve_type /*dyn*/ {
     error Push(@string target, nint weight);
     @string Label();
 }
@@ -56,7 +56,7 @@ internal static void serve(any v) {
 private static readonly @string blueˢ = "blue"u8;
 private static readonly object notASetterˢ = (@string)"not a setter"u8;
 
-[GoType("dyn")] internal partial interface apply_type {
+internal partial interface apply_type /*dyn*/ {
     void Set(@string value);
 }
 

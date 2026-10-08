@@ -11,7 +11,7 @@ using io = io_package;
 partial class lzw_package {
 
 // A writer is a buffered, flushable writer.
-[GoType] partial interface writer :
+partial interface writer :
     io.ByteWriter
 {
     error Flush();
@@ -25,7 +25,7 @@ internal static UntypedInt invalidEntry => 0;
 
 // Writer is an LZW compressor. It writes the compressed form of the data
 // to an underlying writer (see [NewWriter]).
-[GoType] partial struct Writer {
+partial struct Writer {
     // w is the writer that compressed bytes are written to.
     internal writer w;
     // litWidth is the width in bits of literal codes.
@@ -54,7 +54,7 @@ internal static UntypedInt invalidEntry => 0;
 }
 
 // writeLSB writes the code c for "Least Significant Bits first" data.
-[GoRecv] internal static error writeLSB(this ref Writer w, uint32 c) {
+internal static error writeLSB(this ref Writer w, uint32 c) {
     w.bits |= (uint32)(c.Lsh(w.nBits));
     w.nBits += w.width;
     while (w.nBits >= 8) {
@@ -70,7 +70,7 @@ internal static UntypedInt invalidEntry => 0;
 }
 
 // writeMSB writes the code c for "Most Significant Bits first" data.
-[GoRecv] internal static error writeMSB(this ref Writer w, uint32 c) {
+internal static error writeMSB(this ref Writer w, uint32 c) {
     w.bits |= (uint32)(c.Lsh((32 - w.width - w.nBits)));
     w.nBits += w.width;
     while (w.nBits >= 8) {
@@ -268,7 +268,7 @@ public static error Close(this ж<Writer> Ꮡw) {
 
 // Reset clears the [Writer]'s state and allows it to be reused again
 // as a new [Writer].
-[GoRecv] public static void Reset(this ref Writer w, io.Writer dst, Order order, nint litWidth) {
+public static void Reset(this ref Writer w, io.Writer dst, Order order, nint litWidth) {
     w = new Writer(nil);
     w.init(dst, order, litWidth);
 }
@@ -292,7 +292,7 @@ internal static ж<Writer> newWriter(io.Writer dst, Order order, nint litWidth) 
     return w;
 }
 
-[GoRecv] internal static void init(this ref Writer w, io.Writer dst, Order order, nint litWidth) {
+internal static void init(this ref Writer w, io.Writer dst, Order order, nint litWidth) {
     var exprᴛ1 = order;
     if (exprᴛ1 == LSB) {
         w.write = ((Func<ж<Writer>, uint32, error>)(writeLSB));

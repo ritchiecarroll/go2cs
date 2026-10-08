@@ -6,13 +6,13 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct header {
+partial struct header {
     internal int32 kind;
     internal uint32 size;
     internal @string name;
 }
 
-[GoType] partial struct view {
+partial struct view {
     internal int32 kind;
     internal uint32 size;
     internal @string name;

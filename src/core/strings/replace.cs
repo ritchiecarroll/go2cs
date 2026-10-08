@@ -11,14 +11,14 @@ partial class strings_package {
 
 // Replacer replaces a list of strings with replacements.
 // It is safe for concurrent use by multiple goroutines.
-[GoType] partial struct Replacer {
+partial struct Replacer {
     internal Δsync.Once once; // guards buildOnce method
     internal replacer r;
     internal slice<@string> oldnew;
 }
 
 // replacer is the interface that a replacement algorithm needs to implement.
-[GoType] partial interface replacer {
+partial interface replacer {
     @string Replace(@string s);
     (nint n, error err) WriteString(io.Writer w, @string s);
 }
@@ -38,12 +38,12 @@ public static ж<Replacer> NewReplacer(params ꓸꓸꓸstring oldnewʗp) {
     return Ꮡ(new Replacer(oldnew: appendꓸꓸꓸ(slice<@string>(default!), oldnew)));
 }
 
-[GoRecv] internal static void buildOnce(this ref Replacer r) {
+internal static void buildOnce(this ref Replacer r) {
     r.r = r.build();
     r.oldnew = default!;
 }
 
-[GoRecv] internal static replacer build(this ref Replacer b) {
+internal static replacer build(this ref Replacer b) {
     var oldnew = b.oldnew;
     if (len(oldnew) == 2 && len(oldnew[0]) > 1) {
         return new singleStringReplacerжreplacer(makeSingleStringReplacer(oldnew[0], oldnew[1]));
@@ -124,7 +124,7 @@ public static (nint n, error err) WriteString(this ж<Replacer> Ꮡr, io.Writer 
 // n2 and n3; n4's child is n5; n6's child is n7. Nodes n0, n1 and n4 (marked
 // with a trailing "-") are partial keys, and nodes n2, n3, n5, n6 and n7
 // (marked with a trailing "+") are complete keys.
-[GoType] partial struct trieNode {
+partial struct trieNode {
     // value is the value of the trie node's key/value pair. It is empty if
     // this node is not a complete key.
     internal @string value;
@@ -157,7 +157,7 @@ public static (nint n, error err) WriteString(this ж<Replacer> Ꮡr, io.Writer 
     internal slice<ж<trieNode>> table;
 }
 
-[GoRecv] internal static void add(this ref trieNode t, @string key, @string val, nint priority, ж<genericReplacer> Ꮡr) {
+internal static void add(this ref trieNode t, @string key, @string val, nint priority, ж<genericReplacer> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (key == ""u8) {
@@ -266,7 +266,7 @@ internal static (@string val, nint keylen, bool found) lookup(this ж<genericRep
 
 // genericReplacer is the fully generic algorithm.
 // It's used as a fallback when nothing faster can be used.
-[GoType] partial struct genericReplacer {
+partial struct genericReplacer {
     internal trieNode root;
     // tableSize is the size of a trie node's lookup table. It is the number
     // of unique key bytes.
@@ -304,21 +304,21 @@ internal static ж<genericReplacer> makeGenericReplacer(slice<@string> oldnew) {
     return r;
 }
 
-[GoType("[]byte")] partial struct appendSliceWriter;
+partial struct appendSliceWriter /*[]byte*/;
 
 // Write writes to the buffer to satisfy [io.Writer].
-[GoRecv] internal static (nint, error) Write(this ref appendSliceWriter w, slice<byte> p) {
+internal static (nint, error) Write(this ref appendSliceWriter w, slice<byte> p) {
     w = appendꓸꓸꓸ(w, p);
     return (len(p), default!);
 }
 
 // WriteString writes to the buffer without string->[]byte->string allocations.
-[GoRecv] internal static (nint, error) WriteString(this ref appendSliceWriter w, @string s) {
+internal static (nint, error) WriteString(this ref appendSliceWriter w, @string s) {
     w = append(w, s.ꓸꓸꓸ);
     return (len(s), default!);
 }
 
-[GoType] partial struct stringWriter {
+partial struct stringWriter {
     internal io.Writer w;
 }
 
@@ -388,7 +388,7 @@ internal static (nint n, error err) WriteString(this ж<genericReplacer> Ꮡr, i
 
 // singleStringReplacer is the implementation that's used when there is only
 // one string to replace (and that string has more than one byte).
-[GoType] partial struct singleStringReplacer {
+partial struct singleStringReplacer {
     internal ж<stringFinder> finder;
     // value is the new string that replaces that pattern when it's found.
     internal @string value;
@@ -398,7 +398,7 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
     return Ꮡ(new singleStringReplacer(finder: makeStringFinder(pattern), value: value));
 }
 
-[GoRecv] internal static @string Replace(this ref singleStringReplacer r, @string s) {
+internal static @string Replace(this ref singleStringReplacer r, @string s) {
     ref var buf = ref heap(new Builder(), out var Ꮡbuf);
     nint i = 0;
     var matched = false;
@@ -420,7 +420,7 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
     return buf.String();
 }
 
-[GoRecv] internal static (nint n, error err) WriteString(this ref singleStringReplacer r, io.Writer w, @string s) {
+internal static (nint n, error err) WriteString(this ref singleStringReplacer r, io.Writer w, @string s) {
     nint n = default!;
     error err = default!;
 
@@ -449,9 +449,9 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
     return (n, err);
 }
 
-[GoType("[256]byte")] partial struct byteReplacer;
+partial struct byteReplacer /*[256]byte*/;
 
-[GoRecv] internal static @string Replace(this ref byteReplacer r, @string s) {
+internal static @string Replace(this ref byteReplacer r, @string s) {
     slice<byte> buf = default!;           // lazily allocated
     for (nint i = 0; i < len(s); i++) {
         var b = s[i];
@@ -468,7 +468,7 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
     return ((@string)buf);
 }
 
-[GoRecv] internal static (nint n, error err) WriteString(this ref byteReplacer r, io.Writer w, @string s) {
+internal static (nint n, error err) WriteString(this ref byteReplacer r, io.Writer w, @string s) {
     nint n = default!;
 
     var sw = getStringWriter(w);
@@ -504,7 +504,7 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
 
 // byteStringReplacer is the implementation that's used when all the
 // "old" values are single ASCII bytes but the "new" values vary in size.
-[GoType] partial struct byteStringReplacer {
+partial struct byteStringReplacer {
     // replacements contains replacement byte slices indexed by old byte.
     // A nil []byte means that the old byte should not be replaced.
     internal array<slice<byte>> replacements = new(256);
@@ -523,7 +523,7 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
 // TODO(tocarip) revisit once we have register-based abi/mid-stack inlining.
 internal static UntypedInt countCutOff => 8;
 
-[GoRecv] internal static @string Replace(this ref byteStringReplacer r, @string s) {
+internal static @string Replace(this ref byteStringReplacer r, @string s) {
     nint newSize = len(s);
     var anyChanges = false;
     // Is it faster to use Count?
@@ -564,7 +564,7 @@ internal static UntypedInt countCutOff => 8;
     return ((@string)buf);
 }
 
-[GoRecv] internal static (nint n, error err) WriteString(this ref byteStringReplacer r, io.Writer w, @string s) {
+internal static (nint n, error err) WriteString(this ref byteStringReplacer r, io.Writer w, @string s) {
     nint n = default!;
     error err = default!;
 

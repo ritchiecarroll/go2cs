@@ -2,7 +2,7 @@ namespace go.SynthesizedDelegateChildPkg;
 
 partial class inner_package {
 
-[GoType] partial struct Record {
+partial struct Record {
     public @string Name;
     public nint Hits;
 }

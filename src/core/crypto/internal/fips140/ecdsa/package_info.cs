@@ -64,7 +64,7 @@ using static go.crypto.@internal.fips140.ecdsa_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/cast.go", "cast.cs", "ABEglAAWLoIADhiigoKCgoKUyIKCgri4ggAMGoKCgpSAgqSClMiCgoKCAAwagoKClICCpIKU", "55-63:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa.go", "ecdsa.cs", "ABo2gqaCAAcQggAfPqKCgoKUgqaAtIK4gqbugLSCyoKm3IC0griCpgAHEIC0griCpgAJFMKCgoKUgoKUgqb4goKUqNKEhoKW7oIAAhIACAKCgoCCAAsYgKaClAAHEICCgqaCABEmAAoCgpSCzoKAggAIEoQAAhAACwKClIKCgqrCgoLmtoKClIKogoSCgpSCgsyCloKEgoKUgoKWgpao0oKUgoKClMyqAAgKgIKCgILGgoIAAxLSgpSCgoKCpgAFFAAMAoKUgoL2toKCloKClIKUgoKUgpaCloKWgoKmgoKmgoKWgoKWgpQ=", "187-189:1;320-323:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa.go", "ecdsa.cs", "ABo2gqaCAAcQggAfPqKCgoKUgqaAtIK4gqbugLSCyoKm3IC0griCpgAHEIC0griCpgAJFMKCgoKUgoKUgqb4goKUqNKEhoKW7oIAAhIACAKCgoCCAAsYgKaClAAHEICCgqaCABEmAAoCgpSCzoKAggAIEoQAAhAACwKClIKCgqrCgoLmtoKClIKogoSCgpSCgsyCloKEgoKUgoKWgpao0oKUgoKClMyqAAgKgIKCgILGgoIAAxLSgpSCgoKCpgAFFAAMAoKUgoL2toKCloKClIKUgoKUgpaCloKWgoKmgoKmgoKWgoKWgpQ=", "187-189:1;320-323:1", "", "217=Bytes/1/2/3,Bytes/2/2/5")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa_noasm.go", "ecdsa_noasm.cs", "AAgSoqai")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/hmacdrbg.go", "hmacdrbg.cs", "ACFMzuy0hKqWlqiCgoKCgpS0goKCgraUgoKUgoKCgoKUtIKCgoK2lIKChIKCAAIQ8qaigoCCyqSEgpaCloKmgoKCAAYSgoKClIKChA==", "56-58:1")]
 // </GoSourcePositionMaps>
@@ -75,7 +75,7 @@ namespace go.crypto.@internal.fips140;
 public static partial class ecdsa_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

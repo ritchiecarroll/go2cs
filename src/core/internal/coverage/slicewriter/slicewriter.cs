@@ -13,12 +13,12 @@ partial class slicewriter_package {
 // calls to add data to it (and possibly Seek calls to update
 // previously written portions), then finally invoke BytesWritten() to
 // get a pointer to the constructed byte slice.
-[GoType] partial struct WriteSeeker {
+partial struct WriteSeeker {
     internal slice<byte> payload;
     internal int64 off;
 }
 
-[GoRecv] public static (nint n, error err) Write(this ref WriteSeeker sws, slice<byte> p) {
+public static (nint n, error err) Write(this ref WriteSeeker sws, slice<byte> p) {
     nint amt = len(p);
     var towrite = sws.payload.slice((nint)(sws.off));
     if (len(towrite) < amt) {
@@ -34,7 +34,7 @@ partial class slicewriter_package {
 // its internally maintained slice. Note that it is not possible to
 // expand the size of the slice using SEEK_SET; trying to seek outside
 // the slice will result in an error.
-[GoRecv] public static (int64, error) Seek(this ref WriteSeeker sws, int64 offset, nint whence) {
+public static (int64, error) Seek(this ref WriteSeeker sws, int64 offset, nint whence) {
     var exprᴛ1 = whence;
     if (exprᴛ1 == io.SeekStart) {
         if (sws.off != offset && (offset < 0 || offset > (int64)len(sws.payload))) {
@@ -66,11 +66,11 @@ partial class slicewriter_package {
 
 // BytesWritten returns the underlying byte slice for the WriteSeeker,
 // containing the data written to it via Write/Seek calls.
-[GoRecv] public static slice<byte> BytesWritten(this ref WriteSeeker sws) {
+public static slice<byte> BytesWritten(this ref WriteSeeker sws) {
     return sws.payload;
 }
 
-[GoRecv] public static (nint n, error err) Read(this ref WriteSeeker sws, slice<byte> p) {
+public static (nint n, error err) Read(this ref WriteSeeker sws, slice<byte> p) {
     nint amt = len(p);
     var toread = sws.payload.slice((nint)(sws.off));
     if (len(toread) < amt) {
