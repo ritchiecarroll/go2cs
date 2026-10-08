@@ -105,6 +105,7 @@ public class ConvertedGoTypeRuleTests
             {
                 public partial struct Plain {}
                 public partial struct Marked {}
+                public partial struct InfoOnly {}
             }
         }
         """;
@@ -124,12 +125,15 @@ public class ConvertedGoTypeRuleTests
     private static string? PartFor(string[] generated, string kind, string name) =>
         generated.FirstOrDefault(text => text.Contains($" partial {kind} {name}"));
 
+    // Forward slashes: Path.GetFileName splits them on every OS, where a backslash path is one file name on
+    // linux and the name-based exclusions would pass there only by declaration order. The metadata unit is
+    // FIRST for the same reason -- seen first, an unexcluded accessibility part would be the selected one.
     private static readonly (string, string)[] Package =
     [
-        (Converted, @"C:\go2cs\src\core\rule\rule.cs"),
-        (Companion, @"C:\go2cs\src\core\rule\rule_impl.cs"),
-        (ManualFile, @"C:\go2cs\src\core\rule\manual.cs"),
-        (PackageInfo, @"C:\go2cs\src\core\rule\package_info.cs")
+        (PackageInfo, "C:/go2cs/src/core/rule/package_info.cs"),
+        (Converted, "C:/go2cs/src/core/rule/rule.cs"),
+        (Companion, "C:/go2cs/src/core/rule/rule_impl.cs"),
+        (ManualFile, "C:/go2cs/src/core/rule/manual.cs")
     ];
 
     [TestMethod]
@@ -174,6 +178,7 @@ public class ConvertedGoTypeRuleTests
         Assert.IsNull(PartFor(generated, "struct", "Nested"), "only a type declared DIRECTLY in the package class is a Go type");
         Assert.IsFalse(generated.Any(text => text.Contains(" Fn(")), "a delegate is never a Go type for the generators");
         Assert.AreEqual(1, generated.Count(text => text.Contains(" partial struct Plain")), "the package_info.cs accessibility part is not a second definition");
+        Assert.IsNull(PartFor(generated, "struct", "InfoOnly"), "a type declared only in package_info.cs is metadata, never a Go type");
     }
 
     [TestMethod]
@@ -202,7 +207,7 @@ public class ConvertedGoTypeRuleTests
     [TestMethod]
     public void AHandOwnedAssemblySelectsOnlyByTheAttribute()
     {
-        string[] generated = Generate([.. Package, ("[assembly: go.GoHandOwnedPackage]", @"C:\go2cs\src\core\rule\opt_out.cs")]);
+        string[] generated = Generate([.. Package, ("[assembly: go.GoHandOwnedPackage]", "C:/go2cs/src/core/rule/opt_out.cs")]);
 
         Assert.IsNull(PartFor(generated, "struct", "Plain"), "inside a hand-owned package a type is a Go type only by the attribute");
         Assert.IsNull(PartFor(generated, "interface", "Shape"), "inside a hand-owned package a type is a Go type only by the attribute");
@@ -217,9 +222,9 @@ public class ConvertedGoTypeRuleTests
         const string optIn = "namespace go { public static partial class rule_package { [GoType] public partial struct Dual { public int B; } } }";
 
         string[] generated = Generate(
-            (first, @"C:\go2cs\src\core\rule\a.cs"),
-            (second, @"C:\go2cs\src\core\rule\b.cs"),
-            (optIn, @"C:\go2cs\src\core\rule\dual_impl.cs"));
+            (first, "C:/go2cs/src/core/rule/a.cs"),
+            (second, "C:/go2cs/src/core/rule/b.cs"),
+            (optIn, "C:/go2cs/src/core/rule/dual_impl.cs"));
 
         Assert.AreEqual(1, generated.Count(text => text.Contains(" partial struct Dual")), "a hand-written [GoType] partial's type is generated once, by its attribute");
         Assert.IsFalse(PartFor(generated, "struct", "Dual")!.Contains("[GoType] "), "its declared [GoType] is the only one (CS0579 otherwise)");
@@ -229,11 +234,11 @@ public class ConvertedGoTypeRuleTests
     [TestMethod]
     public void TheGeneratedOutputIsTheMarkedOutputPlusTheAttribute()
     {
-        string unmarked = string.Join("\n", Generate((Converted.Replace("[GoType] public partial struct Marked", "public partial struct Marked"), @"C:\go2cs\src\core\rule\rule.cs")));
+        string unmarked = string.Join("\n", Generate((Converted.Replace("[GoType] public partial struct Marked", "public partial struct Marked"), "C:/go2cs/src/core/rule/rule.cs")));
         string marked = string.Join("\n", Generate((Converted
             .Replace("public partial struct Plain", "[GoType] public partial struct Plain")
             .Replace("public partial interface Shape", "[GoType] public partial interface Shape")
-            .Replace("public partial struct Outer", "[GoType] public partial struct Outer"), @"C:\go2cs\src\core\rule\rule.cs")));
+            .Replace("public partial struct Outer", "[GoType] public partial struct Outer"), "C:/go2cs/src/core/rule/rule.cs")));
 
         Assert.IsFalse(marked.Contains("[GoType] "), "with every Go type marked, nothing is re-emitted");
         Assert.AreEqual(marked, unmarked.Replace("[GoType] ", ""), "removing the plain attribute changes the generated output by the re-emitted attribute only");
