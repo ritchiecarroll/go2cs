@@ -952,6 +952,8 @@ PARTIAL = ' partial '
 #   FL-S   '[GoStr] ' removed
 #   FL-F   '[GoEmbedded] ' -> '/*embed*/ '
 #   FL-E   a line '[GoTag(@"<t>")]' removed; the field line under it gains ' /*`<T>`*/' (or the quoted '/*"..."*/' form)
+#          (2026-10-08) a field line with a TRAILING '// comment' gains it BEFORE the comment, the blanks ahead of the
+#          '//' re-aligned (one or more); code and comment text otherwise byte-identical
 #   FL-D   '[GoArrayDims(n,..)]': (i) an attribute line removed, the field line under it gains '/*[n]..*/ ' before its type;
 #          (ii) on a parameter and (iii) before a defined type, the token becomes '/*[n]..*/ ' in place (D2 the same on a
 #          generic method)
@@ -1006,6 +1008,12 @@ _FL_RECORD = re.compile(r'^\s*(?:\[Go(?:LocalName|ValueClone|MemberRecord|Descri
 _FL_PREFIX = re.compile(r'^(\s*)((?:\[Go(?:MemberRecord|LocalName|ValueClone)\((?:[^()"]|"(?:[^"\\]|\\.)*"|\([^()]*\))*\)\] )+)(.*)$')
 _FL_MOVED = re.compile(r'\[Go(?:LocalName|ValueClone)\((?:[^()"]|"(?:[^"\\]|\\.)*")*\)\] ')
 _FL_DECL = re.compile(r'\b(?:struct|class|interface|record)\s+[^\s<;{:(]+(?:<[^>]*>)?')
+_FL_TRAILCOM = re.compile(r'[ \t]+//')
+_FL_TRAILQ = re.compile(r'^ /\*".*"\*/([ \t]+//.*)$')
+
+def _fl_trailok(s, com):
+    # s is what follows the tag comment on the added line: one or more blanks (re-aligned), then the SAME '//' comment
+    return len(s) > len(com) and s.endswith(com) and not s[:len(s) - len(com)].strip(' \t')
 _FL_MODS = re.compile(r'^(\s*(?:(?:public|internal|private|protected|static|readonly|new|volatile|unsafe|const|required)\s+)*)')
 
 def _fl_dims(s):
@@ -1084,13 +1092,23 @@ def fl_normalize(rem, add, fname=None):
     for forms, pd, x, raws in plan:
         if forms is not None: want.append((forms, pd, x, raws)); continue
         fs, fired = _fl_single(x, cnt)
-        for k, v, _raw in pd:
+        for k, v, _raw in sorted(pd, key=lambda p: p[0] == 'E'):   # E last: its tuple forms are matched, never re-transformed
             nf = set()
             for f in fs:
                 if k == 'E':
                     base = f.rstrip()
-                    if '`' not in v and '*/' not in v and v.isprintable(): nf.add(base + ' /*`' + v + '`*/')
+                    tick = '`' not in v and '*/' not in v and v.isprintable()
+                    if tick: nf.add(base + ' /*`' + v + '`*/')
                     nf.add(('QUOTED', base))
+                    # FL-E with a TRAILING '// comment' (2026-10-08): the tag comment goes BEFORE the '//' comment and
+                    # the whitespace in front of the '//' is re-aligned (any run of >= 1 blank). The code part and the
+                    # comment text stay byte-identical; every '<ws>//' split of the line is a candidate (a '//' inside
+                    # the code, a string or a tag, cannot then pass: the code part must match exactly).
+                    for mc in _FL_TRAILCOM.finditer(base):
+                        code, com = base[:mc.start()], base[mc.end() - 2:]
+                        if not code.strip(): continue
+                        if tick: nf.add(('TRAIL', code + ' /*`' + v + '`*/', com))
+                        nf.add(('TRAILQ', code, com))
                 elif k == 'D':
                     mm = _FL_MODS.match(f); nf.add(f[:mm.end()] + f'/*{v}*/ ' + f[mm.end():])
                 elif k == 'K':
@@ -1107,7 +1125,12 @@ def fl_normalize(rem, add, fname=None):
         for i, y in enumerate(a):
             for f in fs:
                 if isinstance(f, tuple):
-                    if y.startswith(f[1] + ' /*"') and y.endswith('"*/'): hit = i; break
+                    if f[0] == 'QUOTED':
+                        if y.startswith(f[1] + ' /*"') and y.endswith('"*/'): hit = i; break
+                    elif f[0] == 'TRAIL':
+                        if y.startswith(f[1]) and _fl_trailok(y[len(f[1]):], f[2]): hit = i; break
+                    elif f[0] == 'TRAILQ':
+                        if y.startswith(f[1] + ' /*"') and _FL_TRAILQ.match(y[len(f[1]):]) and _fl_trailok(_FL_TRAILQ.match(y[len(f[1]):]).group(1), f[2]): hit = i; break
                 elif y == f: hit = i; break
             if hit is not None: break
         real = [s for s in fired if not s.endswith('?')]
@@ -1183,6 +1206,23 @@ FL_PLANTS = [
     ('R6', ['FL-R6'], ['[global::System.Diagnostics.StackTraceHidden] internal static void runtime_procPin() => procPin();'], ['/*linkname*/ internal static partial void runtime_procPin() => procPin();'], True),
     ('R6-neg', [], ['[global::System.Diagnostics.StackTraceHidden] internal static void runtime_procPin() => procPin();'], ['/*linkname*/ internal static void runtime_procPin() => procPin();'], False),
     ('record-alone-neg', [], [], ['    [GoValueClone("Array")] partial struct T { int x; }'], False),
+    # 2026-10-08: FL-E on a field line with a TRAILING '// comment' (the tag comment goes before it, the blanks in front
+    # of the '//' re-aligned: encoding/json decode_test.cs, the 4t patch's 7 OTHER hunks), alone and combined with B, C
+    # and a recorded name; NEGATIVES: the same move with the field's name, its type or the comment text changed.
+    ('E-trail', ['FL-E'], ['    [GoTag(@"json:""x""")]', '    public nint Level1e;           // annihilated by Embed0a.Level1e'], ['    public nint Level1e; /*`json:"x"`*/ // annihilated by Embed0a.Level1e'], True),
+    ('E-trail-wide', ['FL-E'], ['    [GoTag(@"json:""nps2,omitzero""")]', '    public ж<NoPanicStruct> NoPanicStruct2;                               // nil pointer'], ['    public ж<NoPanicStruct> NoPanicStruct2; /*`json:"nps2,omitzero"`*/           // nil pointer'], True),
+    ('E-trail-B', ['FL-B', 'FL-E'], ['[GoType] internal partial struct percentSlashTag {', '    [GoTag(@"json:""text/html%""")]', '    public @string V;                    // https://golang.org/issue/2718'], ['internal partial struct percentSlashTag {', '    public @string V; /*`json:"text/html%"`*/ // https://golang.org/issue/2718'], True),
+    ('E-trail-C-BR', ['FL-C', 'FL-BR', 'FL-E'], ['[GoType("dyn")] [GoLocalName("C")] internal partial struct TestIssue7113_C {', '    [GoTag(@"xml:""""")]', '    public global::go.encoding.xml_package.Name XMLName;          // Sets empty namespace'], ['internal partial struct TestIssue7113_C /*dyn*/ {', '    public global::go.encoding.xml_package.Name XMLName; /*`xml:""`*/ // Sets empty namespace'], True),
+    ('E-trail-quoted', ['FL-E'], ['    [GoTag(@"a `b` c")]', '    public nint X;     // note'], ['    public nint X; /*"a `b` c"*/ // note'], True),
+    ('E-trail-neg-name', [], ['    [GoTag(@"json:""x""")]', '    public nint Level1e;           // annihilated by Embed0a.Level1e'], ['    public nint Level1f; /*`json:"x"`*/ // annihilated by Embed0a.Level1e'], False),
+    ('E-trail-neg-type', [], ['    [GoTag(@"json:""x""")]', '    public nint Level1e;           // annihilated by Embed0a.Level1e'], ['    public nuint Level1e; /*`json:"x"`*/ // annihilated by Embed0a.Level1e'], False),
+    ('E-trail-neg-comment', [], ['    [GoTag(@"json:""x""")]', '    public nint Level1e;           // annihilated by Embed0a.Level1e'], ['    public nint Level1e; /*`json:"x"`*/ // annihilated by Embed0b.Level1e'], False),
+    ('E-trail-neg-glued', [], ['    [GoTag(@"json:""x""")]', '    public nint Level1e;           // annihilated by Embed0a.Level1e'], ['    public nint Level1e; /*`json:"x"`*/// annihilated by Embed0a.Level1e'], False),
+    # 2026-10-08: the diff-ALIGNMENT artifact (_fl_realign): git pairs one struct's '}' and blank with the next struct's,
+    # so the hunk removes and re-adds identical lines; its patience realignment reads FACELIFT. NEGATIVE: a field moved
+    # OUT of its struct across the '}' (a real move) stays OTHER under the realignment too.
+    ('realign', ['FL-B', 'FL-E', 'realigned'], ['[GoType] public partial struct A {', '    [GoTag(@"xml:""x""")]', '    public nint X;', '}', '', '[GoType] public partial struct B {', '    [GoTag(@"xml:""y""")]', '    public nint Y;'], ['public partial struct A {', '    public nint X; /*`xml:"x"`*/', '}', '', 'public partial struct B {', '    public nint Y; /*`xml:"y"`*/'], True),
+    ('realign-neg-move', [], ['[GoType] public partial struct A {', '    [GoTag(@"xml:""x""")]', '    public nint X;', '}'], ['public partial struct A {', '}', '    public nint X; /*`xml:"x"`*/'], False),
 ]
 
 def flcontrol(out):
@@ -1208,36 +1248,93 @@ def flcontrol(out):
           f'(EXPECT wrong=0 and every one of the {len(FL_STEPS)} steps fired) :: wrote fl-pos.patch, fl-neg.patch')
     return 1 if bad else 0
 
+class _Hunk(tuple):
+    # (file, removed lines, added lines) -- compares and hashes as that plain tuple (teattr's --baseline set relies on
+    # it); .pre / .post carry the hunk's own region text in order (context + removed, context + added) for the
+    # patience realignment (_fl_realign). For a -U0 hunk the region is the removed block and the added block.
+    pass
+
 def te_hunks(pf):
-    # -> [(file, removed lines, added lines)], one entry per hunk of a unified diff (context lines are ignored)
-    out, cur, rem, add, inh = [], None, [], [], False
+    # -> [(file, removed lines, added lines)], one entry per hunk of a unified diff (context lines are ignored by the
+    # classes; they are kept on the entry as .pre/.post for the realignment)
+    out, cur, rem, add, pre, post, inh = [], None, [], [], [], [], False
     def flush():
-        nonlocal rem, add
-        if cur is not None and (rem or add): out.append((cur, tuple(rem), tuple(add)))
-        rem, add = [], []
+        nonlocal rem, add, pre, post
+        if cur is not None and (rem or add):
+            h = _Hunk((cur, tuple(rem), tuple(add))); h.pre, h.post = tuple(pre), tuple(post); out.append(h)
+        rem, add, pre, post = [], [], [], []
     for line in open(pf, encoding='utf-8', errors='replace'):
         line = line.rstrip('\r\n')
         if line.startswith('diff --git '):
             flush(); cur = line.split(' b/', 1)[-1].strip(); inh = False
         elif line.startswith('@@'):
             flush(); inh = True
-        elif inh and line.startswith('-'): rem.append(line[1:])
-        elif inh and line.startswith('+'): add.append(line[1:])
+        elif inh and line.startswith('-'): rem.append(line[1:]); pre.append(line[1:])
+        elif inh and line.startswith('+'): add.append(line[1:]); post.append(line[1:])
+        elif inh and line.startswith(' '): pre.append(line[1:]); post.append(line[1:])
     flush()
     return out
+
+# FL (2026-10-08): the DIFF-ALIGNMENT artifact. Git's default (myers) diff pairs a struct's '}' and blank line with the
+# NEXT struct's when a run of structs all lose their [GoType] / [GoTag] lines, so one hunk removes '}' and '' and adds
+# '}' and '' again (identical lines: nothing the face lift explains), or a hunk's removed block lands in one hunk and its
+# added block in the next (measured: encoding/xml marshal_test.cs and read_test.cs, unique/handle_test.cs in the i9's FL
+# shard patch; the same file pair re-diffed with --patience reads FACELIFT). Before a hunk is called OTHER its OWN
+# region text (context + changes, in order) is re-diffed with git's patience algorithm and each sub-hunk read by the
+# same rules; the hunk is FACELIFT only when EVERY sub-hunk is explained and a face-lift step fired. A patience diff is
+# still a diff of the same two texts, so a real move or an extra token stays OTHER (tFL-controls.sh FL-plant: realign
+# positive and negative). LIMITATION: a hunk of a -U0 patch carries no context, so its region is its removed block and
+# its added block alone; a misalignment ACROSS two -U0 hunks (unchanged lines between them that the patch omits) cannot
+# be realigned from the patch, and those hunks stay OTHER -- read the full-context patch of the same run.
+def _fl_realign(pre, post):
+    import tempfile, shutil
+    if not pre or not post: return None
+    d = tempfile.mkdtemp(prefix='flrealign')
+    try:
+        for n, t in (('a', pre), ('b', post)):
+            with open(os.path.join(d, n), 'w', encoding='utf-8', errors='surrogateescape', newline='\n') as fh: fh.write('\n'.join(t) + '\n')
+        r = subprocess.run(['git', '-c', 'core.quotepath=false', '-c', 'diff.noprefix=false', 'diff', '--no-index', '--no-color',
+                            '--no-ext-diff', '--patience', '-U0', '--', 'a', 'b'], cwd=d, capture_output=True)
+        if r.returncode not in (0, 1): return None
+        p = os.path.join(d, 'p')
+        with open(p, 'wb') as fh: fh.write(r.stdout)
+        sub = te_hunks(p)
+    except Exception:
+        return None
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+    if not sub: return None
+    n = u = m = pp = 0; fl = {}
+    for h in sub:
+        c, n1, u1, m1, p1, fl1 = te_class2(h[1], h[2], realign=False)
+        if c == 'OTHER': return None
+        n += n1; u += u1; m += m1; pp += p1
+        for k, v in fl1.items(): fl[k] = fl.get(k, 0) + v
+    if not fl: return None   # the realignment admits the face lift only: an older class keeps its own reading
+    fl['realigned'] = fl.get('realigned', 0) + 1
+    return 'FACELIFT', n, u, m, pp, fl
 
 def te_class(rem, add):
     # -> (class, noinline lines, using lines, map lines, partial lines); the face-lift step counts: te_class2
     return te_class2(rem, add)[:5]
 
-def te_class2(rem, add, fname=None):
+def te_class2(rem, add, fname=None, pre=None, post=None, realign=True):
     # FL (FL1): the face-lift transformations are taken out FIRST (fl_normalize), then the older classes read what is
     # left. A hunk whose every line is explained is FACELIFT when any face-lift step fired in it, else its older class.
     # fname: the hunk's file, for the carrier blank-line credit (fl_prime must have read the same input first).
+    # pre/post: the hunk's region text (te_hunks' .pre/.post); an OTHER reading is retried on its patience realignment
+    # (_fl_realign: on (rem, add) when no region is given) before it stands.
     r, a, fl = fl_normalize(rem, add, fname)
     c, n, u, m, p = _te_class_core(r, a)
     if c != 'OTHER' and fl: c = 'FACELIFT'
+    if c == 'OTHER' and realign:
+        rr = _fl_realign(pre if pre is not None else rem, post if post is not None else add)
+        if rr is not None: return rr
     return c, n, u, m, p, fl
+
+def te_class_h(h):
+    # a te_hunks entry, with its region for the realignment
+    return te_class2(h[1], h[2], h[0], getattr(h, 'pre', None), getattr(h, 'post', None))
 
 def _te_class_core(rem, add):
     r, a = list(rem), list(add)
@@ -1276,7 +1373,7 @@ def teattr(argv):
     cnt = {'G-FRAME': 0, 'MAP': 0, 'N-PARTIAL': 0, 'FACELIFT': 0, 'OTHER': 0}; nl = ul = pl = 0; other, gfiles, ofiles, pfiles = [], set(), set(), set()
     flst, flfiles = {}, set()
     for h in hunks:
-        c, n, u, m, p, fl = te_class2(h[1], h[2], h[0])
+        c, n, u, m, p, fl = te_class_h(h)
         cnt[c] += 1; nl += n; ul += u; pl += p
         for k, v in fl.items(): flst[k] = flst.get(k, 0) + v
         if c == 'FACELIFT': flfiles.add(h[0])
@@ -1291,7 +1388,7 @@ def teattr(argv):
           f'g-frame-only files={len(gonly)}) map-only={cnt["MAP"]} other={cnt["OTHER"]} '
           f'n-partial={cnt["N-PARTIAL"]} (partial-lines={pl}, in {len(pfiles)} file(s); files with no OTHER hunk among them={len(pfiles - ofiles)}) '
           f'facelift={cnt["FACELIFT"]} (in {len(flfiles)} file(s); files with no OTHER hunk among them={len(flfiles - ofiles)})')
-    print('TE FACELIFT steps (FL1; lines per step, every hunk): ' + (' '.join(f'{k}={flst[k]}' for k in FL_STEPS if flst.get(k)) or 'none'))
+    print('TE FACELIFT steps (FL1; lines per step, every hunk): ' + (' '.join(f'{k}={flst[k]}' for k in FL_STEPS + ('realigned',) if flst.get(k)) or 'none'))
     new = None
     if baseline and os.path.exists(baseline):
         bh = te_hunks(baseline); bset = set(bh); bfiles = {h[0] for h in bh}
@@ -1318,7 +1415,7 @@ def hunkclass(patches):
     fl_prime(hunks)
     per, flst = {}, {}
     for h in hunks:
-        c, n, u, m, p, fl = te_class2(h[1], h[2], h[0])
+        c, n, u, m, p, fl = te_class_h(h)
         d = per.setdefault(h[0], {'G-FRAME': 0, 'MAP': 0, 'N-PARTIAL': 0, 'FACELIFT': 0, 'OTHER': 0, 'n': 0, 'u': 0, 'p': 0})
         d[c] += 1; d['n'] += n; d['u'] += u; d['p'] += p
         for k, v in fl.items(): flst[k] = flst.get(k, 0) + v
@@ -1338,7 +1435,7 @@ def hunkclass(patches):
           + f' g-frame-hunks={sum(d["G-FRAME"] for d in per.values())} map-only-hunks={sum(d["MAP"] for d in per.values())} other-hunks={sum(d["OTHER"] for d in per.values())}'
           + f' n-partial-files={len(npf)}' + ((' [' + ' '.join(npf)[:400] + ']') if npf else '')
           + f' facelift-hunks={sum(d["FACELIFT"] for d in per.values())} facelift-files={sum(1 for d in per.values() if d["FACELIFT"])}'
-          + ' facelift-steps=[' + ' '.join(f'{k}={flst[k]}' for k in FL_STEPS if flst.get(k)) + ']')
+          + ' facelift-steps=[' + ' '.join(f'{k}={flst[k]}' for k in FL_STEPS + ('realigned',) if flst.get(k)) + ']')
     return 1 if other else 0
 
 # ---------------------------------------------------------------------------------------------------------------- wallcmp
@@ -1847,8 +1944,8 @@ def uflinux(repo):
 #   testsrc-refresh <repo> --check-worktree                              after `git apply`: every changed path is in the class
 ALIAS_USING = re.compile(r'^using [A-Za-z_][A-Za-z0-9_]* = global::[A-Za-z0-9_.]+;$')
 SLICE_OLD = re.compile(r'\[[^\]]*\.\.[^\]]*\]')
-def ts_class(rem, add, fname=None):
-    c, n, u, m, p, fl = te_class2(rem, add, fname)
+def ts_class(rem, add, fname=None, pre=None, post=None):
+    c, n, u, m, p, fl = te_class2(rem, add, fname, pre, post)
     if c != 'OTHER': return c
     r = [x.strip() for x in rem if x.strip()]; a = [x.strip() for x in add if x.strip()]
     if a and all(ALIAS_USING.match(x) for x in a) and all(x == USING_RT for x in r): return 'ALIAS'
@@ -1919,7 +2016,7 @@ def ts_report(path, blk):
     fl_prime(hs)
     cnt = {'G-FRAME': 0, 'MAP': 0, 'N-PARTIAL': 0, 'FACELIFT': 0, 'ALIAS': 0, 'SLICE': 0, 'OTHER': 0}; first = ''
     for h in hs:
-        c = ts_class(h[1], h[2], h[0]); cnt[c] += 1
+        c = ts_class(h[1], h[2], h[0], h.pre, h.post); cnt[c] += 1
         if c == 'OTHER' and not first: first = f' first-other: -[{(h[1][0].strip() if h[1] else "")[:80]}] +[{(h[2][0].strip() if h[2] else "")[:80]}]'
     return cnt, len(hs), first
 

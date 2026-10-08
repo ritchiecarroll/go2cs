@@ -88,3 +88,16 @@ EXEMPT list).
 - MAP_FROM (FL8) has no planted control: it is inline in the map script and its first real run is the reading.
 - G's four third-party modules (pflag, cobra, logrus, testify) are NOT battery legs: their versions and EXPECTs are
   G's; the checklist dispatches them at the fixup head (FL10) with Q's stamped readings as the prediction.
+
+## 5. Amendment 2026-10-08: FL-E's trailing-comment form and the diff-alignment realignment
+
+- tFL-helpers.py fl_normalize: FL-E admits a field line with a TRAILING `// comment` (the tag comment lands before the
+  `//`, the blanks ahead of it re-aligned; code and comment text byte-identical). The pending attributes apply E LAST.
+- tFL-helpers.py te_class2 / _fl_realign: a hunk read OTHER is re-diffed (git `--patience`, `-U0`) on its OWN region text
+  (te_hunks now keeps context + changes as .pre/.post) and is FACELIFT only when every sub-hunk is explained and a
+  face-lift step fired (counted as `realigned`). LIMITATION: a -U0 hunk has no context, so a misalignment ACROSS two
+  -U0 hunks stays OTHER (i9 FL shard U0: 7 hunks of encoding/xml marshal_test.cs, 2 of unique/handle_test.cs; the
+  full-context patch of the same run reads them FACELIFT).
+- Read: 4t encoding/json OTHER 7 -> 0 (FACELIFT 266 -> 273); i9 FL shard full context OTHER 44 -> 36, -U0 114 -> 101;
+  every remaining OTHER file is TRAIN Q's standing set; TRAIN Q's i9 patches unchanged (0 hunks moved class).
+- tFL-controls.sh: 11 new plants under FL-plant (43), arms FL-E (by name) and FL-E-real (the kept patches).

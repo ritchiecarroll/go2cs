@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # TRAIN FL -- the CONTROLS of every reader FL adds or changes, beside Q's arms (kept: their inputs are fixed objects or
 # kept records). DERIVED 2026-10-08 from trainQ/tQ-controls.sh. NEW at FL (trainFL/tFL-CHANGES.md):
-#   FL-plant  the face-lift classes on 32 planted hunks (tFL-helpers.py flcontrol): a positive per step, a negative for
+#   FL-plant  the face-lift classes on 43 planted hunks (tFL-helpers.py flcontrol): a positive per step, a negative for
 #             each rule that could pass too much; then the same patches through hunkclass (rc 0 / rc 1)
+#   FL-E      (2026-10-08) FL-E's trailing-comment form and the patience realignment, by name from FL-plant's plants
+#             (6 positives FACELIFT, 5 negatives OTHER: name, type, comment text, glued '//', a field moved out of
+#             its struct);  FL-E-real: the 4t json patch other=0, the i9 FL shard patch other=36 with exactly TRAIN
+#             Q's OTHER files, TRAIN Q's i9 patch unchanged
 #   FL-real   the union's regenerated PRODUCTION corpus from the objects (541766413e..14c543bb06): exact counts, and
 #             OTHER only in the six hand-owned files
 #   FL-gold   the regenerated goldens from the same objects: exact counts
@@ -445,6 +449,35 @@ if [ -f "$QP" ]; then
   verdict FL-Q "$?" "TRAIN Q's S rewrites: $(printf '%s' "$ql" | sed -n 's/.* other=\([0-9]*\) n-partial=\([0-9]*\) .* facelift=\([0-9]*\) .*/other=\1 n-partial=\2 facelift=\3/p') (EXPECT n-partial=375, facelift=0: no face-lift class fires on a pre-face-lift patch)"
 else
   notrun FL-Q "no $QP"
+fi
+# FL-E (2026-10-08): FL-E's TRAILING-COMMENT form and the diff-ALIGNMENT realignment (tFL-helpers.py _fl_realign).
+# Planted, by name from FL-plant's own flcontrol.txt: the positives (alone, wide re-alignment, with B, with C + a recorded
+# name, the quoted form, a realigned '}'/blank pairing) FACELIFT, the negatives (the field's NAME, its TYPE or the comment
+# text changed, the '//' glued to the tag comment, a field moved out of its struct across the '}') OTHER. Real, on the
+# kept records (read-only): the fixup's 4t encoding/json patch (run2) reads other=0 facelift=273 (was 7 / 266); the i9's
+# FL shard patch (full context) reads other=36 facelift=1161 with its OTHER files EXACTLY TRAIN Q's i9 patch's OTHER files
+# (the standing class: package_init.cs hooks, two .cs.auto siblings, docs/validation stamps, the os README); TRAIN Q's
+# patch reads unchanged (other=36, n-partial=125, facelift=0).
+want_pos='E-trail E-trail-wide E-trail-B E-trail-C-BR E-trail-quoted realign'; want_neg='E-trail-neg-name E-trail-neg-type E-trail-neg-comment E-trail-neg-glued realign-neg-move'
+ep=0; er=''
+for n in $want_pos; do grep -q "^FLCONTROL $n: class=FACELIFT .* ok\$" "$FLO/flcontrol.txt" && er="$er[$n ok] " || { er="$er[$n WRONG] "; ep=1; }; done
+for n in $want_neg; do grep -q "^FLCONTROL $n: class=OTHER .* ok\$" "$FLO/flcontrol.txt" && er="$er[$n ok] " || { er="$er[$n WRONG] "; ep=1; }; done
+verdict FL-E "$ep" "trailing-comment E and the realignment, planted: $er"
+E4T=${FL_4T_PATCH:-/h/go2cs-tmp-coord/coord-scratch/tFL/run2/tFL-fixup-logs/4t-encoding.json.patch}
+EI9=${FL_I9_PATCH:-/h/go2cs-tmp-coord/coord-scratch/tFL/i9-patches/tFL-tracked-changes.patch}
+EQ9=${Q_I9_PATCH:-/h/go2cs-tmp-coord/coord-scratch/tQ/i9-patches/tQ-tracked-changes.patch}
+if [ -f "$E4T" ] && [ -f "$EI9" ] && [ -f "$EQ9" ]; then
+  e1=$(hp teattr "$(w "$E4T")" | tr -d '\r' | head -n 1); e2=$(hp teattr "$(w "$EI9")" | tr -d '\r' | head -n 1); e3=$(hp teattr "$(w "$EQ9")" | tr -d '\r' | head -n 1)
+  ofiles(){ hp hunkclass "$(w "$1")" | tr -d '\r' | grep '^HUNKCLASS [^ ]*: ' | grep -v ' other-hunks=0 ' | sed 's/^HUNKCLASS \([^:]*\):.*/\1/' | LC_ALL=C sort | tr '\n' ' '; }
+  of2=$(ofiles "$EI9"); of3=$(ofiles "$EQ9")
+  rd(){ printf '%s' "$1" | sed -n 's/.* other=\([0-9]*\) n-partial=\([0-9]*\) .* facelift=\([0-9]*\) .*/other=\1 n-partial=\2 facelift=\3/p'; }
+  case "$e1" in *' other=0 '*' facelift=273 '*) c1=0 ;; *) c1=1 ;; esac
+  case "$e2" in *' other=36 '*' facelift=1161 '*) c2=0 ;; *) c2=1 ;; esac
+  case "$e3" in *' other=36 n-partial=125 '*' facelift=0 '*) c3=0 ;; *) c3=1 ;; esac
+  [ "$c1$c2$c3" = 000 ] && [ -n "$of3" ] && [ "$of2" = "$of3" ]
+  verdict FL-E-real "$?" "4t json [$(rd "$e1")] (EXPECT other=0 facelift=273); i9 FL shard [$(rd "$e2")] (EXPECT other=36 facelift=1161) OTHER files == TRAIN Q's: $([ "$of2" = "$of3" ] && echo yes || echo "NO [$of2] vs [$of3]"); TRAIN Q i9 [$(rd "$e3")] (EXPECT other=36 n-partial=125 facelift=0)"
+else
+  notrun FL-E-real "one of $E4T $EI9 $EQ9 is not on this box"
 fi
 
 # ------------------------------------------------------------------------------------------------ CSP (FL5)
