@@ -81,7 +81,7 @@ named-`uint`-keyed form, elements read back and output-compared vs Go.)
 
 A keyed (sparse, constant-index) literal of a **named array-wrapper** type — internal/trace/oldtrace's `timedEventArgs{1: uint64(ev.StkID)}` where `type timedEventArgs [4]uint64` — backs onto the golib `array<T>(length)` (which has an indexer setter), not a raw C# array. The wrapper's constructor takes an `array<T>` (the positional path already produces one via `.array()`), and the keyed elements render as the `[i] = v` indexed initializer — valid on `new array<uint64>(4){[1] = v}` but *not* on `new uint64[]{[1] = v}` (CS0131, an array-initializer takes no indexed members). A **positional** literal of the same wrapper keeps the `new uint64[]{…}.array()` form (unchanged — no churn). (Guarded by `NamedArrayKeyedLiteral` — a `type args [4]uint64` with multi-keyed, single-keyed, and positional literals, element reads output-compared vs Go.)
 
-A **generic** named array type carries its type parameters (and their constraints) onto the forward declaration, and its element type is emitted fully qualified in the `[GoType]` attribute so the generated array-backed partial — which lives in a file without this file's package-relative `using` aliases — can resolve it:
+A **generic** named array type carries its type parameters (and their constraints) onto the forward declaration, and its element type is emitted fully qualified in the definition comment so the generated array-backed partial — which lives in a file without this file's package-relative `using` aliases — can resolve it:
 
 ```go
 type table[T any] [3]atomic.Pointer[T]
@@ -1316,7 +1316,7 @@ holds the fact**:
 - **The converter** answers for a nested UNNAMED array element, because nothing downstream can. The
   descriptor is `[2]array<nint>` — the inner `3` is gone — and an `array<T>`'s length is INSTANCE
   state, so a site with no instance cannot recover it. It stamps
-  `[GoType("[2]array<nint>")] /*[2][3]*/ partial struct nn;` and gen builds the factory from
+  `/*[2][3]*/ partial struct nn /*[2]array<nint>*/;` and gen builds the factory from
   everything after the first dimension: `new array<array<nint>>(2, static () => new(3))`. This is the
   existing `GoArrayDims` cargo (same attribute, same outermost-first meaning as on a parameter or a
   field) reached one hop earlier — at construction rather than at description — with its

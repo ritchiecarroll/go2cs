@@ -47,7 +47,7 @@ Each `visit*` file handles one Go AST node category, emitting the corresponding 
 | File | Handles |
 |---|---|
 | `visitFile.go` | Top-level file: namespace, usings, package partial class. |
-| `visitDecl.go` / `visitGenDecl.go` / `visitFuncDecl.go` | Declarations: general (var/const/type/import), functions & methods (receivers → `[GoRecv]`). |
+| `visitDecl.go` / `visitGenDecl.go` / `visitFuncDecl.go` | Declarations: general (var/const/type/import), functions & methods (a pointer receiver → `this ref`). |
 | `visitTypeSpec.go` / `visitValueSpec.go` / `visitImportSpec.go` | Type/value/import specs. |
 | `visitStructType.go` / `visitInterfaceType.go` | Struct & interface type defs (embedding, method sets → generators). |
 | `visitArrayType.go` / `visitMapType.go` / `visitChanType.go` / `visitFuncType.go` | Composite type forms. |
@@ -94,11 +94,11 @@ Compile-time emission so converted C# stays visually close to Go. Referenced as 
 | Generator | Trigger | Produces |
 |---|---|---|
 | `ImplementGenerator` | `[assembly: GoImplement<TStruct, TInterface>]` | Explicit interface implementations / promoted methods (Go duck-typing). |
-| `RecvGenerator` | `[GoRecv]` on methods | Value/pointer receiver overloads handling `ptr<T>`/`ж<T>` deref. |
+| `RecvGenerator` | methods whose receiver is `this ref T` | Value/pointer receiver overloads handling `ptr<T>`/`ж<T>` deref. |
 | `ImplicitConvGenerator` | `[GoImplicitConv]` | Implicit conversion operators between Go type aliases. |
-| `TypeGenerator` | `[GoType]` | Wrapper types + field promotion for struct embedding. |
+| `TypeGenerator` | a `partial` type declared in the package class | Wrapper types + field promotion for struct embedding. |
 | `PartialStubGenerator` | a bodyless `partial` method with no implementing part | A throwing stub, so a Go function with no Go body (assembly or cgo) compiles until a hand-owned companion supplies it. |
-| `StrGenerator` | `[GoStr]` on a method | The `@string` forwarder (and, for a package-level function, its value delegate) for an `sstring` twin. |
+| `StrGenerator` | a method with an `sstring` parameter | The `@string` forwarder (and, for a package-level function, its value delegate) for an `sstring` twin. |
 
 ## Runtime type map (`src/core/golib/`)
 

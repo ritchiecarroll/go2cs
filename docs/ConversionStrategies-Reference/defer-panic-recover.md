@@ -972,7 +972,7 @@ defer(() => hʗ1.close(), ref ᒐ);
 Guarded by `DeferTypelessReturns`.
 
 ## Deferred pointer-receiver nullary calls bind the box method group
-`defer conf.releaseSema()` with `conf *resolverConfig` (net nss.go / dnsclient_unix.go) trimmed to the deref-alias method group `Ꮡconf.Value.releaseSema` — a struct VALUE against the [GoRecv] `ref` extension, which cannot create a delegate (CS1113). The emission binds the BOX method group instead:
+`defer conf.releaseSema()` with `conf *resolverConfig` (net nss.go / dnsclient_unix.go) trimmed to the deref-alias method group `Ꮡconf.Value.releaseSema` — a struct VALUE against the `this ref` extension, which cannot create a delegate (CS1113). The emission binds the BOX method group instead:
 ```csharp
 defer(Ꮡconf.releaseSema, ref ᒐ);
 ```

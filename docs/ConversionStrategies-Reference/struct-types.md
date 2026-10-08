@@ -1,7 +1,7 @@
 # Struct Types
 
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#struct-types)
-Go structs are converted to C# `struct` types and used on the stack to optimize memory use and reduce GC pressure; when an instance must escape the stack it is wrapped in a heap box, [`ж<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/%D0%B6.cs) (see [Pointers](pointers.md#pointers)). Rather than spell out the whole struct body, the converter emits a partial struct carrying a `[GoType]` attribute, and the `TypeGenerator` source generator synthesizes the members (equality, `ISupportMake`, embedding promotion, etc.):
+Go structs are converted to C# `struct` types and used on the stack to optimize memory use and reduce GC pressure; when an instance must escape the stack it is wrapped in a heap box, [`ж<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/%D0%B6.cs) (see [Pointers](pointers.md#pointers)). Rather than spell out the whole struct body, the converter emits a bare partial struct, and the `TypeGenerator` source generator synthesizes the members (equality, `ISupportMake`, embedding promotion, etc.):
 
 <!-- source: src/tests/Behavioral/AnonymousStructs/AnonymousStructs.cs.target:7-10 -->
 ```csharp
@@ -673,7 +673,7 @@ package scope under a function-prefixed name. Two Go type-identity rules ride th
   `TestPackageLevelAnonStructDedup`; corpus footprint of the package-level extension measured at
   exactly one site, reflect's lookup-cache pair, by seeded whole-stdlib reconvert.)
 - **A lifted local NAMED type carries its original Go name** via the golib `[GoLocalName]`
-  attribute — a SEPARATE attribute, never a `[GoType]` definition token (the TypeGenerator
+  attribute — a SEPARATE attribute, never a definition-comment token (the TypeGenerator
   matches that slot by exact string and throws on unknown forms). The reflection bridge's
   naming (`GoReflect.GoQualifiedName` → `Type.String()`, `%T`) prefers it, so a local type
   prints Go's `*binary.Person`, never the lifted `*binary.TestNoFixedSize_Person`
@@ -704,8 +704,11 @@ struct field embedding an interface by that stamp, forwarded a promoted method t
 (CS0120/CS1061, BurntSushi/toml's `TestEncodeAnonymousNoStructField`). The interface declaration now places them
 the same way:
 
+<!-- source: the two lines src/go2cs/internalTestLocalInterfaceStamp_test.go:87 and :101 assert, the declaration and its record -->
 ```csharp
-[GoType("dyn")] [GoLocalName("Inner")] internal partial interface TestLocalEmbeddedInterface_Inner {
+internal partial interface TestLocalEmbeddedInterface_Inner /*dyn*/ {
+…
+[GoLocalName("Inner")] partial interface TestLocalEmbeddedInterface_Inner {}
 ```
 
 Outside the bridge nothing comes back and the record stays in `package_info.cs`, so production emission and the
@@ -836,7 +839,7 @@ the type straight into the namespace: `sync.atomic.Int32` / `io.fs.DirEntry` —
 is not a namespace of `go.sync` (the type lives in class `atomic_package`). It now splits the trailing
 `.TypeName` off at the first `.` after the last path `/`, converts the package path with the class
 suffix, and re-appends: `sync.atomic_package.Int32`, `io.fs_package.DirEntry`. The suffix is only added
-when the path segment does not already carry it — some callers (a recorded `[GoType]` underlying,
+when the path segment does not already carry it — some callers (a recorded underlying type,
 `sync/atomic_package.Uint32`) hand a pre-suffixed path, which would otherwise double to
 `atomic_package_package` (a `DefinedTypeOverPkgType` regression, caught and gated). The behavioral
 corpus is byte-identical except the intended change, and an A/B reconvert of net+go/types (same package

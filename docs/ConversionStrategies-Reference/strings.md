@@ -246,7 +246,7 @@ A conversion of a bare, never-written identifier that repeats (two or more uses,
 
 A `string` parameter is an `@string`, so every literal argument is copied into one: `fmt.Sprintf("xxx")` allocates the literal and then the result, where Go allocates only the result. A **twin** gives a registered function a second member that takes `sstring`:
 
-- **The converter** emits the member that carries the Go body, with each registered parameter typed `sstring` and marked `[GoStr]`:
+- **The converter** emits the member that carries the Go body, with each registered parameter typed `sstring`:
 
   <!-- source: src/core/fmt/print.cs:268-276 -->
   ```csharp
@@ -282,7 +282,7 @@ Funcꓸꓸꓸ<@string, any, error> noVetErrorf = fmt.Errorfᶠ;
 
 **Deferred and `go` calls** take the temp-parameter lambda form, `defer(ᴛ1 => Count(ᴛ1), …)`. The arguments stay `@string` generic type arguments, since a `ref struct` cannot be one.
 
-**Pointer receivers.** RecvGenerator gives the `[GoStr]` member its `ж<T>` overload. A pointer-receiver call with an `@string` argument binds it through the implicit view, so the forwarder needs none.
+**Pointer receivers.** RecvGenerator gives the `sstring` member its `ж<T>` overload. A pointer-receiver call with an `@string` argument binds it through the implicit view, so the forwarder needs none.
 
 **Records.** `package_info.cs` publishes each exported package-level twin to other packages:
 

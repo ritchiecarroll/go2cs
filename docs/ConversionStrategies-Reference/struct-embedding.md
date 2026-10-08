@@ -472,7 +472,7 @@ partial struct embeddedLocalTypes_holder /*dyn*/ {
 
 ⚠ Related but distinct, and still open: `%T` of a lifted function-local **non-struct** named type still prints the hoisted identifier, because only lifted STRUCT types carry the `[GoLocalName]` stamp that the reflection bridge reads.
 
-## An embedded PREDECLARED type is a plain field stamped `[GoEmbedded]` (2026-09-05)
+## An embedded PREDECLARED type is a plain field marked `/*embed*/` (2026-09-05)
 
 Go lets a struct embed a predeclared type — `struct{ int }`, `struct{ *int }` — and the embed has
 nothing to promote: no methods, no fields, only a name (`int`) and the **Anonymous** bit
@@ -483,10 +483,9 @@ named `int` of type `nint` is indistinguishable from a field somebody *declared*
 the projection keyed embeddedness on the promotion shape and answered `Anonymous == false` — the
 other half of reflect's `TestFieldPkgPath`, red since increment E2 landed the first half.
 
-The datum is stamped where it is lost, exactly as `[GoArrayDims]` stamps a parameter's array length
-and `[GoMapKeyDims]` a map field's key dims: the two `handled` branches of `visitStructType` that
-render an embedded predeclared type (and an embedded POINTER to one) emit the field with golib's
-`[GoEmbedded]` marker, and `GoReflect.GoFields` reads it into `GoFieldInfo.Embedded` for the
+The datum is written where it is lost, exactly as a `/*[N]*/` comment carries a parameter's array length: the two `handled` branches of `visitStructType` that
+render an embedded predeclared type (and an embedded POINTER to one) emit the field with the
+`/*embed*/` marker, which go2cs-gen records on the struct, and `GoReflect.GoFields` reads it into `GoFieldInfo.Embedded` for the
 plain-field arm. Nothing else moves — every embed of a NAMED type keeps its generated
 promotion shape, which already reports Anonymous:
 
