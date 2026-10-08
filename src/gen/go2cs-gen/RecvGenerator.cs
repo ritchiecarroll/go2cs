@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using go2cs.Templates.ReceiverMethod;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static go2cs.Common;
 using static go2cs.Symbols;
@@ -23,10 +24,6 @@ namespace go2cs;
 [Generator]
 public class RecvGenerator : ISourceGenerator
 {
-    private const string Namespace = "go";
-    private const string AttributeName = "GoRecv";
-    private const string FullAttributeName = $"{Namespace}.{AttributeName}Attribute";
-
     public void Initialize(GeneratorInitializationContext context)
     {
     #if DEBUG_GENERATOR
@@ -34,13 +31,13 @@ public class RecvGenerator : ISourceGenerator
             Debugger.Launch();
     #endif
 
-        // Register to find "GoRecvAttribute" on method declarations
-        context.RegisterForSyntaxNotifications(() => new AttributeFinder<MethodDeclarationSyntax>(FullAttributeName));
+        // Register to find the Go pointer-receiver methods emitted `this ref T`
+        context.RegisterForSyntaxNotifications(() => new PointerReceiverFinder());
     }
 
     public void Execute(GeneratorExecutionContext context)
     {
-        if (context.SyntaxContextReceiver is not AttributeFinder<MethodDeclarationSyntax> { HasAttributes: true } attributeFinder)
+        if (context.SyntaxContextReceiver is not PointerReceiverFinder { Methods.Count: > 0 } finder)
             return;
 
         // Roslyn hintNames are compared case-INSENSITIVELY, and Go routinely pairs an exported
@@ -49,8 +46,14 @@ public class RecvGenerator : ISourceGenerator
         // package (every box.Method() call fails CS1929).
         HashSet<string> emittedHintNames = new(StringComparer.OrdinalIgnoreCase);
 
-        foreach ((MethodDeclarationSyntax methodSyntax, List<AttributeSyntax> attributes) in attributeFinder.TargetAttributes)
+        // In a hand-owned package a method is a pointer receiver by [GoRecv] alone.
+        bool handOwnedPackage = context.Compilation.Assembly.IsHandOwnedPackage();
+
+        foreach (MethodDeclarationSyntax methodSyntax in finder.Methods)
         {
+            if (handOwnedPackage && !methodSyntax.IsPointerSetMethod(handOwnedPackage: true))
+                continue;
+
             SyntaxTree syntaxTree = methodSyntax.SyntaxTree;
             SemanticModel semanticModel = context.Compilation.GetSemanticModel(syntaxTree);
 
@@ -86,46 +89,44 @@ public class RecvGenerator : ISourceGenerator
 
             string[] usingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel);
 
-            foreach (AttributeSyntax attribute in attributes)
+            MethodInfo method = methodSyntax.GetMethodInfo(context.Compilation);
+
+            // Only process methods with a reference receiver to create
+            // a generated overload the handles a ptr<T> receiver
+            if (method.Parameters.Length == 0 || !method.IsRefRecv)
+                continue;
+
+            // A HAND-WRITTEN twin already stands where this overload would go — the hand-owned
+            // testing.T/B/F logging methods, whose `params` tail needs a twin written by hand —
+            // so emitting one here is a duplicate member (CS0111). [GoRecv] on such a method
+            // states only what it is, a pointer-receiver method, for the run-time method set,
+            // which an unmarked `this ref` receiver states as well.
+            if (HasDeclaredPointerTwin(semanticModel, methodSyntax))
+                continue;
+
+            // A null symbol (no semantic info for this declaration) falls back to the name rule,
+            // which is exactly the behaviour this read replaces — never a widening by default.
+            string receiverSimpleName = GetSimpleName(method.Parameters[0].type);
+
+            bool receiverTypeIsPublic = receiverTypeSymbol is null
+                ? GetScope(receiverSimpleName) == "public"
+                : EffectiveScopeIsPublic(receiverTypeSymbol, receiverSimpleName);
+
+            string generatedSource = new ReceiverMethodTemplate
             {
-                MethodInfo method = methodSyntax.GetMethodInfo(context.Compilation);
-
-                // Only process methods with a reference receiver to create
-                // a generated overload the handles a ptr<T> receiver
-                if (method.Parameters.Length == 0 || !method.IsRefRecv)
-                    continue;
-
-                // A HAND-WRITTEN twin already stands where this overload would go — the hand-owned
-                // testing.T/B/F logging methods, whose `params` tail needs a twin written by hand —
-                // so emitting one here is a duplicate member (CS0111). [GoRecv] on such a method
-                // states only what it is, a pointer-receiver method, for the run-time method set.
-                if (HasDeclaredPointerTwin(semanticModel, methodSyntax))
-                    continue;
-
-                // A null symbol (no semantic info for this declaration) falls back to the name rule,
-                // which is exactly the behaviour this read replaces — never a widening by default.
-                string receiverSimpleName = GetSimpleName(method.Parameters[0].type);
-
-                bool receiverTypeIsPublic = receiverTypeSymbol is null
-                    ? GetScope(receiverSimpleName) == "public"
-                    : EffectiveScopeIsPublic(receiverTypeSymbol, receiverSimpleName);
-
-                string generatedSource = new ReceiverMethodTemplate
-                {
-                    PackageNamespace = packageNamespace,
-                    PackageName = packageName,
-                    Scope = scope,
-                    Method = method,
-                    ReceiverTypeIsPublic = receiverTypeIsPublic,
-                    NoInlining = HasNoInliningMark(methodSyntax, semanticModel),
-                    OverloadResolutionPriority = GetOverloadResolutionPriority(methodSyntax),
-                    UsingStatements = usingStatements
-                }
-                .Generate();
-
-                // Add the source code to the compilation
-                context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{method.Parameters[0].type}.g.cs")), generatedSource);
+                PackageNamespace = packageNamespace,
+                PackageName = packageName,
+                Scope = scope,
+                Method = method,
+                ReceiverTypeIsPublic = receiverTypeIsPublic,
+                NoInlining = HasNoInliningMark(methodSyntax, semanticModel),
+                OverloadResolutionPriority = GetOverloadResolutionPriority(methodSyntax),
+                UsingStatements = usingStatements
             }
+            .Generate();
+
+            // Add the source code to the compilation
+            context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{method.Parameters[0].type}.g.cs")), generatedSource);
         }
     }
 
@@ -159,6 +160,28 @@ public class RecvGenerator : ISourceGenerator
         }
 
         return false;
+    }
+
+    // Selects every method whose receiver is `this ref T` and that MethodInfo.IsGoRecv reads as a
+    // POINTER-set method: converted code emits a Go pointer receiver `this ref T` with no mark, and a
+    // hand-written file may still carry [GoRecv], which reads the same. A by-ref receiver marked
+    // [GoCopyBound] is a VALUE-set method and has no pointer twin. Read from syntax alone, so the
+    // selection costs no semantic model per node; a hand-owned package's narrower rule ([GoRecv]
+    // alone) is applied in Execute, where the compilation is known.
+    private sealed class PointerReceiverFinder : ISyntaxContextReceiver
+    {
+        public List<MethodDeclarationSyntax> Methods { get; } = [];
+
+        public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
+        {
+            if (context.Node is not MethodDeclarationSyntax { ParameterList.Parameters.Count: > 0 } method)
+                return;
+
+            SyntaxTokenList modifiers = method.ParameterList.Parameters[0].Modifiers;
+
+            if (modifiers.Any(SyntaxKind.ThisKeyword) && modifiers.Any(SyntaxKind.RefKeyword) && method.IsPointerSetMethod(handOwnedPackage: false))
+                Methods.Add(method);
+        }
     }
 
     private static string? GetOverloadResolutionPriority(MethodDeclarationSyntax methodSyntax)

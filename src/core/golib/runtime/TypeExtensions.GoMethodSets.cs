@@ -131,6 +131,7 @@ public static partial class TypeExtensions
 {
     private static readonly ConcurrentDictionary<Type, ImmutableHashSet<string>> s_interfaceMethodNames = [];
     private static readonly ConcurrentDictionary<(Type element, bool isPointer), List<MethodInfo>> s_goMethodSetCandidates = [];
+    private static readonly ConcurrentDictionary<Assembly, bool> s_handOwnedPackages = [];
     private static readonly ConcurrentDictionary<(Type element, bool isPointer), GoMethodSetEntry[]> s_goMethodSetEntries = [];
     private static readonly ConcurrentDictionary<Type, GoMethodSetEntry[]> s_goInterfaceMethodEntries = [];
     private static readonly ConcurrentDictionary<Type, ImmutableHashSet<string>> s_structFieldNames = [];
@@ -284,8 +285,8 @@ public static partial class TypeExtensions
     }
 
     /// <summary>
-    /// Determines whether <paramref name="method"/> takes its receiver <c>this ref X</c> WITHOUT
-    /// <see cref="GoRecvAttribute"/> — a method of <c>X</c>'s VALUE method set whose emitted receiver
+    /// Determines whether <paramref name="method"/> takes its receiver <c>this ref X</c> and is marked
+    /// <see cref="GoCopyBoundAttribute"/> — a method of <c>X</c>'s VALUE method set whose emitted receiver
     /// is by reference, which every run-time binder must therefore call on a COPY.
     /// </summary>
     /// <param name="method">Receiver-first static method from a Go method set.</param>
@@ -301,8 +302,13 @@ public static partial class TypeExtensions
     /// receiver fits no delegate and no <c>Func&lt;&gt;</c> type argument, so reflect's method table,
     /// method values and the interface shells all refused it. Copying is exactly Go's semantics for a
     /// value receiver, and nothing is lost by it: the forwarder reaches its target through the
-    /// embedded pointer, which the copy shares. A <c>[GoRecv]</c> by-ref receiver is NOT this shape
-    /// — it is a pointer-set method, bound through its <c>ж&lt;X&gt;</c> twin and never through a copy.
+    /// embedded pointer, which the copy shares. The generator marks that forwarder
+    /// <see cref="GoCopyBoundAttribute"/>; every OTHER by-ref receiver is a pointer-set method, bound
+    /// through its <c>ж&lt;X&gt;</c> twin and never through a copy, whether or not it carries
+    /// <c>[GoRecv]</c> (converted code no longer writes it; hand-written files keep it). Inside a
+    /// <see cref="GoHandOwnedPackageAttribute"/> package a method is a pointer receiver only by
+    /// <c>[GoRecv]</c>, so there an unmarked by-ref receiver is copy-bound too, and RecvGenerator mints
+    /// it no twin.
     /// </remarks>
     internal static bool IsCopyBoundReceiver(MethodInfo method, out Type receiverType)
     {
@@ -316,12 +322,35 @@ public static partial class TypeExtensions
 
         receiverType = parameters[0].ParameterType;
 
-        if (!receiverType.IsByRef || method.GetCustomAttribute<GoRecvAttribute>() is not null)
+        if (!receiverType.IsByRef)
+            return false;
+
+        if (method.GetCustomAttribute<GoCopyBoundAttribute>() is null &&
+            !(IsHandOwnedPackage(method) && method.GetCustomAttribute<GoRecvAttribute>() is null))
             return false;
 
         receiverType = receiverType.GetElementType()!;
         return true;
     }
+
+    /// <summary>
+    /// Determines whether <paramref name="method"/>, whose first parameter is <paramref name="receiver"/>,
+    /// is a POINTER-receiver method that a by-reference receiver alone does not show once the byref is
+    /// stripped: a by-ref receiver not marked <see cref="GoCopyBoundAttribute"/> (outside a
+    /// <see cref="GoHandOwnedPackageAttribute"/> package), or any method still marked
+    /// <see cref="GoRecvAttribute"/>.
+    /// </summary>
+    /// <param name="method">Receiver-first static method from a Go method set.</param>
+    /// <param name="receiver">The method's first parameter type, byref included.</param>
+    /// <returns><c>true</c> when the method belongs to the pointer method set only.</returns>
+    internal static bool IsPointerSetByRefReceiver(MethodInfo method, Type receiver) =>
+        method.GetCustomAttribute<GoRecvAttribute>() is not null ||
+        receiver.IsByRef && method.GetCustomAttribute<GoCopyBoundAttribute>() is null && !IsHandOwnedPackage(method);
+
+    // Whether the method's assembly opts out with [assembly: GoHandOwnedPackage]: there a method is a
+    // pointer receiver only by [GoRecv], as it was before converted code stopped writing it.
+    private static bool IsHandOwnedPackage(MethodInfo method) =>
+        s_handOwnedPackages.GetOrAdd(method.Module.Assembly, static assembly => assembly.IsDefined(typeof(GoHandOwnedPackageAttribute), false));
 
     /// <summary>
     /// Collects the extension methods whose receiver belongs to the Go METHOD SET of element type
@@ -354,13 +383,14 @@ public static partial class TypeExtensions
 
                 // Pointer-receiver methods are NOT part of a plain value's method set (Go semantics).
                 // A pointer receiver appears in TWO emitted shapes: the RecvGenerator's ж<X> overload
-                // (receiverIsPointer above) and the original [GoRecv] `this ref X` extension — the
-                // byref strip on the line above erases the latter's pointer-ness, so ask the marker
-                // attribute directly. A `this ref X` receiver WITHOUT [GoRecv] is the third shape, and
-                // it IS a value-set method: the forwarder of a pointer-receiver method promoted through
-                // an embedded POINTER (bufio.ReadWriter's ReadString, through *Reader). It stays in the
-                // set here and is bound through a COPY of the receiver (see IsCopyBoundReceiver).
-                if (!valueIsPointer && (receiverIsPointer || method.GetCustomAttribute<GoRecvAttribute>() is not null))
+                // (receiverIsPointer above) and the original `this ref X` extension — the byref strip on
+                // the line above erases the latter's pointer-ness, so ask the receiver itself
+                // (IsPointerSetByRefReceiver). A `this ref X` receiver marked [GoCopyBound] is the third
+                // shape, and it IS a value-set method: the forwarder of a pointer-receiver method
+                // promoted through an embedded POINTER (bufio.ReadWriter's ReadString, through *Reader).
+                // It stays in the set here and is bound through a COPY of the receiver (see
+                // IsCopyBoundReceiver).
+                if (!valueIsPointer && (receiverIsPointer || IsPointerSetByRefReceiver(method, receiver)))
                     continue;
 
                 if (ReceiverElementMatches(receiverElement, valueElement))

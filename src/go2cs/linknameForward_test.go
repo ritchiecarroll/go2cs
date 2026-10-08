@@ -11,6 +11,7 @@ package main
 import (
 	"go/build"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -90,11 +91,75 @@ func TestRecurseLinknameForwarder(t *testing.T) {
 	}
 
 	// The forwarder is not a Go frame: Go binds the pull to the target's symbol, so no frame of the
-	// puller exists. It is marked [StackTraceHidden], which runtime.Callers skips (managed_impl.cs,
-	// isGoSourceFrame) and Exception.StackTrace omits.
-	if !strings.Contains(mainCs, "[global::System.Diagnostics.StackTraceHidden] public static (Handle handle, Errno err) fwd(") &&
-		!strings.Contains(mainCs, "[global::System.Diagnostics.StackTraceHidden] internal static (Handle handle, Errno err) fwd(") {
-		t.Errorf("linkname forwarder is not marked [StackTraceHidden]:\n%s", mainCs)
+	// puller exists. It is a partial method marked `/*linkname*/`, whose generated declaring part carries
+	// [StackTraceHidden], which runtime.Callers skips (managed_impl.cs, isGoSourceFrame) and
+	// Exception.StackTrace omits (docs/PLAN-marker-comment-parity.md, section 11). Converted code carries
+	// no attribute.
+	if !strings.Contains(mainCs, linknameMarker+" public static partial (Handle handle, Errno err) fwd(") &&
+		!strings.Contains(mainCs, linknameMarker+" internal static partial (Handle handle, Errno err) fwd(") {
+		t.Errorf("linkname forwarder is not a partial method marked %s:\n%s", linknameMarker, mainCs)
+	}
+
+	if strings.Contains(mainCs, "StackTraceHidden") {
+		t.Errorf("converted code carries [StackTraceHidden]; the forwarder's generated declaring part carries it:\n%s", mainCs)
+	}
+}
+
+// TestLinknameMarkerIsTheOnlyForwarderSignal holds section 11 row 6 with comments carried: Go's own //go:linkname line
+// is carried above a pull forwarder AND above a bodied function the converter makes a no-inline carrier (runtime's
+// mutexevent shape: a push on a function that reads runtime.Caller), so only the `/*linkname*/` marker may tell them
+// apart. The forwarder carries it; the carrier is `partial` with no marker, which go2cs-gen reads as no-inline.
+func TestLinknameMarkerIsTheOnlyForwarderSignal(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: runs the real -recurse converter over a module fixture")
+	}
+
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/lnmark\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(appDir, "main.go"),
+		"package main\n\nimport (\n\t\"runtime\"\n\t_ \"unsafe\"\n)\n\ntype Handle uintptr\ntype Errno uintptr\n\n"+
+			"//go:linkname fwd syscall.loadlibrary\nfunc fwd(filename *uint16) (handle Handle, err Errno)\n\n"+
+			"//go:linkname pushed example.com/other.pushed\nfunc pushed() string {\n\t_, file, _, _ := runtime.Caller(0)\n\treturn file\n}\n\n"+
+			"func main() {\n\t_, _ = fwd(nil)\n\t_ = pushed()\n}\n")
+
+	goRoot := build.Default.GOROOT
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		goPath:              build.Default.GOPATH,
+		go2csPath:           filepath.Join(root, "out"),
+		recurse:             true,
+		targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+		includeComments:     true,
+	}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	mainCs := strings.ReplaceAll(readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "lnmark", "main.cs")), "\r\n", "\n")
+
+	if !strings.Contains(mainCs, "//go:linkname fwd syscall.loadlibrary\n"+linknameMarker+" internal static partial (Handle handle, Errno err) fwd(") {
+		t.Errorf("the pull forwarder must carry Go's line AND the marker:\n%s", mainCs)
+	}
+
+	if !strings.Contains(mainCs, "//go:linkname pushed example.com/other.pushed\ninternal static partial @string pushed() {") {
+		t.Errorf("the no-inline carrier under Go's line must be `partial` with no marker:\n%s", mainCs)
+	}
+
+	if got := strings.Count(mainCs, linknameMarker); got != 1 {
+		t.Errorf("got %d %s, want 1 (the forwarder only):\n%s", got, linknameMarker, mainCs)
 	}
 }
 
@@ -234,7 +299,7 @@ func TestRecurseLinknameForwardDefinition(t *testing.T) {
 		t.Errorf("tAbs was routed by splitting the method-shaped symbol at its last dot:\n%s", mainCs)
 	}
 
-	if strings.Contains(mainCs, "static partial") {
+	if regexp.MustCompile(`static partial [^{\n]*\);`).MatchString(mainCs) {
 		t.Errorf("a pull is still a bodyless partial stub (PartialStubGenerator throws on the first call):\n%s", mainCs)
 	}
 
@@ -255,5 +320,20 @@ func TestRecurseLinknameForwardDefinition(t *testing.T) {
 	// The widening is bounded by the rows: a func no row names keeps its Go accessibility.
 	if !strings.Contains(defCs, "internal static nint untouched(") {
 		t.Errorf("an unnamed func in the defining package lost its Go accessibility: the definition access rule widens more than its rows:\n%s", defCs)
+	}
+}
+
+// TestAGoLinknameCommentIsNeverTheMarker holds the marker's safety rule (docs/PLAN-marker-comment-parity.md, 6): a Go block
+// comment that opens the way the forwarder marker does is carried with a space after its `/*`, so go2cs-gen never reads it.
+func TestAGoLinknameCommentIsNeverTheMarker(t *testing.T) {
+	for carried, want := range map[string]string{
+		linknameMarker:          "/* linkname*/",
+		"/*linkname: a note */": "/* linkname: a note */",
+		"/* linkname*/":         "/* linkname*/",
+		"// linkname":           "// linkname",
+	} {
+		if got := carriedComment(carried); got != want {
+			t.Errorf("carriedComment(%q) = %q, want %q", carried, got, want)
+		}
 	}
 }

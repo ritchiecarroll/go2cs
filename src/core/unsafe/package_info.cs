@@ -28,6 +28,9 @@ using static go.unsafe_package;
 // aliases. This allows the type alias to be imported and used from other packages
 // when referenced.
 
+// unsafe is a hand-owned package, never converted (GoHandOwnedPackageAttribute).
+[assembly: GoHandOwnedPackage]
+
 // <ExportedTypeAliases>
 [assembly:GoTypeAlias("@unsafeꓸPointer", "nuint")]
 // </ExportedTypeAliases>

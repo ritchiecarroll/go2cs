@@ -360,7 +360,8 @@ func (v *Visitor) beginCgoUnsafeArgsLift(funcDecl *ast.FuncDecl) *cgoUnsafeArgsL
 	inlineAttrs := v.recordTypeAccessibility("struct", site.typeName, "", access, "")
 
 	decl := &strings.Builder{}
-	decl.WriteString(fmt.Sprintf("[GoType(\"dyn\")] %s%spartial struct %s {", inlineAttrs, access, site.typeName))
+	goTypeAttr, goTypeComment := goTypeMarker("dyn")
+	decl.WriteString(fmt.Sprintf("%s%s%spartial struct %s%s {", goTypeAttr, inlineAttrs, access, site.typeName, goTypeComment))
 	decl.WriteString(v.newline)
 
 	for _, param := range site.params {

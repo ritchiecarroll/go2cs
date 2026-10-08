@@ -109,6 +109,7 @@ func resetPackageState(pkg *packages.Package) {
 	packagePublicizedTypes = make(map[types.Object]bool)
 	packagePublicizedLiftedTypes = make(map[types.Type]bool)
 	packageEmittedTypeAccess = hashset.HashSet[string]{}
+	packageBridgeTypeAccess = make(map[string]hashset.HashSet[string])
 	packageCaptureModeMethods = make(map[*types.Func]bool)
 	packageCaptureModeBoxIdents = make(map[types.Object]bool)
 	packageDirectBoxReceiverMethods = make(map[*types.Func]bool)

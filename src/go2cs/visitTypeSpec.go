@@ -193,12 +193,23 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		// It carries NO [GoType]: TypeGenerator keys on that attribute, and a carrier is not a Go type
 		// anything is emitted for. Measured — with all five go2cs-gen generators live in one
 		// compilation, a carrier draws zero generated output.
+		//
+		// The carrier is machinery the reader of the converted code never needs, so it is declared on
+		// the package's accessibility record in package_info.cs, a partial declaration that is the
+		// whole type (docs/PLAN-marker-comment-parity.md, section 11). Where no record is written (a
+		// hand-owned file, the -tests bridge unit) it stays in the converted file.
 		if definedOverInterface && !v.inFunction {
 			carrierAccess := getAccess(name)
+			carrierName := aliasName + DescriptorCarrierSuffix
+			localNameAttr := fmt.Sprintf("[GoLocalName(\"%s\")] ", typeSpec.Name.Name)
 
-			v.writeOutputLn("// Descriptor carrier for `%s` — uninhabited; see GoDescriptorTypeAttribute.", typeSpec.Name.Name)
-			v.writeOutputLn("[GoLocalName(\"%s\")] %s interface %s%s { }", typeSpec.Name.Name, carrierAccess, aliasName, DescriptorCarrierSuffix)
-			v.writeOutputLn("")
+			if v.typeAccessibilityAbsorbs(carrierName) {
+				v.recordTypeAccessibility("interface", carrierName, "", carrierAccess+" ", localNameAttr)
+			} else {
+				v.writeOutputLn("// Descriptor carrier for `%s` — uninhabited; see GoDescriptorTypeAttribute.", typeSpec.Name.Name)
+				v.writeOutputLn("%s%s interface %s { }", localNameAttr, carrierAccess, carrierName)
+				v.writeOutputLn("")
+			}
 		}
 
 		// Add exported type aliases to package info. Never for a function-local declaration: it is
@@ -337,9 +348,11 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 
 			// Cross-package twin of visitIdent's stamp: a defined type over a struct carrying
 			// fixed-size ARRAY fields needs the forwarded `Clone()` (see wrapperValueCloneAttr).
-			inlineAttrs := v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), "", access, wrapperValueCloneAttr(rhsType))
+			localName, localNameRecord := v.recordedLocalName(identType, getSanitizedIdentifier(name))
+			inlineAttrs := v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), "", access, localNameRecord+wrapperValueCloneAttr(rhsType))
 
-			v.writeStringLn(target, "%s[GoType(\"%s\")] %s%spartial struct %s;", v.localNameAttrFor(identType), rootGoTypeDescriptor(csName), inlineAttrs, access, getSanitizedIdentifier(name))
+			goTypeAttr, goTypeComment := goTypeMarker(rootGoTypeDescriptor(csName))
+			v.writeStringLn(target, "%s%s%s%spartial struct %s%s;", localName, goTypeAttr, inlineAttrs, access, getSanitizedIdentifier(name), goTypeComment)
 			finish()
 		} else {
 			v.outputBuilder.WriteString(v.convSelectorExpr(typeSpecType, DefaultLambdaContext()))
@@ -367,7 +380,8 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 				target.WriteString(v.newline)
 			}
 
-			v.recordTypeAccessibility("class", getSanitizedIdentifier(name), "", access, "")
+			localName, localNameRecord := v.recordedLocalName(identType, getSanitizedIdentifier(name))
+			v.recordTypeAccessibility("class", getSanitizedIdentifier(name), "", access, localNameRecord)
 			// A defined POINTER-TO-ARRAY type carries the array's dims on the wrapper as TYPE-level descriptor
 			// cargo (increment E3 follow-up 7g): `[GoType("ж<array<byte>>")]` spells the pointee's managed type
 			// and nothing of its length, so a nil and a live value of `type P *[0]byte` synthesized two
@@ -375,11 +389,14 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			// any other pointee stamps nothing (census: production 0 named pointer-to-array types).
 			dimsAttr := ""
 
+			// As the dims comment (dimsComment), which go2cs-gen re-emits as [GoArrayDims] on a generated
+			// partial of the wrapper, where golib's TypeStampedDims reads it.
 			if dims := nilArrayPtrDims(v.info.TypeOf(typeSpecType)); len(dims) > 0 {
-				dimsAttr = fmt.Sprintf("[GoArrayDims(%s)] ", renderDimsList(dims))
+				dimsAttr = dimsComment(dims)
 			}
 
-			v.writeStringLn(target, "%s[GoType(\"%s\")] %s%spartial class %s;", v.localNameAttrFor(identType), rootGoTypeDescriptor(pointerTypeName), dimsAttr, access, getSanitizedIdentifier(name))
+			goTypeAttr, goTypeComment := goTypeMarker(rootGoTypeDescriptor(pointerTypeName))
+			v.writeStringLn(target, "%s%s%s%spartial class %s%s;", localName, goTypeAttr, dimsAttr, access, getSanitizedIdentifier(name), goTypeComment)
 			usesUnsafeCode = true
 			finish()
 		}
@@ -451,6 +468,21 @@ func (v *Visitor) liftLocalTypeDeclName(name string) string {
 // prints `[]reflect_test.T`. Shared by every lift-emitting branch (visitIdent's wrapper kinds,
 // visitTypeSpec's SelectorExpr/StarExpr, visitArrayType, visitChanType, visitMapType), mirroring
 // the dyn sites' composition verbatim.
+// recordedLocalName splits localNameAttrFor's stamp between the declaration and its accessibility record:
+// where recordTypeAccessibility writes a record for identifier the stamp rides it (recorded), and the
+// declaration carries nothing; elsewhere (a hand-owned file, the -tests bridge unit) the declaration keeps it
+// (inline). Reflection reads it from the TYPE, through every partial declaration
+// (docs/PLAN-marker-comment-parity.md, section 11).
+func (v *Visitor) recordedLocalName(identType types.Type, identifier string) (inline string, recorded string) {
+	stamp := v.localNameAttrFor(identType)
+
+	if v.typeAccessibilityAbsorbs(identifier) {
+		return "", stamp
+	}
+
+	return stamp, ""
+}
+
 func (v *Visitor) localNameAttrFor(identType types.Type) string {
 	if !v.inFunction {
 		return ""
@@ -461,6 +493,33 @@ func (v *Visitor) localNameAttrFor(identType types.Type) string {
 	}
 
 	return ""
+}
+
+// goTypeMarker renders a converted Go type declaration's marker in its face-lift form
+// (docs/PLAN-marker-comment-parity.md §5.2 and §5.3): the ATTRIBUTE written ahead of the declaration,
+// and the COMMENT written right after its name, or after its type-parameter list when it has one.
+//
+// A plain Go type (definition "") carries neither. go2cs-gen's TypeGenerator recognizes a type declared
+// directly inside a `*_package` class of a converted file as a Go type (Common.IsConvertedGoTypeDeclaration)
+// and puts `[GoType]` on its own generated part, so reflection reads exactly what it read before. A
+// defined type's definition (`num:int64`, `dyn`, `chan T`, `ж<T>`, ...) moves into the comment, the same
+// text the attribute argument held: `partial struct Duration /*num:int64*/;`. The generator reads it back
+// (Common.GetDefinitionComment) and re-emits the attribute with it. A definition no block comment can
+// hold, one carrying `/*` or `*/`, keeps the attribute, which the generator reads first.
+//
+// Every declaration this converter writes is directly inside the package class (a function-local type
+// is lifted to member level) and in a converted file, which is the shape the generator's rule admits.
+// The returned attribute carries its trailing space; the comment carries its leading one.
+func goTypeMarker(definition string) (attribute string, comment string) {
+	if definition == "" {
+		return "", ""
+	}
+
+	if strings.Contains(definition, "/*") || strings.Contains(definition, "*/") {
+		return fmt.Sprintf("[GoType(\"%s\")] ", definition), ""
+	}
+
+	return "", " /*" + definition + "*/"
 }
 
 // liftedTypeDeclaredBy reports whether t is the type the given declaration INTRODUCES, rather than

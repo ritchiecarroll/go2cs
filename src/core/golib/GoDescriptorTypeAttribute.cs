@@ -35,7 +35,11 @@ namespace go;
 /// <para>
 /// This is the <see cref="GoArrayDimsAttribute"/> pattern for a different lost datum, at the same
 /// finite set of positions and for the same reason: the managed type cannot hold it, so it travels
-/// as a converter stamp. <see cref="Self"/> is the position's own type. <see cref="Elem"/> and
+/// as a converter stamp. On a struct FIELD the converter no longer writes the attribute: it records
+/// the carrier on the field's declaring type as <c>[GoMemberRecord(field, GoMemberFact.Descriptor,
+/// typeof(carrier))]</c>, in the package's metadata file, so converted code carries neither
+/// (docs/PLAN-marker-comment-parity.md, section 11). A hand-written field keeps the attribute, and
+/// golib reads either. <see cref="Self"/> is the position's own type. <see cref="Elem"/> and
 /// <see cref="Key"/> are declared for the hops <c>Elem()</c> and <c>Key()</c> hand down and are
 /// NOT read yet — a slice/pointer/map element's carrier has to ride on the DESCRIPTOR rather than
 /// be re-read per access, which is a descriptor-shape change deliberately sequenced after this one.

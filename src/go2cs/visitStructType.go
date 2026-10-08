@@ -13,6 +13,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"strconv"
 	"strings"
 
 	"github.com/ritchiecarroll/hashset"
@@ -20,7 +21,7 @@ import (
 
 const StructPrefixMarker = ">>MARKER:STRUCT_%s_PREFIX<<"
 
-// promotedInterfaceForwarder is one `[GoRecv]` extension a DUAL-embed struct owes: a method the
+// promotedInterfaceForwarder is one pointer-receiver extension a DUAL-embed struct owes: a method the
 // struct's *T method set obtains ONLY through an embedded-interface field (the pointer-only
 // satisfaction arm below). Collected during the embed walk, emitted right after the struct's
 // declaration closes.
@@ -306,7 +307,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	var dynamic string
 
 	if lifted {
-		dynamic = "(\"dyn\")"
+		dynamic = "dyn"
 	}
 
 	// A lifted function-local NAMED type carries its original Go name so the reflection
@@ -365,7 +366,19 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	// symbol's declarations, golib's reflection bridge reads the runtime Type), and C# unions the
 	// attributes of every partial declaration — so they belong on the package_info.cs accessibility
 	// record, out of the reader's way, and the `[GoType]` declaration keeps only what identifies it.
-	inlineAttrs := v.recordTypeAccessibility("struct", structTypeName, typeParams, access, localNameAttr+valueCloneAttr)
+	// The record is written after the fields, since the fields add member records to it
+	// (memberRecords); where no record is written they stay inline (recordTypeAccessibility).
+	recordAbsorbs := v.typeAccessibilityAbsorbs(structTypeName)
+	inlineAttrs := localNameAttr + valueCloneAttr
+
+	if recordAbsorbs {
+		inlineAttrs = ""
+	}
+
+	// The member records the fields add to the type's accessibility record: facts about a field the
+	// converter alone knows and converted code does not show (docs/PLAN-marker-comment-parity.md,
+	// section 11), each naming its field by the field's CLR name.
+	var memberRecords strings.Builder
 
 	// A struct carrying a ZERO-SIZE Go field is LARGER in C# than in Go unless it is laid out
 	// explicitly at Go's own offsets — see zeroSizeFieldLayout.go for why that matters (Reinterpret's
@@ -379,7 +392,8 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		v.addRequiredUsing("System.Runtime.InteropServices")
 	}
 
-	v.writeStringLn(target, "[GoType%s] %s%s%spartial struct %s%s%s{", dynamic, inlineAttrs, structLayoutAttr, access, structTypeName, typeParams, constraints)
+	goTypeAttr, goTypeComment := goTypeMarker(dynamic)
+	v.writeStringLn(target, "%s%s%s%spartial struct %s%s%s%s{", goTypeAttr, inlineAttrs, structLayoutAttr, access, structTypeName, typeParams, goTypeComment, constraints)
 	v.indentLevel++
 
 	var prevNameDiscardedCount int
@@ -392,20 +406,31 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	for _, field := range structType.Fields.List {
 		v.writeDocString(target, field.Doc, field.Pos())
 
+		// The field's Go struct tag rides in a comment at the end of each line that declares the field
+		// (structTagComment), ahead of any comment carried from the Go source, whose padding then counts
+		// from the tag as Go's does. An empty tag is Go's untagged field and writes nothing.
+		var tagComment string
+
 		if field.Tag != nil {
-			v.writeString(target, "[GoTag(")
-			target.WriteString(v.convBasicLit(field.Tag, BasicLitContext{u8StringOK: false, spanTargetUnsupported: true}))
-			target.WriteString(")]")
-			target.WriteString(v.newline)
+			if tag, err := strconv.Unquote(field.Tag.Value); err == nil && tag != "" {
+				tagComment = " " + structTagComment(tag)
+			}
+		}
+
+		goCommentPos := func(afterType token.Pos) token.Pos {
+			if tagComment != "" {
+				return field.Tag.End()
+			}
+
+			return afterType
 		}
 
 		// The array dims this field's type reaches through a hop no zero instance can measure — a
-		// POINTER's pointee, a MAP's key or element. Every name in a Go field group shares
-		// field.Type, so one attribute line covers the whole group (see fieldDimsCargo.go).
-		if dimsAttributes := emitFieldDimsAttributes(v.getType(field.Type, false)); dimsAttributes != "" {
-			v.writeString(target, "%s", dimsAttributes)
-			target.WriteString(v.newline)
-		}
+		// POINTER's pointee, a MAP's key or element (see fieldDimsCargo.go). The element dims ride a
+		// comment directly before the field's type on every line that declares it; a map key's ride a
+		// comment directly before the map's key type argument, written into the type below
+		// (withMapKeyDims).
+		keyDimsComment, fieldDimsComment := emitFieldDims(v.getType(field.Type, false))
 
 		// The DESCRIPTOR CARRIER for a field whose Go type is a defined-over-interface type the
 		// emission erased to a `using` alias: the field's C# type is `object` (or the target
@@ -415,9 +440,33 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		// field's OWN type is stamped here; what Elem()/Key() hand down needs the carrier on the
 		// DESCRIPTOR rather than at the access, which is a descriptor-shape change sequenced after
 		// this one.
+		//
+		// The carrier rides the type's accessibility record as [GoMemberRecord(field, Descriptor,
+		// typeof(carrier))], out of the converted code: the field is already spelled with the Go type's
+		// name, and only the converter knows the carrier that name stands for. An embedded field's record
+		// is added where its member name is settled (embedCarrier). Where no record is written (a
+		// hand-owned file, the -tests bridge unit), or a blank field's renamed member cannot be named, the
+		// field keeps the [GoDescriptorType] attribute a hand-written field uses.
+		var embedCarrier string
+
 		if carrier := v.descriptorCarrierFor(v.getType(field.Type, false)); carrier != "" {
-			v.writeString(target, "[GoDescriptorType(Self = typeof(%s))]", carrier)
-			target.WriteString(v.newline)
+			switch {
+			case recordAbsorbs && len(field.Names) == 0:
+				embedCarrier = carrier
+			case recordAbsorbs && !hasBlankFieldName(field.Names):
+				for _, ident := range field.Names {
+					fieldName := getCoreSanitizedIdentifier(ident.Name)
+
+					if strings.TrimPrefix(fieldName, "@") == strings.TrimPrefix(strings.TrimPrefix(structTypeName, ShadowVarMarker), "@") {
+						fieldName = typeCollidingFieldName(fieldName)
+					}
+
+					memberRecords.WriteString(descriptorMemberRecord(fieldName, carrier))
+				}
+			default:
+				v.writeString(target, "[GoDescriptorType(Self = typeof(%s))]", carrier)
+				target.WriteString(v.newline)
+			}
 		}
 
 		var indentOffset int
@@ -531,6 +580,20 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 		displayLenDeviation := token.Pos(len(csDisplayTypeName) - len(goDisplayTypeName))
 		typeLenDeviation := token.Pos(len(csFullTypeName) - len(goFullTypeName))
+
+		// The map KEY dims go inside the type, after the deviations above are taken, so a Go comment
+		// carried after the field is placed as it was before, as the element dims comment leaves it. A
+		// type that spells no map (an alias's name) keeps the [GoMapKeyDims] attribute line, which
+		// covers the whole group since every name in it shares field.Type.
+		if keyDimsComment != "" {
+			if keyed, ok := withMapKeyDims(csDisplayTypeName, keyDimsComment); ok {
+				csDisplayTypeName = keyed
+			} else {
+				_, keyDims := fieldCargoDims(fieldType)
+				v.writeString(target, "[GoMapKeyDims(%s)]", renderDimsList(keyDims))
+				target.WriteString(v.newline)
+			}
+		}
 
 		// The Go ZERO of a field whose managed default is not already it: a fixed-size array's
 		// length and a directional channel's direction are both parts of the Go TYPE that the
@@ -715,6 +778,10 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				embedName = typeCollidingFieldName(embedName)
 			}
 
+			if embedCarrier != "" {
+				memberRecords.WriteString(descriptorMemberRecord(embedName, embedCarrier))
+			}
+
 			if ifaceType, ok := identType.(*types.Interface); ok {
 				// Record the promoted pair ONLY when Go itself says the struct implements the
 				// embedded interface — the samePackageImplements doctrine ("record what Go already
@@ -762,7 +829,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					// value-form Promoted record would be an OVER-CLAIM here — a VALUE stored into
 					// `any` would assert true where Go says false (measured on the three-arm probe,
 					// 2026-09-02) — so this arm mints the POINTER-form record instead, and emits a
-					// `[GoRecv]` forwarder below for each method only the interface field provides,
+					// `this ref` forwarder below for each method only the interface field provides,
 					// which is what lets go2cs-gen's existing pointer-record adapter compose (under
 					// the record alone the ImplementGenerator emitted NOTHING for the pair, silently
 					// — the missing extension surface was why). Dispatch then matches Go: the box
@@ -843,13 +910,13 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				}
 
 				// An embedded INTERFACE is emitted as a plain field named after its type, which nothing in
-				// the emitted C# tells apart from a NAMED field of that type. The [GoEmbedded] stamp is the
-				// difference: the reflection projection reports the field Anonymous, as Go does, and
+				// the emitted C# tells apart from a NAMED field of that type. The `/*embed*/` comment is the
+				// difference (go2cs-gen's MemberRecordGenerator records it on the struct; face lift F): the reflection projection reports the field Anonymous, as Go does, and
 				// go2cs-gen reads the interface's methods as PROVIDERS when it decides whether a name
 				// promoted through another package's embed is unique in this struct's tree — an unmarked
 				// io_test `Buffer{bytes.Buffer; ReaderFrom; WriterTo}` would otherwise be given the
 				// embedded Buffer's ReadFrom and WriteTo, which Go drops as ambiguous.
-				v.writeString(target, "[GoEmbedded] %s %s %s;", getAccess(goTypeName), csEmitTypeName, embedName)
+				v.writeString(target, "%s %s %s %s;%s", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
 			} else {
 				var handled bool
 
@@ -857,15 +924,15 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					if ptrType, ok := identType.(*types.Pointer); ok {
 						if _, ok = ptrType.Elem().(*types.Named); !ok {
 							// An embedded pointer to a PREDECLARED type has nothing to promote and is a plain field;
-							// the [GoEmbedded] stamp is what lets the reflection projection report it Anonymous
+							// the `/*embed*/` comment is what lets the reflection projection report it Anonymous
 							// (a field named after its type is otherwise indistinguishable from an embed).
-							v.writeString(target, "[GoEmbedded] %s %s %s;", getAccess(goTypeName), csEmitTypeName, embedName)
+							v.writeString(target, "%s %s %s %s;%s", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
 							handled = true
 						}
 					} else if _, ok = identType.(*types.Struct); !ok {
 						if _, ok := identObj.Type().(*types.Named); !ok {
-							// An embedded PREDECLARED type (`struct{ int }`): the same plain-field emission, stamped.
-							v.writeString(target, "[GoEmbedded] %s %s %s;", getAccess(goTypeName), csEmitTypeName, embedName)
+							// An embedded PREDECLARED type (`struct{ int }`): the same plain-field emission, marked.
+							v.writeString(target, "%s %s %s %s;%s", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
 							handled = true
 						}
 					}
@@ -873,11 +940,11 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 				// Handle promoted struct implementations
 				if !handled {
-					v.writeString(target, "%s partial ref %s %s { get; }", getAccess(goTypeName), csEmitTypeName, embedName)
+					v.writeString(target, "%s partial ref %s %s { get; }%s", getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
 				}
 			}
 
-			v.writeCommentString(target, field.Comment, field.Type.End()+typeLenDeviation)
+			v.writeCommentString(target, field.Comment, goCommentPos(field.Type.End()+typeLenDeviation))
 			target.WriteString(v.newline)
 		} else {
 			// Match the Go source's line grouping for readability: when a single Go field
@@ -918,8 +985,8 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 				layoutFieldIndex += len(field.Names)
 
-				v.writeString(target, "%s %s %s;", getAccess(field.Names[0].Name), csDisplayTypeName, strings.Join(fieldNames, ", "))
-				v.writeCommentString(target, field.Comment, field.Type.End()+displayLenDeviation)
+				v.writeString(target, "%s %s%s %s;%s", getAccess(field.Names[0].Name), fieldDimsComment, csDisplayTypeName, strings.Join(fieldNames, ", "), tagComment)
+				v.writeCommentString(target, field.Comment, goCommentPos(field.Type.End()+displayLenDeviation))
 				target.WriteString(v.newline)
 			} else {
 				for _, ident := range field.Names {
@@ -957,8 +1024,8 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 					layoutFieldIndex++
 
-					v.writeString(target, "%s%s %s%s %s%s;", offsetAttr, getAccess(ident.Name), readOnly, csDisplayTypeName, fieldName, fieldInitializer)
-					v.writeCommentString(target, field.Comment, field.Type.End()+displayLenDeviation)
+					v.writeString(target, "%s%s %s%s%s %s%s;%s", offsetAttr, getAccess(ident.Name), readOnly, fieldDimsComment, csDisplayTypeName, fieldName, fieldInitializer, tagComment)
+					v.writeCommentString(target, field.Comment, goCommentPos(field.Type.End()+displayLenDeviation))
 					target.WriteString(v.newline)
 				}
 			}
@@ -967,6 +1034,10 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 	v.indentLevel--
 	v.writeStringLn(target, "}")
+
+	if recordAbsorbs {
+		v.recordTypeAccessibility("struct", structTypeName, typeParams, access, localNameAttr+valueCloneAttr+memberRecords.String())
+	}
 
 	v.emitPromotedInterfaceForwarders(target, forwarderMark)
 
@@ -1139,7 +1210,7 @@ func (v *Visitor) structZeroValueNeedsConstructionRec(t types.Type, seen map[*ty
 	return false
 }
 
-// emitPromotedInterfaceForwarders writes the `[GoRecv]` extensions collected since mark — one per
+// emitPromotedInterfaceForwarders writes the pointer-receiver extensions collected since mark — one per
 // method a DUAL-embed struct's *T method set obtains ONLY through an embedded-interface field —
 // immediately after the struct declaration, so the extension surface is complete before go2cs-gen
 // composes the pointer-form adapter the arm's `GoImplement<T, Iface>(Pointer = true)` record asks
@@ -1221,7 +1292,9 @@ func (v *Visitor) emitPromotedInterfaceForwarders(target *strings.Builder, mark 
 			// is a value method — the generator's own Promoted-path extension form.
 			v.writeStringLn(target, "%s static %s %s(this %s recvᴛ%s) => recvᴛ.%s.%s(%s);", access, resultType, methodName, fwd.structName, params.String(), fwd.embedName, methodName, args.String())
 		} else {
-			v.writeStringLn(target, "[GoRecv] %s static %s %s(this ref %s recvᴛ%s) => recvᴛ.%s.%s(%s);", access, resultType, methodName, fwd.structName, params.String(), fwd.embedName, methodName, args.String())
+			// `this ref` is the pointer-receiver shape: golib reads an unmarked by-ref receiver as a
+			// POINTER-set method (docs/PLAN-marker-comment-parity.md, 5.1).
+			v.writeStringLn(target, "%s static %s %s(this ref %s recvᴛ%s) => recvᴛ.%s.%s(%s);", access, resultType, methodName, fwd.structName, params.String(), fwd.embedName, methodName, args.String())
 		}
 	}
 

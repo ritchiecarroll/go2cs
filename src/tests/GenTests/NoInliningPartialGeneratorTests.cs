@@ -341,6 +341,88 @@ public class NoInliningPartialGeneratorTests
         Assert.IsTrue(run.Methods["first"].HasFlag(MethodImplAttributes.NoInlining), $"first lost the NoInlining flag; {Describe(run)}");
     }
 
+    // Section 11, row 6 (owner ruling (b'), 2026-10-08): a linkname or assembly-trampoline FORWARDER is a carrier marked
+    // `/*linkname*/`, the first token of its declaration line, and its declaring part carries [StackTraceHidden] instead of
+    // the no-inline mark. Go's own //go:linkname line is never read: the guard rows below are the measured no-inline carriers
+    // that carry one above a BODIED function (runtime's mutexevent, unique_runtime_registerUniqueMapCleanup and
+    // pprof_makeProfStack, and runtime_test's ttiExcluded2), each in the converter's rendering, which must stay no-inline.
+    private const string Forwarders = """
+        using System;
+        using System.Runtime.CompilerServices;
+
+        namespace go;
+
+        partial class main_package {
+
+        // Defined by the runtime package.
+        /*linkname*/ internal static partial nint runtime_args() {
+            return 0;
+        }
+
+        //go:linkname fatal crypto/internal/fips140.fatal
+        /*linkname*/ internal static partial void fatal(@string _) {
+        }
+
+        //go:linkname mutexevent sync.event
+        internal static partial void mutexevent(long cycles, nint skip) {
+        }
+
+        //go:linkname unique_runtime_registerUniqueMapCleanup unique.runtime_registerUniqueMapCleanup
+        public static partial void unique_runtime_registerUniqueMapCleanup(Action f) {
+        }
+
+        //go:linkname pprof_makeProfStack
+        public static partial nint[] pprof_makeProfStack() {
+            return null!;
+        }
+
+        //go:linkname ttiExcluded2
+        internal static partial ж<counter> ttiExcluded2() {
+            return null!;
+        }
+
+        /* linkname*/ internal static partial nint carried() {
+            return 0;
+        }
+
+        } // end main_package
+        """;
+
+    [TestMethod]
+    public void AForwarderMarkedLinknameGetsStackTraceHiddenAndNoNoInlining()
+    {
+        Run run = Generate([new NoInliningPartialGenerator()], Stubs, Forwarders);
+        string text = string.Join("\r\n", run.Generated.Values);
+
+        Assert.AreEqual(0, run.Errors.Length, Describe(run));
+
+        string[] lines = text.Split(new[] { "\r\n" }, System.StringSplitOptions.None);
+
+        foreach (string forwarder in new[] { "runtime_args", "fatal" })
+        {
+            int declaring = System.Array.FindIndex(lines, line => line.Contains($" {forwarder}("));
+            Assert.IsTrue(declaring > 0 && lines[declaring - 1].Trim() == "[global::System.Diagnostics.StackTraceHidden]", $"{forwarder}'s declaring part must carry [StackTraceHidden]; {Describe(run)}");
+            Assert.IsTrue(run.Methods.TryGetValue(forwarder, out MethodImplAttributes flags), $"{forwarder} was not emitted; {Describe(run)}");
+            Assert.IsFalse(flags.HasFlag(MethodImplAttributes.NoInlining), $"{forwarder} is a forwarder, not a no-inline carrier; {Describe(run)}");
+        }
+
+        Assert.AreEqual(2, text.Split(new[] { "StackTraceHidden" }, System.StringSplitOptions.None).Length - 1, $"exactly the two marked forwarders; {Describe(run)}");
+    }
+
+    [DataTestMethod]
+    [DataRow("mutexevent")]
+    [DataRow("unique_runtime_registerUniqueMapCleanup")]
+    [DataRow("pprof_makeProfStack")]
+    [DataRow("ttiExcluded2")]
+    [DataRow("carried")]
+    public void ACarrierUnderGosLinknameLineOrACarriedGoCommentStaysNoInlining(string name)
+    {
+        Run run = Generate([new NoInliningPartialGenerator()], Stubs, Forwarders);
+
+        Assert.IsTrue(run.Methods.TryGetValue(name, out MethodImplAttributes flags), $"{name} was not emitted; {Describe(run)}");
+        Assert.IsTrue(flags.HasFlag(MethodImplAttributes.NoInlining), $"{name} must stay a no-inline carrier; {Describe(run)}");
+    }
+
     /// <summary>
     /// A Go init is a module initializer, and C# runs module initializers in declaration order, which
     /// for a partial method is its DECLARING part's: a generated file that sorts after every source

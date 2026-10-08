@@ -4,6 +4,7 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -67,7 +68,8 @@ public record MethodInfo
     // pointer-receiver method reached through a pointer hop belongs to the enclosing type's VALUE
     // method set (the embedded pointer is what it mutates through), and reached through value hops
     // only it belongs to the POINTER set alone. The forwarder emission reads it to decide whether a
-    // `this ref` forwarder carries [GoRecv]; it is a property of the PATH, never of a method name.
+    // `this ref` forwarder carries [GoRecv] or [GoCopyBound]; it is a property of the PATH, never of a
+    // method name.
     public bool PathHasPointer { get; init; }
 
     // Set for a cross-assembly UNEXPORTED interface method — Go's package-sealing markers such as
@@ -96,10 +98,14 @@ public record MethodInfo
     // does not compile. Defaults true so a MethodInfo built without semantic info keeps prior behavior.
     public bool IsSignatureRenderable { get; init; } = true;
 
-    // True when the method carries [GoRecv]: a Go POINTER-receiver method, whatever its emitted
-    // receiver looks like. Read from the attribute itself (syntax and metadata alike) rather than
-    // inferred from the receiver's ref kind, because a generated forwarder of a pointer-receiver
-    // method is `[GoRecv] this ref T` in one assembly and is harvested from METADATA in the next.
+    // True for a Go POINTER-receiver method, by the rule golib's run-time method-set readers apply
+    // (TypeExtensions.IsPointerSetByRefReceiver): a by-ref receiver not marked [GoCopyBound], or any
+    // method marked [GoRecv]. Converted code writes neither mark on a declared method (a Go pointer
+    // receiver is emitted `this ref T`, a value receiver `this T`); hand-written files keep [GoRecv],
+    // and the generated forwarder of a pointer-receiver method promoted through an embedded POINTER
+    // is `[GoCopyBound] this ref T`, a VALUE-set method. Read the same way from syntax and from
+    // metadata, because a generated forwarder is declared in one assembly and harvested from
+    // METADATA in the next.
     public bool IsGoRecv { get; init; }
 
     // Set on a PROMOTED method harvested through an embed of ANOTHER Go package at some hop of its
@@ -375,8 +381,7 @@ public static class MethodSyntaxExtensions
             IsSignatureRenderable = signatureRenderable,
             GenericTypes = string.Join(", ", typeParameters),
             TypeConstraints = typeConstraints,
-            IsGoRecv = methodDeclaration.AttributeLists.SelectMany(list => list.Attributes)
-                .Any(attribute => attribute.Name.ToString() is "GoRecv" or "GoRecvAttribute" or "go.GoRecv" or "global::go.GoRecv"),
+            IsGoRecv = methodDeclaration.IsPointerSetMethod(semanticModel.Compilation.Assembly.IsHandOwnedPackage()),
 
             Parameters = methodDeclaration.ParameterList.Parameters.Select(param =>
             {
@@ -542,7 +547,88 @@ public static class MethodSyntaxExtensions
             GenericTypes = genericTypes,
             TypeConstraints = typeConstraints,
             IsRefRecv = methodSymbol.ReturnsByRef,
-            IsGoRecv = methodSymbol.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "GoRecvAttribute")
+            IsGoRecv = methodSymbol.IsPointerSetMethod()
         };
     }
+
+    // MethodInfo.IsGoRecv's rule, read from a declaration: [GoRecv], or a by-ref receiver (`this ref`
+    // or `this in`) not marked [GoCopyBound] — the latter only outside a hand-owned package, where a
+    // method is a pointer receiver by [GoRecv] alone.
+    public static bool IsPointerSetMethod(this MethodDeclarationSyntax methodDeclaration, bool handOwnedPackage)
+    {
+        if (methodDeclaration.HasGoAttribute("GoRecv"))
+            return true;
+
+        if (handOwnedPackage)
+            return false;
+
+        if (methodDeclaration.ParameterList.Parameters.FirstOrDefault() is not { } receiver ||
+            !receiver.Modifiers.Any(SyntaxKind.ThisKeyword) ||
+            !(receiver.Modifiers.Any(SyntaxKind.RefKeyword) || receiver.Modifiers.Any(SyntaxKind.InKeyword)))
+            return false;
+
+        return !methodDeclaration.HasGoAttribute("GoCopyBound");
+    }
+
+    // MethodInfo.IsGoRecv's rule, read from metadata.
+    public static bool IsPointerSetMethod(this IMethodSymbol methodSymbol)
+    {
+        if (hasAttribute("GoRecvAttribute"))
+            return true;
+
+        return !methodSymbol.ContainingAssembly.IsHandOwnedPackage() &&
+               methodSymbol.IsExtensionMethod && methodSymbol.Parameters.Length > 0 &&
+               methodSymbol.Parameters[0].RefKind != RefKind.None && !hasAttribute("GoCopyBoundAttribute");
+
+        bool hasAttribute(string name) =>
+            methodSymbol.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == name);
+    }
+
+    // Whether the assembly opts out of the converted shapes with `[assembly: GoHandOwnedPackage]`
+    // (golib's GoHandOwnedPackageAttribute): a hand-owned package, never converted, where a declaration
+    // is a Go method or a Go type only by its attribute. A project that says nothing is converted.
+    public static bool IsHandOwnedPackage(this IAssemblySymbol? assembly) =>
+        assembly is not null && assembly.GetAttributes().Any(attribute => attribute.AttributeClass is
+        {
+            Name: "GoHandOwnedPackageAttribute",
+            ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true }
+        });
+
+    // StrGenerator's twin rule (docs/PLAN-marker-comment-parity.md, 5.7), read from a declaration: [GoStr],
+    // or a parameter typed golib's `sstring` view in any spelling (`sstring`, `go.sstring`,
+    // `global::go.sstring`) -- the latter only outside a hand-owned package, where a method is a twin by
+    // [GoStr] alone. The converter types each twinned parameter `sstring` and nothing else in converted code
+    // takes one, so the signature says what the attribute said. Read from syntax alone, so the selection costs
+    // no semantic model per node; the template confirms the type is golib's (StrTemplate.IsRenderable).
+    public static bool IsSStringTwinBody(this MethodDeclarationSyntax methodDeclaration, bool handOwnedPackage)
+    {
+        if (methodDeclaration.HasGoAttribute("GoStr"))
+            return true;
+
+        if (handOwnedPackage)
+            return false;
+
+        return methodDeclaration.ParameterList.Parameters.Any(parameter => parameter.Type switch
+        {
+            IdentifierNameSyntax { Identifier.Text: "sstring" } => true,
+            QualifiedNameSyntax { Right.Identifier.Text: "sstring" } qualified => qualified.Left.ToString() is "go" or "global::go",
+            _ => false
+        });
+    }
+
+    // Whether a declaration carries go.<name>Attribute, in any spelling the converter, the generators
+    // or a hand-written file use: `GoRecv`, `GoRecvAttribute`, `go.GoRecv`, `global::go.GoRecv`.
+    private static bool HasGoAttribute(this MethodDeclarationSyntax methodDeclaration, string name) =>
+        methodDeclaration.AttributeLists.SelectMany(list => list.Attributes).Any(attribute =>
+        {
+            string text = attribute.Name.ToString();
+
+            if (text.StartsWith("global::", StringComparison.Ordinal))
+                text = text["global::".Length..];
+
+            if (text.StartsWith("go.", StringComparison.Ordinal))
+                text = text["go.".Length..];
+
+            return text == name || text == $"{name}Attribute";
+        });
 }

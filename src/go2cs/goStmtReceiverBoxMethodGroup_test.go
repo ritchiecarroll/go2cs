@@ -119,7 +119,7 @@ func main() {
 	for _, want := range []string{
 		"internal static void stop(this ж<tracker> Ꮡt)",
 		"defer(Ꮡt.bump, ref ᒐ);",
-		"[GoRecv] internal static partial void other(this ref tracker t, ж<tracker> Ꮡo)",
+		"internal static partial void other(this ref tracker t, ж<tracker> Ꮡo)",
 		"goǃ(Ꮡo.loop);",
 	} {
 		if !strings.Contains(mainCs, want) {

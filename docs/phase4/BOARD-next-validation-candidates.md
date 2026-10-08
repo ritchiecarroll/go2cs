@@ -26533,4 +26533,85 @@ Three entries for the seats ruled for the train after Q, most important first. E
 
 The macOS figure is the one a user needs to see: on a hosted 3-core Apple-silicon runner the publish of this 31-assembly closure does not fit in six hours, and on Intel it takes nearly five. `aot-smoke` therefore reads three RIDs and prints osx-arm64 as NOT MEASURED on every leg (COORD ruling 2026-10-07, option 2; `claude/c1-aot-smoke-three-rids`); a larger or self-hosted Apple-silicon runner is the owner's call. The route above (golib's reflection annotated, then a full trim) is also the route to a macOS number that fits.
 
+
+## 2026-10-06 — C2: generated twins carry no Go array dims — RECORDED
+
+**What it is.** Several go2cs-gen emitters write a method whose parameter list mirrors a converted
+method: RecvGenerator's `this ж<T>` overload of a pointer-receiver method, StrGenerator's `@string`
+forwarder, and StructTypeTemplate's promoted forwarders and interface adapters. They rebuild each
+parameter from its type and name, so a `[GoArrayDims]` on the source parameter has never reached the
+twin. Face lift D (the `/*[N]*/` comment and the `[GoParamDims]` record) keeps that unchanged: its
+records name the converted method, never a twin. Before D and after it, a func value bound to a twin
+reads no dims for an array parameter. `reflect.TypeOf(f).In(i)` then answers a dims-less array, with
+`Len()` 0 and `String()` `[]uint8` for a `[N]uint8` parameter, the shape `reflect/value_impl.cs`
+records for the missing-cargo case.
+
+**Count**, from committed text at the record branch's base for D (`0a7280d5d4`), counting non-generic
+declarations that carry a dims stamp: production common 103 declarations, of which 17 have a pointer
+receiver (a `ж<T>` twin) and 3 an `@string` parameter (a string twin); production linux and darwin add
+3 and 2 string twins; tests 26, with 1 and 1; behavioral 18, with 1 pointer receiver. Promoted
+forwarders and adapters cannot be counted from text; a count needs the generated output of a build.
+
+**Trigger.** The first banked or module row whose verdict reads `In(i)` (or `reflect.New` of it) of a
+func value that resolves to a twin rather than to the converted method: a method value through a
+pointer, or a string-twin call path, taken as a func value and handed to reflection.
+
+— C2
+
+
+## 2026-10-06 — C2: two amendments after face lift D2 (dated; the rows above stand as written)
+
+**1. NEW-1b residuals, item 4 ("methods the generator skips"): the GENERIC half is LIFTED.** COORD ruled
+(2026-10-06 20:29Z) that a generic method moves. D2 keys it: a type built from a type parameter is spelled
+by its open definition (`typeof(channel<>)`), and a bare type parameter as null. The key is matched in golib
+by `SignatureMatches`, and go2cs-gen refuses at compile time (GO2CS0003, naming both methods) any key that
+would also match another method of the type. The other half of item 4 stands: a declaring type that is not
+partial everywhere, and an unmanaged pointer in the signature. Census at the cut: 0 generic signatures with
+a channel-direction marker in production, tests or behavioral.
+
+**2. The generated-twins row above gains a second shape: a method VALUE the converter lowers to a
+lambda.** `bb.Peek` for a value-receiver method is emitted as `(array<byte> p1) => bbʗ1.Peek(p1)`. A
+lambda the converter synthesizes carries no dims, so `reflect.TypeOf(bb.Peek).In(0).Len()` reads 0 where Go
+reads 6. Measured with a probe on two trees, with identical C# output on both (2 3 / 0 / 0 0 against Go's
+2 3 / 4 / 5 6): the pre-face-lift tree `3196a93cdc` and the record branch at D2. So the shape predates D,
+and D neither fixes nor worsens it, exactly as with the twins. The `ж` method value (`Ꮡbb.Put`) is the
+twins row's own case. **Trigger:** the first banked or module row whose verdict reads the parameter
+types of a method value.
+
+— C2
+
+
+## 2026-10-07 — C2: a func type's String() drops its array lengths, and a func type assertion ignores them — RECORDED
+
+**What it is.** P1 reported (`1166725b5a`, at master) that `reflect.TypeOf` of an instantiated generic
+function with an array parameter prints `func([]string) string` where Go prints `func([3]string) string`.
+Face lift D2 does not close it, and it is not about generics. Measured with probes converted, built and
+run on the record branch at `dfe0991c07` and on the pre-face-lift tree `3196a93cdc`, identical on both:
+
+| Go source | Go | go2cs |
+|---|---|---|
+| `reflect.TypeOf(pick[string]).String()`, `pick[T any](a [3]T) T` | `func([3]string) string` | `func([]string) string` |
+| `reflect.TypeOf(first[int]).String()`, `first[T any](x T, a [2]T) T` | `func(int, [2]int) int` | `func(int, []int) int` |
+| `reflect.TypeOf(plain).String()`, `plain(a [3]string) string` (not generic) | `func([3]string) string` | `func([]string) string` |
+| `reflect.TypeOf(s.Fill).String()`, `(*Stack[T]) Fill(a [4]T)` | `func([4]uint8)` | `func([]uint8)` |
+| `TypeOf(three) == TypeOf(four)`, `[3]string` against `[4]string` | `false` | `false` |
+| `TypeOf(three).In(0).Len()`, `TypeOf(four).In(0).Len()` | `3 4` | `3 4` |
+| `any(three).(func([4]string) string)`, its `ok` | `false` | `true` |
+
+**Why.** `GoReflect.TypeNaming.cs`, `goFuncTypeString`, names each position from the CLR delegate's
+parameter type. `array<T>` there carries no length, so it prints `[]T`. `In(i)` is right because it reads
+the recorded dims through the method (`paramDims`, face lift D); type identity measured right too (its
+mechanism not read here). The type assertion is a CLR delegate type test, and `Func<array<string>, string>`
+is one type for every array length, so it accepts a func value whose array length differs.
+
+**The fix's shape, not cut.** Build the func string from the same `In(i)`/`Out(i)` descriptors
+`rtype` hands out, so the name and the signature cannot disagree (the method's own remark already
+promises that). The assertion needs the dims in the check, which is a converter or golib change to the
+type-assertion path, sized separately.
+
+**Trigger.** A banked or module row whose verdict prints a func type holding an array (a `%T` or
+`reflect.Type.String()`), or asserts an `any` to a func type whose only difference is an array length.
+
+— C2
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

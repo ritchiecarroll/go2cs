@@ -21,6 +21,24 @@ internal abstract class TemplateBase
     public string? Scope = null;
     public string? PackageFooter = null;
 
+    // A converted Go type the converter no longer marks gets its [GoType] back on the generated part,
+    // so reflection reads the type exactly as it did when the converter wrote the attribute.
+    public bool EmitGoTypeAttribute;
+
+    // The definition the converter now writes as a comment after the type's name (`/*num:int64*/`),
+    // re-emitted as the attribute's argument so GoTypeAttribute.Definition reads as before; empty for a
+    // plain Go type.
+    public string GoTypeDefinition = "";
+
+    // A directional channel's direction, read from its definition comment as Go spells it (`/*<-chan T*/`,
+    // Common.NormalizeChanDefinition): the [GoChanDir(…)] argument re-emitted beside [GoType("chan T")], so
+    // reflection's ChanDir() reads the type as it did when the converter wrote both. Empty otherwise.
+    public string GoChanDir = "";
+
+    protected string GoTypeAttributePrefix => !EmitGoTypeAttribute ? "" :
+        (string.IsNullOrEmpty(GoTypeDefinition) ? "[GoType] " : $"[GoType(\"{GoTypeDefinition}\")] ") +
+        (string.IsNullOrEmpty(GoChanDir) ? "" : $"[GoChanDir({GoChanDir})] ");
+
     private readonly HashSet<string> m_usings = new(
     [
         "using System;",

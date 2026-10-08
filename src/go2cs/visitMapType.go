@@ -9,6 +9,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/types"
 )
@@ -58,7 +59,11 @@ func (v *Visitor) visitMapType(mapType *ast.MapType, identType types.Type, name 
 	// unbound T. A non-generic map renders "" for both, so its emission is unchanged.
 	typeParams, constraints := v.getGenericDefinition(identType)
 
-	v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), typeParams, access, "")
-	v.writeStringLn(target, "%s[GoType(\"map[%s, %s]\")] %spartial struct %s%s%s;", v.localNameAttrFor(identType), rootGoTypeDescriptor(keyType), rootGoTypeDescriptor(valueType), access, getSanitizedIdentifier(name), typeParams, constraints)
+	// A lifted function-local type's Go name rides its accessibility record where one is written.
+	localName, localNameRecord := v.recordedLocalName(identType, getSanitizedIdentifier(name))
+
+	v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), typeParams, access, localNameRecord)
+	goTypeAttr, goTypeComment := goTypeMarker(fmt.Sprintf("map[%s, %s]", rootGoTypeDescriptor(keyType), rootGoTypeDescriptor(valueType)))
+	v.writeStringLn(target, "%s%s%spartial struct %s%s%s%s;", localName, goTypeAttr, access, getSanitizedIdentifier(name), typeParams, goTypeComment, constraints)
 	finish()
 }

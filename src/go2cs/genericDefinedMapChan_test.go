@@ -99,10 +99,10 @@ func main() {
 	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "gmc", "main.cs"))
 	packageInfo := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "gmc", "package_info.cs"))
 
-	// The declaration carries the parameter list and its constraints, in the same shape the array shell
-	// takes: `partial struct Set<T> where T : new();`.
+	// The declaration carries the parameter list, its definition comment and its constraints, in the same
+	// shape the array shell takes: `partial struct Set<T> /*map[T, empty]*/ where T : new();`.
 	declaration := func(goType, name, params string) *regexp.Regexp {
-		return regexp.MustCompile(`\[GoType\("` + regexp.QuoteMeta(goType) + `"\)\] (\[[^\]]+\] )?partial struct ` + regexp.QuoteMeta(name+params) + `( where [^;]+)?;`)
+		return regexp.MustCompile(`(\[[^\]]+\] )?partial struct ` + regexp.QuoteMeta(name+params+" /*"+goType+"*/") + `( where [^;]+)?;`)
 	}
 
 	for _, want := range []struct{ goType, name, params string }{
@@ -110,12 +110,12 @@ func main() {
 		{"map[T, EmptyStruct]", "Bag", "<T>"},
 		{"map[K, V]", "Pair", "<K, V>"},
 		{"chan T", "Pipe", "<T>"},
-		{"chan T", "Source", "<T>"},
+		{"<-chan T", "Source", "<T>"}, // a receive-only channel spells its direction (face-lift row 3)
 		{"[]T", "List", "<T>"},
 		{"[2]T", "Grid", "<T>"},
 	} {
 		if !declaration(want.goType, want.name, want.params).MatchString(mainCs) {
-			t.Errorf("want the generic declaration [GoType(%q)] partial struct %s%s in main.cs:\n%s", want.goType, want.name, want.params, mainCs)
+			t.Errorf("want the generic declaration partial struct %s%s /*%s*/ in main.cs:\n%s", want.name, want.params, want.goType, mainCs)
 		}
 
 		if !strings.Contains(packageInfo, "public partial struct "+want.name+want.params+" {}") {
@@ -129,8 +129,8 @@ func main() {
 
 	// CONTROLS: a non-generic map and channel shell keep their exact emission.
 	for _, want := range []string{
-		`[GoType("map[@string, nint]")] partial struct PlainMap;`,
-		`[GoType("chan nint")] partial struct PlainPipe;`,
+		`partial struct PlainMap /*map[@string, nint]*/;`,
+		`partial struct PlainPipe /*chan nint*/;`,
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("control: want %q unchanged in main.cs:\n%s", want, mainCs)

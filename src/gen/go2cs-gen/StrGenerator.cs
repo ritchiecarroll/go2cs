@@ -16,8 +16,10 @@ using static go2cs.Symbols;
 namespace go2cs;
 
 // The back end of an sstring TWIN (docs/phase4/DESIGN-sstring-twin-pilot.md). The converter emits only
-// the member that carries the Go body: each twinned parameter typed `sstring`, marked [GoStr].
-// This generator emits its two companions, so the visible file keeps one method per Go function:
+// the member that carries the Go body, each twinned parameter typed `sstring` and no mark: a method is
+// selected by an `sstring` parameter, or by [GoStr], which hand-written files keep (face lift S,
+// docs/PLAN-marker-comment-parity.md, 5.7; in a hand-owned package by [GoStr] alone). This generator
+// emits its two companions, so the visible file keeps one method per Go function:
 //
 //   - the @string FORWARDER: the same name and signature with each sstring parameter typed @string,
 //     forwarding to the body member under [OverloadResolutionPriority(-1)]. The negative priority on
@@ -30,29 +32,33 @@ namespace go2cs;
 //     this field at every func-value site. Its lambda records the Go name ([GoTwinForwarder]) for
 //     GoNameOf / FuncForPC, and its body is an ordinary call that binds the body member.
 //
-// A [GoRecv] twin needs no ж overload for its forwarder: RecvGenerator gives the visible body member
+// A pointer-receiver twin needs no ж overload for its forwarder: RecvGenerator gives the visible body member
 // one, and a pointer-receiver call with an @string argument binds it through the implicit view. (It
 // could not anyway: a source generator never sees another generator's output.) The forwarder carries
 // [GeneratedCode], so a traceback skips it exactly as it skips RecvGenerator's forwarders.
 [Generator]
 public class StrGenerator : ISourceGenerator
 {
-    private const string FullAttributeName = "go.GoStrAttribute";
-
     public void Initialize(GeneratorInitializationContext context)
     {
-        context.RegisterForSyntaxNotifications(() => new AttributeFinder<MethodDeclarationSyntax>(FullAttributeName));
+        context.RegisterForSyntaxNotifications(() => new TwinBodyFinder());
     }
 
     public void Execute(GeneratorExecutionContext context)
     {
-        if (context.SyntaxContextReceiver is not AttributeFinder<MethodDeclarationSyntax> { HasAttributes: true } attributeFinder)
+        if (context.SyntaxContextReceiver is not TwinBodyFinder { Methods.Count: > 0 } finder)
             return;
 
         HashSet<string> emittedHintNames = new(StringComparer.OrdinalIgnoreCase);
 
-        foreach ((MethodDeclarationSyntax methodSyntax, List<AttributeSyntax> _) in attributeFinder.TargetAttributes)
+        // In a hand-owned package a method is a twin by [GoStr] alone.
+        bool handOwnedPackage = context.Compilation.Assembly.IsHandOwnedPackage();
+
+        foreach (MethodDeclarationSyntax methodSyntax in finder.Methods)
         {
+            if (handOwnedPackage && !methodSyntax.IsSStringTwinBody(handOwnedPackage: true))
+                continue;
+
             SemanticModel semanticModel = context.Compilation.GetSemanticModel(methodSyntax.SyntaxTree);
 
             if (semanticModel.GetDeclaredSymbol(methodSyntax) is not IMethodSymbol method)
@@ -81,6 +87,20 @@ public class StrGenerator : ISourceGenerator
                 continue;
 
             context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{method.Name}.str.g.cs")), template.Generate());
+        }
+    }
+
+    // Selects every method MethodSyntaxExtensions.IsSStringTwinBody reads as a twin's body member: a
+    // parameter typed `sstring`, or [GoStr]. Read from syntax alone; a hand-owned package's narrower rule
+    // ([GoStr] alone) is applied in Execute, where the compilation is known.
+    private sealed class TwinBodyFinder : ISyntaxContextReceiver
+    {
+        public List<MethodDeclarationSyntax> Methods { get; } = [];
+
+        public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
+        {
+            if (context.Node is MethodDeclarationSyntax { ParameterList.Parameters.Count: > 0 } method && method.IsSStringTwinBody(handOwnedPackage: false))
+                Methods.Add(method);
         }
     }
 }

@@ -64,13 +64,7 @@ func goArrayDims(t types.Type) []int64 {
 // dims ride the POINTER descriptor and the bridge's Elem() hands them to the pointee; one hop only,
 // because one hop is what a Go signature ever spells at this position.
 func emitGoArrayDimsAttribute(t types.Type) string {
-	dims := goArrayDims(t)
-
-	if len(dims) == 0 {
-		if pointer, ok := types.Unalias(t).(*types.Pointer); ok {
-			dims = goArrayDims(pointer.Elem())
-		}
-	}
+	dims := paramArrayDims(t)
 
 	if len(dims) == 0 {
 		return ""
@@ -83,6 +77,38 @@ func emitGoArrayDimsAttribute(t types.Type) string {
 	}
 
 	return fmt.Sprintf("[GoArrayDims(%s)] ", strings.Join(values, ", "))
+}
+
+// paramArrayDims is the Go array dimensions t DENOTES at a parameter position: its own when t is an
+// unnamed array type, its pointee's when t is a pointer to one, or nil.
+func paramArrayDims(t types.Type) []int64 {
+	dims := goArrayDims(t)
+
+	if len(dims) == 0 {
+		if pointer, ok := types.Unalias(t).(*types.Pointer); ok {
+			dims = goArrayDims(pointer.Elem())
+		}
+	}
+
+	return dims
+}
+
+// emitParamDims renders a parameter's array dims for a method or func DECLARATION as the dims comment
+// (dimsComment), which go2cs-gen records on the declaring type, and everywhere else as the attribute. The
+// attribute stays where a record cannot key the method (docs/PLAN-marker-comment-parity.md, 11): "a parameter
+// of a function with no declared metadata name" (a lambda or a local function), a func type and an interface
+// member. A generic func or a method of a generic type is keyed (face lift D2): the key spells a type built
+// from a type parameter by its open definition.
+func emitParamDims(t types.Type, declaration bool) string {
+	if !declaration {
+		return emitGoArrayDimsAttribute(t)
+	}
+
+	if dims := paramArrayDims(t); len(dims) > 0 {
+		return dimsComment(dims)
+	}
+
+	return ""
 }
 
 func (v *Visitor) convArrayType(arrayType *ast.ArrayType, context ArrayTypeContext) string {

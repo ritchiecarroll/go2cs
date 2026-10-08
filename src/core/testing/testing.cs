@@ -27,6 +27,9 @@ using ꓸꓸꓸany = System.Span<System.Object>;
 // testConversion.go, which refuses `-tests` on this package outright.
 [module: go.GoManualConversion]
 
+// testing is a hand-owned package, never converted (GoHandOwnedPackageAttribute).
+[assembly: go.GoHandOwnedPackage]
+
 namespace go;
 
 /// <summary>

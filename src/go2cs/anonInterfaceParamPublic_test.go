@@ -77,7 +77,7 @@ func main() {
 	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "aip", "main.cs"))
 	packageInfo := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "aip", "package_info.cs"))
 
-	if want := `[GoType("dyn")] public partial interface Report_r`; !strings.Contains(mainCs, want) {
+	if want := `public partial interface Report_r /*dyn*/`; !strings.Contains(mainCs, want) {
 		t.Errorf("want %q: the exported func's anonymous interface parameter must be public (CS0051):\n%s", want, mainCs)
 	}
 
@@ -87,7 +87,7 @@ func main() {
 
 	// CONTROLS: an unexported func's lift stays internal (a DIFFERENT anonymous interface: identical ones share
 	// one lift), and the anonymous STRUCT twin was already public.
-	if want := `[GoType("dyn")] internal partial interface report_r`; !strings.Contains(mainCs, want) {
+	if want := `internal partial interface report_r /*dyn*/`; !strings.Contains(mainCs, want) {
 		t.Errorf("control: want %q unchanged:\n%s", want, mainCs)
 	}
 

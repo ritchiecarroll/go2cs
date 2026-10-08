@@ -422,8 +422,19 @@ public static class Common
     /// which carries only the access modifier. Any lookup that resolves a type by NAME through the
     /// syntax trees can land on either one, so a lookup that goes on to read members or the
     /// definition token must prefer this one — the accessibility part is empty by construction.
+    /// Without the attribute, the defining part is the converted Go type declaration (see
+    /// <see cref="IsConvertedGoTypeDeclaration"/>), which by rule is never in package_info.cs.
     /// </remarks>
     public static bool IsGoTypeDefinition(this BaseTypeDeclarationSyntax typeDeclaration)
+    {
+        return typeDeclaration.HasGoTypeAttribute() || typeDeclaration.IsConvertedGoTypeDeclaration();
+    }
+
+    /// <summary>
+    /// Determines if <paramref name="typeDeclaration"/> carries a <c>[GoType]</c> attribute, with or
+    /// without a definition argument: the converter's mark, or a hand-written file's opt-in.
+    /// </summary>
+    public static bool HasGoTypeAttribute(this BaseTypeDeclarationSyntax typeDeclaration)
     {
         foreach (AttributeListSyntax attributeList in typeDeclaration.AttributeLists)
         {
@@ -443,6 +454,210 @@ public static class Common
     /// Simple name of the converter-emitted type-definition attribute.
     /// </summary>
     public const string GoTypeAttributeName = "GoType";
+
+    /// <summary>
+    /// The converter-reserved suffix of a descriptor carrier, the uninhabited interface the converter
+    /// emits for a defined type over an interface (see the converter's visitTypeSpec.go).
+    /// </summary>
+    public const string DescriptorCarrierSuffix = "ᴅ";
+
+    /// <summary>
+    /// Simple name of the assembly-level attribute a hand-owned package carries to opt out of the
+    /// converted-Go-type rule (see <see cref="IsConvertedGoTypeDeclaration"/>).
+    /// </summary>
+    public const string HandOwnedPackageAttributeName = "GoHandOwnedPackageAttribute";
+
+    /// <summary>
+    /// Determines if <paramref name="typeDeclaration"/> is a CONVERTED Go type without needing a
+    /// <c>[GoType]</c> attribute: the converter stops writing a plain one, so the fact is where the
+    /// type is declared.
+    /// </summary>
+    /// <remarks>
+    /// A converted Go type is (1) a struct or interface, never a delegate (a Go func type: no
+    /// generator reads one, and no converted delegate ever carried the attribute) and never a class
+    /// (a pointer-defined type is a class, and always carries its definition argument);
+    /// (2) declared directly inside a <c>*_package</c> class; (3) in a CONVERTED file, i.e. not a
+    /// hand-written companion (<c>*_impl.cs</c>, <c>*_impl_test.cs</c>), not a whole-file hand
+    /// conversion (<c>[module: GoManualConversion]</c>), not a metadata file (package_info.cs,
+    /// package_test_info.cs, go2cs_test_host.cs, whose type parts only pin accessibility) and not
+    /// generated output; and (5) not a descriptor carrier, which the converter deliberately leaves
+    /// unmarked so no generator emits anything for it. Rule (4), the hand-owned PROJECT, is
+    /// assembly-wide and is read by <see cref="IsHandOwnedAssembly"/>. A hand-written file keeps the
+    /// attribute as its opt-in (<see cref="HasGoTypeAttribute"/>). A defined type's underlying-type
+    /// definition, once the attribute's argument, is the trailing comment after the type's name
+    /// (<see cref="GetDefinitionComment"/>), so (1) also admits a CLASS that carries one: a
+    /// pointer-defined type, <c>partial class IntPtr /*ж&lt;nint&gt;*/;</c>.
+    /// </remarks>
+    public static bool IsConvertedGoTypeDeclaration(this BaseTypeDeclarationSyntax typeDeclaration)
+    {
+        if (typeDeclaration is not (StructDeclarationSyntax or InterfaceDeclarationSyntax) &&
+            !(typeDeclaration is ClassDeclarationSyntax && typeDeclaration.GetDefinitionComment() is not null))
+        {
+            return false;
+        }
+
+        if (typeDeclaration.Parent is not ClassDeclarationSyntax packageClass || !packageClass.Identifier.Text.EndsWith(PackageSuffix, StringComparison.Ordinal))
+            return false;
+
+        if (typeDeclaration.Identifier.Text.EndsWith(DescriptorCarrierSuffix, StringComparison.Ordinal))
+            return false;
+
+        return IsConvertedSourceFile(typeDeclaration.SyntaxTree);
+    }
+
+    /// <summary>
+    /// Reads the underlying-type definition a converted declaration carries as a comment right after
+    /// its name (or its type parameter list): <c>partial struct Duration /*num:int64*/;</c> reads
+    /// <c>num:int64</c>, the text the <c>[GoType("…")]</c> argument held. Only a multi-line comment
+    /// separated from the name by whitespace alone counts; null when there is none.
+    /// </summary>
+    public static string? GetDefinitionComment(this BaseTypeDeclarationSyntax typeDeclaration)
+    {
+        SyntaxToken anchor = typeDeclaration is TypeDeclarationSyntax { TypeParameterList: { } typeParameters } ?
+            typeParameters.GreaterThanToken :
+            typeDeclaration.Identifier;
+
+        foreach (SyntaxTrivia trivia in anchor.TrailingTrivia)
+        {
+            if (trivia.IsKind(SyntaxKind.MultiLineCommentTrivia))
+            {
+                string text = trivia.ToString();
+                return text.Length > 4 ? text[2..^2].Trim() : null;
+            }
+
+            if (!trivia.IsKind(SyntaxKind.WhitespaceTrivia))
+                break;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Reads a Go type declaration's underlying-type definition: the <c>[GoType("…")]</c> argument when
+    /// the declaration carries the attribute (a hand-written opt-in, or a converted file from before the
+    /// comment), else the definition comment of a CONVERTED declaration, a directional channel read as
+    /// <c>chan T</c> (<see cref="NormalizeChanDefinition"/>). Null for a plain Go type and for any other
+    /// declaration.
+    /// </summary>
+    public static string? GetGoTypeDefinitionText(this BaseTypeDeclarationSyntax typeDeclaration)
+    {
+        foreach (AttributeSyntax attribute in typeDeclaration.AttributeLists.SelectMany(list => list.Attributes))
+        {
+            string name = attribute.Name.ToString();
+
+            if (name != GoTypeAttributeName && name != $"{GoTypeAttributeName}Attribute")
+                continue;
+
+            string? value = attribute.ArgumentList?.Arguments.FirstOrDefault()?.ToString();
+
+            return value is { Length: > 2 } ? value[1..^1].Trim() : null;
+        }
+
+        return typeDeclaration.IsConvertedGoTypeDeclaration() ? NormalizeChanDefinition(typeDeclaration.GetDefinitionComment(), out _) : null;
+    }
+
+    /// <summary>
+    /// Reads a DIRECTIONAL channel definition as Go spells it in a definition comment (face-lift row 3):
+    /// <c>&lt;-chan T</c> is <c>chan T</c> received from, <c>chan&lt;- T</c> is <c>chan T</c> sent to. Answers the
+    /// definition every reader dispatches on (<c>chan T</c>) and, in <paramref name="chanDir"/>, the
+    /// <c>[GoChanDir(…)]</c> argument the generated part re-emits so reflection reads the direction off the
+    /// type as before; "" for any other definition, which is returned unchanged.
+    /// </summary>
+    public static string? NormalizeChanDefinition(string? definition, out string chanDir)
+    {
+        chanDir = "";
+
+        if (definition is null)
+            return null;
+
+        if (definition.StartsWith("<-chan ", StringComparison.Ordinal))
+        {
+            chanDir = "GoChanDir.Recv";
+            return "chan " + definition["<-chan ".Length..];
+        }
+
+        if (definition.StartsWith("chan<- ", StringComparison.Ordinal))
+        {
+            chanDir = "GoChanDir.Send";
+            return "chan " + definition["chan<- ".Length..];
+        }
+
+        return definition;
+    }
+
+    /// <summary>
+    /// Determines if <paramref name="syntaxTree"/> is a file the converter wrote as Go source: not a
+    /// hand-written companion, not a whole-file hand conversion, not a metadata file and not generated
+    /// output. A tree with no file path (an in-memory test source) counts as converted.
+    /// </summary>
+    public static bool IsConvertedSourceFile(SyntaxTree syntaxTree)
+    {
+        string fileName = Path.GetFileName(syntaxTree.FilePath ?? string.Empty);
+
+        if (fileName.EndsWith("_impl.cs", StringComparison.OrdinalIgnoreCase) ||
+            fileName.EndsWith("_impl_test.cs", StringComparison.OrdinalIgnoreCase) ||
+            fileName.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (fileName.Equals("package_info.cs", StringComparison.OrdinalIgnoreCase) ||
+            fileName.Equals("package_test_info.cs", StringComparison.OrdinalIgnoreCase) ||
+            fileName.Equals("package_info_internal_test.cs", StringComparison.OrdinalIgnoreCase) ||
+            fileName.Equals("package_info_external_test.cs", StringComparison.OrdinalIgnoreCase) ||
+            fileName.Equals("go2cs_test_host.cs", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (syntaxTree.GetRoot() is not CompilationUnitSyntax root)
+            return true;
+
+        foreach (AttributeListSyntax attributeList in root.AttributeLists)
+        {
+            if (attributeList.Target?.Identifier.ValueText != "module")
+                continue;
+
+            foreach (AttributeSyntax attribute in attributeList.Attributes)
+            {
+                string name = attribute.Name.ToString();
+
+                if (name.EndsWith("GoManualConversion", StringComparison.Ordinal) || name.EndsWith("GoManualConversionAttribute", StringComparison.Ordinal))
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Determines if <paramref name="compilation"/> is a hand-owned package, which carries
+    /// <c>[assembly: GoHandOwnedPackage]</c> in its own source. Inside one, a type is a Go type only
+    /// by its <c>[GoType]</c> attribute.
+    /// </summary>
+    public static bool IsHandOwnedAssembly(Compilation compilation)
+    {
+        return IsHandOwnedAssembly(compilation.Assembly);
+    }
+
+    private static bool IsHandOwnedAssembly(IAssemblySymbol? assembly)
+    {
+        return assembly is not null && assembly.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == HandOwnedPackageAttributeName);
+    }
+
+    /// <summary>
+    /// Determines if <paramref name="type"/>, a type of the CURRENT compilation, is a converted Go type
+    /// by rule: one of its declarations satisfies <see cref="IsConvertedGoTypeDeclaration"/> and its
+    /// assembly is not a hand-owned package. A type from metadata answers false here; its compiled
+    /// <c>[GoType]</c> (re-emitted by the generator) is what a reader of metadata sees.
+    /// </summary>
+    public static bool IsConvertedGoTypeSymbol(this INamedTypeSymbol type)
+    {
+        if (type.DeclaringSyntaxReferences.Length == 0 || IsHandOwnedAssembly(type.ContainingAssembly))
+            return false;
+
+        return type.DeclaringSyntaxReferences.Any(reference => reference.GetSyntax() is BaseTypeDeclarationSyntax declaration && declaration.IsConvertedGoTypeDeclaration());
+    }
 
     public static IEnumerable<INamedTypeSymbol> GetAllBaseInterfaces(this INamedTypeSymbol type, Compilation compilation)
     {

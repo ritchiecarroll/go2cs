@@ -80,11 +80,12 @@ internal class StrTemplate : TemplateBase
 
     private string ReturnType => Method.ReturnsVoid ? "void" : Method.ReturnType.ToDisplayString(s_typeFormat);
 
-    // The body member's [GoRecv], which the forwarder repeats. It re-declares the same `this ref T`
-    // receiver, and a by-ref receiver WITHOUT [GoRecv] is read at run time as a VALUE-set method
-    // bound through a copy (golib's TypeExtensions.IsCopyBoundReceiver) — so the forwarder of a
-    // pointer-receiver method has to say what it is, exactly as its body member does. RecvGenerator
-    // never sees it (a generator sees no generator output), so the mark mints no ж overload.
+    // The body member's [GoRecv], which the forwarder repeats where a hand-written body carries it,
+    // so the two read alike. The forwarder re-declares the same `this ref T` receiver, which golib
+    // reads as a POINTER-set method whether marked or not (TypeExtensions.IsPointerSetByRefReceiver;
+    // only [GoCopyBound] makes a by-ref receiver value-set, and converted code never writes it on a
+    // body). RecvGenerator never sees the forwarder (a generator sees no generator output), so its
+    // receiver mints no ж overload.
     private string GoRecvMark => Method.GetAttributes().Any(attribute => attribute.AttributeClass is
     {
         Name: "GoRecvAttribute",

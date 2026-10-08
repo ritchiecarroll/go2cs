@@ -104,9 +104,17 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, identType types.Type,
 		target.WriteString(v.newline)
 	}
 
+	// A lifted function-local type's Go name rides its accessibility record where one is written.
+	localName, localNameRecord := v.recordedLocalName(identType, getSanitizedIdentifier(name))
+
+	// The definition (`[]T`, `[N]T`) rides the declaration's name as its face-lift comment
+	// (goTypeMarker); a length whose literal value differs from its source expression keeps the
+	// `/* [expr]T */` annotation line ahead of the declaration.
+	var definition, annotation string
+
 	if arrayType.Len == nil {
 		// Handle slice type
-		v.writeString(target, "%s[GoType(\"[]%s\")] ", v.localNameAttrFor(identType), rootGoTypeDescriptor(csTypeName))
+		definition = fmt.Sprintf("[]%s", rootGoTypeDescriptor(csTypeName))
 	} else {
 		// Handle array type
 		var arrayLenValue string
@@ -132,19 +140,23 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, identType types.Type,
 			// W2c). Strip the embedded delimiters; the readable Go text between them is unaffected,
 			// now sitting directly inside the one outer comment instead of a redundant nested one.
 			annotatedLenExpr := strings.NewReplacer("/*", "", "*/", "").Replace(arrayLenExpr)
-			v.writeString(target, "%s[GoType(\"[%s]%s\")] /* [%s]%s */%s", v.localNameAttrFor(identType), arrayLenValue, rootGoTypeDescriptor(csTypeName), annotatedLenExpr, csTypeName, v.newline)
+			definition = fmt.Sprintf("[%s]%s", arrayLenValue, rootGoTypeDescriptor(csTypeName))
+			annotation = fmt.Sprintf("/* [%s]%s */%s", annotatedLenExpr, csTypeName, v.newline)
 		} else {
-			v.writeString(target, "%s[GoType(\"[%s]%s\")] ", v.localNameAttrFor(identType), arrayLenExpr, rootGoTypeDescriptor(csTypeName))
+			definition = fmt.Sprintf("[%s]%s", arrayLenExpr, rootGoTypeDescriptor(csTypeName))
 		}
 	}
+
+	goTypeAttr, goTypeComment := goTypeMarker(definition)
+	v.writeString(target, "%s%s%s", localName, goTypeAttr, annotation)
 
 	// Append generic type parameters and constraints (e.g. `<K, V> where K : new()`) for a generic
 	// named array type so the forward declaration matches its uses, and the constraints propagate
 	// type-wide to the generated array-backed partial (whose element type may require them).
 	typeParams, constraints := v.getGenericDefinition(identType)
 
-	v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), typeParams, access, "")
-	v.writeString(target, "%s%spartial struct %s%s%s;", namedArrayElemDimsAttr(identType), access, getSanitizedIdentifier(name), typeParams, constraints)
+	v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), typeParams, access, localNameRecord)
+	v.writeString(target, "%s%spartial struct %s%s%s%s;", namedArrayElemDimsAttr(identType), access, getSanitizedIdentifier(name), typeParams, goTypeComment, constraints)
 	v.writeCommentString(target, comment, arrayType.Elt.End()+typeLenDeviation)
 	target.WriteString(v.newline)
 	finish()
@@ -197,8 +209,10 @@ func constArrayLength(value constant.Value) (string, bool) {
 	return strconv.FormatInt(length, 10), true
 }
 
-// namedArrayElemDimsAttr renders the `[GoArrayDims(...)]` stamp a NAMED fixed-array type needs when
-// its ELEMENT is itself an unnamed fixed array (`type nn [2][3]int`), or "" for every other shape.
+// namedArrayElemDimsAttr renders the dims comment (`/*[2][3]*/`, dimsComment) a NAMED fixed-array type
+// needs when its ELEMENT is itself an unnamed fixed array (`type nn [2][3]int`), or "" for every other
+// shape. go2cs-gen reads it for the wrapper's backing and re-emits it as `[GoArrayDims(...)]` on a
+// generated partial, where golib reads it.
 //
 // It is the one fact about such a type that reaches C# nowhere else. The wrapper's descriptor is
 // `[2]array<nint>` — the inner 3 is gone — and go2cs-gen builds the wrapper's backing lazily as
@@ -222,7 +236,7 @@ func namedArrayElemDimsAttr(namedType types.Type) string {
 	}
 
 	if dims := goArrayDims(namedType.Underlying()); len(dims) > 1 {
-		return emitGoArrayDimsAttribute(namedType.Underlying())
+		return dimsComment(dims)
 	}
 
 	return ""
