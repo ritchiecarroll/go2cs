@@ -15,19 +15,23 @@ Go initializes package-level variables in **dependency order** (spec: "within a 
 var procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx")
 ```
 
-<!-- illustration: not converter output -->
+In `syscall_windows.cs` the variable is a bare field beside the method that sets it:
+
+<!-- source: src/core/syscall/windows/syscall_windows.cs:493-494 -->
 ```csharp
-// syscall_windows.cs
 internal static ж<LazyProc> procSetFilePointerEx;
 internal static void initᴛprocSetFilePointerEx() { procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx"u8); }
+```
 
-// package_init.cs (generated)
+The generated `package_init.cs` calls every relocated initializer from the class's static constructor,
+in `types.Info.InitOrder`:
+
+<!-- source: src/core/syscall/windows/package_init.cs:9-12 -->
+```csharp
 partial class syscall_package {
     static syscall_package() {
         initᴛprocSetFilePointerEx();
-        // … every relocated initializer, in types.Info.InitOrder …
-    }
-}
+        initᴛStdin();
 ```
 
 This is correct by C#'s own initialization guarantees: **all** static field initializers (every partial-class file) run **before** the static-constructor body, so every non-relocated dependency is already initialized when the ctor runs; the ctor then applies the relocated initializers in Go's order. Vars with no order hazard (the overwhelming majority — only 25 of the 302 stdlib packages relocate anything) keep their readable inline form. Cross-**package** order needs no handling: accessing another package's static field triggers that type's initialization first (.NET guarantees), matching Go's imported-packages-first rule. Adding an explicit static ctor also removes `beforefieldinit` from the package class, giving it *precise* initialization semantics.

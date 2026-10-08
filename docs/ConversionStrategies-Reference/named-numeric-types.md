@@ -16,11 +16,13 @@ One resolved instance: an argument to the **`min`/`max` builtins** that is a nam
 
 **Named numeric types.** A Go type definition over a numeric base — `type Celsius float64`, `type level int`, `type Flags uint` — is emitted as a partial struct whose name is followed by a `/*num:…*/` comment, and the `TypeGenerator` source generator fills in the body:
 
-<!-- illustration: not converter output -->
+Go's `type Flags uint` and `type Mask uintptr`:
+
+<!-- source: src/tests/Behavioral/UnsignedNamedNumeric/main.cs.target:7-9 -->
 ```csharp
-partial struct level /*num:nint*/;   // type level int
-partial struct Flags /*num:nuint*/;   // type Flags uint
-partial struct Celsius /*num:float64*/; // type Celsius float64
+partial struct Flags /*num:nuint*/;
+
+partial struct Mask /*num:uintptr*/;
 ```
 
 The generated struct wraps the underlying value and implements the comparison and arithmetic operators plus implicit conversions to/from the underlying type, so the named type is a distinct C# type that still behaves like its base.

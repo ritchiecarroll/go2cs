@@ -71,13 +71,14 @@ call-argument path under builtin `new`'s UNNAMED parameter — an EMPTY lift nam
 (mirroring the composite-literal and hpke map-value lifts), so the declaration, the `@new<…>` type
 argument, the `GoImplement` recordings, and the pointer-adapter names all resolve through
 `liftedTypeMap`:
-<!-- illustration: not converter output -->
+<!-- source: src/core/go/internal/gccgoimporter/parser.cs:518-521, 541 -->
 ```csharp
 partial struct reservedᴛ1 /*dyn*/ {
-    public global::go.go.types_package.ΔType Type;
+    /*embed*/ public global::go.go.types_package.ΔType Type;
 }
 internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
-p.typeList[n] = new reservedᴛ1жΔType(reserved);
+…
+        p.typeList[n] = new reservedᴛ1жΔType(reserved);
 ```
 and `visitStructType` itself falls back to the generic `"type"` when a lift arrives with an empty
 name (the FUNCTION-LOCAL `x := new(struct{…})` form still reaches it through the unnamed-parameter

@@ -1416,13 +1416,28 @@ it is present — the marker resolves as one unit to the already-simple lifted n
 `GoImplement` attribute writer resolves or drops it (mirroring the implicit-conversion writer).
 `registerDynamicTypeName` keeps the lexically smallest name for a signature so the winner is
 well-defined even when several files lift the same shape. Emitted form:
-<!-- illustration: not converter output -->
+The declaring file, `batch.cs`:
+
+<!-- source: src/core/internal/trace/batch.cs:45-49 -->
 ```csharp
-// batch.cs (declaring file):
-partial interface readBatch_r /*dyn*/ : /* io.Reader */ … { … }
-// generation.cs (cross-file cast site):
+internal partial interface readBatch_r /*dyn*/ :
+    io.Reader,
+    io.ByteReader
+{
+}
+```
+
+The cast site in another file, `generation.cs`:
+
+<!-- source: src/core/internal/trace/generation.cs:74 -->
+```csharp
 (b, gen, var err) = readBatch(new bufio_ReaderжreadBatch_r(Ꮡr));
-// package_info.cs:
+```
+
+And the record in `package_info.cs`:
+
+<!-- source: src/core/internal/trace/package_info.cs:58 -->
+```csharp
 [assembly: GoImplement<bufio_package.Reader, readBatch_r>(Pointer = true)]
 ```
 Clears internal/trace's 75-error syntax cascade (the residual CS0315 — a named-numeric wrapper
@@ -1516,15 +1531,25 @@ to the registry; hex digits pass through every transform untouched, and the enco
 function of the signature so equal signatures still render the identical (comparable) string.
 Emitted form:
 
-<!-- illustration: not converter output -->
+The declaring file, `zvars.cs`, which is visited after the reference:
+
+<!-- source: src/tests/Behavioral/AnonStructCrossFile/zvars.cs.target:6-10 -->
 ```csharp
-// zvars.cs (declaring file, visited AFTER the reference):
-partial struct compareTestsᴛ1 /*dyn*/ { … }
-internal static slice<compareTestsᴛ1> compareTests = …;
-// main.cs (cross-file range + heap box):
+partial struct compareTestsᴛ1 /*dyn*/ {
+    internal slice<byte> a, b;
+    internal nint i;
+}
+internal static slice<compareTestsᴛ1> compareTests = new compareTestsᴛ1[]{
+```
+
+The range and the heap box in `main.cs`:
+
+<!-- source: src/tests/Behavioral/AnonStructCrossFile/main.cs.target:8-10, 14 -->
+```csharp
 foreach (var (_, vᴛ1) in compareTests) {
     ref var tt = ref heap(new compareTestsᴛ1(), out var Ꮡtt);
-    …
+    tt = vᴛ1;
+…
 }
 ```
 
