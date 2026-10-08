@@ -11,6 +11,7 @@ package main
 import (
 	"go/build"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -298,7 +299,7 @@ func TestRecurseLinknameForwardDefinition(t *testing.T) {
 		t.Errorf("tAbs was routed by splitting the method-shaped symbol at its last dot:\n%s", mainCs)
 	}
 
-	if strings.Contains(mainCs, "static partial") {
+	if regexp.MustCompile(`static partial [^{\n]*\);`).MatchString(mainCs) {
 		t.Errorf("a pull is still a bodyless partial stub (PartialStubGenerator throws on the first call):\n%s", mainCs)
 	}
 

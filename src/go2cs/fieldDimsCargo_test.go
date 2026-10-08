@@ -104,16 +104,16 @@ func TestFieldDimsCargo(t *testing.T) {
 		{"nil type", nil, ""},
 	}
 
-	// Each row states the cargo in its attribute spelling; the emission writes the element dims as the
-	// comment before the field's type and keeps the map key's attribute (emitFieldDims).
+	// Each row states the cargo in its attribute spelling; the emission writes both as dims comments: the element
+	// dims before the field's type, the map key's before the key type argument (emitFieldDims, section 11 row 4).
 	elemCargo := regexp.MustCompile(`GoArrayDims\(([^)]*)\)`)
-	keyCargo := regexp.MustCompile(`GoMapKeyDims\([^)]*\)`)
+	keyCargo := regexp.MustCompile(`GoMapKeyDims\(([^)]*)\)`)
 
 	for _, c := range cases {
 		wantKey, wantComment := "", ""
 
-		if key := keyCargo.FindString(c.want); key != "" {
-			wantKey = "[" + key + "]"
+		if key := keyCargo.FindStringSubmatch(c.want); key != nil {
+			wantKey = "/*[" + strings.ReplaceAll(key[1], ", ", "][") + "]*/ "
 		}
 
 		if elem := elemCargo.FindStringSubmatch(c.want); elem != nil {

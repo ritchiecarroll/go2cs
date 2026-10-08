@@ -8,7 +8,8 @@
 
 // Guards a function-local NAMED interface declared in an INTERNAL _test.go file (BurntSushi/toml's encode
 // test, COORD 2026-10-03): the white-box bridge writes type accessibility inline, so its interface lift must
-// carry the [GoLocalName] stamp on the declaration, as its struct lift already does. Without it go2cs-gen
+// carry the [GoLocalName] stamp, as its struct lift does; since section 11 rows 1+2 both stamps ride the bridge's
+// attribute-only records rather than the declarations. Without it go2cs-gen
 // cannot find the struct field embedding the interface and forwards a promoted method to
 // `recvᴛ.<Func>_<name>.F()` (CS0120/CS1061). The struct lift's stamp and an anonymous interface lift, which has
 // no Go name to stamp, are the controls.
@@ -76,22 +77,37 @@ func TestAnInternalTestLocalInterfaceCarriesItsLocalNameStamp(t *testing.T) {
 
 	testCs := string(data)
 
-	const stamped = `[GoType("dyn")] [GoLocalName("Inner")] internal partial interface TestLocalEmbeddedInterface_Inner`
-
-	if !strings.Contains(testCs, stamped) {
-		t.Errorf("want %q: the inline-access bridge must stamp the interface lift on its declaration:\n%s", stamped, testCs)
+	// Section 11 rows 1+2: the bridge keeps its accessibility on the declaration and records the stamp on an
+	// attribute-only partial in its own metadata unit (packageBridgeTypeAccess), so the lift's declaration
+	// carries no [GoLocalName] and the record names it once.
+	if strings.Contains(testCs, "[GoLocalName(") {
+		t.Errorf("converted bridge code still carries [GoLocalName]:\n%s", testCs)
 	}
 
-	if n := strings.Count(testCs, `[GoLocalName("Inner")]`); n != 1 {
-		t.Errorf("want the interface stamp exactly once, got %d", n)
+	if !strings.Contains(testCs, `[GoType("dyn")] internal partial interface TestLocalEmbeddedInterface_Inner`) ||
+		!strings.Contains(testCs, `[GoType("dyn")] internal partial struct TestLocalEmbeddedInterface_Outer`) {
+		t.Errorf("the lifts must keep their declarations and accessibility:\n%s", testCs)
 	}
 
-	// CONTROLS: the struct lift keeps its inline stamp, and the anonymous interface lift has no Go name to stamp.
-	if !strings.Contains(testCs, `[GoType("dyn")] [GoLocalName("Outer")] internal partial struct TestLocalEmbeddedInterface_Outer`) {
-		t.Errorf("control: the struct lift's inline stamp must be unchanged:\n%s", testCs)
+	var records []string
+
+	for _, lines := range packageBridgeTypeAccess {
+		records = append(records, lines.Keys()...)
 	}
 
-	if n := strings.Count(testCs, "[GoLocalName("); n != 2 {
-		t.Errorf("control: want exactly 2 stamps (Inner, Outer), got %d:\n%s", n, testCs)
+	recorded := strings.Join(records, "\n")
+
+	for _, want := range []string{
+		`[GoLocalName("Inner")] partial interface TestLocalEmbeddedInterface_Inner {}`,
+		`[GoLocalName("Outer")] partial struct TestLocalEmbeddedInterface_Outer {}`,
+	} {
+		if !strings.Contains(recorded, want) {
+			t.Errorf("want the bridge record %s, got:\n%s", want, recorded)
+		}
+	}
+
+	// CONTROL: the anonymous interface lift has no Go name to record.
+	if n := strings.Count(recorded, "[GoLocalName("); n != 2 {
+		t.Errorf("control: want exactly 2 records (Inner, Outer), got %d:\n%s", n, recorded)
 	}
 }
