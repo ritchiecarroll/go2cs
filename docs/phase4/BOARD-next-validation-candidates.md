@@ -26622,4 +26622,21 @@ The converted runtime resolves a frame's Go file:line from its method's portable
 
 Measured 2026-10-07 on windows (win-x64), at `claude/i9-aot-metadata-token` `9a9df3a6a8`: the behavioral program `InitFrameNames` (`fmt` + `runtime`; its inits print `runtime.FuncForPC(pc).Name()` and the line of a `runtime.Caller`), converted with `go2cs -recurse=nuget` and published with Native AOT, runs (exit 0, 7 lines, no stderr) and names every frame, every line 0 (the entry above). FIVE of its seven names equal `go run`'s; TWO differ: the function literal reads `main.init.2.func0` where Go reads `main.init.2.func1`, and the `direct` line reads `main.main` where Go reads `main.init`. Under the JIT the same fixture's Output phase matches Go exactly, so both differ under Native AOT only. **Hypothesis, UNTRACED:** both names are chosen with a frame's position (the literal's ordinal and the init-or-main attribution read the position map), and Native AOT has no position source (the entry above), so the fallback answers. Not read from a stack or a debugger; it may be another cause. **Unpark when** a Native AOT program's frame names are relied on (a row, a module, a user's traceback), or a position source exists under Native AOT, and trace the two names then.
 
+## 2026-10-08 — R: two Reference notes describe an emission that no longer exists (a docs follow-up) — OPEN
+
+Found by the face-lift docs seat while replacing illustrations with verbatim excerpts. Both are stale for
+reasons older than the face lift, so neither is a regeneration: each needs its prose rewritten against
+the present emission. Both samples are marked `illustration: not converter output` until then.
+
+| Page | What the note says | What the emission is at TRAIN FL |
+|:--|:--|:--|
+| `docs/ConversionStrategies-Reference/package-conversion.md`, the blank-import sample (`BlankImportSideEffects`) | the importing file holds an `initᴛᴛimportꓸ…` hook per imported package, each calling `builtin.initPackage` | `src/tests/Behavioral/BlankImportSideEffects/main.cs.target` holds no such hook; the note's "four decisions" describe where they stood |
+| `docs/ConversionStrategies-Reference/pointers.md`, `newPinnerBits` | a `(*Base)(p)` conversion dereferences the box, value-converts and re-boxes: `Ꮡ((pinnerBits)(~newMarkBits(…)))` | `src/core/runtime/pinner.cs:206-208` returns `newMarkBits(…).Reinterpret<gcBits, pinnerBits>()` |
+
+Owed by the follow-up: read where the import hooks are written now and which conversions take the
+reinterpret route against the copy-box route, rewrite the two notes, and replace each sample with its
+file's lines under a source comment (`src/tools/docsamples` then verifies them).
+
+— R
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
