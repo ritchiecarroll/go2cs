@@ -223,9 +223,11 @@ a Native AOT consumer, a full trim, under test. win-x64, one 12-core windows mac
 | F′: arm F with golib's field-metadata tripwire made to REPORT instead of throw (a local instrument, restored byte-identical) | 0 | 125 s (golib rebuilt) | 12.4 MB | **exit 0**; three types reported (below) |
 
 **Arm P's failure is not the trim.** It is the windows defect recorded in docs/KnownIssues.md: the converted runtime
-keyed a call site by its method's metadata token. Its fix, `claude/i9-aot-metadata-token` (`dcd82dc87d`), is in
-neither master nor TRAIN FL, so at master **a windows Native AOT consumer that calls `runtime.Caller` fails under
-either trim mode.** On linux the same partial publish of the published packages runs (the hosted `aot-smoke` record
+keyed a call site by its method's metadata token. Its fix is not on master yet, so at master a windows Native AOT
+consumer that calls `runtime.Caller` fails under either trim mode. The fix rides TRAIN FL: the i9's change restated
+on the per-call caller-line work as `claude/i9-aot-metadata-token-on-g` (`cfe3d6bae7`, row 11, an ancestor of the FL
+union `9b7dfdb2ec`), and **this failure is expected to clear when TRAIN FL lands**; C1's `aot-smoke` at that tip is
+the release gate. On linux the same partial publish of the published packages runs (the hosted `aot-smoke` record
 in docs/KnownIssues.md).
 
 **Which types lose their field metadata under a full trim (arm F′).** Exactly three were refused in this program:
@@ -302,8 +304,11 @@ stated limits, and they keep a regression in golib's reflection from arriving si
      GoFieldMetadata.scout.cs (the tripwire reporting each refused type once on stderr instead of throwing) over
      golib/GoFieldMetadata.cs for one publish and restored it: sha 481a488a53f56397 before and after, tree clean.
      Arm P wall 6541 s, exe 243,076,096 bytes (output folder 1.36 GB with symbols); arm F exe 12,368,384 bytes.
-     The i9 fix for P's windows failure: claude/i9-aot-metadata-token dcd82dc87d, an ancestor of neither master
-     541766413e nor claude/coord-trainFL-union (checked 2026-10-08). -->
+     The fix for P's windows failure: claude/i9-aot-metadata-token-on-g cfe3d6bae7, TRAIN FL row 11 (merged 06:51),
+     an ancestor of the FL union 9b7dfdb2ec and not of master 541766413e (checked 2026-10-08). It supersedes the
+     original cut dcd82dc87d, which is an ancestor of neither; the first version of this plan checked only that cut and
+     wrongly said the fix was missing from TRAIN FL (corrected by COORD, 2026-10-08). -->
+     <!-- Arm P was measured at master, without the fix, so its exit 2 is a reading of master; it is not re-run here. -->
 
 The scripts live in the lane's scratch area, not in the repository; the comment above says what each one did, so any
 reading can be repeated against master `541766413e`.
