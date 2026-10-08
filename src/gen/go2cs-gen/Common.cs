@@ -483,12 +483,18 @@ public static class Common
     /// generated output; and (5) not a descriptor carrier, which the converter deliberately leaves
     /// unmarked so no generator emits anything for it. Rule (4), the hand-owned PROJECT, is
     /// assembly-wide and is read by <see cref="IsHandOwnedAssembly"/>. A hand-written file keeps the
-    /// attribute as its opt-in (<see cref="HasGoTypeAttribute"/>).
+    /// attribute as its opt-in (<see cref="HasGoTypeAttribute"/>). A defined type's underlying-type
+    /// definition, once the attribute's argument, is the trailing comment after the type's name
+    /// (<see cref="GetDefinitionComment"/>), so (1) also admits a CLASS that carries one: a
+    /// pointer-defined type, <c>partial class IntPtr /*ж&lt;nint&gt;*/;</c>.
     /// </remarks>
     public static bool IsConvertedGoTypeDeclaration(this BaseTypeDeclarationSyntax typeDeclaration)
     {
-        if (typeDeclaration is not (StructDeclarationSyntax or InterfaceDeclarationSyntax))
+        if (typeDeclaration is not (StructDeclarationSyntax or InterfaceDeclarationSyntax) &&
+            !(typeDeclaration is ClassDeclarationSyntax && typeDeclaration.GetDefinitionComment() is not null))
+        {
             return false;
+        }
 
         if (typeDeclaration.Parent is not ClassDeclarationSyntax packageClass || !packageClass.Identifier.Text.EndsWith(PackageSuffix, StringComparison.Ordinal))
             return false;
@@ -497,6 +503,56 @@ public static class Common
             return false;
 
         return IsConvertedSourceFile(typeDeclaration.SyntaxTree);
+    }
+
+    /// <summary>
+    /// Reads the underlying-type definition a converted declaration carries as a comment right after
+    /// its name (or its type parameter list): <c>partial struct Duration /*num:int64*/;</c> reads
+    /// <c>num:int64</c>, the text the <c>[GoType("…")]</c> argument held. Only a multi-line comment
+    /// separated from the name by whitespace alone counts; null when there is none.
+    /// </summary>
+    public static string? GetDefinitionComment(this BaseTypeDeclarationSyntax typeDeclaration)
+    {
+        SyntaxToken anchor = typeDeclaration is TypeDeclarationSyntax { TypeParameterList: { } typeParameters } ?
+            typeParameters.GreaterThanToken :
+            typeDeclaration.Identifier;
+
+        foreach (SyntaxTrivia trivia in anchor.TrailingTrivia)
+        {
+            if (trivia.IsKind(SyntaxKind.MultiLineCommentTrivia))
+            {
+                string text = trivia.ToString();
+                return text.Length > 4 ? text[2..^2].Trim() : null;
+            }
+
+            if (!trivia.IsKind(SyntaxKind.WhitespaceTrivia))
+                break;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Reads a Go type declaration's underlying-type definition: the <c>[GoType("…")]</c> argument when
+    /// the declaration carries the attribute (a hand-written opt-in, or a converted file from before the
+    /// comment), else the definition comment of a CONVERTED declaration. Null for a plain Go type and
+    /// for any other declaration.
+    /// </summary>
+    public static string? GetGoTypeDefinitionText(this BaseTypeDeclarationSyntax typeDeclaration)
+    {
+        foreach (AttributeSyntax attribute in typeDeclaration.AttributeLists.SelectMany(list => list.Attributes))
+        {
+            string name = attribute.Name.ToString();
+
+            if (name != GoTypeAttributeName && name != $"{GoTypeAttributeName}Attribute")
+                continue;
+
+            string? value = attribute.ArgumentList?.Arguments.FirstOrDefault()?.ToString();
+
+            return value is { Length: > 2 } ? value[1..^1].Trim() : null;
+        }
+
+        return typeDeclaration.IsConvertedGoTypeDeclaration() ? typeDeclaration.GetDefinitionComment() : null;
     }
 
     /// <summary>

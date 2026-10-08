@@ -661,7 +661,7 @@ internal class InheritedTypeTemplate : TemplateBase
 
     public override string TemplateBody =>
         $$"""
-            [{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
+            {{GoTypeAttributePrefix}}[{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
             {{Scope}} partial {{ObjectKind}} {{ObjectName}}{{ImplementedInterface}}{{ValueCloneInterface}}
             {
                 // Value of the {{ObjectKind}} '{{ObjectName}}'
