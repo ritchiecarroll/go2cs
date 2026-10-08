@@ -32,7 +32,7 @@ public class MemberRecordGeneratorTests
         public sealed class GoTypeAttribute : System.Attribute { public GoTypeAttribute() { } public GoTypeAttribute(string type) { } }
         public sealed class GoTagAttribute(string tag) : System.Attribute { }
         public sealed class GoEmbeddedAttribute : System.Attribute { }
-        public enum GoMemberFact : byte { Embedded = 1, Tag = 2, Dims = 3 }
+        public enum GoMemberFact : byte { Embedded = 1, Tag = 2, Dims = 3, Descriptor = 4, KeyDims = 5 }
         [System.AttributeUsage(System.AttributeTargets.Struct | System.AttributeTargets.Class, AllowMultiple = true)]
         public sealed class GoMemberRecordAttribute : System.Attribute
         {
@@ -255,6 +255,10 @@ public class MemberRecordGeneratorTests
 
         CollectionAssert.AreEqual(new[] { "m global::go.GoMemberFact.Dims 3", "p global::go.GoMemberFact.Dims 3", "q global::go.GoMemberFact.Dims 6", "s global::go.GoMemberFact.Dims 5" },
             Recorded(generated, "GoMemberRecord").Where(record => record.Contains(".Dims ")).ToArray());
+
+        // A map key's dims comment, before the key type argument, through any pointers (section 11).
+        CollectionAssert.AreEqual(new[] { "m global::go.GoMemberFact.KeyDims 2", "pm global::go.GoMemberFact.KeyDims 3" },
+            Recorded(generated, "GoMemberRecord").Where(record => record.Contains(".KeyDims ")).ToArray());
 
         CollectionAssert.AreEqual(new[] { "2 3", "4" }, Recorded(generated, "GoArrayDims"));
         StringAssert.Contains(generated.Single(source => source.Contains("GoArrayDims(2, 3)")), "partial struct nn\r\n");

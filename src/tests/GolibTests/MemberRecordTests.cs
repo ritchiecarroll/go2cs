@@ -81,6 +81,20 @@ public class MemberRecordTests
     }
 
     [TestMethod]
+    public void TheRecordGivesAMapFieldsKeyItsDims()
+    {
+        // Section 11: the converter's key dims comment (`map</*[2]*/ array<@string>, nint>`) is recorded as
+        // [GoMemberRecord(member, KeyDims, dims)]; a hand-written field keeps [GoMapKeyDims].
+        CollectionAssert.AreEqual(new nint[] { 2 }, GoReflect.FieldMapKeyDims(typeof(memberrecord_package.KeyDimsRecorded).GetField("m")!));
+        Assert.IsNull(GoReflect.FieldMapKeyDims(typeof(memberrecord_package.KeyDimsRecorded).GetField("plain")!), "an unrecorded map field has none");
+        CollectionAssert.AreEqual(new nint[] { 4 }, GoReflect.FieldMapKeyDims(typeof(memberrecord_package.KeyDimsStamped).GetField("m")!));
+
+        InvalidOperationException refusal = Assert.ThrowsException<InvalidOperationException>(() => GoReflect.GoFields(typeof(memberrecord_package.KeyDimsMisrecorded)));
+        StringAssert.Contains(refusal.Message, "'nowhere'");
+        StringAssert.Contains(refusal.Message, "map key dims");
+    }
+
+    [TestMethod]
     public void ADimsRecordNamingAFieldTheTypeDoesNotDeclareIsRefusedByName()
     {
         InvalidOperationException refusal = Assert.ThrowsException<InvalidOperationException>(() => GoReflect.GoFields(typeof(memberrecord_package.DimsMisrecorded)));
@@ -283,6 +297,24 @@ public static class memberrecord_package
     public struct Misrecorded
     {
         public nint present;
+    }
+
+    [GoMemberRecord("m", GoMemberFact.KeyDims, 2)]
+    public struct KeyDimsRecorded
+    {
+        public map<array<@string>, nint> m;
+        public map<array<@string>, nint> plain;
+    }
+
+    public struct KeyDimsStamped
+    {
+        [GoMapKeyDims(4)] public map<array<byte>, nint> m;
+    }
+
+    [GoMemberRecord("nowhere", GoMemberFact.KeyDims, 2)]
+    public struct KeyDimsMisrecorded
+    {
+        public map<array<@string>, nint> m;
     }
 
     // The converter's descriptor carrier for `type Token any`: uninhabited, carrying the Go name.

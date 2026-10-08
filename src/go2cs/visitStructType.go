@@ -426,15 +426,10 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 		// The array dims this field's type reaches through a hop no zero instance can measure — a
 		// POINTER's pointee, a MAP's key or element (see fieldDimsCargo.go). The element dims ride a
-		// comment directly before the field's type on every line that declares it; a map key's are still
-		// an attribute line (not in this step; see emitFieldDims), which covers the whole group since every
-		// name in it shares field.Type.
-		keyDimsAttribute, fieldDimsComment := emitFieldDims(v.getType(field.Type, false))
-
-		if keyDimsAttribute != "" {
-			v.writeString(target, "%s", keyDimsAttribute)
-			target.WriteString(v.newline)
-		}
+		// comment directly before the field's type on every line that declares it; a map key's ride a
+		// comment directly before the map's key type argument, written into the type below
+		// (withMapKeyDims).
+		keyDimsComment, fieldDimsComment := emitFieldDims(v.getType(field.Type, false))
 
 		// The DESCRIPTOR CARRIER for a field whose Go type is a defined-over-interface type the
 		// emission erased to a `using` alias: the field's C# type is `object` (or the target
@@ -584,6 +579,20 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 		displayLenDeviation := token.Pos(len(csDisplayTypeName) - len(goDisplayTypeName))
 		typeLenDeviation := token.Pos(len(csFullTypeName) - len(goFullTypeName))
+
+		// The map KEY dims go inside the type, after the deviations above are taken, so a Go comment
+		// carried after the field is placed as it was before, as the element dims comment leaves it. A
+		// type that spells no map (an alias's name) keeps the [GoMapKeyDims] attribute line, which
+		// covers the whole group since every name in it shares field.Type.
+		if keyDimsComment != "" {
+			if keyed, ok := withMapKeyDims(csDisplayTypeName, keyDimsComment); ok {
+				csDisplayTypeName = keyed
+			} else {
+				_, keyDims := fieldCargoDims(fieldType)
+				v.writeString(target, "[GoMapKeyDims(%s)]", renderDimsList(keyDims))
+				target.WriteString(v.newline)
+			}
+		}
 
 		// The Go ZERO of a field whose managed default is not already it: a fixed-size array's
 		// length and a directional channel's direction are both parts of the Go TYPE that the

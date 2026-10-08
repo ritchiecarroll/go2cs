@@ -57,6 +57,15 @@ public static partial class GoReflect
 
                         break;
 
+                    case GoMemberFact.KeyDims:
+                        if (declaring.GetField(record.Member, DeclaredFields) is null)
+                            throw new InvalidOperationException($"go2cs: [GoMemberRecord] on {declaring.FullName} records map key dims for '{record.Member}', but {declaring.Name} declares no field of that name");
+
+                        if (record.Dims is not { Length: > 0 })
+                            throw new InvalidOperationException($"go2cs: [GoMemberRecord] on {declaring.FullName} records map key dims for '{record.Member}' with no dims");
+
+                        break;
+
                     case GoMemberFact.Descriptor:
                         if (declaring.GetField(record.Member, DeclaredFields) is null)
                             throw new InvalidOperationException($"go2cs: [GoMemberRecord] on {declaring.FullName} records a descriptor carrier for '{record.Member}', but {declaring.Name} declares no field of that name");
@@ -122,6 +131,24 @@ public static partial class GoReflect
         foreach (GoMemberRecordAttribute record in MemberRecords(declaring))
         {
             if (record.Fact == GoMemberFact.Dims && record.Member == field.Name)
+                return record.Dims;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// The Go array dims of <paramref name="field"/>'s map KEY, which the converter's key dims comment states and
+    /// go2cs-gen records on its declaring type, or null when there is no such record.
+    /// </summary>
+    internal static long[]? RecordedKeyDims(FieldInfo field)
+    {
+        if (field.DeclaringType is not { } declaring)
+            return null;
+
+        foreach (GoMemberRecordAttribute record in MemberRecords(declaring))
+        {
+            if (record.Fact == GoMemberFact.KeyDims && record.Member == field.Name)
                 return record.Dims;
         }
 

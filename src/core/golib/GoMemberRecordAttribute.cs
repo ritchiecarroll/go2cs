@@ -33,7 +33,13 @@ public enum GoMemberFact : byte
     /// alias, and <see cref="GoMemberRecordAttribute.Carrier"/> is its DESCRIPTOR CARRIER: what
     /// <see cref="GoDescriptorTypeAttribute"/>'s <c>Self</c> says on a field.
     /// </summary>
-    Descriptor = 4
+    Descriptor = 4,
+
+    /// <summary>
+    /// The named map field's KEY carries Go array dims in <see cref="GoMemberRecordAttribute.Dims"/>: what
+    /// <see cref="GoMapKeyDimsAttribute"/> says on a field (the dims <c>reflect.Type.Key()</c> hands down).
+    /// </summary>
+    KeyDims = 5
 }
 
 /// <summary>
@@ -96,7 +102,7 @@ public sealed class GoMemberRecordAttribute : Attribute
     /// <summary>The fact's value (a <see cref="GoMemberFact.Tag"/>'s tag), or null for a fact that has none.</summary>
     public string? Value { get; }
 
-    /// <summary>A <see cref="GoMemberFact.Dims"/> fact's dims, outermost first, or null for any other fact.</summary>
+    /// <summary>A <see cref="GoMemberFact.Dims"/> or <see cref="GoMemberFact.KeyDims"/> fact's dims, outermost first, or null for any other fact.</summary>
     public long[]? Dims { get; }
 
     /// <summary>A <see cref="GoMemberFact.Descriptor"/> fact's carrier interface, or null for any other fact.</summary>

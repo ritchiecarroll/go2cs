@@ -66,8 +66,8 @@ partial class main_package {
 
 [GoType] partial struct holder {
     internal /*[3]*/ ж<array<nint>> p;
-    [GoMapKeyDims(2)]
-    internal /*[3]*/ map<array<@string>, array<nint>> m;
+    internal /*[3]*/ map</*[2]*/ array<@string>, array<nint>> m;
+    internal ж<map</*[3]*/ array<byte>, nint>> pm;
     internal /*[5]*/ slice<ж<array<byte>>> s;
     internal nint n; /* [9]*/
 /* [7]*/

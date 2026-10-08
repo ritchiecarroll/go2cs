@@ -237,6 +237,24 @@ public static class MemberMarkers
     /// <summary>The dims comment before <paramref name="field"/>'s type.</summary>
     public static long[]? DimsOf(FieldDeclarationSyntax field) => DimsBefore(field.Declaration.Type.GetFirstToken());
 
+    /// <summary>
+    /// The map KEY dims comment of <paramref name="field"/>: the dims comment directly before the key type argument of
+    /// the field's map type, reached through any pointers (<c>ж&lt;map&lt;/*[2]*/ array&lt;@string&gt;, nint&gt;&gt;</c>), or
+    /// null when there is none. That is the one position the converter writes it in (docs/PLAN-marker-comment-parity.md,
+    /// section 11).
+    /// </summary>
+    public static long[]? KeyDimsOf(FieldDeclarationSyntax field)
+    {
+        TypeSyntax type = field.Declaration.Type;
+
+        while (type is GenericNameSyntax { TypeArgumentList.Arguments.Count: 1 } pointer && pointer.Identifier.ValueText == "ж")
+            type = pointer.TypeArgumentList.Arguments[0];
+
+        return type is GenericNameSyntax { TypeArgumentList.Arguments.Count: 2 } map && map.Identifier.ValueText == "map"
+            ? DimsBefore(map.TypeArgumentList.Arguments[0].GetFirstToken())
+            : null;
+    }
+
     /// <summary>The dims comment before a type declaration's first modifier (or its keyword).</summary>
     public static long[]? DimsOf(BaseTypeDeclarationSyntax declaration) =>
         DimsBefore(declaration.Modifiers.Count > 0 ? declaration.Modifiers[0] : declaration.GetFirstToken());
@@ -288,7 +306,7 @@ public sealed class MemberMarkerFinder : ISyntaxReceiver
     {
         switch (syntaxNode)
         {
-            case FieldDeclarationSyntax field when MemberMarkers.HasEmbed(field) || MemberMarkers.TagOf(field) is not null || MemberMarkers.DimsOf(field) is not null:
+            case FieldDeclarationSyntax field when MemberMarkers.HasEmbed(field) || MemberMarkers.TagOf(field) is not null || MemberMarkers.DimsOf(field) is not null || MemberMarkers.KeyDimsOf(field) is not null:
             case PropertyDeclarationSyntax property when MemberMarkers.TagOf(property) is not null:
             case MethodDeclarationSyntax method when method.ParameterList.Parameters.Any(parameter => MemberMarkers.DimsOf(parameter) is not null):
             case StructDeclarationSyntax or ClassDeclarationSyntax when MemberMarkers.DimsOf((BaseTypeDeclarationSyntax)syntaxNode) is not null:
@@ -373,6 +391,9 @@ public class MemberRecordGenerator : ISourceGenerator
 
                         if (MemberMarkers.DimsOf(field) is { } fieldDims)
                             record(field, symbol, "Dims", MemberMarkers.DimsArguments(fieldDims));
+
+                        if (MemberMarkers.KeyDimsOf(field) is { } keyDims)
+                            record(field, symbol, "KeyDims", MemberMarkers.DimsArguments(keyDims));
                     }
 
                     break;

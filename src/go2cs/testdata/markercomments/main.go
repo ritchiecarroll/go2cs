@@ -55,6 +55,7 @@ type P *[4]byte
 type holder struct {
 	p        *[3]int
 	m        map[[2]string][3]int
+	pm       *map[[3]byte]int
 	s        []*[5]byte
 	n        int /*[9]*/
 	/*[7]*/ q *[6]int

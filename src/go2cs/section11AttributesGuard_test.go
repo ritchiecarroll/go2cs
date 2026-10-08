@@ -26,6 +26,7 @@ var section11Attributes = []struct {
 }{
 	{"[GoDescriptorType(", "row 5: the descriptor carrier is recorded on the type's accessibility declaration"},
 	{"[GoLocalName(", "row 1: a lifted type's Go name, and a descriptor carrier whole, ride the accessibility record"},
+	{"[GoMapKeyDims(", "row 4: a map key's dims are a comment before the key type argument"},
 }
 
 // TestSection11AttributesLeftConvertedCode reads the COMMITTED corpus and the behavioral suite and holds the

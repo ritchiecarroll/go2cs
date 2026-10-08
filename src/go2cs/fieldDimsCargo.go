@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"go/types"
 	"strings"
+	"unicode/utf8"
 )
 
 // A Go array's LENGTH is part of its type and the managed emission cannot hold it -- `[2]string`
@@ -143,22 +144,45 @@ func elementArrayDims(elem types.Type) []int64 {
 
 // emitFieldDims renders the descriptor cargo a struct field declaration carries, or "" for each part the
 // field's type does not reach: the element dims as the dims comment written directly before the field's
-// type (`internal /*[3]*/ ж<array<nint>> p;`, dimsComment; go2cs-gen records it on the struct), and the map
-// KEY dims as the `[GoMapKeyDims(2)]` attribute line. That attribute is not in this step: face lift D moves
-// [GoArrayDims] only, and [GoMapKeyDims] is a MOVES row of docs/PLAN-marker-comment-parity.md section 11 that
-// rides D's mechanism in its own later step.
-func emitFieldDims(t types.Type) (keyAttribute, elemComment string) {
+// type (`internal /*[3]*/ ж<array<nint>> p;`, dimsComment), and the map KEY dims as the dims comment written
+// directly before the map's KEY type argument (`internal map</*[2]*/ array<@string>, nint> m;`,
+// withMapKeyDims). go2cs-gen records both on the struct (docs/PLAN-marker-comment-parity.md, 5.4 and
+// section 11).
+func emitFieldDims(t types.Type) (keyComment, elemComment string) {
 	elemDims, keyDims := fieldCargoDims(t)
 
 	if len(keyDims) > 0 {
-		keyAttribute = fmt.Sprintf("[GoMapKeyDims(%s)]", renderDimsList(keyDims))
+		keyComment = dimsComment(keyDims)
 	}
 
 	if len(elemDims) > 0 {
 		elemComment = dimsComment(elemDims)
 	}
 
-	return keyAttribute, elemComment
+	return keyComment, elemComment
+}
+
+// withMapKeyDims writes keyComment directly before the KEY type argument of the first `map<` in a field's C# type
+// (`ж<map</*[2]*/ array<@string>, nint>>`), the one position go2cs-gen reads it from. ok is false when the type
+// spells no map, which an alias's name would not; the caller keeps the [GoMapKeyDims] attribute then.
+func withMapKeyDims(typeName string, keyComment string) (string, bool) {
+	for start := 0; start < len(typeName); {
+		index := strings.Index(typeName[start:], "map<")
+
+		if index < 0 {
+			break
+		}
+
+		index += start
+
+		if previous, _ := utf8.DecodeLastRuneInString(typeName[:index]); index == 0 || !isIdentifierRune(previous) {
+			return typeName[:index+len("map<")] + keyComment + typeName[index+len("map<"):], true
+		}
+
+		start = index + len("map<")
+	}
+
+	return typeName, false
 }
 
 // renderDimsList renders array dimensions as C# attribute arguments, outermost first.

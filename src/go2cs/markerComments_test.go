@@ -120,12 +120,13 @@ func TestGoCommentsAreNeverMarkers(t *testing.T) {
 	// Array dims (5.4): the dims comment directly before the type on a declaration a go2cs-gen record can
 	// key (a func or method parameter, a generic one's included (D2), a field, a named array or
 	// pointer-to-array type), and the attribute where none can (a lambda, a local function). A map key's
-	// dims are still an attribute, not in this step.
+	// dims are the dims comment directly before the key type argument, through any pointers (section 11).
 	for _, want := range []string{
 		"[GoType(\"[2]array<nint>\")] /*[2][3]*/ partial struct nn;",
 		"[GoType(\"ж<array<byte>>\")] /*[4]*/ partial class P;",
 		"internal /*[3]*/ ж<array<nint>> p;",
-		"[GoMapKeyDims(2)]\n    internal /*[3]*/ map<array<@string>, array<nint>> m;",
+		"internal /*[3]*/ map</*[2]*/ array<@string>, array<nint>> m;",
+		"internal ж<map</*[3]*/ array<byte>, nint>> pm;",
 		"internal /*[5]*/ slice<ж<array<byte>>> s;",
 		"internal static nint hash(/*[32]*/ array<byte> b) {",
 		", /*[4][8]*/ array<array<byte>> grid) {",
@@ -138,6 +139,10 @@ func TestGoCommentsAreNeverMarkers(t *testing.T) {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("want %q in:\n%s", want, mainCs)
 		}
+	}
+
+	if strings.Contains(mainCs, "GoMapKeyDims") {
+		t.Errorf("converted code still carries [GoMapKeyDims]:\n%s", mainCs)
 	}
 
 	if got := strings.Count(mainCs, "GoArrayDims("); got != 2 {

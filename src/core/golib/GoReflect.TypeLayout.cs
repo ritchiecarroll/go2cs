@@ -1123,15 +1123,17 @@ public static partial class GoReflect
     }
 
     /// <summary>
-    /// The array dims of a map-typed STRUCT FIELD's KEY, from the converter's
-    /// <c>[GoMapKeyDims]</c> stamp — what <c>reflect.Type.Key()</c> hands down — or null when the
+    /// The array dims of a map-typed STRUCT FIELD's KEY — what <c>reflect.Type.Key()</c> hands down —
+    /// from a hand-written <c>[GoMapKeyDims]</c> stamp or the converter's key dims comment, which
+    /// go2cs-gen records on the declaring type (<see cref="GoMemberFact.KeyDims"/>), or null when the
     /// field carries none.
     /// </summary>
     public static nint[]? FieldMapKeyDims(FieldInfo field)
     {
-        return field.GetCustomAttributes(typeof(GoMapKeyDimsAttribute), false) is [GoMapKeyDimsAttribute { Dims.Length: > 0 } stamped]
-            ? toNintDims(stamped.Dims)
-            : null;
+        if (field.GetCustomAttributes(typeof(GoMapKeyDimsAttribute), false) is [GoMapKeyDimsAttribute { Dims.Length: > 0 } stamped])
+            return toNintDims(stamped.Dims);
+
+        return RecordedKeyDims(field) is { } recorded ? toNintDims(recorded) : null;
     }
 
     private static nint[] toNintDims(int[] dims)
