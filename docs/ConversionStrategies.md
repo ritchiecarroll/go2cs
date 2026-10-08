@@ -1349,7 +1349,7 @@ using testing = testing_package;
 
 partial class path_test_package {
 …
-partial struct ExtTest {
+[GoType] partial struct ExtTest {
     internal @string path, ext;
 }
 
@@ -2311,7 +2311,7 @@ n := copy(p, s.data[s.pos:])
 ```
 <!-- source: src/tests/Behavioral/AdapterNameInterfaceCollision/main.cs.target:23 -->
 ```csharp
-nint n = copy(p, s.data[(int)(s.pos)..]);
+nint n = copy(p, s.data.slice(s.pos));
 ```
 
 Slicing itself is explained in [Slices and Arrays](#slices-and-arrays).
@@ -2530,11 +2530,11 @@ const limit = 128 << 10 // untyped
 …
 func clampU(n uintptr) uintptr { return min(n, limit) }
 ```
-<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:7-13 -->
+<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:8-14 -->
 ```csharp
 internal static UntypedInt limit => /* 128 << 10 */ 131072;
 …
-internal static uintptr clampU(uintptr n) {
+internal static partial uintptr clampU(uintptr n) {
     return min(n, (uintptr)(limit));
 }
 ```
@@ -3726,13 +3726,13 @@ func plainGlobalShadow() int {
 	return x + plainCounter // 200 + 5 = 205
 }
 ```
-<!-- source: src/tests/Behavioral/GlobalShadowedByLocal/main.cs.target:5-124 -->
+<!-- source: src/tests/Behavioral/GlobalShadowedByLocal/main.cs.target:6-125 -->
 ```csharp
 partial class main_package {
 …
 internal static nint plainCounter = 100;
 
-internal static nint plainGlobalShadow() {
+internal static partial nint plainGlobalShadow() {
     nint x = main_package.plainCounter * 2;
     nint plainCounterΔ1 = 5;
     return x + plainCounterΔ1;
@@ -5256,7 +5256,7 @@ func (s *Stack[T]) Pop() (T, bool) {
 	return element, true
 }
 ```
-<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:7 -->
+<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:7-30 -->
 ```csharp
 partial struct Stack<T>
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
@@ -5273,13 +5273,13 @@ public static void Push<T>(this ref Stack<T> s, T element)
 public static (T, bool) Pop<T>(this ref Stack<T> s)
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
-    T zero = default!;
+    T zero = GoZero<T>();
     if (len(s.elements) == 0) {
         return (zero, false);
     }
     nint index = len(s.elements) - 1;
     var element = s.elements[index];
-    s.elements = s.elements[..(int)(index)];
+    s.elements = s.elements.slice(0, index);
     return (element, true);
 }
 ```
@@ -5398,10 +5398,10 @@ func describe[T any](label string) string {
 …
 	fmt.Println(describe[fmt.Stringer]("stringer"))
 ```
-<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:50 -->
+<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:50-77 -->
 ```csharp
 internal static @string describe<T>(@string label) {
-    T zero = default!;
+    T zero = GoZero<T>();
     _ = zero;
     return label;
 }
@@ -7926,13 +7926,13 @@ func printSquare(n int) {
 	fmt.Println("Immediate n:", n)
 }
 ```
-<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:96-104 -->
+<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:97-105 -->
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object goThreadSquareˢ = (@string)"Go thread square:"u8;
 private static readonly object immediateNˢ = (@string)"Immediate n:"u8;
 
-internal static void printSquare(nint n) {
+internal static partial void printSquare(nint n) {
     goǃ((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), goThreadSquareˢ, n * n);
     n++;
     fmt.Println(immediateNˢ, n);
@@ -8036,14 +8036,14 @@ func main() {
 	…
 }
 ```
-<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:8-44 -->
+<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:9-45 -->
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 …
 private static readonly object goCountClosureˢ = (@string)"Go count (closure):"u8;
 private static readonly object countBeforeGoˢ = (@string)"Count before Go:"u8;
 …
-internal static void Main() {
+internal static partial void Main() {
     …
     nint count = 1;
     goǃ(() => {
@@ -8081,12 +8081,12 @@ func main() {
 	<-done
 }
 ```
-<!-- source: src/tests/Behavioral/GoroutinePanicExitCode/main.cs.target:7-17 -->
+<!-- source: src/tests/Behavioral/GoroutinePanicExitCode/main.cs.target:8-18 -->
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object beforeGoroutinePanicˢ = (@string)"before goroutine panic"u8;
 
-internal static void Main() {
+internal static partial void Main() {
     fmt.Println(beforeGoroutinePanicˢ);
     var done = new channel<EmptyStruct>(0);
     goǃ(() => {
@@ -8265,11 +8265,11 @@ func filter(src <-chan int, dst chan<- int, prime int) {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:70-76 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:71-77 -->
 ```csharp
 internal static void filter(/*<-*/channel<nint> src, channel/*<-*/<nint> dst, nint prime) {
     foreach (var i in src) {
-        if (i % prime != 0) {
+        if (rem(i, prime) != 0) {
             dst.ᐸꟷ(i);
         }
     }
@@ -9975,7 +9975,7 @@ func main() {
 	fmt.Println(base.n, base.sub.k) // 7 2
 }
 ```
-<!-- source: src/tests/Behavioral/IncDecPointerField/main.cs.target:7-28 -->
+<!-- source: src/tests/Behavioral/IncDecPointerField/main.cs.target:8-29 -->
 ```csharp
 partial struct inner {
     internal nint k;
@@ -9986,7 +9986,7 @@ partial struct counter {
     internal inner sub;
 }
 
-internal static ж<counter> get(ж<counter> Ꮡc) {
+internal static partial ж<counter> get(ж<counter> Ꮡc) {
     return Ꮡc;
 }
 
@@ -10270,7 +10270,7 @@ func bump(c *coord) {
 	bump(&xy)
 	fmt.Println(xy.X, xy.Y) // 3 4
 ```
-<!-- source: src/tests/Behavioral/NamedNumericPointerReinterpret/main.cs.target:53-92 -->
+<!-- source: src/tests/Behavioral/NamedNumericPointerReinterpret/main.cs.target:54-93 -->
 ```csharp
 partial struct coord {
     public nint X, Y;
@@ -10278,7 +10278,7 @@ partial struct coord {
 
 partial struct point /*coord*/;
 
-internal static void bump(ж<coord> Ꮡc) {
+internal static partial void bump(ж<coord> Ꮡc) {
     var p = Ꮡc.Reinterpret<coord, point>();
     (p.Value.X, p.Value.Y) = (3, 4);
 }
@@ -10413,7 +10413,7 @@ func main() {
 	fmt.Println(base.n, base.sub.k) // 7 2
 }
 ```
-<!-- source: src/tests/Behavioral/IncDecPointerField/main.cs.target:7-28 -->
+<!-- source: src/tests/Behavioral/IncDecPointerField/main.cs.target:8-29 -->
 ```csharp
 partial struct inner {
     internal nint k;
@@ -10424,7 +10424,7 @@ partial struct counter {
     internal inner sub;
 }
 
-internal static ж<counter> get(ж<counter> Ꮡc) {
+internal static partial ж<counter> get(ж<counter> Ꮡc) {
     return Ꮡc;
 }
 
@@ -11483,11 +11483,11 @@ partial class atomic_package {
 // The zero value for a Value returns nil from [Value.Load].
 //
 // A Value must not be copied after first use.
-partial struct Value {
+[GoType] partial struct Value {
     internal any v;
 }
 …
-public static any /*val*/ Load(this ref Value v) {
+[GoRecv] public static any /*val*/ Load(this ref Value v) {
     return Volatile.Read(ref v.v);
 }
 ```
