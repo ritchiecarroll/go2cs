@@ -55,10 +55,16 @@ func dimsComment(dims []int64) string {
 	return comment.String()
 }
 
-// The bodies (the text after `/*`) of the comments go2cs-gen reads as member facts: the embed marker, the
-// two openings of a tag comment and the opening of a dims comment. A Go block comment that opens with one
-// of them is carried with a space after its `/*` (carriedComment).
-var memberMarkerOpenings = []string{strings.TrimPrefix(embedMarker, "/*"), "`", `"`, "["}
+// linknameMarker marks a linkname or assembly-trampoline FORWARDER, the first token of its declaration
+// line: `/*linkname*/ internal static partial slice<@string> runtime_args() {`. go2cs-gen's
+// NoInliningPartialGenerator reads it on a partial method with a body and writes [StackTraceHidden] on the
+// declaring part instead of the no-inline mark (docs/PLAN-marker-comment-parity.md, section 11).
+const linknameMarker = "/*linkname*/"
+
+// The bodies (the text after `/*`) of the comments go2cs-gen reads as facts: the embed marker, the two
+// openings of a tag comment, the opening of a dims comment and the linkname marker. A Go block comment
+// that opens with one of them is carried with a space after its `/*` (carriedComment).
+var memberMarkerOpenings = []string{strings.TrimPrefix(embedMarker, "/*"), "`", `"`, "[", "linkname"}
 
 // carriedComment is the text converted code carries for a comment from the Go source. The member facts
 // above are block comments the converter writes itself, and go2cs-gen reads one only as spelled here, so

@@ -1379,7 +1379,24 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	runtimeBootstrapInit := isModuleInitializer && v.pkg.Path() == "runtime"
 	noInliningPartial := false
 
+	// A linkname or assembly-trampoline FORWARDER is not a Go frame: Go binds the name to the target's
+	// symbol (or JMPs to it), so the puller never appears on a stack. It is emitted as a partial method's
+	// IMPLEMENTING part marked `/*linkname*/`, and go2cs-gen's NoInliningPartialGenerator writes the
+	// declaring part carrying [StackTraceHidden] instead of the no-inline mark, so runtime.Callers
+	// (managed_impl.cs, isGoSourceFrame) and Exception.StackTrace skip it (docs/PLAN-marker-comment-parity.md,
+	// section 11, owner ruling (b') 2026-10-08). The marker, never Go's own //go:linkname line, is the signal:
+	// that line also stands above BODIED functions that are no-inline carriers (runtime's mutexevent).
+	linknameForwarder := hasLinknameForward && linknamePanic == ""
+
 	if funcDecl.Body == nil && !hasLinknameForward {
+		v.replaceMarker(functionPartialMarker, " partial")
+	} else if linknameForwarder {
+		// One generated declaring part carries one of the two marks, so a forwarder that also needs the
+		// no-inline mark has no spelling; none does (census 2026-10-08, 0 of 55).
+		if fnObj := v.info.ObjectOf(funcDecl.Name); fnObj != nil && v.needsNoInlining[fnObj] {
+			panic(fmt.Sprintf("@visitFuncDecl - the linkname forwarder %s also needs the no-inline mark, which its generated declaring part cannot carry beside [StackTraceHidden] (docs/PLAN-marker-comment-parity.md, section 11)", funcDecl.Name.Name))
+		}
+
 		v.replaceMarker(functionPartialMarker, " partial")
 	} else if fnObj := v.info.ObjectOf(funcDecl.Name); fnObj != nil && v.needsNoInlining[fnObj] && !isModuleInitializer {
 		noInliningPartial = true
@@ -1411,14 +1428,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		v.replaceMarker(functionParametersMarker, parameterSignature)
 	}
 
-	// A linkname or assembly-trampoline forwarder is not a Go frame: Go binds the name to the
-	// target's symbol (or JMPs to it), so the puller never appears on a stack. Marked
-	// [StackTraceHidden], it is skipped by runtime.Callers (managed_impl.cs, isGoSourceFrame) and
-	// omitted from Exception.StackTrace. Fully qualified so it needs no using.
+	// The forwarder's marker, the first token of its declaration line (see linknameForwarder above).
 	forwarderPrefix := ""
 
-	if hasLinknameForward && linknamePanic == "" {
-		forwarderPrefix = "[global::System.Diagnostics.StackTraceHidden] "
+	if linknameForwarder {
+		forwarderPrefix = linknameMarker + " "
 	}
 
 	if isModuleInitializer {
