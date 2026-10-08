@@ -102,9 +102,7 @@ public class NoUncountedBackingAllocationsTests
         ("runtime/TypeExtensions.ExtensionMethodRegistry.cs|return methods.ToArray();", "runtime metadata: the extension-method registry and delegate signature types"),
         ("runtime/TypeExtensions.ExtensionMethodRegistry.cs|scanned = extensionMethods.ToArray();", "runtime metadata: the extension-method registry and delegate signature types"),
         ("runtime/WaitReason.cs|WaitReason[] parked = new WaitReason[all.Length - 1];", "runtime metadata: the static table of wait reasons"),
-        ("ж.HeaderSliceBox.cs|.ToArray();", "reflection metadata: the ordered fields of a slice-header struct type"),
         ("ж.PointerExtensions.cs|Type[] fieldTypes = new Type[fields.Length];", "reflection metadata: the field types of a reinterpreted struct"),
-        ("ж.SliceHeaderBox.cs|.ToArray();", "reflection metadata: the ordered fields of a slice-header struct type"),
     ];
 
     private static readonly Regex[] s_rawForms =

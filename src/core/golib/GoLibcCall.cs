@@ -242,8 +242,8 @@ public static unsafe class GoLibcCall
         if (!slot.TryLoadThrough(out object? value) || value is null)
             throw new InvalidOperationException($"go2cs: libcCall({symbol}): the argument box is nil");
 
+        // Declaration order is GoFieldMetadata's order (no metadata token under Native AOT; see there).
         FieldInfo[] fields = GoFieldMetadata.InstanceFields(argsType);
-        Array.Sort(fields, static (x, y) => x.MetadataToken.CompareTo(y.MetadataToken));
 
         Span<nuint> args = stackalloc nuint[MaxArgs];
         int argCount = 0;
@@ -350,7 +350,8 @@ public static unsafe class GoLibcCall
             if (fields.Length == 0)
                 throw new InvalidOperationException($"go2cs: libcCall({symbol}): the result block {blockType.Name} has no first word to store into");
 
-            Array.Sort(fields, static (x, y) => x.MetadataToken.CompareTo(y.MetadataToken));
+            // The first field in declaration order: GetFields' order (no metadata token under Native AOT; see
+            // GoFieldMetadata).
             FieldInfo first = fields[0];
 
             first.SetValue(value, RegisterAs(r, first.FieldType) ?? throw new InvalidOperationException(

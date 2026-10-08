@@ -3490,17 +3490,34 @@ partial class runtime_package
         }
     }
 
-    // A captured pc's IDENTITY: the module, the method, the IL offset the CLR reported for the frame, and
-    // whether the frame is a return address. A struct, so interning a frame formats no string -- the key
-    // was once "{module GUID}:{token}:{offset}", built per frame per call. It deliberately holds the
-    // REPORTED offset, not the resolved call site: resolving needs the PDB, and capture must not read it.
+    // A captured pc's IDENTITY: the method, the offset the runtime reported for the frame, whether the
+    // frame is a return address, and whether it is suspended at the reported call itself (see
+    // internCallerFrame). A struct, so interning a frame formats no string -- the key was once
+    // "{module GUID}:{token}:{offset}", built per frame per call. It deliberately holds the REPORTED offset,
+    // not the resolved call site: resolving needs the PDB, and capture must not read it.
+    //
+    // THE METHOD IS ITS HANDLE, not its metadata token: Native AOT gives a member no token (reading one
+    // throws), and a converted program published with it died at its first runtime.Caller (measured
+    // 2026-10-06 on windows; GolibTests' CallSiteKeyTests). The handle names what the token named:
+    // StackFrame.GetMethod() reports a generic method's DEFINITION for every instantiation, a method of a
+    // generic type's included, so one handle per method definition as there was one token per definition
+    // in its module (measured under the JIT and under Native AOT). Under the JIT the key therefore selects
+    // the same frames as before.
+    //
+    // THE OFFSET is the IL offset. Native AOT has no IL and reports -1 for every frame, so there, and only
+    // there, it is the NATIVE offset (NativeOffset says which): per machine-code call site, so a source site
+    // the compiler unrolled is two pcs. No position is resolved from either under Native AOT (no IL offset to
+    // map; methodSourcePosition's token read fails inside its catch), so a frame there has its name and no
+    // file:line. Under the JIT a negative IL offset keeps today's key, by construction. suspendedAtReportedCall
+    // is handed the IL offset, never the native one, so under Native AOT its negative-offset guard returns
+    // before it reads a token or resolves IL.
     //
     // The caveat that follows, stated: two reported offsets that resolve to ONE call site are two pcs.
     // The CLR reports one offset per site for a given compilation of the method, so under the Release
     // TieredCompilation=0 default a site has one pc for the life of the process (pinned by GolibTests'
     // LazyCallersTests.ACallSiteHasOnePcAcrossCalls); only a tiering promotion, which recompiles the
     // method, can give the same site a second one.
-    private readonly record struct CallSiteKey(System.Reflection.Module Module, int MethodToken, int ILOffset, bool ReturnAddress, bool SuspendedAtReportedCall);
+    private readonly record struct CallSiteKey(RuntimeMethodHandle Method, int Offset, bool NativeOffset, bool ReturnAddress, bool SuspendedAtReportedCall);
 
     private static readonly object s_callerTableLock = new();
     private static readonly Dictionary<string, nuint> s_callerTokens = new();
@@ -4056,7 +4073,8 @@ partial class runtime_package
     {
         int ilOffset = frame.GetILOffset();
         bool atReportedCall = returnAddress && callee is not null && suspendedAtReportedCall(method, ilOffset, callee);
-        CallSiteKey key = new(method.Module, method.MetadataToken, ilOffset, returnAddress, atReportedCall);
+        bool nativeOffset = ilOffset < 0 && !System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported;
+        CallSiteKey key = new(method.MethodHandle, nativeOffset ? frame.GetNativeOffset() : ilOffset, nativeOffset, returnAddress, atReportedCall);
 
         lock (s_callerTableLock)
         {
