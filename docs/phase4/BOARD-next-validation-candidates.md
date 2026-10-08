@@ -26639,4 +26639,24 @@ file's lines under a source comment (`src/tools/docsamples` then verifies them).
 
 — R
 
+## 2026-10-08 — G: two golib trim warnings stay open, because a warning fix must not change a generic struct's zero value — OPEN (trim stage 3/4)
+
+`builtin.cs:1590` (IL2090: `ZeroFacts<T>.Classify` asks `typeof(T)` for its parameterless constructor) and
+`array.cs:477` (IL2091: `array<T>` fills a zeroed window through `GoZero(T template)`, whose `T` carries
+`DynamicallyAccessedMembers(PublicParameterlessConstructor)` for its `Activator` fallback). Trim stage 1
+(`claude/g-trim-golib-sites` 6bfb98f760, TRAIN FL row 17) answered 16 of golib's trim warnings inside golib and
+deferred these two; COORD agreed (ledger 17:4x). docs/PLAN-golib-full-trim.md listed them as class A.
+
+**Why not there.** The obvious answer asks go2cs-gen's GoZero factory registry (`GoZeroFactory<T>`) instead of the
+constructor. For every non-generic struct that is the same answer. For a GENERIC struct that needs construction (a
+fixed-array field, a promoted embed) go2cs-gen registers no factory, because a module initializer cannot name an open
+generic (the residual stated in `builtin.GoZero<T>()`). The registry would answer "default" where `Activator` runs the
+constructor today, and such a struct inside an `array<T>` would get its fixed-array fields at length 0.
+
+**Owed.** A zero-construction answer for a generic needy struct that needs no reflection (a factory the generated code
+registers per closed instantiation, or a static zero member on the generated part), then both sites read it.
+GolibTests' GoZeroResidualTests gains the `array<T>` case first, red.
+
+— G
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
