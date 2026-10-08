@@ -20,15 +20,15 @@ func describe() Stringer {
 }
 ```
 ```csharp
-[GoType] partial interface Stringer {
+partial interface Stringer {
     @string String();
 }
 
-[GoType] partial struct point {
+partial struct point {
     internal nint x, y;
 }
 
-[GoRecv] internal static @string String(this ref point p) {
+internal static @string String(this ref point p) {
     return fmt.Sprintf("(%d, %d)"u8, p.x, p.y);
 }
 
@@ -135,7 +135,7 @@ internal sealed class ΔSpeaker<ΔTTarget> : Speaker, IInterfaceAdapter
 }
 ```
 
-**Tier 2 — `ΔIᴛObj`, reflective, for a VALUE-typed dynamic value** (the forcing case: `os.dirFS` is `[GoType("@string")] partial struct dirFS`, a value type held in an `fs.FS`). It holds the value as `object` and forwards through `MethodInvoker`s resolved once per (dynamic type, interface) pair, so it needs **no generic instantiation at all**. That is not a stylistic choice: under Native AOT `ilc` roots exactly the instantiations visible in source, and a `MakeGenericType` driven by a run-time `GetType()` over a value type is never one of them, so this is the tier that is unconditionally available. It is emitted only when every member survives the `object` round-trip (a Go variadic tail lowers to `params Span<T>`, a ref-struct that cannot be boxed):
+**Tier 2 — `ΔIᴛObj`, reflective, for a VALUE-typed dynamic value** (the forcing case: `os.dirFS` is `partial struct dirFS /*@string*/`, a value type held in an `fs.FS`). It holds the value as `object` and forwards through `MethodInvoker`s resolved once per (dynamic type, interface) pair, so it needs **no generic instantiation at all**. That is not a stylistic choice: under Native AOT `ilc` roots exactly the instantiations visible in source, and a `MakeGenericType` driven by a run-time `GetType()` over a value type is never one of them, so this is the tier that is unconditionally available. It is emitted only when every member survives the `object` round-trip (a Go variadic tail lowers to `params Span<T>`, a ref-struct that cannot be boxed):
 
 **The forwarder dispatches on ARITY (2026-07-26).** `GoShellBinding.Invoke` used to build a fresh `object?[args.Length + 1]` on every forwarded call, purely to prepend the receiver — 32 B allocated and zeroed per call even for a Go method with no parameters at all, which is the common case (`Len`, `Error`, `String`, `Less`). The bound members are static extension methods, so `MethodInvoker`'s `obj` is always `null` and the receiver occupies the first *argument* slot; the BCL's fixed-arity overloads take up to four arguments, so Go arities **0–3** now forward with no array and arity 4+ keeps the `Span` path. Measured on `PerfIfaceShell` (one object-tier call per iteration, provisional): JIT **633.7 → 588.0 ms**, Native AOT **760.1 → 727.8 ms** — the AOT column matters more in principle, because the binder's belt degrades *both* shell tiers to this one there, so the cost is paid twice per iteration rather than once. The boxed *return* is not fixable this way: `MethodInvoker` returns `object?` and the shell unboxes, and removing that needs a non-reflective forwarder, which needs a generic instantiation — exactly what this tier exists to avoid. (Guarded by the `ShellForwardArity` behavioral test: one anonymous interface spanning arities 0–5 plus an int-returning and a mixed-parameter shape, every method folding its arguments into the printed result so a dropped, duplicated or reordered argument diverges from `go run` instead of passing silently. An instrumented run confirms all four fixed arms *and* the `Span` fallback are reached.)
 
@@ -277,7 +277,7 @@ satisfaction — Go lets a package's test files add methods to its production ty
 declaration syntax the evidence set was EMPTY, both members classified as markers, and the identical
 silent-stub failure recurred: marshal answered an empty buffer with nil error and the test reported
 "failed to unmarshal" with no diagnostic. The evidence now also covers the friend bridge's
-extensions by receiver simple name, in BOTH receiver forms — direct-`ж`, and `[GoRecv] ref` (which
+extensions by receiver simple name, in BOTH receiver forms — direct-`ж`, and `ref` (which
 forwards through its RecvGenerator `ж`-twin, the same routing `IsRefRecv` applies to a local
 declaration). Genuine markers still stub: a foreign struct with no bridge has no such extensions
 anywhere in the compilation. (Guarded by `GenTests.WhiteboxBridgeAdapterTests`, which runs the real
@@ -613,7 +613,7 @@ stops satisfying interfaces Go says it satisfies, at every site the compile-time
 typ.(interface{ Basic() *BasicType }).Basic()
 ```
 
-— which the converter lifts to a package-local `[GoType("dyn")] partial interface readType_type`. The
+— which the converter lifts to a package-local `partial interface readType_type /*dyn*/`. The
 concrete types (`*IntType`, `*UintType`, `*CharType`, `*UcharType`, `*FloatType`, …) satisfy it **only**
 through `func (b *BasicType) Basic() *BasicType` promoted from their exported `BasicType` value embed, and
 the value is held as a *different* named interface (`Type`) at the assertion site — so no compile-time
@@ -859,7 +859,7 @@ type options struct{ … }        // unexported
 type Option func(*options)       // exported -> public delegate
 ```
 ```csharp
-[GoType] public partial struct options { … }   // publicized to match the delegate
+public partial struct options { … }   // publicized to match the delegate
 public delegate void Option(ж<options> _);
 ```
 
@@ -877,10 +877,10 @@ var SupportedKDFs = map[uint16]func() *hkdfKDF{…}  // exported var -> public f
 ```
 
 emits `public static map<uint16, Func<ж<hkdfKDF>>> SupportedKDFs`, whose type embeds `hkdfKDF` through
-the func RESULT — but `[GoType] partial struct hkdfKDF` defaulted to `internal`, less accessible than
+the func RESULT — but `partial struct hkdfKDF` defaulted to `internal`, less accessible than
 the public field (CS0052). `collectUnexportedNamedTypes` now has a `*types.Signature` case that recurses
 into the signature's PARAMS and RESULTS through the same named-only walk (which handles a nested func
-result in turn), so `hkdfKDF` is publicized to `[GoType] public partial struct hkdfKDF` (and its exported
+result in turn), so `hkdfKDF` is publicized to `public partial struct hkdfKDF` (and its exported
 methods go public via the receiver-access cascade). Both sides of the signature are covered — a func
 PARAMETER exposes an unexported type just as a func RESULT does (`var Appliers = []func(*cfg)` →
 `public static slice<Action<ж<cfg>>> Appliers`, publicizing `cfg`). This routes through the named-only
@@ -1048,7 +1048,7 @@ testDeps, …) *M` is interned into `packagePublicizedTypes`, and `visitTypeSpec
 testDeps`, defaulting to C# `internal`, less accessible than the `public` member that references it
 (CS0051). `visitInterfaceType` now reads-and-clears `pendingTypeAccess` at entry (so the lifted/anonymous
 interfaces it visits recursively see an empty value) and folds the modifier into the post-attribute slot,
-emitting `[GoType] public partial interface testDeps`. Non-publicized interfaces are unchanged (no churn).
+emitting `public partial interface testDeps`. Non-publicized interfaces are unchanged (no churn).
 (Guarded by the `PublicizedInterfaceParam` behavioral test — an exported function taking an unexported
 interface whose method returns a built-in type, output-compared vs Go.) The **transitive** cascade also
 walks a publicized interface's method signatures: the `collectMethodSignatureUnexportedTypes` fixpoint step
@@ -1128,7 +1128,7 @@ emits real C# inheritance at the declaration and **skips re-declaring the covere
 (redeclaring would HIDE the base member — implementers would need both):
 
 ```csharp
-[GoType] partial interface File :
+partial interface File :
     io_package.ReadCloser
 {
     (FileInfo, error) Stat();
@@ -1401,7 +1401,7 @@ it is present — the marker resolves as one unit to the already-simple lifted n
 well-defined even when several files lift the same shape. Emitted form:
 ```csharp
 // batch.cs (declaring file):
-[GoType("dyn")] partial interface readBatch_r : /* io.Reader */ … { … }
+partial interface readBatch_r /*dyn*/ : /* io.Reader */ … { … }
 // generation.cs (cross-file cast site):
 (b, gen, var err) = readBatch(new bufio_ReaderжreadBatch_r(Ꮡr));
 // package_info.cs:
@@ -1430,7 +1430,7 @@ var _ interface{ Equal(x crypto.PublicKey) bool } = &ecdh.PublicKey{}
 internal static interface{Equal(x crypto.PublicKey) bool} _ᴛ1ʗ =
     new ecdhꓸPublicKeyжinterface{Equal(x crypto.PublicKey) bool}(Ꮡ(new ecdhꓸPublicKey(nil)));
 // after:
-[GoType("dyn")] partial interface _ᴛ1 { bool Equal(cryptoꓸPublicKey x); }
+partial interface _ᴛ1 /*dyn*/ { bool Equal(cryptoꓸPublicKey x); }
 internal static _ᴛ1 _ᴛ1ʗ = new ecdh.ΔPublicKeyж_ᴛ1(Ꮡ(new ecdhꓸPublicKey(nil)));
 ```
 
@@ -1499,7 +1499,7 @@ Emitted form:
 
 ```csharp
 // zvars.cs (declaring file, visited AFTER the reference):
-[GoType("dyn")] partial struct compareTestsᴛ1 { … }
+partial struct compareTestsᴛ1 /*dyn*/ { … }
 internal static slice<compareTestsᴛ1> compareTests = …;
 // main.cs (cross-file range + heap box):
 foreach (var (_, vᴛ1) in compareTests) {
@@ -1551,7 +1551,7 @@ with two deliberate exemptions:
 
 ```csharp
 // type.cs (production, pinned):        encoder_test.cs (internal variant, steps around):
-[GoType("dyn")] partial struct Δtype {  [GoType("dyn")] partial struct Δtypeᴛ7 {
+partial struct Δtype /*dyn*/ {  partial struct Δtypeᴛ7 /*dyn*/ {
     internal nint r7;                       internal nint A;
 }                                       }
 ```

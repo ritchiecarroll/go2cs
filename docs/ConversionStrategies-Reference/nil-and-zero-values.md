@@ -154,7 +154,7 @@ tReserved7 = bootstrapType("_reserved1", (*struct{ r7 int })(nil))
 ```
 ```csharp
 internal static typeId tBytes = bootstrapType("bytes"u8, ((ж<slice<byte>>)nil));
-    [GoType("dyn")] partial struct Δtype {
+    partial struct Δtype /*dyn*/ {
         internal nint r7;
     }
 internal static typeId tReserved7 = bootstrapType("_reserved1"u8, ((ж<Δtype>)nil));

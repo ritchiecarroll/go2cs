@@ -459,7 +459,7 @@ four `partial struct …;` declarations into the method body.)
 Two completions of the same rule, both demonstrated by `encoding/gob`'s test suite:
 
 * **The POINTER kind hoists too.** `type X *T` was the one forward-declaration kind still writing
-  its `[GoType("ж<…>")] partial class X;` straight into the body — gob's `codec_test.go`
+  its `partial class X /*ж<…>*/;` straight into the body — gob's `codec_test.go`
   `type Rec ***Rec` produced `CS1525 Invalid expression term 'partial'` and took the rest of the
   function with it. It now takes `liftLocalTypeDecl` like the other kinds, and the lift is taken
   **before** `convStarExpr` renders the pointer text so a self-referential declaration resolves its

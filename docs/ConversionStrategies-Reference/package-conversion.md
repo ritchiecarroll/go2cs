@@ -1028,7 +1028,7 @@ partial class image_internal_test_package {
     builtin.initPackage(typeof(image.color.palette_package));   // CS0426
 }
 
-[GoType] internal partial interface image : Image { … }         // ← occludes `image`
+internal partial interface image : Image { … }         // ← occludes `image`
 ```
 
 Go's own `image_test.go` declares a test-local `type image interface{…}`, and `package image` is free to:
@@ -1328,8 +1328,8 @@ the TARGET's package, so such a record can never satisfy a cast (`image|Alpha|�
 
 **The trust.** A record says the declaring assembly implements the pair; it does not say HOW.
 `ImplementGenerator` makes every named Go type a `partial struct T : Iface` that really does implement
-it — struct, slice (`[GoType("[]Color")] partial struct Palette`), map, channel, numeric
-(`[GoType("num:nint")] partial struct ΔSignal`) — with exactly one exception: a named FUNC type arrives
+it — struct, slice (`partial struct Palette /*[]Color*/`), map, channel, numeric
+(`partial struct ΔSignal /*num:nint*/`) — with exactly one exception: a named FUNC type arrives
 as a C# **delegate**, which cannot be a partial struct, so its `TypeKind.Delegate` arm emits an adapter
 CLASS in the declaring assembly instead. `valueRecordRealizesAsPartialStruct` gates on the target's Go
 underlying being a non-`*types.Signature`, at the use site where `go/types` can still see it. Without

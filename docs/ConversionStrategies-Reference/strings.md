@@ -11,7 +11,7 @@ Go's `string` becomes golib [`@string`](https://github.com/ritchiecarroll/go2cs/
 | a literal used as a value | `static readonly @string textˢ` | [hoisted literals](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use) |
 | `const name = "text"` inside a function | `static readonly @string nameᶜ` | [local string constants](#a-function-local-string-const-hoists-to-a-static-readonly-field-under-its-own-name) |
 | a literal with raw non-UTF-8 bytes | `((@string)(new byte[]{…}))` | [raw-byte literals](#a-string-literal-with-raw-byte-escapes-emits-a-byte-array-string) |
-| `type Token string` | `[GoType("@string")] partial struct Token` | [named string types](#named-string-types) |
+| `type Token string` | `partial struct Token /*@string*/` | [named string types](#named-string-types) |
 | `string(b)` read and discarded | `(sstring)b` | [conversion views](#a-non-escaping-stringbyte-local-emits-the-stack-string-sstring) |
 | a registered function's `string` parameter | an `sstring` member plus a generated `@string` member | [sstring twins](#an-sstring-twin-a-registered-function-gains-an-sstring-overload-that-calls-bind) |
 
@@ -187,7 +187,7 @@ const done Token = "done"
 next := done + "-next"
 ```
 ```csharp
-[GoType("@string")] partial struct Token;
+partial struct Token /*@string*/;
 internal static readonly Token done = "done"u8;
 public static byte First(this Token t) => t[0];
 Token next = done + "-next"u8;

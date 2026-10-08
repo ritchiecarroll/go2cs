@@ -117,7 +117,7 @@ guard instead of throwing at entry, e.g. `orZero[*int, int](nil)`). The NAMED co
 spellings — `[P PtrOf[T]]` and the embedded `[P interface{ PtrOf[T] }]`, where
 `type PtrOf[T any] interface{ *T }` — resolve to the identical singleton type set and erase
 identically. The constraint interface's own DECLARATION follows the existing constraint-interface
-convention (`[GoType] partial interface PtrOf<T> { /* Type constraints: *T */ }`): a pointer term is
+convention (`partial interface PtrOf<T> { /* Type constraints: *T */ }`): a pointer term is
 a type-set term, not an embeddable interface (previously it emitted an interface inheriting the
 struct `ж<T>` — CS0527), and a GENERIC constraint interface carries its own `<T>` list, so the
 arity-0 `<ΔT>` marker list and its generated operator machinery are both suppressed for it.
@@ -324,7 +324,7 @@ Four coordinated pieces make it convert **and dispatch**:
 
 1. **The constraint interface is emitted GENERIC.** A method-set interface whose own Go type
    parameter is used in its member signatures carries its `<T>` (and constraints) in C#, exactly like
-   a generic struct — `[GoType] partial interface nistPoint<T> { … T Add(T, T); (T, error) SetBytes(slice<byte> _); }`.
+   a generic struct — `partial interface nistPoint<T> { … T Add(T, T); (T, error) SetBytes(slice<byte> _); }`.
    Without it the declaration is arity-0 yet the constraint that references it spells the arity-1
    `where Point : nistPoint<Point>` (CS0308) and every bare `T` is undefined (CS0246). (Go's
    operator-only constraint interfaces are arity-0 *in Go*, so this is disjoint from the `<ΔT>`

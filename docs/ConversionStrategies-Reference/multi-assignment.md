@@ -19,7 +19,7 @@ func (h *myHeap) Swap(i, j int) { (*h)[i], (*h)[j] = (*h)[j], (*h)[i] }
 ```
 ```csharp
 // before: two sequential stores drop the temporary — (h)[i] and (h)[j] both end up as the old (h)[j]
-[GoRecv] internal static void Swap(this ref myHeap h, nint i, nint j) {
+internal static void Swap(this ref myHeap h, nint i, nint j) {
     ((h)[i], (h)[j]) = ((h)[j], (h)[i]);   // simultaneous deconstruction, correct swap
 }
 ```

@@ -264,7 +264,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
 | [Integers](#integer-types-and-arithmetic) | `int` · `uint` | `nint` · `nuint`, the C# native-sized integers | converter |
 | [Integers](#integer-types-and-arithmetic) | `uintptr` | golib's `uintptr` struct | golib |
 | [Integers](#integer-types-and-arithmetic) | `int32` · `rune` · `float64` · … | same-named C# aliases declared in each project file, such as `rune` for `System.Int32` | converter |
-| [Named numbers](#named-numeric-types-and-constant-contexts) | `type Float float64` | `[GoType("num:float64")] public partial struct Float;` | TypeGenerator |
+| [Named numbers](#named-numeric-types-and-constant-contexts) | `type Float float64` | `public partial struct Float /*num:float64*/;` | TypeGenerator |
 | [Nil and zero](#nil-and-zero-values) | `nil` | `default!`, or golib's `nil` in a pointer comparison or pointer argument | golib |
 | [Built-ins](#built-in-functions) | `len(s)` · `append(s, x)` · `make([]uint32, 6)` | `len(s)` · `append(s, x)` · `new slice<uint32>(6)`, the first two from golib's `builtin` class | golib |
 | [`any`](#empty-interface-any) | `any` · `interface{}` | `any`, an alias for `object` declared in each project file | converter |
@@ -277,7 +277,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
 | [Maps](#maps) | `map[string]int{"a": 1, "b": 2}` | `new map<@string, nint>{["a"u8] = 1, ["b"u8] = 2}` | golib |
 | [Generics](#generics) | `func Swap[T any](a, b T) (T, T)` · `[S Shape]` | `public static (T, T) Swap<T>(T a, T b)` · `where S : Shape` | converter |
 | [Type aliasing](#type-aliasing) | `type P = *bool` | `global using P = go.ж<bool>;` | converter |
-| [Methods](#functions-and-methods) | `func (r *reg) add(name string) string` | `[GoRecv] internal static @string add(this ref reg r, @string name)`, plus a `ж<reg>` overload | RecvGenerator |
+| [Methods](#functions-and-methods) | `func (r *reg) add(name string) string` | `internal static @string add(this ref reg r, @string name)`, plus a `ж<reg>` overload | RecvGenerator |
 | [Closures](#function-values-and-closures) | `func() string { … }` as a value | a lambda typed `Func<@string>`, or a C# local function when a `name := func…` variable is only ever called | converter |
 | [Loops](#loops-range-and-labels) | `for _, n := range nums` · `break scan` | `foreach (var (_, n) in nums)` · `goto break_scan;` | converter |
 | [Switch](#expression-switch-statements) | `case 4, 5, 6:` | `case 4 or 5 or 6:` | converter |
@@ -285,9 +285,9 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
 | [Defer and panic](#defer--panic--recover) | `defer f()` · `panic(v)` · `recover()` | `defer(…, ref ᒐ)` inside `try`/`catch`/`finally` · `throw panic(v)` · `recover()` | golib |
 | [Goroutines](#goroutines) | `go generate(ch)` | `goǃ(generate, …)` | golib |
 | [Channels](#channels-and-select) | `make(chan int)` · `ch <- 12` · `<-ch` · `select` | `new channel<nint>(0)` · `ch.ᐸꟷ(12)` · `ᐸꟷ(ch)` · `switch (select(…))` | golib |
-| [Structs](#struct-types) | `type reg struct { entries []string; … }` | `[GoType] partial struct reg { internal slice<@string> entries; … }` | TypeGenerator |
+| [Structs](#struct-types) | `type reg struct { entries []string; … }` | `partial struct reg { internal slice<@string> entries; … }` | TypeGenerator |
 | [Embedding](#struct-type-embedding) | `type Record struct { Person; Employee }` | `public partial ref Person Person { get; }`, plus the promoted fields and methods | TypeGenerator |
-| [Interfaces](#interfaces) | `type Reader interface { … }` | `[GoType] partial interface Reader`, plus the glue that lets each type used as a `Reader` implement it | ImplementGenerator |
+| [Interfaces](#interfaces) | `type Reader interface { … }` | `partial interface Reader`, plus the glue that lets each type used as a `Reader` implement it | ImplementGenerator |
 | [Reflection](#reflection-reflect) | `reflect.TypeOf(want)` | `reflect.TypeOf(want)`, unchanged: the converted `reflect` package, backed by golib | converter |
 | [Pointers](#pointers) | `*T` · `&x` · `*p` | `ж<T>` · `Ꮡx` · `~p` to read, or `p.Value` to read or write | golib |
 | [Implicit dereferencing](#implicit-pointer-dereferencing) | `s.val`, where `s` is a `*span` | `s.Value.val` | converter |
@@ -372,7 +372,7 @@ Read it piece by piece:
 
 - All of this sits inside `partial class main_package`, the one static class that holds a Go package
   ([Package Conversion](#package-conversion)).
-- `[GoType] partial struct accum` is the Go struct. A [source generator](#source-generators) completes the
+- `partial struct accum` is the Go struct. A [source generator](#source-generators) completes the
   other half of the `partial` type: constructors, `==` and more ([Struct Types](#struct-types)).
 - `nint` is Go's `int`: both are the size of a pointer ([Integer Types and Arithmetic](#integer-types-and-arithmetic)).
 - The method becomes a static extension method. Its pointer receiver `(a *accum)` is written
@@ -444,7 +444,7 @@ code, and the section that explains it in full.
 | `break_L`, `continue_L` | `goto` targets for Go's labeled `break L` and `continue L` | `goto break_scan;`, `continue_scan:;` | [Loops, Range and Labels](#loops-range-and-labels) |
 | `XжI`, `XᴠI` | An adapter class: pointer `*X` (`ж`) or value `X` (`ᴠ`) as interface `I` | `new joinErrorжerror(e)`, `new HandlerᴠIface(…)` | [Interfaces](#interfaces) |
 | `default!` | Go `nil` (golib `nil` in pointer contexts), and the zero value of a variable declared without a value | `return (n, default!);` | [Nil and Zero Values](#nil-and-zero-values) |
-| `[GoType]`, `[GoRecv]` | Mark a converted Go type, or a pointer-receiver method; a source generator completes it | `[GoType] partial struct accum`, `[GoRecv] internal static nint len(this ref box b)` | [Source Generators](#source-generators) |
+| `[GoType]`, `[GoRecv]` | Mark a converted Go type, or a pointer-receiver method; a source generator completes it | `partial struct accum`, `internal static nint len(this ref box b)` | [Source Generators](#source-generators) |
 | `nint`, `nuint` | Go `int`, `uint` | `internal nint total;` | [Integer Types and Arithmetic](#integer-types-and-arithmetic) |
 | `@name` | A C# keyword used as a name | `@in`, `@unsafe`, `@string` | The naming rules in this section |
 | `<pkg>_package` | The static partial class that holds a package | `partial class strings_package` | [Package Conversion](#package-conversion) |
@@ -1349,7 +1349,7 @@ using testing = testing_package;
 
 partial class path_test_package {
 …
-[GoType] partial struct ExtTest {
+partial struct ExtTest {
     internal @string path, ext;
 }
 
@@ -1870,7 +1870,7 @@ An untyped boolean constant is a plain `const bool`, with the Go expression in a
 
 **A constant of a named type is a property of that type.** A named numeric type such as
 `type Order int` becomes a C# struct, and C# cannot declare a `const` of a struct type.
-`[GoType("num:nint")] partial struct Order;` declares a struct over Go `int` (C# `nint`); a
+`partial struct Order /*num:nint*/;` declares a struct over Go `int` (C# `nint`); a
 [source generator](#source-generators) fills in its body, operators and conversions
 ([Named Numeric Types and Constant Contexts](#named-numeric-types-and-constant-contexts)).
 
@@ -3390,7 +3390,7 @@ A few things in the C# come from other sections:
 - `Ꮡ(…)` is Go's `&`. It places the value in a heap box from golib, the go2cs runtime library. So `e` has type `ж<edge>`, golib's pointer type, even though `var` hides it ([Pointers](#pointers)).
 - `e.Value` and `~e` both reach the struct that `e` points to. `e.Value` is a C# `ref` to the real struct, so the converter uses it where the struct is written. `~e` returns a copy, which is enough where the struct is only read ([Implicit Pointer Dereferencing](#implicit-pointer-dereferencing)).
 - `@out` is the Go field `out`; `@` escapes a C# keyword ([Reading Converted Code](#reading-converted-code-names-and-glyphs)).
-- `[GoType] partial struct` is a Go struct type ([Struct Types](#struct-types)).
+- `partial struct` is a Go struct type ([Struct Types](#struct-types)).
 
 **A `:=` that reuses a name declares only the new ones.** Go's `c, d := two(c)` assigns the existing `c` and declares a new `d`. The converter puts a declaration (`var`, or an explicit type such as `nint`) only in front of each new element. So one tuple both assigns `c` and declares `d`.
 
@@ -5258,19 +5258,19 @@ func (s *Stack[T]) Pop() (T, bool) {
 ```
 <!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:7 -->
 ```csharp
-[GoType] partial struct Stack<T>
+partial struct Stack<T>
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
     internal slice<T> elements;
 }
 
-[GoRecv] public static void Push<T>(this ref Stack<T> s, T element)
+public static void Push<T>(this ref Stack<T> s, T element)
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
     s.elements = append(s.elements, element);
 }
 
-[GoRecv] public static (T, bool) Pop<T>(this ref Stack<T> s)
+public static (T, bool) Pop<T>(this ref Stack<T> s)
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
     T zero = default!;
@@ -9606,7 +9606,7 @@ and two naming marks, `ᴅ` and `ᴺ`. Every glyph is listed in
 | a delegate | `Func` |
 | `object` (Go `any`) or a C# interface | `Interface` |
 | a `[GoType]` struct | `Struct` |
-| a named type, such as `[GoType("num:nint")] partial struct counter` (Go `type counter int`) | its underlying kind, here `Int` |
+| a named type, such as `partial struct counter /*num:nint*/` (Go `type counter int`) | its underlying kind, here `Int` |
 
 The `@` prefix lets a C# keyword, such as `string` or `unsafe`, serve as a name. `[GoType]` marks a type
 converted from Go, and a [source generator](#source-generators) completes it. Its argument, when present,
@@ -9975,11 +9975,11 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/IncDecPointerField/main.cs.target:7-28 -->
 ```csharp
-[GoType] partial struct inner {
+partial struct inner {
     internal nint k;
 }
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
     internal inner sub;
 }
@@ -10270,11 +10270,11 @@ func bump(c *coord) {
 ```
 <!-- source: src/tests/Behavioral/NamedNumericPointerReinterpret/main.cs.target:53-92 -->
 ```csharp
-[GoType] partial struct coord {
+partial struct coord {
     public nint X, Y;
 }
 
-[GoType("coord")] partial struct point;
+partial struct point /*coord*/;
 
 internal static void bump(ж<coord> Ꮡc) {
     var p = Ꮡc.Reinterpret<coord, point>();
@@ -10413,11 +10413,11 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/IncDecPointerField/main.cs.target:7-28 -->
 ```csharp
-[GoType] partial struct inner {
+partial struct inner {
     internal nint k;
 }
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
     internal inner sub;
 }
@@ -11481,11 +11481,11 @@ partial class atomic_package {
 // The zero value for a Value returns nil from [Value.Load].
 //
 // A Value must not be copied after first use.
-[GoType] partial struct Value {
+partial struct Value {
     internal any v;
 }
 …
-[GoRecv] public static any /*val*/ Load(this ref Value v) {
+public static any /*val*/ Load(this ref Value v) {
     return Volatile.Read(ref v.v);
 }
 ```

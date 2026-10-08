@@ -17,7 +17,7 @@ The synthesized value-equality body compares the struct's fields against a param
 
 A combined Go field declaration — `x, y int` — emits a single combined C# line (`internal nint x, y;`) so the output mirrors the Go source's line grouping. The combined form is only used when every name in the group shares the same emitted type and access modifier and none needs per-name special handling; otherwise the converter falls back to one line per name. The fallback applies when any of these hold: a blank field `_` (renamed per occurrence — `_`, `__`, …), a name equal to the enclosing struct type (renamed with the `Δ` collision marker), a per-field array initializer (` = new(N)`), or a mix of exported and unexported names in the same group (`X, y int` → `public nint X;` / `internal nint y;`). Field comments and tags attach to the whole Go field, so they never diverge within a group.
 
-C# does not allow inline or intra-function type definitions, so these are "lifted" out of the function. A **named** local type is lifted with its enclosing function's name as a prefix to avoid collisions — a `type x struct{…}` declared in `main` becomes `main_x`. An **anonymous** struct (or an anonymous struct used as a field/value) is lifted to a synthesized name with a `ᴛ`*N* suffix and marked dynamic, e.g. `[GoType("dyn")] partial struct settingsᴛ1`. Struct "definitions" that match structurally remain usable interchangeably (the generator and implicit conversions handle this). A reference to a lifted type as a bare identifier is renamed to the lifted name, and so is its use as a **slice or array element type** — `[]entry` (where `entry` is a local type) emits `slice<process_entry>`, not the short `slice<entry>` (which is unresolved at package scope → CS0246). The element is resolved through the same lift registry as the bare-identifier and anonymous-struct cases. (Guarded by the `LocalTypeSliceElement` behavioral test, covering both the slice and fixed-array forms; runtime hit this on `printDebugLog`'s `[]readState` and `traceAdvance`'s `[]untracedG`.)
+C# does not allow inline or intra-function type definitions, so these are "lifted" out of the function. A **named** local type is lifted with its enclosing function's name as a prefix to avoid collisions — a `type x struct{…}` declared in `main` becomes `main_x`. An **anonymous** struct (or an anonymous struct used as a field/value) is lifted to a synthesized name with a `ᴛ`*N* suffix and marked dynamic, e.g. `partial struct settingsᴛ1 /*dyn*/`. Struct "definitions" that match structurally remain usable interchangeably (the generator and implicit conversions handle this). A reference to a lifted type as a bare identifier is renamed to the lifted name, and so is its use as a **slice or array element type** — `[]entry` (where `entry` is a local type) emits `slice<process_entry>`, not the short `slice<entry>` (which is unresolved at package scope → CS0246). The element is resolved through the same lift registry as the bare-identifier and anonymous-struct cases. (Guarded by the `LocalTypeSliceElement` behavioral test, covering both the slice and fixed-array forms; runtime hit this on `printDebugLog`'s `[]readState` and `traceAdvance`'s `[]untracedG`.)
 
 **The `dyn` marker is also the type's RUN-TIME identity, and it must not leak the synthesized name.** An unnamed Go struct has no name to report, so `reflect.Type.String()` and `%T` render it STRUCTURALLY — `struct { X int; y int }`, and `struct {}` for golib's `EmptyStruct`. Because a lift gives the type a synthesized C# name (`settingsᴛ1`), that name would otherwise be what reflection reports; `[GoType("dyn")]` is exactly what distinguishes a lift from an ordinary declared struct, whose Go name IS its own. golib's `GoReflect.TypeNaming` therefore renders a `dyn`-marked value type from the `GoFields` projection — the same field table `NumField`/`Field` and the value side read, so a type's reported name and the fields it hands out cannot disagree — following Go's format exactly: an embedded field contributes its type alone, a tagged field appends the `strconv.Quote`d tag. Before it, `go/ast`'s `TestPrint` reported `ast_internal_test.typeᴛ1` where Go prints `struct { X int; y int }`, and `internal/platform`'s decode error named `[]platform_test.listEntry` rather than Go's structural spelling. (Landed 2026-08-09 with `go/ast`'s 9/9 bank; see [`docs/phase4/DESIGN-reflection-bridge.md`](../phase4/DESIGN-reflection-bridge.md).)
 
@@ -72,7 +72,7 @@ call-argument path under builtin `new`'s UNNAMED parameter — an EMPTY lift nam
 argument, the `GoImplement` recordings, and the pointer-adapter names all resolve through
 `liftedTypeMap`:
 ```csharp
-[GoType("dyn")] partial struct reservedᴛ1 {
+partial struct reservedᴛ1 /*dyn*/ {
     public global::go.go.types_package.ΔType Type;
 }
 internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
@@ -113,7 +113,7 @@ same helper, an anonymous interface) is found wherever it sits. The `AnonStructC
 shows the same shape lifting and its elements constructing normally:
 
 ```csharp
-[GoType("dyn")] partial struct ptrElemsᴛ1 {
+partial struct ptrElemsᴛ1 /*dyn*/ {
     internal nint @in;
     internal @string str;
     internal error error;
@@ -163,10 +163,10 @@ type Composed struct {
 }
 ```
 ```csharp
-[GoType("dyn")] partial struct Composed_Ptrs  { public uint32 Size; }
-[GoType("dyn")] partial struct Composed_ByKey { public nint Count; }
+partial struct Composed_Ptrs /*dyn*/  { public uint32 Size; }
+partial struct Composed_ByKey /*dyn*/ { public nint Count; }
 
-[GoType] partial struct Composed {                     // package_info.cs records [GoValueClone("Ptrs")]
+partial struct Composed {                     // package_info.cs records [GoValueClone("Ptrs")]
     public array<ж<Composed_Ptrs>> Ptrs = new(2);
     public map<@string, Composed_ByKey> ByKey;          // was: map<@string, struct{Count int}>
 }
@@ -186,9 +186,9 @@ in two packages, all one incidental canonicalization — the shared helpers excl
 `struct{}`/`interface{}`, and the old field arm did not:
 
 ```csharp
-- [GoType("dyn")] partial struct Func_opaque { }          // …and NamedArg__NamedFieldsRequired, Out__…
-- [GoType] partial struct Func { internal Func_opaque opaque; }
-+ [GoType] partial struct Func { internal EmptyStruct opaque; // unexported field to disallow conversions
+- partial struct Func_opaque /*dyn*/ { }          // …and NamedArg__NamedFieldsRequired, Out__…
+- partial struct Func { internal Func_opaque opaque; }
++ partial struct Func { internal EmptyStruct opaque; // unexported field to disallow conversions
 ```
 
 Go's `opaque struct{}` is `struct{}`, and golib's `EmptyStruct` is what every other site already maps
@@ -687,7 +687,7 @@ func TestNoFixedSize(t *testing.T) {
 	type Person struct { … }
 ```
 ```csharp
-[GoType("dyn")] partial struct TestNoFixedSize_Person {
+partial struct TestNoFixedSize_Person /*dyn*/ {
 
 // package_info.cs
 [GoLocalName("Person")] public partial struct TestNoFixedSize_Person {}
@@ -752,9 +752,9 @@ A package-level literal now gets its **own** sink, flushed at package scope, and
 seed from the declaration being initialized (`packageInitLiftName`, set by `visitValueSpec`):
 
 ```csharp
-[GoType("dyn")] partial struct readersᴛ1 { … }   // the OUTER anonymous struct (unchanged)
+partial struct readersᴛ1 /*dyn*/ { … }   // the OUTER anonymous struct (unchanged)
 
-[GoType("dyn")] partial struct readers_type {    // the lift from inside the func literal
+partial struct readers_type /*dyn*/ {    // the lift from inside the func literal
     public io_package.Reader Reader;
 }
 ```

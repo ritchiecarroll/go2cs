@@ -87,7 +87,7 @@ A **generic** named array type carries its type parameters (and their constraint
 type table[T any] [3]atomic.Pointer[T]
 ```
 ```csharp
-[GoType("[3]sync.atomic_package.Pointer<T>")] partial struct table<T>
+partial struct table<T> /*[3]sync.atomic_package.Pointer<T>*/
     where T : new();
 ```
 
@@ -591,7 +591,7 @@ receiver) clones a struct too. The struct declaration is stamped with the fields
 go2cs-gen turns the stamp into the deep copy:
 
 ```csharp
-[GoType] partial struct digest {
+partial struct digest {
     internal array<uint32> h = new(8);
     internal array<byte> x = new(chunk);
     internal nint nx;
@@ -599,7 +599,7 @@ go2cs-gen turns the stamp into the deep copy:
     internal bool is224;
 }
 
-[GoRecv] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
+internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     ref var d0 = ref heap<digest>(out var Ꮡd0);
     d0 = d.ΔClone();                 // was `d0 = d;` — the arrays were shared
     var hash = Ꮡd0.checkSum();
@@ -752,7 +752,7 @@ gives an empty struct one byte, so every zero-size Go type measures 1. What surv
 faithfully is the FIELD SET — a Go struct is zero-size exactly when it has no fields of nonzero size, and
 the emitted C# struct carries the same fields — so `GoZeroSizeFacts<T>` asks that instead, recursively,
 with "no instance fields at all" as the base case (golib's `EmptyStruct` for an anonymous `struct{}`, and
-every `[GoType] partial struct noCopy { }` the converter emits for a named one). The answer is a
+every `partial struct noCopy { }` the converter emits for a named one). The answer is a
 `static readonly` per closed `T`, so every gate written against it folds at JIT time and no ordinary
 element type pays for the branch.
 
@@ -1316,7 +1316,7 @@ holds the fact**:
 - **The converter** answers for a nested UNNAMED array element, because nothing downstream can. The
   descriptor is `[2]array<nint>` — the inner `3` is gone — and an `array<T>`'s length is INSTANCE
   state, so a site with no instance cannot recover it. It stamps
-  `[GoType("[2]array<nint>")] [GoArrayDims(2, 3)] partial struct nn;` and gen builds the factory from
+  `[GoType("[2]array<nint>")] /*[2][3]*/ partial struct nn;` and gen builds the factory from
   everything after the first dimension: `new array<array<nint>>(2, static () => new(3))`. This is the
   existing `GoArrayDims` cargo (same attribute, same outermost-first meaning as on a parameter or a
   field) reached one hop earlier — at construction rather than at description — with its

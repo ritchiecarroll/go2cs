@@ -2146,7 +2146,7 @@ type holder struct{ x chan<- string }        // reflectlite's TestTypes row
 ```csharp
 var ch = new channel/*<-*/<nint>(0, GoChanDir.Send);
 var p = Ꮡ(channel/*<-*/<@string>.SendOnly);
-[GoType] partial struct holder {
+partial struct holder {
     internal channel/*<-*/<@string> x = channel/*<-*/<@string>.SendOnly;
 }
 ```
@@ -2275,13 +2275,13 @@ populated yet, so the datum has to be in the emitted C#. That is the same conclu
 PARAMETER position reached, and it takes the same carrier — an attribute:
 
 ```csharp
-[GoType] partial struct T1 {
+partial struct T1 {
     [GoArrayDims(2), GoMapKeyDims(2)]
     public map<array<@string>, array<ж<float64>>> Marr;
     [GoArrayDims(3)]
     public ж<array<float64>> N;
 }
-[GoType] partial struct Indirect {
+partial struct Indirect {
     [GoArrayDims(3)]
     public ж<ж<ж<array<nint>>>> A;            // ONE stamp, any pointer depth
 }
@@ -2512,7 +2512,7 @@ itself rejects, so the descent is finite by the source language's own definition
 
 `KindOf`'s fallback answered `Struct` for any managed **reference** type it did not otherwise
 recognize, and that broke the rule in the one direction that matters. The converter emits every Go
-struct as a C# **value** type — the entire converted corpus carries seven `[GoType] partial class`
+struct as a C# **value** type — the entire converted corpus carries seven `partial class`
 declarations and all seven are named-POINTER types (`type P *T`), classified `Pointer` structurally
 before the fallback is reached — so a reference type arriving there is never a Go struct at all. It
 is an opaque managed handle: the backing object a hand-owned shim holds in place of Go's own
@@ -3205,7 +3205,7 @@ contract, and the entire `poolChain` half:
 ```csharp
 // eface is Go's two-word {type, value} representation of an `any`. Under the CLR an `any` IS a single
 // managed reference, so the slot holds that reference directly.
-[GoType] partial struct eface {
+partial struct eface {
     internal any? val;
 }
 ```

@@ -65,8 +65,8 @@ Go keeps types and methods in separate namespaces, so a package may legally decl
 This needs an extra step when the colliding name is also a **golib reserved word** (`slice`, `array`, `channel`, `map`, …). Such a name is `Δ`-prefixed *anyway* — to avoid the golib runtime type (`slice<T>` etc.) — so the method too becomes `Δslice`, and the plain `Δ` no longer separates type from method. In that case the converter appends the type marker `ᴛ` to the **type** only, giving it a name distinct from the method:
 
 ```csharp
-[GoType] partial struct Δsliceᴛ { … }                          // Go `type slice struct{…}`
-[GoRecv] internal static Δsliceᴛ Δslice(this ref builder b, …) // Go `func (*builder) slice(…)`
+partial struct Δsliceᴛ { … }                          // Go `type slice struct{…}`
+internal static Δsliceᴛ Δslice(this ref builder b, …) // Go `func (*builder) slice(…)`
 ```
 
 Only the type side is renamed; the method (and every call site and go2cs-gen-generated pointer-receiver overload) stays `Δslice`. This is deliberate: the go2cs-gen generators compute method names independently, so renaming the *method* would desync them — renaming the *type* keeps the converter and generators in agreement (the generators read the type name from the emitted C# syntax/attributes). This mirrors the Go runtime's `type slice struct{…}` (the GC slice header) versus `func (*userArena) slice(…)`.
@@ -76,7 +76,7 @@ A **struct field** named like a colliding package-level identifier is *not* rena
 One case *does* rename the field: when its name equals its **enclosing type's** name *and* that type is itself `Δ`-renamed for a type-vs-method collision. internal/trace's `type Label struct{ Label string }` sits alongside `func (e Event) Label() Label`, so the type becomes `ΔLabel`; the field, whose name equals the type, is renamed to differ (CS0542 — a member cannot share its type's name). The existing rename prefixed a single `Δ`, but that yields `ΔLabel` — *equal* to the renamed type, so the collision persisted. `typeCollidingFieldName` now **doubles** the marker (`ΔΔLabel`) when the name is a package-level collision, exactly as it already did for the keyword-family case (a reserved-word type is `Δ`-renamed too). Deterministic from the name, so the field declaration, the keyed composite-literal key, and every access site all agree:
 
 ```csharp
-[GoType] partial struct ΔLabel {                 // Go `type Label struct{ Label string }`
+partial struct ΔLabel {                 // Go `type Label struct{ Label string }`
     public @string ΔΔLabel;                      // field name == type name, doubled to differ
 }
 … new ΔLabel(ΔΔLabel: e.label, …)                // composite key
@@ -326,7 +326,7 @@ to `_test.go` files for the member-access edge's reason. `math/rand/v2`'s `*p = 
 `var l Logger` are now one rule.
 
 *`go/scanner` — the recorded interface base.* A converted **concrete** type names no interface in its own
-emitted declaration — `[GoType("[]ж<ΔError>")] partial struct ErrorList;` names none at all. Its bases arrive
+emitted declaration — `partial struct ErrorList /*[]ж<ΔError>*/;` names none at all. Its bases arrive
 as the **VALUE-form `[assembly: GoImplement<T, I>]` records** its package emits, which the go2cs-gen
 `ImplementGenerator` realizes as `partial struct ErrorList : global::go.sort_package.Interface` **inside the
 declaring assembly**. The metadata type therefore *declares* that base, and binding **any** member on it makes

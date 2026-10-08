@@ -17,9 +17,9 @@ One resolved instance: an argument to the **`min`/`max` builtins** that is a nam
 **Named numeric types.** A Go type definition over a numeric base — `type Celsius float64`, `type level int`, `type Flags uint` — is emitted as a partial struct carrying a `num:` `[GoType]` attribute, and the `TypeGenerator` source generator fills in the body:
 
 ```csharp
-[GoType("num:nint")]  partial struct level;   // type level int
-[GoType("num:nuint")] partial struct Flags;   // type Flags uint
-[GoType("num:float64")] partial struct Celsius; // type Celsius float64
+partial struct level /*num:nint*/;   // type level int
+partial struct Flags /*num:nuint*/;   // type Flags uint
+partial struct Celsius /*num:float64*/; // type Celsius float64
 ```
 
 The generated struct wraps the underlying value and implements the comparison and arithmetic operators plus implicit conversions to/from the underlying type, so the named type is a distinct C# type that still behaves like its base.
@@ -184,7 +184,7 @@ The **in-range widened** sibling (2026-07-17; sort's test-suite conversion): a t
 
 The same coercion is needed where the converter itself inserts a C# `(int)` cast on a named-numeric value — a **slice bound** (`summary[sc+1:ec]` with `sc`/`ec` of type `chunkIdx`), a **shift count** (`1 << (d % 64)` with `d` of type `statDep`), or the **length of an `unsafe.Pointer`-to-array slice** (`(*[N]T)(ptr)[:n]` → `new slice<T>(new ReadOnlySpan<T>(ptr, (int)n))`, since the `ReadOnlySpan<T>` constructor takes a C# `int` — see *Slicing a pointer-to-array*). A bare `(int)(sc + 1)` is CS0030 for the same reason, so the converter emits `(int)(nuint)(sc + 1)` / `(int)(nint)(d % 64)` — through the named type's underlying basic; a plain `nint`/`nuint` length is narrowed `(int)(n)`. Plain basic operands keep the bare `(int)(x)` form. (Guarded by the `NamedNumericIntCast` behavioral test; the Span length by `StdLibInternalAbi`.)
 
-**Defined types over a struct — forwarded fields.** A Go type definition over a *struct* — `type winlibcall libcall` — makes the underlying struct's fields accessible on the named type (`w.fn`), without promoting its methods. The named type is emitted as `[GoType("libcall")] partial struct winlibcall;` and the `TypeGenerator` wraps the underlying value (`private libcall m_value;`). For the underlying's fields to be reachable, the generator **forwards each as a ref-returning property** over `m_value`:
+**Defined types over a struct — forwarded fields.** A Go type definition over a *struct* — `type winlibcall libcall` — makes the underlying struct's fields accessible on the named type (`w.fn`), without promoting its methods. The named type is emitted as `partial struct winlibcall /*libcall*/;` and the `TypeGenerator` wraps the underlying value (`private libcall m_value;`). For the underlying's fields to be reachable, the generator **forwards each as a ref-returning property** over `m_value`:
 ```csharp
 private libcall m_value;                 // NOT readonly — see below
 [UnscopedRef] public ref nuint fn => ref m_value.fn;
