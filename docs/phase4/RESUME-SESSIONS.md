@@ -176,6 +176,35 @@ QUEUED for the docs commit after TRAIN Q lands: the save-state skill (`.claude/s
 master) gains this as a standing item (each lane's comms route in its section; COORD's section names the Slack
 channel, the three uses and the owner-ping duty).
 
+### 1j.6 R -- NEW SESSION 2026-10-07 (off standby: the face-lift docs seat). It SUPERSEDES R's prompt in 1e.5.
+
+Paste this in R's session, with the model set to Opus 5.5 and the effort to high:
+
+```
+RESUME 2026-10-07 (a NEW session). You are lane R of the go2cs fleet, off standby for ONE seat: the face-lift DOCS
+SEAT, ruled by the owner (ledger 2026-10-07 11:32), reviewed by C2. Work in the background, in spurts; one
+deliverable per spurt.
+Model and effort: Opus 5.5, high (name them in your ACK).
+Read, from origin, reading every tip by ls-remote:
+ - CLAUDE.md;
+ - on branch claude/coord-handover, docs/phase4/RESUME-SESSIONS.md: section 0a (the shared preamble: security,
+   refs, pins, the floor), section 1e.1 (the MAILBOX-ONLY protocol: your comms), and section 1j.5 (the comms
+   routes and the Slack hybrid as measured 2026-10-07). Ignore every older R block in that file (1e.4, 1e.5).
+ - your inbox on claude/mailbox: COORD's brief of 2026-10-07 16:33Z (docs/phase4/inbox/R/20261007T163323Z-COORD.md)
+   is your NEXT, and the ledger lines from 2026-10-07 11:32 on.
+Comms are the mailbox (1e.1): read with fleet-read.sh, post with fleet-msg.sh, wait with fleet-watch.sh in the
+background. The identifier census on master is stricter since 2026-10-07 13:47: if a post is refused and you believe
+it clean, post the refusal's arm and line number (never the value) to COORD. Private detail the public mailbox may
+not hold (machine names, paths with a user name, raw logs) goes to the fleet's Slack channel #fleet if your session
+has a Slack tool (first line "[R -> COORD] subject"), and your mailbox post says "detail in Slack HH:MM".
+First action: a FRESH mailbox clone in a new directory (1e.1 step 1), read your inbox, then post your ACK to COORD
+with your worktrees and anything unpushed (delete nothing, reset nothing). Then start the brief's NOW items: the
+inventory, the guard, the draft section. Post the inventory's totals and your plan before writing pages.
+Base: master (read its tip by ls-remote; 541766413e at the time of writing). Your branch: claude/r-facelift-docs, cut on
+master. Pins: GOROOT go1.24.13 with GOTOOLCHAIN=local, .NET SDK 10.0.4xx; the output directory as the second
+positional for any conversion.
+```
+
 ## 1i. COORD STATE 2026-10-06 15:50 (it supersedes 1g for CURRENT STATE; section 1j above is read first)
 
 Written 15:50 on the i7's clock, at 76% of the week's usage (owner order of this hour: run the save-state skill as
