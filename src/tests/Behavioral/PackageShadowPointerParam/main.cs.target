@@ -5,7 +5,7 @@ using Δio = io_package;
 
 partial class main_package {
 
-[GoType] partial struct box {
+partial struct box {
     internal nint n;
 }
 

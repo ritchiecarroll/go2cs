@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct gadget {
+partial struct gadget {
     internal nint n;
 }
 
@@ -15,11 +15,11 @@ internal static @string Foo(this gadget g) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string barˢ = "bar"u8;
 
-[GoRecv] internal static @string Bar(this ref gadget g) {
+internal static @string Bar(this ref gadget g) {
     return barˢ;
 }
 
-[GoType] partial interface fooer {
+partial interface fooer {
     @string Foo();
 }
 
@@ -29,7 +29,7 @@ private static readonly object valueNotWidenedOkˢ = (@string)"value-not-widened
 private static readonly object pointerWidenedOkˢ = (@string)"pointer-widened-ok"u8;
 private static readonly object pointerNotWidenedWrongˢ = (@string)"pointer-not-widened-wrong"u8;
 
-[GoType("dyn")] internal partial interface main_type {
+internal partial interface main_type /*dyn*/ {
     @string Foo();
     @string Bar();
 }

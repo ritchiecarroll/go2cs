@@ -4,22 +4,22 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface Closer {
+partial interface Closer {
     @string Close();
 }
 
-[GoType] partial interface Reader {
+partial interface Reader {
     @string Read();
 }
 
-[GoType] partial interface ReadCloser :
+partial interface ReadCloser :
     Reader,
     Closer
 {
 }
 
-[GoType] partial struct myFile {
-    [GoEmbedded] public Closer Closer;
+partial struct myFile {
+    /*embed*/ public Closer Closer;
     internal @string data;
 }
 

@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[]nint")] partial struct Inner;
+partial struct Inner /*[]nint*/;
 
-[GoType("[]Inner")] partial struct Outer;
+partial struct Outer /*[]Inner*/;
 
 internal static Outer build() {
     Outer o = default!;

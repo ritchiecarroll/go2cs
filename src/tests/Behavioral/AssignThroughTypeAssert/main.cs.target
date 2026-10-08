@@ -4,24 +4,24 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface Node {
+partial interface Node {
     void node();
 }
 
-[GoType] partial struct Lit {
+partial struct Lit {
     public nint Len;
     public @string Name;
 }
 
-[GoRecv] internal static void node(this ref Lit _) {
+internal static void node(this ref Lit _) {
 }
 
-[GoType] partial struct ValueSpec {
+partial struct ValueSpec {
     public slice<@string> Names;
     public slice<Node> Values;
 }
 
-[GoRecv] internal static void node(this ref ValueSpec _) {
+internal static void node(this ref ValueSpec _) {
 }
 
 internal static void walk(Node root, Func<Node, bool> f) {

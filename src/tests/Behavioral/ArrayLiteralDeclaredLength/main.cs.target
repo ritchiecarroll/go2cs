@@ -6,9 +6,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[6]byte")] partial struct named;
+partial struct named /*[6]byte*/;
 
-[GoType] partial struct cell {
+partial struct cell {
     public array<uint8> Buf = new(4);
     public @string Tag;
 }

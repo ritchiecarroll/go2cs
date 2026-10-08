@@ -6,11 +6,11 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {
 
-[GoType] partial interface Encoder {
+partial interface Encoder {
     (@string, error) Encode();
 }
 
-[GoType] partial struct Blob {
+partial struct Blob {
     public @string Data;
 }
 
@@ -26,7 +26,7 @@ public static (@string, error) Encode(this ж<Blob> Ꮡb) {
     return (b.Data, default!);
 }
 
-[GoType] partial struct Tag {
+partial struct Tag {
     public nint N;
 }
 
@@ -42,12 +42,12 @@ public static (@string, error) Encode(this ж<Tag> Ꮡt) {
     return (fmt.Sprintf("tag:%d"u8, t.N), default!);
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     public ж<Blob> B;
     public ж<Tag> T;
 }
 
-[GoType] partial struct Stamp {
+partial struct Stamp {
     public @string S;
 }
 
@@ -91,15 +91,15 @@ internal static void report(@string label, reflectꓸValue v) {
 private static readonly @string newBlobElemˢ = "new(*Blob).Elem()"u8;
 private static readonly object assertErrorOkFalseˢ = (@string)"  assert error ok=false"u8;
 
-[GoType("dyn")] internal partial struct main_si {
+internal partial struct main_si /*dyn*/ {
     public any I;
 }
 
-[GoType("dyn")] internal partial struct main_sp {
+internal partial struct main_sp /*dyn*/ {
     public ж<Blob> P;
 }
 
-[GoType("dyn")] internal partial struct main_sh {
+internal partial struct main_sh /*dyn*/ {
     public ж<Stamp> S;
 }
 

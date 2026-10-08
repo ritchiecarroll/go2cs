@@ -5,11 +5,11 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-[GoType] partial struct Pt {
+partial struct Pt {
     public nint X, Y;
 }
 
-[GoType("num:uint32")] partial struct Count;
+partial struct Count /*num:uint32*/;
 
 internal static Pt derefStruct(ж<Pt> Ꮡp) {
     return ~Ꮡp;

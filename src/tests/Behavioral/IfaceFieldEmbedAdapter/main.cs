@@ -4,20 +4,20 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface source {
+partial interface source {
     @string Pull();
 }
 
-[GoType] partial interface sink {
+partial interface sink {
     void Push(@string s);
 }
 
-[GoType] partial struct src {
+partial struct src {
     internal slice<@string> items;
     internal nint pos;
 }
 
-[GoRecv] internal static @string Pull(this ref src s) {
+internal static @string Pull(this ref src s) {
     if (s.pos >= len(s.items)) {
         return ""u8;
     }
@@ -26,24 +26,24 @@ partial class main_package {
     return item;
 }
 
-[GoType] partial struct dst {
+partial struct dst {
     internal slice<@string> log;
 }
 
-[GoRecv] internal static void Push(this ref dst d, @string s) {
+internal static void Push(this ref dst d, @string s) {
     d.log = append(d.log, s);
 }
 
-[GoType] partial struct duplex {
-    [GoEmbedded] internal source source;
-    [GoEmbedded] internal sink sink;
+partial struct duplex {
+    /*embed*/ internal source source;
+    /*embed*/ internal sink sink;
 }
 
-[GoRecv] internal static @string Status(this ref duplex d) {
+internal static @string Status(this ref duplex d) {
     return "ok"u8;
 }
 
-[GoType] partial interface conn {
+partial interface conn {
     @string Pull();
     void Push(@string s);
     @string Status();

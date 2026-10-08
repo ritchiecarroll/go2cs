@@ -141,7 +141,7 @@ internal static (ж<box>, error err) parseLimited(nint n) {
     return (_ᴛ1, err);
 }
 
-[GoType] partial struct box {
+partial struct box {
     internal nint v;
 }
 

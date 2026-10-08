@@ -7,11 +7,11 @@ using sync;
 
 partial class main_package {
 
-[GoType] partial struct proc {
+partial struct proc {
     internal nint addr;
 }
 
-[GoType] partial struct lazyProc {
+partial struct lazyProc {
     internal ж<proc> p;
 }
 

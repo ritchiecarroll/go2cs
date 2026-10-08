@@ -6,20 +6,17 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface Animal {
+partial interface Animal {
     @string Type();
     @string Swim();
 }
-// Descriptor carrier for `Test` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("Test")] public interface Testᴅ { }
 
-
-[GoType] partial struct Dog {
+partial struct Dog {
     public @string Name;
     public @string Breed;
 }
 
-[GoType] partial struct Frog {
+partial struct Frog {
     public @string Name;
     public @string Color;
 }
@@ -54,7 +51,7 @@ internal static void Main() {
     fmt.Println(vowels);
 }
 
-[GoType("num:uintptr")] partial struct errno;
+partial struct errno /*num:uintptr*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string errnoˢ = "errno"u8;
@@ -121,7 +118,7 @@ internal static void useAndRelease() {
     finally { ᒐ.Run(); }
 }
 
-public static void ShowZoo([GoArrayDims(2)] ж<array<Animal>> Ꮡzoo) {
+public static void ShowZoo(/*[2]*/ ж<array<Animal>> Ꮡzoo) {
     ref var zoo = ref Ꮡzoo.DerefOrNull();
 
     Animal a = default!;
@@ -135,28 +132,28 @@ public static void ShowZoo([GoArrayDims(2)] ж<array<Animal>> Ꮡzoo) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string frogˢ = "Frog"u8;
 
-[GoRecv] public static @string Type(this ref Frog f) {
+public static @string Type(this ref Frog f) {
     return frogˢ;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string kickˢ = "Kick"u8;
 
-[GoRecv] public static @string Swim(this ref Frog f) {
+public static @string Swim(this ref Frog f) {
     return kickˢ;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string paddleˢ = "Paddle"u8;
 
-[GoRecv] public static @string Swim(this ref Dog d) {
+public static @string Swim(this ref Dog d) {
     return paddleˢ;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string doggieˢ = "Doggie"u8;
 
-[GoRecv] public static @string Type(this ref Dog d) {
+public static @string Type(this ref Dog d) {
     return doggieˢ;
 }
 

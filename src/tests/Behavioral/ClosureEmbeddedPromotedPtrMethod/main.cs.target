@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static void bump(this ref counter c) {
+internal static void bump(this ref counter c) {
     c.n++;
 }
 
@@ -23,7 +23,7 @@ private static readonly object innerˢ = (@string)"inner:"u8;
 private static readonly @string appliedˢ = "applied"u8;
 private static readonly object appliedˢ2 = (@string)"applied:"u8;
 
-[GoType("dyn")] internal partial struct run_rep {
+internal partial struct run_rep /*dyn*/ {
     internal partial ref counter counter { get; }
     internal @string label;
 }

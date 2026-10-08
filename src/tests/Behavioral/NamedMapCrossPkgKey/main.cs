@@ -5,7 +5,7 @@ using CrossPkgLib = CrossPkgLib_package;
 
 partial class main_package {
 
-[GoType("map[CrossPkgLib.Ticks, Func<nint, nint, nint>]")] partial struct opTable;
+partial struct opTable /*map[CrossPkgLib.Ticks, Func<nint, nint, nint>]*/;
 
 internal static void Main() {
     var ops = new opTable(new map<CrossPkgLib.Ticks, Func<nint, nint, nint>>{

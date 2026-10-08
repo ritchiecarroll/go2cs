@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct writer {
+partial struct writer {
     internal slice<@string> @out;
 }
 
-[GoRecv] internal static void typ(this ref writer w, @string typ) {
+internal static void typ(this ref writer w, @string typ) {
     w.@out = append(w.@out, "t:"u8 + typ);
     if (typ == "top"u8) {
         foreach (var (_, typΔ1) in new @string[]{"a"u8, "b"u8}.slice()) {

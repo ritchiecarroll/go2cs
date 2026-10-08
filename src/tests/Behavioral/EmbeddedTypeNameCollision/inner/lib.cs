@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class inner_package {
 
-[GoType] partial struct Buffer {
+partial struct Buffer {
     public @string Data;
     public nint N;
 }
@@ -17,11 +17,11 @@ public static @string Describe(this Buffer b) {
     return fmt.Sprintf("inner.Buffer(%s,%d)"u8, b.Data, b.N);
 }
 
-[GoRecv] public static void Bump(this ref Buffer b) {
+public static void Bump(this ref Buffer b) {
     b.N++;
 }
 
-[GoRecv] public static void Append(this ref Buffer b, @string s) {
+public static void Append(this ref Buffer b, @string s) {
     b.Data += s;
     b.N += len(s);
 }

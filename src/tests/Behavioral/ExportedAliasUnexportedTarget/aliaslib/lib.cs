@@ -7,7 +7,7 @@ using sync = sync_package;
 
 partial class aliaslib_package {
 
-[GoType] public partial struct mutexWrap {
+public partial struct mutexWrap {
     internal sync.Mutex @lock;
     internal bool disabled;
 }
@@ -28,11 +28,11 @@ public static void Unlock(this ж<mutexWrap> Ꮡmw) {
     }
 }
 
-[GoRecv] public static void Disable(this ref mutexWrap mw) {
+public static void Disable(this ref mutexWrap mw) {
     mw.disabled = true;
 }
 
-[GoType("num:nint")] public partial struct compareResult;
+public partial struct compareResult /*num:nint*/;
 
 internal static compareResult compareLess => /* iota - 1 */ -1;
 internal static compareResult compareEqual => 0;

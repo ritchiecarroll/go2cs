@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:nuint")] partial struct arenaIdx;
+partial struct arenaIdx /*num:nuint*/;
 
-[GoType("num:uint8")] partial struct tag;
+partial struct tag /*num:uint8*/;
 
-[GoType("num:uint64")] partial struct big;
+partial struct big /*num:uint64*/;
 
 internal static UntypedInt bits => 6;
 

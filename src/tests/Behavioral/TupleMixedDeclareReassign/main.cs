@@ -39,7 +39,7 @@ internal static (ж<nint>, ж<nint>) shadow() {
     return (px, py);
 }
 
-[GoType] partial struct cursor {
+partial struct cursor {
     internal nint pos;
     internal @string tag;
 }

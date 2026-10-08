@@ -22,7 +22,7 @@ internal static void consume(Action<error> r, error err) {
     r(err);
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal Action<error> release;
     internal @string name;
 }

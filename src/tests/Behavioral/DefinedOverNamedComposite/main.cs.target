@@ -6,21 +6,21 @@ using DefinedOverNamedComposite;
 
 partial class main_package {
 
-[GoType("global::go.DefinedOverNamedComposite.fslike_package.MapFS")] partial struct shuffledFS;
+partial struct shuffledFS /*global::go.DefinedOverNamedComposite.fslike_package.MapFS*/;
 
 internal static nint get(this shuffledFS f, @string k) {
     return ((fslike.MapFS)f).Get(k);
 }
 
-[GoType("global::go.DefinedOverNamedComposite.fslike_package.List")] partial struct shuffledList;
+partial struct shuffledList /*global::go.DefinedOverNamedComposite.fslike_package.List*/;
 
-[GoType("global::go.DefinedOverNamedComposite.fslike_package.Buf")] partial struct shuffledBuf;
+partial struct shuffledBuf /*global::go.DefinedOverNamedComposite.fslike_package.Buf*/;
 
-[GoType("global::go.DefinedOverNamedComposite.fslike_package.MapFS")] partial struct localMap;
+partial struct localMap /*global::go.DefinedOverNamedComposite.fslike_package.MapFS*/;
 
-[GoType("map[@string, nint]")] partial struct headerA;
+partial struct headerA /*map[@string, nint]*/;
 
-[GoType("map[@string, nint]")] partial struct headerB;
+partial struct headerB /*map[@string, nint]*/;
 
 internal static void Main() {
     var m = new fslike.MapFS(new map<@string, nint>{["a"u8] = 1, ["b"u8] = 2});

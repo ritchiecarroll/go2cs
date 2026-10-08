@@ -4,13 +4,13 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:nint")] partial struct rank;
+partial struct rank /*num:nint*/;
 
 internal static rank rankLow => /* iota */ 0;
 internal static rank rankMid => 1;
 internal static rank rankHigh => 2;
 
-[GoType("num:uint8")] partial struct code;
+partial struct code /*num:uint8*/;
 
 internal static code codeA => /* iota */ 0;
 internal static code codeB => 1;
@@ -26,9 +26,9 @@ internal static slice<@string> codeNames = new golib.SparseArray<@string>{
     [codeB] = "b"u8
 }.slice();
 
-[GoType("num:uintptr")] partial struct errno;
+partial struct errno /*num:uintptr*/;
 
-[GoType("num:nuint")] partial struct kindT;
+partial struct kindT /*num:nuint*/;
 
 internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [1] = "one"u8,

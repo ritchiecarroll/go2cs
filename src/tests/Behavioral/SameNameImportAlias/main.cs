@@ -8,11 +8,11 @@ using SameNameImportAlias.b;
 
 partial class main_package {
 
-[GoType("[]global::go.SameNameImportAlias.a.foo_package.Inner")] partial struct list;
+partial struct list /*[]global::go.SameNameImportAlias.a.foo_package.Inner*/;
 
-[GoType("map[@string, bfoo.Other]")] partial struct table;
+partial struct table /*map[@string, bfoo.Other]*/;
 
-[GoType] partial struct holder {
+partial struct holder {
     internal afoo.Inner a;
     internal bfoo.Other b;
     internal go.SameNameImportAlias.b.foo_package.ΔKind k;

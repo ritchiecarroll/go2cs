@@ -14,7 +14,7 @@ partial class main_package {
 internal static UntypedInt win => 100;
 internal static UntypedInt gamesPerSeries => 10;
 
-[GoType] partial struct score {
+partial struct score {
     internal nint player, opponent, thisTurn;
 }
 
@@ -175,18 +175,18 @@ internal static @string joinPair(@string s, error err) {
     return "got:"u8 + s;
 }
 
-[GoType] partial struct resolver {
+partial struct resolver {
     internal Func<@string, (@string importPath, bool ok)> lookupPackage;
     internal Func<@string, @string, bool> lookupSym;
 }
 
 // type splitter is a methodless func type — rendered inline as its base delegate
 
-[GoType] partial struct machine {
+partial struct machine {
     internal Func<@string, (nint, @string, error)> split;
 }
 
-[GoType] partial struct worker {
+partial struct worker {
     internal Func<ж<worker>, slice<byte>, nint> fill;
     internal Action<ж<worker>> step;
     internal nint n;
@@ -201,11 +201,11 @@ internal static nint fillFast(this ж<worker> Ꮡw, slice<byte> b) {
     return len(b) + w.n;
 }
 
-[GoRecv] internal static void bump(this ref worker w) {
+internal static void bump(this ref worker w) {
     w.n++;
 }
 
-[GoRecv] internal static error /*err*/ initWorker(this ref worker w, nint level) {
+internal static error /*err*/ initWorker(this ref worker w, nint level) {
     switch (ᐧ) {
     case {} when level is 0: {
         w.fill = ((Func<ж<worker>, slice<byte>, nint>)(fillFast));
@@ -235,15 +235,15 @@ internal static @string tag(this handler h) {
     return handlerˢ;
 }
 
-[GoType] partial interface tagged {
+partial interface tagged {
     @string tag();
 }
 
-[GoType] partial struct provider {
+partial struct provider {
     internal Func<nint, nint> produce;
 }
 
-[GoType] partial struct registry {
+partial struct registry {
     internal handler h;
 }
 

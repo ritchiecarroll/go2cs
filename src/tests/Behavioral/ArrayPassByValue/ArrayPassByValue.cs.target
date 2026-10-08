@@ -34,7 +34,7 @@ internal static void Main() {
 
 internal static array<nint> garr = new nint[]{1, 2, 3}.array();
 
-[GoType] partial struct arrHolder {
+partial struct arrHolder {
     internal array<nint> arr = new(3);
 }
 
@@ -84,7 +84,7 @@ internal static void stest(ref @string p) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string goodbyeˢ = "Goodbye"u8;
 
-internal static void test([GoArrayDims(2)] array<@string> a) {
+internal static void test(/*[2]*/ array<@string> a) {
     a = a.Clone();
 
     fmt.Println(a[0], a[1]);

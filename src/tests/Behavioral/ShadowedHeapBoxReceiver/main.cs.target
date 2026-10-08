@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Builder {
+partial struct Builder {
     internal nint n;
 }
 
@@ -12,7 +12,7 @@ public static void With(this ж<Builder> Ꮡb, Action<ж<Builder>> f) {
     f(Ꮡb);
 }
 
-[GoRecv] public static nint Sum(this ref Builder b) {
+public static nint Sum(this ref Builder b) {
     return b.n;
 }
 

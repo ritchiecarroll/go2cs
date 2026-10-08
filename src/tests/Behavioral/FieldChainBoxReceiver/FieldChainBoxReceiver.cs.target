@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal int64 n;
 }
 
@@ -16,11 +16,11 @@ internal static void inc(this ж<counter> Ꮡc) {
     Ꮡc.ptr().Value.n++;
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal counter c;
 }
 
-[GoType] partial struct box {
+partial struct box {
     internal holder h;
 }
 
@@ -28,7 +28,7 @@ internal static void viaParam(ж<box> Ꮡb) {
     Ꮡb.of(box.Ꮡh).of(holder.Ꮡc).inc();
 }
 
-[GoType] partial struct wrapper {
+partial struct wrapper {
     internal box b;
 }
 
@@ -41,11 +41,11 @@ internal static void bump(this ж<wrapper> Ꮡw) {
     Ꮡw.of(wrapper.Ꮡb).of(box.Ꮡh).of(holder.Ꮡc).inc();
 }
 
-[GoType] partial struct mid {
+partial struct mid {
     internal counter c;
 }
 
-[GoType] partial struct deep {
+partial struct deep {
     internal mid mid;
 }
 

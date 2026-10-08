@@ -4,39 +4,39 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Δany {
+partial struct Δany {
     internal nint x;
 }
 
-[GoType] partial struct Δrune {
+partial struct Δrune {
     internal nint r;
 }
 
-[GoType] partial struct Δnint {
+partial struct Δnint {
     internal nint d;
 }
 
-[GoType] partial struct Δbuiltin {
+partial struct Δbuiltin {
     internal nint z;
 }
 
-[GoType] partial struct Δsstring {
+partial struct Δsstring {
     internal nint n;
 }
 
-[GoType] partial struct @required {
+partial struct @required {
     internal nint c;
 }
 
-[GoType] partial struct @scoped {
+partial struct @scoped {
     internal nint b;
 }
 
-[GoType] partial struct record {
+partial struct record {
     internal nint a;
 }
 
-[GoType] partial struct ΔGoFrame {
+partial struct ΔGoFrame {
     internal nint k;
 }
 
@@ -54,11 +54,11 @@ internal static nint deferInShadowedPackage() {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct box {
+partial struct box {
     internal slice<nint> items;
 }
 
-[GoRecv] internal static nint len(this ref box b) {
+internal static nint len(this ref box b) {
     return builtin.len(b.items) + 1;
 }
 

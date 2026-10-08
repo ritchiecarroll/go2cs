@@ -4,12 +4,12 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct inner {
+partial struct inner {
     internal uint16 a;
     internal uint16 b;
 }
 
-[GoType] partial struct outer {
+partial struct outer {
     internal @string name;
     internal inner @in;
     internal ж<inner> ptr;
@@ -35,20 +35,20 @@ internal static void bumpSelected(this ж<outer> Ꮡo, nint which) {
     count.Value += 10;
 }
 
-[GoRecv] internal static void bumpViaPtr(this ref outer o) {
+internal static void bumpViaPtr(this ref outer o) {
     var p = o.ptr.of(inner.Ꮡb);
     p.Value += 3;
 }
 
-[GoType] partial struct leaf {
+partial struct leaf {
     internal nint n;
 }
 
-[GoType] partial struct mid {
+partial struct mid {
     internal leaf lf;
 }
 
-[GoType] partial struct deep {
+partial struct deep {
     internal mid md;
 }
 

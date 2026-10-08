@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Message {
+partial struct Message {
     public @string Text;
 }
 
@@ -12,7 +12,7 @@ public static void Print(this Message m) {
     fmt.Println(m.Text);
 }
 
-[GoType("dyn")] internal partial interface main_Printer {
+internal partial interface main_Printer /*dyn*/ {
     void Print();
 }
 

@@ -4,19 +4,19 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Result<T> {
+partial struct Result<T> {
     public T Value;
     public error Error;
 }
 
-[GoType] partial struct Container {
+partial struct Container {
     public Result<nint> IntResult;
     public Result<@string> StringResult;
     public slice<Result<float64>> FloatValues;
     public map<@string, Result<bool>> Mappings;
 }
 
-[GoType] partial struct tag<T> {
+partial struct tag<T> {
     internal T label;
 }
 
@@ -24,7 +24,7 @@ internal static T show<T>(this tag<T> t) {
     return t.label;
 }
 
-[GoType] partial struct wrapped<T> {
+partial struct wrapped<T> {
     internal partial ref tag<T> tag { get; }
     internal nint count;
 }
@@ -63,11 +63,11 @@ internal static void Main() {
     fmt.Println(w.label, w.tag.show(), w.count);
 }
 
-[GoType] partial struct Δpool<T> {
+partial struct Δpool<T> {
     internal slice<T> items;
 }
 
-[GoRecv] internal static (T, bool) take<T>(this ref Δpool<T> p) {
+internal static (T, bool) take<T>(this ref Δpool<T> p) {
     if (len(p.items) == 0) {
         T zero = GoZero<T>();
         return (zero, false);
@@ -77,7 +77,7 @@ internal static void Main() {
     return (v, true);
 }
 
-[GoType] partial struct keeper {
+partial struct keeper {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

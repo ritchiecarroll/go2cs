@@ -7,7 +7,7 @@ using sync;
 
 partial class main_package {
 
-[GoType] partial struct controller {
+partial struct controller {
     internal atomic.Int64 total;
 }
 

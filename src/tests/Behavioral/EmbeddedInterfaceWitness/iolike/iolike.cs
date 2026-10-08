@@ -2,16 +2,16 @@ namespace go.EmbeddedInterfaceWitness;
 
 partial class iolike_package {
 
-[GoType] partial interface Reader {
+partial interface Reader {
     @string Read();
 }
 
-[GoType] partial interface ReadWriter {
+partial interface ReadWriter {
     @string Read();
     @string Write(@string s);
 }
 
-[GoType] partial struct Base {
+partial struct Base {
     public @string Tag;
 }
 

@@ -10,10 +10,10 @@ using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayou
 
 partial class main_package {
 
-[GoType] partial struct noCopy {
+partial struct noCopy {
 }
 
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] partial struct counter {
+[StructLayout(LayoutKind.Explicit, Size = 4)] partial struct counter {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal int32 v;
 }

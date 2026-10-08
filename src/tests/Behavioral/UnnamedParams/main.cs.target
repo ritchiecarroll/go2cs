@@ -7,7 +7,7 @@ using ꓸꓸꓸstring = Span<@string>;
 
 partial class main_package {
 
-[GoType] partial struct note {
+partial struct note {
     internal nint x;
 }
 

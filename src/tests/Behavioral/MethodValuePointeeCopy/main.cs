@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct frame {
+partial struct frame {
     public @string Name;
 }
 
@@ -24,7 +24,7 @@ internal static @string touch(this frame f) {
     return f.Name;
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal ж<frame> p;
 }
 

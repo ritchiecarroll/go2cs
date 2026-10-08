@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct conn {
+partial struct conn {
     internal nint id;
 }
 
-[GoType] partial struct tracker {
+partial struct tracker {
     internal map<ж<conn>, @string> m;
 }
 

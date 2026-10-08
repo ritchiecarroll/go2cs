@@ -4,28 +4,28 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] public partial struct counts {
+public partial struct counts {
     internal array<nint> vals = new(4);
     internal nint n;
 }
 
-[GoType("counts")] partial struct Counts;
+partial struct Counts /*counts*/;
 
-[GoType] public partial struct grid {
+public partial struct grid {
     internal array<array<nint>> cells = new(2, () => new(3));
 }
 
-[GoType("grid")] partial struct Grid;
+partial struct Grid /*grid*/;
 
-[GoType] partial struct pt {
+partial struct pt {
     public nint X, Y;
 }
 
-[GoType] public partial struct path {
+public partial struct path {
     internal array<pt> pts = new(3);
 }
 
-[GoType("path")] partial struct Path;
+partial struct Path /*path*/;
 
 internal static Counts global = new();
 
@@ -77,7 +77,7 @@ internal static void Main() {
     fmt.Println(sliceˢ, len(s[1].vals), s[1].vals, s[0].vals);
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal nint id;
     internal Counts c;
 }

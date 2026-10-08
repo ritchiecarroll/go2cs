@@ -4,13 +4,13 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("@string")] partial struct errorString;
+partial struct errorString /*@string*/;
 
 internal static @string Error(this errorString e) {
     return "err: "u8 + ((@string)e);
 }
 
-[GoType("@string")] partial struct label;
+partial struct label /*@string*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string kaboomˢ = "kaboom"u8;

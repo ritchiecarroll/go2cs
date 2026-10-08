@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Node {
+partial struct Node {
     internal nint val;
 }
 
-[GoRecv] public static nint Value(this ref Node n) {
+public static nint Value(this ref Node n) {
     return n.val;
 }
 

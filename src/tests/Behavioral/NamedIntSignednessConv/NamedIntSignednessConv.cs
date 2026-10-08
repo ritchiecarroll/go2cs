@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:int64")] partial struct Time;
+partial struct Time /*num:int64*/;
 
-[GoType("num:uint64")] partial struct timestamp;
+partial struct timestamp /*num:uint64*/;
 
 internal static Time toTime(timestamp ts) {
     return ((Time)(int64)(uint64)ts);

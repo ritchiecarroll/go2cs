@@ -3,7 +3,7 @@ namespace go;
 partial class main_package {
 
 
-[GoType("dyn")] partial struct sizeTestsᴛ1 {
+partial struct sizeTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal nint want;
 }

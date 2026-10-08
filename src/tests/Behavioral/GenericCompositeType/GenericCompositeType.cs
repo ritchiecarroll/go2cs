@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Option<T> {
+partial struct Option<T> {
     internal T value;
     internal bool valid;
 }

@@ -43,9 +43,9 @@ internal static @string describeSignal(nint sig) {
     return noneˢ;
 }
 
-[GoType("[3]nint")] partial struct arr;
+partial struct arr /*[3]nint*/;
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 

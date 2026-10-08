@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:uint64")] partial struct stringID;
+partial struct stringID /*num:uint64*/;
 
-[GoType("num:int32")] partial struct offset;
+partial struct offset /*num:int32*/;
 
 internal static K mix<K>(K id, K step)
     where K : /* ~uint64 | ~int32 */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IIncrementOperators<K>, IDecrementOperators<K>, IUnaryNegationOperators<K, K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, int, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()

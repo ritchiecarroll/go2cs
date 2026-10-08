@@ -4,16 +4,16 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Item {
+partial struct Item {
     public @string Name;
     public nint N;
 }
 
-[GoType] partial interface Describer {
+partial interface Describer {
     @string Describe();
 }
 
-[GoType("map[@string, ж<Item>]")] partial struct Reg;
+partial struct Reg /*map[@string, ж<Item>]*/;
 
 public static @string Describe(this Reg r) {
     @string @out = ""u8;
@@ -27,7 +27,7 @@ public static @string Describe(this Reg r) {
     return @out;
 }
 
-[GoType("map[@string, Describer]")] partial struct Bag;
+partial struct Bag /*map[@string, Describer]*/;
 
 public static @string Describe(this Bag b) {
     @string @out = ""u8;
@@ -41,7 +41,7 @@ public static @string Describe(this Bag b) {
     return @out;
 }
 
-[GoType("[]ж<Item>")] partial struct List;
+partial struct List /*[]ж<Item>*/;
 
 public static @string Describe(this List l) {
     @string @out = ""u8;

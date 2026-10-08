@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct box<T> {
+partial struct box<T> {
     internal T v;
 }
 
@@ -12,18 +12,18 @@ internal static T Get<T>(this box<T> b) {
     return b.v;
 }
 
-[GoType] partial struct keeper<T> {
+partial struct keeper<T> {
     internal T v;
 }
 
-[GoRecv] internal static T Get<T>(this ref keeper<T> k) {
+internal static T Get<T>(this ref keeper<T> k) {
     return k.v;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string notAStringGetterˢ = "not a string getter"u8;
 
-[GoType("dyn")] internal partial interface describe_type {
+internal partial interface describe_type /*dyn*/ {
     @string Get();
 }
 

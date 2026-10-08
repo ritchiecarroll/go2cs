@@ -25,7 +25,7 @@ internal static S cloneOrNil<S, E>(S s)
     return appendꓸꓸꓸ<S, E>(new S{}, s);
 }
 
-[GoType("[]nint")] partial struct Named;
+partial struct Named /*[]nint*/;
 
 internal static void Main() {
     slice<nint> nilSlice = default!;

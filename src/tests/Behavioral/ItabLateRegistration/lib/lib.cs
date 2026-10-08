@@ -4,15 +4,15 @@ using fmt = fmt_package;
 
 partial class lib_package {
 
-[GoType] partial interface Named {
+partial interface Named {
     @string Name();
 }
 
-[GoType] partial interface Sized {
+partial interface Sized {
     nint Size();
 }
 
-[GoType] partial struct Circle {
+partial struct Circle {
     public nint R;
 }
 
@@ -24,7 +24,7 @@ public static nint Size(this Circle c) {
     return c.R * 2;
 }
 
-[GoType] partial struct Square {
+partial struct Square {
     public nint S;
 }
 
@@ -36,7 +36,7 @@ public static nint Size(this Square s) {
     return s.S * 4;
 }
 
-[GoType] partial struct Blank {
+partial struct Blank {
     public nint N;
 }
 

@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct node {
+partial struct node {
     internal nint id;
 }
 
-[GoRecv] internal static @string Error(this ref node n) {
+internal static @string Error(this ref node n) {
     return fmt.Sprintf("node %d"u8, n.id);
 }
 

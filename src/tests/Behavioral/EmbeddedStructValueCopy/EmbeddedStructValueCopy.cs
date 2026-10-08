@@ -4,22 +4,22 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct inner {
+partial struct inner {
     internal nint n;
     internal @string tag;
 }
 
-[GoType] partial struct mid {
+partial struct mid {
     internal partial ref inner inner { get; }
     internal nint extra;
 }
 
-[GoType] partial struct deep {
+partial struct deep {
     internal partial ref mid mid { get; }
     internal @string label;
 }
 
-[GoType] partial struct ptrHolder {
+partial struct ptrHolder {
     internal partial ref ж<inner> inner { get; }
     internal @string name;
 }

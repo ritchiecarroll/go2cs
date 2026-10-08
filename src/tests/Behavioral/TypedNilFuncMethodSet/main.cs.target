@@ -13,7 +13,7 @@ public static @string String(this Fn fn) {
     return stringFnˢ;
 }
 
-[GoType] partial interface Getter {
+partial interface Getter {
     nint Get();
 }
 
@@ -23,7 +23,7 @@ public static nint Get(this G g) {
     return 7;
 }
 
-[GoType] partial interface Both :
+partial interface Both :
     fmt.Stringer
 {
     nint Get();

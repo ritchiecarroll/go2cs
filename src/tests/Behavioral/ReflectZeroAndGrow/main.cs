@@ -6,20 +6,20 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType("@string")] partial struct NS;
+partial struct NS /*@string*/;
 
-[GoType("[2]uint8")] partial struct NA;
+partial struct NA /*[2]uint8*/;
 
-[GoType("[]byte")] partial struct NB;
+partial struct NB /*[]byte*/;
 
-[GoType("num:nint")] partial struct NI;
+partial struct NI /*num:nint*/;
 
-[GoType] public partial struct inner {
+public partial struct inner {
     public NS S;
     public nint N;
 }
 
-[GoType] partial struct outer {
+partial struct outer {
     public inner I;
     public NA A;
     public ж<nint> P;

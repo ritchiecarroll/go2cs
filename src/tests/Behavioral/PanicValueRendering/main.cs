@@ -5,12 +5,12 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct openErr {
+partial struct openErr {
     internal @string path;
     internal nint code;
 }
 
-[GoRecv] internal static @string Error(this ref openErr e) {
+internal static @string Error(this ref openErr e) {
     return fmt.Sprintf("open %s: code %d"u8, e.path, e.code);
 }
 

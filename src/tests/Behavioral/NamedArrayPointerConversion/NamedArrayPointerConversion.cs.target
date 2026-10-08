@@ -4,13 +4,13 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[4]byte")] partial struct MyArray;
+partial struct MyArray /*[4]byte*/;
 
-[GoType("[0]byte")] partial struct MyEmptyArray;
+partial struct MyEmptyArray /*[0]byte*/;
 
-[GoType("[3]nint")] partial struct MyInts;
+partial struct MyInts /*[3]nint*/;
 
-[GoType("[]byte")] partial struct MyBytes;
+partial struct MyBytes /*[]byte*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object b1Freshˢ = (@string)"B1 fresh:"u8;

@@ -54,7 +54,7 @@ internal static @string zone(nint kind, @string s) {
     return @out;
 }
 
-[GoType("dyn")] internal partial struct main_cases {
+internal partial struct main_cases /*dyn*/ {
     internal nint kind;
     internal @string s;
 }

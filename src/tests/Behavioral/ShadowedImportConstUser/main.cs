@@ -5,7 +5,7 @@ using ShadowedImportConstLib = ShadowedImportConstLib_package;
 
 partial class main_package {
 
-[GoType] partial struct gauge {
+partial struct gauge {
     internal nint level;
 }
 

@@ -8,7 +8,7 @@ using encoding;
 
 partial class main_package {
 
-[GoType] partial struct E {
+partial struct E {
     public nint Code;
 }
 
@@ -20,7 +20,7 @@ public static @string GoString(this E _) {
     return "E!"u8;
 }
 
-[GoType] partial struct S {
+partial struct S {
     public nint N;
 }
 
@@ -28,32 +28,30 @@ public static @string String(this S _) {
     return "s"u8;
 }
 
-[GoType] partial struct w {
-    [GoEmbedded] internal error error;
+partial struct w {
+    /*embed*/ internal error error;
 }
 
-[GoType] partial struct Pub {
-    [GoEmbedded] public fmt_package.Stringer Stringer;
+partial struct Pub {
+    /*embed*/ public fmt_package.Stringer Stringer;
 }
 
-[GoType] partial struct Named {
+partial struct Named {
     public fmt.Stringer Stringer;
 }
 
-[GoType] partial struct Tagged {
-    [GoTag(@"json:""key""")]
-    [GoEmbedded] public fmt_package.Stringer Stringer;
+partial struct Tagged {
+    /*embed*/ public fmt_package.Stringer Stringer; /*`json:"key"`*/
     public nint N;
 }
 
-[GoType] partial struct Omitted {
-    [GoTag(@"json:""-""")]
-    [GoEmbedded] public fmt_package.Stringer Stringer;
+partial struct Omitted {
+    /*embed*/ public fmt_package.Stringer Stringer; /*`json:"-"`*/
     public nint N;
 }
 
-[GoType] partial struct X {
-    [GoEmbedded] internal error error;
+partial struct X {
+    /*embed*/ internal error error;
     public nint N;
 }
 

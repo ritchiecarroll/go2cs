@@ -5,20 +5,20 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-[GoType] partial struct T1 {
+partial struct T1 {
     internal int32 a;
 }
 
-[GoType] partial struct T2 {
+partial struct T2 {
     internal int32 a;
 }
 
-[GoType] partial struct Inner {
+partial struct Inner {
     internal int32 p;
     internal int64 q;
 }
 
-[GoType] partial struct Outer {
+partial struct Outer {
     internal byte head;
     internal Inner @in;
 }
@@ -26,7 +26,7 @@ partial class main_package {
 internal static ж<Outer> ᏑgOuter = new StandardBox<Outer>(default(Outer));
 internal static ref Outer gOuter => ref ᏑgOuter.Value;
 
-[GoType] partial struct Padded {
+partial struct Padded {
     internal bool flag;
     internal int64 count;
     internal byte tag;
@@ -35,13 +35,13 @@ internal static ref Outer gOuter => ref ᏑgOuter.Value;
     internal int32 code;
 }
 
-[GoType] partial struct Embedded {
+partial struct Embedded {
     internal byte lead;
     public partial ref Padded Padded { get; }
     internal int16 trail;
 }
 
-[GoType] partial struct Arrays {
+partial struct Arrays {
     internal int16 head;
     internal array<int32> cells = new(5);
     internal byte tail;
@@ -59,7 +59,7 @@ public static float64 Float64frombits(uint64 b) {
 private static readonly object valueOfTheNextElementˢ = (@string)"Value of the next element:"u8;
 private static readonly object valueOfT2Aˢ = (@string)"Value of t2.a:"u8;
 
-[GoType("dyn")] internal partial struct main_x {
+internal partial struct main_x /*dyn*/ {
     internal int64 a;
     internal bool b;
     internal @string c;

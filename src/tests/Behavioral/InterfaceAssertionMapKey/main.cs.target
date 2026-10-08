@@ -4,28 +4,28 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface Object {
+partial interface Object {
     @string Name();
 }
 
-[GoType] partial interface dependency :
+partial interface dependency :
     Object
 {
     void isDependency();
 }
 
-[GoType] partial struct myVar {
+partial struct myVar {
     internal @string n;
 }
 
-[GoRecv] internal static @string Name(this ref myVar o) {
+internal static @string Name(this ref myVar o) {
     return o.n;
 }
 
-[GoRecv] internal static void isDependency(this ref myVar o) {
+internal static void isDependency(this ref myVar o) {
 }
 
-[GoType] partial struct myConst {
+partial struct myConst {
     internal @string n;
 }
 
@@ -36,11 +36,11 @@ internal static @string Name(this myConst o) {
 internal static void isDependency(this myConst o) {
 }
 
-[GoType] partial struct myFunc {
+partial struct myFunc {
     internal @string n;
 }
 
-[GoRecv] internal static @string Name(this ref myFunc o) {
+internal static @string Name(this ref myFunc o) {
     return o.n;
 }
 

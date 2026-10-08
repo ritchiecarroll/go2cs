@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct G<T> {
+partial struct G<T> {
     internal T v;
 }
 
-[GoType] partial interface I {
+partial interface I {
     @string M();
 }
 
@@ -16,7 +16,7 @@ public static @string M<T>(this G<T> g) {
     return fmt.Sprint(g.v);
 }
 
-[GoType("num:nint")] partial struct T;
+partial struct T /*num:nint*/;
 
 public static @string M(this T t) {
     return fmt.Sprint((nint)t);

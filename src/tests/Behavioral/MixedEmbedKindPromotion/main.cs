@@ -4,20 +4,20 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static nint Bump(this ref counter c) {
+internal static nint Bump(this ref counter c) {
     c.n++;
     return c.n;
 }
 
-[GoType] partial interface greeter {
+partial interface greeter {
     @string Greet();
 }
 
-[GoType] partial struct hello {
+partial struct hello {
     internal @string who;
 }
 
@@ -25,31 +25,31 @@ internal static @string Greet(this hello h) {
     return "hello "u8 + h.who;
 }
 
-[GoType] partial struct mixed {
+partial struct mixed {
     internal partial ref ж<counter> counter { get; }
-    [GoEmbedded] internal greeter greeter;
+    /*embed*/ internal greeter greeter;
 }
 
-[GoType] partial interface greetBumper {
+partial interface greetBumper {
     @string Greet();
     nint Bump();
 }
 
-[GoType] partial struct holder {
-    [GoEmbedded] internal greeter greeter;
+partial struct holder {
+    /*embed*/ internal greeter greeter;
     internal @string tag;
 }
 
-[GoType] partial struct outer {
+partial struct outer {
     internal partial ref holder holder { get; }
     internal nint extra;
 }
 
-[GoRecv] internal static nint Extra(this ref outer o) {
+internal static nint Extra(this ref outer o) {
     return o.extra;
 }
 
-[GoType] partial interface greetExtra {
+partial interface greetExtra {
     @string Greet();
     nint Extra();
 }

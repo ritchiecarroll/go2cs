@@ -4,20 +4,20 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct item {
+partial struct item {
     internal nint n;
 }
 
-[GoType("ж<item>")] partial class itemPtr;
+partial class itemPtr /*ж<item>*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object topLevelˢ = (@string)"top level:"u8;
 
-[GoType("dyn")] internal partial struct topLevel_s {
+internal partial struct topLevel_s /*dyn*/ {
     internal nint i;
 }
 
-[GoLocalName("sPtr")] [GoType("ж<topLevel_s>")] internal partial class topLevel_sPtr;
+internal partial class topLevel_sPtr /*ж<topLevel_s>*/;
 
 internal static void topLevel() {
     var ps = Ꮡ(new topLevel_s(1));
@@ -28,11 +28,11 @@ internal static void topLevel() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object inClosureˢ = (@string)"in closure:"u8;
 
-[GoType("dyn")] internal partial struct inClosure_s {
+internal partial struct inClosure_s /*dyn*/ {
     internal nint i;
 }
 
-[GoLocalName("sPtr")] [GoType("ж<inClosure_s>")] internal partial class inClosure_sPtr;
+internal partial class inClosure_sPtr /*ж<inClosure_s>*/;
 
 internal static void inClosure() {
     void run() {
@@ -47,11 +47,11 @@ internal static void inClosure() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object fromNilˢ = (@string)"from nil:"u8;
 
-[GoType("dyn")] internal partial struct fromNil_s {
+internal partial struct fromNil_s /*dyn*/ {
     internal nint i;
 }
 
-[GoLocalName("sPtr")] [GoType("ж<fromNil_s>")] internal partial class fromNil_sPtr;
+internal partial class fromNil_sPtr /*ж<fromNil_s>*/;
 
 internal static void fromNil() {
     fromNil_sPtr dps = ((fromNil_sPtr)nil);

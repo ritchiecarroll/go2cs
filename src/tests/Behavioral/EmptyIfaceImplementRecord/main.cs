@@ -6,11 +6,8 @@ using fmt = fmt_package;
 using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {
-// Descriptor carrier for `EmptyInterface` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("EmptyInterface")] public interface EmptyInterfaceᴅ { }
 
-
-[GoType] partial struct name {
+partial struct name {
     internal @string s;
 }
 
@@ -24,9 +21,8 @@ internal static nint args(params ꓸꓸꓸany xsʗp) {
     return len(xs);
 }
 
-[GoType("dyn")] internal partial struct main_xs {
-    [GoDescriptorType(Self = typeof(EmptyInterfaceᴅ))]
-    [GoEmbedded] public EmptyInterface EmptyInterface;
+internal partial struct main_xs /*dyn*/ {
+    /*embed*/ public EmptyInterface EmptyInterface;
 }
 
 internal static void Main() {

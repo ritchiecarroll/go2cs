@@ -4,40 +4,40 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface Reader {
+partial interface Reader {
     @string Read();
 }
 
-[GoType] partial interface Writer {
+partial interface Writer {
     void Write(@string s);
 }
 
-[GoType] partial interface ReadWriteCloser :
+partial interface ReadWriteCloser :
     Reader,
     Writer
 {
     @string Close();
 }
 
-[GoType] partial interface Conn {
+partial interface Conn {
     @string Read();
     void Write(@string s);
     @string Close();
 }
 
-[GoType] partial struct conn {
+partial struct conn {
     internal @string data;
 }
 
-[GoRecv] internal static @string Read(this ref conn c) {
+internal static @string Read(this ref conn c) {
     return c.data;
 }
 
-[GoRecv] internal static void Write(this ref conn c, @string s) {
+internal static void Write(this ref conn c, @string s) {
     c.data = s;
 }
 
-[GoRecv] internal static @string Close(this ref conn c) {
+internal static @string Close(this ref conn c) {
     return "closed:"u8 + c.data;
 }
 

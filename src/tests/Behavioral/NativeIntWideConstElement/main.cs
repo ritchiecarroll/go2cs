@@ -7,7 +7,7 @@ partial class main_package {
 
 internal static UntypedInt maxInt => /* 1<<63 - 1 */ 9223372036854775807;
 
-[GoType] partial struct splitTest {
+partial struct splitTest {
     internal @string name;
     internal nint n;
 }

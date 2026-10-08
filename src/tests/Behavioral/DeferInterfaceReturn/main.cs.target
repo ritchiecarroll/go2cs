@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface Shape {
+partial interface Shape {
     nint Area();
 }
 
-[GoType] partial struct Circle {
+partial struct Circle {
     public nint R;
 }
 
@@ -16,7 +16,7 @@ public static nint Area(this Circle c) {
     return 3 * c.R * c.R;
 }
 
-[GoType] partial struct Square {
+partial struct Square {
     public nint S;
 }
 

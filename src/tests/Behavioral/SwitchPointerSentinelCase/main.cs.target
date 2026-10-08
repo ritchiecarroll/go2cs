@@ -36,11 +36,11 @@ internal static nint classify(ж<byte> Ꮡp) {
     }
 }
 
-[GoType] partial struct mu {
+partial struct mu {
     internal uintptr key;
 }
 
-[GoType] partial struct schedt {
+partial struct schedt {
     internal mu @lock;
 }
 

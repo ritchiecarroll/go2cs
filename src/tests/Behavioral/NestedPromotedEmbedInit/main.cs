@@ -4,17 +4,17 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct flags {
+partial struct flags {
     internal nint width;
     internal @string name;
 }
 
-[GoType] partial struct formatter {
+partial struct formatter {
     internal partial ref flags flags { get; }
     internal array<byte> pad = new(3);
 }
 
-[GoType] partial struct printer {
+partial struct printer {
     internal formatter f;
 }
 

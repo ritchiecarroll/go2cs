@@ -4,19 +4,19 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct registry {
+partial struct registry {
     internal map<@string, ж<nint>> handles;
 }
 
-[GoRecv] internal static nint at(this ref registry r, @string key) {
+internal static nint at(this ref registry r, @string key) {
     return r.handles[key].Value;
 }
 
-[GoRecv] internal static void set(this ref registry r, @string key, nint val) {
+internal static void set(this ref registry r, @string key, nint val) {
     r.handles[key].Value = val;
 }
 
-[GoRecv] internal static registry clone(this ref registry r) {
+internal static registry clone(this ref registry r) {
     return r;
 }
 

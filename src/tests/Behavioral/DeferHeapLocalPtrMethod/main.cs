@@ -4,16 +4,16 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct state {
+partial struct state {
     internal nint n;
     internal @string label;
 }
 
-[GoRecv] internal static void free(this ref state s) {
+internal static void free(this ref state s) {
     fmt.Printf("free: %s n=%d\n"u8, s.label, s.n);
 }
 
-[GoRecv] internal static void add(this ref state s, nint d) {
+internal static void add(this ref state s, nint d) {
     s.n += d;
 }
 

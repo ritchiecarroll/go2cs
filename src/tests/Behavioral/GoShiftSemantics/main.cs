@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:nuint")] partial struct word;
+partial struct word /*num:nuint*/;
 
-[GoType("num:uint32")] partial struct halfword;
+partial struct halfword /*num:uint32*/;
 
-[GoType("num:int64")] partial struct signedword;
+partial struct signedword /*num:int64*/;
 
 internal static void Main() {
     var c = new nuint[]{0, 1, 63, 64, 65, 200}.slice();

@@ -2,66 +2,66 @@ namespace go.ForeignPointerImplementSuppression;
 
 partial class tone_package {
 
-[GoType] partial interface Level {
+partial interface Level {
     nint Tone();
     @string Name();
     void Set(nint d);
 }
 
-[GoType] partial struct ΔTone {
+partial struct ΔTone {
     public nint D;
 }
 
-[GoRecv] public static nint Tone(this ref ΔTone t) {
+public static nint Tone(this ref ΔTone t) {
     return t.D;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string toneˢ = "tone"u8;
 
-[GoRecv] public static @string Name(this ref ΔTone t) {
+public static @string Name(this ref ΔTone t) {
     return toneˢ;
 }
 
-[GoRecv] public static void Set(this ref ΔTone t, nint d) {
+public static void Set(this ref ΔTone t, nint d) {
     t.D = d;
 }
 
-[GoType] partial struct Plain {
+partial struct Plain {
     public nint D;
 }
 
-[GoRecv] public static nint Tone(this ref Plain p) {
+public static nint Tone(this ref Plain p) {
     return p.D * 10;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string plainˢ = "plain"u8;
 
-[GoRecv] public static @string Name(this ref Plain p) {
+public static @string Name(this ref Plain p) {
     return plainˢ;
 }
 
-[GoRecv] public static void Set(this ref Plain p, nint d) {
+public static void Set(this ref Plain p, nint d) {
     p.D = d;
 }
 
-[GoType] partial struct Lone {
+partial struct Lone {
     public nint D;
 }
 
-[GoRecv] public static nint Tone(this ref Lone l) {
+public static nint Tone(this ref Lone l) {
     return l.D * 100;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string loneˢ = "lone"u8;
 
-[GoRecv] public static @string Name(this ref Lone l) {
+public static @string Name(this ref Lone l) {
     return loneˢ;
 }
 
-[GoRecv] public static void Set(this ref Lone l, nint d) {
+public static void Set(this ref Lone l, nint d) {
     l.D = d;
 }
 

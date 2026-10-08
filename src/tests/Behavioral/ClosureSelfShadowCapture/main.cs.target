@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct span {
+partial struct span {
     internal nint largeType;
     internal nint val;
 }

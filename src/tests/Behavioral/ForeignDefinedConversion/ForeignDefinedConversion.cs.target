@@ -7,13 +7,13 @@ using ForeignDefinedConversion;
 
 partial class main_package {
 
-[GoType("global::go.ForeignDefinedConversion.levellib_package.Level")] partial struct Level;
+partial struct Level /*global::go.ForeignDefinedConversion.levellib_package.Level*/;
 
 public static @string String(this Level l) {
     return fmt.Sprintf("Level(%d)"u8, (uint32)((levellib.Level)l));
 }
 
-[GoType("global::go.time_package.Duration")] partial struct Dur;
+partial struct Dur /*global::go.time_package.Duration*/;
 
 internal static fmt.Stringer _ᴛ1ʗ = ((Level)(levellib.Level)0);
 

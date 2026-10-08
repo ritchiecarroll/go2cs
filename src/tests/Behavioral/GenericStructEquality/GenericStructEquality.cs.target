@@ -4,24 +4,24 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct handle<T> {
+partial struct handle<T> {
     internal ж<T> p;
 }
 
-[GoType] partial struct box<T> {
+partial struct box<T> {
     internal T v;
 }
 
-[GoType] partial struct meta<T> {
+partial struct meta<T> {
     internal nint hits;
 }
 
-[GoType] partial struct optval<T> {
+partial struct optval<T> {
     internal T v;
     internal bool valid;
 }
 
-[GoType] partial struct outer<T> {
+partial struct outer<T> {
     internal box<T> inner;
     internal nint n;
 }

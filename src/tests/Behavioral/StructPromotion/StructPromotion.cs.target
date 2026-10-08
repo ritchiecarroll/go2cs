@@ -5,7 +5,7 @@ using strings = strings_package;
 
 partial class main_package {
 
-[GoType] partial struct Person {
+partial struct Person {
     internal @string name;
     internal int32 age;
 }
@@ -18,7 +18,7 @@ public static bool IsAdult(this Person p) {
     return p.age >= 18;
 }
 
-[GoType] partial struct Employee {
+partial struct Employee {
     internal @string position;
 }
 
@@ -26,7 +26,7 @@ public static bool IsManager(this Employee e) {
     return e.position == "manager"u8;
 }
 
-[GoType] partial struct Record {
+partial struct Record {
     public partial ref Person Person { get; }
     public partial ref Employee Employee { get; }
 }
@@ -35,15 +35,15 @@ public static bool IsDr(this Record p) {
     return strings.HasPrefix(p.name, "Dr"u8) && p.age > 18;
 }
 
-[GoType] partial struct commonBase {
+partial struct commonBase {
     internal @string tag;
 }
 
-[GoRecv] internal static @string describe(this ref commonBase c) {
+internal static @string describe(this ref commonBase c) {
     return "base:"u8 + c.tag;
 }
 
-[GoType] partial struct ledger {
+partial struct ledger {
     internal partial ref commonBase commonBase { get; }
     internal nint seq;
 }

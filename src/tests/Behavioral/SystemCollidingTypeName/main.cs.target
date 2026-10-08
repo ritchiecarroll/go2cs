@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct ValueType {
+partial struct ValueType {
     internal @string unit;
 }
 
@@ -12,7 +12,7 @@ internal static @string describe(this ValueType v) {
     return v.unit;
 }
 
-[GoType] partial interface message {
+partial interface message {
     @string describe();
 }
 

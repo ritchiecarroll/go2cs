@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[]any")] partial struct SE;
+partial struct SE /*[]any*/;
 
-[GoType("[]any")] partial struct fileOps;
+partial struct fileOps /*[]any*/;
 
-[GoType] partial struct row {
+partial struct row {
     internal @string format;
     internal SE val;
 }

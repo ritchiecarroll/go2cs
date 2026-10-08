@@ -6,17 +6,17 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-[GoType] partial struct inner {
+partial struct inner {
     internal @string a;
 }
 
-[GoType] partial struct Q {
+partial struct Q {
     public nint A;
     internal nint b;
     internal int32 c;
 }
 
-[GoType] partial struct P {
+partial struct P {
     public nint Public;
     internal nint @private;
     internal inner s;

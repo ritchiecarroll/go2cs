@@ -8,14 +8,14 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct holder {
+partial struct holder {
     internal channel/*<-*/<@string> send = channel/*<-*/<@string>.SendOnly;
     internal /*<-*/channel<nint> recv = /*<-*/channel<nint>.RecvOnly;
     internal channel<bool> both;
     public channel/*<-*/<byte> Sent = channel/*<-*/<byte>.SendOnly;
 }
 
-[GoType("chan @string")] partial struct sink;
+partial struct sink /*chan @string*/;
 
 internal static void describe(@string label, reflectꓸType t) {
     fmt.Printf("%s: %v | dir=%v | kind=%v\n"u8, label, t, t.ChanDir(), t.Kind());

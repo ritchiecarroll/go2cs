@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Counter {
+partial struct Counter {
     internal int32 n;
 }
 
@@ -29,11 +29,11 @@ public static void Set(this ж<Counter> Ꮡc, int32 v) {
     (Ꮡc.of(Counter.Ꮡn)).Value = v;
 }
 
-[GoRecv] public static int32 Get(this ref Counter c) {
+public static int32 Get(this ref Counter c) {
     return c.n;
 }
 
-[GoType] partial struct Flag {
+partial struct Flag {
     internal Counter c;
     internal @string label;
 }
@@ -50,11 +50,11 @@ public static void Reset(this ж<Flag> Ꮡf, int32 v) {
     Ꮡf.of(Flag.Ꮡc).Set(v);
 }
 
-[GoRecv] public static int32 Value(this ref Flag f) {
+public static int32 Value(this ref Flag f) {
     return f.c.Get();
 }
 
-[GoRecv] public static @string Label(this ref Flag f) {
+public static @string Label(this ref Flag f) {
     return f.label;
 }
 

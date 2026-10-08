@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct thing {
+partial struct thing {
     internal nint n;
 }
 
-[GoRecv] internal static @string Ping(this ref thing t) {
+internal static @string Ping(this ref thing t) {
     return fmt.Sprintf("ping %d"u8, t.n);
 }
 
@@ -19,7 +19,7 @@ internal static @string Pong(this thing t) {
     return pongˢ;
 }
 
-[GoType] partial interface speaker {
+partial interface speaker {
     @string Pong();
 }
 
@@ -31,16 +31,16 @@ private static readonly object bothMissedˢ = (@string)"both-missed"u8;
 private static readonly object quitMatchedWrongˢ = (@string)"quit-matched-wrong"u8;
 private static readonly object quitMissedOkˢ = (@string)"quit-missed-ok"u8;
 
-[GoType("dyn")] internal partial interface main_type {
+internal partial interface main_type /*dyn*/ {
     @string Ping();
 }
 
-[GoType("dyn")] internal partial interface main_typeᴛ1 {
+internal partial interface main_typeᴛ1 /*dyn*/ {
     @string Ping();
     @string Pong();
 }
 
-[GoType("dyn")] internal partial interface main_typeᴛ2 {
+internal partial interface main_typeᴛ2 /*dyn*/ {
     void Quit();
 }
 

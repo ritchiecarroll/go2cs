@@ -7,48 +7,48 @@ using sort = sort_package;
 
 partial class main_package {
 
-[GoType("map[nint, Direct]")] partial struct Direct;
+partial struct Direct /*map[nint, Direct]*/;
 
 public static @string String(this Direct d) {
     return fmt.Sprintf("Direct(%d)"u8, len(d));
 }
 
-[GoType("map[@string, DirectStr]")] partial struct DirectStr;
+partial struct DirectStr /*map[@string, DirectStr]*/;
 
-[GoType("map[nint, viaStructV]")] partial struct ViaStruct;
+partial struct ViaStruct /*map[nint, viaStructV]*/;
 
-[GoType] public partial struct viaStructV {
+public partial struct viaStructV {
     internal nint n;
     internal ViaStruct m;
 }
 
-[GoType("map[nint, viaNestedA]")] partial struct ViaNested;
+partial struct ViaNested /*map[nint, viaNestedA]*/;
 
-[GoType] public partial struct viaNestedA {
+public partial struct viaNestedA {
     internal viaNestedB b;
 }
 
-[GoType] partial struct viaNestedB {
+partial struct viaNestedB {
     internal ViaNested m;
 }
 
-[GoType("map[nint, array<ViaArray>]")] partial struct ViaArray;
+partial struct ViaArray /*map[nint, array<ViaArray>]*/;
 
-[GoType("map[nint, slice<ViaSlice>]")] partial struct ViaSlice;
+partial struct ViaSlice /*map[nint, slice<ViaSlice>]*/;
 
-[GoType("map[nint, map<nint, ViaMap>]")] partial struct ViaMap;
+partial struct ViaMap /*map[nint, map<nint, ViaMap>]*/;
 
-[GoType("map[nint, namedSlice]")] partial struct ViaNamed;
+partial struct ViaNamed /*map[nint, namedSlice]*/;
 
-[GoType("[]ViaNamed")] public partial struct namedSlice;
+public partial struct namedSlice /*[]ViaNamed*/;
 
-[GoType("map[nint, Generic<T>]")] partial struct Generic<T>;
+partial struct Generic<T> /*map[nint, Generic<T>]*/;
 
-[GoType("map[nint, ж<ViaPtr>]")] partial struct ViaPtr;
+partial struct ViaPtr /*map[nint, ж<ViaPtr>]*/;
 
-[GoType("viaStructV")] partial struct DefinedOverStruct;
+partial struct DefinedOverStruct /*viaStructV*/;
 
-[GoType("ж<Direct>")] partial class PDirect;
+partial class PDirect /*ж<Direct>*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object directNilˢ = (@string)"direct nil:"u8;

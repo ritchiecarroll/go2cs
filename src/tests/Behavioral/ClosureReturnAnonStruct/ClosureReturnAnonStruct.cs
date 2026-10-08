@@ -8,7 +8,7 @@ partial class main_package {
 private static readonly @string alphaˢ = "alpha"u8;
 private static readonly @string betaˢ = "beta"u8;
 
-[GoType("dyn")] internal partial struct closureReturningAnonStruct_func_R0 {
+internal partial struct closureReturningAnonStruct_func_R0 /*dyn*/ {
     internal @string name;
     internal nint size;
 }

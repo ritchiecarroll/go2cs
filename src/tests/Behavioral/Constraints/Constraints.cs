@@ -6,92 +6,85 @@ namespace go;
 
 partial class constraints_package {
 
-[GoType] partial struct Frog {
+partial struct Frog {
     public @string Name;
     public @string Color;
 }
 
-[GoType] partial interface ConstraintTest1<ΔT> {
+partial interface ConstraintTest1<ΔT> {
     //  Type constraints: string | []int | map[string]int | chan string | *int | [2]int | Frog
     // Derived operators: none
     @string Upper();
 }
 
-[GoType] partial interface ConstraintTest2<ΔT> {
+partial interface ConstraintTest2<ΔT> {
     //  Type constraints: string | chan string | *int | [2]int | Frog
     // Derived operators: none
     @string Lower();
 }
 
-[GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
-partial interface Signed<ΔT> {
+partial interface Signed<ΔT> /*operators = Sum, Arithmetic, Integer, Comparable, Ordered*/ {
     //  Type constraints: ~int | ~int8 | ~int16 | ~int32 | ~int64
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
-partial interface Unsigned<ΔT> {
+partial interface Unsigned<ΔT> /*operators = Sum, Arithmetic, Integer, Comparable, Ordered*/ {
     //  Type constraints: ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
-partial interface Integer<ΔT> {
+partial interface Integer<ΔT> /*operators = Sum, Arithmetic, Integer, Comparable, Ordered*/ {
     //  Type constraints: Signed | Unsigned
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
-partial interface PromotedTest1<ΔT> {
+partial interface PromotedTest1<ΔT> /*operators = Sum, Arithmetic, Integer, Comparable, Ordered*/ {
     //  Type constraints: Signed
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType] partial interface PromotedTest2<ΔT> :
+partial interface PromotedTest2<ΔT> :
     ConstraintTest1<ΔT>
 {
     //  Type constraints: ConstraintTest1
     // Derived operators: none
 }
 
-[GoType] partial interface PromotedTest3<ΔT> :
+partial interface PromotedTest3<ΔT> :
     ConstraintTest2<ΔT>
 {
     //  Type constraints: ConstraintTest2
     // Derived operators: none
 }
 
-[GoType("operators = Sum, Arithmetic, Comparable, Ordered")]
-partial interface Float<ΔT> {
+partial interface Float<ΔT> /*operators = Sum, Arithmetic, Comparable, Ordered*/ {
     //  Type constraints: ~float32 | ~float64
     // Derived operators: +, -, *, /, ==, !=, <, <=, >, >=
 }
 
-[GoType("operators = Sum, Arithmetic, Comparable")]
-partial interface Complex<ΔT> {
+partial interface Complex<ΔT> /*operators = Sum, Arithmetic, Comparable*/ {
     //  Type constraints: ~complex64 | ~complex128
     // Derived operators: +, -, *, /, ==, !=
 }
 
-[GoType("operators = Sum, Comparable, Ordered")]
-partial interface Ordered<ΔT> {
+partial interface Ordered<ΔT> /*operators = Sum, Comparable, Ordered*/ {
     //  Type constraints: Integer | Float | ~string
     // Derived operators: +, ==, !=, <, <=, >, >=
 }
 
-[GoType] partial struct recordA {
+partial struct recordA {
     internal nint n;
 }
 
-[GoType] partial struct recordB {
+partial struct recordB {
     internal nint n;
 }
 
-[GoType] partial struct recordC {
+partial struct recordC {
     internal nint n;
 }
 
-[GoType] partial interface RecordUnion<ΔT> {
+partial interface RecordUnion<ΔT> {
     //  Type constraints: recordA | recordB | recordC
     // Derived operators: none
 }

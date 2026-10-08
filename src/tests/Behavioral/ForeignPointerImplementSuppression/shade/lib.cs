@@ -2,7 +2,7 @@ namespace go.ForeignPointerImplementSuppression;
 
 partial class shade_package {
 
-[GoType] partial interface Level {
+partial interface Level {
     nint Tone();
     @string Name();
     void Set(nint d);

@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal Δsync.Mutex mu;
     internal nint n;
 }

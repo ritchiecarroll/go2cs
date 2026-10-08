@@ -5,7 +5,7 @@ using ꓸꓸꓸnint = Span<nint>;
 
 partial class main_package {
 
-[GoType] partial struct Tally {
+partial struct Tally {
     internal nint total;
     internal @string log;
 }

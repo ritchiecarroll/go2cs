@@ -6,7 +6,7 @@ using AliasStructToInterfaceLib = AliasStructToInterfaceLib_package;
 
 partial class main_package {
 
-[GoType] partial interface mapInterface {
+partial interface mapInterface {
     (any value, bool ok) Load(any key);
     void Store(any key, any value);
 }
@@ -15,7 +15,7 @@ internal static mapInterface newMap() {
     return new sync_MapжmapInterface(Ꮡ(new AliasStructToInterfaceLibꓸMap()));
 }
 
-[GoType] partial interface storer {
+partial interface storer {
     void Store(any key, any value);
 }
 

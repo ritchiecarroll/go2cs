@@ -4,16 +4,16 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] public partial struct hkdfState {
+public partial struct hkdfState {
     internal @string name;
     internal nint size;
 }
 
-[GoRecv] internal static @string describe(this ref hkdfState s) {
+internal static @string describe(this ref hkdfState s) {
     return fmt.Sprintf("%s/%d"u8, s.name, s.size);
 }
 
-[GoType] public partial struct cfg {
+public partial struct cfg {
     internal bool verbose;
 }
 

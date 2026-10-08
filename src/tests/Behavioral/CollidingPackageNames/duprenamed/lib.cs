@@ -2,7 +2,7 @@ namespace go.collidea;
 
 partial class dup_package {
 
-[GoType] partial struct Widget {
+partial struct Widget {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -12,7 +12,7 @@ public static @string Marker(this Widget _) {
     return widgetMarkerˢ;
 }
 
-[GoType] partial struct ΔMarker {
+partial struct ΔMarker {
     public @string Value;
 }
 
@@ -23,7 +23,7 @@ public static @string Greeting() {
     return helloFromDuprenamedˢ;
 }
 
-[GoType] partial struct Box<T> {
+partial struct Box<T> {
     public T V;
 }
 

@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct S {
+partial struct S {
     internal array<nint> a = new(3);
 }
 

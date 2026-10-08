@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("map[@string, slice<@string>]")] partial struct Values;
+partial struct Values /*map[@string, slice<@string>]*/;
 
 public static @string Get(this Values v, @string key) {
     {

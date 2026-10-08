@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 
-[GoType("dyn")] partial struct kindsᴛ1 {
+partial struct kindsᴛ1 /*dyn*/ {
     internal @string name;
     internal nint size;
     internal Func<nint, nint> scale;

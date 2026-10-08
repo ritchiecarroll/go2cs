@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[]byte")] partial struct Buf;
+partial struct Buf /*[]byte*/;
 
 internal static @string fillVia(ж<slice<byte>> Ꮡout) {
     var p = Ꮡout.Reinterpret<slice<byte>, Buf>();
@@ -12,7 +12,7 @@ internal static @string fillVia(ж<slice<byte>> Ꮡout) {
     return ((@string)(slice<byte>)p.ValueSlot);
 }
 
-[GoType] partial struct handler {
+partial struct handler {
     internal slice<byte> preformatted;
     internal nint groups;
 }

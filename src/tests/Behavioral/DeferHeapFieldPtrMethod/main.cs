@@ -4,21 +4,21 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct tracker {
+partial struct tracker {
     internal slice<@string> lines;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object lineˢ = (@string)"line:"u8;
 
-[GoRecv] internal static void flush(this ref tracker t) {
+internal static void flush(this ref tracker t) {
     fmt.Printf("flush: %d lines\n"u8, len(t.lines));
     foreach (var (_, l) in t.lines) {
         fmt.Println(lineˢ, l);
     }
 }
 
-[GoType] partial struct parser {
+partial struct parser {
     internal @string name;
     internal tracker trk;
 }

@@ -6,7 +6,7 @@ partial class main_package {
 
 internal static UntypedInt writing => 4;
 
-[GoType] partial struct hmap {
+partial struct hmap {
     internal uint8 flags;
 }
 

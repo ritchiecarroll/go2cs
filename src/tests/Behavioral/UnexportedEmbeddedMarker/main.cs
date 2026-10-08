@@ -5,25 +5,25 @@ using System.Runtime.InteropServices;
 
 partial class main_package {
 
-[GoType] partial struct noCopy {
+partial struct noCopy {
 }
 
-[GoRecv] internal static void Lock(this ref noCopy _) {
+internal static void Lock(this ref noCopy _) {
 }
 
-[GoRecv] internal static void Unlock(this ref noCopy _) {
+internal static void Unlock(this ref noCopy _) {
 }
 
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Counter {
+[StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Counter {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal int64 v;
 }
 
-[GoRecv] public static void Add(this ref Counter c, int64 n) {
+public static void Add(this ref Counter c, int64 n) {
     c.v += n;
 }
 
-[GoRecv] public static int64 Value(this ref Counter c) {
+public static int64 Value(this ref Counter c) {
     return c.v;
 }
 

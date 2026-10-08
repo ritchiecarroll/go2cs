@@ -4,13 +4,13 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("bool")] partial struct boolVal;
+partial struct boolVal /*bool*/;
 
 internal static bool isSet(this boolVal b) {
     return (bool)b;
 }
 
-[GoType] partial interface Value {
+partial interface Value {
     bool isSet();
 }
 

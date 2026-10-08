@@ -2,7 +2,7 @@ namespace go.DefinedOverNamedComposite;
 
 partial class fslike_package {
 
-[GoType("map[@string, nint]")] partial struct MapFS;
+partial struct MapFS /*map[@string, nint]*/;
 
 public static nint Get(this MapFS m, @string k) {
     return m[k];
@@ -12,7 +12,7 @@ public static nint Size(this MapFS m) {
     return len(m);
 }
 
-[GoType("[]nint")] partial struct List;
+partial struct List /*[]nint*/;
 
 public static nint Sum(this List l) {
     nint t = 0;
@@ -22,7 +22,7 @@ public static nint Sum(this List l) {
     return t;
 }
 
-[GoType("[2]nint")] partial struct Buf;
+partial struct Buf /*[2]nint*/;
 
 public static nint First(this Buf b) {
     b = b.Clone();

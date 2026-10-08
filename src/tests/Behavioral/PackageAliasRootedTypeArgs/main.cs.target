@@ -31,7 +31,7 @@ using Δio = io_package;
 
 partial class main_package {
 
-[GoType] partial struct Header {
+partial struct Header {
     public @string Name;
     public int64 Size;
 }
@@ -40,19 +40,19 @@ public static @string String(this Header h) {
     return fmt.Sprint(h.Name, (@string)"/"u8, h.Size);
 }
 
-[GoType] partial interface Stringish {
+partial interface Stringish {
     @string String();
 }
 
-[GoType("dyn")] partial struct anonᴛ1 {
+partial struct anonᴛ1 /*dyn*/ {
     public nint A;
 }
 
-[GoType("dyn")] partial interface anonIᴛ1 {
+partial interface anonIᴛ1 /*dyn*/ {
     nint Zed();
 }
 
-[GoType] partial struct zed {
+partial struct zed {
     internal nint v;
 }
 

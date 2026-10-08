@@ -12,7 +12,7 @@ using path;
 
 partial class main_package {
 
-[GoType] partial struct entry {
+partial struct entry {
     internal @string name;
     internal @string alt;
     internal bool isDir;
@@ -21,7 +21,7 @@ partial class main_package {
 }
 
 
-[GoType("dyn")] partial struct dirsᴛ1 {
+partial struct dirsᴛ1 /*dyn*/ {
     internal @string rel;
     internal time.Time stamp;
 }
@@ -31,7 +31,7 @@ internal static slice<dirsᴛ1> dirs = new dirsᴛ1[]{
     new("ÜnicödeDir"u8, time.Date(2021, time.February, 3, 6, 7, 8, 0, time.ΔUTC))
 }.slice();
 
-[GoType("dyn")] partial struct filesᴛ1 {
+partial struct filesᴛ1 /*dyn*/ {
     internal @string rel;
     internal nint size;
     internal time.Time stamp;

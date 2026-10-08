@@ -26,7 +26,7 @@ internal static uint32 checksum(slice<byte> b) {
     return sum;
 }
 
-[GoType("dyn")] internal partial struct roundTrip_accepted {
+internal partial struct roundTrip_accepted /*dyn*/ {
     internal Δnet.Conn conn;
     internal error err;
 }

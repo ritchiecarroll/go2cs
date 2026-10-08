@@ -5,9 +5,9 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType("num:float64")] partial struct Celsius;
+partial struct Celsius /*num:float64*/;
 
-[GoType] partial struct pair {
+partial struct pair {
     public int32 A;
     public array<uint8> B = new(2);
 }

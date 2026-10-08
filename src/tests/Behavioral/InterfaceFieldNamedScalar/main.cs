@@ -4,27 +4,27 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:nint")] partial struct myErr;
+partial struct myErr /*num:nint*/;
 
 internal static @string Error(this myErr e) {
     return fmt.Sprintf("myErr(%d)"u8, (nint)e);
 }
 
-[GoType("@string")] partial struct tag;
+partial struct tag /*@string*/;
 
 internal static @string Name(this tag t) {
     return "tag:"u8 + ((@string)t);
 }
 
-[GoType] partial interface named {
+partial interface named {
     @string Name();
 }
 
-[GoType] partial struct box {
+partial struct box {
     internal error err;
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal named n;
 }
 

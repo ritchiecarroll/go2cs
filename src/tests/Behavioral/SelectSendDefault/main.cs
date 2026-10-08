@@ -244,7 +244,7 @@ internal static partial void blockingSendStillBlocks() {
     fmt.Println(blockingSendReceivedˢ, ᐸꟷ(got));
 }
 
-[GoType("chan nint")] partial struct queue;
+partial struct queue /*chan nint*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object namedChannelSentˢ = (@string)"named channel: sent"u8;

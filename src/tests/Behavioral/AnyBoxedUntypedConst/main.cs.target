@@ -17,7 +17,7 @@ internal static readonly @string namedStr = "seed"u8;
 
 internal static readonly @string typedStr = "seed"u8;
 
-[GoType] partial struct holder {
+partial struct holder {
     internal any v;
 }
 

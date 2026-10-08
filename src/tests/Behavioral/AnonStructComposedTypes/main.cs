@@ -5,10 +5,10 @@ using fmt = fmt_package;
 partial class main_package {
 
 
-[GoType("dyn")] partial struct ptrElemsᴛ1 {
+partial struct ptrElemsᴛ1 /*dyn*/ {
     internal nint @in;
     internal @string str;
-    [GoEmbedded] internal error error;
+    /*embed*/ internal error error;
 }
 internal static slice<ж<ptrElemsᴛ1>> ptrElems = new ж<ptrElemsᴛ1>[]{
     Ꮡ(new ptrElemsᴛ1(1, "one"u8, default!)),
@@ -16,7 +16,7 @@ internal static slice<ж<ptrElemsᴛ1>> ptrElems = new ж<ptrElemsᴛ1>[]{
 }.slice();
 
 
-[GoType("dyn")] partial struct mapPtrValuesᴛ1 {
+partial struct mapPtrValuesᴛ1 /*dyn*/ {
     internal nint n;
 }
 internal static map<@string, ж<mapPtrValuesᴛ1>> mapPtrValues = new map<@string, ж<mapPtrValuesᴛ1>>{
@@ -25,7 +25,7 @@ internal static map<@string, ж<mapPtrValuesᴛ1>> mapPtrValues = new map<@strin
 };
 
 
-[GoType("dyn")] partial struct nestedᴛ1 {
+partial struct nestedᴛ1 /*dyn*/ {
     internal @string tag;
 }
 internal static slice<slice<nestedᴛ1>> nested = new slice<nestedᴛ1>[]{

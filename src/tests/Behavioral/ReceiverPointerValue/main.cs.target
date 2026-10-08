@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct ring {
+partial struct ring {
     internal nint data;
     internal ж<ring> next;
 }
@@ -15,7 +15,7 @@ internal static void initSelf(this ж<ring> Ꮡr) {
     r.next = Ꮡr;
 }
 
-[GoRecv] internal static void linkTo(this ref ring r, ж<ring> Ꮡother) {
+internal static void linkTo(this ref ring r, ж<ring> Ꮡother) {
     r.next = Ꮡother;
 }
 

@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
@@ -38,13 +38,13 @@ internal static Action<nint> makeAdder(this ж<counter> Ꮡc) {
     };
 }
 
-[GoType("num:nint")] partial struct label;
+partial struct label /*num:nint*/;
 
 internal static @string render(this label l) {
     return fmt.Sprintf("L%d"u8, (nint)l);
 }
 
-[GoType] partial struct widget {
+partial struct widget {
     internal label id;
 }
 

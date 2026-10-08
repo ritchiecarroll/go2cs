@@ -5,13 +5,13 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType("[16]byte")] partial struct UUID;
+partial struct UUID /*[16]byte*/;
 
-[GoType("[]UUID")] partial struct UUIDs;
+partial struct UUIDs /*[]UUID*/;
 
-[GoType("[]array<nint>")] partial struct Rows;
+partial struct Rows /*[]array<nint>*/;
 
-[GoType("[]@string")] partial struct Names;
+partial struct Names /*[]@string*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object namedEmptyˢ = (@string)"named empty:"u8;

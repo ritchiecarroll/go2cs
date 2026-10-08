@@ -4,13 +4,13 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("map[@string, nint]")] partial struct A;
+partial struct A /*map[@string, nint]*/;
 
-[GoType("map[@string, nint]")] partial struct B;
+partial struct B /*map[@string, nint]*/;
 
-[GoType("[]nint")] partial struct S1;
+partial struct S1 /*[]nint*/;
 
-[GoType("[]nint")] partial struct S2;
+partial struct S2 /*[]nint*/;
 
 internal static void Main() {
     var a = new A(new map<@string, nint>{["x"u8] = 1, ["y"u8] = 2});

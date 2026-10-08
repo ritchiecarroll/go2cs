@@ -6,13 +6,13 @@ using sync;
 
 partial class main_package {
 
-[GoType] partial struct entry<V> {
+partial struct entry<V> {
     internal ж<V> key;
     internal atomic.Pointer<V> v;
     internal ж<entry<V>> next;
 }
 
-[GoType] partial struct Cache<V> {
+partial struct Cache<V> {
     internal atomic.Pointer<entry<V>> head;
 }
 

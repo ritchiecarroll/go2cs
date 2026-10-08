@@ -4,17 +4,17 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct header {
+partial struct header {
     internal ж<node> next;
     internal nint tag;
 }
 
-[GoType] partial struct node {
+partial struct node {
     internal partial ref header header { get; }
     internal nint val;
 }
 
-[GoType] partial struct list {
+partial struct list {
     internal ж<node> head;
 }
 

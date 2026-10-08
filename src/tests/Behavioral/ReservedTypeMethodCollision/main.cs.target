@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Δsliceᴛ {
+partial struct Δsliceᴛ {
     internal nint lo, hi;
 }
 
@@ -12,11 +12,11 @@ internal static nint span(this Δsliceᴛ s) {
     return s.hi - s.lo;
 }
 
-[GoType] partial struct builder {
+partial struct builder {
     internal nint @base;
 }
 
-[GoRecv] internal static Δsliceᴛ Δslice(this ref builder b, nint n) {
+internal static Δsliceᴛ Δslice(this ref builder b, nint n) {
     return new Δsliceᴛ(lo: b.@base, hi: b.@base + n);
 }
 
@@ -33,7 +33,7 @@ internal static void Main() {
 
 // type ΔFilter is a methodless func type — rendered inline as its base delegate
 
-[GoType] partial struct Sieve {
+partial struct Sieve {
     internal slice<nint> vals;
 }
 

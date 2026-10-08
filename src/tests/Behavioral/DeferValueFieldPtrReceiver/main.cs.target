@@ -4,19 +4,19 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static void reset(this ref counter c) {
+internal static void reset(this ref counter c) {
     c.n = 0;
 }
 
-[GoRecv] internal static void inc(this ref counter c) {
+internal static void inc(this ref counter c) {
     c.n++;
 }
 
-[GoType] partial struct builder {
+partial struct builder {
     internal counter c;
 }
 

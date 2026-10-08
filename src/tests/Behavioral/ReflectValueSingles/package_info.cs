@@ -65,7 +65,7 @@ namespace go;
 public static partial class main_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
@@ -74,12 +74,12 @@ public static partial class main_package
     internal partial struct gA {}
     internal partial struct gB<T> {}
     internal partial struct integer {}
-    internal partial struct main_A {}
-    internal partial struct main_AB {}
-    internal partial struct main_B {}
-    internal partial struct main_MyBuffer {}
-    internal partial struct main_S {}
-    internal partial struct main_SB {}
+    [GoLocalName("A")] internal partial struct main_A {}
+    [GoLocalName("AB")] internal partial struct main_AB {}
+    [GoLocalName("B")] internal partial struct main_B {}
+    [GoLocalName("MyBuffer")] internal partial struct main_MyBuffer {}
+    [GoLocalName("S")] internal partial struct main_S {}
+    [GoLocalName("SB")] internal partial struct main_SB {}
     [GoLocalName("chanSlots")] internal partial struct main_chanSlots {}
     [GoLocalName("holder")] internal partial struct main_holder {}
     [GoLocalName("ptrSlots")] internal partial struct main_ptrSlots {}

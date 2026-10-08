@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("map[@string, slice<@string>]")] partial struct Header;
+partial struct Header /*map[@string, slice<@string>]*/;
 
-[GoType] partial struct Request {
+partial struct Request {
     public Header Header;
     public map<@string, nint> Count;
     public slice<@string> Body;

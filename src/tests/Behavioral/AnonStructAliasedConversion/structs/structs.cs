@@ -2,7 +2,7 @@ namespace go.AnonStructAliasedConversion;
 
 partial class structs_package {
 
-[GoType] partial struct AssignB {
+partial struct AssignB {
     public nint A;
 }
 

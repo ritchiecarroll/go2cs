@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] public partial struct item {
+public partial struct item {
     internal @string name;
     internal nint rank;
 }
@@ -16,12 +16,12 @@ public static void Sort(this By by, slice<item> items) {
     s.run();
 }
 
-[GoType] partial struct sorter {
+partial struct sorter {
     internal slice<item> items;
     internal Func<ж<item>, ж<item>, bool> by;
 }
 
-[GoRecv] internal static void run(this ref sorter s) {
+internal static void run(this ref sorter s) {
     nint n = len(s.items);
     for (nint i = 0; i < n; i++) {
         for (nint j = i + 1; j < n; j++) {
@@ -39,7 +39,7 @@ internal static bool byName(ж<item> Ꮡa, ж<item> Ꮡb) {
     return a.name < b.name;
 }
 
-[GoType] partial struct comparer {
+partial struct comparer {
     internal Func<ж<item>, ж<item>, bool> cmp;
 }
 

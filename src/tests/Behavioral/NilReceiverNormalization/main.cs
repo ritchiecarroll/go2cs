@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct loc {
+partial struct loc {
     internal @string name;
     internal nint offset;
 }

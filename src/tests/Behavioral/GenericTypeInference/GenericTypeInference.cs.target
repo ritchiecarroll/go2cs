@@ -4,25 +4,22 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
-partial interface Signed<ΔT> {
+partial interface Signed<ΔT> /*operators = Sum, Arithmetic, Integer, Comparable, Ordered*/ {
     //  Type constraints: ~int | ~int8 | ~int16 | ~int32 | ~int64
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
-partial interface Unsigned<ΔT> {
+partial interface Unsigned<ΔT> /*operators = Sum, Arithmetic, Integer, Comparable, Ordered*/ {
     //  Type constraints: ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
-partial interface Integer<ΔT> {
+partial interface Integer<ΔT> /*operators = Sum, Arithmetic, Integer, Comparable, Ordered*/ {
     //  Type constraints: Signed | Unsigned
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType("[]int32")] partial struct Point;
+partial struct Point /*[]int32*/;
 
 public static @string String(this Point p) {
     return fmt.Sprintf("%d"u8, p);
@@ -97,7 +94,7 @@ public static void PassSlice<S, E>(S s, E v)
     setFirst(new slice<E>(s), v);
 }
 
-[GoType("map[@string, nint]")] partial struct Grades;
+partial struct Grades /*map[@string, nint]*/;
 
 public static bool EqualMaps<M, K, V>(M m1, M m2)
     where M : /* ~map[K]V */ IMap<K, V>, ISupportMake<M>, new()

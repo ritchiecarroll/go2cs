@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct path {
+partial struct path {
     internal @string name;
 }
 
@@ -29,7 +29,7 @@ internal static void Pair(this path p, nint a, @string b) {
     fmt.Println(pairˢ, p.name, a, b);
 }
 
-[GoType] partial struct state {
+partial struct state {
     internal path cur;
 }
 

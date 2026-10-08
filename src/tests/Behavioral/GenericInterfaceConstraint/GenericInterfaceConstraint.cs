@@ -4,48 +4,48 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface Shape {
+partial interface Shape {
     float64 Area();
     @string Name();
 }
 
-[GoType] partial interface Round :
+partial interface Round :
     Shape
 {
     float64 Diameter();
 }
 
-[GoType] partial struct Circle {
+partial struct Circle {
     public float64 R;
 }
 
-[GoRecv] public static float64 Area(this ref Circle c) {
+public static float64 Area(this ref Circle c) {
     return 3.0D * c.R * c.R;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string circleˢ = "circle"u8;
 
-[GoRecv] public static @string Name(this ref Circle c) {
+public static @string Name(this ref Circle c) {
     return circleˢ;
 }
 
-[GoRecv] public static float64 Diameter(this ref Circle c) {
+public static float64 Diameter(this ref Circle c) {
     return 2.0D * c.R;
 }
 
-[GoType] partial struct Square {
+partial struct Square {
     public float64 S;
 }
 
-[GoRecv] public static float64 Area(this ref Square s) {
+public static float64 Area(this ref Square s) {
     return s.S * s.S;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string squareˢ = "square"u8;
 
-[GoRecv] public static @string Name(this ref Square s) {
+public static @string Name(this ref Square s) {
     return squareˢ;
 }
 
@@ -88,7 +88,7 @@ internal static ж<Circle> newUnitCircle() {
     return Ꮡ(new Circle(R: 1D));
 }
 
-[GoType] partial interface Figure {
+partial interface Figure {
     float64 Area();
     @string Name();
 }

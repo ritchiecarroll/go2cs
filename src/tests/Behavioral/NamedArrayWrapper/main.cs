@@ -6,23 +6,23 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[4]uint64")] partial struct pageBits;
+partial struct pageBits /*[4]uint64*/;
 
-[GoType("pageBits")] partial struct pallocBits;
+partial struct pallocBits /*pageBits*/;
 
-[GoType("[]uint32")] partial struct pm;
+partial struct pm /*[]uint32*/;
 
-[GoType("[4]byte")] partial struct tb;
+partial struct tb /*[4]byte*/;
 
 internal static void zeroTB(ref tb buf) {
     buf = new tb(new byte[4].array());
 }
 
-[GoRecv] internal static void set(this ref pageBits b, nuint i, uint64 v) {
+internal static void set(this ref pageBits b, nuint i, uint64 v) {
     b.Value[i] = v;
 }
 
-[GoRecv] internal static uint64 get(this ref pageBits b, nuint i) {
+internal static uint64 get(this ref pageBits b, nuint i) {
     return b.Value[i];
 }
 
@@ -125,9 +125,9 @@ internal static void Main() {
     fmt.Println(grid.Total(), (nint)grid[0], len(grid));
 }
 
-[GoType("num:nint")] public partial struct unit;
+public partial struct unit /*num:nint*/;
 
-[GoType("[3]unit")] partial struct Grid;
+partial struct Grid /*[3]unit*/;
 
 public static nint Total(this Grid g) {
     g = g.Clone();
@@ -135,11 +135,11 @@ public static nint Total(this Grid g) {
     return (nint)g[0] + (nint)g[1] + (nint)g[2];
 }
 
-[GoType("[4]uint64")] partial struct mont;
+partial struct mont /*[4]uint64*/;
 
-[GoType("[4]uint64")] partial struct nonMont;
+partial struct nonMont /*[4]uint64*/;
 
-[GoType] partial struct scal {
+partial struct scal {
     internal mont s;
 }
 
@@ -155,36 +155,36 @@ internal static void @double(ref mont @out, ref nonMont arg) {
     }
 }
 
-[GoType("[4]uintptr")] partial struct callers;
+partial struct callers /*[4]uintptr*/;
 
-[GoType] partial struct holder {
+partial struct holder {
     internal ж<callers> trace;
 }
 
-[GoType] partial struct slot {
+partial struct slot {
     internal nint v;
 }
 
-[GoType("[4]slot")] partial struct slots;
+partial struct slots /*[4]slot*/;
 
-[GoRecv] internal static ж<slot> at(this ref slots s, nint i) {
+internal static ж<slot> at(this ref slots s, nint i) {
     return Ꮡ(s.Value, i);
 }
 
-[GoRecv] internal static nint sum(this ref slots s) {
+internal static nint sum(this ref slots s) {
     return s.Value[0].v + s.Value[1].v + s.Value[2].v + s.Value[3].v;
 }
 
-[GoType] partial struct counter2 {
+partial struct counter2 {
     internal int32 n;
 }
 
-[GoRecv] internal static int32 bump(this ref counter2 c) {
+internal static int32 bump(this ref counter2 c) {
     c.n++;
     return c.n;
 }
 
-[GoType("[3]counter2")] partial struct counters;
+partial struct counters /*[3]counter2*/;
 
 internal static ж<counters> bumpAll(this ж<counters> Ꮡc) {
     Ꮡc.at<counter2>(0).bump();

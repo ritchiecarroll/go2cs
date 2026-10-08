@@ -4,17 +4,17 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct setting {
+partial struct setting {
     internal @string name;
     internal nint count;
 }
 
-[GoRecv] internal static nint bump(this ref setting s) {
+internal static nint bump(this ref setting s) {
     s.count++;
     return s.count;
 }
 
-[GoType] partial struct Setting {
+partial struct Setting {
     internal @string tag;
     internal partial ref ж<setting> setting { get; }
 }

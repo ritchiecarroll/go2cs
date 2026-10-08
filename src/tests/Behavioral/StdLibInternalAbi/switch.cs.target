@@ -6,18 +6,18 @@ namespace go;
 
 partial class main_package {
 
-[GoType] partial struct InterfaceSwitch {
+partial struct InterfaceSwitch {
     public ж<InterfaceSwitchCache> Cache;
     public nint NCases;
     public array<ж<ΔInterfaceType>> Cases = new(1);
 }
 
-[GoType] partial struct InterfaceSwitchCache {
+partial struct InterfaceSwitchCache {
     public uintptr Mask;
     public array<InterfaceSwitchCacheEntry> Entries = new(1);
 }
 
-[GoType] partial struct InterfaceSwitchCacheEntry {
+partial struct InterfaceSwitchCacheEntry {
     public uintptr Typ;
     public nint Case;
     public uintptr Itab;
@@ -39,18 +39,18 @@ public static bool UseInterfaceSwitchCache(@string goarch) {
 
 }
 
-[GoType] partial struct TypeAssert {
+partial struct TypeAssert {
     public ж<TypeAssertCache> Cache;
     public ж<ΔInterfaceType> Inter;
     public bool CanFail;
 }
 
-[GoType] partial struct TypeAssertCache {
+partial struct TypeAssertCache {
     public uintptr Mask;
     public array<TypeAssertCacheEntry> Entries = new(1);
 }
 
-[GoType] partial struct TypeAssertCacheEntry {
+partial struct TypeAssertCacheEntry {
     public uintptr Typ;
     public uintptr Itab;
 }

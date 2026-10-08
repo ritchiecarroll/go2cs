@@ -5,11 +5,8 @@ namespace go;
 using fmt = fmt_package;
 
 partial class main_package {
-// Descriptor carrier for `I` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("I")] public interface Iᴅ { }
 
-
-[GoType] partial struct point {
+partial struct point {
     public nint X, Y;
 }
 

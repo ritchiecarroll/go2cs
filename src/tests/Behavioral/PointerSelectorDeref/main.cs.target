@@ -6,12 +6,12 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct header {
+partial struct header {
     internal uintptr tag;
     internal nint n;
 }
 
-[GoType] partial struct view {
+partial struct view {
     internal uintptr tag;
     internal nint n;
 }

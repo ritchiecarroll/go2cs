@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct box {
+partial struct box {
     internal nint val;
 }
 
@@ -20,7 +20,7 @@ internal static bool same(this ж<box> Ꮡb, ж<box> Ꮡother) {
     return Ꮡb == Ꮡother;
 }
 
-[GoType] partial struct embedder {
+partial struct embedder {
     internal partial ref box box { get; }
     internal nint tag;
 }

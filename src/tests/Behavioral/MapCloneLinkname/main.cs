@@ -5,7 +5,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[global::System.Diagnostics.StackTraceHidden] internal static any clone(any m) {
+/*linkname*/ internal static partial any clone(any m) {
     return mapclone(m);
 }
 

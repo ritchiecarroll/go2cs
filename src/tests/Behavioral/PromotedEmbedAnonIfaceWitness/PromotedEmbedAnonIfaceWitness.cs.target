@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct CommonType {
+partial struct CommonType {
     public int64 ByteSize;
     public @string Label;
 }
@@ -13,17 +13,17 @@ public static ж<CommonType> Common(this ж<CommonType> Ꮡc) {
     return Ꮡc;
 }
 
-[GoRecv] public static @string String(this ref CommonType c) {
+public static @string String(this ref CommonType c) {
     return c.Label;
 }
 
-[GoType] partial interface Node :
+partial interface Node :
     fmt.Stringer
 {
     ж<CommonType> Common();
 }
 
-[GoType] partial struct Base {
+partial struct Base {
     public partial ref CommonType CommonType { get; }
     public int64 BitSize;
 }
@@ -32,15 +32,15 @@ public static ж<Base> Basic(this ж<Base> Ꮡb) {
     return Ꮡb;
 }
 
-[GoType] partial struct Uint {
+partial struct Uint {
     public partial ref Base Base { get; }
 }
 
-[GoType] partial struct Int {
+partial struct Int {
     public partial ref Base Base { get; }
 }
 
-[GoType] partial struct Ptr {
+partial struct Ptr {
     public partial ref CommonType CommonType { get; }
     public Node Node;
 }
@@ -64,7 +64,7 @@ private static readonly object ptrCommonWithNilFieldˢ = (@string)"ptr Common wi
 private static readonly object ptrAfterWriteThroughˢ = (@string)"ptr after write through Common:"u8;
 private static readonly object ptrFieldNodeˢ = (@string)"ptr field node:"u8;
 
-[GoType("dyn")] internal partial interface main_type {
+internal partial interface main_type /*dyn*/ {
     ж<Base> Basic();
 }
 

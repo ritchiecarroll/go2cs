@@ -6,7 +6,7 @@ using ForeignPairNumericConv;
 
 partial class main_package {
 
-[GoType("num:uintptr")] partial struct LocalID;
+partial struct LocalID /*num:uintptr*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object foreignPairˢ = (@string)"foreign pair:"u8;

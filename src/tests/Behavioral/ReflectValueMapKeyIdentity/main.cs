@@ -6,7 +6,7 @@ using strings = strings_package;
 
 partial class main_package {
 
-[GoType] partial struct pair {
+partial struct pair {
     public @string A;
     public nint B;
 }

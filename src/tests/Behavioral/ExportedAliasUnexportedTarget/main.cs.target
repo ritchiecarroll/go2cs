@@ -6,7 +6,7 @@ using ExportedAliasUnexportedTarget;
 
 partial class main_package {
 
-[GoType] partial struct Logger {
+partial struct Logger {
     internal aliaslibꓸMutexWrap mu;
     internal slice<@string> lines;
 }

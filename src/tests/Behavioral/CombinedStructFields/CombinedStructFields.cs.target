@@ -4,13 +4,13 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct point {
+partial struct point {
     internal nint x, y;
     internal @string a, b;
     internal float64 wide, tall;
 }
 
-[GoType] partial struct mixed {
+partial struct mixed {
     public nint X;
     internal nint y;
     internal nint p, q;

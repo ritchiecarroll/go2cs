@@ -4,18 +4,18 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("dyn")] partial struct Stats_BySize {
+partial struct Stats_BySize /*dyn*/ {
     public uint32 Size;
     public uint64 Count;
 }
 
-[GoType] partial struct Stats {
+partial struct Stats {
     public nint Total;
     public array<Stats_BySize> BySize = new(3);
 }
 
 
-[GoType("dyn")] partial struct poolᴛ1 {
+partial struct poolᴛ1 /*dyn*/ {
     internal nint item;
     internal array<byte> pad = new(4);
 }
@@ -26,23 +26,23 @@ internal static array<nint> nums = new(3);
 internal static ж<array<nint>> Ꮡaddr = new StandardBox<array<nint>>(new array<nint>(2));
 internal static ref array<nint> addr => ref Ꮡaddr.Value;
 
-[GoType("dyn")] partial struct Composed_Ptrs {
+partial struct Composed_Ptrs /*dyn*/ {
     public uint32 Size;
 }
 
-[GoType("dyn")] partial struct Composed_Slice {
+partial struct Composed_Slice /*dyn*/ {
     public @string Name;
 }
 
-[GoType("dyn")] partial struct Composed_ByKey {
+partial struct Composed_ByKey /*dyn*/ {
     public nint Count;
 }
 
-[GoType("dyn")] partial interface Composed_Tagged {
+partial interface Composed_Tagged /*dyn*/ {
     @string Tag();
 }
 
-[GoType] partial struct Composed {
+partial struct Composed {
     public array<ж<Composed_Ptrs>> Ptrs = new(2);
     public slice<ж<Composed_Slice>> Slice;
     public map<@string, Composed_ByKey> ByKey;
@@ -58,7 +58,7 @@ internal static (bool, nint, nint, bool) composedReads() {
     return (composed.Ptrs[0] == nil, len(composed.Slice), composed.ByKey[absentˢ].Count, composed.Tagged[absentˢ] == default!);
 }
 
-[GoType("dyn")] internal partial struct reservedIsNil_type {
+internal partial struct reservedIsNil_type /*dyn*/ {
     internal nint r7;
 }
 
@@ -71,7 +71,7 @@ internal static nint statsTotal() {
     return s.Total;
 }
 
-[GoType("dyn")] internal partial struct localHeapAnon_firstFree {
+internal partial struct localHeapAnon_firstFree /*dyn*/ {
     internal nint @base, bound;
 }
 

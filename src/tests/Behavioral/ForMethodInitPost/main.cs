@@ -4,20 +4,20 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct iter {
+partial struct iter {
     internal nint i, n;
 }
 
-[GoRecv] internal static void start(this ref iter it, nint n) {
+internal static void start(this ref iter it, nint n) {
     it.i = 0;
     it.n = n;
 }
 
-[GoRecv] internal static bool valid(this ref iter it) {
+internal static bool valid(this ref iter it) {
     return it.i < it.n;
 }
 
-[GoRecv] internal static void next(this ref iter it) {
+internal static void next(this ref iter it) {
     it.i++;
 }
 

@@ -44,11 +44,11 @@ internal static partial void Main() {
     fmt.Println(mainFunctionˢ);
 }
 
-[GoType] partial struct accum {
+partial struct accum {
     internal nint total;
 }
 
-[GoRecv] internal static nint add(this ref accum a, nint n) {
+internal static nint add(this ref accum a, nint n) {
     a.total += n;
     return a.total;
 }

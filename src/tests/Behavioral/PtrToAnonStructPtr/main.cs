@@ -11,7 +11,7 @@ internal static @string decode(any output) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string bazˢ = "baz"u8;
 
-[GoType("dyn")] internal partial struct main_data {
+internal partial struct main_data /*dyn*/ {
     public @string Foo;
 }
 

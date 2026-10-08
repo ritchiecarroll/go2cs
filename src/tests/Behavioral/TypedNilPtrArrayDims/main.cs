@@ -5,7 +5,7 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType("[3]byte")] partial struct pkgNamed3;
+partial struct pkgNamed3 /*[3]byte*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object distinctTypesˢ = (@string)"distinct types:"u8;
@@ -18,7 +18,7 @@ private static readonly object boxedNilIsNonNilˢ = (@string)"boxed nil is non-n
 private static readonly object packageLevelNamedArrayˢ = (@string)"package-level named array elem len:"u8;
 private static readonly object localNamedArrayElemLenˢ = (@string)"local named array elem len:"u8;
 
-[GoLocalName("named3")] [GoType("[3]byte")] internal partial struct main_named3;
+internal partial struct main_named3 /*[3]byte*/;
 
 internal static void Main() {
     var t0 = reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(0L));

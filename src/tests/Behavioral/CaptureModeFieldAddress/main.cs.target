@@ -6,21 +6,21 @@ using sync;
 
 partial class main_package {
 
-[GoType] partial struct holder {
+partial struct holder {
     internal int32 before;
     internal atomic.Int32 i;
     internal int32 after;
 }
 
-[GoType] partial struct ctr {
+partial struct ctr {
     internal int32 n;
 }
 
-[GoRecv] internal static void inc(this ref ctr c) {
+internal static void inc(this ref ctr c) {
     c.n++;
 }
 
-[GoType] partial struct wrap {
+partial struct wrap {
     internal ctr c;
 }
 
@@ -61,7 +61,7 @@ internal static void typeSwitchCase(any v) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object anonˢ = (@string)"anon:"u8;
 
-[GoType("dyn")] internal partial struct anonStruct_x {
+internal partial struct anonStruct_x /*dyn*/ {
     internal atomic.Int32 i;
 }
 

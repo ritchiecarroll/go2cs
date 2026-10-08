@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct MyError {
+partial struct MyError {
     internal @string description;
 }
 
@@ -16,11 +16,11 @@ internal static error f() {
     return new MyError("foo"u8);
 }
 
-[GoType] partial interface Animal {
+partial interface Animal {
     @string Speak();
 }
 
-[GoType] partial struct Dog {
+partial struct Dog {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -30,24 +30,24 @@ public static @string Speak(this Dog d) {
     return woofˢ;
 }
 
-[GoType] partial struct Cat {
+partial struct Cat {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string meowˢ = "Meow!"u8;
 
-[GoRecv] public static @string Speak(this ref Cat c) {
+public static @string Speak(this ref Cat c) {
     return meowˢ;
 }
 
-[GoType] partial struct Llama {
+partial struct Llama {
 }
 
 public static @string Speak(this Llama l) {
     return "?????"u8;
 }
 
-[GoType] partial struct JavaProgrammer {
+partial struct JavaProgrammer {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -57,7 +57,7 @@ public static @string Speak(this JavaProgrammer j) {
     return designPatternsˢ;
 }
 
-[GoType] partial struct Counter {
+partial struct Counter {
     internal nint n;
 }
 
@@ -75,7 +75,7 @@ public static @string Inc(this ж<Counter> Ꮡc) {
     return incˢ;
 }
 
-[GoRecv] public static nint Total(this ref Counter c) {
+public static nint Total(this ref Counter c) {
     return c.n;
 }
 
@@ -83,13 +83,13 @@ internal static (ж<Counter>, error) makeCounter() {
     return (Ꮡ(new Counter(n: 5)), default!);
 }
 
-[GoType] partial interface Incrementer {
+partial interface Incrementer {
     @string Inc();
     nint Total();
 }
 
-[GoType] partial struct reversed {
-    [GoEmbedded] public Animal Animal;
+partial struct reversed {
+    /*embed*/ public Animal Animal;
 }
 
 public static Animal Reversed(Animal a) {
@@ -219,21 +219,21 @@ internal static any describe(bool b) {
     return (nint)(99);
 }
 
-[GoType] partial interface labeler {
+partial interface labeler {
     @string @string();
     nint @int();
 }
 
-[GoType] partial struct badge {
+partial struct badge {
     internal @string text;
     internal nint num;
 }
 
-[GoRecv] internal static @string @string(this ref badge b) {
+internal static @string @string(this ref badge b) {
     return b.text;
 }
 
-[GoRecv] internal static nint @int(this ref badge b) {
+internal static nint @int(this ref badge b) {
     return b.num;
 }
 
@@ -241,13 +241,13 @@ internal static void replaceAnimal(ref Animal a) {
     a = new CatжAnimal(Ꮡ(new Cat(nil)));
 }
 
-[GoType] partial interface speakShutter {
+partial interface speakShutter {
     @string Speak();
     @string Shut();
 }
 
-[GoType] partial struct wrapSink {
-    [GoEmbedded] public Animal Animal;
+partial struct wrapSink {
+    /*embed*/ public Animal Animal;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -257,21 +257,21 @@ internal static @string Shut(this wrapSink w) {
     return shutˢ;
 }
 
-[GoType] partial interface rdr {
+partial interface rdr {
     @string read();
 }
 
-[GoType] partial interface clsr {
+partial interface clsr {
     @string close();
 }
 
-[GoType] partial interface rdCloser :
+partial interface rdCloser :
     rdr,
     clsr
 {
 }
 
-[GoType] partial struct strRdr {
+partial struct strRdr {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -281,7 +281,7 @@ internal static @string read(this strRdr _) {
     return strRdrˢ;
 }
 
-[GoType] partial struct fileRdr {
+partial struct fileRdr {
     internal @string name;
 }
 
@@ -297,11 +297,11 @@ internal static rdCloser open(@string name) {
     return new fileRdr(name);
 }
 
-[GoType] partial interface sink {
+partial interface sink {
     @string drain();
 }
 
-[GoType] partial struct basin {
+partial struct basin {
     internal @string tag;
 }
 
@@ -309,12 +309,12 @@ internal static @string drain(this basin b) {
     return "b:"u8 + b.tag;
 }
 
-[GoType] partial struct plumbing {
+partial struct plumbing {
     internal sink s;
     internal @string name;
 }
 
-[GoType("[]sink")] partial struct sinks;
+partial struct sinks /*[]sink*/;
 
 internal static @string runPlumbing() {
     var p = new plumbing(name: "n1"u8);

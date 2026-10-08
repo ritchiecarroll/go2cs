@@ -5,60 +5,58 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType("[]byte")] partial struct myBytes;
+partial struct myBytes /*[]byte*/;
 
-[GoType("[]nint")] partial struct myInts;
+partial struct myInts /*[]nint*/;
 
-[GoType("map[@string, nint]")] partial struct myMap;
+partial struct myMap /*map[@string, nint]*/;
 
-[GoType("map[@string, int64]")] partial struct myWideMap;
+partial struct myWideMap /*map[@string, int64]*/;
 
-[GoType("map[nint, nint]")] partial struct myKeyMap;
+partial struct myKeyMap /*map[nint, nint]*/;
 
-[GoType("ж<nint>")] partial class myPtr;
+partial class myPtr /*ж<nint>*/;
 
-[GoType("ж<int64>")] partial class myWidePtr;
+partial class myWidePtr /*ж<int64>*/;
 
-[GoType("chan nint")] partial struct myChan;
+partial struct myChan /*chan nint*/;
 
-[GoType("[3]byte")] partial struct myArray;
+partial struct myArray /*[3]byte*/;
 
-[GoType("[4]byte")] partial struct myWideArray;
+partial struct myWideArray /*[4]byte*/;
 
-[GoType("[]byte")] partial struct myOtherBytes;
+partial struct myOtherBytes /*[]byte*/;
 
-[GoType] partial struct fieldsA {
+partial struct fieldsA {
     public slice<byte> B;
     public map<@string, nint> M;
 }
 
-[GoType] partial struct namedFieldsA {
+partial struct namedFieldsA {
     public slice<byte> B;
     public map<@string, nint> M;
 }
 
-[GoType] partial struct fieldsWideElem {
+partial struct fieldsWideElem {
     public slice<byte> B;
     public map<@string, int64> M;
 }
 
-[GoType] partial struct fieldsRenamed {
+partial struct fieldsRenamed {
     public slice<byte> B;
     public map<@string, nint> N;
 }
 
-[GoType] partial struct fieldsShort {
+partial struct fieldsShort {
     public slice<byte> B;
 }
 
-[GoType] partial struct fieldsTagged {
-    [GoTag(@"json:""b""")]
-    public slice<byte> B;
-    [GoTag(@"json:""m""")]
-    public map<@string, nint> M;
+partial struct fieldsTagged {
+    public slice<byte> B; /*`json:"b"`*/
+    public map<@string, nint> M; /*`json:"m"`*/
 }
 
-[GoType] partial struct speaker {
+partial struct speaker {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -68,7 +66,7 @@ internal static @string String(this speaker _) {
     return speakerˢ;
 }
 
-[GoType] partial struct mute {
+partial struct mute {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -83,7 +81,7 @@ private static readonly object structˢ = (@string)"struct"u8;
 private static readonly object funcˢ = (@string)"func"u8;
 private static readonly object chanˢ = (@string)"chan"u8;
 
-[GoType("dyn")] internal partial struct main_i {
+internal partial struct main_i /*dyn*/ {
     public slice<byte> B;
     public map<@string, nint> M;
 }

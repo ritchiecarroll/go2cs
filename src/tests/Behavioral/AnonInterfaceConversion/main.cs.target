@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct T {
+partial struct T {
     internal nint n;
 }
 
@@ -12,7 +12,7 @@ public static nint Foo(this T t) {
     return t.n;
 }
 
-[GoType("dyn")] internal partial interface main_d {
+internal partial interface main_d /*dyn*/ {
     nint Foo();
 }
 

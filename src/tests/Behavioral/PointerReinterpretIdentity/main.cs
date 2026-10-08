@@ -10,7 +10,7 @@ internal static @unsafe.Pointer noescape(@unsafe.Pointer p) {
     return (@unsafe.Pointer)((uintptr)(x ^ 0));
 }
 
-[GoType] partial struct builder {
+partial struct builder {
     internal ж<builder> addr;
     internal slice<byte> buf;
 }
@@ -33,7 +33,7 @@ internal static void write(this ж<builder> Ꮡb, @string s) {
     b.buf = append(b.buf, s.ꓸꓸꓸ);
 }
 
-[GoRecv] internal static @string String(this ref builder b) {
+internal static @string String(this ref builder b) {
     return ((@string)b.buf);
 }
 

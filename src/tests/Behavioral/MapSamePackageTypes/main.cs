@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct OSArch {
+partial struct OSArch {
     internal @string os, arch;
 }
 
-[GoType] partial struct info {
+partial struct info {
     internal bool supported;
 }
 
@@ -17,7 +17,7 @@ internal static map<OSArch, info> table = new map<OSArch, info>{
     [new("windows"u8, "386"u8)] = new(supported: false)
 };
 
-[GoType] partial struct Description {
+partial struct Description {
     public @string Name;
     public @string ΔDescription;
 }

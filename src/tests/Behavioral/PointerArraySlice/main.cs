@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[4]nint")] partial struct grid;
+partial struct grid /*[4]nint*/;
 
-[GoRecv] internal static nint firstTwo(this ref grid b) {
+internal static nint firstTwo(this ref grid b) {
     nint total = 0;
     foreach (var (_, v) in b.Value[..2]) {
         total += v;

@@ -2,7 +2,7 @@ namespace go.FormatTypeAdapters;
 
 partial class typelib_package {
 
-[GoType] partial struct Mark {
+partial struct Mark {
     public @string Tag;
 }
 

@@ -6,7 +6,7 @@ using NamedInterfaceLateAssert;
 
 partial class main_package {
 
-[GoType("@string")] partial struct dirLike;
+partial struct dirLike /*@string*/;
 
 internal static @string Name(this dirLike d) {
     return ((@string)d);
@@ -27,7 +27,7 @@ internal static @string Whisper(this dirLike d) {
     return "shh "u8 + ((@string)d);
 }
 
-[GoType] partial struct partial {
+partial struct partial {
     internal @string n;
 }
 

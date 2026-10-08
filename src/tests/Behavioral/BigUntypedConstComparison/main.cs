@@ -12,7 +12,7 @@ internal static readonly GoBigConst above1e23 = /* 100000000000000008388608 */
     GoBigConst.Parse("100000000000000008388608");
 internal static UntypedInt small => 1000;
 
-[GoType] partial struct ftoaTest {
+partial struct ftoaTest {
     internal float64 f;
     internal byte fmtc;
     internal nint prec;

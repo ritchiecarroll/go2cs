@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct thing {
+partial struct thing {
     internal nint n;
     internal @string s;
 }
@@ -86,7 +86,7 @@ internal static T orZero<T>(ж<T> Ꮡp)
     return p;
 }
 
-[GoType] partial interface PtrOf<T> {
+partial interface PtrOf<T> {
     //  Type constraints: *T
     // Derived operators: none
 }

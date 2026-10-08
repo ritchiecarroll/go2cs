@@ -6,11 +6,8 @@ using errors = errors_package;
 using fmt = fmt_package;
 
 partial class main_package {
-// Descriptor carrier for `Hook` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("Hook")] public interface Hookᴅ { }
 
-
-[GoType] partial struct holder {
+partial struct holder {
     internal any h;
 }
 

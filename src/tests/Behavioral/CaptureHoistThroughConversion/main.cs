@@ -11,7 +11,7 @@ public static void Do(this Handler h, nint i) {
     h(i);
 }
 
-[GoType] partial interface Iface {
+partial interface Iface {
     void Do(nint _);
 }
 

@@ -19,119 +19,119 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {
 
-[GoType] partial struct Direct {
+partial struct Direct {
     public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
 }
 
-[GoType] partial struct PtrDirect {
+partial struct PtrDirect {
     public partial ref ж<XpkgPromotedInnerLib_package.Inner> Inner { get; }
 }
 
-[GoType] partial struct Outer {
+partial struct Outer {
     public partial ref XpkgPromotedMidLib_package.Mid Mid { get; }
 }
 
-[GoType] partial struct loc {
+partial struct loc {
 }
 
 internal static inner.Token Tok(this loc _) {
     return new inner.Token(N: 7);
 }
 
-[GoType] partial struct Five {
+partial struct Five {
     public partial ref XpkgPromotedMidLib_package.Mid Mid { get; }
     internal partial ref loc loc { get; }
 }
 
-[GoType] partial struct local {
+partial struct local {
     public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
 }
 
-[GoType] partial struct GCounter {
+partial struct GCounter {
     internal partial ref local local { get; }
     public partial ref XpkgPromotedMidLib_package.Mid Mid { get; }
 }
 
-[GoType] partial struct local2 {
+partial struct local2 {
     public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
 }
 
-[GoType] partial struct S6 {
+partial struct S6 {
     internal partial ref loc loc { get; }
     internal partial ref local2 local2 { get; }
 }
 
-[GoType] partial struct Within {
+partial struct Within {
     public partial ref XpkgPromotedMidLib_package.Mid2 Mid2 { get; }
 }
 
-[GoType] partial struct Shadow {
+partial struct Shadow {
     public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
     public nint Tok;
 }
 
-[GoType] partial struct localMid {
+partial struct localMid {
     public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
 }
 
-[GoType] partial struct Mixed {
+partial struct Mixed {
     internal partial ref localMid localMid { get; }
 }
 
 public static nint Name = 0;
 
-[GoType] partial struct brokenState {
+partial struct brokenState {
     public partial ref sync_package.Mutex Mutex { get; }
 }
 
-[GoType] partial struct Broken {
-    [GoEmbedded] public io_package.Reader Reader;
+partial struct Broken {
+    /*embed*/ public io_package.Reader Reader;
     internal partial ref ж<brokenState> brokenState { get; }
 }
 
-[GoType] partial struct Stamp {
+partial struct Stamp {
     public partial ref time_package.Time Time { get; }
 }
 
-[GoType] partial struct PtrStamp {
+partial struct PtrStamp {
     public partial ref ж<time_package.Time> Time { get; }
 }
 
-[GoType] partial struct BufP {
+partial struct BufP {
     public partial ref ж<bytes_package.Buffer> Buffer { get; }
 }
 
-[GoType] partial struct deepTok {
+partial struct deepTok {
 }
 
 internal static inner.Token Tok(this deepTok _) {
     return new inner.Token(N: 5);
 }
 
-[GoType] partial struct localTok {
+partial struct localTok {
     internal partial ref deepTok deepTok { get; }
 }
 
-[GoType] partial struct OuterS5 {
+partial struct OuterS5 {
     public partial ref XpkgPromotedMidLib_package.Mid3 Mid3 { get; }
     internal partial ref localTok localTok { get; }
 }
 
-[GoType] partial struct OuterFD {
+partial struct OuterFD {
     public partial ref XpkgPromotedMidLib_package.MidF MidF { get; }
 }
 
-[GoType] partial struct OuterFS {
+partial struct OuterFS {
     public partial ref XpkgPromotedMidLib_package.PS PS { get; }
 }
 
-[GoType] partial struct TT {
+partial struct TT {
     public partial ref ж<testing_package.T> T { get; }
 }
 
-[GoType] partial struct HideC {
+partial struct HideC {
     public partial ref bytes_package.Buffer Buffer { get; }
-    [GoEmbedded] public io_package.WriterTo WriterTo;
+    /*embed*/ public io_package.WriterTo WriterTo;
 }
 
 internal static @string methods(reflectꓸType t) {
@@ -209,23 +209,23 @@ private static readonly @string notSatisfiedˢ = "not satisfied"u8;
 private static readonly @string sameVValueAssertPingˢ = "SameV value assert Ping"u8;
 private static readonly @string sameVAssertCallPingˢ = "*SameV assert+call Ping"u8;
 
-[GoType("dyn")] internal partial interface main_type {
+internal partial interface main_type /*dyn*/ {
     inner.Token Tok();
 }
 
-[GoType("dyn")] internal partial interface main_typeᴛ1 {
+internal partial interface main_typeᴛ1 /*dyn*/ {
     void Error(params ꓸꓸꓸany ʗp);
 }
 
-[GoType("dyn")] internal partial interface main_typeᴛ2 {
+internal partial interface main_typeᴛ2 /*dyn*/ {
     bool Where();
 }
 
-[GoType("dyn")] internal partial interface main_typeᴛ3 {
+internal partial interface main_typeᴛ3 /*dyn*/ {
     void Set(nint _Δp0);
 }
 
-[GoType("dyn")] internal partial interface main_typeᴛ4 {
+internal partial interface main_typeᴛ4 /*dyn*/ {
     nint Ping();
 }
 

@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Logger {
+partial struct Logger {
     internal @string name;
 }
 
@@ -12,13 +12,13 @@ public static @string Handler(this Logger l) {
     return "logger:"u8 + l.name;
 }
 
-[GoType] partial interface ΔHandler {
+partial interface ΔHandler {
     bool Enabled(nint level);
     @string Handle(@string msg);
     @string WithName(@string name);
 }
 
-[GoType] partial struct baseHandler {
+partial struct baseHandler {
     internal nint level;
 }
 
@@ -34,8 +34,8 @@ internal static @string WithName(this baseHandler b, @string name) {
     return "base-name:"u8 + name;
 }
 
-[GoType] partial struct wrapper {
-    [GoEmbedded] public ΔHandler Handler;
+partial struct wrapper {
+    /*embed*/ public ΔHandler Handler;
     internal @string prefix;
 }
 

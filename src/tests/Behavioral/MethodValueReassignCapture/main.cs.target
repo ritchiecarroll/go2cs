@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct validator {
+partial struct validator {
     internal nint @base;
 }
 
@@ -12,11 +12,11 @@ internal static nint check(this validator v, nint n) {
     return v.@base + n;
 }
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static nint bump(this ref counter c, nint by) {
+internal static nint bump(this ref counter c, nint by) {
     c.n += by;
     return c.n;
 }

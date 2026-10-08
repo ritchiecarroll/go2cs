@@ -6,11 +6,11 @@ using ForeignValueImplementSuppression;
 
 partial class main_package {
 
-[GoType] partial struct Img {
+partial struct Img {
     internal hueꓸShade px;
 }
 
-[GoRecv] public static hue.Tint At(this ref Img p) {
+public static hue.Tint At(this ref Img p) {
     return p.px;
 }
 

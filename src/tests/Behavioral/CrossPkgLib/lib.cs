@@ -9,7 +9,7 @@ public static UntypedInt Precision => 2;
 
 public static UntypedInt Sep => /* ':' */ 58;
 
-[GoType("num:float64")] partial struct Celsius;
+partial struct Celsius /*num:float64*/;
 
 public static Celsius Boiling() {
     return 100D;
@@ -23,7 +23,7 @@ public static Celsius Add(this Celsius c, Celsius d) {
     return c + d;
 }
 
-[GoType] partial struct Sensor {
+partial struct Sensor {
     public @string Name;
     public Celsius Temp;
 }
@@ -36,11 +36,11 @@ public static @string Label(this Sensor s) {
     return s.Name;
 }
 
-[GoRecv] public static void Calibrate(this ref Sensor s, Celsius d) {
+public static void Calibrate(this ref Sensor s, Celsius d) {
     s.Temp += d;
 }
 
-[GoType] partial interface Labeled {
+partial interface Labeled {
     @string Label();
 }
 
@@ -54,11 +54,11 @@ public static Labeled LabeledOf(ж<Sensor> Ꮡs) {
     return new SensorжLabeled(Ꮡs);
 }
 
-[GoType] partial struct Meter {
+partial struct Meter {
     internal nint count;
 }
 
-[GoRecv] public static nint Bump(this ref Meter m) {
+public static nint Bump(this ref Meter m) {
     m.count++;
     return m.count;
 }
@@ -67,22 +67,22 @@ public static ж<Meter> NewMeter() {
     return Ꮡ(new Meter(nil));
 }
 
-[GoType] partial interface Reporter {
+partial interface Reporter {
     @string Report();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string countˢ = "count"u8;
 
-[GoRecv] public static @string Report(this ref Meter m) {
+public static @string Report(this ref Meter m) {
     return countˢ;
 }
 
-[GoType] partial struct Alarm {
+partial struct Alarm {
     public @string Msg;
 }
 
-[GoRecv] public static @string Error(this ref Alarm a) {
+public static @string Error(this ref Alarm a) {
     return a.Msg;
 }
 
@@ -94,11 +94,11 @@ public static Reporter AsReporter(ж<Meter> Ꮡm) {
     return new MeterжReporter(Ꮡm);
 }
 
-[GoType] partial struct Cache<T> {
+partial struct Cache<T> {
     public nint Hits;
 }
 
-[GoRecv] public static nint Bump<T>(this ref Cache<T> c) {
+public static nint Bump<T>(this ref Cache<T> c) {
     c.Hits++;
     return c.Hits;
 }
@@ -117,7 +117,7 @@ public static bool Sift(this Sensor s, Func<nint, bool> f) {
     return f((nint)(float64)s.Temp);
 }
 
-[GoType] partial struct Node {
+partial struct Node {
     public nint ID;
 }
 
@@ -127,30 +127,30 @@ public static (ж<Node>, error) Resolve(Func<map<@string, ж<Node>>, @string, (�
     return r(default!, path);
 }
 
-[GoType] partial struct Probe {
+partial struct Probe {
     public nint Hits;
 }
 
-[GoRecv] public static nint Sample(this ref Probe p) {
+public static nint Sample(this ref Probe p) {
     p.Hits++;
     return p.Hits;
 }
 
-[GoType] partial interface Sampler {
+partial interface Sampler {
     nint Sample();
 }
 
-[GoType] partial interface Sealed {
+partial interface Sealed {
     @string Label();
     @string Seal();
 }
 
-[GoType] partial interface Rated {
+partial interface Rated {
     @string Label();
     nint Rating();
 }
 
-[GoType] partial struct ΔStatus {
+partial struct ΔStatus {
     public nint Code;
 }
 
@@ -158,14 +158,11 @@ public static nint Status(this Sensor s) {
     return (nint)(float64)s.Temp;
 }
 
-[GoType("num:nint")] partial struct ΔGrade;
+partial struct ΔGrade /*num:nint*/;
 
 public static nint Grade(this Sensor s) {
     return 1;
 }
-// Descriptor carrier for `Token` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("Token")] public interface ΔTokenᴅ { }
-
 
 public static nint Token(this Sensor s) {
     return (nint)(float64)s.Temp;
@@ -175,7 +172,7 @@ public static ΔToken AsToken(nint v) {
     return v;
 }
 
-[GoType] public partial struct snapshot {
+public partial struct snapshot {
     public nint At;
 }
 
@@ -185,14 +182,14 @@ public static snapshot Peek() {
     return Latest;
 }
 
-[GoType("num:uintptr")] partial struct Ticks;
+partial struct Ticks /*num:uintptr*/;
 
-[GoType] partial struct Device {
+partial struct Device {
     public partial ref Sensor Sensor { get; }
     public nint Serial;
 }
 
-[GoType] partial struct ΔMarker {
+partial struct ΔMarker {
     public @string ΔΔMarker;
 }
 
@@ -204,7 +201,7 @@ public static ΔMarker MakeMarker(@string s) {
     return new ΔMarker(ΔΔMarker: s);
 }
 
-[GoType] partial interface Emitter {
+partial interface Emitter {
     @string Emit();
     void emitNode();
     @string nodeTag();
@@ -214,18 +211,18 @@ public static @string DescribeEmitter(Emitter e) {
     return e.Emit() + "/"u8 + e.nodeTag();
 }
 
-[GoType] partial struct Leaf {
+partial struct Leaf {
     public @string Text;
 }
 
-[GoRecv] public static @string Emit(this ref Leaf l) {
+public static @string Emit(this ref Leaf l) {
     return l.Text;
 }
 
-[GoRecv] internal static void emitNode(this ref Leaf l) {
+internal static void emitNode(this ref Leaf l) {
 }
 
-[GoRecv] internal static @string nodeTag(this ref Leaf l) {
+internal static @string nodeTag(this ref Leaf l) {
     return "lf"u8;
 }
 
@@ -233,26 +230,26 @@ public static ж<Leaf> NewLeaf(@string text) {
     return Ꮡ(new Leaf(Text: text));
 }
 
-[GoType] partial struct EmitBase {
+partial struct EmitBase {
     public @string Label;
 }
 
-[GoRecv] public static @string Emit(this ref EmitBase e) {
+public static @string Emit(this ref EmitBase e) {
     return e.Label;
 }
 
-[GoType] partial struct Branch {
+partial struct Branch {
     public partial ref EmitBase EmitBase { get; }
     public nint Kind;
 }
 
-[GoRecv] internal static void emitNode(this ref Branch b) {
+internal static void emitNode(this ref Branch b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string brnˢ = "brn"u8;
 
-[GoRecv] internal static @string nodeTag(this ref Branch b) {
+internal static @string nodeTag(this ref Branch b) {
     return brnˢ;
 }
 
@@ -260,13 +257,13 @@ public static ж<Branch> NewBranch(@string label, nint kind) {
     return Ꮡ(new Branch(EmitBase: new EmitBase(Label: label), Kind: kind));
 }
 
-[GoType("num:nint")] partial struct Verdict;
+partial struct Verdict /*num:nint*/;
 
 public static nint Score(this Verdict v) {
     return (nint)v * 10;
 }
 
-[GoType] partial interface Scored {
+partial interface Scored {
     nint Score();
 }
 
