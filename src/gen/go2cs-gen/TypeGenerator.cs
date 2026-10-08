@@ -925,11 +925,27 @@ public class TypeGenerator : ISourceGenerator
     // pageBits, where pallocBits itself is only reachable as metadata — by symbol, never syntax).
     // AttributeData.ConstructorArguments already holds the resolved constant, unlike
     // AttributeSyntax's raw quoted token text, so no quote-stripping is needed here.
+    //
+    // A SOURCE symbol of a converted file carries its definition as a comment after its name (face lift
+    // B/C, docs/PLAN-marker-comment-parity.md §5.3), and the [GoType("…")] its generated part re-emits is
+    // not visible while this generator runs -- generators never see their own output. So with no attribute
+    // argument the symbol's own declarations are read the way the syntax-side reader reads them. Without
+    // this, MapValueContainsSelf stopped at a named wrapper with a comment definition and kept a
+    // self-containing map inline (behavioral SelfContainingMapHolder: TypeLoadException on ViaNamed).
     private static string? GetGoTypeDefinition(ITypeSymbol typeSymbol)
     {
         string? value = typeSymbol.GetAttributes()
             .FirstOrDefault(attribute => attribute.AttributeClass?.Name is $"{AttributeName}Attribute" or AttributeName)
             ?.ConstructorArguments.FirstOrDefault().Value as string;
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            value = typeSymbol.OriginalDefinition.DeclaringSyntaxReferences
+                .Select(reference => reference.GetSyntax())
+                .OfType<BaseTypeDeclarationSyntax>()
+                .Select(declaration => declaration.GetGoTypeDefinitionText())
+                .FirstOrDefault(definition => !string.IsNullOrWhiteSpace(definition));
+        }
 
         return string.IsNullOrWhiteSpace(value) ? null : value;
     }
