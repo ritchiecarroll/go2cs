@@ -120,8 +120,12 @@ public class TypeGenerator : ISourceGenerator
             // wrote it. No declaration of it carries one (checked above), so this is the only one.
             bool emitGoTypeAttribute = byRule;
 
+            // A directional channel's comment (`/*<-chan T*/`) dispatches as `chan T`, its direction re-emitted
+            // beside the attribute (Common.NormalizeChanDefinition); "" for every other definition.
+            string chanDir = "";
+
             (Location location, string typeDefinition)[] definitions = byRule ?
-                [(targetSyntax.Identifier.GetLocation(), targetSyntax.GetDefinitionComment() ?? string.Empty)] :
+                [(targetSyntax.Identifier.GetLocation(), Common.NormalizeChanDefinition(targetSyntax.GetDefinitionComment(), out chanDir) ?? string.Empty)] :
                 attributes.Select(attribute => (attribute.GetLocation(), GetTypeDefinition(attribute))).ToArray();
 
             foreach ((Location attributeLocation, string typeDefinition) in definitions)
@@ -226,6 +230,7 @@ public class TypeGenerator : ISourceGenerator
                             PackageNamespace = packageNamespace,
                             EmitGoTypeAttribute = emitGoTypeAttribute,
                             GoTypeDefinition = typeDefinition,
+                            GoChanDir = chanDir,
                             PackageName = packageName,
                             ObjectName = identifier,
                             Scope = scope,

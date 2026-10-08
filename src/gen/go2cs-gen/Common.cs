@@ -535,8 +535,9 @@ public static class Common
     /// <summary>
     /// Reads a Go type declaration's underlying-type definition: the <c>[GoType("…")]</c> argument when
     /// the declaration carries the attribute (a hand-written opt-in, or a converted file from before the
-    /// comment), else the definition comment of a CONVERTED declaration. Null for a plain Go type and
-    /// for any other declaration.
+    /// comment), else the definition comment of a CONVERTED declaration, a directional channel read as
+    /// <c>chan T</c> (<see cref="NormalizeChanDefinition"/>). Null for a plain Go type and for any other
+    /// declaration.
     /// </summary>
     public static string? GetGoTypeDefinitionText(this BaseTypeDeclarationSyntax typeDeclaration)
     {
@@ -552,7 +553,36 @@ public static class Common
             return value is { Length: > 2 } ? value[1..^1].Trim() : null;
         }
 
-        return typeDeclaration.IsConvertedGoTypeDeclaration() ? typeDeclaration.GetDefinitionComment() : null;
+        return typeDeclaration.IsConvertedGoTypeDeclaration() ? NormalizeChanDefinition(typeDeclaration.GetDefinitionComment(), out _) : null;
+    }
+
+    /// <summary>
+    /// Reads a DIRECTIONAL channel definition as Go spells it in a definition comment (face-lift row 3):
+    /// <c>&lt;-chan T</c> is <c>chan T</c> received from, <c>chan&lt;- T</c> is <c>chan T</c> sent to. Answers the
+    /// definition every reader dispatches on (<c>chan T</c>) and, in <paramref name="chanDir"/>, the
+    /// <c>[GoChanDir(…)]</c> argument the generated part re-emits so reflection reads the direction off the
+    /// type as before; "" for any other definition, which is returned unchanged.
+    /// </summary>
+    public static string? NormalizeChanDefinition(string? definition, out string chanDir)
+    {
+        chanDir = "";
+
+        if (definition is null)
+            return null;
+
+        if (definition.StartsWith("<-chan ", StringComparison.Ordinal))
+        {
+            chanDir = "GoChanDir.Recv";
+            return "chan " + definition["<-chan ".Length..];
+        }
+
+        if (definition.StartsWith("chan<- ", StringComparison.Ordinal))
+        {
+            chanDir = "GoChanDir.Send";
+            return "chan " + definition["chan<- ".Length..];
+        }
+
+        return definition;
     }
 
     /// <summary>

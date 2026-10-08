@@ -110,7 +110,7 @@ func main() {
 		{"map[T, EmptyStruct]", "Bag", "<T>"},
 		{"map[K, V]", "Pair", "<K, V>"},
 		{"chan T", "Pipe", "<T>"},
-		{"chan T", "Source", "<T>"},
+		{"<-chan T", "Source", "<T>"}, // a receive-only channel spells its direction (face-lift row 3)
 		{"[]T", "List", "<T>"},
 		{"[2]T", "Grid", "<T>"},
 	} {
