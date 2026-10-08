@@ -1883,10 +1883,9 @@ The converter emits a tagged field's Go struct tag verbatim at the declaration:
 ```go
 NamedCurveOID asn1.ObjectIdentifier `asn1:"optional,explicit,tag:0"`
 ```
-<!-- source: src/core/crypto/x509/sec1.cs:32-33 -->
+<!-- source: src/core/crypto/x509/sec1.cs:32 -->
 ```csharp
-[GoTag(@"asn1:""optional,explicit,tag:0""")]
-public asn1.ObjectIdentifier NamedCurveOID;
+public asn1.ObjectIdentifier NamedCurveOID; /*`asn1:"optional,explicit,tag:0"`*/
 ```
 
 `GoTagAttribute` aliases `System.ComponentModel.DescriptionAttribute`, so the text survives into
@@ -1980,13 +1979,13 @@ type stringMap map[string]int
 type intChan chan int
 type intPtr *int
 ```
-<!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.cs.target:18-26 -->
+<!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.cs.target:16-24 -->
 ```csharp
-[GoType("[]nint")] partial struct intSET;
-[GoType("[4]byte")] partial struct byteArray;
-[GoType("map[@string, nint]")] partial struct stringMap;
-[GoType("chan nint")] partial struct intChan;
-[GoType("ж<nint>")] partial class intPtr;
+partial struct intSET /*[]nint*/;
+partial struct byteArray /*[4]byte*/;
+partial struct stringMap /*map[@string, nint]*/;
+partial struct intChan /*chan nint*/;
+partial class intPtr /*ж<nint>*/;
 ```
 
 Three further answers change with it, all in the same direction and none of them a value Go can

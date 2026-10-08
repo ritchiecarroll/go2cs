@@ -1100,7 +1100,7 @@ so an exported func taking an anonymous interface emitted its lift `internal` be
 
 <!-- source: src/tests/Behavioral/AnonInterfaceParamPublic/AnonInterfaceParamPublic.cs.target:19 -->
 ```csharp
-[GoType("dyn")] public partial interface Report_r {
+public partial interface Report_r /*dyn*/ {
 ```
 
 An unexported func's anonymous interface keeps `internal`. The census of the shape (a non-empty anonymous

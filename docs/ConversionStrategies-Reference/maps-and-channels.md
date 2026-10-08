@@ -372,9 +372,9 @@ func (cw closeWaiter) Wait()  { <-cw }
 
 <!-- source: src/tests/Behavioral/NamedChannelType/main.cs.target:8-20 -->
 ```csharp
-[GoType("chan EmptyStruct")] partial struct closeWaiter;
+partial struct closeWaiter /*chan EmptyStruct*/;
 
-[GoRecv] internal static void Init(this ref closeWaiter cw) {
+internal static void Init(this ref closeWaiter cw) {
     cw = new closeWaiter(0);
 }
 
@@ -410,9 +410,9 @@ already did. `type Set[T comparable] map[T]void` (the hashset module's exported 
 
 <!-- source: src/tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.cs.target:11 and :46-48 -->
 ```csharp
-[GoType("map[T, @void]")] partial struct Set<T>;
+partial struct Set<T> /*map[T, @void]*/;
 
-[GoRecv] public static void Reset<T>(this ref Set<T> s) {
+public static void Reset<T>(this ref Set<T> s) {
     s = new Set<T>(0);
 }
 ```

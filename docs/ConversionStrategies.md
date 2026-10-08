@@ -168,7 +168,7 @@ func (r *reg) add(name string) string {
 ```
 <!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5-18 -->
 ```csharp
-[GoType] partial struct reg {
+partial struct reg {
     internal slice<@string> entries;
     internal nint count;
 }
@@ -177,7 +177,7 @@ internal static ж<reg> newReg() {
     return Ꮡ(new reg(nil));
 }
 
-[GoRecv] internal static @string add(this ref reg r, @string name) {
+internal static @string add(this ref reg r, @string name) {
     r.entries = append(r.entries, name);
     r.count++;
     return name + "-added"u8;
@@ -348,13 +348,13 @@ func bindAdd(a *accum) {
 	fmt.Println("bound add:", add(5), add(7)) // 5 12
 }
 ```
-<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:46-61 -->
+<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:47-62 -->
 ```csharp
-[GoType] partial struct accum {
+partial struct accum {
     internal nint total;
 }
 
-[GoRecv] internal static nint add(this ref accum a, nint n) {
+internal static nint add(this ref accum a, nint n) {
     a.total += n;
     return a.total;
 }
@@ -397,7 +397,7 @@ acc := &accum{}
 bindAdd(acc)
 fmt.Println("accum total:", acc.total) // 12
 ```
-<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:17 and :40-42 -->
+<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:18-43 -->
 ```csharp
 private static readonly object accumTotalˢ = (@string)"accum total:"u8;
 …
@@ -475,7 +475,7 @@ type Outer struct {
 ```
 <!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:21-24 -->
 ```csharp
-[GoType] partial struct Outer {
+partial struct Outer {
     internal byte head;
     internal Inner @in;
 }
@@ -493,7 +493,7 @@ type GoFrame struct{ k int }
 ```
 <!-- source: src/tests/Behavioral/ReservedNameShadows/main.cs.target:39-41 -->
 ```csharp
-[GoType] partial struct ΔGoFrame {
+partial struct ΔGoFrame {
     internal nint k;
 }
 ```
@@ -515,7 +515,7 @@ func GetPrintLn() func(string) {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:63-67 -->
+<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:64-68 -->
 ```csharp
 public static Action<@string> GetPrintLn() {
     return (@string src) => {
@@ -619,7 +619,7 @@ say why.
 [`builtin`](../src/core/golib/builtin.cs) class with `using static`. So a call such as `len(ch)` reads as it
 does in Go. The same project file also maps Go's sized numeric names, and `any`, to .NET types:
 
-<!-- source: src/tests/Behavioral/ChannelCapLen/ChannelCapLen.csproj:101-116 -->
+<!-- source: src/tests/Behavioral/ChannelCapLen/ChannelCapLen.csproj:106-121 -->
 ```xml
     <Using Include="go.builtin" Static="True" />
 …
@@ -657,7 +657,7 @@ var kindNames = []string{
 ```
 <!-- source: src/tests/Behavioral/SparseArrayNamedIntKey/main.cs.target:31-57 -->
 ```csharp
-[GoType("num:nuint")] partial struct kindT;
+partial struct kindT /*num:nuint*/;
 
 internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [1] = "one"u8,
@@ -976,7 +976,7 @@ has `<OutputType>Exe</OutputType>`, and `registry`'s has `<OutputType>Library</O
 imported package is its own project, and the importer references it. The project file also defines the
 `GoInit` alias and compiles `package_info.cs` ahead of the other files:
 
-<!-- source: src/tests/Behavioral/BlankImportSideEffects/BlankImportSideEffects.csproj:4-153 -->
+<!-- source: src/tests/Behavioral/BlankImportSideEffects/BlankImportSideEffects.csproj:4-158 -->
 ```xml
     <OutputType>Exe</OutputType>
 …
@@ -1011,7 +1011,7 @@ defaults to `windows`; a build sets another target with, for example, `-p:GoTarg
 with OS subfolders keeps a `package_info.cs` in each one, and the project compiles the chosen target's
 copy first. The `Exists` conditions let one project file serve both layouts:
 
-<!-- source: src/core/os/os.csproj:140-164 -->
+<!-- source: src/core/os/os.csproj:145-169 -->
 ```xml
   <PropertyGroup Condition="'$(GoTargetOS)'==''">
     <GoTargetOS>windows</GoTargetOS>
@@ -1197,7 +1197,7 @@ var pipeLabel = string(labelPipe) + "!"
 ```
 <!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:48-50 -->
 ```csharp
-[GoType("@string")] partial struct label;
+partial struct label /*@string*/;
 
 internal static readonly label labelPipe = "pipe"u8;
 ```
@@ -1339,7 +1339,7 @@ func TestExt(t *testing.T) {
 	}
 }
 ```
-<!-- source: src/core/path/path_test.cs:4 -->
+<!-- source: src/core/path/path_test.cs:4-255 -->
 ```csharp
 namespace go;
 
@@ -1413,7 +1413,7 @@ func StringFind(pattern, text string) int {
 	return makeStringFinder(pattern).next(text)
 }
 ```
-<!-- source: src/core/strings/export_test.cs:4 -->
+<!-- source: src/core/strings/export_test.cs:4-59 -->
 ```csharp
 namespace go;
 
@@ -1440,7 +1440,7 @@ package strings_test
 …
 		got := StringFind(tc.pat, tc.text)
 ```
-<!-- source: src/core/strings/search_test.cs:4 -->
+<!-- source: src/core/strings/search_test.cs:4-37 -->
 ```csharp
 namespace go;
 
@@ -1469,7 +1469,7 @@ package list
 …
 func TestExtending(t *testing.T) {
 ```
-<!-- source: src/core/container/list/go2cs_test_host.cs:1 -->
+<!-- source: src/core/container/list/go2cs_test_host.cs:1-28 -->
 ```csharp
 // Code generated by go2cs test conversion. DO NOT EDIT.
 namespace go.container;
@@ -1568,7 +1568,7 @@ func PrintValPtr(ptr *int) {
 ```
 <!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:7-66 -->
 ```csharp
-[GoType] partial struct Buffer {
+partial struct Buffer {
     internal slice<byte> buf;
     internal nint off;
     internal int8 lastRead;
@@ -1628,7 +1628,7 @@ func main() {
 …
 }
 ```
-<!-- source: src/tests/Behavioral/RefLoweredParams/main.cs.target:11-137 -->
+<!-- source: src/tests/Behavioral/RefLoweredParams/main.cs.target:12-138 -->
 ```csharp
 internal static void addTo(ref uint64 @out, uint64 v) {
     @out += v;
@@ -1892,7 +1892,7 @@ const (
 ```
 <!-- source: src/core/compress/lzw/reader.cs:27-30 -->
 ```csharp
-[GoType("num:nint")] partial struct Order;
+partial struct Order /*num:nint*/;
 
 public static Order LSB => /* iota */ 0;
 public static Order MSB => 1;
@@ -2028,7 +2028,7 @@ reads as it does in Go:
 ```go
 func addInt(a, b int) int { return a + b }
 ```
-<!-- source: src/tests/Behavioral/MethodGroupGenericArg/main.cs.target:7 -->
+<!-- source: src/tests/Behavioral/MethodGroupGenericArg/main.cs.target:7-9 -->
 ```csharp
 internal static nint addInt(nint a, nint b) {
     return a + b;
@@ -2073,14 +2073,14 @@ The converter casts the result back to the narrow type, which restores Go's wrap
 In this example, `takeU8` is a function that takes a `uint8`. In the C#, `fmt` is Go's `fmt` package,
 converted to C# like any other package ([Package Conversion](#package-conversion)):
 
-<!-- source: src/tests/Behavioral/NarrowArithmeticArg/main.go:28 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticArg/main.go:28-31 -->
 ```go
 var a, b uint8 = 200, 100
 
 // Argument context.
 fmt.Println(takeU8(a + b)) // 300 wraps to 44
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticArg/main.cs.target:29 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticArg/main.cs.target:29-31 -->
 ```csharp
 uint8 a = 200;
 uint8 b = 100;
@@ -2089,7 +2089,7 @@ fmt.Println(takeU8((uint8)(a + b)));
 
 The same cast appears wherever the result is assigned, declared, returned or stored in a struct field:
 
-<!-- source: src/tests/Behavioral/NarrowArithmeticArg/main.go:43 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticArg/main.go:43-47 -->
 ```go
 y := a + b // short-var declaration; y is uint8, wraps to 44
 fmt.Println(y)
@@ -2097,7 +2097,7 @@ fmt.Println(y)
 y = y + 1 // reassignment, 45
 fmt.Println(y)
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticArg/main.cs.target:40 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticArg/main.cs.target:40-43 -->
 ```csharp
 var y = (uint8)(a + b);
 fmt.Println(y);
@@ -2124,7 +2124,7 @@ too, so `%T` reports `int8`, not `int32`. Here `a` is an `int8` holding 100, so 
 ```go
 var x any = a + a
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:116 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:113 -->
 ```csharp
 any x = (int8)(a + a);
 ```
@@ -2146,13 +2146,13 @@ type explicit. You see it in the `(uint32)(…)` and `(uint64)(…)` around the 
 and `nuint`, and widens smaller unsigned values to a signed type. Go's `-x` on an unsigned value of type `T`
 becomes `((T)0 - x)`, which wraps the same way. The common "lowest set bit" idiom shows it:
 
-<!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.go:20 -->
+<!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.go:20-22 -->
 ```go
 func lowestSetBit(x uint32) uint32 {
 	return x & -x // wrap-around negation; isolates the lowest set bit
 }
 ```
-<!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:7 -->
+<!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:7-9 -->
 ```csharp
 internal static uint32 lowestSetBit(uint32 x) {
     return (uint32)(x & ((uint32)0 - x));
@@ -2169,12 +2169,12 @@ Here `((uint32)0 - x)` is the negation. The outer `(uint32)(…)` is the bitwise
 **Bitwise complement uses C#'s spelling.** Go's unary `^x` becomes C#'s `~x`, and Go's "and not" `x &^ y`
 becomes `x & ~y`. This example clears the top bit of a `uint64`:
 
-<!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.go:63 -->
+<!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.go:63-64 -->
 ```go
 var hi uint64 = 0xFFFFFFFFFFFFFFFF
 fmt.Println(hi &^ (1 << 63)) // clear the high bit -> 0x7FFFFFFFFFFFFFFF
 ```
-<!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:36 -->
+<!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:36-37 -->
 ```csharp
 uint64 hi = 0xFFFFFFFFFFFFFFFFUL;
 fmt.Println((uint64)(hi & ~(((uint64)1 << (int)(63)))));
@@ -2189,12 +2189,12 @@ shift's own parentheses and `(int)` count are explained in the next paragraph.
 looser. The converter wraps each shift in parentheses so the grouping stays Go's. C#'s shift also takes an
 `int` count, while Go accepts any integer type, so the count is cast to `int`:
 
-<!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.go:32 -->
+<!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.go:32-33 -->
 ```go
 var x uint64 = 0x100
 fmt.Println(x>>4 + x) // (0x100>>4)+0x100 = 16 + 256 = 272
 ```
-<!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:20 -->
+<!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:20-21 -->
 ```csharp
 uint64 x = 0x100;
 fmt.Println((x >> (int)(4)) + x);
@@ -2206,7 +2206,7 @@ shifted by 64 comes back unchanged. When the count is not provably below the wid
 and `<<` becomes `.Lsh(…)`. These are extension methods from golib's
 [`GoShift`](../src/core/golib/GoShift.cs), one set per operand type. The 64-bit ones are:
 
-<!-- source: src/core/golib/GoShift.cs:38 -->
+<!-- source: src/core/golib/GoShift.cs:39-49 -->
 ```csharp
 [MethodImpl(MethodImplOptions.AggressiveInlining)]
 public static uint64 Rsh(this uint64 x, uint64 n) => n >= 64 ? 0UL : x >> (int)n;
@@ -2233,7 +2233,7 @@ Here the counts come from a slice at run time, and several are 64 or more. In th
 `new nuint[]{…}.slice()` builds a golib [slice](#slices-and-arrays), and `foreach (var (_, k) in c)` is
 Go's `for _, k := range c` ([Loops, Range and Labels](#loops-range-and-labels)):
 
-<!-- source: src/tests/Behavioral/GoShiftSemantics/main.go:21 -->
+<!-- source: src/tests/Behavioral/GoShiftSemantics/main.go:21-27 -->
 ```go
 c := []uint{0, 1, 63, 64, 65, 200}
 var u uint64 = 0x8000000000000001
@@ -2243,7 +2243,7 @@ for _, k := range c {
 	fmt.Println(u>>k, u<<k)
 }
 ```
-<!-- source: src/tests/Behavioral/GoShiftSemantics/main.cs.target:14 -->
+<!-- source: src/tests/Behavioral/GoShiftSemantics/main.cs.target:14-18 -->
 ```csharp
 var c = new nuint[]{0, 1, 63, 64, 65, 200}.slice();
 uint64 u = 0x8000000000000001UL;
@@ -2256,12 +2256,12 @@ foreach (var (_, k) in c) {
 `x >> 4`, and a count masked or reduced below the width, such as `k & 63` or `k % 64`. These are most shifts
 in real code. Continuing the same example:
 
-<!-- source: src/tests/Behavioral/GoShiftSemantics/main.go:41 -->
+<!-- source: src/tests/Behavioral/GoShiftSemantics/main.go:41-42 -->
 ```go
 fmt.Println(u >> (c[3] & 63)) // 64 & 63 = 0 -> u
 fmt.Println(u >> (c[4] % 64)) // 65 % 64 = 1 -> u >> 1
 ```
-<!-- source: src/tests/Behavioral/GoShiftSemantics/main.cs.target:26 -->
+<!-- source: src/tests/Behavioral/GoShiftSemantics/main.cs.target:26-27 -->
 ```csharp
 fmt.Println((u >> (int)(((nuint)(c[3] & 63)))));
 fmt.Println((u >> (int)((c[4] % 64))));
@@ -2359,7 +2359,7 @@ func (d Duration) Seconds() float64 {
 ```
 <!-- source: src/core/time/time.cs:910-1097 -->
 ```csharp
-[GoType("num:int64")] partial struct Duration;
+partial struct Duration /*num:int64*/;
 …
 public static Duration ΔNanosecond => 1;
 
@@ -2411,7 +2411,7 @@ func maskFor(s uint) word {
 ```
 <!-- source: src/tests/Behavioral/NamedTypeBitwiseConst/main.cs.target:21-50 -->
 ```csharp
-[GoType("num:uint64")] partial struct word;
+partial struct word /*num:uint64*/;
 …
 internal static word maskFor(nuint s) {
     var m = (((word)1) << (int)(s)) - 1;
@@ -2440,9 +2440,9 @@ type nameOff int32   // underlying int32
 ```
 <!-- source: src/tests/Behavioral/NamedNumericConversion/main.cs.target:7-29 -->
 ```csharp
-[GoType("num:uint64")] partial struct traceArg;
+partial struct traceArg /*num:uint64*/;
 …
-[GoType("num:int32")] partial struct nameOff;
+partial struct nameOff /*num:int32*/;
 …
     int32 procs = 5;
     var a = ((traceArg)(uint64)procs);
@@ -2472,7 +2472,7 @@ const (
 ```
 <!-- source: src/core/time/time.cs:324-337 -->
 ```csharp
-[GoType("num:nint")] partial struct ΔMonth;
+partial struct ΔMonth /*num:nint*/;
 
 public static ΔMonth January => /* 1 + iota */ 1;
 public static ΔMonth February => 2;
@@ -2500,7 +2500,7 @@ func (t Tag) Context() Tag     { return t | classContext }
 ```
 <!-- source: src/tests/Behavioral/NamedTypeBitwiseConst/main.cs.target:7-19 -->
 ```csharp
-[GoType("num:uint8")] partial struct Tag;
+partial struct Tag /*num:uint8*/;
 
 internal static UntypedInt classConstructed => 0x20;
 
@@ -2671,7 +2671,7 @@ func passThrough(p *node) bool { return inner(p) }
 ```
 <!-- source: src/tests/Behavioral/DeadPointerParamAlias/main.cs.target:7-28,34-38 -->
 ```csharp
-[GoType] partial struct node {
+partial struct node {
     internal nint val;
 }
 
@@ -2808,18 +2808,18 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/ZeroValueStructVar/main.cs.target:7-24,33,36 -->
 ```csharp
-[GoType] partial struct holder {
+partial struct holder {
     internal @string name;
     internal array<nint> tbl = new(8);
     internal slice<nint> tail;
 }
 
-[GoType] partial struct wrapper {
+partial struct wrapper {
     internal nint id;
     internal holder h;
 }
 
-[GoType] partial struct point {
+partial struct point {
     internal nint x, y;
 }
 
@@ -2863,7 +2863,7 @@ type Embedded struct {
 ```
 <!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:29-42,108-109 -->
 ```csharp
-[GoType] partial struct Padded {
+partial struct Padded {
     internal bool flag;
     internal int64 count;
     internal byte tag;
@@ -2872,7 +2872,7 @@ type Embedded struct {
     internal int32 code;
 }
 
-[GoType] partial struct Embedded {
+partial struct Embedded {
     internal byte lead;
     public partial ref Padded Padded { get; }
     internal int16 trail;
@@ -2946,7 +2946,7 @@ y := []byte{1, 2, 3, 4, 5}
 n := min(len(x), len(y))
 fmt.Println(n) // 3
 ```
-<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:39-42 -->
+<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:40-43 -->
 ```csharp
 var x = new byte[]{1, 2, 3}.slice();
 var y = new byte[]{1, 2, 3, 4, 5}.slice();
@@ -2986,7 +2986,7 @@ func Scale[S ~[]E, E Integer](s S, c E) S {
 	return r
 }
 ```
-<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:31-40 -->
+<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:28-37 -->
 ```csharp
 public static S Scale<S, E>(S s, E c)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
@@ -3082,11 +3082,11 @@ func freeLen() int {
 ```
 <!-- source: src/tests/Behavioral/ReservedNameShadows/main.cs.target:57-68 -->
 ```csharp
-[GoType] partial struct box {
+partial struct box {
     internal slice<nint> items;
 }
 
-[GoRecv] internal static nint len(this ref box b) {
+internal static nint len(this ref box b) {
     return builtin.len(b.items) + 1;
 }
 
@@ -3265,7 +3265,7 @@ func keep(q *pp) { poolPut(q) }
 ```
 <!-- source: src/tests/Behavioral/PointerValueToInterfaceArg/main.cs.target:7-59 -->
 ```csharp
-[GoType] partial struct pp {
+partial struct pp {
     internal nint id;
     internal slice<byte> buf;
 }
@@ -3280,7 +3280,7 @@ internal static any poolGet() {
     {
         nint n = len(freeList); if (n > 0) {
             var x = freeList[n - 1];
-            freeList = freeList[..(int)(n - 1)];
+            freeList = freeList.slice(0, n - 1);
             return x;
         }
     }
@@ -3379,7 +3379,7 @@ type edge struct {
     (f.@out, g.@out, f.arg) = (g.@out, f.arg, f.@out);
     fmt.Println(f.@out, f.arg, g.@out, g.arg);
 …
-[GoType] partial struct edge {
+partial struct edge {
     internal nint @out;
     internal nint arg;
 }
@@ -3488,11 +3488,11 @@ func readThenBump() (int, int) {
 ```
 <!-- source: src/tests/Behavioral/MultiValueReturnOrder/main.cs.target:22-35 -->
 ```csharp
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static nint bump(this ref counter c) {
+internal static nint bump(this ref counter c) {
     c.n++;
     return c.n;
 }
@@ -3826,7 +3826,7 @@ public static (nint n, error err) ReadAtLeast(Reader r, slice<byte> buf, nint mi
     }
     while (n < min && err == default!) {
         nint nn = default!;
-        (nn, err) = r.Read(buf[(int)(n)..]);
+        (nn, err) = r.Read(buf.slice(n));
         n += nn;
     }
     if (n >= min){
@@ -4182,7 +4182,7 @@ d[0] = 42
 base[3] = 43
 fmt.Println(base[2], d[1])
 ```
-<!-- source: src/tests/Behavioral/SliceAliasing/main.cs.target:8-14 -->
+<!-- source: src/tests/Behavioral/SliceAliasing/main.cs.target:9-15 -->
 ```csharp
 var @base = new slice<uint32>(6);
 var d = @base[2..5];
@@ -4212,7 +4212,7 @@ y := append(x, 1, 2, 3)
 y[0] = 999
 fmt.Println(base[2], y[0], len(y), cap(y))
 ```
-<!-- source: src/tests/Behavioral/SliceAliasing/main.cs.target:32-38 -->
+<!-- source: src/tests/Behavioral/SliceAliasing/main.cs.target:33-39 -->
 ```csharp
 var w = @base[2..4];
 var x = append(w, (uint32)(500));
@@ -4276,7 +4276,7 @@ func test(a [2]string) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string goodbyeˢ = "Goodbye"u8;
 
-internal static void test([GoArrayDims(2)] array<@string> a) {
+internal static void test(/*[2]*/ array<@string> a) {
     a = a.Clone();
 
     fmt.Println(a[0], a[1]);
@@ -4637,7 +4637,7 @@ func bump(v version) version { return v + "-next" }
 ```
 <!-- source: src/tests/Behavioral/NamedStringConcat/main.cs.target:7-15 -->
 ```csharp
-[GoType("@string")] partial struct version;
+partial struct version /*@string*/;
 
 internal static @string tag(this version v) {
     return ((@string)v) + "!"u8;
@@ -4726,7 +4726,7 @@ Go's `func Sprintf(format string, a ...any) string` is declared this way in the 
 
 <!-- source: src/core/fmt/print.cs:268-269 and :276 -->
 ```csharp
-[GoStr] public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
+public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
 …
 }
@@ -4962,12 +4962,12 @@ func lookup(reg registry, id uint32) (string, bool) {
 ```
 <!-- source: src/tests/Behavioral/EmptyStructMapSet/EmptyStructMapSet.cs.target:16-32 -->
 ```csharp
-[GoType] partial struct entry {
+partial struct entry {
     internal @string tag;
     internal nint size;
 }
 
-[GoType("map[uint32, entry]")] partial struct registry;
+partial struct registry /*map[uint32, entry]*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string missingˢ = "missing"u8;
@@ -5084,7 +5084,7 @@ and `AreEqual` need no class name ([Built-in Functions](#built-in-functions)).
 **A method-set interface constraint becomes a plain `where` clause** that names the converted interface.
 Calling the constraint's methods on the type parameter works as in Go:
 
-<!-- source: src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.go:12 -->
+<!-- source: src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.go:12-59 -->
 ```go
 type Shape interface {
 	Area() float64
@@ -5099,9 +5099,9 @@ func totalArea[S Shape](shapes []S) float64 {
 	return sum
 }
 ```
-<!-- source: src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.cs.target:7 -->
+<!-- source: src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.cs.target:7-60 -->
 ```csharp
-[GoType] partial interface Shape {
+partial interface Shape {
     float64 Area();
     @string Name();
 }
@@ -5129,7 +5129,7 @@ and the box does not implement `Shape`. A generated adapter class, `CircleжShap
 ([Interfaces](#interfaces)). So the call passes the slice through golib's `widen`, which builds a
 `slice<Shape>` of adapters, and C# instantiates `S` as `Shape`:
 
-<!-- source: src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.go:24 -->
+<!-- source: src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.go:24-109 -->
 ```go
 type Circle struct {
 	R float64
@@ -5147,13 +5147,13 @@ func (c *Circle) Area() float64 {
 …
 	fmt.Printf("shapes: %.2f\n", totalArea(shapes))
 ```
-<!-- source: src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.cs.target:18 -->
+<!-- source: src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.cs.target:18-107 -->
 ```csharp
-[GoType] partial struct Circle {
+partial struct Circle {
     public float64 R;
 }
 
-[GoRecv] public static float64 Area(this ref Circle c) {
+public static float64 Area(this ref Circle c) {
     return 3.0D * c.R * c.R;
 }
 …
@@ -5188,7 +5188,7 @@ func isNaN[T Ordered](x T) bool {
 	return x != x
 }
 ```
-<!-- source: src/core/cmp/cmp.cs:29 -->
+<!-- source: src/core/cmp/cmp.cs:28-71 -->
 ```csharp
 public static bool Less<T>(T x, T y)
     where T : /* Ordered */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
@@ -5222,7 +5222,7 @@ unconstrained, and `==` becomes `AreEqual` as under every other constraint:
 ```go
 func eq[T comparable](a, b T) bool { return a == b }
 ```
-<!-- source: src/tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.cs.target:71 -->
+<!-- source: src/tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.cs.target:70-72 -->
 ```csharp
 internal static bool eq<T>(T a, T b) {
     return AreEqual(a, b);
@@ -5234,7 +5234,7 @@ extension method, and a pointer receiver becomes `[GoRecv] this ref`
 ([Functions and Methods](#functions-and-methods)). An extension method cannot borrow its receiver type's
 parameters. So each method declares `<T>` and restates the `where` clause:
 
-<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.go:6 -->
+<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.go:6-24 -->
 ```go
 type Stack[T ~int | ~string] struct {
 	elements []T
@@ -5298,7 +5298,7 @@ Using the type reads as in Go. Go's `int` is C# `nint`
 the source generator adds for the zero value, which takes golib's `nil` as its argument
 ([Struct Types](#struct-types)). `"…"u8` is a UTF-8 string literal ([Strings](#strings-string-and-sstring)).
 
-<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.go:58 -->
+<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.go:58-62 -->
 ```go
 	intStack := Stack[int]{}
 	intStack.Push(10)
@@ -5306,7 +5306,7 @@ the source generator adds for the zero value, which takes golib's `nil` as its a
 	val, _ := intStack.Pop()
 	fmt.Printf("Popped from int stack: %d\n", val)
 ```
-<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:65 -->
+<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:65-69 -->
 ```csharp
     var intStack = new Stack<nint>(nil);
     intStack.Push(10);
@@ -5320,7 +5320,7 @@ are `E`, including a named slice type such as `type numbers []int`. `ISlice<E>` 
 slice type implements. `ISupportMake<S>` lets `make(S, n)` build an `S`. `ISliceWrap<S, E>` lets `s[i:j]`
 and `append` return `S` again, as they do in Go.
 
-<!-- source: src/tests/Behavioral/ConstrainedSliceParamInPlace/main.go:6 -->
+<!-- source: src/tests/Behavioral/ConstrainedSliceParamInPlace/main.go:6-18 -->
 ```go
 func reverse[E any](s []E) {
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
@@ -5332,7 +5332,7 @@ func reverseSeq[S ~[]E, E any](x S) {
 	reverse(x)
 }
 ```
-<!-- source: src/tests/Behavioral/ConstrainedSliceParamInPlace/main.cs.target:7 -->
+<!-- source: src/tests/Behavioral/ConstrainedSliceParamInPlace/main.cs.target:7-17 -->
 ```csharp
 internal static void reverse<E>(slice<E> s) {
     for ((nint i, nint j) = (0, len(s) - 1); i < j; (i, j) = (i + 1, j - 1)) {
@@ -5356,7 +5356,7 @@ caller's elements.
 constraint `S ~[]E`. C# infers type parameters only from argument types, and no argument has type `E`.
 So each call to `reverseSeq` spells both type arguments:
 
-<!-- source: src/tests/Behavioral/ConstrainedSliceParamInPlace/main.go:45 -->
+<!-- source: src/tests/Behavioral/ConstrainedSliceParamInPlace/main.go:45-57 -->
 ```go
 type numbers []int
 …
@@ -5368,9 +5368,9 @@ type numbers []int
 	reverseSeq(b)
 	fmt.Println(b) // [30 20 10]
 ```
-<!-- source: src/tests/Behavioral/ConstrainedSliceParamInPlace/main.cs.target:39 -->
+<!-- source: src/tests/Behavioral/ConstrainedSliceParamInPlace/main.cs.target:39-49 -->
 ```csharp
-[GoType("[]nint")] partial struct numbers;
+partial struct numbers /*[]nint*/;
 …
     var a = new nint[]{1, 2, 3, 4, 5}.slice();
     reverseSeq<slice<nint>, nint>(a);
@@ -5388,7 +5388,7 @@ Where Go writes the type arguments itself, C# keeps them. Here `T` appears in no
 must name it. `stringerˢ` is the string literal `"stringer"`, hoisted to a field that the example shows
 ([Strings](#strings-string-and-sstring)):
 
-<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.go:50 -->
+<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.go:50-76 -->
 ```go
 func describe[T any](label string) string {
 	var zero T
@@ -5416,7 +5416,7 @@ or from a type parameter. In this example `Int` is the name of the type paramete
 [`ConvertToUInt64<Int>`](../src/core/golib/builtin.TypeParamConversions.cs) turns an `Int` value into a
 `uint64`, and `ConvertToType<Int>` turns a number into an `Int`:
 
-<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.go:243 -->
+<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.go:243-248 -->
 ```go
 func halveN[Int ~int32 | ~int64](n Int) Int {
 	if n <= 0 {
@@ -5425,7 +5425,7 @@ func halveN[Int ~int32 | ~int64](n Int) Int {
 	return Int(uint64(n) / 2)
 }
 ```
-<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:246 -->
+<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:243-250 -->
 ```csharp
 internal static Int halveN<Int>(Int n)
     where Int : /* ~int32 | ~int64 */ IAdditionOperators<Int, Int, Int>, ISubtractionOperators<Int, Int, Int>, IMultiplyOperators<Int, Int, Int>, IDivisionOperators<Int, Int, Int>, IIncrementOperators<Int>, IDecrementOperators<Int>, IUnaryNegationOperators<Int, Int>, IModulusOperators<Int, Int, Int>, IBitwiseOperators<Int, Int, Int>, IShiftOperators<Int, int, Int>, IEqualityOperators<Int, Int, bool>, IComparisonOperators<Int, Int, bool>, new()
@@ -5478,7 +5478,7 @@ namespace go;
 
 partial class CrossPkgLib_package {
 …
-[GoType("num:float64")] partial struct Celsius;
+partial struct Celsius /*num:float64*/;
 
 public static Celsius Boiling() {
     return 100D;
@@ -5526,7 +5526,7 @@ func main() {
 	fmt.Println(n.String())
 }
 ```
-<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:1-54 -->
+<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:1-48 -->
 ```csharp
 global using Token = object;
 global using Named = go.main_package.Stringer;
@@ -5537,11 +5537,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 …
-[GoType] partial interface Stringer {
+partial interface Stringer {
     @string String();
 }
 …
-[GoType] partial struct point {
+partial struct point {
     internal nint x, y;
 }
 
@@ -5604,7 +5604,7 @@ global using fn = System.Func<go.@string, nint>;
 global using fn2 = System.Func<go.main_package.Header, (go.@string, go.error)>;
 global using fn0 = System.Action;
 …
-[GoType] partial struct Header {
+partial struct Header {
     public @string Name;
     public int64 Size;
 }
@@ -5705,7 +5705,7 @@ func swap[T comparable](p P[T, T]) P[T, T] { return P[T, T]{Key: p.Val, Val: p.K
 ```csharp
 global using Pairs = go.slice<go.main_package.Pair<go.@string, nint>>;
 …
-[GoType] partial struct Pair<K, V> {
+partial struct Pair<K, V> {
     public K Key;
     public V Val;
 }
@@ -5790,7 +5790,7 @@ func (c *cat) speak() string {
 ```
 <!-- source: src/tests/Behavioral/AnyStringLitChanSend/main.cs.target:11-25 -->
 ```csharp
-[GoType] partial struct dog {
+partial struct dog {
     internal @string name;
 }
 
@@ -5798,11 +5798,11 @@ internal static @string speak(this dog d) {
     return "woof:"u8 + d.name;
 }
 
-[GoType] partial struct cat {
+partial struct cat {
     internal @string name;
 }
 
-[GoRecv] internal static @string speak(this ref cat c) {
+internal static @string speak(this ref cat c) {
     return "meow:"u8 + c.name;
 }
 ```
@@ -5839,13 +5839,13 @@ func (d digest) show() string {
 ```
 <!-- source: src/tests/Behavioral/StructArrayFieldValueCopy/StructArrayFieldValueCopy.cs.target:7-25 -->
 ```csharp
-[GoType] partial struct digest {
+partial struct digest {
     internal array<nint> h = new(4);
     internal array<byte> x = new(2);
     internal nint nx;
 }
 
-[GoRecv] internal static void bump(this ref digest d) {
+internal static void bump(this ref digest d) {
     foreach (var (i, _) in d.h) {
         d.h[i]++;
     }
@@ -5888,7 +5888,7 @@ func (r *ring) linkTo(other *ring) {
 ```
 <!-- source: src/tests/Behavioral/ReceiverPointerValue/main.cs.target:7-20 -->
 ```csharp
-[GoType] partial struct ring {
+partial struct ring {
     internal nint data;
     internal ж<ring> next;
 }
@@ -5899,7 +5899,7 @@ internal static void initSelf(this ж<ring> Ꮡr) {
     r.next = Ꮡr;
 }
 
-[GoRecv] internal static void linkTo(this ref ring r, ж<ring> Ꮡother) {
+internal static void linkTo(this ref ring r, ж<ring> Ꮡother) {
     r.next = Ꮡother;
 }
 ```
@@ -5945,7 +5945,7 @@ points at `PeopleByAge`, a named slice type whose `Len` method has a value recei
 	…
 	fmt.Println(pb.Len()) // 3
 ```
-<!-- source: src/tests/Behavioral/SortArrayType/SortArrayType.cs.target:200-202 -->
+<!-- source: src/tests/Behavioral/SortArrayType/SortArrayType.cs.target:199-201 -->
 ```csharp
     var pb = @new<PeopleByAge>();
     …
@@ -5982,7 +5982,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/ReceiverFieldAddress/main.cs.target:7-43 -->
 ```csharp
-[GoType] partial struct Counter {
+partial struct Counter {
     internal int32 n;
 }
 
@@ -6001,7 +6001,7 @@ public static void Set(this ж<Counter> Ꮡc, int32 v) {
     (Ꮡc.of(Counter.Ꮡn)).Value = v;
 }
 
-[GoRecv] public static int32 Get(this ref Counter c) {
+public static int32 Get(this ref Counter c) {
     return c.n;
 }
 
@@ -6122,7 +6122,7 @@ become `_Δp0`, `_Δp1` and so on, and an unnamed variadic pack is just `ʗp`:
 ```go
 func variadic(string, ...int)             {}
 ```
-<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:64-65 -->
+<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:62-63 -->
 ```csharp
 internal static void variadic(@string _Δp0, params ꓸꓸꓸnint ʗp) {
 }
@@ -6379,9 +6379,9 @@ func probeA1() {
 	fmt.Println("A1:", t.total, t.log)
 }
 ```
-<!-- source: src/tests/Behavioral/ClosureWriteVisibility/main.cs.target:7-26 -->
+<!-- source: src/tests/Behavioral/ClosureWriteVisibility/main.cs.target:8-27 -->
 ```csharp
-[GoType] partial struct Tally {
+partial struct Tally {
     internal nint total;
     internal @string log;
 }
@@ -6415,7 +6415,7 @@ func probeA3() {
 	fmt.Println("A3:", get())
 }
 ```
-<!-- source: src/tests/Behavioral/ClosureWriteVisibility/main.cs.target:36-43 -->
+<!-- source: src/tests/Behavioral/ClosureWriteVisibility/main.cs.target:37-44 -->
 ```csharp
 internal static void probeA3() {
     ref var t = ref heap<Tally>(out var Ꮡt);
@@ -6451,7 +6451,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/VariableCapture/VariableCapture.cs.target:7-29 -->
 ```csharp
-[GoType] partial struct data {
+partial struct data {
     internal @string name;
 }
 
@@ -6507,12 +6507,12 @@ func viaLocal() (int, int) {
 ```
 <!-- source: src/tests/Behavioral/MethodValueReceiverEscape/main.cs.target:7-47 -->
 ```csharp
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
     internal nint calls;
 }
 
-[GoRecv] internal static nint dec(this ref counter c, nint step) {
+internal static nint dec(this ref counter c, nint step) {
     c.n -= step;
     c.calls++;
     return c.n;
@@ -6554,7 +6554,7 @@ constant, C# knows the loop never ends, so the function needs no trailing `retur
 
 This example shows two things: the endless loop, and two loop variables that the converter renames.
 
-<!-- source: src/tests/Behavioral/ForVarMasksBlockLevel/main.go:12 -->
+<!-- source: src/tests/Behavioral/ForVarMasksBlockLevel/main.go:12-29 -->
 ```go
 func compute(n int) int {
 	total := 0
@@ -6575,7 +6575,7 @@ func compute(n int) int {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/ForVarMasksBlockLevel/main.cs.target:7 -->
+<!-- source: src/tests/Behavioral/ForVarMasksBlockLevel/main.cs.target:7-24 -->
 ```csharp
 internal static nint compute(nint n) {
     nint total = 0;
@@ -6632,7 +6632,7 @@ variables. So when Go ranges into variables that already exist, the `foreach` de
 the body starts by copying them into the real variables. The `ᴛ` suffix marks a name the converter makes
 up. The temporaries take generic names such as `iᴛ1` and `vᴛ1`, not your variables' names:
 
-<!-- source: src/tests/Behavioral/RangeStatements/RangeStatements.go:13 -->
+<!-- source: src/tests/Behavioral/RangeStatements/RangeStatements.go:13-21 -->
 ```go
 nums := []int{2, 3, 4}
 sum := 0
@@ -6644,7 +6644,7 @@ for i, num = range nums {
 	total += i
 }
 ```
-<!-- source: src/tests/Behavioral/RangeStatements/RangeStatements.cs.target:20 -->
+<!-- source: src/tests/Behavioral/RangeStatements/RangeStatements.cs.target:20-31 -->
 ```csharp
 var nums = new nint[]{2, 3, 4}.slice();
 nint sum = 0;
@@ -6671,7 +6671,7 @@ shares one variable across all iterations, so closures made in the loop would al
 When a closure captures `i`, the converted loop counts with a hidden `iᴛ1` and declares a fresh `i`
 from it at the top of each iteration. This Go prints `g1: 0 1 2`, and so does the C#:
 
-<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.go:18 -->
+<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.go:18-24 -->
 ```go
 func g1() {
 	var fs []func() int
@@ -6681,7 +6681,7 @@ func g1() {
 	fmt.Println("g1:", fs[0](), fs[1](), fs[2]())
 }
 ```
-<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:19 -->
+<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:19-26 -->
 ```csharp
 internal static void g1() {
     slice<Func<nint>> fs = default!;
@@ -6705,7 +6705,7 @@ Output: g2: 3, then g2v: 2, 4, 6. -->
 loop. So the C# adds `iᴛ1 = i;` at the end of the body and before each `continue`. This Go prints
 `g2: 3`, then 2, 4 and 6, and so does the C#:
 
-<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.go:27 -->
+<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.go:27-40 -->
 ```go
 func g2() {
 	var fs []func() int
@@ -6722,7 +6722,7 @@ func g2() {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:28 -->
+<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:28-47 -->
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object g2vˢ = (@string)"g2v:"u8;
@@ -6752,7 +6752,7 @@ internal static void g2() {
 **A body that takes `&i` gets a fresh heap box each iteration.** Go's `&i` needs `i` to live on the heap,
 so each iteration's `i` is stored in a golib heap box. This Go prints `g3: 0 1 2`, and so does the C#:
 
-<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.go:43 -->
+<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.go:43-49 -->
 ```go
 func g3() {
 	var ps []*int
@@ -6762,7 +6762,7 @@ func g3() {
 	fmt.Println("g3:", *ps[0], *ps[1], *ps[2])
 }
 ```
-<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:49 -->
+<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:49-58 -->
 ```csharp
 internal static void g3() {
     slice<ж<nint>> ps = default!;
@@ -6787,7 +6787,7 @@ function that takes a `yield` callback and calls it once per value. A named Go f
 `Seq[V]` becomes a C# delegate. The iterator's function literal becomes a lambda that takes
 `Func<nint, bool> yield`, C#'s type for a function from `nint` to `bool`:
 
-<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.go:110 -->
+<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.go:110-123 -->
 ```go
 type Seq[V any] func(yield func(V) bool)
 …
@@ -6801,7 +6801,7 @@ func countdown(n int) Seq[int] {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:118 -->
+<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:115-127 -->
 ```csharp
 public delegate void Seq<V>(Func<V, bool> yield);
 …
@@ -6822,7 +6822,7 @@ The loop hands the iterator to golib's `range` helper. The helper takes a plain 
 method. C# cannot infer `T` from a method passed this way, so the element type is written out:
 `range<nint>`. This loop sums 5, 4 and 3, then stops:
 
-<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.go:169 -->
+<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.go:169-176 -->
 ```go
 sum := 0
 for v := range countdown(5) {
@@ -6833,7 +6833,7 @@ for v := range countdown(5) {
 }
 fmt.Println(sum)
 ```
-<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:177 -->
+<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:174-181 -->
 ```csharp
 nint sum = 0;
 foreach (var v in range<nint>(countdown(5).Invoke)) {
@@ -6860,7 +6860,7 @@ keeps the Go label, adds `continue_L:;` at the end of the labeled loop's body an
 the loop, and turns `continue L` and `break L` into `goto` statements. A labeled `switch` gets the same
 `break_L:;`, placed right after the switch's closing brace. A plain Go `goto L` stays `goto L;`:
 
-<!-- source: src/tests/Behavioral/ForVariants/ForVariants.go:58 -->
+<!-- source: src/tests/Behavioral/ForVariants/ForVariants.go:58-70 -->
 ```go
 nums := []int{1, 2, 3, 4}
 scan:
@@ -6876,7 +6876,7 @@ scan:
 		}
 	}
 ```
-<!-- source: src/tests/Behavioral/ForVariants/ForVariants.cs.target:9 -->
+<!-- source: src/tests/Behavioral/ForVariants/ForVariants.cs.target:10-66 -->
 ```csharp
 private static readonly object pairˢ = (@string)"pair"u8;
 …
@@ -6907,7 +6907,7 @@ break_scan:;
 declaration and the statement share a new pair of braces, which keeps the variable scoped to the
 statement as in Go. That is why the second `a` here can reuse the name:
 
-<!-- source: src/tests/Behavioral/IfStatements/IfStatements.go:6 -->
+<!-- source: src/tests/Behavioral/IfStatements/IfStatements.go:6-12 -->
 ```go
 if a := -1; a < 0 {
 	fmt.Println("a is less than 0")
@@ -6917,7 +6917,7 @@ if a := 1; a > 0 {
 	fmt.Println("a is greater than 0")
 }
 ```
-<!-- source: src/tests/Behavioral/IfStatements/IfStatements.cs.target:8 -->
+<!-- source: src/tests/Behavioral/IfStatements/IfStatements.cs.target:8-26 -->
 ```csharp
 private static readonly object aIsLessThan0ˢ = (@string)"a is less than 0"u8;
 private static readonly object aIsGreaterThan0ˢ = (@string)"a is greater than 0"u8;
@@ -7242,12 +7242,12 @@ func Foo(n int) int {
 ```go
 switch Foo(2) {
 case Foo(1), Foo(2), Foo(3):
-	fmt.Println("First case")
-	fallthrough
+fmt.Println("First case")
+fallthrough
 case Foo(4):
-	fmt.Println("Second case")
+fmt.Println("Second case")
 default:
-	fmt.Println("Default case")
+    fmt.Println("Default case")
 }
 ```
 <!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:71-279 -->
@@ -7561,7 +7561,7 @@ the partial class builtin (builtin.DeferRegistrations.cs:48, builtin.cs:251, :27
 unchanged while the finally still runs the defers: GoFrame.cs:283-313. -->
 **A function that defers wraps its body in `try`/`catch`/`finally`.** This is the smallest `defer`:
 
-<!-- source: src/tests/Behavioral/DeferSimple/DeferSimple.go:5 -->
+<!-- source: src/tests/Behavioral/DeferSimple/DeferSimple.go:5-9 -->
 ```go
 func main() {
 	fmt.Println("Open file")
@@ -7569,7 +7569,7 @@ func main() {
 	fmt.Println("Write data to file")
 }
 ```
-<!-- source: src/tests/Behavioral/DeferSimple/DeferSimple.cs.target:7 -->
+<!-- source: src/tests/Behavioral/DeferSimple/DeferSimple.cs.target:7-21 -->
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object openFileˢ = (@string)"Open file"u8;
@@ -7619,7 +7619,7 @@ These fields are typed `object` because they are only passed to `fmt.Println`, w
 **`defer` evaluates its arguments at once**, as Go does; only the call waits. The arguments are passed to
 `defer` beside the lambda, and the lambda receives them later as `ᴛ1`, `ᴛ2`:
 
-<!-- source: src/tests/Behavioral/DeferEvalParam/DeferEvalParam.go:9 -->
+<!-- source: src/tests/Behavioral/DeferEvalParam/DeferEvalParam.go:9-13 -->
 ```go
 func printSquare(n int) {
 	defer fmt.Println("Deferred square:", n*n)
@@ -7627,7 +7627,7 @@ func printSquare(n int) {
 	fmt.Println("Immediate n:", n)
 }
 ```
-<!-- source: src/tests/Behavioral/DeferEvalParam/DeferEvalParam.cs.target:11 -->
+<!-- source: src/tests/Behavioral/DeferEvalParam/DeferEvalParam.cs.target:11-24 -->
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object deferredSquareˢ = (@string)"Deferred square:"u8;
@@ -7652,7 +7652,7 @@ square: 25", as in Go. `nint` is Go's `int` ([Integer Types](#integer-types-and-
 `PanicException` that carries `x`, and `throw` raises it. A deferred closure calls `recover()` directly:
 it reads the panic that the `catch` parked, and stops it. This function panics and recovers in one place:
 
-<!-- source: src/tests/Behavioral/NamedReturnDefer/main.go:66 -->
+<!-- source: src/tests/Behavioral/NamedReturnDefer/main.go:66-80 -->
 ```go
 // recover sets the named returns on panic; normal path leaves them.
 func guarded(boom bool) (code int, msg string) {
@@ -7670,7 +7670,7 @@ func guarded(boom bool) (code int, msg string) {
 	return code, msg
 }
 ```
-<!-- source: src/tests/Behavioral/NamedReturnDefer/main.cs.target:95 -->
+<!-- source: src/tests/Behavioral/NamedReturnDefer/main.cs.target:95-120 -->
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string recoveredˢ = "recovered"u8;
@@ -7729,7 +7729,7 @@ values returned. The C# tuple `(nint code, @string msg)` carries Go's two result
 **An early `return` sets the results and jumps to the label `ᒐdone`** on the final `return`. Leaving the
 `try` this way still runs the `finally`, so the deferred calls still see and change the results:
 
-<!-- source: src/tests/Behavioral/NamedReturnDefer/main.go:57 -->
+<!-- source: src/tests/Behavioral/NamedReturnDefer/main.go:57-64 -->
 ```go
 func compute(x int) (out int, label string) {
 	defer func() { out += 1000 }() // proves the named result is returned post-defer
@@ -7740,7 +7740,7 @@ func compute(x int) (out int, label string) {
 	return double(x), fmt.Sprintf("v=%d", x)
 }
 ```
-<!-- source: src/tests/Behavioral/NamedReturnDefer/main.cs.target:73 -->
+<!-- source: src/tests/Behavioral/NamedReturnDefer/main.cs.target:73-93 -->
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string negˢ = "neg"u8;
@@ -7778,7 +7778,7 @@ same test that returns `n * 2`. `(@out, label) = (-1, negˢ)` is Go's `out, labe
 `return default!;`, which is Go's rule. A function with no results needs no `return` there. Here `pick`
 recovers any panic its body raises:
 
-<!-- source: src/tests/Behavioral/DeferInterfaceReturn/main.go:24 -->
+<!-- source: src/tests/Behavioral/DeferInterfaceReturn/main.go:24-30 -->
 ```go
 func pick(kind int) Shape {
 	defer func() { _ = recover() }()
@@ -7788,7 +7788,7 @@ func pick(kind int) Shape {
 	return Square{S: 5}
 }
 ```
-<!-- source: src/tests/Behavioral/DeferInterfaceReturn/main.cs.target:27 -->
+<!-- source: src/tests/Behavioral/DeferInterfaceReturn/main.cs.target:27-40 -->
 ```csharp
 internal static Shape pick(nint kind) {
     GoFrame ᒐ = default;
@@ -7819,7 +7819,7 @@ frame recovers, `ᒐ.Run()` throws the panic again after the deferred calls fini
 catches it the same way. Here `divide` has no `defer`, so it has no frame, and `outerGuard` recovers. (`quo`
 is golib's signed division, see [Integer Types and Arithmetic](#integer-types-and-arithmetic).)
 
-<!-- source: src/tests/Behavioral/DivideByZeroPanic/main.go:36 -->
+<!-- source: src/tests/Behavioral/DivideByZeroPanic/main.go:36-47 -->
 ```go
 func divide(a, b int) int { return a / b }
 
@@ -7834,7 +7834,7 @@ func outerGuard(a, b int) (ok bool) {
 	return true
 }
 ```
-<!-- source: src/tests/Behavioral/DivideByZeroPanic/main.cs.target:51 -->
+<!-- source: src/tests/Behavioral/DivideByZeroPanic/main.cs.target:51-70 -->
 ```csharp
 internal static nint divide(nint a, nint b) {
     return quo(a, b);
@@ -7999,7 +7999,7 @@ private static readonly object sumˢ = (@string)"sum:"u8;
 …
 private static readonly object emitˢ = (@string)"emit:"u8;
 …
-internal static void Main() {
+internal static partial void Main() {
     var @out = new channel<nint>(0);
     goǃ((ᴛ1, ᴛ2, ᴛ3) => sum(ᴛ1, ᴛ2, ᴛ3), @out, 3, 4);
     fmt.Println(sumˢ, ᐸꟷ(@out));
@@ -8161,7 +8161,7 @@ ch <- 2
 fmt.Println(<-ch)
 fmt.Println(<-ch)
 ```
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:109-113 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:110-114 -->
 ```csharp
 var ch = new channel<nint>(2);
 ch.ᐸꟷ(1);
@@ -8224,7 +8224,7 @@ func sendOnly(s chan<- string) {
 	s <- "output"
 }
 ```
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:47-51 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:48-52 -->
 ```csharp
 private static readonly @string outputˢ = "output"u8;
 
@@ -8245,7 +8245,7 @@ mychanl := make(chan string)
 // function converts bidirectional channel to send only channel
 go sendOnly(mychanl)
 ```
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:194-195 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:195-196 -->
 ```csharp
 var mychanl = new channel<@string>(0);
 goǃ(sendOnly, mychanl.WithDirection(GoChanDir.Send));
@@ -8312,7 +8312,7 @@ func fibonacci(f, quit chan int) {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:26-44 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:27-45 -->
 ```csharp
 private static readonly object quitˢ = (@string)"quit"u8;
 
@@ -8358,7 +8358,7 @@ func firstMsg(a, b chan string) string {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:214-225 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:215-226 -->
 ```csharp
 internal static @string firstMsg(channel<@string> a, channel<@string> b) {
     var selᴛ12 = a;
@@ -8390,7 +8390,7 @@ func poll(done chan struct{}) string {
 	return "pending"
 }
 ```
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:228-241 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:229-242 -->
 ```csharp
 private static readonly @string doneˢ = "done"u8;
 private static readonly @string pendingˢ = "pending"u8;
@@ -8445,7 +8445,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/CombinedStructFields/CombinedStructFields.cs.target:13-25 -->
 ```csharp
-[GoType] partial struct mixed {
+partial struct mixed {
     public nint X;
     internal nint y;
     internal nint p, q;
@@ -8504,7 +8504,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/StructWithPointer/StructWithPointer.cs.target:7-21 -->
 ```csharp
-[GoType] partial struct ColorList {
+partial struct ColorList {
     public nint Total;
     public @string Color;
     public ж<ColorList> Next;
@@ -8551,7 +8551,7 @@ func plainFunc() int {
 ```
 <!-- source: src/tests/Behavioral/LocalStructFieldAddr/main.cs.target:7-22 -->
 ```csharp
-[GoType] partial struct Thing {
+partial struct Thing {
     internal nint val;
 }
 …
@@ -8594,13 +8594,13 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/ZeroValueStructVar/main.cs.target:7-39 -->
 ```csharp
-[GoType] partial struct holder {
+partial struct holder {
     internal @string name;
     internal array<nint> tbl = new(8);
     internal slice<nint> tail;
 }
 …
-[GoType] partial struct point {
+partial struct point {
     internal nint x, y;
 }
 
@@ -8658,13 +8658,13 @@ func identCopy() {
 ```
 <!-- source: src/tests/Behavioral/StructArrayFieldValueCopy/StructArrayFieldValueCopy.cs.target:7-69 -->
 ```csharp
-[GoType] partial struct digest {
+partial struct digest {
     internal array<nint> h = new(4);
     internal array<byte> x = new(2);
     internal nint nx;
 }
 
-[GoRecv] internal static void bump(this ref digest d) {
+internal static void bump(this ref digest d) {
     foreach (var (i, _) in d.h) {
         d.h[i]++;
     }
@@ -8727,11 +8727,11 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/LiftedLocalTypes/main.cs.target:13-35 -->
 ```csharp
-[GoType("dyn")] internal partial struct main_a {
+internal partial struct main_a /*dyn*/ {
     public nint X;
 }
 
-[GoType("dyn")] internal partial struct main_point {
+internal partial struct main_point /*dyn*/ {
     public nint X, Y;
 }
 
@@ -8846,7 +8846,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:8-81 -->
 ```csharp
-[GoType] partial struct Person {
+partial struct Person {
     internal @string name;
     internal int32 age;
 }
@@ -8859,7 +8859,7 @@ public static bool IsAdult(this Person p) {
     return p.age >= 18;
 }
 
-[GoType] partial struct Employee {
+partial struct Employee {
     internal @string position;
 }
 
@@ -8867,7 +8867,7 @@ public static bool IsManager(this Employee e) {
     return e.position == "manager"u8;
 }
 
-[GoType] partial struct Record {
+partial struct Record {
     public partial ref Person Person { get; }
     public partial ref Employee Employee { get; }
 }
@@ -8944,12 +8944,12 @@ type mid struct {
 ```
 <!-- source: src/tests/Behavioral/EmbeddedStructValueCopy/EmbeddedStructValueCopy.cs.target:7-71 -->
 ```csharp
-[GoType] partial struct inner {
+partial struct inner {
     internal nint n;
     internal @string tag;
 }
 
-[GoType] partial struct mid {
+partial struct mid {
     internal partial ref inner inner { get; }
     internal nint extra;
 }
@@ -9018,28 +9018,28 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/PointerEmbeddingPromotion/main.cs.target:7-41 -->
 ```csharp
-[GoType] partial struct leaf {
+partial struct leaf {
     internal nint n;
 }
 
-[GoRecv] internal static void bump(this ref leaf l) {
+internal static void bump(this ref leaf l) {
     l.n++;
 }
 
-[GoRecv] internal static nint get(this ref leaf l) {
+internal static nint get(this ref leaf l) {
     return l.n;
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal partial ref ж<leaf> leaf { get; }
     internal @string tag;
 }
 
-[GoType] partial struct mid {
+partial struct mid {
     internal partial ref ж<leaf> leaf { get; }
 }
 
-[GoType] partial struct top {
+partial struct top {
     internal partial ref mid mid { get; }
     internal @string label;
 }
@@ -9083,17 +9083,17 @@ type outer struct {
 	o.bump(5)           // promoted: (&o.inner).bump(5)
 	o.bump(3)
 ```
-<!-- source: src/tests/Behavioral/EmbeddedValuePointerMethod/main.cs.target:7-69 -->
+<!-- source: src/tests/Behavioral/EmbeddedValuePointerMethod/main.cs.target:8-70 -->
 ```csharp
-[GoType] partial struct inner {
+partial struct inner {
     internal nint n;
 }
 
-[GoRecv] internal static void bump(this ref inner i, nint d) {
+internal static void bump(this ref inner i, nint d) {
     i.n += d;
 }
 …
-[GoType] partial struct outer {
+partial struct outer {
     internal nint tag;
     internal partial ref inner inner { get; }
 }
@@ -9150,14 +9150,14 @@ func Reverse(data Interface) Interface {
 ```
 <!-- source: src/tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.cs.target:8-42 -->
 ```csharp
-[GoType] partial interface Interface {
+partial interface Interface {
     nint Len();
     bool Less(nint i, nint j);
     void Swap(nint i, nint j);
 }
 …
-[GoType] partial struct reverse {
-    public Interface Interface;
+partial struct reverse {
+    /*embed*/ public Interface Interface;
 }
 
 internal static bool Less(this reverse r, nint i, nint j) {
@@ -9221,15 +9221,15 @@ type rdCloser interface {
 ```
 <!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:260-272 -->
 ```csharp
-[GoType] partial interface rdr {
+partial interface rdr {
     @string read();
 }
 
-[GoType] partial interface clsr {
+partial interface clsr {
     @string close();
 }
 
-[GoType] partial interface rdCloser :
+partial interface rdCloser :
     rdr,
     clsr
 {
@@ -9262,7 +9262,7 @@ func f() error {
 ```
 <!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:7-17 -->
 ```csharp
-[GoType] partial struct MyError {
+partial struct MyError {
     internal @string description;
 }
 
@@ -9313,13 +9313,13 @@ internal static nint Value(this meter m) {
     return m();
 }
 
-[GoType("num:nint")] partial struct gauge;
+partial struct gauge /*num:nint*/;
 
 internal static nint Value(this gauge g) {
     return (nint)g * 2;
 }
 
-[GoType] partial interface valued {
+partial interface valued {
     nint Value();
 }
 
@@ -9381,7 +9381,7 @@ type Incrementer interface {
 ```
 <!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:60-89 -->
 ```csharp
-[GoType] partial struct Counter {
+partial struct Counter {
     internal nint n;
 }
 
@@ -9399,11 +9399,11 @@ public static @string Inc(this ж<Counter> Ꮡc) {
     return incˢ;
 }
 
-[GoRecv] public static nint Total(this ref Counter c) {
+public static nint Total(this ref Counter c) {
     return c.n;
 }
 …
-[GoType] partial interface Incrementer {
+partial interface Incrementer {
     @string Inc();
     nint Total();
 }
@@ -9516,9 +9516,9 @@ func checkErr(n int) {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.cs.target:55-99 -->
+<!-- source: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.cs.target:54-98 -->
 ```csharp
-[GoType("num:uintptr")] partial struct errno;
+partial struct errno /*num:uintptr*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string errnoˢ = "errno"u8;
@@ -9627,14 +9627,12 @@ type record struct {
 	Untagged bool
 }
 ```
-<!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.cs.target:8-15 -->
+<!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.cs.target:9-14 -->
 ```csharp
-[GoType] partial struct record {
+partial struct record {
     public nint Version;
-    [GoTag(@"json:""name"" asn1:""optional,explicit,tag:0""")]
-    public @string Name;
-    [GoTag(@"json:""data,omitempty""")]
-    public slice<byte> Data;
+    public @string Name; /*`json:"name" asn1:"optional,explicit,tag:0"`*/
+    public slice<byte> Data; /*`json:"data,omitempty"`*/
     public bool Untagged;
 }
 ```
@@ -9661,7 +9659,7 @@ func main() {
 …
 }
 ```
-<!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.cs.target:49-111 -->
+<!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.cs.target:47-109 -->
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string jsonˢ = "json"u8;
@@ -9708,7 +9706,7 @@ func bumpParamElem(a [3]int) [3]int {
 ```
 <!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:43 -->
 ```csharp
-internal static array<nint> bumpParamElem([GoArrayDims(3)] array<nint> a) {
+internal static array<nint> bumpParamElem(/*[3]*/ array<nint> a) {
 ```
 
 Similar attributes record a channel direction, an embedded field and the Go name of a type declared inside
@@ -9753,27 +9751,19 @@ func main() {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/DescriptorCarrierFieldName/main.cs.target:1-38 -->
+<!-- source: src/tests/Behavioral/DescriptorCarrierFieldName/main.cs.target:1-30 -->
 ```csharp
 global using eface = object;
 global using namedIface = go.fmt_package.Stringer;
 global using aliasIface = go.fmt_package.Stringer;
 …
-// Descriptor carrier for `eface` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("eface")] internal interface efaceᴅ { }
 
-// Descriptor carrier for `namedIface` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("namedIface")] internal interface namedIfaceᴅ { }
-
-
-[GoType] public partial interface realIface {
+public partial interface realIface {
     void Do();
 }
 
-[GoType] partial struct holder {
-    [GoDescriptorType(Self = typeof(efaceᴅ))]
+partial struct holder {
     public eface E;
-    [GoDescriptorType(Self = typeof(namedIfaceᴅ))]
     public namedIface N;
     public realIface R;
     public aliasIface A;
@@ -9816,22 +9806,16 @@ func nameOf[T any](label string) {
 	fmt.Printf("%-11s Name=%q String=%q PkgPath=%q Kind=%v\n", label, t.Name(), t.String(), t.PkgPath(), t.Kind())
 }
 ```
-<!-- source: src/tests/Behavioral/GenericTypeNameCompanion/main.cs.target:1-27 -->
+<!-- source: src/tests/Behavioral/GenericTypeNameCompanion/main.cs.target:1-21 -->
 ```csharp
 global using eface = object;
 global using namedIface = go.fmt_package.Stringer;
 global using aliasIface = go.fmt_package.Stringer;
 …
-// Descriptor carrier for `eface` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("eface")] internal interface efaceᴅ { }
 
-// Descriptor carrier for `namedIface` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("namedIface")] internal interface namedIfaceᴅ { }
+partial struct ordinary /*@string*/;
 
-
-[GoType("@string")] partial struct ordinary;
-
-[GoType] partial interface inlineIface {
+partial interface inlineIface {
     void Do();
 }
 
@@ -9859,7 +9843,7 @@ func main() {
 …
 }
 ```
-<!-- source: src/tests/Behavioral/GenericTypeNameCompanion/main.cs.target:33-52 -->
+<!-- source: src/tests/Behavioral/GenericTypeNameCompanion/main.cs.target:27-46 -->
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string efaceˢ = "eface"u8;
@@ -10075,9 +10059,9 @@ type grid [3]row
 ```
 <!-- source: src/tests/Behavioral/PointerToArrayElementAddress/main.cs.target:7-23 -->
 ```csharp
-[GoType("[4]uint32")] partial struct row;
+partial struct row /*[4]uint32*/;
 
-[GoType("[3]row")] partial struct grid;
+partial struct grid /*[3]row*/;
 …
     var g = @new<grid>();
     for (nint j = 0; j < 3; j++) {
@@ -10155,7 +10139,7 @@ func addTo(out *uint64, v uint64) {
 	addTo(&total, 7)
 	fmt.Println("total:", total)
 ```
-<!-- source: src/tests/Behavioral/RefLoweredParams/main.cs.target:11-111 -->
+<!-- source: src/tests/Behavioral/RefLoweredParams/main.cs.target:12-112 -->
 ```csharp
 internal static void addTo(ref uint64 @out, uint64 v) {
     @out += v;
@@ -10199,7 +10183,7 @@ func (c *Counter) Get() int32            { return c.n }
 ```
 <!-- source: src/tests/Behavioral/ReceiverFieldAddress/main.cs.target:7-28 -->
 ```csharp
-[GoType] partial struct Counter {
+partial struct Counter {
     internal int32 n;
 }
 
@@ -10218,7 +10202,7 @@ public static void Set(this ж<Counter> Ꮡc, int32 v) {
     (Ꮡc.of(Counter.Ꮡn)).Value = v;
 }
 
-[GoRecv] public static int32 Get(this ref Counter c) {
+public static int32 Get(this ref Counter c) {
     return c.n;
 }
 ```
@@ -10352,7 +10336,7 @@ func populate(t *row, base uint32) {
 ```
 <!-- source: src/tests/Behavioral/PointerToArrayElementAddress/main.cs.target:7-17 -->
 ```csharp
-[GoType("[4]uint32")] partial struct row;
+partial struct row /*[4]uint32*/;
 …
 internal static void populate(ж<row> Ꮡt, uint32 @base) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -10486,20 +10470,20 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/ForMethodInitPost/main.cs.target:7-46 -->
 ```csharp
-[GoType] partial struct iter {
+partial struct iter {
     internal nint i, n;
 }
 
-[GoRecv] internal static void start(this ref iter it, nint n) {
+internal static void start(this ref iter it, nint n) {
     it.i = 0;
     it.n = n;
 }
 
-[GoRecv] internal static bool valid(this ref iter it) {
+internal static bool valid(this ref iter it) {
     return it.i < it.n;
 }
 
-[GoRecv] internal static void next(this ref iter it) {
+internal static void next(this ref iter it) {
     it.i++;
 }
 …
@@ -10558,7 +10542,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/ReceiverPointerValue/main.cs.target:7-62 -->
 ```csharp
-[GoType] partial struct ring {
+partial struct ring {
     internal nint data;
     internal ж<ring> next;
 }
@@ -10569,7 +10553,7 @@ internal static void initSelf(this ж<ring> Ꮡr) {
     r.next = Ꮡr;
 }
 
-[GoRecv] internal static void linkTo(this ref ring r, ж<ring> Ꮡother) {
+internal static void linkTo(this ref ring r, ж<ring> Ꮡother) {
     r.next = Ꮡother;
 }
 …
@@ -10662,7 +10646,7 @@ func addrOf(p *point) uintptr {
 ```
 <!-- source: src/tests/Behavioral/UintptrUnsafePointerIdiom/main.cs.target:8-10, 15-17 -->
 ```csharp
-[GoType] partial struct point {
+partial struct point {
     internal int32 x, y;
 }
 …
@@ -10816,11 +10800,11 @@ type T2 struct {
 ```
 <!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:8-14, 60, 82-85 -->
 ```csharp
-[GoType] partial struct T1 {
+partial struct T1 {
     internal int32 a;
 }
 
-[GoType] partial struct T2 {
+partial struct T2 {
     internal int32 a;
 }
 …
@@ -10937,7 +10921,7 @@ func PrintValPtr(ptr *int) {
 ```
 <!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:7-66 -->
 ```csharp
-[GoType] partial struct Buffer {
+partial struct Buffer {
     internal slice<byte> buf;
     internal nint off;
     internal int8 lastRead;
@@ -10986,11 +10970,11 @@ func (m *Mixed) Bump() { m.n++ }
 ```
 <!-- source: src/tests/Behavioral/NamedInterfacePointerMethodSet/main.cs.target:25-83 -->
 ```csharp
-[GoType] partial struct Mixed {
+partial struct Mixed {
     internal nint n;
 }
 …
-[GoRecv] public static void Bump(this ref Mixed m) {
+public static void Bump(this ref Mixed m) {
     m.n++;
 }
 …
@@ -11024,11 +11008,11 @@ func (c *mc) wrapped() wrap {
 ```
 <!-- source: src/tests/Behavioral/DirectBoxReceiverPassedWhole/main.cs.target:7-33 -->
 ```csharp
-[GoType] partial struct mc {
+partial struct mc {
     internal nint n;
 }
 …
-[GoType] partial struct wrap {
+partial struct wrap {
     internal ж<mc> p;
     internal nint tag;
 }
@@ -11055,7 +11039,7 @@ attribute `[MethodImpl(MethodImplOptions.NoInlining)]`, and C# compiles the two 
 that carries the attribute. Here `here` asks for its caller, and `plain` is a one-line function that the
 JIT would otherwise inline:
 
-<!-- source: src/tests/Behavioral/NoInlinePartial/main.go:18-28 -->
+<!-- source: src/tests/Behavioral/NoInlinePartial/main.go:19-29 -->
 ```go
 // here names the function that called it.
 func here() string {
@@ -11141,20 +11125,20 @@ func assignDescriber(h *holder, s *Setting) {
 ```
 <!-- source: src/tests/Behavioral/PointerInterfaceStructField/main.cs.target:7-41 -->
 ```csharp
-[GoType] partial interface Describer {
+partial interface Describer {
     @string Describe();
 }
 
-[GoType] partial struct Setting {
+partial struct Setting {
     internal @string name;
     internal nint value;
 }
 
-[GoRecv] public static @string Describe(this ref Setting s) {
+public static @string Describe(this ref Setting s) {
     return fmt.Sprintf("%s=%d"u8, s.name, s.value);
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal Describer d;
     internal @string label;
 }
@@ -11313,7 +11297,7 @@ func init() {
 // registerLoadFromEmbeddedTZData is defined in package time.
 //
 //go:linkname registerLoadFromEmbeddedTZData time.registerLoadFromEmbeddedTZData
-[global::System.Diagnostics.StackTraceHidden] internal static void registerLoadFromEmbeddedTZData(Func<@string, (@string, error)> _) {
+/*linkname*/ internal static partial void registerLoadFromEmbeddedTZData(Func<@string, (@string, error)> _) {
     go.time_package.registerLoadFromEmbeddedTZData(_);
 }
 
@@ -11386,7 +11370,7 @@ using runtime = runtime_package;
 // Implemented in runtime.
 
 //go:linkname runtime_registerUniqueMapCleanup
-[global::System.Diagnostics.StackTraceHidden] internal static void runtime_registerUniqueMapCleanup(Action cleanup) {
+/*linkname*/ internal static partial void runtime_registerUniqueMapCleanup(Action cleanup) {
     runtime.unique_runtime_registerUniqueMapCleanup(cleanup);
 }
 ```
@@ -11534,7 +11518,7 @@ func Gosched() {
 
 The converted `proc.cs` keeps only a placeholder where `Gosched` would be:
 
-<!-- source: src/core/runtime/windows/proc.cs:351 -->
+<!-- source: src/core/runtime/windows/proc.cs:352 -->
 ```csharp
 // go2cs generated this placeholder — func Gosched is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 ```
@@ -11542,7 +11526,7 @@ The converted `proc.cs` keeps only a placeholder where `Gosched` would be:
 The placeholder names the attribute that the `*_impl.cs` file carries. It is the same attribute as
 `go.GoManualConversion`; `go` is its namespace. The hand-owned `managed_impl.cs` supplies the method:
 
-<!-- source: src/core/runtime/managed_impl.cs:262-274 -->
+<!-- source: src/core/runtime/managed_impl.cs:380-392 -->
 ```csharp
 // Gosched yields the processor, allowing other goroutines to run. It does not suspend the
 // current goroutine, so execution resumes automatically.
@@ -11976,7 +11960,7 @@ type acceptRange struct {
 ```csharp
 // acceptRange gives the range of valid values for the second byte in a UTF-8
 // sequence.
-[GoType] partial struct acceptRange {
+partial struct acceptRange {
     internal uint8 lo; // lowest value for second byte.
     internal uint8 hi; // highest value for second byte.
 }
@@ -12089,7 +12073,7 @@ public static slice<uint16> Encode(slice<rune> s) {
     }
     // normal rune
     // needs surrogate sequence
-    return a[..(int)(n)];
+    return a.slice(0, n);
 }
 ```
 

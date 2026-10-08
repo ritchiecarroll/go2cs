@@ -191,10 +191,10 @@ would infer a different `T`:
 
 <!-- source: src/tests/Behavioral/MinMaxBuiltin/main.go:143-144 -->
 ```go
-x := max(u8, 1) // u8 is a uint8
+x := max(u8, 1)
 x += 100
 ```
-<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:91-92 -->
+<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:92-93 -->
 ```csharp
 var x = max(u8, (uint8)(1));
 x += 100;

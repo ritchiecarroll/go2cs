@@ -86,17 +86,17 @@ operand. In these examples `a` is an `int8` holding 100 and `u` is a `uint8` hol
 ```go
 var x any = a + a
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:116 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:113 -->
 ```csharp
 any x = (int8)(a + a);
 ```
 
-<!-- source: src/tests/Behavioral/NarrowArithmeticCompileSinks/main.go:22 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticCompileSinks/main.go:22-23 -->
 ```go
 mk := map[uint8]string{144: "wrapped"}
 fmt.Println("map key:", mk[u+u])
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticCompileSinks/main.cs.target:29 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticCompileSinks/main.cs.target:29-30 -->
 ```csharp
 var mk = new map<uint8, @string>{[144] = "wrapped"u8};
 fmt.Println(mapKeyˢ, mk[(uint8)(u + u)]);
@@ -139,7 +139,7 @@ and width, so a guarded shift needs no cast of its own.
 ```go
 var x int8 = (a + a) >> n
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:205 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:202 -->
 ```csharp
 int8 x = (int8)(((int8)(a + a)).Rsh(n));
 ```

@@ -495,11 +495,11 @@ func test() struct { string; *int; P; M } {   // TypeConversionReturnType: P = *
 ```
 <!-- source: src/tests/Behavioral/TypeConversionReturnType/TypeConversionReturnType.cs.target:10-15 -->
 ```csharp
-[GoType("dyn")] internal partial struct test_R0 {
-    [GoEmbedded] internal @string @string;
-    [GoEmbedded] internal ж<nint> @int;
-    [GoEmbedded] public P P;
-    [GoEmbedded] public M M;
+internal partial struct test_R0 /*dyn*/ {
+    /*embed*/ internal @string @string;
+    /*embed*/ internal ж<nint> @int;
+    /*embed*/ public P P;
+    /*embed*/ public M M;
 }
 ```
 

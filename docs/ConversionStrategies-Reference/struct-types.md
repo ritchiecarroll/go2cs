@@ -5,7 +5,7 @@ Go structs are converted to C# `struct` types and used on the stack to optimize 
 
 <!-- source: src/tests/Behavioral/AnonymousStructs/AnonymousStructs.cs.target:7-10 -->
 ```csharp
-[GoType] partial struct Person {
+partial struct Person {
     public @string Name;
     public nint Age;
 }
