@@ -19,7 +19,7 @@ case {} when ᐧᐧ: {
 The marker is deliberately SEPARATE from the const `ᐧ` switch governor: that const's foldability is itself load-bearing (`case ᐧ when ...` label patterns need a constant, and an infinite `for (...; ᐧ ;...)` relies on the fold for reachability proofs -- CS9135/CS0161 when it was made readonly in place). Guarded by `ExprSwitch`.
 
 ## No constant pattern against a named-numeric wrapper
-A constant expression whose CONTEXTUAL type is a wrapper struct -- golib `uintptr` or any `[GoType("num:...")]` named numeric (time's `Duration`) -- can never be a C# constant, so no constant/relational pattern can compare against it: `d is >= 0` types the literal 0 as Duration (CS9135). The lowering keeps the plain operator form (`d >= 0`, the wrapper's operators). Guarded by `ExprSwitch` (the `pace` switch).
+A constant expression whose CONTEXTUAL type is a wrapper struct -- golib `uintptr` or any `/*num:...*/` named numeric (time's `Duration`) -- can never be a C# constant, so no constant/relational pattern can compare against it: `d is >= 0` types the literal 0 as Duration (CS9135). The lowering keeps the plain operator form (`d >= 0`, the wrapper's operators). Guarded by `ExprSwitch` (the `pace` switch).
 
 ## An index-expression case label falls back to equality
 A case label that INDEXES a package-level array/slice variable (`case Typ[UntypedNil]:` — go/types
@@ -37,7 +37,7 @@ package-level array var, output-compared vs Go.)
 ## Literal case labels under a named-type tag compare through a cast
 
 A tagged switch whose tag type is a NAMED (non-interface) type — net/http's
-`func (code socksReply) String()` switching on `code` — renders the tag as a `[GoType]` wrapper
+`func (code socksReply) String()` switching on `code` — renders the tag as a generated wrapper
 struct. An untyped-LITERAL label adopts the tag's named type in Go (go/types records it on the label
 expression), but its C# render is a bare literal of the UNDERLYING type, which can neither be a
 constant pattern (`exprᴛ1 is 0x01` — CS9135, constant pattern against the wrapper) nor compare bare

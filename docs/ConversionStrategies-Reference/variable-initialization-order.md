@@ -15,18 +15,23 @@ Go initializes package-level variables in **dependency order** (spec: "within a 
 var procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx")
 ```
 
+In `syscall_windows.cs` the variable is a bare field beside the method that sets it:
+
+<!-- source: src/core/syscall/windows/syscall_windows.cs:493-494 -->
 ```csharp
-// syscall_windows.cs
 internal static ж<LazyProc> procSetFilePointerEx;
 internal static void initᴛprocSetFilePointerEx() { procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx"u8); }
+```
 
-// package_init.cs (generated)
+The generated `package_init.cs` calls every relocated initializer from the class's static constructor,
+in `types.Info.InitOrder`:
+
+<!-- source: src/core/syscall/windows/package_init.cs:9-12 -->
+```csharp
 partial class syscall_package {
     static syscall_package() {
         initᴛprocSetFilePointerEx();
-        // … every relocated initializer, in types.Info.InitOrder …
-    }
-}
+        initᴛStdin();
 ```
 
 This is correct by C#'s own initialization guarantees: **all** static field initializers (every partial-class file) run **before** the static-constructor body, so every non-relocated dependency is already initialized when the ctor runs; the ctor then applies the relocated initializers in Go's order. Vars with no order hazard (the overwhelming majority — only 25 of the 302 stdlib packages relocate anything) keep their readable inline form. Cross-**package** order needs no handling: accessing another package's static field triggers that type's initialization first (.NET guarantees), matching Go's imported-packages-first rule. Adding an explicit static ctor also removes `beforefieldinit` from the package class, giving it *precise* initialization semantics.
@@ -70,7 +75,7 @@ Two hard-won rules ride along: the hook name doubles the TempVarMarker (`init` +
 
 Go constants are compile-time values with no initialization order at all, so `types.Info.InitOrder` never mentions them — and for almost every constant that stays true in C#, because a constant C# cannot declare `const` is emitted as a **get-only property** rather than a field (see [Constant Values](constants.md#a-constant-c-cannot-declare-const-is-a-get-only-property-not-a-static-readonly-field)). A property re-evaluates at each read, so it can never be observed at its zero value, whatever the declaration order.
 
-**Two forms cannot be properties**, because re-evaluating them would rebuild an allocation on every read: a **string** constant (`@string`, or a `[GoType("@string")]` wrapper such as `const labelPipe label = "pipe"`, whose `u8` literal the string-literal arc deliberately hoists to a single allocation) and a **GoBigConst** constant (a `BigInteger.Parse`). Those two stay `static readonly` **fields with initializers**, and therefore carry exactly the cross-part field-initializer ordering hazard a package *var* has. The relocation analysis has to supply that dependency edge itself, because Go's own analysis has no reason to model it:
+**Two forms cannot be properties**, because re-evaluating them would rebuild an allocation on every read: a **string** constant (`@string`, or a `/*@string*/` wrapper such as `const labelPipe label = "pipe"`, whose `u8` literal the string-literal arc deliberately hoists to a single allocation) and a **GoBigConst** constant (a `BigInteger.Parse`). Those two stay `static readonly` **fields with initializers**, and therefore carry exactly the cross-part field-initializer ordering hazard a package *var* has. The relocation analysis has to supply that dependency edge itself, because Go's own analysis has no reason to model it:
 
 ```go
 // server.go — a plain string const, so a `static readonly @string` FIELD

@@ -1,10 +1,11 @@
 # Struct Types
 
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#struct-types)
-Go structs are converted to C# `struct` types and used on the stack to optimize memory use and reduce GC pressure; when an instance must escape the stack it is wrapped in a heap box, [`ж<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/%D0%B6.cs) (see [Pointers](pointers.md#pointers)). Rather than spell out the whole struct body, the converter emits a partial struct carrying a `[GoType]` attribute, and the `TypeGenerator` source generator synthesizes the members (equality, `ISupportMake`, embedding promotion, etc.):
+Go structs are converted to C# `struct` types and used on the stack to optimize memory use and reduce GC pressure; when an instance must escape the stack it is wrapped in a heap box, [`ж<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/%D0%B6.cs) (see [Pointers](pointers.md#pointers)). Rather than spell out the whole struct body, the converter emits a bare partial struct, and the `TypeGenerator` source generator synthesizes the members (equality, `ISupportMake`, embedding promotion, etc.):
 
+<!-- source: src/tests/Behavioral/AnonymousStructs/AnonymousStructs.cs.target:7-10 -->
 ```csharp
-[GoType] partial struct Person {
+partial struct Person {
     public @string Name;
     public nint Age;
 }
@@ -16,15 +17,15 @@ The synthesized value-equality body compares the struct's fields against a param
 
 A combined Go field declaration — `x, y int` — emits a single combined C# line (`internal nint x, y;`) so the output mirrors the Go source's line grouping. The combined form is only used when every name in the group shares the same emitted type and access modifier and none needs per-name special handling; otherwise the converter falls back to one line per name. The fallback applies when any of these hold: a blank field `_` (renamed per occurrence — `_`, `__`, …), a name equal to the enclosing struct type (renamed with the `Δ` collision marker), a per-field array initializer (` = new(N)`), or a mix of exported and unexported names in the same group (`X, y int` → `public nint X;` / `internal nint y;`). Field comments and tags attach to the whole Go field, so they never diverge within a group.
 
-C# does not allow inline or intra-function type definitions, so these are "lifted" out of the function. A **named** local type is lifted with its enclosing function's name as a prefix to avoid collisions — a `type x struct{…}` declared in `main` becomes `main_x`. An **anonymous** struct (or an anonymous struct used as a field/value) is lifted to a synthesized name with a `ᴛ`*N* suffix and marked dynamic, e.g. `[GoType("dyn")] partial struct settingsᴛ1`. Struct "definitions" that match structurally remain usable interchangeably (the generator and implicit conversions handle this). A reference to a lifted type as a bare identifier is renamed to the lifted name, and so is its use as a **slice or array element type** — `[]entry` (where `entry` is a local type) emits `slice<process_entry>`, not the short `slice<entry>` (which is unresolved at package scope → CS0246). The element is resolved through the same lift registry as the bare-identifier and anonymous-struct cases. (Guarded by the `LocalTypeSliceElement` behavioral test, covering both the slice and fixed-array forms; runtime hit this on `printDebugLog`'s `[]readState` and `traceAdvance`'s `[]untracedG`.)
+C# does not allow inline or intra-function type definitions, so these are "lifted" out of the function. A **named** local type is lifted with its enclosing function's name as a prefix to avoid collisions — a `type x struct{…}` declared in `main` becomes `main_x`. An **anonymous** struct (or an anonymous struct used as a field/value) is lifted to a synthesized name with a `ᴛ`*N* suffix and marked dynamic, e.g. `partial struct settingsᴛ1 /*dyn*/`. Struct "definitions" that match structurally remain usable interchangeably (the generator and implicit conversions handle this). A reference to a lifted type as a bare identifier is renamed to the lifted name, and so is its use as a **slice or array element type** — `[]entry` (where `entry` is a local type) emits `slice<process_entry>`, not the short `slice<entry>` (which is unresolved at package scope → CS0246). The element is resolved through the same lift registry as the bare-identifier and anonymous-struct cases. (Guarded by the `LocalTypeSliceElement` behavioral test, covering both the slice and fixed-array forms; runtime hit this on `printDebugLog`'s `[]readState` and `traceAdvance`'s `[]untracedG`.)
 
-**The `dyn` marker is also the type's RUN-TIME identity, and it must not leak the synthesized name.** An unnamed Go struct has no name to report, so `reflect.Type.String()` and `%T` render it STRUCTURALLY — `struct { X int; y int }`, and `struct {}` for golib's `EmptyStruct`. Because a lift gives the type a synthesized C# name (`settingsᴛ1`), that name would otherwise be what reflection reports; `[GoType("dyn")]` is exactly what distinguishes a lift from an ordinary declared struct, whose Go name IS its own. golib's `GoReflect.TypeNaming` therefore renders a `dyn`-marked value type from the `GoFields` projection — the same field table `NumField`/`Field` and the value side read, so a type's reported name and the fields it hands out cannot disagree — following Go's format exactly: an embedded field contributes its type alone, a tagged field appends the `strconv.Quote`d tag. Before it, `go/ast`'s `TestPrint` reported `ast_internal_test.typeᴛ1` where Go prints `struct { X int; y int }`, and `internal/platform`'s decode error named `[]platform_test.listEntry` rather than Go's structural spelling. (Landed 2026-08-09 with `go/ast`'s 9/9 bank; see [`docs/phase4/DESIGN-reflection-bridge.md`](../phase4/DESIGN-reflection-bridge.md).)
+**The `dyn` marker is also the type's RUN-TIME identity, and it must not leak the synthesized name.** An unnamed Go struct has no name to report, so `reflect.Type.String()` and `%T` render it STRUCTURALLY — `struct { X int; y int }`, and `struct {}` for golib's `EmptyStruct`. Because a lift gives the type a synthesized C# name (`settingsᴛ1`), that name would otherwise be what reflection reports; `/*dyn*/` is exactly what distinguishes a lift from an ordinary declared struct, whose Go name IS its own. golib's `GoReflect.TypeNaming` therefore renders a `dyn`-marked value type from the `GoFields` projection — the same field table `NumField`/`Field` and the value side read, so a type's reported name and the fields it hands out cannot disagree — following Go's format exactly: an embedded field contributes its type alone, a tagged field appends the `strconv.Quote`d tag. Before it, `go/ast`'s `TestPrint` reported `ast_internal_test.typeᴛ1` where Go prints `struct { X int; y int }`, and `internal/platform`'s decode error named `[]platform_test.listEntry` rather than Go's structural spelling. (Landed 2026-08-09 with `go/ast`'s 9/9 bank; see [`docs/phase4/DESIGN-reflection-bridge.md`](../phase4/DESIGN-reflection-bridge.md).)
 
 A **map whose VALUE type is an anonymous struct** is lifted the same way. A package-level `var m = map[K]struct{…}{…}` — crypto/internal/hpke's `SupportedKEMs` (`map[uint16]struct{ curve ecdh.Curve; hash crypto.Hash; nSecret uint16 }`) and `SupportedAEADs` — names its value struct through the lift so the map type reads `map<uint16, SupportedKEMsᴛ1>`; without it, `getAliasQualifiedTypeName`'s map arm stringified the value as raw Go `struct{…}` syntax straight into the C# map signature (`map<uint16, struct{ curve ecdh.Curve; … }>`) — which C# cannot parse (a CS1519/CS1003 syntax cascade). `extractStructType` already lifts a slice/array **element** struct (its `ArrayType` arm) but has no map arm, so a dedicated `extractMapValueStructType` lifts the map **VALUE** struct at the package-level value-spec composite-literal site. The keyed element literals stay the target-typed `new(…)` constructor form — `[0x0020] = new(ecdh.X25519(), crypto.SHA256, 32)` — which binds to the lifted struct's generated constructor; a func-typed value field (SupportedAEADs' `aead func([]byte) (cipher.AEAD, error)`) lifts to a `Func<…>` field that a method-group or func-value element still fills. Both the declaration type (`getCSharpTypeName` → the map arm) and the literal's own type render (`convMapType` → `getExpressionTypeName`) resolve the value through the shared `liftedTypeMap` (the lift runs before the initializer is converted). (Guarded by the `MapAnonStructValue` behavioral test — a package-level map with an anonymous-struct value type, including a func-typed field, constructed and read back by key, output-compared vs Go.)
 
 The **empty struct `struct{}` is never lifted** — it maps to the shared golib `EmptyStruct`, so a `struct{}{}` composite literal emits `new EmptyStruct()` and a `map[K]struct{}` ("set") emits `map<K, EmptyStruct>`. Lifting an empty struct would be doubly wrong: it has no fields to model, and the lift mis-attributes its name and identity. When the `struct{}{}` is the value assigned to a map element (`seen[k] = struct{}{}`), the enclosing assignment passes the **LHS ident** (`seen`) into the struct-conversion context to name the lift — so the empty struct was being lifted to `<func>_seen` *and registered under `seen`'s own type, the map* `map[K]struct{}`, in the lifted-type registry. That poisoned every later reference to that map type: the function parameter `seen map[K]struct{}` rendered as the phantom struct instead of `map<K, EmptyStruct>`, and its comma-ok deconstruction (`(_, ok) = seen[k]`) and two-arg indexer vanished (CS8130/CS0021), while real-map call sites mismatched (CS1503). `convStructType` now short-circuits an empty struct to `EmptyStruct` before any lift, mirroring the `!isEmptyStruct` guard that `extractStructType` already applies everywhere else. (Guarded by the `EmptyStructMapSet` behavioral test; runtime hit this on `typesEqual`'s `seen map[_typePair]struct{}` parameter.)
 
-An **empty `interface{}` field is never lifted** either — it maps to `any`, exactly as a bare `interface{}` type does. When `visitStructType` lifts an anonymous struct it walks its fields and lifts any *anonymous interface* field to its own named `[GoType("dyn")]` interface. Those three inline lift sites (a plain `interface{}` field, a `*interface{}` field, and a `[]interface{}`/`[N]interface{}` element) type-asserted `*ast.InterfaceType` directly, diverging from `extractInterfaceType` — the canonical lift gate, which already excludes empty interfaces. So encoding/json's slice-encoder cycle memo — `ptr := struct{ ptr interface{}; len int }{v.UnsafePointer(), v.Len()}` — lifted its `ptr interface{}` field to a named empty **marker** interface `encode_ptr_ptr`. A named empty interface is implemented by nothing, so constructing the struct from the boxed `uintptr` failed (`cannot convert from 'uintptr' to '…encode_ptr_ptr'`, CS1503). The three sites now carry the same `!isEmptyInterface` guard, so an empty-interface field falls through to the normal field-type conversion and renders `any` (`*interface{}` → `ж<any>`, `[]interface{}` → `slice<any>`). (Guarded by the `AnonymousStructs` extension `cycleMemo` — an in-function anonymous struct with an `interface{}` field constructed from a pointer, read back through the field, and used as a map key, output-compared vs Go; fails CS1503 without the guard. Part of greening encoding/json.)
+An **empty `interface{}` field is never lifted** either — it maps to `any`, exactly as a bare `interface{}` type does. When `visitStructType` lifts an anonymous struct it walks its fields and lifts any *anonymous interface* field to its own named `/*dyn*/` interface. Those three inline lift sites (a plain `interface{}` field, a `*interface{}` field, and a `[]interface{}`/`[N]interface{}` element) type-asserted `*ast.InterfaceType` directly, diverging from `extractInterfaceType` — the canonical lift gate, which already excludes empty interfaces. So encoding/json's slice-encoder cycle memo — `ptr := struct{ ptr interface{}; len int }{v.UnsafePointer(), v.Len()}` — lifted its `ptr interface{}` field to a named empty **marker** interface `encode_ptr_ptr`. A named empty interface is implemented by nothing, so constructing the struct from the boxed `uintptr` failed (`cannot convert from 'uintptr' to '…encode_ptr_ptr'`, CS1503). The three sites now carry the same `!isEmptyInterface` guard, so an empty-interface field falls through to the normal field-type conversion and renders `any` (`*interface{}` → `ж<any>`, `[]interface{}` → `slice<any>`). (Guarded by the `AnonymousStructs` extension `cycleMemo` — an in-function anonymous struct with an `interface{}` field constructed from a pointer, read back through the field, and used as a map key, output-compared vs Go; fails CS1503 without the guard. Part of greening encoding/json.)
 
 **A returned anonymous-struct composite literal records its implicit conversion AFTER it is lifted.** Two structurally-identical anonymous structs are the *same* Go type but the converter lifts each occurrence to a *distinct* C# name, so a conversion between them must be bridged by a recorded `[assembly: GoImplicitConv<…>]` (the `ImplicitConvGenerator` emits the operators). A closure whose **result type** is an anonymous struct that `return`s a **composite literal** of the identical anonymous struct — `mk := func(…) struct{ptr any; len int} { return struct{ptr any; len int}{p, n} }` — lifts the closure-result type (`…_func_R0`) and the composite-literal type (`…_type`) separately, and `visitReturnStmt`'s `checkForDynamicStructs` records the conversion between them. Each side's C# name is resolved through the per-file lifted-type registry (`liftedTypeMap`), but a function-local composite literal is only *added* to that registry **during its own `convExpr`**. The recording therefore had to move to run **after** the result expression is converted: reading the arg's type earlier found it unlifted and stringified it as raw Go `struct{…}` text — an invalid C# generic argument in the emitted attribute (`[assembly: GoImplicitConv<struct{ptr interface{}; len int}, …_func_R0>]`, CS1031 "Type expected"). Recording after the lift resolves both sides to their lifted names (`[assembly: GoImplicitConv<…_type, …_func_R0>]`). The `dynamicCast` template `checkForDynamicStructs` may return is applied to the already-converted result expression identically either way, so the reorder is otherwise output-neutral (the full-stdlib A/B reconvert is byte-identical). This is latent for the current stdlib (encoding/json builds its identical memo struct once into a variable, avoiding a second same-shape lift). (Guarded by the `ClosureReturnAnonStruct` behavioral test.)
 
@@ -70,12 +71,14 @@ call-argument path under builtin `new`'s UNNAMED parameter — an EMPTY lift nam
 (mirroring the composite-literal and hpke map-value lifts), so the declaration, the `@new<…>` type
 argument, the `GoImplement` recordings, and the pointer-adapter names all resolve through
 `liftedTypeMap`:
+<!-- source: src/core/go/internal/gccgoimporter/parser.cs:518-521, 541 -->
 ```csharp
-[GoType("dyn")] partial struct reservedᴛ1 {
-    public global::go.go.types_package.ΔType Type;
+partial struct reservedᴛ1 /*dyn*/ {
+    /*embed*/ public global::go.go.types_package.ΔType Type;
 }
 internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
-p.typeList[n] = new reservedᴛ1жΔType(reserved);
+…
+        p.typeList[n] = new reservedᴛ1жΔType(reserved);
 ```
 and `visitStructType` itself falls back to the generic `"type"` when a lift arrives with an empty
 name (the FUNCTION-LOCAL `x := new(struct{…})` form still reaches it through the unnamed-parameter
@@ -111,11 +114,12 @@ The probe is now a recursive descent over the type-composing syntax — pointer,
 same helper, an anonymous interface) is found wherever it sits. The `AnonStructComposedTypes` golden
 shows the same shape lifting and its elements constructing normally:
 
+<!-- source: src/tests/Behavioral/AnonStructComposedTypes/main.cs.target:8-16 -->
 ```csharp
-[GoType("dyn")] partial struct ptrElemsᴛ1 {
+partial struct ptrElemsᴛ1 /*dyn*/ {
     internal nint @in;
     internal @string str;
-    internal error error;
+    /*embed*/ internal error error;
 }
 internal static slice<ж<ptrElemsᴛ1>> ptrElems = new ж<ptrElemsᴛ1>[]{
     Ꮡ(new ptrElemsᴛ1(1, "one"u8, default!)),
@@ -161,15 +165,26 @@ type Composed struct {
 	ByKey map[string]struct{ Count int }
 }
 ```
+<!-- source: src/tests/Behavioral/AnonStructArrayElement/main.cs.target:29-31, 37-39, 45-46, 48, 50 -->
 ```csharp
-[GoType("dyn")] partial struct Composed_Ptrs  { public uint32 Size; }
-[GoType("dyn")] partial struct Composed_ByKey { public nint Count; }
-
-[GoType] partial struct Composed {                     // package_info.cs records [GoValueClone("Ptrs")]
+partial struct Composed_Ptrs /*dyn*/ {
+    public uint32 Size;
+}
+…
+partial struct Composed_ByKey /*dyn*/ {
+    public nint Count;
+}
+…
+partial struct Composed {
     public array<ж<Composed_Ptrs>> Ptrs = new(2);
-    public map<@string, Composed_ByKey> ByKey;          // was: map<@string, struct{Count int}>
+…
+    public map<@string, Composed_ByKey> ByKey;
+…
 }
 ```
+
+`package_info.cs` records `[GoValueClone("Ptrs")]` for `Composed`, and `ByKey`'s value type, once the
+inline `struct{Count int}`, is the lifted `Composed_ByKey`.
 
 Two properties keep the shared helper faithful to what the arm did before. The lift name stays
 `<struct>_<field>`, which is well-defined for every shape because a field type carrying an anonymous
@@ -184,15 +199,16 @@ converted package declares a composed anonymous-struct field. What the A/B *did*
 in two packages, all one incidental canonicalization — the shared helpers exclude the **empty**
 `struct{}`/`interface{}`, and the old field arm did not:
 
+<!-- illustration: not converter output -->
 ```csharp
-- [GoType("dyn")] partial struct Func_opaque { }          // …and NamedArg__NamedFieldsRequired, Out__…
-- [GoType] partial struct Func { internal Func_opaque opaque; }
-+ [GoType] partial struct Func { internal EmptyStruct opaque; // unexported field to disallow conversions
+- partial struct Func_opaque /*dyn*/ { }          // …and NamedArg__NamedFieldsRequired, Out__…
+- partial struct Func { internal Func_opaque opaque; }
++ partial struct Func { internal EmptyStruct opaque; // unexported field to disallow conversions
 ```
 
 Go's `opaque struct{}` is `struct{}`, and golib's `EmptyStruct` is what every other site already maps
 it to — so `runtime.Func`, `database/sql`'s `NamedArg` and `Out` stop minting a private empty type
-apiece, three `[GoType("dyn")]` declarations and their `package_info.cs` entries disappear, and the Go
+apiece, three `/*dyn*/` declarations and their `package_info.cs` entries disappear, and the Go
 trailing comment lands back where Go writes it. Nothing referenced the removed names (verified across
 the whole reconverted corpus, with the baseline emission as the positive control), and the 302-package
 corpus builds with 0 errors. (Guarded by the `AnonStructArrayElement` behavioral test, extended: a
@@ -672,7 +688,7 @@ package scope under a function-prefixed name. Two Go type-identity rules ride th
   `TestPackageLevelAnonStructDedup`; corpus footprint of the package-level extension measured at
   exactly one site, reflect's lookup-cache pair, by seeded whole-stdlib reconvert.)
 - **A lifted local NAMED type carries its original Go name** via the golib `[GoLocalName]`
-  attribute — a SEPARATE attribute, never a `[GoType]` definition token (the TypeGenerator
+  attribute — a SEPARATE attribute, never a definition-comment token (the TypeGenerator
   matches that slot by exact string and throws on unknown forms). The reflection bridge's
   naming (`GoReflect.GoQualifiedName` → `Type.String()`, `%T`) prefers it, so a local type
   prints Go's `*binary.Person`, never the lifted `*binary.TestNoFixedSize_Person`
@@ -685,8 +701,9 @@ package scope under a function-prefixed name. Two Go type-identity rules ride th
 func TestNoFixedSize(t *testing.T) {
 	type Person struct { … }
 ```
+<!-- illustration: not converter output -->
 ```csharp
-[GoType("dyn")] partial struct TestNoFixedSize_Person {
+partial struct TestNoFixedSize_Person /*dyn*/ {
 
 // package_info.cs
 [GoLocalName("Person")] public partial struct TestNoFixedSize_Person {}
@@ -703,8 +720,11 @@ struct field embedding an interface by that stamp, forwarded a promoted method t
 (CS0120/CS1061, BurntSushi/toml's `TestEncodeAnonymousNoStructField`). The interface declaration now places them
 the same way:
 
+<!-- source: the two lines src/go2cs/internalTestLocalInterfaceStamp_test.go:87 and :101 assert, the declaration and its record -->
 ```csharp
-[GoType("dyn")] [GoLocalName("Inner")] internal partial interface TestLocalEmbeddedInterface_Inner {
+internal partial interface TestLocalEmbeddedInterface_Inner /*dyn*/ {
+…
+[GoLocalName("Inner")] partial interface TestLocalEmbeddedInterface_Inner {}
 ```
 
 Outside the bridge nothing comes back and the record stays in `package_info.cs`, so production emission and the
@@ -750,10 +770,11 @@ declaration order within the file.
 A package-level literal now gets its **own** sink, flushed at package scope, and takes its name
 seed from the declaration being initialized (`packageInitLiftName`, set by `visitValueSpec`):
 
+<!-- illustration: not converter output -->
 ```csharp
-[GoType("dyn")] partial struct readersᴛ1 { … }   // the OUTER anonymous struct (unchanged)
+partial struct readersᴛ1 /*dyn*/ { … }   // the OUTER anonymous struct (unchanged)
 
-[GoType("dyn")] partial struct readers_type {    // the lift from inside the func literal
+partial struct readers_type /*dyn*/ {    // the lift from inside the func literal
     public io_package.Reader Reader;
 }
 ```
@@ -781,6 +802,7 @@ A **non-generic** named func type with **no methods** is therefore rendered AS i
 delegate (`Action`/`Func<…>`) everywhere it is referenced (`getAliasQualifiedTypeName`/`getFullyQualifiedTypeName` return
 the underlying signature), and its declaration is skipped (`visitFuncType` emits only a marker
 comment). Every named↔underlying conversion becomes identity, exactly as Go models it:
+<!-- illustration: not converter output -->
 ```csharp
 // type releaseConn is a methodless func type — rendered inline as its base delegate
 internal static (ж<driverConn>, Action<error>, error) grabConn(this ж<ΔConn> Ꮡc, context.Context _) { … }
@@ -835,7 +857,7 @@ the type straight into the namespace: `sync.atomic.Int32` / `io.fs.DirEntry` —
 is not a namespace of `go.sync` (the type lives in class `atomic_package`). It now splits the trailing
 `.TypeName` off at the first `.` after the last path `/`, converts the package path with the class
 suffix, and re-appends: `sync.atomic_package.Int32`, `io.fs_package.DirEntry`. The suffix is only added
-when the path segment does not already carry it — some callers (a recorded `[GoType]` underlying,
+when the path segment does not already carry it — some callers (a recorded underlying type,
 `sync/atomic_package.Uint32`) hand a pre-suffixed path, which would otherwise double to
 `atomic_package_package` (a `DefinedTypeOverPkgType` regression, caught and gated). The behavioral
 corpus is byte-identical except the intended change, and an A/B reconvert of net+go/types (same package

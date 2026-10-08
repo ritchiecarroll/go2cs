@@ -630,7 +630,7 @@ sync's `testOncePanicX` reported the self-contradictory `want panic x, got x` (3
 `@string`. Choosing that layer over an emission-site `(@string)` cast is deliberate: the cast would
 fix only the literal spelling, while the boundary covers literal, computed, and hand-owned callers
 alike. It is a narrow normalization, not a coercion — a NAMED string type keeps its own identity
-(a `[GoType("@string")]` wrapper is not a C# `string`), and non-string values are untouched. golib's
+(a `/*@string*/` wrapper is not a C# `string`), and non-string values are untouched. golib's
 own `RuntimeErrorPanic` values are unaffected: those construct `PanicException` directly, and Go's
 dynamic type for them is a runtime error, not a string. (Guarded by `PanicRecover`, extended with a
 recover-side type switch over a literal, a computed, a variable, a named-string-type, an int, and a
@@ -972,7 +972,7 @@ defer(() => hʗ1.close(), ref ᒐ);
 Guarded by `DeferTypelessReturns`.
 
 ## Deferred pointer-receiver nullary calls bind the box method group
-`defer conf.releaseSema()` with `conf *resolverConfig` (net nss.go / dnsclient_unix.go) trimmed to the deref-alias method group `Ꮡconf.Value.releaseSema` — a struct VALUE against the [GoRecv] `ref` extension, which cannot create a delegate (CS1113). The emission binds the BOX method group instead:
+`defer conf.releaseSema()` with `conf *resolverConfig` (net nss.go / dnsclient_unix.go) trimmed to the deref-alias method group `Ꮡconf.Value.releaseSema` — a struct VALUE against the `this ref` extension, which cannot create a delegate (CS1113). The emission binds the BOX method group instead:
 ```csharp
 defer(Ꮡconf.releaseSema, ref ᒐ);
 ```

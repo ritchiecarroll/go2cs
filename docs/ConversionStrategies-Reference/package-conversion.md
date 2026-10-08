@@ -3,7 +3,7 @@
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#package-conversion)
 Although a Go package more traditionally parallels a C# namespace, Go includes referenceable functions directly from within a package root, for example, the `Println` function in the `fmt` package is called like: `fmt.Println("Hello, world")`. For C#, only type declarations, e.g., `class`, `struct`, `enum`, etc., are allowed in a namespace; functions exist as part of a `class` or `struct`. Described from a C# perspective, all Go functions are [`static`](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/static-classes-and-static-class-members), i.e., the functions exist separately from an instance of a type. Go supports the notion of a receiver function which allows a function to be targeted to an instance of a type (paralleling the operation of a C# extension function), but this is still a static function.
 
-As such, the conversion strategy for a Go package is to convert it into a static C# partial class, e.g.: `public static partial class fmt_package`. Using a partial class allows all functions within separate files to be available with a single import, e.g.: `using fmt = go.fmt_package;`. The receiver functions are emitted as extension methods on that partial class (decorated with `[GoRecv]`, see [Source Generators](source-generators.md#source-generators)).
+As such, the conversion strategy for a Go package is to convert it into a static C# partial class, e.g.: `public static partial class fmt_package`. Using a partial class allows all functions within separate files to be available with a single import, e.g.: `using fmt = go.fmt_package;`. The receiver functions are emitted as extension methods on that partial class (a pointer receiver is `this ref T`, see [Source Generators](source-generators.md#source-generators)).
 
 So that Go packages are more readily usable in C# applications, all converted code is in a root `go` namespace. Package paths are simply converted to namespaces, so a Go import like `import "unicode/utf8"` becomes a C# using like `using utf8 = go.unicode.utf8_package;`. Each package also emits a `package_info.cs` carrying a `[GoPackage]` assembly attribute plus the package-wide global `using` aliases (Go's built-in types, exported type aliases, etc.).
 
@@ -76,6 +76,7 @@ spellings. `getProjectName` (`importOperations.go`) is the DECLARATION side: it 
 marker was elided by the first and kept by the second, so every reference to a `go2cs/…` path named a
 namespace that nothing emits, and such a package could not be imported at all:
 
+<!-- illustration: not converter output -->
 ```csharp
 // value.cs — the DECLARATION                    // external_test.cs — the IMPORT
 namespace go;                                    using harness = go2cs.convertedtestharness_package;
@@ -278,6 +279,7 @@ Guarded by `TestGorootVendoredReferenceNamesTheVendoredProject` (the vendored sp
 package macOS                                    // directory `macos`, package `macOS`
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 // the declaration side has always followed the package name
 namespace go.crypto.x509.@internal;
@@ -315,6 +317,7 @@ This is the same family as [the GOROOT-vendored reference](#a-goroot-vendored-re
 package foo                                      // both directories, one package name
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 // before: one fully qualified type for both, CS0433 in cmp's tests, which reference both
 namespace go.github.com.google.go_cmp.cmp.@internal.teststructs;
@@ -810,7 +813,7 @@ Inverting costs **zero** new project references here — `isw → runtime` alrea
 
 **Forwarding and populating are one change** — the `GetSystemDirectory` rule again. `canUseLongPaths` is written only by `initLongPathSupport`, called only from `osinit`, which the converter emits already marked not-run and whose body bottoms out in `asmstdcall`; so the alias alone would have faithfully forwarded a permanent `false`. A naive "set it true" would be worse than the gap: `os.fixLongPath` would stop adding the `\\?\` prefix on a host where the PEB `IsLongPathAwareProcess` bit was *not* actually set, producing paths that silently fail. The flag is therefore tied to the **outcome**: golib's `InitializeWindowsLongPaths` reads the PEB bit back after writing it and records that observation in `WindowsLongPathsEnabled`, and the hand-owned `runtime/windows/os_windows_impl.cs` copies it into `canUseLongPaths` from a `[ModuleInitializer]` — the same slot, file and pattern as that file's existing `ᴛInitSysDirectory`. (Guarded by `TestRecurseLinknameVarAlias` for the four emission arms, `TestLinknameVarAliasRegistryMatchesGoSource` for both halves of each row against GOROOT, and the `LongPathRoundTrip` behavioral test for the semantics — a >MAX_PATH path round-tripped through `os` and output-compared vs `go run`. Design and the corrected root: [`docs/phase4/DESIGN-linkname-push-cycles.md`](../phase4/DESIGN-linkname-push-cycles.md).)
 
-**Exported structs and interfaces cross packages.** An exported struct's fields and methods are reachable on the consumer side exactly as the producer emits them — `CrossPkgLib.Sensor{Name: …, Temp: …}` lowers to a C# constructor call and `s.Name` / `s.Hot()` to field/method access on the imported struct — because the struct and its `[GoRecv]` extension methods live in the (referenced) library assembly.
+**Exported structs and interfaces cross packages.** An exported struct's fields and methods are reachable on the consumer side exactly as the producer emits them — `CrossPkgLib.Sensor{Name: …, Temp: …}` lowers to a C# constructor call and `s.Name` / `s.Hot()` to field/method access on the imported struct — because the struct and its `this ref` extension methods live in the (referenced) library assembly.
 
 A cross-package **interface satisfaction** is subtler. Go is structurally typed, so a consumer may assign any value with the right method set to an interface; C# requires the *nominal* `partial struct T : I` implementation glue, which the [`ImplementGenerator`](source-generators.md#source-generators) can only add to `T` **in T's own assembly** (`isLocalImplType`). The converter records a `[assembly: GoImplement<T, I>]` for each concrete→interface conversion it *witnesses while converting T's package* — so for a consumer to use `Sensor` as `Labeled` across the assembly boundary, the satisfaction must be witnessed in the **library** that declares `Sensor`. The idiomatic Go interface-satisfaction assertion does exactly this:
 
@@ -956,6 +959,7 @@ import (
     "BlankImportSideEffects/registry"
 )
 ```
+<!-- illustration: not converter output -->
 ```csharp
 // blank import: BlankImportSideEffects.jpeglike_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 // blank import: BlankImportSideEffects.pnglike_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
@@ -1019,6 +1023,7 @@ the enclosing type declarations **outward first**. A nested type sharing that id
 occludes the namespace for the whole class body — while the alias a few lines above keeps working, which
 is what makes the failure read like a converter regression somewhere else entirely:
 
+<!-- illustration: not converter output -->
 ```csharp
 using palette = image.color.palette_package;   // namespace scope — resolves
 
@@ -1028,7 +1033,7 @@ partial class image_internal_test_package {
     builtin.initPackage(typeof(image.color.palette_package));   // CS0426
 }
 
-[GoType] internal partial interface image : Image { … }         // ← occludes `image`
+internal partial interface image : Image { … }         // ← occludes `image`
 ```
 
 Go's own `image_test.go` declares a test-local `type image interface{…}`, and `package image` is free to:
@@ -1131,6 +1136,7 @@ The remedy is one hook, seeded into `package_test_info.cs`'s anchor class by
 `referenceModelTestPackageInfoSeed`, using the same `RunModuleConstructor` mechanism as the import
 hooks:
 
+<!-- illustration: not converter output -->
 ```csharp
 [GoPackage("pprof")]
 public static partial class pprof_internal_test_package
@@ -1328,8 +1334,8 @@ the TARGET's package, so such a record can never satisfy a cast (`image|Alpha|�
 
 **The trust.** A record says the declaring assembly implements the pair; it does not say HOW.
 `ImplementGenerator` makes every named Go type a `partial struct T : Iface` that really does implement
-it — struct, slice (`[GoType("[]Color")] partial struct Palette`), map, channel, numeric
-(`[GoType("num:nint")] partial struct ΔSignal`) — with exactly one exception: a named FUNC type arrives
+it — struct, slice (`partial struct Palette /*[]Color*/`), map, channel, numeric
+(`partial struct ΔSignal /*num:nint*/`) — with exactly one exception: a named FUNC type arrives
 as a C# **delegate**, which cannot be a partial struct, so its `TypeKind.Delegate` arm emits an adapter
 CLASS in the declaring assembly instead. `valueRecordRealizesAsPartialStruct` gates on the target's Go
 underlying being a non-`*types.Signature`, at the use site where `go/types` can still see it. Without

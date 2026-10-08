@@ -456,7 +456,7 @@ description: Bank a validated package row, mint or judge a disclosure, or read t
   can complete" off this reading and retracted within the hour; the census finding sitting beside it stood untouched
   because it had been run THROUGH the sweep. Note the tension with the testing-refusal rule above, whose census
   escape DEMANDS a scratch root: that escape answers an emission question, not a build one. -->
-- **Displacing a `[GoRecv]` method whose receiver is `ref T` makes the converter emit the BOX-form call `Ꮡa.m(…)`
+- **Displacing a pointer-receiver method whose receiver is `ref T` makes the converter emit the BOX-form call `Ꮡa.m(…)`
   at call sites inside `ref` bodies where no box exists — CS0103.** <!--
   2026-09-03: every prior displacement on that seam took a value receiver, so the shape was never exercised; the
   cut whose value had dropped below the fix's cost was PARKED and the defect routed as its own cut with the parked
@@ -516,7 +516,7 @@ description: Bank a validated package row, mint or judge a disclosure, or read t
   anything ran. Red-before / green-after on a guard NEITHER lane wrote is the strongest form of the red-first bar.
   Reading the row first stops the branch being chosen to fit the measurement afterwards. -->
 - **A ROUTE re-scores every box the body FORMS, not only the ones the design targeted** (a `ref` receiver forms no
-  field-address box at all; `[GoRecv]` on it GENERATING the `ж` overload makes the hand-own ADDITIVE with zero
+  field-address box at all; its `this ref` receiver GENERATING the `ж` overload makes the hand-own ADDITIVE with zero
   call-site edits); **and a registry serves TWO ROLES of which only one is gated — gate the ROLE, not the entry.** <!--
   Both 2026-09-04. A ref-receiver hand-own collects the state word's atomics boxes along with the semaphore boxes it
   was cut for; a prediction was corrected a THIRD time BEFORE the run by the lane's own falsifier firing on its own
@@ -1053,7 +1053,7 @@ docs/validation/current/<row>.md -- met by the gate rather than by the reader. -
    excludes them to protect the hand-owned `.cs` beside them). Restore them in a sweep; re-measure the whole set at
    each rebank head, one seeded reconvert per target, rather than banking a count. <!-- CleanupBacklog 18. -->
 4. **Deduplicated same-shape anonymous structs — LEVELED, so a reappearance is NEWS.** The converter binds a second
-   anonymous `[GoType("dyn")]` struct of identical shape to the FIRST declaration's type; the diff reads as the
+   anonymous `/*dyn*/` struct of identical shape to the FIRST declaration's type; the diff reads as the
    duplicate block vanishing while slice and element types rename onto the original's `ᴛ1`, with a knock-on in
    `package_test_info.cs`. **Unlike classes 1–3 this one does NOT stand: meeting it again means a NEW unbanked
    converter change — find that commit rather than restoring the file.** <!--

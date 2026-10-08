@@ -9,7 +9,7 @@ Two mechanisms deliver this, chosen by granularity:
 * **Whole-file** (pre-existing): a hand-finished file marked `[module: GoManualConversion]` is never overwritten by the converter when it exists in place (`containsManualConversionMarker`), and is restored over auto output by the overlay on fresh (unseeded) reconversions. Right when the whole file is hand-owned (sync/atomic `type.cs`). The marked file's Go source is NOT dropped from conversion (2026-07-17 fix): it is still analyzed and visited with its package — its anonymous-struct lifts, package-var registrations, and other package-wide state must keep feeding the package's sibling files, or those emit corrupted (raw Go `struct{…}` text in selectors, package-var assignments re-declared as shadowing locals) — with emission redirected to a non-compiled `<name>.cs.auto` review sibling. Guarded by the `ManualConversionSiblingState` behavioral test.
 * **Type-level** (`go2cs/manualTypeOperations.go`): the `manualConversionTypes`/`manualConversionFuncs` registry (keyed by package path and raw Go names) makes the converter skip emitting the listed **type declarations**, every **method on those types**, listed **adjacent free functions** (`setGNoWB`), and **`GoImplicitConv` assembly attributes** referencing the types — each replaced by a marker comment pointing at the package's `*_impl.cs`. Right when the types live in a large file (runtime2.go) that must otherwise keep receiving converter improvements. Each `manualConversionFuncs` entry also carries a **platform scope** — see *Hand-owns have a platform* below.
 
-The hand implementation (`src/core/<pkg>/<file>_impl.cs`, e.g. `core/runtime/runtime2_impl.cs`) declares the same type/extension surface the auto call sites bind: value-receiver methods as `this T` extensions, pointer-receiver methods as `[GoRecv] this ref T`, and the conversion operators call sites need. For the guintptr family that surface is: `.ptr()` returns the stored box, `.set()` stores it, `.cas()` is a real `Interlocked.CompareExchange` on the reference slot (the Go original's `atomic.Casuintptr` maps to a throwing asm stub — the managed model makes it *work*), `== 0`/`= 0` bind zero-comparison/nil operators, and numeric escapes are deliberate and loud: converting a non-zero integer **panics** (a number can never faithfully become a managed reference), and converting *to* a number (print/`hex` diagnostics) yields a stable object-identity hash — an opaque token, never an address.
+The hand implementation (`src/core/<pkg>/<file>_impl.cs`, e.g. `core/runtime/runtime2_impl.cs`) declares the same type/extension surface the auto call sites bind: value-receiver methods as `this T` extensions, pointer-receiver methods as `this ref T`, and the conversion operators call sites need. For the guintptr family that surface is: `.ptr()` returns the stored box, `.set()` stores it, `.cas()` is a real `Interlocked.CompareExchange` on the reference slot (the Go original's `atomic.Casuintptr` maps to a throwing asm stub — the managed model makes it *work*), `== 0`/`= 0` bind zero-comparison/nil operators, and numeric escapes are deliberate and loud: converting a non-zero integer **panics** (a number can never faithfully become a managed reference), and converting *to* a number (print/`hex` diagnostics) yields a stable object-identity hash — an opaque token, never an address.
 
 One call-site emission cooperates (`convCallExpr.go`): a conversion **to** a manual type from an `unsafe.Pointer` — `guintptr(unsafe.Pointer(newg))` — unwraps the inner conversion and emits the referent-preserving ctor form `new Δguintptr(newg)` instead of the numeric cast chain `(Δguintptr)(uintptr)new @unsafe.Pointer(newg)`, which would lose the referent at the `(uintptr)` hop.
 
@@ -479,7 +479,7 @@ resolve through, so the NumMethod gate and the interface assert behind it can ne
 a method set (a count from any other source could answer 0 for a set the assert would bind, and the
 gate would silently re-skip the dispatch this fixes). Candidates are deduplicated by **projected Go
 name** — one Go pointer-receiver method reaches the registry in two emitted shapes (the
-RecvGenerator's `ж<X>` overload and the original `[GoRecv]` `this ref X` extension) — and
+RecvGenerator's `ж<X>` overload and the original `this ref X` extension) — and
 exported-ness is judged Go's way (first rune uppercase) on the projection, after the same leading
 collision-marker strip `GoMethodNameMatches` applies. Go's kind split is preserved: an interface
 type counts ALL its methods (`GetInterfaceMethodNames`, instance members only — the golib static
@@ -515,7 +515,7 @@ The whole table is now ONE list — `TypeExtensions.GetGoMethodSetEntries` — a
 `.Count`, so a size and an order can no longer be derived separately and disagree. It is built over
 `GetGoMethodSetCandidates`, the same candidate source `StructurallyImplements` and `AdapterBinder`
 resolve through, then: deduplicated by projected Go name (keeping the shape a delegate can bind —
-a `[GoRecv] this ref X` receiver cannot be a `Func<>` parameter, and the RecvGenerator's `ж<X>`
+a `this ref X` receiver cannot be a `Func<>` parameter, and the RecvGenerator's `ж<X>`
 overload always sits beside it), exported-only for a concrete type, and **sorted ORDINALLY by Go
 method name**, which is Go's own method-table order (verified against `go run`: a promoted embedded
 method sorts *in place*, it is not appended).
@@ -728,7 +728,7 @@ value side AGREE (`v.Field(i).CanSet() == t.Field(i).IsExported()`), and the con
 a decoder that probes before writing must be able to refuse with a returned error rather than a
 panic. Demonstrated consumer: `encoding/asn1`'s `TestUnexportedStructField`.
 
-**A func PARAMETER is the one position an array's LENGTH cannot be recovered from — `[GoArrayDims]`
+**A func PARAMETER is the one position an array's LENGTH cannot be recovered from — the `/*[N]*/` comment
 (2026-08-11).** A Go array's length is part of its type, and it is the one part the managed emission
 cannot carry: `[32]byte` renders as golib `array<byte>`, and C# has no const generic parameter to
 hold the 32. The bridge has always answered that by recovering the dimension from a live source
@@ -749,14 +749,19 @@ a fixed-size array ran against the EMPTY value. `crypto/internal/edwards25519`'s
 with length 0`; its sibling `TestScalarSetUniformBytes` reported `failed on input [0]uint8{}`, which
 names the empty array outright.
 
-The datum therefore has to live at the parameter, and it does: the converter stamps
-`[GoArrayDims(32)]` there (outermost dimension first — `[2][3]int` ⇒ `[GoArrayDims(2, 3)]`), from
-the single `generateParametersSignature` all three signature builders share, so declarations,
-methods, func literals, func types and interface methods are all covered by one emission point.
+<!-- attribute-shown: a converted func literal, local function, func type or interface method keeps [GoArrayDims] -->
+The datum therefore has to live at the parameter, and it does, outermost dimension first, from
+the single `generateParametersSignature` all three signature builders share. On a func or method
+declaration it is Go's own prefix in a comment before the type, `/*[32]*/` (`[2][3]int` ⇒ `/*[2][3]*/`),
+which go2cs-gen records on the declaring type. A func literal, a local function, a func type and an
+interface method have no declaration a record can name, so there it stays the attribute
+`[GoArrayDims(32)]` (`[GoArrayDims(2, 3)]`).
 
 ```go
 f1 := func(in [32]byte, sc Scalar) bool { … }      // edwards25519's scalar_test.go
 ```
+<!-- illustration: not converter output -->
+<!-- attribute-shown: a converted func literal keeps [GoArrayDims] on its parameters -->
 ```csharp
 var f1 = ([GoArrayDims(32)] array<byte> @in, Scalar sc) => { … };
 ```
@@ -793,7 +798,7 @@ survive two hops the func-value route does not have:
    `reflect.Type.Method(i).Type` is synthesized in `value_impl.cs` from `GoMethodFuncType` over the
    `MethodInfo`'s parameters, and nothing in that path ever holds a delegate for
    `GoReflect.FuncParamDims` to read. `GoReflect.MethodParamDims(t, i)` reads the same
-   `[GoArrayDims]` stamps straight off those `ParameterInfo`s, and `Method(i)` carries them as the
+   dims for those parameters, from the method's record on its declaring type, and `Method(i)` carries them as the
    descriptor's `funcParamDims`. It owes no arity guard, unlike the delegate route: the delegate
    type is synthesized FROM that parameter list, receiver included, so the indices line up with
    `In(i)` by construction — which is Go's own shape for a method type, receiver first.
@@ -1509,7 +1514,7 @@ member for member:
 | Go member | Managed mechanism | Semantic note |
 |:--|:--|:--|
 | `NewHashTrieMap[K, V]()` | `Ꮡ(new HashTrieMap<K, V>(store: new mapStore<K, V>()))` | the store is a CLASS, so a by-value copy of the struct shares one map — exactly what Go's `root *indirect[K,V]` pointer gives |
-| `(*HashTrieMap).Load(key)` | `TryGetValue`; miss returns `(*new(V), false)` as `@new<V>().ValueSlot` | `[GoRecv]`, so the RecvGenerator still mints the `ж<…>` overload `unique` binds |
+| `(*HashTrieMap).Load(key)` | `TryGetValue`; miss returns `(*new(V), false)` as `@new<V>().ValueSlot` | `this ref`, so the RecvGenerator still mints the `ж<…>` overload `unique` binds |
 | `(*HashTrieMap).LoadOrStore(key, value)` | `TryGetValue` → `TryAdd` retry loop | exactly one caller of a racing set observes `loaded == false`; `GetOrAdd` is a single call but cannot report WHICH outcome occurred, and `unique.Make` depends on that answer |
 | `(*HashTrieMap).CompareAndDelete(key, old)` | `ContainsKey` gate → `TryRemove(KeyValuePair)` | the pair overload is an atomic compare-and-remove under `EqualityComparer<V>.Default`; the gate reproduces Go's order (a missing key returns false *without* comparing values) |
 | `(*HashTrieMap).All()` | closure over the store's enumerator | ConcurrentDictionary's enumeration is **weakly consistent** — never throws on concurrent mutation, visits each live key once, promises no order — which is Go's documented contract verbatim, and is what lets `unique`'s cleanup pass `CompareAndDelete` while it walks |
@@ -1524,7 +1529,7 @@ shape the converted corpus actually interns these agree:
 * **`ж<T>`** (`unique`'s own `map[*abi.Type]any`) implements `IEquatable<ж<T>>` as pointer IDENTITY with a
   matching identity hash, and `abi.TypeFor<T>()` interns one descriptor box per `System.Type` — so one Go
   type always presents one key, and a second `TypeFor` call finds the first call's entry.
-* **A `[GoType]` struct** — `net/netip`'s `addrDetail{isV6 bool; zoneV6 string}`, the shape `unique`
+* **A converted struct** — `net/netip`'s `addrDetail{isV6 bool; zoneV6 string}`, the shape `unique`
   actually interns — carries a generated field-wise `Equals` over `==` plus a `HashCode.Combine` of the
   same fields, which is Go's struct `==` exactly. It does **not** implement `IEquatable<T>`, so
   `EqualityComparer<T>.Default` routes through the `object` override; that lands on the same comparison, at
@@ -1752,7 +1757,7 @@ question. Go answers by faulting (`throw("getWeakHandle on invalid pointer")` �
 span); here it would observe an eventual nil rather than a fabricated pointer, the safe direction.
 Nothing in the converted corpus takes a weak pointer to one.
 
-**A second, independent defect this closes.** `Pointer[T]` is written out rather than left to `[GoType]`,
+**A second, independent defect this closes.** `Pointer[T]` is written out rather than left to the type generator,
 because the generated struct equality is field-wise `==` **guarded on every type parameter carrying an
 `IEqualityOperators` constraint** (`TypeGenerator`'s `hasEqualityOperators` → `AllGenericTypesHaveConstraint`),
 and Go's `Pointer[T any]` carries none — so the emitted body was literally
@@ -1787,7 +1792,7 @@ FAIL  Strong() is nil once the referent is unreachable (probed first)
 
 with a self-keyed `ConditionalWeakTable` control and the two-level table control both collecting, so the
 ephemeron reasoning above is confirmed rather than assumed. `unique` reads the same way from the other
-side: every `TestHandle` subtest that gets far enough reports **only** `v0 != v1` (the `[GoType]` equality
+side: every `TestHandle` subtest that gets far enough reports **only** `v0 != v1` (the generated-equality
 gate above) and never `v0.Value() != v1.Value()` — i.e. both `Make` calls interned the *same* `ж<T>`, which
 is exactly what canonical weak handles plus `LoadOrStore` are for.
 
@@ -1883,9 +1888,9 @@ The converter emits a tagged field's Go struct tag verbatim at the declaration:
 ```go
 NamedCurveOID asn1.ObjectIdentifier `asn1:"optional,explicit,tag:0"`
 ```
+<!-- source: src/core/crypto/x509/sec1.cs:32 -->
 ```csharp
-[GoTag(@"asn1:""optional,explicit,tag:0""")]
-public asn1.ObjectIdentifier NamedCurveOID;
+public asn1.ObjectIdentifier NamedCurveOID; /*`asn1:"optional,explicit,tag:0"`*/
 ```
 
 `GoTagAttribute` aliases `System.ComponentModel.DescriptionAttribute`, so the text survives into
@@ -1964,7 +1969,7 @@ The gate is now `GoReflect.HasGoName`, the managed stand-in for `TFlagNamed`. It
 trimmed — the two disagreeing would let a type report a name it does not have, or hide one it does.
 False for exactly the arms that render Go structurally: the raw golib containers matched by open
 generic definition (`slice<>`/`array<>`/`map<,>`/`channel<>`/`ж<>`), `object` (`interface {}`),
-`EmptyStruct` (`struct {}`), an anonymous-struct lift (`[GoType("dyn")]` without a `[GoLocalName]`,
+`EmptyStruct` (`struct {}`), an anonymous-struct lift (`/*dyn*/` without a `[GoLocalName]`,
 which would make it a named function-local type), and the pointer-sourced adapter that stands for
 `*T`. True everywhere else — including the predeclared scalars, since Go's `int` IS a named type.
 
@@ -1979,12 +1984,13 @@ type stringMap map[string]int
 type intChan chan int
 type intPtr *int
 ```
+<!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.cs.target:16-24 -->
 ```csharp
-[GoType("[]nint")] partial struct intSET;
-[GoType("[4]byte")] partial struct byteArray;
-[GoType("map[@string, nint]")] partial struct stringMap;
-[GoType("chan nint")] partial struct intChan;
-[GoType("ж<nint>")] partial class intPtr;
+partial struct intSET /*[]nint*/;
+partial struct byteArray /*[4]byte*/;
+partial struct stringMap /*map[@string, nint]*/;
+partial struct intChan /*chan nint*/;
+partial class intPtr /*ж<nint>*/;
 ```
 
 Three further answers change with it, all in the same direction and none of them a value Go can
@@ -2135,17 +2141,18 @@ BORN — the same finite set the array dims occupy, position for position:
 | the made/constructed value | `new(32)` | `new channel<nint>(0, GoChanDir.Send)` |
 | a struct FIELD's zero | `= new(4)` field initializer | `= channel<@string>.SendOnly` field initializer |
 | behind a POINTER | `GoReflect.PointeeArrayDims` | `GoReflect.PointeeChanDir` |
-| a func PARAMETER | `[GoArrayDims(32)]` | *not carried — see the boundaries* |
+| a func PARAMETER | `/*[32]*/` before its type | *not carried — see the boundaries* |
 
 ```go
 ch := make(chan<- int)                       // text/template's TestIssue43065
 p  := new(chan<- string)                     // reflectlite's TestSetValue row
 type holder struct{ x chan<- string }        // reflectlite's TestTypes row
 ```
+<!-- illustration: not converter output -->
 ```csharp
 var ch = new channel/*<-*/<nint>(0, GoChanDir.Send);
 var p = Ꮡ(channel/*<-*/<@string>.SendOnly);
-[GoType] partial struct holder {
+partial struct holder {
     internal channel/*<-*/<@string> x = channel/*<-*/<@string>.SendOnly;
 }
 ```
@@ -2176,7 +2183,7 @@ Four boundaries are deliberate, and each is the same shape as one the array dims
   defined ARRAY type carries no dims: its managed form is a go2cs-gen wrapper struct rather than
   `channel<T>`, so there is no field to carry the cargo. An ALIAS for a channel type IS its target
   and is stamped.
-- **A func PARAMETER is not stamped.** The `[GoArrayDims]` position exists for arrays because
+- **A func PARAMETER is not stamped.** The parameter's dims comment exists for arrays because
   `testing/quick` and `net/rpc` allocate from a parameter type; nothing measured reads
   `reflect.TypeOf(f).In(i).ChanDir()`.
 - **A type PARAMETER instantiated at a channel type** routes through `ISupportMake`, which has no
@@ -2252,7 +2259,7 @@ the struct and func arms reported `true` where Go reports `false`.
 `GolibTests.GoStructLayoutTests.EmbeddedField_IsDistinguishableFromADeclaredFieldOfTheSameNameAndType`
 pins the projection flag the struct arm stands on.)
 
-### A struct FIELD's TYPE-ONLY array dims — `[GoArrayDims]` / `[GoMapKeyDims]` (2026-08-20)
+### A struct FIELD's TYPE-ONLY array dims — the `/*[N]*/` comment (2026-08-20)
 
 The array-length cargo had a hole, and it was in the position that decodes: a field's dims came from
 the declaring type's **zero instance**, which reaches an array the field IS and nothing an array is
@@ -2271,28 +2278,24 @@ instance holds a **nil map**, and a populated one would help no more — a map e
 `Key()`/`Elem()` answer for the TYPE. On `N` and `A` it holds a **nil pointer**, with no pointee to
 measure. Both hops are ordinary at a **decode target**, which is exactly a struct nothing has
 populated yet, so the datum has to be in the emitted C#. That is the same conclusion the func
-PARAMETER position reached, and it takes the same carrier — an attribute:
+PARAMETER position reached, and it takes the same carrier — Go's array prefix in a comment before the type. One comment serves any
+pointer depth, and a map's key carries its own inside the `map<…>`:
 
+<!-- source: src/tests/Behavioral/FieldDimsCargo/main.cs.target:10-13 -->
 ```csharp
-[GoType] partial struct T1 {
-    [GoArrayDims(2), GoMapKeyDims(2)]
-    public map<array<@string>, array<ж<float64>>> Marr;
-    [GoArrayDims(3)]
-    public ж<array<float64>> N;
-}
-[GoType] partial struct Indirect {
-    [GoArrayDims(3)]
-    public ж<ж<ж<array<nint>>>> A;            // ONE stamp, any pointer depth
-}
+partial struct Target {
+    public /*[2]*/ map</*[2]*/ array<@string>, array<ж<float64>>> Marr;
+    public /*[3]*/ ж<array<float64>> N;
+    public /*[3]*/ ж<ж<ж<array<nint>>>> Deep;
 ```
 
-The two attributes are named for **the accessor each feeds**, which is also what the descriptor's own
+The two positions are named for **the accessor each feeds**, which is also what the descriptor's own
 slots have always meant:
 
-| Cargo slot | Attribute | What it is | Handed down by |
+| Cargo slot | Comment | What it is | Handed down by |
 |:--|:--|:--|:--|
-| `abi.Type.arrayDims` | `[GoArrayDims]` | an ARRAY's own dims (head consumed), a POINTER's pointee's, a MAP's element's | `Elem()` — tail for an array, **unshifted** for a pointer and a map |
-| `abi.Type.keyDims` | `[GoMapKeyDims]` | a MAP's key's dims | `Key()` |
+| `abi.Type.arrayDims` | before the field's type | an ARRAY's own dims (head consumed), a POINTER's pointee's, a MAP's element's | `Elem()` — tail for an array, **unshifted** for a pointer and a map |
+| `abi.Type.keyDims` | before the key type, inside `map<…>` | a MAP's key's dims | `Key()` |
 
 So nothing about `arrayDims` changed meaning; a MAP simply joined the POINTER in the unshifted arm it
 already had, and `Key()` — a map type's second accessor, which had no slot at all — got one.
@@ -2336,7 +2339,7 @@ Four boundaries are deliberate:
   parameters. The cargo has exactly one `Elem()` slot and one `Key()` slot, so a second level has
   nowhere to live and no measured consumer asks (the r39d rule). `reflect.Type.String()` still
   renders `[][2]int` as `[][]int`, unchanged.
-- **A func PARAMETER of map type is not stamped.** `[GoArrayDims]` reaches parameters already, but
+- **A func PARAMETER of map type is not stamped.** The dims comment reaches parameters already, but
   nothing measured reads `reflect.TypeOf(f).In(i).Key().Len()`.
 
 (Guarded by the `FieldDimsCargo` behavioral test, byte-identical to `go run`: gob's own field shapes
@@ -2511,7 +2514,7 @@ itself rejects, so the descent is finite by the source language's own definition
 
 `KindOf`'s fallback answered `Struct` for any managed **reference** type it did not otherwise
 recognize, and that broke the rule in the one direction that matters. The converter emits every Go
-struct as a C# **value** type — the entire converted corpus carries seven `[GoType] partial class`
+struct as a C# **value** type — the entire converted corpus carries seven `partial class`
 declarations and all seven are named-POINTER types (`type P *T`), classified `Pointer` structurally
 before the fallback is reached — so a reference type arriving there is never a Go struct at all. It
 is an opaque managed handle: the backing object a hand-owned shim holds in place of Go's own
@@ -2609,18 +2612,19 @@ marker-prefixed backing box, and golib's field projection records that shape as
 `haveIdenticalUnderlyingType` ends each field with `tf.Embedded() != vf.Embedded()`).
 
 **An embed's TAG lives at a different declaration site, and that is the second half.** The converter
-stamps `[GoTag]` on the emitted partial PROPERTY:
+writes the tag as a comment after the emitted partial PROPERTY:
 
+<!-- illustration: not converter output -->
 ```csharp
-[GoTag(@"json:""e,omitempty""")]
-public partial ref ж<Embed0b> Embed0b { get; }
+public partial ref ж<Embed0b> Embed0b { get; } /*`json:"e,omitempty"`*/
 ```
 
-while `go2cs-gen` mints the backing field the property returns a ref to — *without* carrying the
-attribute across:
+while `go2cs-gen` mints the backing field the property returns a ref to, which carries no tag of
+its own:
 
+<!-- illustration: not converter output -->
 ```csharp
-private global::go.ж<…Embed0b> ʗEmbed0b;    // no [GoTag]
+private global::go.ж<…Embed0b> ʗEmbed0b;    // no tag here
 ```
 
 The projection reads FIELDS, so every embedded field came back untagged — silently, because `""` is
@@ -2694,7 +2698,7 @@ The route is `slice<T>.AliasOfElement`, a bridge primitive that re-spells a slic
 carrying its window across unchanged, and its whole safety argument is the gate in front of it: the
 two element types must be ONE representation under two Go names — **both value types, both free of
 managed references, both exactly one byte wide** — asked of the managed types directly and never
-inferred from the `[GoType]` token. Those are the same three facts the blessed
+inferred from the definition comment's text. Those are the same three facts the blessed
 `ReinterpretAliasesStorage` gate asks of a pointee pair. Under them the two backing objects are
 byte-for-byte the same shape and differ only in their method table, and every access golib makes
 through a `slice<T>` addresses the data from the STATIC element type and the array's own length field
@@ -3201,9 +3205,12 @@ The fork is confined to the **slot representation** and keeps every other line o
 the packed `head`/`tail`, the fullness test, the CAS protocol, the single-producer/multi-consumer
 contract, and the entire `poolChain` half:
 
+<!-- source: src/core/sync/poolqueue.cs:73-78 -->
+<!-- attribute-shown: a hand-written file keeps the attribute -->
 ```csharp
 // eface is Go's two-word {type, value} representation of an `any`. Under the CLR an `any` IS a single
-// managed reference, so the slot holds that reference directly.
+// managed reference, so the slot holds that reference directly; see the file header for why the
+// two-word form cannot be reinterpreted here.
 [GoType] partial struct eface {
     internal any? val;
 }
@@ -3484,7 +3491,7 @@ the chain is severed at the API boundary that does — the same severing rule th
 applied at `methodName`. `CallersFrames` itself is pure Go (slice bookkeeping) and stays auto.
 
 What makes the projection *semantically* faithful is the **Go-frame filter**: a managed frame counts
-only when it is a function the **Go source declares** — a free function or `[GoRecv]` receiver on a
+only when it is a function the **Go source declares** — a free function or `this ref` receiver on a
 `go.*` `<pkg>_package` class, a method on a struct nested in one, or a function literal (its compiler
 display class nests in the same scope). go2cs **dispatch machinery is invisible**, exactly as Go's
 interface dispatch adds no frame: generated adapter shells (any `IGoAdapter`) and go2cs-gen's
@@ -4033,6 +4040,7 @@ bridge.
 
 The mint carries five things, and each answers exactly one downstream reader:
 
+<!-- attribute-shown: reflect.StructOf builds a CLR type at run time and puts the attributes on it itself -->
 | Emitted | Read by | Why it cannot be dropped |
 |:--|:--|:--|
 | `[GoType("dyn")]` on the type | `HasGoName`, `GoTypeName` | a `StructOf` result is a Go ANONYMOUS struct: `Name()` must be `""` and `String()` must render structurally |
@@ -4041,6 +4049,7 @@ The mint carries five things, and each answers exactly one downstream reader:
 | `[GoArrayDims]` / `[GoMapKeyDims]` on a field | `FieldStampedDims` / `FieldMapKeyDims` | the pointer-hop and map hops |
 | a `ʗ`-prefixed CLR field name | `collectGoFields` | `StructField.Anonymous` |
 
+<!-- attribute-shown: reflect.StructOf builds a CLR type at run time and puts the attributes on it itself -->
 **The constructor is the piece that is easy to get backwards, so it is worth stating flatly.**
 `collectGoFields` reads an *array* field's dims from a cached **zero instance** —
 `Activator.CreateInstance(declaringType)` — because in converted code the converter emits the length

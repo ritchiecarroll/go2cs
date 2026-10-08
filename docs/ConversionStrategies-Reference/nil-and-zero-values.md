@@ -152,12 +152,14 @@ saw a null descriptor:
 tBytes     = bootstrapType("bytes", (*[]byte)(nil))
 tReserved7 = bootstrapType("_reserved1", (*struct{ r7 int })(nil))
 ```
+<!-- source: src/core/encoding/gob/type.cs:278, 283-286 -->
 ```csharp
 internal static typeId tBytes = bootstrapType("bytes"u8, ((ж<slice<byte>>)nil));
-    [GoType("dyn")] partial struct Δtype {
+…
+    partial struct eᴛ1 /*dyn*/ {
         internal nint r7;
     }
-internal static typeId tReserved7 = bootstrapType("_reserved1"u8, ((ж<Δtype>)nil));
+internal static typeId tReserved7 = bootstrapType("_reserved1"u8, ((ж<eᴛ1>)nil));
 ```
 
 Guarded by `TypedNilInterface` (extended with the slice/map/anonymous-struct type-literal targets),

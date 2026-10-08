@@ -9,7 +9,7 @@ A type-set constraint whose core is an ARRAY — `func polyAdd[T ~[256]fieldElem
 `ringElement`/`nttElement` share the core `[256]fieldElement`) — must map to `where T : IArray<E>`, NOT
 to the operator interfaces the general type-set path would produce. An array is a *comparable* type in
 Go, so the operator-set resolver put `Array` in the comparable set and lifted `IEqualityOperators<T, T,
-bool>`; the named-array `[GoType]` wrapper (which the converter emits for `ringElement` etc.) does not
+bool>`; the named-array generated wrapper (which the converter emits for `ringElement` etc.) does not
 implement that interface, so every instantiation failed CS0315, and the interface exposes no array
 surface, so the body's `t[i]` (CS0021), `for i := range t` (CS8130 on the index deconstruction), and
 `for _, x := range t` (CS1579/CS8183) had nothing to bind against. The fix (`getArrayConstraintElem` in
@@ -34,7 +34,7 @@ The root is what `IEqualityOperators<T, T, bool>` MEANS on each side. Go's `==` 
 type, so the operator-set resolver listed `Struct`, `Array`, `Pointer` and `Channel` in
 `comparableOperatorTypes` and lifted that interface for them. But a C# `where` clause is a claim about
 the type ARGUMENT implementing a BCL interface, not about an operator being available, and nothing on
-the Go side of the corpus implements it: a `[GoType]` struct, `array<T>`, `ж<T>` and `channel<T>` all
+the Go side of the corpus implements it: a converted struct, `array<T>`, `ж<T>` and `channel<T>` all
 compare through `Equals`/`AreEqual`. The lifted clause was therefore unsatisfiable by construction, and
 the diagnostic named the concrete struct rather than the constraint that could not admit it.
 
@@ -117,14 +117,14 @@ guard instead of throwing at entry, e.g. `orZero[*int, int](nil)`). The NAMED co
 spellings — `[P PtrOf[T]]` and the embedded `[P interface{ PtrOf[T] }]`, where
 `type PtrOf[T any] interface{ *T }` — resolve to the identical singleton type set and erase
 identically. The constraint interface's own DECLARATION follows the existing constraint-interface
-convention (`[GoType] partial interface PtrOf<T> { /* Type constraints: *T */ }`): a pointer term is
+convention (`partial interface PtrOf<T> { /* Type constraints: *T */ }`): a pointer term is
 a type-set term, not an embeddable interface (previously it emitted an interface inheriting the
 struct `ж<T>` — CS0527), and a GENERIC constraint interface carries its own `<T>` list, so the
 arity-0 `<ΔT>` marker list and its generated operator machinery are both suppressed for it.
 
 Erasure is deliberately gated to the identity case: **function** type parameters whose constraint
 type-set is a single non-tilde pointer term. Declined shapes warn instead of silently mis-emitting —
-an approximate `~*T` admits *named* pointer types, which emit as `[GoType("ж<E>")]` wrapper classes
+an approximate `~*T` admits *named* pointer types, which emit as `/*ж<E>*/` wrapper classes
 (not identity with `ж<E>`); pointer unions have no single identity; and erasing a generic *named
 type's* parameter would change its emitted arity at every use. None occur anywhere in the converted
 stdlib (exhaustive GOROOT census: go/types' `clone` is the only compiled occurrence of the pattern;
@@ -191,10 +191,10 @@ would infer a different `T`:
 
 <!-- source: src/tests/Behavioral/MinMaxBuiltin/main.go:143-144 -->
 ```go
-x := max(u8, 1) // u8 is a uint8
+x := max(u8, 1)
 x += 100
 ```
-<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:91-92 -->
+<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:92-93 -->
 ```csharp
 var x = max(u8, (uint8)(1));
 x += 100;
@@ -225,7 +225,7 @@ The lifted Integer operator set constrains shifts as `IShiftOperators<T, int, T>
 
 ## Builtins over constrained slice type parameters
 
-golib's builtins carry **interface-typed overloads** so a value held as a constrained type parameter (`S ~[]E`, boxed to its `ISlice<E>` constraint) binds directly: `copy(ISlice<T1> dst, ISlice<T2> src)` (plus an `ISlice<byte>`/`@string` form), `clear(ISlice<T> s)`, and two-argument `min`/`max` constrained on `IComparisonOperators` (Go's `cmp.Ordered` lifts to operator interfaces; a constrained `E` has no `IComparable<E>` conversion). **All four `min`/`max` overloads PROPAGATE NaN**, which is Go's own spec rule — if any argument is a NaN the result is a NaN — and which neither natural C# spelling gives for free: the operator form `x < y ? x : y` answers the NON-NaN side whenever the NaN sits on the left, because every C# comparison involving a NaN is false; and the params form's `IComparable<T>` total order sorts NaN BELOW everything, which happens to be Go's answer for `min` and is the OPPOSITE of Go's answer for `max`. Both test explicitly now, through one shared per-`T` fact (`builtin.OrderedFacts<T>`) that classifies the floating kinds — the two BCL primitives, and the generated single-field `[GoType("num:floatNN")]` wrapper a NAMED Go float becomes, recognized by walking that one field so a wrapper-over-a-wrapper resolves for free. The gate is a `static readonly` per closed `T`, so it folds at JIT time and no integer instantiation pays for it, and the fact carries a same-width reinterpret rather than an operator because `CompareTo`/`Equals` cannot see a NaN at all (`double.NaN.CompareTo(double.NaN)` is 0 and `double.NaN.Equals(double.NaN)` is true, both by BCL design). Measured by `slices`' `TestMinMaxNaNs`, which replaces each element of a float64 slice with NaN in turn and requires `slices.Min` AND `slices.Max` to propagate it; guarded by `GolibTests.OrderedMinMaxNaNTests`, which holds all four overloads including a named-float wrapper. The box wraps the same backing array, so interface writes land in the caller's storage — `copy`/`clear` into an `S` are true write-throughs (span windows, memmove semantics for overlap). Overload resolution keeps concrete calls on the exact `slice<T>` overloads (an exact parameter beats a boxing conversion), so nothing outside generic bodies changes. Cleared ~37 of the slices package's constraint seams. (Guarded by the `GenericTypeInference` extension `CopyClearMinMax` — copy into and clear through constrained values, write-through verified by value vs Go.)
+golib's builtins carry **interface-typed overloads** so a value held as a constrained type parameter (`S ~[]E`, boxed to its `ISlice<E>` constraint) binds directly: `copy(ISlice<T1> dst, ISlice<T2> src)` (plus an `ISlice<byte>`/`@string` form), `clear(ISlice<T> s)`, and two-argument `min`/`max` constrained on `IComparisonOperators` (Go's `cmp.Ordered` lifts to operator interfaces; a constrained `E` has no `IComparable<E>` conversion). **All four `min`/`max` overloads PROPAGATE NaN**, which is Go's own spec rule — if any argument is a NaN the result is a NaN — and which neither natural C# spelling gives for free: the operator form `x < y ? x : y` answers the NON-NaN side whenever the NaN sits on the left, because every C# comparison involving a NaN is false; and the params form's `IComparable<T>` total order sorts NaN BELOW everything, which happens to be Go's answer for `min` and is the OPPOSITE of Go's answer for `max`. Both test explicitly now, through one shared per-`T` fact (`builtin.OrderedFacts<T>`) that classifies the floating kinds — the two BCL primitives, and the generated single-field `/*num:floatNN*/` wrapper a NAMED Go float becomes, recognized by walking that one field so a wrapper-over-a-wrapper resolves for free. The gate is a `static readonly` per closed `T`, so it folds at JIT time and no integer instantiation pays for it, and the fact carries a same-width reinterpret rather than an operator because `CompareTo`/`Equals` cannot see a NaN at all (`double.NaN.CompareTo(double.NaN)` is 0 and `double.NaN.Equals(double.NaN)` is true, both by BCL design). Measured by `slices`' `TestMinMaxNaNs`, which replaces each element of a float64 slice with NaN in turn and requires `slices.Min` AND `slices.Max` to propagate it; guarded by `GolibTests.OrderedMinMaxNaNTests`, which holds all four overloads including a named-float wrapper. The box wraps the same backing array, so interface writes land in the caller's storage — `copy`/`clear` into an `S` are true write-throughs (span windows, memmove semantics for overlap). Overload resolution keeps concrete calls on the exact `slice<T>` overloads (an exact parameter beats a boxing conversion), so nothing outside generic bodies changes. Cleared ~37 of the slices package's constraint seams. (Guarded by the `GenericTypeInference` extension `CopyClearMinMax` — copy into and clear through constrained values, write-through verified by value vs Go.)
 
 **S-preserving sub-slice and append.** Go's sub-slice of a named slice type yields the *same named type sharing the same backing* — pdqsort's recursion depends on it (`pdqsort(s[:mid])` with `s S`). The `ISliceWrap<TSelf, T>` static-abstract factory (`TSelf Wrap(in slice<T> source)`) supplies the non-copying reconstruction: `slice<T>` implements it as identity, every generated named-slice wrapper wraps the window in its own type, and the `~[]E` where-clause carries it (`ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>`). A sub-slice of a constrained type parameter emits golib's `subslice<S, E>(s, lo, hi)` (type arguments explicit — `E` is constraint-only) which routes `S.Wrap(window.Reslice(…))`; the new `slice<T>(ISlice<T> view)` constructor SHARES storage (unboxes a `slice<T>`, reconstructs any other implementer from its source array and window). `append` on a constrained value binds golib's `append<S, T>(S, params ReadOnlySpan<T>)` (S from the first argument, T from the span — fully inferrable) and wraps the result back to S; its body routes to the core `slice<T>.Append` directly, since a recursive `append(…)` call would resolve back to itself (`slice<T>` satisfies the constraints). The same change fixed the named-slice WRAPPER template's sub-slice members, which routed through `ToSpan()` — *detached copies*, a silent write-through divergence for named slice types generally; they now route through the wrapped `m_value` (sharing). (Guarded by the `GenericTypeInference` extensions `SumHalves` — recursion over sub-slices of S with a write through the deepest view, verified against the caller's array — and `AppendKeep`.)
 **No bound of a constrained sub-slice is a SENTINEL** (2026-08-26). The omitted-high form used to travel as `high = -1` through the three-argument method and the omitted-low form as `low = -1`, so `s[i:]` and `s[i:-1]` were the identical call — and the low convention was worse than an ambiguity, because the method clamped EVERY negative low to 0 rather than only the sentinel. Go panics for a negative index, so `slices.Insert(s, -1, …)` and `slices.Replace(s, -1, 2, …)` — whose bodies OPEN with `_ = s[i:]` and `_ = s[i:j]` as their bounds check, the expressions existing for no other purpose — silently succeeded. The remedy removes both sentinels rather than moving them: an omitted LOW is emitted as the `0` it means (Go's `s[:h]` *is* `s[0:h]`, so no overload is needed), and an omitted HIGH selects a two-argument `subslice<S, E>(s, low)` overload. `subslice3` needs no companion — Go's grammar requires the high bound in a full slice expression — and all three now route `slice<T>.Reslice` directly rather than the `slice()` extension, whose own `-1` defaulting convention would have re-opened the collision one layer down. A golib-only remedy was impossible and the reason is worth stating: with one signature and the converter passing `-1` for "omitted", the two calls are byte-identical at the boundary, so no amount of golib logic can separate them — the honest layer is the emission. The corpus footprint is `core/slices/{slices,iter}.cs` and two behavioral goldens, since `subslice` is emitted only for type-parameter receivers. **Residual, recorded not fixed:** the ORDINARY (non-type-parameter) path emits `s[Low..]`, whose `int`→`Index` conversion throws `ArgumentOutOfRangeException` for a negative bound — a .NET exception, not a Go panic, so it is neither `recover`-able nor contained the way `RuntimeErrorPanic.SliceBoundsOutOfRange` is; and `SliceExtensions.slice`'s `-1` default still collides at exactly `-1` for the three-index form. Neither is reachable from a banked row today. (Measured by `slices`' `TestInsertPanics` and `TestReplacePanics`; guarded by `GolibTests.ConstrainedSubsliceBoundsTests`, which holds the negative, out-of-range, valid and backing-shared cases together.)
@@ -244,7 +244,7 @@ Every generated named-slice wrapper also implements the non-generic `IArray` sur
 
 ## Integer type-parameter conversions route through golib (the `E(100)` family)
 
-C# has no cast to or from a type parameter, so the Go conversions in `rand.N[Int intType]` — `Int(x)`, `uint64(n)` — and an untyped constant compared against the parameter (`n <= 0`, which Go types AS `Int` but C# leaves as `int`, unacceptable to the lifted `IComparisonOperators<Int, Int, bool>`) all failed (CS0030/CS0019). Three coordinated pieces, gated on a constraint whose every type-set term has an **integer underlying** (`typeParamIsInteger`): a conversion **to** the parameter emits golib's runtime-typed `ConvertToType<Int>(…)` (typeof-dispatch that JIT-folds to a single branch per instantiation; signed kinds sign-extend, unsigned zero-extend — Go's exact conversion semantics; a `[GoType("num:*")]` wrapper instantiation falls back to a reflection-cached bridge over its `Value` property/ctor); a conversion **from** the parameter to a basic integer emits `ConvertToUInt64<Int>(n)` (plus a plain numeric cast when the target is not `uint64`); and a **constant operand** of a binary op against the parameter materializes via `ConvertToType<Int>(0)` — except a SHIFT count, which Go types independently and the emission already coerces to `int`. Result: `if (n <= ConvertToType<Int>(0)) … return ConvertToType<Int>(ConvertToUInt64<Int>(n) / 2);`. (Guarded by the `GenericTypeInference` extension `halveN` — `~int32 | ~int64` with the compare, both conversions, and a negative value proving sign-extension, values vs Go; clears math/rand/v2's `N`.)
+C# has no cast to or from a type parameter, so the Go conversions in `rand.N[Int intType]` — `Int(x)`, `uint64(n)` — and an untyped constant compared against the parameter (`n <= 0`, which Go types AS `Int` but C# leaves as `int`, unacceptable to the lifted `IComparisonOperators<Int, Int, bool>`) all failed (CS0030/CS0019). Three coordinated pieces, gated on a constraint whose every type-set term has an **integer underlying** (`typeParamIsInteger`): a conversion **to** the parameter emits golib's runtime-typed `ConvertToType<Int>(…)` (typeof-dispatch that JIT-folds to a single branch per instantiation; signed kinds sign-extend, unsigned zero-extend — Go's exact conversion semantics; a `/*num:**/` wrapper instantiation falls back to a reflection-cached bridge over its `Value` property/ctor); a conversion **from** the parameter to a basic integer emits `ConvertToUInt64<Int>(n)` (plus a plain numeric cast when the target is not `uint64`); and a **constant operand** of a binary op against the parameter materializes via `ConvertToType<Int>(0)` — except a SHIFT count, which Go types independently and the emission already coerces to `int`. Result: `if (n <= ConvertToType<Int>(0)) … return ConvertToType<Int>(ConvertToUInt64<Int>(n) / 2);`. (Guarded by the `GenericTypeInference` extension `halveN` — `~int32 | ~int64` with the compare, both conversions, and a negative value proving sign-extension, values vs Go; clears math/rand/v2's `N`.)
 
 ## A named-wide-integer or type-parameter slice index casts to `nint`
 
@@ -324,7 +324,7 @@ Four coordinated pieces make it convert **and dispatch**:
 
 1. **The constraint interface is emitted GENERIC.** A method-set interface whose own Go type
    parameter is used in its member signatures carries its `<T>` (and constraints) in C#, exactly like
-   a generic struct — `[GoType] partial interface nistPoint<T> { … T Add(T, T); (T, error) SetBytes(slice<byte> _); }`.
+   a generic struct — `partial interface nistPoint<T> { … T Add(T, T); (T, error) SetBytes(slice<byte> _); }`.
    Without it the declaration is arity-0 yet the constraint that references it spells the arity-1
    `where Point : nistPoint<Point>` (CS0308) and every bare `T` is undefined (CS0246). (Go's
    operator-only constraint interfaces are arity-0 *in Go*, so this is disjoint from the `<ΔT>`
@@ -510,6 +510,7 @@ crypto-curve family (elliptic, ecdh, nistec) COMPILE (+3 packages):
    PARAMETER (`Func<Point>`, `pointFromAffine` returning `(Point, error)`); the template rewrites each to
    the instantiation's type ARGUMENT before emission —
 
+   <!-- illustration: not converter output -->
    ```csharp
    internal ref global::System.Func<P256PointжnistPoint> newPoint => ref nistCurve.newPoint;
    internal static (P256PointжnistPoint p, error err) pointFromAffine(this ref p256Curve target, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy)
@@ -617,12 +618,12 @@ behavioral test — generic `isNaN`/`less`/`eq` legs over `float64`/`float32`/`c
 `complex64`, boxed-`any` NaN equality, and a NaN-aware interface sort, values vs Go.)
 
 ## Generic struct equality is decided per FIELD, not per type parameter
-A generic `[GoType]` struct's synthesized `Equals` (see [Struct Types](struct-types.md#struct-types)) was gated on
+A generic converted struct's synthesized `Equals` (see [Struct Types](struct-types.md#struct-types)) was gated on
 the struct's TYPE PARAMETERS: unless every parameter carried an `IEqualityOperators`-implementing
 constraint (and, stricter still, every *constraint* of every parameter implemented it), the whole
 struct's `Equals` body was the constant **`false /* missing equality constraints */`**. Since a
 `comparable` parameter deliberately emits no C# constraint (previous subsection),
-essentially every generic struct in the corpus — all 22 generic `[GoType]` declarations at the time
+essentially every generic struct in the corpus — all 22 generic converted type declarations at the time
 of the fix — carried a constant-false `Equals`, breaking equality that never depended on the
 parameter at all. `unique.Handle[T]`'s only field is `*T` (`ж<T>`), whose pointer-identity `==` is
 valid for **every** T, yet no two handles ever compared equal — directly contradicting the type's
@@ -662,7 +663,7 @@ The member classifier asks only "does `==` COMPILE for this member type": a type
 qualifies through ANY `IEqualityOperators`-implementing constraint (matching C# operator
 resolution, not the whole-struct gate's every-constraint test); reference types (classes incl.
 `ж<T>` and `unsafe.Pointer`, interfaces, arrays, delegates), enums, pointers, and built-in value
-types always qualify; a `[GoType]` struct qualifies by its **attribute** — both struct templates
+types always qualify; a converted struct qualifies by its **attribute** — both struct templates
 emit a same-type `operator ==` unconditionally, and for a struct of the *same compilation* the
 attribute is the only visible evidence, because that operator does not exist yet while the
 generator runs; any other value type qualifies only by actually declaring a same-type
@@ -807,7 +808,7 @@ output-compared against Go so the unsigned wrap is verified rather than merely c
 ## `uintptr` as a generic numeric type argument
 The golib `uintptr` struct declares the full generic-math interface set the lifted numeric constraints demand (`IAdditionOperators` through `IComparisonOperators`, `IShiftOperators<uintptr, int, uintptr>` with a `>>>` operator, `IIncrementOperators`/`IDecrementOperators`) -- matching operators alone never satisfy a C# where-clause (CS0315 at reflect's `rangeNum<uintptr, uint64>`). At runtime, `ConvertToType`/`ConvertToUInt64` have `uintptr` fast paths, and the reflection-cached `TypeParamCaster` probes a public `Value` FIELD as well as the generated wrappers' `Value` property (hand-written wrappers keep a field for `Interlocked`/`Volatile` `ref x.Value` seams). Guarded by `GenericTypeInference` (`growShrink[U ~uint32 | ~uintptr]`).
 
-> **Latent gap ([banked](../Glossary.md#banked)):** generated `[GoType("num:*")]` wrapper structs do NOT yet declare the generic-math interfaces -- a NAMED numeric wrapper used as a union-generic type argument would CS0315. No corpus site hits this yet.
+> **Latent gap ([banked](../Glossary.md#banked)):** generated `/*num:**/` wrapper structs do NOT yet declare the generic-math interfaces -- a NAMED numeric wrapper used as a union-generic type argument would CS0315. No corpus site hits this yet.
 
 ## Union-constrained sub-slices ARE the type parameter
 A sub-slice of a `string | []byte` union-constrained value is typed by Go as the type parameter again, so it assigns back to, passes as, and returns as the parameter (time format_rfc3339). The emission is the bare C# range expression:

@@ -220,6 +220,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsSiteLinksTitles_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsKramdownBlocks_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsTableCodePipe_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsRetiredAttributes_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\certContextReachGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\coreReferencesResolve_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\darwinLinknamePulls_test.go" />

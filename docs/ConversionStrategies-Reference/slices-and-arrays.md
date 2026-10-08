@@ -81,13 +81,14 @@ named-`uint`-keyed form, elements read back and output-compared vs Go.)
 
 A keyed (sparse, constant-index) literal of a **named array-wrapper** type — internal/trace/oldtrace's `timedEventArgs{1: uint64(ev.StkID)}` where `type timedEventArgs [4]uint64` — backs onto the golib `array<T>(length)` (which has an indexer setter), not a raw C# array. The wrapper's constructor takes an `array<T>` (the positional path already produces one via `.array()`), and the keyed elements render as the `[i] = v` indexed initializer — valid on `new array<uint64>(4){[1] = v}` but *not* on `new uint64[]{[1] = v}` (CS0131, an array-initializer takes no indexed members). A **positional** literal of the same wrapper keeps the `new uint64[]{…}.array()` form (unchanged — no churn). (Guarded by `NamedArrayKeyedLiteral` — a `type args [4]uint64` with multi-keyed, single-keyed, and positional literals, element reads output-compared vs Go.)
 
-A **generic** named array type carries its type parameters (and their constraints) onto the forward declaration, and its element type is emitted fully qualified in the `[GoType]` attribute so the generated array-backed partial — which lives in a file without this file's package-relative `using` aliases — can resolve it:
+A **generic** named array type carries its type parameters (and their constraints) onto the forward declaration, and its element type is emitted fully qualified in the definition comment so the generated array-backed partial — which lives in a file without this file's package-relative `using` aliases — can resolve it:
 
 ```go
 type table[T any] [3]atomic.Pointer[T]
 ```
+<!-- illustration: not converter output -->
 ```csharp
-[GoType("[3]sync.atomic_package.Pointer<T>")] partial struct table<T>
+partial struct table<T> /*[3]sync.atomic_package.Pointer<T>*/
     where T : new();
 ```
 
@@ -307,7 +308,7 @@ The fallback matters: a Go file may *index* an atomic-typed array field of a str
 * **heap-box allocations** — `ref var n = ref heap(new atomic.Int32(), out var Ꮡn);`;
 * **element-address `at<T>`** — `…at<atomic.Int32>(0)`.
 
-It is **not** used for forms consumed by the source generators in alias-less generated files, which must stay fully-qualified: the `[GoType("…")]` attribute string (e.g. `[GoType("sync.atomic_package.Uint32")]`, `[GoType("[3]sync.atomic_package.Pointer<T>")]`), the `global using` type-alias declarations, and the promoted-interface/embedded-field registration keys. (Embedded fields keep the full form for their promoted accessors; only the named-field branch uses the display name. Struct-embedding promotion across packages re-derives member types from the Roslyn semantic model, not from the field's emitted text, so aliasing the field declaration is safe.) Guarded by `ArrayOfCrossPackageType`, `AtomicValues`, `FuncTypeParam`, `GenericAtomicPointerField`, `GlobalAtomicDefer`, `GlobalAtomicFieldMethod`, and `StructPromotionWithInterface`/`StructPointerPromotionWithInterface`.
+It is **not** used for forms consumed by the source generators in alias-less generated files, which must stay fully-qualified: the `/*…*/` definition comment (e.g. `/*sync.atomic_package.Uint32*/`, `/*[3]sync.atomic_package.Pointer<T>*/`), the `global using` type-alias declarations, and the promoted-interface/embedded-field registration keys. (Embedded fields keep the full form for their promoted accessors; only the named-field branch uses the display name. Struct-embedding promotion across packages re-derives member types from the Roslyn semantic model, not from the field's emitted text, so aliasing the field declaration is safe.) Guarded by `ArrayOfCrossPackageType`, `AtomicValues`, `FuncTypeParam`, `GenericAtomicPointerField`, `GlobalAtomicDefer`, `GlobalAtomicFieldMethod`, and `StructPromotionWithInterface`/`StructPointerPromotionWithInterface`.
 
 ### Combined field-element address `base.at(field, i)`
 
@@ -590,23 +591,26 @@ return, channel send, `append` element, range key/value, function/func-literal p
 receiver) clones a struct too. The struct declaration is stamped with the fields that need it, and
 go2cs-gen turns the stamp into the deep copy:
 
+<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:45-51, 192, 195-197 -->
 ```csharp
-[GoType] partial struct digest {
+partial struct Digest {
     internal array<uint32> h = new(8);
     internal array<byte> x = new(chunk);
     internal nint nx;
     internal uint64 len;
-    internal bool is224;
+    internal bool is224; // mark if this digest is SHA-224
 }
-
-[GoRecv] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
-    ref var d0 = ref heap<digest>(out var Ꮡd0);
-    d0 = d.ΔClone();                 // was `d0 = d;` — the arrays were shared
+…
+public static slice<byte> Sum(this ref Digest d, slice<byte> @in) {
+…
+    ref var d0 = ref heap<Digest>(out var Ꮡd0);
+    d0 = d.ΔClone();
     var hash = Ꮡd0.checkSum();
-    …
-}
 ```
 
+`d0 = d.ΔClone();` was `d0 = d;` before, which shared the two arrays between the copies.
+
+<!-- illustration: not converter output -->
 ```csharp
 // generated (go2cs-gen StructTypeTemplate)
 internal partial struct digest : IGoValueClone
@@ -752,7 +756,7 @@ gives an empty struct one byte, so every zero-size Go type measures 1. What surv
 faithfully is the FIELD SET — a Go struct is zero-size exactly when it has no fields of nonzero size, and
 the emitted C# struct carries the same fields — so `GoZeroSizeFacts<T>` asks that instead, recursively,
 with "no instance fields at all" as the base case (golib's `EmptyStruct` for an anonymous `struct{}`, and
-every `[GoType] partial struct noCopy { }` the converter emits for a named one). The answer is a
+every `partial struct noCopy { }` the converter emits for a named one). The answer is a
 `static readonly` per closed `T`, so every gate written against it folds at JIT time and no ordinary
 element type pays for the branch.
 
@@ -1301,7 +1305,7 @@ holds the fact**:
 
   The element name has to be asked in **both spellings it can arrive in**, and this cost a measured
   defect before it was found. A struct FIELD reaches the predicate already `global::go.`-rooted,
-  because `GetStructMembers` produces rooted names; a `[GoType("[N]E")]` descriptor's element is
+  because `GetStructMembers` produces rooted names; a `/*[N]E*/` descriptor's element is
   *package-alias-qualified* (`sync.atomic_package.Pointer<…>`), which is not a CLR name at all —
   every converted package class lives under the `go` namespace. Asked in that spelling alone, every
   cross-assembly element answered false, and answered it **silently**: the wrapper simply kept the
@@ -1316,7 +1320,7 @@ holds the fact**:
 - **The converter** answers for a nested UNNAMED array element, because nothing downstream can. The
   descriptor is `[2]array<nint>` — the inner `3` is gone — and an `array<T>`'s length is INSTANCE
   state, so a site with no instance cannot recover it. It stamps
-  `[GoType("[2]array<nint>")] [GoArrayDims(2, 3)] partial struct nn;` and gen builds the factory from
+  `/*[2][3]*/ partial struct nn /*[2]array<nint>*/;` and gen builds the factory from
   everything after the first dimension: `new array<array<nint>>(2, static () => new(3))`. This is the
   existing `GoArrayDims` cargo (same attribute, same outermost-first meaning as on a parameter or a
   field) reached one hop earlier — at construction rather than at description — with its
@@ -1463,7 +1467,7 @@ shape as `AssertFacts<T>`), so the overwhelmingly common case compiles to a cons
 |:--|:--|
 | any reference type, or a value type golib owns (`@string`, `slice<T>`, `map<K,V>`, the numerics) | `default` |
 | `array<E>` — implements the new golib marker `IGoZeroShaped` | `GoZeroLike()`: a new array of the template's LENGTH, elements zeroed recursively so `[2][3]int32` keeps its inner lengths |
-| a converted Go struct (`[GoType]` + a generated parameterless constructor) | that constructor — exactly what the converter emits for `var x T`, and `default` for a plain struct |
+| a converted Go struct (a `partial struct` + a generated parameterless constructor) | that constructor — exactly what the converter emits for `var x T`, and `default` for a plain struct |
 
 All three slice-shaped `clear` overloads (`slice<T>`, `Span<T>`, and the constrained `ISlice<T>`)
 route through one `Span<T>` body that keeps the vectorized `Span.Clear()` whenever
@@ -1476,7 +1480,7 @@ clear(q)
 len(q[1]) // 4, not 0
 ```
 
-The `[GoType]`-plus-constructor rule is deliberately broad rather than a per-shape enumeration
+The converted-struct-plus-constructor rule is deliberately broad rather than a per-shape enumeration
 (fixed-array field, promoted embed, …): calling a converted struct's own zero-value constructor is
 always correct, so a FUTURE field shape that needs construction is covered without re-opening the
 class a sixth time. That generality is the whole point — this is the run-time counterpart of the

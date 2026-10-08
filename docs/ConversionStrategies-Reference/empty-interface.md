@@ -45,8 +45,9 @@ a named `I` and an anonymous `interface{}` parameter; a type assertion, a type s
 ## A string literal in an `any` slot boxes through `@string` — as `(@string)"…"u8`
 A Go string literal normally emits as a `"…"u8` `ReadOnlySpan<byte>` (which converts implicitly to `@string`). But a `ReadOnlySpan<byte>` has **no conversion to `object`**, so a string literal RETURNED (or returned as a tuple element) where the result type is the empty interface fails with CS0029 — testing's `func (f *chattyFlag) Get() any { return "test2json" }`. Such a result must box a golib `@string` (preserving Go string identity for a later `x.(string)` assertion), so `visitReturnStmt` renders the literal as `(@string)"…"u8` for an empty-interface result element:
 
+<!-- illustration: not converter output -->
 ```csharp
-[GoRecv] internal static any Get(this ref chattyFlag f) {
+internal static any Get(this ref chattyFlag f) {
     if (f.json) {
         return (@string)"test2json"u8;   // NOT a BARE "test2json"u8 (CS0029)
     }
@@ -220,7 +221,7 @@ all classified by one rule. Whether the rendering is a wrapper struct comes from
 `Info.Uses`) to a `*types.Const` whose **OWN** declared type is `UntypedInt`/`UntypedRune`/
 `UntypedFloat` — `info.Types[arg]` cannot answer this, since it reports plain `int` for a literal and a
 named untyped const alike. A defined-type-over-int constant (`type MyInt int`) is excluded (its box is
-the `[GoType]` wrapper, asserted as `MyInt`). Call arguments reuse the per-argument `castArgToType`
+the generated wrapper, asserted as `MyInt`). Call arguments reuse the per-argument `castArgToType`
 plumbing; the other positions wrap through `boxUntypedConstAsDefaultType`.
 
 **Deliberate exclusions and known residues:**

@@ -17,9 +17,10 @@ The simultaneous deconstruction is **mandatory** whenever the targets alias — 
 ```go
 func (h *myHeap) Swap(i, j int) { (*h)[i], (*h)[j] = (*h)[j], (*h)[i] }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 // before: two sequential stores drop the temporary — (h)[i] and (h)[j] both end up as the old (h)[j]
-[GoRecv] internal static void Swap(this ref myHeap h, nint i, nint j) {
+internal static void Swap(this ref myHeap h, nint i, nint j) {
     ((h)[i], (h)[j]) = ((h)[j], (h)[i]);   // simultaneous deconstruction, correct swap
 }
 ```
@@ -409,7 +410,7 @@ moves, never its C# type, so the method stays the value-receiver extension Go's 
 still callable on a value, still callable through a pointer (which copies into the receiver, so the
 caller's own variable is untouched, matching Go), and still satisfying an interface it implements by
 value. `RecvGenerator` is unaffected because it is gated on `IsRefRecv` (`this ref T`), and a value
-receiver never carries `ref`; `[GoRecv]` is likewise emitted only for a `this ref ` signature. The box
+receiver never carries `ref`. The box
 is an implementation detail of the body, exactly as the parameter `ʗp` + heap preamble is.
 
 Analysis and emission move together here too — `markAddressTakenBoxedReceiver` records and

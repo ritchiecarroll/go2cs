@@ -11,7 +11,7 @@ Go's `string` becomes golib [`@string`](https://github.com/ritchiecarroll/go2cs/
 | a literal used as a value | `static readonly @string textˢ` | [hoisted literals](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use) |
 | `const name = "text"` inside a function | `static readonly @string nameᶜ` | [local string constants](#a-function-local-string-const-hoists-to-a-static-readonly-field-under-its-own-name) |
 | a literal with raw non-UTF-8 bytes | `((@string)(new byte[]{…}))` | [raw-byte literals](#a-string-literal-with-raw-byte-escapes-emits-a-byte-array-string) |
-| `type Token string` | `[GoType("@string")] partial struct Token` | [named string types](#named-string-types) |
+| `type Token string` | `partial struct Token /*@string*/` | [named string types](#named-string-types) |
 | `string(b)` read and discarded | `(sstring)b` | [conversion views](#a-non-escaping-stringbyte-local-emits-the-stack-string-sstring) |
 | a registered function's `string` parameter | an `sstring` member plus a generated `@string` member | [sstring twins](#an-sstring-twin-a-registered-function-gains-an-sstring-overload-that-calls-bind) |
 
@@ -173,7 +173,7 @@ The decision is made in the literal pre-pass (`collectLocalConsts`), and the fun
 
 ## Named string types
 
-`type Token string` becomes a `[GoType("@string")]` wrapper struct. The `InheritedType` template gives it the string surface, since C# indexing and `+` do not apply user-defined conversions:
+`type Token string` becomes a `/*@string*/` wrapper struct. The `InheritedType` template gives it the string surface, since C# indexing and `+` do not apply user-defined conversions:
 - `byte this[int]` and `this[nint]` indexers;
 - a `Range` indexer that returns the wrapper, so a sub-slice keeps the named type;
 - `nint Length` for `len`;
@@ -186,8 +186,9 @@ func (t Token) First() byte { return t[0] }
 const done Token = "done"
 next := done + "-next"
 ```
+<!-- illustration: not converter output -->
 ```csharp
-[GoType("@string")] partial struct Token;
+partial struct Token /*@string*/;
 internal static readonly Token done = "done"u8;
 public static byte First(this Token t) => t[0];
 Token next = done + "-next"u8;
@@ -234,6 +235,7 @@ switch string(cmd) {
 case "get": …
 }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 if (((sstring)(hdr[..4])) == "ZLIB"u8) { … }
 var exprᴛ1 = ((sstring)cmd);
@@ -246,16 +248,18 @@ A conversion of a bare, never-written identifier that repeats (two or more uses,
 
 A `string` parameter is an `@string`, so every literal argument is copied into one: `fmt.Sprintf("xxx")` allocates the literal and then the result, where Go allocates only the result. A **twin** gives a registered function a second member that takes `sstring`:
 
-- **The converter** emits the member that carries the Go body, with each registered parameter typed `sstring` and marked `[GoStr]`:
+- **The converter** emits the member that carries the Go body, with each registered parameter typed `sstring`:
 
+  <!-- source: src/core/fmt/print.cs:268-276 -->
   ```csharp
-  [GoStr] public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
+  public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
       …
   }
   ```
 
 - **`StrGenerator`** (go2cs-gen) emits the companions into a generated file. The first is the `@string` member, which forwards under a lower overload priority. The second, for a package-level function only, is the canonical value delegate (attribute names shortened):
 
+  <!-- illustration: not converter output -->
   ```csharp
   [GeneratedCode("go2cs-gen", …), OverloadResolutionPriority(-1)]
   public static global::go.@string Sprintf(global::go.@string format, params global::System.Span<object> aʗp) => Sprintf((global::go.sstring)format, aʗp);
@@ -281,7 +285,7 @@ Funcꓸꓸꓸ<@string, any, error> noVetErrorf = fmt.Errorfᶠ;
 
 **Deferred and `go` calls** take the temp-parameter lambda form, `defer(ᴛ1 => Count(ᴛ1), …)`. The arguments stay `@string` generic type arguments, since a `ref struct` cannot be one.
 
-**Pointer receivers.** RecvGenerator gives the `[GoStr]` member its `ж<T>` overload. A pointer-receiver call with an `@string` argument binds it through the implicit view, so the forwarder needs none.
+**Pointer receivers.** RecvGenerator gives the `sstring` member its `ж<T>` overload. A pointer-receiver call with an `@string` argument binds it through the implicit view, so the forwarder needs none.
 
 **Records.** `package_info.cs` publishes each exported package-level twin to other packages:
 

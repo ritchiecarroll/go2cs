@@ -291,7 +291,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [The named-array wrapper publishes its lazy backing atomically](struct-embedding.md#the-named-array-wrapper-publishes-its-lazy-backing-atomically)
   - [A promoted field whose name equals the enclosing type is Δ-renamed](struct-embedding.md#a-promoted-field-whose-name-equals-the-enclosing-type-is-δ-renamed)
   - [An embedded field is named by GO, not by the C# rendering of its type](struct-embedding.md#an-embedded-field-is-named-by-go-not-by-the-c-rendering-of-its-type)
-  - [An embedded PREDECLARED type is a plain field stamped `[GoEmbedded]` (2026-09-05)](struct-embedding.md#an-embedded-predeclared-type-is-a-plain-field-stamped-goembedded-2026-09-05)
+  - [An embedded PREDECLARED type is a plain field marked `/*embed*/` (2026-09-05)](struct-embedding.md#an-embedded-predeclared-type-is-a-plain-field-marked-embed-2026-09-05)
   - [An EMBEDDED field whose derived name equals the enclosing type is Δ-renamed](struct-embedding.md#an-embedded-field-whose-derived-name-equals-the-enclosing-type-is-δ-renamed)
   - [Promoted pointer methods descend multi-hop value-embed chains](struct-embedding.md#promoted-pointer-methods-descend-multi-hop-value-embed-chains)
   - [A nil embedded pointer is holdable and assignable — only its dereference panics](struct-embedding.md#a-nil-embedded-pointer-is-holdable-and-assignable--only-its-dereference-panics)

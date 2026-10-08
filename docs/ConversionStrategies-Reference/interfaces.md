@@ -2,42 +2,45 @@
 <!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#interfaces)
-Go interfaces are duck-typed: a type implements an interface simply by having the methods. The converter emits each **user-defined** interface as a partial interface with a `[GoType]` attribute, and the **`ImplementGenerator`** source generator discovers which concrete types satisfy it and emits the implementing glue plus the implicit conversions. As a result, assigning a concrete value to an interface variable is direct — no reflection lookup or `.As(...)` call is needed:
+Go interfaces are duck-typed: a type implements an interface simply by having the methods. The converter emits each **user-defined** interface as a bare partial interface, and the **`ImplementGenerator`** source generator discovers which concrete types satisfy it and emits the implementing glue plus the implicit conversions. As a result, assigning a concrete value to an interface variable is direct — no reflection lookup or `.As(...)` call is needed:
 
+<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.go:17-19, 21-25, 49-50 -->
 ```go
 type Stringer interface {
-    String() string
+	String() string
 }
+…
+type Named Stringer
 
 type point struct{ x, y int }
 
-func (p point) String() string {
-    return fmt.Sprintf("(%d, %d)", p.x, p.y)
-}
-
-func describe() Stringer {
-    return point{1, 2}    // point implements Stringer -> assignable directly
-}
+func (p point) String() string { return fmt.Sprintf("(%d,%d)", p.x, p.y) }
+…
+	var n Named = point{3, 4} // concrete point -> Named (defined over the Stringer interface)
+	fmt.Println(n.String())
 ```
+<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:10-20, 46-47 -->
 ```csharp
-[GoType] partial interface Stringer {
+partial interface Stringer {
     @string String();
 }
 
-[GoType] partial struct point {
+partial struct point {
     internal nint x, y;
 }
 
-[GoRecv] internal static @string String(this ref point p) {
-    return fmt.Sprintf("(%d, %d)"u8, p.x, p.y);
+internal static @string String(this point p) {
+    return fmt.Sprintf("(%d,%d)"u8, p.x, p.y);
 }
-
-internal static Stringer describe() {
-    return new point(1, 2);   // implicit conversion emitted by ImplementGenerator
-}
+…
+    Named n = new point(3, 4);
+    fmt.Println(n.String());
 ```
 
-The well-known built-in interfaces (`error`, `fmt.Stringer`, etc.) are hand-written in `golib`/the baseline rather than `[GoType]`-generated, but concrete types implement them the same duck-typed way. (Earlier strategies used a generic `As`/reflection mechanism; that has been superseded by the compile-time source generators.)
+`Named` is defined over `Stringer`, so in C# it is another name for that interface. Assigning
+`new point(3, 4)` to it needs no cast: `ImplementGenerator` emits the implicit conversion.
+
+The well-known built-in interfaces (`error`, `fmt.Stringer`, etc.) are hand-written in `golib`/the baseline rather than generated from a converted declaration, but concrete types implement them the same duck-typed way. (Earlier strategies used a generic `As`/reflection mechanism; that has been superseded by the compile-time source generators.)
 
 Each discovered "concrete type implements interface" pairing is recorded as an assembly-level attribute in the package's `package_info.cs`, e.g. `[assembly: GoImplement<point, Stringer>]`, which `ImplementGenerator` consumes.
 
@@ -49,6 +52,7 @@ The prune matches a FOREIGN base by its **canonical name**: the inheritance trac
 
 **Promoted forwarders through a Δ-renamed embedded interface use the markerless FIELD name.** The converter names an embedded field after the **Go embed name**, so a struct value-embedding an interface whose C# TYPE was collision-renamed (see [Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)) declares `public log.slog_package.ΔHandler Handler;` — the marker lives on the type only. testing/slogtest's `type wrapper struct { slog.Handler; mod func(*slog.Record) }` (slog has both a `Handler` type and a `Logger.Handler()` method, so the type is `ΔHandler`) broke in BOTH generated wrapper forms because the `ImplementGenerator` derived the promoted-forwarder field name from the interface TYPE's simple name: the value partial struct emitted bare `ΔHandler.Enabled(…)` (CS0103 cross-package, CS0120 same-package where the bare name binds the nested interface type), and the pointer adapter emitted `m_box.Value.ΔHandler.Enabled(…)` (CS1061). The field name is now the `Δ`-stripped simple name (`GetSimpleName(…, dropCollisionPrefix: true)`, the same derivation `StructTypeTemplate` already used for embedded-field accessors) in all three places: the value template's promoted arm, the pointer arm's promoted fallback, and the pointer arm's semantic embedded-interface-field detection (which compares field name to type name and otherwise never matches `Handler` vs `ΔHandler`):
 
+<!-- illustration: not converter output -->
 ```csharp
 // value partial struct — promoted members forward through the field:
 public bool Enabled(nint level) => Handler.Enabled(level);
@@ -73,7 +77,7 @@ internal sealed class runtimeSourceжSource : go.math.rand_package.Source, IжAd
 }
 ```
 
-Cast sites emit the adapter around the box (`Incrementer inc = new CounterжIncrementer(c);`, `src: new runtimeSourceжSource(Ꮡ(new runtimeSource()))`), covering call arguments, keyed composite-literal fields, and `var` declarations; a pointer-typed operand in these positions renders as the box (isPointer ident context), not the deref'd receiver ref-local. Member forwarding picks the receiver form per method: direct-ж and `[GoRecv]` ref-extensions (whose `RecvGenerator` ж-twin exists) forward to `m_box.M(...)`; plain value-receiver methods forward to `m_box.Value.M(...)` (Go copies the value at the call). The golib type-assert machinery (`_<T>()`) unwraps `IжAdapter.Box` so `s.(*T)` yields the original `ж<T>`, and `AreEqual` unwraps both operands so interface-vs-interface and interface-vs-pointer comparisons are box identity (`ж<T>.Equals` is already identity-based); `iface == ptr`/`iface != ptr` comparisons emit `AreEqual(...)` with the pointer operand kept as the box (the old `iface == ~p` deref form compared a copy). Because each adapter is a distinct class, the interface-inheritance de-duplication (dropping `GoImplement<T, Source>` when `GoImplement<T, Source64>` exists and `Source64` embeds `Source`) exempts pointer-form pairs — a `Source`-targeted cast site references `runtimeSourceжSource` even though `runtimeSourceжSource64` also implements `Source`. VALUE-sourced casts (`var s Iface = t`) keep the partial-struct implementation — Go copies the value into the interface there, which is exactly C#'s struct-boxing semantic. Known limits (documented, not yet needed by the corpus): a cross-package pointer cast keeps the old deref-copy form (the adapter class only exists in the impl type's assembly — `isLocalImplType` gate), and asserting an adapter-held interface to a *different* interface (`s.(Source64)` on a `Source`-created value) is not yet unwrapped. (Guarded by the `InterfaceCasting` extension — pointer-receiver `Counter` with a direct-ж member cast to an interface, mutations verified through BOTH the interface and the original pointer, assert-back recovering the same box, and `back == c` pointer equality, run-verified vs Go; and by `InterfaceImplementation`'s output comparison — `zoo[0] == f` interface-vs-pointer identity.)
+Cast sites emit the adapter around the box (`Incrementer inc = new CounterжIncrementer(c);`, `src: new runtimeSourceжSource(Ꮡ(new runtimeSource()))`), covering call arguments, keyed composite-literal fields, and `var` declarations; a pointer-typed operand in these positions renders as the box (isPointer ident context), not the deref'd receiver ref-local. Member forwarding picks the receiver form per method: direct-ж and `this ref` extensions (whose `RecvGenerator` ж-twin exists) forward to `m_box.M(...)`; plain value-receiver methods forward to `m_box.Value.M(...)` (Go copies the value at the call). The golib type-assert machinery (`_<T>()`) unwraps `IжAdapter.Box` so `s.(*T)` yields the original `ж<T>`, and `AreEqual` unwraps both operands so interface-vs-interface and interface-vs-pointer comparisons are box identity (`ж<T>.Equals` is already identity-based); `iface == ptr`/`iface != ptr` comparisons emit `AreEqual(...)` with the pointer operand kept as the box (the old `iface == ~p` deref form compared a copy). Because each adapter is a distinct class, the interface-inheritance de-duplication (dropping `GoImplement<T, Source>` when `GoImplement<T, Source64>` exists and `Source64` embeds `Source`) exempts pointer-form pairs — a `Source`-targeted cast site references `runtimeSourceжSource` even though `runtimeSourceжSource64` also implements `Source`. VALUE-sourced casts (`var s Iface = t`) keep the partial-struct implementation — Go copies the value into the interface there, which is exactly C#'s struct-boxing semantic. Known limits (documented, not yet needed by the corpus): a cross-package pointer cast keeps the old deref-copy form (the adapter class only exists in the impl type's assembly — `isLocalImplType` gate), and asserting an adapter-held interface to a *different* interface (`s.(Source64)` on a `Source`-created value) is not yet unwrapped. (Guarded by the `InterfaceCasting` extension — pointer-receiver `Counter` with a direct-ж member cast to an interface, mutations verified through BOTH the interface and the original pointer, assert-back recovering the same box, and `back == c` pointer equality, run-verified vs Go; and by `InterfaceImplementation`'s output comparison — `zoo[0] == f` interface-vs-pointer identity.)
 
 
 **Non-empty interface-to-interface conversions use a forwarding adapter.** A Go interface value may be assigned or passed to another non-empty interface when the source interface method set satisfies the target (`var local localLabel = foreign`, where `foreign` is `CrossPkgLib.Labeled`). C# has no structural conversion between unrelated interfaces, so the converter records the interface pair as `[assembly: GoImplement<CrossPkgLib_package.Labeled, localLabel>]` and emits the cast site as a generated adapter:
@@ -95,8 +99,9 @@ Two rules govern how concrete implementation records are emitted:
 
 The `GoImplement` STRUCTURAL recorders were a compile-time *approximation* of Go's structural satisfaction, incomplete **by construction** — which is why, once these shells existed, they were retired outright (2026-07-25; see the RETIRED note under *Multi-Result Values and Comma-Ok Forms*). A dynamic type may live in a package converted **after** the interface's own, and then no record can exist: a dynamic type may live in a package converted **after** the interface's own, and then no record can exist. `io/fs` is converted before `os`, so `fs/package_info.cs` records only `subFS→ReadDirFS` — `os.dirFS` is unreachable — and every `fsys.(ReadDirFS)` against an `os.DirFS(…)` value silently missed. golib's structural probe answered the *question* correctly (`StructurallyImplements`) but had nothing to *construct*, so the assertion still failed. That is what kept io/fs at 16/18 (`Glob` returning nothing, `WalkDir` seeing only the root).
 
-With no dynamic code generation available (Native AOT), a **per-interface compile-time artifact is the irreducible minimum**, and it must live in the **interface's own package class** — the only placement guaranteed loaded at every asserting site, and the only one that yields a single cross-assembly identity. `TypeGenerator` therefore emits, for every non-generic, non-constraint, non-empty `[GoType]` interface, **two sibling shells**, discovered through a new `[GoInterfaceShell]` stamp on the interface itself. No static member is added to the interface — that shape would be inherited by every embedding interface, which is both a large CS0108 hiding class and a method-set corruption (no Go type can implement a static helper), and it makes the shell NAMES non-contractual so the generator may disambiguate freely:
+With no dynamic code generation available (Native AOT), a **per-interface compile-time artifact is the irreducible minimum**, and it must live in the **interface's own package class** — the only placement guaranteed loaded at every asserting site, and the only one that yields a single cross-assembly identity. `TypeGenerator` therefore emits, for every non-generic, non-constraint, non-empty converted interface, **two sibling shells**, discovered through a new `[GoInterfaceShell]` stamp on the interface itself. No static member is added to the interface — that shape would be inherited by every embedding interface, which is both a large CS0108 hiding class and a method-set corruption (no Go type can implement a static helper), and it makes the shell NAMES non-contractual so the generator may disambiguate freely:
 
+<!-- illustration: not converter output -->
 ```csharp
 [global::go.GoInterfaceShell(typeof(ΔSpeaker<>), typeof(ΔSpeakerᴛObj), "Speak")]
 public partial interface Speaker
@@ -135,7 +140,7 @@ internal sealed class ΔSpeaker<ΔTTarget> : Speaker, IInterfaceAdapter
 }
 ```
 
-**Tier 2 — `ΔIᴛObj`, reflective, for a VALUE-typed dynamic value** (the forcing case: `os.dirFS` is `[GoType("@string")] partial struct dirFS`, a value type held in an `fs.FS`). It holds the value as `object` and forwards through `MethodInvoker`s resolved once per (dynamic type, interface) pair, so it needs **no generic instantiation at all**. That is not a stylistic choice: under Native AOT `ilc` roots exactly the instantiations visible in source, and a `MakeGenericType` driven by a run-time `GetType()` over a value type is never one of them, so this is the tier that is unconditionally available. It is emitted only when every member survives the `object` round-trip (a Go variadic tail lowers to `params Span<T>`, a ref-struct that cannot be boxed):
+**Tier 2 — `ΔIᴛObj`, reflective, for a VALUE-typed dynamic value** (the forcing case: `os.dirFS` is `partial struct dirFS /*@string*/`, a value type held in an `fs.FS`). It holds the value as `object` and forwards through `MethodInvoker`s resolved once per (dynamic type, interface) pair, so it needs **no generic instantiation at all**. That is not a stylistic choice: under Native AOT `ilc` roots exactly the instantiations visible in source, and a `MakeGenericType` driven by a run-time `GetType()` over a value type is never one of them, so this is the tier that is unconditionally available. It is emitted only when every member survives the `object` round-trip (a Go variadic tail lowers to `params Span<T>`, a ref-struct that cannot be boxed):
 
 **The forwarder dispatches on ARITY (2026-07-26).** `GoShellBinding.Invoke` used to build a fresh `object?[args.Length + 1]` on every forwarded call, purely to prepend the receiver — 32 B allocated and zeroed per call even for a Go method with no parameters at all, which is the common case (`Len`, `Error`, `String`, `Less`). The bound members are static extension methods, so `MethodInvoker`'s `obj` is always `null` and the receiver occupies the first *argument* slot; the BCL's fixed-arity overloads take up to four arguments, so Go arities **0–3** now forward with no array and arity 4+ keeps the `Span` path. Measured on `PerfIfaceShell` (one object-tier call per iteration, provisional): JIT **633.7 → 588.0 ms**, Native AOT **760.1 → 727.8 ms** — the AOT column matters more in principle, because the binder's belt degrades *both* shell tiers to this one there, so the cost is paid twice per iteration rather than once. The boxed *return* is not fixable this way: `MethodInvoker` returns `object?` and the shell unboxes, and removing that needs a non-reflective forwarder, which needs a generic instantiation — exactly what this tier exists to avoid. (Guarded by the `ShellForwardArity` behavioral test: one anonymous interface spanning arities 0–5 plus an int-returning and a mixed-parameter shape, every method folding its arguments into the printed result so a dropped, duplicated or reordered argument diverges from `go run` instead of passing silently. An instrumented run confirms all four fixed arms *and* the `Span` fallback are reached.)
 
@@ -176,13 +181,13 @@ Guarded by three behavioral projects, each pairing a `main` package with a sibli
 
 Measured end-to-end on `PerfIface` (20M iterations of one slice-of-interface read, two interface dispatches, one concrete comma-ok assert and a three-case type switch). The per-stage A/B is a `--filter PerfIface` run: JIT **10,117.8 ms (158.24×) → 458.1 ms (7.20×)** for the attribute fix, **→ 379.7 ms (5.95×)** with the marker probe. The **published figure is the full-table quiet-machine run, median of 5: JIT 370.1 ms (5.86×) and Native AOT 262.3 ms (4.15×)**, against the pre-fix 10,117.8 ms (158.24×) and 42,228.2 ms (660.42×) — a 27× and 161× improvement respectively. Peak working set fell 41.3 → 23.1 MB (JIT) and 29.6 → 11.1 MB (AOT) as ~4.9 GB of per-assert attribute garbage stopped being allocated. A decomposition micro-benchmark against live golib (best-of-5, `DOTNET_TieredCompilation=0`) attributes the whole of it, per iteration of the emitted loop: slice element read 1.8 ns, two interface dispatches 3.9 ns, comma-ok assert **579.0 → 12.1 → 8.1 ns**, type switch **16.0 → 11.0 → 4.4 ns** — against a floor of 1.2 ns for a plain `s is Circle c` and 1.4 ns for a bare C# pattern ladder, both indistinguishable from the slice read alone. `IfaceShell` moved 44.58× → 44.13× → 40.58× across the same two changes — flat for the first (it is the oracle, and does not touch the miss tier) and improving on the second, since the shell tier enters through the same assert. **AOT now beats the JIT on this row**, reversing the pre-fix order, because ILC's failing interface type tests are markedly cheaper (3.7 ns for two against 9.2 ns on the JIT).
 
-**ANONYMOUS (`dyn`) interfaces use the SAME shells — the second renderer is gone.** An interface literal was the *original* duck-typing case, and it had its own machinery long before named interfaces got any: `TypeGenerator` stamped two static `ᴛAs<ᴛTTarget>` conversion methods plus a `ᴛAs(object)` overload onto every `[GoType("dyn")]` interface, emitted a `Δ<Iface><ᴛTTarget>` wrapper next to it (with a full operator/nil block it never needed), and `builtin.TryTypeAssert` reached that wrapper by *reflecting for the method by name* and closing it with `MakeGenericMethod`. Two renderers of one idea, and the older one carried three real defects the shells do not:
+**ANONYMOUS (`dyn`) interfaces use the SAME shells — the second renderer is gone.** An interface literal was the *original* duck-typing case, and it had its own machinery long before named interfaces got any: `TypeGenerator` stamped two static `ᴛAs<ᴛTTarget>` conversion methods plus a `ᴛAs(object)` overload onto every `/*dyn*/` interface, emitted a `Δ<Iface><ᴛTTarget>` wrapper next to it (with a full operator/nil block it never needed), and `builtin.TryTypeAssert` reached that wrapper by *reflecting for the method by name* and closing it with `MakeGenericMethod`. Two renderers of one idea, and the older one carried three real defects the shells do not:
 
 * **It was the last unbelted `MakeGenericMethod` in the assert path.** `MakeGenericMethod` over a run-time type is dynamic code: under Native AOT it succeeds only for an instantiation `ilc` already rooted, and there was no fallback tier — an unavailable instantiation was an unrecoverable MISS, silently wrong rather than degraded. The shells' `IsValueType` branch answers the same case with a shell that needs *no* instantiation, and belts the other way when it does.
 * **Its static members were on the interface.** A converted interface's statics are inherited by every interface that EMBEDS it, so `interface{ error; Temporary() bool }` forwarded `ᴛAs` overloads into its own wrapper (CS0102 ×6) and demanded a static helper from the dynamic value's Go method set — both had to be filtered out downstream. Attribute discovery removes the shape rather than the symptom.
 * **Its binding used the by-name extension lookup.** `GetExtensionMethod` collapses a closed `ж<X>` to the open `ж<>` definition — right for single-dispatch precedence, wrong for a method-set query — so a method name shared across types could bind another type's receiver. `AdapterBinder` matches on element identity.
 
-Nothing about the *emitted* dyn interface changes except the disappearance of `ᴛAs`: an interface literal is still a `[GoType("dyn")] partial interface`, still resolved structurally at run time, still fail-soft. The `dyn` key is no longer read by `TypeGenerator` at all — its only remaining reader is the runtime's `Type.IsDynamicType`, used for Go's anonymous-struct-to-anonymous-struct conversion, which reads the `[GoType]` attribute directly. Guarded by the existing dyn corpus (`AnonymousInterfaces`, `DynIfaceParamNameCollision`, `DynamicInterfaceKeywordMethod`, `AnonIfaceMethodSetWidening`, `AnonIfaceThroughPointerAdapter`, `AnonInterfaceCrossFile`, `AnonInterfaceSignatureAssert`, `DerivedInterfaceStructuralProbe`, `StructuralAssertFailSoftMiss`), which is the dyn contract and stayed green through the migration unchanged, plus the `PerfIfaceShell` performance benchmark, which executes both tiers under a Native AOT publish.
+Nothing about the *emitted* dyn interface changes except the disappearance of `ᴛAs`: an interface literal is still a `partial interface … /*dyn*/`, still resolved structurally at run time, still fail-soft. The `dyn` key is no longer read by `TypeGenerator` at all — its only remaining reader is the runtime's `Type.IsDynamicType`, used for Go's anonymous-struct-to-anonymous-struct conversion, which reads the type's `GoType` attribute, carried by its generated part, directly. Guarded by the existing dyn corpus (`AnonymousInterfaces`, `DynIfaceParamNameCollision`, `DynamicInterfaceKeywordMethod`, `AnonIfaceMethodSetWidening`, `AnonIfaceThroughPointerAdapter`, `AnonInterfaceCrossFile`, `AnonInterfaceSignatureAssert`, `DerivedInterfaceStructuralProbe`, `StructuralAssertFailSoftMiss`), which is the dyn contract and stayed green through the migration unchanged, plus the `PerfIfaceShell` performance benchmark, which executes both tiers under a Native AOT publish.
 
 **golib's three hand-written interfaces joined the same mechanism.** `error` (golib), `fmt.Stringer` and `io.Reader` (the baseline stubs) predate the marker and expose plain `As<T>` helpers; `TryTypeAssert` found *those* by the same reflective probe and closed them the same way, so deleting the probe would have taken their duck-typing with it. Each is now stamped `[GoInterfaceShell(typeof(<I><>), null, "<M>")]` — their existing `<I><T>` carrier class **is** the delegate-bound generic shell, and always was — and each carrier's `(in T)` constructor became `(T)`, because `AdapterBinder` locates a shell's constructor by exact parameter type and an `in` parameter is `T&` in metadata. `null` for the object shell is deliberate rather than a gap: a reflective tier would have to reproduce these carriers' `%v`/`%T` formatting contract (`error<T>.ToString(format, provider)`), so a value-typed error still binds through the generic shell — AOT-graceful, exactly as before. Because a hand-written shell has no `ᴛBoundByPtr`/`ᴛBoundByVal` flags, the binder treats those as optional and forces the type initializer explicitly (`RuntimeHelpers.RunClassConstructor`), so an unbindable pair is still decided — and memoized — at factory-build time rather than rediscovered per construction.
 
@@ -277,7 +282,7 @@ satisfaction — Go lets a package's test files add methods to its production ty
 declaration syntax the evidence set was EMPTY, both members classified as markers, and the identical
 silent-stub failure recurred: marshal answered an empty buffer with nil error and the test reported
 "failed to unmarshal" with no diagnostic. The evidence now also covers the friend bridge's
-extensions by receiver simple name, in BOTH receiver forms — direct-`ж`, and `[GoRecv] ref` (which
+extensions by receiver simple name, in BOTH receiver forms — direct-`ж`, and `ref` (which
 forwards through its RecvGenerator `ж`-twin, the same routing `IsRefRecv` applies to a local
 declaration). Genuine markers still stub: a foreign struct with no bridge has no such extensions
 anywhere in the compilation. (Guarded by `GenTests.WhiteboxBridgeAdapterTests`, which runs the real
@@ -340,7 +345,7 @@ way; `*Branch` (Emit promoted through its `EmitBase` embed) read **`branch/`** b
 and reads `branch/brn` after — proven by neutering the carve-out and running the pair.
 
 ## A dynamic interface's runtime conversion class re-escapes a keyword method name
-An anonymous or type-asserted interface is lifted to a `[GoType("dyn")]` partial interface (see
+An anonymous or type-asserted interface is lifted to a `/*dyn*/` partial interface (see
 [Anonymous interfaces used as an adapter target](#anonymous-interfaces-used-as-an-adapter-target-are-lifted-package-wide)),
 and for the dynamic form `go2cs-gen`'s `InterfaceTypeTemplate` additionally emits a **runtime
 conversion class** — `ΔI<ᴛTTarget> : I` — that duck-types a target at run time by reflection-binding
@@ -375,12 +380,12 @@ internal class ΔcommandContext_type<ΔTTarget> : commandContext_type
 ```
 Greens internal/testenv (its only errors were this one method's cascade). Guarded by the
 `DynamicInterfaceKeywordMethod` behavioral test — a named `TB` interface with a `private()` sealing
-method, embedded in a type-assertion's anonymous interface so the lifted `[GoType("dyn")]` target's
+method, embedded in a type-assertion's anonymous interface so the lifted `/*dyn*/` target's
 conversion class must implement the escaped `@private()`; it does not compile without the fix.
 
 ## A keyword-named type's interface adapters escape declarations and compose class names unescaped
 A Go **type** whose name is a C# reserved keyword (`type fixed struct{…}`, `type lock interface{…}`) is
-`@`-escaped by the converter everywhere it stands as its own identifier token (`[GoType] partial struct
+`@`-escaped by the converter everywhere it stands as its own identifier token (`partial struct
 @fixed`, `ж<@fixed>`, `@lock l = f`). Two other name paths mishandled such types:
 
 1. **`ImplementGenerator`'s emitted type positions.** A LOCAL struct's name reaches the generator as a
@@ -405,10 +410,19 @@ A Go **type** whose name is a C# reserved keyword (`type fixed struct{…}`, `ty
    above rely on: a keyword + suffix is never a keyword).
 
 Emitted form (from the `KeywordNamedTypes` goldens and its generated adapters):
-```csharp
-sizer p = new fixedжsizer(Ꮡf);                          // converter cast site — composed, no marker
-@lock lp = new fixedжlock(Ꮡf);
+At a cast site the converter composes the adapter's name, with no marker:
 
+<!-- source: src/tests/Behavioral/KeywordNamedTypes/main.cs.target:99, 103 -->
+```csharp
+sizer p = new fixedжsizer(Ꮡf);
+…
+@lock lp = new fixedжlock(Ꮡf);
+```
+
+The generated value form escapes the declaration, and the adapter escapes each reference to the type:
+
+<!-- illustration: not converter output -->
+```csharp
 partial struct @fixed : global::go.main_package.@lock   // generator value-form — escaped declaration
 
 internal sealed class fixedжlock : global::go.main_package.@lock, IжAdapter
@@ -613,7 +627,7 @@ stops satisfying interfaces Go says it satisfies, at every site the compile-time
 typ.(interface{ Basic() *BasicType }).Basic()
 ```
 
-— which the converter lifts to a package-local `[GoType("dyn")] partial interface readType_type`. The
+— which the converter lifts to a package-local `partial interface readType_type /*dyn*/`. The
 concrete types (`*IntType`, `*UintType`, `*CharType`, `*UcharType`, `*FloatType`, …) satisfy it **only**
 through `func (b *BasicType) Basic() *BasicType` promoted from their exported `BasicType` value embed, and
 the value is held as a *different* named interface (`Type`) at the assertion site — so no compile-time
@@ -858,8 +872,9 @@ and publicizes the unexported named types in its parameters and results:
 type options struct{ … }        // unexported
 type Option func(*options)       // exported -> public delegate
 ```
+<!-- illustration: not converter output -->
 ```csharp
-[GoType] public partial struct options { … }   // publicized to match the delegate
+public partial struct options { … }   // publicized to match the delegate
 public delegate void Option(ж<options> _);
 ```
 
@@ -877,10 +892,10 @@ var SupportedKDFs = map[uint16]func() *hkdfKDF{…}  // exported var -> public f
 ```
 
 emits `public static map<uint16, Func<ж<hkdfKDF>>> SupportedKDFs`, whose type embeds `hkdfKDF` through
-the func RESULT — but `[GoType] partial struct hkdfKDF` defaulted to `internal`, less accessible than
+the func RESULT — but `partial struct hkdfKDF` defaulted to `internal`, less accessible than
 the public field (CS0052). `collectUnexportedNamedTypes` now has a `*types.Signature` case that recurses
 into the signature's PARAMS and RESULTS through the same named-only walk (which handles a nested func
-result in turn), so `hkdfKDF` is publicized to `[GoType] public partial struct hkdfKDF` (and its exported
+result in turn), so `hkdfKDF` is publicized to `public partial struct hkdfKDF` (and its exported
 methods go public via the receiver-access cascade). Both sides of the signature are covered — a func
 PARAMETER exposes an unexported type just as a func RESULT does (`var Appliers = []func(*cfg)` →
 `public static slice<Action<ж<cfg>>> Appliers`, publicizing `cfg`). This routes through the named-only
@@ -891,7 +906,7 @@ public `map[uint16]func() *hkdfState` var whose func result exposes an unexporte
 `[]func(*cfg)` var whose func parameter exposes another, output-compared vs Go; both fail CS0052 without
 the publicize.)
 
-**A publicized wrapper reaches through an UNNAMED composite RHS to its element type.** A defined type whose `[GoType]` wrapper is emitted `public` (exported, or unexported-but-publicized) exposes its written RHS through the wrapper's `Value`/ctor/indexer/operators, so an unexported RHS type must be publicized too. This holds not just for a NAMED RHS (`type EncoderBuffer encoder`) but for an UNNAMED composite RHS whose ELEMENT is an unexported named type: `type ringElement [256]fieldElement` exposes `fieldElement` through the array-wrapper's indexer/`Value`/`ToSpan`, so `fieldElement` must be publicized (crypto/internal/mlkem768, CS0050/CS0051/CS0053/CS0054/CS0056/CS0057). `collectPublicizedWrapperRHS` therefore feeds the RHS unconditionally to the pointer/slice/array/map/chan-peeling walk (`collectUnexportedNamedTypes`) rather than gating on a named RHS. The walk has no `*types.Struct` case, so a struct RHS stays a no-op — an exported field of an unexported struct-field type is the CS0052 domain and is intentionally left internal. (Guarded by the `NamedArrayWrapper` extension — an exported `Grid [3]unit` over an unexported `unit`, output vs Go.)
+**A publicized wrapper reaches through an UNNAMED composite RHS to its element type.** A defined type whose generated wrapper is emitted `public` (exported, or unexported-but-publicized) exposes its written RHS through the wrapper's `Value`/ctor/indexer/operators, so an unexported RHS type must be publicized too. This holds not just for a NAMED RHS (`type EncoderBuffer encoder`) but for an UNNAMED composite RHS whose ELEMENT is an unexported named type: `type ringElement [256]fieldElement` exposes `fieldElement` through the array-wrapper's indexer/`Value`/`ToSpan`, so `fieldElement` must be publicized (crypto/internal/mlkem768, CS0050/CS0051/CS0053/CS0054/CS0056/CS0057). `collectPublicizedWrapperRHS` therefore feeds the RHS unconditionally to the pointer/slice/array/map/chan-peeling walk (`collectUnexportedNamedTypes`) rather than gating on a named RHS. The walk has no `*types.Struct` case, so a struct RHS stays a no-op — an exported field of an unexported struct-field type is the CS0052 domain and is intentionally left internal. (Guarded by the `NamedArrayWrapper` extension — an exported `Grid [3]unit` over an unexported `unit`, output vs Go.)
 
 **A package-level literal struct reached only as a VALUE publicizes its exported fields' types.** The
 walks above read TYPES, so an anonymous struct built inside a package-level var initializer and held only
@@ -1006,9 +1021,10 @@ func TestUnmarshalEmbeddedUnexported(t *testing.T) {
 The white-box bridge arm asked `generatedTypeScope` for the **local** name, so the two siblings landed
 on opposite sides:
 
+<!-- illustration: not converter output -->
 ```csharp
-[GoType("dyn")] [GoLocalName("embed2")] internal partial struct TestUnmarshalEmbeddedUnexported_embed2 { … }
-[GoType("dyn")] [GoLocalName("S8")]     public   partial struct TestUnmarshalEmbeddedUnexported_S8 {
+internal partial struct TestUnmarshalEmbeddedUnexported_embed2 /*dyn*/ { … }
+public   partial struct TestUnmarshalEmbeddedUnexported_S8 /*dyn*/ {
     public TestUnmarshalEmbeddedUnexported_embed2 embed2;   // CS0053 — less accessible than the property
 }
 ```
@@ -1044,11 +1060,11 @@ struct or func type — testing's `type testDeps interface { … }` reached thro
 testDeps, …) *M` is interned into `packagePublicizedTypes`, and `visitTypeSpec` sets
 `pendingTypeAccess = "public "`. But on the EMISSION side, every top-level type-kind emitter consumes
 `v.pendingTypeAccess` (struct, array, map, ident, the inline selector/star cases) *except*
-`visitInterfaceType`, which dropped it — so the interface always emitted `[GoType] partial interface
+`visitInterfaceType`, which dropped it — so the interface always emitted `partial interface
 testDeps`, defaulting to C# `internal`, less accessible than the `public` member that references it
 (CS0051). `visitInterfaceType` now reads-and-clears `pendingTypeAccess` at entry (so the lifted/anonymous
 interfaces it visits recursively see an empty value) and folds the modifier into the post-attribute slot,
-emitting `[GoType] public partial interface testDeps`. Non-publicized interfaces are unchanged (no churn).
+emitting `public partial interface testDeps`. Non-publicized interfaces are unchanged (no churn).
 (Guarded by the `PublicizedInterfaceParam` behavioral test — an exported function taking an unexported
 interface whose method returns a built-in type, output-compared vs Go.) The **transitive** cascade also
 walks a publicized interface's method signatures: the `collectMethodSignatureUnexportedTypes` fixpoint step
@@ -1098,8 +1114,9 @@ so an exported func taking an anonymous interface emitted its lift `internal` be
 `func Reporter(r interface{ PushStep(PathStep); Report(Result); PopStep() }) Option` was CS0051 in production.
 `visitInterfaceType` now consults `isPublicizedLiftedType` too, ahead of the function-local `internal` default:
 
+<!-- source: src/tests/Behavioral/AnonInterfaceParamPublic/AnonInterfaceParamPublic.cs.target:19 -->
 ```csharp
-[GoType("dyn")] public partial interface Report_r {
+public partial interface Report_r /*dyn*/ {
 ```
 
 An unexported func's anonymous interface keeps `internal`. The census of the shape (a non-empty anonymous
@@ -1126,9 +1143,10 @@ interface from a **directly imported** package (checked with `types.Implements`)
 emits real C# inheritance at the declaration and **skips re-declaring the covered members**
 (redeclaring would HIDE the base member — implementers would need both):
 
+<!-- source: src/core/io/fs/fs.cs:86-90 -->
 ```csharp
-[GoType] partial interface File :
-    io_package.ReadCloser
+partial interface File :
+    io.ReadCloser
 {
     (FileInfo, error) Stat();
 }
@@ -1157,7 +1175,7 @@ CrossPkgLib_package.Labeled`, passed to `CrossPkgLib.Describe`).
 
 ## Embedded-pointer hop receivers split per method
 An interface member satisfied by promotion through an embedded POINTER field forwards through
-the hop — but the receiver form depends on the target method: a `[GoRecv]` ref extension (or
+the hop — but the receiver form depends on the target method: a `this ref` extension (or
 struct method) binds the deref'd value (`this.File.Value.Name()`), while a **direct-ж primary**
 (an extension on `ж<X>` emitted when the receiver escapes — os's `File.Read`/`Write`) binds the
 box FIELD itself (`this.File.Read(p)`; deref'ing first strands the receiver, CS1929). The
@@ -1398,12 +1416,28 @@ it is present — the marker resolves as one unit to the already-simple lifted n
 `GoImplement` attribute writer resolves or drops it (mirroring the implicit-conversion writer).
 `registerDynamicTypeName` keeps the lexically smallest name for a signature so the winner is
 well-defined even when several files lift the same shape. Emitted form:
+The declaring file, `batch.cs`:
+
+<!-- source: src/core/internal/trace/batch.cs:45-49 -->
 ```csharp
-// batch.cs (declaring file):
-[GoType("dyn")] partial interface readBatch_r : /* io.Reader */ … { … }
-// generation.cs (cross-file cast site):
+internal partial interface readBatch_r /*dyn*/ :
+    io.Reader,
+    io.ByteReader
+{
+}
+```
+
+The cast site in another file, `generation.cs`:
+
+<!-- source: src/core/internal/trace/generation.cs:74 -->
+```csharp
 (b, gen, var err) = readBatch(new bufio_ReaderжreadBatch_r(Ꮡr));
-// package_info.cs:
+```
+
+And the record in `package_info.cs`:
+
+<!-- source: src/core/internal/trace/package_info.cs:58 -->
+```csharp
 [assembly: GoImplement<bufio_package.Reader, readBatch_r>(Pointer = true)]
 ```
 Clears internal/trace's 75-error syntax cascade (the residual CS0315 — a named-numeric wrapper
@@ -1424,12 +1458,13 @@ declaration in the file read as a namespace-level one:
 // crypto/ecdh's test half opens with the documented-interface witness idiom:
 var _ interface{ Equal(x crypto.PublicKey) bool } = &ecdh.PublicKey{}
 ```
+<!-- illustration: not converter output -->
 ```csharp
 // before — CS1519/CS1002 at the site, then CS0106 on every remaining member, CS1022 at EOF:
 internal static interface{Equal(x crypto.PublicKey) bool} _ᴛ1ʗ =
     new ecdhꓸPublicKeyжinterface{Equal(x crypto.PublicKey) bool}(Ꮡ(new ecdhꓸPublicKey(nil)));
 // after:
-[GoType("dyn")] partial interface _ᴛ1 { bool Equal(cryptoꓸPublicKey x); }
+partial interface _ᴛ1 /*dyn*/ { bool Equal(cryptoꓸPublicKey x); }
 internal static _ᴛ1 _ᴛ1ʗ = new ecdh.ΔPublicKeyж_ᴛ1(Ꮡ(new ecdhꓸPublicKey(nil)));
 ```
 
@@ -1496,14 +1531,25 @@ to the registry; hex digits pass through every transform untouched, and the enco
 function of the signature so equal signatures still render the identical (comparable) string.
 Emitted form:
 
+The declaring file, `zvars.cs`, which is visited after the reference:
+
+<!-- source: src/tests/Behavioral/AnonStructCrossFile/zvars.cs.target:6-10 -->
 ```csharp
-// zvars.cs (declaring file, visited AFTER the reference):
-[GoType("dyn")] partial struct compareTestsᴛ1 { … }
-internal static slice<compareTestsᴛ1> compareTests = …;
-// main.cs (cross-file range + heap box):
+partial struct compareTestsᴛ1 /*dyn*/ {
+    internal slice<byte> a, b;
+    internal nint i;
+}
+internal static slice<compareTestsᴛ1> compareTests = new compareTestsᴛ1[]{
+```
+
+The range and the heap box in `main.cs`:
+
+<!-- source: src/tests/Behavioral/AnonStructCrossFile/main.cs.target:8-10, 14 -->
+```csharp
 foreach (var (_, vᴛ1) in compareTests) {
     ref var tt = ref heap(new compareTestsᴛ1(), out var Ꮡtt);
-    …
+    tt = vᴛ1;
+…
 }
 ```
 
@@ -1527,10 +1573,10 @@ collision), and a function-local declaration is prefixed with the **method name 
 sibling files legitimately share, since Go allows one `probe` method per receiver type.
 encoding/gob hit both at once: production `type.cs` and the internal-variant `encoder_test.cs`
 each lifted a differently-shaped `struct{…}` to `Δtype`/`Δtypeᴛ1`, and the class then carried two
-definitions of each — CS0579 on the doubled `[GoType]` attribute plus CS0111/CS0557 on every
+definitions of each — CS0579 on the doubled type attribute its generated part carries, plus CS0111/CS0557 on every
 member `go2cs-gen`'s `TypeGenerator` emitted for the duplicate (32 errors, the whole package
 blocked). Note the failure is **not** avoided when the two anonymous structs happen to be
-structurally identical: the second `[GoType("dyn")]` is still a duplicate attribute.
+structurally identical: the second `/*dyn*/` is still a duplicate attribute.
 
 The claim set is therefore package-scoped (`packageLiftedTypeNames`, reset per package/variant),
 with two deliberate exemptions:
@@ -1548,9 +1594,10 @@ with two deliberate exemptions:
   process). The **EXTERNAL** variant is not seeded: its `<pkg>_test_package` is a separate class
   and may reuse every production name freely.
 
+<!-- illustration: not converter output -->
 ```csharp
 // type.cs (production, pinned):        encoder_test.cs (internal variant, steps around):
-[GoType("dyn")] partial struct Δtype {  [GoType("dyn")] partial struct Δtypeᴛ7 {
+partial struct Δtype /*dyn*/ {  partial struct Δtypeᴛ7 /*dyn*/ {
     internal nint r7;                       internal nint A;
 }                                       }
 ```
@@ -1637,6 +1684,7 @@ The interface-field record+route loop was extracted from `checkStructFields` int
 `recordStructFieldInterfaceCasts(compositeLit, structType, callContext)` and is now called from **both** the
 typed path and the elided path (against the inferred `*types.Struct`), so an elided struct composite routes
 its interface fields identically:
+<!-- illustration: not converter output -->
 ```csharp
 new(new poserжerror(poser), err1, true)                      // *poser  → error  (Pointer = true)
 new(new errorUncomparableжerror(Ꮡ(new errorUncomparable(nil))), …)  // *errorUncomparable → error
